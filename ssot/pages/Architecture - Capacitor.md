@@ -96,6 +96,10 @@ delivery address, BiteTribe delivery state, and OS permission:
 - A random installation UUID is generated once and persisted with Capacitor
   Preferences. It is reused across launches and token rotations and resets
   naturally after reinstall.
+- Only registration creates the id. Listing installations uses the non-creating
+  read, so a surface that can never register a token — the web build, or a
+  device where push was never set up — leaves no identity behind and simply
+  matches no row.
 - Push-token documents carry the installation ID, platform, device label
   metadata, OS version, app version, `lastSeenAt`, and their own `enabled`
   state.
@@ -110,6 +114,10 @@ delivery address, BiteTribe delivery state, and OS permission:
   through an **Unknown device** fallback.
 - OS permission is checked only for the current installation and displayed
   separately from the backend `enabled` state.
+- The installation list is account data, so it is listed and switchable from
+  every signed-in surface, including a platform that cannot receive push
+  itself. Only registering _this_ device is platform-gated: the web build says
+  it cannot receive notifications and still manages the user's phones.
 - Permanent installation deletion or revocation is outside issue #1184.
 
 `libs/common/push-notifications` owns this contract:

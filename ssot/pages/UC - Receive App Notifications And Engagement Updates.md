@@ -42,6 +42,9 @@ made notification delivery installation-specific:
 - OS permission controls whether the current device may receive notifications;
   BiteTribe's token state controls whether the backend sends to that
   installation. Both states must remain visible and distinct.
+- An installation's token state is manageable from any signed-in surface, not
+  only from the installation itself. OS permission gates registering the
+  current device, never the management of the others.
 - `Settings.pushNotifications` is not part of delivery eligibility.
 
 ## Supported Evidence

@@ -72,12 +72,15 @@ const createUuid = (): string => {
 };
 
 /**
- * The installation UUID, generated on first use and reused from then on.
+ * The installation UUID if this installation already has one, without creating
+ * it.
  *
- * It survives app launches and FCM token rotations, which is what makes a
- * single row in the settings list keep meaning the same device.
+ * Reading the settings list must not mint an identity: a surface that can never
+ * register a token — the web build, or a device where push was never set up —
+ * would otherwise leave a stored id behind just by opening Settings. Callers
+ * get `undefined` there, which correctly matches no installation in the list.
  */
-export const getInstallationId = async (): Promise<string> => {
+export const readInstallationId = async (): Promise<string | undefined> => {
   try {
     const { value } = await Preferences.get({ key: INSTALLATION_ID_KEY });
 
@@ -88,8 +91,22 @@ export const getInstallationId = async (): Promise<string> => {
     console.warn('Failed to read the push installation id: ', error);
   }
 
-  if (volatileInstallationId) {
-    return volatileInstallationId;
+  return volatileInstallationId;
+};
+
+/**
+ * The installation UUID, generated on first use and reused from then on.
+ *
+ * It survives app launches and FCM token rotations, which is what makes a
+ * single row in the settings list keep meaning the same device. Only
+ * registration calls this; everything else uses {@link readInstallationId} so
+ * it cannot create an identity as a side effect.
+ */
+export const getInstallationId = async (): Promise<string> => {
+  const existing = await readInstallationId();
+
+  if (existing) {
+    return existing;
   }
 
   const installationId = createUuid();
@@ -185,8 +202,17 @@ const userTokenReference = (userUid: string, token: string): string =>
 
 const indexReference = (token: string): string => `pushTokens/${token}`;
 
+/**
+ * Filler the pre-#1184 registration wrote for `appVersion` and `deviceId`
+ * because it had nothing real to put there. It is absence, not a value, so
+ * reading it back as one would print `tbd-xxx` next to a user's device.
+ */
+const LEGACY_PLACEHOLDER = 'tbd-xxx';
+
 const toOptionalString = (value: unknown): string | undefined =>
-  typeof value === 'string' && value.length > 0 ? value : undefined;
+  typeof value === 'string' && value.length > 0 && value !== LEGACY_PLACEHOLDER
+    ? value
+    : undefined;
 
 const toOptionalNumber = (value: unknown): number | undefined =>
   typeof value === 'number' && Number.isFinite(value) ? value : undefined;
@@ -379,9 +405,3 @@ export const registerCurrentPushInstallation = async (
 
   return true;
 };
-
-/** Whether `installation` is the one running this code. */
-export const isCurrentInstallation = (
-  installation: PushInstallation,
-  installationId: string,
-): boolean => installation.installationId === installationId;

@@ -8,10 +8,10 @@ import { TranslocoService } from '@jsverse/transloco';
 import { Platform } from '@ionic/angular';
 import {
   enablePushOnThisDevice,
-  getInstallationId,
   getPushPermissionState,
   loadPushInstallations,
   openPushSettings,
+  readInstallationId,
   setPushInstallationEnabled,
   type PushInstallation,
   type PushPermissionResult,
@@ -57,9 +57,15 @@ export class SettingsDataAccessService {
     await setPushInstallationEnabled(userUid, token, enabled);
   }
 
-  /** Identity of the installation running this code. */
-  getInstallationId(): Promise<string> {
-    return getInstallationId();
+  /**
+   * Identity of the installation running this code, if it has one.
+   *
+   * Deliberately the non-creating read: listing devices must not mint an
+   * installation id on a surface that can never register a token, such as the
+   * web build. `undefined` matches no row, which is the truthful outcome there.
+   */
+  readInstallationId(): Promise<string | undefined> {
+    return readInstallationId();
   }
 
   /** OS notification permission of this device. Never prompts. */

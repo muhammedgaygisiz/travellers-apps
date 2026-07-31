@@ -504,6 +504,65 @@ describe(PageSettings.name, () => {
       expect(byTestId('settings-notifications-enable-device')).toBeNull();
     });
 
+    it('should say nothing beyond the unsupported line when there is no device at all', () => {
+      // Web with no registered installation: the intro copy would promise a
+      // choice that is not there, and the empty note would restate the line
+      // above it.
+      setInstallations([], 'unsupported');
+
+      expect(byTestId('settings-notifications-unsupported')).not.toBeNull();
+      expect(byTestId('settings-notifications-copy')).toBeNull();
+      expect(byTestId('settings-notifications-empty')).toBeNull();
+    });
+
+    it('should state what this device can do before introducing the list', () => {
+      // "Notifications are not available on this device" explains the absent
+      // current-device row, so it has to be read before the list it explains.
+      setInstallations([installation()], 'unsupported');
+
+      const section = byTestId('settings-notifications') as HTMLElement;
+      const order = Array.from(
+        section.querySelectorAll(
+          '[data-testid="settings-notifications-unsupported"], [data-testid="settings-notifications-copy"]',
+        ),
+      ).map((element) => element.getAttribute('data-testid'));
+
+      expect(order).toEqual([
+        'settings-notifications-unsupported',
+        'settings-notifications-copy',
+      ]);
+    });
+
+    it('should introduce the list only once there is one', () => {
+      setInstallations([], 'prompt');
+
+      expect(byTestId('settings-notifications-copy')).toBeNull();
+      // On a platform that can register, the empty list is still worth stating
+      // next to the setup action.
+      expect(byTestId('settings-notifications-empty')).not.toBeNull();
+      expect(byTestId('settings-notifications-enable-device')).not.toBeNull();
+
+      setInstallations([installation()], 'prompt');
+
+      expect(byTestId('settings-notifications-copy')).not.toBeNull();
+    });
+
+    it('should still list and manage other installations where push is unsupported', () => {
+      // The list is account data. Signing in from the web build must not hide
+      // the phones the user actually receives notifications on.
+      setInstallations(
+        [
+          installation({ token: 'token-1', label: 'iPhone' }),
+          installation({ token: 'token-2', label: 'Pixel 7' }),
+        ],
+        'unsupported',
+      );
+
+      expect(deviceRows()).toHaveLength(2);
+      expect(deviceRows()[0].querySelector('ion-toggle')).not.toBeNull();
+      expect(byTestId('settings-notifications-unsupported')).not.toBeNull();
+    });
+
     it('should emit the token and the new state when a switch changes', () => {
       const toggleSpy = jest.spyOn(component.togglePushInstallation, 'emit');
       const row = installation({ token: 'token-9', enabled: true });

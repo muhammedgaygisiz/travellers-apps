@@ -86,3 +86,25 @@ export const NotificationsBlockedByOs: Story = {
     pushPermission: 'denied',
   },
 };
+
+/**
+ * The web build cannot receive notifications itself, but the account's other
+ * installations are still listed and still switchable from here.
+ */
+export const NotificationsUnsupportedPlatform: Story = {
+  args: {
+    pushInstallations: [{ ...thisDevice, isCurrentDevice: false }, otherDevice],
+    pushPermission: 'unsupported',
+  },
+};
+
+/**
+ * Web with nothing registered anywhere. One line says all there is to say; the
+ * list intro and the empty note would only pad it.
+ */
+export const NotificationsUnsupportedAndEmpty: Story = {
+  args: {
+    pushInstallations: [],
+    pushPermission: 'unsupported',
+  },
+};

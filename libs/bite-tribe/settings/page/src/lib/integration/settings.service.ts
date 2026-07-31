@@ -47,7 +47,7 @@ export class SettingsService {
     try {
       const [installations, installationId, permission] = await Promise.all([
         this.dataAccess.loadPushInstallations(),
-        this.dataAccess.getInstallationId(),
+        this.dataAccess.readInstallationId(),
         this.dataAccess.getPushPermissionState(),
       ]);
 
@@ -142,7 +142,7 @@ export class SettingsService {
    */
   private toInstallationView(
     installation: PushInstallation,
-    currentInstallationId: string,
+    currentInstallationId: string | undefined,
   ): PushInstallationView {
     const details = [
       this.toOsLabel(installation),
@@ -156,7 +156,12 @@ export class SettingsService {
       label: installation.deviceLabel ?? '',
       details,
       enabled: installation.enabled,
-      isCurrentDevice: installation.installationId === currentInstallationId,
+      // Both ids being absent is not a match: a legacy token carries no
+      // installation id, and neither does a surface that never registered one,
+      // so a bare equality check would label that token "This device".
+      isCurrentDevice:
+        !!currentInstallationId &&
+        installation.installationId === currentInstallationId,
     };
   }
 

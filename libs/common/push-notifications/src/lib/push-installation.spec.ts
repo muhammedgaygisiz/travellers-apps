@@ -6,6 +6,7 @@ import { App } from '@capacitor/app';
 import {
   describeCurrentInstallation,
   getInstallationId,
+  readInstallationId,
   loadPushInstallations,
   registerCurrentPushInstallation,
   registerPushInstallation,
@@ -90,6 +91,29 @@ describe('push-installation', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  describe(readInstallationId.name, () => {
+    it('returns the persisted id without creating one', async () => {
+      await expect(readInstallationId()).resolves.toBe(INSTALLATION_ID);
+      expect(Preferences.set).not.toHaveBeenCalled();
+    });
+
+    it('creates nothing where this installation has no id yet', async () => {
+      // Listing devices on the web build, or before push was ever set up, must
+      // not leave a stored identity behind.
+      (Preferences.get as jest.Mock).mockResolvedValue({ value: null });
+
+      await expect(readInstallationId()).resolves.toBeUndefined();
+      expect(Preferences.set).not.toHaveBeenCalled();
+    });
+
+    it('creates nothing when the preference store cannot be read', async () => {
+      (Preferences.get as jest.Mock).mockRejectedValue(new Error('boom'));
+
+      await expect(readInstallationId()).resolves.toBeUndefined();
+      expect(Preferences.set).not.toHaveBeenCalled();
+    });
   });
 
   describe(getInstallationId.name, () => {
@@ -199,6 +223,21 @@ describe('push-installation', () => {
           installationId: undefined,
           deviceLabel: undefined,
         }),
+      );
+    });
+
+    it('ignores the placeholder the pre-#1184 registration wrote', async () => {
+      // The old code stored `tbd-xxx` for values it did not have. Reading it
+      // back as real data printed it next to the user's device.
+      storedTokens({
+        id: 'legacy-token',
+        data: { platform: 'ios', appVersion: 'tbd-xxx', deviceId: 'tbd-xxx' },
+      });
+
+      const [installation] = await loadPushInstallations('user-1');
+
+      expect(installation).toEqual(
+        expect.objectContaining({ platform: 'ios', appVersion: undefined }),
       );
     });
 

@@ -179,7 +179,14 @@ export class PageSettings {
   isFreeUser = computed(() => this.subscriptionTier() === 0);
   isProUser = computed(() => this.subscriptionTier() >= 1);
 
-  /** Whether this platform can receive push at all. */
+  /**
+   * Whether this platform can receive push at all.
+   *
+   * This gates only the current-device parts of the section. The installation
+   * list is account data and stays manageable from anywhere the user is signed
+   * in — a browser that cannot receive notifications itself must still be able
+   * to turn delivery off for a phone that can.
+   */
   pushSupported = computed(() => this.pushPermission() !== 'unsupported');
 
   /**
@@ -194,6 +201,22 @@ export class PageSettings {
       (installation) => installation.isCurrentDevice,
     ),
   );
+
+  /**
+   * The intro copy explains the list, so it only appears with one. Offering
+   * "choose which of your devices" above an empty list promises a choice that
+   * is not there.
+   */
+  showInstallationsCopy = computed(() => this.pushInstallations().length > 0);
+
+  /**
+   * Whether the empty list is worth stating.
+   *
+   * Where push is unsupported, "notifications are not available on this device"
+   * already accounts for the empty list; repeating it adds a second line that
+   * says nothing new.
+   */
+  showNoInstallationsNote = this.pushSupported;
 
   /**
    * The setup action only makes sense while this device has no token and the OS

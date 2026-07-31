@@ -72,69 +72,84 @@
     <section class="notifications-section" data-testid="settings-notifications">
       <h2>{{ 'push-notifications' | transloco }}</h2>
 
-      @if (pushSupported()) {
-        <p class="notifications-section__copy">
+      <!-- What this device can do comes first, then what the list is for. The
+      list is account data and is managed from anywhere the user is signed in;
+      only registering *this* device depends on the platform, so an unsupported
+      surface says so and still lists the other installations. -->
+      @if (!pushSupported()) {
+        <p
+          class="notifications-section__empty"
+          data-testid="settings-notifications-unsupported"
+        >
+          {{ 'notifications-not-supported' | transloco }}
+        </p>
+      }
+
+      @if (showInstallationsCopy()) {
+        <p
+          class="notifications-section__copy"
+          data-testid="settings-notifications-copy"
+        >
           {{ 'notifications-devices-copy' | transloco }}
         </p>
+      }
 
-        @if (pushBlockedByOs()) {
-          <div
-            class="notifications-section__blocked"
-            data-testid="settings-notifications-blocked"
+      @if (pushBlockedByOs()) {
+        <div
+          class="notifications-section__blocked"
+          data-testid="settings-notifications-blocked"
+        >
+          <ion-text color="warning">
+            <ion-icon name="notifications-off-outline" aria-hidden="true" />
+            {{ 'notifications-blocked-by-os' | transloco }}
+          </ion-text>
+
+          <ion-button
+            fill="clear"
+            class="ion-align-self-start"
+            data-testid="settings-notifications-open-device-settings"
+            (click)="openPushSettings.emit()"
           >
-            <ion-text color="warning">
-              <ion-icon name="notifications-off-outline" aria-hidden="true" />
-              {{ 'notifications-blocked-by-os' | transloco }}
-            </ion-text>
+            {{ 'notifications-open-device-settings' | transloco }}
+          </ion-button>
+        </div>
+      }
 
-            <ion-button
-              fill="clear"
-              class="ion-align-self-start"
-              data-testid="settings-notifications-open-device-settings"
-              (click)="openPushSettings.emit()"
-            >
-              {{ 'notifications-open-device-settings' | transloco }}
-            </ion-button>
-          </div>
-        }
-
-        @if (pushInstallationsLoading()) {
-          <ion-spinner
-            name="dots"
-            data-testid="settings-notifications-loading"
-          />
-        } @else {
-          @for (installation of pushInstallations(); track installation.token) {
-            <ion-item data-testid="settings-notifications-device">
-              <ion-label>
-                <h3>
-                  @if (installation.label) {
-                    {{ installation.label }}
-                  } @else {
-                    <span data-testid="settings-notifications-unknown-device">
-                      {{ 'notifications-unknown-device' | transloco }}
-                    </span>
-                  }
-                </h3>
-                @if (installation.details) {
-                  <p>{{ installation.details }}</p>
+      @if (pushInstallationsLoading()) {
+        <ion-spinner name="dots" data-testid="settings-notifications-loading" />
+      } @else {
+        @for (installation of pushInstallations(); track installation.token) {
+          <ion-item data-testid="settings-notifications-device">
+            <ion-label>
+              <h3>
+                @if (installation.label) {
+                  {{ installation.label }}
+                } @else {
+                  <span data-testid="settings-notifications-unknown-device">
+                    {{ 'notifications-unknown-device' | transloco }}
+                  </span>
                 }
-                @if (installation.isCurrentDevice) {
-                  <ion-note
-                    color="primary"
-                    data-testid="settings-notifications-current-device"
-                  >
-                    {{ 'notifications-this-device' | transloco }}
-                  </ion-note>
-                }
-              </ion-label>
-              <ion-toggle
-                slot="end"
-                [checked]="installation.enabled"
-                (ionChange)="onPushInstallationToggle(installation, $event)"
-              />
-            </ion-item>
-          } @empty {
+              </h3>
+              @if (installation.details) {
+                <p>{{ installation.details }}</p>
+              }
+              @if (installation.isCurrentDevice) {
+                <ion-note
+                  color="primary"
+                  data-testid="settings-notifications-current-device"
+                >
+                  {{ 'notifications-this-device' | transloco }}
+                </ion-note>
+              }
+            </ion-label>
+            <ion-toggle
+              slot="end"
+              [checked]="installation.enabled"
+              (ionChange)="onPushInstallationToggle(installation, $event)"
+            />
+          </ion-item>
+        } @empty {
+          @if (showNoInstallationsNote()) {
             <p
               class="notifications-section__empty"
               data-testid="settings-notifications-empty"
@@ -143,28 +158,21 @@
             </p>
           }
         }
+      }
 
-        @if (showPushSetup()) {
-          <ion-button
-            expand="block"
-            fill="outline"
-            data-testid="settings-notifications-enable-device"
-            [disabled]="pushSetupRunning()"
-            (click)="enablePushOnThisDevice.emit()"
-          >
-            @if (pushSetupRunning()) {
-              <ion-spinner name="dots" slot="start" />
-            }
-            {{ 'notifications-enable-on-this-device' | transloco }}
-          </ion-button>
-        }
-      } @else {
-        <p
-          class="notifications-section__empty"
-          data-testid="settings-notifications-unsupported"
+      @if (showPushSetup()) {
+        <ion-button
+          expand="block"
+          fill="outline"
+          data-testid="settings-notifications-enable-device"
+          [disabled]="pushSetupRunning()"
+          (click)="enablePushOnThisDevice.emit()"
         >
-          {{ 'notifications-not-supported' | transloco }}
-        </p>
+          @if (pushSetupRunning()) {
+            <ion-spinner name="dots" slot="start" />
+          }
+          {{ 'notifications-enable-on-this-device' | transloco }}
+        </ion-button>
       }
     </section>
 

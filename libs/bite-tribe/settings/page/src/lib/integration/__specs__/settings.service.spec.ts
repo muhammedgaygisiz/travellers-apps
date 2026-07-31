@@ -12,7 +12,7 @@ describe(SettingsService.name, () => {
   let service: SettingsService;
   let loadPushInstallations: jest.Mock;
   let setPushInstallationEnabled: jest.Mock;
-  let getInstallationId: jest.Mock;
+  let readInstallationId: jest.Mock;
   let getPushPermissionState: jest.Mock;
   let enablePushOnThisDevice: jest.Mock;
   let openPushSettings: jest.Mock;
@@ -35,7 +35,7 @@ describe(SettingsService.name, () => {
 
     loadPushInstallations = jest.fn().mockResolvedValue([]);
     setPushInstallationEnabled = jest.fn().mockResolvedValue(undefined);
-    getInstallationId = jest.fn().mockResolvedValue(CURRENT_INSTALLATION);
+    readInstallationId = jest.fn().mockResolvedValue(CURRENT_INSTALLATION);
     getPushPermissionState = jest.fn().mockResolvedValue('granted');
     enablePushOnThisDevice = jest.fn().mockResolvedValue('granted');
     openPushSettings = jest.fn().mockResolvedValue(true);
@@ -51,7 +51,7 @@ describe(SettingsService.name, () => {
             publicUser: signal(undefined),
             loadPushInstallations,
             setPushInstallationEnabled,
-            getInstallationId,
+            readInstallationId,
             getPushPermissionState,
             enablePushOnThisDevice,
             openPushSettings,
@@ -123,6 +123,24 @@ describe(SettingsService.name, () => {
           isCurrentDevice: false,
         }),
       );
+    });
+
+    it('marks nothing as this device where no installation id exists', async () => {
+      // The web build never registers a token, so it has no installation id.
+      // A legacy token has none either, and the two must not match each other.
+      readInstallationId.mockResolvedValue(undefined);
+      loadPushInstallations.mockResolvedValue([
+        installation({ token: 'token-1' }),
+        installation({ token: 'token-2', installationId: undefined }),
+      ]);
+
+      await service.refreshPushInstallations();
+
+      expect(
+        service
+          .pushInstallations()
+          .map(({ isCurrentDevice }) => isCurrentDevice),
+      ).toEqual([false, false]);
     });
 
     it('records this device OS permission alongside the list', async () => {

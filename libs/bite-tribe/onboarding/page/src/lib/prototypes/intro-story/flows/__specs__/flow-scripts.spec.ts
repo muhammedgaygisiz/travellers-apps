@@ -52,4 +52,28 @@ describe('intro intentional flow scripts', () => {
     );
     expect(createTap).toBeTruthy();
   });
+
+  it('typed-name Share and search Find use typeText sync', () => {
+    const typed = SHARE_THE_FIND_FLOWS.find(
+      (f) => f.id === 'share-typed-name-then-photo',
+    );
+    const typeStep = typed?.steps.find((s) => s.kind === 'typeText') as {
+      target: string;
+      text: string;
+      sync?: string;
+    };
+    expect(typeStep?.target).toBe('[data-testid="bite-name"]');
+    expect(typeStep?.text).toBe('Botanic Breeze');
+    expect(typeStep?.sync).toBe('setDraftName');
+
+    const search = FIND_THE_BITE_FLOWS.find((f) => f.id === 'find-search-chip');
+    const searchType = search?.steps.find((s) => s.kind === 'typeText') as {
+      target: string;
+      text: string;
+      sync?: string;
+    };
+    expect(searchType?.target).toBe('[data-testid="search-input"]');
+    expect(searchType?.text).toBe('Botanic');
+    expect(searchType?.sync).toBe('applySearch');
+  });
 });

@@ -14,6 +14,18 @@ export const TAP_PAUSE_MS = 360;
 /** Soft land on a screen before the first gesture. */
 export const LAND_MS = 1300;
 
+/** Per-character delay for simulated typing. */
+export const TYPE_CHAR_MS = 68;
+
+/** Hold after typing so the entered text is readable. */
+export const TYPE_HOLD_MS = 920;
+
+/** Soft keyboard slide-up settle before the first character. */
+export const KEYBOARD_SHOW_MS = 280;
+
+/** Soft keyboard slide-down after the read hold. */
+export const KEYBOARD_HIDE_MS = 220;
+
 /** Default approach into a tap target. */
 export const APPROACH_MS = 780;
 

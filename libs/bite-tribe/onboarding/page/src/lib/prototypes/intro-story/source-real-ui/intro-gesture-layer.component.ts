@@ -69,6 +69,7 @@ export class IntroGestureLayerComponent {
   readonly fingerY = signal(70);
   readonly fingerPressed = signal(false);
   readonly ripple = signal<{ x: number; y: number; key: number } | null>(null);
+  readonly keyboardVisible = signal(false);
   readonly scrollThumb = signal<{
     active: boolean;
     topPct: number;
@@ -117,6 +118,7 @@ export class IntroGestureLayerComponent {
     this.fingerVisible.set(false);
     this.fingerPressed.set(false);
     this.ripple.set(null);
+    this.keyboardVisible.set(false);
     this.scrollThumb.set(null);
   }
 
@@ -149,6 +151,9 @@ export class IntroGestureLayerComponent {
       },
       onEmit: (action): void => {
         this.action.emit(action);
+      },
+      onKeyboard: (visible): void => {
+        this.keyboardVisible.set(visible);
       },
       onScrollProgress: ({ active, scrollTop, maxScroll }): void => {
         if (!active || maxScroll <= 0) {

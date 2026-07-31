@@ -28,6 +28,7 @@ import {
   REACTION_HOLD_MS,
   SETTLE_MS,
   TAP_PAUSE_MS,
+  TYPE_HOLD_MS,
 } from '../gesture';
 
 export interface IntroFlowVariant {
@@ -126,9 +127,11 @@ const findSearchChipThenOpen = (): GestureScriptStep[] =>
     .tap('[data-testid="search-chip"]', { approachMs: 650 })
     .emit({ type: 'openSearch' })
     .wait(400)
-    .tap('[data-testid="search-input"]', { approachMs: 480 })
-    .emit({ type: 'applySearch', term: 'Botanic' })
-    .wait(700)
+    .typeText('[data-testid="search-input"]', 'Botanic', {
+      approachMs: APPROACH_MS,
+      sync: 'applySearch',
+      holdMs: TYPE_HOLD_MS,
+    })
     .appear({ x: 55, y: 58 })
     .tap(DISCOVER_CARD, { approachMs: 520 })
     .wait(100)
@@ -299,9 +302,11 @@ const shareTypedNameThenPhoto = (): GestureScriptStep[] =>
   appendPickPhoto(
     openCreate()
       .appear({ x: 60, y: 42 })
-      .tap('[data-testid="bite-name"]', { approachMs: APPROACH_MS })
-      .emit({ type: 'setDraftName', name: 'Botanic Breeze' })
-      .wait(900),
+      .typeText('[data-testid="bite-name"]', 'Botanic Breeze', {
+        approachMs: APPROACH_MS,
+        sync: 'setDraftName',
+        holdMs: TYPE_HOLD_MS,
+      }),
   )
     .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
     .wait(TAP_PAUSE_MS)
@@ -332,9 +337,11 @@ const sharePhotoFirstThenPriceTags = (): GestureScriptStep[] =>
 const shareSkipPhotoThenPublish = (): GestureScriptStep[] =>
   openCreate()
     .appear({ x: 60, y: 40 })
-    .tap('[data-testid="bite-name"]', { approachMs: APPROACH_MS })
-    .emit({ type: 'setDraftName', name: 'Botanic Breeze' })
-    .wait(900)
+    .typeText('[data-testid="bite-name"]', 'Botanic Breeze', {
+      approachMs: APPROACH_MS,
+      sync: 'setDraftName',
+      holdMs: TYPE_HOLD_MS,
+    })
     .emit({ type: 'setDraftTags', tags: ['bern'] })
     .wait(SETTLE_MS)
     .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })

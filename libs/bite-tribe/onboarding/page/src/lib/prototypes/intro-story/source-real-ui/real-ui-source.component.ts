@@ -302,15 +302,14 @@ export class RealUiSourceComponent {
     };
   });
 
-  readonly createDraft = computed((): Bite | undefined => {
+  readonly createDraft = computed((): Bite => {
     const path = this.createImagePath();
     const name = this.draftName();
-    if (!path && !name) {
-      return undefined;
-    }
+    // Always return a draft shell so typeText can clear→type name without
+    // leaving a stale prefilled value when Angular patches from [bite].
     return {
       id: 'draft',
-      name: name || 'Botanic Breeze',
+      name,
       image: '',
       imagePath: path || '',
       place: 'Einstein au Jardin',

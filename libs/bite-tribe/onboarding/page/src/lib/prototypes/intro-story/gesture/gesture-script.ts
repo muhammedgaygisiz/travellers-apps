@@ -173,7 +173,32 @@ export type GestureScriptStep =
   | { kind: 'then'; fn: () => void | Promise<void> }
   /** Alias of `then` for older scripts. */
   | { kind: 'run'; fn: () => void | Promise<void> }
-  | { kind: 'emit'; action: GestureEmit };
+  | { kind: 'emit'; action: GestureEmit }
+  | {
+      /**
+       * Focus a text field (tap), then type character-by-character.
+       * Updates the real input value + input events; optional host sync emit
+       * keeps Angular signals/forms in lockstep with the visible text.
+       */
+      kind: 'typeText';
+      target: PointOrSelector;
+      text: string;
+      /** Per-character delay (default TYPE_CHAR_MS). */
+      charMs?: number;
+      /** Approach into the field before the focus tap. */
+      approachMs?: number;
+      /** Hold after the last character so the text is readable. */
+      holdMs?: number;
+      /** Soft iOS keyboard chrome while typing (default true). */
+      showKeyboard?: boolean;
+      /** Clear the field before typing (default true). */
+      clearFirst?: boolean;
+      /**
+       * Progressive host sync while characters appear.
+       * `setDraftName` → create form; `applySearch` → home search.
+       */
+      sync?: 'setDraftName' | 'applySearch';
+    };
 
 /** Compact step factories for data-driven beat scripts. */
 export const G = {
@@ -232,6 +257,14 @@ export const G = {
     fn,
   }),
   emit: (action: GestureEmit): GestureScriptStep => ({ kind: 'emit', action }),
+  typeText: (
+    target: PointOrSelector,
+    text: string,
+    opts?: Omit<
+      Extract<GestureScriptStep, { kind: 'typeText' }>,
+      'kind' | 'target' | 'text'
+    >,
+  ): GestureScriptStep => ({ kind: 'typeText', target, text, ...opts }),
 } as const;
 
 /** Fluent script builder — `.then(fn)` is both chain continuation and a step. */
@@ -318,6 +351,18 @@ export class GestureScriptBuilder {
 
   emit(action: GestureEmit): this {
     this.steps.push(G.emit(action));
+    return this;
+  }
+
+  typeText(
+    target: PointOrSelector,
+    text: string,
+    opts?: Omit<
+      Extract<GestureScriptStep, { kind: 'typeText' }>,
+      'kind' | 'target' | 'text'
+    >,
+  ): this {
+    this.steps.push(G.typeText(target, text, opts));
     return this;
   }
 

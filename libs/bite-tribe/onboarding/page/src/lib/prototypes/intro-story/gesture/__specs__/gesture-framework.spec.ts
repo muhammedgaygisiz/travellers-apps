@@ -67,6 +67,29 @@ describe('gesture script builders', () => {
       'scrollToTarget',
     );
   });
+
+  it('builds typeText with sync + char timing options', () => {
+    const step = G.typeText('[data-testid="bite-name"]', 'Botanic', {
+      sync: 'setDraftName',
+      charMs: 50,
+      holdMs: 800,
+    });
+    expect(step).toEqual({
+      kind: 'typeText',
+      target: '[data-testid="bite-name"]',
+      text: 'Botanic',
+      sync: 'setDraftName',
+      charMs: 50,
+      holdMs: 800,
+    });
+
+    const chained = script()
+      .typeText('[data-testid="search-input"]', 'Botanic', {
+        sync: 'applySearch',
+      })
+      .build();
+    expect(chained[0].kind).toBe('typeText');
+  });
 });
 
 describe('intro beat narrative contracts', () => {

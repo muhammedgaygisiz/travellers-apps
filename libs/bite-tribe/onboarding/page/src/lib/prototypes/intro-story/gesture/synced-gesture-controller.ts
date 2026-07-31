@@ -27,6 +27,13 @@ import type {
   PointOrSelector,
   PointPct,
 } from './gesture-script';
+import {
+  APPROACH_MS,
+  KEYBOARD_HIDE_MS,
+  KEYBOARD_SHOW_MS,
+  TYPE_CHAR_MS,
+  TYPE_HOLD_MS,
+} from './timing';
 
 export interface PointerState {
   x: number;
@@ -60,6 +67,8 @@ export interface SyncedGestureControllerOptions {
    * element under the pointer so real Angular handlers can react.
    */
   dispatchDomEvents?: boolean;
+  /** Soft iOS keyboard chrome visibility while typeText runs. */
+  onKeyboard?: (visible: boolean) => void;
 }
 
 export class SyncedGestureController {
@@ -95,6 +104,7 @@ export class SyncedGestureController {
     this.timers = [];
     this.visible = false;
     this.pressed = false;
+    this.opts.onKeyboard?.(false);
     this.pushPointer();
   }
 
@@ -229,6 +239,10 @@ export class SyncedGestureController {
       case 'emit':
         this.opts.onEmit?.(step.action);
         await this.delay(40);
+        return;
+
+      case 'typeText':
+        await this.typeText(step);
         return;
     }
   }
@@ -409,6 +423,113 @@ export class SyncedGestureController {
 
     this.pressed = false;
     this.pushPointer();
+  }
+
+  /**
+   * Focus a text field, slide up soft keyboard chrome, then type character
+   * by character — pointer stays on the field; host sync keeps Angular forms live.
+   */
+  private async typeText(
+    step: Extract<GestureScriptStep, { kind: 'typeText' }>,
+  ): Promise<void> {
+    const charMs = step.charMs ?? TYPE_CHAR_MS;
+    const holdMs = step.holdMs ?? TYPE_HOLD_MS;
+    const approachMs = step.approachMs ?? APPROACH_MS;
+    const showKeyboard = step.showKeyboard !== false;
+    const clearFirst = step.clearFirst !== false;
+
+    const at =
+      typeof step.target === 'string'
+        ? await this.resolvePointWithRetry(step.target)
+        : this.resolvePoint(step.target);
+    if (!at) {
+      await this.delay(approachMs > 0 ? Math.min(approachMs, 200) : 200);
+      return;
+    }
+
+    // 1) Approach + tap to focus — text must not appear while pointer elsewhere.
+    if (approachMs > 0) {
+      await this.tweenPointer(at.x, at.y, approachMs, easeOutCubic);
+    } else {
+      this.x = at.x;
+      this.y = at.y;
+      this.visible = true;
+      this.pushPointer();
+    }
+    this.pressed = true;
+    this.opts.onRipple?.(this.x, this.y);
+    this.pushPointer();
+    if (this.opts.dispatchDomEvents) {
+      this.maybeDispatch('pointerdown');
+    }
+    await this.delay(180);
+    this.pressed = false;
+    this.pushPointer();
+    if (this.opts.dispatchDomEvents) {
+      this.maybeDispatch('pointerup');
+      this.maybeDispatch('click');
+    }
+
+    const field = this.resolveInputField(step.target);
+    field?.focus?.();
+    await this.delay(120);
+
+    // 2) Soft keyboard chrome (visual only).
+    if (showKeyboard) {
+      this.opts.onKeyboard?.(true);
+      await this.delay(KEYBOARD_SHOW_MS);
+    }
+
+    // 3) Clear then type — keep pointer parked on the field.
+    if (clearFirst) {
+      this.applyTypedValue(field, '', step.sync);
+      await this.delay(90);
+    }
+
+    let typed = clearFirst ? '' : (field?.value ?? '');
+    for (const ch of step.text) {
+      if (this.cancelled) {
+        this.opts.onKeyboard?.(false);
+        return;
+      }
+      typed += ch;
+      this.applyTypedValue(field, typed, step.sync);
+      await this.delay(charMs);
+    }
+
+    // 4) Hold so the reader can see the finished text.
+    await this.delay(holdMs);
+
+    if (showKeyboard) {
+      this.opts.onKeyboard?.(false);
+      await this.delay(KEYBOARD_HIDE_MS);
+    }
+  }
+
+  /** Resolve ion-input / ion-searchbar / native input under a selector. */
+  private resolveInputField(
+    target: PointOrSelector,
+  ): HTMLInputElement | HTMLTextAreaElement | null {
+    const host = this.resolveElement(target);
+    if (!host) {
+      return null;
+    }
+    return findEditableInput(host);
+  }
+
+  private applyTypedValue(
+    field: HTMLInputElement | HTMLTextAreaElement | null,
+    value: string,
+    sync?: 'setDraftName' | 'applySearch',
+  ): void {
+    if (field) {
+      setNativeInputValue(field, value);
+    }
+    if (sync === 'setDraftName') {
+      this.opts.onEmit?.({ type: 'setDraftName', name: value });
+    } else if (sync === 'applySearch') {
+      this.opts.onEmit?.({ type: 'applySearch', term: value });
+    }
   }
 
   // ---- clock / helpers -----------------------------------------------------
@@ -641,4 +762,63 @@ function hitTestAtPct(
     }
   }
   return null;
+}
+
+/** Prefer the native editable control inside ion-input / ion-searchbar hosts. */
+function findEditableInput(
+  host: HTMLElement,
+): HTMLInputElement | HTMLTextAreaElement | null {
+  if (host instanceof HTMLInputElement || host instanceof HTMLTextAreaElement) {
+    return host;
+  }
+  const ion =
+    host.closest('ion-input, ion-searchbar, ion-textarea') ??
+    (host.matches?.('ion-input, ion-searchbar, ion-textarea') ? host : null);
+  const root = (ion as HTMLElement | null) ?? host;
+  const fromShadow = root.shadowRoot?.querySelector('input, textarea') as
+    HTMLInputElement | HTMLTextAreaElement | null;
+  if (fromShadow) {
+    return fromShadow;
+  }
+  return root.querySelector('input, textarea') as
+    HTMLInputElement | HTMLTextAreaElement | null;
+}
+
+/**
+ * Set value the way a real keypress would — native setter + input events —
+ * so Angular/(ion) listeners and caret position stay honest.
+ */
+function setNativeInputValue(
+  el: HTMLInputElement | HTMLTextAreaElement,
+  value: string,
+): void {
+  const proto =
+    el instanceof HTMLTextAreaElement
+      ? HTMLTextAreaElement.prototype
+      : HTMLInputElement.prototype;
+  const desc = Object.getOwnPropertyDescriptor(proto, 'value');
+  desc?.set?.call(el, value);
+  el.dispatchEvent(
+    new InputEvent('input', {
+      bubbles: true,
+      cancelable: true,
+      data: value.slice(-1) || null,
+      inputType: 'insertText',
+    }),
+  );
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+
+  // Ionic hosts mirror `.value` for [value] bindings / ionInput handlers.
+  const ion = el.closest('ion-input, ion-searchbar, ion-textarea') as
+    (HTMLElement & { value?: string }) | null;
+  if (ion) {
+    ion.value = value;
+    ion.dispatchEvent(
+      new CustomEvent('ionInput', {
+        bubbles: true,
+        composed: true,
+        detail: { value },
+      }),
+    );
+  }
 }

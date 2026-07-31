@@ -6,19 +6,19 @@ import {
 } from '@storybook/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
-import { ProgressiveDisclosureComponent } from '../progressive-disclosure.component';
+import { SoftWhisperComponent } from '../soft-whisper.component';
 
 addNecessaryIcons();
 
-const meta: Meta<ProgressiveDisclosureComponent> = {
-  title: 'Prototypes/Intro Story/E Progressive Disclosure',
-  component: ProgressiveDisclosureComponent,
+const meta: Meta<SoftWhisperComponent> = {
+  title: 'Prototypes/Intro Story/I Soft Whisper',
+  component: SoftWhisperComponent,
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
         component:
-          'Coach-mark style progressive disclosure over real BiteTribe UI in the iPhone shell. One tip at a time in a fixed teaching order — Next or auto-advance. Tip cards use Next/Back chrome; for a calmer content-first alternative without modal button stacks, see Prototypes/Intro Story/I Soft Whisper.',
+          'Soft Whisper — calm, content-first progressive disclosure. Light Outfit captions fade near the focal UI; gentle grayscale shine; thin progress dots; auto-advance + tap stage. At most one chrome button (Skip). No modal Next/Back stacks. Prefer this over E when the coach-mark cards feel too aggressive.',
       },
     },
   },
@@ -33,9 +33,9 @@ const meta: Meta<ProgressiveDisclosureComponent> = {
   render: (args) => ({
     props: args,
     template: `
-      <ion-app style="width: 100%; height: 100%; overflow: hidden;">
-        <div style="box-sizing: border-box; width: 100%; height: 100vh; max-width: 430px; margin: 0 auto; overflow: hidden; scrollbar-width: none;">
-          <intro-progressive-disclosure ${argsToTemplate(args)} />
+      <ion-app style="width: 100%; height: 100%;">
+        <div style="box-sizing: border-box; width: 100%; height: 100vh; max-width: 430px; margin: 0 auto;">
+          <intro-soft-whisper ${argsToTemplate(args)} />
         </div>
       </ion-app>
     `,
@@ -50,43 +50,47 @@ const meta: Meta<ProgressiveDisclosureComponent> = {
 
 export default meta;
 
-type Story = StoryObj<ProgressiveDisclosureComponent>;
+type Story = StoryObj<SoftWhisperComponent>;
 
-/** Full tour across all four concept arcs. */
+/** Full tour — whisper captions across every tip. */
 export const Interactive: Story = {
   args: {
     arc: 'all',
     autoAdvance: true,
-    badge: 'Progressive',
+    showSkip: true,
+    badge: 'Soft Whisper',
   },
 };
 
-/** Find the bite — feed → filters/search → Bitemap. */
+/** Find the bite — feed → filters → Bitemap. */
 export const FindTheBite: Story = {
   name: '1 Find the bite',
   args: {
     arc: 'discover',
     autoAdvance: true,
+    showSkip: true,
     badge: 'Find',
   },
 };
 
-/** Share the find — Create Bite → photo → publish. */
+/** Share the find — Create → photo → publish. */
 export const ShareTheFind: Story = {
   name: '2 Share the find',
   args: {
     arc: 'share',
     autoAdvance: true,
+    showSkip: true,
     badge: 'Share',
   },
 };
 
-/** Join the tribe — creator → Follow. */
+/** Join the tribe — explorer → Follow. */
 export const JoinTheTribe: Story = {
   name: '3 Join the tribe',
   args: {
     arc: 'tribe',
     autoAdvance: true,
+    showSkip: true,
     badge: 'Tribe',
   },
 };
@@ -97,6 +101,7 @@ export const ReadyToTaste: Story = {
   args: {
     arc: 'go',
     autoAdvance: true,
+    showSkip: true,
     badge: 'Go',
   },
 };

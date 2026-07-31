@@ -38,6 +38,10 @@ interface LocalRect {
 /**
  * E — Progressive disclosure: one coach-mark tip at a time over real UI.
  * Teaching order is fixed; Next (or auto-advance) moves the spotlight.
+ *
+ * Note: tip cards include Next/Back chrome. For a calmer content-first
+ * alternative (≤1 Skip, whisper captions, no modal stacks), see
+ * variant-i-soft-whisper (`Prototypes/Intro Story/I Soft Whisper`).
  */
 @Component({
   selector: 'intro-progressive-disclosure',

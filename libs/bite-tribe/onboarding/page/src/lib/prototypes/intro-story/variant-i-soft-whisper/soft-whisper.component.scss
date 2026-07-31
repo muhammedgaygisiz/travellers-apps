@@ -1,0 +1,357 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: Outfit, system-ui, sans-serif;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:host::-webkit-scrollbar {
+  display: none;
+}
+
+.sw {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 100dvh;
+  padding: calc(0.55rem + var(--ion-safe-area-top, 0px)) 0.85rem
+    calc(0.75rem + var(--ion-safe-area-bottom, 0px));
+  overflow: hidden;
+  color: #1a1917;
+  background:
+    radial-gradient(
+      ellipse at 14% 0%,
+      var(--accent-soft, #d6e7f8) 0%,
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse at 88% 12%,
+      rgb(255 250 242 / 55%) 0%,
+      transparent 40%
+    ),
+    linear-gradient(172deg, #f5f1ea 0%, #ebe5db 55%, #e2dbd0 100%);
+  scrollbar-width: none;
+}
+
+.sw::-webkit-scrollbar {
+  display: none;
+}
+
+.sw__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+  margin-bottom: 0.55rem;
+}
+
+.sw__badge {
+  margin: 0 0 0.2rem;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(26 25 23 / 42%);
+}
+
+.sw__headline {
+  margin: 0;
+  font-size: 1.28rem;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: rgb(26 25 23 / 88%);
+}
+
+/* Sole chrome button — quiet text, not a pill CTA */
+.sw__skip {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  padding: 0.2rem 0.15rem;
+  border: 0;
+  background: transparent;
+  color: rgb(26 25 23 / 42%);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color 220ms ease;
+}
+
+.sw__skip:hover,
+.sw__skip:focus-visible {
+  color: rgb(26 25 23 / 72%);
+  outline: none;
+}
+
+.sw__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.38rem;
+  margin-bottom: 0.65rem;
+}
+
+.sw__dot {
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 999px;
+  background: rgb(26 25 23 / 14%);
+  transition:
+    background 360ms ease,
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sw__dot--done {
+  background: rgb(26 25 23 / 28%);
+}
+
+.sw__dot--active {
+  width: 0.72rem;
+  background: color-mix(in srgb, var(--accent, #4a90d9) 70%, #1a1917);
+  transform: scale(1.05);
+}
+
+.sw__stage {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 1.15rem;
+  cursor: pointer;
+  scrollbar-width: none;
+}
+
+.sw__stage::-webkit-scrollbar {
+  display: none;
+}
+
+.sw__coach {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  --shine-x: 50%;
+  --shine-y: 42%;
+  --shine-w: 0px;
+  --shine-h: 0px;
+  --shine-r: 0.95rem;
+  --morph-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --morph-ms: 380ms;
+}
+
+/* Gentle dim + soft grayscale — lighter than H Focus Shine */
+.sw__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgb(22 20 18 / 14%);
+  backdrop-filter: grayscale(0.55) brightness(0.9) saturate(0.7);
+  -webkit-backdrop-filter: grayscale(0.55) brightness(0.9) saturate(0.7);
+  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#fff 0 0);
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#fff 0 0);
+  -webkit-mask-size:
+    100% 100%,
+    var(--shine-w) var(--shine-h);
+  mask-size:
+    100% 100%,
+    var(--shine-w) var(--shine-h);
+  -webkit-mask-position:
+    0 0,
+    var(--shine-x) var(--shine-y);
+  mask-position:
+    0 0,
+    var(--shine-x) var(--shine-y);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition:
+    mask-size var(--morph-ms) var(--morph-ease),
+    mask-position var(--morph-ms) var(--morph-ease),
+    -webkit-mask-size var(--morph-ms) var(--morph-ease),
+    -webkit-mask-position var(--morph-ms) var(--morph-ease),
+    background var(--morph-ms) var(--morph-ease),
+    backdrop-filter var(--morph-ms) var(--morph-ease),
+    -webkit-backdrop-filter var(--morph-ms) var(--morph-ease);
+}
+
+.sw--morphing .sw__veil {
+  background: rgb(22 20 18 / 18%);
+  backdrop-filter: grayscale(0.65) brightness(0.88) saturate(0.6);
+  -webkit-backdrop-filter: grayscale(0.65) brightness(0.88) saturate(0.6);
+}
+
+.sw__glow {
+  position: absolute;
+  z-index: 2;
+  top: var(--shine-y);
+  left: var(--shine-x);
+  width: var(--shine-w);
+  height: var(--shine-h);
+  border-radius: var(--shine-r);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 35%),
+    0 0 0 5px color-mix(in srgb, var(--accent, #4a90d9) 10%, transparent),
+    0 0 22px 2px color-mix(in srgb, var(--accent, #4a90d9) 16%, transparent);
+  transition:
+    top var(--morph-ms) var(--morph-ease),
+    left var(--morph-ms) var(--morph-ease),
+    width var(--morph-ms) var(--morph-ease),
+    height var(--morph-ms) var(--morph-ease),
+    border-radius var(--morph-ms) var(--morph-ease),
+    box-shadow 420ms var(--morph-ease),
+    opacity 280ms ease;
+  pointer-events: none;
+}
+
+.sw--morphing .sw__glow {
+  opacity: 0.45;
+}
+
+/* Whisper caption — no card chrome, light type only */
+.sw__whisper {
+  --tip-top: auto;
+  --tip-bottom: 1.35rem;
+  --tip-left: 50%;
+  --tip-y: 0%;
+  position: absolute;
+  top: var(--tip-top);
+  right: auto;
+  bottom: var(--tip-bottom);
+  left: var(--tip-left);
+  z-index: 8;
+  box-sizing: border-box;
+  width: min(17rem, calc(100% - 2rem));
+  padding: 0;
+  text-align: center;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(var(--tip-y));
+  animation: sw-whisper-in 640ms cubic-bezier(0.22, 1, 0.36, 1) 90ms both;
+  transition:
+    top 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    left 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sw__whisper--above {
+  animation-name: sw-whisper-in-above;
+}
+
+@keyframes sw-whisper-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateX(-50%) translateY(calc(var(--tip-y) + 10px));
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: translateX(-50%) translateY(var(--tip-y));
+  }
+}
+
+@keyframes sw-whisper-in-above {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateX(-50%) translateY(calc(var(--tip-y) - 10px));
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: translateX(-50%) translateY(var(--tip-y));
+  }
+}
+
+.sw__kicker {
+  margin: 0 0 0.28rem;
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent, #4a90d9) 55%, #1a1917);
+  text-shadow: 0 1px 12px rgb(245 241 234 / 90%);
+  animation: sw-line 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 80ms;
+}
+
+.sw__title {
+  margin: 0 0 0.22rem;
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: #1a1917;
+  text-shadow:
+    0 1px 14px rgb(245 241 234 / 95%),
+    0 0 1px rgb(245 241 234 / 80%);
+  animation: sw-line 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 130ms;
+}
+
+.sw__body {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+  color: rgb(26 25 23 / 68%);
+  text-shadow: 0 1px 12px rgb(245 241 234 / 92%);
+  animation: sw-line 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 180ms;
+}
+
+@keyframes sw-line {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.sw__resume {
+  position: absolute;
+  left: 50%;
+  bottom: 1.25rem;
+  z-index: 8;
+  margin: 0;
+  transform: translateX(-50%);
+  font-size: 0.78rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: rgb(26 25 23 / 48%);
+  pointer-events: none;
+  animation: sw-line 480ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sw__veil,
+  .sw__glow,
+  .sw__whisper {
+    transition: none !important;
+  }
+
+  .sw__whisper,
+  .sw__kicker,
+  .sw__title,
+  .sw__body,
+  .sw__resume {
+    animation: none !important;
+  }
+
+  .sw__dot {
+    transition: none !important;
+  }
+}

@@ -36,6 +36,50 @@ When adding or removing native plugins:
 
 Prefer Capacitor sync over hand-editing generated native dependency files.
 
+## Launch Asset Rule
+
+The launch surfaces — native splash screens, the PWA manifest, and the browser
+theme colour — are not free-standing artwork. Their background follows the
+app theme in `apps/bite-tribe/src/theme/variables.scss`:
+
+- Light: `$BACKGROUND_COLOR` (`#fff`).
+- Dark: `$DARK_BACKGROUND_COLOR` (`#1a1c22`).
+
+Issue [#1203](https://github.com/muhammedgaygisiz/travellers-apps/issues/1203)
+closed the gap left when the current palette landed: splash and manifest still
+carried the previous warm palette (`#fffbef`, `#00365f`, the orange splash
+canvas) while the app itself had already moved to the neutral background.
+
+The generator sources live in `apps/bite-tribe-ios/assets` and feed both
+platforms:
+
+```text
+splash.png        2732x2732, light background + apps/bite-tribe/src/logo.svg
+splash-dark.png   2732x2732, dark background + apps/bite-tribe/src/logo.svg
+icon-only.png     app icon mark
+icon-foreground.png / icon-background.png   Android adaptive icon layers
+```
+
+Regenerate with:
+
+```bash
+npm run ios-asset-generator:generate-ios:bite-tribe
+npx capacitor-assets generate --android --androidProject apps/bite-tribe-android/android --assetPath apps/bite-tribe-ios/assets
+```
+
+The Android run also rewrites the launcher icon (`mipmap-*`,
+`mipmap-anydpi-v26/ic_launcher*.xml`) and reformats `AndroidManifest.xml`. The
+committed adaptive icon uses `@color/ic_launcher_background`, not the generated
+inset mipmap. Keep only the `drawable*/splash.png` output from that run unless
+an icon change is the actual intent.
+
+Web launch colours live in `apps/bite-tribe/src/manifest.webmanifest`
+(`theme_color`, `background_color`) and the `theme-color` meta pair in
+`apps/bite-tribe/src/index.html`. The `apple-splash-*` startup images in
+`apps/bite-tribe/src/assets/icons` come from
+`npm run pwa-asset-generator:generate:bite-tribe`, which renders on white and
+therefore already matched the light background.
+
 ## Service Worker Rule
 
 The Angular service worker (`ngsw`) is web-only. `apps/bite-tribe` keeps building it (`serviceWorker: true`), so the PWA is unchanged, but the shell registers it only outside a native platform (issue \#1067).
@@ -160,6 +204,9 @@ passive position loading.
 ```text
 apps/bite-tribe-ios/capacitor.config.ts
 apps/bite-tribe-android/capacitor.config.ts
+apps/bite-tribe-ios/assets
+apps/bite-tribe/src/manifest.webmanifest
+apps/bite-tribe/src/index.html
 apps/bite-tribe-ios/package.json
 apps/bite-tribe-android/package.json
 libs/bite-tribe/shell/src/lib/service-worker.ts

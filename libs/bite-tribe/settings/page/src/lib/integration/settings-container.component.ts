@@ -16,10 +16,19 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [publicUser]="service.publicUser()"
       [settings]="service.settings()"
       [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
+      [pushInstallations]="service.pushInstallations()"
+      [pushPermission]="service.pushPermission()"
+      [pushInstallationsLoading]="service.pushInstallationsLoading()"
+      [pushSetupRunning]="service.pushSetupRunning()"
       (submitSettings)="service.saveSettings($event)"
       (logout)="service.logout()"
       (resendEmailVerification)="service.resendEmailVerification('settings')"
       (deleteAccount)="service.goToDeleteAccount()"
+      (togglePushInstallation)="
+        service.setPushInstallationEnabled($event.token, $event.enabled)
+      "
+      (enablePushOnThisDevice)="service.enablePushOnThisDevice()"
+      (openPushSettings)="service.openPushSettings()"
     />
   `,
   imports: [PageSettings],
@@ -40,6 +49,10 @@ export class SettingsContainer {
     void FirebaseAnalytics.setCurrentScreen({
       screenName: 'Settings',
     });
+
+    // Reloaded on every entry: another device may have registered since, and
+    // this device's OS permission can be revoked while the app is backgrounded.
+    void this.service.refreshPushInstallations();
 
     if (this.service.emailVerificationPromptVisible()) {
       this.trackPromptShownOnce();

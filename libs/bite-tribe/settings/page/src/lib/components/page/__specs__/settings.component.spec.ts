@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { PageSettings } from '../settings.component';
+import { PageSettings, PushInstallationView } from '../settings.component';
 import { IonModal, provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
@@ -62,7 +62,6 @@ describe(PageSettings.name, () => {
       const formValue = component.settingsForm.getRawValue();
 
       expect(formValue).toEqual({
-        pushNotifications: false,
         emailUpdates: false,
         theme: 'light',
         currency: 'EUR',
@@ -94,7 +93,6 @@ describe(PageSettings.name, () => {
 
     it('should emit submitSettings with form values', () => {
       const mockSettings: Settings = {
-        pushNotifications: true,
         location: false,
         emailUpdates: false,
         theme: 'dark',
@@ -106,7 +104,6 @@ describe(PageSettings.name, () => {
       };
 
       component.settingsForm.setValue({
-        pushNotifications: mockSettings.pushNotifications,
         emailUpdates: mockSettings.emailUpdates,
         theme: mockSettings.theme,
         currency: mockSettings.currency,
@@ -123,7 +120,6 @@ describe(PageSettings.name, () => {
       // The settings write replaces the document, so the grant recorded by
       // onboarding has to survive a save made from this form (#1023).
       compRef.setInput('settings', {
-        pushNotifications: true,
         location: true,
         emailUpdates: true,
         theme: 'dark',
@@ -212,7 +208,6 @@ describe(PageSettings.name, () => {
   describe('settingsEffect', () => {
     it('should patch form with settings when settings input is provided', () => {
       const mockSettings: Settings = {
-        pushNotifications: true,
         location: true,
         emailUpdates: true,
         theme: 'dark',
@@ -399,6 +394,196 @@ describe(PageSettings.name, () => {
       expect(component.subscriptionTier()).toBe(0);
       expect(component.isFreeUser()).toBe(true);
       expect(component.isProUser()).toBe(false);
+    });
+  });
+
+  describe('Push installations', () => {
+    const installation = (
+      overrides: Partial<PushInstallationView> = {},
+    ): PushInstallationView => ({
+      token: 'token-1',
+      label: 'iPhone',
+      details: 'iOS 26.5 · 1.0.1 (88)',
+      enabled: true,
+      isCurrentDevice: false,
+      ...overrides,
+    });
+
+    const setInstallations = (
+      installations: PushInstallationView[],
+      permission = 'prompt',
+    ): void => {
+      compRef.setInput('pushInstallations', installations);
+      compRef.setInput('pushPermission', permission);
+      fixture.detectChanges();
+    };
+
+    const deviceRows = (): HTMLElement[] =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll(
+          '[data-testid="settings-notifications-device"]',
+        ),
+      );
+
+    const byTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should render one row per registered installation', () => {
+      setInstallations([
+        installation({ token: 'token-1', isCurrentDevice: true }),
+        installation({ token: 'token-2', label: 'Pixel 7' }),
+      ]);
+
+      expect(deviceRows()).toHaveLength(2);
+      // The FCM token is a delivery address, not something a user recognises.
+      expect(fixture.nativeElement.textContent).not.toContain('token-1');
+      expect(fixture.nativeElement.textContent).toContain('iPhone');
+      expect(fixture.nativeElement.textContent).toContain('Pixel 7');
+    });
+
+    it('should mark the current installation', () => {
+      setInstallations([installation({ isCurrentDevice: true })]);
+
+      expect(
+        deviceRows()[0].querySelector(
+          '[data-testid="settings-notifications-current-device"]',
+        ),
+      ).not.toBeNull();
+    });
+
+    it('should fall back to a translated label for a legacy installation', () => {
+      // A token registered before installation metadata existed still has to be
+      // manageable, and must not be labelled with its raw token.
+      setInstallations([installation({ label: '', details: '' })]);
+
+      expect(
+        deviceRows()[0].querySelector(
+          '[data-testid="settings-notifications-unknown-device"]',
+        ),
+      ).not.toBeNull();
+    });
+
+    it('should offer the setup action only while this device has no token', () => {
+      setInstallations([installation({ isCurrentDevice: false })]);
+
+      expect(byTestId('settings-notifications-enable-device')).not.toBeNull();
+
+      setInstallations([installation({ isCurrentDevice: true })]);
+
+      expect(byTestId('settings-notifications-enable-device')).toBeNull();
+    });
+
+    it('should replace the setup action with a recovery route once the OS denied', () => {
+      // The OS ignores further permission requests after a denial, so offering
+      // the prompt again would be a button that does nothing.
+      setInstallations([], 'denied');
+
+      expect(byTestId('settings-notifications-enable-device')).toBeNull();
+      expect(byTestId('settings-notifications-blocked')).not.toBeNull();
+      expect(
+        byTestId('settings-notifications-open-device-settings'),
+      ).not.toBeNull();
+    });
+
+    it('should keep a registered row alongside the OS-blocked warning', () => {
+      // A revoked OS permission stops delivery without changing what BiteTribe
+      // was told to send, so both states stay visible and separate.
+      setInstallations(
+        [installation({ isCurrentDevice: true, enabled: true })],
+        'denied',
+      );
+
+      expect(deviceRows()).toHaveLength(1);
+      expect(byTestId('settings-notifications-blocked')).not.toBeNull();
+    });
+
+    it('should show a truthful unsupported state instead of a dead action', () => {
+      setInstallations([], 'unsupported');
+
+      expect(byTestId('settings-notifications-unsupported')).not.toBeNull();
+      expect(byTestId('settings-notifications-enable-device')).toBeNull();
+    });
+
+    it('should say nothing beyond the unsupported line when there is no device at all', () => {
+      // Web with no registered installation: the intro copy would promise a
+      // choice that is not there, and the empty note would restate the line
+      // above it.
+      setInstallations([], 'unsupported');
+
+      expect(byTestId('settings-notifications-unsupported')).not.toBeNull();
+      expect(byTestId('settings-notifications-copy')).toBeNull();
+      expect(byTestId('settings-notifications-empty')).toBeNull();
+    });
+
+    it('should state what this device can do before introducing the list', () => {
+      // "Notifications are not available on this device" explains the absent
+      // current-device row, so it has to be read before the list it explains.
+      setInstallations([installation()], 'unsupported');
+
+      const section = byTestId('settings-notifications') as HTMLElement;
+      const order = Array.from(
+        section.querySelectorAll(
+          '[data-testid="settings-notifications-unsupported"], [data-testid="settings-notifications-copy"]',
+        ),
+      ).map((element) => element.getAttribute('data-testid'));
+
+      expect(order).toEqual([
+        'settings-notifications-unsupported',
+        'settings-notifications-copy',
+      ]);
+    });
+
+    it('should introduce the list only once there is one', () => {
+      setInstallations([], 'prompt');
+
+      expect(byTestId('settings-notifications-copy')).toBeNull();
+      // On a platform that can register, the empty list is still worth stating
+      // next to the setup action.
+      expect(byTestId('settings-notifications-empty')).not.toBeNull();
+      expect(byTestId('settings-notifications-enable-device')).not.toBeNull();
+
+      setInstallations([installation()], 'prompt');
+
+      expect(byTestId('settings-notifications-copy')).not.toBeNull();
+    });
+
+    it('should still list and manage other installations where push is unsupported', () => {
+      // The list is account data. Signing in from the web build must not hide
+      // the phones the user actually receives notifications on.
+      setInstallations(
+        [
+          installation({ token: 'token-1', label: 'iPhone' }),
+          installation({ token: 'token-2', label: 'Pixel 7' }),
+        ],
+        'unsupported',
+      );
+
+      expect(deviceRows()).toHaveLength(2);
+      expect(deviceRows()[0].querySelector('ion-toggle')).not.toBeNull();
+      expect(byTestId('settings-notifications-unsupported')).not.toBeNull();
+    });
+
+    it('should emit the token and the new state when a switch changes', () => {
+      const toggleSpy = jest.spyOn(component.togglePushInstallation, 'emit');
+      const row = installation({ token: 'token-9', enabled: true });
+
+      component.onPushInstallationToggle(row, { detail: { checked: false } });
+
+      expect(toggleSpy).toHaveBeenCalledWith({
+        token: 'token-9',
+        enabled: false,
+      });
+    });
+
+    it('should ignore a change event that matches the current state', () => {
+      // Ionic emits `ionChange` when the bound value is applied, so reloading
+      // the list must not write every row back to Firestore.
+      const toggleSpy = jest.spyOn(component.togglePushInstallation, 'emit');
+      const row = installation({ enabled: true });
+
+      component.onPushInstallationToggle(row, { detail: { checked: true } });
+
+      expect(toggleSpy).not.toHaveBeenCalled();
     });
   });
 });

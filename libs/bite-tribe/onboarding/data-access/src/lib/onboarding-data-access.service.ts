@@ -8,9 +8,11 @@ import { Preferences } from '@capacitor/preferences';
 import { TranslocoService } from '@jsverse/transloco';
 import { Platform } from '@ionic/angular';
 import {
+  enablePushOnThisDevice,
+  getPushPermissionState,
   hasPushPermission,
-  requestPushPermission,
   type PushPermissionResult,
+  type PushPermissionState,
 } from 'push-notifications';
 import {
   hasLocationPermission,
@@ -193,13 +195,38 @@ export class OnboardingDataAccessService {
     this.transloco.setActiveLang(language);
   }
 
+  /**
+   * Asks for push permission and, on a grant, registers this installation's
+   * token.
+   *
+   * Nothing account-level is written: delivery is a property of an app
+   * installation, so a grant produces a token document and a denial produces
+   * nothing at all (issue #1184).
+   */
   requestPushPermission(): Promise<PushPermissionResult> {
-    return requestPushPermission(this.platform);
+    const uid = this.authService.getUser()?.uid;
+
+    if (!uid) {
+      return Promise.resolve('unsupported');
+    }
+
+    return enablePushOnThisDevice(this.platform, uid);
   }
 
   /** Whether the OS still allows delivering push. Never prompts. */
   hasPushPermission(): Promise<boolean> {
     return hasPushPermission(this.platform);
+  }
+
+  /**
+   * OS permission state of this device, without prompting.
+   *
+   * The step reconciles against this rather than a stored preference: there is
+   * no account-level notification flag any more, and the live grant is the only
+   * truthful answer to "has this already been decided here?".
+   */
+  getPushPermissionState(): Promise<PushPermissionState> {
+    return getPushPermissionState(this.platform);
   }
 
   requestLocationPermission(): Promise<LocationPermissionResult> {

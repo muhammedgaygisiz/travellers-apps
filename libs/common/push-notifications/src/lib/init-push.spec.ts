@@ -1,12 +1,16 @@
 import { PushNotifications } from '@capacitor/push-notifications';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+import { AppLauncher } from '@capacitor/app-launcher';
+import { Capacitor } from '@capacitor/core';
 import type { NavController, Platform } from '@ionic/angular';
 import {
+  enablePushOnThisDevice,
+  getPushPermissionState,
   hasPushPermission,
   initPushListeners,
+  openPushSettings,
   requestPushPermission,
 } from './init-push';
+import { registerCurrentPushInstallation } from './push-installation';
 
 // Automocking these packages yields undefined members, and the module under
 // test pulls Angular in through `@ionic/angular` and the `utils` barrel — none
@@ -24,11 +28,13 @@ jest.mock('@capacitor/push-notifications', () => ({
 jest.mock('@capacitor/core', () => ({
   Capacitor: { getPlatform: jest.fn(() => 'ios') },
 }));
-jest.mock('@capacitor-firebase/firestore', () => ({
-  FirebaseFirestore: { setDocument: jest.fn() },
+jest.mock('@capacitor/app-launcher', () => ({
+  AppLauncher: { openUrl: jest.fn() },
 }));
-jest.mock('@capacitor-firebase/messaging', () => ({
-  FirebaseMessaging: { getToken: jest.fn() },
+// Token document handling is covered by `push-installation.spec.ts`; here only
+// the fact that registration is delegated to it matters.
+jest.mock('./push-installation', () => ({
+  registerCurrentPushInstallation: jest.fn(),
 }));
 jest.mock('@ionic/angular', () => ({
   NavController: class {},
@@ -79,14 +85,12 @@ describe('init-push', () => {
     jest.spyOn(console, 'log').mockImplementation();
 
     grantPermission('granted');
+    (Capacitor.getPlatform as jest.Mock).mockReturnValue('ios');
     (PushNotifications.removeAllListeners as jest.Mock).mockResolvedValue(
       undefined,
     );
     (PushNotifications.register as jest.Mock).mockResolvedValue(undefined);
-    (FirebaseFirestore.setDocument as jest.Mock).mockResolvedValue(undefined);
-    (FirebaseMessaging.getToken as jest.Mock).mockResolvedValue({
-      token: 'fcm-token',
-    });
+    (registerCurrentPushInstallation as jest.Mock).mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -161,7 +165,9 @@ describe('init-push', () => {
     );
 
     describe('on registration', () => {
-      it('stores the FCM token against the user and the reverse index', async () => {
+      it('registers the current installation, preserving its enabled state', async () => {
+        // Delegating keeps the login refresh on the same path as the explicit
+        // setup action, so neither can re-enable a disabled installation.
         await initPushListeners(
           platformStub(true),
           'user-1',
@@ -170,56 +176,7 @@ describe('init-push', () => {
 
         await listenerFor('registration')(undefined);
 
-        expect(FirebaseFirestore.setDocument).toHaveBeenCalledWith(
-          expect.objectContaining({
-            reference: 'users/user-1/pushTokens/fcm-token',
-            merge: true,
-            data: expect.objectContaining({ platform: 'ios', enabled: true }),
-          }),
-        );
-        expect(FirebaseFirestore.setDocument).toHaveBeenCalledWith(
-          expect.objectContaining({
-            reference: 'pushTokens/fcm-token',
-            merge: true,
-            data: expect.objectContaining({
-              userUid: 'user-1',
-              platform: 'ios',
-            }),
-          }),
-        );
-      });
-
-      it.each([[''], ['   '], [null]])(
-        'stores nothing when the token comes back as %p',
-        async (token) => {
-          (FirebaseMessaging.getToken as jest.Mock).mockResolvedValue({
-            token,
-          });
-
-          await initPushListeners(
-            platformStub(true),
-            'user-1',
-            navControllerStub(),
-          );
-          await listenerFor('registration')(undefined);
-
-          expect(FirebaseFirestore.setDocument).not.toHaveBeenCalled();
-        },
-      );
-
-      it('stores nothing when the token cannot be read', async () => {
-        (FirebaseMessaging.getToken as jest.Mock).mockRejectedValue(
-          new Error('boom'),
-        );
-
-        await initPushListeners(
-          platformStub(true),
-          'user-1',
-          navControllerStub(),
-        );
-        await listenerFor('registration')(undefined);
-
-        expect(FirebaseFirestore.setDocument).not.toHaveBeenCalled();
+        expect(registerCurrentPushInstallation).toHaveBeenCalledWith('user-1');
       });
     });
 
@@ -417,9 +374,100 @@ describe('init-push', () => {
       await expect(hasPushPermission(platformStub(true))).resolves.toBe(false);
     });
 
-    it('leaves a stored preference alone off a device, having nothing to check', async () => {
+    it('leaves a registration alone off a device, having nothing to check', async () => {
       await expect(hasPushPermission(platformStub(false))).resolves.toBe(true);
       expect(PushNotifications.checkPermissions).not.toHaveBeenCalled();
+    });
+  });
+
+  describe(getPushPermissionState.name, () => {
+    it.each([
+      ['granted', 'granted'],
+      ['denied', 'denied'],
+      ['prompt', 'prompt'],
+      // Android's "ask again with an explanation" still has a prompt to spend,
+      // so it must not be reported as the unrecoverable denial.
+      ['prompt-with-rationale', 'prompt'],
+    ])('maps the OS state %s to %s', async (receive, expected) => {
+      grantPermission(receive);
+
+      await expect(getPushPermissionState(platformStub(true))).resolves.toBe(
+        expected,
+      );
+      expect(PushNotifications.requestPermissions).not.toHaveBeenCalled();
+    });
+
+    it('reports that there is no OS grant to read off a device', async () => {
+      await expect(getPushPermissionState(platformStub(false))).resolves.toBe(
+        'unsupported',
+      );
+      expect(PushNotifications.checkPermissions).not.toHaveBeenCalled();
+    });
+
+    it('treats a failed check as denied', async () => {
+      (PushNotifications.checkPermissions as jest.Mock).mockRejectedValue(
+        new Error('boom'),
+      );
+
+      await expect(getPushPermissionState(platformStub(true))).resolves.toBe(
+        'denied',
+      );
+    });
+  });
+
+  describe(openPushSettings.name, () => {
+    it('opens the app settings page on iOS', async () => {
+      (AppLauncher.openUrl as jest.Mock).mockResolvedValue({ completed: true });
+
+      await expect(openPushSettings()).resolves.toBe(true);
+      expect(AppLauncher.openUrl).toHaveBeenCalledWith({
+        url: 'app-settings:',
+      });
+    });
+
+    it('reports that it could not open the settings page elsewhere', async () => {
+      // Android has no App Launcher route to the app's own settings page.
+      (Capacitor.getPlatform as jest.Mock).mockReturnValue('android');
+
+      await expect(openPushSettings()).resolves.toBe(false);
+      expect(AppLauncher.openUrl).not.toHaveBeenCalled();
+    });
+
+    it('reports a failed launch instead of throwing', async () => {
+      (AppLauncher.openUrl as jest.Mock).mockRejectedValue(new Error('boom'));
+
+      await expect(openPushSettings()).resolves.toBe(false);
+    });
+  });
+
+  describe(enablePushOnThisDevice.name, () => {
+    it('registers this installation once the OS grants', async () => {
+      (PushNotifications.requestPermissions as jest.Mock).mockResolvedValue({
+        receive: 'granted',
+      });
+
+      await expect(
+        enablePushOnThisDevice(platformStub(true), 'user-1'),
+      ).resolves.toBe('granted');
+      expect(registerCurrentPushInstallation).toHaveBeenCalledWith('user-1');
+    });
+
+    it('registers nothing when the OS denies', async () => {
+      (PushNotifications.requestPermissions as jest.Mock).mockResolvedValue({
+        receive: 'denied',
+      });
+
+      await expect(
+        enablePushOnThisDevice(platformStub(true), 'user-1'),
+      ).resolves.toBe('denied');
+      expect(registerCurrentPushInstallation).not.toHaveBeenCalled();
+    });
+
+    it('registers nothing where push is unsupported', async () => {
+      await expect(
+        enablePushOnThisDevice(platformStub(false), 'user-1'),
+      ).resolves.toBe('unsupported');
+      expect(registerCurrentPushInstallation).not.toHaveBeenCalled();
     });
   });
 });

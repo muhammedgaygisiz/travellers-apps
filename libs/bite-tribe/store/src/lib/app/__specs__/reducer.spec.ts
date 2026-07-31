@@ -11,7 +11,7 @@ describe('App Reducer', () => {
     it('should reset the state to initial values', () => {
       const INITIAL_STATE: AppSlice = {
         profile: { displayName: 'Test User' } as PublicUser,
-        settings: { pushNotifications: true } as Settings,
+        settings: { emailUpdates: true } as Settings,
         loading: { home: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
@@ -25,7 +25,6 @@ describe('App Reducer', () => {
       const NEW_STATE: AppSlice = {
         profile: undefined,
         settings: {
-          pushNotifications: false,
           location: false,
           emailUpdates: false,
           theme: 'light',
@@ -161,7 +160,7 @@ describe('App Reducer', () => {
 
   describe('loadedSettingsFromApi', () => {
     it('should set settings', () => {
-      const SETTINGS_MOCK = { pushNotifications: true } as Settings;
+      const SETTINGS_MOCK = { emailUpdates: true } as Settings;
       const INITIAL_STATE = {} as AppSlice;
       const NEW_STATE = {
         settings: SETTINGS_MOCK,

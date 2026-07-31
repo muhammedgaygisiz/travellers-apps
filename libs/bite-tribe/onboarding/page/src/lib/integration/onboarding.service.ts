@@ -166,13 +166,11 @@ export class OnboardingService {
       this.setStepValid('location', true);
     }
 
-    // Same reconciliation as location: the stored flag outlives the OS grant on
-    // a reinstall or a turn-off in system settings, so believing it alone would
-    // show a "granted" step that never prompts and leave push silently dead.
-    if (
-      settings?.pushNotifications &&
-      (await this.dataAccess.hasPushPermission())
-    ) {
+    // Notifications have no stored account-level flag to reconcile any more
+    // (issue #1184): delivery lives on this installation's push token, so the
+    // live OS grant is the only thing that says the step was already decided
+    // here. A reinstall or a turn-off in system settings puts the step back.
+    if ((await this.dataAccess.getPushPermissionState()) === 'granted') {
       this.notificationPermission.set('granted');
       this.setStepValid('notifications', true);
     }
@@ -338,9 +336,10 @@ export class OnboardingService {
   }
 
   /**
-   * Asks the OS for push permission after the step has explained why. The
-   * answer — grant or denial — completes the step either way; only the request
-   * still being in flight blocks advancing.
+   * Asks the OS for push permission after the step has explained why, and
+   * registers this installation on a grant. The answer — grant or denial —
+   * completes the step either way; only the request still being in flight
+   * blocks advancing.
    */
   async requestNotifications(): Promise<void> {
     if (this.notificationPermission() === 'requesting') {
@@ -493,12 +492,9 @@ export class OnboardingService {
       });
     }
 
-    if (id === 'notifications') {
-      return this.persistSettings({
-        pushNotifications: this.notificationPermission() === 'granted',
-      });
-    }
-
+    // The notification step persists nothing account-level. A grant already
+    // registered this installation's push token in `requestNotifications`, and
+    // a denial is not a preference worth storing (issue #1184).
     return true;
   }
 
@@ -527,7 +523,6 @@ export class OnboardingService {
 
     return {
       ...current,
-      pushNotifications: current?.pushNotifications ?? false,
       location: current?.location ?? false,
       emailUpdates: current?.emailUpdates ?? false,
       theme: current?.theme ?? this.systemTheme(),

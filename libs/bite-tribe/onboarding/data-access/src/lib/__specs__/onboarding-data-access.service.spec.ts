@@ -7,7 +7,10 @@ import { TranslocoService } from '@jsverse/transloco';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { PublicUser, Settings } from 'model';
-import { requestPushPermission } from 'push-notifications';
+import {
+  enablePushOnThisDevice,
+  getPushPermissionState,
+} from 'push-notifications';
 import { requestLocationPermission } from 'geolocation';
 import {
   ONBOARDING_VERSION,
@@ -23,7 +26,8 @@ jest.mock('@capacitor/preferences', () => ({
 }));
 
 jest.mock('push-notifications', () => ({
-  requestPushPermission: jest.fn(),
+  enablePushOnThisDevice: jest.fn(),
+  getPushPermissionState: jest.fn(),
 }));
 
 jest.mock('geolocation', () => ({
@@ -32,7 +36,8 @@ jest.mock('geolocation', () => ({
 
 const getDocument = FirebaseFirestore.getDocument as jest.Mock;
 const preferencesSet = Preferences.set as jest.Mock;
-const requestPushPermissionMock = requestPushPermission as jest.Mock;
+const enablePushOnThisDeviceMock = enablePushOnThisDevice as jest.Mock;
+const getPushPermissionStateMock = getPushPermissionState as jest.Mock;
 const requestLocationPermissionMock = requestLocationPermission as jest.Mock;
 
 describe('OnboardingDataAccessService', () => {
@@ -432,12 +437,33 @@ describe('OnboardingDataAccessService', () => {
   });
 
   describe('requestPushPermission', () => {
-    it('delegates to the shared push registration', async () => {
+    it('asks for permission and registers this installation on a grant', async () => {
       setup();
-      requestPushPermissionMock.mockResolvedValue('granted');
+      enablePushOnThisDeviceMock.mockResolvedValue('granted');
 
       await expect(service.requestPushPermission()).resolves.toBe('granted');
-      expect(requestPushPermissionMock).toHaveBeenCalledWith(platformMock);
+      expect(enablePushOnThisDeviceMock).toHaveBeenCalledWith(
+        platformMock,
+        'user-1',
+      );
+    });
+
+    it('asks nothing without a signed-in user to register a token against', () => {
+      setup(null);
+
+      return expect(service.requestPushPermission()).resolves.toBe(
+        'unsupported',
+      );
+    });
+  });
+
+  describe('getPushPermissionState', () => {
+    it("reads this device's OS grant without prompting", async () => {
+      setup();
+      getPushPermissionStateMock.mockResolvedValue('denied');
+
+      await expect(service.getPushPermissionState()).resolves.toBe('denied');
+      expect(getPushPermissionStateMock).toHaveBeenCalledWith(platformMock);
     });
   });
 

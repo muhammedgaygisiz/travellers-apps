@@ -22,10 +22,10 @@ Users and creators can receive engagement signals around Bites and social activi
 - Tapping a notification opens the surface it talks about: the Bite, the follower profile, the leaderboard, or the weekly bites page.
 - The weekly summary counts one calendar week (Monday to Sunday, Europe/Zurich) and carries those bounds, so its landing page lists the Bites of exactly that week even when the user opens it days later.
 
-## Target Installation Contract
+## Installation Contract
 
 Issue [#1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184)
-makes notification delivery installation-specific:
+made notification delivery installation-specific:
 
 - An FCM token is a delivery address for one signed-in user and app
   installation.
@@ -42,6 +42,9 @@ makes notification delivery installation-specific:
 - OS permission controls whether the current device may receive notifications;
   BiteTribe's token state controls whether the backend sends to that
   installation. Both states must remain visible and distinct.
+- An installation's token state is manageable from any signed-in surface, not
+  only from the installation itself. OS permission gates registering the
+  current device, never the management of the others.
 - `Settings.pushNotifications` is not part of delivery eligibility.
 
 ## Supported Evidence

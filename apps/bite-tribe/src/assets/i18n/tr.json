@@ -374,5 +374,10 @@
   "delete-account-public-fallback-step-subject": "Konu satırı olarak «Delete my BiteTribe account» yaz.",
   "delete-account-public-fallback-step-account-email": "BiteTribe'a giriş yaparken kullandığın e-posta adresini ekle.",
   "delete-account-public-timeframe": "Yasal veya güvenlik nedenleriyle belirli bilgileri saklamamız gerekmedikçe hesabını makul bir süre içinde sileceğiz.",
-  "delete-account-public-scope": "Bu silme talebi yalnızca BiteTribe hesabın ve verilerin için geçerlidir."
+  "delete-account-public-scope": "Bu silme talebi yalnızca BiteTribe hesabın ve verilerin için geçerlidir.",
+  "profile-visibility-public": "Herkese açık profil",
+  "profile-visibility-private": "Gizli profil",
+  "profile-visibility-public-hint": "Adın, fotoğrafın, takipçilerin ve Bite etkinliğin uygulamada gösterilebilir.",
+  "profile-visibility-private-hint": "Anonim görünürsün ve herkese açık sosyal alanlarda yer almazsın.",
+  "profile-visibility-change": "Değiştir"
 }

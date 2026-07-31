@@ -30,6 +30,12 @@ Users can maintain their identity and use profile/social context to build trust 
   yet, because the user reads them as facts about that person. The
   "profile not available" message stays reserved for a profile that finished
   loading without data. See GitHub issue #1166.
+- The signed-in user's own personal profile states whether it is public or
+  private and leads from there to the visibility switch in profile edit. Saved
+  visibility is a privacy fact the user must be able to read off the profile
+  itself rather than confirm by opening the edit form. A profile with no saved
+  choice reads as private. Organisation profiles carry no status because they
+  have no visibility switch. See GitHub issue #1188.
 
 ## Supported Evidence
 

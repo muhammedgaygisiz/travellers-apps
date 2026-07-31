@@ -103,6 +103,19 @@ export const OwnProfile: Story = {
   },
 };
 
+export const OwnPrivateProfile: Story = {
+  args: {
+    user: {
+      ...baseUser,
+      userId: currentUserId,
+      public: false,
+    },
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
 export const WithoutBites: Story = {
   args: {
     user: baseUser,

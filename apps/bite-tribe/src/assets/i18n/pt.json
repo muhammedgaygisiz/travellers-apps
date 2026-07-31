@@ -374,5 +374,10 @@
   "delete-account-public-fallback-step-subject": "Use o assunto «Delete my BiteTribe account».",
   "delete-account-public-fallback-step-account-email": "Inclua o e-mail que você usa para entrar no BiteTribe.",
   "delete-account-public-timeframe": "Excluiremos sua conta dentro de um prazo razoável, a menos que sejamos obrigados a reter certas informações por motivos legais ou de segurança.",
-  "delete-account-public-scope": "Esta solicitação de exclusão se aplica apenas à sua conta e aos dados do BiteTribe."
+  "delete-account-public-scope": "Esta solicitação de exclusão se aplica apenas à sua conta e aos dados do BiteTribe.",
+  "profile-visibility-public": "Perfil público",
+  "profile-visibility-private": "Perfil privado",
+  "profile-visibility-public-hint": "O teu nome, foto, seguidores e atividade de Bites podem aparecer na app.",
+  "profile-visibility-private-hint": "Apareces como anónimo e ficas fora das áreas sociais públicas.",
+  "profile-visibility-change": "Alterar"
 }

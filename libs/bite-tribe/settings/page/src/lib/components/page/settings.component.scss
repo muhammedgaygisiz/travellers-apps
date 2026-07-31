@@ -44,6 +44,17 @@
     text-align: end;
   }
 
+  // Ionic insets item content by default, which left the preference rows — and
+  // their dividers and controls — indented against every other section on the
+  // page. The notification and account sections already opt out; this is the
+  // one that never did.
+  .settings-section {
+    ion-item {
+      --padding-start: 0;
+      --inner-padding-end: 0;
+    }
+  }
+
   .notifications-section {
     margin-bottom: 24px;
 

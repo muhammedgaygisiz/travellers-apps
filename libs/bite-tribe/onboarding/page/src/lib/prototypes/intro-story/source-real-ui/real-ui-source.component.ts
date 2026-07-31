@@ -10,6 +10,7 @@ import {
   effect,
   inject,
   input,
+  output,
   signal,
   untracked,
   viewChild,
@@ -56,8 +57,8 @@ import type { Bite, Like, ProfileMetaData, PublicUser } from 'model';
 export type { IntroCoachState } from './intro-coach-state';
 
 const FIT_CAMERA: IntroUiCamera = { zoom: 1, focusX: 50, focusY: 50 };
-/** Dual-layer crossfade — sweet layout window. */
-const TRANSITION_MS = 560;
+/** Dual-layer crossfade — longer sweet layout window, no flash. */
+const TRANSITION_MS = 820;
 
 const BEAT_START_SCREEN: Record<IntroStorySceneId, IntroStageScreen> = {
   discover: 'home',
@@ -115,6 +116,14 @@ export class RealUiSourceComponent {
   flowId = input<string | null>(null);
   /** Short intention caption shown above the phone. */
   caption = input('');
+  /**
+   * When true, gesture end emits beatCompleted for chapter advance
+   * instead of soft-replaying the same beat.
+   */
+  advanceOnComplete = input(false);
+
+  /** Fired when a beat reaches its cheerful final frame (chapter mode). */
+  beatCompleted = output<void>();
 
   readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
   readonly mapPages = viewChildren(MapPageComponent);
@@ -175,6 +184,10 @@ export class RealUiSourceComponent {
   readonly emphasizeFollowers = signal(false);
   readonly walkingSuccess = signal(false);
   readonly mapPan = signal({ x: 0, y: 0 });
+  /** Soft sparkle burst after resolve. */
+  readonly celebrate = signal<{ anchor: string; key: number } | null>(null);
+  /** Soft fade before single-beat replay. */
+  readonly fading = signal(false);
 
   readonly activeFlow = computed(() => {
     const id = this.flowId();
@@ -186,7 +199,11 @@ export class RealUiSourceComponent {
     return flow?.steps ?? null;
   });
 
-  readonly flowLoop = computed(() => this.activeFlow()?.loop ?? true);
+  readonly flowLoop = computed(() => false);
+
+  readonly endBehavior = computed((): 'soft-replay' | 'emit-complete' =>
+    this.advanceOnComplete() ? 'emit-complete' : 'soft-replay',
+  );
 
   readonly displayCaption = computed(
     () => this.caption() || this.activeFlow()?.caption || '',
@@ -392,6 +409,10 @@ export class RealUiSourceComponent {
     this.zone.run(() => this.handleAction(action));
   }
 
+  onGestureCompleted(): void {
+    this.beatCompleted.emit();
+  }
+
   private handleAction(action: IntroStageAction): void {
     switch (action.type) {
       case 'navigate': {
@@ -434,7 +455,14 @@ export class RealUiSourceComponent {
       case 'applyPhoto': {
         const idx = this.pickerSelectedIndex();
         this.createImagePath.set(PICKER_PHOTOS[idx] ?? PICKER_PHOTOS[0]);
+        this.photoLanded.set(true);
         this.cdr.markForCheck();
+        window.setTimeout(() => {
+          this.zone.run(() => {
+            this.photoLanded.set(false);
+            this.cdr.markForCheck();
+          });
+        }, 1400);
         return;
       }
       case 'reactLikes':
@@ -447,14 +475,14 @@ export class RealUiSourceComponent {
             this.likeBurst.update((n) => n + 1);
             this.cdr.markForCheck();
           });
-        }, 900);
+        }, 1000);
         window.setTimeout(() => {
           this.zone.run(() => {
             this.publishedLikes.update((n) => n + 1);
             this.likeBurst.update((n) => n + 1);
             this.cdr.markForCheck();
           });
-        }, 1800);
+        }, 2000);
         return;
       case 'follow':
         if (!this.followed()) {
@@ -541,6 +569,28 @@ export class RealUiSourceComponent {
       case 'resetMapPan':
         this.mapPan.set({ x: 0, y: 0 });
         return;
+      case 'celebrate': {
+        const anchor = action.anchor || '.source__react';
+        this.celebrate.set({ anchor, key: Date.now() });
+        this.cdr.markForCheck();
+        return;
+      }
+      case 'clearCelebrate':
+        this.celebrate.set(null);
+        return;
+      case 'softRestart': {
+        this.fading.set(true);
+        this.cdr.markForCheck();
+        window.setTimeout(() => {
+          this.zone.run(() => {
+            this.celebrate.set(null);
+            this.resetBeatState(this.beat());
+            this.fading.set(false);
+            this.cdr.markForCheck();
+          });
+        }, 520);
+        return;
+      }
       case 'selectPin': {
         const bite =
           INTRO_DEMO_BITES.find((b) => b.id === action.biteId) ?? null;
@@ -622,8 +672,8 @@ export class RealUiSourceComponent {
   }
 
   /**
-   * Crossfade dual-layer — park outgoing FIRST (painted), then swap incoming
-   * on the next frame so we never flash a blank white layer.
+   * Crossfade dual-layer — park outgoing FIRST (painted), double-rAF before
+   * swapping incoming so we never flash a blank white layer.
    */
   private transitionTo(next: IntroStageScreen): void {
     const current = this.incoming();
@@ -640,20 +690,22 @@ export class RealUiSourceComponent {
     this.transitioning.set(false);
     this.cdr.detectChanges();
 
-    // Phase 2: next frame — swap incoming + start sweet crossfade/scale.
+    // Phase 2: two frames — let outgoing paint, then swap + animate.
     requestAnimationFrame(() => {
-      this.zone.run(() => {
-        this.incoming.set(next);
-        this.transitioning.set(true);
-        this.layerEpoch.update((n) => n + 1);
-        this.cdr.detectChanges();
+      requestAnimationFrame(() => {
+        this.zone.run(() => {
+          this.incoming.set(next);
+          this.transitioning.set(true);
+          this.layerEpoch.update((n) => n + 1);
+          this.cdr.detectChanges();
 
-        this.transitionTimer = window.setTimeout(() => {
-          this.outgoing.set(null);
-          this.transitioning.set(false);
-          this.transitionTimer = null;
-          this.cdr.markForCheck();
-        }, TRANSITION_MS);
+          this.transitionTimer = window.setTimeout(() => {
+            this.outgoing.set(null);
+            this.transitioning.set(false);
+            this.transitionTimer = null;
+            this.cdr.markForCheck();
+          }, TRANSITION_MS);
+        });
       });
     });
   }
@@ -774,6 +826,8 @@ export class RealUiSourceComponent {
     this.emphasizeFollowers.set(false);
     this.walkingSuccess.set(false);
     this.mapPan.set({ x: 0, y: 0 });
+    this.celebrate.set(null);
+    this.fading.set(false);
     this.outgoing.set(null);
     this.transitioning.set(false);
     this.incoming.set(flow?.startScreen ?? BEAT_START_SCREEN[beat]);

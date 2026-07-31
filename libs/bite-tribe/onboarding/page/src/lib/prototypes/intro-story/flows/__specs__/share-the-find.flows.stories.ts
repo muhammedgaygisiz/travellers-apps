@@ -34,8 +34,8 @@ const meta: Meta<RealUiSourceComponent> = {
   render: (args) => ({
     props: args,
     template: `
-      <ion-app style="width: 100%; height: 100%;">
-        <div style="box-sizing: border-box; width: 100%; height: 100vh; max-width: 430px; margin: 0 auto;">
+      <ion-app style="width: 100%; height: 100%; overflow: hidden;">
+        <div style="box-sizing: border-box; width: 100%; height: 100vh; max-width: 430px; margin: 0 auto; overflow: hidden; scrollbar-width: none;">
           <intro-real-ui-source ${argsToTemplate(args)} />
         </div>
       </ion-app>

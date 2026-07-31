@@ -1,8 +1,8 @@
 import {
   DISCOVER_TARGET_BITE_ID,
   type IntroStorySceneId,
-} from '../intro-story.model';
-import type { IntroCoachState } from '../source-real-ui/intro-coach-state';
+} from './intro-story.model';
+import type { IntroCoachState } from './source-real-ui/intro-coach-state';
 
 /** Spotlight fallback as % of the native phone screen (390×844). */
 export interface TipFallbackPct {
@@ -195,4 +195,83 @@ export function tipsForArc(arc: IntroStorySceneId | 'all'): ProgressiveTip[] {
     return PROGRESSIVE_TIPS;
   }
   return PROGRESSIVE_TIPS.filter((t) => t.arc === arc);
+}
+
+/**
+ * G — Spotlight Quest: one primary tip per arc for the checklist quest.
+ * Order stays Find → Share → Tribe → Go.
+ */
+const QUEST_TIP_IDS = [
+  'discover-feed',
+  'share-create',
+  'tribe-creator',
+  'go-pin',
+] as const;
+
+export function questTipsForArc(
+  arc: IntroStorySceneId | 'all',
+): ProgressiveTip[] {
+  const quest = QUEST_TIP_IDS.map((id) =>
+    PROGRESSIVE_TIPS.find((t) => t.id === id),
+  ).filter((t): t is ProgressiveTip => !!t);
+  if (arc === 'all') {
+    return quest;
+  }
+  return quest.filter((t) => t.arc === arc);
+}
+
+/** Local rect relative to the stage element. */
+export interface TipLocalRect {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
+/** Resolve a tip anchor (or fallback %) into stage-local coordinates. */
+export function measureTipInStage(
+  stageEl: HTMLElement,
+  tip: ProgressiveTip,
+): TipLocalRect {
+  const stageRect = stageEl.getBoundingClientRect();
+  let target: HTMLElement | null = null;
+
+  if (tip.anchor) {
+    const live =
+      (stageEl.querySelector('.source__layer--in') as HTMLElement | null) ??
+      stageEl;
+    target = live.querySelector(tip.anchor) as HTMLElement | null;
+    if (!target) {
+      target = stageEl.querySelector(tip.anchor) as HTMLElement | null;
+    }
+  }
+
+  if (target) {
+    const r = target.getBoundingClientRect();
+    if (r.width > 2 && r.height > 2) {
+      return {
+        top: r.top - stageRect.top,
+        left: r.left - stageRect.left,
+        width: r.width,
+        height: r.height,
+      };
+    }
+  }
+
+  return fallbackLocalRect(stageEl, stageRect, tip.fallbackPct);
+}
+
+function fallbackLocalRect(
+  stageEl: HTMLElement,
+  stageRect: DOMRect,
+  pct: TipFallbackPct,
+): TipLocalRect {
+  const native =
+    (stageEl.querySelector('.source__native') as HTMLElement | null) ?? null;
+  const box = native?.getBoundingClientRect() ?? stageRect;
+  const w = (pct.w / 100) * box.width;
+  const h = (pct.h / 100) * box.height;
+  const left = box.left - stageRect.left + (pct.x / 100) * box.width - w / 2;
+  const top = box.top - stageRect.top + (pct.y / 100) * box.height - h / 2;
+  return { top, left, width: w, height: h };
 }

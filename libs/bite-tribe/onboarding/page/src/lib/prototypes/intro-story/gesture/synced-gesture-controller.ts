@@ -191,14 +191,16 @@ export class SyncedGestureController {
           this.opts.onEmit?.(step.emitOnPress);
         }
         step.onPress?.();
-        await this.delay(160);
+        // Hold pressed long enough that the UI state change is readable.
+        await this.delay(220);
         this.pressed = false;
         this.pushPointer();
         if (step.dispatchDom ?? this.opts.dispatchDomEvents) {
           this.maybeDispatch('pointerup');
           this.maybeDispatch('click');
         }
-        await this.delay(120);
+        // Follow-through beat — UI settles before the finger leaves.
+        await this.delay(200);
         return;
       }
 

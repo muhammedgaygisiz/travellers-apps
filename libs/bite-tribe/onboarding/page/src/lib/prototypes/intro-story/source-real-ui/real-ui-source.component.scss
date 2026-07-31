@@ -3,6 +3,14 @@
   width: 100%;
   height: 100%;
   min-height: 320px;
+  overflow: hidden;
+  scrollbar-width: none;
+}
+
+:host::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .source {
@@ -13,8 +21,14 @@
   height: 100%;
   min-height: 320px;
   padding: 0.5rem;
+  overflow: hidden;
   background: #ece7de;
   color: #20201e;
+  scrollbar-width: none;
+}
+
+.source::-webkit-scrollbar {
+  display: none;
 }
 
 .source--bare {
@@ -86,6 +100,106 @@
   height: 100%;
   pointer-events: none;
   background: #fff;
+  /* Mirror shell insets when content is projected without shell CSS vars. */
+  --ion-safe-area-top: 54px;
+  --ion-safe-area-right: 0px;
+  --ion-safe-area-bottom: 34px;
+  --ion-safe-area-left: 0px;
+  scrollbar-width: none;
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.source__native--fading {
+  opacity: 0;
+}
+
+.source__native::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide browser scrollbars on nested Ionic scroll hosts. */
+.source__native ::ng-deep .inner-scroll,
+.source__native ::ng-deep .scroll-content,
+.source__native ::ng-deep ion-content::part(scroll) {
+  scrollbar-width: none !important;
+}
+
+.source__native ::ng-deep .inner-scroll::-webkit-scrollbar,
+.source__native ::ng-deep .scroll-content::-webkit-scrollbar,
+.source__native ::ng-deep *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Push BiteTribe header / toolbar below Dynamic Island. */
+.source__native ::ng-deep ion-header ion-toolbar:first-of-type {
+  padding-top: var(--ion-safe-area-top, 54px) !important;
+}
+
+.source__native ::ng-deep ion-footer ion-toolbar:last-of-type {
+  padding-bottom: var(--ion-safe-area-bottom, 34px) !important;
+}
+
+.source__native ::ng-deep ion-tab-bar {
+  padding-bottom: var(--ion-safe-area-bottom, 34px);
+}
+
+/* Soft resolve particles — light sparks on the success frame. */
+.source__celebrate {
+  position: absolute;
+  top: 58%;
+  left: 50%;
+  z-index: 9;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.source__spark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff4c8 0%, #f0a35a 50%, transparent 72%);
+  box-shadow: 0 0 12px rgb(255 200 100 / 55%);
+  animation: spark-pop 1600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform: translate(-50%, -50%);
+}
+
+.source__spark:nth-child(1) {
+  --sx: -32px;
+  --sy: -40px;
+}
+.source__spark:nth-child(2) {
+  --sx: 28px;
+  --sy: -34px;
+}
+.source__spark:nth-child(3) {
+  --sx: -22px;
+  --sy: 26px;
+}
+.source__spark:nth-child(4) {
+  --sx: 34px;
+  --sy: 18px;
+}
+.source__spark:nth-child(5) {
+  --sx: 2px;
+  --sy: -48px;
+}
+.source__spark:nth-child(6) {
+  --sx: -38px;
+  --sy: 6px;
+}
+.source__spark:nth-child(7) {
+  --sx: 40px;
+  --sy: -10px;
+}
+.source__spark:nth-child(8) {
+  --sx: 10px;
+  --sy: 38px;
 }
 
 /* Dual-layer stack — outgoing + incoming overlap during transition */
@@ -111,15 +225,20 @@
 
 .source__layer--out {
   z-index: 1;
-  animation: layer-out cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: layer-out cubic-bezier(0.33, 1, 0.32, 1) forwards;
+  will-change: opacity, transform, filter;
 }
 
 .source__layer--in {
   z-index: 2;
+  /* Always keep incoming opaque while parked — never flash white. */
+  opacity: 1;
+  background: #fff;
 }
 
 .source__layer--in.source__layer--enter {
   animation: layer-in cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform, filter;
 }
 
 .source__stack ::ng-deep ion-content,
@@ -134,6 +253,31 @@
 .source__stack ::ng-deep ion-content::part(scroll),
 .source__stack ::ng-deep .inner-scroll {
   max-height: 100%;
+  /* Hide OS scrollbars — soft-dot / iOS indicator is the intentional chrome. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.source,
+.source__phone,
+.source__viewport,
+.source__native,
+.source__stack {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.source::-webkit-scrollbar,
+.source__phone::-webkit-scrollbar,
+.source__viewport::-webkit-scrollbar,
+.source__native::-webkit-scrollbar,
+.source__stack::-webkit-scrollbar,
+.source__stack ::ng-deep ::-webkit-scrollbar,
+.source__stack ::ng-deep ion-content::part(scroll)::-webkit-scrollbar,
+.source__stack ::ng-deep .inner-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .picker {
@@ -143,7 +287,7 @@
   display: grid;
   align-items: end;
   background: rgb(12 12 14 / 35%);
-  animation: fade-in 280ms ease both;
+  animation: fade-in 380ms ease both;
 }
 
 .picker__sheet {
@@ -151,7 +295,7 @@
   border-radius: 1.25rem 1.25rem 0 0;
   background: #fff;
   box-shadow: 0 -12px 40px rgb(0 0 0 / 18%);
-  animation: layer-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: sheet-up 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .picker__title {
@@ -325,7 +469,7 @@
   border-radius: 1.15rem;
   background: #fff;
   box-shadow: 0 -12px 36px rgb(0 0 0 / 18%);
-  animation: drawer-up 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: drawer-up 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .stage-drawer__kicker {
@@ -642,8 +786,8 @@
 
 @keyframes drawer-up {
   from {
-    opacity: 0;
-    transform: translateY(28px);
+    opacity: 0.9;
+    transform: translateY(42%);
   }
   to {
     opacity: 1;
@@ -667,6 +811,37 @@
   pointer-events: none;
 }
 
+/* Soft sparkle burst — resolve celebration, not carnival. */
+.source__celebrate {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 7;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.source__spark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #f0c56d 55%, transparent 70%);
+  box-shadow: 0 0 8px rgb(240 197 109 / 55%);
+  animation: spark-burst 1400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --a: calc(var(--i) * 45deg);
+  opacity: 0;
+}
+
+.source__spark:nth-child(odd) {
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, #fff 0%, #7ec8e3 60%, transparent 75%);
+}
+
 .source__native--go-cta ::ng-deep [data-testid='bite-details-navigation'] {
   animation: go-pulse 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
   filter: drop-shadow(0 0 10px rgb(63 143 107 / 55%));
@@ -675,23 +850,31 @@
 @keyframes layer-out {
   from {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
+    filter: blur(0);
   }
   to {
     opacity: 0;
-    transform: scale(0.985);
+    transform: scale(0.97) translateY(-6px);
+    filter: blur(1.5px);
   }
 }
 
 @keyframes layer-in {
-  /* Never start at opacity 0 — blank frames are worse than a soft scale. */
+  /* Start nearly opaque — blank frames are worse than a soft scale. */
   from {
-    opacity: 0.92;
-    transform: scale(0.985);
+    opacity: 0.96;
+    transform: scale(1.025) translateY(10px);
+    filter: blur(0.6px);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
+    filter: blur(0);
   }
 }
 
@@ -701,6 +884,17 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    opacity: 0.85;
+    transform: translateY(28%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -721,6 +915,29 @@
   100% {
     opacity: 0;
     transform: translateY(-26px) scale(0.92);
+  }
+}
+
+@keyframes spark-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(
+        calc(-50% + var(--sx, 0px) * 0.35),
+        calc(-50% + var(--sy, 0px) * 0.35)
+      )
+      scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(
+        calc(-50% + var(--sx, 0px)),
+        calc(-50% + var(--sy, -24px))
+      )
+      scale(0.55);
   }
 }
 
@@ -758,6 +975,21 @@
   }
 }
 
+@keyframes spark-burst {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(0) scale(0.3);
+  }
+  18% {
+    opacity: 1;
+    transform: rotate(var(--a)) translateY(-18px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(-52px) scale(0.55);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .source__device,
   .source__layer--out,
@@ -771,6 +1003,8 @@
   .source__gps-toast,
   .source__follow-badge,
   .source__go-hint,
+  .source__spark,
+  .source__celebrate,
   .stage-drawer,
   .stage-drawer__sheet,
   .source__native--go-cta ::ng-deep [data-testid='bite-details-navigation'] {

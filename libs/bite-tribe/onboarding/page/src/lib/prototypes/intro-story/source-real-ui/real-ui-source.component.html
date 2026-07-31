@@ -28,6 +28,8 @@
             class="source__native"
             [class.source__native--go-cta]="directionsHighlight()"
             [class.source__native--new-card]="newFeedCard()"
+            [class.source__native--fading]="fading()"
+            [class.source__native--photo-land]="photoLanded()"
             [style.width.px]="nativeW"
             [style.height.px]="nativeH"
           >
@@ -434,6 +436,22 @@
               <div class="source__go-hint" aria-hidden="true">Directions</div>
             }
 
+            @if (celebrate(); as burst) {
+              <div
+                class="source__celebrate"
+                aria-hidden="true"
+                [attr.data-key]="burst.key"
+              >
+                @for (p of [0, 1, 2, 3, 4, 5, 6, 7]; track p) {
+                  <span
+                    class="source__spark"
+                    [style.--i]="'' + p"
+                    [style.animation-delay.ms]="p * 70"
+                  ></span>
+                }
+              </div>
+            }
+
             @if (simulate()) {
               <intro-gesture-layer
                 [beat]="beat()"
@@ -441,7 +459,9 @@
                 [enabled]="true"
                 [steps]="flowSteps()"
                 [loop]="flowLoop()"
+                [endBehavior]="endBehavior()"
                 (action)="onAction($event)"
+                (completed)="onGestureCompleted()"
               />
             }
           </div>

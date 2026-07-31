@@ -19,42 +19,41 @@ import {
 } from '../intro-story.model';
 import { RealUiSourceComponent } from '../source-real-ui/real-ui-source.component';
 import {
+  measureTipInStage,
   tipsForArc,
   type ProgressiveTip,
-  type TipFallbackPct,
+  type TipLocalRect,
 } from '../progressive-tips.model';
 
-const TIP_AUTO_MS = 6800;
+const TIP_AUTO_MS = 6400;
 
 type ArcFilter = IntroStorySceneId | 'all';
 
-interface LocalRect {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
+interface HotspotMark {
+  tip: ProgressiveTip;
+  rect: TipLocalRect;
+  active: boolean;
 }
 
 /**
- * E — Progressive disclosure: one coach-mark tip at a time over real UI.
- * Teaching order is fixed; Next (or auto-advance) moves the spotlight.
+ * F — Hotspot Tips: subtle pulsing dots on key UI, one focused tip at a time.
+ * Compact floating pill (Material/iOS tip style) near the active hotspot.
  */
 @Component({
-  selector: 'intro-progressive-disclosure',
-  templateUrl: './progressive-disclosure.component.html',
-  styleUrl: './progressive-disclosure.component.scss',
+  selector: 'intro-hotspot-tips',
+  templateUrl: './hotspot-tips.component.html',
+  styleUrl: './hotspot-tips.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RealUiSourceComponent],
 })
-export class ProgressiveDisclosureComponent {
+export class HotspotTipsComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly zone = inject(NgZone);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  /** `all` walks every arc; a scene id locks to that concept beat. */
   arc = input<ArcFilter>('all');
   autoAdvance = input(true);
-  badge = input('Progressive');
+  badge = input('Hotspots');
 
   readonly stage = viewChild<ElementRef<HTMLElement>>('stage');
   readonly source = viewChild(RealUiSourceComponent);
@@ -62,7 +61,7 @@ export class ProgressiveDisclosureComponent {
   readonly tipIndex = signal(0);
   readonly paused = signal(false);
   readonly animKey = signal(0);
-  readonly anchorLocal = signal<LocalRect | null>(null);
+  readonly hotspots = signal<HotspotMark[]>([]);
 
   private timer: ReturnType<typeof setTimeout> | null = null;
   private measureTimers: number[] = [];
@@ -99,71 +98,58 @@ export class ProgressiveDisclosureComponent {
     () => `${this.tipIndex() + 1} / ${this.tipCount()}`,
   );
 
-  readonly tipAbove = computed(() => {
-    const rect = this.anchorLocal();
-    if (!rect) {
-      return false;
+  readonly activeHotspot = computed(
+    () => this.hotspots().find((h) => h.active) ?? null,
+  );
+
+  /** Prefer a floating pill near the hotspot; flip above when low on screen. */
+  readonly pillStyle = computed(() => {
+    const mark = this.activeHotspot();
+    if (!mark) {
+      return {
+        top: 'auto',
+        bottom: '1.1rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
+      };
     }
     const stage = this.stage()?.nativeElement;
     const h = stage?.clientHeight || 700;
-    return rect.top + rect.height / 2 > h * 0.52;
-  });
+    const w = stage?.clientWidth || 390;
+    const cx = mark.rect.left + mark.rect.width / 2;
+    const cy = mark.rect.top + mark.rect.height / 2;
+    const pillW = Math.min(17.5 * 16, w - 24);
+    const left = Math.min(Math.max(cx, pillW / 2 + 12), w - pillW / 2 - 12);
 
-  readonly cardStyle = computed(() => {
-    const rect = this.anchorLocal();
-    if (!rect) {
-      return { top: '42%', transform: 'translate(-50%, -50%)' };
-    }
-    const gap = 14;
-    if (this.tipAbove()) {
+    if (cy > h * 0.58) {
       return {
-        top: `${Math.max(12, rect.top - gap)}px`,
+        top: `${Math.max(12, mark.rect.top - 12)}px`,
+        bottom: 'auto',
+        left: `${left}px`,
         transform: 'translate(-50%, -100%)',
       };
     }
     return {
-      top: `${rect.top + rect.height + gap}px`,
+      top: `${mark.rect.top + mark.rect.height + 14}px`,
+      bottom: 'auto',
+      left: `${left}px`,
       transform: 'translateX(-50%)',
     };
   });
 
-  readonly spotlightStyle = computed(() => {
-    const rect = this.anchorLocal();
-    if (!rect) {
-      return null;
+  readonly useSheet = computed(() => {
+    const mark = this.activeHotspot();
+    if (!mark) {
+      return true;
     }
-    const pad = 6;
-    return {
-      top: `${rect.top - pad}px`,
-      left: `${rect.left - pad}px`,
-      width: `${rect.width + pad * 2}px`,
-      height: `${rect.height + pad * 2}px`,
-    };
-  });
-
-  readonly arrowStyle = computed(() => {
-    const rect = this.anchorLocal();
-    if (!rect) {
-      return null;
-    }
-    const cx = rect.left + rect.width / 2;
-    if (this.tipAbove()) {
-      return {
-        left: `${cx}px`,
-        top: `${rect.top - 2}px`,
-        transform: 'translate(-50%, -100%) rotate(180deg)',
-      };
-    }
-    return {
-      left: `${cx}px`,
-      top: `${rect.top + rect.height + 2}px`,
-      transform: 'translateX(-50%)',
-    };
+    const stage = this.stage()?.nativeElement;
+    const h = stage?.clientHeight || 700;
+    // Very tall anchors (feed cards) → compact bottom sheet feels cleaner.
+    return mark.rect.height > h * 0.28;
   });
 
   constructor() {
     effect(() => {
-      // Reset tip cursor when the arc filter changes (Storybook controls / stories).
       const list = tipsForArc(this.arc());
       if (list.length && this.tipIndex() >= list.length) {
         this.tipIndex.set(0);
@@ -171,7 +157,6 @@ export class ProgressiveDisclosureComponent {
     });
 
     effect(() => {
-      // Re-bind when arc filter or tip changes.
       this.arc();
       const tip = this.tip();
       if (!tip) {
@@ -201,6 +186,17 @@ export class ProgressiveDisclosureComponent {
       return;
     }
     this.tipIndex.update((i) => i + 1);
+    this.animKey.update((k) => k + 1);
+    this.restartTimer();
+  }
+
+  focusTip(tipId: string, event?: Event): void {
+    event?.stopPropagation();
+    const idx = this.tips().findIndex((t) => t.id === tipId);
+    if (idx < 0 || idx === this.tipIndex()) {
+      return;
+    }
+    this.tipIndex.set(idx);
     this.animKey.update((k) => k + 1);
     this.restartTimer();
   }
@@ -235,6 +231,15 @@ export class ProgressiveDisclosureComponent {
 
   tipDuration(): number {
     return TIP_AUTO_MS;
+  }
+
+  hotspotStyle(mark: HotspotMark): Record<string, string> {
+    const cx = mark.rect.left + mark.rect.width / 2;
+    const cy = mark.rect.top + mark.rect.height / 2;
+    return {
+      left: `${cx}px`,
+      top: `${cy}px`,
+    };
   }
 
   private restartTimer(): void {
@@ -276,67 +281,30 @@ export class ProgressiveDisclosureComponent {
 
   private scheduleMeasure(): void {
     this.clearMeasureTimers();
-    const run = (): void => this.zone.run(() => this.measureAnchor());
+    const run = (): void => this.zone.run(() => this.measureHotspots());
     requestAnimationFrame(run);
     this.measureTimers.push(window.setTimeout(run, 80));
     this.measureTimers.push(window.setTimeout(run, 280));
     this.measureTimers.push(window.setTimeout(run, 520));
   }
 
-  private measureAnchor(): void {
-    const tip = this.tip();
+  private measureHotspots(): void {
     const stageEl = this.stage()?.nativeElement;
-    if (!tip || !stageEl) {
-      this.anchorLocal.set(null);
+    const active = this.tip();
+    const list = this.tips();
+    if (!stageEl || !active) {
+      this.hotspots.set([]);
       return;
     }
 
-    const stageRect = stageEl.getBoundingClientRect();
-    let target: HTMLElement | null = null;
-
-    if (tip.anchor) {
-      // Prefer the live incoming layer so outgoing dual-layer ghosts are ignored.
-      const live =
-        (stageEl.querySelector('.source__layer--in') as HTMLElement | null) ??
-        stageEl;
-      target = live.querySelector(tip.anchor) as HTMLElement | null;
-      if (!target) {
-        target = stageEl.querySelector(tip.anchor) as HTMLElement | null;
-      }
-    }
-
-    if (target) {
-      const r = target.getBoundingClientRect();
-      if (r.width > 2 && r.height > 2) {
-        this.anchorLocal.set({
-          top: r.top - stageRect.top,
-          left: r.left - stageRect.left,
-          width: r.width,
-          height: r.height,
-        });
-        this.cdr.markForCheck();
-        return;
-      }
-    }
-
-    this.anchorLocal.set(
-      this.fallbackLocalRect(stageEl, stageRect, tip.fallbackPct),
-    );
+    // Show dormant pulses for tips sharing the same coach screen.
+    const sameScreen = list.filter((t) => t.cue.screen === active.cue.screen);
+    const marks: HotspotMark[] = sameScreen.map((t) => ({
+      tip: t,
+      rect: measureTipInStage(stageEl, t),
+      active: t.id === active.id,
+    }));
+    this.hotspots.set(marks);
     this.cdr.markForCheck();
-  }
-
-  private fallbackLocalRect(
-    stageEl: HTMLElement,
-    stageRect: DOMRect,
-    pct: TipFallbackPct,
-  ): LocalRect {
-    const native =
-      (stageEl.querySelector('.source__native') as HTMLElement | null) ?? null;
-    const box = native?.getBoundingClientRect() ?? stageRect;
-    const w = (pct.w / 100) * box.width;
-    const h = (pct.h / 100) * box.height;
-    const left = box.left - stageRect.left + (pct.x / 100) * box.width - w / 2;
-    const top = box.top - stageRect.top + (pct.y / 100) * box.height - h / 2;
-    return { top, left, width: w, height: h };
   }
 }

@@ -19,42 +19,37 @@ import {
 } from '../intro-story.model';
 import { RealUiSourceComponent } from '../source-real-ui/real-ui-source.component';
 import {
+  measureTipInStage,
   tipsForArc,
   type ProgressiveTip,
-  type TipFallbackPct,
+  type TipLocalRect,
 } from '../progressive-tips.model';
 
-const TIP_AUTO_MS = 6800;
+const TIP_AUTO_MS = 5000;
+/** Hole morph + veil settle — sweet but snappy. */
+const FOCUS_MORPH_MS = 340;
 
 type ArcFilter = IntroStorySceneId | 'all';
 
-interface LocalRect {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-}
-
 /**
- * E — Progressive disclosure: one coach-mark tip at a time over real UI.
- * Teaching order is fixed; Next (or auto-advance) moves the spotlight.
+ * H — Focus Shine: non-focus UI fades + grayscales; the focal control
+ * stays full color and softly glows. Short tip nearby; Find → Share → Tribe → Go.
  */
 @Component({
-  selector: 'intro-progressive-disclosure',
-  templateUrl: './progressive-disclosure.component.html',
-  styleUrl: './progressive-disclosure.component.scss',
+  selector: 'intro-focus-shine',
+  templateUrl: './focus-shine.component.html',
+  styleUrl: './focus-shine.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RealUiSourceComponent],
 })
-export class ProgressiveDisclosureComponent {
+export class FocusShineComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly zone = inject(NgZone);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  /** `all` walks every arc; a scene id locks to that concept beat. */
   arc = input<ArcFilter>('all');
   autoAdvance = input(true);
-  badge = input('Progressive');
+  badge = input('Focus Shine');
 
   readonly stage = viewChild<ElementRef<HTMLElement>>('stage');
   readonly source = viewChild(RealUiSourceComponent);
@@ -62,10 +57,13 @@ export class ProgressiveDisclosureComponent {
   readonly tipIndex = signal(0);
   readonly paused = signal(false);
   readonly animKey = signal(0);
-  readonly anchorLocal = signal<LocalRect | null>(null);
+  readonly focusRect = signal<TipLocalRect | null>(null);
+  /** True while the hole is morphing — softens tip until settle. */
+  readonly morphing = signal(false);
 
   private timer: ReturnType<typeof setTimeout> | null = null;
   private measureTimers: number[] = [];
+  private morphTimer: ReturnType<typeof setTimeout> | null = null;
   private startedAt = 0;
   private remaining = TIP_AUTO_MS;
 
@@ -99,71 +97,83 @@ export class ProgressiveDisclosureComponent {
     () => `${this.tipIndex() + 1} / ${this.tipCount()}`,
   );
 
+  /** CSS vars drive the morphing cutout — keep the veil mounted. */
+  readonly shineVars = computed(() => {
+    const rect = this.focusRect();
+    const stage = this.stage()?.nativeElement;
+    const sw = stage?.clientWidth || 390;
+    const sh = stage?.clientHeight || 700;
+    if (!rect) {
+      return {
+        '--shine-x': `${sw * 0.5}px`,
+        '--shine-y': `${sh * 0.42}px`,
+        '--shine-w': '0px',
+        '--shine-h': '0px',
+        '--shine-r': '0.85rem',
+      };
+    }
+    const pad = Math.max(8, Math.min(14, rect.width * 0.04));
+    const radius =
+      rect.height > sh * 0.22
+        ? '1.05rem'
+        : rect.width < 72
+          ? '999px'
+          : '0.9rem';
+    return {
+      '--shine-x': `${rect.left - pad}px`,
+      '--shine-y': `${rect.top - pad}px`,
+      '--shine-w': `${rect.width + pad * 2}px`,
+      '--shine-h': `${rect.height + pad * 2}px`,
+      '--shine-r': radius,
+    };
+  });
+
   readonly tipAbove = computed(() => {
-    const rect = this.anchorLocal();
+    const rect = this.focusRect();
     if (!rect) {
       return false;
     }
     const stage = this.stage()?.nativeElement;
     const h = stage?.clientHeight || 700;
-    return rect.top + rect.height / 2 > h * 0.52;
+    return rect.top + rect.height / 2 > h * 0.55;
   });
 
-  readonly cardStyle = computed(() => {
-    const rect = this.anchorLocal();
+  /** Prefer a slim tip near the focus; flip above when low. */
+  readonly tipStyle = computed(() => {
+    const rect = this.focusRect();
     if (!rect) {
-      return { top: '42%', transform: 'translate(-50%, -50%)' };
+      return {
+        top: 'auto',
+        bottom: '1.15rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
+      };
     }
-    const gap = 14;
+    const stage = this.stage()?.nativeElement;
+    const w = stage?.clientWidth || 390;
+    const tipW = Math.min(16.5 * 16, w - 28);
+    const cx = rect.left + rect.width / 2;
+    const left = Math.min(Math.max(cx, tipW / 2 + 14), w - tipW / 2 - 14);
+    const gap = 16;
+
     if (this.tipAbove()) {
       return {
-        top: `${Math.max(12, rect.top - gap)}px`,
+        top: `${Math.max(10, rect.top - gap)}px`,
+        bottom: 'auto',
+        left: `${left}px`,
         transform: 'translate(-50%, -100%)',
       };
     }
     return {
       top: `${rect.top + rect.height + gap}px`,
-      transform: 'translateX(-50%)',
-    };
-  });
-
-  readonly spotlightStyle = computed(() => {
-    const rect = this.anchorLocal();
-    if (!rect) {
-      return null;
-    }
-    const pad = 6;
-    return {
-      top: `${rect.top - pad}px`,
-      left: `${rect.left - pad}px`,
-      width: `${rect.width + pad * 2}px`,
-      height: `${rect.height + pad * 2}px`,
-    };
-  });
-
-  readonly arrowStyle = computed(() => {
-    const rect = this.anchorLocal();
-    if (!rect) {
-      return null;
-    }
-    const cx = rect.left + rect.width / 2;
-    if (this.tipAbove()) {
-      return {
-        left: `${cx}px`,
-        top: `${rect.top - 2}px`,
-        transform: 'translate(-50%, -100%) rotate(180deg)',
-      };
-    }
-    return {
-      left: `${cx}px`,
-      top: `${rect.top + rect.height + 2}px`,
+      bottom: 'auto',
+      left: `${left}px`,
       transform: 'translateX(-50%)',
     };
   });
 
   constructor() {
     effect(() => {
-      // Reset tip cursor when the arc filter changes (Storybook controls / stories).
       const list = tipsForArc(this.arc());
       if (list.length && this.tipIndex() >= list.length) {
         this.tipIndex.set(0);
@@ -171,12 +181,12 @@ export class ProgressiveDisclosureComponent {
     });
 
     effect(() => {
-      // Re-bind when arc filter or tip changes.
       this.arc();
       const tip = this.tip();
       if (!tip) {
         return;
       }
+      this.beginMorph();
       this.scheduleMeasure();
       if (this.autoAdvance() && !this.paused()) {
         this.restartTimer();
@@ -188,6 +198,9 @@ export class ProgressiveDisclosureComponent {
       this.destroyRef.onDestroy(() => {
         this.clearTimer();
         this.clearMeasureTimers();
+        if (this.morphTimer) {
+          clearTimeout(this.morphTimer);
+        }
       });
     });
   }
@@ -237,6 +250,21 @@ export class ProgressiveDisclosureComponent {
     return TIP_AUTO_MS;
   }
 
+  private beginMorph(): void {
+    this.morphing.set(true);
+    if (this.morphTimer) {
+      clearTimeout(this.morphTimer);
+    }
+    this.morphTimer = setTimeout(
+      () =>
+        this.zone.run(() => {
+          this.morphing.set(false);
+          this.cdr.markForCheck();
+        }),
+      FOCUS_MORPH_MS + 40,
+    );
+  }
+
   private restartTimer(): void {
     this.remaining = TIP_AUTO_MS;
     this.paused.set(false);
@@ -276,67 +304,21 @@ export class ProgressiveDisclosureComponent {
 
   private scheduleMeasure(): void {
     this.clearMeasureTimers();
-    const run = (): void => this.zone.run(() => this.measureAnchor());
+    const run = (): void => this.zone.run(() => this.measureFocus());
     requestAnimationFrame(run);
     this.measureTimers.push(window.setTimeout(run, 80));
     this.measureTimers.push(window.setTimeout(run, 280));
     this.measureTimers.push(window.setTimeout(run, 520));
   }
 
-  private measureAnchor(): void {
+  private measureFocus(): void {
     const tip = this.tip();
     const stageEl = this.stage()?.nativeElement;
     if (!tip || !stageEl) {
-      this.anchorLocal.set(null);
+      this.focusRect.set(null);
       return;
     }
-
-    const stageRect = stageEl.getBoundingClientRect();
-    let target: HTMLElement | null = null;
-
-    if (tip.anchor) {
-      // Prefer the live incoming layer so outgoing dual-layer ghosts are ignored.
-      const live =
-        (stageEl.querySelector('.source__layer--in') as HTMLElement | null) ??
-        stageEl;
-      target = live.querySelector(tip.anchor) as HTMLElement | null;
-      if (!target) {
-        target = stageEl.querySelector(tip.anchor) as HTMLElement | null;
-      }
-    }
-
-    if (target) {
-      const r = target.getBoundingClientRect();
-      if (r.width > 2 && r.height > 2) {
-        this.anchorLocal.set({
-          top: r.top - stageRect.top,
-          left: r.left - stageRect.left,
-          width: r.width,
-          height: r.height,
-        });
-        this.cdr.markForCheck();
-        return;
-      }
-    }
-
-    this.anchorLocal.set(
-      this.fallbackLocalRect(stageEl, stageRect, tip.fallbackPct),
-    );
+    this.focusRect.set(measureTipInStage(stageEl, tip));
     this.cdr.markForCheck();
-  }
-
-  private fallbackLocalRect(
-    stageEl: HTMLElement,
-    stageRect: DOMRect,
-    pct: TipFallbackPct,
-  ): LocalRect {
-    const native =
-      (stageEl.querySelector('.source__native') as HTMLElement | null) ?? null;
-    const box = native?.getBoundingClientRect() ?? stageRect;
-    const w = (pct.w / 100) * box.width;
-    const h = (pct.h / 100) * box.height;
-    const left = box.left - stageRect.left + (pct.x / 100) * box.width - w / 2;
-    const top = box.top - stageRect.top + (pct.y / 100) * box.height - h / 2;
-    return { top, left, width: w, height: h };
   }
 }

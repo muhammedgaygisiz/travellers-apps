@@ -105,6 +105,21 @@
   min-height: 0;
   height: 100%;
   overflow: hidden;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.beats__stage--fading {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+.beats--finale .beats__stage {
+  /* Soft hold on the last chapter’s cheerful final frame. */
+  filter: saturate(1.05);
 }
 
 .beats__footer {

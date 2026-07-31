@@ -28,10 +28,17 @@ Business app:
 apps/bite-tribe-business/src/assets/i18n/en.json
 ```
 
+Push notifications:
+
+```text
+apps/bite-tribe-firebase/functions/src/functions/shared/i18n/messages/<lang>.ts
+```
+
 ## Rules
 
 - Use Transloco keys for visible text.
 - Update every relevant locale when adding or changing user-facing copy.
+- Push notification copy is localized in Firebase Functions, not in the app: the OS renders the notification before Transloco exists. The backend catalog carries one file per language the app offers and is bound to the recipient's `settings/{uid}.language`. Keep its language list in step with `availableLangs` in `libs/bite-tribe/shell/src/lib/app.config.ts`; see [[Implementation - Firebase Functions]] and issue \#1200.
 - Keep tone consistent inside each locale.
 - Avoid hardcoded visible English in templates, alerts, labels, button text, empty states, and error states.
 - Load a language before activating it when the switch happens in place, and let anything that translates synchronously - loading overlays, alerts, toasts - wait for that switch to settle.
@@ -51,6 +58,8 @@ When editing locale JSON, parse all relevant locale files:
 ```bash
 node -e "for (const f of process.argv.slice(1)) JSON.parse(require('fs').readFileSync(f,'utf8'))" apps/bite-tribe/src/assets/i18n/*.json apps/bite-tribe-business/src/assets/i18n/en.json
 ```
+
+When editing the notification catalog, run the functions tests from `apps/bite-tribe-firebase/functions`; `shared/i18n/__specs__/translate.spec.ts` checks every locale for missing keys, lost placeholders, and blank copy.
 
 ## Related Pages
 

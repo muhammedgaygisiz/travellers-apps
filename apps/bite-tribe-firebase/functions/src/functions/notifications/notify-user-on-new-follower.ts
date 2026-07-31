@@ -1,13 +1,8 @@
 import { onDocumentCreated } from 'firebase-functions/firestore';
 import { logger } from 'firebase-functions';
 import { getFirestore } from 'firebase-admin/firestore';
-import { getMessaging } from 'firebase-admin/messaging';
 import { User } from '../shared/model/user';
-import { getInvalidTokens } from '../shared/utils/get-invalid-tokens';
-import { cleanupInvalidTokens } from '../shared/utils/cleanup-invalid-tokens';
-import { getTokens } from '../shared/utils/get-tokens';
-import { buildChunks } from '../shared/utils/build-chunks';
-import { CHUNK_SIZE } from '../shared/utils/chunk-size';
+import { sendLocalizedNotification } from '../shared/utils/send-localized-notification';
 
 const db = getFirestore();
 
@@ -81,34 +76,19 @@ export const notifyUserOnNewFollower = onDocumentCreated(
       return;
     }
 
-    const tokens = await getTokens([userId]);
-    if (tokens.length === 0) {
-      logger.warn('--- No valid push tokens found, aborting notification');
-      return;
-    }
-
-    const chunks = buildChunks(tokens, CHUNK_SIZE);
-
-    logger.info('--- Chunks:', chunks);
-    for (const chunk of chunks) {
-      const res = await getMessaging().sendEachForMulticast({
-        tokens: chunk,
-        notification: {
-          title: 'New Follower!',
-          body: `${followerData.displayName} is now following you.`,
-        },
-        data: {
-          type: 'NEW_FOLLOWER',
-          userId: `${userId}`,
-          followerUid: `${newFollowerUid}`,
-        },
-      });
-
-      const invalidTokens = getInvalidTokens(res, chunk);
-      logger.info('--- Invalid tokens to clean up:', invalidTokens);
-      if (invalidTokens.length > 0) {
-        await cleanupInvalidTokens(invalidTokens);
-      }
-    }
+    await sendLocalizedNotification({
+      uids: [userId],
+      data: {
+        type: 'NEW_FOLLOWER',
+        userId: `${userId}`,
+        followerUid: `${newFollowerUid}`,
+      },
+      buildMessage: (translate) => ({
+        title: translate('newFollower.title'),
+        body: translate('newFollower.body', {
+          follower: followerData.displayName ?? translate('common.someone'),
+        }),
+      }),
+    });
   },
 );

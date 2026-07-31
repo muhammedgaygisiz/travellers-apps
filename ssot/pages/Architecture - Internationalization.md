@@ -11,6 +11,7 @@ Internationalization keeps BiteTribe usable across languages and travel contexts
 - Business app translations live in `apps/bite-tribe-business/src/assets/i18n/*.json`.
 - New visible text should update every relevant locale, not only English.
 - The consumer app re-renders translated text when the active language changes, so a surface that switches language in place does not need a reload.
+- Text the app never renders itself needs its own translation surface. Push notification copy is one: the OS shows it before the app runs, so it is translated in Firebase Functions at send time against the recipient's saved language (issue #1200).
 
 ## Switching Language
 
@@ -30,11 +31,13 @@ The app has translations for multiple languages including English, German, Turki
 ```text
 apps/bite-tribe/src/assets/i18n
 apps/bite-tribe-business/src/assets/i18n
+apps/bite-tribe-firebase/functions/src/functions/shared/i18n
 libs/**/page/**/*.html
 ```
 
 ## Current Limitations
 
-- Several translations were AI-generated and need manual review.
+- Several translations were AI-generated and need manual review, including the notification catalog in the functions app.
+- The language list exists twice: `availableLangs` in the consumer app's Transloco config and `SUPPORTED_LANGUAGES` in the functions catalog. They are kept in step by hand.
 - Product language should stay consistent with the BiteTribe mission and informal tone choices.
 - Currency and location are related internationalization concerns, not just formatting concerns.

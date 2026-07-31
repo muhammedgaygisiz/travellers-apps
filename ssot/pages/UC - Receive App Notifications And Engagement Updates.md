@@ -21,6 +21,23 @@ Users and creators can receive engagement signals around Bites and social activi
 - Notifications or shared-link behavior keep users connected to activity.
 - Tapping a notification opens the surface it talks about: the Bite, the follower profile, the leaderboard, or the weekly bites page.
 - The weekly summary counts one calendar week (Monday to Sunday, Europe/Zurich) and carries those bounds, so its landing page lists the Bites of exactly that week even when the user opens it days later.
+- Notification text arrives in the language the user chose in settings, not in English.
+
+## Localization Contract
+
+Issue [#1200](https://github.com/muhammedgaygisiz/travellers-apps/issues/1200)
+made notification copy follow the recipient:
+
+- The language of a notification is the `language` the user saved in settings -
+  the same choice the settings page shows them.
+- The OS renders a push notification before the app runs, so the copy is
+  translated in the backend when it is sent, not in the app when it arrives.
+- Every installation of an account receives the same language, because language
+  is an account preference while delivery is per installation.
+- One trigger can go out in several languages at once: followers of the same
+  Bite each read it in their own.
+- An account that never chose a language, or chose one the app no longer offers,
+  receives English rather than nothing.
 
 ## Installation Contract
 
@@ -57,6 +74,8 @@ made notification delivery installation-specific:
 - `sendDailyLeaderboardNotification`
 - `handleSharedLinkToBite`
 - `loadWeeklyBites`
+- `sendLocalizedNotification` and the notification catalog in
+  `apps/bite-tribe-firebase/functions/src/functions/shared/i18n`
 - `weekly-bites` route, served by `WeeklyBitesContainer` in `libs/bite-tribe/home/page`
 
 ## Related Domains

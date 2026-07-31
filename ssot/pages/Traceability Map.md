@@ -121,7 +121,7 @@
   | [[Architecture - Analytics]]            | [[Implementation - Analytics Events]], [[Analytics Operations]]                |
   | [[Architecture - State Management]]     | [[Implementation - Feature Patterns]], [[Implementation - Testing]]            |
   | [[Architecture - Data Access]]          | [[Implementation - Feature Patterns]], [[Implementation - Libraries]]          |
-  | [[Architecture - Internationalization]] | [[Implementation - Localization]]                                              |
+  | [[Architecture - Internationalization]] | [[Implementation - Localization]], [[Implementation - Firebase Functions]]     |
   | [[Architecture - Testing]]              | [[Implementation - Testing]]                                                   |
 
 - ## Current State To Work Selection

@@ -1,5 +1,10 @@
-import { FieldValue, Firestore, QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import {
+  FieldValue,
+  Firestore,
+  QueryDocumentSnapshot,
+} from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
+import { Translate } from '../i18n/translate';
 
 export const USERS_COLLECTION = 'users';
 export const META_COLLECTION = 'meta';
@@ -103,32 +108,38 @@ export const computeRankChanges = (
  * Builds the push-notification body describing a single user's rank change,
  * covering the four cases: dropped out of the top {@link LEADERBOARD_LIMIT},
  * newly entered it, climbed up, or slipped down.
+ *
+ * The wording comes from the caller's language-bound catalog, so the same rank
+ * change reads in the recipient's own language (issue \#1200).
  */
 export const buildLeaderboardNotificationBody = (
   change: LeaderboardRankChange,
+  translate: Translate,
 ): string => {
   if (change.currentRank === null) {
-    return `You dropped out of the top ${LEADERBOARD_LIMIT} on the leaderboard.`;
+    return translate('leaderboard.droppedOut', { limit: LEADERBOARD_LIMIT });
   }
 
   if (change.previousRank === null) {
-    return `You entered the top ${LEADERBOARD_LIMIT} at #${change.currentRank} on the leaderboard! 🎉`;
+    return translate('leaderboard.enteredTop', {
+      limit: LEADERBOARD_LIMIT,
+      rank: change.currentRank,
+    });
   }
 
   if (change.direction === 'up') {
-    return `You climbed up to #${change.currentRank} on the leaderboard! 🎉`;
+    return translate('leaderboard.climbed', { rank: change.currentRank });
   }
 
-  return `You dropped to #${change.currentRank} on the leaderboard.`;
+  return translate('leaderboard.dropped', { rank: change.currentRank });
 };
 
 /**
  * A user is eligible for the leaderboard only when their profile is public.
  * Anonymous (non-public) users are ignored entirely.
  */
-export const isPublicUser = (
-  doc: QueryDocumentSnapshot,
-): boolean => doc.data()['public'] === true;
+export const isPublicUser = (doc: QueryDocumentSnapshot): boolean =>
+  doc.data()['public'] === true;
 
 /**
  * Maps a raw user document into the public leaderboard representation.

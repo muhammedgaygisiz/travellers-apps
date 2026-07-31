@@ -22,7 +22,13 @@
   - app language
   - location priming before the OS permission prompt
   - push notification priming before the OS permission prompt
-- Every OS permission is asked here and nowhere else. The prompt appears once per install, so a cold ask from the login path would spend it before the user knows why it matters. Denial is accepted for both.
+- Onboarding is the primary first-run permission surface. Permission prompts
+  may also follow an explicit later setup or recovery action, such as **Receive
+  notifications on this device** in Settings; they never appear cold from
+  login, startup, or passive loading.
+- A notification grant registers the current installation and token. Denial is
+  accepted without saving an account-level notification preference;
+  `Settings.pushNotifications` is retired by issue #1184.
 - Completion is marked on the user profile; the assistant never shows again.
 - After the assistant, must-dismiss coach marks teach the essential features on first visit: home feed, home menu, home feed controls, create-Bite button, Bite details, map, bucket lists, bucket list swipe, leaderboard.
 - The home menu mark introduces the header menu as the route to the profile, bucket lists, leaderboard, gallery, marketplace, and settings.

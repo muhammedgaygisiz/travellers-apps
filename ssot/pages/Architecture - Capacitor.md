@@ -54,29 +54,79 @@ Two consequences to keep in mind:
 
 The update alert in `libs/bite-tribe/store/src/lib/service-worker/effects.ts` keeps its `hybrid` guard. `SwUpdate.versionUpdates` is `NEVER` while the worker is disabled, so on native the effect is inert either way.
 
-## Push Permission Rule
+## Contextual Permission Rule
 
-The OS shows its push permission prompt once per install, so the ask is owned by exactly one surface: the onboarding notification step, which explains the value first (epic \#850, issue \#1015).
+OS permission prompts must only follow a contextual user action. They must
+never appear cold from login, app startup, passive page loading, or background
+initialization.
+
+Onboarding is the primary first-run request surface. Explicit setup or recovery
+actions may request later when the user understands what capability they are
+enabling. For notifications, issue
+[#1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184) adds
+**Receive notifications on this device** in Settings as a second contextual
+surface.
+
+## Push Permission Rule
 
 `libs/common/push-notifications` splits this in two:
 
 - `initPushListeners` - registers listeners and refreshes the FCM token when permission was already granted. Runs on login (`initAfterLogin$` in the store app effects) and never prompts.
-- `requestPushPermission` - shows the prompt and registers on grant. Called only from the onboarding notification step, and returns `granted` / `denied` / `unsupported` so the choice can be recorded in settings.
+- `requestPushPermission` - shows the prompt and registers on grant. It may be
+  called from the onboarding notification step or the explicit Settings setup
+  action, and returns `granted` / `denied` / `unsupported` to drive that local
+  workflow.
 
-Do not call `requestPushPermission` from app startup or a login path. A cold ask there spends the single OS prompt before the user has any context, and the onboarding step can then never prompt.
+Do not call `requestPushPermission` from app startup or a login path. A cold
+ask there spends the OS prompt before the user has any context for the
+decision.
+
+Issue #1184 retires `Settings.pushNotifications`. Onboarding registers the
+current installation after a grant and accepts a denial without saving an
+account-level notification preference.
+
+## Push Installation Rule
+
+The target contract from issue #1184 separates installation identity, the FCM
+delivery address, BiteTribe delivery state, and OS permission:
+
+- A random installation UUID is generated once and persisted with Capacitor
+  Preferences. It is reused across launches and token rotations and resets
+  naturally after reinstall.
+- Push-token documents carry the installation ID, platform, device label
+  metadata, OS version, app version, `lastSeenAt`, and their own `enabled`
+  state.
+- The raw FCM token is not the primary user-facing device label.
+- There is at most one active token per installation. Token rotation inherits
+  the existing `enabled` state and cleans the superseded token and reverse
+  index.
+- Registration and login refresh must never silently change an existing
+  installation from disabled to enabled.
+- Settings lists registered installations and marks the local match as **This
+  device**. Legacy tokens without installation metadata remain manageable
+  through an **Unknown device** fallback.
+- OS permission is checked only for the current installation and displayed
+  separately from the backend `enabled` state.
+- Permanent installation deletion or revocation is outside issue #1184.
 
 ## Location Permission Rule
 
-Location follows the same rule as push, for the same reason: the OS asks once per install, so the ask is owned by the onboarding location step, which explains what the position is used for first (epic \#850, issue \#1023).
+Location follows the same contextual rule as push. Onboarding explains what the
+position is used for before the primary request (epic #850, issue #1023), while
+an explicit later recovery action may request an unspent permission or guide a
+denied user to device settings.
 
 `libs/common/geolocation` splits this in two:
 
 - `getCurrentPosition` - reads the position on an existing grant and never prompts; it errors instead when permission is not granted, and callers already treat a missing position as non-fatal. Every position read goes through it: the login path (`dispatchGpsPosition` in `initAfterLogin$`) and the Bite details distance (`positionLoader` in `libs/bite-tribe/details/data-access`). Do not re-implement the check/read inline — that is how a stray `requestPermissions` call gets reintroduced.
-- `requestLocationPermission` - shows the prompt. Called only from the onboarding location step, and returns `granted` / `denied` / `unsupported` so the choice can be recorded in settings (`Settings.location`).
+- `requestLocationPermission` - shows the prompt. Called from onboarding or an
+  explicit location setup/recovery action, and returns `granted` / `denied` /
+  `unsupported` so the caller can continue its contextual workflow.
 
 `getCurrentPosition` bails out before reading when permission is undecided on a native platform. `checkPermissions` never prompts, but `getCurrentPosition` does — the native plugin asks the OS itself — so the guard, not the absence of a `requestPermissions` call, is what keeps the login path silent.
 
-Do not call `requestLocationPermission` from app startup or a login path.
+Do not call `requestLocationPermission` from app startup, a login path, or
+passive position loading.
 
 ## Code Anchors
 

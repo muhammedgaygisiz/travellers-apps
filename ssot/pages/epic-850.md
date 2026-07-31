@@ -24,6 +24,16 @@
   - Onboarding funnel analytics shipped in `libs/common/ta-firestore/src/lib/analytics/analytics-events.ts` (`onboarding_assistant_started`, `onboarding_step_completed`, `onboarding_assistant_completed`).
   - Case-insensitive display-name uniqueness backend shipped under `apps/bite-tribe-firebase/functions/src/functions/users/` (claim/check display name, backfill claims).
   - Playwright registration coverage walks the assistant (`apps/bite-tribe-e2e/src/pages/onboarding.page.ts`).
+- Superseded notification decision
+  - Issue [#1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184)
+    preserves onboarding as the primary contextual notification ask but also
+    permits the explicit **Receive notifications on this device** action in
+    Settings.
+  - The original account-level notification preference is retired. A grant
+    registers the installation and its token; denial is accepted without
+    writing `Settings.pushNotifications`.
+  - The original outcome above remains the historical record of what epic #850
+    shipped.
 - Child issues (all closed)
   - \#1011 - Onboarding completion state and blocking entry gate
   - \#1012 - Case-insensitive unique display name enforcement

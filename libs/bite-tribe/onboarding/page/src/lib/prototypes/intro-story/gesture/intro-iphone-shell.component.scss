@@ -285,6 +285,24 @@
   scrollbar-width: none;
 }
 
+/* Suppress browser / Ionic focus rectangles on simulated taps inside the phone. */
+.iphone__screen ::ng-deep *:focus,
+.iphone__screen ::ng-deep *:focus-visible,
+.iphone__screen ::ng-deep *.ion-focused,
+.iphone__screen ::ng-deep .has-focus,
+.iphone__screen ::ng-deep .item-has-focus,
+.iphone__screen ::ng-deep .native-input:focus,
+.iphone__screen ::ng-deep input:focus,
+.iphone__screen ::ng-deep textarea:focus,
+.iphone__screen ::ng-deep button:focus,
+.iphone__screen ::ng-deep a:focus {
+  outline: none !important;
+  --highlight-color: transparent !important;
+  --highlight-color-focused: transparent !important;
+  --highlight-background: transparent !important;
+  box-shadow: none !important;
+}
+
 .iphone__screen ::ng-deep *::-webkit-scrollbar {
   display: none;
   width: 0;

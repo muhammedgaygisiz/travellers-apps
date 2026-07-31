@@ -22,18 +22,14 @@
     calc(0.75rem + var(--ion-safe-area-bottom, 0px));
   overflow: hidden;
   color: #1a1917;
+  /* Warm wash only — no accent-color corner blobs */
   background:
     radial-gradient(
-      ellipse at 14% 0%,
-      var(--accent-soft, #d6e7f8) 0%,
-      transparent 48%
+      ellipse at 50% -10%,
+      rgb(255 252 246 / 90%) 0%,
+      transparent 52%
     ),
-    radial-gradient(
-      ellipse at 88% 12%,
-      rgb(255 250 242 / 55%) 0%,
-      transparent 40%
-    ),
-    linear-gradient(172deg, #f5f1ea 0%, #ebe5db 55%, #e2dbd0 100%);
+    linear-gradient(172deg, #f3efe7 0%, #ebe4d9 55%, #e4ddd2 100%);
   scrollbar-width: none;
 }
 
@@ -114,7 +110,7 @@
 
 .sw__dot--active {
   width: 0.72rem;
-  background: color-mix(in srgb, var(--accent, #4a90d9) 70%, #1a1917);
+  background: rgb(26 25 23 / 55%);
   transform: scale(1.05);
 }
 
@@ -149,25 +145,24 @@
 }
 
 /*
- * Strong focus: rest is near-grayscale + slightly blurred; soft elliptical
- * cutout so the focal UI pops in full color (no hard focus rectangle).
+ * Focus = color pop through a soft oval hole.
+ * Rest = gentle grayscale + dim only — NO blur, NO glow boxes, NO blue.
  */
 .sw__veil {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: rgb(16 14 12 / 38%);
-  backdrop-filter: grayscale(0.96) brightness(0.68) saturate(0.18) blur(1.6px);
-  -webkit-backdrop-filter: grayscale(0.96) brightness(0.68) saturate(0.18)
-    blur(1.6px);
-  /* Soft oval hole — feathered edge, not a sharp rect */
+  background: rgb(18 16 14 / 22%);
+  backdrop-filter: grayscale(0.88) brightness(0.78) saturate(0.28);
+  -webkit-backdrop-filter: grayscale(0.88) brightness(0.78) saturate(0.28);
   -webkit-mask-image:
     linear-gradient(#000 0 0),
     radial-gradient(
       ellipse closest-side at center,
       #fff 0%,
-      #fff 62%,
-      rgb(255 255 255 / 55%) 78%,
+      #fff 48%,
+      rgb(255 255 255 / 70%) 68%,
+      rgb(255 255 255 / 28%) 86%,
       transparent 100%
     );
   mask-image:
@@ -175,16 +170,17 @@
     radial-gradient(
       ellipse closest-side at center,
       #fff 0%,
-      #fff 62%,
-      rgb(255 255 255 / 55%) 78%,
+      #fff 48%,
+      rgb(255 255 255 / 70%) 68%,
+      rgb(255 255 255 / 28%) 86%,
       transparent 100%
     );
   -webkit-mask-size:
     100% 100%,
-    calc(var(--shine-w) * 1.18) calc(var(--shine-h) * 1.22);
+    calc(var(--shine-w) * 1.35) calc(var(--shine-h) * 1.45);
   mask-size:
     100% 100%,
-    calc(var(--shine-w) * 1.18) calc(var(--shine-h) * 1.22);
+    calc(var(--shine-w) * 1.35) calc(var(--shine-h) * 1.45);
   -webkit-mask-position:
     0 0,
     calc(var(--shine-x) + var(--shine-w) * 0.5)
@@ -202,69 +198,16 @@
     mask-position var(--morph-ms) var(--morph-ease),
     -webkit-mask-size var(--morph-ms) var(--morph-ease),
     -webkit-mask-position var(--morph-ms) var(--morph-ease),
-    background var(--morph-ms) var(--morph-ease),
-    backdrop-filter var(--morph-ms) var(--morph-ease),
-    -webkit-backdrop-filter var(--morph-ms) var(--morph-ease);
+    background var(--morph-ms) var(--morph-ease);
 }
 
 .sw--morphing .sw__veil {
-  background: rgb(16 14 12 / 44%);
-  backdrop-filter: grayscale(1) brightness(0.62) saturate(0.12) blur(2px);
-  -webkit-backdrop-filter: grayscale(1) brightness(0.62) saturate(0.12)
-    blur(2px);
+  background: rgb(18 16 14 / 28%);
+  backdrop-filter: grayscale(0.94) brightness(0.74) saturate(0.2);
+  -webkit-backdrop-filter: grayscale(0.94) brightness(0.74) saturate(0.2);
 }
 
-/* Soft color bloom on the focal area — glow only, no outline box */
-.sw__glow {
-  position: absolute;
-  z-index: 2;
-  top: var(--shine-y);
-  left: var(--shine-x);
-  width: var(--shine-w);
-  height: var(--shine-h);
-  border: 0;
-  border-radius: 50%;
-  outline: none;
-  background: radial-gradient(
-    ellipse at center,
-    color-mix(in srgb, var(--accent, #4a90d9) 16%, transparent) 0%,
-    transparent 72%
-  );
-  box-shadow:
-    0 0 42px 18px color-mix(in srgb, var(--accent, #4a90d9) 34%, transparent),
-    0 0 72px 28px rgb(255 250 240 / 18%);
-  filter: saturate(1.35) contrast(1.06);
-  transition:
-    top var(--morph-ms) var(--morph-ease),
-    left var(--morph-ms) var(--morph-ease),
-    width var(--morph-ms) var(--morph-ease),
-    height var(--morph-ms) var(--morph-ease),
-    box-shadow 420ms var(--morph-ease),
-    opacity 280ms ease;
-  pointer-events: none;
-  animation: sw-glow-breathe 2.6s var(--morph-ease) infinite;
-}
-
-.sw--morphing .sw__glow {
-  opacity: 0.45;
-  animation: none;
-}
-
-@keyframes sw-glow-breathe {
-  0%,
-  100% {
-    box-shadow:
-      0 0 38px 16px color-mix(in srgb, var(--accent, #4a90d9) 30%, transparent),
-      0 0 64px 24px rgb(255 250 240 / 14%);
-  }
-  50% {
-    box-shadow:
-      0 0 52px 22px color-mix(in srgb, var(--accent, #4a90d9) 42%, transparent),
-      0 0 88px 34px rgb(255 250 240 / 22%);
-  }
-}
-
-/* Whisper caption — high-contrast cream on darker glass */
+/* Cream type on a subtle dark wash — readable over dimmed + bright focus holes */
 .sw__whisper {
   --tip-top: auto;
   --tip-bottom: 1.35rem;
@@ -278,20 +221,18 @@
   z-index: 8;
   box-sizing: border-box;
   width: min(17rem, calc(100% - 2rem));
-  padding: 0.75rem 0.9rem 0.8rem;
+  padding: 0.65rem 0.8rem 0.7rem;
   border: 0;
-  border-radius: 0.95rem;
+  border-radius: 0.9rem;
   outline: none;
   text-align: center;
-  background: rgb(12 11 10 / 78%);
-  box-shadow:
-    0 10px 28px rgb(0 0 0 / 28%),
-    inset 0 0 0 1px rgb(255 255 255 / 8%);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  background: rgb(12 11 10 / 62%);
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   pointer-events: none;
   transform: translateX(-50%) translateY(var(--tip-y));
-  animation: sw-whisper-in 640ms cubic-bezier(0.22, 1, 0.36, 1) 90ms both;
+  animation: sw-whisper-in 560ms cubic-bezier(0.22, 1, 0.36, 1) 60ms both;
   transition:
     top 380ms cubic-bezier(0.22, 1, 0.36, 1),
     left 380ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -305,12 +246,10 @@
 @keyframes sw-whisper-in {
   from {
     opacity: 0;
-    filter: blur(4px);
-    transform: translateX(-50%) translateY(calc(var(--tip-y) + 10px));
+    transform: translateX(-50%) translateY(calc(var(--tip-y) + 8px));
   }
   to {
     opacity: 1;
-    filter: none;
     transform: translateX(-50%) translateY(var(--tip-y));
   }
 }
@@ -318,12 +257,10 @@
 @keyframes sw-whisper-in-above {
   from {
     opacity: 0;
-    filter: blur(4px);
-    transform: translateX(-50%) translateY(calc(var(--tip-y) - 10px));
+    transform: translateX(-50%) translateY(calc(var(--tip-y) - 8px));
   }
   to {
     opacity: 1;
-    filter: none;
     transform: translateX(-50%) translateY(var(--tip-y));
   }
 }
@@ -334,8 +271,10 @@
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--accent, #4a90d9) 55%, #fff8ee);
-  text-shadow: 0 1px 10px rgb(0 0 0 / 55%);
+  color: #fff8ee;
+  text-shadow:
+    0 0 12px rgb(0 0 0 / 70%),
+    0 1px 3px rgb(0 0 0 / 80%);
   animation: sw-line 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: 80ms;
 }
@@ -347,7 +286,9 @@
   letter-spacing: -0.02em;
   line-height: 1.25;
   color: #fffaf3;
-  text-shadow: 0 1px 12px rgb(0 0 0 / 55%);
+  text-shadow:
+    0 0 14px rgb(0 0 0 / 72%),
+    0 1px 4px rgb(0 0 0 / 85%);
   animation: sw-line 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: 130ms;
 }
@@ -358,8 +299,10 @@
   font-weight: 350;
   letter-spacing: 0.01em;
   line-height: 1.45;
-  color: rgb(255 250 243 / 88%);
-  text-shadow: 0 1px 10px rgb(0 0 0 / 48%);
+  color: rgb(255 250 243 / 92%);
+  text-shadow:
+    0 0 12px rgb(0 0 0 / 68%),
+    0 1px 3px rgb(0 0 0 / 80%);
   animation: sw-line 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: 180ms;
 }
@@ -396,7 +339,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sw__veil,
-  .sw__glow,
   .sw__whisper {
     transition: none !important;
   }

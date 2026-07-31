@@ -53,19 +53,23 @@
         class="fs__coach"
         role="dialog"
         aria-live="polite"
-        [style]="shineVars()"
+        [style.--shine-x]="shineVars()['--shine-x']"
+        [style.--shine-y]="shineVars()['--shine-y']"
+        [style.--shine-w]="shineVars()['--shine-w']"
+        [style.--shine-h]="shineVars()['--shine-h']"
+        [style.--shine-r]="shineVars()['--shine-r']"
       >
-        <!-- Grayscale + dim veil with morphing focus cutout -->
+        <!-- Grayscale + dim veil with soft oval cutout — no glow boxes -->
         <div class="fs__veil" aria-hidden="true"></div>
-
-        <!-- Soft color glow / ring on the shining focus -->
-        <div class="fs__glow" aria-hidden="true"></div>
 
         @for (_ of [animKey()]; track _) {
           <div
             class="fs__tip"
             [class.fs__tip--above]="tipAbove()"
-            [style]="tipStyle()"
+            [style.--tip-top]="tipStyle()['--tip-top']"
+            [style.--tip-bottom]="tipStyle()['--tip-bottom']"
+            [style.--tip-left]="tipStyle()['--tip-left']"
+            [style.--tip-y]="tipStyle()['--tip-y']"
           >
             <p class="fs__tip-kicker">{{ scene().headline }}</p>
             <h2 class="fs__tip-title">{{ active.title }}</h2>

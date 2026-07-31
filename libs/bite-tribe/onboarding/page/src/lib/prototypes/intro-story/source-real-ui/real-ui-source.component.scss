@@ -67,6 +67,24 @@
   );
 }
 
+/* Simulated taps must not flash browser / Ionic focus rectangles. */
+.source__phone :focus,
+.source__phone :focus-visible,
+.source__phone ::ng-deep *:focus,
+.source__phone ::ng-deep *:focus-visible,
+.source__phone ::ng-deep *.ion-focused,
+.source__phone ::ng-deep .has-focus,
+.source__phone ::ng-deep .item-has-focus,
+.source__phone ::ng-deep .native-input:focus,
+.source__phone ::ng-deep input:focus,
+.source__phone ::ng-deep textarea:focus {
+  outline: none !important;
+  --highlight-color: transparent !important;
+  --highlight-color-focused: transparent !important;
+  --highlight-background: transparent !important;
+  box-shadow: none !important;
+}
+
 .source__phone--bare {
   background: transparent;
 }
@@ -409,9 +427,9 @@
 }
 
 .source__native--new-card ::ng-deep bt-bite[data-bite-id='bite1'] ion-card {
-  outline: 2px solid #e08a3a;
-  outline-offset: 2px;
+  outline: none;
   animation: new-card-pulse 1.2s ease both;
+  filter: drop-shadow(0 0 14px rgb(224 138 58 / 45%));
 }
 
 @keyframes new-card-pulse {

@@ -113,18 +113,23 @@ export class FocusShineComponent {
       };
     }
     const pad = Math.max(8, Math.min(14, rect.width * 0.04));
-    const radius =
-      rect.height > sh * 0.22
-        ? '1.05rem'
-        : rect.width < 72
-          ? '999px'
-          : '0.9rem';
+    const w = rect.width + pad * 2;
+    let h = rect.height + pad * 2;
+    const x = rect.left - pad;
+    let y = rect.top - pad;
+    // Wide CTAs: puff into a soft oval so the cutout doesn't read as a focus rect.
+    if (w / Math.max(1, h) > 2.1) {
+      const targetH = Math.min(w / 1.55, h + 56);
+      const dy = (targetH - h) / 2;
+      h = targetH;
+      y -= dy;
+    }
     return {
-      '--shine-x': `${rect.left - pad}px`,
-      '--shine-y': `${rect.top - pad}px`,
-      '--shine-w': `${rect.width + pad * 2}px`,
-      '--shine-h': `${rect.height + pad * 2}px`,
-      '--shine-r': radius,
+      '--shine-x': `${x}px`,
+      '--shine-y': `${y}px`,
+      '--shine-w': `${w}px`,
+      '--shine-h': `${h}px`,
+      '--shine-r': '50%',
     };
   });
 

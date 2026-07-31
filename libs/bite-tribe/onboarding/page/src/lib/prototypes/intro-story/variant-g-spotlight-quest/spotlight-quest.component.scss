@@ -213,11 +213,12 @@
   position: absolute;
   z-index: 1;
   border-radius: 1rem;
-  outline: 1.5px solid rgb(255 255 255 / 50%);
+  outline: none;
   background: transparent;
+  /* Cutout dim + soft glow — no hard rect border */
   box-shadow:
     0 0 0 9999px rgb(12 10 8 / 46%),
-    0 0 28px rgb(255 255 255 / 14%);
+    0 0 32px 8px rgb(255 255 255 / 10%);
   animation: sq-spot-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 

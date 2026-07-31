@@ -14,11 +14,22 @@ import {
   INTRO_BEAT_SCRIPTS,
   SoftDotPointerComponent,
   SyncedGestureController,
+  REPLAY_FADE_MS,
+  REPLAY_SETTLE_MS,
   type GestureEmit,
   type GestureScriptStep,
 } from '../gesture';
 
 export type IntroStageAction = GestureEmit;
+
+/** How to continue after a beat script finishes (no mid-cheer hard cut). */
+export type IntroGestureEndBehavior =
+  /** Soft fade + restart the same beat after settle. */
+  | 'soft-replay'
+  /** Emit completed — parent advances chapter / shows finale. */
+  | 'emit-complete'
+  /** Legacy immediate loop (avoid). */
+  | 'hard-loop';
 
 type IonContentEl = HTMLElement & {
   getScrollElement?: () => Promise<HTMLElement>;
@@ -45,16 +56,19 @@ export class IntroGestureLayerComponent {
   enabled = input(true);
   /** When set, plays this script instead of the canonical beat script. */
   steps = input<GestureScriptStep[] | null>(null);
-  loop = input(true);
+  /** @deprecated Prefer endBehavior — kept for flow stories. */
+  loop = input(false);
+  endBehavior = input<IntroGestureEndBehavior>('soft-replay');
 
   action = output<IntroStageAction>();
+  /** Fires when the script reaches its cheerful final frame (before soft replay). */
+  completed = output<void>();
 
   readonly fingerVisible = signal(false);
   readonly fingerX = signal(50);
   readonly fingerY = signal(70);
   readonly fingerPressed = signal(false);
   readonly ripple = signal<{ x: number; y: number; key: number } | null>(null);
-  /** iOS-style scroll thumb — driven by SyncedGestureController. */
   readonly scrollThumb = signal<{
     active: boolean;
     topPct: number;
@@ -63,7 +77,6 @@ export class IntroGestureLayerComponent {
 
   private player: SyncedGestureController | null = null;
   private runId = 0;
-
   private lastPlayKey = '';
 
   constructor() {
@@ -71,12 +84,13 @@ export class IntroGestureLayerComponent {
       const beat = this.beat();
       const enabled = this.enabled();
       const steps = this.steps();
+      const endBehavior = this.endBehavior();
       const loop = this.loop();
       const root = this.stageRoot();
-      // Key on meaning, not stageRoot identity — parent CD after navigate
-      // must not cancel the player mid-script.
       const stepsKey = steps == null ? 'canon' : `override:${steps.length}`;
-      const key = `${beat}|${enabled}|${loop}|${stepsKey}|${root ? 'root' : 'none'}`;
+      const key = `${beat}|${enabled}|${endBehavior}|${loop}|${stepsKey}|${
+        root ? 'root' : 'none'
+      }`;
       if (!enabled) {
         this.lastPlayKey = '';
         this.stop();
@@ -114,7 +128,8 @@ export class IntroGestureLayerComponent {
     const override = this.steps();
     const beatScript = INTRO_BEAT_SCRIPTS[this.beat()];
     const playSteps = override?.length ? override : beatScript.steps;
-    const playLoop = override?.length ? this.loop() : beatScript.loop;
+    const endBehavior = this.resolveEndBehavior();
+
     const player = new SyncedGestureController({
       getPointerEl: (): HTMLElement | null =>
         this.host.nativeElement.querySelector(
@@ -140,7 +155,7 @@ export class IntroGestureLayerComponent {
           this.scrollThumb.set(null);
           return;
         }
-        const track = 72; // usable track % of screen height
+        const track = 72;
         const thumbH = Math.max(
           10,
           Math.min(28, (track * 120) / (maxScroll + 120)),
@@ -151,13 +166,53 @@ export class IntroGestureLayerComponent {
       },
     });
     this.player = player;
-    await player.play(playSteps, { loop: playLoop });
+
+    if (endBehavior === 'hard-loop') {
+      await player.play(playSteps, { loop: true });
+      return;
+    }
+
+    await player.play(playSteps, { loop: false });
     if (id !== this.runId) {
       return;
     }
+
+    this.completed.emit();
+
+    if (endBehavior === 'emit-complete') {
+      return;
+    }
+
+    // soft-replay: linger on cheerful final frame, then fade + restart.
+    await this.delay(REPLAY_SETTLE_MS);
+    if (id !== this.runId) {
+      return;
+    }
+    this.action.emit({ type: 'softRestart' });
+    await this.delay(REPLAY_FADE_MS);
+    if (id !== this.runId) {
+      return;
+    }
+    // Bump key so the next start is allowed even with same inputs.
+    this.lastPlayKey = `${this.lastPlayKey}|replay:${Date.now()}`;
+    void this.start(++this.runId);
   }
 
-  /** Force Ionic to materialize the innermost scroll host before play. */
+  private resolveEndBehavior(): IntroGestureEndBehavior {
+    const explicit = this.endBehavior();
+    if (this.loop() && explicit === 'soft-replay') {
+      // Flow stories still pass [loop]="true" — treat as soft-replay.
+      return 'soft-replay';
+    }
+    return explicit;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+  }
+
   private async warmIonScroller(): Promise<void> {
     const ion = this.innermostIon();
     if (ion?.getScrollElement) {
@@ -167,15 +222,9 @@ export class IntroGestureLayerComponent {
         /* findScroller still has shadow fallbacks */
       }
     }
-    // Brief settle so scrollHeight > clientHeight is measurable.
-    await new Promise<void>((r) => window.setTimeout(r, 80));
+    await this.delay(80);
   }
 
-  /**
-   * INNERMOST ion-content `.inner-scroll` that can actually scroll.
-   * Outer ta-page / shell ion-content often has scrollHeight === clientHeight
-   * and must NOT be used — that breaks synced scroll.
-   */
   private findScroller(): HTMLElement | null {
     const root = this.stageRoot();
     const searchRoot =
@@ -184,7 +233,6 @@ export class IntroGestureLayerComponent {
       searchRoot.querySelectorAll('ion-content'),
     ) as IonContentEl[];
 
-    // Innermost → outermost: pick first that is actually scrollable.
     for (let i = ions.length - 1; i >= 0; i--) {
       const el = this.scrollHostOf(ions[i]);
       if (el && el.scrollHeight > el.clientHeight + 1) {
@@ -192,7 +240,6 @@ export class IntroGestureLayerComponent {
       }
     }
 
-    // Fallback: innermost host even if layout not measured yet.
     for (let i = ions.length - 1; i >= 0; i--) {
       const el = this.scrollHostOf(ions[i]);
       if (el) {

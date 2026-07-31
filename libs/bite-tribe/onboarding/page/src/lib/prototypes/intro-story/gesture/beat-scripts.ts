@@ -1,10 +1,8 @@
 /**
  * Beat scripts — one sentence story each. Only gestures that serve the sentence.
  *
- * Discover: scroll to Botanic Breeze (3rd card) → open THAT same bite
- * Share:    home → Create Bite → photo → publish → Botanic reactions
- * Tribe:    details → creator → Follow
- * Go:       map pin → drawer → directions
+ * End of beat: resolve (hold success) → celebrate (soft particles) → stop.
+ * Soft replay / chapter advance is owned by the host — never hard-cut mid-cheer.
  */
 import {
   DISCOVER_TARGET_BITE_ID,
@@ -12,12 +10,32 @@ import {
 } from '../intro-story.model';
 import { G, script, type GestureScriptStep } from './gesture-script';
 import { easeInOutCubic, easeOutCubic } from './easing';
+import { appendAppearAndPickPhoto } from './script-phrases';
+import {
+  APPROACH_MS,
+  CELEBRATE_MS,
+  CREATE_LAND_MS,
+  DETAILS_HOLD_MS,
+  DIRECTIONS_HOLD_MS,
+  DRAWER_HOLD_MS,
+  FOLLOW_HOLD_MS,
+  LAND_MS,
+  MOVE_MS,
+  REACTION_HOLD_MS,
+  RESOLVE_HOLD_MS,
+  SETTLE_MS,
+  TAP_PAUSE_MS,
+} from './timing';
 
 export type IntroStageScreen =
   'home' | 'create' | 'details' | 'profile' | 'map' | 'leaderboard';
 
 export interface IntroBeatScript {
   beat: IntroStorySceneId;
+  /**
+   * Hard rAF loop is off — hosts soft-replay or advance chapters after complete.
+   * Kept for API compatibility; always false for polished endings.
+   */
   loop: boolean;
   steps: GestureScriptStep[];
 }
@@ -35,123 +53,127 @@ export const nav = (
       : { type: 'navigate', screen },
   );
 
+/** Resolve hold → soft celebrate → linger on the cheerful final frame. */
+const resolveAndCelebrate = (
+  builder: ReturnType<typeof script>,
+  anchor: string,
+): ReturnType<typeof script> =>
+  builder
+    .wait(RESOLVE_HOLD_MS)
+    .emit({ type: 'celebrate', anchor })
+    .wait(CELEBRATE_MS)
+    .hide()
+    .wait(SETTLE_MS);
+
 export const INTRO_BEAT_SCRIPTS: Record<IntroStorySceneId, IntroBeatScript> = {
-  /**
-   * Find the bite: land on feed → scroll Botanic Breeze into view → tap it → details.
-   */
   discover: {
     beat: 'discover',
-    loop: true,
-    steps: script()
-      .push(nav('home'))
-      .wait(1100) // stable frame — read cards + filters
-      .appear({ x: 74, y: 78 })
-      .moveTo({ x: 52, y: 66 }, 720, easeOutCubic)
-      .scrollToTarget(DISCOVER_CARD, 1450, {
-        alignY: 46,
-        pointerX: 52,
-        easing: easeInOutCubic,
-      })
-      .wait(320)
-      .tap(DISCOVER_CARD, { approachMs: 520 })
-      .wait(100)
-      .push(nav('details', DISCOVER_TARGET_BITE_ID))
-      .wait(1800) // hold details of THAT bite
-      .hide()
-      .wait(360)
-      .push(nav('home'))
-      .wait(700)
-      .build(),
+    loop: false,
+    steps: resolveAndCelebrate(
+      script()
+        .push(nav('home'))
+        .wait(LAND_MS)
+        .appear({ x: 74, y: 78 })
+        .moveTo({ x: 52, y: 66 }, MOVE_MS, easeOutCubic)
+        .scrollToTarget(DISCOVER_CARD, 1600, {
+          alignY: 46,
+          pointerX: 52,
+          easing: easeInOutCubic,
+        })
+        .wait(SETTLE_MS)
+        .tap(DISCOVER_CARD, { approachMs: APPROACH_MS })
+        .wait(TAP_PAUSE_MS)
+        .push(nav('details', DISCOVER_TARGET_BITE_ID))
+        .wait(DETAILS_HOLD_MS),
+      'details-page h1, .title-container, [data-intro="details-title"]',
+    ).build(),
   },
 
-  /**
-   * Share the find: home → Create Bite → capture photo → publish → reactions.
-   */
   share: {
     beat: 'share',
-    loop: true,
-    steps: script()
-      .push(nav('home'))
-      .wait(900) // land on home feed — Create Bite visible in footer
-      .appear({ x: 78, y: 88 })
-      .moveTo({ x: 50, y: 91 }, 650, easeOutCubic)
-      .tap('[data-testid="footer-add-button"]', { approachMs: 380 })
-      .wait(140)
-      .push(nav('create'))
-      .wait(700) // sweet transition into create
-      .appear({ x: 70, y: 80 })
-      .moveTo({ x: 50, y: 26 }, 700, easeOutCubic)
-      .tap({ x: 50, y: 26 }, { approachMs: 160 })
-      .emit({ type: 'openPicker' })
-      .wait(520)
-      .tap({ x: 34, y: 58 }, { approachMs: 540 })
-      .emit({ type: 'selectPickerPhoto' })
-      .wait(280)
-      .emit({ type: 'closePicker' })
-      .wait(300)
-      .emit({ type: 'applyPhoto' })
-      .wait(720)
-      .tap({ x: 50, y: 91 }, { approachMs: 680 })
-      .wait(140)
-      .push(nav('details', DISCOVER_TARGET_BITE_ID)) // published Botanic Breeze
-      .wait(600)
-      .emit({ type: 'reactLikes' })
-      .wait(1400)
-      .hide()
-      .wait(420)
-      .build(),
+    loop: false,
+    steps: resolveAndCelebrate(
+      appendAppearAndPickPhoto(
+        script()
+          .push(nav('home'))
+          .wait(LAND_MS)
+          .appear({ x: 78, y: 88 })
+          .moveTo({ x: 50, y: 91 }, MOVE_MS, easeOutCubic)
+          .tap('[data-testid="footer-add-button"]', { approachMs: APPROACH_MS })
+          .wait(TAP_PAUSE_MS)
+          .push(nav('create'))
+          .wait(CREATE_LAND_MS),
+      )
+        .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
+        .wait(TAP_PAUSE_MS)
+        .push(nav('details', DISCOVER_TARGET_BITE_ID))
+        .wait(SETTLE_MS + 200)
+        .appear({ x: 72, y: 62 })
+        .tap('[data-testid="like-chip"]', {
+          approachMs: APPROACH_MS,
+          emitOnPress: { type: 'reactLikes' },
+        })
+        .wait(REACTION_HOLD_MS),
+      '.source__react, [data-testid="like-chip"]',
+    ).build(),
   },
 
-  /**
-   * Join the tribe: details → creator → profile → Follow → Following toast + count.
-   */
   tribe: {
     beat: 'tribe',
-    loop: true,
-    steps: script()
-      .emit({ type: 'resetFollow' })
-      .push(nav('details', DISCOVER_TARGET_BITE_ID))
-      .wait(1100) // read Botanic details + creator row
-      .appear({ x: 70, y: 58 })
-      .tap('.bite-creator-container', { approachMs: 750 })
-      .wait(180)
-      .push(nav('profile'))
-      .wait(800) // read explorer profile
-      .appear({ x: 78, y: 30 })
-      .tap('.profile-actions ion-button', { approachMs: 650 })
-      .emit({ type: 'follow' })
-      .wait(2200) // hold Following state
-      .hide()
-      .wait(500)
-      .build(),
+    loop: false,
+    steps: resolveAndCelebrate(
+      script()
+        .emit({ type: 'resetFollow' })
+        .push(nav('details', DISCOVER_TARGET_BITE_ID))
+        .wait(LAND_MS)
+        .appear({ x: 70, y: 58 })
+        .tap('.bite-creator-container', { approachMs: APPROACH_MS })
+        .wait(TAP_PAUSE_MS)
+        .push(nav('profile'))
+        .wait(CREATE_LAND_MS)
+        .appear({ x: 78, y: 30 })
+        .tap('.profile-actions ion-button', {
+          approachMs: APPROACH_MS,
+          emitOnPress: { type: 'follow' },
+        })
+        .wait(FOLLOW_HOLD_MS),
+      '[data-intro="following"], .source__toast',
+    ).build(),
   },
 
-  /**
-   * Ready to taste?: map → pin → drawer → details → directions.
-   * One clear arc — every tap serves “pick nearby → go”.
-   */
   go: {
     beat: 'go',
-    loop: true,
-    steps: script()
-      .emit({ type: 'clearHighlight' })
-      .emit({ type: 'clearPin' })
-      .push(nav('map'))
-      .wait(1100) // read the map
-      .appear({ x: 72, y: 28 })
-      .moveTo({ x: 48, y: 46 }, 700, easeOutCubic)
-      .tap({ x: 48, y: 46 }, { approachMs: 200 })
-      .emit({ type: 'selectPin', biteId: DISCOVER_TARGET_BITE_ID })
-      .wait(1700) // drawer must be visibly up
-      .tap('[data-intro="map-drawer"]', { approachMs: 560 })
-      .wait(160)
-      .push(nav('details', DISCOVER_TARGET_BITE_ID))
-      .wait(700)
-      .tap('[data-testid="bite-details-navigation"]', { approachMs: 650 })
-      .emit({ type: 'highlightDirections' })
-      .wait(1600)
-      .hide()
-      .wait(400)
-      .build(),
+    loop: false,
+    steps: resolveAndCelebrate(
+      script()
+        .emit({ type: 'clearHighlight' })
+        .emit({ type: 'clearPin' })
+        .push(nav('map'))
+        .wait(LAND_MS)
+        .appear({ x: 72, y: 28 })
+        .moveTo({ x: 48, y: 46 }, MOVE_MS, easeOutCubic)
+        .wait(SETTLE_MS)
+        .tap(
+          { x: 48, y: 46 },
+          {
+            approachMs: 280,
+            emitOnPress: {
+              type: 'selectPin',
+              biteId: DISCOVER_TARGET_BITE_ID,
+            },
+          },
+        )
+        .wait(DRAWER_HOLD_MS)
+        .tap('[data-intro="map-drawer"]', { approachMs: APPROACH_MS })
+        .wait(TAP_PAUSE_MS)
+        .push(nav('details', DISCOVER_TARGET_BITE_ID))
+        .wait(CREATE_LAND_MS)
+        .tap('[data-testid="bite-details-navigation"]', {
+          approachMs: APPROACH_MS,
+          emitOnPress: { type: 'highlightDirections' },
+        })
+        .wait(DIRECTIONS_HOLD_MS),
+      '.source__go-hint, [data-testid="bite-details-navigation"]',
+    ).build(),
   },
 };

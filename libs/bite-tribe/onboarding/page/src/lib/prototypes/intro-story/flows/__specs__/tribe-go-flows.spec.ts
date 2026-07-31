@@ -36,8 +36,11 @@ describe('Join the tribe / Ready to taste flow contracts', () => {
     );
     const follow = steps.find(
       (s) =>
-        s.kind === 'emit' &&
-        (s as { action?: { type?: string } }).action?.type === 'follow',
+        (s.kind === 'emit' &&
+          (s as { action?: { type?: string } }).action?.type === 'follow') ||
+        (s.kind === 'tap' &&
+          (s as { emitOnPress?: { type?: string } }).emitOnPress?.type ===
+            'follow'),
     );
     expect(creatorTap).toBeTruthy();
     expect(follow).toBeTruthy();
@@ -47,8 +50,11 @@ describe('Join the tribe / Ready to taste flow contracts', () => {
     const steps = READY_TO_TASTE_FLOWS[0].steps;
     const pin = steps.find(
       (s) =>
-        s.kind === 'emit' &&
-        (s as { action?: { type?: string } }).action?.type === 'selectPin',
+        (s.kind === 'emit' &&
+          (s as { action?: { type?: string } }).action?.type === 'selectPin') ||
+        (s.kind === 'tap' &&
+          (s as { emitOnPress?: { type?: string } }).emitOnPress?.type ===
+            'selectPin'),
     );
     const drawer = steps.find(
       (s) =>

@@ -107,12 +107,13 @@ describe('intro beat narrative contracts', () => {
 
   it('go opens the pin drawer then directions for the same bite', () => {
     const steps = INTRO_BEAT_SCRIPTS.go.steps;
-    const pin = steps.find(
+    const pinTap = steps.find(
       (s) =>
-        s.kind === 'emit' &&
-        (s as { action?: { type?: string } }).action?.type === 'selectPin',
-    ) as { action: { biteId?: string } };
-    expect(pin?.action?.biteId).toBe('bite1');
+        s.kind === 'tap' &&
+        (s as { emitOnPress?: { type?: string } }).emitOnPress?.type ===
+          'selectPin',
+    ) as { emitOnPress?: { biteId?: string } };
+    expect(pinTap?.emitOnPress?.biteId).toBe('bite1');
     const drawerTap = steps.find(
       (s) =>
         s.kind === 'tap' &&

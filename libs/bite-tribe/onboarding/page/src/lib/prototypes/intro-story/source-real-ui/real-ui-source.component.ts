@@ -440,20 +440,21 @@ export class RealUiSourceComponent {
       case 'reactLikes':
         this.publishedLikes.update((n) => n + 1);
         this.likeBurst.update((n) => n + 1);
+        // Staggered bursts — spaced so each thumbs-up is readable.
         window.setTimeout(() => {
           this.zone.run(() => {
             this.publishedLikes.update((n) => n + 1);
             this.likeBurst.update((n) => n + 1);
             this.cdr.markForCheck();
           });
-        }, 380);
+        }, 900);
         window.setTimeout(() => {
           this.zone.run(() => {
             this.publishedLikes.update((n) => n + 1);
             this.likeBurst.update((n) => n + 1);
             this.cdr.markForCheck();
           });
-        }, 720);
+        }, 1800);
         return;
       case 'follow':
         if (!this.followed()) {

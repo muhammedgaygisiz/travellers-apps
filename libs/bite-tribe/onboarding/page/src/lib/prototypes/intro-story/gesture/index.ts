@@ -58,4 +58,35 @@ export {
   type IntroStageScreen,
 } from './beat-scripts';
 
+export {
+  SETTLE_MS,
+  TAP_PAUSE_MS,
+  LAND_MS,
+  APPROACH_MS,
+  MOVE_MS,
+  CREATE_LAND_MS,
+  PICKER_OPEN_HOLD_MS,
+  PHOTO_SELECT_HOLD_MS,
+  PHOTO_APPEAR_HOLD_MS,
+  REACTION_HOLD_MS,
+  REACTION_BURST_GAP_MS,
+  FOLLOW_HOLD_MS,
+  DRAWER_HOLD_MS,
+  DIRECTIONS_HOLD_MS,
+  DETAILS_HOLD_MS,
+  LOOP_GAP_MS,
+  RESOLVE_HOLD_MS,
+  CELEBRATE_MS,
+  REPLAY_SETTLE_MS,
+  REPLAY_FADE_MS,
+  CREATE_PHOTO_SEL,
+  pickerPhotoSel,
+} from './timing';
+
+export {
+  appendPickPhoto,
+  appendBrowsePickerThenPick,
+  appendAppearAndPickPhoto,
+} from './script-phrases';
+
 export { DISCOVER_TARGET_BITE_ID } from '../source-real-ui/intro-demo-fixtures';

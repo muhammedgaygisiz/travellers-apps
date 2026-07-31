@@ -227,6 +227,7 @@
                       <button
                         type="button"
                         class="picker__cell"
+                        [attr.data-intro]="'picker-photo-' + i"
                         [class.picker__cell--on]="
                           pickerSelected() && pickerSelectedIndex() === i
                         "

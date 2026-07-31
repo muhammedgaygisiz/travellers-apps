@@ -14,8 +14,20 @@ import {
   script,
   easeInOutCubic,
   easeOutCubic,
+  appendAppearAndPickPhoto,
+  appendBrowsePickerThenPick,
+  appendPickPhoto,
   type GestureScriptStep,
   type IntroStageScreen,
+  APPROACH_MS,
+  CREATE_LAND_MS,
+  DETAILS_HOLD_MS,
+  LAND_MS,
+  LOOP_GAP_MS,
+  MOVE_MS,
+  REACTION_HOLD_MS,
+  SETTLE_MS,
+  TAP_PAUSE_MS,
 } from '../gesture';
 
 export interface IntroFlowVariant {
@@ -57,30 +69,40 @@ const SECOND_CARD = card(SECOND);
 
 /** Shared: soft settle on home before gestures. */
 const landHome = (): GestureScriptBuilder =>
-  script().push(nav('home')).wait(900);
+  script().push(nav('home')).wait(LAND_MS);
 
 type GestureScriptBuilder = ReturnType<typeof script>;
+
+/** Create Bite from home footer → land on create form. */
+const openCreate = (): GestureScriptBuilder =>
+  landHome()
+    .appear({ x: 78, y: 88 })
+    .moveTo({ x: 50, y: 91 }, MOVE_MS, easeOutCubic)
+    .tap('[data-testid="footer-add-button"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
+    .push(nav('create'))
+    .wait(CREATE_LAND_MS);
 
 // ─── Find the bite (10) ─────────────────────────────────────────────────────
 
 const findScrollToCardThenOpen = (): GestureScriptStep[] =>
   landHome()
     .appear({ x: 74, y: 78 })
-    .moveTo({ x: 52, y: 66 }, 720, easeOutCubic)
-    .scrollToTarget(DISCOVER_CARD, 1450, {
+    .moveTo({ x: 52, y: 66 }, MOVE_MS, easeOutCubic)
+    .scrollToTarget(DISCOVER_CARD, 1600, {
       alignY: 46,
       pointerX: 52,
       easing: easeInOutCubic,
     })
-    .wait(320)
-    .tap(DISCOVER_CARD, { approachMs: 520 })
-    .wait(100)
+    .wait(SETTLE_MS)
+    .tap(DISCOVER_CARD, { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', DISCOVER))
-    .wait(1800)
+    .wait(DETAILS_HOLD_MS)
     .hide()
-    .wait(360)
+    .wait(SETTLE_MS)
     .push(nav('home'))
-    .wait(700)
+    .wait(LOOP_GAP_MS)
     .build();
 
 const findTapFirstVisible = (): GestureScriptStep[] =>
@@ -258,301 +280,161 @@ const findQuickPeek = (): GestureScriptStep[] =>
 // ─── Share the find (10) ────────────────────────────────────────────────────
 
 const shareCanonical = (): GestureScriptStep[] =>
-  landHome()
-    .appear({ x: 78, y: 88 })
-    .moveTo({ x: 50, y: 91 }, 650, easeOutCubic)
-    .tap('[data-testid="footer-add-button"]', { approachMs: 380 })
-    .wait(140)
-    .push(nav('create'))
-    .wait(700)
-    .appear({ x: 70, y: 80 })
-    .moveTo({ x: 50, y: 26 }, 700, easeOutCubic)
-    .tap({ x: 50, y: 26 }, { approachMs: 160 })
-    .emit({ type: 'openPicker' })
-    .wait(520)
-    .tap({ x: 34, y: 58 }, { approachMs: 540 })
-    .emit({ type: 'selectPickerPhoto' })
-    .wait(280)
-    .emit({ type: 'closePicker' })
-    .wait(300)
-    .emit({ type: 'applyPhoto' })
-    .wait(720)
-    .tap({ x: 50, y: 91 }, { approachMs: 680 })
-    .wait(140)
+  appendAppearAndPickPhoto(openCreate())
+    .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', DISCOVER))
-    .wait(600)
-    .emit({ type: 'reactLikes' })
-    .wait(1400)
+    .wait(SETTLE_MS + 200)
+    .appear({ x: 72, y: 62 })
+    .tap('[data-testid="like-chip"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'reactLikes' },
+    })
+    .wait(REACTION_HOLD_MS)
     .hide()
-    .wait(420)
+    .wait(LOOP_GAP_MS)
     .build();
 
 const shareTypedNameThenPhoto = (): GestureScriptStep[] =>
-  landHome()
-    .appear({ x: 50, y: 91 })
-    .tap('[data-testid="footer-add-button"]', { approachMs: 420 })
-    .wait(140)
-    .push(nav('create'))
-    .wait(700)
-    .appear({ x: 60, y: 42 })
-    .tap('[data-testid="bite-name"]', { approachMs: 560 })
-    .emit({ type: 'setDraftName', name: 'Botanic Breeze' })
-    .wait(800)
-    .tap({ x: 50, y: 26 }, { approachMs: 520 })
-    .emit({ type: 'openPicker' })
-    .wait(480)
-    .tap({ x: 34, y: 58 }, { approachMs: 500 })
-    .emit({ type: 'selectPickerPhoto' })
-    .wait(260)
-    .emit({ type: 'closePicker' })
-    .wait(280)
-    .emit({ type: 'applyPhoto' })
-    .wait(600)
-    .tap('[data-testid="post-bite"]', { approachMs: 640 })
-    .wait(140)
+  appendPickPhoto(
+    openCreate()
+      .appear({ x: 60, y: 42 })
+      .tap('[data-testid="bite-name"]', { approachMs: APPROACH_MS })
+      .emit({ type: 'setDraftName', name: 'Botanic Breeze' })
+      .wait(900),
+  )
+    .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', DISCOVER))
-    .wait(1200)
+    .wait(DETAILS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 const sharePhotoFirstThenPriceTags = (): GestureScriptStep[] =>
-  landHome()
-    .appear({ x: 50, y: 91 })
-    .tap('[data-testid="footer-add-button"]', { approachMs: 400 })
-    .wait(140)
-    .push(nav('create'))
-    .wait(650)
-    .appear({ x: 50, y: 26 })
-    .tap({ x: 50, y: 26 }, { approachMs: 200 })
-    .emit({ type: 'openPicker' })
-    .wait(480)
-    .tap({ x: 34, y: 58 }, { approachMs: 500 })
-    .emit({ type: 'selectPickerPhoto' })
-    .wait(240)
-    .emit({ type: 'closePicker' })
-    .wait(260)
-    .emit({ type: 'applyPhoto' })
-    .wait(500)
+  appendAppearAndPickPhoto(openCreate())
     .appear({ x: 55, y: 48 })
-    .moveTo({ x: 50, y: 52 }, 500, easeOutCubic)
-    .tap({ x: 50, y: 52 }, { approachMs: 280 })
-    .wait(500)
-    .moveTo({ x: 50, y: 68 }, 600, easeOutCubic)
-    .tap({ x: 42, y: 68 }, { approachMs: 360 })
+    .moveTo({ x: 50, y: 52 }, MOVE_MS, easeOutCubic)
+    .tap({ x: 50, y: 52 }, { approachMs: 320 })
+    .wait(SETTLE_MS)
+    .moveTo({ x: 50, y: 68 }, MOVE_MS, easeOutCubic)
+    .tap({ x: 42, y: 68 }, { approachMs: APPROACH_MS })
     .emit({ type: 'setDraftTags', tags: ['drink', 'bern'] })
-    .wait(700)
-    .tap('[data-testid="post-bite"]', { approachMs: 620 })
-    .wait(140)
+    .wait(900)
+    .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', DISCOVER))
-    .wait(1200)
+    .wait(DETAILS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 const shareSkipPhotoThenPublish = (): GestureScriptStep[] =>
-  landHome()
-    .appear({ x: 50, y: 91 })
-    .tap('[data-testid="footer-add-button"]', { approachMs: 400 })
-    .wait(140)
-    .push(nav('create'))
-    .wait(700)
+  openCreate()
     .appear({ x: 60, y: 40 })
-    .tap('[data-testid="bite-name"]', { approachMs: 520 })
+    .tap('[data-testid="bite-name"]', { approachMs: APPROACH_MS })
     .emit({ type: 'setDraftName', name: 'Botanic Breeze' })
-    .wait(700)
+    .wait(900)
     .emit({ type: 'setDraftTags', tags: ['bern'] })
-    .wait(400)
-    .tap('[data-testid="post-bite"]', { approachMs: 640 })
-    .wait(140)
+    .wait(SETTLE_MS)
+    .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', DISCOVER))
-    .wait(1400)
+    .wait(DETAILS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 const sharePublishThenShareSheet = (): GestureScriptStep[] =>
-  landHome()
-    .appear({ x: 50, y: 91 })
-    .tap('[data-testid="footer-add-button"]', { approachMs: 380 })
-    .wait(140)
-    .push(nav('create'))
-    .wait(600)
-    .tap({ x: 50, y: 26 }, { approachMs: 400 })
-    .emit({ type: 'openPicker' })
-    .wait(420)
-    .tap({ x: 34, y: 58 }, { approachMs: 480 })
-    .emit({ type: 'selectPickerPhoto' })
-    .wait(220)
-    .emit({ type: 'closePicker' })
-    .wait(240)
-    .emit({ type: 'applyPhoto' })
-    .wait(500)
-    .tap('[data-testid="post-bite"]', { approachMs: 600 })
-    .wait(140)
+  appendAppearAndPickPhoto(openCreate())
+    .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', DISCOVER))
-    .wait(700)
+    .wait(900)
     .appear({ x: 78, y: 38 })
-    .tap('[data-testid="bite-details-share"]', { approachMs: 560 })
-    .emit({ type: 'highlightShareSheet' })
-    .wait(1600)
+    .tap('[data-testid="bite-details-share"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'highlightShareSheet' },
+    })
+    .wait(2000)
     .emit({ type: 'clearShareSheet' })
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 const shareCreateDetailsThumbsUp = (): GestureScriptStep[] =>
-  landHome()
-    .appear({ x: 50, y: 91 })
-    .tap('[data-testid="footer-add-button"]', { approachMs: 380 })
-    .wait(140)
-    .push(nav('create'))
-    .wait(600)
-    .tap({ x: 50, y: 26 }, { approachMs: 380 })
-    .emit({ type: 'openPicker' })
-    .wait(400)
-    .tap({ x: 34, y: 58 }, { approachMs: 460 })
-    .emit({ type: 'selectPickerPhoto' })
-    .wait(220)
-    .emit({ type: 'closePicker' })
-    .wait(240)
-    .emit({ type: 'applyPhoto' })
-    .wait(500)
-    .tap('[data-testid="post-bite"]', { approachMs: 580 })
-    .wait(140)
+  appendAppearAndPickPhoto(openCreate())
+    .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', DISCOVER))
-    .wait(500)
+    .wait(SETTLE_MS + 200)
     .appear({ x: 72, y: 62 })
-    .tap('[data-testid="like-chip"]', { approachMs: 560 })
-    .emit({ type: 'reactLikes' })
-    .wait(1600)
+    .tap('[data-testid="like-chip"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'reactLikes' },
+    })
+    .wait(REACTION_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 const shareMultiPhotoPicker = (): GestureScriptStep[] =>
-  landHome()
-    .appear({ x: 50, y: 91 })
-    .tap('[data-testid="footer-add-button"]', { approachMs: 380 })
-    .wait(140)
-    .push(nav('create'))
-    .wait(650)
-    .tap({ x: 50, y: 26 }, { approachMs: 360 })
-    .emit({ type: 'openPicker' })
-    .wait(480)
-    .tap({ x: 34, y: 58 }, { approachMs: 480 })
-    .emit({ type: 'selectPickerPhotoIndex', index: 0 })
-    .wait(380)
-    .tap({ x: 50, y: 58 }, { approachMs: 420 })
-    .emit({ type: 'selectPickerPhotoIndex', index: 1 })
-    .wait(380)
-    .tap({ x: 66, y: 58 }, { approachMs: 420 })
-    .emit({ type: 'selectPickerPhotoIndex', index: 2 })
-    .wait(320)
-    .emit({ type: 'selectPickerPhoto' })
-    .wait(240)
-    .emit({ type: 'closePicker' })
-    .wait(260)
-    .emit({ type: 'applyPhoto' })
-    .wait(550)
-    .tap('[data-testid="post-bite"]', { approachMs: 600 })
-    .wait(140)
+  appendBrowsePickerThenPick(openCreate().appear({ x: 70, y: 80 }), [0, 1, 2])
+    .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', DISCOVER))
-    .wait(1200)
+    .wait(DETAILS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 const shareTagSuggestionsThenPublish = (): GestureScriptStep[] =>
-  landHome()
-    .appear({ x: 50, y: 91 })
-    .tap('[data-testid="footer-add-button"]', { approachMs: 380 })
-    .wait(140)
-    .push(nav('create'))
-    .wait(650)
-    .tap({ x: 50, y: 26 }, { approachMs: 360 })
-    .emit({ type: 'openPicker' })
-    .wait(400)
-    .tap({ x: 34, y: 58 }, { approachMs: 460 })
-    .emit({ type: 'selectPickerPhoto' })
-    .wait(220)
-    .emit({ type: 'closePicker' })
-    .wait(240)
-    .emit({ type: 'applyPhoto' })
-    .wait(450)
+  appendAppearAndPickPhoto(openCreate())
     .appear({ x: 40, y: 72 })
-    .moveTo({ x: 35, y: 74 }, 550, easeOutCubic)
-    .tap({ x: 35, y: 74 }, { approachMs: 320 })
+    .moveTo({ x: 35, y: 74 }, MOVE_MS, easeOutCubic)
+    .tap({ x: 35, y: 74 }, { approachMs: APPROACH_MS })
     .emit({ type: 'setDraftTags', tags: ['vegan', 'drink'] })
-    .wait(800)
-    .tap('[data-testid="post-bite"]', { approachMs: 600 })
-    .wait(140)
+    .wait(1000)
+    .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', DISCOVER))
-    .wait(1200)
+    .wait(DETAILS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 const shareLocationPinThenPublish = (): GestureScriptStep[] =>
-  landHome()
-    .appear({ x: 50, y: 91 })
-    .tap('[data-testid="footer-add-button"]', { approachMs: 380 })
-    .wait(140)
-    .push(nav('create'))
-    .wait(650)
-    .tap({ x: 50, y: 26 }, { approachMs: 360 })
-    .emit({ type: 'openPicker' })
-    .wait(400)
-    .tap({ x: 34, y: 58 }, { approachMs: 460 })
-    .emit({ type: 'selectPickerPhoto' })
-    .wait(220)
-    .emit({ type: 'closePicker' })
-    .wait(240)
-    .emit({ type: 'applyPhoto' })
-    .wait(450)
+  appendAppearAndPickPhoto(openCreate())
     .appear({ x: 55, y: 78 })
-    .moveTo({ x: 42, y: 80 }, 650, easeOutCubic)
-    .tap('[data-testid="position-from-gps"]', { approachMs: 520 })
-    .emit({ type: 'setLocationGps' })
-    .wait(900)
-    .tap('[data-testid="post-bite"]', { approachMs: 600 })
-    .wait(140)
+    .moveTo({ x: 42, y: 80 }, MOVE_MS, easeOutCubic)
+    .tap('[data-testid="position-from-gps"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'setLocationGps' },
+    })
+    .wait(1100)
+    .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', DISCOVER))
-    .wait(1200)
+    .wait(DETAILS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 const shareAppearOnHomeFeed = (): GestureScriptStep[] =>
-  landHome()
-    .appear({ x: 50, y: 91 })
-    .tap('[data-testid="footer-add-button"]', { approachMs: 380 })
-    .wait(140)
-    .push(nav('create'))
-    .wait(600)
-    .tap({ x: 50, y: 26 }, { approachMs: 360 })
-    .emit({ type: 'openPicker' })
-    .wait(400)
-    .tap({ x: 34, y: 58 }, { approachMs: 460 })
-    .emit({ type: 'selectPickerPhoto' })
-    .wait(220)
-    .emit({ type: 'closePicker' })
-    .wait(240)
-    .emit({ type: 'applyPhoto' })
-    .wait(450)
-    .tap('[data-testid="post-bite"]', { approachMs: 580 })
-    .wait(140)
+  appendAppearAndPickPhoto(openCreate())
+    .tap('[data-testid="post-bite"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .emit({ type: 'showNewFeedCard' })
     .push(nav('home'))
-    .wait(1800)
+    .wait(2000)
     .appear({ x: 50, y: 42 })
-    .tap(DISCOVER_CARD, { approachMs: 480 })
-    .wait(100)
+    .tap(DISCOVER_CARD, { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', DISCOVER))
-    .wait(1000)
+    .wait(1200)
     .emit({ type: 'clearNewFeedCard' })
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 export const FIND_THE_BITE_FLOWS: IntroFlowVariant[] = [

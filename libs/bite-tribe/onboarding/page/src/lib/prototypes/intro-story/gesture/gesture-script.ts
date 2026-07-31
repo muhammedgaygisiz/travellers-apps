@@ -76,7 +76,16 @@ export type GestureEmit =
   | { type: 'walkingSuccess' }
   | { type: 'clearWalkingSuccess' }
   | { type: 'panMap'; dxPct: number; dyPct: number }
-  | { type: 'resetMapPan' };
+  | { type: 'resetMapPan' }
+  /**
+   * Soft sparkle burst around a success anchor (CSS selector under the stage).
+   * Prefer after the resolve hold — never mid-action.
+   */
+  | { type: 'celebrate'; anchor?: string }
+  /** Clear celebration particles. */
+  | { type: 'clearCelebrate' }
+  /** Soft single-beat restart: parent fades, resets, then gesture replays. */
+  | { type: 'softRestart' };
 // NOTE: do not add `{ type: string; [k: string]: unknown }` — it widens
 // every property to `unknown` and breaks navigate/screen typing.
 
@@ -97,6 +106,11 @@ export type GestureScriptStep =
       approachMs?: number;
       /** Fired at the moment of press (after approach). */
       onPress?: () => void;
+      /**
+       * Domain emit at the moment of press — keeps cursor on the control
+       * while the UI state change happens (picker open, follow, like, pin).
+       */
+      emitOnPress?: GestureEmit;
       /** When true, also dispatch pointer/mouse events at the hit target. */
       dispatchDom?: boolean;
     }

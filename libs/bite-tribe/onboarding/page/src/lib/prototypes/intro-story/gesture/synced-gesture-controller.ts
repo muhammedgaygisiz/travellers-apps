@@ -186,6 +186,10 @@ export class SyncedGestureController {
         if (step.dispatchDom ?? this.opts.dispatchDomEvents) {
           this.maybeDispatch('pointerdown');
         }
+        // Fire UI side-effect at press so the cursor is still on the control.
+        if (step.emitOnPress) {
+          this.opts.onEmit?.(step.emitOnPress);
+        }
         step.onPress?.();
         await this.delay(160);
         this.pressed = false;

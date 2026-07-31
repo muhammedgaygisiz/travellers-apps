@@ -14,6 +14,17 @@ import {
   easeOutCubic,
   type GestureScriptStep,
   type IntroStageScreen,
+  APPROACH_MS,
+  CREATE_LAND_MS,
+  DETAILS_HOLD_MS,
+  DIRECTIONS_HOLD_MS,
+  DRAWER_HOLD_MS,
+  FOLLOW_HOLD_MS,
+  LAND_MS,
+  LOOP_GAP_MS,
+  MOVE_MS,
+  SETTLE_MS,
+  TAP_PAUSE_MS,
 } from '../gesture';
 import type { IntroFlowVariant } from './flow-scripts';
 
@@ -33,7 +44,7 @@ const nav = (screen: IntroStageScreen, biteId?: string): GestureScriptStep =>
 type Builder = ReturnType<typeof script>;
 
 const land = (screen: IntroStageScreen, biteId?: string): Builder =>
-  script().push(nav(screen, biteId)).wait(900);
+  script().push(nav(screen, biteId)).wait(LAND_MS);
 
 // ─── Join the tribe (10) ────────────────────────────────────────────────────
 
@@ -42,18 +53,20 @@ const tribeCanonical = (): GestureScriptStep[] =>
   script()
     .emit({ type: 'resetFollow' })
     .push(nav('details', BOTANIC))
-    .wait(1100)
+    .wait(LAND_MS)
     .appear({ x: 70, y: 58 })
-    .tap('.bite-creator-container', { approachMs: 750 })
-    .wait(180)
+    .tap('.bite-creator-container', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('profile'))
-    .wait(800)
+    .wait(CREATE_LAND_MS)
     .appear({ x: 78, y: 30 })
-    .tap('.profile-actions ion-button', { approachMs: 650 })
-    .emit({ type: 'follow' })
-    .wait(2200)
+    .tap('.profile-actions ion-button', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'follow' },
+    })
+    .wait(FOLLOW_HOLD_MS)
     .hide()
-    .wait(500)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 2. Follow then open their bites grid */
@@ -61,50 +74,58 @@ const tribeFollowBitesGrid = (): GestureScriptStep[] =>
   script()
     .emit({ type: 'resetFollow' })
     .push(nav('details', BOTANIC))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 68, y: 56 })
-    .tap('.bite-creator-container', { approachMs: 700 })
-    .wait(160)
+    .tap('.bite-creator-container', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('profile'))
-    .wait(700)
+    .wait(CREATE_LAND_MS)
     .appear({ x: 78, y: 30 })
-    .tap('.profile-actions ion-button', { approachMs: 600 })
-    .emit({ type: 'follow' })
-    .wait(900)
+    .tap('.profile-actions ion-button', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'follow' },
+    })
+    .wait(FOLLOW_HOLD_MS)
     .appear({ x: 52, y: 72 })
-    .scrollToTarget('.bites-section', 900, {
+    .scrollToTarget('.bites-section', 1000, {
       alignY: 42,
       pointerX: 52,
       easing: easeInOutCubic,
     })
-    .wait(400)
-    .tap(`bt-bite[data-bite-id="${BOTANIC}"]`, { approachMs: 520 })
-    .wait(120)
+    .wait(SETTLE_MS)
+    .tap(`bt-bite[data-bite-id="${BOTANIC}"]`, { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', BOTANIC))
-    .wait(1400)
+    .wait(DETAILS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 3. Unfollow then re-follow */
 const tribeUnfollowRefollow = (): GestureScriptStep[] =>
   script()
     .push(nav('profile'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 78, y: 30 })
-    .tap('.profile-actions ion-button', { approachMs: 650 })
-    .emit({ type: 'showUnfollowConfirm' })
-    .wait(500)
-    .tap('[data-intro="unfollow-confirm-yes"]', { approachMs: 480 })
-    .emit({ type: 'unfollow' })
+    .tap('.profile-actions ion-button', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'showUnfollowConfirm' },
+    })
+    .wait(SETTLE_MS + 100)
+    .tap('[data-intro="unfollow-confirm-yes"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'unfollow' },
+    })
     .emit({ type: 'hideUnfollowConfirm' })
-    .wait(900)
+    .wait(1100)
     .appear({ x: 78, y: 30 })
-    .tap('.profile-actions ion-button', { approachMs: 650 })
-    .emit({ type: 'follow' })
-    .wait(2000)
+    .tap('.profile-actions ion-button', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'follow' },
+    })
+    .wait(FOLLOW_HOLD_MS)
     .hide()
-    .wait(450)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 4. Follow from details without full profile (inline chip shortcut) */
@@ -112,20 +133,21 @@ const tribeProfileShortcut = (): GestureScriptStep[] =>
   script()
     .emit({ type: 'resetFollow' })
     .push(nav('details', BOTANIC))
-    .wait(900)
+    .wait(LAND_MS)
     .emit({ type: 'showInlineFollow' })
-    .wait(500)
+    .wait(SETTLE_MS + 100)
     .appear({ x: 82, y: 42 })
-    .tap('[data-intro="inline-follow"]', { approachMs: 620 })
-    .emit({ type: 'follow' })
-    .wait(700)
+    .tap('[data-intro="inline-follow"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'follow' },
+    })
+    .wait(FOLLOW_HOLD_MS)
     .emit({ type: 'hideInlineFollow' })
-    .wait(400)
-    // Confirm on profile as the lasting social state
+    .wait(SETTLE_MS)
     .push(nav('profile'))
-    .wait(1600)
+    .wait(DETAILS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 5. Bucket-list save as join-adjacent social act */
@@ -134,21 +156,25 @@ const tribeBucketlistSave = (): GestureScriptStep[] =>
     .emit({ type: 'clearBucketlist' })
     .emit({ type: 'resetFollow' })
     .push(nav('details', BOTANIC))
-    .wait(1000)
+    .wait(LAND_MS)
     .appear({ x: 78, y: 68 })
-    .tap('[data-testid="bite-details-bucket-list"]', { approachMs: 700 })
-    .emit({ type: 'saveBucketlist' })
-    .wait(1400)
-    .appear({ x: 68, y: 42 })
-    .tap('.bite-creator-container', { approachMs: 650 })
-    .wait(160)
-    .push(nav('profile'))
-    .wait(700)
-    .tap('.profile-actions ion-button', { approachMs: 600 })
-    .emit({ type: 'follow' })
+    .tap('[data-testid="bite-details-bucket-list"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'saveBucketlist' },
+    })
     .wait(1800)
+    .appear({ x: 68, y: 42 })
+    .tap('.bite-creator-container', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
+    .push(nav('profile'))
+    .wait(CREATE_LAND_MS)
+    .tap('.profile-actions ion-button', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'follow' },
+    })
+    .wait(FOLLOW_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 6. Follow + follower count bump emphasis */
@@ -157,14 +183,16 @@ const tribeFollowerCountBump = (): GestureScriptStep[] =>
     .emit({ type: 'resetFollow' })
     .emit({ type: 'clearEmphasizeFollowers' })
     .push(nav('profile'))
-    .wait(1000)
+    .wait(LAND_MS)
     .appear({ x: 78, y: 30 })
-    .tap('.profile-actions ion-button', { approachMs: 650 })
-    .emit({ type: 'follow' })
+    .tap('.profile-actions ion-button', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'follow' },
+    })
     .emit({ type: 'emphasizeFollowers' })
-    .wait(2400)
+    .wait(FOLLOW_HOLD_MS)
     .hide()
-    .wait(450)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 7. Open profile from menu then follow (via leaderboard) */
@@ -172,26 +200,30 @@ const tribeMenuThenFollow = (): GestureScriptStep[] =>
   script()
     .emit({ type: 'resetFollow' })
     .push(nav('home'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 88, y: 10 })
-    .tap('[data-testid="btn-menu"]', { approachMs: 550 })
-    .emit({ type: 'showMenu' })
-    .wait(600)
-    .tap('[data-testid="menu-leaderboard"]', { approachMs: 580 })
+    .tap('[data-testid="btn-menu"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'showMenu' },
+    })
+    .wait(700)
+    .tap('[data-testid="menu-leaderboard"]', { approachMs: APPROACH_MS })
     .emit({ type: 'hideMenu' })
-    .wait(140)
+    .wait(TAP_PAUSE_MS)
     .push(nav('leaderboard'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 50, y: 36 })
-    .tap('[data-intro="leaderboard-lina"]', { approachMs: 650 })
-    .wait(160)
+    .tap('[data-intro="leaderboard-lina"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('profile'))
-    .wait(800)
-    .tap('.profile-actions ion-button', { approachMs: 600 })
-    .emit({ type: 'follow' })
-    .wait(2000)
+    .wait(CREATE_LAND_MS)
+    .tap('.profile-actions ion-button', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'follow' },
+    })
+    .wait(FOLLOW_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 8. Follow two creators — tribe building */
@@ -200,24 +232,28 @@ const tribeTwoCreators = (): GestureScriptStep[] =>
     .emit({ type: 'resetFollow' })
     .emit({ type: 'setCreator', creatorId: 'lina' })
     .push(nav('profile'))
-    .wait(800)
+    .wait(CREATE_LAND_MS)
     .appear({ x: 78, y: 30 })
-    .tap('.profile-actions ion-button', { approachMs: 600 })
-    .emit({ type: 'follow' })
-    .wait(1200)
+    .tap('.profile-actions ion-button', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'follow' },
+    })
+    .wait(1600)
     .emit({ type: 'setCreator', creatorId: 'marco' })
     .emit({ type: 'resetFollow' })
-    .wait(200)
+    .wait(TAP_PAUSE_MS)
     .push(nav('home'))
-    .wait(500)
+    .wait(SETTLE_MS + 100)
     .push(nav('profile'))
-    .wait(800)
+    .wait(CREATE_LAND_MS)
     .appear({ x: 78, y: 30 })
-    .tap('.profile-actions ion-button', { approachMs: 600 })
-    .emit({ type: 'follow' })
-    .wait(2000)
+    .tap('.profile-actions ion-button', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'follow' },
+    })
+    .wait(FOLLOW_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 9. Public vs private awareness tip then follow */
@@ -225,26 +261,30 @@ const tribePublicPrivateTip = (): GestureScriptStep[] =>
   script()
     .emit({ type: 'resetFollow' })
     .push(nav('details', BOTANIC))
-    .wait(800)
+    .wait(CREATE_LAND_MS)
     .emit({
       type: 'showTip',
       title: 'Public explorers',
       body: 'Only public profiles show a creator you can follow.',
     })
-    .wait(1600)
-    .appear({ x: 72, y: 78 })
-    .tap('[data-intro="tip-next"]', { approachMs: 520 })
-    .emit({ type: 'hideTip' })
-    .wait(300)
-    .tap('.bite-creator-container', { approachMs: 650 })
-    .wait(160)
-    .push(nav('profile'))
-    .wait(700)
-    .tap('.profile-actions ion-button', { approachMs: 600 })
-    .emit({ type: 'follow' })
     .wait(2000)
+    .appear({ x: 72, y: 78 })
+    .tap('[data-intro="tip-next"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'hideTip' },
+    })
+    .wait(SETTLE_MS)
+    .tap('.bite-creator-container', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
+    .push(nav('profile'))
+    .wait(CREATE_LAND_MS)
+    .tap('.profile-actions ion-button', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'follow' },
+    })
+    .wait(FOLLOW_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 10. Follow then leaderboard peek / profile stats */
@@ -252,21 +292,23 @@ const tribeLeaderboardPeek = (): GestureScriptStep[] =>
   script()
     .emit({ type: 'resetFollow' })
     .push(nav('profile'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 78, y: 30 })
-    .tap('.profile-actions ion-button', { approachMs: 600 })
-    .emit({ type: 'follow' })
+    .tap('.profile-actions ion-button', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'follow' },
+    })
     .emit({ type: 'emphasizeFollowers' })
-    .wait(1200)
+    .wait(1600)
     .appear({ x: 78, y: 18 })
     .tap('.profile-header .header-column:last-child .clickable', {
-      approachMs: 550,
+      approachMs: APPROACH_MS,
     })
-    .wait(400)
+    .wait(SETTLE_MS)
     .push(nav('leaderboard'))
-    .wait(2000)
+    .wait(DETAILS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 // ─── Ready to taste? (10) ───────────────────────────────────────────────────
@@ -278,44 +320,61 @@ const goCanonical = (): GestureScriptStep[] =>
     .emit({ type: 'clearPin' })
     .emit({ type: 'clearWalkingSuccess' })
     .push(nav('map'))
-    .wait(1100)
+    .wait(LAND_MS)
     .appear({ x: 72, y: 28 })
-    .moveTo({ x: 48, y: 46 }, 700, easeOutCubic)
-    .tap({ x: 48, y: 46 }, { approachMs: 200 })
-    .emit({ type: 'selectPin', biteId: BOTANIC })
-    .wait(1700)
-    .tap('[data-intro="map-drawer"]', { approachMs: 560 })
-    .wait(160)
+    .moveTo({ x: 48, y: 46 }, MOVE_MS, easeOutCubic)
+    .wait(SETTLE_MS)
+    .tap(
+      { x: 48, y: 46 },
+      {
+        approachMs: 280,
+        emitOnPress: { type: 'selectPin', biteId: BOTANIC },
+      },
+    )
+    .wait(DRAWER_HOLD_MS)
+    .tap('[data-intro="map-drawer"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', BOTANIC))
-    .wait(700)
-    .tap('[data-testid="bite-details-navigation"]', { approachMs: 650 })
-    .emit({ type: 'highlightDirections' })
-    .wait(1600)
+    .wait(CREATE_LAND_MS)
+    .tap('[data-testid="bite-details-navigation"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'highlightDirections' },
+    })
+    .wait(DIRECTIONS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 2. Home Bitemap chip → map → pin → go */
 const goBitemapChip = (): GestureScriptStep[] =>
   land('home')
     .appear({ x: 78, y: 22 })
-    .tap('[data-testid="bitemap-chip"]', { approachMs: 650 })
-    .wait(140)
+    .tap('[data-testid="bitemap-chip"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('map'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 55, y: 44 })
-    .tap({ x: 48, y: 46 }, { approachMs: 400 })
-    .emit({ type: 'selectPin', biteId: BOTANIC })
-    .wait(1400)
-    .tap('[data-intro="map-drawer"] .stage-drawer__go', { approachMs: 520 })
-    .wait(140)
+    .tap(
+      { x: 48, y: 46 },
+      {
+        approachMs: APPROACH_MS,
+        emitOnPress: { type: 'selectPin', biteId: BOTANIC },
+      },
+    )
+    .wait(DRAWER_HOLD_MS)
+    .tap('[data-intro="map-drawer"] .stage-drawer__go', {
+      approachMs: APPROACH_MS,
+    })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', BOTANIC))
-    .wait(600)
-    .tap('[data-testid="bite-details-navigation"]', { approachMs: 600 })
-    .emit({ type: 'highlightDirections' })
-    .wait(1500)
+    .wait(CREATE_LAND_MS)
+    .tap('[data-testid="bite-details-navigation"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'highlightDirections' },
+    })
+    .wait(DIRECTIONS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 3. Pan map then select pin */
@@ -324,31 +383,37 @@ const goPanThenPin = (): GestureScriptStep[] =>
     .emit({ type: 'clearPin' })
     .emit({ type: 'resetMapPan' })
     .push(nav('map'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 60, y: 40 })
     .down()
-    .drag({ x: 32, y: 52 }, 900, {
+    .drag({ x: 32, y: 52 }, 1000, {
       onProgress: (t) => {
-        /* pan driven by emit after drag */
         void t;
       },
       easing: easeInOutCubic,
     })
     .up()
     .emit({ type: 'panMap', dxPct: -10, dyPct: 6 })
-    .wait(600)
-    .tap({ x: 52, y: 44 }, { approachMs: 450 })
-    .emit({ type: 'selectPin', biteId: BOTANIC })
-    .wait(1600)
-    .tap('[data-intro="map-drawer"]', { approachMs: 520 })
-    .wait(140)
+    .wait(700)
+    .tap(
+      { x: 52, y: 44 },
+      {
+        approachMs: APPROACH_MS,
+        emitOnPress: { type: 'selectPin', biteId: BOTANIC },
+      },
+    )
+    .wait(DRAWER_HOLD_MS)
+    .tap('[data-intro="map-drawer"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', BOTANIC))
-    .wait(600)
-    .tap('[data-testid="bite-details-navigation"]', { approachMs: 600 })
-    .emit({ type: 'highlightDirections' })
-    .wait(1400)
+    .wait(CREATE_LAND_MS)
+    .tap('[data-testid="bite-details-navigation"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'highlightDirections' },
+    })
+    .wait(DIRECTIONS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 4. Select pin → open full details → Directions */
@@ -357,20 +422,27 @@ const goPinFullDetails = (): GestureScriptStep[] =>
     .emit({ type: 'clearPin' })
     .emit({ type: 'clearHighlight' })
     .push(nav('map'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 50, y: 48 })
-    .tap({ x: 48, y: 46 }, { approachMs: 400 })
-    .emit({ type: 'selectPin', biteId: BOTANIC })
-    .wait(1200)
-    .tap('[data-intro="map-drawer"]', { approachMs: 520 })
-    .wait(160)
+    .tap(
+      { x: 48, y: 46 },
+      {
+        approachMs: APPROACH_MS,
+        emitOnPress: { type: 'selectPin', biteId: BOTANIC },
+      },
+    )
+    .wait(DRAWER_HOLD_MS)
+    .tap('[data-intro="map-drawer"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', BOTANIC))
-    .wait(1400) // read full details
-    .tap('[data-testid="bite-details-navigation"]', { approachMs: 650 })
-    .emit({ type: 'highlightDirections' })
-    .wait(1600)
+    .wait(DETAILS_HOLD_MS)
+    .tap('[data-testid="bite-details-navigation"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'highlightDirections' },
+    })
+    .wait(DIRECTIONS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 5. Compare two pins then choose one */
@@ -378,24 +450,36 @@ const goCompareTwoPins = (): GestureScriptStep[] =>
   script()
     .emit({ type: 'clearPin' })
     .push(nav('map'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 40, y: 42 })
-    .tap({ x: 38, y: 40 }, { approachMs: 400 })
-    .emit({ type: 'selectPin', biteId: COMPARE_A })
-    .wait(1400)
+    .tap(
+      { x: 38, y: 40 },
+      {
+        approachMs: APPROACH_MS,
+        emitOnPress: { type: 'selectPin', biteId: COMPARE_A },
+      },
+    )
+    .wait(1800)
     .appear({ x: 58, y: 50 })
-    .tap({ x: 55, y: 48 }, { approachMs: 450 })
-    .emit({ type: 'selectPin', biteId: COMPARE_B })
-    .wait(1400)
-    .tap('[data-intro="map-drawer"]', { approachMs: 520 })
-    .wait(160)
+    .tap(
+      { x: 55, y: 48 },
+      {
+        approachMs: APPROACH_MS,
+        emitOnPress: { type: 'selectPin', biteId: COMPARE_B },
+      },
+    )
+    .wait(DRAWER_HOLD_MS)
+    .tap('[data-intro="map-drawer"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', COMPARE_B))
-    .wait(600)
-    .tap('[data-testid="bite-details-navigation"]', { approachMs: 600 })
-    .emit({ type: 'highlightDirections' })
-    .wait(1500)
+    .wait(CREATE_LAND_MS)
+    .tap('[data-testid="bite-details-navigation"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'highlightDirections' },
+    })
+    .wait(DIRECTIONS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 6. Recenter my-location then nearest pin */
@@ -404,26 +488,35 @@ const goRecenterNearest = (): GestureScriptStep[] =>
     .emit({ type: 'clearPin' })
     .emit({ type: 'resetMapPan' })
     .push(nav('map'))
-    .wait(900)
+    .wait(LAND_MS)
     .emit({ type: 'panMap', dxPct: 12, dyPct: -8 })
-    .wait(700)
-    .appear({ x: 88, y: 82 })
-    .tap('[data-testid="btn-my-position"]', { approachMs: 550 })
-    .emit({ type: 'resetMapPan' })
     .wait(800)
+    .appear({ x: 88, y: 82 })
+    .tap('[data-testid="btn-my-position"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'resetMapPan' },
+    })
+    .wait(1000)
     .appear({ x: 42, y: 44 })
-    .tap({ x: 40, y: 42 }, { approachMs: 400 })
-    .emit({ type: 'selectPin', biteId: NEAREST })
-    .wait(1500)
-    .tap('[data-intro="map-drawer"]', { approachMs: 520 })
-    .wait(140)
+    .tap(
+      { x: 40, y: 42 },
+      {
+        approachMs: APPROACH_MS,
+        emitOnPress: { type: 'selectPin', biteId: NEAREST },
+      },
+    )
+    .wait(DRAWER_HOLD_MS)
+    .tap('[data-intro="map-drawer"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', NEAREST))
-    .wait(600)
-    .tap('[data-testid="bite-details-navigation"]', { approachMs: 600 })
-    .emit({ type: 'highlightDirections' })
-    .wait(1400)
+    .wait(CREATE_LAND_MS)
+    .tap('[data-testid="bite-details-navigation"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'highlightDirections' },
+    })
+    .wait(DIRECTIONS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 7. Drawer expand then navigate */
@@ -432,24 +525,35 @@ const goDrawerExpand = (): GestureScriptStep[] =>
     .emit({ type: 'clearPin' })
     .emit({ type: 'collapseDrawer' })
     .push(nav('map'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 50, y: 48 })
-    .tap({ x: 48, y: 46 }, { approachMs: 400 })
-    .emit({ type: 'selectPin', biteId: BOTANIC })
-    .wait(1000)
-    .appear({ x: 50, y: 78 })
-    .tap('[data-intro="drawer-handle"]', { approachMs: 450 })
-    .emit({ type: 'expandDrawer' })
-    .wait(1200)
-    .tap('[data-intro="map-drawer"] .stage-drawer__go', { approachMs: 520 })
-    .wait(140)
-    .push(nav('details', BOTANIC))
-    .wait(600)
-    .tap('[data-testid="bite-details-navigation"]', { approachMs: 600 })
-    .emit({ type: 'highlightDirections' })
+    .tap(
+      { x: 48, y: 46 },
+      {
+        approachMs: APPROACH_MS,
+        emitOnPress: { type: 'selectPin', biteId: BOTANIC },
+      },
+    )
     .wait(1400)
+    .appear({ x: 50, y: 78 })
+    .tap('[data-intro="drawer-handle"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'expandDrawer' },
+    })
+    .wait(1600)
+    .tap('[data-intro="map-drawer"] .stage-drawer__go', {
+      approachMs: APPROACH_MS,
+    })
+    .wait(TAP_PAUSE_MS)
+    .push(nav('details', BOTANIC))
+    .wait(CREATE_LAND_MS)
+    .tap('[data-testid="bite-details-navigation"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'highlightDirections' },
+    })
+    .wait(DIRECTIONS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 8. Pin → details → back to map */
@@ -457,23 +561,28 @@ const goPinDetailsBack = (): GestureScriptStep[] =>
   script()
     .emit({ type: 'clearPin' })
     .push(nav('map'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 50, y: 48 })
-    .tap({ x: 48, y: 46 }, { approachMs: 400 })
-    .emit({ type: 'selectPin', biteId: BOTANIC })
-    .wait(1200)
-    .tap('[data-intro="map-drawer"]', { approachMs: 520 })
-    .wait(160)
+    .tap(
+      { x: 48, y: 46 },
+      {
+        approachMs: APPROACH_MS,
+        emitOnPress: { type: 'selectPin', biteId: BOTANIC },
+      },
+    )
+    .wait(DRAWER_HOLD_MS)
+    .tap('[data-intro="map-drawer"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', BOTANIC))
-    .wait(1200)
+    .wait(DETAILS_HOLD_MS)
     .appear({ x: 12, y: 10 })
-    .tap('ion-back-button', { approachMs: 480 })
-    .wait(140)
+    .tap('ion-back-button', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('map'))
     .emit({ type: 'selectPin', biteId: BOTANIC })
-    .wait(1600)
+    .wait(DRAWER_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 9. Distance-focused: farthest then nearest */
@@ -481,24 +590,36 @@ const goFarthestThenNearest = (): GestureScriptStep[] =>
   script()
     .emit({ type: 'clearPin' })
     .push(nav('map'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 68, y: 58 })
-    .tap({ x: 66, y: 56 }, { approachMs: 400 })
-    .emit({ type: 'selectPin', biteId: FARTHEST })
-    .wait(1400)
+    .tap(
+      { x: 66, y: 56 },
+      {
+        approachMs: APPROACH_MS,
+        emitOnPress: { type: 'selectPin', biteId: FARTHEST },
+      },
+    )
+    .wait(1800)
     .appear({ x: 40, y: 42 })
-    .tap({ x: 38, y: 40 }, { approachMs: 450 })
-    .emit({ type: 'selectPin', biteId: NEAREST })
-    .wait(1400)
-    .tap('[data-intro="map-drawer"]', { approachMs: 520 })
-    .wait(140)
+    .tap(
+      { x: 38, y: 40 },
+      {
+        approachMs: APPROACH_MS,
+        emitOnPress: { type: 'selectPin', biteId: NEAREST },
+      },
+    )
+    .wait(DRAWER_HOLD_MS)
+    .tap('[data-intro="map-drawer"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', NEAREST))
-    .wait(600)
-    .tap('[data-testid="bite-details-navigation"]', { approachMs: 600 })
-    .emit({ type: 'highlightDirections' })
-    .wait(1400)
+    .wait(CREATE_LAND_MS)
+    .tap('[data-testid="bite-details-navigation"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'highlightDirections' },
+    })
+    .wait(DIRECTIONS_HOLD_MS)
     .hide()
-    .wait(400)
+    .wait(LOOP_GAP_MS)
     .build();
 
 /** 10. End on walking / directions success state */
@@ -508,22 +629,29 @@ const goWalkingSuccess = (): GestureScriptStep[] =>
     .emit({ type: 'clearWalkingSuccess' })
     .emit({ type: 'clearHighlight' })
     .push(nav('map'))
-    .wait(900)
+    .wait(LAND_MS)
     .appear({ x: 50, y: 48 })
-    .tap({ x: 48, y: 46 }, { approachMs: 400 })
-    .emit({ type: 'selectPin', biteId: BOTANIC })
-    .wait(1200)
-    .tap('[data-intro="map-drawer"]', { approachMs: 520 })
-    .wait(140)
+    .tap(
+      { x: 48, y: 46 },
+      {
+        approachMs: APPROACH_MS,
+        emitOnPress: { type: 'selectPin', biteId: BOTANIC },
+      },
+    )
+    .wait(DRAWER_HOLD_MS)
+    .tap('[data-intro="map-drawer"]', { approachMs: APPROACH_MS })
+    .wait(TAP_PAUSE_MS)
     .push(nav('details', BOTANIC))
-    .wait(600)
-    .tap('[data-testid="bite-details-navigation"]', { approachMs: 600 })
-    .emit({ type: 'highlightDirections' })
-    .wait(800)
+    .wait(CREATE_LAND_MS)
+    .tap('[data-testid="bite-details-navigation"]', {
+      approachMs: APPROACH_MS,
+      emitOnPress: { type: 'highlightDirections' },
+    })
+    .wait(1000)
     .emit({ type: 'walkingSuccess' })
-    .wait(2400)
+    .wait(2800)
     .hide()
-    .wait(450)
+    .wait(LOOP_GAP_MS)
     .build();
 
 export const JOIN_THE_TRIBE_FLOWS: IntroFlowVariant[] = [

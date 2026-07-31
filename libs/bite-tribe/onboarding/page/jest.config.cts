@@ -12,6 +12,11 @@ module.exports = {
   preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   coverageDirectory: '../../../../coverage/libs/bite-tribe/onboarding/page',
+  // Storybook Intro Story prototypes are exploration-only; keep them out of
+  // the production onboarding coverage gate.
+  coveragePathIgnorePatterns: [
+    '<rootDir>/src/lib/prototypes/',
+  ],
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

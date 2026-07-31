@@ -113,6 +113,31 @@
   opacity: 0;
 }
 
+/* Photo just applied on create — soft bloom so the state change is obvious. */
+.source__native--photo-land ::ng-deep image-upload,
+.source__native--photo-land ::ng-deep .image-upload,
+.source__native--photo-land ::ng-deep [class*='upload'] {
+  animation: photo-land 1200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes photo-land {
+  0% {
+    opacity: 0.35;
+    transform: scale(0.94);
+    filter: brightness(1.25);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.03);
+    filter: brightness(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: none;
+  }
+}
+
 .source__native::-webkit-scrollbar {
   display: none;
 }

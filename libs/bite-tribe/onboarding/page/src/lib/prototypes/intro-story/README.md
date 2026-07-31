@@ -18,6 +18,7 @@ gestures, progressive disclosure coach-marks, and intentional flow variants.
 | **E Progressive Disclosure** | One tip at a time over real UI              |
 | **F Hotspot Tips**           | Pulsing hotspot dots + compact tip pill     |
 | **G Spotlight Quest**        | Checklist quest + vignette spotlight        |
+| **H Focus Shine**            | Grayscale fade; focal UI shines full color  |
 | **Flows / Find the bite**    | 10 intentional Find variants                |
 | **Flows / Share the find**   | 10 intentional Share variants               |
 | **Flows / Join the tribe**   | 10 intentional Tribe variants               |
@@ -37,6 +38,7 @@ progressive-tips.model.ts  Shared coach tips + anchor measure helper
 variant-e-…/      Progressive tip tour over the real stage
 variant-f-…/      Pulsing hotspot tips + compact pill/sheet
 variant-g-…/      Spotlight quest checklist + vignette
+variant-h-…/      Focus shine — grayscale veil + color cutout
 flows/            40 intentional gesture scripts × Storybook stories
 ```
 
@@ -53,6 +55,7 @@ Useful story URLs (after Storybook is up):
 - E Interactive: `/?path=/story/prototypes-intro-story-e-progressive-disclosure--interactive`
 - F Hotspots: `/?path=/story/prototypes-intro-story-f-hotspot-tips--interactive`
 - G Quest: `/?path=/story/prototypes-intro-story-g-spotlight-quest--interactive`
+- H Focus Shine: `/?path=/story/prototypes-intro-story-h-focus-shine--interactive`
 - Flows Find scroll: `/?path=/story/prototypes-intro-story-flows-find-the-bite--scroll-to-card-then-open`
 - Flows Go pin: `/?path=/story/prototypes-intro-story-flows-ready-to-taste--map-pin-drawer-directions`
 

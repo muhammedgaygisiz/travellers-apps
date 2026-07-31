@@ -138,15 +138,18 @@ export class FocusShineComponent {
     return rect.top + rect.height / 2 > h * 0.55;
   });
 
-  /** Prefer a slim tip near the focus; flip above when low. */
+  /**
+   * Tip anchor via CSS vars so keyframe transforms can compose cleanly
+   * (fade + slide without fighting inline `transform`).
+   */
   readonly tipStyle = computed(() => {
     const rect = this.focusRect();
     if (!rect) {
       return {
-        top: 'auto',
-        bottom: '1.15rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        '--tip-top': 'auto',
+        '--tip-bottom': '1.15rem',
+        '--tip-left': '50%',
+        '--tip-y': '0px',
       };
     }
     const stage = this.stage()?.nativeElement;
@@ -158,17 +161,17 @@ export class FocusShineComponent {
 
     if (this.tipAbove()) {
       return {
-        top: `${Math.max(10, rect.top - gap)}px`,
-        bottom: 'auto',
-        left: `${left}px`,
-        transform: 'translate(-50%, -100%)',
+        '--tip-top': `${Math.max(10, rect.top - gap)}px`,
+        '--tip-bottom': 'auto',
+        '--tip-left': `${left}px`,
+        '--tip-y': '-100%',
       };
     }
     return {
-      top: `${rect.top + rect.height + gap}px`,
-      bottom: 'auto',
-      left: `${left}px`,
-      transform: 'translateX(-50%)',
+      '--tip-top': `${rect.top + rect.height + gap}px`,
+      '--tip-bottom': 'auto',
+      '--tip-left': `${left}px`,
+      '--tip-y': '0%',
     };
   });
 

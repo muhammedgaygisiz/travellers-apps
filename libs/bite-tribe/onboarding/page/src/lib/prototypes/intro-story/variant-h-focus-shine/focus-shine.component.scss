@@ -1,0 +1,418 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:host::-webkit-scrollbar {
+  display: none;
+}
+
+.fs {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 100dvh;
+  padding: calc(0.5rem + var(--ion-safe-area-top, 0px)) 0.7rem
+    calc(0.7rem + var(--ion-safe-area-bottom, 0px));
+  overflow: hidden;
+  color: #1a1917;
+  background:
+    radial-gradient(
+      ellipse at 12% 0%,
+      var(--accent-soft, #d6e7f8) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 92% 18%,
+      rgb(255 248 235 / 70%) 0%,
+      transparent 42%
+    ),
+    linear-gradient(168deg, #f3efe8 0%, #e8e2d6 52%, #ddd6c8 100%);
+  scrollbar-width: none;
+}
+
+.fs::-webkit-scrollbar {
+  display: none;
+}
+
+.fs__progress {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0.28rem;
+  margin-bottom: 0.4rem;
+}
+
+.fs__seg {
+  height: 0.15rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(26 25 23 / 11%);
+}
+
+.fs__fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent, #4a90d9);
+}
+
+.fs__fill--done {
+  width: 100%;
+}
+
+.fs__fill--active {
+  animation: fs-fill linear forwards;
+}
+
+.fs--paused .fs__fill--active {
+  animation-play-state: paused;
+}
+
+@keyframes fs-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.fs__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.fs__badge {
+  margin: 0 0 0.15rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent, #4a90d9);
+}
+
+.fs__headline {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.fs__step {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgb(26 25 23 / 52%);
+}
+
+.fs__ghost {
+  padding: 0.28rem 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(26 25 23 / 6%);
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fs__stage {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 1.1rem;
+  scrollbar-width: none;
+}
+
+.fs__stage::-webkit-scrollbar {
+  display: none;
+}
+
+.fs__coach {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  --shine-x: 50%;
+  --shine-y: 42%;
+  --shine-w: 0px;
+  --shine-h: 0px;
+  --shine-r: 0.9rem;
+  --morph-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --morph-ms: 340ms;
+}
+
+/*
+ * Veil: grayscale + dim everything, with a morphing rectangular hole so the
+ * focal UI keeps full color/opacity underneath. Mask geometry transitions
+ * via CSS vars for a sweet hole morph between tips.
+ */
+.fs__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgb(18 16 14 / 22%);
+  backdrop-filter: grayscale(1) brightness(0.78) saturate(0.35);
+  -webkit-backdrop-filter: grayscale(1) brightness(0.78) saturate(0.35);
+  /* Two layers: full black cover, then white hole subtracted */
+  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#fff 0 0);
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#fff 0 0);
+  -webkit-mask-size:
+    100% 100%,
+    var(--shine-w) var(--shine-h);
+  mask-size:
+    100% 100%,
+    var(--shine-w) var(--shine-h);
+  -webkit-mask-position:
+    0 0,
+    var(--shine-x) var(--shine-y);
+  mask-position:
+    0 0,
+    var(--shine-x) var(--shine-y);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition:
+    mask-size var(--morph-ms) var(--morph-ease),
+    mask-position var(--morph-ms) var(--morph-ease),
+    -webkit-mask-size var(--morph-ms) var(--morph-ease),
+    -webkit-mask-position var(--morph-ms) var(--morph-ease),
+    background var(--morph-ms) var(--morph-ease),
+    backdrop-filter var(--morph-ms) var(--morph-ease),
+    -webkit-backdrop-filter var(--morph-ms) var(--morph-ease);
+  will-change: mask-position, mask-size;
+}
+
+.fs--morphing .fs__veil {
+  background: rgb(18 16 14 / 28%);
+  backdrop-filter: grayscale(1) brightness(0.72) saturate(0.28);
+  -webkit-backdrop-filter: grayscale(1) brightness(0.72) saturate(0.28);
+}
+
+/* Soft warm glow ring — not a debug border */
+.fs__glow {
+  position: absolute;
+  z-index: 2;
+  top: var(--shine-y);
+  left: var(--shine-x);
+  width: var(--shine-w);
+  height: var(--shine-h);
+  border-radius: var(--shine-r);
+  box-shadow:
+    0 0 0 1.5px rgb(255 255 255 / 55%),
+    0 0 0 6px color-mix(in srgb, var(--accent, #4a90d9) 18%, transparent),
+    0 0 28px 4px color-mix(in srgb, var(--accent, #4a90d9) 28%, transparent),
+    0 8px 24px rgb(0 0 0 / 12%);
+  transition:
+    top var(--morph-ms) var(--morph-ease),
+    left var(--morph-ms) var(--morph-ease),
+    width var(--morph-ms) var(--morph-ease),
+    height var(--morph-ms) var(--morph-ease),
+    border-radius var(--morph-ms) var(--morph-ease),
+    box-shadow 420ms var(--morph-ease),
+    opacity 280ms ease;
+  animation: fs-glow-breathe 2.8s var(--morph-ease) infinite;
+  pointer-events: none;
+}
+
+.fs--morphing .fs__glow {
+  opacity: 0.55;
+  animation: none;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 35%),
+    0 0 0 4px color-mix(in srgb, var(--accent, #4a90d9) 12%, transparent),
+    0 0 18px 2px color-mix(in srgb, var(--accent, #4a90d9) 16%, transparent);
+}
+
+@keyframes fs-glow-breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1.5px rgb(255 255 255 / 55%),
+      0 0 0 6px color-mix(in srgb, var(--accent, #4a90d9) 18%, transparent),
+      0 0 28px 4px color-mix(in srgb, var(--accent, #4a90d9) 28%, transparent),
+      0 8px 24px rgb(0 0 0 / 12%);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1.5px rgb(255 255 255 / 70%),
+      0 0 0 8px color-mix(in srgb, var(--accent, #4a90d9) 24%, transparent),
+      0 0 36px 8px color-mix(in srgb, var(--accent, #4a90d9) 36%, transparent),
+      0 8px 24px rgb(0 0 0 / 12%);
+  }
+}
+
+.fs__tip {
+  --tip-top: auto;
+  --tip-bottom: 1.15rem;
+  --tip-left: 50%;
+  --tip-y: 0%;
+  position: absolute;
+  top: var(--tip-top);
+  right: auto;
+  bottom: var(--tip-bottom);
+  left: var(--tip-left);
+  z-index: 8;
+  box-sizing: border-box;
+  width: min(16.5rem, calc(100% - 1.75rem));
+  padding: 0.72rem 0.9rem 0.78rem;
+  border-radius: 1rem;
+  background: rgb(255 253 248 / 96%);
+  color: #1a1917;
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow:
+    0 0.5rem 1.5rem rgb(0 0 0 / 16%),
+    0 0 0 1px rgb(26 25 23 / 6%);
+  pointer-events: auto;
+  transform-origin: center top;
+  /* Hole morphs first (~120ms), then tip fades/slides in */
+  animation: fs-tip-in 480ms cubic-bezier(0.22, 1, 0.36, 1) 110ms both;
+  transition:
+    top 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    left 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fs__tip--above {
+  transform-origin: center bottom;
+  animation-name: fs-tip-in-above;
+}
+
+@keyframes fs-tip-in {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateX(-50%) translateY(calc(var(--tip-y) + 14px))
+      scale(0.94);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: translateX(-50%) translateY(var(--tip-y)) scale(1);
+  }
+}
+
+@keyframes fs-tip-in-above {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateX(-50%) translateY(calc(var(--tip-y) - 12px))
+      scale(0.94);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: translateX(-50%) translateY(var(--tip-y)) scale(1);
+  }
+}
+
+.fs__tip-kicker {
+  margin: 0 0 0.12rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent, #4a90d9);
+  animation: fs-tip-line 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 60ms;
+}
+
+.fs__tip-title {
+  margin: 0 0 0.18rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  animation: fs-tip-line 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 100ms;
+}
+
+.fs__tip-body {
+  margin: 0 0 0.62rem;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: rgb(26 25 23 / 68%);
+  animation: fs-tip-line 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 140ms;
+}
+
+.fs__next {
+  display: block;
+  width: 100%;
+  padding: 0.52rem 0.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: #1a1917;
+  color: #fff;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  animation: fs-tip-line 540ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 180ms;
+}
+
+.fs__next:active {
+  transform: scale(0.98);
+}
+
+@keyframes fs-tip-line {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fs__fill--active {
+    animation: none !important;
+    width: 100%;
+  }
+
+  .fs__veil,
+  .fs__glow {
+    transition: none !important;
+  }
+
+  .fs__glow,
+  .fs__tip,
+  .fs__tip-kicker,
+  .fs__tip-title,
+  .fs__tip-body,
+  .fs__next {
+    animation: none !important;
+  }
+
+  .fs--morphing .fs__tip {
+    opacity: 1;
+    filter: none;
+  }
+}

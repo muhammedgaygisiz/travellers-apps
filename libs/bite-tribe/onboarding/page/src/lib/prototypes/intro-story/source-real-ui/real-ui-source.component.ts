@@ -188,6 +188,8 @@ export class RealUiSourceComponent {
   readonly celebrate = signal<{ anchor: string; key: number } | null>(null);
   /** Soft fade before single-beat replay. */
   readonly fading = signal(false);
+  /** Brief flash when a photo lands on the create form. */
+  readonly photoLanded = signal(false);
 
   readonly activeFlow = computed(() => {
     const id = this.flowId();
@@ -828,6 +830,7 @@ export class RealUiSourceComponent {
     this.mapPan.set({ x: 0, y: 0 });
     this.celebrate.set(null);
     this.fading.set(false);
+    this.photoLanded.set(false);
     this.outgoing.set(null);
     this.transitioning.set(false);
     this.incoming.set(flow?.startScreen ?? BEAT_START_SCREEN[beat]);

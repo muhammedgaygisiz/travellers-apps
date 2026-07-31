@@ -7,6 +7,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { Preferences } from '@capacitor/preferences';
 import { TranslocoService } from '@jsverse/transloco';
 import { Platform } from '@ionic/angular';
+import { firstValueFrom } from 'rxjs';
 import {
   enablePushOnThisDevice,
   getPushPermissionState,
@@ -181,6 +182,12 @@ export class OnboardingDataAccessService {
    * The settings page reloads the document to apply a language change; the
    * assistant cannot, because a reload would tear down the in-progress flow.
    * Transloco swaps the active language in place instead.
+   *
+   * The translation file is fetched before the switch: `setActiveLang` alone
+   * only announces the new language, so a synchronous `translate` running
+   * before the file arrives - the assistant's loading overlay - would render
+   * the raw key (issue #1186). Loads are cached per language, so re-applying
+   * a language costs nothing.
    */
   async applyLanguage(language: string): Promise<void> {
     try {
@@ -190,6 +197,15 @@ export class OnboardingDataAccessService {
       });
     } catch (error) {
       console.warn('Failed to persist onboarding language preference:', error);
+    }
+
+    try {
+      await firstValueFrom(this.transloco.load(language));
+    } catch (error) {
+      // A failed load still switches: Transloco falls back to the fallback
+      // language's translations, which beats keeping the user on a language
+      // they just replaced.
+      console.warn('Failed to load onboarding language translations:', error);
     }
 
     this.transloco.setActiveLang(language);

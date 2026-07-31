@@ -3,7 +3,8 @@ import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Preferences } from '@capacitor/preferences';
 import { Platform } from '@ionic/angular';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoService, Translation } from '@jsverse/transloco';
+import { Observable, of, throwError } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { PublicUser, Settings } from 'model';
@@ -44,6 +45,7 @@ describe('OnboardingDataAccessService', () => {
   let service: OnboardingDataAccessService;
   let getUser: jest.Mock;
   let setActiveLang: jest.Mock;
+  let load: jest.Mock;
   let notifySavedSettings: jest.Mock;
   let notifySavedProfile: jest.Mock;
   let platformMock: Platform;
@@ -82,6 +84,7 @@ describe('OnboardingDataAccessService', () => {
       markOnboardingComplete: jest.fn().mockResolvedValue(undefined),
     };
     setActiveLang = jest.fn();
+    load = jest.fn(() => of({} as Translation));
     notifySavedSettings = jest.fn();
     notifySavedProfile = jest.fn();
     platformMock = { is: jest.fn(() => true) } as unknown as Platform;
@@ -95,7 +98,7 @@ describe('OnboardingDataAccessService', () => {
           provide: BiteTribeStoreService,
           useValue: { notifySavedSettings, notifySavedProfile },
         },
-        { provide: TranslocoService, useValue: { setActiveLang } },
+        { provide: TranslocoService, useValue: { setActiveLang, load } },
         { provide: Platform, useValue: platformMock },
       ],
     });
@@ -421,7 +424,42 @@ describe('OnboardingDataAccessService', () => {
       await service.applyLanguage('tr');
 
       expect(preferencesSet).toHaveBeenCalledWith({ key: 'lang', value: 'tr' });
+      expect(load).toHaveBeenCalledWith('tr');
       expect(setActiveLang).toHaveBeenCalledWith('tr');
+    });
+
+    it('loads the translations before activating the language', async () => {
+      // Activating first would leave a synchronous `translate` - the
+      // onboarding loading overlay - reading a language with no translations
+      // loaded yet, which renders the raw key (issue #1186).
+      setup();
+      const order: string[] = [];
+      let resolveLoad: () => void = () => undefined;
+      let signalLoadStarted: () => void = () => undefined;
+      const loadStarted = new Promise<void>(
+        (resolve) => (signalLoadStarted = resolve),
+      );
+      load.mockReturnValue(
+        new Observable<Translation>((subscriber) => {
+          order.push('load');
+          signalLoadStarted();
+          resolveLoad = (): void => {
+            subscriber.next({});
+            subscriber.complete();
+          };
+        }),
+      );
+      setActiveLang.mockImplementation(() => order.push('setActiveLang'));
+
+      const applied = service.applyLanguage('de');
+      await loadStarted;
+
+      expect(order).toEqual(['load']);
+
+      resolveLoad();
+      await applied;
+
+      expect(order).toEqual(['load', 'setActiveLang']);
     });
 
     it('still switches the language when the preference write fails', async () => {
@@ -429,6 +467,17 @@ describe('OnboardingDataAccessService', () => {
       // is unavailable; only the next cold start would lose the choice.
       setup();
       preferencesSet.mockRejectedValue(new Error('storage full'));
+
+      await service.applyLanguage('de');
+
+      expect(setActiveLang).toHaveBeenCalledWith('de');
+    });
+
+    it('still switches the language when the translations cannot be loaded', async () => {
+      // Transloco falls back to the fallback language's translations, which
+      // beats stranding the user on the language they just replaced.
+      setup();
+      load.mockReturnValue(throwError(() => new Error('offline')));
 
       await service.applyLanguage('de');
 

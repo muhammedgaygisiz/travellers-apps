@@ -85,6 +85,13 @@ export class OnboardingService {
   private pendingDisplayNameCheck = '';
 
   /**
+   * Language switch still loading its translations, if any. The page fires the
+   * language change without awaiting it, so anything that translates
+   * synchronously has to wait for this first (issue #1186).
+   */
+  private languageApplication: Promise<void> = Promise.resolve();
+
+  /**
    * Loads persisted progress and positions the assistant at the first
    * incomplete step. Runs once per app session; re-entering the route does not
    * reset the user's place in the flow.
@@ -308,7 +315,11 @@ export class OnboardingService {
 
     this.selectedLanguage.set(language);
     this.setStepValid('language', true);
-    await this.dataAccess.applyLanguage(language);
+    const application = this.dataAccess.applyLanguage(language);
+    // The waiters only care that the switch has settled; a failed switch is
+    // reported to this caller alone, not to every later step transition.
+    this.languageApplication = application.catch(() => undefined);
+    await application;
   }
 
   /**
@@ -396,6 +407,12 @@ export class OnboardingService {
     // present the overlay can never leave `advancing` stuck true — which would
     // silently no-op every later tap on Next.
     try {
+      // The overlay message is translated synchronously, so a language picked
+      // a moment ago has to have finished loading first. Leaving the step is
+      // the very next tap after choosing one, and translating into a language
+      // whose file is still in flight renders the raw key (issue #1186).
+      await this.languageApplication;
+
       const loading = await this.loadingController.create({
         message: this.transloco.translate('onboarding-advancing'),
         backdropDismiss: false,

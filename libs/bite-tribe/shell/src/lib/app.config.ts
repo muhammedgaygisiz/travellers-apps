@@ -45,6 +45,11 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
         ],
         defaultLang: 'en',
         fallbackLang: 'en',
+        // Transloco renders a pipe once by default, so a language switch only
+        // reaches components created afterwards. The onboarding assistant
+        // changes the language inside a live view that must not be reloaded,
+        // so already-rendered text has to follow the switch (issue #1186).
+        reRenderOnLangChange: true,
       },
       loader: TranslocoHttpLoader,
     }),

@@ -165,24 +165,43 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: rgb(18 16 14 / 22%);
-  backdrop-filter: grayscale(1) brightness(0.78) saturate(0.35);
-  -webkit-backdrop-filter: grayscale(1) brightness(0.78) saturate(0.35);
-  /* Two layers: full black cover, then white hole subtracted */
-  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#fff 0 0);
-  mask-image: linear-gradient(#000 0 0), linear-gradient(#fff 0 0);
+  background: rgb(14 12 11 / 40%);
+  backdrop-filter: grayscale(1) brightness(0.64) saturate(0.15) blur(1.8px);
+  -webkit-backdrop-filter: grayscale(1) brightness(0.64) saturate(0.15)
+    blur(1.8px);
+  /* Soft elliptical cutout — color pops through; no hard rect */
+  -webkit-mask-image:
+    linear-gradient(#000 0 0),
+    radial-gradient(
+      ellipse closest-side at center,
+      #fff 0%,
+      #fff 58%,
+      rgb(255 255 255 / 50%) 76%,
+      transparent 100%
+    );
+  mask-image:
+    linear-gradient(#000 0 0),
+    radial-gradient(
+      ellipse closest-side at center,
+      #fff 0%,
+      #fff 58%,
+      rgb(255 255 255 / 50%) 76%,
+      transparent 100%
+    );
   -webkit-mask-size:
     100% 100%,
-    var(--shine-w) var(--shine-h);
+    calc(var(--shine-w) * 1.2) calc(var(--shine-h) * 1.24);
   mask-size:
     100% 100%,
-    var(--shine-w) var(--shine-h);
+    calc(var(--shine-w) * 1.2) calc(var(--shine-h) * 1.24);
   -webkit-mask-position:
     0 0,
-    var(--shine-x) var(--shine-y);
+    calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5);
   mask-position:
     0 0,
-    var(--shine-x) var(--shine-y);
+    calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5);
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-composite: xor;
@@ -199,12 +218,13 @@
 }
 
 .fs--morphing .fs__veil {
-  background: rgb(18 16 14 / 28%);
-  backdrop-filter: grayscale(1) brightness(0.72) saturate(0.28);
-  -webkit-backdrop-filter: grayscale(1) brightness(0.72) saturate(0.28);
+  background: rgb(14 12 11 / 48%);
+  backdrop-filter: grayscale(1) brightness(0.58) saturate(0.1) blur(2.2px);
+  -webkit-backdrop-filter: grayscale(1) brightness(0.58) saturate(0.1)
+    blur(2.2px);
 }
 
-/* Soft warm glow ring — not a debug border */
+/* Soft color bloom — glow only, no outline rectangle */
 .fs__glow {
   position: absolute;
   z-index: 2;
@@ -212,18 +232,23 @@
   left: var(--shine-x);
   width: var(--shine-w);
   height: var(--shine-h);
-  border-radius: var(--shine-r);
+  border: 0;
+  border-radius: 50%;
+  outline: none;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--accent, #4a90d9) 18%, transparent) 0%,
+    transparent 70%
+  );
   box-shadow:
-    0 0 0 1.5px rgb(255 255 255 / 55%),
-    0 0 0 6px color-mix(in srgb, var(--accent, #4a90d9) 18%, transparent),
-    0 0 28px 4px color-mix(in srgb, var(--accent, #4a90d9) 28%, transparent),
-    0 8px 24px rgb(0 0 0 / 12%);
+    0 0 48px 20px color-mix(in srgb, var(--accent, #4a90d9) 38%, transparent),
+    0 0 80px 32px rgb(255 250 240 / 16%);
+  filter: saturate(1.4) contrast(1.08);
   transition:
     top var(--morph-ms) var(--morph-ease),
     left var(--morph-ms) var(--morph-ease),
     width var(--morph-ms) var(--morph-ease),
     height var(--morph-ms) var(--morph-ease),
-    border-radius var(--morph-ms) var(--morph-ease),
     box-shadow 420ms var(--morph-ease),
     opacity 280ms ease;
   animation: fs-glow-breathe 2.8s var(--morph-ease) infinite;
@@ -231,29 +256,23 @@
 }
 
 .fs--morphing .fs__glow {
-  opacity: 0.55;
+  opacity: 0.45;
   animation: none;
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 35%),
-    0 0 0 4px color-mix(in srgb, var(--accent, #4a90d9) 12%, transparent),
-    0 0 18px 2px color-mix(in srgb, var(--accent, #4a90d9) 16%, transparent);
+  box-shadow: 0 0 28px 10px
+    color-mix(in srgb, var(--accent, #4a90d9) 22%, transparent);
 }
 
 @keyframes fs-glow-breathe {
   0%,
   100% {
     box-shadow:
-      0 0 0 1.5px rgb(255 255 255 / 55%),
-      0 0 0 6px color-mix(in srgb, var(--accent, #4a90d9) 18%, transparent),
-      0 0 28px 4px color-mix(in srgb, var(--accent, #4a90d9) 28%, transparent),
-      0 8px 24px rgb(0 0 0 / 12%);
+      0 0 44px 18px color-mix(in srgb, var(--accent, #4a90d9) 34%, transparent),
+      0 0 72px 28px rgb(255 250 240 / 14%);
   }
   50% {
     box-shadow:
-      0 0 0 1.5px rgb(255 255 255 / 70%),
-      0 0 0 8px color-mix(in srgb, var(--accent, #4a90d9) 24%, transparent),
-      0 0 36px 8px color-mix(in srgb, var(--accent, #4a90d9) 36%, transparent),
-      0 8px 24px rgb(0 0 0 / 12%);
+      0 0 58px 24px color-mix(in srgb, var(--accent, #4a90d9) 46%, transparent),
+      0 0 96px 36px rgb(255 250 240 / 22%);
   }
 }
 

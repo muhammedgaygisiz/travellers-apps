@@ -1,8 +1,8 @@
 {
   "name": "bite-tribe",
   "short_name": "bite-tribe",
-  "theme_color": "#00365f",
-  "background_color": "#fffbef",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
   "display": "standalone",
   "scope": "/",
   "start_url": "/",

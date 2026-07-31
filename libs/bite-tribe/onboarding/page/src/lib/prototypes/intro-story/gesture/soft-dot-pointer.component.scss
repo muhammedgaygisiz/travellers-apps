@@ -1,0 +1,73 @@
+:host {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.gesture {
+  position: absolute;
+  inset: 0;
+}
+
+/* Soft iOS-style touch indicator — circular, subtle, no blue chrome */
+.gesture__touch {
+  position: absolute;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: -0.675rem 0 0 -0.675rem;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 55%);
+  border: 1.5px solid rgb(32 32 30 / 18%);
+  box-shadow:
+    0 2px 8px rgb(20 20 18 / 16%),
+    inset 0 0 0 1px rgb(255 255 255 / 40%);
+  opacity: 0;
+  transform: scale(0.7);
+  transition:
+    opacity 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: left, top, transform, opacity;
+}
+
+.gesture__touch--on {
+  opacity: 0.92;
+  transform: scale(1);
+}
+
+.gesture__touch--pressed {
+  opacity: 1;
+  transform: scale(0.82);
+  background: rgb(255 255 255 / 72%);
+}
+
+.gesture__ripple {
+  position: absolute;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin: -1.2rem 0 0 -1.2rem;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 35%);
+  animation: gesture-ripple-out 560ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes gesture-ripple-out {
+  from {
+    opacity: 0.7;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.55);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gesture__touch,
+  .gesture__ripple {
+    animation: none !important;
+    transition: none !important;
+  }
+}

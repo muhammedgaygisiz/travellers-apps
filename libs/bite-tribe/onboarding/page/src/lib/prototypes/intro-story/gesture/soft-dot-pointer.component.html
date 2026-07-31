@@ -1,0 +1,18 @@
+<div class="gesture" aria-hidden="true">
+  @if (ripple(); as r) {
+    <div
+      class="gesture__ripple"
+      [style.left.%]="r.x"
+      [style.top.%]="r.y"
+      [attr.data-key]="r.key"
+    ></div>
+  }
+
+  <div
+    class="gesture__touch"
+    [class.gesture__touch--on]="visible()"
+    [class.gesture__touch--pressed]="pressed()"
+    [style.left.%]="x()"
+    [style.top.%]="y()"
+  ></div>
+</div>

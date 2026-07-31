@@ -1,0 +1,35 @@
+<div
+  class="iphone"
+  [class.iphone--dark-status]="darkStatus()"
+  aria-hidden="true"
+>
+  <div class="iphone__bezel">
+    <div class="iphone__side iphone__side--left"></div>
+    <div class="iphone__side iphone__side--right"></div>
+
+    <div class="iphone__glass">
+      <div class="iphone__island">
+        <span class="iphone__island-cam"></span>
+      </div>
+
+      <div class="iphone__status">
+        <span class="iphone__time">{{ time() }}</span>
+        <div class="iphone__status-trail">
+          <span class="iphone__signal" title="Cellular">
+            <i></i><i></i><i></i><i></i>
+          </span>
+          <span class="iphone__wifi" title="Wi‑Fi"></span>
+          <span class="iphone__battery" title="Battery">
+            <span class="iphone__battery-fill"></span>
+          </span>
+        </div>
+      </div>
+
+      <div class="iphone__screen">
+        <ng-content />
+      </div>
+
+      <div class="iphone__home"></div>
+    </div>
+  </div>
+</div>

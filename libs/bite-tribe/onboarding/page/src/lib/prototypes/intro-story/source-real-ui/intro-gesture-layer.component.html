@@ -1,0 +1,21 @@
+<intro-soft-dot-pointer
+  [x]="fingerX()"
+  [y]="fingerY()"
+  [visible]="fingerVisible()"
+  [pressed]="fingerPressed()"
+  [ripple]="ripple()"
+/>
+
+@if (scrollThumb(); as thumb) {
+  <div
+    class="scroll-indicator"
+    [class.scroll-indicator--on]="thumb.active"
+    aria-hidden="true"
+  >
+    <div
+      class="scroll-indicator__thumb"
+      [style.top.%]="thumb.topPct"
+      [style.height.%]="thumb.heightPct"
+    ></div>
+  </div>
+}

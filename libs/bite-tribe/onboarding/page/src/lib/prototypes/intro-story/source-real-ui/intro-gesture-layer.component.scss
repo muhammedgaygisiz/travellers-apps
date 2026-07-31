@@ -1,0 +1,34 @@
+/* Host is a passthrough — visuals live on SoftDotPointer + scroll thumb. */
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Realistic iOS-style scroll indicator (right edge of screen). */
+.scroll-indicator {
+  position: absolute;
+  top: 0;
+  right: 0.2rem;
+  bottom: 0;
+  width: 0.18rem;
+  z-index: 6;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  pointer-events: none;
+}
+
+.scroll-indicator--on {
+  opacity: 1;
+}
+
+.scroll-indicator__thumb {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  border-radius: 999px;
+  background: rgb(32 32 30 / 38%);
+  box-shadow: 0 0 0 0.5px rgb(255 255 255 / 35%);
+  transition: top 40ms linear;
+}

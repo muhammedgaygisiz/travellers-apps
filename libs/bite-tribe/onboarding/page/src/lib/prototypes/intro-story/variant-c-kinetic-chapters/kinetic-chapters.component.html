@@ -1,0 +1,40 @@
+<section
+  class="chapters"
+  [style.--accent]="scene().accent"
+  [style.--accent-soft]="scene().accentSoft"
+>
+  <header class="chapters__top">
+    <p class="chapters__caption">{{ scene().headline }}</p>
+    <button type="button" class="chapters__skip" (click)="skip()">Skip</button>
+  </header>
+
+  <nav class="chapters__rail" aria-label="Chapters">
+    @for (item of scenes; track item.id; let i = $index) {
+      <button
+        type="button"
+        class="chapters__tick"
+        [class.chapters__tick--done]="i < index()"
+        [class.chapters__tick--active]="i === index()"
+        [attr.aria-label]="item.headline"
+        (click)="goTo(i)"
+      ></button>
+    }
+  </nav>
+
+  <div class="chapters__stage">
+    <intro-real-ui-source [beat]="scene().id" [framed]="false" />
+  </div>
+
+  <footer class="chapters__footer">
+    @if (isLast()) {
+      <button type="button" class="chapters__cta" (click)="finish()">
+        Enter the app
+      </button>
+    } @else {
+      <button type="button" class="chapters__cta" (click)="next()">
+        Next
+        <ion-icon name="arrow-forward-outline" aria-hidden="true" />
+      </button>
+    }
+  </footer>
+</section>

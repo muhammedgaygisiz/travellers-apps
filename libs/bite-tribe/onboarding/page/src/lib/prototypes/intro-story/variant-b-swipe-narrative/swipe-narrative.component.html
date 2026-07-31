@@ -1,0 +1,42 @@
+<section class="swipe" [style.--accent]="scene().accent">
+  <header class="swipe__top">
+    <p class="swipe__caption">{{ scene().headline }}</p>
+    <button type="button" class="swipe__skip" (click)="skip()">Skip</button>
+  </header>
+
+  <div
+    class="swipe__stage"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp()"
+    (pointercancel)="onPointerUp()"
+  >
+    <intro-real-ui-source [beat]="scene().id" [framed]="false" />
+  </div>
+
+  <div class="swipe__dots" role="tablist" aria-label="Story pages">
+    @for (item of scenes; track item.id; let i = $index) {
+      <button
+        type="button"
+        class="swipe__dot"
+        role="tab"
+        [class.swipe__dot--active]="i === index()"
+        [attr.aria-selected]="i === index()"
+        [attr.aria-label]="item.headline"
+        (click)="goTo(i)"
+      ></button>
+    }
+  </div>
+
+  <footer class="swipe__footer">
+    @if (isLast()) {
+      <button type="button" class="swipe__cta" (click)="finish()">
+        Start exploring
+      </button>
+    } @else {
+      <button type="button" class="swipe__cta" (click)="next()">
+        Continue
+      </button>
+    }
+  </footer>
+</section>

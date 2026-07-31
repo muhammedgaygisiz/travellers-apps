@@ -1,0 +1,27 @@
+<div
+  class="stage"
+  [style.--accent]="scene().accent"
+  [style.--accent-soft]="scene().accentSoft"
+>
+  <div class="stage__media">
+    @if (videoFailed()) {
+      <p class="stage__note">Video missing at {{ videoSrc() }}</p>
+    } @else {
+      <video
+        class="stage__video"
+        [src]="videoSrc()"
+        autoplay
+        muted
+        loop
+        playsinline
+        (error)="onVideoError()"
+        (loadeddata)="onVideoLoaded()"
+      ></video>
+    }
+  </div>
+
+  <div class="stage__copy">
+    <h1 class="stage__headline">{{ scene().headline }}</h1>
+    <p class="stage__line">{{ scene().line }}</p>
+  </div>
+</div>

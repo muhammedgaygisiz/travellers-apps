@@ -4,6 +4,7 @@ import {
   computed,
   input,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
@@ -51,7 +52,8 @@ export class MapPageComponent {
 
   private readonly map = viewChild(MapComponent);
 
-  selectedBite: Bite | undefined | null;
+  /** Selected map pin — signal so programmatic selection paints under OnPush. */
+  readonly selectedBite = signal<Bite | undefined | null>(undefined);
 
   /**
    * Recenters the map on the user's location and asks the container to refresh
@@ -76,12 +78,12 @@ export class MapPageComponent {
 
   onGeopointSelection(geopoint: Geopoint | undefined): void {
     if (!geopoint) {
-      this.selectedBite = undefined;
+      this.selectedBite.set(undefined);
       return;
     }
 
-    this.selectedBite = this.bites()?.find(
-      (bite: Bite) => bite.id === geopoint.id,
+    this.selectedBite.set(
+      this.bites()?.find((bite: Bite) => bite.id === geopoint.id),
     );
   }
 

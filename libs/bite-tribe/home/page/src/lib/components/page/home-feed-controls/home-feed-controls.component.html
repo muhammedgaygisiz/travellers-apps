@@ -26,7 +26,7 @@
 
   @if (showMap()) {
     <div class="chip-container ion-display-flex ion-flex-wrap">
-      <ion-chip (click)="openMapView.emit()">
+      <ion-chip data-testid="bitemap-chip" (click)="openMapView.emit()">
         <ion-icon src="assets/custom-icons/map.svg" />
         <ion-text color="secondary">Bitemap</ion-text>
       </ion-chip>

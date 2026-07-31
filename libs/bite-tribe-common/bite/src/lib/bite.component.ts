@@ -46,6 +46,9 @@ const CANCEL = 'cancel';
   selector: 'bt-bite',
   templateUrl: 'bite.component.html',
   styleUrls: ['bite.component.scss'],
+  host: {
+    '[attr.data-bite-id]': 'bite().id',
+  },
   imports: [
     IonCard,
     IonCardContent,

@@ -28,6 +28,8 @@
     "test": "nx affected --base=develop -t test --parallel --coverage --coverageReporters=text",
     "pwa-asset-generator": "pwa-asset-generator",
     "storybook": "npm run nxgraph-html && nx storybook storybook-host",
+    "intro-story:studio": "npm --prefix tools/intro-story-remotion run studio",
+    "intro-story:render": "npm --prefix tools/intro-story-remotion run render",
     "cap:run:ios": "cap run ios",
     "cap:run:android": "cap run android",
     "pwa-asset-generator:generate:bite-tribe": "pwa-asset-generator apps/bite-tribe/src/logo.svg -i apps/bite-tribe/src/index.html --favicon -m apps/bite-tribe/src/manifest.webmanifest apps/bite-tribe/src/assets/icons",

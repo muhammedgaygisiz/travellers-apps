@@ -1,0 +1,243 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.icons {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 100dvh;
+  padding: calc(0.75rem + var(--ion-safe-area-top, 0px)) 1rem
+    calc(1.25rem + var(--ion-safe-area-bottom, 0px));
+  overflow: hidden;
+  color: #1a1a18;
+  background:
+    radial-gradient(
+      120% 80% at 50% -10%,
+      var(--accent-soft) 0%,
+      transparent 55%
+    ),
+    linear-gradient(165deg, #fffdf8 0%, #f7f1e8 48%, var(--accent-soft) 140%);
+  transition: background 420ms ease;
+  user-select: none;
+}
+
+.icons__track {
+  margin: 0 0 0.45rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(32 32 30 / 45%);
+}
+
+.icons__progress {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.icons__seg {
+  height: 0.2rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(32 32 30 / 14%);
+}
+
+.icons__fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.icons__fill--done {
+  width: 100%;
+}
+
+.icons__fill--active {
+  animation: beat-fill linear forwards;
+}
+
+@keyframes beat-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.icons__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icons__brand {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.icons__skip {
+  padding: 0.35rem 0.6rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(32 32 30 / 6%);
+  color: inherit;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.icons__stage {
+  position: relative;
+  display: grid;
+  flex: 1;
+  place-content: center;
+  gap: 1.75rem;
+  width: 100%;
+  margin: 0;
+  padding: 1rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.icons__glow {
+  position: absolute;
+  inset: 18% 12% 28%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+.icons__orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 9.5rem;
+  height: 9.5rem;
+  margin-inline: auto;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #fff 0%, var(--accent-soft) 100%);
+  box-shadow: 0 18px 40px rgb(32 32 30 / 10%);
+  animation: orb-in 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.icons__orb ion-icon {
+  font-size: 3.25rem;
+  color: var(--accent);
+  animation: icon-float 2.8s ease-in-out infinite;
+}
+
+.icons__copy {
+  position: relative;
+  max-width: 16rem;
+  margin-inline: auto;
+  animation: copy-in 520ms 80ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.icons__kicker {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(32 32 30 / 55%);
+}
+
+.icons__copy h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.75rem, 6vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.icons__copy p:last-child {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+  color: rgb(32 32 30 / 72%);
+}
+
+.icons__footer {
+  display: grid;
+  min-height: 3.25rem;
+  place-items: center;
+}
+
+.icons__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgb(32 32 30 / 45%);
+}
+
+.icons__cta {
+  width: min(100%, 18rem);
+  padding: 0.9rem 1.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@keyframes orb-in {
+  from {
+    opacity: 0;
+    transform: scale(0.72) translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes icon-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icons__orb,
+  .icons__copy,
+  .icons__orb ion-icon,
+  .icons__fill--active {
+    animation: none !important;
+  }
+
+  .icons__fill--active {
+    width: 100%;
+  }
+}

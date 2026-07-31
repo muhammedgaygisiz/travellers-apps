@@ -34,13 +34,13 @@
           </ion-fab-button>
         </ion-fab>
       }
-      @if (selectedBite) {
+      @if (selectedBite(); as bite) {
         <bt-snap-drawer>
           <h4 class="bite-title">
-            {{ selectedBite.name }}
+            {{ bite.name }}
           </h4>
           <bt-bite
-            [bite]="selectedBite"
+            [bite]="bite"
             [userId]="userId()"
             (biteClick)="biteClick.emit($event)"
             (likeButtonClick)="likeButtonClick.emit($event)"

@@ -1,0 +1,46 @@
+<section
+  class="beats"
+  [class.beats--paused]="paused()"
+  [style.--accent]="scene().accent"
+>
+  <div class="beats__progress" aria-hidden="true">
+    @for (scene of scenes; track scene.id; let i = $index) {
+      <div class="beats__seg">
+        @if (i < index()) {
+          <div class="beats__fill beats__fill--done"></div>
+        } @else if (i === index()) {
+          @for (_ of [animKey()]; track _) {
+            <div
+              class="beats__fill beats__fill--active"
+              [style.animation-duration.ms]="14000"
+              [style.animation-play-state]="paused() ? 'paused' : 'running'"
+            ></div>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <header class="beats__top">
+    @for (_ of [index()]; track _) {
+      <p class="beats__caption">{{ scene().headline }}</p>
+    }
+    <button type="button" class="beats__skip" (click)="skip()">Skip</button>
+  </header>
+
+  <div class="beats__stage">
+    <intro-real-ui-source [beat]="scene().id" [framed]="false" />
+  </div>
+
+  <footer class="beats__footer">
+    @if (isLast()) {
+      <button type="button" class="beats__cta" (click)="finish()">
+        Let's go
+      </button>
+    } @else {
+      <button type="button" class="beats__cta" (click)="nextBeat($event)">
+        Next
+      </button>
+    }
+  </footer>
+</section>

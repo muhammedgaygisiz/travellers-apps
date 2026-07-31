@@ -1,12 +1,7 @@
 import { onSchedule } from 'firebase-functions/scheduler';
 import { logger } from 'firebase-functions';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
-import { getMessaging } from 'firebase-admin/messaging';
-import { getInvalidTokens } from '../shared/utils/get-invalid-tokens';
-import { cleanupInvalidTokens } from '../shared/utils/cleanup-invalid-tokens';
-import { getTokens } from '../shared/utils/get-tokens';
-import { buildChunks } from '../shared/utils/build-chunks';
-import { CHUNK_SIZE } from '../shared/utils/chunk-size';
+import { sendLocalizedNotification } from '../shared/utils/send-localized-notification';
 import {
   buildLeaderboardNotificationBody,
   computeRankChanges,
@@ -53,36 +48,17 @@ const storeBaseline = async (users: LeaderboardUser[]): Promise<void> => {
 };
 
 const notifyUser = async (change: LeaderboardRankChange): Promise<void> => {
-  const tokens = await getTokens([change.userId]);
-
-  if (tokens.length === 0) {
-    logger.warn(
-      `--- No valid push tokens for ${change.userId}, skipping leaderboard notification`,
-    );
-    return;
-  }
-
-  const body = buildLeaderboardNotificationBody(change);
-  const chunks = buildChunks(tokens, CHUNK_SIZE);
-
-  for (const chunk of chunks) {
-    const res = await getMessaging().sendEachForMulticast({
-      tokens: chunk,
-      notification: {
-        title: 'Leaderboard Update',
-        body,
-      },
-      data: {
-        type: 'LEADERBOARD_RANK_CHANGE',
-        userId: `${change.userId}`,
-      },
-    });
-
-    const invalidTokens = getInvalidTokens(res, chunk);
-    if (invalidTokens.length > 0) {
-      await cleanupInvalidTokens(invalidTokens);
-    }
-  }
+  await sendLocalizedNotification({
+    uids: [change.userId],
+    data: {
+      type: 'LEADERBOARD_RANK_CHANGE',
+      userId: `${change.userId}`,
+    },
+    buildMessage: (translate) => ({
+      title: translate('leaderboard.title'),
+      body: buildLeaderboardNotificationBody(change, translate),
+    }),
+  });
 };
 
 /**

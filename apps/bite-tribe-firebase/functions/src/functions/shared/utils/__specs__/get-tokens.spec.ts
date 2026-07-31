@@ -1,5 +1,6 @@
 import type { FakeFirestore } from '../../../users/__specs__/fake-firestore';
 import { createFakeFirestore } from '../../../users/__specs__/fake-firestore';
+import type { UserPushToken } from '../get-tokens';
 
 let db: FakeFirestore;
 
@@ -15,7 +16,7 @@ jest.mock('firebase-functions', () => ({
  * The module under test grabs its Firestore handle at import time, so it is
  * re-imported per test against a freshly seeded store.
  */
-const getTokens = (uids: string[]): Promise<string[]> =>
+const getTokens = (uids: string[]): Promise<UserPushToken[]> =>
   (require('../get-tokens') as typeof import('../get-tokens')).getTokens(uids);
 
 describe('getTokens', () => {
@@ -24,13 +25,15 @@ describe('getTokens', () => {
     db = createFakeFirestore();
   });
 
-  it('returns the enabled tokens of a user', async () => {
+  it('returns the enabled tokens of a user with their owner', async () => {
     db.seed('users/user-1/pushTokens/token-a', {
       enabled: true,
       installationId: 'installation-a',
     });
 
-    await expect(getTokens(['user-1'])).resolves.toEqual(['token-a']);
+    await expect(getTokens(['user-1'])).resolves.toEqual([
+      { uid: 'user-1', token: 'token-a' },
+    ]);
   });
 
   it('skips an installation the user disabled', async () => {
@@ -54,14 +57,18 @@ describe('getTokens', () => {
       installationId: 'installation-b',
     });
 
-    await expect(getTokens(['user-1'])).resolves.toEqual(['token-b']);
+    await expect(getTokens(['user-1'])).resolves.toEqual([
+      { uid: 'user-1', token: 'token-b' },
+    ]);
   });
 
   it('delivers to a legacy token that has no enabled flag', async () => {
     // Tokens registered before the flag existed must not go silent.
     db.seed('users/user-1/pushTokens/legacy-token', { platform: 'ios' });
 
-    await expect(getTokens(['user-1'])).resolves.toEqual(['legacy-token']);
+    await expect(getTokens(['user-1'])).resolves.toEqual([
+      { uid: 'user-1', token: 'legacy-token' },
+    ]);
   });
 
   it('collects the tokens of every requested user', async () => {
@@ -69,8 +76,8 @@ describe('getTokens', () => {
     db.seed('users/user-2/pushTokens/token-b', { enabled: true });
 
     await expect(getTokens(['user-1', 'user-2'])).resolves.toEqual([
-      'token-a',
-      'token-b',
+      { uid: 'user-1', token: 'token-a' },
+      { uid: 'user-2', token: 'token-b' },
     ]);
   });
 

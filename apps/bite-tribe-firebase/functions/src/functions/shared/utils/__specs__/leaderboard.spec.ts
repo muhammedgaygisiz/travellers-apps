@@ -1,3 +1,5 @@
+import type { QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import { createTranslate } from '../../i18n/translate';
 import {
   buildLeaderboardNotificationBody,
   computeRankChanges,
@@ -19,11 +21,18 @@ jest.mock('firebase-functions', () => ({
   },
 }));
 
-const asDoc = (id: string, data: Record<string, unknown>): any =>
+/**
+ * The leaderboard helpers only ever read `id` and `data()`, so a full snapshot
+ * is not worth building - the cast names that narrow expectation instead.
+ */
+const asDoc = (
+  id: string,
+  data: Record<string, unknown>,
+): QueryDocumentSnapshot =>
   ({
     id,
     data: () => data,
-  }) as any;
+  }) as unknown as QueryDocumentSnapshot;
 
 const asLeaderboardUser = (userId: string): LeaderboardUser => ({
   userId,
@@ -159,47 +168,75 @@ describe('computeRankChanges', () => {
 });
 
 describe('buildLeaderboardNotificationBody', () => {
+  const inEnglish = createTranslate('en');
+
   it('describes a user who climbed up', () => {
     expect(
-      buildLeaderboardNotificationBody({
-        userId: 'user-1',
-        previousRank: 5,
-        currentRank: 2,
-        direction: 'up',
-      }),
+      buildLeaderboardNotificationBody(
+        {
+          userId: 'user-1',
+          previousRank: 5,
+          currentRank: 2,
+          direction: 'up',
+        },
+        inEnglish,
+      ),
     ).toBe('You climbed up to #2 on the leaderboard! 🎉');
   });
 
   it('describes a user who slipped down', () => {
     expect(
-      buildLeaderboardNotificationBody({
-        userId: 'user-1',
-        previousRank: 2,
-        currentRank: 5,
-        direction: 'down',
-      }),
+      buildLeaderboardNotificationBody(
+        {
+          userId: 'user-1',
+          previousRank: 2,
+          currentRank: 5,
+          direction: 'down',
+        },
+        inEnglish,
+      ),
     ).toBe('You dropped to #5 on the leaderboard.');
   });
 
   it('describes a new entrant', () => {
     expect(
-      buildLeaderboardNotificationBody({
-        userId: 'user-1',
-        previousRank: null,
-        currentRank: 8,
-        direction: 'up',
-      }),
+      buildLeaderboardNotificationBody(
+        {
+          userId: 'user-1',
+          previousRank: null,
+          currentRank: 8,
+          direction: 'up',
+        },
+        inEnglish,
+      ),
     ).toBe('You entered the top 10 at #8 on the leaderboard! 🎉');
   });
 
   it('describes a user who dropped out of the top 10', () => {
     expect(
-      buildLeaderboardNotificationBody({
-        userId: 'user-1',
-        previousRank: 10,
-        currentRank: null,
-        direction: 'down',
-      }),
+      buildLeaderboardNotificationBody(
+        {
+          userId: 'user-1',
+          previousRank: 10,
+          currentRank: null,
+          direction: 'down',
+        },
+        inEnglish,
+      ),
     ).toBe('You dropped out of the top 10 on the leaderboard.');
+  });
+
+  it('describes the same rank change in the recipient language', () => {
+    expect(
+      buildLeaderboardNotificationBody(
+        {
+          userId: 'user-1',
+          previousRank: 5,
+          currentRank: 2,
+          direction: 'up',
+        },
+        createTranslate('de'),
+      ),
+    ).toBe('Du bist auf Platz 2 der Bestenliste geklettert! 🎉');
   });
 });

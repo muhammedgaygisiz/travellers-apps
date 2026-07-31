@@ -3,12 +3,8 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { User } from '../shared/model/user';
 import { Bite } from '../shared/model/bite';
-import { getInvalidTokens } from '../shared/utils/get-invalid-tokens';
-import { buildChunks } from '../shared/utils/build-chunks';
-import { sendNotification } from '../shared/utils/send-notification';
-import { cleanupInvalidTokens } from '../shared/utils/cleanup-invalid-tokens';
-import { getTokens } from '../shared/utils/get-tokens';
-import { CHUNK_SIZE } from '../shared/utils/chunk-size';
+import { Translate } from '../shared/i18n/translate';
+import { sendLocalizedNotification } from '../shared/utils/send-localized-notification';
 
 const db = getFirestore();
 
@@ -19,11 +15,18 @@ const getFollowerUids = (
   >,
 ): string[] => followersSnap.docs.map((d) => d.id);
 
-const buildNotificationBody = (authorData: User, bite: Bite): string => {
-  const authorName = authorData.displayName ?? 'Someone';
-  const title = bite.name ? `: ${bite.name}` : '';
+const buildNotificationBody = (
+  translate: Translate,
+  authorData: User,
+  bite: Bite,
+): string => {
+  const author = authorData.displayName ?? translate('common.someone');
 
-  return `${authorName} just created a new bite${title}`;
+  // A Bite without a name gets the shorter sentence rather than a dangling
+  // separator, which only the catalog can express per language.
+  return bite.name
+    ? translate('newBite.bodyWithName', { author, bite: bite.name })
+    : translate('newBite.body', { author });
 };
 
 export const notifyFollowersOnNewBite = onDocumentCreated(
@@ -79,27 +82,17 @@ export const notifyFollowersOnNewBite = onDocumentCreated(
 
     const followerUids = getFollowerUids(followersSnap);
 
-    const tokens = await getTokens(followerUids);
-    if (tokens.length === 0) {
-      logger.warn('--- No valid push tokens found, aborting notification');
-      return;
-    }
-
-    const body = buildNotificationBody(authorData, bite);
-
-    logger.info('--- Sending Notification with body:', body);
-    const chunks = buildChunks(tokens, CHUNK_SIZE);
-
-    logger.info('--- Chunks:', chunks);
-    for (const chunk of chunks) {
-      const res = await sendNotification(chunk, body, biteId, authorUid);
-
-      const invalidTokens = getInvalidTokens(res, chunk);
-
-      logger.info('--- Invalid tokens to clean up:', invalidTokens);
-      if (invalidTokens.length > 0) {
-        await cleanupInvalidTokens(invalidTokens);
-      }
-    }
+    await sendLocalizedNotification({
+      uids: followerUids,
+      data: {
+        type: 'NEW_BITE',
+        biteId: `${biteId}`,
+        authorUid: `${authorUid}`,
+      },
+      buildMessage: (translate) => ({
+        title: translate('newBite.title'),
+        body: buildNotificationBody(translate, authorData, bite),
+      }),
+    });
   },
 );

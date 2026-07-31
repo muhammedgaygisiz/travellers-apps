@@ -59,7 +59,10 @@ describe(SettingsService.name, () => {
         },
         {
           provide: EmailVerificationService,
-          useValue: { promptVisible: signal(false) },
+          useValue: {
+            promptVisible: signal(false),
+            resendRunning: signal(false),
+          },
         },
         { provide: NavController, useValue: { navigateBack: jest.fn() } },
       ],

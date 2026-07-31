@@ -42,6 +42,7 @@ export class ProfileService {
   isPublicProfile = this.dataAccess.isPublicProfile;
   profileMetadata = this.dataAccess.profileMetadata;
   emailVerificationPromptVisible = this.emailVerification.promptVisible;
+  emailVerificationResendRunning = this.emailVerification.resendRunning;
 
   // The own profile comes from the store instead of a resource, so it has no
   // loading flag: an authenticated user without a profile yet is still loading.

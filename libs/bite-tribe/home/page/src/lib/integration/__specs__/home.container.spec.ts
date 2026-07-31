@@ -32,6 +32,7 @@ const MockHomeService = {
   hasErrorLoadingGpsPosition: signal(false),
   networkStatus: signal(undefined),
   emailVerificationPromptVisible: signal(false),
+  emailVerificationResendRunning: signal(false),
   logout: jest.fn(),
   likeButtonClicked: jest.fn(),
   biteClicked: jest.fn(),

@@ -19,6 +19,7 @@ const localImagePickerMock = {
 
 const emailVerificationMock = {
   promptVisible: jest.fn(() => false),
+  resendRunning: jest.fn(() => false),
   trackPromptShown: jest.fn(),
   resend: jest.fn().mockResolvedValue(undefined),
 };
@@ -671,6 +672,15 @@ describe('HomeService', () => {
       (service: HomeService) => {
         expect(service.emailVerificationPromptVisible).toBe(
           emailVerificationMock.promptVisible,
+        );
+      },
+    ));
+
+    it('should expose the shared resend-running signal', inject(
+      [HomeService],
+      (service: HomeService) => {
+        expect(service.emailVerificationResendRunning).toBe(
+          emailVerificationMock.resendRunning,
         );
       },
     ));

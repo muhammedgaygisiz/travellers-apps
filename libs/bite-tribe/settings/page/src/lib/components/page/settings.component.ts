@@ -90,6 +90,7 @@ export class PageSettings {
   publicUser = input<PublicUser>();
   settings = input<Settings>();
   showEmailVerificationPrompt = input(false);
+  emailVerificationResendRunning = input(false);
 
   /** Registered installations of the signed-in user, most recent first. */
   pushInstallations = input<readonly PushInstallationView[]>([]);

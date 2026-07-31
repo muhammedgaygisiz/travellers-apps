@@ -51,3 +51,20 @@ export const Loading: Story = {
     isBitesLoading: true,
   },
 };
+
+/** The account still has to verify its email, so the resend offer is idle. */
+export const EmailVerificationPrompt: Story = {
+  args: {
+    ...Empty.args,
+    showEmailVerificationPrompt: true,
+  },
+};
+
+/** The resend callable is in flight: progress is shown and the tap is blocked. */
+export const EmailVerificationResendRunning: Story = {
+  args: {
+    ...Empty.args,
+    showEmailVerificationPrompt: true,
+    emailVerificationResendRunning: true,
+  },
+};

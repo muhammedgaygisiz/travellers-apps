@@ -101,7 +101,7 @@
   pointer-events: none;
   background: #fff;
   /* Mirror shell insets when content is projected without shell CSS vars. */
-  --ion-safe-area-top: 54px;
+  --ion-safe-area-top: 59px;
   --ion-safe-area-right: 0px;
   --ion-safe-area-bottom: 34px;
   --ion-safe-area-left: 0px;
@@ -159,7 +159,7 @@
 
 /* Push BiteTribe header / toolbar below Dynamic Island. */
 .source__native ::ng-deep ion-header ion-toolbar:first-of-type {
-  padding-top: var(--ion-safe-area-top, 54px) !important;
+  padding-top: var(--ion-safe-area-top, 59px) !important;
 }
 
 .source__native ::ng-deep ion-footer ion-toolbar:last-of-type {

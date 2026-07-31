@@ -23,6 +23,7 @@ Users can access legal and account lifecycle information.
 - The public `/account-deletion` route stays reachable without signing in for store review. It documents the in-app flow and keeps an email fallback for users who can no longer sign in.
 - Email/password user sees a non-blocking email verification prompt on home, settings, and profile edit when verification is still required.
 - User can request a fresh verification email from the prompt; backend throttling prevents repeated manual sends within one hour.
+- The resend action reports itself: the button shows a spinner with a sending label and is disabled while the callable is in flight, a second tap is ignored, and the outcome always raises a localized toast for success, one-hour throttling, an already-verified address, an unsupported provider, or a generic failure. The button returns to its idle state on every outcome, so a recoverable failure stays retryable.
 - Backend sends monthly automatic verification reminders at 10:00 Europe/Zurich until the configured reminder limit is reached.
 
 ## Deletion Contract

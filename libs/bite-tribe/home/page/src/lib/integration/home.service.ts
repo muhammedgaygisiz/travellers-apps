@@ -57,6 +57,7 @@ export class HomeService {
 
   networkStatus = this.dataAccess.networkStatus;
   emailVerificationPromptVisible = this.emailVerification.promptVisible;
+  emailVerificationResendRunning = this.emailVerification.resendRunning;
 
   logout(): void {
     this.dataAccess.logout();

@@ -20,6 +20,7 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSearchbar,
+  IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
 import type { Bite, LikeClick } from 'model';
@@ -51,6 +52,7 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     IonRefresher,
     IonRefresherContent,
     IonSearchbar,
+    IonSpinner,
     HomeFeedControlsComponent,
     GpsErrorCardComponent,
     NetworkErrorBoxComponent,
@@ -86,6 +88,9 @@ export class BiteTribeHomeComponent {
   enableTriedOutSwipe = input(false, { transform: booleanAttribute });
   triedOutBiteIds = input<string[]>([]);
   showEmailVerificationPrompt = input(false, { transform: booleanAttribute });
+  emailVerificationResendRunning = input(false, {
+    transform: booleanAttribute,
+  });
   enableImageRetry = input(false, { transform: booleanAttribute });
 
   readonly logoutClick = output();

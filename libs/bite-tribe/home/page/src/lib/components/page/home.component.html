@@ -110,9 +110,16 @@
               <ion-button
                 fill="clear"
                 class="ion-align-self-start"
+                data-testid="home-resend-verification-email"
+                [disabled]="emailVerificationResendRunning()"
                 (click)="resendEmailVerification.emit()"
               >
-                {{ 'resend-email' | transloco }}
+                @if (emailVerificationResendRunning()) {
+                  <ion-spinner name="dots" slot="start" />
+                  {{ 'sending-verification-email' | transloco }}
+                } @else {
+                  {{ 'resend-email' | transloco }}
+                }
               </ion-button>
             </div>
           </ion-card-content>

@@ -22,6 +22,7 @@ export class SettingsService {
   publicUser = this.dataAccess.publicUser;
   settings = this.dataAccess.settings;
   emailVerificationPromptVisible = this.emailVerification.promptVisible;
+  emailVerificationResendRunning = this.emailVerification.resendRunning;
 
   readonly pushInstallations = signal<readonly PushInstallationView[]>([]);
   readonly pushPermission = signal<PushPermissionState>('prompt');

@@ -88,8 +88,16 @@
           {{ 'email-not-verified' | transloco }}
         </ion-text>
         } @if (showEmailVerificationPrompt()) {
-        <ion-button fill="clear" (click)="resendEmailVerification.emit()">
-          {{ 'resend-verification-email' | transloco }}
+        <ion-button
+          fill="clear"
+          data-testid="edit-profile-resend-verification-email"
+          [disabled]="emailVerificationResendRunning()"
+          (click)="resendEmailVerification.emit()"
+        >
+          @if (emailVerificationResendRunning()) {
+          <ion-spinner name="dots" slot="start" />
+          {{ 'sending-verification-email' | transloco }} } @else { {{
+          'resend-verification-email' | transloco }} }
         </ion-button>
         }
       </div>

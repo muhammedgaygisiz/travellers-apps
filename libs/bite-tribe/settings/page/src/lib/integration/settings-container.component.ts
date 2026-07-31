@@ -16,6 +16,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [publicUser]="service.publicUser()"
       [settings]="service.settings()"
       [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
+      [emailVerificationResendRunning]="
+        service.emailVerificationResendRunning()
+      "
       [pushInstallations]="service.pushInstallations()"
       [pushPermission]="service.pushPermission()"
       [pushInstallationsLoading]="service.pushInstallationsLoading()"

@@ -177,6 +177,24 @@ describe('EmailVerificationService', () => {
       );
     });
 
+    it('maps send_failed failures to the retryable error toast', async () => {
+      ApiMock.resendEmailVerification.mockRejectedValue({
+        message: 'send_failed',
+      });
+
+      await service.resend('settings');
+
+      expect(analytics.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.EmailVerificationResendFailed,
+        { surface: 'settings', reason: 'send_failed' },
+      );
+      expect(toastController.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'verification-email-could-not-be-sent',
+        }),
+      );
+    });
+
     it('shows the default error toast for unknown failures', async () => {
       ApiMock.resendEmailVerification.mockRejectedValue(new Error('boom'));
 
@@ -185,6 +203,69 @@ describe('EmailVerificationService', () => {
       expect(toastController.create).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'verification-email-could-not-be-sent',
+        }),
+      );
+    });
+  });
+
+  describe('resendRunning', () => {
+    it('is false before the first resend', () => {
+      expect(service.resendRunning()).toBe(false);
+    });
+
+    it('is true while the callable is in flight', async () => {
+      let resolveResend: () => void = () => undefined;
+      ApiMock.resendEmailVerification.mockReturnValue(
+        new Promise<void>((resolve) => {
+          resolveResend = resolve;
+        }),
+      );
+
+      const pending = service.resend('home');
+      expect(service.resendRunning()).toBe(true);
+
+      resolveResend();
+      await pending;
+
+      expect(service.resendRunning()).toBe(false);
+    });
+
+    it('ignores a second tap while a resend is in flight', async () => {
+      let resolveResend: () => void = () => undefined;
+      ApiMock.resendEmailVerification.mockReturnValue(
+        new Promise<void>((resolve) => {
+          resolveResend = resolve;
+        }),
+      );
+
+      const pending = service.resend('home');
+      await service.resend('home');
+
+      expect(ApiMock.resendEmailVerification).toHaveBeenCalledTimes(1);
+      expect(analytics.logEvent).toHaveBeenCalledTimes(1);
+      expect(analytics.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.EmailVerificationResendTapped,
+        { surface: 'home' },
+      );
+
+      resolveResend();
+      await pending;
+    });
+
+    it('is released after a failure so the prompt stays actionable', async () => {
+      ApiMock.resendEmailVerification.mockRejectedValue(new Error('boom'));
+
+      await service.resend('home');
+
+      expect(service.resendRunning()).toBe(false);
+
+      ApiMock.resendEmailVerification.mockResolvedValue(undefined);
+      await service.resend('home');
+
+      expect(ApiMock.resendEmailVerification).toHaveBeenCalledTimes(2);
+      expect(toastController.create).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          message: 'verification-email-sent-check-your-inbox',
         }),
       );
     });

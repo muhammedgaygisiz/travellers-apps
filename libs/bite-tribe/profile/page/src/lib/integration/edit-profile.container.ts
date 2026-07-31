@@ -18,6 +18,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isAuthenticated]="service.isAuthenticated()"
       [publicUser]="service.myUser()"
       [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
+      [emailVerificationResendRunning]="
+        service.emailVerificationResendRunning()
+      "
       (submitPublicUser)="service.saveProfile($event)"
       (resendEmailVerification)="
         service.resendEmailVerification('profile_edit')

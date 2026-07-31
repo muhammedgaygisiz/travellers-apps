@@ -12,6 +12,7 @@ import { Bite, PublicUser } from 'model';
 
 const emailVerificationMock = {
   promptVisible: jest.fn(() => false),
+  resendRunning: jest.fn(() => false),
   trackPromptShown: jest.fn(),
   resend: jest.fn().mockResolvedValue(undefined),
 };
@@ -307,6 +308,12 @@ describe(ProfileService.name, () => {
     it('should expose the shared prompt-visible signal', () => {
       expect(service.emailVerificationPromptVisible).toBe(
         emailVerificationMock.promptVisible,
+      );
+    });
+
+    it('should expose the shared resend-running signal', () => {
+      expect(service.emailVerificationResendRunning).toBe(
+        emailVerificationMock.resendRunning,
       );
     });
 

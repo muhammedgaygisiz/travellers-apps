@@ -21,6 +21,7 @@ import {
   IonItem,
   IonLabel,
   IonModal,
+  IonSpinner,
   IonTextarea,
   IonText,
   IonTitle,
@@ -58,6 +59,7 @@ const GO_PRIVATE = 'go-private';
     IonAlert,
     IonToggle,
     IonModal,
+    IonSpinner,
     IonHeader,
     IonToolbar,
     IonButtons,
@@ -78,6 +80,7 @@ export class EditProfilePage {
 
   publicUser = input<PublicUser>();
   showEmailVerificationPrompt = input(false);
+  emailVerificationResendRunning = input(false);
 
   submitPublicUser = output<PublicUser>();
   resendEmailVerification = output<void>();

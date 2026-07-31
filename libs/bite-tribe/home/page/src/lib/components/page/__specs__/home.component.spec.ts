@@ -401,4 +401,52 @@ describe('BiteTribeHomeComponent', () => {
       expect(component.displayedBites()[0].name).toBe('Burger');
     });
   });
+  describe('email verification prompt', () => {
+    const resendButton = (): (HTMLElement & { disabled?: boolean }) | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="home-resend-verification-email"]',
+      );
+
+    const showPrompt = (resendRunning: boolean): void => {
+      componentRef.setInput('showEmailVerificationPrompt', true);
+      componentRef.setInput('emailVerificationResendRunning', resendRunning);
+      fixture.detectChanges();
+    };
+
+    it('should offer an enabled resend button while idle', () => {
+      showPrompt(false);
+
+      const button = resendButton();
+
+      expect(button).not.toBeNull();
+      expect(button?.disabled).toBe(false);
+      expect(button?.querySelector('ion-spinner')).toBeNull();
+    });
+
+    it('should show progress and block another tap while resending', () => {
+      showPrompt(true);
+
+      const button = resendButton();
+
+      expect(button?.disabled).toBe(true);
+      expect(button?.querySelector('ion-spinner')).not.toBeNull();
+    });
+
+    it('should become actionable again once the resend settles', () => {
+      // A recoverable failure releases the running flag, so the prompt has to
+      // return to its tappable idle state.
+      showPrompt(true);
+      showPrompt(false);
+
+      const button = resendButton();
+      const resendSpy = jest.spyOn(component.resendEmailVerification, 'emit');
+
+      expect(button?.disabled).toBe(false);
+      expect(button?.querySelector('ion-spinner')).toBeNull();
+
+      button?.click();
+
+      expect(resendSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 });

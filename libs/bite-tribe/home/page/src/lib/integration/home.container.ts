@@ -29,6 +29,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
       [networkStatus]="service.networkStatus()"
       [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
+      [emailVerificationResendRunning]="
+        service.emailVerificationResendRunning()
+      "
       [showFilters]="false"
       showSearchChip
       enableImageRetry

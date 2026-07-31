@@ -1,4 +1,4 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -24,10 +24,13 @@ export class EmailVerificationService {
   private readonly transloco = inject(TranslocoService);
 
   private readonly publicUser = toSignal(this.storeService.publicUser$);
+  private readonly resendRunningState = signal(false);
 
   readonly promptVisible = computed(() =>
     isEmailVerificationPromptVisible(this.publicUser()),
   );
+
+  readonly resendRunning = this.resendRunningState.asReadonly();
 
   trackPromptShown(surface: EmailVerificationSurface): void {
     if (!this.promptVisible()) {
@@ -40,6 +43,14 @@ export class EmailVerificationService {
   }
 
   async resend(surface: EmailVerificationSurface): Promise<void> {
+    // A second tap while the callable is in flight would request another email
+    // without the user being able to tell the two results apart.
+    if (this.resendRunningState()) {
+      return;
+    }
+
+    this.resendRunningState.set(true);
+
     this.analytics.logEvent(AnalyticsEvent.EmailVerificationResendTapped, {
       surface,
     });
@@ -57,6 +68,9 @@ export class EmailVerificationService {
         reason,
       });
       await this.showToast(this.getResendErrorKey(reason));
+    } finally {
+      // Released on every outcome so a recoverable failure stays retryable.
+      this.resendRunningState.set(false);
     }
   }
 

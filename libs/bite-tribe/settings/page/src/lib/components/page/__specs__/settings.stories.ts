@@ -108,3 +108,18 @@ export const NotificationsUnsupportedAndEmpty: Story = {
     pushPermission: 'unsupported',
   },
 };
+
+/** The account still has to verify its email, so the resend offer is idle. */
+export const EmailVerificationPrompt: Story = {
+  args: {
+    showEmailVerificationPrompt: true,
+  },
+};
+
+/** The resend callable is in flight: progress is shown and the tap is blocked. */
+export const EmailVerificationResendRunning: Story = {
+  args: {
+    showEmailVerificationPrompt: true,
+    emailVerificationResendRunning: true,
+  },
+};

@@ -33,9 +33,9 @@ type ArcFilter = IntroStorySceneId | 'all';
 
 /**
  * I — Soft Whisper: content-first progressive disclosure.
- * No modal card stacks. At most one chrome button (Skip). Light Outfit
- * captions fade near the focus; soft grayscale shine; auto-advance +
- * tap-stage to advance. Find → Share → Tribe → Go.
+ * No modal card stacks. At most one chrome button (Skip). Outfit
+ * captions live below the phone as page chrome; soft grayscale shine
+ * on stage; auto-advance + tap-stage to advance. Find → Share → Tribe → Go.
  */
 @Component({
   selector: 'intro-soft-whisper',
@@ -150,90 +150,6 @@ export class SoftWhisperComponent {
       '--shine-h': `${h}px`,
       '--shine-r': '50%',
     };
-  });
-
-  readonly tipAbove = computed(() => {
-    const rect = this.focusRect();
-    if (!rect) {
-      return false;
-    }
-    const stage = this.stage()?.nativeElement;
-    const h = stage?.clientHeight || 700;
-    return rect.top + rect.height / 2 > h * 0.52;
-  });
-
-  /** Caption position via CSS vars — never park text inside the shine hole. */
-  readonly tipStyle = computed(() => {
-    const rect = this.focusRect();
-    const stage = this.stage()?.nativeElement;
-    const w = stage?.clientWidth || 390;
-    const h = stage?.clientHeight || 700;
-    const tipW = Math.min(15.25 * 16, w - 45);
-    const tipH = 96;
-    const safeBottom = {
-      '--tip-top': 'auto',
-      '--tip-bottom': '9.5rem',
-      '--tip-left': '50%',
-      '--tip-y': '0%',
-    };
-
-    if (!rect) {
-      return safeBottom;
-    }
-
-    const cx = rect.left + rect.width / 2;
-    const left = Math.min(Math.max(cx, tipW / 2 + 16), w - tipW / 2 - 16);
-    const gap = 26;
-    const holePad = 18;
-    const holeTop = rect.top - holePad;
-    const holeBottom = rect.top + rect.height + holePad;
-    // Leave room for ion-footer Create Bite (~115px) + margin.
-    const footerReserve = 150;
-
-    const placeAbove = (): Record<string, string> => {
-      const top = Math.max(12, holeTop - tipH - 4);
-      if (top < 8) {
-        return { ...safeBottom, '--tip-left': `${left}px` };
-      }
-      return {
-        '--tip-top': `${holeTop - 4}px`,
-        '--tip-bottom': 'auto',
-        '--tip-left': `${left}px`,
-        '--tip-y': '-100%',
-      };
-    };
-
-    const placeBelow = (): Record<string, string> => {
-      const top = holeBottom + gap;
-      if (top + tipH > h - footerReserve) {
-        return placeAbove();
-      }
-      return {
-        '--tip-top': `${top}px`,
-        '--tip-bottom': 'auto',
-        '--tip-left': `${left}px`,
-        '--tip-y': '0%',
-      };
-    };
-
-    // Large card / wide targets: prefer above the hole (dimmed chrome),
-    // so cream captions aren't sitting inside the color-pop.
-    if (rect.height > h * 0.2 || rect.width > w * 0.65) {
-      const above = placeAbove();
-      if (above['--tip-bottom'] === 'auto') {
-        return above;
-      }
-      return { ...safeBottom, '--tip-left': `${left}px` };
-    }
-
-    if (this.tipAbove()) {
-      const above = placeAbove();
-      if (above['--tip-bottom'] === 'auto') {
-        return above;
-      }
-      return placeBelow();
-    }
-    return placeBelow();
   });
 
   constructor() {

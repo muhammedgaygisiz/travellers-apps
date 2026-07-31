@@ -16,7 +16,7 @@ const BEAT_ORDER: IntroStorySceneId[] = ['discover', 'share', 'tribe', 'go'];
 
 /**
  * J — Soft Whisper chrome + animated real-UI story flows.
- * Gestures drive the phone; floating Outfit captions narrate. Skip only.
+ * Gestures drive the phone; Outfit captions below the stage narrate. Skip only.
  */
 @Component({
   selector: 'intro-whisper-flow',

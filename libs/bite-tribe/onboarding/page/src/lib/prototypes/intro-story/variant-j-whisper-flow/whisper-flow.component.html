@@ -29,13 +29,6 @@
         [advanceOnComplete]="true"
         (beatCompleted)="onBeatCompleted()"
       />
-
-      <div class="wf__whisper" role="status" aria-live="polite">
-        <span class="wf__whisper-glow" aria-hidden="true"></span>
-        <p class="wf__kicker">{{ scene().headline }}</p>
-        <p class="wf__title">{{ whisper().title }}</p>
-        <p class="wf__body">{{ whisper().body }}</p>
-      </div>
     } @else {
       <div class="wf__end">
         <p class="wf__end-title">You're ready</p>
@@ -46,4 +39,12 @@
       </div>
     }
   </div>
+
+  @if (!finished()) {
+    <div class="wf__whisper" role="status" aria-live="polite">
+      <p class="wf__kicker">{{ scene().headline }}</p>
+      <p class="wf__title">{{ whisper().title }}</p>
+      <p class="wf__body">{{ whisper().body }}</p>
+    </div>
+  }
 </section>

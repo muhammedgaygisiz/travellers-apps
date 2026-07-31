@@ -48,26 +48,18 @@
       >
         <div class="sw__veil"></div>
       </div>
-
-      @for (_ of [animKey()]; track _) {
-        <div
-          class="sw__whisper"
-          role="status"
-          aria-live="polite"
-          [class.sw__whisper--above]="tipAbove()"
-          [style.--tip-top]="tipStyle()['--tip-top']"
-          [style.--tip-bottom]="tipStyle()['--tip-bottom']"
-          [style.--tip-left]="tipStyle()['--tip-left']"
-          [style.--tip-y]="tipStyle()['--tip-y']"
-        >
-          <span class="sw__whisper-glow" aria-hidden="true"></span>
-          <p class="sw__kicker">{{ scene().headline }}</p>
-          <p class="sw__title">{{ active.title }}</p>
-          <p class="sw__body">{{ active.body }}</p>
-        </div>
-      }
-    } @else if (dismissed()) {
-      <p class="sw__resume" aria-live="polite">Tap to continue</p>
     }
   </div>
+
+  @if (tip(); as active) {
+    @for (_ of [animKey()]; track _) {
+      <div class="sw__whisper" role="status" aria-live="polite">
+        <p class="sw__kicker">{{ scene().headline }}</p>
+        <p class="sw__title">{{ active.title }}</p>
+        <p class="sw__body">{{ active.body }}</p>
+      </div>
+    }
+  } @else if (dismissed()) {
+    <p class="sw__resume" aria-live="polite">Tap to continue</p>
+  }
 </section>

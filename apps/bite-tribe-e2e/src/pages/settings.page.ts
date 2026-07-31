@@ -7,9 +7,9 @@ export type Theme = 'Light' | 'Dark';
  * Page object for the settings screen (route: /settings).
  *
  * Both currency pickers are the same `currency-selector` rendered in an
- * `ion-modal`: the preferred-currency one picks a code, the favorites one only
- * toggles hearts. Its rows are addressed by currency code, which the row prints
- * next to the symbol.
+ * `ion-modal`, in its two modes: the preferred-currency one picks a code and
+ * dismisses, the favorites one toggles rows and stays open. Rows are addressed
+ * by their currency code test id.
  */
 export class SettingsPage {
   readonly page: Page;
@@ -67,7 +67,9 @@ export class SettingsPage {
   }
 
   private currencyRowFor(code: string): Locator {
-    return this.currencySelector.locator('ion-item').filter({ hasText: code });
+    return this.currencySelector.locator(
+      `[data-testid="currency-option-${code}"]`,
+    );
   }
 
   private async searchCurrency(code: string): Promise<void> {
@@ -86,14 +88,12 @@ export class SettingsPage {
   /**
    * Toggles a favorite and closes the modal. The favorites modal has no picking
    * step — its left button is a plain "Save" that just dismisses, because the
-   * heart already wrote through to the form.
+   * row tap already wrote through to the form.
    */
   async toggleFavoriteCurrency(code: string): Promise<void> {
     await this.favoriteCurrenciesRow.click();
     await this.searchCurrency(code);
-    await this.currencyRowFor(code)
-      .getByRole('button', { name: 'add to favorite currencies' })
-      .click();
+    await this.currencyRowFor(code).click();
     await this.currencySelector
       .getByRole('button', { name: 'Save', exact: true })
       .click();

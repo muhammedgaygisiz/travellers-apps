@@ -45,9 +45,9 @@
   <ng-template>
     <currency-selector
       class="ion-page"
+      mode="preferred"
       [selectedCurrency]="currency()"
       [favoriteCurrencies]="favoriteCurrencyList()"
-      [disableFavChange]="true"
       (currencySelected)="selectCurrency($event, currencyModal)"
       (selectionCancel)="currencyModal.dismiss()"
     />
@@ -58,6 +58,7 @@
   <ng-template>
     <currency-selector
       class="ion-page"
+      mode="favorites"
       leftButtonLangCode="save"
       [favoriteCurrencies]="favoriteCurrencyList()"
       (favoriteCurrencyToggled)="toggleFavorite($event)"

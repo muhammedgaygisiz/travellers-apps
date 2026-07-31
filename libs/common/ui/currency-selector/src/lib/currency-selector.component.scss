@@ -9,3 +9,23 @@ ion-content {
 
   flex: 1;
 }
+
+.currency-selector__instruction {
+  margin: 0 24px 8px;
+  color: var(--ion-color-medium);
+  font-size: 0.875rem;
+}
+
+.currency-selector__item--selected {
+  --background: rgba(var(--ion-color-primary-rgb), 0.1);
+}
+
+.currency-selector__checkbox {
+  // The row is the control: the checkbox only reports state.
+  pointer-events: none;
+}
+
+.currency-selector__favorite-note {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}

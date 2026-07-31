@@ -19,6 +19,18 @@ describe('CurrencySelectorComponent', () => {
   let component: CurrencySelectorComponent;
   let fixture: ComponentFixture<CurrencySelectorComponent>;
 
+  const rowFor = (code: string): HTMLElement => {
+    const row = fixture.nativeElement.querySelector(
+      `[data-testid="currency-option-${code}"]`,
+    );
+
+    if (!row) {
+      throw new Error(`No row rendered for ${code}`);
+    }
+
+    return row;
+  };
+
   beforeEach(() => {
     MockTranslocoService.getActiveLang.mockReturnValue('en');
     TestBed.configureTestingModule({
@@ -83,14 +95,20 @@ describe('CurrencySelectorComponent', () => {
     expect(filtered.some((c) => c.code === 'USD')).toBeTruthy();
   });
 
-  it('should emit currencySelected when currency is selected', () => {
+  it('should emit currencySelected when a row is tapped in preferred mode', () => {
     let selectedCode = '';
+    let toggledCode = '';
     component.currencySelected.subscribe((code) => {
       selectedCode = code;
     });
+    component.favoriteCurrencyToggled.subscribe((code) => {
+      toggledCode = code;
+    });
 
-    component.selectCurrency('EUR');
+    component.selectRow('EUR');
+
     expect(selectedCode).toBe('EUR');
+    expect(toggledCode).toBe('');
   });
 
   it('should place favorite currencies at the top', () => {
@@ -110,23 +128,101 @@ describe('CurrencySelectorComponent', () => {
     expect(filtered[0].code).toBe('USD');
   });
 
-  it('should emit favoriteCurrencyToggled when favorite is toggled', () => {
-    const stopPropagation = jest.fn();
-    let toggledCode = '';
-
-    component.favoriteCurrencyToggled.subscribe((code) => {
-      toggledCode = code;
+  describe('favorites mode', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('mode', 'favorites');
+      fixture.detectChanges();
     });
 
-    component.toggleFavorite(
-      {
-        stopPropagation,
-      } as unknown as Event,
-      'EUR',
-    );
+    it('should emit favoriteCurrencyToggled instead of currencySelected when a row is tapped', () => {
+      let selectedCode = '';
+      let toggledCode = '';
+      component.currencySelected.subscribe((code) => {
+        selectedCode = code;
+      });
+      component.favoriteCurrencyToggled.subscribe((code) => {
+        toggledCode = code;
+      });
 
-    expect(stopPropagation).toHaveBeenCalled();
-    expect(toggledCode).toBe('EUR');
+      component.selectRow('EUR');
+
+      expect(toggledCode).toBe('EUR');
+      expect(selectedCode).toBe('');
+    });
+
+    it('should title and instruct for favorites', () => {
+      expect(component.titleKey()).toBe('select-favorite-currencies');
+      expect(component.instructionKey()).toBe(
+        'favorite-currencies-instruction',
+      );
+      // The mock service renders piped copy as empty, so the rendered
+      // instruction is asserted by its presence and its key.
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="currency-instruction"]',
+        ),
+      ).toBeTruthy();
+    });
+
+    it('should name the row by the action it performs and the state it is in', () => {
+      fixture.componentRef.setInput('favoriteCurrencies', ['USD']);
+      fixture.detectChanges();
+
+      expect(rowFor('USD').getAttribute('aria-label')).toBe(
+        'remove-currency-from-favorites',
+      );
+      expect(rowFor('EUR').getAttribute('aria-label')).toBe(
+        'add-currency-to-favorites',
+      );
+    });
+
+    it('should mark selected rows with a checked checkbox and unselected rows without', () => {
+      fixture.componentRef.setInput('favoriteCurrencies', ['USD']);
+      fixture.detectChanges();
+
+      const favorite = rowFor('USD');
+      const other = rowFor('EUR');
+
+      expect(favorite.querySelector('ion-checkbox')?.checked).toBe(true);
+      expect(other.querySelector('ion-checkbox')?.checked).toBe(false);
+      expect(
+        favorite.classList.contains('currency-selector__item--selected'),
+      ).toBe(true);
+      expect(
+        other.classList.contains('currency-selector__item--selected'),
+      ).toBe(false);
+    });
+  });
+
+  describe('preferred mode', () => {
+    it('should title and instruct for a single pick', () => {
+      expect(component.titleKey()).toBe('select-currency');
+      expect(component.instructionKey()).toBe('preferred-currency-instruction');
+    });
+
+    it('should mark the selected currency and label the rows accordingly', () => {
+      fixture.componentRef.setInput('selectedCurrency', 'USD');
+      fixture.detectChanges();
+
+      const selected = rowFor('USD');
+      const other = rowFor('EUR');
+
+      expect(selected.getAttribute('aria-label')).toBe('currency-selected');
+      expect(other.getAttribute('aria-label')).toBe('select-currency-option');
+      expect(selected.querySelector('ion-icon')).toBeTruthy();
+      expect(other.querySelector('ion-icon')).toBeFalsy();
+    });
+
+    it('should show favorites as a labelled note instead of a toggle', () => {
+      fixture.componentRef.setInput('favoriteCurrencies', ['USD']);
+      fixture.detectChanges();
+
+      const favorite = rowFor('USD');
+
+      expect(favorite.querySelector('ion-checkbox')).toBeFalsy();
+      expect(favorite.querySelector('ion-note')).toBeTruthy();
+      expect(rowFor('EUR').querySelector('ion-note')).toBeFalsy();
+    });
   });
 
   it('should emit selectionCancel when cancel is called', () => {

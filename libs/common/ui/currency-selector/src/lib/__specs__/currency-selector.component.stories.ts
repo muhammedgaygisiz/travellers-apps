@@ -27,9 +27,9 @@ export default {
       <ion-app>
         <div style="height: 100vh">
         <currency-selector
+          [mode]="mode"
           [selectedCurrency]="selectedCurrency"
           [favoriteCurrencies]="favoriteCurrencies"
-          [disableFavChange]="disableFavChange"
           [leftButtonLangCode]="leftButtonLangCode"
         />
         </div>
@@ -40,15 +40,17 @@ export default {
 
 type Story = StoryObj<CurrencySelectorComponent>;
 
+/** Picking the one currency prices are shown in. */
 export const Default: Story = {
   args: {
+    mode: 'preferred',
     selectedCurrency: 'EUR',
     favoriteCurrencies: [],
-    disableFavChange: false,
     leftButtonLangCode: 'cancel',
   },
 };
 
+/** Same single pick, with favorites sorted to the top and marked as such. */
 export const WithFavorites: Story = {
   args: {
     ...Default.args,
@@ -57,9 +59,20 @@ export const WithFavorites: Story = {
   },
 };
 
-export const ReadonlyFavorites: Story = {
+/** The multi-select variant with nothing picked yet. */
+export const FavoritesEmpty: Story = {
   args: {
-    ...WithFavorites.args,
-    disableFavChange: true,
+    ...Default.args,
+    mode: 'favorites',
+    favoriteCurrencies: [],
+    leftButtonLangCode: 'save',
+  },
+};
+
+/** The multi-select variant with currencies already added. */
+export const FavoritesSelected: Story = {
+  args: {
+    ...FavoritesEmpty.args,
+    favoriteCurrencies: ['USD', 'CHF', 'THB'],
   },
 };

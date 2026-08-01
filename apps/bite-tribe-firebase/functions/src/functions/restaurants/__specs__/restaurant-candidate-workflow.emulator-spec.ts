@@ -27,6 +27,7 @@ const seedBite = async (
   id: string,
   place = 'Pizza Palace',
   position = CENTER,
+  dish: { name: string; price: number } = { name: 'Margherita', price: 12 },
 ): Promise<void> => {
   await getFirestore()
     .collection('bites')
@@ -34,6 +35,8 @@ const seedBite = async (
     .set({
       place,
       rating: 5,
+      name: dish.name,
+      price: dish.price,
       ...withGeohash(position),
       createdAt: new Date().toISOString(),
       createdAtTimestamp: Date.now(),
@@ -58,8 +61,7 @@ const clearWorkflowCollections = async (): Promise<void> => {
 };
 
 const queryCount = async (collectionName: string): Promise<number> =>
-  (await getFirestore().collection(collectionName).count().get()).data()
-    .count;
+  (await getFirestore().collection(collectionName).count().get()).data().count;
 
 const verifyCandidate = (
   candidateId: string,
@@ -102,11 +104,26 @@ describe('restaurant candidate workflow emulator integration', () => {
 
   it('keeps candidate creation and verification idempotent across repeated workflow runs', async () => {
     await Promise.all([
-      seedBite('bite-new', 'Pizza Palace', CENTER),
-      seedBite('bite-1', 'Pizza Palace', nearby(1)),
-      seedBite('bite-2', 'Pizza Palace', nearby(2)),
-      seedBite('bite-3', 'Pizza Palace', nearby(3)),
-      seedBite('bite-4', 'Pizza Palace', nearby(4)),
+      seedBite('bite-new', 'Pizza Palace', CENTER, {
+        name: 'Margherita',
+        price: 12,
+      }),
+      seedBite('bite-1', 'Pizza Palace', nearby(1), {
+        name: 'Margherita',
+        price: 13,
+      }),
+      seedBite('bite-2', 'Pizza Palace', nearby(2), {
+        name: 'Tiramisu',
+        price: 7,
+      }),
+      seedBite('bite-3', 'Pizza Palace', nearby(3), {
+        name: 'Calzone',
+        price: 14,
+      }),
+      seedBite('bite-4', 'Pizza Palace', nearby(4), {
+        name: 'Calzone',
+        price: 14,
+      }),
     ]);
 
     const selectedBiteSnapshot = await getFirestore()
@@ -162,6 +179,24 @@ describe('restaurant candidate workflow emulator integration', () => {
       verifiedRestaurantId: restaurantId,
       verifiedByUserId: 'business-user-1',
     });
+
+    const menuSnapshot = await getFirestore().collection('menus').get();
+
+    expect(menuSnapshot.docs[0].data()['categories']).toEqual([
+      {
+        title: 'Bites',
+        items: [
+          { name: 'Calzone', description: '', price: 14, isAvailable: true },
+          {
+            name: 'Margherita',
+            description: '',
+            price: 12.5,
+            isAvailable: true,
+          },
+          { name: 'Tiramisu', description: '', price: 7, isAvailable: true },
+        ],
+      },
+    ]);
 
     const linkedBiteSnapshots = await Promise.all(
       ['bite-new', 'bite-1', 'bite-2', 'bite-3', 'bite-4'].map((biteId) =>

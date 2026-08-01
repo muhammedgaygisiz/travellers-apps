@@ -14,6 +14,8 @@ export interface VerifyRestaurantCandidateRequest {
 export interface VerifyRestaurantCandidateResult {
   restaurantId: string;
   menuId?: string;
+  /** Number of menu items the backend derived from the candidate Bites. */
+  menuItemCount?: number;
   candidateId: string;
   status: 'created' | 'already-verified';
 }

@@ -22,4 +22,9 @@ export const en: NotificationMessages = {
     'You dropped out of the top {{limit}} on the leaderboard.',
   'leaderboard.climbed': 'You climbed up to #{{rank}} on the leaderboard! 🎉',
   'leaderboard.dropped': 'You dropped to #{{rank}} on the leaderboard.',
+  'newVersion.title': '🚀 New version available',
+  'newVersion.bodyIos':
+    'A new BiteTribe version is ready in the App Store. Update now to get the latest.',
+  'newVersion.bodyAndroid':
+    'A new BiteTribe version is ready on Google Play. Update now to get the latest.',
 };

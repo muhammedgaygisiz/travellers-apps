@@ -24,4 +24,9 @@ export const it: NotificationMessages = {
   'leaderboard.climbed':
     'Sei salito alla posizione {{rank}} della classifica! 🎉',
   'leaderboard.dropped': 'Sei sceso alla posizione {{rank}} della classifica.',
+  'newVersion.title': '🚀 Nuova versione disponibile',
+  'newVersion.bodyIos':
+    'La nuova versione di BiteTribe è nell’App Store. Aggiorna ora per non perderti nulla.',
+  'newVersion.bodyAndroid':
+    'La nuova versione di BiteTribe è su Google Play. Aggiorna ora per non perderti nulla.',
 };

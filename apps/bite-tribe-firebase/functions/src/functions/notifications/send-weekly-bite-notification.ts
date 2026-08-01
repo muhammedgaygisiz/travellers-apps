@@ -2,17 +2,10 @@ import { onSchedule } from 'firebase-functions/scheduler';
 import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { sendLocalizedNotification } from '../shared/utils/send-localized-notification';
+import { getAllUserUids } from '../shared/utils/get-all-user-uids';
 import { getPreviousWeekBounds, ZURICH_TZ } from '../shared/utils/week-bounds';
 
 const db = getFirestore();
-
-const getAllUserUids = async (): Promise<string[]> => {
-  const usersSnap = await db.collection('users').get();
-
-  logger.info(`--- Number of users: ${usersSnap.size}`);
-
-  return usersSnap.docs.map((doc) => doc.id);
-};
 
 /**
  * Scheduled Cloud Function that runs every Monday evening (18:00 Europe/Zurich).

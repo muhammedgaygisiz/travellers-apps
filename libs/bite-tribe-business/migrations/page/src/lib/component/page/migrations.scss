@@ -10,6 +10,16 @@
   }
 }
 
+.new-version-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.new-version-status {
+  margin-bottom: 2rem;
+}
+
 .bite-review-cell {
   display: flex;
   gap: 0.75rem;

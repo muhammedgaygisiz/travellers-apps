@@ -42,6 +42,26 @@ export interface BackfillBiteAddressResult {
   status: 'resolved' | 'failed' | 'skipped';
 }
 
+/**
+ * The store a release announcement is addressed to.
+ *
+ * The App Store and Google Play clear a review at different times, so the two
+ * are announced separately rather than in one broadcast (issue #1194).
+ */
+export type ReleasePlatform = 'ios' | 'android';
+
+export interface SendNewVersionNotificationRequest {
+  platform: ReleasePlatform;
+}
+
+export interface SendNewVersionNotificationResult {
+  platform: ReleasePlatform;
+  /** Installations the announcement was addressed to. */
+  tokenCount: number;
+  /** Accounts scanned for those installations. */
+  userCount: number;
+}
+
 const hasVerifiedRestaurant = (bite: Bite): boolean =>
   !!bite.restaurantId?.trim();
 
@@ -192,6 +212,26 @@ export class MigrationsDataAccessService {
     });
 
     this.restaurantClusteringBites.reload();
+
+    return result.data;
+  }
+
+  /**
+   * Tells the installations of one store that a new app version is live.
+   *
+   * Nothing local changes, so no resource is reloaded here: the call is a
+   * broadcast, and its only result worth showing is how far it reached.
+   */
+  async sendNewVersionNotification(
+    platform: ReleasePlatform,
+  ): Promise<SendNewVersionNotificationResult> {
+    const result = await FirebaseFunctions.callByName<
+      SendNewVersionNotificationRequest,
+      SendNewVersionNotificationResult
+    >({
+      name: 'sendNewVersionNotification',
+      data: { platform },
+    });
 
     return result.data;
   }

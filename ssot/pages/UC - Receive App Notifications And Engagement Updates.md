@@ -22,6 +22,7 @@ Users and creators can receive engagement signals around Bites and social activi
 - Tapping a notification opens the surface it talks about: the Bite, the follower profile, the leaderboard, or the weekly bites page.
 - The weekly summary counts one calendar week (Monday to Sunday, Europe/Zurich) and carries those bounds, so its landing page lists the Bites of exactly that week even when the user opens it days later.
 - Notification text arrives in the language the user chose in settings, not in English.
+- Users learn that a new app version is live from a notification, instead of waiting for TestFlight or Google Play to auto-update them.
 
 ## Localization Contract
 
@@ -38,6 +39,26 @@ made notification copy follow the recipient:
   Bite each read it in their own.
 - An account that never chose a language, or chose one the app no longer offers,
   receives English rather than nothing.
+
+## Release Announcement Contract
+
+Issue [#1194](https://github.com/muhammedgaygisiz/travellers-apps/issues/1194)
+added a manually triggered notification for a released app version:
+
+- The trigger is manual. Nothing observable tells the backend when a TestFlight
+  build or a Play Console review has actually gone live, so an operator fires it
+  from the business migrations page once the store serves the new build.
+- iOS and Android are announced separately, because the two stores clear their
+  review at different times.
+- The announcement is addressed by installation platform, not by account: the
+  same user can have an iPhone and an Android phone registered, and only the
+  installation whose store already serves the release is told to update.
+- An installation whose `platform` was never recorded receives nothing, because
+  guessing would announce an App Store release to an Android device.
+- The copy still follows the Localization Contract: every recipient reads it in
+  the language they chose.
+- The business page reports how far the announcement reached, since a broadcast
+  leaves nothing else behind to verify it by.
 
 ## Installation Contract
 
@@ -72,6 +93,7 @@ made notification delivery installation-specific:
 - `notifyUserOnNewFollower`
 - `sendWeeklyBiteNotification`
 - `sendDailyLeaderboardNotification`
+- `sendNewVersionNotification`, triggered from the business `migrations` page
 - `handleSharedLinkToBite`
 - `loadWeeklyBites`
 - `sendLocalizedNotification` and the notification catalog in

@@ -21,4 +21,8 @@ export const am: NotificationMessages = {
   'leaderboard.droppedOut': 'ከመሪዎች ሰሌዳ ምርጥ {{limit}} ውጪ ሆነዋል።',
   'leaderboard.climbed': 'በመሪዎች ሰሌዳ ላይ ወደ {{rank}}ኛ ደረጃ ወጥተዋል! 🎉',
   'leaderboard.dropped': 'በመሪዎች ሰሌዳ ላይ ወደ {{rank}}ኛ ደረጃ ወርደዋል።',
+  'newVersion.title': '🚀 አዲስ ስሪት ወጥቷል',
+  'newVersion.bodyIos': 'አዲሱ የBiteTribe ስሪት በApp Store ላይ ደርሷል። አሁን ያዘምኑት።',
+  'newVersion.bodyAndroid':
+    'አዲሱ የBiteTribe ስሪት በGoogle Play ላይ ደርሷል። አሁን ያዘምኑት።',
 };

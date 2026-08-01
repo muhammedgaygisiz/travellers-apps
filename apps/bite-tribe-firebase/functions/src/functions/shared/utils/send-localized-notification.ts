@@ -1,6 +1,7 @@
 import { getMessaging } from 'firebase-admin/messaging';
 import { logger } from 'firebase-functions';
 import { Translate, createTranslate } from '../i18n/translate';
+import { NotificationPlatform } from '../model/notification-platform';
 import { buildChunks } from './build-chunks';
 import { CHUNK_SIZE } from './chunk-size';
 import { cleanupInvalidTokens } from './cleanup-invalid-tokens';
@@ -15,6 +16,13 @@ export interface LocalizedNotification {
 export interface LocalizedNotificationRequest {
   /** Accounts to notify. Their enabled installations are resolved here. */
   uids: string[];
+  /**
+   * Restricts the send to the installations of one store. Omit it to reach
+   * every enabled installation, which is what an engagement trigger wants; a
+   * release announcement sets it because the stores clear a review at
+   * different times (issue \#1194).
+   */
+  platform?: NotificationPlatform;
   /** The payload the app's notification handler routes on. */
   data: Record<string, string>;
   /**
@@ -37,10 +45,11 @@ export interface LocalizedNotificationRequest {
  */
 export const sendLocalizedNotification = async ({
   uids,
+  platform,
   data,
   buildMessage,
 }: LocalizedNotificationRequest): Promise<number> => {
-  const groups = await getTokensByLanguage(uids);
+  const groups = await getTokensByLanguage(uids, platform);
   const tokenCount = groups.reduce(
     (total, group) => total + group.tokens.length,
     0,

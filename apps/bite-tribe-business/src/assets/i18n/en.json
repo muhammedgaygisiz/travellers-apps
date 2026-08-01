@@ -223,5 +223,12 @@
   "image-upload-failed": "Photo couldn’t be uploaded",
   "retry-upload": "Retry upload",
   "choose-photo": "Choose a photo",
-  "image-upload-retry-failed": "We couldn’t start the upload. Please try again."
+  "image-upload-retry-failed": "We couldn’t start the upload. Please try again.",
+  "new-version-notification": "New version notification",
+  "new-version-notification-hint": "Announce a released app version to the users of one store. Only press a button once the store actually serves the new build, because the App Store and Google Play clear their review at different times.",
+  "notify-ios-users": "Notify iPhone users",
+  "notify-android-users": "Notify Android users",
+  "new-version-notification-sending": "Sending the {{platform}} announcement…",
+  "new-version-notification-sent": "Announced on {{platform}}: sent to {{tokenCount}} installation(s) across {{userCount}} account(s).",
+  "new-version-notification-failed": "The {{platform}} announcement could not be sent. Check the function logs and try again."
 }

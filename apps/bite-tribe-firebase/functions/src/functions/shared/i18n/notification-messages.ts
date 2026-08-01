@@ -23,7 +23,10 @@ export type NotificationMessageKey =
   | 'leaderboard.enteredTop'
   | 'leaderboard.droppedOut'
   | 'leaderboard.climbed'
-  | 'leaderboard.dropped';
+  | 'leaderboard.dropped'
+  | 'newVersion.title'
+  | 'newVersion.bodyIos'
+  | 'newVersion.bodyAndroid';
 
 /**
  * One locale's full catalog. `Record` is deliberate: a locale that forgets a

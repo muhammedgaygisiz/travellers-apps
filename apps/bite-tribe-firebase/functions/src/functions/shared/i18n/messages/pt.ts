@@ -22,4 +22,9 @@ export const pt: NotificationMessages = {
   'leaderboard.droppedOut': 'Saíste do top {{limit}} da classificação.',
   'leaderboard.climbed': 'Subiste para a posição {{rank}} da classificação! 🎉',
   'leaderboard.dropped': 'Desceste para a posição {{rank}} da classificação.',
+  'newVersion.title': '🚀 Nova versão disponível',
+  'newVersion.bodyIos':
+    'Já está disponível uma nova versão do BiteTribe na App Store. Atualiza agora para não perderes nada.',
+  'newVersion.bodyAndroid':
+    'Já está disponível uma nova versão do BiteTribe no Google Play. Atualiza agora para não perderes nada.',
 };

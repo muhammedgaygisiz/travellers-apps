@@ -21,4 +21,9 @@ export const tr: NotificationMessages = {
   'leaderboard.droppedOut': 'Lider tablosunda ilk {{limit}} dışına düştün.',
   'leaderboard.climbed': 'Lider tablosunda {{rank}}. sıraya yükseldin! 🎉',
   'leaderboard.dropped': 'Lider tablosunda {{rank}}. sıraya düştün.',
+  'newVersion.title': '🚀 Yeni sürüm hazır',
+  'newVersion.bodyIos':
+    'BiteTribe’ın yeni sürümü App Store’da. Hemen güncelle, hiçbir yeniliği kaçırma.',
+  'newVersion.bodyAndroid':
+    'BiteTribe’ın yeni sürümü Google Play’de. Hemen güncelle, hiçbir yeniliği kaçırma.',
 };

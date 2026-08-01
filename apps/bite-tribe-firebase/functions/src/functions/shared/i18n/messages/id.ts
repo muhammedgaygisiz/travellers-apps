@@ -23,4 +23,9 @@ export const id: NotificationMessages = {
   'leaderboard.climbed':
     'Kamu naik ke peringkat {{rank}} di papan peringkat! 🎉',
   'leaderboard.dropped': 'Kamu turun ke peringkat {{rank}} di papan peringkat.',
+  'newVersion.title': '🚀 Versi baru tersedia',
+  'newVersion.bodyIos':
+    'Versi baru BiteTribe sudah ada di App Store. Perbarui sekarang agar tidak ketinggalan.',
+  'newVersion.bodyAndroid':
+    'Versi baru BiteTribe sudah ada di Google Play. Perbarui sekarang agar tidak ketinggalan.',
 };

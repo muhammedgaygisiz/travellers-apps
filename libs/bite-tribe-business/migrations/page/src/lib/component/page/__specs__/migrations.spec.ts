@@ -234,6 +234,97 @@ describe('Migrations', () => {
     });
   });
 
+  describe('new version notification', () => {
+    const notificationButton = (
+      key: string,
+    ): HTMLIonButtonElement | undefined =>
+      Array.from(fixture.nativeElement.querySelectorAll('ion-button')).find(
+        (button) => (button as HTMLElement).textContent?.includes(key),
+      ) as HTMLIonButtonElement | undefined;
+
+    it('should offer one button per store', () => {
+      const textContent = fixture.nativeElement.textContent;
+
+      expect(textContent).toContain('new-version-notification');
+      expect(textContent).toContain('notify-ios-users');
+      expect(textContent).toContain('notify-android-users');
+      expect(notificationButton('notify-ios-users')?.disabled).toBe(false);
+      expect(notificationButton('notify-android-users')?.disabled).toBe(false);
+    });
+
+    it('should emit the store the announcement is addressed to', () => {
+      const emitSpy = jest.spyOn(component.sendNewVersionNotification, 'emit');
+
+      component.notifyNewVersion('ios');
+      component.notifyNewVersion('android');
+
+      expect(emitSpy).toHaveBeenNthCalledWith(1, 'ios');
+      expect(emitSpy).toHaveBeenNthCalledWith(2, 'android');
+    });
+
+    it('should say nothing before an announcement was triggered', () => {
+      expect(component.newVersionNotificationStatusKey()).toBeNull();
+      expect(fixture.nativeElement.textContent).not.toContain(
+        'new-version-notification-sent',
+      );
+    });
+
+    it('should block both buttons while a send is in flight', () => {
+      // Pressing again mid-send would announce the same release twice.
+      compRef.setInput('newVersionNotification', {
+        platform: 'ios',
+        status: 'sending',
+      });
+      fixture.detectChanges();
+
+      expect(component.isSendingNewVersionNotification()).toBe(true);
+      expect(notificationButton('notify-ios-users')?.disabled).toBe(true);
+      expect(notificationButton('notify-android-users')?.disabled).toBe(true);
+    });
+
+    it('should report how far a finished announcement reached', () => {
+      compRef.setInput('newVersionNotification', {
+        platform: 'android',
+        status: 'sent',
+        result: { platform: 'android', tokenCount: 12, userCount: 30 },
+      });
+      fixture.detectChanges();
+
+      expect(component.newVersionNotificationStatusKey()).toBe(
+        'new-version-notification-sent',
+      );
+      expect(component.newVersionNotificationStatusParams()).toEqual({
+        platform: 'android',
+        tokenCount: 12,
+        userCount: 30,
+      });
+      expect(component.isSendingNewVersionNotification()).toBe(false);
+      expect(fixture.nativeElement.textContent).toContain(
+        'new-version-notification-sent',
+      );
+    });
+
+    it('should report a failed announcement instead of staying silent', () => {
+      compRef.setInput('newVersionNotification', {
+        platform: 'ios',
+        status: 'failed',
+      });
+      fixture.detectChanges();
+
+      expect(component.newVersionNotificationStatusKey()).toBe(
+        'new-version-notification-failed',
+      );
+      expect(component.newVersionNotificationStatusParams()).toEqual({
+        platform: 'ios',
+        tokenCount: 0,
+        userCount: 0,
+      });
+      expect(fixture.nativeElement.textContent).toContain(
+        'new-version-notification-failed',
+      );
+    });
+  });
+
   describe('migrate', () => {
     describe('given a old bite', () => {
       const oldBite = {

@@ -275,6 +275,41 @@ describe(MigrationsDataAccessService.name, () => {
       });
     });
   });
+
+  describe('sendNewVersionNotification', () => {
+    it('should call the release announcement callable for the selected store', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: { platform: 'ios', tokenCount: 42, userCount: 100 },
+      });
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      const result = await service.sendNewVersionNotification('ios');
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'sendNewVersionNotification',
+        data: { platform: 'ios' },
+      });
+      expect(result).toEqual({
+        platform: 'ios',
+        tokenCount: 42,
+        userCount: 100,
+      });
+    });
+
+    it('should announce to Android separately from iOS', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: { platform: 'android', tokenCount: 7, userCount: 100 },
+      });
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      await service.sendNewVersionNotification('android');
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'sendNewVersionNotification',
+        data: { platform: 'android' },
+      });
+    });
+  });
 });
 
 describe(getRestaurantClusteringEligibleBites.name, () => {

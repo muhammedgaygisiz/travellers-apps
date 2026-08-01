@@ -8,6 +8,30 @@
         <h1>Bites</h1>
       </div>
 
+      <h2>{{ 'new-version-notification' | transloco }}</h2>
+      <p>{{ 'new-version-notification-hint' | transloco }}</p>
+      <div class="new-version-actions">
+        <ion-button
+          fill="outline"
+          [disabled]="isSendingNewVersionNotification()"
+          (click)="notifyNewVersion('ios')"
+        >
+          {{ 'notify-ios-users' | transloco }}
+        </ion-button>
+        <ion-button
+          fill="outline"
+          [disabled]="isSendingNewVersionNotification()"
+          (click)="notifyNewVersion('android')"
+        >
+          {{ 'notify-android-users' | transloco }}
+        </ion-button>
+      </div>
+      @if (newVersionNotificationStatusKey(); as statusKey) {
+      <p class="new-version-status">
+        {{ statusKey | transloco: newVersionNotificationStatusParams() }}
+      </p>
+      }
+
       <h2>{{ 'bite-address-backfill' | transloco }}</h2>
       <table class="migration-table" border="1">
         <thead>

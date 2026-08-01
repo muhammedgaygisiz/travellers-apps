@@ -67,7 +67,28 @@ describe('getTokens', () => {
     db.seed('users/user-1/pushTokens/legacy-token', { platform: 'ios' });
 
     await expect(getTokens(['user-1'])).resolves.toEqual([
-      { uid: 'user-1', token: 'legacy-token' },
+      { uid: 'user-1', token: 'legacy-token', platform: 'ios' },
+    ]);
+  });
+
+  it('reports the platform an installation registered from', async () => {
+    // A release announcement addresses one store at a time (issue #1194), so
+    // the platform has to survive token collection.
+    db.seed('users/user-1/pushTokens/token-a', {
+      enabled: true,
+      platform: 'android',
+    });
+
+    await expect(getTokens(['user-1'])).resolves.toEqual([
+      { uid: 'user-1', token: 'token-a', platform: 'android' },
+    ]);
+  });
+
+  it('leaves the platform undefined when the document never recorded one', async () => {
+    db.seed('users/user-1/pushTokens/token-a', { enabled: true });
+
+    await expect(getTokens(['user-1'])).resolves.toEqual([
+      { uid: 'user-1', token: 'token-a', platform: undefined },
     ]);
   });
 

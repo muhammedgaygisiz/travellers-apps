@@ -13,10 +13,12 @@ import { MigrationsService } from './migrations.service';
       [restaurantClusteringEligibleBites]="
         service.restaurantClusteringEligibleBites()
       "
+      [newVersionNotification]="service.newVersionNotification()"
       (clusterRestaurantCandidate)="
         service.clusterRestaurantCandidateForBite($event)
       "
       (backfillBiteAddress)="service.backfillBiteAddress($event)"
+      (sendNewVersionNotification)="service.sendNewVersionNotification($event)"
     />
   `,
 })

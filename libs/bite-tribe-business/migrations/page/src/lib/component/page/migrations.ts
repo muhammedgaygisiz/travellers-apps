@@ -18,8 +18,21 @@ import {
   guessExtFromContentType,
 } from 'utils';
 import { geohashForLocation } from 'geofire-common';
+import {
+  NewVersionNotificationState,
+  ReleasePlatform,
+} from './new-version-notification';
 
 const BITE_COLLECTION = 'bites';
+
+const NEW_VERSION_STATUS_KEYS: Record<
+  NewVersionNotificationState['status'],
+  string
+> = {
+  sending: 'new-version-notification-sending',
+  sent: 'new-version-notification-sent',
+  failed: 'new-version-notification-failed',
+};
 
 @Component({
   selector: 'btb-migrations',
@@ -33,8 +46,36 @@ export class Migrations {
   addressBackfillBites = input<Bite[]>([]);
   restaurantClusteringEligibleBites = input<Bite[]>([]);
   isAuthenticated = input(false);
+  newVersionNotification = input<NewVersionNotificationState | null>(null);
   clusterRestaurantCandidate = output<Bite>();
   backfillBiteAddress = output<Bite>();
+  sendNewVersionNotification = output<ReleasePlatform>();
+
+  /** True while a send is in flight, so neither button can fire twice. */
+  isSendingNewVersionNotification = computed(
+    () => this.newVersionNotification()?.status === 'sending',
+  );
+
+  /**
+   * The Transloco key describing the last announcement, or `null` when none has
+   * been triggered in this session.
+   */
+  newVersionNotificationStatusKey = computed(() => {
+    const state = this.newVersionNotification();
+
+    return state ? NEW_VERSION_STATUS_KEYS[state.status] : null;
+  });
+
+  /** Interpolation for the status message: which store, and how far it got. */
+  newVersionNotificationStatusParams = computed(() => {
+    const state = this.newVersionNotification();
+
+    return {
+      platform: state?.platform ?? '',
+      tokenCount: state?.result?.tokenCount ?? 0,
+      userCount: state?.result?.userCount ?? 0,
+    };
+  });
 
   bitesNeedingMigration = computed(() => {
     const bites = this.bites();
@@ -66,6 +107,10 @@ export class Migrations {
 
   backfillAddress(bite: Bite): void {
     this.backfillBiteAddress.emit(bite);
+  }
+
+  notifyNewVersion(platform: ReleasePlatform): void {
+    this.sendNewVersionNotification.emit(platform);
   }
 
   async migrate(bite: Bite): Promise<void> {

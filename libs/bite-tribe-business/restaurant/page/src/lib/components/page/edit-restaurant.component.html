@@ -14,7 +14,7 @@
       <div
         class="header-container ion-display-flex ion-justify-content-between ion-align-items-center ion-margin-bottom"
       >
-        <h1>{{ placeName() }}</h1>
+        <h1 data-testid="restaurant-name">{{ placeName() }}</h1>
       </div>
 
       <div [formGroup]="socialMediaForm">
@@ -62,8 +62,13 @@
               [maxlength]="500"
               [rows]="6"
               mode="md"
+              data-testid="restaurant-description"
             />
-            <ion-button class="ion-margin-top" (click)="saveDescription()">
+            <ion-button
+              class="ion-margin-top"
+              data-testid="save-description"
+              (click)="saveDescription()"
+            >
               {{ 'save' | transloco }}
             </ion-button>
           </div>
@@ -75,6 +80,7 @@
               fill="outline"
               class="ion-margin-top"
               mode="md"
+              data-testid="restaurant-street"
             />
             <div class="ion-display-flex ion-gap-2 ion-margin-top">
               <ion-input
@@ -83,6 +89,7 @@
                 fill="outline"
                 mode="md"
                 class="ion-flex-1 ion-margin-end"
+                data-testid="restaurant-postcode"
               />
               <ion-input
                 label="{{ 'city' | transloco }}"
@@ -90,6 +97,7 @@
                 fill="outline"
                 mode="md"
                 class="ion-flex-1"
+                data-testid="restaurant-city"
               />
             </div>
             <ion-input
@@ -98,8 +106,13 @@
               fill="outline"
               class="ion-margin-top"
               mode="md"
+              data-testid="restaurant-country"
             />
-            <ion-button class="ion-margin-top" (click)="saveAddress()">
+            <ion-button
+              class="ion-margin-top"
+              data-testid="save-address"
+              (click)="saveAddress()"
+            >
               {{ 'save' | transloco }}
             </ion-button>
           </div>

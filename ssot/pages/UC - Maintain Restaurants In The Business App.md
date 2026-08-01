@@ -32,6 +32,7 @@ Business users or admins can maintain Restaurant and menu context that improves 
 - `restaurant/:restaurantId/menu/:menuId`
 - `restaurantCandidates` dashboard data and candidate-backed new Restaurant prefill
 - `verifyRestaurantCandidate` Firebase callable
+- `apps/bite-tribe-business-e2e/src/tests/maintain-restaurant.spec.ts` covers the business login, the dashboard restaurants list, opening a Restaurant, and persisting its About text and address
 
 ## Related GitHub Scope
 

@@ -52,7 +52,7 @@
             <ion-card-title>{{ 'restaurants' | transloco }}</ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            <ion-list lines="full">
+            <ion-list lines="full" data-testid="dashboard-restaurants">
               @for (restaurant of restaurants(); track restaurant.id) {
                 <ion-item
                   [button]="true"

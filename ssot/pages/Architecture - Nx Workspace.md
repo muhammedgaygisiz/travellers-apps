@@ -13,6 +13,7 @@ apps/bite-tribe-firebase
 apps/bite-tribe-ios
 apps/bite-tribe-android
 apps/bite-tribe-e2e
+apps/bite-tribe-business-e2e
 apps/storybook-host
 ```
 

@@ -3,7 +3,9 @@
 ## Purpose
 
 This page tracks Playwright end-to-end coverage across Bite Tribe use cases so
-future work can resume from the last verified state.
+future work can resume from the last verified state. It covers both suites:
+`apps/bite-tribe-e2e` for the consumer app and `apps/bite-tribe-business-e2e`
+for the business app.
 
 The status describes E2E coverage, not whether the product use case is
 implemented. Keep coverage conservative: use ✅ only when the representative
@@ -37,7 +39,7 @@ Legend: ✅ covered · 🟡 partially covered · ⬜ not covered
 | [[UC - Use Account And Legal Flows]]                            |       ⬜        |   ✅    | Email verification prompt and resend offer on settings; in-app privacy-policy navigation; delete-account contract, cancellation safety, completed profile/settings deletion, and Bite anonymization. The resend call itself needs Workspace mail secrets the emulator has none for |
 | [[UC - Use Local Gallery Support]]                              |       ⬜        |   ⬜    | No representative E2E journey                                                                                                                                                                                                                                                      |
 | [[UC - Receive App Notifications And Engagement Updates]]       |       ⬜        |   ⬜    | No representative E2E journey                                                                                                                                                                                                                                                      |
-| [[UC - Maintain Restaurants In The Business App]]               |       ⬜        |   ⬜    | No representative E2E journey                                                                                                                                                                                                                                                      |
+| [[UC - Maintain Restaurants In The Business App]]               |       ⬜        |   🟡    | Business login, the dashboard restaurants list, opening a Restaurant, and persisting its About text and address. The restaurant-candidate verification flow, menu editing, and new-restaurant creation stay uncovered                                                              |
 | [[UC - Create And Operate BiteTrails In The Business App]]      |       ⬜        |   ⬜    | No representative E2E journey                                                                                                                                                                                                                                                      |
 | [[UC - Run Operational Migrations]]                             |       ⬜        |   ⬜    | No representative E2E journey                                                                                                                                                                                                                                                      |
 
@@ -48,7 +50,8 @@ Legend: ✅ covered · 🟡 partially covered · ⬜ not covered
 - Otherwise choose an ⬜ journey based on the current product and release
   priorities.
 - Read the linked use-case page before defining the next scenario.
-- Add or update Playwright coverage under `apps/bite-tribe-e2e`.
+- Add or update Playwright coverage under `apps/bite-tribe-e2e` for consumer
+  journeys and `apps/bite-tribe-business-e2e` for business-app journeys.
 - Run emulator-backed E2E tests serially as described in
   [[Implementation - Testing]].
 - Update this table and the linked use-case evidence when coverage changes.

@@ -1,0 +1,24 @@
+{
+  "name": "bite-tribe-business-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/bite-tribe-business-e2e/src",
+  "tags": ["scope:bite-tribe-business"],
+  "implicitDependencies": ["bite-tribe-business", "bite-tribe-firebase"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": [
+        "{workspaceRoot}/dist/.playwright/apps/bite-tribe-business-e2e"
+      ],
+      "options": {
+        "config": "apps/bite-tribe-business-e2e/playwright.config.ts",
+        "skipInstall": true
+      },
+      "dependsOn": ["bite-tribe-firebase:firebase-build"]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

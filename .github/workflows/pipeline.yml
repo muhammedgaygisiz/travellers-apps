@@ -206,13 +206,66 @@ jobs:
           path: dist/.playwright/apps/bite-tribe-e2e
           retention-days: 7
 
+  # Same setup as the consumer `e2e` job, but its own runner: both suites drive
+  # the same Firebase emulator ports and would fight over them in one job.
+  business-e2e:
+    runs-on: ubuntu-latest
+    needs:
+      - tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+
+      - name: 'Restore Cache'
+        uses: ./.github/actions/restore-cache
+
+      # The Firebase emulators require a JVM; firebase-tools needs JDK 21+.
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # Boots the Firebase emulators + business Angular dev server (see
+      # apps/bite-tribe-business-e2e/playwright.config.ts) and runs the suite.
+      #
+      # Same throwaway emulator configuration as the consumer e2e job; only the
+      # auth domain differs, because the business bundle reads
+      # NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN.
+      - name: Run Business E2E Tests
+        run: npm run nx -- e2e bite-tribe-business-e2e
+        env:
+          NX_APP_BITE_TRIBE_IS_DEV: 'true'
+          NX_APP_BITE_TRIBE_PROJECT_ID: bite-tribe
+          NX_APP_BITE_TRIBE_API_KEY: demo-api-key
+          NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN: bite-tribe.firebaseapp.com
+          NX_APP_BITE_TRIBE_STORAGE_BUCKET: bite-tribe.appspot.com
+          NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID: '000000000000'
+          NX_APP_BITE_TRIBE_APP_ID: demo-app-id
+
+      - name: Upload Business Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: business-playwright-report
+          path: dist/.playwright/apps/bite-tribe-business-e2e
+          retention-days: 7
+
   # Surfaces the e2e and Loki outcomes on the PR as a single sticky comment.
-  # Runs after both regardless of their result so a failure is still reported.
+  # Runs after all of them regardless of their result so a failure is still
+  # reported.
   report:
     runs-on: ubuntu-latest
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     needs:
       - e2e
+      - business-e2e
       - loki
 
     permissions:
@@ -226,6 +279,9 @@ jobs:
           script: |
             const results = {
               e2e: '${{ needs.e2e.result }}',
+              // Index syntax: the GitHub expression parser reads the hyphen in
+              // `needs.business-e2e` as a subtraction.
+              businessE2e: '${{ needs['business-e2e'].result }}',
               loki: '${{ needs.loki.result }}',
             };
             const icon = (r) =>
@@ -243,9 +299,10 @@ jobs:
               '| Check | Result |',
               '| --- | --- |',
               `| E2E (Playwright) | ${icon(results.e2e)} |`,
+              `| Business E2E (Playwright) | ${icon(results.businessE2e)} |`,
               `| Visual regression (Loki) | ${icon(results.loki)} |`,
               '',
-              `Artifacts on the [workflow run](${runUrl}): \`playwright-report\`, plus \`loki-diffs\` when Loki finds visual changes.`,
+              `Artifacts on the [workflow run](${runUrl}): \`playwright-report\`, \`business-playwright-report\`, plus \`loki-diffs\` when Loki finds visual changes.`,
             ].join('\n');
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,

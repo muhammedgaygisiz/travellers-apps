@@ -46,16 +46,26 @@ npx jest --config libs/bite-tribe/search/data-access/jest.config.ts --runInBand
 | Locale JSON                      | Parse all touched locale files with Node                                         |
 | Storybook UI                     | `npm run build:storybook`; add direct `npx loki test` when visual output matters |
 | Consumer app E2E                 | `NX_DAEMON=false npx nx e2e bite-tribe-e2e`                                      |
+| Business app E2E                 | `NX_DAEMON=false npx nx e2e bite-tribe-business-e2e`                             |
 | Capacitor native wrapper changes | `npx cap sync android` or the relevant Capacitor sync target                     |
 | Markdown/docs                    | `git diff --check`                                                               |
 
 ## Playwright E2E
 
-`apps/bite-tribe-e2e` uses Playwright for consumer app smoke coverage.
+There are two Playwright projects, one per app:
+
+| Project                        | App                   | Dev server | Suite scope           |
+| ------------------------------ | --------------------- | ---------- | --------------------- |
+| `apps/bite-tribe-e2e`          | `bite-tribe`          | `:4200`    | Consumer app journeys |
+| `apps/bite-tribe-business-e2e` | `bite-tribe-business` | `:4300`    | Business app journeys |
 
 Playwright is the only supported E2E framework. Put new consumer and business-app E2E scenarios in Playwright. The legacy Cypress business project has been removed; do not reintroduce Cypress or `@nx/cypress` during later Nx migrations.
 
-The E2E target starts the Firebase emulators and the Angular dev server before running browser tests. Use it when validating launch-critical flows such as login, registration, and creating a Bite through the real UI.
+Both E2E targets start the Firebase emulators and their app's Angular dev server before running browser tests. Use them when validating launch-critical flows such as login, registration, creating a Bite, or maintaining a Restaurant through the real UI.
+
+The two suites share **one** emulator stack (`bite-tribe-firebase`, same ports, same `.firebase-export` seed). They are kept as separate projects, and as separate CI jobs, so they never contend for those ports. Never run them at the same time.
+
+Each suite owns its own `src/support` helpers and page objects. That duplication is deliberate: a business journey must not be able to break the consumer suite, and vice versa.
 
 ### Run It Serially Locally
 
@@ -65,6 +75,7 @@ Run the suite serially when a local result has to be trustworthy:
 
 ```bash
 npx nx e2e bite-tribe-e2e --workers=1
+npx nx e2e bite-tribe-business-e2e --workers=1
 ```
 
 A local red suite is not evidence of a regression until it has been reproduced serially. Do not draw conclusions by comparing a parallel full-suite run against a single `--grep` run: those differ in more than the code being tested.
@@ -77,7 +88,7 @@ An aborted run leaves the emulators holding their ports while the emulator UI on
 npx nx firebase-kill bite-tribe-firebase
 ```
 
-Never run two E2E suites at once. They share the emulator ports and the dev server, and the results of both become meaningless.
+Never run two E2E suites at once — including `bite-tribe-e2e` alongside `bite-tribe-business-e2e`. They share the emulator ports, and the results of both become meaningless.
 
 ## Loki Visual Regression
 

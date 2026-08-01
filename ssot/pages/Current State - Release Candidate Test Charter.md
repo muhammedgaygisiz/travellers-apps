@@ -78,7 +78,7 @@ Cover the oldest supported OS if a device is available. The lowest supported lev
 
 ## Web
 
-1. Run the full Playwright suite serially with `npx nx e2e bite-tribe-e2e --workers=1`. A parallel local run is not evidence; see [[Implementation - Testing]].
+1. Run the full Playwright suites serially, one after the other, with `npx nx e2e bite-tribe-e2e --workers=1` and `npx nx e2e bite-tribe-business-e2e --workers=1`. They share the emulator ports, so never run them at once, and a parallel local run is not evidence; see [[Implementation - Testing]].
 2. Repeat the critical journeys manually against a production-configuration build: registration, onboarding, login, create a Bite with a photo, Bite details, search, map, bucket list, profile, settings.
 3. Check the privacy policy page and the account deletion flow.
 4. Confirm no console errors and no failed network requests on the main journeys.

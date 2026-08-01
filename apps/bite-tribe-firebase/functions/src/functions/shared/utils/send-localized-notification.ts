@@ -1,5 +1,6 @@
 import { getMessaging } from 'firebase-admin/messaging';
 import { logger } from 'firebase-functions';
+import { SupportedLanguage } from '../i18n/supported-languages';
 import { Translate, createTranslate } from '../i18n/translate';
 import { NotificationPlatform } from '../model/notification-platform';
 import { buildChunks } from './build-chunks';
@@ -28,8 +29,15 @@ export interface LocalizedNotificationRequest {
   /**
    * Builds the visible copy for one language. Called once per language present
    * among the recipients, never once per token.
+   *
+   * `language` is handed along for copy that has to name something the catalog
+   * does not carry — a country, a currency, a date — and which ICU can localize
+   * from the same language the sentence is written in (issue \#1212).
    */
-  buildMessage: (translate: Translate) => LocalizedNotification;
+  buildMessage: (
+    translate: Translate,
+    language: SupportedLanguage,
+  ) => LocalizedNotification;
 }
 
 /**
@@ -62,7 +70,10 @@ export const sendLocalizedNotification = async ({
   }
 
   for (const group of groups) {
-    const { title, body } = buildMessage(createTranslate(group.language));
+    const { title, body } = buildMessage(
+      createTranslate(group.language),
+      group.language,
+    );
 
     logger.info(`--- Sending notification in ${group.language}:`, body);
 

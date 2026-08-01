@@ -31,6 +31,11 @@ export const createUserOnAuthCreate = beforeUserCreated(async (event) => {
       fullName: user.displayName || '',
       email: user.email || '',
       photoUrl: getPhotoUrl(user),
+      // An empty badge list, not a missing property: the first Bite of a fresh
+      // account must read as "earned your first country" rather than as the
+      // never-ran-before signal that makes `addCountryCodeToUser` backfill and
+      // stay silent (issue #1212).
+      countryCodes: [],
       public: false,
       subscriptionTier: 1,
       ...buildEmailVerificationMetadata(user),

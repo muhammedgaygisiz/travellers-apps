@@ -205,6 +205,7 @@ class FakeWriteBatch {
 
 export interface FakeFirestore {
   collection(name: string): FakeCollectionReference;
+  doc(path: string): FakeDocumentReference;
   collectionGroup(name: string): FakeQuery;
   batch(): FakeWriteBatch;
   seed(path: string, data: DocData): void;
@@ -217,6 +218,7 @@ export const createFakeFirestore = (): FakeFirestore => {
 
   return {
     collection: (name) => new FakeCollectionReference(store, name),
+    doc: (path) => new FakeDocumentReference(store, path),
     collectionGroup: (name) =>
       new FakeQuery(store, (path) => {
         const segments = path.split('/');

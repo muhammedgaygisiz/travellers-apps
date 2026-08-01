@@ -1,4 +1,9 @@
-import { DocumentReference, FieldValue, UpdateData, getFirestore } from 'firebase-admin/firestore';
+import {
+  DocumentReference,
+  FieldValue,
+  UpdateData,
+  getFirestore,
+} from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onDocumentCreated } from 'firebase-functions/firestore';
 import { HttpsError, onCall } from 'firebase-functions/https';
@@ -10,6 +15,7 @@ import {
   reverseGeocode,
 } from '../shared/utils/reverse-geocode';
 import { addCountryCodeToUser } from '../shared/utils/user-country-codes';
+import { notifyOnNewCountryBadge } from '../notifications/notify-on-new-country-badge';
 
 export { extractBiteAddress } from '../shared/utils/reverse-geocode';
 export type { BiteAddress } from '../shared/utils/reverse-geocode';
@@ -62,6 +68,34 @@ export const buildBiteAddressUpdate = (
 const loadBiteAddress = (position: Position): Promise<BiteAddress> =>
   reverseGeocode(position, googleGeocodingApiKey.value());
 
+/**
+ * Records the bite's country on the author's profile and celebrates it when it
+ * is a country they had never covered before (issue \#1212).
+ *
+ * The badge work is deliberately kept out of the geocoding result: the address
+ * is already written and resolved at this point, so a failing push send must
+ * not travel back up and mark the bite's address as failed.
+ */
+const awardCountryBadge = async (
+  biteId: string,
+  userId: string,
+  countryCode: unknown,
+): Promise<void> => {
+  try {
+    const newCountryCode = await addCountryCodeToUser(db, userId, countryCode);
+
+    if (newCountryCode) {
+      await notifyOnNewCountryBadge(userId, newCountryCode);
+    }
+  } catch (error) {
+    logger.warn('enrichBiteAddress: failed to award the country badge', {
+      biteId,
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
 const enrichBiteAddress = async (
   biteId: string,
   bite: Bite,
@@ -90,7 +124,7 @@ const enrichBiteAddress = async (
     await biteRef.update(buildBiteAddressUpdate('resolved', address));
 
     if (bite.userId) {
-      await addCountryCodeToUser(db, bite.userId, address.countryCode);
+      await awardCountryBadge(biteId, bite.userId, address.countryCode);
     }
 
     logger.info('enrichBiteAddress: resolved bite address', {

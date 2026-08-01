@@ -44,6 +44,7 @@ jest.mock('utils', () => ({
   PATH: {
     BITE: 'bite',
     PROFILE: 'profile',
+    MY_PROFILE: 'my-profile',
     LEADERBOARD: 'leaderboard',
     WEEKLY_BITES: 'weekly-bites',
   },
@@ -244,6 +245,33 @@ describe('init-push', () => {
 
         expect(navController.navigateForward).toHaveBeenCalledWith([
           'leaderboard',
+        ]);
+      });
+
+      it('opens the badge profile for a follower of the achiever', async () => {
+        const navController = await tap({
+          type: 'NEW_COUNTRY_BADGE',
+          userId: 'user-2',
+          countryCode: 'IT',
+        });
+
+        expect(navController.navigateForward).toHaveBeenCalledWith([
+          'profile',
+          'user-2',
+        ]);
+      });
+
+      it('opens their own profile for the user who earned the badge', async () => {
+        // Owner and followers receive the same payload; only the recipient
+        // tells the two apart.
+        const navController = await tap({
+          type: 'NEW_COUNTRY_BADGE',
+          userId: 'user-1',
+          countryCode: 'IT',
+        });
+
+        expect(navController.navigateForward).toHaveBeenCalledWith([
+          'my-profile',
         ]);
       });
 

@@ -17,6 +17,9 @@
 - ## Business Rules
 - A User can create many Bites.
 - A User can have a public or private profile.
+- A public profile is visible to other BiteTribe users inside the app. It is not
+  a shareable link: profiles have no share action and no deep link, by design.
+  Sharing is a [[Bite]] capability. See [[issue-1190]].
 - A User can follow and be followed by other users.
 - A User can save Bites to bucket lists.
 - A User can save a BiteTrail as a bucket list.

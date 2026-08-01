@@ -21,6 +21,11 @@ Users can inspect one Bite deeply enough to decide whether the dish is relevant.
 - A public creator profile identifies who shared the Bite.
 - The page shows the Bite's distance from the user's current position and converts its price into the user's preferred currency.
 - User can share the Bite through the device share sheet, including WhatsApp when available.
+- The Bite is the only shareable entity in BiteTribe. The share link, the
+  `handleSharedLinkToBite` preview endpoint, and the native `/s/bite/*` deep-link
+  registration in the iOS Associated Domains file and the Android App Links
+  intent filter exist for Bites alone. Profiles, bucket lists, restaurants, and
+  BiteTrails have no share action and no deep link. See [[issue-1190]].
 - User can open directions to the Bite's place through the platform navigation experience.
 - User can save the Bite to an existing bucket list or create a new list for it.
 - User can understand creator/profile context, restaurant/place context, image, likes, reviews, and related data.

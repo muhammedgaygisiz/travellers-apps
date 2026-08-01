@@ -1,0 +1,20 @@
+- [feat: add profile sharing and native profile deep links](https://github.com/muhammedgaygisiz/travellers-apps/issues/1190) (Issue \#1190)
+- Description
+  - The preliminary build-87 iOS pass under [[Current State - Release Candidate Test Charter]] executed check 9, "Deep links into Bite details and profiles". A shared `https://bite-tribe.web.app/bite/...` link opened the correct Bite in the native app, but the tester found no profile share action and no native profile handler, and filed that half of the check as a defect.
+  - The issue was written as feature work: expose a profile share URL, resolve it on the web route, register the profile path in the iOS Associated Domains file and the Android asset links, and define signed-out behavior.
+- Correction
+  - There is no profile-sharing gap. Shareable profiles were never part of the product intent, and no epic, use case, or domain page has ever specified them. The defect is in the charter sentence, which named profiles alongside Bite details without a specification behind it.
+  - Sharing is a Bite capability. [[UC - Inspect Bite Details]] owns the share action, and the whole deep-link surface is built for Bites only: `handleSharedLinkToBite` accepts `/s/bite/<id>` and rejects anything else, `apps/bite-tribe/src/apple-app-site-association` registers `/s/bite/*`, and the verified Android App Links intent filter in `apps/bite-tribe-android/android/app/src/main/AndroidManifest.xml` uses `android:pathPrefix="/s/bite"` (with `apps/bite-tribe/src/.well-known/assetlinks.json` carrying only the app-to-domain association). Nothing about that shape was an oversight.
+  - A profile is an in-app destination, not a published page. Users reach `profile/:userId` from a Bite, from a follower or following list, or from search. The `public` flag decides whether other BiteTribe users may open it, not whether it can be handed to somebody outside the app as a link.
+  - Making profiles shareable would therefore be a new product decision about publishing personal identity outside the app — with its own privacy handling, its own crawler and preview behavior, and its own signed-out story — rather than the completion of an unfinished feature. It is not proposed here.
+- Decisions
+  - Charter check 9 covers deep links into Bite details only. The profile half is removed rather than deferred, so no future pass re-files it.
+  - Charter finding 9 is closed as a specification correction. Its build-88 follow-up is dropped; there is nothing to re-test.
+  - [[Current State - Known Issues]] keeps the profile row for the [issue \#1188](https://github.com/muhammedgaygisiz/travellers-apps/issues/1188) visibility verification only. The row is renamed from "Profile sharing" to "Profile visibility" and states that the absent share flow is intended, so the entry cannot be read as an open launch risk again.
+  - The boundary is written into the pages that own it, so it does not have to be rediscovered from this issue: an "Out Of Scope" section in [[UC - Manage Profile And Social Graph]], a business rule in [[User]], the shareable-entity rule in [[Bite]], and the Bite-only sharing scope in [[UC - Inspect Bite Details]].
+- Outcome
+  - SSOT-only change. No application code, native configuration, route, or locale file is touched, because the implementation already matches the intended scope.
+  - Issue \#1190 is resolved by this clarification and needs no implementation.
+- Validation
+  - `git diff --check` - clean.
+  - No Nx target ran, and none applies: the change is limited to `ssot/pages`.

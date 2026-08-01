@@ -24,6 +24,12 @@ export const fr: NotificationMessages = {
   'leaderboard.droppedOut': 'Tu es sorti du top {{limit}} du classement.',
   'leaderboard.climbed': 'Tu es monté à la place n°{{rank}} du classement ! 🎉',
   'leaderboard.dropped': 'Tu es descendu à la place n°{{rank}} du classement.',
+  'countryBadge.title': '🎉 Nouveau badge pays !',
+  'countryBadge.body':
+    'Bravo ! Tu viens de débloquer le badge pour {{country}}',
+  'countryBadge.followerTitle': '🌍 Nouveau badge pays',
+  'countryBadge.followerBody':
+    '{{user}} vient de débloquer le badge pour {{country}}',
   'newVersion.title': '🚀 Nouvelle version disponible',
   'newVersion.bodyIos':
     'Une nouvelle version de BiteTribe est disponible sur l’App Store. Mets-la à jour dès maintenant.',

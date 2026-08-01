@@ -228,6 +228,7 @@ setBiteImagePathOnUpload
 enrichBiteAddressOnCreate
 backfillBiteAddress
 notifyFollowersOnNewBite
+notifyOnNewCountryBadge
 notifyBiteCreatorOnLike
 incrementBiteLikeCountOnLikeCreate
 decrementBiteLikeCountOnLikeDelete

@@ -24,6 +24,10 @@ export type NotificationMessageKey =
   | 'leaderboard.droppedOut'
   | 'leaderboard.climbed'
   | 'leaderboard.dropped'
+  | 'countryBadge.title'
+  | 'countryBadge.body'
+  | 'countryBadge.followerTitle'
+  | 'countryBadge.followerBody'
   | 'newVersion.title'
   | 'newVersion.bodyIos'
   | 'newVersion.bodyAndroid';

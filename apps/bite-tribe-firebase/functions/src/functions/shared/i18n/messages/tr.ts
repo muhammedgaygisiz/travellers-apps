@@ -21,6 +21,10 @@ export const tr: NotificationMessages = {
   'leaderboard.droppedOut': 'Lider tablosunda ilk {{limit}} dışına düştün.',
   'leaderboard.climbed': 'Lider tablosunda {{rank}}. sıraya yükseldin! 🎉',
   'leaderboard.dropped': 'Lider tablosunda {{rank}}. sıraya düştün.',
+  'countryBadge.title': '🎉 Yeni ülke rozeti!',
+  'countryBadge.body': 'Tebrikler! {{country}} rozetinin kilidini açtın',
+  'countryBadge.followerTitle': '🌍 Yeni ülke rozeti',
+  'countryBadge.followerBody': '{{user}}, {{country}} rozetinin kilidini açtı',
   'newVersion.title': '🚀 Yeni sürüm hazır',
   'newVersion.bodyIos':
     'BiteTribe’ın yeni sürümü App Store’da. Hemen güncelle, hiçbir yeniliği kaçırma.',

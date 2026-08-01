@@ -22,6 +22,10 @@ export const th: NotificationMessages = {
   'leaderboard.droppedOut': 'คุณหลุดจากท็อป {{limit}} บนกระดานผู้นำ',
   'leaderboard.climbed': 'คุณขยับขึ้นมาอยู่อันดับ {{rank}} บนกระดานผู้นำ! 🎉',
   'leaderboard.dropped': 'คุณตกลงมาอยู่อันดับ {{rank}} บนกระดานผู้นำ',
+  'countryBadge.title': '🎉 เหรียญตราประเทศใหม่!',
+  'countryBadge.body': 'ยินดีด้วย! คุณปลดล็อกเหรียญตรา {{country}} แล้ว',
+  'countryBadge.followerTitle': '🌍 เหรียญตราประเทศใหม่',
+  'countryBadge.followerBody': '{{user}} ปลดล็อกเหรียญตรา {{country}} แล้ว',
   'newVersion.title': '🚀 มีเวอร์ชันใหม่แล้ว',
   'newVersion.bodyIos':
     'BiteTribe เวอร์ชันใหม่พร้อมใช้งานบน App Store แล้ว อัปเดตเลยเพื่อไม่พลาดของใหม่',

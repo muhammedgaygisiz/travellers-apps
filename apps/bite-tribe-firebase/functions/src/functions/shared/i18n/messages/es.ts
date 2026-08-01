@@ -24,6 +24,12 @@ export const es: NotificationMessages = {
     '¡Has subido al puesto n.º {{rank}} de la clasificación! 🎉',
   'leaderboard.dropped':
     'Has bajado al puesto n.º {{rank}} de la clasificación.',
+  'countryBadge.title': '🎉 ¡Nueva insignia de país!',
+  'countryBadge.body':
+    '¡Enhorabuena! Has desbloqueado la insignia de {{country}}',
+  'countryBadge.followerTitle': '🌍 Nueva insignia de país',
+  'countryBadge.followerBody':
+    '{{user}} ha desbloqueado la insignia de {{country}}',
   'newVersion.title': '🚀 Nueva versión disponible',
   'newVersion.bodyIos':
     'Ya está la nueva versión de BiteTribe en la App Store. Actualiza ahora para no perderte nada.',

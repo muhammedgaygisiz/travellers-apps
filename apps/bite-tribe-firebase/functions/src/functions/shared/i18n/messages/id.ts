@@ -23,6 +23,10 @@ export const id: NotificationMessages = {
   'leaderboard.climbed':
     'Kamu naik ke peringkat {{rank}} di papan peringkat! 🎉',
   'leaderboard.dropped': 'Kamu turun ke peringkat {{rank}} di papan peringkat.',
+  'countryBadge.title': '🎉 Lencana negara baru!',
+  'countryBadge.body': 'Selamat! Kamu membuka lencana {{country}}',
+  'countryBadge.followerTitle': '🌍 Lencana negara baru',
+  'countryBadge.followerBody': '{{user}} membuka lencana {{country}}',
   'newVersion.title': '🚀 Versi baru tersedia',
   'newVersion.bodyIos':
     'Versi baru BiteTribe sudah ada di App Store. Perbarui sekarang agar tidak ketinggalan.',

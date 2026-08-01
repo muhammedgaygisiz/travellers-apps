@@ -23,6 +23,7 @@ Users and creators can receive engagement signals around Bites and social activi
 - The weekly summary counts one calendar week (Monday to Sunday, Europe/Zurich) and carries those bounds, so its landing page lists the Bites of exactly that week even when the user opens it days later.
 - Notification text arrives in the language the user chose in settings, not in English.
 - Users learn that a new app version is live from a notification, instead of waiting for TestFlight or Google Play to auto-update them.
+- A Bite in a country the user has never covered congratulates them on the new country badge, and tells their followers when the profile is public.
 
 ## Localization Contract
 
@@ -60,6 +61,37 @@ added a manually triggered notification for a released app version:
 - The business page reports how far the announcement reached, since a broadcast
   leaves nothing else behind to verify it by.
 
+## Country Badge Contract
+
+Issue [#1212](https://github.com/muhammedgaygisiz/travellers-apps/issues/1212)
+turned the profile's country badges into an engagement signal:
+
+- The trigger is the badge, not the Bite. A country that enters a profile's
+  `countryCodes` list for the first time is congratulated; every later Bite in
+  the same country is silent, because only the first one is an achievement.
+- Followers of a public profile are told about the achievement, so a badge is
+  recognition in front of an audience rather than a private counter. That is
+  what the feature is for on the follower side: the same motivation, borrowed.
+- A private profile is congratulated but never announced. Followers of a
+  private account see none of its activity anywhere else in the app, and a
+  badge notification must not become the one place that leaks where someone has
+  been.
+- A tap opens the profile that carries the badge - their own for the achiever,
+  the achiever's for a follower.
+- The country is named in the recipient's language, following the Localization
+  Contract. ICU supplies the country name from the same language the sentence is
+  written in, so the catalog carries the sentence and not 200 country names per
+  locale. The flag emoji travels with the name as one value, so a locale decides
+  where the whole badge goes in its sentence.
+- The one-time backfill that gave existing profiles their badge list stays
+  silent. It reconstructs a history the user already lived through, so it is a
+  migration, not an achievement.
+- A new account starts with an empty badge list rather than no list at all, so
+  its first Bite reads as a first country earned instead of as the
+  never-ran-before signal that triggers the backfill.
+- A failing send never marks the Bite's address as unresolved. Awarding the
+  badge happens after the address is written and is contained on its own.
+
 ## Installation Contract
 
 Issue [#1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184)
@@ -94,6 +126,7 @@ made notification delivery installation-specific:
 - `sendWeeklyBiteNotification`
 - `sendDailyLeaderboardNotification`
 - `sendNewVersionNotification`, triggered from the business `migrations` page
+- `notifyOnNewCountryBadge`, awarded from `enrichBiteAddressOnCreate`
 - `handleSharedLinkToBite`
 - `loadWeeklyBites`
 - `sendLocalizedNotification` and the notification catalog in

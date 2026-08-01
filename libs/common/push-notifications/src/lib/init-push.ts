@@ -111,6 +111,18 @@ export const initPushListeners = async (
           navController.navigateForward([PATH.LEADERBOARD]);
         }
 
+        if (data?.type === 'NEW_COUNTRY_BADGE' && data?.userId) {
+          // The badge lives on the profile of whoever earned it. The same
+          // payload reaches the achiever and their followers, so the achiever
+          // is sent to their own profile page rather than to a read-only view
+          // of themselves.
+          navController.navigateForward(
+            data.userId === userUid
+              ? [PATH.MY_PROFILE]
+              : [PATH.PROFILE, data.userId],
+          );
+        }
+
         if (data?.type === 'WEEKLY_BITE_SUMMARY') {
           // The summary counts one specific week, so carry its bounds into the
           // page instead of dropping the user on the home feed. Older payloads

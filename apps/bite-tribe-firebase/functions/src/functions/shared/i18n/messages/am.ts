@@ -21,6 +21,10 @@ export const am: NotificationMessages = {
   'leaderboard.droppedOut': 'ከመሪዎች ሰሌዳ ምርጥ {{limit}} ውጪ ሆነዋል።',
   'leaderboard.climbed': 'በመሪዎች ሰሌዳ ላይ ወደ {{rank}}ኛ ደረጃ ወጥተዋል! 🎉',
   'leaderboard.dropped': 'በመሪዎች ሰሌዳ ላይ ወደ {{rank}}ኛ ደረጃ ወርደዋል።',
+  'countryBadge.title': '🎉 አዲስ የአገር ባጅ!',
+  'countryBadge.body': 'እንኳን ደስ አለዎት! የ{{country}} ባጅ ከፍተዋል',
+  'countryBadge.followerTitle': '🌍 አዲስ የአገር ባጅ',
+  'countryBadge.followerBody': '{{user}} የ{{country}} ባጅ ከፍቷል',
   'newVersion.title': '🚀 አዲስ ስሪት ወጥቷል',
   'newVersion.bodyIos': 'አዲሱ የBiteTribe ስሪት በApp Store ላይ ደርሷል። አሁን ያዘምኑት።',
   'newVersion.bodyAndroid':

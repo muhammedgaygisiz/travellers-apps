@@ -109,16 +109,22 @@ export const backfillUserCountryCodes = async (
  * will not have the `countryCodes` property yet. That is our signal that the
  * feature has never run before, so we backfill the list for all users instead
  * of only touching the current one.
+ *
+ * Returns the country code when it was genuinely new to this profile, and
+ * `undefined` otherwise, so a caller can celebrate a first-time badge
+ * (issue \#1212) without re-reading the user document. The backfill path
+ * deliberately reports nothing: it reconstructs a history the user already
+ * lived through, so it is a migration, not an achievement.
  */
 export const addCountryCodeToUser = async (
   db: Firestore,
   userId: string,
   countryCode: unknown,
-): Promise<void> => {
+): Promise<string | undefined> => {
   const normalizedCountryCode = normalizeCountryCode(countryCode);
 
   if (!normalizedCountryCode) {
-    return;
+    return undefined;
   }
 
   const userRef = db.collection(USERS_COLLECTION).doc(userId);
@@ -126,20 +132,26 @@ export const addCountryCodeToUser = async (
 
   if (!userSnap.exists) {
     logger.warn('addCountryCodeToUser: user not found', { userId });
-    return;
+    return undefined;
   }
 
-  const hasCountryCodesProperty =
-    userSnap.get(COUNTRY_CODES_FIELD) !== undefined;
+  const currentCountryCodes = userSnap.get(COUNTRY_CODES_FIELD);
 
-  if (!hasCountryCodesProperty) {
+  if (currentCountryCodes === undefined) {
     logger.info(
       'addCountryCodeToUser: country codes property missing, running backfill',
       { userId },
     );
     await backfillUserCountryCodes(db);
-    return;
+    return undefined;
   }
+
+  const isNewCountry = !(
+    Array.isArray(currentCountryCodes) &&
+    currentCountryCodes.some(
+      (existing) => normalizeCountryCode(existing) === normalizedCountryCode,
+    )
+  );
 
   await userRef.update({
     [COUNTRY_CODES_FIELD]: FieldValue.arrayUnion(normalizedCountryCode),
@@ -149,7 +161,10 @@ export const addCountryCodeToUser = async (
   logger.info('addCountryCodeToUser: added country code', {
     userId,
     countryCode: normalizedCountryCode,
+    isNewCountry,
   });
+
+  return isNewCountry ? normalizedCountryCode : undefined;
 };
 
 /**

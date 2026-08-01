@@ -23,7 +23,8 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - A Restaurant can have an address and GPS position.
 - A Restaurant can have social media links, opening hours, description, and image.
 - Creating a Restaurant can update selected Bites with the new `restaurantId`.
-- Verifying a Restaurant candidate creates the Restaurant through the backend, creates its empty Menu, updates all candidate Bites with the new `restaurantId`, and records the verification on the candidate.
+- Verifying a Restaurant candidate creates the Restaurant through the backend, creates its initial Menu from the candidate Bites, updates all candidate Bites with the new `restaurantId`, and records the verification on the candidate.
+- The initial Menu is a draft built from evidence, not a claim about the real menu: one item per distinct Bite dish name, priced with the average of the prices users reported, in a single `Bites` category the business user edits afterwards.
 - Candidate-backed Restaurant creation should be idempotent: repeated verification of an already verified or merged candidate must return the existing verified Restaurant instead of creating another one.
 - Verified versus unverified restaurant behavior is an active product area.
 - A Restaurant has no owner today. Ownership, claiming, and authorization are specified in [[UC - Own And Claim Restaurants]] and are the prerequisite for every operational restaurant capability.
@@ -95,7 +96,7 @@ Restaurant candidate or business-created restaurant
 |
 Restaurant saved
 |
-Menu created
+Menu created (seeded from Bite evidence for verified candidates)
 |
 Bites linked through restaurantId
 |
@@ -107,7 +108,7 @@ Visible in Bite, restaurant, menu, search, and business flows
 Current implementation notes:
 
 - Restaurants are stored in `/restaurants/{restaurantId}`.
-- Creating a restaurant also creates an empty menu document and stores the `menuId` on the restaurant.
+- Creating a restaurant also creates a menu document and stores the `menuId` on the restaurant. The business app create path writes an empty menu; candidate verification writes the initial menu derived from the candidate Bites.
 - If `biteIds` are provided during creation, those Bites are updated with the new `restaurantId`.
 - Candidate-backed creation uses `verifyRestaurantCandidate` so restaurant creation, menu creation, Bite linking, and candidate status changes happen in one backend transaction.
 - Candidate verification stores `verifiedRestaurantId`, `verifiedAt`, `verifiedAtTimestamp`, and `verifiedByUserId` on `/restaurantCandidates/{candidateId}`.

@@ -21,7 +21,8 @@ Business users or admins can maintain Restaurant and menu context that improves 
 - Business user can select a pending restaurant candidate from the dashboard.
 - The candidate opens the existing new-restaurant flow with suggested name, position, Bite IDs, and Bite evidence prefilled.
 - When the business user saves the reviewed candidate, the app calls the backend verification workflow instead of the normal store save path.
-- The backend creates the verified Restaurant, creates an empty Menu, links the candidate Bites to the new `restaurantId`, and marks the candidate verified.
+- The backend creates the verified Restaurant, creates the initial Menu from the candidate Bites, links the candidate Bites to the new `restaurantId`, and marks the candidate verified.
+- The initial Menu saves the business user the first round of typing: each distinct Bite dish name becomes one item, priced with the average of the prices users reported, in a single `Bites` category. The business user then corrects, renames, and structures it in the edit-menu page.
 
 ## Supported Evidence
 
@@ -36,6 +37,7 @@ Business users or admins can maintain Restaurant and menu context that improves 
 
 - Issue \#734 includes opening hours, social links, verified/unverified restaurant handling, menu cleanup, and admin restaurant workflows.
 - Issue \#778 / \#942 covers verifying restaurant candidates discovered from repeated Bite evidence into real Restaurants.
+- Issue \#1003 seeds the initial Menu of a verified candidate from its Bites.
 
 ## Related Domains
 

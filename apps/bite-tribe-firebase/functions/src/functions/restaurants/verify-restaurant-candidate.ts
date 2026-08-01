@@ -1,8 +1,16 @@
-import { DocumentData, Transaction, getFirestore } from 'firebase-admin/firestore';
+import {
+  DocumentData,
+  Transaction,
+  getFirestore,
+} from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { geohashForLocation } from 'geofire-common';
 import { onAppCheck } from '../shared/callable-options';
+import {
+  buildInitialMenuCategories,
+  InitialMenuBite,
+} from '../shared/utils/initial-menu';
 
 const BITE_COLLECTION = 'bites';
 const MENU_COLLECTION = 'menus';
@@ -17,6 +25,7 @@ interface VerifyRestaurantCandidateRequest {
 interface VerifyRestaurantCandidateResult {
   restaurantId: string;
   menuId?: string;
+  menuItemCount?: number;
   candidateId: string;
   status: 'created' | 'already-verified';
 }
@@ -47,10 +56,8 @@ const parsePosition = (value: unknown): RestaurantPosition | undefined => {
   return undefined;
 };
 
-const getString = (
-  data: DocumentData,
-  field: string,
-): string => (typeof data[field] === 'string' ? data[field] : '');
+const getString = (data: DocumentData, field: string): string =>
+  typeof data[field] === 'string' ? data[field] : '';
 
 const isBase64Image = (value: string): boolean =>
   /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(value);
@@ -117,15 +124,17 @@ const toRestaurantDocument = (
   return document;
 };
 
-const getStringArray = (
-  data: DocumentData,
-  field: string,
-): string[] =>
+const getStringArray = (data: DocumentData, field: string): string[] =>
   Array.isArray(data[field])
     ? data[field].filter(
         (value: unknown): value is string => typeof value === 'string',
       )
     : [];
+
+const toInitialMenuBite = (data: DocumentData): InitialMenuBite => ({
+  name: typeof data['name'] === 'string' ? data['name'] : undefined,
+  price: typeof data['price'] === 'number' ? data['price'] : undefined,
+});
 
 const getExistingVerifiedRestaurantId = async (
   transaction: Transaction,
@@ -220,6 +229,25 @@ export const verifyRestaurantCandidateHandler = async (
         };
       }
 
+      const biteIds = getStringArray(candidateData, 'biteIds');
+      const biteSnapshots = biteIds.length
+        ? await transaction.getAll(
+            ...biteIds.map((biteId) =>
+              db.collection(BITE_COLLECTION).doc(biteId),
+            ),
+          )
+        : [];
+      // A Bite deleted after clustering must not fail the whole verification,
+      // so the candidate cannot get stuck in `pending`.
+      const existingBiteSnapshots = biteSnapshots.filter(
+        (snapshot) => snapshot.exists,
+      );
+      const categories = buildInitialMenuCategories(
+        existingBiteSnapshots.map((snapshot) =>
+          toInitialMenuBite(snapshot.data() ?? {}),
+        ),
+      );
+
       const now = new Date();
       const restaurantRef = db.collection(RESTAURANT_COLLECTION).doc();
       const menuRef = db.collection(MENU_COLLECTION).doc();
@@ -228,17 +256,16 @@ export const verifyRestaurantCandidateHandler = async (
         menuRef.id,
         now,
       );
-      const biteIds = getStringArray(candidateData, 'biteIds');
 
       transaction.create(restaurantRef, restaurantDocument);
       transaction.create(menuRef, {
-        categories: [],
+        categories,
         createdAt: now.toISOString(),
         createdAtTimestamp: now.getTime(),
       });
 
-      biteIds.forEach((biteId) => {
-        transaction.update(db.collection(BITE_COLLECTION).doc(biteId), {
+      existingBiteSnapshots.forEach((snapshot) => {
+        transaction.update(snapshot.ref, {
           restaurantId: restaurantRef.id,
           updatedAt: now.toISOString(),
           updatedAtTimestamp: now.getTime(),
@@ -258,6 +285,10 @@ export const verifyRestaurantCandidateHandler = async (
       return {
         restaurantId: restaurantRef.id,
         menuId: menuRef.id,
+        menuItemCount: categories.reduce(
+          (total, category) => total + category.items.length,
+          0,
+        ),
         candidateId,
         status: 'created',
       };
@@ -267,6 +298,7 @@ export const verifyRestaurantCandidateHandler = async (
   logger.info('restaurant candidate verification finished', {
     candidateId,
     restaurantId: result.restaurantId,
+    menuItemCount: result.menuItemCount,
     status: result.status,
   });
 

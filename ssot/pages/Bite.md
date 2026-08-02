@@ -32,6 +32,9 @@ A good Bite makes one concrete dish understandable enough that another person ca
 - A Bite can be reviewed.
 - A Bite can be added to bucket lists.
 - A Bite can be part of BiteTrail-based journeys.
+- A Bite is the only entity with a public share link and a native deep link
+  (`/s/bite/*`). Users, bucket lists, restaurants, and BiteTrails are not
+  shareable. See [[issue-1190]].
 - A Bite should have an image because the image is a core trust signal.
 - Deleting a Bite currently deletes the Firestore document and attempts to delete its stored image.
 - Deleting a Bite must decrement the creator's `biteCount` aggregate because Bite creation increments it.

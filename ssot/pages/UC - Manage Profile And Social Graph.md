@@ -37,6 +37,19 @@ Users can maintain their identity and use profile/social context to build trust 
   choice reads as private. Organisation profiles carry no status because they
   have no visibility switch. See GitHub issue #1188.
 
+## Out Of Scope
+
+- A profile is not a shareable destination. There is no profile share action, no
+  public profile share URL, and no native profile deep link, and none of them is
+  planned. A profile is reached inside the app from a Bite, a follower or
+  following list, or search.
+- Public visibility means other BiteTribe users may open the profile in the app.
+  It does not mean the profile is published as a link that can be handed to
+  someone outside the app.
+- Sharing is a Bite capability. Making profiles shareable would be a new product
+  decision with its own privacy handling, not a completion of existing work. See
+  [[issue-1190]] and [[UC - Inspect Bite Details]].
+
 ## Supported Evidence
 
 - `my-profile`

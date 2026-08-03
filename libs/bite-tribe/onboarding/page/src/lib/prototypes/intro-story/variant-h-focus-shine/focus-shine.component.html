@@ -1,0 +1,85 @@
+<section
+  class="fs"
+  [class.fs--paused]="paused()"
+  [class.fs--morphing]="morphing()"
+  [style.--accent]="scene().accent"
+  [style.--accent-soft]="scene().accentSoft"
+  (pointerdown)="onPressStart()"
+  (pointerup)="onPressEnd()"
+  (pointercancel)="onPressEnd()"
+  (pointerleave)="onPressEnd()"
+>
+  <div class="fs__progress" aria-hidden="true">
+    @for (t of tips(); track t.id; let i = $index) {
+      <div class="fs__seg">
+        @if (i < tipIndex()) {
+          <div class="fs__fill fs__fill--done"></div>
+        } @else if (i === tipIndex()) {
+          @for (_ of [animKey()]; track _) {
+            <div
+              class="fs__fill fs__fill--active"
+              [style.animation-duration.ms]="tipDuration()"
+              [style.animation-play-state]="
+                paused() || !autoAdvance() ? 'paused' : 'running'
+              "
+            ></div>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <header class="fs__top">
+    <div class="fs__titles">
+      <p class="fs__badge">{{ badge() }}</p>
+      <h1 class="fs__headline">{{ scene().headline }}</h1>
+      <p class="fs__step">Shine {{ progressLabel() }}</p>
+    </div>
+    <button type="button" class="fs__ghost" (click)="prevTip($event)">
+      Back
+    </button>
+  </header>
+
+  <div #stage class="fs__stage">
+    <intro-real-ui-source
+      [beat]="beatId()"
+      [framed]="false"
+      [simulate]="false"
+      [coach]="coach()"
+    />
+
+    @if (tip(); as active) {
+      <div
+        class="fs__coach"
+        aria-hidden="true"
+        [style.--shine-x]="shineVars()['--shine-x']"
+        [style.--shine-y]="shineVars()['--shine-y']"
+        [style.--shine-w]="shineVars()['--shine-w']"
+        [style.--shine-h]="shineVars()['--shine-h']"
+        [style.--shine-r]="shineVars()['--shine-r']"
+      >
+        <div class="fs__veil"></div>
+      </div>
+
+      @for (_ of [animKey()]; track _) {
+        <div
+          class="fs__tip"
+          role="dialog"
+          aria-live="polite"
+          [class.fs__tip--above]="tipAbove()"
+          [style.--tip-top]="tipStyle()['--tip-top']"
+          [style.--tip-bottom]="tipStyle()['--tip-bottom']"
+          [style.--tip-left]="tipStyle()['--tip-left']"
+          [style.--tip-y]="tipStyle()['--tip-y']"
+        >
+          <p class="fs__tip-kicker">{{ scene().headline }}</p>
+          <h2 class="fs__tip-title">{{ active.title }}</h2>
+          <p class="fs__tip-body">{{ active.body }}</p>
+          <button type="button" class="fs__next" (click)="nextTip($event)">
+            {{ isLast() ? 'Replay' : 'Next' }}
+          </button>
+        </div>
+      }
+    }
+  </div>
+</section>

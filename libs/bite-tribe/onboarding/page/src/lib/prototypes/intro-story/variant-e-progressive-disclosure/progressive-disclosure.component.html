@@ -1,0 +1,92 @@
+<section
+  class="pd"
+  [class.pd--paused]="paused()"
+  [style.--accent]="scene().accent"
+  [style.--accent-soft]="scene().accentSoft"
+  (pointerdown)="onPressStart()"
+  (pointerup)="onPressEnd()"
+  (pointercancel)="onPressEnd()"
+  (pointerleave)="onPressEnd()"
+>
+  <div class="pd__progress" aria-hidden="true">
+    @for (t of tips(); track t.id; let i = $index) {
+      <div class="pd__seg">
+        @if (i < tipIndex()) {
+          <div class="pd__fill pd__fill--done"></div>
+        } @else if (i === tipIndex()) {
+          @for (_ of [animKey()]; track _) {
+            <div
+              class="pd__fill pd__fill--active"
+              [style.animation-duration.ms]="tipDuration()"
+              [style.animation-play-state]="
+                paused() || !autoAdvance() ? 'paused' : 'running'
+              "
+            ></div>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <header class="pd__top">
+    <div class="pd__titles">
+      <p class="pd__badge">{{ badge() }}</p>
+      <h1 class="pd__headline">{{ scene().headline }}</h1>
+      <p class="pd__step">Tip {{ progressLabel() }}</p>
+    </div>
+    <div class="pd__nav">
+      <button type="button" class="pd__ghost" (click)="prevTip($event)">
+        Back
+      </button>
+    </div>
+  </header>
+
+  <div #stage class="pd__stage">
+    <intro-real-ui-source
+      [beat]="beatId()"
+      [framed]="false"
+      [simulate]="false"
+      [coach]="coach()"
+    />
+
+    @if (tip(); as active) {
+      <div
+        class="pd__coach"
+        role="dialog"
+        aria-modal="true"
+        aria-live="polite"
+        [style.--shine-x]="shineVars()['--shine-x']"
+        [style.--shine-y]="shineVars()['--shine-y']"
+        [style.--shine-w]="shineVars()['--shine-w']"
+        [style.--shine-h]="shineVars()['--shine-h']"
+      >
+        <div class="pd__veil" aria-hidden="true"></div>
+
+        @if (arrowStyle(); as arrow) {
+          <div
+            class="pd__arrow"
+            aria-hidden="true"
+            [style.left]="arrow.left"
+            [style.top]="arrow.top"
+            [style.transform]="arrow.transform"
+          ></div>
+        }
+
+        @for (_ of [animKey()]; track _) {
+          <div
+            class="pd__card"
+            [style.top]="cardStyle().top"
+            [style.transform]="cardStyle().transform"
+          >
+            <p class="pd__card-kicker">{{ scene().headline }}</p>
+            <h2 class="pd__card-title">{{ active.title }}</h2>
+            <p class="pd__card-body">{{ active.body }}</p>
+            <button type="button" class="pd__next" (click)="nextTip($event)">
+              {{ isLast() ? 'Replay' : 'Next' }}
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>

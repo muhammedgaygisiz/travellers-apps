@@ -1,0 +1,75 @@
+<section
+  class="icons"
+  [style.--accent]="scene().accent"
+  [style.--accent-soft]="scene().accentSoft"
+  [class.icons--paused]="paused()"
+  (mousedown)="onPressStart()"
+  (mouseup)="onPressEnd()"
+  (mouseleave)="onPressEnd()"
+  (touchstart)="onPressStart()"
+  (touchend)="onPressEnd()"
+>
+  <p class="icons__track">0 · Icons-only abstract</p>
+
+  <div class="icons__progress" aria-hidden="true">
+    @for (s of scenes; track s.id; let i = $index) {
+      <div class="icons__seg">
+        @if (i < index()) {
+          <div class="icons__fill icons__fill--done"></div>
+        } @else if (i === index()) {
+          @for (_ of [animKey()]; track _) {
+            <div
+              class="icons__fill icons__fill--active"
+              [style.animation-duration.ms]="4200"
+              [style.animation-play-state]="paused() ? 'paused' : 'running'"
+            ></div>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <header class="icons__top">
+    <span class="icons__brand">BiteTribe</span>
+    <button
+      type="button"
+      class="icons__skip"
+      (click)="skip(); $event.stopPropagation()"
+    >
+      Skip
+    </button>
+  </header>
+
+  <button
+    type="button"
+    class="icons__stage"
+    (click)="onTap($event)"
+    [attr.aria-label]="'Story beat ' + (index() + 1)"
+  >
+    @for (_ of [animKey()]; track _) {
+      <div class="icons__glow" aria-hidden="true"></div>
+      <div class="icons__orb" aria-hidden="true">
+        <ion-icon [name]="scene().icon" />
+      </div>
+      <div class="icons__copy">
+        <p class="icons__kicker">{{ index() + 1 }} / {{ scenes.length }}</p>
+        <h1>{{ scene().headline }}</h1>
+        <p>{{ scene().line }}</p>
+      </div>
+    }
+  </button>
+
+  <footer class="icons__footer">
+    @if (isLast()) {
+      <button
+        type="button"
+        class="icons__cta"
+        (click)="finish(); $event.stopPropagation()"
+      >
+        Let's go
+      </button>
+    } @else {
+      <p class="icons__hint">Tap to continue · hold to pause</p>
+    }
+  </footer>
+</section>

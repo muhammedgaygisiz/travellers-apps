@@ -1,0 +1,1087 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  overflow: hidden;
+  scrollbar-width: none;
+}
+
+:host::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.source {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  padding: 0.5rem;
+  overflow: hidden;
+  background: #ece7de;
+  color: #20201e;
+  scrollbar-width: none;
+}
+
+.source::-webkit-scrollbar {
+  display: none;
+}
+
+.source--bare {
+  padding: 0;
+  background: transparent;
+}
+
+.source__badge {
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #4a90d9;
+}
+
+.source__caption {
+  margin: -0.15rem 0 0.55rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: #5a574f;
+}
+
+.source__phone {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 280px;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse at 50% 28%,
+    #f7f3ec 0%,
+    #e4ddd0 68%,
+    #d8d0c2 100%
+  );
+}
+
+/* Simulated taps must not flash browser / Ionic focus rectangles. */
+.source__phone :focus,
+.source__phone :focus-visible,
+.source__phone ::ng-deep *:focus,
+.source__phone ::ng-deep *:focus-visible,
+.source__phone ::ng-deep *.ion-focused,
+.source__phone ::ng-deep .has-focus,
+.source__phone ::ng-deep .item-has-focus,
+.source__phone ::ng-deep .native-input:focus,
+.source__phone ::ng-deep input:focus,
+.source__phone ::ng-deep textarea:focus {
+  outline: none !important;
+  --highlight-color: transparent !important;
+  --highlight-color-focused: transparent !important;
+  --highlight-background: transparent !important;
+  box-shadow: none !important;
+}
+
+.source__phone--bare {
+  background: transparent;
+}
+
+.source__viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  overflow: hidden;
+}
+
+/* Outer device (bezel + glass) — fit-scaled into the viewport. */
+.source__device {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  transform-origin: top left;
+  pointer-events: none;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* Screen content at native 390×844 inside the glass (status overlays, no crop). */
+.source__native {
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: #fff;
+  /* Mirror shell insets when content is projected without shell CSS vars. */
+  --ion-safe-area-top: 59px;
+  --ion-safe-area-right: 0px;
+  --ion-safe-area-bottom: 34px;
+  --ion-safe-area-left: 0px;
+  scrollbar-width: none;
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.source__native--fading {
+  opacity: 0;
+}
+
+/* Photo just applied on create — soft bloom so the state change is obvious. */
+.source__native--photo-land ::ng-deep image-upload,
+.source__native--photo-land ::ng-deep .image-upload,
+.source__native--photo-land ::ng-deep [class*='upload'] {
+  animation: photo-land 1200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes photo-land {
+  0% {
+    opacity: 0.35;
+    transform: scale(0.94);
+    filter: brightness(1.25);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.03);
+    filter: brightness(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: none;
+  }
+}
+
+.source__native::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide browser scrollbars on nested Ionic scroll hosts. */
+.source__native ::ng-deep .inner-scroll,
+.source__native ::ng-deep .scroll-content,
+.source__native ::ng-deep ion-content::part(scroll) {
+  scrollbar-width: none !important;
+}
+
+.source__native ::ng-deep .inner-scroll::-webkit-scrollbar,
+.source__native ::ng-deep .scroll-content::-webkit-scrollbar,
+.source__native ::ng-deep *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Push BiteTribe header / toolbar below Dynamic Island. */
+.source__native ::ng-deep ion-header ion-toolbar:first-of-type {
+  padding-top: var(--ion-safe-area-top, 59px) !important;
+}
+
+.source__native ::ng-deep ion-footer ion-toolbar:last-of-type {
+  padding-bottom: var(--ion-safe-area-bottom, 34px) !important;
+}
+
+.source__native ::ng-deep ion-tab-bar {
+  padding-bottom: var(--ion-safe-area-bottom, 34px);
+}
+
+/* Cheerful resolve celebration — big bright sparks (not subtle). */
+.source__celebrate {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  z-index: 9;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 18px rgb(255 210 120 / 55%));
+}
+
+.source__spark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fffef5 0%,
+    #ffe08a 38%,
+    #f0a35a 62%,
+    transparent 78%
+  );
+  box-shadow:
+    0 0 22px rgb(255 220 120 / 95%),
+    0 0 44px rgb(255 180 80 / 55%);
+  animation: spark-pop 3000ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform: translate(-50%, -50%);
+}
+
+.source__spark:nth-child(odd) {
+  width: 13px;
+  height: 13px;
+  background: radial-gradient(
+    circle,
+    #fff 0%,
+    #ffd4e2 42%,
+    #f28aa0 68%,
+    transparent 80%
+  );
+  box-shadow:
+    0 0 20px rgb(255 170 190 / 90%),
+    0 0 36px rgb(242 138 160 / 50%);
+}
+
+.source__spark:nth-child(3n) {
+  width: 22px;
+  height: 22px;
+  background: radial-gradient(
+    circle,
+    #fff 0%,
+    #b8ecff 40%,
+    #7ec8e3 65%,
+    transparent 78%
+  );
+  box-shadow:
+    0 0 24px rgb(160 220 255 / 85%),
+    0 0 40px rgb(126 200 227 / 50%);
+}
+
+.source__spark:nth-child(1) {
+  --sx: -72px;
+  --sy: -88px;
+}
+.source__spark:nth-child(2) {
+  --sx: 68px;
+  --sy: -76px;
+}
+.source__spark:nth-child(3) {
+  --sx: -58px;
+  --sy: 54px;
+}
+.source__spark:nth-child(4) {
+  --sx: 78px;
+  --sy: 42px;
+}
+.source__spark:nth-child(5) {
+  --sx: 4px;
+  --sy: -108px;
+}
+.source__spark:nth-child(6) {
+  --sx: -92px;
+  --sy: 12px;
+}
+.source__spark:nth-child(7) {
+  --sx: 96px;
+  --sy: -22px;
+}
+.source__spark:nth-child(8) {
+  --sx: 22px;
+  --sy: 86px;
+}
+.source__spark:nth-child(9) {
+  --sx: -44px;
+  --sy: -52px;
+}
+.source__spark:nth-child(10) {
+  --sx: 52px;
+  --sy: 64px;
+}
+.source__spark:nth-child(11) {
+  --sx: -84px;
+  --sy: -28px;
+}
+.source__spark:nth-child(12) {
+  --sx: 40px;
+  --sy: -96px;
+}
+.source__spark:nth-child(13) {
+  --sx: -18px;
+  --sy: 98px;
+}
+.source__spark:nth-child(14) {
+  --sx: 88px;
+  --sy: 28px;
+}
+.source__spark:nth-child(15) {
+  --sx: -66px;
+  --sy: 72px;
+}
+.source__spark:nth-child(16) {
+  --sx: 12px;
+  --sy: -64px;
+}
+
+/* Dual-layer stack — outgoing + incoming overlap during transition */
+.source__stack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #fff;
+}
+
+.source__layer {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+}
+
+.source__layer > * {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.source__layer--out {
+  z-index: 1;
+  animation: layer-out cubic-bezier(0.33, 1, 0.32, 1) forwards;
+  will-change: opacity, transform, filter;
+}
+
+.source__layer--in {
+  z-index: 2;
+  /* Always keep incoming opaque while parked — never flash white. */
+  opacity: 1;
+  background: #fff;
+}
+
+.source__layer--in.source__layer--enter {
+  animation: layer-in cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform, filter;
+}
+
+.source__stack ::ng-deep ion-content,
+.source__stack ::ng-deep .ion-page,
+.source__stack ::ng-deep ta-page {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+}
+
+/* Keep Ionic scroll host constrained so scrollSynced can move scrollTop. */
+.source__stack ::ng-deep ion-content::part(scroll),
+.source__stack ::ng-deep .inner-scroll {
+  max-height: 100%;
+  /* Hide OS scrollbars — soft-dot / iOS indicator is the intentional chrome. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.source,
+.source__phone,
+.source__viewport,
+.source__native,
+.source__stack {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.source::-webkit-scrollbar,
+.source__phone::-webkit-scrollbar,
+.source__viewport::-webkit-scrollbar,
+.source__native::-webkit-scrollbar,
+.source__stack::-webkit-scrollbar,
+.source__stack ::ng-deep ::-webkit-scrollbar,
+.source__stack ::ng-deep ion-content::part(scroll)::-webkit-scrollbar,
+.source__stack ::ng-deep .inner-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.picker {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  align-items: end;
+  background: rgb(12 12 14 / 35%);
+  animation: fade-in 380ms ease both;
+}
+
+.picker__sheet {
+  padding: 1rem 1rem 1.25rem;
+  border-radius: 1.25rem 1.25rem 0 0;
+  background: #fff;
+  box-shadow: 0 -12px 40px rgb(0 0 0 / 18%);
+  animation: sheet-up 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.picker__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.picker__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.picker__cell {
+  aspect-ratio: 1;
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 0.75rem;
+  background: #f3eee6;
+}
+
+.picker__cell img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.picker__cell--on {
+  border-color: #20201e;
+  box-shadow: 0 0 0 3px rgb(32 32 30 / 12%);
+}
+
+.picker__cell--muted {
+  opacity: 0.72;
+}
+
+.share-sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  align-items: end;
+  background: rgb(12 12 14 / 32%);
+  animation: fade-in 280ms ease both;
+}
+
+.share-sheet__panel {
+  padding: 1rem 1.1rem 1.35rem;
+  border-radius: 1.25rem 1.25rem 0 0;
+  background: #fff;
+  box-shadow: 0 -12px 40px rgb(0 0 0 / 18%);
+  animation: layer-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.share-sheet__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.share-sheet__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4a4a46;
+}
+
+.source__gps-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 22%;
+  z-index: 6;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: rgb(63 143 107 / 94%);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transform: translateX(-50%);
+  animation: toast-in 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.source__native--new-card ::ng-deep bt-bite[data-bite-id='bite1'] ion-card {
+  outline: none;
+  animation: new-card-pulse 1.2s ease both;
+  filter: drop-shadow(0 0 14px rgb(224 138 58 / 45%));
+}
+
+@keyframes new-card-pulse {
+  from {
+    transform: translateY(-10px);
+    opacity: 0.55;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.source__react {
+  position: absolute;
+  inset: auto 0 26% 0;
+  z-index: 8;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1.1rem;
+  pointer-events: none;
+  filter: drop-shadow(0 0 22px rgb(255 200 90 / 55%));
+}
+
+.source__thumb {
+  font-size: 3.35rem;
+  line-height: 1;
+  /* Big cheerful pop — long hold so the cheer reads clearly. */
+  animation: thumb-pop 3600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  filter: drop-shadow(0 8px 18px rgb(0 0 0 / 28%))
+    drop-shadow(0 0 24px rgb(255 210 110 / 65%));
+  transform-origin: 50% 80%;
+}
+
+.source__toast {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  z-index: 6;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: rgb(32 32 30 / 92%);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transform: translateX(-50%);
+  animation: toast-in 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 22%);
+}
+
+.source__follow-badge {
+  position: absolute;
+  top: 26%;
+  right: 6%;
+  z-index: 6;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: #c45d6a;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  animation: go-hint-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  box-shadow: 0 8px 20px rgb(196 93 106 / 35%);
+}
+
+.stage-drawer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  align-items: end;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 45%,
+    rgb(12 12 14 / 28%) 100%
+  );
+  animation: fade-in 280ms ease both;
+}
+
+.stage-drawer__sheet {
+  margin: 0 0.75rem 1.1rem;
+  padding: 0.9rem 1rem 1rem;
+  border-radius: 1.15rem;
+  background: #fff;
+  box-shadow: 0 -12px 36px rgb(0 0 0 / 18%);
+  animation: drawer-up 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stage-drawer__kicker {
+  margin: 0 0 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #3f8f6b;
+}
+
+.stage-drawer__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: #20201e;
+}
+
+.stage-drawer__place {
+  margin: 0.2rem 0 0.75rem;
+  font-size: 0.82rem;
+  color: rgb(32 32 30 / 68%);
+}
+
+.stage-drawer__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stage-drawer__thumb {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 0.7rem;
+  object-fit: cover;
+}
+
+.stage-drawer__go {
+  margin-left: auto;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: #3f8f6b;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.stage-drawer__handle {
+  width: 2.5rem;
+  height: 0.28rem;
+  margin: 0 auto 0.65rem;
+  border-radius: 999px;
+  background: rgb(32 32 30 / 22%);
+}
+
+.stage-drawer--expanded .stage-drawer__sheet {
+  min-height: 42%;
+  padding-bottom: 1.35rem;
+}
+
+.stage-drawer__blurb {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: rgb(32 32 30 / 72%);
+}
+
+.source__map-pan {
+  width: 100%;
+  height: 100%;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.source__map-pan > * {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.source__inline-follow {
+  position: absolute;
+  top: 38%;
+  right: 5%;
+  z-index: 6;
+  padding: 0.45rem 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: #c45d6a;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgb(196 93 106 / 35%);
+  animation: go-hint-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.source__follow-badge--bump {
+  animation: count-bump 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  box-shadow: 0 10px 28px rgb(196 93 106 / 45%);
+}
+
+.source__stats-bump {
+  position: absolute;
+  top: 18%;
+  right: 8%;
+  z-index: 6;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.65rem;
+  background: rgb(32 32 30 / 92%);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  animation: count-bump 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.source__toast--bucket {
+  bottom: 24%;
+  background: rgb(63 143 107 / 94%);
+}
+
+.stage-tip {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 14%;
+  z-index: 7;
+  padding: 0.95rem 1rem 1rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 14px 36px rgb(12 12 14 / 22%);
+  animation: drawer-up 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stage-tip__title {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+.stage-tip__body {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: rgb(32 32 30 / 72%);
+}
+
+.stage-tip__next {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  background: #c45d6a;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.stage-menu {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: grid;
+  align-items: start;
+  justify-items: end;
+  padding: 3.25rem 0.75rem 0;
+  background: rgb(12 12 14 / 28%);
+  animation: fade-in 240ms ease both;
+}
+
+.stage-menu__sheet {
+  min-width: 11.5rem;
+  padding: 0.4rem 0;
+  border-radius: 0.85rem;
+  background: #fff;
+  box-shadow: 0 12px 32px rgb(12 12 14 / 22%);
+}
+
+.stage-menu__item {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #20201e;
+}
+
+.stage-alert {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 38%;
+  z-index: 8;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(12 12 14 / 24%);
+  text-align: center;
+  animation: go-hint-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stage-alert__title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.stage-alert__yes {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  background: #c45d6a;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.stage-walk {
+  position: absolute;
+  inset: auto 8% 18% 8%;
+  z-index: 7;
+  padding: 1.1rem 1rem 1.15rem;
+  border-radius: 1.15rem;
+  background: linear-gradient(160deg, #3f8f6b 0%, #2f6f53 100%);
+  color: #fff;
+  box-shadow: 0 16px 40px rgb(47 111 83 / 35%);
+  animation: drawer-up 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stage-walk__kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.stage-walk__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 750;
+}
+
+.stage-walk__body {
+  margin: 0.35rem 0 0;
+  font-size: 0.84rem;
+  opacity: 0.92;
+}
+
+.stage-leaderboard {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 1.25rem 1rem 2rem;
+  background: #fff;
+  color: #20201e;
+}
+
+.stage-leaderboard h1 {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+  font-weight: 750;
+}
+
+.stage-leaderboard__row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  margin: 0 0 0.55rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid rgb(32 32 30 / 10%);
+  border-radius: 0.85rem;
+  background: #f7f3ec;
+  text-align: left;
+}
+
+.stage-leaderboard__row img {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.stage-leaderboard__rank {
+  width: 1.4rem;
+  font-weight: 750;
+  color: #3f8f6b;
+}
+
+.stage-leaderboard__name {
+  flex: 1;
+  font-weight: 700;
+}
+
+.stage-leaderboard__bites {
+  font-size: 0.75rem;
+  color: rgb(32 32 30 / 62%);
+}
+
+@keyframes count-bump {
+  0% {
+    transform: scale(0.92);
+  }
+  45% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes drawer-up {
+  from {
+    opacity: 0.9;
+    transform: translateY(42%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.source__go-hint {
+  display: none !important;
+}
+
+.source__native--go-cta ::ng-deep [data-testid='bite-details-navigation'] {
+  animation: go-pulse 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  filter: drop-shadow(0 0 10px rgb(63 143 107 / 55%));
+}
+
+@keyframes layer-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97) translateY(-6px);
+    filter: blur(1.5px);
+  }
+}
+
+@keyframes layer-in {
+  /* Start nearly opaque — blank frames are worse than a soft scale. */
+  from {
+    opacity: 0.96;
+    transform: scale(1.025) translateY(10px);
+    filter: blur(0.6px);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    opacity: 0.85;
+    transform: translateY(28%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes thumb-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.28) rotate(-18deg);
+  }
+  8% {
+    opacity: 1;
+    transform: translateY(-18px) scale(1.55) rotate(8deg);
+  }
+  16% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.28) rotate(-4deg);
+  }
+  /* Long cheerful hold — readable celebration, not a blink. */
+  78% {
+    opacity: 1;
+    transform: translateY(-22px) scale(1.22) rotate(2deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-64px) scale(0.95) rotate(6deg);
+  }
+}
+
+@keyframes spark-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(
+        calc(-50% + var(--sx, 0px) * 0.28),
+        calc(-50% + var(--sy, 0px) * 0.28)
+      )
+      scale(1.45);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(
+        calc(-50% + var(--sx, 0px) * 0.78),
+        calc(-50% + var(--sy, 0px) * 0.78)
+      )
+      scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(
+        calc(-50% + var(--sx, 0px) * 1.35),
+        calc(-50% + var(--sy, -36px) * 1.2)
+      )
+      scale(0.45);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes go-pulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.22);
+  }
+  100% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes go-hint-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .source__device,
+  .source__layer--out,
+  .source__layer--enter,
+  .picker,
+  .picker__sheet,
+  .share-sheet,
+  .share-sheet__panel,
+  .source__thumb,
+  .source__toast,
+  .source__gps-toast,
+  .source__follow-badge,
+  .source__go-hint,
+  .source__spark,
+  .source__celebrate,
+  .stage-drawer,
+  .stage-drawer__sheet,
+  .source__native--go-cta ::ng-deep [data-testid='bite-details-navigation'] {
+    animation: none !important;
+    transition: none !important;
+  }
+}

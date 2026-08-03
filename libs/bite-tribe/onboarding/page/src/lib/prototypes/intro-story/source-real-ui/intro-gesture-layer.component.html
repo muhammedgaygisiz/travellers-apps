@@ -1,0 +1,55 @@
+<intro-soft-dot-pointer
+  [x]="fingerX()"
+  [y]="fingerY()"
+  [visible]="fingerVisible()"
+  [pressed]="fingerPressed()"
+  [ripple]="ripple()"
+/>
+
+<div
+  class="soft-keyboard"
+  [class.soft-keyboard--on]="keyboardVisible()"
+  aria-hidden="true"
+>
+  <div class="soft-keyboard__panel">
+    <div class="soft-keyboard__row">
+      @for (k of ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']; track k) {
+        <span class="soft-keyboard__key">{{ k }}</span>
+      }
+    </div>
+    <div class="soft-keyboard__row soft-keyboard__row--mid">
+      @for (k of ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L']; track k) {
+        <span class="soft-keyboard__key">{{ k }}</span>
+      }
+    </div>
+    <div class="soft-keyboard__row">
+      <span class="soft-keyboard__key soft-keyboard__key--wide">⇧</span>
+      @for (k of ['Z', 'X', 'C', 'V', 'B', 'N', 'M']; track k) {
+        <span class="soft-keyboard__key">{{ k }}</span>
+      }
+      <span class="soft-keyboard__key soft-keyboard__key--wide">⌫</span>
+    </div>
+    <div class="soft-keyboard__row soft-keyboard__row--bottom">
+      <span class="soft-keyboard__key soft-keyboard__key--mod">123</span>
+      <span class="soft-keyboard__key soft-keyboard__key--space">space</span>
+      <span
+        class="soft-keyboard__key soft-keyboard__key--mod soft-keyboard__key--go"
+        >go</span
+      >
+    </div>
+  </div>
+</div>
+
+@if (scrollThumb(); as thumb) {
+  <div
+    class="scroll-indicator"
+    [class.scroll-indicator--on]="thumb.active"
+    aria-hidden="true"
+  >
+    <div
+      class="scroll-indicator__thumb"
+      [style.top.%]="thumb.topPct"
+      [style.height.%]="thumb.heightPct"
+    ></div>
+  </div>
+}

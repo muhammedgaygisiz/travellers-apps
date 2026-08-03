@@ -1,0 +1,102 @@
+<section
+  class="hs"
+  [class.hs--paused]="paused()"
+  [style.--accent]="scene().accent"
+  [style.--accent-soft]="scene().accentSoft"
+  (pointerdown)="onPressStart()"
+  (pointerup)="onPressEnd()"
+  (pointercancel)="onPressEnd()"
+  (pointerleave)="onPressEnd()"
+>
+  <div class="hs__progress" aria-hidden="true">
+    @for (t of tips(); track t.id; let i = $index) {
+      <div class="hs__seg">
+        @if (i < tipIndex()) {
+          <div class="hs__fill hs__fill--done"></div>
+        } @else if (i === tipIndex()) {
+          @for (_ of [animKey()]; track _) {
+            <div
+              class="hs__fill hs__fill--active"
+              [style.animation-duration.ms]="tipDuration()"
+              [style.animation-play-state]="
+                paused() || !autoAdvance() ? 'paused' : 'running'
+              "
+            ></div>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <header class="hs__top">
+    <div class="hs__titles">
+      <p class="hs__badge">{{ badge() }}</p>
+      <h1 class="hs__headline">{{ scene().headline }}</h1>
+      <p class="hs__step">Hotspot {{ progressLabel() }}</p>
+    </div>
+    <button type="button" class="hs__ghost" (click)="prevTip($event)">
+      Back
+    </button>
+  </header>
+
+  <div #stage class="hs__stage">
+    <intro-real-ui-source
+      [beat]="beatId()"
+      [framed]="false"
+      [simulate]="false"
+      [coach]="coach()"
+    />
+
+    @if (tip(); as active) {
+      <div class="hs__coach" role="dialog" aria-live="polite">
+        @for (mark of hotspots(); track mark.tip.id) {
+          <button
+            type="button"
+            class="hs__dot"
+            [class.hs__dot--active]="mark.active"
+            [style.left]="hotspotStyle(mark).left"
+            [style.top]="hotspotStyle(mark).top"
+            [attr.aria-label]="mark.tip.title"
+            (click)="focusTip(mark.tip.id, $event)"
+          >
+            <span class="hs__dot-core"></span>
+            <span class="hs__dot-ring" aria-hidden="true"></span>
+            <span
+              class="hs__dot-ring hs__dot-ring--late"
+              aria-hidden="true"
+            ></span>
+          </button>
+        }
+
+        @for (_ of [animKey()]; track _) {
+          @if (useSheet()) {
+            <div class="hs__sheet">
+              <div class="hs__sheet-handle" aria-hidden="true"></div>
+              <p class="hs__pill-kicker">{{ scene().headline }}</p>
+              <h2 class="hs__pill-title">{{ active.title }}</h2>
+              <p class="hs__pill-body">{{ active.body }}</p>
+              <button type="button" class="hs__next" (click)="nextTip($event)">
+                {{ isLast() ? 'Replay' : 'Next tip' }}
+              </button>
+            </div>
+          } @else {
+            <div
+              class="hs__pill"
+              [style.top]="pillStyle().top"
+              [style.bottom]="pillStyle().bottom"
+              [style.left]="pillStyle().left"
+              [style.transform]="pillStyle().transform"
+            >
+              <p class="hs__pill-kicker">{{ scene().headline }}</p>
+              <h2 class="hs__pill-title">{{ active.title }}</h2>
+              <p class="hs__pill-body">{{ active.body }}</p>
+              <button type="button" class="hs__next" (click)="nextTip($event)">
+                {{ isLast() ? 'Replay' : 'Got it' }}
+              </button>
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</section>

@@ -1,0 +1,391 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:host::-webkit-scrollbar {
+  display: none;
+}
+
+.fs {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 100dvh;
+  padding: calc(0.5rem + var(--ion-safe-area-top, 0px)) 0.7rem
+    calc(0.7rem + var(--ion-safe-area-bottom, 0px));
+  overflow: hidden;
+  color: #1a1917;
+  background:
+    radial-gradient(
+      ellipse at 50% -10%,
+      rgb(255 252 246 / 90%) 0%,
+      transparent 52%
+    ),
+    linear-gradient(168deg, #f3efe8 0%, #e8e2d6 52%, #ddd6c8 100%);
+  scrollbar-width: none;
+}
+
+.fs::-webkit-scrollbar {
+  display: none;
+}
+
+.fs__progress {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0.28rem;
+  margin-bottom: 0.4rem;
+}
+
+.fs__seg {
+  height: 0.15rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(26 25 23 / 11%);
+}
+
+.fs__fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: rgb(26 25 23 / 72%);
+}
+
+.fs__fill--done {
+  width: 100%;
+}
+
+.fs__fill--active {
+  animation: fs-fill linear forwards;
+}
+
+.fs--paused .fs__fill--active {
+  animation-play-state: paused;
+}
+
+@keyframes fs-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.fs__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.fs__badge {
+  margin: 0 0 0.15rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(26 25 23 / 48%);
+}
+
+.fs__headline {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.fs__step {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgb(26 25 23 / 52%);
+}
+
+.fs__ghost {
+  padding: 0.28rem 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(26 25 23 / 6%);
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fs__stage {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 1.1rem;
+  isolation: isolate;
+  contain: paint;
+  transform: translateZ(0);
+  scrollbar-width: none;
+}
+
+.fs__stage::-webkit-scrollbar {
+  display: none;
+}
+
+.fs__coach {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+  isolation: isolate;
+  contain: paint;
+  transform: translateZ(0);
+  --shine-x: 50%;
+  --shine-y: 42%;
+  --shine-w: 0px;
+  --shine-h: 0px;
+  --shine-r: 0.9rem;
+  --morph-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --morph-ms: 340ms;
+}
+
+/*
+ * Soft oval color-pop: hole centered via gradient `at` (not mask-position).
+ * Rest = grayscale + dim — no blur, no blue glow.
+ */
+.fs__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgb(18 16 14 / 22%);
+  backdrop-filter: grayscale(0.88) brightness(0.78) saturate(0.28);
+  -webkit-backdrop-filter: grayscale(0.88) brightness(0.78) saturate(0.28);
+  -webkit-mask-image: radial-gradient(
+    ellipse calc(var(--shine-w) * 0.72) calc(var(--shine-h) * 0.72) at
+      calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5),
+    transparent 0%,
+    transparent 52%,
+    rgb(0 0 0 / 42%) 74%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    ellipse calc(var(--shine-w) * 0.72) calc(var(--shine-h) * 0.72) at
+      calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5),
+    transparent 0%,
+    transparent 52%,
+    rgb(0 0 0 / 42%) 74%,
+    #000 100%
+  );
+  transition:
+    mask-image var(--morph-ms) var(--morph-ease),
+    -webkit-mask-image var(--morph-ms) var(--morph-ease),
+    background var(--morph-ms) var(--morph-ease);
+}
+
+.fs--morphing .fs__veil {
+  background: rgb(18 16 14 / 28%);
+  backdrop-filter: grayscale(0.94) brightness(0.74) saturate(0.2);
+  -webkit-backdrop-filter: grayscale(0.94) brightness(0.74) saturate(0.2);
+}
+
+/* Caption above veil — soft oval wash + blur (no isolation rect clip) */
+.fs__tip {
+  --tip-top: auto;
+  --tip-bottom: 1.15rem;
+  --tip-left: 50%;
+  --tip-y: 0%;
+  position: absolute;
+  top: var(--tip-top);
+  right: auto;
+  bottom: var(--tip-bottom);
+  left: var(--tip-left);
+  z-index: 10;
+  box-sizing: border-box;
+  width: min(16.5rem, calc(100% - 1.75rem));
+  padding: 1.15rem 1.25rem 1.2rem;
+  border: 0;
+  filter: none;
+  background: transparent;
+  color: #fffaf3;
+  box-shadow: none;
+  pointer-events: auto;
+  transform-origin: center top;
+  animation: fs-tip-in 480ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+  transition:
+    top 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    left 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fs__tip::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: -1;
+  width: 132%;
+  height: 148%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 50% 46% at 50% 48%,
+    rgb(14 12 10 / 82%) 0%,
+    rgb(14 12 10 / 52%) 36%,
+    rgb(14 12 10 / 18%) 58%,
+    transparent 72%
+  );
+  backdrop-filter: blur(12px) saturate(1.05);
+  -webkit-backdrop-filter: blur(12px) saturate(1.05);
+  -webkit-mask-image: radial-gradient(
+    ellipse 48% 44% at 50% 48%,
+    #000 0%,
+    #000 34%,
+    rgb(0 0 0 / 55%) 52%,
+    transparent 70%
+  );
+  mask-image: radial-gradient(
+    ellipse 48% 44% at 50% 48%,
+    #000 0%,
+    #000 34%,
+    rgb(0 0 0 / 55%) 52%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.fs__tip--above {
+  transform-origin: center bottom;
+  animation-name: fs-tip-in-above;
+}
+
+@keyframes fs-tip-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(calc(var(--tip-y) + 10px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(var(--tip-y));
+  }
+}
+
+@keyframes fs-tip-in-above {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(calc(var(--tip-y) - 10px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(var(--tip-y));
+  }
+}
+
+.fs__tip-kicker {
+  margin: 0 0 0.12rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff8ee;
+  text-shadow:
+    0 0 12px rgb(0 0 0 / 70%),
+    0 1px 3px rgb(0 0 0 / 80%);
+  animation: fs-tip-line 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 60ms;
+}
+
+.fs__tip-title {
+  margin: 0 0 0.18rem;
+  font-size: 0.98rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  color: #fffaf3;
+  text-shadow:
+    0 0 14px rgb(0 0 0 / 72%),
+    0 1px 4px rgb(0 0 0 / 85%);
+  animation: fs-tip-line 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 100ms;
+}
+
+.fs__tip-body {
+  margin: 0 0 0.55rem;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: rgb(255 250 243 / 90%);
+  text-shadow:
+    0 0 12px rgb(0 0 0 / 68%),
+    0 1px 3px rgb(0 0 0 / 80%);
+  animation: fs-tip-line 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 140ms;
+}
+
+.fs__next {
+  display: inline-block;
+  margin: 0 auto;
+  padding: 0.28rem 0.15rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgb(255 250 243 / 78%);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 6px rgb(0 0 0 / 70%);
+  cursor: pointer;
+  animation: fs-tip-line 540ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 180ms;
+}
+
+.fs__next:active {
+  transform: scale(0.98);
+}
+
+@keyframes fs-tip-line {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fs__fill--active {
+    animation: none !important;
+    width: 100%;
+  }
+
+  .fs__veil,
+  .fs__tip {
+    transition: none !important;
+  }
+
+  .fs__tip,
+  .fs__tip-kicker,
+  .fs__tip-title,
+  .fs__tip-body,
+  .fs__next {
+    animation: none !important;
+  }
+
+  .fs--morphing .fs__tip {
+    opacity: 1;
+    filter: none;
+  }
+}

@@ -1,0 +1,91 @@
+<div class="fake" [attr.data-beat]="beat()">
+  <p class="fake__badge">Track 2 · Fake-real UI (Remotion-style sim)</p>
+
+  <div class="fake__phone">
+    <header class="fake__bar">
+      <span class="fake__brand">BiteTribe</span>
+      <span class="fake__menu"></span>
+    </header>
+
+    @switch (beat()) {
+      @case ('discover') {
+        <div class="fake__body" #feedScroll>
+          <div class="fake__chip-row">
+            <span class="fake__chip">Search</span>
+            <span class="fake__chip fake__chip--accent">Bitemap</span>
+            <span class="fake__chip">Distance</span>
+          </div>
+          @for (i of [1, 2, 3]; track i) {
+            <article class="fake__card" [style.--i]="i">
+              <div class="fake__photo"></div>
+              <div class="fake__meta">
+                <strong>{{
+                  i === 1
+                    ? 'Botanic Breeze'
+                    : i === 2
+                      ? 'Brausermeisterplatte'
+                      : 'Garden Bowl'
+                }}</strong>
+                <span>{{
+                  i === 1
+                    ? '0.6 km · Einstein'
+                    : i === 2
+                      ? '0.62 km · Tramdepot'
+                      : '1.1 km · Lorraine'
+                }}</span>
+              </div>
+            </article>
+          }
+        </div>
+        <footer class="fake__cta">
+          <span class="fake__cta-btn fake__cta-btn--pulse">Create Bite</span>
+        </footer>
+      }
+      @case ('share') {
+        <div class="fake__body fake__body--form">
+          <div class="fake__camera">
+            <span class="fake__shutter"></span>
+            <p>Tap to add a photo</p>
+          </div>
+          <div class="fake__field fake__field--fill">Botanic Breeze</div>
+          <div class="fake__field">Einstein au Jardin</div>
+          <div class="fake__tags">
+            <span>bern</span><span>drink</span><span>+ tag</span>
+          </div>
+          <button type="button" class="fake__save">Share Bite</button>
+        </div>
+      }
+      @case ('tribe') {
+        <div class="fake__body">
+          <div class="fake__hero"></div>
+          <div class="fake__creator">
+            <span class="fake__avatar"></span>
+            <div>
+              <strong>Mo</strong>
+              <span>Public · 12 Bites</span>
+            </div>
+          </div>
+          <div class="fake__actions">
+            <span class="fake__action fake__action--hot">Share</span>
+            <span class="fake__action">Directions</span>
+            <span class="fake__action">Save</span>
+          </div>
+          <p class="fake__blurb">
+            A refreshing botanical drink in the city garden.
+          </p>
+        </div>
+      }
+      @case ('go') {
+        <div class="fake__map">
+          <span class="fake__pin fake__pin--a"></span>
+          <span class="fake__pin fake__pin--b"></span>
+          <span class="fake__pin fake__pin--me"></span>
+          <div class="fake__drawer">
+            <strong>Botanic Breeze</strong>
+            <span>0.6 km away</span>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

@@ -126,25 +126,25 @@ describe('MapPageComponent', () => {
     it('should set selectedBite if bite with geopoint id is found', () => {
       componentRef.setInput('bites', bites);
       component.onGeopointSelection({ id: '1', latitude: 1, longitude: 2 });
-      expect(component.selectedBite).toEqual(bites[0]);
+      expect(component.selectedBite()).toEqual(bites[0]);
     });
 
     it('should set selectedBite to undefined if bite with geopoint id is not found', () => {
       componentRef.setInput('bites', bites);
       component.onGeopointSelection({ id: '3', latitude: 5, longitude: 6 });
-      expect(component.selectedBite).toBeUndefined();
+      expect(component.selectedBite()).toBeUndefined();
     });
 
     it('should set selectedBite to undefined if bites is undefined', () => {
       componentRef.setInput('bites', undefined);
       component.onGeopointSelection({ id: '1', latitude: 1, longitude: 2 });
-      expect(component.selectedBite).toBeUndefined();
+      expect(component.selectedBite()).toBeUndefined();
     });
 
     it('should set selectedBite to undefined if bite is missing', () => {
-      component.selectedBite = bites[0];
+      component.selectedBite.set(bites[0]);
       component.onGeopointSelection(undefined);
-      expect(component.selectedBite).toBeUndefined();
+      expect(component.selectedBite()).toBeUndefined();
     });
   });
 });

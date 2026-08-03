@@ -87,7 +87,7 @@ const parameters = {
   },
   options: {
     storySort: {
-      order: ['Pages', 'Components', 'Tech'],
+      order: ['Prototypes', 'Pages', 'Components', 'Tech'],
     },
   },
 };

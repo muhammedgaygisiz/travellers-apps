@@ -1,0 +1,98 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.swipe {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 100dvh;
+  padding: calc(0.55rem + var(--ion-safe-area-top, 0px)) 0.75rem
+    calc(0.85rem + var(--ion-safe-area-bottom, 0px));
+  background: #f3eee6;
+  color: #20201e;
+}
+
+.swipe__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.45rem;
+}
+
+.swipe__caption {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.swipe__skip {
+  padding: 0.3rem 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(32 32 30 / 6%);
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.swipe__stage {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.swipe__stage:active {
+  cursor: grabbing;
+}
+
+.swipe__dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0.55rem 0 0.35rem;
+}
+
+.swipe__dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(32 32 30 / 18%);
+  cursor: pointer;
+}
+
+.swipe__dot--active {
+  width: 1.05rem;
+  background: var(--accent, #4a90d9);
+}
+
+.swipe__footer {
+  display: grid;
+  place-items: center;
+}
+
+.swipe__cta {
+  width: min(100%, 16rem);
+  padding: 0.8rem 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  background: #20201e;
+  color: #fff;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}

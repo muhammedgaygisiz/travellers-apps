@@ -1,0 +1,57 @@
+<div class="compare">
+  <div class="compare__switcher" role="tablist" aria-label="Intro experiments">
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="variant() === 'icons'"
+      [class.compare__tab--active]="variant() === 'icons'"
+      (click)="select('icons')"
+    >
+      A · Icons
+    </button>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="variant() === 'beats'"
+      [class.compare__tab--active]="variant() === 'beats'"
+      (click)="select('beats')"
+    >
+      B · Story Beats
+    </button>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="variant() === 'swipe'"
+      [class.compare__tab--active]="variant() === 'swipe'"
+      (click)="select('swipe')"
+    >
+      C · Swipe
+    </button>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="variant() === 'chapters'"
+      [class.compare__tab--active]="variant() === 'chapters'"
+      (click)="select('chapters')"
+    >
+      D · Chapters
+    </button>
+  </div>
+
+  <div class="compare__frame">
+    @switch (variant()) {
+      @case ('icons') {
+        <intro-icons-only />
+      }
+      @case ('beats') {
+        <intro-story-beats />
+      }
+      @case ('swipe') {
+        <intro-swipe-narrative />
+      }
+      @case ('chapters') {
+        <intro-kinetic-chapters />
+      }
+    }
+  </div>
+</div>

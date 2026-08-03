@@ -1,0 +1,313 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: Outfit, system-ui, sans-serif;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:host::-webkit-scrollbar {
+  display: none;
+}
+
+.sw {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 100dvh;
+  padding: calc(0.6rem + var(--ion-safe-area-top, 0px)) 0.9rem
+    calc(0.8rem + var(--ion-safe-area-bottom, 0px));
+  overflow: hidden;
+  color: #1a1917;
+  /* Quiet parchment — no accent corner blobs */
+  background:
+    radial-gradient(
+      ellipse 90% 55% at 50% -8%,
+      rgb(255 253 248 / 95%) 0%,
+      transparent 58%
+    ),
+    linear-gradient(174deg, #f5f1e9 0%, #ebe4d8 48%, #e3dbcf 100%);
+  scrollbar-width: none;
+}
+
+.sw::-webkit-scrollbar {
+  display: none;
+}
+
+.sw__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-bottom: 0.45rem;
+}
+
+.sw__badge {
+  margin: 0 0 0.22rem;
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgb(26 25 23 / 38%);
+}
+
+.sw__headline {
+  margin: 0;
+  font-size: 1.42rem;
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  color: rgb(26 25 23 / 90%);
+}
+
+/* Sole chrome — quiet text, never a pill CTA */
+.sw__skip {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  padding: 0.25rem 0.2rem;
+  border: 0;
+  background: transparent;
+  color: rgb(26 25 23 / 38%);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: color 260ms ease;
+}
+
+.sw__skip:hover,
+.sw__skip:focus-visible {
+  color: rgb(26 25 23 / 70%);
+  outline: none;
+}
+
+.sw__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  margin-bottom: 0.7rem;
+}
+
+.sw__dot {
+  width: 0.26rem;
+  height: 0.26rem;
+  border-radius: 999px;
+  background: rgb(26 25 23 / 12%);
+  transition:
+    background 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 420ms ease;
+}
+
+.sw__dot--done {
+  background: rgb(26 25 23 / 26%);
+  opacity: 0.85;
+}
+
+.sw__dot--active {
+  width: 1rem;
+  background: rgb(26 25 23 / 58%);
+  transform: scaleY(1.08);
+}
+
+.sw__stage {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  isolation: isolate;
+  contain: paint;
+  transform: translateZ(0);
+  cursor: pointer;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 55%) inset,
+    0 18px 40px rgb(26 25 23 / 8%);
+  scrollbar-width: none;
+}
+
+.sw__stage::-webkit-scrollbar {
+  display: none;
+}
+
+.sw__coach {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  isolation: isolate;
+  contain: paint;
+  transform: translateZ(0);
+  --shine-x: 50%;
+  --shine-y: 42%;
+  --shine-w: 0px;
+  --shine-h: 0px;
+  --shine-r: 50%;
+  --morph-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --morph-ms: 480ms;
+}
+
+/*
+ * Soft oval color-pop: hole centered with gradient `at` coords
+ * (never mask-position — that shifts highlights down/right).
+ * Rest = gentle grayscale + dim only — no muddy full-screen blur.
+ */
+.sw__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgb(22 18 14 / 16%);
+  backdrop-filter: grayscale(0.68) brightness(0.88) saturate(0.48);
+  -webkit-backdrop-filter: grayscale(0.68) brightness(0.88) saturate(0.48);
+  -webkit-mask-image: radial-gradient(
+    ellipse calc(var(--shine-w) * 0.82) calc(var(--shine-h) * 0.82) at
+      calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5),
+    transparent 0%,
+    transparent 42%,
+    rgb(0 0 0 / 22%) 62%,
+    rgb(0 0 0 / 68%) 82%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    ellipse calc(var(--shine-w) * 0.82) calc(var(--shine-h) * 0.82) at
+      calc(var(--shine-x) + var(--shine-w) * 0.5)
+      calc(var(--shine-y) + var(--shine-h) * 0.5),
+    transparent 0%,
+    transparent 42%,
+    rgb(0 0 0 / 22%) 62%,
+    rgb(0 0 0 / 68%) 82%,
+    #000 100%
+  );
+  transition:
+    mask-image var(--morph-ms) var(--morph-ease),
+    -webkit-mask-image var(--morph-ms) var(--morph-ease),
+    background var(--morph-ms) var(--morph-ease),
+    backdrop-filter var(--morph-ms) var(--morph-ease),
+    -webkit-backdrop-filter var(--morph-ms) var(--morph-ease);
+}
+
+.sw--morphing .sw__veil {
+  background: rgb(22 18 14 / 18%);
+  backdrop-filter: grayscale(0.7) brightness(0.86) saturate(0.42);
+  -webkit-backdrop-filter: grayscale(0.7) brightness(0.86) saturate(0.42);
+}
+
+/*
+ * Soft Whisper caption — page chrome below the phone stage.
+ * Near-black type on the warm parchment; no overlay washes or blur.
+ */
+.sw__whisper {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 22rem;
+  margin: 0.85rem auto 0;
+  padding: 0.15rem 0.35rem 0;
+  border: 0;
+  outline: none;
+  text-align: center;
+  background: transparent;
+  box-shadow: none;
+  filter: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
+  animation: sw-whisper-in 420ms cubic-bezier(0.22, 1, 0.36, 1) 20ms both;
+}
+
+@keyframes sw-whisper-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sw__kicker {
+  margin: 0 0 0.2rem;
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(26 25 23 / 42%);
+  animation: sw-line 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 40ms;
+}
+
+.sw__title {
+  margin: 0 0 0.22rem;
+  font-size: 1.08rem;
+  font-weight: 450;
+  letter-spacing: -0.02em;
+  line-height: 1.28;
+  color: #1a1917;
+  animation: sw-line 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 70ms;
+}
+
+.sw__body {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 350;
+  letter-spacing: 0.008em;
+  line-height: 1.45;
+  color: rgb(26 25 23 / 72%);
+  animation: sw-line 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 100ms;
+}
+
+@keyframes sw-line {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sw__resume {
+  flex: 0 0 auto;
+  margin: 0.9rem auto 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 0.8rem;
+  font-weight: 350;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: rgb(26 25 23 / 48%);
+  text-shadow: none;
+  pointer-events: none;
+  animation: sw-line 520ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sw__veil,
+  .sw__whisper {
+    transition: none !important;
+  }
+
+  .sw__whisper,
+  .sw__kicker,
+  .sw__title,
+  .sw__body,
+  .sw__resume {
+    animation: none !important;
+  }
+
+  .sw__dot {
+    transition: none !important;
+  }
+}

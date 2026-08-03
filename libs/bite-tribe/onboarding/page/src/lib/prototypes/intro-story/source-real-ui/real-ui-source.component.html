@@ -1,0 +1,467 @@
+<div
+  class="source"
+  [class.source--bare]="!framed()"
+  data-intro-capture="true"
+  [attr.data-beat]="beat()"
+  [attr.data-flow]="flowId()"
+  [attr.data-selected-bite]="selectedBiteId()"
+  [attr.data-screen]="incoming()"
+>
+  @if (badge()) {
+    <p class="source__badge">{{ badge() }}</p>
+  }
+  @if (displayCaption()) {
+    <p class="source__caption">{{ displayCaption() }}</p>
+  }
+
+  <div class="source__phone" [class.source__phone--bare]="!framed()">
+    <div #viewport class="source__viewport">
+      <div
+        class="source__device"
+        [style.width.px]="shellW"
+        [style.height.px]="shellH"
+        [style.transform]="stageTransform()"
+      >
+        <intro-iphone-shell [darkStatus]="incoming() === 'map'">
+          <div
+            #native
+            class="source__native"
+            [class.source__native--go-cta]="directionsHighlight()"
+            [class.source__native--new-card]="newFeedCard()"
+            [class.source__native--fading]="fading()"
+            [class.source__native--photo-land]="photoLanded()"
+            [style.width.px]="nativeW"
+            [style.height.px]="nativeH"
+          >
+            <div class="source__stack">
+              @if (outgoing(); as outScreen) {
+                <div
+                  class="source__layer source__layer--out"
+                  [style.animation-duration.ms]="transitionMs"
+                  aria-hidden="true"
+                >
+                  @switch (outScreen) {
+                    @case ('home') {
+                      <bt-home
+                        [isAuthenticated]="true"
+                        [bites]="feedBites()"
+                        [allTags]="tags"
+                        [selectedFilters]="selectedFilters()"
+                        [sorting]="sorting()"
+                        [showSearchChip]="true"
+                        [showMap]="true"
+                        [showFooter]="true"
+                        [showAddButton]="true"
+                        [showHeaderMenu]="true"
+                      />
+                    }
+                    @case ('create') {
+                      <bite
+                        [isNew]="true"
+                        [position]="gps"
+                        [bite]="createDraft()"
+                        [suggestedTags]="[
+                          'vegan',
+                          'spicy',
+                          'bern',
+                          'drink',
+                          'dessert',
+                        ]"
+                      />
+                    }
+                    @case ('details') {
+                      <details-page
+                        [isAuthenticated]="true"
+                        [bite]="detailsBite()"
+                        [biteCreator]="explorer()"
+                        [position]="position"
+                      />
+                    }
+                    @case ('profile') {
+                      <profile-page
+                        [isAuthenticated]="true"
+                        [user]="explorer()"
+                        [userId]="viewerUserId"
+                        [profileMetadata]="profileMeta()"
+                        [bites]="feedBites()"
+                      />
+                    }
+                    @case ('map') {
+                      <map-page
+                        [isAuthenticated]="true"
+                        [bites]="feedBites()"
+                        [gpsPosition]="gps"
+                        [enableZoom]="false"
+                        [showMyPositionButton]="true"
+                      />
+                    }
+                    @case ('leaderboard') {
+                      <div class="stage-leaderboard" data-intro="leaderboard">
+                        <h1>Leaderboard</h1>
+                        <button
+                          type="button"
+                          class="stage-leaderboard__row"
+                          data-intro="leaderboard-lina"
+                        >
+                          <span class="stage-leaderboard__rank">1</span>
+                          <img src="assets/demo/avatar-explorer.png" alt="" />
+                          <span class="stage-leaderboard__name">Lina</span>
+                          <span class="stage-leaderboard__bites">14 bites</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="stage-leaderboard__row"
+                          data-intro="leaderboard-marco"
+                        >
+                          <span class="stage-leaderboard__rank">2</span>
+                          <img src="assets/demo/avatar-demo.png" alt="" />
+                          <span class="stage-leaderboard__name">Marco</span>
+                          <span class="stage-leaderboard__bites">9 bites</span>
+                        </button>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+
+              <div
+                class="source__layer source__layer--in"
+                [class.source__layer--enter]="transitioning()"
+                [style.animation-duration.ms]="transitionMs"
+              >
+                @switch (incoming()) {
+                  @case ('home') {
+                    <bt-home
+                      [isAuthenticated]="true"
+                      [bites]="feedBites()"
+                      [allTags]="tags"
+                      [selectedFilters]="selectedFilters()"
+                      [sorting]="sorting()"
+                      [showSearchChip]="true"
+                      [showMap]="true"
+                      [showFooter]="true"
+                      [showAddButton]="true"
+                      [showHeaderMenu]="true"
+                    />
+                  }
+                  @case ('create') {
+                    <bite
+                      [isNew]="true"
+                      [position]="gps"
+                      [bite]="createDraft()"
+                      [suggestedTags]="[
+                        'vegan',
+                        'spicy',
+                        'bern',
+                        'drink',
+                        'dessert',
+                      ]"
+                    />
+                  }
+                  @case ('details') {
+                    <details-page
+                      [isAuthenticated]="true"
+                      [bite]="detailsBite()"
+                      [biteCreator]="explorer()"
+                      [position]="position"
+                    />
+                  }
+                  @case ('profile') {
+                    <profile-page
+                      [isAuthenticated]="true"
+                      [user]="explorer()"
+                      [userId]="viewerUserId"
+                      [profileMetadata]="profileMeta()"
+                      [bites]="feedBites()"
+                    />
+                  }
+                  @case ('map') {
+                    <div
+                      class="source__map-pan"
+                      [style.transform]="
+                        'translate(' + mapPan().x + '%,' + mapPan().y + '%)'
+                      "
+                    >
+                      <map-page
+                        [isAuthenticated]="true"
+                        [bites]="feedBites()"
+                        [gpsPosition]="gps"
+                        [enableZoom]="false"
+                        [showMyPositionButton]="true"
+                      />
+                    </div>
+                  }
+                  @case ('leaderboard') {
+                    <div class="stage-leaderboard" data-intro="leaderboard">
+                      <h1>Leaderboard</h1>
+                      <button
+                        type="button"
+                        class="stage-leaderboard__row"
+                        data-intro="leaderboard-lina"
+                      >
+                        <span class="stage-leaderboard__rank">1</span>
+                        <img src="assets/demo/avatar-explorer.png" alt="" />
+                        <span class="stage-leaderboard__name">Lina</span>
+                        <span class="stage-leaderboard__bites">14 bites</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="stage-leaderboard__row"
+                        data-intro="leaderboard-marco"
+                      >
+                        <span class="stage-leaderboard__rank">2</span>
+                        <img src="assets/demo/avatar-demo.png" alt="" />
+                        <span class="stage-leaderboard__name">Marco</span>
+                        <span class="stage-leaderboard__bites">9 bites</span>
+                      </button>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+
+            @if (pickerOpen()) {
+              <div class="picker" aria-hidden="true">
+                <div class="picker__sheet">
+                  <p class="picker__title">Choose a photo</p>
+                  <div class="picker__grid">
+                    @for (photo of pickerPhotos; track photo; let i = $index) {
+                      <button
+                        type="button"
+                        class="picker__cell"
+                        [attr.data-intro]="'picker-photo-' + i"
+                        [class.picker__cell--on]="
+                          pickerSelected() && pickerSelectedIndex() === i
+                        "
+                        [class.picker__cell--muted]="
+                          !(pickerSelected() && pickerSelectedIndex() === i)
+                        "
+                      >
+                        <img [src]="photo" alt="" />
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (shareSheetOpen() && incoming() === 'details') {
+              <div
+                class="share-sheet"
+                aria-hidden="true"
+                data-intro="share-sheet"
+              >
+                <div class="share-sheet__panel">
+                  <p class="share-sheet__title">Share this find</p>
+                  <div class="share-sheet__row">
+                    <span>Copy link</span>
+                    <span>Messages</span>
+                    <span>More…</span>
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (locationGps() && incoming() === 'create') {
+              <div class="source__gps-toast" aria-hidden="true">
+                Location from GPS ✓
+              </div>
+            }
+
+            @if (mapPinBite(); as pinBite) {
+              @if (incoming() === 'map') {
+                <div
+                  class="stage-drawer"
+                  [class.stage-drawer--expanded]="drawerExpanded()"
+                  aria-hidden="true"
+                  data-intro="map-drawer"
+                >
+                  <div class="stage-drawer__sheet">
+                    <div
+                      class="stage-drawer__handle"
+                      data-intro="drawer-handle"
+                    ></div>
+                    <p class="stage-drawer__kicker">Nearby</p>
+                    <h3 class="stage-drawer__title">{{ pinBite.name }}</h3>
+                    <p class="stage-drawer__place">
+                      {{ pinBite.place }} · {{ pinBite.distance }} km
+                    </p>
+                    <div class="stage-drawer__row">
+                      <img
+                        class="stage-drawer__thumb"
+                        [src]="pinBite.imagePath"
+                        alt=""
+                      />
+                      <span class="stage-drawer__go">Directions</span>
+                    </div>
+                    @if (drawerExpanded()) {
+                      <p class="stage-drawer__blurb">
+                        {{ pinBite.description }}
+                      </p>
+                    }
+                  </div>
+                </div>
+              }
+            }
+
+            @if (likeBurst() > 0 && incoming() === 'details') {
+              <div class="source__react" aria-hidden="true">
+                @for (i of [1, 2, 3, 4, 5]; track i) {
+                  <span
+                    class="source__thumb"
+                    [style.animation-delay.ms]="i * 110"
+                    >👍</span
+                  >
+                }
+              </div>
+            }
+
+            @if (inlineFollow() && incoming() === 'details') {
+              <button
+                type="button"
+                class="source__inline-follow"
+                data-intro="inline-follow"
+              >
+                Follow {{ explorer().displayName }}
+              </button>
+            }
+
+            @if (bucketSaved() && incoming() === 'details') {
+              <div
+                class="source__toast source__toast--bucket"
+                aria-hidden="true"
+              >
+                Saved to bucket list
+              </div>
+            }
+
+            @if (followed() && incoming() === 'profile') {
+              <div
+                class="source__follow-badge"
+                [class.source__follow-badge--bump]="emphasizeFollowers()"
+                aria-hidden="true"
+                data-intro="following"
+              >
+                Following · {{ followerCount() }}
+              </div>
+              <div class="source__toast" aria-hidden="true">
+                Following {{ followToastName() }}
+              </div>
+            }
+
+            @if (emphasizeFollowers() && incoming() === 'profile') {
+              <div
+                class="source__stats-bump"
+                aria-hidden="true"
+                data-intro="followers-bump"
+              >
+                Followers {{ followerCount() }}
+              </div>
+            }
+
+            @if (tip(); as tipCard) {
+              <div class="stage-tip" aria-hidden="true" data-intro="tip">
+                <p class="stage-tip__title">{{ tipCard.title }}</p>
+                <p class="stage-tip__body">{{ tipCard.body }}</p>
+                <button
+                  type="button"
+                  class="stage-tip__next"
+                  data-intro="tip-next"
+                >
+                  Got it
+                </button>
+              </div>
+            }
+
+            @if (menuOpen()) {
+              <div class="stage-menu" aria-hidden="true" data-intro="menu">
+                <div class="stage-menu__sheet" data-testid="menu-list">
+                  <button type="button" class="stage-menu__item">
+                    My profile
+                  </button>
+                  <button
+                    type="button"
+                    class="stage-menu__item"
+                    data-testid="menu-leaderboard"
+                  >
+                    Leaderboard
+                  </button>
+                  <button
+                    type="button"
+                    class="stage-menu__item"
+                    data-testid="menu-my-bucketlists"
+                  >
+                    My bucket lists
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (unfollowConfirm()) {
+              <div
+                class="stage-alert"
+                aria-hidden="true"
+                data-intro="unfollow-confirm"
+              >
+                <p class="stage-alert__title">Stop following?</p>
+                <button
+                  type="button"
+                  class="stage-alert__yes"
+                  data-intro="unfollow-confirm-yes"
+                >
+                  Yes, unfollow
+                </button>
+              </div>
+            }
+
+            @if (walkingSuccess()) {
+              <div
+                class="stage-walk"
+                aria-hidden="true"
+                data-intro="walking-success"
+              >
+                <p class="stage-walk__kicker">On your way</p>
+                <h3 class="stage-walk__title">Directions started</h3>
+                <p class="stage-walk__body">
+                  Walk to the bite — enjoy the taste.
+                </p>
+              </div>
+            }
+
+            @if (celebrate(); as burst) {
+              <div
+                class="source__celebrate"
+                aria-hidden="true"
+                [attr.data-key]="burst.key"
+              >
+                @for (
+                  p of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+                  track p
+                ) {
+                  <span
+                    class="source__spark"
+                    [style.--i]="'' + p"
+                    [style.animation-delay.ms]="p * 55"
+                  ></span>
+                }
+              </div>
+            }
+
+            @if (simulate()) {
+              <intro-gesture-layer
+                [beat]="beat()"
+                [stageRoot]="native"
+                [enabled]="true"
+                [steps]="flowSteps()"
+                [loop]="flowLoop()"
+                [endBehavior]="endBehavior()"
+                (action)="onAction($event)"
+                (completed)="onGestureCompleted()"
+              />
+            }
+          </div>
+        </intro-iphone-shell>
+      </div>
+    </div>
+  </div>
+</div>

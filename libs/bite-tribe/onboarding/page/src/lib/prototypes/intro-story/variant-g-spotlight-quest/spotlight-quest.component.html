@@ -1,0 +1,103 @@
+<section
+  class="sq"
+  [class.sq--paused]="paused()"
+  [class.sq--checking]="checking()"
+  [style.--accent]="scene().accent"
+  [style.--accent-soft]="scene().accentSoft"
+  (pointerdown)="onPressStart()"
+  (pointerup)="onPressEnd()"
+  (pointercancel)="onPressEnd()"
+  (pointerleave)="onPressEnd()"
+>
+  <header class="sq__top">
+    <div class="sq__titles">
+      <p class="sq__badge">{{ badge() }}</p>
+      <h1 class="sq__headline">{{ scene().headline }}</h1>
+      <p class="sq__step">
+        {{ completedCount() }} of {{ tipCount() }} complete
+      </p>
+    </div>
+  </header>
+
+  <nav class="sq__quest" aria-label="Quest progress">
+    @for (item of checklist(); track item.id; let i = $index) {
+      <button
+        type="button"
+        class="sq__chip"
+        [class.sq__chip--done]="item.done"
+        [class.sq__chip--current]="item.current"
+        (click)="jumpTo(i, $event)"
+      >
+        <span class="sq__check" aria-hidden="true">
+          @if (item.done) {
+            <svg viewBox="0 0 16 16" class="sq__check-svg">
+              <path
+                d="M3.5 8.2 6.4 11l6.1-6.4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          } @else {
+            <span class="sq__check-dot"></span>
+          }
+        </span>
+        <span class="sq__chip-label">{{ item.label }}</span>
+      </button>
+      @if (i < checklist().length - 1) {
+        <span
+          class="sq__rail"
+          [class.sq__rail--lit]="item.done"
+          aria-hidden="true"
+        ></span>
+      }
+    }
+  </nav>
+
+  <div #stage class="sq__stage">
+    <intro-real-ui-source
+      [beat]="beatId()"
+      [framed]="false"
+      [simulate]="false"
+      [coach]="coach()"
+    />
+
+    @if (tip(); as active) {
+      <div
+        class="sq__coach"
+        role="dialog"
+        aria-live="polite"
+        [style.--shine-x]="shineVars()['--shine-x']"
+        [style.--shine-y]="shineVars()['--shine-y']"
+        [style.--shine-w]="shineVars()['--shine-w']"
+        [style.--shine-h]="shineVars()['--shine-h']"
+      >
+        <div class="sq__veil" aria-hidden="true"></div>
+
+        @for (_ of [animKey()]; track _) {
+          <div
+            class="sq__tip"
+            [style.top]="tipDockStyle().top"
+            [style.bottom]="tipDockStyle().bottom"
+          >
+            <p class="sq__tip-kicker">Step {{ tipIndex() + 1 }}</p>
+            <h2 class="sq__tip-title">{{ active.title }}</h2>
+            <p class="sq__tip-body">{{ active.body }}</p>
+            <button
+              type="button"
+              class="sq__cta"
+              [disabled]="checking()"
+              (click)="completeStep($event)"
+            >
+              {{
+                checking() ? 'Nice!' : isLast() ? 'Finish quest' : 'Mark done'
+              }}
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>

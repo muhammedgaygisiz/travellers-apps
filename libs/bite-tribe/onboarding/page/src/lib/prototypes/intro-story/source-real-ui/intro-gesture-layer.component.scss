@@ -1,0 +1,133 @@
+/* Host is a passthrough — visuals live on SoftDotPointer + scroll thumb. */
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Soft iOS-style keyboard chrome (visual only — typeText drives the value). */
+.soft-keyboard {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 7;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0.35rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+  transform: translateY(108%);
+  opacity: 0;
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 180ms ease;
+}
+
+.soft-keyboard--on {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.soft-keyboard__panel {
+  width: 100%;
+  padding: 0.38rem 0.28rem 0.45rem;
+  border-radius: 0.55rem 0.55rem 0.2rem 0.2rem;
+  background: linear-gradient(180deg, #d8dae0 0%, #c5c8d0 100%);
+  box-shadow:
+    0 -1px 0 rgb(255 255 255 / 55%) inset,
+    0 -10px 28px rgb(0 0 0 / 18%);
+}
+
+.soft-keyboard__row {
+  display: flex;
+  justify-content: center;
+  gap: 0.18rem;
+  margin-bottom: 0.22rem;
+}
+
+.soft-keyboard__row--mid {
+  padding: 0 0.55rem;
+}
+
+.soft-keyboard__row--bottom {
+  margin-bottom: 0;
+  gap: 0.22rem;
+}
+
+.soft-keyboard__key {
+  flex: 1 1 0;
+  max-width: 2rem;
+  min-height: 1.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.28rem;
+  background: #fff;
+  color: #1c1c1e;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  box-shadow:
+    0 1px 0 rgb(0 0 0 / 18%),
+    0 0.5px 0 rgb(255 255 255 / 70%) inset;
+}
+
+.soft-keyboard__key--wide {
+  flex: 1.35 1 0;
+  max-width: 2.6rem;
+  font-size: 0.55rem;
+  background: #abb0bb;
+  color: #1c1c1e;
+}
+
+.soft-keyboard__key--mod {
+  flex: 1.4 1 0;
+  max-width: 3rem;
+  font-size: 0.52rem;
+  font-weight: 600;
+  text-transform: lowercase;
+  background: #abb0bb;
+}
+
+.soft-keyboard__key--space {
+  flex: 4.2 1 0;
+  max-width: none;
+  font-size: 0.52rem;
+  text-transform: lowercase;
+  color: #3a3a3c;
+}
+
+.soft-keyboard__key--go {
+  background: #0a84ff;
+  color: #fff;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 22%);
+}
+
+/* Realistic iOS-style scroll indicator (right edge of screen). */
+.scroll-indicator {
+  position: absolute;
+  top: 0;
+  right: 0.2rem;
+  bottom: 0;
+  width: 0.18rem;
+  z-index: 6;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  pointer-events: none;
+}
+
+.scroll-indicator--on {
+  opacity: 1;
+}
+
+.scroll-indicator__thumb {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  border-radius: 999px;
+  background: rgb(32 32 30 / 38%);
+  box-shadow: 0 0 0 0.5px rgb(255 255 255 / 35%);
+  transition: top 40ms linear;
+}

@@ -1,0 +1,95 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  color: #20201e;
+}
+
+.stage__media {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: var(--accent-soft);
+}
+
+.stage__video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #111;
+}
+
+.stage__stand-in {
+  height: 100%;
+  transform: scale(0.92);
+  transform-origin: top center;
+  pointer-events: none;
+}
+
+.stage__stand-in ::ng-deep .fake {
+  min-height: 100%;
+  padding: 0;
+  background: transparent;
+}
+
+.stage__stand-in ::ng-deep .fake__badge {
+  display: none;
+}
+
+.stage__note {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 2;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 55%);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.stage__copy {
+  padding: 0.85rem 0.15rem 0.25rem;
+  text-align: center;
+  animation: copy-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stage__headline {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.45rem, 5.5vw, 1.85rem);
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.stage__line {
+  margin: 0;
+  color: rgb(32 32 30 / 68%);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+@keyframes copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

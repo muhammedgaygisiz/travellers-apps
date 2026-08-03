@@ -388,5 +388,7 @@
   "profile-visibility-private": "Perfil privado",
   "profile-visibility-public-hint": "O teu nome, foto, seguidores e atividade de Bites podem aparecer na app.",
   "profile-visibility-private-hint": "Apareces como anónimo e ficas fora das áreas sociais públicas.",
-  "profile-visibility-change": "Alterar"
+  "profile-visibility-change": "Alterar",
+  "privacy-policy-language-fallback": "Esta Política de Privacidade ainda não está disponível no idioma do seu app, por isso é exibida em inglês.",
+  "all-rights-reserved": "Todos os direitos reservados."
 }

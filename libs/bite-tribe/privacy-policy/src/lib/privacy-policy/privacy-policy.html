@@ -3,168 +3,144 @@
   class="ion-page"
 >
   <ion-content class="ion-padding">
-    <main>
-      <h1>Privacy Policy for BiteTribe</h1>
-      <p class="sub">
-        <span class="pill">Last updated: February 2026</span>
-      </p>
-    </main>
+    <!--
+      The document is keyed on its language so it is rebuilt when the app
+      language resolves after the first render - the startup preference is read
+      asynchronously. A static Transloco lang alone would keep the language it
+      first resolved to.
+    -->
+    @for (lang of [policyLang()]; track lang) {
+    <ng-container *transloco="let t; lang: lang">
+      <main>
+        <h1>{{ t('privacy-policy-title') }}</h1>
+        <p class="sub">
+          <span class="pill">{{ t('privacy-policy-last-updated') }}</span>
+        </p>
 
-    <main>
-      <p>
-        BiteTribe (“we”, “our”, “us”) respects your privacy. This Privacy Policy
-        explains how information is collected, used, and shared when you use the
-        BiteTribe mobile application and related services (the “App”).
-      </p>
+        @if (isLanguageFallback()) {
+        <p class="notice" data-testid="privacy-policy-language-fallback">
+          {{ 'privacy-policy-language-fallback' | transloco }}
+        </p>
+        }
+      </main>
 
-      <h2>1. Information We Collect</h2>
+      <main>
+        <p>{{ t('privacy-policy-intro') }}</p>
 
-      <h3>1.1 Account Information</h3>
-      <p>When you sign in to BiteTribe, we collect:</p>
-      <ul>
-        <li>Your authentication identifier (e.g. user ID)</li>
-        <li>Your email address (if you sign in with email)</li>
-        <li>
-          Your display name and profile image (if provided by Google or Apple
-          sign-in)
-        </li>
-      </ul>
-      <p>Authentication is handled securely via Firebase Authentication.</p>
+        <h2>{{ t('privacy-policy-collect-title') }}</h2>
 
-      <h3>1.2 User-Generated Content</h3>
-      <p>When you use the App, you create and share content, including:</p>
-      <ul>
-        <li>Photos of meals (“Bites”)</li>
-        <li>Restaurant or place names</li>
-        <li>Prices</li>
-        <li>Ratings</li>
-        <li>Location data associated with a Bite</li>
-      </ul>
-      <p>
-        This content is stored to provide the core functionality of the App.
-      </p>
+        <h3>{{ t('privacy-policy-account-title') }}</h3>
+        <p>{{ t('privacy-policy-account-intro') }}</p>
+        <ul>
+          <li>{{ t('privacy-policy-account-identifier') }}</li>
+          <li>{{ t('privacy-policy-account-email') }}</li>
+          <li>{{ t('privacy-policy-account-profile') }}</li>
+        </ul>
+        <p>{{ t('privacy-policy-account-note') }}</p>
 
-      <h3>1.3 Location Data</h3>
-      <p>
-        Location data is used
-        <strong>only when you create or view Bites</strong> to:
-      </p>
-      <ul>
-        <li>Attach a location to a Bite</li>
-        <li>Show nearby food posts</li>
-      </ul>
-      <p>
-        Location access is optional and controlled by your device permissions.
-      </p>
+        <h3>{{ t('privacy-policy-content-title') }}</h3>
+        <p>{{ t('privacy-policy-content-intro') }}</p>
+        <ul>
+          <li>{{ t('privacy-policy-content-photos') }}</li>
+          <li>{{ t('privacy-policy-content-places') }}</li>
+          <li>{{ t('privacy-policy-content-prices') }}</li>
+          <li>{{ t('privacy-policy-content-ratings') }}</li>
+          <li>{{ t('privacy-policy-content-location') }}</li>
+        </ul>
+        <p>{{ t('privacy-policy-content-note') }}</p>
 
-      <h3>1.4 Usage Data</h3>
-      <p>
-        We may collect basic usage data to understand how the App is used and to
-        improve it, such as:
-      </p>
-      <ul>
-        <li>App interactions</li>
-        <li>Crash reports</li>
-        <li>Performance data</li>
-      </ul>
-      <p>
-        This data is collected using Firebase services and does not personally
-        identify you.
-      </p>
+        <h3>{{ t('privacy-policy-location-title') }}</h3>
+        <p>{{ t('privacy-policy-location-intro') }}</p>
+        <ul>
+          <li>{{ t('privacy-policy-location-attach') }}</li>
+          <li>{{ t('privacy-policy-location-nearby') }}</li>
+        </ul>
+        <p>{{ t('privacy-policy-location-note') }}</p>
 
-      <h2>2. How We Use Your Information</h2>
-      <p>We use the collected information to:</p>
-      <ul>
-        <li>Provide and operate the BiteTribe App</li>
-        <li>Allow users to create, view, and share Bites</li>
-        <li>Authenticate users and secure accounts</li>
-        <li>Improve app performance, stability, and user experience</li>
-        <li>Communicate important updates related to the App</li>
-      </ul>
+        <h3>{{ t('privacy-policy-usage-title') }}</h3>
+        <p>{{ t('privacy-policy-usage-intro') }}</p>
+        <ul>
+          <li>{{ t('privacy-policy-usage-interactions') }}</li>
+          <li>{{ t('privacy-policy-usage-crashes') }}</li>
+          <li>{{ t('privacy-policy-usage-performance') }}</li>
+        </ul>
+        <p>{{ t('privacy-policy-usage-note') }}</p>
 
-      <h2>3. Data Storage and Security</h2>
-      <ul>
-        <li>Data is stored using Google Firebase services.</li>
-        <li>
-          Reasonable technical and organizational measures are used to protect
-          your information.
-        </li>
-        <li>
-          No system can be guaranteed 100% secure, but we take security
-          seriously.
-        </li>
-      </ul>
+        <h2>{{ t('privacy-policy-use-title') }}</h2>
+        <p>{{ t('privacy-policy-use-intro') }}</p>
+        <ul>
+          <li>{{ t('privacy-policy-use-operate') }}</li>
+          <li>{{ t('privacy-policy-use-share') }}</li>
+          <li>{{ t('privacy-policy-use-authenticate') }}</li>
+          <li>{{ t('privacy-policy-use-improve') }}</li>
+          <li>{{ t('privacy-policy-use-communicate') }}</li>
+        </ul>
 
-      <h2>4. Data Sharing</h2>
-      <p>We <strong>do not sell</strong> your personal data.</p>
-      <p>Your data may be shared only in the following cases:</p>
-      <ul>
-        <li>
-          Public content you choose to share (e.g. Bites) is visible to other
-          users
-        </li>
-        <li>
-          With service providers (such as Firebase) strictly to operate the App
-        </li>
-        <li>If required by law</li>
-      </ul>
+        <h2>{{ t('privacy-policy-security-title') }}</h2>
+        <ul>
+          <li>{{ t('privacy-policy-security-storage') }}</li>
+          <li>{{ t('privacy-policy-security-measures') }}</li>
+          <li>{{ t('privacy-policy-security-note') }}</li>
+        </ul>
 
-      <h2>5. Third-Party Services</h2>
-      <p>BiteTribe uses the following third-party services:</p>
-      <ul>
-        <li>Firebase Authentication</li>
-        <li>Firebase Firestore</li>
-        <li>Firebase Storage</li>
-        <li>Firebase Analytics (if enabled)</li>
-      </ul>
-      <p>
-        These services are provided by Google and are subject to Google’s
-        privacy policies.
-      </p>
+        <h2>{{ t('privacy-policy-sharing-title') }}</h2>
+        <p>
+          <strong>{{ t('privacy-policy-sharing-no-sale') }}</strong>
+        </p>
+        <p>{{ t('privacy-policy-sharing-intro') }}</p>
+        <ul>
+          <li>{{ t('privacy-policy-sharing-public') }}</li>
+          <li>{{ t('privacy-policy-sharing-providers') }}</li>
+          <li>{{ t('privacy-policy-sharing-legal') }}</li>
+        </ul>
 
-      <h2>6. Your Rights</h2>
-      <p>
-        Depending on your location, you may have the right to access your
-        personal data, request correction or deletion of your data, and withdraw
-        consent where applicable.
-      </p>
-      <p>You can delete your account and associated data by contacting us.</p>
+        <h2>{{ t('privacy-policy-services-title') }}</h2>
+        <p>{{ t('privacy-policy-services-intro') }}</p>
+        <ul>
+          <li>Firebase Authentication</li>
+          <li>Firebase Firestore</li>
+          <li>Firebase Storage</li>
+          <li>{{ t('privacy-policy-services-analytics') }}</li>
+        </ul>
+        <p>{{ t('privacy-policy-services-note') }}</p>
 
-      <h2>7. Children’s Privacy</h2>
-      <p>
-        BiteTribe is not intended for children under the age of 13. We do not
-        knowingly collect personal data from children.
-      </p>
+        <h2>{{ t('privacy-policy-rights-title') }}</h2>
+        <p>{{ t('privacy-policy-rights-intro') }}</p>
+        <p>{{ t('privacy-policy-rights-delete') }}</p>
 
-      <h2>8. Changes to This Policy</h2>
-      <p>
-        We may update this Privacy Policy from time to time. Changes will be
-        reflected on this page with an updated “Last updated” date.
-      </p>
+        <h2>{{ t('privacy-policy-children-title') }}</h2>
+        <p>{{ t('privacy-policy-children-body') }}</p>
 
-      <h2>9. Contact</h2>
-      <p>
-        If you have questions about this Privacy Policy or your data, you can
-        contact us at:
-      </p>
-      @if (!isContactClicked()) {
-      <ion-button fill="clear" (click)="contactClicked()">Contact</ion-button>
-      } @if (isContactClicked()) {
-      <ul>
-        <li><strong>Email:</strong> muhammed.gaygisiz&#64;gmail.com</li>
-        <li><strong>App name:</strong> BiteTribe</li>
-      </ul>
-      }
-    </main>
+        <h2>{{ t('privacy-policy-changes-title') }}</h2>
+        <p>{{ t('privacy-policy-changes-body') }}</p>
 
-    <main>
-      <div class="ion-text-center">
-        <img width="150" src="assets/icons/logo.svg" alt="logo" />
-      </div>
-    </main>
+        <h2>{{ t('privacy-policy-contact-title') }}</h2>
+        <p>{{ t('privacy-policy-contact-intro') }}</p>
+        @if (!isContactClicked()) {
+        <ion-button fill="clear" (click)="contactClicked()">
+          {{ t('contact') }}
+        </ion-button>
+        } @else {
+        <ul>
+          <li>
+            <strong>{{ t('email') }}:</strong>
+            muhammed.gaygisiz&#64;gmail.com
+          </li>
+          <li><strong>{{ t('app-name') }}:</strong> BiteTribe</li>
+        </ul>
+        }
+      </main>
 
-    <footer>
-      <p>© {{ year }} BiteTribe. All rights reserved.</p>
-    </footer>
+      <main>
+        <div class="ion-text-center">
+          <img width="150" src="assets/icons/logo.svg" alt="logo" />
+        </div>
+      </main>
+
+      <footer>
+        <p>© {{ year }} BiteTribe. {{ t('all-rights-reserved') }}</p>
+      </footer>
+    </ng-container>
+    }
   </ion-content>
 </ta-page>

@@ -388,5 +388,7 @@
   "profile-visibility-private": "Gizli profil",
   "profile-visibility-public-hint": "Adın, fotoğrafın, takipçilerin ve Bite etkinliğin uygulamada gösterilebilir.",
   "profile-visibility-private-hint": "Anonim görünürsün ve herkese açık sosyal alanlarda yer almazsın.",
-  "profile-visibility-change": "Değiştir"
+  "profile-visibility-change": "Değiştir",
+  "privacy-policy-language-fallback": "Bu Gizlilik Politikası uygulama dilinde henüz mevcut değil, bu yüzden İngilizce gösteriliyor.",
+  "all-rights-reserved": "Tüm hakları saklıdır."
 }

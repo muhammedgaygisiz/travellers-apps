@@ -1,0 +1,22 @@
+- [bug: Show the privacy policy in the selected app language](https://github.com/muhammedgaygisiz/travellers-apps/issues/1218) (Issue \#1218)
+- Description
+  - The physical iOS release-candidate rerun on TestFlight 1.0.1 build 89 opened the Privacy Policy with the app language set to German and got the English document. The entry point and the page itself worked; only the language was wrong.
+  - `libs/bite-tribe/privacy-policy` was the last legal surface still written as hardcoded English markup. The public account-deletion page next to it had already been localized under [[issue-1182]], so the policy was the outlier rather than the pattern.
+- Decisions
+  - A legal document is only published in a language whose wording has been reviewed. `REVIEWED_PRIVACY_POLICY_LANGUAGES` in `libs/bite-tribe/privacy-policy` names them, and it is deliberately smaller than the app's `availableLangs`: an unreviewed machine translation of a privacy policy would claim legal coverage the wording has not been checked for.
+  - The first reviewed set is English and German, which is what the issue requires as the minimum. Adding a language to the list means its policy copy exists in that locale file and has been reviewed.
+  - Every other app language resolves to English and the page says so. `resolvePrivacyPolicyLanguage` returns the language plus an `isFallback` flag, and the page renders a notice in the _app_ language - the user is told in a language they read that the document below is in English. Silently swapping the language of legal content was rejected.
+  - Resolution is deterministic in both directions and shared by every entry point. The in-app route and the public `/privacy` web route are the same component, so native and web cannot drift apart.
+  - The document renders with a static Transloco lang, keyed on the resolved language. Static keeps a later app-language switch from re-rendering the policy in a language that has no policy and showing raw keys (the failure mode behind \#1186); the key rebuilds the document when the startup language preference arrives after the first render, because `initLanguage` reads it asynchronously.
+- Outcome
+  - `libs/bite-tribe/privacy-policy/src/lib/privacy-policy/privacy-policy-language.ts` is new and owns the language contract: the reviewed set, the English fallback, and the regional-tag normalization (`de-CH` is German).
+  - `privacy-policy.html` is fully Transloco-driven; `privacy-policy.ts` resolves the policy language from `langChanges$` and exposes `policyLang` and `isLanguageFallback`.
+  - 61 keys were added to `en.json` and `de.json` - the full policy plus the shared footer line. The other nine locales received the disclosed fallback notice and the footer line only, because they have no reviewed policy yet.
+  - The legal coverage of the German document matches the English one section for section; no clause was added, dropped, or weakened in translation.
+- Validation
+  - `npx nx test privacy-policy` - 26 tests green, including rendering the German policy for a German app, the English policy plus a French notice for a French app, and the rebuild when the app language arrives late.
+  - `npx nx lint privacy-policy` - clean.
+  - `npx nx build bite-tribe` - succeeds.
+  - Locale JSON parse over all 11 consumer locale files - clean.
+  - `git diff --check` - clean.
+  - Not run: the physical-device recheck on iOS with the app set to German, which the issue's acceptance criteria require before this can be recorded under [[Current State - Release Candidate Test Charter]].

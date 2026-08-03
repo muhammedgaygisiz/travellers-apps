@@ -388,5 +388,7 @@
   "profile-visibility-private": "Profilo privato",
   "profile-visibility-public-hint": "Nome, foto, follower e attività Bite possono essere mostrati nell’app.",
   "profile-visibility-private-hint": "Appari come anonimo e resti fuori dalle superfici social pubbliche.",
-  "profile-visibility-change": "Modifica"
+  "profile-visibility-change": "Modifica",
+  "privacy-policy-language-fallback": "Questa Informativa sulla privacy non è ancora disponibile nella lingua della tua app, quindi viene mostrata in inglese.",
+  "all-rights-reserved": "Tutti i diritti riservati."
 }

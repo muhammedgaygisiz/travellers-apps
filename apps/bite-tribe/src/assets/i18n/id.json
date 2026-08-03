@@ -388,5 +388,7 @@
   "profile-visibility-private": "Profil privat",
   "profile-visibility-public-hint": "Nama, foto, pengikut, dan aktivitas Bite kamu dapat ditampilkan di aplikasi.",
   "profile-visibility-private-hint": "Kamu tampil anonim dan tidak muncul di area sosial publik.",
-  "profile-visibility-change": "Ubah"
+  "profile-visibility-change": "Ubah",
+  "privacy-policy-language-fallback": "Kebijakan Privasi ini belum tersedia dalam bahasa aplikasimu, jadi ditampilkan dalam bahasa Inggris.",
+  "all-rights-reserved": "Semua hak dilindungi."
 }

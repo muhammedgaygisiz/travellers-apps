@@ -388,5 +388,7 @@
   "profile-visibility-private": "የግል መገለጫ",
   "profile-visibility-public-hint": "ስምህ፣ ፎቶህ፣ ተከታዮችህ እና የBite እንቅስቃሴህ በመተግበሪያው ሊታዩ ይችላሉ።",
   "profile-visibility-private-hint": "እንደ ስም-አልባ ትታያለህ እና ከይፋዊ ማህበራዊ ቦታዎች ውጭ ትቆያለህ።",
-  "profile-visibility-change": "ቀይር"
+  "profile-visibility-change": "ቀይር",
+  "privacy-policy-language-fallback": "ይህ የግላዊነት መመሪያ በመረጡት የመተግበሪያ ቋንቋ ገና አልተዘጋጀም፣ ስለዚህ በእንግሊዝኛ ይታያል።",
+  "all-rights-reserved": "መብቱ በሙሉ የተጠበቀ ነው።"
 }

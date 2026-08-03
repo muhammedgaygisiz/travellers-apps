@@ -388,5 +388,7 @@
   "profile-visibility-private": "ملف شخصي خاص",
   "profile-visibility-public-hint": "يمكن عرض اسمك وصورتك ومتابعيك ونشاط Bites في التطبيق.",
   "profile-visibility-private-hint": "تظهر كمجهول وتبقى خارج المساحات الاجتماعية العامة.",
-  "profile-visibility-change": "تغيير"
+  "profile-visibility-change": "تغيير",
+  "privacy-policy-language-fallback": "سياسة الخصوصية هذه غير متوفرة بعد بلغة التطبيق التي اخترتها، لذلك يتم عرضها باللغة الإنجليزية.",
+  "all-rights-reserved": "جميع الحقوق محفوظة."
 }

@@ -201,7 +201,7 @@ Record one row per platform per execution. Keep previous rows when re-running af
 ### Session 7 - Privacy And Account-Deletion Entry Points
 
 - The Privacy Policy entry was discoverable in the app and the document loaded successfully.
-- With the app language set to German, the policy was displayed in English; this new localization defect is tracked by [issue #1218](https://github.com/muhammedgaygisiz/travellers-apps/issues/1218).
+- With the app language set to German, the policy was displayed in English; this new localization defect is tracked by [issue #1218](https://github.com/muhammedgaygisiz/travellers-apps/issues/1218). Fixed: the policy now follows the app language for the reviewed languages (English and German), and every other app language gets the English document with a notice in its own language saying so (see [[issue-1218]]). Recheck the German policy on a physical device in the next pass.
 - The Delete Account entry was discoverable.
 - Its warning and consequences were understandable, and the flow could be cancelled safely before destructive confirmation.
 - Result: pass for the non-destructive entry-point portion of issue #1182. End-to-end deletion with a disposable account remains unverified.
@@ -221,7 +221,7 @@ Record one row per platform per execution. Keep previous rows when re-running af
 
 - The tester stopped the run after the registration blocker reproduced twice. Registration is a pass criterion, so continuing could not produce valid release-candidate evidence for build 89.
 - Passed before abort: build identity and cold start, language switching in normal Settings, currency selection in normal Settings, profile visibility, current-device push enable/disable persistence, and the non-destructive privacy/account-deletion entry points.
-- Partial or failed before abort: location-denial recovery remains inconsistent under issue #1183; notification Settings has the misleading disabled Save action in issue #1217; the German app opens an English Privacy Policy in issue #1218; registration is blocked by issue #1219.
+- Partial or failed before abort: location-denial recovery remains inconsistent under issue #1183; notification Settings has the misleading disabled Save action in issue #1217; the German app opened an English Privacy Policy in issue #1218, now fixed and awaiting a device recheck; registration is blocked by issue #1219.
 - Not executed because of the abort: onboarding-specific language and currency checks, verification resend, disposable-account deletion, photo upload failure and retry, ranking notification delivery, remaining critical native journeys, App Check refusal, Crashlytics, Analytics, dashboard, business app, Android, and web.
 - Build 89 is not release-candidate evidence. Resume with a newer named store build after issue #1219 is fixed, starting again with fresh registration before the deferred checks.
 

@@ -388,5 +388,7 @@
   "profile-visibility-private": "โปรไฟล์ส่วนตัว",
   "profile-visibility-public-hint": "ชื่อ รูป ผู้ติดตาม และกิจกรรม Bite ของคุณอาจแสดงในแอป",
   "profile-visibility-private-hint": "คุณจะแสดงเป็นไม่ระบุตัวตนและไม่อยู่ในพื้นที่โซเชียลสาธารณะ",
-  "profile-visibility-change": "เปลี่ยน"
+  "profile-visibility-change": "เปลี่ยน",
+  "privacy-policy-language-fallback": "นโยบายความเป็นส่วนตัวนี้ยังไม่มีในภาษาของแอปที่คุณเลือก จึงแสดงเป็นภาษาอังกฤษ",
+  "all-rights-reserved": "สงวนลิขสิทธิ์ทุกประการ"
 }

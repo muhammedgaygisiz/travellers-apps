@@ -39,6 +39,7 @@ apps/bite-tribe-firebase/functions/src/functions/shared/i18n/messages/<lang>.ts
 - Use Transloco keys for visible text.
 - Update every relevant locale when adding or changing user-facing copy.
 - Push notification copy is localized in Firebase Functions, not in the app: the OS renders the notification before Transloco exists. The backend catalog carries one file per language the app offers and is bound to the recipient's `settings/{uid}.language`. Keep its language list in step with `availableLangs` in `libs/bite-tribe/shell/src/lib/app.config.ts`; see [[Implementation - Firebase Functions]] and issue \#1200.
+- Legal documents carry their own language list. The privacy policy renders only from `PUBLISHED_PRIVACY_POLICY_LANGUAGES` in `libs/bite-tribe/privacy-policy`, which currently holds all eleven app languages; anything outside it gets the English document plus a notice in the app language that says so. Extend that list together with `availableLangs`, and never let a legal document switch language silently; see [[UC - Use Account And Legal Flows]] and issue \#1218.
 - Keep tone consistent inside each locale.
 - Avoid hardcoded visible English in templates, alerts, labels, button text, empty states, and error states.
 - Load a language before activating it when the switch happens in place, and let anything that translates synchronously - loading overlays, alerts, toasts - wait for that switch to settle.

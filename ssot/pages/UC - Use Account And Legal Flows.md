@@ -16,6 +16,8 @@ Users can access legal and account lifecycle information.
 ## Current Flow
 
 - User opens the privacy policy from the About page, or from the public `/privacy` route.
+- The privacy policy is shown in the selected app language. It is published in all eleven app languages, and both entry points share the same component, so the in-app and web routes resolve the language identically.
+- A language without published policy copy - a locale added to the app before its policy is written - falls back to the English document and is told so on the page, in its own app language. The policy language is never switched silently.
 - User opens account deletion from the Account section at the bottom of the settings page.
 - The delete-account page names what is removed and what is kept, then asks for an explicit destructive confirmation.
 - The `deleteOwnAccount` callable rejects a sign-in older than five minutes with `reauth_required`; the app re-runs the account's own sign-in method (Google, Apple, or a password prompt) and retries once.
@@ -47,6 +49,16 @@ The cascade also prunes the deleted user from `/meta/leaderboardDaily` and rebui
 - `syncEmailVerificationStatus`
 - `sendEmailVerificationReminders`
 - `apps/bite-tribe-e2e/src/tests/account-and-legal.spec.ts` covers in-app privacy navigation, deletion cancellation, and the completed emulator-backed cascade with a retained anonymized Bite.
+- `libs/bite-tribe/privacy-policy/src/lib/privacy-policy/__specs__` covers the policy language contract: German and Turkish apps render their own policy, a language without published policy copy renders the English one with the disclosed notice in its own language, and a late language preference rebuilds the document.
+
+## Policy Language Contract
+
+See [[issue-1218]] for the reasoning.
+
+- `PUBLISHED_PRIVACY_POLICY_LANGUAGES` in `libs/bite-tribe/privacy-policy` is the published set. A language belongs there only once its policy copy exists in that locale file with legal coverage equivalent to the English original. It currently matches `availableLangs` and has to be extended with it.
+- Everything outside that set - including an unknown or missing app language - resolves to English and reports the fallback, so the page can disclose it. This is what keeps a newly added locale from rendering raw keys inside a legal document.
+- Regional tags resolve to their base language: `de-CH` gets the German policy.
+- The policy translations outside English and German have not been through a human legal review yet.
 
 ## Related Domains
 

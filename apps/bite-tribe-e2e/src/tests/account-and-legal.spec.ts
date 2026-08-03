@@ -50,6 +50,12 @@ test.describe('Account and legal flows', () => {
 
     await page.waitForURL(/\/privacy$/);
     await expect(page.locator('lib-privacy-policy')).toBeVisible();
+
+    // The document is translated, so it must render the copy of the active app
+    // language rather than a raw Transloco key (issue #1218).
+    await expect(page.locator('lib-privacy-policy h1')).toHaveText(
+      'Privacy Policy for BiteTribe',
+    );
   });
 
   test('cancelling the confirmation leaves the account alone', async ({

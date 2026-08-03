@@ -217,6 +217,7 @@
   "registration-success-check-your-email-to-verify-account": "Registrierung erfolgreich! Bitte überprüfe deine E-Mail, um dein Konto zu verifizieren.",
   "registration-error-try-again": "Bei der Registrierung ist ein Fehler aufgetreten. Bitte versuche es erneut.",
   "registration-unknown-error-try-again": "Bei der Registrierung ist ein unbekannter Fehler aufgetreten. Bitte versuche es erneut.",
+  "registration-timeout-try-again": "Die Registrierung dauert länger als erwartet. Bitte prüfe deine Verbindung und versuche es erneut. Falls dein Konto bereits erstellt wurde, melde dich stattdessen an.",
   "rate-now": "Jetzt bewerten",
   "how-did-you-like-this-bite": "Wie hat dir dieser Bite gefallen?",
   "portuguese": "Portuguese",

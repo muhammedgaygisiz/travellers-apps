@@ -22,7 +22,7 @@ import { BucketlistActions } from '../bucketlists/actions';
 import { PATH } from 'utils';
 import { userId } from '../router/selectors';
 import { fromAuth } from 'ta-firestore';
-import { ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 
 @Injectable()

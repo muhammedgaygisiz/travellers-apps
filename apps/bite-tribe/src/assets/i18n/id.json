@@ -217,6 +217,7 @@
   "registration-success-check-your-email-to-verify-account": "Pendaftaran berhasil! Cek emailmu untuk memverifikasi akunmu.",
   "registration-error-try-again": "Terjadi kesalahan saat pendaftaran. Coba lagi, ya.",
   "registration-unknown-error-try-again": "Terjadi kesalahan yang tidak diketahui saat pendaftaran. Coba lagi, ya.",
+  "registration-timeout-try-again": "Pendaftaran memakan waktu lebih lama dari biasanya. Cek koneksimu dan coba lagi. Kalau akunmu sudah dibuat, masuk saja.",
   "rate-now": "Nilai sekarang",
   "how-did-you-like-this-bite": "Bagaimana pendapatmu tentang Bite ini?",
   "portuguese": "Portuguese",

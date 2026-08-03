@@ -8,7 +8,7 @@ import { BucketListEffect } from '../effects';
 import { BucketlistActions } from '../actions';
 import SpyInstance = jest.SpyInstance;
 import { AuthService } from 'ta-firestore';
-import { NavController, ToastController } from '@ionic/angular';
+import { NavController, ToastController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import type { Action } from '@ngrx/store';
 

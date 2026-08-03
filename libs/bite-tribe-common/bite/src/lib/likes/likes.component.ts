@@ -9,7 +9,7 @@ import {
 import { IonChip, IonLabel } from '@ionic/angular/standalone';
 import { LikeClick, LikeType } from 'model';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
-import { PopoverController } from '@ionic/angular';
+import { PopoverController } from '@ionic/angular/standalone';
 import { LikeCounts, likeTypes } from '../utils/like-counts';
 
 const emojiMap: Record<string, string> = {

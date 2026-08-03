@@ -217,6 +217,7 @@
   "registration-success-check-your-email-to-verify-account": "สมัครสมาชิกสำเร็จ! โปรดตรวจสอบอีเมลของคุณเพื่อยืนยันบัญชี",
   "registration-error-try-again": "เกิดข้อผิดพลาดระหว่างการสมัครสมาชิก โปรดลองอีกครั้ง",
   "registration-unknown-error-try-again": "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุระหว่างการสมัครสมาชิก โปรดลองอีกครั้ง",
+  "registration-timeout-try-again": "การสมัครสมาชิกใช้เวลานานกว่าปกติ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง หากบัญชีของคุณถูกสร้างแล้ว ให้เข้าสู่ระบบแทน",
   "rate-now": "ให้คะแนนตอนนี้",
   "how-did-you-like-this-bite": "คุณชอบ Bite นี้แค่ไหน?",
   "portuguese": "Portuguese",

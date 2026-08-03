@@ -218,6 +218,7 @@
   "registration-success-check-your-email-to-verify-account": "Conta criada! Verifica o teu e-mail para confirmar.",
   "registration-error-try-again": "Erro no registo. Tenta novamente.",
   "registration-unknown-error-try-again": "Ocorreu um erro inesperado. Tenta novamente.",
+  "registration-timeout-try-again": "O registo está a demorar mais do que o esperado. Verifica a tua ligação e tenta novamente. Se a tua conta foi criada, inicia sessão.",
   "rate-now": "Avaliar agora",
   "how-did-you-like-this-bite": "O que achaste deste Bite?",
   "set-manually": "Definir manualmente",

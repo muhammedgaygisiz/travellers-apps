@@ -90,6 +90,45 @@ export default [
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'error',
+      // Both apps bootstrap through `provideIonicAngular` from
+      // `@ionic/angular/standalone`. In that build a custom element only exists
+      // once something calls its `defineCustomElement`, which the standalone
+      // controllers do in their constructor and the identically named lazy
+      // exports below do not. `createOverlay` then awaits
+      // `customElements.whenDefined(tag)` forever, so `await create()` hangs
+      // with no error and no rejection - this silently blocked registration for
+      // a whole release (issue #1219). `MenuController` is listed because the
+      // two entry points wrap different `menuController` singletons, so the
+      // lazy one addresses an empty menu registry. Everything else exported
+      // from `@ionic/angular` (`NavController`, `Platform`,
+      // `IonicRouteStrategy`, `AngularDelegate`, event-detail types) is
+      // re-exported from `@ionic/angular/common` by both entry points and is
+      // safe. Specs are deliberately not exempt: a mock provided against the
+      // lazy token is never injected into code that resolves the standalone
+      // one. See [[Current State - Known Issues]].
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@ionic/angular',
+              importNames: [
+                'ActionSheetController',
+                'AlertController',
+                'LoadingController',
+                'MenuController',
+                'ModalController',
+                'PickerController',
+                'PopoverController',
+                'ToastController',
+              ],
+              message:
+                "Import Ionic controllers from '@ionic/angular/standalone'. The '@ionic/angular' versions never define their custom element, so create() never resolves and the caller hangs forever (issue #1219).",
+              allowTypeImports: true,
+            },
+          ],
+        },
+      ],
     },
   },
   {

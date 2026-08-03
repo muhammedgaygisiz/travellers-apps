@@ -5,7 +5,7 @@ import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { NavController } from '@ionic/angular/standalone';
-import { ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
 import { Bite, PublicUser } from 'model';

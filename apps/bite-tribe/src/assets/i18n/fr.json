@@ -217,6 +217,7 @@
   "registration-success-check-your-email-to-verify-account": "Inscription réussie ! Vérifie ton e-mail pour confirmer ton compte.",
   "registration-error-try-again": "Une erreur s’est produite pendant l’inscription. Réessaie.",
   "registration-unknown-error-try-again": "Une erreur inconnue s’est produite pendant l’inscription. Réessaie.",
+  "registration-timeout-try-again": "L’inscription prend plus de temps que prévu. Vérifie ta connexion et réessaie. Si ton compte a été créé, connecte-toi à la place.",
   "rate-now": "Évaluer maintenant",
   "how-did-you-like-this-bite": "Comment as-tu trouvé ce Bite ?",
   "portuguese": "Portuguese",

@@ -217,6 +217,7 @@
   "registration-success-check-your-email-to-verify-account": "ምዝገባው ተሳክቷል! መለያህን ለማረጋገጥ ኢሜይልህን ተመልከት።",
   "registration-error-try-again": "በምዝገባ ጊዜ ስህተት ተፈጥሯል። እንደገና ሞክር።",
   "registration-unknown-error-try-again": "በምዝገባ ጊዜ ያልታወቀ ስህተት ተፈጥሯል። እንደገና ሞክር።",
+  "registration-timeout-try-again": "ምዝገባው ከተጠበቀው በላይ ጊዜ ወስዷል። ግንኙነትህን አረጋግጠህ እንደገና ሞክር። መለያህ ከተፈጠረ ግባ።",
   "rate-now": "አሁን ደረጃ ስጥ",
   "how-did-you-like-this-bite": "ይህን Bite እንዴት ወደዳህ?",
   "portuguese": "Portuguese",

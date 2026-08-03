@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
-import { ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import {
   getEmailVerificationFailureReason,

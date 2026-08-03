@@ -6,11 +6,13 @@ import {
   LoadingController,
   NavController,
   ToastController,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 
 const translations: Record<string, string> = {
   ok: 'OK',
   'registration-in-progress': 'Creating your account...',
+  'registration-timeout-try-again':
+    'Registration is taking longer than expected. Please check your connection and try again. If your account was created, sign in instead.',
   'registration-error-try-again':
     'An error occurred during registration. Please try again.',
   'registration-success-check-your-email-to-verify-account':
@@ -68,6 +70,9 @@ describe(RegistrationService.name, () => {
     MockedAuthService.sendEmailVerification.mockResolvedValue(undefined);
     MockedNavController.navigateBack.mockResolvedValue(true);
     MockedLoadingController.create.mockResolvedValue(loadingOverlay);
+    MockedToastController.create.mockResolvedValue({
+      present: jest.fn().mockResolvedValue(undefined),
+    });
 
     TestBed.configureTestingModule({
       providers: [
@@ -234,7 +239,11 @@ describe(RegistrationService.name, () => {
        * pending auth call, without completing it.
        */
       const settleOverlay = async (): Promise<void> => {
-        for (let tick = 0; tick < 5; tick++) {
+        for (let tick = 0; tick < 50; tick++) {
+          if (resolveRegistration) {
+            return;
+          }
+
           await Promise.resolve();
         }
       };
@@ -306,6 +315,113 @@ describe(RegistrationService.name, () => {
         await pending;
 
         expect(navigateBackSpy).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    // Issue #1219: on iOS the overlay controller was resolved from the lazy
+    // `@ionic/angular` entry point, so `create()` waited forever on an
+    // `ion-loading` element that the standalone build never defines. The whole
+    // registration was parked on that promise: no Auth user, no error, no way
+    // out. Nothing in this flow may depend on a promise that never settles.
+    describe('given a dependency never settles', () => {
+      const neverSettles = <T>(): Promise<T> => new Promise<T>(() => undefined);
+
+      /** Lets the flow run up to the call that hangs before timers advance. */
+      const settleMicrotasks = async (): Promise<void> => {
+        for (let tick = 0; tick < 5; tick++) {
+          await Promise.resolve();
+        }
+      };
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('should register anyway when the loading overlay never appears', async () => {
+        MockedLoadingController.create.mockReturnValue(neverSettles());
+
+        const pending = service.register({
+          email: 'q@q.de',
+          password: '12345678',
+        });
+        await settleMicrotasks();
+        await jest.advanceTimersByTimeAsync(2_000);
+        await pending;
+
+        expect(registerWithUsernameAndPasswordSpy).toHaveBeenCalledWith({
+          email: 'q@q.de',
+          password: '12345678',
+        });
+        expect(navigateBackSpy).toHaveBeenCalledWith(['/home']);
+        expect(service.registering()).toBe(false);
+      });
+
+      it('should end the pending state with an actionable message when the auth round-trip never settles', async () => {
+        registerWithUsernameAndPasswordSpy.mockImplementation(() =>
+          neverSettles(),
+        );
+
+        const pending = service.register({
+          email: 'q@q.de',
+          password: '12345678',
+        });
+        await settleMicrotasks();
+        await jest.advanceTimersByTimeAsync(30_000);
+        await pending;
+
+        expect(MockedToastController.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: translations['registration-timeout-try-again'],
+          }),
+        );
+        expect(loadingOverlay.dismiss).toHaveBeenCalled();
+        expect(navigateBackSpy).not.toHaveBeenCalled();
+        expect(service.registering()).toBe(false);
+      });
+
+      it('should allow a retry after a timed out attempt', async () => {
+        registerWithUsernameAndPasswordSpy.mockImplementation(() =>
+          neverSettles(),
+        );
+
+        const pending = service.register({
+          email: 'q@q.de',
+          password: '12345678',
+        });
+        await settleMicrotasks();
+        await jest.advanceTimersByTimeAsync(30_000);
+        await pending;
+
+        registerWithUsernameAndPasswordSpy.mockResolvedValue(undefined);
+        await service.register({ email: 'q@q.de', password: '12345678' });
+
+        expect(registerWithUsernameAndPasswordSpy).toHaveBeenCalledTimes(2);
+        expect(navigateBackSpy).toHaveBeenCalledWith(['/home']);
+      });
+
+      it('should release the form when the feedback toast never appears', async () => {
+        registerWithUsernameAndPasswordSpy.mockRejectedValue(
+          Object.assign(new Error('Network request failed'), {
+            code: 'auth/network-request-failed',
+            errorMessage: 'Network request failed',
+          }),
+        );
+        MockedToastController.create.mockReturnValue(neverSettles());
+
+        const pending = service.register({
+          email: 'q@q.de',
+          password: '12345678',
+        });
+        await settleMicrotasks();
+        await jest.advanceTimersByTimeAsync(2_000);
+        await pending;
+
+        expect(loadingOverlay.dismiss).toHaveBeenCalled();
+        expect(service.registering()).toBe(false);
       });
     });
 

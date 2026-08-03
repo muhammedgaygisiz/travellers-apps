@@ -6,7 +6,7 @@ import { catchError, from, map, of, switchMap } from 'rxjs';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { AuthService } from 'ta-firestore';
 import { shouldLoadBucketlists } from './utils/should-load-bucketlists';
-import { NavController, ToastController } from '@ionic/angular';
+import { NavController, ToastController } from '@ionic/angular/standalone';
 import { PATH } from 'utils';
 import { TranslocoService } from '@jsverse/transloco';
 

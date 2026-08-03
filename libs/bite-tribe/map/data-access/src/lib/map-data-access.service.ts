@@ -2,6 +2,13 @@ import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import type { Bite, LikeClick } from 'model';
+import {
+  getLocationPermissionState,
+  openLocationSettings,
+  requestLocationPermission,
+  type LocationPermissionResult,
+  type LocationPermissionState,
+} from 'geolocation';
 
 @Injectable({
   providedIn: 'root',
@@ -38,5 +45,17 @@ export class MapDataAccessService {
 
   submitLikeClick(likeClick: LikeClick): void {
     this.storeService.submitLikeClick(likeClick);
+  }
+
+  getLocationPermissionState(): Promise<LocationPermissionState> {
+    return getLocationPermissionState();
+  }
+
+  requestLocationPermission(): Promise<LocationPermissionResult> {
+    return requestLocationPermission();
+  }
+
+  openLocationSettings(): Promise<boolean> {
+    return openLocationSettings();
   }
 }

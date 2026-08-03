@@ -26,6 +26,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [showAddButton]="false"
       [isReloading]="service.isReloading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
+      [locationPermissionState]="service.locationPermissionState()"
       enableImageRetry
       (retryImageUpload)="service.retryBiteImageUpload($event)"
       (logoutClick)="service.logout()"

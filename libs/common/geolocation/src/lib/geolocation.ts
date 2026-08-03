@@ -1,7 +1,7 @@
 import { Geolocation } from '@capacitor/geolocation';
 import { from, Observable } from 'rxjs';
 import { Position } from '@capacitor/geolocation/dist/esm/definitions';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, type PermissionState } from '@capacitor/core';
 import { AppLauncher } from '@capacitor/app-launcher';
 
 const ONE_MINUTE = 60 * 1000;
@@ -27,11 +27,33 @@ export type LocationPermissionState =
 
 /** Thrown by {@link getCurrentPosition} instead of triggering a cold OS prompt. */
 export class LocationPermissionNotGrantedError extends Error {
-  constructor() {
+  /**
+   * The state that blocked the read, so a caller can offer the right way back
+   * without asking the OS a second time. A refused read alone cannot say
+   * whether a prompt is still available or only the settings page can help.
+   */
+  readonly permissionState: LocationPermissionState;
+
+  constructor(permissionState: LocationPermissionState) {
     super('Location permission is not granted');
     this.name = 'LocationPermissionNotGrantedError';
+    this.permissionState = permissionState;
   }
 }
+
+/**
+ * `prompt-with-rationale` is Android's "ask again with an explanation", so it
+ * still has a prompt left to spend and folds into `prompt`.
+ */
+const toPermissionState = (
+  location: PermissionState,
+): LocationPermissionState => {
+  if (location === 'granted') {
+    return 'granted';
+  }
+
+  return location === 'denied' ? 'denied' : 'prompt';
+};
 
 const readCurrentPosition = async (): Promise<Position> => {
   const permissionStatus = await Geolocation.checkPermissions();
@@ -41,7 +63,9 @@ const readCurrentPosition = async (): Promise<Position> => {
   // keeps a read on an undecided permission from spending the prompt that the
   // onboarding location step owns (epic #850, issue #1023).
   if (Capacitor.isNativePlatform() && permissionStatus.location !== 'granted') {
-    throw new LocationPermissionNotGrantedError();
+    throw new LocationPermissionNotGrantedError(
+      toPermissionState(permissionStatus.location),
+    );
   }
 
   return await Geolocation.getCurrentPosition({
@@ -107,13 +131,7 @@ export const getLocationPermissionState =
     try {
       const { location } = await Geolocation.checkPermissions();
 
-      if (location === 'granted') {
-        return 'granted';
-      }
-
-      // `prompt-with-rationale` is Android's "ask again with an explanation",
-      // so it still has a prompt left to spend.
-      return location === 'denied' ? 'denied' : 'prompt';
+      return toPermissionState(location);
     } catch (error) {
       console.warn('Location permission check failed: ', error);
 

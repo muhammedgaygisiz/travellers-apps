@@ -1,4 +1,5 @@
 import type { Geopoint, PublicUser, Settings } from 'model';
+import type { LocationPermissionState } from 'geolocation';
 
 export type AppSlice = {
   position?: Geopoint;
@@ -17,4 +18,11 @@ export type AppSlice = {
   };
   exchangeRates: Record<string, number>;
   errorLoadingGpsPosition: boolean;
+  /**
+   * What the OS said about location access the last time a position read was
+   * attempted. A failed read alone cannot tell a denial apart from a device
+   * that simply has no fix, and only a denial needs the settings-page handoff,
+   * so the recovery UI branches on this rather than on the error flag.
+   */
+  locationPermissionState?: LocationPermissionState;
 };

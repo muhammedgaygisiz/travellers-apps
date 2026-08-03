@@ -53,6 +53,7 @@ describe('WeeklyBitesContainer', () => {
             weeklyBitesRange,
             userId: signal('user-1'),
             hasErrorLoadingGpsPosition: signal(false),
+            locationPermissionState: signal(undefined),
             logout: (): void => {},
             likeButtonClicked: (): void => {},
             biteClicked: (): void => {},

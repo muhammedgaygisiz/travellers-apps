@@ -30,6 +30,7 @@ const MockHomeService = {
   maxPriceHome: signal(0),
   isReloading: signal(false),
   hasErrorLoadingGpsPosition: signal(false),
+  locationPermissionState: signal(undefined),
   networkStatus: signal(undefined),
   emailVerificationPromptVisible: signal(false),
   emailVerificationResendRunning: signal(false),

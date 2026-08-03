@@ -8,7 +8,10 @@ import {
   switchMap,
   take,
 } from 'rxjs';
-import { getCurrentPosition } from 'geolocation';
+import {
+  getCurrentPosition,
+  LocationPermissionNotGrantedError,
+} from 'geolocation';
 import { AppActions } from '../actions';
 import { Store } from '@ngrx/store';
 import { gpsPosition } from '../selectors';
@@ -66,10 +69,22 @@ export const dispatchGpsPosition = (
 
           return args;
         }),
+        // A read that failed for some other reason — no fix, a browser refusal —
+        // leaves the permission state unknown, and the recovery UI keeps its
+        // neutral wording rather than sending the user to a settings page that
+        // would not have been the obstacle.
         catchError((error) => {
           console.error(error);
 
-          store.dispatch(AppActions.errorLoadingGPSPosition({ error }));
+          store.dispatch(
+            AppActions.errorLoadingGPSPosition({
+              error,
+              permissionState:
+                error instanceof LocationPermissionNotGrantedError
+                  ? error.permissionState
+                  : undefined,
+            }),
+          );
 
           return of(args);
         }),

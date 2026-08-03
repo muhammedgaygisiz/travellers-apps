@@ -20,6 +20,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
       [isBitesLoading]="service.isBitesLoading()"
       [isReloading]="service.isReloading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
+      [locationPermissionState]="service.locationPermissionState()"
       [sorting]="service.myBitesSorting()"
       showSearch
       editableBites

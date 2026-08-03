@@ -115,6 +115,9 @@ export class HomeDataAccessService {
     this.storeService.hasErrorLoadingGpsPosition$,
     { initialValue: false },
   );
+  locationPermissionState = toSignal(
+    this.storeService.locationPermissionState$,
+  );
   biteById = toSignal(this.storeService.bite$);
   private readonly gpsPosition = toSignal(this.storeService.position$);
   private readonly likes = toSignal(this.storeService.likes$, {

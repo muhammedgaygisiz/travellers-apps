@@ -15,10 +15,19 @@ import { Action, Store } from '@ngrx/store';
 import { getEffectsMetadata } from '@ngrx/effects';
 import SpyInstance = jest.SpyInstance;
 import { gpsPosition } from '../selectors';
+import { LocationPermissionNotGrantedError } from 'geolocation';
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
   getCurrentPosition: (): void => getCurrentPositionMock(),
+  // Mirrors the real error so the effect's `instanceof` branch is exercised
+  // without pulling the Capacitor plugin into this spec.
+  LocationPermissionNotGrantedError: class extends Error {
+    constructor(readonly permissionState: string) {
+      super('Location permission is not granted');
+      this.name = 'LocationPermissionNotGrantedError';
+    }
+  },
 }));
 
 const assertDeepEqual = (actual: unknown, expected: unknown): void => {
@@ -326,8 +335,37 @@ describe(AppEffect.name, () => {
       expect(dispatchSpy).toHaveBeenCalledWith(
         AppActions.errorLoadingGPSPosition({
           error,
+          permissionState: undefined,
         }),
       );
+
+      errorSpy.mockRestore();
+    });
+
+    // The read refuses to prompt, so it is the only place that already knows
+    // whether the OS still has a prompt left or only settings can help.
+    it('should forward the permission state that blocked the read', () => {
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const error = new LocationPermissionNotGrantedError('denied');
+
+      scheduler.run(({ cold, expectObservable }) => {
+        getCurrentPositionMock.mockReturnValue(cold('#', {}, error));
+
+        actions$ = cold('a', { a: AppActions.fetchGPSPosition() });
+
+        expectObservable(effects.fetchGpsPosition$).toBe('a', {
+          a: AppActions.fetchGPSPosition(),
+        });
+      });
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        AppActions.errorLoadingGPSPosition({
+          error,
+          permissionState: 'denied',
+        }),
+      );
+
+      errorSpy.mockRestore();
     });
   });
 

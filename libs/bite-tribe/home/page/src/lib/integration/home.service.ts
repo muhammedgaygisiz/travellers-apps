@@ -54,6 +54,7 @@ export class HomeService {
   isReloading = this.dataAccess.isReloading;
 
   hasErrorLoadingGpsPosition = this.dataAccess.hasErrorLoadingGpsPosition;
+  locationPermissionState = this.dataAccess.locationPermissionState;
 
   networkStatus = this.dataAccess.networkStatus;
   emailVerificationPromptVisible = this.emailVerification.promptVisible;

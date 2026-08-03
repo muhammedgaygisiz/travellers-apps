@@ -49,6 +49,7 @@ import {
   isBitesLoading,
   isPublicProfile,
   isReloadingHome,
+  locationPermissionState,
   preferredCurrency,
   profileMetadata,
   publicUser,
@@ -136,6 +137,7 @@ export class BiteTribeStoreService implements StoreService {
   maxPriceHome$ = this.store.select(homeMaxPriceFilter);
   isReloadingHome$ = this.store.select(isReloadingHome);
   hasErrorLoadingGpsPosition$ = this.store.select(hasErrorLoadingGpsPosition);
+  locationPermissionState$ = this.store.select(locationPermissionState);
 
   likes$ = this.store.select(likes);
   userId$ = this.store.select(fromAuth.selectUserId);

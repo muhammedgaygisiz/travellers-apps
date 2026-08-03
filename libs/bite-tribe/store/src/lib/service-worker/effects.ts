@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType, rootEffectsInit } from '@ngrx/effects';
 import { switchMap, tap } from 'rxjs';
 import { SwUpdate } from '@angular/service-worker';
-import { AlertController, Platform } from '@ionic/angular';
+import { AlertController, Platform } from '@ionic/angular/standalone';
 
 @Injectable()
 export class ServiceWorkerEffects {

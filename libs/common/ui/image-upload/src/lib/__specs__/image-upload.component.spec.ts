@@ -6,7 +6,11 @@ import { getExifDataFromPhoto } from '../utils/get-exif-data-from-photo';
 import { getExifDataFromFilePath } from '../utils/get-exif-data-from-file-path';
 import { FilePicker } from '@capawesome/capacitor-file-picker';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AlertController, NavController, Platform } from '@ionic/angular';
+import {
+  AlertController,
+  NavController,
+  Platform,
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { imageOutline } from 'ionicons/icons';
 import { ComponentRef, signal } from '@angular/core';

@@ -14,9 +14,9 @@ import { resolvePrivacyPolicyLanguage } from './privacy-policy-language';
  * The Privacy Policy document.
  *
  * The policy follows the selected app language instead of the English original
- * (issue #1218). Only reviewed languages have a published policy, so an app
- * language without one falls back to English and says so on the page rather
- * than switching the language of legal content without telling the user.
+ * (issue #1218). It is published in every language the app offers; a language
+ * without published policy copy falls back to English and says so on the page
+ * rather than switching the language of legal content without telling the user.
  */
 @Component({
   selector: 'lib-privacy-policy',
@@ -50,7 +50,7 @@ export class PrivacyPolicy {
    */
   policyLang = computed(() => `${this.policyLanguage().lang}|static`);
 
-  /** True when the app language has no reviewed policy and English is shown. */
+  /** True when the app language has no published policy and English is shown. */
   isLanguageFallback = computed(() => this.policyLanguage().isFallback);
 
   isContactClicked = signal(false);

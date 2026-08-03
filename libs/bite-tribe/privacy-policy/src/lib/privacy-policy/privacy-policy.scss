@@ -1,11 +1,15 @@
 :host {
   --max: 860px;
   --pad: 20px;
-  --fg: #111;
-  --muted: #555;
-  --bg: #fff;
-  --card: #f7f7f8;
-  --border: #e6e6e8;
+
+  // Derived from the Ionic theme rather than fixed light values: the page is
+  // rendered inside the themed app, so the chips have to follow the light/dark
+  // switch instead of staying light on a dark page.
+  --fg: var(--ion-text-color);
+  --muted: var(--ion-text-color-step-400);
+  --bg: var(--ion-background-color);
+  --card: var(--ion-background-color-step-50);
+  --border: var(--ion-background-color-step-150);
 
   main {
     padding: calc(var(--pad) * 1.4) var(--pad);
@@ -36,7 +40,7 @@
   }
 
   code {
-    background: #f1f1f3;
+    background: var(--card);
     padding: 0.12rem 0.28rem;
     border-radius: 6px;
   }
@@ -68,7 +72,7 @@
     padding: 0.15rem 0.55rem;
     border: 1px solid var(--border);
     border-radius: 999px;
-    background: #fff;
+    background: var(--bg);
     font-size: 0.9rem;
     color: var(--muted);
   }

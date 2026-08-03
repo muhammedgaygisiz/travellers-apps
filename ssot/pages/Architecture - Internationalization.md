@@ -12,7 +12,7 @@ Internationalization keeps BiteTribe usable across languages and travel contexts
 - New visible text should update every relevant locale, not only English.
 - The consumer app re-renders translated text when the active language changes, so a surface that switches language in place does not need a reload.
 - Text the app never renders itself needs its own translation surface. Push notification copy is one: the OS shows it before the app runs, so it is translated in Firebase Functions at send time against the recipient's saved language (issue #1200).
-- Legal documents are a second exception. They may only be shown in a language that has been reviewed, so the privacy policy resolves the app language against its own reviewed set instead of following `availableLangs`, renders with a static lang, and discloses the English fallback to everyone else (issue #1218).
+- Legal documents are a second exception. They may only be shown in a language they were written for, so the privacy policy resolves the app language against its own published set instead of following `availableLangs`, renders with a static lang, and discloses the English fallback to anything outside that set (issue #1218). The set holds every app language today, so the two lists have to move together.
 
 ## Switching Language
 

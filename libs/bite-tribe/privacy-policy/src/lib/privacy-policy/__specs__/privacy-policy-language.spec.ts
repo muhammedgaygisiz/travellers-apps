@@ -1,12 +1,12 @@
 import {
   PRIVACY_POLICY_FALLBACK_LANGUAGE,
-  REVIEWED_PRIVACY_POLICY_LANGUAGES,
+  PUBLISHED_PRIVACY_POLICY_LANGUAGES,
   resolvePrivacyPolicyLanguage,
 } from '../privacy-policy-language';
 
 describe('resolvePrivacyPolicyLanguage', () => {
-  describe.each(REVIEWED_PRIVACY_POLICY_LANGUAGES)(
-    'given the reviewed language %s',
+  describe.each(PUBLISHED_PRIVACY_POLICY_LANGUAGES)(
+    'given the published language %s',
     (lang) => {
       it('should resolve to that language without a fallback', () => {
         expect(resolvePrivacyPolicyLanguage(lang)).toEqual({
@@ -17,8 +17,10 @@ describe('resolvePrivacyPolicyLanguage', () => {
     },
   );
 
-  describe.each(['fr', 'tr', 'es', 'it', 'ar', 'am', 'id', 'pt', 'th'])(
-    'given the app language %s',
+  // Languages the app does not publish a policy in - a locale added to the app
+  // before its policy copy exists lands here.
+  describe.each(['ja', 'zh', 'nl'])(
+    'given the unpublished app language %s',
     (lang) => {
       it('should resolve to the fallback language and report the fallback', () => {
         expect(resolvePrivacyPolicyLanguage(lang)).toEqual({
@@ -32,7 +34,7 @@ describe('resolvePrivacyPolicyLanguage', () => {
   describe.each(['de-CH', 'de_AT', 'DE'])(
     'given the regional language tag %s',
     (lang) => {
-      it('should resolve to the reviewed base language', () => {
+      it('should resolve to the published base language', () => {
         expect(resolvePrivacyPolicyLanguage(lang)).toEqual({
           lang: 'de',
           isFallback: false,

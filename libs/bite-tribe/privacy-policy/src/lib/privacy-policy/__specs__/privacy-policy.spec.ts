@@ -25,10 +25,20 @@ const de = {
     'Diese Datenschutzerklärung ist noch nicht in deiner App-Sprache verfügbar und wird daher auf Englisch angezeigt.',
 };
 
-const fr = {
-  'privacy-policy-title': 'NOT TRANSLATED',
+const tr = {
+  'privacy-policy-title': 'BiteTribe Gizlilik Politikası',
   'privacy-policy-language-fallback':
-    'Cette politique de confidentialité n’est pas encore disponible dans la langue de votre application ; elle est donc affichée en anglais.',
+    'Bu Gizlilik Politikası uygulama dilinde henüz mevcut değil, bu yüzden İngilizce gösteriliyor.',
+};
+
+// Stands in for a locale that is offered by the app but carries no policy copy
+// - the state a newly added language is in until its policy is written. It has
+// the disclosure notice and nothing else.
+const unpublishedLang = 'ja';
+
+const ja = {
+  'privacy-policy-language-fallback':
+    'このプライバシーポリシーはまだアプリの言語で利用できないため、英語で表示されます。',
 };
 
 describe(PrivacyPolicy.name, () => {
@@ -55,9 +65,9 @@ describe(PrivacyPolicy.name, () => {
     TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en, de, fr },
+          langs: { en, de, tr, ja },
           translocoConfig: {
-            availableLangs: ['en', 'de', 'fr'],
+            availableLangs: ['en', 'de', 'tr', unpublishedLang],
             defaultLang: 'en',
             fallbackLang: 'en',
             reRenderOnLangChange: true,
@@ -99,21 +109,31 @@ describe(PrivacyPolicy.name, () => {
       });
     });
 
-    describe('given the app language has no reviewed policy', () => {
-      it('should show the English policy and disclose the fallback in the app language', () => {
-        renderWithAppLanguage('fr');
+    describe('given the app language is Turkish', () => {
+      it('should show the Turkish policy without a fallback notice', () => {
+        renderWithAppLanguage('tr');
+
+        expect(title()).toBe(tr['privacy-policy-title']);
+        expect(component.isLanguageFallback()).toBe(false);
+        expect(fallbackNotice()).toBeNull();
+      });
+    });
+
+    describe('given a language with no published policy', () => {
+      it('should show the English policy and disclose the fallback in that language', () => {
+        renderWithAppLanguage(unpublishedLang);
 
         expect(title()).toBe(en['privacy-policy-title']);
         expect(component.isLanguageFallback()).toBe(true);
         expect(fallbackNotice()?.textContent?.trim()).toBe(
-          fr['privacy-policy-language-fallback'],
+          ja['privacy-policy-language-fallback'],
         );
       });
     });
 
     describe('given the app language arrives after the first render', () => {
-      it('should rebuild the document in the reviewed policy language', () => {
-        renderWithAppLanguage('fr');
+      it('should rebuild the document in the published policy language', () => {
+        renderWithAppLanguage(unpublishedLang);
         expect(title()).toBe(en['privacy-policy-title']);
 
         TestBed.inject(TranslocoService).setActiveLang('de');

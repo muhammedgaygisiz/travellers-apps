@@ -114,37 +114,23 @@ export class SettingsPage {
   }
 
   /**
-   * Saving reloads the whole SPA (the language switch needs a fresh bootstrap)
-   * while the page also navigates back to Home. Neither the URL nor the load
-   * state can be waited on: the reload races that navigation, so the URL may
-   * never change and the current document is already loaded. Marking this
-   * document and waiting for the mark to disappear is what actually proves the
-   * new one arrived.
+   * Saving writes the document, confirms with a toast, and navigates to Home.
+   *
+   * It used to reload the whole SPA, which raced the navigation and left the
+   * landing page undecidable; this waited on a marker rather than on the URL.
+   * The reload is gone (#1217), so the navigation is now the thing to wait for,
+   * and the toast is what proves the write was reported as saved.
    */
   async save(): Promise<void> {
     await expect(this.saveButton).not.toHaveAttribute('aria-disabled', 'true');
 
-    await this.page.evaluate(() => {
-      (window as Window & { beforeSettingsSave?: boolean }).beforeSettingsSave =
-        true;
-    });
-
     await this.saveButton.click();
 
-    await this.page.waitForFunction(
-      () =>
-        !(window as Window & { beforeSettingsSave?: boolean })
-          .beforeSettingsSave,
-    );
-
-    // The restarted app settles on Home or back on settings, depending on which
-    // side of that race won and on how fast the auth guard restores.
-    await expect(this.page.locator('settings, bt-home').first()).toBeVisible({
-      timeout: 30_000,
-    });
+    await expect(this.page.locator('ion-toast')).toBeVisible();
+    await this.page.waitForURL(/\/home$/);
   }
 
-  /** Returns to settings after a save, from wherever the reload landed. */
+  /** Returns to settings after a save, which lands on Home. */
   async reopen(): Promise<void> {
     if (new URL(this.page.url()).pathname !== '/settings') {
       await this.open();

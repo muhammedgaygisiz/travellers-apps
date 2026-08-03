@@ -2,6 +2,8 @@ import { inject, Injectable, signal } from '@angular/core';
 import { SettingsDataAccessService } from 'bite-tribe/settings-data-access';
 import { Settings } from 'model';
 import { NavController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular/standalone';
+import { TranslocoService } from '@jsverse/transloco';
 import {
   EmailVerificationService,
   type EmailVerificationSurface,
@@ -10,6 +12,8 @@ import { PATH } from 'utils';
 import type { PushInstallation, PushPermissionState } from 'push-notifications';
 import type { PushInstallationView } from '../components/page/settings.component';
 
+const TOAST_DURATION_MS = 5000;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -17,6 +21,8 @@ export class SettingsService {
   dataAccess = inject(SettingsDataAccessService);
   private readonly navController = inject(NavController);
   private readonly emailVerification = inject(EmailVerificationService);
+  private readonly toastController = inject(ToastController);
+  private readonly transloco = inject(TranslocoService);
 
   user = this.dataAccess.user;
   publicUser = this.dataAccess.publicUser;
@@ -29,8 +35,18 @@ export class SettingsService {
   readonly pushInstallationsLoading = signal(false);
   readonly pushSetupRunning = signal(false);
 
+  /**
+   * Saves the preferences form and confirms it.
+   *
+   * The page navigates away on success, so without the toast the only feedback
+   * is the screen changing — which says something happened, not that it was
+   * saved (#1217). The toast outlives the navigation because Ionic presents it
+   * at the app root.
+   */
   async saveSettings(settings: Settings): Promise<void> {
     await this.dataAccess.saveSettings(settings);
+
+    await this.showToast('preferences-saved');
 
     void this.navController.navigateBack(['home']);
   }
@@ -69,6 +85,11 @@ export class SettingsService {
    * The row is updated from the write rather than from a reload so the switch
    * does not visibly bounce back while Firestore catches up. A failed write
    * restores the previous state instead of leaving a switch that lies.
+   *
+   * The restore is announced: on its own it looks like the switch moved back by
+   * itself, which reads as a glitch rather than as a write that did not land
+   * (#1217). Success stays silent — the switch moving under the user's finger
+   * is the confirmation, and a toast per row would cover the rows below it.
    */
   async setPushInstallationEnabled(
     token: string,
@@ -85,7 +106,25 @@ export class SettingsService {
         error,
       );
       this.pushInstallations.set(previous);
+
+      await this.showToast('notifications-change-failed');
     }
+  }
+
+  private async showToast(messageKey: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message: this.transloco.translate(messageKey),
+      position: 'bottom',
+      duration: TOAST_DURATION_MS,
+      buttons: [
+        {
+          text: this.transloco.translate('ok'),
+          role: 'confirm',
+        },
+      ],
+    });
+
+    await toast.present();
   }
 
   /**

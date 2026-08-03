@@ -587,6 +587,72 @@ describe(PageSettings.name, () => {
     });
   });
 
+  describe('Section grouping', () => {
+    const byTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should keep the save button inside the preferences section', () => {
+      // The button read as a page-level action while it sat outside any named
+      // section, which made the auto-saving push switches above look unsaved
+      // (#1217).
+      const save = byTestId('settings-save');
+
+      expect(save).not.toBeNull();
+      expect(save?.closest('.preferences-section')).not.toBeNull();
+      expect(
+        save?.closest('[data-testid="settings-notifications"]'),
+      ).toBeNull();
+    });
+
+    it('should keep logout out of the preferences form', () => {
+      const logout = byTestId('settings-logout');
+
+      expect(logout).not.toBeNull();
+      expect(logout?.closest('form')).toBeNull();
+      expect(logout?.closest('.account-section')).not.toBeNull();
+    });
+
+    it('should leave account deletion alone in a section of its own', () => {
+      // Destructive and never a mis-tap away from the form action or logout.
+      const remove = byTestId('settings-delete-account');
+      const section = remove?.closest('.delete-section');
+
+      expect(section).not.toBeNull();
+      expect(section?.querySelectorAll('ion-item')).toHaveLength(1);
+      expect(
+        section?.querySelector('[data-testid="settings-logout"]'),
+      ).toBeNull();
+      expect(
+        section?.querySelector('[data-testid="settings-save"]'),
+      ).toBeNull();
+    });
+
+    it('should still emit logout when the relocated button is used', () => {
+      const logoutSpy = jest.spyOn(component.logout, 'emit');
+
+      byTestId('settings-logout')?.click();
+
+      expect(logoutSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should keep the save button disabled while nothing is pending', () => {
+      const save = byTestId('settings-save') as HTMLElement & {
+        disabled?: boolean;
+      };
+
+      expect(save.disabled).toBe(true);
+
+      component.settingsForm.patchValue({ currency: 'USD' });
+      component.settingsForm.markAsDirty();
+      fixture.detectChanges();
+
+      expect(
+        (byTestId('settings-save') as HTMLElement & { disabled?: boolean })
+          .disabled,
+      ).toBe(false);
+    });
+  });
+
   describe('Email verification prompt', () => {
     const resendButton = (): (HTMLElement & { disabled?: boolean }) | null =>
       fixture.nativeElement.querySelector(

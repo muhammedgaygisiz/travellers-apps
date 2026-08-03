@@ -183,9 +183,15 @@
       }
     </section>
 
-    <div>
+    <!-- Named and bounded on purpose: the save button below belongs to these
+    rows and to nothing else on the page. Without a heading it read as the
+    page's save, which made it look like the push switches above needed saving
+    too (#1217). -->
+    <section class="preferences-section">
+      <h2>{{ 'preferences' | transloco }}</h2>
+
       <form [formGroup]="settingsForm">
-        <section class="settings-section">
+        <div class="settings-section">
           <ion-item>
             <ion-label>{{ 'email-updates' | transloco }}</ion-label>
             <ion-toggle slot="end" formControlName="emailUpdates" />
@@ -280,28 +286,37 @@
               </ion-select-option>
             </ion-select>
           </ion-item>
-        </section>
-
-        <div class="button-container">
-          <ion-button fill="outline" (click)="logout.emit()"
-            >{{ 'logout' | transloco }}
-          </ion-button>
-          <ion-button
-            data-testid="settings-save"
-            [disabled]="!settingsForm.valid || settingsForm.pristine"
-            (click)="saveSettings()"
-            >{{ 'save-changes' | transloco }}
-          </ion-button>
         </div>
-      </form>
-    </div>
 
-    <!-- Account lifecycle sits in its own section, away from the save button:
-    account deletion is destructive and must never be a mis-tap next to a form
-    action. -->
-    <section class="account-section safe-padding-bottom">
+        <!-- Labelled for its section rather than the page: on a small screen
+        the heading above is often scrolled out by the time this is reached, so
+        the label has to carry the scope on its own. -->
+        <ion-button
+          expand="block"
+          class="preferences-section__save"
+          data-testid="settings-save"
+          [disabled]="!settingsForm.valid || settingsForm.pristine"
+          (click)="saveSettings()"
+          >{{ 'save-preferences' | transloco }}
+        </ion-button>
+      </form>
+    </section>
+
+    <section class="account-section">
       <h2>{{ 'account' | transloco }}</h2>
 
+      <ion-button
+        expand="block"
+        fill="outline"
+        data-testid="settings-logout"
+        (click)="logout.emit()"
+        >{{ 'logout' | transloco }}
+      </ion-button>
+    </section>
+
+    <!-- Account deletion is destructive and stands alone: never a mis-tap away
+    from the form action it used to share a row with, and never beside logout. -->
+    <section class="delete-section safe-padding-bottom">
       <ion-item
         data-testid="settings-delete-account"
         [button]="true"

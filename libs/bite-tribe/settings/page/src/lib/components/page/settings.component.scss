@@ -1,9 +1,16 @@
 :host {
+  // Every section on the page carries its own heading, which is what tells the
+  // save button apart from a page-level action (#1217). One rule so the four
+  // sections cannot drift apart.
+  h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
   .subscription-section {
     h2 {
-      font-size: 1.25rem;
       margin-bottom: 1rem;
-      font-weight: 600;
     }
 
     .subscription-cards {
@@ -55,14 +62,18 @@
     }
   }
 
-  .notifications-section {
-    margin-bottom: 24px;
+  .preferences-section {
+    margin-bottom: 32px;
 
-    h2 {
-      font-size: 1.25rem;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
+    // Full width and alone under its own rows, so it reads as this section's
+    // action rather than the page's.
+    &__save {
+      margin-top: 16px;
     }
+  }
+
+  .notifications-section {
+    margin-bottom: 32px;
 
     &__copy,
     &__empty {
@@ -92,30 +103,19 @@
   }
 
   .account-section {
-    margin-top: 48px;
+    margin-bottom: 32px;
+  }
+
+  // The rule and the extra space are the point: deletion is the last thing on
+  // the page and shares its row with nothing.
+  .delete-section {
+    margin-top: 40px;
     padding-top: 16px;
     border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
-
-    h2 {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-      font-weight: 600;
-    }
 
     ion-item {
       --padding-start: 0;
       --inner-padding-end: 0;
-    }
-  }
-
-  .button-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    margin-top: 32px;
-
-    ion-button {
-      flex: 1;
     }
   }
 

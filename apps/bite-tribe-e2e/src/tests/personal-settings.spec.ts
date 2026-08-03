@@ -89,7 +89,7 @@ test.describe('Configure personal settings', () => {
 
     // Read the values back through the UI. The theme control is deliberately
     // not asserted here: a system-theme effect also writes that control on
-    // init, so what it shows after a reload is not the stored value alone.
+    // init, so what it shows after reopening is not the stored value alone.
     await settings.reopen();
     await settings.expectPreferredCurrency('Swiss Franc');
     await settings.expectFavoriteCurrencies('Japanese Yen');

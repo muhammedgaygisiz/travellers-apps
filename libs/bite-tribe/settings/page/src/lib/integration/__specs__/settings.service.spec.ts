@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { NavController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular/standalone';
+import { TranslocoService } from '@jsverse/transloco';
 import { SettingsDataAccessService } from 'bite-tribe/settings-data-access';
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
 import type { PushInstallation } from 'push-notifications';
@@ -16,6 +18,10 @@ describe(SettingsService.name, () => {
   let getPushPermissionState: jest.Mock;
   let enablePushOnThisDevice: jest.Mock;
   let openPushSettings: jest.Mock;
+  let saveSettings: jest.Mock;
+  let navigateBack: jest.Mock;
+  let createToast: jest.Mock;
+  let presentToast: jest.Mock;
 
   const installation = (
     overrides: Partial<PushInstallation> = {},
@@ -39,6 +45,10 @@ describe(SettingsService.name, () => {
     getPushPermissionState = jest.fn().mockResolvedValue('granted');
     enablePushOnThisDevice = jest.fn().mockResolvedValue('granted');
     openPushSettings = jest.fn().mockResolvedValue(true);
+    saveSettings = jest.fn().mockResolvedValue(undefined);
+    navigateBack = jest.fn();
+    presentToast = jest.fn().mockResolvedValue(undefined);
+    createToast = jest.fn().mockResolvedValue({ present: presentToast });
 
     TestBed.configureTestingModule({
       providers: [
@@ -55,6 +65,7 @@ describe(SettingsService.name, () => {
             getPushPermissionState,
             enablePushOnThisDevice,
             openPushSettings,
+            saveSettings,
           },
         },
         {
@@ -64,7 +75,12 @@ describe(SettingsService.name, () => {
             resendRunning: signal(false),
           },
         },
-        { provide: NavController, useValue: { navigateBack: jest.fn() } },
+        { provide: NavController, useValue: { navigateBack } },
+        { provide: ToastController, useValue: { create: createToast } },
+        {
+          provide: TranslocoService,
+          useValue: { translate: jest.fn((key: string) => key) },
+        },
       ],
     });
 
@@ -191,6 +207,27 @@ describe(SettingsService.name, () => {
       ]);
     });
 
+    it('stays silent when the write lands', async () => {
+      // The switch moving under the user's finger is the confirmation. A toast
+      // per row would cover the rows below the one just changed.
+      await service.setPushInstallationEnabled('token-1', false);
+
+      expect(createToast).not.toHaveBeenCalled();
+    });
+
+    it('explains the restore when the write fails', async () => {
+      // Reverting silently looks like the switch moved back by itself, which
+      // reads as a glitch rather than as a write that did not land (#1217).
+      setPushInstallationEnabled.mockRejectedValue(new Error('boom'));
+
+      await service.setPushInstallationEnabled('token-1', false);
+
+      expect(createToast).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'notifications-change-failed' }),
+      );
+      expect(presentToast).toHaveBeenCalledTimes(1);
+    });
+
     it('restores the previous state when the write fails', async () => {
       // A switch that stays flipped after a failed write would claim delivery
       // is off while the backend still sends to that installation.
@@ -199,6 +236,36 @@ describe(SettingsService.name, () => {
       await service.setPushInstallationEnabled('token-1', false);
 
       expect(service.pushInstallations()[0].enabled).toBe(true);
+    });
+  });
+
+  describe('saveSettings', () => {
+    const settings = {
+      location: false,
+      emailUpdates: false,
+      theme: 'light',
+      currency: 'EUR',
+      favoriteCurrencies: [],
+      language: 'en',
+    } as Parameters<SettingsService['saveSettings']>[0];
+
+    it('confirms the save before leaving the page', async () => {
+      // The page navigates away on success, so the screen changing is the only
+      // other feedback — and that says something happened, not that it saved.
+      await service.saveSettings(settings);
+
+      expect(createToast).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'preferences-saved' }),
+      );
+      expect(navigateBack).toHaveBeenCalledWith(['home']);
+    });
+
+    it('does not confirm a save that never happened', async () => {
+      saveSettings.mockRejectedValue(new Error('boom'));
+
+      await expect(service.saveSettings(settings)).rejects.toThrow('boom');
+      expect(createToast).not.toHaveBeenCalled();
+      expect(navigateBack).not.toHaveBeenCalled();
     });
   });
 

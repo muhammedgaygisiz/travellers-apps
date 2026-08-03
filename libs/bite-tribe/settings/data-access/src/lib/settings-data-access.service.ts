@@ -6,6 +6,7 @@ import { BiteTribeApiService } from 'bite-tribe/api';
 import { Preferences } from '@capacitor/preferences';
 import { TranslocoService } from '@jsverse/transloco';
 import { Platform } from '@ionic/angular';
+import { firstValueFrom } from 'rxjs';
 import {
   enablePushOnThisDevice,
   getPushPermissionState,
@@ -91,6 +92,14 @@ export class SettingsDataAccessService {
     return openPushSettings();
   }
 
+  /**
+   * Persists the settings document and applies the language in place.
+   *
+   * This used to end in a full `document.location.reload()` so the new language
+   * reached already-rendered text. Transloco has re-rendered on every language
+   * change since #1186, so the reload only restarted the app and destroyed the
+   * save confirmation on its way out (#1217).
+   */
   async saveSettings(settings: Settings): Promise<void> {
     await this.saveLanguageToPreferences(settings.language);
 
@@ -98,9 +107,7 @@ export class SettingsDataAccessService {
 
     this.storeService.notifySavedSettings(settings);
 
-    this.setLanguage(settings.language);
-
-    document.location.reload();
+    await this.setLanguage(settings.language);
   }
 
   private saveLanguageToPreferences(language = 'en'): Promise<void> {
@@ -110,7 +117,25 @@ export class SettingsDataAccessService {
     });
   }
 
-  private setLanguage(language = 'en'): void {
+  /**
+   * Applies the language in place, once its translations are in memory.
+   *
+   * `setActiveLang` only announces the new language, so anything translated
+   * synchronously right after - the save confirmation - would render its raw
+   * key while the file is still in flight (issue #1186). The full reload used
+   * to hide this; without it the load has to be awaited, as onboarding already
+   * does. Loads are cached per language, so an unchanged language costs
+   * nothing.
+   */
+  private async setLanguage(language = 'en'): Promise<void> {
+    try {
+      await firstValueFrom(this.transloco.load(language));
+    } catch (error) {
+      // A failed load still switches: Transloco falls back to the fallback
+      // language rather than stranding the user on the language they replaced.
+      console.warn('Failed to load translations for the new language:', error);
+    }
+
     this.transloco.setActiveLang(language);
   }
 

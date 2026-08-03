@@ -1,5 +1,40 @@
 # Changelog
 
+## build-90 (2026-08-03)
+
+<!-- changelog-start-rev: ad5d1c0c -->
+<!-- changelog-end-rev: ecf83228 -->
+
+### Features
+
+- notify users and followers on a new country badge (#1212) (#1213) (fad19a12)
+- **bite-tribe-firebase**: seed initial menu from bites when verifying a candidate (#1210) (3941b643)
+- notify users when a new app version is available (#1194) (#1209) (41955d5b)
+
+### Bug Fixes
+
+- **1217**: fix misleading design and restructure settings page (#1225) (ecf83228)
+- **1183**: recover from denied ios location permission (#1224) (af3d30d0)
+- **privacy-policy**: show the policy in the selected app language (#1218) (#1223) (97bf8e82)
+- registration hangs endlessly with no new auth user (#1222) (e6accb81)
+
+### Refactoring
+
+- **bite-tribe-firebase**: remove temporary leaderboard biteCount backfill (#905) (#1211) (a1560624)
+
+### Documentation
+
+- release test run #2 (#1220) (34b64bfb)
+- **ssot**: scope sharing to Bites and drop the profile deep-link gap (#1190) (#1216) (fdc64e93)
+
+### Tests
+
+- **bite-tribe-business-e2e**: add business app e2e setup and first journey (#1214) (#1215) (0a40c1be)
+
+### Chores
+
+- prepare build 1.0.1-89 release (#1208) (ac2eba40)
+
 ## build-89 (2026-07-31)
 
 <!-- changelog-start-rev: 2bf12a87 -->

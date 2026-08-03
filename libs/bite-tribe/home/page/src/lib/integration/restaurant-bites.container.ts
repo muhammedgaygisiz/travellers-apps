@@ -19,6 +19,7 @@ import { BiteTribeHomeComponent } from '../components/page/home.component';
       [isBitesLoading]="service.restaurantBitesLoading()"
       [isReloading]="service.isReloading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
+      [locationPermissionState]="service.locationPermissionState()"
       [sorting]="service.restaurantBitesSorting()"
       [showMap]="false"
       showSearch

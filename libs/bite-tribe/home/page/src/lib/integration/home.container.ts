@@ -27,6 +27,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [maxPriceFilter]="service.maxPriceHome()"
       [isReloading]="service.isReloading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
+      [locationPermissionState]="service.locationPermissionState()"
       [networkStatus]="service.networkStatus()"
       [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
       [emailVerificationResendRunning]="

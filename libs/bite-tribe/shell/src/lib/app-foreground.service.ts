@@ -19,13 +19,40 @@ export class AppForegroundService {
     { initialValue: false },
   );
 
+  private readonly hasErrorLoadingGpsPosition = toSignal(
+    this.storeService.hasErrorLoadingGpsPosition$,
+    { initialValue: false },
+  );
+
   handleAppStateChange(isActive: boolean): void {
     if (isActive) {
       this.updateUserMetadata();
 
+      this.retryBlockedGpsPosition();
+
       this.triggerRefreshIfNeeded();
     } else {
       this.lastBackgroundTimestamp = Date.now();
+    }
+  }
+
+  /**
+   * Re-reads the position as soon as the app comes back with a location error
+   * still on screen, no matter how briefly it was away.
+   *
+   * The only way out of a denied location permission is the system settings
+   * page, and that round trip is fast — well under
+   * {@link FOREGROUND_REFRESH_THRESHOLD_MS}. Leaving the recovery to the
+   * inactivity threshold meant a user who granted access and came straight
+   * back still saw the error until they refreshed by hand (issue #1183).
+   */
+  private retryBlockedGpsPosition(): void {
+    if (this.lastBackgroundTimestamp === null) {
+      return;
+    }
+
+    if (this.hasErrorLoadingGpsPosition()) {
+      this.storeService.reloadGPSPosition();
     }
   }
 

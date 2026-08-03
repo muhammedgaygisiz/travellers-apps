@@ -1,7 +1,7 @@
 <ion-card>
   <ion-card-content>
-    <ion-text color="warning">
-      {{ 'we-could-not-access-your-location' | transloco }}
+    <ion-text color="warning" data-testid="gps-error-message">
+      {{ messageKey() | transloco }}
     </ion-text>
   </ion-card-content>
 
@@ -9,7 +9,7 @@
     fill="clear"
     data-testid="gps-error-enable-location"
     (click)="enableLocationClick.emit()"
-    >{{ 'enable-location' | transloco }}</ion-button
+    >{{ enableLocationLabelKey() | transloco }}</ion-button
   >
 
   <ion-button

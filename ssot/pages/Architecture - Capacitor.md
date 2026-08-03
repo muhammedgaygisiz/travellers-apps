@@ -199,6 +199,34 @@ denied user to device settings.
 Do not call `requestLocationPermission` from app startup, a login path, or
 passive position loading.
 
+### Denied-Permission Recovery Rule
+
+A denial is not just a failed read: the OS ignores every further permission
+request, so the system settings page is the only way back. Recovery surfaces
+must therefore branch on the state, not on the failure (issue #1183).
+
+- The refused read carries the reason. `LocationPermissionNotGrantedError`
+  holds the `permissionState` that blocked it, so no caller has to ask the OS a
+  second time to find out. `dispatchGpsPosition` forwards it on
+  `Error loading GPS position`, and it is undefined when the read failed for
+  some other reason — no fix, a browser refusal — where the settings page would
+  not have been the obstacle.
+- Copy names the handoff. A `denied` state gets its own explanation and an
+  action labelled as opening the settings page. Wording that promises an in-app
+  switch (`enable-location`) is only correct for `prompt`, where an OS prompt is
+  still available.
+- Success clears the error. Every successful read resets
+  `errorLoadingGpsPosition`, including
+  `Updated GPS position without reload` — restoring access rarely moves a user
+  past the 100 m reload threshold, so that is exactly where the recovered read
+  lands.
+- The return trip is a refresh. `AppForegroundService` re-reads the position on
+  any foreground event that finds a location error pending, without waiting out
+  `FOREGROUND_REFRESH_THRESHOLD_MS`; the settings round trip is far shorter
+  than that threshold.
+- `openLocationSettings` is iOS-only. It reports `false` on every other
+  platform, so a caller must not present the handoff as guaranteed.
+
 ## Code Anchors
 
 ```text

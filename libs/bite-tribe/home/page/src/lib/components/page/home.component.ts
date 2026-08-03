@@ -32,6 +32,7 @@ import { GpsErrorCardComponent } from './gps-error-card/gps-error-card.component
 import { NetworkErrorBoxComponent } from './network-error-box/network-error-box.component';
 import { BiteListComponent } from './bite-list/bite-list.component';
 import { TranslocoPipe } from '@jsverse/transloco';
+import type { LocationPermissionState } from 'geolocation';
 
 const PAGE_SIZE = 50;
 const MIN_SKELETON_VISIBLE_MS = 2000;
@@ -82,6 +83,7 @@ export class BiteTribeHomeComponent {
   preferedCurrency = input('EUR');
   isReloading = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
+  locationPermissionState = input<LocationPermissionState | undefined>();
   showFilters = input(true, { transform: booleanAttribute });
   showSearchChip = input(false, { transform: booleanAttribute });
   showSearch = input(false, { transform: booleanAttribute });

@@ -210,6 +210,28 @@ describe('App Selectors', () => {
     });
   });
 
+  describe('locationPermissionState', () => {
+    it('should return the permission state that blocked the read', () => {
+      const stateWithDeniedPermission = {
+        ...mockState,
+        locationPermissionState: 'denied' as const,
+      };
+
+      const result = fromSelectors.locationPermissionState.projector(
+        stateWithDeniedPermission,
+      );
+
+      expect(result).toBe('denied');
+    });
+
+    // A read can fail without the permission being the obstacle.
+    it('should return undefined when the failure was not classified', () => {
+      const result = fromSelectors.locationPermissionState.projector(mockState);
+
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('profileMetadata', () => {
     it('should return the profile metadata', () => {
       const result = fromSelectors.profileMetadata.projector(mockState);

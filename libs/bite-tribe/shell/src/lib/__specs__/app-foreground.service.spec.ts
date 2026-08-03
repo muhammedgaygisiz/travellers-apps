@@ -250,6 +250,61 @@ describe(AppForegroundService.name, () => {
     });
   });
 
+  /**
+   * The settings page is the only way back from a denied location permission,
+   * and that round trip is far shorter than the inactivity threshold. Before
+   * issue #1183 the restored grant went unnoticed until a manual refresh.
+   */
+  describe('gps recovery on return from the settings page', () => {
+    const setGpsError = (value: boolean): void => {
+      store.setState({ app: { errorLoadingGpsPosition: value } });
+      store.refreshState();
+    };
+
+    it('re-reads the position on a short return when an error is showing', () => {
+      jest.useFakeTimers();
+      const reloadSpy = jest
+        .spyOn(storeService, 'reloadGPSPosition')
+        .mockImplementation();
+      setGpsError(true);
+
+      jest.setSystemTime(1_000_000);
+      service.handleAppStateChange(false);
+
+      jest.setSystemTime(1_000_000 + 1_000);
+      service.handleAppStateChange(true);
+
+      expect(reloadSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('stays quiet on a short return without a location error', () => {
+      jest.useFakeTimers();
+      const reloadSpy = jest
+        .spyOn(storeService, 'reloadGPSPosition')
+        .mockImplementation();
+      setGpsError(false);
+
+      jest.setSystemTime(1_000_000);
+      service.handleAppStateChange(false);
+
+      jest.setSystemTime(1_000_000 + 1_000);
+      service.handleAppStateChange(true);
+
+      expect(reloadSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not re-read on a foreground event that follows no background', () => {
+      const reloadSpy = jest
+        .spyOn(storeService, 'reloadGPSPosition')
+        .mockImplementation();
+      setGpsError(true);
+
+      service.handleAppStateChange(true);
+
+      expect(reloadSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('FOREGROUND_REFRESH_THRESHOLD_MS', () => {
     it('should be 30 seconds', () => {
       expect(FOREGROUND_REFRESH_THRESHOLD_MS).toBe(30_000);

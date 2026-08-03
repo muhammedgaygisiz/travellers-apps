@@ -60,7 +60,7 @@ export const reducer = createReducer<AppSlice>(
       },
     };
   }),
-  on(AppActions.errorLoadingGPSPosition, (state) => ({
+  on(AppActions.errorLoadingGPSPosition, (state, { permissionState }) => ({
     ...state,
     reloading: {
       home: false,
@@ -70,10 +70,12 @@ export const reducer = createReducer<AppSlice>(
       home: false,
     },
     errorLoadingGpsPosition: true,
+    locationPermissionState: permissionState,
   })),
   on(AppActions.clearGPSError, (state) => ({
     ...state,
     errorLoadingGpsPosition: false,
+    locationPermissionState: undefined,
   })),
   on(AppActions.loadedGPSPosition, (state, { position }) => {
     const { coords } = position;
@@ -87,6 +89,7 @@ export const reducer = createReducer<AppSlice>(
         home: false,
       },
       errorLoadingGpsPosition: false,
+      locationPermissionState: undefined,
     };
   }),
   on(AppActions.updatedGPSPositionWithoutReload, (state, { position }) => {
@@ -94,6 +97,11 @@ export const reducer = createReducer<AppSlice>(
 
     // Keep the marker on the user's live position, but leave the bites (loaded
     // for the last meaningful position) untouched so no backend refetch runs.
+    //
+    // The read still succeeded, so the previous error is stale and has to go:
+    // a user who restores location access without moving 100 m lands here, and
+    // leaving the flag set kept a "we could not access your location" card up
+    // next to a working position (issue #1183).
     return {
       ...state,
       position: { latitude, longitude },
@@ -101,6 +109,8 @@ export const reducer = createReducer<AppSlice>(
         ...state.reloading,
         home: false,
       },
+      errorLoadingGpsPosition: false,
+      locationPermissionState: undefined,
     };
   }),
   on(

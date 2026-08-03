@@ -6,6 +6,7 @@ import type {
   UploadParams,
 } from 'model';
 import type { Position } from '@capacitor/geolocation';
+import type { LocationPermissionState } from 'geolocation';
 
 export const AppActions = createActionGroup({
   source: 'APP',
@@ -18,7 +19,14 @@ export const AppActions = createActionGroup({
     // follows the user) without triggering the bite refetch that
     // `Loaded GPS position` drives.
     'Updated GPS position without reload': props<{ position: Position }>(),
-    'Error loading GPS position': props<{ error: unknown }>(),
+    // The permission state travels with the failure so the recovery UI can name
+    // the actual obstacle: only `denied` needs the settings-page handoff, and
+    // only `prompt` still has an OS prompt left to spend. It is undefined when
+    // the read failed for a reason other than permission.
+    'Error loading GPS position': props<{
+      error: unknown;
+      permissionState?: LocationPermissionState;
+    }>(),
     'Saved settings': props<{ settings: Settings }>(),
     'Save public profile': props<{ profile: PublicUser }>(),
     'Saved public profile': props<{ profile: PublicUser }>(),

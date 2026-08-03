@@ -28,6 +28,7 @@ const MockHomeService = {
   isAuthenticated: signal(true),
   isReloading: signal(false),
   hasErrorLoadingGpsPosition: signal(false),
+  locationPermissionState: signal(undefined),
   logout: jest.fn(),
   likeButtonClicked: jest.fn(),
   biteClicked: jest.fn(),

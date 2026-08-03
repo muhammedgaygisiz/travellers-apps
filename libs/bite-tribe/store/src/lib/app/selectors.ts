@@ -45,6 +45,11 @@ export const hasErrorLoadingGpsPosition = createSelector(
   (state) => state?.errorLoadingGpsPosition,
 );
 
+export const locationPermissionState = createSelector(
+  slice,
+  (state) => state?.locationPermissionState,
+);
+
 export const profileMetadata = createSelector(
   slice,
   (state) => state?.profileMetadata,

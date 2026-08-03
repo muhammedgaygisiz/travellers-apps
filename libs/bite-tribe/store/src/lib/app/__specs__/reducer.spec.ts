@@ -127,8 +127,34 @@ describe('App Reducer', () => {
       expect(reducer(INITIAL_STATE, action)).toEqual({
         position: { latitude: 3, longitude: 4 },
         bites: ['existing-bite'],
+        errorLoadingGpsPosition: false,
+        locationPermissionState: undefined,
         reloading: { home: false },
       });
+    });
+
+    /**
+     * Restoring location access in the settings page rarely moves the user
+     * 100 m, so the successful re-read lands here. Leaving the flag set kept
+     * the error card on screen next to a working position (issue #1183).
+     */
+    it('clears a stale error even when the movement is below the threshold', () => {
+      const INITIAL_STATE = {
+        position: { latitude: 1, longitude: 2 },
+        errorLoadingGpsPosition: true,
+        locationPermissionState: 'denied',
+      } as unknown as AppSlice;
+
+      const action = AppActions.updatedGPSPositionWithoutReload({
+        position: { coords: { latitude: 1, longitude: 2 } },
+      });
+
+      expect(reducer(INITIAL_STATE, action)).toEqual(
+        expect.objectContaining({
+          errorLoadingGpsPosition: false,
+          locationPermissionState: undefined,
+        }),
+      );
     });
   });
 
@@ -140,6 +166,7 @@ describe('App Reducer', () => {
       const NEW_STATE = {
         position: { latitude: 1, longitude: 2 },
         errorLoadingGpsPosition: true,
+        locationPermissionState: undefined,
         loading: {
           home: false,
         },
@@ -155,6 +182,17 @@ describe('App Reducer', () => {
       expect(reducer(INITIAL_STATE, errorLoadingGpsPositionAction)).toEqual({
         ...NEW_STATE,
       });
+    });
+
+    it('should record the permission state that blocked the read', () => {
+      const action = AppActions.errorLoadingGPSPosition({
+        error: 'error',
+        permissionState: 'denied',
+      });
+
+      expect(reducer({} as AppSlice, action)).toEqual(
+        expect.objectContaining({ locationPermissionState: 'denied' }),
+      );
     });
   });
 

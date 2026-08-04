@@ -53,10 +53,12 @@ export class BiteImageStatusComponent {
   readonly retryImageUpload = output<Bite>();
 
   /**
-   * The moment the status is answered for, re-read while a `pending` upload is
-   * on screen. See {@link PENDING_UPLOAD_RECHECK_MS}.
+   * Bumped while a `pending` upload is on screen, purely to invalidate
+   * {@link imageStatus}. It carries no time of its own: the status is always
+   * answered for the moment it is read, never for the moment this component was
+   * created. See {@link PENDING_UPLOAD_RECHECK_MS}.
    */
-  private readonly now = signal(Date.now());
+  private readonly pendingRecheck = signal(0);
 
   /**
    * The stored status, except that a long-abandoned `pending` upload reads as
@@ -68,9 +70,11 @@ export class BiteImageStatusComponent {
    * left the viewer on the spinner for as long as the page stayed open. See
    * GitHub issue #1229.
    */
-  readonly imageStatus = computed(() =>
-    getEffectiveImageStatus(this.bite(), this.now()),
-  );
+  readonly imageStatus = computed(() => {
+    this.pendingRecheck();
+
+    return getEffectiveImageStatus(this.bite());
+  });
 
   constructor() {
     effect((onCleanup) => {
@@ -79,7 +83,7 @@ export class BiteImageStatusComponent {
       }
 
       const timer = setInterval(
-        () => this.now.set(Date.now()),
+        () => this.pendingRecheck.update((count) => count + 1),
         PENDING_UPLOAD_RECHECK_MS,
       );
 

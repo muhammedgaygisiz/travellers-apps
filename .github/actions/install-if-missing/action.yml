@@ -1,0 +1,20 @@
+name: 'Install If Missing'
+description: 'Installs dependencies only when the restored node_modules cache is unusable'
+runs:
+  using: 'composite'
+  steps:
+    # `restore-cache` is an exact-key restore with no fallback, so a job that
+    # only restores has no dependencies at all when the cache entry is gone or
+    # the cache service is unreachable — it then fails with `nx: not found`
+    # before compiling anything. Installing here keeps the happy path free (the
+    # cache hit skips it) while a miss costs an install instead of a red build.
+    - name: Install dependencies when the cache is unavailable
+      shell: bash
+      run: |
+        if [ -x node_modules/.bin/nx ]; then
+          echo 'node_modules restored from cache; skipping install'
+          exit 0
+        fi
+
+        echo 'node_modules cache unavailable; running npm ci'
+        npm ci

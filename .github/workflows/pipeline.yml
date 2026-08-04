@@ -342,6 +342,9 @@ jobs:
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
+      - name: 'Install dependencies when the cache is unavailable'
+        uses: ./.github/actions/install-if-missing
+
       - name: 'Nx cache'
         uses: ./.github/actions/nx-cache
 
@@ -400,6 +403,9 @@ jobs:
 
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
+
+      - name: 'Install dependencies when the cache is unavailable'
+        uses: ./.github/actions/install-if-missing
 
       - name: 'Nx cache'
         uses: ./.github/actions/nx-cache

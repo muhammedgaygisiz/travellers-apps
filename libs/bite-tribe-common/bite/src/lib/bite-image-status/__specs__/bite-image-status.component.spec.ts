@@ -6,7 +6,10 @@ import { of } from 'rxjs';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import type { Bite } from 'model';
 import { BiteImageStatusComponent } from '../bite-image-status.component';
-import { STALE_PENDING_UPLOAD_MS } from '../../utils/image-status';
+import {
+  PENDING_UPLOAD_RECHECK_MS,
+  STALE_PENDING_UPLOAD_MS,
+} from '../../utils/image-status';
 
 addNecessaryIcons();
 
@@ -46,6 +49,10 @@ describe(BiteImageStatusComponent.name, () => {
     fixture = TestBed.createComponent(BiteImageStatusComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   const querySpinner = (): HTMLElement | null =>
@@ -103,6 +110,25 @@ describe(BiteImageStatusComponent.name, () => {
   describe('failed', () => {
     it('should show the failed state', () => {
       componentRef.setInput('bite', bite({ imageStatus: 'failed' }));
+      fixture.detectChanges();
+
+      expect(queryFailed()).toBeTruthy();
+      expect(querySpinner()).toBeNull();
+    });
+
+    it('should give up on a pending upload that goes stale while it is on screen', () => {
+      jest.useFakeTimers();
+      componentRef.setInput(
+        'bite',
+        bite({ imageStatus: 'pending', createdAtTimestamp: Date.now() }),
+      );
+      fixture.detectChanges();
+
+      expect(querySpinner()).toBeTruthy();
+
+      jest.advanceTimersByTime(
+        STALE_PENDING_UPLOAD_MS + PENDING_UPLOAD_RECHECK_MS,
+      );
       fixture.detectChanges();
 
       expect(queryFailed()).toBeTruthy();

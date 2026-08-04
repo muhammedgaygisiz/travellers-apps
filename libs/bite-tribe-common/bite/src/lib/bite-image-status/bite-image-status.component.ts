@@ -3,8 +3,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   output,
+  signal,
 } from '@angular/core';
 import {
   IonButton,
@@ -14,7 +16,10 @@ import {
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { Bite } from 'model';
-import { getEffectiveImageStatus } from '../utils/image-status';
+import {
+  getEffectiveImageStatus,
+  PENDING_UPLOAD_RECHECK_MS,
+} from '../utils/image-status';
 
 /**
  * Stands in for a Bite photo that is not there yet, or never arrived.
@@ -48,12 +53,43 @@ export class BiteImageStatusComponent {
   readonly retryImageUpload = output<Bite>();
 
   /**
-   * The stored status, except that a long-abandoned `pending` upload reads as
-   * `failed`. Recomputed whenever the Bite changes rather than on a timer, so a
-   * card left open past the threshold flips on its next render (a feed refresh,
-   * a navigation, or a document update) instead of mid-view.
+   * Bumped while a `pending` upload is on screen, purely to invalidate
+   * {@link imageStatus}. It carries no time of its own: the status is always
+   * answered for the moment it is read, never for the moment this component was
+   * created. See {@link PENDING_UPLOAD_RECHECK_MS}.
    */
-  readonly imageStatus = computed(() => getEffectiveImageStatus(this.bite()));
+  private readonly pendingRecheck = signal(0);
+
+  /**
+   * The stored status, except that a long-abandoned `pending` upload reads as
+   * `failed`.
+   *
+   * Recomputed whenever the Bite changes and, while it still reads `pending`,
+   * on a timer as well. The Bite that lost its photo is exactly the Bite that
+   * stops changing: nothing writes to it again, so waiting for the next render
+   * left the viewer on the spinner for as long as the page stayed open. See
+   * GitHub issue #1229.
+   */
+  readonly imageStatus = computed(() => {
+    this.pendingRecheck();
+
+    return getEffectiveImageStatus(this.bite());
+  });
+
+  constructor() {
+    effect((onCleanup) => {
+      if (this.imageStatus() !== 'pending') {
+        return;
+      }
+
+      const timer = setInterval(
+        () => this.pendingRecheck.update((count) => count + 1),
+        PENDING_UPLOAD_RECHECK_MS,
+      );
+
+      onCleanup(() => clearInterval(timer));
+    });
+  }
 
   /**
    * Only the poster's device is doing the upload, so only the poster can act on

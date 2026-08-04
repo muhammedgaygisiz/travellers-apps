@@ -31,14 +31,25 @@ Users can create and maintain real dish-level food experiences.
   holding the transfer, so they are asked to keep the app open; everyone else
   gets a neutral "loading photo" wait message, because they cannot influence
   someone else's upload.
+- The posting device gives up on an upload that reports neither progress, nor
+  completion, nor an error for thirty seconds, and records `failed`. A transfer
+  that loses connectivity mid-flight is silently retried by the Storage SDK for
+  its own ten-minute window, so without this bound the Bite stayed `pending`
+  with no error for the user to act on — the offline case from GitHub issue
+  #1229. Each progress report restarts the clock, so a slow but moving upload is
+  never cut short. Offline the `failed` write is queued by Firestore and applies
+  to the local cache at once, which is what makes the state visible while the
+  device is still disconnected.
 - A Bite still `pending` ten minutes after it was created reads as `failed` when
-  rendered, without its document changing. Neither terminal write is guaranteed:
-  the upload promise does not resolve when the device drops offline mid-transfer,
-  so the error branch never runs and the storage trigger never fires. The stored
-  status stays the source of truth; the age rule only stops a card from claiming
-  forever that a photo is on its way. A Bite with no usable creation timestamp
-  keeps its stored status, because an abandoned upload cannot be told apart from
-  a fresh one.
+  rendered, without its document changing. This is the backstop for the devices
+  that are not doing the upload, and for a posting device that was killed before
+  it could record the failure. The stored status stays the source of truth; the
+  age rule only stops a card from claiming forever that a photo is on its way. A
+  visible `pending` state re-checks its own age every thirty seconds, because
+  the Bite that lost its photo is exactly the Bite that stops changing and would
+  otherwise never be re-rendered. A Bite with no usable creation timestamp keeps
+  its stored status, because an abandoned upload cannot be told apart from a
+  fresh one.
   The client writes `failed` itself, because `setBiteImagePathOnUpload` only ever
   runs on a finalized object — without it the card kept telling every viewer
   "uploading, keep the app open" forever. A failed upload shows that state even
@@ -51,7 +62,13 @@ Users can create and maintain real dish-level food experiences.
   straight away. Otherwise, for an older Bite or one posted from another device,
   the user picks from the photos saved locally, the same set the gallery shows.
   A started retry puts the document back to `pending`, so every viewer sees the
-  new attempt. Picking nothing cancels and the Bite stays failed.
+  new attempt. Picking nothing cancels and the Bite stays failed. Only one
+  attempt per Bite runs at a time: a retry started while this device is already
+  uploading that Bite's photo — the first upload or an earlier retry — is
+  ignored, so a double tap cannot start two transfers. A transfer already
+  written off as stalled is the exception: the Storage SDK exposes no way to
+  cancel it, so it may still finalize later, and the storage trigger's write
+  decides which photo the Bite ends up with.
 - The retry is raised as an output by the card and the details page and carried
   out by the owning integration service. Presentational components never reach
   a service themselves: they take inputs and emit outputs, and the smart layer

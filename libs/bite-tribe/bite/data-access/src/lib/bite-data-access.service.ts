@@ -23,6 +23,26 @@ import { toUploadErrorCode } from './utils/to-upload-error-code';
 
 const MIN_GOOGLE_PLACE_SEARCH_TEXT_LENGTH = 3;
 
+/**
+ * How long an upload may report nothing at all before this device stops
+ * claiming the photo is still on its way.
+ *
+ * A transfer that loses connectivity mid-flight neither completes nor errors:
+ * the Storage SDK keeps retrying silently for its own (ten minute) window, so
+ * the error branch below never runs and the Bite sits on `pending` with no
+ * failure to act on. That is the offline case from GitHub issue #1229. Every
+ * progress event restarts this clock, so a slow-but-moving upload is never cut
+ * short and only a transfer that has genuinely stopped is declared failed.
+ */
+export const STALLED_UPLOAD_TIMEOUT_MS = 30 * 1000;
+
+/**
+ * Analytics code for an upload that stopped reporting instead of failing, so
+ * stalls stay distinguishable from the Storage error codes `toUploadErrorCode`
+ * produces.
+ */
+const STALLED_UPLOAD_ERROR_CODE = 'stalled';
+
 @Injectable({ providedIn: 'root' })
 export class BiteDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
@@ -119,6 +139,19 @@ export class BiteDataAccessService {
     progress: UploadParams;
   } | null>(null);
 
+  /** Stall watchdogs for the uploads this device currently has in flight. */
+  private readonly stalledUploadTimers = new Map<
+    string,
+    ReturnType<typeof setTimeout>
+  >();
+
+  /**
+   * The Bites this device is currently uploading a photo for, so a second
+   * attempt cannot start alongside the first and put two objects in Storage for
+   * the same Bite.
+   */
+  private readonly uploadsInFlight = new Set<string>();
+
   async submitNewBite(bite: Bite): Promise<void> {
     this.storeService.saveNewBite();
 
@@ -160,48 +193,123 @@ export class BiteDataAccessService {
    * #1168.
    */
   async retryImageUpload(bite: Bite, fileUri: string): Promise<void> {
+    // Claimed synchronously: the first `await` below is enough of a gap for a
+    // double tap to start a second transfer for the same Bite.
+    if (this.uploadsInFlight.has(bite.id)) {
+      return;
+    }
+    this.uploadsInFlight.add(bite.id);
+
     await this.api.setBiteImageStatus(bite.id, 'pending');
     this.storeService.savedNewBite({ ...bite, imageStatus: 'pending' });
 
     this.analytics.logEvent(AnalyticsEvent.BiteImageUploadRetried);
 
-    await this.api.uploadBiteImageFromLocalFile(
-      bite.id,
-      fileUri,
-      this.handleUploadProgress({ ...bite, imageStatus: 'pending' }),
-    );
+    const pendingBite = { ...bite, imageStatus: 'pending' as const };
+
+    try {
+      await this.api.uploadBiteImageFromLocalFile(
+        bite.id,
+        fileUri,
+        this.handleUploadProgress(pendingBite),
+      );
+    } catch (error) {
+      // A file that cannot be read (deleted, or a picked image the app can no
+      // longer open) never reaches the upload callback, so the failure has to be
+      // recorded here or the Bite would stay pending until the watchdog fires.
+      this.failImageUpload(pendingBite, toUploadErrorCode(error));
+    }
   }
 
   /**
    * Shared by the first upload and every retry: reports progress, and records a
    * terminal `failed` on the document because only the storage finalize trigger
    * clears `pending` and it never runs for an upload that errored.
+   *
+   * Creating the handler also starts the stall watchdog, so no caller can start
+   * a transfer that has no way out of `pending`.
    */
   private handleUploadProgress(
     bite: Bite,
   ): (p: CreateAndUploadImageCallbackParams) => void {
+    this.uploadsInFlight.add(bite.id);
+    this.restartStalledUploadTimer(bite);
+
     return (p: CreateAndUploadImageCallbackParams): void => {
       const uploadError = p.uploadParams?.err;
       const isInProgress = p.uploadParams?.evt?.completed === false;
       const finishedUpload = p.uploadParams?.evt?.completed === true;
 
       if (uploadError) {
-        this.analytics.logEvent(AnalyticsEvent.BiteImageUploadFailed, {
-          code: toUploadErrorCode(uploadError),
-        });
-        void this.api.setBiteImageStatus(bite.id, 'failed');
-        this.storeService.savedNewBite({ ...bite, imageStatus: 'failed' });
-        this.uploadProgress.set(null);
+        this.failImageUpload(bite, toUploadErrorCode(uploadError));
       } else if (isInProgress && p.uploadParams) {
+        this.restartStalledUploadTimer(bite);
         this.uploadProgress.set({
           biteId: bite.id,
           progress: p.uploadParams,
         });
       } else if (finishedUpload) {
+        this.endUpload(bite.id);
         this.analytics.logEvent(AnalyticsEvent.BiteImageUploaded);
         this.uploadProgress.set(null);
       }
     };
+  }
+
+  /**
+   * Gives the transfer a fresh {@link STALLED_UPLOAD_TIMEOUT_MS} to report
+   * something before it counts as abandoned.
+   */
+  private restartStalledUploadTimer(bite: Bite): void {
+    this.clearStalledUploadTimer(bite.id);
+
+    this.stalledUploadTimers.set(
+      bite.id,
+      setTimeout(
+        () => this.failImageUpload(bite, STALLED_UPLOAD_ERROR_CODE),
+        STALLED_UPLOAD_TIMEOUT_MS,
+      ),
+    );
+  }
+
+  private clearStalledUploadTimer(biteId: string): void {
+    const timer = this.stalledUploadTimers.get(biteId);
+
+    if (timer) {
+      clearTimeout(timer);
+      this.stalledUploadTimers.delete(biteId);
+    }
+  }
+
+  private endUpload(biteId: string): void {
+    this.clearStalledUploadTimer(biteId);
+    this.uploadsInFlight.delete(biteId);
+  }
+
+  /**
+   * Records the terminal `failed` state everywhere it is read: on the document
+   * for other devices and later sessions, and in the store so the card in front
+   * of the user stops saying "uploading" right away.
+   *
+   * Offline the document write is queued by Firestore and applies to the local
+   * cache immediately, which is what makes the failed state visible while the
+   * device that posted the Bite is still disconnected.
+   *
+   * Only an upload this device is still tracking can fail, so an attempt that
+   * has already reached a terminal state cannot be written off a second time by
+   * a late error.
+   */
+  private failImageUpload(bite: Bite, code: string): void {
+    if (!this.uploadsInFlight.has(bite.id)) {
+      return;
+    }
+
+    this.endUpload(bite.id);
+
+    this.analytics.logEvent(AnalyticsEvent.BiteImageUploadFailed, { code });
+    void this.api.setBiteImageStatus(bite.id, 'failed');
+    this.storeService.savedNewBite({ ...bite, imageStatus: 'failed' });
+    this.uploadProgress.set(null);
   }
 
   async submitEditedBite(bite: Bite): Promise<void> {

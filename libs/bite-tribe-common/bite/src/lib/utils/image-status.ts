@@ -17,6 +17,17 @@ import type { Bite } from 'model';
  */
 export const STALE_PENDING_UPLOAD_MS = 10 * 60 * 1000;
 
+/**
+ * How often a visible `pending` state re-checks whether it has become stale.
+ *
+ * {@link getEffectiveImageStatus} only answers for the moment it is called, so
+ * a card that is already on screen when the threshold passes needs something to
+ * ask again — an abandoned upload produces no document update to re-render it.
+ * Half a minute is granular enough that nobody watches a spinner meaningfully
+ * longer than the threshold, and coarse enough to stay unnoticeable on a feed.
+ */
+export const PENDING_UPLOAD_RECHECK_MS = 30 * 1000;
+
 const getCreatedAtMs = (bite: Bite): number | undefined => {
   if (typeof bite.createdAtTimestamp === 'number') {
     return bite.createdAtTimestamp;

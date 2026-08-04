@@ -12,7 +12,10 @@ import type {
   UploadParams,
 } from 'model';
 import { of } from 'rxjs';
-import { BiteDataAccessService } from '../bite-data-access.service';
+import {
+  BiteDataAccessService,
+  STALLED_UPLOAD_TIMEOUT_MS,
+} from '../bite-data-access.service';
 
 const SAVED_BITE_ID = 'saved-bite-id';
 
@@ -61,6 +64,10 @@ describe(BiteDataAccessService.name, () => {
   let analytics: { logEvent: jest.Mock };
 
   beforeEach(() => {
+    // The stall watchdog is a timer, and every upload started in this file arms
+    // one, so the clock is controlled for the whole suite.
+    jest.useFakeTimers();
+
     api = {
       saveNewBite: jest
         .fn()
@@ -111,6 +118,11 @@ describe(BiteDataAccessService.name, () => {
     });
 
     service = TestBed.inject(BiteDataAccessService);
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   describe('biteLoader', () => {
@@ -200,6 +212,138 @@ describe(BiteDataAccessService.name, () => {
         SAVED_BITE_ID,
         'failed',
       );
+    });
+
+    it('should mark the bite failed when the retry stalls', async () => {
+      await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+
+      jest.advanceTimersByTime(STALLED_UPLOAD_TIMEOUT_MS);
+
+      expect(api.setBiteImageStatus).toHaveBeenLastCalledWith(
+        SAVED_BITE_ID,
+        'failed',
+      );
+    });
+
+    it('should mark the bite failed when the chosen file cannot be read', async () => {
+      api.uploadBiteImageFromLocalFile.mockRejectedValue(
+        new Error('file not found'),
+      );
+
+      await service.retryImageUpload(failedBite(), 'file:///gone.jpg');
+
+      expect(api.setBiteImageStatus).toHaveBeenLastCalledWith(
+        SAVED_BITE_ID,
+        'failed',
+      );
+    });
+
+    it('should ignore a second retry while the first one is still running', async () => {
+      await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+      await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+
+      expect(api.uploadBiteImageFromLocalFile).toHaveBeenCalledTimes(1);
+      expect(analytics.logEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('should ignore a retry while the first upload of the bite is still running', async () => {
+      await service.submitNewBite(biteWithImage());
+
+      await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+
+      expect(api.uploadBiteImageFromLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('should allow another retry once the previous attempt failed', async () => {
+      await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+      const callback = api.uploadBiteImageFromLocalFile.mock.calls[0][2];
+      callback({
+        uploadParams: { err: new Error('still offline') } as UploadParams,
+      } as CreateAndUploadImageCallbackParams);
+
+      await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+
+      expect(api.uploadBiteImageFromLocalFile).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('stalled uploads', () => {
+    it('should mark a bite whose upload never reports back as failed', async () => {
+      await service.submitNewBite(biteWithImage());
+
+      jest.advanceTimersByTime(STALLED_UPLOAD_TIMEOUT_MS);
+
+      expect(api.setBiteImageStatus).toHaveBeenCalledWith(
+        SAVED_BITE_ID,
+        'failed',
+      );
+      expect(store.savedNewBite).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: SAVED_BITE_ID, imageStatus: 'failed' }),
+      );
+      expect(analytics.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.BiteImageUploadFailed,
+        { code: 'stalled' },
+      );
+      expect(service.uploadProgress()).toBeNull();
+    });
+
+    it('should hold the pending state until the bound is reached', async () => {
+      await service.submitNewBite(biteWithImage());
+
+      jest.advanceTimersByTime(STALLED_UPLOAD_TIMEOUT_MS - 1);
+
+      expect(api.setBiteImageStatus).not.toHaveBeenCalled();
+    });
+
+    it('should keep waiting while the upload is still making progress', async () => {
+      const callback = await captureUploadCallback(service, api);
+
+      jest.advanceTimersByTime(STALLED_UPLOAD_TIMEOUT_MS - 1);
+      callback({
+        uploadParams: { evt: { completed: false } } as UploadParams,
+      } as CreateAndUploadImageCallbackParams);
+      jest.advanceTimersByTime(STALLED_UPLOAD_TIMEOUT_MS - 1);
+
+      expect(api.setBiteImageStatus).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(1);
+
+      expect(api.setBiteImageStatus).toHaveBeenCalledWith(
+        SAVED_BITE_ID,
+        'failed',
+      );
+    });
+
+    it('should not fail an upload that finished', async () => {
+      const callback = await captureUploadCallback(service, api);
+
+      callback({
+        uploadParams: { evt: { completed: true } } as UploadParams,
+      } as CreateAndUploadImageCallbackParams);
+      jest.advanceTimersByTime(STALLED_UPLOAD_TIMEOUT_MS);
+
+      expect(api.setBiteImageStatus).not.toHaveBeenCalled();
+    });
+
+    it('should record an errored upload once instead of failing it twice', async () => {
+      const callback = await captureUploadCallback(service, api);
+
+      callback({
+        uploadParams: { err: new Error('network down') } as UploadParams,
+      } as CreateAndUploadImageCallbackParams);
+      jest.advanceTimersByTime(STALLED_UPLOAD_TIMEOUT_MS);
+
+      expect(api.setBiteImageStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not watch a bite that has no image to upload', async () => {
+      const { image, ...biteWithoutImage } = biteWithImage();
+      void image;
+
+      await service.submitNewBite(biteWithoutImage as Bite);
+      jest.advanceTimersByTime(STALLED_UPLOAD_TIMEOUT_MS);
+
+      expect(api.setBiteImageStatus).not.toHaveBeenCalled();
     });
   });
 

@@ -11,6 +11,7 @@ import {
   switchMap,
   take,
   tap,
+  timeout,
 } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
@@ -24,6 +25,13 @@ import { userId } from '../router/selectors';
 import { fromAuth } from 'ta-firestore';
 import { ToastController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
+
+/**
+ * How long the position-driven feed load may run before it counts as failed.
+ * It has to stay well inside the native callable's own ~70s ceiling, which is
+ * longer than a user will watch a skeleton.
+ */
+export const FEED_LOAD_TIMEOUT_MS = 20_000;
 
 @Injectable()
 export class BiteEffects {
@@ -88,6 +96,16 @@ export class BiteEffects {
     );
   });
 
+  /**
+   * Loads the feed for a new position, and always settles.
+   *
+   * The Home skeleton stays up until this answers, so a request that never
+   * comes back is indistinguishable from one that is still working: on iOS a
+   * call issued right after connectivity returned held the feed under the
+   * skeleton past a minute, and only a force quit cleared it (issue #1230).
+   * After {@link FEED_LOAD_TIMEOUT_MS} the attempt is reported as failed, which
+   * ends the loading state and offers a retry instead.
+   */
   loadBitesByGpsPosition$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(AppActions.loadedGPSPosition),
@@ -100,9 +118,12 @@ export class BiteEffects {
               BiteTribeApiService['bitesByPosition']
             >[0],
           ),
-        ).pipe(catchError(() => of([])));
+        ).pipe(
+          timeout(FEED_LOAD_TIMEOUT_MS),
+          map((bites) => BiteActions.loadedByGPSPositionFromAPI({ bites })),
+          catchError(() => of(BiteActions.errorLoadingByGPSPositionFromAPI())),
+        );
       }),
-      map((bites) => BiteActions.loadedByGPSPositionFromAPI({ bites })),
     );
   });
 

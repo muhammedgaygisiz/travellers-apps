@@ -86,6 +86,7 @@ class StoreMock {
   maxPriceHome$ = of(0);
   isReloadingHome$ = of(false);
   hasErrorLoadingGpsPosition$ = of(false);
+  hasErrorLoadingBites$ = of(false);
   locationPermissionState$ = of(undefined);
   position$ = of(undefined);
   biteIdFromUrl = (): string | undefined => undefined;

@@ -88,6 +88,10 @@
         <bt-network-error-box />
       }
 
+      @if (hasErrorLoadingBites()) {
+        <bt-feed-error-card (retryClick)="refresh.emit()" />
+      }
+
       @if (showEmailVerificationPrompt()) {
         <ion-card>
           <ion-card-content>
@@ -145,7 +149,7 @@
         [enableTriedOutSwipe]="enableTriedOutSwipe()"
         [triedOutBiteIds]="triedOutBiteIds()"
         [hasMore]="hasMore()"
-        [showSkeleton]="showBiteSkeleton()"
+        [showSkeleton]="showBiteListSkeleton()"
         [enableImageRetry]="enableImageRetry()"
         (retryImageUpload)="retryImageUpload.emit($event)"
         (biteClick)="biteClick.emit($event)"

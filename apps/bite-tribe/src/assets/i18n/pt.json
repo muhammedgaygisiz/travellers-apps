@@ -187,6 +187,7 @@
   "write-review-label": "Escreve uma avaliação",
   "add-your-review": "Adiciona a tua avaliação",
   "we-could-not-access-your-location": "Não foi possível aceder à tua localização.",
+  "we-could-not-load-your-feed": "Não foi possível carregar os Bites mais recentes. Os teus Bites estão seguros — verifica a tua ligação e tenta de novo.",
   "you-are-offline": "Parece que estás offline. Verifica a tua ligação.",
   "retry": "TENTAR NOVAMENTE",
   "enable-location": "ATIVAR LOCALIZAÇÃO",

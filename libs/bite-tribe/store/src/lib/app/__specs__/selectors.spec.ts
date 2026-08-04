@@ -29,6 +29,7 @@ describe('App Selectors', () => {
       home: false,
     },
     errorLoadingGpsPosition: false,
+    errorLoadingBites: false,
     profileMetadata: {
       followers: 0,
       following: 0,
@@ -206,6 +207,25 @@ describe('App Selectors', () => {
         fromSelectors.hasErrorLoadingGpsPosition.projector(
           stateWithoutGpsError,
         );
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('hasErrorLoadingBites', () => {
+    it('should report a failed feed synchronization', () => {
+      const result = fromSelectors.hasErrorLoadingBites.projector({
+        ...mockState,
+        errorLoadingBites: true,
+      });
+
+      expect(result).toBe(true);
+    });
+
+    it('should report no failure for a state that never carried the flag', () => {
+      const result = fromSelectors.hasErrorLoadingBites.projector(
+        undefined as unknown as AppSlice,
+      );
+
       expect(result).toBe(false);
     });
   });

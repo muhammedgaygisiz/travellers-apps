@@ -305,6 +305,94 @@ describe(AppForegroundService.name, () => {
     });
   });
 
+  /**
+   * A user who saved a Bite offline and switched the radio back on without
+   * leaving the app hits no other refresh hook, so the feed stayed on whatever
+   * the offline session had produced until a manual pull (issue #1230).
+   */
+  describe('handleNetworkStatusChange', () => {
+    const setAuthenticated = (value: boolean): void => {
+      store.overrideSelector(fromAuth.selectIsAuthenticated, value);
+      store.refreshState();
+    };
+
+    it('resynchronizes the feed once connectivity comes back', () => {
+      setAuthenticated(true);
+      const reloadSpy = jest
+        .spyOn(storeService, 'reloadGPSPosition')
+        .mockImplementation();
+
+      service.handleNetworkStatusChange({
+        connected: false,
+        connectionType: 'none',
+      });
+      service.handleNetworkStatusChange({
+        connected: true,
+        connectionType: 'wifi',
+      });
+
+      expect(reloadSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores a repeated connected event that follows no outage', () => {
+      setAuthenticated(true);
+      const reloadSpy = jest
+        .spyOn(storeService, 'reloadGPSPosition')
+        .mockImplementation();
+
+      service.handleNetworkStatusChange({
+        connected: true,
+        connectionType: 'wifi',
+      });
+      service.handleNetworkStatusChange({
+        connected: true,
+        connectionType: 'cellular',
+      });
+
+      expect(reloadSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not resynchronize for a signed-out user', () => {
+      setAuthenticated(false);
+      const reloadSpy = jest
+        .spyOn(storeService, 'reloadGPSPosition')
+        .mockImplementation();
+
+      service.handleNetworkStatusChange({
+        connected: false,
+        connectionType: 'none',
+      });
+      service.handleNetworkStatusChange({
+        connected: true,
+        connectionType: 'wifi',
+      });
+
+      expect(reloadSpy).not.toHaveBeenCalled();
+    });
+
+    it('resynchronizes once per outage', () => {
+      setAuthenticated(true);
+      const reloadSpy = jest
+        .spyOn(storeService, 'reloadGPSPosition')
+        .mockImplementation();
+
+      service.handleNetworkStatusChange({
+        connected: false,
+        connectionType: 'none',
+      });
+      service.handleNetworkStatusChange({
+        connected: true,
+        connectionType: 'wifi',
+      });
+      service.handleNetworkStatusChange({
+        connected: true,
+        connectionType: 'wifi',
+      });
+
+      expect(reloadSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('FOREGROUND_REFRESH_THRESHOLD_MS', () => {
     it('should be 30 seconds', () => {
       expect(FOREGROUND_REFRESH_THRESHOLD_MS).toBe(30_000);

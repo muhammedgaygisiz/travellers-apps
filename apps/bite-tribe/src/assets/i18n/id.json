@@ -186,6 +186,7 @@
   "write-review-label": "Tulis ulasan",
   "add-your-review": "Tambahkan ulasanmu",
   "we-could-not-access-your-location": "Kami tidak dapat mengakses lokasimu. Jarak ke Bites tidak dapat ditampilkan atau tidak terbaru.",
+  "we-could-not-load-your-feed": "Kami tidak dapat memuat Bites terbaru. Bites milikmu tetap aman — periksa koneksimu dan coba lagi.",
   "you-are-offline": "Sepertinya kamu sedang offline. Cek koneksi internetmu.",
   "retry": "COBA LAGI",
   "enable-location": "AKTIFKAN LOKASI",

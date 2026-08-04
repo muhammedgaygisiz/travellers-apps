@@ -52,6 +52,7 @@ const MockTranslocoService = {
 
 const MockAppForegroundService = {
   handleAppStateChange: jest.fn(),
+  handleNetworkStatusChange: jest.fn(),
 };
 
 describe(AppComponent.name, () => {
@@ -258,6 +259,20 @@ describe(AppComponent.name, () => {
       });
 
       expect(setNetworkStatusSpy).toHaveBeenCalledWith({ connected: true });
+    });
+
+    it('should delegate to AppForegroundService.handleNetworkStatusChange', () => {
+      // Reconnecting is what has to bring the feed back after an offline save,
+      // and only the foreground service can ask for that (issue #1230).
+      const addListenerCalls = (Network.addListener as jest.Mock).mock.calls;
+
+      addListenerCalls.find(([event]) => event === 'networkStatusChange')[1]({
+        connected: true,
+      });
+
+      expect(
+        MockAppForegroundService.handleNetworkStatusChange,
+      ).toHaveBeenCalledWith({ connected: true });
     });
   });
 

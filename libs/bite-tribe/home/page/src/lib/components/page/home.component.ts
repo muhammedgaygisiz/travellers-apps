@@ -29,6 +29,7 @@ import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
 import { HomeFeedControlsComponent } from './home-feed-controls/home-feed-controls.component';
 import { GpsErrorCardComponent } from './gps-error-card/gps-error-card.component';
+import { FeedErrorCardComponent } from './feed-error-card/feed-error-card.component';
 import { NetworkErrorBoxComponent } from './network-error-box/network-error-box.component';
 import { BiteListComponent } from './bite-list/bite-list.component';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -56,6 +57,7 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     IonSpinner,
     HomeFeedControlsComponent,
     GpsErrorCardComponent,
+    FeedErrorCardComponent,
     NetworkErrorBoxComponent,
     BiteListComponent,
     TranslocoPipe,
@@ -83,6 +85,7 @@ export class BiteTribeHomeComponent {
   preferedCurrency = input('EUR');
   isReloading = input(false, { transform: booleanAttribute });
   hasErrorLoadingGpsPosition = input(false);
+  hasErrorLoadingBites = input(false, { transform: booleanAttribute });
   locationPermissionState = input<LocationPermissionState | undefined>();
   showFilters = input(true, { transform: booleanAttribute });
   showSearchChip = input(false, { transform: booleanAttribute });
@@ -167,6 +170,17 @@ export class BiteTribeHomeComponent {
       }, 2000);
     }
   });
+
+  /**
+   * The skeleton stands in for the feed, so it may only run while there is no
+   * feed to show. Once bites are on screen a resynchronization reports itself
+   * through the header progress bar and leaves them readable and navigable —
+   * a reconnect used to hide everything the user already had behind a skeleton
+   * for as long as the load took (issue #1230).
+   */
+  showBiteListSkeleton = computed(
+    () => this.showBiteSkeleton() && (this.bites()?.length ?? 0) === 0,
+  );
 
   moreThen5Bites = computed(() => {
     const bites = this.bites();

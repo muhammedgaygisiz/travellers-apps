@@ -186,6 +186,7 @@
   "write-review-label": "ግምገማ ጻፍ",
   "add-your-review": "ግምገማህን ጨምር",
   "we-could-not-access-your-location": "ወደ አካባቢህ መዳረስ አልቻልንም። ወደ Bites ያለው ርቀት ሊታይ አይችልም ወይም ወቅታዊ አይደለም።",
+  "we-could-not-load-your-feed": "የቅርብ ጊዜዎቹን Bites መጫን አልቻልንም። የራስህ Bites ደህና ናቸው — ግንኙነትህን አረጋግጠህ እንደገና ሞክር።",
   "you-are-offline": "ከመስመር ውጭ ያለህ ይመስላል። እባክህ የኢንተርኔት ግንኙነትህን አረጋግጥ።",
   "retry": "እንደገና ሞክር",
   "enable-location": "አካባቢን አንቃ",

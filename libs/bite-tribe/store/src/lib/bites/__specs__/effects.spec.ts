@@ -4,7 +4,7 @@ import { BiteTribeApiService } from 'bite-tribe/api';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { BiteEffects } from '../effects';
+import { BiteEffects, FEED_LOAD_TIMEOUT_MS } from '../effects';
 import { BiteActions } from '../actions';
 import type { Bite } from 'model';
 import { routerNavigatedAction } from '@ngrx/router-store';
@@ -268,6 +268,60 @@ describe(BiteEffects.name, () => {
           expected,
           output,
         );
+      });
+    });
+
+    /**
+     * The Home skeleton runs until this effect answers, so a request that never
+     * comes back used to keep the feed hidden past a minute — only a force quit
+     * cleared it (issue #1230).
+     */
+    it('should give up on a load that never answers', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        jest
+          .spyOn(apiService, 'bitesByPosition')
+          .mockReturnValue(
+            cold<Bite[]>('-') as unknown as ReturnType<
+              typeof apiService.bitesByPosition
+            >,
+          );
+
+        actions$ = cold('a', {
+          a: AppActions.loadedGPSPosition({
+            position: {} as unknown as Parameters<
+              typeof AppActions.loadedGPSPosition
+            >[0]['position'],
+          }),
+        });
+
+        expectObservable(effects.loadBitesByGpsPosition$).toBe(
+          `${FEED_LOAD_TIMEOUT_MS}ms a`,
+          { a: BiteActions.errorLoadingByGPSPositionFromAPI() },
+        );
+      });
+    });
+
+    it('should report a failed load instead of leaving the feed loading', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        jest
+          .spyOn(apiService, 'bitesByPosition')
+          .mockReturnValue(
+            cold('#') as unknown as ReturnType<
+              typeof apiService.bitesByPosition
+            >,
+          );
+
+        actions$ = cold('a', {
+          a: AppActions.loadedGPSPosition({
+            position: {} as unknown as Parameters<
+              typeof AppActions.loadedGPSPosition
+            >[0]['position'],
+          }),
+        });
+
+        expectObservable(effects.loadBitesByGpsPosition$).toBe('a', {
+          a: BiteActions.errorLoadingByGPSPositionFromAPI(),
+        });
       });
     });
   });

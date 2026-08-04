@@ -186,6 +186,7 @@
   "write-review-label": "Écrire un avis",
   "add-your-review": "Ajoute ton avis",
   "we-could-not-access-your-location": "Nous n'avons pas pu accéder à ta position. La distance jusqu'aux Bites ne peut pas être affichée ou n'est pas à jour.",
+  "we-could-not-load-your-feed": "Nous n’avons pas pu charger les derniers Bites. Tes propres Bites sont en sécurité : vérifie ta connexion et réessaie.",
   "you-are-offline": "Il semble que tu sois hors ligne. Vérifie ta connexion Internet.",
   "retry": "RÉESSAYER",
   "enable-location": "ACTIVER LA LOCALISATION",

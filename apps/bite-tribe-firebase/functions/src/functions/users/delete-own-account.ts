@@ -126,6 +126,11 @@ export const anonymizeBitesByUser = (
 /**
  * Deletes every like the user gave. The like-count triggers on the Bite keep
  * `thumbup`/`drooling`/`mindblown` correct as the documents go.
+ *
+ * Likes live at `/bites/{biteId}/likes/{uid}`, so they can only be found across
+ * every Bite with a collection-group query. Firestore indexes single fields at
+ * collection scope by default, so `likes.userId` needs the collection-group
+ * exemption in `firestore.indexes.json` or this query fails with `FAILED_PRECONDITION`.
  */
 export const deleteLikesByUser = (
   db: Firestore,
@@ -196,6 +201,9 @@ export const deleteBiteTrailRatingsByUser = async (
  * them. The seller's `soldCount` is derived from the number of documents in
  * `/biteTrails/{id}/sells`, so deleting them would silently reduce another
  * user's sales figure.
+ *
+ * Like {@link deleteLikesByUser}, this reaches into a subcollection, so
+ * `sells.userId` needs the collection-group exemption in `firestore.indexes.json`.
  */
 export const anonymizeBiteTrailSalesByUser = (
   db: Firestore,

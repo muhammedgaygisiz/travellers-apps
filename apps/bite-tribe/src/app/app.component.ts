@@ -115,6 +115,7 @@ export class AppComponent implements OnInit, OnDestroy {
       'networkStatusChange',
       (event: ConnectionStatus) => {
         this.networkStatusService.setNetworkStatus(event);
+        this.appForegroundService.handleNetworkStatusChange(event);
       },
     );
   }

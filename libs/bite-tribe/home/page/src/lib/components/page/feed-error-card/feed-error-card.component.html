@@ -1,0 +1,22 @@
+<ion-card>
+  <ion-card-content>
+    <div class="ion-display-flex ion-flex-row ion-align-items-center">
+      <ion-icon name="cloud-offline-outline" color="warning" size="large" />
+
+      <ion-text
+        color="warning"
+        class="ion-padding-start"
+        data-testid="feed-error-message"
+      >
+        {{ 'we-could-not-load-your-feed' | transloco }}
+      </ion-text>
+    </div>
+  </ion-card-content>
+
+  <ion-button
+    fill="clear"
+    data-testid="feed-error-retry"
+    (click)="retryClick.emit()"
+    >{{ 'retry' | transloco }}</ion-button
+  >
+</ion-card>

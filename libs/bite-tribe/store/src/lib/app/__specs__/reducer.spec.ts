@@ -15,6 +15,7 @@ describe('App Reducer', () => {
         loading: { home: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
+        errorLoadingBites: false,
         profileMetadata: {
           followers: 0,
           following: 0,
@@ -36,6 +37,7 @@ describe('App Reducer', () => {
         loading: { home: true },
         exchangeRates: { EUR: 1 },
         errorLoadingGpsPosition: false,
+        errorLoadingBites: false,
         profileMetadata: {
           followers: 0,
           following: 0,
@@ -81,9 +83,63 @@ describe('App Reducer', () => {
         bites: [],
       });
 
-      expect(reducer(INITIAL_STATE, loadedBitesFromApiAction)).toEqual({
-        ...NEW_STATE,
+      expect(reducer(INITIAL_STATE, loadedBitesFromApiAction)).toEqual(
+        expect.objectContaining({
+          ...NEW_STATE,
+        }),
+      );
+    });
+
+    it('should clear a previous feed error', () => {
+      const INITIAL_STATE = { errorLoadingBites: true } as AppSlice;
+
+      expect(
+        reducer(
+          INITIAL_STATE,
+          BiteActions.loadedByGPSPositionFromAPI({ bites: [] }),
+        ),
+      ).toEqual(
+        expect.objectContaining({
+          errorLoadingBites: false,
+        }),
+      );
+    });
+  });
+
+  describe('errorLoadingByGPSPositionFromAPI', () => {
+    /**
+     * The loading flags are otherwise only cleared by a successful load, so a
+     * feed request that failed or ran out of time held Home under its skeleton
+     * indefinitely (issue #1230).
+     */
+    it('should end both loading states and raise a scoped feed error', () => {
+      const INITIAL_STATE = {
+        loading: { home: true },
+        reloading: { home: true },
+        errorLoadingBites: false,
+      } as AppSlice;
+
+      expect(
+        reducer(INITIAL_STATE, BiteActions.errorLoadingByGPSPositionFromAPI()),
+      ).toEqual({
+        loading: { home: false },
+        reloading: { home: false },
+        errorLoadingBites: true,
       });
+    });
+
+    it('should leave the location error alone', () => {
+      const INITIAL_STATE = {
+        errorLoadingGpsPosition: false,
+      } as AppSlice;
+
+      expect(
+        reducer(INITIAL_STATE, BiteActions.errorLoadingByGPSPositionFromAPI()),
+      ).toEqual(
+        expect.objectContaining({
+          errorLoadingGpsPosition: false,
+        }),
+      );
     });
   });
 
@@ -129,8 +185,31 @@ describe('App Reducer', () => {
         bites: ['existing-bite'],
         errorLoadingGpsPosition: false,
         locationPermissionState: undefined,
+        loading: { home: false },
         reloading: { home: false },
       });
+    });
+
+    /**
+     * No refetch follows this action, so nothing else would ever clear the
+     * loading flag: a re-login that resolved to the same position left Home
+     * under its skeleton for good, and only a force quit cleared it
+     * (issue #1230).
+     */
+    it('ends the initial load, because no refetch will follow', () => {
+      const INITIAL_STATE = {
+        loading: { home: true },
+      } as AppSlice;
+
+      const action = AppActions.updatedGPSPositionWithoutReload({
+        position: { coords: { latitude: 1, longitude: 2 } },
+      });
+
+      expect(reducer(INITIAL_STATE, action)).toEqual(
+        expect.objectContaining({
+          loading: { home: false },
+        }),
+      );
     });
 
     /**
@@ -258,6 +337,7 @@ describe('App Reducer', () => {
       } as AppSlice;
       const NEW_STATE = {
         reloading: { home: true },
+        errorLoadingBites: false,
       } as AppSlice;
 
       const reloadGPSPositionAction = AppActions.reloadGPSPosition();
@@ -265,6 +345,18 @@ describe('App Reducer', () => {
       expect(reducer(INITIAL_STATE, reloadGPSPositionAction)).toEqual({
         ...NEW_STATE,
       });
+    });
+
+    it('should drop a feed error the retry is about to answer', () => {
+      const INITIAL_STATE = {
+        errorLoadingBites: true,
+      } as AppSlice;
+
+      expect(reducer(INITIAL_STATE, AppActions.reloadGPSPosition())).toEqual(
+        expect.objectContaining({
+          errorLoadingBites: false,
+        }),
+      );
     });
   });
 

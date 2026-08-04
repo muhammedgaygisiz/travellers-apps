@@ -186,6 +186,7 @@
   "write-review-label": "Bir yorum yaz",
   "add-your-review": "Yorumunu ekle",
   "we-could-not-access-your-location": "Konumuna erişemedik. Bite'lere olan mesafe gösterilemiyor veya güncel değil.",
+  "we-could-not-load-your-feed": "En yeni Bite’ları yükleyemedik. Kendi Bite’ların güvende — bağlantını kontrol edip tekrar dene.",
   "you-are-offline": "Görünüşe göre çevrimdışısın. Lütfen internet bağlantını kontrol et.",
   "retry": "TEKRAR DENE",
   "enable-location": "KONUMU ETKİNLEŞTİR",

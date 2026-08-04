@@ -187,6 +187,7 @@
   "write-review-label": "Write a review",
   "add-your-review": "Add your Review",
   "we-could-not-access-your-location": "We couldn’t access your location. The distance to the bites can’t be shown or is not up-to-date.",
+  "we-could-not-load-your-feed": "We couldn’t load the latest bites. Your own bites are safe — check your connection and try again.",
   "you-are-offline": "It seems you are offline. Please check your internet connection.",
   "retry": "RETRY",
   "enable-location": "ENABLE LOCATION",

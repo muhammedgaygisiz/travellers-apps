@@ -1,10 +1,20 @@
 import { Geolocation } from '@capacitor/geolocation';
-import { from, Observable } from 'rxjs';
+import { from, Observable, throwError, timeout } from 'rxjs';
 import { Position } from '@capacitor/geolocation/dist/esm/definitions';
 import { Capacitor, type PermissionState } from '@capacitor/core';
 import { AppLauncher } from '@capacitor/app-launcher';
 
 const ONE_MINUTE = 60 * 1000;
+
+/**
+ * How long a single position read may run before it counts as failed.
+ *
+ * Callers gate visible loading state on the read settling, so a read that never
+ * answers is worse than one that fails: on iOS a reconnect could leave the Home
+ * feed skeleton up indefinitely because CoreLocation never called back
+ * (issue #1230).
+ */
+export const LOCATION_READ_TIMEOUT_MS = 15_000;
 
 /**
  * Outcome of an in-context location permission request.
@@ -24,6 +34,14 @@ export type LocationPermissionResult = 'granted' | 'denied' | 'unsupported';
  */
 export type LocationPermissionState =
   'granted' | 'denied' | 'prompt' | 'unsupported';
+
+/** Thrown by {@link getCurrentPosition} when the read outran its time budget. */
+export class LocationReadTimeoutError extends Error {
+  constructor() {
+    super(`Location read did not answer within ${LOCATION_READ_TIMEOUT_MS}ms`);
+    this.name = 'LocationReadTimeoutError';
+  }
+}
 
 /** Thrown by {@link getCurrentPosition} instead of triggering a cold OS prompt. */
 export class LocationPermissionNotGrantedError extends Error {
@@ -70,6 +88,7 @@ const readCurrentPosition = async (): Promise<Position> => {
 
   return await Geolocation.getCurrentPosition({
     maximumAge: ONE_MINUTE,
+    timeout: LOCATION_READ_TIMEOUT_MS,
   });
 };
 
@@ -84,9 +103,20 @@ const readCurrentPosition = async (): Promise<Position> => {
  *
  * Errors when permission is not granted; callers already treat a missing
  * position as a non-fatal outcome.
+ *
+ * The read always settles within {@link LOCATION_READ_TIMEOUT_MS}. The plugin's
+ * own `timeout` option covers web and Android, but the iOS implementation hands
+ * the request to CoreLocation without one, so a device that never produces a
+ * fix — the state a phone can sit in right after regaining connectivity — would
+ * otherwise leave the caller waiting forever (issue #1230).
  */
 export const getCurrentPosition = (): Observable<Position> => {
-  return from(readCurrentPosition());
+  return from(readCurrentPosition()).pipe(
+    timeout({
+      each: LOCATION_READ_TIMEOUT_MS,
+      with: () => throwError(() => new LocationReadTimeoutError()),
+    }),
+  );
 };
 
 /**

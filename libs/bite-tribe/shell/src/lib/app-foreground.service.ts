@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { AuthService } from 'ta-firestore';
 import { NavController } from '@ionic/angular';
-import { Network } from '@capacitor/network';
+import { ConnectionStatus, Network } from '@capacitor/network';
 
 export const FOREGROUND_REFRESH_THRESHOLD_MS = 30_000;
 
@@ -13,6 +13,7 @@ export class AppForegroundService {
   private readonly authService = inject(AuthService);
   private readonly navController = inject(NavController);
   private lastBackgroundTimestamp: number | null = null;
+  private wasDisconnected = false;
 
   private readonly isAuthenticated = toSignal(
     this.storeService.isAuthenticated$,
@@ -34,6 +35,36 @@ export class AppForegroundService {
     } else {
       this.lastBackgroundTimestamp = Date.now();
     }
+  }
+
+  /**
+   * Resynchronizes the feed when connectivity comes back while the app is in
+   * the foreground.
+   *
+   * Nothing else covers this transition: the app-state hooks only run on a
+   * background round trip, so a user who saved a Bite offline and switched the
+   * radio back on without leaving the app sat on whatever the offline session
+   * had produced until they refreshed by hand (issue #1230). Only a recovery is
+   * acted on — a status event that merely repeats "connected" is not one.
+   */
+  handleNetworkStatusChange({ connected }: ConnectionStatus): void {
+    if (!connected) {
+      this.wasDisconnected = true;
+
+      return;
+    }
+
+    if (!this.wasDisconnected) {
+      return;
+    }
+
+    this.wasDisconnected = false;
+
+    if (!this.isAuthenticated()) {
+      return;
+    }
+
+    this.storeService.reloadGPSPosition();
   }
 
   /**

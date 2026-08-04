@@ -27,6 +27,7 @@ const initialState: AppSlice = {
   },
   exchangeRates: { EUR: 1 },
   errorLoadingGpsPosition: false,
+  errorLoadingBites: false,
   profileMetadata: CLEAN_PROFILE_METADATA,
 };
 
@@ -43,8 +44,29 @@ export const reducer = createReducer<AppSlice>(
         ...state.loading,
         home: false,
       },
+      reloading: {
+        ...state.reloading,
+        home: false,
+      },
+      errorLoadingBites: false,
     }),
   ),
+  // A feed load that failed or outran its budget settles the Home page the same
+  // way a successful one does, and raises its own scoped error instead. Leaving
+  // the loading flags set kept the feed under an endless skeleton, because only
+  // a `loaded...` action ever cleared them (issue #1230).
+  on(BiteActions.errorLoadingByGPSPositionFromAPI, (state) => ({
+    ...state,
+    loading: {
+      ...state.loading,
+      home: false,
+    },
+    reloading: {
+      ...state.reloading,
+      home: false,
+    },
+    errorLoadingBites: true,
+  })),
   on(fromAuth.AuthActions.loginSucceeded, (state) => ({
     ...state,
     loading: {
@@ -58,6 +80,9 @@ export const reducer = createReducer<AppSlice>(
       reloading: {
         home: true,
       },
+      // A retry starts from a clean slate: the previous failure is about to be
+      // answered, and leaving it up would outlive the attempt it describes.
+      errorLoadingBites: false,
     };
   }),
   on(AppActions.errorLoadingGPSPosition, (state, { permissionState }) => ({
@@ -102,9 +127,19 @@ export const reducer = createReducer<AppSlice>(
     // a user who restores location access without moving 100 m lands here, and
     // leaving the flag set kept a "we could not access your location" card up
     // next to a working position (issue #1183).
+    //
+    // No refetch follows, so this is the last action of the sequence and has to
+    // end the initial load itself. `loading.home` is otherwise only cleared by a
+    // `loaded...` action, which left the feed under a skeleton for good whenever
+    // a re-login resolved to the same position — the state a reconnect on the
+    // spot produces (issue #1230).
     return {
       ...state,
       position: { latitude, longitude },
+      loading: {
+        ...state.loading,
+        home: false,
+      },
       reloading: {
         ...state.reloading,
         home: false,

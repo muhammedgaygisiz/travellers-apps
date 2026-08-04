@@ -54,6 +54,7 @@ export class HomeService {
   isReloading = this.dataAccess.isReloading;
 
   hasErrorLoadingGpsPosition = this.dataAccess.hasErrorLoadingGpsPosition;
+  hasErrorLoadingBites = this.dataAccess.hasErrorLoadingBites;
   locationPermissionState = this.dataAccess.locationPermissionState;
 
   networkStatus = this.dataAccess.networkStatus;

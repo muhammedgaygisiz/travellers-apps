@@ -3,6 +3,8 @@ import {
   getCurrentPosition,
   getLocationPermissionState,
   hasLocationPermission,
+  LOCATION_READ_TIMEOUT_MS,
+  LocationReadTimeoutError,
   openLocationSettings,
   requestLocationPermission,
 } from './geolocation';
@@ -87,8 +89,37 @@ describe(getCurrentPosition.name, () => {
         expect(Geolocation.checkPermissions).toHaveBeenCalled();
         expect(Geolocation.getCurrentPosition).toHaveBeenCalledWith({
           maximumAge: 60000,
+          timeout: LOCATION_READ_TIMEOUT_MS,
         });
         expect(result).toEqual(mockPosition);
+      });
+
+      /**
+       * The plugin's own timeout covers web and Android, but iOS hands the
+       * request to CoreLocation without one. Callers gate visible loading state
+       * on this settling, so a read that never answers has to fail on its own
+       * (issue #1230).
+       */
+      it('should fail a read that never answers', async () => {
+        jest.useFakeTimers();
+        (Geolocation.getCurrentPosition as jest.Mock).mockReturnValue(
+          new Promise(() => undefined),
+        );
+
+        try {
+          const read = lastValueFrom(getCurrentPosition());
+          const settled = expect(read).rejects.toThrow(
+            LocationReadTimeoutError,
+          );
+
+          await jest.advanceTimersByTimeAsync(LOCATION_READ_TIMEOUT_MS);
+          await settled;
+        } finally {
+          // `clearAllMocks` keeps implementations, so the never-settling promise
+          // would otherwise hang every read that runs after this one.
+          (Geolocation.getCurrentPosition as jest.Mock).mockReset();
+          jest.useRealTimers();
+        }
       });
     });
   });

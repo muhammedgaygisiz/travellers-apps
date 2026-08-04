@@ -5,6 +5,10 @@ export const BiteActions = createActionGroup({
   source: 'BITES',
   events: {
     'Loaded By GPS Position from API': props<{ bites: Bite[] }>(),
+    // The feed load never answered. It ends the Home loading state the same way
+    // a successful load does, so a request that hangs cannot keep the feed under
+    // a skeleton (issue #1230).
+    'Error loading by GPS position from API': emptyProps(),
     'Loaded By User From API': props<{ bites: Bite[] }>(),
     'Loaded By Bucketlist From API': props<{ bites: Bite[] }>(),
     'Save new bite': emptyProps(),

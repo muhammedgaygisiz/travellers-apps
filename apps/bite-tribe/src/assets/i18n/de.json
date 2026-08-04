@@ -186,6 +186,7 @@
   "write-review-label": "Bewertung schreiben",
   "add-your-review": "Deine Bewertung hinzufügen",
   "we-could-not-access-your-location": "Wir konnten nicht auf deinen Standort zugreifen. Die Entfernung zu den Bites kann nicht angezeigt werden oder ist nicht aktuell.",
+  "we-could-not-load-your-feed": "Wir konnten die neuesten Bites nicht laden. Deine eigenen Bites sind sicher – prüfe deine Verbindung und versuche es erneut.",
   "you-are-offline": "Du scheinst offline zu sein. Bitte überprüfe deine Internetverbindung.",
   "retry": "ERNEUT VERSUCHEN",
   "enable-location": "STANDORT AKTIVIEREN",

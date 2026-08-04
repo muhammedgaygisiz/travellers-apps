@@ -115,6 +115,9 @@ export class HomeDataAccessService {
     this.storeService.hasErrorLoadingGpsPosition$,
     { initialValue: false },
   );
+  hasErrorLoadingBites = toSignal(this.storeService.hasErrorLoadingBites$, {
+    initialValue: false,
+  });
   locationPermissionState = toSignal(
     this.storeService.locationPermissionState$,
   );

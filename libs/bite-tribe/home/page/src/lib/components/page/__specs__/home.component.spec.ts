@@ -172,6 +172,67 @@ describe('BiteTribeHomeComponent', () => {
     ).toBeNull();
   });
 
+  it('should keep an already loaded feed readable while it resynchronizes', () => {
+    // The skeleton replaces the feed, so a resynchronization that runs on
+    // content the user already has must not hide it. Reconnecting after an
+    // offline save put Home under a skeleton with everything behind it
+    // (issue #1230).
+    componentRef.setInput('bites', [createBite({ id: '1', name: 'Burger' })]);
+    componentRef.setInput('showSpinner', true);
+    componentRef.setInput('isReloading', true);
+
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('bt-bite-skeleton-list'),
+    ).toBeNull();
+    expect(fixture.nativeElement.querySelector('bt-bite')).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+    ).toBeTruthy();
+  });
+
+  describe('feed synchronization error', () => {
+    const feedErrorCard = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('bt-feed-error-card');
+
+    it('should not report a feed error while the feed is healthy', () => {
+      fixture.detectChanges();
+
+      expect(feedErrorCard()).toBeNull();
+    });
+
+    it('should report a failed feed synchronization', () => {
+      componentRef.setInput('hasErrorLoadingBites', true);
+
+      fixture.detectChanges();
+
+      expect(feedErrorCard()).not.toBeNull();
+    });
+
+    it('should keep the known bites next to the error', () => {
+      componentRef.setInput('bites', [createBite({ id: '1', name: 'Burger' })]);
+      componentRef.setInput('hasErrorLoadingBites', true);
+
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('bt-bite')).toBeTruthy();
+    });
+
+    it('should ask for another synchronization on retry', () => {
+      componentRef.setInput('hasErrorLoadingBites', true);
+      fixture.detectChanges();
+
+      const refreshSpy = jest.spyOn(component.refresh, 'emit');
+
+      fixture.nativeElement
+        .querySelector('[data-testid="feed-error-retry"]')
+        ?.click();
+
+      expect(refreshSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('should call scrollToTop on ionContent when scrollToTop is called', () => {
     fixture.detectChanges();
     const ionContent = component.ionContent();

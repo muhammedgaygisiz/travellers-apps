@@ -186,6 +186,7 @@
   "write-review-label": "اكتب مراجعة",
   "add-your-review": "أضف مراجعتك",
   "we-could-not-access-your-location": "تعذر الوصول إلى موقعك. لا يمكن عرض المسافة إلى الـ Bites أو أنها غير محدثة.",
+  "we-could-not-load-your-feed": "تعذّر تحميل أحدث الـ Bites. الـ Bites الخاصة بك آمنة — تحقق من اتصالك وحاول مرة أخرى.",
   "you-are-offline": "يبدو أنك غير متصل بالإنترنت. يرجى التحقق من اتصالك بالإنترنت.",
   "retry": "إعادة المحاولة",
   "enable-location": "تفعيل الموقع",

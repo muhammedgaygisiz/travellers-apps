@@ -32,6 +32,13 @@
         "command": "npm run deploy"
       }
     },
+    "firebase-deploy-indexes": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-firebase/functions",
+        "command": "npm run deploy:indexes"
+      }
+    },
     "firebase-set-geocoding-secret": {
       "executor": "nx:run-commands",
       "options": {

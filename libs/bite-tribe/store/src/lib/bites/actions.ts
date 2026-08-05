@@ -16,6 +16,10 @@ export const BiteActions = createActionGroup({
     'Saved bite': props<{ bite: Bite }>(),
     'Error saving bite': props<{ bite: Bite }>(),
     'Cache bite': props<{ bite: Partial<Bite> }>(),
+    // Ends a Bite creation session that was seeded with a prefilled draft (from
+    // a menu item or an existing Bite) without saving, so the draft cannot show
+    // up in the next, unrelated creation session (issue #1233).
+    'Clear cached bite': emptyProps(),
     'Set editing bite': props<{ bite: Partial<Bite> }>(),
     'Delete bite': props<{ bite: Bite }>(),
     'Deleted bite': props<{ bite: Bite }>(),

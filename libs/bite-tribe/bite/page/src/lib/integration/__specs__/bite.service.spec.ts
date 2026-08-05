@@ -19,6 +19,7 @@ const Mock = {
   submitBite: jest.fn(),
   back: jest.fn(),
   setEditingBite: jest.fn(),
+  clearCachedBite: jest.fn(),
   getCurrencyByPosition: jest.fn(),
   currency: (): string => 'EUR',
 };
@@ -87,6 +88,27 @@ describe('BiteService', () => {
         AnalyticsEvent.BiteCreated,
       );
     });
+
+    it('should keep the restaurant and dish of a menu-derived bite', async () => {
+      const menuDerivedBite = {
+        id: '',
+        name: 'Amok Trey',
+        place: 'Khmer Kitchen',
+        restaurantId: 'restaurant-1',
+        price: '5.50',
+        currency: 'EUR',
+      };
+
+      await service.submitNewBite(menuDerivedBite);
+
+      expect(Mock.submitNewBite).toHaveBeenCalledWith({
+        name: 'Amok Trey',
+        place: 'Khmer Kitchen',
+        restaurantId: 'restaurant-1',
+        price: '5.50',
+        currency: 'EUR',
+      });
+    });
   });
 
   describe('submitNewBiteAndAddAnother', () => {
@@ -145,6 +167,14 @@ describe('BiteService', () => {
       service.setEditingBite(bite);
 
       expect(Mock.setEditingBite).toHaveBeenCalledWith(bite);
+    });
+  });
+
+  describe('clearCachedBite', () => {
+    it('should clear the cached bite', () => {
+      service.clearCachedBite();
+
+      expect(Mock.clearCachedBite).toHaveBeenCalled();
     });
   });
 

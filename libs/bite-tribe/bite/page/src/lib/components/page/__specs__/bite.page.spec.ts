@@ -431,7 +431,7 @@ describe('BitePage', () => {
       const expected: BiteFormValue = {
         id: '1',
         image: 'test.jpg',
-        imagePath: undefined,
+        imagePath: '',
         name: 'Test Bite',
         place: 'Test Place',
         price: '10',
@@ -444,6 +444,27 @@ describe('BitePage', () => {
       };
 
       expect(component.biteFormGroup.getRawValue()).toEqual(expected);
+    });
+
+    it('should keep imagePath a string for a prefilled draft without a photo', () => {
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+      // The shape a menu item or a re-posted Bite seeds the form with: no photo
+      // of its own. `undefined` here reaches Firestore as an unsupported value
+      // and the Bite is rejected while the form reports a successful post.
+      componentRef.setInput('bite', {
+        name: 'Amok Trey',
+        place: 'Khmer Kitchen',
+        price: 8.5,
+        currency: 'EUR',
+        restaurantId: 'restaurant-1',
+        position: { latitude: 42, longitude: 24 },
+      });
+
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.biteFormGroup.controls['imagePath'].value).toBe('');
     });
 
     it('should set currency when input is provided', () => {

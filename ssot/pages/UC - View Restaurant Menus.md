@@ -17,6 +17,7 @@ Users can inspect menu information connected to a Restaurant and its Bites.
 ## Current Flow
 
 - User opens a restaurant menu from a Bite.
+- User can create a Bite from a menu item, which opens the Bite form prefilled with that Restaurant and dish. The prefilled draft is scoped to that one creation session; see [[UC - Create And Maintain Personal Bites]].
 - Business users can maintain menus from the business app.
 
 ## Supported Evidence

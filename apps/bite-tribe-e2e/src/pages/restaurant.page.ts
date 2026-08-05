@@ -85,6 +85,14 @@ export class RestaurantPage {
     }
   }
 
+  async openMenu(): Promise<void> {
+    const activePage = this.verified.or(this.unverified);
+    await activePage.getByRole('button', { name: 'Menu', exact: true }).click();
+    await this.page.waitForURL(
+      /\/bite\/[^/]+\/restaurant\/[^/]+\/menu\/[^/]+$/,
+    );
+  }
+
   async openBites(): Promise<void> {
     const activePage = this.verified.or(this.unverified);
     await activePage

@@ -276,6 +276,10 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(BiteActions.cacheBite({ bite }));
   }
 
+  clearCachedBite(): void {
+    this.store.dispatch(BiteActions.clearCachedBite());
+  }
+
   saveSocialMediaLinks(restaurantId: string, links: Link[]): void {
     this.store.dispatch(
       saveSocialMediaLinksForRestaurant({

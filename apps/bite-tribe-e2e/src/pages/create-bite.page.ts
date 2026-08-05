@@ -22,10 +22,18 @@ export class CreateBitePage {
   readonly tagsInput: Locator;
   readonly fromGps: Locator;
   readonly post: Locator;
+  readonly backButton: Locator;
+  readonly selectedPlace: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.footerAddButton = page.getByTestId('footer-add-button');
+    // Scoped to the visible one: Ionic keeps the pages it has navigated away
+    // from in the DOM, so their footers answer this test id as well.
+    this.footerAddButton = page.locator(
+      '[data-testid="footer-add-button"]:visible',
+    );
+    this.backButton = page.locator('bite ion-back-button');
+    this.selectedPlace = page.locator('bite .selected-place-name');
     this.imageInput = page.getByTestId('image-file-input');
     this.name = page.getByTestId('bite-name').locator('input');
     this.setRestaurant = page.getByTestId('set-restaurant');
@@ -54,6 +62,34 @@ export class CreateBitePage {
   async open(): Promise<void> {
     await this.footerAddButton.click();
     await this.page.waitForURL('**/new-bite');
+  }
+
+  /** Leaves the form without saving, the way a user cancels the flow. */
+  async cancel(): Promise<void> {
+    await this.backButton.click();
+    await this.page.waitForURL((url) => !url.pathname.endsWith('/new-bite'));
+  }
+
+  /** Asserts the dish and Restaurant a prefilled creation session was seeded with. */
+  async expectPrefilledWith(options: {
+    name: string;
+    place: string;
+    price: string;
+  }): Promise<void> {
+    await expect(this.name).toHaveValue(options.name);
+    await expect(this.selectedPlace).toHaveText(options.place);
+    await expect(this.price).toHaveValue(options.price);
+  }
+
+  /**
+   * Asserts the form carries no draft from an earlier creation session: no dish,
+   * no Restaurant, no price.
+   */
+  async expectCleanForm(): Promise<void> {
+    await expect(this.name).toHaveValue('');
+    await expect(this.selectedPlace).toHaveCount(0);
+    await expect(this.setRestaurant).toBeVisible();
+    await expect(this.price).toHaveValue('');
   }
 
   async uploadImage(filePath: string): Promise<void> {

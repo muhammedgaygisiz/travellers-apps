@@ -190,7 +190,11 @@ export class BitePage {
     this.biteFormGroup.patchValue({
       id: bite.id,
       image: image || bite.image,
-      imagePath: bite.imagePath,
+      // A prefilled draft (menu item, or an existing Bite posted again) carries
+      // no photo of its own. Patching the missing path through as `undefined`
+      // put an unsupported value in the document Firestore is asked to write, so
+      // the Bite was rejected while the form reported a successful post.
+      imagePath: bite.imagePath || '',
       name: bite.name,
       place: bite.place,
       price,

@@ -65,6 +65,15 @@ describe('ImageViewerComponent', () => {
     expect(query('image-viewer-position')).toBeUndefined();
   });
 
+  // The active index survives an images list that shrinks under it, so the
+  // action label has to tolerate pointing at nothing.
+  it('offers no action when no photo sits at the active index', () => {
+    setup([]);
+
+    expect(fixture.componentInstance.actionLabel()).toBeUndefined();
+    expect(query('image-viewer-action')).toBeUndefined();
+  });
+
   it('emits closed when the close button is used', () => {
     setup(IMAGES);
     const closed = jest.fn();

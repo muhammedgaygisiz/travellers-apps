@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import {
   AlertController,
+  IonContent,
   provideIonicAngular,
 } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
@@ -92,6 +94,83 @@ describe(GalleryPage.name, () => {
     component.goToBite(0);
 
     expect(component.openBite.emit).not.toHaveBeenCalled();
+  });
+
+  describe('returning from a Bite', () => {
+    const images = [{ name: 'first.jpg', src: 'first-uri' }];
+
+    // `ta-page` renders an ion-content of its own, so the grid's is picked by
+    // its class rather than by directive, which would match the wrapper first.
+    const contentInstance = (): IonContent =>
+      fixture.debugElement.query(
+        By.css('ion-content.content-safe-padding-bottom'),
+      ).componentInstance;
+
+    // The first render is what creates the ion-content to spy on, and the
+    // restore fires during change detection, so the offset arrives only after
+    // the spy is in place.
+    const renderWith = (
+      scrollTop: number,
+      galleryImages = images,
+    ): jest.SpyInstance => {
+      fixture.componentRef.setInput('images', galleryImages);
+      fixture.detectChanges();
+
+      const scrollToPoint = jest
+        .spyOn(contentInstance(), 'scrollToPoint')
+        .mockResolvedValue(undefined);
+
+      fixture.componentRef.setInput('initialScrollTop', scrollTop);
+      fixture.detectChanges();
+
+      return scrollToPoint;
+    };
+
+    it('restores the offset the user left from', () => {
+      const scrollToPoint = renderWith(240);
+
+      expect(scrollToPoint).toHaveBeenCalledWith(0, 240);
+    });
+
+    it('restores it once, not on every later change', () => {
+      const scrollToPoint = renderWith(240);
+      scrollToPoint.mockClear();
+
+      fixture.componentRef.setInput('images', [
+        ...images,
+        { name: 'second.jpg', src: 'second-uri' },
+      ]);
+      fixture.componentRef.setInput('initialScrollTop', 300);
+      fixture.detectChanges();
+
+      expect(scrollToPoint).not.toHaveBeenCalled();
+    });
+
+    it('leaves the grid alone when the user never scrolled', () => {
+      const scrollToPoint = renderWith(0);
+
+      expect(scrollToPoint).not.toHaveBeenCalled();
+    });
+
+    it('waits for the images before scrolling anywhere', () => {
+      const scrollToPoint = renderWith(240, []);
+
+      expect(scrollToPoint).not.toHaveBeenCalled();
+    });
+
+    it('reports the current offset for the way out', async () => {
+      fixture.componentRef.setInput('images', images);
+      fixture.detectChanges();
+      jest
+        .spyOn(contentInstance(), 'getScrollElement')
+        .mockResolvedValue({ scrollTop: 180 } as HTMLElement);
+
+      expect(await component.currentScrollTop()).toBe(180);
+    });
+
+    it('reports no offset before the content exists', async () => {
+      expect(await component.currentScrollTop()).toBe(0);
+    });
   });
 
   it('runs the header progress bar while the spinner shows', () => {

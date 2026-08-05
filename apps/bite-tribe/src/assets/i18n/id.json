@@ -77,6 +77,8 @@
   "confirm-password": "Konfirmasi Kata Sandi",
   "yes-unfollow": "Ya, berhenti ikuti",
   "bitetrail-saved-as-bucket-list": "BiteTrail disimpan sebagai daftar keinginan!",
+  "bucket-list-created-with-bite": "Daftar keinginan dibuat dan Bite ditambahkan!",
+  "bucket-list-create-with-bite-failed": "Daftar keinginan tidak dapat dibuat. Silakan coba lagi.",
   "go-to-bucket-lists": "Buka Daftar Keinginan",
   "no-stay-public": "Tidak, tetap publik",
   "yes-go-private": "Ya, jadikan privat",

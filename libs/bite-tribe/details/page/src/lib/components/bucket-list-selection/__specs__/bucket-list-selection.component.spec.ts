@@ -3,7 +3,6 @@ import { BucketListSelectionComponent } from '../bucket-list-selection.component
 import { Bite, Bucketlist } from 'model';
 import { GetBucketlistIconPipe } from '../../../pipes/get-bucketlist-icon.pipe';
 import {
-  IonAlert,
   IonContent,
   IonIcon,
   IonItem,
@@ -50,7 +49,6 @@ describe('BucketListSelectionComponent', () => {
         IonIcon,
         IonContent,
         GetBucketlistIconPipe,
-        IonAlert,
       ],
     }).compileComponents();
 
@@ -87,26 +85,23 @@ describe('BucketListSelectionComponent', () => {
     expect(spy).toHaveBeenCalledWith(mockBucketlists[1]);
   });
 
-  it('should call onNewList with input value when alert is dismissed', () => {
-    const newListName = 'New List';
-    const spy = jest.spyOn(component, 'onNewList');
-    component.onAlertDidDismiss([newListName]);
-    expect(spy).toHaveBeenCalledWith(newListName);
-  });
+  // The popover is created with `dismissOnSelect`, so it is destroyed by the
+  // same tap that asks for a new list. Delegating to the host page keeps the
+  // name prompt alive. See GitHub issue #1231.
+  it('should delegate asking for a new list to the host page', () => {
+    const requestNewList = jest.fn();
+    component.requestNewList = requestNewList;
+    fixture.detectChanges();
 
-  it('should have correct alert inputs configuration', () => {
-    expect(component.newListInputs).toEqual([
-      {
-        placeholder: 'Name',
-      },
-    ]);
-  });
-
-  it('should have correct save button configuration', () => {
-    expect(component.saveButton).toHaveLength(2);
-    const saveButton = component.saveButton[0];
-    expect(saveButton).toEqual(
-      expect.objectContaining({ text: 'Save', handler: expect.any(Function) }),
+    const items: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('ion-item'),
     );
+    items[items.length - 1].click();
+
+    expect(requestNewList).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not declare an overlay of its own', () => {
+    expect(fixture.nativeElement.querySelector('ion-alert')).toBeFalsy();
   });
 });

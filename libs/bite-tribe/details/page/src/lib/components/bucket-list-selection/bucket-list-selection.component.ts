@@ -5,7 +5,6 @@ import {
   output,
 } from '@angular/core';
 import {
-  IonAlert,
   IonContent,
   IonIcon,
   IonItem,
@@ -29,63 +28,36 @@ import { GetBucketlistIconPipe } from '../../pipes/get-bucketlist-icon.pipe';
         }
         <ion-item
           [detail]="false"
-          id="preset-new-list-alert"
           class="cursor-pointer"
+          (click)="requestNewList()"
         >
           <ion-icon slot="start" name="add-outline" />
           New Bucket list
         </ion-item>
-        <ion-alert
-          trigger="preset-new-list-alert"
-          header="Please enter a name for your new list"
-          [inputs]="newListInputs"
-          [buttons]="saveButton"
-        />
       </ion-list>
     </ion-content>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    IonList,
-    IonItem,
-    IonIcon,
-    IonContent,
-    GetBucketlistIconPipe,
-    IonAlert,
-  ],
+  imports: [IonList, IonItem, IonIcon, IonContent, GetBucketlistIconPipe],
 })
 export class BucketListSelectionComponent {
   bucketLists = input<Bucketlist[]>([]);
   bite = input<Bite>();
 
   selectList = output<Bucketlist>();
-  onNewList = (newListName: string): void => {
-    void newListName;
-  };
+
+  /**
+   * Asking for the new list's name is delegated to the page that opened this
+   * popover, which replaces this no-op through the popover's `componentProps`.
+   *
+   * The prompt cannot live in this template: the popover is created with
+   * `dismissOnSelect`, so the same tap that asks for a new list also dismisses
+   * the popover, and Ionic destroys this component — together with any overlay
+   * declared inside it — as part of that dismissal. See GitHub issue #1231.
+   */
+  requestNewList: () => void = () => undefined;
 
   removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();
-
-  public saveButton = [
-    {
-      text: 'Save',
-      handler: this.onAlertDidDismiss.bind(this),
-    },
-    'Cancel',
-  ];
-
-  public newListInputs = [
-    {
-      placeholder: 'Name',
-    },
-  ];
-
-  onAlertDidDismiss(event: unknown): void {
-    if (!Array.isArray(event) || typeof event[0] !== 'string') {
-      return;
-    }
-
-    this.onNewList(event[0]);
-  }
 
   onBucketlistSelected(bucketList: Bucketlist): void {
     const bite = this.bite();

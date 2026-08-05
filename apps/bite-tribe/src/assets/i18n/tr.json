@@ -77,6 +77,8 @@
   "confirm-password": "Şifreyi tekrarla",
   "yes-unfollow": "Evet, takipten çık",
   "bitetrail-saved-as-bucket-list": "BiteTrail, yapılacaklar listesine eklendi!",
+  "bucket-list-created-with-bite": "Liste oluşturuldu ve Bite eklendi!",
+  "bucket-list-create-with-bite-failed": "Liste oluşturulamadı. Lütfen tekrar dene.",
   "go-to-bucket-lists": "Yapılacaklar Listesine git",
   "no-stay-public": "Hayır, Herkeze acik kal",
   "yes-go-private": "Evet, gizli moda geç",

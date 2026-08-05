@@ -384,15 +384,68 @@ describe('DetailsPage', () => {
       expect(presentSpy).toHaveBeenCalled();
     });
 
-    it('should bind the correct context to onNewList in popover', async () => {
+    it('should bind the correct context to promptForNewList in popover', async () => {
       const mockEvent = new MouseEvent('click');
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      const boundOnNewList = jest.spyOn(component.onNewList, 'bind');
+      const boundPrompt = jest.spyOn(component.promptForNewList, 'bind');
 
       await component.showBucketListsSelection(mockEvent);
 
-      expect(boundOnNewList).toHaveBeenCalledWith(component);
+      expect(boundPrompt).toHaveBeenCalledWith(component);
+    });
+  });
+
+  // The popover destroys itself on select, so the name prompt is owned by the
+  // page. Ionic passes the alert's text inputs to the handler as an object
+  // keyed by input name — reading it as an array dropped the name and left the
+  // list uncreated. See GitHub issue #1231.
+  describe('promptForNewList', () => {
+    const presentAlertAndGetSaveHandler = async (): Promise<
+      AlertButton['handler']
+    > => {
+      let capturedButtons: AlertButton[] = [];
+      const alert = document.createElement('ion-alert');
+      jest.spyOn(alert, 'present').mockResolvedValue();
+      jest.spyOn(alertController, 'create').mockImplementation((options) => {
+        capturedButtons = (options?.buttons ?? []).filter(
+          (button): button is AlertButton => typeof button !== 'string',
+        );
+        return Promise.resolve(alert);
+      });
+
+      await component.promptForNewList();
+
+      return capturedButtons.find((button) => button.text === 'save')?.handler;
+    };
+
+    it('should emit the name Ionic reports for the alert input', async () => {
+      const emitSpy = jest.spyOn(component.newList, 'emit');
+
+      const handler = await presentAlertAndGetSaveHandler();
+      const dismissed = handler?.({ name: 'My New List' });
+
+      expect(emitSpy).toHaveBeenCalledWith('My New List');
+      expect(dismissed).toBe(true);
+    });
+
+    it('should trim the name before emitting', async () => {
+      const emitSpy = jest.spyOn(component.newList, 'emit');
+
+      const handler = await presentAlertAndGetSaveHandler();
+      handler?.({ name: '  Street Food  ' });
+
+      expect(emitSpy).toHaveBeenCalledWith('Street Food');
+    });
+
+    it('should keep the alert open and emit nothing for a blank name', async () => {
+      const emitSpy = jest.spyOn(component.newList, 'emit');
+
+      const handler = await presentAlertAndGetSaveHandler();
+      const dismissed = handler?.({ name: '   ' });
+
+      expect(emitSpy).not.toHaveBeenCalled();
+      expect(dismissed).toBe(false);
     });
   });
 

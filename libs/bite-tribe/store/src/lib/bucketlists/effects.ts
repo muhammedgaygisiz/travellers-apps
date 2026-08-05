@@ -61,12 +61,28 @@ export class BucketListEffect {
     ),
   );
 
+  /**
+   * The list and its first Bite are written together, so there is nothing to
+   * roll back on failure. Confirming or reporting only once that write settles
+   * keeps the Bite's inline create-and-add flow from claiming a save that never
+   * happened. See GitHub issue #1231.
+   */
   createBucketlistAndSaveBiteIdToBucketListEffect$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BucketlistActions.createAndSaveBiteIdToBucketlist),
       switchMap((params) =>
         from(this.api.createBucketListAndSaveBiteIdToBucketList(params)).pipe(
-          map(() => BucketlistActions.createdBucketlistAndSavedBiteToIt()),
+          map(() => {
+            void this.showToast('bucket-list-created-with-bite');
+            return BucketlistActions.createdBucketlistAndSavedBiteToIt();
+          }),
+          catchError((error) => {
+            console.error('Error creating bucket list for bite:', error);
+            void this.showToast('bucket-list-create-with-bite-failed');
+            return of(
+              BucketlistActions.createBucketlistAndSaveBiteToItFailed(),
+            );
+          }),
         ),
       ),
     );
@@ -172,6 +188,16 @@ export class BucketListEffect {
     if (!toast) {
       return;
     }
+
+    await toast.present();
+  }
+
+  private async showToast(translationKey: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message: this.transloco.translate(translationKey),
+      duration: 3000,
+      position: 'bottom',
+    });
 
     await toast.present();
   }

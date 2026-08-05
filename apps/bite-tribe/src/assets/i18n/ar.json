@@ -77,6 +77,8 @@
   "confirm-password": "تأكيد كلمة المرور",
   "yes-unfollow": "نعم، إلغاء المتابعة",
   "bitetrail-saved-as-bucket-list": "تم حفظ BiteTrail كقائمة آمال!",
+  "bucket-list-created-with-bite": "تم إنشاء قائمة الآمال وإضافة الـ Bite!",
+  "bucket-list-create-with-bite-failed": "تعذّر إنشاء قائمة الآمال. يرجى المحاولة مرة أخرى.",
   "go-to-bucket-lists": "انتقل إلى قوائم الآمال",
   "no-stay-public": "لا، ابق عاماً",
   "yes-go-private": "نعم، انتقل إلى الخاص",

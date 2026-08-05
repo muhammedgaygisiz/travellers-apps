@@ -61,7 +61,7 @@ test.describe('Account and legal flows', () => {
   test('cancelling the confirmation leaves the account alone', async ({
     page,
   }) => {
-    const { uid } = await registerDisposableUser(page, 'cancel');
+    const { uid, email } = await registerDisposableUser(page, 'cancel');
 
     const settings = new SettingsPage(page);
     const deleteAccount = new DeleteAccountPage(page);
@@ -69,6 +69,7 @@ test.describe('Account and legal flows', () => {
     await settings.open();
     await settings.openDeleteAccount();
     await deleteAccount.expectContractVisible();
+    await deleteAccount.expectAccountIdentified(email);
     await deleteAccount.cancelDeletion();
 
     await expect(page).toHaveURL(/\/settings\/delete-account$/);
@@ -78,7 +79,7 @@ test.describe('Account and legal flows', () => {
   test('deletes the account, keeps the bites, and clears their author', async ({
     page,
   }) => {
-    const { uid } = await registerDisposableUser(page, 'delete');
+    const { uid, email } = await registerDisposableUser(page, 'delete');
 
     // Seeded rather than created through the UI: this test is about the
     // deletion contract, and creating a Bite by hand would drag a photo upload
@@ -101,7 +102,8 @@ test.describe('Account and legal flows', () => {
     await settings.open();
     await settings.openDeleteAccount();
     await deleteAccount.expectContractVisible();
-    await deleteAccount.confirmDeletion();
+    await deleteAccount.expectAccountIdentified(email);
+    await deleteAccount.confirmDeletion(email);
 
     // Success signs the user out, which navigates to login and reloads the app.
     await page.waitForURL(/\/(login|start)$/, { timeout: 60_000 });

@@ -1,13 +1,18 @@
 import { TestBed } from '@angular/core/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 import { AnalyticsService, AuthService } from 'ta-firestore';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+import { BehaviorSubject } from 'rxjs';
+import type { PublicUser } from 'model';
 import { DeleteMyAccountService } from '../delete-my-account.service';
 
 jest.mock('@capacitor-firebase/authentication');
 
 const reauthRequired = (): Error =>
   Object.assign(new Error('reauth_required'), { code: 'failed-precondition' });
+
+const CONFIRMED = { confirmedUid: 'user-1' };
 
 describe(DeleteMyAccountService.name, () => {
   let service: DeleteMyAccountService;
@@ -19,12 +24,21 @@ describe(DeleteMyAccountService.name, () => {
   const loginWithUsernameAndPassword = jest.fn();
   const getUser = jest.fn();
   const logEvent = jest.fn();
+  const publicUser$ = new BehaviorSubject<PublicUser | undefined>(undefined);
 
-  const setProvider = (providerId: string): void => {
+  const setCurrentUser = (
+    user: Record<string, unknown> | null = {
+      uid: 'user-1',
+      providerData: [{ providerId: 'password' }],
+    },
+  ): void => {
     (FirebaseAuthentication.getCurrentUser as jest.Mock).mockResolvedValue({
-      user: { providerData: [{ providerId }] },
+      user,
     });
   };
+
+  const setProvider = (providerId: string): void =>
+    setCurrentUser({ uid: 'user-1', providerData: [{ providerId }] });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -33,12 +47,20 @@ describe(DeleteMyAccountService.name, () => {
     signInWithGoogleAccount.mockResolvedValue(undefined);
     signInWithAppleAccount.mockResolvedValue(undefined);
     loginWithUsernameAndPassword.mockResolvedValue(undefined);
-    getUser.mockReturnValue({ uid: 'user-1', email: 'gone@example.com' });
-    setProvider('password');
+    getUser.mockReturnValue({
+      uid: 'user-1',
+      email: 'gone@example.com',
+      displayName: null,
+      photoUrl: null,
+      providerData: [{ providerId: 'password' }],
+    });
+    publicUser$.next(undefined);
+    setCurrentUser();
 
     TestBed.configureTestingModule({
       providers: [
         { provide: BiteTribeApiService, useValue: { deleteOwnAccount } },
+        { provide: BiteTribeStoreService, useValue: { publicUser$ } },
         {
           provide: AuthService,
           useValue: {
@@ -57,9 +79,71 @@ describe(DeleteMyAccountService.name, () => {
     service.reset();
   });
 
+  describe('the identity of the account that would be deleted', () => {
+    it('names the signed-in account with its sign-in method', () => {
+      expect(service.identity()).toEqual({
+        uid: 'user-1',
+        displayName: '',
+        email: 'gone@example.com',
+        photoUrl: '',
+        signInMethod: 'password',
+      });
+    });
+
+    it('prefers the profile name and photo the user recognizes', () => {
+      publicUser$.next({
+        userId: 'user-1',
+        displayName: 'Mia Fernandes',
+        email: 'mia@example.com',
+        photoUrl: 'https://example.com/mia.jpg',
+      } as PublicUser);
+
+      expect(service.identity()).toMatchObject({
+        displayName: 'Mia Fernandes',
+        photoUrl: 'https://example.com/mia.jpg',
+        email: 'gone@example.com',
+      });
+    });
+
+    it('ignores a profile left over from another account', () => {
+      publicUser$.next({
+        userId: 'someone-else',
+        displayName: 'Someone Else',
+        email: 'someone@example.com',
+        photoUrl: 'https://example.com/someone.jpg',
+      } as PublicUser);
+
+      expect(service.identity()).toMatchObject({
+        uid: 'user-1',
+        displayName: '',
+        photoUrl: '',
+      });
+    });
+
+    it.each([
+      ['google.com', 'google'],
+      ['apple.com', 'apple'],
+      ['github.com', 'unknown'],
+    ])('reports %s as %s', (providerId, signInMethod) => {
+      getUser.mockReturnValue({
+        uid: 'user-1',
+        email: null,
+        providerData: [{ providerId }],
+      });
+
+      expect(service.identity()?.signInMethod).toBe(signInMethod);
+    });
+
+    it('is empty while nobody is signed in', () => {
+      getUser.mockReturnValue(null);
+
+      expect(service.identity()).toBeNull();
+    });
+  });
+
   describe('given the deletion succeeds', () => {
     it('signs the user out', async () => {
-      await expect(service.deleteAccount()).resolves.toBe(true);
+      await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(true);
 
       expect(logout).toHaveBeenCalled();
       expect(service.state()).toBe('idle');
@@ -67,11 +151,55 @@ describe(DeleteMyAccountService.name, () => {
     });
   });
 
+  describe('given the session no longer matches the confirmed account', () => {
+    it('deletes nothing when another account is signed in', async () => {
+      setCurrentUser({
+        uid: 'user-2',
+        providerData: [{ providerId: 'password' }],
+      });
+
+      await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(false);
+
+      expect(deleteOwnAccount).not.toHaveBeenCalled();
+      expect(service.state()).toBe('failed');
+      expect(service.failure()).toBe('account-changed');
+      expect(logEvent).toHaveBeenCalledWith('account_deletion_failed', {
+        reason: 'account_changed',
+      });
+    });
+
+    it('deletes nothing when the session is gone', async () => {
+      setCurrentUser(null);
+
+      await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(false);
+
+      expect(deleteOwnAccount).not.toHaveBeenCalled();
+      expect(service.failure()).toBe('account-changed');
+    });
+
+    it('deletes nothing when the provider sheet signed a different account in', async () => {
+      setProvider('google.com');
+      deleteOwnAccount.mockRejectedValueOnce(reauthRequired());
+      signInWithGoogleAccount.mockImplementationOnce(async () => {
+        setCurrentUser({
+          uid: 'user-2',
+          providerData: [{ providerId: 'google.com' }],
+        });
+      });
+
+      await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(false);
+
+      expect(deleteOwnAccount).toHaveBeenCalledTimes(1);
+      expect(logout).not.toHaveBeenCalled();
+      expect(service.failure()).toBe('account-changed');
+    });
+  });
+
   describe('given the sign-in is too old', () => {
     it('asks for the password on an email/password account', async () => {
       deleteOwnAccount.mockRejectedValueOnce(reauthRequired());
 
-      await expect(service.deleteAccount()).resolves.toBe(false);
+      await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(false);
 
       expect(service.passwordRequired()).toBe(true);
       expect(logout).not.toHaveBeenCalled();
@@ -84,7 +212,7 @@ describe(DeleteMyAccountService.name, () => {
         .mockResolvedValueOnce({ status: 'completed' });
 
       await expect(
-        service.deleteAccount({ password: 'hunter2' }),
+        service.deleteAccount({ ...CONFIRMED, password: 'hunter2' }),
       ).resolves.toBe(true);
 
       expect(loginWithUsernameAndPassword).toHaveBeenCalledWith({
@@ -101,7 +229,7 @@ describe(DeleteMyAccountService.name, () => {
         .mockRejectedValueOnce(reauthRequired())
         .mockResolvedValueOnce({ status: 'completed' });
 
-      await expect(service.deleteAccount()).resolves.toBe(true);
+      await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(true);
 
       expect(signInWithGoogleAccount).toHaveBeenCalled();
       expect(service.passwordRequired()).toBe(false);
@@ -114,7 +242,7 @@ describe(DeleteMyAccountService.name, () => {
         .mockRejectedValueOnce(reauthRequired())
         .mockResolvedValueOnce({ status: 'completed' });
 
-      await expect(service.deleteAccount()).resolves.toBe(true);
+      await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(true);
 
       expect(signInWithAppleAccount).toHaveBeenCalled();
     });
@@ -124,9 +252,10 @@ describe(DeleteMyAccountService.name, () => {
       deleteOwnAccount.mockRejectedValueOnce(reauthRequired());
       signInWithGoogleAccount.mockRejectedValueOnce(new Error('cancelled'));
 
-      await expect(service.deleteAccount()).resolves.toBe(false);
+      await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(false);
 
       expect(service.state()).toBe('failed');
+      expect(service.failure()).toBe('generic');
       expect(deleteOwnAccount).toHaveBeenCalledTimes(1);
       expect(logout).not.toHaveBeenCalled();
       expect(logEvent).toHaveBeenCalledWith('account_deletion_failed', {
@@ -139,9 +268,10 @@ describe(DeleteMyAccountService.name, () => {
     it('reports the failure and keeps the user signed in', async () => {
       deleteOwnAccount.mockRejectedValueOnce(new Error('internal'));
 
-      await expect(service.deleteAccount()).resolves.toBe(false);
+      await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(false);
 
       expect(service.state()).toBe('failed');
+      expect(service.failure()).toBe('generic');
       expect(logout).not.toHaveBeenCalled();
       expect(logEvent).toHaveBeenCalledWith('account_deletion_failed', {
         reason: 'unknown',

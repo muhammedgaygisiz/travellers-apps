@@ -287,7 +287,7 @@ Record one row per platform per execution. Keep previous rows when re-running af
 
 ### Session 16 - Disposable-Account Deletion
 
-- The deletion page did not identify the signed-in disposable account before the irreversible action. [Issue #1234](https://github.com/muhammedgaygisiz/travellers-apps/issues/1234) tracks displaying the correct account identity on the page and final confirmation.
+- The deletion page did not identify the signed-in disposable account before the irreversible action. [Issue #1234](https://github.com/muhammedgaygisiz/travellers-apps/issues/1234) now names the account on the page and repeats it in the final confirmation and the password prompt, and refuses a deletion whose signed-in account is no longer the confirmed one (see [[issue-1234]]). Reverification on a physical iOS device through TestFlight is still open.
 - The deletion contract and final destructive action were otherwise understandable.
 - Password reauthentication was requested before deletion, and a visible progress state appeared.
 - Deletion completed within two minutes and returned the app automatically to the unauthenticated Start screen.

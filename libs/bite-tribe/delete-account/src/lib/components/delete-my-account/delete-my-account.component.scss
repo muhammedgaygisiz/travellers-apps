@@ -1,3 +1,30 @@
+.identity-section {
+  margin-bottom: 1.5rem;
+
+  h2 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+  }
+
+  ion-avatar {
+    // The generic icon has to fill the same circle as a photo, otherwise the
+    // row jumps depending on whether the account has one.
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .identity-avatar {
+    font-size: 2.5rem;
+    color: var(--ion-color-medium);
+  }
+}
+
 .contract-section {
   margin-top: 1.5rem;
 

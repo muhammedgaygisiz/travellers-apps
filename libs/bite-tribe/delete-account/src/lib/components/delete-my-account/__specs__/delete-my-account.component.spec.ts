@@ -4,6 +4,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { AlertController } from '@ionic/angular/standalone';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { getIonicConfig } from 'utils';
+import type { DeleteAccountIdentity } from 'bite-tribe/account-data-access';
 import { DeleteMyAccountComponent } from '../delete-my-account.component';
 
 // A real Transloco instance rather than a stubbed service: the alert copy and
@@ -11,16 +12,33 @@ import { DeleteMyAccountComponent } from '../delete-my-account.component';
 const en = {
   cancel: 'Cancel',
   password: 'Password',
+  'no-display-name': 'No display name',
   'delete-account': 'Delete Account',
   'delete-account-irreversible': 'Deleting your account cannot be undone.',
   'delete-account-kept-bites':
     'Your Bites stay on BiteTribe without your name.',
   'delete-account-removed-profile': 'Your profile, display name and photo',
   'delete-account-failed': 'We could not delete your account.',
+  'delete-account-account-changed': 'The signed-in account changed.',
   'delete-account-in-progress': 'Deleting your account...',
   'delete-account-confirm-title': 'Delete account?',
   'delete-account-confirm-delete': 'Delete account',
   'delete-account-reauth-title': "Confirm it's you",
+  'delete-account-identity-title': 'Account to be deleted',
+  'delete-account-identity-method-password':
+    'Signed in with email and password',
+  'delete-account-identity-method-google': 'Signed in with Google',
+  'delete-account-identity-method-apple': 'Signed in with Apple',
+  'delete-account-identity-method-unknown': 'Signed in with a linked account',
+  'delete-account-identity-unavailable': 'No account is signed in.',
+};
+
+const passwordAccount: DeleteAccountIdentity = {
+  uid: 'user-1',
+  displayName: 'Mia Fernandes',
+  email: 'mia@example.com',
+  photoUrl: '',
+  signInMethod: 'password',
 };
 
 interface AlertButton {
@@ -30,6 +48,7 @@ interface AlertButton {
 
 interface AlertOptions {
   header?: string;
+  subHeader?: string;
   buttons: AlertButton[];
   inputs?: unknown[];
 }
@@ -71,6 +90,7 @@ describe(DeleteMyAccountComponent.name, () => {
     fixture = TestBed.createComponent(DeleteMyAccountComponent);
     component = fixture.componentInstance;
     compRef = fixture.componentRef;
+    compRef.setInput('identity', passwordAccount);
 
     fixture.detectChanges();
   });
@@ -97,6 +117,90 @@ describe(DeleteMyAccountComponent.name, () => {
     );
   });
 
+  describe('the account being deleted', () => {
+    it('names the signed-in account before the destructive action', () => {
+      const identity = fixture.nativeElement.querySelector(
+        '[data-testid="delete-account-identity"]',
+      );
+
+      expect(identity.textContent).toContain('Mia Fernandes');
+      expect(identity.textContent).toContain('mia@example.com');
+      expect(identity.textContent).toContain(
+        'Signed in with email and password',
+      );
+    });
+
+    it.each([
+      ['google', 'Signed in with Google'],
+      ['apple', 'Signed in with Apple'],
+    ] as const)('names the %s sign-in method', (signInMethod, label) => {
+      compRef.setInput('identity', {
+        ...passwordAccount,
+        email: '',
+        signInMethod,
+      });
+      fixture.detectChanges();
+
+      const identity = fixture.nativeElement.querySelector(
+        '[data-testid="delete-account-identity"]',
+      );
+
+      expect(identity.textContent).toContain(label);
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="delete-account-identity-email"]',
+        ),
+      ).toBeNull();
+    });
+
+    it('falls back to the generic avatar when the photo does not load', () => {
+      compRef.setInput('identity', {
+        ...passwordAccount,
+        photoUrl: 'https://example.com/broken.jpg',
+      });
+      fixture.detectChanges();
+
+      const image = fixture.nativeElement.querySelector(
+        '[data-testid="delete-account-identity"] img',
+      );
+
+      expect(image).toBeTruthy();
+
+      image.dispatchEvent(new Event('error'));
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="delete-account-identity"] img',
+        ),
+      ).toBeNull();
+    });
+
+    it('offers no deletion while no account is signed in', async () => {
+      const emitted: unknown[] = [];
+      component.deleteAccount.subscribe((request) => emitted.push(request));
+
+      compRef.setInput('identity', null);
+      fixture.detectChanges();
+
+      const submit = fixture.nativeElement.querySelector(
+        '[data-testid="delete-account-submit"]',
+      );
+
+      expect(submit.disabled).toBe(true);
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="delete-account-identity-missing"]',
+        ),
+      ).toBeTruthy();
+
+      await component.confirmDelete();
+
+      expect(present).not.toHaveBeenCalled();
+      expect(emitted).toEqual([]);
+    });
+  });
+
   describe('confirmDelete', () => {
     it('asks for an explicit destructive confirmation before emitting', async () => {
       const emitted: unknown[] = [];
@@ -112,7 +216,31 @@ describe(DeleteMyAccountComponent.name, () => {
       );
       destructive?.handler?.();
 
-      expect(emitted).toEqual([{}]);
+      expect(emitted).toEqual([{ uid: 'user-1' }]);
+    });
+
+    it('repeats the account in the final confirmation', async () => {
+      await component.confirmDelete();
+
+      expect(presentedAlerts[0].subHeader).toBe(
+        'Mia Fernandes · mia@example.com',
+      );
+    });
+
+    it('names the sign-in method when the provider withholds the email', async () => {
+      compRef.setInput('identity', {
+        ...passwordAccount,
+        email: '',
+        displayName: '',
+        signInMethod: 'apple',
+      });
+      fixture.detectChanges();
+
+      await component.confirmDelete();
+
+      expect(presentedAlerts[0].subHeader).toBe(
+        'No display name · Signed in with Apple',
+      );
     });
 
     it('offers a cancel option', async () => {
@@ -134,7 +262,15 @@ describe(DeleteMyAccountComponent.name, () => {
       expect(presentedAlerts[0].inputs).toHaveLength(1);
     });
 
-    it('emits the typed password', async () => {
+    it('names the account the password belongs to', async () => {
+      await component.promptForPassword();
+
+      expect(presentedAlerts[0].subHeader).toBe(
+        'Mia Fernandes · mia@example.com',
+      );
+    });
+
+    it('emits the typed password with the confirmed account', async () => {
       const emitted: unknown[] = [];
       component.deleteAccount.subscribe((request) => emitted.push(request));
 
@@ -148,7 +284,7 @@ describe(DeleteMyAccountComponent.name, () => {
       expect(emitted).toEqual([]);
 
       expect(destructive?.handler?.({ password: 'hunter2' })).toBe(true);
-      expect(emitted).toEqual([{ password: 'hunter2' }]);
+      expect(emitted).toEqual([{ uid: 'user-1', password: 'hunter2' }]);
     });
   });
 
@@ -174,7 +310,19 @@ describe(DeleteMyAccountComponent.name, () => {
     expect(
       fixture.nativeElement.querySelector(
         '[data-testid="delete-account-error"]',
-      ),
-    ).toBeTruthy();
+      ).textContent,
+    ).toContain('We could not delete your account.');
+  });
+
+  it('says so when the deletion was refused because the account changed', () => {
+    compRef.setInput('failed', true);
+    compRef.setInput('failure', 'account-changed');
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="delete-account-error"]',
+      ).textContent,
+    ).toContain('The signed-in account changed.');
   });
 });

@@ -17,6 +17,7 @@ export class DeleteAccountPage {
   readonly submitButton: Locator;
   readonly error: Locator;
   readonly alert: Locator;
+  readonly identity: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -27,6 +28,7 @@ export class DeleteAccountPage {
     this.submitButton = this.root.getByTestId('delete-account-submit');
     this.error = this.root.getByTestId('delete-account-error');
     this.alert = page.locator('ion-alert:visible');
+    this.identity = this.root.getByTestId('delete-account-identity');
   }
 
   async expectVisible(): Promise<void> {
@@ -43,10 +45,28 @@ export class DeleteAccountPage {
     await expect(this.keptList).toBeVisible();
   }
 
-  async confirmDeletion(): Promise<void> {
+  /**
+   * The page has to say which account it would delete, otherwise the contract
+   * above it cannot be checked against anything (issue #1234).
+   */
+  async expectAccountIdentified(email: string): Promise<void> {
+    await expect(this.identity).toBeVisible();
+    await expect(this.identity).toContainText(email);
+  }
+
+  /**
+   * Passing `account` also asserts that the final confirmation repeats it: the
+   * alert is the point of no return, so it has to name its target too.
+   */
+  async confirmDeletion(account?: string): Promise<void> {
     await this.submitButton.click();
 
     await expect(this.alert).toBeVisible();
+
+    if (account) {
+      await expect(this.alert).toContainText(account);
+    }
+
     await this.alert
       .getByRole('button', { name: 'Delete account', exact: true })
       .click();

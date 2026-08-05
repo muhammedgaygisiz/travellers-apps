@@ -8,6 +8,45 @@
   <ion-content class="ion-padding">
     <h1 class="ion-margin-bottom">{{ 'delete-account' | transloco }}</h1>
 
+    <!-- The account comes before the warning: an irreversible action is only
+    understandable once it is clear which account it applies to. -->
+    <section class="identity-section">
+      <h2>{{ 'delete-account-identity-title' | transloco }}</h2>
+
+      @if (identity(); as account) {
+        <ion-item lines="none" data-testid="delete-account-identity">
+          <ion-avatar slot="start" aria-hidden="true">
+            @if (avatarUrl()) {
+              <img [src]="avatarUrl()" alt="" (error)="onPhotoError()" />
+            } @else {
+              <ion-icon name="person-circle-outline" class="identity-avatar" />
+            }
+          </ion-avatar>
+          <ion-label class="ion-text-wrap">
+            <h3 data-testid="delete-account-identity-name">
+              @if (account.displayName) {
+                {{ account.displayName }}
+              } @else {
+                {{ 'no-display-name' | transloco }}
+              }
+            </h3>
+            @if (account.email) {
+              <p data-testid="delete-account-identity-email">
+                {{ account.email }}
+              </p>
+            }
+            <p data-testid="delete-account-identity-method">
+              {{ signInMethodKey() | transloco }}
+            </p>
+          </ion-label>
+        </ion-item>
+      } @else {
+        <p data-testid="delete-account-identity-missing">
+          {{ 'delete-account-identity-unavailable' | transloco }}
+        </p>
+      }
+    </section>
+
     <ion-text color="danger">
       <p data-testid="delete-account-warning">
         <strong>{{ 'delete-account-irreversible' | transloco }}</strong>
@@ -83,7 +122,7 @@
     @if (failed()) {
       <ion-text color="danger">
         <p data-testid="delete-account-error">
-          {{ 'delete-account-failed' | transloco }}
+          {{ failureKey() | transloco }}
         </p>
       </ion-text>
     }
@@ -107,10 +146,12 @@
         (click)="cancelDelete.emit()"
         >{{ 'cancel' | transloco }}
       </ion-button>
+      <!-- Without a known account there is nothing to confirm against, so the
+      destructive action stays unavailable rather than guessing a target. -->
       <ion-button
         data-testid="delete-account-submit"
         color="danger"
-        [disabled]="deleting()"
+        [disabled]="deleting() || !identity()"
         (click)="confirmDelete()"
         >{{ 'delete-account' | transloco }}
       </ion-button>

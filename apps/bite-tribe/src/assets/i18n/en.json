@@ -468,5 +468,10 @@
   "privacy-policy-changes-body": "We may update this Privacy Policy from time to time. Changes will be reflected on this page with an updated “Last updated” date.",
   "privacy-policy-contact-title": "9. Contact",
   "privacy-policy-contact-intro": "If you have questions about this Privacy Policy or your data, you can contact us at:",
-  "all-rights-reserved": "All rights reserved."
+  "all-rights-reserved": "All rights reserved.",
+  "open-bite": "Open Bite",
+  "close-image-viewer": "Close photo",
+  "bite-not-found": "Bite not found",
+  "this-bite-is-no-longer-available": "This Bite is no longer available. It may have been deleted.",
+  "go-back": "Go back"
 }

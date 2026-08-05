@@ -94,6 +94,78 @@ describe('DetailsPage', () => {
     expect(component.reviews()).toMatchSnapshot();
   });
 
+  describe('Image viewer', () => {
+    it('opens the viewer with the photo that was tapped', () => {
+      componentRef.setInput('bite', {
+        id: '1',
+        name: 'Pizza',
+        image: 'dish.jpg',
+      } as Bite);
+      componentRef.changeDetectorRef.detectChanges();
+
+      fixture.nativeElement
+        .querySelector('[data-testid="dish-image-button"]')
+        .click();
+
+      expect(component.viewerImages()).toEqual([
+        { src: 'dish.jpg', alt: 'Dish Image' },
+      ]);
+    });
+
+    it('offers no action, since the page already is the Bite', () => {
+      component.openImageViewer('dish.jpg');
+
+      expect(component.viewerImages()[0].actionLabel).toBeUndefined();
+    });
+
+    it('closes on request', () => {
+      component.openImageViewer('dish.jpg');
+
+      component.closeImageViewer();
+
+      expect(component.viewerImages()).toEqual([]);
+    });
+  });
+
+  describe('Deleted Bite', () => {
+    it('blocks the page with a dismissal-proof alert offering the way back', async () => {
+      const present = jest.fn();
+      let created: Parameters<AlertController['create']>[0] | undefined;
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async (options) => {
+          created = options;
+          return { present } as never;
+        });
+      jest.spyOn(component.goBack, 'emit');
+
+      componentRef.setInput('biteNotFound', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await Promise.resolve();
+
+      expect(present).toHaveBeenCalled();
+      expect(created?.backdropDismiss).toBe(false);
+      expect(created?.buttons).toHaveLength(1);
+
+      (created?.buttons as { handler?: () => void }[])[0].handler?.();
+      expect(component.goBack.emit).toHaveBeenCalled();
+    });
+
+    it('reports a missing Bite once, not on every check', async () => {
+      const create = jest
+        .spyOn(alertController, 'create')
+        .mockResolvedValue({ present: jest.fn() } as never);
+
+      componentRef.setInput('biteNotFound', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await Promise.resolve();
+      componentRef.changeDetectorRef.detectChanges();
+      await Promise.resolve();
+
+      expect(create).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('Bite Display', () => {
     const actionTestIds = [
       'bite-details-share',

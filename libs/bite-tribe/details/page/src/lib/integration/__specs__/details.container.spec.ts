@@ -71,6 +71,8 @@ describe(DetailsContainer.name, () => {
             exchangeRates: signal({}),
             preferredCurrency: signal('EUR'),
             isAuthenticated: signal(true),
+            biteNotFound: signal(false),
+            goBack: jest.fn(),
           },
         },
         {

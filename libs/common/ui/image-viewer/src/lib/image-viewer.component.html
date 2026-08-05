@@ -1,0 +1,47 @@
+<div class="viewer">
+  <div class="viewer-top">
+    @if (hasMultipleImages()) {
+      <span class="viewer-position" data-testid="image-viewer-position">
+        {{ position() }}
+      </span>
+    }
+    <ion-button
+      class="viewer-close"
+      fill="clear"
+      data-testid="image-viewer-close"
+      [attr.aria-label]="'close-image-viewer' | transloco"
+      (click)="closed.emit()"
+    >
+      <ion-icon name="close-outline" slot="icon-only" />
+    </ion-button>
+  </div>
+
+  <swiper-container
+    class="viewer-slides"
+    zoom="true"
+    [attr.initial-slide]="startIndex()"
+    (swiperslidechange)="onSlideChange($event)"
+  >
+    @for (image of images(); track image.src) {
+      <swiper-slide>
+        <div class="swiper-zoom-container">
+          <img [src]="image.src" [alt]="image.alt" />
+        </div>
+      </swiper-slide>
+    }
+  </swiper-container>
+
+  @let label = actionLabel();
+  @if (label) {
+    <div class="viewer-bottom">
+      <ion-button
+        fill="outline"
+        data-testid="image-viewer-action"
+        (click)="actionSelected.emit(activeIndex())"
+      >
+        {{ label }}
+        <ion-icon name="arrow-forward-outline" slot="end" />
+      </ion-button>
+    </div>
+  }
+</div>

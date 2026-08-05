@@ -1,12 +1,15 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { Directory, FileInfo, Filesystem } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
+import { biteIdFromImageName } from './bite-id-from-image-name';
 
 const IMAGE_FILE_PATTERN = /\.(gif|heic|heif|jpe?g|png|webp)$/i;
 
 export type GalleryImage = {
   name: string;
   src: string;
+  /** Set only for photos whose filename identifies the Bite they belong to. */
+  biteId?: string;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -15,6 +18,16 @@ export class GalleryService {
 
   readonly images = signal<GalleryImage[]>([]);
   readonly loading = signal(false);
+
+  /**
+   * Where the grid was scrolled to when the user left for a Bite, so returning
+   * lands on the photo they came from rather than back at the top.
+   */
+  readonly scrollTop = signal(0);
+
+  rememberScrollTop(scrollTop: number): void {
+    this.scrollTop.set(scrollTop);
+  }
 
   async loadImages(): Promise<void> {
     this.loading.set(true);
@@ -32,6 +45,7 @@ export class GalleryService {
           .map(({ name, uri }) => ({
             name,
             src: Capacitor.convertFileSrc(uri),
+            biteId: biteIdFromImageName(name),
           })),
       );
     } catch (error) {

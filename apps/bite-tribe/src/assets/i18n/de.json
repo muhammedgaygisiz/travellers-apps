@@ -468,5 +468,10 @@
   "privacy-policy-changes-body": "Wir können diese Datenschutzerklärung von Zeit zu Zeit aktualisieren. Änderungen werden auf dieser Seite mit einem aktualisierten Datum unter „Zuletzt aktualisiert“ angezeigt.",
   "privacy-policy-contact-title": "9. Kontakt",
   "privacy-policy-contact-intro": "Wenn du Fragen zu dieser Datenschutzerklärung oder zu deinen Daten hast, kannst du uns hier erreichen:",
-  "all-rights-reserved": "Alle Rechte vorbehalten."
+  "all-rights-reserved": "Alle Rechte vorbehalten.",
+  "open-bite": "Bite öffnen",
+  "close-image-viewer": "Foto schließen",
+  "bite-not-found": "Bite nicht gefunden",
+  "this-bite-is-no-longer-available": "Dieser Bite ist nicht mehr verfügbar. Er wurde möglicherweise gelöscht.",
+  "go-back": "Zurück"
 }

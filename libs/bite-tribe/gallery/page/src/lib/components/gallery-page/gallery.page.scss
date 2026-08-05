@@ -16,7 +16,24 @@
   gap: 0.5rem;
 }
 
+.gallery-tile {
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  // Without a press state the tile reads as decoration; the gallery had no tap
+  // feedback at all before. See GitHub issue #1232.
+  transition: opacity 0.1s ease-in-out;
+
+  &:active {
+    opacity: 0.92;
+  }
+}
+
 .gallery-grid img {
+  display: block;
   width: 100%;
   aspect-ratio: 1;
   border-radius: 0.5rem;

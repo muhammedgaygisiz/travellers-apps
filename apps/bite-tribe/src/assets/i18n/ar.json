@@ -468,5 +468,10 @@
   "privacy-policy-changes-title": "8. التغييرات على هذه السياسة",
   "privacy-policy-changes-body": "قد نحدّث سياسة الخصوصية هذه من وقت لآخر. وستظهر التغييرات على هذه الصفحة مع تحديث تاريخ «آخر تحديث».",
   "privacy-policy-contact-title": "9. التواصل",
-  "privacy-policy-contact-intro": "إذا كانت لديك أسئلة حول سياسة الخصوصية هذه أو حول بياناتك، يمكنك التواصل معنا عبر:"
+  "privacy-policy-contact-intro": "إذا كانت لديك أسئلة حول سياسة الخصوصية هذه أو حول بياناتك، يمكنك التواصل معنا عبر:",
+  "open-bite": "فتح الـ Bite",
+  "close-image-viewer": "إغلاق الصورة",
+  "bite-not-found": "لم يتم العثور على الـ Bite",
+  "this-bite-is-no-longer-available": "لم يعد هذا الـ Bite متاحًا. ربما تم حذفه.",
+  "go-back": "رجوع"
 }

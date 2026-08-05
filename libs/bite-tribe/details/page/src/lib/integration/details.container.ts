@@ -23,6 +23,8 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       [exchangeRates]="service.exchangeRates()"
       [preferredCurrency]="service.preferredCurrency()"
       [biteCreator]="service.biteCreator.value()"
+      [biteNotFound]="service.biteNotFound()"
+      (goBack)="service.goBack()"
       (submitNewReview)="service.saveReview($event)"
       (selectList)="service.addBiteToSelectedBucketList($event)"
       (removeBiteFromBucketlist)="service.removeBiteFromBucketlist($event)"

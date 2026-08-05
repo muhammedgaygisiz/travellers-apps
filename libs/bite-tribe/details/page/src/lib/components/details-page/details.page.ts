@@ -3,9 +3,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
@@ -25,12 +27,14 @@ import {
   IonLabel,
   IonList,
   IonListHeader,
+  IonModal,
   IonNote,
   IonSkeletonText,
   IonText,
   IonTextarea,
   PopoverController,
 } from '@ionic/angular/standalone';
+import { ImageViewerComponent, ImageViewerImage } from 'common/ui/image-viewer';
 import { CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -93,6 +97,8 @@ const NEW_LIST_NAME_INPUT = 'name';
     IonSkeletonText,
     TranslocoPipe,
     BiteImageStatusComponent,
+    IonModal,
+    ImageViewerComponent,
   ],
 })
 export class DetailsPage {
@@ -106,6 +112,7 @@ export class DetailsPage {
   exchangeRates = input<Record<string, number>>();
   preferredCurrency = input<string>();
   enableImageRetry = input(false, { transform: booleanAttribute });
+  biteNotFound = input(false, { transform: booleanAttribute });
 
   /**
    * Mirrors the feed card: a photo that is still uploading, or whose upload was
@@ -130,6 +137,7 @@ export class DetailsPage {
   readonly gotoEdit = output<Bite>();
   readonly gotoNew = output<Bite>();
   readonly retryImageUpload = output<Bite>();
+  readonly goBack = output();
 
   private readonly formBuilder = inject(FormBuilder);
   private popoverController = inject(PopoverController);
@@ -140,6 +148,61 @@ export class DetailsPage {
   activeLang = toSignal(this.transloco.langChanges$, {
     initialValue: this.transloco.getActiveLang?.() || 'en',
   });
+
+  private notFoundReported = false;
+
+  constructor() {
+    effect(() => {
+      if (!this.biteNotFound() || this.notFoundReported) {
+        return;
+      }
+
+      this.notFoundReported = true;
+      void this.reportBiteNotFound();
+    });
+  }
+
+  /**
+   * A Bite that has been deleted leaves nothing to interact with, so the alert
+   * refuses backdrop dismissal and offers only the way back. See GitHub issue
+   * #1232.
+   */
+  private async reportBiteNotFound(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: this.transloco.translate('bite-not-found'),
+      message: this.transloco.translate('this-bite-is-no-longer-available'),
+      backdropDismiss: false,
+      buttons: [
+        {
+          text: this.transloco.translate('go-back'),
+          handler: (): void => this.goBack.emit(),
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  /**
+   * The photo handed to the full-screen viewer, empty while it is closed.
+   * Testers reached for pinch-zoom here first, which is what made the viewer
+   * worth sharing with the gallery. See GitHub issue #1232.
+   */
+  private readonly viewedImageSrc = signal('');
+
+  readonly viewerImages = computed<ImageViewerImage[]>(() => {
+    const src = this.viewedImageSrc();
+
+    return src ? [{ src, alt: 'Dish Image' }] : [];
+  });
+
+  openImageViewer(src: string): void {
+    this.viewedImageSrc.set(src);
+  }
+
+  closeImageViewer(): void {
+    this.viewedImageSrc.set('');
+  }
 
   likeCounts = computed(() => getLikeCounts(this.bite()));
   userLikeType = computed(() => getUserLikeType(this.bite(), this.userId()));

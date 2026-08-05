@@ -468,5 +468,10 @@
   "privacy-policy-changes-title": "8. በዚህ መመሪያ ላይ የሚደረጉ ለውጦች",
   "privacy-policy-changes-body": "ይህን የግላዊነት መመሪያ ከጊዜ ወደ ጊዜ ልናዘምነው እንችላለን። ለውጦቹ በተዘመነ የ“መጨረሻ የተዘመነው” ቀን በዚህ ገጽ ላይ ይንጸባረቃሉ።",
   "privacy-policy-contact-title": "9. እውቂያ",
-  "privacy-policy-contact-intro": "ስለዚህ የግላዊነት መመሪያ ወይም ስለ መረጃህ ጥያቄ ካለህ በሚከተለው ልታገኘን ትችላለህ፦"
+  "privacy-policy-contact-intro": "ስለዚህ የግላዊነት መመሪያ ወይም ስለ መረጃህ ጥያቄ ካለህ በሚከተለው ልታገኘን ትችላለህ፦",
+  "open-bite": "Bite ክፈት",
+  "close-image-viewer": "ፎቶ ዝጋ",
+  "bite-not-found": "Bite አልተገኘም",
+  "this-bite-is-no-longer-available": "ይህ Bite ከዚህ በኋላ አይገኝም። ተሰርዞ ሊሆን ይችላል።",
+  "go-back": "ተመለስ"
 }

@@ -42,6 +42,58 @@ describe(GalleryPage.name, () => {
     expect(images[0].getAttribute('src')).toBe('local-photo-uri');
   });
 
+  it('opens the viewer at the tapped photo', () => {
+    fixture.componentRef.setInput('images', [
+      { name: 'first.jpg', src: 'first-uri' },
+      { name: 'second.jpg', src: 'second-uri' },
+    ]);
+    fixture.detectChanges();
+
+    fixture.nativeElement
+      .querySelectorAll('[data-testid="gallery-tile"]')[1]
+      .click();
+
+    expect(component.viewerIndex()).toBe(1);
+  });
+
+  it('offers the Bite action only for photos named after a Bite', () => {
+    fixture.componentRef.setInput('images', [
+      { name: 'bites_abc-123.jpg', src: 'first-uri', biteId: 'abc-123' },
+      { name: 'IMG_0417.jpg', src: 'second-uri' },
+    ]);
+    fixture.detectChanges();
+
+    const [fromBite, unrelated] = component.viewerImages();
+    expect(fromBite.actionLabel).toBe('open-bite');
+    expect(unrelated.actionLabel).toBeUndefined();
+  });
+
+  it('closes the viewer before leaving for the Bite', () => {
+    fixture.componentRef.setInput('images', [
+      { name: 'bites_abc-123.jpg', src: 'first-uri', biteId: 'abc-123' },
+    ]);
+    fixture.detectChanges();
+    jest.spyOn(component.openBite, 'emit');
+    component.openViewer(0);
+
+    component.goToBite(0);
+
+    expect(component.viewerIndex()).toBeUndefined();
+    expect(component.openBite.emit).toHaveBeenCalledWith('abc-123');
+  });
+
+  it('stays put for a photo without a Bite', () => {
+    fixture.componentRef.setInput('images', [
+      { name: 'IMG_0417.jpg', src: 'first-uri' },
+    ]);
+    fixture.detectChanges();
+    jest.spyOn(component.openBite, 'emit');
+
+    component.goToBite(0);
+
+    expect(component.openBite.emit).not.toHaveBeenCalled();
+  });
+
   it('runs the header progress bar while the spinner shows', () => {
     fixture.componentRef.setInput('loading', true);
     fixture.detectChanges();

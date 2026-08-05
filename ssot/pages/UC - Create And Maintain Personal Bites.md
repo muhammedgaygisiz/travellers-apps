@@ -83,6 +83,9 @@ Users can create and maintain real dish-level food experiences.
 - `new-bite`
 - `bite/:biteId/edit`
 - "Post and add another Bite" action on `new-bite`.
+- Playwright "add another" E2E coverage: three Bites posted in one session
+  started from Home, and a session started from a menu item whose Restaurant is
+  kept for the Bites typed after it.
 - Bite API create, edit, upload, and image-path utilities.
 - `getCurrencyByPosition`
 - `searchNearbyPlaces`

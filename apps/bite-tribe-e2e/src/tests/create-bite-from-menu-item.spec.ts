@@ -1,6 +1,5 @@
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { geohashForLocation } from 'geofire-common';
 import { CreateBitePage } from '../pages/create-bite.page';
 import { MenuPage } from '../pages/menu.page';
 import { RestaurantPage } from '../pages/restaurant.page';
@@ -10,12 +9,13 @@ import { dismissCoachMarks } from '../support/coach-marks';
 import {
   deleteFirestoreDocument,
   queryDocumentsByStringField,
-  seedFirestoreDocument,
 } from '../support/firestore';
+import {
+  deleteRestaurantWithMenu,
+  seedRestaurantWithMenu,
+} from '../support/menu-fixture';
 import { completeOnboardingIfNeeded } from '../support/onboarding';
-import { TEST_USERS } from '../support/test-users';
 
-const POSITION = { latitude: 48.137154, longitude: 11.576124 };
 const IMAGE_FIXTURE = join(__dirname, '..', 'fixtures', 'bite.jpg');
 
 /**
@@ -37,102 +37,29 @@ test.describe('Create a Bite from a Restaurant menu item', () => {
     // The ids deliberately carry the word "menu". Deciding routes by searching
     // the URL text used to read them as a menu route, so the Restaurant was
     // never loaded on its own page and this journey could not run at all.
-    const restaurantId = `menu-draft-restaurant-${runId}`;
-    const restaurantName = `Menu Draft Bistro ${runId}`;
-    const menuId = `menu-draft-menu-${runId}`;
-    const biteId = `menu-draft-bite-${runId}`;
-    const firstDish = `Amok Trey ${runId}`;
-    const secondDish = `Lok Lak ${runId}`;
+    const fixture = {
+      restaurantId: `menu-draft-restaurant-${runId}`,
+      restaurantName: `Menu Draft Bistro ${runId}`,
+      menuId: `menu-draft-menu-${runId}`,
+      biteId: `menu-draft-bite-${runId}`,
+      biteName: `Menu Draft Starter ${runId}`,
+      dishes: [
+        {
+          name: `Amok Trey ${runId}`,
+          description: 'Steamed fish curry.',
+          price: 8.5,
+        },
+        {
+          name: `Lok Lak ${runId}`,
+          description: 'Pepper beef with rice.',
+          price: 9.5,
+        },
+      ],
+    };
+    const { restaurantId, restaurantName } = fixture;
+    const [firstDish, secondDish] = fixture.dishes;
 
-    await Promise.all([
-      seedFirestoreDocument(page, `restaurants/${restaurantId}`, {
-        id: { stringValue: restaurantId },
-        name: { stringValue: restaurantName },
-        description: { stringValue: 'A verified restaurant with a menu.' },
-        menuId: { stringValue: menuId },
-        biteIds: {
-          arrayValue: { values: [{ stringValue: biteId }] },
-        },
-        position: {
-          mapValue: {
-            fields: {
-              latitude: { doubleValue: POSITION.latitude },
-              longitude: { doubleValue: POSITION.longitude },
-            },
-          },
-        },
-      }),
-      seedFirestoreDocument(page, `menus/${menuId}`, {
-        id: { stringValue: menuId },
-        categories: {
-          arrayValue: {
-            values: [
-              {
-                mapValue: {
-                  fields: {
-                    title: { stringValue: 'Mains' },
-                    items: {
-                      arrayValue: {
-                        values: [
-                          {
-                            mapValue: {
-                              fields: {
-                                name: { stringValue: firstDish },
-                                description: {
-                                  stringValue: 'Steamed fish curry.',
-                                },
-                                price: { doubleValue: 8.5 },
-                              },
-                            },
-                          },
-                          {
-                            mapValue: {
-                              fields: {
-                                name: { stringValue: secondDish },
-                                description: {
-                                  stringValue: 'Pepper beef with rice.',
-                                },
-                                price: { doubleValue: 9.5 },
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                },
-              },
-            ],
-          },
-        },
-      }),
-      seedFirestoreDocument(page, `bites/${biteId}`, {
-        id: { stringValue: biteId },
-        name: { stringValue: `Menu Draft Starter ${runId}` },
-        place: { stringValue: restaurantName },
-        restaurantId: { stringValue: restaurantId },
-        price: { stringValue: '12.00' },
-        currency: { stringValue: 'EUR' },
-        rating: { integerValue: '4' },
-        position: {
-          mapValue: {
-            fields: {
-              latitude: { doubleValue: POSITION.latitude },
-              longitude: { doubleValue: POSITION.longitude },
-            },
-          },
-        },
-        geohash: {
-          stringValue: geohashForLocation([
-            POSITION.latitude,
-            POSITION.longitude,
-          ]),
-        },
-        userId: { stringValue: TEST_USERS.organisation.uid },
-        createdAt: { stringValue: new Date().toISOString() },
-        createdAtTimestamp: { integerValue: String(runId) },
-      }),
-    ]);
+    await seedRestaurantWithMenu(page, fixture);
 
     await loginAsTestUser(page);
     await completeOnboardingIfNeeded(page);
@@ -178,12 +105,12 @@ test.describe('Create a Bite from a Restaurant menu item', () => {
     };
 
     await openMenuFromHome();
-    await menu.expectItem(firstDish);
+    await menu.expectItem(firstDish.name);
 
     // The supported flow: the menu item seeds this creation session.
-    await menu.createBiteFrom(firstDish);
+    await menu.createBiteFrom(firstDish.name);
     await createBite.expectPrefilledWith({
-      name: firstDish,
+      name: firstDish.name,
       place: restaurantName,
       price: '8.5',
     });
@@ -201,9 +128,9 @@ test.describe('Create a Bite from a Restaurant menu item', () => {
     // The same for another menu item: it prefills its own dish and price rather
     // than the cancelled ones.
     await openMenuFromHome();
-    await menu.createBiteFrom(secondDish);
+    await menu.createBiteFrom(secondDish.name);
     await createBite.expectPrefilledWith({
-      name: secondDish,
+      name: secondDish.name,
       place: restaurantName,
       price: '9.5',
     });
@@ -218,13 +145,14 @@ test.describe('Create a Bite from a Restaurant menu item', () => {
 
     await expect
       .poll(
-        () => queryDocumentsByStringField(page, 'bites', 'name', secondDish),
+        () =>
+          queryDocumentsByStringField(page, 'bites', 'name', secondDish.name),
         { timeout: 15_000 },
       )
       .toMatchObject([
         {
           fields: {
-            name: secondDish,
+            name: secondDish.name,
             place: restaurantName,
             restaurantId,
           },
@@ -235,12 +163,10 @@ test.describe('Create a Bite from a Restaurant menu item', () => {
       page,
       'bites',
       'name',
-      secondDish,
+      secondDish.name,
     );
 
     await deleteFirestoreDocument(page, savedBite.path);
-    await deleteFirestoreDocument(page, `bites/${biteId}`);
-    await deleteFirestoreDocument(page, `menus/${menuId}`);
-    await deleteFirestoreDocument(page, `restaurants/${restaurantId}`);
+    await deleteRestaurantWithMenu(page, fixture);
   });
 });

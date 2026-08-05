@@ -1,0 +1,78 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.viewer {
+  position: relative;
+  display: flex;
+  height: 100%;
+  background: #000;
+}
+
+.viewer-slides {
+  width: 100%;
+  height: 100%;
+}
+
+swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// The zoom container is Swiper's own hook: it measures this element to decide
+// how far the photo may be scaled and panned.
+.swiper-zoom-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+}
+
+.viewer-top,
+.viewer-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.viewer-top {
+  top: 0;
+  justify-content: flex-end;
+  padding-top: var(--ion-safe-area-top, 0);
+}
+
+.viewer-bottom {
+  bottom: 0;
+  justify-content: center;
+  padding-bottom: var(--ion-safe-area-bottom, 0);
+}
+
+.viewer-position {
+  margin-inline-start: 1rem;
+  margin-inline-end: auto;
+  color: #fff;
+  font-size: 0.875rem;
+}
+
+.viewer-close {
+  --color: #fff;
+}
+
+.viewer-bottom ion-button {
+  --color: #fff;
+  --border-color: rgba(255, 255, 255, 0.5);
+  margin: 0.5rem;
+}

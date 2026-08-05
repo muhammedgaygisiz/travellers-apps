@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import {
   AlertController,
+  IonContent,
+  IonModal,
   provideIonicAngular,
 } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
@@ -40,6 +43,150 @@ describe(GalleryPage.name, () => {
     const images = fixture.nativeElement.querySelectorAll('.gallery-grid img');
     expect(images).toHaveLength(1);
     expect(images[0].getAttribute('src')).toBe('local-photo-uri');
+  });
+
+  it('opens the viewer at the tapped photo', () => {
+    fixture.componentRef.setInput('images', [
+      { name: 'first.jpg', src: 'first-uri' },
+      { name: 'second.jpg', src: 'second-uri' },
+    ]);
+    fixture.detectChanges();
+
+    fixture.nativeElement
+      .querySelectorAll('[data-testid="gallery-tile"]')[1]
+      .click();
+
+    expect(component.viewerIndex()).toBe(1);
+  });
+
+  it('offers the Bite action only for photos named after a Bite', () => {
+    fixture.componentRef.setInput('images', [
+      { name: 'bites_abc-123.jpg', src: 'first-uri', biteId: 'abc-123' },
+      { name: 'IMG_0417.jpg', src: 'second-uri' },
+    ]);
+    fixture.detectChanges();
+
+    const [fromBite, unrelated] = component.viewerImages();
+    expect(fromBite.actionLabel).toBe('open-bite');
+    expect(unrelated.actionLabel).toBeUndefined();
+  });
+
+  // Navigating with the overlay still up leaves it above the Bite, where its
+  // close button no longer belongs to the active page. See GitHub issue #1232.
+  it('waits for the viewer to dismiss before leaving for the Bite', async () => {
+    fixture.componentRef.setInput('images', [
+      { name: 'bites_abc-123.jpg', src: 'first-uri', biteId: 'abc-123' },
+    ]);
+    fixture.detectChanges();
+    component.openViewer(0);
+    fixture.detectChanges();
+
+    const order: string[] = [];
+    const modal = fixture.debugElement.query(
+      By.directive(IonModal),
+    ).componentInstance;
+    jest.spyOn(modal, 'dismiss').mockImplementation(async () => {
+      order.push('dismiss');
+      return true;
+    });
+    jest.spyOn(component.openBite, 'emit').mockImplementation(() => {
+      order.push('navigate');
+    });
+
+    await component.goToBite(0);
+
+    expect(order).toEqual(['dismiss', 'navigate']);
+    expect(component.viewerIndex()).toBeUndefined();
+    expect(component.openBite.emit).toHaveBeenCalledWith('abc-123');
+  });
+
+  it('stays put for a photo without a Bite', async () => {
+    fixture.componentRef.setInput('images', [
+      { name: 'IMG_0417.jpg', src: 'first-uri' },
+    ]);
+    fixture.detectChanges();
+    jest.spyOn(component.openBite, 'emit');
+
+    await component.goToBite(0);
+
+    expect(component.openBite.emit).not.toHaveBeenCalled();
+  });
+
+  describe('returning from a Bite', () => {
+    const images = [{ name: 'first.jpg', src: 'first-uri' }];
+
+    // `ta-page` renders an ion-content of its own, so the grid's is picked by
+    // its class rather than by directive, which would match the wrapper first.
+    const contentInstance = (): IonContent =>
+      fixture.debugElement.query(
+        By.css('ion-content.content-safe-padding-bottom'),
+      ).componentInstance;
+
+    // The first render is what creates the ion-content to spy on, and the
+    // restore fires during change detection, so the offset arrives only after
+    // the spy is in place.
+    const renderWith = (
+      scrollTop: number,
+      galleryImages = images,
+    ): jest.SpyInstance => {
+      fixture.componentRef.setInput('images', galleryImages);
+      fixture.detectChanges();
+
+      const scrollToPoint = jest
+        .spyOn(contentInstance(), 'scrollToPoint')
+        .mockResolvedValue(undefined);
+
+      fixture.componentRef.setInput('initialScrollTop', scrollTop);
+      fixture.detectChanges();
+
+      return scrollToPoint;
+    };
+
+    it('restores the offset the user left from', () => {
+      const scrollToPoint = renderWith(240);
+
+      expect(scrollToPoint).toHaveBeenCalledWith(0, 240);
+    });
+
+    it('restores it once, not on every later change', () => {
+      const scrollToPoint = renderWith(240);
+      scrollToPoint.mockClear();
+
+      fixture.componentRef.setInput('images', [
+        ...images,
+        { name: 'second.jpg', src: 'second-uri' },
+      ]);
+      fixture.componentRef.setInput('initialScrollTop', 300);
+      fixture.detectChanges();
+
+      expect(scrollToPoint).not.toHaveBeenCalled();
+    });
+
+    it('leaves the grid alone when the user never scrolled', () => {
+      const scrollToPoint = renderWith(0);
+
+      expect(scrollToPoint).not.toHaveBeenCalled();
+    });
+
+    it('waits for the images before scrolling anywhere', () => {
+      const scrollToPoint = renderWith(240, []);
+
+      expect(scrollToPoint).not.toHaveBeenCalled();
+    });
+
+    it('reports the current offset for the way out', async () => {
+      fixture.componentRef.setInput('images', images);
+      fixture.detectChanges();
+      jest
+        .spyOn(contentInstance(), 'getScrollElement')
+        .mockResolvedValue({ scrollTop: 180 } as HTMLElement);
+
+      expect(await component.currentScrollTop()).toBe(180);
+    });
+
+    it('reports no offset before the content exists', async () => {
+      expect(await component.currentScrollTop()).toBe(0);
+    });
   });
 
   it('runs the header progress bar while the spinner shows', () => {

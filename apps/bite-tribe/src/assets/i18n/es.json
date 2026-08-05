@@ -468,5 +468,10 @@
   "privacy-policy-changes-title": "8. Cambios en esta política",
   "privacy-policy-changes-body": "Podemos actualizar esta Política de privacidad de vez en cuando. Los cambios se reflejarán en esta página con una fecha de «última actualización» actualizada.",
   "privacy-policy-contact-title": "9. Contacto",
-  "privacy-policy-contact-intro": "Si tienes preguntas sobre esta Política de privacidad o sobre tus datos, puedes escribirnos a:"
+  "privacy-policy-contact-intro": "Si tienes preguntas sobre esta Política de privacidad o sobre tus datos, puedes escribirnos a:",
+  "open-bite": "Abrir Bite",
+  "close-image-viewer": "Cerrar foto",
+  "bite-not-found": "Bite no encontrado",
+  "this-bite-is-no-longer-available": "Este Bite ya no está disponible. Puede que se haya eliminado.",
+  "go-back": "Volver"
 }

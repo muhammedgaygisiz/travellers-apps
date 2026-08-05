@@ -468,5 +468,10 @@
   "privacy-policy-changes-title": "8. การเปลี่ยนแปลงนโยบายนี้",
   "privacy-policy-changes-body": "เราอาจอัปเดตนโยบายความเป็นส่วนตัวนี้เป็นครั้งคราว การเปลี่ยนแปลงจะแสดงในหน้านี้พร้อมวันที่ “อัปเดตล่าสุด” ที่ปรับปรุงแล้ว",
   "privacy-policy-contact-title": "9. ติดต่อ",
-  "privacy-policy-contact-intro": "หากคุณมีคำถามเกี่ยวกับนโยบายความเป็นส่วนตัวนี้หรือข้อมูลของคุณ ติดต่อเราได้ที่:"
+  "privacy-policy-contact-intro": "หากคุณมีคำถามเกี่ยวกับนโยบายความเป็นส่วนตัวนี้หรือข้อมูลของคุณ ติดต่อเราได้ที่:",
+  "open-bite": "เปิด Bite",
+  "close-image-viewer": "ปิดรูปภาพ",
+  "bite-not-found": "ไม่พบ Bite",
+  "this-bite-is-no-longer-available": "Bite นี้ไม่พร้อมใช้งานแล้ว อาจถูกลบไปแล้ว",
+  "go-back": "ย้อนกลับ"
 }

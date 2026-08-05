@@ -153,6 +153,7 @@
       ],
       "push-notifications": ["libs/common/push-notifications/src/index.ts"],
       "image-upload": ["libs/common/ui/image-upload/src/index.ts"],
+      "common/ui/image-viewer": ["libs/common/ui/image-viewer/src/index.ts"],
       "bite-tribe/privacy-policy": [
         "libs/bite-tribe/privacy-policy/src/index.ts"
       ],

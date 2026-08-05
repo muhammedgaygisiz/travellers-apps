@@ -1,0 +1,21 @@
+{
+  "name": "image-viewer",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/common/ui/image-viewer/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:common", "type:ui", "framework:ionic"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/common/ui/image-viewer/jest.config.cts",
+        "tsConfig": "libs/common/ui/image-viewer/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

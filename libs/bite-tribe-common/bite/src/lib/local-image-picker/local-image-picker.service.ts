@@ -1,7 +1,7 @@
 import { EventEmitter, inject, Injectable, signal } from '@angular/core';
-import { Capacitor } from '@capacitor/core';
 import { Directory, FileInfo, Filesystem } from '@capacitor/filesystem';
 import { ModalController } from '@ionic/angular/standalone';
+import { localImageSrc } from 'utils';
 import {
   LocalImagePickerComponent,
   type LocalImage,
@@ -67,14 +67,16 @@ export class LocalImagePickerService {
         directory: Directory.Documents,
       });
 
-      return files
-        .filter(isImageFile)
-        .sort((a, b) => (b.mtime ?? 0) - (a.mtime ?? 0))
-        .map(({ name, uri }) => ({
-          name,
-          uri,
-          src: Capacitor.convertFileSrc(uri),
-        }));
+      return await Promise.all(
+        files
+          .filter(isImageFile)
+          .sort((a, b) => (b.mtime ?? 0) - (a.mtime ?? 0))
+          .map(async ({ name, uri }) => ({
+            name,
+            uri,
+            src: await localImageSrc(name, uri),
+          })),
+      );
     } catch (error) {
       console.error('Error loading local images:', error);
 

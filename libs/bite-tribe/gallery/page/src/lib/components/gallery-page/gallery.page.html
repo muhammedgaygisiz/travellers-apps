@@ -24,14 +24,33 @@
     <p class="gallery-state">{{ 'no-local-images-found' | transloco }}</p>
     } @else {
     <div class="gallery-grid">
-      @for (image of images(); track image.name) {
-      <img
-        [src]="image.src"
-        [alt]="'locally-saved-image' | transloco"
-        loading="lazy"
-      />
+      @for (image of images(); track image.name; let index = $index) {
+      <button
+        type="button"
+        class="gallery-tile"
+        data-testid="gallery-tile"
+        (click)="openViewer(index)"
+      >
+        <img
+          [src]="image.src"
+          [alt]="'locally-saved-image' | transloco"
+          loading="lazy"
+        />
+      </button>
       }
     </div>
     }
   </ion-content>
+
+  @let openAt = viewerIndex();
+  <ion-modal [isOpen]="openAt !== undefined" (didDismiss)="closeViewer()">
+    <ng-template>
+      <image-viewer
+        [images]="viewerImages()"
+        [startIndex]="openAt ?? 0"
+        (closed)="closeViewer()"
+        (actionSelected)="goToBite($event)"
+      />
+    </ng-template>
+  </ion-modal>
 </ta-page>

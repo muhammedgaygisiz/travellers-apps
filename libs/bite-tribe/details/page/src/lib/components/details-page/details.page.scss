@@ -12,6 +12,17 @@
   .dish-image {
     width: 100%;
     min-height: 20vh;
+    display: block;
+  }
+
+  /* The photo keeps its full-bleed look; the button only makes it tappable. */
+  .dish-image-button {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
   }
 
   /* Stands in for the header photo, so it takes the same space the loading

@@ -28,6 +28,16 @@ export class DetailsService {
   isAuthenticated = this.dataAccess.isAuthenticated;
   biteCreator = this.dataAccess.biteCreator;
   position = this.dataAccess.position;
+  biteNotFound = this.dataAccess.biteNotFound;
+
+  /**
+   * Leaves a Bite that no longer exists. The page it was opened from — gallery,
+   * feed or a shared link — is whatever the navigation stack holds, so this
+   * hands back rather than routing anywhere specific.
+   */
+  goBack(): void {
+    this.navController.back();
+  }
 
   saveReview(newReview: { review: string; biteId: string }): void {
     this.dataAccess.saveNewReview(newReview);

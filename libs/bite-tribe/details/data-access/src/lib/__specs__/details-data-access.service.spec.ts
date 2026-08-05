@@ -1,4 +1,5 @@
 import { DetailsDataAccessService } from '../details-data-access.service';
+import { BiteNotFoundError } from '../bite-not-found-error';
 import { TestBed } from '@angular/core/testing';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of, throwError } from 'rxjs';
@@ -101,6 +102,22 @@ describe(DetailsDataAccessService.name, () => {
       it('should return undefined', async () => {
         const result = await service.biteLoader(loaderParams({}));
         expect(result).toBeUndefined();
+      });
+    });
+
+    describe('given the bite no longer exists', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockResolvedValue(getDocumentResult(null));
+      });
+
+      // Firestore answers a deleted document with a successful, empty snapshot,
+      // which used to become a Bite carrying nothing but an id. See #1232.
+      it('should report it as not found instead of an empty bite', async () => {
+        await expect(
+          service.biteLoader(loaderParams({ biteId: 'gone' })),
+        ).rejects.toBeInstanceOf(BiteNotFoundError);
       });
     });
 

@@ -21,6 +21,7 @@ import { Share } from '@capacitor/share';
 import { lastValueFrom } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { retry, withTimeout } from './async-retry';
+import { BiteNotFoundError } from './bite-not-found-error';
 
 const SHARE_BITE_URL = 'https://bite-tribe.web.app/s/bite';
 
@@ -77,6 +78,10 @@ export class DetailsDataAccessService {
         BITE_LOAD_RETRY_DELAY_MS,
       );
 
+      if (!res.snapshot.data) {
+        throw new BiteNotFoundError(biteId);
+      }
+
       return {
         ...res.snapshot.data,
         likes,
@@ -94,6 +99,9 @@ export class DetailsDataAccessService {
     }),
     loader: this.biteLoader.bind(this),
   });
+
+  /** True once the read has come back and the Bite is gone for good. */
+  biteNotFound = computed(() => this.bite.error() instanceof BiteNotFoundError);
 
   reviews = toSignal(this.storeService.reviews$, { initialValue: [] });
   bucketlists = toSignal(this.storeService.bucketlists$, {

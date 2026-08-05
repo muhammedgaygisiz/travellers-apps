@@ -468,5 +468,10 @@
   "privacy-policy-changes-title": "8. Bu Politikadaki Değişiklikler",
   "privacy-policy-changes-body": "Bu Gizlilik Politikasını zaman zaman güncelleyebiliriz. Değişiklikler, güncellenmiş bir “Son güncelleme” tarihiyle bu sayfaya yansıtılır.",
   "privacy-policy-contact-title": "9. İletişim",
-  "privacy-policy-contact-intro": "Bu Gizlilik Politikası veya verilerin hakkında sorun varsa bize şu adresten ulaşabilirsin:"
+  "privacy-policy-contact-intro": "Bu Gizlilik Politikası veya verilerin hakkında sorun varsa bize şu adresten ulaşabilirsin:",
+  "open-bite": "Bite'ı aç",
+  "close-image-viewer": "Fotoğrafı kapat",
+  "bite-not-found": "Bite bulunamadı",
+  "this-bite-is-no-longer-available": "Bu Bite artık mevcut değil. Silinmiş olabilir.",
+  "go-back": "Geri dön"
 }

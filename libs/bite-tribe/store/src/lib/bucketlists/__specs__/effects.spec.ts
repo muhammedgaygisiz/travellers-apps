@@ -54,6 +54,7 @@ describe('BucketListEffect', () => {
 
   beforeEach(() => {
     mockToastCreate.mockResolvedValue({ present: jest.fn() });
+    MockTranslocoService.translate.mockImplementation((key: string) => key);
     scheduler = new TestScheduler(assertDeepEqual);
     TestBed.configureTestingModule({
       providers: [
@@ -214,6 +215,62 @@ describe('BucketListEffect', () => {
       expect(
         createBucketListAndSaveBiteIdToBucketListSpy,
       ).toHaveBeenCalledTimes(1);
+    });
+
+    // The Bite's inline create-and-add flow used to report success no matter
+    // what the write did, and an error killed the effect for the rest of the
+    // session. See GitHub issue #1231.
+    it('should report a failure instead of the success action when the write fails', () => {
+      createBucketListAndSaveBiteIdToBucketListSpy.mockImplementationOnce(
+        () =>
+          throwError(() => new Error('Failed')) as unknown as ReturnType<
+            BiteTribeApiService['createBucketListAndSaveBiteIdToBucketList']
+          >,
+      );
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: BucketlistActions.createAndSaveBiteIdToBucketlist({
+            bucketListName: 'bucketListName',
+            biteId: 'biteId',
+          }),
+        });
+
+        expectObservable(
+          effects.createBucketlistAndSaveBiteIdToBucketListEffect$,
+        ).toBe('a', {
+          a: BucketlistActions.createBucketlistAndSaveBiteToItFailed(),
+        });
+      });
+
+      expect(mockToastCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'bucket-list-create-with-bite-failed',
+        }),
+      );
+    });
+
+    it('should confirm only once the write has settled', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: BucketlistActions.createAndSaveBiteIdToBucketlist({
+            bucketListName: 'bucketListName',
+            biteId: 'biteId',
+          }),
+        });
+
+        expectObservable(
+          effects.createBucketlistAndSaveBiteIdToBucketListEffect$,
+        ).toBe('a', {
+          a: BucketlistActions.createdBucketlistAndSavedBiteToIt(),
+        });
+      });
+
+      expect(mockToastCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'bucket-list-created-with-bite',
+        }),
+      );
     });
   });
 

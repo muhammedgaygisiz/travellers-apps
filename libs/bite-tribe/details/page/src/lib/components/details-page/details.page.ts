@@ -58,6 +58,8 @@ import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-cur
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { getLocalizedRegionName } from 'bite-tribe-common/bite';
 
+const NEW_LIST_NAME_INPUT = 'name';
+
 @Component({
   selector: 'details-page',
   templateUrl: 'details.page.html',
@@ -218,6 +220,50 @@ export class DetailsPage {
     this.newList.emit(newListName);
   }
 
+  /**
+   * Asks for the new list's name from the page rather than from the bucket list
+   * popover. The popover dismisses itself on select, which destroys the
+   * component and any overlay declared in its template, so the prompt has to
+   * outlive it. See GitHub issue #1231.
+   *
+   * Ionic hands the alert's text inputs to the handler as an object keyed by
+   * input name, not as an array, so the name is read by key.
+   */
+  async promptForNewList(): Promise<void> {
+    const alert = await this.alertController.create({
+      cssClass: 'new-bucket-list-alert',
+      header: this.transloco.translate('please-enter-a-name-for-your-new-list'),
+      inputs: [
+        {
+          name: NEW_LIST_NAME_INPUT,
+          placeholder: this.transloco.translate('name'),
+        },
+      ],
+      buttons: [
+        {
+          text: this.transloco.translate('cancel'),
+          role: 'cancel',
+        },
+        {
+          text: this.transloco.translate('save'),
+          handler: (values: Record<string, string>): boolean => {
+            const newListName = values?.[NEW_LIST_NAME_INPUT]?.trim();
+
+            if (!newListName) {
+              return false;
+            }
+
+            this.onNewList(newListName);
+
+            return true;
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
   async showBucketListsSelection($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
       component: BucketListSelectionComponent,
@@ -230,7 +276,7 @@ export class DetailsPage {
         bite: this.bite,
         selectList: this.selectList,
         removeBiteFromBucketlist: this.removeBiteFromBucketlist,
-        onNewList: this.onNewList.bind(this),
+        requestNewList: this.promptForNewList.bind(this),
       },
     });
 

@@ -77,6 +77,8 @@
   "confirm-password": "ยืนยันรหัสผ่าน",
   "yes-unfollow": "ใช่ เลิกติดตาม",
   "bitetrail-saved-as-bucket-list": "บันทึก BiteTrail เป็นรายการความฝันแล้ว!",
+  "bucket-list-created-with-bite": "สร้างรายการความฝันและเพิ่ม Bite แล้ว!",
+  "bucket-list-create-with-bite-failed": "สร้างรายการความฝันไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
   "go-to-bucket-lists": "ไปที่รายการความฝัน",
   "no-stay-public": "ไม่ ยังคงสาธารณะ",
   "yes-go-private": "ใช่ ไปส่วนตัว",

@@ -77,6 +77,8 @@
   "confirm-password": "የምስጢር ቁጥር አረጋግጥ",
   "yes-unfollow": "አዎ፣ መከታተልን አቁም",
   "bitetrail-saved-as-bucket-list": "BiteTrail እንደ ዝርዝር ተቀምጧል!",
+  "bucket-list-created-with-bite": "ዝርዝር ተፈጥሯል እና Bite ታክሏል!",
+  "bucket-list-create-with-bite-failed": "ዝርዝሩን መፍጠር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
   "go-to-bucket-lists": "ወደ ዝርዝሮቼ ሂድ",
   "no-stay-public": "አይ፣ ይፋዊ ሆኖ ይቆይ",
   "yes-go-private": "አዎ፣ ወደ ግል ሂድ",

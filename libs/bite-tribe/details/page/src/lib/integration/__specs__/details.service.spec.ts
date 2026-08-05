@@ -268,7 +268,7 @@ describe('DetailsService', () => {
       ).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle undefined bite gracefully', () => {
+    it('should not create a list when the bite is not loaded yet', () => {
       // Arrange
       mockDataAccessService = {
         bite: {
@@ -302,13 +302,7 @@ describe('DetailsService', () => {
       // Assert
       expect(
         mockDataAccessService.createAndSaveToBucketList,
-      ).toHaveBeenCalledWith({
-        bucketListName: 'My New List',
-        biteId: undefined,
-      });
-      expect(
-        mockDataAccessService.createAndSaveToBucketList,
-      ).toHaveBeenCalledTimes(1);
+      ).not.toHaveBeenCalled();
     });
   });
 

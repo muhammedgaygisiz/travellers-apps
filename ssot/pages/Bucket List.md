@@ -25,6 +25,7 @@ Bucket Lists also bridge BiteTrails into a personal user journey.
 - Removing a Bite from a Bucket List also removes its tried-out status for that Bucket List.
 - Deleting a Bucket List deletes the list, not the Bites.
 - Saving a BiteTrail as a Bucket List writes a sell record for that BiteTrail.
+- Creating a Bucket List from a Bite writes the list and that Bite's membership as one document, so the pair either both exist or neither does. The user is told it worked, or told it failed, only once that write has settled — never on the prompt closing. A list is not created before its Bite is loaded, since an unloaded Bite would leave an empty list behind. This is the contract GitHub issue #1231 restored, where a first list created from a Bite's empty add dialog reported success and persisted nothing.
 
 ## Required Data
 

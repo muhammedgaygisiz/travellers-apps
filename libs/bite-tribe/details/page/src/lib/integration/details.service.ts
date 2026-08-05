@@ -42,12 +42,20 @@ export class DetailsService {
     });
   }
 
+  /**
+   * The list and its first Bite are created in one write, so a Bite that is not
+   * loaded yet would silently produce an empty list. See GitHub issue #1231.
+   */
   saveBiteToBucketListWithNewList(newListName: string): void {
-    const currBite = this.bite.value();
+    const biteId = this.bite.value()?.id;
+
+    if (!biteId) {
+      return;
+    }
 
     this.dataAccess.createAndSaveToBucketList({
       bucketListName: newListName,
-      biteId: currBite?.id,
+      biteId,
     });
   }
 

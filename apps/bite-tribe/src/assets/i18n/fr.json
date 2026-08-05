@@ -77,6 +77,8 @@
   "confirm-password": "Confirmer le mot de passe",
   "yes-unfollow": "Oui, ne plus suivre",
   "bitetrail-saved-as-bucket-list": "BiteTrail enregistré comme liste de souhaits !",
+  "bucket-list-created-with-bite": "Liste de souhaits créée et Bite ajouté !",
+  "bucket-list-create-with-bite-failed": "La liste de souhaits n'a pas pu être créée. Réessaie.",
   "go-to-bucket-lists": "Aller aux listes de souhaits",
   "no-stay-public": "Non, rester public",
   "yes-go-private": "Oui, passer en privé",

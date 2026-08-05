@@ -1,11 +1,14 @@
 import { Page } from '@playwright/test';
 import { LoginPage } from '../pages/login.page';
-import { TEST_USERS } from './test-users';
+import { TEST_USERS, TestUser } from './test-users';
 
-/** Logs in as the default seeded emulator user. */
-export async function loginAsTestUser(page: Page): Promise<void> {
+/** Logs in as a seeded emulator user, the shared default one unless told otherwise. */
+export async function loginAsTestUser(
+  page: Page,
+  user: TestUser = TEST_USERS.default,
+): Promise<void> {
   const loginPage = new LoginPage(page);
 
   await loginPage.goto();
-  await loginPage.login(TEST_USERS.default.email, TEST_USERS.default.password);
+  await loginPage.login(user.email, user.password);
 }

@@ -73,12 +73,26 @@ const decodeFields = (
     Object.entries(fields).map(([key, value]) => [key, decodeValue(value)]),
   );
 
-export const getDocumentByStringField = async (
+/** A queried document together with the path needed to read or delete it again. */
+export interface QueriedDocument {
+  path: string;
+  fields: Record<string, unknown>;
+}
+
+/**
+ * Every document of a collection matching one string field, with its path.
+ *
+ * Used where the assertion is about how many documents match — "the Bite landed
+ * in exactly one list" — or where the matches have to be cleared to establish a
+ * precondition, neither of which a single-document lookup can express.
+ */
+export const queryDocumentsByStringField = async (
   page: Page,
   collectionId: string,
   fieldPath: string,
   value: string,
-): Promise<Record<string, unknown> | undefined> => {
+  limit?: number,
+): Promise<QueriedDocument[]> => {
   const response = await page.request.post(
     `${FIRESTORE_EMULATOR_URL}:runQuery`,
     {
@@ -93,7 +107,7 @@ export const getDocumentByStringField = async (
               value: { stringValue: value },
             },
           },
-          limit: 1,
+          ...(limit === undefined ? {} : { limit }),
         },
       },
     },
@@ -104,8 +118,33 @@ export const getDocumentByStringField = async (
   const results = (await response.json()) as Array<{
     document?: FirestoreDocument;
   }>;
-  const document = results[0]?.document;
-  return document ? decodeFields(document.fields ?? {}) : undefined;
+
+  return results
+    .map((result) => result.document)
+    .filter((document): document is FirestoreDocument => !!document)
+    .map((document) => ({
+      // `name` is the absolute resource name; the helpers here take the path
+      // relative to the documents root.
+      path: document.name.split('/documents/')[1],
+      fields: decodeFields(document.fields ?? {}),
+    }));
+};
+
+export const getDocumentByStringField = async (
+  page: Page,
+  collectionId: string,
+  fieldPath: string,
+  value: string,
+): Promise<Record<string, unknown> | undefined> => {
+  const [document] = await queryDocumentsByStringField(
+    page,
+    collectionId,
+    fieldPath,
+    value,
+    1,
+  );
+
+  return document?.fields;
 };
 
 export const getBiteByName = (

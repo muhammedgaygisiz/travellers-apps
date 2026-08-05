@@ -1,6 +1,5 @@
 import { ErrorHandler } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { GalleryService } from '../gallery.service';
 
@@ -12,13 +11,18 @@ jest.mock('@capacitor/filesystem', () => ({
   },
 }));
 
+// Turning a stored file into a loadable URL differs per platform and is covered
+// by its own tests; here it only has to be deterministic.
+jest.mock('utils', () => ({
+  localImageSrc: jest.fn((_name: string, uri: string) => Promise.resolve(uri)),
+}));
+
 describe(GalleryService.name, () => {
   let service: GalleryService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(GalleryService);
-    jest.spyOn(Capacitor, 'convertFileSrc').mockImplementation((uri) => uri);
   });
 
   afterEach(() => jest.clearAllMocks());

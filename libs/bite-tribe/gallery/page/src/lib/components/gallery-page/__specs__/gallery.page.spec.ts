@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import {
   AlertController,
   IonContent,
+  IonModal,
   provideIonicAngular,
 } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
@@ -70,28 +71,43 @@ describe(GalleryPage.name, () => {
     expect(unrelated.actionLabel).toBeUndefined();
   });
 
-  it('closes the viewer before leaving for the Bite', () => {
+  // Navigating with the overlay still up leaves it above the Bite, where its
+  // close button no longer belongs to the active page. See GitHub issue #1232.
+  it('waits for the viewer to dismiss before leaving for the Bite', async () => {
     fixture.componentRef.setInput('images', [
       { name: 'bites_abc-123.jpg', src: 'first-uri', biteId: 'abc-123' },
     ]);
     fixture.detectChanges();
-    jest.spyOn(component.openBite, 'emit');
     component.openViewer(0);
+    fixture.detectChanges();
 
-    component.goToBite(0);
+    const order: string[] = [];
+    const modal = fixture.debugElement.query(
+      By.directive(IonModal),
+    ).componentInstance;
+    jest.spyOn(modal, 'dismiss').mockImplementation(async () => {
+      order.push('dismiss');
+      return true;
+    });
+    jest.spyOn(component.openBite, 'emit').mockImplementation(() => {
+      order.push('navigate');
+    });
 
+    await component.goToBite(0);
+
+    expect(order).toEqual(['dismiss', 'navigate']);
     expect(component.viewerIndex()).toBeUndefined();
     expect(component.openBite.emit).toHaveBeenCalledWith('abc-123');
   });
 
-  it('stays put for a photo without a Bite', () => {
+  it('stays put for a photo without a Bite', async () => {
     fixture.componentRef.setInput('images', [
       { name: 'IMG_0417.jpg', src: 'first-uri' },
     ]);
     fixture.detectChanges();
     jest.spyOn(component.openBite, 'emit');
 
-    component.goToBite(0);
+    await component.goToBite(0);
 
     expect(component.openBite.emit).not.toHaveBeenCalled();
   });

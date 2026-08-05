@@ -46,6 +46,7 @@ export class GalleryPage {
   private readonly injector = inject(Injector);
 
   private readonly content = viewChild(IonContent);
+  private readonly viewer = viewChild(IonModal);
 
   readonly images = input<GalleryImage[]>([]);
   readonly loading = input(false);
@@ -95,16 +96,23 @@ export class GalleryPage {
   }
 
   /**
-   * Leaves for the Bite behind the photo at `index`. The viewer is dismissed
-   * first so the modal does not outlive the page it was opened from.
+   * Leaves for the Bite behind the photo at `index`.
+   *
+   * The viewer is dismissed through the modal itself and awaited, rather than
+   * by clearing the signal `isOpen` is bound to and navigating in the same
+   * breath. That route only asks for a dismissal on the next change detection
+   * pass, which the navigation can outrun, leaving the overlay on screen above
+   * the Bite - and its close button belonging to a page that is no longer the
+   * active one, so only a backdrop tap still works. See GitHub issue #1232.
    */
-  goToBite(index: number): void {
+  async goToBite(index: number): Promise<void> {
     const biteId = this.images()[index]?.biteId;
 
     if (!biteId) {
       return;
     }
 
+    await this.viewer()?.dismiss();
     this.closeViewer();
     this.openBite.emit(biteId);
   }

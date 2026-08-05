@@ -79,28 +79,73 @@ describe(provideFirestoreUtils.name, () => {
       .mockResolvedValue(READY);
   });
 
-  it('should create a Firebase startup initializer without calling App Check during provider construction', async () => {
-    const initializeAppCheckSpy = jest.spyOn(
-      appCheckUtils,
-      'initializeFirebaseAppCheck',
-    );
+  // The runtime mode is derived from `NX_APP_BITE_TRIBE_IS_DEV`, which Nx reads
+  // out of a developer's local `.env` and puts into the task environment. Both
+  // branches are pinned here: inheriting the ambient value made the expectation
+  // depend on the machine the suite runs on, so it passed in CI and failed on a
+  // workstation configured for the emulators.
+  describe('the App Check startup initializer', () => {
+    const originalIsDev = process.env['NX_APP_BITE_TRIBE_IS_DEV'];
 
-    provideFirestoreUtils({} as FirebaseOptions);
+    const setIsDev = (value: string | undefined): void => {
+      if (value === undefined) {
+        delete process.env['NX_APP_BITE_TRIBE_IS_DEV'];
 
-    expect(initializeAppCheckSpy).not.toHaveBeenCalled();
+        return;
+      }
 
-    const analytics = {} as unknown as Analytics;
-    const initializer = createFirebaseAppCheckInitializer(
-      firebaseApp,
-      { production: true },
-      analytics,
-    );
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = value;
+    };
 
-    await initializer();
+    afterEach(() => {
+      setIsDev(originalIsDev);
+    });
 
-    expect(initializeAppCheckSpy).toHaveBeenCalledWith(firebaseApp, {
-      analytics,
-      runtimeMode: 'production',
+    it('is created without calling App Check during provider construction', async () => {
+      setIsDev('false');
+
+      const initializeAppCheckSpy = jest.spyOn(
+        appCheckUtils,
+        'initializeFirebaseAppCheck',
+      );
+
+      provideFirestoreUtils({} as FirebaseOptions);
+
+      expect(initializeAppCheckSpy).not.toHaveBeenCalled();
+
+      const analytics = {} as unknown as Analytics;
+      const initializer = createFirebaseAppCheckInitializer(
+        firebaseApp,
+        { production: true },
+        analytics,
+      );
+
+      await initializer();
+
+      expect(initializeAppCheckSpy).toHaveBeenCalledWith(firebaseApp, {
+        analytics,
+        runtimeMode: 'production',
+      });
+    });
+
+    it('reports the simulator runtime mode when the app runs against the emulators', async () => {
+      setIsDev('true');
+
+      const analytics = {} as unknown as Analytics;
+
+      await createFirebaseAppCheckInitializer(
+        firebaseApp,
+        { production: true },
+        analytics,
+      )();
+
+      expect(appCheckUtils.initializeFirebaseAppCheck).toHaveBeenCalledWith(
+        firebaseApp,
+        {
+          analytics,
+          runtimeMode: 'dev_simulator',
+        },
+      );
     });
   });
 

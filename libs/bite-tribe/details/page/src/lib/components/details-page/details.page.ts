@@ -231,6 +231,7 @@ export class DetailsPage {
    */
   async promptForNewList(): Promise<void> {
     const alert = await this.alertController.create({
+      cssClass: 'new-bucket-list-alert',
       header: this.transloco.translate('please-enter-a-name-for-your-new-list'),
       inputs: [
         {

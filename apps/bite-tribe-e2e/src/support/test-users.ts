@@ -14,4 +14,16 @@ export const TEST_USERS = {
     email: 'organisation@test.com',
     password: 'Test4711',
   },
+  /**
+   * Kept out of every other journey so a spec can rely on what this account does
+   * *not* own. `default` is shared, and specs seed bucket lists onto it freely,
+   * so an empty-state precondition can only be stated here.
+   */
+  fresh: {
+    uid: 'sKjq4POYpxuV27V3JIJfshUre4Cw',
+    email: 'test2@test.com',
+    password: 'Test4711',
+  },
 } as const;
+
+export type TestUser = (typeof TEST_USERS)[keyof typeof TEST_USERS];

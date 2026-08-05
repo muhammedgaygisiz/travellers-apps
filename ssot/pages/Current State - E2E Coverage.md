@@ -31,7 +31,7 @@ Legend: ✅ covered · 🟡 partially covered · ⬜ not covered
 | [[UC - Search In BiteTribe]]                                    |       ✅        |   ✅    | Bite and restaurant-category search                                                                                                                                                                                                                                                                           |
 | [[UC - Manage Profile And Social Graph]]                        |       ⬜        |   ✅    | Profile editing, public-profile navigation, followers/following lists, follow/unfollow state, counts, and Firestore relationships                                                                                                                                                                             |
 | [[UC - Browse Restaurants And Places]]                          |       ⬜        |   ✅    | Restaurant search and empty states, verified restaurant context, unverified place context, associated Bites, and Bite navigation                                                                                                                                                                              |
-| [[UC - Save And Rate BiteTrails Through Bucket Lists]]          |       ⬜        |   ✅    | Adding from Bite details, claiming a free BiteTrail into a Bucket List with its sell record, the saved-trail return state, ticking a Bite off and undoing it, and the one-time BiteTrail rating with its read-only state                                                                                      |
+| [[UC - Save And Rate BiteTrails Through Bucket Lists]]          |       ⬜        |   ✅    | Adding from Bite details, creating the first list inline from a Bite on an account that owns none, claiming a free BiteTrail into a Bucket List with its sell record, the saved-trail return state, ticking a Bite off and undoing it, and the one-time BiteTrail rating with its read-only state             |
 | [[UC - Discover BiteTrails In The Marketplace]]                 |       ⬜        |   ✅    | Market place listing with owner, location, Bite count, and free-trail pricing, plus navigation into the trail's Bites                                                                                                                                                                                         |
 | [[UC - View Restaurant Menus]]                                  |       ⬜        |   ⬜    | No representative E2E journey                                                                                                                                                                                                                                                                                 |
 | [[UC - Use Gamification Signals]]                               |       ⬜        |   🟡    | Leaderboard ranking order, per-user Bite counts, navigation into a ranked profile, and the empty state; the Bite-triggered rebuild and the daily ranking notification stay on the functions unit tests                                                                                                        |
@@ -54,6 +54,11 @@ Legend: ✅ covered · 🟡 partially covered · ⬜ not covered
   journeys and `apps/bite-tribe-business-e2e` for business-app journeys.
 - Run emulator-backed E2E tests serially as described in
   [[Implementation - Testing]].
+- A journey whose precondition is what an account does _not_ own cannot use the
+  shared `default` test user, since other specs seed onto it. Use the isolated
+  `fresh` user in `apps/bite-tribe-e2e/src/support/test-users.ts` and clear the
+  documents the journey depends on, because the emulator keeps every write for
+  the whole run.
 - Update this table and the linked use-case evidence when coverage changes.
 
 ## Related Pages

@@ -60,6 +60,7 @@ describe(BiteDataAccessService.name, () => {
     savedNewBite: jest.Mock;
     saveEditedBite: jest.Mock;
     setEditingBite: jest.Mock;
+    clearCachedBite: jest.Mock;
   };
   let analytics: { logEvent: jest.Mock };
 
@@ -88,6 +89,7 @@ describe(BiteDataAccessService.name, () => {
       savedNewBite: jest.fn(),
       saveEditedBite: jest.fn(),
       setEditingBite: jest.fn(),
+      clearCachedBite: jest.fn(),
     };
     analytics = { logEvent: jest.fn() };
 
@@ -468,6 +470,12 @@ describe(BiteDataAccessService.name, () => {
       service.setEditingBite(bite);
 
       expect(store.setEditingBite).toHaveBeenCalledWith(bite);
+    });
+
+    it('clears the cached bite in the store', () => {
+      service.clearCachedBite();
+
+      expect(store.clearCachedBite).toHaveBeenCalled();
     });
 
     it('updates the Google place search text', () => {

@@ -48,6 +48,7 @@ describe(CreateBiteContainer.name, () => {
             image: signal(undefined),
             submitNewBite: (): void => {},
             setEditingBite: (): jest.Mock => jest.fn(),
+            clearCachedBite: jest.fn(),
             determineCurrencyForPosition: jest.fn(),
           },
         },
@@ -78,6 +79,20 @@ describe(CreateBiteContainer.name, () => {
       expect(setCurrentScreenSpy).toHaveBeenCalledWith({
         screenName: 'New Bite',
       });
+    });
+  });
+
+  describe('leaving the create form', () => {
+    it('should discard the prefilled draft so the next creation starts clean', () => {
+      mockCachedBite.set({
+        name: 'Amok Trey',
+        place: 'Khmer Kitchen',
+        restaurantId: 'restaurant-1',
+      });
+
+      fixture.destroy();
+
+      expect(biteServiceMock.clearCachedBite).toHaveBeenCalled();
     });
   });
 

@@ -25,6 +25,10 @@ describe('Bites - Actions', () => {
     expect(BiteActions.cacheBite).toBeDefined();
   });
 
+  it('should have clearCachedBite action', () => {
+    expect(BiteActions.clearCachedBite).toBeDefined();
+  });
+
   it('should have deleteBite action', () => {
     expect(BiteActions.deleteBite).toBeDefined();
   });

@@ -226,6 +226,56 @@ describe('Bite Reducer', () => {
     });
   });
 
+  describe('clearCachedBite', () => {
+    const MENU_ITEM_DRAFT = {
+      name: 'Amok Trey',
+      place: 'Khmer Kitchen',
+      restaurantId: 'restaurant-1',
+    } as Partial<Bite>;
+
+    it('should clear the cached bite in the state', () => {
+      const INITIAL_STATE = {
+        ...EMPTY_STATE,
+        cachedBite: MENU_ITEM_DRAFT,
+      };
+
+      const clearCachedBiteAction = BiteActions.clearCachedBite();
+
+      expect(reducer(INITIAL_STATE, clearCachedBiteAction)).toEqual({
+        ...EMPTY_STATE,
+      });
+    });
+
+    it('should leave a later generic bite creation without a prefilled draft', () => {
+      const cancelledMenuFlow = reducer(
+        reducer(EMPTY_STATE, BiteActions.cacheBite({ bite: MENU_ITEM_DRAFT })),
+        BiteActions.clearCachedBite(),
+      );
+
+      expect(cancelledMenuFlow.cachedBite).toBeUndefined();
+    });
+
+    it('should let a later menu item prefill its own draft', () => {
+      const otherMenuItemDraft = {
+        name: 'Lok Lak',
+        place: 'Khmer Kitchen',
+        restaurantId: 'restaurant-1',
+      } as Partial<Bite>;
+
+      const cancelledMenuFlow = reducer(
+        reducer(EMPTY_STATE, BiteActions.cacheBite({ bite: MENU_ITEM_DRAFT })),
+        BiteActions.clearCachedBite(),
+      );
+
+      expect(
+        reducer(
+          cancelledMenuFlow,
+          BiteActions.cacheBite({ bite: otherMenuItemDraft }),
+        ).cachedBite,
+      ).toEqual(otherMenuItemDraft);
+    });
+  });
+
   describe('saveNewBite', () => {
     it('should clear the cached bite in the state', () => {
       const INITIAL_STATE = {

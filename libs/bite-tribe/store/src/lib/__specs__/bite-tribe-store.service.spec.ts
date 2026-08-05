@@ -288,6 +288,17 @@ describe(BiteTribeStoreService.name, () => {
     ));
   });
 
+  describe('clearCachedBite', () => {
+    it('should dispatch clearCachedBite on BiteTribeStoreService', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        service.clearCachedBite();
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
   describe('saveSocialMediaLinks', () => {
     it('should dispatch saveSocialMediaLinks on BiteTribeStoreService', inject(
       [BiteTribeStoreService],

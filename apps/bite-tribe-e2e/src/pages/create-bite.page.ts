@@ -22,10 +22,24 @@ export class CreateBitePage {
   readonly tagsInput: Locator;
   readonly fromGps: Locator;
   readonly post: Locator;
+  readonly postAndAddAnother: Locator;
+  readonly backButton: Locator;
+  readonly selectedPlace: Locator;
+  readonly tagChips: Locator;
+  readonly suggestedTags: Locator;
+  readonly filledStars: Locator;
+  readonly imagePreview: Locator;
+  readonly creatingOverlay: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.footerAddButton = page.getByTestId('footer-add-button');
+    // Scoped to the visible one: Ionic keeps the pages it has navigated away
+    // from in the DOM, so their footers answer this test id as well.
+    this.footerAddButton = page.locator(
+      '[data-testid="footer-add-button"]:visible',
+    );
+    this.backButton = page.locator('bite ion-back-button');
+    this.selectedPlace = page.locator('bite .selected-place-name');
     this.imageInput = page.getByTestId('image-file-input');
     this.name = page.getByTestId('bite-name').locator('input');
     this.setRestaurant = page.getByTestId('set-restaurant');
@@ -44,6 +58,19 @@ export class CreateBitePage {
     this.tagsInput = page.locator('bt-tags-input ion-input input');
     this.fromGps = page.getByTestId('position-from-gps');
     this.post = page.getByTestId('post-bite');
+    this.postAndAddAnother = page.getByTestId('post-bite-and-add-another');
+    this.tagChips = page.locator('bite bt-tags-input .container bt-chip');
+    this.suggestedTags = page.locator(
+      'bite bt-tags-input .suggestions bt-chip',
+    );
+    this.filledStars = page.locator(
+      'bite star-rating:not([readonly]) ion-icon.filled',
+    );
+    this.imagePreview = page.locator('bite image-upload .image-preview img');
+    // The overlay the create runs behind. Ionic removes it from the DOM on
+    // dismiss, so waiting for it to disappear is how the next Bite of an
+    // "add another" session avoids being typed against the backdrop.
+    this.creatingOverlay = page.locator('ion-loading.bite-creating-loading');
   }
 
   /**
@@ -56,10 +83,49 @@ export class CreateBitePage {
     await this.page.waitForURL('**/new-bite');
   }
 
+  /** Leaves the form without saving, the way a user cancels the flow. */
+  async cancel(): Promise<void> {
+    await this.backButton.click();
+    await this.page.waitForURL((url) => !url.pathname.endsWith('/new-bite'));
+  }
+
+  /** Asserts the dish and Restaurant a prefilled creation session was seeded with. */
+  async expectPrefilledWith(options: {
+    name: string;
+    place: string;
+    price: string;
+  }): Promise<void> {
+    await expect(this.name).toHaveValue(options.name);
+    await expect(this.selectedPlace).toHaveText(options.place);
+    await expect(this.price).toHaveValue(options.price);
+  }
+
+  /**
+   * Asserts the form carries no draft from an earlier creation session: no dish,
+   * no Restaurant, no price.
+   */
+  async expectCleanForm(): Promise<void> {
+    await expect(this.name).toHaveValue('');
+    await expect(this.selectedPlace).toHaveCount(0);
+    await expect(this.setRestaurant).toBeVisible();
+    await expect(this.price).toHaveValue('');
+  }
+
   async uploadImage(filePath: string): Promise<void> {
     // The <input type="file"> is hidden (.ion-hide); setInputFiles bypasses the
     // visibility check, mirroring a real file pick.
+    //
+    // Cleared first because the form reset of "Post and add another Bite"
+    // clears the form control but not the DOM input: setting a file the input
+    // already holds is no change at all, so the next Bite of a session would
+    // silently keep no photo. A real picker always reports its selection, so
+    // this is a harness detail, not app behaviour.
+    await this.imageInput.setInputFiles([]);
     await this.imageInput.setInputFiles(filePath);
+
+    // The pick is read and compressed asynchronously; the preview is the form
+    // saying it now holds the photo.
+    await expect(this.imagePreview).toBeVisible();
   }
 
   async fillName(name: string): Promise<void> {
@@ -172,6 +238,18 @@ export class CreateBitePage {
     await expect(this.post).toHaveAttribute('aria-disabled', 'true');
   }
 
+  /**
+   * `toBeEnabled()` says nothing about an `ion-button`: it is a custom element,
+   * so Playwright reads neither its `disabled` property nor the class Ionic
+   * sets. `aria-disabled` is what the component actually exposes.
+   */
+  async expectPostAndAddAnotherEnabled(): Promise<void> {
+    await expect(this.postAndAddAnother).not.toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+  }
+
   /** Adopts the browser geolocation (set in playwright.config) as the bite position. */
   async useGpsPosition(): Promise<void> {
     await this.fromGps.click();
@@ -179,5 +257,47 @@ export class CreateBitePage {
 
   async submit(): Promise<void> {
     await this.post.click();
+  }
+
+  /**
+   * Posts the Bite through "Post and add another Bite" and waits for the create
+   * to finish, which is what leaves the form usable for the next Bite.
+   */
+  async submitAndAddAnother(): Promise<void> {
+    await this.postAndAddAnother.click();
+    await expect(this.creatingOverlay).toHaveCount(0);
+  }
+
+  /**
+   * Asserts the form is ready for the next Bite of the same session: everything
+   * that belonged to the Bite just posted is gone, while the place the user is
+   * still sitting at — and the currency that goes with it — is kept.
+   */
+  async expectReadyForNextBite(options: {
+    place: string;
+    currency: string;
+  }): Promise<void> {
+    await expect(this.name).toHaveValue('');
+    await expect(this.price).toHaveValue('');
+    await expect(this.description).toHaveValue('');
+    await expect(this.tagChips).toHaveCount(0);
+    await expect(this.filledStars).toHaveCount(0);
+
+    await expect(this.selectedPlace).toHaveText(options.place);
+    await expect(this.currency).toContainText(options.currency);
+
+    // The photo is cleared with the rest, so the same Bite cannot be posted
+    // twice by tapping again.
+    await this.expectPostDisabled();
+  }
+
+  /** The currency the form currently carries, as the trigger displays it. */
+  async currencyName(): Promise<string> {
+    return (await this.currency.innerText()).trim();
+  }
+
+  /** Asserts a tag is offered as a suggestion, e.g. from a Bite posted before. */
+  async expectSuggestedTag(tag: string): Promise<void> {
+    await expect(this.suggestedTags.filter({ hasText: tag })).toBeVisible();
   }
 }

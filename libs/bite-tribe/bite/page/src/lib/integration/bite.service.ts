@@ -134,6 +134,14 @@ export class BiteService {
     this.dataAccess.setEditingBite(bite);
   }
 
+  /**
+   * Drops the prefilled draft a creation session was seeded with, so it cannot
+   * be inherited by the next one.
+   */
+  clearCachedBite(): void {
+    this.dataAccess.clearCachedBite();
+  }
+
   searchGooglePlaces(searchText: string): void {
     this.dataAccess.searchGooglePlaces(searchText);
   }

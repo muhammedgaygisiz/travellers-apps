@@ -16,6 +16,8 @@ Users can create and maintain real dish-level food experiences.
 ## Current Flow
 
 - User creates a new Bite.
+- A creation session can be seeded with a prefilled draft — a Restaurant menu item, or an existing Bite the user wants to post again — and that draft belongs to that one session. Leaving the form ends the session and drops the draft, so cancelling a menu-derived creation and later starting a generic Bite from Home begins from the normal defaults instead of the abandoned Restaurant and dish. This is the contract GitHub issue #1233 established, where the cancelled draft survived in the store and prefilled the next, unrelated creation. Only the intentional global defaults — the current location and the preferred currency — carry across sessions, and a Bite that is actually posted keeps the Restaurant and dish its draft supplied.
+- A prefilled draft brings no photo of its own, and the form keeps that absence as an empty path rather than an undefined one. Firestore rejects an undefined field, so a menu-derived Bite used to be refused by the backend while the form reported a successful post, and the Bite was lost with nothing to retry. See GitHub issue #1233.
 - User enters dish details, price, currency, tags, rating, description, and image context.
 - User selects a restaurant/place through the picker before saving; direct free-text place entry is no longer the form-level path.
 - When a selected restaurant or other location source changes the Bite position, the form map refits its camera to the new marker.
@@ -81,6 +83,9 @@ Users can create and maintain real dish-level food experiences.
 - `new-bite`
 - `bite/:biteId/edit`
 - "Post and add another Bite" action on `new-bite`.
+- Playwright "add another" E2E coverage: three Bites posted in one session
+  started from Home, and a session started from a menu item whose Restaurant is
+  kept for the Bites typed after it.
 - Bite API create, edit, upload, and image-path utilities.
 - `getCurrencyByPosition`
 - `searchNearbyPlaces`

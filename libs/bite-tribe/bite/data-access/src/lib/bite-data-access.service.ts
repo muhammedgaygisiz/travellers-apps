@@ -320,6 +320,10 @@ export class BiteDataAccessService {
     this.storeService.setEditingBite(bite);
   }
 
+  clearCachedBite(): void {
+    this.storeService.clearCachedBite();
+  }
+
   searchGooglePlaces(searchText: string): void {
     this.googlePlaceSearchText.set(searchText);
   }

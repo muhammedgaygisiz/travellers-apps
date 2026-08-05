@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnDestroy,
+} from '@angular/core';
 import { BiteService } from './bite.service';
 import { BitePage } from '../components/page/bite.page';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -34,13 +39,27 @@ import type { Geopoint } from 'model';
   `,
   imports: [BitePage],
 })
-export class CreateBiteContainer {
+export class CreateBiteContainer implements OnDestroy {
   service = inject(BiteService);
 
   ionViewDidEnter(): void {
     void FirebaseAnalytics.setCurrentScreen({
       screenName: 'New Bite',
     });
+  }
+
+  /**
+   * The prefilled draft belongs to this creation session only. Leaving the form
+   * — cancelling, going back, or posting the Bite — ends the session, so the
+   * draft is dropped here instead of surviving in the store and prefilling the
+   * next, unrelated Create Bite (issue #1233).
+   *
+   * Ionic destroys the page when it is popped off the navigation stack, so this
+   * runs on every way out of the form while a forward navigation, which keeps
+   * the page on the stack, leaves the draft alone.
+   */
+  ngOnDestroy(): void {
+    this.service.clearCachedBite();
   }
 
   onPlaceChange(place: string): void {

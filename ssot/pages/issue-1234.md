@@ -1,0 +1,30 @@
+- [bug: Account deletion confirmation does not identify the account](https://github.com/muhammedgaygisiz/travellers-apps/issues/1234) (Issue \#1234)
+- Description
+  - iOS release-candidate Run 3 for [issue 1176](https://github.com/muhammedgaygisiz/travellers-apps/issues/1176) on TestFlight 1.0.1 build 90 completed the whole deletion contract from [[issue-1182]] within two minutes, including password reauthentication, progress, and the return to the unauthenticated Start screen.
+  - The gap was upstream of all of that: neither the destructive page nor the final confirmation said which signed-in account would be deleted. The password prompt proves possession, not target - it cannot tell one BiteTribe account on the device from another.
+- Decisions
+  - The account is named before the contract, not after it. An irreversible action is only understandable once its target is clear, so the identity card sits directly under the page title, above the "cannot be undone" warning.
+  - Identity is non-secret and human-readable: profile photo, display name, email, and sign-in method. The uid is never shown - it distinguishes nothing for a user - and no credential ever is.
+  - The final confirmation repeats it in the alert's `subHeader` rather than folding it into the message. The alert body is plain text with no line breaks, and the point of no return has to carry its target where it cannot be skimmed past.
+  - A provider that withholds the email - Apple with a hidden address - is identified by display name plus sign-in method, so email/password, Google, and Apple accounts each stay distinguishable without inventing an identifier.
+  - Name and photo come from the profile document, because that is what the user recognizes; uid, email, and sign-in method come from the auth user, because that is what the deletion runs against. A profile whose `userId` is not the signed-in uid is ignored: a leftover from a previous session must not describe this account.
+  - The shown identity follows the auth session instead of being read once when the page opens, so a sign-out or an account switch underneath the page changes what is shown rather than leaving stale identity in front of a destructive action.
+  - Showing the right account is not enough on its own, so the deletion is checked as well. `deleteAccount` takes the uid the user confirmed, re-reads the signed-in account, and refuses when they differ. The same check runs again after a provider sheet re-authenticates, because that sheet lets the user pick a _different_ account and a successful sign-in is not proof of the same one.
+  - A refusal is reported as its own message, not as a generic failure: nothing was deleted and the user needs to know why, so `account_changed` is a distinct analytics reason and a distinct localized message.
+  - Without a signed-in account the page says so and the destructive button stays disabled. There is nothing to confirm against, and guessing a target is exactly the failure this issue is about.
+  - Reauthentication is untouched. The recent-sign-in contract from [[issue-1182]] still decides when a password or a provider sheet is required; the prompt only gained the account it belongs to.
+- Outcome
+  - `DeleteMyAccountService` exposes `identity` (uid, display name, email, photo, sign-in method) and `failure`, and `deleteAccount` now takes `{ confirmedUid, password? }` and guards on it before and after reauthentication.
+  - `DeleteMyAccountComponent` renders the identity card, disables the destructive action without an identity, falls back to the generic avatar when a photo URL does not load, and puts the account in both the confirmation and the password prompt.
+  - `AnalyticsEvent.AccountDeletionFailed` gained the `account_changed` reason.
+  - Seven keys were added to all eleven locale files: the section title, the four sign-in-method labels, the signed-out notice, and the account-changed message.
+  - Storybook covers the password, Google, Apple-without-email, signed-out, deleting, failed, and account-changed states.
+  - The e2e page object asserts the named account on the page and in the alert, in both the cancellation and the full-deletion test.
+- Validation
+  - `npx nx test delete-account` - 21 tests green.
+  - `npx nx test bite-tribe/account-data-access` - 17 tests green.
+  - `npx nx lint delete-account bite-tribe/account-data-access` - clean.
+  - `npx nx build bite-tribe` - succeeds.
+  - Locale JSON parse and key-parity check over all 11 consumer locale files - clean.
+  - Storybook at `localhost:4499`: the identity card, the Apple account without an email, the disabled signed-out state, the account-changed message, and the confirmation alert repeating `Mia Fernandes · mia@example.com`.
+  - Not run: the Playwright account-and-legal spec, which needs the Firebase emulator, and the physical-iOS recheck the issue's acceptance criteria require before this can be recorded under [[Current State - Release Candidate Test Charter]].

@@ -19,14 +19,25 @@ Users can access legal and account lifecycle information.
 - The privacy policy is shown in the selected app language. It is published in all eleven app languages, and both entry points share the same component, so the in-app and web routes resolve the language identically.
 - A language without published policy copy - a locale added to the app before its policy is written - falls back to the English document and is told so on the page, in its own app language. The policy language is never switched silently.
 - User opens account deletion from the Account section at the bottom of the settings page.
-- The delete-account page names what is removed and what is kept, then asks for an explicit destructive confirmation.
-- The `deleteOwnAccount` callable rejects a sign-in older than five minutes with `reauth_required`; the app re-runs the account's own sign-in method (Google, Apple, or a password prompt) and retries once.
+- The delete-account page names the signed-in account first - avatar, display name, email and sign-in method - then what is removed and what is kept, then asks for an explicit destructive confirmation that repeats the account.
+- The `deleteOwnAccount` callable rejects a sign-in older than five minutes with `reauth_required`; the app re-runs the account's own sign-in method (Google, Apple, or a password prompt) and retries once. The password prompt names the account it belongs to.
 - The backend removes the user-owned data, then deletes the Firebase Auth account last, and the app signs the user out.
 - The public `/account-deletion` route stays reachable without signing in for store review. It documents the in-app flow and keeps an email fallback for users who can no longer sign in.
 - Email/password user sees a non-blocking email verification prompt on home, settings, and profile edit when verification is still required.
 - User can request a fresh verification email from the prompt; backend throttling prevents repeated manual sends within one hour.
 - The resend action reports itself: the button shows a spinner with a sending label and is disabled while the callable is in flight, a second tap is ignored, and the outcome always raises a localized toast for success, one-hour throttling, an already-verified address, an unsupported provider, or a generic failure. The button returns to its idle state on every outcome, so a recoverable failure stays retryable.
 - Backend sends monthly automatic verification reminders at 10:00 Europe/Zurich until the configured reminder limit is reached.
+
+## Account Identity Contract
+
+See [[issue-1234]] for the reasoning.
+
+- A deletion is only offered against an account the page has named. Without a signed-in account the page says so and the destructive action stays disabled.
+- The identity is non-secret: profile photo, display name, email, and the sign-in method. The uid is never shown, and no credential ever is.
+- A provider that withholds the email - Apple with a hidden address - is identified by display name and sign-in method instead, so the three supported methods each stay distinguishable.
+- The shown identity follows the auth session rather than a value read once when the page opened, so a session that changes underneath the page changes what is shown.
+- The deletion re-reads the signed-in account and refuses to run when it is no longer the confirmed one; the page reports the refusal instead of a failure. The same check runs again after a provider sheet re-authenticates, because that sheet lets the user pick a different account.
+- Profile name and photo come from the profile document, but only when it belongs to the signed-in uid; the auth user is the only source for uid, email, and sign-in method.
 
 ## Deletion Contract
 

@@ -16,8 +16,10 @@ import { DeleteMyAccountService } from 'bite-tribe/account-data-access';
   template: `
     <delete-my-account
       class="ion-page"
+      [identity]="service.identity()"
       [deleting]="deleting()"
       [failed]="failed()"
+      [failure]="service.failure()"
       [passwordRequired]="service.passwordRequired()"
       (deleteAccount)="onDeleteAccount($event)"
       (cancelDelete)="onCancel()"
@@ -42,9 +44,10 @@ export class DeleteMyAccountContainer {
   }
 
   onDeleteAccount(request: DeleteMyAccountRequest): void {
-    void this.service.deleteAccount(
-      request.password ? { password: request.password } : undefined,
-    );
+    void this.service.deleteAccount({
+      confirmedUid: request.uid,
+      password: request.password,
+    });
   }
 
   onCancel(): void {

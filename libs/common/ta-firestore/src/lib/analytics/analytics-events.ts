@@ -77,7 +77,9 @@ export interface AnalyticsEventParamMap {
   [AnalyticsEvent.AccountDeletionStarted]: never;
   [AnalyticsEvent.AccountDeletionCompleted]: never;
   [AnalyticsEvent.AccountDeletionFailed]: {
-    reason: 'reauth_required' | 'reauth_failed' | 'unknown';
+    // `account_changed` is a refusal rather than a fault: the signed-in account
+    // was no longer the one the user confirmed, so nothing was deleted.
+    reason: 'reauth_required' | 'reauth_failed' | 'account_changed' | 'unknown';
   };
   [AnalyticsEvent.BiteCreated]: never;
   [AnalyticsEvent.BiteImageUploaded]: never;

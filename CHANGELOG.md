@@ -1,5 +1,31 @@
 # Changelog
 
+## build-91 (2026-08-06)
+
+<!-- changelog-start-rev: ecf83228 -->
+<!-- changelog-end-rev: b3aef3ab -->
+
+### Features
+
+- zoom, swipe and jump to bite from gallery (#1241) (b3aef3ab)
+- identify the account in deletion process (#1240) (c16b0af0)
+
+### Bug Fixes
+
+- fix resetting pre-seeded bite from menu item (#1239) (36717482)
+- persist the first bucket list created from a bite (#1231) (#1238) (671bf0b6)
+- bound home feed resynchronization after reconnect (#1230) (#1237) (cccd1596)
+- fix no failed state or retry state for photo upload (#1236) (4a8f435a)
+- setup necessary indexed for deleteOwnAccount function (#1228) (fbf79511)
+
+### Documentation
+
+- test run 3 and findings (only ios) (#1235) (dc5bd601)
+
+### Chores
+
+- prepare build 1.0.1-90 release (#1226) (2540079f)
+
 ## build-90 (2026-08-03)
 
 <!-- changelog-start-rev: ad5d1c0c -->

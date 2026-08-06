@@ -1,7 +1,7 @@
 import { PushNotifications } from '@capacitor/push-notifications';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { Capacitor } from '@capacitor/core';
-import type { NavController, Platform } from '@ionic/angular';
+import type { Platform } from '@ionic/angular';
 import {
   enablePushOnThisDevice,
   getPushPermissionState,
@@ -54,8 +54,8 @@ jest.mock('utils', () => ({
 const platformStub = (isCapacitor: boolean): Platform =>
   ({ is: jest.fn(() => isCapacitor) }) as unknown as Platform;
 
-const navControllerStub = (): NavController =>
-  ({ navigateForward: jest.fn() }) as unknown as NavController;
+/** Receives the surface a tapped notification asked for. */
+const onTapStub = (): jest.Mock => jest.fn();
 
 type Listener = (payload: unknown) => Promise<void> | void;
 
@@ -100,11 +100,7 @@ describe('init-push', () => {
 
   describe(initPushListeners.name, () => {
     it('does nothing off a device build', async () => {
-      await initPushListeners(
-        platformStub(false),
-        'user-1',
-        navControllerStub(),
-      );
+      await initPushListeners(platformStub(false), 'user-1', onTapStub());
 
       expect(PushNotifications.removeAllListeners).not.toHaveBeenCalled();
       expect(PushNotifications.addListener).not.toHaveBeenCalled();
@@ -112,11 +108,7 @@ describe('init-push', () => {
     });
 
     it('stops before registering listeners when there is no signed-in user', async () => {
-      await initPushListeners(
-        platformStub(true),
-        undefined,
-        navControllerStub(),
-      );
+      await initPushListeners(platformStub(true), undefined, onTapStub());
 
       expect(PushNotifications.removeAllListeners).toHaveBeenCalledTimes(1);
       expect(PushNotifications.addListener).not.toHaveBeenCalled();
@@ -128,22 +120,14 @@ describe('init-push', () => {
         new Error('nothing to remove'),
       );
 
-      await initPushListeners(
-        platformStub(true),
-        'user-1',
-        navControllerStub(),
-      );
+      await initPushListeners(platformStub(true), 'user-1', onTapStub());
 
       expect(PushNotifications.addListener).toHaveBeenCalled();
       expect(PushNotifications.register).toHaveBeenCalledTimes(1);
     });
 
     it('registers for push when permission was already granted', async () => {
-      await initPushListeners(
-        platformStub(true),
-        'user-1',
-        navControllerStub(),
-      );
+      await initPushListeners(platformStub(true), 'user-1', onTapStub());
 
       expect(PushNotifications.register).toHaveBeenCalledTimes(1);
     });
@@ -154,11 +138,7 @@ describe('init-push', () => {
         // Registering here would spend the OS prompt that onboarding owns.
         grantPermission(receive);
 
-        await initPushListeners(
-          platformStub(true),
-          'user-1',
-          navControllerStub(),
-        );
+        await initPushListeners(platformStub(true), 'user-1', onTapStub());
 
         expect(PushNotifications.register).not.toHaveBeenCalled();
         expect(PushNotifications.requestPermissions).not.toHaveBeenCalled();
@@ -169,11 +149,7 @@ describe('init-push', () => {
       it('registers the current installation, preserving its enabled state', async () => {
         // Delegating keeps the login refresh on the same path as the explicit
         // setup action, so neither can re-enable a disabled installation.
-        await initPushListeners(
-          platformStub(true),
-          'user-1',
-          navControllerStub(),
-        );
+        await initPushListeners(platformStub(true), 'user-1', onTapStub());
 
         await listenerFor('registration')(undefined);
 
@@ -182,152 +158,87 @@ describe('init-push', () => {
     });
 
     it('surfaces a registration error without throwing', async () => {
-      await initPushListeners(
-        platformStub(true),
-        'user-1',
-        navControllerStub(),
-      );
+      await initPushListeners(platformStub(true), 'user-1', onTapStub());
 
       expect(() =>
         listenerFor('registrationError')({ error: 'boom' }),
       ).not.toThrow();
     });
 
-    it('accepts a received notification without navigating', async () => {
-      const navController = navControllerStub();
-      await initPushListeners(platformStub(true), 'user-1', navController);
+    it('accepts a received notification without reporting a target', async () => {
+      const onTap = onTapStub();
+      await initPushListeners(platformStub(true), 'user-1', onTap);
 
       listenerFor('pushNotificationReceived')({ title: 'hi' });
 
-      expect(navController.navigateForward).not.toHaveBeenCalled();
+      expect(onTap).not.toHaveBeenCalled();
     });
 
     describe('on notification tap', () => {
-      const tap = async (
-        data: Record<string, string>,
-      ): Promise<NavController> => {
-        const navController = navControllerStub();
-        await initPushListeners(platformStub(true), 'user-1', navController);
+      // Which surface each payload maps to is `notification-target.spec.ts`;
+      // what matters here is that a tap is reported rather than navigated, so
+      // the caller can hold it until startup routing has settled (issue #1244).
+      const tap = async (data: Record<string, string>): Promise<jest.Mock> => {
+        const onTap = onTapStub();
+        await initPushListeners(platformStub(true), 'user-1', onTap);
 
         listenerFor('pushNotificationActionPerformed')({
           notification: { data },
         });
 
-        return navController;
+        return onTap;
       };
 
-      it.each(['NEW_BITE', 'NEW_BITE_REVIEW', 'NEW_BITE_LIKE'])(
-        'opens the bite for a %s notification',
-        async (type) => {
-          const navController = await tap({ type, biteId: 'bite-1' });
-
-          expect(navController.navigateForward).toHaveBeenCalledWith([
-            'bite',
-            'bite-1',
-          ]);
-        },
-      );
-
-      it('opens the follower profile for a NEW_FOLLOWER notification', async () => {
-        const navController = await tap({
+      it('reports the follower profile for a NEW_FOLLOWER notification', async () => {
+        const onTap = await tap({
           type: 'NEW_FOLLOWER',
           followerUid: 'user-2',
         });
 
-        expect(navController.navigateForward).toHaveBeenCalledWith([
-          'profile',
-          'user-2',
-        ]);
-      });
-
-      it('opens the leaderboard for a rank change', async () => {
-        const navController = await tap({ type: 'LEADERBOARD_RANK_CHANGE' });
-
-        expect(navController.navigateForward).toHaveBeenCalledWith([
-          'leaderboard',
-        ]);
-      });
-
-      it('opens the badge profile for a follower of the achiever', async () => {
-        const navController = await tap({
-          type: 'NEW_COUNTRY_BADGE',
-          userId: 'user-2',
-          countryCode: 'IT',
+        expect(onTap).toHaveBeenCalledWith({
+          commands: ['profile', 'user-2'],
         });
-
-        expect(navController.navigateForward).toHaveBeenCalledWith([
-          'profile',
-          'user-2',
-        ]);
       });
 
-      it('opens their own profile for the user who earned the badge', async () => {
-        // Owner and followers receive the same payload; only the recipient
-        // tells the two apart.
-        const navController = await tap({
+      it('reports the recipient-dependent target of a country badge', async () => {
+        // The recipient is known here and nowhere downstream, so the listener
+        // has to resolve it before handing the target on.
+        const onTap = await tap({
           type: 'NEW_COUNTRY_BADGE',
           userId: 'user-1',
           countryCode: 'IT',
         });
 
-        expect(navController.navigateForward).toHaveBeenCalledWith([
-          'my-profile',
-        ]);
+        expect(onTap).toHaveBeenCalledWith({ commands: ['my-profile'] });
       });
 
-      it('opens the deep-linked week for a weekly bite summary', async () => {
-        const navController = await tap({
-          type: 'WEEKLY_BITE_SUMMARY',
-          biteCount: '12',
-          weekStart: '1752444000000',
-          weekEnd: '1753048799999',
-        });
+      it('reports the target exactly once per tap', async () => {
+        const onTap = await tap({ type: 'NEW_BITE', biteId: 'bite-1' });
 
-        expect(navController.navigateForward).toHaveBeenCalledWith(
-          ['weekly-bites'],
-          {
-            queryParams: {
-              weekStart: '1752444000000',
-              weekEnd: '1753048799999',
-            },
-          },
-        );
+        expect(onTap).toHaveBeenCalledTimes(1);
       });
 
-      it('opens the weekly bites page without a range when the payload has none', async () => {
-        // Notifications sent before the range shipped still have to land on the
-        // page; it falls back to the previous week on its own.
-        const navController = await tap({
-          type: 'WEEKLY_BITE_SUMMARY',
-          biteCount: '12',
-        });
+      it('reports nothing for an unknown notification type', async () => {
+        const onTap = await tap({ type: 'SOMETHING_ELSE' });
 
-        expect(navController.navigateForward).toHaveBeenCalledWith(
-          ['weekly-bites'],
-          undefined,
-        );
+        expect(onTap).not.toHaveBeenCalled();
       });
 
-      it('stays put for an unknown notification type', async () => {
-        const navController = await tap({ type: 'SOMETHING_ELSE' });
-
-        expect(navController.navigateForward).not.toHaveBeenCalled();
-      });
-
-      it('stays put when the payload is missing its target id', async () => {
+      it('reports nothing when the payload is missing its target id', async () => {
         // A malformed payload must not navigate to a half-built route.
-        const navController = await tap({ type: 'NEW_BITE' });
+        const onTap = await tap({ type: 'NEW_BITE' });
 
-        expect(navController.navigateForward).not.toHaveBeenCalled();
+        expect(onTap).not.toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalled();
       });
 
-      it('stays put when the notification carries no data at all', async () => {
-        const navController = navControllerStub();
-        await initPushListeners(platformStub(true), 'user-1', navController);
+      it('reports nothing when the notification carries no data at all', async () => {
+        const onTap = onTapStub();
+        await initPushListeners(platformStub(true), 'user-1', onTap);
 
         listenerFor('pushNotificationActionPerformed')({ notification: {} });
 
-        expect(navController.navigateForward).not.toHaveBeenCalled();
+        expect(onTap).not.toHaveBeenCalled();
       });
     });
   });

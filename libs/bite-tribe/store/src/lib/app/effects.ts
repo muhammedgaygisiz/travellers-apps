@@ -12,7 +12,7 @@ import {
   tap,
   throttleTime,
 } from 'rxjs';
-import { NavController, Platform } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { AnalyticsEvent, AnalyticsService, fromAuth } from 'ta-firestore';
 import { routerNavigatedAction } from '@ngrx/router-store';
@@ -21,6 +21,7 @@ import { isBase64String, PATH } from 'utils';
 import { stopIfUserIsUndefined } from './utils/stop-if-user-is-undefined';
 import { dispatchGpsPosition } from './utils/dispatch-gps-position';
 import { initPushNotifications } from './utils/init-push-notifications';
+import { PushNavigationService } from './push-navigation.service';
 import { Store } from '@ngrx/store';
 import { withUserFromAction } from './utils/with-user-from-action';
 import { isProfilePage } from './utils/is-profile-page';
@@ -35,8 +36,8 @@ export class AppEffect {
   private readonly api = inject(BiteTribeApiService);
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly store = inject(Store);
-  private readonly navController = inject(NavController);
   private readonly analytics = inject(AnalyticsService);
+  private readonly pushNavigation = inject(PushNavigationService);
 
   private readonly userId = toSignal(this.store.select(userId));
 
@@ -98,7 +99,7 @@ export class AppEffect {
         stopIfUserIsUndefined(),
         dispatchGpsPosition(this.store),
         withUserFromAction(),
-        initPushNotifications(this.platform, this.navController),
+        initPushNotifications(this.platform, this.pushNavigation),
       ),
     { dispatch: false },
   );

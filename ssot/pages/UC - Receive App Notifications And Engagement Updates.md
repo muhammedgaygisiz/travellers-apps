@@ -25,6 +25,34 @@ Users and creators can receive engagement signals around Bites and social activi
 - Users learn that a new app version is live from a notification, instead of waiting for TestFlight or Google Play to auto-update them.
 - A Bite in a country the user has never covered congratulates them on the new country badge, and tells their followers when the profile is public.
 
+## Notification Navigation Contract
+
+Issue [#1244](https://github.com/muhammedgaygisiz/travellers-apps/issues/1244)
+made a tapped notification reliably open its own surface:
+
+- A tap opens the surface the notification is about, whether the app was
+  already open, backgrounded, or had to start from cold. Landing on Home is a
+  failure, not a fallback.
+- A tap that launched the app arrives mid-startup, before the app has decided
+  where a returning user belongs. The target is therefore held, not navigated:
+  first until startup navigation is released, then until the redirect chain it
+  starts has come to rest. Only then is one navigation issued.
+- Startup navigation resolves the address the app was launched at, which for a
+  signed-in user is Home. It is the last navigation issued during startup, so
+  anything routed before it is discarded — which is why a target may not be
+  navigated on arrival.
+- Both waits are bounded. A startup that never settles opens the target anyway
+  rather than swallowing the tap without trace.
+- One tap produces one navigation. Two notifications tapped during the same
+  startup open only the later surface, because the user asked for that one and
+  the first would only be passed through.
+- A payload naming a type the app does not route, or missing the id its route
+  needs, leaves the user where they are. Guessing a surface the notification
+  never mentioned is worse than not moving.
+- Route guards still decide. The target goes through the router, so incomplete
+  onboarding or a lost session redirects a tapped notification exactly as it
+  would redirect the same route reached by hand.
+
 ## Localization Contract
 
 Issue [#1200](https://github.com/muhammedgaygisiz/travellers-apps/issues/1200)

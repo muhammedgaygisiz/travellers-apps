@@ -19,6 +19,7 @@
     "e2e:install": "playwright install chromium",
     "build": "nx build",
     "increment-build-number": "node tools/increment-build-number.mjs",
+    "release:android": "node tools/build-android-release.mjs",
     "analytics:report": "node tools/analytics/report.mjs",
     "analytics:digest": "node tools/analytics/digest.mjs",
     "analytics:provision": "node tools/analytics/provision-ga4.mjs",

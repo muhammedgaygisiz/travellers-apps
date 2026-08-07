@@ -43,7 +43,7 @@ While the upload runs, start the Android build; the two are independent.
 ## Android - Signed Bundle
 
 ```bash
-npx nx run bite-tribe-android:bundle
+npm run release:android
 ```
 
 The signed bundle lands at:
@@ -55,19 +55,29 @@ apps/bite-tribe-android/android/app/build/outputs/bundle/release/app-release.aab
 Gradle signs it directly, so the Android Studio wizard is no longer part of a
 release.
 
+`tools/build-android-release.mjs` does three things the raw Gradle target does
+not:
+
+1. Resolves a usable JDK, so no `JAVA_HOME` export is needed.
+2. Fails when the bundle is unsigned, which is otherwise a silent outcome.
+3. Fails when the bundle is signed with the wrong key, before it can be
+   uploaded and rejected by Play.
+
+It exits non-zero on any of those, so it is safe to chain.
+
+`npx nx run bite-tribe-android:bundle` remains available as the bare Gradle
+target, but it performs none of those checks — prefer the npm script.
+
 ### JDK Requirement
 
-Gradle 8.14.3 does not accept a JDK newer than 21. A shell whose default is a
-newer JDK fails during configuration with
-`Unsupported class file major version`. Point `JAVA_HOME` at a supported JDK —
-Android Studio ships one:
+Gradle does not accept a JDK newer than 24. A shell whose default is newer — a
+Homebrew JDK 25, for example — fails during configuration with
+`Unsupported class file major version`. The npm script handles this by searching
+`JAVA_HOME`, then the JDK bundled with Android Studio, then any JDK 21 or 17 the
+system reports, and it names the problem if none is usable.
 
-```bash
-export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
-```
-
-Android Studio's own build does this implicitly, which is why the wizard never
-hit this.
+Android Studio's own build always used its bundled JDK, which is why the wizard
+never hit this.
 
 ### Signing Configuration
 
@@ -96,6 +106,26 @@ Rules:
 ```bash
 jarsigner -verify apps/bite-tribe-android/android/app/build/outputs/bundle/release/app-release.aab
 ```
+
+`jar verified.` is the expected output. The accompanying PKIX
+`unable to find valid certification path` warning is normal and not a problem:
+Android upload keys are self-signed, so there is no CA chain to build.
+
+Confirm it is the right key, not merely a key. The upload certificate is:
+
+```text
+Owner:  C=CH, ST=Berne, L=Berne, CN=Muhammed Veysel Gaygisiz
+SHA256: 34:67:17:77:36:90:77:DD:04:C6:90:9B:D9:22:C2:F8:F6:99:FC:02:D4:28:07:08:12:2C:59:46:50:45:27:AF
+Valid:  29 Dec 2025 to 23 Dec 2050
+```
+
+```bash
+keytool -printcert -jarfile apps/bite-tribe-android/android/app/build/outputs/bundle/release/app-release.aab
+```
+
+A different fingerprint means the wrong keystore was used and Play will reject
+the upload. The same value appears in the Play Console under
+**App integrity → App signing → Upload key certificate**.
 
 - Capacitor sync does not regenerate `app/build.gradle`, so the signing block
   survives `nx run bite-tribe-android:sync`.

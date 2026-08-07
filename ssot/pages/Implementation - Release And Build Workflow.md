@@ -6,21 +6,22 @@ Release and build workflow describes the implementation-facing scripts that supp
 
 ## Npm Scripts
 
-| Script                                                  | Purpose                                                           |
-| ------------------------------------------------------- | ----------------------------------------------------------------- |
-| `npm run start`                                         | Serve an Nx app through the default serve target                  |
-| `npm run development`                                   | Start Firebase serve and the BiteTribe app together               |
-| `npm run build`                                         | Run Nx build                                                      |
-| `npm run test`                                          | Run affected Nx tests against `develop`                           |
-| `npm run storybook`                                     | Start Storybook host                                              |
-| `npm run build:storybook`                               | Build Storybook and refresh the Nx graph asset                    |
-| `npm run increment-build-number`                        | Increment the shared build number                                 |
-| `npm run release:android`                               | Build, sign, and verify the Android release bundle                |
-| `npm run generate-changelog`                            | Generate incremental changelog output                             |
-| `npm run generate-full-changelog`                       | Generate full Logseq changelog output                             |
-| `npm run increment-build-number-and-generate-changelog` | Generate changelog, increment build number, commit, tag, and push |
-| `npm run cap:run:ios`                                   | Run Capacitor iOS                                                 |
-| `npm run cap:run:android`                               | Run Capacitor Android                                             |
+| Script                                                  | Purpose                                                                                       |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run start`                                         | Serve an Nx app through the default serve target                                              |
+| `npm run development`                                   | Start Firebase serve and the BiteTribe app together                                           |
+| `npm run build`                                         | Run Nx build                                                                                  |
+| `npm run test`                                          | Run affected Nx tests against `develop`                                                       |
+| `npm run storybook`                                     | Start Storybook host                                                                          |
+| `npm run build:storybook`                               | Build Storybook and refresh the Nx graph asset                                                |
+| `npm run increment-build-number`                        | Increment the shared build number                                                             |
+| `npm run release:android`                               | Build, sign, and verify the Android release bundle                                            |
+| `npm run generate-changelog`                            | Generate incremental changelog output                                                         |
+| `npm run release:notes`                                 | Print the changelog range for store build notes (`-- --full` for the GitHub release body)     |
+| `npm run generate-full-changelog`                       | Generate full Logseq changelog output                                                         |
+| `npm run increment-build-number-and-generate-changelog` | Generate changelog, increment build number, commit, tag, push, and publish the GitHub release |
+| `npm run cap:run:ios`                                   | Run Capacitor iOS                                                                             |
+| `npm run cap:run:android`                               | Run Capacitor Android                                                                         |
 
 ## Native Wrapper Targets
 
@@ -52,6 +53,10 @@ workspace sync-generator command and does not sync Capacitor.
 5. Creates the annotated tag `build-<version>-<build number>` using the build
    number captured **before** the increment.
 6. Pushes the branch and the tag.
+7. Publishes the GitHub release `Build <build number>` from that tag, using the
+   full changelog range as the body. `BITETRIBE_RELEASE_DRAFT=1` creates it as a
+   draft instead. A failure here is reported explicitly with a retry command,
+   and does not undo the push that already happened.
 
 Because it pushes, no separate `git push` or `git push --tags` is needed after
 it. The tag is created on the bump commit, which already carries the next build

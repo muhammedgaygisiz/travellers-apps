@@ -72,10 +72,9 @@ npx nx run bite-tribe-android:sync
 
 4. Build and upload the native apps.
    - Archive and upload iOS from Xcode.
-   - Produce the signed Android App Bundle with
-     `npx nx run bite-tribe-android:bundle`, and verify it is actually signed
-     before uploading — an unsigned bundle is a silent outcome when the signing
-     credentials are missing.
+   - Produce the signed Android App Bundle with `npm run release:android`, which
+     also verifies the bundle is signed with the Play upload key and refuses to
+     finish otherwise.
    - Confirm the archived version and build number before distributing.
    - The full console procedure is [[Implementation - Store Release Steps]].
 
@@ -91,27 +90,40 @@ npx nx run bite-tribe-android:sync
 npm run increment-build-number-and-generate-changelog
 ```
 
-The helper performs the whole release commit in one step: it generates the
-changelog section for build `x`, increments the shared build number to `x+1`,
-commits as `chore: prepare build <version>-<x> release`, creates the
-annotated tag `build-<version>-<x>`, and pushes both the branch and the tag.
-No separate `git push` is needed.
+The helper performs the whole release in one step: it generates the changelog
+section for build `x`, increments the shared build number to `x+1`, commits as
+`chore: prepare build <version>-<x> release`, creates the annotated tag
+`build-<version>-<x>`, pushes both the branch and the tag, and publishes the
+GitHub release `Build <x>` from that tag. No separate `git push` is needed, and
+the GitHub release is no longer created by hand.
+
+If the GitHub release step fails — `gh` not authenticated, for example — the
+helper says so explicitly and prints the exact retry command. The commit, tag,
+and push have already succeeded at that point and must not be repeated.
 
 7. Write the store build notes.
-   - Source: the generated changelog, from `### Features` up to, but not
-     including, `### Chores`.
-   - Summarize that range into user-facing notes of at most 230 characters.
-   - The same text is used for App Store Connect _What to Test_ and the Play
-     Console release notes.
+
+```bash
+npm run release:notes
+```
+
+- That prints the changelog range for store notes: everything from the first
+  heading up to, but not including, `### Chores`.
+- Summarize it into user-facing notes of at most 230 characters.
+- The same text is used for App Store Connect _What to Test_ and the Play
+  Console release notes.
+- `npm run release:notes -- --full` prints the wider range that the helper
+  already used for the GitHub release body.
 
 8. Complete the store submissions.
-   - Add the External Testers group with the build notes in App Store Connect and
-     submit for beta review. The build must not show **Missing Compliance**; if
-     it does, `ITSAppUsesNonExemptEncryption` has been lost from the iOS
-     `Info.plist`.
-   - Add the build notes to the Play Console release, save, and submit the change
-     for review.
-   - Both are detailed in [[Implementation - Store Release Steps]].
+
+- Add the External Testers group with the build notes in App Store Connect and
+  submit for beta review. The build must not show **Missing Compliance**; if
+  it does, `ITSAppUsesNonExemptEncryption` has been lost from the iOS
+  `Info.plist`.
+- Add the build notes to the Play Console release, save, and submit the change
+  for review.
+- Both are detailed in [[Implementation - Store Release Steps]].
 
 9. Merge the release branch.
    - Open a pull request back to `develop` with `gh pr create`, accepting the
@@ -122,14 +134,12 @@ No separate `git push` is needed.
    - Resume normal development on `develop`, where web and development now use
      build `x+1` while native stores still serve build `x`.
 
-10. Publish the GitHub release.
+10. Confirm the GitHub release.
 
-- Open the repository tags, find `build-<version>-<x>`, and choose
-  **Create release** from the row menu.
-- Title the release `Build <x>`.
-- Body: the generated changelog from `### Features` through the end of
-  `### Chores`. This range is wider than the store build notes on purpose.
-- **Publish release**.
+- Step 6 already published `Build <x>` from the tag, with the full changelog
+  range as its body. Nothing to create by hand.
+- Only act here if step 6 reported that the release could not be created, in
+  which case run the retry command it printed.
 
 ## Release Output
 

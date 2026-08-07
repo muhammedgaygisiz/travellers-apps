@@ -29,10 +29,17 @@ $wide-desktop-breakpoint: 1280px;
   }
 
   /* Full-width children of the grid: neither belongs in a card column. */
-  bt-bite-skeleton-list,
   ion-infinite-scroll,
   .empty-message {
     grid-column: 1 / -1;
+  }
+
+  /* Dissolves the skeleton list's own box so its skeletons become children of
+   * this grid and load in the same columns as the Bites they stand in for.
+   * Spanning it instead would leave the loading state in one column while the
+   * loaded feed uses two or three. */
+  bt-bite-skeleton-list {
+    display: contents;
   }
 
   bt-bite {

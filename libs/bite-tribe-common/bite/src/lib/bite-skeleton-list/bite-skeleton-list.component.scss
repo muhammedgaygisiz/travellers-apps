@@ -1,0 +1,26 @@
+/* Mirrors the breakpoint the desktop layout switches at, in common/ui/page's
+ * page.component.scss and the feed grid in bite-list.component.scss. All of
+ * them have to change together. See GitHub issue #1250. */
+$desktop-breakpoint: 1024px;
+
+:host {
+  /* Owns the spacing between its skeletons, at the same 1rem the loaded feed
+   * puts between Bite cards.
+   *
+   * A caller that arranges the skeletons itself — the desktop feed grid, which
+   * lays them out in columns — sets `display: contents` on this host so the
+   * skeletons become its own children and this box drops out of the way. */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  /* Held back until the grid has columns to put them in; stacked in a single
+   * column they would only add scrolling to a loading state. */
+  bt-bite-skeleton.desktop-only {
+    display: none;
+
+    @media (width >= $desktop-breakpoint) {
+      display: block;
+    }
+  }
+}

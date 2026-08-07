@@ -1,3 +1,3 @@
-<bt-bite-skeleton />
-<bt-bite-skeleton />
-<bt-bite-skeleton />
+@for (index of skeletons(); track index) {
+  <bt-bite-skeleton [class.desktop-only]="isDesktopOnly(index)" />
+}

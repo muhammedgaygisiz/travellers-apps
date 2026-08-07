@@ -1,8 +1,10 @@
 :host {
   --border-radius: 46px;
 
+  /* Spacing between skeletons belongs to the list that arranges them, so a
+   * single skeleton can be placed straight into a grid cell without carrying a
+   * stray bottom margin. See GitHub issue #1250. */
   display: block;
-  margin-bottom: 1rem;
 
   .bite-loading-card {
     min-width: 345px;

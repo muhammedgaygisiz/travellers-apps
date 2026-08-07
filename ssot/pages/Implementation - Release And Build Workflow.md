@@ -58,4 +58,5 @@ Rules:
 
 - [[Architecture - Capacitor]]
 - [[Implementation - Testing]]
+- [[Implementation - CI Pipeline]]
 - [[Current State - Nx And Dependency Migration Roadmap]]

@@ -92,4 +92,5 @@ libs/bite-tribe-business/shell/src/lib/routes.ts
 
 - [[Architecture - Testing]]
 - [[Implementation - Testing]]
+- [[Implementation - CI Pipeline]]
 - [[Current State - Nx And Dependency Migration Roadmap]]

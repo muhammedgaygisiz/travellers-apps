@@ -34,6 +34,19 @@ Use these adaptive tokens:
 - **Ionic validity styling requires `ng-invalid` _and_ `ng-touched`.** A control with no validators is always valid, so Ionic's `--highlight-color-invalid` never triggers. To drive the frame from state that lives outside the form, put that state behind a validator and mark the control touched. See [[Implementation - Feature Patterns]].
 - **Do not style radio selection with `:has(:checked)`.** Chromium does not reliably invalidate `:has()` when a sibling radio steals the check through the group, which leaves a stale highlight on the deselected option. Drive selection from component state instead.
 - **`ion-radio` can hide projected label content.** Its shadow label wrapper is collapsed with `label-text-wrapper-hidden` when it decides there is no label, which races with Angular content projection. For rich option cards, native radio inputs wrapped in a `<label>` are more predictable and keep the whole card tappable.
+- **A solid `ion-button` inside a toolbar ignores `--background`.** Ionic derives the fill of an in-toolbar button from `--ion-toolbar-color` and its text from `--ion-toolbar-background`, so setting `--background` and `--color` has no visible effect. Set the toolbar pair instead; the footer bar and the desktop header button both do.
+- **`ion-title` is absolutely positioned across the whole toolbar.** In `ios` mode it spans the full width and reserves a fixed 90px at each end for buttons, so anything wider than that in a `slot="end"` will be overlapped by the centred title rather than pushing it aside. Give the title `position: static` when the toolbar carries more than an icon button.
+- **A square-cornered border inside a rounded, clipped container leaves a gap.** `ion-card` clips its children to its own radius, which cuts a square border's corner arcs away instead of bending them. Give the inner element the same radius. A background fill hides the defect, which is why it usually surfaces only on an empty state. See GitHub issue #1251.
+
+## Desktop Layout
+
+`PageChromeConfig.desktopLayout` opts a page into the desktop layout in `libs/common/ui/page`. It is off by default, so pages that do not set it are unaffected at every width.
+
+When it is on and the viewport is at least 1024px: the content column widens from 720px to a 1440px cap, the first three menu entries and the add button move from the hamburger and the footer bar into the header, the footer bar is released, and the brand moves to the start of the toolbar. Below the breakpoint the page renders exactly as it did before.
+
+The switch is a media query only — no resize listener and no component state — so both variants exist in the DOM at once and CSS decides which is shown.
+
+The breakpoint is repeated as a SCSS variable in `page.component.scss`, `bite-list.component.scss` and `home.component.scss`, which have no shared stylesheet between them. They have to change together. See GitHub issue #1250.
 
 ## Validation
 

@@ -119,7 +119,135 @@ describe('PageComponent', () => {
         showFooter: true,
         showAddButton: false,
         fullWidth: false,
+        desktopLayout: false,
       });
+    });
+  });
+
+  describe('desktop layout', () => {
+    const getNavButton = (target: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        `[data-testid="desktop-nav-${target}"]`,
+      );
+
+    const getHeaderAddButton = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="header-add-button"]');
+
+    const getFooterAddButton = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="footer-add-button"]');
+
+    it('promotes no menu entries while the page has not opted in', async () => {
+      componentRef.setInput('isAuthenticated', true);
+      componentRef.setInput('menuConfig', { myProfile: true, myBites: true });
+      await fixture.whenStable();
+
+      expect(component['desktopNavItems']()).toEqual([]);
+      expect(getNavButton('profile')).toBeNull();
+    });
+
+    it('promotes the top menu entries in the popover order', async () => {
+      componentRef.setInput('chrome', { desktopLayout: true });
+      componentRef.setInput('isAuthenticated', true);
+      componentRef.setInput('menuConfig', {
+        myProfile: true,
+        myBites: true,
+        myBucketlists: true,
+        settings: true,
+        gallery: true,
+      });
+      await fixture.whenStable();
+
+      expect(component['desktopNavItems']()).toEqual([
+        { target: 'profile', labelKey: 'my-profile' },
+        { target: 'my-bites', labelKey: 'my-bites' },
+        { target: 'my-bucketlists', labelKey: 'my-bucket-lists' },
+      ]);
+    });
+
+    it('only promotes entries the page actually offers', async () => {
+      componentRef.setInput('chrome', { desktopLayout: true });
+      componentRef.setInput('isAuthenticated', true);
+      componentRef.setInput('menuConfig', { myBites: true });
+      await fixture.whenStable();
+
+      expect(component['desktopNavItems']()).toEqual([
+        { target: 'my-bites', labelKey: 'my-bites' },
+      ]);
+    });
+
+    // The promoted entries all navigate to the signed-in user's own content, so
+    // a signed-out visitor has nothing to promote.
+    it('promotes nothing while signed out', async () => {
+      componentRef.setInput('chrome', { desktopLayout: true });
+      componentRef.setInput('isAuthenticated', false);
+      componentRef.setInput('menuConfig', { myProfile: true, myBites: true });
+      await fixture.whenStable();
+
+      expect(component['desktopNavItems']()).toEqual([]);
+    });
+
+    it('emits the menu target when a promoted entry is used', async () => {
+      componentRef.setInput('chrome', { desktopLayout: true });
+      componentRef.setInput('isAuthenticated', true);
+      componentRef.setInput('menuConfig', { myBites: true });
+      await fixture.whenStable();
+      const navigateSpy = jest.fn();
+      component.menuNavigate.subscribe(navigateSpy);
+
+      getNavButton('my-bites')?.click();
+
+      expect(navigateSpy).toHaveBeenCalledWith('my-bites');
+    });
+
+    /**
+     * Both buttons stay in the DOM and the breakpoint decides which one is
+     * shown, so there is no resize state to keep in sync. The footer marks
+     * itself with `add-button-in-header`, which is the hook the stylesheet uses
+     * to drop the bar at desktop widths — without it the two would be offered
+     * at once.
+     */
+    it('adds the header add button and marks the footer for release', async () => {
+      componentRef.setInput('chrome', {
+        desktopLayout: true,
+        showAddButton: true,
+      });
+      await fixture.whenStable();
+
+      expect(getHeaderAddButton()).not.toBeNull();
+      expect(component['addButtonInHeader']()).toBe(true);
+      expect(
+        fixture.nativeElement
+          .querySelector('ion-footer')
+          .classList.contains('add-button-in-header'),
+      ).toBe(true);
+    });
+
+    it('keeps the add button in the footer without the desktop layout', async () => {
+      componentRef.setInput('chrome', { showAddButton: true });
+      await fixture.whenStable();
+
+      expect(getHeaderAddButton()).toBeNull();
+      expect(getFooterAddButton()).not.toBeNull();
+      expect(component['addButtonInHeader']()).toBe(false);
+      expect(
+        fixture.nativeElement
+          .querySelector('ion-footer')
+          .classList.contains('add-button-in-header'),
+      ).toBe(false);
+    });
+
+    it('emits the add click from the header button', async () => {
+      componentRef.setInput('chrome', {
+        desktopLayout: true,
+        showAddButton: true,
+      });
+      await fixture.whenStable();
+      const addSpy = jest.fn();
+      component.addButtonClick.subscribe(addSpy);
+
+      getHeaderAddButton()?.click();
+
+      expect(addSpy).toHaveBeenCalledTimes(1);
     });
   });
 

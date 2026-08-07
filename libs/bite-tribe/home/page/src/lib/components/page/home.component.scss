@@ -1,3 +1,9 @@
+/* Mirrors the breakpoint and column cap in common/ui/page's
+ * page.component.scss, so the button tracks the column it scrolls.
+ * See GitHub issue #1250. */
+$desktop-breakpoint: 1024px;
+$desktop-content-max-width: 1440px;
+
 :host {
   ion-refresher {
     z-index: 1;
@@ -14,6 +20,19 @@
     bottom: calc(var(--ion-safe-area-bottom, 0) + 97px);
 
     &.with-safe-distance {
+      bottom: calc(var(--ion-safe-area-bottom, 0) + 16px);
+    }
+
+    /* Sits just inside the widened column rather than staying pinned to the
+     * viewport edge, where it would float alone in the empty gutter and read as
+     * unrelated to the feed. Below the column's full width the max() keeps the
+     * original 10px inset.
+     *
+     * The footer offset is dropped because every Bite list either hides the
+     * footer outright or opts into the desktop layout, which releases it; no
+     * list keeps a footer bar at this width. */
+    @media (width >= $desktop-breakpoint) {
+      left: max(10px, calc(50% - #{$desktop-content-max-width * 0.5} + 10px));
       bottom: calc(var(--ion-safe-area-bottom, 0) + 16px);
     }
   }

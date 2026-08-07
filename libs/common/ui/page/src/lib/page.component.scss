@@ -35,6 +35,16 @@ $desktop-content-max-width: 1440px;
       --padding-start: 1rem;
       --padding-end: 1rem;
 
+      /* Restores the app's own button shape. Ionic shrinks a button placed in a
+       * toolbar to a 4px radius, a 17px label and a 32px box, which reads as a
+       * toolbar control rather than as the same button the rest of the app
+       * uses. These three put it back on the 14px radius and 16px label that
+       * every other solid button in the app renders at, at a height that still
+       * sits comfortably inside the 68px toolbar. */
+      --border-radius: 14px;
+
+      height: 40px;
+      font-size: 16px;
       margin-inline: 0.75rem;
     }
   }
@@ -64,6 +74,10 @@ $desktop-content-max-width: 1440px;
   }
 
   .title-container {
+    /* Held here rather than on Ionic's `ion-justify-content-center` utility,
+     * which is `!important` and so cannot be overridden per breakpoint. */
+    justify-content: center;
+
     ion-icon {
       font-size: 1.6rem;
     }

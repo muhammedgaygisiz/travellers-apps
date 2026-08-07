@@ -1,5 +1,30 @@
 # Changelog
 
+## build-92 (2026-08-07)
+
+<!-- changelog-start-rev: b3aef3ab -->
+<!-- changelog-end-rev: ac217b99 -->
+
+### Features
+
+- desktop layout for the Bites feed (#1253) (9925fdca)
+
+### Bug Fixes
+
+- stop re-syncing email verification for users who are already verified (#1255) (cb8b444d)
+- remove disabling photo on offline causing not writing image status to document (#1252) (041e6bd1)
+- cold start does not open the bite on deep-link click on web (#1249) (6eb7c48a)
+- push notification lands on home instead of defined target (#1248) (0638bf04)
+
+### Documentation
+
+- check and document google places verification rate (#1257) (ac217b99)
+- test run #4 (#1247) (7ca4da1c)
+
+### Chores
+
+- bump build 1.0.1-91 release (#1242) (b092d1c2)
+
 ## build-91 (2026-08-06)
 
 <!-- changelog-start-rev: ecf83228 -->

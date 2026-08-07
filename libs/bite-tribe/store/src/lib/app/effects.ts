@@ -17,7 +17,7 @@ import { BiteTribeApiService } from 'bite-tribe/api';
 import { AnalyticsEvent, AnalyticsService, fromAuth } from 'ta-firestore';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
-import { isBase64String, PATH } from 'utils';
+import { isBase64String, isEmailVerificationPromptVisible, PATH } from 'utils';
 import { stopIfUserIsUndefined } from './utils/stop-if-user-is-undefined';
 import { dispatchGpsPosition } from './utils/dispatch-gps-position';
 import { initPushNotifications } from './utils/init-push-notifications';
@@ -27,6 +27,7 @@ import { withUserFromAction } from './utils/with-user-from-action';
 import { isProfilePage } from './utils/is-profile-page';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { userId } from '../router/selectors';
+import { publicUser } from './selectors';
 import { CreateAndUploadImageCallbackParams } from 'model';
 
 @Injectable()
@@ -120,7 +121,7 @@ export class AppEffect {
         stopIfUserIsUndefined(),
         tap(() => {
           void this.api.updateUserMetadata();
-          void this.syncEmailVerificationStatus('app_start');
+          this.syncEmailVerificationStatusIfPending('app_start');
         }),
       );
     },
@@ -144,12 +145,44 @@ export class AppEffect {
       return this.actions$.pipe(
         ofType(AppActions.syncEmailVerificationStatus),
         tap(() => {
-          void this.syncEmailVerificationStatus('app_resume');
+          this.syncEmailVerificationStatusIfPending('app_resume');
         }),
       );
     },
     { dispatch: false },
   );
+
+  /**
+   * Runs the sync only while a verification is actually outstanding.
+   *
+   * The callable costs an Auth lookup plus a Firestore read and write, and for
+   * everyone else it re-confirms on every start and every resume a state that
+   * cannot change while they stay signed in: verified users never become
+   * unverified, and the Google/Apple sign-ins are classified as verified
+   * without ever being asked (issue #1254). The once-a-day `updateUserMetadata`
+   * refresh rebuilds the same metadata from the same helper, so a document this
+   * skips still reconciles on its own.
+   */
+  private syncEmailVerificationStatusIfPending(
+    source: 'app_start' | 'app_resume',
+  ): void {
+    this.store
+      .select(publicUser)
+      .pipe(
+        // On a cold start the profile document arrives after `loadedUser`, so
+        // the check waits for it instead of reading an empty slice and
+        // concluding there is nothing to verify.
+        filter((user) => !!user),
+        take(1),
+      )
+      .subscribe((user) => {
+        if (!isEmailVerificationPromptVisible(user)) {
+          return;
+        }
+
+        void this.syncEmailVerificationStatus(source);
+      });
+  }
 
   private async syncEmailVerificationStatus(
     source: 'app_start' | 'app_resume',

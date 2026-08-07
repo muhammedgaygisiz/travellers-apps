@@ -92,16 +92,31 @@ to environment variables so CI can sign without a file on disk:
 | `keyAlias`      | `BITETRIBE_KEY_ALIAS`         |
 | `keyPassword`   | `BITETRIBE_KEY_PASSWORD`      |
 
+The file is four lines:
+
+```properties
+storeFile=/absolute/path/to/bitetribe.jks
+storePassword=
+keyAlias=First Key
+keyPassword=
+```
+
 Rules:
 
 - `keystore.properties`, `*.jks`, and `*.keystore` are gitignored. The signing
   key and its passwords must never reach the repository.
-- `keystore.properties.example` is the committed template. Copy it, do not edit
-  it.
+- **Do not quote any value.** This is a Java properties file, not a shell
+  script: a value runs to the end of the line, so spaces are already preserved.
+  Writing `keyAlias="First Key"` makes the alias literally contain the quote
+  characters, and signing then fails with a misleading `No key with alias`. A
+  literal backslash in a path must be doubled; forward slashes need nothing.
+- Capacitor sync does not regenerate `app/build.gradle`, so the signing block
+  survives `nx run bite-tribe-android:sync`.
 - When neither the file nor the environment variables are present, the release
   build stays **unsigned** rather than failing. That keeps debug work and
-  contributors without the key unblocked — but it also means an unsigned bundle
-  is a silent outcome, so verify the signature before uploading:
+  contributors without the key unblocked, but it makes an unsigned bundle a
+  silent outcome. `npm run release:android` closes that gap by refusing to
+  finish on an unsigned or wrong-key bundle. Verifying by hand:
 
 ```bash
 jarsigner -verify apps/bite-tribe-android/android/app/build/outputs/bundle/release/app-release.aab
@@ -125,10 +140,10 @@ keytool -printcert -jarfile apps/bite-tribe-android/android/app/build/outputs/bu
 
 A different fingerprint means the wrong keystore was used and Play will reject
 the upload. The same value appears in the Play Console under
-**App integrity → App signing → Upload key certificate**.
-
-- Capacitor sync does not regenerate `app/build.gradle`, so the signing block
-  survives `nx run bite-tribe-android:sync`.
+**App signing → Upload key certificate** — not the _App signing key
+certificate_ shown beside it, which is Google's own key. BiteTribe is enrolled
+in Play App Signing, so this keystore is the upload key only, and Google can
+reset it if it is ever lost.
 
 ### Android Studio Fallback
 

@@ -30,7 +30,6 @@ export class BiteService {
   cachedBite = this.dataAccess.cachedBite;
   nearbyRestaurants = this.dataAccess.nearbyRestaurants;
   tagSuggestionsForEditingBite = this.dataAccess.tagSuggestionsForEditingBite;
-  networkStatus = this.dataAccess.networkStatus;
   googlePlaces = this.dataAccess.googlePlaces;
   googlePlacesLoading = this.dataAccess.googlePlacesLoading;
   nearbyGooglePlaces = this.dataAccess.nearbyGooglePlaces;

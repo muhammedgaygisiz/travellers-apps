@@ -40,7 +40,6 @@ import { TagsInputComponent } from 'common/ui/tags';
 import { normalizePriceForBackend } from './utils/normalize-price-for-backend';
 import { ImageValidator } from './utils/image-validator';
 import { normalizePriceForForm } from './utils/normalize-price-for-form';
-import { ConnectionStatus } from '@capacitor/network';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PriceInputComponent } from './price-input/price-input.component';
 
@@ -93,8 +92,6 @@ export class BitePage {
   position = input<Geopoint>();
 
   suggestedTags = input<string[]>([]);
-
-  networkStatus = input<ConnectionStatus | undefined>();
 
   fallbackPosition = linkedSignal(() => this.position());
 
@@ -161,20 +158,6 @@ export class BitePage {
       validators: [ImageValidator],
     },
   );
-
-  networkStatusEffect = effect(() => {
-    const networkStatus = this.networkStatus();
-
-    if (networkStatus?.connected === true) {
-      this.biteFormGroup.get('image')?.enable();
-    } else if (networkStatus?.connected === false) {
-      this.biteFormGroup.get('image')?.disable();
-    } else {
-      return;
-    }
-
-    this.biteFormGroup.updateValueAndValidity();
-  });
 
   biteInitFromInputEffect = effect(() => {
     const bite = this.bite();
@@ -392,7 +375,14 @@ export class BitePage {
       return undefined;
     }
 
-    const newBite = this.biteFormGroup.value;
+    // Raw value, not `value`: Angular leaves disabled controls out of `value`,
+    // so a control disabled between picking and saving takes its value with it.
+    // The form used to disable the image control while the device was offline,
+    // which silently posted the Bite without the photo the user had picked: no
+    // `image` reached the data access layer, so no upload started, no
+    // `imageStatus: 'pending'` was written, and the failed/retry recovery was
+    // never armed for it (issue #1229).
+    const newBite = this.biteFormGroup.getRawValue();
 
     newBite.price = normalizePriceForBackend(newBite.price);
 

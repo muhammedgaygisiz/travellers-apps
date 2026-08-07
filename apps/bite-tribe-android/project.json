@@ -47,6 +47,13 @@
         "cmd": "sync android"
       }
     },
+    "bundle": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-android/android",
+        "command": "./gradlew bundleRelease"
+      }
+    },
     "update": {
       "executor": "@nxext/capacitor:cap",
       "options": {

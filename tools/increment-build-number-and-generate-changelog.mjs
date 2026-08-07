@@ -1,7 +1,9 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { buildNotes } from './changelog-sections.mjs';
 
 const require = createRequire(import.meta.url);
 const { readBuildNumber } = require('../apps/bite-tribe/read-build-number.js');
@@ -39,6 +41,51 @@ run('git', ['push', 'origin', 'HEAD']);
 run('git', ['push', 'origin', tagName]);
 
 console.log(`Release changes committed, tagged, and pushed as ${tagName}.`);
+
+publishGitHubRelease(tagName, buildNumber);
+
+function publishGitHubRelease(tagName, buildNumber) {
+  const notes = buildNotes(buildNumber, { includeChores: true });
+  const notesFile = join(tmpdir(), `bitetribe-release-${buildNumber}.md`);
+  const draft = process.env.BITETRIBE_RELEASE_DRAFT === '1';
+
+  writeFileSync(notesFile, `${notes}\n`, 'utf8');
+
+  const args = [
+    'release',
+    'create',
+    tagName,
+    '--title',
+    `Build ${buildNumber}`,
+    '--notes-file',
+    notesFile,
+    ...(draft ? ['--draft'] : []),
+  ];
+
+  try {
+    run('gh', args);
+  } catch {
+    // The commit, tag, and push already succeeded, so this is recoverable and
+    // must not look like the whole release failed. The notes file is left in
+    // place so the retry below works as printed.
+    console.error(
+      [
+        '',
+        `The release commit and tag ${tagName} were pushed successfully.`,
+        'Only the GitHub release could not be created. Retry with:',
+        '',
+        `  gh release create ${tagName} --title "Build ${buildNumber}" --notes-file ${notesFile}`,
+        '',
+      ].join('\n'),
+    );
+    process.exit(1);
+  }
+
+  rmSync(notesFile, { force: true });
+  console.log(
+    `GitHub release "Build ${buildNumber}"${draft ? ' (draft)' : ''} published.`,
+  );
+}
 
 function ensureCleanWorkingTree() {
   const status = git(['status', '--porcelain']).stdout;

@@ -84,6 +84,7 @@ The product is not yet in public launch mode. The launch-blocking backend work f
 - Remaining launch blockers fixed.
 - App Store assets prepared.
 - Google Play assets prepared.
+- App Store Connect export compliance revisited for public launch. `ITSAppUsesNonExemptEncryption` is declared `false` in the iOS `Info.plist` from build 93 onward, which removed the per-build prompt and the France question with it. Apple no longer asks, but France's own encryption rules still apply on their own terms and must be checked before France is in distribution scope. See [[Implementation - Store Release Steps]].
 - Crashlytics and Analytics monitoring plan active for soft launch.
 
 ## Launch Rule

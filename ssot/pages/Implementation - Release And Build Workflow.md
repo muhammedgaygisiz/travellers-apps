@@ -6,20 +6,62 @@ Release and build workflow describes the implementation-facing scripts that supp
 
 ## Npm Scripts
 
-| Script                                                  | Purpose                                                           |
-| ------------------------------------------------------- | ----------------------------------------------------------------- |
-| `npm run start`                                         | Serve an Nx app through the default serve target                  |
-| `npm run development`                                   | Start Firebase serve and the BiteTribe app together               |
-| `npm run build`                                         | Run Nx build                                                      |
-| `npm run test`                                          | Run affected Nx tests against `develop`                           |
-| `npm run storybook`                                     | Start Storybook host                                              |
-| `npm run build:storybook`                               | Build Storybook and refresh the Nx graph asset                    |
-| `npm run increment-build-number`                        | Increment the shared build number                                 |
-| `npm run generate-changelog`                            | Generate incremental changelog output                             |
-| `npm run generate-full-changelog`                       | Generate full Logseq changelog output                             |
-| `npm run increment-build-number-and-generate-changelog` | Generate changelog, increment build number, commit, tag, and push |
-| `npm run cap:run:ios`                                   | Run Capacitor iOS                                                 |
-| `npm run cap:run:android`                               | Run Capacitor Android                                             |
+| Script                                                  | Purpose                                                                                       |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run start`                                         | Serve an Nx app through the default serve target                                              |
+| `npm run development`                                   | Start Firebase serve and the BiteTribe app together                                           |
+| `npm run build`                                         | Run Nx build                                                                                  |
+| `npm run test`                                          | Run affected Nx tests against `develop`                                                       |
+| `npm run storybook`                                     | Start Storybook host                                                                          |
+| `npm run build:storybook`                               | Build Storybook and refresh the Nx graph asset                                                |
+| `npm run increment-build-number`                        | Increment the shared build number                                                             |
+| `npm run release:android`                               | Build, sign, and verify the Android release bundle                                            |
+| `npm run generate-changelog`                            | Generate incremental changelog output                                                         |
+| `npm run release:notes`                                 | Print the changelog range for store build notes (`-- --full` for the GitHub release body)     |
+| `npm run generate-full-changelog`                       | Generate full Logseq changelog output                                                         |
+| `npm run increment-build-number-and-generate-changelog` | Generate changelog, increment build number, commit, tag, push, and publish the GitHub release |
+| `npm run cap:run:ios`                                   | Run Capacitor iOS                                                                             |
+| `npm run cap:run:android`                               | Run Capacitor Android                                                                         |
+
+## Native Wrapper Targets
+
+The native wrappers are Nx projects, so their Capacitor commands are targets
+rather than npm scripts:
+
+| Target                             | Purpose                                                                                                               |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `nx run bite-tribe-ios:sync`       | Capacitor sync into the iOS wrapper                                                                                   |
+| `nx run bite-tribe-android:sync`   | Capacitor sync into the Android wrapper                                                                               |
+| `nx run bite-tribe-ios:open`       | Open the iOS wrapper in Xcode                                                                                         |
+| `nx run bite-tribe-android:open`   | Open the Android wrapper in Android Studio                                                                            |
+| `nx run bite-tribe-android:bundle` | Bare Gradle `bundleRelease`; prefer `npm run release:android`, which also resolves the JDK and verifies the signature |
+
+Use the `run <project>:<target>` form. `nx sync` without `run` is Nx's built-in
+workspace sync-generator command and does not sync Capacitor.
+
+## Release Helper Behavior
+
+`npm run increment-build-number-and-generate-changelog` is not just a bump. In
+`tools/increment-build-number-and-generate-changelog.mjs` it:
+
+1. Refuses to run against a dirty working tree.
+2. Reads the current version and build number and refuses if the resulting tag
+   already exists locally or on `origin`.
+3. Runs `generate-changelog`, then `increment-build-number`.
+4. Stages `CHANGELOG.md` and both native version files, and commits as
+   `chore: prepare build <version>-<build number> release`.
+5. Creates the annotated tag `build-<version>-<build number>` using the build
+   number captured **before** the increment.
+6. Pushes the branch and the tag.
+7. Publishes the GitHub release `Build <build number>` from that tag, using the
+   full changelog range as the body. `BITETRIBE_RELEASE_DRAFT=1` creates it as a
+   draft instead. A failure here is reported explicitly with a retry command,
+   and does not undo the push that already happened.
+
+Because it pushes, no separate `git push` or `git push --tags` is needed after
+it. The tag is created on the bump commit, which already carries the next build
+number, so the tag names the released build but does not point at the released
+source tree.
 
 ## Native Asset Scripts
 
@@ -35,7 +77,7 @@ npm run ios-asset-generator:generate-ios:bite-tribe
 - Run the build-number increment only after the current build has been built, released, and published to native stores.
 - Capture the native version and build number before incrementing when creating release tags. The combined helper tags the release commit as `build-<version>-<build-number>`, for example `build-1.0.1-81`.
 - Use the changelog scripts for SSOT changelog pages.
-- Use closed Priority P0 issue titles from the release week as the source for short TestFlight and Google Play build notes.
+- Derive the short TestFlight and Google Play build notes from the generated changelog, using the `### Features` to `### Chores` range and summarizing it to at most 230 characters. The changelog is produced by tooling, so it is the reliable source; closed Priority P0 issue titles from the release week are a cross-check, not the input.
 - Use Capacitor sync commands when native dependency or wrapper state changes.
 - Keep source maps and native build artifacts traceable to the release build number and future git tag.
 - Treat generated native files as outputs unless the requested change specifically targets native wrapper source.
@@ -56,6 +98,8 @@ Rules:
 
 ## Related Pages
 
+- [[Release Workflow]]
+- [[Implementation - Store Release Steps]]
 - [[Architecture - Capacitor]]
 - [[Implementation - Testing]]
 - [[Implementation - CI Pipeline]]

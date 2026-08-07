@@ -1,0 +1,9 @@
+/* BiteTribe iOS permission prompts.
+   Keep in sync with apps/bite-tribe/src/assets/i18n/*.json when a locale is added.
+   See ssot/pages/Implementation - Localization.md. */
+
+"NSCameraUsageDescription" = "BiteTribe necesita acceso a tu cámara para capturar fotos de comida y compartirlas con otros.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "BiteTribe usa tu ubicación para ayudarte a marcar dónde disfrutaste una comida y descubrir Bites cercanos.";
+"NSLocationWhenInUseUsageDescription" = "BiteTribe usa tu ubicación para ayudarte a marcar dónde disfrutaste una comida y descubrir Bites cercanos.";
+"NSPhotoLibraryAddUsageDescription" = "BiteTribe necesita acceso a tu fototeca para compartir fotos de comida con otros.";
+"NSPhotoLibraryUsageDescription" = "BiteTribe necesita acceso a tu fototeca para que puedas seleccionar y compartir fotos de comida.";

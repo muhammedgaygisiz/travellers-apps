@@ -26,6 +26,7 @@ This contract is model-agnostic. Codex, Claude, GPT, local IDE agents, and futur
 - Prefer existing Nx library boundaries and local patterns.
 - Use Transloco keys for visible UI text.
 - Update every relevant locale file when adding user-facing copy.
+- Adding a language means four lists, not one: Transloco locales, the Firebase Functions notification catalog, the published privacy-policy languages, and the iOS `InfoPlist.strings` variant group. Follow the checklist in `ssot/pages/Implementation - Localization.md`; a missed list silently falls back to English instead of failing.
 - Update Storybook when shared UI gains visible states, inputs, modes, or layout behavior.
 - Use Capacitor sync commands for native wrapper dependency changes.
 - Keep Logseq backup pages out of the committed SSOT graph.

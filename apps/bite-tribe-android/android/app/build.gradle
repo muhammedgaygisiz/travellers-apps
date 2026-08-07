@@ -1,6 +1,24 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.firebase.crashlytics'
 
+// Release signing. Values come from android/keystore.properties, which is
+// gitignored, or from the matching environment variables so CI can sign without
+// a file. When neither is present the release build stays unsigned instead of
+// failing, so debug work and contributors without the key are unaffected.
+// See ssot/pages/Implementation - Store Release Steps.md.
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+
+def signingValue = { String key, String environmentVariable ->
+    def value = keystoreProperties.getProperty(key) ?: System.getenv(environmentVariable)
+    return value?.trim() ? value.trim() : null
+}
+
+def releaseStoreFile = signingValue('storeFile', 'BITETRIBE_KEYSTORE_FILE')
+def hasReleaseSigning = releaseStoreFile != null
 
 android {
     namespace = "com.bitetribe.app"
@@ -18,8 +36,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(releaseStoreFile)
+                storePassword signingValue('storePassword', 'BITETRIBE_KEYSTORE_PASSWORD')
+                keyAlias signingValue('keyAlias', 'BITETRIBE_KEY_ALIAS')
+                keyPassword signingValue('keyPassword', 'BITETRIBE_KEY_PASSWORD')
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

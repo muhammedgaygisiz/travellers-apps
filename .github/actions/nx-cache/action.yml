@@ -1,17 +1,77 @@
 name: "Nx computation cache"
-description: "Persist the Nx task cache (.nx/cache) across CI runs so unchanged targets are restored instead of re-executed."
+description: "Persist the Nx task cache across CI runs so unchanged targets are restored instead of re-executed."
 runs:
   using: "composite"
   steps:
-    # Restores the most recent .nx/cache via the restore-keys prefix and saves
-    # this job's cache under a unique key in a post step. Nx keys its entries by
-    # a content hash, so restoring a slightly stale cache is safe: matching
-    # tasks are replayed, everything else is recomputed. Persisting it lets
-    # unchanged projects skip re-running between CI runs (no remote cache needed).
+    # Restores the most recent cache via the restore-keys prefix and saves this
+    # job's cache under a unique key in a post step. Nx keys its entries by a
+    # content hash, so restoring a slightly stale cache is safe: matching tasks
+    # are replayed, everything else is recomputed. Persisting it lets unchanged
+    # projects skip re-running between CI runs (no remote cache needed).
+    #
+    # Both directories are required. `.nx/cache` holds the task artifacts, but
+    # since Nx 20 the *index* that maps a task hash to an artifact is a SQLite
+    # database under `.nx/workspace-data`. Cache lookups go through that
+    # database only (DbCache#get in nx/src/tasks-runner/cache.ts) with no
+    # filesystem fallback, so restoring the artifacts without the index yields a
+    # 0% hit rate — every task re-runs and the artifacts are pure dead weight.
     - name: Cache Nx task results
       uses: actions/cache@v5
       with:
-        path: .nx/cache
-        key: nx-cache-${{ runner.os }}-${{ github.run_id }}-${{ github.job }}
+        path: |
+          .nx/cache
+          .nx/workspace-data
+        # v2: entries under the old prefix hold `.nx/cache` only, so they can
+        # never produce a hit. The bump avoids restoring ~150 MB of unusable
+        # artifacts until they age out.
+        key: nx-cache-v2-${{ runner.os }}-${{ github.run_id }}-${{ github.job }}
         restore-keys: |
-          nx-cache-${{ runner.os }}-
+          nx-cache-v2-${{ runner.os }}-
+
+    # Nx names the index after the machine id of the host that created it
+    # (`<machine-id>-v<schema>.db`, see packages/nx/src/native/db), and offers no
+    # override for it. A runner whose machine id differs from the one that saved
+    # the cache would ignore the restored index and open a fresh, empty one, so
+    # rename it to what this runner will look for.
+    - name: Align the restored Nx cache index with this runner
+      shell: bash
+      run: |
+        dir=.nx/workspace-data
+        if [ ! -d "$dir" ]; then
+          echo 'No Nx cache index restored; Nx will start from an empty cache.'
+          exit 0
+        fi
+
+        # Same lookup order as the machine_uid crate Nx builds on.
+        id=$(cat /var/lib/dbus/machine-id 2>/dev/null || cat /etc/machine-id 2>/dev/null || true)
+        id=$(printf '%s' "$id" | tr -d '[:space:]')
+        if [ -z "$id" ]; then
+          echo 'No machine id on this runner; leaving the restored index untouched.'
+          exit 0
+        fi
+
+        if compgen -G "$dir/$id-v*.db" > /dev/null; then
+          echo "Nx cache index already matches this runner ($id)."
+          exit 0
+        fi
+
+        shopt -s nullglob
+        for db in "$dir"/*.db; do
+          # Keep the schema-version suffix; only the machine id part is remapped.
+          suffix=$(basename "$db" | sed -nE 's/^.*(-v[0-9]+)\.db$/\1/p')
+          if [ -z "$suffix" ]; then
+            continue
+          fi
+
+          target="$dir/$id$suffix.db"
+          echo "Renaming $(basename "$db") -> $(basename "$target")"
+          mv -f "$db" "$target"
+
+          # SQLite replays the write-ahead log on open, but only finds it under
+          # the database's own name. The shared-memory file and the lock file
+          # are both rebuilt from scratch, so drop them.
+          if [ -f "$db-wal" ]; then
+            mv -f "$db-wal" "$target-wal"
+          fi
+          rm -f "$db-shm" "${db%.db}.lock"
+        done

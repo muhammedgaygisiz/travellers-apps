@@ -85,6 +85,7 @@
   - [[Implementation - Storybook]]
   - [[Implementation - Testing]]
   - [[Implementation - Release And Build Workflow]]
+  - [[Implementation - CI Pipeline]]
 - Decisions
   collapsed:: true
   - [[ADR-0001 Dish First Product]]

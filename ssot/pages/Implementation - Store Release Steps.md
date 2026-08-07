@@ -42,19 +42,80 @@ While the upload runs, start the Android build; the two are independent.
 
 ## Android - Signed Bundle
 
-1. `npx nx run bite-tribe-android:open` opens the wrapper in Android Studio.
-2. **Build → Clean Project** and wait for it to finish.
-3. In the **Build Variants** panel, set the Active Build Variant to **release**.
-4. **Build → Generate Signed App Bundle or APK…**.
-5. Keep **Android App Bundle** selected → **Next**.
-6. Confirm the key store path, key store password, key alias, and key password
-   are prefilled and **Remember passwords** is checked → **Next**.
-7. Confirm the **release** variant is selected → **Create**.
-8. When the `Generate Signed Bundle` notification appears, click **locate** to
-   open the produced `app-release.aab` in Finder.
+```bash
+npx nx run bite-tribe-android:bundle
+```
 
-The signing key is a workstation credential. It is not in the repository, and
-the release cannot be produced on a machine that does not already hold it.
+The signed bundle lands at:
+
+```text
+apps/bite-tribe-android/android/app/build/outputs/bundle/release/app-release.aab
+```
+
+Gradle signs it directly, so the Android Studio wizard is no longer part of a
+release.
+
+### JDK Requirement
+
+Gradle 8.14.3 does not accept a JDK newer than 21. A shell whose default is a
+newer JDK fails during configuration with
+`Unsupported class file major version`. Point `JAVA_HOME` at a supported JDK —
+Android Studio ships one:
+
+```bash
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+```
+
+Android Studio's own build does this implicitly, which is why the wizard never
+hit this.
+
+### Signing Configuration
+
+`apps/bite-tribe-android/android/app/build.gradle` resolves the release signing
+config from `apps/bite-tribe-android/android/keystore.properties`, falling back
+to environment variables so CI can sign without a file on disk:
+
+| Property        | Environment variable          |
+| --------------- | ----------------------------- |
+| `storeFile`     | `BITETRIBE_KEYSTORE_FILE`     |
+| `storePassword` | `BITETRIBE_KEYSTORE_PASSWORD` |
+| `keyAlias`      | `BITETRIBE_KEY_ALIAS`         |
+| `keyPassword`   | `BITETRIBE_KEY_PASSWORD`      |
+
+Rules:
+
+- `keystore.properties`, `*.jks`, and `*.keystore` are gitignored. The signing
+  key and its passwords must never reach the repository.
+- `keystore.properties.example` is the committed template. Copy it, do not edit
+  it.
+- When neither the file nor the environment variables are present, the release
+  build stays **unsigned** rather than failing. That keeps debug work and
+  contributors without the key unblocked — but it also means an unsigned bundle
+  is a silent outcome, so verify the signature before uploading:
+
+```bash
+jarsigner -verify apps/bite-tribe-android/android/app/build/outputs/bundle/release/app-release.aab
+```
+
+- Capacitor sync does not regenerate `app/build.gradle`, so the signing block
+  survives `nx run bite-tribe-android:sync`.
+
+### Android Studio Fallback
+
+Only needed when Gradle signing is unavailable, for example on a machine that
+has the key in Android Studio's password store but not in
+`keystore.properties`:
+
+1. `npx nx run bite-tribe-android:open`.
+2. **Build → Generate Signed App Bundle or APK…** → **Android App Bundle** →
+   **Next**.
+3. Confirm the key store path, passwords, and alias → **Next**.
+4. Select the **release** variant → **Create**, then use the **locate** link in
+   the notification to find the `.aab`.
+
+The signing key is a workstation credential either way. It is not in the
+repository, and the release cannot be produced on a machine that does not hold
+it.
 
 ## Store Build Notes
 

@@ -26,12 +26,13 @@ Release and build workflow describes the implementation-facing scripts that supp
 The native wrappers are Nx projects, so their Capacitor commands are targets
 rather than npm scripts:
 
-| Target                           | Purpose                                    |
-| -------------------------------- | ------------------------------------------ |
-| `nx run bite-tribe-ios:sync`     | Capacitor sync into the iOS wrapper        |
-| `nx run bite-tribe-android:sync` | Capacitor sync into the Android wrapper    |
-| `nx run bite-tribe-ios:open`     | Open the iOS wrapper in Xcode              |
-| `nx run bite-tribe-android:open` | Open the Android wrapper in Android Studio |
+| Target                             | Purpose                                        |
+| ---------------------------------- | ---------------------------------------------- |
+| `nx run bite-tribe-ios:sync`       | Capacitor sync into the iOS wrapper            |
+| `nx run bite-tribe-android:sync`   | Capacitor sync into the Android wrapper        |
+| `nx run bite-tribe-ios:open`       | Open the iOS wrapper in Xcode                  |
+| `nx run bite-tribe-android:open`   | Open the Android wrapper in Android Studio     |
+| `nx run bite-tribe-android:bundle` | Build the signed release `.aab` through Gradle |
 
 Use the `run <project>:<target>` form. `nx sync` without `run` is Nx's built-in
 workspace sync-generator command and does not sync Capacitor.

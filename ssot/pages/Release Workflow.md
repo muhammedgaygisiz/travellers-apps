@@ -71,8 +71,11 @@ npx nx run bite-tribe-android:sync
   to run against a dirty working tree.
 
 4. Build and upload the native apps.
-   - Archive and upload iOS from Xcode, and produce the signed Android App Bundle
-     from Android Studio.
+   - Archive and upload iOS from Xcode.
+   - Produce the signed Android App Bundle with
+     `npx nx run bite-tribe-android:bundle`, and verify it is actually signed
+     before uploading — an unsigned bundle is a silent outcome when the signing
+     credentials are missing.
    - Confirm the archived version and build number before distributing.
    - The full console procedure is [[Implementation - Store Release Steps]].
 

@@ -39,15 +39,15 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>This app requires access to your camera to capture food photos and share it with others.</string>
+	<string>BiteTribe needs access to your camera to capture food photos and share them with others.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>BiteTribe uses your location to help you tag where you enjoyed a meal and discover nearby bites.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>BiteTribe uses your location to help you tag where you enjoyed a meal and discover nearby bites.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>This app requires access to your photo library to share food photos with others.</string>
+	<string>BiteTribe needs access to your photo library to share food photos with others.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs access to your photo library so you can select and share food photos.</string>
+	<string>BiteTribe needs access to your photo library so you can select and share food photos.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

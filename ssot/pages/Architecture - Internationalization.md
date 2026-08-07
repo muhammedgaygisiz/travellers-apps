@@ -13,6 +13,7 @@ Internationalization keeps BiteTribe usable across languages and travel contexts
 - The consumer app re-renders translated text when the active language changes, so a surface that switches language in place does not need a reload.
 - Text the app never renders itself needs its own translation surface. Push notification copy is one: the OS shows it before the app runs, so it is translated in Firebase Functions at send time against the recipient's saved language (issue #1200).
 - Legal documents are a second exception. They may only be shown in a language they were written for, so the privacy policy resolves the app language against its own published set instead of following `availableLangs`, renders with a static lang, and discloses the English fallback to anything outside that set (issue #1218). The set holds every app language today, so the two lists have to move together.
+- iOS permission prompts are a third. The camera, location, and photo-library dialogs are rendered by iOS before the web view exists, so they are translated in `apps/bite-tribe-ios/ios/App/App/<lang>.lproj/InfoPlist.strings` and registered in the Xcode project rather than in Transloco. Android needs no counterpart: its runtime permission dialogs carry no per-app text.
 
 ## Switching Language
 
@@ -38,7 +39,7 @@ libs/**/page/**/*.html
 
 ## Current Limitations
 
-- Several translations were AI-generated and need manual review, including the notification catalog in the functions app.
-- The language list exists twice: `availableLangs` in the consumer app's Transloco config and `SUPPORTED_LANGUAGES` in the functions catalog. They are kept in step by hand.
+- Several translations were AI-generated and need manual review, including the notification catalog in the functions app and the iOS permission prompts added for build 93.
+- The language list exists four times: `availableLangs` in the consumer app's Transloco config, `SUPPORTED_LANGUAGES` in the functions catalog, `PUBLISHED_PRIVACY_POLICY_LANGUAGES` in the privacy-policy library, and the `InfoPlist.strings` variant group plus `knownRegions` in the iOS Xcode project. They are kept in step by hand, and nothing fails when one is missed — the user silently gets English. [[Implementation - Localization]] carries the add-a-language checklist.
 - Product language should stay consistent with the BiteTribe mission and informal tone choices.
 - Currency and location are related internationalization concerns, not just formatting concerns.

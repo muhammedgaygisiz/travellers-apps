@@ -70,9 +70,12 @@ export interface AnalyticsEventParamMap {
       | 'send_failed'
       | 'unknown';
   };
+  // Only logged while a verification is still outstanding, so `verified: true`
+  // marks the session where the user completed it rather than repeating for
+  // every verified user on every app start.
   [AnalyticsEvent.EmailVerificationSynced]: {
     verified: boolean;
-    source: 'app_start' | 'app_resume' | 'profile_edit';
+    source: 'app_start' | 'app_resume';
   };
   [AnalyticsEvent.AccountDeletionStarted]: never;
   [AnalyticsEvent.AccountDeletionCompleted]: never;

@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { NavController, Platform } from '@ionic/angular';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
-import { AnalyticsService, fromAuth } from 'ta-firestore';
+import { AnalyticsEvent, AnalyticsService, fromAuth } from 'ta-firestore';
 import { AppActions } from '../actions';
 import { AppEffect } from '../effects';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
@@ -14,7 +14,7 @@ import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import { Action, Store } from '@ngrx/store';
 import { getEffectsMetadata } from '@ngrx/effects';
 import SpyInstance = jest.SpyInstance;
-import { gpsPosition } from '../selectors';
+import { gpsPosition, publicUser } from '../selectors';
 import { LocationPermissionNotGrantedError } from 'geolocation';
 
 const getCurrentPositionMock = jest.fn();
@@ -791,6 +791,156 @@ describe(AppEffect.name, () => {
       });
 
       expect(updateUserMetadataSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('syncEmailVerificationStatus effects', () => {
+    const pendingUser = {
+      emailVerificationRequired: true,
+      emailVerified: false,
+    } as PublicUser;
+
+    const flushPromises = (): Promise<void> =>
+      new Promise((resolve) => {
+        setTimeout(resolve, 0);
+      });
+
+    const emitLoadedUser = (): void => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: fromAuth.AuthActions.loadedUser({
+            user: {} as unknown as Parameters<
+              typeof fromAuth.AuthActions.loadedUser
+            >[0]['user'],
+          }),
+        });
+
+        expectObservable(effects.updateUserMetadataAfterLogin$);
+      });
+    };
+
+    beforeEach(() => {
+      jest.spyOn(apiService, 'updateUserMetadata').mockImplementation();
+      BiteTribeApiServiceMock.syncEmailVerificationStatus.mockClear();
+      AnalyticsServiceMock.logEvent.mockClear();
+      dispatchSpy.mockClear();
+    });
+
+    it('should sync on loadedUser when the verification is still pending', async () => {
+      store.overrideSelector(publicUser, pendingUser);
+      store.refreshState();
+
+      emitLoadedUser();
+      await flushPromises();
+
+      expect(
+        BiteTribeApiServiceMock.syncEmailVerificationStatus,
+      ).toHaveBeenCalledTimes(1);
+      expect(AnalyticsServiceMock.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.EmailVerificationSynced,
+        { verified: false, source: 'app_start' },
+      );
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        AppActions.syncedEmailVerificationStatus({
+          metadata: { emailVerified: false, emailVerificationRequired: true },
+        }),
+      );
+    });
+
+    it('should not sync on loadedUser when the user is already verified', async () => {
+      store.overrideSelector(publicUser, {
+        emailVerificationRequired: true,
+        emailVerified: true,
+      } as PublicUser);
+      store.refreshState();
+
+      emitLoadedUser();
+      await flushPromises();
+
+      expect(
+        BiteTribeApiServiceMock.syncEmailVerificationStatus,
+      ).not.toHaveBeenCalled();
+      expect(AnalyticsServiceMock.logEvent).not.toHaveBeenCalled();
+    });
+
+    it('should not sync for a user who is never asked to verify', async () => {
+      // Google and Apple sign-ins are classified as verified without ever
+      // being sent a verification mail.
+      store.overrideSelector(publicUser, {
+        emailVerificationRequired: false,
+        emailVerified: true,
+      } as PublicUser);
+      store.refreshState();
+
+      emitLoadedUser();
+      await flushPromises();
+
+      expect(
+        BiteTribeApiServiceMock.syncEmailVerificationStatus,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should wait for the profile document before deciding on a cold start', async () => {
+      store.overrideSelector(publicUser, undefined);
+      store.refreshState();
+
+      emitLoadedUser();
+      await flushPromises();
+
+      expect(
+        BiteTribeApiServiceMock.syncEmailVerificationStatus,
+      ).not.toHaveBeenCalled();
+
+      store.overrideSelector(publicUser, pendingUser);
+      store.refreshState();
+      await flushPromises();
+
+      expect(
+        BiteTribeApiServiceMock.syncEmailVerificationStatus,
+      ).toHaveBeenCalledTimes(1);
+    });
+
+    it('should sync on AppActions.syncEmailVerificationStatus when pending', async () => {
+      store.overrideSelector(publicUser, pendingUser);
+      store.refreshState();
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: AppActions.syncEmailVerificationStatus(),
+        });
+
+        expectObservable(effects.syncEmailVerificationStatus$);
+      });
+      await flushPromises();
+
+      expect(
+        BiteTribeApiServiceMock.syncEmailVerificationStatus,
+      ).toHaveBeenCalledTimes(1);
+      expect(AnalyticsServiceMock.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.EmailVerificationSynced,
+        { verified: false, source: 'app_resume' },
+      );
+    });
+
+    it('should not sync on AppActions.syncEmailVerificationStatus when verified', async () => {
+      store.overrideSelector(publicUser, {
+        emailVerificationRequired: true,
+        emailVerified: true,
+      } as PublicUser);
+      store.refreshState();
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: AppActions.syncEmailVerificationStatus(),
+        });
+
+        expectObservable(effects.syncEmailVerificationStatus$);
+      });
+      await flushPromises();
+
+      expect(
+        BiteTribeApiServiceMock.syncEmailVerificationStatus,
+      ).not.toHaveBeenCalled();
     });
   });
 

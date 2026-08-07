@@ -1,7 +1,11 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
-import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import {
+  AnalyticsEvent,
+  AnalyticsService,
+  RequestedUrlService,
+} from 'ta-firestore';
 import { getCurrencyForLocale, getDisplayNameFailureReason, PATH } from 'utils';
 import {
   OnboardingDataAccessService,
@@ -37,6 +41,7 @@ export class OnboardingService {
   private readonly loadingController = inject(LoadingController);
   private readonly transloco = inject(TranslocoService);
   private readonly analytics = inject(AnalyticsService);
+  private readonly requestedUrlService = inject(RequestedUrlService);
 
   readonly steps = ONBOARDING_STEPS;
 
@@ -473,7 +478,11 @@ export class OnboardingService {
     this.analytics.logEvent(AnalyticsEvent.OnboardingAssistantCompleted);
 
     this.dataAccess.dismissForSession();
-    void this.navController.navigateRoot([`/${PATH.HOME}`]);
+
+    // Someone who followed a shared Bite link into a first-run onboarding gets
+    // that Bite now the assistant is done, not the feed (issue #1246).
+    const requestedUrl = this.requestedUrlService.consume();
+    void this.navController.navigateRoot(requestedUrl ?? `/${PATH.HOME}`);
   }
 
   private async markComplete(id: OnboardingStepId): Promise<void> {

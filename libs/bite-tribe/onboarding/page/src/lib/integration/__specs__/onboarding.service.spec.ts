@@ -1,7 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
-import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import {
+  AnalyticsEvent,
+  AnalyticsService,
+  RequestedUrlService,
+} from 'ta-firestore';
 import {
   OnboardingDataAccessService,
   OnboardingProgressService,
@@ -312,7 +316,17 @@ describe('OnboardingService', () => {
       );
       expect(completeOnboarding).toHaveBeenCalledTimes(1);
       expect(dismissForSession).toHaveBeenCalledTimes(1);
-      expect(navigateRoot).toHaveBeenCalledWith([`/${PATH.HOME}`]);
+      expect(navigateRoot).toHaveBeenCalledWith(`/${PATH.HOME}`);
+    });
+
+    it('finishes on the URL the visitor was headed for before the gate', async () => {
+      setup(ONBOARDING_STEPS.slice(0, -1).map((step) => step.id));
+      TestBed.inject(RequestedUrlService).remember('/bite/shared-123');
+      await service.initialize();
+
+      await service.next();
+
+      expect(navigateRoot).toHaveBeenCalledWith('/bite/shared-123');
     });
 
     it('keeps the user on the finish step when the completion write fails', async () => {

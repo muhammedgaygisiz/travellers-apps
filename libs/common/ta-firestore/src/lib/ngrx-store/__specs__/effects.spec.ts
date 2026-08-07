@@ -9,11 +9,12 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { AuthActions } from '../actions';
 import { Action } from '@ngrx/store';
 import { NavController } from '@ionic/angular';
-import { isBiteDetailsPage } from 'utils';
+import { isAuthEntryPage } from 'utils';
+import { RequestedUrlService } from '../../requested-url.service';
 
 jest.mock('utils', () => ({
   ...jest.requireActual('utils'),
-  isBiteDetailsPage: jest.fn(() => false),
+  isAuthEntryPage: jest.fn(() => true),
 }));
 
 jest.mock('@ionic/angular');
@@ -51,6 +52,9 @@ describe(AuthEffects.name, () => {
 
     // Reset all mocks before each test
     jest.clearAllMocks();
+
+    // Default to an interactive sign-in; the startup-restore case sets its own.
+    (isAuthEntryPage as jest.Mock).mockReturnValue(true);
 
     // Set default implementations
     AuthServiceMock.loginWithUsernameAndPassword.mockResolvedValue({
@@ -329,18 +333,18 @@ describe(AuthEffects.name, () => {
 
   describe('successFulLogin$', () => {
     describe('given a loginSucceeded action', () => {
-      describe('and it is a bite detail page', () => {
+      describe('and the visitor is already inside the app', () => {
         beforeEach(() => {
-          (isBiteDetailsPage as jest.Mock).mockReturnValue(true);
+          (isAuthEntryPage as jest.Mock).mockReturnValue(false);
         });
 
-        it('should do nothing', () => {
+        it('should leave them on the page they opened', () => {
           (
             effects as unknown as {
               pageAfterLogin?: string;
               pageAfterLogout?: string;
             }
-          ).pageAfterLogin = '/bites/123';
+          ).pageAfterLogin = '/home';
 
           scheduler.run(({ cold, expectObservable }) => {
             actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
@@ -349,14 +353,53 @@ describe(AuthEffects.name, () => {
           });
 
           expect(MockNavController.navigateRoot).not.toHaveBeenCalled();
+          expect(MockNavController.navigateBack).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('and a requested URL was remembered before signing in', () => {
+        it('should return the visitor to it', () => {
+          TestBed.inject(RequestedUrlService).remember('/bite/shared-123');
+          (effects as unknown as { pageAfterLogin?: string }).pageAfterLogin =
+            '/home';
+
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
+
+            expectObservable(effects.successFulLogin$);
+          });
+
+          expect(MockNavController.navigateRoot).toHaveBeenCalledWith(
+            '/bite/shared-123',
+          );
+          expect(MockNavController.navigateBack).not.toHaveBeenCalled();
+        });
+
+        it('should keep it when the same sign-in is reported twice', () => {
+          // The login effect and the startup session check both report one
+          // sign-in; a second routing would land on the default page.
+          TestBed.inject(RequestedUrlService).remember('/bite/shared-123');
+          (effects as unknown as { pageAfterLogin?: string }).pageAfterLogin =
+            '/home';
+
+          scheduler.run(({ cold, expectObservable }) => {
+            actions$ = cold('-ab', {
+              a: AuthActions.loginSucceeded(),
+              b: AuthActions.loginSucceeded(),
+            });
+
+            expectObservable(effects.successFulLogin$);
+          });
+
+          expect(MockNavController.navigateRoot).toHaveBeenCalledTimes(1);
+          expect(MockNavController.navigateRoot).toHaveBeenCalledWith(
+            '/bite/shared-123',
+          );
+          expect(MockNavController.navigateBack).not.toHaveBeenCalled();
         });
       });
 
       describe('and pageAfterLogin is defined', () => {
-        beforeEach(() => {
-          (isBiteDetailsPage as jest.Mock).mockReturnValue(false);
-        });
-
         it('should navigate to pageAfterLogin', () => {
           (
             effects as unknown as {
@@ -377,7 +420,7 @@ describe(AuthEffects.name, () => {
         });
       });
 
-      describe('and it is not a bite page or the pageAfterLogin', () => {
+      describe('and neither a requested URL nor a pageAfterLogin exists', () => {
         it('should navigate back to root', () => {
           scheduler.run(({ cold, expectObservable }) => {
             actions$ = cold('-a', { a: AuthActions.loginSucceeded() });

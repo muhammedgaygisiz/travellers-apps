@@ -1,16 +1,27 @@
 import { TestBed } from '@angular/core/testing';
-import { Router, UrlTree } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  Router,
+  RouterStateSnapshot,
+  UrlTree,
+} from '@angular/router';
 import { OnboardingDataAccessService } from 'bite-tribe/onboarding-data-access';
+import { RequestedUrlService } from 'ta-firestore';
 import { onboardingGuard } from '../onboarding.guard';
 
 describe('onboardingGuard', () => {
   let isOnboardingComplete: jest.Mock;
   let dismissedForSession: jest.Mock;
   let parseUrl: jest.Mock;
+  let requestedUrlService: RequestedUrlService;
 
-  const runGuard = (): Promise<boolean | UrlTree> =>
-    TestBed.runInInjectionContext(() =>
-      (onboardingGuard as () => Promise<boolean | UrlTree>)(),
+  const runGuard = (url = '/home'): Promise<boolean | UrlTree> =>
+    TestBed.runInInjectionContext(
+      () =>
+        onboardingGuard(
+          {} as ActivatedRouteSnapshot,
+          { url } as RouterStateSnapshot,
+        ) as Promise<boolean | UrlTree>,
     );
 
   beforeEach(() => {
@@ -29,6 +40,8 @@ describe('onboardingGuard', () => {
         { provide: Router, useValue: { parseUrl } },
       ],
     });
+
+    requestedUrlService = TestBed.inject(RequestedUrlService);
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -46,6 +59,14 @@ describe('onboardingGuard', () => {
 
     expect(parseUrl).toHaveBeenCalledWith('/onboarding');
     expect(result).toEqual({ url: '/onboarding' });
+  });
+
+  it('remembers the displaced URL so the assistant can hand it back', async () => {
+    isOnboardingComplete.mockResolvedValue(false);
+
+    await runGuard('/bite/shared-123');
+
+    expect(requestedUrlService.consume()).toBe('/bite/shared-123');
   });
 
   it('allows navigation after a session dismissal without reading state', async () => {

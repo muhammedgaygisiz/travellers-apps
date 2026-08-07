@@ -65,6 +65,13 @@ export class OnboardingDataAccessService {
       return true;
     }
 
+    // The entry gate runs alongside `authGuard`, not after it, so on a cold
+    // load — a shared Bite link opened in a new tab — the session may still be
+    // being restored. Answering "not onboarded" from a user who has not arrived
+    // yet sends a returning user into the assistant and loses the page they
+    // asked for (issue #1246).
+    await this.authService.whenAuthStateRestored();
+
     const uid = this.authService.getUser()?.uid;
     if (!uid) {
       return false;

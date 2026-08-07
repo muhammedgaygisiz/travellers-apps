@@ -1,4 +1,4 @@
-import { AuthService } from '../auth.service';
+import { AUTH_RESTORE_TIMEOUT_MS, AuthService } from '../auth.service';
 import { TestBed } from '@angular/core/testing';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../provide-firestore-utils';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
@@ -170,6 +170,92 @@ describe(AuthService.name, () => {
       expect(authStateChangeNextSpy).toHaveBeenNthCalledWith(2, {
         user: { uid: '456' },
       });
+    });
+
+    it('should treat a restored user as the conclusive auth state', async () => {
+      await service.initialize();
+
+      expect(service.isAuthStateRestored()).toBe(true);
+      await expect(service.whenAuthStateRestored()).resolves.toBeUndefined();
+    });
+
+    describe('given the web, where a missing user is not yet conclusive', () => {
+      beforeEach(() => {
+        (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
+        jest
+          .spyOn(FirebaseAuthentication, 'getCurrentUser')
+          .mockResolvedValue({ user: null } as unknown as Awaited<
+            ReturnType<typeof FirebaseAuthentication.getCurrentUser>
+          >);
+      });
+
+      it('should wait for the first authStateChange event', async () => {
+        let notifyAuthStateChange: ((change: unknown) => void) | undefined;
+        (FirebaseAuthentication.addListener as jest.Mock).mockImplementation(
+          (event, callback) => {
+            if (event === 'authStateChange') {
+              notifyAuthStateChange = callback;
+            }
+          },
+        );
+
+        await service.initialize();
+
+        expect(service.isAuthStateRestored()).toBe(false);
+
+        notifyAuthStateChange?.({ user: { uid: '456' } });
+
+        expect(service.isAuthStateRestored()).toBe(true);
+        await expect(service.whenAuthStateRestored()).resolves.toBeUndefined();
+      });
+
+      it('should settle on a signed-out visitor too', async () => {
+        (FirebaseAuthentication.addListener as jest.Mock).mockImplementation(
+          (event, callback) => {
+            if (event === 'authStateChange') {
+              callback({ user: null });
+            }
+          },
+        );
+
+        await service.initialize();
+
+        expect(service.isAuthStateRestored()).toBe(true);
+      });
+    });
+
+    describe('given a native platform, where the first answer is final', () => {
+      beforeEach(() => {
+        (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+        jest
+          .spyOn(FirebaseAuthentication, 'getCurrentUser')
+          .mockResolvedValue({ user: null } as unknown as Awaited<
+            ReturnType<typeof FirebaseAuthentication.getCurrentUser>
+          >);
+        (FirebaseAuthentication.addListener as jest.Mock).mockImplementation(
+          () => undefined,
+        );
+      });
+
+      it('should not hold routing back for an event that may never come', async () => {
+        await service.initialize();
+
+        expect(service.isAuthStateRestored()).toBe(true);
+      });
+    });
+  });
+
+  describe('whenAuthStateRestored', () => {
+    it('should give up on a platform that never reports an auth state', async () => {
+      jest.useFakeTimers();
+
+      const waited = service.whenAuthStateRestored();
+      jest.advanceTimersByTime(AUTH_RESTORE_TIMEOUT_MS);
+
+      await expect(waited).resolves.toBeUndefined();
+      expect(service.isAuthStateRestored()).toBe(false);
+
+      jest.useRealTimers();
     });
   });
 

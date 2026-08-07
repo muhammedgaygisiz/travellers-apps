@@ -16,6 +16,7 @@ export {
 
 export { authGuard } from './lib/auth.guard';
 export { startGuard } from './lib/start.guard';
+export { RequestedUrlService } from './lib/requested-url.service';
 export { freshSessionGuard } from './lib/fresh-session.guard';
 
 export { AuthService } from './lib/auth.service';

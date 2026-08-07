@@ -1,22 +1,55 @@
+/* Mirrors the breakpoint in common/ui/page's page.component.scss, where the
+ * content column widens. The column has to widen before the feed can add a
+ * second column, so the two switch at the same width. See GitHub issue #1250. */
+$desktop-breakpoint: 1024px;
+$wide-desktop-breakpoint: 1280px;
+
 :host {
   // Matches the Bite card radius so the revealed swipe option is clipped to the
   // same rounded shape as the card it sits behind.
   --bite-card-radius: 46px;
 
+  /* One column on phones, so the feed keeps the layout it already had; the row
+   * gap replaces the per-card bottom margin at the same 1rem. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+
+  /* Each card keeps its natural height rather than being stretched to its row.
+   * Stretching would hand the surplus to the card's own content row, which is
+   * where the likes sit, and their layout is deliberately left alone here. */
+  align-items: start;
+
+  @media (width >= $desktop-breakpoint) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (width >= $wide-desktop-breakpoint) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* Full-width children of the grid: neither belongs in a card column. */
+  ion-infinite-scroll,
+  .empty-message {
+    grid-column: 1 / -1;
+  }
+
+  /* Dissolves the skeleton list's own box so its skeletons become children of
+   * this grid and load in the same columns as the Bites they stand in for.
+   * Spanning it instead would leave the loading state in one column while the
+   * loaded feed uses two or three. */
+  bt-bite-skeleton-list {
+    display: contents;
+  }
+
   bt-bite {
     display: block;
-    margin-bottom: 1rem;
   }
 
   ion-item-sliding.bite-sliding {
     display: block;
-    margin-bottom: 1rem;
     border-radius: var(--bite-card-radius);
     overflow: hidden;
-
-    bt-bite {
-      margin-bottom: 0;
-    }
 
     ion-item.bite-sliding-item {
       --background: transparent;

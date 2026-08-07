@@ -38,6 +38,13 @@ export interface PageChromeConfig {
   showFooter?: boolean;
   showAddButton?: boolean;
   fullWidth?: boolean;
+  /**
+   * Opts the page into the desktop layout. At desktop widths the content column
+   * widens past the phone column, the top menu entries and the add button move
+   * into the header, and the fixed footer bar is released. Below the breakpoint
+   * the page renders exactly as before. See GitHub issue #1250.
+   */
+  desktopLayout?: boolean;
 }
 
 export const DEFAULT_PAGE_MENU_CONFIG: Required<PageMenuConfig> = {
@@ -59,4 +66,5 @@ export const DEFAULT_PAGE_CHROME_CONFIG: Required<PageChromeConfig> = {
   showFooter: true,
   showAddButton: false,
   fullWidth: false,
+  desktopLayout: false,
 };

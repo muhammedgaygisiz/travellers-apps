@@ -1,4 +1,4 @@
-<div class="ion-page">
+<div class="ion-page" [class.desktop-layout]="chromeConfig().desktopLayout">
   <ion-header>
     <ion-toolbar>
       <ion-buttons slot="start">
@@ -9,7 +9,7 @@
 
       <ion-title>
         <div
-          class="title-container ion-display-flex ion-flex-row ion-align-items-center ion-justify-content-center"
+          class="title-container ion-display-flex ion-flex-row ion-align-items-center"
         >
           <ion-icon src="assets/icons/logo-black-white.svg" color="primary" />
           <ion-text>
@@ -19,6 +19,32 @@
           </ion-text>
         </div>
       </ion-title>
+
+      <!-- Hidden below the desktop breakpoint by CSS rather than by a resize
+      listener, so the header has no layout state to keep in sync. -->
+      @if (showDesktopNav()) {
+        <ion-buttons slot="end" class="desktop-nav">
+          @for (item of desktopNavItems(); track item.target) {
+            <ion-button
+              [attr.data-testid]="'desktop-nav-' + item.target"
+              (click)="menuNavigate.emit(item.target)"
+            >
+              {{ item.labelKey | transloco }}
+            </ion-button>
+          }
+
+          @if (chromeConfig().showAddButton) {
+            <ion-button
+              class="desktop-add-button"
+              fill="solid"
+              data-testid="header-add-button"
+              (click)="addButtonClick.emit($event)"
+            >
+              {{ addButtonText() ?? ('create-bite' | transloco) }}
+            </ion-button>
+          }
+        </ion-buttons>
+      }
 
       @if (chromeConfig().showHeaderMenu) {
         <ion-buttons slot="end">
@@ -48,6 +74,7 @@
         class="inner-content-container {{
           chromeConfig().fullWidth ? 'full-width' : 'mobile-style'
         }}"
+        [class.desktop-layout]="chromeConfig().desktopLayout"
       >
         <ng-content></ng-content>
       </div>
@@ -56,7 +83,7 @@
 
   <ng-container>
     @if (chromeConfig().showFooter) {
-      <ion-footer>
+      <ion-footer [class.add-button-in-header]="addButtonInHeader()">
         <ion-toolbar>
           @if (chromeConfig().showAddButton) {
             <ion-button

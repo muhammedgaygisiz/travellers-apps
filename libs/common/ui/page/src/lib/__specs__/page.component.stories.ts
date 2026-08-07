@@ -43,6 +43,44 @@ export const Primary: Story = {
 };
 
 /**
+ * The desktop layout, which a page opts into with `chrome.desktopLayout`. Above
+ * 1024px the content column widens past the phone column, the first three menu
+ * entries and the add button move into the header, and the fixed footer bar is
+ * released. Narrow the viewport below the breakpoint and the same page renders
+ * exactly like Primary — the switch is a media query, not component state.
+ * See GitHub issue #1250.
+ */
+export const DesktopLayout: Story = {
+  args: {
+    chrome: {
+      enableBackButton: false,
+      desktopLayout: true,
+      showAddButton: true,
+    },
+    isAuthenticated: true,
+    menuConfig: {
+      myProfile: true,
+      myBites: true,
+      myBucketlists: true,
+      settings: true,
+      about: true,
+      gallery: true,
+    },
+  },
+};
+
+/**
+ * The same page signed out. Every promoted entry leads to the visitor's own
+ * content, so none is promoted and the header keeps only the add button.
+ */
+export const DesktopLayoutSignedOut: Story = {
+  args: {
+    ...DesktopLayout.args,
+    isAuthenticated: false,
+  },
+};
+
+/**
  * A background refresh of content that is already on screen. The indeterminate
  * bar sits over the header separator, so the page it reports on does not move.
  */

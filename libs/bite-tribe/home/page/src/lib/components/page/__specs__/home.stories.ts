@@ -44,6 +44,40 @@ export const withBites: Story = {
   },
 };
 
+/**
+ * The feed at desktop widths: two columns from 1024px and three from 1280px,
+ * inside a content column that widens past the phone column. Narrow the
+ * viewport below 1024px and the same feed falls back to the single column it
+ * has always had — the layout is driven by media queries, not by state.
+ *
+ * Enough Bites to fill more than one row, with titles of different lengths so
+ * the row alignment is visible. See GitHub issue #1250.
+ */
+export const DesktopFeed: Story = {
+  args: {
+    ...Empty.args,
+    bites: [
+      'Botanic Breeze',
+      'Beef Krapao with a runny fried egg',
+      'Boiled beef',
+      'Som tam',
+      'Mango sticky rice with coconut cream',
+      'Massaman curry',
+    ].map(
+      (name, index) =>
+        ({
+          id: `bite${index + 1}`,
+          name,
+          imagePath: 'assets/demo/bite-demo.png',
+          place: 'Einstein au Jardin',
+          distance: `${index + 1}.4`,
+          rating: (index % 5) + 1,
+          thumbup: index % 3,
+        }) as Bite,
+    ),
+  },
+};
+
 export const Loading: Story = {
   args: {
     ...Empty.args,

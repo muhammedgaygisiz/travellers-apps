@@ -28,7 +28,39 @@ type LokiWindow = Window & { loki?: { isRunning?: boolean } };
 const isRunningUnderLoki = (): boolean =>
   Boolean((window as LokiWindow).loki?.isRunning);
 
-const IPHONE = 'iphone14';
+/**
+ * The three viewports the app is reviewed at.
+ *
+ * These drive manual Storybook browsing only. Loki emulates its own devices
+ * through `configurations` in `loki.config.js`, so changing this list does not
+ * move any visual-regression baseline.
+ */
+const DESKTOP = 'desktop';
+const IPHONE_12_MINI = 'iphone12mini';
+const GALAXY_A5 = 'galaxyA5';
+
+/**
+ * 1440px is the width the desktop content column is capped at, so this shows
+ * the widest layout the app will ever produce — past it the page only adds
+ * gutters. See GitHub issue #1250.
+ */
+const DESKTOP_VIEWPORT = {
+  name: 'Desktop',
+  styles: { width: '1440px', height: '900px' },
+  type: 'desktop',
+} as const;
+
+/**
+ * Storybook ships no Samsung preset beyond the Galaxy S5/S9. Every Galaxy A5
+ * generation reports the same 360x640 CSS pixels — 720x1280 at 2x on the 2015
+ * model, 1080x1920 at 3x on the 2016 and 2017 ones — so the density does not
+ * change the layout box.
+ */
+const GALAXY_A5_VIEWPORT = {
+  name: 'Samsung Galaxy A5',
+  styles: { width: '360px', height: '640px' },
+  type: 'mobile',
+} as const;
 
 const SUPPORTED_LOCALES = [
   { value: 'en', title: 'English' },
@@ -80,10 +112,11 @@ const withLocale: Decorator = (storyFn, context): ReturnType<StoryFn> => {
 const parameters = {
   layout: 'fullscreen',
   viewport: {
-    viewports: {
-      [IPHONE]: INITIAL_VIEWPORTS[IPHONE],
+    options: {
+      [DESKTOP]: DESKTOP_VIEWPORT,
+      [IPHONE_12_MINI]: INITIAL_VIEWPORTS[IPHONE_12_MINI],
+      [GALAXY_A5]: GALAXY_A5_VIEWPORT,
     },
-    defaultViewport: IPHONE,
   },
   options: {
     storySort: {
@@ -132,6 +165,16 @@ const preview: Preview = {
   },
   initialGlobals: {
     locale: 'en',
+    /**
+     * Storybook 10 takes the starting viewport from globals. The older
+     * `parameters.viewport.defaultViewport` is ignored, which is why the
+     * toolbar used to open on the built-in "Small mobile" instead of the
+     * configured device.
+     *
+     * Most components are still designed phone-first, so stories open at a
+     * phone width.
+     */
+    viewport: { value: IPHONE_12_MINI },
   },
 };
 

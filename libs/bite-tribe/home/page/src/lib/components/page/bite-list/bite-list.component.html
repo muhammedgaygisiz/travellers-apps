@@ -1,5 +1,7 @@
 @if (showSkeleton()) {
-  <bt-bite-skeleton-list />
+  <!-- Six fills two rows of the desktop grid, so the loading state covers a
+  comparable amount of the screen to the feed it stands in for. -->
+  <bt-bite-skeleton-list [desktopCount]="6" />
 } @else {
   @for (bite of bites(); track bite.id) {
     @if (enableTriedOutSwipe()) {
@@ -58,7 +60,9 @@
       />
     }
   } @empty {
-    <div class="ion-display-flex ion-justify-content-center ion-padding-top">
+    <div
+      class="empty-message ion-display-flex ion-justify-content-center ion-padding-top"
+    >
       <ion-text color="primary"> No bites found. Be the first one.</ion-text>
     </div>
   }

@@ -9,7 +9,7 @@ import { expect, Locator, Page } from '@playwright/test';
  */
 export class CreateBitePage {
   readonly page: Page;
-  readonly footerAddButton: Locator;
+  readonly addButton: Locator;
   readonly imageInput: Locator;
   readonly name: Locator;
   readonly setRestaurant: Locator;
@@ -33,10 +33,16 @@ export class CreateBitePage {
 
   constructor(page: Page) {
     this.page = page;
-    // Scoped to the visible one: Ionic keeps the pages it has navigated away
-    // from in the DOM, so their footers answer this test id as well.
-    this.footerAddButton = page.locator(
-      '[data-testid="footer-add-button"]:visible',
+    // Matches whichever add button the current layout shows. The desktop layout
+    // moves it from the footer bar into the header and hides the bar, and both
+    // stay in the DOM at every width, so selecting on visibility is what tells
+    // them apart. See GitHub issue #1250.
+    //
+    // `:visible` is also what scopes this to the current page: Ionic keeps the
+    // pages it has navigated away from in the DOM, so their footers answer this
+    // test id as well.
+    this.addButton = page.locator(
+      '[data-testid="footer-add-button"]:visible, [data-testid="header-add-button"]:visible',
     );
     this.backButton = page.locator('bite ion-back-button');
     this.selectedPlace = page.locator('bite .selected-place-name');
@@ -74,12 +80,12 @@ export class CreateBitePage {
   }
 
   /**
-   * Opens the create-bite form via the home footer button (in-app navigation).
+   * Opens the create-bite form via the home add button (in-app navigation).
    * A hard `goto('/new-bite')` reloads the SPA and the auth guard bounces back
    * to home before Firebase auth is restored, so we navigate from within the app.
    */
   async open(): Promise<void> {
-    await this.footerAddButton.click();
+    await this.addButton.click();
     await this.page.waitForURL('**/new-bite');
   }
 

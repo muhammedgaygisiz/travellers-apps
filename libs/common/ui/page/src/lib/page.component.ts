@@ -135,6 +135,55 @@ export class PageComponent {
   );
   private readonly hideAuthButton = computed(() => this.menu().hideAuth);
 
+  /**
+   * The menu entries promoted out of the hamburger at desktop widths, in the
+   * popover's own order so the three it lists first are the three that surface
+   * directly. Each stays gated by its menu flag, so a page only promotes what
+   * it already offers, and the remaining entries keep the menu button. The
+   * popover is the only navigation below the desktop breakpoint, where the
+   * header has no room for these. See GitHub issue #1250.
+   */
+  protected readonly desktopNavItems = computed<
+    { target: PageMenuTarget; labelKey: string }[]
+  >(() => {
+    if (!this.chromeConfig().desktopLayout || !this.isAuthenticated()) {
+      return [];
+    }
+
+    const menu = this.menu();
+
+    return [
+      { target: 'profile', labelKey: 'my-profile', show: menu.myProfile },
+      { target: 'my-bites', labelKey: 'my-bites', show: menu.myBites },
+      {
+        target: 'my-bucketlists',
+        labelKey: 'my-bucket-lists',
+        show: menu.myBucketlists,
+      },
+    ]
+      .filter(({ show }) => show)
+      .map(({ target, labelKey }) => ({
+        target: target as PageMenuTarget,
+        labelKey,
+      }));
+  });
+
+  /**
+   * The add button is rendered in the header instead of the footer bar once the
+   * page opts into the desktop layout, so the footer is released at desktop
+   * widths rather than covering the bottom of the content.
+   */
+  protected readonly addButtonInHeader = computed(
+    () =>
+      this.chromeConfig().desktopLayout && this.chromeConfig().showAddButton,
+  );
+
+  protected readonly showDesktopNav = computed(
+    () =>
+      this.chromeConfig().desktopLayout &&
+      (this.desktopNavItems().length > 0 || this.chromeConfig().showAddButton),
+  );
+
   async showMenuPopover($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
       component: AppMenuComponent,

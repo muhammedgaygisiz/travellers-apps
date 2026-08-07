@@ -1,7 +1,52 @@
+/* Width at which the desktop layout takes over. Mirrored by the feed grid in
+ * bite-list.component.scss and the scroll-to-top button in home.component.scss;
+ * all three have to switch together. See GitHub issue #1250. */
+$desktop-breakpoint: 1024px;
+
+/* Caps the widened column so cards keep a readable size on an ultrawide
+ * display. Past this width the feed adds gutters, not wider cards. */
+$desktop-content-max-width: 1440px;
+
 :host {
   ion-toolbar {
     --ion-color-secondary: black;
     --border-width: 0 0 3px;
+  }
+
+  /* Kept out of the flow below the breakpoint: the phone header has room for
+   * the logo and the menu button only. */
+  .desktop-nav {
+    display: none;
+
+    @media (width >= $desktop-breakpoint) {
+      display: flex;
+    }
+
+    /* Carries the footer bar's call-to-action weight into the header, where a
+     * toolbar button would otherwise render as plain clear text and lose it
+     * against the navigation entries beside it.
+     *
+     * Ionic derives a solid in-toolbar button's fill from the toolbar colours
+     * rather than from `--background`, so these are the same two variables the
+     * footer bar sets — setting `--background` here has no effect. */
+    .desktop-add-button {
+      --ion-toolbar-color: var(--ion-color-primary);
+      --ion-toolbar-background: var(--ion-color-primary-contrast);
+      --padding-start: 1rem;
+      --padding-end: 1rem;
+
+      /* Restores the app's own button shape. Ionic shrinks a button placed in a
+       * toolbar to a 4px radius, a 17px label and a 32px box, which reads as a
+       * toolbar control rather than as the same button the rest of the app
+       * uses. These three put it back on the 14px radius and 16px label that
+       * every other solid button in the app renders at, at a height that still
+       * sits comfortably inside the 68px toolbar. */
+      --border-radius: 14px;
+
+      height: 40px;
+      font-size: 16px;
+      margin-inline: 0.75rem;
+    }
   }
 
   ion-back-button {
@@ -29,12 +74,35 @@
   }
 
   .title-container {
+    /* Held here rather than on Ionic's `ion-justify-content-center` utility,
+     * which is `!important` and so cannot be overridden per breakpoint. */
+    justify-content: center;
+
     ion-icon {
       font-size: 1.6rem;
     }
 
     ion-text {
       margin-inline-start: 0.25rem;
+    }
+  }
+
+  /* Ionic centres the title by stretching it across the whole toolbar and
+   * reserving a fixed 90px for buttons at each end. The promoted navigation is
+   * far wider than that, so the centred brand runs underneath it between the
+   * breakpoint and roughly 1200px. Taking the title out of that absolute box
+   * lets the toolbar's own flex row keep the two apart at every width, and
+   * moves the brand to the start — where a desktop header expects it. */
+  .desktop-layout {
+    @media (width >= $desktop-breakpoint) {
+      ion-title {
+        position: static;
+        padding-inline: 1rem;
+      }
+
+      .title-container {
+        justify-content: flex-start;
+      }
     }
   }
 
@@ -48,6 +116,12 @@
       &.mobile-style {
         max-width: 720px;
         width: 100%;
+
+        &.desktop-layout {
+          @media (width >= $desktop-breakpoint) {
+            max-width: $desktop-content-max-width;
+          }
+        }
       }
 
       &.full-width {
@@ -64,6 +138,14 @@
     width: 100%;
     max-width: 720px;
     margin-inline: auto;
+
+    /* The add button is the footer's only content, so once the header carries
+     * it the bar has nothing left to show and stops covering the content. */
+    &.add-button-in-header {
+      @media (width >= $desktop-breakpoint) {
+        display: none;
+      }
+    }
 
     ion-toolbar {
       --border-width: 0;

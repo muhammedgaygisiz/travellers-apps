@@ -346,6 +346,28 @@ export const UploadedState: Story = {
   }),
 };
 
+/**
+ * A Bite that has lost its photo. Nothing reports a transfer, so neither the
+ * upload placeholder nor an image is rendered and the photo box stays empty.
+ * That leaves the card's own corners carrying the shape on their own, which is
+ * where the square photo-box border used to show through the rounded card.
+ * See GitHub issue #1251.
+ */
+export const MissingPhoto: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...demoBiteBase,
+      image: '',
+      imagePath: undefined,
+    },
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
 export const PendingToUploaded: Story = {
   render: () => ({
     moduleMetadata: { imports: [BiteUploadDemoComponent] },
@@ -358,6 +380,25 @@ export const LoadingSkeletonList: Story = {
     template: `
       <div class="ion-margin">
         <bt-bite-skeleton-list />
+      </div>
+    `,
+  }),
+};
+
+/**
+ * A caller that lays the skeletons out in a grid fits more of them per screen
+ * than a single column does, so it can ask for a higher desktop count. The feed
+ * asks for six, which fills two rows of its three-column grid.
+ *
+ * All six are in the DOM at every width and the extras are hidden below the
+ * desktop breakpoint, so narrowing the viewport drops this back to three
+ * without any resize handling. See GitHub issue #1250.
+ */
+export const LoadingSkeletonListForDesktop: Story = {
+  render: () => ({
+    template: `
+      <div class="ion-margin">
+        <bt-bite-skeleton-list [desktopCount]="6" />
       </div>
     `,
   }),

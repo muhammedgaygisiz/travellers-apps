@@ -20,6 +20,15 @@
         border: var(--border-width) solid var(--ion-color-card-border);
         border-bottom: unset;
 
+        /* Follows the card's own corners. The card clips to this radius, so a
+         * square-cornered border here is cut away at each top corner and leaves
+         * the outline broken. A photo covers the gap, which is why it only
+         * shows on a Bite whose image is missing — there the corner is bare.
+         * The details section below needs no equivalent because its background
+         * fill is clipped to the same shape. See GitHub issue #1251. */
+        border-start-start-radius: var(--border-radius);
+        border-start-end-radius: var(--border-radius);
+
         max-height: 220px;
         min-height: 220px;
 

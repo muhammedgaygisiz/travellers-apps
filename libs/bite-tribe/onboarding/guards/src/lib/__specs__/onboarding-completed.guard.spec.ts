@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
 import { OnboardingDataAccessService } from 'bite-tribe/onboarding-data-access';
+import { RequestedUrlService } from 'ta-firestore';
 import { onboardingCompletedGuard } from '../onboarding-completed.guard';
 
 describe('onboardingCompletedGuard', () => {
   let isOnboardingComplete: jest.Mock;
   let parseUrl: jest.Mock;
+  let requestedUrlService: RequestedUrlService;
 
   const runGuard = (): Promise<boolean | UrlTree> =>
     TestBed.runInInjectionContext(() =>
@@ -27,6 +29,8 @@ describe('onboardingCompletedGuard', () => {
         { provide: Router, useValue: { parseUrl } },
       ],
     });
+
+    requestedUrlService = TestBed.inject(RequestedUrlService);
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -44,5 +48,14 @@ describe('onboardingCompletedGuard', () => {
 
     expect(parseUrl).toHaveBeenCalledWith('/home');
     expect(result).toEqual({ url: '/home' });
+  });
+
+  it('redirects them to the URL that was displaced by the gate', async () => {
+    isOnboardingComplete.mockResolvedValue(true);
+    requestedUrlService.remember('/bite/shared-123');
+
+    const result = await runGuard();
+
+    expect(result).toEqual({ url: '/bite/shared-123' });
   });
 });

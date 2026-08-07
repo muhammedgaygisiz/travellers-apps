@@ -1,48 +1,51 @@
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, GuardResult, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from './auth.service';
-import { debounceTime, map, startWith } from 'rxjs';
-import { isBiteDetailsPage, isPrivacyPage, isAccountDeletionPage } from 'utils';
+import { RequestedUrlService } from './requested-url.service';
+import { isPrivacyPage, isAccountDeletionPage, PATH } from 'utils';
 
-export const authGuard: CanActivateFn = () => {
+/**
+ * Protects the authenticated surface, and waits for auth to be restored before
+ * judging a visitor who arrives cold.
+ *
+ * On the web a cold load — a shared Bite link opened in a new tab — runs this
+ * guard while the persisted session is still being read out of IndexedDB, so
+ * the signed-in visitor looks signed out. Waiting a fixed two seconds and then
+ * redirecting to `/start` discarded the requested URL for both answers: a
+ * signed-in visitor was forwarded on to Home by `startGuard`, and a signed-out
+ * one lost the Bite they were sent (issue #1246).
+ *
+ * So the guard waits on the restoration itself rather than a timer, and when
+ * the visitor really is signed out it remembers where they were headed, so
+ * signing in returns them to it.
+ */
+export const authGuard: CanActivateFn = async (
+  _route,
+  state,
+): Promise<GuardResult> => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const requestedUrlService = inject(RequestedUrlService);
 
-  const isBitePage = isBiteDetailsPage();
-  const authState = authService.authState();
-
-  const isPrivacyPageAddressed = isPrivacyPage();
-  if (isPrivacyPageAddressed) {
+  if (isPrivacyPage()) {
     return true;
   }
 
-  const isAccountDeletionAddressed = isAccountDeletionPage();
-  if (isAccountDeletionAddressed) {
+  if (isAccountDeletionPage()) {
     return true;
   }
 
-  if (isBitePage && authState?.user) {
+  if (authService.getUser()) {
     return true;
   }
 
-  if (isBitePage && !authState?.user) {
-    return authService.authStateChange$.pipe(
-      startWith(null),
-      // Wait for 2 second to see if the user is logged in
-      debounceTime(2000),
-      map((authState) => {
-        if (authState?.user) {
-          return true;
-        } else {
-          return router.parseUrl('/start');
-        }
-      }),
-    );
+  await authService.whenAuthStateRestored();
+
+  if (authService.getUser()) {
+    return true;
   }
 
-  if (!authState?.user) {
-    return router.parseUrl('/start');
-  }
+  requestedUrlService.remember(state.url);
 
-  return true;
+  return router.parseUrl(`/${PATH.START}`);
 };

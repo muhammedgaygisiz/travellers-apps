@@ -22,16 +22,38 @@ Backend callables validate request.auth where required
 
 ## Auth Surfaces
 
-- `AuthService` wraps Capacitor Firebase Authentication.
+- `AuthService` wraps Capacitor Firebase Authentication, and reports when the
+  persisted session has been restored so nothing decides on the current user
+  before that answer exists.
 - `withAuthRoutes` provides shared auth routes.
 - `authGuard` protects authenticated routes.
 - `startGuard` controls the start route.
+- `RequestedUrlService` holds the URL a visitor asked for while auth redirected
+  them, so signing in returns them to it instead of to Home.
 - `createUserOnAuthCreate` initializes profile-related backend behavior.
 - `updateLastSeen` records activity through a legacy callable for older app versions.
 - `updateUserMetadata` records current app activity and client version/build metadata through a callable.
 - `syncEmailVerificationStatus` mirrors Firebase Auth verification state into the public user document on app start/resume.
 - `resendEmailVerification` lets eligible email/password users request a Firebase email verification link through the backend.
 - `sendEmailVerificationReminders` sends monthly backend reminders for eligible unverified email/password accounts.
+
+## Cold Start Rules
+
+- On the web, `getCurrentUser()` answers from `auth.currentUser`, which is still
+  null while the persisted session is read out of IndexedDB. A cold load
+  therefore starts with a signed-in visitor looking signed out.
+- The conclusive answer is the first `authStateChange` event, which arrives for
+  a signed-out visitor too. Guards and gates wait on that, bounded, rather than
+  on a fixed delay. Native SDKs answer from an already-restored session, so
+  their first answer is taken as final and startup timing is unchanged there.
+- Angular runs a route's `canActivate` guards alongside each other, not one
+  after the other. Every guard that reads the current user has to wait for
+  restoration itself; waiting in `authGuard` alone does not protect the guards
+  running next to it.
+- A guard that redirects away from a requested URL remembers it, and a guard
+  that resolves a visitor into the app hands it back. That keeps a shared Bite
+  link alive across the whole entry chain. See the Shared Link Entry Contract in
+  [[UC - Inspect Bite Details]].
 
 ## Supported Auth Modes
 
@@ -50,6 +72,9 @@ Email verification is non-blocking. Password-only accounts require verification 
 libs/common/ta-firestore/src/lib/auth.service.ts
 libs/common/ta-firestore/src/lib/auth.guard.ts
 libs/common/ta-firestore/src/lib/start.guard.ts
+libs/common/ta-firestore/src/lib/requested-url.service.ts
+libs/bite-tribe/onboarding/guards/src/lib/onboarding.guard.ts
+libs/bite-tribe/onboarding/guards/src/lib/onboarding-completed.guard.ts
 libs/common/ui/auth
 libs/bite-tribe/shell/src/lib/routes.ts
 libs/bite-tribe-business/shell/src/lib/routes.ts

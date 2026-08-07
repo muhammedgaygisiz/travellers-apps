@@ -44,6 +44,7 @@ const requestLocationPermissionMock = requestLocationPermission as jest.Mock;
 describe('OnboardingDataAccessService', () => {
   let service: OnboardingDataAccessService;
   let getUser: jest.Mock;
+  let whenAuthStateRestored: jest.Mock;
   let setActiveLang: jest.Mock;
   let load: jest.Mock;
   let notifySavedSettings: jest.Mock;
@@ -59,6 +60,7 @@ describe('OnboardingDataAccessService', () => {
   };
 
   const setup = (uid: string | null = 'user-1'): void => {
+    whenAuthStateRestored = jest.fn(() => Promise.resolve());
     getUser = jest.fn(() =>
       uid
         ? {
@@ -92,7 +94,10 @@ describe('OnboardingDataAccessService', () => {
     TestBed.configureTestingModule({
       providers: [
         OnboardingDataAccessService,
-        { provide: AuthService, useValue: { getUser } },
+        {
+          provide: AuthService,
+          useValue: { getUser, whenAuthStateRestored },
+        },
         { provide: BiteTribeApiService, useValue: apiMock },
         {
           provide: BiteTribeStoreService,
@@ -141,6 +146,22 @@ describe('OnboardingDataAccessService', () => {
     await service.isOnboardingComplete();
 
     expect(getDocument).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits for the auth state before deciding on a cold start', async () => {
+    // The entry gate runs alongside authGuard, so on a cold deep link the user
+    // arrives while this is already being asked (issue #1246).
+    setup(null);
+    getDocument.mockResolvedValue({
+      snapshot: { data: { onboardingCompletedAt: '2026-07-15T00:00:00.000Z' } },
+    });
+    whenAuthStateRestored.mockImplementation(() => {
+      getUser.mockReturnValue({ uid: 'user-1' });
+      return Promise.resolve();
+    });
+
+    await expect(service.isOnboardingComplete()).resolves.toBe(true);
+    expect(getDocument).toHaveBeenCalledWith({ reference: 'users/user-1' });
   });
 
   it('treats a read failure as not complete', async () => {

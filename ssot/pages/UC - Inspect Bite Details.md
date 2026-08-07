@@ -41,6 +41,35 @@ Users can inspect one Bite deeply enough to decide whether the dish is relevant.
   `bt-bite-image-status` component so they cannot drift. See GitHub issue #1168
   and [[UC - Create And Maintain Personal Bites]] for the status rules.
 
+## Shared Link Entry Contract
+
+Issue [#1246](https://github.com/muhammedgaygisiz/travellers-apps/issues/1246)
+made the recipient of a shared Bite link arrive at that Bite:
+
+- A shared link is opened cold — a new tab, a message, a browser that has never
+  run the app in this session. The recipient must end on the Bite. Ending on
+  Home or the welcome page is a failure, not a fallback.
+- A cold load runs the route guards before the persisted Firebase session has
+  been read back, so a signed-in visitor first looks signed out. Nothing decides
+  who the visitor is until auth has reported an answer, and that wait is on the
+  restoration itself rather than on a fixed delay that can expire early.
+- Guards on one route run alongside each other, not in sequence, so the
+  onboarding entry gate sees the same unrestored state and waits for the same
+  answer. A gate that reads "no user" from a session still loading would send a
+  returning user into the assistant and drop the Bite on the way.
+- A visitor who really is signed out is sent to sign in, and the requested URL
+  is remembered rather than discarded. Signing in, registering, or completing
+  first-run onboarding returns them to the Bite they were sent.
+- The welcome page and the onboarding gate hand a remembered URL back instead of
+  resolving to Home, so a target survives every redirect the entry chain makes.
+- A remembered URL lives for the current page only. Reloading or closing the tab
+  before signing in abandons it; a target resurfacing in a later session would
+  be the more surprising outcome.
+- This shares its shape with the tapped-notification contract in
+  [[UC - Receive App Notifications And Engagement Updates]]: a target requested
+  while the app is still starting, against startup navigation that resolves the
+  address a returning user is sent to.
+
 ## Supported Evidence
 
 - `bite/:biteId`
@@ -50,6 +79,9 @@ Users can inspect one Bite deeply enough to decide whether the dish is relevant.
 - Playwright E2E coverage of the failed header photo: the reported state, the
   photo that is withheld rather than shown, and the poster's retry falling back
   to the local photo picker when this device holds no copy.
+- Playwright E2E coverage of the cold shared-link entry:
+  `apps/bite-tribe-e2e/src/tests/shared-bite-deep-link.spec.ts` opens
+  `/bite/:biteId` as a fresh page load, signed in and signed out.
 
 ## Related Domains
 

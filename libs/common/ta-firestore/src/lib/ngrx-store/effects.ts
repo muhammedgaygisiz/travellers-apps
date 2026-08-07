@@ -20,13 +20,8 @@ import {
 import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
-import {
-  AFTER_LOGIN_PAGE,
-  AFTER_LOGOUT_PAGE,
-  isAccountDeletionPage,
-  isBiteDetailsPage,
-  isPrivacyPage,
-} from 'utils';
+import { RequestedUrlService } from '../requested-url.service';
+import { AFTER_LOGIN_PAGE, AFTER_LOGOUT_PAGE, isAuthEntryPage } from 'utils';
 import { SignInResult } from '@capacitor-firebase/authentication';
 import { Store } from '@ngrx/store';
 
@@ -38,6 +33,9 @@ export class AuthEffects {
   private readonly authService = inject(AuthService);
   private readonly navController = inject(NavController);
   private readonly store = inject(Store);
+  private readonly requestedUrlService = inject(RequestedUrlService);
+
+  private hasRoutedAfterSignIn = false;
 
   private readonly pageAfterLogout = inject(AFTER_LOGOUT_PAGE, {
     optional: true,
@@ -145,19 +143,29 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.loginSucceeded),
         tap(() => {
-          const isBitePage = isBiteDetailsPage();
-
-          if (isBitePage) {
+          // A session restored on startup reports itself as a successful login
+          // too, and by then the visitor is already on the page they opened the
+          // app at — a shared Bite link, say. Only someone who came through the
+          // sign-in pages is routed onwards; anyone already inside the app
+          // stays where they asked to be (issue #1246).
+          if (!isAuthEntryPage()) {
             return;
           }
 
-          const isPrivacyPageAddressed = isPrivacyPage();
-          if (isPrivacyPageAddressed) {
+          // One sign-in reports itself twice: the login effect dispatches it,
+          // and the startup session check sees the same user arrive. Only the
+          // first may route — the second would find the requested URL already
+          // consumed and send the visitor to the default page instead. A logout
+          // reloads the document, so one routed sign-in per page is right.
+          if (this.hasRoutedAfterSignIn) {
             return;
           }
 
-          const isAccountDeletionPageAddressed = isAccountDeletionPage();
-          if (isAccountDeletionPageAddressed) {
+          this.hasRoutedAfterSignIn = true;
+
+          const requestedUrl = this.requestedUrlService.consume();
+          if (requestedUrl) {
+            this.navController.navigateRoot(requestedUrl);
             return;
           }
 

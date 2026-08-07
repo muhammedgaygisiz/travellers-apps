@@ -22,6 +22,12 @@ import { terminate } from 'firebase/firestore';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
 import { NavController } from '@ionic/angular';
 
+/**
+ * How long a caller waits for Firebase to report whether a persisted session
+ * exists before it has to decide without that answer.
+ */
+export const AUTH_RESTORE_TIMEOUT_MS = 5_000;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -40,9 +46,60 @@ export class AuthService {
 
   authState = toSignal(this.authStateChange$);
 
+  private authStateRestored = false;
+  private resolveAuthStateRestored!: () => void;
+
+  private readonly authStateRestoredPromise = new Promise<void>((resolve) => {
+    this.resolveAuthStateRestored = resolve;
+  });
+
   authStateChangeListener = (result: AuthStateChange): void => {
     this._authStateChange$.next(result);
+    this.markAuthStateRestored();
   };
+
+  /**
+   * Whether Firebase has reported whether a persisted session exists. Until it
+   * has, a missing user means "not known yet", not "signed out".
+   */
+  isAuthStateRestored(): boolean {
+    return this.authStateRestored;
+  }
+
+  /**
+   * Resolves once that answer has arrived, immediately when it already has.
+   *
+   * On the web `getCurrentUser()` reads `auth.currentUser`, which is still null
+   * while the persisted session is being read out of IndexedDB, so a cold load
+   * looks signed out to a user who is signed in. The conclusive answer arrives
+   * with the first `authStateChange` event — for a signed-out visitor too — and
+   * everything that decides on the current user waits for it rather than
+   * deciding on a timer (issue #1246).
+   *
+   * The wait is bounded: a platform that never answers must not hang a route
+   * forever. Reaching that bound is a failure, not the expected path.
+   */
+  whenAuthStateRestored(): Promise<void> {
+    if (this.authStateRestored) {
+      return Promise.resolve();
+    }
+
+    return Promise.race([
+      this.authStateRestoredPromise,
+      new Promise<void>((resolve) =>
+        setTimeout(resolve, AUTH_RESTORE_TIMEOUT_MS),
+      ),
+    ]);
+  }
+
+  private markAuthStateRestored(): void {
+    if (this.authStateRestored) {
+      return;
+    }
+
+    this.authStateRestored = true;
+    this.resolveAuthStateRestored();
+  }
 
   getUser(): User | null | undefined {
     return this.authState()?.user;
@@ -67,6 +124,13 @@ export class AuthService {
   async initialize(): Promise<void> {
     const currentUser = await FirebaseAuthentication.getCurrentUser();
     this._authStateChange$.next(currentUser);
+
+    // The native SDKs answer from an already-restored session, so their first
+    // answer is final either way. On the web only a user is conclusive; a null
+    // there waits for the `authStateChange` event below.
+    if (Capacitor.isNativePlatform() || currentUser?.user) {
+      this.markAuthStateRestored();
+    }
 
     await FirebaseAuthentication.addListener(
       'authStateChange',

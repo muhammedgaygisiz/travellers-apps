@@ -93,7 +93,6 @@ describe('BitePage', () => {
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
 
-    componentRef.setInput('networkStatus', { connected: true });
     componentRef.changeDetectorRef.detectChanges();
   });
 
@@ -223,13 +222,16 @@ describe('BitePage', () => {
       expect(emitSpy).not.toHaveBeenCalled();
     });
 
-    it('should emit form value on saveBite without image required when offline', () => {
-      componentRef.setInput('networkStatus', { connected: false });
-      componentRef.changeDetectorRef.detectChanges();
-
+    // Issue #1229: the picked photo has to reach the data access layer, since
+    // that is what starts the upload and puts the Bite on `imageStatus:
+    // 'pending'` — without it neither the failed state nor the retry can ever
+    // appear. Angular leaves disabled controls out of `FormGroup.value`, so a
+    // control disabled between picking and saving must not take the photo with
+    // it.
+    it('should emit an image whose control was disabled after it was picked', () => {
       const validBite: BiteFormValue = {
         id: '',
-        image: '',
+        image: 'data:image/jpeg;base64,test',
         imagePath: '',
         description: '',
         name: 'Test Burger',
@@ -245,13 +247,13 @@ describe('BitePage', () => {
         },
       };
 
-      const emitSpy = jest.spyOn(component.submitBite, 'emit');
       component.biteFormGroup.patchValue(validBite);
+      component.biteFormGroup.controls['image'].disable();
+
+      const emitSpy = jest.spyOn(component.submitBite, 'emit');
       component.saveBite();
 
-      const { image, ...expectedBite } = validBite;
-      void image;
-      expect(emitSpy).toHaveBeenCalledWith(expectedBite);
+      expect(emitSpy).toHaveBeenCalledWith(validBite);
     });
   });
 

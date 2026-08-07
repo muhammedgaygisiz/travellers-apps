@@ -26,6 +26,17 @@ Users can create and maintain real dish-level food experiences.
 - User can still manually correct the currency before saving.
 - The app warns when the entered price looks suspiciously high.
 - The app stores the Bite and uploads the image.
+- Connectivity is not a precondition for the photo. A Bite always needs one, the
+  user can pick it while offline, and a photo chosen before connectivity was
+  lost is still posted with the Bite. It then enters the upload states below and
+  can be retried instead of disappearing. The form used to disable its image
+  control while offline and waive the photo requirement, which is what lost the
+  photo: Angular leaves a disabled control out of a form group's value, so the
+  offline form submitted no image at all, no upload started, the document was
+  written without an image status, and none of the recovery below could ever
+  run. Picking a photo is a local operation, and the upload states now cover a
+  transfer that cannot start, so the restriction is gone. See GitHub issue
+  #1229.
 - The image upload has three states on the Bite document, and every viewer sees
   the card accordingly: `pending` while it uploads, `uploaded` once the storage
   trigger has the download URL, and `failed` when the upload errored.

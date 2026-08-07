@@ -24,7 +24,6 @@ import type { Geopoint } from 'model';
       [isNew]="true"
       [nearbyRestaurants]="service.nearbyRestaurants() || []"
       [suggestedTags]="service.tagSuggestionsForEditingBite() || []"
-      [networkStatus]="service.networkStatus()"
       [googlePlaces]="service.googlePlaces()"
       [googlePlacesLoading]="service.googlePlacesLoading()"
       [nearbyGooglePlaces]="service.nearbyGooglePlaces()"

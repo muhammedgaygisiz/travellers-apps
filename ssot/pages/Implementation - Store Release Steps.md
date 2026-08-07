@@ -76,30 +76,44 @@ the GitHub release body, not for store notes. See [[Release Workflow]].
    links straight there.
 2. **Apps → BiteTribe → TestFlight**.
 3. Wait until the new build finishes processing.
-4. Under the current version, the build row shows **Missing Compliance**. Click
-   **Manage**.
-5. In _App Encryption Documentation_, select **Standard encryption algorithms
-   instead of, or in addition to, using or accessing the encryption within
-   Apple's operating system**.
-6. **Is your app going to be available for distribution in France?** → **No**
-   while BiteTribe is not publicly launched.
-7. **Save**. The build's Missing Compliance state clears.
-8. Hover the build row's **GROUPS** cell and click the **+** that appears.
-9. Select **External Groups → External Testers**.
-10. Paste the store build notes into the **What to Test** modal.
-11. **Submit for Review**. External TestFlight distribution is gated on Apple's
-    beta app review; internal testers already have the build.
+4. Hover the build row's **GROUPS** cell and click the **+** that appears.
+5. Select **External Groups → External Testers**.
+6. Paste the store build notes into the **What to Test** modal.
+7. **Submit for Review**. External TestFlight distribution is gated on Apple's
+   beta app review; internal testers already have the build.
 
 ### Encryption Compliance Rule
 
-Steps 4 to 7 repeat for every single build because
-`ITSAppUsesNonExemptEncryption` is not declared in
-`apps/bite-tribe-ios/ios/App/App/Info.plist`. Declaring it there answers the
-question at build time and removes the modal from the weekly release.
+The build row must **not** show **Missing Compliance**.
+`apps/bite-tribe-ios/ios/App/App/Info.plist` declares:
 
-The France answer is tied to BiteTribe not being publicly launched. It must be
-revisited before the public launch window; [[Current State - Release State]]
-carries that as a launch checklist item.
+```xml
+<key>ITSAppUsesNonExemptEncryption</key>
+<false/>
+```
+
+That answers the export-compliance question at build time, so App Store Connect
+stops asking per build. It declares that BiteTribe uses no non-exempt
+encryption, which matches the code: there is no cryptography dependency in the
+workspace and no proprietary crypto in the wrapper. All encryption is HTTPS/TLS
+through the operating system and the Firebase SDKs.
+
+Capacitor sync does not regenerate `Info.plist`, so the declaration survives
+every `nx run bite-tribe-ios:sync`.
+
+Before build 93 this was answered by hand for every upload — _App Encryption
+Documentation_ → standard encryption algorithms → France **No** → Save. If the
+prompt ever reappears, the key has been lost from `Info.plist`; restore it
+rather than answering the modal again.
+
+Two consequences to keep in mind:
+
+- Apple no longer asks the France question, but France's own encryption rules
+  are not waived by the plist. Revisit before distributing there;
+  [[Current State - Release State]] carries that as a launch checklist item.
+- The declaration is an export-compliance statement, not a build setting. If
+  BiteTribe ever adds its own cryptography, this key has to be re-evaluated —
+  the non-exempt path needs `true` plus an `ITSEncryptionExportComplianceCode`.
 
 ## Google Play Console - Open Testing
 

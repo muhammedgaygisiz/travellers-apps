@@ -102,8 +102,10 @@ No separate `git push` is needed.
      Console release notes.
 
 8. Complete the store submissions.
-   - Clear the App Store Connect encryption compliance prompt, add the External
-     Testers group with the build notes, and submit for beta review.
+   - Add the External Testers group with the build notes in App Store Connect and
+     submit for beta review. The build must not show **Missing Compliance**; if
+     it does, `ITSAppUsesNonExemptEncryption` has been lost from the iOS
+     `Info.plist`.
    - Add the build notes to the Play Console release, save, and submit the change
      for review.
    - Both are detailed in [[Implementation - Store Release Steps]].

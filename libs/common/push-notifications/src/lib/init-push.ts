@@ -1,9 +1,12 @@
 import { PushNotifications } from '@capacitor/push-notifications';
-import { NavController, Platform } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { AppLauncher } from '@capacitor/app-launcher';
-import { PATH } from 'utils';
 import { registerCurrentPushInstallation } from './push-installation';
+import {
+  NotificationTarget,
+  toNotificationTarget,
+} from './notification-target';
 
 /**
  * Outcome of an in-context push permission request.
@@ -25,24 +28,6 @@ export type PushPermissionState =
   'granted' | 'denied' | 'prompt' | 'unsupported';
 
 /**
- * Turns the week bounds of a weekly summary payload into navigation query
- * params. Push data arrives as strings, and a payload without a complete range
- * yields no params at all so the page can pick its own default week.
- */
-const toWeekRangeOptions = (
-  data: Record<string, string> | undefined,
-): { queryParams: { weekStart: string; weekEnd: string } } | undefined => {
-  const weekStart = data?.['weekStart'];
-  const weekEnd = data?.['weekEnd'];
-
-  if (!weekStart || !weekEnd) {
-    return undefined;
-  }
-
-  return { queryParams: { weekStart, weekEnd } };
-};
-
-/**
  * Registers push listeners and, when permission was already granted, refreshes
  * the FCM token. It never shows the OS permission prompt.
  *
@@ -50,11 +35,16 @@ const toWeekRangeOptions = (
  * ({@link requestPushPermission}), which explains why notifications matter
  * first. Asking here — on every login — would burn the OS's single prompt
  * before the user has any context for the decision (epic #850, issue #1015).
+ *
+ * `onNotificationTap` receives the surface a tapped notification talks about.
+ * The tap is reported rather than navigated here because a tap that launched
+ * the app arrives while the app is still starting, and only the caller knows
+ * when routing has settled enough to keep the target (issue #1244).
  */
 export const initPushListeners = async (
   platform: Platform,
   userUid: string | undefined,
-  navController: NavController,
+  onNotificationTap: (target: NotificationTarget) => void,
 ): Promise<void> => {
   if (platform.is('capacitor')) {
     try {
@@ -89,49 +79,22 @@ export const initPushListeners = async (
       'pushNotificationActionPerformed',
       (action) => {
         console.log('Push notification action performed: ', action);
-        const data = action.notification.data;
 
-        if (data?.type === 'NEW_BITE' && data?.biteId) {
-          navController.navigateForward([PATH.BITE, data.biteId]);
-        }
+        const target = toNotificationTarget(action.notification.data, userUid);
 
-        if (data?.type === 'NEW_BITE_REVIEW' && data?.biteId) {
-          navController.navigateForward([PATH.BITE, data.biteId]);
-        }
-
-        if (data?.type === 'NEW_BITE_LIKE' && data?.biteId) {
-          navController.navigateForward([PATH.BITE, data.biteId]);
-        }
-
-        if (data?.type === 'NEW_FOLLOWER' && data?.followerUid) {
-          navController.navigateForward([PATH.PROFILE, data.followerUid]);
-        }
-
-        if (data?.type === 'LEADERBOARD_RANK_CHANGE') {
-          navController.navigateForward([PATH.LEADERBOARD]);
-        }
-
-        if (data?.type === 'NEW_COUNTRY_BADGE' && data?.userId) {
-          // The badge lives on the profile of whoever earned it. The same
-          // payload reaches the achiever and their followers, so the achiever
-          // is sent to their own profile page rather than to a read-only view
-          // of themselves.
-          navController.navigateForward(
-            data.userId === userUid
-              ? [PATH.MY_PROFILE]
-              : [PATH.PROFILE, data.userId],
+        if (!target) {
+          // An unroutable type, or a payload missing the id its route needs.
+          // Leaving the user where they are is the bounded outcome; guessing a
+          // surface the notification never mentioned is not.
+          console.warn(
+            'Tapped push notification carries no navigable target: ',
+            action.notification.data,
           );
+
+          return;
         }
 
-        if (data?.type === 'WEEKLY_BITE_SUMMARY') {
-          // The summary counts one specific week, so carry its bounds into the
-          // page instead of dropping the user on the home feed. Older payloads
-          // have no bounds; the page then falls back to the previous week.
-          navController.navigateForward(
-            [PATH.WEEKLY_BITES],
-            toWeekRangeOptions(data),
-          );
-        }
+        onNotificationTap(target);
       },
     );
 

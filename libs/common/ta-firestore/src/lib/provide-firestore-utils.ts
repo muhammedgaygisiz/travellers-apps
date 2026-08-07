@@ -45,6 +45,7 @@ import { Emulators } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { Analytics } from 'firebase/analytics';
 import { AuthService } from './auth.service';
+import { StartupNavigationService } from './startup-navigation.service';
 
 export const FIREBASE_APP = new InjectionToken<'FIREBASE_APP' | null>(
   'FIREBASE_APP',
@@ -125,6 +126,7 @@ const provideFirebaseStartupInitializer = (
     const authService = inject(AuthService);
     const readiness = inject(AppCheckReadinessService);
     const router = inject(Router);
+    const startupNavigation = inject(StartupNavigationService);
 
     return createFirebaseStartupInitializer(
       app,
@@ -133,7 +135,7 @@ const provideFirebaseStartupInitializer = (
       authService,
       {
         readiness,
-        startNavigation: () => runInitialNavigation(router),
+        startNavigation: () => runInitialNavigation(router, startupNavigation),
       },
     )();
   });
@@ -144,13 +146,20 @@ const provideFirebaseStartupInitializer = (
  * navigation settles. Awaiting it keeps the app-initializer blocking until the
  * first route has rendered, matching Angular's default enabled-blocking initial
  * navigation, so startup timing is unchanged when App Check is not enforced.
+ *
+ * Settling is announced so a deep target held back during startup can be
+ * applied without this navigation overwriting it (issue #1244).
  */
-const runInitialNavigation = async (router: Router): Promise<void> => {
+const runInitialNavigation = async (
+  router: Router,
+  startupNavigation: Pick<StartupNavigationService, 'markSettled'>,
+): Promise<void> => {
   const settled = firstValueFrom(
     router.events.pipe(filter(isNavigationSettled)),
   );
   router.initialNavigation();
   await settled;
+  startupNavigation.markSettled();
 };
 
 const isNavigationSettled = (event: RouterEvent): boolean =>
@@ -168,11 +177,8 @@ export const createFirebaseStartupInitializer =
     gate: AppCheckStartupGate,
   ): (() => Promise<void>) =>
   async () => {
-    const readiness: AppCheckReadiness = await createFirebaseAppCheckInitializer(
-      app,
-      runtimeContext,
-      analytics,
-    )();
+    const readiness: AppCheckReadiness =
+      await createFirebaseAppCheckInitializer(app, runtimeContext, analytics)();
 
     if (!readiness.ready) {
       // Enforced mode with no usable App Check token: hold auth and navigation,

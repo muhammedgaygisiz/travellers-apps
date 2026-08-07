@@ -4,7 +4,8 @@
 
 This workflow describes the usual Sunday native release path for BiteTribe.
 
-It turns the current build number into native app updates, then opens the next development cycle by bumping the build number on a small branch.
+It turns the current build number into native app updates, then opens the next
+development cycle by bumping the build number on the same small branch.
 
 ## Schedule
 
@@ -14,7 +15,9 @@ Native app releases usually happen on Sundays.
 
 Development happens against the next build number.
 
-After native apps are built, released, and published for build `x`, generate the release notes for that completed build. Then create a small branch that only bumps the build number to `x+1`. Merge that bump back to `develop` before normal development resumes.
+After native apps are built, released, and published for build `x`, generate the
+release notes for that completed build and bump the shared build number to
+`x+1`. Merge that bump back to `develop` before normal development resumes.
 
 During the following development week:
 
@@ -23,132 +26,167 @@ During the following development week:
 - The next Sunday native release publishes build `x+1`.
 - After publishing build `x+1`, bump the shared build number again to `x+2`.
 
+## Branch Convention
+
+The release branch is named after the build being **released**, not the build it
+bumps to: releasing build 92 uses `bump-version-92`, and the bump it carries
+takes the workspace to 93.
+
+Create it from `origin/develop` at the start of the release, before the web
+build. It is the branch the release commit, the tag, and the store artifacts all
+belong to.
+
 ## Workflow
 
 1. Confirm the release build.
-   - Start from the current intended release base on `develop`.
-   - Confirm the build number that will be published to native stores.
+   - Confirm the build number currently on `develop`; that is the build `x` being
+     released.
    - Confirm local state with `git status --short --branch`.
-   - Do not increment the build number before native apps for the current build are published.
+   - Create `bump-version-<x>` from `origin/develop`.
+   - Do not increment the build number yet.
 
-2. Identify store build notes.
-   - Identify the closed Priority P0 issues implemented during the release week.
-   - Use the issue titles to write a short build-notes summary for TestFlight and Google Play Console.
-   - Do not archive closed issues yet; keep them available until release notes are generated after native publish.
-
-3. Build the web application for the release build.
-   - Run the application build for the current build number.
-   - Fix release-blocking build errors before continuing.
+2. Build the web application for the release build.
 
 ```bash
-npm run build
+npx nx build bite-tribe --configuration=production
 ```
 
-4. Sync native apps.
-   - Run the Capacitor sync workflow for iOS and Android.
-   - Treat generated native changes as sync outputs.
-   - Review generated native diffs before committing.
+- Fix release-blocking build errors before continuing.
+- Confirm the bundle is clean before it is wrapped: grep the emitted
+  JavaScript in `dist/apps/bite-tribe` for the App Check debug token value and
+  for `IS_DEV`, and expect no match. This check is not optional; see
+  [[Current State - Release Candidate Test Charter]].
 
-5. Prepare production monitoring artifacts.
-   - Generate source maps for the production build when supported by the build configuration.
-   - Keep source maps available for future production issue monitoring.
-   - Do not expose source maps publicly unless the monitoring setup explicitly requires it.
-
-6. Release tagging.
-   - Create a git tag for the release build.
-   - Use the native version and current build number before the next build-number increment.
-   - Use the `build-<version>-<build-number>` tag convention, for example `build-1.0.1-81`.
-   - Push the release commit and tag.
-   - Publish the release on GitHub when needed.
-   - Attach native build artifacts to the tag or GitHub release when the artifact packaging convention is finalized.
-   - Include the matching source maps in the release package or monitoring upload path.
-
-7. Build native apps.
-   - Build the iOS app for the current build number.
-   - Build the Android app for the current build number.
-   - Verify both native builds before distribution.
-   - Keep the native build outputs traceable to the released build number and future tag.
-
-8. Deploy test builds.
-   - Deploy iOS to TestFlight.
-   - Deploy Android to Google Play Open Testing.
-   - Use the short weekly P0 issue summary as the external build notes.
-   - Confirm the uploaded builds are visible in the relevant store/testing dashboards.
-
-9. Generate release notes.
-   - Generate release notes after the native apps for build `x` are uploaded.
-   - Generate release notes before creating the next-build branch or incrementing the build number to `x+1`.
-   - Archive the closed issues after the release notes and store build notes are captured.
-   - Use the existing changelog script where possible:
+3. Sync native apps.
 
 ```bash
-npm run generate-changelog
+npx nx run bite-tribe-ios:sync
+npx nx run bite-tribe-android:sync
 ```
 
-10. Create the next-build branch.
+- The wrappers bundle `dist/apps/bite-tribe`, so an unsynced wrapper ships the
+  previous build's web assets silently.
+- Treat generated native changes as sync outputs and review the diffs.
+- Commit or discard any sync output before step 6. The release helper refuses
+  to run against a dirty working tree.
 
-- Create a branch from the released state only after the native uploads and release notes are complete.
-- The branch should only bump the shared build number for the next development cycle.
-- Do not include unrelated development work in this branch.
+4. Build and upload the native apps.
+   - Archive and upload iOS from Xcode, and produce the signed Android App Bundle
+     from Android Studio.
+   - Confirm the archived version and build number before distributing.
+   - The full console procedure is [[Implementation - Store Release Steps]].
 
-11. Bump the build number.
+5. Upload to the test tracks.
+   - iOS to TestFlight through App Store Connect.
+   - Android to Google Play Open Testing.
+   - Confirm both uploads are visible in their store dashboards.
 
-- Increment the shared build number from the released build `x` to the next build `x+1`.
-- Use the existing build-number script:
-
-```bash
-npm run increment-build-number
-```
-
-The combined helper can be used after native publish when the release state is
-ready to be committed and pushed:
+6. Generate release notes, bump, tag, and push.
+   - Run only after the native artifacts for build `x` are uploaded.
 
 ```bash
 npm run increment-build-number-and-generate-changelog
 ```
 
-12. Merge the next-build branch.
+The helper performs the whole release commit in one step: it generates the
+changelog section for build `x`, increments the shared build number to `x+1`,
+commits as `chore: prepare build <version>-<x> release`, creates the
+annotated tag `build-<version>-<x>`, and pushes both the branch and the tag.
+No separate `git push` is needed.
 
-- Create a pull request back to `develop`.
-- Confirm the PR contains only the build-number bump.
-- Merge the PR after checks pass and the next build number is reviewed.
-- Resume normal development on `develop`, where web and development now use build `x+1` while native stores still serve build `x`.
+7. Write the store build notes.
+   - Source: the generated changelog, from `### Features` up to, but not
+     including, `### Chores`.
+   - Summarize that range into user-facing notes of at most 230 characters.
+   - The same text is used for App Store Connect _What to Test_ and the Play
+     Console release notes.
+
+8. Complete the store submissions.
+   - Clear the App Store Connect encryption compliance prompt, add the External
+     Testers group with the build notes, and submit for beta review.
+   - Add the build notes to the Play Console release, save, and submit the change
+     for review.
+   - Both are detailed in [[Implementation - Store Release Steps]].
+
+9. Merge the release branch.
+   - Open a pull request back to `develop` with `gh pr create`, accepting the
+     generated `chore: prepare build <version>-<x> release` title.
+   - Confirm the PR contains only the changelog section and the build-number
+     bump.
+   - Squash and merge, then delete the branch.
+   - Resume normal development on `develop`, where web and development now use
+     build `x+1` while native stores still serve build `x`.
+
+10. Publish the GitHub release.
+
+- Open the repository tags, find `build-<version>-<x>`, and choose
+  **Create release** from the row menu.
+- Title the release `Build <x>`.
+- Body: the generated changelog from `### Features` through the end of
+  `### Chores`. This range is wider than the store build notes on purpose.
+- **Publish release**.
 
 ## Release Output
 
 Each release should produce:
 
 - native apps built and uploaded with the current release build number
-- generated release notes
-- short TestFlight and Google Play build notes from closed weekly P0 issue titles
-- updated changelog
-- archived closed release issues
+- generated changelog section for the released build
+- store build notes of at most 230 characters, used for both TestFlight and Play
+  Console
 - synced native app state
-- production source maps retained for issue monitoring
-- iOS build uploaded to TestFlight
-- Android build uploaded to Google Play Open Testing
-- git tag pushed with the released native version and build number
-- next-build PR back to `develop` that only increments the shared build number
-- future: GitHub release with packaged native artifacts and source maps
+- iOS build uploaded to TestFlight and submitted for external beta review
+- Android build uploaded to Google Play Open Testing and submitted for review
+- git tag `build-<version>-<build-number>` pushed
+- release PR back to `develop` carrying the changelog and the next build-number
+  bump
+- GitHub release published from the tag
 
 ## Checks
 
-- Build succeeds.
-- Native sync completes.
-- iOS native build succeeds.
-- Android native build succeeds.
-- Release notes and changelog reflect the release.
-- TestFlight and Google Play build notes summarize the closed Priority P0 work from the release week.
-- Closed release issues are archived after the notes are generated.
-- Source maps are generated or the missing source-map path is explicitly documented.
-- Native uploads complete before release notes are generated.
-- Release notes are generated before the next build number is incremented.
-- Release tag uses the native version and build number captured before the increment.
-- Pull request back to `develop` contains only the next build-number bump.
+- Production web build succeeds and the bundle passes the debug-token check.
+- Both Capacitor syncs complete and their diffs are reviewed.
+- iOS archive and Android signed bundle both succeed.
+- Native uploads complete before the release helper runs.
+- Release tag uses the native version and the build number captured before the
+  increment.
+- Pull request back to `develop` contains only the changelog section and the next
+  build-number bump.
+- Both store submissions are sent for review, not just uploaded.
+- GitHub release published from the pushed tag.
+
+## Known Gaps
+
+These are real deviations, recorded so the page does not assert something the
+release does not do.
+
+- **The tag does not point at the released source.** The helper tags the bump
+  commit, which already carries build `x+1`. Record the source commit for each
+  uploaded artifact separately; the stores do not expose it, and
+  [[Current State - Release Candidate Test Charter]] needs it.
+- **The release PR is merged without waiting for CI.** Bump-only PRs are merged
+  with the branch-protection bypass so the next development week is not blocked
+  behind a full pipeline run. The released artifacts were built locally and are
+  already uploaded by that point, so the pipeline result would not gate them.
+- **Build notes come from the changelog, not from closed P0 issue titles.** The
+  changelog is generated by tooling and the issue list is not, so the changelog
+  is the practical source.
+- **Closed release issues are not archived** as part of the release.
+
+## Not Yet Practiced
+
+Intended, but not part of the current release:
+
+- Production source maps generated and retained for issue monitoring.
+- Native build artifacts and source maps attached to the tag or GitHub release.
+- Signed, commit-traceable native artifacts produced in CI
+  ([issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)).
 
 ## Related Pages
 
+- [[Implementation - Store Release Steps]]
 - [[Implementation - Release And Build Workflow]]
 - [[Architecture - Capacitor]]
 - [[Current State - Release State]]
+- [[Current State - Release Candidate Test Charter]]
 - [[Feature Delivery Workflow]]

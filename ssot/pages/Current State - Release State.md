@@ -84,6 +84,7 @@ The product is not yet in public launch mode. The launch-blocking backend work f
 - Remaining launch blockers fixed.
 - App Store assets prepared.
 - Google Play assets prepared.
+- App Store Connect export compliance revisited for public launch. Weekly builds currently answer **No** to French distribution because BiteTribe is not live; that answer must be corrected before France is in scope. Declaring `ITSAppUsesNonExemptEncryption` in the iOS `Info.plist` removes the per-build prompt entirely. See [[Implementation - Store Release Steps]].
 - Crashlytics and Analytics monitoring plan active for soft launch.
 
 ## Launch Rule

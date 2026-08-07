@@ -62,6 +62,14 @@ createUserOnAuthCreate
 deleteOwnAccount
 ```
 
+## Google Maps Platform Trust Boundary
+
+Google Maps Platform is reached only from the backend. The apps call the `searchPlaces`, `searchNearbyPlaces`, `getPlaceDetails`, `searchBitesByCity`, `getCurrencyByPosition`, and `backfillBiteAddress` callables, and the functions call `places.googleapis.com` and `maps.googleapis.com` server-to-server with the backend-only `GOOGLE_GEOCODING_API_KEY`. No app, library, or native project links a Maps or Places SDK.
+
+Google Maps Platform App Check only accepts tokens minted by the client Maps and Places SDKs, so a server-to-server REST call has no App Check token to attach. Places API (New) therefore reports 0% verified in App Check monitoring by design, and enforcement must stay off for it - enabling it would reject every legitimate BiteTribe place search.
+
+The equivalent verified control is the callable in front of the API: App Check enforced through `onAppCheck`, plus an authenticated caller. `apps/bite-tribe-firebase/functions/src/__specs__/google-maps-request-path.spec.ts` fails the build when a client reaches a Google Maps host, when a native Maps or Places SDK is linked, or when a callable is registered without App Check enforcement. See [[issue-1245]].
+
 ## Local Development
 
 Firebase emulator targets are defined under `apps/bite-tribe-firebase/project.json`.
@@ -85,4 +93,5 @@ libs/bite-tribe/api
 
 - Some backend responsibilities are still split between frontend Firebase access and backend callables.
 - App Check health depends on runtime configuration and platform attestation.
+- App Check cannot cover Google Maps Platform from a backend request path, so Places API (New) stays in Monitoring behind the callable boundary described above.
 - Some aggregate and migration behaviors need operational care because Firestore query semantics can skip documents with missing fields.

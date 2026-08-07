@@ -1,7 +1,10 @@
+import { onAppCheck } from '../../shared/callable-options';
 import {
+  getPlaceDetails,
   parseAddress,
   toOpeningHours,
   toPlaceDetails,
+  type PlaceDetails,
 } from '../get-place-details';
 
 jest.mock('firebase-functions', () => ({
@@ -32,6 +35,57 @@ jest.mock('firebase-functions/params', () => ({
 jest.mock('../../shared/callable-options', () => ({
   onAppCheck: jest.fn((_options, handler) => handler),
 }));
+
+/** The handler is unwrapped by the mocked onAppCheck above. */
+const getPlaceDetailsHandler = getPlaceDetails as unknown as (request: {
+  auth?: { uid: string };
+  data: { placeId?: unknown };
+}) => Promise<PlaceDetails | null>;
+
+/**
+ * Same boundary as the place searches: Places API (New) cannot verify the
+ * caller, so App Check enforcement and a signed-in user on this callable are
+ * the control that keeps the backend-only key from serving anyone else. See
+ * issue #1245.
+ */
+describe('place details callable boundary', () => {
+  const auth = { uid: 'user-1' };
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('registers the callable through the App Check wrapper', () => {
+    expect(jest.mocked(onAppCheck).mock.calls).toHaveLength(1);
+  });
+
+  it('rejects an unauthenticated caller', async () => {
+    await expect(
+      getPlaceDetailsHandler({ data: { placeId: 'place-1' } }),
+    ).rejects.toMatchObject({ code: 'unauthenticated' });
+  });
+
+  it('rejects a blank place id', async () => {
+    await expect(
+      getPlaceDetailsHandler({ auth, data: { placeId: '  ' } }),
+    ).rejects.toMatchObject({ code: 'invalid-argument' });
+  });
+
+  it('sends the backend-only API key to Google instead of exposing it', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ id: 'place-1', displayName: { text: 'Trattoria' } }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    await getPlaceDetailsHandler({ auth, data: { placeId: 'place-1' } });
+
+    const [url, init] = fetchMock.mock.calls[0];
+
+    expect(url).toBe('https://places.googleapis.com/v1/places/place-1');
+    expect(init.headers['X-Goog-Api-Key']).toBe('secret-value');
+  });
+});
 
 describe('get-place-details helpers', () => {
   describe('parseAddress', () => {

@@ -346,6 +346,28 @@ export const UploadedState: Story = {
   }),
 };
 
+/**
+ * A Bite that has lost its photo. Nothing reports a transfer, so neither the
+ * upload placeholder nor an image is rendered and the photo box stays empty.
+ * That leaves the card's own corners carrying the shape on their own, which is
+ * where the square photo-box border used to show through the rounded card.
+ * See GitHub issue #1251.
+ */
+export const MissingPhoto: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...demoBiteBase,
+      image: '',
+      imagePath: undefined,
+    },
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
 export const PendingToUploaded: Story = {
   render: () => ({
     moduleMetadata: { imports: [BiteUploadDemoComponent] },

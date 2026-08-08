@@ -473,5 +473,8 @@
   "close-image-viewer": "Tutup foto",
   "bite-not-found": "Bite tidak ditemukan",
   "this-bite-is-no-longer-available": "Bite ini sudah tidak tersedia. Mungkin telah dihapus.",
-  "go-back": "Kembali"
+  "go-back": "Kembali",
+  "bite-could-not-be-loaded": "Bite tidak dapat dimuat",
+  "this-bite-could-not-be-loaded-right-now": "Terjadi kesalahan saat memuat Bite ini. Periksa koneksimu dan coba lagi.",
+  "try-again": "Coba lagi"
 }

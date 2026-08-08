@@ -20,6 +20,13 @@ export class DetailsService {
   private readonly navController = inject(NavController);
 
   bite = this.dataAccess.bite;
+
+  /**
+   * The Bite itself, never read off the resource directly: `value()` throws once
+   * a read has failed. See GitHub issue #1232.
+   */
+  biteValue = this.dataAccess.biteValue;
+  biteCreatorValue = this.dataAccess.biteCreatorValue;
   reviews = this.dataAccess.reviews;
   bucketlists = this.dataAccess.bucketlists;
   exchangeRates = this.dataAccess.exchangeRates;
@@ -29,6 +36,12 @@ export class DetailsService {
   biteCreator = this.dataAccess.biteCreator;
   position = this.dataAccess.position;
   biteNotFound = this.dataAccess.biteNotFound;
+  biteUnavailable = this.dataAccess.biteUnavailable;
+
+  /** Runs the failed read again, without leaving the page. */
+  retryBiteLoad(): void {
+    this.dataAccess.reloadBite();
+  }
 
   /**
    * Leaves a Bite that no longer exists. The page it was opened from — gallery,
@@ -44,7 +57,7 @@ export class DetailsService {
   }
 
   addBiteToSelectedBucketList(list: Bucketlist): void {
-    const currBite = this.bite.value();
+    const currBite = this.biteValue();
 
     this.dataAccess.saveToBucketList({
       bucketListId: list.id,
@@ -57,7 +70,7 @@ export class DetailsService {
    * loaded yet would silently produce an empty list. See GitHub issue #1231.
    */
   saveBiteToBucketListWithNewList(newListName: string): void {
-    const biteId = this.bite.value()?.id;
+    const biteId = this.biteValue()?.id;
 
     if (!biteId) {
       return;

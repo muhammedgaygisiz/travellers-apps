@@ -8,6 +8,7 @@ export { provideFirestoreUtils } from './lib/provide-firestore-utils';
 export { provideFirestoreState } from './lib/ngrx-store/provide-firestore-state';
 export { provideFirestoreAnalytics } from './lib/analytics/provide-firestore-analytics';
 export { AnalyticsService } from './lib/analytics/analytics.service';
+export { CrashReportingService } from './lib/analytics/crash-reporting.service';
 export {
   AnalyticsEvent,
   type AnalyticsEventName,

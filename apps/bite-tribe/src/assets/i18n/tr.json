@@ -473,5 +473,8 @@
   "close-image-viewer": "Fotoğrafı kapat",
   "bite-not-found": "Bite bulunamadı",
   "this-bite-is-no-longer-available": "Bu Bite artık mevcut değil. Silinmiş olabilir.",
-  "go-back": "Geri dön"
+  "go-back": "Geri dön",
+  "bite-could-not-be-loaded": "Bite yüklenemedi",
+  "this-bite-could-not-be-loaded-right-now": "Bu Bite yüklenirken bir sorun oluştu. Bağlantını kontrol edip tekrar dene.",
+  "try-again": "Tekrar dene"
 }

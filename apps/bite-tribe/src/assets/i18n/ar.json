@@ -473,5 +473,8 @@
   "close-image-viewer": "إغلاق الصورة",
   "bite-not-found": "لم يتم العثور على الـ Bite",
   "this-bite-is-no-longer-available": "لم يعد هذا الـ Bite متاحًا. ربما تم حذفه.",
-  "go-back": "رجوع"
+  "go-back": "رجوع",
+  "bite-could-not-be-loaded": "تعذّر تحميل الـ Bite",
+  "this-bite-could-not-be-loaded-right-now": "حدث خطأ أثناء تحميل هذا الـ Bite. تحقّق من اتصالك وحاول مرة أخرى.",
+  "try-again": "حاول مرة أخرى"
 }

@@ -113,6 +113,7 @@ export class DetailsPage {
   preferredCurrency = input<string>();
   enableImageRetry = input(false, { transform: booleanAttribute });
   biteNotFound = input(false, { transform: booleanAttribute });
+  biteUnavailable = input(false, { transform: booleanAttribute });
 
   /**
    * Mirrors the feed card: a photo that is still uploading, or whose upload was
@@ -138,6 +139,7 @@ export class DetailsPage {
   readonly gotoNew = output<Bite>();
   readonly retryImageUpload = output<Bite>();
   readonly goBack = output();
+  readonly retryLoad = output();
 
   private readonly formBuilder = inject(FormBuilder);
   private popoverController = inject(PopoverController);
@@ -149,17 +151,39 @@ export class DetailsPage {
     initialValue: this.transloco.getActiveLang?.() || 'en',
   });
 
-  private notFoundReported = false;
+  private reportedFailure: 'not-found' | 'unavailable' | undefined;
 
   constructor() {
     effect(() => {
-      if (!this.biteNotFound() || this.notFoundReported) {
+      const failure = this.biteNotFound()
+        ? 'not-found'
+        : this.biteUnavailable()
+          ? 'unavailable'
+          : undefined;
+
+      if (!failure) {
+        // A retry puts the read back in flight, so the next failure is reported
+        // again rather than leaving the page silent.
+        this.reportedFailure = undefined;
+
         return;
       }
 
-      this.notFoundReported = true;
-      void this.reportBiteNotFound();
+      if (this.reportedFailure === failure) {
+        return;
+      }
+
+      this.reportedFailure = failure;
+      void this.reportLoadFailure(failure);
     });
+  }
+
+  private reportLoadFailure(
+    failure: 'not-found' | 'unavailable',
+  ): Promise<void> {
+    return failure === 'not-found'
+      ? this.reportBiteNotFound()
+      : this.reportBiteUnavailable();
   }
 
   /**
@@ -176,6 +200,36 @@ export class DetailsPage {
         {
           text: this.transloco.translate('go-back'),
           handler: (): void => this.goBack.emit(),
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  /**
+   * A read that failed for any other reason — a timeout, a rejected permission,
+   * an App Check refusal — says nothing about the Bite, so unlike a deleted one
+   * this offers the read again as well as the way back. Without it the page had
+   * no answer at all and simply kept its skeleton running. See GitHub issue
+   * #1232.
+   */
+  private async reportBiteUnavailable(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: this.transloco.translate('bite-could-not-be-loaded'),
+      message: this.transloco.translate(
+        'this-bite-could-not-be-loaded-right-now',
+      ),
+      backdropDismiss: false,
+      buttons: [
+        {
+          text: this.transloco.translate('go-back'),
+          role: 'cancel',
+          handler: (): void => this.goBack.emit(),
+        },
+        {
+          text: this.transloco.translate('try-again'),
+          handler: (): void => this.retryLoad.emit(),
         },
       ],
     });

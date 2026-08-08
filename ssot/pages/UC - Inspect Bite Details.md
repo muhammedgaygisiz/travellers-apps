@@ -70,6 +70,37 @@ made the recipient of a shared Bite link arrive at that Bite:
   while the app is still starting, against startup navigation that resolves the
   address a returning user is sent to.
 
+## Unresolvable Bite Contract
+
+Issue [#1232](https://github.com/muhammedgaygisiz/travellers-apps/issues/1232)
+gave the page an answer for every way its read can end. It is reachable with a
+Bite that cannot be resolved from the local gallery, the home feed, a shared
+link, and a tapped notification alike, so the page owns this rather than each
+entry point.
+
+- The page never waits forever. Once the read has settled, exactly one of three
+  things is true: a Bite is shown, the Bite is reported as gone, or the read is
+  reported as failed. A loading skeleton means a read still in flight and
+  nothing else.
+- A Bite that no longer exists is answered by a blocking alert that cannot be
+  dismissed by the backdrop and offers only the way back. Firestore answers a
+  read for a deleted document with a successful but empty snapshot, so "the read
+  finished and there is no Bite" is the condition, not one particular error.
+- A read that failed for its own reasons — a timeout from the retry wrapper, a
+  rejected permission, an App Check refusal — says nothing about whether the
+  Bite exists, so it is reported separately and offers the read again next to
+  the way back.
+- A route without a `biteId` is not a failure. Nothing has been asked for, and
+  the page stays in its loading state rather than claiming a Bite is missing.
+- Every settled read that produced no Bite files a Crashlytics non-fatal
+  carrying the Bite id, the branch taken, and where the navigation came from.
+  A user who is shown a message cannot report a timeout usefully, and the
+  branches are indistinguishable from the outside.
+- The Bite is never read straight off the resource in a template.
+  `ResourceRef.value()` throws once the read has failed, which aborted the whole
+  binding update and left the page unable to report the very failure it had
+  detected. Reads go through a guarded accessor instead.
+
 ## Supported Evidence
 
 - `bite/:biteId`

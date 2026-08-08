@@ -198,7 +198,28 @@ export class AuthService {
     });
   }
 
-  public async sendEmailVerification(): Promise<void> {
+  /**
+   * Sends the Firebase Auth verification mail in `languageCode`.
+   *
+   * This mail is rendered from the Firebase email templates, not by the app, so
+   * the only way to choose its language is the auth instance's language code.
+   * Left unset it is always English, which is how issue \#1264 shipped. The
+   * language code is set per send rather than once at start-up because the app
+   * language can change while the session lives.
+   *
+   * Setting it is best effort: a platform that rejects the language must not
+   * cost the user their verification mail, so the send still runs and Firebase
+   * falls back to English.
+   */
+  public async sendEmailVerification(languageCode?: string): Promise<void> {
+    if (languageCode) {
+      try {
+        await FirebaseAuthentication.setLanguageCode({ languageCode });
+      } catch (error) {
+        console.warn('Failed to set the auth email language:', error);
+      }
+    }
+
     await FirebaseAuthentication.sendEmailVerification();
   }
 

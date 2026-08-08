@@ -1,12 +1,20 @@
 /**
- * Every piece of copy a push notification can carry.
+ * Every piece of copy the backend can put in front of a user.
  *
  * The keys are the backend equivalent of a Transloco key: the sender names the
  * message, never the English sentence, so the same trigger can go out in the
  * recipient's language (issue \#1200).
+ *
+ * Push notifications were the first surface, transactional email the second:
+ * both are rendered outside the running app, so neither can reach Transloco and
+ * both read from this one catalog rather than a second list that drifts
+ * (issue \#1264).
  */
 export type NotificationMessageKey =
   | 'common.someone'
+  | 'emailVerification.subject'
+  | 'emailVerification.body'
+  | 'emailVerification.linkLabel'
   | 'newBite.title'
   | 'newBite.body'
   | 'newBite.bodyWithName'

@@ -3,6 +3,10 @@ import { NotificationMessages } from '../notification-messages';
 /** Arabic copy. */
 export const ar: NotificationMessages = {
   'common.someone': 'شخص ما',
+  'emailVerification.subject': 'أكّد عنوان بريدك الإلكتروني في Bite Tribe',
+  'emailVerification.body':
+    'يرجى تأكيد عنوان بريدك الإلكتروني ليبقى حسابك في Bite Tribe آمنًا ولتتمكن من تلقي الرسائل المهمة المتعلقة بحسابك.',
+  'emailVerification.linkLabel': 'تأكيد عنوان البريد الإلكتروني',
   'newBite.title': 'Bite جديد',
   'newBite.body': '{{author}} أنشأ للتو Bite جديدًا',
   'newBite.bodyWithName': '{{author}} أنشأ للتو Bite جديدًا: {{bite}}',

@@ -1,5 +1,10 @@
 import { createSign } from 'crypto';
 import { defineSecret } from 'firebase-functions/params';
+import {
+  DEFAULT_LANGUAGE,
+  SupportedLanguage,
+} from '../shared/i18n/supported-languages';
+import { createTranslate } from '../shared/i18n/translate';
 
 const GOOGLE_WORKSPACE_PRIVATE_KEY_ENV = 'GOOGLE_WORKSPACE_PRIVATE_KEY';
 const GOOGLE_WORKSPACE_CLIENT_EMAIL_ENV = 'GOOGLE_WORKSPACE_CLIENT_EMAIL';
@@ -24,15 +29,18 @@ interface GoogleWorkspaceTokenResponse {
 export interface SendVerificationEmailParams {
   to: string;
   verificationLink: string;
+  /**
+   * The recipient's account language. Omitted or unknown means English, which
+   * is what {@link createTranslate} already falls back to: a mail in the wrong
+   * language still beats no mail (issue \#1264).
+   */
+  language?: SupportedLanguage | string;
 }
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const GMAIL_SEND_URL =
   'https://gmail.googleapis.com/gmail/v1/users/me/messages/send';
 const SCOPE = 'https://www.googleapis.com/auth/gmail.send';
-const SUBJECT = 'Verify your Bite Tribe email address';
-const BODY =
-  'Please verify your email address so your Bite Tribe account stays secure and you can receive important account messages.';
 
 const base64Url = (value: string | Buffer): string => {
   return Buffer.from(value)
@@ -100,22 +108,55 @@ const fetchAccessToken = async (): Promise<string> => {
   return data.access_token;
 };
 
-const createRawEmail = (to: string, verificationLink: string): string => {
+/**
+ * Encodes a header value as an RFC 2047 encoded word when it is not pure ASCII.
+ *
+ * A header carries raw ASCII only. Once the subject is translated it can hold
+ * umlauts, Arabic, Thai or Amharic, and a raw 8-bit header reaches the inbox as
+ * mojibake or gets the message rejected outright.
+ */
+const encodeHeaderValue = (value: string): string =>
+  Buffer.byteLength(value, 'utf8') === value.length
+    ? value
+    : `=?UTF-8?B?${Buffer.from(value, 'utf8').toString('base64')}?=`;
+
+/**
+ * Base64 body lines, wrapped at the 76 characters RFC 2045 allows.
+ *
+ * The body is sent base64-encoded rather than as raw UTF-8 for the same reason
+ * the subject is encoded: the default transfer encoding is 7bit, which the
+ * non-English copy is not.
+ */
+const encodeBody = (html: string): string =>
+  (
+    Buffer.from(html, 'utf8')
+      .toString('base64')
+      .match(/.{1,76}/g) ?? []
+  ).join('\r\n');
+
+/** Exported for tests: the rendered message is the contract, not the send. */
+export const createRawEmail = (
+  to: string,
+  verificationLink: string,
+  language?: SupportedLanguage | string,
+): string => {
   const from = process.env[GOOGLE_WORKSPACE_DELEGATED_USER_ENV];
 
   if (!from) {
     throw new Error('Google Workspace delegated sender is missing.');
   }
 
-  const htmlBody = `${BODY}<br><br><a href="${verificationLink}">Verify email address</a>`;
+  const translate = createTranslate(language ?? DEFAULT_LANGUAGE);
+  const htmlBody = `${translate('emailVerification.body')}<br><br><a href="${verificationLink}">${translate('emailVerification.linkLabel')}</a>`;
   const message = [
     `From: Bite Tribe <${from}>`,
     `To: ${to}`,
-    `Subject: ${SUBJECT}`,
+    `Subject: ${encodeHeaderValue(translate('emailVerification.subject'))}`,
     'MIME-Version: 1.0',
     'Content-Type: text/html; charset=UTF-8',
+    'Content-Transfer-Encoding: base64',
     '',
-    htmlBody,
+    encodeBody(htmlBody),
   ].join('\r\n');
 
   return base64Url(message);
@@ -124,6 +165,7 @@ const createRawEmail = (to: string, verificationLink: string): string => {
 export const sendGoogleWorkspaceVerificationEmail = async ({
   to,
   verificationLink,
+  language,
 }: SendVerificationEmailParams): Promise<void> => {
   const accessToken = await fetchAccessToken();
   const response = await fetch(GMAIL_SEND_URL, {
@@ -133,7 +175,7 @@ export const sendGoogleWorkspaceVerificationEmail = async ({
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      raw: createRawEmail(to, verificationLink),
+      raw: createRawEmail(to, verificationLink, language),
     }),
   });
 

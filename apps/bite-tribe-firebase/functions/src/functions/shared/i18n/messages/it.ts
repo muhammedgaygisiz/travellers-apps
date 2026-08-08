@@ -3,6 +3,10 @@ import { NotificationMessages } from '../notification-messages';
 /** Italian copy. Informal "tu", matching the app's locale files. */
 export const it: NotificationMessages = {
   'common.someone': 'Qualcuno',
+  'emailVerification.subject': 'Conferma il tuo indirizzo e-mail Bite Tribe',
+  'emailVerification.body':
+    'Conferma il tuo indirizzo e-mail per mantenere sicuro il tuo account Bite Tribe e ricevere i messaggi importanti che lo riguardano.',
+  'emailVerification.linkLabel': 'Conferma indirizzo e-mail',
   'newBite.title': 'Nuovo Bite',
   'newBite.body': '{{author}} ha appena creato un nuovo Bite',
   'newBite.bodyWithName': '{{author}} ha appena creato un nuovo Bite: {{bite}}',

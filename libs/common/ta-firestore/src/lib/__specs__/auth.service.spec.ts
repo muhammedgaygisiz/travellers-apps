@@ -479,15 +479,43 @@ describe(AuthService.name, () => {
 
   describe('sendEmailVerification', () => {
     let sendEmailVerificationSpy: jest.SpyInstance;
+    let setLanguageCodeSpy: jest.SpyInstance;
 
     beforeEach(() => {
       sendEmailVerificationSpy = jest
         .spyOn(FirebaseAuthentication, 'sendEmailVerification')
         .mockResolvedValue(undefined);
+      setLanguageCodeSpy = jest
+        .spyOn(FirebaseAuthentication, 'setLanguageCode')
+        .mockResolvedValue(undefined);
     });
 
     it('should call sendEmailVerification', async () => {
       await service.sendEmailVerification();
+
+      expect(sendEmailVerificationSpy).toHaveBeenCalled();
+    });
+
+    it('should send the mail in the given language', async () => {
+      // The Firebase email templates render this mail, so the auth language
+      // code is the only thing that decides which one is used (issue #1264).
+      await service.sendEmailVerification('de');
+
+      expect(setLanguageCodeSpy).toHaveBeenCalledWith({ languageCode: 'de' });
+      expect(sendEmailVerificationSpy).toHaveBeenCalled();
+    });
+
+    it('should not touch the language code when none is given', async () => {
+      await service.sendEmailVerification();
+
+      expect(setLanguageCodeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should still send when the language code is rejected', async () => {
+      // Losing the verification mail is worse than sending it in English.
+      setLanguageCodeSpy.mockRejectedValue(new Error('unsupported'));
+
+      await service.sendEmailVerification('de');
 
       expect(sendEmailVerificationSpy).toHaveBeenCalled();
     });

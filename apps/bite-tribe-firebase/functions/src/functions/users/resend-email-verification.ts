@@ -3,6 +3,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/https';
 import { logger } from 'firebase-functions';
 import { onAppCheck } from '../shared/callable-options';
+import { getUserLanguage } from '../shared/utils/get-user-language';
 import {
   buildEmailVerificationMetadata,
   classifyEmailVerificationUser,
@@ -61,8 +62,12 @@ export const resendEmailVerificationForUser = async (
     const verificationLink = await getAuth().generateEmailVerificationLink(
       authUser.email,
     );
+    // Read after the rate-limit gate so a throttled request costs no extra
+    // document read. An account that never opened settings resolves to English
+    // rather than failing the send (issue \#1264).
+    const language = await getUserLanguage(uid);
 
-    await sender({ to: authUser.email, verificationLink });
+    await sender({ to: authUser.email, verificationLink, language });
   } catch (error) {
     logger.error('email verification manual resend failed', {
       uid,

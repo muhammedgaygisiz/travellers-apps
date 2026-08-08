@@ -42,15 +42,22 @@ apps/bite-tribe-ios/ios/App/App/<lang>.lproj/InfoPlist.strings
 
 ## Localized Surfaces
 
-BiteTribe copy lives in four places, because three of them are rendered by
+BiteTribe copy lives in six places, because five of them are rendered by
 something other than Transloco:
 
 | Surface                | Owner                                | Rendered by                 |
 | ---------------------- | ------------------------------------ | --------------------------- |
 | App UI                 | Transloco locale JSON                | The running Angular app     |
 | Push notifications     | Firebase Functions i18n catalog      | The OS, before the app runs |
+| Verification mail      | Firebase Functions i18n catalog      | The recipient's mail client |
+| Registration mail      | Firebase Auth email templates        | Firebase, in the console    |
 | Legal documents        | `PUBLISHED_PRIVACY_POLICY_LANGUAGES` | The privacy-policy library  |
 | iOS permission prompts | `InfoPlist.strings` per `.lproj`     | The OS, before the app runs |
+
+The verification mail shares the notification catalog rather than owning a
+second list, so it is not a fifth language list to maintain. The registration
+mail is the one surface this repository cannot fully control: its templates live
+in the Firebase console, and the code can only name the language.
 
 All four language lists have to move together. Nothing fails a build when one is
 forgotten — the user just silently gets English.
@@ -78,6 +85,8 @@ carries only the app name and URL scheme.
 - Use Transloco keys for visible text.
 - Update every relevant locale when adding or changing user-facing copy.
 - Push notification copy is localized in Firebase Functions, not in the app: the OS renders the notification before Transloco exists. The backend catalog carries one file per language the app offers and is bound to the recipient's `settings/{uid}.language`. Keep its language list in step with `availableLangs` in `libs/bite-tribe/shell/src/lib/app.config.ts`; see [[Implementation - Firebase Functions]] and issue \#1200.
+- The verification mail reads from the same catalog under `emailVerification.*`, resolved through the shared `shared/utils/get-user-language.ts`, so an account hears from BiteTribe in one language across push and mail. Both senders localize: the manual resend and the monthly reminder job. A subject or body outside ASCII is MIME-encoded (RFC 2047 for the header, base64 for the body); sending translated copy as raw 7-bit reaches the inbox as mojibake. See issue \#1264.
+- The registration mail is rendered by Firebase Auth from the email templates in the Firebase console, so it cannot read the catalog. Its language comes from the auth language code, which the app sets from the active Transloco language right before sending. The templates themselves are console configuration: a language whose template was never filled in still arrives in English, and nothing in this repository fails when that happens.
 - Legal documents carry their own language list. The privacy policy renders only from `PUBLISHED_PRIVACY_POLICY_LANGUAGES` in `libs/bite-tribe/privacy-policy`, which currently holds all eleven app languages; anything outside it gets the English document plus a notice in the app language that says so. Extend that list together with `availableLangs`, and never let a legal document switch language silently; see [[UC - Use Account And Legal Flows]] and issue \#1218.
 - iOS permission prompts are localized in `InfoPlist.strings`, not in Transloco: iOS renders the camera, location, and photo-library dialogs before the web view exists. The English text stays in `Info.plist` as the development-language fallback; each `<lang>.lproj/InfoPlist.strings` overrides it. A key present in `Info.plist` but missing from a locale falls back to English rather than showing the raw key.
 - Name the app in permission copy. Every usage description starts with "BiteTribe" rather than "This app", which is what Apple's review guidance expects and what the location strings already did.
@@ -91,6 +100,9 @@ carries only the app name and URL scheme.
 libs/bite-tribe/shell/src/lib/app.config.ts
 libs/bite-tribe/onboarding/data-access/src/lib/onboarding-data-access.service.ts
 libs/bite-tribe/settings/data-access/src/lib/settings-data-access.service.ts
+apps/bite-tribe-firebase/functions/src/functions/shared/utils/get-user-language.ts
+apps/bite-tribe-firebase/functions/src/functions/users/google-workspace-email.ts
+libs/common/ta-firestore/src/lib/auth.service.ts
 ```
 
 ## Validation

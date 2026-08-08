@@ -105,6 +105,10 @@ export class BiteTribeStoreService implements StoreService {
     initialValue: false,
   });
 
+  loginPending = toSignal(this.store.select(fromAuth.selectLoginPending), {
+    initialValue: false,
+  });
+
   bites$ = this.store.select(bites);
   nearbyRestaurants$ = this.store.select(nearbyRestaurants);
   tagSuggestionsForEditingBite$ = this.store.select(

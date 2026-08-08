@@ -17,6 +17,7 @@ import {
   IonIcon,
   IonInput,
   IonInputPasswordToggle,
+  IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
 import { Credentials } from '../../api/credentials.model';
@@ -39,6 +40,7 @@ interface AuthCredentialFields {
     IonInput,
     IonText,
     IonInputPasswordToggle,
+    IonSpinner,
     IonContent,
     TranslocoPipe,
   ],
@@ -46,6 +48,9 @@ interface AuthCredentialFields {
 })
 export class LoginComponent {
   readonly loginFailed = input(false);
+
+  /** Keeps the form locked while a sign-in is in flight (issue #1273). */
+  public readonly pending = input(false);
 
   public readonly submitAuth = output<Credentials>();
 
@@ -61,11 +66,29 @@ export class LoginComponent {
     password: new FormControl<string>('', Validators.required),
   });
 
+  public onSubmit(): void {
+    // The disabled button already blocks this, but a queued tap can still land
+    // between the click and the pending flag turning on.
+    if (this.pending() || !this.authFormGroup.valid) {
+      return;
+    }
+
+    this.submitAuth.emit(this.authFormGroup.value);
+  }
+
   public onGoogleLogin(): void {
+    if (this.pending()) {
+      return;
+    }
+
     this.submitLoginWithGoogle.emit();
   }
 
   public onAppleLogin(): void {
+    if (this.pending()) {
+      return;
+    }
+
     this.submitLoginWithApple.emit();
   }
 

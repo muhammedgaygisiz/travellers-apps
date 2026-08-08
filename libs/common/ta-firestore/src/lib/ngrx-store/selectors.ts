@@ -6,25 +6,30 @@ const authState = createFeatureSelector<AuthResult>(key);
 
 export const selectIsAuthenticated = createSelector(
   authState,
-  (authState) => authState.authenticated
+  (authState) => authState.authenticated,
 );
 
 export const selectLoginFailed = createSelector(
   authState,
-  (authState) => authState.authenticationFailed
+  (authState) => authState.authenticationFailed,
+);
+
+export const selectLoginPending = createSelector(
+  authState,
+  (authState) => authState.authenticationPending,
 );
 
 export const selectRegistrationErrorCode = createSelector(
   authState,
-  (authState) => authState.errorCode
+  (authState) => authState.errorCode,
 );
 
 export const selectUserId = createSelector(
   authState,
-  (authState) => authState.user?.uid
+  (authState) => authState.user?.uid,
 );
 
 export const selectUser = createSelector(
   authState,
-  (authState) => authState.user
+  (authState) => authState.user,
 );

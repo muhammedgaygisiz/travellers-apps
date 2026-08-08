@@ -5,7 +5,10 @@ export { PATH } from './lib/paths';
 export { normalize } from './lib/normalize';
 export { currencyCodes } from './lib/currencies';
 export { getLocalizedCurrencyName } from './lib/get-localized-currency-name';
-export { getCurrencyForLocale } from './lib/get-currency-for-locale';
+export {
+  getCurrencyForDevice,
+  type DeviceRegionSignals,
+} from './lib/get-currency-for-device';
 export { getSimilarityScore } from './lib/get-similarity-score';
 export { haversineDistance } from './lib/haversine-distance';
 export { getNormalizedPriceInEur } from './lib/get-normalized-price-in-eur';

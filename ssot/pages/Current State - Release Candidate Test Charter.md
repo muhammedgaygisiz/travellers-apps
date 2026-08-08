@@ -90,7 +90,7 @@ Install the named Google Play Open Testing artifact on a physical device, then e
 1. Registration, the blocking onboarding assistant, and continuation to the home page.
 2. Login, logout, and session restore after a cold start.
 3. Create a Bite with a photo, including the upload failure state and both retry paths.
-4. Location permission grant and denial, currency prefill from position, and manual currency override.
+4. Location permission grant and denial, Bite currency prefill from the Bite position, and manual currency override. The account default currency suggested during onboarding is a separate check with a separate source: it is derived from the device region through the device time zone, never from the interface language, so a device whose Region and language variant disagree must still suggest the currency of the Region. See [[issue-1262]].
 5. Map view, marker selection, the Bite drawer, and camera stability while live updates arrive.
 6. Search for Bites, restaurants and cities.
 7. Bucket list add, swipe to tick, and undo.
@@ -215,7 +215,8 @@ Record one row per platform per execution. Keep previous rows when re-running af
 - Continuing opened Language.
 - No error, technical text, or raw translation key appeared.
 - Finding, filed rather than blocking: the device is set to Region `Switzerland` in iOS, so the expected suggestion is `CHF`. The suggestion is derived from `navigator.language`, and reaching `GBP` requires an explicit `GB` region subtag because the language-only fallback maps `en` to `US` and would have produced `USD`. The device therefore reported `en-GB`, and the app read the region of the interface _language_ instead of the device region. Filed as [issue #1262](https://github.com/muhammedgaygisiz/travellers-apps/issues/1262).
-- The same issue records a charter defect: check 4 is written as `currency prefill from position`, but no implementation path consults position. The wording or the implementation has to change, and that decision is carried by #1262.
+- The same issue recorded a charter defect against check 4, `currency prefill from position`. Resolved while fixing #1262: check 4 describes the _Bite_ currency, which really is prefilled from the Bite position through the `getCurrencyByPosition` function, and Session 12 evidences that path working. The finding had conflated it with the onboarding _account default_ suggestion, which has no position at that point in the flow. Check 4 now names both prefills and their separate sources.
+- Fixed in #1262: the suggestion is derived from the device time zone, and only falls back to the locale for an unmapped zone. The time zone is the one region signal an iOS web view gets for free — `navigator.language` keeps the `en-GB` variant the user reads in whatever the device Region says, and no web API exposes the Region setting itself. It is also the closest permission-free stand-in for position, so onboarding does not have to spend a location permission two steps before it asks for one. The reported device would now suggest `CHF` from `Europe/Zurich`. Retest on a device whose Region and interface language disagree.
 - Manual override of the _default_ currency was not exercised here, because the prefill already matched the currency this run wants. Settings covers the override path later.
 - Result: pass for the step's mechanics, with #1262 recorded against the suggested value. GBP persistence remains to be checked after onboarding.
 

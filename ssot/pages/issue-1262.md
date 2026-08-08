@@ -1,0 +1,24 @@
+- [bug: default currency is suggested from the language variant, not the device region](https://github.com/muhammedgaygisiz/travellers-apps/issues/1262) (Issue \#1262)
+- Description
+  - Found in iOS release-candidate Run 5 under [[Current State - Release Candidate Test Charter]], Session 5. The onboarding currency step prefilled `British Pound` on an iPhone whose iOS Region is `Switzerland`, under copy reading "We picked one from your device".
+  - The suggestion was derived from `navigator.language`. The device reads in English (United Kingdom), so the tag was `en-GB`, and the region subtag of the interface _language_ decided the currency. The device Region, which is the setting that actually says Switzerland, was never consulted.
+  - This is normal for anyone living abroad, which is exactly the travelling audience BiteTribe targets.
+- Decision - which region signal
+  - A web view cannot read the iOS Region setting. `navigator.language` keeps the language variant the user picked whatever the Region says, and no web API exposes the Region itself, so there is no locale-based fix for the reported device.
+  - The device time zone is used instead. It is the one region signal the web view gets for free, it tracks where the device actually is, and it needs no permission - which matters because the currency step is two steps before the location step and must not open a permission prompt of its own.
+  - The locale stays as the fallback for a device whose zone is not mapped, and the language default region as the fallback below that. An unresolvable device still gets `EUR`, and a currency the app cannot render is still replaced by `EUR`. Falling back never produces a wrong region, only a less precise one.
+  - Position through `getCurrencyByPosition` was rejected for this step: it needs a location permission the user has not been asked for yet, and it is a network round-trip on a step that must prefill instantly.
+- Decision - the charter defect
+  - The finding also recorded charter check 4, `currency prefill from position`, as wrong on the grounds that no implementation path consults position. That reading was mistaken.
+  - Check 4 describes the _Bite_ currency, which is prefilled from the Bite position through the `getCurrencyByPosition` Cloud Function. Run-5 Session 12 evidences it working: a Spanish photo position prefilled `Euro` over the account's `British Pound`.
+  - The two prefills were conflated. Check 4 now names both and their separate sources: the Bite currency from the Bite position, and the onboarding account default from the device region.
+- Outcome
+  - `getCurrencyForLocale` became `getCurrencyForDevice` in `libs/common/utils`, taking the device time zone and the locale rather than a locale alone. `getRegionForTimeZone` holds the explicit IANA-zone-to-region map, which covers the regions the currency map knows plus the deprecated aliases devices still report.
+  - `OnboardingService` passes `Intl.DateTimeFormat().resolvedOptions().timeZone` alongside `navigator.language`. The language prefill is unchanged: language and currency are separate questions and Run 5 confirmed the language prefill already reads the device correctly.
+  - No user-facing copy changed. "We picked one from your device" was already accurate; it is now true of the region rather than the language.
+- Validation
+  - `npx nx test utils-common` - 11 suites, 65 tests, pass.
+  - `npx nx test bite-tribe/onboarding` - 9 suites, 137 tests, pass.
+  - `npx nx run-many -t lint -p utils-common,bite-tribe/onboarding` - pass.
+  - `git diff --check` - clean.
+  - Not covered by an automated check: what a physical iPhone reports for `timeZone` when Region and interface language disagree. Retest belongs in the next charter pass on the Run-5 device.

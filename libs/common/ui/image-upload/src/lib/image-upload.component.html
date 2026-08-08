@@ -9,9 +9,11 @@
 }
 
 @if (isLoading()) {
-  <ion-skeleton-text class="image-loading" [animated]="true" />
+  <div class="image-processing" role="status" data-testid="image-processing">
+    <ion-spinner name="crescent" aria-label="Processing image" />
+  </div>
 } @else if (showImage()) {
-  <div class="image-preview">
+  <div class="image-preview" [class.is-pending]="isImagePending()">
     <img
       [src]="imageSource()"
       alt="Image"
@@ -31,6 +33,19 @@
         <ion-icon name="trash-outline" />
       </ion-button>
     </div>
+    @if (isImagePending()) {
+      <!-- Covers the img, and the actions with it, until the img has decoded.
+      The img stays mounted so it can load at all, but it paints nothing until
+      then. The actions stay mounted too because #edit-button is the crop
+      modal's trigger, which only binds while the element exists. -->
+      <div
+        class="image-processing image-processing--overlay"
+        role="status"
+        data-testid="image-pending"
+      >
+        <ion-spinner name="crescent" aria-label="Processing image" />
+      </div>
+    }
   </div>
 
   <ion-modal

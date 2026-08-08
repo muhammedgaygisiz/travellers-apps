@@ -19,7 +19,7 @@ import {
   IonHeader,
   IonIcon,
   IonModal,
-  IonSkeletonText,
+  IonSpinner,
   IonTitle,
   IonToolbar,
   AlertController,
@@ -66,7 +66,7 @@ const cameraOnlyOptions = {
     IonButton,
     IonIcon,
     IonModal,
-    IonSkeletonText,
+    IonSpinner,
     ImageCropperComponent,
     IonHeader,
     IonToolbar,
@@ -117,11 +117,28 @@ export class ImageUploadComponent implements ControlValueAccessor {
     return this.value() || this.imageUrl() || null;
   });
 
+  /**
+   * Image source that finished painting. Tracked by source rather than a boolean
+   * so re-picking the same image, which never fires `load` again because `src`
+   * does not change, does not leave the preview stuck behind the spinner.
+   */
+  loadedImageSource = signal<string | null>(null);
+
   showImage = computed(() => {
     const imageSource = this.imageSource();
 
     return !!imageSource && imageSource !== this.failedImageSource();
   });
+
+  /**
+   * True between the `img` being inserted and its `load` or `error` event. A
+   * freshly inserted `img` paints nothing until it has decoded its source, and
+   * a compressed photo is a multi-megabyte data URL, so without this the box
+   * collapses to empty space the moment the processing state is cleared.
+   */
+  isImagePending = computed(
+    () => this.showImage() && this.imageSource() !== this.loadedImageSource(),
+  );
 
   imageFile?: File;
 
@@ -201,12 +218,17 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   private async getImageFromNative(): Promise<void> {
+    // Set before the picker rather than after it. `getPhoto` only resolves once
+    // the plugin has base64-encoded the full-resolution photo and pushed it
+    // across the bridge, and the web view is already visible again by then, so
+    // setting this afterwards leaves the placeholder card on screen for the
+    // whole transfer with no sign that anything is happening.
+    this.isLoading.set(true);
     try {
       await Camera.requestPermissions();
 
       const photo = await Camera.getPhoto(photoOptions);
 
-      this.isLoading.set(true);
       this.readAndEmitPositionFrom(photo);
 
       const compressedPhoto = await compressPhoto(photo);
@@ -252,12 +274,12 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   private async takePhotoWithCamera(): Promise<void> {
+    this.isLoading.set(true);
     try {
       await Camera.requestPermissions();
 
       const photo = await Camera.getPhoto(cameraOnlyOptions);
 
-      this.isLoading.set(true);
       this.readAndEmitPositionFrom(photo);
 
       const compressedPhoto = await compressPhoto(photo);
@@ -271,6 +293,9 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   async pickImageFromGallery(): Promise<void> {
+    // `readData: true` means the picker resolves only after the whole file has
+    // been read into base64, so the loading state has to cover that wait too.
+    this.isLoading.set(true);
     try {
       await FilePicker.requestPermissions({
         permissions: ['accessMediaLocation'],
@@ -284,7 +309,6 @@ export class ImageUploadComponent implements ControlValueAccessor {
       }
 
       const pickedFile = result.files[0];
-      this.isLoading.set(true);
 
       // Extract EXIF data from the file path
       if (pickedFile.path) {
@@ -435,6 +459,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }
 
   onImageLoad(): void {
+    this.loadedImageSource.set(this.imageSource());
     this.failedImageSource.set(null);
   }
 

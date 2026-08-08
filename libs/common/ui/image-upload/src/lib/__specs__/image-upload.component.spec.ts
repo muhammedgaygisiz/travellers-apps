@@ -412,8 +412,15 @@ describe('ImageUploadComponent', () => {
     });
   });
 
+  // Either busy state: processing the picked file, or waiting for the chosen
+  // image to paint. Both render the same spinner, so the box never goes blank.
+  const spinner = (): HTMLElement | null =>
+    fixture.nativeElement.querySelector(
+      '[data-testid="image-processing"], [data-testid="image-pending"]',
+    );
+
   describe('loading state', () => {
-    it('should show a skeleton while a selected file is processed', async () => {
+    it('should spin from selecting a file until the image has painted', async () => {
       const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
       let resolveCompression!: (file: File) => void;
       (compressFile as jest.Mock).mockReturnValue(
@@ -428,18 +435,51 @@ describe('ImageUploadComponent', () => {
       fixture.detectChanges();
 
       expect(component.isLoading()).toBe(true);
-      expect(
-        fixture.nativeElement.querySelector('ion-skeleton-text'),
-      ).not.toBeNull();
+      expect(spinner()).not.toBeNull();
 
       resolveCompression(file);
       await processing;
       fixture.detectChanges();
 
+      // Processing is done, but the img has not painted yet, so the spinner
+      // hands over to the pending overlay rather than exposing an empty box.
       expect(component.isLoading()).toBe(false);
-      expect(
-        fixture.nativeElement.querySelector('ion-skeleton-text'),
-      ).toBeNull();
+      expect(component.isImagePending()).toBe(true);
+      expect(spinner()).not.toBeNull();
+
+      component.onImageLoad();
+      fixture.detectChanges();
+
+      expect(spinner()).toBeNull();
+    });
+
+    it('should show the loading state while the native picker is still resolving', async () => {
+      component.isWeb.set(false);
+      (Camera.requestPermissions as jest.Mock).mockResolvedValue(undefined);
+      (Camera.getPhoto as jest.Mock).mockReturnValue(
+        new Promise(() => undefined),
+      );
+
+      void getInternals(component).getImageFromNative();
+      await Promise.resolve();
+      fixture.detectChanges();
+
+      // getPhoto only resolves once the full-resolution photo has been
+      // base64-encoded and moved across the bridge, and the web view is already
+      // visible by then. The box has to show progress for that whole wait.
+      expect(component.isLoading()).toBe(true);
+      expect(spinner()).not.toBeNull();
+    });
+
+    it('should clear the loading state when the native picker is cancelled', async () => {
+      (Camera.requestPermissions as jest.Mock).mockResolvedValue(undefined);
+      (Camera.getPhoto as jest.Mock).mockRejectedValue(new Error('cancelled'));
+
+      await expect(
+        getInternals(component).getImageFromNative(),
+      ).rejects.toThrow('cancelled');
+
+      expect(component.isLoading()).toBe(false);
     });
 
     it('should clear the loading state when processing fails', async () => {
@@ -455,6 +495,62 @@ describe('ImageUploadComponent', () => {
       ).rejects.toThrow('Compression failed');
 
       expect(component.isLoading()).toBe(false);
+    });
+  });
+
+  describe('pending image state', () => {
+    it('should keep the pending overlay until the image reports it has loaded', () => {
+      compRef.setInput('imageUrl', 'https://example.com/profile.jpg');
+      fixture.detectChanges();
+
+      expect(component.isImagePending()).toBe(true);
+
+      component.onImageLoad();
+      fixture.detectChanges();
+
+      expect(component.isImagePending()).toBe(false);
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="image-pending"]'),
+      ).toBeNull();
+    });
+
+    it('should not go pending again when the same image is chosen twice', () => {
+      component.writeValue('data:image/jpeg;base64,abc');
+      fixture.detectChanges();
+      component.onImageLoad();
+
+      // Re-picking the same photo leaves src untouched, so the img never fires
+      // load again. Tracking the loaded source rather than a flag is what keeps
+      // this from sticking on the skeleton forever.
+      component.writeValue('data:image/jpeg;base64,abc');
+      fixture.detectChanges();
+
+      expect(component.isImagePending()).toBe(false);
+    });
+
+    it('should leave no pending state behind when the image fails', () => {
+      compRef.setInput('imageUrl', 'https://example.com/missing.jpg');
+      fixture.detectChanges();
+
+      component.onImageError();
+      fixture.detectChanges();
+
+      expect(component.isImagePending()).toBe(false);
+      expect(fixture.nativeElement.querySelector('ion-card')).not.toBeNull();
+    });
+
+    it('should go pending again for a newly cropped image', () => {
+      component.writeValue('data:image/jpeg;base64,abc');
+      component.onImageLoad();
+      getInternals(component).cropModal = (): ReturnType<
+        ImageUploadInternals['cropModal']
+      > => ({ dismiss: jest.fn() });
+      component.croppedImage.set('data:image/jpeg;base64,cropped');
+
+      component.confirmCropping();
+      fixture.detectChanges();
+
+      expect(component.isImagePending()).toBe(true);
     });
   });
 

@@ -1,14 +1,33 @@
 :host {
-  .image-loading {
+  // Picking a photo is work, not content streaming in, so this is a spinner
+  // rather than a skeleton: the box is busy compressing and decoding, and its
+  // final shape is not known until the image paints.
+  .image-processing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 200px;
     margin: 0;
     border-radius: 12px;
+    background: var(--ion-background-color-step-50);
+
+    ion-spinner {
+      width: 2.5rem;
+      height: 2.5rem;
+      color: var(--ion-color-primary);
+    }
   }
 
   .image-preview {
     position: relative;
     width: 100%;
+
+    // An img that has not decoded yet has no intrinsic size, so the container
+    // would collapse to nothing. Hold the placeholder height until it paints.
+    &.is-pending {
+      min-height: 200px;
+    }
 
     img {
       display: block;
@@ -24,6 +43,14 @@
       right: 8px;
       display: flex;
       gap: 8px;
+    }
+
+    // Same treatment as the pre-image state, so picking a photo reads as one
+    // continuous spinner rather than two different loading visuals in a row.
+    .image-processing--overlay {
+      position: absolute;
+      inset: 0;
+      height: 100%;
     }
   }
 

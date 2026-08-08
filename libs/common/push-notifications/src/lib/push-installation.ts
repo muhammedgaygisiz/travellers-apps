@@ -3,6 +3,7 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { Preferences } from '@capacitor/preferences';
 import { App } from '@capacitor/app';
+import { Device } from '@capacitor/device';
 
 /**
  * Preferences key holding the app-installation UUID.
@@ -121,28 +122,15 @@ export const getInstallationId = async (): Promise<string> => {
   return installationId;
 };
 
-const describeIosDevice = (
-  userAgent: string,
-): { deviceLabel: string; osVersion: string } => ({
-  deviceLabel: /(iPad|iPod touch|iPod|iPhone)/.exec(userAgent)?.[1] ?? 'iPhone',
-  osVersion: (
-    /OS (\d+(?:[._]\d+)*) like Mac OS X/.exec(userAgent)?.[1] ?? ''
-  ).replace(/_/g, '.'),
-});
+const labelIosDevice = (userAgent: string): string =>
+  /(iPad|iPod touch|iPod|iPhone)/.exec(userAgent)?.[1] ?? 'iPhone';
 
-const describeAndroidDevice = (
-  userAgent: string,
-): { deviceLabel: string; osVersion: string } => ({
-  // Android user agents carry the marketing model between the locale and the
-  // build id, e.g. `; Pixel 7 Build/TQ3A`.
-  deviceLabel:
-    /;\s*([^;()]+?)\s+Build\//.exec(userAgent)?.[1]?.trim() ?? 'Android',
-  osVersion: /Android (\d+(?:\.\d+)*)/.exec(userAgent)?.[1] ?? '',
-});
+// Android user agents carry the marketing model between the locale and the
+// build id, e.g. `; Pixel 7 Build/TQ3A`.
+const labelAndroidDevice = (userAgent: string): string =>
+  /;\s*([^;()]+?)\s+Build\//.exec(userAgent)?.[1]?.trim() ?? 'Android';
 
-const describeBrowser = (
-  userAgent: string,
-): { deviceLabel: string; osVersion: string } => {
+const labelBrowser = (userAgent: string): string => {
   const browser = /(Edg|OPR|Chrome|Firefox|Safari)\//.exec(userAgent)?.[1];
   const labels: Record<string, string> = {
     Edg: 'Edge',
@@ -152,10 +140,37 @@ const describeBrowser = (
     Safari: 'Safari',
   };
 
-  return {
-    deviceLabel: browser ? labels[browser] : 'Browser',
-    osVersion: '',
-  };
+  return browser ? labels[browser] : 'Browser';
+};
+
+/**
+ * The OS version the device reports about itself.
+ *
+ * It cannot come from the user agent. WKWebView freezes the version it
+ * announces there — an iPhone on iOS 26.5 still says `OS 18_7 like Mac OS X` —
+ * so a parsed value is not a stale guess but a confident falsehood shown to the
+ * user and persisted with the token (issue #1263). The Android user agent
+ * happens to be truthful, but both native platforms read the same native source
+ * so the field answers to one standard.
+ *
+ * A browser has no device OS worth printing next to its name, and a failed
+ * native read yields nothing rather than the frozen user-agent value: the row
+ * then reads `iOS` alone, which is less than the truth but never against it.
+ */
+const readOsVersion = async (platform: string): Promise<string> => {
+  if (platform !== 'ios' && platform !== 'android') {
+    return '';
+  }
+
+  try {
+    const { osVersion } = await Device.getInfo();
+
+    return osVersion ?? '';
+  } catch (error) {
+    console.warn('Failed to read the device OS version: ', error);
+
+    return '';
+  }
 };
 
 const readAppVersion = async (): Promise<string> => {
@@ -173,28 +188,29 @@ const readAppVersion = async (): Promise<string> => {
 /**
  * Device and app metadata for the current installation.
  *
- * The label is derived from the user agent rather than a native device plugin:
- * it only has to make a row recognisable in a list of a user's own devices, and
- * that keeps the native wrapper unchanged.
+ * The label stays user-agent derived: it only has to make a row recognisable in
+ * a list of a user's own devices, and no user agent lies about being an iPhone.
+ * The version does not, because a wrong version disambiguates nothing while
+ * claiming to (issue #1263).
  */
 export const describeCurrentInstallation =
   async (): Promise<InstallationDescription> => {
     const platform = Capacitor.getPlatform();
     const userAgent = globalThis.navigator?.userAgent ?? '';
 
-    const device =
+    const deviceLabel =
       platform === 'ios'
-        ? describeIosDevice(userAgent)
+        ? labelIosDevice(userAgent)
         : platform === 'android'
-          ? describeAndroidDevice(userAgent)
-          : describeBrowser(userAgent);
+          ? labelAndroidDevice(userAgent)
+          : labelBrowser(userAgent);
 
-    return {
-      platform,
-      deviceLabel: device.deviceLabel,
-      osVersion: device.osVersion,
-      appVersion: await readAppVersion(),
-    };
+    const [osVersion, appVersion] = await Promise.all([
+      readOsVersion(platform),
+      readAppVersion(),
+    ]);
+
+    return { platform, deviceLabel, osVersion, appVersion };
   };
 
 const userTokenReference = (userUid: string, token: string): string =>

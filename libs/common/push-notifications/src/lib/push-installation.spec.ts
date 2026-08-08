@@ -3,6 +3,7 @@ import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { Preferences } from '@capacitor/preferences';
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
+import { Device } from '@capacitor/device';
 import {
   describeCurrentInstallation,
   getInstallationId,
@@ -33,6 +34,9 @@ jest.mock('@capacitor/core', () => ({
 }));
 jest.mock('@capacitor/app', () => ({
   App: { getInfo: jest.fn() },
+}));
+jest.mock('@capacitor/device', () => ({
+  Device: { getInfo: jest.fn() },
 }));
 
 const INSTALLATION_ID = 'installation-a';
@@ -76,6 +80,7 @@ describe('push-installation', () => {
       version: '1.0.1',
       build: '88',
     });
+    (Device.getInfo as jest.Mock).mockResolvedValue({ osVersion: '26.5.2' });
     (FirebaseFirestore.setDocument as jest.Mock).mockResolvedValue(undefined);
     (FirebaseFirestore.deleteDocument as jest.Mock).mockResolvedValue(
       undefined,
@@ -84,8 +89,10 @@ describe('push-installation', () => {
       token: 'fcm-token',
     });
     storedTokens();
+    // The version WKWebView freezes into its user agent, eight major releases
+    // behind the device the tests describe (issue #1263).
     setUserAgent(
-      'Mozilla/5.0 (iPhone; CPU iPhone OS 26_5 like Mac OS X) AppleWebKit/605.1.15',
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15',
     );
   });
 
@@ -142,17 +149,24 @@ describe('push-installation', () => {
   });
 
   describe(describeCurrentInstallation.name, () => {
-    it('labels an iOS device from its user agent and app info', async () => {
+    it('reports the real iOS version, not the one frozen in the user agent', async () => {
+      // The user agent claims 18.7 on a device running 26.5.2. Parsing it
+      // printed a confidently wrong version next to the user's iPhone and
+      // stored it with the token (issue #1263).
       await expect(describeCurrentInstallation()).resolves.toEqual({
         platform: 'ios',
         deviceLabel: 'iPhone',
-        osVersion: '26.5',
+        osVersion: '26.5.2',
         appVersion: '1.0.1 (88)',
       });
     });
 
-    it('labels an Android device with its marketing model', async () => {
+    it('labels an Android device with its marketing model and native version', async () => {
+      // The Android user agent happens to be truthful about the version, but
+      // both native platforms answer from the same source rather than one
+      // being trusted for being accidentally right.
       (Capacitor.getPlatform as jest.Mock).mockReturnValue('android');
+      (Device.getInfo as jest.Mock).mockResolvedValue({ osVersion: '15' });
       setUserAgent(
         'Mozilla/5.0 (Linux; Android 14; Pixel 7 Build/UQ1A) AppleWebKit/537.36',
       );
@@ -161,12 +175,22 @@ describe('push-installation', () => {
         expect.objectContaining({
           platform: 'android',
           deviceLabel: 'Pixel 7',
-          osVersion: '14',
+          osVersion: '15',
         }),
       );
     });
 
+    it('omits the version rather than the frozen one when the device cannot be read', async () => {
+      (Device.getInfo as jest.Mock).mockRejectedValue(new Error('boom'));
+
+      await expect(describeCurrentInstallation()).resolves.toEqual(
+        expect.objectContaining({ deviceLabel: 'iPhone', osVersion: '' }),
+      );
+    });
+
     it('falls back to the browser name where there is no native app info', async () => {
+      // A browser has no device OS worth printing next to its name, so the web
+      // path never asks for one.
       (Capacitor.getPlatform as jest.Mock).mockReturnValue('web');
       (App.getInfo as jest.Mock).mockRejectedValue(new Error('not native'));
       setUserAgent('Mozilla/5.0 (Macintosh) Chrome/120.0.0.0 Safari/537.36');
@@ -177,6 +201,7 @@ describe('push-installation', () => {
         osVersion: '',
         appVersion: '',
       });
+      expect(Device.getInfo).not.toHaveBeenCalled();
     });
   });
 
@@ -271,7 +296,9 @@ describe('push-installation', () => {
           installationId: INSTALLATION_ID,
           platform: 'ios',
           deviceLabel: 'iPhone',
-          osVersion: '26.5',
+          // The stored value is the one the row displays, so a token written
+          // from a frozen user agent cannot outlive the fix (issue #1263).
+          osVersion: '26.5.2',
           appVersion: '1.0.1 (88)',
           enabled: true,
         }),

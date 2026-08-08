@@ -28,6 +28,7 @@ def capacitor_pods
   pod 'CapacitorKeyboard', :path => '../../../../node_modules/@capacitor/keyboard'
   pod 'CapacitorStatusBar', :path => '../../../../node_modules/@capacitor/status-bar'
   pod 'CapacitorApp', :path => '../../../../node_modules/@capacitor/app'
+  pod 'CapacitorDevice', :path => '../../../../node_modules/@capacitor/device'
   pod 'CapacitorPushNotifications', :path => '../../../../node_modules/@capacitor/push-notifications'
   pod 'CapacitorFirebaseMessaging', :path => '../../../../node_modules/@capacitor-firebase/messaging'
   pod 'CapawesomeCapacitorFilePicker', :path => '../../../../node_modules/@capawesome/capacitor-file-picker'

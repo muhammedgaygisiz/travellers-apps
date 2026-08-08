@@ -1,5 +1,8 @@
 import { Bite } from 'model';
-import { classifyBiteLoadFailure } from '../bite-load-failure';
+import {
+  classifyBiteLoadFailure,
+  describeBiteLoadError,
+} from '../bite-load-failure';
 import { BiteNotFoundError } from '../bite-not-found-error';
 
 const bite = { id: 'bite-1' } as Bite;
@@ -54,5 +57,19 @@ describe('classifyBiteLoadFailure', () => {
         classifyBiteLoadFailure('error', undefined, new Error('timed out')),
       ).toBe('unavailable');
     });
+  });
+});
+
+describe('describeBiteLoadError', () => {
+  it('should name the error for the non-fatal report', () => {
+    expect(describeBiteLoadError(new BiteNotFoundError('gone'))).toBe(
+      'BiteNotFoundError: Bite gone does not exist.',
+    );
+  });
+
+  // The resource types its error as `unknown`, and a report that throws while
+  // describing a failure would be its own defect.
+  it('should say nothing when there is no error to name', () => {
+    expect(describeBiteLoadError(undefined)).toBe('');
   });
 });

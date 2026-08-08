@@ -38,3 +38,14 @@ export const classifyBiteLoadFailure = (
     ? 'not-found'
     : 'unavailable';
 };
+
+/**
+ * How a failed read is named in its non-fatal report.
+ *
+ * Angular hands the loader's rejection through unchanged when it is error-like
+ * and wraps anything else in a `ResourceWrappedError`, so in practice this is
+ * always an `Error` — but the resource types it as `unknown`, and a report that
+ * throws while describing a failure would be its own defect.
+ */
+export const describeBiteLoadError = (error: unknown): string =>
+  error instanceof Error ? `${error.name}: ${error.message}` : '';

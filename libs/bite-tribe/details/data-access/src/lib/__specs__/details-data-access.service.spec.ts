@@ -66,9 +66,20 @@ describe(DetailsDataAccessService.name, () => {
   let storeService: BiteTribeStoreService;
   let recordNonFatal: jest.Mock;
   const biteIdFromUrl = signal<string | undefined>(undefined);
+  const navigationFrom = (
+    url: string | undefined,
+  ): { previousNavigation?: { extractedUrl: { toString(): string } } } => ({
+    previousNavigation: url
+      ? { extractedUrl: { toString: (): string => url } }
+      : undefined,
+  });
+  const lastSuccessfulNavigation = signal<
+    ReturnType<typeof navigationFrom> | undefined
+  >(navigationFrom('/gallery'));
 
   beforeEach(() => {
     biteIdFromUrl.set(undefined);
+    lastSuccessfulNavigation.set(navigationFrom('/gallery'));
     recordNonFatal = jest.fn();
 
     TestBed.configureTestingModule({
@@ -77,13 +88,7 @@ describe(DetailsDataAccessService.name, () => {
         { provide: CrashReportingService, useValue: { recordNonFatal } },
         {
           provide: Router,
-          useValue: {
-            lastSuccessfulNavigation: signal({
-              previousNavigation: {
-                finalUrl: { toString: (): string => '/gallery' },
-              },
-            }),
-          },
+          useValue: { lastSuccessfulNavigation },
         },
         {
           provide: BiteTribeStoreService,
@@ -398,6 +403,46 @@ describe(DetailsDataAccessService.name, () => {
         await settleBiteRead();
 
         expect(recordNonFatal).toHaveBeenCalledTimes(1);
+      });
+
+      // Moving to a sub-route of the same Bite — the restaurant page, say —
+      // changes the navigation the report reads without changing the failure,
+      // and one failure is worth one non-fatal.
+      it('should not file it again when only the navigation moved on', async () => {
+        lastSuccessfulNavigation.set(navigationFrom('/bite/gone/restaurant'));
+        await settleBiteRead();
+
+        expect(recordNonFatal).toHaveBeenCalledTimes(1);
+      });
+
+      describe('given nothing was navigated from', () => {
+        beforeEach(() => {
+          recordNonFatal.mockClear();
+        });
+
+        // A cold start onto a deep link or a tapped notification has no
+        // previous page, which is itself worth knowing in the report.
+        it('should report the origin as direct', async () => {
+          lastSuccessfulNavigation.set(navigationFrom(undefined));
+          biteIdFromUrl.set('gone-too');
+          await settleBiteRead();
+
+          expect(recordNonFatal).toHaveBeenCalledWith(
+            'Bite details load failed',
+            expect.objectContaining({ origin: 'direct' }),
+          );
+        });
+
+        it('should report the origin as direct when nothing has navigated yet', async () => {
+          lastSuccessfulNavigation.set(undefined);
+          biteIdFromUrl.set('gone-as-well');
+          await settleBiteRead();
+
+          expect(recordNonFatal).toHaveBeenCalledWith(
+            'Bite details load failed',
+            expect.objectContaining({ origin: 'direct' }),
+          );
+        });
       });
     });
 

@@ -9,6 +9,7 @@ import {
 import { Router } from '@angular/router';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { CrashReportingService } from 'ta-firestore';
+import { resourceValue } from 'utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
@@ -25,7 +26,11 @@ import { lastValueFrom } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { retry, withTimeout } from './async-retry';
 import { BiteNotFoundError } from './bite-not-found-error';
-import { BiteLoadFailure, classifyBiteLoadFailure } from './bite-load-failure';
+import {
+  BiteLoadFailure,
+  classifyBiteLoadFailure,
+  describeBiteLoadError,
+} from './bite-load-failure';
 
 const SHARE_BITE_URL = 'https://bite-tribe.web.app/s/bite';
 
@@ -127,9 +132,7 @@ export class DetailsDataAccessService {
    * with nothing to explain it. Everything outside this library reads the Bite
    * through here. See GitHub issue #1232.
    */
-  biteValue = computed(() =>
-    this.bite.hasValue() ? this.bite.value() : undefined,
-  );
+  biteValue = resourceValue(this.bite);
 
   /** Why the settled read produced no Bite, if it produced none. */
   biteLoadFailure = computed<BiteLoadFailure | undefined>(() =>
@@ -176,25 +179,23 @@ export class DetailsDataAccessService {
 
     this.lastReportedFailure = key;
 
-    const error = this.bite.error();
-
     void this.crashReporting.recordNonFatal('Bite details load failed', {
       biteId,
       branch: failure,
       origin: this.navigationOrigin(),
-      error: error instanceof Error ? `${error.name}: ${error.message}` : '',
+      error: describeBiteLoadError(this.bite.error()),
     });
   });
 
-  /** The page navigated away from, which identifies how this page was reached. */
+  /**
+   * The page navigated away from, which identifies how this page was reached.
+   * Nothing before it means the app opened straight onto the Bite — a deep link
+   * or a tapped notification rather than the gallery or the feed.
+   */
   private navigationOrigin(): string {
     const previous = this.router.lastSuccessfulNavigation()?.previousNavigation;
 
-    return (
-      previous?.finalUrl?.toString() ??
-      previous?.extractedUrl?.toString() ??
-      'direct'
-    );
+    return previous ? previous.extractedUrl.toString() : 'direct';
   }
 
   /** Re-runs a read that failed, for the page's try-again action. */
@@ -264,9 +265,7 @@ export class DetailsDataAccessService {
    * rejected user read would otherwise throw out of the page's template and
    * take the whole Bite down with it, over a name and an avatar.
    */
-  biteCreatorValue = computed(() =>
-    this.biteCreator.hasValue() ? this.biteCreator.value() : undefined,
-  );
+  biteCreatorValue = resourceValue(this.biteCreator);
 
   saveNewReview(newReview: { review: string; biteId: string }): void {
     this.storeService.saveReview(newReview);

@@ -258,6 +258,35 @@ describe('OnboardingService', () => {
       expect(saveCompletedSteps).toHaveBeenCalledWith(['identity']);
     });
 
+    // The identity step asks for a display name, not a real name, so it has no
+    // real name to write. Writing one anyway made the profile show the same
+    // name on two lines. See GitHub issue #1270.
+    it('does not write the claimed display name into fullName', async () => {
+      setup([], { fullName: '' });
+      await service.initialize();
+
+      service.updateIdentity({ displayName: 'NewName', photoUrl: 'new-photo' });
+      await service.checkDisplayNameAvailability('NewName');
+      await service.next();
+
+      expect(saveProfile).toHaveBeenCalledWith(
+        expect.objectContaining({ displayName: 'NewName', fullName: '' }),
+      );
+    });
+
+    it('keeps a real name the user already had', async () => {
+      setup();
+      await service.initialize();
+
+      service.updateIdentity({ displayName: 'NewName', photoUrl: 'new-photo' });
+      await service.checkDisplayNameAvailability('NewName');
+      await service.next();
+
+      expect(saveProfile).toHaveBeenCalledWith(
+        expect.objectContaining({ fullName: 'Current Name' }),
+      );
+    });
+
     it('does not leave identity when the display name claim fails', async () => {
       setup();
       claimDisplayName.mockRejectedValue(

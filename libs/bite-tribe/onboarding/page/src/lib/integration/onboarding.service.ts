@@ -603,7 +603,9 @@ export class OnboardingService {
         ...profile,
         displayName: claim.displayName,
         normalizedDisplayName: claim.normalizedDisplayName,
-        fullName: profile.fullName || claim.displayName,
+        // The identity step collects a display name, not a real name, so it
+        // has none to write. See GitHub issue #1270.
+        fullName: profile.fullName || '',
         photoUrl: draft.photoUrl || '',
       });
       this.profile.set(updated);

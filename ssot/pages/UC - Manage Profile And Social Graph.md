@@ -26,16 +26,46 @@ Users can maintain their identity and use profile/social context to build trust 
   filters. See [[issue-1118]].
 - While a profile loads, the page shows a skeleton in the shape of the loaded
   profile instead of the field fallbacks. Placeholder values such as the FREE
-  badge or "no location" must never be shown for a profile that has not arrived
-  yet, because the user reads them as facts about that person. The
-  "profile not available" message stays reserved for a profile that finished
-  loading without data. See GitHub issue #1166.
+  badge must never be shown for a profile that has not arrived yet, because the
+  user reads them as facts about that person. The "profile not available"
+  message stays reserved for a profile that finished loading without data. See
+  GitHub issue #1166. The "no location" placeholder this rule also named is
+  gone; see the identity contract below.
 - The signed-in user's own personal profile states whether it is public or
   private and leads from there to the visibility switch in profile edit. Saved
   visibility is a privacy fact the user must be able to read off the profile
   itself rather than confirm by opening the edit form. A profile with no saved
   choice reads as private. Organisation profiles carry no status because they
   have no visibility switch. See GitHub issue #1188.
+
+## Profile Identity Contract
+
+Issue [#1270](https://github.com/muhammedgaygisiz/travellers-apps/issues/1270)
+stopped the profile repeating itself. The header carries the display name and
+the line under it carries what the display name does not say — a real name, a
+city — so that line only earns its space when it has something of its own.
+
+- A display name is what the user chose to be called. A real name is a separate
+  fact the user supplies in profile edit, and nothing else may invent one.
+  Onboarding never asks for it, so nothing written during onboarding, during
+  the first user document write, or while reading a profile back seeds
+  `fullName` from the auth or claimed display name. An absent real name stays
+  absent.
+- A stored `fullName` equal to the display name is read as the absence of a
+  real name, not as a second one. Every account created before this carries the
+  copied value permanently, and the profile has to be right for them without a
+  migration, so the source fix alone is not enough — the suppression is the
+  half that repairs existing accounts. The comparison ignores case and
+  surrounding spaces.
+- A real name that genuinely differs still shows, which is the case the line
+  exists for: `Mo` in the heading over `Muhammed Gaygisiz, Bern`.
+- A profile with no city shows no city. The former "no location" placeholder
+  announced missing data for something the app never asked the user for, which
+  reads as a fact about that person rather than as an unfilled optional field.
+  With neither a distinct real name nor a city the line is not rendered at all.
+- Onboarding collecting no home location is the product half of this and is
+  tracked separately in issue #1271. This contract covers only what the profile
+  renders for a location it does not have.
 
 ## Out Of Scope
 

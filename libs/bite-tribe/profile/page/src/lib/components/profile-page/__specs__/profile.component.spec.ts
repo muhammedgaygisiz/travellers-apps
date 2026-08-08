@@ -452,9 +452,72 @@ describe('ProfileComponent', () => {
       expect(location.textContent?.replace(/\s+/g, ' ').trim()).toBe('Zurich');
     });
 
-    it('should show only location placeholder when fullName and city are empty', () => {
+    // An account created through onboarding carries its display name in
+    // `fullName`, so the meta line repeated the heading. See GitHub issue
+    // #1270.
+    it('should show only city when fullName repeats the display name', () => {
+      compRef.setInput('user', {
+        displayName: 'run5mo',
+        fullName: 'run5mo',
+        city: 'Zurich',
+        userId: 'user1',
+      });
+
+      fixture.detectChanges();
+
+      const location = fixture.nativeElement.querySelector(
+        '.profile-meta',
+      ) as HTMLElement;
+
+      expect(location.textContent?.replace(/\s+/g, ' ').trim()).toBe('Zurich');
+    });
+
+    it('should treat a fullName differing only in case as a repeat', () => {
       compRef.setInput('user', {
         displayName: 'mo',
+        fullName: ' Mo ',
+        city: 'Zurich',
+        userId: 'user1',
+      });
+
+      fixture.detectChanges();
+
+      const location = fixture.nativeElement.querySelector(
+        '.profile-meta',
+      ) as HTMLElement;
+
+      expect(location.textContent?.replace(/\s+/g, ' ').trim()).toBe('Zurich');
+    });
+
+    it('should show nothing when fullName repeats the display name and no city is known', () => {
+      compRef.setInput('user', {
+        displayName: 'run5mo',
+        fullName: 'run5mo',
+        userId: 'user1',
+      });
+
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.profile-meta')).toBeNull();
+    });
+
+    // The placeholder announced missing data for a city the app never asked
+    // the user for. See GitHub issue #1270.
+    it('should show no location placeholder when fullName and city are empty', () => {
+      compRef.setInput('user', {
+        displayName: 'mo',
+        userId: 'user1',
+      });
+
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.profile-meta')).toBeNull();
+    });
+
+    it('should still show a real name that differs from the display name', () => {
+      compRef.setInput('user', {
+        displayName: 'mo',
+        fullName: 'Muhammed Gaygisiz',
         userId: 'user1',
       });
 
@@ -465,7 +528,7 @@ describe('ProfileComponent', () => {
       ) as HTMLElement;
 
       expect(location.textContent?.replace(/\s+/g, ' ').trim()).toBe(
-        'no-location',
+        'Muhammed Gaygisiz',
       );
     });
   });

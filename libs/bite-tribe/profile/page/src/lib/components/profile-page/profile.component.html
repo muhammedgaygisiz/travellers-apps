@@ -47,12 +47,9 @@
             }
           </h1>
 
-          <div class="profile-meta">
-            @if (userData?.fullName) {
-              {{ userData?.fullName }},
-            }
-            {{ city() }}
-          </div>
+          @if (profileMeta()) {
+            <div class="profile-meta">{{ profileMeta() }}</div>
+          }
         </div>
 
         @if (!userData?.isOrganisation) {

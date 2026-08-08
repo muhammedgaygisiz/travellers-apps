@@ -78,8 +78,38 @@ export class ProfileComponent {
       this.user()?.isOrganisation ? 'no-bite-trails-yet' : 'no-bites-yet',
     );
   });
-  city = computed((): string => {
-    return this.user()?.city || this.transloco.translate('no-location');
+  /**
+   * The real name, shown only when it says something the heading does not.
+   *
+   * Onboarding used to copy the display name into `fullName`, so every account
+   * created through it carries the duplicate permanently and read its own name
+   * twice. The write is fixed at the source, but accounts created before that
+   * can only be repaired here — a stored value equal to the display name is
+   * treated as the absence of a real name rather than as a second one. See
+   * GitHub issue #1270.
+   */
+  readonly metaName = computed((): string => {
+    const user = this.user();
+    const fullName = user?.fullName?.trim() || '';
+    const displayName = user?.displayName?.trim() || '';
+
+    return fullName.toLocaleLowerCase() === displayName.toLocaleLowerCase()
+      ? ''
+      : fullName;
+  });
+
+  /**
+   * The line under the display name, empty when it has nothing to carry.
+   *
+   * A profile with no city used to advertise "No location" for something the
+   * app never asked the user for, which reads as data that went missing rather
+   * than as an optional field nobody filled in. Onboarding collects no city at
+   * all today, which is tracked separately in issue #1271.
+   */
+  readonly profileMeta = computed((): string => {
+    const city = this.user()?.city?.trim() || '';
+
+    return [this.metaName(), city].filter(Boolean).join(', ');
   });
   biteTrails = input<BiteTrail[]>();
   enableImageRetry = input(false, { transform: booleanAttribute });

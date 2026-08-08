@@ -277,7 +277,11 @@ export class OnboardingDataAccessService {
     return {
       displayName: current.displayName || authDisplayName || '',
       normalizedDisplayName: current.normalizedDisplayName,
-      fullName: current.fullName || authDisplayName || '',
+      // The auth display name is not a real name, and onboarding never asks
+      // for one. Falling back to it here made every onboarded profile carry
+      // its display name twice and read it back on two lines. An absent real
+      // name stays absent. See GitHub issue #1270.
+      fullName: current.fullName || '',
       email: current.email || authEmail || '',
       photoUrl: current.photoUrl || providerPhotoUrl || authPhotoUrl || '',
       userId: current.userId || uid,

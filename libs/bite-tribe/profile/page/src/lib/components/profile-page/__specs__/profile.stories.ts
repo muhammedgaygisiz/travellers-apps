@@ -141,6 +141,25 @@ export const NewUserEmptyProfile: Story = {
   },
 };
 
+// An account created through onboarding before issue #1270: `fullName` holds a
+// copy of the display name and no city was ever collected, which is what made
+// the profile read its own name twice above "No location". The meta line is
+// expected to be absent here, not to repeat the heading.
+export const OnboardedAccountWithDuplicatedName: Story = {
+  args: {
+    user: {
+      ...baseUser,
+      about: '',
+      city: '',
+      displayName: 'run5mo',
+      fullName: 'run5mo',
+    },
+    userId: currentUserId,
+    profileMetadata: noProfileMetadata,
+    bites: [],
+  },
+};
+
 // This story covers how a long list of flags wraps, so the specific countries
 // are arbitrary padding. Keep them to flat-colour, straight-edged flags: the
 // emblem-bearing ones (Portugal's armillary sphere, Cambodia's Angkor Wat)

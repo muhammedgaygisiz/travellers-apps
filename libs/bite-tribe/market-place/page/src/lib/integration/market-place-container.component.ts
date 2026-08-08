@@ -9,7 +9,7 @@ import { MarketPlaceService } from './market-place.service';
   template: `
     <market-place-page
       class="ion-page"
-      [biteTrails]="service.biteTrails.value()"
+      [biteTrails]="service.biteTrailsValue()"
     />
   `,
   imports: [MarketPlacePage],

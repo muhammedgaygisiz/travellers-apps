@@ -34,11 +34,16 @@ export class ProfileService {
   isAuthenticated = this.dataAccess.isAuthenticated;
   myUser = this.dataAccess.myUser;
   user = this.dataAccess.user;
+
+  /** Read guarded: `value()` throws once a read has failed (#1232). */
+  userValue = this.dataAccess.userValue;
   userId = this.dataAccess.userId;
   bitesByUser = this.dataAccess.bitesByUser;
   biteTrailsByUser = this.dataAccess.biteTrailsByUser;
+  biteTrailsByUserValue = this.dataAccess.biteTrailsByUserValue;
   myBites = this.dataAccess.myBites;
   myBiteTrails = this.dataAccess.myBiteTrails;
+  myBiteTrailsValue = this.dataAccess.myBiteTrailsValue;
   isPublicProfile = this.dataAccess.isPublicProfile;
   profileMetadata = this.dataAccess.profileMetadata;
   emailVerificationPromptVisible = this.emailVerification.promptVisible;

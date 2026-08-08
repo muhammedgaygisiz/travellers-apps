@@ -4,6 +4,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import type { Bite, BiteTrail, LikeClick, PublicUser } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { resourceValue } from 'utils';
 
 const BITE_TRAIL_COLLECTION = 'biteTrails';
 
@@ -101,6 +102,16 @@ export class ProfileDataAccessService {
     }),
     loader: this.biteTrailLoader.bind(this),
   });
+
+  // Read guarded: `value()` throws once a read has failed, and the profile page
+  // binds the user and the trails on the same element, so one failed read used
+  // to take the other one down with it. See GitHub issue #1232.
+  userValue = resourceValue(this.user);
+  biteTrailsByUserValue = resourceValue(
+    this.biteTrailsByUser,
+    [] as BiteTrail[],
+  );
+  myBiteTrailsValue = resourceValue(this.myBiteTrails, [] as BiteTrail[]);
 
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
 

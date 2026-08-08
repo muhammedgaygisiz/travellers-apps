@@ -17,7 +17,13 @@ import type {
 } from 'model';
 import { NetworkStatusService } from 'common/networkstatus';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import { getSimilarityScore, haversineDistance, normalize } from 'utils';
+import {
+  getSimilarityScore,
+  haversineDistance,
+  normalize,
+  resourceFailed,
+  resourceValue,
+} from 'utils';
 import {
   getLocationPermissionState,
   openLocationSettings,
@@ -260,10 +266,22 @@ export class HomeDataAccessService {
     loader: this.restaurantBitesLoader.bind(this),
   });
 
+  /**
+   * Read guarded, and reported separately: `value()` throws once the read has
+   * failed, which took down the binding that would have said so and left the
+   * page on its skeleton. See GitHub issue #1232.
+   */
+  private readonly restaurantBitesValue = resourceValue(
+    this.restaurantBitesResource,
+    [] as Bite[],
+  );
+
+  restaurantBitesFailed = resourceFailed(this.restaurantBitesResource);
+
   restaurantBites = computed((): Bite[] => {
     const likes = this.likes();
     const gpsPosition = this.gpsPosition();
-    const bites = (this.restaurantBitesResource.value() ?? []).map((bite) => ({
+    const bites = this.restaurantBitesValue().map((bite) => ({
       ...bite,
       likes: likes.filter((like) => like.biteId === bite.id),
       distance: haversineDistance(
@@ -311,10 +329,18 @@ export class HomeDataAccessService {
     defaultValue: EMPTY_WEEKLY_BITES,
   });
 
+  /** Read guarded for the same reason as the restaurant bites above (#1232). */
+  private readonly weeklyBitesValue = resourceValue(
+    this.weeklyBitesResource,
+    EMPTY_WEEKLY_BITES,
+  );
+
+  weeklyBitesFailed = resourceFailed(this.weeklyBitesResource);
+
   weeklyBites = computed((): Bite[] => {
     const likes = this.likes();
     const gpsPosition = this.gpsPosition();
-    const bites = this.weeklyBitesResource.value().bites.map((bite) => ({
+    const bites = this.weeklyBitesValue().bites.map((bite) => ({
       ...bite,
       likes: likes.filter((like) => like.biteId === bite.id),
       distance: haversineDistance(
@@ -341,7 +367,7 @@ export class HomeDataAccessService {
    * label instead of showing a guessed range.
    */
   weeklyBitesRange = computed((): WeekRange | undefined => {
-    const { weekStart, weekEnd } = this.weeklyBitesResource.value();
+    const { weekStart, weekEnd } = this.weeklyBitesValue();
 
     if (weekStart === 0 && weekEnd === 0) {
       return undefined;

@@ -99,23 +99,19 @@ describe(BiteTrailDataAccessService.name, () => {
     });
 
     it('should return true when bite trail price is 0', () => {
-      mutableService.biteTrail = {
-        value: signal(makeBiteTrail({ price: 0 })),
-      };
+      mutableService.biteTrailValue = signal(makeBiteTrail({ price: 0 }));
       expect(service.isFree()).toBe(true);
     });
 
     it('should return false when bite trail price is greater than 0', () => {
-      mutableService.biteTrail = {
-        value: signal(makeBiteTrail({ price: 10 })),
-      };
+      mutableService.biteTrailValue = signal(makeBiteTrail({ price: 10 }));
       expect(service.isFree()).toBe(false);
     });
   });
 
   describe('saveBiteTrailAsBucketList', () => {
     it('should do nothing when bite trail is undefined', () => {
-      mutableService.biteTrail = { value: signal(undefined) };
+      mutableService.biteTrailValue = signal(undefined);
       service.saveBiteTrailAsBucketList();
       expect(mockStoreService.saveBiteTrailAsBucketList).not.toHaveBeenCalled();
     });
@@ -127,7 +123,7 @@ describe(BiteTrailDataAccessService.name, () => {
         biteIds: ['b1', 'b2'],
         price: 0,
       });
-      mutableService.biteTrail = { value: signal(trail) };
+      mutableService.biteTrailValue = signal(trail);
       service.saveBiteTrailAsBucketList();
       expect(mockStoreService.saveBiteTrailAsBucketList).toHaveBeenCalledWith({
         bucketListName: 'My Trail',
@@ -242,7 +238,7 @@ describe(BiteTrailDataAccessService.name, () => {
       const mockBites = [
         makeBite({ id: 'b1', position: { latitude: 47.38, longitude: 8.55 } }),
       ];
-      mutableService.bites = { value: signal(mockBites) };
+      mutableService.bitesValue = signal(mockBites);
       mutableService.gpsPosition = signal({
         latitude: 47.38,
         longitude: 8.55,
@@ -257,7 +253,7 @@ describe(BiteTrailDataAccessService.name, () => {
       const mockBites = [
         makeBite({ id: 'b1', position: { latitude: 47.38, longitude: 8.55 } }),
       ];
-      mutableService.bites = { value: signal(mockBites) };
+      mutableService.bitesValue = signal(mockBites);
       mutableService.gpsPosition = signal(null);
 
       const result = service.bitesWithDistance();
@@ -266,7 +262,7 @@ describe(BiteTrailDataAccessService.name, () => {
 
     it('should return bites with distance when bite has no position', () => {
       const mockBites = [makeBite({ id: 'b1', position: undefined })];
-      mutableService.bites = { value: signal(mockBites) };
+      mutableService.bitesValue = signal(mockBites);
       mutableService.gpsPosition = signal({
         latitude: 47.38,
         longitude: 8.55,
@@ -276,10 +272,26 @@ describe(BiteTrailDataAccessService.name, () => {
       expect(result.length).toBe(1);
     });
 
-    it('should return empty when bites resource returns undefined', () => {
-      mutableService.bites = { value: signal(undefined) };
+    it('should return empty when the read produced no bites', () => {
+      // A failed read lands here too: the guarded value falls back to an empty
+      // list rather than throwing out of the template. See issue #1232.
+      mutableService.bitesValue = signal([]);
       const result = service.bitesWithDistance();
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('bitesFailed', () => {
+    it('should stay false while the reads are fine', () => {
+      expect(service.bitesFailed()).toBe(false);
+    });
+
+    // The page has no Bites to show whichever of the two reads failed, and
+    // saying "no Bites in this trail" would be untrue. See issue #1232.
+    it('should report a failed trail read', () => {
+      mutableService.biteTrailFailed = signal(true);
+
+      expect(service.bitesFailed()).toBe(true);
     });
   });
 });

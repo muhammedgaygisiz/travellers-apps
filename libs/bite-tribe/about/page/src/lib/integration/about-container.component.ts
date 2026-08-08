@@ -9,8 +9,8 @@ import { AboutService } from './about.service';
   template: `
     <about-page
       class="ion-page"
-      [totalNumberBites]="service.totalNumberBites.value()"
-      [totalNumberUsers]="service.totalNumberUsers.value()"
+      [totalNumberBites]="service.totalNumberBitesValue()"
+      [totalNumberUsers]="service.totalNumberUsersValue()"
       (openPrivacyPolicy)="service.goToPrivacyPolicy()"
     />
   `,

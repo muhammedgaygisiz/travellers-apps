@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -56,10 +57,13 @@ export class FollowersListComponent {
   type = input.required<'followers' | 'following'>();
   loggedInUserId = input<string>();
   isLoading = input<boolean>(false);
+  /** The read failed, which is not the same as having no followers (#1232). */
+  hasError = input(false, { transform: booleanAttribute });
   profileOwnerid = input<string>();
 
   userClick = output<PublicUser>();
   unfollowClick = output<PublicUser>();
+  retryClick = output<void>();
 
   isOpen = signal(false);
   imageErroredUserIds = signal<Set<string>>(new Set());

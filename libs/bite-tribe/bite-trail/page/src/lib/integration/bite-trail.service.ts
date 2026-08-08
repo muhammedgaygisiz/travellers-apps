@@ -17,6 +17,14 @@ export class BiteTrailService {
   isFree = this.dataAccess.isFree;
   savedBucketlistId = this.dataAccess.savedBucketlistId;
 
+  /** True once the trail or its Bites could not be read (#1232). */
+  hasError = this.dataAccess.bitesFailed;
+
+  /** Runs the failed reads again. */
+  retryLoad(): void {
+    this.dataAccess.reload();
+  }
+
   biteClicked(bite: Bite): void {
     void this.navController.navigateForward([PATH.BITE, bite.id]);
   }

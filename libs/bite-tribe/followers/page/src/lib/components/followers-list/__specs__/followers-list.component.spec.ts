@@ -57,6 +57,52 @@ describe(FollowersListComponent.name, () => {
     ).toBeFalsy();
   });
 
+  describe('given the list could not be read', () => {
+    // An unreadable list is not an empty one: "no followers yet" would state
+    // something untrue about the account. See GitHub issue #1232.
+    it('should report the failure instead of claiming there are none', () => {
+      componentRef.setInput('type', 'followers');
+      componentRef.setInput('users', []);
+      componentRef.setInput('isLoading', false);
+      componentRef.setInput('hasError', true);
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="followers-error-message"]',
+        ),
+      ).toBeTruthy();
+    });
+
+    it('should offer the read again', () => {
+      jest.spyOn(component.retryClick, 'emit');
+      componentRef.setInput('type', 'followers');
+      componentRef.setInput('users', []);
+      componentRef.setInput('isLoading', false);
+      componentRef.setInput('hasError', true);
+      fixture.detectChanges();
+
+      fixture.nativeElement
+        .querySelector('[data-testid="followers-error-retry"]')
+        .click();
+
+      expect(component.retryClick.emit).toHaveBeenCalled();
+    });
+
+    it('should say nothing when the read simply came back empty', () => {
+      componentRef.setInput('type', 'followers');
+      componentRef.setInput('users', []);
+      componentRef.setInput('isLoading', false);
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="followers-error-message"]',
+        ),
+      ).toBeNull();
+    });
+  });
+
   describe('toggleTitleText', () => {
     it('should return "Followers" when type is followers', () => {
       componentRef.setInput('type', 'followers');

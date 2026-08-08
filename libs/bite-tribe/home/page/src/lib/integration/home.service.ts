@@ -27,9 +27,11 @@ export class HomeService {
   myBitesSorting = this.dataAccess.myBitesSorting;
   restaurantBites = this.dataAccess.restaurantBites;
   restaurantBitesLoading = this.dataAccess.restaurantBitesLoading;
+  restaurantBitesFailed = this.dataAccess.restaurantBitesFailed;
   restaurantBitesSorting = this.dataAccess.restaurantBitesSorting;
   weeklyBites = this.dataAccess.weeklyBites;
   weeklyBitesLoading = this.dataAccess.weeklyBitesLoading;
+  weeklyBitesFailed = this.dataAccess.weeklyBitesFailed;
   weeklyBitesSorting = this.dataAccess.weeklyBitesSorting;
   weeklyBitesRange = this.dataAccess.weeklyBitesRange;
   bitesBySelectedBucketlist = this.dataAccess.bitesBySelectedBucketlist;
@@ -199,6 +201,18 @@ export class HomeService {
 
   refresh(): void {
     this.dataAccess.reloadGPSPosition();
+  }
+
+  /**
+   * Refreshes the restaurant Bite list, which has its own resource rather than
+   * the store-backed feed. The shared `refresh` only reloads the position, which
+   * left the error card on this page offering a retry that could not retry the
+   * read that actually failed. The weekly list already has `reloadWeeklyBites`.
+   * See GitHub issue #1232.
+   */
+  refreshRestaurantBites(): void {
+    this.refresh();
+    this.dataAccess.restaurantBitesResource.reload();
   }
 
   closeGpsError(): void {

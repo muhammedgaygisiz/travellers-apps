@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { NetworkStatusService } from 'common/networkstatus';
@@ -63,8 +63,10 @@ describe(BiteDataAccessService.name, () => {
     clearCachedBite: jest.Mock;
   };
   let analytics: { logEvent: jest.Mock };
+  const biteIdFromUrl = signal<string | undefined>(undefined);
 
   beforeEach(() => {
+    biteIdFromUrl.set(undefined);
     // The stall watchdog is a timer, and every upload started in this file arms
     // one, so the clock is controlled for the whole suite.
     jest.useFakeTimers();
@@ -107,7 +109,7 @@ describe(BiteDataAccessService.name, () => {
           provide: BiteTribeStoreService,
           useValue: {
             ...store,
-            biteIdFromUrl: (): undefined => undefined,
+            biteIdFromUrl,
             currencyFromSettings$: of(undefined),
             favCurrenciesFromSettings$: of(undefined),
             position$: of(undefined),
@@ -161,6 +163,51 @@ describe(BiteDataAccessService.name, () => {
         }),
       ).resolves.toBeUndefined();
       expect(getDocument).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('given the bite read fails', () => {
+    const settle = async (): Promise<void> => {
+      TestBed.flushEffects();
+
+      for (let tick = 0; tick < 20; tick++) {
+        await Promise.resolve();
+      }
+
+      TestBed.flushEffects();
+    };
+
+    // Reading `bite.value()` on a failed resource throws, and the edit page
+    // bound it as its first input, so the whole page froze rather than saying
+    // the Bite could not be loaded. See GitHub issue #1232.
+    it('answers with no bite and reports the failure', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockRejectedValue(new Error('permission-denied'));
+      biteIdFromUrl.set('bite-123');
+
+      await settle();
+
+      expect(() => service.bite.value()).toThrow();
+      expect(service.biteValue()).toBeUndefined();
+      expect(service.biteLoadFailed()).toBe(true);
+    });
+  });
+
+  describe('given a Places lookup fails', () => {
+    it('falls back to no suggestions instead of throwing', async () => {
+      api.searchPlaces.mockRejectedValue(new Error('app-check-refused'));
+      service.googlePlaceSearchText.set('pizzeria');
+
+      TestBed.flushEffects();
+
+      for (let tick = 0; tick < 20; tick++) {
+        await Promise.resolve();
+      }
+
+      TestBed.flushEffects();
+
+      expect(service.googlePlaces()).toEqual([]);
     });
   });
 

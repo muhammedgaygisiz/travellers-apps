@@ -11,8 +11,8 @@ type UsersLoaderArg = Parameters<FollowersDataAccessService['usersLoader']>[0];
 
 class MockBiteTribeStoreService {
   type$ = of('followers');
-  userIdFromUrl = signal(null);
-  type = signal(null);
+  userIdFromUrl = signal<string | null>(null);
+  type = signal<string | null>(null);
 }
 
 class MockProfileApiService {
@@ -188,6 +188,41 @@ describe('FollowersDataAccessService', () => {
         ));
       });
     });
+  });
+
+  describe('given the list read fails', () => {
+    const settle = async (): Promise<void> => {
+      TestBed.flushEffects();
+
+      for (let tick = 0; tick < 20; tick++) {
+        await Promise.resolve();
+      }
+
+      TestBed.flushEffects();
+    };
+
+    // Reading `users.value()` on a failed resource throws, which used to abort
+    // the list page's binding update instead of reporting the failure.
+    // See GitHub issue #1232.
+    it('should answer with no users and report the failure', inject(
+      [FollowersDataAccessService, BiteTribeStoreService],
+      async (
+        service: FollowersDataAccessService,
+        store: MockBiteTribeStoreService,
+      ) => {
+        jest
+          .spyOn(profileApiService, 'fetchFollowersWithDetails')
+          .mockRejectedValue(new Error('permission-denied'));
+        store.userIdFromUrl.set('user1');
+        store.type.set('followers');
+
+        await settle();
+
+        expect(() => service.users.value()).toThrow();
+        expect(service.usersValue()).toEqual([]);
+        expect(service.usersFailed()).toBe(true);
+      },
+    ));
   });
 
   describe('unfollowUser', () => {

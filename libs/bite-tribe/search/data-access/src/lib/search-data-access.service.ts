@@ -20,6 +20,9 @@ export class SearchDataAccessService {
   readonly searchText = signal('');
   readonly searchCategory = signal<SearchCategory>('user');
 
+  // Every call is caught below, so this resource never enters an error state
+  // and `results.value()` is safe to read straight from the template — unlike
+  // the resources audited in GitHub issue #1232.
   resultsLoader: ResourceLoader<SearchResult[], SearchParams> = async ({
     params,
   }) => {

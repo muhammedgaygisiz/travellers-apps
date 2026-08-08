@@ -7,9 +7,9 @@ import { OrganisationDashboard } from '../components/page/organisation-dashboard
   template: `
     <organisation-dashboard
       class="ion-page"
-      [employees]="service.employees.value()"
-      [bites]="service.bites.value()"
-      [biteTrails]="service.biteTrails.value()"
+      [employees]="service.employeesValue()"
+      [bites]="service.bitesValue()"
+      [biteTrails]="service.biteTrailsValue()"
       [selectedEmployeeIds]="service.selectedEmployeeIds()"
       [selectedBiteIds]="service.selectedBiteIds()"
       (employeeToggled)="service.toggleEmployee($event)"

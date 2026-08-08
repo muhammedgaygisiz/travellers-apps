@@ -11,6 +11,10 @@ export class AboutService {
   totalNumberBites = this.dataAccess.totalNumberBites;
   totalNumberUsers = this.dataAccess.totalNumberUsers;
 
+  /** Read guarded: `value()` throws once a read has failed (#1232). */
+  totalNumberBitesValue = this.dataAccess.totalNumberBitesValue;
+  totalNumberUsersValue = this.dataAccess.totalNumberUsersValue;
+
   goToPrivacyPolicy(): void {
     void this.navController.navigateForward([PATH.PRIVACY_POLICY]);
   }

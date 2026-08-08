@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -8,6 +9,7 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
+  IonButton,
   IonCard,
   IonCardContent,
   IonChip,
@@ -30,6 +32,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
     IonChip,
     IonIcon,
     IonText,
+    IonButton,
     IonCard,
     IonCardContent,
     BiteComponent,
@@ -44,11 +47,14 @@ export class BiteTrailBitesPage {
   userId = input<string>();
   isFree = input<boolean>(false);
   savedBucketlistId = input<string | null>(null);
+  /** The read failed, which is not the same as a trail with no Bites (#1232). */
+  hasError = input(false, { transform: booleanAttribute });
 
   readonly biteClick = output<Bite>();
   readonly openMapView = output<void>();
   readonly getForFree = output<void>();
   readonly goToSavedBucketList = output<void>();
+  readonly retryClick = output<void>();
 
   toggleAddButtonText = computed(() => {
     const savedBucketlistId = this.savedBucketlistId();

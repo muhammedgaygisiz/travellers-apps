@@ -15,6 +15,11 @@ export class OrganisationDashboardService {
   employees = this.dataAccess.employees;
   bites = this.dataAccess.bites;
   biteTrails = this.dataAccess.biteTrails;
+
+  // Read guarded: `value()` throws once a read has failed (#1232).
+  employeesValue = this.dataAccess.employeesValue;
+  bitesValue = this.dataAccess.bitesValue;
+  biteTrailsValue = this.dataAccess.biteTrailsValue;
   selectedEmployeeIds = this.dataAccess.selectedUserIds;
   selectedBiteIds = this.dataAccess.selectedBiteIds;
 
@@ -55,11 +60,11 @@ export class OrganisationDashboardService {
     }
 
     const selectedBiteIds = this.dataAccess.selectedBiteIds();
-    const selectedBites = (this.dataAccess.bites.value() ?? []).filter((bite) =>
-      selectedBiteIds.includes(bite.id),
-    );
+    const selectedBites = this.dataAccess
+      .bitesValue()
+      .filter((bite) => selectedBiteIds.includes(bite.id));
 
-    const employees = this.dataAccess.employees.value() ?? [];
+    const employees = this.dataAccess.employeesValue();
 
     this.createBiteTrailDataAccess.selectedBites.set(selectedBites);
     this.createBiteTrailDataAccess.employees.set(employees);

@@ -3,6 +3,10 @@ import { NotificationMessages } from '../notification-messages';
 /** Amharic copy. */
 export const am: NotificationMessages = {
   'common.someone': 'አንድ ሰው',
+  'emailVerification.subject': 'የBite Tribe ኢሜይል አድራሻዎን ያረጋግጡ',
+  'emailVerification.body':
+    'የBite Tribe መለያዎ ደኅንነቱ የተጠበቀ ሆኖ እንዲቆይና ስለ መለያዎ አስፈላጊ መልእክቶችን መቀበል እንዲችሉ እባክዎ የኢሜይል አድራሻዎን ያረጋግጡ።',
+  'emailVerification.linkLabel': 'የኢሜይል አድራሻ ያረጋግጡ',
   'newBite.title': 'አዲስ Bite',
   'newBite.body': '{{author}} አዲስ Bite ፈጥሯል',
   'newBite.bodyWithName': '{{author}} አዲስ Bite ፈጥሯል፦ {{bite}}',

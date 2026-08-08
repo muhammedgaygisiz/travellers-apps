@@ -3,8 +3,12 @@ const listUsersMock = jest.fn();
 const generateEmailVerificationLinkMock = jest.fn();
 const getMock = jest.fn();
 const setMock = jest.fn();
+const settingsGetMock = jest.fn();
 const docMock = jest.fn(() => ({ get: getMock, set: setMock }));
-const collectionMock = jest.fn(() => ({ doc: docMock }));
+const settingsDocMock = jest.fn(() => ({ get: settingsGetMock }));
+const collectionMock = jest.fn((name: string) =>
+  name === 'settings' ? { doc: settingsDocMock } : { doc: docMock },
+);
 
 jest.mock('firebase-admin/auth', () => ({
   getAuth: (): any => ({
@@ -59,6 +63,7 @@ describe('sendEmailVerificationRemindersForUsers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getMock.mockResolvedValue({ exists: true, data: () => ({}) });
+    settingsGetMock.mockResolvedValue({ exists: true, data: () => ({}) });
     setMock.mockResolvedValue(undefined);
     generateEmailVerificationLinkMock.mockResolvedValue(
       'https://example.com/verify',
@@ -97,6 +102,23 @@ describe('sendEmailVerificationRemindersForUsers', () => {
         emailVerificationReminderCount: 2,
       }),
       { merge: true },
+    );
+  });
+
+  it('sends the automatic reminder in the recipient language', async () => {
+    listUsersMock.mockResolvedValueOnce({
+      users: [authUser({ uid: 'user-1', email: 'one@example.com' })],
+    });
+    settingsGetMock.mockResolvedValueOnce({
+      exists: true,
+      data: () => ({ language: 'tr' }),
+    });
+    const sender = jest.fn().mockResolvedValue(undefined);
+
+    await sendEmailVerificationRemindersForUsers(sender);
+
+    expect(sender).toHaveBeenCalledWith(
+      expect.objectContaining({ language: 'tr' }),
     );
   });
 

@@ -53,6 +53,7 @@ const MockedTranslocoService = {
   translate: jest.fn(
     (key: string): string => translations[key] ?? `missing-translation:${key}`,
   ),
+  getActiveLang: jest.fn((): string => 'en'),
 };
 
 type RegistrationServiceWithPrivateMethods = RegistrationService & {
@@ -68,6 +69,7 @@ describe(RegistrationService.name, () => {
       undefined,
     );
     MockedAuthService.sendEmailVerification.mockResolvedValue(undefined);
+    MockedTranslocoService.getActiveLang.mockReturnValue('en');
     MockedNavController.navigateBack.mockResolvedValue(true);
     MockedLoadingController.create.mockResolvedValue(loadingOverlay);
     MockedToastController.create.mockResolvedValue({
@@ -125,6 +127,19 @@ describe(RegistrationService.name, () => {
         });
         expect(sendEmailVerificationSpy).toHaveBeenCalled();
         expect(navigateBackSpy).toHaveBeenCalledWith(['/home']);
+      });
+
+      it('should request the verification mail in the language on screen', async () => {
+        // The mail comes from the Firebase email templates, which only follow
+        // the language the auth instance was given (issue #1264).
+        MockedTranslocoService.getActiveLang.mockReturnValue('de');
+
+        await service.register({
+          email: 'q@q.de',
+          password: '12345678',
+        });
+
+        expect(sendEmailVerificationSpy).toHaveBeenCalledWith('de');
       });
 
       it('should log the sign_up analytics event', async () => {

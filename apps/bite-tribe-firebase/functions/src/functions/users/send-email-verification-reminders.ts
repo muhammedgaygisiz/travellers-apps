@@ -2,6 +2,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onSchedule } from 'firebase-functions/scheduler';
+import { getUserLanguage } from '../shared/utils/get-user-language';
 import {
   buildEmailVerificationMetadata,
   classifyEmailVerificationUser,
@@ -106,8 +107,11 @@ export const sendEmailVerificationRemindersForUsers = async (
         const verificationLink = await getAuth().generateEmailVerificationLink(
           authUser.email,
         );
+        // The automatic reminder is the same mail as the manual resend, so it
+        // reads the same language rather than staying English (issue \#1264).
+        const language = await getUserLanguage(authUser.uid);
 
-        await sender({ to: authUser.email, verificationLink });
+        await sender({ to: authUser.email, verificationLink, language });
 
         await userReference.set(
           {

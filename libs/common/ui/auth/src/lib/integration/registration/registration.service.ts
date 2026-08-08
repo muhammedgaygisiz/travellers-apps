@@ -98,8 +98,12 @@ export class RegistrationService {
 
       this.analytics.logEvent(AnalyticsEvent.SignUp, { method: 'password' });
 
+      // The verification mail comes from the Firebase email templates, which
+      // only speak the language the auth instance was given. The active
+      // Transloco language is what the user is reading the form in, so it is
+      // the language the mail has to arrive in (issue #1264).
       await withTimeout(
-        this.authService.sendEmailVerification(),
+        this.authService.sendEmailVerification(this.transloco.getActiveLang()),
         REGISTRATION_TIMEOUT_MS,
       );
 

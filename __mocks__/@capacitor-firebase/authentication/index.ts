@@ -7,4 +7,5 @@ export const FirebaseAuthentication = {
   signInWithApple: jest.fn(),
   createUserWithEmailAndPassword: jest.fn(),
   sendEmailVerification: jest.fn(),
+  setLanguageCode: jest.fn(),
 };

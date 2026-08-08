@@ -3,6 +3,10 @@ import { NotificationMessages } from '../notification-messages';
 /** Turkish copy. Informal "sen", matching the app's locale files. */
 export const tr: NotificationMessages = {
   'common.someone': 'Birisi',
+  'emailVerification.subject': 'Bite Tribe e-posta adresini doğrula',
+  'emailVerification.body':
+    'Bite Tribe hesabının güvende kalması ve hesabınla ilgili önemli mesajları alabilmen için lütfen e-posta adresini doğrula.',
+  'emailVerification.linkLabel': 'E-posta adresini doğrula',
   'newBite.title': 'Yeni Bite',
   'newBite.body': '{{author}} yeni bir Bite oluşturdu',
   'newBite.bodyWithName': '{{author}} yeni bir Bite oluşturdu: {{bite}}',

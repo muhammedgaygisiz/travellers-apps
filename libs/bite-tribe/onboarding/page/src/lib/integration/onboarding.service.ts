@@ -6,7 +6,7 @@ import {
   AnalyticsService,
   RequestedUrlService,
 } from 'ta-firestore';
-import { getCurrencyForLocale, getDisplayNameFailureReason, PATH } from 'utils';
+import { getCurrencyForDevice, getDisplayNameFailureReason, PATH } from 'utils';
 import {
   OnboardingDataAccessService,
   OnboardingProgressService,
@@ -143,8 +143,11 @@ export class OnboardingService {
   /**
    * Prefills the currency, language, location, and notification steps.
    * Persisted settings win so a returning user sees their own choices; a
-   * first-time user gets the device locale's best guess, which already makes
-   * both preference steps satisfiable.
+   * first-time user gets the device's best guess, which already makes both
+   * preference steps satisfiable. Currency reads the device's region and
+   * language reads its interface language: they are separate questions, and a
+   * device set to Switzerland while reading English has to answer both
+   * correctly (issue #1262).
    */
   private async initializePreferences(): Promise<void> {
     const settings = await this.dataAccess.loadSettings();
@@ -153,7 +156,8 @@ export class OnboardingService {
     const locale = this.deviceLocale();
 
     this.selectedCurrency.set(
-      settings?.currency || getCurrencyForLocale(locale),
+      settings?.currency ||
+        getCurrencyForDevice({ locale, timeZone: this.deviceTimeZone() }),
     );
     this.favoriteCurrencies.set(settings?.favoriteCurrencies ?? []);
     this.setStepValid('currency', true);
@@ -190,6 +194,19 @@ export class OnboardingService {
 
   private deviceLocale(): string {
     return navigator.language || navigator.languages?.[0] || DEFAULT_LANGUAGE;
+  }
+
+  /**
+   * IANA zone the device is set to, which is the closest thing to the device
+   * region a web view can read. A runtime without a resolvable zone leaves the
+   * currency suggestion to the locale.
+   */
+  private deviceTimeZone(): string | undefined {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      return undefined;
+    }
   }
 
   private languageForLocale(locale: string): string {

@@ -16,6 +16,7 @@ The app should help users avoid misleading Bite and Restaurant context.
 
 ## Current Flow
 
+- App suggests the user's default currency during onboarding from the device region, read through the device time zone rather than through the interface language. See [[issue-1262]].
 - App prefills Bite currency from the selected Bite position when the backend can resolve a country currency.
 - User preferred currency remains the fallback when the position is missing or currency resolution fails.
 - User can manually correct the selected currency before saving.
@@ -35,6 +36,7 @@ The app should help users avoid misleading Bite and Restaurant context.
 - Issue 967 covers suspicious price validation.
 - Issue 902 was closed as obsolete after issue 943 because selected places already patch Bite position when possible.
 - Issue 978 covers currency prefill edge-case verification.
+- Issue 1262 moved the onboarding default currency suggestion from the interface language to the device region.
 
 ## Related Domains
 

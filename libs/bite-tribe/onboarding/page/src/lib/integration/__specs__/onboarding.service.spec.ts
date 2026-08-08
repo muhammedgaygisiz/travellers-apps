@@ -39,12 +39,23 @@ describe('OnboardingService', () => {
   let loadingDismiss: jest.Mock;
   let createLoading: jest.Mock;
 
-  /** Device locale backing the currency and language prefill. */
+  /** Device locale backing the language prefill. */
   const mockDeviceLocale = (locale: string): void => {
     Object.defineProperty(navigator, 'language', {
       value: locale,
       configurable: true,
     });
+  };
+
+  const originalResolvedOptions = Intl.DateTimeFormat.prototype.resolvedOptions;
+
+  /** Device time zone backing the currency prefill. */
+  const mockDeviceTimeZone = (timeZone: string): void => {
+    Intl.DateTimeFormat.prototype.resolvedOptions = function (
+      this: Intl.DateTimeFormat,
+    ): Intl.ResolvedDateTimeFormatOptions {
+      return { ...originalResolvedOptions.call(this), timeZone };
+    };
   };
 
   const setup = (
@@ -53,6 +64,7 @@ describe('OnboardingService', () => {
     settings: Settings | undefined = undefined,
   ): void => {
     mockDeviceLocale('en-US');
+    mockDeviceTimeZone('America/New_York');
     loadCompletedSteps = jest.fn().mockResolvedValue(completed);
     saveCompletedSteps = jest.fn().mockResolvedValue(undefined);
     dismissForSession = jest.fn();
@@ -131,7 +143,10 @@ describe('OnboardingService', () => {
     service = TestBed.inject(OnboardingService);
   };
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    jest.clearAllMocks();
+    Intl.DateTimeFormat.prototype.resolvedOptions = originalResolvedOptions;
+  });
 
   it('exposes the steps in the configured order', () => {
     setup();
@@ -717,9 +732,10 @@ describe('OnboardingService', () => {
   });
 
   describe('currency step', () => {
-    it('prefills the default currency from the device locale for a new user', async () => {
+    it('prefills the default currency from the device region for a new user', async () => {
       setup(['identity', 'visibility']);
       mockDeviceLocale('de-AT');
+      mockDeviceTimeZone('Europe/Vienna');
 
       await service.initialize();
 
@@ -728,9 +744,33 @@ describe('OnboardingService', () => {
       expect(service.favoriteCurrencies()).toEqual([]);
     });
 
+    it('prefills from the device region even when the language variant is foreign', async () => {
+      // The reported device: iOS Region `Switzerland`, interface language
+      // English (United Kingdom). The language must not decide the currency
+      // (issue #1262).
+      setup(['identity', 'visibility']);
+      mockDeviceLocale('en-GB');
+      mockDeviceTimeZone('Europe/Zurich');
+
+      await service.initialize();
+
+      expect(service.selectedCurrency()).toBe('CHF');
+    });
+
+    it('falls back to the device locale when the region cannot be determined', async () => {
+      setup(['identity', 'visibility']);
+      mockDeviceLocale('en-GB');
+      mockDeviceTimeZone('Africa/Kampala');
+
+      await service.initialize();
+
+      expect(service.selectedCurrency()).toBe('GBP');
+    });
+
     it('prefills from persisted settings when the user already has them', async () => {
       setup(['identity', 'visibility'], {}, storedSettings());
       mockDeviceLocale('de-AT');
+      mockDeviceTimeZone('Europe/Vienna');
 
       await service.initialize();
 

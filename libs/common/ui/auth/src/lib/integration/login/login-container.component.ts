@@ -12,6 +12,7 @@ import { Credentials } from '../../api/credentials.model';
   template: ` <ta-login
     class="ion-page"
     [loginFailed]="loginFailed()"
+    [pending]="pending()"
     (submitAuth)="login($event)"
     (signup)="gotoSignup()"
     (forgotPassword)="gotoForgotPassword($event)"
@@ -27,6 +28,14 @@ export class LoginContainerComponent {
   loginFailed = computed(() => {
     if (this.loginService) {
       return this.loginService.loginFailed();
+    }
+
+    return false;
+  });
+
+  pending = computed(() => {
+    if (this.loginService) {
+      return this.loginService.loginPending();
     }
 
     return false;

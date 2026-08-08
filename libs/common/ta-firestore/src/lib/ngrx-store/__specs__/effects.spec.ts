@@ -127,6 +127,51 @@ describe(AuthEffects.name, () => {
       });
     });
 
+    // Issue #1273: the login form is locked while this effect runs, so a second
+    // submit must be dropped rather than raced, and a round-trip that never
+    // settles must still release the form.
+    describe('given a duplicate login action', () => {
+      it('should only start one sign-in', () => {
+        AuthServiceMock.loginWithUsernameAndPassword.mockReturnValue(
+          new Promise(() => undefined),
+        );
+
+        scheduler.run(({ cold, expectObservable }) => {
+          const authCreds = {
+            email: 'q@q.de',
+            password: 'password',
+          };
+          actions$ = cold('-a-a', { a: AuthActions.login({ authCreds }) });
+
+          expectObservable(effects.loginEffect$);
+        });
+
+        expect(
+          AuthServiceMock.loginWithUsernameAndPassword,
+        ).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('given a sign-in that never settles', () => {
+      it('should dispatch loginFailed once the timeout elapses', () => {
+        AuthServiceMock.loginWithUsernameAndPassword.mockReturnValue(
+          new Promise(() => undefined),
+        );
+
+        scheduler.run(({ cold, expectObservable }) => {
+          const authCreds = {
+            email: 'q@q.de',
+            password: 'password',
+          };
+          actions$ = cold('-a', { a: AuthActions.login({ authCreds }) });
+
+          expectObservable(effects.loginEffect$).toBe('30001ms b', {
+            b: AuthActions.loginFailed(),
+          });
+        });
+      });
+    });
+
     describe('given an error is thrown', () => {
       it('should dispatch loginFailed action', () => {
         AuthServiceMock.loginWithUsernameAndPassword.mockRejectedValue(

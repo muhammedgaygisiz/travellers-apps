@@ -2,6 +2,7 @@ import { AuthActions } from './actions';
 import {
   selectIsAuthenticated,
   selectLoginFailed,
+  selectLoginPending,
   selectRegistrationErrorCode,
   selectUser,
   selectUserId,
@@ -10,6 +11,7 @@ import {
 export const fromAuth = {
   selectRegistrationErrorCode,
   selectLoginFailed,
+  selectLoginPending,
   selectIsAuthenticated,
   selectUserId,
   selectUser,

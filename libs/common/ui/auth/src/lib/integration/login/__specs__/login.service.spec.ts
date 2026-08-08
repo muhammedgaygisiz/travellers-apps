@@ -1,3 +1,4 @@
+import { signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { NavController } from '@ionic/angular';
@@ -9,9 +10,11 @@ describe('LoginService', () => {
   let service: LoginService;
   let navController: NavController;
   let store: StoreService;
+  let loginPending: WritableSignal<boolean>;
 
   beforeEach(() => {
     const initialState = {};
+    loginPending = signal(false);
     TestBed.configureTestingModule({
       providers: [
         provideMockStore({ initialState }),
@@ -27,6 +30,7 @@ describe('LoginService', () => {
             loginWithAppleAccount: jest.fn(),
             loginWithFacebookAccount: jest.fn(),
             loginFailed: jest.fn(),
+            loginPending,
           },
         },
       ],
@@ -74,6 +78,36 @@ describe('LoginService', () => {
 
       expect(loginSpy).toHaveBeenCalledWith(authCreds);
     });
+
+    // Issue #1273: a tap queued between the click and the pending flag turning
+    // on must not start a second sign-in.
+    it('should not dispatch while a login is already in flight', () => {
+      const loginSpy = jest.spyOn(store, 'login');
+      loginPending.set(true);
+
+      service.login({ email: 'email', password: 'password' });
+
+      expect(loginSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('loginPending', () => {
+    it('should follow the store', () => {
+      expect(service.loginPending()).toBe(false);
+
+      loginPending.set(true);
+
+      expect(service.loginPending()).toBe(true);
+    });
+
+    it('should be false without a store', () => {
+      const store = service['store'];
+      service['store'] = null;
+
+      expect(service.loginPending()).toBe(false);
+
+      service['store'] = store;
+    });
   });
 
   describe('gotoSignUp', () => {
@@ -116,6 +150,15 @@ describe('LoginService', () => {
 
       expect(loginWithGoogleSpy).toHaveBeenCalled();
     });
+
+    it('should not dispatch while a login is already in flight', () => {
+      const loginWithGoogleSpy = jest.spyOn(store, 'loginWithGoogleAccount');
+      loginPending.set(true);
+
+      service.loginWithGoogleAccount();
+
+      expect(loginWithGoogleSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('loginWithAppleAccount', () => {
@@ -125,6 +168,15 @@ describe('LoginService', () => {
       service.loginWithAppleAccount();
 
       expect(loginWithAppleSpy).toHaveBeenCalled();
+    });
+
+    it('should not dispatch while a login is already in flight', () => {
+      const loginWithAppleSpy = jest.spyOn(store, 'loginWithAppleAccount');
+      loginPending.set(true);
+
+      service.loginWithAppleAccount();
+
+      expect(loginWithAppleSpy).not.toHaveBeenCalled();
     });
   });
 

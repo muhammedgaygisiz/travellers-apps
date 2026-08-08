@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { LoginContainerComponent } from '../login-container.component';
 import { LoginService } from '../login.service';
 import { provideIonicAngular } from '@ionic/angular/standalone';
@@ -23,10 +23,13 @@ describe('LoginContainerComponent', () => {
   let component: LoginContainerComponent;
   let fixture: ComponentFixture<LoginContainerComponent>;
   let mockLoginService: jest.Mocked<LoginService>;
+  let loginPending: WritableSignal<boolean>;
 
   beforeEach(() => {
+    loginPending = signal(false);
     mockLoginService = {
       loginFailed: signal(false) as unknown as LoginService['loginFailed'],
+      loginPending: loginPending as unknown as LoginService['loginPending'],
       login: jest.fn(),
       gotoSignUp: jest.fn(),
       gotoForgotPassword: jest.fn(),
@@ -63,6 +66,14 @@ describe('LoginContainerComponent', () => {
 
   it('should initialize with loginFailed as false', () => {
     expect(component.loginFailed()).toBeFalsy();
+  });
+
+  it('should forward the pending state from the service', () => {
+    expect(component.pending()).toBe(false);
+
+    loginPending.set(true);
+
+    expect(component.pending()).toBe(true);
   });
 
   it('should call login on service when login is called', () => {
@@ -128,5 +139,6 @@ describe('LoginContainerComponent', () => {
     )['loginService'] = null;
 
     expect(componentWithoutService.loginFailed()).toBeFalsy();
+    expect(componentWithoutService.pending()).toBeFalsy();
   });
 });

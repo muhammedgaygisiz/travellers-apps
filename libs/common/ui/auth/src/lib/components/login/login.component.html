@@ -5,6 +5,7 @@
     showFooter: false,
   }"
   [menuConfig]="{ hideAuth: true }"
+  [loading]="pending()"
 >
   <ion-content>
     <div slot="fixed" class="container ion-padding">
@@ -17,10 +18,20 @@
         </div>
 
         <div class="registration-options">
-          <ion-button fill="outline" (click)="onGoogleLogin()">
+          <ion-button
+            fill="outline"
+            [disabled]="pending()"
+            (click)="onGoogleLogin()"
+            data-testid="google-login"
+          >
             <ion-icon name="logo-google" color="secondary" />
           </ion-button>
-          <ion-button fill="outline" (click)="onAppleLogin()">
+          <ion-button
+            fill="outline"
+            [disabled]="pending()"
+            (click)="onAppleLogin()"
+            data-testid="apple-login"
+          >
             <ion-icon name="logo-apple" color="secondary" />
           </ion-button>
         </div>
@@ -70,10 +81,22 @@
             class="ion-margin-top"
             fill="outline"
             expand="block"
-            (click)="submitAuth.emit(authFormGroup.value)"
+            [disabled]="!authFormGroup.valid || pending()"
+            (click)="onSubmit()"
             data-testid="submit"
-            >{{ 'log-in' | transloco }}</ion-button
           >
+            @if (pending()) {
+              <ion-spinner
+                class="submit-spinner"
+                slot="start"
+                name="crescent"
+                data-testid="submit-spinner"
+              />
+              {{ 'log-in-in-progress' | transloco }}
+            } @else {
+              {{ 'log-in' | transloco }}
+            }
+          </ion-button>
 
           @if (loginFailed()) {
             <div class="ion-margin-top">

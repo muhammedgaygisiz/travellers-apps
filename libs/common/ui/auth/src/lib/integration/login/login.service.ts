@@ -18,7 +18,22 @@ export class LoginService {
     return true;
   });
 
+  /** Whether a sign-in round-trip is still running (issue #1273). */
+  public loginPending = computed(() => {
+    if (this.store) {
+      return this.store.loginPending();
+    }
+
+    return false;
+  });
+
   public login(authCreds: Credentials): void {
+    // The disabled button already blocks this, but a queued tap can still land
+    // between the click and the pending flag turning on.
+    if (this.loginPending()) {
+      return;
+    }
+
     this.store?.login(authCreds);
   }
 
@@ -36,10 +51,18 @@ export class LoginService {
   }
 
   public loginWithGoogleAccount(): void {
+    if (this.loginPending()) {
+      return;
+    }
+
     this.store?.loginWithGoogleAccount();
   }
 
   public loginWithAppleAccount(): void {
+    if (this.loginPending()) {
+      return;
+    }
+
     this.store?.loginWithAppleAccount();
   }
 }

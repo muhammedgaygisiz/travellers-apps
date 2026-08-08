@@ -41,6 +41,31 @@ Users can inspect one Bite deeply enough to decide whether the dish is relevant.
   `bt-bite-image-status` component so they cannot drift. See GitHub issue #1168
   and [[UC - Create And Maintain Personal Bites]] for the status rules.
 
+## Relative Time Contract
+
+Issue [#1272](https://github.com/muhammedgaygisiz/travellers-apps/issues/1272)
+made the page's ages honest. The Bite's age and every review's age render
+through the same pipe, so the contract covers both:
+
+- An age is written in the reader's language. It is formatted by
+  `Intl.RelativeTimeFormat` against the active Transloco language rather than
+  assembled from hardcoded English, which is what put `5 min ago` in the middle
+  of an otherwise German page during release-candidate Run 5.
+- The abbreviations come from CLDR, so the unit stays readable per language.
+  The hand-written pair that shipped before — `min` for minutes and `m` for
+  months — was a distinction no translation would have preserved.
+- A single unit is shown. The composed forms the old pipe produced, such as
+  `2 w 3 d ago`, have no localized equivalent and are gone; the coarser unit is
+  enough to judge how fresh a Bite is.
+- A timestamp ahead of now is reported as ahead, not as elapsed. Clock skew and
+  a bad write both produce one, and rendering it as an age presented a wrong
+  reading as a confident one.
+- A Bite or review without a timestamp renders nothing. The pipe used to
+  default its argument to a hardcoded May 2025 constant, so an absent
+  `createdAt` was reported as a real age measured from an arbitrary date —
+  missing data shown to the user as data. Anything unparsable renders nothing
+  for the same reason.
+
 ## Shared Link Entry Contract
 
 Issue [#1246](https://github.com/muhammedgaygisiz/travellers-apps/issues/1246)

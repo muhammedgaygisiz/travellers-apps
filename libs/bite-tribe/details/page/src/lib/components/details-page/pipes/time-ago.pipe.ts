@@ -1,63 +1,96 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-const FALLBACK_CREATION_DATE = '2025-05-17T08:01:18.001Z';
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
+const WEEK_MS = 7 * DAY_MS;
+const MONTH_MS = 30 * DAY_MS;
+const YEAR_MS = 365 * DAY_MS;
 
+/**
+ * The ladder the elapsed distance is measured against. The first entry whose
+ * `until` the distance stays below owns the output, so the order matters.
+ */
+const UNITS: {
+  until: number;
+  ms: number;
+  unit: Intl.RelativeTimeFormatUnit;
+}[] = [
+  { until: HOUR_MS, ms: MINUTE_MS, unit: 'minute' },
+  { until: DAY_MS, ms: HOUR_MS, unit: 'hour' },
+  { until: WEEK_MS, ms: DAY_MS, unit: 'day' },
+  { until: MONTH_MS, ms: WEEK_MS, unit: 'week' },
+  { until: YEAR_MS, ms: MONTH_MS, unit: 'month' },
+  { until: Number.POSITIVE_INFINITY, ms: YEAR_MS, unit: 'year' },
+];
+
+/**
+ * `Intl.RelativeTimeFormat` is not free to construct and this pipe runs once
+ * per Bite timestamp and once per review on the details page, so the formatter
+ * for the active language is kept.
+ */
+const formatters = new Map<string, Intl.RelativeTimeFormat>();
+
+const getFormatter = (lang: string): Intl.RelativeTimeFormat => {
+  let formatter = formatters.get(lang);
+
+  if (!formatter) {
+    formatter = new Intl.RelativeTimeFormat(lang, {
+      // `auto` uses the natural wording a language has for the nearest values
+      // - "yesterday", "gestern", "last week" - instead of counting them out.
+      numeric: 'auto',
+      // `short` is the compact form CLDR defines per language, so minutes stay
+      // distinguishable from months in every locale. Hand-abbreviating them to
+      // `min` and `m` was what made the English output ambiguous.
+      style: 'short',
+    });
+    formatters.set(lang, formatter);
+  }
+
+  return formatter;
+};
+
+/**
+ * Renders a timestamp as a relative distance from now, in the language handed
+ * to it.
+ *
+ * The language is an argument rather than an injected `TranslocoService`
+ * reading, because a pure pipe is only re-evaluated when one of its arguments
+ * changes: a pipe that read the active language itself would keep rendering
+ * the language that was active when the view was created. See GitHub issue
+ * #1272.
+ */
 @Pipe({
   name: 'timeAgo',
 })
 export class TimeAgoPipe implements PipeTransform {
-  transform(value = FALLBACK_CREATION_DATE): string {
+  transform(value: string | undefined | null, lang = 'en'): string {
     if (!value) {
       return '';
     }
 
-    const date = new Date(value);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const timestamp = new Date(value).getTime();
 
-    // Convert to different time units
-    const diffMinutes = Math.floor(diffTime / (1000 * 60));
-    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const diffWeeks = Math.floor(diffDays / 7);
-    const diffMonths = Math.floor(diffDays / 30);
-    const diffYears = Math.floor(diffDays / 365);
-
-    // Minutes
-    if (diffMinutes < 60) {
-      return diffMinutes <= 1 ? 'just now' : `${diffMinutes} min ago`;
+    if (Number.isNaN(timestamp)) {
+      return '';
     }
 
-    // Hours
-    if (diffHours < 24) {
-      return `${diffHours} h ago`;
+    // Signed on purpose: negative is the past, positive the future. Taking the
+    // absolute difference used to render a timestamp ahead of now - clock skew,
+    // a bad write - as time already elapsed.
+    const deltaMs = timestamp - Date.now();
+    const distanceMs = Math.abs(deltaMs);
+    const formatter = getFormatter(lang);
+
+    if (distanceMs < MINUTE_MS) {
+      return formatter.format(0, 'second');
     }
 
-    // Days (less than a week)
-    if (diffDays < 7) {
-      return `${diffDays} d ago`;
-    }
+    const { ms, unit } =
+      UNITS.find(({ until }) => distanceMs < until) ?? UNITS[UNITS.length - 1];
 
-    // Weeks (less than a month)
-    if (diffDays < 30) {
-      const remainingDays = diffDays % 7;
-      return remainingDays > 0
-        ? `${diffWeeks} w ${remainingDays} d ago`
-        : `${diffWeeks} w ago`;
-    }
-
-    // Months (less than a year)
-    if (diffDays < 365) {
-      const remainingWeeks = Math.floor((diffDays % 30) / 7);
-      return remainingWeeks > 0
-        ? `${diffMonths} m ${remainingWeeks} w ago`
-        : `${diffMonths} m ago`;
-    }
-
-    // Years
-    const remainingMonths = Math.floor((diffDays % 365) / 30);
-    return remainingMonths > 0
-      ? `${diffYears} y ${remainingMonths} m ago`
-      : `${diffYears} y ago`;
+    // Truncated rather than rounded, so a value never claims a unit it has not
+    // reached yet: 89 minutes is "1 hr. ago", not "2 hr. ago".
+    return formatter.format(Math.trunc(deltaMs / ms), unit);
   }
 }

@@ -21,6 +21,18 @@ class StorybookLoadingDirective {
 }
 
 @Directive({
+  selector: 'image-upload[storybookPending]',
+})
+class StorybookPendingDirective {
+  constructor() {
+    // Freezes the component between the img being inserted and its load event.
+    // That window is real but too short to reach by hand, so neutralise the
+    // load handler to hold the state for review.
+    inject(ImageUploadComponent).onImageLoad = (): void => undefined;
+  }
+}
+
+@Directive({
   selector: 'image-upload[storybookDisabled]',
 })
 class StorybookDisabledDirective {
@@ -101,5 +113,19 @@ export const Loading: Story = {
   ],
   render: () => ({
     template: '<image-upload storybookLoading />',
+  }),
+};
+
+// The chosen image is in the DOM but has not decoded yet, so the skeleton still
+// covers the box. Without it the box would collapse to empty space here.
+export const Pending: Story = {
+  decorators: [
+    moduleMetadata({
+      imports: [ImageUploadComponent, StorybookPendingDirective],
+    }),
+  ],
+  render: () => ({
+    template:
+      '<image-upload storybookPending imageUrl="/assets/icons/apple-splash-2736-1260.jpg" />',
   }),
 };

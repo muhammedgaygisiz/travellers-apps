@@ -18,6 +18,7 @@ import type {
 } from 'model';
 import { BiteTribeApiService, type LocalImageFile } from 'bite-tribe/api';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { resourceFailed, resourceValue } from 'utils';
 import { withGooglePlaceDistance } from './utils/with-google-place-distance';
 import { toUploadErrorCode } from './utils/to-upload-error-code';
 
@@ -74,6 +75,16 @@ export class BiteDataAccessService {
     loader: this.biteLoader.bind(this),
   });
 
+  /**
+   * The Bite being edited, or nothing. Never read off the resource directly:
+   * `value()` throws once the read has failed, which would take the whole page
+   * binding down with it. See GitHub issue #1232.
+   */
+  biteValue = resourceValue(this.bite);
+
+  /** True once the Bite read failed, so the page can say so. */
+  biteLoadFailed = resourceFailed(this.bite);
+
   currency = toSignal(this.storeService.currencyFromSettings$);
   favCurrencies = toSignal(this.storeService.favCurrenciesFromSettings$);
   position = toSignal(this.storeService.position$);
@@ -104,7 +115,10 @@ export class BiteDataAccessService {
     defaultValue: [],
   });
 
-  googlePlaces = this.googlePlacesResource.value;
+  // A Places lookup rejects on a network drop or an App Check refusal, and the
+  // page binds this straight through, so it is read guarded and falls back to
+  // no suggestions rather than throwing. See GitHub issue #1232.
+  googlePlaces = resourceValue(this.googlePlacesResource, [] as GooglePlace[]);
   googlePlacesLoading = this.googlePlacesResource.isLoading;
 
   /**
@@ -131,7 +145,10 @@ export class BiteDataAccessService {
     defaultValue: [],
   });
 
-  nearbyGooglePlaces = this.nearbyGooglePlacesResource.value;
+  nearbyGooglePlaces = resourceValue(
+    this.nearbyGooglePlacesResource,
+    [] as GooglePlace[],
+  );
   nearbyGooglePlacesLoading = this.nearbyGooglePlacesResource.isLoading;
 
   readonly uploadProgress = signal<{

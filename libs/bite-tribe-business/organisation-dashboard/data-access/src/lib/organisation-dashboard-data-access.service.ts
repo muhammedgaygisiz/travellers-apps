@@ -8,6 +8,7 @@ import {
 import { Bite, BiteTrail, PublicUser } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { resourceValue } from 'utils';
 
 export const USERS_COLLECTION = 'users';
 export const BITE_COLLECTION = 'bites';
@@ -161,4 +162,11 @@ export class OrganisationDashboardDataAccessService {
     }),
     loader: this.biteTrailsLoader.bind(this),
   });
+
+  // Guarded reads: `value()` throws once a read has failed, which would abort
+  // the dashboard's binding update rather than showing an empty list.
+  // See GitHub issue #1232.
+  employeesValue = resourceValue(this.employees, [] as PublicUser[]);
+  bitesValue = resourceValue(this.bites, [] as Bite[]);
+  biteTrailsValue = resourceValue(this.biteTrails, [] as BiteTrail[]);
 }

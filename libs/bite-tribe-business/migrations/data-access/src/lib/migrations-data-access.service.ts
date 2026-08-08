@@ -9,6 +9,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Bite, RestaurantCandidate } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { resourceValue } from 'utils';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 
 export const RESTAURANT_CANDIDATES_COLLECTION = 'restaurantCandidates';
@@ -172,17 +173,27 @@ export class MigrationsDataAccessService {
     loader: this.restaurantClusteringBitesLoader.bind(this),
   });
 
+  // Guarded reads: `value()` throws once a read has failed, and these computeds
+  // feed the migrations page directly. See GitHub issue #1232.
+  private readonly clusteringBitesValue = resourceValue(
+    this.restaurantClusteringBites,
+    [] as Bite[],
+  );
+
+  private readonly activeCandidatesValue = resourceValue(
+    this.activeRestaurantCandidates,
+    [] as RestaurantCandidate[],
+  );
+
   restaurantClusteringEligibleBites = computed(() =>
     getRestaurantClusteringEligibleBites(
-      this.restaurantClusteringBites.value() ?? [],
-      this.activeRestaurantCandidates.value() ?? [],
+      this.clusteringBitesValue(),
+      this.activeCandidatesValue(),
     ),
   );
 
   addressBackfillBites = computed(() =>
-    getBitesNeedingAddressBackfill(
-      this.restaurantClusteringBites.value() ?? [],
-    ),
+    getBitesNeedingAddressBackfill(this.clusteringBitesValue()),
   );
 
   async clusterRestaurantCandidateForBite(

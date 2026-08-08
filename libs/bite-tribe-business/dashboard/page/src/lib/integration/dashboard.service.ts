@@ -18,6 +18,12 @@ export class DashboardService {
   restaurants = this.dataAccess.restaurants;
   bitePlaces = this.dataAccess.bitePlaces;
   restaurantCandidates = this.dataAccess.restaurantCandidates;
+
+  // Read guarded: `value()` throws once a read has failed (#1232).
+  organisationsValue = this.dataAccess.organisationsValue;
+  restaurantsValue = this.dataAccess.restaurantsValue;
+  bitePlacesValue = this.dataAccess.bitePlacesValue;
+  restaurantCandidatesValue = this.dataAccess.restaurantCandidatesValue;
   isAuthenticated = this.dataAccess.isAuthenticated;
   gpsPosition = this.dataAccess.gpsPosition;
 

@@ -9,7 +9,7 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type { Bite, BiteTrail, Geopoint } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { haversineDistance } from 'utils';
+import { haversineDistance, resourceFailed, resourceValue } from 'utils';
 
 const BITE_TRAIL_COLLECTION = 'biteTrails';
 const BITE_COLLECTION = 'bites';
@@ -57,9 +57,20 @@ export class BiteTrailDataAccessService {
     loader: this.biteTrailLoader.bind(this),
   });
 
-  biteTrailName = computed(() => this.biteTrail.value()?.name ?? '');
+  /**
+   * The trail, or nothing. `value()` throws once the read has failed, and this
+   * one is read from three computeds and a resource's params, so an unguarded
+   * read took the page down rather than reporting anything. See GitHub issue
+   * #1232.
+   */
+  biteTrailValue = resourceValue(this.biteTrail);
 
-  isFree = computed(() => (this.biteTrail.value()?.price ?? -1) === 0);
+  /** True once the trail read failed, so the page can say so. */
+  biteTrailFailed = resourceFailed(this.biteTrail);
+
+  biteTrailName = computed(() => this.biteTrailValue()?.name ?? '');
+
+  isFree = computed(() => (this.biteTrailValue()?.price ?? -1) === 0);
 
   savedBucketlistId = computed(() => {
     const biteTrailId = this.biteTrailIdFromUrl();
@@ -69,7 +80,7 @@ export class BiteTrailDataAccessService {
   });
 
   saveBiteTrailAsBucketList(): void {
-    const biteTrail = this.biteTrail.value();
+    const biteTrail = this.biteTrailValue();
 
     if (!biteTrail) {
       return;
@@ -111,14 +122,32 @@ export class BiteTrailDataAccessService {
     };
 
   bites = resource({
+    // Guarded like every other read of the trail: a params function that throws
+    // would leave this resource permanently stuck as well.
     params: () => ({
-      biteIds: this.biteTrail.value()?.biteIds,
+      biteIds: this.biteTrailValue()?.biteIds,
     }),
     loader: this.bitesLoader.bind(this),
   });
 
+  /** The trail's Bites, or none while the read is running or has failed. */
+  bitesValue = resourceValue(this.bites, [] as Bite[]);
+
+  private readonly bitesReadFailed = resourceFailed(this.bites);
+
+  /** True once either read failed: the page has no Bites to show either way. */
+  bitesFailed = computed(
+    () => this.biteTrailFailed() || this.bitesReadFailed(),
+  );
+
+  /** Runs the failed reads again, for the page's try-again action. */
+  reload(): void {
+    this.biteTrail.reload();
+    this.bites.reload();
+  }
+
   bitesWithDistance = computed(() => {
-    const bites = this.bites.value() ?? [];
+    const bites = this.bitesValue();
     const position = this.gpsPosition() as Geopoint | null | undefined;
 
     return bites.map(

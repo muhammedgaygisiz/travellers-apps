@@ -37,6 +37,7 @@ const createMockDataAccess = (
       value: signal(mockBite),
       reload: jest.fn(),
     },
+    biteValue: signal(mockBite),
     reviews: signal([]),
     bucketlists: signal([]),
     userId: signal('user1'),
@@ -51,6 +52,7 @@ const createMockDataAccess = (
     logout: jest.fn(),
     cacheBite: jest.fn(),
     shareBite: jest.fn(),
+    reloadBite: jest.fn(),
   };
   return { ...base, ...overrides } as MockDetailsDataAccessService;
 };
@@ -111,6 +113,12 @@ describe('DetailsService', () => {
     expect(service.bite.value()).toEqual(mockBite);
   });
 
+  it('should run the read again on request, without leaving the page', () => {
+    service.retryBiteLoad();
+
+    expect(mockDataAccessService.reloadBite).toHaveBeenCalled();
+  });
+
   it('should call dataAccess.saveNewReview with provided review data', () => {
     // Arrange
     const reviewData = {
@@ -143,9 +151,7 @@ describe('DetailsService', () => {
     it('should call dataAccess.saveToBucketList with correct parameters when bite exists', () => {
       // Arrange
       mockDataAccessService = {
-        bite: {
-          value: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
-        },
+        biteValue: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
         saveToBucketList: jest.fn(),
       };
 
@@ -182,9 +188,7 @@ describe('DetailsService', () => {
     it('should handle undefined bite gracefully', () => {
       // Arrange
       mockDataAccessService = {
-        bite: {
-          value: signal(undefined),
-        },
+        biteValue: signal(undefined),
         saveToBucketList: jest.fn(),
       };
 
@@ -228,9 +232,7 @@ describe('DetailsService', () => {
     it('should call dataAccess.createAndSaveToBucketList with correct parameters when bite exists', () => {
       // Arrange
       mockDataAccessService = {
-        bite: {
-          value: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
-        },
+        biteValue: signal({ id: 'bite123', name: 'Test Bite' } as Bite),
         createAndSaveToBucketList: jest.fn(),
       };
 
@@ -271,9 +273,7 @@ describe('DetailsService', () => {
     it('should not create a list when the bite is not loaded yet', () => {
       // Arrange
       mockDataAccessService = {
-        bite: {
-          value: signal(undefined),
-        },
+        biteValue: signal(undefined),
         createAndSaveToBucketList: jest.fn(),
       };
 

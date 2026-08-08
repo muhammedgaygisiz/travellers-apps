@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Bite, PublicUser, Restaurant, RestaurantCandidate } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { resourceValue } from 'utils';
 
 export const USERS_COLLECTION = 'users';
 export const RESTAURANT_COLLECTION = 'restaurants';
@@ -169,6 +170,17 @@ export class DashboardDataAccessService {
   restaurantCandidates = resource({
     loader: this.restaurantCandidatesLoader.bind(this),
   });
+
+  // Every one of these reads Firestore and can reject. `value()` throws in that
+  // state, and the dashboard binds all four in a row, so one failed collection
+  // read used to take the whole page's binding update with it. See issue #1232.
+  restaurantsValue = resourceValue(this.restaurants, [] as Restaurant[]);
+  organisationsValue = resourceValue(this.organisations, [] as PublicUser[]);
+  bitePlacesValue = resourceValue(this.bitePlaces, [] as string[]);
+  restaurantCandidatesValue = resourceValue(
+    this.restaurantCandidates,
+    [] as DashboardRestaurantCandidate[],
+  );
 
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,

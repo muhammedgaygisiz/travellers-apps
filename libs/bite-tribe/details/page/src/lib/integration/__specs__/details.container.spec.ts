@@ -52,6 +52,8 @@ describe(DetailsContainer.name, () => {
               error: signal(undefined),
               reload: biteReloadSpy,
             },
+            biteValue: biteSignal,
+            biteCreatorValue: signal(undefined),
             position: {
               value: signal(undefined),
               error: signal(undefined),
@@ -72,7 +74,9 @@ describe(DetailsContainer.name, () => {
             preferredCurrency: signal('EUR'),
             isAuthenticated: signal(true),
             biteNotFound: signal(false),
+            biteUnavailable: signal(false),
             goBack: jest.fn(),
+            retryBiteLoad: jest.fn(),
           },
         },
         {

@@ -11,6 +11,9 @@ export class MarketPlaceService {
 
   biteTrails = this.dataAccess.biteTrails;
 
+  /** Read guarded: `value()` throws once the read has failed (#1232). */
+  biteTrailsValue = this.dataAccess.biteTrailsValue;
+
   onGoToProfileClick(ownerId: string): void {
     this.navController.navigateForward(['profile', ownerId]);
   }

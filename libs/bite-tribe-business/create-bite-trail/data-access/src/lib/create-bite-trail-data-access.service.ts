@@ -8,6 +8,7 @@ import {
 import { Bite, BiteTrail, PublicUser } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { resourceValue } from 'utils';
 import { BiteTribeApiService } from 'bite-tribe/api';
 
 export const USERS_COLLECTION = 'users';
@@ -48,6 +49,9 @@ export class CreateBiteTrailDataAccessService {
     }),
     loader: this.organisationLoader.bind(this),
   });
+
+  /** Guarded read: `value()` throws once the read has failed (#1232). */
+  organisationValue = resourceValue(this.organisation);
 
   createBiteTrail(
     trailData: Omit<

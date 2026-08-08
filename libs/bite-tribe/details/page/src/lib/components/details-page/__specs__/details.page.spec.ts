@@ -151,6 +151,61 @@ describe('DetailsPage', () => {
       expect(component.goBack.emit).toHaveBeenCalled();
     });
 
+    it('offers the read again as well as the way back when it simply failed', async () => {
+      // A timeout, a rejected permission or an App Check refusal says nothing
+      // about whether the Bite exists, so unlike a deleted one it is worth
+      // retrying. Without this the page had no answer at all. See #1232.
+      const present = jest.fn();
+      let created: Parameters<AlertController['create']>[0] | undefined;
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async (options) => {
+          created = options;
+          return { present } as never;
+        });
+      jest.spyOn(component.retryLoad, 'emit');
+      jest.spyOn(component.goBack, 'emit');
+
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await Promise.resolve();
+
+      expect(present).toHaveBeenCalled();
+      expect(created?.backdropDismiss).toBe(false);
+
+      const buttons = created?.buttons as {
+        text?: string;
+        handler?: () => void;
+      }[];
+      expect(buttons).toHaveLength(2);
+
+      buttons[0].handler?.();
+      expect(component.goBack.emit).toHaveBeenCalled();
+
+      buttons[1].handler?.();
+      expect(component.retryLoad.emit).toHaveBeenCalled();
+    });
+
+    it('reports a failed read again once the retry fails again', async () => {
+      const create = jest
+        .spyOn(alertController, 'create')
+        .mockResolvedValue({ present: jest.fn() } as never);
+
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await Promise.resolve();
+
+      // The retry puts the read back in flight before it fails again.
+      componentRef.setInput('biteUnavailable', false);
+      componentRef.changeDetectorRef.detectChanges();
+      await Promise.resolve();
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await Promise.resolve();
+
+      expect(create).toHaveBeenCalledTimes(2);
+    });
+
     it('reports a missing Bite once, not on every check', async () => {
       const create = jest
         .spyOn(alertController, 'create')

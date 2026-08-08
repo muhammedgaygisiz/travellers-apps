@@ -473,5 +473,8 @@
   "close-image-viewer": "ปิดรูปภาพ",
   "bite-not-found": "ไม่พบ Bite",
   "this-bite-is-no-longer-available": "Bite นี้ไม่พร้อมใช้งานแล้ว อาจถูกลบไปแล้ว",
-  "go-back": "ย้อนกลับ"
+  "go-back": "ย้อนกลับ",
+  "bite-could-not-be-loaded": "โหลด Bite ไม่สำเร็จ",
+  "this-bite-could-not-be-loaded-right-now": "เกิดข้อผิดพลาดขณะโหลด Bite นี้ ตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง",
+  "try-again": "ลองอีกครั้ง"
 }

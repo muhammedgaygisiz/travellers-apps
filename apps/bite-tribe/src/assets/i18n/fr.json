@@ -473,5 +473,8 @@
   "close-image-viewer": "Fermer la photo",
   "bite-not-found": "Bite introuvable",
   "this-bite-is-no-longer-available": "Ce Bite n'est plus disponible. Il a peut-être été supprimé.",
-  "go-back": "Retour"
+  "go-back": "Retour",
+  "bite-could-not-be-loaded": "Impossible de charger le Bite",
+  "this-bite-could-not-be-loaded-right-now": "Une erreur s'est produite lors du chargement de ce Bite. Vérifie ta connexion et réessaie.",
+  "try-again": "Réessayer"
 }

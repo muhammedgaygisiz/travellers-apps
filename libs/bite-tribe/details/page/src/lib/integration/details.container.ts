@@ -14,7 +14,7 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
   template: `
     <details-page
       class="ion-page"
-      [bite]="service.bite.value()"
+      [bite]="service.biteValue()"
       [reviews]="service.reviews()"
       [bucketlists]="service.bucketlists()"
       [userId]="service.userId()"
@@ -22,9 +22,11 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       [position]="service.position.value()"
       [exchangeRates]="service.exchangeRates()"
       [preferredCurrency]="service.preferredCurrency()"
-      [biteCreator]="service.biteCreator.value()"
+      [biteCreator]="service.biteCreatorValue()"
       [biteNotFound]="service.biteNotFound()"
+      [biteUnavailable]="service.biteUnavailable()"
       (goBack)="service.goBack()"
+      (retryLoad)="service.retryBiteLoad()"
       (submitNewReview)="service.saveReview($event)"
       (selectList)="service.addBiteToSelectedBucketList($event)"
       (removeBiteFromBucketlist)="service.removeBiteFromBucketlist($event)"
@@ -44,7 +46,7 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       surface="bite-details"
       titleKey="coach-bite-details-title"
       bodyKey="coach-bite-details-body"
-      [enabled]="!!service.bite.value()"
+      [enabled]="!!service.biteValue()"
       (settled)="detailsCoachSettled.set(true)"
     />
 
@@ -91,7 +93,7 @@ export class DetailsContainer {
     });
     this.analytics.logEvent(AnalyticsEvent.BiteViewed);
 
-    if (this.service.bite.value()?.id || this.service.bite.error()) {
+    if (this.service.biteValue()?.id || this.service.bite.error()) {
       this.service.bite.reload();
     }
 

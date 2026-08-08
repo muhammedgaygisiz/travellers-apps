@@ -926,6 +926,35 @@ describe('HomeDataAccessService', () => {
     ));
   });
 
+  describe('given a bite list read fails', () => {
+    const settle = async (): Promise<void> => {
+      TestBed.flushEffects();
+
+      for (let tick = 0; tick < 20; tick++) {
+        await Promise.resolve();
+      }
+
+      TestBed.flushEffects();
+    };
+
+    // Reading `value()` on a failed resource throws, which aborted the binding
+    // update carrying the error card and left the page on its skeleton.
+    // See GitHub issue #1232.
+    it('should answer with no bites and report the failure', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.weeklyBites.mockRejectedValue(new Error('unavailable'));
+        service.weeklyBitesResource.reload();
+
+        await settle();
+
+        expect(() => service.weeklyBitesResource.value()).toThrow();
+        expect(service.weeklyBites()).toEqual([]);
+        expect(service.weeklyBitesFailed()).toBe(true);
+      },
+    ));
+  });
+
   describe('weeklyBites', () => {
     const WEEK = { weekStart: 1752444000000, weekEnd: 1753048799999 };
 

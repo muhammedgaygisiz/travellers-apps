@@ -18,6 +18,7 @@ export { getMetaReducers } from './lib/get-meta-reducers';
 export { STORE_SERVICE } from './lib/store.service';
 export type { StoreService } from './lib/store.service';
 export * from './lib/app-tokens';
+export { resourceValue, resourceFailed } from './lib/resource-value';
 export { toDate } from './lib/to-date';
 export { byDate } from './lib/by-date';
 export type { Login } from './lib/login';

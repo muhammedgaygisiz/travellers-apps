@@ -8,13 +8,15 @@ import { FollowersService } from './followers.service';
   template: `
     <followers-list
       class="ion-page"
-      [users]="service.users.value()"
+      [users]="service.usersValue()"
       [type]="service.type()"
       [loggedInUserId]="service.loggedInUserId()"
       [isLoading]="service.users.isLoading()"
+      [hasError]="service.usersFailed()"
       [profileOwnerid]="service.userIdFromUrl()"
       (userClick)="service.userClicked($event)"
       (unfollowClick)="service.unfollowClicked($event)"
+      (retryClick)="service.retryLoad()"
     />
   `,
   imports: [FollowersListComponent],

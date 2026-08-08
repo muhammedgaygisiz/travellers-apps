@@ -473,5 +473,8 @@
   "close-image-viewer": "ፎቶ ዝጋ",
   "bite-not-found": "Bite አልተገኘም",
   "this-bite-is-no-longer-available": "ይህ Bite ከዚህ በኋላ አይገኝም። ተሰርዞ ሊሆን ይችላል።",
-  "go-back": "ተመለስ"
+  "go-back": "ተመለስ",
+  "bite-could-not-be-loaded": "Bite መጫን አልተቻለም",
+  "this-bite-could-not-be-loaded-right-now": "ይህን Bite በመጫን ላይ ችግር ተከስቷል። ግንኙነትዎን አረጋግጠው እንደገና ይሞክሩ።",
+  "try-again": "እንደገና ይሞክሩ"
 }

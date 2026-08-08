@@ -24,6 +24,14 @@ export class BiteService {
   image = signal<string>('');
 
   bite = this.dataAccess.bite;
+
+  /**
+   * The Bite being edited, read through the data access guard rather than off
+   * the resource: `value()` throws once a read has failed. See GitHub issue
+   * #1232.
+   */
+  biteValue = this.dataAccess.biteValue;
+  biteLoadFailed = this.dataAccess.biteLoadFailed;
   currency = this.dataAccess.currency;
   favCurrencies = this.dataAccess.favCurrencies;
   position = this.dataAccess.position;
@@ -126,6 +134,16 @@ export class BiteService {
 
   submitEditedBite(editedBite: BiteFormValue): void {
     void this.dataAccess.submitEditedBite(editedBite as unknown as Bite);
+    this.location.back();
+  }
+
+  /** Runs a failed Bite read again, for the edit page's try-again action. */
+  retryBiteLoad(): void {
+    this.dataAccess.bite.reload();
+  }
+
+  /** Leaves an edit that cannot be started because the Bite never loaded. */
+  goBack(): void {
     this.location.back();
   }
 

@@ -13,6 +13,9 @@ export class CreateBiteTrailService {
   employees = this.dataAccess.employees;
   organisation = this.dataAccess.organisation;
 
+  /** Read guarded: `value()` throws once the read has failed (#1232). */
+  organisationValue = this.dataAccess.organisationValue;
+
   async submitBiteTrail(
     trailData: Omit<
       BiteTrail,
@@ -28,10 +31,7 @@ export class CreateBiteTrailService {
       await this.showToast('Bite trail created successfully.', 'success');
       void this.navController.navigateBack([]);
     } catch {
-      await this.showToast(
-        'Something went wrong. Please try again.',
-        'danger',
-      );
+      await this.showToast('Something went wrong. Please try again.', 'danger');
     }
   }
 

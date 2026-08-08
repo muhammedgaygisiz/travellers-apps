@@ -8,10 +8,10 @@ import { DashboardService } from './dashboard.service';
   template: `
     <bt-business-dashboard
       class="ion-page"
-      [organisations]="service.organisations.value()"
-      [restaurants]="service.restaurants.value()"
-      [bitePlaces]="service.bitePlaces.value()"
-      [restaurantCandidates]="service.restaurantCandidates.value()"
+      [organisations]="service.organisationsValue()"
+      [restaurants]="service.restaurantsValue()"
+      [bitePlaces]="service.bitePlacesValue()"
+      [restaurantCandidates]="service.restaurantCandidatesValue()"
       [isAuthenticated]="service.isAuthenticated()"
       [gpsPosition]="service.gpsPosition()"
       (logoutClick)="service.logout()"

@@ -1,7 +1,10 @@
 import { DetailsDataAccessService } from '../details-data-access.service';
 import { BiteNotFoundError } from '../bite-not-found-error';
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { CrashReportingService } from 'ta-firestore';
 import { of, throwError } from 'rxjs';
 import {
   FirebaseFirestore,
@@ -61,11 +64,32 @@ const getDocumentResult = <T extends DocumentData>(
 describe(DetailsDataAccessService.name, () => {
   let service: DetailsDataAccessService;
   let storeService: BiteTribeStoreService;
+  let recordNonFatal: jest.Mock;
+  const biteIdFromUrl = signal<string | undefined>(undefined);
+  const navigationFrom = (
+    url: string | undefined,
+  ): { previousNavigation?: { extractedUrl: { toString(): string } } } => ({
+    previousNavigation: url
+      ? { extractedUrl: { toString: (): string => url } }
+      : undefined,
+  });
+  const lastSuccessfulNavigation = signal<
+    ReturnType<typeof navigationFrom> | undefined
+  >(navigationFrom('/gallery'));
 
   beforeEach(() => {
+    biteIdFromUrl.set(undefined);
+    lastSuccessfulNavigation.set(navigationFrom('/gallery'));
+    recordNonFatal = jest.fn();
+
     TestBed.configureTestingModule({
       providers: [
         DetailsDataAccessService,
+        { provide: CrashReportingService, useValue: { recordNonFatal } },
+        {
+          provide: Router,
+          useValue: { lastSuccessfulNavigation },
+        },
         {
           provide: BiteTribeStoreService,
           useValue: {
@@ -82,7 +106,7 @@ describe(DetailsDataAccessService.name, () => {
             removeBiteFromBucketlist: jest.fn(),
             logout: jest.fn(),
             submitLikeClick: jest.fn(),
-            biteIdFromUrl: jest.fn(),
+            biteIdFromUrl,
             cacheBite: jest.fn(),
           },
         },
@@ -97,14 +121,30 @@ describe(DetailsDataAccessService.name, () => {
     expect(service).toBeTruthy();
   });
 
-  describe('biteLoader', () => {
-    describe('given no bite id', () => {
-      it('should return undefined', async () => {
-        const result = await service.biteLoader(loaderParams({}));
-        expect(result).toBeUndefined();
+  describe('biteParams', () => {
+    describe('given no bite id in the url', () => {
+      // Loading for a missing id resolved the resource successfully with no
+      // Bite, which the page could not tell apart from still loading and
+      // answered with an endless skeleton. See #1232.
+      it('should ask for nothing, leaving the resource idle', () => {
+        expect(service.biteParams()).toBeUndefined();
+        expect(service.bite.status()).toBe('idle');
       });
     });
 
+    describe('given a bite id in the url', () => {
+      it('should ask for that bite', () => {
+        biteIdFromUrl.set('bite-1');
+
+        expect(service.biteParams()).toEqual({
+          biteId: 'bite-1',
+          userId: '',
+        });
+      });
+    });
+  });
+
+  describe('biteLoader', () => {
     describe('given the bite no longer exists', () => {
       beforeEach(() => {
         jest
@@ -318,6 +358,134 @@ describe(DetailsDataAccessService.name, () => {
           likes: [],
         });
       });
+    });
+  });
+
+  describe('bite load failures', () => {
+    const settleBiteRead = async (): Promise<void> => {
+      TestBed.flushEffects();
+
+      for (let tick = 0; tick < 20; tick++) {
+        await Promise.resolve();
+      }
+
+      TestBed.flushEffects();
+    };
+
+    describe('given the bite no longer exists', () => {
+      beforeEach(async () => {
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockResolvedValue(getDocumentResult(null));
+
+        biteIdFromUrl.set('gone');
+        await settleBiteRead();
+      });
+
+      it('should report it as not found', () => {
+        expect(service.biteLoadFailure()).toBe('not-found');
+        expect(service.biteNotFound()).toBe(true);
+        expect(service.biteUnavailable()).toBe(false);
+      });
+
+      it('should file a non-fatal naming the bite, the branch and the origin', () => {
+        expect(recordNonFatal).toHaveBeenCalledWith(
+          'Bite details load failed',
+          expect.objectContaining({
+            biteId: 'gone',
+            branch: 'not-found',
+            origin: '/gallery',
+          }),
+        );
+      });
+
+      it('should file it once, not on every recheck', async () => {
+        await settleBiteRead();
+
+        expect(recordNonFatal).toHaveBeenCalledTimes(1);
+      });
+
+      // Moving to a sub-route of the same Bite — the restaurant page, say —
+      // changes the navigation the report reads without changing the failure,
+      // and one failure is worth one non-fatal.
+      it('should not file it again when only the navigation moved on', async () => {
+        lastSuccessfulNavigation.set(navigationFrom('/bite/gone/restaurant'));
+        await settleBiteRead();
+
+        expect(recordNonFatal).toHaveBeenCalledTimes(1);
+      });
+
+      describe('given nothing was navigated from', () => {
+        beforeEach(() => {
+          recordNonFatal.mockClear();
+        });
+
+        // A cold start onto a deep link or a tapped notification has no
+        // previous page, which is itself worth knowing in the report.
+        it('should report the origin as direct', async () => {
+          lastSuccessfulNavigation.set(navigationFrom(undefined));
+          biteIdFromUrl.set('gone-too');
+          await settleBiteRead();
+
+          expect(recordNonFatal).toHaveBeenCalledWith(
+            'Bite details load failed',
+            expect.objectContaining({ origin: 'direct' }),
+          );
+        });
+
+        it('should report the origin as direct when nothing has navigated yet', async () => {
+          lastSuccessfulNavigation.set(undefined);
+          biteIdFromUrl.set('gone-as-well');
+          await settleBiteRead();
+
+          expect(recordNonFatal).toHaveBeenCalledWith(
+            'Bite details load failed',
+            expect.objectContaining({ origin: 'direct' }),
+          );
+        });
+      });
+    });
+
+    describe('given the read itself fails', () => {
+      beforeEach(async () => {
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockRejectedValue(new Error('unavailable'));
+
+        biteIdFromUrl.set('bite-1');
+        await settleBiteRead();
+        // Five attempts, 700ms apart, before the resource gives up.
+        await new Promise((resolve) => setTimeout(resolve, 4000));
+        await settleBiteRead();
+      }, 15000);
+
+      // A timeout, a rejected permission or an App Check refusal used to leave
+      // the page with no terminal state at all. See #1232.
+      it('should report it as unavailable rather than as a missing bite', () => {
+        expect(service.biteUnavailable()).toBe(true);
+        expect(service.biteNotFound()).toBe(false);
+      });
+
+      it('should file a non-fatal carrying the failing branch', () => {
+        expect(recordNonFatal).toHaveBeenCalledWith(
+          'Bite details load failed',
+          expect.objectContaining({
+            biteId: 'bite-1',
+            branch: 'unavailable',
+            error: 'Error: unavailable',
+          }),
+        );
+      });
+    });
+  });
+
+  describe('reloadBite', () => {
+    it('should run the read again', () => {
+      const reload = jest.spyOn(service.bite, 'reload');
+
+      service.reloadBite();
+
+      expect(reload).toHaveBeenCalled();
     });
   });
 

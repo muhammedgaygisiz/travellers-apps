@@ -28,6 +28,11 @@ describe('OrganisationDashboardService', () => {
       bites: mockBites,
       employees: mockEmployees,
       biteTrails: mockBiteTrails,
+      // The guarded reads are what the service uses: `value()` throws once a
+      // read has failed. See GitHub issue #1232.
+      bitesValue: signal<Bite[]>([]),
+      employeesValue: signal<PublicUser[]>([]),
+      biteTrailsValue: signal([]),
       organisationId: signal<string | undefined>(undefined),
     } as unknown as jest.Mocked<OrganisationDashboardDataAccessService>;
 
@@ -182,8 +187,8 @@ describe('OrganisationDashboardService', () => {
 
         dataAccessMock.organisationId.set('org-123');
         dataAccessMock.selectedBiteIds.set(['bite-1']);
-        dataAccessMock.bites.value.mockReturnValue(selectedBites);
-        dataAccessMock.employees.value.mockReturnValue(employees);
+        dataAccessMock.bitesValue.set(selectedBites);
+        dataAccessMock.employeesValue.set(employees);
         navControllerMock.navigateForward.mockImplementation(
           mockNavigateForward,
         );

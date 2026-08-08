@@ -2,6 +2,7 @@ import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { ProfileApiService } from 'bite-tribe/api';
 import type { PublicUser } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { resourceFailed, resourceValue } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class FollowersDataAccessService {
@@ -37,6 +38,16 @@ export class FollowersDataAccessService {
     }),
     loader: this.usersLoader.bind(this),
   });
+
+  /**
+   * The list, or nothing. `value()` throws once the read has failed, and read
+   * from the template that took the whole list page down with it rather than
+   * reporting anything. See GitHub issue #1232.
+   */
+  usersValue = resourceValue(this.users, [] as PublicUser[]);
+
+  /** True once the read failed, so the list can say so instead of looking empty. */
+  usersFailed = resourceFailed(this.users);
 
   async unfollowUser(user: PublicUser): Promise<void> {
     return this.profileApiService.unfollowUser(user);

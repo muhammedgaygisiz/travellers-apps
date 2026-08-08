@@ -51,6 +51,29 @@ Data-access libraries should own:
 - Feature-local request and result types
 - Mapping remote payloads into feature-ready shapes
 
+### Reading A Resource
+
+`ResourceRef.value()` throws a `ResourceValueError` once its resource is in an
+error state, and `defaultValue` does not cover it — the value computed throws
+before the default is consulted. Read from a template, that throw aborts the
+whole binding update for the element: every input after it silently never runs,
+so the surface freezes in whatever state it was in, usually a loading skeleton,
+with nothing on screen to explain it. This is what left the Bite details page
+loading forever in [issue #1232](https://github.com/muhammedgaygisiz/travellers-apps/issues/1232).
+
+- A resource whose loader can reject is exposed through `resourceValue(...)`
+  from `libs/common/utils`, never as `resource.value()`, and never straight off
+  the resource in a template, a params function, or a computed.
+- The failure is reported separately with `resourceFailed(...)`, so the surface
+  gets a terminal state — an error card, a blocking alert — rather than a
+  loading state that never ends. An unreadable list is not an empty one: saying
+  "no followers yet" or "no Bites in this trail" states something untrue.
+- A loader that catches everything itself can never enter the error state, and
+  its value is safe to read directly. Say so in a comment where it is caught,
+  so the exception is verifiable rather than looking like an oversight.
+  `search`, `leaderboard` and the details-page position loader are the current
+  examples.
+
 ## Shared API Pattern
 
 Use `libs/bite-tribe/api` for shared Firebase, Firestore, and Storage operations that multiple features consume.

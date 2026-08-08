@@ -16,6 +16,9 @@ export type LeaderboardUser = Pick<
 
 @Injectable({ providedIn: 'root' })
 export class LeaderboardDataAccessService {
+  // The call is caught below, so this resource never enters an error state and
+  // `users.value()` is safe to read straight from the template — unlike the
+  // resources audited in GitHub issue #1232.
   usersLoader: ResourceLoader<LeaderboardUser[], undefined> = async () => {
     try {
       const result = await FirebaseFunctions.callByName<

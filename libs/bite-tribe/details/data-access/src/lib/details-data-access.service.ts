@@ -1,11 +1,15 @@
 import {
   computed,
+  effect,
   inject,
   Injectable,
   resource,
   ResourceLoader,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { CrashReportingService } from 'ta-firestore';
+import { resourceValue } from 'utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
@@ -22,6 +26,11 @@ import { lastValueFrom } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { retry, withTimeout } from './async-retry';
 import { BiteNotFoundError } from './bite-not-found-error';
+import {
+  BiteLoadFailure,
+  classifyBiteLoadFailure,
+  describeBiteLoadError,
+} from './bite-load-failure';
 
 const SHARE_BITE_URL = 'https://bite-tribe.web.app/s/bite';
 
@@ -33,20 +42,22 @@ const BITE_LOAD_ATTEMPTS = 5;
 const BITE_LOAD_TIMEOUT_MS = 8000;
 const BITE_LOAD_RETRY_DELAY_MS = 700;
 
+/** What a Bite read needs. Undefined means nothing was asked for at all. */
+type BiteRequest = { biteId: string; userId?: string };
+
 @Injectable({
   providedIn: 'root',
 })
 export class DetailsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly crashReporting = inject(CrashReportingService);
+  private readonly router = inject(Router);
 
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
 
-  biteLoader: ResourceLoader<
-    Bite | undefined,
-    { biteId?: string; userId?: string }
-  > = async ({ params }) => {
-    const biteId = params.biteId;
-    if (biteId) {
+  biteLoader: ResourceLoader<Bite | undefined, BiteRequest | undefined> =
+    async ({ params }) => {
+      const biteId = params.biteId;
       let likes: Like[] = [];
       const userId = params.userId;
 
@@ -87,21 +98,110 @@ export class DetailsDataAccessService {
         likes,
         id: res.snapshot.id,
       } as Bite;
-    }
+    };
 
-    return undefined;
+  /**
+   * What the resource is being asked for, or nothing at all.
+   *
+   * The `bite/:biteId` route always carries an id, so a missing one means the
+   * app is simply not on a Bite page — while leaving it, for instance. That has
+   * to stay distinguishable from a Bite that could not be read: running the
+   * loader for it resolved the resource *successfully* with no Bite, which the
+   * page could not tell apart from still loading and answered with an endless
+   * skeleton. Undefined params keep the resource idle instead. See GitHub issue
+   * #1232.
+   */
+  biteParams = (): BiteRequest | undefined => {
+    const biteId = this.storeService.biteIdFromUrl();
+
+    return biteId ? { biteId, userId: this.userId() } : undefined;
   };
 
   bite = resource({
-    params: () => ({
-      biteId: this.storeService.biteIdFromUrl(),
-      userId: this.userId(),
-    }),
+    params: this.biteParams,
     loader: this.biteLoader.bind(this),
   });
 
+  /**
+   * The loaded Bite, or nothing at all.
+   *
+   * `ResourceRef.value()` *throws* once its resource is in an error state, and
+   * the page read it straight out of the template. A failed read therefore blew
+   * up the whole binding update — including the very input that reports the
+   * failure — so nothing reached the page and its loading skeleton ran forever
+   * with nothing to explain it. Everything outside this library reads the Bite
+   * through here. See GitHub issue #1232.
+   */
+  biteValue = resourceValue(this.bite);
+
+  /** Why the settled read produced no Bite, if it produced none. */
+  biteLoadFailure = computed<BiteLoadFailure | undefined>(() =>
+    classifyBiteLoadFailure(
+      this.bite.status(),
+      this.biteValue(),
+      this.bite.error(),
+    ),
+  );
+
   /** True once the read has come back and the Bite is gone for good. */
-  biteNotFound = computed(() => this.bite.error() instanceof BiteNotFoundError);
+  biteNotFound = computed(() => this.biteLoadFailure() === 'not-found');
+
+  /** True once the read itself failed, which says nothing about the Bite. */
+  biteUnavailable = computed(() => this.biteLoadFailure() === 'unavailable');
+
+  private lastReportedFailure: string | undefined;
+
+  /**
+   * Files a non-fatal for every settled read that produced no Bite.
+   *
+   * A device run can see the page fail but not which branch failed, since they
+   * all look the same from the outside, and a user who is only shown a message
+   * cannot report a timeout or a rejected read in a usable form. The `biteId`,
+   * the branch and where the navigation came from are carried along, because
+   * the gallery, a deep link and a push notification reach this page
+   * differently. See GitHub issue #1232.
+   */
+  private readonly reportBiteLoadFailure = effect(() => {
+    const failure = this.biteLoadFailure();
+
+    if (!failure) {
+      this.lastReportedFailure = undefined;
+
+      return;
+    }
+
+    const biteId = this.storeService.biteIdFromUrl();
+    const key = `${biteId}:${failure}`;
+
+    if (this.lastReportedFailure === key) {
+      return;
+    }
+
+    this.lastReportedFailure = key;
+
+    void this.crashReporting.recordNonFatal('Bite details load failed', {
+      biteId,
+      branch: failure,
+      origin: this.navigationOrigin(),
+      error: describeBiteLoadError(this.bite.error()),
+    });
+  });
+
+  /**
+   * The page navigated away from, which identifies how this page was reached.
+   * Nothing before it means the app opened straight onto the Bite — a deep link
+   * or a tapped notification rather than the gallery or the feed.
+   */
+  private navigationOrigin(): string {
+    const previous = this.router.lastSuccessfulNavigation()?.previousNavigation;
+
+    return previous ? previous.extractedUrl.toString() : 'direct';
+  }
+
+  /** Re-runs a read that failed, for the page's try-again action. */
+  reloadBite(): void {
+    this.bite.reload();
+  }
 
   reviews = toSignal(this.storeService.reviews$, { initialValue: [] });
   bucketlists = toSignal(this.storeService.bucketlists$, {
@@ -114,7 +214,7 @@ export class DetailsDataAccessService {
   });
 
   biteCreatorId = computed(() => {
-    const bite = this.bite.value();
+    const bite = this.biteValue();
     return bite?.userId;
   });
 
@@ -159,6 +259,13 @@ export class DetailsDataAccessService {
   position = resource({
     loader: this.positionLoader.bind(this),
   });
+
+  /**
+   * The Bite's creator, if the read produced one. Same hazard as `biteValue`: a
+   * rejected user read would otherwise throw out of the page's template and
+   * take the whole Bite down with it, over a name and an avatar.
+   */
+  biteCreatorValue = resourceValue(this.biteCreator);
 
   saveNewReview(newReview: { review: string; biteId: string }): void {
     this.storeService.saveReview(newReview);

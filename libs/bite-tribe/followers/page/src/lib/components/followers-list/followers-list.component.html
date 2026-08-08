@@ -15,6 +15,22 @@
       <div class="spinner-container">
         <ion-spinner color="primary" />
       </div>
+    } @else if (hasError()) {
+      <!-- An unreadable list is not an empty one: saying "no followers yet"
+      here would state something untrue about the account. See issue #1232. -->
+      <div class="empty-container">
+        <ion-label data-testid="followers-error-message">
+          {{ 'something-went-wrong-please-try-again' | transloco }}
+        </ion-label>
+
+        <ion-button
+          fill="clear"
+          data-testid="followers-error-retry"
+          (click)="retryClick.emit()"
+        >
+          {{ 'retry' | transloco }}
+        </ion-button>
+      </div>
     } @else if (users()?.length === 0) {
       <div class="empty-container">
         <ion-label>

@@ -473,5 +473,8 @@
   "close-image-viewer": "Close photo",
   "bite-not-found": "Bite not found",
   "this-bite-is-no-longer-available": "This Bite is no longer available. It may have been deleted.",
-  "go-back": "Go back"
+  "go-back": "Go back",
+  "bite-could-not-be-loaded": "Bite could not be loaded",
+  "this-bite-could-not-be-loaded-right-now": "Something went wrong while loading this Bite. Check your connection and try again.",
+  "try-again": "Try again"
 }

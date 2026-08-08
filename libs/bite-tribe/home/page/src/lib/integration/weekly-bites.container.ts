@@ -33,6 +33,7 @@ import { HomeService } from './home.service';
       [showSpinner]="true"
       [isBitesLoading]="service.weeklyBitesLoading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
+      [hasErrorLoadingBites]="service.weeklyBitesFailed()"
       [locationPermissionState]="service.locationPermissionState()"
       [sorting]="service.weeklyBitesSorting()"
       [showMap]="false"

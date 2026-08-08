@@ -6,6 +6,7 @@ import {
   ResourceLoader,
 } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { resourceValue } from 'utils';
 import type { BiteTrail } from 'model';
 
 const BITE_TRAIL_COLLECTION = 'biteTrails';
@@ -55,4 +56,7 @@ export class MarketPlaceDataAccessService {
   biteTrails = resource({
     loader: this.biteTrailsLoader.bind(this),
   });
+
+  /** Read guarded: `value()` throws once the read has failed (#1232). */
+  biteTrailsValue = resourceValue(this.biteTrails, [] as BiteTrail[]);
 }

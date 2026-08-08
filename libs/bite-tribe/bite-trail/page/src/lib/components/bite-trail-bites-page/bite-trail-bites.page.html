@@ -37,10 +37,27 @@
           >
         </ion-card-content>
       </ion-card>
-      } @if (!bites().length) {
+      } @if (hasError()) {
+      <!-- A trail that could not be read is not an empty trail: the message
+      below would claim the trail has no Bites. See issue #1232. -->
       <ion-card>
         <ion-card-content>
-          <ion-text color="primary"
+          <ion-text color="warning" data-testid="bite-trail-error-message"
+            >{{ 'something-went-wrong-please-try-again' | transloco }}</ion-text
+          >
+        </ion-card-content>
+
+        <ion-button
+          fill="clear"
+          data-testid="bite-trail-error-retry"
+          (click)="retryClick.emit()"
+          >{{ 'retry' | transloco }}</ion-button
+        >
+      </ion-card>
+      } @else if (!bites().length) {
+      <ion-card>
+        <ion-card-content>
+          <ion-text color="primary" data-testid="bite-trail-empty-message"
             >{{ 'no-bites-found-in-this-trail' | transloco }}</ion-text
           >
         </ion-card-content>

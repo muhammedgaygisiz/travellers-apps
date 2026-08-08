@@ -66,6 +66,7 @@
     "@capacitor/app": "8.1.1",
     "@capacitor/app-launcher": "8.0.1",
     "@capacitor/camera": "8.2.1",
+    "@capacitor/device": "8.0.3",
     "@capacitor/filesystem": "8.1.2",
     "@capacitor/geolocation": "8.2.0",
     "@capacitor/haptics": "8.0.2",

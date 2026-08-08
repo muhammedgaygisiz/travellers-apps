@@ -1214,6 +1214,8 @@ PODS:
     - Capacitor
     - IONCameraLib (~> 1.0.4)
   - CapacitorCordova (8.4.2)
+  - CapacitorDevice (8.0.3):
+    - Capacitor
   - CapacitorFilesystem (8.1.2):
     - Capacitor
     - IONFilesystemLib (~> 1.1.1)
@@ -1553,6 +1555,7 @@ DEPENDENCIES:
   - "CapacitorAppLauncher (from `../../../../node_modules/@capacitor/app-launcher`)"
   - "CapacitorCamera (from `../../../../node_modules/@capacitor/camera`)"
   - "CapacitorCordova (from `../../../../node_modules/@capacitor/ios`)"
+  - "CapacitorDevice (from `../../../../node_modules/@capacitor/device`)"
   - "CapacitorFilesystem (from `../../../../node_modules/@capacitor/filesystem`)"
   - "CapacitorFirebaseAnalytics (from `../../../../node_modules/@capacitor-firebase/analytics`)"
   - "CapacitorFirebaseAnalytics/Analytics (from `../../../../node_modules/@capacitor-firebase/analytics`)"
@@ -1629,6 +1632,8 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/@capacitor/camera"
   CapacitorCordova:
     :path: "../../../../node_modules/@capacitor/ios"
+  CapacitorDevice:
+    :path: "../../../../node_modules/@capacitor/device"
   CapacitorFilesystem:
     :path: "../../../../node_modules/@capacitor/filesystem"
   CapacitorFirebaseAnalytics:
@@ -1678,6 +1683,7 @@ SPEC CHECKSUMS:
   CapacitorAppLauncher: 43949ccc5aaa5139a1ebe27a98c0a4d76c883fa7
   CapacitorCamera: 1b9dde3aaffbd1f051486f4cee2b4cdd962662ae
   CapacitorCordova: 345eacdc4c8282415446aea4acd8c77d82480bd4
+  CapacitorDevice: 708e742b60a61572cd593e44c809592e8f31da14
   CapacitorFilesystem: 2db285a1ac6e475cc27cae2e1bea999000f9e2be
   CapacitorFirebaseAnalytics: 0cdb216fd543a6a1e0ef1c83f9b5c8ed744c634d
   CapacitorFirebaseAppCheck: 9d7a36eac96fbda3ed2ab575de846a1377e0f7df
@@ -1733,6 +1739,6 @@ SPEC CHECKSUMS:
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
 
-PODFILE CHECKSUM: 62363471dd24ac73766fe56b736c7d14446212c1
+PODFILE CHECKSUM: ea8ba0e80277f1d24848e957ffe4dea1dac0499a
 
 COCOAPODS: 1.16.2

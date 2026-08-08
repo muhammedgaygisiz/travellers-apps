@@ -18,6 +18,7 @@ apps/bite-tribe-android
 - Firebase Storage.
 - Firebase Functions.
 - Push notifications.
+- Device information for installation labelling.
 - Filesystem and local gallery support.
 - Geolocation and maps.
 - Native image handling and compression support.
@@ -147,6 +148,8 @@ delivery address, BiteTribe delivery state, and OS permission:
 - Push-token documents carry the installation ID, platform, device label
   metadata, OS version, app version, `lastSeenAt`, and their own `enabled`
   state.
+- The OS version comes from `@capacitor/device`, never from the user agent
+  (issue #1263). See the Device Metadata Source Rule below.
 - The raw FCM token is not the primary user-facing device label.
 - There is at most one active token per installation. Token rotation inherits
   the existing `enabled` state and cleans the superseded token and reverse
@@ -179,6 +182,32 @@ delivery address, BiteTribe delivery state, and OS permission:
 
 Backend delivery filtering stays in `getTokens`, which skips a token whose
 `enabled` is `false` and keeps delivering to a legacy token that has no flag.
+
+### Device Metadata Source Rule
+
+The two halves of a device row have different truth requirements, so they have
+different sources (issue
+[#1263](https://github.com/muhammedgaygisiz/travellers-apps/issues/1263)).
+
+- The **device label** stays derived from `navigator.userAgent`. It only has to
+  make a row recognisable among a user's own devices, and no user agent lies
+  about being an iPhone or a Pixel 7.
+- The **OS version** is read from `@capacitor/device`. WKWebView freezes the
+  version it announces in its user agent — a device on iOS 26.5.2 still reports
+  `OS 18_7 like Mac OS X` — so a parsed value is not a stale approximation but a
+  false statement, displayed to the user and persisted with the push token.
+- Both native platforms read the same native source. The Android user agent
+  happens to be truthful about the version, but a field is not trusted for being
+  accidentally right.
+- The web build asks for no version: a browser has no device OS worth printing
+  next to its name.
+- A failed native read yields an empty version, never the frozen user-agent
+  value. The row then reads `iOS` alone, which is less than the truth but never
+  against it, and `toOsLabel` in the Settings service already drops an absent
+  version — the same path a legacy token takes.
+- Dropping the version from the iOS label entirely was considered and rejected:
+  the field exists to disambiguate a user's own devices, and a real version does
+  that while an absent one does not.
 
 ## Location Permission Rule
 

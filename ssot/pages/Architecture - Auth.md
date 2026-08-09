@@ -66,6 +66,31 @@ Backend callables validate request.auth where required
 
 Email verification is non-blocking. Password-only accounts require verification prompts and reminders; accounts with trusted Google or Apple provider links are considered verified enough for this lifecycle. Unknown provider combinations are logged but do not receive automatic reminders.
 
+## Sign-In Feedback Contract
+
+See [[issue-1273]] for the reasoning. Sign-in is not fast - it is a network
+round-trip, auth-state propagation, and the guard chain - so it reports itself
+the same way registration does rather than inventing a second pattern.
+
+- The pending state is store state, not component state. `authenticationPending`
+  in the auth reducer is raised by all three sign-in entry points (email and
+  password, Google, Apple) and lowered by every outcome: success, failure, a
+  provider failure reported as `registrationFailed`, and logout. The login page
+  reads it through `selectLoginPending` and `StoreService.loginPending`.
+- While it is raised the page runs the header progress bar, the submit action
+  locks behind a pending label with a spinner, and the provider buttons lock
+  with it. All three actions guard themselves in code as well, because a tap
+  can be queued between the click and the flag turning on.
+- A new sign-in clears the previous failure, so a retry is not shown spinning
+  underneath a stale error. The failure itself still surfaces exactly as before.
+- The email/password round-trip is bounded at 30 seconds and a timeout reports
+  itself as a normal login failure. The form is locked while the request runs,
+  so a request that never settles would otherwise lock the form with it. The
+  native provider sheets are deliberately unbounded: the user is typing a
+  password in someone else's UI there.
+- The sign-in effects are `exhaustMap`, so a duplicate action is dropped rather
+  than racing a second credential submission.
+
 ## Code Anchors
 
 ```text

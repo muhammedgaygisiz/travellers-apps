@@ -21,6 +21,30 @@ export default {
 } as Meta<DetailsPage>;
 
 type Story = StoryObj<DetailsPage>;
+
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
+
+/**
+ * How old the Bites in the upload-state stories are.
+ *
+ * These have to stay under `STALE_PENDING_UPLOAD_MS` (ten minutes), because a
+ * `pending` upload older than that is rendered as failed and the story would
+ * stop showing the state it exists for.
+ */
+const PENDING_UPLOAD_AGE_MS = 2 * MINUTE_MS;
+
+/**
+ * Story timestamps are pinned to an offset from now rather than to a date, so
+ * the age renders as the same string on every run and the visual reference
+ * stays valid. A fixed date would walk through the units as the calendar moves
+ * and fail the reference with no code change behind it — which is exactly what
+ * the pipe's old hardcoded fallback date did to these stories. See GitHub issue
+ * #1272.
+ */
+const isoAgo = (ms: number): string => new Date(Date.now() - ms).toISOString();
+
 export const Default: Story = {
   args: {
     isAuthenticated: true,
@@ -42,6 +66,7 @@ export const Default: Story = {
       currency: 'CHF',
       city: 'Bern',
       countryCode: 'CH',
+      createdAt: isoAgo(5 * MINUTE_MS),
     } satisfies Bite,
     biteCreator: {
       userId: '1',
@@ -78,6 +103,21 @@ export const withDescription: Story = {
   },
 };
 
+/**
+ * The same Bite three weeks old. `Default` sits in the minute band, so this is
+ * what makes the unit selection visible: the pipe picks one unit and renders it
+ * in the reader's language rather than composing `3 w 0 d ago`.
+ */
+export const withOlderTimestamp: Story = {
+  args: {
+    ...Default.args,
+    bite: {
+      ...Default.args?.bite,
+      createdAt: isoAgo(21 * DAY_MS),
+    } as unknown as Bite,
+  },
+};
+
 export const withPreferredCurrency: Story = {
   args: {
     ...withDescription.args,
@@ -104,6 +144,45 @@ export const noBite: Story = {
 };
 
 /**
+ * A Bite with no place and no position of its own. Neither half of the
+ * place-distance line has anything to say, so the line stays empty rather than
+ * rendering the separator and a "-" for a distance that cannot be measured.
+ */
+export const withoutPlaceOrDistance: Story = {
+  args: {
+    ...Default.args,
+    bite: {
+      ...Default.args?.bite,
+      place: '',
+      position: undefined,
+    } as unknown as Bite,
+  },
+};
+
+/**
+ * A Bite nobody tagged. The read-only tag list is left out entirely rather than
+ * heading an empty row, which is the same call as the place-distance line above
+ * it.
+ */
+export const withoutTags: Story = {
+  args: {
+    ...Default.args,
+    bite: {
+      ...Default.args?.bite,
+      tags: [],
+    } as unknown as Bite,
+  },
+};
+
+/** A Bite whose place is known while the reader's position is not. */
+export const withoutReaderPosition: Story = {
+  args: {
+    ...Default.args,
+    position: undefined,
+  },
+};
+
+/**
  * The photo has not arrived yet. The poster is the one holding the transfer, so
  * only they are asked to keep the app open. See GitHub issue #1168.
  */
@@ -114,10 +193,15 @@ export const pendingImageForOwner: Story = {
     bite: {
       id: 'botanic-breeze',
       image: '',
+      ...Default.args?.bite,
       imagePath: undefined,
       imageStatus: 'pending',
       userId: '1',
-      createdAtTimestamp: Date.now(),
+      // Both forms of the creation time, from the same instant: the image
+      // status reads the numeric one and the age bar reads the ISO one, and a
+      // Bite whose two timestamps disagree is not a state the app can be in.
+      createdAt: isoAgo(PENDING_UPLOAD_AGE_MS),
+      createdAtTimestamp: Date.now() - PENDING_UPLOAD_AGE_MS,
     } as unknown as Bite,
   },
 };
@@ -127,6 +211,7 @@ export const pendingImageForViewer: Story = {
   args: {
     ...pendingImageForOwner.args,
     bite: {
+      ...Default.args?.bite,
       ...(pendingImageForOwner.args?.bite as Bite),
       userId: 'someone-else',
     },
@@ -138,10 +223,15 @@ export const failedImage: Story = {
   args: {
     ...Default.args,
     bite: {
+      ...Default.args?.bite,
       id: 'botanic-breeze',
       image: '',
       imagePath: undefined,
       imageStatus: 'failed',
+      // A stored `failed` is returned as-is, so the age here is free to sit
+      // outside the ten-minute pending window.
+      createdAt: isoAgo(2 * HOUR_MS),
+      createdAtTimestamp: Date.now() - 2 * HOUR_MS,
     } as unknown as Bite,
   },
 };

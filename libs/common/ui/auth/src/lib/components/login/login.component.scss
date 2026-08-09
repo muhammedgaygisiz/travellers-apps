@@ -25,5 +25,11 @@
       display: flex;
       justify-content: flex-end;
     }
+
+    // The button centers its slotted content, so the spinner needs its own gap
+    // to the pending label instead of sitting flush against it.
+    .submit-spinner {
+      margin-inline-end: 0.5rem;
+    }
   }
 }

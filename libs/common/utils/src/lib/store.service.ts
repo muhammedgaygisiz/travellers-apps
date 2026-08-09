@@ -4,6 +4,9 @@ import { Login } from './login';
 export interface StoreService {
   loginFailed: Signal<boolean>;
 
+  /** Whether a sign-in round-trip is still running (issue #1273). */
+  loginPending: Signal<boolean>;
+
   loginWithGoogleAccount(): void;
   loginWithAppleAccount(): void;
 

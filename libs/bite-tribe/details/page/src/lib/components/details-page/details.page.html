@@ -123,7 +123,14 @@
             [animated]="true"
             style="height: 20px; width: 124px"
           />
-          } @if (biteData) {
+          } @if (biteData) { @let positionData = position();
+          <!-- A distance needs both ends: the reader's position and the Bite's
+          own. Without them `toMetric` renders its "-" placeholder, which used
+          to reach the screen as "· -" - on a page still loading, where there
+          was no Bite to be any distance from. -->
+          @let distance = positionData && biteData.position ? (biteData.position
+          | calcDistance : positionData | roundDistance | toMetric) : ''; @if
+          (biteData.place) {
           <span
             class="link"
             role="button"
@@ -133,9 +140,7 @@
           >
             {{ biteData.place }}
           </span>
-          } @let positionData = position(); @if (positionData) { · {{
-          biteData?.position | calcDistance : positionData | roundDistance
-          |toMetric }} }
+          } @if (distance) { @if (biteData.place) { · } {{ distance }} } }
         </span>
 
         <div class="ion-display-flex ion-flex-column">
@@ -177,7 +182,7 @@
         />
         }
 
-        <span>{{ biteData?.createdAt | timeAgo }}</span>
+        <span>{{ biteData?.createdAt | timeAgo: activeLang() }}</span>
       </div>
 
       <div
@@ -255,9 +260,13 @@
         }
       </div>
 
-      <bt-tags-input [readonly]="true" [tags]="biteData?.tags || []" />
-
-      @if (!biteData) {
+      <!-- A Bite with no tags has nothing for the list to show and, read-only,
+      no way to add any. Rendering it anyway left a "Tags" heading over an empty
+      row, announcing an absent optional field as though it had failed to load.
+      The tag skeletons below still cover the loading state. -->
+      @let biteTags = biteData?.tags; @if (biteTags?.length) {
+      <bt-tags-input [readonly]="true" [tags]="biteTags!" />
+      } @if (!biteData) {
       <div class="ion-display-flex ion-flex-row">
         <ion-skeleton-text
           [animated]="true"
@@ -307,7 +316,7 @@
               <h2>{{ review.author }}</h2>
               <ion-text><p>{{ review.review }}</p></ion-text>
             </div>
-            <ion-note>{{ review?.createdAt | timeAgo }}</ion-note>
+            <ion-note>{{ review?.createdAt | timeAgo: activeLang() }}</ion-note>
           </ion-label>
         </ion-item>
         } }

@@ -11,10 +11,10 @@ import {
   exhaustMap,
   from,
   map,
-  mergeMap,
   of,
   switchMap,
   tap,
+  timeout,
 } from 'rxjs';
 
 import { NavController } from '@ionic/angular';
@@ -26,6 +26,16 @@ import { SignInResult } from '@capacitor-firebase/authentication';
 import { Store } from '@ngrx/store';
 
 type AuthCreds = { authCreds: AuthCredentials };
+
+/**
+ * Upper bound for the email/password sign-in round-trip. The login form is now
+ * locked while it runs, so a request that never settles would leave the form
+ * locked with it; a bounded failure keeps it retryable (issue #1273). The
+ * native provider sheets are deliberately not bounded: the user is typing a
+ * password in someone else's UI there, and that legitimately takes as long as
+ * it takes.
+ */
+const LOGIN_TIMEOUT_MS = 30_000;
 
 @Injectable()
 export class AuthEffects {
@@ -81,8 +91,11 @@ export class AuthEffects {
   loginEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),
-      mergeMap(({ authCreds }: AuthCreds) =>
+      // A sign-in that is already running is the answer to a second one, so a
+      // duplicate submit is dropped rather than raced (issue #1273).
+      exhaustMap(({ authCreds }: AuthCreds) =>
         from(this.login(authCreds)).pipe(
+          timeout(LOGIN_TIMEOUT_MS),
           map(() => AuthActions.loginSucceeded()),
           catchError((err) => {
             console.debug('#mo error login: ', err);
@@ -108,7 +121,7 @@ export class AuthEffects {
   loginWithGoogleAccountEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.loginWithGoogleAccount),
-      mergeMap(() =>
+      exhaustMap(() =>
         from(this.signInWithGoogleAccount()).pipe(
           map((result) => {
             console.debug('#mo signInResult', result);
@@ -126,7 +139,7 @@ export class AuthEffects {
   loginWithAppleAccountEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.loginWithAppleAccount),
-      mergeMap(() =>
+      exhaustMap(() =>
         from(this.signInWithAppleAccount()).pipe(
           map(() => AuthActions.loginSucceeded()),
           tap(() => this.navController.navigateBack(['/'])),

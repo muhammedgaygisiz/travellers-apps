@@ -120,6 +120,37 @@ turned the profile's country badges into an engagement signal:
 - A failing send never marks the Bite's address as unresolved. Awarding the
   badge happens after the address is written and is contained on its own.
 
+## Review Thread Contract
+
+Issue [#1283](https://github.com/muhammedgaygisiz/travellers-apps/issues/1283)
+extends review notifications from one recipient to a conversation. Specified, not
+implemented yet.
+
+- A reply notifies everyone already in that thread except the person who just
+  wrote it: the root review author, every reply author, and the Bite creator.
+  Being in the conversation is what makes someone a recipient, not owning the
+  Bite.
+- A participant is notified once per reply however many messages they have in the
+  thread, so joining a conversation early is not punished with duplicates.
+- A new root review is a new conversation. It notifies the Bite creator alone,
+  exactly as `notifyBiteCreatorOnReview` does today, and reaches no participant of
+  any other thread on the same Bite. This is the one rule the issue stated
+  outright, and it is the reason a reply cannot simply reuse the existing trigger.
+- A reply carries its own type, `NEW_REVIEW_REPLY`, with its own copy. The
+  existing `NEW_BITE_REVIEW` text says "X reviewed your Bite", which is false for
+  every recipient who is a reviewer rather than the creator.
+- A participant whose review predates the `authorId` field is unreachable and is
+  skipped. The rest of the fan-out still goes out; one unattributable document
+  does not silence a conversation.
+- A creator replying on their own Bite triggers no self-notification, consistent
+  with the existing review and like triggers.
+- A tap opens the Bite with the thread expanded and highlighted, so the payload
+  carries `threadId` alongside `biteId`. Under the Notification Navigation
+  Contract a payload missing the id its route needs leaves the user where they
+  are.
+- The copy follows the Localization Contract, so `newReviewReply` keys are added
+  to every catalog rather than to English alone.
+
 ## Installation Contract
 
 Issue [#1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184)

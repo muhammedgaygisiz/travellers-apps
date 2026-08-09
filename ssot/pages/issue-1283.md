@@ -1,0 +1,58 @@
+- [feat: user wants to answer to a review](https://github.com/muhammedgaygisiz/travellers-apps/issues/1283) (Issue \#1283)
+- Status
+  - Specified, not implemented. This page records the agreed specification so the implementation has a contract to work against.
+- Description
+  - A Bite can be reviewed, and `notifyBiteCreatorOnReview` tells the Bite creator about it. There the conversation stops. The creator cannot answer a specific review, and a reviewer is never told that anyone responded.
+  - The only way for a creator to say something back today is to write another root-level review of their own Bite. That reads as a second opinion rather than as an answer, and it notifies nobody.
+  - The review compartment becomes a thread list: a root review opens a conversation, anyone can answer inside it, and the people already in that conversation are told when it moves.
+- Decisions
+  - Depth is one level. A root review has replies. A reply cannot be replied to at a deeper level - answering a reply attaches to the same root thread with an `@name` prefill. No second indent ever renders.
+  - Any authenticated user who can see the Bite may reply, not only the Bite creator. Reviews are open to everyone today, so the thread is too. This is deliberately wider than the issue's original wording: without it a reviewer cannot answer a follow-up question from the creator, and "thread participants get notified" has no meaning.
+  - A reply notifies all participants of its thread except the actor: the root review author, every reply author in that thread, and the Bite creator, deduplicated.
+  - A new root review is a new thread and notifies the Bite creator only, exactly as today. Participants of other threads on the same Bite are not notified. This is the one behaviour the issue named explicitly and it is unchanged.
+  - Replies live in the existing `/reviews` collection with `parentReviewId` and `threadId` added, so `loadReviewsByBiteId` stays one query per Bite and grouping happens client-side.
+  - Reply notifications use their own type `NEW_REVIEW_REPLY` with their own copy. Reusing `NEW_BITE_REVIEW` would tell a reviewer "X reviewed your Bite" about a Bite that is not theirs.
+  - Reviews written before `authorId` existed are skipped in fan-out. No migration. Replying to such a review still works; its author is simply unreachable, and the gap self-heals as new reviews are written.
+- Model
+  - `libs/bite-tribe-common/model/src/lib/review.ts` gains `authorId`, `parentReviewId` and `threadId`, all optional so legacy documents stay assignable.
+  - `authorId` is already written by `saveNewReview` but was never declared on the interface.
+  - `parentReviewId` is absent on a root review and carries the id of the review being answered on a reply.
+  - `threadId` is the root review id, so a reply can be grouped without walking the parent chain.
+  - Ordering becomes deterministic as part of this work. `loadReviewsByBiteId` has no `orderBy` today, so review order is effectively arbitrary - tolerable for a flat list, not for threads. Root threads sort newest first by `createdAtTimestamp`; replies sort oldest first inside their thread so the conversation reads top to bottom. This is a change to existing review display, not only an addition.
+- Backend
+  - `notify-bite-creator-on-review.ts` gains an early return when `parentReviewId` is set. Its behaviour for root reviews is otherwise untouched.
+  - A new `notify-thread-participants-on-review-reply.ts`, also `onDocumentCreated('reviews/{reviewId}')`, early-returns when `parentReviewId` is absent, resolves the thread, collects participant uids, drops the actor, drops uids without a `public` user document, dedupes, and sends one `NEW_REVIEW_REPLY`.
+  - Branching inside the single existing trigger was considered and rejected for readability and isolated tests. The cost is one no-op invocation per review write.
+  - Payload: `type`, `biteId`, `threadId`, `replyId`, `replyAuthorId`.
+  - `newReviewReply.title` and `newReviewReply.body` are added to every catalog under `apps/bite-tribe-firebase/functions/src/functions/shared/i18n/messages`. Per [[Implementation - Localization]] a missing entry silently falls back to English rather than failing.
+- Client
+  - `libs/common/push-notifications/src/lib/notification-target.ts` routes `NEW_REVIEW_REPLY` to `[PATH.BITE, biteId]` with `queryParams: { threadId }`. A payload missing `biteId` yields `undefined`, matching the existing guard style.
+  - `libs/bite-tribe/api/src/lib/review-api/review-api.service.ts` gains `saveReply`, and `authorId` is added to the existing write path.
+  - `libs/bite-tribe/store/src/lib/reviews` gains actions, effects and selectors for posting a reply and grouping reviews into threads.
+  - `libs/bite-tribe/details/page` renders threads, a per-item reply affordance, collapse state, an inline composer, and handles the `threadId` query param for scroll and highlight.
+  - Storybook gains states for the review item if it becomes a shared component: root versus reply, collapsed versus expanded, creator badge.
+- UI
+  - Threads with more than two replies render collapsed behind a "Show N replies" control that expands in place. One or two replies render expanded.
+  - The existing bottom composer keeps meaning "start a new thread", so the rule that a new root review is a new conversation is visible in the layout rather than only in the notification behaviour.
+  - The Bite creator is marked in the thread so an owner answer is distinguishable from another diner's.
+- Acceptance Criteria
+  - A review in the list offers a reply action to any authenticated user.
+  - Posting a reply stores a review document with `parentReviewId` and `threadId` set and renders it indented under its root review without a page reload.
+  - A reply never renders more than one level deep; replying to a reply attaches to the same thread with an `@name` prefill.
+  - Every participant of the thread receives a `NEW_REVIEW_REPLY` notification, except the author of the reply.
+  - A participant is notified once per reply regardless of how many messages they have in that thread.
+  - A participant whose review predates `authorId` is skipped without failing the fan-out for anyone else.
+  - A new root review notifies the Bite creator only, with the unchanged `NEW_BITE_REVIEW` copy, and no participant of any other thread on that Bite.
+  - A Bite creator reviewing or replying on their own Bite triggers no self-notification.
+  - Tapping a reply notification opens the Bite details page with the thread expanded and highlighted.
+  - Threads with more than two replies render collapsed behind a control that expands in place.
+  - Root threads render newest first; replies render oldest first inside their thread.
+- Out Of Scope
+  - Edit, delete and reporting of reviews and replies belong to [[epic-1284]]. Deleting a root review that carries replies destroys other people's contributions, so it needs its own rule before it can be built, and [[Bite]] already records admin moderation as unmodelled today.
+- Traceability
+  - Domain: [[Bite]]
+  - Use cases: [[UC - Inspect Bite Details]], [[UC - Receive App Notifications And Engagement Updates]]
+  - Implementation: [[Implementation - Firebase Functions]], [[Implementation - Localization]], [[Implementation - Storybook]]
+  - Follow-up epic: [[epic-1284]]
+- Open Questions
+  - Recorded in [[Current State - Open Questions]] under Review Thread Questions.

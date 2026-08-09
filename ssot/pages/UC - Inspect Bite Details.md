@@ -101,6 +101,38 @@ entry point.
   binding update and left the page unable to report the very failure it had
   detected. Reads go through a guarded accessor instead.
 
+## Review Thread Contract
+
+Issue [#1283](https://github.com/muhammedgaygisiz/travellers-apps/issues/1283)
+turns the review compartment from a flat list into a thread list. Specified, not
+implemented yet.
+
+- A root review opens a conversation. Replying to it is an action on that review,
+  not a second review of the Bite, which is what writing back means today.
+- Threads are one level deep. Answering a reply attaches to the same root thread
+  with an `@name` prefill, so a conversation cannot fan out into a tree that a
+  phone screen has to indent.
+- Any authenticated user who can see the Bite may reply, not only the Bite
+  creator. Reviews are open to everyone, so the conversation about them is too;
+  restricting replies to the creator would leave a reviewer unable to answer the
+  creator's own follow-up question.
+- The composer at the foot of the compartment keeps meaning "start a new
+  thread". The rule that a new root review is a new conversation is visible in
+  the layout, not only in who gets notified.
+- The Bite creator is marked inside a thread, so an answer from the person who
+  posted the dish is distinguishable from another diner's.
+- A thread with more than two replies renders collapsed behind a count that
+  expands in place, because a Bite with a busy compartment is otherwise unusable
+  on a phone.
+- Review order becomes deterministic: root threads newest first, replies oldest
+  first inside their thread. The current read has no `orderBy` at all, which is
+  survivable for a flat list and not for threads.
+- Arriving from a tapped reply notification opens the Bite with that thread
+  already expanded and highlighted. See
+  [[UC - Receive App Notifications And Engagement Updates]] for the fan-out.
+- Editing, deleting and reporting a review or reply are not part of this
+  contract. [[epic-1284]] owns them.
+
 ## Supported Evidence
 
 - `bite/:biteId`

@@ -100,6 +100,17 @@
 
   Stage 0 blocks stages 2 and 3. Stage 1 can run in parallel with stage 0, and only its "hide ads for Pro" child depends on it. Stage 3 additionally depends on [[epic-1069]] for the verified identity that creator payouts require.
 
+- ## Review Conversations
+
+  [[issue-1283]] turns the review compartment of a Bite into a thread list and extends review notifications to every participant of a conversation. [[epic-1284]] follows it with edit, delete and reporting, which threading makes necessary but does not itself answer.
+
+  | Work           | Use Case                                                                                 | Domain             |
+  | -------------- | ---------------------------------------------------------------------------------------- | ------------------ |
+  | [[issue-1283]] | [[UC - Inspect Bite Details]], [[UC - Receive App Notifications And Engagement Updates]] | [[Bite]], [[User]] |
+  | [[epic-1284]]  | [[UC - Inspect Bite Details]]                                                            | [[Bite]], [[User]] |
+
+  [[issue-1283]] is specified but not implemented. [[epic-1284]] depends on it: a moderation rule for deleting a root review only has meaning once a root review can carry replies.
+
 - ## Decisions To Constraints
 
   | Decision                        | Constraint                                                                                                          |

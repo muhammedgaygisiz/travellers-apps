@@ -78,6 +78,16 @@ Paid BiteTrails, stage 3, issue \#1125:
 - Does a purchased BiteTrail stay accessible after a refund, and what happens to a Bucket List created from it?
 - Who is liable for VAT per launch market? Under store in-app purchase the store is usually the merchant of record, and that must be confirmed rather than assumed.
 
+## Review Thread Questions
+
+These belong to issue \#1283 and do not block its implementation. Each has a working answer in the spec; they are recorded because the answer was chosen rather than derived.
+
+- Should threads collapse only above two replies, as specified, or should every thread render collapsed by default for a uniform list?
+- When replying to a reply, should the `@name` mention be stored as part of the review text, or only prefilled in the composer so the author can delete it before sending?
+- Does a Bite document need a reply or thread count for the feed card, or is the count only ever derived on the details page?
+
+Moderation questions raised by threading are recorded on [[epic-1284]], not here.
+
 ## Analytics Questions
 
 - Which events define activation?

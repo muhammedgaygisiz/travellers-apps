@@ -23,7 +23,17 @@ export default {
 type Story = StoryObj<DetailsPage>;
 
 const MINUTE_MS = 60 * 1000;
-const DAY_MS = 24 * 60 * MINUTE_MS;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
+
+/**
+ * How old the Bites in the upload-state stories are.
+ *
+ * These have to stay under `STALE_PENDING_UPLOAD_MS` (ten minutes), because a
+ * `pending` upload older than that is rendered as failed and the story would
+ * stop showing the state it exists for.
+ */
+const PENDING_UPLOAD_AGE_MS = 2 * MINUTE_MS;
 
 /**
  * Story timestamps are pinned to an offset from now rather than to a date, so
@@ -147,7 +157,11 @@ export const pendingImageForOwner: Story = {
       imagePath: undefined,
       imageStatus: 'pending',
       userId: '1',
-      createdAtTimestamp: Date.now(),
+      // Both forms of the creation time, from the same instant: the image
+      // status reads the numeric one and the age bar reads the ISO one, and a
+      // Bite whose two timestamps disagree is not a state the app can be in.
+      createdAt: isoAgo(PENDING_UPLOAD_AGE_MS),
+      createdAtTimestamp: Date.now() - PENDING_UPLOAD_AGE_MS,
     } as unknown as Bite,
   },
 };
@@ -172,6 +186,10 @@ export const failedImage: Story = {
       image: '',
       imagePath: undefined,
       imageStatus: 'failed',
+      // A stored `failed` is returned as-is, so the age here is free to sit
+      // outside the ten-minute pending window.
+      createdAt: isoAgo(2 * HOUR_MS),
+      createdAtTimestamp: Date.now() - 2 * HOUR_MS,
     } as unknown as Bite,
   },
 };

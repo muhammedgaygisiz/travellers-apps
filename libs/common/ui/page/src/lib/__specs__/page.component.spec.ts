@@ -1,9 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PageComponent } from '../page.component';
-import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
+import {
+  addNecessaryIcons,
+  APP_TITLE,
+  getIonicConfig,
+  SIGNED_IN_ACCOUNT,
+  SignedInAccount,
+} from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
+import {
+  ComponentRef,
+  provideZonelessChangeDetection,
+  signal,
+} from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 
@@ -106,6 +116,93 @@ describe('PageComponent', () => {
       expect(props['showSettingsButton']()).toBe(true);
       expect(props['showAboutButton']()).toBe(false);
       expect(props['showLeaderboardButton']()).toBe(false);
+    });
+
+    it('forwards no account when no app bound one', async () => {
+      const createSpy = jest
+        .spyOn(component.popoverController, 'create')
+        .mockReturnValue({ present: jest.fn() } as unknown as ReturnType<
+          typeof component.popoverController.create
+        >);
+
+      await component.showMenuPopover({} as MouseEvent);
+
+      const props = createSpy.mock.calls[0][0].componentProps as Record<
+        string,
+        () => unknown
+      >;
+      expect(props['account']()).toBeUndefined();
+    });
+  });
+
+  describe('signed-in account', () => {
+    // Rebuilt with the token bound, which the default bed leaves unprovided so
+    // the rest of the suite covers an app that supplies no identity.
+    const account = signal<SignedInAccount | undefined>({
+      displayName: 'Muhammed',
+      photoUrl: 'https://example.test/avatar.png',
+    });
+
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          provideZonelessChangeDetection(),
+          provideIonicAngular(getIonicConfig()),
+          { provide: TranslocoService, useValue: MockTranslocoService },
+          { provide: SIGNED_IN_ACCOUNT, useValue: account },
+        ],
+      });
+      fixture = TestBed.createComponent(PageComponent);
+      component = fixture.componentInstance;
+    });
+
+    it('forwards the bound account to the popover', async () => {
+      account.set({
+        displayName: 'Muhammed',
+        photoUrl: 'https://example.test/avatar.png',
+      });
+
+      const createSpy = jest
+        .spyOn(component.popoverController, 'create')
+        .mockReturnValue({ present: jest.fn() } as unknown as ReturnType<
+          typeof component.popoverController.create
+        >);
+
+      await component.showMenuPopover({} as MouseEvent);
+
+      const props = createSpy.mock.calls[0][0].componentProps as Record<
+        string,
+        () => unknown
+      >;
+      expect(props['account']()).toEqual({
+        displayName: 'Muhammed',
+        photoUrl: 'https://example.test/avatar.png',
+      });
+    });
+
+    it('reports the session that ended after the popover was opened', async () => {
+      account.set({
+        displayName: 'Muhammed',
+        photoUrl: 'https://example.test/avatar.png',
+      });
+
+      const createSpy = jest
+        .spyOn(component.popoverController, 'create')
+        .mockReturnValue({ present: jest.fn() } as unknown as ReturnType<
+          typeof component.popoverController.create
+        >);
+
+      await component.showMenuPopover({} as MouseEvent);
+
+      const props = createSpy.mock.calls[0][0].componentProps as Record<
+        string,
+        () => unknown
+      >;
+
+      account.set(undefined);
+
+      expect(props['account']()).toBeUndefined();
     });
   });
 

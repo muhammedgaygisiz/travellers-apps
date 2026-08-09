@@ -31,7 +31,7 @@ import {
   PageMenuConfig,
   PageMenuTarget,
 } from './page-config';
-import { APP_TITLE } from 'utils';
+import { APP_TITLE, SIGNED_IN_ACCOUNT } from 'utils';
 import { UpperCasePipe } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
 
@@ -60,6 +60,14 @@ import { TranslocoPipe } from '@jsverse/transloco';
 })
 export class PageComponent {
   appTitleToken = inject(APP_TITLE, { optional: true });
+
+  /**
+   * Optional so an app that binds no account still gets the page chrome, and so
+   * the shared component keeps no dependency on any app's user store.
+   */
+  private readonly signedInAccountToken = inject(SIGNED_IN_ACCOUNT, {
+    optional: true,
+  });
 
   popoverController = inject(PopoverController);
 
@@ -147,6 +155,13 @@ export class PageComponent {
   private readonly hideAuthButton = computed(() => this.menu().hideAuth);
 
   /**
+   * Reading the bound account through a computed keeps the open popover on the
+   * live session rather than on whoever was signed in when it was opened, and
+   * gives the menu a signal to call even when no app bound the token.
+   */
+  private readonly account = computed(() => this.signedInAccountToken?.());
+
+  /**
    * The menu entries promoted out of the hamburger at desktop widths, in the
    * popover's own order so the three it lists first are the three that surface
    * directly. Each stays gated by its menu flag, so a page only promotes what
@@ -214,6 +229,7 @@ export class PageComponent {
       dismissOnSelect: true,
       componentProps: {
         isAuthenticated: this.isAuthenticated,
+        account: this.account,
         hideAuthButton: this.hideAuthButton,
         showSettingsButton: this.showSettingsButton,
         showAboutButton: this.showAboutButton,

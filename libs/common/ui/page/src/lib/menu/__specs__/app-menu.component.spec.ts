@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { AppMenuComponent } from '../app-menu.component';
 import {
   ComponentRef,
+  DebugElement,
   Pipe,
   PipeTransform,
   provideZonelessChangeDetection,
@@ -90,6 +91,137 @@ describe('AppMenuComponent', () => {
     );
     logoutButton.triggerEventHandler('click', null);
     expect(component.logoutClick.emit).toHaveBeenCalled();
+  });
+
+  describe('signed-in account', () => {
+    const showProfileEntry = (): void => {
+      componentRef.setInput('isAuthenticated', true);
+      componentRef.setInput('showMyProfile', true);
+    };
+
+    const query = (testId: string): DebugElement =>
+      fixture.debugElement.query(By.css(`[data-testid="${testId}"]`));
+
+    it('should show the account photo and display name on the profile entry', () => {
+      showProfileEntry();
+      componentRef.setInput('account', {
+        displayName: 'Muhammed',
+        photoUrl: 'https://example.test/avatar.png',
+      });
+
+      fixture.detectChanges();
+
+      expect(
+        query('menu-account-photo').nativeElement.getAttribute('src'),
+      ).toBe('https://example.test/avatar.png');
+      expect(query('menu-account-display-name').nativeElement.textContent).toBe(
+        'Muhammed',
+      );
+    });
+
+    it('should label the account photo with the display name', () => {
+      showProfileEntry();
+      componentRef.setInput('account', {
+        displayName: 'Muhammed',
+        photoUrl: 'https://example.test/avatar.png',
+      });
+
+      fixture.detectChanges();
+
+      expect(
+        query('menu-account-photo').nativeElement.getAttribute('alt'),
+      ).toBe('Muhammed');
+    });
+
+    it('should keep the anonymous icon when no account is bound', () => {
+      showProfileEntry();
+
+      fixture.detectChanges();
+
+      expect(query('menu-account-photo')).toBeNull();
+      expect(query('menu-account-display-name')).toBeNull();
+      expect(query('menu-my-profile').nativeElement.innerHTML).toContain(
+        'person-circle-outline',
+      );
+    });
+
+    it('should keep the display name when the account has no photo', () => {
+      showProfileEntry();
+      componentRef.setInput('account', {
+        displayName: 'Muhammed',
+        photoUrl: '',
+      });
+
+      fixture.detectChanges();
+
+      expect(query('menu-account-photo')).toBeNull();
+      expect(query('menu-account-display-name').nativeElement.textContent).toBe(
+        'Muhammed',
+      );
+    });
+
+    it('should fall back to the anonymous icon when the photo fails to load', () => {
+      showProfileEntry();
+      componentRef.setInput('account', {
+        displayName: 'Muhammed',
+        photoUrl: 'https://example.test/gone.png',
+      });
+
+      fixture.detectChanges();
+
+      query('menu-account-photo').triggerEventHandler('error', null);
+      fixture.detectChanges();
+
+      expect(query('menu-account-photo')).toBeNull();
+      expect(query('menu-account-display-name').nativeElement.textContent).toBe(
+        'Muhammed',
+      );
+    });
+
+    it('should show the next account photo after a failed one', () => {
+      showProfileEntry();
+      componentRef.setInput('account', {
+        displayName: 'Muhammed',
+        photoUrl: 'https://example.test/gone.png',
+      });
+
+      fixture.detectChanges();
+
+      query('menu-account-photo').triggerEventHandler('error', null);
+      fixture.detectChanges();
+
+      componentRef.setInput('account', {
+        displayName: 'Someone Else',
+        photoUrl: 'https://example.test/other.png',
+      });
+
+      fixture.detectChanges();
+
+      expect(
+        query('menu-account-photo').nativeElement.getAttribute('src'),
+      ).toBe('https://example.test/other.png');
+      expect(query('menu-account-display-name').nativeElement.textContent).toBe(
+        'Someone Else',
+      );
+    });
+
+    it('should drop the account when the session ends', () => {
+      showProfileEntry();
+      componentRef.setInput('account', {
+        displayName: 'Muhammed',
+        photoUrl: 'https://example.test/avatar.png',
+      });
+
+      fixture.detectChanges();
+
+      componentRef.setInput('isAuthenticated', false);
+      componentRef.setInput('account', undefined);
+
+      fixture.detectChanges();
+
+      expect(query('menu-my-profile')).toBeNull();
+      expect(query('menu-account-display-name')).toBeNull();
+    });
   });
 
   it('should not show auth/logout button when hideAuthButton is true', () => {

@@ -49,6 +49,14 @@ The switch is a media query only — no resize listener and no component state �
 
 The breakpoint is repeated as a SCSS variable in `page.component.scss`, `bite-list.component.scss` and `home.component.scss`, which have no shared stylesheet between them. They have to change together. See GitHub issue #1250.
 
+## App Data In The Shared Page Chrome
+
+`libs/common/ui/page` is `scope:common`, so it cannot import an app's store or its domain model, and the menu popover it opens is created by `PopoverController` rather than by a template — there is no host binding to thread a value through either.
+
+App-owned data reaches it through an injection token in `libs/common/utils`, injected `{ optional: true }` so an app that binds nothing still gets the chrome. `APP_TITLE` is the plain-value case; `SIGNED_IN_ACCOUNT` is the reactive one and carries a `Signal`, because the session changes while the chrome stays mounted. Each app binds it in its shell — `provideBiteTribeShell` maps the store's own profile onto it — and `PageComponent` forwards it into `componentProps` as a computed signal, which is what keeps an already-open popover on the live value instead of the one it was opened with. See GitHub issue #1260.
+
+The account itself is reduced to `SignedInAccount` (display name and photo URL) rather than passed as a domain object, so the boundary carries the two fields the chrome renders and nothing that would pull a model into `scope:common`.
+
 ## Validation
 
 Check every visual change in **both** light and dark mode. Most theming defects here are invisible in one of them. Storybook renders both and is the cheapest place to look.

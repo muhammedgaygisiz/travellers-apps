@@ -19,9 +19,32 @@
       </ion-item>
     } @else {
       @if (showMyProfile()) {
-        <ion-item (click)="menuNavigate.emit('profile')">
-          <ion-icon name="person-circle-outline" slot="start" />
-          <ng-container>{{ 'my-profile' | transloco }}</ng-container>
+        <ion-item
+          data-testid="menu-my-profile"
+          (click)="menuNavigate.emit('profile')"
+        >
+          @if (photoUrl()) {
+            <ion-avatar class="account-avatar" slot="start">
+              <img
+                data-testid="menu-account-photo"
+                [src]="photoUrl()"
+                [alt]="displayName()"
+                (error)="onPhotoError()"
+              />
+            </ion-avatar>
+          } @else {
+            <ion-icon name="person-circle-outline" slot="start" />
+          }
+          <div class="account-entry">
+            <span>{{ 'my-profile' | transloco }}</span>
+            @if (displayName()) {
+              <small
+                class="account-display-name"
+                data-testid="menu-account-display-name"
+                >{{ displayName() }}</small
+              >
+            }
+          </div>
         </ion-item>
       }
       @if (showMyBites()) {

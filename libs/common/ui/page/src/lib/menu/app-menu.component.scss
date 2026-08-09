@@ -1,0 +1,26 @@
+// The avatar stands in for the profile entry's icon, so it is sized to the icon
+// it replaces rather than to an avatar's usual size: 1.6rem is what Ionic
+// renders a slotted `ion-icon` at in these items. The menu keeps the layout it
+// had before it named the account. See GitHub issue #1260.
+.account-avatar {
+  width: 1.6rem;
+  height: 1.6rem;
+  min-width: 1.6rem;
+}
+
+.account-entry {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+// The account name is supporting detail under the entry's own label, and it can
+// be long, so it is kept to one truncated line.
+.account-display-name {
+  overflow: hidden;
+  color: var(--ion-color-medium);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

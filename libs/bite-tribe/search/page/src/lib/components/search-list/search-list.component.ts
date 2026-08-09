@@ -71,7 +71,11 @@ export class SearchListComponent {
       return result.value.fullName;
     }
 
-    if (result.category === 'bite' || result.category === 'city') {
+    if (
+      result.category === 'bite' ||
+      result.category === 'city' ||
+      result.category === 'country'
+    ) {
       return this.getBiteSubtitle(result.value);
     }
 
@@ -91,7 +95,7 @@ export class SearchListComponent {
       return 'person-circle-outline';
     }
 
-    if (result.category === 'city') {
+    if (result.category === 'city' || result.category === 'country') {
       return 'location-outline';
     }
 

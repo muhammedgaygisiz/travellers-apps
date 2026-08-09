@@ -5,7 +5,23 @@ export default [
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
   {
-    ignores: ['**/dist'],
+    // Generated output that is gitignored and therefore absent on a fresh CI
+    // checkout, but present for anyone who has run a build or a Capacitor
+    // sync. Without these ignores the very same lint command is green in CI
+    // and reports tens of thousands of errors in compiled bundles locally,
+    // which makes `nx affected -t lint` useless as a pre-push check.
+    //
+    // `functions/lib` is `tsc` output; the Firebase-CLI `.eslintrc.js` used to
+    // carry it as `ignorePatterns` but that file was never actually applied.
+    // The iOS and Android entries are the copied web bundle that
+    // `capacitor sync` writes into the native wrappers.
+    ignores: [
+      '**/dist',
+      'apps/bite-tribe-firebase/functions/lib',
+      'apps/bite-tribe-ios/ios/App/App/public',
+      'apps/bite-tribe-android/android/app/build',
+      'apps/bite-tribe-android/android/app/src/main/assets/public',
+    ],
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],

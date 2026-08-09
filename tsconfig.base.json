@@ -124,6 +124,7 @@
       "common/ui/card": ["libs/common/ui/card/src/index.ts"],
       "common/ui/chip": ["libs/common/ui/chip/src/index.ts"],
       "common/ui/coach-mark": ["libs/common/ui/coach-mark/src/index.ts"],
+      "country-selector": ["libs/common/ui/country-selector/src/index.ts"],
       "currency-selector": ["libs/common/ui/currency-selector/src/index.ts"],
       "restaurant-selector": [
         "libs/common/ui/restaurant-selector/src/index.ts"

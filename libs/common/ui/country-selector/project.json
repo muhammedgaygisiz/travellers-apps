@@ -1,0 +1,21 @@
+{
+  "name": "country-selector",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/common/ui/country-selector/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:common", "type:ui", "framework:ionic"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/common/ui/country-selector/jest.config.ts",
+        "tsConfig": "libs/common/ui/country-selector/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

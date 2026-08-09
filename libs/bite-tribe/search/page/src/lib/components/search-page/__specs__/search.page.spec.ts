@@ -74,7 +74,71 @@ describe(SearchPage.name, () => {
         { label: 'search-category-bite', value: 'bite' },
         { label: 'search-category-restaurant', value: 'restaurant' },
         { label: 'search-category-city', value: 'city' },
+        { label: 'search-category-country', value: 'country' },
       ]);
+    });
+  });
+
+  describe('country selection', () => {
+    beforeEach(() => {
+      componentRef.setInput('selectedCategory', 'country');
+      fixture.detectChanges();
+    });
+
+    it('should replace the searchbar with the country field', () => {
+      expect(fixture.nativeElement.querySelector('ion-searchbar')).toBeNull();
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="search-country-field"]',
+        ),
+      ).toBeTruthy();
+    });
+
+    it('should keep the searchbar for the text-driven categories', () => {
+      componentRef.setInput('selectedCategory', 'city');
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('ion-searchbar')).toBeTruthy();
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="search-country-field"]',
+        ),
+      ).toBeNull();
+    });
+
+    it('should prompt for a country while none is picked', () => {
+      // The prompt comes from the template pipe, not from the computed: a
+      // translate() call inside the computed would cache the raw key when the
+      // catalog is not loaded yet.
+      expect(component.selectedCountryName()).toBe('');
+      expect(component.selectedCountryFlagClass()).toBe('');
+    });
+
+    it('should show the localized name and flag of the picked country', () => {
+      componentRef.setInput('selectedCountryCode', 'CH');
+      fixture.detectChanges();
+
+      expect(component.selectedCountryName()).toBe('Switzerland');
+      expect(component.selectedCountryFlagClass()).toBe('fi fi-ch');
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="search-country-field"]',
+        ).textContent,
+      ).toContain('Switzerland');
+    });
+
+    it('should emit the picked country and close the picker', () => {
+      const emitSpy = jest.spyOn(component.countryChange, 'emit');
+      const modal = { dismiss: jest.fn() };
+
+      component.countrySelected('CH', modal as never);
+
+      expect(emitSpy).toHaveBeenCalledWith('CH');
+      expect(modal.dismiss).toHaveBeenCalled();
+    });
+
+    it('should offer the map for country results', () => {
+      expect(component.canShowMap()).toBe(true);
     });
   });
 
@@ -134,6 +198,73 @@ describe(SearchPage.name, () => {
       expect(component.mapPositions()).toEqual([
         { id: 'bite-bite-1', latitude: 46.948, longitude: 7.447 },
       ]);
+    });
+
+    it('should carry the rating into the marker so it matches other maps', () => {
+      componentRef.setInput('selectedCategory', 'bite');
+      componentRef.setInput('results', [
+        {
+          category: 'bite',
+          value: {
+            id: 'bite-1',
+            name: 'Butter Chicken',
+            place: 'Tandoori House',
+            position: { latitude: 46.948, longitude: 7.447 },
+            rating: 5,
+          },
+        },
+      ]);
+
+      expect(component.mapPositions()).toEqual([
+        { id: 'bite-bite-1', latitude: 46.948, longitude: 7.447, rating: 5 },
+      ]);
+    });
+
+    it('should leave an unrated bite without a rating rather than a zero', () => {
+      componentRef.setInput('selectedCategory', 'bite');
+      componentRef.setInput('results', [
+        {
+          category: 'bite',
+          value: {
+            id: 'bite-1',
+            name: 'Butter Chicken',
+            place: 'Tandoori House',
+            position: { latitude: 46.948, longitude: 7.447 },
+          },
+        },
+      ]);
+
+      expect(component.mapPositions()[0]).not.toHaveProperty('rating');
+    });
+
+    it('should not put a rating on restaurant markers', () => {
+      componentRef.setInput('selectedCategory', 'restaurant');
+      componentRef.setInput('results', [
+        {
+          category: 'restaurant',
+          value: {
+            id: 'restaurant-1',
+            name: 'Tandoori House',
+            biteId: 'bite-1',
+            position: { latitude: 46.948, longitude: 7.447 },
+          },
+        },
+      ]);
+
+      expect(component.mapPositions()[0]).not.toHaveProperty('rating');
+    });
+
+    it('should run the page full width only while the map is showing', () => {
+      componentRef.setInput('selectedCategory', 'bite');
+      expect(component.isMapView()).toBe(false);
+
+      component.viewModeChange('map');
+      expect(component.isMapView()).toBe(true);
+
+      // A user category has no map, so the page keeps its reading column even
+      // though the map toggle was left switched on.
+      componentRef.setInput('selectedCategory', 'user');
+      expect(component.isMapView()).toBe(false);
     });
 
     it('should emit the matching result when a map marker is selected', () => {

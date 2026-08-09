@@ -11,10 +11,12 @@ import { SearchService } from './search.service';
       class="ion-page"
       [results]="service.results.value()"
       [selectedCategory]="service.selectedCategory()"
+      [selectedCountryCode]="service.selectedCountryCode()"
       [isLoading]="service.results.isLoading()"
       [hasSearched]="service.hasSearched()"
       (searchTextChange)="service.search($event)"
       (categoryChange)="service.selectCategory($event)"
+      (countryChange)="service.selectCountry($event)"
       (resultClick)="service.resultClicked($event)"
     />
   `,

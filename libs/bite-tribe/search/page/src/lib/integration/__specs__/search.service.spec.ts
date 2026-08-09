@@ -10,6 +10,7 @@ describe(SearchService.name, () => {
   const results = { value: signal([]) };
   const searchText = signal('');
   const searchCategory = signal<SearchCategory>('user');
+  const searchCountryCode = signal('');
   const navController = {
     navigateForward: jest.fn(),
   };
@@ -20,6 +21,7 @@ describe(SearchService.name, () => {
   beforeEach(() => {
     searchText.set('');
     searchCategory.set('user');
+    searchCountryCode.set('');
     jest.clearAllMocks();
 
     TestBed.configureTestingModule({
@@ -29,7 +31,7 @@ describe(SearchService.name, () => {
         { provide: NavController, useValue: navController },
         {
           provide: SearchDataAccessService,
-          useValue: { results, searchText, searchCategory },
+          useValue: { results, searchText, searchCategory, searchCountryCode },
         },
       ],
     });
@@ -81,6 +83,71 @@ describe(SearchService.name, () => {
     searchText.set('  Dan  ');
 
     expect(service.hasSearched()).toBe(true);
+  });
+
+  it('should pass the picked country to data access', () => {
+    const service = TestBed.inject(SearchService);
+
+    service.selectCountry('CH');
+
+    expect(searchCountryCode()).toBe('CH');
+  });
+
+  it('should log search_performed once a country is picked', () => {
+    const service = TestBed.inject(SearchService);
+    searchCategory.set('country');
+
+    service.selectCountry('CH');
+
+    expect(analytics.logEvent).toHaveBeenCalledWith(
+      AnalyticsEvent.SearchPerformed,
+    );
+  });
+
+  it('should log search_performed only once per country search session', () => {
+    const service = TestBed.inject(SearchService);
+    searchCategory.set('country');
+
+    service.selectCountry('CH');
+    service.selectCountry('DE');
+
+    expect(analytics.logEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('should report a country search as soon as a country is picked', () => {
+    const service = TestBed.inject(SearchService);
+    searchCategory.set('country');
+
+    expect(service.hasSearched()).toBe(false);
+
+    searchCountryCode.set('CH');
+
+    expect(service.hasSearched()).toBe(true);
+  });
+
+  it('should not treat a picked country as a search in a text category', () => {
+    const service = TestBed.inject(SearchService);
+    searchCountryCode.set('CH');
+
+    expect(service.hasSearched()).toBe(false);
+  });
+
+  it('should navigate to the selected country bite', () => {
+    const service = TestBed.inject(SearchService);
+
+    service.resultClicked({
+      category: 'country',
+      value: {
+        id: 'bite-3',
+        name: 'Fondue',
+        place: 'Bern',
+      },
+    });
+
+    expect(navController.navigateForward).toHaveBeenCalledWith([
+      'bite',
+      'bite-3',
+    ]);
   });
 
   it('should navigate to the selected user profile', () => {

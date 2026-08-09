@@ -4,7 +4,9 @@ export { PATH } from './lib/paths';
 
 export { normalize } from './lib/normalize';
 export { currencyCodes } from './lib/currencies';
+export { countries, type Country } from './lib/countries';
 export { getLocalizedCurrencyName } from './lib/get-localized-currency-name';
+export { getLocalizedCountryName } from './lib/get-localized-country-name';
 export {
   getCurrencyForDevice,
   type DeviceRegionSignals,

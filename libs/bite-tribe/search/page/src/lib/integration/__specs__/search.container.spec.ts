@@ -25,15 +25,18 @@ const results = signal<SearchResult[]>([]);
 const isLoading = signal(false);
 const hasSearched = signal(false);
 const selectedCategory = signal<SearchCategory>('user');
+const selectedCountryCode = signal('');
 const MockSearchService = {
   results: {
     value: results,
     isLoading,
   },
   selectedCategory,
+  selectedCountryCode,
   hasSearched,
   search: jest.fn(),
   selectCategory: jest.fn(),
+  selectCountry: jest.fn(),
   resultClicked: jest.fn(),
 };
 
@@ -46,6 +49,7 @@ describe(SearchContainer.name, () => {
     isLoading.set(false);
     hasSearched.set(false);
     selectedCategory.set('user');
+    selectedCountryCode.set('');
 
     TestBed.configureTestingModule({
       providers: [
@@ -94,6 +98,29 @@ describe(SearchContainer.name, () => {
     chips[1].click();
 
     expect(MockSearchService.selectCategory).toHaveBeenCalledWith('bite');
+  });
+
+  it('should pass the picked country to the search service', () => {
+    selectedCategory.set('country');
+    fixture.detectChanges();
+
+    const page = fixture.debugElement.children[0].componentInstance;
+    page.countryChange.emit('CH');
+
+    expect(MockSearchService.selectCountry).toHaveBeenCalledWith('CH');
+  });
+
+  it('should show the country field instead of the searchbar for country search', () => {
+    selectedCategory.set('country');
+    selectedCountryCode.set('CH');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('ion-searchbar')).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="search-country-field"]',
+      ).textContent,
+    ).toContain('Switzerland');
   });
 
   it('should not show the empty state before a search', () => {

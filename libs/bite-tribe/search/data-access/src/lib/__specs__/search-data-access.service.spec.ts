@@ -139,6 +139,56 @@ describe(SearchDataAccessService.name, () => {
     expect(result).toEqual([{ category: 'restaurant', value: restaurants[0] }]);
   });
 
+  it('should return mapped country results from the searchBitesByCountry function', async () => {
+    const service = createService();
+    const bites = [
+      {
+        id: 'bite-3',
+        name: 'Fondue',
+        place: 'Bern',
+      },
+    ];
+    jest
+      .mocked(FirebaseFunctions.callByName)
+      .mockResolvedValue({ data: bites });
+
+    const result = await service.resultsLoader({
+      params: { searchText: '', category: 'country', countryCode: 'CH' },
+    } as never);
+
+    expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+      name: 'searchBitesByCountry',
+      data: {
+        countryCode: 'CH',
+      },
+    });
+    expect(result).toEqual([{ category: 'country', value: bites[0] }]);
+  });
+
+  it('should not call a Firebase function before a country is picked', async () => {
+    const service = createService();
+
+    const result = await service.resultsLoader({
+      params: { searchText: '', category: 'country', countryCode: '' },
+    } as never);
+
+    expect(FirebaseFunctions.callByName).not.toHaveBeenCalled();
+    expect(result).toEqual([]);
+  });
+
+  it('should return empty results when the country function fails', async () => {
+    const service = createService();
+    jest
+      .mocked(FirebaseFunctions.callByName)
+      .mockRejectedValue(new Error('Function not found'));
+
+    const result = await service.resultsLoader({
+      params: { searchText: '', category: 'country', countryCode: 'CH' },
+    } as never);
+
+    expect(result).toEqual([]);
+  });
+
   it('should return empty results when a Firebase function fails', async () => {
     const service = createService();
     jest

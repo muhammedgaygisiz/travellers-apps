@@ -1,7 +1,8 @@
 import type { PublicUser } from './public-user';
 import type { Geopoint } from './geopoint';
 
-export type SearchCategory = 'user' | 'bite' | 'restaurant' | 'city';
+export type SearchCategory =
+  'user' | 'bite' | 'restaurant' | 'city' | 'country';
 
 export interface SearchBite {
   id: string;
@@ -12,6 +13,8 @@ export interface SearchBite {
   description?: string;
   tags?: string[];
   position?: Geopoint;
+  /** Feeds the rating shown inside the map marker, as on every other map. */
+  rating?: number;
 }
 
 export interface SearchRestaurant {
@@ -29,4 +32,5 @@ export type SearchResult =
   | { category: 'user'; value: PublicUser }
   | { category: 'bite'; value: SearchBite }
   | { category: 'restaurant'; value: SearchRestaurant }
-  | { category: 'city'; value: SearchBite };
+  | { category: 'city'; value: SearchBite }
+  | { category: 'country'; value: SearchBite };

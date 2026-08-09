@@ -61,6 +61,12 @@ export class OnboardingService {
   readonly favoriteCurrencies = signal<readonly string[]>([]);
   readonly selectedLanguage = signal<string>(DEFAULT_LANGUAGE);
   readonly locationPermission = signal<LocationPermissionState>('idle');
+  /**
+   * Home city shown on the profile next to the display name. Optional, so it
+   * never takes part in step validity: an empty value is a decline, and the
+   * profile deliberately shows no location line for it (issues #1270, #1271).
+   */
+  readonly homeCity = signal<string>('');
   readonly notificationPermission = signal<NotificationPermissionState>('idle');
 
   private readonly completedSteps = signal<ReadonlySet<OnboardingStepId>>(
@@ -127,6 +133,7 @@ export class OnboardingService {
       photoUrl: profile?.photoUrl || '',
     });
     this.selectedVisibility.set(profile?.public ?? false);
+    this.homeCity.set(profile?.city || '');
 
     // The finish step only confirms and completes; it gathers nothing, so it is
     // valid the moment the user reaches it and the Finish button is enabled.
@@ -369,6 +376,15 @@ export class OnboardingService {
   }
 
   /**
+   * Records the home city. It never touches step validity: the field is
+   * optional, so leaving it empty must not block the step, and filling it in
+   * must not unblock a step whose permission question is still unanswered.
+   */
+  updateHomeCity(city: string): void {
+    this.homeCity.set(city.trim());
+  }
+
+  /**
    * Asks the OS for push permission after the step has explained why, and
    * registers this installation on a grant. The answer — grant or denial —
    * completes the step either way; only the request still being in flight
@@ -530,9 +546,11 @@ export class OnboardingService {
     }
 
     if (id === 'location') {
-      return this.persistSettings({
+      const persisted = await this.persistSettings({
         location: this.locationPermission() === 'granted',
       });
+
+      return persisted ? this.persistHomeCity() : false;
     }
 
     // The notification step persists nothing account-level. A grant already
@@ -621,6 +639,37 @@ export class OnboardingService {
       );
       this.availableDisplayName.set(null);
       this.setStepValid('identity', false);
+      return false;
+    }
+  }
+
+  /**
+   * Writes the optional home city onto the profile, so the field the profile
+   * header already displays finally has a value (issue #1271).
+   *
+   * An unchanged value writes nothing: most users leave the field alone, and
+   * the location step should not cost a profile round-trip for a no-op. An
+   * emptied value is still a change and is written, so clearing a city the user
+   * set earlier actually removes it.
+   *
+   * A failed write keeps the user on the step to retry, matching the identity
+   * and visibility steps. The settings write that ran first is idempotent, so
+   * the retry costs nothing.
+   */
+  private async persistHomeCity(): Promise<boolean> {
+    const profile = this.profile();
+    const city = this.homeCity().trim();
+
+    if (!profile || (profile.city ?? '') === city) {
+      return true;
+    }
+
+    try {
+      const updated = await this.dataAccess.saveProfile({ ...profile, city });
+      this.profile.set(updated);
+      return true;
+    } catch (error) {
+      console.warn('Failed to persist onboarding home city:', error);
       return false;
     }
   }

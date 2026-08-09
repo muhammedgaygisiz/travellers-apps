@@ -66,6 +66,7 @@ export class OnboardingPage {
   favoriteCurrencies = input<readonly string[]>([]);
   selectedLanguage = input<string>('en');
   locationPermission = input<LocationPermissionState>('idle');
+  homeCity = input<string>('');
   notificationPermission = input<NotificationPermissionState>('idle');
 
   next = output<void>();
@@ -78,6 +79,7 @@ export class OnboardingPage {
   languageChange = output<string>();
   enableLocation = output<void>();
   skipLocation = output<void>();
+  homeCityChange = output<string>();
   enableNotifications = output<void>();
   skipNotifications = output<void>();
   placeholderValidityChange = output<boolean>();

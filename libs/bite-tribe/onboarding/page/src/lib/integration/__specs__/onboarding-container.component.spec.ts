@@ -43,6 +43,7 @@ describe(OnboardingContainerComponent.name, () => {
     favoriteCurrencies: ReturnType<typeof signal<readonly string[]>>;
     selectedLanguage: ReturnType<typeof signal<string>>;
     locationPermission: ReturnType<typeof signal<LocationPermissionState>>;
+    homeCity: ReturnType<typeof signal<string>>;
     notificationPermission: ReturnType<
       typeof signal<NotificationPermissionState>
     >;
@@ -58,6 +59,7 @@ describe(OnboardingContainerComponent.name, () => {
     updateLanguage: jest.Mock;
     requestLocation: jest.Mock;
     skipLocation: jest.Mock;
+    updateHomeCity: jest.Mock;
     requestNotifications: jest.Mock;
     skipNotifications: jest.Mock;
   };
@@ -76,6 +78,7 @@ describe(OnboardingContainerComponent.name, () => {
       favoriteCurrencies: signal<readonly string[]>([]),
       selectedLanguage: signal('en'),
       locationPermission: signal<LocationPermissionState>('idle'),
+      homeCity: signal(''),
       notificationPermission: signal<NotificationPermissionState>('idle'),
       initialize: jest.fn().mockResolvedValue(undefined),
       next: jest.fn(),
@@ -89,6 +92,7 @@ describe(OnboardingContainerComponent.name, () => {
       updateLanguage: jest.fn(),
       requestLocation: jest.fn(),
       skipLocation: jest.fn(),
+      updateHomeCity: jest.fn(),
       requestNotifications: jest.fn(),
       skipNotifications: jest.fn(),
     };

@@ -63,4 +63,35 @@
       </ion-button>
     </div>
   }
+
+  <section class="location-step__home">
+    <h2 class="location-step__home-title">
+      {{ 'onboarding-home-city-title' | transloco }}
+    </h2>
+
+    <p class="onboarding-step-copy">
+      {{ 'onboarding-home-city-copy' | transloco }}
+    </p>
+
+    <ion-input
+      label="{{ 'onboarding-home-city-label' | transloco }}"
+      placeholder="{{ 'onboarding-home-city-placeholder' | transloco }}"
+      [formControl]="homeCityControl"
+      fill="outline"
+      mode="md"
+      autocapitalize="words"
+      data-testid="onboarding-home-city"
+    />
+
+    <p
+      class="location-step__home-note"
+      data-testid="onboarding-home-city-visibility"
+    >
+      {{ visibilityNoteKey() | transloco }}
+    </p>
+
+    <p class="location-step__home-note">
+      {{ 'onboarding-home-city-optional' | transloco }}
+    </p>
+  </section>
 </div>

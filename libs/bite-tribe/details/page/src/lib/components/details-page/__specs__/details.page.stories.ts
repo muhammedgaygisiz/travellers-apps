@@ -154,6 +154,7 @@ export const pendingImageForOwner: Story = {
     bite: {
       id: 'botanic-breeze',
       image: '',
+      ...Default.args?.bite,
       imagePath: undefined,
       imageStatus: 'pending',
       userId: '1',
@@ -171,6 +172,7 @@ export const pendingImageForViewer: Story = {
   args: {
     ...pendingImageForOwner.args,
     bite: {
+      ...Default.args?.bite,
       ...(pendingImageForOwner.args?.bite as Bite),
       userId: 'someone-else',
     },
@@ -182,6 +184,7 @@ export const failedImage: Story = {
   args: {
     ...Default.args,
     bite: {
+      ...Default.args?.bite,
       id: 'botanic-breeze',
       image: '',
       imagePath: undefined,

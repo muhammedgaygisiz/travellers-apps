@@ -98,6 +98,12 @@ export class BiteTribeHomeComponent {
   });
   enableImageRetry = input(false, { transform: booleanAttribute });
 
+  /**
+   * Locks the add button behind a spinner while the Create Bite page is still
+   * opening, and runs the header bar with it. See GitHub issue #1287.
+   */
+  createBitePending = input(false, { transform: booleanAttribute });
+
   readonly logoutClick = output();
   readonly addButtonClick = output();
   readonly menuNavigate = output<PageMenuTarget>();

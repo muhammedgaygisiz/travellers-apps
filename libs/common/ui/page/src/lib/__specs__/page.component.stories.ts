@@ -90,3 +90,20 @@ export const Loading: Story = {
     loading: true,
   },
 };
+
+/**
+ * The add button while its target is still opening. Reaching the Create Bite
+ * page is a guard round-trip plus a lazy chunk, so the button locks behind a
+ * spinner and the pending label rather than leaving the tap unanswered.
+ * See GitHub issue #1287.
+ */
+export const AddButtonPending: Story = {
+  args: {
+    chrome: {
+      enableBackButton: false,
+      showAddButton: true,
+    },
+    loading: true,
+    addButtonPending: true,
+  },
+};

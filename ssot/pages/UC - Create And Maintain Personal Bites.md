@@ -16,6 +16,14 @@ Users can create and maintain real dish-level food experiences.
 ## Current Flow
 
 - User creates a new Bite.
+- Entering the flow is not instant: `new-bite` sits behind `freshSessionGuard`,
+  which force-refreshes the ID token over the network, and behind the lazily
+  loaded Bite page chunk. The Create Bite button therefore reports the wait
+  itself — it locks behind a spinner and the `create-bite-in-progress` label,
+  and the page runs the header progress bar — instead of leaving the tap
+  unanswered for seconds. This is the same feedback contract sign-in follows;
+  see the Entry Feedback Contract in [[Implementation - Feature Patterns]] and
+  GitHub issue #1287.
 - A creation session can be seeded with a prefilled draft — a Restaurant menu item, or an existing Bite the user wants to post again — and that draft belongs to that one session. Leaving the form ends the session and drops the draft, so cancelling a menu-derived creation and later starting a generic Bite from Home begins from the normal defaults instead of the abandoned Restaurant and dish. This is the contract GitHub issue #1233 established, where the cancelled draft survived in the store and prefilled the next, unrelated creation. Only the intentional global defaults — the current location and the preferred currency — carry across sessions, and a Bite that is actually posted keeps the Restaurant and dish its draft supplied.
 - A prefilled draft brings no photo of its own, and the form keeps that absence as an empty path rather than an undefined one. Firestore rejects an undefined field, so a menu-derived Bite used to be refused by the backend while the form reported a successful post, and the Bite was lost with nothing to retry. See GitHub issue #1233.
 - User enters dish details, price, currency, tags, rating, description, and image context.

@@ -3,6 +3,7 @@
   "app-check-blocked-message": "Bite Tribe no pudo verificar este dispositivo con su control de seguridad. Comprueba tu conexión e inténtalo de nuevo para continuar.",
   "app-check-retry": "Reintentar",
   "create-bite": "Crear Bite",
+  "create-bite-in-progress": "Abriendo Crear Bite...",
   "gallery": "Galería",
   "delete-all": "Eliminar todo",
   "delete-all-images": "Eliminar todas las imágenes",

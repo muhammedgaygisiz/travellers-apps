@@ -133,6 +133,24 @@ This is deliberately additive: it does not change when a placeholder appears. Fi
 
 The end state is that a reload of content already on screen reports itself only through this bar instead of replacing that content with a placeholder. Adopting it is the first half of that move. See GitHub issue #1168.
 
+## Entry Feedback Contract
+
+**An action whose result is a page change reports the wait on the control that was used.** A route is not free: a guard can be a network round-trip and the page itself is a lazy chunk, so the seconds between the tap and the new page are seconds the old page still owns. Leaving them unanswered reads as a dead button and invites a second tap.
+
+The pattern is the sign-in one from [[Architecture - Auth]], applied to navigation:
+
+- The pending flag lives in the integration service that owns the navigation, raised before the call and lowered in a `finally`, so a guard that redirects elsewhere or a failed navigation never leaves the control locked.
+- The control locks behind a spinner and a pending label, and the page runs the header progress bar with it.
+- The handler guards itself in code as well. The disabled control already blocks a second click, but a tap can be queued between the click and the flag turning on.
+
+`ta-page` carries this for its add button through `addButtonPending`:
+
+```html
+<ta-page [addButtonPending]="createBitePending()" [loading]="createBitePending()"></ta-page>
+```
+
+Create Bite is the first case: `new-bite` is behind `freshSessionGuard`, which force-refreshes the ID token, plus the Bite page chunk. See GitHub issue #1287.
+
 ## Image Pattern
 
 For Bite images, prefer this display fallback:

@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
@@ -63,6 +63,9 @@ export class HomeService {
   emailVerificationPromptVisible = this.emailVerification.promptVisible;
   emailVerificationResendRunning = this.emailVerification.resendRunning;
 
+  private readonly createBiteNavigationRunning = signal(false);
+  readonly createBitePending = this.createBiteNavigationRunning.asReadonly();
+
   logout(): void {
     this.dataAccess.logout();
   }
@@ -83,8 +86,26 @@ export class HomeService {
     this.dataAccess.updateBiteRating(params);
   }
 
-  onAddButtonClicked(): void {
-    void this.navController.navigateForward(['new-bite']);
+  /**
+   * Reaching the Create Bite page is a network round-trip (the fresh-session
+   * guard force-refreshes the ID token) plus a lazy chunk, so the tap has
+   * seconds of nothing to show for it. The button reports the wait itself
+   * instead. See GitHub issue #1287.
+   */
+  async onAddButtonClicked(): Promise<void> {
+    if (this.createBiteNavigationRunning()) {
+      return;
+    }
+
+    this.createBiteNavigationRunning.set(true);
+
+    try {
+      await this.navController.navigateForward(['new-bite']);
+    } finally {
+      // Lowered on every outcome, including a guard that redirects to /start,
+      // so returning to the feed never finds the button still locked.
+      this.createBiteNavigationRunning.set(false);
+    }
   }
 
   onGotoSettingsClick(): void {

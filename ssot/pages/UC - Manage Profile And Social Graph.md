@@ -67,6 +67,31 @@ city — so that line only earns its space when it has something of its own.
   tracked separately in issue #1271. This contract covers only what the profile
   renders for a location it does not have.
 
+## Account Identity In The Menu
+
+Issue
+[#1260](https://github.com/muhammedgaygisiz/travellers-apps/issues/1260) moved
+the answer to "who am I signed in as" out of the profile page and into the app
+menu. Release-candidate Run 5 could not name the account it was testing with
+without leaving the menu, and #1240 already established that the app should name
+the account before consequential actions; knowing who you are is the same
+question asked earlier.
+
+- The signed-in account is named on the profile entry rather than in a header
+  block of its own. The account photo replaces that entry's icon at the icon's
+  own size, and the display name is the entry's subtitle. The menu identifies
+  the account without taking any height it did not already have.
+- The identity shown is the same `PublicUser` record the profile page renders,
+  so the menu cannot disagree with the profile, and it follows the session: it
+  arrives when the profile loads and is gone when the session ends.
+- Only non-secret identity appears. The reduced form is avatar and display name;
+  the email is not shown in the menu, because the entry has one line of
+  supporting text and the display name is what identifies the account to its
+  owner across email/password, Google, and Apple sign-in alike.
+- A missing or unloadable photo falls back to the anonymous icon, and a missing
+  display name renders no subtitle. Neither degradation costs the entry its
+  label or its navigation.
+
 ## Out Of Scope
 
 - A profile is not a shareable destination. There is no profile share action, no

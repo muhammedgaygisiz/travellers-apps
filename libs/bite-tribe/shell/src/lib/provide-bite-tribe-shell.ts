@@ -12,9 +12,18 @@ import {
   AFTER_LOGOUT_PAGE,
   APP_TITLE,
   Environment,
+  SIGNED_IN_ACCOUNT,
+  SignedInAccount,
 } from 'utils';
-import { provideBiteTribeStore } from 'bite-tribe/store';
-import { EnvironmentProviders, Provider } from '@angular/core';
+import { BiteTribeStoreService, provideBiteTribeStore } from 'bite-tribe/store';
+import {
+  computed,
+  EnvironmentProviders,
+  inject,
+  Provider,
+  Signal,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 export const provideBiteTribeShell = (
   environment: Environment,
@@ -37,5 +46,30 @@ export const provideBiteTribeShell = (
   { provide: APP_TITLE, useValue: 'Bite Tribe' },
   { provide: AFTER_LOGOUT_PAGE, useValue: '/start' },
   { provide: AFTER_LOGIN_PAGE, useValue: '/home' },
+  {
+    // The signed-in profile the store already keeps for the app, handed to the
+    // shared page chrome so the menu can name the account it belongs to. It is
+    // the same record the profile page renders, so the menu cannot disagree
+    // with it, and it is cleared with the session. See GitHub issue #1260.
+    provide: SIGNED_IN_ACCOUNT,
+    useFactory: (): Signal<SignedInAccount | undefined> => {
+      const profile = toSignal(inject(BiteTribeStoreService).publicUser$);
+
+      return computed(() => {
+        const user = profile();
+
+        // Before the profile has loaded there is no identity to show yet, and
+        // an empty one would only put a blank line under the entry.
+        if (!user?.displayName && !user?.photoUrl) {
+          return undefined;
+        }
+
+        return {
+          displayName: user.displayName ?? '',
+          photoUrl: user.photoUrl ?? '',
+        };
+      });
+    },
+  },
   provideBiteTribeStore(environment),
 ];

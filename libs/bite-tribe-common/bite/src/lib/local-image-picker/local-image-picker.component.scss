@@ -1,3 +1,7 @@
+@use 'globals';
+
+@include globals.modal-header-title;
+
 /* Matches the local gallery grid, so picking a photo here looks like browsing
  * the same set of images the gallery page shows. */
 .picker-grid {

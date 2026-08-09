@@ -13,6 +13,8 @@ export default {
   ],
   args: {
     permission: 'idle',
+    homeCity: '',
+    isPublicProfile: false,
   },
 } as Meta<LocationStepComponent>;
 
@@ -44,5 +46,22 @@ export const Denied: Story = {
 export const Unsupported: Story = {
   args: {
     permission: 'unsupported',
+  },
+};
+
+/** A returning user sees the home city already on their profile (issue #1271). */
+export const WithHomeCity: Story = {
+  args: {
+    permission: 'granted',
+    homeCity: 'Bern',
+  },
+};
+
+/** A public profile shows the home city to everyone, and says so. */
+export const PublicProfileHomeCity: Story = {
+  args: {
+    permission: 'granted',
+    homeCity: 'Bern',
+    isPublicProfile: true,
   },
 };

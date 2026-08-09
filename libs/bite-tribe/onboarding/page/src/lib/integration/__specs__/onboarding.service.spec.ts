@@ -1148,6 +1148,100 @@ describe('OnboardingService', () => {
     });
   });
 
+  describe('home city', () => {
+    const reachLocationStep = async (
+      profile: Record<string, unknown> = {},
+    ): Promise<void> => {
+      setup(['identity', 'visibility', 'currency', 'language'], profile);
+      await service.initialize();
+    };
+
+    it('starts empty for an account that has never given one', async () => {
+      await reachLocationStep();
+
+      expect(service.homeCity()).toBe('');
+    });
+
+    it('prefills the city the profile already carries', async () => {
+      await reachLocationStep({ city: 'Bern' });
+
+      expect(service.homeCity()).toBe('Bern');
+    });
+
+    it('never gates the step, because the field is optional', async () => {
+      await reachLocationStep();
+
+      service.updateHomeCity('Bern');
+
+      // Naming a city must not stand in for answering the permission question.
+      expect(service.canAdvance()).toBe(false);
+
+      service.skipLocation();
+
+      expect(service.canAdvance()).toBe(true);
+    });
+
+    it('advances with the profile untouched when the user declines', async () => {
+      await reachLocationStep();
+
+      service.skipLocation();
+      await service.next();
+
+      // Declining is a deliberate answer, and the profile renders no location
+      // line for it (issue #1270) — there is nothing to write.
+      expect(saveProfile).not.toHaveBeenCalled();
+      expect(service.currentStep().id).toBe('notifications');
+    });
+
+    it('persists the city onto the profile when the step is left', async () => {
+      await reachLocationStep();
+
+      service.updateHomeCity('  Bern  ');
+      service.skipLocation();
+      await service.next();
+
+      expect(saveProfile).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 'user-1', city: 'Bern' }),
+      );
+      expect(service.currentStep().id).toBe('notifications');
+    });
+
+    it('writes an emptied city so a stored one is actually removed', async () => {
+      await reachLocationStep({ city: 'Bern' });
+
+      service.updateHomeCity('');
+      service.skipLocation();
+      await service.next();
+
+      expect(saveProfile).toHaveBeenCalledWith(
+        expect.objectContaining({ city: '' }),
+      );
+    });
+
+    it('writes nothing when the prefilled city is left alone', async () => {
+      await reachLocationStep({ city: 'Bern' });
+
+      service.skipLocation();
+      await service.next();
+
+      // Most users never touch the field, and an unchanged value should not
+      // cost the location step a profile round-trip.
+      expect(saveProfile).not.toHaveBeenCalled();
+      expect(service.currentStep().id).toBe('notifications');
+    });
+
+    it('stays on the step when the city write fails', async () => {
+      await reachLocationStep();
+      saveProfile.mockRejectedValue(new Error('offline'));
+
+      service.updateHomeCity('Bern');
+      service.skipLocation();
+      await service.next();
+
+      expect(service.currentStep().id).toBe('location');
+    });
+  });
+
   describe('notification step', () => {
     it('does not prompt before the user asks for it', async () => {
       setup(['identity', 'visibility', 'currency', 'language', 'location']);

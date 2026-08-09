@@ -1,4 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 import { LocationStepComponent } from '../location-step.component';
@@ -86,4 +91,72 @@ describe(LocationStepComponent.name, () => {
       expect(query('onboarding-location-skip')).toBeNull();
     },
   );
+
+  describe('home city', () => {
+    it('asks for the home city whatever the position permission is', () => {
+      fixture.componentRef.setInput('permission', 'denied');
+
+      fixture.detectChanges();
+
+      // The home city is profile data, so refusing the device position must
+      // not take the question away (issue #1271).
+      expect(query('onboarding-home-city')).not.toBeNull();
+    });
+
+    it('prefills the city an existing profile already carries', () => {
+      fixture.componentRef.setInput('homeCity', 'Bern');
+
+      fixture.detectChanges();
+
+      expect(component['homeCityControl'].value).toBe('Bern');
+    });
+
+    it('leaves a city the user is typing alone when the profile arrives late', () => {
+      fixture.detectChanges();
+      component['homeCityControl'].markAsDirty();
+      component['homeCityControl'].setValue('Zurich', { emitEvent: false });
+
+      fixture.componentRef.setInput('homeCity', 'Bern');
+      fixture.detectChanges();
+
+      expect(component['homeCityControl'].value).toBe('Zurich');
+    });
+
+    it('emits the trimmed city once typing settles', fakeAsync(() => {
+      fixture.detectChanges();
+      const homeCityChange = jest.spyOn(component.homeCityChange, 'emit');
+
+      component['homeCityControl'].setValue('  Bern  ');
+      tick(250);
+
+      expect(homeCityChange).toHaveBeenCalledWith('Bern');
+    }));
+
+    it('emits an empty city when the user clears the field', fakeAsync(() => {
+      fixture.componentRef.setInput('homeCity', 'Bern');
+      fixture.detectChanges();
+      const homeCityChange = jest.spyOn(component.homeCityChange, 'emit');
+
+      // Clearing is a real answer, not a no-op: it has to reach the service so
+      // the previously stored city is actually removed.
+      component['homeCityControl'].setValue('');
+      tick(250);
+
+      expect(homeCityChange).toHaveBeenCalledWith('');
+    }));
+
+    it.each([
+      [true, 'onboarding-home-city-visibility-public'],
+      [false, 'onboarding-home-city-visibility-private'],
+    ])('states who can see it when public is %s', (isPublicProfile, key) => {
+      fixture.componentRef.setInput('isPublicProfile', isPublicProfile);
+
+      fixture.detectChanges();
+
+      // The field is shown publicly, so who can see it is stated rather than
+      // left implicit in the visibility choice made a step earlier.
+      expect(query('onboarding-home-city-visibility')).not.toBeNull();
+      expect(component['visibilityNoteKey']()).toBe(key);
+    });
+  });
 });

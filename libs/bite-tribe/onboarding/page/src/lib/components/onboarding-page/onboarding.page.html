@@ -50,8 +50,11 @@
       } @case ('location') {
       <onboarding-location-step
         [permission]="locationPermission()"
+        [homeCity]="homeCity()"
+        [isPublicProfile]="selectedVisibility()"
         (enableLocation)="enableLocation.emit()"
         (skipLocation)="skipLocation.emit()"
+        (homeCityChange)="homeCityChange.emit($event)"
       />
       } @case ('notifications') {
       <onboarding-notification-step

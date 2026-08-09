@@ -41,3 +41,23 @@
   display: grid;
   gap: 0.25rem;
 }
+
+.location-step__home {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.location-step__home-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.location-step__home-note {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}

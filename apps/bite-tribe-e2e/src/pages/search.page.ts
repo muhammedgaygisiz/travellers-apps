@@ -1,6 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test';
 
-type SearchCategory = 'Bite' | 'Restaurant' | 'City' | 'User';
+type SearchCategory = 'Bite' | 'Restaurant' | 'City' | 'Country' | 'User';
 
 /**
  * Page object for the search screen (route: /search).

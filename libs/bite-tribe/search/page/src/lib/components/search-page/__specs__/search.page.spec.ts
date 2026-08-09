@@ -74,7 +74,71 @@ describe(SearchPage.name, () => {
         { label: 'search-category-bite', value: 'bite' },
         { label: 'search-category-restaurant', value: 'restaurant' },
         { label: 'search-category-city', value: 'city' },
+        { label: 'search-category-country', value: 'country' },
       ]);
+    });
+  });
+
+  describe('country selection', () => {
+    beforeEach(() => {
+      componentRef.setInput('selectedCategory', 'country');
+      fixture.detectChanges();
+    });
+
+    it('should replace the searchbar with the country field', () => {
+      expect(fixture.nativeElement.querySelector('ion-searchbar')).toBeNull();
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="search-country-field"]',
+        ),
+      ).toBeTruthy();
+    });
+
+    it('should keep the searchbar for the text-driven categories', () => {
+      componentRef.setInput('selectedCategory', 'city');
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('ion-searchbar')).toBeTruthy();
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="search-country-field"]',
+        ),
+      ).toBeNull();
+    });
+
+    it('should prompt for a country while none is picked', () => {
+      // The prompt comes from the template pipe, not from the computed: a
+      // translate() call inside the computed would cache the raw key when the
+      // catalog is not loaded yet.
+      expect(component.selectedCountryName()).toBe('');
+      expect(component.selectedCountryFlagClass()).toBe('');
+    });
+
+    it('should show the localized name and flag of the picked country', () => {
+      componentRef.setInput('selectedCountryCode', 'CH');
+      fixture.detectChanges();
+
+      expect(component.selectedCountryName()).toBe('Switzerland');
+      expect(component.selectedCountryFlagClass()).toBe('fi fi-ch');
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="search-country-field"]',
+        ).textContent,
+      ).toContain('Switzerland');
+    });
+
+    it('should emit the picked country and close the picker', () => {
+      const emitSpy = jest.spyOn(component.countryChange, 'emit');
+      const modal = { dismiss: jest.fn() };
+
+      component.countrySelected('CH', modal as never);
+
+      expect(emitSpy).toHaveBeenCalledWith('CH');
+      expect(modal.dismiss).toHaveBeenCalled();
+    });
+
+    it('should offer the map for country results', () => {
+      expect(component.canShowMap()).toBe(true);
     });
   });
 

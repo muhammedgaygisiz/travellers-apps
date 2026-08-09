@@ -12,13 +12,17 @@ import {
   IonContent,
   IonIcon,
   IonLabel,
+  IonModal,
   IonSearchbar,
   IonSpinner,
   IonToggle,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { SearchbarInputEventDetail } from '@ionic/core';
 import { ChipRadioGroupComponent, type ChipRadioOption } from 'common/ui/chip';
+import { CountrySelectorComponent } from 'country-selector';
+import { getLocalizedCountryName } from 'utils';
 import type { Geopoint, SearchCategory, SearchResult } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { SearchListComponent } from '../search-list/search-list.component';
@@ -38,11 +42,13 @@ interface SearchCategoryOption {
     IonContent,
     IonIcon,
     IonLabel,
+    IonModal,
     IonSearchbar,
     IonSpinner,
     IonToggle,
     TranslocoPipe,
     ChipRadioGroupComponent,
+    CountrySelectorComponent,
     SearchListComponent,
     MapComponent,
   ],
@@ -55,19 +61,55 @@ export class SearchPage {
     { labelKey: 'search-category-bite', value: 'bite' },
     { labelKey: 'search-category-restaurant', value: 'restaurant' },
     { labelKey: 'search-category-city', value: 'city' },
+    { labelKey: 'search-category-country', value: 'country' },
   ];
 
   results = input<SearchResult[]>([]);
   selectedCategory = input<SearchCategory>('user');
+  selectedCountryCode = input<string>('');
   isLoading = input(false);
   hasSearched = input(false);
 
   searchTextChange = output<string>();
   categoryChange = output<SearchCategory>();
+  countryChange = output<string>();
   resultClick = output<SearchResult>();
 
   readonly viewMode = signal<'list' | 'map'>('list');
   readonly canShowMap = computed(() => this.selectedCategory() !== 'user');
+
+  /**
+   * Country is picked from a list, not typed, so the free-text searchbar would
+   * only be a dead control here and is swapped for the picker instead.
+   */
+  readonly isCountrySearch = computed(
+    () => this.selectedCategory() === 'country',
+  );
+
+  private readonly activeLang = toSignal(this.translocoService.langChanges$, {
+    initialValue: this.translocoService.getActiveLang?.() || 'en',
+  });
+
+  /**
+   * Empty until a country is picked; the template supplies the prompt through
+   * the Transloco pipe. Translating in here would freeze the first value this
+   * computed ever produced, which is the raw key when the catalog has not
+   * loaded yet.
+   */
+  readonly selectedCountryName = computed(() => {
+    const countryCode = this.selectedCountryCode();
+
+    return countryCode
+      ? getLocalizedCountryName(countryCode, this.activeLang())
+      : '';
+  });
+
+  readonly selectedCountryFlagClass = computed(() => {
+    const countryCode = this.selectedCountryCode();
+
+    return countryCode ? `fi fi-${countryCode.toLowerCase()}` : '';
+  });
+
   readonly mapPositions = computed(() =>
     this.results()
       .filter(
@@ -96,6 +138,11 @@ export class SearchPage {
 
   categoryValueChange(category: string): void {
     this.categoryChange.emit(category as SearchCategory);
+  }
+
+  countrySelected(countryCode: string, modal: IonModal): void {
+    this.countryChange.emit(countryCode);
+    void modal.dismiss();
   }
 
   viewModeChange(viewMode: unknown): void {

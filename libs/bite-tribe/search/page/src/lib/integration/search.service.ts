@@ -15,11 +15,21 @@ export class SearchService {
 
   readonly results = this.dataAccessService.results;
   readonly selectedCategory = this.dataAccessService.searchCategory;
-  readonly hasSearched = computed(
-    () =>
+  readonly selectedCountryCode = this.dataAccessService.searchCountryCode;
+  /**
+   * Country search has no minimum term to clear: picking a country is the
+   * whole query, so the moment a code is set the empty state is meaningful.
+   */
+  readonly hasSearched = computed(() => {
+    if (this.selectedCategory() === 'country') {
+      return !!this.selectedCountryCode();
+    }
+
+    return (
       this.dataAccessService.searchText().trim().length >=
-      MIN_SEARCH_TEXT_LENGTH,
-  );
+      MIN_SEARCH_TEXT_LENGTH
+    );
+  });
 
   search(searchText: string): void {
     const wasSearching = this.hasSearched();
@@ -36,6 +46,17 @@ export class SearchService {
     this.dataAccessService.searchCategory.set(category);
   }
 
+  selectCountry(countryCode: string): void {
+    const wasSearching = this.hasSearched();
+    this.dataAccessService.searchCountryCode.set(countryCode);
+
+    // Same rule as the free-text search: one event per search session, once
+    // the query first becomes meaningful.
+    if (!wasSearching && this.hasSearched()) {
+      this.analytics.logEvent(AnalyticsEvent.SearchPerformed);
+    }
+  }
+
   resultClicked(result: SearchResult): void {
     if (result.category === 'user') {
       void this.navController.navigateForward([
@@ -45,7 +66,11 @@ export class SearchService {
       return;
     }
 
-    if (result.category === 'bite' || result.category === 'city') {
+    if (
+      result.category === 'bite' ||
+      result.category === 'city' ||
+      result.category === 'country'
+    ) {
       void this.navController.navigateForward([PATH.BITE, result.value.id]);
       return;
     }

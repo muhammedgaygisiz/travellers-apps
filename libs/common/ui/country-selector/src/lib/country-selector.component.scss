@@ -1,0 +1,28 @@
+@use 'globals';
+
+@include globals.modal-header-title;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+ion-content {
+  --padding-bottom: calc(16px + var(--ion-safe-area-bottom, 0px));
+
+  flex: 1;
+}
+
+.country-selector__item--selected {
+  --background: rgba(var(--ion-color-primary-rgb), 0.1);
+}
+
+.country-selector__flag {
+  width: 1.75rem;
+  // flag-icons sizes rectangular flags from the font-size of the element, so
+  // the box has to be given a height of its own.
+  height: 1.3125rem;
+  margin-inline-end: 1rem;
+  border-radius: 2px;
+}

@@ -39,6 +39,25 @@ const restaurantResults: SearchResult[] = [
   },
 ];
 
+const countryResults: SearchResult[] = [
+  {
+    category: 'country',
+    value: {
+      id: 'bite-1',
+      name: 'Fondue Moitié-Moitié',
+      place: 'Bern',
+    },
+  },
+  {
+    category: 'country',
+    value: {
+      id: 'bite-2',
+      name: 'Zürcher Geschnetzeltes',
+      place: 'Zurich',
+    },
+  },
+];
+
 export default {
   title: 'Pages/Search',
   component: SearchPage,
@@ -67,6 +86,25 @@ export const EmptyResults: Story = {
   args: {
     selectedCategory: 'restaurant',
     results: [],
+    hasSearched: true,
+  },
+};
+
+/** Country search before a pick: the searchbar is replaced by the picker. */
+export const CountryNotPicked: Story = {
+  args: {
+    selectedCategory: 'country',
+    selectedCountryCode: '',
+    results: [],
+  },
+};
+
+/** After a pick, the field carries the flag and the localized country name. */
+export const CountryPicked: Story = {
+  args: {
+    selectedCategory: 'country',
+    selectedCountryCode: 'CH',
+    results: countryResults,
     hasSearched: true,
   },
 };

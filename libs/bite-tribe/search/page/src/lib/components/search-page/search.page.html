@@ -27,11 +27,34 @@
         }
       </div>
 
+      @if (isCountrySearch()) {
+      <button
+        id="search-country-selector-trigger"
+        type="button"
+        class="country-field"
+        data-testid="search-country-field"
+        [attr.aria-label]="'search-select-country' | transloco"
+      >
+        @if (selectedCountryFlagClass(); as flagClass) {
+        <span
+          class="country-field__flag"
+          [class]="flagClass"
+          aria-hidden="true"
+        ></span>
+        }
+        <span class="country-field__name"
+          >{{ selectedCountryName() || ('search-select-country' | transloco)
+          }}</span
+        >
+        <ion-icon name="chevron-expand-outline" aria-hidden="true" />
+      </button>
+      } @else {
       <ion-searchbar
         [debounce]="1000"
         [placeholder]="'search' | transloco"
         (ionInput)="searchbarInput($event)"
       />
+      }
 
       <bt-chip-radio-group
         class="ion-margin-vertical"
@@ -73,4 +96,17 @@
     />
     }
   </ion-content>
+
+  @if (isCountrySearch()) {
+  <ion-modal trigger="search-country-selector-trigger" #countryModal>
+    <ng-template>
+      <country-selector
+        class="ion-page"
+        [selectedCountry]="selectedCountryCode()"
+        (countrySelected)="countrySelected($event, countryModal)"
+        (selectionCancel)="countryModal.dismiss()"
+      />
+    </ng-template>
+  </ion-modal>
+  }
 </ta-page>

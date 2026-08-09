@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">{{
+        leftButtonLangCode() | transloco
+      }}</ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'select-country' | transloco }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-searchbar
+    (ionInput)="searchbarInput($event)"
+    placeholder="{{ 'search-countries' | transloco }}"
+  />
+
+  <ion-list [inset]="true">
+    @for (country of filteredCountries(); track country.code) {
+      <ion-item
+        button
+        [detail]="false"
+        [attr.data-testid]="'country-option-' + country.code"
+        [attr.aria-label]="rowLabel(country)"
+        [class.country-selector__item--selected]="
+          selectedCountry() === country.code
+        "
+        (click)="selectRow(country.code)"
+      >
+        <span
+          slot="start"
+          class="country-selector__flag"
+          [class]="getFlagClass(country)"
+          aria-hidden="true"
+        ></span>
+
+        <ion-label>
+          <h2>{{ getCountryName(country) }}</h2>
+          <p>{{ country.code }}</p>
+        </ion-label>
+
+        @if (selectedCountry() === country.code) {
+          <ion-icon
+            slot="end"
+            name="checkmark-outline"
+            color="primary"
+            aria-hidden="true"
+          />
+        }
+      </ion-item>
+    } @empty {
+      <ion-item>
+        <ion-label>{{ 'no-countries-found' | transloco }}</ion-label>
+      </ion-item>
+    }
+  </ion-list>
+</ion-content>

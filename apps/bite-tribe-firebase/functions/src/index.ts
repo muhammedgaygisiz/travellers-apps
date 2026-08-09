@@ -17,6 +17,7 @@ export {
 export { searchUsers } from './functions/users/search-users';
 export { searchBites } from './functions/bites/search-bites';
 export { searchBitesByCity } from './functions/bites/search-bites-by-city';
+export { searchBitesByCountry } from './functions/bites/search-bites-by-country';
 export { searchRestaurants } from './functions/restaurants/search-restaurants';
 export {
   searchPlaces,

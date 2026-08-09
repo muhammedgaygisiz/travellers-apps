@@ -8,6 +8,7 @@ jest.mock('firebase-functions/params', () => ({
 import { createRawEmail } from '../google-workspace-email';
 
 const DELEGATED_USER_ENV = 'GOOGLE_WORKSPACE_DELEGATED_USER';
+const SENDER_ADDRESS_ENV = 'GOOGLE_WORKSPACE_SENDER_ADDRESS';
 
 /** Undoes the base64url the Gmail API expects, back to the RFC 2822 message. */
 const decode = (raw: string): string =>
@@ -33,21 +34,40 @@ const render = (language?: string): string =>
     createRawEmail('user@example.com', 'https://example.com/verify', language),
   );
 
+const restore = (name: string, value: string | undefined): void => {
+  if (value === undefined) {
+    delete process.env[name];
+
+    return;
+  }
+
+  process.env[name] = value;
+};
+
 describe('createRawEmail', () => {
   const originalDelegatedUser = process.env[DELEGATED_USER_ENV];
+  const originalSenderAddress = process.env[SENDER_ADDRESS_ENV];
 
   beforeEach(() => {
-    process.env[DELEGATED_USER_ENV] = 'noreply@bitetribe.app';
+    // The delegated mailbox and the visible sender are deliberately different
+    // here: the whole point of issue \#1265 is that the delegation account must
+    // not reach a recipient.
+    process.env[DELEGATED_USER_ENV] = 'delegated.person@bitetribe.app';
+    process.env[SENDER_ADDRESS_ENV] = 'noreply@bitetribe.app';
   });
 
   afterAll(() => {
-    if (originalDelegatedUser === undefined) {
-      delete process.env[DELEGATED_USER_ENV];
+    restore(DELEGATED_USER_ENV, originalDelegatedUser);
+    restore(SENDER_ADDRESS_ENV, originalSenderAddress);
+  });
 
-      return;
-    }
+  it('sends from the configured sender address, never from the delegated mailbox', () => {
+    const message = render('en');
 
-    process.env[DELEGATED_USER_ENV] = originalDelegatedUser;
+    expect(headerOf(message, 'From')).toBe(
+      'Bite Tribe <noreply@bitetribe.app>',
+    );
+    expect(message).not.toContain('delegated.person@bitetribe.app');
   });
 
   it('renders subject, body and link label in the requested language', () => {
@@ -100,11 +120,19 @@ describe('createRawEmail', () => {
     bodyLines.forEach((line) => expect(line.length).toBeLessThanOrEqual(76));
   });
 
-  it('fails when the delegated sender is missing rather than sending from nobody', () => {
-    delete process.env[DELEGATED_USER_ENV];
+  it('fails when the sender address is missing rather than sending from nobody', () => {
+    delete process.env[SENDER_ADDRESS_ENV];
 
     expect(() => render('en')).toThrow(
-      'Google Workspace delegated sender is missing.',
+      'Google Workspace sender address is missing.',
     );
+  });
+
+  it('does not fall back to the delegated mailbox when the sender address is unset', () => {
+    // A fallback would restore exactly the behaviour issue \#1265 reports: the
+    // mail would keep sending, from a personal address, unnoticed.
+    delete process.env[SENDER_ADDRESS_ENV];
+
+    expect(() => render('en')).toThrow();
   });
 });

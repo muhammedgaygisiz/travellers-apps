@@ -158,6 +158,10 @@ test.describe('Create and maintain personal bites', () => {
     await biteForm.fillName(originalName);
     await biteForm.chooseGoogleRestaurant(googleSearch, googleRestaurant);
     await expectPositionMarkerInsideMap(page);
+    // The Google place moved the position, so the location row must say so.
+    // Asserting the persisted position alone cannot catch a row that keeps
+    // crediting the wrong source.
+    await biteForm.expectPositionSource('From Google');
     await biteForm.fillPrice('14.50');
     await biteForm.chooseRating(4);
     await biteForm.fillDescription('Crispy tofu with chili and lime.');
@@ -171,6 +175,7 @@ test.describe('Create and maintain personal bites', () => {
       place: googleRestaurant,
       restaurantId: '',
       position: GOOGLE_POSITION,
+      positionSource: 'google',
       price: '14.50',
       rating: 4,
       description: 'Crispy tofu with chili and lime.',
@@ -201,6 +206,7 @@ test.describe('Create and maintain personal bites', () => {
     await biteForm.addTag('sesame');
     await biteForm.chooseLocalRestaurant(verifiedRestaurant);
     await expectPositionMarkerInsideMap(page);
+    await biteForm.expectPositionSource('From restaurant');
     await biteForm.expectPostEnabled();
     await biteForm.submit();
 
@@ -209,6 +215,9 @@ test.describe('Create and maintain personal bites', () => {
       place: verifiedRestaurant,
       restaurantId,
       position: POSITION,
+      // Stored, so reopening this Bite later still knows the restaurant put it
+      // here rather than falling back to an unknown source.
+      positionSource: 'restaurant',
       price: '16.75',
       rating: 5,
       description: 'Even crispier tofu with chili, lime, and sesame.',
@@ -221,6 +230,51 @@ test.describe('Create and maintain personal bites', () => {
       description: 'Even crispier tofu with chili, lime, and sesame.',
       tags: ['crispy', 'spicy', 'sesame'],
       rating: 5,
+    });
+  });
+
+  /**
+   * The position modal applies nothing until it is confirmed. Cancelling after a
+   * manual pick must leave both the position and the source it is credited to
+   * exactly as they were, so a rejected pick cannot reach the saved Bite.
+   */
+  test('discards a manual position pick that is cancelled', async ({
+    page,
+  }) => {
+    const runId = Date.now();
+    const name = `Cancelled Position ${runId}`;
+    const restaurant = `Trattoria Cancelled ${runId}`;
+
+    await mockCallable(page, 'getCurrencyByPosition', { currency: 'EUR' });
+
+    await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
+    await dismissCoachMarks(page);
+
+    const biteForm = new CreateBitePage(page);
+    await biteForm.open();
+    await biteForm.uploadImage(IMAGE_FIXTURE);
+    await biteForm.fillName(name);
+    await biteForm.chooseCustomRestaurant(restaurant);
+    await biteForm.fillPrice('9.00');
+
+    // The pinned browser geolocation is POSITION, so this is the position the
+    // cancelled pick must not be allowed to replace.
+    await biteForm.useGpsPosition();
+
+    await biteForm.discardManualPositionPick();
+
+    await biteForm.expectPositionSource('From GPS');
+
+    await biteForm.expectPostEnabled();
+    await biteForm.submit();
+
+    await page.waitForURL('**/home');
+    await expectBiteFields(page, name, {
+      place: restaurant,
+      position: POSITION,
+      positionSource: 'gps',
+      price: '9.00',
     });
   });
 });

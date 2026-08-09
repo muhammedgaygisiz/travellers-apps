@@ -30,11 +30,11 @@
           </ion-label>
           <ion-button
             fill="outline"
-            class="reselect-button"
+            class="field-edit-button"
             aria-label="{{ 'change-restaurant' | transloco }}"
             (click)="openRestaurantSelector()"
           >
-            <ion-icon name="repeat" />
+            <ion-icon name="create-outline" />
           </ion-button>
         </div>
         } @else {
@@ -82,37 +82,35 @@
         <ion-label class="ion-display-block map-label">
           {{ 'location-label' | transloco }}
         </ion-label>
-        <div class="position-button-container">
+        <div class="position-field">
+          @if (currentPosition()) {
+          <div class="selected-position">
+            <ion-label
+              class="selected-position-source"
+              data-testid="position-source-row"
+            >
+              {{ currentSourceLabelKey() | transloco }}
+            </ion-label>
+            <ion-button
+              fill="outline"
+              class="field-edit-button"
+              aria-label="{{ 'change-position' | transloco }}"
+              (click)="openPositionSourceModal()"
+              data-testid="edit-position"
+            >
+              <ion-icon name="create-outline" />
+            </ion-button>
+          </div>
+          } @else {
           <ion-button
-            [disabled]="!imagePosition()"
-            (click)="onPositionFromImage(imagePosition())"
+            expand="block"
+            fill="outline"
+            (click)="openPositionSourceModal()"
+            data-testid="set-position"
           >
-            {{ 'from-photo' | transloco }} @if (locationFromImage()) {
-            <ion-icon name="checkmark-outline" />
-            }
+            {{ 'set-position' | transloco }}
           </ion-button>
-          <ion-button
-            [disabled]="!position()"
-            (click)="onPositionFromNavigator()"
-            data-testid="position-from-gps"
-          >
-            {{ 'from-gps' | transloco }} @if (locationFromGps()) {
-            <ion-icon name="checkmark-outline" />
-            }
-          </ion-button>
-          <ion-button (click)="openManualPositionModal()">
-            {{ 'set-manually' | transloco }} @if (locationFromManual()) {
-            <ion-icon name="checkmark-outline" />
-            }
-          </ion-button>
-          <ion-button
-            [disabled]="!googlePosition()"
-            (click)="onPositionFromGoogle()"
-          >
-            {{ 'from-google' | transloco }} @if (locationFromGoogle()) {
-            <ion-icon name="checkmark-outline" />
-            }
-          </ion-button>
+          }
         </div>
         <position
           formControlName="position"
@@ -177,9 +175,10 @@
 </ion-modal>
 
 <ion-modal
-  #manualPositionModal
-  [isOpen]="isManualPositionModalOpen()"
+  #positionSourceModal
+  [isOpen]="isPositionSourceModalOpen()"
   (ionModalDidPresent)="onModalDidPresent()"
+  (didDismiss)="closePositionSourceModal()"
 >
   <ng-template>
     <ion-header>
@@ -187,17 +186,19 @@
         <ion-buttons slot="start">
           <ion-button
             fill="clear"
-            (click)="cancelManualPosition(manualPositionModal)"
+            (click)="positionSourceModal.dismiss()"
+            data-testid="cancel-position-source"
           >
             {{ 'cancel' | transloco }}
           </ion-button>
         </ion-buttons>
-        <ion-title>{{ 'set-manually' | transloco }}</ion-title>
+        <ion-title>{{ 'change-position' | transloco }}</ion-title>
         <ion-buttons slot="end">
           <ion-button
             fill="clear"
-            [disabled]="!manualPosition()"
-            (click)="confirmManualPosition(manualPositionModal)"
+            [disabled]="!draftPosition()"
+            (click)="confirmPositionSource(positionSourceModal)"
+            data-testid="confirm-position-source"
           >
             {{ 'ok' | transloco }}
           </ion-button>
@@ -205,13 +206,53 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      @if (shouldRenderMapInModal()) {
-      <bt-map
-        [geopoints]="manualPosition() ? [manualPosition()!] : []"
-        [gpsPosition]="position()"
-        (clickOnMap)="onManualPositionSelected($event)"
-      />
+      <div class="position-source-map">
+        @if (shouldRenderMapInModal()) {
+        <bt-map
+          [geopoints]="modalGeopoints()"
+          [markerColors]="candidateMarkerColors()"
+          [gpsPosition]="position()"
+          [readonly]="!isManualDraftMode()"
+          [emitMarkerClick]="!isManualDraftMode()"
+          [clusterMarkers]="false"
+          (clickOnMarker)="onCandidateMarkerClick($event)"
+          (clickOnMap)="onManualPositionSelected($event)"
+        />
+        }
+      </div>
+
+      @if (isManualDraftMode()) {
+      <ion-note class="position-source-hint">
+        {{ 'pick-position-on-map' | transloco }}
+      </ion-note>
       }
+
+      <ion-list>
+        @for (candidate of positionCandidates(); track candidate.source) {
+        <ion-item
+          button
+          [detail]="false"
+          [disabled]="candidate.disabled"
+          [attr.data-testid]="'position-source-' + candidate.source"
+          (click)="selectDraftSource(candidate.source)"
+        >
+          <span
+            slot="start"
+            class="source-swatch"
+            [style.background-color]="candidate.color"
+          ></span>
+          <ion-label>
+            <h3>{{ candidate.labelKey | transloco }}</h3>
+            @if (candidate.unavailableReasonKey) {
+            <p>{{ candidate.unavailableReasonKey | transloco }}</p>
+            }
+          </ion-label>
+          @if (draftSource() === candidate.source) {
+          <ion-icon slot="end" name="checkmark-outline" />
+          }
+        </ion-item>
+        }
+      </ion-list>
     </ion-content>
   </ng-template>
 </ion-modal>

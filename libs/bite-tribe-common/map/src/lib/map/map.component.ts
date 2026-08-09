@@ -26,6 +26,7 @@ import { zoomToMarkers } from './utils/zoom-to-markers';
 import { focusMarker } from './utils/focus-marker';
 import { addGpsMarker } from './utils/add-gps-marker';
 import { removeGpsMarker } from './utils/remove-gps-marker';
+import { MarkerColor } from './model/marker-color.enum';
 
 // Fix for marker icons
 const iconUrl = 'assets/leaflet/marker-icon.png';
@@ -57,6 +58,18 @@ export class MapComponent implements OnDestroy {
   clickOnMap = output<Geopoint>();
   clickOnMarker = output<Geopoint | undefined>();
   gpsPosition = input<Geopoint | null | undefined>();
+
+  /**
+   * Marker colour per geopoint id. Ids without an entry stay on the default
+   * red, so maps that do not colour their markers are unaffected.
+   */
+  markerColors = input<Record<string, MarkerColor>>({});
+
+  /**
+   * Clustering folds nearby markers into a single bubble. Turn it off where the
+   * whole point of the map is comparing markers that sit close together.
+   */
+  clusterMarkers = input(true, { transform: booleanAttribute });
 
   private readonly createTileLayer = inject(TILE_LAYER_FACTORY);
   private map!: L.Map;
@@ -195,8 +208,10 @@ export class MapComponent implements OnDestroy {
 
   private updateMarkers(positions: Geopoint[]): void {
     clearMarkers(this.markerClusterGroup, this.map);
-    this.markers = geopointsToMarkers(positions);
-    this.markerClusterGroup = L.markerClusterGroup()
+    this.markers = geopointsToMarkers(positions, this.markerColors());
+    this.markerClusterGroup = L.markerClusterGroup(
+      this.clusterMarkers() ? undefined : { maxClusterRadius: 0 },
+    )
       .addLayers(this.markers)
       .addTo(this.map);
 

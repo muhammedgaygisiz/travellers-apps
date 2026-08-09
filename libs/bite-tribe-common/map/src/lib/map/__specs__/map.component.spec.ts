@@ -296,7 +296,10 @@ describe('MapComponent', () => {
         };
 
         expect(emitClickOnMapSpy).toHaveBeenCalledWith(expectedPosition);
-        expect(geopointsToMarkersMock).toHaveBeenCalledWith([expectedPosition]);
+        expect(geopointsToMarkersMock).toHaveBeenCalledWith(
+          [expectedPosition],
+          {},
+        );
       });
 
       it('should not emit clickOnMap when readonly', () => {
@@ -331,7 +334,10 @@ describe('MapComponent', () => {
         };
 
         expect(emitClickOnMapSpy).toHaveBeenCalledWith(expectedPosition);
-        expect(geopointsToMarkersMock).toHaveBeenCalledWith([expectedPosition]);
+        expect(geopointsToMarkersMock).toHaveBeenCalledWith(
+          [expectedPosition],
+          {},
+        );
       });
 
       it('should clear existing markers when map is clicked and not readonly', () => {

@@ -6,6 +6,7 @@ export type * from './lib/user';
 export type * from './lib/settings';
 export type * from './lib/menu';
 export type * from './lib/geopoint';
+export type * from './lib/position-source';
 export type * from './lib/link';
 export type * from './lib/save-to-bucket-list-params';
 export type * from './lib/create-and-save-to-bucket-list-params';

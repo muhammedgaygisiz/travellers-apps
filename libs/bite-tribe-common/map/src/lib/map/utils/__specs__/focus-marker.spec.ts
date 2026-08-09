@@ -1,5 +1,6 @@
 import { focusMarker } from '../focus-marker';
 import { MarkerColor } from '../../model/marker-color.enum';
+import { setMarkerColor } from '../marker-color-tag';
 import * as L from 'leaflet';
 
 const getMarkerWithColorMock = jest.fn();
@@ -45,6 +46,41 @@ describe('focusMarker', () => {
     expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.DARKRED, {
       size: 'big',
       rating: '2',
+    });
+  });
+
+  it('should keep a coloured marker on its own colour when focused', () => {
+    const coloredMarker = setMarkerColor(
+      { setIcon: mockSetIcon, options: {} } as unknown as L.Marker,
+      MarkerColor.BLUE,
+    );
+
+    focusMarker(coloredMarker, [coloredMarker], mockMap);
+
+    expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.BLUE, {
+      size: 'big',
+      rating: undefined,
+    });
+    expect(getMarkerWithColorMock).not.toHaveBeenCalledWith(
+      MarkerColor.DARKRED,
+      expect.anything(),
+    );
+  });
+
+  it('should restore unfocused markers to their own colour', () => {
+    const blueMarker = setMarkerColor(
+      { setIcon: mockSetIcon, options: {} } as unknown as L.Marker,
+      MarkerColor.BLUE,
+    );
+    const greenMarker = setMarkerColor(
+      { setIcon: mockSetIcon, options: {} } as unknown as L.Marker,
+      MarkerColor.GREEN,
+    );
+
+    focusMarker(blueMarker, [blueMarker, greenMarker], mockMap);
+
+    expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.GREEN, {
+      rating: undefined,
     });
   });
 

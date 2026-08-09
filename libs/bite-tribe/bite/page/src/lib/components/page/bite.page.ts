@@ -8,6 +8,7 @@ import {
   linkedSignal,
   output,
   signal,
+  untracked,
   viewChild,
   WritableSignal,
 } from '@angular/core';
@@ -19,8 +20,11 @@ import {
   IonHeader,
   IonIcon,
   IonInput,
+  IonItem,
   IonLabel,
+  IonList,
   IonModal,
+  IonNote,
   IonText,
   IonTextarea,
   IonTitle,
@@ -31,9 +35,19 @@ import { Platform } from '@ionic/angular';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, filter, map, tap } from 'rxjs';
-import { MapComponent, PositionComponent } from 'bite-tribe-common/map';
+import {
+  MapComponent,
+  MarkerColor,
+  PositionComponent,
+} from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
-import type { Bite, Geopoint, GooglePlace, NearbyRestaurant } from 'model';
+import type {
+  Bite,
+  Geopoint,
+  GooglePlace,
+  NearbyRestaurant,
+  PositionSource,
+} from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
@@ -42,6 +56,12 @@ import { ImageValidator } from './utils/image-validator';
 import { normalizePriceForForm } from './utils/normalize-price-for-form';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PriceInputComponent } from './price-input/price-input.component';
+import {
+  POSITION_SOURCE_COLORS,
+  POSITION_SOURCE_LABEL_KEYS,
+  PositionCandidate,
+  UNKNOWN_POSITION_SOURCE_LABEL_KEY,
+} from './model/position-source';
 
 @Component({
   selector: 'bite',
@@ -66,7 +86,10 @@ import { PriceInputComponent } from './price-input/price-input.component';
     PriceInputComponent,
     RestaurantSelectorComponent,
     IonIcon,
+    IonItem,
     IonLabel,
+    IonList,
+    IonNote,
     TranslocoPipe,
   ],
   templateUrl: 'bite.page.html',
@@ -152,6 +175,10 @@ export class BitePage {
       currency: ['EUR', Validators.required],
       tags: [[] as string[]],
       position: [this.position(), Validators.required],
+      // Null rather than undefined: the whole form value is handed to Firestore,
+      // which rejects an undefined field and takes the Bite down with it. That
+      // is what lost menu-derived Bites in issue #1233.
+      positionSource: [null as PositionSource | null],
       rating: [0, [Validators.min(0), Validators.max(5)]],
     },
     {
@@ -184,6 +211,7 @@ export class BitePage {
       currency: bite.currency,
       tags: bite.tags || [],
       position: bite.position,
+      positionSource: bite.positionSource ?? null,
       restaurantId: bite.restaurantId || '',
       rating: bite.rating || 0,
       description: bite.description || '',
@@ -191,6 +219,9 @@ export class BitePage {
 
     if (bite?.position) {
       this.fallbackPosition.set(bite.position);
+      // Bites written before the source was recorded carry none, and the row
+      // reports that as an unknown source rather than guessing one.
+      this.positionSource.set(bite.positionSource ?? undefined);
     }
   });
 
@@ -224,14 +255,22 @@ export class BitePage {
     const bite = this.bite();
     const position = this.position();
 
-    if (!bite && position) {
-      this.biteFormGroup.controls['position'].patchValue(position);
+    if (bite || !position) {
       return;
     }
 
-    if (bite) {
+    // The device fix keeps flowing in while the form is open. It may prefill and
+    // then follow the device, but once the user has picked another source it
+    // must not overwrite that choice: the source row reports the position's
+    // origin, so a silent overwrite would read as a spontaneous switch to GPS.
+    const chosenSource = untracked(() => this.positionSource());
+
+    if (chosenSource && chosenSource !== 'gps') {
       return;
     }
+
+    this.biteFormGroup.controls['position'].patchValue(position);
+    this.positionSource.set('gps');
   });
 
   isInvalid = toSignal(
@@ -281,8 +320,9 @@ export class BitePage {
     return imagePathValue || undefined;
   });
 
-  positionValueChanges = toSignal(
+  currentPosition = toSignal(
     this.biteFormGroup.controls['position'].valueChanges,
+    { initialValue: this.biteFormGroup.controls['position'].value },
   );
 
   positionChangeEmitter = toSignal(
@@ -297,6 +337,7 @@ export class BitePage {
 
   imagePosition: WritableSignal<Geopoint | undefined> = signal(undefined);
 
+  /** Position picked on the map inside the edit modal, before confirming. */
   manualPosition: WritableSignal<Geopoint | undefined> = signal(undefined);
 
   confirmedManualPosition: WritableSignal<Geopoint | undefined> =
@@ -304,46 +345,149 @@ export class BitePage {
 
   googlePosition: WritableSignal<Geopoint | undefined> = signal(undefined);
 
-  isManualPositionModalOpen = signal(false);
+  restaurantPosition: WritableSignal<Geopoint | undefined> = signal(undefined);
+
+  /** Where the position currently in the form came from. */
+  positionSource: WritableSignal<PositionSource | undefined> =
+    signal(undefined);
+
+  /**
+   * Mirrors the source into the form group, which is what reaches the backend.
+   * Storing it means a Bite reopened for editing can still name its source
+   * instead of falling back to the unknown label.
+   */
+  positionSourcePersistEffect = effect(() => {
+    const source = this.positionSource();
+
+    this.biteFormGroup.controls['positionSource'].setValue(source ?? null, {
+      emitEvent: false,
+    });
+  });
+
+  isPositionSourceModalOpen = signal(false);
+
+  /** Source highlighted in the modal, applied to the form only on confirm. */
+  draftSource: WritableSignal<PositionSource | undefined> = signal(undefined);
 
   shouldRenderMapInModal = signal(false);
 
-  locationFromImage = computed(() => {
-    const currentValue = this.positionValueChanges();
-    const position = this.imagePosition();
-    return (
-      currentValue?.latitude === position?.latitude &&
-      currentValue?.longitude === position?.longitude
-    );
+  /** Transloco key for the row that states where the position came from. */
+  currentSourceLabelKey = computed(() => {
+    const source = this.positionSource();
+
+    return source
+      ? POSITION_SOURCE_LABEL_KEYS[source]
+      : UNKNOWN_POSITION_SOURCE_LABEL_KEY;
   });
 
-  locationFromGps = computed(() => {
-    const currentValue = this.positionValueChanges();
-    const position = this.position();
-    return (
-      currentValue?.latitude === position?.latitude &&
-      currentValue?.longitude === position?.longitude
-    );
+  positionCandidates = computed<PositionCandidate[]>(() => {
+    const lookedUp = (
+      source: Exclude<PositionSource, 'manual'>,
+      position: Geopoint | undefined,
+      unavailableReasonKey: string,
+    ): PositionCandidate => ({
+      source,
+      labelKey: POSITION_SOURCE_LABEL_KEYS[source],
+      color: POSITION_SOURCE_COLORS[source],
+      position,
+      disabled: !position,
+      ...(position ? {} : { unavailableReasonKey }),
+    });
+
+    return [
+      lookedUp('photo', this.imagePosition(), 'no-photo-position'),
+      lookedUp('gps', this.position(), 'no-device-position'),
+      lookedUp(
+        'restaurant',
+        this.restaurantPosition(),
+        'no-restaurant-position',
+      ),
+      lookedUp('google', this.googlePosition(), 'no-google-position'),
+      // Manual is never unavailable: it is a pick on the map, not a lookup that
+      // can come back empty.
+      {
+        source: 'manual',
+        labelKey: POSITION_SOURCE_LABEL_KEYS.manual,
+        color: POSITION_SOURCE_COLORS.manual,
+        position: this.confirmedManualPosition(),
+        disabled: false,
+      },
+    ];
   });
 
-  locationFromManual = computed(() => {
-    const currentValue = this.positionValueChanges();
-    const confirmed = this.confirmedManualPosition();
-    return !!(
-      confirmed &&
-      currentValue?.latitude === confirmed.latitude &&
-      currentValue?.longitude === confirmed.longitude
-    );
+  /**
+   * True only while the user is actively picking on the map. Reopening the
+   * modal on a manual position starts in the comparison view instead, so the
+   * manual point can be weighed against the other sources before editing it.
+   */
+  isManualDraftMode = signal(false);
+
+  /** Position the modal would apply, used to gate the confirm button. */
+  draftPosition = computed(() => {
+    const source = this.draftSource();
+
+    if (!source) {
+      return undefined;
+    }
+
+    if (source === 'manual') {
+      return this.manualPosition();
+    }
+
+    return this.positionCandidates().find(
+      (candidate) => candidate.source === source,
+    )?.position;
   });
 
-  locationFromGoogle = computed(() => {
-    const currentValue = this.positionValueChanges();
-    const google = this.googlePosition();
-    return !!(
-      google &&
-      currentValue?.latitude === google.latitude &&
-      currentValue?.longitude === google.longitude
-    );
+  /**
+   * Candidates as map markers. The source is carried in `id` so a marker click
+   * resolves back to its source without comparing coordinates.
+   */
+  candidateGeopoints = computed<Geopoint[]>(() =>
+    this.positionCandidates().flatMap((candidate) =>
+      candidate.position
+        ? [
+            {
+              id: candidate.source,
+              latitude: candidate.position.latitude,
+              longitude: candidate.position.longitude,
+            },
+          ]
+        : [],
+    ),
+  );
+
+  candidateMarkerColors = computed<Record<string, MarkerColor>>(() =>
+    Object.fromEntries(
+      this.positionCandidates().map((candidate) => [
+        candidate.source,
+        candidate.color,
+      ]),
+    ),
+  );
+
+  /**
+   * The modal map compares the candidates, and switches to a single draggable
+   * marker while the manual source is selected.
+   */
+  modalGeopoints = computed<Geopoint[]>(() => {
+    if (!this.isManualDraftMode()) {
+      return this.candidateGeopoints();
+    }
+
+    const manualPosition = this.manualPosition();
+
+    // Tagged with the source so the draft marker takes the manual colour the
+    // swatch in the list promises, instead of falling back to the default red.
+    return manualPosition
+      ? [
+          {
+            id: 'manual',
+            latitude: manualPosition.latitude,
+            longitude: manualPosition.longitude,
+          },
+        ]
+      : [];
   });
 
   saveBite(): void {
@@ -409,6 +553,12 @@ export class BitePage {
 
     this.imagePosition.set(undefined);
 
+    // The position carries over to the next Bite, but the photo it came from is
+    // gone, so the row stops attributing it to a source it can no longer offer.
+    if (this.positionSource() === 'photo') {
+      this.positionSource.set(undefined);
+    }
+
     const ionContent = this.ionContent();
 
     if (ionContent) {
@@ -420,6 +570,7 @@ export class BitePage {
     if (position) {
       this.imagePosition.set(position);
       this.biteFormGroup.controls['position'].patchValue(position);
+      this.positionSource.set('photo');
     }
   }
 
@@ -427,13 +578,19 @@ export class BitePage {
     const position = this.position();
     if (position) {
       this.biteFormGroup.controls['position'].patchValue(position);
+      this.positionSource.set('gps');
     }
   }
 
-  openManualPositionModal(): void {
+  openPositionSourceModal(): void {
     const currentPosition = this.biteFormGroup.controls['position'].value;
-    this.manualPosition.set(currentPosition ?? undefined);
-    this.isManualPositionModalOpen.set(true);
+
+    this.draftSource.set(this.positionSource());
+    this.manualPosition.set(
+      this.confirmedManualPosition() ?? currentPosition ?? undefined,
+    );
+    this.isManualDraftMode.set(false);
+    this.isPositionSourceModalOpen.set(true);
     this.shouldRenderMapInModal.set(false);
   }
 
@@ -441,25 +598,55 @@ export class BitePage {
     this.shouldRenderMapInModal.set(true);
   }
 
+  selectDraftSource(source: PositionSource): void {
+    // Entering manual mode starts from whatever was highlighted, so the map
+    // keeps a marker to drag instead of dropping the user on a blank world map.
+    if (source === 'manual' && !this.manualPosition()) {
+      this.manualPosition.set(
+        this.draftPosition() ??
+          this.biteFormGroup.controls['position'].value ??
+          undefined,
+      );
+    }
+
+    this.draftSource.set(source);
+    this.isManualDraftMode.set(source === 'manual');
+  }
+
+  /** A background tap on the map emits `undefined`, which must not deselect. */
+  onCandidateMarkerClick(geopoint: Geopoint | undefined): void {
+    const source = geopoint?.id as PositionSource | undefined;
+
+    if (source) {
+      this.selectDraftSource(source);
+    }
+  }
+
   onManualPositionSelected(position: Geopoint): void {
     this.manualPosition.set(position);
   }
 
-  confirmManualPosition(modal: IonModal): void {
-    const pos = this.manualPosition();
-    if (pos) {
-      this.biteFormGroup.controls['position'].patchValue(pos);
-      this.confirmedManualPosition.set(pos);
+  confirmPositionSource(modal: IonModal): void {
+    const source = this.draftSource();
+    const position = this.draftPosition();
+
+    if (source && position) {
+      this.biteFormGroup.controls['position'].patchValue(position);
+      this.positionSource.set(source);
+
+      if (source === 'manual') {
+        this.confirmedManualPosition.set(position);
+      }
     }
+
     void modal.dismiss();
-    this.isManualPositionModalOpen.set(false);
-    this.shouldRenderMapInModal.set(false);
+    this.closePositionSourceModal();
   }
 
-  cancelManualPosition(modal: IonModal): void {
-    void modal.dismiss();
-    this.isManualPositionModalOpen.set(false);
+  closePositionSourceModal(): void {
+    this.isPositionSourceModalOpen.set(false);
     this.shouldRenderMapInModal.set(false);
+    this.isManualDraftMode.set(false);
   }
 
   setTags(tags: string[]): void {
@@ -472,6 +659,12 @@ export class BitePage {
   resetImagePath(): void {
     this.biteFormGroup.get('imagePath')?.reset();
     this.imagePosition.set(undefined);
+
+    // Clearing the photo makes `image-upload` patch the device position back
+    // in, so the row must stop claiming the position came from the photo.
+    if (this.positionSource() === 'photo') {
+      this.positionSource.set(this.position() ? 'gps' : undefined);
+    }
   }
 
   openRestaurantSelector(): void {
@@ -503,6 +696,12 @@ export class BitePage {
         ? { position: selectedRestaurant.position }
         : {}),
     });
+
+    if (selectedRestaurant?.position) {
+      this.restaurantPosition.set(selectedRestaurant.position);
+      this.positionSource.set('restaurant');
+    }
+
     this.isRestaurantModalOpen.set(false);
   }
 
@@ -513,14 +712,8 @@ export class BitePage {
       restaurantId: '',
     });
     this.googlePosition.set(place.position);
+    this.positionSource.set('google');
     this.isRestaurantModalOpen.set(false);
-  }
-
-  onPositionFromGoogle(): void {
-    const position = this.googlePosition();
-    if (position) {
-      this.biteFormGroup.controls['position'].patchValue(position);
-    }
   }
 }
 

@@ -39,6 +39,30 @@ ion-alert {
   }
 }
 
+// A modal header that pairs a text action with a title.
+//
+// In `ios` mode Ionic lays the title out absolutely across the whole toolbar
+// with a hard-coded 90px inline padding, so the title box starts at a fixed
+// position no matter how wide the action next to it actually is. Any label
+// wider than that - `Abbrechen` measures ~99px - ends up underneath the title,
+// which then reads as one run-on string with both halves clipped (#1267).
+//
+// Putting the title back into the toolbar's flex row makes the gap follow the
+// real button width, so it holds for every shipped language instead of only
+// the ones that happen to fit inside 90px. The title keeps Ionic's own
+// ellipsis; it just truncates against the space that is actually left.
+//
+// Not for the app chrome header: its start slot is an icon-only back button
+// that cannot collide, and flowing the title would push it off centre.
+@mixin modal-header-title {
+  ion-toolbar ion-title {
+    position: static;
+    width: auto;
+    min-width: 0;
+    padding-inline: 8px;
+  }
+}
+
 @mixin light-border {
   border: 1px solid var(--ion-color-primary);
   border-radius: 1rem;

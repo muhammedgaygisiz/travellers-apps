@@ -1,3 +1,7 @@
+@use 'globals';
+
+@include globals.modal-header-title;
+
 :host {
   display: flex;
   flex-direction: column;

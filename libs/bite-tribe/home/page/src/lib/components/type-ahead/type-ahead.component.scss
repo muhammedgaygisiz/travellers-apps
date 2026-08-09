@@ -1,3 +1,7 @@
+@use 'globals';
+
+@include globals.modal-header-title;
+
 :host {
   .available-tags-title {
     margin-top: 0;
@@ -15,7 +19,9 @@
 
       min-width: 28px;
       height: 28px;
-      transition: transform 120ms ease, background 120ms ease;
+      transition:
+        transform 120ms ease,
+        background 120ms ease;
     }
   }
 }

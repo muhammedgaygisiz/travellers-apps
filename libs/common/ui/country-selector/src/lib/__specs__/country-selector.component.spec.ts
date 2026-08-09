@@ -157,4 +157,61 @@ describe('CountrySelectorComponent', () => {
       );
     });
   });
+
+  describe('searchbar input', () => {
+    const searchbar = (): HTMLIonSearchbarElement =>
+      fixture.nativeElement.querySelector('ion-searchbar');
+
+    it('should filter from what the user types, case-insensitively', () => {
+      const bar = searchbar();
+      bar.value = 'SWITZERLAND';
+      bar.dispatchEvent(new CustomEvent('ionInput'));
+      fixture.detectChanges();
+
+      expect(component.rawSearchTerm()).toBe('switzerland');
+      expect(component.filteredCountries()[0].code).toBe('CH');
+    });
+
+    it('should fall back to an empty term when the searchbar is cleared', () => {
+      component.rawSearchTerm.set('switzerland');
+
+      const bar = searchbar();
+      bar.value = null;
+      bar.dispatchEvent(new CustomEvent('ionInput'));
+      fixture.detectChanges();
+
+      expect(component.rawSearchTerm()).toBe('');
+      expect(component.filteredCountries()).toHaveLength(countries.length);
+    });
+
+    it('should render the empty state instead of rows when nothing matches', () => {
+      component.rawSearchTerm.set('zzzzzzzz');
+      fixture.detectChanges();
+
+      // The mocked Transloco service makes the pipe emit an empty string, so
+      // the empty row is asserted structurally rather than by its copy.
+      expect(
+        fixture.nativeElement.querySelectorAll(
+          '[data-testid^="country-option-"]',
+        ),
+      ).toHaveLength(0);
+      expect(fixture.nativeElement.querySelectorAll('ion-item')).toHaveLength(
+        1,
+      );
+    });
+  });
+
+  describe('active language fallback', () => {
+    it('should fall back to English when no active language is reported', () => {
+      MockTranslocoService.getActiveLang.mockReturnValue(
+        undefined as unknown as string,
+      );
+      createComponent();
+
+      expect(component.activeLang()).toBe('en');
+      expect(
+        component.getCountryName({ code: 'CH', name: 'Switzerland' }),
+      ).toBe('Switzerland');
+    });
+  });
 });

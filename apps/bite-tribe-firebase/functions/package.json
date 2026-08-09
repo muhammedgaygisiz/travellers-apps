@@ -1,7 +1,7 @@
 {
   "name": "functions",
   "scripts": {
-    "lint": "cd ../../.. && node_modules/.bin/eslint apps/bite-tribe-firebase/functions/src",
+    "lint": "cd ../../.. && npx nx run functions:lint",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "test": "jest --config jest.config.cjs --runInBand",
@@ -26,11 +26,6 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^25.5.0",
-    "@typescript-eslint/eslint-plugin": "^8.14.0",
-    "@typescript-eslint/parser": "^8.14.0",
-    "eslint": "^8.57.0",
-    "eslint-config-google": "^0.14.0",
-    "eslint-plugin-import": "^2.25.4",
     "firebase-functions-test": "^3.5.0",
     "graphql": "^16.13.1",
     "typescript": "^5.7.3"

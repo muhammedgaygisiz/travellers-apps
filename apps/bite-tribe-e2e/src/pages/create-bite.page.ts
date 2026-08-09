@@ -23,8 +23,9 @@ export class CreateBitePage {
   readonly editPosition: Locator;
   readonly setPosition: Locator;
   readonly positionSourceRow: Locator;
-  readonly gpsPositionSource: Locator;
+  readonly positionSourceMap: Locator;
   readonly confirmPositionSource: Locator;
+  readonly cancelPositionSource: Locator;
   readonly post: Locator;
   readonly postAndAddAnother: Locator;
   readonly backButton: Locator;
@@ -69,8 +70,11 @@ export class CreateBitePage {
     this.editPosition = page.getByTestId('edit-position');
     this.setPosition = page.getByTestId('set-position');
     this.positionSourceRow = page.getByTestId('position-source-row');
-    this.gpsPositionSource = page.getByTestId('position-source-gps');
+    this.positionSourceMap = page.locator(
+      'ion-modal .position-source-map bt-map .leaflet-container',
+    );
     this.confirmPositionSource = page.getByTestId('confirm-position-source');
+    this.cancelPositionSource = page.getByTestId('cancel-position-source');
     this.post = page.getByTestId('post-bite');
     this.postAndAddAnother = page.getByTestId('post-bite-and-add-another');
     this.tagChips = page.locator('bite bt-tags-input .container bt-chip');
@@ -216,8 +220,15 @@ export class CreateBitePage {
       .click();
   }
 
+  /**
+   * The comma is what commits the tag, after which the component clears the
+   * input. Waiting for the chip before returning stops the next `fill` from
+   * overwriting a tag the component has not consumed yet, which silently
+   * dropped the first of two tags whenever the machine was busy.
+   */
   async addTag(tag: string): Promise<void> {
     await this.tagsInput.fill(`${tag},`);
+    await expect(this.tagChips.filter({ hasText: tag })).toBeVisible();
   }
 
   async expectCurrency(currencyName: string): Promise<void> {
@@ -264,21 +275,79 @@ export class CreateBitePage {
     );
   }
 
+  /** One source row of the position modal, e.g. `gps` or `manual`. */
+  positionSourceOption(source: string): Locator {
+    return this.page.getByTestId(`position-source-${source}`);
+  }
+
   /**
-   * Adopts the browser geolocation (set in playwright.config) as the bite
-   * position, through the source modal the edit action opens. The form may or
-   * may not have resolved a position already, so both entry points are handled.
+   * Opens the modal behind the location row. The form may or may not have
+   * resolved a position already, and the row is replaced by a call to action
+   * while it has none, so both entry points are handled.
    */
-  async useGpsPosition(): Promise<void> {
+  async openPositionSourceModal(): Promise<void> {
     if (await this.editPosition.isVisible()) {
       await this.editPosition.click();
     } else {
       await this.setPosition.click();
     }
 
-    await this.gpsPositionSource.click();
+    await expect(this.positionSourceMap).toBeVisible();
+  }
+
+  /**
+   * Asserts what the location row claims about where the position came from.
+   * This is the whole point of the row: the position itself can be right while
+   * the source it is attributed to is wrong.
+   */
+  async expectPositionSource(label: string): Promise<void> {
+    await expect(this.positionSourceRow).toHaveText(label);
+  }
+
+  /** Adopts the browser geolocation (set in playwright.config) as the bite position. */
+  async useGpsPosition(): Promise<void> {
+    await this.openPositionSourceModal();
+    await this.positionSourceOption('gps').click();
     await this.confirmPositionSource.click();
-    await expect(this.positionSourceRow).toHaveText('From GPS');
+    await this.expectPositionSource('From GPS');
+    await this.expectPositionSourceModalClosed();
+  }
+
+  /**
+   * The location row updates the moment the form is patched, which is before
+   * Ionic has finished animating the modal away. Reopening in that window races
+   * the dismiss and leaves the overlay half-built, so every helper that leaves
+   * the modal waits for it to be gone.
+   */
+  async expectPositionSourceModalClosed(): Promise<void> {
+    await expect(this.positionSourceMap).toBeHidden();
+  }
+
+  /**
+   * Picks a point on the modal map through the manual source, then leaves the
+   * modal through `Cancel`. Offsetting from the map centre is what makes the
+   * pick land somewhere other than the position the form already holds.
+   */
+  async discardManualPositionPick(): Promise<void> {
+    await this.openPositionSourceModal();
+    await this.positionSourceOption('manual').click();
+
+    const map = await this.positionSourceMap.boundingBox();
+
+    if (!map) {
+      throw new Error('The position source map is not on screen to click in.');
+    }
+
+    // Clicked through the locator rather than at raw viewport coordinates, so
+    // Playwright waits for the modal to settle before the click lands. The
+    // upper right quadrant is clear of the zoom controls in the top left, the
+    // Leaflet attribution in the bottom right, and the marker in the centre.
+    await this.positionSourceMap.click({
+      position: { x: (map.width * 3) / 4, y: map.height / 4 },
+    });
+
+    await this.cancelPositionSource.click();
+    await this.expectPositionSourceModalClosed();
   }
 
   async submit(): Promise<void> {

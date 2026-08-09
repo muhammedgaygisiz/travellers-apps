@@ -41,7 +41,13 @@ import {
   PositionComponent,
 } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
-import type { Bite, Geopoint, GooglePlace, NearbyRestaurant } from 'model';
+import type {
+  Bite,
+  Geopoint,
+  GooglePlace,
+  NearbyRestaurant,
+  PositionSource,
+} from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
@@ -54,7 +60,6 @@ import {
   POSITION_SOURCE_COLORS,
   POSITION_SOURCE_LABEL_KEYS,
   PositionCandidate,
-  PositionSource,
   UNKNOWN_POSITION_SOURCE_LABEL_KEY,
 } from './model/position-source';
 
@@ -170,6 +175,10 @@ export class BitePage {
       currency: ['EUR', Validators.required],
       tags: [[] as string[]],
       position: [this.position(), Validators.required],
+      // Null rather than undefined: the whole form value is handed to Firestore,
+      // which rejects an undefined field and takes the Bite down with it. That
+      // is what lost menu-derived Bites in issue #1233.
+      positionSource: [null as PositionSource | null],
       rating: [0, [Validators.min(0), Validators.max(5)]],
     },
     {
@@ -202,6 +211,7 @@ export class BitePage {
       currency: bite.currency,
       tags: bite.tags || [],
       position: bite.position,
+      positionSource: bite.positionSource ?? null,
       restaurantId: bite.restaurantId || '',
       rating: bite.rating || 0,
       description: bite.description || '',
@@ -209,8 +219,9 @@ export class BitePage {
 
     if (bite?.position) {
       this.fallbackPosition.set(bite.position);
-      // A stored Bite carries a position but no record of where it came from.
-      this.positionSource.set(undefined);
+      // Bites written before the source was recorded carry none, and the row
+      // reports that as an unknown source rather than guessing one.
+      this.positionSource.set(bite.positionSource ?? undefined);
     }
   });
 
@@ -339,6 +350,19 @@ export class BitePage {
   /** Where the position currently in the form came from. */
   positionSource: WritableSignal<PositionSource | undefined> =
     signal(undefined);
+
+  /**
+   * Mirrors the source into the form group, which is what reaches the backend.
+   * Storing it means a Bite reopened for editing can still name its source
+   * instead of falling back to the unknown label.
+   */
+  positionSourcePersistEffect = effect(() => {
+    const source = this.positionSource();
+
+    this.biteFormGroup.controls['positionSource'].setValue(source ?? null, {
+      emitEvent: false,
+    });
+  });
 
   isPositionSourceModalOpen = signal(false);
 

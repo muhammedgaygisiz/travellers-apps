@@ -225,6 +225,7 @@ describe('BitePage', () => {
           latitude: 0,
           longitude: 0,
         },
+        positionSource: null,
       };
 
       const emitSpy = jest.spyOn(component.submitBite, 'emit');
@@ -232,6 +233,34 @@ describe('BitePage', () => {
       component.saveBite();
 
       expect(emitSpy).toHaveBeenCalledWith(validBite);
+    });
+
+    // The source has to reach the backend, not just the screen: without it a
+    // Bite reopened for editing cannot say where its position came from, and
+    // the photo position is gone for good once the upload strips the EXIF.
+    it('should emit the source the position came from', () => {
+      component.biteFormGroup.patchValue({
+        id: '',
+        image: 'data:image/jpeg;base64,test',
+        imagePath: '',
+        description: '',
+        name: 'Test Burger',
+        place: 'Test Place',
+        tags: ['fish healthy'],
+        price: '9.99',
+        rating: 0,
+        currency: 'EUR',
+        restaurantId: '',
+      });
+      component.onPositionFromImage({ latitude: 10, longitude: 20 });
+      componentRef.changeDetectorRef.detectChanges();
+
+      const emitSpy = jest.spyOn(component.submitBite, 'emit');
+      component.saveBite();
+
+      expect(emitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ positionSource: 'photo' }),
+      );
     });
 
     it('should not emit form value on saveBite when invalid', () => {
@@ -263,6 +292,7 @@ describe('BitePage', () => {
           latitude: 0,
           longitude: 0,
         },
+        positionSource: null,
       };
 
       component.biteFormGroup.patchValue(validBite);
@@ -294,6 +324,7 @@ describe('BitePage', () => {
         latitude: 10,
         longitude: 20,
       },
+      positionSource: null,
     };
 
     beforeEach(() => {
@@ -461,9 +492,32 @@ describe('BitePage', () => {
         description: '',
         tags: ['test', 'food'],
         position: { latitude: 42, longitude: 24 },
+        // A Bite stored before the source was recorded carries none.
+        positionSource: null,
       };
 
       expect(component.biteFormGroup.getRawValue()).toEqual(expected);
+    });
+
+    it('should restore the stored source of a Bite opened for editing', () => {
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+      componentRef.setInput('bite', {
+        id: '1',
+        image: 'test.jpg',
+        name: 'Test Bite',
+        place: 'Test Place',
+        price: 10,
+        currency: 'USD',
+        position: { latitude: 42, longitude: 24 },
+        positionSource: 'photo',
+      });
+
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.positionSource()).toBe('photo');
+      expect(component.currentSourceLabelKey()).toBe('from-photo');
     });
 
     it('should keep imagePath a string for a prefilled draft without a photo', () => {

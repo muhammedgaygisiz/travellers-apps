@@ -30,11 +30,11 @@
           </ion-label>
           <ion-button
             fill="outline"
-            class="reselect-button"
+            class="field-edit-button"
             aria-label="{{ 'change-restaurant' | transloco }}"
             (click)="openRestaurantSelector()"
           >
-            <ion-icon name="repeat" />
+            <ion-icon name="create-outline" />
           </ion-button>
         </div>
         } @else {
@@ -93,7 +93,7 @@
             </ion-label>
             <ion-button
               fill="outline"
-              class="edit-position-button"
+              class="field-edit-button"
               aria-label="{{ 'change-position' | transloco }}"
               (click)="openPositionSourceModal()"
               data-testid="edit-position"
@@ -184,7 +184,11 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-button fill="clear" (click)="positionSourceModal.dismiss()">
+          <ion-button
+            fill="clear"
+            (click)="positionSourceModal.dismiss()"
+            data-testid="cancel-position-source"
+          >
             {{ 'cancel' | transloco }}
           </ion-button>
         </ion-buttons>

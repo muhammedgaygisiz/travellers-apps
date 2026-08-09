@@ -20,28 +20,30 @@
     font-size: 0.8rem;
   }
 
-  .place-field {
-    .selected-place {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
+  // The restaurant and the location field share one shape: what is set, with
+  // the same edit action at the end of the row.
+  .selected-place,
+  .selected-position {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
 
-      .selected-place-name {
-        min-width: 0;
-        font-weight: 500;
-      }
-
-      .reselect-button {
-        --border-radius: 8px;
-        --padding-end: 0;
-        --padding-start: 0;
-        width: 47px;
-        height: 47px;
-        margin: 0;
-        flex-shrink: 0;
-      }
+    .selected-place-name,
+    .selected-position-source {
+      min-width: 0;
+      font-weight: 500;
     }
+  }
+
+  .field-edit-button {
+    --border-radius: 8px;
+    --padding-end: 0;
+    --padding-start: 0;
+    width: 47px;
+    height: 47px;
+    margin: 0;
+    flex-shrink: 0;
   }
 
   .map-label {
@@ -50,28 +52,6 @@
 
   .position-field {
     margin-bottom: 0.5rem;
-
-    .selected-position {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
-
-      .selected-position-source {
-        min-width: 0;
-        font-weight: 500;
-      }
-
-      .edit-position-button {
-        --border-radius: 8px;
-        --padding-end: 0;
-        --padding-start: 0;
-        width: 47px;
-        height: 47px;
-        margin: 0;
-        flex-shrink: 0;
-      }
-    }
   }
 }
 

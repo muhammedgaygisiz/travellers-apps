@@ -1,13 +1,5 @@
 import { MarkerColor } from 'bite-tribe-common/map';
-import type { Geopoint } from 'model';
-
-/**
- * Where the position on the Bite form came from. Tracked explicitly instead of
- * inferred by comparing coordinates: two sources can resolve to the same point,
- * and a position with no matching candidate used to report no source at all.
- */
-export type PositionSource =
-  'photo' | 'gps' | 'restaurant' | 'google' | 'manual';
+import type { Geopoint, PositionSource } from 'model';
 
 /** Transloco key naming each source in the text row and the modal list. */
 export const POSITION_SOURCE_LABEL_KEYS: Record<PositionSource, string> = {

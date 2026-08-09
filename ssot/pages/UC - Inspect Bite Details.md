@@ -66,6 +66,31 @@ through the same pipe, so the contract covers both:
   missing data shown to the user as data. Anything unparsable renders nothing
   for the same reason.
 
+## Absent Field Contract
+
+The details page renders a Bite whose optional fields are frequently empty, and
+the same rule governs all of them: a field with no value contributes nothing —
+no placeholder, no separator, no heading of its own. The page is shorter, not
+apologetic.
+
+- The place and distance share one line joined by a `·`. The separator belongs
+  to the join, so it appears only when both sides do. The distance itself needs
+  both ends — the reader's position and the Bite's own — and renders nothing
+  when either is missing, rather than falling back to `toMetric`'s `-`. Before
+  this, a page that had not loaded a Bite at all still rendered `· -`,
+  underneath the skeleton that was correctly saying nothing was there yet.
+- The read-only tag list is left out entirely for a Bite with no tags, heading
+  included. A "Tags" heading over an empty row announces an absent optional
+  field as though something had failed to load, and read-only there is nothing
+  the reader could add. The gate sits on the page rather than inside the shared
+  `bt-tags-input`, so the component still renders its heading for every caller:
+  the condition is a Bite having tags, which is knowledge the page has and the
+  component does not.
+- This is the same judgement as the profile's dropped "no location"
+  placeholder in [[UC - Manage Profile And Social Graph]] and the empty string
+  an absent timestamp renders above: BiteTribe does not fill a gap with a
+  message about the gap.
+
 ## Shared Link Entry Contract
 
 Issue [#1246](https://github.com/muhammedgaygisiz/travellers-apps/issues/1246)

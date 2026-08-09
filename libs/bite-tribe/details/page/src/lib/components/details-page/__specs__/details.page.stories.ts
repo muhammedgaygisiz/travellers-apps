@@ -144,6 +144,45 @@ export const noBite: Story = {
 };
 
 /**
+ * A Bite with no place and no position of its own. Neither half of the
+ * place-distance line has anything to say, so the line stays empty rather than
+ * rendering the separator and a "-" for a distance that cannot be measured.
+ */
+export const withoutPlaceOrDistance: Story = {
+  args: {
+    ...Default.args,
+    bite: {
+      ...Default.args?.bite,
+      place: '',
+      position: undefined,
+    } as unknown as Bite,
+  },
+};
+
+/**
+ * A Bite nobody tagged. The read-only tag list is left out entirely rather than
+ * heading an empty row, which is the same call as the place-distance line above
+ * it.
+ */
+export const withoutTags: Story = {
+  args: {
+    ...Default.args,
+    bite: {
+      ...Default.args?.bite,
+      tags: [],
+    } as unknown as Bite,
+  },
+};
+
+/** A Bite whose place is known while the reader's position is not. */
+export const withoutReaderPosition: Story = {
+  args: {
+    ...Default.args,
+    position: undefined,
+  },
+};
+
+/**
  * The photo has not arrived yet. The poster is the one holding the transfer, so
  * only they are asked to keep the app open. See GitHub issue #1168.
  */

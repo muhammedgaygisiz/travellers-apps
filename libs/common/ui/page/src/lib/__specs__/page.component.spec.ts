@@ -269,6 +269,84 @@ describe('PageComponent', () => {
     });
   });
 
+  /**
+   * Opening the add button's target is a guard round-trip plus a lazy chunk, so
+   * the button has to answer the tap itself. See GitHub issue #1287.
+   */
+  describe('add button pending', () => {
+    const getFooterAddButton = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="footer-add-button"]');
+
+    const getHeaderAddButton = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="header-add-button"]');
+
+    it('should not render a spinner in the add button by default', async () => {
+      componentRef.setInput('chrome', { showAddButton: true });
+      await fixture.whenStable();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="footer-add-button-spinner"]',
+        ),
+      ).toBeNull();
+      expect(getFooterAddButton()?.hasAttribute('disabled')).toBe(false);
+    });
+
+    it('should lock the footer add button behind a spinner while pending', async () => {
+      componentRef.setInput('chrome', { showAddButton: true });
+      componentRef.setInput('addButtonPending', true);
+      await fixture.whenStable();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="footer-add-button-spinner"]',
+        ),
+      ).not.toBeNull();
+      expect(getFooterAddButton()?.getAttribute('disabled')).not.toBeNull();
+    });
+
+    it('should lock the header add button behind a spinner while pending', async () => {
+      componentRef.setInput('chrome', {
+        desktopLayout: true,
+        showAddButton: true,
+      });
+      componentRef.setInput('addButtonPending', true);
+      await fixture.whenStable();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="header-add-button-spinner"]',
+        ),
+      ).not.toBeNull();
+      expect(getHeaderAddButton()?.getAttribute('disabled')).not.toBeNull();
+    });
+
+    // The disabled button already blocks this, but a tap can be queued between
+    // the click and the pending flag turning on.
+    it('should drop a click that lands while pending', async () => {
+      componentRef.setInput('chrome', { showAddButton: true });
+      componentRef.setInput('addButtonPending', true);
+      await fixture.whenStable();
+      const addSpy = jest.fn();
+      component.addButtonClick.subscribe(addSpy);
+
+      component.onAddButtonClick({} as MouseEvent);
+
+      expect(addSpy).not.toHaveBeenCalled();
+    });
+
+    it('should emit the add click while not pending', async () => {
+      componentRef.setInput('chrome', { showAddButton: true });
+      await fixture.whenStable();
+      const addSpy = jest.fn();
+      component.addButtonClick.subscribe(addSpy);
+
+      getFooterAddButton()?.click();
+
+      expect(addSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('app title', () => {
     it('should return input title when provided', () => {
       componentRef.setInput('title', 'Test Title');

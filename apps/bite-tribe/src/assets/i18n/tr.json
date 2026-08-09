@@ -3,6 +3,7 @@
   "app-check-blocked-message": "Bite Tribe bu cihazı güvenlik kontrolüyle doğrulayamadı. Devam etmek için bağlantını kontrol edip tekrar dene.",
   "app-check-retry": "Tekrar dene",
   "create-bite": "Bite Oluştur",
+  "create-bite-in-progress": "Bite Oluştur açılıyor...",
   "gallery": "Galeri",
   "delete-all": "Tümünü sil",
   "delete-all-images": "Tüm görselleri sil",

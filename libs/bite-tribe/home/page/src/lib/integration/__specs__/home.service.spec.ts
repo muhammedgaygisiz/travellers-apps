@@ -197,9 +197,59 @@ describe('HomeService', () => {
 
     it('should navigate to new bite page', inject(
       [HomeService],
-      (service: HomeService) => {
-        service.onAddButtonClicked();
+      async (service: HomeService) => {
+        await service.onAddButtonClicked();
         expect(navigateForwardSpy).toHaveBeenCalledWith(['new-bite']);
+      },
+    ));
+
+    /**
+     * The page is behind a token refresh and a lazy chunk, so the wait is the
+     * thing the user sees. See GitHub issue #1287.
+     */
+    it('should report the navigation as pending until the page is reached', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        let arrive: () => void = () => undefined;
+        navigateForwardSpy.mockReturnValue(
+          new Promise<boolean>((resolve) => {
+            arrive = (): void => resolve(true);
+          }),
+        );
+
+        const navigation = service.onAddButtonClicked();
+        expect(service.createBitePending()).toBe(true);
+
+        arrive();
+        await navigation;
+
+        expect(service.createBitePending()).toBe(false);
+      },
+    ));
+
+    it('should lower the pending flag when the navigation fails', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        navigateForwardSpy.mockRejectedValue(new Error('navigation failed'));
+
+        await expect(service.onAddButtonClicked()).rejects.toThrow(
+          'navigation failed',
+        );
+        expect(service.createBitePending()).toBe(false);
+      },
+    ));
+
+    it('should drop a second click while the first navigation is running', inject(
+      [HomeService],
+      async (service: HomeService) => {
+        navigateForwardSpy.mockReturnValue(
+          new Promise<boolean>(() => undefined),
+        );
+
+        void service.onAddButtonClicked();
+        void service.onAddButtonClicked();
+
+        expect(navigateForwardSpy).toHaveBeenCalledTimes(1);
       },
     ));
   });

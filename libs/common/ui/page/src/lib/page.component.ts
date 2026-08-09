@@ -16,6 +16,7 @@ import {
   IonHeader,
   IonIcon,
   IonProgressBar,
+  IonSpinner,
   IonText,
   IonTitle,
   IonToolbar,
@@ -48,6 +49,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
     IonContent,
     IonFooter,
     IonProgressBar,
+    IonSpinner,
     IonText,
     UpperCasePipe,
     TranslocoPipe,
@@ -72,6 +74,15 @@ export class PageComponent {
    * there is nothing to show yet. See GitHub issue #1168.
    */
   loading = input(false, { transform: booleanAttribute });
+
+  /**
+   * Reports that the add button's target is still opening. Reaching the Create
+   * Bite page is a guard chain plus a lazy chunk, so the tap has seconds of
+   * nothing to show for it unless the button says so itself. The button locks
+   * behind a spinner and the pending label while it is raised, the same way the
+   * sign-in submit does. See GitHub issue #1287.
+   */
+  addButtonPending = input(false, { transform: booleanAttribute });
 
   // Merge partial configs over the defaults so unspecified flags keep their
   // default value (Angular replaces the whole object on partial input).
@@ -183,6 +194,18 @@ export class PageComponent {
       this.chromeConfig().desktopLayout &&
       (this.desktopNavItems().length > 0 || this.chromeConfig().showAddButton),
   );
+
+  /**
+   * The disabled button already blocks this, but a tap can be queued between
+   * the click and the pending flag turning on.
+   */
+  onAddButtonClick($event: MouseEvent): void {
+    if (this.addButtonPending()) {
+      return;
+    }
+
+    this.addButtonClick.emit($event);
+  }
 
   async showMenuPopover($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({

@@ -17,7 +17,8 @@
     leaderboard: true,
   }"
   [isAuthenticated]="isAuthenticated()"
-  [loading]="showBiteSkeleton()"
+  [loading]="showBiteSkeleton() || createBitePending()"
+  [addButtonPending]="createBitePending()"
   (logoutClick)="logoutClick.emit()"
   (addButtonClick)="addButtonClick.emit()"
   (menuNavigate)="menuNavigate.emit($event)"

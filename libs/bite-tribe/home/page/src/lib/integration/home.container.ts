@@ -35,6 +35,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
         service.emailVerificationResendRunning()
       "
       [showFilters]="false"
+      [createBitePending]="service.createBitePending()"
       showSearchChip
       enableImageRetry
       (retryImageUpload)="service.retryBiteImageUpload($event)"

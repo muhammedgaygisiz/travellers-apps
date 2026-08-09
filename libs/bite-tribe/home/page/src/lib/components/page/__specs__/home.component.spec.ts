@@ -192,6 +192,37 @@ describe('BiteTribeHomeComponent', () => {
     ).toBeTruthy();
   });
 
+  /**
+   * The Create Bite page is behind a token refresh and a lazy chunk, so the tap
+   * has to be answered where it happened. See GitHub issue #1287.
+   */
+  describe('create bite pending', () => {
+    it('should leave the add button usable by default', () => {
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="footer-add-button-spinner"]',
+        ),
+      ).toBeNull();
+    });
+
+    it('should lock the add button and run the header bar while the page opens', () => {
+      componentRef.setInput('createBitePending', true);
+
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="footer-add-button-spinner"]',
+        ),
+      ).toBeTruthy();
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+      ).toBeTruthy();
+    });
+  });
+
   describe('feed synchronization error', () => {
     const feedErrorCard = (): HTMLElement | null =>
       fixture.nativeElement.querySelector('bt-feed-error-card');

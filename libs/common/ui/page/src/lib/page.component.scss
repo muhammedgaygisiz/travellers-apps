@@ -13,6 +13,12 @@ $desktop-content-max-width: 1440px;
     --border-width: 0 0 3px;
   }
 
+  /* The button centers its slotted content, so the spinner needs its own gap
+   * to the pending label instead of sitting flush against it. */
+  .add-button-spinner {
+    margin-inline-end: 0.5rem;
+  }
+
   /* Kept out of the flow below the breakpoint: the phone header has room for
    * the logo and the menu button only. */
   .desktop-nav {

@@ -38,9 +38,20 @@
               class="desktop-add-button"
               fill="solid"
               data-testid="header-add-button"
-              (click)="addButtonClick.emit($event)"
+              [disabled]="addButtonPending()"
+              (click)="onAddButtonClick($event)"
             >
-              {{ addButtonText() ?? ('create-bite' | transloco) }}
+              @if (addButtonPending()) {
+                <ion-spinner
+                  class="add-button-spinner"
+                  slot="start"
+                  name="crescent"
+                  data-testid="header-add-button-spinner"
+                />
+                {{ 'create-bite-in-progress' | transloco }}
+              } @else {
+                {{ addButtonText() ?? ('create-bite' | transloco) }}
+              }
             </ion-button>
           }
         </ion-buttons>
@@ -89,10 +100,21 @@
             <ion-button
               class="button"
               expand="block"
-              (click)="addButtonClick.emit($event)"
+              [disabled]="addButtonPending()"
+              (click)="onAddButtonClick($event)"
               data-testid="footer-add-button"
             >
-              {{ addButtonText() ?? ('create-bite' | transloco) }}
+              @if (addButtonPending()) {
+                <ion-spinner
+                  class="add-button-spinner"
+                  slot="start"
+                  name="crescent"
+                  data-testid="footer-add-button-spinner"
+                />
+                {{ 'create-bite-in-progress' | transloco }}
+              } @else {
+                {{ addButtonText() ?? ('create-bite' | transloco) }}
+              }
             </ion-button>
           }
         </ion-toolbar>

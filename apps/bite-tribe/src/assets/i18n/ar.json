@@ -3,6 +3,7 @@
   "app-check-blocked-message": "تعذّر على Bite Tribe التحقق من هذا الجهاز عبر فحص الأمان. تحقق من اتصالك وحاول مرة أخرى للمتابعة.",
   "app-check-retry": "حاول مرة أخرى",
   "create-bite": "Bite إنشاء",
+  "create-bite-in-progress": "جارٍ فتح إنشاء Bite...",
   "gallery": "المعرض",
   "delete-all": "حذف الكل",
   "delete-all-images": "حذف جميع الصور",

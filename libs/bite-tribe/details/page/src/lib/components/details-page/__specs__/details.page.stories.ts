@@ -21,6 +21,20 @@ export default {
 } as Meta<DetailsPage>;
 
 type Story = StoryObj<DetailsPage>;
+
+const MINUTE_MS = 60 * 1000;
+const DAY_MS = 24 * 60 * MINUTE_MS;
+
+/**
+ * Story timestamps are pinned to an offset from now rather than to a date, so
+ * the age renders as the same string on every run and the visual reference
+ * stays valid. A fixed date would walk through the units as the calendar moves
+ * and fail the reference with no code change behind it — which is exactly what
+ * the pipe's old hardcoded fallback date did to these stories. See GitHub issue
+ * #1272.
+ */
+const isoAgo = (ms: number): string => new Date(Date.now() - ms).toISOString();
+
 export const Default: Story = {
   args: {
     isAuthenticated: true,
@@ -42,6 +56,7 @@ export const Default: Story = {
       currency: 'CHF',
       city: 'Bern',
       countryCode: 'CH',
+      createdAt: isoAgo(5 * MINUTE_MS),
     } satisfies Bite,
     biteCreator: {
       userId: '1',
@@ -74,6 +89,21 @@ export const withDescription: Story = {
       ...Default.args?.bite,
       description:
         'A refreshing blend of botanical flavors, perfect for a sunny day in the city. This drink combines herbal notes with a hint of citrus, creating a delightful and invigorating experience.',
+    } as unknown as Bite,
+  },
+};
+
+/**
+ * The same Bite three weeks old. `Default` sits in the minute band, so this is
+ * what makes the unit selection visible: the pipe picks one unit and renders it
+ * in the reader's language rather than composing `3 w 0 d ago`.
+ */
+export const withOlderTimestamp: Story = {
+  args: {
+    ...Default.args,
+    bite: {
+      ...Default.args?.bite,
+      createdAt: isoAgo(21 * DAY_MS),
     } as unknown as Bite,
   },
 };

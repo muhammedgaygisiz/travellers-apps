@@ -237,6 +237,44 @@ describe(ProfileApiService.name, () => {
       },
     ));
 
+    describe('given an account that has a display name', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(AuthService, {
+          useValue: {
+            ...MockedAuthService,
+            getUser: (): any => ({
+              uid: '123',
+              displayName: 'run5mo',
+              providerData: [{ photoUrl: 'photo-url' }],
+            }),
+          },
+        });
+      });
+
+      // A real name is only ever set by the user in the edit-profile form.
+      // Seeding it from the display name made the profile show one name on
+      // both of its lines. See GitHub issue #1270.
+      it('should not seed fullName from the display name', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const setDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'setDocument')
+            .mockResolvedValue();
+
+          await service.saveUser(true);
+
+          expect(setDocumentSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+              data: expect.objectContaining({
+                displayName: 'run5mo',
+                fullName: '',
+              }),
+            }),
+          );
+        },
+      ));
+    });
+
     describe('given an error', () => {
       it('should handle the error', inject(
         [ProfileApiService],

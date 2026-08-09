@@ -121,7 +121,10 @@ export class ProfileApiService {
         data: {
           userId: user?.uid || '',
           displayName: user?.displayName || '',
-          fullName: user?.displayName || '',
+          // Not seeded from the display name: a profile that repeats one name
+          // on both of its lines is the bug in GitHub issue #1270. A real name
+          // is only ever set by the user, in the edit-profile form.
+          fullName: '',
           email: user?.email || '',
           photoUrl: photoUrl || '',
           public: isPublic,

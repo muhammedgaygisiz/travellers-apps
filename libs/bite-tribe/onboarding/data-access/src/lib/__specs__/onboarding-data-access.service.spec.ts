@@ -246,11 +246,22 @@ describe('OnboardingDataAccessService', () => {
       expect.objectContaining({
         userId: 'user-1',
         displayName: 'Auth Name',
-        fullName: 'Auth Name',
         email: 'auth@example.com',
         photoUrl: 'auth-photo',
         public: false,
       }),
+    );
+  });
+
+  // The auth display name is not a real name. Seeding `fullName` with it made
+  // the profile show the same name on both of its lines. See GitHub issue
+  // #1270.
+  it('leaves fullName empty rather than seeding it with the auth display name', async () => {
+    setup();
+    getDocument.mockResolvedValue({ snapshot: { data: {} } });
+
+    await expect(service.loadCurrentProfile()).resolves.toEqual(
+      expect.objectContaining({ displayName: 'Auth Name', fullName: '' }),
     );
   });
 

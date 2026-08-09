@@ -48,20 +48,40 @@
     margin-bottom: 0.5rem;
   }
 
-  .position-button-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 0.25rem;
+  .position-field {
     margin-bottom: 0.5rem;
 
-    ion-button {
-      width: 100%;
-      margin: 0;
+    .selected-position {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+
+      .selected-position-source {
+        min-width: 0;
+        font-weight: 500;
+      }
+
+      .edit-position-button {
+        --border-radius: 8px;
+        --padding-end: 0;
+        --padding-start: 0;
+        width: 47px;
+        height: 47px;
+        margin: 0;
+        flex-shrink: 0;
+      }
     }
   }
 }
 
 ion-modal {
+  // The source picker shares the sheet with the candidate list, so the map
+  // takes a fixed slice instead of the full height the manual picker used.
+  .position-source-map {
+    height: 45vh;
+  }
+
   bt-map {
     display: block;
     height: 100%;
@@ -69,5 +89,19 @@ ion-modal {
     ::ng-deep .map-container {
       height: 100%;
     }
+  }
+
+  .position-source-hint {
+    display: block;
+    padding: 0.5rem 1rem 0;
+    font-size: 0.8rem;
+  }
+
+  .source-swatch {
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: 50%;
+    margin-inline-end: 0.75rem;
+    flex-shrink: 0;
   }
 }

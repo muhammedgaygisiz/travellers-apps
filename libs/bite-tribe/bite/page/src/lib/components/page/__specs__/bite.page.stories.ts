@@ -28,6 +28,14 @@ export const Empty: Story = {
   },
 };
 
+/**
+ * No source has resolved a position yet, so the location section offers the
+ * call to action instead of a row naming a source.
+ */
+export const WithoutPosition: Story = {
+  args: {},
+};
+
 export const WithTagSuggestions: Story = {
   args: {
     position: {

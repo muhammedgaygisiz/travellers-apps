@@ -1,5 +1,6 @@
 import { geopointsToMarkers } from '../geopoints-to-markers';
 import { MarkerColor } from '../../model/marker-color.enum';
+import { getMarkerColor } from '../marker-color-tag';
 import { Geopoint } from 'model';
 
 jest.mock('leaflet');
@@ -47,5 +48,35 @@ describe('geopointsToMarkers', () => {
     expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.RED, {
       rating: '1',
     });
+  });
+
+  it('should colour a marker by the id it was given', () => {
+    geopointsToMarkers([{ latitude: 51.5074, longitude: -0.1278, id: 'gps' }], {
+      gps: MarkerColor.BLUE,
+    });
+
+    expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.BLUE, {
+      rating: undefined,
+    });
+  });
+
+  it('should keep the default colour for ids without an entry', () => {
+    geopointsToMarkers(
+      [{ latitude: 51.5074, longitude: -0.1278, id: 'photo' }],
+      { gps: MarkerColor.BLUE },
+    );
+
+    expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.RED, {
+      rating: undefined,
+    });
+  });
+
+  it('should remember the colour on the marker so focusing can restore it', () => {
+    const markers = geopointsToMarkers(
+      [{ latitude: 51.5074, longitude: -0.1278, id: 'gps' }],
+      { gps: MarkerColor.BLUE },
+    );
+
+    expect(getMarkerColor(markers[0])).toBe(MarkerColor.BLUE);
   });
 });

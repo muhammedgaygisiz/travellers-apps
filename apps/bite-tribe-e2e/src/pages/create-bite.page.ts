@@ -20,7 +20,11 @@ export class CreateBitePage {
   readonly invalidPriceMessage: Locator;
   readonly description: Locator;
   readonly tagsInput: Locator;
-  readonly fromGps: Locator;
+  readonly editPosition: Locator;
+  readonly setPosition: Locator;
+  readonly positionSourceRow: Locator;
+  readonly gpsPositionSource: Locator;
+  readonly confirmPositionSource: Locator;
   readonly post: Locator;
   readonly postAndAddAnother: Locator;
   readonly backButton: Locator;
@@ -62,7 +66,11 @@ export class CreateBitePage {
       'ion-textarea[formcontrolname="description"] textarea',
     );
     this.tagsInput = page.locator('bt-tags-input ion-input input');
-    this.fromGps = page.getByTestId('position-from-gps');
+    this.editPosition = page.getByTestId('edit-position');
+    this.setPosition = page.getByTestId('set-position');
+    this.positionSourceRow = page.getByTestId('position-source-row');
+    this.gpsPositionSource = page.getByTestId('position-source-gps');
+    this.confirmPositionSource = page.getByTestId('confirm-position-source');
     this.post = page.getByTestId('post-bite');
     this.postAndAddAnother = page.getByTestId('post-bite-and-add-another');
     this.tagChips = page.locator('bite bt-tags-input .container bt-chip');
@@ -256,9 +264,21 @@ export class CreateBitePage {
     );
   }
 
-  /** Adopts the browser geolocation (set in playwright.config) as the bite position. */
+  /**
+   * Adopts the browser geolocation (set in playwright.config) as the bite
+   * position, through the source modal the edit action opens. The form may or
+   * may not have resolved a position already, so both entry points are handled.
+   */
   async useGpsPosition(): Promise<void> {
-    await this.fromGps.click();
+    if (await this.editPosition.isVisible()) {
+      await this.editPosition.click();
+    } else {
+      await this.setPosition.click();
+    }
+
+    await this.gpsPositionSource.click();
+    await this.confirmPositionSource.click();
+    await expect(this.positionSourceRow).toHaveText('From GPS');
   }
 
   async submit(): Promise<void> {

@@ -129,63 +129,81 @@ describe('BitePage', () => {
     });
   });
 
-  describe('locationFromImage', () => {
-    it('should return true if position in form is same as image', () => {
+  describe('currentSourceLabelKey', () => {
+    it('should name the source the position came from', () => {
+      component.onPositionFromImage({ latitude: 10, longitude: 20 });
+
+      expect(component.currentSourceLabelKey()).toBe('from-photo');
+    });
+
+    it('should fall back to the unknown label when no source is recorded', () => {
+      component.positionSource.set(undefined);
+
+      expect(component.currentSourceLabelKey()).toBe('position-source-unknown');
+    });
+
+    it('should report the source even when two sources share coordinates', () => {
       const position = { latitude: 10, longitude: 20 };
-      component.biteFormGroup.controls['position'].patchValue(position);
-      component.imagePosition.set(position);
+      componentRef.setInput('position', position);
 
-      expect(component.locationFromImage()).toBe(true);
-    });
+      component.onPositionFromImage(position);
 
-    it('should return false if position in form is different from image', () => {
-      component.biteFormGroup.controls['position'].patchValue({
-        latitude: 10,
-        longitude: 20,
-      });
-      component.imagePosition.set({ latitude: 30, longitude: 40 });
-
-      expect(component.locationFromImage()).toBe(false);
-    });
-
-    it('should return false if imagePosition is undefined', () => {
-      component.biteFormGroup.controls['position'].patchValue({
-        latitude: 10,
-        longitude: 20,
-      });
-      component.imagePosition.set(undefined);
-
-      expect(component.locationFromImage()).toBe(false);
+      expect(component.currentSourceLabelKey()).toBe('from-photo');
     });
   });
 
-  describe('locationFromGps', () => {
-    it('should return true if position in form is same as gps position', () => {
-      const position = { latitude: 10, longitude: 20 };
-      component.biteFormGroup.controls['position'].patchValue(position);
-      componentRef.setInput('position', position);
+  describe('positionCandidates', () => {
+    it('should disable a source that has no position and say why', () => {
+      component.imagePosition.set(undefined);
 
-      expect(component.locationFromGps()).toBe(true);
+      const photo = component
+        .positionCandidates()
+        .find((candidate) => candidate.source === 'photo');
+
+      expect(photo?.disabled).toBe(true);
+      expect(photo?.unavailableReasonKey).toBe('no-photo-position');
     });
 
-    it('should return false if position in form is different from gps position', () => {
-      component.biteFormGroup.controls['position'].patchValue({
-        latitude: 10,
-        longitude: 20,
-      });
-      component.fallbackPosition.set({ latitude: 30, longitude: 40 });
+    it('should enable a source once it has a position', () => {
+      component.imagePosition.set({ latitude: 10, longitude: 20 });
 
-      expect(component.locationFromGps()).toBe(false);
+      const photo = component
+        .positionCandidates()
+        .find((candidate) => candidate.source === 'photo');
+
+      expect(photo?.disabled).toBe(false);
+      expect(photo?.unavailableReasonKey).toBeUndefined();
     });
 
-    it('should return false if fallbackPosition is undefined', () => {
-      component.biteFormGroup.controls['position'].patchValue({
-        latitude: 10,
-        longitude: 20,
-      });
-      component.fallbackPosition.set(undefined);
+    it('should keep the manual source selectable without a position', () => {
+      component.confirmedManualPosition.set(undefined);
 
-      expect(component.locationFromGps()).toBe(false);
+      const manual = component
+        .positionCandidates()
+        .find((candidate) => candidate.source === 'manual');
+
+      expect(manual?.disabled).toBe(false);
+    });
+
+    it('should offer every source as a row', () => {
+      expect(
+        component.positionCandidates().map((candidate) => candidate.source),
+      ).toEqual(['photo', 'gps', 'restaurant', 'google', 'manual']);
+    });
+  });
+
+  describe('candidateGeopoints', () => {
+    it('should carry the source in the marker id and skip empty sources', () => {
+      component.imagePosition.set({ latitude: 10, longitude: 20 });
+      component.googlePosition.set({ latitude: 30, longitude: 40 });
+      component.restaurantPosition.set(undefined);
+      component.confirmedManualPosition.set(undefined);
+      componentRef.setInput('position', undefined);
+
+      expect(component.candidateGeopoints()).toEqual([
+        { id: 'photo', latitude: 10, longitude: 20 },
+        { id: 'google', latitude: 30, longitude: 40 },
+      ]);
     });
   });
 
@@ -710,6 +728,104 @@ describe('BitePage', () => {
       component.resetImagePath();
       expect(component.biteFormGroup.get('imagePath')).toBeNull();
     });
+
+    it('should stop crediting the photo once it is cleared', () => {
+      componentRef.setInput('position', { latitude: 1, longitude: 2 });
+      component.onPositionFromImage({ latitude: 10, longitude: 20 });
+
+      component.resetImagePath();
+
+      expect(component.positionSource()).toBe('gps');
+    });
+
+    it('should drop the source when there is no device position to fall back to', () => {
+      componentRef.setInput('position', undefined);
+      component.onPositionFromImage({ latitude: 10, longitude: 20 });
+
+      component.resetImagePath();
+
+      expect(component.positionSource()).toBeUndefined();
+    });
+  });
+
+  describe('position source tracking', () => {
+    it('should record the photo as the source when a photo position arrives', () => {
+      component.onPositionFromImage({ latitude: 10, longitude: 20 });
+
+      expect(component.positionSource()).toBe('photo');
+    });
+
+    it('should record GPS as the source when the device position is applied', () => {
+      componentRef.setInput('position', { latitude: 10, longitude: 20 });
+
+      component.onPositionFromNavigator();
+
+      expect(component.positionSource()).toBe('gps');
+    });
+
+    it('should record the restaurant as the source and offer it as a candidate', () => {
+      const position = { latitude: 12, longitude: 34 };
+      componentRef.setInput('nearbyRestaurants', [
+        { name: 'Test Restaurant', position },
+      ]);
+
+      component.onRestaurantSelected('Test Restaurant');
+
+      expect(component.positionSource()).toBe('restaurant');
+      expect(component.restaurantPosition()).toEqual(position);
+    });
+
+    it('should leave the source alone for a restaurant without a position', () => {
+      component.onPositionFromImage({ latitude: 10, longitude: 20 });
+      componentRef.setInput('nearbyRestaurants', [{ name: 'No Position' }]);
+
+      component.onRestaurantSelected('No Position');
+
+      expect(component.positionSource()).toBe('photo');
+      expect(component.restaurantPosition()).toBeUndefined();
+    });
+
+    it('should prefill from the device fix and keep following it', () => {
+      componentRef.setInput('position', { latitude: 1, longitude: 2 });
+      componentRef.changeDetectorRef.detectChanges();
+
+      componentRef.setInput('position', { latitude: 3, longitude: 4 });
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.biteFormGroup.controls['position'].value).toEqual({
+        latitude: 3,
+        longitude: 4,
+      });
+      expect(component.positionSource()).toBe('gps');
+    });
+
+    it('should not let a later device fix overwrite a chosen source', () => {
+      const imagePosition = { latitude: 10, longitude: 20 };
+      componentRef.setInput('position', { latitude: 1, longitude: 2 });
+      componentRef.changeDetectorRef.detectChanges();
+
+      component.onPositionFromImage(imagePosition);
+      componentRef.setInput('position', { latitude: 3, longitude: 4 });
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        imagePosition,
+      );
+      expect(component.positionSource()).toBe('photo');
+    });
+
+    it('should record Google as the source when a Google place is picked', () => {
+      const position = { latitude: 12, longitude: 34 };
+
+      component.onGooglePlaceSelected({
+        placeId: 'place-1',
+        name: 'Google Place',
+        address: 'Main Street 1',
+        position,
+      });
+
+      expect(component.positionSource()).toBe('google');
+    });
   });
 
   describe('onRestaurantSelected', () => {
@@ -865,53 +981,109 @@ describe('BitePage', () => {
     });
   });
 
-  describe('locationFromManual', () => {
-    it('should return true if position in form matches confirmed manual position', () => {
+  describe('openPositionSourceModal', () => {
+    it('should open the modal on the source the form currently uses', () => {
+      component.positionSource.set('google');
+
+      component.openPositionSourceModal();
+
+      expect(component.isPositionSourceModalOpen()).toBe(true);
+      expect(component.draftSource()).toBe('google');
+    });
+
+    it('should open on the comparison map even when the source is manual', () => {
+      component.positionSource.set('manual');
+      component.confirmedManualPosition.set({ latitude: 10, longitude: 20 });
+
+      component.openPositionSourceModal();
+
+      expect(component.draftSource()).toBe('manual');
+      expect(component.isManualDraftMode()).toBe(false);
+      expect(component.draftPosition()).toEqual({
+        latitude: 10,
+        longitude: 20,
+      });
+    });
+
+    it('should seed the manual pick with the current form position', () => {
       const position = { latitude: 10, longitude: 20 };
-      component.biteFormGroup.controls['position'].patchValue(position);
-      component.confirmedManualPosition.set(position);
-
-      expect(component.locationFromManual()).toBe(true);
-    });
-
-    it('should return false if position in form differs from confirmed manual position', () => {
-      component.biteFormGroup.controls['position'].patchValue({
-        latitude: 10,
-        longitude: 20,
-      });
-      component.confirmedManualPosition.set({ latitude: 30, longitude: 40 });
-
-      expect(component.locationFromManual()).toBe(false);
-    });
-
-    it('should return false if confirmedManualPosition is undefined', () => {
-      component.biteFormGroup.controls['position'].patchValue({
-        latitude: 10,
-        longitude: 20,
-      });
       component.confirmedManualPosition.set(undefined);
-
-      expect(component.locationFromManual()).toBe(false);
-    });
-  });
-
-  describe('openManualPositionModal', () => {
-    it('should open the manual position modal', () => {
-      component.openManualPositionModal();
-      expect(component.isManualPositionModalOpen()).toBe(true);
-    });
-
-    it('should initialize manualPosition with current form position', () => {
-      const position = { latitude: 10, longitude: 20 };
       component.biteFormGroup.controls['position'].patchValue(position);
-      component.openManualPositionModal();
+
+      component.openPositionSourceModal();
+
       expect(component.manualPosition()).toEqual(position);
     });
 
-    it('should set manualPosition to undefined if form has no position', () => {
-      component.biteFormGroup.controls['position'].reset();
-      component.openManualPositionModal();
-      expect(component.manualPosition()).toBeUndefined();
+    it('should prefer the last confirmed manual pick when seeding', () => {
+      const manual = { latitude: 30, longitude: 40 };
+      component.confirmedManualPosition.set(manual);
+      component.biteFormGroup.controls['position'].patchValue({
+        latitude: 10,
+        longitude: 20,
+      });
+
+      component.openPositionSourceModal();
+
+      expect(component.manualPosition()).toEqual(manual);
+    });
+  });
+
+  describe('selectDraftSource', () => {
+    it('should highlight a source without touching the form', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.biteFormGroup.controls['position'].patchValue(position);
+      component.imagePosition.set({ latitude: 30, longitude: 40 });
+
+      component.selectDraftSource('photo');
+
+      expect(component.draftSource()).toBe('photo');
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        position,
+      );
+    });
+
+    it('should leave manual pick mode when another source is selected', () => {
+      component.selectDraftSource('manual');
+
+      component.selectDraftSource('gps');
+
+      expect(component.isManualDraftMode()).toBe(false);
+    });
+
+    it('should start manual mode from the highlighted position', () => {
+      const imagePosition = { latitude: 30, longitude: 40 };
+      component.confirmedManualPosition.set(undefined);
+      component.manualPosition.set(undefined);
+      component.imagePosition.set(imagePosition);
+      component.selectDraftSource('photo');
+
+      component.selectDraftSource('manual');
+
+      expect(component.isManualDraftMode()).toBe(true);
+      expect(component.manualPosition()).toEqual(imagePosition);
+    });
+  });
+
+  describe('onCandidateMarkerClick', () => {
+    it('should select the source the marker belongs to', () => {
+      component.googlePosition.set({ latitude: 10, longitude: 20 });
+
+      component.onCandidateMarkerClick({
+        id: 'google',
+        latitude: 10,
+        longitude: 20,
+      });
+
+      expect(component.draftSource()).toBe('google');
+    });
+
+    it('should keep the selection when the map background is tapped', () => {
+      component.selectDraftSource('gps');
+
+      component.onCandidateMarkerClick(undefined);
+
+      expect(component.draftSource()).toBe('gps');
     });
   });
 
@@ -923,48 +1095,83 @@ describe('BitePage', () => {
     });
   });
 
-  describe('confirmManualPosition', () => {
-    it('should set position in the form group and confirmedManualPosition, then dismiss modal', () => {
-      const position = { latitude: 10, longitude: 20 };
-      const dismissSpy = jest.fn();
-      component.manualPosition.set(position);
-      component.confirmManualPosition({
-        dismiss: dismissSpy,
-      } as unknown as IonModal);
-      expect(component.biteFormGroup.controls['position'].value).toEqual(
-        position,
-      );
-      expect(component.confirmedManualPosition()).toEqual(position);
-      expect(dismissSpy).toHaveBeenCalled();
-      expect(component.isManualPositionModalOpen()).toBe(false);
+  describe('draftPosition', () => {
+    it('should resolve the highlighted source to its position', () => {
+      const googlePosition = { latitude: 10, longitude: 20 };
+      component.googlePosition.set(googlePosition);
+      component.selectDraftSource('google');
+
+      expect(component.draftPosition()).toEqual(googlePosition);
     });
 
-    it('should not update form if manualPosition is undefined', () => {
-      const dismissSpy = jest.fn();
-      component.manualPosition.set(undefined);
+    it('should be empty while manual mode has no pick yet', () => {
+      component.confirmedManualPosition.set(undefined);
       component.biteFormGroup.controls['position'].reset();
-      component.confirmManualPosition({
+      component.manualPosition.set(undefined);
+      component.draftSource.set('manual');
+
+      expect(component.draftPosition()).toBeUndefined();
+    });
+  });
+
+  describe('confirmPositionSource', () => {
+    it('should apply the highlighted source to the form and record it', () => {
+      const googlePosition = { latitude: 10, longitude: 20 };
+      const dismissSpy = jest.fn();
+      component.googlePosition.set(googlePosition);
+      component.selectDraftSource('google');
+
+      component.confirmPositionSource({
         dismiss: dismissSpy,
       } as unknown as IonModal);
+
+      expect(component.biteFormGroup.controls['position'].value).toEqual(
+        googlePosition,
+      );
+      expect(component.positionSource()).toBe('google');
+      expect(dismissSpy).toHaveBeenCalled();
+      expect(component.isPositionSourceModalOpen()).toBe(false);
+    });
+
+    it('should remember a manual pick so it stays offered as a candidate', () => {
+      const position = { latitude: 10, longitude: 20 };
+      component.manualPosition.set(position);
+      component.draftSource.set('manual');
+
+      component.confirmPositionSource({
+        dismiss: jest.fn(),
+      } as unknown as IonModal);
+
+      expect(component.confirmedManualPosition()).toEqual(position);
+      expect(component.positionSource()).toBe('manual');
+    });
+
+    it('should leave the form untouched when nothing is highlighted', () => {
+      const dismissSpy = jest.fn();
+      component.biteFormGroup.controls['position'].reset();
+      component.draftSource.set(undefined);
+
+      component.confirmPositionSource({
+        dismiss: dismissSpy,
+      } as unknown as IonModal);
+
       expect(component.biteFormGroup.controls['position'].value).toBeNull();
       expect(dismissSpy).toHaveBeenCalled();
     });
   });
 
-  describe('cancelManualPosition', () => {
-    it('should dismiss modal and close it without changing form position', () => {
+  describe('closePositionSourceModal', () => {
+    it('should close without changing the form position', () => {
       const position = { latitude: 10, longitude: 20 };
-      const dismissSpy = jest.fn();
       component.biteFormGroup.controls['position'].patchValue(position);
-      component.isManualPositionModalOpen.set(true);
-      component.cancelManualPosition({
-        dismiss: dismissSpy,
-      } as unknown as IonModal);
+      component.isPositionSourceModalOpen.set(true);
+
+      component.closePositionSourceModal();
+
       expect(component.biteFormGroup.controls['position'].value).toEqual(
         position,
       );
-      expect(dismissSpy).toHaveBeenCalled();
-      expect(component.isManualPositionModalOpen()).toBe(false);
+      expect(component.isPositionSourceModalOpen()).toBe(false);
     });
   });
 

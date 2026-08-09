@@ -276,6 +276,120 @@ describe('DetailsPage', () => {
       ).toBeFalsy();
     });
 
+    // The separator and the distance placeholder used to survive every guard
+    // on this line, so a page with no Bite still rendered "· -".
+    describe('place and distance line', () => {
+      const readLine = (): string =>
+        (
+          fixture.nativeElement.querySelector(
+            '.restaurant-distance',
+          ) as HTMLElement
+        ).textContent
+          ?.replace(/\s+/g, ' ')
+          .trim() ?? '';
+
+      const readerPosition = {
+        coords: { latitude: 46.9, longitude: 7.4 },
+      } as unknown as GeolocationPosition;
+
+      it('stays empty while the bite is loading', () => {
+        componentRef.setInput('position', readerPosition);
+        componentRef.changeDetectorRef.detectChanges();
+
+        expect(readLine()).toBe('');
+      });
+
+      it('stays empty for a bite with neither a place nor a position', () => {
+        componentRef.setInput('bite', {
+          id: '1',
+          name: 'Pizza',
+          place: '',
+        } as Bite);
+        componentRef.setInput('position', readerPosition);
+        componentRef.changeDetectorRef.detectChanges();
+
+        expect(readLine()).toBe('');
+      });
+
+      it('shows the place alone when the reader has no position', () => {
+        componentRef.setInput('bite', {
+          id: '1',
+          name: 'Pizza',
+          place: 'Einstein au Jardin',
+          position: { latitude: 46.9, longitude: 7.4 },
+        } as Bite);
+        componentRef.setInput('position', undefined);
+        componentRef.changeDetectorRef.detectChanges();
+
+        expect(readLine()).toBe('Einstein au Jardin');
+      });
+
+      it('shows the place alone when the bite has no position', () => {
+        componentRef.setInput('bite', {
+          id: '1',
+          name: 'Pizza',
+          place: 'Einstein au Jardin',
+        } as Bite);
+        componentRef.setInput('position', readerPosition);
+        componentRef.changeDetectorRef.detectChanges();
+
+        expect(readLine()).toBe('Einstein au Jardin');
+      });
+
+      it('joins the place and the distance when both are known', () => {
+        componentRef.setInput('bite', {
+          id: '1',
+          name: 'Pizza',
+          place: 'Einstein au Jardin',
+          position: { latitude: 46.9, longitude: 7.4 },
+        } as Bite);
+        componentRef.setInput('position', readerPosition);
+        componentRef.changeDetectorRef.detectChanges();
+
+        expect(readLine()).toBe('Einstein au Jardin · 0.00 km');
+      });
+    });
+
+    // Read-only, an empty tag list is a heading over nothing: no tags to read
+    // and no way to add any.
+    describe('tags', () => {
+      const tagList = (): HTMLElement | null =>
+        fixture.nativeElement.querySelector('bt-tags-input');
+
+      it('hides the tag list for a bite without tags', () => {
+        componentRef.setInput('bite', { id: '1', name: 'Pizza' } as Bite);
+        componentRef.changeDetectorRef.detectChanges();
+
+        expect(tagList()).toBeNull();
+      });
+
+      it('hides the tag list for a bite with an empty tag array', () => {
+        componentRef.setInput('bite', {
+          id: '1',
+          name: 'Pizza',
+          tags: [],
+        } as unknown as Bite);
+        componentRef.changeDetectorRef.detectChanges();
+
+        expect(tagList()).toBeNull();
+      });
+
+      it('hides the tag list while the bite is loading', () => {
+        expect(tagList()).toBeNull();
+      });
+
+      it('shows the tag list for a bite that has tags', () => {
+        componentRef.setInput('bite', {
+          id: '1',
+          name: 'Pizza',
+          tags: ['halal'],
+        } as unknown as Bite);
+        componentRef.changeDetectorRef.detectChanges();
+
+        expect(tagList()).not.toBeNull();
+      });
+    });
+
     it('should show a review field skeleton while bite is loading', () => {
       const nativeElement = fixture.debugElement.nativeElement as HTMLElement;
 

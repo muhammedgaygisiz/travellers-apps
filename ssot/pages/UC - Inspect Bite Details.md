@@ -41,6 +41,56 @@ Users can inspect one Bite deeply enough to decide whether the dish is relevant.
   `bt-bite-image-status` component so they cannot drift. See GitHub issue #1168
   and [[UC - Create And Maintain Personal Bites]] for the status rules.
 
+## Relative Time Contract
+
+Issue [#1272](https://github.com/muhammedgaygisiz/travellers-apps/issues/1272)
+made the page's ages honest. The Bite's age and every review's age render
+through the same pipe, so the contract covers both:
+
+- An age is written in the reader's language. It is formatted by
+  `Intl.RelativeTimeFormat` against the active Transloco language rather than
+  assembled from hardcoded English, which is what put `5 min ago` in the middle
+  of an otherwise German page during release-candidate Run 5.
+- The abbreviations come from CLDR, so the unit stays readable per language.
+  The hand-written pair that shipped before — `min` for minutes and `m` for
+  months — was a distinction no translation would have preserved.
+- A single unit is shown. The composed forms the old pipe produced, such as
+  `2 w 3 d ago`, have no localized equivalent and are gone; the coarser unit is
+  enough to judge how fresh a Bite is.
+- A timestamp ahead of now is reported as ahead, not as elapsed. Clock skew and
+  a bad write both produce one, and rendering it as an age presented a wrong
+  reading as a confident one.
+- A Bite or review without a timestamp renders nothing. The pipe used to
+  default its argument to a hardcoded May 2025 constant, so an absent
+  `createdAt` was reported as a real age measured from an arbitrary date —
+  missing data shown to the user as data. Anything unparsable renders nothing
+  for the same reason.
+
+## Absent Field Contract
+
+The details page renders a Bite whose optional fields are frequently empty, and
+the same rule governs all of them: a field with no value contributes nothing —
+no placeholder, no separator, no heading of its own. The page is shorter, not
+apologetic.
+
+- The place and distance share one line joined by a `·`. The separator belongs
+  to the join, so it appears only when both sides do. The distance itself needs
+  both ends — the reader's position and the Bite's own — and renders nothing
+  when either is missing, rather than falling back to `toMetric`'s `-`. Before
+  this, a page that had not loaded a Bite at all still rendered `· -`,
+  underneath the skeleton that was correctly saying nothing was there yet.
+- The read-only tag list is left out entirely for a Bite with no tags, heading
+  included. A "Tags" heading over an empty row announces an absent optional
+  field as though something had failed to load, and read-only there is nothing
+  the reader could add. The gate sits on the page rather than inside the shared
+  `bt-tags-input`, so the component still renders its heading for every caller:
+  the condition is a Bite having tags, which is knowledge the page has and the
+  component does not.
+- This is the same judgement as the profile's dropped "no location"
+  placeholder in [[UC - Manage Profile And Social Graph]] and the empty string
+  an absent timestamp renders above: BiteTribe does not fill a gap with a
+  message about the gap.
+
 ## Shared Link Entry Contract
 
 Issue [#1246](https://github.com/muhammedgaygisiz/travellers-apps/issues/1246)

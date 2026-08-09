@@ -46,6 +46,8 @@ const countryResults: SearchResult[] = [
       id: 'bite-1',
       name: 'Fondue Moitié-Moitié',
       place: 'Bern',
+      position: { latitude: 46.948, longitude: 7.447 },
+      rating: 5,
     },
   },
   {
@@ -54,6 +56,17 @@ const countryResults: SearchResult[] = [
       id: 'bite-2',
       name: 'Zürcher Geschnetzeltes',
       place: 'Zurich',
+      position: { latitude: 47.3769, longitude: 8.5417 },
+      rating: 4,
+    },
+  },
+  {
+    category: 'country',
+    value: {
+      id: 'bite-3',
+      name: 'Not rated yet',
+      place: 'Geneva',
+      position: { latitude: 46.2044, longitude: 6.1432 },
     },
   },
 ];
@@ -106,5 +119,22 @@ export const CountryPicked: Story = {
     selectedCountryCode: 'CH',
     results: countryResults,
     hasSearched: true,
+  },
+};
+
+/**
+ * Map view: the page drops its 720px desktop cap so the map runs full width,
+ * and rated Bites carry their rating in the marker as they do on every other
+ * map. The third Bite is unrated and keeps the plain pin.
+ */
+export const CountryMapView: Story = {
+  args: {
+    ...CountryPicked.args,
+  },
+  play: async ({ canvasElement }) => {
+    const toggle = canvasElement.querySelector('ion-toggle');
+    toggle?.dispatchEvent(
+      new CustomEvent('ionChange', { detail: { checked: true } }),
+    );
   },
 };

@@ -1,4 +1,13 @@
 :host {
+  // Map view drops the page's 720px desktop cap so the map can use the full
+  // width. The controls do not want that width, so they keep the column
+  // themselves. A no-op in list view, where the page already caps at 720px.
+  .search-controls {
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
   .search-title {
     display: flex;
     align-items: center;
@@ -40,12 +49,18 @@
 
   // Takes the searchbar's place for country search, so it has to read as the
   // same control: same height, same rounded field, tappable across its width.
+  //
+  // Ionic lays its 2.25rem searchbar input inside a 3.75rem host, and that
+  // 0.75rem above and below survives the `padding: 0` above. A bare button has
+  // none of it, so without the matching margin the field collides with the
+  // title (#722) and the controls jump whenever the category changes.
   .country-field {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     width: 100%;
     min-height: 2.25rem;
+    margin-block: 0.75rem;
     padding: 0 1rem;
     border: none;
     border-radius: 10px;

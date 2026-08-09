@@ -76,6 +76,7 @@ export class MapComponent implements OnDestroy {
   private markerClusterGroup: L.MarkerClusterGroup = L.markerClusterGroup();
   private markers: L.Marker[] = [];
   private hasAutoFitted = false;
+  private resizeObserver?: ResizeObserver;
   private readonly mapChild = viewChild<ElementRef>('map');
 
   isReadonly = computed(() => {
@@ -109,6 +110,7 @@ export class MapComponent implements OnDestroy {
 
     this.addMapClickEvent();
 
+    this.observeContainerResize(mapElement);
     this.forceMapRedraw();
   });
 
@@ -195,6 +197,8 @@ export class MapComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+
     if (this.map) {
       this.map.remove();
     }
@@ -204,6 +208,25 @@ export class MapComponent implements OnDestroy {
     setTimeout(() => {
       this.map.invalidateSize();
     }, 0);
+  }
+
+  /**
+   * Leaflet caches the container size and only paints tiles for the area it
+   * knew about, so a container that changes width after the map was built ends
+   * up with the new size and the old tiles - blank space beside the map. The
+   * single `invalidateSize` on creation cannot cover that, because the layout
+   * driving the width can settle after it (the search page widens its column
+   * when it switches into map view).
+   */
+  private observeContainerResize(element: ElementRef): void {
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    this.resizeObserver = new ResizeObserver(() => {
+      this.map?.invalidateSize();
+    });
+    this.resizeObserver.observe(element.nativeElement);
   }
 
   private updateMarkers(positions: Geopoint[]): void {

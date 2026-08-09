@@ -79,6 +79,15 @@ export class SearchPage {
   readonly canShowMap = computed(() => this.selectedCategory() !== 'user');
 
   /**
+   * Drives both the map itself and the page's full-width chrome: on desktop the
+   * page column is capped at 720px, which leaves the map as wide as the
+   * searchbar. The controls keep that column through their own max-width.
+   */
+  readonly isMapView = computed(
+    () => this.viewMode() === 'map' && this.canShowMap(),
+  );
+
+  /**
    * Country is picked from a list, not typed, so the free-text searchbar would
    * only be a dead control here and is swapped for the picker instead.
    */
@@ -121,6 +130,12 @@ export class SearchPage {
           ({
             ...result.value.position,
             id: this.getResultId(result),
+            // Carries the rating into the marker, so a Bite found through
+            // search looks like the same Bite on every other map in the app.
+            // Restaurants have no rating of their own and keep the plain pin.
+            ...(result.category !== 'restaurant' && result.value.rating
+              ? { rating: result.value.rating }
+              : {}),
           }) as Geopoint,
       ),
   );

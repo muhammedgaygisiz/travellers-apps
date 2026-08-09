@@ -1,8 +1,13 @@
 <ta-page
-  [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+    fullWidth: isMapView(),
+  }"
   [loading]="isLoading()"
 >
-  <ion-content [class.map-view]="viewMode() === 'map' && canShowMap()">
+  <ion-content [class.map-view]="isMapView()">
     <div class="search-controls ion-padding">
       <div class="search-title">
         <h1>{{ 'search' | transloco }}</h1>
@@ -65,7 +70,7 @@
       />
     </div>
 
-    @if (viewMode() === 'map' && canShowMap()) { @if (isLoading()) {
+    @if (isMapView()) { @if (isLoading()) {
     <div
       class="ion-display-flex ion-justify-content-center state-container"
       data-testid="search-map-loading"

@@ -13,6 +13,8 @@ export interface SearchBite {
   description?: string;
   tags?: string[];
   position?: Geopoint;
+  /** Feeds the rating shown inside the map marker, as on every other map. */
+  rating?: number;
 }
 
 export interface SearchRestaurant {

@@ -9,15 +9,27 @@ import { createTranslate } from '../shared/i18n/translate';
 const GOOGLE_WORKSPACE_PRIVATE_KEY_ENV = 'GOOGLE_WORKSPACE_PRIVATE_KEY';
 const GOOGLE_WORKSPACE_CLIENT_EMAIL_ENV = 'GOOGLE_WORKSPACE_CLIENT_EMAIL';
 const GOOGLE_WORKSPACE_DELEGATED_USER_ENV = 'GOOGLE_WORKSPACE_DELEGATED_USER';
+const GOOGLE_WORKSPACE_SENDER_ADDRESS_ENV = 'GOOGLE_WORKSPACE_SENDER_ADDRESS';
+
+/**
+ * The name in front of the address, matching the Firebase Auth template so both
+ * verification mails present one identity.
+ */
+const SENDER_NAME = 'Bite Tribe';
 
 // Firebase Functions gen2 only injects a secret into a function's runtime when
 // that function declares it via `secrets: [...]`. Every function that sends a
 // verification email must spread this array into its options, otherwise these
 // values are undefined at runtime and `createJwt` throws.
+//
+// The sender address is not confidential - it is printed in every mail - but it
+// rides the same mechanism so the mail configuration is set, rotated and
+// deployed as one unit rather than half secret and half deploy-time param.
 export const googleWorkspaceEmailSecrets = [
   defineSecret(GOOGLE_WORKSPACE_PRIVATE_KEY_ENV),
   defineSecret(GOOGLE_WORKSPACE_CLIENT_EMAIL_ENV),
   defineSecret(GOOGLE_WORKSPACE_DELEGATED_USER_ENV),
+  defineSecret(GOOGLE_WORKSPACE_SENDER_ADDRESS_ENV),
 ];
 
 interface GoogleWorkspaceTokenResponse {
@@ -140,16 +152,19 @@ export const createRawEmail = (
   verificationLink: string,
   language?: SupportedLanguage | string,
 ): string => {
-  const from = process.env[GOOGLE_WORKSPACE_DELEGATED_USER_ENV];
+  // Never the delegated user: which Workspace mailbox performs the Gmail API
+  // delegation is infrastructure, and building `From` from it published a
+  // personal address to every user who requested a resend (issue \#1265).
+  const from = process.env[GOOGLE_WORKSPACE_SENDER_ADDRESS_ENV];
 
   if (!from) {
-    throw new Error('Google Workspace delegated sender is missing.');
+    throw new Error('Google Workspace sender address is missing.');
   }
 
   const translate = createTranslate(language ?? DEFAULT_LANGUAGE);
   const htmlBody = `${translate('emailVerification.body')}<br><br><a href="${verificationLink}">${translate('emailVerification.linkLabel')}</a>`;
   const message = [
-    `From: Bite Tribe <${from}>`,
+    `From: ${SENDER_NAME} <${from}>`,
     `To: ${to}`,
     `Subject: ${encodeHeaderValue(translate('emailVerification.subject'))}`,
     'MIME-Version: 1.0',

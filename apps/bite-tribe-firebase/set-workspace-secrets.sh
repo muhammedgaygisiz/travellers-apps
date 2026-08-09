@@ -23,7 +23,15 @@ $FIREBASE functions:secrets:set GOOGLE_WORKSPACE_CLIENT_EMAIL --project "$PROJEC
 
 echo "==> Setting GOOGLE_WORKSPACE_DELEGATED_USER"
 echo "    Paste the PRIMARY mailbox address, e.g. muhammed.gaygisiz@bitetribe..."
+echo "    Infrastructure only: this is the mailbox that performs the Gmail API"
+echo "    delegation and is never shown to a recipient."
 $FIREBASE functions:secrets:set GOOGLE_WORKSPACE_DELEGATED_USER --project "$PROJECT"
+
+echo "==> Setting GOOGLE_WORKSPACE_SENDER_ADDRESS"
+echo "    Paste the address users see as the sender, e.g. noreply@bitetribe.app"
+echo "    Gmail rewrites 'From' to the delegated mailbox unless this address is"
+echo "    a verified 'Send mail as' alias of that mailbox, or the mailbox itself."
+$FIREBASE functions:secrets:set GOOGLE_WORKSPACE_SENDER_ADDRESS --project "$PROJECT"
 
 echo "==> Setting GOOGLE_WORKSPACE_PRIVATE_KEY"
 echo "    Paste the ENTIRE \"private_key\" value from the JSON, including the"

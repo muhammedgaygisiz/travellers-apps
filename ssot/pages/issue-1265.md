@@ -1,0 +1,28 @@
+- [bug: verification resend mail is sent from a personal mailbox, not a BiteTribe sender](https://github.com/muhammedgaygisiz/travellers-apps/issues/1265) (Issue \#1265)
+- Description
+  - Found in iOS release-candidate Run 5 under [[Current State - Release Candidate Test Charter]], Session 11. Two verification mails for the same account, twenty-five minutes apart, arrived with two sender identities: the registration mail from `Bite Tribe <noreply@bitetribe.app>`, the manual resend from `Bite Tribe <muhammed.gaygisiz@bitetribe.app>`.
+  - `createRawEmail` built the `From` header from `GOOGLE_WORKSPACE_DELEGATED_USER`, so the mailbox that performs the Gmail API delegation was also the address every recipient saw.
+  - Three costs: a personal address is published to every user who requests a resend and replies land in an unmonitored mailbox; one operation presents two identities, which is the pattern phishing training teaches users to distrust; and changing which Workspace account delegates would silently change the sender.
+- Decision - sender identity is its own setting
+  - `GOOGLE_WORKSPACE_SENDER_ADDRESS` now carries the visible sender and `GOOGLE_WORKSPACE_DELEGATED_USER` stays infrastructure. They are separate values on purpose: rotating the delegation account is an operations decision, and it must not be able to change what a user sees.
+  - A missing sender address throws rather than falling back to the delegated user. A fallback would restore exactly the reported behaviour - the mail would keep sending, from a personal address, and nothing would surface it.
+  - The display name `Bite Tribe` is a constant in code rather than configuration. It already matched the Firebase Auth template, and the defect was never in the name.
+  - Gmail rewrites `From` to the authenticated mailbox unless the address is a verified `Send mail as` alias of that mailbox, or the mailbox itself. Configuring the secret is therefore not sufficient on its own; the alias has to exist in Workspace, and `set-workspace-secrets.sh` says so at the prompt.
+- Decision - the two subjects
+  - The registration mail's `Verify your email for Bite Tribe` is a Firebase Auth console template. The resend's `Verify your Bite Tribe email address` comes from `emailVerification.subject` in the backend catalog and exists in eleven reviewed translations.
+  - Reconciled towards the catalog: the console template is edited to the catalog's English wording, rather than rewriting eleven translations to match an English-only console default. The console template is not repository code, so this is an operational step recorded here and in [[Implementation - Firebase Functions]] rather than a diff.
+- Decision - the `bite-tribe.firebaseapp.com` action link
+  - Worth moving onto a BiteTribe domain, but deliberately not in this issue.
+  - The action URL is `authDomain`, which is also the OAuth redirect origin for Google and Apple sign-in. Moving it means a Firebase Hosting custom domain, DNS records, updated provider redirect URIs, and an app config change that only reaches users in a new build.
+  - Doing that during the 1.0.1 release candidate risks breaking sign-in for the exact release under test, to improve a link most recipients never expand. The trust gain is real but smaller than the regression it can cause mid-RC.
+  - Sequenced after 1.0.1 ships, as its own change with its own sign-in regression pass. The reasoning is recorded so a later reader does not read the default domain as an oversight.
+- Outcome
+  - `google-workspace-email.ts` reads the new secret for `From`, and `googleWorkspaceEmailSecrets` declares it, so both senders - `resendEmailVerification` and the scheduled `sendEmailVerificationReminders` - pick it up without touching either function.
+  - `set-workspace-secrets.sh` prompts for the new secret and states which of the two addresses is visible to users.
+  - `google-workspace-email.spec.ts` sets the delegated mailbox and the sender address to deliberately different values, asserts the delegated address appears nowhere in the rendered message, and covers the missing-sender throw.
+  - Workspace side, done in the Admin console on 2026-08-09: `noreply@bitetribe.app` is an email alias of `muhammed.gaygisiz@bitetribe.app`, which is what makes Gmail accept it as the `From` rather than rewriting it. It replaced an unused `email-verification@bitetribe.app` alias that no code ever referenced. The address matches the Firebase Auth registration mail, so both mails now present one identity; note that the registration mail reaches it through Firebase's own mailer, not through Workspace.
+- Validation
+  - `npx jest --config jest.config.cjs --runInBand src/functions/users/__specs__/google-workspace-email.spec.ts` from `apps/bite-tribe-firebase/functions` - 9 tests, pass.
+  - `npm run build` and `npm run lint` from `apps/bite-tribe-firebase/functions` - pass.
+  - `git diff --check` - clean.
+  - Not covered by an automated check: whether Workspace accepts the alias and delivers with the new `From`. Only a real send proves it, because Gmail's rewrite happens server-side. Verify after the secret is set with a resend from the app, and re-check the sender in the received mail.

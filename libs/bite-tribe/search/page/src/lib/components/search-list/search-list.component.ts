@@ -3,19 +3,26 @@ import {
   Component,
   computed,
   input,
+  linkedSignal,
   output,
   signal,
 } from '@angular/core';
 import {
   IonAvatar,
   IonIcon,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonItem,
   IonLabel,
   IonList,
   IonSpinner,
 } from '@ionic/angular/standalone';
+import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { SearchBite, SearchRestaurant, SearchResult } from 'model';
+
+/** Matches the home feed and profile windows, so every list pages alike. */
+const PAGE_SIZE = 50;
 
 @Component({
   selector: 'search-list',
@@ -24,6 +31,8 @@ import type { SearchBite, SearchRestaurant, SearchResult } from 'model';
   imports: [
     IonAvatar,
     IonIcon,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
     IonItem,
     IonLabel,
     IonList,
@@ -45,6 +54,33 @@ export class SearchListComponent {
       this.getResultTitle(a).localeCompare(this.getResultTitle(b)),
     ),
   );
+
+  /**
+   * A country search returns every Bite of that country in one payload, so the
+   * whole set would otherwise render — and request every result image — at
+   * once. The list is windowed the same way the home feed and profile are, and
+   * a fresh result set starts back at the first page.
+   */
+  currentPage = linkedSignal<SearchResult[], number>({
+    source: this.results,
+    computation: () => 1,
+  });
+
+  displayedResults = computed(() =>
+    this.sortedResults().slice(0, this.currentPage() * PAGE_SIZE),
+  );
+
+  hasMore = computed(
+    () => this.sortedResults().length > this.currentPage() * PAGE_SIZE,
+  );
+
+  onIonInfinite(event: InfiniteScrollCustomEvent): void {
+    if (this.hasMore()) {
+      this.currentPage.update((page) => page + 1);
+    }
+
+    void event.target.complete();
+  }
 
   onResultImageError(resultId: string): void {
     this.imageErroredResultIds.update((ids) => new Set([...ids, resultId]));

@@ -151,6 +151,35 @@ The pattern is the sign-in one from [[Architecture - Auth]], applied to navigati
 
 Create Bite is the first case: `new-bite` is behind `freshSessionGuard`, which force-refreshes the ID token, plus the Bite page chunk. See GitHub issue #1287.
 
+## List Windowing
+
+**A list whose data arrives as one payload still renders in pages.** The callables and Firestore reads behind the feeds return the whole result set, so nothing is saved by paging the request — but rendering all of it mounts every row and starts every image request in one frame, which is what makes a large result set feel like a stall.
+
+The window is client-side and always looks the same:
+
+```ts
+const PAGE_SIZE = 50;
+
+displayedItems = computed(() => this.items().slice(0, this.currentPage() * PAGE_SIZE));
+hasMore = computed(() => this.items().length > this.currentPage() * PAGE_SIZE);
+```
+
+`hasMore` gates an `ion-infinite-scroll`, whose `ionInfinite` handler raises the page and then calls `event.target.complete()`. The page counter resets to 1 whenever the underlying set changes — through the handler that changes it (home's search input) or through a `linkedSignal` on the source when the set arrives as an input (search results).
+
+| Surface     | Windowed by                                 | Reset trigger        |
+| ----------- | ------------------------------------------- | -------------------- |
+| Home feed   | `home.component` over filtered Bites        | search input handler |
+| Profile     | `profile.component` over Bites/Trails       | page load            |
+| Search list | `search-list.component` over sorted results | new `results` input  |
+
+List images carry `loading="lazy"` and `decoding="async"`, so rows below the fold cost nothing until they scroll in. The three are complementary and bound different resources: the window bounds the DOM, `loading` bounds the network, `decoding` keeps a batch of decodes from landing in one frame.
+
+`decoding="async"` earns its place on the large images — the Bite card's 220px dish photo is the case it is for. On small avatars the decode is cheap enough that the browser's `auto` default behaves much the same; it is harmless there, not a win.
+
+A view that needs the complete set reads the unwindowed signal — search's map plots every marker while its list pages.
+
+**The window itself does not get a Storybook story.** `ion-infinite-scroll` is invisible at rest — it only renders a spinner while loading — so a story large enough to have a second page shows nothing the ordinary result story does not, at the cost of two Loki references of a full page of near-identical rows. Cover paging in unit tests, which can assert the row count and the reset. `Components/Bite List/Has More` is not a counter-example: `bt-bite-list` takes `hasMore` as an input, so it shows the affordance with two Bites rather than a full page.
+
 ## Image Pattern
 
 For Bite images, prefer this display fallback:

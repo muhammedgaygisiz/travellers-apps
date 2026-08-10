@@ -534,6 +534,32 @@ describe('DetailsPage', () => {
     });
   });
 
+  describe('saveReply', () => {
+    const reply = {
+      review: 'Thanks!',
+      parentReviewId: 'root-1',
+      threadId: 'root-1',
+    };
+
+    it('adds the Bite on screen to the answer the thread raised', () => {
+      const emitSpy = jest.spyOn(component.submitReviewReply, 'emit');
+      componentRef.setInput('bite', { id: '123', name: 'Pizza' });
+
+      component.saveReply(reply);
+
+      expect(emitSpy).toHaveBeenCalledWith({ ...reply, biteId: '123' });
+    });
+
+    it('sends nothing while the Bite is not loaded, since it names the target', () => {
+      const emitSpy = jest.spyOn(component.submitReviewReply, 'emit');
+      componentRef.setInput('bite', undefined);
+
+      component.saveReply(reply);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('isBucketlistBite', () => {
     it('should return true if bite is in any bucketlist', () => {
       const mockBite = { id: '1', name: 'Pizza' };

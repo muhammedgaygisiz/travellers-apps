@@ -45,6 +45,7 @@ const createMockDataAccess = (
     isAuthenticated: signal(true),
     saveNewTags: jest.fn(),
     saveNewReview: jest.fn(),
+    saveReviewReply: jest.fn(),
     saveToBucketList: jest.fn(),
     createAndSaveToBucketList: jest.fn(),
     removeBiteFromBucketlist: jest.fn(),
@@ -135,6 +136,23 @@ describe('DetailsService', () => {
       reviewData,
     );
     expect(mockDataAccessService.saveNewReview).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call dataAccess.saveReviewReply with the answered thread', () => {
+    // Arrange
+    const reply = {
+      review: 'Thanks!',
+      biteId: 'bite123',
+      parentReviewId: 'root-1',
+      threadId: 'root-1',
+    };
+
+    // Act
+    service.saveReviewReply(reply);
+
+    // Assert
+    expect(mockDataAccessService.saveReviewReply).toHaveBeenCalledWith(reply);
+    expect(mockDataAccessService.saveReviewReply).toHaveBeenCalledTimes(1);
   });
 
   describe('addBiteToSelectedBucketList', () => {

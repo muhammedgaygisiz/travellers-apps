@@ -166,6 +166,21 @@ describe(ReviewThreadComponent.name, () => {
     expect(query('hide-replies')).toBeTruthy();
   });
 
+  it('folds an expanded thread back', () => {
+    render({
+      thread: thread([reply('reply-1'), reply('reply-2'), reply('reply-3')]),
+    });
+
+    query('show-replies')?.click();
+    fixture.detectChanges();
+
+    query('hide-replies')?.click();
+    fixture.detectChanges();
+
+    expect(query('reply-reply-1')).toBeNull();
+    expect(query('show-replies')).toBeTruthy();
+  });
+
   it('opens a long thread the notification pointed at', () => {
     render({
       thread: thread([reply('reply-1'), reply('reply-2'), reply('reply-3')]),
@@ -174,6 +189,52 @@ describe(ReviewThreadComponent.name, () => {
 
     expect(query('show-replies')).toBeNull();
     expect(query('reply-reply-3')).toBeTruthy();
+  });
+
+  it('brings a highlighted thread onto the screen', () => {
+    // The review compartment sits far below the fold, so the mark alone would
+    // not be enough for a reader arriving from a notification.
+    const scrollIntoView = jest.fn();
+    fixture.nativeElement.scrollIntoView = scrollIntoView;
+
+    render({ thread: thread(), highlighted: true });
+
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center' });
+  });
+
+  it('leaves a thread nobody was sent to where it is', () => {
+    const scrollIntoView = jest.fn();
+    fixture.nativeElement.scrollIntoView = scrollIntoView;
+
+    render({ thread: thread(), highlighted: false });
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('refuses a reply that is only whitespace', () => {
+    const submitted: ReviewReplySubmit[] = [];
+    render({ thread: thread() });
+    component.submitReply.subscribe((event) => submitted.push(event));
+
+    query('reply-to-review')?.click();
+    fixture.detectChanges();
+
+    component['replyForm'].setValue({ review: '   ' });
+    query('submit-reply')?.click();
+
+    expect(submitted).toEqual([]);
+  });
+
+  it('sends nothing when no composer is open', () => {
+    // The button only exists while the composer does, so this guards the
+    // component's own contract rather than a reachable click.
+    const submitted: ReviewReplySubmit[] = [];
+    render({ thread: thread() });
+    component.submitReply.subscribe((event) => submitted.push(event));
+
+    component['submit']();
+
+    expect(submitted).toEqual([]);
   });
 
   it('marks the Bite creator so their answer is distinguishable', () => {

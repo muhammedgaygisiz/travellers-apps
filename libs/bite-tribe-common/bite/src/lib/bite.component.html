@@ -19,6 +19,7 @@
           class="cursor-pointer"
           [class.fade-in]="imageJustUploaded()"
           [src]="biteData | getImage"
+          decoding="async"
           height="220"
           loading="lazy"
           role="button"

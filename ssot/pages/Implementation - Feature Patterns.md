@@ -172,7 +172,9 @@ hasMore = computed(() => this.items().length > this.currentPage() * PAGE_SIZE);
 | Profile     | `profile.component` over Bites/Trails       | page load            |
 | Search list | `search-list.component` over sorted results | new `results` input  |
 
-Result images carry `loading="lazy"`, so rows below the fold cost nothing until they scroll in. Windowing and lazy images are complementary: the window bounds the DOM, the attribute bounds the network.
+List images carry `loading="lazy"` and `decoding="async"`, so rows below the fold cost nothing until they scroll in. The three are complementary and bound different resources: the window bounds the DOM, `loading` bounds the network, `decoding` keeps a batch of decodes from landing in one frame.
+
+`decoding="async"` earns its place on the large images — the Bite card's 220px dish photo is the case it is for. On small avatars the decode is cheap enough that the browser's `auto` default behaves much the same; it is harmless there, not a win.
 
 A view that needs the complete set reads the unwindowed signal — search's map plots every marker while its list pages.
 

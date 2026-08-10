@@ -501,5 +501,10 @@
   "go-back": "Indietro",
   "bite-could-not-be-loaded": "Impossibile caricare il Bite",
   "this-bite-could-not-be-loaded-right-now": "Si è verificato un problema durante il caricamento di questo Bite. Controlla la connessione e riprova.",
-  "try-again": "Riprova"
+  "try-again": "Riprova",
+  "reply": "Rispondi",
+  "reply-to": "Rispondi a {{name}}",
+  "show-replies": "Mostra {{count}} risposte",
+  "hide-replies": "Nascondi risposte",
+  "review-creator-badge": "autore"
 }

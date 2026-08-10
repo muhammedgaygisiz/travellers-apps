@@ -12,6 +12,7 @@ type Review = {
   authorId: string;
   author: string;
   review: string;
+  parentReviewId?: string;
 };
 
 export const notifyBiteCreatorOnReview = onDocumentCreated(
@@ -25,6 +26,17 @@ export const notifyBiteCreatorOnReview = onDocumentCreated(
     }
 
     const review = snap.data() as Review;
+
+    // A reply is stored as an ordinary review, so this trigger sees it too. It
+    // belongs to a conversation the Bite creator may not even be in, and is
+    // announced to that conversation's participants by
+    // `notifyThreadParticipantsOnReviewReply` instead (issue #1283).
+    if (review.parentReviewId) {
+      logger.info('--- Review is a reply, handled by the thread trigger');
+
+      return;
+    }
+
     const reviewAuthorId = review.authorId;
 
     logger.info('--- Review author UID:', reviewAuthorId);

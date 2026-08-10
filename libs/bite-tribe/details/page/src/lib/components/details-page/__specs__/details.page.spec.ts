@@ -90,8 +90,8 @@ describe('DetailsPage', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with default reviews', () => {
-    expect(component.reviews()).toMatchSnapshot();
+  it('should initialize with default review threads', () => {
+    expect(component.reviewThreads()).toMatchSnapshot();
   });
 
   describe('Image viewer', () => {
@@ -530,6 +530,32 @@ describe('DetailsPage', () => {
       component.saveReview();
 
       // Assert
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('saveReply', () => {
+    const reply = {
+      review: 'Thanks!',
+      parentReviewId: 'root-1',
+      threadId: 'root-1',
+    };
+
+    it('adds the Bite on screen to the answer the thread raised', () => {
+      const emitSpy = jest.spyOn(component.submitReviewReply, 'emit');
+      componentRef.setInput('bite', { id: '123', name: 'Pizza' });
+
+      component.saveReply(reply);
+
+      expect(emitSpy).toHaveBeenCalledWith({ ...reply, biteId: '123' });
+    });
+
+    it('sends nothing while the Bite is not loaded, since it names the target', () => {
+      const emitSpy = jest.spyOn(component.submitReviewReply, 'emit');
+      componentRef.setInput('bite', undefined);
+
+      component.saveReply(reply);
+
       expect(emitSpy).not.toHaveBeenCalled();
     });
   });

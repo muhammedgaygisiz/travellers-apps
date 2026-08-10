@@ -501,5 +501,10 @@
   "go-back": "رجوع",
   "bite-could-not-be-loaded": "تعذّر تحميل الـ Bite",
   "this-bite-could-not-be-loaded-right-now": "حدث خطأ أثناء تحميل هذا الـ Bite. تحقّق من اتصالك وحاول مرة أخرى.",
-  "try-again": "حاول مرة أخرى"
+  "try-again": "حاول مرة أخرى",
+  "reply": "رد",
+  "reply-to": "رد على {{name}}",
+  "show-replies": "عرض {{count}} ردود",
+  "hide-replies": "إخفاء الردود",
+  "review-creator-badge": "المنشئ"
 }

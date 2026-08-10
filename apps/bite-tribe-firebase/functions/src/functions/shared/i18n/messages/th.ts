@@ -16,6 +16,8 @@ export const th: NotificationMessages = {
   'newLike.body': '{{liker}} ถูกใจ Bite "{{bite}}" ของคุณ',
   'newReview.title': 'มีรีวิวใหม่ใน Bite ของคุณ!',
   'newReview.body': '{{reviewer}} รีวิว Bite "{{bite}}" ของคุณ',
+  'newReviewReply.title': 'มีการตอบกลับรีวิวใหม่',
+  'newReviewReply.body': '{{replier}} ตอบกลับรีวิวของ "{{bite}}"',
   'weeklyBites.title': '🍽️ Bites ประจำสัปดาห์มาแล้ว 🤩',
   'weeklyBites.bodyOne': 'BiteTribe แชร์ Bite ใหม่ 1 รายการเมื่อสัปดาห์ที่แล้ว',
   'weeklyBites.bodyMany':

@@ -5,6 +5,8 @@ initializeApp();
 export { notifyFollowersOnNewBite } from './functions/notifications/notify-followers-on-new-bite';
 export { notifyBiteCreatorOnLike } from './functions/notifications/notify-bite-creator-on-like';
 export { notifyBiteCreatorOnReview } from './functions/notifications/notify-bite-creator-on-review';
+export { notifyThreadParticipantsOnReviewReply } from './functions/notifications/notify-thread-participants-on-review-reply';
+export { backfillReviewTimestampsCallable } from './functions/reviews/backfill-review-timestamps';
 export { notifyUserOnNewFollower } from './functions/notifications/notify-user-on-new-follower';
 export { handleSharedLinkToBite } from './functions/bites/handle-shared-link-to-bite';
 export { sendWeeklyBiteNotification } from './functions/notifications/send-weekly-bite-notification';
@@ -39,7 +41,6 @@ export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-cr
 export { claimDisplayName } from './functions/users/claim-display-name';
 export { deleteOwnAccount } from './functions/users/delete-own-account';
 export { checkDisplayNameAvailability } from './functions/users/check-display-name-availability';
-export { backfillDisplayNameClaimsCallable } from './functions/users/backfill-display-name-claims';
 export { loadLeaderboard } from './functions/leaderboard/load-leaderboard';
 export { sendDailyLeaderboardNotification } from './functions/leaderboard/send-daily-leaderboard-notification';
 export { resyncBiteCounts } from './functions/leaderboard/resync-bite-counts';

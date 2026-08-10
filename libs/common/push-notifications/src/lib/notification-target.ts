@@ -60,6 +60,20 @@ export const toNotificationTarget = (
         ? { commands: [PATH.BITE, data['biteId']] }
         : undefined;
 
+    case 'NEW_REVIEW_REPLY':
+      // The reply is one message inside one conversation under the Bite, and
+      // the compartment can hold many. Carrying the thread along lets the page
+      // open and mark the right one instead of dropping the reader at the top
+      // of the list (issue #1283).
+      return data['biteId']
+        ? {
+            commands: [PATH.BITE, data['biteId']],
+            extras: data['threadId']
+              ? { queryParams: { threadId: data['threadId'] } }
+              : undefined,
+          }
+        : undefined;
+
     case 'NEW_FOLLOWER':
       return data['followerUid']
         ? { commands: [PATH.PROFILE, data['followerUid']] }

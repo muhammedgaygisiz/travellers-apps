@@ -501,5 +501,10 @@
   "go-back": "Retour",
   "bite-could-not-be-loaded": "Impossible de charger le Bite",
   "this-bite-could-not-be-loaded-right-now": "Une erreur s'est produite lors du chargement de ce Bite. Vérifie ta connexion et réessaie.",
-  "try-again": "Réessayer"
+  "try-again": "Réessayer",
+  "reply": "Répondre",
+  "reply-to": "Répondre à {{name}}",
+  "show-replies": "Afficher les {{count}} réponses",
+  "hide-replies": "Masquer les réponses",
+  "review-creator-badge": "auteur"
 }

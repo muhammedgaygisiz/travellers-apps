@@ -143,8 +143,11 @@ describe('Migrations', () => {
       compRef.setInput('addressBackfillBites', [historicalBite]);
       fixture.detectChanges();
 
-      const textContent =
-        fixture.nativeElement.querySelector('.migration-table').textContent;
+      // Addressed by test id rather than by being the first `.migration-table`
+      // on the page, which is not a property of this table.
+      const textContent = fixture.nativeElement.querySelector(
+        '[data-testid="bite-address-backfill-table"]',
+      ).textContent;
 
       expect(textContent).toContain('Historical Bite');
       expect(textContent).not.toContain('Store Bite');
@@ -434,6 +437,86 @@ describe('Migrations', () => {
 
       const dataParameter = updateDocumentSpy.mock.calls[0][0].data as Bite;
       expect(dataParameter.geohash).toEqual('s3y0zh7w1z');
+    });
+  });
+
+  describe('collection migrations', () => {
+    const row = (name: string): HTMLElement =>
+      fixture.nativeElement.querySelector(
+        `[data-testid="collection-migration-${name}"]`,
+      );
+
+    const runButton = (name: string): HTMLElement =>
+      row(name).querySelector('[data-testid="run-migration"]') as HTMLElement;
+
+    it('lists every collection-wide migration', () => {
+      expect(row('review-timestamps')).toBeTruthy();
+    });
+
+    it('reports a migration that has not been run in this session', () => {
+      expect(row('review-timestamps').textContent).toContain(
+        'migration-not-run',
+      );
+    });
+
+    it('asks for the migration the button belongs to', () => {
+      const requested: string[] = [];
+      component.runCollectionMigration.subscribe((name) =>
+        requested.push(name),
+      );
+
+      runButton('review-timestamps').click();
+
+      expect(requested).toEqual(['review-timestamps']);
+    });
+
+    it('holds the button of a run that is still going', () => {
+      compRef.setInput('collectionMigrations', {
+        'review-timestamps': { status: 'running' },
+      });
+      compRef.changeDetectorRef.detectChanges();
+
+      expect(runButton('review-timestamps')).toHaveProperty('disabled', true);
+      expect(
+        row('review-timestamps').querySelector(
+          '[data-testid="migration-running"]',
+        ),
+      ).toBeTruthy();
+    });
+
+    it('renders whatever counts the finished run reported', () => {
+      // The row is not written per migration: it renders the counts it is
+      // given, whichever migration produced them.
+      compRef.setInput('collectionMigrations', {
+        'review-timestamps': {
+          status: 'done',
+          result: { processed: 12, filled: 4, skipped: 7, unresolvable: 1 },
+        },
+      });
+      compRef.changeDetectorRef.detectChanges();
+
+      const counts = row('review-timestamps').querySelector(
+        '[data-testid="migration-counts"]',
+      );
+
+      expect(counts?.textContent).toContain('migration-count-processed');
+      expect(counts?.textContent).toContain('12');
+      expect(counts?.textContent).toContain('migration-count-unresolvable');
+      expect(counts?.textContent).toContain('1');
+    });
+
+    it('says so when a run failed rather than showing nothing', () => {
+      compRef.setInput('collectionMigrations', {
+        'review-timestamps': { status: 'failed' },
+      });
+      compRef.changeDetectorRef.detectChanges();
+
+      expect(
+        row('review-timestamps').querySelector(
+          '[data-testid="migration-failed"]',
+        ),
+      ).toBeTruthy();
+      expect(runButton('review-timestamps')).toHaveProperty('disabled', false);
     });
   });
 });

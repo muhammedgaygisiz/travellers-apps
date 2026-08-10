@@ -501,5 +501,10 @@
   "go-back": "ย้อนกลับ",
   "bite-could-not-be-loaded": "โหลด Bite ไม่สำเร็จ",
   "this-bite-could-not-be-loaded-right-now": "เกิดข้อผิดพลาดขณะโหลด Bite นี้ ตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง",
-  "try-again": "ลองอีกครั้ง"
+  "try-again": "ลองอีกครั้ง",
+  "reply": "ตอบกลับ",
+  "reply-to": "ตอบกลับ {{name}}",
+  "show-replies": "แสดง {{count}} การตอบกลับ",
+  "hide-replies": "ซ่อนการตอบกลับ",
+  "review-creator-badge": "ผู้สร้าง"
 }

@@ -109,4 +109,86 @@ describe(ReviewApiService.name, () => {
       ));
     });
   });
+
+  describe('saveReply', () => {
+    it('writes the reply into the same collection, marked with its thread', inject(
+      [ReviewApiService],
+      async (service: ReviewApiService) => {
+        const addDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'addDocument')
+          .mockResolvedValue({} as any);
+
+        await service.saveReply({
+          review: 'Thanks! Try the garlic sauce next time.',
+          biteId: 'biteId123',
+          parentReviewId: 'root-1',
+          threadId: 'root-1',
+        });
+
+        expect(addDocumentSpy).toHaveBeenCalledWith({
+          reference: 'reviews',
+          data: {
+            author: 'El Mo',
+            authorId: '123',
+            biteId: '/bites/biteId123',
+            review: 'Thanks! Try the garlic sauce next time.',
+            parentReviewId: 'root-1',
+            threadId: 'root-1',
+            createdAt: '2024-03-15T12:00:00.000Z',
+            createdAtTimestamp: 1710504000000,
+          },
+        });
+      },
+    ));
+
+    it('reloads the compartment so the reply renders without a reload', inject(
+      [ReviewApiService],
+      async (service: ReviewApiService) => {
+        jest
+          .spyOn(FirebaseFirestore, 'addDocument')
+          .mockResolvedValue({} as any);
+
+        await service.saveReply({
+          review: 'Will do',
+          biteId: 'biteId123',
+          parentReviewId: 'root-1',
+          threadId: 'root-1',
+        });
+
+        expect(
+          loadReviewsByBiteIdUtils.loadReviewsByBiteId,
+        ).toHaveBeenCalledWith('biteId123');
+      },
+    ));
+
+    describe('given an error', () => {
+      it('should handle the error', inject(
+        [ReviewApiService],
+        async (service: ReviewApiService) => {
+          jest
+            .spyOn(FirebaseFirestore, 'addDocument')
+            .mockRejectedValue(new Error('Firestore error'));
+          const consoleErrorSpy = jest
+            .spyOn(console, 'error')
+            .mockImplementation();
+
+          try {
+            await service.saveReply({
+              review: 'Will do',
+              biteId: 'biteId123',
+              parentReviewId: 'root-1',
+              threadId: 'root-1',
+            });
+          } catch {
+            // Swallow the error for test
+          }
+
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error saving review reply:',
+            expect.any(Error),
+          );
+        },
+      ));
+    });
+  });
 });

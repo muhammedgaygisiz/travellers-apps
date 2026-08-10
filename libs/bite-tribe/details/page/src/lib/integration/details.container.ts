@@ -15,7 +15,8 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
     <details-page
       class="ion-page"
       [bite]="service.biteValue()"
-      [reviews]="service.reviews()"
+      [reviewThreads]="service.reviewThreads()"
+      [highlightedThreadId]="service.highlightedThreadId()"
       [bucketlists]="service.bucketlists()"
       [userId]="service.userId()"
       [isAuthenticated]="service.isAuthenticated()"
@@ -28,6 +29,7 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       (goBack)="service.goBack()"
       (retryLoad)="service.retryBiteLoad()"
       (submitNewReview)="service.saveReview($event)"
+      (submitReviewReply)="service.saveReviewReply($event)"
       (selectList)="service.addBiteToSelectedBucketList($event)"
       (removeBiteFromBucketlist)="service.removeBiteFromBucketlist($event)"
       (newList)="service.saveBiteToBucketListWithNewList($event)"

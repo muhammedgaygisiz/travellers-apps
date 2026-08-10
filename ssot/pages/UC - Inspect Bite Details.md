@@ -154,8 +154,8 @@ entry point.
 ## Review Thread Contract
 
 Issue [#1283](https://github.com/muhammedgaygisiz/travellers-apps/issues/1283)
-turns the review compartment from a flat list into a thread list. Specified, not
-implemented yet.
+turns the review compartment from a flat list into a thread list. Implemented by
+`ReviewThreadComponent` and the `reviewThreads` selector.
 
 - A root review opens a conversation. Replying to it is an action on that review,
   not a second review of the Bite, which is what writing back means today.
@@ -188,7 +188,19 @@ implemented yet.
 - `bite/:biteId`
 - Bite details page and data-access.
 - Like API.
-- Review API.
+- Review API, including `saveReply`.
+- `ReviewThreadComponent` in `libs/bite-tribe/details/page`, with Storybook
+  states for a bare root, an open thread, a folded one, the notification
+  highlight, the creator badge, and the read-only view.
+- `toReviewThreads` in `libs/bite-tribe/store`, which owns the grouping and the
+  ordering.
+- Playwright E2E coverage of the review thread:
+  `apps/bite-tribe-e2e/src/tests/review-threads.spec.ts` answers a review as an
+  account that owns neither the Bite nor the review, answers that answer and
+  checks it stayed in the same thread with an `@name` prefill and no second
+  indent, marks the creator, asserts thread and reply order against seeded
+  timestamps, folds and unfolds a thread of three replies, and opens
+  `/bite/:biteId?threadId=` expanded and highlighted.
 - Playwright E2E coverage of the failed header photo: the reported state, the
   photo that is withheld rather than shown, and the poster's retry falling back
   to the local photo picker when this device holds no copy.

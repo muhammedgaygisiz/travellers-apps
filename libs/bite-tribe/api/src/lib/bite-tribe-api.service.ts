@@ -73,6 +73,15 @@ export class BiteTribeApiService {
     return this.reviewApiService.saveNewReview(payload);
   }
 
+  saveReviewReply(payload: {
+    review: string;
+    biteId: string;
+    parentReviewId: string;
+    threadId: string;
+  }): Promise<Review[]> {
+    return this.reviewApiService.saveReply(payload);
+  }
+
   reviewsByBiteId(biteId: string): Promise<Review[]> {
     return this.reviewApiService.reviewsByBiteId(biteId);
   }

@@ -14,11 +14,13 @@ import { MigrationsService } from './migrations.service';
         service.restaurantClusteringEligibleBites()
       "
       [newVersionNotification]="service.newVersionNotification()"
+      [collectionMigrations]="service.collectionMigrations()"
       (clusterRestaurantCandidate)="
         service.clusterRestaurantCandidateForBite($event)
       "
       (backfillBiteAddress)="service.backfillBiteAddress($event)"
       (sendNewVersionNotification)="service.sendNewVersionNotification($event)"
+      (runCollectionMigration)="service.runCollectionMigration($event)"
     />
   `,
 })

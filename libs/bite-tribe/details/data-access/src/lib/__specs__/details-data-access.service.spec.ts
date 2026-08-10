@@ -94,6 +94,8 @@ describe(DetailsDataAccessService.name, () => {
           provide: BiteTribeStoreService,
           useValue: {
             reviews$: of(),
+            reviewThreads$: of(),
+            highlightedThreadIdFromUrl$: of(),
             bucketlists$: of(),
             exchangeRates$: of(),
             preferedCurrency$: of(),
@@ -101,6 +103,7 @@ describe(DetailsDataAccessService.name, () => {
             userId$: of(),
             isAuthenticated$: of(),
             saveReview: jest.fn(),
+            saveReviewReply: jest.fn(),
             saveToBucketList: jest.fn(),
             createAndSaveToBucketList: jest.fn(),
             removeBiteFromBucketlist: jest.fn(),

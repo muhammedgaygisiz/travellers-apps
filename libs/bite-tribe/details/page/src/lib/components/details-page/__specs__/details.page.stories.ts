@@ -1,7 +1,7 @@
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import { DetailsPage } from '../details.page';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
-import { Bite, Like, PublicUser } from 'model';
+import { Bite, Like, PublicUser, ReviewThread } from 'model';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import type { Position } from '@capacitor/geolocation';
 
@@ -89,6 +89,53 @@ export const Default: Story = {
         course: null,
       },
     } satisfies Position,
+  },
+};
+
+/**
+ * The review compartment as a list of conversations. The bottom composer still
+ * means "start a new thread", which is what keeps the rule that a new root
+ * review notifies only the Bite creator visible in the layout rather than only
+ * in the notification behaviour. See GitHub issue #1283.
+ */
+export const withReviewThreads: Story = {
+  args: {
+    ...Default.args,
+    reviewThreads: [
+      {
+        root: {
+          id: 'root-1',
+          biteId: '/bites/botanic-breeze',
+          author: 'Mira',
+          authorId: 'mira',
+          review: 'Best kebab I had in Kreuzberg, no contest.',
+          createdAt: isoAgo(2 * DAY_MS),
+        },
+        replies: [
+          {
+            id: 'reply-1',
+            biteId: '/bites/botanic-breeze',
+            author: 'Mo',
+            authorId: '1',
+            review: 'Thanks! Try the garlic sauce next time.',
+            parentReviewId: 'root-1',
+            threadId: 'root-1',
+            createdAt: isoAgo(DAY_MS),
+          },
+        ],
+      },
+      {
+        root: {
+          id: 'root-2',
+          biteId: '/bites/botanic-breeze',
+          author: 'Jonas',
+          authorId: 'jonas',
+          review: 'Was it very spicy?',
+          createdAt: isoAgo(5 * HOUR_MS),
+        },
+        replies: [],
+      },
+    ] satisfies ReviewThread[],
   },
 };
 

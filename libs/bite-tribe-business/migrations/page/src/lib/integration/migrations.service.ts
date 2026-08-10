@@ -4,6 +4,12 @@ import {
   NewVersionNotificationState,
   ReleasePlatform,
 } from '../component/page/new-version-notification';
+import {
+  CollectionMigrationName,
+  CollectionMigrationResult,
+  CollectionMigrationState,
+  CollectionMigrationStates,
+} from '../component/page/collection-migration';
 
 @Injectable({ providedIn: 'root' })
 export class MigrationsService {
@@ -18,6 +24,54 @@ export class MigrationsService {
     signal<NewVersionNotificationState | null>(null);
 
   newVersionNotification = this.newVersionNotificationState.asReadonly();
+
+  private readonly collectionMigrationStates =
+    signal<CollectionMigrationStates>({});
+
+  collectionMigrations = this.collectionMigrationStates.asReadonly();
+
+  /**
+   * Which callable each migration name stands for. Adding a migration means
+   * adding a name and its runner, not another copy of the state handling below.
+   */
+  private readonly migrationRunners: Record<
+    CollectionMigrationName,
+    () => Promise<CollectionMigrationResult>
+  > = {
+    'review-timestamps': () => this.dataAccess.backfillReviewTimestamps(),
+  };
+
+  /**
+   * Runs one collection-wide migration and keeps what it reported.
+   *
+   * A failure is kept as state rather than rethrown, for the same reason as the
+   * release announcement: this page is the only place these are triggered from,
+   * and an operator who just pressed the button needs to see that nothing
+   * happened rather than a console error.
+   */
+  async runCollectionMigration(name: CollectionMigrationName): Promise<void> {
+    this.setCollectionMigrationState(name, { status: 'running' });
+
+    try {
+      const result = await this.migrationRunners[name]();
+
+      this.setCollectionMigrationState(name, { status: 'done', result });
+    } catch (error) {
+      console.error(`Failed to run the ${name} migration: `, error);
+
+      this.setCollectionMigrationState(name, { status: 'failed' });
+    }
+  }
+
+  private setCollectionMigrationState(
+    name: CollectionMigrationName,
+    state: CollectionMigrationState,
+  ): void {
+    this.collectionMigrationStates.update((states) => ({
+      ...states,
+      [name]: state,
+    }));
+  }
 
   async clusterRestaurantCandidateForBite(
     bite: Parameters<

@@ -2,7 +2,6 @@ import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
 import { DocumentReference, getFirestore } from 'firebase-admin/firestore';
 import { claimDisplayNameForUser } from '../claim-display-name';
 import { checkDisplayNameAvailabilityForUser } from '../check-display-name-availability';
-import { backfillDisplayNameClaims } from '../backfill-display-name-claims';
 
 const PROJECT_ID = 'bite-tribe-emulator-tests';
 const DISPLAY_NAMES_COLLECTION = 'displayNames';
@@ -44,8 +43,7 @@ const clearCollections = async (): Promise<void> => {
 };
 
 const queryCount = async (collectionName: string): Promise<number> =>
-  (await getFirestore().collection(collectionName).count().get()).data()
-    .count;
+  (await getFirestore().collection(collectionName).count().get()).data().count;
 
 describe('display name claims emulator integration', () => {
   beforeAll(() => {
@@ -189,30 +187,20 @@ describe('display name claims emulator integration', () => {
     });
   });
 
-  it('backfills existing names first-come, leaving later collisions unclaimed', async () => {
-    await Promise.all([
-      seedUser('user-early', 'Foodie', 1),
-      seedUser('user-late', 'foodie', 2),
-      seedUser('user-other', 'Traveller', 3),
-    ]);
+  /**
+   * The two specs above prove a legacy name is protected without a claim, which
+   * is why there is no backfill. This is the other half: the legacy user gets
+   * their own claim by returning, since `onboardingGuard` routes anyone without
+   * `onboardingCompletedAt` through the assistant and it claims for them. See
+   * [[UC - Run Operational Migrations]].
+   */
+  it('lets a legacy user claim the name they already store', async () => {
+    await seedUser('user-legacy', 'Foodie', 1);
 
-    const result = await backfillDisplayNameClaims();
+    await claimDisplayNameForUser('user-legacy', 'Foodie');
 
-    expect(result).toMatchObject({
-      processed: 3,
-      claimed: 2,
-      collisions: 1,
-    });
-
-    expect(await queryCount(DISPLAY_NAMES_COLLECTION)).toBe(2);
     expect((await claimRef('foodie').get()).data()).toMatchObject({
-      userId: 'user-early',
-      backfilled: true,
+      userId: 'user-legacy',
     });
-
-    // Running again is idempotent: the owned claim is skipped, no new writes.
-    const secondRun = await backfillDisplayNameClaims();
-    expect(secondRun).toMatchObject({ claimed: 0, collisions: 1 });
-    expect(await queryCount(DISPLAY_NAMES_COLLECTION)).toBe(2);
   });
 });

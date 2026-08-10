@@ -1,11 +1,12 @@
 import { key } from './key';
 import { reducer } from './reducer';
-import { reviews } from './selectors';
+import { reviewThreads, reviews } from './selectors';
 
 const fromReviews = {
   key,
   reducer,
   reviews,
+  reviewThreads,
 };
 
 export { fromReviews };

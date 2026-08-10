@@ -501,5 +501,10 @@
   "go-back": "Geri dön",
   "bite-could-not-be-loaded": "Bite yüklenemedi",
   "this-bite-could-not-be-loaded-right-now": "Bu Bite yüklenirken bir sorun oluştu. Bağlantını kontrol edip tekrar dene.",
-  "try-again": "Tekrar dene"
+  "try-again": "Tekrar dene",
+  "reply": "Yanıtla",
+  "reply-to": "{{name}} kişisine yanıt",
+  "show-replies": "{{count}} yanıtı göster",
+  "hide-replies": "Yanıtları gizle",
+  "review-creator-badge": "oluşturan"
 }

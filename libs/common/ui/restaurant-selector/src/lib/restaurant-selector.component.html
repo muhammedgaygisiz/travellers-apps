@@ -1,3 +1,20 @@
+<!--
+  Rows carry one distance while the Bite was posted where the user is standing,
+  and two named ones once the Bite sits somewhere else, so the distance that
+  actually separates the candidates is readable. See GitHub issue #1269.
+-->
+<ng-template #distances let-option>
+  @for (line of distanceLines(option); track line.labelKey) {
+    <p>
+      @if (line.labelKey) {
+        {{ line.labelKey | transloco: { distance: line.distance } }}
+      } @else {
+        {{ line.distance }}
+      }
+    </p>
+  }
+</ng-template>
+
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -39,9 +56,9 @@
       <ion-item [detail]="false" (click)="selectRestaurant(restaurant.name)">
         <ion-label>
           <h2>{{ restaurant.name }}</h2>
-          @if (formatDistance(restaurant.distance)) {
-            <p>{{ formatDistance(restaurant.distance) }}</p>
-          }
+          <ng-container
+            *ngTemplateOutlet="distances; context: { $implicit: restaurant }"
+          />
         </ion-label>
         @if (selectedRestaurant() === restaurant.name) {
           <ion-icon slot="end" name="checkmark" color="primary" />
@@ -77,9 +94,9 @@
             <ion-label>
               <h2>{{ place.name }}</h2>
               <p>{{ place.address }}</p>
-              @if (formatDistance(place.distance)) {
-                <p>{{ formatDistance(place.distance) }}</p>
-              }
+              <ng-container
+                *ngTemplateOutlet="distances; context: { $implicit: place }"
+              />
             </ion-label>
           </ion-item>
         }
@@ -124,9 +141,9 @@
             <ion-label>
               <h2>{{ place.name }}</h2>
               <p>{{ place.address }}</p>
-              @if (formatDistance(place.distance)) {
-                <p>{{ formatDistance(place.distance) }}</p>
-              }
+              <ng-container
+                *ngTemplateOutlet="distances; context: { $implicit: place }"
+              />
             </ion-label>
           </ion-item>
         } @empty {

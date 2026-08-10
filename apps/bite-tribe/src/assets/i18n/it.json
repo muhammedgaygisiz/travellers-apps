@@ -168,6 +168,8 @@
   "restaurant-selector-cancel": "Annulla",
   "restaurant-selector-title": "Seleziona ristorante",
   "restaurant-selector-search-placeholder": "Cerca ristoranti...",
+  "restaurant-selector-distance-from-bite": "{{distance}} dal Bite",
+  "restaurant-selector-distance-from-you": "{{distance}} da te",
   "restaurant-selector-use-custom": "Usa: \"{{searchTerm}}\"",
   "restaurant-selector-add-as-new": "Aggiungi come nuovo ristorante",
   "restaurant-selector-start-typing": "Inizia a digitare per cercare ristoranti",

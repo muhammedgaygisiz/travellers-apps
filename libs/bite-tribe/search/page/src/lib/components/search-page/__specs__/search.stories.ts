@@ -71,6 +71,24 @@ const countryResults: SearchResult[] = [
   },
 ];
 
+/**
+ * A country returns every one of its Bites in one response, which is the case
+ * the paged list exists for: 120 results render as the first 50 plus the
+ * infinite scroll that loads the rest.
+ */
+const manyCountryResults: SearchResult[] = Array.from(
+  { length: 120 },
+  (_, index) => ({
+    category: 'country',
+    value: {
+      id: `bite-${index}`,
+      name: `Bite ${String(index + 1).padStart(3, '0')}`,
+      place: 'Berlin',
+      position: { latitude: 52.52, longitude: 13.405 },
+    },
+  }),
+);
+
 export default {
   title: 'Pages/Search',
   component: SearchPage,
@@ -118,6 +136,16 @@ export const CountryPicked: Story = {
     selectedCategory: 'country',
     selectedCountryCode: 'CH',
     results: countryResults,
+    hasSearched: true,
+  },
+};
+
+/** A large country result set, showing the first page of the windowed list. */
+export const CountryManyResults: Story = {
+  args: {
+    selectedCategory: 'country',
+    selectedCountryCode: 'DE',
+    results: manyCountryResults,
     hasSearched: true,
   },
 };

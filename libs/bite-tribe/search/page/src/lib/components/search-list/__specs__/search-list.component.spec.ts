@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 import type { SearchResult } from 'model';
@@ -8,6 +9,21 @@ import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { SearchListComponent } from '../search-list.component';
 
 addNecessaryIcons();
+
+/**
+ * Titles are padded so the alphabetical sort keeps the generated order, which
+ * makes the paging assertions readable.
+ */
+const buildUserResults = (count: number): SearchResult[] =>
+  Array.from({ length: count }, (_, index) => ({
+    category: 'user',
+    value: {
+      userId: `user-${index}`,
+      displayName: `User ${String(index).padStart(3, '0')}`,
+      email: `user-${index}@example.com`,
+      photoUrl: '',
+    },
+  }));
 
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
@@ -120,6 +136,55 @@ describe(SearchListComponent.name, () => {
     items[0].click();
 
     expect(emitSpy).toHaveBeenCalledWith(daniel);
+  });
+
+  it('should render only the first page and grow it on infinite scroll', () => {
+    componentRef.setInput('results', buildUserResults(120));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('ion-item')).toHaveLength(50);
+    expect(component.hasMore()).toBe(true);
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="search-infinite-scroll"]',
+      ),
+    ).toBeTruthy();
+
+    const complete = jest.fn();
+    component.onIonInfinite({
+      target: { complete },
+    } as unknown as InfiniteScrollCustomEvent);
+    fixture.detectChanges();
+
+    expect(complete).toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelectorAll('ion-item')).toHaveLength(
+      100,
+    );
+    expect(component.hasMore()).toBe(true);
+  });
+
+  it('should hide the infinite scroll once every result is shown', () => {
+    componentRef.setInput('results', buildUserResults(60));
+    component.currentPage.set(2);
+    fixture.detectChanges();
+
+    expect(component.displayedResults()).toHaveLength(60);
+    expect(component.hasMore()).toBe(false);
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="search-infinite-scroll"]',
+      ),
+    ).toBeFalsy();
+  });
+
+  it('should start a new result set back at the first page', () => {
+    componentRef.setInput('results', buildUserResults(120));
+    component.currentPage.set(2);
+
+    componentRef.setInput('results', buildUserResults(120));
+
+    expect(component.currentPage()).toBe(1);
+    expect(component.displayedResults()).toHaveLength(50);
   });
 
   it('should add the result id on image error without mutating the previous set', () => {

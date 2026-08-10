@@ -22,6 +22,7 @@ Users can find people, Bites, and restaurants quickly.
 - Search categories help separate result types.
 - User can search Bites by city when enriched location data exists.
 - User can search Bites by country. Country is picked from a searchable list of every ISO 3166-1 alpha-2 country instead of typed, so the category swaps the free-text searchbar for a picker. Names are localized through `Intl.DisplayNames`, never through Transloco. The query is an exact match on the Bite's persisted `countryCode`.
+- The result list pages in through infinite scroll, the same window the home feed and profile use. A country returns every one of its Bites in a single response, so rendering the whole set at once would request every result image at once. The map view still plots the complete result set.
 - Bite, restaurant, city, and country search results can switch between list and map views.
 - The map view runs the page full width, so on desktop the map is not held to the 720px reading column the result list uses. The controls above it keep that column.
 - Bite markers carry their rating, the same marker the Bite gets on every other map. An unrated Bite keeps the plain pin, and restaurants have no rating of their own.

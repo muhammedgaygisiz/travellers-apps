@@ -151,6 +151,31 @@ The pattern is the sign-in one from [[Architecture - Auth]], applied to navigati
 
 Create Bite is the first case: `new-bite` is behind `freshSessionGuard`, which force-refreshes the ID token, plus the Bite page chunk. See GitHub issue #1287.
 
+## List Windowing
+
+**A list whose data arrives as one payload still renders in pages.** The callables and Firestore reads behind the feeds return the whole result set, so nothing is saved by paging the request — but rendering all of it mounts every row and starts every image request in one frame, which is what makes a large result set feel like a stall.
+
+The window is client-side and always looks the same:
+
+```ts
+const PAGE_SIZE = 50;
+
+displayedItems = computed(() => this.items().slice(0, this.currentPage() * PAGE_SIZE));
+hasMore = computed(() => this.items().length > this.currentPage() * PAGE_SIZE);
+```
+
+`hasMore` gates an `ion-infinite-scroll`, whose `ionInfinite` handler raises the page and then calls `event.target.complete()`. The page counter resets to 1 whenever the underlying set changes — through the handler that changes it (home's search input) or through a `linkedSignal` on the source when the set arrives as an input (search results).
+
+| Surface     | Windowed by                                 | Reset trigger        |
+| ----------- | ------------------------------------------- | -------------------- |
+| Home feed   | `home.component` over filtered Bites        | search input handler |
+| Profile     | `profile.component` over Bites/Trails       | page load            |
+| Search list | `search-list.component` over sorted results | new `results` input  |
+
+Result images carry `loading="lazy"`, so rows below the fold cost nothing until they scroll in. Windowing and lazy images are complementary: the window bounds the DOM, the attribute bounds the network.
+
+A view that needs the complete set reads the unwindowed signal — search's map plots every marker while its list pages.
+
 ## Image Pattern
 
 For Bite images, prefer this display fallback:

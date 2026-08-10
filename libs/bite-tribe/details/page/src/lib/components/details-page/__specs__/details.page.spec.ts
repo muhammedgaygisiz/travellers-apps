@@ -90,8 +90,8 @@ describe('DetailsPage', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with default reviews', () => {
-    expect(component.reviews()).toMatchSnapshot();
+  it('should initialize with default review threads', () => {
+    expect(component.reviewThreads()).toMatchSnapshot();
   });
 
   describe('Image viewer', () => {

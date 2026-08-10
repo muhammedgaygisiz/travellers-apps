@@ -1,0 +1,139 @@
+@let root = thread().root;
+
+<ion-item
+  lines="full"
+  class="review-thread"
+  [class.highlighted]="highlighted()"
+  [attr.data-testid]="'review-thread-' + root.id"
+>
+  <ion-label>
+    <div class="review-entry">
+      <div class="ion-display-flex ion-align-items-center review-row">
+        <h2>{{ root.author }}</h2>
+        @if (isCreator(root)) {
+          <ion-note class="creator-badge">
+            {{ 'review-creator-badge' | transloco }}
+          </ion-note>
+        }
+        <ion-text
+          ><p>{{ root.review }}</p></ion-text
+        >
+      </div>
+
+      <div class="review-footer">
+        <ion-note>{{ root.createdAt | timeAgo: activeLang() }}</ion-note>
+
+        @if (canReply()) {
+          <ion-button
+            fill="clear"
+            size="small"
+            data-testid="reply-to-review"
+            (click)="startReply(root)"
+          >
+            <ion-icon slot="start" name="arrow-undo-outline" />
+            {{ 'reply' | transloco }}
+          </ion-button>
+        }
+      </div>
+    </div>
+
+    @if (replies().length) {
+      @if (collapsed()) {
+        <ion-button
+          fill="clear"
+          size="small"
+          class="toggle-replies"
+          data-testid="show-replies"
+          (click)="expand()"
+        >
+          <ion-icon slot="start" name="chevron-down-outline" />
+          {{ 'show-replies' | transloco: { count: replies().length } }}
+        </ion-button>
+      } @else {
+        <div class="replies">
+          @for (reply of replies(); track reply.id) {
+            <div
+              class="review-entry reply"
+              [attr.data-testid]="'reply-' + reply.id"
+            >
+              <div class="ion-display-flex ion-align-items-center review-row">
+                <h2>{{ reply.author }}</h2>
+                @if (isCreator(reply)) {
+                  <ion-note class="creator-badge">
+                    {{ 'review-creator-badge' | transloco }}
+                  </ion-note>
+                }
+                <ion-text
+                  ><p>{{ reply.review }}</p></ion-text
+                >
+              </div>
+
+              <div class="review-footer">
+                <ion-note>{{
+                  reply.createdAt | timeAgo: activeLang()
+                }}</ion-note>
+
+                @if (canReply()) {
+                  <ion-button
+                    fill="clear"
+                    size="small"
+                    data-testid="reply-to-reply"
+                    (click)="startReply(reply)"
+                  >
+                    <ion-icon slot="start" name="arrow-undo-outline" />
+                    {{ 'reply' | transloco }}
+                  </ion-button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    @if (composerOpen()) {
+      <form class="reply-composer" [formGroup]="replyForm">
+        <ion-textarea
+          label="{{ 'reply-to' | transloco: { name: answeringAuthor() } }}"
+          formControlName="review"
+          fill="outline"
+          mode="md"
+          rows="2"
+          data-testid="reply-input"
+        />
+
+        <div class="reply-actions">
+          <ion-button
+            fill="clear"
+            size="small"
+            data-testid="cancel-reply"
+            (click)="cancelReply()"
+          >
+            {{ 'cancel' | transloco }}
+          </ion-button>
+          <ion-button
+            size="small"
+            data-testid="submit-reply"
+            [disabled]="replyForm.invalid"
+            (click)="submit()"
+          >
+            {{ 'reply' | transloco }}
+          </ion-button>
+        </div>
+      </form>
+    }
+
+    @if (canCollapse()) {
+      <ion-button
+        fill="clear"
+        size="small"
+        class="toggle-replies"
+        data-testid="hide-replies"
+        (click)="collapse()"
+      >
+        <ion-icon slot="start" name="chevron-up-outline" />
+        {{ 'hide-replies' | transloco }}
+      </ion-button>
+    }
+  </ion-label>
+</ion-item>

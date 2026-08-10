@@ -309,16 +309,15 @@
             />
           </ion-label>
         </ion-item>
-        } @else { @for (review of reviews(); track review.id) {
-        <ion-item lines="full" class="review">
-          <ion-label>
-            <div class="ion-display-flex ion-align-items-center review-row">
-              <h2>{{ review.author }}</h2>
-              <ion-text><p>{{ review.review }}</p></ion-text>
-            </div>
-            <ion-note>{{ review?.createdAt | timeAgo: activeLang() }}</ion-note>
-          </ion-label>
-        </ion-item>
+        } @else { @for (thread of reviewThreads(); track thread.root.id) {
+        <bt-review-thread
+          [thread]="thread"
+          [biteCreatorId]="biteCreatorData?.userId"
+          [canReply]="isAuthenticated()"
+          [highlighted]="thread.root.id === highlightedThreadId()"
+          [activeLang]="activeLang()"
+          (submitReply)="saveReply($event)"
+        />
         } }
       </ion-list>
 

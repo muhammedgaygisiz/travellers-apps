@@ -32,8 +32,7 @@ A good Bite makes one concrete dish understandable enough that another person ca
 - A Bite can be reviewed.
 - A review can be answered. A root review opens a thread, any authenticated user
   may reply inside it, and replies are one level deep. A new root review is a new
-  conversation, not a continuation of an existing one. Specified in
-  [[issue-1283]], not implemented yet.
+  conversation, not a continuation of an existing one. See [[issue-1283]].
 - A Bite can be added to bucket lists.
 - A Bite can be part of BiteTrail-based journeys.
 - A Bite is the only entity with a public share link and a native deep link
@@ -264,13 +263,16 @@ images/bites/{biteId}/{filename}
 - Counter aggregates must stay symmetric across create/delete lifecycles. If a future aggregate increments when a Bite, like, review, or related counted document is created, add the matching decrement behavior when that counted document can be deleted.
 - Older Bite documents may not have like aggregate fields. Like-count triggers migrate missing `thumbup`, `drooling`, and `mindblown` fields by recomputing counts from the Bite's `likes` subcollection before applying ongoing delta maintenance.
 - The like aggregates are eventually consistent, so the client cannot treat them as the only source for the displayed reaction counter. A reaction the client already knows about - an own reaction written optimistically, or an old Bite whose aggregates were never migrated - is not yet reflected in `thumbup`, `drooling`, or `mindblown`, and issue \#1165 showed the counter dropping to the empty chip on the Bite details and restaurant pages while the reaction chip was already rendered as liked. `getLikeCount` in `libs/bite-tribe-common/bite/src/lib/utils/like-counts.ts` therefore takes the higher of the aggregate and the loaded `likes` per like type. Reading only the aggregate field is a regression.
-- Reviews are flat. `/reviews` documents carry no parent or thread reference, so a
-  review cannot be answered, and `loadReviewsByBiteId` reads them without an
-  `orderBy`, which makes review order effectively arbitrary. [[issue-1283]]
-  specifies the threading and the ordering that replaces this.
-- The shared `Review` interface does not declare `authorId` even though
-  `saveNewReview` writes it, so reviews written before that field existed cannot
-  be attributed to a user. Notification fan-out has to tolerate their absence.
+- Reviews and their replies share the `/reviews` collection. A reply carries
+  `parentReviewId` and `threadId`, so `loadReviewsByBiteId` stays one equality
+  query per Bite and the grouping into threads happens on the client, in
+  `toReviewThreads`. The read still has no `orderBy`; ordering is applied to the
+  loaded set instead, which keeps the query unindexed and puts the rule in one
+  tested place. See [[issue-1283]].
+- Reviews written before `authorId` was declared on the `Review` interface —
+  `saveNewReview` has always written it — cannot be attributed to a user.
+  Notification fan-out skips them rather than failing, and the gap self-heals as
+  new reviews are written.
 - Guest permissions and admin moderation are not clearly expressed as current Bite-domain capabilities. [[epic-1284]] owns closing that gap for review threads.
 
 ## Future Ideas

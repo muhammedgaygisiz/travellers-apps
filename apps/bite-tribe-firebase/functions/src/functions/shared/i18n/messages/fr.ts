@@ -17,6 +17,8 @@ export const fr: NotificationMessages = {
   'newLike.body': '{{liker}} a aimé ton Bite « {{bite}} ».',
   'newReview.title': 'Nouvel avis sur ton Bite !',
   'newReview.body': '{{reviewer}} a laissé un avis sur ton Bite « {{bite}} ».',
+  'newReviewReply.title': 'Nouvelle réponse à un avis',
+  'newReviewReply.body': '{{replier}} a répondu à un avis sur « {{bite}} ».',
   'weeklyBites.title': '🍽️ Les Bites de la semaine sont là 🤩',
   'weeklyBites.bodyOne':
     'La BiteTribe a partagé 1 nouveau Bite la semaine dernière',

@@ -6,6 +6,7 @@ import {
   alertOutline,
   arrowBackOutline,
   arrowForwardOutline,
+  arrowUndoOutline,
   bookmark,
   bookmarkOutline,
   cameraOutline,
@@ -136,5 +137,6 @@ export const addNecessaryIcons = (): void => {
     construct,
     earthOutline,
     lockClosedOutline,
+    arrowUndoOutline,
   });
 };

@@ -501,5 +501,10 @@
   "go-back": "Volver",
   "bite-could-not-be-loaded": "No se pudo cargar el Bite",
   "this-bite-could-not-be-loaded-right-now": "Algo salió mal al cargar este Bite. Comprueba tu conexión e inténtalo de nuevo.",
-  "try-again": "Intentar de nuevo"
+  "try-again": "Intentar de nuevo",
+  "reply": "Responder",
+  "reply-to": "Responder a {{name}}",
+  "show-replies": "Mostrar {{count}} respuestas",
+  "hide-replies": "Ocultar respuestas",
+  "review-creator-badge": "creador"
 }

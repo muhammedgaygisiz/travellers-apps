@@ -16,7 +16,7 @@ import {
   LikeClick,
   PublicUser,
   RemoveBiteFromBucketlistParams,
-  Review,
+  ReviewThread,
 } from 'model';
 import {
   AlertController,
@@ -28,9 +28,7 @@ import {
   IonList,
   IonListHeader,
   IonModal,
-  IonNote,
   IonSkeletonText,
-  IonText,
   IonTextarea,
   PopoverController,
 } from '@ionic/angular/standalone';
@@ -61,6 +59,10 @@ import { CalcDistancePipe } from './pipes/calc-distance.pipe';
 import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-currency.pipe';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { getLocalizedRegionName } from 'bite-tribe-common/bite';
+import {
+  ReviewReplySubmit,
+  ReviewThreadComponent,
+} from '../review-thread/review-thread.component';
 
 const NEW_LIST_NAME_INPUT = 'name';
 
@@ -77,12 +79,10 @@ const NEW_LIST_NAME_INPUT = 'name';
     IonListHeader,
     IonLabel,
     IonItem,
-    IonNote,
     IonTextarea,
     IonButton,
     ReactiveFormsModule,
     TimeAgoPipe,
-    IonText,
     ToMetricPipe,
     MapComponent,
     IonIcon,
@@ -99,11 +99,26 @@ const NEW_LIST_NAME_INPUT = 'name';
     BiteImageStatusComponent,
     IonModal,
     ImageViewerComponent,
+    ReviewThreadComponent,
   ],
 })
 export class DetailsPage {
   bite = input<Bite>();
-  reviews = input<Review[]>([]);
+
+  /**
+   * The review compartment as conversations rather than as a flat list. The
+   * grouping is done in the store, so the page only decides how a thread looks
+   * (issue #1283).
+   */
+  reviewThreads = input<ReviewThread[]>([]);
+
+  /**
+   * The thread a tapped reply notification asked for. It renders expanded and
+   * marked so the reply the notification was about is the thing the user lands
+   * on.
+   */
+  highlightedThreadId = input<string>();
+
   bucketlists = input<Bucketlist[]>([]);
   userId = input<string>();
   isAuthenticated = input(false);
@@ -131,6 +146,12 @@ export class DetailsPage {
   removeBiteFromBucketlist = output<RemoveBiteFromBucketlistParams>();
   newList = output<string>();
   submitNewReview = output<{ review: string; biteId: string }>();
+  submitReviewReply = output<{
+    review: string;
+    biteId: string;
+    parentReviewId: string;
+    threadId: string;
+  }>();
   likeButtonClick = output<LikeClick>();
   readonly logoutClick = output();
   readonly restaurantClick = output<Bite>();
@@ -315,6 +336,21 @@ export class DetailsPage {
     });
 
     this.reviewFormGroup.reset();
+  }
+
+  /**
+   * Answers a review inside its thread. The Bite id comes from the page rather
+   * than from the thread, so a reply cannot be attributed to a Bite other than
+   * the one on screen.
+   */
+  saveReply(reply: ReviewReplySubmit): void {
+    const biteId = this.bite()?.id;
+
+    if (!biteId) {
+      return;
+    }
+
+    this.submitReviewReply.emit({ ...reply, biteId });
   }
 
   editBite(bite: Bite | undefined): void {

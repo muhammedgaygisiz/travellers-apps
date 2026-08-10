@@ -27,7 +27,8 @@ export class DetailsService {
    */
   biteValue = this.dataAccess.biteValue;
   biteCreatorValue = this.dataAccess.biteCreatorValue;
-  reviews = this.dataAccess.reviews;
+  reviewThreads = this.dataAccess.reviewThreads;
+  highlightedThreadId = this.dataAccess.highlightedThreadId;
   bucketlists = this.dataAccess.bucketlists;
   exchangeRates = this.dataAccess.exchangeRates;
   preferredCurrency = this.dataAccess.preferredCurrency;
@@ -54,6 +55,15 @@ export class DetailsService {
 
   saveReview(newReview: { review: string; biteId: string }): void {
     this.dataAccess.saveNewReview(newReview);
+  }
+
+  saveReviewReply(reply: {
+    review: string;
+    biteId: string;
+    parentReviewId: string;
+    threadId: string;
+  }): void {
+    this.dataAccess.saveReviewReply(reply);
   }
 
   addBiteToSelectedBucketList(list: Bucketlist): void {

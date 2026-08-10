@@ -16,6 +16,9 @@ export const tr: NotificationMessages = {
   'newLike.body': '{{liker}}, "{{bite}}" adlı Bite\'ını beğendi.',
   'newReview.title': "Bite'ına yeni yorum!",
   'newReview.body': '{{reviewer}}, "{{bite}}" adlı Bite\'ına yorum yaptı.',
+  'newReviewReply.title': 'Bir yoruma yeni yanıt',
+  'newReviewReply.body':
+    '{{replier}}, "{{bite}}" için yazılan bir yoruma yanıt verdi.',
   'weeklyBites.title': "🍽️ Haftanın Bite'ları burada 🤩",
   'weeklyBites.bodyOne': 'BiteTribe geçen hafta 1 yeni Bite paylaştı',
   'weeklyBites.bodyMany': 'BiteTribe geçen hafta {{count}} yeni Bite paylaştı',

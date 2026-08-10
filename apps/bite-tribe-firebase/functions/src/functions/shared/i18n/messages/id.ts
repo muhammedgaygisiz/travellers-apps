@@ -16,6 +16,8 @@ export const id: NotificationMessages = {
   'newLike.body': '{{liker}} menyukai Bite-mu "{{bite}}".',
   'newReview.title': 'Ulasan baru untuk Bite-mu!',
   'newReview.body': '{{reviewer}} mengulas Bite-mu "{{bite}}".',
+  'newReviewReply.title': 'Balasan baru untuk sebuah ulasan',
+  'newReviewReply.body': '{{replier}} membalas ulasan untuk "{{bite}}".',
   'weeklyBites.title': '🍽️ Bite minggu ini sudah ada 🤩',
   'weeklyBites.bodyOne': 'BiteTribe membagikan 1 Bite baru minggu lalu',
   'weeklyBites.bodyMany':

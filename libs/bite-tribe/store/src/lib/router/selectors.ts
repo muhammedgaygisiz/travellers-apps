@@ -45,6 +45,16 @@ export const organisationId = createSelector(
 );
 
 /**
+ * The review thread a reply notification points at. Absent on every other way
+ * of reaching a Bite, which renders the review compartment as usual
+ * (issue #1283).
+ */
+export const highlightedThreadId = createSelector(
+  selectQueryParams,
+  (params) => params?.['threadId'],
+);
+
+/**
  * The week a weekly bites deep link points at, as delivered by the summary
  * notification. Both bounds are required: a half-filled range says nothing
  * about which week to show, so consumers fall back to their own default.

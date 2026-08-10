@@ -24,6 +24,8 @@ export type NotificationMessageKey =
   | 'newLike.body'
   | 'newReview.title'
   | 'newReview.body'
+  | 'newReviewReply.title'
+  | 'newReviewReply.body'
   | 'weeklyBites.title'
   | 'weeklyBites.bodyOne'
   | 'weeklyBites.bodyMany'

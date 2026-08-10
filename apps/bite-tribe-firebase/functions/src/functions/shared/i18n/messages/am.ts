@@ -16,6 +16,8 @@ export const am: NotificationMessages = {
   'newLike.body': '{{liker}} የእርስዎን Bite «{{bite}}» ወዷል።',
   'newReview.title': 'በBite ላይ አዲስ ግምገማ!',
   'newReview.body': '{{reviewer}} የእርስዎን Bite «{{bite}}» ገምግሟል።',
+  'newReviewReply.title': 'በግምገማ ላይ አዲስ ምላሽ',
+  'newReviewReply.body': '{{replier}} «{{bite}}» ላይ ለተሰጠ ግምገማ ምላሽ ሰጥቷል።',
   'weeklyBites.title': '🍽️ የሳምንቱ ባይትስ ደርሰዋል 🤩',
   'weeklyBites.bodyOne': 'BiteTribe ባለፈው ሳምንት 1 አዲስ Bite አጋርቷል',
   'weeklyBites.bodyMany': 'BiteTribe ባለፈው ሳምንት {{count}} አዲስ ባይትስ አጋርቷል',

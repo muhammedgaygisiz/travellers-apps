@@ -1,6 +1,8 @@
 - [feat: user wants to answer to a review](https://github.com/muhammedgaygisiz/travellers-apps/issues/1283) (Issue \#1283)
 - Status
-  - Specified, not implemented. This page records the agreed specification so the implementation has a contract to work against.
+  - Implemented. This page records the agreed specification the implementation was built against.
+  - Delivered: `Review.authorId`/`parentReviewId`/`threadId` and the `ReviewThread` type, `ReviewApiService.saveReply`, the `saveReviewReply` action/effect and the `reviewThreads` selector over `toReviewThreads`, `ReviewThreadComponent` with Storybook states, `NEW_REVIEW_REPLY` routing with `threadId`, `notifyThreadParticipantsOnReviewReply`, the reply early return in `notifyBiteCreatorOnReview`, and `newReviewReply` copy in all eleven catalogs.
+  - Deviation worth recording: ordering is applied in `toReviewThreads` rather than as an `orderBy` on `loadReviewsByBiteId`. The read stays one unindexed equality query per Bite, and the order is decided in one pure, tested place that also handles reviews written before `createdAtTimestamp` existed.
 - Description
   - A Bite can be reviewed, and `notifyBiteCreatorOnReview` tells the Bite creator about it. There the conversation stops. The creator cannot answer a specific review, and a reviewer is never told that anyone responded.
   - The only way for a creator to say something back today is to write another root-level review of their own Bite. That reads as a second opinion rather than as an answer, and it notifies nobody.

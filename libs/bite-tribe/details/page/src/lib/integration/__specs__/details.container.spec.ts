@@ -59,7 +59,8 @@ describe(DetailsContainer.name, () => {
               error: signal(undefined),
               reload: jest.fn(),
             },
-            reviews: signal([]),
+            reviewThreads: signal([]),
+            highlightedThreadId: signal(undefined),
             currentPosition: {
               value: signal(undefined),
             },

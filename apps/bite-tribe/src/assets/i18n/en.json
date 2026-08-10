@@ -501,5 +501,10 @@
   "go-back": "Go back",
   "bite-could-not-be-loaded": "Bite could not be loaded",
   "this-bite-could-not-be-loaded-right-now": "Something went wrong while loading this Bite. Check your connection and try again.",
-  "try-again": "Try again"
+  "try-again": "Try again",
+  "reply": "Reply",
+  "reply-to": "Reply to {{name}}",
+  "show-replies": "Show {{count}} replies",
+  "hide-replies": "Hide replies",
+  "review-creator-badge": "creator"
 }

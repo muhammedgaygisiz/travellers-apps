@@ -123,8 +123,8 @@ turned the profile's country badges into an engagement signal:
 ## Review Thread Contract
 
 Issue [#1283](https://github.com/muhammedgaygisiz/travellers-apps/issues/1283)
-extends review notifications from one recipient to a conversation. Specified, not
-implemented yet.
+extends review notifications from one recipient to a conversation. Implemented by
+`notifyThreadParticipantsOnReviewReply`.
 
 - A reply notifies everyone already in that thread except the person who just
   wrote it: the root review author, every reply author, and the Bite creator.
@@ -180,7 +180,8 @@ made notification delivery installation-specific:
 
 - `notifyFollowersOnNewBite`
 - `notifyBiteCreatorOnLike`
-- `notifyBiteCreatorOnReview`
+- `notifyBiteCreatorOnReview`, which returns early for a reply
+- `notifyThreadParticipantsOnReviewReply`
 - `notifyUserOnNewFollower`
 - `sendWeeklyBiteNotification`
 - `sendDailyLeaderboardNotification`

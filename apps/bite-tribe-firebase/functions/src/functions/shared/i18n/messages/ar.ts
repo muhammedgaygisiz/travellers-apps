@@ -16,6 +16,8 @@ export const ar: NotificationMessages = {
   'newLike.body': '{{liker}} أعجب بـ Bite «{{bite}}» الخاص بك.',
   'newReview.title': 'مراجعة جديدة على Bite الخاص بك!',
   'newReview.body': '{{reviewer}} كتب مراجعة على Bite «{{bite}}» الخاص بك.',
+  'newReviewReply.title': 'رد جديد على مراجعة',
+  'newReviewReply.body': '{{replier}} رد على مراجعة لـ «{{bite}}».',
   'weeklyBites.title': '🍽️ قضمات الأسبوع وصلت 🤩',
   'weeklyBites.bodyOne': 'شاركت BiteTribe قضمة جديدة واحدة الأسبوع الماضي',
   'weeklyBites.bodyMany': 'شاركت BiteTribe {{count}} قضمة جديدة الأسبوع الماضي',

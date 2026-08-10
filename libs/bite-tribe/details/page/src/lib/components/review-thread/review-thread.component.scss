@@ -1,0 +1,95 @@
+:host {
+  display: block;
+}
+
+.review-thread {
+  --padding-start: 0;
+
+  /**
+   * The thread a notification pointed at. A translucent tint over whatever is
+   * behind the item, plus an accent bar, so the mark reads in both the light
+   * and the dark theme — an opaque light background would swallow the text of
+   * one of them.
+   */
+  &.highlighted {
+    --background: rgba(var(--ion-color-primary-rgb), 0.12);
+
+    box-shadow: inset 3px 0 0 0 var(--ion-color-primary);
+  }
+}
+
+.review-entry {
+  .review-row {
+    gap: 8px;
+    margin-bottom: 4px;
+
+    h2 {
+      font-weight: bold;
+      margin-bottom: 4px;
+
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    p {
+      margin: 0;
+      font-size: 16px;
+    }
+  }
+
+  .review-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    ion-note {
+      font-size: 14px;
+      display: block;
+    }
+
+    ion-button {
+      margin: 0;
+      --padding-start: 4px;
+      --padding-end: 4px;
+    }
+  }
+}
+
+.creator-badge {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--ion-color-primary);
+}
+
+/**
+ * The one indent a thread ever gets. Answering a reply attaches to the same
+ * root, so nothing nests below this level.
+ */
+.replies {
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 2px solid var(--ion-color-medium, #92949c);
+}
+
+.toggle-replies {
+  margin: 0;
+  --padding-start: 4px;
+  --padding-end: 4px;
+}
+
+.reply-composer {
+  margin-left: 12px;
+  padding-left: 12px;
+  margin-top: 8px;
+
+  .reply-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 4px;
+  }
+}

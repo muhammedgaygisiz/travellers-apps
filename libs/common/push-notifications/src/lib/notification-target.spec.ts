@@ -22,6 +22,44 @@ describe(toNotificationTarget.name, () => {
     },
   );
 
+  it('targets the thread a review reply belongs to', () => {
+    // A Bite's review compartment holds many conversations, so the thread comes
+    // along and the page opens on the right one (issue #1283).
+    expect(
+      toNotificationTarget(
+        {
+          type: 'NEW_REVIEW_REPLY',
+          biteId: 'bite-1',
+          threadId: 'root-1',
+          replyId: 'reply-1',
+          replyAuthorId: 'user-2',
+        },
+        RECIPIENT,
+      ),
+    ).toEqual({
+      commands: ['bite', 'bite-1'],
+      extras: { queryParams: { threadId: 'root-1' } },
+    });
+  });
+
+  it('still opens the Bite when a reply payload names no thread', () => {
+    expect(
+      toNotificationTarget(
+        { type: 'NEW_REVIEW_REPLY', biteId: 'bite-1' },
+        RECIPIENT,
+      ),
+    ).toEqual({ commands: ['bite', 'bite-1'], extras: undefined });
+  });
+
+  it('targets nothing for a reply payload without a bite', () => {
+    expect(
+      toNotificationTarget(
+        { type: 'NEW_REVIEW_REPLY', threadId: 'root-1' },
+        RECIPIENT,
+      ),
+    ).toBeUndefined();
+  });
+
   it('targets the follower profile of a new-follower notification', () => {
     // The subject of the notification is the follower, not the recipient whose
     // uid the same payload also carries (issue #1244).

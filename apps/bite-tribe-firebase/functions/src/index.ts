@@ -5,6 +5,7 @@ initializeApp();
 export { notifyFollowersOnNewBite } from './functions/notifications/notify-followers-on-new-bite';
 export { notifyBiteCreatorOnLike } from './functions/notifications/notify-bite-creator-on-like';
 export { notifyBiteCreatorOnReview } from './functions/notifications/notify-bite-creator-on-review';
+export { notifyThreadParticipantsOnReviewReply } from './functions/notifications/notify-thread-participants-on-review-reply';
 export { notifyUserOnNewFollower } from './functions/notifications/notify-user-on-new-follower';
 export { handleSharedLinkToBite } from './functions/bites/handle-shared-link-to-bite';
 export { sendWeeklyBiteNotification } from './functions/notifications/send-weekly-bite-notification';

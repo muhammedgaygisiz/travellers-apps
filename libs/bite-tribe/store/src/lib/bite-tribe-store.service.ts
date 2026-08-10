@@ -3,7 +3,7 @@ import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
 import { BiteActions } from './bites/actions';
-import { saveNewReview } from './reviews/actions';
+import { saveNewReview, saveReviewReply } from './reviews/actions';
 import { bites, sortedHomeBites } from './bites/home-bites.selector';
 import {
   bitesByUser,
@@ -25,7 +25,7 @@ import {
 } from './restaurants/selectors';
 import { menu } from './menus/selectors';
 import { AppActions } from './app/actions';
-import { reviews } from './reviews/selectors';
+import { reviewThreads, reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import type {
   Bite,
@@ -93,6 +93,7 @@ import {
   userId as userIdFromUrl,
   organisationId as organisationIdFromUrlSelector,
   weekRange as weekRangeFromUrlSelector,
+  highlightedThreadId as highlightedThreadIdFromUrlSelector,
 } from './router/selectors';
 
 @Injectable({
@@ -133,6 +134,7 @@ export class BiteTribeStoreService implements StoreService {
   restaurants$ = this.store.select(restaurants);
   menu$ = this.store.select(menu);
   reviews$ = this.store.select(reviews);
+  reviewThreads$ = this.store.select(reviewThreads);
   bucketlists$ = this.store.select(bucketlists);
   currencyFromSettings$ = this.store.select(currency);
   favCurrenciesFromSettings$ = this.store.select(favCurrencies);
@@ -168,6 +170,9 @@ export class BiteTribeStoreService implements StoreService {
   biteTrailIdFromUrl$ = this.store.select(biteTrailIdFromUrlSelector);
   organisationIdFromUrl$ = this.store.select(organisationIdFromUrlSelector);
   weekRangeFromUrl$ = this.store.select(weekRangeFromUrlSelector);
+  highlightedThreadIdFromUrl$ = this.store.select(
+    highlightedThreadIdFromUrlSelector,
+  );
 
   bucketlist = toSignal(this.store.select(selectedBucketlist));
   user = toSignal(this.user$);
@@ -181,6 +186,7 @@ export class BiteTribeStoreService implements StoreService {
   biteTrailIdFromUrl = toSignal(this.biteTrailIdFromUrl$);
   organisationIdFromUrl = toSignal(this.organisationIdFromUrl$);
   weekRangeFromUrl = toSignal(this.weekRangeFromUrl$);
+  highlightedThreadIdFromUrl = toSignal(this.highlightedThreadIdFromUrl$);
 
   loginWithGoogleAccount(): void {
     this.store.dispatch(fromAuth.AuthActions.loginWithGoogleAccount());
@@ -270,6 +276,15 @@ export class BiteTribeStoreService implements StoreService {
 
   saveReview(newReview: { review: string; biteId: string }): void {
     this.store.dispatch(saveNewReview(newReview));
+  }
+
+  saveReviewReply(reply: {
+    review: string;
+    biteId: string;
+    parentReviewId: string;
+    threadId: string;
+  }): void {
+    this.store.dispatch(saveReviewReply(reply));
   }
 
   selectRestaurantToCreate(restaurant: Restaurant): void {

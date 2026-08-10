@@ -109,7 +109,7 @@
   | [[issue-1283]] | [[UC - Inspect Bite Details]], [[UC - Receive App Notifications And Engagement Updates]] | [[Bite]], [[User]] |
   | [[epic-1284]]  | [[UC - Inspect Bite Details]]                                                            | [[Bite]], [[User]] |
 
-  [[issue-1283]] is specified but not implemented. [[epic-1284]] depends on it: a moderation rule for deleting a root review only has meaning once a root review can carry replies.
+  [[issue-1283]] is implemented. [[epic-1284]] depends on it: a moderation rule for deleting a root review only has meaning once a root review can carry replies.
 
 - ## Decisions To Constraints
 

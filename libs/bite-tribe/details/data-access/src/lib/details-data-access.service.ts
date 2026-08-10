@@ -203,7 +203,22 @@ export class DetailsDataAccessService {
     this.bite.reload();
   }
 
-  reviews = toSignal(this.storeService.reviews$, { initialValue: [] });
+  /**
+   * The Bite's reviews grouped into conversations, as the page renders them.
+   * The flat list is not exposed: every reader of the compartment now needs the
+   * threads, and two shapes of the same data would drift (issue #1283).
+   */
+  reviewThreads = toSignal(this.storeService.reviewThreads$, {
+    initialValue: [],
+  });
+
+  /**
+   * The thread a tapped reply notification asked for, if the page was reached
+   * that way. The compartment opens and highlights it instead of leaving the
+   * reply somewhere below the fold (issue #1283).
+   */
+  highlightedThreadId = toSignal(this.storeService.highlightedThreadIdFromUrl$);
+
   bucketlists = toSignal(this.storeService.bucketlists$, {
     initialValue: [],
   });
@@ -269,6 +284,15 @@ export class DetailsDataAccessService {
 
   saveNewReview(newReview: { review: string; biteId: string }): void {
     this.storeService.saveReview(newReview);
+  }
+
+  saveReviewReply(reply: {
+    review: string;
+    biteId: string;
+    parentReviewId: string;
+    threadId: string;
+  }): void {
+    this.storeService.saveReviewReply(reply);
   }
 
   saveToBucketList(saveToBucketListEvent: SaveToBucketListParams): void {

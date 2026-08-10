@@ -3,6 +3,7 @@
   - [[Traceability Map]]
   - [[Spec To Code Workflow]]
   - [[Feature Delivery Workflow]]
+  - [[GitHub Project Board And Issue Handling]]
   - [[Release Workflow]]
 - Product
   - [[Vision]]

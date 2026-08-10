@@ -42,6 +42,8 @@ Use the authenticated `gh` CLI for GitHub issue, pull request, project, label, a
 
 Connector-backed GitHub tools may be used only as supplementary read helpers when they are already available and clearly sufficient, but durable issue or PR updates should go through `gh` so repository permissions match the user's local setup.
 
+Issues belong on the `Bite Tribe` project board, and their priority is a board field rather than a label. Filing an issue without adding it to the board leaves it invisible to planning. See [[GitHub Project Board And Issue Handling]] for the board, the fields, and the commands.
+
 ## Traceability Requirement
 
 Every implementation should be traceable through this chain:
@@ -98,6 +100,7 @@ When finishing, report:
 ## Related Pages
 
 - [[SSOT]]
+- [[GitHub Project Board And Issue Handling]]
 - [[Traceability Map]]
 - [[Spec To Code Workflow]]
 - [[Feature Delivery Workflow]]

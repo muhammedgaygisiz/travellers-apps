@@ -1,5 +1,51 @@
 # Changelog
 
+## build-93 (2026-08-10)
+
+<!-- changelog-start-rev: ac217b99 -->
+<!-- changelog-end-rev: a2753b18 -->
+
+### Features
+
+- in case show distance from bite and distance from your location (#1299) (cdc8bed3)
+- answer to reviews (#1298) (9bd32056)
+- search by country (#1296) (d1396ff3)
+- show identity in app menu (#1293) (20799e8c)
+- loading state on create bite click (#1292) (654af3d1)
+- add home base to onboarding assistent (#1291) (fb67d0a4)
+- adjust location selection (#1288) (b4c0471d)
+- localize verification email (#1279) (8cf50263)
+
+### Bug Fixes
+
+- typo (#1300) (a2753b18)
+- fix sender email address in verification email (#1295) (25942af6)
+- stop the profile repeating the display name as a real name (#1282) (aa623f19)
+- localize relative timestamps and stop inventing ages (#1281) (32f67bd5)
+- add pending state to login (#1280) (f89e98da)
+- get os version from capacitor device plugin (#1278) (76434534)
+- use timezone to determine preferred currency on onboarding (#1277) (4dd9fbe5)
+- show loading state between photo placeholder and photo preview (#1276) (b0b08db5)
+- **1232**: proper handling failed bite load (#1275) (41c299c3)
+
+### Performance Improvements
+
+- page the search result list and ease image decoding (#1297) (d994059b)
+
+### Documentation
+
+- specify threaded review replies and review moderation epic (#1285) (21a2c706)
+- test run #5 (#1274) (39c87bcc)
+
+### Styles
+
+- overlapping header fix (#1286) (e82dd209)
+
+### Chores
+
+- automate and document the native release process (#1259) (738901be)
+- prepare build 1.0.1-92 release (#1258) (47faadba)
+
 ## build-92 (2026-08-07)
 
 <!-- changelog-start-rev: b3aef3ab -->

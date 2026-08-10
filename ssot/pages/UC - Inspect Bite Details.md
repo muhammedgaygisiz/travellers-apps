@@ -194,6 +194,13 @@ turns the review compartment from a flat list into a thread list. Implemented by
   highlight, the creator badge, and the read-only view.
 - `toReviewThreads` in `libs/bite-tribe/store`, which owns the grouping and the
   ordering.
+- Playwright E2E coverage of the review thread:
+  `apps/bite-tribe-e2e/src/tests/review-threads.spec.ts` answers a review as an
+  account that owns neither the Bite nor the review, answers that answer and
+  checks it stayed in the same thread with an `@name` prefill and no second
+  indent, marks the creator, asserts thread and reply order against seeded
+  timestamps, folds and unfolds a thread of three replies, and opens
+  `/bite/:biteId?threadId=` expanded and highlighted.
 - Playwright E2E coverage of the failed header photo: the reported state, the
   photo that is withheld rather than shown, and the poster's retry falling back
   to the local photo picker when this device holds no copy.

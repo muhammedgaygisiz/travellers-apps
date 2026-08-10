@@ -2,6 +2,7 @@
 - Status
   - Implemented. This page records the agreed specification the implementation was built against.
   - Delivered: `Review.authorId`/`parentReviewId`/`threadId` and the `ReviewThread` type, `ReviewApiService.saveReply`, the `saveReviewReply` action/effect and the `reviewThreads` selector over `toReviewThreads`, `ReviewThreadComponent` with Storybook states, `NEW_REVIEW_REPLY` routing with `threadId`, `notifyThreadParticipantsOnReviewReply`, the reply early return in `notifyBiteCreatorOnReview`, and `newReviewReply` copy in all eleven catalogs.
+  - Verified against the emulator by `apps/bite-tribe-e2e/src/tests/review-threads.spec.ts`. Its run also exercises both triggers on real writes: `notifyBiteCreatorOnReview` returns early for a reply, and `notifyThreadParticipantsOnReviewReply` resolves the root author and the Bite creator while dropping the account that wrote the reply. The send itself stops at zero push tokens, so the fan-out assertions stay on the Functions unit tests.
   - Deviation worth recording: ordering is applied in `toReviewThreads` rather than as an `orderBy` on `loadReviewsByBiteId`. The read stays one unindexed equality query per Bite, and the order is decided in one pure, tested place that also handles reviews written before `createdAtTimestamp` existed.
 - Description
   - A Bite can be reviewed, and `notifyBiteCreatorOnReview` tells the Bite creator about it. There the conversation stops. The creator cannot answer a specific review, and a reviewer is never told that anyone responded.

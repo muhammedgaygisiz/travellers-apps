@@ -11,8 +11,15 @@ jest.mock('../utils/load-review-by-bite-id', () => ({
 
 jest.mock('@capacitor-firebase/firestore');
 
+// The name on the account's profile. It is deliberately not the name the
+// Firebase Auth user carries: a Google or Apple sign-in supplies the person's
+// legal name there, and publishing that on a review is issue #1308.
+const profiles: Record<string, Record<string, unknown> | null> = {
+  '123': { userId: '123', displayName: 'El Mo' },
+};
+
 const MockedAuthService = {
-  getUser: (): any => ({ uid: '123', displayName: 'El Mo' }),
+  getUser: (): any => ({ uid: '123', displayName: 'Muhammed Gaygisiz' }),
   isLoggedIn$: of(false),
 };
 
@@ -22,6 +29,13 @@ describe(ReviewApiService.name, () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(mockDate);
+    (FirebaseFirestore.getDocument as jest.Mock).mockImplementation(
+      async ({ reference }: { reference: string }) => ({
+        snapshot: {
+          data: profiles[reference.split('/').pop() as string] ?? null,
+        },
+      }),
+    );
     TestBed.configureTestingModule({
       providers: [{ provide: AuthService, useValue: MockedAuthService }],
     });
@@ -76,6 +90,58 @@ describe(ReviewApiService.name, () => {
         });
       },
     ));
+
+    // The account signs in with Google and Apple, so the Firebase Auth user
+    // carries the legal name and the profile carries the chosen one. They are
+    // identical on an email and password account, which is why this defect
+    // survived six release-candidate runs. See GitHub issue #1308.
+    it('attributes the review to the profile display name, not the provider name', inject(
+      [ReviewApiService],
+      async (service: ReviewApiService) => {
+        const addDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'addDocument')
+          .mockResolvedValue({} as any);
+
+        await service.saveNewReview({
+          review: 'Great food!',
+          biteId: 'biteId123',
+        });
+
+        expect(addDocumentSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              author: 'El Mo',
+              authorId: '123',
+            }),
+          }),
+        );
+      },
+    ));
+
+    describe('given an account with no readable profile', () => {
+      it('writes no name at all rather than the provider one', inject(
+        [ReviewApiService],
+        async (service: ReviewApiService) => {
+          (FirebaseFirestore.getDocument as jest.Mock).mockResolvedValue({
+            snapshot: { data: null },
+          });
+          const addDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'addDocument')
+            .mockResolvedValue({} as any);
+
+          await service.saveNewReview({
+            review: 'Great food!',
+            biteId: 'biteId123',
+          });
+
+          expect(addDocumentSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+              data: expect.objectContaining({ author: '' }),
+            }),
+          );
+        },
+      ));
+    });
 
     describe('given an error', () => {
       it('should handle the error', inject(
@@ -138,6 +204,33 @@ describe(ReviewApiService.name, () => {
             createdAtTimestamp: 1710504000000,
           },
         });
+      },
+    ));
+
+    // A thread repeats the attribution on every message, so the provider name
+    // leaked once per reply as well. See GitHub issue #1308.
+    it('attributes the reply to the profile display name, not the provider name', inject(
+      [ReviewApiService],
+      async (service: ReviewApiService) => {
+        const addDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'addDocument')
+          .mockResolvedValue({} as any);
+
+        await service.saveReply({
+          review: 'Thanks!',
+          biteId: 'biteId123',
+          parentReviewId: 'root-1',
+          threadId: 'root-1',
+        });
+
+        expect(addDocumentSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              author: 'El Mo',
+              authorId: '123',
+            }),
+          }),
+        );
       },
     ));
 

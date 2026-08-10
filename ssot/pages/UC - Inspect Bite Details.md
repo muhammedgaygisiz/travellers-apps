@@ -183,12 +183,47 @@ turns the review compartment from a flat list into a thread list. Implemented by
 - Editing, deleting and reporting a review or reply are not part of this
   contract. [[epic-1284]] owns them.
 
+## Review Attribution Contract
+
+Issue [#1308](https://github.com/muhammedgaygisiz/travellers-apps/issues/1308)
+stopped reviews publishing the author's real name. It is the same two-names
+confusion as the Profile Identity Contract in
+[[UC - Manage Profile And Social Graph]], on a surface that publishes rather
+than displays.
+
+- A review and every reply in its thread are attributed to the author's
+  BiteTribe display name. The name the identity provider knows the person by is
+  never rendered to another user.
+- The display name is read from the user document, never from the Firebase Auth
+  user. `AuthService.getUser()` returns the provider's account, whose
+  `displayName` is populated by the Google or Apple sign-in and holds a legal
+  name. The two coincide on an email and password account, which is why five
+  release-candidate runs missed this and why a test has to use an account where
+  they differ.
+- The name is resolved through `authorId` when the compartment is read, not
+  taken from the `author` string stored on the review. Every review written
+  before this carries a name copied from the provider, and correcting the write
+  path does not correct a denormalised field, so re-reading is what repairs the
+  reviews that already exist. It also makes a display-name change show up on
+  everything the person wrote before it.
+- One profile is read per distinct author, not per review, so a thread in which
+  one person wrote ten messages costs one document read.
+- `author` is still written, so a reader has an attribution before the join
+  resolves, but it is now written from the profile. An account with no readable
+  profile writes an empty name rather than falling back to the provider's — the
+  provider's name never reaches a review document.
+- A review whose author cannot be resolved keeps its stored name. Those are the
+  ones written before `authorId` was carried and the ones whose account is gone;
+  blanking them would remove the only attribution they have. The existing data
+  is small enough that no backfill was written for it.
+
 ## Supported Evidence
 
 - `bite/:biteId`
 - Bite details page and data-access.
 - Like API.
-- Review API, including `saveReply`.
+- Review API, including `saveReply` and the display-name resolution in
+  `loadReviewsByBiteId` and `loadDisplayNamesById`.
 - `ReviewThreadComponent` in `libs/bite-tribe/details/page`, with Storybook
   states for a bare root, an open thread, a folded one, the notification
   highlight, the creator badge, and the read-only view.

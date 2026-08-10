@@ -3,6 +3,7 @@ import { AuthService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BITE_COLLECTION, REVIEW_COLLECTION } from '../utils/constants';
 import { loadReviewsByBiteId } from './utils/load-review-by-bite-id';
+import { loadDisplayNameById } from './utils/load-display-names-by-id';
 import { Review } from 'model';
 
 @Injectable({ providedIn: 'root' })
@@ -20,6 +21,7 @@ export class ReviewApiService {
   }): Promise<Review[]> {
     try {
       const user = this.authService.getUser();
+      const author = await this.authorName(user?.uid);
 
       await FirebaseFirestore.addDocument({
         reference: REVIEW_COLLECTION,
@@ -29,7 +31,7 @@ export class ReviewApiService {
           createdAt: new Date().toISOString(),
           createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
           authorId: user?.uid || '',
-          author: user?.displayName || '',
+          author,
         },
       });
 
@@ -59,6 +61,7 @@ export class ReviewApiService {
   }): Promise<Review[]> {
     try {
       const user = this.authService.getUser();
+      const author = await this.authorName(user?.uid);
 
       await FirebaseFirestore.addDocument({
         reference: REVIEW_COLLECTION,
@@ -70,7 +73,7 @@ export class ReviewApiService {
           createdAt: new Date().toISOString(),
           createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
           authorId: user?.uid || '',
-          author: user?.displayName || '',
+          author,
         },
       });
 
@@ -81,5 +84,23 @@ export class ReviewApiService {
 
       return <Review[]>[];
     }
+  }
+
+  /**
+   * The name a review is written under.
+   *
+   * Read from the user's profile rather than from the Firebase Auth user: the
+   * latter's `displayName` is whatever Google or Apple knows the person as,
+   * which is their legal name, and publishing it defeated the display name the
+   * product asks for during onboarding (issue #1308).
+   *
+   * The stored name is still written, so a reader that has not resolved the
+   * author yet has something to show, but it is now the same name the read
+   * path resolves. An account with no readable profile writes an empty author
+   * instead of falling back to the provider's name — the whole point is that
+   * the provider's name never reaches a review document.
+   */
+  private async authorName(uid: string | undefined): Promise<string> {
+    return (await loadDisplayNameById(uid || '')) || '';
   }
 }

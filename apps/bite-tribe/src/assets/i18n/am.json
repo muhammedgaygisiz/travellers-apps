@@ -169,6 +169,8 @@
   "restaurant-selector-cancel": "ሰርዝ",
   "restaurant-selector-title": "ምግብ ቤት ይምረጡ",
   "restaurant-selector-search-placeholder": "ምግብ ቤቶችን ፈልግ...",
+  "restaurant-selector-distance-from-bite": "ከBite {{distance}}",
+  "restaurant-selector-distance-from-you": "ካንተ {{distance}}",
   "restaurant-selector-use-custom": "ተጠቀም: \"{{searchTerm}}\"",
   "restaurant-selector-add-as-new": "እንደ አዲስ ምግብ ቤት አክል",
   "restaurant-selector-start-typing": "ምግብ ቤቶችን ለመፈለግ መጻፍ ጀምር",

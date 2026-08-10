@@ -166,6 +166,8 @@
       [googlePlacesLoading]="googlePlacesLoading()"
       [nearbyGooglePlaces]="nearbyGooglePlaces()"
       [nearbyGooglePlacesLoading]="nearbyGooglePlacesLoading()"
+      [userPosition]="position()"
+      [bitePosition]="currentPosition() ?? undefined"
       (restaurantSelected)="onRestaurantSelected($event)"
       (searchInGoogleMaps)="searchGooglePlaces.emit($event)"
       (googlePlaceSelected)="onGooglePlaceSelected($event)"

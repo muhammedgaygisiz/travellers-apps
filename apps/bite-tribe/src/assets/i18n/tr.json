@@ -169,6 +169,8 @@
   "restaurant-selector-cancel": "İptal",
   "restaurant-selector-title": "Restoran seç",
   "restaurant-selector-search-placeholder": "Restoran ara...",
+  "restaurant-selector-distance-from-bite": "Bite’a {{distance}}",
+  "restaurant-selector-distance-from-you": "Sana {{distance}}",
   "restaurant-selector-use-custom": "Kullan: \"{{searchTerm}}\"",
   "restaurant-selector-add-as-new": "Yeni restoran olarak ekle",
   "restaurant-selector-start-typing": "Restoran aramak için yazmaya başla",

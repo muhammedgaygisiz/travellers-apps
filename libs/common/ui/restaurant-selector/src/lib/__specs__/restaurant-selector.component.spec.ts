@@ -3,6 +3,33 @@ import { RestaurantSelectorComponent } from '../restaurant-selector.component';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 
+/** The `Posting later` fixture from GitHub issue #1269: device in Bern... */
+const BERN = { latitude: 46.948, longitude: 7.4474 };
+
+/** ...photo taken in Ronda, roughly 1539 km away. */
+const RONDA = { latitude: 36.7423, longitude: -5.166 };
+
+/**
+ * Two Ronda candidates on opposite sides of the Bite. `northOfBite` is farther
+ * from the Bite but nearer to Bern, so ordering by the device and ordering by
+ * the Bite disagree.
+ */
+const northOfBite = {
+  placeId: 'north',
+  name: 'North Tapas',
+  address: 'Calle Norte 1, Ronda',
+  position: { latitude: 36.76, longitude: -5.166 },
+  distance: '1537.1',
+};
+
+const southOfBite = {
+  placeId: 'south',
+  name: 'South Tapas',
+  address: 'Calle Sur 1, Ronda',
+  position: { latitude: 36.74, longitude: -5.166 },
+  distance: '1539.0',
+};
+
 const MockTranslocoService = {
   translate: jest.fn((key: string, params?: Record<string, string>): string => {
     if (!params) {
@@ -283,6 +310,113 @@ describe('RestaurantSelectorComponent', () => {
     fixture.detectChanges();
 
     expect(component.showNearbyGooglePlaces()).toBe(false);
+  });
+
+  describe('with a Bite position that differs from the device position', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('userPosition', BERN);
+      fixture.componentRef.setInput('bitePosition', RONDA);
+      fixture.detectChanges();
+    });
+
+    it('should recognize the two positions as diverged', () => {
+      expect(component.hasDivergedPositions()).toBe(true);
+    });
+
+    it('should name both origins on a row', () => {
+      const lines = component.distanceLines(southOfBite);
+
+      expect(lines.map((line) => line.labelKey)).toEqual([
+        'restaurant-selector-distance-from-bite',
+        'restaurant-selector-distance-from-you',
+      ]);
+      expect(lines[0].distance).toBe('0.3 km');
+      expect(lines[1].distance).toMatch(/^153\d\.\d km$/);
+    });
+
+    it('should keep the two values distinguishable', () => {
+      const [fromBite, fromUser] = component.distanceLines(southOfBite);
+
+      expect(fromBite.distance).not.toBe(fromUser.distance);
+    });
+
+    it('should order Google Maps results by the distance from the Bite', () => {
+      fixture.componentRef.setInput('googlePlaces', [northOfBite, southOfBite]);
+      fixture.detectChanges();
+
+      expect(component.sortedGooglePlaces().map((place) => place.name)).toEqual(
+        ['South Tapas', 'North Tapas'],
+      );
+    });
+
+    it('should order nearby Google places by the distance from the Bite', () => {
+      fixture.componentRef.setInput('nearbyGooglePlaces', [
+        northOfBite,
+        southOfBite,
+      ]);
+      fixture.detectChanges();
+
+      expect(
+        component.sortedNearbyGooglePlaces().map((place) => place.name),
+      ).toEqual(['South Tapas', 'North Tapas']);
+    });
+
+    it('should order local restaurants by the distance from the Bite', () => {
+      fixture.componentRef.setInput('restaurants', [
+        { name: northOfBite.name, ...northOfBite },
+        { name: southOfBite.name, ...southOfBite },
+      ]);
+      fixture.detectChanges();
+
+      expect(component.filteredRestaurants().map((r) => r.name)).toEqual([
+        'South Tapas',
+        'North Tapas',
+      ]);
+    });
+
+    it('should show no distance for a row without a position of its own', () => {
+      expect(component.distanceLines({ distance: '1539.0' })).toEqual([]);
+    });
+  });
+
+  describe('with the Bite position and the device position co-located', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('userPosition', RONDA);
+      fixture.componentRef.setInput('bitePosition', {
+        latitude: RONDA.latitude + 0.001,
+        longitude: RONDA.longitude,
+      });
+      fixture.detectChanges();
+    });
+
+    it('should not treat a position within the threshold as diverged', () => {
+      expect(component.hasDivergedPositions()).toBe(false);
+    });
+
+    it('should show a single unlabelled distance instead of two near-identical ones', () => {
+      expect(component.distanceLines(southOfBite)).toEqual([
+        { labelKey: '', distance: '1539.0 km' },
+      ]);
+    });
+
+    it('should keep ordering Google Maps results by the precomputed distance', () => {
+      fixture.componentRef.setInput('googlePlaces', [southOfBite, northOfBite]);
+      fixture.detectChanges();
+
+      expect(component.sortedGooglePlaces().map((place) => place.name)).toEqual(
+        ['North Tapas', 'South Tapas'],
+      );
+    });
+  });
+
+  it('should show a single distance while no Bite position is known', () => {
+    fixture.componentRef.setInput('userPosition', BERN);
+    fixture.detectChanges();
+
+    expect(component.hasDivergedPositions()).toBe(false);
+    expect(component.distanceLines(southOfBite)).toEqual([
+      { labelKey: '', distance: '1539.0 km' },
+    ]);
   });
 
   it('should update rawSearchTerm on searchbar input', () => {

@@ -30,6 +30,8 @@ export default {
     googlePlacesLoading: false,
     nearbyGooglePlaces: [],
     nearbyGooglePlacesLoading: false,
+    userPosition: undefined,
+    bitePosition: undefined,
   },
   render: (args) => ({
     props: args,
@@ -43,6 +45,8 @@ export default {
             [googlePlacesLoading]="googlePlacesLoading"
             [nearbyGooglePlaces]="nearbyGooglePlaces"
             [nearbyGooglePlacesLoading]="nearbyGooglePlacesLoading"
+            [userPosition]="userPosition"
+            [bitePosition]="bitePosition"
           />
         </div>
       </ion-app>
@@ -119,6 +123,40 @@ export const NearbyGooglePlacesLoading: Story = {
     googlePlacesLoading: false,
     nearbyGooglePlaces: [],
     nearbyGooglePlacesLoading: true,
+  },
+};
+
+/**
+ * The `Posting later` case from GitHub issue #1269: the device is in Bern and
+ * the Bite carries a position in Ronda, so every candidate is ~1539 km away and
+ * only the distance from the Bite separates them. Both origins are named, and
+ * the list is ordered by the Bite rather than by the device.
+ */
+export const DistanceFromBiteAndUser: Story = {
+  args: {
+    restaurants: [],
+    selectedRestaurant: '',
+    googlePlaces: [],
+    googlePlacesLoading: false,
+    userPosition: { latitude: 46.948, longitude: 7.4474 },
+    bitePosition: { latitude: 36.7423, longitude: -5.166 },
+    nearbyGooglePlaces: [
+      {
+        placeId: 'toro-tapas-ronda',
+        name: 'Toro Tapas Ronda',
+        address: 'Calle Virgen de la Paz 22, 29400 Ronda, Spain',
+        position: { latitude: 36.7429, longitude: -5.1668 },
+        distance: '1538.8',
+      },
+      {
+        placeId: 'toro-tapas-rmcr',
+        name: 'TORO TAPAS RMCR',
+        address: 'Plaza de España 1, 29400 Ronda, Spain',
+        position: { latitude: 36.7409, longitude: -5.1651 },
+        distance: '1539.0',
+      },
+    ],
+    nearbyGooglePlacesLoading: false,
   },
 };
 

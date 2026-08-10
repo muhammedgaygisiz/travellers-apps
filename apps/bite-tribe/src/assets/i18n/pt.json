@@ -170,6 +170,8 @@
   "restaurant-selector-cancel": "Cancelar",
   "restaurant-selector-title": "Selecionar restaurante",
   "restaurant-selector-search-placeholder": "Pesquisar restaurantes...",
+  "restaurant-selector-distance-from-bite": "{{distance}} do Bite",
+  "restaurant-selector-distance-from-you": "{{distance}} de ti",
   "restaurant-selector-use-custom": "Usar: \"{{searchTerm}}\"",
   "restaurant-selector-add-as-new": "Adicionar como novo restaurante",
   "restaurant-selector-start-typing": "Começa a escrever para pesquisar restaurantes",

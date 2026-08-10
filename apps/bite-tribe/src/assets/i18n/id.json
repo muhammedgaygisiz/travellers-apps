@@ -169,6 +169,8 @@
   "restaurant-selector-cancel": "Batal",
   "restaurant-selector-title": "Pilih restoran",
   "restaurant-selector-search-placeholder": "Cari restoran...",
+  "restaurant-selector-distance-from-bite": "{{distance}} dari Bite",
+  "restaurant-selector-distance-from-you": "{{distance}} dari kamu",
   "restaurant-selector-use-custom": "Gunakan: \"{{searchTerm}}\"",
   "restaurant-selector-add-as-new": "Tambahkan sebagai restoran baru",
   "restaurant-selector-start-typing": "Mulai ketik untuk mencari restoran",

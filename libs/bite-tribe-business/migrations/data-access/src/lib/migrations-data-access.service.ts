@@ -63,6 +63,36 @@ export interface SendNewVersionNotificationResult {
   userCount: number;
 }
 
+/**
+ * What a collection-wide backfill reports back.
+ *
+ * These mirror the result interfaces the callables return. The Functions app is
+ * a separate build, so its types cannot be imported here — the same reason
+ * every other callable on this page declares its own request and result shape.
+ *
+ * Every field is a count, which is what lets the page render any of them
+ * without knowing which migration produced it.
+ */
+export type CollectionMigrationResult = Record<string, number>;
+
+export interface BackfillReviewTimestampsResult extends CollectionMigrationResult {
+  /** Every review document the migration looked at. */
+  processed: number;
+  /** Documents that gained a `createdAtTimestamp`. */
+  filled: number;
+  /** Documents that already had a usable one. */
+  skipped: number;
+  /** Documents with no `createdAt` the value could be derived from. */
+  unresolvable: number;
+}
+
+export interface BackfillDisplayNameClaimsResult extends CollectionMigrationResult {
+  processed: number;
+  claimed: number;
+  skipped: number;
+  collisions: number;
+}
+
 const hasVerifiedRestaurant = (bite: Bite): boolean =>
   !!bite.restaurantId?.trim();
 
@@ -223,6 +253,37 @@ export class MigrationsDataAccessService {
     });
 
     this.restaurantClusteringBites.reload();
+
+    return result.data;
+  }
+
+  /**
+   * Gives every review the numeric `createdAtTimestamp` the threaded review
+   * compartment sorts by, derived from the ISO `createdAt` the document already
+   * carries (issue #1283).
+   *
+   * No resource is reloaded: this page shows Bites, and the migration touches
+   * the `reviews` collection, which nothing here reads.
+   */
+  async backfillReviewTimestamps(): Promise<BackfillReviewTimestampsResult> {
+    const result = await FirebaseFunctions.callByName<
+      void,
+      BackfillReviewTimestampsResult
+    >({ name: 'backfillReviewTimestampsCallable' });
+
+    return result.data;
+  }
+
+  /**
+   * Claims every existing user's current display name, so uniqueness
+   * enforcement can be switched on without locking existing users out of their
+   * own name.
+   */
+  async backfillDisplayNameClaims(): Promise<BackfillDisplayNameClaimsResult> {
+    const result = await FirebaseFunctions.callByName<
+      void,
+      BackfillDisplayNameClaimsResult
+    >({ name: 'backfillDisplayNameClaimsCallable' });
 
     return result.data;
   }

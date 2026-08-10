@@ -22,6 +22,11 @@ import {
   NewVersionNotificationState,
   ReleasePlatform,
 } from './new-version-notification';
+import {
+  COLLECTION_MIGRATIONS,
+  CollectionMigrationName,
+  CollectionMigrationStates,
+} from './collection-migration';
 
 const BITE_COLLECTION = 'bites';
 
@@ -47,9 +52,14 @@ export class Migrations {
   restaurantClusteringEligibleBites = input<Bite[]>([]);
   isAuthenticated = input(false);
   newVersionNotification = input<NewVersionNotificationState | null>(null);
+  collectionMigrations = input<CollectionMigrationStates>({});
   clusterRestaurantCandidate = output<Bite>();
   backfillBiteAddress = output<Bite>();
   sendNewVersionNotification = output<ReleasePlatform>();
+  runCollectionMigration = output<CollectionMigrationName>();
+
+  /** The collection-wide migrations, in the order they are listed. */
+  protected readonly collectionMigrationNames = COLLECTION_MIGRATIONS;
 
   /** True while a send is in flight, so neither button can fire twice. */
   isSendingNewVersionNotification = computed(
@@ -94,6 +104,38 @@ export class Migrations {
 
     return bites?.filter((bite) => bite.addressStatus !== 'resolved');
   });
+
+  /** What the last run of one migration did, or nothing if it never ran here. */
+  protected migrationState(
+    name: CollectionMigrationName,
+  ): CollectionMigrationStates[CollectionMigrationName] {
+    return this.collectionMigrations()[name];
+  }
+
+  /** True while a run is in flight, so the same migration cannot be doubled up. */
+  protected isMigrationRunning(name: CollectionMigrationName): boolean {
+    return this.migrationState(name)?.status === 'running';
+  }
+
+  /**
+   * The counts a finished run reported, as label/value pairs.
+   *
+   * Every result is a flat set of counts, which is what lets one row render any
+   * migration's outcome instead of each needing its own markup.
+   */
+  protected migrationCounts(
+    name: CollectionMigrationName,
+  ): { key: string; value: number }[] {
+    const result = this.migrationState(name)?.result;
+
+    return result
+      ? Object.entries(result).map(([key, value]) => ({ key, value }))
+      : [];
+  }
+
+  runMigration(name: CollectionMigrationName): void {
+    this.runCollectionMigration.emit(name);
+  }
 
   restaurantClusteringState(bite: Bite): string {
     return bite.geohash

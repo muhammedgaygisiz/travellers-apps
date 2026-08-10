@@ -273,6 +273,18 @@ images/bites/{biteId}/{filename}
   `saveNewReview` has always written it — cannot be attributed to a user.
   Notification fan-out skips them rather than failing, and the gap self-heals as
   new reviews are written.
+- `createdAtTimestamp` was added to reviews after they shipped, so older
+  documents carried only the ISO `createdAt`. `backfillReviewTimestamps` derives
+  the numeric value from that string, which is the same instant in another
+  shape, rather than inventing one — a backfilled review keeps its real place in
+  its thread. The migration is idempotent and counts what it cannot resolve
+  instead of guessing, and `toReviewThreads` keeps its own ISO fallback for
+  those.
+- A review's `biteId` is a path-shaped string, `/bites/{biteId}`, not a
+  Firestore reference. The write in `ReviewApiService` and the `where` value in
+  `loadReviewsByBiteId` build it the same way, so it is self-consistent; only
+  the two notification triggers unpick it, with `split('/').pop()`. Not a
+  legacy shape — it is what every review write produces today.
 - Guest permissions and admin moderation are not clearly expressed as current Bite-domain capabilities. [[epic-1284]] owns closing that gap for review threads.
 
 ## Future Ideas

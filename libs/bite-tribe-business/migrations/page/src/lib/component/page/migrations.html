@@ -32,8 +32,67 @@
       </p>
       }
 
-      <h2>{{ 'bite-address-backfill' | transloco }}</h2>
+      <h2>{{ 'collection-migrations' | transloco }}</h2>
+      <p>{{ 'collection-migrations-hint' | transloco }}</p>
       <table class="migration-table" border="1">
+        <thead>
+          <tr>
+            <th>{{ 'migration' | transloco }}</th>
+            <th>{{ 'last-run' | transloco }}</th>
+            <th>{{ 'action' | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (name of collectionMigrationNames; track name) {
+          <tr [attr.data-testid]="'collection-migration-' + name">
+            <td>
+              <strong>{{ 'migration-' + name | transloco }}</strong>
+              <br />
+              <span>{{ 'migration-' + name + '-hint' | transloco }}</span>
+            </td>
+            <td>
+              @switch (migrationState(name)?.status) { @case ('running') {
+              <span data-testid="migration-running">
+                {{ 'migration-running' | transloco }}
+              </span>
+              } @case ('failed') {
+              <ion-text color="danger" data-testid="migration-failed">
+                {{ 'migration-failed' | transloco }}
+              </ion-text>
+              } @case ('done') {
+              <ul class="migration-counts" data-testid="migration-counts">
+                @for (count of migrationCounts(name); track count.key) {
+                <li>
+                  {{ 'migration-count-' + count.key | transloco }}: {{
+                  count.value }}
+                </li>
+                }
+              </ul>
+              } @default {
+              <span>{{ 'migration-not-run' | transloco }}</span>
+              } }
+            </td>
+            <td>
+              <ion-button
+                fill="outline"
+                data-testid="run-migration"
+                [disabled]="isMigrationRunning(name)"
+                (click)="runMigration(name)"
+              >
+                {{ 'run-migration' | transloco }}
+              </ion-button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+
+      <h2>{{ 'bite-address-backfill' | transloco }}</h2>
+      <table
+        class="migration-table"
+        border="1"
+        data-testid="bite-address-backfill-table"
+      >
         <thead>
           <tr>
             <th>{{ 'bite' | transloco }}</th>

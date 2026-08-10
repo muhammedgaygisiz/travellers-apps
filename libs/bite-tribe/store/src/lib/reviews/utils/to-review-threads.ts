@@ -4,9 +4,12 @@ import type { Review, ReviewThread } from 'model';
  * When a review was written, as a comparable number.
  *
  * `createdAtTimestamp` is written alongside `createdAt` and is the cheaper
- * read, but reviews exist that predate it, so the ISO string is the fallback
- * and an unusable one sorts as the oldest possible rather than as `NaN`, which
- * would make the comparison non-transitive and the order unstable.
+ * read. Reviews written before that field existed were given it by
+ * `backfillReviewTimestamps`, derived from their own `createdAt`, so the ISO
+ * fallback below is no longer the path a legacy review takes — it covers what
+ * the migration could not resolve and anything written while it had not run
+ * yet. An unusable value sorts as the oldest possible rather than as `NaN`,
+ * which would make the comparison non-transitive and the order unstable.
  */
 const writtenAt = (review: Review): number => {
   if (typeof review.createdAtTimestamp === 'number') {

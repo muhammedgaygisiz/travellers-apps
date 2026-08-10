@@ -74,6 +74,20 @@ Field and option ids are read with `gh project field-list 4 --owner muhammedgayg
 
 This needs the `project` token scope on the authenticated `gh` CLI, in addition to `repo`.
 
+## Reopening An Issue
+
+**Reopening an issue is not enough on its own.** The board runs an auto-close workflow: an item whose `Status` is `Done` closes its issue. A closed issue still carries `Status` `Done`, so reopening it leaves the board and the issue disagreeing, and the next time anything touches that item the workflow resolves the disagreement by closing the issue again.
+
+This is silent. `gh issue reopen` reports success, the issue is genuinely open for a while, and it closes later without anyone acting on it. Issue #1265 was reopened during release-candidate Run 6, verified open, and re-closed seven minutes later when its `Priority` field was set.
+
+The order that works:
+
+1. Move `Status` off `Done` first, to `Backlog` or `Ready`.
+2. Then `gh issue reopen`.
+3. Then verify the issue is still open, rather than trusting the command's success message.
+
+The same applies to any later field edit on a reopened item: if `Status` is still `Done`, the edit re-closes the issue.
+
 ## Rules
 
 - Every new issue is added to the `Bite Tribe` board as part of filing it, not later.
@@ -81,6 +95,7 @@ This needs the `project` token scope on the authenticated `gh` CLI, in addition 
 - `P0` is a decision with a named consequence, and the reasoning belongs in a comment on the issue so the classification survives the conversation that produced it.
 - Labels describe type only.
 - An issue filed during a release-candidate run follows this page exactly as a feature issue does. The charter records the finding; the board records its priority.
+- Reopening an issue means moving its board `Status` off `Done` first, then reopening, then verifying it stayed open. The board closes it again otherwise.
 
 ## Related Pages
 

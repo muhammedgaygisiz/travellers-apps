@@ -178,6 +178,8 @@ List images carry `loading="lazy"` and `decoding="async"`, so rows below the fol
 
 A view that needs the complete set reads the unwindowed signal — search's map plots every marker while its list pages.
 
+**The window itself does not get a Storybook story.** `ion-infinite-scroll` is invisible at rest — it only renders a spinner while loading — so a story large enough to have a second page shows nothing the ordinary result story does not, at the cost of two Loki references of a full page of near-identical rows. Cover paging in unit tests, which can assert the row count and the reset. `Components/Bite List/Has More` is not a counter-example: `bt-bite-list` takes `hasMore` as an input, so it shows the affordance with two Bites rather than a full page.
+
 ## Image Pattern
 
 For Bite images, prefer this display fallback:

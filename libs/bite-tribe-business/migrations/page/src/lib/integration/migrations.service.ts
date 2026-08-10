@@ -39,7 +39,6 @@ export class MigrationsService {
     () => Promise<CollectionMigrationResult>
   > = {
     'review-timestamps': () => this.dataAccess.backfillReviewTimestamps(),
-    'display-name-claims': () => this.dataAccess.backfillDisplayNameClaims(),
   };
 
   /**

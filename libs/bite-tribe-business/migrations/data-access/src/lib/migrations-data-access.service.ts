@@ -86,13 +86,6 @@ export interface BackfillReviewTimestampsResult extends CollectionMigrationResul
   unresolvable: number;
 }
 
-export interface BackfillDisplayNameClaimsResult extends CollectionMigrationResult {
-  processed: number;
-  claimed: number;
-  skipped: number;
-  collisions: number;
-}
-
 const hasVerifiedRestaurant = (bite: Bite): boolean =>
   !!bite.restaurantId?.trim();
 
@@ -270,20 +263,6 @@ export class MigrationsDataAccessService {
       void,
       BackfillReviewTimestampsResult
     >({ name: 'backfillReviewTimestampsCallable' });
-
-    return result.data;
-  }
-
-  /**
-   * Claims every existing user's current display name, so uniqueness
-   * enforcement can be switched on without locking existing users out of their
-   * own name.
-   */
-  async backfillDisplayNameClaims(): Promise<BackfillDisplayNameClaimsResult> {
-    const result = await FirebaseFunctions.callByName<
-      void,
-      BackfillDisplayNameClaimsResult
-    >({ name: 'backfillDisplayNameClaimsCallable' });
 
     return result.data;
   }

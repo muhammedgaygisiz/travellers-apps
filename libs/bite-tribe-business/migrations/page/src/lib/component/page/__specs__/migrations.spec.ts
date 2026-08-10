@@ -451,7 +451,6 @@ describe('Migrations', () => {
 
     it('lists every collection-wide migration', () => {
       expect(row('review-timestamps')).toBeTruthy();
-      expect(row('display-name-claims')).toBeTruthy();
     });
 
     it('reports a migration that has not been run in this session', () => {
@@ -466,9 +465,9 @@ describe('Migrations', () => {
         requested.push(name),
       );
 
-      runButton('display-name-claims').click();
+      runButton('review-timestamps').click();
 
-      expect(requested).toEqual(['display-name-claims']);
+      expect(requested).toEqual(['review-timestamps']);
     });
 
     it('holds the button of a run that is still going', () => {
@@ -485,21 +484,9 @@ describe('Migrations', () => {
       ).toBeTruthy();
     });
 
-    it('leaves the other migrations startable while one runs', () => {
-      compRef.setInput('collectionMigrations', {
-        'review-timestamps': { status: 'running' },
-      });
-      compRef.changeDetectorRef.detectChanges();
-
-      expect(runButton('display-name-claims')).toHaveProperty(
-        'disabled',
-        false,
-      );
-    });
-
     it('renders whatever counts the finished run reported', () => {
-      // The two migrations report different fields, and the row is not written
-      // per migration, so it renders what it is given.
+      // The row is not written per migration: it renders the counts it is
+      // given, whichever migration produced them.
       compRef.setInput('collectionMigrations', {
         'review-timestamps': {
           status: 'done',
@@ -520,19 +507,16 @@ describe('Migrations', () => {
 
     it('says so when a run failed rather than showing nothing', () => {
       compRef.setInput('collectionMigrations', {
-        'display-name-claims': { status: 'failed' },
+        'review-timestamps': { status: 'failed' },
       });
       compRef.changeDetectorRef.detectChanges();
 
       expect(
-        row('display-name-claims').querySelector(
+        row('review-timestamps').querySelector(
           '[data-testid="migration-failed"]',
         ),
       ).toBeTruthy();
-      expect(runButton('display-name-claims')).toHaveProperty(
-        'disabled',
-        false,
-      );
+      expect(runButton('review-timestamps')).toHaveProperty('disabled', false);
     });
   });
 });

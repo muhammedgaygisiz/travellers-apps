@@ -45,15 +45,40 @@ callable walks the collection itself.
 - Adding a migration means adding a name, its runner, and its copy — not another
   copy of the state handling.
 
-Registered today: `review-timestamps` ([[issue-1283]]) and
-`display-name-claims`.
+Registered today: `review-timestamps` ([[issue-1283]]).
+
+### Why There Is No Display Name Backfill
+
+`backfillDisplayNameClaimsCallable` existed and was removed rather than surfaced
+here. It claimed every existing user's display name so uniqueness enforcement
+could be switched on "with existing users protected", and that justification does
+not hold:
+
+- Nothing needs a claim to exist. `/displayNames` is read only by
+  `claimDisplayName`, `checkDisplayNameAvailability`, and `deleteOwnAccount`
+  releasing a claim. No route, search, or render depends on one.
+- Unclaimed names are already protected. Both uniqueness checks scan `/users`
+  for a matching `displayName`/`normalizedDisplayName` alongside the claim
+  collection, so enforcement never needed the backfill to be switched on.
+- Active users claim their own name. `onboardingGuard` gates every authenticated
+  route on `onboardingCompletedAt`, which no pre-existing user has, so a
+  returning user is routed through the assistant and `persistIdentityStep`
+  claims for them.
+
+What the backfill actually did was close a narrower gap: a legacy user has no
+`normalizedDisplayName`, so only the exact case-sensitive scan matches them, and
+a case variant of their name could be claimed by someone else. Closing it also
+froze the names of accounts that may never return — squatting on behalf of
+dormant users. Between protecting a dormant name forever and freeing it, the
+decision is to free it. A returning user whose case variant was taken picks a new
+name in onboarding.
 
 ## Supported Evidence
 
 - Business `migrations`.
 - `sendNewVersionNotification`.
-- `backfillReviewTimestampsCallable` and `backfillDisplayNameClaimsCallable`,
-  both started from the collection migrations table.
+- `backfillReviewTimestampsCallable`, started from the collection migrations
+  table.
 
 ## Related Domains
 

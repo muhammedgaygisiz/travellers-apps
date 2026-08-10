@@ -244,12 +244,8 @@
   "migration-not-run": "Not run in this session",
   "migration-review-timestamps": "Review timestamps",
   "migration-review-timestamps-hint": "Gives every review the numeric createdAtTimestamp the threaded review compartment sorts by, derived from the ISO createdAt it already carries. Reviews written before that field existed have only the string.",
-  "migration-display-name-claims": "Display name claims",
-  "migration-display-name-claims-hint": "Claims every existing user's current display name so uniqueness enforcement can be switched on without locking existing users out of their own name. On a collision the first-registered user keeps the name.",
   "migration-count-processed": "Processed",
   "migration-count-filled": "Filled",
   "migration-count-skipped": "Skipped",
-  "migration-count-unresolvable": "Unresolvable",
-  "migration-count-claimed": "Claimed",
-  "migration-count-collisions": "Collisions"
+  "migration-count-unresolvable": "Unresolvable"
 }

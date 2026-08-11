@@ -23,7 +23,11 @@ import { toPublicUser } from './utils/to-public-user';
 import { Platform } from '@ionic/angular';
 import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-profile-image-and-mirror-to-firebase';
 import { USERS_COLLECTION } from './utils/user-collection-key';
-import { getDownloadUrlFromFirebaseStorage, isBase64String } from 'utils';
+import {
+  getDownloadUrlFromFirebaseStorage,
+  isBase64String,
+  loadAppRelease,
+} from 'utils';
 import { deleteCurrentImage } from './utils/delete-current-image';
 import { uploadBase64ToFirebaseStorage } from './utils/upload-base64-to-firebase-storage';
 import { updateProfileWithImagePathFromFirebaseStorage } from './bite-api/utils/update-profile-with-image-path-from-firestorage';
@@ -315,16 +319,18 @@ export class ProfileApiService {
       return;
     }
 
+    // `appVersion` on the user document is read long after the fact, to answer
+    // which build a user was on. It is only worth writing if it is the build's
+    // own version rather than a build-time placeholder (issue #1303).
+    const { version, buildNumber } = await loadAppRelease();
+
     try {
       await FirebaseFunctions.callByName<
         { version?: string; buildNumber?: string },
         void
       >({
         name: 'updateUserMetadata',
-        data: {
-          version: process.env['version'],
-          buildNumber: process.env['buildNumber'],
-        },
+        data: { version, buildNumber },
       });
 
       await markUserMetadataUpdated(uid);

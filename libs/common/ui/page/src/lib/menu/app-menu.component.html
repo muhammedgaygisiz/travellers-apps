@@ -2,7 +2,10 @@
   <ion-item-group>
     <ion-item>
       <ion-icon name="construct" slot="start"></ion-icon>
-      <small>Version {{ version }} (Build {{ buildNumber }})</small>
+      <small
+        >Version {{ release().version }} (Build
+        {{ release().buildNumber }})</small
+      >
     </ion-item>
   </ion-item-group>
 

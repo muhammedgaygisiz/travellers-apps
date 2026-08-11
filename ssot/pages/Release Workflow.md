@@ -13,6 +13,20 @@ Native app releases usually happen on Sundays.
 
 ## Version Cadence
 
+The build number and the marketing version move on different clocks.
+
+**A release moves the build number only.** The marketing version stays where it
+is across many builds — build 93 and build 94 are both `1.0.1` — and changes
+only when someone decides the release is a `1.0.2` or a `1.1.0`. That decision
+is a deliberate edit to `package.json`, not something the release performs.
+
+The marketing version is bumped in `package.json` and nowhere else. The release
+propagates it into the Android and iOS projects and then refuses to continue if
+the three disagree, so `versionName` and `MARKETING_VERSION` are outputs rather
+than places to edit. On the usual release the propagation is a no-op, because
+the version it writes is the one already there. See
+[[Implementation - Release And Build Workflow]].
+
 Development happens against the next build number.
 
 After native apps are built, released, and published for build `x`, generate the
@@ -90,8 +104,13 @@ npx nx run bite-tribe-android:sync
 npm run increment-build-number-and-generate-changelog
 ```
 
+- If this release changes the marketing version, bump it in `package.json`
+  before running the helper. The helper writes it into both native projects and
+  fails if `package.json`, Android, and iOS do not agree afterwards.
+
 The helper performs the whole release in one step: it generates the changelog
-section for build `x`, increments the shared build number to `x+1`, commits as
+section for build `x`, writes the `package.json` marketing version into both
+native projects, increments the shared build number to `x+1`, commits as
 `chore: prepare build <version>-<x> release`, creates the annotated tag
 `build-<version>-<x>`, pushes both the branch and the tag, and publishes the
 GitHub release `Build <x>` from that tag. No separate `git push` is needed, and
@@ -163,8 +182,10 @@ Each release should produce:
 - Both Capacitor syncs complete and their diffs are reviewed.
 - iOS archive and Android signed bundle both succeed.
 - Native uploads complete before the release helper runs.
-- Release tag uses the native version and the build number captured before the
-  increment.
+- Release tag uses the `package.json` version and the build number captured
+  before the increment.
+- `package.json`, Android `versionName`, and every iOS `MARKETING_VERSION` name
+  the same marketing version after the helper runs.
 - Pull request back to `develop` contains only the changelog section and the next
   build-number bump.
 - Both store submissions are sent for review, not just uploaded.

@@ -173,6 +173,17 @@ const readOsVersion = async (platform: string): Promise<string> => {
   }
 };
 
+/**
+ * The label's `1.0.1 (93)` half.
+ *
+ * This screen was the only surface reporting the real marketing version while
+ * the menu and the About page reported `0.0.0`, because it asks the native
+ * bundle and they read a build-time placeholder (issue #1303). Those surfaces
+ * now go through `appRelease` in `utils`, which reads the same native source.
+ * This module deliberately keeps its own call rather than importing it: the
+ * `utils` barrel pulls in `@angular/core`, which this library's plain ts-jest
+ * setup cannot load.
+ */
 const readAppVersion = async (): Promise<string> => {
   try {
     const { version, build } = await App.getInfo();

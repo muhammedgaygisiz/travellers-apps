@@ -31,6 +31,9 @@ jest.mock('@capacitor-firebase/functions', () => ({
 jest.mock('utils', () => ({
   isBase64String: jest.fn(),
   getDownloadUrlFromFirebaseStorage: jest.fn(),
+  loadAppRelease: jest
+    .fn()
+    .mockResolvedValue({ version: '1.0.1', buildNumber: '93' }),
 }));
 
 jest.mock('../utils/delete-current-image', () => ({
@@ -506,12 +509,11 @@ describe(ProfileApiService.name, () => {
 
         await service.updateUserMetadata();
 
+        // The real marketing version, not the `0.0.0` placeholder the bundle
+        // used to inline and persist on every user document (issue #1303).
         expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
           name: 'updateUserMetadata',
-          data: {
-            version: process.env['version'],
-            buildNumber: process.env['buildNumber'],
-          },
+          data: { version: '1.0.1', buildNumber: '93' },
         });
         expect(updateDocumentMock).toHaveBeenCalledTimes(
           updateDocumentCallCount,

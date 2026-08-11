@@ -13,13 +13,7 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
-
-declare const process: {
-  env: {
-    version?: string;
-    buildNumber?: string;
-  };
-};
+import { appRelease } from 'utils';
 
 @Component({
   selector: 'about-page',
@@ -37,8 +31,7 @@ declare const process: {
   ],
 })
 export class AboutPage {
-  protected readonly version = process.env['version'];
-  protected readonly buildNumber = process.env['buildNumber'];
+  protected readonly release = appRelease;
 
   totalNumberBites = input<number>();
   totalNumberUsers = input<number>();

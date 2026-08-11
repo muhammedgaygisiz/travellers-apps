@@ -15,6 +15,7 @@ Release and build workflow describes the implementation-facing scripts that supp
 | `npm run storybook`                                     | Start Storybook host                                                                          |
 | `npm run build:storybook`                               | Build Storybook and refresh the Nx graph asset                                                |
 | `npm run increment-build-number`                        | Increment the shared build number                                                             |
+| `npm run sync-native-version`                           | Write the `package.json` marketing version into both native projects                          |
 | `npm run release:android`                               | Build, sign, and verify the Android release bundle                                            |
 | `npm run generate-changelog`                            | Generate incremental changelog output                                                         |
 | `npm run release:notes`                                 | Print the changelog range for store build notes (`-- --full` for the GitHub release body)     |
@@ -45,15 +46,20 @@ workspace sync-generator command and does not sync Capacitor.
 `tools/increment-build-number-and-generate-changelog.mjs` it:
 
 1. Refuses to run against a dirty working tree.
-2. Reads the current version and build number and refuses if the resulting tag
-   already exists locally or on `origin`.
-3. Runs `generate-changelog`, then `increment-build-number`.
-4. Stages `CHANGELOG.md` and both native version files, and commits as
+2. Reads the version from `package.json` and the build number from the native
+   projects, and refuses if the resulting tag already exists locally or on
+   `origin`. It also refuses a `package.json` still holding `0.0.0`.
+3. Runs `generate-changelog`, then `sync-native-version`, then
+   `increment-build-number`.
+4. Verifies afterwards that `package.json`, Android `versionName`, and every
+   iOS `MARKETING_VERSION` name the same version, and fails the release if they
+   do not.
+5. Stages `CHANGELOG.md` and both native version files, and commits as
    `chore: prepare build <version>-<build number> release`.
-5. Creates the annotated tag `build-<version>-<build number>` using the build
+6. Creates the annotated tag `build-<version>-<build number>` using the build
    number captured **before** the increment.
-6. Pushes the branch and the tag.
-7. Publishes the GitHub release `Build <build number>` from that tag, using the
+7. Pushes the branch and the tag.
+8. Publishes the GitHub release `Build <build number>` from that tag, using the
    full changelog range as the body. `BITETRIBE_RELEASE_DRAFT=1` creates it as a
    draft instead. A failure here is reported explicitly with a retry command,
    and does not undo the push that already happened.
@@ -70,12 +76,42 @@ npm run pwa-asset-generator:generate:bite-tribe
 npm run ios-asset-generator:generate-ios:bite-tribe
 ```
 
+## Marketing Version
+
+`package.json` is the single source of truth for the marketing version. Bump it
+there and nowhere else.
+
+Everything else is downstream of it:
+
+- `tools/env-var-plugin.js` inlines it into `process.env['version']`, which is
+  what the app menu, the About page, and the `appVersion` written to the user
+  document all read.
+- `npm run sync-native-version` writes it into Android `versionName` and every
+  iOS `MARKETING_VERSION`, and the release helper runs that and then verifies
+  all three agree.
+
+Rules:
+
+- A release does not bump it. Only the build number moves on a release; the
+  marketing version changes when someone edits `package.json` on purpose, which
+  is rare. `sync-native-version` is therefore a no-op on most releases, writing
+  back the version that is already there.
+- Do not edit `versionName` or `MARKETING_VERSION` by hand. They are release
+  outputs, in the same sense the build number already was.
+- Do not reintroduce reading the version out of the native projects into the
+  bundle. That is what left `package.json` at `0.0.0` while the app displayed
+  and persisted it as a fact (issue #1303).
+- On a native build the app prefers what `App.getInfo()` reports over the
+  build-time value, through `appRelease` in `libs/common/utils`. That is a
+  safety net for a skipped or failed sync, not a second source of truth: the web
+  build has no native bundle to ask and always reports the build-time value.
+
 ## Rules
 
 - Use the existing build-number scripts instead of editing generated release state manually.
 - Generate changelog and release notes after the current native build is published, but before incrementing the shared build number for the next development week.
 - Run the build-number increment only after the current build has been built, released, and published to native stores.
-- Capture the native version and build number before incrementing when creating release tags. The combined helper tags the release commit as `build-<version>-<build-number>`, for example `build-1.0.1-81`.
+- Capture the `package.json` version and the native build number before incrementing when creating release tags. The combined helper tags the release commit as `build-<version>-<build-number>`, for example `build-1.0.1-81`.
 - Use the changelog scripts for SSOT changelog pages.
 - Derive the short TestFlight and Google Play build notes from the generated changelog, using the `### Features` to `### Chores` range and summarizing it to at most 230 characters. The changelog is produced by tooling, so it is the reliable source; closed Priority P0 issue titles from the release week are a cross-check, not the input.
 - Use Capacitor sync commands when native dependency or wrapper state changes.

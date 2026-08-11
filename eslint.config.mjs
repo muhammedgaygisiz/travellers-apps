@@ -35,6 +35,9 @@ export default [
             // Build-time esbuild plugin shared by both app builds. It runs in
             // Node before bundling and never ends up in an app bundle.
             '^.*/tools/env-var-plugin$',
+            // Release tooling for the marketing version. Like the plugin above
+            // it runs in Node, and is only reached from a spec that covers it.
+            '^.*/tools/native-version\\.mjs$',
           ],
           depConstraints: [
             {

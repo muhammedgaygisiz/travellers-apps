@@ -1,29 +1,41 @@
-import { readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { buildNotes } from './changelog-sections.mjs';
+import {
+  ANDROID_BUILD_GRADLE_PATH,
+  IOS_PROJECT_PATH,
+  readNativeVersion,
+  readPackageVersion,
+} from './native-version.mjs';
 
 const require = createRequire(import.meta.url);
 const { readBuildNumber } = require('../apps/bite-tribe/read-build-number.js');
 
 const releaseFiles = [
   'CHANGELOG.md',
-  'apps/bite-tribe-android/android/app/build.gradle',
-  'apps/bite-tribe-ios/ios/App/App.xcodeproj/project.pbxproj',
+  ANDROID_BUILD_GRADLE_PATH,
+  IOS_PROJECT_PATH,
 ];
 
 ensureCleanWorkingTree();
 
 const buildNumber = readBuildNumber(process.cwd());
-const version = readNativeVersion();
+// `package.json` is the single source of truth for the marketing version
+// (issue #1303). The native projects are written from it below, so reading them
+// here would only re-read whatever the previous release happened to leave.
+const version = readPackageVersion();
 const tagName = `build-${version}-${buildNumber}`;
 
 ensureTagDoesNotExist(tagName);
 
 run('npm', ['run', 'generate-changelog']);
+run('npm', ['run', 'sync-native-version']);
 run('npm', ['run', 'increment-build-number']);
+
+ensureNativeVersionMatches(version);
 
 run('git', ['add', ...releaseFiles]);
 
@@ -123,28 +135,24 @@ function ensureTagDoesNotExist(tagName) {
   }
 }
 
-function readNativeVersion() {
-  const androidBuildGradle = readFileSync(
-    resolve('apps/bite-tribe-android/android/app/build.gradle'),
-    'utf8',
-  );
-  const iosProject = readFileSync(
-    resolve('apps/bite-tribe-ios/ios/App/App.xcodeproj/project.pbxproj'),
-    'utf8',
-  );
-  const androidVersion = androidBuildGradle.match(
-    /^\s*versionName\s+"([^"]+)"\s*$/m,
-  )?.[1];
-  const iosVersions = [
-    ...iosProject.matchAll(/MARKETING_VERSION = ([^;]+);/g),
-  ].map((match) => match[1]);
-  const versions = new Set([androidVersion, ...iosVersions]);
+/**
+ * The equality check that used to gate the release now closes it.
+ *
+ * `readNativeVersion` still refuses a workspace whose Android and iOS projects
+ * disagree, so this asserts the third source as well: all three must name the
+ * same marketing version once the sync has run.
+ */
+function ensureNativeVersionMatches(version) {
+  const nativeVersion = readNativeVersion();
 
-  if (!androidVersion || iosVersions.length === 0 || versions.size !== 1) {
-    throw new Error('Android and iOS versions must exist and match.');
+  if (nativeVersion !== version) {
+    throw new Error(
+      [
+        `package.json declares version ${version}, but the native projects`,
+        `declare ${nativeVersion} after the sync.`,
+      ].join(' '),
+    );
   }
-
-  return androidVersion;
 }
 
 function run(command, args) {

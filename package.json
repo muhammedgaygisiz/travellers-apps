@@ -1,6 +1,6 @@
 {
   "name": "travellers-apps",
-  "version": "0.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "scripts": {
     "prepare": "husky",
@@ -19,6 +19,7 @@
     "e2e:install": "playwright install chromium",
     "build": "nx build",
     "increment-build-number": "node tools/increment-build-number.mjs",
+    "sync-native-version": "node tools/sync-native-version.mjs",
     "release:android": "node tools/build-android-release.mjs",
     "analytics:report": "node tools/analytics/report.mjs",
     "analytics:digest": "node tools/analytics/digest.mjs",

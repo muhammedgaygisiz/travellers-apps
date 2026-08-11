@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { provideBiteTribeShell } from './provide-bite-tribe-shell';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { Environment, getIonicConfig } from 'utils';
+import { Environment, getIonicConfig, loadAppRelease } from 'utils';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideTransloco } from '@jsverse/transloco';
 import { TranslocoHttpLoader } from './transloco-loader';
@@ -26,6 +26,14 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
     // startup must not wait for - or fail on - the cleanup.
     provideAppInitializer(() => {
       void disableServiceWorkerOnNative();
+    }),
+    // Replaces the build-time version with what the native bundle says it is,
+    // so the menu, the About page, and the user document all report the build
+    // the user is actually running (issue #1303). Not awaited: the build-time
+    // values are already correct enough to render, and startup must not wait
+    // on a Capacitor bridge call.
+    provideAppInitializer(() => {
+      void loadAppRelease();
     }),
     provideIonicAngular(getIonicConfig()),
     provideTransloco({

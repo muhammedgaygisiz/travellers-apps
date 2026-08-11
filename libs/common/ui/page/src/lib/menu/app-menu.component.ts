@@ -13,16 +13,9 @@ import {
   IonItemGroup,
   IonList,
 } from '@ionic/angular/standalone';
-import { SignedInAccount, SupportedLang } from 'utils';
+import { appRelease, SignedInAccount, SupportedLang } from 'utils';
 import { PageMenuTarget } from '../page-config';
 import { TranslocoPipe } from '@jsverse/transloco';
-
-declare const process: {
-  env: {
-    version?: string;
-    buildNumber?: string;
-  };
-};
 
 @Component({
   selector: 'popover-menu',
@@ -32,8 +25,7 @@ declare const process: {
   imports: [IonList, IonItem, IonIcon, TranslocoPipe, IonItemGroup, IonAvatar],
 })
 export class AppMenuComponent {
-  protected readonly version = process.env['version'];
-  protected readonly buildNumber = process.env['buildNumber'];
+  protected readonly release = appRelease;
   protected readonly SupportedLang = SupportedLang;
 
   isAuthenticated = input<boolean | null>(false);

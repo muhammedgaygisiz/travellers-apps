@@ -15,6 +15,13 @@ export { getSimilarityScore } from './lib/get-similarity-score';
 export { haversineDistance } from './lib/haversine-distance';
 export { getNormalizedPriceInEur } from './lib/get-normalized-price-in-eur';
 
+export {
+  appRelease,
+  loadAppRelease,
+  resetAppReleaseForTesting,
+  type AppRelease,
+} from './lib/app-release';
+
 export { addNecessaryIcons } from './lib/add-necessary-icons';
 export * from './lib/get-ionic-config';
 export type { Environment, Emulators } from './lib/environment';

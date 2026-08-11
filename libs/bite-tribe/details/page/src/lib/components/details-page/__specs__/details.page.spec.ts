@@ -128,14 +128,24 @@ describe('DetailsPage', () => {
   });
 
   describe('Deleted Bite', () => {
+    /**
+     * Ionic mounts alerts on the app root, so the page only ever holds a handle
+     * to one. The handle is what the page presents and, on teardown, dismisses.
+     */
+    const alertStub = (): { present: jest.Mock; dismiss: jest.Mock } => ({
+      present: jest.fn(),
+      dismiss: jest.fn().mockResolvedValue(true),
+    });
+
     it('blocks the page with a dismissal-proof alert offering the way back', async () => {
-      const present = jest.fn();
+      const alert = alertStub();
+      const present = alert.present;
       let created: Parameters<AlertController['create']>[0] | undefined;
       jest
         .spyOn(alertController, 'create')
         .mockImplementation(async (options) => {
           created = options;
-          return { present } as never;
+          return alert as never;
         });
       jest.spyOn(component.goBack, 'emit');
 
@@ -155,13 +165,14 @@ describe('DetailsPage', () => {
       // A timeout, a rejected permission or an App Check refusal says nothing
       // about whether the Bite exists, so unlike a deleted one it is worth
       // retrying. Without this the page had no answer at all. See #1232.
-      const present = jest.fn();
+      const alert = alertStub();
+      const present = alert.present;
       let created: Parameters<AlertController['create']>[0] | undefined;
       jest
         .spyOn(alertController, 'create')
         .mockImplementation(async (options) => {
           created = options;
-          return { present } as never;
+          return alert as never;
         });
       jest.spyOn(component.retryLoad, 'emit');
       jest.spyOn(component.goBack, 'emit');
@@ -189,7 +200,7 @@ describe('DetailsPage', () => {
     it('reports a failed read again once the retry fails again', async () => {
       const create = jest
         .spyOn(alertController, 'create')
-        .mockResolvedValue({ present: jest.fn() } as never);
+        .mockImplementation(async () => alertStub() as never);
 
       componentRef.setInput('biteUnavailable', true);
       componentRef.changeDetectorRef.detectChanges();
@@ -209,7 +220,7 @@ describe('DetailsPage', () => {
     it('reports a missing Bite once, not on every check', async () => {
       const create = jest
         .spyOn(alertController, 'create')
-        .mockResolvedValue({ present: jest.fn() } as never);
+        .mockImplementation(async () => alertStub() as never);
 
       componentRef.setInput('biteNotFound', true);
       componentRef.changeDetectorRef.detectChanges();
@@ -218,6 +229,85 @@ describe('DetailsPage', () => {
       await Promise.resolve();
 
       expect(create).toHaveBeenCalledTimes(1);
+    });
+
+    it('takes the alert down with the page it belongs to', async () => {
+      // The alert lives on the app root, not in the page, so a route change
+      // leaves it on screen over the page navigated back to, where its
+      // dismissal-proof backdrop swallows every tap. See #1304.
+      const alert = alertStub();
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async () => alert as never);
+
+      componentRef.setInput('biteNotFound', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await Promise.resolve();
+      expect(alert.present).toHaveBeenCalled();
+
+      fixture.destroy();
+      await Promise.resolve();
+
+      expect(alert.dismiss).toHaveBeenCalled();
+    });
+
+    it('never presents an alert the destroyed page could no longer take down', async () => {
+      // A destruction landing between creating the alert and presenting it
+      // would otherwise leak the very overlay the teardown is there to remove.
+      const alert = alertStub();
+      let releaseCreate: () => void = () => undefined;
+      jest.spyOn(alertController, 'create').mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            releaseCreate = (): void => resolve(alert as never);
+          }),
+      );
+
+      componentRef.setInput('biteNotFound', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await Promise.resolve();
+
+      fixture.destroy();
+      releaseCreate();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(alert.present).not.toHaveBeenCalled();
+      expect(alert.dismiss).toHaveBeenCalled();
+    });
+
+    it('presents one alert at a time, so a re-read cannot stack a second', async () => {
+      // While the page tears down its inputs settle back to undefined and then
+      // re-read as the same failure, which used to reach presentation a second
+      // time while the first alert was still being created. Two stacked alerts
+      // need two presses of the same action to clear. See #1304.
+      const alert = alertStub();
+      let releaseCreate: () => void = () => undefined;
+      const create = jest.spyOn(alertController, 'create').mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            releaseCreate = (): void => resolve(alert as never);
+          }),
+      );
+
+      componentRef.setInput('biteNotFound', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await Promise.resolve();
+
+      // The inputs settle and the failure re-reads, all before the first alert
+      // exists.
+      componentRef.setInput('biteNotFound', false);
+      componentRef.changeDetectorRef.detectChanges();
+      componentRef.setInput('biteNotFound', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await Promise.resolve();
+
+      releaseCreate();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(alert.present).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   input,
@@ -167,6 +168,7 @@ export class DetailsPage {
   private readonly platform = inject(Platform);
   private readonly alertController = inject(AlertController);
   private readonly transloco = inject(TranslocoService);
+  private readonly destroyRef = inject(DestroyRef);
 
   activeLang = toSignal(this.transloco.langChanges$, {
     initialValue: this.transloco.getActiveLang?.() || 'en',
@@ -174,7 +176,31 @@ export class DetailsPage {
 
   private reportedFailure: 'not-found' | 'unavailable' | undefined;
 
+  /**
+   * The load-failure alert the page currently owns. Ionic mounts overlays on the
+   * app root rather than inside the page, so without a reference to take down
+   * there is nothing to take down: the alert survives the route change and sits
+   * over whatever the user navigated back to. See GitHub issue #1304.
+   */
+  private loadFailureAlert: HTMLIonAlertElement | undefined;
+
+  /**
+   * Covers the gap between creating an alert and presenting it, so presenting
+   * stays single-flight. A teardown settling the inputs, or a resource read
+   * failing again, must not stack a second alert under the one on screen. See
+   * GitHub issue #1304.
+   */
+  private presentingLoadFailure = false;
+
+  private isDestroyed = false;
+
   constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.isDestroyed = true;
+
+      void this.dismissLoadFailureAlert();
+    });
+
     effect(() => {
       const failure = this.biteNotFound()
         ? 'not-found'
@@ -184,8 +210,11 @@ export class DetailsPage {
 
       if (!failure) {
         // A retry puts the read back in flight, so the next failure is reported
-        // again rather than leaving the page silent.
+        // again rather than leaving the page silent, and the alert about the
+        // read that is no longer failing goes away with it.
         this.reportedFailure = undefined;
+
+        void this.dismissLoadFailureAlert();
 
         return;
       }
@@ -199,12 +228,47 @@ export class DetailsPage {
     });
   }
 
-  private reportLoadFailure(
+  private async reportLoadFailure(
     failure: 'not-found' | 'unavailable',
   ): Promise<void> {
-    return failure === 'not-found'
-      ? this.reportBiteNotFound()
-      : this.reportBiteUnavailable();
+    if (this.loadFailureAlert || this.presentingLoadFailure) {
+      return;
+    }
+
+    this.presentingLoadFailure = true;
+
+    try {
+      const alert = await (failure === 'not-found'
+        ? this.createBiteNotFoundAlert()
+        : this.createBiteUnavailableAlert());
+
+      // Creating is asynchronous, so the page can be gone, or the read can have
+      // moved on, by the time there is an alert to show. Presenting it then
+      // would leak exactly the overlay this is meant to prevent.
+      if (this.isDestroyed || this.reportedFailure !== failure) {
+        await alert.dismiss();
+
+        return;
+      }
+
+      this.loadFailureAlert = alert;
+
+      await alert.present();
+    } finally {
+      this.presentingLoadFailure = false;
+    }
+  }
+
+  /**
+   * Takes the alert down with the page that raised it. Its backdrop refuses
+   * dismissal, so an alert left behind does not merely look wrong, it swallows
+   * every tap on the page underneath. See GitHub issue #1304.
+   */
+  private async dismissLoadFailureAlert(): Promise<void> {
+    const alert = this.loadFailureAlert;
+    this.loadFailureAlert = undefined;
+
+    await alert?.dismiss();
   }
 
   /**
@@ -212,8 +276,8 @@ export class DetailsPage {
    * refuses backdrop dismissal and offers only the way back. See GitHub issue
    * #1232.
    */
-  private async reportBiteNotFound(): Promise<void> {
-    const alert = await this.alertController.create({
+  private createBiteNotFoundAlert(): Promise<HTMLIonAlertElement> {
+    return this.alertController.create({
       header: this.transloco.translate('bite-not-found'),
       message: this.transloco.translate('this-bite-is-no-longer-available'),
       backdropDismiss: false,
@@ -224,8 +288,6 @@ export class DetailsPage {
         },
       ],
     });
-
-    await alert.present();
   }
 
   /**
@@ -235,8 +297,8 @@ export class DetailsPage {
    * no answer at all and simply kept its skeleton running. See GitHub issue
    * #1232.
    */
-  private async reportBiteUnavailable(): Promise<void> {
-    const alert = await this.alertController.create({
+  private createBiteUnavailableAlert(): Promise<HTMLIonAlertElement> {
+    return this.alertController.create({
       header: this.transloco.translate('bite-could-not-be-loaded'),
       message: this.transloco.translate(
         'this-bite-could-not-be-loaded-right-now',
@@ -254,8 +316,6 @@ export class DetailsPage {
         },
       ],
     });
-
-    await alert.present();
   }
 
   /**

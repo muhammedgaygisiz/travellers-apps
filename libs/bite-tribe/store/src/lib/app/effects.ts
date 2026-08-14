@@ -81,14 +81,21 @@ export class AppEffect {
     );
   });
 
+  /**
+   * Takes one snapshot of the signed-in user's document at login.
+   *
+   * The `take(1)` is deliberate, and it is also what bounds the cost: the
+   * source is a Firestore snapshot listener that bills a read per change, so
+   * unsubscribing here removes it rather than leaving it to bill for updates
+   * this effect would never read. The profile the store holds is therefore a
+   * login-time snapshot, and server-maintained aggregates on it are kept
+   * current by the reducer instead. See [[Architecture - State Management]].
+   */
   loadPublicProfile$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(fromAuth.AuthActions.loadedUser),
       stopIfUserIsUndefined(),
       switchMap(() => this.api.publicProfile$.pipe(take(1))),
-      filter(
-        (profile): profile is NonNullable<typeof profile> => profile !== null,
-      ),
       map((profile) => AppActions.setPublicProfile({ profile })),
     );
   });

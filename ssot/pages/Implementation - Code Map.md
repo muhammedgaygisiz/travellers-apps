@@ -51,19 +51,20 @@ Examples:
 
 ## Shared Libraries
 
-| Path                                | Purpose                                                          |
-| ----------------------------------- | ---------------------------------------------------------------- |
-| `libs/bite-tribe/api`               | Shared client-side Firebase, Firestore, Storage, and API helpers |
-| `libs/bite-tribe/store`             | App-wide NgRx state, effects, selectors, and router state        |
-| `libs/bite-tribe-common/model`      | Shared domain model types used across multiple libraries         |
-| `libs/bite-tribe-common/bite`       | Shared Bite UI/domain support                                    |
-| `libs/bite-tribe-common/bite-trail` | Shared BiteTrail UI/domain support                               |
-| `libs/bite-tribe-common/map`        | Shared map functionality                                         |
-| `libs/common/ui`                    | Shared reusable UI components                                    |
-| `libs/common/utils`                 | Shared utilities, paths, icon registration, and helpers          |
-| `libs/common/ta-firestore`          | Firebase bootstrap and Firestore integration support             |
-| `libs/common/geolocation`           | Shared geolocation support                                       |
-| `libs/common/push-notifications`    | Push notification support                                        |
+| Path                                | Purpose                                                            |
+| ----------------------------------- | ------------------------------------------------------------------ |
+| `libs/bite-tribe/api`               | Shared client-side Firebase, Firestore, Storage, and API helpers   |
+| `libs/bite-tribe/restaurant`        | Restaurant **view** for the consumer app; editing is business-only |
+| `libs/bite-tribe/store`             | App-wide NgRx state, effects, selectors, and router state          |
+| `libs/bite-tribe-common/model`      | Shared domain model types used across multiple libraries           |
+| `libs/bite-tribe-common/bite`       | Shared Bite UI/domain support                                      |
+| `libs/bite-tribe-common/bite-trail` | Shared BiteTrail UI/domain support                                 |
+| `libs/bite-tribe-common/map`        | Shared map functionality                                           |
+| `libs/common/ui`                    | Shared reusable UI components                                      |
+| `libs/common/utils`                 | Shared utilities, paths, icon registration, and helpers            |
+| `libs/common/ta-firestore`          | Firebase bootstrap and Firestore integration support               |
+| `libs/common/geolocation`           | Shared geolocation support                                         |
+| `libs/common/push-notifications`    | Push notification support                                          |
 
 ## Backend Functions
 

@@ -29,12 +29,19 @@ describe('RestaurantDataAccessService', () => {
 
     storeServiceMock = {
       restaurantToCreate$: of(undefined),
+      restaurant$: of(undefined),
       saveNewRestaurant: jest.fn(),
     } as unknown as jest.Mocked<BiteTribeStoreService>;
     apiMock = {
       getPlaceDetails: jest.fn(),
       searchPlaces: jest.fn(),
       saveRestaurantImage: jest.fn().mockResolvedValue(undefined),
+      createMenuForRestaurant: jest.fn().mockResolvedValue('menu-1'),
+      saveSocialMediaLinksForRestaurant: jest.fn().mockResolvedValue(undefined),
+      saveDescriptionForRestaurant: jest.fn().mockResolvedValue(undefined),
+      saveOpeningHoursForRestaurant: jest.fn().mockResolvedValue(undefined),
+      saveAddressForRestaurant: jest.fn().mockResolvedValue(undefined),
+      savePositionForRestaurant: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<BiteTribeApiService>;
 
     jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
@@ -65,6 +72,84 @@ describe('RestaurantDataAccessService', () => {
 
       expect(storeServiceMock.saveNewRestaurant).toHaveBeenCalledWith(
         restaurant,
+      );
+    });
+  });
+
+  // Moved here from `bite-tribe/restaurant-data-access` in issue #1317: only
+  // the business app edits a restaurant, so the consumer's library had no
+  // business owning these and the business edit page was reaching across the
+  // scope boundary to call them.
+  describe('restaurant edits', () => {
+    it('creates a menu for a restaurant through the API', async () => {
+      await expect(service.createMenuForRestaurant('rest-1')).resolves.toBe(
+        'menu-1',
+      );
+
+      expect(apiMock.createMenuForRestaurant).toHaveBeenCalledWith('rest-1');
+    });
+
+    it('saves social media links through the API', async () => {
+      const links = [{ network: 'facebook', url: 'https://fb.com' }];
+
+      await service.submitSocialMediaLinks('rest-1', links);
+
+      expect(apiMock.saveSocialMediaLinksForRestaurant).toHaveBeenCalledWith(
+        'rest-1',
+        links,
+      );
+    });
+
+    it('saves the description through the API', async () => {
+      await service.submitDescription('rest-1', 'A great place');
+
+      expect(apiMock.saveDescriptionForRestaurant).toHaveBeenCalledWith(
+        'rest-1',
+        'A great place',
+      );
+    });
+
+    it('saves opening hours through the API', async () => {
+      const openingHours = [
+        {
+          day: 'monday' as const,
+          isOpen: true,
+          timeRanges: [{ from: '09:00', to: '17:00' }],
+        },
+      ];
+
+      await service.submitOpeningHours('rest-1', openingHours);
+
+      expect(apiMock.saveOpeningHoursForRestaurant).toHaveBeenCalledWith(
+        'rest-1',
+        openingHours,
+      );
+    });
+
+    it('saves the address through the API', async () => {
+      const address = {
+        street: '123 Main St',
+        postcode: '12345',
+        city: 'Berlin',
+        country: 'Germany',
+      };
+
+      await service.submitAddress('rest-1', address);
+
+      expect(apiMock.saveAddressForRestaurant).toHaveBeenCalledWith(
+        'rest-1',
+        address,
+      );
+    });
+
+    it('saves the position through the API', async () => {
+      const position = { latitude: 52.52, longitude: 13.405 };
+
+      await service.submitPosition('rest-1', position);
+
+      expect(apiMock.savePositionForRestaurant).toHaveBeenCalledWith(
+        'rest-1',
+        position,
       );
     });
   });

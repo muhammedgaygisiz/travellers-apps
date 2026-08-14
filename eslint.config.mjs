@@ -38,6 +38,17 @@ export default [
             // Release tooling for the marketing version. Like the plugin above
             // it runs in Node, and is only reached from a spec that covers it.
             '^.*/tools/native-version\\.mjs$',
+            // The one remaining cross-app data-access dependency, listed so it
+            // is visible rather than silently permitted. `bite-tribe-business`
+            // edit-menu reads `restaurant` and `menu` and calls `saveMenu`
+            // through the consumer's library.
+            //
+            // Unlike the restaurant case this is not a write surface only one
+            // app uses: both menu pages use the same three members, so whether
+            // it should be split per app or promoted to a shared scope is a
+            // real decision rather than a move. See GitHub issue #1318; issue
+            // #1317 added the constraint this entry excuses.
+            '^bite-tribe/menu-data-access$',
           ],
           depConstraints: [
             {
@@ -97,6 +108,26 @@ export default [
               onlyDependOnLibsWithTags: [
                 'scope:bite-tribe',
                 'scope:common',
+                'type:ui',
+              ],
+            },
+            // The business app shares the platform layers with the consumer app
+            // - one Firebase client (`type:api`), one NgRx store (`type:store`),
+            // one domain model - but not its features or its feature-local
+            // data-access. Without this entry `scope:bite-tribe-business` had no
+            // constraint at all, which is how the business edit-restaurant page
+            // came to read and write through the consumer's own
+            // `bite-tribe/restaurant-data-access` while its sibling
+            // new-restaurant page used the business one. Two services in one
+            // library, two data-access libraries, same entity (issue #1317).
+            {
+              sourceTag: 'scope:bite-tribe-business',
+              onlyDependOnLibsWithTags: [
+                'scope:bite-tribe-business',
+                'scope:common',
+                'type:api',
+                'type:store',
+                'type:model',
                 'type:ui',
               ],
             },

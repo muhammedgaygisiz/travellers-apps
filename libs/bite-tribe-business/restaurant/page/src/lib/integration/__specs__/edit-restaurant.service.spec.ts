@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { EditRestaurantService } from '../edit-restaurant.service';
-import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
+import { RestaurantDataAccessService } from 'bite-tribe-business/restaurant-data-access';
 import { NavController, ToastController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { Address, Geopoint, Restaurant } from 'model';
 
-jest.mock('bite-tribe/restaurant-data-access');
+jest.mock('bite-tribe-business/restaurant-data-access');
 jest.mock('@capacitor-firebase/firestore');
 jest.mock('@capacitor-firebase/analytics');
 

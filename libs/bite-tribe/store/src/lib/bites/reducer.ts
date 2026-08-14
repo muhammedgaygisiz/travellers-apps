@@ -57,7 +57,7 @@ export const reducer = createReducer(
     ...state,
     cachedBite: undefined,
   })),
-  on(BiteActions.savedBite, (state, { bite }) => {
+  on(BiteActions.savedBite, BiteActions.createdBite, (state, { bite }) => {
     const stateWithResetCachedBite = {
       ...state,
       editingBite: undefined,

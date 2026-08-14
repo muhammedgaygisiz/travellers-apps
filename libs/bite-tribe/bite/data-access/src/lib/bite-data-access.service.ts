@@ -181,7 +181,7 @@ export class BiteDataAccessService {
       : biteDocWithoutImage;
     const savedBite = await this.api.saveNewBite(biteDocToSave);
     const newBite = { ...savedBite, image };
-    this.storeService.savedNewBite(newBite);
+    this.storeService.createdNewBite(newBite);
 
     if (image) {
       // Fire-and-forget: the Cloud Function setBiteImagePathOnUpload

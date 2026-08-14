@@ -17,6 +17,10 @@ describe('Bites - Actions', () => {
     expect(BiteActions.saveNewBite).toBeDefined();
   });
 
+  it('should have createdBite action', () => {
+    expect(BiteActions.createdBite).toBeDefined();
+  });
+
   it('should have saveExistingBite action', () => {
     expect(BiteActions.saveExistingBite).toBeDefined();
   });

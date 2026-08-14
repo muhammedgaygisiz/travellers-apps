@@ -209,6 +209,24 @@ describe('Bite Reducer', () => {
     });
   });
 
+  describe('createdBite', () => {
+    it('should put the new bite in the state', () => {
+      const NEW_STATE = {
+        ...EMPTY_STATE,
+        ids: ['1'],
+        entities: { '1': { id: '1', name: 'Bite new' } as Bite },
+      };
+
+      const createdBiteAction = BiteActions.createdBite({
+        bite: { id: '1', name: 'Bite new' } as Bite,
+      });
+
+      expect(reducer(EMPTY_STATE, createdBiteAction)).toEqual({
+        ...NEW_STATE,
+      });
+    });
+  });
+
   describe('cacheBite', () => {
     it('should cache the bite in the state', () => {
       const NEW_STATE = {

@@ -40,6 +40,16 @@ A substring test cannot tell a route segment from a value that happens to contai
 
 The same substring style is still used elsewhere in the store, listed under Current Limitations.
 
+## The Signed-In User's Profile Document Is Not Live
+
+`loadPublicProfile$` reads `api.publicProfile$` with `take(1)` after `loadedUser`, so the `app` slice holds a snapshot of the signed-in user's document taken at login and nothing refreshes it for the rest of the session. `ProfileApiService.startListener` does register a real Firestore snapshot listener, but its later emissions have no subscriber and are discarded.
+
+Every server-maintained aggregate on that document is therefore stale in the client as soon as a trigger writes it: `biteCount` from `incrementBiteCountOnBiteCreate` and `decrementBiteCountOnBiteDelete`, and the follower counters. The server value itself is not late — the trigger commits within seconds — which is why only an app restart used to repair the count.
+
+Aggregates the user moves themselves are corrected optimistically in the reducer, because the delta is exact and the next login reconciles it: followers on `followedUser`/`unfollowedUser`, and `biteCount` on `createdBite`/`deletedBite`. A profile with no aggregate at all is left alone so the view keeps counting what it loaded. See [issue \#1310](https://github.com/muhammedgaygisiz/travellers-apps/issues/1310).
+
+Anything reading such an aggregate should treat it as a lower bound rather than as truth when it has a fully loaded list to compare against.
+
 ## Code Anchors
 
 ```text

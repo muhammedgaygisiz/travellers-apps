@@ -171,6 +171,34 @@ export const reducer = createReducer<AppSlice>(
       };
     },
   ),
+  // Optimistic `biteCount` updates for the signed-in user's own profile. The
+  // aggregate is maintained by a Firestore trigger, and the client's copy of the
+  // user document is read once at login and never again, so the profile header
+  // kept showing the count from before the Bite the user had just posted — next
+  // to a list that already showed it — until the app was restarted (issue
+  // #1310). Both writes are the user's own, so the delta is exact, and the next
+  // login reconciles it against the server aggregate either way.
+  //
+  // An account whose document carries no aggregate at all is left without one:
+  // the profile falls back to counting the loaded Bites, and seeding a 1 here
+  // would replace that full count with a partial one.
+  on(BiteActions.createdBite, (state) => ({
+    ...state,
+    profile:
+      state.profile && typeof state.profile.biteCount === 'number'
+        ? { ...state.profile, biteCount: state.profile.biteCount + 1 }
+        : state.profile,
+  })),
+  on(BiteActions.deletedBite, (state) => ({
+    ...state,
+    profile:
+      state.profile && typeof state.profile.biteCount === 'number'
+        ? {
+            ...state.profile,
+            biteCount: Math.max(state.profile.biteCount - 1, 0),
+          }
+        : state.profile,
+  })),
   on(AppActions.loadedExchangeRatesFromAPI, (state, { exchangeRates }) => ({
     ...state,
     exchangeRates,

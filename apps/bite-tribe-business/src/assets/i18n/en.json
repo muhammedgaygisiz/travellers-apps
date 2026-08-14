@@ -249,5 +249,12 @@
   "migration-count-processed": "Processed",
   "migration-count-filled": "Filled",
   "migration-count-skipped": "Skipped",
-  "migration-count-unresolvable": "Unresolvable"
+  "migration-count-unresolvable": "Unresolvable",
+  "social-media-links-saved": "Social media links saved successfully!",
+  "about-restaurant-saved": "About the restaurant saved successfully!",
+  "opening-hours-saved": "Opening hours saved successfully!",
+  "address-saved": "Address saved successfully!",
+  "location-saved": "Location saved successfully!",
+  "bite-trail-created": "BiteTrail created successfully!",
+  "bucket-list-name-updated": "Bucket list name updated!"
 }

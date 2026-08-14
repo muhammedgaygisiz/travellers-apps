@@ -508,5 +508,6 @@
   "reply-to": "ตอบกลับ {{name}}",
   "show-replies": "แสดง {{count}} การตอบกลับ",
   "hide-replies": "ซ่อนการตอบกลับ",
-  "review-creator-badge": "ผู้สร้าง"
+  "review-creator-badge": "ผู้สร้าง",
+  "bucket-list-name-updated": "อัปเดตชื่อรายการความฝันแล้ว!"
 }

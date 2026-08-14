@@ -508,5 +508,6 @@
   "reply-to": "Balas ke {{name}}",
   "show-replies": "Tampilkan {{count}} balasan",
   "hide-replies": "Sembunyikan balasan",
-  "review-creator-badge": "pembuat"
+  "review-creator-badge": "pembuat",
+  "bucket-list-name-updated": "Nama daftar keinginan berhasil diperbarui!"
 }

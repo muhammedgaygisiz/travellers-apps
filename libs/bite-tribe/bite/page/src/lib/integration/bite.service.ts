@@ -3,13 +3,10 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import type { Bite, Geopoint } from 'model';
 import type { BiteFormValue } from '../components/page/bite.page';
-import {
-  LoadingController,
-  NavController,
-  ToastController,
-} from '@ionic/angular/standalone';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { ToastService } from 'toast';
 
 @Injectable({ providedIn: 'root' })
 export class BiteService {
@@ -18,7 +15,7 @@ export class BiteService {
   private readonly location = inject(Location);
   private readonly loadingController = inject(LoadingController);
   private readonly transloco = inject(TranslocoService);
-  private readonly toastController = inject(ToastController);
+  private readonly toast = inject(ToastService);
   private readonly analytics = inject(AnalyticsService);
 
   image = signal<string>('');
@@ -94,7 +91,10 @@ export class BiteService {
     await this.createBite(newBite, () => {
       void this.navController.navigateBack(['home']);
 
-      void this.showToast('bite-created-successfully');
+      void this.toast.present({
+        messageKey: 'bite-created-successfully',
+        outcome: 'success',
+      });
     });
   }
 
@@ -104,7 +104,10 @@ export class BiteService {
    */
   async submitNewBiteAndAddAnother(newBite: BiteFormValue): Promise<void> {
     await this.createBite(newBite, () => {
-      void this.showToast('bite-created-successfully');
+      void this.toast.present({
+        messageKey: 'bite-created-successfully',
+        outcome: 'success',
+      });
     });
   }
 
@@ -165,15 +168,5 @@ export class BiteService {
 
   loadNearbyGooglePlaces(position: Geopoint): void {
     this.dataAccess.loadNearbyGooglePlaces(position);
-  }
-
-  private async showToast(key: string): Promise<void> {
-    const currentToast = await this.toastController.create({
-      message: this.transloco.translate(key),
-      duration: 3000,
-      position: 'top',
-      color: 'success',
-    });
-    await currentToast.present();
   }
 }

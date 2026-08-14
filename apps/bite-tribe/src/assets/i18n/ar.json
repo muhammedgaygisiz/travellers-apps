@@ -508,5 +508,6 @@
   "reply-to": "رد على {{name}}",
   "show-replies": "عرض {{count}} ردود",
   "hide-replies": "إخفاء الردود",
-  "review-creator-badge": "المنشئ"
+  "review-creator-badge": "المنشئ",
+  "bucket-list-name-updated": "تم تحديث اسم قائمة الآمال!"
 }

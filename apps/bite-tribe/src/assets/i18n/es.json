@@ -508,5 +508,6 @@
   "reply-to": "Responder a {{name}}",
   "show-replies": "Mostrar {{count}} respuestas",
   "hide-replies": "Ocultar respuestas",
-  "review-creator-badge": "creador"
+  "review-creator-badge": "creador",
+  "bucket-list-name-updated": "¡Nombre de la lista de deseos actualizado!"
 }

@@ -508,5 +508,6 @@
   "reply-to": "ለ{{name}} መልስ",
   "show-replies": "{{count}} ምላሾችን አሳይ",
   "hide-replies": "ምላሾችን ደብቅ",
-  "review-creator-badge": "ፈጣሪ"
+  "review-creator-badge": "ፈጣሪ",
+  "bucket-list-name-updated": "የዝርዝሩ ስም ተዘምኗል!"
 }

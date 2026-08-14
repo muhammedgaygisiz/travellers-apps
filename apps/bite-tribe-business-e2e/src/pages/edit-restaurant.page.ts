@@ -59,8 +59,11 @@ export class EditRestaurantPage {
   }
 
   /**
-   * The save handlers report through an Ionic toast. Each toast auto-dismisses
-   * after 3s, so assert on the one that is currently presented.
+   * The save handlers report through the shared `ToastService`, which presents
+   * one `ion-toast` at the top and dismisses any toast still on screen before
+   * the next one. A success auto-dismisses after 5s, so assert on the one that
+   * is currently presented. The copy is a Transloco key rather than a literal
+   * since issue #1305, so these strings come from the business locale file.
    */
   async expectSavedToast(message: string): Promise<void> {
     await expect(

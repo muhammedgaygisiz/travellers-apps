@@ -508,5 +508,6 @@
   "reply-to": "Antwort an {{name}}",
   "show-replies": "{{count}} Antworten anzeigen",
   "hide-replies": "Antworten ausblenden",
-  "review-creator-badge": "Ersteller"
+  "review-creator-badge": "Ersteller",
+  "bucket-list-name-updated": "Name der Bucket-Liste aktualisiert!"
 }

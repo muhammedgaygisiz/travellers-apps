@@ -62,6 +62,7 @@ Examples:
 | `libs/bite-tribe-common/map`        | Shared map functionality                                           |
 | `libs/common/ui`                    | Shared reusable UI components                                      |
 | `libs/common/utils`                 | Shared utilities, paths, icon registration, and helpers            |
+| `libs/common/toast`                 | `ToastService`, the only way either app raises a toast             |
 | `libs/common/ta-firestore`          | Firebase bootstrap and Firestore integration support               |
 | `libs/common/geolocation`           | Shared geolocation support                                         |
 | `libs/common/push-notifications`    | Push notification support                                          |

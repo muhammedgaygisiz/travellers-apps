@@ -2,11 +2,8 @@ import { RegistrationService } from '../registration.service';
 import { TestBed } from '@angular/core/testing';
 import { TranslocoService } from '@jsverse/transloco';
 import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
-import {
-  LoadingController,
-  NavController,
-  ToastController,
-} from '@ionic/angular/standalone';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
+import { ToastService } from 'toast';
 
 const translations: Record<string, string> = {
   ok: 'OK',
@@ -34,10 +31,8 @@ const MockedAnalyticsService = {
   logEvent: jest.fn(),
 };
 
-const MockedToastController = {
-  create: jest.fn().mockResolvedValue({
-    present: jest.fn().mockResolvedValue(undefined),
-  }),
+const MockedToastService = {
+  present: jest.fn().mockResolvedValue(undefined),
 };
 
 const loadingOverlay = {
@@ -56,10 +51,6 @@ const MockedTranslocoService = {
   getActiveLang: jest.fn((): string => 'en'),
 };
 
-type RegistrationServiceWithPrivateMethods = RegistrationService & {
-  showRegistrationErrorMessage(message: string): Promise<void>;
-};
-
 describe(RegistrationService.name, () => {
   let service: RegistrationService;
 
@@ -72,16 +63,14 @@ describe(RegistrationService.name, () => {
     MockedTranslocoService.getActiveLang.mockReturnValue('en');
     MockedNavController.navigateBack.mockResolvedValue(true);
     MockedLoadingController.create.mockResolvedValue(loadingOverlay);
-    MockedToastController.create.mockResolvedValue({
-      present: jest.fn().mockResolvedValue(undefined),
-    });
+    MockedToastService.present.mockResolvedValue(undefined);
 
     TestBed.configureTestingModule({
       providers: [
         { provide: AuthService, useValue: MockedAuthService },
         { provide: AnalyticsService, useValue: MockedAnalyticsService },
         { provide: NavController, useValue: MockedNavController },
-        { provide: ToastController, useValue: MockedToastController },
+        { provide: ToastService, useValue: MockedToastService },
         { provide: LoadingController, useValue: MockedLoadingController },
         { provide: TranslocoService, useValue: MockedTranslocoService },
       ],
@@ -156,19 +145,12 @@ describe(RegistrationService.name, () => {
     });
 
     describe('given a AuthErrorCodes.EMAIL_EXISTS is thrown', () => {
-      let showRegistrationErrorMessageSpy: jest.SpyInstance;
-
       beforeEach(() => {
         registerWithUsernameAndPasswordSpy.mockImplementation(() => {
           throw Object.assign(new Error('Email already exists'), {
             code: 'auth/email-already-in-use',
           }) as Error & { code: string };
         });
-
-        showRegistrationErrorMessageSpy = jest.spyOn(
-          service as RegistrationServiceWithPrivateMethods,
-          'showRegistrationErrorMessage',
-        );
       });
 
       it('should show a generic error message', async () => {
@@ -177,15 +159,14 @@ describe(RegistrationService.name, () => {
           password: '12345678',
         });
 
-        expect(showRegistrationErrorMessageSpy).toHaveBeenCalledWith(
-          'An error occurred during registration. Please try again.',
-        );
+        expect(MockedToastService.present).toHaveBeenCalledWith({
+          messageKey: 'registration-error-try-again',
+          outcome: 'failure',
+        });
       });
     });
 
     describe('given any other error from AuthErrorCodes is thrown', () => {
-      let showRegistrationErrorMessageSpy: jest.SpyInstance;
-
       beforeEach(() => {
         registerWithUsernameAndPasswordSpy.mockImplementation(() => {
           throw Object.assign(new Error('Some unknown error'), {
@@ -193,28 +174,24 @@ describe(RegistrationService.name, () => {
             errorMessage: 'This is an unknown error',
           }) as Error & { code: string; errorMessage: string };
         });
-
-        showRegistrationErrorMessageSpy = jest.spyOn(
-          service as RegistrationServiceWithPrivateMethods,
-          'showRegistrationErrorMessage',
-        );
       });
 
+      // Firebase's message is not a translation key, so it goes through the
+      // toast service as already-resolved text.
       it('should show the error message from the thrown error', async () => {
         await service.register({
           email: 'q@q.de',
           password: '12345678',
         });
 
-        expect(showRegistrationErrorMessageSpy).toHaveBeenCalledWith(
-          'This is an unknown error',
-        );
+        expect(MockedToastService.present).toHaveBeenCalledWith({
+          message: 'This is an unknown error',
+          outcome: 'failure',
+        });
       });
     });
 
     describe('given an unknown error without error message is thrown', () => {
-      let showRegistrationErrorMessageSpy: jest.SpyInstance;
-
       beforeEach(() => {
         registerWithUsernameAndPasswordSpy.mockImplementation(() => {
           const error = new Error('Some unknown error');
@@ -225,11 +202,6 @@ describe(RegistrationService.name, () => {
 
           throw error;
         });
-
-        showRegistrationErrorMessageSpy = jest.spyOn(
-          service as never,
-          'showRegistrationErrorMessage' as never,
-        );
       });
 
       it('should show the translated fallback error message', async () => {
@@ -238,9 +210,10 @@ describe(RegistrationService.name, () => {
           password: '12345678',
         });
 
-        expect(showRegistrationErrorMessageSpy).toHaveBeenCalledWith(
-          'An unknown error occurred during registration. Please try again.',
-        );
+        expect(MockedToastService.present).toHaveBeenCalledWith({
+          messageKey: 'registration-unknown-error-try-again',
+          outcome: 'failure',
+        });
       });
     });
 
@@ -388,11 +361,10 @@ describe(RegistrationService.name, () => {
         await jest.advanceTimersByTimeAsync(30_000);
         await pending;
 
-        expect(MockedToastController.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: translations['registration-timeout-try-again'],
-          }),
-        );
+        expect(MockedToastService.present).toHaveBeenCalledWith({
+          messageKey: 'registration-timeout-try-again',
+          outcome: 'failure',
+        });
         expect(loadingOverlay.dismiss).toHaveBeenCalled();
         expect(navigateBackSpy).not.toHaveBeenCalled();
         expect(service.registering()).toBe(false);
@@ -418,26 +390,10 @@ describe(RegistrationService.name, () => {
         expect(navigateBackSpy).toHaveBeenCalledWith(['/home']);
       });
 
-      it('should release the form when the feedback toast never appears', async () => {
-        registerWithUsernameAndPasswordSpy.mockRejectedValue(
-          Object.assign(new Error('Network request failed'), {
-            code: 'auth/network-request-failed',
-            errorMessage: 'Network request failed',
-          }),
-        );
-        MockedToastController.create.mockReturnValue(neverSettles());
-
-        const pending = service.register({
-          email: 'q@q.de',
-          password: '12345678',
-        });
-        await settleMicrotasks();
-        await jest.advanceTimersByTimeAsync(2_000);
-        await pending;
-
-        expect(loadingOverlay.dismiss).toHaveBeenCalled();
-        expect(service.registering()).toBe(false);
-      });
+      // The stalled-toast half of #1219 moved with the toast itself:
+      // `ToastService` in `libs/common/toast` bounds `create()` and `present()`
+      // and resolves rather than rejecting, and its spec covers both. This flow
+      // holds the invariant through that contract, not through a guard here.
     });
 
     describe('given registration fails', () => {

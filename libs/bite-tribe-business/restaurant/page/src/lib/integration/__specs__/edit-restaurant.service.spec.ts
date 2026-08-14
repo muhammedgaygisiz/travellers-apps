@@ -1,9 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { EditRestaurantService } from '../edit-restaurant.service';
 import { RestaurantDataAccessService } from 'bite-tribe-business/restaurant-data-access';
-import { NavController, ToastController } from '@ionic/angular/standalone';
+import { NavController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { Address, Geopoint, Restaurant } from 'model';
+import { ToastService } from 'toast';
 
 jest.mock('bite-tribe-business/restaurant-data-access');
 jest.mock('@capacitor-firebase/firestore');
@@ -13,9 +14,7 @@ describe('EditRestaurantService', () => {
   let service: EditRestaurantService;
   let dataAccessMock: jest.Mocked<RestaurantDataAccessService>;
   let navControllerMock: { navigateForward: jest.Mock };
-  let toastControllerMock: { create: jest.Mock };
-
-  const mockToast = { present: jest.fn() };
+  let toastMock: { present: jest.Mock };
 
   beforeEach(() => {
     dataAccessMock = {
@@ -29,14 +28,14 @@ describe('EditRestaurantService', () => {
     } as unknown as jest.Mocked<RestaurantDataAccessService>;
 
     navControllerMock = { navigateForward: jest.fn() };
-    toastControllerMock = { create: jest.fn().mockResolvedValue(mockToast) };
+    toastMock = { present: jest.fn().mockResolvedValue(undefined) };
 
     TestBed.configureTestingModule({
       providers: [
         EditRestaurantService,
         { provide: RestaurantDataAccessService, useValue: dataAccessMock },
         { provide: NavController, useValue: navControllerMock },
-        { provide: ToastController, useValue: toastControllerMock },
+        { provide: ToastService, useValue: toastMock },
       ],
     });
 
@@ -94,9 +93,10 @@ describe('EditRestaurantService', () => {
 
       await service.createMenu();
 
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'danger' }),
-      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
     });
   });
 
@@ -121,9 +121,10 @@ describe('EditRestaurantService', () => {
         'rest1',
         [{ network: 'facebook', url: 'https://fb.com' }],
       );
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'success' }),
-      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'social-media-links-saved',
+        outcome: 'success',
+      });
     });
 
     it('should show danger toast on error', async () => {
@@ -137,9 +138,10 @@ describe('EditRestaurantService', () => {
         links: [{ network: 'facebook', url: 'https://fb.com' }],
       });
 
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'danger' }),
-      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
     });
   });
 
@@ -162,9 +164,10 @@ describe('EditRestaurantService', () => {
         'rest1',
         'A great place',
       );
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'success' }),
-      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'about-restaurant-saved',
+        outcome: 'success',
+      });
     });
 
     it('should show danger toast on error', async () => {
@@ -176,9 +179,10 @@ describe('EditRestaurantService', () => {
 
       await service.submitDescription('A great place');
 
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'danger' }),
-      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
     });
   });
 
@@ -210,9 +214,10 @@ describe('EditRestaurantService', () => {
           timeRanges: [{ from: '09:00', to: '17:00' }],
         },
       ]);
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'success' }),
-      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'opening-hours-saved',
+        outcome: 'success',
+      });
     });
 
     it('should show danger toast on error', async () => {
@@ -224,9 +229,10 @@ describe('EditRestaurantService', () => {
 
       await service.submitOpeningHours([]);
 
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'danger' }),
-      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
     });
   });
 
@@ -254,9 +260,10 @@ describe('EditRestaurantService', () => {
         'rest1',
         address,
       );
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'success' }),
-      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'address-saved',
+        outcome: 'success',
+      });
     });
 
     it('should show danger toast on error', async () => {
@@ -268,9 +275,10 @@ describe('EditRestaurantService', () => {
 
       await service.submitAddress(address);
 
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'danger' }),
-      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
     });
   });
 
@@ -293,9 +301,10 @@ describe('EditRestaurantService', () => {
         'rest1',
         position,
       );
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'success' }),
-      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'location-saved',
+        outcome: 'success',
+      });
     });
 
     it('should show danger toast on error', async () => {
@@ -307,9 +316,10 @@ describe('EditRestaurantService', () => {
 
       await service.submitPosition(position);
 
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({ color: 'danger' }),
-      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
     });
   });
 });

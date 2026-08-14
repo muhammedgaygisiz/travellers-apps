@@ -508,5 +508,6 @@
   "reply-to": "Reply to {{name}}",
   "show-replies": "Show {{count}} replies",
   "hide-replies": "Hide replies",
-  "review-creator-badge": "creator"
+  "review-creator-badge": "creator",
+  "bucket-list-name-updated": "Bucket list name updated!"
 }

@@ -21,10 +21,9 @@ import { AppActions } from '../app/actions';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { BucketlistActions } from '../bucketlists/actions';
 import { PATH } from 'utils';
+import { ToastService } from 'toast';
 import { userId } from '../router/selectors';
 import { fromAuth } from 'ta-firestore';
-import { ToastController } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
 
 /**
  * How long the position-driven feed load may run before it counts as failed.
@@ -39,8 +38,7 @@ export class BiteEffects {
   private readonly api = inject(BiteTribeApiService);
   private readonly store = inject(Store);
   private readonly storeService = inject(BiteTribeStoreService);
-  private readonly toastController = inject(ToastController);
-  private readonly transloco = inject(TranslocoService);
+  private readonly toast = inject(ToastService);
 
   biteCreatorId = toSignal(this.store.select(userId));
 
@@ -153,7 +151,10 @@ export class BiteEffects {
       switchMap(({ bite }) => {
         return from(this.api.saveEditedBite(bite)).pipe(
           tap(() => {
-            void this.showToast('bite-updated-successfully');
+            void this.toast.present({
+              messageKey: 'bite-updated-successfully',
+              outcome: 'success',
+            });
           }),
           map((bite) => BiteActions.savedBite({ bite })),
           catchError(() => of(BiteActions.errorSavingBite({ bite }))),
@@ -168,7 +169,10 @@ export class BiteEffects {
       switchMap(({ bite }) =>
         from(this.api.deleteBite(bite)).pipe(
           tap(() => {
-            void this.showToast('bite-deleted-successfully');
+            void this.toast.present({
+              messageKey: 'bite-deleted-successfully',
+              outcome: 'success',
+            });
           }),
           map((bite) => BiteActions.deletedBite({ bite })),
           catchError(() => of(BiteActions.errorDeletingBite({ bite }))),
@@ -176,22 +180,4 @@ export class BiteEffects {
       ),
     );
   });
-
-  private currentToast: HTMLIonToastElement | null = null;
-
-  private async showToast(key: string): Promise<void> {
-    if (this.currentToast) {
-      await this.currentToast.onDidDismiss();
-    }
-    this.currentToast = await this.toastController.create({
-      message: this.transloco.translate(key),
-      duration: 3000,
-      position: 'top',
-      color: 'success',
-    });
-    await this.currentToast.present();
-    void this.currentToast.onDidDismiss().then(() => {
-      this.currentToast = null;
-    });
-  }
 }

@@ -2,17 +2,14 @@ import { inject, Injectable, signal } from '@angular/core';
 import { SettingsDataAccessService } from 'bite-tribe/settings-data-access';
 import { Settings } from 'model';
 import { NavController } from '@ionic/angular';
-import { ToastController } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
 import {
   EmailVerificationService,
   type EmailVerificationSurface,
 } from 'bite-tribe/email-verification-data-access';
 import { PATH } from 'utils';
+import { ToastService } from 'toast';
 import type { PushInstallation, PushPermissionState } from 'push-notifications';
 import type { PushInstallationView } from '../components/page/settings.component';
-
-const TOAST_DURATION_MS = 5000;
 
 @Injectable({
   providedIn: 'root',
@@ -21,8 +18,7 @@ export class SettingsService {
   dataAccess = inject(SettingsDataAccessService);
   private readonly navController = inject(NavController);
   private readonly emailVerification = inject(EmailVerificationService);
-  private readonly toastController = inject(ToastController);
-  private readonly transloco = inject(TranslocoService);
+  private readonly toast = inject(ToastService);
 
   user = this.dataAccess.user;
   publicUser = this.dataAccess.publicUser;
@@ -46,7 +42,10 @@ export class SettingsService {
   async saveSettings(settings: Settings): Promise<void> {
     await this.dataAccess.saveSettings(settings);
 
-    await this.showToast('preferences-saved');
+    await this.toast.present({
+      messageKey: 'preferences-saved',
+      outcome: 'success',
+    });
 
     void this.navController.navigateBack(['home']);
   }
@@ -107,24 +106,11 @@ export class SettingsService {
       );
       this.pushInstallations.set(previous);
 
-      await this.showToast('notifications-change-failed');
+      await this.toast.present({
+        messageKey: 'notifications-change-failed',
+        outcome: 'failure',
+      });
     }
-  }
-
-  private async showToast(messageKey: string): Promise<void> {
-    const toast = await this.toastController.create({
-      message: this.transloco.translate(messageKey),
-      position: 'bottom',
-      duration: TOAST_DURATION_MS,
-      buttons: [
-        {
-          text: this.transloco.translate('ok'),
-          role: 'confirm',
-        },
-      ],
-    });
-
-    await toast.present();
   }
 
   /**

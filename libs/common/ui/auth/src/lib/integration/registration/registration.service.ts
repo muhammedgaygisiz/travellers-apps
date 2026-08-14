@@ -2,13 +2,9 @@ import { inject, Injectable, signal } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { Credentials } from '../../api/credentials.model';
 import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
-import {
-  LoadingController,
-  NavController,
-  ToastController,
-  type ToastOptions,
-} from '@ionic/angular/standalone';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { AuthErrorCodes } from 'firebase/auth';
+import { ToastService } from 'toast';
 
 interface RegistrationError {
   code?: string;
@@ -16,8 +12,9 @@ interface RegistrationError {
 }
 
 /**
- * Upper bound for the overlays. They are progress decoration on top of the
- * `registering` signal, so registration must never wait on them (issue #1219).
+ * Upper bound for the loading overlay. It is progress decoration on top of the
+ * `registering` signal, so registration must never wait on it (issue #1219).
+ * The toasts carry the same guarantee inside `ToastService`.
  */
 const OVERLAY_TIMEOUT_MS = 2_000;
 
@@ -65,7 +62,7 @@ export class RegistrationService {
   private readonly authService = inject(AuthService);
   private readonly analytics = inject(AnalyticsService);
   private readonly transloco = inject(TranslocoService);
-  readonly toastController = inject(ToastController);
+  private readonly toast = inject(ToastService);
   readonly loadingController = inject(LoadingController);
   readonly navController = inject(NavController);
 
@@ -107,11 +104,10 @@ export class RegistrationService {
         REGISTRATION_TIMEOUT_MS,
       );
 
-      await this.showRegistrationSuccessMessage(
-        this.transloco.translate(
-          'registration-success-check-your-email-to-verify-account',
-        ),
-      );
+      await this.toast.present({
+        messageKey: 'registration-success-check-your-email-to-verify-account',
+        outcome: 'success',
+      });
 
       // Awaited so the loading overlay survives the onboarding gate that
       // intercepts this navigation.
@@ -125,25 +121,35 @@ export class RegistrationService {
       if (code === REGISTRATION_TIMEOUT_CODE) {
         // The account may or may not exist by now, so the copy has to point at
         // both a retry and signing in (issue #1219).
-        await this.showRegistrationErrorMessage(
-          this.transloco.translate('registration-timeout-try-again'),
-        );
+        await this.toast.present({
+          messageKey: 'registration-timeout-try-again',
+          outcome: 'failure',
+        });
 
         return;
       }
 
       if (code === AuthErrorCodes.EMAIL_EXISTS) {
         // Prevent user enumeration by showing a generic error message
-        await this.showRegistrationErrorMessage(
-          this.transloco.translate('registration-error-try-again'),
-        );
+        await this.toast.present({
+          messageKey: 'registration-error-try-again',
+          outcome: 'failure',
+        });
 
         return;
       }
 
-      await this.showRegistrationErrorMessage(
-        this.getErrorMessage(error) ??
-          this.transloco.translate('registration-unknown-error-try-again'),
+      // Firebase's own message, when it carries one, is not a translation key,
+      // so it is passed through as resolved text.
+      const message = this.getErrorMessage(error);
+
+      await this.toast.present(
+        message
+          ? { message, outcome: 'failure' }
+          : {
+              messageKey: 'registration-unknown-error-try-again',
+              outcome: 'failure',
+            },
       );
     } finally {
       await this.dismissLoading(loading);
@@ -205,48 +211,5 @@ export class RegistrationService {
 
   private isRegistrationError(error: unknown): error is RegistrationError {
     return typeof error === 'object' && error !== null;
-  }
-
-  private async showRegistrationSuccessMessage(message: string): Promise<void> {
-    await this.presentToast({
-      message,
-      position: 'bottom',
-      duration: 5000,
-      buttons: [
-        {
-          text: this.transloco.translate('ok'),
-          role: 'confirm',
-        },
-      ],
-    });
-  }
-
-  private async showRegistrationErrorMessage(message: string): Promise<void> {
-    await this.presentToast({
-      message,
-      position: 'bottom',
-      buttons: [
-        {
-          text: this.transloco.translate('ok'),
-          role: 'confirm',
-        },
-      ],
-    });
-  }
-
-  /**
-   * Best-effort toast. A failing or stalled toast must not swallow the outcome
-   * it is reporting, nor keep the form pending (issue #1219).
-   */
-  private async presentToast(options: ToastOptions): Promise<void> {
-    try {
-      const toast = await withTimeout(
-        this.toastController.create(options),
-        OVERLAY_TIMEOUT_MS,
-      );
-      await withTimeout(toast.present(), OVERLAY_TIMEOUT_MS);
-    } catch {
-      // Nothing left to fall back to; the caller already handled the outcome.
-    }
   }
 }

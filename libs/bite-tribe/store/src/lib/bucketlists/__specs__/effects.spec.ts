@@ -8,8 +8,8 @@ import { BucketListEffect } from '../effects';
 import { BucketlistActions } from '../actions';
 import SpyInstance = jest.SpyInstance;
 import { AuthService } from 'ta-firestore';
-import { NavController, ToastController } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
+import { NavController } from '@ionic/angular/standalone';
+import { ToastService } from 'toast';
 import type { Action } from '@ngrx/store';
 
 const assertDeepEqual = (actual: unknown, expected: unknown): void => {
@@ -31,18 +31,14 @@ const MockedAuthService = {
     ({ uid: '123' }) as ReturnType<AuthService['getUser']>,
 };
 
-const mockToastCreate = jest.fn().mockResolvedValue({ present: jest.fn() });
-const MockToastController = {
-  create: mockToastCreate,
+const mockToastPresent = jest.fn().mockResolvedValue(undefined);
+const MockToastService = {
+  present: mockToastPresent,
 };
 
 const mockNavigateForward = jest.fn();
 const MockNavController = {
   navigateForward: mockNavigateForward,
-};
-
-const MockTranslocoService = {
-  translate: jest.fn((key: string): string => key),
 };
 
 describe('BucketListEffect', () => {
@@ -53,8 +49,7 @@ describe('BucketListEffect', () => {
   let authService: AuthService;
 
   beforeEach(() => {
-    mockToastCreate.mockResolvedValue({ present: jest.fn() });
-    MockTranslocoService.translate.mockImplementation((key: string) => key);
+    mockToastPresent.mockClear();
     scheduler = new TestScheduler(assertDeepEqual);
     TestBed.configureTestingModule({
       providers: [
@@ -63,9 +58,8 @@ describe('BucketListEffect', () => {
         provideMockStore(),
         { provide: BiteTribeApiService, useValue: BiteTribeApiServiceMock },
         { provide: AuthService, useValue: MockedAuthService },
-        { provide: ToastController, useValue: MockToastController },
+        { provide: ToastService, useValue: MockToastService },
         { provide: NavController, useValue: MockNavController },
-        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
 
@@ -243,11 +237,10 @@ describe('BucketListEffect', () => {
         });
       });
 
-      expect(mockToastCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'bucket-list-create-with-bite-failed',
-        }),
-      );
+      expect(mockToastPresent).toHaveBeenCalledWith({
+        messageKey: 'bucket-list-create-with-bite-failed',
+        outcome: 'failure',
+      });
     });
 
     it('should confirm only once the write has settled', () => {
@@ -266,11 +259,10 @@ describe('BucketListEffect', () => {
         });
       });
 
-      expect(mockToastCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'bucket-list-created-with-bite',
-        }),
-      );
+      expect(mockToastPresent).toHaveBeenCalledWith({
+        messageKey: 'bucket-list-created-with-bite',
+        outcome: 'success',
+      });
     });
   });
 

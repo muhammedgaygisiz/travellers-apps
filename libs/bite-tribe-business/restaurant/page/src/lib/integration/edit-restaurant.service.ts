@@ -1,13 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { RestaurantDataAccessService } from 'bite-tribe-business/restaurant-data-access';
 import { Address, DaySchedule, Geopoint, Link } from 'model';
-import { NavController, ToastController } from '@ionic/angular/standalone';
+import { NavController } from '@ionic/angular/standalone';
+import { ToastService } from 'toast';
 
 @Injectable({ providedIn: 'root' })
 export class EditRestaurantService {
   private readonly dataAccess = inject(RestaurantDataAccessService);
   private readonly navController = inject(NavController);
-  private readonly toastController = inject(ToastController);
+  private readonly toast = inject(ToastService);
 
   restaurant = this.dataAccess.restaurant;
 
@@ -34,7 +35,7 @@ export class EditRestaurantService {
       );
       this.gotoEditMenu(restaurant.id, menuId);
     } catch {
-      await this.showToast('Something went wrong. Please try again.', 'danger');
+      await this.showFailureToast();
     }
   }
 
@@ -45,15 +46,12 @@ export class EditRestaurantService {
     if (restaurant && links) {
       try {
         await this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
-        await this.showToast(
-          'Social media links saved successfully.',
-          'success',
-        );
+        await this.toast.present({
+          messageKey: 'social-media-links-saved',
+          outcome: 'success',
+        });
       } catch {
-        await this.showToast(
-          'Something went wrong. Please try again.',
-          'danger',
-        );
+        await this.showFailureToast();
       }
     }
   }
@@ -63,12 +61,12 @@ export class EditRestaurantService {
     if (restaurant) {
       try {
         await this.dataAccess.submitDescription(restaurant.id, description);
-        await this.showToast('About restaurant saved successfully.', 'success');
+        await this.toast.present({
+          messageKey: 'about-restaurant-saved',
+          outcome: 'success',
+        });
       } catch {
-        await this.showToast(
-          'Something went wrong. Please try again.',
-          'danger',
-        );
+        await this.showFailureToast();
       }
     }
   }
@@ -78,12 +76,12 @@ export class EditRestaurantService {
     if (restaurant) {
       try {
         await this.dataAccess.submitOpeningHours(restaurant.id, openingHours);
-        await this.showToast('Opening hours saved successfully.', 'success');
+        await this.toast.present({
+          messageKey: 'opening-hours-saved',
+          outcome: 'success',
+        });
       } catch {
-        await this.showToast(
-          'Something went wrong. Please try again.',
-          'danger',
-        );
+        await this.showFailureToast();
       }
     }
   }
@@ -93,12 +91,12 @@ export class EditRestaurantService {
     if (restaurant) {
       try {
         await this.dataAccess.submitAddress(restaurant.id, address);
-        await this.showToast('Address saved successfully.', 'success');
+        await this.toast.present({
+          messageKey: 'address-saved',
+          outcome: 'success',
+        });
       } catch {
-        await this.showToast(
-          'Something went wrong. Please try again.',
-          'danger',
-        );
+        await this.showFailureToast();
       }
     }
   }
@@ -108,26 +106,20 @@ export class EditRestaurantService {
     if (restaurant) {
       try {
         await this.dataAccess.submitPosition(restaurant.id, position);
-        await this.showToast('Location saved successfully.', 'success');
+        await this.toast.present({
+          messageKey: 'location-saved',
+          outcome: 'success',
+        });
       } catch {
-        await this.showToast(
-          'Something went wrong. Please try again.',
-          'danger',
-        );
+        await this.showFailureToast();
       }
     }
   }
 
-  private async showToast(
-    message: string,
-    color: 'success' | 'danger',
-  ): Promise<void> {
-    const toast = await this.toastController.create({
-      message,
-      duration: 3000,
-      position: 'bottom',
-      color,
+  private showFailureToast(): Promise<void> {
+    return this.toast.present({
+      messageKey: 'something-went-wrong-please-try-again',
+      outcome: 'failure',
     });
-    await toast.present();
   }
 }

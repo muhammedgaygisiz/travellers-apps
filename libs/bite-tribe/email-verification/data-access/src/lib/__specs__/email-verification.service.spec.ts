@@ -4,8 +4,7 @@ import type { PublicUser } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
-import { ToastController } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
+import { ToastService } from 'toast';
 import { EmailVerificationService } from '../email-verification.service';
 
 let mockPublicUser$: BehaviorSubject<PublicUser | null>;
@@ -22,18 +21,14 @@ class AnalyticsMock {
   logEvent = jest.fn();
 }
 
-class ToastControllerMock {
-  create = jest.fn().mockResolvedValue({ present: jest.fn() });
-}
-
-class TranslocoMock {
-  translate = jest.fn((key: string) => key);
+class ToastServiceMock {
+  present = jest.fn().mockResolvedValue(undefined);
 }
 
 describe('EmailVerificationService', () => {
   let service: EmailVerificationService;
   let analytics: AnalyticsService;
-  let toastController: ToastController;
+  let toast: ToastServiceMock;
 
   beforeEach(() => {
     mockPublicUser$ = new BehaviorSubject<PublicUser | null>(null);
@@ -45,14 +40,13 @@ describe('EmailVerificationService', () => {
         { provide: BiteTribeStoreService, useClass: StoreMock },
         { provide: BiteTribeApiService, useValue: ApiMock },
         { provide: AnalyticsService, useClass: AnalyticsMock },
-        { provide: ToastController, useClass: ToastControllerMock },
-        { provide: TranslocoService, useClass: TranslocoMock },
+        { provide: ToastService, useClass: ToastServiceMock },
       ],
     });
 
     service = TestBed.inject(EmailVerificationService);
     analytics = TestBed.inject(AnalyticsService);
-    toastController = TestBed.inject(ToastController);
+    toast = TestBed.inject(ToastService) as unknown as ToastServiceMock;
   });
 
   describe('promptVisible', () => {
@@ -126,11 +120,10 @@ describe('EmailVerificationService', () => {
         AnalyticsEvent.EmailVerificationResendSucceeded,
         { surface: 'home' },
       );
-      expect(toastController.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'verification-email-sent-check-your-inbox',
-        }),
-      );
+      expect(toast.present).toHaveBeenCalledWith({
+        messageKey: 'verification-email-sent-check-your-inbox',
+        outcome: 'success',
+      });
     });
 
     it('logs failed analytics and shows the rate-limited toast', async () => {
@@ -144,11 +137,10 @@ describe('EmailVerificationService', () => {
         AnalyticsEvent.EmailVerificationResendFailed,
         { surface: 'profile_edit', reason: 'rate_limited' },
       );
-      expect(toastController.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'please-wait-before-requesting-another-verification-email',
-        }),
-      );
+      expect(toast.present).toHaveBeenCalledWith({
+        messageKey: 'please-wait-before-requesting-another-verification-email',
+        outcome: 'failure',
+      });
     });
 
     it('maps already_verified failures to the already-verified toast', async () => {
@@ -158,9 +150,10 @@ describe('EmailVerificationService', () => {
 
       await service.resend('home');
 
-      expect(toastController.create).toHaveBeenCalledWith(
-        expect.objectContaining({ message: 'email-already-verified' }),
-      );
+      expect(toast.present).toHaveBeenCalledWith({
+        messageKey: 'email-already-verified',
+        outcome: 'failure',
+      });
     });
 
     it('maps unsupported_provider failures to the not-available toast', async () => {
@@ -170,11 +163,10 @@ describe('EmailVerificationService', () => {
 
       await service.resend('home');
 
-      expect(toastController.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'email-verification-not-available',
-        }),
-      );
+      expect(toast.present).toHaveBeenCalledWith({
+        messageKey: 'email-verification-not-available',
+        outcome: 'failure',
+      });
     });
 
     it('maps send_failed failures to the retryable error toast', async () => {
@@ -188,11 +180,10 @@ describe('EmailVerificationService', () => {
         AnalyticsEvent.EmailVerificationResendFailed,
         { surface: 'settings', reason: 'send_failed' },
       );
-      expect(toastController.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'verification-email-could-not-be-sent',
-        }),
-      );
+      expect(toast.present).toHaveBeenCalledWith({
+        messageKey: 'verification-email-could-not-be-sent',
+        outcome: 'failure',
+      });
     });
 
     it('shows the default error toast for unknown failures', async () => {
@@ -200,11 +191,10 @@ describe('EmailVerificationService', () => {
 
       await service.resend('home');
 
-      expect(toastController.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'verification-email-could-not-be-sent',
-        }),
-      );
+      expect(toast.present).toHaveBeenCalledWith({
+        messageKey: 'verification-email-could-not-be-sent',
+        outcome: 'failure',
+      });
     });
   });
 
@@ -263,11 +253,10 @@ describe('EmailVerificationService', () => {
       await service.resend('home');
 
       expect(ApiMock.resendEmailVerification).toHaveBeenCalledTimes(2);
-      expect(toastController.create).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          message: 'verification-email-sent-check-your-inbox',
-        }),
-      );
+      expect(toast.present).toHaveBeenLastCalledWith({
+        messageKey: 'verification-email-sent-check-your-inbox',
+        outcome: 'success',
+      });
     });
   });
 });

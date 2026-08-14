@@ -73,11 +73,11 @@ test.describe('Maintain restaurants in the business app', () => {
 
     await editRestaurant.fillDescription(description);
     await editRestaurant.expectSavedToast(
-      'About restaurant saved successfully.',
+      'About the restaurant saved successfully!',
     );
 
     await editRestaurant.fillAddress(address);
-    await editRestaurant.expectSavedToast('Address saved successfully.');
+    await editRestaurant.expectSavedToast('Address saved successfully!');
 
     await expectFirestoreDocument(page, `restaurants/${restaurantId}`, {
       name: restaurantName,

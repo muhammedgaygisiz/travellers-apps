@@ -39,6 +39,29 @@ libs/common
 
 Prefer existing library boundaries over new abstractions. Add a new abstraction only when it removes real complexity or matches an existing local pattern.
 
+## Scope Boundaries Between The Two Apps
+
+`depConstraints` in `eslint.config.mjs` is what actually holds the app boundary. Both `scope:bite-tribe` and `scope:bite-tribe-business` have an entry; a scope with no entry is unconstrained, not restricted.
+
+The two apps share the **platform** layers and nothing else:
+
+| Shared                                                          | Not shared                                 |
+| --------------------------------------------------------------- | ------------------------------------------ |
+| `type:api` (one Firebase client), `type:store` (one NgRx store) | `type:feature` libraries                   |
+| `type:model`, `scope:common`, `type:ui`                         | feature-local `type:data-access` libraries |
+
+**A feature-local data-access library belongs to exactly one app.** When both apps touch the same entity, each owns its own read and write surface over the shared store and API rather than importing the other's.
+
+This was learned the expensive way. `scope:bite-tribe-business` had no `depConstraints` entry at all until [issue #1317](https://github.com/muhammedgaygisiz/travellers-apps/issues/1317), so business libraries could import anything. Three things had drifted in under it:
+
+- `bite-tribe/restaurant-data-access` held six restaurant **write** methods that only the business app ever called, and the business edit page imported that library to reach them — while its sibling new-restaurant page used the business one. Two services in one library, two data-access libraries, same entity.
+- `libs/bite-tribe/restaurant/page` carried an unreachable duplicate of the business edit UI, container and component and service, exported from nothing and routed by nothing.
+- `libs/bite-tribe-business/start` was tagged `scope:bite-tribe` despite living in the business app and being routed only by the business shell.
+
+Adding the constraint found all three in one lint run. Two known crossings remain deliberately excused in the rule's `allow` array rather than silently permitted; each names its issue.
+
+**A tag that disagrees with the directory is a defect.** Nothing derives the scope tag from the path, so `libs/bite-tribe-business/**` carrying `scope:bite-tribe` lints clean and quietly opts that library out of the boundary.
+
 ## Bundle Budget Rule
 
 `apps/bite-tribe` enforces an initial bundle budget of 3 MB (error) and 500 kB (warning). The error budget fails the production build in CI.

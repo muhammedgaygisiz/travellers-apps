@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
+import { RestaurantDataAccessService } from 'bite-tribe-business/restaurant-data-access';
 import { Address, DaySchedule, Geopoint, Link } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import { ToastService } from 'toast';

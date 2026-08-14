@@ -1,7 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Geopoint, GooglePlace, PlaceDetails, Restaurant } from 'model';
+import {
+  Address,
+  DaySchedule,
+  Geopoint,
+  GooglePlace,
+  Link,
+  PlaceDetails,
+  Restaurant,
+} from 'model';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { isBase64String } from 'utils';
@@ -29,8 +37,47 @@ export class RestaurantDataAccessService {
 
   restaurantToCreate = toSignal(this.storeService.restaurantToCreate$);
 
+  /** The restaurant currently being edited, from the shared store. */
+  restaurant = toSignal(this.storeService.restaurant$);
+
   submitNewRestaurant(restaurant: Restaurant): void {
     this.storeService.saveNewRestaurant(restaurant);
+  }
+
+  createMenuForRestaurant(restaurantId: string): Promise<string> {
+    return this.api.createMenuForRestaurant(restaurantId);
+  }
+
+  async submitSocialMediaLinks(
+    restaurantId: string,
+    links: Link[],
+  ): Promise<void> {
+    await this.api.saveSocialMediaLinksForRestaurant(restaurantId, links);
+  }
+
+  async submitDescription(
+    restaurantId: string,
+    description: string,
+  ): Promise<void> {
+    await this.api.saveDescriptionForRestaurant(restaurantId, description);
+  }
+
+  async submitOpeningHours(
+    restaurantId: string,
+    openingHours: DaySchedule[],
+  ): Promise<void> {
+    await this.api.saveOpeningHoursForRestaurant(restaurantId, openingHours);
+  }
+
+  async submitAddress(restaurantId: string, address: Address): Promise<void> {
+    await this.api.saveAddressForRestaurant(restaurantId, address);
+  }
+
+  async submitPosition(
+    restaurantId: string,
+    position: Geopoint,
+  ): Promise<void> {
+    await this.api.savePositionForRestaurant(restaurantId, position);
   }
 
   async searchPlaces(

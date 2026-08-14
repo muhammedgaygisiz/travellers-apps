@@ -213,6 +213,7 @@
         <bt-map
           [geopoints]="modalGeopoints()"
           [markerColors]="candidateMarkerColors()"
+          [focusedGeopointId]="draftSource()"
           [gpsPosition]="position()"
           [readonly]="!isManualDraftMode()"
           [emitMarkerClick]="!isManualDraftMode()"

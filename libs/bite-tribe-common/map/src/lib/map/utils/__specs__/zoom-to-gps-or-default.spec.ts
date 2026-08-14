@@ -78,6 +78,26 @@ describe('zoomToGpsOrDefault', () => {
     expect(addGpsMarkerMock).toHaveBeenCalledWith(gpsPosition, map);
   });
 
+  /**
+   * The bite maps recenter on the device through this helper, so the position
+   * source modal was given an explicit focus input instead of a change here.
+   * See GitHub issue #1306.
+   */
+  it('should keep the gps position ahead of the markers', () => {
+    markers.push(L.marker(COORD_SAN_FRANCISCO));
+    markers.push(L.marker(COORD_LOS_ANGELES));
+    positions.push({ latitude: 37.7749, longitude: -122.4194 });
+    positions.push({ latitude: 34.0522, longitude: -118.2437 });
+
+    zoomToGpsOrDefault(GEOPOINT_SAN_FRANCISCO, markers, positions, map);
+
+    expect(zoomToGeopointMock).toHaveBeenCalledWith(
+      GEOPOINT_SAN_FRANCISCO,
+      map,
+    );
+    expect(fitBoundsSpy).not.toHaveBeenCalled();
+  });
+
   describe('given gps position is null', () => {
     it('should fit map to markers', () => {
       const gpsPosition = null;

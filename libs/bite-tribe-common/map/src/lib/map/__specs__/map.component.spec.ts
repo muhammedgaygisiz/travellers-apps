@@ -564,6 +564,149 @@ describe('MapComponent', () => {
     });
   });
 
+  describe('focusedGeopointId', () => {
+    // The charter's `Posting later` case: the photo was taken in Ronda while
+    // the device is in Bern, so the two candidates are ~1500 km apart.
+    const photoPosition: Geopoint = {
+      id: 'photo',
+      latitude: 36.7422,
+      longitude: -5.1667,
+    };
+    const gpsPosition: Geopoint = {
+      id: 'gps',
+      latitude: 46.948,
+      longitude: 7.4474,
+    };
+    const candidates = [photoPosition, gpsPosition];
+
+    let photoMarker: MockMarker;
+    let gpsMarker: MockMarker;
+
+    beforeEach(() => {
+      const mapDiv = document.createElement('div');
+      mapDiv.setAttribute('data-testid', 'map');
+      fixture.nativeElement.appendChild(mapDiv);
+
+      photoMarker = { on: jest.fn(), options: { title: 'photo' } };
+      gpsMarker = { on: jest.fn(), options: { title: 'gps' } };
+
+      geopointsToMarkersMock.mockImplementation(() => [photoMarker, gpsMarker]);
+
+      mockMap.on.mockClear();
+      zoomToGeopointMock.mockClear();
+      zoomToMarkersMock.mockClear();
+      focusMarkerMock.mockClear();
+    });
+
+    it('should centre on the focused geopoint instead of the device position', () => {
+      componentRef.setInput('geopoints', candidates);
+      componentRef.setInput('gpsPosition', gpsPosition);
+      componentRef.setInput('focusedGeopointId', 'photo');
+
+      fixture.detectChanges();
+
+      expect(zoomToGeopointMock).toHaveBeenCalledWith(
+        photoPosition,
+        expect.any(Object),
+      );
+      expect(zoomToMarkersMock).not.toHaveBeenCalled();
+    });
+
+    it('should grow the focused marker', () => {
+      componentRef.setInput('geopoints', candidates);
+      componentRef.setInput('focusedGeopointId', 'photo');
+
+      fixture.detectChanges();
+
+      expect(focusMarkerMock).toHaveBeenCalledWith(
+        photoMarker,
+        [photoMarker, gpsMarker],
+        expect.any(Object),
+      );
+    });
+
+    it('should follow a change of selection', () => {
+      componentRef.setInput('geopoints', candidates);
+      componentRef.setInput('focusedGeopointId', 'photo');
+      fixture.detectChanges();
+
+      zoomToGeopointMock.mockClear();
+      focusMarkerMock.mockClear();
+
+      componentRef.setInput('focusedGeopointId', 'gps');
+      fixture.detectChanges();
+
+      expect(zoomToGeopointMock).toHaveBeenCalledWith(
+        gpsPosition,
+        expect.any(Object),
+      );
+      expect(focusMarkerMock).toHaveBeenCalledWith(
+        gpsMarker,
+        [photoMarker, gpsMarker],
+        expect.any(Object),
+      );
+    });
+
+    it('should keep the focus when the map background is tapped', () => {
+      componentRef.setInput('geopoints', candidates);
+      componentRef.setInput('focusedGeopointId', 'photo');
+      fixture.detectChanges();
+
+      focusMarkerMock.mockClear();
+
+      const clickHandler = mockMap.on.mock.calls[0][1];
+      clickHandler({ latlng: { lat: 51.505, lng: -0.09 } });
+
+      expect(focusMarkerMock).toHaveBeenCalledWith(
+        photoMarker,
+        [photoMarker, gpsMarker],
+        expect.any(Object),
+      );
+    });
+
+    it('should not move the camera when the focused position moves under an unchanged selection', () => {
+      componentRef.setInput('geopoints', candidates);
+      componentRef.setInput('focusedGeopointId', 'photo');
+      fixture.detectChanges();
+
+      zoomToGeopointMock.mockClear();
+      focusMarkerMock.mockClear();
+
+      // A manual pick follows the taps on the map, so the marker moves while
+      // the selection stays where it is.
+      componentRef.setInput('geopoints', [
+        { ...photoPosition, latitude: 36.75 },
+        gpsPosition,
+      ]);
+      fixture.detectChanges();
+
+      expect(zoomToGeopointMock).not.toHaveBeenCalled();
+      expect(focusMarkerMock).toHaveBeenCalled();
+    });
+
+    it('should fit the markers as before when nothing is focused', () => {
+      componentRef.setInput('geopoints', candidates);
+      componentRef.setInput('gpsPosition', gpsPosition);
+
+      fixture.detectChanges();
+
+      expect(zoomToMarkersMock).toHaveBeenCalled();
+      expect(focusMarkerMock).not.toHaveBeenCalled();
+    });
+
+    it('should leave the markers untouched on geopoint changes when nothing is focused', () => {
+      componentRef.setInput('geopoints', candidates);
+      fixture.detectChanges();
+
+      focusMarkerMock.mockClear();
+
+      componentRef.setInput('geopoints', [photoPosition]);
+      fixture.detectChanges();
+
+      expect(focusMarkerMock).not.toHaveBeenCalled();
+    });
+  });
+
   describe('setGeopointsEffect', () => {
     beforeEach(async () => {
       fixture.detectChanges();

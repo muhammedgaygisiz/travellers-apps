@@ -128,6 +128,20 @@ describe(ReviewThreadComponent.name, () => {
     ]);
   });
 
+  it('keeps the label off the line the reply is typed on', () => {
+    render({ thread: thread() });
+
+    query('reply-to-review')?.click();
+    fixture.detectChanges();
+
+    // The label reads "Reply to {{name}}", so inline it took the width of the
+    // author's name away from the input and left a strip to type in on a phone
+    // (issue #1309). Stacked, the name cannot reach the typing area at all.
+    expect(query('reply-input')?.getAttribute('labelplacement')).toBe(
+      'stacked',
+    );
+  });
+
   it('closes the composer on cancel without submitting', () => {
     const submitted: ReviewReplySubmit[] = [];
     render({ thread: thread() });

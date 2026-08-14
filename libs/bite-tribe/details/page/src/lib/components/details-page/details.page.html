@@ -332,8 +332,10 @@
       } @else {
       <div class="ion-margin-vertical">
         <form [formGroup]="reviewFormGroup">
+          <!-- Stacked to match the reply composer inside the threads (#1309). -->
           <ion-textarea
             label="{{ 'write-review-label' | transloco }}"
+            labelPlacement="stacked"
             formControlName="review"
             fill="outline"
             mode="md"

@@ -5,6 +5,13 @@ import { Link } from 'model';
 import { PATH } from 'utils';
 import { ToastService } from 'toast';
 
+/**
+ * Unreachable in the consumer app: `EditRestaurantContainer` is not exported
+ * from this library's `index.ts` and nothing routes to it, so editing a
+ * restaurant only exists in the business app. `social-media-links-saved` is
+ * therefore only in the business locale file — reviving this surface means
+ * adding that key to the eleven bite-tribe locales as well.
+ */
 @Injectable({
   providedIn: 'root',
 })

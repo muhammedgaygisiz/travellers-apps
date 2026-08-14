@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { CreateBiteTrailService } from '../create-bite-trail.service';
 import { CreateBiteTrailDataAccessService } from 'bite-tribe-business/create-bite-trail-data-access';
-import { NavController, ToastController } from '@ionic/angular/standalone';
+import { NavController } from '@ionic/angular/standalone';
 import { Bite, BiteTrail, PublicUser } from 'model';
+import { ToastService } from 'toast';
 import { signal } from '@angular/core';
 
 jest.mock('bite-tribe-business/create-bite-trail-data-access');
@@ -12,9 +13,6 @@ describe('CreateBiteTrailService', () => {
   let service: CreateBiteTrailService;
   let dataAccessMock: jest.Mocked<CreateBiteTrailDataAccessService>;
   let navControllerMock: { navigateBack: jest.Mock };
-  let toastControllerMock: {
-    create: jest.Mock;
-  };
   let toastMock: { present: jest.Mock };
 
   beforeEach(() => {
@@ -30,9 +28,6 @@ describe('CreateBiteTrailService', () => {
     navControllerMock = { navigateBack: jest.fn() };
 
     toastMock = { present: jest.fn().mockResolvedValue(undefined) };
-    toastControllerMock = {
-      create: jest.fn().mockResolvedValue(toastMock),
-    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -46,8 +41,8 @@ describe('CreateBiteTrailService', () => {
           useValue: navControllerMock,
         },
         {
-          provide: ToastController,
-          useValue: toastControllerMock,
+          provide: ToastService,
+          useValue: toastMock,
         },
       ],
     });
@@ -113,12 +108,10 @@ describe('CreateBiteTrailService', () => {
     it('should show success toast after creating bite trail', async () => {
       await service.submitBiteTrail(trailData);
 
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          color: 'success',
-        }),
-      );
-      expect(toastMock.present).toHaveBeenCalled();
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'bite-trail-created',
+        outcome: 'success',
+      });
     });
 
     it('should show error toast and not navigate when createBiteTrail fails', async () => {
@@ -128,12 +121,10 @@ describe('CreateBiteTrailService', () => {
 
       await service.submitBiteTrail(trailData);
 
-      expect(toastControllerMock.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          color: 'danger',
-        }),
-      );
-      expect(toastMock.present).toHaveBeenCalled();
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
       expect(navControllerMock.navigateBack).not.toHaveBeenCalled();
     });
   });

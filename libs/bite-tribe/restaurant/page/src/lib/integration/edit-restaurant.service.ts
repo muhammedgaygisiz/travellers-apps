@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
-import { NavController, ToastController } from '@ionic/angular/standalone';
+import { NavController } from '@ionic/angular/standalone';
 import { Link } from 'model';
 import { PATH } from 'utils';
+import { ToastService } from 'toast';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +11,7 @@ import { PATH } from 'utils';
 export class EditRestaurantService {
   private readonly dataAccess = inject(RestaurantDataAccessService);
   private readonly navController = inject(NavController);
-  private readonly toastController = inject(ToastController);
+  private readonly toast = inject(ToastService);
 
   restaurant = this.dataAccess.restaurant;
 
@@ -42,7 +43,7 @@ export class EditRestaurantService {
       );
       this.gotoEditMenu(restaurant.id, menuId);
     } catch {
-      await this.showToast('Something went wrong. Please try again.', 'danger');
+      await this.showFailureToast();
     }
   }
 
@@ -53,15 +54,12 @@ export class EditRestaurantService {
     if (restaurant && links) {
       try {
         await this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
-        await this.showToast(
-          'Social media links saved successfully.',
-          'success',
-        );
+        await this.toast.present({
+          messageKey: 'social-media-links-saved',
+          outcome: 'success',
+        });
       } catch {
-        await this.showToast(
-          'Something went wrong. Please try again.',
-          'danger',
-        );
+        await this.showFailureToast();
       }
     }
   }
@@ -78,16 +76,10 @@ export class EditRestaurantService {
     return menuId.split('/').filter(Boolean).pop() ?? menuId;
   }
 
-  private async showToast(
-    message: string,
-    color: 'success' | 'danger',
-  ): Promise<void> {
-    const toast = await this.toastController.create({
-      message,
-      duration: 3000,
-      position: 'bottom',
-      color,
+  private showFailureToast(): Promise<void> {
+    return this.toast.present({
+      messageKey: 'something-went-wrong-please-try-again',
+      outcome: 'failure',
     });
-    await toast.present();
   }
 }

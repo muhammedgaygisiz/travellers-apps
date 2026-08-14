@@ -3,8 +3,6 @@ import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { NavController } from '@ionic/angular/standalone';
-import { ToastController } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
 import type { PageMenuTarget } from 'common/ui/page';
 import type { Bite, LikeClick, PublicUser } from 'model';
 import {
@@ -12,13 +10,12 @@ import {
   getDisplayNameFailureReason,
   type DisplayNameFailureReason,
 } from 'utils';
+import { ToastService } from 'toast';
 import { Location } from '@angular/common';
 import {
   EmailVerificationService,
   type EmailVerificationSurface,
 } from 'bite-tribe/email-verification-data-access';
-
-const TOAST_DURATION_MS = 5000;
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
@@ -28,8 +25,7 @@ export class ProfileService {
   private readonly navController = inject(NavController);
   private readonly location = inject(Location);
   private readonly emailVerification = inject(EmailVerificationService);
-  private readonly toastController = inject(ToastController);
-  private readonly transloco = inject(TranslocoService);
+  private readonly toast = inject(ToastService);
 
   isAuthenticated = this.dataAccess.isAuthenticated;
   myUser = this.dataAccess.myUser;
@@ -113,9 +109,12 @@ export class ProfileService {
       try {
         await this.dataAccess.claimDisplayName(publicUser.displayName);
       } catch (error) {
-        await this.showToast(
-          this.getDisplayNameErrorKey(getDisplayNameFailureReason(error)),
-        );
+        await this.toast.present({
+          messageKey: this.getDisplayNameErrorKey(
+            getDisplayNameFailureReason(error),
+          ),
+          outcome: 'failure',
+        });
 
         return;
       }
@@ -135,22 +134,6 @@ export class ProfileService {
       default:
         return 'display-name-could-not-be-saved';
     }
-  }
-
-  private async showToast(messageKey: string): Promise<void> {
-    const toast = await this.toastController.create({
-      message: this.transloco.translate(messageKey),
-      position: 'bottom',
-      duration: TOAST_DURATION_MS,
-      buttons: [
-        {
-          text: this.transloco.translate('ok'),
-          role: 'confirm',
-        },
-      ],
-    });
-
-    await toast.present();
   }
 
   followButtonClicked(user: PublicUser): void {

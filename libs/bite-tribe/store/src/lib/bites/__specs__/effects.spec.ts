@@ -14,8 +14,7 @@ import { signal, WritableSignal } from '@angular/core';
 import { BucketlistActions } from '../../bucketlists/actions';
 import { PATH } from 'utils';
 import { fromAuth } from 'ta-firestore';
-import { ToastController } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
+import { ToastService } from 'toast';
 import type { Action } from '@ngrx/store';
 
 const assertDeepEqual = (actual: unknown, expected: unknown): void => {
@@ -23,17 +22,8 @@ const assertDeepEqual = (actual: unknown, expected: unknown): void => {
 };
 
 const mockToastPresent = jest.fn().mockResolvedValue(undefined);
-const mockToastOnDidDismiss = jest.fn().mockResolvedValue(undefined);
-const mockToastCreate = jest.fn().mockResolvedValue({
+const MockToastService = {
   present: mockToastPresent,
-  onDidDismiss: mockToastOnDidDismiss,
-});
-const MockToastController = {
-  create: mockToastCreate,
-};
-
-const MockTranslocoService = {
-  translate: jest.fn((key: string): string => key),
 };
 
 const Mock = {
@@ -73,10 +63,7 @@ describe(BiteEffects.name, () => {
   let storeService: BiteTribeStoreService;
 
   beforeEach(() => {
-    mockToastCreate.mockClear();
     mockToastPresent.mockClear();
-    mockToastOnDidDismiss.mockClear();
-    MockTranslocoService.translate.mockClear();
     scheduler = new TestScheduler(assertDeepEqual);
     TestBed.configureTestingModule({
       providers: [
@@ -92,8 +79,7 @@ describe(BiteEffects.name, () => {
         }),
         { provide: BiteTribeApiService, useValue: Mock },
         { provide: BiteTribeStoreService, useValue: Mock },
-        { provide: ToastController, useValue: MockToastController },
-        { provide: TranslocoService, useValue: MockTranslocoService },
+        { provide: ToastService, useValue: MockToastService },
       ],
     });
 
@@ -431,12 +417,10 @@ describe(BiteEffects.name, () => {
           expectObservable(effects.saveEditedBiteToFirestore$);
         });
 
-        expect(mockToastCreate).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: 'bite-updated-successfully',
-            color: 'success',
-          }),
-        );
+        expect(mockToastPresent).toHaveBeenCalledWith({
+          messageKey: 'bite-updated-successfully',
+          outcome: 'success',
+        });
       });
     });
 
@@ -513,12 +497,10 @@ describe(BiteEffects.name, () => {
           expectObservable(effects.deleteBite$);
         });
 
-        expect(mockToastCreate).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: 'bite-deleted-successfully',
-            color: 'success',
-          }),
-        );
+        expect(mockToastPresent).toHaveBeenCalledWith({
+          messageKey: 'bite-deleted-successfully',
+          outcome: 'success',
+        });
       });
     });
 

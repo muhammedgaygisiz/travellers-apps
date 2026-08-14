@@ -39,6 +39,29 @@ Use these adaptive tokens:
 - **A translated action label is what breaks that 90px reserve.** `Abbrechen` measures ~99px in the app's font, so the German header collides where the English one fits, and every locale has to be checked rather than only the one the copy was written in. Modal headers that pair a text action with a title use the `modal-header-title` mixin in `libs/bite-tribe-common/styles/_globals.scss`, which flows the title in the toolbar's row so the gap follows the real button width for any language. The app chrome header in `libs/common/ui/page` is deliberately excluded: its start slot is an icon-only back button that cannot collide, and flowing the title would push it off centre. See GitHub issue #1267.
 - **A square-cornered border inside a rounded, clipped container leaves a gap.** `ion-card` clips its children to its own radius, which cuts a square border's corner arcs away instead of bending them. Give the inner element the same radius. A background fill hides the defect, which is why it usually surfaces only on an empty state. See GitHub issue #1251.
 
+## Toasts
+
+**Every toast goes through `ToastService` in `libs/common/toast`.** No call site builds its own `toastController.create` options; a `no-restricted-imports` rule in `eslint.config.mjs` blocks `ToastController` everywhere except the service itself and its spec.
+
+The service owns the four things the fourteen former call sites disagreed on:
+
+| Decision | Value                                            |
+| -------- | ------------------------------------------------ |
+| Position | `top`, for every toast in both apps              |
+| Colour   | `success` or `danger`, from a required `outcome` |
+| Duration | 5s for a success, 10s for a failure              |
+| Message  | A Transloco key, looked up by the service        |
+
+`outcome` is a required input, so a call site cannot raise an uncoloured toast. That was the actual defect in [issue #1305](https://github.com/muhammedgaygisiz/travellers-apps/issues/1305): only the two Bite paths passed a colour and nothing anywhere passed `danger`, so a failed registration, settings save or bucket-list write rendered in exactly the same grey as a success. The outcome of an action was not encoded visually at all and had to be read out of the message text.
+
+Three details worth knowing before changing it:
+
+- **`top` is a footer decision, not a majority one.** Twelve of the fourteen sites presented at the bottom, but the shared page chrome in `libs/common/ui/page` renders a persistent `ion-footer` carrying the menu entries and the add button, and a bottom toast lands on it. The Bite creation toast also sits better above the full-width photo card.
+- **Failures stay up twice as long, deliberately.** A success confirms something the user just did and only has to be noticed; a failure carries a recovery instruction that has to be read, and it arrives when the user has already moved on. Both durations derive from one constant.
+- **`present()` never rejects and always settles.** Every overlay call is bounded by a 2s timeout and every failure swallowed, so a flow can `await` a toast without the toast becoming what that flow depends on. This is the [[Current State - Known Issues]] #1219 guarantee, held once in the service instead of separately at each caller. A toast still on screen is dismissed before the next one, because Ionic stacks toasts at the same position.
+
+A toast that leads somewhere passes an `action` instead, which replaces the dismiss button — the bucket-list save is the one example.
+
 ## Desktop Layout
 
 `PageChromeConfig.desktopLayout` opts a page into the desktop layout in `libs/common/ui/page`. It is off by default, so pages that do not set it are unaffected at every width.

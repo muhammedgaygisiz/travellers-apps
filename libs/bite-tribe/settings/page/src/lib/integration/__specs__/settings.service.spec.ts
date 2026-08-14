@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { NavController } from '@ionic/angular';
-import { ToastController } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
+import { ToastService } from 'toast';
 import { SettingsDataAccessService } from 'bite-tribe/settings-data-access';
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
 import type { PushInstallation } from 'push-notifications';
@@ -20,7 +19,6 @@ describe(SettingsService.name, () => {
   let openPushSettings: jest.Mock;
   let saveSettings: jest.Mock;
   let navigateBack: jest.Mock;
-  let createToast: jest.Mock;
   let presentToast: jest.Mock;
 
   const installation = (
@@ -48,7 +46,6 @@ describe(SettingsService.name, () => {
     saveSettings = jest.fn().mockResolvedValue(undefined);
     navigateBack = jest.fn();
     presentToast = jest.fn().mockResolvedValue(undefined);
-    createToast = jest.fn().mockResolvedValue({ present: presentToast });
 
     TestBed.configureTestingModule({
       providers: [
@@ -76,11 +73,7 @@ describe(SettingsService.name, () => {
           },
         },
         { provide: NavController, useValue: { navigateBack } },
-        { provide: ToastController, useValue: { create: createToast } },
-        {
-          provide: TranslocoService,
-          useValue: { translate: jest.fn((key: string) => key) },
-        },
+        { provide: ToastService, useValue: { present: presentToast } },
       ],
     });
 
@@ -212,7 +205,7 @@ describe(SettingsService.name, () => {
       // per row would cover the rows below the one just changed.
       await service.setPushInstallationEnabled('token-1', false);
 
-      expect(createToast).not.toHaveBeenCalled();
+      expect(presentToast).not.toHaveBeenCalled();
     });
 
     it('explains the restore when the write fails', async () => {
@@ -222,9 +215,10 @@ describe(SettingsService.name, () => {
 
       await service.setPushInstallationEnabled('token-1', false);
 
-      expect(createToast).toHaveBeenCalledWith(
-        expect.objectContaining({ message: 'notifications-change-failed' }),
-      );
+      expect(presentToast).toHaveBeenCalledWith({
+        messageKey: 'notifications-change-failed',
+        outcome: 'failure',
+      });
       expect(presentToast).toHaveBeenCalledTimes(1);
     });
 
@@ -254,9 +248,10 @@ describe(SettingsService.name, () => {
       // other feedback — and that says something happened, not that it saved.
       await service.saveSettings(settings);
 
-      expect(createToast).toHaveBeenCalledWith(
-        expect.objectContaining({ message: 'preferences-saved' }),
-      );
+      expect(presentToast).toHaveBeenCalledWith({
+        messageKey: 'preferences-saved',
+        outcome: 'success',
+      });
       expect(navigateBack).toHaveBeenCalledWith(['home']);
     });
 
@@ -264,7 +259,7 @@ describe(SettingsService.name, () => {
       saveSettings.mockRejectedValue(new Error('boom'));
 
       await expect(service.saveSettings(settings)).rejects.toThrow('boom');
-      expect(createToast).not.toHaveBeenCalled();
+      expect(presentToast).not.toHaveBeenCalled();
       expect(navigateBack).not.toHaveBeenCalled();
     });
   });

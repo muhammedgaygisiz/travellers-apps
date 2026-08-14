@@ -6,18 +6,17 @@ import { catchError, from, map, of, switchMap } from 'rxjs';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { AuthService } from 'ta-firestore';
 import { shouldLoadBucketlists } from './utils/should-load-bucketlists';
-import { NavController, ToastController } from '@ionic/angular/standalone';
+import { NavController } from '@ionic/angular/standalone';
 import { PATH } from 'utils';
-import { TranslocoService } from '@jsverse/transloco';
+import { ToastService } from 'toast';
 
 @Injectable()
 export class BucketListEffect {
   private readonly actions$ = inject(Actions);
   private readonly api = inject(BiteTribeApiService);
   private readonly authService = inject(AuthService);
-  private readonly toastController = inject(ToastController);
+  private readonly toast = inject(ToastService);
   private readonly navController = inject(NavController);
-  private readonly transloco = inject(TranslocoService);
 
   loadMyBucketlists$ = createEffect(() => {
     return this.actions$.pipe(
@@ -73,12 +72,18 @@ export class BucketListEffect {
       switchMap((params) =>
         from(this.api.createBucketListAndSaveBiteIdToBucketList(params)).pipe(
           map(() => {
-            void this.showToast('bucket-list-created-with-bite');
+            void this.toast.present({
+              messageKey: 'bucket-list-created-with-bite',
+              outcome: 'success',
+            });
             return BucketlistActions.createdBucketlistAndSavedBiteToIt();
           }),
           catchError((error) => {
             console.error('Error creating bucket list for bite:', error);
-            void this.showToast('bucket-list-create-with-bite-failed');
+            void this.toast.present({
+              messageKey: 'bucket-list-create-with-bite-failed',
+              outcome: 'failure',
+            });
             return of(
               BucketlistActions.createBucketlistAndSaveBiteToItFailed(),
             );
@@ -129,9 +134,10 @@ export class BucketListEffect {
       switchMap(({ bucketlistId, name }) =>
         from(this.api.updateBucketlistName(bucketlistId, name)).pipe(
           map(() => {
-            this.showSuccessfulChangeToast(
-              'Bucket list name updated successfully',
-            );
+            void this.toast.present({
+              messageKey: 'bucket-list-name-updated',
+              outcome: 'success',
+            });
             return BucketlistActions.updatedBucketlistName();
           }),
         ),
@@ -163,7 +169,7 @@ export class BucketListEffect {
       switchMap((params) =>
         from(this.api.createBucketListFromBiteTrail(params)).pipe(
           map(() => {
-            this.showBiteTrailSavedAsBucketListToast();
+            void this.showBiteTrailSavedAsBucketListToast();
             return BucketlistActions.savedBiteTrailAsBucketList();
           }),
         ),
@@ -171,51 +177,20 @@ export class BucketListEffect {
     );
   });
 
-  private async showBiteTrailSavedAsBucketListToast(): Promise<void> {
-    const toast = await this.toastController.create({
-      message: this.transloco.translate('bitetrail-saved-as-bucket-list'),
-      position: 'bottom',
-      buttons: [
-        {
-          text: this.transloco.translate('go-to-bucket-lists'),
-          handler: (): void => {
-            void this.navController.navigateForward([PATH.MY_BUCKETLISTS]);
-          },
+  /**
+   * The save is confirmed with the one thing the user is likely to want next,
+   * so the toast's button replaces the plain dismiss.
+   */
+  private showBiteTrailSavedAsBucketListToast(): Promise<void> {
+    return this.toast.present({
+      messageKey: 'bitetrail-saved-as-bucket-list',
+      outcome: 'success',
+      action: {
+        labelKey: 'go-to-bucket-lists',
+        handler: (): void => {
+          void this.navController.navigateForward([PATH.MY_BUCKETLISTS]);
         },
-      ],
+      },
     });
-
-    if (!toast) {
-      return;
-    }
-
-    await toast.present();
-  }
-
-  private async showToast(translationKey: string): Promise<void> {
-    const toast = await this.toastController.create({
-      message: this.transloco.translate(translationKey),
-      duration: 3000,
-      position: 'bottom',
-    });
-
-    await toast.present();
-  }
-
-  private async showSuccessfulChangeToast(
-    bucketlistNameUpdated: string,
-  ): Promise<void> {
-    const toast = await this.toastController.create({
-      message: bucketlistNameUpdated,
-      position: 'bottom',
-      buttons: [
-        {
-          text: 'OK',
-          role: 'confirm',
-        },
-      ],
-    });
-
-    await toast.present();
   }
 }

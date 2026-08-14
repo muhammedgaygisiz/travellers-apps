@@ -1,13 +1,10 @@
 import { Location } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
 import { BiteService } from '../bite.service';
-import {
-  LoadingController,
-  NavController,
-  ToastController,
-} from '@ionic/angular/standalone';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { TranslocoService } from '@jsverse/transloco';
+import { ToastService } from 'toast';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 const Mock = {
@@ -32,9 +29,7 @@ const LoadingMock = {
 };
 
 const ToastMock = {
-  create: jest.fn().mockResolvedValue({
-    present: jest.fn().mockResolvedValue(undefined),
-  }),
+  present: jest.fn().mockResolvedValue(undefined),
 };
 
 const TranslocoMock = {
@@ -56,7 +51,7 @@ describe('BiteService', () => {
         { provide: NavController, useValue: Mock },
         { provide: Location, useValue: Mock },
         { provide: LoadingController, useValue: LoadingMock },
-        { provide: ToastController, useValue: ToastMock },
+        { provide: ToastService, useValue: ToastMock },
         { provide: TranslocoService, useValue: TranslocoMock },
         { provide: AnalyticsService, useValue: AnalyticsMock },
       ],
@@ -130,9 +125,10 @@ describe('BiteService', () => {
       const newBite = { id: '123', name: 'Test Bite' };
       await service.submitNewBiteAndAddAnother(newBite);
 
-      expect(TranslocoMock.translate).toHaveBeenCalledWith(
-        'bite-created-successfully',
-      );
+      expect(ToastMock.present).toHaveBeenCalledWith({
+        messageKey: 'bite-created-successfully',
+        outcome: 'success',
+      });
     });
 
     it('should log the bite_created analytics event', async () => {

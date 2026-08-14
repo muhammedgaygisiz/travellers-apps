@@ -1,15 +1,14 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { RestaurantDataAccessService } from 'bite-tribe-business/restaurant-data-access';
 import { Bite, Geopoint, GooglePlace, PlaceDetails, Restaurant } from 'model';
-import { NavController, ToastController } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
+import { NavController } from '@ionic/angular/standalone';
+import { ToastService } from 'toast';
 
 @Injectable({ providedIn: 'root' })
 export class NewRestaurantService {
   private readonly dataAccess = inject(RestaurantDataAccessService);
   private readonly navController = inject(NavController);
-  private readonly toastController = inject(ToastController);
-  private readonly transloco = inject(TranslocoService);
+  private readonly toast = inject(ToastService);
 
   restaurantToCreate = this.dataAccess.restaurantToCreate;
 
@@ -94,13 +93,10 @@ export class NewRestaurantService {
     }
   }
 
-  private async showErrorToast(): Promise<void> {
-    const toast = await this.toastController.create({
-      message: this.transloco.translate('prefill-error'),
-      duration: 3000,
-      position: 'bottom',
-      color: 'danger',
+  private showErrorToast(): Promise<void> {
+    return this.toast.present({
+      messageKey: 'prefill-error',
+      outcome: 'failure',
     });
-    await toast.present();
   }
 }

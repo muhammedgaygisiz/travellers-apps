@@ -145,6 +145,27 @@ export default [
                 "Import Ionic controllers from '@ionic/angular/standalone'. The '@ionic/angular' versions never define their custom element, so create() never resolves and the caller hangs forever (issue #1219).",
               allowTypeImports: true,
             },
+            // Toasts go through `ToastService` in `libs/common/toast`, which
+            // owns position, colour, duration and the translation lookup.
+            // Fourteen call sites used to build their own `create()` options
+            // and disagreed on all four; the only two that passed a colour were
+            // the Bite paths, so a failed registration, settings save or
+            // bucket-list write rendered in the same grey as a success and had
+            // to be read to be understood. Requiring the service is what keeps
+            // a new call site from re-introducing an uncoloured toast at
+            // whichever position its library happens to pick (issue #1305).
+            //
+            // `toast.service.ts` is the one file that has to reach the
+            // controller and disables this rule inline. Specs are deliberately
+            // not exempt: a spec that provides a `ToastController` mock is
+            // asserting options no call site builds any more.
+            {
+              name: '@ionic/angular/standalone',
+              importNames: ['ToastController'],
+              message:
+                "Raise toasts through `ToastService` from 'toast'. It owns position, colour, duration and the translation lookup, so every toast encodes its outcome visually (issue #1305).",
+              allowTypeImports: false,
+            },
           ],
         },
       ],

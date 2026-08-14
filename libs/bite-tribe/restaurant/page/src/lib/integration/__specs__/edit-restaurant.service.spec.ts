@@ -1,8 +1,9 @@
 import { signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NavController, ToastController } from '@ionic/angular/standalone';
+import { NavController } from '@ionic/angular/standalone';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { Bite, Restaurant } from 'model';
+import { ToastService } from 'toast';
 import { EditRestaurantService } from '../edit-restaurant.service';
 
 const mockBite: Bite = {
@@ -42,23 +43,21 @@ const createNavControllerMock = (): Partial<NavController> => ({
   navigateForward: jest.fn().mockResolvedValue(true),
 });
 
-const createMockToastController = (): Partial<ToastController> => ({
-  create: jest.fn().mockResolvedValue({
-    present: jest.fn().mockResolvedValue(undefined),
-  }),
+const createMockToastService = (): { present: jest.Mock } => ({
+  present: jest.fn().mockResolvedValue(undefined),
 });
 
 describe(EditRestaurantService.name, () => {
   let service: EditRestaurantService;
   let mockDataAccessService: MockRestaurantDataAccess;
   let mockNavController: Partial<NavController>;
-  let mockToastController: Partial<ToastController>;
+  let mockToast: { present: jest.Mock };
 
   beforeEach(() => {
     TestBed.resetTestingModule();
     mockDataAccessService = createMockDataAccess();
     mockNavController = createNavControllerMock();
-    mockToastController = createMockToastController();
+    mockToast = createMockToastService();
 
     TestBed.configureTestingModule({
       providers: [
@@ -72,8 +71,8 @@ describe(EditRestaurantService.name, () => {
           useValue: mockNavController,
         },
         {
-          provide: ToastController,
-          useValue: mockToastController,
+          provide: ToastService,
+          useValue: mockToast,
         },
       ],
     });
@@ -152,13 +151,10 @@ describe(EditRestaurantService.name, () => {
 
       await service.createMenu();
 
-      expect(mockToastController.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'Something went wrong. Please try again.',
-          color: 'danger',
-          duration: 3000,
-        }),
-      );
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
     });
 
     it('should do nothing if restaurant is not set', async () => {
@@ -181,13 +177,10 @@ describe(EditRestaurantService.name, () => {
         mockRestaurant.id,
         links,
       );
-      expect(mockToastController.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'Social media links saved successfully.',
-          color: 'success',
-          duration: 3000,
-        }),
-      );
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'social-media-links-saved',
+        outcome: 'success',
+      });
     });
 
     it('should show error toast if data access throws', async () => {
@@ -196,13 +189,10 @@ describe(EditRestaurantService.name, () => {
       ).mockRejectedValueOnce(new Error('Network error'));
       const links = [{ url: 'https://example.com', network: 'facebook' }];
       await service.submitSocialMediaLinks({ links });
-      expect(mockToastController.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'Something went wrong. Please try again.',
-          color: 'danger',
-          duration: 3000,
-        }),
-      );
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
     });
   });
 });

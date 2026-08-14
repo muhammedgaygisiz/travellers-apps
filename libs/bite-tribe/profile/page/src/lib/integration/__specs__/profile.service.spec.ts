@@ -5,8 +5,7 @@ import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { NavController } from '@ionic/angular/standalone';
-import { ToastController } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
+import { ToastService } from 'toast';
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
 import { Bite, PublicUser } from 'model';
 
@@ -18,13 +17,7 @@ const emailVerificationMock = {
 };
 
 const toastPresent = jest.fn().mockResolvedValue(undefined);
-const toastControllerMock = {
-  create: jest.fn().mockResolvedValue({ present: toastPresent }),
-};
-
-const translocoMock = {
-  translate: jest.fn((key: string) => key),
-};
+const toastServiceMock = { present: toastPresent };
 
 class Mock {
   logout = jest.fn();
@@ -58,7 +51,6 @@ describe(ProfileService.name, () => {
     emailVerificationMock.promptVisible.mockReturnValue(false);
     emailVerificationMock.trackPromptShown.mockReset();
     emailVerificationMock.resend.mockReset().mockResolvedValue(undefined);
-    toastControllerMock.create.mockClear();
     toastPresent.mockClear();
 
     TestBed.configureTestingModule({
@@ -75,8 +67,7 @@ describe(ProfileService.name, () => {
         NavController,
         { provide: ProfileDataAccessService, useClass: Mock },
         { provide: EmailVerificationService, useValue: emailVerificationMock },
-        { provide: ToastController, useValue: toastControllerMock },
-        { provide: TranslocoService, useValue: translocoMock },
+        { provide: ToastService, useValue: toastServiceMock },
         provideMockStore(),
       ],
     }).compileComponents();
@@ -242,11 +233,10 @@ describe(ProfileService.name, () => {
       await service.saveProfile(publicUser);
 
       expect(savePublicProfileSpy).not.toHaveBeenCalled();
-      expect(translocoMock.translate).toHaveBeenCalledWith(
-        'display-name-already-taken',
-      );
-      expect(toastControllerMock.create).toHaveBeenCalled();
-      expect(toastPresent).toHaveBeenCalled();
+      expect(toastPresent).toHaveBeenCalledWith({
+        messageKey: 'display-name-already-taken',
+        outcome: 'failure',
+      });
     });
   });
 

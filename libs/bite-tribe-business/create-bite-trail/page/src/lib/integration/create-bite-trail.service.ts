@@ -1,13 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { CreateBiteTrailDataAccessService } from 'bite-tribe-business/create-bite-trail-data-access';
-import { NavController, ToastController } from '@ionic/angular/standalone';
+import { NavController } from '@ionic/angular/standalone';
 import type { BiteTrail } from 'model';
+import { ToastService } from 'toast';
 
 @Injectable({ providedIn: 'root' })
 export class CreateBiteTrailService {
   private readonly dataAccess = inject(CreateBiteTrailDataAccessService);
   private readonly navController = inject(NavController);
-  private readonly toastController = inject(ToastController);
+  private readonly toast = inject(ToastService);
 
   selectedBites = this.dataAccess.selectedBites;
   employees = this.dataAccess.employees;
@@ -28,23 +29,16 @@ export class CreateBiteTrailService {
   ): Promise<void> {
     try {
       await this.dataAccess.createBiteTrail(trailData);
-      await this.showToast('Bite trail created successfully.', 'success');
+      await this.toast.present({
+        messageKey: 'bite-trail-created',
+        outcome: 'success',
+      });
       void this.navController.navigateBack([]);
     } catch {
-      await this.showToast('Something went wrong. Please try again.', 'danger');
+      await this.toast.present({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
     }
-  }
-
-  private async showToast(
-    message: string,
-    color: 'success' | 'danger',
-  ): Promise<void> {
-    const toast = await this.toastController.create({
-      message,
-      duration: 3000,
-      position: 'bottom',
-      color,
-    });
-    await toast.present();
   }
 }

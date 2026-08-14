@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { NewRestaurantService } from '../new-restaurant.service';
 import { RestaurantDataAccessService } from 'bite-tribe-business/restaurant-data-access';
-import { NavController, ToastController } from '@ionic/angular/standalone';
+import { NavController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { Bite, GooglePlace, PlaceDetails, Restaurant } from 'model';
 import { TranslocoService } from '@jsverse/transloco';
+import { ToastService } from 'toast';
 import { of } from 'rxjs';
 
 jest.mock('bite-tribe-business/restaurant-data-access');
@@ -24,7 +25,6 @@ describe('NewRestaurantService', () => {
     navigateBack: jest.Mock;
   };
   let toastPresent: jest.Mock;
-  let toastControllerMock: { create: jest.Mock };
 
   beforeEach(() => {
     dataAccessMock = {
@@ -45,16 +45,13 @@ describe('NewRestaurantService', () => {
     };
 
     toastPresent = jest.fn().mockResolvedValue(undefined);
-    toastControllerMock = {
-      create: jest.fn().mockResolvedValue({ present: toastPresent }),
-    };
 
     TestBed.configureTestingModule({
       providers: [
         NewRestaurantService,
         { provide: RestaurantDataAccessService, useValue: dataAccessMock },
         { provide: NavController, useValue: navControllerMock },
-        { provide: ToastController, useValue: toastControllerMock },
+        { provide: ToastService, useValue: { present: toastPresent } },
         { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
@@ -163,7 +160,7 @@ describe('NewRestaurantService', () => {
       expect(dataAccessMock.getPlaceDetails).toHaveBeenCalledWith('p1');
       expect(service.placeDetails()).toEqual(details);
       expect(service.placeDetailsLoading()).toBe(false);
-      expect(toastControllerMock.create).not.toHaveBeenCalled();
+      expect(toastPresent).not.toHaveBeenCalled();
     });
 
     it('shows an error toast and leaves details unset when nothing is returned', async () => {
@@ -172,8 +169,10 @@ describe('NewRestaurantService', () => {
       await service.loadPlaceDetails('p1');
 
       expect(service.placeDetails()).toBeUndefined();
-      expect(toastControllerMock.create).toHaveBeenCalled();
-      expect(toastPresent).toHaveBeenCalled();
+      expect(toastPresent).toHaveBeenCalledWith({
+        messageKey: 'prefill-error',
+        outcome: 'failure',
+      });
     });
 
     it('shows an error toast when the lookup throws', async () => {
@@ -182,7 +181,10 @@ describe('NewRestaurantService', () => {
       await service.loadPlaceDetails('p1');
 
       expect(service.placeDetails()).toBeUndefined();
-      expect(toastControllerMock.create).toHaveBeenCalled();
+      expect(toastPresent).toHaveBeenCalledWith({
+        messageKey: 'prefill-error',
+        outcome: 'failure',
+      });
       expect(service.placeDetailsLoading()).toBe(false);
     });
   });

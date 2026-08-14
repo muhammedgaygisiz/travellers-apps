@@ -1,0 +1,21 @@
+{
+  "name": "toast",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/common/toast/src",
+  "prefix": "travellers-apps",
+  "tags": ["scope:common", "framework:ionic"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/common/toast/jest.config.ts",
+        "tsConfig": "libs/common/toast/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

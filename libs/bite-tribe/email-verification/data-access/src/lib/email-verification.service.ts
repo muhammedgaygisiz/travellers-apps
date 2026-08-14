@@ -3,25 +3,21 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
-import { ToastController } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
 import {
   getEmailVerificationFailureReason,
   isEmailVerificationPromptVisible,
   type EmailVerificationFailureReason,
 } from 'utils';
+import { ToastService } from 'toast';
 
 export type EmailVerificationSurface = 'home' | 'settings' | 'profile_edit';
-
-const TOAST_DURATION_MS = 5000;
 
 @Injectable({ providedIn: 'root' })
 export class EmailVerificationService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly api = inject(BiteTribeApiService);
   private readonly analytics = inject(AnalyticsService);
-  private readonly toastController = inject(ToastController);
-  private readonly transloco = inject(TranslocoService);
+  private readonly toast = inject(ToastService);
 
   private readonly publicUser = toSignal(this.storeService.publicUser$);
   private readonly resendRunningState = signal(false);
@@ -60,14 +56,20 @@ export class EmailVerificationService {
       this.analytics.logEvent(AnalyticsEvent.EmailVerificationResendSucceeded, {
         surface,
       });
-      await this.showToast('verification-email-sent-check-your-inbox');
+      await this.toast.present({
+        messageKey: 'verification-email-sent-check-your-inbox',
+        outcome: 'success',
+      });
     } catch (error) {
       const reason = getEmailVerificationFailureReason(error);
       this.analytics.logEvent(AnalyticsEvent.EmailVerificationResendFailed, {
         surface,
         reason,
       });
-      await this.showToast(this.getResendErrorKey(reason));
+      await this.toast.present({
+        messageKey: this.getResendErrorKey(reason),
+        outcome: 'failure',
+      });
     } finally {
       // Released on every outcome so a recoverable failure stays retryable.
       this.resendRunningState.set(false);
@@ -85,21 +87,5 @@ export class EmailVerificationService {
       default:
         return 'verification-email-could-not-be-sent';
     }
-  }
-
-  private async showToast(messageKey: string): Promise<void> {
-    const toast = await this.toastController.create({
-      message: this.transloco.translate(messageKey),
-      position: 'bottom',
-      duration: TOAST_DURATION_MS,
-      buttons: [
-        {
-          text: this.transloco.translate('ok'),
-          role: 'confirm',
-        },
-      ],
-    });
-
-    await toast.present();
   }
 }

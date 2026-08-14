@@ -71,13 +71,31 @@ export class MapComponent implements OnDestroy {
    */
   clusterMarkers = input(true, { transform: booleanAttribute });
 
+  /**
+   * Id of the geopoint the host has selected. The map moves to it and grows its
+   * marker, so a selection made outside the map - a row in a list - leaves the
+   * map in the same state as clicking that marker does. Maps that leave it
+   * unset keep the marker-click-only focus they always had.
+   */
+  focusedGeopointId = input<string | null | undefined>();
+
   private readonly createTileLayer = inject(TILE_LAYER_FACTORY);
   private map!: L.Map;
   private markerClusterGroup: L.MarkerClusterGroup = L.markerClusterGroup();
   private markers: L.Marker[] = [];
   private hasAutoFitted = false;
+  private centeredGeopointId?: string;
   private resizeObserver?: ResizeObserver;
   private readonly mapChild = viewChild<ElementRef>('map');
+
+  /** The selected geopoint, resolved from {@link focusedGeopointId}. */
+  private readonly focusedGeopoint = computed(() => {
+    const focusedId = this.focusedGeopointId();
+
+    return focusedId
+      ? this.cleanUpPoints().find((geopoint) => geopoint.id === focusedId)
+      : undefined;
+  });
 
   isReadonly = computed(() => {
     const positionsList = this.geopoints();
@@ -100,7 +118,15 @@ export class MapComponent implements OnDestroy {
 
     if (geopoints && geopoints.length > 0) {
       this.updateMarkers(geopoints);
-      zoomToMarkers(gpsPosition, geopoints, this.markers, this.map);
+
+      // A focused geopoint owns the camera and `focusedGeopointEffect` moves it
+      // there. The automatic fit ends on a timer and would otherwise win, which
+      // is how the source modal opened on the device position while a candidate
+      // 1500 km away was selected (issue #1306).
+      if (!this.focusedGeopoint()) {
+        zoomToMarkers(gpsPosition, geopoints, this.markers, this.map);
+      }
+
       this.hasAutoFitted = true;
     } else if (gpsPosition) {
       zoomToGpsOrDefault(gpsPosition, this.markers, geopoints, this.map);
@@ -133,6 +159,40 @@ export class MapComponent implements OnDestroy {
 
     addGpsMarker(gpsPosition, this.map);
   });
+
+  /**
+   * Moves the camera to the focused geopoint and grows its marker. Registered
+   * after `createMapEffect` so the map and its markers already exist, and it
+   * depends on the geopoints because rebuilt markers come back unfocused.
+   */
+  focusedGeopointEffect = afterRenderEffect(() => {
+    const focusedGeopoint = this.focusedGeopoint();
+    const focusedId = this.focusedGeopointId();
+
+    // Maps that do not drive a selection keep their own focus handling: the
+    // marker click focuses there, and repainting the icons would undo it.
+    if (!this.map || !focusedId) {
+      return;
+    }
+
+    focusMarker(this.findFocusedMarker(), this.markers, this.map);
+
+    // Only a change of selection moves the camera. A focused position that
+    // moves under an unchanged selection - the manual pick follows the taps on
+    // the map - must leave the view where the user put it.
+    if (focusedGeopoint && focusedId !== this.centeredGeopointId) {
+      this.centeredGeopointId = focusedId;
+      zoomToGeopoint(focusedGeopoint, this.map);
+    }
+  });
+
+  private findFocusedMarker(): L.Marker | undefined {
+    const focusedId = this.focusedGeopointId();
+
+    return focusedId
+      ? this.markers.find((marker) => marker.options.title === focusedId)
+      : undefined;
+  }
 
   private cleanUpPoints(): Geopoint[] {
     return (this.geopoints() || []).filter((point) => !!point);
@@ -175,6 +235,12 @@ export class MapComponent implements OnDestroy {
     // updates (e.g. a new bite arriving via the live stream) must leave the
     // camera untouched so the user keeps their current pan/zoom.
     if (this.hasAutoFitted && !this.refitOnGeopointChanges()) {
+      return;
+    }
+
+    // The focused geopoint owns the camera, see `createMapEffect`.
+    if (this.focusedGeopoint()) {
+      this.hasAutoFitted = true;
       return;
     }
 
@@ -250,7 +316,10 @@ export class MapComponent implements OnDestroy {
         longitude: e.latlng.lng,
       };
 
-      focusMarker(undefined, this.markers, this.map);
+      // A host-driven focus survives a background tap: the selection lives
+      // outside the map, so the map must not silently drop its mark. Without
+      // `focusedGeopointId` this clears the focus exactly as it always did.
+      focusMarker(this.findFocusedMarker(), this.markers, this.map);
       this.clickOnMarker.emit(undefined);
 
       if (!this.isReadonly()) {

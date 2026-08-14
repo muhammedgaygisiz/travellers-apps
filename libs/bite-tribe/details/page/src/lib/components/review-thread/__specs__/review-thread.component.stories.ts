@@ -141,3 +141,31 @@ export const ReadOnly: Story = {
     canReply: false,
   },
 };
+
+/**
+ * The composer open on the narrowest phone the app is tested on, addressed to
+ * the longest name a story carries.
+ *
+ * The label is `Reply to {{name}}`, so it grows with the name. Rendered inline
+ * it took the whole line and left a strip to type in on an iPhone 12 mini
+ * (issue #1309); stacked, the length of the name cannot reach the input.
+ */
+export const ComposerOpen: Story = {
+  args: {
+    ...RootOnly.args,
+    thread: thread([
+      reply(
+        'reply-1',
+        'Aleksandra Kowalczyk-Nowak',
+        JONAS,
+        'Which branch, the one by the canal?',
+        HOUR_MS,
+      ),
+    ]),
+  },
+  play: ({ canvasElement }) => {
+    canvasElement
+      .querySelector<HTMLElement>('[data-testid="reply-to-reply"]')
+      ?.click();
+  },
+};

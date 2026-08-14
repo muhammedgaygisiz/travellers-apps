@@ -93,12 +93,19 @@
 
     @if (composerOpen()) {
       <form class="reply-composer" [formGroup]="replyForm">
+        <!--
+          The label sits above the control, not inline: "Reply to {{name}}" is
+          as long as the name is, and inline it took the whole line on a phone
+          and left a strip to type in (issue #1309). Stacked also keeps the
+          reply box the same shape as the review composer it sits under.
+        -->
         <ion-textarea
           label="{{ 'reply-to' | transloco: { name: answeringAuthor() } }}"
+          labelPlacement="stacked"
           formControlName="review"
           fill="outline"
           mode="md"
-          rows="2"
+          rows="3"
           data-testid="reply-input"
         />
 

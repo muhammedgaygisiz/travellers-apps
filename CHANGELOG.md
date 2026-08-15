@@ -1,5 +1,29 @@
 # Changelog
 
+## build-94 (2026-08-15)
+
+<!-- changelog-start-rev: a2753b18 -->
+<!-- changelog-end-rev: 4fdf021d -->
+
+### Bug Fixes
+
+- profile bite count is state after creating a bite until app restarts (#1322) (4fdf021d)
+- reply field has almost no room to type (#1321) (49c6049e)
+- position source modal never shows the position being selected (#1320) (82160afa)
+- not closing alert after back click (#1315) (eeb0c3d8)
+- fix reading version from package.json (#1314) (23989baa)
+- use bitetribes display name instead of auth users (#1312) (8f5419ea)
+
+### Refactoring
+
+- toasts disagree on position and never signal failure (#1316) (fd545fa9)
+- split restaurant data-access by app (#1317) (#1319) (720f80f7)
+
+### Chores
+
+- test run 6 (#1311) (a76a78dc)
+- prepare build 1.0.1-93 release (#1301) (1358c5cf)
+
 ## build-93 (2026-08-10)
 
 <!-- changelog-start-rev: ac217b99 -->

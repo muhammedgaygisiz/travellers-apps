@@ -10,10 +10,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
     <bucketlists-page
       class="ion-page"
       [bucketlists]="service.bucketlists()"
-      [sorting]="service.sorting()"
       (gotoBucketlistDetails)="service.gotoBucketlistDetails($event)"
       (newList)="service.createAndSaveToBucketList($event)"
-      (sortingChange)="service.sortingChange($event)"
       (editBucketlist)="service.gotoEditBucketlist($event)"
       (deleteBucketlist)="service.deleteBucketlist($event)"
       (rateBucketlist)="service.gotoRateBucketlist($event)"

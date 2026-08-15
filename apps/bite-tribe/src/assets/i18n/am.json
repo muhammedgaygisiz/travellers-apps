@@ -513,5 +513,8 @@
   "no-bites-found-be-the-first": "ምንም Bites አልተገኙም። የመጀመሪያው ይሁኑ።",
   "no-bites-match-search": "ከ«{{term}}» ጋር የሚዛመድ Bites የለም።",
   "clear-search": "ፍለጋን አጽዳ",
-  "search-bites-or-places": "Bites ወይም ቦታዎችን ይፈልጉ..."
+  "search-bites-or-places": "Bites ወይም ቦታዎችን ይፈልጉ...",
+  "search-bucket-lists": "ዝርዝሮችን ይፈልጉ...",
+  "no-bucket-lists-match-search": "ከ«{{term}}» ጋር የሚዛመድ ዝርዝር የለም።",
+  "no-bucket-lists-yet-create-one": "እስካሁን ዝርዝሮች የሉም። የመጀመሪያዎን ይፍጠሩ።"
 }

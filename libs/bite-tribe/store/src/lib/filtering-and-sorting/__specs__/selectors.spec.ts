@@ -127,35 +127,6 @@ describe('Filtering and Sorting Selectors', () => {
     });
   });
 
-  describe('bucketlistSorting', () => {
-    it('should return the bucketlists sorting method', () => {
-      const stateWithBucketlistSorting: FilteringAndSortingSlice = {
-        ...mockState,
-        sorting: { bucketlists: 'createdAt' },
-      };
-      const result = fromSelectors.bucketlistSorting.projector(
-        stateWithBucketlistSorting,
-      );
-      expect(result).toBe('createdAt');
-    });
-
-    it('should return "name" when bucketlists sorting is not set', () => {
-      const stateWithoutSorting = { ...mockState, sorting: undefined };
-      const result =
-        fromSelectors.bucketlistSorting.projector(stateWithoutSorting);
-      expect(result).toBe('name');
-    });
-
-    it('should return name when slice is undefined', () => {
-      const result = fromSelectors.bucketlistSorting.projector(
-        undefined as unknown as Parameters<
-          typeof fromSelectors.bucketlistSorting.projector
-        >[0],
-      );
-      expect(result).toBe('name');
-    });
-  });
-
   describe('restaurantBitesSorting', () => {
     it('should return the restaurant bites sorting method', () => {
       const stateWithRestaurantBitesSorting: FilteringAndSortingSlice = {

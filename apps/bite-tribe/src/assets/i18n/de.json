@@ -513,5 +513,8 @@
   "no-bites-found-be-the-first": "Keine Bites gefunden. Sei der Erste.",
   "no-bites-match-search": "Keine Bites passen zu „{{term}}“.",
   "clear-search": "Suche löschen",
-  "search-bites-or-places": "Bites oder Orte suchen ..."
+  "search-bites-or-places": "Bites oder Orte suchen ...",
+  "search-bucket-lists": "Bucket-Listen suchen ...",
+  "no-bucket-lists-match-search": "Keine Bucket-Listen passen zu „{{term}}“.",
+  "no-bucket-lists-yet-create-one": "Noch keine Bucket-Listen. Erstelle deine erste."
 }

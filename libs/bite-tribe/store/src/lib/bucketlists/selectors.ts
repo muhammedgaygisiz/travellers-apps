@@ -4,8 +4,7 @@ import { adapter } from './adapter';
 import { EntityState } from '@ngrx/entity';
 import type { Bucketlist } from 'model';
 import { bucketlistId } from '../router/selectors';
-import { bucketlistSorting } from '../filtering-and-sorting/selectors';
-import { sortByCriteria } from './utils/sort-by-criteria';
+import { sortBucketlistsByName } from './utils/sort-bucketlists-by-name';
 
 const slice = createFeatureSelector<EntityState<Bucketlist>>(key);
 
@@ -24,8 +23,11 @@ export const selectedBucketlistTitle = createSelector(
   (bucketlist) => bucketlist?.name || 'My Bucketlist',
 );
 
-export const sortedBucketlists = createSelector(
-  bucketlists,
-  bucketlistSorting,
-  (bucketlists, sorting) => sortByCriteria(bucketlists, sorting),
+/**
+ * Bucket lists are always ordered by name. They are looked up by name rather
+ * than browsed chronologically, so the page offers a name filter instead of a
+ * sort control. See GitHub issue #1329.
+ */
+export const sortedBucketlists = createSelector(bucketlists, (bucketlists) =>
+  sortBucketlistsByName(bucketlists),
 );

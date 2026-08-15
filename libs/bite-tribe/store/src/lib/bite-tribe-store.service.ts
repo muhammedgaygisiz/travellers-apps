@@ -57,7 +57,6 @@ import {
   settings,
 } from './app/selectors';
 import {
-  bucketlistSorting,
   homeDistance,
   homeFilters,
   homeMaxPriceFilter,
@@ -118,7 +117,6 @@ export class BiteTribeStoreService implements StoreService {
   sortedHomeBites$ = this.store.select(sortedHomeBites);
   sortedBucketlists$ = this.store.select(sortedBucketlists);
   homeSorting$ = this.store.select(homeSorting);
-  bucketlistSorting$ = this.store.select(bucketlistSorting);
   bite$ = this.store.select(bite);
   sortedMyBites$ = this.store.select(sortedBitesByUser);
   myBitesSorting$ = this.store.select(myBitesSorting);
@@ -394,12 +392,6 @@ export class BiteTribeStoreService implements StoreService {
 
   clearGpsError(): void {
     this.store.dispatch(AppActions.clearGPSError());
-  }
-
-  setBucketlistSorting(sorting: string): void {
-    this.store.dispatch(
-      FilteringAndSortingActions.setBucketlistSorting({ sorting }),
-    );
   }
 
   followUser(user: PublicUser): void {

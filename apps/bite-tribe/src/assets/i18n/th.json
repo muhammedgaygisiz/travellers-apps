@@ -513,5 +513,8 @@
   "no-bites-found-be-the-first": "ไม่พบ Bites มาเป็นคนแรกกันเลย",
   "no-bites-match-search": "ไม่มี Bites ที่ตรงกับ “{{term}}”",
   "clear-search": "ล้างการค้นหา",
-  "search-bites-or-places": "ค้นหา Bites หรือสถานที่..."
+  "search-bites-or-places": "ค้นหา Bites หรือสถานที่...",
+  "search-bucket-lists": "ค้นหารายการความฝัน...",
+  "no-bucket-lists-match-search": "ไม่มีรายการความฝันที่ตรงกับ “{{term}}”",
+  "no-bucket-lists-yet-create-one": "ยังไม่มีรายการความฝัน สร้างรายการแรกของคุณ"
 }

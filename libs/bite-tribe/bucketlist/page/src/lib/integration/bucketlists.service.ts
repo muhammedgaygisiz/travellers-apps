@@ -12,7 +12,6 @@ export class BucketlistsService {
   private readonly analytics = inject(AnalyticsService);
 
   bucketlists = this.dataAccess.bucketlists;
-  sorting = this.dataAccess.sorting;
 
   gotoBucketlistDetails(bucketlistId: string): void {
     this.navController.navigateForward(['my-bucketlists', bucketlistId]);
@@ -41,9 +40,5 @@ export class BucketlistsService {
 
   deleteBucketlist(bucketlistId: string): void {
     this.dataAccess.deleteBucketlist(bucketlistId);
-  }
-
-  sortingChange(value: string): void {
-    this.dataAccess.setBucketlistSorting(value);
   }
 }

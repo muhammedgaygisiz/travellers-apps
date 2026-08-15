@@ -79,6 +79,7 @@ Current implementation notes:
 - `biteIds` stores the saved Bites.
 - `triedOutBites` stores Bite completion with date and timestamp.
 - A Bucket List created from a BiteTrail stores `biteTrailId`.
+- `My Bucket Lists` orders lists alphabetically by name and offers no sort choice. Lists are looked up by name rather than browsed chronologically, so the page carries a client-side name filter instead. See GitHub issue #1329.
 - Creating a Bucket List from a BiteTrail writes to `/biteTrails/{biteTrailId}/sells`.
 
 ## Permissions

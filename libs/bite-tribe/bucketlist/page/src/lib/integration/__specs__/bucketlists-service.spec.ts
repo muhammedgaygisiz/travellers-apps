@@ -4,13 +4,11 @@ import { NavController } from '@ionic/angular';
 import { BucketlistsDataAccessService } from 'bite-tribe/bucketlist-data-access';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
-const setBucketlistSortingMock = jest.fn();
 const navigateForwardMock = jest.fn();
 const createAndSaveToBucketListMock = jest.fn();
 const deleteBucketlistMock = jest.fn();
 const logEventMock = jest.fn();
 const Mock = {
-  setBucketlistSorting: setBucketlistSortingMock,
   createAndSaveToBucketList: createAndSaveToBucketListMock,
   deleteBucketlist: deleteBucketlistMock,
   navigateForward: navigateForwardMock,
@@ -91,14 +89,6 @@ describe('BucketlistsService', () => {
       const bucketlistId = '12345';
       service.deleteBucketlist(bucketlistId);
       expect(deleteBucketlistMock).toHaveBeenCalledWith(bucketlistId);
-    });
-  });
-
-  describe('sortingChange', () => {
-    it('should call setBucketlistSorting with correct value', () => {
-      const sortingValue = 'newest';
-      service.sortingChange(sortingValue);
-      expect(setBucketlistSortingMock).toHaveBeenCalledWith(sortingValue);
     });
   });
 });

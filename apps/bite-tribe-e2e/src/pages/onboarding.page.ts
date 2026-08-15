@@ -171,7 +171,15 @@ export class OnboardingPage {
     await this.expectNextEnabled();
   }
 
+  /**
+   * The step preselects private and that default is the answer, so it is
+   * satisfiable on arrival — the regression in #1326 left Next dead for exactly
+   * the user accepting it. Picking an option explicitly still has to work.
+   */
   private async completeVisibilityStep(): Promise<void> {
+    await expect(this.visibilityChoice).toBeVisible();
+    await this.expectNextEnabled();
+
     await this.visibilityChoice
       .getByTestId('onboarding-visibility-private')
       .click();

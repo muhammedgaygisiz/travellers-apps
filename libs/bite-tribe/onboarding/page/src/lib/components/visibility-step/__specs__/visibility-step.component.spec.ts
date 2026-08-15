@@ -73,16 +73,25 @@ describe(VisibilityStepComponent.name, () => {
     expect(visibilityChange).toHaveBeenCalledWith(true);
   });
 
-  it('emits an explicit choice when the preselected option is tapped', () => {
-    // Tapping the already-selected radio fires no change event, so the explicit
-    // choice must still be registered via the click; otherwise a user keeping
-    // the default (private) could never advance.
-    fixture.componentRef.setInput('selectedPublic', false);
+  it('emits once when an option is chosen', () => {
+    // A radio click fires both `click` and `change`; only `change` is bound, so
+    // one tap must not report the same choice twice.
+    fixture.detectChanges();
+    const visibilityChange = jest.spyOn(component.visibilityChange, 'emit');
+
+    optionInput('onboarding-visibility-public').click();
+
+    expect(visibilityChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('switches back to private after public was chosen', () => {
+    fixture.componentRef.setInput('selectedPublic', true);
     fixture.detectChanges();
     const visibilityChange = jest.spyOn(component.visibilityChange, 'emit');
 
     optionInput('onboarding-visibility-private').click();
 
     expect(visibilityChange).toHaveBeenCalledWith(false);
+    expect(optionInput('onboarding-visibility-private').checked).toBe(true);
   });
 });

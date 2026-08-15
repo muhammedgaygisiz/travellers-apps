@@ -71,10 +71,14 @@ export const FirstStepNameTaken: Story = {
   },
 };
 
+/**
+ * Arrival state: private is preselected and that default already counts as the
+ * answer, so Next is enabled without touching an option (issue #1326).
+ */
 export const VisibilityStep: Story = {
   args: {
     currentIndex: 1,
-    canAdvance: false,
+    canAdvance: true,
     selectedVisibility: false,
   },
 };

@@ -882,6 +882,55 @@ describe('BitePage', () => {
     });
   });
 
+  describe('restaurantsNearBite', () => {
+    const bern = { latitude: 46.948, longitude: 7.4474 };
+    const ronda = { latitude: 36.7429, longitude: -5.1663 };
+
+    it('should offer the local restaurants for a Bite posted where the device is', () => {
+      const restaurants = [{ name: 'Tuktuk Bistro', position: bern }];
+      fixture.componentRef.setInput('nearbyRestaurants', restaurants);
+      component.biteFormGroup.controls['position'].patchValue(bern);
+
+      expect(component.restaurantsNearBite()).toEqual(restaurants);
+    });
+
+    it('should offer none of them for a Bite positioned far away', () => {
+      fixture.componentRef.setInput('nearbyRestaurants', [
+        { name: 'Tuktuk Bistro', position: bern },
+      ]);
+      component.biteFormGroup.controls['position'].patchValue(ronda);
+
+      expect(component.restaurantsNearBite()).toEqual([]);
+    });
+
+    it('should show the Google fallback only while nothing local places the Bite', () => {
+      const places = [
+        {
+          placeId: 'place-1',
+          name: 'Ronda Bistro',
+          address: 'Calle Mayor 1',
+          position: ronda,
+        },
+      ];
+      fixture.componentRef.setInput('nearbyGooglePlaces', places);
+      fixture.componentRef.setInput('nearbyGooglePlacesLoading', true);
+      fixture.componentRef.setInput('nearbyRestaurants', [
+        { name: 'Tuktuk Bistro', position: bern },
+      ]);
+      component.biteFormGroup.controls['position'].patchValue(ronda);
+
+      expect(component.googleFallbackPlaces()).toEqual(places);
+      expect(component.googleFallbackLoading()).toBe(true);
+
+      // Moving the Bite back to the device makes the local list answer again,
+      // so results fetched for Ronda must stop being listed.
+      component.biteFormGroup.controls['position'].patchValue(bern);
+
+      expect(component.googleFallbackPlaces()).toEqual([]);
+      expect(component.googleFallbackLoading()).toBe(false);
+    });
+  });
+
   describe('onRestaurantSelected', () => {
     it('should set place in the form group and close the selector modal', () => {
       component.isRestaurantModalOpen.set(true);
@@ -964,6 +1013,23 @@ describe('BitePage', () => {
         currentPosition,
       );
     });
+
+    it('should not patch the position of a restaurant far from the Bite', () => {
+      const ronda = { latitude: 36.7429, longitude: -5.1663 };
+      component.biteFormGroup.controls['position'].patchValue(ronda);
+      fixture.componentRef.setInput('nearbyRestaurants', [
+        {
+          name: 'Tuktuk Bistro',
+          position: { latitude: 46.948, longitude: 7.4474 },
+          restaurantId: 'restaurant-123',
+        },
+      ]);
+
+      component.onRestaurantSelected('Tuktuk Bistro');
+
+      expect(component.biteFormGroup.controls['position'].value).toEqual(ronda);
+      expect(component.biteFormGroup.controls['restaurantId'].value).toBe('');
+    });
   });
 
   describe('onGooglePlaceSelected', () => {
@@ -1022,6 +1088,26 @@ describe('BitePage', () => {
       component.openRestaurantSelector();
 
       expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should request nearby Google places when every local restaurant is far from the Bite', () => {
+      const emitSpy = jest.spyOn(component.requestNearbyGooglePlaces, 'emit');
+      fixture.componentRef.setInput('nearbyRestaurants', [
+        {
+          name: 'Bütschelegg',
+          position: { latitude: 46.948, longitude: 7.44 },
+        },
+        {
+          name: 'Tuktuk Bistro',
+          position: { latitude: 46.95, longitude: 7.45 },
+        },
+      ]);
+      const ronda = { latitude: 36.7429, longitude: -5.1663 };
+      component.biteFormGroup.controls['position'].patchValue(ronda);
+
+      component.openRestaurantSelector();
+
+      expect(emitSpy).toHaveBeenCalledWith(ronda);
     });
 
     it('should not request nearby Google places when no position is available', () => {

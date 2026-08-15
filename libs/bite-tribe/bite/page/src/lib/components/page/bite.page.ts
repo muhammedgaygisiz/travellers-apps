@@ -54,6 +54,10 @@ import { TagsInputComponent } from 'common/ui/tags';
 import { normalizePriceForBackend } from './utils/normalize-price-for-backend';
 import { ImageValidator } from './utils/image-validator';
 import { normalizePriceForForm } from './utils/normalize-price-for-form';
+import {
+  getRestaurantsNearBite,
+  hasRestaurantNearBite,
+} from './utils/restaurants-near-bite';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PriceInputComponent } from './price-input/price-input.component';
 import {
@@ -323,6 +327,46 @@ export class BitePage {
   currentPosition = toSignal(
     this.biteFormGroup.controls['position'].valueChanges,
     { initialValue: this.biteFormGroup.controls['position'].value },
+  );
+
+  /**
+   * The local restaurants offered as candidates for this Bite. The input list is
+   * built around the device, so it has to be measured against the Bite's own
+   * position before it is shown: a Bern restaurant is never the place a Bite in
+   * Ronda belongs to. See GitHub issue #1307.
+   */
+  restaurantsNearBite = computed(() =>
+    getRestaurantsNearBite(
+      this.nearbyRestaurants(),
+      this.currentPosition() ?? undefined,
+    ),
+  );
+
+  /**
+   * True while nothing local answers "which place is this Bite" for the position
+   * the Bite currently carries. That is both when the Google lookup is worth a
+   * callable and when its result is worth showing.
+   */
+  needsGoogleFallback = computed(
+    () =>
+      !hasRestaurantNearBite(
+        this.nearbyRestaurants(),
+        this.currentPosition() ?? undefined,
+      ),
+  );
+
+  /**
+   * Google suggestions are a fallback for a Bite the local list cannot place, so
+   * they are dropped again as soon as it can. Without this, results fetched for
+   * a far-away position would still be listed after the Bite is moved back to
+   * where the device is.
+   */
+  googleFallbackPlaces = computed(() =>
+    this.needsGoogleFallback() ? this.nearbyGooglePlaces() : [],
+  );
+
+  googleFallbackLoading = computed(
+    () => this.needsGoogleFallback() && this.nearbyGooglePlacesLoading(),
   );
 
   positionChangeEmitter = toSignal(
@@ -670,18 +714,22 @@ export class BitePage {
   openRestaurantSelector(): void {
     this.isRestaurantModalOpen.set(true);
 
-    // Only fall back to Google nearby suggestions when we have no local
-    // restaurants to offer, so the Google callable is hit on demand.
-    const hasLocalRestaurants = this.nearbyRestaurants().length > 0;
+    // Only fall back to Google nearby suggestions when no local restaurant sits
+    // near the Bite, so the Google callable is hit on demand. Asking whether the
+    // local list is non-empty instead let a list of restaurants around the
+    // device suppress the lookup for a Bite posted 1535 km away.
     const position = this.biteFormGroup.controls['position'].value;
 
-    if (!hasLocalRestaurants && position) {
+    if (this.needsGoogleFallback() && position) {
       this.requestNearbyGooglePlaces.emit(position);
     }
   }
 
   onRestaurantSelected(restaurantName: string): void {
-    const selectedRestaurant = this.nearbyRestaurants().find(
+    // Resolved against the offered candidates, not the full device-sourced list,
+    // so a far-away restaurant that happens to share the name cannot patch its
+    // position into a Bite it has nothing to do with.
+    const selectedRestaurant = this.restaurantsNearBite().find(
       (restaurant) => restaurant.name === restaurantName,
     );
 

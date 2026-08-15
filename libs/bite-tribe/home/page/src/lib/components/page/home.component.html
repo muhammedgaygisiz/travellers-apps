@@ -136,7 +136,7 @@
       @if (isSearchVisible()) {
         <ion-searchbar
           data-testid="search-input"
-          placeholder="Search ..."
+          [placeholder]="'search-bites-or-places' | transloco"
           [value]="searchTerm()"
           (ionInput)="onSearchInput($event)"
           [animated]="true"
@@ -153,6 +153,8 @@
         [hasMore]="hasMore()"
         [showSkeleton]="showBiteListSkeleton()"
         [enableImageRetry]="enableImageRetry()"
+        [searchTerm]="searchTerm()"
+        (clearSearch)="clearSearch()"
         (retryImageUpload)="retryImageUpload.emit($event)"
         (biteClick)="biteClick.emit($event)"
         (likeButtonClick)="likeButtonClick.emit($event)"

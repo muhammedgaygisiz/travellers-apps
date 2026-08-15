@@ -51,6 +51,17 @@ export const Empty: Story = {
   },
 };
 
+/**
+ * A search that excludes everything, which is not the same empty state as a
+ * feed with nothing in it. See GitHub issue #1331.
+ */
+export const EmptySearchResult: Story = {
+  args: {
+    bites: [],
+    searchTerm: 'zzzznomatch',
+  },
+};
+
 export const WithTriedOutSwipe: Story = {
   args: {
     bites,

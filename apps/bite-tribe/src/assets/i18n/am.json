@@ -509,5 +509,9 @@
   "show-replies": "{{count}} ምላሾችን አሳይ",
   "hide-replies": "ምላሾችን ደብቅ",
   "review-creator-badge": "ፈጣሪ",
-  "bucket-list-name-updated": "የዝርዝሩ ስም ተዘምኗል!"
+  "bucket-list-name-updated": "የዝርዝሩ ስም ተዘምኗል!",
+  "no-bites-found-be-the-first": "ምንም Bites አልተገኙም። የመጀመሪያው ይሁኑ።",
+  "no-bites-match-search": "ከ«{{term}}» ጋር የሚዛመድ Bites የለም።",
+  "clear-search": "ፍለጋን አጽዳ",
+  "search-bites-or-places": "Bites ወይም ቦታዎችን ይፈልጉ..."
 }

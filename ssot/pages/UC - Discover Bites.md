@@ -21,6 +21,7 @@ Food lovers can discover real dishes nearby or in a broader feed before deciding
 - User can switch to map view.
 - Map zoom controls and zoom gestures are available to every user regardless of subscription tier.
 - User can filter or search within the feed.
+- An empty feed and an empty search result are two different states and never share their copy. `No bites found. Be the first one.` invites a first Bite and is only correct when there is nothing to show; a search that excluded everything names the term instead and offers to clear it, because the Bites are still there and the next action is to change the search, not to create. See issue \#1331.
 - Nearby Bites can be loaded through backend-assisted location loading.
 - `loadBitesByLocation` loads a fixed 15 km radius around the reported position. This radius is the free tier. Loading a position other than the current one, or a radius beyond 15 km, becomes a Pro capability through [[epic-1122]]. See [[Monetization]].
 - When live Bite updates add markers, the map should preserve the user's current pan and zoom after the initial marker fit.

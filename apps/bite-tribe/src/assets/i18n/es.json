@@ -509,5 +509,9 @@
   "show-replies": "Mostrar {{count}} respuestas",
   "hide-replies": "Ocultar respuestas",
   "review-creator-badge": "creador",
-  "bucket-list-name-updated": "¡Nombre de la lista de deseos actualizado!"
+  "bucket-list-name-updated": "¡Nombre de la lista de deseos actualizado!",
+  "no-bites-found-be-the-first": "No se encontraron Bites. Sé el primero.",
+  "no-bites-match-search": "Ningún Bite coincide con «{{term}}».",
+  "clear-search": "Borrar búsqueda",
+  "search-bites-or-places": "Buscar Bites o lugares..."
 }

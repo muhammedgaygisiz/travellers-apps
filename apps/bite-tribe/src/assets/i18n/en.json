@@ -509,5 +509,9 @@
   "show-replies": "Show {{count}} replies",
   "hide-replies": "Hide replies",
   "review-creator-badge": "creator",
-  "bucket-list-name-updated": "Bucket list name updated!"
+  "bucket-list-name-updated": "Bucket list name updated!",
+  "no-bites-found-be-the-first": "No bites found. Be the first one.",
+  "no-bites-match-search": "No bites match “{{term}}”.",
+  "clear-search": "Clear search",
+  "search-bites-or-places": "Search bites or places..."
 }

@@ -13,10 +13,9 @@ import { TranslocoPipe } from '@jsverse/transloco';
  *
  * The options are native radio inputs wrapped in labels, so the whole card is
  * tappable and keyboard/screen-reader accessible without depending on Ionic's
- * shadow-DOM radio label rendering. Private is preselected but the parent still
- * requires an explicit selection: tapping the already-selected option fires no
- * `change`, so selection is emitted on `click` too — otherwise a user keeping
- * the default (private) could never satisfy the gate.
+ * shadow-DOM radio label rendering. Private is preselected, and the parent
+ * treats that preselection as a real answer, so the step is presentational: it
+ * only reports the changes the user makes (issue #1326).
  */
 @Component({
   selector: 'onboarding-visibility-step',

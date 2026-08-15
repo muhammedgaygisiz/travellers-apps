@@ -25,7 +25,6 @@
         class="visibility-option__input"
         name="onboarding-visibility"
         [checked]="!isPublicSelected()"
-        (click)="selectVisibility(false)"
         (change)="selectVisibility(false)"
       />
       <span class="visibility-option__indicator" aria-hidden="true"></span>
@@ -45,7 +44,6 @@
         class="visibility-option__input"
         name="onboarding-visibility"
         [checked]="isPublicSelected()"
-        (click)="selectVisibility(true)"
         (change)="selectVisibility(true)"
       />
       <span class="visibility-option__indicator" aria-hidden="true"></span>

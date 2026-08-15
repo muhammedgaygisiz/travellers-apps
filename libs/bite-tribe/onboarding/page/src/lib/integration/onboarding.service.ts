@@ -54,7 +54,6 @@ export class OnboardingService {
     signal<DisplayNameAvailabilityState>('idle');
   private readonly availableDisplayName = signal<string | null>(null);
   readonly selectedVisibility = signal<boolean | null>(false);
-  readonly visibilitySelectionExplicit = signal(false);
 
   readonly settings = signal<Settings | undefined>(undefined);
   readonly selectedCurrency = signal<string>('EUR');
@@ -132,7 +131,13 @@ export class OnboardingService {
       displayName: profile?.displayName || '',
       photoUrl: profile?.photoUrl || '',
     });
+    // The step arrives with a visible default — the profile's own setting, or
+    // private for a new account — and that default is a real answer, so the
+    // step is satisfiable on arrival. Requiring an extra tap on an option that
+    // already looks selected only produced a dead Next button for the users
+    // accepting the privacy-preserving default (issue #1326).
     this.selectedVisibility.set(profile?.public ?? false);
+    this.setStepValid('visibility', true);
     this.homeCity.set(profile?.city || '');
 
     // The finish step only confirms and completes; it gathers nothing, so it is
@@ -311,7 +316,6 @@ export class OnboardingService {
 
   updateVisibility(isPublic: boolean): void {
     this.selectedVisibility.set(isPublic);
-    this.visibilitySelectionExplicit.set(true);
     this.setStepValid('visibility', true);
   }
 
@@ -410,10 +414,6 @@ export class OnboardingService {
   }
 
   private setStepValid(id: OnboardingStepId, valid: boolean): void {
-    if (id === 'visibility' && !this.visibilitySelectionExplicit()) {
-      valid = false;
-    }
-
     this.validSteps.update((set) => {
       const next = new Set(set);
       if (valid) {
@@ -677,7 +677,7 @@ export class OnboardingService {
   private async persistVisibilityStep(): Promise<boolean> {
     const profile = this.profile();
 
-    if (!profile || !this.visibilitySelectionExplicit()) {
+    if (!profile) {
       this.setStepValid('visibility', false);
       return false;
     }

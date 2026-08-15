@@ -305,12 +305,11 @@ describe('OnboardingService', () => {
       expect(saveCompletedSteps).not.toHaveBeenCalled();
     });
 
-    it('persists visibility only after the user makes an explicit choice', async () => {
+    it('persists the visibility the user picked', async () => {
       setup(['identity']);
       await service.initialize();
 
       expect(service.currentStep().id).toBe('visibility');
-      expect(service.canAdvance()).toBe(false);
 
       service.updateVisibility(true);
       await service.next();
@@ -322,6 +321,25 @@ describe('OnboardingService', () => {
         'identity',
         'visibility',
       ]);
+      expect(service.currentStep().id).toBe('currency');
+    });
+
+    it('advances on the preselected default without touching an option', async () => {
+      // The step shows private already selected, so accepting that default has
+      // to be enough to leave the step: requiring a tap on an option that
+      // already looks chosen left a new user stuck behind a dead Next button
+      // (issue #1326).
+      setup(['identity']);
+      await service.initialize();
+
+      expect(service.currentStep().id).toBe('visibility');
+      expect(service.canAdvance()).toBe(true);
+
+      await service.next();
+
+      expect(saveProfile).toHaveBeenCalledWith(
+        expect.objectContaining({ public: false }),
+      );
       expect(service.currentStep().id).toBe('currency');
     });
 

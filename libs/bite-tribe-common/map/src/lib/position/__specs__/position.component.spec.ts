@@ -2,14 +2,18 @@ import { PositionComponent } from '../position.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MapComponent } from '../../map/map.component';
+import { ComponentRef } from '@angular/core';
+import { MarkerColor } from '../../map/model/marker-color.enum';
 
 describe(PositionComponent.name, () => {
   let component: PositionComponent;
+  let componentRef: ComponentRef<PositionComponent>;
   let fixture: ComponentFixture<PositionComponent>;
 
   beforeEach(async () => {
     fixture = TestBed.createComponent(PositionComponent);
     component = fixture.componentInstance;
+    componentRef = fixture.componentRef;
   });
 
   it('should create', () => {
@@ -23,6 +27,48 @@ describe(PositionComponent.name, () => {
       .componentInstance as MapComponent;
 
     expect(map.refitOnGeopointChanges()).toBe(true);
+  });
+
+  // The marker colour is how a form says which source its position came from,
+  // so it has to reach the map instead of leaving every marker on the default
+  // red. See GitHub issue #1325.
+  describe('markerColor', () => {
+    it('should colour the marker in the given colour', () => {
+      component.writeValue({ latitude: 10, longitude: 20 });
+      componentRef.setInput('markerColor', MarkerColor.ORANGE);
+
+      const [geopoint] = component.markerGeopoints();
+
+      expect(component.markerColors()).toEqual({
+        [geopoint.id as string]: MarkerColor.ORANGE,
+      });
+    });
+
+    it('should leave the map on its default colour when unset', () => {
+      component.writeValue({ latitude: 10, longitude: 20 });
+
+      expect(component.markerColors()).toEqual({});
+    });
+
+    it('should pass the colour to the map', () => {
+      componentRef.setInput('markerColor', MarkerColor.GREEN);
+      fixture.detectChanges();
+
+      const map = fixture.debugElement.query(By.directive(MapComponent))
+        .componentInstance as MapComponent;
+
+      expect(Object.values(map.markerColors())).toEqual([MarkerColor.GREEN]);
+    });
+  });
+
+  describe('markerGeopoints', () => {
+    it('should keep the position and tag it so it can be coloured', () => {
+      component.writeValue({ latitude: 10, longitude: 20 });
+
+      expect(component.markerGeopoints()).toEqual([
+        { id: expect.any(String), latitude: 10, longitude: 20 },
+      ]);
+    });
   });
 
   describe('writeValue', () => {

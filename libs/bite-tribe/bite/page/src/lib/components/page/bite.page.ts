@@ -424,6 +424,18 @@ export class BitePage {
       : UNKNOWN_POSITION_SOURCE_LABEL_KEY;
   });
 
+  /**
+   * Colour of the marker on the form, taken from the same table the modal
+   * colours its candidates with. Without it the form drew every position red -
+   * the colour of the photo source - while naming a different source next to it
+   * (issue #1325). An unknown source keeps the map's default.
+   */
+  currentSourceColor = computed(() => {
+    const source = this.positionSource();
+
+    return source ? POSITION_SOURCE_COLORS[source] : undefined;
+  });
+
   positionCandidates = computed<PositionCandidate[]>(() => {
     const lookedUp = (
       source: Exclude<PositionSource, 'manual'>,

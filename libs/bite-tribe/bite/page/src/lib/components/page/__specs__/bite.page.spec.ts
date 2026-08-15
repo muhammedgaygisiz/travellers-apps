@@ -17,6 +17,7 @@ import { FormGroup } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { TranslocoService } from '@jsverse/transloco';
+import { POSITION_SOURCE_COLORS } from '../model/position-source';
 
 jest.mock('leaflet');
 
@@ -149,6 +150,31 @@ describe('BitePage', () => {
       component.onPositionFromImage(position);
 
       expect(component.currentSourceLabelKey()).toBe('from-photo');
+    });
+  });
+
+  // The form drew every position in the photo colour while naming a different
+  // source next to it, so the two views of the same fact disagreed. See GitHub
+  // issue #1325.
+  describe('currentSourceColor', () => {
+    it('should use the colour the modal gives the selected source', () => {
+      component.onPositionFromImage({ latitude: 10, longitude: 20 });
+
+      expect(component.currentSourceColor()).toBe(POSITION_SOURCE_COLORS.photo);
+    });
+
+    it('should follow the source when it changes', () => {
+      component.positionSource.set('google');
+
+      expect(component.currentSourceColor()).toBe(
+        POSITION_SOURCE_COLORS.google,
+      );
+    });
+
+    it('should leave the marker on the map default when no source is recorded', () => {
+      component.positionSource.set(undefined);
+
+      expect(component.currentSourceColor()).toBeUndefined();
     });
   });
 

@@ -65,7 +65,14 @@ export class FollowersListComponent {
   unfollowClick = output<PublicUser>();
   retryClick = output<void>();
 
-  isOpen = signal(false);
+  /**
+   * The row whose unfollow is awaiting confirmation, rather than a boolean.
+   * A boolean was shared by every row, so one alert per row was constructed up
+   * front and a click on any row opened all of them at once — the topmost being
+   * the last row's, which is the one that got unfollowed. See GitHub issue
+   * #1334.
+   */
+  userPendingUnfollow = signal<PublicUser | undefined>(undefined);
   imageErroredUserIds = signal<Set<string>>(new Set());
 
   sortedUsers = computed(() =>
@@ -99,9 +106,12 @@ export class FollowersListComponent {
 
   readonly defaultHref = `/${PATH.MY_PROFILE}`;
 
-  openConfirmationDialog(event: Pick<Event, 'stopPropagation'>): void {
+  openConfirmationDialog(
+    event: Pick<Event, 'stopPropagation'>,
+    user: PublicUser,
+  ): void {
     event.stopPropagation();
-    this.isOpen.set(true);
+    this.userPendingUnfollow.set(user);
   }
 
   handleConfirmationDismiss(
@@ -114,7 +124,7 @@ export class FollowersListComponent {
       this.unfollow(user);
     }
 
-    this.isOpen.set(false);
+    this.userPendingUnfollow.set(undefined);
   }
 
   unfollow(user: PublicUser): void {

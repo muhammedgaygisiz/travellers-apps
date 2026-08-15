@@ -104,13 +104,19 @@
   </div>
 </ion-card>
 
-<ion-alert
-  [isOpen]="isOpen()"
-  header="{{ 'delete-bite' | transloco }}"
-  message="{{ 'are-you-sure-you-want-to-delete-this-bite' | transloco }}"
-  [buttons]="confirmationButtons"
-  (didDismiss)="handleConfirmationDismiss($event)"
-/>
+<!-- Created only once delete is invoked. A feed renders one card per Bite, so
+keeping the alert in the template unconditionally put one hidden `ion-alert` in
+the DOM per card, including Bites the user cannot delete. See GitHub issue
+#1327. -->
+@if (isOpen()) {
+  <ion-alert
+    [isOpen]="true"
+    header="{{ 'delete-bite' | transloco }}"
+    message="{{ 'are-you-sure-you-want-to-delete-this-bite' | transloco }}"
+    [buttons]="confirmationButtons"
+    (didDismiss)="handleConfirmationDismiss($event)"
+  />
+}
 
 <ion-modal #ratingModal [isOpen]="isRatingModalOpen()">
   <ng-template>

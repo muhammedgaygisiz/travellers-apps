@@ -116,13 +116,20 @@ describe(FollowersListComponent.name, () => {
   });
 
   describe('openConfirmationDialog', () => {
-    it('should set isOpen to true and stop event propagation', () => {
+    const mockUser: PublicUser = {
+      userId: 'user123',
+      displayName: 'Test User',
+      email: 'test@example.com',
+      photoUrl: 'photo.jpg',
+    };
+
+    it('should hold the row being confirmed and stop event propagation', () => {
       const mockEvent = { stopPropagation: jest.fn() } as {
         stopPropagation: jest.Mock;
       };
-      component.openConfirmationDialog(mockEvent);
+      component.openConfirmationDialog(mockEvent, mockUser);
       expect(mockEvent.stopPropagation).toHaveBeenCalled();
-      expect(component.isOpen()).toBe(true);
+      expect(component.userPendingUnfollow()).toBe(mockUser);
     });
   });
 
@@ -134,7 +141,7 @@ describe(FollowersListComponent.name, () => {
       photoUrl: 'photo.jpg',
     };
 
-    it('should call unfollow and set isOpen to false when role is unfollow', () => {
+    it('should call unfollow and release the pending row when role is unfollow', () => {
       const mockEvent = {
         detail: { role: 'unfollow' },
       } as CustomEvent<{ role: string }>;
@@ -143,10 +150,10 @@ describe(FollowersListComponent.name, () => {
       component.handleConfirmationDismiss(mockEvent, mockUser);
 
       expect(unfollowSpy).toHaveBeenCalledWith(mockUser);
-      expect(component.isOpen()).toBe(false);
+      expect(component.userPendingUnfollow()).toBeUndefined();
     });
 
-    it('should only set isOpen to false when role is cancel', () => {
+    it('should only release the pending row when role is cancel', () => {
       const mockEvent = {
         detail: { role: 'cancel' },
       } as CustomEvent<{ role: string }>;
@@ -155,7 +162,92 @@ describe(FollowersListComponent.name, () => {
       component.handleConfirmationDismiss(mockEvent, mockUser);
 
       expect(unfollowSpy).not.toHaveBeenCalled();
-      expect(component.isOpen()).toBe(false);
+      expect(component.userPendingUnfollow()).toBeUndefined();
+    });
+  });
+
+  // A per-row alert bound to one shared boolean opened every row at once, and
+  // the topmost — the last row's — is the one the user answered. See issue
+  // #1334.
+  describe('given a Following list the signed-in user owns', () => {
+    const following: PublicUser[] = [
+      {
+        userId: 'user1',
+        displayName: 'Alice',
+        email: '',
+        photoUrl: '',
+        public: true,
+      },
+      {
+        userId: 'user2',
+        displayName: 'Bob',
+        email: '',
+        photoUrl: '',
+        public: true,
+      },
+      {
+        userId: 'user3',
+        displayName: 'Charlie',
+        email: '',
+        photoUrl: '',
+        public: true,
+      },
+    ];
+
+    const queryAlerts = (): HTMLElement[] => [
+      ...fixture.nativeElement.querySelectorAll('ion-alert'),
+    ];
+
+    const queryUnfollowButtons = (): HTMLElement[] => [
+      ...fixture.nativeElement.querySelectorAll('ion-item ion-button'),
+    ];
+
+    beforeEach(() => {
+      componentRef.setInput('type', 'following');
+      componentRef.setInput('users', following);
+      componentRef.setInput('loggedInUserId', 'me');
+      componentRef.setInput('profileOwnerid', 'me');
+      fixture.detectChanges();
+    });
+
+    it('should not carry a confirmation for any row up front', () => {
+      expect(queryUnfollowButtons()).toHaveLength(3);
+      expect(queryAlerts()).toHaveLength(0);
+    });
+
+    it('should open exactly one confirmation when a row is clicked', () => {
+      queryUnfollowButtons()[0].click();
+      fixture.detectChanges();
+
+      expect(queryAlerts()).toHaveLength(1);
+    });
+
+    it('should unfollow the account whose row was clicked', () => {
+      const unfollowed: string[] = [];
+      component.unfollowClick.subscribe((user) =>
+        unfollowed.push(user.displayName),
+      );
+
+      // Alice sorts first, so hers is the first row.
+      queryUnfollowButtons()[0].click();
+      fixture.detectChanges();
+
+      queryAlerts()[0].dispatchEvent(
+        new CustomEvent('didDismiss', { detail: { role: 'unfollow' } }),
+      );
+      fixture.detectChanges();
+
+      expect(unfollowed).toEqual(['Alice']);
+      expect(queryAlerts()).toHaveLength(0);
+    });
+
+    // The alert's message is built from this user, so a wrong one here is the
+    // wrong name in front of the reader.
+    it('should hold the account whose row was clicked, not the last row', () => {
+      queryUnfollowButtons()[1].click();
+      fixture.detectChanges();
+
+      expect(component.userPendingUnfollow()?.displayName).toBe('Bob');
     });
   });
 

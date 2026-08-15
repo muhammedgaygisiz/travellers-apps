@@ -513,5 +513,8 @@
   "no-bites-found-be-the-first": "لا توجد Bites. كن أول من يضيف واحدة.",
   "no-bites-match-search": "لا توجد Bites تطابق «{{term}}».",
   "clear-search": "مسح البحث",
-  "search-bites-or-places": "ابحث عن Bites أو أماكن..."
+  "search-bites-or-places": "ابحث عن Bites أو أماكن...",
+  "search-bucket-lists": "ابحث في قوائم الآمال...",
+  "no-bucket-lists-match-search": "لا توجد قوائم آمال تطابق «{{term}}».",
+  "no-bucket-lists-yet-create-one": "لا توجد قوائم آمال بعد. أنشئ أول قائمة."
 }

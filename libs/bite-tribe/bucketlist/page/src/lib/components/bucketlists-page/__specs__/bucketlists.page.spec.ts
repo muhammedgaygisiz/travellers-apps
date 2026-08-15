@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
+import type { Bucketlist } from 'model';
 import SpyInstance = jest.SpyInstance;
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
@@ -39,38 +40,75 @@ describe('BucketlistsPage', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('sortingLabel', () => {
-    it('should return "Name" when sorting is "name"', () => {
-      componentRef.setInput('sorting', 'name');
-      expect(component.sortingLabel()).toBe('name');
+  describe('toggleSearch', () => {
+    it('should open the searchbar', () => {
+      component.toggleSearch();
+      expect(component.isSearchVisible()).toBe(true);
     });
 
-    it('should return "Date" when sorting is "createdAt"', () => {
-      componentRef.setInput('sorting', 'createdAt');
-      expect(component.sortingLabel()).toBe('date');
-    });
+    it('should drop the term when the searchbar is closed again', () => {
+      component.toggleSearch();
+      component.searchTerm.set('Malta');
 
-    it('should return "Name" for any other sorting value', () => {
-      componentRef.setInput('sorting', 'otherValue');
-      expect(component.sortingLabel()).toBe('name');
+      component.toggleSearch();
+
+      expect(component.isSearchVisible()).toBe(false);
+      expect(component.searchTerm()).toBe('');
     });
   });
 
-  describe('emitSortingChange', () => {
-    it('should emit sortingChange event with the correct value', () => {
-      jest.spyOn(component.sortingChange, 'emit');
-      const event = { detail: { value: 'createdAt' } };
-      component.emitSortingChange(event);
-      expect(component.sortingChange.emit).toHaveBeenCalledWith('createdAt');
+  describe('clearSearch', () => {
+    it('should drop the term but keep the searchbar open', () => {
+      component.toggleSearch();
+      component.searchTerm.set('Malta');
+
+      component.clearSearch();
+
+      expect(component.searchTerm()).toBe('');
+      expect(component.isSearchVisible()).toBe(true);
+    });
+  });
+
+  describe('onSearchInput', () => {
+    it('should take the term from the input element', () => {
+      const input = document.createElement('input');
+      input.value = 'Malta';
+      const event = { target: input } as unknown as Event;
+
+      component.onSearchInput(event);
+
+      expect(component.searchTerm()).toBe('Malta');
+    });
+  });
+
+  describe('filteredBucketlists', () => {
+    const BUCKETLISTS = [
+      { id: '1', name: 'Malta' },
+      { id: '2', name: 'Cologne' },
+      { id: '3', name: 'Kosovo' },
+    ] as Bucketlist[];
+
+    beforeEach(() => {
+      componentRef.setInput('bucketlists', BUCKETLISTS);
     });
 
-    it('should not emit sortingChange event if detail is missing', () => {
-      jest.spyOn(component.sortingChange, 'emit');
-      const event = { detail: null } as unknown as Parameters<
-        BucketlistsPage['emitSortingChange']
-      >[0];
-      component.emitSortingChange(event);
-      expect(component.sortingChange.emit).not.toHaveBeenCalled();
+    it('should return every bucketlist when no term is entered', () => {
+      expect(component.filteredBucketlists()).toEqual(BUCKETLISTS);
+    });
+
+    it('should match a bucketlist name case insensitively', () => {
+      component.searchTerm.set('malt');
+      expect(component.filteredBucketlists()).toEqual([BUCKETLISTS[0]]);
+    });
+
+    it('should match a bucketlist name with a typo', () => {
+      component.searchTerm.set('Cologn');
+      expect(component.filteredBucketlists()).toEqual([BUCKETLISTS[1]]);
+    });
+
+    it('should return nothing when no bucketlist matches', () => {
+      component.searchTerm.set('Reykjavik');
+      expect(component.filteredBucketlists()).toEqual([]);
     });
   });
 

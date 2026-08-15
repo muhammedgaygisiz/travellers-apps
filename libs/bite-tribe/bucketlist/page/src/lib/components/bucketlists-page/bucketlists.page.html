@@ -3,98 +3,125 @@
   addButtonText="{{'create-new-bucket-list' | transloco}}"
   (addButtonClick)="openAlert()"
 >
+  <ion-buttons header-end slot="end">
+    <ion-button
+      data-testid="btn-search"
+      (click)="toggleSearch()"
+      [attr.aria-pressed]="isSearchVisible()"
+    >
+      <ion-icon
+        slot="icon-only"
+        [name]="isSearchVisible() ? 'close-outline' : 'search-outline'"
+      />
+    </ion-button>
+  </ion-buttons>
+
   <ion-content class="ion-padding content-safe-padding-bottom">
-    <div class="bucketlists-header-container" slot="fixed">
+    <div class="bucketlists-header-container">
       <ion-text color="secondary" class="subheadline">
         <h4>{{ 'my-bucket-lists' | transloco }}</h4>
       </ion-text>
-      <div
-        class="ion-display-flex ion-flex-row ion-justify-content-center ion-margin-bottom chip-sort-filter-container"
-      >
-        <div
-          class="ion-display-flex ion-flex-row ion-justify-content-center sort-container"
-        >
-          <ion-chip id="select-sorting">
-            <ion-select
-              interface="modal"
-              toggleIcon="chevron-down-outline"
-              [value]="sorting()"
-              [placeholder]="sortingLabel()"
-              (ionChange)="emitSortingChange($event)"
-            >
-              <ion-select-option value="name"
-                >{{ 'name' | transloco }}</ion-select-option
-              >
-              <ion-select-option value="createdAt"
-                >{{ 'date' | transloco }}</ion-select-option
-              >
-            </ion-select>
-          </ion-chip>
-        </div>
-      </div>
     </div>
 
-    <ion-list
-      lines="full"
-      class="ion-padding-top bucketlists-scrolling-content-container"
-    >
-      @for (bucketlist of bucketlists(); track bucketlist.id) {
-      <ion-item
-        data-testid="bucketlist-item"
-        [button]="true"
-        (click)="gotoBucketlistDetails.emit(bucketlist.id)"
-      >
-        <ion-icon name="bookmark" slot="start" />
-        <div
-          class="ion-display-flex ion-flex-column ion-flex-1 bucketlist-content"
-        >
-          <ion-label class="ion-margin-bottom ion-margin-top title-margin">
-            <span>{{ bucketlist.name }}</span>
-            @if ((bucketlist | progress) === 1) {
-            <ion-icon
-              name="checkmark-circle-outline"
-              color="success"
-              class="completed-icon"
-              aria-hidden="true"
-            />
-            }
-          </ion-label>
-          <div class="ion-display-flex ion-margin-bottom bucketlist-actions">
-            <ion-button
-              size="small"
-              (click)="onEditBucketlist(bucketlist.id, $event)"
-            >
-              {{ 'edit' | transloco }}
-            </ion-button>
-            <ion-button
-              size="small"
-              color="danger"
-              (click)="openDeleteConfirmation(bucketlist.id, $event)"
-            >
-              {{ 'delete' | transloco }}
-            </ion-button>
-            @if (bucketlist.biteTrailId) {
-            <ion-button
-              size="small"
-              color="tertiary"
-              data-testid="bucketlist-rate"
-              (click)="onRateBucketlist(bucketlist.id, $event)"
-            >
-              {{ 'rating' | transloco }}
-            </ion-button>
-            }
-          </div>
-        </div>
-        <ion-badge>{{ bucketlist.biteIds | count }}</ion-badge>
-        @if (bucketlist.biteIds | count) {
-        <ion-progress-bar
-          class="bucketlist-progress"
-          [value]="bucketlist | progress"
-        />
-        }
-      </ion-item>
+    <div class="bucketlists-scrolling-content-container">
+      @if (isSearchVisible()) {
+      <ion-searchbar
+        data-testid="search-input"
+        [placeholder]="'search-bucket-lists' | transloco"
+        [value]="searchTerm()"
+        (ionInput)="onSearchInput($event)"
+        [animated]="true"
+      />
       }
-    </ion-list>
+
+      <ion-list lines="full">
+        @for (bucketlist of filteredBucketlists(); track bucketlist.id) {
+        <ion-item
+          data-testid="bucketlist-item"
+          [button]="true"
+          (click)="gotoBucketlistDetails.emit(bucketlist.id)"
+        >
+          <ion-icon name="bookmark" slot="start" />
+          <div
+            class="ion-display-flex ion-flex-column ion-flex-1 bucketlist-content"
+          >
+            <ion-label class="ion-margin-bottom ion-margin-top title-margin">
+              <span>{{ bucketlist.name }}</span>
+              @if ((bucketlist | progress) === 1) {
+              <ion-icon
+                name="checkmark-circle-outline"
+                color="success"
+                class="completed-icon"
+                aria-hidden="true"
+              />
+              }
+            </ion-label>
+            <div class="ion-display-flex ion-margin-bottom bucketlist-actions">
+              <ion-button
+                size="small"
+                (click)="onEditBucketlist(bucketlist.id, $event)"
+              >
+                {{ 'edit' | transloco }}
+              </ion-button>
+              <ion-button
+                size="small"
+                color="danger"
+                (click)="openDeleteConfirmation(bucketlist.id, $event)"
+              >
+                {{ 'delete' | transloco }}
+              </ion-button>
+              @if (bucketlist.biteTrailId) {
+              <ion-button
+                size="small"
+                color="tertiary"
+                data-testid="bucketlist-rate"
+                (click)="onRateBucketlist(bucketlist.id, $event)"
+              >
+                {{ 'rating' | transloco }}
+              </ion-button>
+              }
+            </div>
+          </div>
+          <ion-badge>{{ bucketlist.biteIds | count }}</ion-badge>
+          @if (bucketlist.biteIds | count) {
+          <ion-progress-bar
+            class="bucketlist-progress"
+            [value]="bucketlist | progress"
+          />
+          }
+        </ion-item>
+        }
+      </ion-list>
+
+      @if (filteredBucketlists().length === 0) {
+      <div
+        class="empty-message ion-display-flex ion-flex-column ion-align-items-center ion-padding-top"
+      >
+        <!-- A search that excludes everything is not an empty page: the lists
+        are still there, so the copy names the term as the cause and offers to
+        clear it instead of inviting a first list. Mirrors the home feed, see
+        GitHub issue #1331. -->
+        @if (searchTerm()) {
+        <ion-text color="primary" data-testid="empty-search-message">
+          {{ 'no-bucket-lists-match-search' | transloco: { term: searchTerm() }
+          }}
+        </ion-text>
+
+        <ion-button
+          fill="clear"
+          data-testid="clear-search"
+          (click)="clearSearch()"
+        >
+          {{ 'clear-search' | transloco }}
+        </ion-button>
+        } @else {
+        <ion-text color="primary" data-testid="empty-bucketlists-message">
+          {{ 'no-bucket-lists-yet-create-one' | transloco }}
+        </ion-text>
+        }
+      </div>
+      }
+    </div>
 
     <ion-alert
       [isOpen]="isAlertOpen()"

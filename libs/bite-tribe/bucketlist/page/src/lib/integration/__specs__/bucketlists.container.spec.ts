@@ -35,10 +35,8 @@ describe('BucketlistsContainerComponent', () => {
           provide: BucketlistsService,
           useValue: {
             bucketlists: signal(undefined),
-            sorting: signal(undefined),
             gotoBucketlistDetails: jest.fn(),
             createAndSaveToBucketList: jest.fn(),
-            sortingChange: jest.fn(),
             gotoEditBucketlist: jest.fn(),
             deleteBucketlist: jest.fn(),
             gotoRateBucketlist: jest.fn(),

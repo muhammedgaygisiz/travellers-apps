@@ -22,10 +22,6 @@ export class BucketlistsDataAccessService {
     initialValue: [] as Bucketlist[],
   });
 
-  sorting = toSignal(this.storeService.bucketlistSorting$, {
-    initialValue: 'name',
-  });
-
   userId = toSignal(this.storeService.userId$, {
     initialValue: '',
   });
@@ -41,10 +37,6 @@ export class BucketlistsDataAccessService {
 
   createAndSaveToBucketList(bucketListName: string): void {
     this.storeService.createBucketList(bucketListName);
-  }
-
-  setBucketlistSorting(sorting: string): void {
-    this.storeService.setBucketlistSorting(sorting);
   }
 
   deleteBucketlist(bucketlistId: string): void {

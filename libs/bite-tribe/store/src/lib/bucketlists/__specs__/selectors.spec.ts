@@ -1,14 +1,6 @@
 import * as fromSelectors from '../selectors';
 import { EntityState } from '@ngrx/entity';
 import type { Bucketlist } from 'model';
-import type { sortByCriteria } from '../utils/sort-by-criteria';
-
-const sortByCriteriaMock = jest.fn();
-jest.mock('../utils/sort-by-criteria', () => ({
-  sortByCriteria: (
-    ...args: Parameters<typeof sortByCriteria>
-  ): ReturnType<typeof sortByCriteria> => sortByCriteriaMock(...args),
-}));
 
 describe('Bucketlists - selectors', () => {
   const BUCKETLIST_1 = { id: '1', name: 'Bucketlist 1' } as Bucketlist;
@@ -69,20 +61,21 @@ describe('Bucketlists - selectors', () => {
   });
 
   describe('sortedBucketlists', () => {
-    beforeEach(() => {
-      sortByCriteriaMock.mockReturnValue([BUCKETLIST_1, BUCKETLIST_2]);
+    it('should return the bucketlists sorted by name ascending', () => {
+      const result = fromSelectors.sortedBucketlists.projector([
+        BUCKETLIST_2,
+        BUCKETLIST_1,
+      ]);
+
+      expect(result).toEqual([BUCKETLIST_1, BUCKETLIST_2]);
     });
 
-    it('should return the bucketlists sorted by name ascending', () => {
-      const result = fromSelectors.sortedBucketlists.projector(
-        [BUCKETLIST_2, BUCKETLIST_1],
-        'name',
-      );
-      expect(sortByCriteriaMock).toHaveBeenCalledWith(
-        [BUCKETLIST_2, BUCKETLIST_1],
-        'name',
-      );
-      expect(result).toEqual([BUCKETLIST_1, BUCKETLIST_2]);
+    it('should not mutate the incoming bucketlists', () => {
+      const bucketlists = [BUCKETLIST_2, BUCKETLIST_1];
+
+      fromSelectors.sortedBucketlists.projector(bucketlists);
+
+      expect(bucketlists).toEqual([BUCKETLIST_2, BUCKETLIST_1]);
     });
   });
 });

@@ -164,26 +164,6 @@ describe('Filtering And Sorting Reducer', () => {
     });
   });
 
-  describe('setBucketlistSorting', () => {
-    it('should set bucketlist sorting', () => {
-      const INITIAL_STATE: FilteringAndSortingSlice = {
-        sorting: { bucketlists: 'name' },
-      };
-      const NEW_STATE: FilteringAndSortingSlice = {
-        sorting: { bucketlists: 'createdAt' },
-      };
-
-      const setBucketlistSortingAction =
-        FilteringAndSortingActions.setBucketlistSorting({
-          sorting: 'createdAt',
-        });
-
-      expect(reducer(INITIAL_STATE, setBucketlistSortingAction)).toEqual({
-        ...NEW_STATE,
-      });
-    });
-  });
-
   describe('setRestaurantBitesSorting', () => {
     it('should set restaurant bites sorting', () => {
       const INITIAL_STATE: FilteringAndSortingSlice = {

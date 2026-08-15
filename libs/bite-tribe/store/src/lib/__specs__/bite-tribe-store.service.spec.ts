@@ -462,17 +462,6 @@ describe(BiteTribeStoreService.name, () => {
     ));
   });
 
-  describe('setBucketlistSorting', () => {
-    it('should dispatch setBucketlistSorting on BiteTribeStoreService', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.setBucketlistSorting('');
-        expect(dispatchSpy).toHaveBeenCalledTimes(1);
-      },
-    ));
-  });
-
   describe('setEditingBite', () => {
     it('should dispatch setEditingBite on BiteTribeStoreService', inject(
       [BiteTribeStoreService],

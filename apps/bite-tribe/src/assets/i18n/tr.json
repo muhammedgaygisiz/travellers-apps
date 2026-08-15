@@ -513,5 +513,8 @@
   "no-bites-found-be-the-first": "Bite bulunamadı. İlk sen ol.",
   "no-bites-match-search": "“{{term}}” ile eşleşen Bite yok.",
   "clear-search": "Aramayı temizle",
-  "search-bites-or-places": "Bite veya mekan ara..."
+  "search-bites-or-places": "Bite veya mekan ara...",
+  "search-bucket-lists": "Listelerde ara...",
+  "no-bucket-lists-match-search": "“{{term}}” ile eşleşen liste yok.",
+  "no-bucket-lists-yet-create-one": "Henüz liste yok. İlk listeni oluştur."
 }

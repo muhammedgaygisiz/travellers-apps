@@ -513,5 +513,8 @@
   "no-bites-found-be-the-first": "Nessun Bite trovato. Sii il primo.",
   "no-bites-match-search": "Nessun Bite corrisponde a «{{term}}».",
   "clear-search": "Cancella ricerca",
-  "search-bites-or-places": "Cerca Bites o luoghi..."
+  "search-bites-or-places": "Cerca Bites o luoghi...",
+  "search-bucket-lists": "Cerca liste dei desideri...",
+  "no-bucket-lists-match-search": "Nessuna lista dei desideri corrisponde a «{{term}}».",
+  "no-bucket-lists-yet-create-one": "Ancora nessuna lista dei desideri. Creane una."
 }

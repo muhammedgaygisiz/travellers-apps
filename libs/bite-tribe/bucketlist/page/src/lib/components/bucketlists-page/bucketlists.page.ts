@@ -13,21 +13,21 @@ import {
   IonAlert,
   IonBadge,
   IonButton,
-  IonChip,
+  IonButtons,
   IonContent,
   IonIcon,
   IonItem,
   IonLabel,
   IonList,
   IonProgressBar,
-  IonSelect,
-  IonSelectOption,
+  IonSearchbar,
   IonText,
 } from '@ionic/angular/standalone';
 import { CountPipe } from '../../pipes/count.pipe';
 import { ProgressPipe } from '../../pipes/progress.pipe';
 import type { OverlayEventDetail } from '@ionic/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { getSimilarityScore, normalize } from 'utils';
 
 const DELETE = 'delete';
 const CANCEL = 'cancel';
@@ -49,11 +49,10 @@ const CANCEL = 'cancel';
     ProgressPipe,
     IonBadge,
     IonAlert,
-    IonChip,
-    IonSelect,
-    IonSelectOption,
     IonText,
     IonButton,
+    IonButtons,
+    IonSearchbar,
     TranslocoPipe,
   ],
 })
@@ -61,22 +60,9 @@ export class BucketlistsPage {
   private readonly transloco = inject(TranslocoService);
 
   bucketlists = input<Bucketlist[]>([]);
-  sorting = input<string>('name');
-  sortingLabel = computed(() => {
-    const sorting = this.sorting();
-    switch (sorting) {
-      case 'name':
-        return this.transloco.translate('name');
-      case 'createdAt':
-        return this.transloco.translate('date');
-      default:
-        return this.transloco.translate('name');
-    }
-  });
 
   gotoBucketlistDetails = output<string>();
   newList = output<string>();
-  readonly sortingChange = output<string>();
   readonly editBucketlist = output<string>();
   readonly deleteBucketlist = output<string>();
   readonly rateBucketlist = output<string>();
@@ -85,10 +71,51 @@ export class BucketlistsPage {
   isDeleteAlertOpen = signal<boolean>(false);
   bucketlistToDelete = signal<string | null>(null);
 
-  emitSortingChange(event: { detail: { value: string } }): void {
-    if (event.detail) {
-      this.sortingChange.emit(event.detail.value);
+  isSearchVisible = signal(false);
+  searchTerm = signal('');
+
+  /**
+   * Bucket lists arrive already ordered by name, so the page only has to narrow
+   * them down. The sort control this replaced offered a choice nobody needed
+   * and rendered a raw translation key while doing it. See GitHub issue #1329.
+   */
+  filteredBucketlists = computed(() => {
+    const bucketlists = this.bucketlists() || [];
+    const rawTerm = this.searchTerm();
+
+    if (!rawTerm) {
+      return bucketlists;
     }
+
+    const term = normalize(rawTerm);
+
+    return bucketlists.filter((bucketlist) => {
+      const name = normalize(bucketlist.name);
+
+      return name.includes(term) || getSimilarityScore(term, name).length > 0;
+    });
+  });
+
+  toggleSearch(): void {
+    this.isSearchVisible.update((visible) => !visible);
+
+    if (!this.isSearchVisible()) {
+      this.searchTerm.set('');
+    }
+  }
+
+  /**
+   * Drops the term but keeps the searchbar open, so the empty result can offer
+   * its way out without the user having to reopen the search to type the next
+   * term. Mirrors the home feed, see GitHub issue #1331.
+   */
+  clearSearch(): void {
+    this.searchTerm.set('');
+  }
+
+  onSearchInput(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.searchTerm.set(inputElement.value ?? '');
   }
 
   newListInputs = [

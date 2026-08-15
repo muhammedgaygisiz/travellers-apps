@@ -5,7 +5,6 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
 
 const createBucketListMock = jest.fn();
-const setBucketlistSortingMock = jest.fn();
 const navigateForwardMock = jest.fn();
 const deleteBucketlistMock = jest.fn();
 const updateBucketlistNameMock = jest.fn();
@@ -23,12 +22,10 @@ jest.mock('@capacitor-firebase/firestore', () => ({
 
 const Mock = {
   sortedBucketlists$: of(undefined),
-  bucketlistSorting$: of(undefined),
   selectedBucketlist$: of(undefined),
   bitesBySelectedBucketlist$: of([]),
   userId$: of('user-123'),
   createBucketList: createBucketListMock,
-  setBucketlistSorting: setBucketlistSortingMock,
   navigateForward: navigateForwardMock,
   deleteBucketlist: deleteBucketlistMock,
   updateBucketlistName: updateBucketlistNameMock,
@@ -60,14 +57,6 @@ describe('BucketlistsDataAccessService', () => {
       const bucketListName = 'New Bucket List';
       service.createAndSaveToBucketList(bucketListName);
       expect(createBucketListMock).toHaveBeenCalledWith(bucketListName);
-    });
-  });
-
-  describe('setBucketlistSorting', () => {
-    it('should call setBucketlistSorting with correct value', () => {
-      const sortingValue = 'newest';
-      service.setBucketlistSorting(sortingValue);
-      expect(setBucketlistSortingMock).toHaveBeenCalledWith(sortingValue);
     });
   });
 

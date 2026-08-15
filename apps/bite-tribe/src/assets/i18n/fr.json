@@ -512,5 +512,6 @@
   "bucket-list-name-updated": "Nom de la liste de souhaits mis à jour !",
   "no-bites-found-be-the-first": "Aucun Bite trouvé. Sois le premier.",
   "no-bites-match-search": "Aucun Bite ne correspond à « {{term}} ».",
-  "clear-search": "Effacer la recherche"
+  "clear-search": "Effacer la recherche",
+  "search-bites-or-places": "Rechercher des Bites ou des lieux..."
 }

@@ -512,5 +512,6 @@
   "bucket-list-name-updated": "Yapılacaklar listesinin adı güncellendi!",
   "no-bites-found-be-the-first": "Bite bulunamadı. İlk sen ol.",
   "no-bites-match-search": "“{{term}}” ile eşleşen Bite yok.",
-  "clear-search": "Aramayı temizle"
+  "clear-search": "Aramayı temizle",
+  "search-bites-or-places": "Bite veya mekan ara..."
 }

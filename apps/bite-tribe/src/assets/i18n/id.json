@@ -512,5 +512,6 @@
   "bucket-list-name-updated": "Nama daftar keinginan berhasil diperbarui!",
   "no-bites-found-be-the-first": "Belum ada Bites. Jadilah yang pertama.",
   "no-bites-match-search": "Tidak ada Bites yang cocok dengan “{{term}}”.",
-  "clear-search": "Hapus pencarian"
+  "clear-search": "Hapus pencarian",
+  "search-bites-or-places": "Cari Bites atau tempat..."
 }

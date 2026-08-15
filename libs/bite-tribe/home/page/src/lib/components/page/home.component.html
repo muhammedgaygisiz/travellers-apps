@@ -136,7 +136,7 @@
       @if (isSearchVisible()) {
         <ion-searchbar
           data-testid="search-input"
-          placeholder="Search ..."
+          [placeholder]="'search-bites-or-places' | transloco"
           [value]="searchTerm()"
           (ionInput)="onSearchInput($event)"
           [animated]="true"

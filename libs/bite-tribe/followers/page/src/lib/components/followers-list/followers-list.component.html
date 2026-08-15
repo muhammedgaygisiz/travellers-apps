@@ -84,20 +84,9 @@
                 <ion-button
                   slot="end"
                   fill="outline"
-                  (click)="openConfirmationDialog($event)"
+                  (click)="openConfirmationDialog($event, user)"
                   >{{ 'unfollow' | transloco }}</ion-button
                 >
-
-                <ion-alert
-                  [isOpen]="isOpen()"
-                  header="{{ 'stop-following' | transloco }}"
-                  message="{{
-                    'are-you-sure-you-want-to-stop-following-username'
-                      | transloco: { username: user?.displayName }
-                  }}"
-                  [buttons]="confirmationButtons"
-                  (didDismiss)="handleConfirmationDismiss($event, user)"
-                />
               }
             </ion-item>
           } @else {
@@ -112,6 +101,23 @@
           }
         }
       </ion-list>
+    }
+
+    <!-- One alert for the whole list, created only once a row is awaiting
+    confirmation, and bound to that row's user. Per-row alerts sharing one
+    boolean opened every row at once and unfollowed the last one. See GitHub
+    issue #1334. -->
+    @if (userPendingUnfollow(); as pendingUser) {
+      <ion-alert
+        [isOpen]="true"
+        header="{{ 'stop-following' | transloco }}"
+        message="{{
+          'are-you-sure-you-want-to-stop-following-username'
+            | transloco: { username: pendingUser.displayName }
+        }}"
+        [buttons]="confirmationButtons"
+        (didDismiss)="handleConfirmationDismiss($event, pendingUser)"
+      />
     }
   </ion-content>
 </ta-page>

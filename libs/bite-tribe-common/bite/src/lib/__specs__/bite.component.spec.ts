@@ -260,6 +260,41 @@ describe('BiteComponent', () => {
     });
   });
 
+  describe('delete confirmation alert', () => {
+    const queryAlert = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('ion-alert');
+
+    it('should not be in the DOM while it is closed', () => {
+      expect(queryAlert()).toBeNull();
+    });
+
+    it('should not be in the DOM for a card that only shows the delete button', () => {
+      componentRef.setInput('showEditButton', true);
+      fixture.detectChanges();
+
+      expect(queryAlert()).toBeNull();
+    });
+
+    it('should be created once delete is invoked', () => {
+      component.openConfirmationDialog();
+      fixture.detectChanges();
+
+      expect(queryAlert()).not.toBeNull();
+    });
+
+    it('should be removed again after the confirmation is dismissed', () => {
+      component.openConfirmationDialog();
+      fixture.detectChanges();
+
+      component.handleConfirmationDismiss({
+        detail: { role: 'cancel' },
+      } as CustomEvent<OverlayEventDetail>);
+      fixture.detectChanges();
+
+      expect(queryAlert()).toBeNull();
+    });
+  });
+
   describe('isOwnUnratedBite', () => {
     it('should return true when bite belongs to current user and has no rating', () => {
       componentRef.setInput('bite', { ...mockBite, userId: 'user1' });

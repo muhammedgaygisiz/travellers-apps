@@ -160,12 +160,12 @@
   <ng-template>
     <lib-restaurant-selector
       class="ion-page"
-      [restaurants]="nearbyRestaurants()"
+      [restaurants]="restaurantsNearBite()"
       [selectedRestaurant]="biteFormGroup.get('place')?.value || ''"
       [googlePlaces]="googlePlaces()"
       [googlePlacesLoading]="googlePlacesLoading()"
-      [nearbyGooglePlaces]="nearbyGooglePlaces()"
-      [nearbyGooglePlacesLoading]="nearbyGooglePlacesLoading()"
+      [nearbyGooglePlaces]="googleFallbackPlaces()"
+      [nearbyGooglePlacesLoading]="googleFallbackLoading()"
       [userPosition]="position()"
       [bitePosition]="currentPosition() ?? undefined"
       (restaurantSelected)="onRestaurantSelected($event)"

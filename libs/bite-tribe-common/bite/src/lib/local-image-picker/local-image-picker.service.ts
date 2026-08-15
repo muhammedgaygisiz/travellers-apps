@@ -1,7 +1,7 @@
 import { EventEmitter, inject, Injectable, signal } from '@angular/core';
 import { Directory, FileInfo, Filesystem } from '@capacitor/filesystem';
 import { ModalController } from '@ionic/angular/standalone';
-import { localImageSrc } from 'utils';
+import { localImageDirectory, localImageSrc } from 'utils';
 import {
   LocalImagePickerComponent,
   type LocalImage,
@@ -57,13 +57,24 @@ export class LocalImagePickerService {
   }
 
   /**
-   * The locally saved photos, newest first. An unreadable directory yields an
-   * empty list, which the picker reports as "no local images found".
+   * The signed-in user's locally saved photos, newest first. An unreadable
+   * directory yields an empty list, which the picker reports as "no local
+   * images found" - as does having nobody signed in to own one.
+   *
+   * Scoped to the user rather than the device so a shared browser profile does
+   * not offer one account the photos of the previous one. See GitHub issue
+   * #1328.
    */
   private async loadImages(): Promise<LocalImage[]> {
     try {
+      const path = await localImageDirectory();
+
+      if (!path) {
+        return [];
+      }
+
       const { files } = await Filesystem.readdir({
-        path: '',
+        path,
         directory: Directory.Documents,
       });
 

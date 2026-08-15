@@ -1,6 +1,7 @@
 import { ErrorHandler } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Directory, Filesystem } from '@capacitor/filesystem';
+import { localImageDirectory } from 'utils';
 import { GalleryService } from '../gallery.service';
 
 jest.mock('@capacitor/filesystem', () => ({
@@ -12,15 +13,20 @@ jest.mock('@capacitor/filesystem', () => ({
 }));
 
 // Turning a stored file into a loadable URL differs per platform and is covered
-// by its own tests; here it only has to be deterministic.
+// by its own tests; here it only has to be deterministic. The per-user
+// directory has its own tests too, so here it is just a name.
 jest.mock('utils', () => ({
   localImageSrc: jest.fn((_name: string, uri: string) => Promise.resolve(uri)),
+  localImageDirectory: jest.fn(() => Promise.resolve('user-1')),
 }));
+
+const localImageDirectoryMock = localImageDirectory as jest.Mock;
 
 describe(GalleryService.name, () => {
   let service: GalleryService;
 
   beforeEach(() => {
+    localImageDirectoryMock.mockResolvedValue('user-1');
     TestBed.configureTestingModule({});
     service = TestBed.inject(GalleryService);
   });
@@ -40,13 +46,37 @@ describe(GalleryService.name, () => {
     await service.loadImages();
 
     expect(Filesystem.readdir).toHaveBeenCalledWith({
-      path: '',
+      path: 'user-1',
       directory: Directory.Documents,
     });
     expect(service.images()).toEqual([
       { name: 'newer.PNG', src: 'newer-uri' },
       { name: 'older.jpg', src: 'older-uri' },
     ]);
+  });
+
+  // A second account on the same browser profile must not be shown the photos
+  // of the first one. See GitHub issue #1328.
+  it('reads only the directory of the signed-in user', async () => {
+    localImageDirectoryMock.mockResolvedValue('user-2');
+    (Filesystem.readdir as jest.Mock).mockResolvedValue({ files: [] });
+
+    await service.loadImages();
+
+    expect(Filesystem.readdir).toHaveBeenCalledWith({
+      path: 'user-2',
+      directory: Directory.Documents,
+    });
+  });
+
+  it('shows nothing when nobody is signed in', async () => {
+    localImageDirectoryMock.mockResolvedValue(undefined);
+
+    await service.loadImages();
+
+    expect(Filesystem.readdir).not.toHaveBeenCalled();
+    expect(service.images()).toEqual([]);
+    expect(service.loading()).toBe(false);
   });
 
   it('deletes only the loaded gallery images and reloads the list', async () => {
@@ -61,7 +91,7 @@ describe(GalleryService.name, () => {
 
     expect(Filesystem.deleteFile).toHaveBeenCalledTimes(2);
     expect(Filesystem.deleteFile).toHaveBeenCalledWith({
-      path: 'first.jpg',
+      path: 'user-1/first.jpg',
       directory: Directory.Documents,
     });
     expect(service.images()).toEqual([]);

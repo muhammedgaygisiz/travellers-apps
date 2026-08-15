@@ -9,11 +9,8 @@ jest.mock('@capacitor/core', () => ({
   },
 }));
 
-// The shared mock under `__mocks__` stubs `Filesystem.readFile` only, and this
-// helper also names the directory it reads from.
 jest.mock('@capacitor/filesystem', () => ({
   Filesystem: { readFile: jest.fn() },
-  Directory: { Documents: 'DOCUMENTS' },
 }));
 
 const isNativePlatform = Capacitor.isNativePlatform as jest.Mock;
@@ -52,10 +49,22 @@ describe('localImageSrc', () => {
 
       const src = await localImageSrc(
         'bites_abc.jpg',
-        'DOCUMENTS/bites_abc.jpg',
+        '/DOCUMENTS/user-1/bites_abc.jpg',
       );
 
       expect(src).toBe('data:image/jpeg;base64,AAECAw==');
+    });
+
+    // The file name alone no longer locates the file: local copies live in a
+    // per-user directory since issue #1328.
+    it('reads the stored path rather than the bare file name', async () => {
+      readFile.mockResolvedValue({ data: 'AAECAw==' });
+
+      await localImageSrc('bites_abc.jpg', '/DOCUMENTS/user-1/bites_abc.jpg');
+
+      expect(readFile).toHaveBeenCalledWith({
+        path: '/DOCUMENTS/user-1/bites_abc.jpg',
+      });
     });
 
     it.each([

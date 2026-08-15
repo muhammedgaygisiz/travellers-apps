@@ -36,6 +36,11 @@ export { byDate } from './lib/by-date';
 export type { Login } from './lib/login';
 export { dataUrlToBlob } from './lib/data-url-to-blob';
 export { localImageSrc } from './lib/local-image-src';
+export {
+  localImageDirectory,
+  localImagePath,
+  resetLocalImageDirectoryForTesting,
+} from './lib/local-image-directory';
 export { guessExtFromContentType } from './lib/guess-ext-from-content-type';
 export { getDownloadUrlFromFirebaseStorage } from './lib/get-download-url-from-firebase-storage';
 export { storagePathFromDownloadUrl } from './lib/storage-path-from-download-url';

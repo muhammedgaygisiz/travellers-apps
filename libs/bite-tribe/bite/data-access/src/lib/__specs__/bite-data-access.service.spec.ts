@@ -58,6 +58,7 @@ describe(BiteDataAccessService.name, () => {
   let store: {
     saveNewBite: jest.Mock;
     savedNewBite: jest.Mock;
+    createdNewBite: jest.Mock;
     saveEditedBite: jest.Mock;
     setEditingBite: jest.Mock;
     clearCachedBite: jest.Mock;
@@ -89,6 +90,7 @@ describe(BiteDataAccessService.name, () => {
     store = {
       saveNewBite: jest.fn(),
       savedNewBite: jest.fn(),
+      createdNewBite: jest.fn(),
       saveEditedBite: jest.fn(),
       setEditingBite: jest.fn(),
       clearCachedBite: jest.fn(),
@@ -229,6 +231,12 @@ describe(BiteDataAccessService.name, () => {
       expect(store.savedNewBite).toHaveBeenLastCalledWith(
         expect.objectContaining({ imageStatus: 'pending' }),
       );
+    });
+
+    it('should not report a retried bite as created', async () => {
+      await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+
+      expect(store.createdNewBite).not.toHaveBeenCalled();
     });
 
     it('should upload the chosen file', async () => {
@@ -417,6 +425,14 @@ describe(BiteDataAccessService.name, () => {
   });
 
   describe('submitNewBite', () => {
+    it('should report the bite as created, so the profile count moves', async () => {
+      await service.submitNewBite(biteWithImage());
+
+      expect(store.createdNewBite).toHaveBeenCalledWith(
+        expect.objectContaining({ id: SAVED_BITE_ID }),
+      );
+    });
+
     it('should mark the image as pending while it uploads', async () => {
       await service.submitNewBite(biteWithImage());
 

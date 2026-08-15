@@ -1,7 +1,7 @@
 import { AppActions } from '../actions';
 import { reducer } from '../reducer';
 import { AppSlice } from '../app-slice.model';
-import type { PublicUser, Settings } from 'model';
+import type { Bite, PublicUser, Settings } from 'model';
 import { BiteActions } from '../../bites/actions';
 import { fromAuth } from 'ta-firestore';
 import { routerRequestAction } from '@ngrx/router-store';
@@ -462,6 +462,78 @@ describe('App Reducer', () => {
       expect(reducer(INITIAL_STATE, AppActions.unfollowedUser())).toEqual({
         profileMetadata: { followers: 0, following: 5, isFollowedByMe: false },
       } as AppSlice);
+    });
+  });
+
+  describe('createdBite', () => {
+    const NEW_BITE = { id: 'bite-1' } as Bite;
+
+    it('should raise the bite count the profile reads', () => {
+      const INITIAL_STATE = {
+        profile: { displayName: 'Mo', biteCount: 2 } as PublicUser,
+      } as AppSlice;
+
+      expect(
+        reducer(INITIAL_STATE, BiteActions.createdBite({ bite: NEW_BITE }))
+          .profile,
+      ).toEqual({ displayName: 'Mo', biteCount: 3 });
+    });
+
+    it('should leave a profile without an aggregate to the loaded bites', () => {
+      const INITIAL_STATE = {
+        profile: { displayName: 'Mo' } as PublicUser,
+      } as AppSlice;
+
+      expect(
+        reducer(INITIAL_STATE, BiteActions.createdBite({ bite: NEW_BITE }))
+          .profile,
+      ).toEqual({ displayName: 'Mo' });
+    });
+
+    it('should do nothing without a profile', () => {
+      const INITIAL_STATE = {} as AppSlice;
+
+      expect(
+        reducer(INITIAL_STATE, BiteActions.createdBite({ bite: NEW_BITE }))
+          .profile,
+      ).toBeUndefined();
+    });
+
+    it('should not raise the count for a bite that was only edited', () => {
+      const INITIAL_STATE = {
+        profile: { displayName: 'Mo', biteCount: 2 } as PublicUser,
+      } as AppSlice;
+
+      expect(
+        reducer(INITIAL_STATE, BiteActions.savedBite({ bite: NEW_BITE }))
+          .profile,
+      ).toEqual({ displayName: 'Mo', biteCount: 2 });
+    });
+  });
+
+  describe('deletedBite', () => {
+    const DELETED_BITE = { id: 'bite-1' } as Bite;
+
+    it('should lower the bite count the profile reads', () => {
+      const INITIAL_STATE = {
+        profile: { displayName: 'Mo', biteCount: 3 } as PublicUser,
+      } as AppSlice;
+
+      expect(
+        reducer(INITIAL_STATE, BiteActions.deletedBite({ bite: DELETED_BITE }))
+          .profile,
+      ).toEqual({ displayName: 'Mo', biteCount: 2 });
+    });
+
+    it('should not lower the bite count below zero', () => {
+      const INITIAL_STATE = {
+        profile: { displayName: 'Mo', biteCount: 0 } as PublicUser,
+      } as AppSlice;
+
+      expect(
+        reducer(INITIAL_STATE, BiteActions.deletedBite({ bite: DELETED_BITE }))
+          .profile,
+      ).toEqual({ displayName: 'Mo', biteCount: 0 });
     });
   });
 });

@@ -5,21 +5,16 @@ import {
   shouldUpdateUserMetadata,
 } from '../utils/user-metadata-throttle';
 import { inject, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, take } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type { PublicUser } from 'model';
-import { TestScheduler } from 'rxjs/testing';
 import { ErrorHandler } from '@angular/core';
 import { getDownloadUrlFromFirebaseStorage, isBase64String } from 'utils';
 import { deleteCurrentImage } from '../utils/delete-current-image';
 import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
 import { updateProfileWithImagePathFromFirebaseStorage } from '../bite-api/utils/update-profile-with-image-path-from-firestorage';
 import { loadProfileById } from '../bite-api/utils/load-profile-by-id';
-
-const assertDeepEqual = (actual: any, expected: any): void => {
-  expect(actual).toEqual(expected);
-};
 
 jest.mock('@capacitor-firebase/firestore');
 jest.mock('@capacitor-firebase/functions', () => ({
@@ -73,13 +68,11 @@ const MockedErrorHandler = {
 };
 
 describe(ProfileApiService.name, () => {
-  let scheduler: TestScheduler;
   const mockDate = new Date('2024-03-15T12:00:00Z');
 
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(mockDate);
-    scheduler = new TestScheduler(assertDeepEqual);
     TestBed.configureTestingModule({
       providers: [
         { provide: AuthService, useValue: MockedAuthService },
@@ -95,88 +88,179 @@ describe(ProfileApiService.name, () => {
     },
   ));
 
-  describe('given no login', () => {
-    let nextSpy: jest.SpyInstance;
+  describe('publicProfile$', () => {
+    let addCollectionSnapshotListenerSpy: jest.SpyInstance;
+    let removeSnapshotListenerSpy: jest.SpyInstance;
 
-    beforeEach(() => {
-      TestBed.overrideProvider(AuthService, {
-        useValue: { ...MockedAuthService, isLoggedIn: false },
-      });
+    const CALLBACK_ID = 'mocked-callback-id';
+
+    const snapshotOf = (data: Record<string, unknown>): any => ({
+      snapshots: [{ id: 'user-doc', data }],
     });
 
-    it('should skip execution', inject(
-      [ProfileApiService],
-      (service: ProfileApiService) => {
-        nextSpy = jest
-          .spyOn((service as any).profileChannel$, 'next')
-          .mockImplementation();
-
-        scheduler.run(({ expectObservable }) => {
-          const expected = '';
-
-          expectObservable(service.publicProfile$).toBe(expected);
-        });
-
-        expect(nextSpy).not.toHaveBeenCalled();
-      },
-    ));
-  });
-
-  describe('startListener', () => {
-    let addCollectionSnapshotListenerSpy: jest.SpyInstance;
+    /** Lets the pending listener registration resolve. */
+    const settleRegistration = (): Promise<void> => Promise.resolve();
 
     beforeEach(() => {
+      // The spies outlive the test that installed them, so each case has to
+      // start from a clean call history to read `mock.calls[0]` as its own.
       addCollectionSnapshotListenerSpy = jest
         .spyOn(FirebaseFirestore, 'addCollectionSnapshotListener')
-        .mockResolvedValue('mocked-callback-id');
+        .mockClear()
+        .mockResolvedValue(CALLBACK_ID);
+      removeSnapshotListenerSpy = jest
+        .spyOn(FirebaseFirestore, 'removeSnapshotListener')
+        .mockClear()
+        .mockResolvedValue();
     });
 
-    it('should start the listener', inject(
+    it('should listen to the signed-in user document', inject(
       [ProfileApiService],
-      async (service: ProfileApiService) => {
-        await service.startListener();
+      (service: ProfileApiService) => {
+        const subscription = service.publicProfile$.subscribe();
 
-        expect(addCollectionSnapshotListenerSpy).toHaveBeenCalled();
+        expect(addCollectionSnapshotListenerSpy).toHaveBeenCalledWith(
+          {
+            reference: 'users',
+            compositeFilter: {
+              type: 'and',
+              queryConstraints: [
+                {
+                  type: 'where',
+                  fieldPath: 'userId',
+                  opStr: '==',
+                  value: '123',
+                },
+              ],
+            },
+          },
+          expect.any(Function),
+        );
+
+        subscription.unsubscribe();
       },
     ));
 
-    describe('given passed callback of listener', () => {
-      it('should handle response when listener callback is invoked', inject(
+    it('should emit the document the listener delivers', inject(
+      [ProfileApiService],
+      (service: ProfileApiService) => {
+        const emitted: unknown[] = [];
+        const subscription = service.publicProfile$.subscribe((profile) =>
+          emitted.push(profile),
+        );
+
+        const callback = addCollectionSnapshotListenerSpy.mock.calls[0][1];
+        callback(snapshotOf({ userId: '123', displayName: 'Mo' }));
+
+        expect(emitted).toEqual([
+          { userId: '123', displayName: 'Mo', id: 'user-doc' },
+        ]);
+
+        subscription.unsubscribe();
+      },
+    ));
+
+    it('should ignore a snapshot that carries no document', inject(
+      [ProfileApiService],
+      (service: ProfileApiService) => {
+        const emitted: unknown[] = [];
+        const subscription = service.publicProfile$.subscribe((profile) =>
+          emitted.push(profile),
+        );
+
+        const callback = addCollectionSnapshotListenerSpy.mock.calls[0][1];
+        callback({ snapshots: [] });
+
+        expect(emitted).toEqual([]);
+
+        subscription.unsubscribe();
+      },
+    ));
+
+    // A snapshot listener bills a read per change for as long as it is
+    // registered, and the native one survives the RxJS teardown by itself, so
+    // the subscription has to take it down with it (issue #1310).
+    it('should remove the listener when the subscription ends', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const subscription = service.publicProfile$.subscribe();
+        await settleRegistration();
+
+        subscription.unsubscribe();
+
+        expect(removeSnapshotListenerSpy).toHaveBeenCalledWith({
+          callbackId: CALLBACK_ID,
+        });
+      },
+    ));
+
+    // What a single-snapshot consumer actually does: the listener answers from
+    // cache and `take(1)` unsubscribes before the registration promise that
+    // holds the only removable id has even resolved.
+    it('should remove a listener whose registration outlived its subscription', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        service.publicProfile$.pipe(take(1)).subscribe();
+
+        const callback = addCollectionSnapshotListenerSpy.mock.calls[0][1];
+        callback(snapshotOf({ userId: '123' }));
+
+        await settleRegistration();
+
+        expect(removeSnapshotListenerSpy).toHaveBeenCalledWith({
+          callbackId: CALLBACK_ID,
+        });
+      },
+    ));
+
+    it('should report a listener it cannot remove instead of throwing', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        removeSnapshotListenerSpy.mockRejectedValue(new Error('bridge gone'));
+
+        const subscription = service.publicProfile$.subscribe();
+        await settleRegistration();
+        subscription.unsubscribe();
+        await settleRegistration();
+
+        expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(
+          new Error('bridge gone'),
+        );
+      },
+    ));
+
+    describe('given no login', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(AuthService, {
+          useValue: { ...MockedAuthService, isLoggedIn$: of(false) },
+        });
+      });
+
+      it('should not register a listener', inject(
         [ProfileApiService],
-        async (service: ProfileApiService) => {
-          await service.startListener();
-          const mockDoc = {
-            snapshots: [
-              {
-                data: {
-                  userId: '123',
-                  name: 'Test User',
-                },
-              },
-            ],
-          };
+        (service: ProfileApiService) => {
+          const emitted: unknown[] = [];
+          const subscription = service.publicProfile$.subscribe((profile) =>
+            emitted.push(profile),
+          );
 
-          const callback = addCollectionSnapshotListenerSpy.mock.calls[0][1];
+          expect(addCollectionSnapshotListenerSpy).not.toHaveBeenCalled();
+          expect(emitted).toEqual([]);
 
-          callback(mockDoc);
+          subscription.unsubscribe();
         },
       ));
     });
   });
 
   describe('handleResponse', () => {
-    let nextSpy: jest.SpyInstance;
-
-    it('should handle the response and update profile channel', inject(
+    it('should map the document and keep its id', inject(
       [ProfileApiService],
       (service: ProfileApiService) => {
-        nextSpy = jest
-          .spyOn((service as any).profileChannel$, 'next')
-          .mockImplementation();
-
         const mockDoc = {
           snapshots: [
             {
+              id: 'user-doc',
               data: {
                 userId: '123',
                 name: 'Test User',
@@ -185,31 +269,19 @@ describe(ProfileApiService.name, () => {
           ],
         };
 
-        service.handleResponse(mockDoc);
-
-        expect(nextSpy).toHaveBeenCalledWith({
+        expect(service.handleResponse(mockDoc)).toEqual({
           userId: '123',
           name: 'Test User',
+          id: 'user-doc',
         });
       },
     ));
-  });
 
-  describe('stopProfileListener', () => {
-    it('should call stopped$.next and removeSnapshotListener', inject(
+    it('should return nothing when the snapshot has no data', inject(
       [ProfileApiService],
-      async (service: ProfileApiService) => {
-        const removeSnapshotListenerSpy = jest
-          .spyOn(FirebaseFirestore, 'removeSnapshotListener')
-          .mockResolvedValue();
-
-        const callbackId = 'test-callback-id';
-
-        await service.stopProfileListener(callbackId);
-
-        expect(removeSnapshotListenerSpy).toHaveBeenCalledWith({
-          callbackId,
-        });
+      (service: ProfileApiService) => {
+        expect(service.handleResponse({ snapshots: [] })).toBeUndefined();
+        expect(service.handleResponse(null)).toBeUndefined();
       },
     ));
   });

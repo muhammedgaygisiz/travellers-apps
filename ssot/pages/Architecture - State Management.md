@@ -40,6 +40,20 @@ A substring test cannot tell a route segment from a value that happens to contai
 
 The same substring style is still used elsewhere in the store, listed under Current Limitations.
 
+## The Signed-In User's Profile Document Is Not Live
+
+`loadPublicProfile$` reads `api.publicProfile$` with `take(1)` after `loadedUser`, so the `app` slice holds a snapshot of the signed-in user's document taken at login and nothing refreshes it for the rest of the session. This is deliberate, and it is a cost decision rather than an oversight.
+
+`ProfileApiService.publicProfile$` is backed by a real Firestore snapshot listener, and a listener bills a document read for its first snapshot **and for every change after it**. The user document is written far more often than it is read: the `biteCount` triggers, the follower-count trigger, `updateLastSeen`, `updateUserMetadata`, and the email-verification sync all touch it. A session-long listener would bill every one of those to deliver updates the store has no consumer for.
+
+**A snapshot listener must be owned by the subscription that wants it.** The native listener registered through `addCollectionSnapshotListener` outlives any RxJS teardown by itself — removing it takes an explicit `removeSnapshotListener` with the callback id — so `publicProfile$` registers it per subscription and removes it in the teardown, including when the subscription ends before the registration promise resolves. A single-snapshot consumer therefore pays for exactly one read. A consumer that wants a live profile only has to stay subscribed.
+
+The consequence is that every server-maintained aggregate on that document is stale in the client the moment a trigger writes it: `biteCount` from `incrementBiteCountOnBiteCreate` and `decrementBiteCountOnBiteDelete`, and the follower counters. The server value itself is not late — the trigger commits within seconds — which is why only an app restart used to repair the count.
+
+Aggregates the user moves themselves are therefore corrected optimistically in the reducer, because the delta is exact and the next login reconciles it: followers on `followedUser`/`unfollowedUser`, and `biteCount` on `createdBite`/`deletedBite`. A profile with no aggregate at all is left alone so the view keeps counting what it loaded. See [issue \#1310](https://github.com/muhammedgaygisiz/travellers-apps/issues/1310).
+
+Anything reading such an aggregate should treat it as a lower bound rather than as truth when it has a fully loaded list to compare against. Drift from a source that is not the user's own action — the weekly `resyncBiteCounts` job, a write from another device — is only reconciled at the next login, which is the accepted trade for not holding the listener.
+
 ## Code Anchors
 
 ```text

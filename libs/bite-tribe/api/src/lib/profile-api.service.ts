@@ -1,13 +1,6 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from 'ta-firestore';
-import {
-  BehaviorSubject,
-  skip,
-  skipWhile,
-  Subject,
-  switchMap,
-  takeUntil,
-} from 'rxjs';
+import { EMPTY, Observable, skipWhile, switchMap } from 'rxjs';
 import {
   DocumentData,
   DocumentSnapshot,
@@ -42,33 +35,38 @@ export class ProfileApiService {
   private readonly authService = inject(AuthService);
   private readonly errorHandler = inject(ErrorHandler);
   private readonly platform = inject(Platform);
-  private readonly profileChannel$ = new BehaviorSubject<
-    (PublicUser & { id?: string }) | null
-  >(null);
-
   isWeb = signal(!this.platform.is('hybrid'));
 
-  private readonly stopped$ = new Subject<void>();
-  profileCallbackId = '';
+  /**
+   * The signed-in user's own document, for as long as someone is listening.
+   *
+   * The listener is owned by the subscription. A Firestore snapshot listener
+   * bills a document read for its first snapshot and for every change after it,
+   * and the native one outlives any RxJS teardown on its own, so registering it
+   * without owning its removal meant paying for updates nobody read until the
+   * process ended — and paying twice after a sign-out and back in, because the
+   * second registration overwrote the only id that could have removed the first
+   * (issue #1310). Whoever subscribes now decides what that costs: the store
+   * takes a single snapshot at login, and the listener goes with it.
+   *
+   * A consumer that wants a live profile only has to stay subscribed. See
+   * [[Architecture - State Management]] for what the store does instead.
+   */
+  public publicProfile$: Observable<PublicUser & { id?: string }> =
+    this.authService.isLoggedIn$.pipe(
+      skipWhile((isLoggedIn) => !isLoggedIn),
+      switchMap((isLoggedIn) =>
+        isLoggedIn ? this.profileSnapshots$() : EMPTY,
+      ),
+    );
 
-  public publicProfile$ = this.authService.isLoggedIn$.pipe(
-    skipWhile((isLoggedIn) => !isLoggedIn),
-    switchMap((isLoggedIn) => {
-      if (isLoggedIn) {
-        this.startListener();
-      }
+  private profileSnapshots$(): Observable<PublicUser & { id?: string }> {
+    return new Observable<PublicUser & { id?: string }>((subscriber) => {
+      const user = this.authService.getUser();
+      let callbackId: string | undefined;
+      let unsubscribed = false;
 
-      return this.profileChannel$.pipe(skip(1), takeUntil(this.stopped$));
-    }),
-  );
-
-  async startListener(): Promise<
-    BehaviorSubject<(PublicUser & { id?: string }) | null>
-  > {
-    const user = this.authService.getUser();
-
-    this.profileCallbackId =
-      await FirebaseFirestore.addCollectionSnapshotListener(
+      void FirebaseFirestore.addCollectionSnapshotListener(
         {
           reference: `${USERS_COLLECTION}`,
           compositeFilter: {
@@ -83,33 +81,61 @@ export class ProfileApiService {
             ],
           },
         },
-        (publicProfileDoc) => this.handleResponse(publicProfileDoc),
-      );
+        (publicProfileDoc) => {
+          const profile = this.handleResponse(publicProfileDoc);
 
-    return this.profileChannel$;
+          if (profile) {
+            subscriber.next(profile);
+          }
+        },
+      ).then((id) => {
+        callbackId = id;
+
+        // The subscription can end before the registration resolves — a
+        // consumer taking a single snapshot off a listener that answers
+        // immediately does exactly that — so the teardown below may already
+        // have run with no id to act on.
+        if (unsubscribed) {
+          void this.removeListener(id);
+        }
+      });
+
+      return (): void => {
+        unsubscribed = true;
+
+        if (callbackId) {
+          void this.removeListener(callbackId);
+        }
+      };
+    });
+  }
+
+  private async removeListener(callbackId: string): Promise<void> {
+    try {
+      await FirebaseFirestore.removeSnapshotListener({ callbackId });
+    } catch (error) {
+      // A listener that cannot be removed is a leak worth reporting, but it
+      // must not take down the flow that was merely finished with it.
+      this.errorHandler.handleError(error);
+    }
   }
 
   handleResponse(
     publicProfileDoc: {
       snapshots?: Array<{ id?: string; data?: DocumentData | null }>;
     } | null,
-  ): void {
+  ): (PublicUser & { id?: string }) | undefined {
     const snapshot = publicProfileDoc?.snapshots?.[0];
     const publicProfile = snapshot?.data;
 
-    if (publicProfile) {
-      this.profileChannel$.next({
-        ...publicProfile,
-        ...(snapshot.id ? { id: snapshot.id } : {}),
-      } as PublicUser & { id?: string });
+    if (!publicProfile) {
+      return undefined;
     }
-  }
 
-  async stopProfileListener(callbackId: string): Promise<void> {
-    this.stopped$.next();
-    if (callbackId) {
-      await FirebaseFirestore.removeSnapshotListener({ callbackId });
-    }
+    return {
+      ...publicProfile,
+      ...(snapshot.id ? { id: snapshot.id } : {}),
+    } as PublicUser & { id?: string };
   }
 
   async saveUser(isPublic: boolean): Promise<void> {

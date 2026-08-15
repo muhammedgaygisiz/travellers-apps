@@ -426,6 +426,19 @@ export class BiteTribeStoreService implements StoreService {
     );
   }
 
+  /**
+   * Reports a Bite that has just been created, as opposed to one that was
+   * edited or whose local image state changed. Only this raises the signed-in
+   * user's `biteCount` (issue #1310).
+   */
+  createdNewBite(newBite: Bite): void {
+    this.store.dispatch(
+      BiteActions.createdBite({
+        bite: newBite,
+      }),
+    );
+  }
+
   saveNewBite(): void {
     this.store.dispatch(BiteActions.saveNewBite());
   }

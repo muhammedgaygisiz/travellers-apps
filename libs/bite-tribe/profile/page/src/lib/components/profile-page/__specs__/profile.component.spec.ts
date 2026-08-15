@@ -31,6 +31,11 @@ describe('ProfileComponent', () => {
     compRef = fixture.componentRef;
   });
 
+  const renderedHeadlineCount = (): string | undefined =>
+    (fixture.nativeElement as HTMLElement)
+      .querySelector('[data-testid="profile-headline-count"]')
+      ?.textContent?.trim();
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -178,6 +183,35 @@ describe('ProfileComponent', () => {
       compRef.setInput('user', {});
 
       expect(component.biteCount()).toBe(bitesArray.length);
+    });
+
+    // The header used to report an aggregate that predated the user's own
+    // write, next to a list that already showed the new Bite (issue #1310).
+    it('should render the count the store hands it', () => {
+      compRef.setInput('user', { displayName: 'Mo', biteCount: 3 });
+      compRef.setInput('bites', [{}, {}, {}]);
+
+      fixture.detectChanges();
+
+      expect(renderedHeadlineCount()).toBe('3');
+    });
+
+    it('should never render fewer bites than the list under it shows', () => {
+      compRef.setInput('user', { displayName: 'Mo', biteCount: 2 });
+      compRef.setInput('bites', [{}, {}, {}]);
+
+      fixture.detectChanges();
+
+      expect(renderedHeadlineCount()).toBe('3');
+    });
+
+    it('should keep the aggregate when the list is a paginated subset', () => {
+      compRef.setInput('user', { displayName: 'Mo', biteCount: 120 });
+      compRef.setInput('bites', [{}, {}, {}]);
+
+      fixture.detectChanges();
+
+      expect(renderedHeadlineCount()).toBe('120');
     });
   });
 

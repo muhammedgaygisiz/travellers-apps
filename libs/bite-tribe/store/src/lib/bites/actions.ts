@@ -14,6 +14,11 @@ export const BiteActions = createActionGroup({
     'Save new bite': emptyProps(),
     'Save existing bite': props<{ bite: Bite }>(),
     'Saved bite': props<{ bite: Bite }>(),
+    // The first successful write of a Bite that did not exist before, kept
+    // apart from `Saved bite` because that one also carries an edit and every
+    // local image-upload state change of a Bite that is already counted. Only a
+    // creation moves the signed-in user's `biteCount` aggregate (issue #1310).
+    'Created bite': props<{ bite: Bite }>(),
     'Error saving bite': props<{ bite: Bite }>(),
     'Cache bite': props<{ bite: Partial<Bite> }>(),
     // Ends a Bite creation session that was seeded with a prefilled draft (from

@@ -1,6 +1,6 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { Directory, FileInfo, Filesystem } from '@capacitor/filesystem';
-import { localImageSrc } from 'utils';
+import { localImageDirectory, localImageSrc } from 'utils';
 import { biteIdFromImageName } from './bite-id-from-image-name';
 
 const IMAGE_FILE_PATTERN = /\.(gif|heic|heif|jpe?g|png|webp)$/i;
@@ -29,12 +29,28 @@ export class GalleryService {
     this.scrollTop.set(scrollTop);
   }
 
+  /**
+   * The photos this device stored for the signed-in user.
+   *
+   * Reading their own directory rather than the whole device is what keeps a
+   * shared browser profile from showing one account the previous account's
+   * photos - and, through the file names, which Bites those belonged to. See
+   * GitHub issue #1328 and `localImageDirectory`.
+   */
   async loadImages(): Promise<void> {
     this.loading.set(true);
 
     try {
+      const path = await localImageDirectory();
+
+      if (!path) {
+        this.images.set([]);
+
+        return;
+      }
+
       const { files } = await Filesystem.readdir({
-        path: '',
+        path,
         directory: Directory.Documents,
       });
 
@@ -59,11 +75,17 @@ export class GalleryService {
   }
 
   async deleteAllImages(): Promise<void> {
+    const directory = await localImageDirectory();
+
+    if (!directory) {
+      return;
+    }
+
     const deletionSucceeded = await Promise.all(
       this.images().map(async ({ name }) => {
         try {
           await Filesystem.deleteFile({
-            path: name,
+            path: `${directory}/${name}`,
             directory: Directory.Documents,
           });
           return true;

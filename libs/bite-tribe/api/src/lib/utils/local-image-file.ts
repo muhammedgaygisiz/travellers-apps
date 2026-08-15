@@ -1,4 +1,5 @@
 import { Directory, Filesystem } from '@capacitor/filesystem';
+import { localImageDirectory } from 'utils';
 
 /**
  * Deterministic on-device filename for the local copy of an uploaded image.
@@ -24,6 +25,9 @@ export type LocalImageFile = { name: string; uri: string };
  * Finds the local copy previously written for a document, if it still exists.
  * Returns the most recently modified match (extensions can differ between
  * uploads), or `undefined` when no local copy is present.
+ *
+ * Only the signed-in user's own directory is searched, so a copy another
+ * account left on this device is not found. See GitHub issue #1328.
  */
 export const findLocalUploadedImage = async (
   collection: string,
@@ -32,8 +36,14 @@ export const findLocalUploadedImage = async (
   const prefix = localImageFilePrefix(collection, docId);
 
   try {
+    const path = await localImageDirectory();
+
+    if (!path) {
+      return undefined;
+    }
+
     const { files } = await Filesystem.readdir({
-      path: '',
+      path,
       directory: Directory.Documents,
     });
 

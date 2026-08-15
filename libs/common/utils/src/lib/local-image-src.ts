@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import { Directory, Filesystem } from '@capacitor/filesystem';
+import { Filesystem } from '@capacitor/filesystem';
 
 const CONTENT_TYPE_BY_EXTENSION: Record<string, string> = {
   gif: 'image/gif',
@@ -31,9 +31,14 @@ const asDataUrl = (blob: Blob): Promise<string> =>
  * something the WebView will serve - lazily, so a photo costs nothing until it
  * scrolls into view. In a browser there is no filesystem: the Capacitor web
  * implementation keeps files in IndexedDB and reports a pseudo-path
- * (`DOCUMENTS/<name>`), while `convertFileSrc` is the identity function, so that
- * path would end up in `src` as a relative URL and 404 against the dev server.
- * The web branch therefore reads the bytes back out and inlines them.
+ * (`/DOCUMENTS/<user>/<name>`), while `convertFileSrc` is the identity function,
+ * so that path would end up in `src` as a relative URL and 404 against the dev
+ * server. The web branch therefore reads the bytes back out and inlines them.
+ *
+ * The read goes through the stored `uri` rather than the file name and a
+ * directory, because the name alone no longer locates the file: local copies
+ * live in a per-user directory since issue #1328. `name` is still what names
+ * the content type.
  *
  * Data URLs rather than object URLs on purpose: the callers reload their list
  * every time their page is entered, and an object URL would have to be revoked
@@ -53,10 +58,7 @@ export const localImageSrc = async (
   }
 
   try {
-    const { data } = await Filesystem.readFile({
-      path: name,
-      directory: Directory.Documents,
-    });
+    const { data } = await Filesystem.readFile({ path: uri });
 
     return typeof data === 'string'
       ? `data:${contentTypeOf(name)};base64,${data}`

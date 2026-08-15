@@ -3,13 +3,24 @@ import {
   localImageFileName,
 } from '../local-image-file';
 import { Directory, Filesystem } from '@capacitor/filesystem';
+import { localImageDirectory } from 'utils';
 
 jest.mock('@capacitor/filesystem', () => ({
   Directory: { Documents: 'DOCUMENTS' },
   Filesystem: { readdir: jest.fn() },
 }));
 
+jest.mock('utils', () => ({
+  localImageDirectory: jest.fn(() => Promise.resolve('user-1')),
+}));
+
 const readdir = Filesystem.readdir as jest.Mock;
+const localImageDirectoryMock = localImageDirectory as jest.Mock;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  localImageDirectoryMock.mockResolvedValue('user-1');
+});
 
 describe('localImageFileName', () => {
   it('derives a deterministic name from collection, docId and extension', () => {
@@ -42,9 +53,18 @@ describe('findLocalUploadedImage', () => {
 
     expect(result).toEqual({ name: 'bites_abc-123.jpg', uri: 'file:///bite' });
     expect(readdir).toHaveBeenCalledWith({
-      path: '',
+      path: 'user-1',
       directory: Directory.Documents,
     });
+  });
+
+  // A copy another account left on this device is not this user's to find. See
+  // GitHub issue #1328.
+  it('finds nothing when nobody is signed in', async () => {
+    localImageDirectoryMock.mockResolvedValue(undefined);
+
+    expect(await findLocalUploadedImage('bites', 'abc-123')).toBeUndefined();
+    expect(readdir).not.toHaveBeenCalled();
   });
 
   it('returns the most recently modified match when extensions differ', async () => {

@@ -363,6 +363,7 @@ Executed on decision after the surfaces above, accepting the Storage cleanup cos
 - The exposure is not only the photographs. `biteIdFromImageName` derives a Bite id from the filename, so the gallery also reveals **which Bites the previous user created**, and links to them.
 - **Confirmed across a full logout and login cycle**, which was the open question when it was first filed: signing out and back in leaves all thirteen in place. Logging out does not clear it.
 - On native this is defensible — a phone generally has one owner. On the **web** app a shared or public computer is an ordinary scenario, and that is where it matters. `Delete all` exists but is manual and depends on the departing user knowing to use it.
+- **Resolved by scoping the directory to the uid rather than by clearing it on logout.** Local copies now live under `Documents/<uid>/`, and `localImageDirectory` is the only way any reader or writer reaches them. Scoping the read holds where a logout hook does not: this run confirmed the files survive a logout, and a browser tab that is simply closed never runs one at all. Copies written before the change are adopted by the signed-in user on a device and **deleted in a browser**, which also removes the twelve photographs this run found still sitting in that Chrome profile. The web behaviour was verified against the real Capacitor filesystem in a browser: a second uid reads an empty directory. See the account-scoping contract in [[UC - Use Local Gallery Support]].
 
 ### Fourth Finding - A Raw Translation Key On The Bucket List Sort Chip
 

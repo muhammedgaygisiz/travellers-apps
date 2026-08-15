@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import {
+  IonButton,
   IonIcon,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
@@ -32,6 +33,7 @@ import { IsBiteTriedOutPipe } from './is-bite-tried-out.pipe';
     BiteComponent,
     BiteSkeletonListComponent,
     NgTemplateOutlet,
+    IonButton,
     IonIcon,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
@@ -60,6 +62,12 @@ export class BiteListComponent {
   hasMore = input(false);
   showSkeleton = input(false);
   enableImageRetry = input(false);
+  /**
+   * The term the feed is currently filtered by. An empty list under an active
+   * term means the search excluded everything, which is a different empty state
+   * from a feed that has nothing in it. See GitHub issue #1331.
+   */
+  searchTerm = input('');
 
   readonly biteClick = output<Bite>();
   readonly likeButtonClick = output<LikeClick>();
@@ -69,6 +77,7 @@ export class BiteListComponent {
   readonly triedOutChange = output<{ biteId: string; checked: boolean }>();
   readonly retryImageUpload = output<Bite>();
   readonly loadMore = output<void>();
+  readonly clearSearch = output<void>();
 
   /**
    * Toggles the tried-out status, whether the user completed the swipe or

@@ -509,5 +509,8 @@
   "show-replies": "แสดง {{count}} การตอบกลับ",
   "hide-replies": "ซ่อนการตอบกลับ",
   "review-creator-badge": "ผู้สร้าง",
-  "bucket-list-name-updated": "อัปเดตชื่อรายการความฝันแล้ว!"
+  "bucket-list-name-updated": "อัปเดตชื่อรายการความฝันแล้ว!",
+  "no-bites-found-be-the-first": "ไม่พบ Bites มาเป็นคนแรกกันเลย",
+  "no-bites-match-search": "ไม่มี Bites ที่ตรงกับ “{{term}}”",
+  "clear-search": "ล้างการค้นหา"
 }

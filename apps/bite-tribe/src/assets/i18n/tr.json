@@ -509,5 +509,8 @@
   "show-replies": "{{count}} yanıtı göster",
   "hide-replies": "Yanıtları gizle",
   "review-creator-badge": "oluşturan",
-  "bucket-list-name-updated": "Yapılacaklar listesinin adı güncellendi!"
+  "bucket-list-name-updated": "Yapılacaklar listesinin adı güncellendi!",
+  "no-bites-found-be-the-first": "Bite bulunamadı. İlk sen ol.",
+  "no-bites-match-search": "“{{term}}” ile eşleşen Bite yok.",
+  "clear-search": "Aramayı temizle"
 }

@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { BiteTribeHomeComponent } from '../home.component';
 import { HomeFeedControlsComponent } from '../home-feed-controls/home-feed-controls.component';
+import { BiteListComponent } from '../bite-list/bite-list.component';
 import { ComponentRef } from '@angular/core';
 import { addIcons } from 'ionicons';
 import { add, menuOutline } from 'ionicons/icons';
@@ -485,6 +486,30 @@ describe('BiteTribeHomeComponent', () => {
       component.onSearchInput(event);
       expect(component.searchTerm()).toBe('Sushi');
       expect(component.currentPage()).toBe(1);
+    });
+
+    it('should drop the search term but keep the searchbar open on clearSearch', () => {
+      component.isSearchVisible.set(true);
+      component.searchTerm.set('zzzznomatch');
+      component.currentPage.set(3);
+
+      component.clearSearch();
+
+      expect(component.searchTerm()).toBe('');
+      expect(component.currentPage()).toBe(1);
+      expect(component.isSearchVisible()).toBe(true);
+    });
+
+    it('should hand the search term to the bite list so it can tell the empty states apart', () => {
+      componentRef.setInput('bites', [createBite({ name: 'Burger' })]);
+      component.searchTerm.set('zzzznomatch');
+      fixture.detectChanges();
+
+      const biteList = fixture.debugElement.query(
+        By.directive(BiteListComponent),
+      );
+
+      expect(biteList.componentInstance.searchTerm()).toBe('zzzznomatch');
     });
 
     it('should use filteredBites for displayedBites', () => {

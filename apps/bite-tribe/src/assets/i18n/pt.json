@@ -509,5 +509,8 @@
   "show-replies": "Mostrar {{count}} respostas",
   "hide-replies": "Ocultar respostas",
   "review-creator-badge": "criador",
-  "bucket-list-name-updated": "Nome da lista atualizado!"
+  "bucket-list-name-updated": "Nome da lista atualizado!",
+  "no-bites-found-be-the-first": "Nenhum Bite encontrado. Seja o primeiro.",
+  "no-bites-match-search": "Nenhum Bite corresponde a “{{term}}”.",
+  "clear-search": "Limpar pesquisa"
 }

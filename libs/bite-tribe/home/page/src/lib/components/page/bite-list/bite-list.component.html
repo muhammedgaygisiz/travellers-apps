@@ -61,9 +61,28 @@
     }
   } @empty {
     <div
-      class="empty-message ion-display-flex ion-justify-content-center ion-padding-top"
+      class="empty-message ion-display-flex ion-flex-column ion-align-items-center ion-padding-top"
     >
-      <ion-text color="primary"> No bites found. Be the first one.</ion-text>
+      <!-- A search that excludes everything is not an empty feed: the Bites are
+      still there, so the copy names the term as the cause and offers to clear
+      it instead of inviting a first Bite. See GitHub issue #1331. -->
+      @if (searchTerm()) {
+        <ion-text color="primary" data-testid="empty-search-message">
+          {{ 'no-bites-match-search' | transloco: { term: searchTerm() } }}
+        </ion-text>
+
+        <ion-button
+          fill="clear"
+          data-testid="clear-search"
+          (click)="clearSearch.emit()"
+        >
+          {{ 'clear-search' | transloco }}
+        </ion-button>
+      } @else {
+        <ion-text color="primary" data-testid="empty-feed-message">
+          {{ 'no-bites-found-be-the-first' | transloco }}
+        </ion-text>
+      }
     </div>
   }
 

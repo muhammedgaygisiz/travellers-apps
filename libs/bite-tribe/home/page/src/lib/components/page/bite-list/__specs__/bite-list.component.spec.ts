@@ -49,12 +49,53 @@ describe('BiteListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show the empty message when there are no bites', () => {
+  it('should show the empty feed message when there are no bites', () => {
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain(
-      'No bites found. Be the first one.',
-    );
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="empty-feed-message"]'),
+    ).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="empty-search-message"]',
+      ),
+    ).toBeNull();
+  });
+
+  it('should blame the search term instead of the empty feed when a search excludes everything', () => {
+    componentRef.setInput('searchTerm', 'zzzznomatch');
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="empty-search-message"]',
+      ),
+    ).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="empty-feed-message"]'),
+    ).toBeNull();
+  });
+
+  it('should emit clearSearch when the clear search button is clicked', () => {
+    const emitSpy = jest.spyOn(component.clearSearch, 'emit');
+    componentRef.setInput('searchTerm', 'zzzznomatch');
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('[data-testid="clear-search"]').click();
+
+    expect(emitSpy).toHaveBeenCalled();
+  });
+
+  it('should keep the search empty state out of a list that still has bites', () => {
+    componentRef.setInput('bites', [createBite('bite-1', 'Burger')]);
+    componentRef.setInput('searchTerm', 'burger');
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="empty-search-message"]',
+      ),
+    ).toBeNull();
   });
 
   it('should render a bt-bite for each bite', () => {

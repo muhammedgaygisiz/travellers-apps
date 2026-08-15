@@ -208,6 +208,16 @@ export class BiteTribeHomeComponent {
     }
   }
 
+  /**
+   * Drops the search term but keeps the searchbar open, so the empty result can
+   * offer its way out without the user having to reopen the search to type the
+   * next term. See GitHub issue #1331.
+   */
+  clearSearch(): void {
+    this.searchTerm.set('');
+    this.currentPage.set(1);
+  }
+
   onSearchInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     this.searchTerm.set(inputElement.value ?? '');

@@ -509,5 +509,8 @@
   "show-replies": "عرض {{count}} ردود",
   "hide-replies": "إخفاء الردود",
   "review-creator-badge": "المنشئ",
-  "bucket-list-name-updated": "تم تحديث اسم قائمة الآمال!"
+  "bucket-list-name-updated": "تم تحديث اسم قائمة الآمال!",
+  "no-bites-found-be-the-first": "لا توجد Bites. كن أول من يضيف واحدة.",
+  "no-bites-match-search": "لا توجد Bites تطابق «{{term}}».",
+  "clear-search": "مسح البحث"
 }

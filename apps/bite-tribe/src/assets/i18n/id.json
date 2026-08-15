@@ -509,5 +509,8 @@
   "show-replies": "Tampilkan {{count}} balasan",
   "hide-replies": "Sembunyikan balasan",
   "review-creator-badge": "pembuat",
-  "bucket-list-name-updated": "Nama daftar keinginan berhasil diperbarui!"
+  "bucket-list-name-updated": "Nama daftar keinginan berhasil diperbarui!",
+  "no-bites-found-be-the-first": "Belum ada Bites. Jadilah yang pertama.",
+  "no-bites-match-search": "Tidak ada Bites yang cocok dengan “{{term}}”.",
+  "clear-search": "Hapus pencarian"
 }

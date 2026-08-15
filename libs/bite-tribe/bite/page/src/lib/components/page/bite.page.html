@@ -116,6 +116,7 @@
           formControlName="position"
           [readonly]="true"
           [dragging]="false"
+          [markerColor]="currentSourceColor()"
         />
         @if (biteFormGroup.get('position')?.invalid) {
         <ion-text color="danger">

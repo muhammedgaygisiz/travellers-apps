@@ -380,6 +380,12 @@ jobs:
           NX_APP_BITE_TRIBE_MEASSUREMENT_ID: ${{ secrets.NX_APP_BITE_TRIBE_MEASSUREMENT_ID }}
           NX_APP_BITE_TRIBE_APP_ID: ${{ secrets.NX_APP_BITE_TRIBE_APP_ID }}
           NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY: ${{ secrets.NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY }}
+          # Enforced-mode App Check gate from issue 933: preflight the token and
+          # show a retry gate instead of loading an app whose every request the
+          # already-enforced backend will refuse. Release-candidate decision on
+          # issue 1177. Consumer app only - the business app is out of
+          # release-candidate scope, so its deploy leaves the gate off.
+          NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED: 'true'
 
       - name: Bite Tribe Publish to Firebase
         if: github.ref == 'refs/heads/develop'

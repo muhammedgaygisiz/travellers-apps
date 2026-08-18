@@ -14,25 +14,45 @@ Target public launch period: 3 August 2026 to 16 August 2026.
 
 ## Current Release Stage
 
-BiteTribe is in Phase 2 (Product Intelligence) as of 25 July 2026, working toward the 31 July 2026 Release Candidate milestone.
+BiteTribe is completing Phase 2 (Product Intelligence) as of 19 August 2026. The original Phase 3 window of 3 to 16 August 2026 passed without a release candidate and is recorded below as missed rather than quietly rewritten.
 
-The product is not yet in public launch mode. The launch-blocking backend work from Phase 1 is largely complete, including the onboarding assistant ([[epic-850]]). The remaining launch-critical code item is issue 933 (App Check blocking behavior before enforcement). The current focus is landing that gate and proving the recently landed backend trust, location, currency, gamification, notification, onboarding, and restaurant data-quality work in realistic testing before the release candidate.
+The product is not yet in public launch mode. All launch-blocking **code** work is complete: Phase 1's backend work, the onboarding assistant ([[epic-850]]), and the enforced-mode App Check startup gate from issue 933, which landed and is now switched on for the release candidate. What remains is not implementation but proof and paperwork.
+
+Three things stand between here and a release candidate:
+
+- **The platform test pass ([issue 1176](https://github.com/muhammedgaygisiz/travellers-apps/issues/1176)) is incomplete.** The web half passed at Run 8 and the iOS half at Run 7, each against a named build. **Android has never been executed in any of the eight runs**, its device-matrix rows are empty, and the Google Play Open Testing track still carries build 87 from 26 July, which predates most of the fixes since. Notification delivery, a Crashlytics non-fatal from Android, DebugView from a physical device, and the enforced App Check gate (charter check 12) are all unverified on every platform.
+- **Store assets ([issue 1178](https://github.com/muhammedgaygisiz/travellers-apps/issues/1178)) do not exist at all.** No `docs/store`, no fastlane, no screenshots, no listing copy, and neither privacy declaration. This is the longest lead-time item and does not depend on the test pass, so it runs in parallel.
+- **[Issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177) is settled except for device verification.** Every decision in it is made and recorded: issue 952 deferred, issue 978 closed, Angular 22 out of scope, the Nx gates met, the debug token rotated, and both rules gaps accepted. Its one open acceptance criterion is App Check enforcement verified against real traffic on all three platforms, which is charter check 12 and therefore blocked on issue 1176.
 
 ## Next Milestones
 
-| Milestone                              | Target Date              | State   |
-| -------------------------------------- | ------------------------ | ------- |
-| Launch-blocking backend work completed | 17 July 2026             | Planned |
-| Release Candidate ready                | 31 July 2026             | Planned |
-| Soft launch                            | Week of 3 August 2026    | Planned |
-| Public launch                          | Week of 10 August 2026   | Planned |
-| Learning phase                         | August to September 2026 | Planned |
+Revised on 19 August 2026. The original targets are kept alongside the new ones, because a schedule that quietly forgets it slipped teaches nothing the next time.
+
+| Milestone                              | Original Target          | Revised Target            | State                                            |
+| -------------------------------------- | ------------------------ | ------------------------- | ------------------------------------------------ |
+| Launch-blocking backend work completed | 17 July 2026             | Met, late                 | Done. All launch-blocking code has landed        |
+| Release Candidate ready                | 31 July 2026             | 2 September 2026          | In progress. Blocked on Android and store assets |
+| Soft launch                            | Week of 3 August 2026    | Week of 7 September 2026  | Missed original window                           |
+| Public launch                          | Week of 10 August 2026   | Week of 14 September 2026 | Missed original window                           |
+| Learning phase                         | August to September 2026 | September to October 2026 | Follows public launch                            |
+
+The revised dates are derived rather than chosen, and the derivation is what to argue with if they look wrong:
+
+- **Android needs a distributed artifact before it can start.** Cutting build 96 from current `develop` and getting it onto the Play track is a day or two, so the first Android run realistically begins around 22 August.
+- **Expect the first Android run to find things.** Every first run on a platform has: Run 3 opened six `P0` defects, and Runs 7 and 8 each found more. At the observed cadence of one run every two to three days including fix time, budget two to three Android iterations, landing around 29 August to 1 September.
+- **Store assets are the parallel long pole.** Screenshots at every required size from seeded realistic data, listing copy across the shipped locales, both privacy declarations, and two console entries is one to two weeks of work starting from nothing. Running alongside the test pass, that also lands near 2 September.
+- **The soft launch needs a few days after the release candidate** for the build to be cut, distributed and confirmed installable from both tracks, which puts it in the week of 7 September.
+- **The gap from soft to public launch stays one week**, unchanged from the original plan.
+
+These assume the Android pass finds nothing that needs a substantial fix. A single `P0` of the kind Run 6 hit with issue 1308 moves everything downstream by roughly a week.
 
 ## Recent Completed Work
 
+- Issue 1177 settled the remaining release-candidate decisions on 19 August 2026: issue 952 (App Check replay protection) deferred to the monetization work because only `deleteOwnAccount` of its candidate functions exists today; issue 978 closed after its last uncovered bullet gained a currency re-resolution assertion; Angular 22 (issue 1037) confirmed out of scope; the Nx migration gates confirmed met through Phase 3; the burned App Check debug token deleted from all three apps with no replacement issued; and the open `firestore.rules` and `storage.rules` authorization gaps accepted as documented launch risks, the Storage half filed as [issue 1350](https://github.com/muhammedgaygisiz/travellers-apps/issues/1350) because it previously had no owning issue.
+- The enforced-mode App Check gate was switched on for the release candidate: `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` is now set on the `deploy-bite-tribe` job and in the charter's local build procedure. It had been set nowhere, so every artifact including build 95 shipped the gate off.
 - Epic 850 landed the blocking onboarding assistant, must-dismiss feature coach marks, and the onboarding funnel analytics (issue 850 closed 17 July 2026, all nine sub-issues complete).
 - Issue 908 hardened Firebase App Check (verified request-ratio monitoring and remaining fixes) toward enforcement.
-- Issue 933 added the enforced-mode App Check startup gate: a token preflight, blocking behavior, and a full-screen retry gate, gated by the `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` flag (off by default). Enabling Console enforcement and device validation remain the operational go-live step.
+- Issue 933 added the enforced-mode App Check startup gate: a token preflight, blocking behavior, and a full-screen retry gate, gated by the `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` flag, which defaulted to off. Superseded on 19 August 2026: Console enforcement turned out to have been active for Firestore, Storage and Authentication since before Run 4, and the flag is now set for the release candidate. Device validation is the only part of this that is still outstanding, as charter check 12.
 - Issue 927 addressed intermittent Bite photo upload failures so a posted Bite is not left silently without its intended photo.
 - Issue 967 added client-side suspicious price validation.
 - Issue 909 / PR \#965 added location-based currency prefill for Bite creation.
@@ -52,12 +72,12 @@ The product is not yet in public launch mode. The launch-blocking backend work f
 
 - Firebase App Check verified request ratio monitored.
 - Remaining App Check issues fixed.
-- App Check enforcement enabled.
+- App Check enforcement enabled. **Server-side enforcement has been active** for Firestore, Storage and Authentication since before Run 4; Places API (New) stays in Monitoring by decision under [issue 1245](https://github.com/muhammedgaygisiz/travellers-apps/issues/1245). The **client-side enforced-mode gate is on for the release candidate** by decision under [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177) and is now set on the `deploy-bite-tribe` job and in the charter's local build procedure. Device validation is charter check 12 under [issue 1176](https://github.com/muhammedgaygisiz/travellers-apps/issues/1176) and is still unexecuted on every platform.
 - Bite location enriched with Google Places.
 - City search backed by enriched Bite location data implemented.
 - Location-based Bite currency prefill implemented.
 - Client-side suspicious price validation implemented.
-- Currency prefill fallback and manual override tested.
+- Currency prefill fallback and manual override tested. Covered by Playwright in `bite-data-quality.spec.ts`, plus a currency re-resolution assertion added to the geotagged test in `create-and-edit-bite.spec.ts`. [Issue 978](https://github.com/muhammedgaygisiz/travellers-apps/issues/978) closed 19 August 2026; the remaining native device proof is charter check 4 under [issue 1176](https://github.com/muhammedgaygisiz/travellers-apps/issues/1176).
 - Leaderboard aggregate resync implemented.
 - Ranking-change notifications implemented and device-tested.
 - Profile badges implemented.
@@ -78,9 +98,9 @@ The product is not yet in public launch mode. The launch-blocking backend work f
 - Android testing completed.
 - iOS testing completed.
 - Web testing completed.
-- Phases 0 to 2 of the Nx and dependency migration roadmap completed with their validation gates, without making Angular 22 an artificial launch prerequisite.
-- Cypress removed after required E2E scenarios are represented in Playwright.
-- Visual regression runs directly through `oblador/loki` without the `nx-loki` adapter.
+- Phases 0 to 2 of the Nx and dependency migration roadmap completed with their validation gates, without making Angular 22 an artificial launch prerequisite. **Met, and Phase 3 is complete as well.** Phase 0 through [issue 1030](https://github.com/muhammedgaygisiz/travellers-apps/issues/1030), [issue 1032](https://github.com/muhammedgaygisiz/travellers-apps/issues/1032) and [issue 1040](https://github.com/muhammedgaygisiz/travellers-apps/issues/1040); Phase 1 through [issue 1035](https://github.com/muhammedgaygisiz/travellers-apps/issues/1035); Phase 2 through [issue 1033](https://github.com/muhammedgaygisiz/travellers-apps/issues/1033), which put `nx`, every official `@nx/*` package and `@nxext/capacitor` on a single Nx 23 generation; Phase 3 through [issue 1031](https://github.com/muhammedgaygisiz/travellers-apps/issues/1031) and [issue 1036](https://github.com/muhammedgaygisiz/travellers-apps/issues/1036). Only Phase 4 remains, which is Angular 22 ([issue 1037](https://github.com/muhammedgaygisiz/travellers-apps/issues/1037)) and **stays out of release-candidate scope** by decision under [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177), consistent with [[Current State - Roadmap]].
+- Cypress removed after required E2E scenarios are represented in Playwright. **Done** through [issue 1032](https://github.com/muhammedgaygisiz/travellers-apps/issues/1032). The `CYPRESS_PASSWORD` and `CYPRESS_USER_NAME` repository secrets outlived it and were deleted on 19 August 2026; nothing in `.github/` or the repository referenced them.
+- Visual regression runs directly through `oblador/loki` without the `nx-loki` adapter. **Done** through [issue 1040](https://github.com/muhammedgaygisiz/travellers-apps/issues/1040).
 - Remaining launch blockers fixed.
 - App Store assets prepared.
 - Google Play assets prepared.

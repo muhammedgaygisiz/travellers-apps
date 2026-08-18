@@ -124,6 +124,16 @@ Users can create and maintain real dish-level food experiences.
   failed state and its poster-only retry, the age threshold that leaves the
   document untouched, and a blocked upload driven from the create flow through
   the terminal `failed` write to a successful retry from the local copy.
+- Playwright position-source E2E coverage: the location row asserted for the
+  Google and restaurant sources, a photo whose GPS EXIF is read into the Bite,
+  and both outcomes of a manual pick — cancelled, leaving the row and the
+  persisted position untouched, and confirmed, reaching the saved Bite over the
+  restaurant position and the device fix it had already resolved. The photo case
+  needs its own fixture, `bite-geotagged.jpg`, because the plain one carries no
+  EXIF; see `tools/generate-geotagged-fixture.mjs`. The modal's disabled rows and
+  marker-tap selection stay on the unit tests in `bite.page.spec.ts`: neither
+  writes to the Bite, so an E2E failure there would not be catching data loss.
+  See GitHub issues #1266 and #1289.
 
 ## Related Domains
 

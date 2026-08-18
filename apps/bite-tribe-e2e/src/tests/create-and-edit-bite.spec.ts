@@ -6,13 +6,41 @@ import { CreateBitePage } from '../pages/create-bite.page';
 import { HomePage } from '../pages/home.page';
 import { loginAsTestUser } from '../support/auth';
 import { dismissCoachMarks } from '../support/coach-marks';
-import { expectBiteFields, FIRESTORE_EMULATOR_URL } from '../support/firestore';
+import {
+  expectBiteFields,
+  FIRESTORE_EMULATOR_URL,
+  getBiteByName,
+} from '../support/firestore';
 import { completeOnboardingIfNeeded } from '../support/onboarding';
 import { TEST_USERS } from '../support/test-users';
 
 const IMAGE_FIXTURE = join(__dirname, '..', 'fixtures', 'bite.jpg');
+/**
+ * Carries GPS EXIF, unlike {@link IMAGE_FIXTURE}, which is what makes the photo
+ * position source reachable. See `tools/generate-geotagged-fixture.mjs`.
+ */
+const GEOTAGGED_IMAGE_FIXTURE = join(
+  __dirname,
+  '..',
+  'fixtures',
+  'bite-geotagged.jpg',
+);
 const POSITION = { latitude: 48.137154, longitude: 11.576124 };
 const GOOGLE_POSITION = { latitude: 48.227154, longitude: 11.676124 };
+/**
+ * What the EXIF of {@link GEOTAGGED_IMAGE_FIXTURE} encodes. Deliberately far
+ * from {@link POSITION}: if the photo carried the pinned browser geolocation,
+ * an assertion on it could not tell the photo source from the device fix.
+ */
+const PHOTO_POSITION = { latitude: 41.875, longitude: 12.375 };
+/**
+ * Close enough to {@link POSITION} to be offered as a nearby restaurant, far
+ * enough to be told apart from the device fix.
+ */
+const NEARBY_RESTAURANT_POSITION = {
+  latitude: 48.139154,
+  longitude: 11.578124,
+};
 
 async function expectPositionMarkerInsideMap(page: Page): Promise<void> {
   const map = page.locator('position bt-map .leaflet-container');
@@ -72,8 +100,17 @@ async function mockCallable(
 
 async function seedVerifiedRestaurantBite(
   page: Page,
-  options: { documentId: string; restaurantId: string; restaurantName: string },
+  options: {
+    documentId: string;
+    restaurantId: string;
+    restaurantName: string;
+    // Where the restaurant sits. Defaults to the device fix, which is what the
+    // edit flow wants: there the restaurant is asserted to keep the position it
+    // already had, not to move it.
+    position?: { latitude: number; longitude: number };
+  },
 ): Promise<void> {
+  const position = options.position ?? POSITION;
   const response = await page.request.patch(
     `${FIRESTORE_EMULATOR_URL}/bites/${options.documentId}`,
     {
@@ -87,15 +124,15 @@ async function seedVerifiedRestaurantBite(
           position: {
             mapValue: {
               fields: {
-                latitude: { doubleValue: POSITION.latitude },
-                longitude: { doubleValue: POSITION.longitude },
+                latitude: { doubleValue: position.latitude },
+                longitude: { doubleValue: position.longitude },
               },
             },
           },
           geohash: {
             stringValue: geohashForLocation([
-              POSITION.latitude,
-              POSITION.longitude,
+              position.latitude,
+              position.longitude,
             ]),
           },
           price: { stringValue: '10.00' },
@@ -276,5 +313,121 @@ test.describe('Create and maintain personal bites', () => {
       positionSource: 'gps',
       price: '9.00',
     });
+  });
+
+  /**
+   * The photo is the position source with the least redundancy elsewhere: a
+   * Google position can be re-derived from `place` and a restaurant one from
+   * `restaurantId`, but a position read out of EXIF exists only for as long as
+   * the form holds it. So this asserts the coordinates themselves and not just
+   * the row that credits them.
+   */
+  test('takes the position from the GPS EXIF of the photo', async ({
+    page,
+  }) => {
+    const runId = Date.now();
+    const name = `Geotagged Bite ${runId}`;
+    const restaurant = `Trattoria Geotagged ${runId}`;
+
+    await mockCallable(page, 'getCurrencyByPosition', { currency: 'EUR' });
+
+    await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
+    await dismissCoachMarks(page);
+
+    const biteForm = new CreateBitePage(page);
+    await biteForm.open();
+    await biteForm.uploadImage(GEOTAGGED_IMAGE_FIXTURE);
+
+    await biteForm.expectPositionSource('From photo');
+    await expectPositionMarkerInsideMap(page);
+
+    await biteForm.fillName(name);
+    // The custom entry carries no position of its own, so the photo stays the
+    // source — and the device fix keeps arriving while the form is open, so
+    // getting here still saying "From photo" is also what proves the pinned
+    // geolocation does not quietly take the position back.
+    await biteForm.chooseCustomRestaurant(restaurant);
+    await biteForm.fillPrice('11.00');
+    await biteForm.expectPositionSource('From photo');
+
+    await biteForm.expectPostEnabled();
+    await biteForm.submit();
+
+    await page.waitForURL('**/home');
+    await expectBiteFields(page, name, {
+      place: restaurant,
+      position: PHOTO_POSITION,
+      positionSource: 'photo',
+      price: '11.00',
+    });
+  });
+
+  /**
+   * The counterpart of the cancelled pick: what the modal is confirmed with is
+   * what has to reach the saved Bite, over both of the positions the form had
+   * already resolved for itself.
+   */
+  test('saves a manual position pick that is confirmed', async ({ page }) => {
+    const runId = Date.now();
+    const name = `Confirmed Position ${runId}`;
+    const verifiedRestaurant = `Verified Manual ${runId}`;
+    const restaurantId = `verified-manual-${runId}`;
+
+    await seedVerifiedRestaurantBite(page, {
+      documentId: `verified-manual-seed-${runId}`,
+      restaurantId,
+      restaurantName: verifiedRestaurant,
+      position: NEARBY_RESTAURANT_POSITION,
+    });
+    await mockCallable(page, 'getCurrencyByPosition', { currency: 'EUR' });
+
+    await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
+    await dismissCoachMarks(page);
+
+    const biteForm = new CreateBitePage(page);
+    await biteForm.open();
+    await biteForm.uploadImage(IMAGE_FIXTURE);
+    await biteForm.fillName(name);
+
+    // Gives the form a second resolved position to be told apart from: it now
+    // holds the restaurant's, while the device fix stays pinned to POSITION.
+    await biteForm.chooseLocalRestaurant(verifiedRestaurant);
+    await biteForm.expectPositionSource('From restaurant');
+    await biteForm.fillPrice('12.00');
+
+    await biteForm.confirmManualPositionPick();
+    await biteForm.expectPositionSource('Set manually');
+
+    await biteForm.expectPostEnabled();
+    await biteForm.submit();
+
+    await page.waitForURL('**/home');
+    await expectBiteFields(page, name, {
+      place: verifiedRestaurant,
+      restaurantId,
+      positionSource: 'manual',
+      price: '12.00',
+    });
+
+    const saved = await getBiteByName(page, name);
+    const position = saved?.['position'] as {
+      latitude: number;
+      longitude: number;
+    };
+
+    // The pick landed north east of the map centre, and the camera sat on the
+    // restaurant position when it did. Asserting the direction it moved is what
+    // makes this about the tapped point rather than about any position the form
+    // could have supplied on its own — no screen point has to be translated
+    // back into coordinates for that.
+    expect(position.latitude).toBeGreaterThan(
+      NEARBY_RESTAURANT_POSITION.latitude,
+    );
+    expect(position.longitude).toBeGreaterThan(
+      NEARBY_RESTAURANT_POSITION.longitude,
+    );
+    expect(position).not.toEqual(POSITION);
   });
 });

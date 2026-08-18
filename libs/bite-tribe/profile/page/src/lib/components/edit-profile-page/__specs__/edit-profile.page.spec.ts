@@ -237,6 +237,40 @@ describe(EditProfilePage.name, () => {
     });
   });
 
+  // The alert used to be bound to a boolean and therefore instantiated on
+  // every visit to the form, whether or not the toggle was ever touched. See
+  // GitHub issue #1343.
+  describe('the go-private confirmation', () => {
+    const queryAlerts = (): HTMLElement[] => [
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll('ion-alert'),
+    ];
+
+    it('should not be created before the toggle is turned off', () => {
+      fixture.detectChanges();
+
+      expect(queryAlerts()).toHaveLength(0);
+    });
+
+    it('should be created once the toggle is turned off', () => {
+      component.openConfirmationDialog();
+      fixture.detectChanges();
+
+      expect(queryAlerts()).toHaveLength(1);
+    });
+
+    it('should be dropped again once it is answered', () => {
+      component.openConfirmationDialog();
+      fixture.detectChanges();
+
+      component.handleGoPrivateConfirmation({
+        detail: { role: 'stay-public' },
+      } as CustomEvent<OverlayEventDetail>);
+      fixture.detectChanges();
+
+      expect(queryAlerts()).toHaveLength(0);
+    });
+  });
+
   describe('handleGoPrivateConfirmation', () => {
     describe('given a confirmation', () => {
       it('should set public field to false', () => {

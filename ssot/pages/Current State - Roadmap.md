@@ -10,12 +10,14 @@
 
   Dates: 26 June 2026 to 17 July 2026.
 
-- ### Status as of 25 July 2026
+- ### Status as of 19 August 2026
 
-  BiteTribe has moved into Phase 2 (Product Intelligence), working toward the 31 July 2026 Release Candidate milestone. The launch-blocking backend work from Phase 1 is largely complete; the remaining launch-critical code item is issue 933 (App Check blocking behavior before enforcement).
+  BiteTribe is completing Phase 2 (Product Intelligence). The 31 July 2026 Release Candidate milestone and the original 3 to 16 August 2026 Phase 3 window both passed without a release candidate; the revised targets are in [[Current State - Release State]], which holds the dates and the reasoning behind them. This page keeps the phase structure rather than restating them.
+
+  **All launch-blocking code work is now complete**, including issue 933's enforced-mode App Check startup gate, which has landed and is switched on for the release candidate. What remains is proof and paperwork rather than implementation: the Android half of the platform test pass has never been executed, and the store assets do not exist yet.
 
 - Completed or landed toward launch:
-  - Firebase App Check hardening (monitoring and remaining fixes) has landed through issue 908; the App Check bootstrap and telemetry are in place. The remaining gate is issue 933 (switch startup failure to blocking behavior before Console enforcement).
+  - Firebase App Check hardening (monitoring and remaining fixes) has landed through issue 908; the App Check bootstrap and telemetry are in place. Issue 933's enforced-mode startup gate has since landed and is switched on for the release candidate, so no App Check code work remains.
   - The onboarding assistant has landed through [[epic-850]] (issue 850 closed 17 July 2026, all nine sub-issues complete).
   - Intermittent Bite photo upload failures have been addressed through issue 927 (closed 13 July 2026).
   - Bite address enrichment and city search have landed through issue 974.
@@ -29,8 +31,10 @@
   - Map live-update camera stability has landed through issue 982.
   - Playwright login, registration, and create-Bite E2E coverage has landed through issue 983.
 - Current gap to the Release Candidate milestone:
-  - Issue 933 (App Check blocking behavior) has landed behind the `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` flag; enable Console enforcement and validate the enforced flag on devices.
-  - Prove the launch-critical flows on devices and emulators, especially App Check enforcement readiness, notification delivery, city search quality, issue 978 currency prefill and manual override, suspicious-price UX, restaurant/place picker behavior, map camera stability, Playwright E2E reliability, and restaurant candidate verification state transitions.
+  - **Android has never been tested.** Eight runs have covered iOS and web only, and the Google Play Open Testing track still carries build 87 from 26 July. This is the single largest gap. See [issue 1176](https://github.com/muhammedgaygisiz/travellers-apps/issues/1176).
+  - **Store assets do not exist**, and nothing about them depends on the test pass, so they run in parallel. See [issue 1178](https://github.com/muhammedgaygisiz/travellers-apps/issues/1178).
+  - Issue 933's gate is switched on for the release candidate and Console enforcement turned out to have been active since before Run 4. What is left is device validation, which is charter check 12 and has not run on any platform.
+  - Prove the remaining launch-critical flows on devices, especially notification delivery, city search quality, suspicious-price UX, restaurant/place picker behavior, map camera stability, and restaurant candidate verification state transitions. Currency prefill and manual override are no longer part of this list: [issue 978](https://github.com/muhammedgaygisiz/travellers-apps/issues/978) closed on 19 August 2026 once Playwright covered the flow, leaving only the native device proof that charter check 4 already owns.
 - ### Week 1
 
   Focus: Firebase App Check.
@@ -74,8 +78,8 @@
 - Web testing.
 - Fix remaining launch blockers.
 - Prepare App Store and Google Play assets.
-- Execute Phases 0 to 2 of [[Current State - Nx And Dependency Migration Roadmap]] without combining Nx, Angular, native, and backend major upgrades into one change.
-- Replace the `nx-loki` adapter with direct `oblador/loki` usage; the legacy Cypress E2E surface has been removed in favor of Playwright.
+- Execute Phases 0 to 2 of [[Current State - Nx And Dependency Migration Roadmap]] without combining Nx, Angular, native, and backend major upgrades into one change. **Done, and Phase 3 with them**, through issues 1030, 1032, 1033, 1035, 1036 and 1040. Only Phase 4 (Angular 22) remains.
+- Replace the `nx-loki` adapter with direct `oblador/loki` usage; the legacy Cypress E2E surface has been removed in favor of Playwright. **Done** through [issue 1040](https://github.com/muhammedgaygisiz/travellers-apps/issues/1040) and [issue 1032](https://github.com/muhammedgaygisiz/travellers-apps/issues/1032).
 - Angular 22 is not a release-candidate prerequisite; it follows only after the Nx 23 workspace is stable and the Angular 22 dependency prerequisites are available.
 - ### Onboarding assistant
 
@@ -93,7 +97,7 @@
 
 - ## Phase 3 - Public Launch
 
-  Dates: 3 August 2026 to 16 August 2026.
+  Original dates: 3 August 2026 to 16 August 2026. **Missed.** Revised to the week of 7 September 2026 for the soft launch and the week of 14 September 2026 for the public launch. The derivation is in [[Current State - Release State]].
 
 - ### Week 5
 
@@ -118,7 +122,7 @@
 
 - ## Phase 4 - Learn
 
-  Dates: August 2026 to September 2026.
+  Original dates: August 2026 to September 2026. Revised to September to October 2026, following the public launch.
 
   Focus: learn from real usage instead of adding major new features.
 

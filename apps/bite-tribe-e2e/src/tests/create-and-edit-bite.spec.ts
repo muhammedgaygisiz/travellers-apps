@@ -329,7 +329,19 @@ test.describe('Create and maintain personal bites', () => {
     const name = `Geotagged Bite ${runId}`;
     const restaurant = `Trattoria Geotagged ${runId}`;
 
-    await mockCallable(page, 'getCurrencyByPosition', { currency: 'EUR' });
+    // Every position the form resolved a currency for, in order, so the last
+    // entry says which position the prefill ended up following.
+    const currencyLookups: { latitude: number; longitude: number }[] = [];
+    await mockCallable(
+      page,
+      'getCurrencyByPosition',
+      { currency: 'EUR' },
+      (data) => {
+        currencyLookups.push(
+          (data as { data: { latitude: number; longitude: number } }).data,
+        );
+      },
+    );
 
     await loginAsTestUser(page);
     await completeOnboardingIfNeeded(page);
@@ -341,6 +353,13 @@ test.describe('Create and maintain personal bites', () => {
 
     await biteForm.expectPositionSource('From photo');
     await expectPositionMarkerInsideMap(page);
+
+    // The photo moving the position has to re-resolve the currency against the
+    // new position rather than keep the one the device fix produced. The
+    // coordinates the lookup was last called with are what separate the two:
+    // both positions sit in the Eurozone, so the resolved currency cannot.
+    await expect.poll(() => currencyLookups.at(-1)).toEqual(PHOTO_POSITION);
+    await biteForm.expectCurrency('Euro');
 
     await biteForm.fillName(name);
     // The custom entry carries no position of its own, so the photo stays the

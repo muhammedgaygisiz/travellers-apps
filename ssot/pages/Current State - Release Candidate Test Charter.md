@@ -103,13 +103,14 @@ Install the named Google Play Open Testing artifact on a physical device, then e
 10. Privacy policy and account deletion end to end.
 11. Restaurant menus and local gallery support, which have no Playwright coverage at all.
 12. App Check in enforced mode: a working session, then the retry gate when the token is refused. Google Maps Platform is read separately: Places API (New) at 0% verified is the expected reading and must not be enforced, so the evidence to record is that restaurant, city, and Bite place search still work while the Firebase APIs are enforced. See [[issue-1245]].
+13. Trigger the verification-mail **resend** and read the delivered `From` header and subject in the received mail, not the code that built them. Expect `Bite Tribe <noreply@bitetribe.app>` and the catalog subject in the account's language. This is a required check rather than an optional one because Gmail rewrites `From` server-side when the delegated mailbox's `Send mail as` list does not carry the address, which happens after the function has already produced a correct header: [[issue-1265]] shipped twice and changed nothing a recipient saw, and no unit test can catch it. Read the resend mail specifically - the registration mail comes from Firebase Auth's own mailer and exercises a different sender path. See [[Implementation - Firebase Functions]].
 
 ## iOS
 
-Execute the same twelve checks on a physical device, plus:
+Execute the same thirteen checks on a physical device, plus:
 
-13. The iOS permission prompts for photos, location and notifications, including the deny-then-enable-in-Settings path.
-14. Behavior after backgrounding and returning, and after a force quit.
+14. The iOS permission prompts for photos, location and notifications, including the deny-then-enable-in-Settings path.
+15. Behavior after backgrounding and returning, and after a force quit.
 
 ## Edge Cases
 

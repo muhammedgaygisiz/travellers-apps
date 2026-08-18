@@ -45,9 +45,18 @@ $desktop-content-max-width: 1440px;
      * field does not want that measure: at 1470px it stretched to roughly three
      * times a card's width while the cards and chips below it kept a narrower
      * one. 720px is the column the page uses below the breakpoint, so the field
-     * keeps the width it already had there and simply stops growing, staying
-     * flush with the start of the feed grid. See GitHub issue #1330. */
+     * keeps the width it already had there and simply stops growing.
+     * See GitHub issue #1330.
+     *
+     * Centred rather than left in place. #1341 aligned the field with the start
+     * of the feed grid, but the control it actually sits next to is the chip
+     * row directly above, which is centred — so the page read as one centred
+     * control stacked on one flush-left one. Centring also matches the
+     * `My Bucket Lists` field. Below the breakpoint the field already fills the
+     * 720px column, so the auto margins collapse to nothing.
+     * See GitHub issue #1344. */
     max-width: 720px;
+    margin-inline: auto;
   }
 
   .home-header-container {

@@ -133,10 +133,20 @@
   </ion-content>
 </ta-page>
 
-<ion-alert
-  [isOpen]="isOpen()"
-  header="Stop following"
-  message="Are you sure you want to stop following {{ user()?.displayName }}?"
-  [buttons]="confirmationButtons"
-  (didDismiss)="handleConfirmationDismiss($event)"
-/>
+<!-- Created only once an unfollow is awaiting confirmation. Bound to a
+boolean, the hidden alert was instantiated on every profile, including the
+signed-in user's own, where it offered to unfollow themselves. Same shape as
+the followers list, which is also where the wording comes from, so both
+surfaces read the same sentence in the same language. See GitHub issue #1343. -->
+@if (isOpen()) {
+  <ion-alert
+    [isOpen]="true"
+    header="{{ 'stop-following' | transloco }}"
+    message="{{
+      'are-you-sure-you-want-to-stop-following-username'
+        | transloco: { username: user()?.displayName }
+    }}"
+    [buttons]="confirmationButtons"
+    (didDismiss)="handleConfirmationDismiss($event)"
+  />
+}

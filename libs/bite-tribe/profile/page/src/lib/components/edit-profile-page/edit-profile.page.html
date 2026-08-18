@@ -142,10 +142,15 @@
   </ion-content>
 </ta-page>
 
+<!-- Created only once the switch back to a private profile is awaiting
+confirmation, rather than kept hidden on every visit to the form. See GitHub
+issue #1343. -->
+@if (isOpen()) {
 <ion-alert
-  [isOpen]="isOpen()"
+  [isOpen]="true"
   header="{{ 'return-to-private-profile' | transloco }}"
   message="{{ 'are-you-sure-you-want-to-return-to-a-private-profile-you-will-be-shown-as-anonymous' | transloco }}"
   [buttons]="confirmationButtons"
   (didDismiss)="handleGoPrivateConfirmation($event)"
 />
+}

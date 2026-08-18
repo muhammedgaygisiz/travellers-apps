@@ -15,7 +15,16 @@ export default [
       // method name (no globs), so list each page-object assertion helper here.
       'playwright/expect-expect': [
         'warn',
-        { assertFunctionNames: ['expect', 'expectResult'] },
+        {
+          assertFunctionNames: [
+            'expect',
+            'expectResult',
+            'expectBiteFields',
+            'expectPositionMarkerInsideMap',
+            'expectPositionSource',
+            'expectPostEnabled',
+          ],
+        },
       ],
     },
   },

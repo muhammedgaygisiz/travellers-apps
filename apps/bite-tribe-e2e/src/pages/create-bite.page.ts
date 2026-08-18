@@ -329,25 +329,84 @@ export class CreateBitePage {
    * pick land somewhere other than the position the form already holds.
    */
   async discardManualPositionPick(): Promise<void> {
+    await this.startManualPositionPick();
+    await this.pickPointNorthEastOfMapCentre();
+
+    await this.cancelPositionSource.click();
+    await this.expectPositionSourceModalClosed();
+  }
+
+  /**
+   * Picks a point on the modal map through the manual source and applies it
+   * through `OK` — the counterpart of {@link discardManualPositionPick}.
+   *
+   * The pick lands north east of the map centre, and the camera sits on the
+   * position the form held when the modal opened, so a test can assert which
+   * way the saved position moved without having to translate a screen point
+   * back into coordinates.
+   */
+  async confirmManualPositionPick(): Promise<void> {
+    await this.startManualPositionPick();
+    await this.pickPointNorthEastOfMapCentre();
+
+    await this.confirmPositionSource.click();
+    await this.expectPositionSourceModalClosed();
+  }
+
+  /**
+   * Opens the modal on the manual source and waits for the camera it moves to
+   * the current position to come to rest. Selecting a source recentres the map,
+   * so a pick made while that pan is still running would land on a different
+   * coordinate every run.
+   */
+  private async startManualPositionPick(): Promise<void> {
     await this.openPositionSourceModal();
     await this.positionSourceOption('manual').click();
+    await this.expectMapPaneSettled();
+  }
 
+  /**
+   * Waits until the Leaflet pane stops moving, read as two consecutive samples
+   * of the same transform. Watching the pane rather than the markers keeps this
+   * independent of how a marker icon is anchored.
+   */
+  private async expectMapPaneSettled(): Promise<void> {
+    const pane = this.page.locator(
+      'ion-modal .position-source-map .leaflet-map-pane',
+    );
+    let previous: string | undefined;
+
+    await expect
+      .poll(async () => {
+        const current = await pane.evaluate(
+          (element) => getComputedStyle(element).transform,
+        );
+        const settled = current === previous;
+        previous = current;
+
+        return settled;
+      })
+      .toBe(true);
+  }
+
+  /**
+   * Clicks the upper right quadrant of the modal map: clear of the zoom controls
+   * in the top left, the Leaflet attribution in the bottom right, and the marker
+   * in the centre.
+   *
+   * Clicked through the locator rather than at raw viewport coordinates, so
+   * Playwright waits for the modal to settle before the click lands.
+   */
+  private async pickPointNorthEastOfMapCentre(): Promise<void> {
     const map = await this.positionSourceMap.boundingBox();
 
     if (!map) {
       throw new Error('The position source map is not on screen to click in.');
     }
 
-    // Clicked through the locator rather than at raw viewport coordinates, so
-    // Playwright waits for the modal to settle before the click lands. The
-    // upper right quadrant is clear of the zoom controls in the top left, the
-    // Leaflet attribution in the bottom right, and the marker in the centre.
     await this.positionSourceMap.click({
       position: { x: (map.width * 3) / 4, y: map.height / 4 },
     });
-
-    await this.cancelPositionSource.click();
-    await this.expectPositionSourceModalClosed();
   }
 
   async submit(): Promise<void> {

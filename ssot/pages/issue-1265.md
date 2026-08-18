@@ -11,6 +11,7 @@
 - Decision - the two subjects
   - The registration mail's `Verify your email for Bite Tribe` is a Firebase Auth console template. The resend's `Verify your Bite Tribe email address` comes from `emailVerification.subject` in the backend catalog and exists in eleven reviewed translations.
   - Reconciled towards the catalog: the console template is edited to the catalog's English wording, rather than rewriting eleven translations to match an English-only console default. The console template is not repository code, so this is an operational step recorded here and in [[Implementation - Firebase Functions]] rather than a diff.
+  - Done in the Firebase console on 2026-08-18: the English `Email address verification` template's subject now reads `Verify your Bite Tribe email address`. Only the subject changed; the body and the action URL are untouched, because the link is the deferred decision below. That template is sent by Firebase's own mailer rather than by `resendEmailVerification`, so it is confirmed by the subject of a **registration** mail on the next platform run - a resend exercises the other sender and proves nothing about it.
 - Decision - the `bite-tribe.firebaseapp.com` action link
   - Worth moving onto a BiteTribe domain, but deliberately not in this issue.
   - The action URL is `authDomain`, which is also the OAuth redirect origin for Google and Apple sign-in. Moving it means a Firebase Hosting custom domain, DNS records, updated provider redirect URIs, and an app config change that only reaches users in a new build.

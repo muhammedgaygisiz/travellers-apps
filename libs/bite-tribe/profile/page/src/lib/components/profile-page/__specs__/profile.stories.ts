@@ -13,7 +13,7 @@ export default {
     applicationConfig({
       providers: [
         provideIonicAngular(getIonicConfig()),
-        { provide: APP_TITLE, useValue: 'Bite Tribe' },
+        { provide: APP_TITLE, useValue: 'BiteTribe' },
       ],
     }),
   ],
@@ -67,7 +67,7 @@ const biteTrail: BiteTrail = {
   imagePath: 'assets/demo/bite-demo.png',
   image: '',
   ownerImagePath: '',
-  ownerName: 'Bite Tribe',
+  ownerName: 'BiteTribe',
   location: 'Bern',
   description: 'A compact morning route through three easygoing brunch spots.',
   price: 12,
@@ -225,7 +225,7 @@ export const OrganisationWithBiteTrails: Story = {
       userId: 'organisation-owner',
       about: 'Curated food trails around Swiss cities.',
       city: 'Bern',
-      displayName: 'Bite Tribe Guides',
+      displayName: 'BiteTribe Guides',
       fullName: '',
       isOrganisation: true,
     },

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is **Bite Tribe**, a monorepo managed with Nx, built with Angular 20 and Ionic 8. The project consists of multiple applications including a main PWA (bite-tribe), a business portal (bite-tribe-business), and a CV app.
+This is **BiteTribe**, a monorepo managed with Nx, built with Angular 20 and Ionic 8. The project consists of multiple applications including a main PWA (bite-tribe), a business portal (bite-tribe-business), and a CV app.
 
 ## Nx Monorepo Structure
 

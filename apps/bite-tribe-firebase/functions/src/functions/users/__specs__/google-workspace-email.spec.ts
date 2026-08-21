@@ -64,9 +64,7 @@ describe('createRawEmail', () => {
   it('sends from the configured sender address, never from the delegated mailbox', () => {
     const message = render('en');
 
-    expect(headerOf(message, 'From')).toBe(
-      'Bite Tribe <noreply@bitetribe.app>',
-    );
+    expect(headerOf(message, 'From')).toBe('BiteTribe <noreply@bitetribe.app>');
     expect(message).not.toContain('delegated.person@bitetribe.app');
   });
 
@@ -79,7 +77,7 @@ describe('createRawEmail', () => {
     );
     expect(headerOf(message, 'Subject')).toBe(
       `=?UTF-8?B?${Buffer.from(
-        'Bestätige deine Bite-Tribe-E-Mail-Adresse',
+        'Bestätige deine BiteTribe-E-Mail-Adresse',
         'utf8',
       ).toString('base64')}?=`,
     );
@@ -89,7 +87,7 @@ describe('createRawEmail', () => {
     // The English mail is what shipped; encoding it would change a mail that
     // was already correct.
     expect(headerOf(render('en'), 'Subject')).toBe(
-      'Verify your Bite Tribe email address',
+      'Verify your BiteTribe email address',
     );
   });
 

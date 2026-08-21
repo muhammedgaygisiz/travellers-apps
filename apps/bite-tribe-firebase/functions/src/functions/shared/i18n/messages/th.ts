@@ -3,9 +3,9 @@ import { NotificationMessages } from '../notification-messages';
 /** Thai copy. */
 export const th: NotificationMessages = {
   'common.someone': 'ใครบางคน',
-  'emailVerification.subject': 'ยืนยันที่อยู่อีเมล Bite Tribe ของคุณ',
+  'emailVerification.subject': 'ยืนยันที่อยู่อีเมล BiteTribe ของคุณ',
   'emailVerification.body':
-    'โปรดยืนยันที่อยู่อีเมลของคุณ เพื่อให้บัญชี Bite Tribe ของคุณปลอดภัยและคุณได้รับข้อความสำคัญเกี่ยวกับบัญชี',
+    'โปรดยืนยันที่อยู่อีเมลของคุณ เพื่อให้บัญชี BiteTribe ของคุณปลอดภัยและคุณได้รับข้อความสำคัญเกี่ยวกับบัญชี',
   'emailVerification.linkLabel': 'ยืนยันที่อยู่อีเมล',
   'newBite.title': 'Bite ใหม่',
   'newBite.body': '{{author}} เพิ่งสร้าง Bite ใหม่',

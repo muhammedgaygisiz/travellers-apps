@@ -31,7 +31,7 @@ export const provideBiteTribeBusinessShell = (
     provide: RouteReuseStrategy,
     useClass: IonicRouteStrategy,
   },
-  { provide: APP_TITLE, useValue: 'Bite Tribe Business' },
+  { provide: APP_TITLE, useValue: 'BiteTribe Business' },
   { provide: AFTER_LOGOUT_PAGE, useValue: '/start' },
   { provide: AFTER_LOGIN_PAGE, useValue: '/dashboard' },
   provideBiteTribeStore(environment),

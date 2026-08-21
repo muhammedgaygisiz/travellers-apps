@@ -10,7 +10,7 @@ Prefer existing Nx library boundaries:
 - `libs/bite-tribe/store`: NgRx state, router selectors, derived selectors, effects, and app-wide transformations.
 - `libs/bite-tribe/api`: client-side Firebase/Firestore API services and storage helpers used by app features.
 - `apps/bite-tribe-firebase/functions`: backend callable/storage/pubsub functions. Export new functions from `src/index.ts`.
-- `apps/bite-tribe/src/assets/i18n/*.json`: Bite Tribe translations. If visible UI text is added, add keys for every app locale, not only English.
+- `apps/bite-tribe/src/assets/i18n/*.json`: BiteTribe translations. If visible UI text is added, add keys for every app locale, not only English.
 
 ## Common Flow
 

@@ -46,7 +46,7 @@ describe(RegistrationComponent.name, () => {
       providers: [
         provideIonicAngular(getIonicConfig()),
         provideRouter([]),
-        { provide: APP_TITLE, useValue: 'Bite Tribe' },
+        { provide: APP_TITLE, useValue: 'BiteTribe' },
         { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     }).compileComponents();

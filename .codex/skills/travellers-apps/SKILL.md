@@ -1,6 +1,6 @@
 ---
 name: travellers-apps
-description: Repo operating guide for muhammedgaygisiz/travellers-apps. Use when implementing or validating Angular/Ionic Bite Tribe features, shared UI components, Storybook stories, Firebase functions, Capacitor native plugin changes, localization, profile/API/store/search flows, or when Nx project graph behavior affects validation.
+description: Repo operating guide for muhammedgaygisiz/travellers-apps. Use when implementing or validating Angular/Ionic BiteTribe features, shared UI components, Storybook stories, Firebase functions, Capacitor native plugin changes, localization, profile/API/store/search flows, or when Nx project graph behavior affects validation.
 ---
 
 # Travellers Apps

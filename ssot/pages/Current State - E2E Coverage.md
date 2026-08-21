@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This page tracks Playwright end-to-end coverage across Bite Tribe use cases so
+This page tracks Playwright end-to-end coverage across BiteTribe use cases so
 future work can resume from the last verified state. It covers both suites:
 `apps/bite-tribe-e2e` for the consumer app and `apps/bite-tribe-business-e2e`
 for the business app.

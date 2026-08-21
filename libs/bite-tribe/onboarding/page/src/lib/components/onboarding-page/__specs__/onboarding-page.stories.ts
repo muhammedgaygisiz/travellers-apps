@@ -29,7 +29,7 @@ export default {
     applicationConfig({
       providers: [
         provideIonicAngular(getIonicConfig()),
-        { provide: APP_TITLE, useValue: 'Bite Tribe' },
+        { provide: APP_TITLE, useValue: 'BiteTribe' },
       ],
     }),
   ],

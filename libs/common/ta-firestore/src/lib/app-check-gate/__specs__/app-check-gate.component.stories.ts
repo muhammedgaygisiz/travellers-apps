@@ -19,7 +19,7 @@ import { AppCheckReadinessService } from '../../app-check-readiness.service';
 const TRANSLATIONS: Translation = {
   'app-check-blocked-title': 'Extra security check needed',
   'app-check-blocked-message':
-    'Bite Tribe could not verify this device with its security check. Check your connection and try again to continue.',
+    'BiteTribe could not verify this device with its security check. Check your connection and try again to continue.',
   'app-check-retry': 'Try again',
 };
 

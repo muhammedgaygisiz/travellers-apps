@@ -3,9 +3,9 @@ import { NotificationMessages } from '../notification-messages';
 /** Indonesian copy. Informal "kamu", matching the app's locale files. */
 export const id: NotificationMessages = {
   'common.someone': 'Seseorang',
-  'emailVerification.subject': 'Verifikasi alamat email Bite Tribe kamu',
+  'emailVerification.subject': 'Verifikasi alamat email BiteTribe kamu',
   'emailVerification.body':
-    'Verifikasi alamat emailmu agar akun Bite Tribe kamu tetap aman dan kamu bisa menerima pesan penting tentang akunmu.',
+    'Verifikasi alamat emailmu agar akun BiteTribe kamu tetap aman dan kamu bisa menerima pesan penting tentang akunmu.',
   'emailVerification.linkLabel': 'Verifikasi alamat email',
   'newBite.title': 'Bite baru',
   'newBite.body': '{{author}} baru saja membuat Bite baru',

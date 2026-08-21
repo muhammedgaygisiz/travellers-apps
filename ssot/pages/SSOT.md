@@ -104,6 +104,7 @@
   - [[Implementation - Testing]]
   - [[Implementation - Release And Build Workflow]]
   - [[Implementation - Store Release Steps]]
+  - [[Implementation - Store Listing Assets]]
   - [[Implementation - CI Pipeline]]
 - Decisions
   - [[ADR-0001 Dish First Product]]

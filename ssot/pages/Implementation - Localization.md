@@ -42,7 +42,7 @@ apps/bite-tribe-ios/ios/App/App/<lang>.lproj/InfoPlist.strings
 
 ## Localized Surfaces
 
-BiteTribe copy lives in six places, because five of them are rendered by
+BiteTribe copy lives in seven places, because six of them are rendered by
 something other than Transloco:
 
 | Surface                | Owner                                | Rendered by                 |
@@ -53,11 +53,20 @@ something other than Transloco:
 | Registration mail      | Firebase Auth email templates        | Firebase, in the console    |
 | Legal documents        | `PUBLISHED_PRIVACY_POLICY_LANGUAGES` | The privacy-policy library  |
 | iOS permission prompts | `InfoPlist.strings` per `.lproj`     | The OS, before the app runs |
+| Store listings         | App Store Connect and Play Console   | The store, before install   |
 
 The verification mail shares the notification catalog rather than owning a
 second list, so it is not a fifth language list to maintain. The registration
-mail is the one surface this repository cannot fully control: its templates live
-in the Firebase console, and the code can only name the language.
+mail and the store listings are the surfaces this repository cannot fully
+control: their content lives in the Firebase, Apple and Google consoles, and the
+code can only name the language.
+
+Store listings are console configuration rather than a repository list, so they
+do not add a fifth entry to `Adding A Language` below. They are still a language
+list in practice: the decision in [[Implementation - Store Listing Assets]] is
+that the listing locales match `availableLangs`, so a language added here is not
+finished until both product pages carry it. A missing listing locale falls back
+to English on the store page while the app itself does not.
 
 All four language lists have to move together. Nothing fails a build when one is
 forgotten — the user just silently gets English.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Sets the Google Workspace email secrets for the Bite Tribe functions and
+# Sets the Google Workspace email secrets for the BiteTribe functions and
 # redeploys the two functions that use them.
 #
 # Each `secrets:set` command pauses and prompts you to paste the value. The

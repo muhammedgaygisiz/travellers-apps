@@ -17,7 +17,7 @@ export default {
     applicationConfig({
       providers: [
         provideIonicAngular(getIonicConfig()),
-        { provide: APP_TITLE, useValue: 'BiteTribe' },
+        { provide: APP_TITLE, useValue: 'Bite Tribe' },
       ],
     }),
   ],

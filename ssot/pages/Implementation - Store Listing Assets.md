@@ -286,9 +286,10 @@ restaurant and bite-place components. It is a rating accent, not the brand
 surface.
 
 Consequence: **every captured asset currently in the stores predates this
-palette and must be recaptured, not merely resized.** That covers the Play
-feature graphic, whose orange band and orange lockup no longer match any surface
-in the app, and both Play phone screenshots, which show orange app chrome.
+palette and must be recaptured, not merely resized.** That covered the Play
+feature graphic, whose orange band and orange lockup matched no surface in the
+app, and both Play phone screenshots, which showed orange app chrome. Both were
+replaced on 22 August 2026 and no stale-palette asset remains on either store.
 
 ### Capture Rules
 
@@ -389,6 +390,57 @@ frames' own background. At 1620 px on the short side the set also clears Play's
 Do not crop to reach the ratio. Cropping a 6.9" master loses status bar or tab
 bar and makes the two stores show different framing of the same screen.
 
+### The Feature Graphic Was A Recolour, Not A Re-Shoot
+
+Play's 1024 x 500 feature graphic is the one asset with a real design source: a
+Figma frame, exported to SVG. `ssot/assets/store-listing/feature-graphic/` holds
+the untouched export as `feature-graphic-original.svg`, the recoloured
+`feature-graphic.svg`, the 1024 x 500 `feature-graphic.png` that is live, and
+`photo-ojja.png`.
+
+The export made the recolour surgical, because the whole orange surface is one
+two-stop linear gradient rather than painted artwork. Three edits:
+
+| Element              | From                  | To                    |
+| -------------------- | --------------------- | --------------------- |
+| Gradient stop 1      | `#FEC56B` @ 0 opacity | `#1A1C22` @ 0 opacity |
+| Gradient stop 2      | `#F6C67A`             | `#1A1C22`             |
+| Wordmark and tagline | `#55422A`             | `#F1F1F1`             |
+
+Plus an opaque `#1A1C22` rect behind everything: the photo rect starts at
+`x=130`, so the leftmost 130 px had no fill of its own once the overlay stopped
+being opaque.
+
+**The mascot is not touched.** All twelve `#55422A` strokes and the `#CE8B3D`,
+`#F0B967`, `#825534` and `#D36127` fills are exactly as exported, per _The Brand
+Mark Is Current_ above. It reads better against the dark ground than it did
+against the tan, where its own body colour was nearly the same value and the
+shape was carried entirely by its outline.
+
+The wordmark and tagline are outlined paths — the export has no `<text>` element
+— but each is a single path with a single fill, so recolouring them needed no
+type work. Re-setting them would mean Outfit, the app's `--ion-font-family`.
+
+Figma compressed the fade between ground and photo into 2% of the gradient
+length, which a tan ground needs or the two turn to mud. A dark ground does not,
+so the transition was widened to roughly 6%. That is the only change beyond
+colour, and it is why the offsets differ from the original export.
+
+Export is reproducible, and pins the output to exactly 1024 x 500:
+
+```bash
+npx playwright screenshot --viewport-size=1024,500 \
+  "file://$PWD/feature-graphic.svg" feature-graphic.png
+```
+
+`qlmanage -t` also rasterizes SVG and needs no dependency, but it renders into a
+square canvas and does not preserve the 1024 x 500 aspect. Do not use it to
+produce the asset.
+
+The photograph is a dish from the maintainer's own Bites, so the asset carries
+no third-party image licence. Recorded because the graphic predates the graph
+and its provenance was written down nowhere.
+
 ### Uploading Them Is Not Symmetrical
 
 Both consoles hide the screenshot upload behind something other than the obvious
@@ -434,7 +486,7 @@ listing, no custom listings, and no additional locales.
 | Short description     | `Find it. Try it. Share it.`, 26 / 80 |
 | Full description      | 1307 / 4000, in review                |
 | App icon              | present                               |
-| Feature graphic       | present, stale palette                |
+| Feature graphic       | present, current palette              |
 | Phone screenshots     | 5 of 8, current palette               |
 | 7-inch tablet         | none                                  |
 | 10-inch tablet        | none                                  |
@@ -445,8 +497,8 @@ The two stale-palette screenshots were removed and the five current ones added
 on 22 August 2026, saved as a draft change awaiting **Send for review**. Five at
 1620 px clears Play's promotion threshold, which the previous two did not.
 
-The feature graphic is still the stale orange lockup and is the last stale asset
-on either store.
+The feature graphic was recoloured to the current palette the same day, so no
+stale-palette asset remains on either store.
 
 ### App Store Connect
 
@@ -603,11 +655,14 @@ As of 22 August 2026, in the order they gate a submission.
 | ------------------------------ | ----- | ---------------------------------------------------------- |
 | Send the listing for review    | Play  | Saved as a draft change, sitting in Publishing overview    |
 | Support URL                    | Apple | Required for submission; parked on a contact address       |
-| Feature graphic                | Play  | Still the stale orange lockup                              |
-| 7-inch and 10-inch screenshots | Play  | Marked required, both empty                                |
+| 7-inch and 10-inch screenshots | Play  | Asterisked, both empty — does not block review             |
 | Light-theme captures           | Both  | The set is dark-theme only; the capture rule asks for both |
 | Ten listing translations       | Both  | Derive from the English copy above                         |
 | App previews                   | Apple | Optional, none captured                                    |
+
+Play's tablet slots carry a required asterisk but do **not** gate submission:
+with both empty, Publishing overview still reports `Your changes can now be sent
+for review`. Treat them as a quality gap, not a blocker.
 
 Screenshot reordering on Apple is manual by nature — Media Manager offers only
 drag-and-drop — and was done by hand on 22 August to bring the bite detail to

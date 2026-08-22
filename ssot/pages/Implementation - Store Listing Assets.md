@@ -298,11 +298,130 @@ in the app, and both Play phone screenshots, which show orange app chrome.
 - Cover both light and dark, since the app ships both and the dark background
   (`#1a1c22`) is a deliberate surface.
 - Keep the sources in the SSOT graph next to this page, so a re-shoot starts from
-  the previous framing rather than from scratch.
+  the previous framing rather than from scratch. They are in
+  `ssot/assets/store-listing/phone-6.9/`.
+
+### The Captured Set
+
+Five frames, shot 22 August 2026 on an iPhone 16 Pro simulator at
+1320 x 2868 against the **production** Firebase project, so every dish, review
+and profile is real content rather than a fixture.
+
+| #   | File                 | Shows                                                        |
+| --- | -------------------- | ------------------------------------------------------------ |
+| 1   | `01-home-feed.png`   | The Bites feed with search, sitemap and distance filters     |
+| 2   | `02-bitemap.png`     | The map view, clustered pins over Istanbul                   |
+| 3   | `03-bite-detail.png` | One Bite: photo, author, stars, price, place and distance    |
+| 4   | `04-bucket-list.png` | A BiteTrail saved as a bucket list, with its Bites           |
+| 5   | `05-profile.png`     | A profile: follower counts, visited-country flags, own Bites |
+
+The file numbering is capture order, not store order. What matters is that the
+App Store uses only the **first three** on install sheets, so those three have to
+carry the pitch alone: what one Bite contains, where the Bites are, and what the
+app is. `03-bite-detail` is the frame that shows a price and a rating, which is
+the claim the description opens with, so it must not sit in the tail.
+
+As uploaded on 22 August 2026:
+
+| Store     | Order                                        |
+| --------- | -------------------------------------------- |
+| App Store | bite detail, map, feed, bucket list, profile |
+| Play      | feed, map, bite detail, profile, bucket list |
+
+The two differ because each console orders by how its upload path happened to
+land, and each was then corrected only as far as the first three required. They
+do not need to match; the constraint is that the bite detail is above the fold
+on both.
+
+The frames are dark-theme throughout. The capture rule asks for both light and
+dark; this set does not satisfy that half yet, and a light-theme pass is
+outstanding.
+
+Prod content means real people appear. Frame 3 shows another user's Bite, used
+with that creator's consent; frames 4 and 5 are the maintainer's own account.
+A re-shoot inherits that constraint — consent is per-person, not per-set.
+
+### Capturing Prod Content Needs A Simulator App Check Provider
+
+A production build points at the production Firebase project, where App Check is
+enforced on Authentication, Firestore and Storage. On iOS the provider is App
+Attest, and **App Attest has no simulator implementation** — no token is ever
+issued, so sign-in fails with a generic `Something went wrong` that says nothing
+about attestation. Without a fix there is no way to shoot prod content on a
+simulator at all.
+
+`BiteTribeAppCheckProviderFactory` in
+`apps/bite-tribe-ios/ios/App/App/AppDelegate.swift` returns
+`AppCheckDebugProvider` under `#if targetEnvironment(simulator)` and
+`AppAttestProvider` otherwise. The branch is resolved at compile time, and store
+and TestFlight builds are always compiled for a device, so the debug provider
+cannot reach a release binary even by misconfiguration.
+
+The provider emits a token that has to be registered in the Firebase console
+before it works. That registration is a **standing App Check bypass for whoever
+holds the token**, so it is issued per capture session and revoked afterwards —
+the token used for this set was deleted on 22 August 2026. It joins the rotation
+list in [issue #1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177).
+
+Two things this makes explicit that were previously only implicit:
+
+- `npx nx build bite-tribe` is a **production** build. `defaultConfiguration` on
+  the `bite-tribe` build target is `production`, so the bare command strips
+  `NX_APP_BITE_TRIBE_IS_DEV` and the debug token by way of `DEV_ONLY_ENV_KEYS`.
+- A development build is not an alternative here. It routes at the local
+  emulators, so it cannot show prod content no matter how App Check is answered.
+
+### Play Needs Padding, Not A Re-Shoot
+
+Play requires exactly 16:9 or 9:16. The 6.9" master is 1320 x 2868, which is
+neither, so Play rejects it. Padding to the nearest exact 9:16 on the dark
+background token keeps one capture serving both stores:
+
+```bash
+sips -p 2880 1620 --padColor 1A1C22 01-home-feed.png
+```
+
+1620 x 2880 is exact — `1620 * 16 == 2880 * 9` — and the pad colour is
+`--ion-background-color` dark, so the added bars are invisible against the
+frames' own background. At 1620 px on the short side the set also clears Play's
+1080 px promotion threshold.
+
+Do not crop to reach the ratio. Cropping a 6.9" master loses status bar or tab
+bar and makes the two stores show different framing of the same screen.
+
+### Uploading Them Is Not Symmetrical
+
+Both consoles hide the screenshot upload behind something other than the obvious
+control, in different ways. Recorded because both cost a failed attempt.
+
+**App Store Connect.** The version page's iPhone tab exposes only the **6.5"**
+slot. Dropping a 1320 x 2868 master there is rejected with a dimension list that
+names only 6.5" sizes, which reads as though the master is wrong. It is not —
+6.9" has no slot on that page at all. Use **View All Sizes in Media Manager →
+iPhone 6.9" Display**. Once it is filled, the 6.5" slot on the version page
+switches to `Using 6.9" Display` and scales the frames itself, so the larger
+master is the only one that ever needs capturing.
+
+Media Manager writes on upload. The version page's **Save** stays disabled
+afterwards because there is nothing left unsaved, which looks like a failed
+upload and is not.
+
+Reordering in Media Manager is HTML5 drag-and-drop and has no keyboard or button
+equivalent, so it is a manual step.
+
+**Google Play.** The store listing page carries no file input until **Add
+assets** opens the asset library; the library's own **Upload** is what creates
+one. Files land in the library first, are selected there, and only reach the
+slot on **Add** — a two-step the App Store does not have. Each tile in the slot
+carries a trash and a move control on hover, so ordering and removal need no
+drag.
+
+Saving stages the listing in **Publishing overview**. Nothing is live, and no
+review has started, until **Send for review** is used there.
 
 ## Current State
 
-As inventoried on 21 August 2026.
+As inventoried on 21 August 2026, with the screenshot rows updated 22 August.
 
 ### Google Play
 
@@ -316,14 +435,18 @@ listing, no custom listings, and no additional locales.
 | Full description      | 1307 / 4000, in review                |
 | App icon              | present                               |
 | Feature graphic       | present, stale palette                |
-| Phone screenshots     | 2 of 8, stale palette                 |
+| Phone screenshots     | 5 of 8, current palette               |
 | 7-inch tablet         | none                                  |
 | 10-inch tablet        | none                                  |
 | Chromebook, video, XR | none                                  |
 | Website, phone number | empty                                 |
 
-Two phone screenshots meets Play's minimum but not its promotion threshold,
-which is four at 1080 px or more on each side.
+The two stale-palette screenshots were removed and the five current ones added
+on 22 August 2026, saved as a draft change awaiting **Send for review**. Five at
+1620 px clears Play's promotion threshold, which the previous two did not.
+
+The feature graphic is still the stale orange lockup and is the last stale asset
+on either store.
 
 ### App Store Connect
 
@@ -333,7 +456,8 @@ Version 1.0 is in Prepare for Submission and is effectively empty.
 | --------------------------------------- | --------------------------- |
 | Name, subtitle                          | set                         |
 | Age rating                              | set, 18+                    |
-| Screenshots and previews                | none                        |
+| Screenshots                             | 5 of 10, 6.9", current      |
+| App previews                            | none                        |
 | Description, promotional text, keywords | set                         |
 | Support URL, marketing URL, copyright   | empty, support URL required |
 | Primary category                        | Food & Drink                |
@@ -470,6 +594,24 @@ Both public URLs render, but a cold load of the privacy policy can hit the App
 Check gate and show the security-check screen first. A store reviewer opening
 that link from a fresh browser can see it, which makes it a review risk rather
 than a cosmetic one.
+
+## What The Listings Still Need
+
+As of 22 August 2026, in the order they gate a submission.
+
+| Gap                            | Store | Note                                                       |
+| ------------------------------ | ----- | ---------------------------------------------------------- |
+| Send the listing for review    | Play  | Saved as a draft change, sitting in Publishing overview    |
+| Support URL                    | Apple | Required for submission; parked on a contact address       |
+| Feature graphic                | Play  | Still the stale orange lockup                              |
+| 7-inch and 10-inch screenshots | Play  | Marked required, both empty                                |
+| Light-theme captures           | Both  | The set is dark-theme only; the capture rule asks for both |
+| Ten listing translations       | Both  | Derive from the English copy above                         |
+| App previews                   | Apple | Optional, none captured                                    |
+
+Screenshot reordering on Apple is manual by nature — Media Manager offers only
+drag-and-drop — and was done by hand on 22 August to bring the bite detail to
+the front.
 
 ## Blockers Outside The Listing
 

@@ -6,7 +6,24 @@ import FirebaseMessaging
 
 class BiteTribeAppCheckProviderFactory: NSObject, AppCheckProviderFactory {
     func createProvider(with app: FirebaseApp) -> AppCheckProvider? {
+        // App Attest has no simulator implementation - AppCheckCore logs
+        // "App Attest is not supported" and no token is ever issued. Because
+        // App Check is enforced on Authentication, Firestore and Storage, that
+        // makes a simulator unable to sign in at all, surfacing as a generic
+        // "Something went wrong" rather than anything about attestation.
+        //
+        // The debug provider emits a token that can be registered in the
+        // Firebase console, which is what makes simulator work against the
+        // production project possible.
+        //
+        // This is a compile-time branch, not a runtime flag: an App Store or
+        // TestFlight build is always compiled for a device, so the debug
+        // provider cannot reach a release binary even by misconfiguration.
+        #if targetEnvironment(simulator)
+        return AppCheckDebugProvider(app: app)
+        #else
         return AppAttestProvider(app: app)
+        #endif
     }
 }
 

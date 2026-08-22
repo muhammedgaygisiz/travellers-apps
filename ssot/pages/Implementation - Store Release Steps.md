@@ -19,12 +19,35 @@ passed its debug-token check, and both Capacitor syncs have run:
 
 ```bash
 npx nx build bite-tribe --configuration=production
-npx nx run bite-tribe-ios:sync
+npm run cap:sync:ios
 npx nx run bite-tribe-android:sync
 ```
 
 The native wrappers bundle `dist/apps/bite-tribe`, so an unsynced wrapper ships
 the previous build's web assets without any visible error.
+
+### UTF-8 Requirement For The iOS Sync
+
+`npm run cap:sync:ios` exists for one reason: it pins `LANG` and `LC_ALL` to
+`en_US.UTF-8` before handing off to `nx run bite-tribe-ios:sync`.
+
+CocoaPods refuses to run under a non-UTF-8 locale. With `LANG` unset the shell
+falls back to `C`, and `pod install` dies inside the sync with
+
+```text
+Unicode Normalization not appropriate for ASCII-8BIT (Encoding::CompatibilityError)
+```
+
+which reads like a CocoaPods bug rather than a missing environment variable.
+
+This is invisible from a normal Terminal session, because an interactive macOS
+shell already exports a UTF-8 `LANG`. It appears in exactly the places that do
+not: non-interactive shells, agent-driven runs, and CI. It is the same class of
+problem as the JDK requirement below — an environment prerequisite that is
+silently satisfied when a human runs the command by hand.
+
+`nx run bite-tribe-ios:sync` still works when the shell already has a UTF-8
+locale. Prefer the npm script so it works either way.
 
 ## iOS - Archive And Upload
 

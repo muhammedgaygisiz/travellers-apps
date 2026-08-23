@@ -1,5 +1,8 @@
 export const Filesystem = {
   readFile: jest.fn(),
+  checkPermissions: jest.fn(() =>
+    Promise.resolve({ publicStorage: 'granted' }),
+  ),
 };
 
 /**

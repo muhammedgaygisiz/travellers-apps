@@ -49,6 +49,34 @@ const ensureDirectory = async (uid: string): Promise<void> => {
   }
 };
 
+/**
+ * Whether the old public directory can be read without asking the user for
+ * anything.
+ *
+ * `readdir` on `Documents` does not fail when the storage permission is
+ * missing - it *requests* it, and on Android 9 and below that request blocked
+ * the very save this migration exists to support, behind a prompt for a
+ * permission the app otherwise has no use for. Migrating a photo cache is never
+ * worth a permission dialog, so it is skipped instead of asked for.
+ *
+ * Skipping costs nothing: a device that cannot read that folder could not write
+ * to it either, so it has no copies of ours to migrate.
+ */
+const canReadLegacyDirectory = async (): Promise<boolean> => {
+  // In a browser the Capacitor filesystem is IndexedDB, with no permissions.
+  if (!Capacitor.isNativePlatform()) {
+    return true;
+  }
+
+  try {
+    const { publicStorage } = await Filesystem.checkPermissions();
+
+    return publicStorage === 'granted';
+  } catch {
+    return false;
+  }
+};
+
 /** Image files directly under `path` in the directory copies used to live in. */
 const legacyImageNames = async (path: string): Promise<string[]> => {
   try {
@@ -96,7 +124,8 @@ const migrateLegacyImage = async (
 
 /**
  * Moves local copies left behind in the public `Documents` folder into the
- * private directory {@link LOCAL_IMAGE_DIRECTORY} names.
+ * private directory {@link LOCAL_IMAGE_DIRECTORY} names, when that folder can
+ * be read without prompting - see {@link canReadLegacyDirectory}.
  *
  * Two layouts predate it. Files sitting directly under `Documents` carry no
  * owner: on a device the signed-in user is the only plausible one, so they are
@@ -108,6 +137,10 @@ const migrateLegacyImage = async (
  * part of this still has to be able to read and write its own directory.
  */
 const migrateLegacyImages = async (uid: string): Promise<void> => {
+  if (!(await canReadLegacyDirectory())) {
+    return;
+  }
+
   const adopt = Capacitor.isNativePlatform();
 
   for (const name of await legacyImageNames('')) {

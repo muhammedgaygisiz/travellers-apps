@@ -15,6 +15,7 @@ jest.mock('@capacitor/core', () => ({
 jest.mock('@capacitor/filesystem', () => ({
   Directory: { Data: 'DATA', Documents: 'DOCUMENTS' },
   Filesystem: {
+    checkPermissions: jest.fn(),
     deleteFile: jest.fn(),
     mkdir: jest.fn(),
     readdir: jest.fn(),
@@ -24,6 +25,7 @@ jest.mock('@capacitor/filesystem', () => ({
 
 const isNativePlatform = Capacitor.isNativePlatform as jest.Mock;
 const getCurrentUser = FirebaseAuthentication.getCurrentUser as jest.Mock;
+const checkPermissions = Filesystem.checkPermissions as jest.Mock;
 const deleteFile = Filesystem.deleteFile as jest.Mock;
 const mkdir = Filesystem.mkdir as jest.Mock;
 const readdir = Filesystem.readdir as jest.Mock;
@@ -48,6 +50,7 @@ describe('localImageDirectory', () => {
     resetLocalImageDirectoryForTesting();
 
     isNativePlatform.mockReturnValue(false);
+    checkPermissions.mockResolvedValue({ publicStorage: 'granted' });
     readdir.mockResolvedValue({ files: [] });
     mkdir.mockResolvedValue(undefined);
     deleteFile.mockResolvedValue(undefined);
@@ -186,6 +189,50 @@ describe('localImageDirectory', () => {
     });
   });
 
+  // Reading the old public folder without the storage permission does not fail,
+  // it opens a permission dialog - and awaiting that dialog blocked the save
+  // this migration exists to support. See GitHub issue #1229.
+  describe('when the old public directory needs a permission we do not have', () => {
+    beforeEach(() => {
+      isNativePlatform.mockReturnValue(true);
+      checkPermissions.mockResolvedValue({ publicStorage: 'prompt' });
+      legacyDirectoryHolds({
+        '': [{ name: 'bites_abc.jpg', type: 'file' }],
+        'user-1': [{ name: 'bites_def.jpg', type: 'file' }],
+      });
+    });
+
+    it('does not touch it, so nothing can prompt', async () => {
+      signedInAs('user-1');
+
+      expect(await localImageDirectory()).toBe('user-1');
+      expect(readdir).not.toHaveBeenCalled();
+      expect(rename).not.toHaveBeenCalled();
+      expect(deleteFile).not.toHaveBeenCalled();
+    });
+
+    it('still creates the directory it actually writes to', async () => {
+      signedInAs('user-1');
+
+      await localImageDirectory();
+
+      expect(mkdir).toHaveBeenCalledWith({
+        path: 'user-1',
+        directory: Directory.Data,
+        recursive: true,
+      });
+    });
+
+    it('skips the migration when the permission cannot even be read', async () => {
+      isNativePlatform.mockReturnValue(true);
+      checkPermissions.mockRejectedValue(new Error('no permissions api'));
+      signedInAs('user-1');
+
+      expect(await localImageDirectory()).toBe('user-1');
+      expect(readdir).not.toHaveBeenCalled();
+    });
+  });
+
   describe('migrating images the user already owned in the old directory', () => {
     beforeEach(() => {
       legacyDirectoryHolds({
@@ -232,6 +279,7 @@ describe('localImagePath', () => {
     resetLocalImageDirectoryForTesting();
 
     isNativePlatform.mockReturnValue(false);
+    checkPermissions.mockResolvedValue({ publicStorage: 'granted' });
     readdir.mockResolvedValue({ files: [] });
     mkdir.mockResolvedValue(undefined);
   });

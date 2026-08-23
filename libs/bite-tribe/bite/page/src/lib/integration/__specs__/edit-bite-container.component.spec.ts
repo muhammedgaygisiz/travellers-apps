@@ -4,12 +4,14 @@ import {
   provideIonicAngular,
 } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { addNecessaryIcons } from 'utils';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 import type { Bite } from 'model';
 import { BiteService } from '../bite.service';
 import { EditBiteContainer } from '../edit-bite-container.component';
+import { BitePage } from '../../components/page/bite.page';
 
 jest.mock('@capacitor-firebase/analytics');
 jest.mock('heic2any', () => jest.fn());
@@ -66,6 +68,17 @@ describe(EditBiteContainer.name, () => {
 
   it('should create', () => {
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  // The form is shared with the create page, so an edit that does not say so
+  // used to head itself "Create Bite" (issue #1365).
+  it('should head the form as an edit', () => {
+    fixture.detectChanges();
+
+    const page = fixture.debugElement.query(By.directive(BitePage))
+      .componentInstance as BitePage;
+
+    expect(page.titleKey()).toBe('edit-bite');
   });
 
   describe('given the bite could not be read', () => {

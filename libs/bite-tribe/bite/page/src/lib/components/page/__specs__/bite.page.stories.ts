@@ -8,6 +8,12 @@ addNecessaryIcons();
 export default {
   title: 'Pages/Create Bite',
   component: BitePage,
+  // The form is shared with the edit page, and `isNew` is what tells the two
+  // apart - down to the heading. Every story here shows the create page unless
+  // it says otherwise.
+  args: {
+    isNew: true,
+  },
   decorators: [
     applicationConfig({
       providers: [
@@ -46,9 +52,10 @@ export const WithTagSuggestions: Story = {
   },
 };
 
-export const NewBite: Story = {
+/** The same form reached by editing an existing Bite, headed accordingly. */
+export const EditBite: Story = {
   args: {
-    isNew: true,
+    isNew: false,
     position: {
       latitude: 46.9422564444011,
       longitude: 7.457160053942448,

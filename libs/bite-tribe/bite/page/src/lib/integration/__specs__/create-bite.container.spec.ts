@@ -2,9 +2,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { addNecessaryIcons } from 'utils';
 import { BiteService } from '../bite.service';
 import { CreateBiteContainer } from '../create-bite.container';
+import { BitePage } from '../../components/page/bite.page';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
@@ -46,7 +48,18 @@ describe(CreateBiteContainer.name, () => {
             effectiveCurrency: signal(undefined),
             position: signal(undefined),
             image: signal(undefined),
+            isCurrencyLoading: signal(false),
+            favCurrencies: signal([]),
+            nearbyRestaurants: signal([]),
+            tagSuggestionsForEditingBite: signal([]),
+            googlePlaces: signal([]),
+            googlePlacesLoading: signal(false),
+            nearbyGooglePlaces: signal([]),
+            nearbyGooglePlacesLoading: signal(false),
             submitNewBite: (): void => {},
+            submitNewBiteAndAddAnother: (): void => {},
+            searchGooglePlaces: jest.fn(),
+            loadNearbyGooglePlaces: jest.fn(),
             setEditingBite: (): jest.Mock => jest.fn(),
             clearCachedBite: jest.fn(),
             determineCurrencyForPosition: jest.fn(),
@@ -64,6 +77,15 @@ describe(CreateBiteContainer.name, () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should head the form as a creation', () => {
+    fixture.detectChanges();
+
+    const page = fixture.debugElement.query(By.directive(BitePage))
+      .componentInstance as BitePage;
+
+    expect(page.titleKey()).toBe('create-bite');
   });
 
   describe('ionViewDidEnter', () => {

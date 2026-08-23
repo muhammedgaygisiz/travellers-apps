@@ -109,6 +109,20 @@ describe('BitePage', () => {
     expect(component.isInvalid()).toBe(true);
   });
 
+  describe('titleKey', () => {
+    it('should name the create page when the Bite is new', () => {
+      componentRef.setInput('isNew', true);
+
+      expect(component.titleKey()).toBe('create-bite');
+    });
+
+    it('should name the edit page when the Bite already exists', () => {
+      componentRef.setInput('isNew', false);
+
+      expect(component.titleKey()).toBe('edit-bite');
+    });
+  });
+
   describe('biteFormGroup', () => {
     it('should validate required fields', () => {
       const validBite = {

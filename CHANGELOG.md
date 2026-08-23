@@ -1,5 +1,50 @@
 # Changelog
 
+## build-95 (2026-08-23)
+
+<!-- changelog-start-rev: 4fdf021d -->
+<!-- changelog-end-rev: 39ca8201 -->
+
+### Features
+
+- remove sorting control from my bucket lists page (#1340) (0afaa508)
+
+### Bug Fixes
+
+- localize hard coded text and conditional rendering of alert (#1346) (39e55fb8)
+- separate accounts galleries (#1339) (9d164f94)
+- advance with pre-selected profile visibility in onboarding (#1338) (b9d974c6)
+- marker color according selection (#1337) (2746bdeb)
+- show restaurants nearby by bite position instead of device position (#1336) (d350a17b)
+- fix alert per line and guard to make sure it effects the right item (#1335) (f69a612c)
+- fix wording for filter with no hits in bucket list (#1333) (d8627d72)
+
+### Performance Improvements
+
+- slow reactions and scrolling on android (#1358) (c187b984)
+
+### Documentation
+
+- point the release path at cap:sync:ios and the enforced build flag (39ca8201)
+- prepare app store and google play assets (#1356) (9f23439d)
+- record the Send mail as configuration behind the verification mail sender (#1348) (a264317d)
+- test run #8 web-only (#1345) (5d1248f8)
+
+### Tests
+
+- e2e coverage for manual position pick and pos from photo (#1349) (2592d412)
+
+### Styles
+
+- position search bar in my bites on desktop to center (#1347) (e4018595)
+- max-width search field on my bites (#1341) (a20f485a)
+
+### Chores
+
+- decide and record the remaining release-candidate blockers (#1351) (2fee779a)
+- test run 7 (#1332) (353ea1d3)
+- prepare build 1.0.1-94 release (#1324) (aa8cdc6d)
+
 ## build-94 (2026-08-15)
 
 <!-- changelog-start-rev: a2753b18 -->

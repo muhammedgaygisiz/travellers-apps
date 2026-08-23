@@ -103,21 +103,26 @@ export const attachCallerLikes = async (
 
     const likesByBiteId = new Map<string, DocumentData[]>();
 
-    // Batched in chunks so one very large feed cannot turn into a single
-    // oversized read that the callable has to wait out.
+    // Chunked so one very large feed cannot become a single oversized read,
+    // and issued together rather than one after another: the feed waits for
+    // the slowest batch instead of the sum of all of them.
+    const batches = [];
+
     for (let i = 0; i < references.length; i += LIKE_READ_BATCH_SIZE) {
-      const documents = await firestore.getAll(
-        ...references.slice(i, i + LIKE_READ_BATCH_SIZE),
+      batches.push(
+        firestore.getAll(...references.slice(i, i + LIKE_READ_BATCH_SIZE)),
       );
+    }
 
-      for (const document of documents) {
-        // The parent Bite owns the id, so a like whose document lost its own
-        // `biteId` still lands on the right Bite.
-        const biteId = document.ref.parent.parent?.id;
+    const documents = (await Promise.all(batches)).flat();
 
-        if (document.exists && biteId) {
-          likesByBiteId.set(biteId, [document.data() as DocumentData]);
-        }
+    for (const document of documents) {
+      // The parent Bite owns the id, so a like whose document lost its own
+      // `biteId` still lands on the right Bite.
+      const biteId = document.ref.parent.parent?.id;
+
+      if (document.exists && biteId) {
+        likesByBiteId.set(biteId, [document.data() as DocumentData]);
       }
     }
 

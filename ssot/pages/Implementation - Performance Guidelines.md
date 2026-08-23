@@ -17,6 +17,22 @@ Two measurements that separate the cases quickly:
 - `dumpsys gfxinfo <package>` distinguishes a rendering problem from an unresponsive one. Healthy frame times with a high `Number High input latency` means the app is drawing fine and not answering, which points inside the WebView rather than at Android.
 - Counting `requestAnimationFrame` callbacks during the interaction distinguishes blocked from waiting. Two frames in 1.6 s is a blocked main thread. A profile that looks mostly idle is waiting on IO.
 
+### A Locally Signed Build Needs Two Registrations Before It Can Reach Production Data
+
+Profiling against real data means running a locally built app against the production project, and two separate gates reject that build. Both cost more time to rediscover than to read.
+
+**Google Sign-In needs the build's signing certificate registered.** Google matches the calling app's SHA-1 against the fingerprints on the Firebase Android app, and a build signed with the local debug keystore matches none of them, so sign-in fails with `NoCredentialException: No credentials available` rather than anything that names the cause. Add the debug keystore's SHA-1 under Project settings, Your apps, Add fingerprint.
+
+Note that the **upload key is not registered either**, and signing the build with it does not help. Play re-signs every release with its own app-signing key, so the fingerprints that production users authenticate against belong to Play, not to the keystore in `keystore.properties`. Read the debug keystore's fingerprint with:
+
+```text
+keytool -list -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey
+```
+
+**App Check needs a debug token.** Play Integrity only attests a build installed from Play, so a locally signed one cannot obtain a token and every callable is rejected while `enforceAppCheck` is on. The debug variant installs `DebugAppCheckProviderFactory`, which prints a secret to logcat on first run; that secret has to be registered under App Check, Apps, Manage debug tokens.
+
+Both are credentials with real reach: a debug token bypasses App Check for whoever holds it. **Revoke both when the profiling session ends.** Leave the long-standing fingerprints alone - the ones referenced by `google-services.json` back Google Sign-In and the one in `.well-known/assetlinks.json` backs App Links, so removing either breaks production.
+
 ## A Derivation Runs Whenever Anything It Reads Changes
 
 A selector hanging off a broadly shared slice runs on every change to that slice, not only when its own inputs are meaningful. `nearbyRestaurants` is only needed by the create and edit Bite forms, but it derives from the whole Bite feed, so it ran on every like, every feed load and every GPS update.

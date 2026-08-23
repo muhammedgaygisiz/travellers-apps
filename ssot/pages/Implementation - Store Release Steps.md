@@ -18,7 +18,7 @@ Do not start until the release branch exists, the production web bundle has
 passed its debug-token check, and both Capacitor syncs have run:
 
 ```bash
-npx nx build bite-tribe --configuration=production
+NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true npx nx build bite-tribe --configuration=production
 npm run cap:sync:ios
 npx nx run bite-tribe-android:sync
 ```

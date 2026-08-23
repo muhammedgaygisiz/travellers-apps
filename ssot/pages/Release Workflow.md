@@ -62,22 +62,38 @@ belong to.
 2. Build the web application for the release build.
 
 ```bash
-npx nx build bite-tribe --configuration=production
+NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true npx nx build bite-tribe --configuration=production
 ```
 
 - Fix release-blocking build errors before continuing.
-- Confirm the bundle is clean before it is wrapped: grep the emitted
-  JavaScript in `dist/apps/bite-tribe` for the App Check debug token value and
-  for `IS_DEV`, and expect no match. This check is not optional; see
+- The `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` prefix is required. The variable
+  defaults to off and the local `.env` sets it to `false`, so a build without
+  the prefix silently wraps native artifacts with the enforced-mode gate
+  disabled. Decided under
+  [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177).
+- Confirm the bundle is clean before it is wrapped. In `dist/apps/bite-tribe`,
+  grep for `NX_APP_BITE_TRIBE_IS_DEV:` and
+  `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN:` — **with the trailing colon** — and
+  expect no match, then grep for
+  `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED:"true"` and expect a match. The colon is
+  what makes the check mean anything: the bare key names appear in every build
+  as runtime lookup constants. This check is not optional; see
   [[Current State - Release Candidate Test Charter]].
 
 3. Sync native apps.
 
 ```bash
-npx nx run bite-tribe-ios:sync
+npm run cap:sync:ios
 npx nx run bite-tribe-android:sync
 ```
 
+- The iOS sync goes through `npm run cap:sync:ios`, not through
+  `nx run bite-tribe-ios:sync` directly. The script exists only to pin `LANG`
+  and `LC_ALL` to `en_US.UTF-8`, without which CocoaPods aborts `pod install`
+  with `Unicode Normalization not appropriate for ASCII-8BIT`. An interactive
+  terminal already exports a UTF-8 locale, so calling the target directly works
+  by hand and fails in agent shells and CI. See
+  [[Implementation - Store Release Steps]] and [[Architecture - Capacitor]].
 - The wrappers bundle `dist/apps/bite-tribe`, so an unsynced wrapper ships the
   previous build's web assets silently.
 - Treat generated native changes as sync outputs and review the diffs.

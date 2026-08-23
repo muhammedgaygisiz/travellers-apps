@@ -69,6 +69,9 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation "com.google.firebase:firebase-appcheck-playintegrity:$firebaseAppCheckPlayIntegrityVersion"
+    // Debug variant only: lets a locally signed build obtain an App Check
+    // token, which Play Integrity cannot issue outside a Play install.
+    debugImplementation "com.google.firebase:firebase-appcheck-debug:$firebaseAppCheckPlayIntegrityVersion"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"

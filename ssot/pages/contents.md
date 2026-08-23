@@ -80,6 +80,7 @@
   - [[Implementation - Libraries]]
   - [[Implementation - Naming Conventions]]
   - [[Implementation - Feature Patterns]]
+  - [[Implementation - Performance Guidelines]]
   - [[Implementation - Firebase Functions]]
   - [[Implementation - Localization]]
   - [[Implementation - Storybook]]

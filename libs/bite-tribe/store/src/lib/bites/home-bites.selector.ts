@@ -18,10 +18,12 @@ import { handleMaxPriceFilter } from './utils/handle-max-price-filter';
 import { handleNearbyFilter } from './utils/handle-nearby-filter';
 import { handleTagFilters } from './utils/handle-tag-filters';
 import { dedupMerge } from './utils/dedup-merge';
-import { getLikesForBite } from './utils/get-likes-for-bite';
-import { haversineDistance } from 'utils';
-import { Bite } from 'model';
+import { groupLikesByBiteId } from './utils/group-likes-by-bite-id';
+import { createBiteMetadataJoin } from './utils/join-bite-metadata';
 import { byDistance } from './utils/by-distance';
+
+/** Own cache per feed, so one feed's churn cannot evict another's. */
+const joinHomeBiteMetadata = createBiteMetadataJoin();
 
 const slice = createFeatureSelector<BitesState>(key);
 
@@ -39,22 +41,11 @@ export const bitesWithMetadata = createSelector(
   (bites, latestBites, likes, gpsPosition) => {
     const dedupedBites = dedupMerge(bites, latestBites);
 
-    return dedupedBites
-      .map(
-        (bite) =>
-          ({
-            ...bite,
-            likes: getLikesForBite(likes, bite),
-            distance: haversineDistance(
-              bite.position?.latitude,
-              bite.position?.longitude,
-              gpsPosition?.latitude,
-              gpsPosition?.longitude,
-              'km',
-            ),
-          }) as Bite,
-      )
-      .sort(byDistance);
+    return joinHomeBiteMetadata(
+      dedupedBites,
+      groupLikesByBiteId(likes),
+      gpsPosition,
+    ).sort(byDistance);
   },
 );
 

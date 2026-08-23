@@ -10,7 +10,18 @@ import { onAppCheck } from '../shared/callable-options';
 const BITE_COLLECTION = 'bites';
 const LIKE_SUBCOLLECTION = 'likes';
 const LIKE_READ_BATCH_SIZE = 300;
-const DEFAULT_SEARCH_RADIUS_IN_M = 15 * 1000;
+/**
+ * How far "nearby" reaches.
+ *
+ * Every Bite inside this radius is read, and read again for the caller's like,
+ * whether or not the user ever scrolls to it: a single position at 15km
+ * returned 491 Bites against a feed that renders 50 at a time. Narrowing the
+ * horizon is the only lever that reduces the Bite reads themselves, because the
+ * geohash bounds have to come back before any distance can be compared. See
+ * GitHub issue #1294 for the staged search that replaces a fixed radius
+ * altogether.
+ */
+const DEFAULT_SEARCH_RADIUS_IN_M = 10 * 1000;
 
 interface LoadBitesByLocationRequest {
   latitude?: unknown;

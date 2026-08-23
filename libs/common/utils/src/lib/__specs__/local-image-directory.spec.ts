@@ -2,6 +2,7 @@ import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import {
+  LOCAL_IMAGE_DIRECTORY,
   localImageDirectory,
   localImagePath,
   resetLocalImageDirectoryForTesting,
@@ -12,7 +13,7 @@ jest.mock('@capacitor/core', () => ({
 }));
 
 jest.mock('@capacitor/filesystem', () => ({
-  Directory: { Documents: 'DOCUMENTS' },
+  Directory: { Data: 'DATA', Documents: 'DOCUMENTS' },
   Filesystem: {
     deleteFile: jest.fn(),
     mkdir: jest.fn(),
@@ -32,6 +33,15 @@ const signedInAs = (uid: string | undefined): void => {
   getCurrentUser.mockResolvedValue({ user: uid ? { uid } : null });
 };
 
+type LegacyFile = { name: string; type: 'file' | 'directory' };
+
+/** Mocks what the old public directory holds, per path within it. */
+const legacyDirectoryHolds = (contents: Record<string, LegacyFile[]>): void => {
+  readdir.mockImplementation(({ path }: { path: string }) =>
+    Promise.resolve({ files: contents[path] ?? [] }),
+  );
+};
+
 describe('localImageDirectory', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,13 +54,20 @@ describe('localImageDirectory', () => {
     rename.mockResolvedValue(undefined);
   });
 
+  // The copies used to live in `Documents`, which Capacitor maps to Android's
+  // public external storage: writing there needs a permission the app does not
+  // declare, so on API 29 and below every write was denied. See issue #1229.
+  it('keeps the copies in app-private storage, not the public folder', () => {
+    expect(LOCAL_IMAGE_DIRECTORY).toBe(Directory.Data);
+  });
+
   it('names the directory after the signed-in user and creates it', async () => {
     signedInAs('user-1');
 
     expect(await localImageDirectory()).toBe('user-1');
     expect(mkdir).toHaveBeenCalledWith({
       path: 'user-1',
-      directory: Directory.Documents,
+      directory: Directory.Data,
       recursive: true,
     });
   });
@@ -76,7 +93,6 @@ describe('localImageDirectory', () => {
     await localImageDirectory();
 
     expect(mkdir).toHaveBeenCalledTimes(1);
-    expect(readdir).toHaveBeenCalledTimes(1);
   });
 
   it('prepares again when a different user signs in', async () => {
@@ -98,10 +114,10 @@ describe('localImageDirectory', () => {
     expect(await localImageDirectory()).toBe('user-1');
   });
 
-  describe('reconciling images left in the flat legacy directory', () => {
+  describe('migrating images left flat in the old public directory', () => {
     beforeEach(() => {
-      readdir.mockResolvedValue({
-        files: [
+      legacyDirectoryHolds({
+        '': [
           { name: 'bites_abc.jpg', type: 'file' },
           { name: 'notes.txt', type: 'file' },
           { name: 'user-9', type: 'directory' },
@@ -111,7 +127,7 @@ describe('localImageDirectory', () => {
     });
 
     // A phone has one owner, so the files are the signed-in user's and their
-    // gallery should survive the upgrade.
+    // gallery should survive the move.
     it('adopts them into the user directory on a device', async () => {
       isNativePlatform.mockReturnValue(true);
       signedInAs('user-1');
@@ -123,11 +139,13 @@ describe('localImageDirectory', () => {
         from: 'bites_abc.jpg',
         to: 'user-1/bites_abc.jpg',
         directory: Directory.Documents,
+        toDirectory: Directory.Data,
       });
       expect(rename).toHaveBeenCalledWith({
         from: 'avatar.PNG',
         to: 'user-1/avatar.PNG',
         directory: Directory.Documents,
+        toDirectory: Directory.Data,
       });
       expect(deleteFile).not.toHaveBeenCalled();
     });
@@ -147,7 +165,7 @@ describe('localImageDirectory', () => {
       expect(rename).not.toHaveBeenCalled();
     });
 
-    it('keeps going when one of them cannot be reconciled', async () => {
+    it('keeps going when one of them cannot be migrated', async () => {
       jest.spyOn(console, 'error').mockImplementation();
       signedInAs('user-1');
       deleteFile
@@ -158,12 +176,51 @@ describe('localImageDirectory', () => {
       expect(deleteFile).toHaveBeenCalledTimes(2);
     });
 
-    it('still answers when the legacy directory cannot be read', async () => {
+    it('still answers when the old directory cannot be read', async () => {
       jest.spyOn(console, 'error').mockImplementation();
       signedInAs('user-1');
       readdir.mockRejectedValue(new Error('no dir'));
 
       expect(await localImageDirectory()).toBe('user-1');
+      expect(deleteFile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('migrating images the user already owned in the old directory', () => {
+    beforeEach(() => {
+      legacyDirectoryHolds({
+        'user-1': [
+          { name: 'bites_abc.jpg', type: 'file' },
+          { name: 'notes.txt', type: 'file' },
+        ],
+      });
+    });
+
+    // These carry the owner in their path, so unlike the flat ones there is
+    // nothing to guess and nothing to drop - in a browser either.
+    it('moves them across on a device', async () => {
+      isNativePlatform.mockReturnValue(true);
+      signedInAs('user-1');
+
+      await localImageDirectory();
+
+      expect(rename).toHaveBeenCalledTimes(1);
+      expect(rename).toHaveBeenCalledWith({
+        from: 'user-1/bites_abc.jpg',
+        to: 'user-1/bites_abc.jpg',
+        directory: Directory.Documents,
+        toDirectory: Directory.Data,
+      });
+    });
+
+    it('moves them across in a browser too', async () => {
+      signedInAs('user-1');
+
+      await localImageDirectory();
+
+      expect(rename).toHaveBeenCalledWith(
+        expect.objectContaining({ from: 'user-1/bites_abc.jpg' }),
+      );
       expect(deleteFile).not.toHaveBeenCalled();
     });
   });

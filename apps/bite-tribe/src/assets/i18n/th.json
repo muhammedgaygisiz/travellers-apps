@@ -263,6 +263,7 @@
   "choose-photo": "เลือกรูปภาพ",
   "image-upload-retry-failed": "ไม่สามารถเริ่มการอัปโหลดได้ โปรดลองอีกครั้ง",
   "bite-updated-successfully": "อัปเดต Bite สำเร็จแล้ว!",
+  "bite-update-failed": "เราไม่สามารถอัปเดต Bite ได้ โปรดลองอีกครั้ง",
   "bite-deleted-successfully": "ลบ Bite สำเร็จแล้ว!",
   "creating-bite": "กำลังสร้าง Bite...",
   "leaderboard": "กระดานผู้นำ",

@@ -37,6 +37,7 @@ export type { Login } from './lib/login';
 export { dataUrlToBlob } from './lib/data-url-to-blob';
 export { localImageSrc } from './lib/local-image-src';
 export {
+  LOCAL_IMAGE_DIRECTORY,
   localImageDirectory,
   localImagePath,
   resetLocalImageDirectoryForTesting,

@@ -5,7 +5,7 @@ import { localImageDirectory } from 'utils';
 import { GalleryService } from '../gallery.service';
 
 jest.mock('@capacitor/filesystem', () => ({
-  Directory: { Documents: 'DOCUMENTS' },
+  Directory: { Data: 'DATA', Documents: 'DOCUMENTS' },
   Filesystem: {
     deleteFile: jest.fn(),
     readdir: jest.fn(),
@@ -16,6 +16,7 @@ jest.mock('@capacitor/filesystem', () => ({
 // by its own tests; here it only has to be deterministic. The per-user
 // directory has its own tests too, so here it is just a name.
 jest.mock('utils', () => ({
+  LOCAL_IMAGE_DIRECTORY: 'DATA',
   localImageSrc: jest.fn((_name: string, uri: string) => Promise.resolve(uri)),
   localImageDirectory: jest.fn(() => Promise.resolve('user-1')),
 }));
@@ -47,7 +48,7 @@ describe(GalleryService.name, () => {
 
     expect(Filesystem.readdir).toHaveBeenCalledWith({
       path: 'user-1',
-      directory: Directory.Documents,
+      directory: Directory.Data,
     });
     expect(service.images()).toEqual([
       { name: 'newer.PNG', src: 'newer-uri' },
@@ -65,7 +66,7 @@ describe(GalleryService.name, () => {
 
     expect(Filesystem.readdir).toHaveBeenCalledWith({
       path: 'user-2',
-      directory: Directory.Documents,
+      directory: Directory.Data,
     });
   });
 
@@ -92,7 +93,7 @@ describe(GalleryService.name, () => {
     expect(Filesystem.deleteFile).toHaveBeenCalledTimes(2);
     expect(Filesystem.deleteFile).toHaveBeenCalledWith({
       path: 'user-1/first.jpg',
-      directory: Directory.Documents,
+      directory: Directory.Data,
     });
     expect(service.images()).toEqual([]);
   });

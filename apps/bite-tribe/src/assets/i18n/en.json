@@ -263,6 +263,7 @@
   "choose-photo": "Choose a photo",
   "image-upload-retry-failed": "We couldn’t start the upload. Please try again.",
   "bite-updated-successfully": "Bite updated successfully!",
+  "bite-update-failed": "We couldn't update the Bite. Please try again.",
   "bite-deleted-successfully": "Bite deleted successfully!",
   "creating-bite": "Creating your Bite...",
   "leaderboard": "Leaderboard",

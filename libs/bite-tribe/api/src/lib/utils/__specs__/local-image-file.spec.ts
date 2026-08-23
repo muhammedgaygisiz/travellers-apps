@@ -6,11 +6,12 @@ import { Directory, Filesystem } from '@capacitor/filesystem';
 import { localImageDirectory } from 'utils';
 
 jest.mock('@capacitor/filesystem', () => ({
-  Directory: { Documents: 'DOCUMENTS' },
+  Directory: { Data: 'DATA', Documents: 'DOCUMENTS' },
   Filesystem: { readdir: jest.fn() },
 }));
 
 jest.mock('utils', () => ({
+  LOCAL_IMAGE_DIRECTORY: 'DATA',
   localImageDirectory: jest.fn(() => Promise.resolve('user-1')),
 }));
 
@@ -54,7 +55,7 @@ describe('findLocalUploadedImage', () => {
     expect(result).toEqual({ name: 'bites_abc-123.jpg', uri: 'file:///bite' });
     expect(readdir).toHaveBeenCalledWith({
       path: 'user-1',
-      directory: Directory.Documents,
+      directory: Directory.Data,
     });
   });
 

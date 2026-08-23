@@ -263,6 +263,7 @@
   "choose-photo": "اختر صورة",
   "image-upload-retry-failed": "تعذّر بدء الرفع. يرجى المحاولة مرة أخرى.",
   "bite-updated-successfully": "تم تحديث الوجبة بنجاح!",
+  "bite-update-failed": "تعذّر تحديث الـ Bite. يرجى المحاولة مرة أخرى.",
   "bite-deleted-successfully": "تم حذف الوجبة بنجاح!",
   "creating-bite": "جارٍ إنشاء الوجبة...",
   "leaderboard": "لوحة المتصدرين",

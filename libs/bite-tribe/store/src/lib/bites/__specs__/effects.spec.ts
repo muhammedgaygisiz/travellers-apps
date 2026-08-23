@@ -454,6 +454,36 @@ describe(BiteEffects.name, () => {
           );
         });
       });
+
+      // `errorSavingBite` reaches no reducer and no other effect, so this toast
+      // is the only thing standing between a failed edit and a save that looks
+      // exactly like a successful one. See GitHub issue #1229.
+      it('should show a failure toast when the bite cannot be updated', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          jest
+            .spyOn(apiService, 'saveEditedBite')
+            .mockReturnValue(
+              cold(
+                '#',
+                {},
+                new Error('Error saving bite'),
+              ) as unknown as ReturnType<BiteTribeApiService['saveEditedBite']>,
+            );
+
+          actions$ = cold('a', {
+            a: BiteActions.saveExistingBite({
+              bite: {} as Bite,
+            }),
+          });
+
+          expectObservable(effects.saveEditedBiteToFirestore$);
+        });
+
+        expect(mockToastPresent).toHaveBeenCalledWith({
+          messageKey: 'bite-update-failed',
+          outcome: 'failure',
+        });
+      });
     });
   });
 

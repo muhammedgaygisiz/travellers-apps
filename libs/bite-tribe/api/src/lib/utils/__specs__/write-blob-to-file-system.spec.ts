@@ -8,13 +8,14 @@ jest.mock('../to-base-64', () => ({
 }));
 
 jest.mock('@capacitor/filesystem', () => ({
-  Directory: { Documents: 'DOCUMENTS' },
+  Directory: { Data: 'DATA', Documents: 'DOCUMENTS' },
   Filesystem: {
     writeFile: jest.fn().mockReturnValue({ uri: 'uri' }),
   },
 }));
 
 jest.mock('utils', () => ({
+  LOCAL_IMAGE_DIRECTORY: 'DATA',
   localImagePath: jest.fn(),
 }));
 
@@ -47,7 +48,7 @@ describe('writeBlobToFileSystem', () => {
     expect(writeFile).toHaveBeenCalledWith(
       expect.objectContaining({
         path: 'user-1/test-file.txt',
-        directory: Directory.Documents,
+        directory: Directory.Data,
         recursive: true,
       }),
     );

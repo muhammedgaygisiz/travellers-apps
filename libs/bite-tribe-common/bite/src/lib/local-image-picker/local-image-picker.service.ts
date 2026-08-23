@@ -1,7 +1,11 @@
 import { EventEmitter, inject, Injectable, signal } from '@angular/core';
-import { Directory, FileInfo, Filesystem } from '@capacitor/filesystem';
+import { FileInfo, Filesystem } from '@capacitor/filesystem';
 import { ModalController } from '@ionic/angular/standalone';
-import { localImageDirectory, localImageSrc } from 'utils';
+import {
+  LOCAL_IMAGE_DIRECTORY,
+  localImageDirectory,
+  localImageSrc,
+} from 'utils';
 import {
   LocalImagePickerComponent,
   type LocalImage,
@@ -75,7 +79,7 @@ export class LocalImagePickerService {
 
       const { files } = await Filesystem.readdir({
         path,
-        directory: Directory.Documents,
+        directory: LOCAL_IMAGE_DIRECTORY,
       });
 
       return await Promise.all(

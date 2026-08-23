@@ -263,6 +263,7 @@
   "choose-photo": "Fotoğraf seç",
   "image-upload-retry-failed": "Yükleme başlatılamadı. Lütfen tekrar deneyin.",
   "bite-updated-successfully": "Bite başarıyla güncellendi!",
+  "bite-update-failed": "Bite güncellenemedi. Lütfen tekrar dene.",
   "bite-deleted-successfully": "Bite başarıyla silindi!",
   "creating-bite": "Bite oluşturuluyor...",
   "leaderboard": "Lider tablosu",

@@ -1,5 +1,5 @@
-import { Directory, Filesystem, WriteFileResult } from '@capacitor/filesystem';
-import { localImagePath } from 'utils';
+import { Filesystem, WriteFileResult } from '@capacitor/filesystem';
+import { LOCAL_IMAGE_DIRECTORY, localImagePath } from 'utils';
 import { toBase64 } from './to-base-64';
 
 export const writeBlobToFileSystem = async (
@@ -21,7 +21,7 @@ export const writeBlobToFileSystem = async (
   return await Filesystem.writeFile({
     path,
     data: base64Data,
-    directory: Directory.Documents,
+    directory: LOCAL_IMAGE_DIRECTORY,
     recursive: true,
   });
 };

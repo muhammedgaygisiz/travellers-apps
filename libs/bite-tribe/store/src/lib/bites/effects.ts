@@ -157,7 +157,19 @@ export class BiteEffects {
             });
           }),
           map((bite) => BiteActions.savedBite({ bite })),
-          catchError(() => of(BiteActions.errorSavingBite({ bite }))),
+          // `errorSavingBite` is dispatched and handled nowhere, so without this
+          // toast a failed edit was indistinguishable from a successful one: the
+          // form navigates back either way and said nothing. That is how a photo
+          // that never uploaded looked like a photo that saved fine, for six
+          // months. See GitHub issue #1229.
+          catchError(() => {
+            void this.toast.present({
+              messageKey: 'bite-update-failed',
+              outcome: 'failure',
+            });
+
+            return of(BiteActions.errorSavingBite({ bite }));
+          }),
         );
       }),
     );

@@ -263,6 +263,7 @@
   "choose-photo": "ፎቶ ይምረጡ",
   "image-upload-retry-failed": "ጭነቱን መጀመር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
   "bite-updated-successfully": "ባይቱ በተሳካ ሁኔታ ተዘምኗል!",
+  "bite-update-failed": "Bite ማዘመን አልቻልንም። እባክህ እንደገና ሞክር።",
   "bite-deleted-successfully": "ባይቱ በተሳካ ሁኔታ ተሰርዟል!",
   "creating-bite": "ባይት እየተፈጠሩ ነው...",
   "leaderboard": "የመሪዎች ሰሌዳ",

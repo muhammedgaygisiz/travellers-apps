@@ -110,6 +110,13 @@ export class BitePage {
 
   isNew = input<boolean>(false);
 
+  /**
+   * Transloco key for the page heading. Derived from {@link isNew} rather than
+   * passed in separately, so the create and the edit page cannot end up naming
+   * themselves the same thing again (issue #1365).
+   */
+  titleKey = computed(() => (this.isNew() ? 'create-bite' : 'edit-bite'));
+
   currency = input<string>();
 
   currencyLoading = input<boolean>(false);

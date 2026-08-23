@@ -15,7 +15,6 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   template: `
     <bite
       class="ion-page"
-      title="Edit Bite"
       [bite]="service.biteValue()"
       [image]="service.image() || ''"
       [nearbyRestaurants]="service.nearbyRestaurants() || []"

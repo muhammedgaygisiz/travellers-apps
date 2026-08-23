@@ -2,7 +2,7 @@
   [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
 >
   <ion-content class="ion-padding">
-    <h1 class="ion-margin-bottom">{{ 'create-bite' | transloco }}</h1>
+    <h1 class="ion-margin-bottom">{{ titleKey() | transloco }}</h1>
 
     <form [formGroup]="biteFormGroup">
       <image-upload

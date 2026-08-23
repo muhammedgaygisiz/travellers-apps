@@ -1,6 +1,6 @@
 # bite-tribe/coach-mark
 
-Feature coach marks for Bite Tribe. It owns:
+Feature coach marks for BiteTribe. It owns:
 
 - `CoachMarkStateService` — per-user "seen" bookkeeping in device Preferences,
   tracked separately from the onboarding completion flag.

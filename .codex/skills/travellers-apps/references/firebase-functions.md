@@ -2,7 +2,7 @@
 
 ## Callable And Trigger Shape
 
-- Put Bite Tribe backend functions under `apps/bite-tribe-firebase/functions/src/functions` and export new functions from `apps/bite-tribe-firebase/functions/src/index.ts`.
+- Put BiteTribe backend functions under `apps/bite-tribe-firebase/functions/src/functions` and export new functions from `apps/bite-tribe-firebase/functions/src/index.ts`.
 - Use `onCall` for frontend-requested operations and check `request.auth` before reading user-scoped data.
 - Use Firestore triggers such as `onDocumentCreated('bites/{biteId}', ...)` for aggregate side effects caused by writes.
 - On the frontend, prefer the established Capawesome call shape:

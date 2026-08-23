@@ -15,7 +15,7 @@ const GOOGLE_WORKSPACE_SENDER_ADDRESS_ENV = 'GOOGLE_WORKSPACE_SENDER_ADDRESS';
  * The name in front of the address, matching the Firebase Auth template so both
  * verification mails present one identity.
  */
-const SENDER_NAME = 'Bite Tribe';
+const SENDER_NAME = 'BiteTribe';
 
 // Firebase Functions gen2 only injects a secret into a function's runtime when
 // that function declares it via `secrets: [...]`. Every function that sends a

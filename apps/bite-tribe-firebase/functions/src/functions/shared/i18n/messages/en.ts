@@ -3,9 +3,9 @@ import { NotificationMessages } from '../notification-messages';
 /** English copy. Also the fallback for any language the catalog cannot serve. */
 export const en: NotificationMessages = {
   'common.someone': 'Someone',
-  'emailVerification.subject': 'Verify your Bite Tribe email address',
+  'emailVerification.subject': 'Verify your BiteTribe email address',
   'emailVerification.body':
-    'Please verify your email address so your Bite Tribe account stays secure and you can receive important account messages.',
+    'Please verify your email address so your BiteTribe account stays secure and you can receive important account messages.',
   'emailVerification.linkLabel': 'Verify email address',
   'newBite.title': 'New Bite',
   'newBite.body': '{{author}} just created a new bite',

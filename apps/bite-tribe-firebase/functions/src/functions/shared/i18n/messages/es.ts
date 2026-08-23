@@ -3,9 +3,9 @@ import { NotificationMessages } from '../notification-messages';
 /** Spanish copy. Informal "tú", matching the app's locale files. */
 export const es: NotificationMessages = {
   'common.someone': 'Alguien',
-  'emailVerification.subject': 'Verifica tu dirección de correo de Bite Tribe',
+  'emailVerification.subject': 'Verifica tu dirección de correo de BiteTribe',
   'emailVerification.body':
-    'Verifica tu dirección de correo para que tu cuenta de Bite Tribe siga siendo segura y puedas recibir mensajes importantes sobre ella.',
+    'Verifica tu dirección de correo para que tu cuenta de BiteTribe siga siendo segura y puedas recibir mensajes importantes sobre ella.',
   'emailVerification.linkLabel': 'Verificar dirección de correo',
   'newBite.title': 'Nuevo Bite',
   'newBite.body': '{{author}} acaba de crear un nuevo Bite',

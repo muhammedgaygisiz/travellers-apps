@@ -34,6 +34,7 @@
     "storybook": "npm run nxgraph-html && nx storybook storybook-host",
     "cap:run:ios": "cap run ios",
     "cap:run:android": "cap run android",
+    "cap:sync:ios": "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 nx run bite-tribe-ios:sync",
     "pwa-asset-generator:generate:bite-tribe": "pwa-asset-generator apps/bite-tribe/src/logo.svg -i apps/bite-tribe/src/index.html --favicon -m apps/bite-tribe/src/manifest.webmanifest apps/bite-tribe/src/assets/icons",
     "ios-asset-generator:generate-ios:bite-tribe": "capacitor-assets generate --ios --iosProject apps/bite-tribe-ios/ios/App --assetPath apps/bite-tribe-ios/assets"
   },

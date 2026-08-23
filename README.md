@@ -2,7 +2,7 @@
 [![codecov](https://codecov.io/github/muhammedgaygisiz/travellers-apps/branch/develop/graph/badge.svg?token=QGA8MS6VXF)](https://codecov.io/github/muhammedgaygisiz/travellers-apps)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
-# Bite Tribe
+# BiteTribe
 
 # Prerequisites
 

@@ -23,7 +23,7 @@ let nextOverlayId = 0;
  * shows an explanation card that must be dismissed with its explicit action —
  * tapping the dimmed backdrop does nothing, so a mark is never dismissed by
  * accident. All visible text arrives through inputs, keeping the component free
- * of Transloco and reusable outside Bite Tribe; the smart wrapper in
+ * of Transloco and reusable outside BiteTribe; the smart wrapper in
  * `bite-tribe/coach-mark` resolves the copy and owns the seen state.
  *
  * The spotlight is a single element sized to the anchor with a very large spread

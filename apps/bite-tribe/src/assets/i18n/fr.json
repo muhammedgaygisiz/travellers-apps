@@ -263,6 +263,7 @@
   "choose-photo": "Choisir une photo",
   "image-upload-retry-failed": "Impossible de démarrer l’envoi. Veuillez réessayer.",
   "bite-updated-successfully": "Bite mis à jour avec succès !",
+  "bite-update-failed": "Nous n'avons pas pu mettre à jour le Bite. Réessaie.",
   "bite-deleted-successfully": "Bite supprimé avec succès !",
   "creating-bite": "Création de ton Bite...",
   "leaderboard": "Classement",

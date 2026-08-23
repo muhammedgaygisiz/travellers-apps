@@ -1,6 +1,10 @@
 import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
-import { Directory, FileInfo, Filesystem } from '@capacitor/filesystem';
-import { localImageDirectory, localImageSrc } from 'utils';
+import { FileInfo, Filesystem } from '@capacitor/filesystem';
+import {
+  LOCAL_IMAGE_DIRECTORY,
+  localImageDirectory,
+  localImageSrc,
+} from 'utils';
 import { biteIdFromImageName } from './bite-id-from-image-name';
 
 const IMAGE_FILE_PATTERN = /\.(gif|heic|heif|jpe?g|png|webp)$/i;
@@ -51,7 +55,7 @@ export class GalleryService {
 
       const { files } = await Filesystem.readdir({
         path,
-        directory: Directory.Documents,
+        directory: LOCAL_IMAGE_DIRECTORY,
       });
 
       this.images.set(
@@ -86,7 +90,7 @@ export class GalleryService {
         try {
           await Filesystem.deleteFile({
             path: `${directory}/${name}`,
-            directory: Directory.Documents,
+            directory: LOCAL_IMAGE_DIRECTORY,
           });
           return true;
         } catch {

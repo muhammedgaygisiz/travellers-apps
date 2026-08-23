@@ -1,5 +1,5 @@
-import { Directory, Filesystem } from '@capacitor/filesystem';
-import { localImageDirectory } from 'utils';
+import { Filesystem } from '@capacitor/filesystem';
+import { LOCAL_IMAGE_DIRECTORY, localImageDirectory } from 'utils';
 
 /**
  * Deterministic on-device filename for the local copy of an uploaded image.
@@ -44,7 +44,7 @@ export const findLocalUploadedImage = async (
 
     const { files } = await Filesystem.readdir({
       path,
-      directory: Directory.Documents,
+      directory: LOCAL_IMAGE_DIRECTORY,
     });
 
     const match = files

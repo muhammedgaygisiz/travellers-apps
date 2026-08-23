@@ -31,7 +31,7 @@ const asDataUrl = (blob: Blob): Promise<string> =>
  * something the WebView will serve - lazily, so a photo costs nothing until it
  * scrolls into view. In a browser there is no filesystem: the Capacitor web
  * implementation keeps files in IndexedDB and reports a pseudo-path
- * (`/DOCUMENTS/<user>/<name>`), while `convertFileSrc` is the identity function,
+ * (`/DATA/<user>/<name>`), while `convertFileSrc` is the identity function,
  * so that path would end up in `src` as a relative URL and 404 against the dev
  * server. The web branch therefore reads the bytes back out and inlines them.
  *

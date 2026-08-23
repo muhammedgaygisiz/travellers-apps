@@ -19,6 +19,7 @@ import { handleNearbyFilter } from './utils/handle-nearby-filter';
 import { handleTagFilters } from './utils/handle-tag-filters';
 import { dedupMerge } from './utils/dedup-merge';
 import { getLikesForBite } from './utils/get-likes-for-bite';
+import { groupLikesByBiteId } from './utils/group-likes-by-bite-id';
 import { haversineDistance } from 'utils';
 import { Bite } from 'model';
 import { byDistance } from './utils/by-distance';
@@ -38,13 +39,14 @@ export const bitesWithMetadata = createSelector(
   gpsPosition,
   (bites, latestBites, likes, gpsPosition) => {
     const dedupedBites = dedupMerge(bites, latestBites);
+    const likesByBiteId = groupLikesByBiteId(likes);
 
     return dedupedBites
       .map(
         (bite) =>
           ({
             ...bite,
-            likes: getLikesForBite(likes, bite),
+            likes: getLikesForBite(likesByBiteId, bite),
             distance: haversineDistance(
               bite.position?.latitude,
               bite.position?.longitude,

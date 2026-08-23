@@ -3,6 +3,7 @@ import { EntityState } from '@ngrx/entity';
 import { adapter, initialState } from '../adapter';
 import { reducer } from '../reducer';
 import {
+  loadedLikesFromApi,
   removeLike,
   removeLikeFailed,
   saveLike,
@@ -20,6 +21,50 @@ const stateWith = (...likes: Like[]): EntityState<Like> =>
   adapter.upsertMany(likes, initialState);
 
 describe('Likes Reducer', () => {
+  /**
+   * Seeding re-loads the same likes on navigation into a Bite. The identity of
+   * the likes state has to survive that, because the Bite feed selectors hang
+   * off it and rebuild every Bite when it changes. See GitHub issue #1357.
+   */
+  describe('loadedLikesFromApi', () => {
+    it('should keep the same state reference when nothing changed', () => {
+      const state = stateWith(like);
+
+      const next = reducer(state, loadedLikesFromApi({ likes: [like] }));
+
+      expect(next).toBe(state);
+    });
+
+    it('should keep the same state reference for an empty load', () => {
+      const state = stateWith(like);
+
+      const next = reducer(state, loadedLikesFromApi({ likes: [] }));
+
+      expect(next).toBe(state);
+    });
+
+    it('should apply a like whose type changed', () => {
+      const state = stateWith(like);
+
+      const next = reducer(
+        state,
+        loadedLikesFromApi({ likes: [{ ...like, likeType: 'drooling' }] }),
+      );
+
+      expect(next).not.toBe(state);
+      expect(next.entities['bite1-user1']?.likeType).toBe('drooling');
+    });
+
+    it('should add a like the store does not hold yet', () => {
+      const other: Like = { ...like, biteId: 'bite2' };
+      const state = stateWith(like);
+
+      const next = reducer(state, loadedLikesFromApi({ likes: [other] }));
+
+      expect(next).not.toBe(state);
+      expect(next.entities['bite2-user1']).toEqual(other);
+    });
+  });
   describe('saveLike', () => {
     it('should optimistically add the like', () => {
       const state = reducer(initialState, saveLike({ like }));

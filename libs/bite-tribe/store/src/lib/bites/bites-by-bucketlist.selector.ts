@@ -3,12 +3,13 @@ import { BitesState } from './adapter';
 import { key } from './key';
 import { likes } from '../likes/selectors';
 import { gpsPosition } from '../app/selectors';
-import { getLikesForBite } from './utils/get-likes-for-bite';
 import { groupLikesByBiteId } from './utils/group-likes-by-bite-id';
-import { haversineDistance } from 'utils';
-import type { Bite } from 'model';
+import { createBiteMetadataJoin } from './utils/join-bite-metadata';
 import { byDistance } from './utils/by-distance';
 import { selectedBucketlist } from '../bucketlists/selectors';
+
+/** Own cache per feed, so one feed's churn cannot evict another's. */
+const joinBucketlistBiteMetadata = createBiteMetadataJoin();
 
 const slice = createFeatureSelector<BitesState>(key);
 
@@ -22,24 +23,11 @@ export const bitesByBucketlistWithMetadata = createSelector(
   likes,
   gpsPosition,
   (bites, likes, gpsPosition) => {
-    const likesByBiteId = groupLikesByBiteId(likes);
-
-    return bites
-      .map(
-        (bite) =>
-          ({
-            ...bite,
-            likes: getLikesForBite(likesByBiteId, bite),
-            distance: haversineDistance(
-              bite.position?.latitude,
-              bite.position?.longitude,
-              gpsPosition?.latitude,
-              gpsPosition?.longitude,
-              'km',
-            ),
-          }) as Bite,
-      )
-      .sort(byDistance);
+    return joinBucketlistBiteMetadata(
+      bites,
+      groupLikesByBiteId(likes),
+      gpsPosition,
+    ).sort(byDistance);
   },
 );
 

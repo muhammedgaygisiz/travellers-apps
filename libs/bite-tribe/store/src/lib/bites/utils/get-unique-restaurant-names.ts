@@ -34,12 +34,24 @@ const getLongestFuzzyEqualRestaurantName = (
   return getCandidateWithLongestName(candidatesArray);
 };
 
+/**
+ * The fuzzy dedup compares every place against every other one, and each
+ * comparison builds its own search index, so the cost is quadratic in the
+ * number of places it is handed. Feeding it one entry per Bite meant a feed of
+ * 440 Bites did on the order of 190,000 index builds, which blocked the main
+ * thread for over a second every time the selector recomputed - and it
+ * recomputes on every like. Identical names cannot produce a different result,
+ * so they are collapsed before the quadratic part starts. See GitHub issue
+ * #1357.
+ */
 export const getUniqueRestaurantNames = (bites: Bite[]): Set<string> => {
   const restaurantNames = new Set<string>();
 
-  const places = bites
-    .map((bite) => bite?.place?.trim())
-    .filter((place) => !!place);
+  const places = Array.from(
+    new Set(
+      bites.map((bite) => bite?.place?.trim()).filter((place) => !!place),
+    ),
+  ) as string[];
 
   places.forEach((place) => {
     const listContainsFuzzyEqualRestaurantName =

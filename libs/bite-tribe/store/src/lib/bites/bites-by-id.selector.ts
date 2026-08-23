@@ -5,10 +5,8 @@ import {
   gpsPosition,
   preferredCurrency,
 } from '../app/selectors';
-import { getLikesForBite } from './utils/get-likes-for-bite';
 import { groupLikesByBiteId } from './utils/group-likes-by-bite-id';
-import { haversineDistance } from 'utils';
-import type { Bite } from 'model';
+import { createBiteMetadataJoin } from './utils/join-bite-metadata';
 import { byDistance } from './utils/by-distance';
 import { BitesState } from './adapter';
 import { key } from './key';
@@ -25,6 +23,9 @@ import { handleTagFilters } from './utils/handle-tag-filters';
 import { sortByCriteria } from './utils/sort-by-criteria';
 import { sortBitesByCreatedAt } from './utils/sort-bites-by-created-at';
 
+/** Own cache per feed, so one feed's churn cannot evict another's. */
+const joinBitesByUserMetadata = createBiteMetadataJoin();
+
 const slice = createFeatureSelector<BitesState>(key);
 
 const bitesByUserId = createSelector(slice, (state) => state.bitesByUserId);
@@ -34,24 +35,11 @@ export const bitesByUserIdWithMetadata = createSelector(
   likes,
   gpsPosition,
   (bites, likes, gpsPosition) => {
-    const likesByBiteId = groupLikesByBiteId(likes);
-
-    return bites
-      .map(
-        (bite) =>
-          ({
-            ...bite,
-            likes: getLikesForBite(likesByBiteId, bite),
-            distance: haversineDistance(
-              bite.position?.latitude,
-              bite.position?.longitude,
-              gpsPosition?.latitude,
-              gpsPosition?.longitude,
-              'km',
-            ),
-          }) as Bite,
-      )
-      .sort(byDistance);
+    return joinBitesByUserMetadata(
+      bites,
+      groupLikesByBiteId(likes),
+      gpsPosition,
+    ).sort(byDistance);
   },
 );
 

@@ -37,6 +37,37 @@ When adding or removing native plugins:
 
 Prefer Capacitor sync over hand-editing generated native dependency files.
 
+### Sync iOS Through The Npm Script
+
+Always sync the iOS wrapper with:
+
+```bash
+npm run cap:sync:ios
+```
+
+That script is `nx run bite-tribe-ios:sync` with `LANG` and `LC_ALL` pinned to
+`en_US.UTF-8`, and the locale is the whole reason it exists. Without it
+`pod install` aborts inside the sync with
+`Unicode Normalization not appropriate for ASCII-8BIT` from
+`Pod::Config#installation_root`: CocoaPods normalizes the installation path and
+Ruby refuses to normalize a string tagged `ASCII-8BIT`, which is what a shell
+with no UTF-8 locale produces.
+
+Calling `nx run bite-tribe-ios:sync` directly is what reintroduces the failure.
+It works from an interactive terminal, which already exports a UTF-8 `LANG`
+from the login shell, and fails every time in the shells that do not: agent
+runs, scripts, and CI. That asymmetry is why the raw target keeps looking
+correct right up until something automated calls it.
+
+The failure is partial, and that is the trap. Capacitor reports `copy ios` as
+succeeded, so the web assets do land in `ios/App/App/public`, and only
+`update ios` fails. A release that waves the error through wraps the new web
+bundle around stale native pods.
+
+Android sync is unaffected and needs no script; it never invokes CocoaPods.
+
+The full procedure is [[Implementation - Store Release Steps]].
+
 ## Launch Asset Rule
 
 The launch surfaces — native splash screens, the PWA manifest, and the browser

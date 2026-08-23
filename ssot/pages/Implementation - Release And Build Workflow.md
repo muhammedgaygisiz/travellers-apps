@@ -21,6 +21,7 @@ Release and build workflow describes the implementation-facing scripts that supp
 | `npm run release:notes`                                 | Print the changelog range for store build notes (`-- --full` for the GitHub release body)     |
 | `npm run generate-full-changelog`                       | Generate full Logseq changelog output                                                         |
 | `npm run increment-build-number-and-generate-changelog` | Generate changelog, increment build number, commit, tag, push, and publish the GitHub release |
+| `npm run cap:sync:ios`                                  | Capacitor sync into the iOS wrapper with a UTF-8 locale pinned                                |
 | `npm run cap:run:ios`                                   | Run Capacitor iOS                                                                             |
 | `npm run cap:run:android`                               | Run Capacitor Android                                                                         |
 
@@ -31,7 +32,7 @@ rather than npm scripts:
 
 | Target                             | Purpose                                                                                                               |
 | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `nx run bite-tribe-ios:sync`       | Capacitor sync into the iOS wrapper                                                                                   |
+| `nx run bite-tribe-ios:sync`       | Capacitor sync into the iOS wrapper; call it through `npm run cap:sync:ios`, never directly                           |
 | `nx run bite-tribe-android:sync`   | Capacitor sync into the Android wrapper                                                                               |
 | `nx run bite-tribe-ios:open`       | Open the iOS wrapper in Xcode                                                                                         |
 | `nx run bite-tribe-android:open`   | Open the Android wrapper in Android Studio                                                                            |
@@ -115,6 +116,13 @@ Rules:
 - Use the changelog scripts for SSOT changelog pages.
 - Derive the short TestFlight and Google Play build notes from the generated changelog, using the `### Features` to `### Chores` range and summarizing it to at most 230 characters. The changelog is produced by tooling, so it is the reliable source; closed Priority P0 issue titles from the release week are a cross-check, not the input.
 - Use Capacitor sync commands when native dependency or wrapper state changes.
+- Sync iOS through `npm run cap:sync:ios`, never through
+  `nx run bite-tribe-ios:sync` directly. The script pins `LANG` and `LC_ALL`;
+  without a UTF-8 locale CocoaPods aborts `pod install` while Capacitor still
+  reports the web-asset copy as succeeded, so the wrapper ends up with new web
+  assets and stale native pods. The raw target works from an interactive
+  terminal and fails in agent shells and CI, which is why it keeps getting
+  called. See [[Architecture - Capacitor]].
 - Keep source maps and native build artifacts traceable to the release build number and future git tag.
 - Treat generated native files as outputs unless the requested change specifically targets native wrapper source.
 - Keep local and CI Node.js versions explicitly aligned as defined by [[Current State - Nx And Dependency Migration Roadmap]].

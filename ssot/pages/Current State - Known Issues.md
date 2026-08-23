@@ -48,6 +48,11 @@
 - ## Data Trust
 - **`appVersion` on the user document is not trustworthy before build 94.** Until issue 1303, `package.json` held the placeholder `0.0.0` and `tools/env-var-plugin.js` inlined it into `process.env['version']`, which `ProfileApiService.updateUserMetadata` sent to the `updateUserMetadata` callable. Every user document written before the fix therefore carries `appVersion: "0.0.0"` regardless of which build wrote it. `appBuildNumber` was always read from the native projects and is correct.
 - **Decision: the historical values are not backfilled.** A backfill would have to invent the version each document was written under, and the only evidence available is `appBuildNumber`, which already answers the question the backfill would be trying to answer. Rewriting `appVersion` from it would produce a field that looks derived from the client and is not. **Do not use `appVersion` for release-adoption reporting across the `0.0.0` boundary; use `appBuildNumber`.** A document is on the fixed path once its `appVersion` is anything other than `0.0.0`.
+- ## Nearby Feed Cost And Latency
+
+- `loadBitesByLocation` returns every Bite inside its radius. A single position returns 440 Bites against a feed that renders 50 at a time, and the callable answers in roughly 2.4 s warm. Since the caller's likes now travel with the feed, each returned Bite costs a second read as well.
+- Narrowing the radius is a weak lever: cutting it from 15 km to 10 km removed only a tenth of the result, because Bites cluster where the user already is. The fix is the staged search in [issue \#1294](https://github.com/muhammedgaygisiz/travellers-apps/issues/1294), not further radius tuning.
+- Attaching the likes server-side traded feed latency for feed correctness. Time to a full feed moved from about 4.0 s to about 6.7 s, and in exchange a liked Bite can no longer render as unliked. Bounding the result set is what recovers the latency.
 - ## Operational Issues To Watch
 - Crashlytics should be monitored daily during soft launch.
 - Analytics should be monitored daily during soft launch.

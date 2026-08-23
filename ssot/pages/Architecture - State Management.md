@@ -101,3 +101,7 @@ apps/bite-tribe-firebase/functions/src/functions/bites/load-bites-by-location.ts
 - The likes slice is legacy, as described under Derived Read Models Belong On The Server. It is still the source for feeds that do not carry likes and for optimistic like writes, but new work should move the read model to the backend rather than extend it.
 - `bitesWithMetadata` rebuilds every Bite it returns, so any slice it depends on — bites, latest bites, likes, GPS position — re-renders the whole feed when its identity changes. Reducers feeding it are bound by the contract under A Reducer That Changes Nothing Must Return The Same State.
 - Shared selectors must not assume both apps fill the same slices. The bites slice is only populated in the consumer app, so `restaurantToCreate` resolves Bite evidence from the store first and falls back to the Bites carried on the selection itself, which is how the business app passes restaurant-candidate evidence. See [[issue-1117]].
+
+## Related Pages
+
+- [[Implementation - Performance Guidelines]]

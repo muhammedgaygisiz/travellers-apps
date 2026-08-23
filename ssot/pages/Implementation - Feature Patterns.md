@@ -192,6 +192,8 @@ imagePath || image || ''
 
 ## Related Pages
 
+- [[Implementation - Performance Guidelines]]
+
 - [[Architecture - Data Access]]
 - [[Architecture - State Management]]
 - [[Implementation - Code Map]]

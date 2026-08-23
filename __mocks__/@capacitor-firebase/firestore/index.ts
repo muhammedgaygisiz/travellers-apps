@@ -8,6 +8,7 @@ export const FirebaseFirestore = {
   getCountFromServer: jest.fn(),
   deleteDocument: jest.fn(),
   getCollection: jest.fn(),
+  getCollectionGroup: jest.fn(),
   clearPersistence: jest.fn(),
   removeAllListeners: jest.fn(),
 };

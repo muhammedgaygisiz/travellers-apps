@@ -1,11 +1,10 @@
 import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Bite, PublicUser, Restaurant, RestaurantCandidate } from 'model';
+import { Bite, Restaurant, RestaurantCandidate } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { resourceValue } from 'utils';
 
-export const USERS_COLLECTION = 'users';
 export const RESTAURANT_COLLECTION = 'restaurants';
 export const BITE_COLLECTION = 'bites';
 export const RESTAURANT_CANDIDATES_COLLECTION = 'restaurantCandidates';
@@ -57,34 +56,6 @@ export class DashboardDataAccessService {
 
   restaurants = resource({
     loader: this.restaurantsLoader.bind(this),
-  });
-
-  organisationsLoader: ResourceLoader<PublicUser[] | undefined, unknown> =
-    async () => {
-      const docs = await FirebaseFirestore.getCollection({
-        reference: USERS_COLLECTION,
-        compositeFilter: {
-          type: 'and',
-          queryConstraints: [
-            {
-              type: 'where',
-              fieldPath: 'isOrganisation',
-              opStr: '==',
-              value: true,
-            },
-          ],
-        },
-      });
-
-      if (!docs?.snapshots) {
-        return [];
-      }
-
-      return docs.snapshots.map((doc) => doc.data as PublicUser);
-    };
-
-  organisations = resource({
-    loader: this.organisationsLoader.bind(this),
   });
 
   bitePlacesLoader: ResourceLoader<string[] | undefined, unknown> =
@@ -172,10 +143,9 @@ export class DashboardDataAccessService {
   });
 
   // Every one of these reads Firestore and can reject. `value()` throws in that
-  // state, and the dashboard binds all four in a row, so one failed collection
+  // state, and the dashboard binds all three in a row, so one failed collection
   // read used to take the whole page's binding update with it. See issue #1232.
   restaurantsValue = resourceValue(this.restaurants, [] as Restaurant[]);
-  organisationsValue = resourceValue(this.organisations, [] as PublicUser[]);
   bitePlacesValue = resourceValue(this.bitePlaces, [] as string[]);
   restaurantCandidatesValue = resourceValue(
     this.restaurantCandidates,

@@ -2,7 +2,7 @@
 
 - ## Purpose
 
-  A User represents a person, creator, organisation, or restaurant-facing profile participating in BiteTribe.
+  A User represents a person or creator participating in BiteTribe.
 
   Users are the trust layer around Bites. They create Bites, follow each other, save food experiences, rate BiteTrails, and provide the social context that helps other people decide what to eat.
 
@@ -25,7 +25,6 @@
 - A User can save a BiteTrail as a bucket list.
 - A User can like and review Bites.
 - A User can rate a BiteTrail once.
-- A User can represent an individual, organisation, or restaurant-like profile.
 - Public profile quality affects trust in Bites and BiteTrails.
 - Email/password users should verify their email address; linked Google or Apple provider accounts are treated as trusted for this lifecycle.
 - ## Required Data
@@ -47,8 +46,6 @@
 - `biteCount`
 - `countryCodes`
 - `subscriptionTier`
-- `isOrganisation`
-- `isRestaurant`
 - `createdAt`
 - `createdAtTimestamp`
 - `updatedAt`
@@ -78,7 +75,7 @@
   |-- Reviews
   |-- Followers
   |-- Following
-  |-- BiteTrails (owner, organisation, or curator)
+  |-- BiteTrails (owner or curator)
   |-- BiteTrail ratings
   ```
 
@@ -118,6 +115,7 @@
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
 - A User can delete their own account from the app. `deleteOwnAccount` removes the public user document, its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes, bucket lists, BiteTrail ratings and profile images, then deletes the Firebase Auth account last. Bites are kept with `userId` removed so the shared content graph survives, and a Bite without a `userId` renders like a private user's Bite. The full per-category contract is in [[UC - Use Account And Legal Flows]]; the reasoning is in [[issue-1182]].
 - Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
+- There is no organisation or restaurant profile type. `isOrganisation` and `isRestaurant` were declared on `PublicUser` but never written by any client, callable, or migration - only by hand onto a few seeded emulator documents - so no account could ever become one from inside the app. `isOrganisation` nevertheless changed the profile page (Bite Trails instead of Bites, no subscription badge, no follow or edit action, no visibility status) and drove the business dashboard's Organisations list, and `isRestaurant` was read by nothing at all. Both are removed, along with the `organisationId` field the business app queried without ever declaring it. Business capability is planned as an additional role on a normal user instead. See [[UC - Own And Claim Restaurants]] and [[issue-1371]].
 - ## Permissions
 - Guest
   - Guest behavior is not the main authenticated app flow today.
@@ -153,15 +151,14 @@
 
 - Onboarding assistant.
 - Better privacy guidance.
-- Organisation profile management.
-- Restaurant profile ownership.
+- Restaurant ownership through an additional role on a normal user.
 - Creator credibility and badges.
 - ## Related Epics
 - Onboarding assistant
 - Search
 - Marketplace
 - BiteTrail gamification
-- Organisation and BiteTrail packages
+- BiteTrail packages
 - [[epic-1122]] entitlement foundation and Pro gating
 - ## Technical Implementation
 
@@ -213,7 +210,7 @@
   ```
 
 - ## Current Limitations
-- Organisation and restaurant user profile behavior exists in fields but is still evolving as a product concept.
+- There is no profile type. Every User is an individual profile; business capability is planned as an additional role on a normal user rather than a separate kind of profile. See [[UC - Own And Claim Restaurants]].
 - Public/private visibility needs clearer user-facing guidance.
 - Admin moderation is not clearly modeled.
 - Profile trust and creator credibility are mostly implicit.
@@ -222,7 +219,6 @@
 - Guided onboarding for username, public profile, currency, and first actions.
 - Creator profile completeness score.
 - Creator badges.
-- Organisation-owned creator teams.
 - Clearer public/private profile controls.
 - Better trust signals for search and Bite ranking.
 - ## Sources Used

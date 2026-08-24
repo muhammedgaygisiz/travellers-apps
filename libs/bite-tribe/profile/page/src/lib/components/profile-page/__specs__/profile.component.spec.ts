@@ -215,21 +215,6 @@ describe('ProfileComponent', () => {
     });
   });
 
-  describe('biteTrailCount', () => {
-    it('should return 0 if biteTrails is undefined', () => {
-      compRef.setInput('biteTrails', undefined);
-
-      expect(component.biteTrailCount()).toBe(0);
-    });
-
-    it('should return the length of biteTrails if biteTrails is defined', () => {
-      const biteTrailsArray = [{}, {}, {}, {}];
-      compRef.setInput('biteTrails', biteTrailsArray);
-
-      expect(component.biteTrailCount()).toBe(biteTrailsArray.length);
-    });
-  });
-
   describe('displayedBites', () => {
     describe('given bites', () => {
       it('should return the correct number of bites based on currentPage', () => {
@@ -258,34 +243,6 @@ describe('ProfileComponent', () => {
     });
   });
 
-  describe('displayedBiteTrails', () => {
-    describe('given biteTrails', () => {
-      it('should return the correct number of biteTrails based on currentPage', () => {
-        const biteTrailsArray = new Array(120)
-          .fill({})
-          .map((_, i) => ({ id: i + 1 }));
-        compRef.setInput('biteTrails', biteTrailsArray);
-        component.currentPage.set(1);
-
-        const displayed = component.displayedBiteTrails();
-
-        expect(displayed.length).toBe(50);
-        expect(displayed[0].id).toBe(1);
-        expect(displayed[49].id).toBe(50);
-      });
-    });
-
-    describe('given biteTrails are undefined', () => {
-      it('should return an empty array', () => {
-        compRef.setInput('biteTrails', undefined);
-
-        const displayed = component.displayedBiteTrails();
-
-        expect(displayed.length).toBe(0);
-      });
-    });
-  });
-
   describe('emptyBitesMessage', () => {
     it('should show a placeholder when the user has no bites', () => {
       compRef.setInput('user', {
@@ -302,25 +259,6 @@ describe('ProfileComponent', () => {
 
       expect(emptyBitesMessage.textContent?.replace(/\s+/g, ' ').trim()).toBe(
         'no-bites-yet',
-      );
-    });
-
-    it('should show a placeholder when the organisation has no Bite Trails', () => {
-      compRef.setInput('user', {
-        displayName: 'mo',
-        isOrganisation: true,
-        userId: 'user1',
-      });
-      compRef.setInput('biteTrails', []);
-
-      fixture.detectChanges();
-
-      const emptyBitesMessage = fixture.nativeElement.querySelector(
-        '.empty-bites-message',
-      ) as HTMLElement;
-
-      expect(emptyBitesMessage.textContent?.replace(/\s+/g, ' ').trim()).toBe(
-        'no-bite-trails-yet',
       );
     });
   });
@@ -370,20 +308,6 @@ describe('ProfileComponent', () => {
     it('should not show the visibility status on another user profile', () => {
       compRef.setInput('user', { userId: 'user1', public: true });
       compRef.setInput('userId', 'user2');
-
-      fixture.detectChanges();
-
-      expect(component.showVisibilityStatus()).toBe(false);
-      expect(queryVisibility()).toBeNull();
-    });
-
-    it('should not show the visibility status for an organisation profile', () => {
-      compRef.setInput('user', {
-        userId: 'user1',
-        public: true,
-        isOrganisation: true,
-      });
-      compRef.setInput('userId', 'user1');
 
       fixture.detectChanges();
 

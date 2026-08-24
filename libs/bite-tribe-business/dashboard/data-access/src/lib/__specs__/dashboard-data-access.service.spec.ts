@@ -8,7 +8,6 @@ import {
   DashboardDataAccessService,
   RESTAURANT_CANDIDATES_COLLECTION,
   RESTAURANT_COLLECTION,
-  USERS_COLLECTION,
 } from '../dashboard-data-access.service';
 import { Restaurant } from 'model';
 
@@ -89,59 +88,6 @@ describe(DashboardDataAccessService.name, () => {
 
       const service = TestBed.inject(DashboardDataAccessService);
       const result = await service.restaurantsLoader({} as never);
-
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('organisationsLoader', () => {
-    it('should load organisation users from Firestore', async () => {
-      jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
-        snapshots: [
-          {
-            id: 'organisation-1',
-            data: {
-              userId: 'organisation-1',
-              displayName: 'Bite Org',
-              isOrganisation: true,
-            },
-          },
-        ],
-      } as unknown as FirestoreCollection);
-
-      const service = TestBed.inject(DashboardDataAccessService);
-      const result = await service.organisationsLoader({} as never);
-
-      expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
-        reference: USERS_COLLECTION,
-        compositeFilter: {
-          type: 'and',
-          queryConstraints: [
-            {
-              type: 'where',
-              fieldPath: 'isOrganisation',
-              opStr: '==',
-              value: true,
-            },
-          ],
-        },
-      });
-      expect(result).toEqual([
-        {
-          userId: 'organisation-1',
-          displayName: 'Bite Org',
-          isOrganisation: true,
-        },
-      ]);
-    });
-
-    it('should return an empty list when organisation snapshots are missing', async () => {
-      jest
-        .spyOn(FirebaseFirestore, 'getCollection')
-        .mockResolvedValue({} as unknown as FirestoreCollection);
-
-      const service = TestBed.inject(DashboardDataAccessService);
-      const result = await service.organisationsLoader({} as never);
 
       expect(result).toEqual([]);
     });

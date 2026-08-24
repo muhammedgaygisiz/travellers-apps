@@ -18,13 +18,9 @@ interface SearchUser {
   city?: string;
   about?: string;
   public?: boolean;
-  isOrganisation?: boolean;
-  isRestaurant?: boolean;
 }
 
-const toSearchUser = (
-  doc: QueryDocumentSnapshot,
-): SearchUser => {
+const toSearchUser = (doc: QueryDocumentSnapshot): SearchUser => {
   const user = doc.data();
 
   return {
@@ -39,12 +35,6 @@ const toSearchUser = (
     ...(typeof user['city'] === 'string' ? { city: user['city'] } : {}),
     ...(typeof user['about'] === 'string' ? { about: user['about'] } : {}),
     ...(typeof user['public'] === 'boolean' ? { public: user['public'] } : {}),
-    ...(typeof user['isOrganisation'] === 'boolean'
-      ? { isOrganisation: user['isOrganisation'] }
-      : {}),
-    ...(typeof user['isRestaurant'] === 'boolean'
-      ? { isRestaurant: user['isRestaurant'] }
-      : {}),
   };
 };
 

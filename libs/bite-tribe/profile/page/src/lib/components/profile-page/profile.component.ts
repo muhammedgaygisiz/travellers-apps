@@ -17,12 +17,11 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
 } from '@ionic/angular/standalone';
-import { Bite, BiteTrail, LikeClick, ProfileMetaData, PublicUser } from 'model';
+import { Bite, LikeClick, ProfileMetaData, PublicUser } from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { OverlayEventDetail } from '@ionic/core';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
-import { BiteTrailComponent } from 'bite-trail';
 import { ProfileHeader } from './components/profile-header';
 import { CountryFlags } from './components/country-flags';
 import { ProfileSkeleton } from './components/profile-skeleton';
@@ -48,7 +47,6 @@ const PAGE_SIZE = 50;
     IonAlert,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
-    BiteTrailComponent,
     ProfileHeader,
     CountryFlags,
     ProfileSkeleton,
@@ -74,9 +72,7 @@ export class ProfileComponent {
     );
   });
   emptyBitesMessage = computed((): string => {
-    return this.transloco.translate(
-      this.user()?.isOrganisation ? 'no-bite-trails-yet' : 'no-bites-yet',
-    );
+    return this.transloco.translate('no-bites-yet');
   });
   /**
    * The real name, shown only when it says something the heading does not.
@@ -111,7 +107,6 @@ export class ProfileComponent {
 
     return [this.metaName(), city].filter(Boolean).join(', ');
   });
-  biteTrails = input<BiteTrail[]>();
   enableImageRetry = input(false, { transform: booleanAttribute });
 
   readonly logoutClick = output();
@@ -175,12 +170,6 @@ export class ProfileComponent {
       : loadedBiteCount;
   });
 
-  biteTrailCount = computed(() => {
-    const biteTrails = this.biteTrails();
-
-    return biteTrails ? biteTrails.length : 0;
-  });
-
   displayedBites = computed(() => {
     const allBites = this.bites() || [];
     const page = this.currentPage();
@@ -188,15 +177,6 @@ export class ProfileComponent {
     const endIndex = page * PAGE_SIZE;
 
     return allBites.slice(startIndex, endIndex);
-  });
-
-  displayedBiteTrails = computed(() => {
-    const allBiteTrails = this.biteTrails() || [];
-    const page = this.currentPage();
-    const startIndex = 0;
-    const endIndex = page * PAGE_SIZE;
-
-    return allBiteTrails.slice(startIndex, endIndex);
   });
 
   isUnfollowedUser = computed((): boolean => {
@@ -218,10 +198,9 @@ export class ProfileComponent {
   });
 
   // The visibility status is a self-service privacy control, so it only belongs
-  // on the signed-in user's own personal profile. Organisation profiles have no
-  // visibility switch it could explain or lead to.
+  // on the signed-in user's own profile.
   showVisibilityStatus = computed((): boolean => {
-    return this.isOwnProfile() && !this.user()?.isOrganisation;
+    return this.isOwnProfile();
   });
 
   onFollow(): void {

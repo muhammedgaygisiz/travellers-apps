@@ -13,18 +13,15 @@
 - Restaurant profile
   - Definition: Public restaurant presence that groups business information, location, menu-related content, and bites connected to that restaurant.
   - Business relevance: Anchor for business-side value, discovery, and potential monetization.
-- Organisation profile
-  - Definition: A business or creator-owned profile representing an organisation rather than an individual user.
-  - Business relevance: Enables food creators, businesses, and partners to publish curated experiences and manage a branded presence.
 - Menu item
-  - Definition: A dish or product offered by a restaurant or organisation.
+  - Definition: A dish or product offered by a restaurant.
   - Business relevance: Connects business inventory to user-generated bite content and can support conversion flows such as creating a bite from a menu item.
 - BiteTrail
-  - Definition: Curated package or route of bites that can be offered by an organisation, food vlogger, or business.
+  - Definition: Curated package or route of bites that can be offered by a creator, food vlogger, or business user.
   - Business relevance: Marketplace concept for packaging local food knowledge into a product-like experience.
 - Marketplace
   - Definition: Product area where curated food experiences such as BiteTrails can be discovered, claimed, purchased, or consumed.
-  - Business relevance: Potential monetization surface for BiteTribe and for external food creators or organisations.
+  - Business relevance: Potential monetization surface for BiteTribe and for external food creators.
 - Bucket list
   - Definition: Personal saved list of bites or food experiences a user wants to remember or try later.
   - Business relevance: Retention feature that turns discovery into intent and future engagement.
@@ -65,7 +62,7 @@
   - Definition: The patterns, dishes, places, and stories that represent what people actually eat in a location.
   - Business relevance: Long-term strategic differentiator for BiteTribe compared with generic restaurant directories.
 - Restaurant claim
-  - Definition: A request by a business organisation to be recognised as the owner of an existing restaurant in BiteTribe, reviewed and approved before it takes effect.
+  - Definition: A request by a user with the business role to be recognised as the owner of an existing restaurant in BiteTribe, reviewed and approved before it takes effect.
   - Business relevance: Establishes who is accountable for a restaurant's data and who is allowed to operate it. Every operational restaurant capability depends on it.
 - Floor plan
   - Definition: A restaurant's structured two-dimensional representation of its dining area, made of rooms, tables, and geometry objects stored as data rather than as an image.

@@ -37,7 +37,6 @@ const getBadgeColor = (biteCount: number): string => {
 export class ProfileHeader {
   user = input<PublicUser | undefined>();
   biteCount = input(0);
-  biteTrailCount = input(0);
   followingCount = input<number | undefined>(0);
   followerCount = input<number | undefined>(0);
 
@@ -51,16 +50,7 @@ export class ProfileHeader {
   });
 
   badgeColor = computed(() => {
-    const biteTrailCount = this.biteTrailCount();
-    const userData = this.user();
-
-    if (userData?.isOrganisation) {
-      return getBadgeColor(biteTrailCount);
-    }
-
-    const biteCount = this.biteCount();
-
-    return getBadgeColor(biteCount);
+    return getBadgeColor(this.biteCount());
   });
 
   onImageError(): void {

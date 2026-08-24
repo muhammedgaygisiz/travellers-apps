@@ -26,29 +26,6 @@
       >
         <ion-card>
           <ion-card-header>
-            <ion-card-title>Organisations</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-list lines="full">
-              @for (
-                organisation of organisations();
-                track organisation.userId
-              ) {
-                <ion-item
-                  [button]="true"
-                  (click)="organisationClick.emit(organisation)"
-                >
-                  <ion-label>{{ organisation.displayName }}</ion-label>
-                </ion-item>
-              } @empty {
-                <p>No organisations found.</p>
-              }
-            </ion-list>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card>
-          <ion-card-header>
             <ion-card-title>{{ 'restaurants' | transloco }}</ion-card-title>
           </ion-card-header>
           <ion-card-content>

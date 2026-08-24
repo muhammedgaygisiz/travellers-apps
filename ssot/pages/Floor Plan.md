@@ -27,7 +27,7 @@ The Floor Plan is deliberately not an architecturally exact construction plan. I
 - A Room cannot be deleted while it still contains Tables.
 - A Floor Plan has a draft state and a published state. Only the published state is read by staff and guest surfaces.
 - Editing the Floor Plan never writes live table state, and a live state change never writes the Floor Plan.
-- Only the owning organisation of the Restaurant may edit the Floor Plan.
+- Only the owner of the Restaurant may edit the Floor Plan.
 
 ## Coordinate System
 
@@ -87,7 +87,7 @@ Restaurant
 ## Lifecycle
 
 ```text
-Restaurant is owned by an organisation
+Restaurant is owned by a user with the business role
 |
 Owner creates a room and sets its dimensions
 |
@@ -107,7 +107,7 @@ Published plan is read by staff live view and by guest QR resolution
 - Guest: no access to the plan structure. A guest only ever resolves a single table through a QR token.
 - Registered user: no access.
 - Restaurant staff: read the published plan. No write access.
-- Restaurant owner or organisation member: full read and write.
+- Restaurant owner: full read and write.
 - Admin: full access for support and moderation.
 
 ## Use Cases

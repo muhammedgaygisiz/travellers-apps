@@ -8,13 +8,13 @@ This is the blocking prerequisite for every other stage of the Restaurant Intera
 
 ## Goal
 
-A restaurant has exactly one accountable owner. Business users can only read and write the restaurants they own. Staff can act on those restaurants within a narrower permission set. Admins can review and resolve claims.
+A restaurant has exactly one accountable owner: a normal BiteTribe user carrying an additional business role. Users can only read and write the restaurants they own. Staff can act on those restaurants within a narrower permission set. Admins can review and resolve claims.
 
 ## Why It Is Needed
 
 Verified in the codebase on 25 July 2026:
 
-- `Restaurant` in `libs/bite-tribe-common/model/src/lib/restaurant.ts` has no owner, organisation, or claim field.
+- `Restaurant` in `libs/bite-tribe-common/model/src/lib/restaurant.ts` has no owner or claim field.
 - No roles, custom claims, or membership checks exist in `apps/bite-tribe-firebase/functions/src`.
 - `apps/bite-tribe-firebase/firestore.rules` grants read and write on every document to every authenticated user.
 
@@ -22,27 +22,27 @@ Any floor plan, table state, visit, or order written under those rules is writab
 
 ## Actors
 
-- Business user requesting ownership
+- User with the business role requesting ownership
 - Restaurant staff member
 - Admin reviewing claims
 
 ## Planned Flow
 
-- A business user searches existing restaurants in the business app and starts a claim.
-- The claim captures the requesting organisation and supporting evidence.
+- A user with the business role searches existing restaurants in the business app and starts a claim.
+- The claim captures the requesting user and supporting evidence.
 - The restaurant moves to `pending`.
 - An admin reviews open claims and approves, rejects, or marks a claim contested.
-- Approval sets the owning `organisationId` and `claimStatus: claimed` atomically, and rejects competing claims in the same transaction.
+- Approval sets the owning `ownerUserId` and `claimStatus: claimed` atomically, and rejects competing claims in the same transaction.
 - The owner invites staff, granting them a narrower role.
-- The business dashboard shows only restaurants the caller's organisation owns.
+- The business dashboard shows only restaurants the caller owns.
 - Ownership can later be revoked, with an attributable reason.
 
 ## Key Behaviours
 
-- Ownership is held by an organisation, not by a single user, because `users` and `biteTrails` already carry `organisationId`.
-- Roles and organisation membership are Firebase Auth custom claims set only by the backend, so they cannot be forged from the client.
+- Ownership is held by a normal user carrying an additional business role. There is no organisation entity: the `isOrganisation` and `organisationId` fields this was once going to build on never had a writer and were removed in [[issue-1371]].
+- Roles are Firebase Auth custom claims set only by the backend, so they cannot be forged from the client.
 - Approval is idempotent, matching the existing `verifyRestaurantCandidate` rule.
-- No restaurant can end up claimed by two organisations.
+- No restaurant can end up claimed by two owners.
 - Existing unowned restaurants keep working for consumer read paths and are visible to admins for triage.
 
 ## Success Criteria

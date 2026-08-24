@@ -6,18 +6,18 @@ Next to implement.
 
 ## Goal
 
-Organisations and creators should be able to package Bites into credible marketplace offerings.
+Creators and business users should be able to package Bites into credible marketplace offerings.
 
 ## Actors
 
-- Organisation admin
 - Food curator or vlogger
+- Business user
 - Food lover
 
 ## Target Flow
 
-- Organisation packages Bites into BiteTrails.
-- Organisation can show existing BiteTrails, assign users, expose free BiteTrails, show sold counters, and connect BiteTrails to organisation profiles.
+- A creator packages Bites into BiteTrails.
+- A creator can show existing BiteTrails, assign users, expose free BiteTrails, show sold counters, and connect BiteTrails to their creator profile.
 
 ## Related GitHub Scope
 

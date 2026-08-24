@@ -11,7 +11,6 @@ Business users or admins can maintain Restaurant and menu context that improves 
 ## Actors
 
 - Restaurant owner or business maintainer
-- Organisation admin
 
 ## Current Flow
 

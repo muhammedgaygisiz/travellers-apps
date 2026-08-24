@@ -18,10 +18,9 @@
   <div
     class="header-column ion-display-flex ion-flex-column ion-justify-content-center"
   >
-    <strong>{{ userData?.isOrganisation ? 'Bite Trails' : 'Bites' }}</strong>
-    @let calculatedBadgeColor = badgeColor(); @let headlineCount =
-    userData?.isOrganisation ? biteTrailCount() : biteCount(); @if
-    (calculatedBadgeColor) {
+    <strong>Bites</strong>
+    @let calculatedBadgeColor = badgeColor(); @let headlineCount = biteCount();
+    @if (calculatedBadgeColor) {
     <ion-badge
       class="bite-badge {{ calculatedBadgeColor }}"
       data-testid="profile-headline-count"

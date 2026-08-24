@@ -19,7 +19,6 @@
     } @else {
       <profile-header
         [user]="this.user()"
-        [biteTrailCount]="biteTrailCount()"
         [biteCount]="biteCount()"
         [followerCount]="followerCount()"
         [followingCount]="followingCount()"
@@ -32,19 +31,17 @@
           <h1 class="profile-name">
             <span class="profile-display-name">{{ displayName() }}</span>
 
-            @if (!userData?.isOrganisation) {
-              <ion-badge class="subscription-badge">
-                @if (subscriptionTierData === 0) {
-                  FREE
-                }
-                @if (subscriptionTierData === 1) {
-                  PRO
-                }
-                @if (subscriptionTierData === 2) {
-                  ULTRA
-                }
-              </ion-badge>
-            }
+            <ion-badge class="subscription-badge">
+              @if (subscriptionTierData === 0) {
+                FREE
+              }
+              @if (subscriptionTierData === 1) {
+                PRO
+              }
+              @if (subscriptionTierData === 2) {
+                ULTRA
+              }
+            </ion-badge>
           </h1>
 
           @if (profileMeta()) {
@@ -52,26 +49,24 @@
           }
         </div>
 
-        @if (!userData?.isOrganisation) {
-          <div class="profile-actions">
-            @if (isOwnProfile()) {
-              <ion-button (click)="gotoEditProfile.emit()"
-                >{{ 'edit-profile' | transloco }}
+        <div class="profile-actions">
+          @if (isOwnProfile()) {
+            <ion-button (click)="gotoEditProfile.emit()"
+              >{{ 'edit-profile' | transloco }}
+            </ion-button>
+          }
+          @if (isUnfollowedUser()) {
+            @if (this.profileMetadata()?.isFollowedByMe) {
+              <ion-button fill="outline" (click)="openConfirmationDialog()"
+                >{{ 'stop-following' | transloco }}
+              </ion-button>
+            } @else {
+              <ion-button fill="outline" (click)="onFollow()"
+                >{{ 'follow' | transloco }}
               </ion-button>
             }
-            @if (isUnfollowedUser()) {
-              @if (this.profileMetadata()?.isFollowedByMe) {
-                <ion-button fill="outline" (click)="openConfirmationDialog()"
-                  >{{ 'stop-following' | transloco }}
-                </ion-button>
-              } @else {
-                <ion-button fill="outline" (click)="onFollow()"
-                  >{{ 'follow' | transloco }}
-                </ion-button>
-              }
-            }
-          </div>
-        }
+          }
+        </div>
       </div>
 
       @if (showVisibilityStatus()) {
@@ -88,32 +83,22 @@
       <country-flags [countryCodes]="userData?.countryCodes" />
 
       <div class="bites-section">
-        <h2>{{ userData?.isOrganisation ? 'Bite Trails' : 'Bites' }}</h2>
+        <h2>Bites</h2>
 
-        @if (userData?.isOrganisation) {
-          @if (displayedBiteTrails().length) {
-            @for (trail of displayedBiteTrails(); track trail.id) {
-              <bite-trail [biteTrail]="trail" />
-            }
-          } @else {
-            <p class="empty-bites-message">{{ emptyBitesMessage() }}</p>
+        @if (displayedBites().length) {
+          @for (bite of displayedBites(); track bite.id) {
+            <bt-bite
+              [bite]="bite"
+              [userId]="currentUserId"
+              [showEditButton]="false"
+              [enableImageRetry]="enableImageRetry()"
+              (retryImageUpload)="retryImageUpload.emit($event)"
+              (biteClick)="biteClick.emit($event)"
+              (likeButtonClick)="likeButtonClick.emit($event)"
+            />
           }
         } @else {
-          @if (displayedBites().length) {
-            @for (bite of displayedBites(); track bite.id) {
-              <bt-bite
-                [bite]="bite"
-                [userId]="currentUserId"
-                [showEditButton]="false"
-                [enableImageRetry]="enableImageRetry()"
-                (retryImageUpload)="retryImageUpload.emit($event)"
-                (biteClick)="biteClick.emit($event)"
-                (likeButtonClick)="likeButtonClick.emit($event)"
-              />
-            }
-          } @else {
-            <p class="empty-bites-message">{{ emptyBitesMessage() }}</p>
-          }
+          <p class="empty-bites-message">{{ emptyBitesMessage() }}</p>
         }
 
         <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">

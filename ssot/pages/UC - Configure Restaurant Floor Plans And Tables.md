@@ -14,11 +14,11 @@ This is not a construction plan. It is a practical, easy-to-maintain top-down re
 
 ## Actors
 
-- Restaurant owner or organisation member
+- Restaurant owner
 
 ## Planned Flow
 
-- Owner opens the floor-plan editor for a restaurant their organisation owns.
+- Owner opens the floor-plan editor for a restaurant they own.
 - Owner creates a room and sets its width and height in metres.
 - Owner places geometry: walls, doors, counters, bar areas, blocked areas, chairs, decoration.
 - Owner places tables, then moves, resizes, rotates, duplicates, and deletes them.

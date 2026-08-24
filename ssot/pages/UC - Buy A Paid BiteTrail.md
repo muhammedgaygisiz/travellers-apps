@@ -13,7 +13,6 @@ A food lover can buy a curated food journey, and the creator who curated it gets
 - Food lover
 - Traveler
 - Food curator or vlogger
-- Organisation admin
 
 ## Target Flow
 
@@ -56,7 +55,7 @@ Not implemented. Today a BiteTrail has `price` and `currency`, and saving one as
 
 - Issue \#1125 is the epic.
 - Issue \#1122 provides the entitlement foundation and issue \#1124 the purchase rails this reuses.
-- Issue \#1069 provides the verified organisation identity that payouts require.
+- Issue \#1069 provides the verified owner identity that payouts require.
 - Issue \#266 and [[UC - Mature BiteTrail Marketplace Packages]] cover the packaging work this builds on.
 
 ## Related Domains

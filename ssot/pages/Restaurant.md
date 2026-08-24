@@ -62,7 +62,7 @@ Current model fields:
 Future or expanding data:
 
 - verification status
-- owner or organisation id, plus claim status and claim audit fields (issue \#1074)
+- owner user id, plus claim status and claim audit fields (issue \#1074)
 - floor plan rooms and tables (issue \#1080)
 - table-ordering enablement flag (issue \#1100)
 - derived tags from Bites
@@ -79,7 +79,7 @@ Restaurant
 |-- Address
 |-- Location
 |-- Social Links
-|-- Organisation or business maintainer (future/expanding)
+|-- Owner or business maintainer (future/expanding)
 |-- Floor Plan (planned)
     |-- Rooms
         |-- Tables
@@ -159,7 +159,7 @@ Related future or expanding use cases:
 - Restaurant menu
 - Menu items linked to Bites
 - Search
-- Organisation and BiteTrail packages
+- BiteTrail packages
 - Issue \#735 - Restaurant Interaction Platform, the umbrella for ownership, floor plans, table management, QR ordering, and Bites from orders
 
 ## Technical Implementation
@@ -201,12 +201,12 @@ images/restaurants/{restaurantId}/{filename}
 
 ## Current Limitations
 
-- Restaurants cannot be claimed. `Restaurant` carries no owner, organisation, or claim field, no roles or custom claims exist in the Functions codebase, and `apps/bite-tribe-firebase/firestore.rules` allows every authenticated user to write every document. Product descriptions that assume a claimed restaurant describe a capability that does not exist yet. See [[UC - Own And Claim Restaurants]].
+- Restaurants cannot be claimed. `Restaurant` carries no owner or claim field, no roles or custom claims exist in the Functions codebase, and `apps/bite-tribe-firebase/firestore.rules` allows every authenticated user to write every document. Product descriptions that assume a claimed restaurant describe a capability that does not exist yet. See [[UC - Own And Claim Restaurants]].
 - `MenuItem` has no stable identifier. Items are array entries inside `Menu.categories[]`, addressable only by name and index, so nothing can safely reference a menu item over time. See issue \#1099.
 - Verified versus unverified Restaurant rules are still evolving.
 - A Bite can use `place` without a `restaurantId`, so restaurant matching can be fuzzy or incomplete.
 - Restaurant ownership is not clearly represented in the Restaurant model.
-- Candidate verification currently relies on a business-user workflow and callable auth; explicit role/organisation authorization is not fully modeled here.
+- Candidate verification currently relies on a business-user workflow and callable auth; explicit role-based authorization is not fully modeled here.
 - Menu item actions are not yet connected to Bite creation, reservation, or contact flows.
 - Aggregate rating/tag behavior is derived from Bites and not fully formalized in the Restaurant model.
 
@@ -217,7 +217,7 @@ images/restaurants/{restaurantId}/{filename}
 - Menu item to Bite creation.
 - Restaurant tags from Bites.
 - Availability and reservation flows.
-- Ownership and organisation management.
+- Ownership and business role management.
 - Better Restaurant data quality checks.
 
 ## Sources Used

@@ -12,7 +12,7 @@ The goal of a BiteTrail is to help a user answer:
 
 > Which curated food journey should I follow?
 
-BiteTrails turn isolated food discoveries into a guided sequence or collection with creator, organisation, location, and price context.
+BiteTrails turn isolated food discoveries into a guided sequence or collection with creator, location, and price context.
 
 ## Business Rules
 
@@ -34,19 +34,19 @@ BiteTrails turn isolated food discoveries into a guided sequence or collection w
 
 Current model fields:
 
-| Field        | Current name in code | Description                                             |
-| ------------ | -------------------- | ------------------------------------------------------- |
-| BiteTrail id | `id`                 | Unique BiteTrail identifier.                            |
-| Owner        | `ownerId`            | User, organisation, or creator that owns the BiteTrail. |
-| Name         | `name`               | User-visible BiteTrail title.                           |
-| Bites        | `biteIds`            | Bites included in the journey.                          |
-| Image        | `imagePath`          | Display image for the BiteTrail.                        |
-| Owner image  | `ownerImagePath`     | Display image for the owner.                            |
-| Owner name   | `ownerName`          | Display name of the owner.                              |
-| Location     | `location`           | Human-readable location context.                        |
-| Description  | `description`        | Explanation of the journey.                             |
-| Price        | `price`              | Price of the BiteTrail.                                 |
-| Currency     | `currency`           | Currency of the price.                                  |
+| Field        | Current name in code | Description                              |
+| ------------ | -------------------- | ---------------------------------------- |
+| BiteTrail id | `id`                 | Unique BiteTrail identifier.             |
+| Owner        | `ownerId`            | User or creator that owns the BiteTrail. |
+| Name         | `name`               | User-visible BiteTrail title.            |
+| Bites        | `biteIds`            | Bites included in the journey.           |
+| Image        | `imagePath`          | Display image for the BiteTrail.         |
+| Owner image  | `ownerImagePath`     | Display image for the owner.             |
+| Owner name   | `ownerName`          | Display name of the owner.               |
+| Location     | `location`           | Human-readable location context.         |
+| Description  | `description`        | Explanation of the journey.              |
+| Price        | `price`              | Price of the BiteTrail.                  |
+| Currency     | `currency`           | Currency of the price.                   |
 
 ## Optional Data
 
@@ -66,7 +66,7 @@ Related subcollection data:
 
 ```text
 BiteTrail
-|-- User or Organisation (owner)
+|-- User (owner)
 |-- Bites
 |-- Bucket Lists (saved user copies)
 |-- Market Place
@@ -112,7 +112,7 @@ Current implementation notes:
   - Open BiteTrail detail and map.
   - Save BiteTrail as Bucket List.
   - Rate a BiteTrail once.
-- Organisation or business user
+- Business user
   - Create BiteTrail.
   - Curate Bites into a BiteTrail.
 - Admin
@@ -132,7 +132,7 @@ Supported today:
 
 Related future or expanding use cases:
 
-- Manage existing BiteTrails of an organisation.
+- Manage existing BiteTrails of a creator.
 - Select Bites from assigned users.
 - Show free BiteTrail content.
 - Monthly BiteTrail contest.
@@ -141,7 +141,7 @@ Related future or expanding use cases:
 
 ## Related Epics
 
-- Organisation and BiteTrail packages
+- BiteTrail packages
 - Marketplace
 - BiteTrail gamification
 - [[epic-1125]] paid BiteTrails and creator revenue share
@@ -184,7 +184,7 @@ images/biteTrails/{biteTrailId}/{filename}
 
 ## Current Limitations
 
-- BiteTrail ownership works through owner fields, but organisation/team workflows are still evolving.
+- BiteTrail ownership works through owner fields, but creator/team workflows are still evolving.
 - Paid purchase semantics are not complete; current sell records are lightweight.
 - Completion progress and badges are not complete.
 - BiteTrail management after creation is limited.
@@ -194,7 +194,7 @@ images/biteTrails/{biteTrailId}/{filename}
 
 - Paid BiteTrail purchase.
 - Free BiteTrail claim flow.
-- Organisation BiteTrail dashboard.
+- Creator BiteTrail dashboard.
 - Assigned-user Bite selection.
 - Completion badge.
 - Monthly contest.

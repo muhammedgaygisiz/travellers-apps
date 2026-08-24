@@ -16,7 +16,7 @@ import {
   IonList,
   IonText,
 } from '@ionic/angular/standalone';
-import { Geopoint, PublicUser, Restaurant } from 'model';
+import { Geopoint, Restaurant } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { DashboardRestaurantCandidate } from 'bite-tribe-business/dashboard-data-access';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -42,7 +42,6 @@ import { TranslocoPipe } from '@jsverse/transloco';
   styleUrl: 'dashboard.component.scss',
 })
 export class DashboardComponent {
-  organisations = input<PublicUser[]>();
   restaurants = input<Restaurant[]>();
   bitePlaces = input<string[]>();
   restaurantCandidates = input<DashboardRestaurantCandidate[]>();
@@ -55,7 +54,6 @@ export class DashboardComponent {
 
   readonly restaurantClick = output<Restaurant>();
   readonly restaurantCandidateClick = output<DashboardRestaurantCandidate>();
-  readonly organisationClick = output<PublicUser>();
   readonly placeClick = output<string>();
 
   candidateEvidenceCount(candidate: DashboardRestaurantCandidate): number {

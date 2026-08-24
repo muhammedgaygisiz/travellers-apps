@@ -1,12 +1,12 @@
 import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Bite, PublicUser, Restaurant, RestaurantCandidate } from 'model';
+import { Bite, BiteTrail, Restaurant, RestaurantCandidate } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { resourceValue } from 'utils';
 
-export const USERS_COLLECTION = 'users';
 export const RESTAURANT_COLLECTION = 'restaurants';
+export const BITE_TRAIL_COLLECTION = 'biteTrails';
 export const BITE_COLLECTION = 'bites';
 export const RESTAURANT_CANDIDATES_COLLECTION = 'restaurantCandidates';
 export const DASHBOARD_RESTAURANT_CANDIDATES_LIMIT = 5;
@@ -59,32 +59,45 @@ export class DashboardDataAccessService {
     loader: this.restaurantsLoader.bind(this),
   });
 
-  organisationsLoader: ResourceLoader<PublicUser[] | undefined, unknown> =
-    async () => {
-      const docs = await FirebaseFirestore.getCollection({
-        reference: USERS_COLLECTION,
-        compositeFilter: {
-          type: 'and',
-          queryConstraints: [
-            {
-              type: 'where',
-              fieldPath: 'isOrganisation',
-              opStr: '==',
-              value: true,
-            },
-          ],
-        },
-      });
+  // Scoped to the signed-in account: a BiteTrail is owned by the user who
+  // created it, now that the organisation concept is gone (issue #1371).
+  biteTrailsLoader: ResourceLoader<
+    BiteTrail[] | undefined,
+    { userId: string | undefined }
+  > = async ({ params }) => {
+    const { userId } = params;
 
-      if (!docs?.snapshots) {
-        return [];
-      }
+    if (!userId) {
+      return [];
+    }
 
-      return docs.snapshots.map((doc) => doc.data as PublicUser);
-    };
+    const docs = await FirebaseFirestore.getCollection({
+      reference: BITE_TRAIL_COLLECTION,
+      compositeFilter: {
+        type: 'and',
+        queryConstraints: [
+          {
+            type: 'where',
+            fieldPath: 'ownerId',
+            opStr: '==',
+            value: userId,
+          },
+        ],
+      },
+    });
 
-  organisations = resource({
-    loader: this.organisationsLoader.bind(this),
+    if (!docs?.snapshots?.length) {
+      return [];
+    }
+
+    return docs.snapshots.map(
+      (doc) => ({ ...doc.data, id: doc.id }) as BiteTrail,
+    );
+  };
+
+  biteTrails = resource({
+    params: () => ({ userId: this.storeService.user()?.uid }),
+    loader: this.biteTrailsLoader.bind(this),
   });
 
   bitePlacesLoader: ResourceLoader<string[] | undefined, unknown> =
@@ -175,7 +188,7 @@ export class DashboardDataAccessService {
   // state, and the dashboard binds all four in a row, so one failed collection
   // read used to take the whole page's binding update with it. See issue #1232.
   restaurantsValue = resourceValue(this.restaurants, [] as Restaurant[]);
-  organisationsValue = resourceValue(this.organisations, [] as PublicUser[]);
+  biteTrailsValue = resourceValue(this.biteTrails, [] as BiteTrail[]);
   bitePlacesValue = resourceValue(this.bitePlaces, [] as string[]);
   restaurantCandidatesValue = resourceValue(
     this.restaurantCandidates,

@@ -125,7 +125,7 @@ Related future or expanding use cases:
 
 - BiteTrail gamification
 - Marketplace
-- Organisation and BiteTrail packages
+- BiteTrail packages
 
 ## Technical Implementation
 

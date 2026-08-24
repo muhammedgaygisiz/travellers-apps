@@ -20,7 +20,7 @@
   - \#\# Corrections to the original vision
   - The original vision assumed restaurants can already be **claimed**. They cannot.
   - Verified facts in the codebase as of 25 July 2026:
-  - `Restaurant` (`libs/bite-tribe-common/model/src/lib/restaurant.ts`) has no owner, organisation, or claim field.
+  - `Restaurant` (`libs/bite-tribe-common/model/src/lib/restaurant.ts`) has no owner or claim field.
   - There are no roles or custom claims anywhere in `apps/bite-tribe-firebase/functions/src`.
   - `apps/bite-tribe-firebase/firestore.rules` grants **read and write on every document to every authenticated user**.
   - `MenuItem` (`libs/bite-tribe-common/model/src/lib/menu.ts`) has no stable identifier. Items are array entries inside `Menu.categories[]`, addressable only by name and array index.

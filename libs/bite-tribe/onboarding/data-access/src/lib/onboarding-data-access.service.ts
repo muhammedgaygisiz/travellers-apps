@@ -290,8 +290,6 @@ export class OnboardingDataAccessService {
       public: current.public ?? false,
       biteCount: current.biteCount,
       subscriptionTier: current.subscriptionTier,
-      isOrganisation: current.isOrganisation,
-      isRestaurant: current.isRestaurant,
       countryCodes: current.countryCodes,
       createdAt: current.createdAt,
       createdAtTimestamp: current.createdAtTimestamp,

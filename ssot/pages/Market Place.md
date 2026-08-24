@@ -4,7 +4,7 @@
 
 The Market Place is the discovery and conversion surface for curated food experiences.
 
-Today it primarily lists BiteTrails. Conceptually, it is where creators, organisations, and businesses can offer curated Bite-based journeys to users.
+Today it primarily lists BiteTrails. Conceptually, it is where creators and businesses can offer curated Bite-based journeys to users.
 
 ## Why It Exists
 
@@ -21,7 +21,7 @@ It is the business-facing extension of BiteTribe's authentic discovery loop.
 - A marketplace item should be grounded in real Bites.
 - A free BiteTrail can be saved as a Bucket List.
 - Sell counts are derived from BiteTrail sell records.
-- Marketplace value depends on creator, organisation, Bite, and BiteTrail trust.
+- Marketplace value depends on creator, Bite, and BiteTrail trust.
 - The Market Place should not weaken the dish-first mission.
 - A paid BiteTrail sells through store in-app purchase, and its Bites stay locked until the purchase is verified. A non-buyer sees a preview only. See [[Monetization]] and [[epic-1125]].
 - Paid BiteTrail revenue is shared with the creator at 80 percent of net proceeds, meaning the amount remaining after the store commission. Gross-based wording must never be used.
@@ -33,17 +33,17 @@ There is no standalone Market Place model today.
 
 Current marketplace listing data comes from BiteTrail fields:
 
-| Field       | Current name in code                     | Description                      |
-| ----------- | ---------------------------------------- | -------------------------------- |
-| Item id     | `id`                                     | BiteTrail id.                    |
-| Name        | `name`                                   | BiteTrail title.                 |
-| Image       | `imagePath`                              | Listing image.                   |
-| Owner       | `ownerId`, `ownerName`, `ownerImagePath` | Creator or organisation context. |
-| Location    | `location`                               | Journey location.                |
-| Description | `description`                            | Offer explanation.               |
-| Price       | `price`                                  | Offer price.                     |
-| Currency    | `currency`                               | Offer currency.                  |
-| Bites       | `biteIds`                                | Included Bites.                  |
+| Field       | Current name in code                     | Description        |
+| ----------- | ---------------------------------------- | ------------------ |
+| Item id     | `id`                                     | BiteTrail id.      |
+| Name        | `name`                                   | BiteTrail title.   |
+| Image       | `imagePath`                              | Listing image.     |
+| Owner       | `ownerId`, `ownerName`, `ownerImagePath` | Creator context.   |
+| Location    | `location`                               | Journey location.  |
+| Description | `description`                            | Offer explanation. |
+| Price       | `price`                                  | Offer price.       |
+| Currency    | `currency`                               | Offer currency.    |
+| Bites       | `biteIds`                                | Included Bites.    |
 
 ## Optional Data
 
@@ -59,7 +59,7 @@ Current marketplace listing data comes from BiteTrail fields:
 Market Place
 |-- BiteTrails
 |-- Bites
-|-- Users or Organisations (owners)
+|-- Users (owners)
 |-- Bucket Lists (saved copies)
 |-- Sells
 |-- Ratings
@@ -97,7 +97,7 @@ Current implementation notes:
   - View Market Place.
   - Open BiteTrail detail.
   - Save or claim free BiteTrails as Bucket Lists.
-- Creator, organisation, or business user
+- Creator or business user
   - Create BiteTrails through business tooling.
 - Admin
   - Marketplace moderation, approval, and payment operations are future or operational capabilities, not clearly modeled today.
@@ -116,14 +116,14 @@ Related future or expanding use cases:
 
 - Paid BiteTrail purchase.
 - Marketplace campaign pages.
-- Creator/organisation storefront.
+- Creator storefront.
 - Marketplace moderation.
 - Better offer ranking.
 - Sold badge and analytics.
 
 ## Related Epics
 
-- Organisation and BiteTrail packages
+- BiteTrail packages
 - Marketplace
 - BiteTrail gamification
 - Search
@@ -167,17 +167,17 @@ Uses BiteTrail images from images/biteTrails/{biteTrailId}/{filename}.
 - Marketplace currently lists BiteTrails only.
 - Payment and purchase lifecycle are not complete.
 - Marketplace ranking, categories, moderation, and campaign logic are not formalized.
-- Organisation storefront behavior is still evolving.
+- Creator storefront behavior is still evolving.
 
 ## Future Ideas
 
 - Marketplace item model.
 - Paid checkout.
-- Creator and organisation storefronts.
+- Creator storefronts.
 - Campaign landing pages.
 - Ranking and recommendation logic.
 - Marketplace moderation.
-- Analytics for creators and organisations.
+- Analytics for creators.
 
 ## Sources Used
 

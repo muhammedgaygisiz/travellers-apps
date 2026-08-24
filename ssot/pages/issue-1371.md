@@ -1,0 +1,29 @@
+- [chore: cleanup Organisation properties in user model](https://github.com/muhammedgaygisiz/travellers-apps/issues/1371) (Issue \#1371)
+- Description
+  - The issue was filed without a body. The properties to remove, and the impact of removing them, were to be established by analysis first.
+- Findings
+  - `PublicUser` (`libs/bite-tribe-common/model/src/lib/public-user.ts`) declared two organisation properties: `isOrganisation` and `isRestaurant`.
+  - Neither had a writer. `createUserOnAuthCreate` is the only creator of a user document and never wrote them; `saveUser`, `updateUser`/`toProfileUpdate`, and `markOnboardingComplete` never wrote them; no callable, migration, or admin tool set them. The onboarding service copied both through `toPublicUser`, but that is a read normalizer that never persists. No Firestore rule or index referenced either field.
+  - So no account could become an organisation from inside either app. The only documents carrying the fields were hand-seeded emulator fixtures: one `Organisation A` with `isOrganisation`, one `Org A Employee` with `organisationId`.
+  - `isRestaurant` was read by nothing. Its only appearance beyond the model was a pass-through in the `searchUsers` callable response that no consumer read.
+  - `isOrganisation` did drive real behavior. On the consumer profile it swapped the Bites list and header count for Bite Trails, hid the subscription badge, hid the edit and follow actions, hid the public/private visibility status, and changed the badge colour source and the empty-state message. In the business app it was the `where isOrganisation == true` query behind the dashboard's Organisations card, which was the only navigation into `:organisationId/dashboard` and `:organisationId/create-bite-trail`.
+  - `organisationId` was queried by the business app's organisation dashboard to list "employees" but was never declared on `PublicUser`. Firestore field paths are strings, so TypeScript never caught it. [[epic-1069]] recorded as fact that "`users` and `biteTrails` already carry `organisationId`" and proposed organisation-held restaurant ownership on that premise. The premise was false: `BiteTrail` carries `ownerId` and no organisation field at all.
+- Decisions
+  - Remove `isOrganisation` and `isRestaurant` completely, with their readers. Confirmed by the owner that no Firestore user documents carry organisation data any more.
+  - There is no organisation entity in the product. Creating BiteTrails becomes available to every user, gated by an additional role rather than by a profile type, and restaurant claiming likewise happens for normal users with an additional role.
+  - Code only. Removing a field from a TypeScript interface does not delete it from Firestore, and no stored data is stripped; there was none left to strip.
+  - Bite Trails no longer render on any profile, so the profile's bite-trail reads are removed as well. They existed only for the organisation branch and cost a Firestore collection read per profile view while feeding nothing.
+  - The organisation dashboard is deleted rather than kept. Its whole first step was the "employees" list - users matching `organisationId` - so with that field gone the page could reach no Bite at all and no trail could be created through it. That step was already dead in production, where no user document has ever carried `organisationId`.
+  - BiteTrail creation survives, folded into `create-bite-trail` as a single self-contained page: it loads the signed-in account's own Bites, the trail is owned by that account, and the route takes no owner parameter. The business dashboard gains a BiteTrails card listing the signed-in user's trails plus the entry point into creation.
+  - Creating a trail now requires at least one selected Bite. Selection used to happen on the organisation dashboard and arrive pre-filled, so the form alone could decide validity; it starts empty here.
+- Outcome
+  - Model, onboarding pass-through, and the `searchUsers` callable no longer carry either field.
+  - The consumer profile page and header lost every organisation branch; the orphaned `no-bite-trails-yet` key is removed from all eleven locale files, and the two organisation Storybook stories and their four Loki baselines are deleted.
+  - The business dashboard lost its Organisations card, loader, navigation handler, and the `USERS_COLLECTION` constant that only that loader used. It gained a BiteTrails card scoped to the signed-in owner, with three new keys in the business locale.
+  - `libs/bite-tribe-business/organisation-dashboard` is deleted, with its two `tsconfig.base.json` path entries, the `:organisationId/dashboard` route, and the `organisationId` router selector and store signal that only it used. `:organisationId/create-bite-trail` becomes `create-bite-trail`.
+  - The SSOT no longer models an organisation profile type or organisation-held ownership. [[User]], [[Glossary]], [[Personas]], [[Restaurant]], [[Bite Trail]], [[Market Place]], [[Floor Plan]], [[epic-1069]], [[epic-735]], [[epic-1121]], [[epic-1125]], [[UC - Own And Claim Restaurants]], and the affected use-case pages are updated. Generic prose naming organisations as a business audience in [[Mission]], [[Principles]], [[Monetization]], and [[Subscription]] is left alone; it describes who the product serves, not a modeled entity.
+- Validation
+  - `nx affected -t test,lint --base=develop` - 90 projects, all passing.
+  - `nx run-many -t lint` on every touched project - clean.
+  - `nx run-many -t build --projects=bite-tribe,bite-tribe-business` - both bundles generated, which is what proves no template still binds a removed input.
+  - `git diff --check` - clean.

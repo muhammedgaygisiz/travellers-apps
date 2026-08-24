@@ -1,10 +1,4 @@
-import {
-  inject,
-  Injectable,
-  resource,
-  ResourceLoader,
-  signal,
-} from '@angular/core';
+import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { Bite, BiteTrail, PublicUser } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
@@ -12,46 +6,95 @@ import { resourceValue } from 'utils';
 import { BiteTribeApiService } from 'bite-tribe/api';
 
 export const USERS_COLLECTION = 'users';
+export const BITE_COLLECTION = 'bites';
 export const BITE_TRAIL_COLLECTION = 'biteTrails';
+
+interface OwnerLoaderParams {
+  userId: string | undefined;
+}
 
 @Injectable({ providedIn: 'root' })
 export class CreateBiteTrailDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly api = inject(BiteTribeApiService);
 
-  selectedBites = signal<Bite[]>([]);
-  employees = signal<PublicUser[]>([]);
+  /**
+   * A BiteTrail is owned by the account creating it.
+   *
+   * Both the owner and the selectable Bites used to arrive from the
+   * organisation dashboard, which listed an organisation's "employees" by the
+   * `organisationId` field on their user documents. Nothing ever wrote that
+   * field, so the list was always empty and no Bite could be reached through
+   * it. The organisation concept is gone (see GitHub issue #1371) and creating
+   * a BiteTrail is becoming a capability of any user with the right role, so
+   * the signed-in account is both the owner and the source of the Bites.
+   */
+  private readonly signedInUserId = (): string | undefined =>
+    this.storeService.user()?.uid;
 
-  organisationLoader: ResourceLoader<
-    PublicUser | undefined,
-    { organisationId: string | undefined }
-  > = async ({ params }) => {
-    const { organisationId } = params;
+  ownerLoader: ResourceLoader<PublicUser | undefined, OwnerLoaderParams> =
+    async ({ params }) => {
+      const { userId } = params;
 
-    if (!organisationId) {
-      return undefined;
+      if (!userId) {
+        return undefined;
+      }
+
+      const doc = await FirebaseFirestore.getDocument({
+        reference: `${USERS_COLLECTION}/${userId}`,
+      });
+
+      if (!doc.snapshot.data) {
+        return undefined;
+      }
+
+      return { ...doc.snapshot.data, userId: doc.snapshot.id } as PublicUser;
+    };
+
+  bitesLoader: ResourceLoader<Bite[], OwnerLoaderParams> = async ({
+    params,
+  }) => {
+    const { userId } = params;
+
+    if (!userId) {
+      return [];
     }
 
-    const doc = await FirebaseFirestore.getDocument({
-      reference: `${USERS_COLLECTION}/${organisationId}`,
+    const docs = await FirebaseFirestore.getCollection({
+      reference: BITE_COLLECTION,
+      compositeFilter: {
+        type: 'and',
+        queryConstraints: [
+          {
+            type: 'where',
+            fieldPath: 'userId',
+            opStr: '==',
+            value: userId,
+          },
+        ],
+      },
     });
 
-    if (!doc.snapshot.data) {
-      return undefined;
+    if (!docs?.snapshots?.length) {
+      return [];
     }
 
-    return { ...doc.snapshot.data, userId: doc.snapshot.id } as PublicUser;
+    return docs.snapshots.map((doc) => ({ ...doc.data, id: doc.id }) as Bite);
   };
 
-  organisation = resource({
-    params: () => ({
-      organisationId: this.storeService.organisationIdFromUrl(),
-    }),
-    loader: this.organisationLoader.bind(this),
+  owner = resource({
+    params: () => ({ userId: this.signedInUserId() }),
+    loader: this.ownerLoader.bind(this),
   });
 
-  /** Guarded read: `value()` throws once the read has failed (#1232). */
-  organisationValue = resourceValue(this.organisation);
+  bites = resource({
+    params: () => ({ userId: this.signedInUserId() }),
+    loader: this.bitesLoader.bind(this),
+  });
+
+  /** Guarded reads: `value()` throws once the read has failed (#1232). */
+  ownerValue = resourceValue(this.owner);
+  bitesValue = resourceValue(this.bites, [] as Bite[]);
 
   createBiteTrail(
     trailData: Omit<

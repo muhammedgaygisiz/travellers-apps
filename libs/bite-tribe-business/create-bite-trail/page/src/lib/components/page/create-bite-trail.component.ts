@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   input,
   output,
@@ -23,7 +22,6 @@ import {
   IonLabel,
   IonList,
   IonModal,
-  IonNote,
   IonText,
   IonTextarea,
 } from '@ionic/angular/standalone';
@@ -55,7 +53,6 @@ import { TranslocoService } from '@jsverse/transloco';
     IonItem,
     IonLabel,
     IonCheckbox,
-    IonNote,
     IonText,
     IonModal,
     ReactiveFormsModule,
@@ -68,9 +65,8 @@ export class CreateBiteTrailComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly transloco = inject(TranslocoService);
 
-  selectedBites = input<Bite[]>([]);
-  employees = input<PublicUser[]>([]);
-  organisation = input<PublicUser | undefined>();
+  bites = input<Bite[]>([]);
+  owner = input<PublicUser | undefined>();
 
   readonly submitTrail =
     output<
@@ -98,16 +94,19 @@ export class CreateBiteTrailComponent {
     imagePath: [''],
   });
 
-  selectedBitesInitEffect = effect(() => {
-    const bites = this.selectedBites();
-    this.localSelectedBiteIds.set(bites.map((b) => b.id));
-  });
-
-  isInvalid = toSignal(
+  private readonly formInvalid = toSignal(
     this.biteTrailFormGroup.valueChanges.pipe(
       map(() => !this.biteTrailFormGroup.valid),
     ),
     { initialValue: !this.biteTrailFormGroup.valid },
+  );
+
+  // A BiteTrail with no Bites is not a trail. The Bites used to be picked on
+  // the organisation dashboard and arrive already selected, so the form alone
+  // could decide this; they are picked here now, starting from none.
+  isInvalid = computed(
+    (): boolean =>
+      this.formInvalid() || this.localSelectedBiteIds().length === 0,
   );
 
   currencyValueChanges = toSignal(
@@ -127,10 +126,7 @@ export class CreateBiteTrailComponent {
       : undefined;
   });
 
-  displayedBites = computed(() => {
-    const allBites = this.selectedBites();
-    return allBites;
-  });
+  displayedBites = computed(() => this.bites());
 
   imagePathValue = toSignal(
     this.biteTrailFormGroup.valueChanges.pipe(
@@ -163,14 +159,6 @@ export class CreateBiteTrailComponent {
     }
   }
 
-  getEmployeeName(userId: string | undefined): string {
-    if (!userId) {
-      return '';
-    }
-    const employee = this.employees().find((e) => e.userId === userId);
-    return employee?.displayName ?? '';
-  }
-
   onCurrencySelected(currencyCode: string, modal: IonModal): void {
     this.biteTrailFormGroup.patchValue({ currency: currencyCode });
     modal.dismiss();
@@ -181,13 +169,13 @@ export class CreateBiteTrailComponent {
       return;
     }
 
-    const org = this.organisation();
+    const owner = this.owner();
     const formValue = this.biteTrailFormGroup.getRawValue();
 
     this.submitTrail.emit({
-      ownerId: org?.userId ?? '',
-      ownerName: org?.displayName ?? '',
-      ownerImagePath: org?.photoUrl ?? '',
+      ownerId: owner?.userId ?? '',
+      ownerName: owner?.displayName ?? '',
+      ownerImagePath: owner?.photoUrl ?? '',
       name: formValue.name,
       description: formValue.description,
       location: formValue.location,

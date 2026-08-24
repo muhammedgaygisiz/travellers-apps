@@ -4,13 +4,14 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import {
   BITE_COLLECTION,
+  BITE_TRAIL_COLLECTION,
   DASHBOARD_RESTAURANT_CANDIDATES_LIMIT,
   DashboardDataAccessService,
   RESTAURANT_CANDIDATES_COLLECTION,
   RESTAURANT_COLLECTION,
-  USERS_COLLECTION,
 } from '../dashboard-data-access.service';
-import { Restaurant } from 'model';
+import { BiteTrail, Restaurant } from 'model';
+import { signal } from '@angular/core';
 
 jest.mock('@capacitor-firebase/firestore');
 jest.mock('bite-tribe/store', () => ({
@@ -28,6 +29,7 @@ describe(DashboardDataAccessService.name, () => {
   let storeServiceMock: {
     isAuthenticated$: ReturnType<typeof of<boolean>>;
     position$: ReturnType<typeof of<null>>;
+    user: ReturnType<typeof signal<{ uid: string } | undefined>>;
     logout: jest.Mock;
     selectRestaurantToCreate: jest.Mock;
   };
@@ -38,6 +40,7 @@ describe(DashboardDataAccessService.name, () => {
     storeServiceMock = {
       isAuthenticated$: of(false),
       position$: of(null),
+      user: signal<{ uid: string } | undefined>(undefined),
       logout: jest.fn(),
       selectRestaurantToCreate: jest.fn(),
     };
@@ -94,54 +97,53 @@ describe(DashboardDataAccessService.name, () => {
     });
   });
 
-  describe('organisationsLoader', () => {
-    it('should load organisation users from Firestore', async () => {
+  describe('biteTrailsLoader', () => {
+    const createParams = (userId?: string): never =>
+      ({ params: { userId } }) as never;
+
+    it('should return an empty list without a signed-in user', async () => {
+      const service = TestBed.inject(DashboardDataAccessService);
+
+      const result = await service.biteTrailsLoader(createParams());
+
+      expect(FirebaseFirestore.getCollection).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
+    });
+
+    it('should load the BiteTrails owned by the signed-in user', async () => {
       jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
-        snapshots: [
-          {
-            id: 'organisation-1',
-            data: {
-              userId: 'organisation-1',
-              displayName: 'Bite Org',
-              isOrganisation: true,
-            },
-          },
-        ],
+        snapshots: [{ id: 'trail-1', data: { name: 'Bern Brunch Walk' } }],
       } as unknown as FirestoreCollection);
 
       const service = TestBed.inject(DashboardDataAccessService);
-      const result = await service.organisationsLoader({} as never);
+      const result = await service.biteTrailsLoader(createParams('user-1'));
 
       expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
-        reference: USERS_COLLECTION,
+        reference: BITE_TRAIL_COLLECTION,
         compositeFilter: {
           type: 'and',
           queryConstraints: [
             {
               type: 'where',
-              fieldPath: 'isOrganisation',
+              fieldPath: 'ownerId',
               opStr: '==',
-              value: true,
+              value: 'user-1',
             },
           ],
         },
       });
       expect(result).toEqual([
-        {
-          userId: 'organisation-1',
-          displayName: 'Bite Org',
-          isOrganisation: true,
-        },
+        { id: 'trail-1', name: 'Bern Brunch Walk' } as BiteTrail,
       ]);
     });
 
-    it('should return an empty list when organisation snapshots are missing', async () => {
+    it('should return an empty list when there are no snapshots', async () => {
       jest
         .spyOn(FirebaseFirestore, 'getCollection')
         .mockResolvedValue({} as unknown as FirestoreCollection);
 
       const service = TestBed.inject(DashboardDataAccessService);
-      const result = await service.organisationsLoader({} as never);
+      const result = await service.biteTrailsLoader(createParams('user-1'));
 
       expect(result).toEqual([]);
     });

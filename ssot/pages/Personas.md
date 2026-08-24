@@ -55,13 +55,13 @@
       - Eventually monetize food journeys.
     - Needs:
       - BiteTrail creation and publishing.
-      - Organisation or creator profile context.
+      - Creator profile context.
       - Marketplace visibility and clear ownership.
       - Metrics such as sold counters, ratings, and completion signals.
     - Supported today:
       - Marketplace and BiteTrail detail/map routes exist.
       - Bucket lists and BiteTrails can support curated collections.
-      - Business app has organisation dashboard and BiteTrail creation route.
+      - Business app has a BiteTrail creation route.
     - Next opportunities:
       - Complete marketplace packages, free BiteTrail access, assigned-user workflows, sold counters, ratings, badges, and creator-facing BiteTrail management.
       - Selling paid BiteTrails and earning 80 percent of net proceeds, with payout onboarding and an earnings dashboard. See [[Monetization]] and [[epic-1125]].
@@ -81,23 +81,6 @@
       - Consumer app routes for restaurant pages, place pages, restaurant bites, and menu pages.
     - Next opportunities:
       - More complete restaurant profile maintenance, verified/unverified distinction, menu item states, menu-to-bite linking, reservation/contact/visit planning, and restaurant data-quality support.
-  - Organisation admin
-    - Description: A person managing an organisation presence, assigned users, and curated BiteTrail offerings.
-    - Goals:
-      - Coordinate creators or assigned users.
-      - Package organisational food knowledge into BiteTrails.
-      - Maintain a credible business or organisation profile.
-    - Needs:
-      - Organisation dashboard.
-      - Assigned-user list and assigned bite visibility.
-      - BiteTrail creation from selected bites.
-      - Marketplace publishing and organisation profile linking.
-    - Supported today:
-      - Business app organisation dashboard and create BiteTrail route.
-      - Marketplace and BiteTrail consumer surfaces.
-    - Next opportunities:
-      - Assigned-user management, organisation profile refinement, existing BiteTrail list, selected-bite workflows, free BiteTrail content visibility, and package monetization.
-      - Pricing and publishing paid BiteTrails once identity verification and payout onboarding are complete. See [[Monetization]] and [[epic-1125]].
   - New user
     - Description: A person who has just registered and does not yet understand how to participate well.
     - Goals:
@@ -129,7 +112,7 @@
 - Persona relationships
   - Food lovers and travelers consume bites and create demand for trustworthy discovery.
   - Bite creators supply authentic experiences that make discovery useful.
-  - Food curators and organisations turn groups of bites into journeys.
+  - Food curators turn groups of bites into journeys.
   - Restaurant owners and business maintainers improve the context around places and menus.
   - New users and privacy-conscious participants highlight where onboarding, defaults, and trust boundaries must be especially clear.
 - Sources used

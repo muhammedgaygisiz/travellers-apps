@@ -90,7 +90,6 @@ import {
   followType,
   restaurantId as restaurantIdFromUrlSelector,
   userId as userIdFromUrl,
-  organisationId as organisationIdFromUrlSelector,
   weekRange as weekRangeFromUrlSelector,
   highlightedThreadId as highlightedThreadIdFromUrlSelector,
 } from './router/selectors';
@@ -166,7 +165,6 @@ export class BiteTribeStoreService implements StoreService {
   biteIdFromUrl$ = this.store.select(biteIdFromUrl);
   restaurantIdFromUrl$ = this.store.select(restaurantIdFromUrlSelector);
   biteTrailIdFromUrl$ = this.store.select(biteTrailIdFromUrlSelector);
-  organisationIdFromUrl$ = this.store.select(organisationIdFromUrlSelector);
   weekRangeFromUrl$ = this.store.select(weekRangeFromUrlSelector);
   highlightedThreadIdFromUrl$ = this.store.select(
     highlightedThreadIdFromUrlSelector,
@@ -182,7 +180,6 @@ export class BiteTribeStoreService implements StoreService {
   biteIdFromUrl = toSignal(this.biteIdFromUrl$);
   restaurantIdFromUrl = toSignal(this.restaurantIdFromUrl$);
   biteTrailIdFromUrl = toSignal(this.biteTrailIdFromUrl$);
-  organisationIdFromUrl = toSignal(this.organisationIdFromUrl$);
   weekRangeFromUrl = toSignal(this.weekRangeFromUrl$);
   highlightedThreadIdFromUrl = toSignal(this.highlightedThreadIdFromUrl$);
 

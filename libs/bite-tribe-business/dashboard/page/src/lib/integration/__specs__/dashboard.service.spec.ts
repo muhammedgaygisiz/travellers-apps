@@ -6,7 +6,7 @@ import {
 } from 'bite-tribe-business/dashboard-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
-import { PublicUser, Restaurant } from 'model';
+import { Restaurant } from 'model';
 
 jest.mock('bite-tribe-business/dashboard-data-access');
 jest.mock('@capacitor-firebase/firestore');
@@ -24,7 +24,6 @@ describe('DashboardService', () => {
 
     dataAccessMock = {
       restaurants: mockResource,
-      organisations: mockResource,
       bitePlaces: mockResource,
       restaurantCandidates: mockResource,
       isAuthenticated: signal(false),
@@ -95,35 +94,6 @@ describe('DashboardService', () => {
           'restaurant',
           'Testaurant',
         ]);
-      });
-    });
-  });
-
-  describe('organisationClicked', () => {
-    describe('given an user id in organisation', () => {
-      it('should navigate forward to organisation dashboard with user id', () => {
-        const organisation = {
-          userId: 'org123',
-          displayName: 'OrgName',
-        } as PublicUser;
-        service.organisationClicked(organisation);
-
-        expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
-          'org123',
-          'dashboard',
-        ]);
-      });
-    });
-
-    describe('given no user id in organisation', () => {
-      it('should not navigate', () => {
-        const organisation = {
-          userId: '',
-          displayName: 'OrgName',
-        } as PublicUser;
-        service.organisationClicked(organisation);
-
-        expect(navControllerMock.navigateForward).not.toHaveBeenCalled();
       });
     });
   });

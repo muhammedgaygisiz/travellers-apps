@@ -81,77 +81,6 @@ describe('ProfileDataAccessService', () => {
     },
   ));
 
-  describe('biteTrailLoader', () => {
-    let getCollectionSpy: jest.SpiedFunction<
-      typeof FirebaseFirestore.getCollection
-    >;
-
-    beforeEach(() => {
-      getCollectionSpy = jest
-        .spyOn(FirebaseFirestore, 'getCollection')
-        .mockResolvedValue(createCollectionResult([]));
-    });
-
-    describe('given no bite trails', () => {
-      it('should load bite trail data from FirebaseFirestore', inject(
-        [ProfileDataAccessService],
-        async (service: ProfileDataAccessService) => {
-          await service.biteTrailLoader(createLoaderParams('user-id'));
-
-          expect(getCollectionSpy).toHaveBeenCalledWith({
-            reference: 'biteTrails',
-            compositeFilter: {
-              type: 'and',
-              queryConstraints: [
-                {
-                  type: 'where',
-                  fieldPath: 'ownerId',
-                  opStr: '==',
-                  value: 'user-id',
-                },
-              ],
-            },
-          });
-        },
-      ));
-    });
-
-    describe('given bite trails', () => {
-      it('should return bite trails in the correct format', inject(
-        [ProfileDataAccessService],
-        async (service: ProfileDataAccessService) => {
-          getCollectionSpy.mockResolvedValue(
-            createCollectionResult([
-              {
-                id: 'bite-trail-id',
-                data: { name: 'Bite Trail 1' },
-              },
-            ]),
-          );
-
-          const result = await service.biteTrailLoader(
-            createLoaderParams('user-id'),
-          );
-
-          expect(result).toEqual([
-            { id: 'bite-trail-id', name: 'Bite Trail 1' },
-          ]);
-        },
-      ));
-    });
-
-    describe('given no user id', () => {
-      it('should return an empty array', inject(
-        [ProfileDataAccessService],
-        async (service: ProfileDataAccessService) => {
-          const result = await service.biteTrailLoader(createLoaderParams(''));
-
-          expect(result).toEqual([]);
-        },
-      ));
-    });
-  });
-
   describe('logout', () => {
     it('should call logout on BiteTribeStoreService', inject(
       [ProfileDataAccessService],
@@ -236,61 +165,6 @@ describe('ProfileDataAccessService', () => {
         expect(unfollowUserSpy).toHaveBeenCalledWith(mockUser);
       },
     ));
-  });
-
-  describe('myBiteTrails', () => {
-    let getCollectionSpy: jest.SpiedFunction<
-      typeof FirebaseFirestore.getCollection
-    >;
-
-    const settle = async (service: ProfileDataAccessService): Promise<void> => {
-      for (let i = 0; i < 5 && service.myBiteTrails.isLoading(); i++) {
-        await TestBed.inject(ApplicationRef).whenStable();
-      }
-    };
-
-    beforeEach(async () => {
-      getCollectionSpy = jest
-        .spyOn(FirebaseFirestore, 'getCollection')
-        .mockResolvedValue(createCollectionResult([]));
-
-      await TestBed.inject(ApplicationRef).whenStable();
-      getCollectionSpy.mockClear();
-    });
-
-    describe('given a logged in user', () => {
-      it('should request bite trails using the uid of the store user', async () => {
-        const service = TestBed.inject(ProfileDataAccessService);
-        jest.spyOn(storeService, 'user').mockReturnValue({
-          uid: 'store-user-id',
-        } as unknown as ReturnType<BiteTribeStoreService['user']>);
-
-        service.myBiteTrails.value();
-        await settle(service);
-
-        expect(getCollectionSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            compositeFilter: expect.objectContaining({
-              queryConstraints: [
-                expect.objectContaining({ value: 'store-user-id' }),
-              ],
-            }),
-          }),
-        );
-      });
-    });
-
-    describe('given no logged in user', () => {
-      it('should not request bite trails', async () => {
-        const service = TestBed.inject(ProfileDataAccessService);
-        jest.spyOn(storeService, 'user').mockReturnValue(undefined);
-
-        service.myBiteTrails.value();
-        await settle(service);
-
-        expect(getCollectionSpy).not.toHaveBeenCalled();
-      });
-    });
   });
 
   describe('userLoader', () => {

@@ -5,7 +5,7 @@ import {
 } from 'bite-tribe-business/dashboard-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import type { PageMenuTarget } from 'common/ui/page';
-import { PublicUser, Restaurant } from 'model';
+import { Restaurant } from 'model';
 
 @Injectable({
   providedIn: 'root',
@@ -14,14 +14,14 @@ export class DashboardService {
   dataAccess = inject(DashboardDataAccessService);
   private readonly navController = inject(NavController);
 
-  organisations = this.dataAccess.organisations;
   restaurants = this.dataAccess.restaurants;
+  biteTrails = this.dataAccess.biteTrails;
   bitePlaces = this.dataAccess.bitePlaces;
   restaurantCandidates = this.dataAccess.restaurantCandidates;
 
   // Read guarded: `value()` throws once a read has failed (#1232).
-  organisationsValue = this.dataAccess.organisationsValue;
   restaurantsValue = this.dataAccess.restaurantsValue;
+  biteTrailsValue = this.dataAccess.biteTrailsValue;
   bitePlacesValue = this.dataAccess.bitePlacesValue;
   restaurantCandidatesValue = this.dataAccess.restaurantCandidatesValue;
   isAuthenticated = this.dataAccess.isAuthenticated;
@@ -49,12 +49,8 @@ export class DashboardService {
     }
   }
 
-  organisationClicked(organisation: PublicUser): void {
-    const organisationId = organisation.userId;
-
-    if (organisationId) {
-      void this.navController.navigateForward([organisationId, 'dashboard']);
-    }
+  createBiteTrailClicked(): void {
+    void this.navController.navigateForward(['create-bite-trail']);
   }
 
   gotoMigrations(): void {

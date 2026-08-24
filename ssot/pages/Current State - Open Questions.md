@@ -18,7 +18,6 @@ Post-launch. These belong to issue \#735 and its stage epics. Each blocks the st
 
 Ownership, stage 0, issue \#1069:
 
-- Is ownership held by a user or by an organisation?
 - What evidence is required before a restaurant claim is approved?
 - What happens to a restaurant's Bites and menu when ownership changes or is revoked?
 

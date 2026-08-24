@@ -2,11 +2,9 @@ import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import type { Bite, BiteTrail, LikeClick, PublicUser } from 'model';
+import type { Bite, LikeClick, PublicUser } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { resourceValue } from 'utils';
-
-const BITE_TRAIL_COLLECTION = 'biteTrails';
 
 interface ProfileResourceParams {
   userId: string | undefined;
@@ -59,59 +57,10 @@ export class ProfileDataAccessService {
     loader: this.userLoader.bind(this),
   });
 
-  biteTrailLoader: ResourceLoader<BiteTrail[], ProfileResourceParams> = async ({
-    params,
-  }) => {
-    if (!params.userId) {
-      return Promise.resolve([]);
-    }
-
-    const result = await FirebaseFirestore.getCollection({
-      reference: BITE_TRAIL_COLLECTION,
-      compositeFilter: {
-        type: 'and',
-        queryConstraints: [
-          {
-            type: 'where',
-            fieldPath: 'ownerId',
-            opStr: '==',
-            value: params.userId,
-          },
-        ],
-      },
-    });
-
-    return result.snapshots.map((snapshot) => {
-      return {
-        id: snapshot.id,
-        ...snapshot.data,
-      } as BiteTrail;
-    });
-  };
-
-  biteTrailsByUser = resource({
-    params: () => ({
-      userId: this.storeService.userIdFromUrl(),
-    }),
-    loader: this.biteTrailLoader.bind(this),
-  });
-
-  myBiteTrails = resource({
-    params: () => ({
-      userId: this.storeService.user()?.uid,
-    }),
-    loader: this.biteTrailLoader.bind(this),
-  });
-
-  // Read guarded: `value()` throws once a read has failed, and the profile page
-  // binds the user and the trails on the same element, so one failed read used
-  // to take the other one down with it. See GitHub issue #1232.
+  // Read guarded: `value()` throws once a read has failed, which would abort
+  // the profile page's binding update rather than showing the loaded user.
+  // See GitHub issue #1232.
   userValue = resourceValue(this.user);
-  biteTrailsByUserValue = resourceValue(
-    this.biteTrailsByUser,
-    [] as BiteTrail[],
-  );
-  myBiteTrailsValue = resourceValue(this.myBiteTrails, [] as BiteTrail[]);
 
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
 

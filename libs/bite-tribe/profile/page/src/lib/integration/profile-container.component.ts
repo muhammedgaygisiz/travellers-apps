@@ -12,7 +12,6 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isLoading]="service.user.isLoading()"
       [user]="service.userValue()"
       [bites]="service.bitesByUser()"
-      [biteTrails]="service.biteTrailsByUserValue()"
       [userId]="service.userId()"
       [profileMetadata]="service.profileMetadata()"
       (biteClick)="service.biteClicked($event)"

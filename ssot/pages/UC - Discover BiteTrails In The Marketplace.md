@@ -13,7 +13,6 @@ Users can discover curated BiteTrail packages in the Market Place.
 - Food lover
 - Traveler
 - Food curator or vlogger
-- Organisation admin
 
 ## Current Flow
 
@@ -31,7 +30,7 @@ Users can discover curated BiteTrail packages in the Market Place.
 
 ## Related GitHub Scope
 
-- Issue \#266 describes the marketplace MVP for organisation or food-vlogger BiteTrail packages.
+- Issue \#266 describes the marketplace MVP for creator or food-vlogger BiteTrail packages.
 
 ## Related Domains
 

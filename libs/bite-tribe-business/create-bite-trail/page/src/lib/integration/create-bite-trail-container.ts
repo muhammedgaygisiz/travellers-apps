@@ -7,9 +7,8 @@ import { CreateBiteTrailComponent } from '../components/page/create-bite-trail.c
   template: `
     <create-bite-trail-page
       class="ion-page"
-      [selectedBites]="service.selectedBites()"
-      [employees]="service.employees()"
-      [organisation]="service.organisationValue()"
+      [bites]="service.bitesValue()"
+      [owner]="service.ownerValue()"
       (submitTrail)="service.submitBiteTrail($event)"
     />
   `,

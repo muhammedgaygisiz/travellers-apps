@@ -12,8 +12,6 @@ export interface PublicUser {
   followersCount?: number;
   followingCount?: number;
   subscriptionTier?: number;
-  isOrganisation?: boolean;
-  isRestaurant?: boolean;
   countryCodes?: string[];
 
   createdAt?: string;

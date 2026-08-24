@@ -2,7 +2,7 @@ import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import { ProfileComponent } from '../profile.component';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { Bite, BiteTrail, Like, ProfileMetaData, PublicUser } from 'model';
+import { Bite, Like, ProfileMetaData, PublicUser } from 'model';
 
 addNecessaryIcons();
 
@@ -57,22 +57,6 @@ const bite: Bite = {
   rating: 3,
   likes: [{ likeType: 'thumbup' } as Like],
 } as Bite;
-
-const biteTrail: BiteTrail = {
-  id: 'trail1',
-  ownerId: 'organisation-owner',
-  name: 'Bern Brunch Walk',
-  biteIds: ['bite1', 'bite2', 'bite3'],
-  soldCount: 24,
-  imagePath: 'assets/demo/bite-demo.png',
-  image: '',
-  ownerImagePath: '',
-  ownerName: 'BiteTribe',
-  location: 'Bern',
-  description: 'A compact morning route through three easygoing brunch spots.',
-  price: 12,
-  currency: 'CHF',
-};
 
 export const Loading: Story = {
   args: {
@@ -215,39 +199,5 @@ export const NoFollowersOrFollowing: Story = {
     userId: currentUserId,
     profileMetadata: noProfileMetadata,
     bites: [bite],
-  },
-};
-
-export const OrganisationWithBiteTrails: Story = {
-  args: {
-    user: {
-      ...baseUser,
-      userId: 'organisation-owner',
-      about: 'Curated food trails around Swiss cities.',
-      city: 'Bern',
-      displayName: 'BiteTribe Guides',
-      fullName: '',
-      isOrganisation: true,
-    },
-    userId: currentUserId,
-    profileMetadata,
-    biteTrails: [biteTrail],
-  },
-};
-
-export const OrganisationWithoutBiteTrails: Story = {
-  args: {
-    user: {
-      ...baseUser,
-      userId: 'organisation-owner',
-      about: '',
-      city: '',
-      displayName: 'New Food Guide',
-      fullName: '',
-      isOrganisation: true,
-    },
-    userId: currentUserId,
-    profileMetadata: noProfileMetadata,
-    biteTrails: [],
   },
 };

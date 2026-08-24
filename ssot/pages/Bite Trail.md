@@ -184,7 +184,7 @@ images/biteTrails/{biteTrailId}/{filename}
 
 ## Current Limitations
 
-- BiteTrail ownership works through owner fields, but creator/team workflows are still evolving.
+- BiteTrail ownership works through owner fields, and a trail is owned by the account that created it. Team or assigned-user workflows do not exist: creating a trail curates the creator's own Bites only.
 - Paid purchase semantics are not complete; current sell records are lightweight.
 - Completion progress and badges are not complete.
 - BiteTrail management after creation is limited.

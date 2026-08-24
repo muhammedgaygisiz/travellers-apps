@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import {
+  BITE_COLLECTION,
   CreateBiteTrailDataAccessService,
   USERS_COLLECTION,
 } from '../create-bite-trail-data-access.service';
@@ -13,9 +14,9 @@ jest.mock('@capacitor-firebase/firestore');
 jest.mock('bite-tribe/api');
 
 const createLoaderParams = (
-  organisationId?: string,
-): ResourceLoaderParams<{ organisationId: string | undefined }> => ({
-  params: { organisationId },
+  userId?: string,
+): ResourceLoaderParams<{ userId: string | undefined }> => ({
+  params: { userId },
   abortSignal: new AbortController().signal,
   previous: { status: 'idle' },
 });
@@ -40,7 +41,7 @@ describe('CreateBiteTrailDataAccessService', () => {
         {
           provide: BiteTribeStoreService,
           useValue: {
-            organisationIdFromUrl: signal<string | undefined>(undefined),
+            user: signal<{ uid: string } | undefined>(undefined),
           },
         },
         {
@@ -57,92 +58,97 @@ describe('CreateBiteTrailDataAccessService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('selectedBites signal', () => {
-    it('should start with empty array', () => {
-      expect(service.selectedBites()).toEqual([]);
-    });
-
-    it('should allow setting bites', () => {
-      const bites: Bite[] = [
-        {
-          id: 'bite-1',
-          name: 'Pasta',
-          image: '',
-          place: 'Restaurant A',
-          price: 12,
-          position: { latitude: 0, longitude: 0 },
-        },
-      ];
-      service.selectedBites.set(bites);
-      expect(service.selectedBites()).toHaveLength(1);
-    });
-  });
-
-  describe('employees signal', () => {
-    it('should start with empty array', () => {
-      expect(service.employees()).toEqual([]);
-    });
-
-    it('should allow setting employees', () => {
-      const employees: PublicUser[] = [
-        {
-          userId: 'user-1',
-          displayName: 'Alice',
-          email: 'alice@example.com',
-          photoUrl: '',
-        },
-      ];
-      service.employees.set(employees);
-      expect(service.employees()).toHaveLength(1);
-    });
-  });
-
-  describe('organisationLoader', () => {
-    it('should return undefined when organisationId is not provided', async () => {
-      const result = await service.organisationLoader(createLoaderParams());
+  describe('ownerLoader', () => {
+    it('should return undefined when no user id is provided', async () => {
+      const result = await service.ownerLoader(createLoaderParams());
       expect(result).toBeUndefined();
     });
 
-    it('should return undefined when document has no data', async () => {
+    it('should return undefined when the document has no data', async () => {
       jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
         snapshot: {
-          id: 'org-1',
-          path: `${USERS_COLLECTION}/org-1`,
+          id: 'user-1',
+          path: `${USERS_COLLECTION}/user-1`,
           data: null,
           metadata: snapshotMetadata,
         },
       });
 
-      const result = await service.organisationLoader(
-        createLoaderParams('org-1'),
-      );
+      const result = await service.ownerLoader(createLoaderParams('user-1'));
 
       expect(result).toBeUndefined();
     });
 
-    it('should query Firestore users collection with the provided organisationId', async () => {
+    it('should load the owner document for the given user id', async () => {
       const getDocumentSpy = jest
         .spyOn(FirebaseFirestore, 'getDocument')
         .mockResolvedValue({
           snapshot: {
-            id: 'org-1',
-            path: `${USERS_COLLECTION}/org-1`,
-            data: { displayName: 'My Org', photoUrl: 'photo.jpg' },
+            id: 'user-1',
+            path: `${USERS_COLLECTION}/user-1`,
+            data: { displayName: 'Mo', photoUrl: 'photo.jpg' },
             metadata: snapshotMetadata,
           },
         });
 
-      const result = await service.organisationLoader(
-        createLoaderParams('org-1'),
-      );
+      const result = await service.ownerLoader(createLoaderParams('user-1'));
 
       expect(getDocumentSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          reference: `${USERS_COLLECTION}/org-1`,
+          reference: `${USERS_COLLECTION}/user-1`,
         }),
       );
-      expect((result as PublicUser).displayName).toBe('My Org');
-      expect((result as PublicUser).userId).toBe('org-1');
+      expect((result as PublicUser).displayName).toBe('Mo');
+      expect((result as PublicUser).userId).toBe('user-1');
+    });
+  });
+
+  describe('bitesLoader', () => {
+    it('should return an empty list when no user id is provided', async () => {
+      const result = await service.bitesLoader(createLoaderParams());
+      expect(result).toEqual([]);
+    });
+
+    it('should query the Bites owned by the given user', async () => {
+      const getCollectionSpy = jest
+        .spyOn(FirebaseFirestore, 'getCollection')
+        .mockResolvedValue({
+          snapshots: [{ id: 'bite-1', data: { name: 'Pasta' } }],
+        } as unknown as Awaited<
+          ReturnType<typeof FirebaseFirestore.getCollection>
+        >);
+
+      const result = await service.bitesLoader(createLoaderParams('user-1'));
+
+      expect(getCollectionSpy).toHaveBeenCalledWith({
+        reference: BITE_COLLECTION,
+        compositeFilter: {
+          type: 'and',
+          queryConstraints: [
+            {
+              type: 'where',
+              fieldPath: 'userId',
+              opStr: '==',
+              value: 'user-1',
+            },
+          ],
+        },
+      });
+      expect(result).toEqual([{ id: 'bite-1', name: 'Pasta' } as Bite]);
+    });
+
+    it('should return an empty list when there are no snapshots', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'getCollection')
+        .mockResolvedValue(
+          {} as unknown as Awaited<
+            ReturnType<typeof FirebaseFirestore.getCollection>
+          >,
+        );
+
+      const result = await service.bitesLoader(createLoaderParams('user-1'));
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -155,8 +161,8 @@ describe('CreateBiteTrailDataAccessService', () => {
       | 'updatedAt'
       | 'updatedAtTimestamp'
     > = {
-      ownerId: 'org-1',
-      ownerName: 'My Org',
+      ownerId: 'user-1',
+      ownerName: 'Mo',
       ownerImagePath: 'photo.jpg',
       name: 'My Trail',
       biteIds: ['bite-1', 'bite-2'],

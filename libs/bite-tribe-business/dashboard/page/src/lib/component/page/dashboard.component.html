@@ -26,6 +26,30 @@
       >
         <ion-card>
           <ion-card-header>
+            <ion-card-title>{{ 'bite-trails' | transloco }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="full" data-testid="dashboard-bite-trails">
+              @for (biteTrail of biteTrails(); track biteTrail.id) {
+                <ion-item>
+                  <ion-label>{{ biteTrail.name }}</ion-label>
+                </ion-item>
+              } @empty {
+                <p>{{ 'no-bite-trails-found' | transloco }}</p>
+              }
+            </ion-list>
+            <ion-button
+              expand="block"
+              class="ion-margin-top"
+              (click)="createBiteTrailClick.emit()"
+            >
+              {{ 'create-bite-trail' | transloco }}
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
             <ion-card-title>{{ 'restaurants' | transloco }}</ion-card-title>
           </ion-card-header>
           <ion-card-content>

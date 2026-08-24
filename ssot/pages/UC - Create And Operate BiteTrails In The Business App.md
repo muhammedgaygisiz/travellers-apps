@@ -15,16 +15,16 @@ Creators and business users can create curated BiteTrail offerings.
 
 ## Current Flow
 
-- A business user opens the dashboard.
-- The business user creates a BiteTrail.
+- A business user opens the dashboard and sees the BiteTrails they own.
+- The business user opens Create BiteTrail, picks from their own Bites, and creates the trail.
 - BiteTrail becomes available as a marketplace-related journey.
 
 ## Supported Evidence
 
-- Business `:organisationId/dashboard`
-- Business `:organisationId/create-bite-trail`
+- Business `dashboard`, which lists the signed-in user's BiteTrails and links to creation
+- Business `create-bite-trail`
 
-Both routes still carry the `:organisationId` parameter name and are no longer reachable from the business dashboard, which lost its Organisations list when the unwritten organisation fields were removed in [[issue-1371]]. The parameter is a user id. Renaming it belongs to the business-app rework, not to that cleanup.
+A BiteTrail is owned by the account that creates it. The route takes no owner parameter: the owner is the signed-in user. The organisation dashboard that used to sit in front of this flow is gone, together with its `:organisationId` routes and the "employees" list it was built around - that list read the `organisationId` field on user documents, which nothing ever wrote, so it was always empty and no Bite could be reached through it. See [[issue-1371]].
 
 ## Related GitHub Scope
 

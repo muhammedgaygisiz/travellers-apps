@@ -39,11 +39,6 @@ export const biteTrailId = createSelector(
   (params) => params?.['biteTrailId'],
 );
 
-export const organisationId = createSelector(
-  selectRouteParams,
-  (params) => params?.['organisationId'],
-);
-
 /**
  * The review thread a reply notification points at. Absent on every other way
  * of reaching a Bite, which renders the review compartment as usual

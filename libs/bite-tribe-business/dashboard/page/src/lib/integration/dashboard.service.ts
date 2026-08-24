@@ -15,11 +15,13 @@ export class DashboardService {
   private readonly navController = inject(NavController);
 
   restaurants = this.dataAccess.restaurants;
+  biteTrails = this.dataAccess.biteTrails;
   bitePlaces = this.dataAccess.bitePlaces;
   restaurantCandidates = this.dataAccess.restaurantCandidates;
 
   // Read guarded: `value()` throws once a read has failed (#1232).
   restaurantsValue = this.dataAccess.restaurantsValue;
+  biteTrailsValue = this.dataAccess.biteTrailsValue;
   bitePlacesValue = this.dataAccess.bitePlacesValue;
   restaurantCandidatesValue = this.dataAccess.restaurantCandidatesValue;
   isAuthenticated = this.dataAccess.isAuthenticated;
@@ -45,6 +47,10 @@ export class DashboardService {
       ]);
       return;
     }
+  }
+
+  createBiteTrailClicked(): void {
+    void this.navController.navigateForward(['create-bite-trail']);
   }
 
   gotoMigrations(): void {

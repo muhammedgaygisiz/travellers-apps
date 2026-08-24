@@ -116,35 +116,8 @@ describe('CreateBiteTrailComponent', () => {
     });
   });
 
-  describe('getEmployeeName', () => {
-    beforeEach(() => {
-      const employees: PublicUser[] = [
-        {
-          userId: 'user-1',
-          displayName: 'Alice',
-          email: 'alice@example.com',
-          photoUrl: '',
-        },
-      ];
-      compRef.setInput('employees', employees);
-      fixture.detectChanges();
-    });
-
-    it('should return the display name for a known userId', () => {
-      expect(component.getEmployeeName('user-1')).toBe('Alice');
-    });
-
-    it('should return empty string for an unknown userId', () => {
-      expect(component.getEmployeeName('unknown')).toBe('');
-    });
-
-    it('should return empty string when userId is undefined', () => {
-      expect(component.getEmployeeName(undefined)).toBe('');
-    });
-  });
-
-  describe('selectedBites input', () => {
-    it('should initialize localSelectedBiteIds from selectedBites', () => {
+  describe('bites input', () => {
+    it('should display the bites it is given without preselecting any', () => {
       const bites: Bite[] = [
         {
           id: 'bite-1',
@@ -164,10 +137,26 @@ describe('CreateBiteTrailComponent', () => {
         },
       ];
 
-      compRef.setInput('selectedBites', bites);
+      compRef.setInput('bites', bites);
       fixture.detectChanges();
 
-      expect(component.localSelectedBiteIds()).toEqual(['bite-1', 'bite-2']);
+      expect(component.displayedBites()).toEqual(bites);
+      expect(component.localSelectedBiteIds()).toEqual([]);
+    });
+  });
+
+  describe('isInvalid', () => {
+    it('should stay invalid while no Bite is selected', () => {
+      component.biteTrailFormGroup.patchValue({ name: 'My Trail' });
+
+      expect(component.isInvalid()).toBe(true);
+    });
+
+    it('should become valid once the form is filled and a Bite is selected', () => {
+      component.biteTrailFormGroup.patchValue({ name: 'My Trail' });
+      component.localSelectedBiteIds.set(['bite-1']);
+
+      expect(component.isInvalid()).toBe(false);
     });
   });
 
@@ -208,14 +197,14 @@ describe('CreateBiteTrailComponent', () => {
     });
 
     it('should emit submitTrail with correct owner data when form is valid', () => {
-      const org: PublicUser = {
-        userId: 'org-1',
-        displayName: 'My Org',
-        email: 'org@example.com',
+      const owner: PublicUser = {
+        userId: 'user-1',
+        displayName: 'Mo',
+        email: 'mo@example.com',
         photoUrl: 'photo.jpg',
       };
 
-      compRef.setInput('organisation', org);
+      compRef.setInput('owner', owner);
       fixture.detectChanges();
 
       component.biteTrailFormGroup.patchValue({ name: 'My Trail' });
@@ -228,8 +217,8 @@ describe('CreateBiteTrailComponent', () => {
 
       expect(submitTrailSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          ownerId: 'org-1',
-          ownerName: 'My Org',
+          ownerId: 'user-1',
+          ownerName: 'Mo',
           ownerImagePath: 'photo.jpg',
           name: 'My Trail',
           biteIds: ['bite-1'],

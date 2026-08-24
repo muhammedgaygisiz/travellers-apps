@@ -68,7 +68,7 @@
       <div class="ion-margin-top">
         <ion-card>
           <ion-card-header>
-            <ion-card-title>Selected Bites</ion-card-title>
+            <ion-card-title>Your Bites</ion-card-title>
           </ion-card-header>
           <ion-card-content>
             <ion-list lines="full">
@@ -80,22 +80,19 @@
                     aria-label="Toggle Bite selection"
                   />
                   <ion-label>{{ bite.name }}</ion-label>
-                  <ion-note slot="end">
-                    {{ getEmployeeName(bite.userId) }}
-                  </ion-note>
                 </ion-item>
               } @empty {
-                <p>No bites selected.</p>
+                <p>No bites found.</p>
               }
             </ion-list>
           </ion-card-content>
         </ion-card>
       </div>
 
-      @if (organisation()) {
+      @if (owner()) {
         <div class="ion-margin-top owner-info">
           <ion-text color="medium">
-            <p>Owner: {{ organisation()?.displayName }}</p>
+            <p>Owner: {{ owner()?.displayName }}</p>
           </ion-text>
         </div>
       }

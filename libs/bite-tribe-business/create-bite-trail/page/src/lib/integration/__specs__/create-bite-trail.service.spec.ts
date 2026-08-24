@@ -2,9 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { CreateBiteTrailService } from '../create-bite-trail.service';
 import { CreateBiteTrailDataAccessService } from 'bite-tribe-business/create-bite-trail-data-access';
 import { NavController } from '@ionic/angular/standalone';
-import { Bite, BiteTrail, PublicUser } from 'model';
+import { BiteTrail } from 'model';
 import { ToastService } from 'toast';
-import { signal } from '@angular/core';
 
 jest.mock('bite-tribe-business/create-bite-trail-data-access');
 jest.mock('@capacitor-firebase/firestore');
@@ -16,12 +15,11 @@ describe('CreateBiteTrailService', () => {
   let toastMock: { present: jest.Mock };
 
   beforeEach(() => {
-    const mockOrganisation = { value: jest.fn().mockReturnValue(undefined) };
+    const mockResource = { value: jest.fn().mockReturnValue(undefined) };
 
     dataAccessMock = {
-      selectedBites: signal<Bite[]>([]),
-      employees: signal<PublicUser[]>([]),
-      organisation: mockOrganisation,
+      bites: mockResource,
+      owner: mockResource,
       createBiteTrail: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<CreateBiteTrailDataAccessService>;
 
@@ -54,21 +52,15 @@ describe('CreateBiteTrailService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('selectedBites', () => {
-    it('should expose selectedBites from dataAccess', () => {
-      expect(service.selectedBites).toBe(dataAccessMock.selectedBites);
+  describe('bites', () => {
+    it('should expose bites from dataAccess', () => {
+      expect(service.bites).toBe(dataAccessMock.bites);
     });
   });
 
-  describe('employees', () => {
-    it('should expose employees from dataAccess', () => {
-      expect(service.employees).toBe(dataAccessMock.employees);
-    });
-  });
-
-  describe('organisation', () => {
-    it('should expose organisation from dataAccess', () => {
-      expect(service.organisation).toBe(dataAccessMock.organisation);
+  describe('owner', () => {
+    it('should expose owner from dataAccess', () => {
+      expect(service.owner).toBe(dataAccessMock.owner);
     });
   });
 

@@ -10,12 +10,12 @@ export class CreateBiteTrailService {
   private readonly navController = inject(NavController);
   private readonly toast = inject(ToastService);
 
-  selectedBites = this.dataAccess.selectedBites;
-  employees = this.dataAccess.employees;
-  organisation = this.dataAccess.organisation;
+  bites = this.dataAccess.bites;
+  owner = this.dataAccess.owner;
 
   /** Read guarded: `value()` throws once the read has failed (#1232). */
-  organisationValue = this.dataAccess.organisationValue;
+  bitesValue = this.dataAccess.bitesValue;
+  ownerValue = this.dataAccess.ownerValue;
 
   async submitBiteTrail(
     trailData: Omit<

@@ -9,6 +9,7 @@ import {
   IonCard,
   IonCardContent,
   IonCardHeader,
+  IonButton,
   IonCardTitle,
   IonContent,
   IonItem,
@@ -16,7 +17,7 @@ import {
   IonList,
   IonText,
 } from '@ionic/angular/standalone';
-import { Geopoint, Restaurant } from 'model';
+import { BiteTrail, Geopoint, Restaurant } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { DashboardRestaurantCandidate } from 'bite-tribe-business/dashboard-data-access';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -32,6 +33,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
     IonCardContent,
     IonCardHeader,
     IonCardTitle,
+    IonButton,
     MapComponent,
     IonList,
     IonLabel,
@@ -43,6 +45,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 })
 export class DashboardComponent {
   restaurants = input<Restaurant[]>();
+  biteTrails = input<BiteTrail[]>();
   bitePlaces = input<string[]>();
   restaurantCandidates = input<DashboardRestaurantCandidate[]>();
 
@@ -55,6 +58,7 @@ export class DashboardComponent {
   readonly restaurantClick = output<Restaurant>();
   readonly restaurantCandidateClick = output<DashboardRestaurantCandidate>();
   readonly placeClick = output<string>();
+  readonly createBiteTrailClick = output<void>();
 
   candidateEvidenceCount(candidate: DashboardRestaurantCandidate): number {
     return candidate.evidence?.biteCount ?? candidate.biteIds?.length ?? 0;

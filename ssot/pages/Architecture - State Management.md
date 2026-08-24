@@ -96,7 +96,8 @@ apps/bite-tribe-firebase/functions/src/functions/bites/load-bites-by-location.ts
 ## Current Limitations
 
 - Some newer feature data uses Angular resources directly, while older/shared flows use NgRx.
-- Store and resource boundaries should remain explicit so features do not duplicate remote state ownership.
+- Store and resource boundaries should remain explicit so features do not duplicate remote state ownership. NgRx 22 (issue #1037) adds resource extensions to `@ngrx/signals`, which is the first release that offers a shared home for both sides of that split; the package is installed but not yet used anywhere.
+- `@ngrx/component-store` is a declared dependency with no import in the workspace.
 - `bites/effects.ts`, `bites/reducer.ts`, `reviews/effects.ts`, `app/effects.ts`, `app/utils/is-profile-page.ts`, and `bucketlists/utils/should-load-bucketlists.ts` still decide on `url.includes(...)`. Each one can be fooled by an id or a name that contains the word it looks for, in the way described under Route-Driven Effects; the restaurant and menu effects have been moved to route parameters, the rest have not.
 - The likes slice is legacy, as described under Derived Read Models Belong On The Server. It is still the source for feeds that do not carry likes and for optimistic like writes, but new work should move the read model to the backend rather than extend it.
 - `bitesWithMetadata` rebuilds every Bite it returns, so any slice it depends on — bites, latest bites, likes, GPS position — re-renders the whole feed when its identity changes. Reducers feeding it are bound by the contract under A Reducer That Changes Nothing Must Return The Same State.

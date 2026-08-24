@@ -21,15 +21,15 @@ The goal is to improve project-graph reliability and keep the toolchain supporte
 
 ## Current Baseline
 
-As of 19 July 2026:
+As of 24 August 2026:
 
 | Area                | Current State                                                                                     | Migration Relevance                                                                           |
 | ------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Nx                  | `23.1.0` across the official top-level packages (issue #1033)                                     | Phase 2 complete; Angular 22 is the next major boundary (Phase 4).                            |
-| Angular             | `21.2.x` (issue #1031)                                                                            | Supported by Nx 23; on the latest Angular 21 family before the Angular 22 boundary.           |
-| TypeScript          | `5.9.3`                                                                                           | Correct for Angular 21; retained on Nx 23 (TypeScript 6 deferred to Angular 22).              |
-| Node.js             | Pinned to `24.15.0`+ (`24.18.0`) via `.nvmrc`, `package.json` engines, and CI `node-version-file` | Aligned and pinned (issue #1030); inside the supported Node 24 line for Nx 23 and Angular 21. |
-| NgRx                | `21.1.1` (issue #1031)                                                                            | Stable NgRx 21 requires Angular 21, so it currently blocks Angular 22.                        |
+| Nx                  | `23.1.0` across the official top-level packages (issue #1033)                                     | Phase 2 complete; Nx 23 carried Angular 22 without a version change.                          |
+| Angular             | `22.1.3` framework / `22.1.5` CLI family (issue #1037)                                            | Phase 4 complete; the workspace is on the Angular 22 major.                                   |
+| TypeScript          | `6.0.3` (issue #1037)                                                                             | Inside Angular 22's supported `>=6.0 <6.1` range. TypeScript 7 is not installed.              |
+| Node.js             | Pinned to `24.15.0`+ (`24.18.0`) via `.nvmrc`, `package.json` engines, and CI `node-version-file` | Aligned and pinned (issue #1030); inside the supported Node 24 line for Nx 23 and Angular 22. |
+| NgRx                | `22.0.0` (issue #1037)                                                                            | Stable NgRx 22 published on 24 August 2026; it peers `@angular/core ^22.0.0`.                 |
 | Capacitor Nx plugin | `@nxext/capacitor@23.0.0`                                                                         | Loads Nx 23 (issue #1033); the nested Nx 21 generation is gone.                               |
 | Visual regression   | `loki@0.35.1` invoked directly via repository scripts; `nx-loki` removed                          | Nx adapter removed (issue #1040); Loki now runs through `loki.config.js`.                     |
 | E2E                 | Playwright consumer suite; legacy Cypress business project removed                                | Cypress removed; place all E2E coverage in Playwright.                                        |
@@ -218,7 +218,7 @@ Validation run for issue #1036 (Node 24 target; run locally under Node 22 in the
 
 ## Phase 4 - Angular 22
 
-Angular 22 starts only when the complete dependency set is available and compatible.
+Status: complete (issue #1037). Angular, NgRx, and TypeScript moved to their next majors as one coordinated set on 24 August 2026, the day stable NgRx `22.0.0` was published and the last declared prerequisite closed. Every prerequisite below was satisfied on its own published version range; no peer override was added to force the set together.
 
 Prerequisites:
 
@@ -246,6 +246,48 @@ Do not install TypeScript 7 during this phase.
 - Firebase Functions validation.
 - Capacitor sync plus Android and iOS builds.
 - Manual launch-critical device checks from [[Current State - Release State]].
+
+### Angular 22, NgRx 22, and TypeScript 6 batch (issue #1037)
+
+| Package family                                                                            | From      | To        |
+| ----------------------------------------------------------------------------------------- | --------- | --------- |
+| Angular framework (`core`, `common`, `compiler`, `forms`, `router`, `localize`, ...)      | `21.2.18` | `22.1.3`  |
+| Angular CLI, Devkit, `@angular/build`, `pwa`, `@schematics/angular`                       | `21.2.19` | `22.1.5`  |
+| `@angular/compiler-cli`, `@angular/language-service`                                      | `21.2.18` | `22.1.3`  |
+| `@angular/material`, `@angular/cdk`, `@angular/cdk-experimental`                          | `21.2.14` | `22.1.3`  |
+| All `@ngrx/*` packages, `@ngrx/schematics`, `@ngrx/store-devtools`                        | `21.1.1`  | `22.0.0`  |
+| `typescript`                                                                              | `5.9.3`   | `6.0.3`   |
+| `angular-eslint`                                                                          | `21.1.0`  | `22.1.0`  |
+| `typescript-eslint`, `@typescript-eslint/{eslint-plugin,parser,utils}`                    | `8.51.0` / `8.53.1` | `8.68.0` |
+| Storybook (`storybook`, `@storybook/angular`, `@storybook/addon-docs`, `eslint-plugin-storybook`) | `10.5.2` | `10.5.10` |
+
+Each Angular and NgRx family was moved with `nx migrate <package>@<version>`; no raw `npm update` was used.
+
+Two packages entered the batch because TypeScript 6 forces them, not because Angular 22 does:
+
+- `typescript-eslint` and its three sibling packages peered `typescript >=4.8.4 <6.0.0` up to `8.53`. `8.60.0` widened that to `<6.1.0`, so the trio moved to the current `8.68.0`. The existing `overrides` entry pinning `@typescript-eslint/parser` under `@typescript-eslint/eslint-plugin` was retargeted to the same version rather than dropped, so the single-parser mechanism from issue #1039 still holds.
+- Storybook declared `typescript ^4.9.0 || ^5.0.0` through `10.5.4` and added `|| ^6.0.0` in `10.5.5`. The family moved to `10.5.10`, still inside Storybook 10. `@chromatic-com/storybook` stays `5.2.1`; it is unaffected.
+
+`zone.js` stays `0.16.0`: the Angular migration selected no change and Angular 22 peers `~0.15.0 || ~0.16.0`. `jest-preset-angular` stays `16.2.0`, which already declares `@angular/core >=19.0.0 <23.0.0`, `jest ^30`, and `typescript >=5.5`; `jest-preset-angular@17` was again not taken. `@ionic/angular` (`8.8.14`), `@jsverse/transloco` (`8.4.0`), `@nx/*` (`23.1.0`), and `@nxext/capacitor` (`23.0.0`) all needed no change, because their declared ranges already admit Angular 22. TypeScript 7 was not installed.
+
+All thirteen generated Angular migrations ran. The two optional ones were excluded under Migration Principle 4: `use-application-builder` (the workspace builds through Nx executors) and `migrate-karma-to-vitest` (the workspace tests with Jest). Four applied migrations changed files:
+
+- `change-detection-eager` pinned the six components without an explicit `changeDetection` and two spec host components to `ChangeDetectionStrategy.Eager`, preserving the pre-v22 default. The other 141 components already declared `OnPush`.
+- `strict-safe-navigation-narrow` suppressed the `nullishCoalescingNotNullable` and `optionalChainNotNullable` extended diagnostics across the project tsconfigs, so Angular 22's improved safe-navigation narrowing does not surface as new diagnostics.
+- `safe-optional-chaining` wrapped optional chaining in ten templates with `$safeNavigationMigration()`, so `a?.b` keeps evaluating to `null` rather than v22's `undefined`.
+- `strict-templates-default` pinned `strictTemplates: false` in two spec tsconfigs that did not inherit it. Both belong to utility libraries with no Angular templates.
+
+The last three are Angular's compatibility shims rather than the v22 behavior. They were kept so this change stays a version move with unchanged behavior; removing them is tracked separately as adoption work.
+
+TypeScript 6 also required the two `@nx/js` migrations that Phase 2 generated and deliberately reverted, both gated on `requires: typescript >=6.0.0` and therefore inert until now: `add-ignore-deprecations-for-ts6` and `set-tsconfig-root-dir-for-ts6`. Without the first, the production build fails outright with `TS5101: Option 'baseUrl' is deprecated and will stop functioning in TypeScript 7.0`.
+
+One adaptation was made beyond the migration output. Two of the components `change-detection-eager` pinned to `Eager` failed `@angular-eslint/prefer-on-push-component-change-detection`, a rule this workspace already enforces. All six production components are `OnPush`-safe by construction — `storybook-host`'s `App` holds one constant title and `NxWelcome` is a fully static template, `cv`'s `AppComponent` assigns readonly arrays once and `Technology` reads only `input()` signals, `DeleteAccount` keeps its only mutable state in a `signal()`, and `PrivacyPolicy` is signal- and computed-driven — and both applications are zoneless, so nothing outside a signal write or an explicit `markForCheck` drives change detection under either strategy. Those six therefore take the new v22 `OnPush` default. The two spec host components keep `Eager`, because their tests mutate plain fields and rely on `fixture.detectChanges()` re-rendering the host.
+
+No production source adaptation was needed. The workspace uses none of the removed or changed APIs on either side of the upgrade: no `tapResponse` callback signature, no `data-persistence` sub-package, no `signalState` union slices (NgRx 22); and no `ChangeDetectorRef.checkNoChanges`, `ComponentFactoryResolver`, `createNgModuleRef`, `provideRoutes`, `CanMatchFn`, `TitleStrategy`, Hammer.js, JSONP, `reportProgress`, or `@angular/animations` import (Angular 22).
+
+Validation run for issue #1037 (Node 24 target; run under Node 22 in the agent sandbox, so `npm install` used `--ignore-scripts` because the `sharp` prebuilt-binary postinstall stays blocked by the egress policy, the same limitation recorded for the earlier phases): `bite-tribe`, `bite-tribe-business`, and `cv` production builds passed; `nx run-many -t test --all` passed for all 83 projects; lint passed for `bite-tribe`, `bite-tribe-business`, `cv`, `storybook-host`, `common-ui-card`, and `bite-tribe-e2e` under `angular-eslint@22` and `typescript-eslint@8.68` (only the three pre-existing `playwright/expect-expect` warnings remain); the Firebase Functions `tsc` build is clean under TypeScript 6; the Storybook host build passed on `@storybook/angular@10.5.10`; and `git diff --check` is clean. Serial Playwright E2E against the Firebase emulators, direct Loki visual regression, Capacitor sync, and the Android/iOS device builds and launch-critical device checks remain deferred to CI/device runs because they need emulators, reference images, the `sharp` prebuilt binary, and the native toolchains, consistent with every earlier phase.
+
+Angular 22 deprecates `@angular/animations` in favour of `animate.enter`/`animate.leave`. The package is still a direct dependency at `22.1.3` but is imported nowhere in the workspace and is an optional peer of `@angular/platform-browser`, so removing it is adoption work rather than part of this version move.
 
 ## Separate Migration Tracks
 
@@ -356,7 +398,7 @@ The roadmap is complete when:
 - Playwright owns all E2E coverage.
 - `nx-loki` is gone and direct `oblador/loki` commands own visual regression.
 - Local and CI Node.js versions are explicitly aligned.
-- Angular 22 and TypeScript 6 have landed only after their dependency prerequisites are satisfied.
+- Angular 22 and TypeScript 6 have landed only after their dependency prerequisites are satisfied. Done in issue #1037; every prerequisite was met on a published version range without a peer override.
 - The full validation gate is green and remaining exceptions are recorded in [[Current State - Known Issues]].
 
 ## Related Pages

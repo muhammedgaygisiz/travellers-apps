@@ -1,4 +1,4 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonButton, IonContent } from '@ionic/angular/standalone';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -16,7 +16,6 @@ import { TranslocoPipe } from '@jsverse/transloco';
   selector: 'lib-delete-account',
   imports: [PageComponent, IonContent, IonButton, TranslocoPipe],
   templateUrl: 'delete-account.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: 'delete-account.scss',
 })
 export class DeleteAccount {

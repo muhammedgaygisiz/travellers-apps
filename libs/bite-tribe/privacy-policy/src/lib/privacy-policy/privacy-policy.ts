@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import { IonButton, IonContent } from '@ionic/angular/standalone';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -28,7 +28,6 @@ import { resolvePrivacyPolicyLanguage } from './privacy-policy-language';
     TranslocoPipe,
   ],
   templateUrl: 'privacy-policy.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: 'privacy-policy.scss',
 })
 export class PrivacyPolicy {

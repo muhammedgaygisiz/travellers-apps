@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { DurationPipe } from './duration.pipe';
@@ -65,7 +65,6 @@ const APPRENTICE: Education = {
   imports: [RouterModule, DatePipe, DurationPipe, Technology, TechnologyPipe],
   selector: 'app-root',
   templateUrl: './app.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.component.scss',
 })
 export class AppComponent {

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NxWelcome } from './nx-welcome';
 
@@ -6,7 +6,6 @@ import { NxWelcome } from './nx-welcome';
   imports: [NxWelcome, RouterModule],
   selector: 'app-root',
   templateUrl: './app.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.scss',
 })
 export class App {

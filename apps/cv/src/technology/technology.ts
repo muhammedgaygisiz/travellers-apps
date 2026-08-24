@@ -1,4 +1,4 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { DurationPipe } from '../app/duration.pipe';
 import { Project } from '../app/project';
 
@@ -25,7 +25,6 @@ import { Project } from '../app/project';
       }
     `,
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [DurationPipe],
 })
 export class Technology {

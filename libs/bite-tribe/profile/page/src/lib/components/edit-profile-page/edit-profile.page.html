@@ -7,7 +7,7 @@
 
     <form [formGroup]="profileForm">
       <div class="profile-image-block" id="select-image">
-        @let photoUrl = this.profileForm.get('photoUrl')?.value; @if
+        @let photoUrl = $safeNavigationMigration(this.profileForm.get('photoUrl')?.value); @if
         (shouldShowProfileImage(photoUrl)) {
         <img
           [src]="photoUrl"

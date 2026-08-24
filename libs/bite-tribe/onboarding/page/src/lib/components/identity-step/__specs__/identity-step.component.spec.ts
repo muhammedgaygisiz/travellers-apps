@@ -1,4 +1,4 @@
-import { Component, forwardRef } from '@angular/core';
+import { Component, forwardRef, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   ControlValueAccessor,
@@ -15,6 +15,7 @@ import { IdentityStepComponent } from '../identity-step.component';
 @Component({
   selector: 'image-upload',
   template: '',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

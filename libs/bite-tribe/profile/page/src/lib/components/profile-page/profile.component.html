@@ -71,7 +71,7 @@
 
       @if (showVisibilityStatus()) {
         <profile-visibility
-          [isPublic]="userData?.public"
+          [isPublic]="$safeNavigationMigration(userData?.public)"
           (editClick)="gotoEditProfile.emit()"
         />
       }
@@ -80,7 +80,7 @@
         {{ userData?.about || ('no-description-available' | transloco) }}
       </p>
 
-      <country-flags [countryCodes]="userData?.countryCodes" />
+      <country-flags [countryCodes]="$safeNavigationMigration(userData?.countryCodes)" />
 
       <div class="bites-section">
         <h2>Bites</h2>
@@ -129,7 +129,7 @@ surfaces read the same sentence in the same language. See GitHub issue #1343. --
     header="{{ 'stop-following' | transloco }}"
     message="{{
       'are-you-sure-you-want-to-stop-following-username'
-        | transloco: { username: user()?.displayName }
+        | transloco: { username: $safeNavigationMigration(user()?.displayName) }
     }}"
     [buttons]="confirmationButtons"
     (didDismiss)="handleConfirmationDismiss($event)"

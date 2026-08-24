@@ -169,7 +169,12 @@
       "bite-tribe-business/create-bite-trail-data-access": [
         "libs/bite-tribe-business/create-bite-trail/data-access/src/index.ts"
       ]
-    }
+    },
+    "strict": false,
+    "noUncheckedSideEffectImports": false,
+    "types": ["*"],
+    "esModuleInterop": false,
+    "ignoreDeprecations": "6.0"
   },
   "exclude": ["node_modules", "tmp"]
 }

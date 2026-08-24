@@ -5,8 +5,8 @@
     @if (validPhotoUrl()) {
     <ion-avatar class="profile-avatar ion-display-flex">
       <img
-        [src]="userData?.photoUrl"
-        [alt]="userData?.displayName"
+        [src]="$safeNavigationMigration(userData?.photoUrl)"
+        [alt]="$safeNavigationMigration(userData?.displayName)"
         (error)="onImageError()"
       />
     </ion-avatar>

@@ -225,6 +225,24 @@ describe('CreateBiteTrailComponent', () => {
         }),
       );
     });
+
+    it('should emit empty owner fields while the owner has not loaded', () => {
+      component.biteTrailFormGroup.patchValue({ name: 'My Trail' });
+      component.localSelectedBiteIds.set(['bite-1']);
+
+      const submitTrailSpy = jest.fn();
+      component.submitTrail.subscribe(submitTrailSpy);
+
+      component.saveTrail();
+
+      expect(submitTrailSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ownerId: '',
+          ownerName: '',
+          ownerImagePath: '',
+        }),
+      );
+    });
   });
 
   describe('resetImagePath', () => {

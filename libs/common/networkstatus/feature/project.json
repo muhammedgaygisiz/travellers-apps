@@ -4,10 +4,5 @@
   "projectType": "library",
   "sourceRoot": "libs/common/networkstatus/feature/src",
   "prefix": "travellers-apps",
-  "tags": ["scope:common"],
-  "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["scope:common"]
 }

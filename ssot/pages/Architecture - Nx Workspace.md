@@ -99,6 +99,19 @@ Two roots are excluded from that inference in `nx.json`:
 
 Shared Jest task configuration lives in one place: the `test` entry of `nx.json` `targetDefaults`, filtered to `plugin: "@nx/jest/plugin"` so it applies to the inferred targets and leaves the Functions `test` target alone. That entry, not the plugin's own defaults, owns the cache inputs — including the exclusions for `*.stories.*`, `.storybook/**`, and `tsconfig.storybook.json` that keep a story edit from invalidating a test result.
 
+`lint` is inferred too. `@nx/eslint/plugin` creates one `lint` target per project it finds a governing ESLint config for (issue #1379). One project opts out: `functions` declares an explicit `nx:run-commands` `lint` target, because its `package.json` `lint` script is `cd ../../.. && npx nx run functions:lint` — without an explicit target Nx infers `lint` from that script and the task invokes itself, which Nx detects and fails. Its command also runs from the workspace root rather than the project root, because `apps/bite-tribe-firebase/functions` carries its own nested `node_modules` with ESLint 8 and a project-root cwd resolves that instead of the workspace's ESLint 9.
+
+The lint targets need no `targetDefaults` entry at all. The plugin's own inputs are a superset of the ones the old `@nx/eslint:lint` defaults carried: it adds each project's own `eslint.config.mjs` and its tsconfig `extends` chain, which the flat workspace-wide list never tracked, so editing a library's ESLint config now invalidates that library's lint cache.
+
+### The ESLint basePath Trap
+
+An inferred `lint` target runs `eslint .` with the cwd set to the **project root**, where the old executor ran from the workspace root. ESLint resolves both `files` and `ignores` patterns relative to the directory of the config file it loaded, so moving the cwd silently changes which patterns match. Two live bugs in this repo were only ever dormant because the cwd was the workspace root:
+
+- A `files` entry without a `**/` prefix — `['*.js', '*.jsx']` — matches nothing at the workspace root, so two leftover eslintrc-style blocks carrying the `extends` key sat in the root `eslint.config.mjs` as dead code. From a project root they match `apps/bite-tribe/env-var-plugin.js`, ESLint applies the block, and the whole lint run dies on `"extends" ... is not supported in flat config system`. Both blocks were removed; neither had ever contributed a rule.
+- An `ignores` entry written workspace-root-relative stops matching when the basePath becomes the project root. `apps/storybook-host/eslint.config.mjs` ignored `apps/storybook-host/src/assets/temp/**`, the gitignored Nx-graph bundle; from the project root that pattern misses and the minified output produced **12,513 errors**. It now carries both spellings.
+
+**When adding a `files` or `ignores` pattern, write it so it matches from either basePath** — prefix with `**/`, or list both the workspace-root-relative and project-relative form. A pattern that is merely dead is indistinguishable from one that works until the cwd moves.
+
 `useInferencePlugins` stays `false`. It gates only whether generators and `nx add` register plugins for you; it has never gated the plugins listed explicitly in `nx.json`, and this workspace registers all of them by hand on purpose.
 
 ## Validation Rule

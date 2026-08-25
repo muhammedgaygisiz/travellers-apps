@@ -6,9 +6,6 @@
   "prefix": "travellers-apps",
   "tags": ["scope:common", "type:ui", "framework:ionic"],
   "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    },
     "stylelint": {
       "executor": "nx-stylelint:lint",
       "outputs": ["{options.outputFile}"],

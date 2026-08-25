@@ -41,7 +41,7 @@ Prefer scaffolding new Angular libraries with the repo's Nx generators so `proje
 
 ## Linting And Formatting
 
-- Most Angular/Nx libraries use repo-root ESLint through each library's `eslint.config.mjs` or Nx `lint` target.
+- Most Angular/Nx libraries use repo-root ESLint through each library's `eslint.config.mjs` or Nx `lint` target. `project.json` declares no `lint` target — `@nx/eslint/plugin` infers it and runs `eslint .` with the cwd set to the project root (issue #1379). When adding a `files` or `ignores` pattern to any ESLint config, write it so it matches from either basePath; see the basePath trap in `ssot/pages/Architecture - Nx Workspace.md`.
 - Prefer targeted ESLint for touched Angular files:
 
 ```bash

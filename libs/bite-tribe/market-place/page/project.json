@@ -4,10 +4,5 @@
   "sourceRoot": "libs/bite-tribe/market-place/page/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["scope:bite-tribe", "type:feature"],
-  "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["scope:bite-tribe", "type:feature"]
 }

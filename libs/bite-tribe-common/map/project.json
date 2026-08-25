@@ -4,10 +4,5 @@
   "sourceRoot": "libs/bite-tribe-common/map/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["scope:bite-tribe", "type:ui"],
-  "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["scope:bite-tribe", "type:ui"]
 }

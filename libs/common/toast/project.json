@@ -4,10 +4,5 @@
   "projectType": "library",
   "sourceRoot": "libs/common/toast/src",
   "prefix": "travellers-apps",
-  "tags": ["scope:common", "framework:ionic"],
-  "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["scope:common", "framework:ionic"]
 }

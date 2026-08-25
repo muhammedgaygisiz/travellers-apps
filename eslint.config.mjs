@@ -215,15 +215,4 @@ export default [
     ],
     rules: {},
   },
-  {
-    files: ['*.js', '*.jsx'],
-    extends: ['plugin:@nx/javascript'],
-    rules: {
-      'no-extra-semi': 'off',
-    },
-  },
-  {
-    files: ['*.stories.*', 'main.js'],
-    extends: ['plugin:storybook/recommended'],
-  },
 ];

@@ -6,9 +6,19 @@
   "tags": ["scope:firebase"],
   "targets": {
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/eslint.config.mjs",
+        "{workspaceRoot}/tools/eslint-rules/**/*",
+        {
+          "externalDependencies": ["eslint"]
+        }
+      ],
       "options": {
-        "lintFilePatterns": ["apps/bite-tribe-firebase/functions/src/**/*.ts"]
+        "command": "eslint \"apps/bite-tribe-firebase/functions/src/**/*.ts\""
       }
     },
     "test": {

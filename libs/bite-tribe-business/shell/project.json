@@ -4,10 +4,5 @@
   "sourceRoot": "libs/bite-tribe-business/shell/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["type:shell", "scope:bite-tribe-business", "framework:ionic"],
-  "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["type:shell", "scope:bite-tribe-business", "framework:ionic"]
 }

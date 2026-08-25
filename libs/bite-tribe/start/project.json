@@ -4,10 +4,5 @@
   "sourceRoot": "libs/bite-tribe/start/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["type:feature", "scope:bite-tribe", "framework:ionic"],
-  "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["type:feature", "scope:bite-tribe", "framework:ionic"]
 }

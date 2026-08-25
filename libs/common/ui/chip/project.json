@@ -4,10 +4,5 @@
   "projectType": "library",
   "sourceRoot": "libs/common/ui/chip/src",
   "prefix": "bt",
-  "tags": ["type:ui", "scope:common", "framework:ionic"],
-  "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["type:ui", "scope:common", "framework:ionic"]
 }

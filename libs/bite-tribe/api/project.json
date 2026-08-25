@@ -4,10 +4,5 @@
   "sourceRoot": "libs/bite-tribe/api/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["scope:bite-tribe", "type:api"],
-  "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["scope:bite-tribe", "type:api"]
 }

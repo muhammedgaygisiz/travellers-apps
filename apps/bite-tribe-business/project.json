@@ -86,9 +86,6 @@
       "defaultConfiguration": "development",
       "continuous": true
     },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    },
     "serve-static": {
       "executor": "@nx/web:file-server",
       "options": {

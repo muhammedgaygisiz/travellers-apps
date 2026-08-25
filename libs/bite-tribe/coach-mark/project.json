@@ -4,10 +4,5 @@
   "sourceRoot": "libs/bite-tribe/coach-mark/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["scope:bite-tribe", "type:ui"],
-  "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["scope:bite-tribe", "type:ui"]
 }

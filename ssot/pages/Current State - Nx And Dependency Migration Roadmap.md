@@ -35,6 +35,7 @@ As of 24 August 2026:
 | Visual regression   | `loki@0.35.1` invoked directly via repository scripts; `nx-loki` removed                          | Nx adapter removed (issue #1040); Loki now runs through `loki.config.js`.                     |
 | E2E                 | Playwright consumer suite; legacy Cypress business project removed                                | Cypress removed; place all E2E coverage in Playwright.                                        |
 | Jest task wiring    | `@nx/jest/plugin` inferred `test` targets; no `@nx/jest:jest` executor anywhere (issue #1379)     | Off the Nx 24 removal path; shared config lives in `nx.json` `targetDefaults.test`.           |
+| Lint task wiring    | `@nx/eslint/plugin` inferred `lint` targets; no `@nx/eslint:lint` executor anywhere (issue #1379) | Off the Nx 24 removal path; the plugin's own inputs replaced the `targetDefaults` entry.      |
 
 The installed dependency tree now contains a single Nx generation. `@nxext/capacitor@23` loads Nx 23 (issue #1033), the `nx-loki` adapter has been removed, and the previously nested `nx@21`/`@nx/devkit@21` under `@nxext/capacitor`/`@nxext/common` is gone. This closes the documented multi-generation project-graph risk.
 
@@ -335,7 +336,9 @@ Two environment observations that are not defects in the app. The Gradle build r
 
 Angular 22 deprecates `@angular/animations` in favour of `animate.enter`/`animate.leave`. The package is still a direct dependency at `22.1.3` but is imported nowhere in the workspace and is an optional peer of `@angular/platform-browser`, so removing it is adoption work rather than part of this version move.
 
-## Jest Inferred Targets
+## Inferred Targets
+
+### Jest inferred targets
 
 Status: complete (issue #1379). The deprecated `@nx/jest:jest` executor is gone from the workspace. `@nx/jest/plugin` is registered in `nx.json` and infers one `test` target per project from its `jest.config.{ts,cts}`; 82 `project.json` files lost their Jest target and nothing replaced it in them. Nx 24 removes the executor, and this was deliberately run on the settled Nx 23 workspace rather than under the time pressure of the next major.
 
@@ -358,7 +361,7 @@ Decisions taken:
 
 `NODE_MODULES_TO_IGNORE` was untouched. It lives inside each project's Jest config, not in the executor options, so the 63 configs that use it for `@ionic`, `@stencil`, `@capacitor`, and `@jsverse` are unaffected.
 
-### Jest inferred targets validation gate
+#### Jest inferred targets validation gate
 
 Validation run for issue #1379 (Node 24.13.0 locally; the repo pins 24.18.0):
 
@@ -370,6 +373,31 @@ Validation run for issue #1379 (Node 24.13.0 locally; the repo pins 24.18.0):
 - `git diff --check` is clean.
 
 CI coverage and `nx affected` behavior over a real base still need a pipeline run to confirm; a local run cannot prove them.
+
+### ESLint inferred targets
+
+Status: complete (issue #1379). `@nx/eslint:lint` carries the same Nx 24 removal deadline as the Jest executor and was converted in the same change, after the deprecation was raised on the issue. 84 `project.json` files lost their `lint` target. `@nx/eslint/plugin` was already registered, so 6 projects were already running on inferred lint targets — that head start is what made the conversion's real behaviour observable before committing to it.
+
+The now-dead `@nx/eslint:lint` `targetDefaults` entry was deleted outright rather than re-keyed the way the Jest one was. The plugin's own inputs are a superset of it: they add each project's own `eslint.config.mjs` and its tsconfig `extends` chain, and they drop `{workspaceRoot}/.eslintrc.json`, which has not existed in this workspace for some time. Editing a library's ESLint config now invalidates that library's lint cache, which the flat workspace-wide input list never did.
+
+Three defects surfaced, all of them pre-existing and all of them latent only because the executor ran ESLint from the workspace root. They are written up as a rule in [[Architecture - Nx Workspace]]:
+
+| Defect                                                                                                                                                                                                                                             | Fix                                                                                   |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `functions` infers `lint` from its own `package.json` script, `cd ../../.. && npx nx run functions:lint`, so the task invokes itself. Nx detects the loop and fails the task.                                                                      | An explicit `nx:run-commands` `lint` target in `project.json`.                        |
+| The root `eslint.config.mjs` ended with two eslintrc-era blocks using the `extends` key. `files: ['*.js']` matches nothing at the workspace root, so they were dead; from a project root they match `env-var-plugin.js` and ESLint aborts the run. | Both blocks removed. Neither had ever contributed a rule.                             |
+| `apps/storybook-host` ignored its gitignored Nx-graph bundle with a workspace-root-relative path that stops matching once the basePath is the project root — 12,513 errors.                                                                        | The ignore now carries both the workspace-relative and the project-relative spelling. |
+
+`functions` also runs its ESLint from the workspace root rather than the project root, because that directory carries its own nested `node_modules` with ESLint 8.57.1; a project-root cwd resolves that copy instead of the workspace's ESLint 9.33.0 and dies on a typescript-eslint rule it cannot load.
+
+#### ESLint inferred targets validation gate
+
+- `nx run-many -t lint --all --skip-nx-cache` — 90 of 90 projects passed, with no deprecation warning.
+- Findings compared project by project against a pre-conversion baseline: **0 errors and 62 warnings before, 0 errors and 62 warnings after, every project identical**. The 62 warnings are pre-existing and untouched.
+- `nx run-many -t lint --all` a second time — 90/90 cache hit.
+- Project graph diffed before and after: the same 90 `lint` targets, none lost, none gained, and no change to any target's `cache` flag.
+- `nx run functions:lint` reports the same 17 warnings as the executor did with its `lintFilePatterns` scoping.
+- `nx run-many -t test --all` re-run after the `nx.json` edit — 83 of 83 still pass, 82/83 cache hit.
 
 ## Separate Migration Tracks
 
@@ -481,7 +509,7 @@ The roadmap is complete when:
 - `nx-loki` is gone and direct `oblador/loki` commands own visual regression.
 - Local and CI Node.js versions are explicitly aligned.
 - Angular 22 and TypeScript 6 have landed only after their dependency prerequisites are satisfied. Done in issue #1037; every prerequisite was met on a published version range without a peer override.
-- The deprecated `@nx/jest:jest` executor is gone and Jest runs through inferred targets. Done in issue #1379, ahead of the Nx 24 removal.
+- The deprecated `@nx/jest:jest` and `@nx/eslint:lint` executors are gone and both Jest and ESLint run through inferred targets. Done in issue #1379, ahead of the Nx 24 removal.
 - The full validation gate is green and remaining exceptions are recorded in [[Current State - Known Issues]].
 
 ## Related Pages

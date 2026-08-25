@@ -8,10 +8,5 @@
     "d3": "7.9.0",
     "@types/d3": "7.4.3"
   },
-  "tags": ["type:ui", "framework:d3"],
-  "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["type:ui", "framework:d3"]
 }

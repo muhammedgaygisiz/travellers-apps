@@ -70,6 +70,30 @@ Do not create priority labels. If a `P0` or `P1` label appears in the repository
 
 4. Set `Status` when work starts, and move it to `Done` after the pull request is merged and the behavior is verified.
 
+### Verifying An Add
+
+**Do not verify with `gh project item-list`.** It serves a stale view: on
+2026-08-25 it reported the board ending at #1371 while #1374 through #1382 were
+already on it with `Priority` set, and re-running it did not refresh. Trusting it
+leads to either re-adding items that are already there, creating duplicates, or
+reporting a successful add as failed.
+
+Verify against the item id that `item-add` returned instead:
+
+```bash
+gh api graphql -f query='
+query($id: ID!) {
+  node(id: $id) {
+    ... on ProjectV2Item {
+      content { ... on Issue { number title } }
+      fieldValues(first: 20) {
+        nodes { ... on ProjectV2ItemFieldSingleSelectValue { name field { ... on ProjectV2SingleSelectField { name } } } }
+      }
+    }
+  }
+}' -f id="<item-id>"
+```
+
 Field and option ids are read with `gh project field-list 4 --owner muhammedgaygisiz` and a GraphQL `node` query against the field id. They are stable, so they can be looked up once per session rather than per issue.
 
 This needs the `project` token scope on the authenticated `gh` CLI, in addition to `repo`.

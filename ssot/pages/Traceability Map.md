@@ -121,19 +121,19 @@
 
 - ## Architecture To Implementation
 
-  | Architecture Page                       | Implementation Page                                                                                                                                                |
-  | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-  | [[Architecture - Overview]]             | [[Implementation - Overview]], [[Implementation - Code Map]]                                                                                                       |
-  | [[Architecture - Firebase]]             | [[Implementation - Firebase Functions]], [[Implementation - Testing]]                                                                                              |
-  | [[Architecture - Nx Workspace]]         | [[Implementation - Libraries]], [[Implementation - Naming Conventions]], [[Implementation - CI Pipeline]]                                                          |
-  | [[Architecture - Capacitor]]            | [[Implementation - Testing]], [[Implementation - Release And Build Workflow]], [[Implementation - Store Release Steps]], [[Implementation - Store Listing Assets]] |
-  | [[Architecture - Auth]]                 | [[Implementation - Code Map]], [[Implementation - Feature Patterns]]                                                                                               |
-  | [[Architecture - Storage]]              | [[Implementation - Firebase Functions]], [[Implementation - Feature Patterns]]                                                                                     |
-  | [[Architecture - Analytics]]            | [[Implementation - Analytics Events]], [[Analytics Operations]]                                                                                                    |
-  | [[Architecture - State Management]]     | [[Implementation - Feature Patterns]], [[Implementation - Testing]]                                                                                                |
-  | [[Architecture - Data Access]]          | [[Implementation - Feature Patterns]], [[Implementation - Libraries]]                                                                                              |
-  | [[Architecture - Internationalization]] | [[Implementation - Localization]], [[Implementation - Firebase Functions]]                                                                                         |
-  | [[Architecture - Testing]]              | [[Implementation - Testing]]                                                                                                                                       |
+  | Architecture Page                       | Implementation Page                                                                                                                                                                                             |
+  | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | [[Architecture - Overview]]             | [[Implementation - Overview]], [[Implementation - Code Map]]                                                                                                                                                    |
+  | [[Architecture - Firebase]]             | [[Implementation - Firebase Functions]], [[Implementation - Testing]]                                                                                                                                           |
+  | [[Architecture - Nx Workspace]]         | [[Implementation - Libraries]], [[Implementation - Naming Conventions]], [[Implementation - CI Pipeline]]                                                                                                       |
+  | [[Architecture - Capacitor]]            | [[Implementation - Testing]], [[Implementation - Android Device Testing]], [[Implementation - Release And Build Workflow]], [[Implementation - Store Release Steps]], [[Implementation - Store Listing Assets]] |
+  | [[Architecture - Auth]]                 | [[Implementation - Code Map]], [[Implementation - Feature Patterns]]                                                                                                                                            |
+  | [[Architecture - Storage]]              | [[Implementation - Firebase Functions]], [[Implementation - Feature Patterns]]                                                                                                                                  |
+  | [[Architecture - Analytics]]            | [[Implementation - Analytics Events]], [[Analytics Operations]]                                                                                                                                                 |
+  | [[Architecture - State Management]]     | [[Implementation - Feature Patterns]], [[Implementation - Testing]]                                                                                                                                             |
+  | [[Architecture - Data Access]]          | [[Implementation - Feature Patterns]], [[Implementation - Libraries]]                                                                                                                                           |
+  | [[Architecture - Internationalization]] | [[Implementation - Localization]], [[Implementation - Firebase Functions]]                                                                                                                                      |
+  | [[Architecture - Testing]]              | [[Implementation - Testing]]                                                                                                                                                                                    |
 
 - ## Current State To Work Selection
 

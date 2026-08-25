@@ -44,4 +44,22 @@ export default [
     // Override or add rules here
     rules: {},
   },
+  {
+    // `no-uninstalled-addons` reads a package.json to check that every addon
+    // listed in `main.ts` is actually installed. It resolves the path with
+    // `path.resolve`, i.e. against `process.cwd()`, and the inferred `lint`
+    // target runs ESLint with the cwd set to this project root — which has no
+    // package.json of its own, because dependencies live in the workspace one.
+    //
+    // This override is scoped here rather than in the root config because this
+    // is the only project with a `.storybook/main.ts`, and the relative path
+    // below is only correct from this directory.
+    files: ['.storybook/main.@(js|cjs|mjs|ts)'],
+    rules: {
+      'storybook/no-uninstalled-addons': [
+        'error',
+        { packageJsonLocation: '../../package.json' },
+      ],
+    },
+  },
 ];

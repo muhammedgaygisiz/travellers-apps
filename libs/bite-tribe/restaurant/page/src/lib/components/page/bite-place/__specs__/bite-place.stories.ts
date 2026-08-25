@@ -30,7 +30,7 @@ const baseBite: Bite = {
   },
 } as Bite;
 
-export const withRatedBites: Story = {
+export const WithRatedBites: Story = {
   args: {
     bite: baseBite,
     bites: [
@@ -57,7 +57,7 @@ export const withRatedBites: Story = {
   },
 };
 
-export const withoutRatedBites: Story = {
+export const WithoutRatedBites: Story = {
   args: {
     bite: baseBite,
     bites: [

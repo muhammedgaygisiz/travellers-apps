@@ -30,7 +30,7 @@ export const Empty: Story = {
   },
 };
 
-export const withMenu: Story = {
+export const WithMenu: Story = {
   args: {
     ...Empty.args,
     menu: {
@@ -58,7 +58,7 @@ export const withMenu: Story = {
   },
 };
 
-export const withDishVariants: Story = {
+export const WithDishVariants: Story = {
   args: {
     restaurant: {
       image: restaurantB64Image,

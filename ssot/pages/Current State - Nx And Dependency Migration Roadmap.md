@@ -390,6 +390,14 @@ Three defects surfaced, all of them pre-existing and all of them latent only bec
 
 `functions` also runs its ESLint from the workspace root rather than the project root, because that directory carries its own nested `node_modules` with ESLint 8.57.1; a project-root cwd resolves that copy instead of the workspace's ESLint 9.33.0 and dies on a typescript-eslint rule it cannot load.
 
+### Storybook lint rules
+
+Status: complete (issue #1379). Removing the dead eslintrc blocks revealed that `eslint-plugin-storybook` — installed at `^10.5.10` — had never linted anything. The old block was `extends: ['plugin:storybook/recommended']` with `files: ['*.stories.*']`, and an unprefixed glob only matches files directly in the basePath directory, never a story nested under `src`. It was reinstated as `...storybook.configs['flat/recommended']`, whose own globs are `**/`-prefixed.
+
+Enabling it produced 25 `storybook/prefer-pascal-case` warnings across 8 story files in 6 libraries, and one hard error: `storybook/no-uninstalled-addons` resolves its `packageJsonLocation` against `process.cwd()`, which the inferred `lint` target sets to a project root that has no `package.json`. That rule is now configured in `apps/storybook-host/eslint.config.mjs`, the only project with a `.storybook/main.ts`.
+
+All 25 exports were renamed to PascalCase. The rename does not touch a single visual reference: Storybook derives story names with `startCase`, so `imageLoaded` and `ImageLoaded` both yield `Image Loaded`, leaving the story id and every `.loki/reference` filename unchanged. This is recorded in [[Implementation - Storybook]] so a future reviewer does not mistake it for a reference-invalidating change.
+
 #### ESLint inferred targets validation gate
 
 - `nx run-many -t lint --all --skip-nx-cache` — 90 of 90 projects passed, with no deprecation warning.

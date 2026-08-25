@@ -1,0 +1,54 @@
+- [11 - chore: upgrade Angular and NgRx to 22 with TypeScript 6](https://github.com/muhammedgaygisiz/travellers-apps/issues/1037) (Issue \#1037)
+- Description
+  - Part of \#1029.
+  - \#\# Goal
+  - Complete the coordinated Angular 22 and TypeScript 6 migration after all compatibility prerequisites exist.
+  - \#\# Blocked until
+  - The Nx 23 workspace is stable.
+  - The pinned Node.js version is supported by Angular 22.
+  - Stable NgRx 22 is available.
+  - Ionic, Storybook, Jest, jest-preset-angular, Transloco, and Angular tooling declare compatible ranges.
+  - \#\# Scope
+  - Upgrade the full Angular framework/CLI/compiler/Devkit/build/Material/CDK/PWA/service-worker family to 22.
+  - Upgrade NgRx packages and schematics to 22.
+  - Upgrade Angular ESLint to 22.
+  - Upgrade TypeScript to Angular 22's supported 6.0.x range.
+  - Apply Zone.js and other dependency versions selected by the official migration.
+  - Do not install TypeScript 7.
+  - \#\# Acceptance criteria
+  - All declared compatibility prerequisites are satisfied without peer overrides.
+  - Angular, NgRx, TypeScript, ESLint, Storybook, Jest, Playwright, Firebase, and native builds operate as one supported stack.
+  - Launch-critical application behavior remains unchanged.
+- Outcome
+  - Angular framework `21.2.18` -> `22.1.3`; Angular CLI, Devkit, `@angular/build`, `pwa` and `@schematics/angular` `21.2.19` -> `22.1.5`; `@angular/compiler-cli` and `@angular/language-service` `21.2.18` -> `22.1.3`; `@angular/material`, `@angular/cdk` and `@angular/cdk-experimental` `21.2.14` -> `22.1.3`.
+  - All `@ngrx/*` packages, `@ngrx/schematics` and `@ngrx/store-devtools` `21.1.1` -> `22.0.0`. Stable NgRx 22 published on 24 August 2026, which is the prerequisite that had blocked this issue since July; it peers `@angular/core ^22.0.0`.
+  - `typescript` `5.9.3` -> `6.0.3`, inside Angular 22's `>=6.0 <6.1` peer range. TypeScript 7 was not installed.
+  - `angular-eslint` `21.1.0` -> `22.1.0`.
+  - Two packages were pulled in by TypeScript 6 rather than by Angular 22. `typescript-eslint` and its three siblings peered `typescript <6.0.0` up to `8.53`, so the trio moved to `8.68.0` (peer `<6.1.0`) and the existing `@typescript-eslint/parser` override was retargeted to match. Storybook gained its `typescript ^6.0.0` peer in `10.5.5`, so the family moved `10.5.2` -> `10.5.10`, still inside Storybook 10.
+  - `zone.js` stays `0.16.0` (the migration selected no change; Angular 22 peers `~0.15.0 || ~0.16.0`) and `jest-preset-angular` stays `16.2.0` (already declares `@angular/core >=19 <23`). Ionic, Transloco, `@nx/*` and `@nxext/capacitor` needed no change.
+  - All thirteen generated Angular migrations ran. The optional `use-application-builder` and `migrate-karma-to-vitest` migrations were excluded: the workspace builds through Nx executors and tests with Jest.
+  - `change-detection-eager`, `strict-safe-navigation-narrow`, `safe-optional-chaining` and `strict-templates-default` produced the only file changes. The last three are Angular's compatibility shims and were kept so this stays a version move with unchanged behavior.
+  - TypeScript 6 also required the two `@nx/js` migrations Phase 2 generated and deliberately reverted, both gated on `typescript >=6.0.0`: `add-ignore-deprecations-for-ts6` and `set-tsconfig-root-dir-for-ts6`. Without the first the production build fails with `TS5101` on the deprecated `baseUrl`.
+  - One adaptation beyond the migration output: two components that `change-detection-eager` pinned to `Eager` failed `@angular-eslint/prefer-on-push-component-change-detection`, which this workspace enforces. All six production components are `OnPush`-safe by construction and both apps are zoneless, so those six take the new v22 `OnPush` default. The two spec host components keep `Eager` because their tests mutate plain fields and rely on `fixture.detectChanges()`.
+  - No production source adaptation was needed. The workspace uses none of the removed or changed APIs on either side: no `tapResponse` callback signature, `data-persistence` sub-package or `signalState` union slice; and no `checkNoChanges`, `ComponentFactoryResolver`, `createNgModuleRef`, `provideRoutes`, `CanMatchFn`, `TitleStrategy`, Hammer.js, JSONP, `reportProgress` or `@angular/animations` import.
+  - This issue had been recorded on 18 August as out of release-candidate scope under \#1177, on the reasoning that a framework major plus a TypeScript major is the largest available source of regression risk and would land on the build the launch depends on. That position was reversed by explicit request once stable NgRx 22 shipped. The emulator and visual gates have since been retired by CI; the native device half below is the part of that risk that is still open.
+  - Details and the full validation run are recorded in [[Current State - Nx And Dependency Migration Roadmap]].
+- CI validation
+  - [Run 2809](https://github.com/muhammedgaygisiz/travellers-apps/actions/runs/32866446626) on commit `a6761fc` is green end to end, so the three gates the agent sandbox could not run were executed rather than deferred.
+  - `loki` passed: the full visual-regression suite through the upstream `oblador/loki` CLI against the committed `.loki/reference` images, headless Chrome in Docker, 4m 31s, a blocking check. No story reported a difference, including the ten templates the `safe-optional-chaining` migration rewrote.
+  - `e2e` (6m 43s) and `business-e2e` passed: both Playwright suites against the Firebase emulators.
+  - `tests` passed with Codecov coverage; `bite-tribe-build` and `bite-tribe-business-build` passed; `lint` and `stylelint` passed across the workspace.
+  - This is the first phase of \#1029 where Loki and Playwright were actually executed for the change rather than carried forward as a deferral.
+- Android device validation
+  - Run on 25 August 2026 on a Samsung Galaxy A56 (`SM-A566B`, Android 16, SDK 36), against a production bundle built with `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true` and installed with `nx run bite-tribe-android:run`. Setup steps are in [[Implementation - Android Device Testing]].
+  - `nx run bite-tribe-android:sync` produced no committed native diff, the outcome \#1038 established for a version-only move inside the Capacitor 8 family.
+  - Translations pass, which is what the device run existed for. Attaching to the WebView over CDP shows `en.json` and `ar.json` returning `200` from `https://localhost/assets/i18n/` with resource type `Fetch` rather than `XHR`, so the transport did move to `FetchBackend` and does read the local bundle scheme. German and Arabic force-quit cold starts render their own catalogues, and deeper screens stay translated. A failure would have been invisible in English, because `en` is the fallback.
+  - Ionic overlays pass. Alert, toast and modal were each opened twice and measured identical on the second open, with only Ionic's normal per-overlay `z-index` increment differing. The toast survives destruction of the settings page that raised it.
+  - App Check passes in both directions: the gate blocked with its translated retry screen when Play Integrity attestation failed, then released once the debug secret was allow-listed. The production build strips `NX_APP_BITE_TRIBE_IS_DEV` and the debug token, verified by reading the inlined `process.env` out of the built bundle, so this ran genuinely under enforcement.
+  - Of the ten rewritten templates, four bite-tribe surfaces were verified against real data (Bite card, Bite details, profile with header, edit profile), including both branches of the distance binding. Two could not be exercised: the `restaurant/page` menu-item template is dead code, and the onboarding identity step is unreachable on an onboarded account and is recorded as inferred rather than observed. Three of the ten belong to the business app.
+- Remaining gap
+  - iOS only: the iOS build and a WKWebView pass. CI still has no native job.
+- Found during the device run
+  - Two `P0` defects, neither caused by this upgrade: \#1381 (the restaurant page has no loading state and offers its menu button before the restaurant document resolves) and \#1382 (the menu page has neither a loading nor a failure state). The branch changes zero `.ts` files, and every component in that path already declared `ChangeDetectionStrategy.OnPush` explicitly before and after.
+  - The `restaurant/page` `MenuItemComponent` is dead code — `category.component.ts` imports the `menu/page` one, which carries no shim. Worth folding into \#1374 as a scope note.
+  - Two environment observations, not app defects: the Gradle build needs a JDK 21 toolchain and fails on a Homebrew JDK 25 default, and the WebView logs two `403`s from `firebase.googleapis.com` and `firebaseinstallations.googleapis.com` because the Firebase web API key's HTTP-referrer restriction does not cover `https://localhost/`. Those are the Firebase JS SDK's own fetches and never pass through Angular's `HttpClient`.

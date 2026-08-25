@@ -110,10 +110,38 @@ Two boundary details keep direct Loki working against the Angular Storybook 10 h
 - `apps/storybook-host/src/assets/fonts/noto-color-emoji-subset.woff2` is a self-hosted Noto Color Emoji subset loaded only in Storybook (via `.storybook/preview-head.html`), so references show consistent colour emoji regardless of the Docker Chrome's installed fonts. `'Noto Color Emoji'` is listed in the app emoji font stack (`theme/variables.scss`); production ships no `@font-face` for it, so production emoji rendering is unchanged. Extend the subset (see the font folder README) if a new story renders a new emoji.
 - `loki.config.js` sets `fetchFailIgnore` to ignore failed requests from every host except the served Storybook build. Loki fails a story on any failed request, and stories legitimately load third-party resources (OpenStreetMap tiles, web fonts, remote images) that visual references must not depend on. A genuinely missing bundled asset (same origin) still fails. Note: references stay deterministic only while those external resources render consistently; mock them in stories if that becomes flaky.
 
+### Operating Loki
+
+Three behaviours that have each cost a wrong conclusion at least once.
+
+**Use `loki:approve`, not `loki:update`, to accept a diff.** `tools/loki.mjs`
+forwards its command straight to the upstream CLI with no story filter, so
+`loki update` re-captures **every** story and rewrites references that were never
+in the failure set. A reference that was passing is silently rebaselined along
+with the one being fixed, which can bless a real regression that nobody looked
+at. `loki approve` promotes only what is sitting in `.loki/difference`. If
+`loki:update` has already been run, restore the references that were not part of
+the failure set before committing.
+
+**A story that renders the Leaflet map must set `parameters: { loki: { skip: true } }`.**
+Markers never paint in Loki's Docker Chrome, so a baseline locks in a blank grey
+rectangle instead of the markers the story exists to show. See
+`libs/bite-tribe-common/map/src/lib/map/__specs__/map.component.stories.ts`, which
+carries the skip and the reason. The device is where map rendering gets confirmed
+instead — see [[Implementation - Android Device Testing]].
+
+**A skeleton in a reference image is not automatically a regression.**
+`loki-getstories-shim.ts` carries a settle gate precisely because an `@defer`
+block's `@placeholder (minimum <n>ms)` outlives a naive settle check, and Loki
+would otherwise capture the placeholder for some viewports and the resolved
+content for others. Before treating a skeleton diff as a bug, check whether the
+committed reference already shows a skeleton.
+
 ## Related Pages
 
 - [[Architecture - Testing]]
 - [[Current State - E2E Coverage]]
+- [[Implementation - Android Device Testing]]
 - [[Implementation - Firebase Functions]]
 - [[Implementation - Storybook]]
 - [[Current State - Nx And Dependency Migration Roadmap]]

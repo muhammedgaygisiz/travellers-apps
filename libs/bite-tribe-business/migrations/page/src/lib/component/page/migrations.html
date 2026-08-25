@@ -204,7 +204,7 @@
             </div>
           </td>
           <td>
-            <img alt="{{bite.name}}" [src]="bite?.image" width="100" />
+            <img alt="{{bite.name}}" [src]="$safeNavigationMigration(bite?.image)" width="100" />
           </td>
           <td>
             <img alt="{{bite.name}}" [src]="bite.imagePath" width="100" />

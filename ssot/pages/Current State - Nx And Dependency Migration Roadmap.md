@@ -21,15 +21,15 @@ The goal is to improve project-graph reliability and keep the toolchain supporte
 
 ## Current Baseline
 
-As of 19 July 2026:
+As of 24 August 2026:
 
 | Area                | Current State                                                                                     | Migration Relevance                                                                           |
 | ------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Nx                  | `23.1.0` across the official top-level packages (issue #1033)                                     | Phase 2 complete; Angular 22 is the next major boundary (Phase 4).                            |
-| Angular             | `21.2.x` (issue #1031)                                                                            | Supported by Nx 23; on the latest Angular 21 family before the Angular 22 boundary.           |
-| TypeScript          | `5.9.3`                                                                                           | Correct for Angular 21; retained on Nx 23 (TypeScript 6 deferred to Angular 22).              |
-| Node.js             | Pinned to `24.15.0`+ (`24.18.0`) via `.nvmrc`, `package.json` engines, and CI `node-version-file` | Aligned and pinned (issue #1030); inside the supported Node 24 line for Nx 23 and Angular 21. |
-| NgRx                | `21.1.1` (issue #1031)                                                                            | Stable NgRx 21 requires Angular 21, so it currently blocks Angular 22.                        |
+| Nx                  | `23.1.0` across the official top-level packages (issue #1033)                                     | Phase 2 complete; Nx 23 carried Angular 22 without a version change.                          |
+| Angular             | `22.1.3` framework / `22.1.5` CLI family (issue #1037)                                            | Phase 4 complete; the workspace is on the Angular 22 major.                                   |
+| TypeScript          | `6.0.3` (issue #1037)                                                                             | Inside Angular 22's supported `>=6.0 <6.1` range. TypeScript 7 is not installed.              |
+| Node.js             | Pinned to `24.15.0`+ (`24.18.0`) via `.nvmrc`, `package.json` engines, and CI `node-version-file` | Aligned and pinned (issue #1030); inside the supported Node 24 line for Nx 23 and Angular 22. |
+| NgRx                | `22.0.0` (issue #1037)                                                                            | Stable NgRx 22 published on 24 August 2026; it peers `@angular/core ^22.0.0`.                 |
 | Capacitor Nx plugin | `@nxext/capacitor@23.0.0`                                                                         | Loads Nx 23 (issue #1033); the nested Nx 21 generation is gone.                               |
 | Visual regression   | `loki@0.35.1` invoked directly via repository scripts; `nx-loki` removed                          | Nx adapter removed (issue #1040); Loki now runs through `loki.config.js`.                     |
 | E2E                 | Playwright consumer suite; legacy Cypress business project removed                                | Cypress removed; place all E2E coverage in Playwright.                                        |
@@ -83,11 +83,11 @@ Status: complete (issue #1030). The steps below are done; keep them for context.
 
 Package-tree audit under Node `24.18.0` records the following non-official Nx / older-Devkit loaders and their keep/upgrade/remove decisions:
 
-| Package                  | Installed | Older generation it loads                                                                                                                            | Decision                                                                                                                                  |
-| ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `@nxext/capacitor`       | `23.0.0`  | none nested; depends on `@nx/devkit@^23` and `nx@^23`, satisfied by the hoisted `23.1.0`, so `@nxext/common@23.0.0` no longer carries a nested Nx 21 | Upgraded to `@nxext/capacitor@23` in Phase 2 (issue #1033); the workspace now runs a single Nx 23 generation.                             |
-| `@ionic/angular-toolkit` | `12.3.0`  | nested `@angular-devkit/core@20.3.20` (peer `@angular-devkit/*@^20`), one generation behind the workspace's `21.0.4`                                 | Keep; schematics-only, not an application runtime dependency. Validate generators before any Angular major bump; do not upgrade blindly.  |
-| `nx-stylelint`           | `19.0.0`  | none nested; v19 declares `@nx/devkit@^22` as a direct dependency, so an override pins it to the hoisted `@nx/devkit@23.1.0` (issue #1039)            | Upgraded to `nx-stylelint@19` with Stylelint 17 in the dedicated Stylelint batch (issue #1039); the override keeps a single Nx generation. |
+| Package                  | Installed | Older generation it loads                                                                                                                            | Decision                                                                                                                                                                     |
+| ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@nxext/capacitor`       | `23.0.0`  | none nested; depends on `@nx/devkit@^23` and `nx@^23`, satisfied by the hoisted `23.1.0`, so `@nxext/common@23.0.0` no longer carries a nested Nx 21 | Upgraded to `@nxext/capacitor@23` in Phase 2 (issue #1033); the workspace now runs a single Nx 23 generation.                                                                |
+| `@ionic/angular-toolkit` | `12.3.0`  | nested `@angular-devkit/core@20.3.20` (peer `@angular-devkit/*@^20`), one generation behind the workspace's `21.0.4`                                 | Keep; schematics-only, not an application runtime dependency. Validate generators before any Angular major bump; do not upgrade blindly.                                     |
+| `nx-stylelint`           | `19.0.0`  | none nested; v19 declares `@nx/devkit@^22` as a direct dependency, so an override pins it to the hoisted `@nx/devkit@23.1.0` (issue #1039)           | Upgraded to `nx-stylelint@19` with Stylelint 17 in the dedicated Stylelint batch (issue #1039); the override keeps a single Nx generation.                                   |
 | `nx-mcp`                 | `0.3.0`   | none (no `nx`/`@nx` dependency; no repository MCP config or script references it)                                                                    | Kept pinned at `0.3.0` in issue #1039; intended use is unverified, so it was not upgraded merely because `0.25.0` exists, and it adds no dependency or Nx-generation impact. |
 
 After Phase 2 (issue #1033), only `@ionic/angular-toolkit` (Angular Devkit 20) still loads an older generation, and it has an explicit follow-up decision. The `@nxext/capacitor` Nx 21 nesting that drove the documented multi-generation project-graph risk is resolved: the tree now carries a single Nx 23 generation.
@@ -218,7 +218,7 @@ Validation run for issue #1036 (Node 24 target; run locally under Node 22 in the
 
 ## Phase 4 - Angular 22
 
-Angular 22 starts only when the complete dependency set is available and compatible.
+Status: complete (issue #1037). Angular, NgRx, and TypeScript moved to their next majors as one coordinated set on 24 August 2026, the day stable NgRx `22.0.0` was published and the last declared prerequisite closed. Every prerequisite below was satisfied on its own published version range; no peer override was added to force the set together.
 
 Prerequisites:
 
@@ -247,6 +247,92 @@ Do not install TypeScript 7 during this phase.
 - Capacitor sync plus Android and iOS builds.
 - Manual launch-critical device checks from [[Current State - Release State]].
 
+### Angular 22, NgRx 22, and TypeScript 6 batch (issue #1037)
+
+| Package family                                                                                    | From                | To        |
+| ------------------------------------------------------------------------------------------------- | ------------------- | --------- |
+| Angular framework (`core`, `common`, `compiler`, `forms`, `router`, `localize`, ...)              | `21.2.18`           | `22.1.3`  |
+| Angular CLI, Devkit, `@angular/build`, `pwa`, `@schematics/angular`                               | `21.2.19`           | `22.1.5`  |
+| `@angular/compiler-cli`, `@angular/language-service`                                              | `21.2.18`           | `22.1.3`  |
+| `@angular/material`, `@angular/cdk`, `@angular/cdk-experimental`                                  | `21.2.14`           | `22.1.3`  |
+| All `@ngrx/*` packages, `@ngrx/schematics`, `@ngrx/store-devtools`                                | `21.1.1`            | `22.0.0`  |
+| `typescript`                                                                                      | `5.9.3`             | `6.0.3`   |
+| `angular-eslint`                                                                                  | `21.1.0`            | `22.1.0`  |
+| `typescript-eslint`, `@typescript-eslint/{eslint-plugin,parser,utils}`                            | `8.51.0` / `8.53.1` | `8.68.0`  |
+| Storybook (`storybook`, `@storybook/angular`, `@storybook/addon-docs`, `eslint-plugin-storybook`) | `10.5.2`            | `10.5.10` |
+
+Each Angular and NgRx family was moved with `nx migrate <package>@<version>`; no raw `npm update` was used.
+
+Two packages entered the batch because TypeScript 6 forces them, not because Angular 22 does:
+
+- `typescript-eslint` and its three sibling packages peered `typescript >=4.8.4 <6.0.0` up to `8.53`. `8.60.0` widened that to `<6.1.0`, so the trio moved to the current `8.68.0`. The existing `overrides` entry pinning `@typescript-eslint/parser` under `@typescript-eslint/eslint-plugin` was retargeted to the same version rather than dropped, so the single-parser mechanism from issue #1039 still holds.
+- Storybook declared `typescript ^4.9.0 || ^5.0.0` through `10.5.4` and added `|| ^6.0.0` in `10.5.5`. The family moved to `10.5.10`, still inside Storybook 10. `@chromatic-com/storybook` stays `5.2.1`; it is unaffected.
+
+`zone.js` stays `0.16.0`: the Angular migration selected no change and Angular 22 peers `~0.15.0 || ~0.16.0`. `jest-preset-angular` stays `16.2.0`, which already declares `@angular/core >=19.0.0 <23.0.0`, `jest ^30`, and `typescript >=5.5`; `jest-preset-angular@17` was again not taken. `@ionic/angular` (`8.8.14`), `@jsverse/transloco` (`8.4.0`), `@nx/*` (`23.1.0`), and `@nxext/capacitor` (`23.0.0`) all needed no change, because their declared ranges already admit Angular 22. TypeScript 7 was not installed.
+
+All thirteen generated Angular migrations ran. The two optional ones were excluded under Migration Principle 4: `use-application-builder` (the workspace builds through Nx executors) and `migrate-karma-to-vitest` (the workspace tests with Jest). Four applied migrations changed files:
+
+- `change-detection-eager` pinned the six components without an explicit `changeDetection` and two spec host components to `ChangeDetectionStrategy.Eager`, preserving the pre-v22 default. The other 141 components already declared `OnPush`.
+- `strict-safe-navigation-narrow` suppressed the `nullishCoalescingNotNullable` and `optionalChainNotNullable` extended diagnostics across the project tsconfigs, so Angular 22's improved safe-navigation narrowing does not surface as new diagnostics.
+- `safe-optional-chaining` wrapped optional chaining in ten templates with `$safeNavigationMigration()`, so `a?.b` keeps evaluating to `null` rather than v22's `undefined`.
+- `strict-templates-default` pinned `strictTemplates: false` in two spec tsconfigs that did not inherit it. Both belong to utility libraries with no Angular templates.
+
+The last three are Angular's compatibility shims rather than the v22 behavior. They were kept so this change stays a version move with unchanged behavior; removing them is tracked separately as adoption work.
+
+TypeScript 6 also required the two `@nx/js` migrations that Phase 2 generated and deliberately reverted, both gated on `requires: typescript >=6.0.0` and therefore inert until now: `add-ignore-deprecations-for-ts6` and `set-tsconfig-root-dir-for-ts6`. Without the first, the production build fails outright with `TS5101: Option 'baseUrl' is deprecated and will stop functioning in TypeScript 7.0`.
+
+One adaptation was made beyond the migration output. Two of the components `change-detection-eager` pinned to `Eager` failed `@angular-eslint/prefer-on-push-component-change-detection`, a rule this workspace already enforces. All six production components are `OnPush`-safe by construction — `storybook-host`'s `App` holds one constant title and `NxWelcome` is a fully static template, `cv`'s `AppComponent` assigns readonly arrays once and `Technology` reads only `input()` signals, `DeleteAccount` keeps its only mutable state in a `signal()`, and `PrivacyPolicy` is signal- and computed-driven — and both applications are zoneless, so nothing outside a signal write or an explicit `markForCheck` drives change detection under either strategy. Those six therefore take the new v22 `OnPush` default. The two spec host components keep `Eager`, because their tests mutate plain fields and rely on `fixture.detectChanges()` re-rendering the host.
+
+No production source adaptation was needed. The workspace uses none of the removed or changed APIs on either side of the upgrade: no `tapResponse` callback signature, no `data-persistence` sub-package, no `signalState` union slices (NgRx 22); and no `ChangeDetectorRef.checkNoChanges`, `ComponentFactoryResolver`, `createNgModuleRef`, `provideRoutes`, `CanMatchFn`, `TitleStrategy`, Hammer.js, JSONP, `reportProgress`, or `@angular/animations` import (Angular 22).
+
+Validation run for issue #1037 (Node 24 target; run under Node 22 in the agent sandbox, so `npm install` used `--ignore-scripts` because the `sharp` prebuilt-binary postinstall stays blocked by the egress policy, the same limitation recorded for the earlier phases): `bite-tribe`, `bite-tribe-business`, and `cv` production builds passed; `nx run-many -t test --all` passed for all 83 projects; lint passed for `bite-tribe`, `bite-tribe-business`, `cv`, `storybook-host`, `common-ui-card`, and `bite-tribe-e2e` under `angular-eslint@22` and `typescript-eslint@8.68` (only the three pre-existing `playwright/expect-expect` warnings remain); the Firebase Functions `tsc` build is clean under TypeScript 6; the Storybook host build passed on `@storybook/angular@10.5.10`; and `git diff --check` is clean.
+
+The three gates the sandbox could not run were then executed by CI rather than deferred. [Run 2809](https://github.com/muhammedgaygisiz/travellers-apps/actions/runs/32866446626) on commit `a6761fc` is green end to end, and its jobs cover most of the Phase 4 gate directly:
+
+| Gate                                                 | CI job                                                                                                                                   | Result |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Full production builds for every Angular application | `bite-tribe-build`, `bite-tribe-business-build`                                                                                          | pass   |
+| All focused and affected Jest suites                 | `tests` (with Codecov coverage)                                                                                                          | pass   |
+| Storybook build and direct Loki visual regression    | `loki` — full suite through the upstream CLI against the committed `.loki/reference` images, headless Chrome in Docker, 4m 31s, blocking | pass   |
+| Serial Playwright E2E against Firebase emulators     | `e2e` (6m 43s) and `business-e2e`                                                                                                        | pass   |
+| Lint and Stylelint across the workspace              | `lint`, `stylelint`                                                                                                                      | pass   |
+
+So Loki visual regression and both Playwright E2E suites did run for this phase, against real emulators and committed reference images, and neither reported a difference. This is the first phase of the epic where those two gates were actually executed rather than carried forward.
+
+CI has no native job, and the Playwright suites drive headless Chromium rather than a WKWebView or an Android WebView, so the native half of the gate was executed by hand on a physical Android device. That run is recorded below. What remains genuinely unexecuted after it is iOS only: the iOS build and a WKWebView pass.
+
+### Phase 4 Android device validation
+
+Run on 25 August 2026 against a Samsung Galaxy A56 (`SM-A566B`, Android 16, SDK 36) on the branch head, using a production `bite-tribe` bundle built with `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true` and installed through `nx run bite-tribe-android:run`. The setup this needs is written down in [[Implementation - Android Device Testing]].
+
+`nx run bite-tribe-android:sync` produced **no committed native diff**, which is the outcome issue #1038 established for a version-only move inside the Capacitor 8 family. `capacitor.build.gradle` and `variables.gradle` are unchanged, and the copied bundle is the one just built.
+
+| Check                                                       | Result                                                                |
+| ----------------------------------------------------------- | --------------------------------------------------------------------- |
+| Translations in a non-English locale, force-quit cold start | pass — German and Arabic both render from their own catalogues        |
+| Ionic overlays, each opened twice                           | pass — alert, toast and modal, identical on the second open           |
+| The ten templates `safe-optional-chaining` rewrote          | pass on the four reachable bite-tribe surfaces; see the residue below |
+| App Check enforced-mode gate                                | pass in both directions                                               |
+
+The translation check is the one the device run existed for, and it clears the concern directly. Angular 22 makes root `HttpBackend` resolve to `FetchBackend`, and neither application calls `provideHttpClient()`, so both Transloco loaders moved from `XMLHttpRequest` to `fetch()` (see issue #1375). Inside the Capacitor WebView the loader reads `/assets/i18n/<lang>.json` off the local bundle scheme rather than over the network, which is the case Chromium never exercised. Attaching to the WebView over CDP shows `en.json` and `ar.json` both returning `200` from `https://localhost/assets/i18n/` with resource type `Fetch` rather than `XHR`. So the transport did move, and it reads the bundle scheme correctly. German and Arabic cold starts after a force-quit render their own catalogues (`Entdecken. Probieren. Teilen.` / `ابحث عنه. جربه. شاركه.`), and screens deeper in the app stay translated. A failure here would have been invisible in English, because `en` is the fallback.
+
+Overlays were opened twice each, because Angular 22 removes styles when the associated host is dropped and Ionic builds overlays outside the Angular component tree. Alert, toast and modal were measured on both opens and were identical in background, radius, width and classes, with only Ionic's normal per-overlay `z-index` increment differing. The toast case is the stronger one: it is presented at the app root and survives the navigation that destroys the settings page which raised it.
+
+App Check was exercised in both directions rather than only the happy path. The first launch failed Play Integrity attestation, and the enforced gate correctly blocked with its translated retry screen and no partial Firebase screens, which is the behaviour issue #933 specifies. After the debug secret was allow-listed the gate released and initial navigation resumed. The production build also strips `NX_APP_BITE_TRIBE_IS_DEV` and `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN`, confirmed by reading the inlined `process.env` object out of the built bundle, so this genuinely ran under enforcement.
+
+Two of the ten rewritten templates could not be exercised on the device, and neither is a gap in the upgrade:
+
+- `libs/bite-tribe/restaurant/page/.../menu-item/menu-item.component.html` is **dead code**. Two components share the name `MenuItemComponent`; the one `category.component.ts` imports is `libs/bite-tribe/menu/page/.../menu-item/`, which carries no shim. The shimmed one is referenced only by its own spec, so it renders on no screen. That is worth folding into issue #1374 as a scope note: the shim can be deleted with the component rather than migrated.
+- The onboarding identity step is unreachable on an onboarded account. Its shim is the same `@let photoUrl = $safeNavigationMigration(form.get('photoUrl')?.value)` construct as `edit-profile.page.html`, which was verified on the device. This is recorded as inferred, not observed.
+
+The four surfaces that were verified against real production data are the Bite card, Bite details, profile with its header, and edit profile. Both branches of the distance binding were covered: `-` with location denied, and real values once granted. Bite details covers seven of the twenty-one shim sites in one screen, including dual-currency prices, German relative time, and the Leaflet map, whose marker paints on the device although it never does in Loki's Docker Chrome.
+
+Two defects were found during the run and filed as `P0`, neither caused by this upgrade. The restaurant page has no loading state and offers its menu button before the restaurant document resolves (issue #1381), and the menu page has neither a loading nor a failure state, so an unresolved menu is indistinguishable from an empty one (issue #1382). Both were confirmed against unchanged code: the branch changes **zero `.ts` files**, and every component in the restaurant and menu path already declared `ChangeDetectionStrategy.OnPush` explicitly before and after, so the v22 default change does not reach them.
+
+Two environment observations that are not defects in the app. The Gradle build requires a JDK 21 toolchain and fails on a Homebrew JDK 25 default, which [[Implementation - Store Release Steps]] documents for the release script but which the debug `:run` path had no written answer for until [[Implementation - Android Device Testing]]. And the WebView logs two `403`s from `firebase.googleapis.com/.../webConfig` and `firebaseinstallations.googleapis.com`, reading `Requests from referer https://localhost/ are blocked` — an HTTP-referrer restriction on the Firebase web API key that does not cover the Capacitor origin. Those are the Firebase JS SDK's own internal fetches and never pass through Angular's `HttpClient`, so Angular 22 cannot have caused them; Analytics falls back to the local measurement id, while Installations fails outright, which is what FCM registration depends on.
+
+Angular 22 deprecates `@angular/animations` in favour of `animate.enter`/`animate.leave`. The package is still a direct dependency at `22.1.3` but is imported nowhere in the workspace and is an optional peer of `@angular/platform-browser`, so removing it is adoption work rather than part of this version move.
+
 ## Separate Migration Tracks
 
 The following should not be bundled into the Nx or Angular major migrations:
@@ -264,22 +350,22 @@ The following should not be bundled into the Nx or Angular major migrations:
 
 Status: complete (issue #1038). The Capacitor 8 family was moved off its mixed `8.0.0`/`8.0.1`/`8.3.0` pins onto one consistent set of compatible Capacitor 8 releases, kept separate from the Nx and Angular tracks. `@nxext/capacitor` stays on `23.0.0` (owned by the Nx track) and `@capacitor/assets` stays on `3.0.5` (a standalone asset-generation tool on its own major, not part of the Capacitor 8 runtime family).
 
-| Package group                                                                                          | From                                              | To      |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ------- |
-| Capacitor core, CLI, Android, iOS (`@capacitor/core`, `/cli`, `/android`, `/ios`)                      | `8.0.0`                                           | `8.4.2` |
-| `@capacitor/app`                                                                                       | `8.0.0`                                           | `8.1.1` |
-| `@capacitor/app-launcher`                                                                              | `8.0.0`                                           | `8.0.1` |
-| `@capacitor/camera`                                                                                    | `8.0.0`                                           | `8.2.1` |
-| `@capacitor/filesystem`                                                                                | `8.0.0`                                           | `8.1.2` |
-| `@capacitor/geolocation`                                                                               | `8.0.0`                                           | `8.2.0` |
-| `@capacitor/haptics`                                                                                   | `8.0.0`                                           | `8.0.2` |
-| `@capacitor/keyboard`                                                                                  | `8.0.0`                                           | `8.0.5` |
-| `@capacitor/preferences`                                                                               | `8.0.0`                                           | `8.0.1` |
-| `@capacitor/push-notifications`                                                                        | `8.0.0`                                           | `8.1.2` |
-| `@capacitor/splash-screen`                                                                             | `8.0.0`                                           | `8.0.2` |
-| `@capacitor/status-bar`                                                                                | `8.0.0`                                           | `8.0.3` |
-| `@capacitor/network`, `@capacitor/share`                                                               | `8.0.1`                                           | `8.0.1` |
-| `@capawesome/capacitor-file-picker`                                                                    | `8.0.1`                                           | `8.0.3` |
+| Package group                                                                                                                           | From                          | To      |
+| --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------- |
+| Capacitor core, CLI, Android, iOS (`@capacitor/core`, `/cli`, `/android`, `/ios`)                                                       | `8.0.0`                       | `8.4.2` |
+| `@capacitor/app`                                                                                                                        | `8.0.0`                       | `8.1.1` |
+| `@capacitor/app-launcher`                                                                                                               | `8.0.0`                       | `8.0.1` |
+| `@capacitor/camera`                                                                                                                     | `8.0.0`                       | `8.2.1` |
+| `@capacitor/filesystem`                                                                                                                 | `8.0.0`                       | `8.1.2` |
+| `@capacitor/geolocation`                                                                                                                | `8.0.0`                       | `8.2.0` |
+| `@capacitor/haptics`                                                                                                                    | `8.0.0`                       | `8.0.2` |
+| `@capacitor/keyboard`                                                                                                                   | `8.0.0`                       | `8.0.5` |
+| `@capacitor/preferences`                                                                                                                | `8.0.0`                       | `8.0.1` |
+| `@capacitor/push-notifications`                                                                                                         | `8.0.0`                       | `8.1.2` |
+| `@capacitor/splash-screen`                                                                                                              | `8.0.0`                       | `8.0.2` |
+| `@capacitor/status-bar`                                                                                                                 | `8.0.0`                       | `8.0.3` |
+| `@capacitor/network`, `@capacitor/share`                                                                                                | `8.0.1`                       | `8.0.1` |
+| `@capawesome/capacitor-file-picker`                                                                                                     | `8.0.1`                       | `8.0.3` |
 | All eight `@capacitor-firebase/*` plugins (analytics, app-check, authentication, crashlytics, firestore, functions, messaging, storage) | mixed `8.0.0`/`8.0.1`/`8.3.0` | `8.3.0` |
 
 The eight `@capacitor-firebase/*` plugins were the only real drift risk: they were spread across `8.0.0`, `8.0.1`, and `8.3.0`, and are now on one release family (`8.3.0`). `@capacitor-firebase/*@8.3.0` peers `@capacitor/core >=8.0.0` (satisfied by `8.4.2`) and `firebase ^12.6.0`; the installed `firebase@12.6.0` and the existing `overrides` that pin `firebase` to `12.6.0` for the Firebase plugins both stay valid, so no `firebase` change was needed on this track (that is the separate issue #1034 backend/client track).
@@ -322,19 +408,19 @@ Validation run for issue #1034 (Node 24 target; run under Node 22 in the agent s
 
 Status: complete (issue #1039). The remaining independent developer tooling was upgraded in three separately reviewable commits by compatible package group, kept off the Nx and Angular tracks.
 
-| Package group                                                                                                    | From                              | To        |
-| ---------------------------------------------------------------------------------------------------------------- | --------------------------------- | --------- |
-| Stylelint (`stylelint`)                                                                                          | `16.18.0`                         | `17.14.1` |
-| `stylelint-config-standard`                                                                                      | `38.0.0`                          | `40.0.0`  |
-| `stylelint-config-standard-scss`                                                                                 | `14.0.0`                          | `17.0.0`  |
-| `nx-stylelint`                                                                                                   | `18.0.0`                          | `19.0.0`  |
-| `@jsverse/transloco`                                                                                             | `7.6.1`                           | `8.4.0`   |
-| `@commitlint/cli`, `@commitlint/config-nx-scopes`                                                               | `19.8.1`                          | `21.2.1` / `21.2.0` |
-| `prettier`                                                                                                       | `3.6.2`                           | `3.9.5`   |
-| `commitizen`                                                                                                     | `4.3.1`                           | `4.3.2`   |
-| `lint-staged`                                                                                                    | `16.1.5`                          | `17.1.0`  |
-| `eslint-plugin-playwright`                                                                                       | `1.8.3`                           | `2.10.5`  |
-| `jsonc-eslint-parser`                                                                                            | `^2.1.0`                          | `^3.1.0`  |
+| Package group                                     | From      | To                  |
+| ------------------------------------------------- | --------- | ------------------- |
+| Stylelint (`stylelint`)                           | `16.18.0` | `17.14.1`           |
+| `stylelint-config-standard`                       | `38.0.0`  | `40.0.0`            |
+| `stylelint-config-standard-scss`                  | `14.0.0`  | `17.0.0`            |
+| `nx-stylelint`                                    | `18.0.0`  | `19.0.0`            |
+| `@jsverse/transloco`                              | `7.6.1`   | `8.4.0`             |
+| `@commitlint/cli`, `@commitlint/config-nx-scopes` | `19.8.1`  | `21.2.1` / `21.2.0` |
+| `prettier`                                        | `3.6.2`   | `3.9.5`             |
+| `commitizen`                                      | `4.3.1`   | `4.3.2`             |
+| `lint-staged`                                     | `16.1.5`  | `17.1.0`            |
+| `eslint-plugin-playwright`                        | `1.8.3`   | `2.10.5`            |
+| `jsonc-eslint-parser`                             | `^2.1.0`  | `^3.1.0`            |
 
 Three source-level adaptations were required:
 
@@ -356,7 +442,7 @@ The roadmap is complete when:
 - Playwright owns all E2E coverage.
 - `nx-loki` is gone and direct `oblador/loki` commands own visual regression.
 - Local and CI Node.js versions are explicitly aligned.
-- Angular 22 and TypeScript 6 have landed only after their dependency prerequisites are satisfied.
+- Angular 22 and TypeScript 6 have landed only after their dependency prerequisites are satisfied. Done in issue #1037; every prerequisite was met on a published version range without a peer override.
 - The full validation gate is green and remaining exceptions are recorded in [[Current State - Known Issues]].
 
 ## Related Pages

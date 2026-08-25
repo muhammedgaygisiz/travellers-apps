@@ -5,7 +5,7 @@
 
   <div class="identity-step__photo">
     <div class="profile-image-block" id="onboarding-select-image">
-      @let photoUrl = form.get('photoUrl')?.value;
+      @let photoUrl = $safeNavigationMigration(form.get('photoUrl')?.value);
       @if (shouldShowProfileImage(photoUrl)) {
         <img
           [src]="photoUrl"

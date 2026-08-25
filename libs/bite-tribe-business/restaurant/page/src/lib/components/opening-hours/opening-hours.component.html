@@ -12,7 +12,7 @@
         <tr [formGroupName]="i">
           <td class="day-cell">
             <ion-label>{{
-              'day-' + dayGroup.get('day')?.value | transloco
+              'day-' + $safeNavigationMigration(dayGroup.get('day')?.value) | transloco
             }}</ion-label>
           </td>
           <td class="open-cell">

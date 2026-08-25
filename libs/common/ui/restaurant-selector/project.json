@@ -4,18 +4,5 @@
   "sourceRoot": "libs/common/ui/restaurant-selector/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["scope:common", "type:ui", "framework:ionic"],
-  "targets": {
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "libs/common/ui/restaurant-selector/jest.config.ts",
-        "tsConfig": "libs/common/ui/restaurant-selector/tsconfig.spec.json"
-      }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["scope:common", "type:ui", "framework:ionic"]
 }

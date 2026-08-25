@@ -63,17 +63,6 @@
       "defaultConfiguration": "development",
       "continuous": true
     },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "apps/cv/jest.config.ts",
-        "tsConfig": "apps/cv/tsconfig.spec.json"
-      }
-    },
     "serve-static": {
       "executor": "@nx/web:file-server",
       "options": {

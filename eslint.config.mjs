@@ -1,4 +1,5 @@
 import nx from '@nx/eslint-plugin';
+import storybook from 'eslint-plugin-storybook';
 
 export default [
   ...nx.configs['flat/base'],
@@ -215,15 +216,12 @@ export default [
     ],
     rules: {},
   },
-  {
-    files: ['*.js', '*.jsx'],
-    extends: ['plugin:@nx/javascript'],
-    rules: {
-      'no-extra-semi': 'off',
-    },
-  },
-  {
-    files: ['*.stories.*', 'main.js'],
-    extends: ['plugin:storybook/recommended'],
-  },
+  // Storybook's own rules. `eslint-plugin-storybook` has been installed for a
+  // long time but never actually applied: the block that used to sit here was
+  // eslintrc syntax (`extends: ['plugin:storybook/recommended']`) with
+  // `files: ['*.stories.*']`, and an unprefixed glob matches only files
+  // directly in the basePath directory, never a story nested under `src`. It
+  // was removed with the rest of the eslintrc leftovers in issue #1379 and is
+  // reinstated here as flat config, whose own globs are `**/`-prefixed.
+  ...storybook.configs['flat/recommended'],
 ];

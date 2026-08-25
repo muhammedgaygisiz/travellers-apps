@@ -55,41 +55,41 @@ const verifiedRestaurant = {
   distance: '449.28',
 };
 
-export const registered: Story = {
+export const Registered: Story = {
   args: {
     bites: [...verifiedBites],
     restaurant: verifiedRestaurant,
   },
 };
 
-export const registeredWithSocialMediaLinks: Story = {
+export const RegisteredWithSocialMediaLinks: Story = {
   args: {
-    ...registered.args,
+    ...Registered.args,
     restaurant: {
-      ...registered.args?.restaurant,
+      ...Registered.args?.restaurant,
       socialMediaLinks: [
         { network: 'facebook', url: 'https://www.facebook.com' },
         { network: 'google', url: 'https://www.google.com' },
       ],
     } as unknown as Restaurant,
-    bites: [...(registered.args?.bites || [])],
+    bites: [...(Registered.args?.bites || [])],
   },
 };
 
-export const fullMaintained: Story = {
+export const FullMaintained: Story = {
   args: {
     bites: [
       {
-        ...(registered.args?.bites?.[0] || {}),
+        ...(Registered.args?.bites?.[0] || {}),
         tags: ['cocktail', 'refreshing', 'non-alcoholic'],
       },
       {
-        ...(registered.args?.bites?.[1] || {}),
+        ...(Registered.args?.bites?.[1] || {}),
         tags: ['cocktail', 'aperitif', 'summer'],
       },
     ] as Bite[],
     restaurant: {
-      ...registered.args?.restaurant,
+      ...Registered.args?.restaurant,
       description:
         'China Wok is a cozy family-run restaurant serving authentic Cantonese and Sichuan dishes. From hand-pulled noodles to dim sum, every dish is prepared fresh daily with high-quality ingredients. Perfect for a relaxed lunch or a lively dinner with friends.',
       address: {

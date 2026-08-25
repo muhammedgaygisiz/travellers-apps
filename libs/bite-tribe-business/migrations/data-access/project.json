@@ -4,18 +4,5 @@
   "sourceRoot": "libs/bite-tribe-business/migrations/data-access/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["scope:bite-tribe-business", "type:data-access"],
-  "targets": {
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "libs/bite-tribe-business/migrations/data-access/jest.config.ts",
-        "tsConfig": "libs/bite-tribe-business/migrations/data-access/tsconfig.spec.json"
-      }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["scope:bite-tribe-business", "type:data-access"]
 }

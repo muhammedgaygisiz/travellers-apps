@@ -6,17 +6,6 @@
   "prefix": "travellers-apps",
   "tags": ["type:ui", "scope:common", "framework:ionic"],
   "targets": {
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/common/ui/page"],
-      "options": {
-        "jestConfig": "libs/common/ui/page/jest.config.ts",
-        "tsConfig": "libs/common/ui/page/tsconfig.spec.json"
-      }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    },
     "stylelint": {
       "executor": "nx-stylelint:lint",
       "outputs": ["{options.outputFile}"],

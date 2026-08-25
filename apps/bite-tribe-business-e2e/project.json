@@ -16,9 +16,6 @@
         "skipInstall": true
       },
       "dependsOn": ["bite-tribe-firebase:firebase-build"]
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
     }
   }
 }

@@ -98,7 +98,7 @@ export const Default: Story = {
  * review notifies only the Bite creator visible in the layout rather than only
  * in the notification behaviour. See GitHub issue #1283.
  */
-export const withReviewThreads: Story = {
+export const WithReviewThreads: Story = {
   args: {
     ...Default.args,
     reviewThreads: [
@@ -139,7 +139,7 @@ export const withReviewThreads: Story = {
   },
 };
 
-export const withDescription: Story = {
+export const WithDescription: Story = {
   args: {
     ...Default.args,
     bite: {
@@ -155,7 +155,7 @@ export const withDescription: Story = {
  * what makes the unit selection visible: the pipe picks one unit and renders it
  * in the reader's language rather than composing `3 w 0 d ago`.
  */
-export const withOlderTimestamp: Story = {
+export const WithOlderTimestamp: Story = {
   args: {
     ...Default.args,
     bite: {
@@ -165,27 +165,27 @@ export const withOlderTimestamp: Story = {
   },
 };
 
-export const withPreferredCurrency: Story = {
+export const WithPreferredCurrency: Story = {
   args: {
-    ...withDescription.args,
+    ...WithDescription.args,
     bite: {
-      ...withDescription.args?.bite,
+      ...WithDescription.args?.bite,
       priceInPreferredCurrency: 9.6,
       priceInPreferredCurrencySymbol: 'EUR',
     } as unknown as Bite,
   },
 };
 
-export const myBite: Story = {
+export const MyBite: Story = {
   args: {
-    ...withDescription.args,
+    ...WithDescription.args,
     userId: '1',
   },
 };
 
-export const noBite: Story = {
+export const NoBite: Story = {
   args: {
-    ...withDescription.args,
+    ...WithDescription.args,
     bite: undefined,
   },
 };
@@ -195,7 +195,7 @@ export const noBite: Story = {
  * place-distance line has anything to say, so the line stays empty rather than
  * rendering the separator and a "-" for a distance that cannot be measured.
  */
-export const withoutPlaceOrDistance: Story = {
+export const WithoutPlaceOrDistance: Story = {
   args: {
     ...Default.args,
     bite: {
@@ -211,7 +211,7 @@ export const withoutPlaceOrDistance: Story = {
  * heading an empty row, which is the same call as the place-distance line above
  * it.
  */
-export const withoutTags: Story = {
+export const WithoutTags: Story = {
   args: {
     ...Default.args,
     bite: {
@@ -222,7 +222,7 @@ export const withoutTags: Story = {
 };
 
 /** A Bite whose place is known while the reader's position is not. */
-export const withoutReaderPosition: Story = {
+export const WithoutReaderPosition: Story = {
   args: {
     ...Default.args,
     position: undefined,
@@ -233,7 +233,7 @@ export const withoutReaderPosition: Story = {
  * The photo has not arrived yet. The poster is the one holding the transfer, so
  * only they are asked to keep the app open. See GitHub issue #1168.
  */
-export const pendingImageForOwner: Story = {
+export const PendingImageForOwner: Story = {
   args: {
     ...Default.args,
     userId: '1',
@@ -254,19 +254,19 @@ export const pendingImageForOwner: Story = {
 };
 
 /** The same Bite seen by anyone else, who cannot influence that upload. */
-export const pendingImageForViewer: Story = {
+export const PendingImageForViewer: Story = {
   args: {
-    ...pendingImageForOwner.args,
+    ...PendingImageForOwner.args,
     bite: {
       ...Default.args?.bite,
-      ...(pendingImageForOwner.args?.bite as Bite),
+      ...(PendingImageForOwner.args?.bite as Bite),
       userId: 'someone-else',
     },
   },
 };
 
 /** An upload that errored, or one abandoned long enough to count as failed. */
-export const failedImage: Story = {
+export const FailedImage: Story = {
   args: {
     ...Default.args,
     bite: {

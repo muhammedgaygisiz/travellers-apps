@@ -65,7 +65,7 @@ export const Empty: Story = {
   args: {},
 };
 
-export const withBucketlists: Story = {
+export const WithBucketlists: Story = {
   args: {
     bucketlists: BUCKETLISTS,
   },
@@ -89,14 +89,14 @@ const search = async (
   }
 };
 
-export const withNameFilter: Story = {
+export const WithNameFilter: Story = {
   args: {
     bucketlists: BUCKETLISTS,
   },
   play: async ({ canvasElement }) => search(canvasElement, 'Malta'),
 };
 
-export const withNameFilterWithoutMatches: Story = {
+export const WithNameFilterWithoutMatches: Story = {
   args: {
     bucketlists: BUCKETLISTS,
   },

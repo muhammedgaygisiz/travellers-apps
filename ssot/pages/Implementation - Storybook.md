@@ -23,6 +23,14 @@ Update or add stories when a change introduces:
 - Layout variants
 - Visual behavior that is hard to verify through unit tests alone
 
+## Story Exports Are PascalCase
+
+`eslint-plugin-storybook` has been installed for a long time but linted nothing: the block that enabled it was eslintrc syntax with a `files: ['*.stories.*']` glob that never matched a nested story. It was reinstated as flat config in issue #1379, and its `flat/recommended` rules now run over every `**/*.stories.*`.
+
+That surfaced 25 camelCase story exports, all renamed to PascalCase. **This rename is safe to repeat and safe to ignore in reviews of Loki output.** Storybook derives a story's display name from its export with `startCase`, and `startCase('imageLoaded')` and `startCase('ImageLoaded')` are both `Image Loaded` — so the story name, the story id, and the `.loki/reference` filename are byte-identical either way. Renaming a story export from camelCase to PascalCase never invalidates a visual reference; renaming it to a _different word_ does.
+
+`storybook/no-uninstalled-addons` is configured in `apps/storybook-host/eslint.config.mjs` rather than the root config. It resolves its `packageJsonLocation` against `process.cwd()`, and the inferred `lint` target sets that to the project root, which has no `package.json` of its own — see the basePath trap in [[Architecture - Nx Workspace]].
+
 ## Story Data Must Not Move On Its Own
 
 Every story is a committed visual reference under `.loki/reference`, so a story

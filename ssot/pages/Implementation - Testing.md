@@ -8,7 +8,7 @@ Testing should prove the changed contract with the smallest reliable command.
 
 1. Identify touched projects with `git diff --name-only`.
 2. Read the nearest `project.json` for the actual Nx project name.
-3. For narrow Jest-only library changes, prefer the direct Jest command from the owning project's `jestConfig`.
+3. For narrow Jest-only library changes, prefer the direct Jest command against the project's own `jest.config.ts` or `jest.config.cts`.
 4. Run focused Nx tests when the project graph behavior itself needs coverage or when a target has no direct equivalent.
 5. Fall back to direct Jest when Nx is silent, slow, or blocked by project graph issues.
 6. Run specialized validation for Firebase Functions, locale JSON, Storybook, or native sync when the touched files require it.
@@ -24,9 +24,18 @@ Run one Nx target at a time.
 
 If Nx starts without useful output for roughly 10 seconds, stop it and use the direct command for the touched project. Report that Nx was bypassed because of the recurring silent startup/project-graph stall.
 
+## Where The Test Target Comes From
+
+`project.json` no longer declares a Jest target. `@nx/jest/plugin` infers one `test` target per project from the `jest.config.{ts,cts}` sitting in the project root (issue #1379), and `nx.json` `targetDefaults.test` carries the shared cache inputs, `passWithNoTests`, and the `ci` configuration. Read [[Architecture - Nx Workspace]] for the inference rule and the two excluded roots.
+
+Two consequences for validation:
+
+- `nx show project <name>` is the only accurate view of a `test` target. Reading `project.json` will show you no Jest target at all.
+- The Nx target now shells out to `jest` with `cwd` set to the project root, so the direct fallback below runs the same Jest that Nx runs.
+
 ## Direct Jest Fallback
 
-Read the touched project's `project.json`, then run its Jest config directly.
+Find the touched project's `jest.config.ts` or `jest.config.cts` in its root, then run it directly.
 
 For small Angular/Ionic library edits, this direct Jest path is acceptable as the primary validation command. It preserves the project's Jest transform/setup while avoiding the recurring Nx daemon/project-graph startup stall.
 

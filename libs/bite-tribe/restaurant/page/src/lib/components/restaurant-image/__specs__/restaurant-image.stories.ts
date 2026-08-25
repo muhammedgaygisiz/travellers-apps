@@ -26,7 +26,7 @@ export default {
 
 type Story = StoryObj<RestaurantImageComponent>;
 
-export const imageLoaded: Story = {
+export const ImageLoaded: Story = {
   args: {
     restaurant: restaurantWithImage,
   },

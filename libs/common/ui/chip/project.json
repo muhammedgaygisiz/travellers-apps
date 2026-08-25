@@ -4,18 +4,5 @@
   "projectType": "library",
   "sourceRoot": "libs/common/ui/chip/src",
   "prefix": "bt",
-  "tags": ["type:ui", "scope:common", "framework:ionic"],
-  "targets": {
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/common/ui/chip"],
-      "options": {
-        "jestConfig": "libs/common/ui/chip/jest.config.ts",
-        "tsConfig": "libs/common/ui/chip/tsconfig.spec.json"
-      }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    }
-  }
+  "tags": ["type:ui", "scope:common", "framework:ionic"]
 }

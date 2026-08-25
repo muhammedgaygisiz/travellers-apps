@@ -27,7 +27,7 @@ export const Empty: Story = {
   },
 };
 
-export const withBites: Story = {
+export const WithBites: Story = {
   args: {
     ...Empty.args,
     bites: [

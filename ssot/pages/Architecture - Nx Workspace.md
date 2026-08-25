@@ -84,6 +84,23 @@ Route guards must be imported statically to build the route config. A lazily loa
 
 Before reaching for lazy routing to fix a bundle, prefer the on-demand dependency import above: it is cheaper, has no module-boundary consequences, and helps every consumer.
 
+## Target Inference Rule
+
+Some targets live in `project.json`, some are inferred by an `nx.json` plugin, and nothing in a project's files tells you which. `@nx/playwright`, `@nx/eslint`, `@nx/storybook`, `@nxext/capacitor`, and `@nx/jest` all infer targets. **Read `nx show project <name>` rather than `project.json` when you need a target's real configuration.**
+
+`test` is inferred. `@nx/jest/plugin` creates one `test` target per project that has a `jest.config.{ts,cts,js,cjs,mjs,mts}` next to a `project.json` or a workspace `package.json` (issue #1379). No `project.json` declares a Jest target, and adding a library with a Jest config is enough to give it a working `test` target.
+
+Two roots are excluded from that inference in `nx.json`:
+
+| Root                                 | Why                                                                                                                   |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `apps/bite-tribe-firebase/functions` | Owns an explicit `nx:run-commands` `test` target that runs Jest with `--runInBand` against the emulator-shaped suite. |
+| `apps/storybook-host`                | Has a Jest config and one unrun spec but has never had a `test` target. Inferring one would newly enter it into CI.   |
+
+Shared Jest task configuration lives in one place: the `test` entry of `nx.json` `targetDefaults`, filtered to `plugin: "@nx/jest/plugin"` so it applies to the inferred targets and leaves the Functions `test` target alone. That entry, not the plugin's own defaults, owns the cache inputs — including the exclusions for `*.stories.*`, `.storybook/**`, and `tsconfig.storybook.json` that keep a story edit from invalidating a test result.
+
+`useInferencePlugins` stays `false`. It gates only whether generators and `nx add` register plugins for you; it has never gated the plugins listed explicitly in `nx.json`, and this workspace registers all of them by hand on purpose.
+
 ## Validation Rule
 
 Use focused Nx targets when they are reliable. If Nx daemon or graph behavior hangs, use direct Jest/build/lint commands for the touched project and still run `git diff --check`.

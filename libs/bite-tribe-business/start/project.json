@@ -6,14 +6,6 @@
   "projectType": "library",
   "tags": ["type:feature", "scope:bite-tribe-business", "framework:ionic"],
   "targets": {
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "libs/bite-tribe-business/start/jest.config.ts",
-        "tsConfig": "libs/bite-tribe-business/start/tsconfig.spec.json"
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint"
     }

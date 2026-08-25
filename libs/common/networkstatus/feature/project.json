@@ -6,14 +6,6 @@
   "prefix": "travellers-apps",
   "tags": ["scope:common"],
   "targets": {
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "libs/common/networkstatus/feature/jest.config.ts",
-        "tsConfig": "libs/common/networkstatus/feature/tsconfig.spec.json"
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint"
     }

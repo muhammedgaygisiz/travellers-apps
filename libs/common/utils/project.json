@@ -7,14 +7,6 @@
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"
-    },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/common/utils"],
-      "options": {
-        "jestConfig": "libs/common/utils/jest.config.ts",
-        "tsConfig": "libs/common/utils/tsconfig.spec.json"
-      }
     }
   }
 }

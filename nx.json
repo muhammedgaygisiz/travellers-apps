@@ -34,26 +34,39 @@
         "{workspaceRoot}/tools/eslint-rules/**/*"
       ]
     },
-    "@nx/jest:jest": {
-      "cache": true,
-      "inputs": [
-        "default",
-        "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
-        "!{projectRoot}/.storybook/**/*",
-        "!{projectRoot}/tsconfig.storybook.json",
-        "^production",
-        "{workspaceRoot}/jest.preset.js"
-      ],
-      "options": {
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
+    "test": [
+      {
+        "filter": {
+          "plugin": "@nx/jest/plugin"
+        },
+        "cache": true,
+        "inputs": [
+          "default",
+          "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
+          "!{projectRoot}/.storybook/**/*",
+          "!{projectRoot}/tsconfig.storybook.json",
+          "^production",
+          "{workspaceRoot}/jest.preset.js",
+          {
+            "externalDependencies": [
+              "jest",
+              "@nx/jest",
+              "ts-jest",
+              "jest-preset-angular"
+            ]
+          }
+        ],
+        "options": {
+          "passWithNoTests": true
+        },
+        "configurations": {
+          "ci": {
+            "ci": true,
+            "coverage": true
+          }
         }
       }
-    },
+    ],
     "stylelint": {
       "inputs": [
         "default",
@@ -99,7 +112,17 @@
         "staticStorybookTargetName": "static-storybook"
       }
     },
-    "@nxext/capacitor/plugin"
+    "@nxext/capacitor/plugin",
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
+      },
+      "exclude": [
+        "apps/bite-tribe-firebase/functions/**/*",
+        "apps/storybook-host/**/*"
+      ]
+    }
   ],
   "pluginsConfig": {
     "@nx/js": {

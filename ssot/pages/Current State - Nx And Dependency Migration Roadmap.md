@@ -18,6 +18,7 @@ The goal is to improve project-graph reliability and keep the toolchain supporte
 - Angular 22 is not part of the initial Nx 23 migration.
 - TypeScript must follow Angular's supported range; do not upgrade to TypeScript 7 independently.
 - Capacitor, Firebase, Stylelint, Storybook, and other ecosystem upgrades should be separate batches unless an Nx migration strictly requires them.
+- Inferred-task conversion is its own track, run on a settled Nx major rather than inside one. Phases 1 and 2 deliberately deferred it; it landed on the stable Nx 23 workspace in issue #1379.
 
 ## Current Baseline
 
@@ -33,6 +34,7 @@ As of 24 August 2026:
 | Capacitor Nx plugin | `@nxext/capacitor@23.0.0`                                                                         | Loads Nx 23 (issue #1033); the nested Nx 21 generation is gone.                               |
 | Visual regression   | `loki@0.35.1` invoked directly via repository scripts; `nx-loki` removed                          | Nx adapter removed (issue #1040); Loki now runs through `loki.config.js`.                     |
 | E2E                 | Playwright consumer suite; legacy Cypress business project removed                                | Cypress removed; place all E2E coverage in Playwright.                                        |
+| Jest task wiring    | `@nx/jest/plugin` inferred `test` targets; no `@nx/jest:jest` executor anywhere (issue #1379)     | Off the Nx 24 removal path; shared config lives in `nx.json` `targetDefaults.test`.           |
 
 The installed dependency tree now contains a single Nx generation. `@nxext/capacitor@23` loads Nx 23 (issue #1033), the `nx-loki` adapter has been removed, and the previously nested `nx@21`/`@nx/devkit@21` under `@nxext/capacitor`/`@nxext/common` is gone. This closes the documented multi-generation project-graph risk.
 
@@ -333,6 +335,42 @@ Two environment observations that are not defects in the app. The Gradle build r
 
 Angular 22 deprecates `@angular/animations` in favour of `animate.enter`/`animate.leave`. The package is still a direct dependency at `22.1.3` but is imported nowhere in the workspace and is an optional peer of `@angular/platform-browser`, so removing it is adoption work rather than part of this version move.
 
+## Jest Inferred Targets
+
+Status: complete (issue #1379). The deprecated `@nx/jest:jest` executor is gone from the workspace. `@nx/jest/plugin` is registered in `nx.json` and infers one `test` target per project from its `jest.config.{ts,cts}`; 82 `project.json` files lost their Jest target and nothing replaced it in them. Nx 24 removes the executor, and this was deliberately run on the settled Nx 23 workspace rather than under the time pressure of the next major.
+
+`nx g @nx/jest:convert-to-inferred` was run and its output reviewed rather than accepted. Two things in it were rejected:
+
+- **It inlined the shared configuration into all 82 projects.** The generator copies the `targetDefaults` inputs, `passWithNoTests`, and the `ci` configuration into every `project.json` and leaves the now-dead `@nx/jest:jest` `targetDefaults` key behind — roughly 2,000 added lines and 83 places to edit the next time the input list changes. Instead the `targetDefaults` entry was re-keyed from `@nx/jest:jest` to `test` in the array form with `filter: { plugin: "@nx/jest/plugin" }`, which scopes it to the inferred targets and keeps it in one place.
+- **It pinned the plugin to an 83-entry `include` list.** That list has to be edited by hand for every new library, and a forgotten entry means a library with tests and no `test` target. It was replaced with a two-entry `exclude`, so new libraries are covered automatically.
+
+Decisions taken:
+
+| Question                                 | Decision                                                                                                                                                                                                 |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Where shared Jest task config lives      | `nx.json` `targetDefaults.test`, filtered to `@nx/jest/plugin`. Target defaults outrank an inferred target's own values, so this entry — not the plugin — owns the cache inputs.                         |
+| The story exclusions                     | Carried over verbatim. The plugin's own inputs do not exclude `*.stories.*`, `.storybook/**`, or `tsconfig.storybook.json`; losing them degrades cache correctness silently.                             |
+| `codeCoverage` in the `ci` configuration | Renamed to `coverage`. The inferred target shells out to the `jest` CLI, which has no `--codeCoverage` flag. Nothing in CI or `package.json` runs `-c ci`, so the entry stays inert.                     |
+| Jest toolchain in the cache key          | Added `externalDependencies: [jest, @nx/jest, ts-jest, jest-preset-angular]`, which the plugin computes per project. Dropping it would leave toolchain versions out of the task hash.                    |
+| `apps/bite-tribe-firebase/functions`     | Excluded. It keeps its explicit `nx:run-commands` `test` target with `--runInBand`, and the `plugin` filter keeps the new target defaults off it, so it is byte-identical to before.                     |
+| `apps/storybook-host`                    | Excluded. It has a Jest config and one never-run spec; inferring a target would newly enter it into CI, which is a separate decision from this conversion.                                               |
+| `useInferencePlugins`                    | Stays `false`. It gates only whether generators and `nx add` register plugins automatically; it has never gated the plugins listed explicitly in `nx.json`, as the four already-registered plugins show. |
+
+`NODE_MODULES_TO_IGNORE` was untouched. It lives inside each project's Jest config, not in the executor options, so the 63 configs that use it for `@ionic`, `@stencil`, `@capacitor`, and `@jsverse` are unaffected.
+
+### Jest inferred targets validation gate
+
+Validation run for issue #1379 (Node 24.13.0 locally; the repo pins 24.18.0):
+
+- `nx run-many -t test --all --skip-nx-cache` — 83 of 83 projects passed in 3m 37s, with no deprecation warning.
+- `nx run-many -t test --all` twice more — second run populated the cache, third run was 82/83 hit in 1.4s. The one miss is `functions:test`, which was never cached before this change either.
+- A story file was appended to and `nx run-many -t test --all` stayed at 82/83 hit, proving the story exclusions survived the conversion.
+- Project graph diffed before and after: the same 90 projects and the same 83 `test` targets, with identical resolved `inputs`, `cache`, and coverage `outputs` for every one.
+- `nx run bite-trail:test --coverage --coverageReporters=cobertura` produced `coverage/libs/bite-tribe-common/bite-trail/cobertura-coverage.xml`, matching what the CI `tests` job and Codecov expect.
+- `git diff --check` is clean.
+
+CI coverage and `nx affected` behavior over a real base still need a pipeline run to confirm; a local run cannot prove them.
+
 ## Separate Migration Tracks
 
 The following should not be bundled into the Nx or Angular major migrations:
@@ -443,6 +481,7 @@ The roadmap is complete when:
 - `nx-loki` is gone and direct `oblador/loki` commands own visual regression.
 - Local and CI Node.js versions are explicitly aligned.
 - Angular 22 and TypeScript 6 have landed only after their dependency prerequisites are satisfied. Done in issue #1037; every prerequisite was met on a published version range without a peer override.
+- The deprecated `@nx/jest:jest` executor is gone and Jest runs through inferred targets. Done in issue #1379, ahead of the Nx 24 removal.
 - The full validation gate is green and remaining exceptions are recorded in [[Current State - Known Issues]].
 
 ## Related Pages

@@ -61,7 +61,64 @@ For local visual inspection:
 npm run storybook
 ```
 
+## Driving A Story To Prove Behaviour
+
+A story is also the fastest way to reproduce and prove a UI defect in a real
+browser **without signing in**, which matters for flows that sit behind auth and
+for Ionic overlay lifecycle bugs that do not reproduce in jsdom at all.
+
+The `storybook` target serves on port **4400**. Navigate straight to the story's
+iframe to skip the Storybook chrome:
+
+```text
+http://localhost:4400/iframe.html?id=<story-id>&viewMode=story
+```
+
+The story id is the kebab-cased `title` plus the export name — `Components/Bite`
+and `export const Bite` give `components-bite--bite`.
+
+Storybook serves a development build, so Angular's global debug utilities are
+present and the component instance is reachable:
+
+```js
+const cmp = window.ng.getComponent(document.querySelector('bt-bite'));
+cmp.biteClick.subscribe((v) => (window.__x ??= []).push(v));
+```
+
+Subscribing to an `output()` this way turns "it looks right" into a hard
+pass/fail signal. Verified on 25 August 2026 against `components-bite--bite`:
+`window.ng` exposes `getComponent`, `ngDevMode` is live, and `getComponent`
+resolves `BiteComponent` with all six of its outputs subscribable.
+
+Note the contrast with a production bundle, where `window.ng` is **absent** — see
+[[Implementation - Android Device Testing]], where application state has to be
+reached through the DOM or the Capacitor bridge instead. Checking out the
+pre-fix files with `git checkout HEAD -- <files>` reproduces the old behaviour on
+the same story, which gives a before/after on one page.
+
+## Verifying Capacitor Plugin Behaviour On Web
+
+When a fix depends on what a Capacitor plugin actually does on web — filesystem
+paths, IndexedDB keys, exact error messages — bundle a throwaway script against
+the real plugin rather than reasoning from its source. There is no
+`fake-indexeddb` in this workspace, so a Jest run cannot exercise the web
+implementation at all.
+
+esbuild cannot resolve bare specifiers from a scratch directory outside the
+repository, and `--node-paths` and `--absolute-paths` are not real flags.
+Aliasing to the concrete `dist/esm` entry is what works:
+
+```bash
+npx esbuild scratch/main.ts --bundle --format=esm --outfile=scratch/main.js \
+  --alias:@capacitor/filesystem=$PWD/node_modules/@capacitor/filesystem/dist/esm/index.js \
+  --alias:@capacitor/core=$PWD/node_modules/@capacitor/core/dist/index.js
+```
+
+Serve the directory from a temporary entry in `.claude/launch.json`, which is
+gitignored, then remove the entry afterwards.
+
 ## Related Pages
 
+- [[Implementation - Android Device Testing]]
 - [[Implementation - Feature Patterns]]
 - [[Implementation - Testing]]

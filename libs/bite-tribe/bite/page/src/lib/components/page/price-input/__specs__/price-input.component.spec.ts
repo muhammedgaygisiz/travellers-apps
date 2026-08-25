@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
@@ -23,7 +23,6 @@ const MockTranslocoService = {
       <bt-price-input [currencyLoading]="currencyLoading" />
     </form>
   `,
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ReactiveFormsModule, PriceInputComponent],
 })
 class HostComponent {

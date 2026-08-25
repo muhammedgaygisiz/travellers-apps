@@ -285,7 +285,23 @@ One adaptation was made beyond the migration output. Two of the components `chan
 
 No production source adaptation was needed. The workspace uses none of the removed or changed APIs on either side of the upgrade: no `tapResponse` callback signature, no `data-persistence` sub-package, no `signalState` union slices (NgRx 22); and no `ChangeDetectorRef.checkNoChanges`, `ComponentFactoryResolver`, `createNgModuleRef`, `provideRoutes`, `CanMatchFn`, `TitleStrategy`, Hammer.js, JSONP, `reportProgress`, or `@angular/animations` import (Angular 22).
 
-Validation run for issue #1037 (Node 24 target; run under Node 22 in the agent sandbox, so `npm install` used `--ignore-scripts` because the `sharp` prebuilt-binary postinstall stays blocked by the egress policy, the same limitation recorded for the earlier phases): `bite-tribe`, `bite-tribe-business`, and `cv` production builds passed; `nx run-many -t test --all` passed for all 83 projects; lint passed for `bite-tribe`, `bite-tribe-business`, `cv`, `storybook-host`, `common-ui-card`, and `bite-tribe-e2e` under `angular-eslint@22` and `typescript-eslint@8.68` (only the three pre-existing `playwright/expect-expect` warnings remain); the Firebase Functions `tsc` build is clean under TypeScript 6; the Storybook host build passed on `@storybook/angular@10.5.10`; and `git diff --check` is clean. Serial Playwright E2E against the Firebase emulators, direct Loki visual regression, Capacitor sync, and the Android/iOS device builds and launch-critical device checks remain deferred to CI/device runs because they need emulators, reference images, the `sharp` prebuilt binary, and the native toolchains, consistent with every earlier phase.
+Validation run for issue #1037 (Node 24 target; run under Node 22 in the agent sandbox, so `npm install` used `--ignore-scripts` because the `sharp` prebuilt-binary postinstall stays blocked by the egress policy, the same limitation recorded for the earlier phases): `bite-tribe`, `bite-tribe-business`, and `cv` production builds passed; `nx run-many -t test --all` passed for all 83 projects; lint passed for `bite-tribe`, `bite-tribe-business`, `cv`, `storybook-host`, `common-ui-card`, and `bite-tribe-e2e` under `angular-eslint@22` and `typescript-eslint@8.68` (only the three pre-existing `playwright/expect-expect` warnings remain); the Firebase Functions `tsc` build is clean under TypeScript 6; the Storybook host build passed on `@storybook/angular@10.5.10`; and `git diff --check` is clean.
+
+The three gates the sandbox could not run were then executed by CI rather than deferred. [Run 2809](https://github.com/muhammedgaygisiz/travellers-apps/actions/runs/32866446626) on commit `a6761fc` is green end to end, and its jobs cover most of the Phase 4 gate directly:
+
+| Gate | CI job | Result |
+| ---- | ------ | ------ |
+| Full production builds for every Angular application | `bite-tribe-build`, `bite-tribe-business-build` | pass |
+| All focused and affected Jest suites | `tests` (with Codecov coverage) | pass |
+| Storybook build and direct Loki visual regression | `loki` — full suite through the upstream CLI against the committed `.loki/reference` images, headless Chrome in Docker, 4m 31s, blocking | pass |
+| Serial Playwright E2E against Firebase emulators | `e2e` (6m 43s) and `business-e2e` | pass |
+| Lint and Stylelint across the workspace | `lint`, `stylelint` | pass |
+
+So Loki visual regression and both Playwright E2E suites did run for this phase, against real emulators and committed reference images, and neither reported a difference. This is the first phase of the epic where those two gates were actually executed rather than carried forward.
+
+What remains genuinely unexecuted is the native half only: Capacitor sync, the Android and iOS builds, and the launch-critical device checks from [[Current State - Release State]]. CI has no native job, and the Playwright suites drive headless Chromium rather than a WKWebView or an Android WebView.
+
+That residue is not evenly distributed across the diff. Angular 22 makes root `HttpBackend` resolve to `FetchBackend`, and neither application calls `provideHttpClient()`, so both Transloco loaders moved from `XMLHttpRequest` to `fetch()` (see issue #1375). The Chromium E2E run proves that path in a browser. It does not prove it inside a Capacitor WebView, where the loader reads `/assets/i18n/<lang>.json` off the local bundle scheme rather than over the network. Every visible string in both apps, in all 11 locales, depends on it.
 
 Angular 22 deprecates `@angular/animations` in favour of `animate.enter`/`animate.leave`. The package is still a direct dependency at `22.1.3` but is imported nowhere in the workspace and is an optional peer of `@angular/platform-browser`, so removing it is adoption work rather than part of this version move.
 

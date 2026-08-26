@@ -15,7 +15,10 @@ describe(MenuDataAccessService.name, () => {
     bite$: Observable<unknown>;
     restaurant$: Observable<unknown>;
     menu$: Observable<unknown>;
+    isMenuLoading$: Observable<boolean>;
+    isMenuUnavailable$: Observable<boolean>;
     cacheBite: jest.Mock;
+    retryMenuLoad: jest.Mock;
   };
 
   beforeEach(() => {
@@ -24,7 +27,10 @@ describe(MenuDataAccessService.name, () => {
       bite$: of(),
       restaurant$: of(),
       menu$: of(),
+      isMenuLoading$: of(true),
+      isMenuUnavailable$: of(false),
       cacheBite: jest.fn(),
+      retryMenuLoad: jest.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -49,6 +55,14 @@ describe(MenuDataAccessService.name, () => {
       service.saveMenu(menu);
 
       expect(apiMock.saveMenu).toHaveBeenCalledWith(menu);
+    });
+  });
+
+  describe('retryMenuLoad', () => {
+    it('should ask the store for the menu again', () => {
+      service.retryMenuLoad();
+
+      expect(storeMock.retryMenuLoad).toHaveBeenCalled();
     });
   });
 

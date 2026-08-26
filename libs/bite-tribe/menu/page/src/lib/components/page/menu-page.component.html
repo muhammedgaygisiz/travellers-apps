@@ -1,23 +1,96 @@
+@let loading = isMenuLoading(); @let imageSource = imageSrc();
+
 <ta-page
   [chrome]="{
     enableBackButton: true,
     showHeaderMenu: false,
     showFooter: false,
   }"
+  [loading]="loading"
 >
   <ion-content>
-    <ion-img
-      [src]="restaurant()?.imagePath || restaurant()?.image"
-      class="place-image"
-    />
-
-    <div class="ion-padding">
-      <h1>{{ placeName() }}</h1>
-
-      <bt-menu
-        [menu]="menu()"
-        (createBiteClick)="createBiteClick.emit($event)"
+    @if (loading) {
+      <!-- The header image is a skeleton rather than an empty box, so nothing
+      reserves 300px for a photo that has no source yet. See issue #1382. -->
+      <ion-skeleton-text
+        [animated]="true"
+        class="place-image-skeleton"
+        data-testid="menu-loading-skeleton"
       />
-    </div>
+
+      <div class="ion-padding">
+        <ion-skeleton-text [animated]="true" class="title-skeleton" />
+
+        <div class="category-skeleton">
+          <ion-skeleton-text
+            [animated]="true"
+            class="category-title-skeleton"
+          />
+          <ion-skeleton-text [animated]="true" class="menu-item-skeleton" />
+          <ion-skeleton-text [animated]="true" class="menu-item-skeleton" />
+        </div>
+
+        <div class="category-skeleton">
+          <ion-skeleton-text
+            [animated]="true"
+            class="category-title-skeleton"
+          />
+          <ion-skeleton-text [animated]="true" class="menu-item-skeleton" />
+          <ion-skeleton-text [animated]="true" class="menu-item-skeleton" />
+        </div>
+      </div>
+    } @else if (isMenuUnavailable()) {
+      <!-- A menu that could not be read is not a restaurant without a menu: the
+      empty state below would claim the restaurant has none. Stated in the page
+      rather than in an alert, so the answer survives a dismissed overlay and
+      the state is reachable in Storybook. See issue #1382. -->
+      <div class="ion-padding">
+        <!-- Reached directly, the failure has no Restaurant to name: the menu
+        route reuses the one the Restaurant page put in the store, so an empty
+        heading is left out rather than rendered blank. -->
+        @if (placeName()) {
+          <h1>{{ placeName() }}</h1>
+        }
+
+        <ion-card>
+          <ion-card-content>
+            <ion-text color="warning" data-testid="menu-error-message">
+              {{ 'this-menu-could-not-be-loaded-right-now' | transloco }}
+            </ion-text>
+          </ion-card-content>
+
+          <div class="menu-error-actions">
+            <ion-button
+              fill="clear"
+              data-testid="menu-error-go-back"
+              (click)="goBack.emit()"
+            >
+              {{ 'go-back' | transloco }}
+            </ion-button>
+
+            <ion-button
+              fill="clear"
+              data-testid="menu-error-retry"
+              (click)="retryLoad.emit()"
+            >
+              {{ 'try-again' | transloco }}
+            </ion-button>
+          </div>
+        </ion-card>
+      </div>
+    } @else {
+      @if (imageSource) {
+        <ion-img [src]="imageSource" class="place-image" />
+      }
+
+      <div class="ion-padding">
+        <h1>{{ placeName() }}</h1>
+
+        <bt-menu
+          [menu]="menu()"
+          (createBiteClick)="createBiteClick.emit($event)"
+        />
+      </div>
+    }
   </ion-content>
 </ta-page>

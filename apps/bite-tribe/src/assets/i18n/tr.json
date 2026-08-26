@@ -503,6 +503,7 @@
   "go-back": "Geri dön",
   "bite-could-not-be-loaded": "Bite yüklenemedi",
   "this-bite-could-not-be-loaded-right-now": "Bu Bite yüklenirken bir sorun oluştu. Bağlantını kontrol edip tekrar dene.",
+  "this-menu-could-not-be-loaded-right-now": "Bu menü yüklenirken bir sorun oluştu. Bağlantını kontrol edip tekrar dene.",
   "try-again": "Tekrar dene",
   "reply": "Yanıtla",
   "reply-to": "{{name}} kişisine yanıt",

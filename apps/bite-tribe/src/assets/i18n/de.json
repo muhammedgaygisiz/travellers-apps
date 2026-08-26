@@ -503,6 +503,7 @@
   "go-back": "Zurück",
   "bite-could-not-be-loaded": "Bite konnte nicht geladen werden",
   "this-bite-could-not-be-loaded-right-now": "Beim Laden dieses Bites ist etwas schiefgelaufen. Prüfe deine Verbindung und versuche es erneut.",
+  "this-menu-could-not-be-loaded-right-now": "Beim Laden dieser Speisekarte ist etwas schiefgelaufen. Prüfe deine Verbindung und versuche es erneut.",
   "try-again": "Erneut versuchen",
   "reply": "Antworten",
   "reply-to": "Antwort an {{name}}",

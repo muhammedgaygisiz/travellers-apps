@@ -503,6 +503,7 @@
   "go-back": "Voltar",
   "bite-could-not-be-loaded": "Não foi possível carregar o Bite",
   "this-bite-could-not-be-loaded-right-now": "Ocorreu um problema ao carregar este Bite. Verifica a tua ligação e tenta novamente.",
+  "this-menu-could-not-be-loaded-right-now": "Ocorreu um problema ao carregar este menu. Verifica a tua ligação e tenta novamente.",
   "try-again": "Tentar novamente",
   "reply": "Responder",
   "reply-to": "Responder a {{name}}",

@@ -503,6 +503,7 @@
   "go-back": "رجوع",
   "bite-could-not-be-loaded": "تعذّر تحميل الـ Bite",
   "this-bite-could-not-be-loaded-right-now": "حدث خطأ أثناء تحميل هذا الـ Bite. تحقّق من اتصالك وحاول مرة أخرى.",
+  "this-menu-could-not-be-loaded-right-now": "حدث خطأ أثناء تحميل هذه القائمة. تحقّق من اتصالك وحاول مرة أخرى.",
   "try-again": "حاول مرة أخرى",
   "reply": "رد",
   "reply-to": "رد على {{name}}",

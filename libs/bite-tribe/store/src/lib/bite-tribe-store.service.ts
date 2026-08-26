@@ -23,7 +23,8 @@ import {
   restaurants,
   restaurantToCreate,
 } from './restaurants/selectors';
-import { menu } from './menus/selectors';
+import { isMenuLoading, isMenuUnavailable, menu } from './menus/selectors';
+import { MenuActions } from './menus/actions';
 import { AppActions } from './app/actions';
 import { reviewThreads, reviews } from './reviews/selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -130,6 +131,8 @@ export class BiteTribeStoreService implements StoreService {
   restaurant$ = this.store.select(restaurant);
   restaurants$ = this.store.select(restaurants);
   menu$ = this.store.select(menu);
+  isMenuLoading$ = this.store.select(isMenuLoading);
+  isMenuUnavailable$ = this.store.select(isMenuUnavailable);
   reviews$ = this.store.select(reviews);
   reviewThreads$ = this.store.select(reviewThreads);
   bucketlists$ = this.store.select(bucketlists);
@@ -199,6 +202,15 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(
       fromAuth.AuthActions.registerWithEmail({ registration }),
     );
+  }
+
+  /**
+   * Reads the menu on screen again after a failed read. The id comes from the
+   * route inside the store, so the page asks for "this menu" without having to
+   * know which one it is. See GitHub issue #1382.
+   */
+  retryMenuLoad(): void {
+    this.store.dispatch(MenuActions.retryMenuLoad());
   }
 
   saveNewRestaurant(entity: Restaurant): void {

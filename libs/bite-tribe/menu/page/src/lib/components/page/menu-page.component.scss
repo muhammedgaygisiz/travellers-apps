@@ -4,4 +4,36 @@
     object-fit: cover;
     width: 100%;
   }
+
+  .place-image-skeleton {
+    border-radius: 0;
+    height: 300px;
+    margin: 0;
+    width: 100%;
+  }
+
+  .title-skeleton {
+    height: 32px;
+    width: 172px;
+  }
+
+  .category-skeleton {
+    margin-top: 32px;
+  }
+
+  .category-title-skeleton {
+    height: 24px;
+    width: 128px;
+  }
+
+  .menu-item-skeleton {
+    height: 56px;
+    margin-top: 12px;
+    width: 100%;
+  }
+
+  .menu-error-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
 }

@@ -503,6 +503,7 @@
   "go-back": "Kembali",
   "bite-could-not-be-loaded": "Bite tidak dapat dimuat",
   "this-bite-could-not-be-loaded-right-now": "Terjadi kesalahan saat memuat Bite ini. Periksa koneksimu dan coba lagi.",
+  "this-menu-could-not-be-loaded-right-now": "Terjadi kesalahan saat memuat menu ini. Periksa koneksimu dan coba lagi.",
   "try-again": "Coba lagi",
   "reply": "Balas",
   "reply-to": "Balas ke {{name}}",

@@ -10,7 +10,11 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [bite]="service.bite()"
       [restaurant]="service.restaurant()"
       [menu]="service.menu()"
+      [isMenuLoading]="service.isMenuLoading()"
+      [isMenuUnavailable]="service.isMenuUnavailable()"
       (createBiteClick)="service.prepareBiteFromMenuItem($event)"
+      (goBack)="service.goBack()"
+      (retryLoad)="service.retryMenuLoad()"
     />
   `,
   imports: [MenuPage],

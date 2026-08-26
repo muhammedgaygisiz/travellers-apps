@@ -503,6 +503,7 @@
   "go-back": "ተመለስ",
   "bite-could-not-be-loaded": "Bite መጫን አልተቻለም",
   "this-bite-could-not-be-loaded-right-now": "ይህን Bite በመጫን ላይ ችግር ተከስቷል። ግንኙነትዎን አረጋግጠው እንደገና ይሞክሩ።",
+  "this-menu-could-not-be-loaded-right-now": "ይህን ሜኑ በመጫን ላይ ችግር ተከስቷል። ግንኙነትዎን አረጋግጠው እንደገና ይሞክሩ።",
   "try-again": "እንደገና ይሞክሩ",
   "reply": "መልስ",
   "reply-to": "ለ{{name}} መልስ",

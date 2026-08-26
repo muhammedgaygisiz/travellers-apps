@@ -6,8 +6,8 @@ import {
 } from '@ionic/angular/standalone';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { addNecessaryIcons } from 'utils';
-import { of } from 'rxjs';
-import type { Menu, Restaurant } from 'model';
+import { of, throwError } from 'rxjs';
+import type { Bite, Menu, Restaurant } from 'model';
 import { MenuPage } from '../menu-page.component';
 import { MenuComponent } from '../../menu/menu.component';
 
@@ -225,6 +225,46 @@ describe(MenuPage.name, () => {
       expect(presented.present).toHaveBeenCalled();
     });
 
+    it('should say nothing more once the read has recovered mid-report', async () => {
+      // The dropped failure is only worth answering while the page is still on
+      // it. A read that came back in the meantime has nothing left to report.
+      let finishDismiss!: () => void;
+      const abandoned = {
+        present: jest.fn(),
+        dismiss: jest.fn(
+          () =>
+            new Promise<boolean>((resolve) => {
+              finishDismiss = (): void => resolve(true);
+            }),
+        ),
+      };
+      const second = alertStub();
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementationOnce(async () => abandoned as never)
+        .mockImplementation(async () => second as never);
+
+      componentRef.setInput('isMenuUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+
+      componentRef.setInput('isMenuUnavailable', false);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      componentRef.setInput('isMenuUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      // The menu arrives after all, before the abandoned report finishes.
+      componentRef.setInput('isMenuUnavailable', false);
+      componentRef.changeDetectorRef.detectChanges();
+
+      finishDismiss();
+      await settle();
+
+      expect(second.present).not.toHaveBeenCalled();
+    });
+
     it('should take its alert down with the page', async () => {
       const alert = alertStub();
       jest
@@ -245,6 +285,40 @@ describe(MenuPage.name, () => {
     });
   });
 
+  describe('given a language that is still loading', () => {
+    it('should still report the failure when the language cannot be loaded', async () => {
+      // Transloco falls back on its own, and a page that has given up has to
+      // say so either way. See GitHub issue #1382.
+      MockTranslocoService.load.mockReturnValueOnce(
+        throwError(() => new Error('offline')),
+      );
+      const alert = alertStub();
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async () => alert as never);
+
+      componentRef.setInput('isMenuUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      expect(alert.present).toHaveBeenCalled();
+    });
+
+    it('should fall back to English when no language is active yet', () => {
+      MockTranslocoService.getActiveLang.mockReturnValueOnce(
+        undefined as unknown as string,
+      );
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async () => alertStub() as never);
+
+      componentRef.setInput('isMenuUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(MockTranslocoService.load).toHaveBeenCalledWith('en');
+    });
+  });
+
   describe('given a loaded menu with no items', () => {
     beforeEach(() => {
       componentRef.setInput('menu', MENU);
@@ -258,6 +332,47 @@ describe(MenuPage.name, () => {
 
     it('should show the restaurant photo', () => {
       expect(query('ion-img')).toBeTruthy();
+    });
+  });
+
+  describe('given the place it is a menu for', () => {
+    it('should name the Restaurant it belongs to', () => {
+      expect(fixture.componentInstance.placeName()).toBe('China Wok');
+    });
+
+    it('should fall back to the place the Bite records', () => {
+      // A menu reached from a Bite of an unverified Restaurant has no
+      // Restaurant document to take a name from.
+      componentRef.setInput('restaurant', undefined);
+      componentRef.setInput('bite', { place: 'Curry Corner' } as Bite);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.placeName()).toBe('Curry Corner');
+    });
+
+    it('should name nothing when neither the Restaurant nor a Bite is known', () => {
+      // Reached directly, the menu route has neither in the store yet, so the
+      // heading is left out rather than rendered blank.
+      componentRef.setInput('restaurant', undefined);
+      componentRef.setInput('bite', undefined);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.placeName()).toBeUndefined();
+    });
+
+    it('should prefer the stored photo path over the inline image', () => {
+      // A saved Restaurant carries a storage path; only a Bite-derived one
+      // still carries the image inline.
+      componentRef.setInput('restaurant', {
+        name: 'China Wok',
+        image: 'inline.jpg',
+        imagePath: 'restaurants/china-wok.jpg',
+      } as Restaurant);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.imageSrc()).toBe(
+        'restaurants/china-wok.jpg',
+      );
     });
   });
 

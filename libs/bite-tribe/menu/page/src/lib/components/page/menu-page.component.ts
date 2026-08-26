@@ -124,10 +124,6 @@ export class MenuPage {
         return;
       }
 
-      if (this.reportedFailure) {
-        return;
-      }
-
       this.reportedFailure = true;
 
       void this.reportLoadFailure();

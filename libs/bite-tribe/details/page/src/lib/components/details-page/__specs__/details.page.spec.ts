@@ -14,7 +14,7 @@ import { addNecessaryIcons } from 'utils';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { Platform } from '@ionic/angular';
 import type { Bite, PublicUser } from 'model';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 import { TranslocoPipe } from '@jsverse/transloco';
 
@@ -324,6 +324,58 @@ describe('DetailsPage', () => {
 
       const buttons = create.mock.calls[1][0]?.buttons as unknown[];
       expect(buttons).toHaveLength(1);
+    });
+
+    it('keeps its answer when the other branch flips under it', async () => {
+      // Both inputs feed one decision, and a deleted Bite outranks a failed
+      // read. A late `biteUnavailable` therefore re-runs the effect without
+      // changing what the page is reporting, and must not create a second
+      // alert over the one on screen.
+      const create = jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async () => alertStub() as never);
+
+      componentRef.setInput('biteNotFound', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      expect(create).toHaveBeenCalledTimes(1);
+    });
+
+    it('still reports the failure when the language cannot be loaded', async () => {
+      // Transloco falls back on its own, and a page that has given up has to
+      // say so either way.
+      MockTranslocoService.load.mockReturnValueOnce(
+        throwError(() => new Error('offline')),
+      );
+      const alert = alertStub();
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async () => alert as never);
+
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      expect(alert.present).toHaveBeenCalled();
+    });
+
+    it('falls back to English when no language is active yet', () => {
+      MockTranslocoService.getActiveLang.mockReturnValueOnce(
+        undefined as unknown as string,
+      );
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async () => alertStub() as never);
+
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(MockTranslocoService.load).toHaveBeenCalledWith('en');
     });
 
     it('takes the alert down with the page it belongs to', async () => {

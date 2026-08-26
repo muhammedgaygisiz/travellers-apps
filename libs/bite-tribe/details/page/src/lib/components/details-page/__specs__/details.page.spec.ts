@@ -14,7 +14,7 @@ import { addNecessaryIcons } from 'utils';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { Platform } from '@ionic/angular';
 import type { Bite, PublicUser } from 'model';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 import { TranslocoPipe } from '@jsverse/transloco';
 
@@ -41,11 +41,21 @@ addNecessaryIcons();
 
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
+  getActiveLang: jest.fn((): string => 'en'),
+  load: jest.fn(() => of({})),
   config: {
     reRenderOnLangChange: jest.fn(),
   },
   langChanges$: of(),
 };
+
+/**
+ * Lets a failure report run to completion. Reporting waits for the active
+ * language before it writes the alert, so a single microtask tick is not enough
+ * to reach the presented overlay.
+ */
+const settle = (): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, 0));
 
 // Properly mock the AppLauncher module
 jest.mock('@capacitor/app-launcher', () => ({
@@ -151,7 +161,7 @@ describe('DetailsPage', () => {
 
       componentRef.setInput('biteNotFound', true);
       componentRef.changeDetectorRef.detectChanges();
-      await Promise.resolve();
+      await settle();
 
       expect(present).toHaveBeenCalled();
       expect(created?.backdropDismiss).toBe(false);
@@ -179,7 +189,7 @@ describe('DetailsPage', () => {
 
       componentRef.setInput('biteUnavailable', true);
       componentRef.changeDetectorRef.detectChanges();
-      await Promise.resolve();
+      await settle();
 
       expect(present).toHaveBeenCalled();
       expect(created?.backdropDismiss).toBe(false);
@@ -204,15 +214,15 @@ describe('DetailsPage', () => {
 
       componentRef.setInput('biteUnavailable', true);
       componentRef.changeDetectorRef.detectChanges();
-      await Promise.resolve();
+      await settle();
 
       // The retry puts the read back in flight before it fails again.
       componentRef.setInput('biteUnavailable', false);
       componentRef.changeDetectorRef.detectChanges();
-      await Promise.resolve();
+      await settle();
       componentRef.setInput('biteUnavailable', true);
       componentRef.changeDetectorRef.detectChanges();
-      await Promise.resolve();
+      await settle();
 
       expect(create).toHaveBeenCalledTimes(2);
     });
@@ -224,11 +234,148 @@ describe('DetailsPage', () => {
 
       componentRef.setInput('biteNotFound', true);
       componentRef.changeDetectorRef.detectChanges();
-      await Promise.resolve();
+      await settle();
       componentRef.changeDetectorRef.detectChanges();
-      await Promise.resolve();
+      await settle();
 
       expect(create).toHaveBeenCalledTimes(1);
+    });
+
+    it('still reaches the screen when the read fails again mid-report', async () => {
+      // A cold start onto a Bite - a tapped notification, a shared link - reads
+      // twice, so the page can give up, recover and give up again while one
+      // report is still running. The second failure used to find the
+      // single-flight guard closed, and the page then said nothing at all,
+      // which is the silence issue #1232 was raised to end.
+      let finishDismiss!: () => void;
+      const abandoned = {
+        present: jest.fn(),
+        dismiss: jest.fn(
+          () =>
+            new Promise<boolean>((resolve) => {
+              finishDismiss = (): void => resolve(true);
+            }),
+        ),
+      };
+      const presented = alertStub();
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementationOnce(async () => abandoned as never)
+        .mockImplementation(async () => presented as never);
+
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+
+      // The read is in flight again before the first report has an alert to
+      // show, so that report is abandoned while it takes its alert down.
+      componentRef.setInput('biteUnavailable', false);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      expect(abandoned.dismiss).toHaveBeenCalled();
+
+      // It fails again while that teardown is still running.
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      finishDismiss();
+      await settle();
+
+      expect(presented.present).toHaveBeenCalled();
+    });
+
+    it('reports the branch the read settled on, not the one it dropped', async () => {
+      // The dropped report named the branch it was raised for. A retry can
+      // settle on the other one, so what finally reaches the screen has to be
+      // the failure the page is on now.
+      let finishDismiss!: () => void;
+      const abandoned = {
+        present: jest.fn(),
+        dismiss: jest.fn(
+          () =>
+            new Promise<boolean>((resolve) => {
+              finishDismiss = (): void => resolve(true);
+            }),
+        ),
+      };
+      const presented = alertStub();
+      const create = jest
+        .spyOn(alertController, 'create')
+        .mockImplementationOnce(async () => abandoned as never)
+        .mockImplementation(async () => presented as never);
+
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+
+      componentRef.setInput('biteUnavailable', false);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      // This time the read comes back saying the Bite is gone for good.
+      componentRef.setInput('biteNotFound', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      finishDismiss();
+      await settle();
+
+      expect(presented.present).toHaveBeenCalled();
+
+      const buttons = create.mock.calls[1][0]?.buttons as unknown[];
+      expect(buttons).toHaveLength(1);
+    });
+
+    it('keeps its answer when the other branch flips under it', async () => {
+      // Both inputs feed one decision, and a deleted Bite outranks a failed
+      // read. A late `biteUnavailable` therefore re-runs the effect without
+      // changing what the page is reporting, and must not create a second
+      // alert over the one on screen.
+      const create = jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async () => alertStub() as never);
+
+      componentRef.setInput('biteNotFound', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      expect(create).toHaveBeenCalledTimes(1);
+    });
+
+    it('still reports the failure when the language cannot be loaded', async () => {
+      // Transloco falls back on its own, and a page that has given up has to
+      // say so either way.
+      MockTranslocoService.load.mockReturnValueOnce(
+        throwError(() => new Error('offline')),
+      );
+      const alert = alertStub();
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async () => alert as never);
+
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+      await settle();
+
+      expect(alert.present).toHaveBeenCalled();
+    });
+
+    it('falls back to English when no language is active yet', () => {
+      MockTranslocoService.getActiveLang.mockReturnValueOnce(
+        undefined as unknown as string,
+      );
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async () => alertStub() as never);
+
+      componentRef.setInput('biteUnavailable', true);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(MockTranslocoService.load).toHaveBeenCalledWith('en');
     });
 
     it('takes the alert down with the page it belongs to', async () => {
@@ -242,11 +389,11 @@ describe('DetailsPage', () => {
 
       componentRef.setInput('biteNotFound', true);
       componentRef.changeDetectorRef.detectChanges();
-      await Promise.resolve();
+      await settle();
       expect(alert.present).toHaveBeenCalled();
 
       fixture.destroy();
-      await Promise.resolve();
+      await settle();
 
       expect(alert.dismiss).toHaveBeenCalled();
     });
@@ -265,12 +412,12 @@ describe('DetailsPage', () => {
 
       componentRef.setInput('biteNotFound', true);
       componentRef.changeDetectorRef.detectChanges();
-      await Promise.resolve();
+      await settle();
 
       fixture.destroy();
       releaseCreate();
-      await Promise.resolve();
-      await Promise.resolve();
+      await settle();
+      await settle();
 
       expect(alert.present).not.toHaveBeenCalled();
       expect(alert.dismiss).toHaveBeenCalled();
@@ -292,7 +439,7 @@ describe('DetailsPage', () => {
 
       componentRef.setInput('biteNotFound', true);
       componentRef.changeDetectorRef.detectChanges();
-      await Promise.resolve();
+      await settle();
 
       // The inputs settle and the failure re-reads, all before the first alert
       // exists.
@@ -300,11 +447,11 @@ describe('DetailsPage', () => {
       componentRef.changeDetectorRef.detectChanges();
       componentRef.setInput('biteNotFound', true);
       componentRef.changeDetectorRef.detectChanges();
-      await Promise.resolve();
+      await settle();
 
       releaseCreate();
-      await Promise.resolve();
-      await Promise.resolve();
+      await settle();
+      await settle();
 
       expect(create).toHaveBeenCalledTimes(1);
       expect(alert.present).toHaveBeenCalledTimes(1);

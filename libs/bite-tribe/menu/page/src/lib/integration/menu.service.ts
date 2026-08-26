@@ -13,10 +13,26 @@ export class MenuService {
   bite = this.dataAccess.bite;
   restaurant = this.dataAccess.restaurant;
   menu = this.dataAccess.menu;
+  isMenuLoading = this.dataAccess.isMenuLoading;
+  isMenuUnavailable = this.dataAccess.isMenuUnavailable;
 
   saveMenu(menu: Menu): void {
     this.dataAccess.saveMenu(menu);
 
+    this.navController.back();
+  }
+
+  /**
+   * Reads the menu again after a failed read, which is worth offering because a
+   * failure says nothing about the menu itself - a timeout or an offline device
+   * leaves it perfectly intact. See GitHub issue #1382.
+   */
+  retryMenuLoad(): void {
+    this.dataAccess.retryMenuLoad();
+  }
+
+  /** Leaves a menu that cannot be shown, rather than stranding the user on it. */
+  goBack(): void {
     this.navController.back();
   }
 

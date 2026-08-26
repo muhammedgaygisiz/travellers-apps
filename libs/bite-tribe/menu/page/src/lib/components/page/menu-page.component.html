@@ -1,23 +1,85 @@
+@let menuData = menu(); @let imageSource = imageSrc();
+
 <ta-page
   [chrome]="{
     enableBackButton: true,
     showHeaderMenu: false,
     showFooter: false,
   }"
+  [loading]="isMenuLoading()"
 >
   <ion-content>
-    <ion-img
-      [src]="restaurant()?.imagePath || restaurant()?.image"
-      class="place-image"
-    />
+    @if (menuData) {
+      <!-- The photo is left out entirely when there is none, rather than
+      reserving 300px for an image with no source. See issue #1382. -->
+      @if (imageSource) {
+        <ion-img [src]="imageSource" class="place-image" />
+      }
 
-    <div class="ion-padding">
-      <h1>{{ placeName() }}</h1>
+      <div class="ion-padding">
+        <h1>{{ placeName() }}</h1>
 
-      <bt-menu
-        [menu]="menu()"
-        (createBiteClick)="createBiteClick.emit($event)"
+        <bt-menu
+          [menu]="menuData"
+          (createBiteClick)="createBiteClick.emit($event)"
+        />
+      </div>
+    } @else {
+      <!-- No menu to show yet, so the page traces its own shape: the header
+      photo, the place name, and the categories with their items. A menu that
+      could not be resolved keeps these and explains itself in an alert, the way
+      the Bite details page answers a failed read. The empty state inside
+      `bt-menu` is reserved for a menu that loaded and really has no items. -->
+      <ion-skeleton-text
+        [animated]="true"
+        class="place-image-skeleton"
+        data-testid="menu-loading-skeleton"
       />
-    </div>
+
+      <div class="ion-padding">
+        <ion-skeleton-text [animated]="true" class="title-skeleton" />
+
+        <div class="menu-container-skeleton">
+          @for (category of skeletonCategories; track category) {
+            <div class="menu-category-skeleton">
+              <ion-skeleton-text
+                [animated]="true"
+                class="category-title-skeleton"
+              />
+              <ion-skeleton-text
+                [animated]="true"
+                class="category-subtitle-skeleton"
+              />
+
+              @for (item of skeletonItems; track item) {
+                <div class="menu-item-skeleton">
+                  <div class="item-details-skeleton">
+                    <ion-skeleton-text
+                      [animated]="true"
+                      class="item-name-skeleton"
+                    />
+                    <ion-skeleton-text
+                      [animated]="true"
+                      class="item-description-skeleton"
+                    />
+                  </div>
+
+                  <div class="price-actions-skeleton">
+                    <ion-skeleton-text
+                      [animated]="true"
+                      class="item-price-skeleton"
+                    />
+                    <ion-skeleton-text
+                      [animated]="true"
+                      class="item-action-skeleton"
+                    />
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
   </ion-content>
 </ta-page>

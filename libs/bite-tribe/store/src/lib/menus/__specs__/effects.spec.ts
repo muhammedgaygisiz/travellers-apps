@@ -1,5 +1,5 @@
 import { TestScheduler } from 'rxjs/testing';
-import { Observable, of } from 'rxjs';
+import { NEVER, Observable, of, throwError } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
@@ -66,8 +66,8 @@ describe(MenuEffects.name, () => {
     jest.resetAllMocks();
   });
 
-  describe('loadMenuFromApi$', () => {
-    it('should load the menu the route identifies', () => {
+  describe('startMenuLoad$', () => {
+    it('should ask for the menu the route identifies', () => {
       navigateTo({ menuId: 'menu-1' });
 
       scheduler.run(({ cold, expectObservable }) => {
@@ -75,12 +75,10 @@ describe(MenuEffects.name, () => {
           a: navigationTo('/bite/bite-1/restaurant/restaurant-1/menu/menu-1'),
         });
 
-        expectObservable(effects.loadMenuFromApi$).toBe('a', {
-          a: MenuActions.loadedMenuFromAPI({ menu: MENU }),
+        expectObservable(effects.startMenuLoad$).toBe('a', {
+          a: MenuActions.loadMenu({ menuId: 'menu-1' }),
         });
       });
-
-      expect(BiteTribeApiServiceMock.loadMenu).toHaveBeenCalledWith('menu-1');
     });
 
     it('should ignore a route that identifies no menu', () => {
@@ -93,23 +91,82 @@ describe(MenuEffects.name, () => {
           a: navigationTo('/bite/bite-1/restaurant/the-menu-house'),
         });
 
-        expectObservable(effects.loadMenuFromApi$).toBe('');
+        expectObservable(effects.startMenuLoad$).toBe('');
+      });
+    });
+  });
+
+  describe('retryMenuLoad$', () => {
+    it('should ask for the menu on screen again', () => {
+      navigateTo({ menuId: 'menu-1' });
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', { a: MenuActions.retryMenuLoad() });
+
+        expectObservable(effects.retryMenuLoad$).toBe('a', {
+          a: MenuActions.loadMenu({ menuId: 'menu-1' }),
+        });
+      });
+    });
+  });
+
+  describe('loadMenuFromApi$', () => {
+    it('should load the requested menu', () => {
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: MenuActions.loadMenu({ menuId: 'menu-1' }),
+        });
+
+        expectObservable(effects.loadMenuFromApi$).toBe('a', {
+          a: MenuActions.loadedMenuFromAPI({ menu: MENU }),
+        });
       });
 
-      expect(BiteTribeApiServiceMock.loadMenu).not.toHaveBeenCalled();
+      expect(BiteTribeApiServiceMock.loadMenu).toHaveBeenCalledWith('menu-1');
     });
 
     it('should report an id that resolves to no menu', () => {
       BiteTribeApiServiceMock.loadMenu.mockReturnValue(of(undefined));
-      navigateTo({ menuId: 'menu-1' });
 
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: navigationTo('/bite/bite-1/restaurant/restaurant-1/menu/menu-1'),
+          a: MenuActions.loadMenu({ menuId: 'menu-1' }),
         });
 
         expectObservable(effects.loadMenuFromApi$).toBe('a', {
-          a: MenuActions.noMenuFound(),
+          a: MenuActions.noMenuFound({ menuId: 'menu-1' }),
+        });
+      });
+    });
+
+    it('should report a read that fails', () => {
+      BiteTribeApiServiceMock.loadMenu.mockReturnValue(
+        throwError(() => new Error('offline')),
+      );
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: MenuActions.loadMenu({ menuId: 'menu-1' }),
+        });
+
+        expectObservable(effects.loadMenuFromApi$).toBe('a', {
+          a: MenuActions.menuLoadFailed({ menuId: 'menu-1' }),
+        });
+      });
+    });
+
+    it('should report a read that never comes back', () => {
+      // A read with no bound leaves the page waiting for a menu that is never
+      // coming, which is the state issue #1382 was raised for.
+      BiteTribeApiServiceMock.loadMenu.mockReturnValue(NEVER);
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: MenuActions.loadMenu({ menuId: 'menu-1' }),
+        });
+
+        expectObservable(effects.loadMenuFromApi$).toBe('8000ms a', {
+          a: MenuActions.menuLoadFailed({ menuId: 'menu-1' }),
         });
       });
     });

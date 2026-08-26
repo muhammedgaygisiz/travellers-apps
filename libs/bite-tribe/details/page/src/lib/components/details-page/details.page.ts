@@ -37,7 +37,7 @@ import { ImageViewerComponent, ImageViewerImage } from 'common/ui/image-viewer';
 import { CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
 import { RoundDistancePipe, ToMetricPipe } from 'common/distance';
 import { MapComponent } from 'bite-tribe-common/map';
@@ -192,6 +192,14 @@ export class DetailsPage {
    */
   private presentingLoadFailure = false;
 
+  /**
+   * A failure that arrived while a report was in flight, and still owes an
+   * answer. Without it the guard above drops that failure for good, and a page
+   * that has given up says nothing at all - which is the state issue #1232 was
+   * raised to end.
+   */
+  private pendingReport = false;
+
   private isDestroyed = false;
 
   constructor() {
@@ -232,30 +240,90 @@ export class DetailsPage {
     failure: 'not-found' | 'unavailable',
   ): Promise<void> {
     if (this.loadFailureAlert || this.presentingLoadFailure) {
+      // A read that fails again while this report is still running would be
+      // dropped here and never reach the screen. A cold start onto a Bite - a
+      // tapped notification, a shared link - reads twice, so the page can give
+      // up, recover and give up again inside one report. It is remembered
+      // instead and answered below.
+      this.pendingReport = true;
+
       return;
     }
 
     this.presentingLoadFailure = true;
 
     try {
-      const alert = await (failure === 'not-found'
-        ? this.createBiteNotFoundAlert()
-        : this.createBiteUnavailableAlert());
-
-      // Creating is asynchronous, so the page can be gone, or the read can have
-      // moved on, by the time there is an alert to show. Presenting it then
-      // would leak exactly the overlay this is meant to prevent.
-      if (this.isDestroyed || this.reportedFailure !== failure) {
-        await alert.dismiss();
-
-        return;
-      }
-
-      this.loadFailureAlert = alert;
-
-      await alert.present();
+      await this.presentLoadFailureAlert(failure);
     } finally {
       this.presentingLoadFailure = false;
+    }
+
+    if (!this.pendingReport) {
+      return;
+    }
+
+    this.pendingReport = false;
+
+    // Whatever the page is failing on now, rather than what was dropped: a
+    // retry can settle on the other branch. A report that presented owns the
+    // screen, and a read that recovered has nothing left to say.
+    const current = this.reportedFailure;
+
+    if (!this.isDestroyed && current && !this.loadFailureAlert) {
+      await this.reportLoadFailure(current);
+    }
+  }
+
+  /**
+   * Writes the alert and puts it on screen, or drops it if there is no longer
+   * that failure to report. Separate from `reportLoadFailure` so that giving up
+   * here ends this attempt rather than the report, which still has to answer a
+   * failure that arrived while this one was running.
+   */
+  private async presentLoadFailureAlert(
+    failure: 'not-found' | 'unavailable',
+  ): Promise<void> {
+    await this.ensureTranslationsLoaded();
+
+    const alert = await (failure === 'not-found'
+      ? this.createBiteNotFoundAlert()
+      : this.createBiteUnavailableAlert());
+
+    // Creating is asynchronous, so the page can be gone, or the read can have
+    // moved on, by the time there is an alert to show. Presenting it then
+    // would leak exactly the overlay this is meant to prevent.
+    if (this.isDestroyed || this.reportedFailure !== failure) {
+      await alert.dismiss();
+
+      return;
+    }
+
+    this.loadFailureAlert = alert;
+
+    await alert.present();
+  }
+
+  /**
+   * Waits for the active language before an alert is written.
+   *
+   * The alerts translate synchronously, and this page is reached cold - from a
+   * tapped notification or a shared link - so a failure reported before the
+   * language file has arrived would put raw keys on screen, which is the defect
+   * issue #1186 fixed elsewhere. Loads are cached per language, so a language
+   * already in memory costs nothing.
+   */
+  private async ensureTranslationsLoaded(): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.transloco.load(this.transloco.getActiveLang?.() || 'en'),
+      );
+    } catch (error) {
+      // A failed load is no reason to withhold the failure: Transloco falls
+      // back on its own, and the page must still say what happened.
+      console.warn(
+        'Failed to load translations for the load-failure alert:',
+        error,
+      );
     }
   }
 

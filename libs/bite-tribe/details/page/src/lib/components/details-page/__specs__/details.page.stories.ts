@@ -191,6 +191,31 @@ export const NoBite: Story = {
 };
 
 /**
+ * The read came back and the Bite is gone for good. The alert refuses backdrop
+ * dismissal and offers only the way back, because a deleted Bite leaves nothing
+ * to interact with and nothing to retry. See GitHub issue #1232.
+ */
+export const BiteNotFound: Story = {
+  args: {
+    ...NoBite.args,
+    biteNotFound: true,
+  },
+};
+
+/**
+ * The read itself failed - a timeout, a rejected permission, an App Check
+ * refusal. That says nothing about whether the Bite exists, so the read is
+ * offered again next to the way back. The skeletons stay underneath, because
+ * the page still has nothing to show. See GitHub issue #1232.
+ */
+export const BiteUnavailable: Story = {
+  args: {
+    ...NoBite.args,
+    biteUnavailable: true,
+  },
+};
+
+/**
  * A Bite with no place and no position of its own. Neither half of the
  * place-distance line has anything to say, so the line stays empty rather than
  * rendering the separator and a "-" for a distance that cannot be measured.

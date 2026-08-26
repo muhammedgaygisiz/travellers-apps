@@ -142,6 +142,18 @@ entry point.
   the way back.
 - A route without a `biteId` is not a failure. Nothing has been asked for, and
   the page stays in its loading state rather than claiming a Bite is missing.
+- A failure raised while a report is already in flight is remembered rather than
+  dropped. This page is reached cold - a tapped notification, a shared link - so
+  its read can give up, recover and give up again inside one report, and the
+  single-flight guard that keeps alerts from stacking used to swallow the second
+  failure entirely. The page then showed no alert at all and kept its skeletons
+  running, which is the silence this issue exists to end. What finally reaches
+  the screen is the branch the read settled on, not the one that was dropped.
+- The alert waits for the active language before it is written. It translates
+  synchronously, so a failure reported before the language file has arrived -
+  which a cold start makes likely - would put raw keys on screen, the defect
+  issue #1186 fixed elsewhere. Storybook proved it: the first captures of the
+  failure stories rendered `bite-not-found` and `go-back` verbatim.
 - Every settled read that produced no Bite files a Crashlytics non-fatal
   carrying the Bite id, the branch taken, and where the navigation came from.
   A user who is shown a message cannot report a timeout usefully, and the

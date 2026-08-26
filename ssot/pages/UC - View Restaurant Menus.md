@@ -32,14 +32,25 @@ has no menu.
   is still being read, or the menu is reported as unresolvable. The empty state
   ("no items here yet") belongs to a menu that loaded and really has no items,
   and can no longer be reached while a read is in flight.
-- A read still in flight is answered by skeletons, including one for the header
-  image, so nothing reserves layout space for a photo that has no source. Once
-  the read has settled, an absent photo renders no element at all.
+- A read still in flight is answered by skeletons that trace this page's own
+  shape - the full-bleed header photo, the place name, and the categories with
+  their dish rows, priced on the right - so what stands in for the page looks
+  like the page rather than like some other one. A Restaurant with no photo
+  renders no header element at all once the read has settled, rather than
+  reserving space for an image with no source.
 - A menu that cannot be resolved - the document does not exist, the read failed,
-  or it never came back within eight seconds - is reported in the page, offering
-  the way back and the read again. It is stated in the page rather than in an
-  alert so the answer survives a dismissed overlay and the state is reachable in
-  Storybook and in visual regression.
+  or it never came back within eight seconds - is reported by a blocking alert
+  that refuses backdrop dismissal and offers the way back next to the read
+  again, the same answer [[UC - Inspect Bite Details]] gives a failed Bite read.
+  The skeletons stay underneath it, so nothing behind the alert claims the
+  Restaurant has no menu.
+- The alert waits for the active language before it is written. It translates
+  synchronously, so a failure reported on a cold start straight onto a menu
+  route would otherwise put raw keys on screen - the defect issue #1186 fixed
+  elsewhere.
+- The alert is taken down with the page that raised it. Ionic mounts overlays on
+  the app root, and one left behind sits over whatever the user navigated back
+  to with a backdrop that swallows every tap (issue #1304).
 - The failure is recorded against the menu id it belongs to, so a failure
   carried over from a menu left behind never describes the menu now on screen.
 - A route without a `menuId` is not a failure. Nothing has been asked for.

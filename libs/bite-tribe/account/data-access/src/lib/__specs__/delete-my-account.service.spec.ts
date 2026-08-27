@@ -37,8 +37,13 @@ describe(DeleteMyAccountService.name, () => {
     });
   };
 
-  const setProvider = (providerId: string): void =>
-    setCurrentUser({ uid: 'user-1', providerData: [{ providerId }] });
+  const setProviders = (...providerIds: string[]): void =>
+    setCurrentUser({
+      uid: 'user-1',
+      providerData: providerIds.map((providerId) => ({ providerId })),
+    });
+
+  const setProvider = (providerId: string): void => setProviders(providerId);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -134,6 +139,18 @@ describe(DeleteMyAccountService.name, () => {
       expect(service.identity()?.signInMethod).toBe(signInMethod);
     });
 
+    // Android lists the Firebase user itself first; reading that entry as the
+    // sign-in method is what made every account look unknown (issue #1385).
+    it('skips the reserved Firebase entry the native SDK lists first', () => {
+      getUser.mockReturnValue({
+        uid: 'user-1',
+        email: 'gone@example.com',
+        providerData: [{ providerId: 'firebase' }, { providerId: 'password' }],
+      });
+
+      expect(service.identity()?.signInMethod).toBe('password');
+    });
+
     it('is empty while nobody is signed in', () => {
       getUser.mockReturnValue(null);
 
@@ -206,6 +223,30 @@ describe(DeleteMyAccountService.name, () => {
       expect(deleteOwnAccount).toHaveBeenCalledTimes(1);
     });
 
+    it('asks for the password when the native provider list starts with Firebase', async () => {
+      setProviders('firebase', 'password');
+      deleteOwnAccount.mockRejectedValueOnce(reauthRequired());
+
+      await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(false);
+
+      expect(service.passwordRequired()).toBe(true);
+      expect(signInWithGoogleAccount).not.toHaveBeenCalled();
+      expect(logout).not.toHaveBeenCalled();
+    });
+
+    // A provider the app cannot open a sign-in sheet for has no way back other
+    // than the password, so it must be asked for rather than skipped.
+    it('asks for the password on a provider it cannot re-sign in', async () => {
+      setProvider('github.com');
+      deleteOwnAccount.mockRejectedValueOnce(reauthRequired());
+
+      await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(false);
+
+      expect(service.passwordRequired()).toBe(true);
+      expect(service.state()).toBe('idle');
+      expect(deleteOwnAccount).toHaveBeenCalledTimes(1);
+    });
+
     it('retries with the supplied password', async () => {
       deleteOwnAccount
         .mockRejectedValueOnce(reauthRequired())
@@ -255,12 +296,28 @@ describe(DeleteMyAccountService.name, () => {
       await expect(service.deleteAccount(CONFIRMED)).resolves.toBe(false);
 
       expect(service.state()).toBe('failed');
-      expect(service.failure()).toBe('generic');
+      expect(service.failure()).toBe('reauth-failed');
       expect(deleteOwnAccount).toHaveBeenCalledTimes(1);
       expect(logout).not.toHaveBeenCalled();
       expect(logEvent).toHaveBeenCalledWith('account_deletion_failed', {
         reason: 'reauth_failed',
       });
+    });
+
+    // The generic copy asks for a retry, and a retry with the same wrong
+    // password fails identically, so the refusal gets its own message.
+    it('reports a refused password as a failed re-authentication', async () => {
+      deleteOwnAccount.mockRejectedValueOnce(reauthRequired());
+      loginWithUsernameAndPassword.mockRejectedValueOnce(
+        new Error('wrong-password'),
+      );
+
+      await expect(
+        service.deleteAccount({ ...CONFIRMED, password: 'wrong' }),
+      ).resolves.toBe(false);
+
+      expect(service.failure()).toBe('reauth-failed');
+      expect(deleteOwnAccount).toHaveBeenCalledTimes(1);
     });
   });
 

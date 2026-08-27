@@ -12,10 +12,26 @@ import { getAccountDeletionFailureReason } from 'utils';
 export type DeleteMyAccountState = 'idle' | 'deleting' | 'failed';
 
 /**
- * Why the last attempt failed, as far as it changes what the page says. Only a
- * changed session needs its own message: everything else is retryable in place.
+ * Why the last attempt failed, as far as it changes what the page says. A
+ * changed session and a refused re-authentication each need their own message,
+ * because neither is fixed by repeating the same action; everything else is
+ * retryable in place.
  */
-export type DeleteMyAccountFailure = 'account-changed' | 'generic';
+export type DeleteMyAccountFailure =
+  'account-changed' | 'reauth-failed' | 'generic';
+
+/** The reason reported to analytics when an attempt ends without a deletion. */
+type DeleteMyAccountFailureReason =
+  'reauth_failed' | 'unknown' | 'account_changed';
+
+const FAILURE_BY_REASON: Record<
+  DeleteMyAccountFailureReason,
+  DeleteMyAccountFailure
+> = {
+  reauth_failed: 'reauth-failed',
+  unknown: 'generic',
+  account_changed: 'account-changed',
+};
 
 /** How the signed-in account authenticates, named for the UI. */
 export type AccountSignInMethod = 'password' | 'google' | 'apple' | 'unknown';
@@ -48,8 +64,9 @@ export interface DeleteMyAccountCommand {
 
 /**
  * Credentials the flow asks for when the signed-in session is too old and the
- * account uses email/password. Provider accounts re-authenticate through their
- * own sign-in sheet instead, so nothing is collected for them.
+ * account cannot refresh the sign-in on its own. Google and Apple accounts
+ * re-authenticate through their own sheet instead, so nothing is collected for
+ * them.
  */
 export interface ReauthenticationPassword {
   password: string;
@@ -59,11 +76,25 @@ const GOOGLE_PROVIDER_ID = 'google.com';
 const APPLE_PROVIDER_ID = 'apple.com';
 const PASSWORD_PROVIDER_ID = 'password';
 
+/**
+ * Firebase's own reserved entry, not a sign-in method.
+ *
+ * The Android SDK returns the `FirebaseUser` itself as the first element of
+ * `providerData`, under this id; the web and iOS SDKs list the linked providers
+ * only. Reading element zero therefore resolved every Android account to an
+ * unknown provider, which is what left account deletion unable to
+ * re-authenticate (issue #1385).
+ */
+const FIREBASE_PROVIDER_ID = 'firebase';
+
 const SIGN_IN_METHOD_BY_PROVIDER_ID: Record<string, AccountSignInMethod> = {
   [GOOGLE_PROVIDER_ID]: 'google',
   [APPLE_PROVIDER_ID]: 'apple',
   [PASSWORD_PROVIDER_ID]: 'password',
 };
+
+/** Providers that refresh a sign-in through their own sheet. */
+const SHEET_PROVIDER_IDS = new Set([GOOGLE_PROVIDER_ID, APPLE_PROVIDER_ID]);
 
 @Injectable({ providedIn: 'root' })
 export class DeleteMyAccountService {
@@ -80,7 +111,7 @@ export class DeleteMyAccountService {
 
   /**
    * True while the flow needs the account password to refresh the sign-in.
-   * Provider accounts never reach this state.
+   * Google and Apple accounts never reach this state.
    */
   readonly passwordRequired = signal(false);
 
@@ -164,7 +195,11 @@ export class DeleteMyAccountService {
   ): Promise<boolean> {
     const providerId = getProviderId(user);
 
-    if (providerId === PASSWORD_PROVIDER_ID && !credentials) {
+    // Only Google and Apple can refresh a sign-in on their own. Every other
+    // provider id - including one this app does not know - is answered with the
+    // password prompt, because opening a sign-in sheet that does not exist can
+    // only fail and would leave the deletion permanently unreachable.
+    if (!SHEET_PROVIDER_IDS.has(providerId) && !credentials) {
       // The page collects the password and calls back into `deleteAccount`.
       this.passwordRequired.set(true);
       this.state.set('idle');
@@ -215,6 +250,9 @@ export class DeleteMyAccountService {
       return;
     }
 
+    // Everything that is not a sheet provider re-authenticates with the
+    // password, which is also the only answer available to a provider id this
+    // app does not recognize.
     const email = this.authService.getUser()?.email;
 
     if (!email || !credentials) {
@@ -251,13 +289,9 @@ export class DeleteMyAccountService {
     return true;
   }
 
-  private onFailed(
-    reason: 'reauth_required' | 'reauth_failed' | 'unknown' | 'account_changed',
-  ): boolean {
+  private onFailed(reason: DeleteMyAccountFailureReason): boolean {
     this.analytics.logEvent(AnalyticsEvent.AccountDeletionFailed, { reason });
-    this.failure.set(
-      reason === 'account_changed' ? 'account-changed' : 'generic',
-    );
+    this.failure.set(FAILURE_BY_REASON[reason]);
     this.state.set('failed');
 
     return false;
@@ -270,8 +304,15 @@ export class DeleteMyAccountService {
   }
 }
 
+/**
+ * The provider the account actually signs in with, skipping Firebase's own
+ * reserved entry. Falls back to email/password, the only method that can be
+ * re-authenticated without knowing the provider.
+ */
 const getProviderId = (user: User): string =>
-  user.providerData?.[0]?.providerId ?? PASSWORD_PROVIDER_ID;
+  user.providerData?.find(
+    ({ providerId }) => providerId && providerId !== FIREBASE_PROVIDER_ID,
+  )?.providerId ?? PASSWORD_PROVIDER_ID;
 
 const toSignInMethod = (user: User): AccountSignInMethod =>
   SIGN_IN_METHOD_BY_PROVIDER_ID[getProviderId(user)] ?? 'unknown';

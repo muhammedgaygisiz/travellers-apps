@@ -1,0 +1,40 @@
+- [bug: Android resolves the sign-in provider to unknown, so account deletion can never re-authenticate](https://github.com/muhammedgaygisiz/travellers-apps/issues/1385) (Issue \#1385)
+- Description
+  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95) from tag `build-1.0.1-95`, on a physical Samsung SM-A566B running Android 16.
+  - An email/password account could only be deleted within five minutes of signing in. Past that, Settings - Delete Account passed both confirmation gates and then said "We could not delete your account. Please try again." Reproduced twice by the agent and once by the tester, at roughly 24 minutes, 4 hours and 6.5 hours after sign-in.
+  - Store policy and GDPR both require a working deletion, so it was accepted as a release-candidate `P0`.
+- Findings - the backend was never at fault
+  - Production logs for every attempt showed `{"verifications":{"app":"VALID","auth":"VALID"}}` and then no further entry, meaning the function threw before its own logging. The only throw before that point is `assertRecentSignIn`, and `REAUTH_MAX_AGE_SECONDS` is five minutes, so the backend correctly answered `failed-precondition / reauth_required`.
+  - The client is built to answer exactly that: collect the password, re-run the sign-in, retry once. On Android it never could.
+- Findings - the root cause, confirmed from the SDK rather than inferred
+  - The charter named `providerData[0]` as the most likely cause and asked for a device log to confirm it. It was confirmed a step earlier instead, from the shipped Firebase Android SDK itself, which does not need a device and cannot be misread from a symptom.
+  - `firebase-auth-24.0.1.aar`, class `com.google.firebase.auth.internal.zzaf` - the only `FirebaseUser` implementation - builds the list that `getProviderData()` returns by appending **every** `UserInfo` it is given, including the reserved entry whose `providerId` is `firebase`. That entry is additionally kept as the default user info, and it is the separate provider-id list behind `getProviders()` that skips it. So on Android `getProviderData()` contains `firebase` and the web and iOS SDKs' lists do not.
+  - `@capacitor-firebase/authentication` maps that list straight through in `FirebaseAuthenticationHelper.createUserResult`, so `user.providerData[0].providerId` is `firebase` on Android for every account, whatever it actually signs in with.
+  - `getProviderId` read index 0 unconditionally, so `signInMethod` resolved to `unknown` - which is what put "Signed in with a linked account" on screen for an email/password account - and `providerId === PASSWORD_PROVIDER_ID` never matched, so the password was never asked for. Control fell through to a re-authentication for a provider that does not exist, which threw, which produced the generic retry message.
+  - The `?? 'password'` fallback could not save it: index 0 was present, with the wrong value.
+- Decisions
+  - **Resolve the provider by skipping the reserved entry, not by special-casing Android.** `getProviderId` now returns the first `providerData` entry whose id is not `firebase`. On web and iOS that is still element zero, so their behaviour is unchanged, and nothing has to know which platform it is running on.
+  - **An unrecognised provider now asks for the password instead of attempting a sign-in that cannot exist.** Only Google and Apple can refresh a sign-in through their own sheet; everything else - including a provider id this app has never seen - is answered with the password prompt. This is the guard that would have contained the defect even without the provider fix, and it is the reason a future SDK change to `providerData` cannot make deletion unreachable again.
+  - **A refused re-authentication gets its own message.** The generic copy asks the user to try again, and after a refused sign-in a retry fails identically, so the copy was an instruction to repeat something guaranteed not to work. `delete-account-reauth-failed` says nothing was deleted and asks for the sign-in to be completed, in all eleven locales.
+  - **The five-minute precondition stays reactive rather than becoming a visible up-front step.** Asking every user to re-authenticate before the deletion page would charge the common case - a fresh session, which needs nothing - for the rare one. What was wrong was not the timing of the ask but that the ask never came and never explained itself. `delete-account-reauth-message` now names the reason ("Deleting an account needs a recent sign-in") rather than only "for your security", so the prompt explains why it appeared.
+- Outcome
+  - `delete-my-account.service.ts` skips the reserved `firebase` entry, sends every non-sheet provider to the password prompt, and maps a refused re-authentication onto its own `reauth-failed` state; the analytics reason strings are unchanged, so existing funnels keep working.
+  - `delete-my-account.component.ts` maps the three failures onto three keys through a table rather than a two-way conditional.
+  - Eleven locale files gain `delete-account-reauth-failed` and carry a `delete-account-reauth-message` that states the reason. A `ReauthenticationFailed` Storybook story and its two Loki references cover the new state.
+- Validation
+  - `nx test bite-tribe/account-data-access` - 21 tests, pass, including the Android `providerData` shape and the unknown-provider password fallback.
+  - `nx test delete-account` - 22 tests, pass.
+  - `nx run-many -t lint` on both projects - clean. `prettier --check` on the touched sources and all eleven locale files - clean. Every locale file parses and carries the same key set as English.
+  - `npm run build:storybook`, then `loki update` filtered to the new story, then a full `loki test`. Only the two new references were written; no existing baseline was rewritten.
+  - `git diff --check` - clean.
+- Open, and honestly still open
+  - **The inside-window failure is not explained by this fix and is not closed by it.** The charter records the tester deleting inside the five-minute window and failing there too. Inside the window `assertRecentSignIn` passes and the provider is never consulted, so nothing here would change that outcome. The charter also records that the observation could not be re-checked against the logs because of rate limiting, so it is a lead rather than an established second defect.
+  - Of the charter's three candidates, `auth_time` not refreshing on native `signInWithEmailAndPassword` is the least likely: `auth_time` is minted by Firebase Auth on the sign-in itself, not by the client. The cheaper reading is that the attempt followed an app launch on a restored session rather than an actual credential sign-in, which does not refresh `auth_time` on any platform. Neither reading is proven.
+  - The confirmation test is the one the charter already names: sign in on the device, delete within five minutes, read the function log immediately. It separates "never reached the server" from "reached it and the cascade failed", and the throwaway account `Run9 Tester` is still there to run it against.
+  - **Whether iOS ever resolved `providerData` correctly is still untested.** It should be, before this is filed away as Android-only - the SDK evidence says iOS was never affected, but no iOS run has exercised a stale session.
+- Related
+  - [[UC - Use Account And Legal Flows]]
+  - [[Current State - Release Candidate Test Charter]]
+  - [[issue-1234]]
+  - [[issue-1182]]
+  - [[Architecture - Capacitor]]

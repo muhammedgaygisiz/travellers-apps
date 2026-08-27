@@ -20,6 +20,7 @@ const en = {
   'delete-account-removed-profile': 'Your profile, display name and photo',
   'delete-account-failed': 'We could not delete your account.',
   'delete-account-account-changed': 'The signed-in account changed.',
+  'delete-account-reauth-failed': 'We could not confirm it was you.',
   'delete-account-in-progress': 'Deleting your account...',
   'delete-account-confirm-title': 'Delete account?',
   'delete-account-confirm-delete': 'Delete account',
@@ -312,6 +313,20 @@ describe(DeleteMyAccountComponent.name, () => {
         '[data-testid="delete-account-error"]',
       ).textContent,
     ).toContain('We could not delete your account.');
+  });
+
+  // The generic copy tells the user to try again; after a refused sign-in that
+  // is an instruction to repeat something that fails the same way.
+  it('says so when the re-authentication was refused', () => {
+    compRef.setInput('failed', true);
+    compRef.setInput('failure', 'reauth-failed');
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="delete-account-error"]',
+      ).textContent,
+    ).toContain('We could not confirm it was you.');
   });
 
   it('says so when the deletion was refused because the account changed', () => {

@@ -84,3 +84,10 @@ export const AccountChanged: Story = {
     failure: 'account-changed',
   },
 };
+
+export const ReauthenticationFailed: Story = {
+  args: {
+    failed: true,
+    failure: 'reauth-failed',
+  },
+};

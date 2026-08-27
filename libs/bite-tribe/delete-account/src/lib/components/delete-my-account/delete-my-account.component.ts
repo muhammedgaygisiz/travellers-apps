@@ -42,6 +42,17 @@ const SIGN_IN_METHOD_KEYS: Record<AccountSignInMethod, string> = {
 };
 
 /**
+ * What the page says about a failed attempt. A refused re-authentication gets
+ * its own line because the generic copy asks for a retry, and a retry without a
+ * fresh sign-in fails exactly the same way.
+ */
+const FAILURE_KEYS: Record<DeleteMyAccountFailure, string> = {
+  'account-changed': 'delete-account-account-changed',
+  'reauth-failed': 'delete-account-reauth-failed',
+  generic: 'delete-account-failed',
+};
+
+/**
  * Presents the account-deletion contract and collects the confirmation.
  *
  * The contract is shown on the page rather than inside the alert so it stays
@@ -103,19 +114,17 @@ export class DeleteMyAccountComponent {
     return identity ? SIGN_IN_METHOD_KEYS[identity.signInMethod] : '';
   });
 
-  readonly failureKey = computed((): string =>
-    this.failure() === 'account-changed'
-      ? 'delete-account-account-changed'
-      : 'delete-account-failed',
+  readonly failureKey = computed(
+    (): string => FAILURE_KEYS[this.failure() ?? 'generic'],
   );
 
   onPhotoError(): void {
     this.failedPhotoUrl.set(this.identity()?.photoUrl ?? '');
   }
 
-  // The backend answers a stale sign-in with `reauth_required`; for an
-  // email/password account the only way back is the password, so the prompt is
-  // opened as soon as the flow asks for it.
+  // The backend answers a stale sign-in with `reauth_required`; unless the
+  // account can refresh its own sign-in through a provider sheet, the only way
+  // back is the password, so the prompt is opened as soon as the flow asks.
   private readonly passwordPromptEffect = effect(() => {
     if (this.passwordRequired()) {
       void this.promptForPassword();
@@ -155,8 +164,8 @@ export class DeleteMyAccountComponent {
 
   /**
    * Asks for the account password when the backend rejected the sign-in as too
-   * old. Only email/password accounts reach this: provider accounts refresh
-   * their sign-in through their own sheet.
+   * old. Google and Apple accounts never reach this: they refresh their sign-in
+   * through their own sheet.
    */
   async promptForPassword(): Promise<void> {
     const identity = this.identity();

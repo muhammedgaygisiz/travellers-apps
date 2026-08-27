@@ -66,6 +66,23 @@ Backend callables validate request.auth where required
 
 Email verification is non-blocking. Password-only accounts require verification prompts and reminders; accounts with trusted Google or Apple provider links are considered verified enough for this lifecycle. Unknown provider combinations are logged but do not receive automatic reminders.
 
+## Provider Data Rules
+
+See [[issue-1385]] for what reading these positionally cost.
+
+- `user.providerData` is **not** the same list on every platform. The Android
+  SDK includes Firebase's own reserved record - `providerId` of `firebase`, the
+  user itself rather than a sign-in method - alongside the real providers; the
+  web and iOS SDKs list linked providers only.
+- Anything deriving a sign-in method reads the first entry that is not that
+  reserved record, never `providerData[0]`. Positional reads look correct on the
+  web, where they are developed and tested, and identify every Android account
+  as unknown in production.
+- Code that branches on the resolved provider treats "not recognised" as a
+  reason to fall back to email and password, not as a reason to attempt a
+  provider flow. An unmapped id is the expected outcome of an SDK change, and it
+  must not be able to make a user-facing flow unreachable.
+
 ## Sign-In Feedback Contract
 
 See [[issue-1273]] for the reasoning. Sign-in is not fast - it is a network

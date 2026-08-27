@@ -20,7 +20,7 @@ Users can access legal and account lifecycle information.
 - A language without published policy copy - a locale added to the app before its policy is written - falls back to the English document and is told so on the page, in its own app language. The policy language is never switched silently.
 - User opens account deletion from the Account section at the bottom of the settings page.
 - The delete-account page names the signed-in account first - avatar, display name, email and sign-in method - then what is removed and what is kept, then asks for an explicit destructive confirmation that repeats the account.
-- The `deleteOwnAccount` callable rejects a sign-in older than five minutes with `reauth_required`; the app re-runs the account's own sign-in method (Google, Apple, or a password prompt) and retries once. The password prompt names the account it belongs to.
+- The `deleteOwnAccount` callable rejects a sign-in older than five minutes with `reauth_required`; the app re-runs the account's own sign-in method (Google, Apple, or a password prompt) and retries once. The password prompt names the account it belongs to and says why it appeared, and a refused re-authentication is reported as such rather than as a generic failure the user is invited to repeat.
 - The backend removes the user-owned data, then deletes the Firebase Auth account last, and the app signs the user out.
 - The public `/account-deletion` route stays reachable without signing in for store review. It documents the in-app flow and keeps an email fallback for users who can no longer sign in.
 - Email/password user sees a non-blocking email verification prompt on home, settings, and profile edit when verification is still required.
@@ -38,6 +38,14 @@ See [[issue-1234]] for the reasoning.
 - The shown identity follows the auth session rather than a value read once when the page opened, so a session that changes underneath the page changes what is shown.
 - The deletion re-reads the signed-in account and refuses to run when it is no longer the confirmed one; the page reports the refusal instead of a failure. The same check runs again after a provider sheet re-authenticates, because that sheet lets the user pick a different account.
 - Profile name and photo come from the profile document, but only when it belongs to the signed-in uid; the auth user is the only source for uid, email, and sign-in method.
+
+## Re-Authentication Contract
+
+See [[issue-1385]] for the reasoning.
+
+- The sign-in method is read from the first `providerData` entry that is not Firebase's own reserved `firebase` record. The Android SDK includes that record and the web and iOS SDKs do not, so reading the list positionally identified every Android account as unknown and made deletion unreachable for them.
+- Only Google and Apple refresh a sign-in through their own sheet. Every other provider - including one the app does not recognise - is answered with the password prompt, because a sign-in sheet that does not exist can only fail, and failing there leaves the user with no route to a deletion the law requires.
+- The re-authentication is asked for when the backend rejects the session, not before it. A fresh session needs nothing, and charging the common case for the rare one would put a password prompt in front of every deletion.
 
 ## Deletion Contract
 

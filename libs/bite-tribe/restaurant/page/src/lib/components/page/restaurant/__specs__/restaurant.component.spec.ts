@@ -258,6 +258,18 @@ describe('RestaurantComponent', () => {
       ]);
       expect(component.uniqueTags()).toEqual(['sushi']);
     });
+
+    it('should deduplicate tags across the hash prefix and case', () => {
+      componentRef.setInput('bites', [
+        createBite({ tags: ['Chinawok', 'cologne', 'asianfood'] }),
+        createBite({ tags: ['#Chinawok', '#Cologne', '#asianfood'] }),
+      ]);
+      expect(component.uniqueTags()).toEqual([
+        'Chinawok',
+        'cologne',
+        'asianfood',
+      ]);
+    });
   });
 
   describe('address display', () => {

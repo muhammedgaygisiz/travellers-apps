@@ -1,0 +1,38 @@
+- [bug: Restaurant page tags are not deduplicated across the # prefix and case](https://github.com/muhammedgaygisiz/travellers-apps/issues/1389) (Issue \#1389)
+- Description
+  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - The China Wok restaurant page showed `Chinawok` next to `#Chinawok`, `cologne` next to `#Cologne`, and `asianfood` next to `#asianfood` - six chips for three tags.
+- Findings - the page showed the raw union, and Bites store tags exactly as typed
+  - `TagsInputComponent` writes whatever the user types. Nothing strips a `#` or normalizes case on the way into a Bite, so `Chinawok`, `#Chinawok` and `chinawok` are three different strings in Firestore and all three are correct as stored data.
+  - The restaurant page derived its tag list with `[...new Set(allTags)]`, which is identity comparison on those raw strings. `Set` deduplicates `Chinawok` against `Chinawok` and against nothing else, which is exactly what the device showed.
+  - The same five lines existed twice, in `RestaurantComponent` (a verified Restaurant) and in `BitePlaceComponent` (an unverified `place`), so both surfaces had the bug and a fix in one would have left the other.
+  - The repository already knew how to fold a `#`: `getTagSuggestionsByPlace` cleans hashes and fuzzy-matches before offering a tag on the Bite form. Nothing shared that with the read surfaces.
+  - Reproduced and fixed in the browser against the `Pages/Restaurant/Verified Restaurant/Full Maintained` story, whose fixture now carries the issue's shape.
+- Decisions
+  - **The `#` is dropped from the displayed tag, not preserved from the first spelling.** Keeping it would make presentation depend on which Bite happened to be first, and the chip is already a visible container - the `#` adds nothing the chip does not say.
+  - **Comparison folds case; the first surviving spelling is displayed.** This follows the precedent `uniqueBitesByName` already sets for the same page, and it keeps a tag readable as its author wrote it (`Chinawok`, not `chinawok`). Which spelling wins therefore depends on Bite order, which is accepted rather than hidden.
+  - **Only leading hashes are stripped.** `rock#roll` is a tag, not a hashtag with a typo, and a tag that is nothing but hashes disappears instead of rendering an empty chip.
+  - **Folding is `toLowerCase()` rather than `normalize()` from `utils`.** `normalize` also strips accents and punctuation, which would merge tags that are genuinely different words. This bug is about `#` and case only.
+  - **The stored Bite tags are left alone.** This is a display aggregation; no migration, and no change to what the Bite form writes. A Bite detail page still shows the tag as its author typed it.
+  - **One util, both surfaces.** `uniqueTagsFromBites` lives beside `uniqueBitesByName` and is used by the verified and the unverified place page, so the two cannot drift again.
+- Outcome
+  - `libs/bite-tribe/restaurant/page/src/lib/utils/unique-tags-from-bites.ts`: strips leading hashes, trims, folds case for comparison, and keeps the first spelling.
+  - `libs/bite-tribe/restaurant/page/src/lib/utils/__specs__/unique-tags-from-bites.spec.ts`: hashed and cased duplicates, a non-leading `#`, a hash-only tag, whitespace, and the reporter's own six China Wok tags collapsing to three.
+  - `libs/bite-tribe/restaurant/page/src/lib/components/page/restaurant/restaurant.component.ts` and `.../bite-place/bite-place.component.ts`: `uniqueTags` delegates to the util.
+  - The two component specs assert the reporter's case on both surfaces.
+  - `.../restaurant/__specs__/restaurant.stories.ts`: the `Full Maintained` fixture carries `#Cocktail` and `#Refreshing` against its existing `cocktail` and `refreshing`, so the story renders the same five chips as before and an extra chip means the fold broke. The Loki reference is unchanged by design.
+  - Recorded as a rule in [[Restaurant]].
+- Validation
+  - `nx test bite-tribe/restaurant` - 11 suites, 91 tests, pass. `nx lint bite-tribe/restaurant` - clean. `nx build bite-tribe` - pass.
+  - Browser proof in Storybook against `Pages/Restaurant/Verified Restaurant/Full Maintained`: with the old `Set` the story rendered `cocktail, refreshing, non-alcoholic, #Cocktail, aperitif, summer, #Refreshing`; with the fix it renders `cocktail, refreshing, non-alcoholic, aperitif, summer`.
+  - `git diff --check` - clean.
+- Open
+  - **Not verified on a device.** The fix is proven in a desktop browser; the China Wok page on the Samsung SM-A566B that reported it has not been reopened.
+  - **Loki was not run.** The rendered chip list is byte-identical to the pre-change one, so the reference should still match, but no visual run has confirmed it.
+  - **Case folding is not locale-aware.** `toLowerCase()` is used so the result does not depend on the host locale, which means Turkish `İstanbul` and `istanbul` are still two tags. See [[issue-1388]] for why locale-aware casing needs the language passed in explicitly.
+  - **Only display is deduplicated.** Search, tag suggestions, and any future tag-based filtering still see the raw stored strings.
+  - **Near-duplicates are untouched.** `asian food` and `asianfood` remain two tags; the fuzzy matching `getTagSuggestionsByPlace` uses was not brought to the read surface.
+- Related
+  - [[Restaurant]]
+  - [[UC - Browse Restaurants And Places]]
+  - [[Current State - Release Candidate Test Charter]]

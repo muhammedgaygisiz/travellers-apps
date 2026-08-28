@@ -20,11 +20,17 @@ On a native platform the transport is the **native** SDK, reached through
 context (`setCurrentScreen`), user identity (`setUserId`), and the App Check
 telemetry in `initialize-firebase-app-check.ts` all go through that plugin,
 which resolves to the native SDK on iOS and Android and to the JS SDK on the
-web. The `getAnalytics(app)` instance behind `FIREBASE_ANALYTICS` is the web
-transport and the App Check telemetry fallback; it is not a second native path.
+web. `FirebaseErrorHandlerService` emits `exception` the same way. The
+`getAnalytics(app)` instance behind `FIREBASE_ANALYTICS` is the web transport
+and the App Check telemetry fallback; it is not a second native path, and code
+that reads it must tolerate `null`, which is what
+`provideFirestoreAnalytics` yields where analytics is unsupported.
 
-Consequence: a disabled **native** collection flag silences the app's own
-events on a device, not only the auto-collected ones.
+Two consequences. A disabled **native** collection flag silences the app's own
+events on a device, not only the auto-collected ones. And an event sent through
+the JS SDK from a native platform lands on a different measurement path than
+every other event the same device produces, which is what `exception` did until
+[[issue-1387]].
 
 ## Collection Flag Rule
 
@@ -94,5 +100,3 @@ libs/bite-tribe/**/page/src/lib/integration
 
 - Screen tracking is spread across route containers.
 - Analytics support depends on platform/runtime support.
-- `FirebaseErrorHandlerService` logs `exception` through the JS SDK on every
-  platform, unlike every other analytics call, which uses the plugin.

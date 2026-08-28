@@ -16,19 +16,22 @@
   - **The re-enable is not gated on `withAnalytics`.** Native collection is on by default for both apps today, so an unconditional `true` preserves the business app's current behavior while still repairing it; gating on the flag would leave a poisoned business device broken forever for no gain.
   - **It sits on the non-dev branch, not in `provideStandardFirestoreUtils`.** The dev fallback with no emulator configuration returns the standard providers too, and it must keep analytics off; a spec pins that the enable does not run behind the disable.
   - **The call cannot break startup.** It is fire-and-forget with a `catch`, matching how `AnalyticsService` and the App Check telemetry treat analytics as best-effort.
-  - Recorded as the Collection Flag Rule and the Native Transport Rule in [[Architecture - Analytics]].
+  - **The one call that disagreed with the transport rule was corrected here rather than left as a note.** `FirebaseErrorHandlerService` sent `exception` through the JS SDK on every platform, so a native device reported its errors on a different measurement path than every other event it produced - and on a device with the flag disabled, that is also the one event that would still have arrived, which would have made the gap harder to see rather than easier. It now branches like the App Check telemetry does.
+  - **The exception event stays fire-and-forget.** Reporting a failure must not hold the Crashlytics report behind an analytics round trip, and must never raise a second failure inside the error handler. The web instance is now injected `optional`, because `provideFirestoreAnalytics` yields `null` where analytics is unsupported and `logEvent(null, ...)` would have thrown from inside `handleError`.
+  - Recorded as the Collection Flag Rule and the Transport Rule in [[Architecture - Analytics]].
 - Outcome
   - `libs/common/ta-firestore/src/lib/provide-firestore-utils.ts`: `enableNativeAnalyticsCollection` is called on the production path, documenting the persistence mechanism at the call site.
   - `libs/common/ta-firestore/src/lib/__specs__/provide-firestore-utils.spec.ts`: the flag is re-enabled on a native platform, untouched on the web, and never re-enabled on the dev fallback path.
+  - `libs/common/ta-firestore/src/lib/analytics/firebase-error-handler.service.ts`: `logException` picks the platform's transport, tolerates a missing web analytics instance, and swallows its own failures.
+  - `libs/common/ta-firestore/src/lib/analytics/__specs__/firebase-error-handler.service.spec.ts`: the event goes through the plugin on native and the JS SDK on the web with neither reaching the other's transport, an unsupported web instance still reports the error, and a rejected exception event does not stop the report.
 - Validation
-  - `nx test ta-firestore` - 18 suites, 165 tests, pass. The native re-enable spec was confirmed to fail against the unfixed source before the fix was restored, so it is a real guard rather than a vacuous one.
-  - `nx lint ta-firestore` - clean. `prettier --check` on the touched sources and SSOT pages - clean.
+  - `nx test ta-firestore` - 18 suites, 168 tests, pass. Both new guards were confirmed to fail against the unfixed sources before those were restored, so neither is vacuous.
+  - `nx lint ta-firestore` - clean. `nx build bite-tribe` and `nx build bite-tribe-business` - pass. `prettier --check` on the touched sources and SSOT pages - clean.
   - `git diff --check` - clean.
 - Open
   - **Nothing here is verified on a device.** The repair only shows up in logcat on the affected phone: `debug.firebase.analytics.app` set, build relaunched, and the `App measurement disabled` line gone with `Logging event` lines following. The charter's Monitoring item - analytics events verified in DebugView from a real device - is the test that closes it, and it has never been executed on Android.
   - **Devices already poisoned stay poisoned until they run a build that carries this fix.** No production build in the field re-enables anything, so build 95 cannot be used to verify it.
   - **The dev branch can still write persistent native state.** Disabling collection is the only such call today; anything similar added later inherits the same trap unless production asserts the opposite value as well.
-  - **`FirebaseErrorHandlerService` still logs `exception` through the JS SDK on native platforms**, unlike every other analytics call in the app. That inconsistency was found while answering the transport question and is untouched here.
 - Related
   - [[Architecture - Analytics]]
   - [[Implementation - Analytics Events]]

@@ -13,6 +13,7 @@ import {
   disableServiceWorkerOnNative,
   isServiceWorkerEnabled,
 } from './service-worker';
+import { provideDocumentLanguage } from './document-language';
 
 export const appConfig = (environment: Environment): ApplicationConfig => ({
   providers: [
@@ -61,5 +62,9 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
       },
       loader: TranslocoHttpLoader,
     }),
+    // Tags the document with the active language so the browser uppercases
+    // with that language's rules (issue #1388). Registered after
+    // `provideTransloco`, which owns the service it listens to.
+    provideDocumentLanguage(),
   ],
 });

@@ -1,0 +1,38 @@
+- [bug: Turkish uppercase drops the dotted I across cards, drawer and restaurant names](https://github.com/muhammedgaygisiz/travellers-apps/issues/1388) (Issue \#1388)
+- Description
+  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - With the app in Turkish, a Bite card and the Bitemap drawer showed `ÜMRANIYE, TÜRKIYE` instead of `ÜMRANİYE, TÜRKİYE`, another card showed `BERN, İSVIÇRE` instead of `BERN, İSVİÇRE`, and a restaurant name rendered `KAYSERI MANTI EVI` instead of `KAYSERİ MANTI EVİ`.
+  - The lowercase source strings were correct in every case, so only the uppercase transform was wrong. The second example got its leading `İ` right only because the source already began with one.
+- Findings - casing is a property of the language, and the document never named one
+  - Turkish has two `i` letters. Dotted `i` uppercases to `İ` and dotless `ı` uppercases to `I`; the default Unicode mapping sends both to `I`, which is what the device showed.
+  - Every uppercased surface in the app gets there through CSS, not through code. Bite cards and the Bitemap drawer uppercase through Ionic's own `ion-card-subtitle` rule, which carries `text-transform: uppercase` in the shipped component; the review thread and the currency selector declare it themselves. The drawer is not a second surface - `map-page.component.html` renders `<bt-bite>` inside `<bt-snap-drawer>`, so it is the same card.
+  - `text-transform` picks its case mapping from the language of the element it applies to, and `apps/bite-tribe/src/index.html` ships a hardcoded `<html lang="en">` that nothing updated afterwards. Transloco changed the language of the copy without ever changing the language of the document, so English rules were applied to Turkish text.
+  - Confirmed in the browser against the real card before the fix: with `lang="en"` the story's own `ion-card-subtitle` rendered `KAYSERI MANTI EVI` / `ÜMRANIYE, TÜRKIYE`, and setting `lang="tr"` on the document element alone turned them into `KAYSERİ MANTI EVİ` / `ÜMRANİYE, TÜRKİYE`. `MANTI` is unchanged in both, correctly - its source is the dotless `Mantı`.
+  - One uppercase does happen in TypeScript. `WithFirstLetterUpperCasePipe` capitalizes the Bite title on the same card with `toUpperCase()`, which no `lang` attribute can reach, so a Bite named `istanbul kebap` rendered as `Istanbul kebap`. It was not in the report because the observed Bite titles happened not to start with an `i`.
+- Decisions
+  - **The document is tagged with the active language, rather than the affected screens.** `lang` is inherited, so one attribute on the document element reaches every uppercased surface - including the ones inside Ionic's shadow DOM - and every surface added later. Fixing the three known call sites would have left the next one broken.
+  - **The tag follows Transloco rather than being set once at bootstrap.** `provideDocumentLanguage` subscribes to `langChanges$` in an app initializer, so the document is tagged at startup and again on every switch, including the one `AppComponent.initLanguage` makes after reading the stored preference and the one the onboarding assistant makes inside a live view.
+  - **`index.html` keeps `lang="en"`.** It is the correct value for the default language and for the moment before Angular exists; the provider replaces it as soon as the real language is known.
+  - **The consumer app only.** The business app ships one locale and never switches language, so it has no wrong value to correct.
+  - **The pipe takes the language as an argument instead of injecting it.** A pure pipe is not re-evaluated on a language change unless the language is one of its inputs, which is the rule [[Implementation - Localization]] already records for `Intl`-backed formatting; `BiteComponent` already exposes `activeLang` as a signal for exactly this.
+  - **`dir` is left alone.** Arabic is in `availableLangs` and would want `dir="rtl"`, but right-to-left layout is not this bug and is not proven by this change.
+- Outcome
+  - `libs/bite-tribe/shell/src/lib/document-language.ts`: `provideDocumentLanguage` keeps `<html lang>` in step with the active Transloco language.
+  - `libs/bite-tribe/shell/src/lib/app.config.ts`: the provider is registered after `provideTransloco`, which owns the service it listens to.
+  - `libs/bite-tribe/shell/src/lib/__specs__/document-language.spec.ts`: the document is tagged at startup and follows a later switch.
+  - `libs/bite-tribe-common/bite/src/lib/pipes/with-first-letter-upper-case.pipe.ts`: the first letter is uppercased with the active language's rules, falling back to the default mapping when no language is passed.
+  - `libs/bite-tribe-common/bite/src/lib/bite.component.html`: the Bite title passes `activeLang()` to the pipe.
+  - `libs/bite-tribe-common/bite/src/lib/pipes/__specs__/with-first-letter-upper-case.pipe.spec.ts`: `istanbul kebap` becomes `İstanbul kebap` in Turkish and `Istanbul kebap` otherwise.
+  - Recorded as a rule in [[Implementation - Localization]].
+- Validation
+  - `nx test bite-tribe-common/bite` - 13 suites, 109 tests, pass. `nx test bite-tribe-shell` - 3 suites, 35 tests, pass.
+  - `nx lint bite-tribe-common/bite` and `nx lint bite-tribe-shell` - clean. `nx build bite-tribe` - pass.
+  - Browser proof in Storybook against the `Components/Bite` story: the issue's own strings render `KAYSERI MANTI EVI` / `ÜMRANIYE, TÜRKIYE` under `lang="en"` and `KAYSERİ MANTI EVİ` / `ÜMRANİYE, TÜRKİYE` under `lang="tr"`.
+  - `git diff --check` - clean.
+- Open
+  - **Not verified on a device.** The fix is proven in a desktop browser; the Turkish reading on the Samsung SM-A566B that reported it has not been repeated.
+  - **Only the app's own uppercasing is covered.** Copy that is already uppercase in a locale file, and text the OS renders before the app runs - push notifications, iOS permission prompts, store listings - carry their own casing and are untouched by `lang`.
+  - **The `lang` value is the Transloco language code, not a full locale.** `tr` is enough for casing; a language that needs a region to case correctly would need more than this.
+- Related
+  - [[Implementation - Localization]]
+  - [[Current State - Release Candidate Test Charter]]

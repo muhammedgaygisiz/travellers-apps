@@ -37,7 +37,10 @@
         <ion-card-title (click)="biteClick.emit(biteData)">
           <span class="bite-title cursor-pointer">
             <ion-text color="secondary" class="copytext">
-              {{ $safeNavigationMigration(biteData?.name) | withFirstLetterUpperCase }}
+              {{
+                $safeNavigationMigration(biteData?.name)
+                  | withFirstLetterUpperCase: activeLang()
+              }}
             </ion-text>
           </span>
         </ion-card-title>
@@ -62,7 +65,10 @@
       <ion-card-content [class.with-edit]="showEditButton()">
         <div class="rating-container ion-margin-top">
           @if (biteData?.rating) {
-            <star-rating [rating]="$safeNavigationMigration(biteData?.rating)" readonly />
+            <star-rating
+              [rating]="$safeNavigationMigration(biteData?.rating)"
+              readonly
+            />
           } @else if (isOwnUnratedBite()) {
             <ion-button
               fill="outline"

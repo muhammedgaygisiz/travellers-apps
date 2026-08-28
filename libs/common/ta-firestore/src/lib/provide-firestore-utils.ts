@@ -59,6 +59,34 @@ export type FirebaseAppCheckRuntimeContext = {
   production?: boolean;
 };
 
+/**
+ * Re-asserts native Firebase Analytics collection on every non-dev startup.
+ *
+ * The native SDKs persist the flag set by `setEnabled` - Android in the app's
+ * SharedPreferences, iOS in its user defaults - so the DEV-only
+ * `setEnabled({ enabled: false })` below outlives the process, the build, and
+ * the install that made the call. A device that once ran a dev build
+ * therefore kept native collection off in every later production build, which
+ * is exactly what run 9 of the release-candidate charter observed on Android
+ * (`App measurement disabled by setAnalyticsCollectionEnabled(false)`, issue
+ * #1387). Production has to state the flag rather than trust the SDK default.
+ *
+ * Only native platforms are touched. On web the same plugin call sets a
+ * per-page-load `ga-disable-*` window flag that nothing persists, so there is
+ * no leak to undo there, and calling it here would eagerly initialize web
+ * analytics for apps - the business app among them - that never asked for it.
+ */
+const enableNativeAnalyticsCollection = (): void => {
+  if (!Capacitor.isNativePlatform()) {
+    return;
+  }
+
+  FirebaseAnalytics.setEnabled({ enabled: true }).catch((error) => {
+    // Analytics is best-effort; a failed flag must not break startup.
+    console.warn('Failed to enable native analytics collection:', error);
+  });
+};
+
 export const provideFirestoreUtils = (
   firebaseOptions: FirebaseOptions,
   withAnalytics?: boolean,
@@ -73,6 +101,8 @@ export const provideFirestoreUtils = (
   );
 
   if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] !== 'true') {
+    enableNativeAnalyticsCollection();
+
     return [
       startupInitializer,
       ...provideStandardFirestoreUtils(app, firestore, Boolean(withAnalytics)),

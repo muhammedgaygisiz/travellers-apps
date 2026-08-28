@@ -133,7 +133,7 @@ The business app has no Playwright coverage. Cover at minimum restaurant mainten
 ## Monitoring
 
 - Confirm Crashlytics receives a report from each native platform. Note what the app actually sends: `FirebaseErrorHandlerService` calls `recordException`, which files a **non-fatal**, and it only runs on a native platform. A JavaScript error never crashes the native process, so there is no path that produces a fatal crash report from app code. Trigger an unhandled Angular error, restart the app so the report uploads, and expect it under Non-fatals rather than Crashes.
-- Verify the analytics events in DebugView from a real device, not only from the web build.
+- Verify the analytics events in DebugView from a real device, not only from the web build. On Android this needs a build that carries the [#1387](https://github.com/muhammedgaygisiz/travellers-apps/issues/1387) fix: the native collection flag persists in SharedPreferences, so a device that once ran a dev build stays silent under any earlier artifact, build 95 included. Expect the `App measurement disabled by setAnalyticsCollectionEnabled(false)` line to be gone and `Logging event` lines to follow.
 - Confirm the key metrics dashboard exists and receives data.
 
 ## Pass Criteria
@@ -233,7 +233,9 @@ Why no earlier run caught it: the iOS runs deleted within minutes of signing in,
 ### Monitoring
 
 - **Crashlytics** initialises correctly - `Initializing Firebase Crashlytics 20.0.3` on every cold start - but a non-fatal was not triggered before the run stopped. Not verified.
-- **Analytics is an evidence gap, not a pass.** With `debug.firebase.analytics.app` set, logcat reports `App measurement disabled by setAnalyticsCollectionEnabled(false)` and no event logging follows. The only call site in the repo is the DEV-only branch in `provide-firestore-utils.ts:84`, which build 95 cannot reach, and nothing anywhere calls `setEnabled({ enabled: true })`. The likely mechanism is that the native setting persisted in SharedPreferences from an earlier dev build on the same device. Filed as [#1387](https://github.com/muhammedgaygisiz/travellers-apps/issues/1387), which also raises the open question of whether the native or the JS SDK is the intended transport on native platforms.
+- **Analytics is an evidence gap, not a pass.** With `debug.firebase.analytics.app` set, logcat reports `App measurement disabled by setAnalyticsCollectionEnabled(false)` and no event logging follows. The only call site in the repo is the DEV-only branch in `provide-firestore-utils.ts`, which build 95 cannot reach, and nothing anywhere calls `setEnabled({ enabled: true })`. Filed as [#1387](https://github.com/muhammedgaygisiz/travellers-apps/issues/1387).
+
+  **Since confirmed and fixed, and not yet verified on a device.** The suspected mechanism was read out of the shipped SDK: `play-services-measurement-impl` keeps the flag in the `com.google.android.gms.measurement.prefs` SharedPreferences file under `measurement_enabled`, so a dev build's disable outlives the process, the build, and the install that wrote it - and `android:allowBackup="true"` puts it inside auto-backup's default set, so even clearing app data may not undo it. Production now states the flag: the non-dev path calls `setEnabled({ enabled: true })` on native platforms. The transport question is answered too, and it is native - `AnalyticsService`, `setCurrentScreen`, `setUserId`, and the App Check telemetry all go through `@capacitor-firebase/analytics`, so the disabled flag was silencing the app's own events, not only the auto-collected ones. The reasoning is in [[issue-1387]]. **Build 95 cannot be used to check this**: only a build carrying the fix repairs the device.
 
 ### Two Cross-Platform Results Worth Keeping
 

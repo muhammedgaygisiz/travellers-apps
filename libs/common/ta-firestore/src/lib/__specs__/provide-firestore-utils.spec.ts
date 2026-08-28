@@ -288,6 +288,35 @@ describe(provideFirestoreUtils.name, () => {
       process.env['NX_APP_BITE_TRIBE_IS_DEV'] = undefined;
     });
 
+    // Native Firebase Analytics persists the collection flag (Android
+    // SharedPreferences, iOS user defaults), so the DEV-only disable outlives
+    // the build that made the call. Production must re-assert it or a device
+    // that once ran a dev build stays silent forever (issue #1387).
+    describe('the native analytics collection flag', () => {
+      it('should be re-enabled on a native platform', () => {
+        jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        jest.mocked(FirebaseAnalytics.setEnabled).mockResolvedValue(undefined);
+
+        provideFirestoreUtils({} as FirebaseOptions, true, undefined, {
+          production: true,
+        });
+
+        expect(FirebaseAnalytics.setEnabled).toHaveBeenCalledWith({
+          enabled: true,
+        });
+      });
+
+      it('should not be touched on the web, where nothing persists it', () => {
+        jest.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+
+        provideFirestoreUtils({} as FirebaseOptions, true, undefined, {
+          production: true,
+        });
+
+        expect(FirebaseAnalytics.setEnabled).not.toHaveBeenCalled();
+      });
+    });
+
     describe('without analytics', () => {
       it('should initialize firestore utils without connecting to emulators', () => {
         const FIREBASE_OPTIONS = {};
@@ -431,6 +460,11 @@ describe(provideFirestoreUtils.name, () => {
       );
 
       expect(analyticsSetEnablesSpy).toHaveBeenCalledWith({ enabled: false });
+      // The fallback returns the standard providers, but it is still dev: the
+      // production re-enable must not run behind the disable (issue #1387).
+      expect(analyticsSetEnablesSpy).not.toHaveBeenCalledWith({
+        enabled: true,
+      });
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         'DEV ENVIRONMENT - NX_APP_BITE_TRIBE_IS_DEV is true, but no emulators configuration was provided. Falling back to standard Firestore initialization.',
       );

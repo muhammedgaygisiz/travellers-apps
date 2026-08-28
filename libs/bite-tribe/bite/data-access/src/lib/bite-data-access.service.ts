@@ -217,7 +217,15 @@ export class BiteDataAccessService {
     }
     this.uploadsInFlight.add(bite.id);
 
-    await this.api.setBiteImageStatus(bite.id, 'pending');
+    // Started, not awaited. Firestore applies the write to the local cache at
+    // once - which is what puts the card back into the uploading state - but
+    // only settles the promise when the server acknowledges it, so offline this
+    // await never returned and the transfer below, along with the stall
+    // watchdog `handleUploadProgress` arms, never started at all. That is why a
+    // retry taken while disconnected spun forever while the first attempt timed
+    // out normally. See GitHub issue #1390. `setBiteImageStatus` handles its own
+    // errors, so nothing is left unhandled by letting it finish on its own.
+    void this.api.setBiteImageStatus(bite.id, 'pending');
     this.storeService.savedNewBite({ ...bite, imageStatus: 'pending' });
 
     this.analytics.logEvent(AnalyticsEvent.BiteImageUploadRetried);

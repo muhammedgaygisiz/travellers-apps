@@ -282,6 +282,52 @@ describe(BiteDataAccessService.name, () => {
       );
     });
 
+    describe('while the pending write is not acknowledged yet', () => {
+      // Offline a Firestore write reaches the local cache immediately but is
+      // only acknowledged once the device is back on the network, so its
+      // promise stays open for as long as the user is disconnected.
+      const unacknowledgedWrite = (): void => {
+        api.setBiteImageStatus.mockReturnValue(new Promise<void>(() => void 0));
+      };
+
+      it('should still send the photo', async () => {
+        unacknowledgedWrite();
+
+        await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+
+        expect(api.uploadBiteImageFromLocalFile).toHaveBeenCalledWith(
+          SAVED_BITE_ID,
+          'file:///local.jpg',
+          expect.any(Function),
+        );
+      });
+
+      it('should mark the bite failed when the retry stalls', async () => {
+        unacknowledgedWrite();
+
+        await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+        jest.advanceTimersByTime(STALLED_UPLOAD_TIMEOUT_MS);
+
+        expect(api.setBiteImageStatus).toHaveBeenLastCalledWith(
+          SAVED_BITE_ID,
+          'failed',
+        );
+        expect(store.savedNewBite).toHaveBeenLastCalledWith(
+          expect.objectContaining({ imageStatus: 'failed' }),
+        );
+      });
+
+      it('should allow another retry after that failure', async () => {
+        unacknowledgedWrite();
+
+        await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+        jest.advanceTimersByTime(STALLED_UPLOAD_TIMEOUT_MS);
+        await service.retryImageUpload(failedBite(), 'file:///local.jpg');
+
+        expect(api.uploadBiteImageFromLocalFile).toHaveBeenCalledTimes(2);
+      });
+    });
+
     it('should mark the bite failed when the chosen file cannot be read', async () => {
       api.uploadBiteImageFromLocalFile.mockRejectedValue(
         new Error('file not found'),

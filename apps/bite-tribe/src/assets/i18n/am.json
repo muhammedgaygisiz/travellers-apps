@@ -261,6 +261,7 @@
   "loading-photo": "ፎቶ በመጫን ላይ…",
   "image-upload-failed": "ፎቶውን መጫን አልተቻለም",
   "retry-upload": "ጭነትን እንደገና ሞክር",
+  "retry-upload-offline": "ከመስመር ውጭ ነህ — ፎቶውን ለመጫን እንደገና ተገናኝ",
   "choose-photo": "ፎቶ ይምረጡ",
   "image-upload-retry-failed": "ጭነቱን መጀመር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
   "bite-updated-successfully": "ባይቱ በተሳካ ሁኔታ ተዘምኗል!",

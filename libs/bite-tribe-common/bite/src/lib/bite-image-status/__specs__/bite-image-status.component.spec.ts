@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, signal } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
+import { NetworkStatusService } from 'common/networkstatus';
+import type { ConnectionStatus } from '@capacitor/network';
 import type { Bite } from 'model';
 import { BiteImageStatusComponent } from '../bite-image-status.component';
 import {
@@ -36,13 +38,22 @@ describe(BiteImageStatusComponent.name, () => {
   let component: BiteImageStatusComponent;
   let fixture: ComponentFixture<BiteImageStatusComponent>;
   let componentRef: ComponentRef<BiteImageStatusComponent>;
+  // Undefined until the first Capacitor read resolves, which is the state the
+  // component is created in on a real device.
+  const networkStatus = signal<ConnectionStatus | undefined>(undefined);
 
   beforeEach(async () => {
+    networkStatus.set({ connected: true, connectionType: 'wifi' });
+
     await TestBed.configureTestingModule({
       imports: [BiteImageStatusComponent],
       providers: [
         provideIonicAngular(getIonicConfig()),
         { provide: TranslocoService, useValue: MockTranslocoService },
+        {
+          provide: NetworkStatusService,
+          useValue: { status: networkStatus },
+        },
       ],
     }).compileComponents();
 
@@ -61,6 +72,10 @@ describe(BiteImageStatusComponent.name, () => {
     fixture.nativeElement.querySelector('[data-testid="bite-image-failed"]');
   const queryRetryButton = (): HTMLElement | null =>
     fixture.nativeElement.querySelector('[data-testid="bite-image-retry"]');
+  const queryOfflineHint = (): HTMLElement | null =>
+    fixture.nativeElement.querySelector(
+      '[data-testid="bite-image-retry-offline"]',
+    );
 
   // The template renders the message through TranslocoPipe, which resolves to
   // an empty string against the mocked service, so the key is asserted at the
@@ -198,6 +213,61 @@ describe(BiteImageStatusComponent.name, () => {
       fixture.detectChanges();
 
       expect(queryRetryButton()).toBeNull();
+    });
+
+    describe('while the device reports no connection', () => {
+      const goOffline = (): void => {
+        networkStatus.set({ connected: false, connectionType: 'none' });
+        fixture.detectChanges();
+      };
+
+      it('should say so instead of offering a retry that cannot work', () => {
+        setUpFailedOwnBite();
+        goOffline();
+
+        expect(queryRetryButton()).toBeNull();
+        expect(queryOfflineHint()).toBeTruthy();
+      });
+
+      it('should still say the upload failed', () => {
+        setUpFailedOwnBite();
+        goOffline();
+
+        expect(queryFailed()).toBeTruthy();
+      });
+
+      it('should offer the retry again once the connection is back', () => {
+        setUpFailedOwnBite();
+        goOffline();
+
+        networkStatus.set({ connected: true, connectionType: 'cellular' });
+        fixture.detectChanges();
+
+        expect(queryRetryButton()).toBeTruthy();
+        expect(queryOfflineHint()).toBeNull();
+      });
+
+      it('should keep the hint to the poster, who is the only one offered a retry', () => {
+        componentRef.setInput(
+          'bite',
+          bite({ imageStatus: 'failed', userId: 'someone-else' }),
+        );
+        componentRef.setInput('userId', 'user1');
+        componentRef.setInput('enableRetry', true);
+        goOffline();
+
+        expect(queryOfflineHint()).toBeNull();
+      });
+    });
+
+    it('should offer the retry while the connection is still unknown', () => {
+      // Nothing has reported yet on a cold start. An unknown connection is not
+      // an absent one, so the poster keeps the button. See GitHub issue #1390.
+      networkStatus.set(undefined);
+      setUpFailedOwnBite();
+
+      expect(queryRetryButton()).toBeTruthy();
+      expect(queryOfflineHint()).toBeNull();
     });
 
     it('should not offer the retry while the upload is still pending', () => {

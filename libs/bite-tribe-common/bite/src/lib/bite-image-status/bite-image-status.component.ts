@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   effect,
+  inject,
   input,
   output,
   signal,
@@ -15,6 +16,7 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { NetworkStatusService } from 'common/networkstatus';
 import type { Bite } from 'model';
 import {
   getEffectiveImageStatus,
@@ -38,6 +40,14 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteImageStatusComponent {
+  /**
+   * Read here rather than passed in, because this component exists so the feed
+   * card, the details page and the profile cannot answer the retry question
+   * differently. Threading connectivity through each of those chains is four
+   * more places for them to drift.
+   */
+  private readonly networkStatus = inject(NetworkStatusService).status;
+
   bite = input.required<Bite>();
 
   /** The signed-in user, used to decide who the pending message speaks to. */
@@ -101,13 +111,40 @@ export class BiteImageStatusComponent {
   });
 
   /**
-   * Only the poster is offered the retry: the photo lives on their device, so
-   * nobody else has anything to send.
+   * Whether this viewer is the one who could re-send the photo at all: the
+   * photo lives on the poster's device, so nobody else has anything to send.
    */
-  protected readonly canRetry = computed((): boolean => {
+  private readonly isRetryable = computed((): boolean => {
     return (
       this.enableRetry() && this.imageStatus() === 'failed' && this.isOwnBite()
     );
+  });
+
+  /**
+   * Offline only when the device has said so. The status is `undefined` until
+   * the first Capacitor read resolves, and unknown is not offline: a retry that
+   * might work beats a message that might be wrong.
+   */
+  private readonly isOffline = computed((): boolean => {
+    return this.networkStatus()?.connected === false;
+  });
+
+  /**
+   * The retry is only offered when it could actually do something. A device
+   * that reports no connection cannot upload, so pressing the button would buy
+   * the poster another thirty seconds of spinner and the same failure back.
+   * See GitHub issue #1390.
+   */
+  protected readonly canRetry = computed((): boolean => {
+    return this.isRetryable() && !this.isOffline();
+  });
+
+  /**
+   * Takes the button's place while the device is offline, so the tile says why
+   * there is nothing to press instead of simply dropping the affordance.
+   */
+  protected readonly showOfflineHint = computed((): boolean => {
+    return this.isRetryable() && this.isOffline();
   });
 
   private readonly isOwnBite = computed((): boolean => {

@@ -261,6 +261,7 @@
   "loading-photo": "جارٍ تحميل الصورة…",
   "image-upload-failed": "تعذّر رفع الصورة",
   "retry-upload": "إعادة محاولة الرفع",
+  "retry-upload-offline": "أنت غير متصل بالإنترنت — أعد الاتصال لرفع الصورة",
   "choose-photo": "اختر صورة",
   "image-upload-retry-failed": "تعذّر بدء الرفع. يرجى المحاولة مرة أخرى.",
   "bite-updated-successfully": "تم تحديث الوجبة بنجاح!",

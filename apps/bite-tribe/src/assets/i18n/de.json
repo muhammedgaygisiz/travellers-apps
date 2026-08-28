@@ -261,6 +261,7 @@
   "loading-photo": "Foto wird geladen…",
   "image-upload-failed": "Foto konnte nicht hochgeladen werden",
   "retry-upload": "Erneut hochladen",
+  "retry-upload-offline": "Du bist offline – zum Hochladen des Fotos brauchst du eine Verbindung",
   "choose-photo": "Foto auswählen",
   "image-upload-retry-failed": "Der Upload konnte nicht gestartet werden. Bitte versuche es erneut.",
   "bite-updated-successfully": "Bite erfolgreich aktualisiert!",

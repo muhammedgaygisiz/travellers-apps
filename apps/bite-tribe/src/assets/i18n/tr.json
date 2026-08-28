@@ -261,6 +261,7 @@
   "loading-photo": "Fotoğraf yükleniyor…",
   "image-upload-failed": "Fotoğraf yüklenemedi",
   "retry-upload": "Yüklemeyi yeniden dene",
+  "retry-upload-offline": "Çevrimdışısın — fotoğrafı yüklemek için tekrar bağlan",
   "choose-photo": "Fotoğraf seç",
   "image-upload-retry-failed": "Yükleme başlatılamadı. Lütfen tekrar deneyin.",
   "bite-updated-successfully": "Bite başarıyla güncellendi!",

@@ -111,6 +111,25 @@
             {{ 'notifications-blocked-by-os' | transloco }}
           </ion-text>
 
+          <!-- Android returns a revoked permission to an unspent prompt, so the
+          OS dialog is still the shortest way back and is offered first. The
+          settings page stays offered next to it because a request the OS
+          silently drops would otherwise be a dead end (issue #1386). -->
+          @if (canRequestPushPermission()) {
+            <ion-button
+              expand="block"
+              fill="outline"
+              data-testid="settings-notifications-allow-device"
+              [disabled]="pushSetupRunning()"
+              (click)="enablePushOnThisDevice.emit({})"
+            >
+              @if (pushSetupRunning()) {
+                <ion-spinner name="dots" slot="start" />
+              }
+              {{ 'notifications-allow-on-this-device' | transloco }}
+            </ion-button>
+          }
+
           <ion-button
             fill="clear"
             class="ion-align-self-start"
@@ -148,10 +167,21 @@
                   {{ 'notifications-this-device' | transloco }}
                 </ion-note>
               }
+              <!-- The switch below reads off, and this says why: the flag says
+              deliver while the OS drops it (issue #1386). -->
+              @if (isMutedByOs(installation)) {
+                <ion-note
+                  color="warning"
+                  class="notifications-section__device-note"
+                  data-testid="settings-notifications-device-muted"
+                >
+                  {{ 'notifications-muted-on-this-device' | transloco }}
+                </ion-note>
+              }
             </ion-label>
             <ion-toggle
               slot="end"
-              [checked]="installation.enabled"
+              [checked]="isDeliveringTo(installation)"
               (ionChange)="onPushInstallationToggle(installation, $event)"
             />
           </ion-item>
@@ -173,7 +203,7 @@
           fill="outline"
           data-testid="settings-notifications-enable-device"
           [disabled]="pushSetupRunning()"
-          (click)="enablePushOnThisDevice.emit()"
+          (click)="enablePushOnThisDevice.emit({})"
         >
           @if (pushSetupRunning()) {
             <ion-spinner name="dots" slot="start" />

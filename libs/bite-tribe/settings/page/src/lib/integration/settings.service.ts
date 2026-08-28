@@ -119,8 +119,12 @@ export class SettingsService {
    * The list is reloaded on success so the setup action is replaced by the new
    * installation's row; a denial only refreshes the permission state, which
    * turns the action into the device-settings recovery.
+   *
+   * `token` arrives when an installation's own switch asked for this, and names
+   * the device to turn back on in BiteTribe as well as at the OS — a user who
+   * flips a muted switch means both (issue #1386).
    */
-  async enablePushOnThisDevice(): Promise<void> {
+  async enablePushOnThisDevice(token?: string): Promise<void> {
     if (this.pushSetupRunning()) {
       return;
     }
@@ -128,6 +132,8 @@ export class SettingsService {
     this.pushSetupRunning.set(true);
 
     try {
+      await this.enableInstallation(token);
+
       const result = await this.dataAccess.enablePushOnThisDevice();
 
       if (result === 'granted') {
@@ -142,6 +148,28 @@ export class SettingsService {
     } finally {
       this.pushSetupRunning.set(false);
     }
+  }
+
+  /**
+   * Turns BiteTribe's own switch back on for a named installation, before the
+   * OS is asked.
+   *
+   * The order matters. A grant re-registers this installation, and registration
+   * inherits the previous token's `enabled` state — so writing the flag first is
+   * what carries it through a token rotation, while writing it afterwards could
+   * address a token the rotation has already replaced and deleted (issue #1184).
+   * A row that is already on is left alone rather than written back.
+   */
+  private async enableInstallation(token: string | undefined): Promise<void> {
+    const installation = this.pushInstallations().find(
+      (candidate) => candidate.token === token,
+    );
+
+    if (!token || !installation || installation.enabled) {
+      return;
+    }
+
+    await this.setPushInstallationEnabled(token, true);
   }
 
   openPushSettings(): Promise<boolean> {

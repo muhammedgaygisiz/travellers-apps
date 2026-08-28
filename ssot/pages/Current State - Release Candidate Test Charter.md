@@ -206,6 +206,8 @@ Settings is not. With `POST_NOTIFICATIONS` revoked at OS level, the device row s
 
 This is the direct contrast with iOS, where run 6 session 15 recorded that disabling the permission in iOS Settings was recognised, explained, and given an action that opened the right Settings page. **[Issue #1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184)'s OS-permission recovery route exists on iOS and does not exist on Android.** Filed as [#1386](https://github.com/muhammedgaygisiz/travellers-apps/issues/1386). Delivery of a ranking-change notification remains unverified, and #1386 is why.
 
+**Since fixed, and not yet verified on a device.** The blocked state, the recovery action and the copy for both already existed - none of it appeared on Android because only `denied` counted as muted, and Capacitor returns a `POST_NOTIFICATIONS` revoked in system settings to an unspent `prompt`. The three symptoms are one assumption: the row's switch now shows what actually arrives rather than the stored `enabled` flag, a muted device is explained, switching it back on asks the OS instead of writing Firestore, and Android has a settings route at last - a native intent in the app's own wrapper, because App Launcher has no URL for it. The reasoning is in [[issue-1386]]. This check is the test that closes it, and it also unblocks the ranking-change delivery check waiting behind it.
+
 ### Check 10 - The Blocker That Ended The Run
 
 The privacy policy passes: it renders in-app with full content and a February 2026 date.

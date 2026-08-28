@@ -141,7 +141,12 @@ actions may request later when the user understands what capability they are
 enabling. For notifications, issue
 [#1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184) adds
 **Receive notifications on this device** in Settings as a second contextual
-surface.
+surface, and issue
+[#1386](https://github.com/muhammedgaygisiz/travellers-apps/issues/1386) adds
+two more in the same section: **Turn on notifications** next to the muted-device
+explanation, and the installation's own switch when the user flips a muted
+device back on. All three are contextual — the user asked for notifications on
+this device — and all three route through `enablePushOnThisDevice`.
 
 ## Push Permission Rule
 
@@ -191,7 +196,12 @@ delivery address, BiteTribe delivery state, and OS permission:
   device**. Legacy tokens without installation metadata remain manageable
   through an **Unknown device** fallback.
 - OS permission is checked only for the current installation and displayed
-  separately from the backend `enabled` state.
+  separately from the backend `enabled` state. Separately, not independently:
+  the current installation's switch shows what actually arrives, so a missing OS
+  permission renders it off whatever `enabled` says, and switching it back on
+  asks the OS instead of writing the flag (issue
+  [#1386](https://github.com/muhammedgaygisiz/travellers-apps/issues/1386)).
+  See the OS Permission Reflection Rule below.
 - The installation list is account data, so it is listed and switchable from
   every signed-in surface, including a platform that cannot receive push
   itself. Only registering _this_ device is platform-gated: the web build says
@@ -213,6 +223,62 @@ delivery address, BiteTribe delivery state, and OS permission:
 
 Backend delivery filtering stays in `getTokens`, which skips a token whose
 `enabled` is `false` and keeps delivering to a legacy token that has no flag.
+
+### OS Permission Reflection Rule
+
+Only `granted` means delivery. Every other state mutes the device, and the UI
+must say so rather than treat the difference as "not decided yet" (issue
+[#1386](https://github.com/muhammedgaygisiz/travellers-apps/issues/1386)).
+
+The two platforms report a revoked permission differently, which is what made
+this a rule rather than a detail:
+
+- iOS reports a permission the user turned off in Settings as `denied`.
+- Android does not. Capacitor derives its state from
+  `checkSelfPermission` plus a cached "never ask again" flag, so revoking
+  `POST_NOTIFICATIONS` in system settings returns the permission to an unspent
+  `prompt`. Reading `denied` as the only muted state left a registered Android
+  device showing its switch fully on while nothing could arrive.
+
+What follows from it:
+
+- `denied` and `prompt` select the recovery action, never whether to show one.
+  An unspent prompt is offered as the OS dialog, because it is the shorter route
+  back; the system settings page is offered alongside it, because a request the
+  OS silently drops would otherwise be a dead end.
+- The muted state is stated only where registering the device is not already the
+  answer. A device that never registered is told to register, not that something
+  is blocking it.
+- The judgement covers the current installation alone. Another device's OS grant
+  is its own and cannot be read from here.
+
+### Android Settings Route Rule
+
+iOS reaches its own settings page through the `app-settings:` URL scheme and App
+Launcher. Android has no such URL, which is why a revoked `POST_NOTIFICATIONS`
+had no route back at all.
+
+The route is a native intent, fired by an `AppSettings` plugin that is part of
+the Android wrapper rather than an npm dependency:
+`apps/bite-tribe-android/android/app/src/main/java/com/bitetribe/app/AppSettingsPlugin.java`,
+registered in `MainActivity` before `super.onCreate` builds the bridge. It tries
+`ACTION_APP_NOTIFICATION_SETTINGS` first — the app's own notification page,
+carrying exactly the switch the user came for — and falls back to
+`ACTION_APPLICATION_DETAILS_SETTINGS`, which exists on every Android version the
+app supports. It resolves whether a page opened, so a caller can keep guiding
+the user instead of appearing to do nothing.
+
+`libs/common/push-notifications/src/lib/app-settings.ts` is the web-side proxy.
+Location has the same Android gap and is the obvious second caller; the proxy
+moves out of `push-notifications` when it gets one.
+
+Recovery is recognised on re-entering the Settings page, which reloads the
+installation list and re-reads the permission. Returning from the system
+settings page to a Settings page that is still mounted does not re-read it — the
+same limitation iOS has, and not addressed by #1386.
+
+See [[issue-1386]] for what reading a revoked Android permission as "not decided
+yet" cost.
 
 ### Device Metadata Source Rule
 

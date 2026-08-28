@@ -88,6 +88,25 @@ export const NotificationsBlockedByOs: Story = {
 };
 
 /**
+ * Android returns a revoked `POST_NOTIFICATIONS` to an unspent prompt, so the
+ * registered device reads as muted rather than denied: the switch shows off
+ * whatever its stored flag says, and the OS dialog is offered before the
+ * settings page (issue #1386).
+ */
+export const NotificationsMutedWithPromptLeft: Story = {
+  args: {
+    pushInstallations: [
+      {
+        ...thisDevice,
+        label: 'SM-A566B',
+        details: 'Android 16 · 1.0.1 (95)',
+      },
+    ],
+    pushPermission: 'prompt',
+  },
+};
+
+/**
  * The web build cannot receive notifications itself, but the account's other
  * installations are still listed and still switchable from here.
  */

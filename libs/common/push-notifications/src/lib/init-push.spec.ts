@@ -1,6 +1,7 @@
 import { PushNotifications } from '@capacitor/push-notifications';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { Capacitor } from '@capacitor/core';
+import { AppSettings } from './app-settings';
 import type { Platform } from '@ionic/angular';
 import {
   enablePushOnThisDevice,
@@ -30,6 +31,12 @@ jest.mock('@capacitor/core', () => ({
 }));
 jest.mock('@capacitor/app-launcher', () => ({
   AppLauncher: { openUrl: jest.fn() },
+}));
+// The Android settings route is a native intent fired by the app's own
+// Capacitor plugin, so there is nothing to exercise here beyond the fact that
+// the platform branch reaches it and honours what it reports.
+jest.mock('./app-settings', () => ({
+  AppSettings: { openNotificationSettings: jest.fn() },
 }));
 // Token document handling is covered by `push-installation.spec.ts`; here only
 // the fact that registration is delegated to it matters.
@@ -364,16 +371,49 @@ describe('init-push', () => {
       });
     });
 
-    it('reports that it could not open the settings page elsewhere', async () => {
-      // Android has no App Launcher route to the app's own settings page.
+    it('opens the app notification settings on Android', async () => {
+      // Android has no App Launcher route to the app's own settings page, so
+      // the wrapper's native intent is the only way back (issue #1386).
       (Capacitor.getPlatform as jest.Mock).mockReturnValue('android');
+      (AppSettings.openNotificationSettings as jest.Mock).mockResolvedValue({
+        opened: true,
+      });
+
+      await expect(openPushSettings()).resolves.toBe(true);
+      expect(AppSettings.openNotificationSettings).toHaveBeenCalled();
+      expect(AppLauncher.openUrl).not.toHaveBeenCalled();
+    });
+
+    it('reports an Android settings page that did not open', async () => {
+      // A device whose ROM has no activity for the intent leaves the caller to
+      // keep guiding the user rather than to claim it handed them over.
+      (Capacitor.getPlatform as jest.Mock).mockReturnValue('android');
+      (AppSettings.openNotificationSettings as jest.Mock).mockResolvedValue({
+        opened: false,
+      });
+
+      await expect(openPushSettings()).resolves.toBe(false);
+    });
+
+    it('reports that there is no settings page to open on the web', async () => {
+      (Capacitor.getPlatform as jest.Mock).mockReturnValue('web');
 
       await expect(openPushSettings()).resolves.toBe(false);
       expect(AppLauncher.openUrl).not.toHaveBeenCalled();
+      expect(AppSettings.openNotificationSettings).not.toHaveBeenCalled();
     });
 
     it('reports a failed launch instead of throwing', async () => {
       (AppLauncher.openUrl as jest.Mock).mockRejectedValue(new Error('boom'));
+
+      await expect(openPushSettings()).resolves.toBe(false);
+    });
+
+    it('reports a failed Android intent instead of throwing', async () => {
+      (Capacitor.getPlatform as jest.Mock).mockReturnValue('android');
+      (AppSettings.openNotificationSettings as jest.Mock).mockRejectedValue(
+        new Error('boom'),
+      );
 
       await expect(openPushSettings()).resolves.toBe(false);
     });

@@ -151,6 +151,8 @@
   "notifications-no-devices": "እስካሁን ለማሳወቂያ የተመዘገበ መሣሪያ የለም።",
   "notifications-enable-on-this-device": "በዚህ መሣሪያ ላይ ማሳወቂያዎችን ተቀበል",
   "notifications-blocked-by-os": "የመሣሪያህ ቅንብሮች የBiteTribe ማሳወቂያዎችን እያገዱ ናቸው።",
+  "notifications-muted-on-this-device": "በመሣሪያ ቅንብሮች ውስጥ ጠፍቷል",
+  "notifications-allow-on-this-device": "ማሳወቂያዎችን አንቃ",
   "notifications-open-device-settings": "የመሣሪያ ቅንብሮችን ክፈት",
   "notifications-not-supported": "በዚህ መሣሪያ ላይ ማሳወቂያዎች አይገኙም።",
   "notifications-change-failed": "ለዚያ መሣሪያ ማሳወቂያዎችን መቀየር አልቻልንም። እባክህ እንደገና ሞክር።",

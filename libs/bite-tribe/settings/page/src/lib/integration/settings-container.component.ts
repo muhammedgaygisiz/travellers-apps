@@ -30,7 +30,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (togglePushInstallation)="
         service.setPushInstallationEnabled($event.token, $event.enabled)
       "
-      (enablePushOnThisDevice)="service.enablePushOnThisDevice()"
+      (enablePushOnThisDevice)="service.enablePushOnThisDevice($event.token)"
       (openPushSettings)="service.openPushSettings()"
     />
   `,

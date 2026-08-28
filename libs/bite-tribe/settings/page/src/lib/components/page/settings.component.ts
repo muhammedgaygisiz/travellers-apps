@@ -105,7 +105,14 @@ export class PageSettings {
   resendEmailVerification = output<void>();
   deleteAccount = output<void>();
   togglePushInstallation = output<{ token: string; enabled: boolean }>();
-  enablePushOnThisDevice = output<void>();
+  /**
+   * Register this device, or bring a muted one back.
+   *
+   * `token` is present only when the request came from an installation's own
+   * switch, so a device the user had turned off in BiteTribe comes back on
+   * together with the OS permission it is waiting for (issue #1386).
+   */
+  enablePushOnThisDevice = output<{ token?: string }>();
   openPushSettings = output<void>();
 
   private readonly formBuilder = inject(FormBuilder);
@@ -191,11 +198,23 @@ export class PageSettings {
   pushSupported = computed(() => this.pushPermission() !== 'unsupported');
 
   /**
-   * Whether the OS is dropping delivery for this device. Shown next to, not
-   * instead of, the installation's own switch: the two states are independent
-   * and a user who sees only one cannot tell which one to fix.
+   * Whether the OS is dropping delivery for this device.
+   *
+   * Anything short of a grant mutes it, not only an outright denial: Android
+   * returns a revoked `POST_NOTIFICATIONS` to an unspent prompt, and reading
+   * that as "not decided yet" is what left a registered device showing its
+   * switch on while nothing could arrive (issue #1386).
    */
-  pushBlockedByOs = computed(() => this.pushPermission() === 'denied');
+  private readonly osMutesThisDevice = computed(
+    () => this.pushSupported() && this.pushPermission() !== 'granted',
+  );
+
+  /**
+   * Whether the OS prompt can still be spent, and the dialog is therefore the
+   * shortest route back. Once it is gone the system settings page is the only
+   * one left.
+   */
+  canRequestPushPermission = computed(() => this.pushPermission() === 'prompt');
 
   hasCurrentInstallation = computed(() =>
     this.pushInstallations().some(
@@ -228,7 +247,20 @@ export class PageSettings {
     () =>
       this.pushSupported() &&
       !this.hasCurrentInstallation() &&
-      !this.pushBlockedByOs(),
+      this.pushPermission() !== 'denied',
+  );
+
+  /**
+   * Whether to explain the muted OS permission and offer the way back.
+   *
+   * Shown next to, not instead of, an installation's own switch: the two states
+   * are independent and a user who sees only one cannot tell which one to fix.
+   * It stays out of the way while the setup action is the answer — a device
+   * that was never registered is told to register, not that something is
+   * blocking it.
+   */
+  pushBlockedByOs = computed(
+    () => this.osMutesThisDevice() && !this.showPushSetup(),
   );
 
   constructor() {
@@ -306,11 +338,36 @@ export class PageSettings {
   }
 
   /**
+   * Whether the OS is muting this row's device.
+   *
+   * Only the current installation can be judged. Another device's OS grant is
+   * its own, and this device can neither see nor change it (issue #1184).
+   */
+  isMutedByOs(installation: PushInstallationView): boolean {
+    return installation.isCurrentDevice && this.osMutesThisDevice();
+  }
+
+  /**
+   * Whether notifications actually reach this installation.
+   *
+   * The token document's `enabled` flag is what BiteTribe was told to send, not
+   * what arrives: an OS permission that was never granted, or was taken away
+   * again, drops delivery without touching it. A switch driven by the flag
+   * alone claims push is on for a device that cannot receive anything
+   * (issue #1386).
+   */
+  isDeliveringTo(installation: PushInstallationView): boolean {
+    return installation.enabled && !this.isMutedByOs(installation);
+  }
+
+  /**
    * Flips one installation's delivery switch.
    *
    * Ionic also emits `ionChange` when the bound `checked` value is applied, so a
    * value that already matches is dropped — otherwise reloading the list would
-   * write every row back to Firestore.
+   * write every row back to Firestore. The comparison is against what the row
+   * shows rather than against the stored flag, because a muted device shows off
+   * while its flag says on.
    */
   onPushInstallationToggle(
     installation: PushInstallationView,
@@ -318,7 +375,19 @@ export class PageSettings {
   ): void {
     const enabled = event?.detail?.checked;
 
-    if (enabled === undefined || enabled === installation.enabled) {
+    if (
+      enabled === undefined ||
+      enabled === this.isDeliveringTo(installation)
+    ) {
+      return;
+    }
+
+    // Switching a muted device back on is a permission problem, not a Firestore
+    // one: writing `enabled` would leave the switch on and the device just as
+    // silent. The OS has to be asked first (issue #1386).
+    if (enabled && this.isMutedByOs(installation)) {
+      this.enablePushOnThisDevice.emit({ token: installation.token });
+
       return;
     }
 

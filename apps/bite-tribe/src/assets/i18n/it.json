@@ -150,6 +150,8 @@
   "notifications-no-devices": "Nessun dispositivo è ancora registrato per le notifiche.",
   "notifications-enable-on-this-device": "Ricevi le notifiche su questo dispositivo",
   "notifications-blocked-by-os": "Le impostazioni del tuo dispositivo bloccano le notifiche di BiteTribe.",
+  "notifications-muted-on-this-device": "Disattivate nelle impostazioni del dispositivo",
+  "notifications-allow-on-this-device": "Attiva le notifiche",
   "notifications-open-device-settings": "Apri le impostazioni del dispositivo",
   "notifications-not-supported": "Le notifiche non sono disponibili su questo dispositivo.",
   "notifications-change-failed": "Non siamo riusciti a modificare le notifiche per quel dispositivo. Riprova.",

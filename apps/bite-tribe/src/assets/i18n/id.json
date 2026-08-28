@@ -151,6 +151,8 @@
   "notifications-no-devices": "Belum ada perangkat yang terdaftar untuk notifikasi.",
   "notifications-enable-on-this-device": "Terima notifikasi di perangkat ini",
   "notifications-blocked-by-os": "Pengaturan perangkatmu memblokir notifikasi BiteTribe.",
+  "notifications-muted-on-this-device": "Dimatikan di pengaturan perangkat",
+  "notifications-allow-on-this-device": "Aktifkan notifikasi",
   "notifications-open-device-settings": "Buka pengaturan perangkat",
   "notifications-not-supported": "Notifikasi tidak tersedia di perangkat ini.",
   "notifications-change-failed": "Kami tidak dapat mengubah notifikasi untuk perangkat itu. Coba lagi.",

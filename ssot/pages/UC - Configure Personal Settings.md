@@ -33,8 +33,15 @@ installation-specific management:
 - When the current installation is not registered, an explicit **Receive
   notifications on this device** action runs the contextual permission and
   registration flow.
-- OS permission is shown separately from BiteTribe's delivery state. A denied
-  permission receives device-settings recovery guidance.
+- OS permission is shown separately from BiteTribe's delivery state, and the
+  current installation's switch reflects both: an OS permission the user never
+  granted, or took away again, shows the row off whatever its stored `enabled`
+  flag says. The flag is what BiteTribe was told to send, not what arrives
+  (issue [#1386](https://github.com/muhammedgaygisiz/travellers-apps/issues/1386)).
+- A muted current device is explained and given a way back on both platforms:
+  the OS dialog while the prompt can still be spent, and the app's own page in
+  the system settings either way. Switching a muted row back on asks the OS
+  rather than writing the delivery flag.
 - The list is manageable from any signed-in surface. A platform that cannot
   receive push itself, such as the web build, says so and still lists and
   switches the account's other installations.

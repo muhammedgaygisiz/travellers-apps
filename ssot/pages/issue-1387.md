@@ -1,0 +1,39 @@
+- [bug: Native analytics collection stays disabled on devices that ran a dev build](https://github.com/muhammedgaygisiz/travellers-apps/issues/1387) (Issue \#1387)
+- Description
+  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - With `debug.firebase.analytics.app` set to `com.bitetribe.app`, logcat reported `App measurement disabled by setAnalyticsCollectionEnabled(false)` at startup and no `Logging event` line followed while the feed was browsed and a Bite opened.
+  - The only call site in the repository is `provide-firestore-utils.ts`, inside the branch reached only when `NX_APP_BITE_TRIBE_IS_DEV === 'true'`. Build 95 has `IS_DEV` stripped from its bundle, so that build cannot be the caller, and nothing anywhere calls `setEnabled({ enabled: true })`.
+  - Analytics DebugView could therefore not be verified on Android and was recorded as an evidence gap rather than a pass.
+- Findings - the flag is persistent state, not process state
+  - The report's hypothesis is confirmed from the shipped SDK. `FirebaseAnalytics.setEnabled` maps straight to `setAnalyticsCollectionEnabled` in the plugin's `FirebaseAnalytics.java`, and `play-services-measurement-impl` keeps that value in a `com.google.android.gms.measurement.prefs` SharedPreferences file under the key `measurement_enabled`, written with `putBoolean` and read back with `getBoolean` on the next start.
+  - So the DEV-only disable is not scoped to the process, the build, or the install that made the call. It outlives all three. iOS is the same shape - `Analytics.setAnalyticsCollectionEnabled` in the plugin's `FirebaseAnalytics.swift` - so this is not an Android-only defect, only an Android-first observation.
+  - The Android wrapper declares `android:allowBackup="true"` with no `dataExtractionRules` or `fullBackupContent`, so the poisoned preference is inside Android auto-backup's default set. Clearing app data is not reliably enough either: a restore can carry `measurement_enabled=false` onto a fresh install or a new device.
+  - Nothing in the app could ever undo it. A production build set no flag at all and relied on the SDK default, which a device that once ran a dev build no longer has.
+  - **The second question the report raised has an answer already in the code, and it is native.** Every product event goes through `AnalyticsService`, which wraps `FirebaseAnalytics.logEvent` from `@capacitor-firebase/analytics`; the route containers call `setCurrentScreen` on the same plugin; `AuthService` calls `setUserId` on it; and `initialize-firebase-app-check.ts` already branches explicitly - the plugin on `ios`/`android`, the JS SDK otherwise. On a native platform the plugin is the native SDK, so the disabled flag was silencing the app's own events, not only the auto-collected ones. The JS `getAnalytics(app)` instance behind `FIREBASE_ANALYTICS` is the web transport and the App Check telemetry fallback.
+- Decisions
+  - **Production states the flag instead of trusting the default.** `provideFirestoreUtils` calls `setEnabled({ enabled: true })` on the non-dev path, so the first launch of any production build on a poisoned device repairs it. Asserting a value the SDK already defaults to is the cost of the dev branch being allowed to write persistent state at all.
+  - **The re-enable is native-only.** On web the same call sets a `ga-disable-*` window flag that lasts one page load, so there is no leak to undo, and calling it during provider construction would eagerly initialize web analytics for apps that never asked for it - the business app passes `withAnalytics: false` and would otherwise start collecting. The dev disable stays unconditional, because dev on the web should stay quiet.
+  - **The re-enable is not gated on `withAnalytics`.** Native collection is on by default for both apps today, so an unconditional `true` preserves the business app's current behavior while still repairing it; gating on the flag would leave a poisoned business device broken forever for no gain.
+  - **It sits on the non-dev branch, not in `provideStandardFirestoreUtils`.** The dev fallback with no emulator configuration returns the standard providers too, and it must keep analytics off; a spec pins that the enable does not run behind the disable.
+  - **The call cannot break startup.** It is fire-and-forget with a `catch`, matching how `AnalyticsService` and the App Check telemetry treat analytics as best-effort.
+  - **The one call that disagreed with the transport rule was corrected here rather than left as a note.** `FirebaseErrorHandlerService` sent `exception` through the JS SDK on every platform, so a native device reported its errors on a different measurement path than every other event it produced - and on a device with the flag disabled, that is also the one event that would still have arrived, which would have made the gap harder to see rather than easier. It now branches like the App Check telemetry does.
+  - **The exception event stays fire-and-forget.** Reporting a failure must not hold the Crashlytics report behind an analytics round trip, and must never raise a second failure inside the error handler. The web instance is now injected `optional`, because `provideFirestoreAnalytics` yields `null` where analytics is unsupported and `logEvent(null, ...)` would have thrown from inside `handleError`.
+  - Recorded as the Collection Flag Rule and the Transport Rule in [[Architecture - Analytics]].
+- Outcome
+  - `libs/common/ta-firestore/src/lib/provide-firestore-utils.ts`: `enableNativeAnalyticsCollection` is called on the production path, documenting the persistence mechanism at the call site.
+  - `libs/common/ta-firestore/src/lib/__specs__/provide-firestore-utils.spec.ts`: the flag is re-enabled on a native platform, untouched on the web, and never re-enabled on the dev fallback path.
+  - `libs/common/ta-firestore/src/lib/analytics/firebase-error-handler.service.ts`: `logException` picks the platform's transport, tolerates a missing web analytics instance, and swallows its own failures.
+  - `libs/common/ta-firestore/src/lib/analytics/__specs__/firebase-error-handler.service.spec.ts`: the event goes through the plugin on native and the JS SDK on the web with neither reaching the other's transport, an unsupported web instance still reports the error, and a rejected exception event does not stop the report.
+- Validation
+  - `nx test ta-firestore` - 18 suites, 168 tests, pass. Both new guards were confirmed to fail against the unfixed sources before those were restored, so neither is vacuous.
+  - `nx lint ta-firestore` - clean. `nx build bite-tribe` and `nx build bite-tribe-business` - pass. `prettier --check` on the touched sources and SSOT pages - clean.
+  - `git diff --check` - clean.
+- Open
+  - **Nothing here is verified on a device.** The repair only shows up in logcat on the affected phone: `debug.firebase.analytics.app` set, build relaunched, and the `App measurement disabled` line gone with `Logging event` lines following. The charter's Monitoring item - analytics events verified in DebugView from a real device - is the test that closes it, and it has never been executed on Android.
+  - **Devices already poisoned stay poisoned until they run a build that carries this fix.** No production build in the field re-enables anything, so build 95 cannot be used to verify it.
+  - **The dev branch can still write persistent native state.** Disabling collection is the only such call today; anything similar added later inherits the same trap unless production asserts the opposite value as well.
+- Related
+  - [[Architecture - Analytics]]
+  - [[Implementation - Analytics Events]]
+  - [[Current State - Release Candidate Test Charter]]
+  - [[Current State - Known Issues]]

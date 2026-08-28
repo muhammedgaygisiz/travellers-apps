@@ -108,6 +108,11 @@
      project.
   2. Enable debug mode:
   - Android: `adb shell setprop debug.firebase.analytics.app <package-name>`.
+    If logcat answers that app measurement is disabled by
+    `setAnalyticsCollectionEnabled(false)`, the device is carrying a disable a
+    dev build wrote into `com.google.android.gms.measurement.prefs`. Only a
+    build that includes the [[issue-1387]] fix re-enables it; clearing app data
+    may not, because auto-backup can restore the preference.
   - iOS: add launch argument `-FIRDebugEnabled`.
   - Web: analytics debug is visible via the `google-analytics`/`g/collect`
     network calls; use the GA4 DebugView with the debug extension if needed. 3. Open Firebase console → Analytics → DebugView and select the debug device. 4. Exercise each flow and confirm the matching event appears with expected

@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { FIREBASE_ANALYTICS } from './provide-firestore-analytics';
 import { logEvent } from 'firebase/analytics';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import {
   FirebaseCrashlytics,
   StackFrame,
@@ -9,7 +10,7 @@ import { Capacitor } from '@capacitor/core';
 
 @Injectable()
 export class FirebaseErrorHandlerService {
-  analytics = inject(FIREBASE_ANALYTICS);
+  analytics = inject(FIREBASE_ANALYTICS, { optional: true });
 
   async handleError(error: unknown): Promise<void> {
     const err = error as
@@ -18,10 +19,7 @@ export class FirebaseErrorHandlerService {
       | undefined;
     const message = err?.message || err?.toString() || 'Unknown error';
 
-    logEvent(this.analytics, 'exception', {
-      description: message,
-      fatal: true,
-    });
+    this.logException(message);
 
     if (Capacitor.isNativePlatform()) {
       try {
@@ -39,5 +37,39 @@ export class FirebaseErrorHandlerService {
 
     // Optionally, rethrow the error or log it to console
     console.error('Captured error:', error);
+  }
+
+  /**
+   * Emits `exception` on the platform's own analytics transport: the Capacitor
+   * plugin, which is the native SDK on iOS and Android, and the JS SDK on the
+   * web. That is the split the rest of the app uses - `AnalyticsService`,
+   * `setCurrentScreen`, `setUserId`, and the App Check telemetry all route this
+   * way - and this handler was the one place still sending native traffic
+   * through the JS SDK, so exceptions were reported on a different measurement
+   * path than every other event the same device produced (issue #1387).
+   *
+   * It stays fire-and-forget: reporting a failure must not delay the Crashlytics
+   * report behind it, and must never raise a second failure of its own. The web
+   * instance is optional because `provideFirestoreAnalytics` yields null where
+   * analytics is unsupported.
+   */
+  private logException(description: string): void {
+    const params = { description, fatal: true };
+
+    if (Capacitor.isNativePlatform()) {
+      FirebaseAnalytics.logEvent({ name: 'exception', params }).catch(
+        (error) => {
+          console.warn('Failed to log the exception event:', error);
+        },
+      );
+
+      return;
+    }
+
+    if (!this.analytics) {
+      return;
+    }
+
+    logEvent(this.analytics, 'exception', params);
   }
 }

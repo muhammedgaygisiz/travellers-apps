@@ -3,9 +3,17 @@ import { FirebaseErrorHandlerService } from '../firebase-error-handler.service';
 import { FIREBASE_ANALYTICS } from '../provide-firestore-analytics';
 import { logEvent } from 'firebase/analytics';
 import { Capacitor } from '@capacitor/core';
+import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
 
 jest.mock('@capacitor/core');
+jest.mock('@capacitor-firebase/analytics', () => {
+  return {
+    FirebaseAnalytics: {
+      logEvent: jest.fn(),
+    },
+  };
+});
 jest.mock('firebase/analytics', () => {
   return {
     logEvent: jest.fn(),
@@ -25,6 +33,12 @@ describe('FirebaseErrorHandlerService', (): void => {
   const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
   beforeEach(() => {
+    // Both analytics transports are asserted as *not* used on the platform they
+    // do not belong to, so their call history must not leak between tests.
+    jest.mocked(logEvent).mockClear();
+    jest.mocked(FirebaseAnalytics.logEvent).mockClear();
+    jest.mocked(FirebaseAnalytics.logEvent).mockResolvedValue(undefined);
+
     TestBed.configureTestingModule({
       providers: [
         FirebaseErrorHandlerService,
@@ -105,6 +119,25 @@ describe('FirebaseErrorHandlerService', (): void => {
         description: 'Test error',
         fatal: true,
       });
+      expect(FirebaseAnalytics.logEvent).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Captured error:',
+        testError,
+      );
+    });
+
+    it('should still report the error when analytics is unsupported', async () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          FirebaseErrorHandlerService,
+          { provide: FIREBASE_ANALYTICS, useValue: null },
+        ],
+      });
+
+      await TestBed.inject(FirebaseErrorHandlerService).handleError(testError);
+
+      expect(logEvent).not.toHaveBeenCalled();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Captured error:',
         testError,
@@ -115,6 +148,46 @@ describe('FirebaseErrorHandlerService', (): void => {
   describe('given native platform', () => {
     beforeEach(() => {
       jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+    });
+
+    // Every other analytics call on a native platform goes through the
+    // Capacitor plugin, which is the native SDK there. The exception event was
+    // the one that did not, so it reported on a different measurement path
+    // than the events from the same device (issue #1387).
+    it('should emit the exception event through the native plugin', async () => {
+      jest.spyOn(FirebaseCrashlytics, 'recordException').mockResolvedValue();
+
+      await service.handleError(testError);
+
+      expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+        name: 'exception',
+        params: { description: 'Test error', fatal: true },
+      });
+      expect(logEvent).not.toHaveBeenCalled();
+    });
+
+    it('should keep reporting the error when the exception event fails', async () => {
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      jest
+        .mocked(FirebaseAnalytics.logEvent)
+        .mockRejectedValue(new Error('Analytics error'));
+      jest.spyOn(FirebaseCrashlytics, 'recordException').mockResolvedValue();
+
+      await service.handleError(testError);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Captured error:',
+        testError,
+      );
+
+      await Promise.resolve();
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Failed to log the exception event:',
+        expect.any(Error),
+      );
+
+      consoleWarnSpy.mockRestore();
     });
 
     it('should log error on exception in recordException', async () => {

@@ -338,16 +338,16 @@ describe('ImageUploadComponent', () => {
         header: 'choose-image-source',
         buttons: [
           {
-            role: 'cancel',
-            text: 'cancel',
-          },
-          {
             role: 'camera',
             text: 'take-photo',
           },
           {
             role: 'gallery',
             text: 'choose-from-gallery',
+          },
+          {
+            role: 'cancel',
+            text: 'cancel',
           },
         ],
       });

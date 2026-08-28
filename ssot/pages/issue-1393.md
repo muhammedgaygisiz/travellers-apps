@@ -1,0 +1,35 @@
+- [bug: Photo source action sheet lists Cancel before the real actions](https://github.com/muhammedgaygisiz/travellers-apps/issues/1393) (Issue \#1393)
+- Description
+  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - Tapping the photo box on the Bite form opened "Görsel kaynağını seç" with "İptal et" first, then "Fotoğraf çek", then "Galeriden seç". Cancel sat directly under the title, where the first real choice is expected.
+  - Nothing was broken - every option worked - so this is presentation only. It costs a moment of reading on the one sheet that stands between the user and the photo of their Bite.
+- Findings - the sheet is an `ion-alert`, and it renders its buttons in array order
+  - `ImageUploadComponent.showImageSourceDialog` builds an `AlertController` alert whose `buttons` array listed cancel, camera, gallery, in that order. Ionic presents them exactly as listed; `role: 'cancel'` only decides what `onDidDismiss` reports and what the backdrop tap does, never the position.
+  - Three buttons put the group into `alert-button-group-vertical`, so the array order is literally the top-to-bottom row order. That is why the defect shows on this sheet and on no other alert in the app: every other one is a two-button confirm that stays in a single horizontal row, where cancel first correctly means cancel on the left.
+  - The sheet is Android-only. `onImageUploadClick` calls it behind `platform.is('android')`; the web path opens the file input and iOS uses Ionic's own camera prompt. The global Ionic mode is `ios` on every platform (`getIonicConfig()` in `libs/common/utils`), so what the Samsung shows is an iOS-styled alert.
+  - That mode is what makes the fix a pure reorder. Ionic's `ios` stylesheet already bolds `.alert-button:last-child` and draws a hairline divider above every button, so cancel gains the platform's dismissive treatment simply by being last. Measured in the browser after the change: cancel is `font-weight: 700` against `400` for both sources, with the same `0.5px` divider above it.
+- Decisions
+  - **Camera, gallery, then cancel.** Camera stays ahead of gallery: the Bite form is a "photograph the plate in front of you" surface first, and the issue asks for that order explicitly.
+  - **No custom styling for the cancel row.** The first attempt gave it a `cssClass` with a muted colour and a heavier divider. It was removed: the app runs `mode: 'ios'` everywhere, and iOS's dismissive option is the bold last row, so greying it out would have fought the convention the rest of the sheet follows - and it would have been bold and grey at the same time.
+  - **The `role` values are untouched.** `camera`, `gallery`, and `cancel` still drive the `onDidDismiss` branch, so moving the buttons cannot move the behaviour.
+  - **Nothing else in the app is reordered.** The other alerts - delete account, delete gallery, prefill replace, retry - are two-button confirms whose horizontal layout already places cancel correctly.
+- Outcome
+  - `libs/common/ui/image-upload/src/lib/image-upload.component.ts`: the `buttons` array now reads camera, gallery, cancel, with a comment recording why the order is load-bearing.
+  - `libs/common/ui/image-upload/src/lib/__specs__/image-upload.component.spec.ts`: the existing exact-array assertion on `alertController.create` follows, so the order is pinned by a test rather than by the comment.
+  - Recorded as a rule on [[Implementation - Ionic Patterns]].
+- Validation
+  - `nx test image-upload` - 4 suites, 76 tests, pass. `nx lint image-upload` - clean. `nx build bite-tribe` - pass. `git diff --check` - clean.
+  - Mutation-checked: restoring the old cancel-first array fails exactly one test, the `showImageSourceDialog` creation assertion, and no others.
+  - Browser proof in Storybook against `Components/Image Upload/Empty` at 375x812, calling `showImageSourceDialog()` on the live component because the sheet is behind an Android platform check. The rendered rows are `take-photo`, `choose-from-gallery`, `cancel`, the group carries `alert-button-group-vertical`, and the computed styles are `400 / 400 / 700` with a `0.5px` hairline above each row.
+  - Loki was not run: the alert is presented at the app root, outside `#storybook-root`, so no reference image contains it and none of the six Image Upload references can change.
+- Open
+  - **Not verified on a device.** The Samsung SM-A566B that reported it has not run a build carrying the fix, so the ordering is proven in a desktop browser and in the specs only.
+  - **No Storybook or Loki coverage of the sheet.** It is an overlay outside the story root and behind a platform check, so a future reorder would be caught by the unit test alone.
+  - **The `md` mode case is untested.** If the global mode ever stops being `ios`, cancel loses the bold-last-row treatment and Material's own flat button row takes over, which would need its own look at the styling.
+  - **iOS still uses Ionic's native prompt.** `getImageFromNative` runs `CameraSource.Prompt` there, so the iOS sheet's wording and order remain the plugin's, untouched by this change.
+- Related
+  - [[Implementation - Ionic Patterns]]
+  - [[UC - Create And Maintain Personal Bites]]
+  - [[Bite]]
+  - [[Current State - Release Candidate Test Charter]]
+  - [[issue-1392]]

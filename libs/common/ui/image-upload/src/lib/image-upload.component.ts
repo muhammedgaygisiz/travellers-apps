@@ -245,11 +245,12 @@ export class ImageUploadComponent implements ControlValueAccessor {
   async showImageSourceDialog(): Promise<void> {
     const alert = await this.alertController.create({
       header: this.transloco.translate('choose-image-source'),
+      // Cancel goes last. Listing it first put it directly under the header,
+      // where the first real choice is expected, so it read as one of the
+      // sources rather than the way out. Ionic's `ios` mode - which this app
+      // uses on every platform - then styles it as the dismissive option for
+      // free: the last row is bold and every row carries a hairline divider.
       buttons: [
-        {
-          text: this.transloco.translate('cancel'),
-          role: 'cancel',
-        },
         {
           text: this.transloco.translate('take-photo'),
           role: 'camera',
@@ -257,6 +258,10 @@ export class ImageUploadComponent implements ControlValueAccessor {
         {
           text: this.transloco.translate('choose-from-gallery'),
           role: 'gallery',
+        },
+        {
+          text: this.transloco.translate('cancel'),
+          role: 'cancel',
         },
       ],
     });

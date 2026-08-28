@@ -1,0 +1,38 @@
+- [bug: Bitemap Bite drawer has no bottom safe-area spacing](https://github.com/muhammedgaygisiz/travellers-apps/issues/1392) (Issue \#1392)
+- Description
+  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - Selecting a Bite marker on the Bitemap and expanding the drawer put the last row - the star rating and the reaction chip - flush against the system navigation bar. Everything was reachable and the drawer snapped correctly, so this was presentation only.
+  - Raised by the tester while working through the map checks; the matrix did not ask for it.
+- Findings - the drawer positions itself against the viewport, so nothing gave it the inset
+  - `SnapDrawerComponent` is `position: fixed` with `inset: 0` and is pushed down by `transform: translateY(<offset>px)`. The offsets come from `computeSnapOffsets`, which is `window.innerHeight - snapPixel` for the default `[120, 480]`.
+  - On an edge-to-edge Android build `window.innerHeight` includes the strip the navigation bar draws over, so the expanded snap gives the content exactly 480px measured from behind the bar. The drawer's own background does extend under it, which is why the defect reads as a cramped last row rather than a clipped one.
+  - The page around it is not affected because `ion-content` carries Ionic's bottom inset, and the map's `my-position` button already subtracts `env(safe-area-inset-bottom)` by hand. The drawer was the one fixed surface that did neither.
+  - Measured in Storybook at 375x812: the drawer opened at `translateY(332px)`, `bt-bite` ended at y=785, 27px above the viewport bottom. Against a 48px navigation bar that 27px is entirely behind it.
+- Decisions
+  - **Lift the drawer by the inset rather than pad the content.** Padding the bottom of the drawer is invisible: the element is a full viewport tall and its bottom edge is already off-screen, so only the offset it is translated by decides where content lands. Raising the drawer moves the same content up and leaves its own background filling the strip behind the navigation bar, which is what the issue asks for.
+  - **The inset stays in CSS, the snap arithmetic stays in TypeScript.** The template publishes the snap position as `--snap-drawer-offset` and the stylesheet computes `translateY(calc(var(--snap-drawer-offset) - env(safe-area-inset-bottom, 0px)))`. Reading `env()` from JavaScript to fold it into `computeSnapOffsets` would have put a rendering concern into the four snap utilities and their unit tests.
+  - **`env()` directly, not `var(--ion-safe-area-bottom)`.** The `my-position` button in the same feature already uses `env(safe-area-inset-bottom)`, and one spelling per repository is worth more than the extra indirection.
+  - **No new snap constant.** `snapPixels` still means "this much drawer content"; the inset is added underneath it, so the collapsed peek and the expanded panel both clear the bar by the same amount and the input keeps its meaning.
+  - **Nothing about dragging changes.** The offset is a constant shift applied after the pointer math, so the clamp bounds, the direction threshold and the closest-snap search all still work on the raw values.
+- Outcome
+  - `libs/bite-tribe/map/page/src/lib/components/snap-drawer/snap-drawer.component.html`: `[style]` replaced by `[style.--snap-drawer-offset]`.
+  - `.../snap-drawer.component.scss`: `--snap-drawer-offset: 0px` as the default and the `transform` that subtracts the bottom safe area.
+  - `.../snap-drawer/__specs__/snap-drawer.component.spec.ts`: the drawer element publishes the snap position as the custom property the stylesheet reads.
+  - Recorded as a rule on [[Implementation - Ionic Patterns]].
+- Validation
+  - `nx test bite-tribe/map` - 11 suites, 64 tests, pass. `nx lint bite-tribe/map` - clean. `nx build bite-tribe` - pass. `git diff --check` - clean.
+  - Mutation-checked: restoring the old `[style]` transform binding fails exactly the new test and no others.
+  - Browser proof in Storybook against `Pages/Bitemap/With Bites` at 375x812, with the drawer expanded and a 48px band drawn where the navigation bar sits. Before: the stars and the reaction chip are inside the band. After, with the same 48px fed through the rule: the last row ends 27px above the band, the same clearance the drawer has on a device with no bar, and the drawer background still fills the strip so no map shows through.
+  - `npm run loki:test` - the full suite passes and `git status .loki` is empty. `env(safe-area-inset-bottom)` is `0px` in the headless browser, so the rendered transform is unchanged there, and neither Bitemap story opens the drawer in the first place.
+- Open
+  - **Not verified on a device.** The Samsung SM-A566B that reported it has not run a build carrying the fix, so the real inset value and the resulting gap are unconfirmed on hardware.
+  - **The browser proof simulates the inset.** `env(safe-area-inset-bottom)` cannot be forced in a desktop browser, so the 48px was injected as the same `calc()` the shipped rule evaluates. It proves the geometry, not the platform's inset reporting.
+  - **iOS is untested.** The same rule covers the home indicator, and the iOS half of the test charter has not run against a build carrying it.
+  - **No Storybook coverage of the open drawer.** Both Bitemap stories render the collapsed map; the expanded drawer is reached only by clicking a marker, so no Loki reference would catch a regression here.
+  - **A very tall drawer content still overflows.** The snap heights are fixed pixels, so content taller than 480px is cut at the snap either way; the inset only moves where that cut happens.
+- Related
+  - [[Implementation - Ionic Patterns]]
+  - [[UC - Discover Bites]]
+  - [[Bite]]
+  - [[Current State - Release Candidate Test Charter]]
+  - [[issue-1391]]

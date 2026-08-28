@@ -1,6 +1,6 @@
 <div
   class="drawer"
-  [style]="'transform: translateY(' + translateY + 'px)'"
+  [style.--snap-drawer-offset]="translateY + 'px'"
   (pointerdown)="onPointerDown($event)"
   (pointermove)="onPointerMove($event)"
   (pointerup)="onPointerUp($event)"

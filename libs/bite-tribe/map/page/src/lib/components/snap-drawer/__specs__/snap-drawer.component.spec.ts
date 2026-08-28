@@ -137,6 +137,23 @@ describe('SnapDrawerComponent', () => {
     });
   });
 
+  describe('drawer offset', () => {
+    it('should expose the snap position as a custom property', () => {
+      // the stylesheet subtracts the bottom safe area from this property, so
+      // the drawer has to publish the raw snap position rather than a transform
+      computeSnapOffsetsMock.mockReturnValue([320, 740]);
+      getLowestSnapMock.mockReturnValue(740);
+
+      fixture.detectChanges();
+
+      const drawer: HTMLElement =
+        fixture.nativeElement.querySelector('.drawer');
+      expect(drawer.style.getPropertyValue('--snap-drawer-offset')).toBe(
+        '740px',
+      );
+    });
+  });
+
   describe('ngAfterViewInit', () => {
     let querySelectorSpy: SpyInstance;
     let setStyleSpy: SpyInstance;

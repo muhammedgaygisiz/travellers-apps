@@ -21,4 +21,20 @@ describe(WithFirstLetterUpperCasePipe.name, () => {
       expect(pipe.transform('Bite')).toBe('Bite');
     });
   });
+
+  describe('given a Turkish active language', () => {
+    it('should uppercase a leading i to the dotted İ', () => {
+      expect(pipe.transform('istanbul kebap', 'tr')).toBe('İstanbul kebap');
+    });
+
+    it('should leave the rest of the value untouched', () => {
+      expect(pipe.transform('izmir simidi', 'tr')).toBe('İzmir simidi');
+    });
+  });
+
+  describe('given a non-Turkish active language', () => {
+    it('should uppercase a leading i to the dotless I', () => {
+      expect(pipe.transform('istanbul kebap', 'en')).toBe('Istanbul kebap');
+    });
+  });
 });

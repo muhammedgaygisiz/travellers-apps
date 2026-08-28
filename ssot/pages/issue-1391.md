@@ -1,0 +1,38 @@
+- [bug: A typed Bite tag is lost unless a space is pressed](https://github.com/muhammedgaygisiz/travellers-apps/issues/1391) (Issue \#1391)
+- Description
+  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - `run9test` typed into the tag field of the Bite form stayed plain text. It was not committed on blur, on Enter, or on submit, and tapping "Paylaş" posted the Bite without it and without a word about it. Only a space turned it into a chip.
+- Findings - only a delimiter ever committed a tag
+  - `TagsInputComponent` committed a tag from exactly one place: the `valueChanges` pipe, which calls `inputChange` as soon as the typed text contains one of `DELIMITERS` (`' ', ',', '.', '-', '_', ';'`). Nothing else read the field.
+  - The field therefore held live state that no other event drained. Blur, Enter, and the form's own submit all passed it by, so the pending text was dropped as soon as the form was left or posted.
+  - The label ("Etiketler? (boşlukla ayır)") does state the rule, so the behaviour was discoverable, but the failure mode was silent data loss rather than a hint.
+  - The submit button is outside the tag field, so a tap on it does blur the input first. Relying on that alone would leave the fix to event ordering, which is why the form flushes the field explicitly as well.
+- Decisions
+  - **Commit the pending token, rather than render it as a pending chip.** The issue offered both. Committing is what the user already believes has happened - a half-committed chip is a second state to explain, and it would still need the same three events to resolve it.
+  - **Three new commit points, one method.** `commitPendingTag` is called from blur, from Enter, and from `BitePage` before it submits. One method means the three cannot drift, and the delimiter path is untouched.
+  - **Enter commits and does not submit the form.** `onEnter` calls `preventDefault`, so Enter in the tag field means "finish this tag", which is what reaching for it there is for.
+  - **The form flushes the field itself instead of trusting blur.** `toSubmittableBite` calls `commitPendingTag` before it reads the form, so both "Paylaş" and "post and add another" carry the tag no matter how the button was reached.
+  - **The committed value is trimmed, and the existing validity and duplicate rules still apply.** A field holding only blank space is cleared without emitting, and a tag that already exists is not added twice.
+  - **Nothing about how tags are stored changes.** This is the form committing what the user typed; the tag reaches Firestore exactly as before.
+- Outcome
+  - `libs/common/ui/tags/src/lib/tags-input/tags-input.component.ts`: `commitPendingTag` and `onEnter`.
+  - `libs/common/ui/tags/src/lib/tags-input/tags-input.component.html`: `(ionBlur)`, `(keydown.enter)`, and `enterkeyhint="done"` on the tag input.
+  - `libs/bite-tribe/bite/page/src/lib/components/page/bite.page.ts`: a `viewChild` on the tags input, flushed at the top of `toSubmittableBite`.
+  - `libs/common/ui/tags/src/lib/tags-input/__specs__/tags-input.component.spec.ts`: the commit itself (text, trimming, empty field, blank-only field, duplicate), Enter, and the two template bindings - the bindings are the fix, so they are asserted by dispatching `ionBlur` and `keydown` at the element.
+  - `libs/bite-tribe/bite/page/src/lib/components/page/__specs__/bite.page.spec.ts`: `saveBite` emits a tag that was still pending in the field.
+  - Recorded as a rule on [[Bite]].
+- Validation
+  - `nx test tags` - 3 suites, 28 tests, pass. `nx test bite-tribe/bite` - 10 suites, 169 tests, pass. `nx lint tags` and `nx lint bite-tribe/bite` - clean. `nx build bite-tribe` - pass. `git diff --check` - clean.
+  - Both new contracts were mutation-checked: removing the `(ionBlur)` binding fails the tags spec, removing the flush in `toSubmittableBite` fails the Bite page spec.
+  - Browser proof in Storybook against `Components/Tags/Primary`, driving the real Ionic input: typing `run9test` emits nothing, blurring it emits `[..., 'run9test']` and clears the field; Enter emits and prevents the default; a trailing space still commits as before. No console errors.
+- Open
+  - **Not verified on a device.** The fix is proven in a desktop browser and in the specs; the Samsung SM-A566B that reported it has not run a build carrying the fix, so the on-device keyboard's "done" key is unconfirmed.
+  - **No e2e coverage.** `create-bite.page.ts` still commits its tags with a trailing comma, so no Playwright test exercises the blur, Enter, or submit path.
+  - **Loki was not run.** The only markup change is an `enterkeyhint` attribute, which does not render, so the reference should still match.
+  - **Blur commits unconditionally.** Text left in the field and abandoned deliberately now becomes a tag; removing it is one tap on the chip, which is the trade the issue asks for.
+  - **Multi-word paste is unchanged.** Pasted text containing a space is still committed as one tag by the delimiter path rather than split into several.
+- Related
+  - [[Bite]]
+  - [[UC - Create And Maintain Personal Bites]]
+  - [[Current State - Release Candidate Test Charter]]
+  - [[issue-1389]]

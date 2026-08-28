@@ -21,6 +21,9 @@
         formControlName="tagInput"
         fill="outline"
         mode="md"
+        enterkeyhint="done"
+        (keydown.enter)="onEnter($event)"
+        (ionBlur)="commitPendingTag()"
       />
     </ng-container>
   }

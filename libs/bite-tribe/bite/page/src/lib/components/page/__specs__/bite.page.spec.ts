@@ -14,6 +14,8 @@ import {
   pricetagOutline,
 } from 'ionicons/icons';
 import { FormGroup } from '@angular/forms';
+import { By } from '@angular/platform-browser';
+import { TagsInputComponent } from 'common/ui/tags';
 import { Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { TranslocoService } from '@jsverse/transloco';
@@ -300,6 +302,42 @@ describe('BitePage', () => {
 
       expect(emitSpy).toHaveBeenCalledWith(
         expect.objectContaining({ positionSource: 'photo' }),
+      );
+    });
+
+    // Issue #1391: a tag typed but never separated with a space stayed in the
+    // field, and tapping the submit button posted the Bite without it.
+    it('should emit a tag still pending in the tag field', () => {
+      component.biteFormGroup.patchValue({
+        id: '',
+        image: 'data:image/jpeg;base64,test',
+        imagePath: '',
+        description: '',
+        name: 'Test Burger',
+        place: 'Test Place',
+        tags: [],
+        price: '9.99',
+        rating: 0,
+        currency: 'EUR',
+        restaurantId: '',
+        position: {
+          latitude: 0,
+          longitude: 0,
+        },
+        positionSource: null,
+      });
+      componentRef.changeDetectorRef.detectChanges();
+
+      const tagsInput = fixture.debugElement.query(
+        By.directive(TagsInputComponent),
+      ).componentInstance as TagsInputComponent;
+      tagsInput.formGroup.get('tagInput')?.setValue('run9test');
+
+      const emitSpy = jest.spyOn(component.submitBite, 'emit');
+      component.saveBite();
+
+      expect(emitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ tags: ['run9test'] }),
       );
     });
 

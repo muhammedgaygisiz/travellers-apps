@@ -159,6 +159,8 @@ export class BitePage {
 
   readonly ionContent = viewChild(IonContent);
 
+  private readonly tagsInput = viewChild(TagsInputComponent);
+
   /** Tags of the Bites already posted in this "add another Bite" session. */
   private readonly previouslyPostedTags = signal<string[]>([]);
 
@@ -578,6 +580,11 @@ export class BitePage {
   }
 
   private toSubmittableBite(): typeof this.biteFormGroup.value | undefined {
+    // A tag that was typed but never separated with a space is still sitting in
+    // the tag field, and was posted as nothing at all (issue #1391). Committing
+    // it here means the Bite carries the tags the user can see on the form.
+    this.tagsInput()?.commitPendingTag();
+
     if (!this.biteFormGroup.valid) {
       return undefined;
     }

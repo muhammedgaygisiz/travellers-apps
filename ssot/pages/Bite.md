@@ -28,6 +28,10 @@ A good Bite makes one concrete dish understandable enough that another person ca
 - A Bite has one geographic position.
 - A Bite can optionally be linked to a verified restaurant.
 - A Bite may contain multiple tags.
+- A tag typed on the Bite form is committed by a delimiter, by Enter, by
+  leaving the field, and by submitting the form. The field is live state that
+  nothing else drains, so a tag left in it used to be posted as nothing at all.
+  See issue \#1391 and [[issue-1391]].
 - A Bite can be liked, but not by its own creator. On their own Bite the
   creator still sees the reaction chip, as a read-only label rather than a
   control, and it is left out entirely while the Bite has no reactions yet. See

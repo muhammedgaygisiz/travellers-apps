@@ -54,6 +54,32 @@ export class TagsInputComponent implements OnInit {
     }
   }
 
+  /**
+   * Turns whatever is still in the field into a tag. Only a delimiter used to
+   * do that, so a tag that was typed and then submitted, confirmed with Enter,
+   * or left by tapping elsewhere was dropped without a word (issue #1391).
+   * The input calls this on Enter and on blur, the owning form before it
+   * submits.
+   */
+  commitPendingTag(): void {
+    const pendingTag: string = this.formGroup.get('tagInput')?.value ?? '';
+
+    if (!pendingTag) {
+      return;
+    }
+
+    this.inputChange(pendingTag.trim());
+  }
+
+  /**
+   * Enter commits the tag rather than submitting the surrounding form, which is
+   * what pressing it while the tag field has focus is meant to do.
+   */
+  onEnter(event: Event): void {
+    event.preventDefault();
+    this.commitPendingTag();
+  }
+
   inputChange(value: string): void {
     const isValidTag = !REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES.test(value);
     const isUniqueTag = !this.tags().includes(value);

@@ -148,6 +148,34 @@ explanation, and the installation's own switch when the user flips a muted
 device back on. All three are contextual — the user asked for notifications on
 this device — and all three route through `enablePushOnThisDevice`.
 
+## Media Permission Rule
+
+Picking an existing photo goes through `FilePicker.pickImages({ limit: 1 })` in
+`libs/common/ui/image-upload`. On Android the plugin builds an
+`ActivityResultContracts.PickVisualMedia` intent, which is the system Photo
+Picker: it runs outside the app, returns the one photo the user chose, and
+carries its own read grant for that URI.
+
+`limit: 1` is load-bearing, not cosmetic. At the default `0` the plugin builds
+`PickMultipleVisualMedia` instead, and the picker opens in multi-select mode
+with a confirming tap, while only the first file is ever read.
+
+The picker itself needs no permission. `ACCESS_MEDIA_LOCATION` is nevertheless
+declared and requested in front of it, and that is a product decision rather
+than an oversight: Android strips a picked photo's location metadata for any
+caller that does not hold the grant, so without it the `Aus Bild` position
+source in the Bite form is dead on every gallery photo. Declaring the
+permission without requesting it buys nothing — it is the grant, not the
+declaration, that lifts the redaction. `READ_EXTERNAL_STORAGE` stays for the
+same reason: below API 33 `ACCESS_MEDIA_LOCATION` has no effect without it, and
+`minSdkVersion` is 24.
+
+The price is the "access photos and videos on this device" prompt, and under
+**Allow limited access** a grant screen that asks the user to name the photo
+before the picker asks again. That double selection is accepted. It cannot be
+removed while the photo position is required, because the prompt and the
+unredacted EXIF are the same grant. See GitHub issue #1394.
+
 ## Push Permission Rule
 
 `libs/common/push-notifications` splits this in two:

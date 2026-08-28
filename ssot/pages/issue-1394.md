@@ -1,0 +1,37 @@
+- [Use the Android Photo Picker for the gallery path](https://github.com/muhammedgaygisiz/travellers-apps/issues/1394) (Issue \#1394)
+- Description
+  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16 (SDK 36).
+  - Tapping "Galeriden seç" on the Bite form raised the Android runtime prompt "Allow BiteTribe to access photos and videos on this device?". Under "Allow limited access" the system's grant-these-photos screen opened first and the app's own picker second, so the tester chose the photo twice: "I had to choose the photo twice though...".
+  - Filed as an improvement rather than a defect. Under "Allow all" it is a single selection and the flow works; the point was that the app requests a media permission at all.
+- Findings - the picker was already the right one, and the permission is not removable
+  - `ImageUploadComponent.pickImageFromGallery` called `FilePicker.requestPermissions({ permissions: ['accessMediaLocation'] })` and then `FilePicker.pickImages({ readData: true })`.
+  - `pickImages` on Android already builds an `ActivityResultContracts.PickVisualMedia` intent - `FilePickerPlugin.pickVisualMedia` in `@capawesome/capacitor-file-picker` 8.0.3 - which **is** the Android Photo Picker. The premise of the issue, that the gallery path should move onto the Photo Picker, was already satisfied; nothing had to be swapped.
+  - The prompt comes from `ACCESS_MEDIA_LOCATION`. On Android 14 and later it sits in the `READ_MEDIA_VISUAL` permission group, so requesting it shows the photos-and-videos dialog with the "Allow limited access" option, and that option's grant screen is the first of the two selections.
+  - **Removing the request would cost the photo position.** Android redacts location metadata from a picked photo for any caller that does not hold `ACCESS_MEDIA_LOCATION`, and only a granted permission counts - declaring it in the manifest without requesting it changes nothing. The prompt and the readable EXIF are the same grant, so the double selection under limited access cannot be removed while `Aus Bild` is wanted.
+  - The picker also opened in multi-select mode. `limit` defaulted to `0`, which sends the plugin down `PickMultipleVisualMedia` - checkboxes and a confirming tap - while the code only ever read `result.files[0]`.
+- Decisions
+  - **Keep `ACCESS_MEDIA_LOCATION`, keep requesting it.** Reading the position out of the photo is core comfort in this app: the Bite form's whole location section is built around competing sources, and `Aus Bild` is the one that makes posting a photo taken earlier work. The prompt is the price and it is paid. This overrides the issue's "reduces the app's declared media access" benefit, which was written before the EXIF dependency was weighed.
+  - **Keep `READ_EXTERNAL_STORAGE` too.** Below API 33 `ACCESS_MEDIA_LOCATION` has no effect without it, and `minSdkVersion` is 24. It serves the same EXIF goal on older devices.
+  - **`limit: 1`.** This is the part of the issue that ships. Single-select returns on the tap instead of needing a confirming tap, it is what "returns a single user-chosen photo" means, and it matches what the code does with the result. It is free - it costs no permission and no position.
+  - **The request stays in front of the pick rather than after it.** Moving it after would not reduce the number of selections under limited access, and it would depend on an unverified assumption, that a grant obtained after the picker URI was issued still lifts redaction on that URI. Not worth risking the position for no gain.
+  - **The camera path is untouched.** `takePhotoWithCamera` keeps `Camera.requestPermissions()` and `getExifDataFromPhoto`; a capture the app makes itself is never redacted.
+- Outcome
+  - `libs/common/ui/image-upload/src/lib/image-upload.component.ts`: `pickImageFromGallery` passes `limit: 1`, and the permission request now carries a comment recording that it is deliberate and what removing it would cost.
+  - `libs/common/ui/image-upload/src/lib/__specs__/image-upload.component.spec.ts`: the `pickImages` assertion pins `limit: 1`, and a new test pins the `accessMediaLocation` request so it cannot be dropped as dead code.
+  - `apps/bite-tribe-android/android/app/src/main/AndroidManifest.xml`: unchanged. Both media permissions were removed during implementation and restored once the EXIF dependency was weighed.
+  - Recorded as the Media Permission Rule on [[Architecture - Capacitor]], and as flow bullets on [[UC - Create And Maintain Personal Bites]].
+- Validation
+  - `nx test image-upload` - 4 suites, 77 tests, pass. `nx lint image-upload` - clean. `nx build bite-tribe` - pass. `git diff --check` - clean.
+  - Mutation-checked at the point where the permission was still removed: restoring the request and the default limit failed exactly the two assertions written for them and nothing else. The limit assertion still holds; the permission assertion was inverted with the decision.
+  - `./gradlew :app:processDebugMainManifest` was run while the permissions were removed and succeeded, so the manifest is known to merge either way.
+- Open
+  - **Not verified on a device.** No Android device was attached. The single-select behaviour is proven from the plugin's intent construction, not from a run on the Samsung SM-A566B that reported it.
+  - **The EXIF dependency itself is reasoned, not measured.** Redaction without `ACCESS_MEDIA_LOCATION` is the documented Android behaviour, but this app's own read - `getExifDataFromFilePath` through a `content://media/picker/...` URI - has not been observed both ways on one device. If a device shows the position resolving without the grant, the permission becomes removable and the issue can be reopened as originally written.
+  - **The double selection under "Allow limited access" remains.** It is now a recorded trade rather than a defect. The only way to shrink it further would be to move the ask to a first-run surface - see the Contextual Permission Rule on [[Architecture - Capacitor]] - so the photo flow does not carry it. That is not done here.
+  - **No automated coverage of the native surface.** The picker is a system activity; the specs pin the call shape only.
+- Related
+  - [[Architecture - Capacitor]]
+  - [[UC - Create And Maintain Personal Bites]]
+  - [[Bite]]
+  - [[Current State - Release Candidate Test Charter]]
+  - [[issue-1393]]

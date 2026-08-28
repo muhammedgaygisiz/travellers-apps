@@ -1084,6 +1084,7 @@ describe('ImageUploadComponent', () => {
           await component.pickImageFromGallery();
 
           expect(FilePicker.pickImages).toHaveBeenCalledWith({
+            limit: 1,
             readData: true,
           });
           expect(getExifDataFromFilePath).toHaveBeenCalledWith(
@@ -1092,6 +1093,22 @@ describe('ImageUploadComponent', () => {
           expect(mockEmit).toHaveBeenCalledWith({
             latitude: 10,
             longitude: 20,
+          });
+        });
+      });
+
+      describe('given the picker is opened', () => {
+        it('should request media location access before picking', async () => {
+          (FilePicker.pickImages as jest.Mock).mockResolvedValue({
+            files: [],
+          });
+
+          await component.pickImageFromGallery();
+
+          // Without this grant Android strips the photo's location metadata
+          // and `Aus Bild` resolves to nothing. See GitHub issue #1394.
+          expect(FilePicker.requestPermissions).toHaveBeenCalledWith({
+            permissions: ['accessMediaLocation'],
           });
         });
       });

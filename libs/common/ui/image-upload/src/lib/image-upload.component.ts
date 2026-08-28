@@ -302,10 +302,24 @@ export class ImageUploadComponent implements ControlValueAccessor {
     // been read into base64, so the loading state has to cover that wait too.
     this.isLoading.set(true);
     try {
+      // This request is deliberate, and it is what buys the photo's position.
+      // Android redacts location metadata from a picked photo unless the
+      // caller holds `ACCESS_MEDIA_LOCATION`, and the permission is only held
+      // once it has been granted, so declaring it without asking would leave
+      // `Aus Bild` empty on every gallery photo. The cost is the "access
+      // photos and videos on this device" prompt, and under "Allow limited
+      // access" a grant screen that makes the user name the photo before the
+      // picker does - accepted, because reading the position out of the photo
+      // is worth more than the prompt. See GitHub issue #1394.
       await FilePicker.requestPermissions({
         permissions: ['accessMediaLocation'],
       });
       const result = await FilePicker.pickImages({
+        // Single selection. `pickImages` is the Android Photo Picker, and at
+        // the default limit of 0 the plugin builds a `PickMultipleVisualMedia`
+        // intent, so it opened in multi-select mode - checkboxes plus a
+        // confirming tap - while only the first file was ever read below.
+        limit: 1,
         readData: true,
       });
 
@@ -315,7 +329,10 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
       const pickedFile = result.files[0];
 
-      // Extract EXIF data from the file path
+      // Read the GPS position out of the photo. This is why the permission
+      // above is requested; without the grant the read returns a photo whose
+      // location metadata Android has stripped, and the location section
+      // falls back to its other sources.
       if (pickedFile.path) {
         await this.patchPositionFromFilePath(pickedFile.path);
       }

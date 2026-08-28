@@ -28,7 +28,10 @@ A good Bite makes one concrete dish understandable enough that another person ca
 - A Bite has one geographic position.
 - A Bite can optionally be linked to a verified restaurant.
 - A Bite may contain multiple tags.
-- A Bite can be liked.
+- A Bite can be liked, but not by its own creator. On their own Bite the
+  creator still sees the reaction chip, as a read-only label rather than a
+  control, and it is left out entirely while the Bite has no reactions yet. See
+  [[issue-1401]].
 - A Bite can be reviewed.
 - A review can be answered. A root review opens a thread, any authenticated user
   may reply inside it, and replies are one level deep. A new root review is a new

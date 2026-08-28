@@ -111,6 +111,16 @@
 
   [[issue-1283]] is implemented. [[epic-1284]] depends on it: a moderation rule for deleting a root review only has meaning once a root review can carry replies.
 
+- ## Own Bite Reactions
+
+  [[issue-1401]] gives a Bite creator the reaction counts on their own Bite as a read-only label, on the Bite card and on the Bite details page, and removes the client affordance to react to a Bite they created.
+
+  | Work           | Use Case                                                                   | Domain   |
+  | -------------- | -------------------------------------------------------------------------- | -------- |
+  | [[issue-1401]] | [[UC - Create And Maintain Personal Bites]], [[UC - Inspect Bite Details]] | [[Bite]] |
+
+  The rule it adds is recorded on [[Bite]]. The guard is a client affordance only; nothing in the Firestore rules or the like triggers enforces it.
+
 - ## Decisions To Constraints
 
   | Decision                        | Constraint                                                                                                          |

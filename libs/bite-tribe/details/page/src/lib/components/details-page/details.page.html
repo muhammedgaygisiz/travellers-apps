@@ -111,7 +111,10 @@
       </div>
 
       <div class="star-rating ion-margin-bottom">
-        <star-rating readonly [rating]="$safeNavigationMigration(biteData?.rating)" />
+        <star-rating
+          readonly
+          [rating]="$safeNavigationMigration(biteData?.rating)"
+        />
       </div>
 
       <div
@@ -164,7 +167,8 @@
           </span>
           } @if (biteData?.price) {
           <span class="price">
-            {{ $safeNavigationMigration(biteData?.price) | currency:(biteData?.currency || 'USD') }}
+            {{ $safeNavigationMigration(biteData?.price) |
+            currency:(biteData?.currency || 'USD') }}
           </span>
           }
         </div>
@@ -182,7 +186,10 @@
         />
         }
 
-        <span>{{ $safeNavigationMigration(biteData?.createdAt) | timeAgo: activeLang() }}</span>
+        <span
+          >{{ $safeNavigationMigration(biteData?.createdAt) | timeAgo:
+          activeLang() }}</span
+        >
       </div>
 
       <div
@@ -199,6 +206,7 @@
             [biteId]="biteData.id"
             [likeCounts]="likeCounts()"
             [userLikeType]="userLikeType()"
+            [readonly]="isOwnBiteLike()"
             (likeButtonClick)="likeButtonClick.emit($event)"
           />
         </div>
@@ -256,7 +264,10 @@
 
       <div class="map ion-margin-bottom">
         @if (biteData?.position) {
-        <bt-map [geopoints]="[$safeNavigationMigration(biteData?.position)!]" readonly />
+        <bt-map
+          [geopoints]="[$safeNavigationMigration(biteData?.position)!]"
+          readonly
+        />
         }
       </div>
 
@@ -264,7 +275,8 @@
       no way to add any. Rendering it anyway left a "Tags" heading over an empty
       row, announcing an absent optional field as though it had failed to load.
       The tag skeletons below still cover the loading state. -->
-      @let biteTags = $safeNavigationMigration(biteData?.tags); @if (biteTags?.length) {
+      @let biteTags = $safeNavigationMigration(biteData?.tags); @if
+      (biteTags?.length) {
       <bt-tags-input [readonly]="true" [tags]="biteTags!" />
       } @if (!biteData) {
       <div class="ion-display-flex ion-flex-row">

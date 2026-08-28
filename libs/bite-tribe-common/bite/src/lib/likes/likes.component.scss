@@ -17,6 +17,20 @@
       }
     }
 
+    /* A Bite the viewer created themselves reports its likes but offers no
+     * action, so the chip drops the raised look: no fill of its own and no
+     * top/left edge, leaving the emoji and count sitting on whatever surface
+     * carries them. Transparent rather than a fixed colour because the chip
+     * appears both on the card's detail strip and on the details page
+     * background. See GitHub issue #1401. */
+    ion-chip.readonly {
+      background-color: transparent !important;
+      border-top: unset !important;
+      border-left: unset !important;
+      cursor: default;
+      pointer-events: none;
+    }
+
     ion-chip.unliked {
       border-left: var(--border-width) solid var(--ion-color-tertiary-tint) !important;
       border-top: var(--border-width) solid var(--ion-color-tertiary-tint) !important;

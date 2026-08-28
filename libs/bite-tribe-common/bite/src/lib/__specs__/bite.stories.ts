@@ -197,6 +197,27 @@ export const EditMode: Story = {
   }),
 };
 
+/**
+ * The viewer's own Bite in a feed. The likes chip is shown flat and read-only
+ * next to the card corner instead of being hidden. See GitHub issue #1401.
+ */
+export const OwnBiteWithReadOnlyLikes: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...demoBiteBase,
+      userId: OWNER_ID,
+      thumbup: 2,
+      drooling: 1,
+    },
+    userId: OWNER_ID,
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
 export const NoRating: Story = {
   args: {
     ...Bite.args,

@@ -295,6 +295,26 @@ describe('BiteComponent', () => {
     });
   });
 
+  describe('isOwnBite', () => {
+    it('should return true when the bite belongs to the current user', () => {
+      componentRef.setInput('bite', { ...mockBite, userId: 'user1' });
+      componentRef.setInput('userId', 'user1');
+      expect(component.isOwnBite()).toBe(true);
+    });
+
+    it('should return false when the bite belongs to another user', () => {
+      componentRef.setInput('bite', { ...mockBite, userId: 'other-user' });
+      componentRef.setInput('userId', 'user1');
+      expect(component.isOwnBite()).toBe(false);
+    });
+
+    it('should return false when userId is not provided', () => {
+      componentRef.setInput('bite', { ...mockBite, userId: 'user1' });
+      componentRef.setInput('userId', undefined);
+      expect(component.isOwnBite()).toBe(false);
+    });
+  });
+
   describe('isOwnUnratedBite', () => {
     it('should return true when bite belongs to current user and has no rating', () => {
       componentRef.setInput('bite', { ...mockBite, userId: 'user1' });

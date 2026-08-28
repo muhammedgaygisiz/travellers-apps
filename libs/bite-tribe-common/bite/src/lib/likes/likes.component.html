@@ -1,24 +1,26 @@
 <div class="like-container {{ inCard() ? 'in-card' : '' }}">
-  <ion-chip
-    data-testid="like-chip"
-    class="{{ calcClass() }}"
-    (click)="openLikeOptions($event)"
-  >
-    @if (totalLikeCount()) {
-      @for (
-        emoji of getLikeEmojis();
-        let index = $index, last = $last;
-        track index
-      ) {
-        <ion-label class="emoji" [class.last-emoji]="last">{{
-          emoji
+  @if (showChip()) {
+    <ion-chip
+      data-testid="like-chip"
+      class="{{ calcClass() }}"
+      (click)="openLikeOptions($event)"
+    >
+      @if (totalLikeCount()) {
+        @for (
+          emoji of getLikeEmojis();
+          let index = $index, last = $last;
+          track index
+        ) {
+          <ion-label class="emoji" [class.last-emoji]="last">{{
+            emoji
+          }}</ion-label>
+        }
+        <ion-label class="like-nr" data-testid="like-count">{{
+          totalLikeCount()
         }}</ion-label>
+      } @else {
+        <ion-label class="ion-margin-horizontal">👍</ion-label>
       }
-      <ion-label class="like-nr" data-testid="like-count">{{
-        totalLikeCount()
-      }}</ion-label>
-    } @else {
-      <ion-label class="ion-margin-horizontal">👍</ion-label>
-    }
-  </ion-chip>
+    </ion-chip>
+  }
 </div>

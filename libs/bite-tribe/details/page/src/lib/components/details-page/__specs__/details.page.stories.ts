@@ -176,10 +176,18 @@ export const WithPreferredCurrency: Story = {
   },
 };
 
+/**
+ * The viewer looking at a Bite they posted themselves. The likes chip reports
+ * how it was received but is not a control. See GitHub issue #1401.
+ */
 export const MyBite: Story = {
   args: {
     ...WithDescription.args,
     userId: '1',
+    bite: {
+      ...(WithDescription.args?.bite as Bite),
+      userId: '1',
+    },
   },
 };
 

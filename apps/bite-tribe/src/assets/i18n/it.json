@@ -261,6 +261,7 @@
   "loading-photo": "Caricamento della foto…",
   "image-upload-failed": "Impossibile caricare la foto",
   "retry-upload": "Riprova il caricamento",
+  "retry-upload-offline": "Sei offline: riconnettiti per caricare la foto",
   "choose-photo": "Scegli una foto",
   "image-upload-retry-failed": "Non è stato possibile avviare il caricamento. Riprova.",
   "bite-updated-successfully": "Bite aggiornato con successo!",

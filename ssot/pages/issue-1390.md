@@ -1,0 +1,63 @@
+- [bug: Offline photo upload retry never times out](https://github.com/muhammedgaygisiz/travellers-apps/issues/1390) (Issue \#1390)
+- Description
+  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - A Bite created in airplane mode reached `Fotoğraf yüklenemedi` with a `Yüklemeyi yeniden dene` button inside two minutes, which is the failed-photo state working. Tapping retry while still offline returned the tile to the uploading state, where it stayed for six minutes with no failure and no second retry affordance. Reconnecting completed the upload.
+  - The asymmetry was the complaint: the first attempt times out, the retry does not.
+- Findings - the retry never started, so nothing was there to time out
+  - The thirty-second stall watchdog is armed by `handleUploadProgress`, which the retry only reaches after `await this.api.setBiteImageStatus(bite.id, 'pending')`.
+  - That await is a Firestore write. Firestore applies a write to the local cache immediately but settles its promise only when the server acknowledges it, so offline the two come apart: the document reads `pending` at once - which is what put the tile back into the uploading state - while the promise stays open for as long as the device is disconnected.
+  - So `retryImageUpload` was suspended on line one. The store update, the retry analytics event, the transfer, and the watchdog that would have failed it all sat behind that await. Nothing was uploading and nothing was being watched; the spinner was showing a Bite document, not a transfer.
+  - This also explains the recovery. Reconnecting acknowledged the write, the await returned, and only then did the upload start - and succeed - which reads as "the retry eventually worked" but is really "the retry finally began".
+  - The first attempt was never affected because `submitNewBite` does not await a write before uploading, and `failImageUpload` already writes its terminal `failed` with `void` rather than awaiting it. The retry was the one path that awaited.
+- Second finding - the retry was offered where it could not work
+  - Raised on review of the fix rather than by the run: the failed tile offers a retry with no regard for connectivity, so in airplane mode the feed showed the offline banner at the top and, in the card below it, a button that could not possibly succeed.
+  - `canRetry` on `BiteImageStatusComponent` was `enableRetry && failed && isOwnBite`. Connectivity was never part of the question, even though `NetworkStatusService` already drives the Home offline banner from the same signal.
+  - With the timeout fixed, tapping it offline now costs the poster thirty seconds of spinner and a `pending` write queued to the server that other devices will see and then see reverted. Better than forever, still nothing worth offering.
+  - This does not replace the timeout. Capacitor's `Network.getStatus()` reports the interface, not reachability: hotel wifi, a captive portal, and a dead uplink all report `connected: true`, which is exactly when a transfer stalls silently. Gating the button covers airplane mode only, so the retry still has to be able to fail on its own.
+- Decisions
+  - **The tile says why instead of silently dropping the button.** An affordance that disappears reads as a bug; `retry-upload-offline` takes its place under the existing `image-upload-failed` line.
+  - **Unknown is not offline.** `NetworkStatusService.status` is `undefined` until the first Capacitor read resolves, which is the state a cold start renders in. Only an explicit `connected === false` hides the button - a retry that might work beats a message that might be wrong.
+  - **The component reads connectivity itself rather than taking it as an input.** It exists so the feed card, the details page and the profile cannot answer the retry question differently; threading a `networkStatus` input through four chains - two of whose services do not carry it - is four more places to drift. `BiteComponent` already injects `TranslocoService`, and `type:ui` may depend on `scope:common`.
+  - **The offline hint is shown only to the poster.** It stands in for the retry button, and nobody else is offered one.
+  - **`retryImageUpload` is not double-guarded.** A tap that races a connection drop is exactly what the stall timeout above is for.
+  - **Start the pending write, do not await it.** The write is what other viewers and later sessions read, so it still happens and still happens first; only the suspension is removed. `setImageStatus` handles its own errors, so nothing is left unhandled by letting it settle on its own.
+  - **No new timeout constant.** The issue asks for the same failure timeout as the initial attempt, and there already is one: `STALLED_UPLOAD_TIMEOUT_MS`. The retry was not missing a watchdog, it was never reaching the code that arms it. Adding a second timer would have hidden that.
+  - **The double-tap guard stays synchronous and stays first.** `uploadsInFlight` is claimed before anything else, so removing the await does not open a window for a second transfer.
+  - **Nothing about the storage transfer changes.** Offline the Storage SDK still retries silently; the watchdog declaring the attempt failed after thirty seconds of silence is the existing #1229 behaviour, now reached by the retry too.
+  - **Recorded as an architecture rule, not a Bite rule.** Awaiting a Firestore write on an offline-capable path is a data-access mistake any feature can repeat, so it belongs on [[Architecture - Data Access]].
+- Outcome
+  - `libs/bite-tribe/bite/data-access/src/lib/bite-data-access.service.ts`: `retryImageUpload` starts the `pending` write instead of awaiting it, with the reason in place.
+  - `libs/bite-tribe/bite/data-access/src/lib/__specs__/bite-data-access.service.spec.ts`: a `while the pending write is not acknowledged yet` block that mocks the write as a promise which never settles - the offline shape - and asserts that the photo is still sent, that the bite reaches `failed` on both the document and the store after `STALLED_UPLOAD_TIMEOUT_MS`, and that a further retry is allowed afterwards.
+  - Recorded as the Offline Write Rule on [[Architecture - Data Access]].
+  - `libs/bite-tribe-common/bite/src/lib/bite-image-status/bite-image-status.component.ts`: `isRetryable` extracted, `isOffline` added, `canRetry` gated on it and `showOfflineHint` taking the button's place.
+  - `.../bite-image-status.component.html`: the hint branch, on `data-testid="bite-image-retry-offline"`.
+  - `.../bite-image-status/__specs__/bite-image-status.component.spec.ts`: a controllable `NetworkStatusService`, and a `while the device reports no connection` block - hint instead of button, the failure line still shown, the button back on reconnect, no hint for another viewer - plus the unknown-connection case.
+  - `retry-upload-offline` in all eleven `apps/bite-tribe` locales and in the business app's `en.json`.
+  - `libs/bite-tribe-common/bite/src/lib/__specs__/bite.stories.ts`: `FailedUploadForOwnerOffline`, which overrides the provider with a disconnected status, and its two Loki references.
+  - Recorded as a rule on [[Bite]].
+- Validation
+  - `NX_DAEMON=false npx nx test bite-tribe/bite-data-access --runInBand` - 3 suites, 46 tests, pass.
+  - Mutation-checked: restoring the `await` fails exactly the three new tests and no others, so they test the fix rather than the code around it.
+  - The mechanism was proven directly, not inferred. A throwaway script drove the real Firebase client SDK against a Firestore emulator: seed online, `disableNetwork`, then `updateDoc`. The snapshot listener received the new value from cache after 1ms, and the `updateDoc` promise was still unsettled 8 seconds later. That is the retry's await, reproduced.
+  - `nx test bite-tribe-common/bite` - 13 suites, 122 tests, pass. `nx test bite-tribe/home`, `bite-tribe/details` and `bite-tribe/profile` - 33 suites, 486 tests, pass, which is what proves the injected service does not disturb the surfaces that render the card.
+  - Mutation-checked again: dropping `!isOffline()` from `canRetry` fails the offline test.
+  - `nx lint` clean for both projects. `nx build bite-tribe` and `nx build bite-tribe-business` - pass. Every locale file re-parsed as JSON.
+  - Browser proof in Storybook: `Components/Bite/Failed Upload For Owner Offline` renders "Photo couldn't be uploaded" over "You're offline — reconnect to upload this photo" with no button, while `Failed Upload For Owner` still renders the button. Console errors are the pre-existing Storybook router noise, identical on an untouched story.
+  - `npm run loki:test` - the full suite passes. The two new references were written with a filtered `loki:update`, and `git status .loki` shows those two files added and nothing else rewritten.
+  - `git diff --check` - clean.
+- Open
+  - **Not verified on a device.** The Samsung SM-A566B that reported it has not run a build carrying the fix, so the thirty-second offline retry timeout is unconfirmed on hardware.
+  - **The emulator proof used the Firebase JS SDK, not the Capacitor plugin's native path.** `@capacitor-firebase/firestore` bridges to the native SDK's write `Task`, which acknowledges on the same terms, and the field report - a six-minute spin that completed on reconnect - matches that shape exactly. Nothing was measured on the native path itself.
+  - **No e2e coverage.** `bite-image-upload-status.spec.ts` covers the failed and retry states; it does not simulate a write that is applied locally but never acknowledged.
+  - **The other await in the retry is untouched.** `uploadBiteImageFromLocalFile` is still awaited, which is correct: it reads a local file and its rejection is the "file is gone" failure path. The watchdog is armed before it, so a slow read cannot hide the Bite in `pending` either.
+  - **The button is only hidden for an interface that is down.** A connection that reports up but carries nothing - captive portal, dead uplink - still offers the retry, and still needs the thirty-second timeout to end it. That is by design, not an oversight.
+  - **Auto-retry on reconnect was considered and not done.** The local photo copy is on disk and `findLocalImageForBite` already finds it, so the tile could re-send itself when the network returns instead of asking. That is a larger change and wants its own issue; the poster still has to come back and tap.
+  - **The translations are unreviewed.** Eleven locales were written in one pass and none has been read by a speaker.
+  - **A queued pending write still reaches the server later.** Offline the sequence written is `pending` then `failed`, and both are delivered in order on reconnect, so other devices briefly see the retry before they see it fail. That is the pre-existing #1168 behaviour and is unchanged.
+- Related
+  - [[Architecture - Data Access]]
+  - [[Bite]]
+  - [[UC - Create And Maintain Personal Bites]]
+  - [[Current State - Release Candidate Test Charter]]
+  - [[issue-1389]]
+  - [[issue-1391]]

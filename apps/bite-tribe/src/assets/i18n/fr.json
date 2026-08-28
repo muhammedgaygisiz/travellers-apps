@@ -261,6 +261,7 @@
   "loading-photo": "Chargement de la photo…",
   "image-upload-failed": "La photo n’a pas pu être envoyée",
   "retry-upload": "Réessayer l’envoi",
+  "retry-upload-offline": "Tu es hors ligne — reconnecte-toi pour envoyer la photo",
   "choose-photo": "Choisir une photo",
   "image-upload-retry-failed": "Impossible de démarrer l’envoi. Veuillez réessayer.",
   "bite-updated-successfully": "Bite mis à jour avec succès !",

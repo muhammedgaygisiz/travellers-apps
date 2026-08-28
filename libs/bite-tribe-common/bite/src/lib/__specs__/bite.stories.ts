@@ -10,6 +10,8 @@ import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { IonButton, provideIonicAngular } from '@ionic/angular/standalone';
 import { BiteSkeletonListComponent } from '../bite-skeleton-list/bite-skeleton-list.component';
 import { Bite as BiteModel } from 'model';
+import { NetworkStatusService } from 'common/networkstatus';
+import type { ConnectionStatus } from '@capacitor/network';
 
 // The app registers its icon set at bootstrap; Storybook has to do it itself or
 // ion-icon renders an empty box (e.g. the failed-upload state).
@@ -347,6 +349,34 @@ export const FailedUploadForOwner: Story = {
     userId: OWNER_ID,
     enableImageRetry: true,
   },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
+/**
+ * The same failure, with the device reporting no connection. The upload cannot
+ * start, so the poster is told why instead of being offered a button that would
+ * spin for thirty seconds and fail again. See GitHub issue #1390.
+ */
+export const FailedUploadForOwnerOffline: Story = {
+  args: { ...FailedUploadForOwner.args },
+  decorators: [
+    applicationConfig({
+      providers: [
+        {
+          provide: NetworkStatusService,
+          useValue: {
+            status: signal<ConnectionStatus>({
+              connected: false,
+              connectionType: 'none',
+            }),
+          },
+        },
+      ],
+    }),
+  ],
   render: (args) => ({
     props: { ...args },
     template,

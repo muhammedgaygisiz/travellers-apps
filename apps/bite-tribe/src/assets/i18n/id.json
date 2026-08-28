@@ -261,6 +261,7 @@
   "loading-photo": "Memuat foto…",
   "image-upload-failed": "Foto tidak dapat diunggah",
   "retry-upload": "Coba unggah lagi",
+  "retry-upload-offline": "Kamu sedang offline — sambungkan lagi untuk mengunggah foto",
   "choose-photo": "Pilih foto",
   "image-upload-retry-failed": "Unggahan tidak dapat dimulai. Silakan coba lagi.",
   "bite-updated-successfully": "Bite berhasil diperbarui!",

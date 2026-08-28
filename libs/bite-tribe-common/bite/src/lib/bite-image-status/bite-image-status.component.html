@@ -26,6 +26,13 @@
         >
           {{ 'retry-upload' | transloco }}
         </ion-button>
+      } @else if (showOfflineHint()) {
+        <ion-text
+          class="image-state-text smalltext"
+          data-testid="bite-image-retry-offline"
+        >
+          {{ 'retry-upload-offline' | transloco }}
+        </ion-text>
       }
     </div>
   }

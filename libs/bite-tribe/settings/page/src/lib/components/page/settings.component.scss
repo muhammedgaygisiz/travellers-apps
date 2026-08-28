@@ -96,6 +96,13 @@
       }
     }
 
+    // A row can carry two notes. "This device" and the OS state are separate
+    // facts, so the second starts its own line rather than running on from the
+    // first (issue #1386).
+    &__device-note {
+      display: block;
+    }
+
     ion-item {
       --padding-start: 0;
       --inner-padding-end: 0;

@@ -150,6 +150,8 @@
   "notifications-no-devices": "ยังไม่มีอุปกรณ์ที่ลงทะเบียนรับการแจ้งเตือน",
   "notifications-enable-on-this-device": "รับการแจ้งเตือนบนอุปกรณ์นี้",
   "notifications-blocked-by-os": "การตั้งค่าอุปกรณ์ของคุณกำลังบล็อกการแจ้งเตือนของ BiteTribe",
+  "notifications-muted-on-this-device": "ปิดอยู่ในการตั้งค่าอุปกรณ์",
+  "notifications-allow-on-this-device": "เปิดการแจ้งเตือน",
   "notifications-open-device-settings": "เปิดการตั้งค่าอุปกรณ์",
   "notifications-not-supported": "อุปกรณ์นี้ไม่รองรับการแจ้งเตือน",
   "notifications-change-failed": "เราไม่สามารถเปลี่ยนการแจ้งเตือนสำหรับอุปกรณ์นั้นได้ โปรดลองอีกครั้ง",

@@ -497,6 +497,97 @@ describe(PageSettings.name, () => {
       expect(byTestId('settings-notifications-blocked')).not.toBeNull();
     });
 
+    it('should show a muted current device as off, whatever its stored flag says', () => {
+      // The flag is what BiteTribe was told to send; the OS decides what
+      // arrives. A switch reading the flag alone claimed push was on for a
+      // device that could not receive anything (issue #1386).
+      const row = installation({ isCurrentDevice: true, enabled: true });
+
+      setInstallations([row], 'denied');
+
+      expect(component.isDeliveringTo(row)).toBe(false);
+      expect(
+        deviceRows()[0].querySelector<HTMLIonToggleElement>('ion-toggle')
+          ?.checked,
+      ).toBe(false);
+      expect(byTestId('settings-notifications-device-muted')).not.toBeNull();
+    });
+
+    it('should leave another device untouched by this device OS permission', () => {
+      // Another installation's grant is its own and cannot be read from here,
+      // so only the current device is judged (issue #1184).
+      const other = installation({ isCurrentDevice: false, enabled: true });
+
+      setInstallations([other], 'denied');
+
+      expect(component.isMutedByOs(other)).toBe(false);
+      expect(component.isDeliveringTo(other)).toBe(true);
+    });
+
+    it('should explain and offer a way back when a registered device lost the OS permission', () => {
+      // Android returns a revoked POST_NOTIFICATIONS to an unspent prompt, so
+      // this reads as `prompt` rather than `denied`. Treating it as "not
+      // decided yet" left the section with nothing but a switch that lied
+      // (issue #1386).
+      setInstallations([installation({ isCurrentDevice: true })], 'prompt');
+
+      expect(byTestId('settings-notifications-blocked')).not.toBeNull();
+      expect(byTestId('settings-notifications-allow-device')).not.toBeNull();
+      expect(
+        byTestId('settings-notifications-open-device-settings'),
+      ).not.toBeNull();
+    });
+
+    it('should offer only the settings route once the OS prompt is spent', () => {
+      // A request the OS silently drops would be a button that does nothing.
+      setInstallations([installation({ isCurrentDevice: true })], 'denied');
+
+      expect(byTestId('settings-notifications-allow-device')).toBeNull();
+      expect(
+        byTestId('settings-notifications-open-device-settings'),
+      ).not.toBeNull();
+    });
+
+    it('should not call a device blocked while registering it is still the answer', () => {
+      // Nothing is wrong on a device that simply never registered: it is told
+      // to register, not that something is in its way.
+      setInstallations([], 'prompt');
+
+      expect(byTestId('settings-notifications-blocked')).toBeNull();
+      expect(byTestId('settings-notifications-enable-device')).not.toBeNull();
+    });
+
+    it('should request the OS permission when a muted device is switched back on', () => {
+      // Writing `enabled` would leave the switch on and the device just as
+      // silent; the OS has to be asked first (issue #1386).
+      const toggleSpy = jest.spyOn(component.togglePushInstallation, 'emit');
+      const setupSpy = jest.spyOn(component.enablePushOnThisDevice, 'emit');
+      const row = installation({
+        token: 'token-9',
+        isCurrentDevice: true,
+        enabled: true,
+      });
+
+      setInstallations([row], 'prompt');
+      component.onPushInstallationToggle(row, { detail: { checked: true } });
+
+      expect(setupSpy).toHaveBeenCalledWith({ token: 'token-9' });
+      expect(toggleSpy).not.toHaveBeenCalled();
+    });
+
+    it('should ignore the echo of a muted row rendering itself off', () => {
+      // Ionic emits `ionChange` for the bound value, which for a muted row is
+      // `false` while the stored flag is `true`. Comparing against the flag
+      // would write that row off in Firestore on every render.
+      const toggleSpy = jest.spyOn(component.togglePushInstallation, 'emit');
+      const row = installation({ isCurrentDevice: true, enabled: true });
+
+      setInstallations([row], 'denied');
+      component.onPushInstallationToggle(row, { detail: { checked: false } });
+
+      expect(toggleSpy).not.toHaveBeenCalled();
+    });
+
     it('should show a truthful unsupported state instead of a dead action', () => {
       setInstallations([], 'unsupported');
 

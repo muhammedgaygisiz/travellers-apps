@@ -2,6 +2,7 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { AppLauncher } from '@capacitor/app-launcher';
+import { AppSettings } from './app-settings';
 import { registerCurrentPushInstallation } from './push-installation';
 import {
   NotificationTarget,
@@ -209,29 +210,36 @@ export const getPushPermissionState = async (
 };
 
 /**
- * Opens the app's own page in the OS settings, the only route back once
- * notifications were denied — the OS silently ignores further permission
- * requests.
+ * Opens the app's own notification page in the OS settings, the only route back
+ * once the OS stopped allowing delivery.
  *
  * Returns whether the settings page was actually opened, so the caller can keep
- * guiding the user instead of appearing to do nothing. iOS exposes the app's
- * settings under a URL scheme; Android has no equivalent that App Launcher can
- * open, so it reports `false` there and needs a native settings plugin.
+ * guiding the user instead of appearing to do nothing. The two platforms get
+ * there differently: iOS exposes the app's settings under a URL scheme, while
+ * Android has no such URL and needs a native intent, which the Android wrapper
+ * supplies through {@link AppSettings} (issue #1386). Neither exists on the
+ * web, which has no OS page to open.
  */
 export const openPushSettings = async (): Promise<boolean> => {
-  if (Capacitor.getPlatform() !== 'ios') {
-    return false;
-  }
+  const platform = Capacitor.getPlatform();
 
   try {
-    await AppLauncher.openUrl({ url: 'app-settings:' });
+    if (platform === 'ios') {
+      await AppLauncher.openUrl({ url: 'app-settings:' });
 
-    return true;
+      return true;
+    }
+
+    if (platform === 'android') {
+      const { opened } = await AppSettings.openNotificationSettings();
+
+      return opened;
+    }
   } catch (error) {
     console.warn('Could not open notification settings: ', error);
-
-    return false;
   }
+
+  return false;
 };
 
 /**

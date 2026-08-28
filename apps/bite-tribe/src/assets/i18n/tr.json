@@ -151,6 +151,8 @@
   "notifications-no-devices": "Bildirimler için henüz kayıtlı cihaz yok.",
   "notifications-enable-on-this-device": "Bu cihazda bildirim al",
   "notifications-blocked-by-os": "Cihaz ayarların BiteTribe bildirimlerini engelliyor.",
+  "notifications-muted-on-this-device": "Cihaz ayarlarında kapalı",
+  "notifications-allow-on-this-device": "Bildirimleri aç",
   "notifications-open-device-settings": "Cihaz ayarlarını aç",
   "notifications-not-supported": "Bu cihazda bildirimler kullanılamıyor.",
   "notifications-change-failed": "Bu cihazın bildirimleri değiştirilemedi. Lütfen tekrar dene.",

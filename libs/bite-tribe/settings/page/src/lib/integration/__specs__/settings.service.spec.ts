@@ -291,6 +291,61 @@ describe(SettingsService.name, () => {
       expect(service.pushPermission()).toBe('unsupported');
     });
 
+    it('turns a muted installation back on together with the OS permission', async () => {
+      // A user flipping a muted switch means both halves: the OS grant it is
+      // waiting for and BiteTribe's own flag they had turned off (issue #1386).
+      loadPushInstallations.mockResolvedValue([
+        installation({ token: 'token-1', enabled: false }),
+      ]);
+      await service.refreshPushInstallations();
+
+      await service.enablePushOnThisDevice('token-1');
+
+      expect(setPushInstallationEnabled).toHaveBeenCalledWith('token-1', true);
+    });
+
+    it('writes the flag before the OS is asked, so a token rotation inherits it', async () => {
+      // A grant re-registers this installation, and registration inherits the
+      // previous token's state. Writing afterwards could address a token the
+      // rotation has already replaced and deleted (issue #1184).
+      loadPushInstallations.mockResolvedValue([
+        installation({ token: 'token-1', enabled: false }),
+      ]);
+      await service.refreshPushInstallations();
+
+      const order: string[] = [];
+      setPushInstallationEnabled.mockImplementation(async () => {
+        order.push('flag');
+      });
+      enablePushOnThisDevice.mockImplementation(async () => {
+        order.push('os');
+
+        return 'granted';
+      });
+
+      await service.enablePushOnThisDevice('token-1');
+
+      expect(order).toEqual(['flag', 'os']);
+    });
+
+    it('leaves an installation that is already on unwritten', async () => {
+      loadPushInstallations.mockResolvedValue([
+        installation({ token: 'token-1', enabled: true }),
+      ]);
+      await service.refreshPushInstallations();
+
+      await service.enablePushOnThisDevice('token-1');
+
+      expect(setPushInstallationEnabled).not.toHaveBeenCalled();
+    });
+
+    it('writes no flag for the setup action, which has no installation yet', async () => {
+      await service.enablePushOnThisDevice();
+
+      expect(setPushInstallationEnabled).not.toHaveBeenCalled();
+      expect(enablePushOnThisDevice).toHaveBeenCalled();
+    });
+
     it('ignores a second tap while the first setup is still running', async () => {
       let resolveSetup!: (value: string) => void;
       enablePushOnThisDevice.mockReturnValue(

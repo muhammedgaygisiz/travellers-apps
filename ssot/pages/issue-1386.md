@@ -1,0 +1,45 @@
+- [bug: Push notification settings do not reflect or recover the OS permission on Android](https://github.com/muhammedgaygisiz/travellers-apps/issues/1386) (Issue \#1386)
+- Description
+  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - Onboarding step 6 was correct: it raised the real `GrantPermissionsActivity` dialog and a grant moved the permission to `granted=true, USER_SET`.
+  - Settings was not. With `POST_NOTIFICATIONS` revoked at OS level, the device row still showed its toggle fully ON. The section carried no blocked-state explanation, no hint that the OS permission was missing, and no action that opened the Android app notification settings. On a second account the same row read ON while the OS reported `granted=false` and `importance=NONE userSet=false` - the permission had never been requested for that account at all - and toggling the row off and on again raised no prompt.
+  - [Issue 1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184)'s OS-permission recovery route existed on iOS and did not exist on Android, which is also why [issue 971](https://github.com/muhammedgaygisiz/travellers-apps/issues/971)'s ranking-change notifications have never been verified as delivered on Android.
+- Findings - one wrong assumption, three symptoms
+  - The section already had a blocked state, a recovery action, and copy for both. None of it appeared on Android because `pushBlockedByOs` was `pushPermission() === 'denied'`, and Android never reports `denied` for a permission the user revoked in system settings.
+  - Capacitor derives its Android permission state in `Bridge.getPermissionStates` from `ActivityCompat.checkSelfPermission` plus a cached "never ask again" flag written by `validatePermissions`. A revoked `POST_NOTIFICATIONS` fails the check and has no cached flag, so it comes back as `prompt`. The cached `denied` only ever exists after an in-app request the user refused permanently.
+  - So the app read "the user revoked notifications" as "the user has not decided yet", and the two states it had were not enough: `denied` was the only muted one, and everything else was treated as fine.
+  - The row's switch was bound to the token document's `enabled` flag alone. That flag is what BiteTribe was told to send, not what arrives, so a muted device rendered its switch on - the "toggle fully ON" in the report.
+  - Switching that row wrote `enabled` to Firestore, which is why toggling off and on raised no prompt and left `granted=false`. The write was answering the wrong question.
+  - `openPushSettings` returned `false` on anything but iOS by construction. Its own comment said Android "needs a native settings plugin": `ACTION_APP_NOTIFICATION_SETTINGS` is an intent action, not a URL, and App Launcher builds an `ACTION_VIEW` intent from a `Uri`, so there was nothing for it to open.
+- Decisions
+  - **Only `granted` means delivery.** Every other state mutes the device, and the difference between `denied` and `prompt` selects the recovery action rather than whether to show one. This is the fix; the rest follows from it. Recorded as the OS Permission Reflection Rule in [[Architecture - Capacitor]].
+  - **The current device's switch shows what arrives, not what was requested.** A muted device renders off whatever `enabled` says, with a short note saying why, and the section's warning above it explains the OS half. The stored flag is left alone: the two reasons delivery can stop stay independent, which is the issue 1184 contract.
+  - **The echo guard compares against what the row shows, not against the stored flag.** Ionic emits `ionChange` for the bound value, which for a muted row is `false` while the flag is `true`. Comparing against the flag would have written every muted row off in Firestore on each render - the same class of bug the guard was added for.
+  - **Switching a muted row back on asks the OS.** Writing `enabled` would leave the switch on and the device just as silent. It routes to the same contextual setup action the button uses, carrying the token so a device the user had also turned off in BiteTribe comes back on with both halves.
+  - **The flag is written before the OS is asked, not after.** A grant re-registers the installation and registration inherits the previous token's `enabled` state, so writing first carries it through a token rotation; writing afterwards could address a token the rotation has already replaced and deleted.
+  - **An unspent prompt is offered as the OS dialog, and the settings page is offered next to it either way.** The dialog is the shorter route back and Android genuinely restores it after a settings-level revoke. The settings link stays because a request the OS silently drops would otherwise be a dead end, and one extra link in a rare state costs less than a button that does nothing.
+  - **The muted state is stated only where registering the device is not already the answer.** A device that never registered is told to register. Showing "something is blocking notifications" above a working setup button would invent a problem.
+  - **The Android settings route is a native intent in the app's own wrapper, not a new npm dependency.** `AppSettingsPlugin` sits next to the existing `AppCheckProviderInstaller`, so the route is versioned with the app and adds nothing to resolve. It tries the app's own notification page first and falls back to the app details page, which exists on every supported Android version, and reports whether either opened.
+- Outcome
+  - `libs/common/push-notifications`: `openPushSettings` branches per platform and reaches the new `AppSettings` proxy on Android; `app-settings.ts` declares it.
+  - `apps/bite-tribe-android/android`: `AppSettingsPlugin.java` fires the intent, `MainActivity` registers it before `super.onCreate` builds the bridge.
+  - `settings.component.ts`: `osMutesThisDevice`, `canRequestPushPermission`, `isMutedByOs`, `isDeliveringTo`; `pushBlockedByOs` and `showPushSetup` no longer overlap; the toggle handler routes a muted switch to the permission request.
+  - `settings.service.ts`: `enablePushOnThisDevice` takes an optional token and turns that installation back on before asking the OS.
+  - Eleven locale files gain `notifications-allow-on-this-device` and `notifications-muted-on-this-device`. A `NotificationsMutedWithPromptLeft` Storybook story covers the Android state that had no representation, and the row's two notes were given separate lines - "This device" and the OS state are separate facts and ran together on one.
+- Validation
+  - `nx test bite-tribe/settings` - 80 tests, pass, including the muted-row rendering, the echo guard, the permission request from a muted switch, and the write-before-ask ordering.
+  - `nx test push-notifications` - 84 tests, pass, including the Android settings route, a page that would not open, and the web build having none.
+  - `nx lint bite-tribe/settings` and `nx lint push-notifications` - clean. `prettier --check` on the touched sources and all eleven locale files - clean.
+  - `nx build bite-tribe` - pass, which type-checks the templates and the container's new binding.
+  - `gradlew :app:compileDebugJavaWithJavac` - pass, so the plugin and its registration compile against the shipped Capacitor Android sources.
+  - `npm run build:storybook`, then a full `loki test`. Two references changed: the new story's, and `Notifications Blocked By Os`, whose device row correctly reads off now. Only the failure set was promoted, so no passing baseline was rewritten. A second full `loki test` is green.
+  - `git diff --check` - clean.
+- Open
+  - **Nothing here is verified on a device.** The whole issue is an Android behaviour, and the reasoning about what Capacitor reports for a revoked `POST_NOTIFICATIONS` is read from `Bridge.getPermissionStates` rather than observed. The charter's check 8 is the test that closes it, and it also unblocks the ranking-change delivery check that #1386 was holding up.
+  - **Returning from the system settings page to a still-mounted Settings page does not re-read the permission.** Recovery is recognised on re-entering the page. That is the limitation iOS already has - run 6 session 15 recorded re-enabling being recognised "after a page transition" - so it was left alone rather than fixed on one platform only. An app-resume refresh would close it for both.
+  - **Location has the same Android gap.** `openLocationSettings` in `libs/common/geolocation` still returns `false` off iOS, and the `AppSettings` plugin it needs now exists. Out of scope here; the proxy moves out of `push-notifications` when that is taken on.
+- Related
+  - [[UC - Configure Personal Settings]]
+  - [[UC - Receive App Notifications And Engagement Updates]]
+  - [[Architecture - Capacitor]]
+  - [[Current State - Release Candidate Test Charter]]

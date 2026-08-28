@@ -151,6 +151,8 @@
   "notifications-no-devices": "لا توجد أجهزة مسجّلة للإشعارات بعد.",
   "notifications-enable-on-this-device": "تلقّي الإشعارات على هذا الجهاز",
   "notifications-blocked-by-os": "إعدادات جهازك تحجب إشعارات BiteTribe.",
+  "notifications-muted-on-this-device": "مُعطَّلة في إعدادات جهازك",
+  "notifications-allow-on-this-device": "تفعيل الإشعارات",
   "notifications-open-device-settings": "فتح إعدادات الجهاز",
   "notifications-not-supported": "الإشعارات غير متاحة على هذا الجهاز.",
   "notifications-change-failed": "تعذّر تغيير الإشعارات لهذا الجهاز. حاول مرة أخرى.",

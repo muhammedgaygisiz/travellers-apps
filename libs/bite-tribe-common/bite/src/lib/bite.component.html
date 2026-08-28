@@ -87,6 +87,7 @@
             [likeCounts]="likeCounts()"
             [userLikeType]="userLikeType()"
             [inCard]="true"
+            [readonly]="isOwnBite()"
             (likeButtonClick)="likeButtonClick.emit($event)"
           />
         }

@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -34,6 +35,13 @@ export class LikesComponent {
   userLikeType = input<LikeType | undefined>();
   inCard = input(false);
 
+  /**
+   * Renders the chip as a plain label instead of a control. Used on a Bite the
+   * viewer created themselves: they may see how it was received, but liking
+   * your own Bite is not an available action. See GitHub issue #1401.
+   */
+  readonly = input(false, { transform: booleanAttribute });
+
   likeButtonClick = output<LikeClick>();
 
   totalLikeCount = computed(() => {
@@ -44,7 +52,17 @@ export class LikesComponent {
     );
   });
 
+  /**
+   * A read-only chip with nothing to report would show a lone thumbs-up that
+   * cannot be tapped, so the zero-like case drops the chip entirely.
+   */
+  showChip = computed(() => !this.readonly() || this.totalLikeCount() > 0);
+
   calcClass = computed(() => {
+    if (this.readonly()) {
+      return 'readonly';
+    }
+
     if (this.userLikeType()) {
       return 'liked';
     }
@@ -64,6 +82,10 @@ export class LikesComponent {
   });
 
   async openLikeOptions($event: MouseEvent): Promise<void> {
+    if (this.readonly()) {
+      return;
+    }
+
     const popover = await this.popoverController.create({
       component: LikeOptionsPopoverMenuComponent,
       event: $event,

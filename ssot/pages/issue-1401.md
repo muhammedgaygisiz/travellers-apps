@@ -1,0 +1,31 @@
+- [feat: user should see own bites likes as read-only](https://github.com/muhammedgaygisiz/travellers-apps/issues/1401) (Issue \#1401)
+- Status
+  - Implemented. This page records the agreed specification the implementation was built against.
+  - Delivered: a `readonly` input on `LikesComponent` with its `readonly` chip style and the `showChip` zero-state rule, `isOwnBite` on `BiteComponent`, `isOwnBiteLike` on `DetailsPage`, Storybook states for both surfaces, and refreshed Loki references.
+- Description
+  - A Bite creator could not see how their own Bite was received. On the Bite card the reaction chip was hidden outright whenever the edit affordance was shown, so My Bites reported nothing at all.
+  - On the Bite details page the opposite was true: the chip was fully interactive, so a creator could react to their own Bite. Nothing in the client or in the Functions prevented it.
+  - The creator should see the reaction chip on their own Bite, as a report rather than as a control.
+- Decisions
+  - The issue asked for the visual to be settled before implementation. Three treatments were sketched - flat, flat with dimmed emoji and count, and a bare count with no chip box. The flat treatment was chosen: the chip keeps its geometry and its emoji sizing, drops its own fill, and drops the top and left border.
+  - The fill is `transparent` rather than a named background colour. The chip appears both on the card's detail strip and on the details page background, and those are different surfaces; `--ion-color-card-border` is also only defined for the dark theme, so naming it would break the light theme.
+  - A read-only chip with no reactions yet is not rendered. The interactive chip shows a lone thumbs-up as an invitation, which is meaningless when it cannot be tapped.
+  - A card showing the edit and delete actions keeps hiding the chip entirely, as it always has. That surface is for managing the Bite, not for reading its reception, and the corner the chip occupies belongs to the Delete button there.
+  - `pointer-events: none` rather than only skipping the click handler, so the chip cannot take a tap or show a hover state at all.
+  - Ownership is read from `Bite.userId`, on both surfaces. The details page also derives ownership from the loaded `biteCreator` profile for its edit button, but that profile is fetched _from_ `Bite.userId` and is still absent on the first render, so it is the weaker signal for a chip that renders immediately.
+- UI
+  - Bite card, own Bite in a feed: the flat chip stays in the card's bottom-right corner where the interactive chip sits.
+  - Bite card with the edit and delete actions, as on My Bites: no chip at all, unchanged.
+  - Bite details page: the flat chip replaces the interactive one on the creator's own Bite.
+- Client
+  - `libs/bite-tribe-common/bite/src/lib/likes` owns the mode. `readonly` collapses `calcClass` to a single `readonly` class, guards `openLikeOptions`, and drives `showChip`.
+  - `libs/bite-tribe-common/bite/src/lib/bite.component.html` passes `isOwnBite()`. Its `!showEditButton() && !readonly()` gate is untouched, so the chip appears on an own Bite in a feed and stays absent wherever the edit actions render.
+  - `libs/bite-tribe/details/page` passes `isOwnBiteLike()`.
+  - Storybook gains `Components/Likes` `Read Only` and `Read Only Without Likes`, and `Components/Bite` `Own Bite With Read Only Likes`. `Read Only Without Likes` renders nothing by design, so it carries `parameters.loki.skip` - Loki fails a zero-height root rather than capturing an empty baseline.
+  - `Pages/Bite` `My Bite` previously set only the viewer's `userId` while the Bite fixture carried no `userId` at all, so it did not actually represent the viewer's own Bite. The fixture now sets it.
+- Not In Scope
+  - No server-side rule stops a creator reacting to their own Bite. The Firestore rules and the like triggers are unchanged, so the guard is a client affordance only. A creator determined to write the document directly still can.
+- Validation
+  - `nx test`/`nx lint` for `bite-tribe-common/bite` and `bite-tribe/details`, then `nx affected -t test,lint` against `origin/develop`.
+  - `npm run build:storybook` and `npm run loki:test`, green after the reference update.
+  - `nx build bite-tribe`.

@@ -51,6 +51,51 @@ describe(LikesComponent.name, () => {
     expect(component.calcClass()).toBe('unliked');
   });
 
+  describe('read-only mode', () => {
+    beforeEach(() => {
+      componentRef.setInput('readonly', true);
+      fixture.detectChanges();
+    });
+
+    it('should calculate the read-only class regardless of the like state', () => {
+      expect(component.calcClass()).toBe('readonly');
+    });
+
+    it('should still show the chip while there are likes to report', () => {
+      expect(component.showChip()).toBe(true);
+    });
+
+    it('should hide the chip when there is nothing to report', () => {
+      componentRef.setInput('likeCounts', {
+        thumbup: 0,
+        drooling: 0,
+        mindblown: 0,
+      });
+      fixture.detectChanges();
+
+      expect(component.showChip()).toBe(false);
+    });
+
+    it('should not open the like options popover', async () => {
+      const createSpy = jest.spyOn(component['popoverController'], 'create');
+
+      await component.openLikeOptions(new MouseEvent('click'));
+
+      expect(createSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should always show the chip when it is interactive', () => {
+    componentRef.setInput('likeCounts', {
+      thumbup: 0,
+      drooling: 0,
+      mindblown: 0,
+    });
+    fixture.detectChanges();
+
+    expect(component.showChip()).toBe(true);
+  });
+
   describe('getLikeEmojis', () => {
     it('should map like types with counts to emojis correctly', () => {
       const emojis = component.getLikeEmojis();

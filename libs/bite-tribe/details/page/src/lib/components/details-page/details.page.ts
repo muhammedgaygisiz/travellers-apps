@@ -410,6 +410,17 @@ export class DetailsPage {
   likeCounts = computed(() => getLikeCounts(this.bite()));
   userLikeType = computed(() => getUserLikeType(this.bite(), this.userId()));
 
+  /**
+   * A Bite the viewer created. Their own likes chip stays visible but is not a
+   * control: liking your own Bite is not an available action. Read off the Bite
+   * rather than the loaded creator profile, which is fetched *from* this same
+   * field and is still absent on the first render. See GitHub issue #1401.
+   */
+  protected readonly isOwnBiteLike = computed(() => {
+    const userId = this.userId();
+    return !!userId && this.bite()?.userId === userId;
+  });
+
   protected readonly biteLocation = computed(() => {
     const bite = this.bite();
     const lang = this.activeLang();

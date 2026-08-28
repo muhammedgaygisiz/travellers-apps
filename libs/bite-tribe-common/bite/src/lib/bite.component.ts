@@ -126,6 +126,15 @@ export class BiteComponent {
     getEffectiveImageStatus(this.bite()),
   );
 
+  /**
+   * A Bite the viewer created. Their own likes chip is shown, but read-only:
+   * liking your own Bite is not an available action. See GitHub issue #1401.
+   */
+  isOwnBite = computed(() => {
+    const userId = this.userId();
+    return !!userId && this.bite().userId === userId;
+  });
+
   isOwnUnratedBite = computed(() => {
     const bite = this.bite();
     const userId = this.userId();

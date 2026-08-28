@@ -22,6 +22,7 @@ import { getPosition } from '../../../utils/get-position';
 import { getDistance } from '../../../utils/get-distance';
 import { DistanceComponent } from 'common/distance';
 import { uniqueBitesByName } from '../../../utils/unique-bites-by-name';
+import { uniqueTagsFromBites } from '../../../utils/unique-tags-from-bites';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { TagsInputComponent } from 'common/ui/tags';
 
@@ -102,11 +103,7 @@ export class RestaurantComponent {
     );
   });
 
-  uniqueTags = computed(() => {
-    const bites = this.bites() || [];
-    const allTags = bites.flatMap((bite) => bite.tags || []);
-    return [...new Set(allTags)];
-  });
+  uniqueTags = computed(() => uniqueTagsFromBites(this.bites() || []));
 
   setSelectedSegment(selectedSegment: unknown): void {
     if (selectedSegment !== 'bites' && selectedSegment !== 'menu') {

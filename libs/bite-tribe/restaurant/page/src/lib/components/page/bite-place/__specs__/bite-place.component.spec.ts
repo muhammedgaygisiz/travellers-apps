@@ -147,5 +147,17 @@ describe('BitePlaceComponent', () => {
       ] as Bite[]);
       expect(component.uniqueTags()).toEqual(['sushi']);
     });
+
+    it('should deduplicate tags across the hash prefix and case', () => {
+      componentRef.setInput('bites', [
+        { tags: ['Chinawok', 'cologne', 'asianfood'] },
+        { tags: ['#Chinawok', '#Cologne', '#asianfood'] },
+      ] as Bite[]);
+      expect(component.uniqueTags()).toEqual([
+        'Chinawok',
+        'cologne',
+        'asianfood',
+      ]);
+    });
   });
 });

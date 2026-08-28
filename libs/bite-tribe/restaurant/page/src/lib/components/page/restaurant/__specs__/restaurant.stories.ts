@@ -85,7 +85,9 @@ export const FullMaintained: Story = {
       },
       {
         ...(Registered.args?.bites?.[1] || {}),
-        tags: ['cocktail', 'aperitif', 'summer'],
+        // The hashed and differently cased spellings collapse into the tags
+        // of the first Bite, so this story renders five chips. See issue #1389.
+        tags: ['#Cocktail', 'aperitif', 'summer', '#Refreshing'],
       },
     ] as Bite[],
     restaurant: {

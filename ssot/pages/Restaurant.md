@@ -29,6 +29,7 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - Verified versus unverified restaurant behavior is an active product area.
 - A Restaurant has no owner today. Ownership, claiming, and authorization are specified in [[UC - Own And Claim Restaurants]] and are the prerequisite for every operational restaurant capability.
 - A Restaurant will be able to have one Floor Plan, containing Rooms and Tables. See [[Floor Plan]] and [[Table]].
+- Restaurant tags are derived from the Bites at the place and are not stored on the Restaurant. Bites keep tags exactly as they were typed, so the derived list compares them with a leading `#` stripped and case folded, shows the first spelling that survives that folding, and never shows the `#`. See issue \#1389 and [[issue-1389]].
 
 ## Required Data
 
@@ -208,7 +209,7 @@ images/restaurants/{restaurantId}/{filename}
 - Restaurant ownership is not clearly represented in the Restaurant model.
 - Candidate verification currently relies on a business-user workflow and callable auth; explicit role-based authorization is not fully modeled here.
 - Menu item actions are not yet connected to Bite creation, reservation, or contact flows.
-- Aggregate rating/tag behavior is derived from Bites and not fully formalized in the Restaurant model.
+- Aggregate rating/tag behavior is derived from Bites and not fully formalized in the Restaurant model. Tag deduplication is a display concern in `libs/bite-tribe/restaurant/page`, folding only the `#` prefix and case; near-duplicates such as `asian food` and `asianfood` still show twice, and search and tag suggestions still read the raw stored strings.
 
 ## Future Ideas
 

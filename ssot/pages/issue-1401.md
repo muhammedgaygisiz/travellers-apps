@@ -25,7 +25,12 @@
   - `Pages/Bite` `My Bite` previously set only the viewer's `userId` while the Bite fixture carried no `userId` at all, so it did not actually represent the viewer's own Bite. The fixture now sets it.
 - Not In Scope
   - No server-side rule stops a creator reacting to their own Bite. The Firestore rules and the like triggers are unchanged, so the guard is a client affordance only. A creator determined to write the document directly still can.
+- E2E
+  - `like-bite.spec.ts` reacted to a Bite it had just created through the UI, which this change makes impossible - the creator's own chip takes no input, so the click timed out. The reaction journey now reacts to a Bite seeded onto `TEST_USERS.organisation` instead, and the fixture is deleted afterwards rather than left in the shared nearby feed.
+  - A second test covers the new rule directly: two Bites seeded onto the signed-in account, one with reactions and one without. The first shows a visible chip with its count that refuses pointer input and opens no popover when tapped at its own coordinates; the second shows no chip at all.
+  - `HomePage.tapLikeChipDirectly` exists because `Locator.click` waits for actionability, which a `pointer-events: none` chip can never reach. The tap is aimed at the chip's own box instead, which is what a real tap does.
 - Validation
   - `nx test`/`nx lint` for `bite-tribe-common/bite` and `bite-tribe/details`, then `nx affected -t test,lint` against `origin/develop`.
+  - `nx e2e bite-tribe-e2e --workers=1`, all 42 green. The `--workers=1` matters: CI runs one worker, and under local parallelism the two `leaderboard.spec.ts` tests race each other on the singleton `meta/leaderboard` document and fail for reasons unrelated to any change under test.
   - `npm run build:storybook` and `npm run loki:test`, green after the reference update.
   - `nx build bite-tribe`.

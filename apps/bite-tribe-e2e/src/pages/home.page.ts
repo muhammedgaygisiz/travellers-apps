@@ -44,6 +44,29 @@ export class HomePage {
     await this.page.waitForURL(/\/bite\/[^/]+$/);
   }
 
+  /** The named Bite's reaction chip, interactive or read-only. */
+  likeChip(name: string): Locator {
+    return this.biteCard(name).getByTestId('like-chip');
+  }
+
+  /**
+   * Clicks the named Bite's reaction chip at its own coordinates instead of
+   * through `Locator.click`, which first waits for the element to be
+   * actionable. On a read-only chip that wait can only time out, so this is the
+   * way to prove a real tap there does nothing. See GitHub issue #1401.
+   */
+  async tapLikeChipDirectly(name: string): Promise<void> {
+    const box = await this.likeChip(name).boundingBox();
+
+    if (!box) {
+      throw new Error(
+        `The like chip on "${name}" has no layout box to aim at.`,
+      );
+    }
+
+    await this.page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
   /**
    * Opens the reaction popover on the named Bite and picks a reaction.
    * `like-chip` opens the popover; `like-option-<reaction>` lives in the

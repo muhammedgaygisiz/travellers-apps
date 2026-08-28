@@ -1,5 +1,10 @@
 :host {
   .drawer {
+    // The offset is set per snap position by the component. Lifting the drawer
+    // by the bottom safe area keeps its last content row clear of the Android
+    // navigation bar and the iOS home indicator.
+    --snap-drawer-offset: 0px;
+
     cursor: grab;
     box-shadow: rgba(0, 0, 0, 0.55) 0 3px 15px;
     position: fixed;
@@ -10,6 +15,9 @@
     background: var(--ion-background-color);
     border-top-left-radius: var(--border-radius);
     border-top-right-radius: var(--border-radius);
+    transform: translateY(
+      calc(var(--snap-drawer-offset) - env(safe-area-inset-bottom, 0px))
+    );
     transition: none;
     touch-action: none;
     display: flex;

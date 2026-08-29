@@ -222,17 +222,15 @@ export class OnboardingService {
     this.setStepValid('language', true);
     await this.dataAccess.applyLanguage(language);
 
-    // Only a stored grant is treated as decided. A stored `false` is
-    // indistinguishable from "never asked" on a fresh settings document, so the
-    // step still offers the choice rather than recording a refusal the user
-    // never gave.
-    //
-    // The stored flag alone is not proof the OS still allows reads: it lives in
-    // Firestore and survives a reinstall or a revoke in system settings, which
-    // both reset the OS grant. Trusting it on its own showed a "granted" step
-    // that never prompted, leaving the app with no position at all — so the
-    // live permission has to agree before the step counts as decided.
-    if (settings?.location && (await this.dataAccess.hasLocationPermission())) {
+    // The live OS grant decides the step, not the stored `settings.location`
+    // flag. The flag lives in Firestore and survives a reinstall or a revoke in
+    // system settings, so it is no proof the OS still allows reads; and it is
+    // absent — or stored `false`, which cannot be told apart from "never
+    // asked" — on a device where the permission is nonetheless already granted.
+    // Requiring the flag as well asked a returning user to grant something the
+    // OS had already answered (issue #1412), the same gap issue #1386 closed
+    // for notifications in Settings.
+    if ((await this.dataAccess.getLocationPermissionState()) === 'granted') {
       this.locationPermission.set('granted');
       this.setStepValid('location', true);
     }

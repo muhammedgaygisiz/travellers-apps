@@ -1,0 +1,41 @@
+- [bug: Onboarding location step ignores an already-granted permission](https://github.com/muhammedgaygisiz/travellers-apps/issues/1412) (Issue \#1412)
+- Description
+  - Found in [[Current State - Release Candidate Test Charter]] Run 10, the Android re-run, on a locally built debug artifact of `develop` at `78889774`, build 1.0.1 (96), on a physical Samsung SM-A566B running Android 16. Run 9 had recorded the same behaviour on iOS as a cross-platform observation rather than an issue.
+  - Onboarding step 5 offers **Share my location** and **Not now** even when `ACCESS_FINE_LOCATION` is already granted at the OS level. The tester ruled the cached-component confound out: granting underneath the app with `adb shell pm grant`, then force-stopping and cold starting, still showed both buttons with the permission `granted=true`.
+  - Nothing breaks. Tapping **Share my location** on an existing grant raises no OS dialog and resolves to "Location is on." immediately. The defect is that a returning user is asked to grant what they already granted, and the assistant presents its own state as unknown while the platform knows it.
+- Findings - the step reconciled against a stored flag that cannot answer the question
+  - `OnboardingService.initializePreferences` prefilled the step only when `settings?.location` **and** the live permission agreed. The `&&` is what hid the grant: on a fresh account there is no settings document at all, and a stored `false` cannot be told apart from "never asked", so the live grant was never allowed to decide anything on its own.
+  - The comment above it recorded the right half of the reasoning - a stored flag survives a reinstall or a revoke that resets the OS grant, so it is no proof of access - and drew the wrong conclusion from it. A flag that is not sufficient is not therefore necessary. The grant is a fact about this installation; the flag is what some install once wrote to Firestore.
+  - The sibling steps had already moved on. `photos` reads `getMediaLocationPermissionState()` and `notifications` reads `getPushPermissionState()`, each with a comment saying the live state is the only truthful answer to "has this already been decided here?" (issues \#1394, \#1184). Location was the one step left behind.
+  - `hasLocationPermission()` was the wrong read for this. It returns `true` on the web build, where there is nothing to pre-check, so calling it alone would have marked every web user's step granted without an answer and persisted `location: true`. `getLocationPermissionState()` already existed for the Home and Bitemap recovery paths and reports `unsupported` there instead.
+  - `settings.location` gates nothing anywhere in the app. Home, Bitemap and the Bite form all branch on the live permission, and Settings has no control for the flag ("the location grant is recorded by onboarding and has no control on this page"). It is a record, not a switch, which is why writing it from the live state loses nothing.
+- Decisions
+  - **The live OS state decides the step, alone.** `getLocationPermissionState() === 'granted'` prefills it; the stored flag no longer takes part in the decision. It is still written on advance, so the record follows the state rather than gating it.
+  - **Only `granted` is prefilled.** `denied` deliberately keeps the two buttons. The issue itself checked that path and ruled it not a defect: the buttons coming back on a restart are the only route left to a user who changed their mind, and Android may still have a prompt with a rationale to spend. Prefilling a denial would take that away to make the screen tidier.
+  - **`unsupported` keeps the buttons too.** The web build has no OS prompt of its own - the browser asks on the first read - so the step keeps offering the choice and resolves to its `unsupported` copy when the user takes it. Web behaviour is unchanged by this issue.
+  - **Read once, at initialization.** This matches the photos and notification steps and the Settings page: a grant made in system settings while the assistant is open is picked up on the next start, not on resume. Adding a foreground re-read would be a different change on all four surfaces.
+  - **`hasLocationPermission` is deleted rather than left unused.** It had exactly one caller, this one. Its `true`-on-web answer is the trap that would re-introduce the same class of bug for the next caller reconciling against it, and `getLocationPermissionState` answers the same question honestly with `unsupported`.
+  - **No UI change.** The step already renders a `granted` permission - the outcome line, no buttons - and has a Storybook story for it. Only which state it arrives in changed.
+- Outcome
+  - `libs/bite-tribe/onboarding/page/src/lib/integration/onboarding.service.ts`: the location prefill reads `getLocationPermissionState()` and drops the `settings?.location` conjunct, with the reasoning in the comment.
+  - `libs/bite-tribe/onboarding/data-access/src/lib/onboarding-data-access.service.ts`: `hasLocationPermission()` replaced by `getLocationPermissionState()`, matching the shape the push and media location reads already have.
+  - `libs/common/geolocation/src/lib/geolocation.ts`: `hasLocationPermission` removed, and `getLocationPermissionState` says why it is the only read on offer.
+  - Specs follow in all three libraries: the service spec now covers a grant with no stored flag, a grant against a stored `false`, a stored grant that outlived the OS permission, an OS denial, and the unsupported surface.
+  - Recorded as the Live State Rule on [[Architecture - Capacitor]], as a target-flow rule on [[UC - Guide New Users After Registration]], and traced on [[Traceability Map]].
+- Validation
+  - `nx test bite-tribe/onboarding` - 9 suites, 167 tests, pass. `nx test bite-tribe/onboarding-data-access` and `nx test geolocation` - pass. `nx lint` on all three - clean. `nx build bite-tribe` - pass. `git diff --check` - clean.
+  - Mutation-checked: restoring the `settings?.location &&` conjunct fails exactly the two new prefill tests - "prefills an OS grant so an already-permitted user is not asked again" and "prefills an OS grant that no stored flag records" - and nothing else.
+  - No Storybook or Loki work: the step component is untouched and its `Granted` story already exists, so no reference image can change.
+- Open
+  - **Not verified on a device.** The Samsung SM-A566B that reported it has not run a build carrying the fix. The repro needs a fresh registration, which an agent must not perform, so the device check belongs to a guided run - grant `ACCESS_FINE_LOCATION` with `adb shell pm grant com.bitetribe.app android.permission.ACCESS_FINE_LOCATION` before reaching step 5 and confirm the step arrives on "Location is on." with no buttons.
+  - **The web build cannot show the fix.** `getLocationPermissionState()` is `unsupported` off-native, so the changed branch is unreachable in a browser and is proven by the unit tests alone.
+  - **iOS is unverified.** Run 9 recorded the same behaviour there and the same code path serves it, but no iOS build carries the fix yet.
+  - **A mid-assistant grant still needs a restart.** Granting in system settings while the assistant is open is not re-read on resume, the same limitation Settings has and #1386 left open.
+  - **The `denied` state is untouched by design.** A user who denied at the OS level still meets the two buttons on the next start, and on Android a spent prompt makes **Share my location** resolve to the denial copy without a dialog. Giving that state a settings handoff, as Home and Settings have, is a separate piece of work.
+- Related
+  - [[Architecture - Capacitor]]
+  - [[UC - Guide New Users After Registration]]
+  - [[User]]
+  - [[Current State - Release Candidate Test Charter]]
+  - [[issue-1386]]
+  - [[issue-1394]]

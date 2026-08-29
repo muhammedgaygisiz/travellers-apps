@@ -29,6 +29,13 @@
 - A notification grant registers the current installation and token. Denial is
   accepted without saving an account-level notification preference;
   `Settings.pushNotifications` is retired by issue #1184.
+- Every permission step reads the live OS state when the assistant starts and
+  skips its question where the permission is already granted. The assistant does
+  not ask what the platform has already answered, and no stored account flag may
+  gate that: the grant is a fact about this installation, while
+  `settings.location` is what a user once chose on some install (issue \#1412,
+  the assistant's half of \#1386). A denial still leaves the choice on screen,
+  because the step is where a user who changed their mind gets back to it.
 - The home city is the `PublicUser.city` the profile header displays next to the
   display name. It shares the location step because it is the same question in
   the user's mind, while the copy keeps it apart from the device position: one
@@ -56,6 +63,8 @@
 - Issues \#1011, \#1012, \#1013, \#1014, \#1015, \#1023, \#1016, \#1017
 - Issue \#1271 (home city collected in the location step), with \#1270 for the
   profile display of the same field
+- Issue \#1412 (the location step reads the live OS grant), following \#1394 for
+  the photos step and \#1184 for notifications
 - ## Related Domains
 - [[User]]
 - [[Bite]]

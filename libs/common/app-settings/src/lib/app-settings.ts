@@ -13,9 +13,10 @@ import { registerPlugin } from '@capacitor/core';
  * Calling it on any other platform rejects, so callers branch on the platform
  * first.
  *
- * Location has the same Android gap and is the obvious second caller. This
- * proxy moves out of `push-notifications` when it gets one; until then it lives
- * next to its only user rather than in a library with one export.
+ * It lived in `push-notifications` while notifications were its only caller.
+ * Media location is the second - `ACCESS_MEDIA_LOCATION` has the same Android
+ * gap - so the proxy moved into a library of its own rather than making one
+ * permission's library a dependency of another's.
  */
 export interface AppSettingsPlugin {
   /**
@@ -25,6 +26,15 @@ export interface AppSettingsPlugin {
    * user instead of appearing to do nothing.
    */
   openNotificationSettings(): Promise<{ opened: boolean }>;
+
+  /**
+   * Opens this app's details page, where its permission list lives.
+   *
+   * This is the route for permissions with no page of their own. Notifications
+   * have one and should keep using {@link openNotificationSettings}; a media
+   * permission does not, and the details page is the closest the OS offers.
+   */
+  openAppDetailsSettings(): Promise<{ opened: boolean }>;
 }
 
 export const AppSettings = registerPlugin<AppSettingsPlugin>('AppSettings');

@@ -56,6 +56,12 @@
         (skipLocation)="skipLocation.emit()"
         (homeCityChange)="homeCityChange.emit($event)"
       />
+      } @case ('photos') {
+      <onboarding-photos-step
+        [permission]="photoLocationPermission()"
+        (enablePhotoLocation)="enablePhotoLocation.emit()"
+        (skipPhotoLocation)="skipPhotoLocation.emit()"
+      />
       } @case ('notifications') {
       <onboarding-notification-step
         [permission]="notificationPermission()"

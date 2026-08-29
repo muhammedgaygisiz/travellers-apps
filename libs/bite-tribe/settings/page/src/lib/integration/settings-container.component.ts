@@ -23,6 +23,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [pushPermission]="service.pushPermission()"
       [pushInstallationsLoading]="service.pushInstallationsLoading()"
       [pushSetupRunning]="service.pushSetupRunning()"
+      [photoLocationPermission]="service.photoLocationPermission()"
+      [photoLocationSetupRunning]="service.photoLocationSetupRunning()"
       (submitSettings)="service.saveSettings($event)"
       (logout)="service.logout()"
       (resendEmailVerification)="service.resendEmailVerification('settings')"
@@ -32,6 +34,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       "
       (enablePushOnThisDevice)="service.enablePushOnThisDevice($event.token)"
       (openPushSettings)="service.openPushSettings()"
+      (enablePhotoLocation)="service.enablePhotoLocation()"
+      (openPhotoLocationSettings)="service.openPhotoLocationSettings()"
     />
   `,
   imports: [PageSettings],
@@ -56,6 +60,7 @@ export class SettingsContainer {
     // Reloaded on every entry: another device may have registered since, and
     // this device's OS permission can be revoked while the app is backgrounded.
     void this.service.refreshPushInstallations();
+    void this.service.refreshPhotoLocationPermission();
 
     if (this.service.emailVerificationPromptVisible()) {
       this.trackPromptShownOnce();

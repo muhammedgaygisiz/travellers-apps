@@ -13,6 +13,7 @@ import { OnboardingPage } from '../../components/onboarding-page/onboarding.page
 import type { PublicUser } from 'model';
 import type { DisplayNameAvailabilityState } from '../../components/identity-step/identity-step.component';
 import type { LocationPermissionState } from '../../components/location-step/location-step.component';
+import type { PhotoLocationPermissionState } from '../../components/photos-step/photos-step.component';
 import type { NotificationPermissionState } from '../../components/notification-step/notification-step.component';
 
 jest.mock('@capacitor-firebase/analytics');
@@ -29,7 +30,7 @@ describe(OnboardingContainerComponent.name, () => {
   let component: OnboardingContainerComponent;
   let fixture: ComponentFixture<OnboardingContainerComponent>;
   let serviceMock: {
-    steps: typeof ONBOARDING_STEPS;
+    steps: ReturnType<typeof signal<typeof ONBOARDING_STEPS>>;
     currentIndex: ReturnType<typeof signal<number>>;
     canAdvance: ReturnType<typeof signal<boolean>>;
     isCurrentStepValid: ReturnType<typeof signal<boolean>>;
@@ -44,6 +45,9 @@ describe(OnboardingContainerComponent.name, () => {
     selectedLanguage: ReturnType<typeof signal<string>>;
     locationPermission: ReturnType<typeof signal<LocationPermissionState>>;
     homeCity: ReturnType<typeof signal<string>>;
+    photoLocationPermission: ReturnType<
+      typeof signal<PhotoLocationPermissionState>
+    >;
     notificationPermission: ReturnType<
       typeof signal<NotificationPermissionState>
     >;
@@ -60,13 +64,15 @@ describe(OnboardingContainerComponent.name, () => {
     requestLocation: jest.Mock;
     skipLocation: jest.Mock;
     updateHomeCity: jest.Mock;
+    requestPhotoLocation: jest.Mock;
+    skipPhotoLocation: jest.Mock;
     requestNotifications: jest.Mock;
     skipNotifications: jest.Mock;
   };
 
   beforeEach(() => {
     serviceMock = {
-      steps: ONBOARDING_STEPS,
+      steps: signal(ONBOARDING_STEPS),
       currentIndex: signal(0),
       canAdvance: signal(false),
       isCurrentStepValid: signal(false),
@@ -79,6 +85,7 @@ describe(OnboardingContainerComponent.name, () => {
       selectedLanguage: signal('en'),
       locationPermission: signal<LocationPermissionState>('idle'),
       homeCity: signal(''),
+      photoLocationPermission: signal<PhotoLocationPermissionState>('idle'),
       notificationPermission: signal<NotificationPermissionState>('idle'),
       initialize: jest.fn().mockResolvedValue(undefined),
       next: jest.fn(),
@@ -93,6 +100,8 @@ describe(OnboardingContainerComponent.name, () => {
       requestLocation: jest.fn(),
       skipLocation: jest.fn(),
       updateHomeCity: jest.fn(),
+      requestPhotoLocation: jest.fn(),
+      skipPhotoLocation: jest.fn(),
       requestNotifications: jest.fn(),
       skipNotifications: jest.fn(),
     };
@@ -158,7 +167,8 @@ describe(OnboardingContainerComponent.name, () => {
     [2, 'onboarding-currency-step'],
     [3, 'onboarding-language-step'],
     [4, 'onboarding-location-step'],
-    [5, 'onboarding-notification-step'],
+    [5, 'onboarding-photos-step'],
+    [6, 'onboarding-notification-step'],
   ])('renders the step component for step index %i', (index, selector) => {
     serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[index]);
     serviceMock.currentIndex.set(index);
@@ -171,8 +181,8 @@ describe(OnboardingContainerComponent.name, () => {
   });
 
   it('renders the finish step on the final step', () => {
-    serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[6]);
-    serviceMock.currentIndex.set(6);
+    serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[7]);
+    serviceMock.currentIndex.set(7);
 
     fixture.detectChanges();
 

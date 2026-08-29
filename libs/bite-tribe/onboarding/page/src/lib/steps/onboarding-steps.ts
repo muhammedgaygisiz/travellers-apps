@@ -11,6 +11,11 @@ export interface OnboardingStepDefinition {
  * users cannot skip ahead or exit before the final step. The concrete inputs
  * for each step are filled in by follow-up issues (#1014, #1015, #1016); this
  * registry only fixes the order and titles (epic #850, issue #1013).
+ *
+ * This is the full registry, not necessarily what a given device shows.
+ * `OnboardingService` narrows it on platforms where a step has nothing to ask:
+ * `photos` exists only on Android, the one platform with a media location
+ * permission (issue #1394).
  */
 export const ONBOARDING_STEPS: readonly OnboardingStepDefinition[] = [
   { id: 'identity', titleKey: 'onboarding-step-identity' },
@@ -18,6 +23,7 @@ export const ONBOARDING_STEPS: readonly OnboardingStepDefinition[] = [
   { id: 'currency', titleKey: 'onboarding-step-currency' },
   { id: 'language', titleKey: 'onboarding-step-language' },
   { id: 'location', titleKey: 'onboarding-step-location' },
+  { id: 'photos', titleKey: 'onboarding-step-photos' },
   { id: 'notifications', titleKey: 'onboarding-step-notifications' },
   { id: 'finish', titleKey: 'onboarding-step-finish' },
 ];

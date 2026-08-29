@@ -37,6 +37,7 @@ import { User } from '@capacitor-firebase/authentication';
 import { CardComponent } from 'common/ui/card';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { PushPermissionState } from 'push-notifications';
+import type { MediaLocationPermissionState } from 'media-location';
 
 /**
  * One registered app installation, as the settings list shows it.
@@ -100,6 +101,13 @@ export class PageSettings {
   /** Whether the current-device setup action is waiting on the OS or Firestore. */
   pushSetupRunning = input(false);
 
+  /**
+   * OS media location permission of this device: whether a photo picked from
+   * the gallery still carries the position it was taken at.
+   */
+  photoLocationPermission = input<MediaLocationPermissionState>('unsupported');
+  photoLocationSetupRunning = input(false);
+
   submitSettings = output<Settings>();
   logout = output<void>();
   resendEmailVerification = output<void>();
@@ -114,6 +122,8 @@ export class PageSettings {
    */
   enablePushOnThisDevice = output<{ token?: string }>();
   openPushSettings = output<void>();
+  enablePhotoLocation = output<void>();
+  openPhotoLocationSettings = output<void>();
 
   private readonly formBuilder = inject(FormBuilder);
 
@@ -261,6 +271,40 @@ export class PageSettings {
    */
   pushBlockedByOs = computed(
     () => this.osMutesThisDevice() && !this.showPushSetup(),
+  );
+
+  /**
+   * Whether this platform has a media location permission at all.
+   *
+   * Only Android does, so everywhere else the section is hidden outright rather
+   * than shown with an "not available here" line. There is nothing the user
+   * could do about it and nothing they are missing: iOS hands the metadata over
+   * with the photo library grant, and the web build reads the chosen file
+   * directly (issue #1394).
+   */
+  photoLocationSupported = computed(
+    () => this.photoLocationPermission() !== 'unsupported',
+  );
+
+  /**
+   * Whether a gallery photo currently loses its position.
+   *
+   * Anything short of a grant strips it, so this is the same "anything but
+   * granted" reading the push section applies to delivery.
+   */
+  photoLocationBlocked = computed(
+    () =>
+      this.photoLocationSupported() &&
+      this.photoLocationPermission() !== 'granted',
+  );
+
+  /**
+   * Whether the OS prompt can still be spent, and the dialog is therefore the
+   * shortest route back. Once it is gone the app's page in the system settings
+   * is the only one left.
+   */
+  canRequestPhotoLocation = computed(
+    () => this.photoLocationPermission() === 'prompt',
   );
 
   constructor() {

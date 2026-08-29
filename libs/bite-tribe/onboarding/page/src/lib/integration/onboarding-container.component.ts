@@ -12,7 +12,7 @@ import { OnboardingService } from './onboarding.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<onboarding-page
     class="ion-page"
-    [steps]="service.steps"
+    [steps]="service.steps()"
     [currentIndex]="service.currentIndex()"
     [canAdvance]="service.canAdvance()"
     [isCurrentStepValid]="service.isCurrentStepValid()"
@@ -24,6 +24,7 @@ import { OnboardingService } from './onboarding.service';
     [selectedLanguage]="service.selectedLanguage()"
     [locationPermission]="service.locationPermission()"
     [homeCity]="service.homeCity()"
+    [photoLocationPermission]="service.photoLocationPermission()"
     [notificationPermission]="service.notificationPermission()"
     (next)="service.next()"
     (back)="service.back()"
@@ -36,6 +37,8 @@ import { OnboardingService } from './onboarding.service';
     (enableLocation)="service.requestLocation()"
     (skipLocation)="service.skipLocation()"
     (homeCityChange)="service.updateHomeCity($event)"
+    (enablePhotoLocation)="service.requestPhotoLocation()"
+    (skipPhotoLocation)="service.skipPhotoLocation()"
     (enableNotifications)="service.requestNotifications()"
     (skipNotifications)="service.skipNotifications()"
     (placeholderValidityChange)="service.setCurrentStepValid($event)"

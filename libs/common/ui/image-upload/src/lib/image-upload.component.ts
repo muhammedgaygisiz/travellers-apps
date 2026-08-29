@@ -100,6 +100,17 @@ export class ImageUploadComponent implements ControlValueAccessor {
   }>();
   clearImagePath = output();
 
+  /**
+   * Where the photo now in the control came from.
+   *
+   * Only a gallery pick can lose its position to Android's redaction: a camera
+   * capture is the app's own file and a web file input reads the bytes
+   * directly. Callers that want to explain a missing photo position have to
+   * know which of the two they are looking at, or they blame the permission for
+   * a photo that simply has no GPS. See GitHub issue #1394.
+   */
+  imagePickedFrom = output<'camera' | 'gallery' | 'web'>();
+
   private readonly fileUpload =
     viewChild<ElementRef<HTMLInputElement>>('fileUploader');
 
@@ -141,6 +152,14 @@ export class ImageUploadComponent implements ControlValueAccessor {
   );
 
   imageFile?: File;
+
+  /**
+   * Filesystem path of the last gallery pick, kept so the position can be read
+   * again after a late media location grant. The first read happens before the
+   * user has any chance to grant, and Android hands back a stripped copy until
+   * they do (issue #1394).
+   */
+  private readonly lastPickedPath = signal<string | undefined>(undefined);
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   _onChange: (value: string | null) => void = () => {};
@@ -201,6 +220,8 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
       await this.setValueAndTriggerChange(compressedFile);
       this.imageFile = compressedFile;
+      this.lastPickedPath.set(undefined);
+      this.imagePickedFrom.emit('web');
     } finally {
       this.isLoading.set(false);
     }
@@ -290,6 +311,8 @@ export class ImageUploadComponent implements ControlValueAccessor {
       const compressedPhoto = await compressPhoto(photo);
 
       await this.setValueAndTriggerChange(compressedPhoto);
+      this.lastPickedPath.set(undefined);
+      this.imagePickedFrom.emit('camera');
     } catch (e) {
       console.error('Error taking photo:', e);
     } finally {
@@ -302,18 +325,14 @@ export class ImageUploadComponent implements ControlValueAccessor {
     // been read into base64, so the loading state has to cover that wait too.
     this.isLoading.set(true);
     try {
-      // This request is deliberate, and it is what buys the photo's position.
-      // Android redacts location metadata from a picked photo unless the
-      // caller holds `ACCESS_MEDIA_LOCATION`, and the permission is only held
-      // once it has been granted, so declaring it without asking would leave
-      // `Aus Bild` empty on every gallery photo. The cost is the "access
-      // photos and videos on this device" prompt, and under "Allow limited
-      // access" a grant screen that makes the user name the photo before the
-      // picker does - accepted, because reading the position out of the photo
-      // is worth more than the prompt. See GitHub issue #1394.
-      await FilePicker.requestPermissions({
-        permissions: ['accessMediaLocation'],
-      });
+      // No permission request precedes the picker. `pickImages` runs the
+      // Android Photo Picker, a system surface that hands back a read grant for
+      // the one photo the user chose. Asking for `accessMediaLocation` here
+      // raised the "access photos and videos on this device" prompt on the way
+      // to the photo, and under "Allow limited access" cost a second selection
+      // on the OS grant screen. The onboarding photos step owns that request
+      // now, with Settings and the position modal as the recovery surfaces.
+      // See GitHub issue #1394.
       const result = await FilePicker.pickImages({
         // Single selection. `pickImages` is the Android Photo Picker, and at
         // the default limit of 0 the plugin builds a `PickMultipleVisualMedia`
@@ -329,10 +348,11 @@ export class ImageUploadComponent implements ControlValueAccessor {
 
       const pickedFile = result.files[0];
 
-      // Read the GPS position out of the photo. This is why the permission
-      // above is requested; without the grant the read returns a photo whose
-      // location metadata Android has stripped, and the location section
-      // falls back to its other sources.
+      // Read the GPS position out of the photo. It comes back stripped unless
+      // the media location permission was granted earlier, which is what the
+      // onboarding photos step asks for; without it the location section falls
+      // back to its other sources and the position modal names the reason.
+      this.lastPickedPath.set(pickedFile.path);
       if (pickedFile.path) {
         await this.patchPositionFromFilePath(pickedFile.path);
       }
@@ -351,11 +371,31 @@ export class ImageUploadComponent implements ControlValueAccessor {
         await this.setValueAndTriggerChange(compressedFile);
         this.imageFile = compressedFile;
       }
+
+      this.imagePickedFrom.emit('gallery');
     } catch (e) {
       console.error('Error picking image from gallery:', e);
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  /**
+   * Reads the position out of the last gallery pick again.
+   *
+   * Called after a late media location grant: the photo was already read once,
+   * with its location stripped, and nothing else would ever look at it again.
+   * A pick that carried no path, and every camera or web photo, has nothing to
+   * re-read and is a no-op. See GitHub issue #1394.
+   */
+  async rereadPositionFromLastPick(): Promise<void> {
+    const path = this.lastPickedPath();
+
+    if (!path) {
+      return;
+    }
+
+    await this.patchPositionFromFilePath(path);
   }
 
   private async patchPositionFromFilePath(filePath: string): Promise<void> {
@@ -421,6 +461,7 @@ export class ImageUploadComponent implements ControlValueAccessor {
   clearImage(): void {
     this.value.set(null);
     this.failedImageSource.set(null);
+    this.lastPickedPath.set(undefined);
     this._onChange(null);
 
     const fallbackPosition = this.position();

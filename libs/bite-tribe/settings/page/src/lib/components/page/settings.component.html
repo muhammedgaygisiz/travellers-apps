@@ -217,6 +217,73 @@
     rows and to nothing else on the page. Without a heading it read as the
     page's save, which made it look like the push switches above needed saving
     too (#1217). -->
+    <!-- Photo locations: the grant that decides whether a Bite can take its
+    position from the photo it was posted with. Android only; the onboarding
+    photos step is where it is normally answered, and this is the way back for
+    anyone who skipped it, revoked it, or onboarded before it existed (#1394). -->
+    @if (photoLocationSupported()) {
+      <section
+        class="photo-location-section"
+        data-testid="settings-photo-location"
+      >
+        <h2>{{ 'photo-location' | transloco }}</h2>
+
+        <p
+          class="photo-location-section__copy"
+          data-testid="settings-photo-location-copy"
+        >
+          {{ 'photo-location-copy' | transloco }}
+        </p>
+
+        @if (photoLocationBlocked()) {
+          <div
+            class="photo-location-section__blocked"
+            data-testid="settings-photo-location-blocked"
+          >
+            <ion-text color="warning">
+              <ion-icon name="location-outline" aria-hidden="true" />
+              {{ 'photo-location-blocked-by-os' | transloco }}
+            </ion-text>
+
+            <!-- The OS dialog while it still has a prompt to spend, the system
+            settings page once it does not. Same two-route recovery the
+            notification section uses. -->
+            @if (canRequestPhotoLocation()) {
+              <ion-button
+                expand="block"
+                fill="outline"
+                data-testid="settings-photo-location-allow-device"
+                [disabled]="photoLocationSetupRunning()"
+                (click)="enablePhotoLocation.emit()"
+              >
+                @if (photoLocationSetupRunning()) {
+                  <ion-spinner name="dots" slot="start" />
+                }
+                {{ 'photo-location-allow-on-this-device' | transloco }}
+              </ion-button>
+            }
+
+            <ion-button
+              fill="clear"
+              class="ion-align-self-start"
+              data-testid="settings-photo-location-open-device-settings"
+              (click)="openPhotoLocationSettings.emit()"
+            >
+              {{ 'photo-location-open-device-settings' | transloco }}
+            </ion-button>
+          </div>
+        } @else {
+          <p
+            class="photo-location-section__granted"
+            data-testid="settings-photo-location-granted"
+          >
+            <ion-icon name="checkmark-circle-outline" aria-hidden="true" />
+            {{ 'photo-location-granted' | transloco }}
+          </p>
+        }
+      </section>
+    }
+
     <section class="preferences-section">
       <h2>{{ 'preferences' | transloco }}</h2>
 

@@ -1098,18 +1098,17 @@ describe('ImageUploadComponent', () => {
       });
 
       describe('given the picker is opened', () => {
-        it('should request media location access before picking', async () => {
+        it('should not request a media permission first', async () => {
           (FilePicker.pickImages as jest.Mock).mockResolvedValue({
             files: [],
           });
 
           await component.pickImageFromGallery();
 
-          // Without this grant Android strips the photo's location metadata
-          // and `Aus Bild` resolves to nothing. See GitHub issue #1394.
-          expect(FilePicker.requestPermissions).toHaveBeenCalledWith({
-            permissions: ['accessMediaLocation'],
-          });
+          // The onboarding photos step owns that request. Asking here put an OS
+          // prompt between the user and their photo, and under limited access a
+          // second selection step. See GitHub issue #1394.
+          expect(FilePicker.requestPermissions).not.toHaveBeenCalled();
         });
       });
 

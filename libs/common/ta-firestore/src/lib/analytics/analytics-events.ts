@@ -104,6 +104,7 @@ export interface AnalyticsEventParamMap {
       | 'currency'
       | 'language'
       | 'location'
+      | 'photos'
       | 'notifications'
       | 'finish';
   };

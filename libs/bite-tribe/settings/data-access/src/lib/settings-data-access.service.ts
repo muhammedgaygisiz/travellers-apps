@@ -18,6 +18,13 @@ import {
   type PushPermissionResult,
   type PushPermissionState,
 } from 'push-notifications';
+import {
+  getMediaLocationPermissionState,
+  openMediaLocationSettings,
+  requestMediaLocationPermission,
+  type MediaLocationPermissionResult,
+  type MediaLocationPermissionState,
+} from 'media-location';
 
 @Injectable({
   providedIn: 'root',
@@ -90,6 +97,26 @@ export class SettingsDataAccessService {
 
   openPushSettings(): Promise<boolean> {
     return openPushSettings();
+  }
+
+  /** OS media location permission of this device. Never prompts. */
+  getMediaLocationPermissionState(): Promise<MediaLocationPermissionState> {
+    return getMediaLocationPermissionState();
+  }
+
+  /**
+   * Runs the contextual media location request for this device.
+   *
+   * The onboarding photos step is where most users answer this. Settings is the
+   * recovery surface for everyone who skipped it, revoked it, or onboarded
+   * before the step existed (issue #1394).
+   */
+  requestMediaLocationPermission(): Promise<MediaLocationPermissionResult> {
+    return requestMediaLocationPermission();
+  }
+
+  openMediaLocationSettings(): Promise<boolean> {
+    return openMediaLocationSettings();
   }
 
   /**

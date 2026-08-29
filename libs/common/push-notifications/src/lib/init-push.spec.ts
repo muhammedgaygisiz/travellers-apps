@@ -1,7 +1,7 @@
 import { PushNotifications } from '@capacitor/push-notifications';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { Capacitor } from '@capacitor/core';
-import { AppSettings } from './app-settings';
+import { AppSettings } from 'app-settings';
 import type { Platform } from '@ionic/angular';
 import {
   enablePushOnThisDevice,
@@ -35,7 +35,7 @@ jest.mock('@capacitor/app-launcher', () => ({
 // The Android settings route is a native intent fired by the app's own
 // Capacitor plugin, so there is nothing to exercise here beyond the fact that
 // the platform branch reaches it and honours what it reports.
-jest.mock('./app-settings', () => ({
+jest.mock('app-settings', () => ({
   AppSettings: { openNotificationSettings: jest.fn() },
 }));
 // Token document handling is covered by `push-installation.spec.ts`; here only

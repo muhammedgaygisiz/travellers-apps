@@ -128,6 +128,36 @@ export const NotificationsUnsupportedAndEmpty: Story = {
   },
 };
 
+/**
+ * Android with photo locations granted: a Bite can take its position from the
+ * photo it was posted with, and there is nothing to act on.
+ */
+export const PhotoLocationGranted: Story = {
+  args: {
+    photoLocationPermission: 'granted',
+  },
+};
+
+/**
+ * The OS prompt has not been spent yet - the user skipped the onboarding photos
+ * step - so the dialog is still the shortest route back.
+ */
+export const PhotoLocationPromptLeft: Story = {
+  args: {
+    photoLocationPermission: 'prompt',
+  },
+};
+
+/**
+ * Denied. The OS drops further requests, so only the system settings page is
+ * offered (issue #1394).
+ */
+export const PhotoLocationBlockedByOs: Story = {
+  args: {
+    photoLocationPermission: 'denied',
+  },
+};
+
 /** The account still has to verify its email, so the resend offer is idle. */
 export const EmailVerificationPrompt: Story = {
   args: {

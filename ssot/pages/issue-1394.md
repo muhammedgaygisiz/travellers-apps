@@ -27,7 +27,7 @@
 - Open
   - **Not verified on a device.** No Android device was attached. The single-select behaviour is proven from the plugin's intent construction, not from a run on the Samsung SM-A566B that reported it.
   - **The EXIF dependency itself is reasoned, not measured.** Redaction without `ACCESS_MEDIA_LOCATION` is the documented Android behaviour, but this app's own read - `getExifDataFromFilePath` through a `content://media/picker/...` URI - has not been observed both ways on one device. If a device shows the position resolving without the grant, the permission becomes removable and the issue can be reopened as originally written.
-  - **The double selection under "Allow limited access" remains.** It is now a recorded trade rather than a defect. The only way to shrink it further would be to move the ask to a first-run surface - see the Contextual Permission Rule on [[Architecture - Capacitor]] - so the photo flow does not carry it. That is not done here.
+  - **The double selection under "Allow limited access" remains.** It is now a recorded trade rather than a defect. The only way to shrink it further is to move the ask to a first-run surface so the photo flow does not carry it. **That is what [[issue-1409]] then did**, and it supersedes the decisions above: the permission is still declared and still needed, but it is asked for by the onboarding photos step, and the picker asks for nothing.
   - **No automated coverage of the native surface.** The picker is a system activity; the specs pin the call shape only.
 - Related
   - [[Architecture - Capacitor]]
@@ -35,3 +35,4 @@
   - [[Bite]]
   - [[Current State - Release Candidate Test Charter]]
   - [[issue-1393]]
+  - [[issue-1409]]

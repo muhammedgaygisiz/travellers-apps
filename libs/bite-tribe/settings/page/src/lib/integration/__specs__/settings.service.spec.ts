@@ -17,6 +17,9 @@ describe(SettingsService.name, () => {
   let getPushPermissionState: jest.Mock;
   let enablePushOnThisDevice: jest.Mock;
   let openPushSettings: jest.Mock;
+  let getMediaLocationPermissionState: jest.Mock;
+  let requestMediaLocationPermission: jest.Mock;
+  let openMediaLocationSettings: jest.Mock;
   let saveSettings: jest.Mock;
   let navigateBack: jest.Mock;
   let presentToast: jest.Mock;
@@ -43,6 +46,9 @@ describe(SettingsService.name, () => {
     getPushPermissionState = jest.fn().mockResolvedValue('granted');
     enablePushOnThisDevice = jest.fn().mockResolvedValue('granted');
     openPushSettings = jest.fn().mockResolvedValue(true);
+    getMediaLocationPermissionState = jest.fn().mockResolvedValue('prompt');
+    requestMediaLocationPermission = jest.fn().mockResolvedValue('granted');
+    openMediaLocationSettings = jest.fn().mockResolvedValue(true);
     saveSettings = jest.fn().mockResolvedValue(undefined);
     navigateBack = jest.fn();
     presentToast = jest.fn().mockResolvedValue(undefined);
@@ -62,6 +68,9 @@ describe(SettingsService.name, () => {
             getPushPermissionState,
             enablePushOnThisDevice,
             openPushSettings,
+            getMediaLocationPermissionState,
+            requestMediaLocationPermission,
+            openMediaLocationSettings,
             saveSettings,
           },
         },
@@ -367,6 +376,60 @@ describe(SettingsService.name, () => {
     it('delegates to the device settings route', async () => {
       await expect(service.openPushSettings()).resolves.toBe(true);
       expect(openPushSettings).toHaveBeenCalled();
+    });
+  });
+
+  describe('photo location permission', () => {
+    it('rests on unsupported until the OS is actually read', () => {
+      // The section hides itself on `unsupported`, so this is the value that
+      // keeps a non-Android surface from flashing a permission warning before
+      // the first read answers (issue #1394).
+      expect(service.photoLocationPermission()).toBe('unsupported');
+    });
+
+    it('reads the live OS state on refresh', async () => {
+      getMediaLocationPermissionState.mockResolvedValue('denied');
+
+      await service.refreshPhotoLocationPermission();
+
+      expect(service.photoLocationPermission()).toBe('denied');
+    });
+
+    it('records a grant from the explicit Settings action', async () => {
+      await service.enablePhotoLocation();
+
+      expect(requestMediaLocationPermission).toHaveBeenCalled();
+      expect(service.photoLocationPermission()).toBe('granted');
+    });
+
+    it('turns a denial into the settings-page route without a reload', async () => {
+      requestMediaLocationPermission.mockResolvedValue('denied');
+
+      await service.enablePhotoLocation();
+
+      expect(service.photoLocationPermission()).toBe('denied');
+    });
+
+    it('ignores a second request while one is in flight', async () => {
+      let resolveRequest!: (value: string) => void;
+      requestMediaLocationPermission.mockReturnValue(
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        }),
+      );
+
+      const first = service.enablePhotoLocation();
+      const second = service.enablePhotoLocation();
+
+      expect(requestMediaLocationPermission).toHaveBeenCalledTimes(1);
+
+      resolveRequest('granted');
+      await Promise.all([first, second]);
+    });
+
+    it('delegates the recovery route to the device settings page', async () => {
+      await expect(service.openPhotoLocationSettings()).resolves.toBe(true);
+      expect(openMediaLocationSettings).toHaveBeenCalled();
     });
   });
 });

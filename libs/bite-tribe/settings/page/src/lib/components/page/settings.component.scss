@@ -109,6 +109,36 @@
     }
   }
 
+  // Mirrors the notifications section: one OS permission, stated plainly, with
+  // the two routes back underneath it.
+  .photo-location-section {
+    margin-bottom: 32px;
+
+    &__copy {
+      margin: 0 0 12px;
+      color: var(--ion-color-medium);
+      font-size: 0.875rem;
+    }
+
+    &__blocked {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    &__granted {
+      margin: 0;
+      color: var(--ion-color-success);
+      font-size: 0.875rem;
+    }
+
+    ion-icon {
+      vertical-align: middle;
+      margin-inline-end: 4px;
+    }
+  }
+
   .account-section {
     margin-bottom: 32px;
   }

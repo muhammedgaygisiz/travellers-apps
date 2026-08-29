@@ -138,7 +138,12 @@ initialization.
 
 Onboarding is the primary first-run request surface. Explicit setup or recovery
 actions may request later when the user understands what capability they are
-enabling. For notifications, issue
+enabling.
+
+Three permissions follow this: location, notifications, and media location. Each
+has an onboarding step that explains before it asks, and each has a recovery
+surface in Settings for the users that step cannot reach - a denial, a revoke,
+or an account that onboarded before the step existed. For notifications, issue
 [#1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184) adds
 **Receive notifications on this device** in Settings as a second contextual
 surface, and issue
@@ -150,31 +155,57 @@ this device — and all three route through `enablePushOnThisDevice`.
 
 ## Media Permission Rule
 
-Picking an existing photo goes through `FilePicker.pickImages({ limit: 1 })` in
-`libs/common/ui/image-upload`. On Android the plugin builds an
-`ActivityResultContracts.PickVisualMedia` intent, which is the system Photo
-Picker: it runs outside the app, returns the one photo the user chose, and
-carries its own read grant for that URI.
+`libs/common/media-location` owns the Android `ACCESS_MEDIA_LOCATION`
+permission - the grant that decides whether a photo picked from the gallery
+still carries the position it was taken at. Android strips that metadata for
+any caller without the grant, and it is the **grant** that lifts the redaction,
+not the manifest declaration.
 
-`limit: 1` is load-bearing, not cosmetic. At the default `0` the plugin builds
-`PickMultipleVisualMedia` instead, and the picker opens in multi-select mode
-with a confirming tap, while only the first file is ever read.
+The library splits this the same way `push-notifications` and `geolocation` do:
 
-The picker itself needs no permission. `ACCESS_MEDIA_LOCATION` is nevertheless
-declared and requested in front of it, and that is a product decision rather
-than an oversight: Android strips a picked photo's location metadata for any
-caller that does not hold the grant, so without it the `Aus Bild` position
-source in the Bite form is dead on every gallery photo. Declaring the
-permission without requesting it buys nothing — it is the grant, not the
-declaration, that lifts the redaction. `READ_EXTERNAL_STORAGE` stays for the
-same reason: below API 33 `ACCESS_MEDIA_LOCATION` has no effect without it, and
-`minSdkVersion` is 24.
+- `getMediaLocationPermissionState` / `hasMediaLocationPermission` - read the OS
+  state, never prompt. `prompt` still has an unspent OS prompt; `denied` does
+  not, and only the settings page can undo it. Callers must branch on the two.
+- `requestMediaLocationPermission` - shows the prompt.
+- `openMediaLocationSettings` - the app's page in the system settings, through
+  `libs/common/app-settings`. There is no per-permission page, so it opens app
+  details, which carries the permission list.
 
-The price is the "access photos and videos on this device" prompt, and under
-**Allow limited access** a grant screen that asks the user to name the photo
-before the picker asks again. That double selection is accepted. It cannot be
-removed while the photo position is required, because the prompt and the
-unredacted EXIF are the same grant. See GitHub issue #1394.
+Everything but Android reports `unsupported`. iOS hands the metadata over with
+the photo library grant the camera plugin already owns, and the web build reads
+the chosen file directly.
+
+### Who May Ask
+
+Three surfaces, all contextual, in the sense the Contextual Permission Rule
+above requires:
+
+- The onboarding `photos` step, which is the primary one and where most users
+  answer. It is filtered out of the assistant where the permission is
+  `unsupported`.
+- The **Photo locations** section in Settings, for a user who skipped the step,
+  revoked the grant, or onboarded before the step existed.
+- The recovery action on the Bite form's position modal, which appears only
+  once a gallery photo has actually come back without a position.
+
+**The gallery picker must never ask.** `pickImageFromGallery` in
+`libs/common/ui/image-upload` reads and picks; it requests nothing. Asking
+there put an OS prompt between the user and their photo, and under "Allow
+limited access" Android made them select the photo twice - once on the grant
+screen, once in the picker. See GitHub issues #1394 and #1409.
+
+`FilePicker.pickImages({ limit: 1 })` is the picker, and the limit is
+load-bearing: at the default `0` the plugin builds `PickMultipleVisualMedia`
+and the picker opens in multi-select mode with a confirming tap, while only the
+first file is ever read.
+
+### Nothing Is Stored
+
+There is no account-level flag for this, for the reason issue #1184 established
+for notifications: the grant is a fact about one OS installation. A reinstall or
+a revoke in system settings resets it while a stored flag would survive, so
+every surface reconciles against the live state and a denial is not written
+anywhere.
 
 ## Push Permission Rule
 

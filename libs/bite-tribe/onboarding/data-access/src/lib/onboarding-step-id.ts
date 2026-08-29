@@ -10,5 +10,6 @@ export type OnboardingStepId =
   | 'currency'
   | 'language'
   | 'location'
+  | 'photos'
   | 'notifications'
   | 'finish';

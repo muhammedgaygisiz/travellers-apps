@@ -21,9 +21,20 @@ import { TestScheduler } from 'rxjs/testing';
 import { TranslocoService } from '@jsverse/transloco';
 import { POSITION_SOURCE_COLORS } from '../model/position-source';
 
+import {
+  getMediaLocationPermissionState,
+  openMediaLocationSettings,
+  requestMediaLocationPermission,
+} from 'media-location';
+
 jest.mock('leaflet');
 
 jest.mock('@capacitor/camera');
+jest.mock('media-location', () => ({
+  getMediaLocationPermissionState: jest.fn().mockResolvedValue('prompt'),
+  requestMediaLocationPermission: jest.fn().mockResolvedValue('granted'),
+  openMediaLocationSettings: jest.fn().mockResolvedValue(true),
+}));
 jest.mock('image-compression', () => ({
   compressFile: jest.fn(),
   compressPhoto: jest.fn(),
@@ -227,10 +238,118 @@ describe('BitePage', () => {
       expect(manual?.disabled).toBe(false);
     });
 
+    it('should blame the permission only for a gallery photo that lost its position', async () => {
+      component.imagePosition.set(undefined);
+      await component.onImagePickedFrom('gallery');
+
+      const photo = component
+        .positionCandidates()
+        .find((candidate) => candidate.source === 'photo');
+
+      expect(photo?.unavailableReasonKey).toBe('photo-position-permission-off');
+    });
+
+    it('should keep the honest reason for a camera photo with no GPS', async () => {
+      // A capture the app made itself is never redacted, so the permission
+      // cannot be the cause and naming it would send the user to a setting
+      // that would not have helped (issue #1394).
+      component.imagePosition.set(undefined);
+      await component.onImagePickedFrom('camera');
+
+      const photo = component
+        .positionCandidates()
+        .find((candidate) => candidate.source === 'photo');
+
+      expect(photo?.unavailableReasonKey).toBe('no-photo-position');
+      expect(component.photoPositionBlockedByPermission()).toBe(false);
+    });
+
+    it('should not blame the permission once a gallery photo did resolve a position', async () => {
+      await component.onImagePickedFrom('gallery');
+      component.imagePosition.set({ latitude: 10, longitude: 20 });
+
+      expect(component.photoPositionBlockedByPermission()).toBe(false);
+    });
+
     it('should offer every source as a row', () => {
       expect(
         component.positionCandidates().map((candidate) => candidate.source),
       ).toEqual(['photo', 'gps', 'restaurant', 'google', 'manual']);
+    });
+  });
+
+  describe('recoverPhotoLocation', () => {
+    // The suite has no global mock reset, so call counts would otherwise carry
+    // over from the candidate tests above, which also pick a gallery photo.
+    beforeEach(() => {
+      (getMediaLocationPermissionState as jest.Mock).mockClear();
+      (requestMediaLocationPermission as jest.Mock).mockClear();
+      (openMediaLocationSettings as jest.Mock).mockClear();
+    });
+
+    it('should spend the OS prompt while one is left and re-read the photo', async () => {
+      (getMediaLocationPermissionState as jest.Mock).mockResolvedValue(
+        'prompt',
+      );
+      (requestMediaLocationPermission as jest.Mock).mockResolvedValue(
+        'granted',
+      );
+      await component.onImagePickedFrom('gallery');
+
+      await component.recoverPhotoLocation();
+
+      expect(requestMediaLocationPermission).toHaveBeenCalled();
+      expect(openMediaLocationSettings).not.toHaveBeenCalled();
+      // The first read came back stripped and nothing else would look again.
+      expect(component.photoPositionBlockedByPermission()).toBe(false);
+    });
+
+    it('should open the system settings page once the prompt is spent', async () => {
+      (getMediaLocationPermissionState as jest.Mock).mockResolvedValue(
+        'denied',
+      );
+      await component.onImagePickedFrom('gallery');
+
+      await component.recoverPhotoLocation();
+
+      // The OS drops further requests after a denial, so asking again would be
+      // a button that does nothing.
+      expect(requestMediaLocationPermission).not.toHaveBeenCalled();
+      expect(openMediaLocationSettings).toHaveBeenCalled();
+    });
+
+    it('should keep offering the row when the request is refused', async () => {
+      (getMediaLocationPermissionState as jest.Mock).mockResolvedValue(
+        'prompt',
+      );
+      (requestMediaLocationPermission as jest.Mock).mockResolvedValue('denied');
+      await component.onImagePickedFrom('gallery');
+
+      await component.recoverPhotoLocation();
+
+      expect(component.photoPositionBlockedByPermission()).toBe(true);
+      expect(component.canRequestPhotoLocation()).toBe(false);
+    });
+
+    it('should ignore a second tap while one request is in flight', async () => {
+      (getMediaLocationPermissionState as jest.Mock).mockResolvedValue(
+        'prompt',
+      );
+      let resolveRequest!: (value: string) => void;
+      (requestMediaLocationPermission as jest.Mock).mockReturnValue(
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        }),
+      );
+      await component.onImagePickedFrom('gallery');
+
+      const first = component.recoverPhotoLocation();
+      await component.recoverPhotoLocation();
+
+      expect(requestMediaLocationPermission).toHaveBeenCalledTimes(1);
+
+      resolveRequest('granted');
+      await first;
     });
   });
 

@@ -1,0 +1,7 @@
+{
+  "name": "app-settings",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/common/app-settings/src",
+  "projectType": "library",
+  "tags": ["scope:common", "framework:ionic"]
+}

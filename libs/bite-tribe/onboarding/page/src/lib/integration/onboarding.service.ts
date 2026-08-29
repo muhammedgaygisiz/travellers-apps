@@ -13,13 +13,17 @@ import {
   OnboardingStepId,
 } from 'bite-tribe/onboarding-data-access';
 import type { PublicUser, Settings } from 'model';
-import { ONBOARDING_STEPS } from '../steps/onboarding-steps';
+import {
+  ONBOARDING_STEPS,
+  type OnboardingStepDefinition,
+} from '../steps/onboarding-steps';
 import type {
   DisplayNameAvailabilityState,
   OnboardingIdentityDraft,
 } from '../components/identity-step/identity-step.component';
 import { ONBOARDING_LANGUAGES } from '../components/language-step/language-step.component';
 import type { LocationPermissionState } from '../components/location-step/location-step.component';
+import type { PhotoLocationPermissionState } from '../components/photos-step/photos-step.component';
 import type { NotificationPermissionState } from '../components/notification-step/notification-step.component';
 
 const DEFAULT_LANGUAGE = 'en';
@@ -43,7 +47,19 @@ export class OnboardingService {
   private readonly analytics = inject(AnalyticsService);
   private readonly requestedUrlService = inject(RequestedUrlService);
 
-  readonly steps = ONBOARDING_STEPS;
+  /**
+   * The steps this device actually shows.
+   *
+   * Starts as the full registry and is narrowed in {@link initialize} for
+   * platforms where a step has nothing to ask. `photos` is the only such step:
+   * the media location permission exists on Android alone, and showing iOS and
+   * web users a screen that can only say "not available here" is worse than
+   * not showing it (issue #1394).
+   */
+  private readonly visibleSteps =
+    signal<readonly OnboardingStepDefinition[]>(ONBOARDING_STEPS);
+
+  readonly steps = this.visibleSteps.asReadonly();
 
   readonly profile = signal<PublicUser | undefined>(undefined);
   readonly identityDraft = signal<OnboardingIdentityDraft>({
@@ -66,6 +82,8 @@ export class OnboardingService {
    * profile deliberately shows no location line for it (issues #1270, #1271).
    */
   readonly homeCity = signal<string>('');
+  readonly photoLocationPermission =
+    signal<PhotoLocationPermissionState>('idle');
   readonly notificationPermission = signal<NotificationPermissionState>('idle');
 
   private readonly completedSteps = signal<ReadonlySet<OnboardingStepId>>(
@@ -77,7 +95,7 @@ export class OnboardingService {
 
   readonly currentIndex = signal(0);
 
-  readonly currentStep = computed(() => this.steps[this.currentIndex()]);
+  readonly currentStep = computed(() => this.steps()[this.currentIndex()]);
 
   readonly isCurrentStepValid = computed(() =>
     this.validSteps().has(this.currentStep().id),
@@ -115,6 +133,11 @@ export class OnboardingService {
     // Funnel entry: emitted once per session, when the assistant first loads.
     this.analytics.logEvent(AnalyticsEvent.OnboardingAssistantStarted);
 
+    // Before anything reads the registry. `isKnownStep` filters persisted
+    // progress against it and `firstIncompleteIndex` indexes into it, so
+    // narrowing afterwards would resume a user at the wrong step.
+    await this.narrowStepsToThisPlatform();
+
     const completed = (await this.progress.loadCompletedSteps()).filter((id) =>
       this.isKnownStep(id),
     );
@@ -150,6 +173,26 @@ export class OnboardingService {
     if (this.currentStep().id === 'identity' && displayName) {
       await this.checkDisplayNameAvailability(displayName);
     }
+  }
+
+  /**
+   * Drops the steps this platform cannot ask anything on.
+   *
+   * Only `photos` qualifies: `ACCESS_MEDIA_LOCATION` exists on Android alone,
+   * and an iOS or web user would meet a screen whose every button is a no-op.
+   * Dropping it also keeps the progress count honest — "5 of 7" rather than a
+   * total that includes a step nobody can answer.
+   */
+  private async narrowStepsToThisPlatform(): Promise<void> {
+    const state = await this.dataAccess.getMediaLocationPermissionState();
+
+    if (state !== 'unsupported') {
+      return;
+    }
+
+    this.visibleSteps.set(
+      ONBOARDING_STEPS.filter((step) => step.id !== 'photos'),
+    );
   }
 
   /**
@@ -192,6 +235,16 @@ export class OnboardingService {
     if (settings?.location && (await this.dataAccess.hasLocationPermission())) {
       this.locationPermission.set('granted');
       this.setStepValid('location', true);
+    }
+
+    // Photo location has no stored flag either, for the same reason: the grant
+    // is a fact about this Android install, not about the account. A reinstall
+    // or a revoke in system settings puts the step back (issue #1394).
+    if (
+      (await this.dataAccess.getMediaLocationPermissionState()) === 'granted'
+    ) {
+      this.photoLocationPermission.set('granted');
+      this.setStepValid('photos', true);
     }
 
     // Notifications have no stored account-level flag to reconcile any more
@@ -389,6 +442,35 @@ export class OnboardingService {
   }
 
   /**
+   * Asks the OS for the media location permission after the step has explained
+   * that it is what lets a photo carry its own position. The answer — grant or
+   * denial — completes the step either way; only the request still being in
+   * flight blocks advancing.
+   *
+   * This and the recovery actions in Settings and the Bite form are the only
+   * places that may ask. The gallery picker must not: asking there is what put
+   * an OS prompt between the user and their photo (issue #1394).
+   */
+  async requestPhotoLocation(): Promise<void> {
+    if (this.photoLocationPermission() === 'requesting') {
+      return;
+    }
+
+    this.photoLocationPermission.set('requesting');
+
+    const result = await this.dataAccess.requestMediaLocationPermission();
+
+    this.photoLocationPermission.set(result);
+    this.setStepValid('photos', true);
+  }
+
+  /** Declining without opening the OS prompt is an explicit "no". */
+  skipPhotoLocation(): void {
+    this.photoLocationPermission.set('denied');
+    this.setStepValid('photos', true);
+  }
+
+  /**
    * Asks the OS for push permission after the step has explained why, and
    * registers this installation on a grant. The answer — grant or denial —
    * completes the step either way; only the request still being in flight
@@ -468,7 +550,7 @@ export class OnboardingService {
           step: completedStep,
         });
 
-        if (this.currentIndex() >= this.steps.length - 1) {
+        if (this.currentIndex() >= this.steps().length - 1) {
           await this.finish();
           return;
         }
@@ -553,9 +635,10 @@ export class OnboardingService {
       return persisted ? this.persistHomeCity() : false;
     }
 
-    // The notification step persists nothing account-level. A grant already
-    // registered this installation's push token in `requestNotifications`, and
-    // a denial is not a preference worth storing (issue #1184).
+    // The photos and notification steps persist nothing account-level. A push
+    // grant already registered this installation's token in
+    // `requestNotifications`, a media location grant lives in the OS alone, and
+    // neither denial is a preference worth storing (issues #1184, #1394).
     return true;
   }
 
@@ -700,11 +783,11 @@ export class OnboardingService {
   private firstIncompleteIndex(
     completed: ReadonlySet<OnboardingStepId>,
   ): number {
-    const index = this.steps.findIndex((step) => !completed.has(step.id));
-    return index === -1 ? this.steps.length - 1 : index;
+    const index = this.steps().findIndex((step) => !completed.has(step.id));
+    return index === -1 ? this.steps().length - 1 : index;
   }
 
   private isKnownStep(id: OnboardingStepId): boolean {
-    return this.steps.some((step) => step.id === id);
+    return this.steps().some((step) => step.id === id);
   }
 }

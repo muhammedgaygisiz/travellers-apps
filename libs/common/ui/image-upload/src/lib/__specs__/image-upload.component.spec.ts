@@ -47,6 +47,7 @@ jest.mock('heic2any', () => jest.fn());
 jest.mock('@capawesome/capacitor-file-picker', () => ({
   FilePicker: {
     pickImages: jest.fn(),
+    pickFiles: jest.fn(),
     requestPermissions: jest.fn(),
   },
 }));
@@ -1164,6 +1165,98 @@ describe('ImageUploadComponent', () => {
           await component.pickImageFromGallery();
 
           expect(FilePicker.pickImages).toHaveBeenCalled();
+        });
+      });
+
+      // The pinned picker fires `ACTION_PICK`, which opens the OEM gallery app.
+      // An old one answers with a `file://` URI the app cannot read, and the
+      // plugin reports that as empty data rather than an error. See GitHub
+      // issue #1414.
+      describe('given the gallery returns an unreadable file', () => {
+        const readableFile = {
+          path: 'content://media/external/images/media/42',
+          data: 'base64data',
+          name: 'fallback.jpg',
+          mimeType: 'image/jpeg',
+        };
+
+        beforeEach(() => {
+          (compressFile as jest.Mock).mockResolvedValue(
+            new File([''], 'image.jpg'),
+          );
+          global.fetch = jest.fn().mockResolvedValue({
+            blob: jest.fn().mockResolvedValue(new Blob(['test'])),
+          });
+          const mockFileReader = createMockFileReader();
+          // @ts-expect-error - Mocking FileReader
+          global.FileReader = jest.fn(() => mockFileReader);
+        });
+
+        it('should retry through the document picker for a file:// path', async () => {
+          (FilePicker.pickImages as jest.Mock).mockResolvedValue({
+            files: [
+              {
+                path: 'file:///storage/emulated/0/DCIM/image.jpg',
+                data: 'base64data',
+                name: 'image.jpg',
+                mimeType: 'image/jpeg',
+              },
+            ],
+          });
+          (FilePicker.pickFiles as jest.Mock).mockResolvedValue({
+            files: [readableFile],
+          });
+
+          await component.pickImageFromGallery();
+
+          expect(FilePicker.pickFiles).toHaveBeenCalledWith({
+            types: ['image/*'],
+            limit: 1,
+            readData: true,
+          });
+          expect(getExifDataFromFilePath).toHaveBeenCalledWith(
+            readableFile.path,
+          );
+        });
+
+        it('should retry through the document picker when the data is empty', async () => {
+          (FilePicker.pickImages as jest.Mock).mockResolvedValue({
+            files: [
+              {
+                path: 'content://media/external/images/media/7',
+                data: '',
+                name: 'image.jpg',
+                mimeType: 'image/jpeg',
+              },
+            ],
+          });
+          (FilePicker.pickFiles as jest.Mock).mockResolvedValue({
+            files: [readableFile],
+          });
+
+          await component.pickImageFromGallery();
+
+          expect(FilePicker.pickFiles).toHaveBeenCalled();
+        });
+
+        it('should not retry when the picked file is readable', async () => {
+          (FilePicker.pickImages as jest.Mock).mockResolvedValue({
+            files: [readableFile],
+          });
+
+          await component.pickImageFromGallery();
+
+          expect(FilePicker.pickFiles).not.toHaveBeenCalled();
+        });
+
+        it('should not retry when the user cancelled the first pick', async () => {
+          (FilePicker.pickImages as jest.Mock).mockResolvedValue({ files: [] });
+
+          await component.pickImageFromGallery();
+
+          // Cancelling is not a failed read. Reopening a picker the user just
+          // dismissed would trap them in it.
+          expect(FilePicker.pickFiles).not.toHaveBeenCalled();
         });
       });
     });

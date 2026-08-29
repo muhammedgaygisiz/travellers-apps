@@ -290,7 +290,7 @@ A second defect surfaced from the same session. One prediction was **refuted**: 
 
 **[#1414](https://github.com/muhammedgaygisiz/travellers-apps/issues/1414) `P0` - gallery photo GPS is never read on Android.**
 
-Onboarding step 6 of 8, new in `78889774`, exists only to request `ACCESS_MEDIA_LOCATION` and promises "a Bite you post from your gallery already knows where you ate". On Android the permission is requested and produces nothing.
+Onboarding step 6 of 8, new in `78889774`, exists only to request `ACCESS_MEDIA_LOCATION` and promises "a Bite you post from your gallery already knows where you ate". On Android the permission is requested and produces nothing. The mechanism recorded below was revised after the run; the observations here stand, the first diagnosis did not.
 
 Proven with the committed e2e fixture `bite-geotagged.jpg`, pushed to the device and media-scanned. Its coordinates are 41.875 N, 12.375 E - Rome, deliberately far from Bern, so a photo-derived position cannot be confused with the device fix:
 
@@ -299,7 +299,22 @@ Proven with the committed e2e fixture `bite-geotagged.jpg`, pushed to the device
 - the app logged `{"accessMediaLocation":"granted"}` at pick time, and `dumpsys` agrees
 - the position modal still reports **"From photo - No GPS in photo"** and disables the source
 
-The cause is in the Capacitor plugin, not app code. `@capawesome/capacitor-file-picker@8.0.3` reads the picked item with a bare `getContentResolver().openInputStream(uri)` at `FilePicker.java:90`, and `grep -rl "setRequireOriginal" node_modules/@capawesome node_modules/@capacitor` returns nothing. Android redacts location from media served through the resolver unless the item is opened via `MediaStore.setRequireOriginal(uri)`. The permission is what makes that call legal; it does nothing on its own.
+The cause is in the Capacitor plugin, not app code - but **not** the missing `MediaStore.setRequireOriginal` the run first concluded. That call lifts redaction on `MediaStore` URIs obtained by querying `MediaStore` directly; it does nothing for Android Photo Picker URIs, which are redacted unconditionally regardless of `ACCESS_MEDIA_LOCATION` ([google/issuetracker#243294058](https://issuetracker.google.com/issues/243294058)). Patching the plugin as the run proposed would have been a no-op.
+
+The actual cause is a **dependency bump**. `@capawesome/capacitor-file-picker@8.0.3` rewrote `pickImages` from `Intent.ACTION_PICK` to `ActivityResultContracts.PickVisualMedia` (upstream `327b8bfd`, PR #893). `ACTION_PICK` returns a MediaStore URI whose EXIF survives; the Photo Picker's does not. The bump landed on 20 Jul 2026 in `834221e5`, five weeks before this run.
+
+Established on the device by installing four builds differing only in picker version, each verified before install by extracting `FilePickerPlugin.class` and confirming which constant it carries:
+
+| Build                                       | Picker intent     | Result                                  |
+| ------------------------------------------- | ----------------- | --------------------------------------- |
+| 96 (`78889774`), picker 8.0.3               | `PickVisualMedia` | no position                             |
+| Run 9 code (`f2ae6dbf`), picker 8.0.3       | `PickVisualMedia` | no position                             |
+| Run 9 code (`f2ae6dbf`), picker **8.0.1**   | `ACTION_PICK`     | **position read**                       |
+| Current code (`14022581`), picker **8.0.2** | `ACTION_PICK`     | **position read, no permission prompt** |
+
+**This corrects the run's framing of the defect.** The gallery position worked on Android from #571 (26 Jan 2026) until the picker bump, so #1410 did not break it - it made a five-week-old silent breakage visible and harmful by adding an onboarding step that asks for a privacy-sensitive permission and returns nothing. Nothing exercised the Android gallery position in that window; run 9 used the gallery path but never checked the position, which is the coverage gap that let the regression through. The `P0` stands; its cause does not.
+
+Resolved by pinning the picker to `8.0.2`, with a `pickFiles` fallback for the OEM `file://` case the pin reintroduces. See the Gallery Picker Version Pin in [[Architecture - Capacitor]].
 
 Raised to `P0` by decision, with the accepted consequence recorded on the issue: build 96 fails its release-candidate check on the Android half while it is open. Nothing malfunctions in a core journey - the position falls back to GPS, restaurant, Google place or manual - but asking every new user for a privacy-sensitive permission and returning no value for it is worse than not asking.
 

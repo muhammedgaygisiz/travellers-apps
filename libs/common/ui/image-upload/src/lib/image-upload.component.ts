@@ -37,7 +37,7 @@ import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { Placeholder } from './components/placeholder';
 import { getExifDataFromPhoto } from './utils/get-exif-data-from-photo';
 import { getExifDataFromFile } from './utils/get-exif-data-from-file';
-import { FilePicker } from '@capawesome/capacitor-file-picker';
+import { FilePicker, PickedFile } from '@capawesome/capacitor-file-picker';
 import { getExifDataFromFilePath } from './utils/get-exif-data-from-file-path';
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -54,6 +54,18 @@ const cameraOnlyOptions = {
   resultType: CameraResultType.Base64,
   source: CameraSource.Camera,
 };
+
+/**
+ * Whether a gallery pick is one this app can actually read.
+ *
+ * A `file://` path is the OEM gallery symptom described on `pickGalleryFile`,
+ * and empty data is how the plugin reports the read it could not perform: it
+ * logs the `EACCES` natively and resolves with an empty string rather than
+ * rejecting. Either one means the pick is unusable, and both are checked
+ * because a device could produce a readable path and still fail the read.
+ */
+const isReadableGalleryFile = (file: PickedFile): boolean =>
+  !file.path?.startsWith('file://') && !!file.data;
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -325,33 +337,34 @@ export class ImageUploadComponent implements ControlValueAccessor {
     // been read into base64, so the loading state has to cover that wait too.
     this.isLoading.set(true);
     try {
-      // No permission request precedes the picker. `pickImages` runs the
-      // Android Photo Picker, a system surface that hands back a read grant for
-      // the one photo the user chose. Asking for `accessMediaLocation` here
-      // raised the "access photos and videos on this device" prompt on the way
-      // to the photo, and under "Allow limited access" cost a second selection
-      // on the OS grant screen. The onboarding photos step owns that request
-      // now, with Settings and the position modal as the recovery surfaces.
-      // See GitHub issue #1394.
-      const result = await FilePicker.pickImages({
-        // Single selection. `pickImages` is the Android Photo Picker, and at
-        // the default limit of 0 the plugin builds a `PickMultipleVisualMedia`
-        // intent, so it opened in multi-select mode - checkboxes plus a
-        // confirming tap - while only the first file was ever read below.
-        limit: 1,
-        readData: true,
-      });
+      // No permission request precedes the picker. Asking for
+      // `accessMediaLocation` here raised the "access photos and videos on this
+      // device" prompt on the way to the photo, and under "Allow limited
+      // access" cost a second selection on the OS grant screen. The onboarding
+      // photos step owns that request now, with Settings and the position
+      // modal as the recovery surfaces. See GitHub issue #1394.
+      //
+      // `@capawesome/capacitor-file-picker` is held at 8.0.2 on purpose, and
+      // the pick below is why. 8.0.3 rewrote `pickImages` to fire the Photo
+      // Picker, which redacts a photo's GPS unconditionally and ignores
+      // `ACCESS_MEDIA_LOCATION` - so the position below silently read nothing
+      // for five weeks. 8.0.2 still fires `ACTION_PICK`, whose MediaStore URI
+      // carries the EXIF intact. Do not bump this dependency without reading
+      // GitHub issue #1414; the upstream change is a real fix for OEM gallery
+      // apps returning `file://` URIs, so replacing it needs a plugin of our
+      // own rather than a version bump.
+      const pickedFile = await this.pickGalleryFile();
 
-      if (result.files.length === 0) {
+      if (!pickedFile) {
         return;
       }
 
-      const pickedFile = result.files[0];
-
-      // Read the GPS position out of the photo. It comes back stripped unless
-      // the media location permission was granted earlier, which is what the
-      // onboarding photos step asks for; without it the location section falls
-      // back to its other sources and the position modal names the reason.
+      // Read the GPS position out of the photo. The media location permission
+      // the onboarding photos step asks for is necessary but not sufficient:
+      // it governs whether Android hands over an unredacted photo, and which
+      // intent the picker fired decides whether there is one to hand over at
+      // all. Without either, the location section falls back to its other
+      // sources and the position modal names the reason.
       this.lastPickedPath.set(pickedFile.path);
       if (pickedFile.path) {
         await this.patchPositionFromFilePath(pickedFile.path);
@@ -378,6 +391,59 @@ export class ImageUploadComponent implements ControlValueAccessor {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  /**
+   * Picks one gallery image, retrying through the document picker when the
+   * gallery hands back something this app cannot read.
+   *
+   * `ACTION_PICK`, which the pinned picker fires, opens the OEM gallery app.
+   * Gallery apps with an old `targetSdkVersion` predate Android 7's
+   * `FileProvider` requirement and answer with a raw `file://` URI instead of a
+   * `content://` one, which an app holding no storage permission cannot open -
+   * the plugin swallows the resulting `EACCES` and returns empty data. That is
+   * the defect the upstream Photo Picker change fixed, and pinning to 8.0.2
+   * for the sake of EXIF brings it back for those devices (issue #1414).
+   *
+   * `pickFiles` fires `ACTION_GET_CONTENT`, which Android 13 and later route to
+   * the Photo Picker, so the retry always yields a readable `content://` URI.
+   * Its photo carries no position - the Photo Picker is what strips it - so
+   * this trades the position for an image that actually loads, on the devices
+   * that would otherwise get neither. It costs a second selection, which is
+   * why it only runs once the first pick is already unusable.
+   */
+  private async pickGalleryFile(): Promise<PickedFile | undefined> {
+    const picked = (
+      await FilePicker.pickImages({
+        // Single selection. At the default limit of 0 the plugin sets
+        // `EXTRA_ALLOW_MULTIPLE`, so the gallery opened in multi-select mode -
+        // checkboxes plus a confirming tap - while only the first file was ever
+        // read below.
+        limit: 1,
+        readData: true,
+      })
+    ).files[0];
+
+    if (!picked) {
+      return undefined;
+    }
+
+    if (isReadableGalleryFile(picked)) {
+      return picked;
+    }
+
+    console.warn(
+      'Gallery returned an unreadable file, retrying through the document picker:',
+      picked.path,
+    );
+
+    return (
+      await FilePicker.pickFiles({
+        types: ['image/*'],
+        limit: 1,
+        readData: true,
+      })
+    ).files[0];
   }
 
   /**

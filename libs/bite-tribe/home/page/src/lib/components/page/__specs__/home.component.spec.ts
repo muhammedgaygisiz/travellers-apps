@@ -512,6 +512,19 @@ describe('BiteTribeHomeComponent', () => {
       expect(biteList.componentInstance.searchTerm()).toBe('zzzznomatch');
     });
 
+    it('should hand its empty message key to the bite list', () => {
+      componentRef.setInput('emptyMessageKey', 'no-own-bites-yet');
+      fixture.detectChanges();
+
+      const biteList = fixture.debugElement.query(
+        By.directive(BiteListComponent),
+      );
+
+      expect(biteList.componentInstance.emptyMessageKey()).toBe(
+        'no-own-bites-yet',
+      );
+    });
+
     it('should use filteredBites for displayedBites', () => {
       component.searchTerm.set('Burger');
       expect(component.displayedBites().length).toBe(1);

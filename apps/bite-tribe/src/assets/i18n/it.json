@@ -517,6 +517,7 @@
   "review-creator-badge": "autore",
   "bucket-list-name-updated": "Nome della lista dei desideri aggiornato!",
   "no-bites-found-be-the-first": "Nessun Bite trovato. Sii il primo.",
+  "no-own-bites-yet": "Non hai ancora condiviso un Bite. Crea il primo.",
   "no-bites-match-search": "Nessun Bite corrisponde a «{{term}}».",
   "clear-search": "Cancella ricerca",
   "search-bites-or-places": "Cerca Bites o luoghi...",

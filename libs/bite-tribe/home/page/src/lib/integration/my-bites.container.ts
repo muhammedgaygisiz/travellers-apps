@@ -22,6 +22,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
       [locationPermissionState]="service.locationPermissionState()"
       [sorting]="service.myBitesSorting()"
+      emptyMessageKey="no-own-bites-yet"
       showSearch
       editableBites
       enableImageRetry

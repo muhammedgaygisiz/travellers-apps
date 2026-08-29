@@ -52,6 +52,18 @@ export const Empty: Story = {
 };
 
 /**
+ * The same empty list on My Bites, where the feed's invitation to be the first
+ * one is wrong: the user cannot be the first to write their own list. See
+ * GitHub issue #1417.
+ */
+export const EmptyOwnList: Story = {
+  args: {
+    bites: [],
+    emptyMessageKey: 'no-own-bites-yet',
+  },
+};
+
+/**
  * A search that excludes everything, which is not the same empty state as a
  * feed with nothing in it. See GitHub issue #1331.
  */

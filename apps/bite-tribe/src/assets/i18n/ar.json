@@ -517,6 +517,7 @@
   "review-creator-badge": "المنشئ",
   "bucket-list-name-updated": "تم تحديث اسم قائمة الآمال!",
   "no-bites-found-be-the-first": "لا توجد Bites. كن أول من يضيف واحدة.",
+  "no-own-bites-yet": "لم تشارك أي Bite بعد. أنشئ أول واحد.",
   "no-bites-match-search": "لا توجد Bites تطابق «{{term}}».",
   "clear-search": "مسح البحث",
   "search-bites-or-places": "ابحث عن Bites أو أماكن...",

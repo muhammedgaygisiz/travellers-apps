@@ -97,6 +97,11 @@ export class BiteTribeHomeComponent {
     transform: booleanAttribute,
   });
   enableImageRetry = input(false, { transform: booleanAttribute });
+  /**
+   * Forwarded to the bite list so a page that shows the user's own Bites can
+   * replace the shared feed's "be the first one" invitation. See issue #1417.
+   */
+  emptyMessageKey = input('no-bites-found-be-the-first');
 
   /**
    * Locks the add button behind a spinner while the Create Bite page is still

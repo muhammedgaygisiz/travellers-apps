@@ -504,19 +504,19 @@ stale-palette asset remains on either store.
 
 Version 1.0 is in Prepare for Submission and is effectively empty.
 
-| Slot                                    | State                       |
-| --------------------------------------- | --------------------------- |
-| Name, subtitle                          | set                         |
-| Age rating                              | set, 18+                    |
-| Screenshots                             | 5 of 10, 6.9", current      |
-| App previews                            | none                        |
-| Description, promotional text, keywords | set                         |
-| Support URL, marketing URL, copyright   | empty, support URL required |
-| Primary category                        | Food & Drink                |
-| App Privacy                             | published                   |
-| Pricing, availability                   | free, all 175 regions       |
-| Content Rights                          | declared                    |
-| Build                                   | none attached               |
+| Slot                                    | State                                        |
+| --------------------------------------- | -------------------------------------------- |
+| Name, subtitle                          | set                                          |
+| Age rating                              | set, 18+                                     |
+| Screenshots                             | 5 of 10, 6.9", current                       |
+| App previews                            | none                                         |
+| Description, promotional text, keywords | set                                          |
+| Support URL, marketing URL, copyright   | empty; support URL required, page now exists |
+| Primary category                        | Food & Drink                                 |
+| App Privacy                             | published                                    |
+| Pricing, availability                   | free, all 175 regions                        |
+| Content Rights                          | declared                                     |
+| Build                                   | none attached                                |
 
 TestFlight is the exception and is in good shape: internal and external groups
 exist, build 94 (1.0.1) is in Testing, and the beta description, feedback email
@@ -654,7 +654,7 @@ As of 22 August 2026, in the order they gate a submission.
 | Gap                            | Store | Note                                                       |
 | ------------------------------ | ----- | ---------------------------------------------------------- |
 | Send the listing for review    | Play  | Saved as a draft change, sitting in Publishing overview    |
-| Support URL                    | Apple | Required for submission; parked on a contact address       |
+| Support URL                    | Apple | Page written; set the field once the deploy is live        |
 | 7-inch and 10-inch screenshots | Play  | Asterisked, both empty — does not block review             |
 | Light-theme captures           | Both  | The set is dark-theme only; the capture rule asks for both |
 | Ten listing translations       | Both  | Derive from the English copy above                         |
@@ -667,6 +667,23 @@ for review`. Treat them as a quality gap, not a blocker.
 Screenshot reordering on Apple is manual by nature — Media Manager offers only
 drag-and-drop — and was done by hand on 22 August to bring the bite detail to
 the front.
+
+## The Support URL Is A Page, Not An Address
+
+Apple's own help text for the field reads: "A URL with support information for your app. This appears on your app's product page once you release your app on the App Store." So a provisioned mailbox does not satisfy it. The field takes an `http(s)` URL, Apple publishes that link publicly on the product page, and a `mailto:` is not accepted there.
+
+The app therefore serves its own page at **`/support`**, built on 30 August 2026 in the same shape as `/privacy` and `/account-deletion`: public, reachable without signing in - which matters, because someone who cannot sign in is exactly the person who needs it - and localized into all eleven shipped languages rather than English-only.
+
+| Property  | Value                                                        |
+| --------- | ------------------------------------------------------------ |
+| URL       | `https://bite-tribe.web.app/support`                         |
+| Route     | `PATH.SUPPORT`, in `libs/bite-tribe/shell/src/lib/routes.ts` |
+| Component | `libs/bite-tribe/support`                                    |
+| Contact   | `support@bitetribe.app`, behind a click-to-reveal control    |
+
+The contact address sits behind the reveal control for the same reason it does on the other two public pages: it keeps the address out of the page source for scrapers while still being one tap from a reviewer. The page also links to the privacy policy and the account-deletion page, so a reviewer arriving at the Support URL first can reach both legal surfaces from it.
+
+**Set the field only after the page is deployed.** Apple does not check the URL at the moment it is typed, but a Support URL that 404s during review is a rejection with no upside.
 
 ## Blockers Outside The Listing
 

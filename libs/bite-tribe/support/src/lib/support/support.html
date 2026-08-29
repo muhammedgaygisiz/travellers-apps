@@ -1,0 +1,85 @@
+<ta-page
+  [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
+>
+  <ion-content class="ion-padding">
+    <main>
+      <h1>{{ 'support-title' | transloco }}</h1>
+      <p class="note">{{ 'support-intro' | transloco }}</p>
+    </main>
+
+    <main>
+      <div class="box">
+        <h3>{{ 'support-contact-title' | transloco }}</h3>
+        <p>{{ 'support-contact-intro' | transloco }}</p>
+
+        <div class="ion-margin-vertical">
+          @if (!isContactClicked()) {
+          <ion-button
+            fill="clear"
+            data-testid="support-contact"
+            (click)="contactClicked()"
+          >
+            {{ 'contact' | transloco }}
+          </ion-button>
+          } @else {
+          <ul>
+            <li>
+              <strong>{{ 'email' | transloco }}:</strong>
+              support&#64;bitetribe.app
+            </li>
+            <li><strong>{{ 'app-name' | transloco }}:</strong> BiteTribe</li>
+          </ul>
+          }
+        </div>
+
+        <p class="note">{{ 'support-response-time' | transloco }}</p>
+      </div>
+
+      <h3>{{ 'support-include-title' | transloco }}</h3>
+      <p>{{ 'support-include-intro' | transloco }}</p>
+      <ul>
+        <li>{{ 'support-include-account-email' | transloco }}</li>
+        <li>{{ 'support-include-device' | transloco }}</li>
+        <li>{{ 'support-include-version' | transloco }}</li>
+        <li>{{ 'support-include-steps' | transloco }}</li>
+      </ul>
+      <p class="note">{{ 'support-include-version-hint' | transloco }}</p>
+
+      <h3>{{ 'support-common-title' | transloco }}</h3>
+      <ul>
+        <li>{{ 'support-common-verification-mail' | transloco }}</li>
+        <li>{{ 'support-common-sign-in' | transloco }}</li>
+        <li>{{ 'support-common-photo-upload' | transloco }}</li>
+        <li>{{ 'support-common-location-currency' | transloco }}</li>
+        <li>{{ 'support-common-notifications' | transloco }}</li>
+      </ul>
+
+      <h3>{{ 'support-report-title' | transloco }}</h3>
+      <p>{{ 'support-report-intro' | transloco }}</p>
+
+      <h3>{{ 'support-links-title' | transloco }}</h3>
+      <ul>
+        <li>
+          <a [routerLink]="privacyPolicyPath">
+            {{ 'privacy-policy' | transloco }}
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="accountDeletionPath">
+            {{ 'support-links-account-deletion' | transloco }}
+          </a>
+        </li>
+      </ul>
+    </main>
+
+    <main>
+      <div class="ion-text-center">
+        <img width="150" src="assets/icons/logo.svg" alt="logo" />
+      </div>
+    </main>
+
+    <footer>
+      <p>© {{ year }} BiteTribe. All rights reserved.</p>
+    </footer>
+  </ion-content>
+</ta-page>

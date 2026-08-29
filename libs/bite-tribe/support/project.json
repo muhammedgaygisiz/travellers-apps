@@ -1,0 +1,8 @@
+{
+  "name": "support",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bite-tribe/support/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:bite-tribe", "type:feature"]
+}

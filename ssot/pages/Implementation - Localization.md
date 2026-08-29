@@ -76,7 +76,8 @@ forgotten — the user just silently gets English.
 When a language is added, update **all** of these:
 
 1. `availableLangs` in `libs/bite-tribe/shell/src/lib/app.config.ts`.
-2. `apps/bite-tribe/src/assets/i18n/<lang>.json`.
+2. `apps/bite-tribe/src/assets/i18n/<lang>.json`, and the new language's
+   endonym under its own key in **every** locale file, not only the new one.
 3. `apps/bite-tribe-firebase/functions/src/functions/shared/i18n/messages/<lang>.ts`.
 4. `PUBLISHED_PRIVACY_POLICY_LANGUAGES` in `libs/bite-tribe/privacy-policy`.
 5. `apps/bite-tribe-ios/ios/App/App/<lang>.lproj/InfoPlist.strings`, **and**
@@ -93,6 +94,7 @@ carries only the app name and URL scheme.
 
 - Use Transloco keys for visible text.
 - Update every relevant locale when adding or changing user-facing copy.
+- Language names are the one group of strings that is not translated. Every locale file carries the same endonym for each offered language - `Deutsch`, `Türkçe`, `Português`, `አማርኛ` - so a speaker finds their own language in the picker whatever the interface is currently set to. Translating them, or naming one by its English exonym, hides that language from exactly the user who cannot read the rest of the list. `apps/bite-tribe/src/app/__specs__/language-names.spec.ts` asserts every name across every locale file; see issue \#1415.
 - Push notification copy is localized in Firebase Functions, not in the app: the OS renders the notification before Transloco exists. The backend catalog carries one file per language the app offers and is bound to the recipient's `settings/{uid}.language`. Keep its language list in step with `availableLangs` in `libs/bite-tribe/shell/src/lib/app.config.ts`; see [[Implementation - Firebase Functions]] and issue \#1200.
 - The verification mail reads from the same catalog under `emailVerification.*`, resolved through the shared `shared/utils/get-user-language.ts`, so an account hears from BiteTribe in one language across push and mail. Both senders localize: the manual resend and the monthly reminder job. A subject or body outside ASCII is MIME-encoded (RFC 2047 for the header, base64 for the body); sending translated copy as raw 7-bit reaches the inbox as mojibake. See issue \#1264.
 - The registration mail is rendered by Firebase Auth from the email templates in the Firebase console, so it cannot read the catalog. Its language comes from the auth language code, which the app sets from the active Transloco language right before sending. The templates themselves are console configuration: a language whose template was never filled in still arrives in English, and nothing in this repository fails when that happens.
@@ -125,6 +127,13 @@ When editing locale JSON, parse all relevant locale files:
 
 ```bash
 node -e "for (const f of process.argv.slice(1)) JSON.parse(require('fs').readFileSync(f,'utf8'))" apps/bite-tribe/src/assets/i18n/*.json apps/bite-tribe-business/src/assets/i18n/en.json
+```
+
+The endonym convention has its own guard, which fails per locale file and per
+language name rather than on the first mismatch:
+
+```bash
+npx jest --config apps/bite-tribe/jest.config.ts --runInBand apps/bite-tribe/src/app/__specs__/language-names.spec.ts
 ```
 
 When editing the notification catalog, run the functions tests from `apps/bite-tribe-firebase/functions`; `shared/i18n/__specs__/translate.spec.ts` checks every locale for missing keys, lost placeholders, and blank copy.

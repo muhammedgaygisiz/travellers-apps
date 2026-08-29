@@ -12,7 +12,10 @@ import {
   enablePushOnThisDevice,
   getPushPermissionState,
 } from 'push-notifications';
-import { requestLocationPermission } from 'geolocation';
+import {
+  getLocationPermissionState,
+  requestLocationPermission,
+} from 'geolocation';
 import {
   ONBOARDING_VERSION,
   OnboardingDataAccessService,
@@ -32,6 +35,7 @@ jest.mock('push-notifications', () => ({
 }));
 
 jest.mock('geolocation', () => ({
+  getLocationPermissionState: jest.fn(),
   requestLocationPermission: jest.fn(),
 }));
 
@@ -40,6 +44,7 @@ const preferencesSet = Preferences.set as jest.Mock;
 const enablePushOnThisDeviceMock = enablePushOnThisDevice as jest.Mock;
 const getPushPermissionStateMock = getPushPermissionState as jest.Mock;
 const requestLocationPermissionMock = requestLocationPermission as jest.Mock;
+const getLocationPermissionStateMock = getLocationPermissionState as jest.Mock;
 
 describe('OnboardingDataAccessService', () => {
   let service: OnboardingDataAccessService;
@@ -555,6 +560,18 @@ describe('OnboardingDataAccessService', () => {
 
       await expect(service.requestLocationPermission()).resolves.toBe('denied');
       expect(requestLocationPermissionMock).toHaveBeenCalled();
+    });
+  });
+
+  describe('getLocationPermissionState', () => {
+    it("reads this device's OS grant without prompting", async () => {
+      setup();
+      getLocationPermissionStateMock.mockResolvedValue('granted');
+
+      await expect(service.getLocationPermissionState()).resolves.toBe(
+        'granted',
+      );
+      expect(getLocationPermissionStateMock).toHaveBeenCalled();
     });
   });
 });

@@ -31,7 +31,7 @@ describe('OnboardingService', () => {
   let requestPushPermission: jest.Mock;
   let getPushPermissionState: jest.Mock;
   let requestLocationPermission: jest.Mock;
-  let hasLocationPermission: jest.Mock;
+  let getLocationPermissionState: jest.Mock;
   let requestMediaLocationPermission: jest.Mock;
   let getMediaLocationPermissionState: jest.Mock;
   let completeOnboarding: jest.Mock;
@@ -96,8 +96,8 @@ describe('OnboardingService', () => {
     // Default: this device has an unspent prompt, so the step still asks.
     getPushPermissionState = jest.fn().mockResolvedValue('prompt');
     requestLocationPermission = jest.fn().mockResolvedValue('granted');
-    // Default: the OS still allows reads, so a stored grant stays trustworthy.
-    hasLocationPermission = jest.fn().mockResolvedValue(true);
+    // Default: this device has an unspent prompt, so the step still asks.
+    getLocationPermissionState = jest.fn().mockResolvedValue('prompt');
     requestMediaLocationPermission = jest.fn().mockResolvedValue('granted');
     // Default: Android with an unspent prompt, so the photos step is shown and
     // still asks. `unsupported` is the iOS and web answer and drops the step.
@@ -129,7 +129,7 @@ describe('OnboardingService', () => {
             requestPushPermission,
             getPushPermissionState,
             requestLocationPermission,
-            hasLocationPermission,
+            getLocationPermissionState,
             requestMediaLocationPermission,
             getMediaLocationPermissionState,
             completeOnboarding,
@@ -1114,18 +1114,34 @@ describe('OnboardingService', () => {
       expect(requestLocationPermission).toHaveBeenCalledTimes(1);
     });
 
-    it('prefills a stored grant so a returning user is not asked again', async () => {
-      setup(
-        ['identity', 'visibility', 'currency', 'language'],
-        {},
-        storedSettings({ location: true }),
-      );
+    it('prefills an OS grant so an already-permitted user is not asked again', async () => {
+      // The permission is a fact about this install, and the assistant must not
+      // ask a question the OS has already answered (issue #1412).
+      setup(['identity', 'visibility', 'currency', 'language']);
+      getLocationPermissionState.mockResolvedValue('granted');
 
       await service.initialize();
 
       expect(service.locationPermission()).toBe('granted');
       expect(service.canAdvance()).toBe(true);
       expect(requestLocationPermission).not.toHaveBeenCalled();
+    });
+
+    it('prefills an OS grant that no stored flag records', async () => {
+      // The Firestore flag is absent on a fresh account, and a stored `false`
+      // cannot be told apart from "never asked". Neither says anything about
+      // what this device already allows (issue #1412).
+      setup(
+        ['identity', 'visibility', 'currency', 'language'],
+        {},
+        storedSettings({ location: false }),
+      );
+      getLocationPermissionState.mockResolvedValue('granted');
+
+      await service.initialize();
+
+      expect(service.locationPermission()).toBe('granted');
+      expect(service.canAdvance()).toBe(true);
     });
 
     it('re-asks when a stored grant outlived the OS permission', async () => {
@@ -1137,7 +1153,6 @@ describe('OnboardingService', () => {
         {},
         storedSettings({ location: true }),
       );
-      hasLocationPermission.mockResolvedValue(false);
 
       await service.initialize();
 
@@ -1145,14 +1160,24 @@ describe('OnboardingService', () => {
       expect(service.canAdvance()).toBe(false);
     });
 
-    it('still offers the choice when nothing was ever recorded', async () => {
-      // A stored `false` cannot be told apart from "never asked", so the step
-      // asks rather than reporting a refusal the user never gave.
-      setup(
-        ['identity', 'visibility', 'currency', 'language'],
-        {},
-        storedSettings({ location: false }),
-      );
+    it('still offers the choice after an OS denial', async () => {
+      // A denial is not prefilled: the buttons coming back on a restart are the
+      // only route left to a user who changed their mind, and Android may still
+      // have a prompt with a rationale to spend (issue #1412).
+      setup(['identity', 'visibility', 'currency', 'language']);
+      getLocationPermissionState.mockResolvedValue('denied');
+
+      await service.initialize();
+
+      expect(service.locationPermission()).toBe('idle');
+      expect(service.canAdvance()).toBe(false);
+    });
+
+    it('still offers the choice on a surface without an OS permission', async () => {
+      // The web build has nothing to pre-read: the browser asks on the first
+      // position read, so the step keeps offering the choice.
+      setup(['identity', 'visibility', 'currency', 'language']);
+      getLocationPermissionState.mockResolvedValue('unsupported');
 
       await service.initialize();
 

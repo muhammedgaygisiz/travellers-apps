@@ -126,6 +126,21 @@ surfaces in Settings and on the Bite form.
 [[issue-1409]] supersedes [[issue-1394]]'s decision to keep asking at the
 picker. The permission itself is unchanged; only who asks for it moved.
 
+## Onboarding And The Live OS Permission
+
+[[issue-1412]] makes the onboarding location step read the OS grant it was
+ignoring, so a user who has already granted location is not asked for it again.
+
+| Work           | Use Case                                    | Domain   |
+| -------------- | ------------------------------------------- | -------- |
+| [[issue-1412]] | [[UC - Guide New Users After Registration]] | [[User]] |
+
+It completes a pattern rather than starting one: issue \#1184 established that
+a permission is a fact about an installation and not an account, [[issue-1394]]
+applied that to the photos step, [[issue-1386]] gave notifications a Settings
+surface that reflects the live state, and the location step was the one left
+reconciling against a stored flag. The rule is on [[Architecture - Capacitor]].
+
 ## Own Bite Reactions
 
 [[issue-1401]] gives a Bite creator the reaction counts on their own Bite as a read-only label, on the Bite card and on the Bite details page, and removes the client affordance to react to a Bite they created.

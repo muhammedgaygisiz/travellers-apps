@@ -16,9 +16,10 @@ import {
   type PushPermissionState,
 } from 'push-notifications';
 import {
-  hasLocationPermission,
+  getLocationPermissionState,
   requestLocationPermission,
   type LocationPermissionResult,
+  type LocationPermissionState,
 } from 'geolocation';
 import {
   getMediaLocationPermissionState,
@@ -285,9 +286,17 @@ export class OnboardingDataAccessService {
     return getMediaLocationPermissionState();
   }
 
-  /** Whether the OS still allows location reads. Never prompts. */
-  hasLocationPermission(): Promise<boolean> {
-    return hasLocationPermission();
+  /**
+   * OS location state of this device, without prompting.
+   *
+   * The step reconciles against this rather than a stored preference. The
+   * stored `settings.location` flag records what the user once chose on some
+   * install, while the grant is a fact about this one, and the live state is
+   * the only truthful answer to "has this already been decided here?"
+   * (issue #1412).
+   */
+  getLocationPermissionState(): Promise<LocationPermissionState> {
+    return getLocationPermissionState();
   }
 
   private toPublicUser(

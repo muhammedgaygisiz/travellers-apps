@@ -120,37 +120,15 @@ export const getCurrentPosition = (): Observable<Position> => {
 };
 
 /**
- * Whether the OS currently allows reading the position. Never prompts.
- *
- * A stored `settings.location` flag records what the user once chose, not what
- * the OS allows today: reinstalling the app or revoking access in system
- * settings resets the OS grant while the stored preference survives. Callers
- * must reconcile the two before treating location as available, otherwise they
- * show a "granted" state for a permission that no longer exists.
- *
- * Web has no pre-checkable grant — the browser asks on read — so it reports
- * `true` and leaves the decision to {@link getCurrentPosition}.
- */
-export const hasLocationPermission = async (): Promise<boolean> => {
-  if (!Capacitor.isNativePlatform()) {
-    return true;
-  }
-
-  try {
-    const permissionStatus = await Geolocation.checkPermissions();
-
-    return permissionStatus.location === 'granted';
-  } catch (error) {
-    console.warn('Location permission check failed: ', error);
-
-    return false;
-  }
-};
-
-/**
  * Reads the OS permission state without prompting, so a caller can tell a
  * recoverable "never asked" apart from a "denied" that only the system settings
  * page can undo.
+ *
+ * This is the only permission read callers get, deliberately: a boolean
+ * `hasLocationPermission` used to sit beside it and reported `true` on web,
+ * where there is nothing to pre-check, which reads as a grant to anyone
+ * reconciling a stored preference against it. `unsupported` says that plainly
+ * (issue #1412).
  */
 export const getLocationPermissionState =
   async (): Promise<LocationPermissionState> => {

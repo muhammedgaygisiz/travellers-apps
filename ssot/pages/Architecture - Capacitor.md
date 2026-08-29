@@ -375,14 +375,48 @@ denied user to device settings.
 `libs/common/geolocation` splits this in two:
 
 - `getCurrentPosition` - reads the position on an existing grant and never prompts; it errors instead when permission is not granted, and callers already treat a missing position as non-fatal. Every position read goes through it: the login path (`dispatchGpsPosition` in `initAfterLogin$`) and the Bite details distance (`positionLoader` in `libs/bite-tribe/details/data-access`). Do not re-implement the check/read inline — that is how a stray `requestPermissions` call gets reintroduced.
+- `getLocationPermissionState` - reads the OS state and never prompts. `prompt`
+  still has an unspent OS prompt; `denied` does not, and only the settings page
+  can undo it; `unsupported` is the web build, which has nothing to pre-check.
+  Callers must branch on the three. It is the only permission read the library
+  offers: a boolean `hasLocationPermission` sat beside it until issue #1412 and
+  reported `true` on web, which reads as a grant to anyone reconciling against
+  it.
 - `requestLocationPermission` - shows the prompt. Called from onboarding or an
   explicit location setup/recovery action, and returns `granted` / `denied` /
   `unsupported` so the caller can continue its contextual workflow.
+- `openLocationSettings` - the app's own page in the system settings, the only
+  route back from a denial. iOS only; see the Denied-Permission Recovery Rule.
 
 `getCurrentPosition` bails out before reading when permission is undecided on a native platform. `checkPermissions` never prompts, but `getCurrentPosition` does — the native plugin asks the OS itself — so the guard, not the absence of a `requestPermissions` call, is what keeps the login path silent.
 
 Do not call `requestLocationPermission` from app startup, a login path, or
 passive position loading.
+
+### Live State Rule
+
+The onboarding location step reads the live OS state on arrival and treats a
+`granted` permission as an answer already given, exactly as the photos and
+notification steps do. `settings.location` records what a user once chose on
+some install; the grant is a fact about this one, so the flag decides nothing
+about whether the step still has a question (issue
+[#1412](https://github.com/muhammedgaygisiz/travellers-apps/issues/1412)).
+
+- The stored flag cannot stand in for the state in either direction. It survives
+  a reinstall or a revoke that resets the grant, and it is absent — or a stored
+  `false`, indistinguishable from "never asked" — on a device where the
+  permission is already granted. Requiring both is what asked a returning user
+  to grant something the OS had already answered.
+- Only `granted` is prefilled. `denied` keeps the step's two buttons, because
+  the OS may still have a prompt with a rationale to spend and the buttons
+  coming back are the only route left to a user who changed their mind;
+  `unsupported` keeps them because the web build's browser asks on the first
+  read.
+- The read happens once, when the assistant initializes. A grant made in system
+  settings while the assistant is open is not picked up until the next start —
+  the same limitation Settings has, and not addressed by #1412.
+- This is the assistant's half of what issue #1386 fixed for notifications in
+  Settings. See the OS Permission Reflection Rule above.
 
 ### Denied-Permission Recovery Rule
 

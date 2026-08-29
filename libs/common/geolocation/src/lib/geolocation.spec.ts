@@ -2,7 +2,6 @@ import { Geolocation } from '@capacitor/geolocation';
 import {
   getCurrentPosition,
   getLocationPermissionState,
-  hasLocationPermission,
   LOCATION_READ_TIMEOUT_MS,
   LocationReadTimeoutError,
   openLocationSettings,
@@ -195,60 +194,6 @@ describe(requestLocationPermission.name, () => {
       await expect(requestLocationPermission()).resolves.toBe('unsupported');
 
       expect(Geolocation.requestPermissions).not.toHaveBeenCalled();
-    });
-  });
-});
-
-describe(hasLocationPermission.name, () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe('given native platform', () => {
-    beforeEach(() => {
-      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
-    });
-
-    it('reports the grant without ever prompting', async () => {
-      (Geolocation.checkPermissions as jest.Mock).mockResolvedValue({
-        location: 'granted',
-      });
-
-      await expect(hasLocationPermission()).resolves.toBe(true);
-      expect(Geolocation.requestPermissions).not.toHaveBeenCalled();
-    });
-
-    it.each(['denied', 'prompt', 'prompt-with-rationale'])(
-      'reports no permission when the OS says %s',
-      async (location) => {
-        // A stored preference can outlive the OS grant (reinstall, revoke), so
-        // anything short of "granted" must read as unavailable.
-        (Geolocation.checkPermissions as jest.Mock).mockResolvedValue({
-          location,
-        });
-
-        await expect(hasLocationPermission()).resolves.toBe(false);
-      },
-    );
-
-    it('treats a failed check as no permission', async () => {
-      jest.spyOn(console, 'warn').mockImplementation();
-      (Geolocation.checkPermissions as jest.Mock).mockRejectedValue(
-        new Error('boom'),
-      );
-
-      await expect(hasLocationPermission()).resolves.toBe(false);
-    });
-  });
-
-  describe('given not native platform', () => {
-    beforeEach(() => {
-      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
-    });
-
-    it('defers to the browser, which asks on read', async () => {
-      await expect(hasLocationPermission()).resolves.toBe(true);
-      expect(Geolocation.checkPermissions).not.toHaveBeenCalled();
     });
   });
 });

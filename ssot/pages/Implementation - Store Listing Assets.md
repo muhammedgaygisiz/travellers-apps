@@ -504,19 +504,19 @@ stale-palette asset remains on either store.
 
 Version 1.0 is in Prepare for Submission and is effectively empty.
 
-| Slot                                    | State                                    |
-| --------------------------------------- | ---------------------------------------- |
-| Name, subtitle                          | set                                      |
-| Age rating                              | set, 13+ - was 18+                       |
-| Screenshots                             | 5 of 10, 6.9", current                   |
-| App previews                            | none                                     |
-| Description, promotional text, keywords | set                                      |
-| Support URL, marketing URL, copyright   | support URL **set**; the other two empty |
-| Primary category                        | Food & Drink                             |
-| App Privacy                             | published                                |
-| Pricing, availability                   | free, all 175 regions                    |
-| Content Rights                          | declared                                 |
-| Build                                   | none attached                            |
+| Slot                                    | State                             |
+| --------------------------------------- | --------------------------------- |
+| Name, subtitle                          | set                               |
+| Age rating                              | set, 13+ - was 18+                |
+| Screenshots                             | 5 of 10, 6.9", current            |
+| App previews                            | none                              |
+| Description, promotional text, keywords | set                               |
+| Support URL, marketing URL, copyright   | support URL and copyright **set** |
+| Primary category                        | Food & Drink                      |
+| App Privacy                             | published                         |
+| Pricing, availability                   | free, all 175 regions             |
+| Content Rights                          | declared                          |
+| Build                                   | none attached                     |
 
 TestFlight is the exception and is in good shape: internal and external groups
 exist, build 94 (1.0.1) is in Testing, and the beta description, feedback email
@@ -740,6 +740,31 @@ at the moment it is typed, but a Support URL that 404s during review is a
 rejection with no upside. Done in that order on 30 August 2026: the page
 deployed with the merge, was confirmed to render, and only then was the field
 saved.
+
+### Copyright Is 2025, Not 2026
+
+Set to **`2025 Muhammed Gaygisiz`** on 30 August 2026.
+
+Apple's help text for the field is specific: "The name of the person or entity
+that owns the exclusive rights to your app, preceded by the year the rights were
+obtained." That is the year the work was created, not the year it is submitted,
+and the two are a year apart here.
+
+The year comes from the repository rather than from memory. BiteTribe's first
+commit is **28 April 2025** (`chore: cleanup, initialize tribe bite app shell`).
+The monorepo itself goes back to 19 May 2022, but that is the workspace, which
+began as the other app on the same App Store Connect account - so 2022 would
+attribute BiteTribe's rights to work that is not BiteTribe.
+
+The entity is the legal entity already on the account. `BiteTribe` was rejected
+as the rights holder because it is a product name with no company behind it, and
+naming it would attribute the rights to something that does not exist in law.
+
+**The in-app footers are a separate thing and are not wrong.** The privacy
+policy, account-deletion and support pages render the current year by the
+ordinary convention for a website footer. Do not "fix" either one to match the
+other: the store field is a legal attribution of authorship, the footer is a
+notice on a web page.
 
 ### The Public Pages Sit Behind The App Check Gate
 

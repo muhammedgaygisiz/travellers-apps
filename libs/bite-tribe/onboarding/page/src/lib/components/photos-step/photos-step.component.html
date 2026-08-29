@@ -1,0 +1,59 @@
+<div class="photos-step">
+  <p class="onboarding-step-copy">
+    {{ 'onboarding-photos-copy' | transloco }}
+  </p>
+
+  <ul class="photos-step__benefits">
+    <li>{{ 'onboarding-photos-benefit-position' | transloco }}</li>
+    <li>{{ 'onboarding-photos-benefit-later' | transloco }}</li>
+    <li>{{ 'onboarding-photos-benefit-control' | transloco }}</li>
+  </ul>
+
+  @switch (permission()) {
+    @case ('granted') {
+      <p
+        class="photos-step__outcome photos-step__outcome--granted"
+        data-testid="onboarding-photos-outcome"
+      >
+        <ion-icon name="checkmark-circle-outline" aria-hidden="true" />
+        {{ 'onboarding-photos-granted' | transloco }}
+      </p>
+    }
+    @case ('denied') {
+      <p class="photos-step__outcome" data-testid="onboarding-photos-outcome">
+        {{ 'onboarding-photos-denied' | transloco }}
+      </p>
+    }
+    @case ('unsupported') {
+      <p class="photos-step__outcome" data-testid="onboarding-photos-outcome">
+        {{ 'onboarding-photos-unsupported' | transloco }}
+      </p>
+    }
+  }
+
+  @if (!isDecided()) {
+    <div class="photos-step__actions">
+      <ion-button
+        expand="block"
+        data-testid="onboarding-photos-enable"
+        [disabled]="isRequesting()"
+        (click)="enablePhotoLocation.emit()"
+      >
+        @if (isRequesting()) {
+          <ion-spinner name="dots" slot="start" />
+        }
+        {{ 'onboarding-photos-enable' | transloco }}
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        fill="clear"
+        data-testid="onboarding-photos-skip"
+        [disabled]="isRequesting()"
+        (click)="skipPhotoLocation.emit()"
+      >
+        {{ 'onboarding-photos-skip' | transloco }}
+      </ion-button>
+    </div>
+  }
+</div>

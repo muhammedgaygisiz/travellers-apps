@@ -10,6 +10,7 @@
         [imageUrl]="imageUrl()"
         [position]="fallbackPosition()"
         (positionFromImage)="onPositionFromImage($event)"
+        (imagePickedFrom)="onImagePickedFrom($event)"
         (clearImagePath)="resetImagePath()"
       />
 
@@ -257,6 +258,23 @@
         </ion-item>
         }
       </ion-list>
+
+      <!-- The photo row above is disabled, so its own fix cannot live inside
+      it. This sits under the list instead, and only when the permission really
+      is the cause: the OS dialog while one is left, the app's settings page
+      once it is not (#1394). -->
+      @if (photoPositionBlockedByPermission()) {
+      <ion-button
+        fill="clear"
+        size="small"
+        class="ion-align-self-start"
+        data-testid="photo-position-recover"
+        [disabled]="isRequestingPhotoLocation()"
+        (click)="recoverPhotoLocation()"
+      >
+        {{ 'photo-position-turn-on' | transloco }}
+      </ion-button>
+      }
     </ion-content>
   </ng-template>
 </ion-modal>

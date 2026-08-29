@@ -2,7 +2,7 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { AppLauncher } from '@capacitor/app-launcher';
-import { AppSettings } from './app-settings';
+import { AppSettings } from 'app-settings';
 import { registerCurrentPushInstallation } from './push-installation';
 import {
   NotificationTarget,

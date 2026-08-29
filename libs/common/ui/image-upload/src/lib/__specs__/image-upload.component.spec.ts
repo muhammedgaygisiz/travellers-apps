@@ -1084,6 +1084,7 @@ describe('ImageUploadComponent', () => {
           await component.pickImageFromGallery();
 
           expect(FilePicker.pickImages).toHaveBeenCalledWith({
+            limit: 1,
             readData: true,
           });
           expect(getExifDataFromFilePath).toHaveBeenCalledWith(
@@ -1093,6 +1094,21 @@ describe('ImageUploadComponent', () => {
             latitude: 10,
             longitude: 20,
           });
+        });
+      });
+
+      describe('given the picker is opened', () => {
+        it('should not request a media permission first', async () => {
+          (FilePicker.pickImages as jest.Mock).mockResolvedValue({
+            files: [],
+          });
+
+          await component.pickImageFromGallery();
+
+          // The onboarding photos step owns that request. Asking here put an OS
+          // prompt between the user and their photo, and under limited access a
+          // second selection step. See GitHub issue #1394.
+          expect(FilePicker.requestPermissions).not.toHaveBeenCalled();
         });
       });
 

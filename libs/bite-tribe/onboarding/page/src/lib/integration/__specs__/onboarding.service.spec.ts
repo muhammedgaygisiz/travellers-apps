@@ -32,6 +32,8 @@ describe('OnboardingService', () => {
   let getPushPermissionState: jest.Mock;
   let requestLocationPermission: jest.Mock;
   let hasLocationPermission: jest.Mock;
+  let requestMediaLocationPermission: jest.Mock;
+  let getMediaLocationPermissionState: jest.Mock;
   let completeOnboarding: jest.Mock;
   let navigateRoot: jest.Mock;
   let logEvent: jest.Mock;
@@ -96,6 +98,10 @@ describe('OnboardingService', () => {
     requestLocationPermission = jest.fn().mockResolvedValue('granted');
     // Default: the OS still allows reads, so a stored grant stays trustworthy.
     hasLocationPermission = jest.fn().mockResolvedValue(true);
+    requestMediaLocationPermission = jest.fn().mockResolvedValue('granted');
+    // Default: Android with an unspent prompt, so the photos step is shown and
+    // still asks. `unsupported` is the iOS and web answer and drops the step.
+    getMediaLocationPermissionState = jest.fn().mockResolvedValue('prompt');
     completeOnboarding = jest.fn().mockResolvedValue(undefined);
     navigateRoot = jest.fn();
     logEvent = jest.fn();
@@ -124,6 +130,8 @@ describe('OnboardingService', () => {
             getPushPermissionState,
             requestLocationPermission,
             hasLocationPermission,
+            requestMediaLocationPermission,
+            getMediaLocationPermissionState,
             completeOnboarding,
           },
         },
@@ -148,18 +156,31 @@ describe('OnboardingService', () => {
     Intl.DateTimeFormat.prototype.resolvedOptions = originalResolvedOptions;
   });
 
-  it('exposes the steps in the configured order', () => {
+  it('exposes the steps in the configured order', async () => {
     setup();
+    await service.initialize();
 
-    expect(service.steps.map((step) => step.id)).toEqual([
+    expect(service.steps().map((step) => step.id)).toEqual([
       'identity',
       'visibility',
       'currency',
       'language',
       'location',
+      'photos',
       'notifications',
       'finish',
     ]);
+  });
+
+  it('drops the photos step where the permission does not exist', async () => {
+    setup();
+    getMediaLocationPermissionState.mockResolvedValue('unsupported');
+    await service.initialize();
+
+    // iOS and web would meet a screen whose every button is a no-op, and the
+    // progress count would include a step nobody can answer (issue #1394).
+    expect(service.steps().map((step) => step.id)).not.toContain('photos');
+    expect(service.steps()).toHaveLength(7);
   });
 
   describe('initialize', () => {
@@ -1029,10 +1050,10 @@ describe('OnboardingService', () => {
       expect(saveSettings).toHaveBeenCalledWith(
         expect.objectContaining({ location: true }),
       );
-      expect(service.currentStep().id).toBe('notifications');
+      expect(service.currentStep().id).toBe('photos');
     });
 
-    it('accepts a denial and continues to the notification step', async () => {
+    it('accepts a denial and continues to the photos step', async () => {
       setup(['identity', 'visibility', 'currency', 'language']);
       requestLocationPermission.mockResolvedValue('denied');
       await service.initialize();
@@ -1047,7 +1068,7 @@ describe('OnboardingService', () => {
       expect(saveSettings).toHaveBeenCalledWith(
         expect.objectContaining({ location: false }),
       );
-      expect(service.currentStep().id).toBe('notifications');
+      expect(service.currentStep().id).toBe('photos');
     });
 
     it('records no location for a surface without an OS prompt', async () => {
@@ -1208,7 +1229,7 @@ describe('OnboardingService', () => {
       // Declining is a deliberate answer, and the profile renders no location
       // line for it (issue #1270) — there is nothing to write.
       expect(saveProfile).not.toHaveBeenCalled();
-      expect(service.currentStep().id).toBe('notifications');
+      expect(service.currentStep().id).toBe('photos');
     });
 
     it('persists the city onto the profile when the step is left', async () => {
@@ -1221,7 +1242,7 @@ describe('OnboardingService', () => {
       expect(saveProfile).toHaveBeenCalledWith(
         expect.objectContaining({ userId: 'user-1', city: 'Bern' }),
       );
-      expect(service.currentStep().id).toBe('notifications');
+      expect(service.currentStep().id).toBe('photos');
     });
 
     it('writes an emptied city so a stored one is actually removed', async () => {
@@ -1245,7 +1266,7 @@ describe('OnboardingService', () => {
       // Most users never touch the field, and an unchanged value should not
       // cost the location step a profile round-trip.
       expect(saveProfile).not.toHaveBeenCalled();
-      expect(service.currentStep().id).toBe('notifications');
+      expect(service.currentStep().id).toBe('photos');
     });
 
     it('stays on the step when the city write fails', async () => {
@@ -1260,9 +1281,120 @@ describe('OnboardingService', () => {
     });
   });
 
+  describe('photos step', () => {
+    const upToPhotos = (): void =>
+      setup(['identity', 'visibility', 'currency', 'language', 'location']);
+
+    it('does not prompt before the user asks for it', async () => {
+      upToPhotos();
+
+      await service.initialize();
+
+      expect(service.currentStep().id).toBe('photos');
+      expect(service.photoLocationPermission()).toBe('idle');
+      // The whole point of the step: the OS prompt is spent here, in context,
+      // and never on the way to picking a photo (issue #1394).
+      expect(requestMediaLocationPermission).not.toHaveBeenCalled();
+      expect(service.canAdvance()).toBe(false);
+    });
+
+    it('records a granted permission and continues', async () => {
+      upToPhotos();
+      await service.initialize();
+
+      await service.requestPhotoLocation();
+
+      expect(service.photoLocationPermission()).toBe('granted');
+      expect(service.canAdvance()).toBe(true);
+
+      await service.next();
+
+      // The grant is a fact about this Android install, so there is no
+      // account-level flag to write.
+      expect(saveSettings).not.toHaveBeenCalled();
+      expect(service.currentStep().id).toBe('notifications');
+    });
+
+    it('accepts a denial and continues the flow', async () => {
+      upToPhotos();
+      requestMediaLocationPermission.mockResolvedValue('denied');
+      await service.initialize();
+
+      await service.requestPhotoLocation();
+
+      expect(service.photoLocationPermission()).toBe('denied');
+      expect(service.canAdvance()).toBe(true);
+
+      await service.next();
+
+      expect(saveSettings).not.toHaveBeenCalled();
+      expect(service.currentStep().id).toBe('notifications');
+    });
+
+    it('treats skipping as an explicit no without opening the prompt', async () => {
+      upToPhotos();
+      await service.initialize();
+
+      service.skipPhotoLocation();
+
+      expect(service.photoLocationPermission()).toBe('denied');
+      expect(requestMediaLocationPermission).not.toHaveBeenCalled();
+      expect(service.canAdvance()).toBe(true);
+    });
+
+    it('prefills a live OS grant so a returning user is not asked again', async () => {
+      upToPhotos();
+      getMediaLocationPermissionState.mockResolvedValue('granted');
+
+      await service.initialize();
+
+      expect(service.photoLocationPermission()).toBe('granted');
+      expect(service.canAdvance()).toBe(true);
+      expect(requestMediaLocationPermission).not.toHaveBeenCalled();
+    });
+
+    it('asks again when the grant was revoked in system settings', async () => {
+      upToPhotos();
+      // A reinstall or a revoke resets the OS grant, and there is no stored
+      // flag that could disagree, so the step comes back.
+      getMediaLocationPermissionState.mockResolvedValue('denied');
+
+      await service.initialize();
+
+      expect(service.photoLocationPermission()).toBe('idle');
+      expect(service.canAdvance()).toBe(false);
+    });
+
+    it('ignores a second request while one is in flight', async () => {
+      upToPhotos();
+      let resolvePermission!: (value: string) => void;
+      requestMediaLocationPermission.mockReturnValue(
+        new Promise((resolve) => {
+          resolvePermission = resolve;
+        }),
+      );
+      await service.initialize();
+
+      const first = service.requestPhotoLocation();
+      await service.requestPhotoLocation();
+
+      expect(requestMediaLocationPermission).toHaveBeenCalledTimes(1);
+
+      resolvePermission('granted');
+      await first;
+    });
+  });
+
   describe('notification step', () => {
     it('does not prompt before the user asks for it', async () => {
-      setup(['identity', 'visibility', 'currency', 'language', 'location']);
+      setup([
+        'identity',
+        'visibility',
+        'currency',
+        'language',
+        'location',
+        'photos',
+      ]);
 
       await service.initialize();
 
@@ -1274,7 +1406,14 @@ describe('OnboardingService', () => {
     });
 
     it('records a granted permission and continues', async () => {
-      setup(['identity', 'visibility', 'currency', 'language', 'location']);
+      setup([
+        'identity',
+        'visibility',
+        'currency',
+        'language',
+        'location',
+        'photos',
+      ]);
       await service.initialize();
 
       await service.requestNotifications();
@@ -1291,7 +1430,14 @@ describe('OnboardingService', () => {
     });
 
     it('accepts a denial and continues the flow', async () => {
-      setup(['identity', 'visibility', 'currency', 'language', 'location']);
+      setup([
+        'identity',
+        'visibility',
+        'currency',
+        'language',
+        'location',
+        'photos',
+      ]);
       requestPushPermission.mockResolvedValue('denied');
       await service.initialize();
 
@@ -1307,7 +1453,14 @@ describe('OnboardingService', () => {
     });
 
     it('records no push for a surface without an OS prompt', async () => {
-      setup(['identity', 'visibility', 'currency', 'language', 'location']);
+      setup([
+        'identity',
+        'visibility',
+        'currency',
+        'language',
+        'location',
+        'photos',
+      ]);
       requestPushPermission.mockResolvedValue('unsupported');
       await service.initialize();
 
@@ -1319,7 +1472,14 @@ describe('OnboardingService', () => {
     });
 
     it('treats skipping as an explicit no without opening the prompt', async () => {
-      setup(['identity', 'visibility', 'currency', 'language', 'location']);
+      setup([
+        'identity',
+        'visibility',
+        'currency',
+        'language',
+        'location',
+        'photos',
+      ]);
       await service.initialize();
 
       service.skipNotifications();
@@ -1330,7 +1490,14 @@ describe('OnboardingService', () => {
     });
 
     it('ignores a second request while one is in flight', async () => {
-      setup(['identity', 'visibility', 'currency', 'language', 'location']);
+      setup([
+        'identity',
+        'visibility',
+        'currency',
+        'language',
+        'location',
+        'photos',
+      ]);
       let resolvePermission!: (value: string) => void;
       requestPushPermission.mockReturnValue(
         new Promise((resolve) => {
@@ -1348,7 +1515,14 @@ describe('OnboardingService', () => {
     });
 
     it('prefills a live OS grant so a returning user is not asked again', async () => {
-      setup(['identity', 'visibility', 'currency', 'language', 'location']);
+      setup([
+        'identity',
+        'visibility',
+        'currency',
+        'language',
+        'location',
+        'photos',
+      ]);
       getPushPermissionState.mockResolvedValue('granted');
 
       await service.initialize();
@@ -1363,7 +1537,14 @@ describe('OnboardingService', () => {
         // There is no stored notification preference to fall back on any more
         // (issue #1184), so anything short of a live grant leaves the step to
         // be decided here.
-        setup(['identity', 'visibility', 'currency', 'language', 'location']);
+        setup([
+          'identity',
+          'visibility',
+          'currency',
+          'language',
+          'location',
+          'photos',
+        ]);
         getPushPermissionState.mockResolvedValue(state);
 
         await service.initialize();

@@ -111,15 +111,30 @@
 
   [[issue-1283]] is implemented. [[epic-1284]] depends on it: a moderation rule for deleting a root review only has meaning once a root review can carry replies.
 
-- ## Own Bite Reactions
+- ## Photo Position And The Media Permission
 
-  [[issue-1401]] gives a Bite creator the reaction counts on their own Bite as a read-only label, on the Bite card and on the Bite details page, and removes the client affordance to react to a Bite they created.
+[[issue-1394]] moved the Android gallery path onto the single-select Photo
+Picker. [[issue-1409]] follows it by moving the media location permission the
+photo position depends on out of the picker and into onboarding, with recovery
+surfaces in Settings and on the Bite form.
 
-  | Work           | Use Case                                                                   | Domain   |
-  | -------------- | -------------------------------------------------------------------------- | -------- |
-  | [[issue-1401]] | [[UC - Create And Maintain Personal Bites]], [[UC - Inspect Bite Details]] | [[Bite]] |
+| Work           | Use Case                                                                                 | Domain             |
+| -------------- | ---------------------------------------------------------------------------------------- | ------------------ |
+| [[issue-1394]] | [[UC - Create And Maintain Personal Bites]]                                              | [[Bite]]           |
+| [[issue-1409]] | [[UC - Create And Maintain Personal Bites]], [[UC - Guide New Users After Registration]] | [[Bite]], [[User]] |
 
-  The rule it adds is recorded on [[Bite]]. The guard is a client affordance only; nothing in the Firestore rules or the like triggers enforces it.
+[[issue-1409]] supersedes [[issue-1394]]'s decision to keep asking at the
+picker. The permission itself is unchanged; only who asks for it moved.
+
+## Own Bite Reactions
+
+[[issue-1401]] gives a Bite creator the reaction counts on their own Bite as a read-only label, on the Bite card and on the Bite details page, and removes the client affordance to react to a Bite they created.
+
+| Work           | Use Case                                                                   | Domain   |
+| -------------- | -------------------------------------------------------------------------- | -------- |
+| [[issue-1401]] | [[UC - Create And Maintain Personal Bites]], [[UC - Inspect Bite Details]] | [[Bite]] |
+
+The rule it adds is recorded on [[Bite]]. The guard is a client affordance only; nothing in the Firestore rules or the like triggers enforces it.
 
 - ## Decisions To Constraints
 

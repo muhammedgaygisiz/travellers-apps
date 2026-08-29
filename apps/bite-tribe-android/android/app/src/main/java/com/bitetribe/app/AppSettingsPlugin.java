@@ -40,6 +40,23 @@ public class AppSettingsPlugin extends Plugin {
     }
 
     /**
+     * Opens this app's details page, which carries its permission list.
+     *
+     * This is the route for a permission with no page of its own.
+     * `ACCESS_MEDIA_LOCATION` is one: it decides whether a photo picked from
+     * the gallery still carries its GPS position, and once it is denied the OS
+     * ignores further requests, so this page is the only way back (issue
+     * #1394).
+     */
+    @PluginMethod
+    public void openAppDetailsSettings(PluginCall call) {
+        JSObject result = new JSObject();
+        result.put("opened", openAppDetails());
+
+        call.resolve(result);
+    }
+
+    /**
      * The app's own notification page: one screen, carrying exactly the switch
      * the user has to flip. It was introduced in Android 8, so older devices
      * fall through to the app details page.
@@ -57,8 +74,9 @@ public class AppSettingsPlugin extends Plugin {
 
     /**
      * App info: always available, and one tap away from notifications. It is
-     * the fallback rather than the first choice because it drops the user a
-     * level above the switch they came for.
+     * the notification fallback rather than the first choice because it drops
+     * the user a level above the switch they came for - but it is the direct
+     * target for permissions that have no page of their own.
      */
     private boolean openAppDetails() {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);

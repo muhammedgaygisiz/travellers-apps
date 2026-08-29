@@ -20,6 +20,12 @@ import {
   requestLocationPermission,
   type LocationPermissionResult,
 } from 'geolocation';
+import {
+  getMediaLocationPermissionState,
+  requestMediaLocationPermission,
+  type MediaLocationPermissionResult,
+  type MediaLocationPermissionState,
+} from 'media-location';
 
 const USERS_COLLECTION = 'users';
 const LANGUAGE_PREFERENCE_KEY = 'lang';
@@ -254,6 +260,29 @@ export class OnboardingDataAccessService {
 
   requestLocationPermission(): Promise<LocationPermissionResult> {
     return requestLocationPermission();
+  }
+
+  /**
+   * Asks for the media location permission, which is what lets a photo picked
+   * from the gallery keep its GPS position.
+   *
+   * Nothing is written anywhere: the grant is an OS fact about this device, so
+   * there is no account-level flag to reconcile later — the same shape issue
+   * #1184 established for notifications (issue #1394).
+   */
+  requestMediaLocationPermission(): Promise<MediaLocationPermissionResult> {
+    return requestMediaLocationPermission();
+  }
+
+  /**
+   * OS media location state of this device, without prompting.
+   *
+   * The step reconciles against this rather than a stored preference. A
+   * reinstall or a revoke in system settings resets the grant, and the live
+   * state is the only truthful answer to "has this already been decided here?".
+   */
+  getMediaLocationPermissionState(): Promise<MediaLocationPermissionState> {
+    return getMediaLocationPermissionState();
   }
 
   /** Whether the OS still allows location reads. Never prompts. */

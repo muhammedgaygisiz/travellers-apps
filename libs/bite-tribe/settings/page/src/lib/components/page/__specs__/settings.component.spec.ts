@@ -678,6 +678,60 @@ describe(PageSettings.name, () => {
     });
   });
 
+  describe('Photo locations', () => {
+    const byTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    const setPermission = (
+      permission: 'granted' | 'denied' | 'prompt' | 'unsupported',
+    ): void => {
+      compRef.setInput('photoLocationPermission', permission);
+      fixture.detectChanges();
+    };
+
+    it('should hide the whole section where the permission does not exist', () => {
+      // iOS hands the metadata over with the photo library grant and the web
+      // build reads the chosen file directly, so there is nothing to offer and
+      // nothing the user is missing (issue #1394).
+      setPermission('unsupported');
+
+      expect(byTestId('settings-photo-location')).toBeNull();
+    });
+
+    it('should confirm a grant without offering any action', () => {
+      setPermission('granted');
+
+      expect(byTestId('settings-photo-location-granted')).not.toBeNull();
+      expect(byTestId('settings-photo-location-blocked')).toBeNull();
+    });
+
+    it('should offer the OS dialog while the prompt is unspent', () => {
+      setPermission('prompt');
+
+      expect(byTestId('settings-photo-location-blocked')).not.toBeNull();
+      expect(byTestId('settings-photo-location-allow-device')).not.toBeNull();
+    });
+
+    it('should replace the dialog with the settings page once denied', () => {
+      // The OS drops further requests after a denial, so the prompt button
+      // would do nothing. Same rule the notification section follows.
+      setPermission('denied');
+
+      expect(byTestId('settings-photo-location-allow-device')).toBeNull();
+      expect(
+        byTestId('settings-photo-location-open-device-settings'),
+      ).not.toBeNull();
+    });
+
+    it('should always offer the settings page while the position is blocked', () => {
+      setPermission('prompt');
+
+      expect(
+        byTestId('settings-photo-location-open-device-settings'),
+      ).not.toBeNull();
+    });
+  });
+
   describe('Section grouping', () => {
     const byTestId = (testId: string): HTMLElement | null =>
       fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);

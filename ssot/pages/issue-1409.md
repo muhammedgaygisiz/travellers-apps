@@ -1,0 +1,47 @@
+- [Move the media location permission into onboarding](https://github.com/muhammedgaygisiz/travellers-apps/issues/1409) (Issue \#1409)
+- Description
+  - Follow-up to [[issue-1394]], which is where the finding and the reasoning live. That issue asked for the Android Photo Picker on the gallery path so attaching a photo raises no prompt and, under "Allow limited access", costs one selection instead of two.
+  - Half of it shipped in `d75ef6e3`: `FilePicker.pickImages` was already the Photo Picker, and it now runs single-select. The prompt stayed, because `ACCESS_MEDIA_LOCATION` is what makes a gallery photo's GPS readable, and Android lifts the redaction on the granted permission rather than the declared one. `Aus Bild` is the source that makes posting a photo taken earlier work at all, so the permission could not simply be dropped.
+  - The prompt therefore cannot be deleted. It can only be moved out of the photo flow, which is what this issue does.
+- Findings - the ask had no home, so it lived where it did the most damage
+  - Onboarding is already the repo's primary first-run request surface, and the Contextual Permission Rule on [[Architecture - Capacitor]] already routes push and location through it. Media location was the only OS permission still being requested from the middle of a task.
+  - The permission was requested on **every** gallery pick, not once. Capacitor's `requestPermissionForAliases` no-ops on an existing grant, so the prompt only appeared once in practice - but the call site was in the picker, and a fresh install met it on the way to its first Bite photo.
+  - `libs/common/push-notifications/src/lib/app-settings.ts` had predicted its own move: "Location has the same Android gap and is the obvious second caller. This proxy moves out of `push-notifications` when it gets one." Media location is that second caller.
+  - Android has no per-permission settings page for this, so the recovery route has to be the app details page. `AppSettingsPlugin` already had a private `openAppDetails()` as the notification fallback; it only needed exposing.
+  - "No GPS in photo" was a lie whenever the permission was the real cause, and the two are indistinguishable from the read alone: a photo with no GPS and a photo whose GPS was stripped come back identical. Only the permission state tells them apart, and only for a gallery pick - a camera capture is the app's own file and is never redacted.
+- Decisions
+  - **A `photos` step of its own, between `location` and `notifications`.** Two OS prompts stay in two steps, each with its own state and its own "denial completes the step" rule. Folding it into the location step would have fired two prompts from one screen.
+  - **Android only, filtered out rather than shown as unsupported.** iOS hands the metadata over with the photo library grant and the web build reads the chosen file directly, so an iOS user would meet a screen whose every button is a no-op - and the progress count would include a step nobody can answer. `OnboardingService.steps` became a signal so the registry can be narrowed at `initialize`, before `firstIncompleteIndex` indexes into it.
+  - **The gallery picker never asks.** Not even when the prompt is unspent. That is the whole point, and it is what the Contextual Permission Rule requires of location and push already.
+  - **Settings recovers, mirroring #1386.** The OS dialog while the prompt is unspent, the app's settings page once it is not, and the section hides itself entirely where the permission does not exist. Already-onboarded users never see the assistant again, so without this they would lose the photo position silently.
+  - **The Bite form names the real cause and fixes it in place.** The recovery action opens the OS page rather than navigating to the app's Settings, because leaving the form ends the creation session and drops the draft. After a grant the photo is re-read, since the first read came back stripped and nothing else would look at it again.
+  - **The reason key only changes for a gallery photo.** All three conditions - gallery source, no resolved position, permission not granted - have to hold. Blaming the permission for a camera photo with no GPS would send the user to a setting that would not have helped.
+  - **Nothing is stored.** No account-level flag, for the reason #1184 established for notifications: the grant is a fact about one OS installation, and a stored flag would survive a reinstall or a revoke that resets it.
+- Outcome
+  - New `libs/common/media-location`: the four permission functions, mirroring `libs/common/geolocation`. The only place that talks to `FilePicker` about permissions.
+  - New `libs/common/app-settings`: the plugin proxy moved out of `push-notifications`, which now imports it. `AppSettingsPlugin.java` gained `openAppDetailsSettings`.
+  - `libs/bite-tribe/onboarding`: the `photos` step id, registry entry, component, stories, service state and the platform narrowing; `getMediaLocationPermissionState` and `requestMediaLocationPermission` on the data-access service.
+  - `libs/bite-tribe/settings`: the **Photo locations** section, its computeds, service state and three data-access pass-throughs.
+  - `libs/bite-tribe/bite`: the `photo-position-permission-off` reason key, the recovery row under the candidate list, and `recoverPhotoLocation`.
+  - `libs/common/ui/image-upload`: `requestPermissions` gone; a new `imagePickedFrom` output and `rereadPositionFromLastPick`.
+  - `libs/common/ta-firestore`: `'photos'` added to the inlined `OnboardingStepCompleted` step union, which is a compile-time mirror of `OnboardingStepId`.
+  - 18 Transloco keys across all eleven locales. The manifest is unchanged - both media permissions stay declared.
+  - Recorded as a rewritten Media Permission Rule on [[Architecture - Capacitor]], an extension of its Contextual Permission Rule, and flow bullets on [[UC - Create And Maintain Personal Bites]].
+- Validation
+  - `nx test` across `media-location`, `app-settings`, `bite-tribe/onboarding`, `bite-tribe/onboarding-data-access`, `bite-tribe/settings`, `bite-tribe/settings-data-access`, `bite-tribe/bite`, `image-upload`, `push-notifications`, `ta-firestore`, `geolocation` - 11 projects, all pass. `nx lint` on each - clean. `nx build bite-tribe` - pass. `git diff --check` - clean.
+  - `./gradlew :app:compileDebugJavaWithJavac` - pass. It needs `JAVA_HOME` pointed at a JDK 21; the machine's default is 25 and the Capacitor modules' toolchain rejects it. Android Studio's bundled JBR works.
+  - Mutation-checked, three ways, each caught by exactly its own assertions and nothing else: never narrowing the registry, a grant that does not complete the step, and a live grant that is not reconciled at `initialize`.
+  - Storybook and Loki: five `Photos Step` stories and three `Photo locations` Settings stories, 16 new references. Loki green at exit 0 with zero differences. The 14 changed references are all the onboarding shell, which now reads "of 8" instead of "of 7"; `loki:approve` also rewrote 9 unrelated references - Feed Controls, Home, Login, Restaurant - and those were restored against the recorded failure set before finishing.
+  - Playwright needs no change and got none: the step is filtered out on web, so the walker still sees seven steps, and it reads the total from the shell rather than hard-coding it.
+- Open
+  - **Not verified on a device.** No Android device was attached. Four passes are needed and none of them has run: a fresh install granting at the step, a fresh install skipping it, an upgrade from an already-onboarded install, and the "Allow limited access" case the tester originally reported.
+  - **The EXIF redaction itself is still reasoned rather than measured.** It is documented Android behaviour, but this app's own read - `getExifDataFromFilePath` through a `content://media/picker/...` URI - has not been observed both ways on one device. The entire design rests on it.
+  - **The re-read after a late grant is unproven.** `rereadPositionFromLastPick` assumes a grant obtained after the picker URI was issued lifts redaction on that same URI. If a device shows otherwise, the fallback is copy asking the user to pick the photo again.
+  - **Existing installs still lose the position until someone acts.** They never see the assistant again, so the Settings section and the modal row are their only routes, and both need the user to notice. `ONBOARDING_VERSION` was deliberately not bumped.
+  - **No automated coverage of the native surfaces.** The picker and the settings intent are system activities; the specs pin call shapes only.
+- Related
+  - [[issue-1394]]
+  - [[Architecture - Capacitor]]
+  - [[UC - Create And Maintain Personal Bites]]
+  - [[Bite]]
+  - [[Current State - Release Candidate Test Charter]]

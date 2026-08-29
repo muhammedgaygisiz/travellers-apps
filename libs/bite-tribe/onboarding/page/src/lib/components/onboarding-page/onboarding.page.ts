@@ -24,6 +24,8 @@ import { CurrencyStepComponent } from '../currency-step/currency-step.component'
 import { LanguageStepComponent } from '../language-step/language-step.component';
 import { LocationStepComponent } from '../location-step/location-step.component';
 import type { LocationPermissionState } from '../location-step/location-step.component';
+import { PhotosStepComponent } from '../photos-step/photos-step.component';
+import type { PhotoLocationPermissionState } from '../photos-step/photos-step.component';
 import { NotificationStepComponent } from '../notification-step/notification-step.component';
 import type { NotificationPermissionState } from '../notification-step/notification-step.component';
 import { FinishStepComponent } from '../finish-step/finish-step.component';
@@ -50,6 +52,7 @@ import type { PublicUser } from 'model';
     CurrencyStepComponent,
     LanguageStepComponent,
     LocationStepComponent,
+    PhotosStepComponent,
     NotificationStepComponent,
     FinishStepComponent,
   ],
@@ -67,6 +70,7 @@ export class OnboardingPage {
   selectedLanguage = input<string>('en');
   locationPermission = input<LocationPermissionState>('idle');
   homeCity = input<string>('');
+  photoLocationPermission = input<PhotoLocationPermissionState>('idle');
   notificationPermission = input<NotificationPermissionState>('idle');
 
   next = output<void>();
@@ -80,6 +84,8 @@ export class OnboardingPage {
   enableLocation = output<void>();
   skipLocation = output<void>();
   homeCityChange = output<string>();
+  enablePhotoLocation = output<void>();
+  skipPhotoLocation = output<void>();
   enableNotifications = output<void>();
   skipNotifications = output<void>();
   placeholderValidityChange = output<boolean>();

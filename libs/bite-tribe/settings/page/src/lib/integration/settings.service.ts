@@ -9,6 +9,7 @@ import {
 import { PATH } from 'utils';
 import { ToastService } from 'toast';
 import type { PushInstallation, PushPermissionState } from 'push-notifications';
+import type { MediaLocationPermissionState } from 'media-location';
 import type { PushInstallationView } from '../components/page/settings.component';
 
 @Injectable({
@@ -30,6 +31,18 @@ export class SettingsService {
   readonly pushPermission = signal<PushPermissionState>('prompt');
   readonly pushInstallationsLoading = signal(false);
   readonly pushSetupRunning = signal(false);
+
+  /**
+   * OS media location permission of this device — whether a photo picked from
+   * the gallery still carries its GPS position.
+   *
+   * `unsupported` is the resting value because it is the honest answer
+   * everywhere but Android, and the section hides itself on it. See issue
+   * #1394.
+   */
+  readonly photoLocationPermission =
+    signal<MediaLocationPermissionState>('unsupported');
+  readonly photoLocationSetupRunning = signal(false);
 
   /**
    * Saves the preferences form and confirms it.
@@ -174,6 +187,48 @@ export class SettingsService {
 
   openPushSettings(): Promise<boolean> {
     return this.dataAccess.openPushSettings();
+  }
+
+  /** Re-reads the media location grant, which can be revoked while backgrounded. */
+  async refreshPhotoLocationPermission(): Promise<void> {
+    this.photoLocationPermission.set(
+      await this.dataAccess.getMediaLocationPermissionState(),
+    );
+  }
+
+  /**
+   * Asks the OS for the media location permission from the explicit Settings
+   * action.
+   *
+   * Only worth offering while the prompt is unspent; once denied the OS drops
+   * further requests silently, and the page offers the system settings page
+   * instead. The outcome is written back so a denial turns this action into
+   * that one without a reload.
+   */
+  async enablePhotoLocation(): Promise<void> {
+    if (this.photoLocationSetupRunning()) {
+      return;
+    }
+
+    this.photoLocationSetupRunning.set(true);
+
+    try {
+      const result = await this.dataAccess.requestMediaLocationPermission();
+
+      this.photoLocationPermission.set(
+        result === 'granted'
+          ? 'granted'
+          : result === 'unsupported'
+            ? 'unsupported'
+            : 'denied',
+      );
+    } finally {
+      this.photoLocationSetupRunning.set(false);
+    }
+  }
+
+  openPhotoLocationSettings(): Promise<boolean> {
+    return this.dataAccess.openMediaLocationSettings();
   }
 
   private applyEnabled(token: string, enabled: boolean): void {

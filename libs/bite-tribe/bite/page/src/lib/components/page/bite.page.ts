@@ -41,6 +41,12 @@ import {
   PositionComponent,
 } from 'bite-tribe-common/map';
 import { ImageUploadComponent } from 'image-upload';
+import {
+  getMediaLocationPermissionState,
+  openMediaLocationSettings,
+  requestMediaLocationPermission,
+  type MediaLocationPermissionState,
+} from 'media-location';
 import type {
   Bite,
   Geopoint,
@@ -390,6 +396,49 @@ export class BitePage {
 
   imagePosition: WritableSignal<Geopoint | undefined> = signal(undefined);
 
+  private readonly imageUpload = viewChild(ImageUploadComponent);
+
+  /** Where the photo in the form came from; only a gallery pick can be redacted. */
+  private readonly imagePickedFrom = signal<
+    'camera' | 'gallery' | 'web' | undefined
+  >(undefined);
+
+  /**
+   * OS media location permission, read once when the form opens and again after
+   * the user acts on it here. Resting on `unsupported` keeps every non-Android
+   * surface - including Storybook - out of the recovery row entirely.
+   */
+  private readonly mediaLocationPermission =
+    signal<MediaLocationPermissionState>('unsupported');
+
+  private readonly photoLocationRequestRunning = signal(false);
+
+  /**
+   * Whether a gallery photo lost its position to Android's redaction rather
+   * than simply never having had one.
+   *
+   * All three conditions matter. A camera capture is the app's own file and is
+   * never stripped, a photo that did resolve a position proves the grant is
+   * working, and on a granted or unsupported permission there is nothing to
+   * offer. Getting this wrong means telling a user to change a setting that
+   * would not have helped. See GitHub issue #1394.
+   */
+  readonly photoPositionBlockedByPermission = computed(
+    () =>
+      this.imagePickedFrom() === 'gallery' &&
+      !this.imagePosition() &&
+      (this.mediaLocationPermission() === 'prompt' ||
+        this.mediaLocationPermission() === 'denied'),
+  );
+
+  /** Whether the OS prompt is still worth spending, rather than the settings page. */
+  readonly canRequestPhotoLocation = computed(
+    () => this.mediaLocationPermission() === 'prompt',
+  );
+
+  readonly isRequestingPhotoLocation =
+    this.photoLocationRequestRunning.asReadonly();
+
   /** Position picked on the map inside the edit modal, before confirming. */
   manualPosition: WritableSignal<Geopoint | undefined> = signal(undefined);
 
@@ -460,7 +509,15 @@ export class BitePage {
     });
 
     return [
-      lookedUp('photo', this.imagePosition(), 'no-photo-position'),
+      lookedUp(
+        'photo',
+        this.imagePosition(),
+        // Naming the permission only where it is actually the cause; otherwise
+        // the honest answer stays "no GPS in photo".
+        this.photoPositionBlockedByPermission()
+          ? 'photo-position-permission-off'
+          : 'no-photo-position',
+      ),
       lookedUp('gps', this.position(), 'no-device-position'),
       lookedUp(
         'restaurant',
@@ -641,6 +698,62 @@ export class BitePage {
       this.imagePosition.set(position);
       this.biteFormGroup.controls['position'].patchValue(position);
       this.positionSource.set('photo');
+    }
+  }
+
+  /**
+   * Records which surface the photo came from, and reads the media location
+   * permission the first time a gallery pick makes it relevant.
+   *
+   * The read is deferred to here rather than done when the form opens: it is
+   * only ever used to explain a gallery photo with no position, and a form the
+   * user never attaches a gallery photo to should not ask the OS anything.
+   */
+  async onImagePickedFrom(source: 'camera' | 'gallery' | 'web'): Promise<void> {
+    this.imagePickedFrom.set(source);
+
+    if (source === 'gallery') {
+      this.mediaLocationPermission.set(await getMediaLocationPermissionState());
+    }
+  }
+
+  /**
+   * The recovery action on the disabled photo row: spend the OS prompt while
+   * one is left, otherwise open the app's page in the system settings.
+   *
+   * This is an explicit user action on a surface that has just explained why
+   * the position is missing, which is what the Contextual Permission Rule
+   * allows - unlike the picker, which asked before the user had any reason to
+   * care. Opening the OS page keeps the app's activity alive, so the half-filled
+   * Bite draft survives; navigating to the app's own Settings page would end the
+   * creation session and drop it.
+   */
+  async recoverPhotoLocation(): Promise<void> {
+    if (this.photoLocationRequestRunning()) {
+      return;
+    }
+
+    if (!this.canRequestPhotoLocation()) {
+      await openMediaLocationSettings();
+      return;
+    }
+
+    this.photoLocationRequestRunning.set(true);
+
+    try {
+      const result = await requestMediaLocationPermission();
+
+      this.mediaLocationPermission.set(
+        result === 'granted' ? 'granted' : 'denied',
+      );
+
+      // The photo was already read once, with its location stripped, and
+      // nothing else would look at it again.
+      if (result === 'granted') {
+        await this.imageUpload()?.rereadPositionFromLastPick();
+      }
+    } finally {
+      this.photoLocationRequestRunning.set(false);
     }
   }
 

@@ -241,9 +241,9 @@ Two things bound the risk:
   returns no position, but the image loads instead of failing silently.
 - **The install base.** At the time of the pin, GA4 showed 21 identifiable
   Android app devices: 9 Pixel, 9 Samsung, 3 Xiaomi, no Motorola and no budget
-  MediaTek brands. One Xiaomi was old enough to plausibly be affected. That
-  justified the pin before public launch; it will not justify it after, when
-  the brand mix broadens.
+  MediaTek brands. One Xiaomi was old enough to plausibly be affected. The
+  trade rests on that distribution, so it is worth re-reading the numbers when
+  the brand mix changes rather than treating the pin as settled.
 
 The durable fix is an app-owned Capacitor plugin firing `ACTION_PICK` with a
 Photo Picker fallback natively - upstream's fix plus the case they did not need

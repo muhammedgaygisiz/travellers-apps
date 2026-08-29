@@ -135,6 +135,18 @@ const migrateLegacyImage = async (
  *
  * Best effort throughout, and must stay that way: a device that refuses every
  * part of this still has to be able to read and write its own directory.
+ *
+ * Its reach is bounded, and the bound is accepted rather than fixed - see
+ * GitHub issue #1413. Under scoped storage an app owns only what it wrote, and
+ * an uninstall drops that ownership, so copies left by a previous install are
+ * invisible to `readdir` here: it reports an empty directory where `adb shell
+ * ls` shows files, without throwing. An in-place store update keeps the uid and
+ * migrates normally, which is the path virtually every user takes; a reinstall
+ * strands its predecessor's copies in public `Documents` for good. Reaching
+ * those needs a MediaStore query behind `READ_MEDIA_IMAGES`, which is a full
+ * photo-library prompt and a store permission declaration spent on tidying a
+ * cache nothing reads any more. The same is true of the API 30 to 32 band,
+ * where {@link canReadLegacyDirectory} is false because the app never asks.
  */
 const migrateLegacyImages = async (uid: string): Promise<void> => {
   if (!(await canReadLegacyDirectory())) {

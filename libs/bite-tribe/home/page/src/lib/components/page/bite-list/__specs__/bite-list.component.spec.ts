@@ -1,7 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, Injectable } from '@angular/core';
 import { IonItemSliding, provideIonicAngular } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
+import {
+  provideTransloco,
+  Translation,
+  TranslocoLoader,
+  TranslocoService,
+} from '@jsverse/transloco';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { of } from 'rxjs';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
@@ -201,5 +206,66 @@ describe('BiteListComponent', () => {
       expect(emitSpy).toHaveBeenCalled();
       expect(infiniteScrollEvent.target.complete).toHaveBeenCalled();
     });
+  });
+});
+
+/**
+ * Echoes every key back, so an assertion names the key the list chose rather
+ * than the copy of the day. The suite above stubs Transloco with a service that
+ * never emits a language, which is enough to assert that an empty state is
+ * shown but not which one.
+ */
+@Injectable()
+class EchoTranslocoLoader implements TranslocoLoader {
+  getTranslation(): ReturnType<TranslocoLoader['getTranslation']> {
+    const keys = ['no-bites-found-be-the-first', 'no-own-bites-yet'];
+
+    return of(Object.fromEntries(keys.map((key) => [key, key])) as Translation);
+  }
+}
+
+describe('BiteListComponent empty message', () => {
+  let fixture: ComponentFixture<BiteListComponent>;
+  let componentRef: ComponentRef<BiteListComponent>;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        provideTransloco({
+          config: {
+            availableLangs: ['en'],
+            defaultLang: 'en',
+            fallbackLang: 'en',
+          },
+          loader: EchoTranslocoLoader,
+        }),
+      ],
+    });
+
+    fixture = TestBed.createComponent(BiteListComponent);
+    componentRef = fixture.componentRef;
+  });
+
+  const emptyFeedText = (): string =>
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLElement>('[data-testid="empty-feed-message"]')
+      ?.textContent?.trim() ?? '';
+
+  it('should invite the first bite when no key is given', () => {
+    fixture.detectChanges();
+
+    expect(emptyFeedText()).toBe('no-bites-found-be-the-first');
+  });
+
+  /**
+   * My Bites shows only the signed-in user's own Bites, so it cannot ask them to
+   * be the first one. See GitHub issue #1417.
+   */
+  it('should render the given key instead of the feed invitation', () => {
+    componentRef.setInput('emptyMessageKey', 'no-own-bites-yet');
+    fixture.detectChanges();
+
+    expect(emptyFeedText()).toBe('no-own-bites-yet');
   });
 });

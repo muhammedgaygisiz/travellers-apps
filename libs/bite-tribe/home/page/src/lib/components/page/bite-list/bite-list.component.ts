@@ -68,6 +68,13 @@ export class BiteListComponent {
    * from a feed that has nothing in it. See GitHub issue #1331.
    */
   searchTerm = input('');
+  /**
+   * Transloco key for the empty state shown when the list has nothing in it and
+   * no search is active. The default invites the user to post the first Bite,
+   * which only makes sense on a shared feed - a list of the user's own Bites
+   * needs copy about their own list instead. See GitHub issue #1417.
+   */
+  emptyMessageKey = input('no-bites-found-be-the-first');
 
   readonly biteClick = output<Bite>();
   readonly likeButtonClick = output<LikeClick>();

@@ -107,6 +107,9 @@ carries only the app name and URL scheme.
 - German addresses the user informally with "du", never with "Sie". This holds across every surface: the app locale file, the notification and verification-mail catalog, and the privacy policy. The same choice is made per language wherever a language distinguishes formal and informal address.
 - In German, the form follows what the string does, not what it says. Copy that asks the user to act - hints, coach copy, onboarding benefits, validation and error messages, parenthetical field instructions, and option rows that continue a flow with something the user typed - uses the du-imperative: `Verwende: "Jabri"`, `Tippe auf die Karte, um den Standort zu setzen.`, `Trenne sie mit Leerzeichen`. Controls that only name their action - buttons, menu entries, list actions, field placeholders - keep the conventional infinitive noun phrase: `Speichern`, `Konto löschen`, `Anzeigenamen eingeben`. The English source is the reliable signal: an English imperative sentence should arrive in German as an imperative, and an infinitive rendering of one is a translation artifact. See issue \#1268.
 - Avoid hardcoded visible English in templates, alerts, labels, button text, empty states, and error states.
+- Diacritics are part of the word, not decoration. A Turkish string written in ASCII - `Isik Modu` for `Işık Modu`, `Aydinlik` for `Aydınlık`, `Konum bulunamadi` for `Konum bulunamadı` - reads as sloppiness to a native speaker in a way an English reviewer never sees, and no build fails over it. `apps/bite-tribe/src/app/__specs__/locale-copy.spec.ts` pins the settings strings that shipped that way, and asserts that every locale file carries the same key set as `en.json` so a half-translated feature fails a test instead of silently falling back to English; see issue \#1416.
+- A setting is named after what it chooses, not after one of its options. The theme row switches between light and dark, so Turkish `Işık Modu` ("light mode") named the option rather than the setting, and German and French had left `Theme` untranslated. It is `Tema`, `Design` and `Thème`; see issue \#1416.
+- An empty state belongs to the list that shows it, not to the component that renders it. The discovery feed invites the user to post the first Bite, which is wrong on My Bites, where the list holds only that user's own Bites and they cannot be the first one in it. `bt-bite-list` therefore takes the Transloco key for its empty state as an input, defaulting to the feed invitation; see issue \#1417.
 - Load a language before activating it when the switch happens in place, and let anything that translates synchronously - loading overlays, alerts, toasts - wait for that switch to settle.
 
 ## Code Anchors
@@ -134,6 +137,13 @@ language name rather than on the first mismatch:
 
 ```bash
 npx jest --config apps/bite-tribe/jest.config.ts --runInBand apps/bite-tribe/src/app/__specs__/language-names.spec.ts
+```
+
+Key parity, the Turkish settings strings, and the theme label have a second
+guard next to it:
+
+```bash
+npx jest --config apps/bite-tribe/jest.config.ts --runInBand apps/bite-tribe/src/app/__specs__/locale-copy.spec.ts
 ```
 
 When editing the notification catalog, run the functions tests from `apps/bite-tribe-firebase/functions`; `shared/i18n/__specs__/translate.spec.ts` checks every locale for missing keys, lost placeholders, and blank copy.

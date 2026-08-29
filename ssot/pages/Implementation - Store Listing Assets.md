@@ -793,6 +793,65 @@ from Firebase, so gating them on device attestation buys no protection and costs
 a store-review risk. Exempting those three routes from the startup gate would
 remove the risk outright.
 
+## The DSA Trader Decision
+
+Declared **non-trader** on 30 August 2026, at account level, covering the 27 EU
+territories.
+
+Two things this page previously said about the DSA were wrong, and both mattered
+enough to change the decision, so they are corrected here rather than quietly
+overwritten.
+
+**"Apple removes apps from the EU App Store without it" is about not declaring
+at all, not about declaring non-trader.** Apple requires a declaration either
+way - "Even if you don't distribute apps in the EU, you'll still need to declare
+a trader status." Declaring non-trader keeps the app in the EU. What happens is a
+disclosure: "If you're not a trader, consumers in the EU will be informed that
+consumer rights stemming from applicable consumer protection laws won't apply to
+contracts between you and them." The removal risk attaches to leaving the field
+undeclared, which is what the red banner was warning about.
+
+**Trader status does not force a home address into public view.** For an
+individual membership Apple asks for "Address **or P.O. Box**", with a receipt or
+bill proving association with the alternate address. So the choice was never
+"publish where you live or lose the EU".
+
+### Why non-trader is the accurate answer today
+
+Apple's stated factors, against the app as it actually is:
+
+| Factor                                                     | BiteTribe                                      |
+| ---------------------------------------------------------- | ---------------------------------------------- |
+| Revenue from the app - in-app purchase, paid, ad-sponsored | None. Free, no IAP, and no ad code exists      |
+| Commercial practices toward consumers                      | None shipped                                   |
+| Developed in connection with a trade or profession         | The deciding factor, and the owner's to assess |
+
+Apple's own example is the one that fits: "if you're a hobbyist and you developed
+your app with no intention of commercializing it, you may not be considered a
+trader."
+
+### What makes it stop being accurate
+
+The monetization epics. Apple names an **ad-sponsored** app explicitly among the
+trader factors, so [[epic-1123]] - Stage 1 in [[epic-1121]]'s sequencing, and the
+first release that earns anything - is the crossing point, even though no user
+pays. [[epic-1122]] is Stage 0 and sells nothing, so the entitlement foundation
+can ship with the status unchanged.
+
+The declaration is reversible at two levels, both confirmed present in the
+console: account level under Business, and per app under App Information ->
+App Store Regulations & Permits -> Digital Services Act.
+
+**Reversible does not mean cheap.** Switching to trader triggers contact details,
+two-factor validation of both a phone and an email, uploaded documentation
+verifying name and address, payment account details, and then verification by
+Apple on their timetable. That is why it is filed as [#1433](https://github.com/muhammedgaygisiz/travellers-apps/issues/1433) under
+[[epic-1123]] rather than left as a note: it has to start while that epic is in
+progress, not when its build is ready.
+
+This is a compliance self-assessment rather than a configuration value, and
+Apple's guidance says to consult a legal advisor where the status is uncertain.
+
 ## Blockers Outside The Listing
 
 These are account-level and gate submission regardless of listing completeness:
@@ -802,13 +861,11 @@ These are account-level and gate submission regardless of listing completeness:
   2026: the Free Apps Agreement is `Active`, effective 23 August 2026 to 13 April 2027. The Paid Apps Agreement is still `New` and unsigned, and needs the legal
   entity updated before it can be signed - that gates in-app purchases, so it
   belongs to the monetization epic [[epic-1121]], not to this release.
-- **Digital Services Act trader status is not provided. Apple removes apps from
-  the EU App Store without it.** Still open, and the console shows it as a red
-  banner on the Business page. Note what declaring trader status means for a
-  developer who is a private individual rather than a company: the DSA requires
-  Apple to verify **and publicly display** the trader's contact details, so the
-  address on file becomes public on the EU App Store listing. That is a decision
-  to take deliberately, not a form to rush.
+- ~~Digital Services Act trader status is not provided.~~ **Declared non-trader
+  on 30 August 2026.** The Business page now reads "You have completed all
+  regulatory requirements at this time", and the Compliance table shows
+  `Digital Services Act - 27 Countries or Regions - Active`. No contact
+  information is published on the product page. The reasoning is below.
 - ~~The new social media age-rating questions are optional until 7 September
   2026, but mandatory for a new app submission, which this is.~~ **Done**, 30
   August 2026. Both were answered as part of the age-rating correction above.

@@ -507,7 +507,7 @@ Version 1.0 is in Prepare for Submission and is effectively empty.
 | Slot                                    | State                                        |
 | --------------------------------------- | -------------------------------------------- |
 | Name, subtitle                          | set                                          |
-| Age rating                              | set, 18+                                     |
+| Age rating                              | set, 13+ - was 18+                           |
 | Screenshots                             | 5 of 10, 6.9", current                       |
 | App previews                            | none                                         |
 | Description, promotional text, keywords | set                                          |
@@ -525,15 +525,19 @@ draft of the App Store description and should seed it.
 
 ## Declarations
 
-Play's ten app-content declarations are all complete. Apple's equivalents are
-not started.
+Play's ten app-content declarations are all complete. **Apple's are complete
+too**: the nutrition labels were published on 21 August 2026 and the age-rating
+questionnaire was corrected and saved on 30 August 2026. This paragraph read
+"Apple's equivalents are not started" until then, while the subsection directly
+below it recorded the labels as published - a contradiction inside one page, and
+the reason a reader trusting the summary would have re-done finished work.
 
 | Declaration      | Value                                                                                     |
 | ---------------- | ----------------------------------------------------------------------------------------- |
 | Privacy policy   | `https://bite-tribe.web.app/privacy`                                                      |
 | Account deletion | `https://bite-tribe.web.app/account-deletion`                                             |
 | Content rating   | 12+ / Teen                                                                                |
-| Target age group | 18 and over                                                                               |
+| Target age group | 18 and over - now the outlier, see below                                                  |
 | Ads              | none in this build                                                                        |
 | Data shared      | none                                                                                      |
 | Data collected   | name, email, user IDs, precise location, photos, crash logs, app interactions, device IDs |
@@ -543,6 +547,54 @@ not started.
 The Apple nutrition labels are answered from this same list, so the two stores
 describe one set of data flows. Revisit both when the AdMob epic
 [[epic-1123]] lands, since `Ads` becomes true at that point.
+
+### The Age Rating Was Over-Declared
+
+Corrected on 30 August 2026, from **18+ to 13+**, after reading the questionnaire
+against the codebase rather than against itself.
+
+| Rating surface     | Before                          | After                             |
+| ------------------ | ------------------------------- | --------------------------------- |
+| Main rating        | 18+, 173 countries or regions   | **13+**, 171 countries or regions |
+| Second tier        | -                               | 16+, 2 countries or regions       |
+| Brazil             | A16                             | A16                               |
+| Korea              | 19+                             | **15+**                           |
+| Pre-iOS-26 devices | 17+ global, regional exceptions | **12+** global                    |
+
+Five answers changed. Two were new questions Apple added and nobody had answered,
+which is what blocked submission; three were pre-existing and wrong.
+
+| Answer                         | Was      | Now            | Evidence                                                                                                                                                                             |
+| ------------------------------ | -------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Social Media                   | blank    | **Yes**        | A discovery feed that spreads user Bites to many users is exactly Apple's definition. Unanswered questions block `Next`, so this was the actual submission blocker                   |
+| Social Media Disabled Under 13 | blank    | **No**         | The app calls no Declared Age Range API and does no age assurance, so under-13 users are not handled specially. Answering yes would have been a claim about code that does not exist |
+| Advertising                    | Yes      | **No**         | No AdMob dependency in `package.json`, no ad code in `libs/` or `apps/`, and the Declarations table above already says `Ads: none in this build`                                     |
+| Messaging and Chat             | Yes      | **No**         | No messaging route exists. The only conversation surface is the review thread under a Bite, which is public user-generated content and is already declared separately                |
+| Alcohol, Tobacco, or Drug Use  | Frequent | **Infrequent** | **This was the 18+ driver.** Correcting Advertising and Messaging alone left the calculated rating at 18+; only this moved it                                                        |
+
+The alcohol answer is the judgement call, so it is worth stating the reasoning
+rather than just the result. References do exist - restaurant menus list drinks
+and a Bite can be of a beer - but Apple defines Frequent as content users
+_regularly_ encounter, and a dish-photo feed is not that. Infrequent, "users
+will rarely encounter this content", is the honest reading. It is also what Play
+concluded independently: Play rates the same product 12+ / Teen.
+
+Availability improved as a side effect. The restricted-countries warning went
+from Afghanistan and Morocco, **plus** Iraq, Libya, Maldives, Saudi Arabia and
+the United Arab Emirates if the category is Entertainment, Lifestyle or Games,
+**plus** Brazil if the category is Games, down to Afghanistan and Morocco alone.
+
+**The lesson is that a declaration is a claim about the code and should be
+checked against it.** Three of these had been sitting in the console asserting
+features the app has never had, and the cost was not abstract: 18+ on a
+restaurant-discovery app is a reach penalty on every store surface that filters
+by age.
+
+**One inconsistency is left, and it now points the other way.** Play's
+`Target age group` is still declared as 18 and over, which was presumably set to
+match the old Apple 18+. With Apple at 13+ and Play's own content rating at
+12+ / Teen, that Play answer is the odd one out and should be revisited in the
+console.
 
 ### Apple Nutrition Labels
 
@@ -689,12 +741,21 @@ The contact address sits behind the reveal control for the same reason it does o
 
 These are account-level and gate submission regardless of listing completeness:
 
-- The Apple Developer Program License Agreement has been updated and needs the
-  Account Holder to accept it.
-- Digital Services Act trader status is not provided. Apple removes apps from
-  the EU App Store without it.
-- The new social media age-rating questions are optional until 7 September 2026,
-  but mandatory for a new app submission, which this is.
+- ~~The Apple Developer Program License Agreement has been updated and needs the
+  Account Holder to accept it.~~ **Done.** Verified in the console on 29 August
+  2026: the Free Apps Agreement is `Active`, effective 23 August 2026 to 13 April 2027. The Paid Apps Agreement is still `New` and unsigned, and needs the legal
+  entity updated before it can be signed - that gates in-app purchases, so it
+  belongs to the monetization epic [[epic-1121]], not to this release.
+- **Digital Services Act trader status is not provided. Apple removes apps from
+  the EU App Store without it.** Still open, and the console shows it as a red
+  banner on the Business page. Note what declaring trader status means for a
+  developer who is a private individual rather than a company: the DSA requires
+  Apple to verify **and publicly display** the trader's contact details, so the
+  address on file becomes public on the EU App Store listing. That is a decision
+  to take deliberately, not a form to rush.
+- ~~The new social media age-rating questions are optional until 7 September
+  2026, but mandatory for a new app submission, which this is.~~ **Done**, 30
+  August 2026. Both were answered as part of the age-rating correction above.
 - Play's internal testing track is paused and holds a stale build 58 plus an
   `Untitled release` draft. [Issue #1179](https://github.com/muhammedgaygisiz/travellers-apps/issues/1179)
   needs it live to receive the release candidate.

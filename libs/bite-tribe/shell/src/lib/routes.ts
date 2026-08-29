@@ -238,6 +238,11 @@ const APP_ROUTES: Routes = [
     title: 'Privacy Policy',
   },
   {
+    path: PATH.SUPPORT,
+    loadComponent: () => import('bite-tribe/support').then((m) => m.Support),
+    title: 'Support',
+  },
+  {
     path: PATH.ACCOUNT_DELETION,
     loadComponent: () =>
       import('bite-tribe/delete-account').then((m) => m.DeleteAccount),

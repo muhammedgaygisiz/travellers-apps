@@ -1,9 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import {
-  IonButton,
-  IonContent,
-  IonSpinner,
-} from '@ionic/angular/standalone';
+import { IonButton, IonContent, IonSpinner } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AppCheckReadinessService } from '../app-check-readiness.service';
 
@@ -22,7 +18,7 @@ import { AppCheckReadinessService } from '../app-check-readiness.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonContent, IonButton, IonSpinner, TranslocoPipe],
   template: `
-    <ion-content class="app-check-gate ion-padding" [fullscreen]="true">
+    <ion-content class="app-check-gate" [fullscreen]="true">
       <div class="app-check-gate__inner">
         <h1 class="app-check-gate__title">
           {{ 'app-check-blocked-title' | transloco }}
@@ -45,6 +41,32 @@ import { AppCheckReadinessService } from '../app-check-readiness.service';
     </ion-content>
   `,
   styles: `
+    /*
+     * The gate is rendered directly under \`ion-app\` in place of the router
+     * outlet, so nothing gives it the size that \`.ion-page\` gives a routed
+     * page. Without it \`ion-content\` collapses to zero height, the panel's
+     * \`min-height: 100%\` resolves against nothing, and the centring goes
+     * inert. See GitHub issue #1411.
+     */
+    :host {
+      display: flex;
+      position: absolute;
+      inset: 0;
+      flex-direction: column;
+    }
+
+    /*
+     * A fullscreen content with no \`ion-header\` starts at y = 0, behind the
+     * status bar. Ionic mirrors the platform insets onto these custom
+     * properties, so the gate carries them itself.
+     */
+    .app-check-gate {
+      --padding-top: calc(1rem + var(--ion-safe-area-top, 0px));
+      --padding-bottom: calc(1rem + var(--ion-safe-area-bottom, 0px));
+      --padding-start: 1rem;
+      --padding-end: 1rem;
+    }
+
     .app-check-gate__inner {
       display: flex;
       flex-direction: column;

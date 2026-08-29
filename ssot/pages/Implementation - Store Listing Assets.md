@@ -504,19 +504,19 @@ stale-palette asset remains on either store.
 
 Version 1.0 is in Prepare for Submission and is effectively empty.
 
-| Slot                                    | State                                        |
-| --------------------------------------- | -------------------------------------------- |
-| Name, subtitle                          | set                                          |
-| Age rating                              | set, 13+ - was 18+                           |
-| Screenshots                             | 5 of 10, 6.9", current                       |
-| App previews                            | none                                         |
-| Description, promotional text, keywords | set                                          |
-| Support URL, marketing URL, copyright   | empty; support URL required, page now exists |
-| Primary category                        | Food & Drink                                 |
-| App Privacy                             | published                                    |
-| Pricing, availability                   | free, all 175 regions                        |
-| Content Rights                          | declared                                     |
-| Build                                   | none attached                                |
+| Slot                                    | State                                    |
+| --------------------------------------- | ---------------------------------------- |
+| Name, subtitle                          | set                                      |
+| Age rating                              | set, 13+ - was 18+                       |
+| Screenshots                             | 5 of 10, 6.9", current                   |
+| App previews                            | none                                     |
+| Description, promotional text, keywords | set                                      |
+| Support URL, marketing URL, copyright   | support URL **set**; the other two empty |
+| Primary category                        | Food & Drink                             |
+| App Privacy                             | published                                |
+| Pricing, availability                   | free, all 175 regions                    |
+| Content Rights                          | declared                                 |
+| Build                                   | none attached                            |
 
 TestFlight is the exception and is in good shape: internal and external groups
 exist, build 94 (1.0.1) is in Testing, and the beta description, feedback email
@@ -706,7 +706,7 @@ As of 22 August 2026, in the order they gate a submission.
 | Gap                            | Store | Note                                                       |
 | ------------------------------ | ----- | ---------------------------------------------------------- |
 | Send the listing for review    | Play  | Saved as a draft change, sitting in Publishing overview    |
-| Support URL                    | Apple | Page written; set the field once the deploy is live        |
+| ~~Support URL~~                | Apple | **Done** 30 Aug 2026, `https://bite-tribe.web.app/support` |
 | 7-inch and 10-inch screenshots | Play  | Asterisked, both empty — does not block review             |
 | Light-theme captures           | Both  | The set is dark-theme only; the capture rule asks for both |
 | Ten listing translations       | Both  | Derive from the English copy above                         |
@@ -735,7 +735,38 @@ The app therefore serves its own page at **`/support`**, built on 30 August 2026
 
 The contact address sits behind the reveal control for the same reason it does on the other two public pages: it keeps the address out of the page source for scrapers while still being one tap from a reviewer. The page also links to the privacy policy and the account-deletion page, so a reviewer arriving at the Support URL first can reach both legal surfaces from it.
 
-**Set the field only after the page is deployed.** Apple does not check the URL at the moment it is typed, but a Support URL that 404s during review is a rejection with no upside.
+**Set the field only after the page is deployed.** Apple does not check the URL
+at the moment it is typed, but a Support URL that 404s during review is a
+rejection with no upside. Done in that order on 30 August 2026: the page
+deployed with the merge, was confirmed to render, and only then was the field
+saved.
+
+### The Public Pages Sit Behind The App Check Gate
+
+Confirmed on 30 August 2026, and it is the same defect this page already noted
+for the privacy policy - but it matters more now, because the Support URL is a
+link **Apple publishes on the product page** and invites a reviewer to click.
+
+A cold load of `/support` from an automated browser rendered the enforced-mode
+App Check gate instead of the page: "Extra security check needed. BiteTribe
+couldn't verify this device with its security check." The same URL in an
+ordinary Chrome profile rendered the page in full. That matches the Run 7
+methodology note in [[Current State - Release Candidate Test Charter]]: an
+instrumented browser scores badly with reCAPTCHA Enterprise, and a bad score
+produces an App Check refusal.
+
+So this is not a broken deploy, and a normal reviewer will most likely see the
+page. The residual risk is that **reCAPTCHA Enterprise scores a browser, not a
+person**, and a reviewer on a fresh profile with no history, a VPN, or an
+automated pre-check is exactly the low-reputation shape that scores badly. The
+gate is all-or-nothing: it blocks the router outlet, so it takes down the three
+pages the stores require to be publicly reachable along with the rest of the app.
+
+Worth considering separately from the listing work: the privacy policy, the
+account-deletion page and the support page carry no user data and read nothing
+from Firebase, so gating them on device attestation buys no protection and costs
+a store-review risk. Exempting those three routes from the startup gate would
+remove the risk outright.
 
 ## Blockers Outside The Listing
 

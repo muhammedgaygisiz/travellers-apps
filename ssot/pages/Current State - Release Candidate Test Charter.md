@@ -8,20 +8,20 @@ It covers issue 1176 and belongs to issue 911 under [[epic-907]].
 
 ## Build Under Test
 
-| Property              | Value                                                                   |
-| --------------------- | ----------------------------------------------------------------------- |
-| App identifier        | `com.bitetribe.app`                                                     |
-| Marketing version     | 1.0.1                                                                   |
-| Build number          | 94, source commit `4fdf021d`, tag `build-1.0.1-94`                      |
-| Configuration         | Production configuration, produced as described below                   |
-| Backend               | Production Firebase project, not the emulator                           |
-| App Check             | `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` **off** in the build 94 artifact |
-| Android minimum SDK   | 24                                                                      |
-| iOS deployment target | 15.6                                                                    |
+| Property              | Value                                                                  |
+| --------------------- | ---------------------------------------------------------------------- |
+| App identifier        | `com.bitetribe.app`                                                    |
+| Marketing version     | 1.0.1                                                                  |
+| Build number          | 96, source commit `68f8626e`, no tag - locally built, see below        |
+| Configuration         | Production configuration, produced as described below                  |
+| Backend               | Production Firebase project, not the emulator                          |
+| App Check             | `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` **on** in the build 96 artifact |
+| Android minimum SDK   | 24                                                                     |
+| iOS deployment target | 15.6                                                                   |
 
-Record the actual version, build number and commit SHA used, because the numbers above change with every build increment.
+The App Check row has changed meaning twice. Build 94 shipped the flag **off**, so its client-side enforced-mode gate is recorded as not applicable rather than passed, and that is still the newest iOS artifact any run has exercised. Build 95 was the first artifact built with the flag on. The build 96 rows above describe runs 10 and 11: a locally built **debug** APK, not a store artifact, produced from a production web bundle carrying `` `ENFORCED:"true"` ``. The debug variant was chosen deliberately - `apps/bite-tribe-android/android/app/build.gradle` adds `firebase-appcheck-debug` to that variant only, so the gate can be made to fail attestation on demand, which is how check 12's refused-token half was finally executed. Version 1.0.1 (96) covers both runs 10 and 11 with the same `versionCode`, so on Android the **source commit is the only build discriminator**: `78889774` for run 10 and `68f8626e` for run 11.
 
-The App Check row changed meaning at build 94 and the previous wording was aspirational. `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` is off by default and was left off deliberately for this release, so the build 94 artifact runs App Check under the transitional `continue_after_failure` policy. The client-side enforced-mode startup gate is therefore **not exercisable on this artifact** and must be recorded as not applicable rather than passed. This says nothing about backend protection: Firebase Console enforcement is a separate, server-side switch that is active, so protected reads and writes are still verified traffic. Verifying the client gate needs a build produced with the flag on, which is the pending go-live step in [[Current State - Release State]].
+This says nothing about backend protection: Firebase Console enforcement is a separate, server-side switch that is active for Firestore, Storage and Authentication, so protected reads and writes are verified traffic regardless of the client flag. Record the actual version, build number and commit SHA used for every run, because the numbers above change with every build increment and, on Android, sometimes do not change when the code does.
 
 ## How To Produce The Build
 
@@ -35,7 +35,7 @@ The release-candidate pass must use the same distribution route as testers:
 
 The native wrappers bundle `dist/apps/bite-tribe`. Producing the store artifacts starts from a local production build, whose safety comes from the production configuration plus an explicit check:
 
-1. `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true npx nx build bite-tribe --configuration=production`. The enforced-mode gate from issue 933 is **on for the release candidate**, decided under [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177). The variable defaults to off and nothing in a local build sets it, so a build produced without it silently ships the gate disabled while every other part of this charter still reads as if it were on. CI sets the same variable on the `deploy-bite-tribe` job, so the web deploy and the native wrappers agree.
+1. `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true npx nx build bite-tribe --configuration=production --skip-nx-cache`. The enforced-mode gate from issue 933 is **on for the release candidate**, decided under [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177). The variable defaults to off and nothing in a local build sets it, so a build produced without it silently ships the gate disabled while every other part of this charter still reads as if it were on. CI sets the same variable on the `deploy-bite-tribe` job, so the web deploy and the native wrappers agree. `--skip-nx-cache` is not belt-and-braces. The variable is **not part of the build target's cache key**, so the command above, written correctly and run with the variable set, still returns a cached bundle carrying `` `ENFORCED:"false"` `` if one exists. Run 11 hit exactly that, and only step 3's grep caught it. See [#1428](https://github.com/muhammedgaygisiz/travellers-apps/issues/1428).
 2. Confirm the bundle is clean before it is wrapped. The environment plugin strips `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN` and `NX_APP_BITE_TRIBE_IS_DEV` only when `NX_TASK_TARGET_CONFIGURATION` is `production`, so a build made through any other path keeps them. In `dist/apps/bite-tribe`, grep for the debug token's own value, and for `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN:` and `NX_APP_BITE_TRIBE_IS_DEV:` — **with the trailing colon** — and expect no match.
 
    The colon is what makes this check mean anything. Grepping the bare key name always matches even in a correctly stripped bundle, because the app source declares those names as lookup constants and the minifier keeps them as plain strings: a clean production build contains `q="NX_APP_BITE_TRIBE_IS_DEV"` in the App Check chunk. Only the property form proves a **value** was inlined. Checking without the colon reports every build as contaminated, which is worse than not checking, because it trains the reader to wave the result through.
@@ -65,13 +65,13 @@ Build 87 predates the failed-photo state and retry workflow delivered in commit 
 
 Fill in the actual hardware during execution. The minimum is one physical device per native platform; simulators and emulators do not count for permissions, notifications, camera or App Check.
 
-| Platform | Device                        | OS version  | Physical or virtual | Notes                                                    |
-| -------- | ----------------------------- | ----------- | ------------------- | -------------------------------------------------------- |
-| iOS      | iPhone 12 mini                | 26.5.2      | Physical            | TestFlight build 92, run 5 executed                      |
-| iOS      |                               |             | Simulator           | Optional second OS version                               |
-| Android  | Samsung SM-A566B (Galaxy A56) | 16 (SDK 36) | Physical            | Play build 95 for run 9; local debug build 96 for run 10 |
-| Android  |                               |             | Emulator            | Optional older API level                                 |
-| Web      | MacBook                       | macOS       | Chrome              | Runs 7 and 8 executed in Chrome; Safari never exercised  |
+| Platform | Device                        | OS version  | Physical or virtual | Notes                                                   |
+| -------- | ----------------------------- | ----------- | ------------------- | ------------------------------------------------------- |
+| iOS      | iPhone 12 mini                | 26.6        | Physical            | Newest iOS execution is run 7 on TestFlight build 94    |
+| iOS      |                               |             | Simulator           | Optional second OS version                              |
+| Android  | Samsung SM-A566B (Galaxy A56) | 16 (SDK 36) | Physical            | Play build 95 for run 9; local debug 96 for runs 10, 11 |
+| Android  |                               |             | Emulator            | Optional older API level                                |
+| Web      | MacBook                       | macOS       | Chrome              | Runs 7 and 8 executed in Chrome; Safari never exercised |
 
 Cover the oldest supported OS if a device is available. The lowest supported levels are Android API 24 and iOS 15.6, and neither has ever been exercised deliberately.
 
@@ -128,22 +128,41 @@ The first two are reachable on web without travelling: the position-source modal
 
 ## Business App
 
-The business app has no Playwright coverage. Cover at minimum restaurant maintenance and BiteTrail creation manually, or record explicitly that the business app is out of scope for this release candidate.
+The business app has no Playwright coverage and was never exercised in any of the eleven runs.
+
+**Decided on 29 August 2026: the business app is out of scope for this release candidate.** It gets its own soft launch later, and testing it against a consumer release candidate would prove nothing about the artifact being shipped. This is the charter's own second option taken deliberately, not a check that was quietly skipped. The business app's own pass is written when its launch is scheduled.
 
 ## Monitoring
 
 - Confirm Crashlytics receives a report from each native platform. Note what the app actually sends: `FirebaseErrorHandlerService` calls `recordException`, which files a **non-fatal**, and it only runs on a native platform. A JavaScript error never crashes the native process, so there is no path that produces a fatal crash report from app code. Trigger an unhandled Angular error, restart the app so the report uploads, and expect it under Non-fatals rather than Crashes.
 - Verify the analytics events in DebugView from a real device, not only from the web build. On Android this needs a build that carries the [#1387](https://github.com/muhammedgaygisiz/travellers-apps/issues/1387) fix: the native collection flag persists in SharedPreferences, so a device that once ran a dev build stays silent under any earlier artifact, build 95 included. Expect the `App measurement disabled by setAnalyticsCollectionEnabled(false)` line to be gone and `Logging event` lines to follow.
-- Confirm the key metrics dashboard exists and receives data.
+- Confirm the key metrics dashboard exists and receives data. **Confirmed on 29 August 2026.** The dashboard is not a console dashboard: GA4 has no API to create one, so the nine launch tiles in [[Implementation - Analytics Events]] live as code in `tools/analytics/dashboard.config.mjs`, and `.github/workflows/analytics-digest.yml` runs `digest.mjs` daily against GA4 property `487035057` and posts the result to [#991](https://github.com/muhammedgaygisiz/travellers-apps/issues/991). The 29 August run reported 144 restaurant and Bite views per day, 38 daily active users and 5 Bites per day, and correctly raised its own threshold alert on sign-ups at zero for the window. Two tiles stay console-only because the Data API cannot do cohorts - D1/D7 retention and crash-free users - and [#986](https://github.com/muhammedgaygisiz/travellers-apps/issues/986) is what would close them.
 
 ## Pass Criteria
 
-- Every check above is executed and recorded as pass, fail, or not applicable, with the reason.
+- Every check above is executed and recorded as pass, fail, or not applicable, with the reason. Where a check was deliberately not executed for the release candidate, it is recorded under Accepted Gaps below with the evidence standing in its place - never as a pass.
 - No open defect that prevents registration, login, Bite creation with a photo, or app start.
 - Crashlytics receives a non-fatal from each native platform, and analytics receives events from every platform.
 - No crash observed on a supported OS version during the pass.
 
 Anything else found is filed, triaged, and either fixed under issue 1177 or accepted as a known issue.
+
+## Accepted Gaps
+
+Decided on 29 August 2026, when the platform pass was closed out. These are checks the charter asks for that will **not** be executed before the release candidate. They are recorded here rather than left to be rediscovered, and each names the evidence that stands in its place, so a later reader can judge the substitution instead of assuming a pass.
+
+| Gap                                           | Accepted because                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **One build proven on all three platforms**   | Android passed at Run 11 on build 96, web at Run 8 on `a20f485a`, iOS at Run 7 on TestFlight build 94. The maintainer accepts three separate per-platform passes instead of one artifact proven everywhere. The residual risk is that no single artifact has been exercised end to end on all three.                                                                              |
+| **Check 12 on web and iOS**                   | Executed on Android only, both halves. Web and iOS never attempted it. The enforced build is delivered on both - CI sets the flag on `deploy-bite-tribe`, and TestFlight build 95 was the first artifact carrying it - and no attestation failure has surfaced in the field, which covers the working session. **The refused-token retry gate remains unproven outside Android.** |
+| **Ranking-change notification delivery**      | Never executed on either platform in eleven runs, because `sendDailyLeaderboardNotification` is scheduled and forcing it would push to every real user whose rank changed. Users have reported receiving these notifications and that they work, and push transport itself is proven on both platforms by the new-follower path.                                                  |
+| **iOS Analytics DebugView**                   | iOS analytics is verified through GA4 Realtime on runs 4, 6 and 7. DebugView needs a dedicated Xcode debug-mode launch and would confirm a transport that is not in doubt. Android DebugView is verified at Run 10.                                                                                                                                                               |
+| **Edge cases, exhaustively**                  | Partially covered: Run 8 reached the vacation and posting-later shape on web through the position-source modal's `Set manually` option, which is how it found [#1307](https://github.com/muhammedgaygisiz/travellers-apps/issues/1307), and Run 11 covered missing location on Android by denying the permission. A real trip across a currency boundary is not tested.           |
+| **The business app**                          | Out of scope for this release candidate by decision; it gets its own soft launch. See the Business App section above.                                                                                                                                                                                                                                                             |
+| **Android deep-link OS auto-verification**    | `pm get-app-links` reports state 1024 only because the debug signature is not in the published `assetlinks.json`. The server half is verified independently and the app's own handling passes warm and cold. A store-signed artifact resolves it, so it belongs to [#1179](https://github.com/muhammedgaygisiz/travellers-apps/issues/1179) rather than here.                     |
+| **Android Crashlytics `ErrorHandler` wiring** | The app is zoneless, so a thrown error from an injected `setTimeout` never reaches Angular's `ErrorHandler`. Run 10 called `recordException` directly - the same call the service makes - and the report uploaded, which proves the transport. The service's own wiring is verified on iOS, not on Android.                                                                       |
+
+Everything else in this charter was executed and recorded. The accepted gaps do not include any check that a run attempted and failed.
 
 ## Result Log
 

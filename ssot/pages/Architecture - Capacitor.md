@@ -32,6 +32,9 @@ When adding or removing native plugins:
 - Regenerate wrapper lockfiles from the wrapper directory.
 - Run the platform sync target.
 - Review generated native diffs.
+- Read the plugin's own native diff for the versions crossed, not only its
+  changelog. A patch bump can swap the OS intent a method fires; see the Gallery
+  Picker Version Pin below for the five weeks that cost.
 
 ## Sync Rule
 
@@ -161,6 +164,12 @@ still carries the position it was taken at. Android strips that metadata for
 any caller without the grant, and it is the **grant** that lifts the redaction,
 not the manifest declaration.
 
+The grant is necessary but **not sufficient**. Which intent the picker fires
+decides whether there is an unredacted photo to hand over at all, and the
+Android Photo Picker redacts unconditionally no matter what is granted. See the
+Gallery Picker Version Pin below; assuming the permission is the whole story is
+what sent issue #1414's first diagnosis in the wrong direction.
+
 The library splits this the same way `push-notifications` and `geolocation` do:
 
 - `getMediaLocationPermissionState` / `hasMediaLocationPermission` - read the OS
@@ -195,9 +204,52 @@ limited access" Android made them select the photo twice - once on the grant
 screen, once in the picker. See GitHub issues #1394 and #1409.
 
 `FilePicker.pickImages({ limit: 1 })` is the picker, and the limit is
-load-bearing: at the default `0` the plugin builds `PickMultipleVisualMedia`
-and the picker opens in multi-select mode with a confirming tap, while only the
-first file is ever read.
+load-bearing: at the default `0` the plugin sets `EXTRA_ALLOW_MULTIPLE` and the
+gallery opens in multi-select mode with a confirming tap, while only the first
+file is ever read.
+
+### Gallery Picker Version Pin
+
+**`@capawesome/capacitor-file-picker` is pinned to `8.0.2`. Do not bump it
+without reading this section and GitHub issue #1414.**
+
+`8.0.3` rewrote `pickImages` to fire the Android Photo Picker
+(`ActivityResultContracts.PickVisualMedia`) instead of `Intent.ACTION_PICK`.
+The Photo Picker redacts a photo's location unconditionally and ignores
+`ACCESS_MEDIA_LOCATION`, so the gallery position stopped working the moment the
+bump landed - silently, in `834221e5` on 20 Jul 2026, a dependency-alignment
+commit that flagged no behaviour change. Nothing tested the Android gallery
+position for the five weeks until run 10 of the test charter found it dead.
+
+| Version          | `pickImages` fires   | Photo position  |
+| ---------------- | -------------------- | --------------- |
+| `8.0.1`, `8.0.2` | `Intent.ACTION_PICK` | reads correctly |
+| `8.0.3`, `8.0.4` | `PickVisualMedia`    | always absent   |
+
+The pin is a holding position, not a resting place. Upstream
+[PR #893](https://github.com/capawesome-team/capacitor-plugins/pull/893) made
+the change for a real reason: OEM gallery apps with an old `targetSdkVersion`
+answer `ACTION_PICK` with a raw `file://` URI, which an app holding no storage
+permission cannot read. Pinning brings that defect back for those devices.
+
+Two things bound the risk:
+
+- **The fallback in `pickGalleryFile`.** An unreadable pick - a `file://` path,
+  or empty data, which is how the plugin reports the `EACCES` it swallowed -
+  retries through `FilePicker.pickFiles`, whose `ACTION_GET_CONTENT` Android 13
+  and later route to the Photo Picker. The retry costs a second selection and
+  returns no position, but the image loads instead of failing silently.
+- **The install base.** At the time of the pin, GA4 showed 21 identifiable
+  Android app devices: 9 Pixel, 9 Samsung, 3 Xiaomi, no Motorola and no budget
+  MediaTek brands. One Xiaomi was old enough to plausibly be affected. The
+  trade rests on that distribution, so it is worth re-reading the numbers when
+  the brand mix changes rather than treating the pin as settled.
+
+The durable fix is an app-owned Capacitor plugin firing `ACTION_PICK` with a
+Photo Picker fallback natively - upstream's fix plus the case they did not need
+
+- or the opt-in picker location API arriving in the August 2026 mainline
+  update. Either removes the pin.
 
 ### Nothing Is Stored
 
@@ -467,3 +519,5 @@ libs/common/image-compression
 
 - Native plugin changes must be reflected consistently in root and wrapper package files.
 - Android and iOS generated files should be treated as sync output, not hand-maintained source of truth.
+- `@capawesome/capacitor-file-picker` is held at `8.0.2` and cannot be upgraded without losing the Android gallery photo position. See the Gallery Picker Version Pin above.
+- A patch release of a native plugin can change which OS intent is fired, and therefore what the app is handed, without saying so. Read the Android or iOS diff of a native plugin bump, not just its version number.

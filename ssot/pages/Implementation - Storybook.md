@@ -55,6 +55,39 @@ references aged from `1 y ago` to `1 y 2 m ago` on their own. See issue \#1272.
 Keep the offset comfortably inside its unit band, so a slow render cannot tip
 it into the next one.
 
+## A Story Has To Reproduce The Component's Container
+
+Storybook mounts a story under its own root, which is a block with a definite
+height. The app mounts the component wherever the app mounts it. When a
+component depends on something its container gives it - a height, a positioning
+context, a platform inset - the two disagree, and the story renders a layout the
+device never produces.
+
+The App Check gate is the case. It is rendered inside `ion-app` in place of the
+router outlet, and `ion-app` hands its children no height, so on the device the
+panel collapsed and sat under the status bar. The story, mounted on Storybook's
+sized root, centred it perfectly - through four committed reference images and
+every review that looked at them. See issue \#1411.
+
+Wrap the story in the container the component actually lives in, and import the
+Ionic element through `moduleMetadata` so the wrapper template resolves:
+
+```ts
+componentWrapperDecorator((story) => `<ion-app>${story}</ion-app>`);
+```
+
+Platform insets are the same problem and take the same treatment. Ionic mirrors
+them onto `--ion-safe-area-*`, which is inherited, so a wrapper that declares
+them puts a story on a device's geometry without a device:
+
+```ts
+const inset = '--ion-safe-area-top: 35px';
+componentWrapperDecorator((story) => `<div style="${inset}">${story}</div>`);
+```
+
+They resolve to `0px` in a desktop browser, so a story that never declares them
+cannot show whether a full-screen surface clears the system bars.
+
 ## Validation
 
 Build Storybook when UI stories are part of the change:
@@ -129,4 +162,5 @@ gitignored, then remove the entry afterwards.
 
 - [[Implementation - Android Device Testing]]
 - [[Implementation - Feature Patterns]]
+- [[Implementation - Ionic Patterns]]
 - [[Implementation - Testing]]

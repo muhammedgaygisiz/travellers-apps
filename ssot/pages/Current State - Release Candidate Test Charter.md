@@ -222,7 +222,7 @@ Run 9 could only prove the accepted-token half, because a Play-distributed build
 - **Recovery:** after the secret was allow-listed, **Try again** ran `exchangeDebugToken`, `tokenChanged` fired, and the app resumed into the landing screen **without a restart**.
 - **Google Maps Platform, read separately as the charter requires:** the nearby-restaurant list and a text restaurant search both returned results while the Firebase APIs were enforced, including Google Places entries marked "not verified on BiteTribe yet".
 
-The gate's own layout is wrong, which is [#1411](https://github.com/muhammedgaygisiz/travellers-apps/issues/1414).
+The gate's own layout is wrong, which is [#1411](https://github.com/muhammedgaygisiz/travellers-apps/issues/1411).
 
 ### The Eleven Run 9 Findings
 

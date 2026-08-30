@@ -174,7 +174,8 @@ day — saved on the App Store version page, and submitted for Google's review o
 Play, where it replaced a 224-character original that still said `Bite Tribe`.
 One body serves both: the App Store description and the Play full description are
 both capped at 4000 characters, so they do not diverge. The ten translations
-derive from this text.
+derive from this text and are written out in
+[[Implementation - Store Listing Translations]].
 
 ### Description
 
@@ -296,8 +297,16 @@ replaced on 22 August 2026 and no stale-palette asset remains on either store.
 - Capture against the current theme. A screenshot showing `#fec56b` as a header,
   button, or background colour is stale by definition.
 - Capture from seeded, realistic data. An empty account is not a product page.
-- Cover both light and dark, since the app ships both and the dark background
-  (`#1a1c22`) is a deliberate surface.
+- **Shoot one theme, and shoot dark.** This rule previously read "cover both
+  light and dark, since the app ships both", which is not achievable and kept
+  regenerating a to-do that could never be done: a store listing shows **one**
+  set of screenshots to everyone, so light frames cannot be served to
+  light-theme users. The app follows the system theme - `html.dark` plus
+  `@media (prefers-color-scheme: dark)` in `variables.scss` - so a light-mode
+  user's first launch does not match the listing, and that is accepted. Dark
+  wins because the dish photography is the product and it reads far better
+  against `#1a1c22` than against a light ground. If the asset library ever holds
+  light frames, they are reference material, not listing candidates.
 - Keep the sources in the SSOT graph next to this page, so a re-shoot starts from
   the previous framing rather than from scratch. They are in
   `ssot/assets/store-listing/phone-6.9/`.
@@ -334,9 +343,16 @@ land, and each was then corrected only as far as the first three required. They
 do not need to match; the constraint is that the bite detail is above the fold
 on both.
 
-The frames are dark-theme throughout. The capture rule asks for both light and
-dark; this set does not satisfy that half yet, and a light-theme pass is
-outstanding.
+The frames are dark-theme throughout, **by decision on 30 August 2026**, and no
+light-theme pass is outstanding. See the capture rule above for why one set can
+only be one theme.
+
+**The framing is intentional, not a defect.** In frame 1 the first card is
+clipped by the filter row, and the scroll-to-top control and `Create Bite`
+button overlap the second card's restaurant name. That was raised as something
+to fix in a re-shoot and rejected by the maintainer: it reads as a live app mid-
+scroll rather than a staged render, which is the impression the set is meant to
+give. **Do not "fix" it.** A future re-shoot should reproduce it.
 
 Prod content means real people appear. Frame 3 shows another user's Bite, used
 with that creator's consent; frames 4 and 5 are the maintainer's own account.
@@ -469,7 +485,28 @@ carries a trash and a move control on hover, so ordering and removal need no
 drag.
 
 Saving stages the listing in **Publishing overview**. Nothing is live, and no
-review has started, until **Send for review** is used there.
+review has started, until **Submit changes for review** is used there. Confirmed
+by doing it on 30 August 2026: saving the ten translations produced the dialog
+"Your change has been saved. To send it to Google for review, go to Publishing
+overview", and the ten changes then sat under "Changes not yet submitted for
+review".
+
+**A correction, kept because the wrong version was written down and acted on.**
+This page briefly claimed the opposite - that managed publishing is off, so a
+save publishes by itself and no send-for-review step exists. That was wrong. It
+came from finding Publishing overview empty and the recent listing submissions
+already published, and inferring automatic submission from the absence of a
+queue. The real explanation is that those changes had already been submitted by
+hand, so nothing was left pending. **An empty queue is not evidence of automatic
+submission.**
+
+What managed publishing actually controls is the other end: with it **off**,
+changes go live as soon as Google approves them; with it **on**, approved changes
+wait for you to release them. Either way the submission itself is manual.
+
+Play also runs pre-submission checks - "Running quick checks for commonly found
+issues", quoted as up to 14 minutes - and holds the submission until they pass.
+Budget for that when a listing change is on the critical path.
 
 ## Current State
 
@@ -484,7 +521,7 @@ listing, no custom listings, and no additional locales.
 | --------------------- | ------------------------------------- |
 | App name              | `BiteTribe`, 9 / 30                   |
 | Short description     | `Find it. Try it. Share it.`, 26 / 80 |
-| Full description      | 1307 / 4000, in review                |
+| Full description      | 1307 / 4000, live                     |
 | App icon              | present                               |
 | Feature graphic       | present, current palette              |
 | Phone screenshots     | 5 of 8, current palette               |
@@ -493,9 +530,14 @@ listing, no custom listings, and no additional locales.
 | Chromebook, video, XR | none                                  |
 | Website, phone number | empty                                 |
 
-The two stale-palette screenshots were removed and the five current ones added
-on 22 August 2026, saved as a draft change awaiting **Send for review**. Five at
-1620 px clears Play's promotion threshold, which the previous two did not.
+The two stale-palette screenshots were removed and the five current ones added on
+22 August 2026, and they are **published**. Five at 1620 px clears Play's
+promotion threshold, which the previous two did not.
+
+Submission activity, read on 30 August 2026, records the listing changes going
+out on their own: submission **49** on 21 August and submission **50** on 23
+August, both `Store Listing`, both `Published`. There was never a draft waiting
+for anyone.
 
 The feature graphic was recoloured to the current palette the same day, so no
 stale-palette asset remains on either store.
@@ -504,19 +546,19 @@ stale-palette asset remains on either store.
 
 Version 1.0 is in Prepare for Submission and is effectively empty.
 
-| Slot                                    | State                                        |
-| --------------------------------------- | -------------------------------------------- |
-| Name, subtitle                          | set                                          |
-| Age rating                              | set, 18+                                     |
-| Screenshots                             | 5 of 10, 6.9", current                       |
-| App previews                            | none                                         |
-| Description, promotional text, keywords | set                                          |
-| Support URL, marketing URL, copyright   | empty; support URL required, page now exists |
-| Primary category                        | Food & Drink                                 |
-| App Privacy                             | published                                    |
-| Pricing, availability                   | free, all 175 regions                        |
-| Content Rights                          | declared                                     |
-| Build                                   | none attached                                |
+| Slot                                    | State                             |
+| --------------------------------------- | --------------------------------- |
+| Name, subtitle                          | set                               |
+| Age rating                              | set, 13+ - was 18+                |
+| Screenshots                             | 5 of 10, 6.9", current            |
+| App previews                            | none                              |
+| Description, promotional text, keywords | set                               |
+| Support URL, marketing URL, copyright   | support URL and copyright **set** |
+| Primary category                        | Food & Drink                      |
+| App Privacy                             | published                         |
+| Pricing, availability                   | free, all 175 regions             |
+| Content Rights                          | declared                          |
+| Build                                   | none attached                     |
 
 TestFlight is the exception and is in good shape: internal and external groups
 exist, build 94 (1.0.1) is in Testing, and the beta description, feedback email
@@ -525,15 +567,19 @@ draft of the App Store description and should seed it.
 
 ## Declarations
 
-Play's ten app-content declarations are all complete. Apple's equivalents are
-not started.
+Play's ten app-content declarations are all complete. **Apple's are complete
+too**: the nutrition labels were published on 21 August 2026 and the age-rating
+questionnaire was corrected and saved on 30 August 2026. This paragraph read
+"Apple's equivalents are not started" until then, while the subsection directly
+below it recorded the labels as published - a contradiction inside one page, and
+the reason a reader trusting the summary would have re-done finished work.
 
 | Declaration      | Value                                                                                     |
 | ---------------- | ----------------------------------------------------------------------------------------- |
 | Privacy policy   | `https://bite-tribe.web.app/privacy`                                                      |
 | Account deletion | `https://bite-tribe.web.app/account-deletion`                                             |
 | Content rating   | 12+ / Teen                                                                                |
-| Target age group | 18 and over                                                                               |
+| Target age group | 18 and over - now the outlier, see below                                                  |
 | Ads              | none in this build                                                                        |
 | Data shared      | none                                                                                      |
 | Data collected   | name, email, user IDs, precise location, photos, crash logs, app interactions, device IDs |
@@ -543,6 +589,54 @@ not started.
 The Apple nutrition labels are answered from this same list, so the two stores
 describe one set of data flows. Revisit both when the AdMob epic
 [[epic-1123]] lands, since `Ads` becomes true at that point.
+
+### The Age Rating Was Over-Declared
+
+Corrected on 30 August 2026, from **18+ to 13+**, after reading the questionnaire
+against the codebase rather than against itself.
+
+| Rating surface     | Before                          | After                             |
+| ------------------ | ------------------------------- | --------------------------------- |
+| Main rating        | 18+, 173 countries or regions   | **13+**, 171 countries or regions |
+| Second tier        | -                               | 16+, 2 countries or regions       |
+| Brazil             | A16                             | A16                               |
+| Korea              | 19+                             | **15+**                           |
+| Pre-iOS-26 devices | 17+ global, regional exceptions | **12+** global                    |
+
+Five answers changed. Two were new questions Apple added and nobody had answered,
+which is what blocked submission; three were pre-existing and wrong.
+
+| Answer                         | Was      | Now            | Evidence                                                                                                                                                                             |
+| ------------------------------ | -------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Social Media                   | blank    | **Yes**        | A discovery feed that spreads user Bites to many users is exactly Apple's definition. Unanswered questions block `Next`, so this was the actual submission blocker                   |
+| Social Media Disabled Under 13 | blank    | **No**         | The app calls no Declared Age Range API and does no age assurance, so under-13 users are not handled specially. Answering yes would have been a claim about code that does not exist |
+| Advertising                    | Yes      | **No**         | No AdMob dependency in `package.json`, no ad code in `libs/` or `apps/`, and the Declarations table above already says `Ads: none in this build`                                     |
+| Messaging and Chat             | Yes      | **No**         | No messaging route exists. The only conversation surface is the review thread under a Bite, which is public user-generated content and is already declared separately                |
+| Alcohol, Tobacco, or Drug Use  | Frequent | **Infrequent** | **This was the 18+ driver.** Correcting Advertising and Messaging alone left the calculated rating at 18+; only this moved it                                                        |
+
+The alcohol answer is the judgement call, so it is worth stating the reasoning
+rather than just the result. References do exist - restaurant menus list drinks
+and a Bite can be of a beer - but Apple defines Frequent as content users
+_regularly_ encounter, and a dish-photo feed is not that. Infrequent, "users
+will rarely encounter this content", is the honest reading. It is also what Play
+concluded independently: Play rates the same product 12+ / Teen.
+
+Availability improved as a side effect. The restricted-countries warning went
+from Afghanistan and Morocco, **plus** Iraq, Libya, Maldives, Saudi Arabia and
+the United Arab Emirates if the category is Entertainment, Lifestyle or Games,
+**plus** Brazil if the category is Games, down to Afghanistan and Morocco alone.
+
+**The lesson is that a declaration is a claim about the code and should be
+checked against it.** Three of these had been sitting in the console asserting
+features the app has never had, and the cost was not abstract: 18+ on a
+restaurant-discovery app is a reach penalty on every store surface that filters
+by age.
+
+**One inconsistency is left, and it now points the other way.** Play's
+`Target age group` is still declared as 18 and over, which was presumably set to
+match the old Apple 18+. With Apple at 13+ and Play's own content rating at
+12+ / Teen, that Play answer is the odd one out and should be revisited in the
+console.
 
 ### Apple Nutrition Labels
 
@@ -651,14 +745,14 @@ than a cosmetic one.
 
 As of 22 August 2026, in the order they gate a submission.
 
-| Gap                            | Store | Note                                                       |
-| ------------------------------ | ----- | ---------------------------------------------------------- |
-| Send the listing for review    | Play  | Saved as a draft change, sitting in Publishing overview    |
-| Support URL                    | Apple | Page written; set the field once the deploy is live        |
-| 7-inch and 10-inch screenshots | Play  | Asterisked, both empty — does not block review             |
-| Light-theme captures           | Both  | The set is dark-theme only; the capture rule asks for both |
-| Ten listing translations       | Both  | Derive from the English copy above                         |
-| App previews                   | Apple | Optional, none captured                                    |
+| Gap                            | Store | Note                                                            |
+| ------------------------------ | ----- | --------------------------------------------------------------- |
+| Send the listing for review    | Play  | Real, and manual. Ten translations staged 30 Aug 2026           |
+| ~~Support URL~~                | Apple | **Done** 30 Aug 2026, `https://bite-tribe.web.app/support`      |
+| 7-inch and 10-inch screenshots | Play  | **Deferred** until the app is run on a tablet                   |
+| ~~Light-theme captures~~       | Both  | **Not a task.** One listing, one theme; dark by decision        |
+| Listing translations           | Both  | **Done.** Play 10 submitted, Apple 9 saved; no Amharic on Apple |
+| App previews                   | Apple | Optional, none captured                                         |
 
 Play's tablet slots carry a required asterisk but do **not** gate submission:
 with both empty, Publishing overview still reports `Your changes can now be sent
@@ -683,25 +777,195 @@ The app therefore serves its own page at **`/support`**, built on 30 August 2026
 
 The contact address sits behind the reveal control for the same reason it does on the other two public pages: it keeps the address out of the page source for scrapers while still being one tap from a reviewer. The page also links to the privacy policy and the account-deletion page, so a reviewer arriving at the Support URL first can reach both legal surfaces from it.
 
-**Set the field only after the page is deployed.** Apple does not check the URL at the moment it is typed, but a Support URL that 404s during review is a rejection with no upside.
+**Set the field only after the page is deployed.** Apple does not check the URL
+at the moment it is typed, but a Support URL that 404s during review is a
+rejection with no upside. Done in that order on 30 August 2026: the page
+deployed with the merge, was confirmed to render, and only then was the field
+saved.
+
+### Copyright Is 2025, Not 2026
+
+Set to **`2025 Muhammed Gaygisiz`** on 30 August 2026.
+
+Apple's help text for the field is specific: "The name of the person or entity
+that owns the exclusive rights to your app, preceded by the year the rights were
+obtained." That is the year the work was created, not the year it is submitted,
+and the two are a year apart here.
+
+The year comes from the repository rather than from memory. BiteTribe's first
+commit is **28 April 2025** (`chore: cleanup, initialize tribe bite app shell`).
+The monorepo itself goes back to 19 May 2022, but that is the workspace, which
+began as the other app on the same App Store Connect account - so 2022 would
+attribute BiteTribe's rights to work that is not BiteTribe.
+
+The entity is the legal entity already on the account. `BiteTribe` was rejected
+as the rights holder because it is a product name with no company behind it, and
+naming it would attribute the rights to something that does not exist in law.
+
+**The in-app footers are a separate thing and are not wrong.** The privacy
+policy, account-deletion and support pages render the current year by the
+ordinary convention for a website footer. Do not "fix" either one to match the
+other: the store field is a legal attribution of authorship, the footer is a
+notice on a web page.
+
+### The Public Pages Sit Behind The App Check Gate
+
+Confirmed on 30 August 2026, and it is the same defect this page already noted
+for the privacy policy - but it matters more now, because the Support URL is a
+link **Apple publishes on the product page** and invites a reviewer to click.
+
+A cold load of `/support` from an automated browser rendered the enforced-mode
+App Check gate instead of the page: "Extra security check needed. BiteTribe
+couldn't verify this device with its security check." The same URL in an
+ordinary Chrome profile rendered the page in full. That matches the Run 7
+methodology note in [[Current State - Release Candidate Test Charter]]: an
+instrumented browser scores badly with reCAPTCHA Enterprise, and a bad score
+produces an App Check refusal.
+
+So this is not a broken deploy, and a normal reviewer will most likely see the
+page. The residual risk is that **reCAPTCHA Enterprise scores a browser, not a
+person**, and a reviewer on a fresh profile with no history, a VPN, or an
+automated pre-check is exactly the low-reputation shape that scores badly. The
+gate is all-or-nothing: it blocks the router outlet, so it takes down the three
+pages the stores require to be publicly reachable along with the rest of the app.
+
+Worth considering separately from the listing work: the privacy policy, the
+account-deletion page and the support page carry no user data and read nothing
+from Firebase, so gating them on device attestation buys no protection and costs
+a store-review risk. Exempting those three routes from the startup gate would
+remove the risk outright.
+
+## The DSA Trader Decision
+
+Declared **non-trader** on 30 August 2026, at account level, covering the 27 EU
+territories.
+
+Two things this page previously said about the DSA were wrong, and both mattered
+enough to change the decision, so they are corrected here rather than quietly
+overwritten.
+
+**"Apple removes apps from the EU App Store without it" is about not declaring
+at all, not about declaring non-trader.** Apple requires a declaration either
+way - "Even if you don't distribute apps in the EU, you'll still need to declare
+a trader status." Declaring non-trader keeps the app in the EU. What happens is a
+disclosure: "If you're not a trader, consumers in the EU will be informed that
+consumer rights stemming from applicable consumer protection laws won't apply to
+contracts between you and them." The removal risk attaches to leaving the field
+undeclared, which is what the red banner was warning about.
+
+**Trader status does not force a home address into public view.** For an
+individual membership Apple asks for "Address **or P.O. Box**", with a receipt or
+bill proving association with the alternate address. So the choice was never
+"publish where you live or lose the EU".
+
+### Why non-trader is the accurate answer today
+
+Apple's stated factors, against the app as it actually is:
+
+| Factor                                                     | BiteTribe                                      |
+| ---------------------------------------------------------- | ---------------------------------------------- |
+| Revenue from the app - in-app purchase, paid, ad-sponsored | None. Free, no IAP, and no ad code exists      |
+| Commercial practices toward consumers                      | None shipped                                   |
+| Developed in connection with a trade or profession         | The deciding factor, and the owner's to assess |
+
+Apple's own example is the one that fits: "if you're a hobbyist and you developed
+your app with no intention of commercializing it, you may not be considered a
+trader."
+
+### What makes it stop being accurate
+
+The monetization epics. Apple names an **ad-sponsored** app explicitly among the
+trader factors, so [[epic-1123]] - Stage 1 in [[epic-1121]]'s sequencing, and the
+first release that earns anything - is the crossing point, even though no user
+pays. [[epic-1122]] is Stage 0 and sells nothing, so the entitlement foundation
+can ship with the status unchanged.
+
+The declaration is reversible at two levels, both confirmed present in the
+console: account level under Business, and per app under App Information ->
+App Store Regulations & Permits -> Digital Services Act.
+
+**Reversible does not mean cheap.** Switching to trader triggers contact details,
+two-factor validation of both a phone and an email, uploaded documentation
+verifying name and address, payment account details, and then verification by
+Apple on their timetable. That is why it is filed as [#1433](https://github.com/muhammedgaygisiz/travellers-apps/issues/1433) under
+[[epic-1123]] rather than left as a note: it has to start while that epic is in
+progress, not when its build is ready.
+
+This is a compliance self-assessment rather than a configuration value, and
+Apple's guidance says to consult a legal advisor where the status is uncertain.
+
+## Tablets Are Deferred, And The iPad Claim Is Untested
+
+Deferred on 30 August 2026: no tablet screenshots for either store until the app
+has actually been run on a tablet. Shipping tablet frames before that would be
+advertising a layout nobody has seen.
+
+**The claim is already live, though, and that is the part worth acting on.**
+`apps/bite-tribe-ios/ios/App/App.xcodeproj/project.pbxproj` sets
+`TARGETED_DEVICE_FAMILY = "1,2"`, which is iPhone **and iPad**. So the App Store
+listing offers an iPad app today, and the eleven-run platform test pass in
+[[Current State - Release Candidate Test Charter]] never touched an iPad - every
+iOS run was an iPhone 12 mini.
+
+Two consequences, in order of how much they cost:
+
+- **App Review may test on iPad.** If a reviewer opens it there and the layout
+  is broken, that is a rejection, and it is a rejection caused by a build setting
+  nobody chose deliberately rather than by the product.
+- **Apple's guidance asks for iPad screenshots when an app supports iPad.** The
+  version page's `Add for Review` is currently enabled with the iPad slots empty,
+  so the console is not enforcing it client-side. Whether submission validation
+  enforces it is unverified, and finding out by being rejected is the expensive
+  way.
+
+The decision to take is not about screenshots. It is whether BiteTribe supports
+iPad at all:
+
+| Option                                | Cost                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------- |
+| Set `TARGETED_DEVICE_FAMILY = "1"`    | One build-setting change, a new build, and the iPad question disappears entirely      |
+| Keep iPad, test it, shoot iPad frames | An iPad or iPad simulator run against the charter, plus a capture session and uploads |
+
+Play's 7-inch and 10-inch slots are the same shape of question and carry a
+required asterisk that does **not** gate submission - Publishing overview reports
+`Your changes can now be sent for review` with both empty.
 
 ## Blockers Outside The Listing
 
 These are account-level and gate submission regardless of listing completeness:
 
-- The Apple Developer Program License Agreement has been updated and needs the
-  Account Holder to accept it.
-- Digital Services Act trader status is not provided. Apple removes apps from
-  the EU App Store without it.
-- The new social media age-rating questions are optional until 7 September 2026,
-  but mandatory for a new app submission, which this is.
-- Play's internal testing track is paused and holds a stale build 58 plus an
-  `Untitled release` draft. [Issue #1179](https://github.com/muhammedgaygisiz/travellers-apps/issues/1179)
-  needs it live to receive the release candidate.
+- ~~The Apple Developer Program License Agreement has been updated and needs the
+  Account Holder to accept it.~~ **Done.** Verified in the console on 29 August
+  2026: the Free Apps Agreement is `Active`, effective 23 August 2026 to 13 April 2027. The Paid Apps Agreement is still `New` and unsigned, and needs the legal
+  entity updated before it can be signed - that gates in-app purchases, so it
+  belongs to the monetization epic [[epic-1121]], not to this release.
+- ~~Digital Services Act trader status is not provided.~~ **Declared non-trader
+  on 30 August 2026.** The Business page now reads "You have completed all
+  regulatory requirements at this time", and the Compliance table shows
+  `Digital Services Act - 27 Countries or Regions - Active`. No contact
+  information is published on the product page. The reasoning is below.
+- ~~The new social media age-rating questions are optional until 7 September
+  2026, but mandatory for a new app submission, which this is.~~ **Done**, 30
+  August 2026. Both were answered as part of the age-rating correction above.
+- ~~Play's internal testing track is paused and holds a stale build 58 plus an
+  `Untitled release` draft, and issue 1179 needs it live to receive the release
+  candidate.~~ **Not a blocker, and the wrong track.** BiteTribe distributes on
+  Android through **Open testing**, not internal testing, which is what every
+  Android run in [[Current State - Release Candidate Test Charter]] used. Open
+  testing is `Active`, carrying release **95 (1.0.1)** from 23 August 2026, to
+  unlimited testers across 12 countries. Verified in the console on 30 August 2026.
+
+  The internal testing track really is paused with a February build 58 and an
+  `Untitled release` draft, and that is simply an abandoned track: nothing
+  distributes through it and [issue 1179](https://github.com/muhammedgaygisiz/travellers-apps/issues/1179)
+  does not need it. Reading its paused state as a release blocker is the mistake
+  this bullet used to make - **check which track the product actually ships on
+  before reading a track's state as a problem.**
 
 ## Related Pages
 
 - [[Implementation - Store Release Steps]]
+- [[Implementation - Store Listing Translations]]
 - [[Implementation - Localization]]
 - [[Implementation - Release And Build Workflow]]
 - [[Current State - Release State]]

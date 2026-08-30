@@ -206,8 +206,27 @@ error rather than an unsigned artifact when one is missing.
 | `APP_STORE_CONNECT_ISSUER_ID`          | `ios`     | App Store Connect API issuer id                               |
 | `APP_STORE_CONNECT_PRIVATE_KEY_BASE64` | `ios`     | `AuthKey_<key id>.p8`, base64-encoded                         |
 
-Encode a file with `base64 -i <file> | pbcopy`, and set it with
-`gh secret set <NAME>`.
+Set them with `tools/set-native-release-secrets.sh`, which takes a section:
+
+```bash
+bash tools/set-native-release-secrets.sh android
+bash tools/set-native-release-secrets.sh ios
+bash tools/set-native-release-secrets.sh play
+```
+
+It reads each value from a local file or a hidden prompt and pipes it straight
+into `gh secret set`, so nothing is echoed, written to disk, or passed as a
+command argument where `ps` could read it.
+
+The `android` section needs no input at all: `keystore.properties` already holds
+every value, and the job reads the same four through the environment-variable
+fallback in `app/build.gradle`. The script strips the newline `sed` leaves on a
+properties value, because an alias of `First Key\n` fails signing with the same
+misleading `No key with alias` that quoting the value causes. See
+[[Implementation - Store Release Steps]].
+
+`PLAY_SERVICE_ACCOUNT_JSON` is only read when publishing, which is off by
+default, so the `play` section can stay unset until a store upload is wanted.
 
 The Firebase `NX_APP_*` secrets the `web-bundle` job needs already exist; it
 uses the same set as `deploy-bite-tribe`, including the misspelled
@@ -219,10 +238,41 @@ provisioning profile, so no profile is carried in a secret and the CocoaPods
 targets keep their own signing settings. `App.xcscheme` is committed as a shared
 scheme for the same reason `xcodebuild` needs a scheme it can name.
 
+The API key needs **App Manager or Admin**. A Developer-role key authenticates
+but may not fetch or create the distribution profile, which is the whole reason
+the key is passed.
+
+#### There Is No Distribution Certificate To Export Yet
+
+Checked on the release workstation on 30 August 2026:
+`security find-identity -v` lists one identity, `Apple Development`, and
+`security find-certificate -c "Apple Distribution"` finds nothing in any
+keychain.
+
+The manual releases are therefore signed with a **cloud-managed** distribution
+certificate, whose private key Apple holds and Xcode fetches. That works from
+Xcode and leaves nothing on disk to export, which is why
+`IOS_DIST_CERTIFICATE_P12_BASE64` cannot be filled in from this machine as
+things stand.
+
+Two ways forward, and the second is untested:
+
+1. Create an Apple Distribution certificate - Xcode, Settings, Accounts, Manage
+   Certificates, `+` - then export it from Keychain Access as a `.p12`
+   **including the private key**. This is what the workflow expects today.
+2. Drop the keychain import and let `-allowProvisioningUpdates` do the cloud
+   signing it already has the API key for. Fewer secrets and nothing to rotate,
+   but nobody has run it, and a failure here costs a full macOS job to discover.
+
+Take route 1 first. Route 2 is a simplification to try once something is known
+to work, not a thing to debug on the first run.
+
 ### Not Yet Verified
 
-- **No job has run.** The secrets above are not provisioned, so neither the
-  archive nor the signing path has been executed on a runner.
+- **No job has run.** As of 30 August 2026 none of the ten secrets is set, so
+  neither the archive nor the signing path has been executed on a runner. The
+  Android four can be provisioned from the release workstation immediately; the
+  iOS ones are blocked on a distribution certificate that does not exist yet.
 - The two publishing steps are unexecuted. They are opt-in and off by default.
 - The Xcode version is whatever `macos-latest` carries, so an artifact is
   reproducible against a commit but not against a toolchain.

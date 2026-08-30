@@ -1,5 +1,23 @@
 # Changelog
 
+## build-97 (2026-08-30)
+
+<!-- changelog-start-rev: dcd8d395 -->
+<!-- changelog-end-rev: f301593f -->
+
+### Bug Fixes
+
+- make the build tag point at the released source, and cut releases from it (#1443) (f301593f)
+
+### Documentation
+
+- record the release candidate and the resolved deep-link gap (#1442) (85a4dcb3)
+- update docs (#1440) (1dc6fd52)
+
+### Chores
+
+- prepare build 1.0.1-96 release (#1439) (79811067)
+
 ## build-96 (2026-08-30)
 
 <!-- changelog-start-rev: 39ca8201 -->

@@ -27,7 +27,8 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - The initial Menu is a draft built from evidence, not a claim about the real menu: one item per distinct Bite dish name, priced with the average of the prices users reported, in a single `Bites` category the business user edits afterwards.
 - Candidate-backed Restaurant creation should be idempotent: repeated verification of an already verified or merged candidate must return the existing verified Restaurant instead of creating another one.
 - Verified versus unverified restaurant behavior is an active product area.
-- A Restaurant has no owner today. Ownership, claiming, and authorization are specified in [[UC - Own And Claim Restaurants]] and are the prerequisite for every operational restaurant capability.
+- A Restaurant can record an owner and a claim state, but nothing writes them yet. `ownerUserId` and `claimStatus` exist on the model as of issue \#1074, and a missing `claimStatus` means `unclaimed`. Ownership, claiming, and authorization are specified in [[UC - Own And Claim Restaurants]] and are the prerequisite for every operational restaurant capability.
+- Ownership is held by a normal user carrying an additional business role. There is no organisation entity; see [[issue-1371]].
 - A Restaurant will be able to have one Floor Plan, containing Rooms and Tables. See [[Floor Plan]] and [[Table]].
 - Restaurant tags are derived from the Bites at the place and are not stored on the Restaurant. Bites keep tags exactly as they were typed, so the derived list compares them with a leading `#` stripped and case folded, shows the first spelling that survives that folding, and never shows the `#`. See issue \#1389 and [[issue-1389]].
 
@@ -52,6 +53,10 @@ Current model fields:
 - `restaurantCandidateId`
 - `biteIds`
 - `bites`
+- `ownerUserId`
+- `claimStatus`
+- `claimedAt`
+- `claimedAtTimestamp`
 - `socialMediaLinks`
 - `description`
 - `openingHours`
@@ -63,7 +68,7 @@ Current model fields:
 Future or expanding data:
 
 - verification status
-- owner user id, plus claim status and claim audit fields (issue \#1074)
+- claim request documents and the review workflow that writes `ownerUserId` and `claimStatus` (issues \#1076 and \#1077); the model fields themselves landed in issue \#1074
 - floor plan rooms and tables (issue \#1080)
 - table-ordering enablement flag (issue \#1100)
 - derived tags from Bites
@@ -178,6 +183,7 @@ Frontend and shared model:
 
 ```text
 libs/bite-tribe-common/model/src/lib/restaurant.ts
+libs/bite-tribe-common/model/src/lib/restaurant-claim.ts
 libs/bite-tribe-common/model/src/lib/menu.ts
 libs/bite-tribe/api/src/lib/restaurant-api/restaurant-api.service.ts
 libs/bite-tribe/api/src/lib/menu-api/menu-api.service.ts
@@ -202,11 +208,10 @@ images/restaurants/{restaurantId}/{filename}
 
 ## Current Limitations
 
-- Restaurants cannot be claimed. `Restaurant` carries no owner or claim field, no roles or custom claims exist in the Functions codebase, and `apps/bite-tribe-firebase/firestore.rules` allows every authenticated user to write every document. Product descriptions that assume a claimed restaurant describe a capability that does not exist yet. See [[UC - Own And Claim Restaurants]].
+- Restaurants cannot be claimed yet. `Restaurant` now carries `ownerUserId` and `claimStatus`, and `RestaurantClaim` models a claim request, but no writer, collection, role, or rule exists for either: no roles or custom claims exist in the Functions codebase, and `apps/bite-tribe-firebase/firestore.rules` still allows every authenticated user to write every document. Every stored restaurant is `unclaimed` by absence. Product descriptions that assume a claimed restaurant describe a capability that does not exist yet. See [[UC - Own And Claim Restaurants]].
 - `MenuItem` has no stable identifier. Items are array entries inside `Menu.categories[]`, addressable only by name and index, so nothing can safely reference a menu item over time. See issue \#1099.
 - Verified versus unverified Restaurant rules are still evolving.
 - A Bite can use `place` without a `restaurantId`, so restaurant matching can be fuzzy or incomplete.
-- Restaurant ownership is not clearly represented in the Restaurant model.
 - Candidate verification currently relies on a business-user workflow and callable auth; explicit role-based authorization is not fully modeled here.
 - Menu item actions are not yet connected to Bite creation, reservation, or contact flows.
 - Aggregate rating/tag behavior is derived from Bites and not fully formalized in the Restaurant model. Tag deduplication is a display concern in `libs/bite-tribe/restaurant/page`, folding only the `#` prefix and case; near-duplicates such as `asian food` and `asianfood` still show twice, and search and tag suggestions still read the raw stored strings.

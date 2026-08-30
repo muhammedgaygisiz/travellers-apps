@@ -2,7 +2,7 @@
 
 ## Status
 
-Not implemented. Specified through issue \#1069 as stage 0 of issue \#735.
+Partially specified in code. The shared model carries the ownership and claim types as of issue \#1074; no writer, collection, role, or rule exists yet. Specified through issue \#1069 as stage 0 of issue \#735.
 
 This is the blocking prerequisite for every other stage of the Restaurant Interaction Platform.
 
@@ -14,7 +14,7 @@ A restaurant has exactly one accountable owner: a normal BiteTribe user carrying
 
 Verified in the codebase on 25 July 2026:
 
-- `Restaurant` in `libs/bite-tribe-common/model/src/lib/restaurant.ts` has no owner or claim field.
+- `Restaurant` in `libs/bite-tribe-common/model/src/lib/restaurant.ts` had no owner or claim field. Issue \#1074 added `ownerUserId`, `claimStatus`, `claimedAt`, and `claimedAtTimestamp` as optional fields, plus a `RestaurantClaim` model, but nothing writes them.
 - No roles, custom claims, or membership checks exist in `apps/bite-tribe-firebase/functions/src`.
 - `apps/bite-tribe-firebase/firestore.rules` grants read and write on every document to every authenticated user.
 
@@ -36,6 +36,19 @@ Any floor plan, table state, visit, or order written under those rules is writab
 - The owner invites staff, granting them a narrower role.
 - The business dashboard shows only restaurants the caller owns.
 - Ownership can later be revoked, with an attributable reason.
+
+## Data Model
+
+Added in issue \#1074, all optional so existing documents stay valid:
+
+- `Restaurant.ownerUserId` - the current owner, absent when unowned.
+- `Restaurant.claimStatus` - `unclaimed`, `pending`, `claimed`, `disputed`, `revoked`. A missing value means `unclaimed`.
+- `Restaurant.claimedAt` and `claimedAtTimestamp` - when the current ownership was granted.
+- `RestaurantClaim` in `libs/bite-tribe-common/model/src/lib/restaurant-claim.ts` - `restaurantId`, `requestedByUserId`, `status`, `evidenceNotes`, `reviewedByUserId`, `reviewedAt`, `reviewedAtTimestamp`, `decisionReason`.
+
+The restaurant's `claimStatus` and a claim's `status` are deliberately separate state machines. A claim resolves to `pending`, `approved`, `rejected`, `withdrawn`, or `superseded`. A contested claim is several `pending` claims pointing at one `restaurantId` while the restaurant sits at `disputed`; approving one marks the rest `superseded`.
+
+There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it would duplicate `ownerUserId`, and the audit trail of who filed and who reviewed lives on the claim document.
 
 ## Key Behaviours
 

@@ -174,7 +174,8 @@ day — saved on the App Store version page, and submitted for Google's review o
 Play, where it replaced a 224-character original that still said `Bite Tribe`.
 One body serves both: the App Store description and the Play full description are
 both capped at 4000 characters, so they do not diverge. The ten translations
-derive from this text.
+derive from this text and are written out in
+[[Implementation - Store Listing Translations]].
 
 ### Description
 
@@ -722,7 +723,7 @@ As of 22 August 2026, in the order they gate a submission.
 | ~~Support URL~~                 | Apple | **Done** 30 Aug 2026, `https://bite-tribe.web.app/support`  |
 | 7-inch and 10-inch screenshots  | Play  | Asterisked, both empty — does not block review              |
 | Light-theme captures            | Both  | The set is dark-theme only; the capture rule asks for both  |
-| Ten listing translations        | Both  | Derive from the English copy above                          |
+| Ten listing translations        | Both  | **Drafted**, see the translations page; not yet entered     |
 | App previews                    | Apple | Optional, none captured                                     |
 
 Play's tablet slots carry a required asterisk but do **not** gate submission:
@@ -889,6 +890,7 @@ These are account-level and gate submission regardless of listing completeness:
 ## Related Pages
 
 - [[Implementation - Store Release Steps]]
+- [[Implementation - Store Listing Translations]]
 - [[Implementation - Localization]]
 - [[Implementation - Release And Build Workflow]]
 - [[Current State - Release State]]

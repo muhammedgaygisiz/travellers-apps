@@ -62,6 +62,33 @@ export const Registered: Story = {
   },
 };
 
+/**
+ * The restaurant document has not arrived yet. The page holds a skeleton
+ * instead of assembling itself around the Bites that are already in memory,
+ * and offers no action — the menu button in particular used to be tappable
+ * here, with no menu id behind it to navigate to. See GitHub issue #1381.
+ */
+export const Loading: Story = {
+  args: {
+    bites: [...verifiedBites],
+    restaurant: undefined,
+  },
+};
+
+/**
+ * A loaded restaurant that carries no menu. The menu button stays away rather
+ * than routing by place name onto the empty-menu page. See GitHub issue #1381.
+ */
+export const RegisteredWithoutMenu: Story = {
+  args: {
+    bites: [...verifiedBites],
+    restaurant: {
+      ...verifiedRestaurant,
+      menuId: undefined,
+    },
+  },
+};
+
 export const RegisteredWithSocialMediaLinks: Story = {
   args: {
     ...Registered.args,

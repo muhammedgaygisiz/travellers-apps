@@ -1,0 +1,409 @@
+name: BiteTribe Native Release
+
+# Signed Android and iOS artifacts, built from a commit rather than from a
+# workstation (issue #1181).
+#
+# This workflow is deliberately not part of pipeline.yml. Everything in that
+# file gates a change on its way to develop; this one turns an already-reviewed
+# commit into store artifacts, needs a macOS runner, and must not run on every
+# pull request. The staleness argument that keeps deploys in pipeline.yml does
+# not apply either: a release creates a build-* tag, and the tag fires this.
+#
+# See ssot/pages/Implementation - Release And Build Workflow.md for the secrets
+# and the release-ordering note.
+
+on:
+  push:
+    tags:
+      - 'build-*'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Native artifacts to build'
+        required: true
+        type: choice
+        default: both
+        options:
+          - both
+          - android
+          - ios
+      publish:
+        description: 'Also upload to TestFlight and the Play internal track'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Never cancel a native release in flight: a half-finished store upload is
+# worse than a queued run.
+concurrency:
+  group: native-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  NX_DAEMON: false
+
+jobs:
+  # One production web build, shared by both wrappers. Building it twice would
+  # let the Android and iOS artifacts wrap different bundles, which
+  # ssot/pages/Implementation - Store Release Steps.md forbids for the manual
+  # release for the same reason.
+  web-bundle:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.provenance.outputs.version }}
+      build-number: ${{ steps.provenance.outputs.build-number }}
+      artifact-base-name: ${{ steps.provenance.outputs.artifact-base-name }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup action
+        uses: ./.github/actions/setup
+
+      # The same production build the release does by hand. --skip-nx-cache is
+      # not belt-and-braces: the NX_APP_* values are not part of the build
+      # target's task hash, so a bundle built with a different set of them is a
+      # legal cache hit for this command. Run 11 of the release-candidate
+      # charter was handed a cached bundle carrying the App Check gate off. The
+      # runner starts without an Nx cache today, and this keeps that from being
+      # the reason it is safe.
+      - name: Build the production web bundle
+        run: npx nx build bite-tribe --configuration=production --skip-nx-cache
+        env:
+          NX_APP_BITE_TRIBE_API_KEY: ${{ secrets.NX_APP_BITE_TRIBE_API_KEY }}
+          NX_APP_BITE_TRIBE_AUTH_DOMAIN: ${{ secrets.NX_APP_BITE_TRIBE_AUTH_DOMAIN }}
+          NX_APP_BITE_TRIBE_PROJECT_ID: ${{ secrets.NX_APP_BITE_TRIBE_PROJECT_ID }}
+          NX_APP_BITE_TRIBE_STORAGE_BUCKET: ${{ secrets.NX_APP_BITE_TRIBE_STORAGE_BUCKET }}
+          NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID }}
+          NX_APP_BITE_TRIBE_MEASSUREMENT_ID: ${{ secrets.NX_APP_BITE_TRIBE_MEASSUREMENT_ID }}
+          NX_APP_BITE_TRIBE_APP_ID: ${{ secrets.NX_APP_BITE_TRIBE_APP_ID }}
+          NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY: ${{ secrets.NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY }}
+          # Off by default, so a build without this wraps the native artifacts
+          # with the enforced-mode gate disabled (issue #1177).
+          NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED: 'true'
+
+      - name: Assert the bundle carries no dev-only key
+        run: npm run release:verify-bundle
+
+      - name: Record build provenance
+        id: provenance
+        run: npm run release:provenance
+
+      - name: Summarize the build
+        run: |
+          {
+            echo '### Native release build'
+            echo
+            echo '```json'
+            cat dist/build-provenance.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the web bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-web-bundle
+          path: |
+            dist/apps/bite-tribe
+            dist/build-provenance.json
+          retention-days: 30
+
+  android:
+    runs-on: ubuntu-latest
+    needs:
+      - web-bundle
+    if: ${{ github.event.inputs.platform != 'ios' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup action
+        uses: ./.github/actions/setup
+
+      # tools/build-android-release.mjs rejects a JDK newer than 24, and
+      # resolves JAVA_HOME itself, so setting one here is all it needs.
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Download the web bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: native-web-bundle
+          path: dist
+
+      # Re-asserted per platform rather than trusted from the producing job, so
+      # a corrupted or swapped artifact cannot reach a store artifact.
+      - name: Assert the bundle carries no dev-only key
+        run: npm run release:verify-bundle
+
+      - name: Sync the Android wrapper
+        run: npx nx run bite-tribe-android:sync
+
+      - name: Install the upload keystore
+        env:
+          BITETRIBE_KEYSTORE_BASE64: ${{ secrets.BITETRIBE_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BITETRIBE_KEYSTORE_BASE64}" ]; then
+            echo "::error::BITETRIBE_KEYSTORE_BASE64 is not set. The native release secrets are listed in ssot/pages/Implementation - Release And Build Workflow.md."
+            exit 1
+          fi
+          printf '%s' "${BITETRIBE_KEYSTORE_BASE64}" | base64 --decode > "${RUNNER_TEMP}/bitetribe-upload.jks"
+
+      # Signs through Gradle and then refuses to finish on an unsigned bundle or
+      # one signed with a key other than the Play upload key. Without that check
+      # an unsigned release bundle is a silent outcome.
+      - name: Build and verify the signed bundle
+        run: npm run release:android
+        env:
+          BITETRIBE_KEYSTORE_FILE: ${{ runner.temp }}/bitetribe-upload.jks
+          BITETRIBE_KEYSTORE_PASSWORD: ${{ secrets.BITETRIBE_KEYSTORE_PASSWORD }}
+          BITETRIBE_KEY_ALIAS: ${{ secrets.BITETRIBE_KEY_ALIAS }}
+          BITETRIBE_KEY_PASSWORD: ${{ secrets.BITETRIBE_KEY_PASSWORD }}
+
+      # Named after the build and the commit, and staged next to the
+      # provenance, so the artifact answers "which commit is this?" on its own.
+      - name: Stage the release artifacts
+        id: bundle
+        env:
+          ARTIFACT_BASE_NAME: ${{ needs.web-bundle.outputs.artifact-base-name }}
+        run: |
+          set -euo pipefail
+          staging="${RUNNER_TEMP}/artifacts"
+          mkdir -p "${staging}"
+          mv apps/bite-tribe-android/android/app/build/outputs/bundle/release/app-release.aab \
+            "${staging}/${ARTIFACT_BASE_NAME}.aab"
+          cp dist/build-provenance.json "${staging}/"
+          echo "aab-path=${staging}/${ARTIFACT_BASE_NAME}.aab" >> "$GITHUB_OUTPUT"
+
+      - name: Upload the Android bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.web-bundle.outputs.artifact-base-name }}-android
+          path: ${{ runner.temp }}/artifacts
+          retention-days: 90
+          if-no-files-found: error
+
+      # Opt-in. A build number cannot be reused once a store has seen it, so the
+      # default run stops at the artifact above.
+      - name: Upload to the Play internal track
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+        uses: r0adkll/upload-google-play@v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.bitetribe.app
+          releaseFiles: ${{ steps.bundle.outputs.aab-path }}
+          track: internal
+          status: completed
+
+      - name: Remove the keystore
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/bitetribe-upload.jks"
+
+  ios:
+    runs-on: macos-latest
+    needs:
+      - web-bundle
+    if: ${{ github.event.inputs.platform != 'android' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # Deliberately not ./.github/actions/setup. That action restores and saves
+      # node_modules under a key derived from package-lock.json alone, with no
+      # runner OS in it, so a macOS job sharing it would either restore Linux
+      # native binaries or overwrite the cache the Linux jobs depend on.
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download the web bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: native-web-bundle
+          path: dist
+
+      - name: Assert the bundle carries no dev-only key
+        run: npm run release:verify-bundle
+
+      # Goes through the npm script, which pins LANG and LC_ALL. Without a UTF-8
+      # locale CocoaPods aborts pod install while Capacitor still reports the
+      # web-asset copy as succeeded, leaving new assets on stale pods.
+      - name: Sync the iOS wrapper
+        run: npm run cap:sync:ios
+
+      - name: Install the signing certificate
+        env:
+          IOS_DIST_CERTIFICATE_P12_BASE64: ${{ secrets.IOS_DIST_CERTIFICATE_P12_BASE64 }}
+          IOS_DIST_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DIST_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${IOS_DIST_CERTIFICATE_P12_BASE64}" ]; then
+            echo "::error::IOS_DIST_CERTIFICATE_P12_BASE64 is not set. The native release secrets are listed in ssot/pages/Implementation - Release And Build Workflow.md."
+            exit 1
+          fi
+
+          # Random, and never leaves this step: the keychain exists only for
+          # the life of the runner and nothing later needs to unlock it.
+          keychain_password="$(openssl rand -base64 24)"
+          echo "::add-mask::${keychain_password}"
+
+          keychain="${RUNNER_TEMP}/bitetribe-signing.keychain-db"
+          certificate="${RUNNER_TEMP}/bitetribe-distribution.p12"
+          printf '%s' "${IOS_DIST_CERTIFICATE_P12_BASE64}" | base64 --decode > "${certificate}"
+
+          security create-keychain -p "${keychain_password}" "${keychain}"
+          security set-keychain-settings -lut 21600 "${keychain}"
+          security unlock-keychain -p "${keychain_password}" "${keychain}"
+          security import "${certificate}" -k "${keychain}" \
+            -P "${IOS_DIST_CERTIFICATE_PASSWORD}" \
+            -T /usr/bin/codesign -T /usr/bin/security
+          # Without this, codesign blocks on a GUI prompt for the private key.
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "${keychain_password}" "${keychain}" > /dev/null
+          # Prepend rather than replace, so the runner's own keychains stay
+          # searchable.
+          security list-keychains -d user -s "${keychain}" \
+            $(security list-keychains -d user | tr -d '"')
+
+          rm -f "${certificate}"
+
+      # Signing stays automatic, as it is in the Xcode project. The API key lets
+      # xcodebuild fetch the App Store profile with -allowProvisioningUpdates,
+      # so no provisioning profile has to be carried in a secret and the Pods
+      # targets keep their own signing settings.
+      - name: Install the App Store Connect API key
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${APP_STORE_CONNECT_PRIVATE_KEY_BASE64}" ]; then
+            echo "::error::APP_STORE_CONNECT_PRIVATE_KEY_BASE64 is not set. The native release secrets are listed in ssot/pages/Implementation - Release And Build Workflow.md."
+            exit 1
+          fi
+
+          key_path="${RUNNER_TEMP}/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+          mkdir -p "${RUNNER_TEMP}/private_keys"
+          printf '%s' "${APP_STORE_CONNECT_PRIVATE_KEY_BASE64}" | base64 --decode > "${key_path}"
+          echo "APP_STORE_CONNECT_KEY_PATH=${key_path}" >> "$GITHUB_ENV"
+
+          # altool looks the key up by id in a fixed set of directories rather
+          # than taking a path.
+          mkdir -p "${HOME}/.appstoreconnect/private_keys"
+          cp "${key_path}" "${HOME}/.appstoreconnect/private_keys/"
+
+      - name: Archive the iOS app
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          xcodebuild archive \
+            -workspace apps/bite-tribe-ios/ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "${RUNNER_TEMP}/App.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "${APP_STORE_CONNECT_KEY_PATH}" \
+            -authenticationKeyID "${APP_STORE_CONNECT_KEY_ID}" \
+            -authenticationKeyIssuerID "${APP_STORE_CONNECT_ISSUER_ID}"
+
+      # The Organizer check from the manual release, as an assertion. A stale
+      # or Xcode-managed build number is cheap to catch here and expensive to
+      # catch in App Store Connect.
+      - name: Assert the archive names the expected build
+        env:
+          EXPECTED_VERSION: ${{ needs.web-bundle.outputs.version }}
+          EXPECTED_BUILD: ${{ needs.web-bundle.outputs.build-number }}
+        run: |
+          set -euo pipefail
+          plist="${RUNNER_TEMP}/App.xcarchive/Info.plist"
+          archived_version="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleShortVersionString' "${plist}")"
+          archived_build="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleVersion' "${plist}")"
+
+          echo "Archive: ${archived_version} (${archived_build})"
+
+          if [ "${archived_version}" != "${EXPECTED_VERSION}" ] || [ "${archived_build}" != "${EXPECTED_BUILD}" ]; then
+            echo "::error::The archive is ${archived_version} (${archived_build}), but the tree is ${EXPECTED_VERSION} (${EXPECTED_BUILD})."
+            exit 1
+          fi
+
+      - name: Export the signed .ipa
+        id: export
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ARTIFACT_BASE_NAME: ${{ needs.web-bundle.outputs.artifact-base-name }}
+        run: |
+          set -euo pipefail
+          xcodebuild -exportArchive \
+            -archivePath "${RUNNER_TEMP}/App.xcarchive" \
+            -exportPath "${RUNNER_TEMP}/export" \
+            -exportOptionsPlist apps/bite-tribe-ios/ios/App/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "${APP_STORE_CONNECT_KEY_PATH}" \
+            -authenticationKeyID "${APP_STORE_CONNECT_KEY_ID}" \
+            -authenticationKeyIssuerID "${APP_STORE_CONNECT_ISSUER_ID}"
+
+          staging="${RUNNER_TEMP}/artifacts"
+          mkdir -p "${staging}"
+          mv "${RUNNER_TEMP}/export/App.ipa" "${staging}/${ARTIFACT_BASE_NAME}.ipa"
+          cp dist/build-provenance.json "${staging}/"
+          echo "ipa-path=${staging}/${ARTIFACT_BASE_NAME}.ipa" >> "$GITHUB_OUTPUT"
+
+      # Retained so a crash reported against this artifact can be symbolicated
+      # from CI output rather than from whichever workstation happened to build
+      # it. See the dSYM findings on issue #1181.
+      - name: Collect the dSYMs
+        env:
+          ARTIFACT_BASE_NAME: ${{ needs.web-bundle.outputs.artifact-base-name }}
+        run: |
+          set -euo pipefail
+          ditto -c -k --sequesterRsrc --keepParent \
+            "${RUNNER_TEMP}/App.xcarchive/dSYMs" \
+            "${RUNNER_TEMP}/artifacts/${ARTIFACT_BASE_NAME}-dsyms.zip"
+
+      - name: Upload the iOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.web-bundle.outputs.artifact-base-name }}-ios
+          path: ${{ runner.temp }}/artifacts
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Upload to TestFlight
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          IPA_PATH: ${{ steps.export.outputs.ipa-path }}
+        run: |
+          set -euo pipefail
+          xcrun altool --upload-app --type ios \
+            --file "${IPA_PATH}" \
+            --apiKey "${APP_STORE_CONNECT_KEY_ID}" \
+            --apiIssuer "${APP_STORE_CONNECT_ISSUER_ID}"
+
+      - name: Remove the signing keychain
+        if: always()
+        run: |
+          security delete-keychain "${RUNNER_TEMP}/bitetribe-signing.keychain-db" || true
+          rm -rf "${RUNNER_TEMP}/private_keys" "${HOME}/.appstoreconnect/private_keys"

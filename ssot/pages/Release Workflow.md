@@ -71,14 +71,23 @@ NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true npx nx build bite-tribe --configuratio
   the prefix silently wraps native artifacts with the enforced-mode gate
   disabled. Decided under
   [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177).
-- Confirm the bundle is clean before it is wrapped. In `dist/apps/bite-tribe`,
-  grep for `NX_APP_BITE_TRIBE_IS_DEV:` and
-  `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN:` — **with the trailing colon** — and
-  expect no match, then grep for
-  `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED:"true"` and expect a match. The colon is
-  what makes the check mean anything: the bare key names appear in every build
-  as runtime lookup constants. This check is not optional; see
-  [[Current State - Release Candidate Test Charter]].
+- Confirm the bundle is clean before it is wrapped:
+
+```bash
+npm run release:verify-bundle
+```
+
+It fails when either dev-only key is inlined, and when the App Check gate is
+not. Prefer it over grepping by hand. The check that was documented here
+looked for `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED:"true"`, and the build of
+commit `297f8be4` emits that value as the template literal `` `true` ``, so
+the "expect a match" half found nothing on a bundle that was entirely
+correct. The script accepts every quote form.
+
+What the colon is for still holds, and the script relies on it: the bare key
+names appear in every build as runtime lookup constants, so only the property
+form proves a **value** was inlined. This check is not optional; see
+[[Current State - Release Candidate Test Charter]].
 
 3. Sync native apps.
 
@@ -105,6 +114,9 @@ npx nx run bite-tribe-android:sync
    - Produce the signed Android App Bundle with `npm run release:android`, which
      also verifies the bundle is signed with the Play upload key and refuses to
      finish otherwise.
+   - `.github/workflows/native-release.yml` is the intended replacement for this
+     step. Until a run has produced an installable artifact on each platform, it
+     is not the release path — see the ordering note under Known Gaps.
    - Confirm the archived version and build number before distributing.
    - The full console procedure is [[Implementation - Store Release Steps]].
 
@@ -216,6 +228,18 @@ release does not do.
   commit, which already carries build `x+1`. Record the source commit for each
   uploaded artifact separately; the stores do not expose it, and
   [[Current State - Release Candidate Test Charter]] needs it.
+
+  This is also what stands between the CI native jobs and the released
+  artifacts. `native-release.yml` fires on the `build-*` tag, but under the
+  order below that tag is created in step 6, after step 4 has already uploaded,
+  and on a tree carrying `x+1`. A tag-triggered run therefore builds next
+  week's build, correctly and traceably, but not the one that shipped. Making CI
+  the source of the released artifact means dispatching the workflow on the
+  release branch during step 4, while it still carries build `x`, and leaving
+  the tag as the record it already is. That decision is open; nothing is broken
+  by leaving it open, because the jobs name their artifacts from the tree rather
+  than from the tag.
+
 - **The release PR is merged without waiting for CI.** Bump-only PRs are merged
   with the branch-protection bypass so the next development week is not blocked
   behind a full pipeline run. The released artifacts were built locally and are
@@ -231,7 +255,9 @@ Intended, but not part of the current release:
 
 - Production source maps generated and retained for issue monitoring.
 - Native build artifacts and source maps attached to the tag or GitHub release.
-- Signed, commit-traceable native artifacts produced in CI
+- Signed, commit-traceable native artifacts produced in CI. The jobs exist in
+  `.github/workflows/native-release.yml`, but no run has happened: the signing
+  secrets are not provisioned, so step 4 is still a workstation
   ([issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)).
 
 ## Related Pages

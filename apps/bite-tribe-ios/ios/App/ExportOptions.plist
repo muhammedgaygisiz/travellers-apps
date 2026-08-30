@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Export settings for the CI archive in .github/workflows/native-release.yml.
+	     Xcode's Distribute App wizard asks these on a workstation; xcodebuild
+	     needs them written down. See
+	     ssot/pages/Implementation - Release And Build Workflow.md. -->
+	<key>method</key>
+	<string>app-store-connect</string>
+	<!-- Export the .ipa and keep it. Uploading is a separate, opt-in step, so a
+	     run that only wants an artifact never touches App Store Connect. -->
+	<key>destination</key>
+	<string>export</string>
+	<key>teamID</key>
+	<string>DJ2XQYP3NB</string>
+	<!-- The project signs automatically; the job passes an App Store Connect API
+	     key with -allowProvisioningUpdates so the profile is fetched rather than
+	     committed. -->
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<key>uploadSymbols</key>
+	<true/>
+	<!-- Non-negotiable. Left on, Xcode picks its own build number at export, and
+	     the artifact would then disagree with the shared build number the
+	     release is named after. -->
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+	<key>stripSwiftSymbols</key>
+	<true/>
+</dict>
+</plist>

@@ -6,8 +6,20 @@ Store release steps records the manual workstation procedure that turns a synced
 native wrapper into a TestFlight build and a Google Play Open Testing release.
 
 Everything on this page is performed by hand in Xcode, Android Studio, App Store
-Connect, and the Google Play Console. None of it runs in CI. [Issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
-tracks replacing it with signed, commit-traceable CI artifacts.
+Connect, and the Google Play Console.
+
+`.github/workflows/native-release.yml` now implements the build-and-sign half of
+it in CI, under
+[issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181).
+It has never run: the signing secrets are not provisioned. **This page is still
+the procedure in force**, and stays so until a real run has produced an
+installable artifact on each platform. See
+[[Implementation - Release And Build Workflow]] for what the jobs do and which
+secrets they need.
+
+The console halves below — App Store Connect and the Play Console — remain
+manual either way. CI produces and signs the artifact; a person still decides
+what to submit.
 
 [[Release Workflow]] owns the surrounding order. This page owns the console
 details that page deliberately does not repeat.

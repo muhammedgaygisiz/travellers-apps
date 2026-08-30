@@ -73,6 +73,39 @@ npm run lint
 
 Use focused function tests when they exist for the changed callable or trigger.
 
+### `tsc` Is The Only Type Check
+
+Neither the tests nor the linter compile this project.
+
+- `jest.config.cjs` transforms through ts-jest against `tsconfig.dev.json`,
+  which sets `isolatedModules`, so specs are transpiled per file and not
+  type-checked. `tsconfig.dev.json` also `include`s only the spec files, and
+  the build's `tsconfig.json` `exclude`s them, so the two configurations never
+  meet over `src`.
+- eslint reports style and rule violations, not assignability.
+
+Confirmed rather than assumed: with
+`const probeTypeError: number = 'definitely not a number';` appended to a source
+file that a spec imports, `nx run functions:test` passed nine tests and
+`nx run functions:lint` passed. Only `tsc` reported `error TS2322`.
+
+That error used to reach `develop` green and surface in the `predeploy` hook of
+`firebase.json`, at deploy time, on whoever's workstation ran the deploy. The
+`functions-build` job in `pipeline.yml` now compiles them on every pull request,
+which is what closes it.
+
+Rules:
+
+- `functions-build` is the type check, not a formality. It exists because
+  nothing else in CI compiles this project, so removing it removes the only
+  compiler in the pipeline.
+- A change to how the tests compile is not a substitute for it. If
+  `isolatedModules` is ever removed from `tsconfig.dev.json`, the specs get
+  checked, but the sources no spec imports still do not.
+- Keep it building with `tsconfig.json`, the configuration the deploy actually
+  uses. Compiling anything else would pass a build the `predeploy` hook then
+  fails.
+
 ## Related Pages
 
 - [[Architecture - Firebase]]

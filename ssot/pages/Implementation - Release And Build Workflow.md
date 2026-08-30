@@ -17,6 +17,8 @@ Release and build workflow describes the implementation-facing scripts that supp
 | `npm run increment-build-number`                        | Increment the shared build number                                                             |
 | `npm run sync-native-version`                           | Write the `package.json` marketing version into both native projects                          |
 | `npm run release:android`                               | Build, sign, and verify the Android release bundle                                            |
+| `npm run release:verify-bundle`                         | Assert a built web bundle carries no dev-only key and does carry the App Check gate           |
+| `npm run release:provenance`                            | Write `dist/build-provenance.json` naming the version, build number, and source commit        |
 | `npm run generate-changelog`                            | Generate incremental changelog output                                                         |
 | `npm run release:notes`                                 | Print the changelog range for store build notes (`-- --full` for the GitHub release body)     |
 | `npm run generate-full-changelog`                       | Generate full Logseq changelog output                                                         |
@@ -69,6 +71,250 @@ Because it pushes, no separate `git push` or `git push --tags` is needed after
 it. The tag is created on the bump commit, which already carries the next build
 number, so the tag names the released build but does not point at the released
 source tree.
+
+## Native Release Jobs In CI
+
+`.github/workflows/native-release.yml` produces the signed Android bundle and
+the signed iOS archive on runners rather than on a workstation. It exists
+because a hand-built store artifact is tied to a commit only by convention:
+build 92's source had to be reconstructed afterwards from one machine's reflog,
+and the answer was `ac217b99` plus an uncommitted change, which is to say no
+commit at all. See
+[issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181).
+
+### Triggers
+
+| Trigger                 | Behavior                                                           |
+| ----------------------- | ------------------------------------------------------------------ |
+| Push of a `build-*` tag | Builds both platforms and retains the artifacts. Does not publish. |
+| `workflow_dispatch`     | Same, with a `platform` choice and an opt-in `publish`             |
+
+Publishing is opt-in even on a tag. A build number cannot be reused once a
+store has seen it, so an accidental upload is not undoable, and the default run
+therefore stops at a retained artifact.
+
+This is the one workflow that is deliberately **not** in `pipeline.yml`. The
+rule that keeps deploys there exists because a hand-dispatched workflow goes
+stale, and nothing here can: a release creates a `build-*` tag and the tag fires
+the workflow. Against that, `pipeline.yml` gates changes on their way to
+`develop`, runs on every pull request, and would have to grow a tag trigger and
+a guard on every existing job to host a native build that needs a macOS runner.
+
+### Job Graph
+
+```text
+web-bundle  (ubuntu-latest)
+|
++-- android (ubuntu-latest)
++-- ios     (macos-latest)
+```
+
+`web-bundle` builds the production bundle **once** and both wrappers download
+it. Building it per platform would let the two store artifacts wrap different
+web bundles, which is the same failure the manual release avoids by not
+re-syncing between the iOS archive and the Android bundle.
+
+The `ios` job does not use `.github/actions/setup`. That action keys the
+`node_modules` cache on `package-lock.json` alone, with no runner OS in it, so a
+macOS job sharing it would either restore Linux native binaries or overwrite the
+entry every Linux job depends on. It runs `actions/setup-node` and `npm ci`
+directly instead.
+
+### What The Jobs Assert
+
+Every one of these was a human step before, and each is now a job failure:
+
+- `npm run release:verify-bundle` runs in all three jobs. It fails when either
+  key in `DEV_ONLY_ENV_KEYS` is inlined, and when
+  `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` is not inlined as `true`. The native
+  jobs re-run it on the downloaded artifact rather than trusting the job that
+  produced it.
+- `npm run release:android` fails on an unsigned bundle, and on one signed with
+  a key other than the Play upload key.
+- The iOS job reads `CFBundleShortVersionString` and `CFBundleVersion` out of
+  the finished archive and fails unless they match the tree. This is the
+  Organizer check from the manual release, which was previously a human reading
+  a dialog.
+- `ExportOptions.plist` sets `manageAppVersionAndBuildNumber` to `false`. Left
+  on, Xcode picks its own build number at export and the artifact stops matching
+  the shared build number.
+
+### Quoting Is Not Part Of The Check
+
+`release:verify-bundle` accepts `"true"`, `'true'` and `` `true` `` on the
+value side, and the same three around the key.
+
+This is not defensive padding. The build of commit `297f8be4` emits
+`` NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED:`true` `` — a template literal — so the
+double-quoted grep that [[Release Workflow]] and
+[[Current State - Release Candidate Test Charter]] both document returns **no
+match** on a bundle that is entirely correct. A check whose "expected match"
+half silently never matches is worse than no check. Which quote form the
+minifier picks is not a property the release cares about, so the script does not
+care either.
+
+### Artifact Naming And Provenance
+
+`npm run release:provenance` writes `dist/build-provenance.json` and names the
+artifacts. Both carry the version, the build number, and the short commit:
+
+```text
+bite-tribe-1.0.1-96-297f8be.aab
+bite-tribe-1.0.1-96-297f8be.ipa
+bite-tribe-1.0.1-96-297f8be-dsyms.zip
+```
+
+The provenance file travels inside every uploaded artifact and adds the full
+commit, the ref, the build timestamp, and the workflow run URL. Neither store
+exposes the source commit, so this is where the answer lives.
+
+The iOS dSYMs are retained for the same reason. A crash reported against a CI
+artifact can then be symbolicated from CI output rather than from whichever
+workstation happened to build it.
+
+### Tag And Tree Can Disagree, And The Tree Wins
+
+The release helper tags the bump commit, so a `build-<version>-<x>` tag names
+build `x` on a tree that already carries `x+1`. A tag-triggered run therefore
+builds `x+1`, not the `x` the tag is named after.
+
+The jobs read the version and build number from the tree, name the artifacts
+from the tree, and emit a warning when the tag disagrees. They do not fail:
+under the current release ordering the tag is created _after_ the artifacts are
+uploaded, so a disagreement is the expected state, not a defect.
+
+Adopting CI artifacts as the released ones means inverting that order —
+dispatch the workflow on the release branch while it still carries build `x`,
+then run the release helper. [[Release Workflow]] records that as the open
+decision; nothing in this workflow depends on it being made.
+
+### Secrets
+
+None of these existed when the workflow was written. The jobs fail with a named
+error rather than an unsigned artifact when one is missing.
+
+| Secret                                 | Job       | Contents                                                      |
+| -------------------------------------- | --------- | ------------------------------------------------------------- |
+| `BITETRIBE_KEYSTORE_BASE64`            | `android` | The upload keystore `.jks`, base64-encoded                    |
+| `BITETRIBE_KEYSTORE_PASSWORD`          | `android` | Its store password                                            |
+| `BITETRIBE_KEY_ALIAS`                  | `android` | The key alias, unquoted                                       |
+| `BITETRIBE_KEY_PASSWORD`               | `android` | The key password                                              |
+| `PLAY_SERVICE_ACCOUNT_JSON`            | `android` | Play Developer API service account JSON, publishing only      |
+| `IOS_DIST_CERTIFICATE_P12_BASE64`      | `ios`     | Apple Distribution certificate and private key, base64 `.p12` |
+| `IOS_DIST_CERTIFICATE_PASSWORD`        | `ios`     | The `.p12` export password                                    |
+| `APP_STORE_CONNECT_KEY_ID`             | `ios`     | App Store Connect API key id                                  |
+| `APP_STORE_CONNECT_ISSUER_ID`          | `ios`     | App Store Connect API issuer id                               |
+| `APP_STORE_CONNECT_PRIVATE_KEY_BASE64` | `ios`     | `AuthKey_<key id>.p8`, base64-encoded                         |
+
+Set them with `tools/set-native-release-secrets.sh`, which takes a section:
+
+```bash
+bash tools/set-native-release-secrets.sh android
+bash tools/set-native-release-secrets.sh ios
+bash tools/set-native-release-secrets.sh play
+```
+
+It reads each value from a local file or a hidden prompt and pipes it straight
+into `gh secret set`, so nothing is echoed, written to disk, or passed as a
+command argument where `ps` could read it.
+
+The `android` section needs no input at all: `keystore.properties` already holds
+every value, and the job reads the same four through the environment-variable
+fallback in `app/build.gradle`. The script strips the newline `sed` leaves on a
+properties value, because an alias of `First Key\n` fails signing with the same
+misleading `No key with alias` that quoting the value causes. See
+[[Implementation - Store Release Steps]].
+
+`PLAY_SERVICE_ACCOUNT_JSON` is only read when publishing, which is off by
+default, so the `play` section can stay unset until a store upload is wanted.
+
+The Firebase `NX_APP_*` secrets the `web-bundle` job needs already exist; it
+uses the same set as `deploy-bite-tribe`, including the misspelled
+`NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID`.
+
+Signing stays **automatic**, as it is in the Xcode project. The App Store
+Connect API key lets `xcodebuild -allowProvisioningUpdates` fetch the
+provisioning profile, so no profile is carried in a secret and the CocoaPods
+targets keep their own signing settings. `App.xcscheme` is committed as a shared
+scheme for the same reason `xcodebuild` needs a scheme it can name.
+
+The API key needs **App Manager or Admin**. A Developer-role key authenticates
+but may not fetch or create the distribution profile, which is the whole reason
+the key is passed.
+
+#### The Distribution Certificate Had To Be Created
+
+Before 30 August 2026 there was none to export. `security find-identity -v` on
+the release workstation listed a single identity, `Apple Development`, and
+`security find-certificate -c "Apple Distribution"` found nothing in any
+keychain - while TestFlight uploads had been happening for months.
+
+The explanation is **cloud-managed signing**: Xcode's automatic distribution
+certificate keeps its private key with Apple. It works from Xcode, appears
+nowhere in Keychain Access, and is not listed under Manage Certificates, so
+there is nothing on disk for CI to import. A release process can depend on it
+for a year without anyone noticing it cannot leave the machine.
+
+An Apple Distribution certificate was created on 30 August 2026 through Xcode,
+Settings, Apple Accounts, the team row, `Manage Certificates`, then the `+`
+menu. It landed in the login keychain with its private key, which
+`security find-identity -v -p codesigning` confirms by listing it at all - that
+policy only shows certificates whose private key is present. The cap is two per
+team and one is now used.
+
+Rules:
+
+- Export as **Personal Information Exchange (`.p12`)**, not `.cer`. A `.cer`
+  omits the private key, encodes to a plausible-looking secret, and fails only
+  once a macOS job has run.
+- Delete the exported `.p12` once the secret is set. The keychain copy is the
+  original; the export is a second copy of a private key sitting in a folder.
+
+##### Verifying A `.p12` With Homebrew OpenSSL
+
+`openssl pkcs12 -in <file> -noout -info` fails on a Keychain Access export with
+`Error outputting keys and certificates`. This is not a bad export.
+
+Keychain Access writes `.p12` files with legacy algorithms - 3DES for the key,
+RC2 for the certificates - and OpenSSL 3 refuses them unless asked:
+
+```bash
+openssl pkcs12 -legacy -in <file> -noout -info
+```
+
+A `Shrouded Keybag` line in that output is the private key. macOS ships
+LibreSSL as `/usr/bin/openssl`, which needs no flag; the failure appears when
+Homebrew's OpenSSL 3 is first on `PATH`.
+
+None of this affects CI, which imports with `security import` rather than
+OpenSSL and reads those algorithms natively. It only affects checking the file
+by hand.
+
+#### The API Key Is App Manager, Not Admin
+
+App Store Connect gates the API behind a one-time organization-level unlock -
+`Users and Access`, `Integrations`, `Request Access` - which the Account Holder
+approves for themselves. Until it is granted, no key can exist.
+
+The key is scoped **App Manager**. It has to fetch the App Store provisioning
+profile during `-allowProvisioningUpdates` and upload through `altool`, and it
+never has to create a distribution certificate, because that one is made by
+hand and imported from a secret. Admin would additionally let a leaked key
+revoke certificates, which buys nothing.
+
+If a run ever fails on profile permissions, generate an Admin key and swap the
+three secrets rather than assuming something deeper is wrong. Fifty keys can be
+active at once, so the tighter role costs nothing to get wrong.
+
+### Not Yet Verified
+
+- **No job has run.** Nine of the ten secrets were set on 30 August 2026 - the
+  four Android, the two certificate, and the three App Store Connect - so the
+  jobs are runnable but unrun. `PLAY_SERVICE_ACCOUNT_JSON` is deliberately
+  still unset: it is read only when publishing, which is off by default.
+- The two publishing steps are unexecuted. They are opt-in and off by default.
+- The Xcode version is whatever `macos-latest` carries, so an artifact is
+  reproducible against a commit but not against a toolchain.
 
 ## Native Asset Scripts
 
@@ -124,6 +370,12 @@ Rules:
   terminal and fails in agent shells and CI, which is why it keeps getting
   called. See [[Architecture - Capacitor]].
 - Keep source maps and native build artifacts traceable to the release build number and future git tag.
+- Run `npm run release:verify-bundle` against `dist/apps/bite-tribe` before
+  wrapping it, by hand or in CI. Do not hand-grep for the dev-only keys: the
+  quoting the minifier chooses varies, and the documented double-quoted grep
+  misses a correct bundle.
+- Add a key to `DEV_ONLY_ENV_KEYS` and the release check starts asserting it.
+  The check imports that list rather than repeating it.
 - Treat generated native files as outputs unless the requested change specifically targets native wrapper source.
 - Keep local and CI Node.js versions explicitly aligned as defined by [[Current State - Nx And Dependency Migration Roadmap]].
 - Keep visual regression scripts as direct `oblador/loki` CLI wrappers; do not route them through `nx-loki` or inferred Nx targets.
@@ -147,4 +399,5 @@ Rules:
 - [[Architecture - Capacitor]]
 - [[Implementation - Testing]]
 - [[Implementation - CI Pipeline]]
+- [[Current State - Release Candidate Test Charter]]
 - [[Current State - Nx And Dependency Migration Roadmap]]

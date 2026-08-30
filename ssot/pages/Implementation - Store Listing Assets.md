@@ -469,16 +469,29 @@ slot on **Add** — a two-step the App Store does not have. Each tile in the slo
 carries a trash and a move control on hover, so ordering and removal need no
 drag.
 
-Saving stages the listing in **Publishing overview** only when **managed
-publishing is on**. It is **off** on this account, verified on 30 August 2026, so
-a save goes to review by itself and no `Send for review` step exists. Checked on
-30 August, Publishing overview was empty and reported `Last published on August
-23, 2026`.
+Saving stages the listing in **Publishing overview**. Nothing is live, and no
+review has started, until **Submit changes for review** is used there. Confirmed
+by doing it on 30 August 2026: saving the ten translations produced the dialog
+"Your change has been saved. To send it to Google for review, go to Publishing
+overview", and the ten changes then sat under "Changes not yet submitted for
+review".
 
-This distinction is worth keeping, because the opposite was written here and
-believed for over a week: it produced a to-do to "send the draft for review" that
-had nothing behind it. If managed publishing is ever switched on, saving stops
-publishing and the queue becomes real.
+**A correction, kept because the wrong version was written down and acted on.**
+This page briefly claimed the opposite - that managed publishing is off, so a
+save publishes by itself and no send-for-review step exists. That was wrong. It
+came from finding Publishing overview empty and the recent listing submissions
+already published, and inferring automatic submission from the absence of a
+queue. The real explanation is that those changes had already been submitted by
+hand, so nothing was left pending. **An empty queue is not evidence of automatic
+submission.**
+
+What managed publishing actually controls is the other end: with it **off**,
+changes go live as soon as Google approves them; with it **on**, approved changes
+wait for you to release them. Either way the submission itself is manual.
+
+Play also runs pre-submission checks - "Running quick checks for commonly found
+issues", quoted as up to 14 minutes - and holds the submission until they pass.
+Budget for that when a listing change is on the critical path.
 
 ## Current State
 
@@ -717,14 +730,14 @@ than a cosmetic one.
 
 As of 22 August 2026, in the order they gate a submission.
 
-| Gap                             | Store | Note                                                        |
-| ------------------------------- | ----- | ----------------------------------------------------------- |
-| ~~Send the listing for review~~ | Play  | **Not a step.** Managed publishing is off, so saves publish |
-| ~~Support URL~~                 | Apple | **Done** 30 Aug 2026, `https://bite-tribe.web.app/support`  |
-| 7-inch and 10-inch screenshots  | Play  | Asterisked, both empty — does not block review              |
-| Light-theme captures            | Both  | The set is dark-theme only; the capture rule asks for both  |
-| Ten listing translations        | Both  | **Drafted**, see the translations page; not yet entered     |
-| App previews                    | Apple | Optional, none captured                                     |
+| Gap                            | Store | Note                                                       |
+| ------------------------------ | ----- | ---------------------------------------------------------- |
+| Send the listing for review    | Play  | Real, and manual. Ten translations staged 30 Aug 2026      |
+| ~~Support URL~~                | Apple | **Done** 30 Aug 2026, `https://bite-tribe.web.app/support` |
+| 7-inch and 10-inch screenshots | Play  | Asterisked, both empty — does not block review             |
+| Light-theme captures           | Both  | The set is dark-theme only; the capture rule asks for both |
+| Ten listing translations       | Both  | **Drafted**, see the translations page; not yet entered    |
+| App previews                   | Apple | Optional, none captured                                    |
 
 Play's tablet slots carry a required asterisk but do **not** gate submission:
 with both empty, Publishing overview still reports `Your changes can now be sent

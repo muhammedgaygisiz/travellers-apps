@@ -354,14 +354,31 @@ Both jobs are proven. The workflow produced signed, named, commit-traceable
 Android and iOS artifacts on runners, with no workstation involved, on
 30 August 2026.
 
-| Run | Ref                                               | web-bundle    | android       | ios            |
-| --- | ------------------------------------------------- | ------------- | ------------- | -------------- |
-| #1  | `develop@963e247`                                 | pass, 2.2 min | pass, 5.5 min | fail at export |
-| #2  | `1181-fix-native-release-artifact-naming@1cafbd0` | pass, 1.8 min | pass, 5.2 min | pass, 22.9 min |
+| Run | Ref                                               | Trigger  | web-bundle    | android       | ios            |
+| --- | ------------------------------------------------- | -------- | ------------- | ------------- | -------------- |
+| #1  | `develop@963e247`                                 | dispatch | pass, 2.2 min | pass, 5.5 min | fail at export |
+| #2  | `1181-fix-native-release-artifact-naming@1cafbd0` | dispatch | pass, 1.8 min | pass, 5.2 min | pass, 22.9 min |
+| #3  | `develop@dcd8d39`                                 | dispatch | pass, 1.9 min | pass, 5.3 min | pass, 20.5 min |
+| #4  | `build-1.0.1-96@269cb26`                          | tag push | pass, 1.8 min | pass, 5.6 min | -              |
 
-Run #2 produced `bitetribe-1.0.1-96-1cafbd0-android` at 15.7 MB and
-`bitetribe-1.0.1-96-1cafbd0-ios` at 118.1 MB, the latter carrying the `.ipa`,
-the dSYMs and the provenance.
+**Run #3 produced the artifacts that were actually released** as build 96 on
+30 August 2026: `bitetribe-1.0.1-96-dcd8d39-android` at 15.7 MB and
+`bitetribe-1.0.1-96-dcd8d39-ios` at 118.1 MB, the latter carrying the `.ipa`,
+the dSYMs and the provenance. Both went to the stores by hand, through
+Transporter and the Play Console, because the publish steps are still unrun.
+
+**Run #4 is the off-by-one, observed rather than predicted.** Pushing the
+`build-1.0.1-96` tag fired the workflow against the bump commit, which already
+carries 97, so it produced `bitetribe-1.0.1-97-269cb26-android` under a tag
+named 96 and logged:
+
+```text
+Tag build-1.0.1-96 names build 1.0.1 (96), but this tree is 1.0.1 (97).
+The artifacts are named after the tree, which is what was actually built.
+```
+
+That is the designed behaviour and it costs a runner. Expect one such run after
+every release until the ordering question in [[Release Workflow]] is settled.
 
 Run #1 found two defects, both recorded above: the artifact name emptied by
 secret redaction, and an App Store Connect key scoped too narrowly to export.

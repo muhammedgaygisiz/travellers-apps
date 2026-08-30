@@ -61,6 +61,24 @@ belong to.
 
 2. Build the web application for the release build.
 
+**CI does steps 2, 3 and 4 in one dispatch.** From build 96 onwards the release
+artifacts are produced by `.github/workflows/native-release.yml`, not on a
+workstation:
+
+```bash
+gh workflow run native-release.yml --ref develop -f platform=both -f publish=false
+```
+
+That runs the production build, the bundle check, both Capacitor syncs, the
+Gradle bundle with its signature verification, and the Xcode archive and
+export - and names the artifacts after the commit. Dispatch it on the commit
+being released, which is `develop` at the point the release branch was cut, not
+on the release branch: the branch is about to carry a changelog and a bump that
+are not in the build. Budget about 25 minutes.
+
+The rest of steps 2 and 3 below are the **fallback** for a release that cannot
+use CI, and remain accurate. Read step 4 either way.
+
 ```bash
 NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true npx nx build bite-tribe --configuration=production
 ```
@@ -109,16 +127,41 @@ npx nx run bite-tribe-android:sync
 - Commit or discard any sync output before step 6. The release helper refuses
   to run against a dirty working tree.
 
-4. Build and upload the native apps.
-   - Archive and upload iOS from Xcode.
-   - Produce the signed Android App Bundle with `npm run release:android`, which
-     also verifies the bundle is signed with the Play upload key and refuses to
-     finish otherwise.
-   - `.github/workflows/native-release.yml` is the intended replacement for this
-     step. Until a run has produced an installable artifact on each platform, it
-     is not the release path — see the ordering note under Known Gaps.
-   - Confirm the archived version and build number before distributing.
-   - The full console procedure is [[Implementation - Store Release Steps]].
+4. Collect the artifacts and upload them.
+
+   From the CI run, download both artifacts into one directory:
+
+```bash
+gh run download <run id> -n bitetribe-<version>-<build>-<sha>-android -D ~/Desktop/release-<build>
+gh run download <run id> -n bitetribe-<version>-<build>-<sha>-ios -D ~/Desktop/release-<build>
+```
+
+The second download reports an error extracting `build-provenance.json`
+because the first already wrote an identical copy. Everything else extracts;
+the message is noise, not a failed download.
+
+Verify before uploading, because this is the last cheap place to catch a
+wrong artifact:
+
+- `keytool -printcert -jarfile <aab>` and compare the SHA-256 with the Play
+  upload key recorded in [[Implementation - Store Release Steps]]. The CI job
+  already checked it; this also proves the download is intact.
+- Read `CFBundleShortVersionString`, `CFBundleVersion` and
+  `ITSAppUsesNonExemptEncryption` out of `Payload/App.app/Info.plist` inside
+  the `.ipa`. The last one is what keeps the build row off **Missing
+  Compliance**.
+- `build-provenance.json` names the commit the artifacts came from. Record
+  it; the stores do not.
+
+Then upload. **Transporter** takes the `.ipa` - Xcode's Distribute wizard is
+not involved, because the archive was never on this machine - and the Play
+Console takes the `.aab`. The console procedure is
+[[Implementation - Store Release Steps]].
+
+The fallback path, when CI is unavailable: archive and upload iOS from
+Xcode, and produce the bundle with `npm run release:android`, which verifies
+the signature and refuses to finish on an unsigned or wrong-key bundle.
+Confirm the archived version and build number before distributing.
 
 5. Upload to the test tracks.
    - iOS to TestFlight through App Store Connect.

@@ -264,8 +264,8 @@ Two consequences to keep in mind:
 3. **Create new release**.
 4. Upload the `app-release.aab` located in the Android step and wait for the
    upload to finish.
-5. In **Release notes**, replace the placeholder text between the existing
-   `<en-US>` tags with the store build notes. Leave the tags themselves intact.
+5. In **Release notes**, replace **every** placeholder block with the store
+   build notes for that locale. Leave the tags themselves intact.
 6. **Next**, then **Save**.
 7. On the `Go to Publishing overview?` dialog, choose **Go to overview**.
 8. Confirm the new release appears in the Changes list, then
@@ -275,6 +275,35 @@ Two consequences to keep in mind:
 
 Play Open Testing releases are not live for testers until Google's review
 completes, in the same way TestFlight external distribution waits on Apple.
+
+### Release Notes Are Eleven Locales, Not One
+
+Play pre-fills the release-notes field with one block per listing locale, and
+the listing is localized: `en-US`, `am`, `ar`, `de-DE`, `es-ES`, `fr-FR`, `id`,
+`it-IT`, `pt-BR`, `th`, `tr-TR`.
+
+**A block left unedited is published verbatim.** Testers in that language see
+`Enter or paste your release notes for de-DE here`. This step used to say to
+replace the text "between the existing `<en-US>` tags", which was written when
+both listings were English-only, and following it literally would have shipped
+placeholder text to ten locales. Caught during the build 96 release, before
+submission.
+
+Rules:
+
+- Translate the notes rather than repeating the English. A language is not
+  finished until it is actually in that language, which is the standard
+  [[Implementation - Store Listing Translations]] already holds the listing to.
+- Play allows 500 characters per locale, which is looser than the 230-character
+  summary the notes are written to, so a translation that runs longer than the
+  English is fine. French is reliably the longest.
+- Cross-check terminology against [[Implementation - Store Listing Translations]],
+  which carries the ten-locale listing copy, rather than translating each
+  release from scratch.
+- App Store Connect's **What to Test** takes a single box, so the English note
+  is written to serve both stores. Keep it free of platform-specific phrasing
+  for that reason: an Android permission fix listed in a TestFlight note is
+  noise to an iOS tester.
 
 ## Rules
 

@@ -947,9 +947,20 @@ These are account-level and gate submission regardless of listing completeness:
 - ~~The new social media age-rating questions are optional until 7 September
   2026, but mandatory for a new app submission, which this is.~~ **Done**, 30
   August 2026. Both were answered as part of the age-rating correction above.
-- Play's internal testing track is paused and holds a stale build 58 plus an
-  `Untitled release` draft. [Issue #1179](https://github.com/muhammedgaygisiz/travellers-apps/issues/1179)
-  needs it live to receive the release candidate.
+- ~~Play's internal testing track is paused and holds a stale build 58 plus an
+  `Untitled release` draft, and issue 1179 needs it live to receive the release
+  candidate.~~ **Not a blocker, and the wrong track.** BiteTribe distributes on
+  Android through **Open testing**, not internal testing, which is what every
+  Android run in [[Current State - Release Candidate Test Charter]] used. Open
+  testing is `Active`, carrying release **95 (1.0.1)** from 23 August 2026, to
+  unlimited testers across 12 countries. Verified in the console on 30 August 2026.
+
+  The internal testing track really is paused with a February build 58 and an
+  `Untitled release` draft, and that is simply an abandoned track: nothing
+  distributes through it and [issue 1179](https://github.com/muhammedgaygisiz/travellers-apps/issues/1179)
+  does not need it. Reading its paused state as a release blocker is the mistake
+  this bullet used to make - **check which track the product actually ships on
+  before reading a track's state as a problem.**
 
 ## Related Pages
 

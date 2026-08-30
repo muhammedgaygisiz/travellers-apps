@@ -228,6 +228,31 @@ misleading `No key with alias` that quoting the value causes. See
 `PLAY_SERVICE_ACCOUNT_JSON` is only read when publishing, which is off by
 default, so the `play` section can stay unset until a store upload is wanted.
 
+### The Android Track Is Open Testing, As A Draft
+
+The publish step uploads to `beta`, which is **Open testing** in the Play
+Developer API, and creates the release as a **draft**.
+
+Both halves were wrong in the first version of this workflow, and both were
+taken from the wording of
+[issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
+rather than from the SSOT:
+
+- **Not `internal`.** BiteTribe distributes on Android through Open testing.
+  The internal track is paused and abandoned, still holding a February build 58
+  and an `Untitled release` draft. [[Implementation - Store Listing Assets]]
+  records mistaking that paused track for a release blocker as an error already
+  made once, and closes with the rule this repeats: check which track the
+  product actually ships on.
+- **Not `completed`.** The store build notes are produced by summarizing
+  `npm run release:notes` to at most 230 characters, by a person, and the
+  submission for review is a deliberate click. A completed release would reach
+  review carrying no notes. `draft` leaves the console steps in
+  [[Implementation - Store Release Steps]] exactly as they are.
+
+An issue body is a starting hypothesis. The SSOT is the source of truth, and
+where the two disagree the SSOT wins.
+
 The Firebase `NX_APP_*` secrets the `web-bundle` job needs already exist; it
 uses the same set as `deploy-bite-tribe`, including the misspelled
 `NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID`.
@@ -290,29 +315,72 @@ None of this affects CI, which imports with `security import` rather than
 OpenSSL and reads those algorithms natively. It only affects checking the file
 by hand.
 
-#### The API Key Is App Manager, Not Admin
+#### The API Key Must Be Admin
 
 App Store Connect gates the API behind a one-time organization-level unlock -
 `Users and Access`, `Integrations`, `Request Access` - which the Account Holder
 approves for themselves. Until it is granted, no key can exist.
 
-The key is scoped **App Manager**. It has to fetch the App Store provisioning
-profile during `-allowProvisioningUpdates` and upload through `altool`, and it
-never has to create a distribution certificate, because that one is made by
-hand and imported from a secret. Admin would additionally let a leaked key
-revoke certificates, which buys nothing.
+The key must be scoped **Admin**. This was tried the other way first, on the
+least-privilege reasoning that the key only has to fetch a provisioning profile
+and upload a build, and that Admin would additionally let a leaked key revoke
+certificates. Run #1 disproved it:
 
-If a run ever fails on profile permissions, generate an Admin key and swap the
-three secrets rather than assuming something deeper is wrong. Fifty keys can be
-active at once, so the tighter role costs nothing to get wrong.
+```text
+error: exportArchive Cloud signing permission error
+** EXPORT FAILED **
+error: exportArchive No profiles for 'com.bitetribe.app' were found
+```
 
-### Not Yet Verified
+The archive itself succeeded and passed the build-number assertion. Only
+`-exportArchive` failed, because that is where the **App Store** provisioning
+profile is required, and creating or downloading one is cloud signing.
+App Manager covers apps and TestFlight; certificates and profiles are Admin.
+There is no narrower role that can run `-allowProvisioningUpdates`.
 
-- **No job has run.** Nine of the ten secrets were set on 30 August 2026 - the
-  four Android, the two certificate, and the three App Store Connect - so the
-  jobs are runnable but unrun. `PLAY_SERVICE_ACCOUNT_JSON` is deliberately
-  still unset: it is read only when publishing, which is off by default.
-- The two publishing steps are unexecuted. They are opt-in and off by default.
+The lower-privilege alternative is to stop asking `xcodebuild` to manage
+signing at all: create the App Store provisioning profile by hand in the
+developer portal, carry it in a secret, and switch `ExportOptions.plist` to
+`signingStyle: manual`. That would work with a weaker key, at the cost of one
+more secret and a profile that expires every year and fails a release when it
+does. The Admin key is the smaller ongoing burden.
+
+Generating a replacement key is cheap - fifty can be active at once - so a role
+that turns out to be too narrow costs one dispatch, not a rebuild.
+
+### Run History
+
+Both jobs are proven. The workflow produced signed, named, commit-traceable
+Android and iOS artifacts on runners, with no workstation involved, on
+30 August 2026.
+
+| Run | Ref                                               | web-bundle    | android       | ios            |
+| --- | ------------------------------------------------- | ------------- | ------------- | -------------- |
+| #1  | `develop@963e247`                                 | pass, 2.2 min | pass, 5.5 min | fail at export |
+| #2  | `1181-fix-native-release-artifact-naming@1cafbd0` | pass, 1.8 min | pass, 5.2 min | pass, 22.9 min |
+
+Run #2 produced `bitetribe-1.0.1-96-1cafbd0-android` at 15.7 MB and
+`bitetribe-1.0.1-96-1cafbd0-ios` at 118.1 MB, the latter carrying the `.ipa`,
+the dSYMs and the provenance.
+
+Run #1 found two defects, both recorded above: the artifact name emptied by
+secret redaction, and an App Store Connect key scoped too narrowly to export.
+Its Android bundle was correctly built and signed and then dropped, arriving as
+412 bytes of provenance JSON.
+
+Budget the iOS job at roughly 23 minutes and the Android job at 5. The iOS
+figure is dominated by `pod install` and the archive, and it is why this
+workflow is not on the pull-request path.
+
+### Still Not Verified
+
+- **Neither publish step has ever run.** Both are opt-in and off by default,
+  and `PLAY_SERVICE_ACCOUNT_JSON` is still deliberately unset. The TestFlight
+  and Play Open testing uploads are therefore written but unexecuted.
+- **No artifact has been installed on a device.** The jobs prove the artifacts
+  are produced, signed and named; they do not prove either one runs.
+  [issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
+  asks for an install of each, and that is what remains of it.
 - The Xcode version is whatever `macos-latest` carries, so an artifact is
   reproducible against a commit but not against a toolchain.
 

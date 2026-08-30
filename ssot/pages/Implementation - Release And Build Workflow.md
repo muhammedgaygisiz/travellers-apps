@@ -242,37 +242,76 @@ The API key needs **App Manager or Admin**. A Developer-role key authenticates
 but may not fetch or create the distribution profile, which is the whole reason
 the key is passed.
 
-#### There Is No Distribution Certificate To Export Yet
+#### The Distribution Certificate Had To Be Created
 
-Checked on the release workstation on 30 August 2026:
-`security find-identity -v` lists one identity, `Apple Development`, and
-`security find-certificate -c "Apple Distribution"` finds nothing in any
-keychain.
+Before 30 August 2026 there was none to export. `security find-identity -v` on
+the release workstation listed a single identity, `Apple Development`, and
+`security find-certificate -c "Apple Distribution"` found nothing in any
+keychain - while TestFlight uploads had been happening for months.
 
-The manual releases are therefore signed with a **cloud-managed** distribution
-certificate, whose private key Apple holds and Xcode fetches. That works from
-Xcode and leaves nothing on disk to export, which is why
-`IOS_DIST_CERTIFICATE_P12_BASE64` cannot be filled in from this machine as
-things stand.
+The explanation is **cloud-managed signing**: Xcode's automatic distribution
+certificate keeps its private key with Apple. It works from Xcode, appears
+nowhere in Keychain Access, and is not listed under Manage Certificates, so
+there is nothing on disk for CI to import. A release process can depend on it
+for a year without anyone noticing it cannot leave the machine.
 
-Two ways forward, and the second is untested:
+An Apple Distribution certificate was created on 30 August 2026 through Xcode,
+Settings, Apple Accounts, the team row, `Manage Certificates`, then the `+`
+menu. It landed in the login keychain with its private key, which
+`security find-identity -v -p codesigning` confirms by listing it at all - that
+policy only shows certificates whose private key is present. The cap is two per
+team and one is now used.
 
-1. Create an Apple Distribution certificate - Xcode, Settings, Accounts, Manage
-   Certificates, `+` - then export it from Keychain Access as a `.p12`
-   **including the private key**. This is what the workflow expects today.
-2. Drop the keychain import and let `-allowProvisioningUpdates` do the cloud
-   signing it already has the API key for. Fewer secrets and nothing to rotate,
-   but nobody has run it, and a failure here costs a full macOS job to discover.
+Rules:
 
-Take route 1 first. Route 2 is a simplification to try once something is known
-to work, not a thing to debug on the first run.
+- Export as **Personal Information Exchange (`.p12`)**, not `.cer`. A `.cer`
+  omits the private key, encodes to a plausible-looking secret, and fails only
+  once a macOS job has run.
+- Delete the exported `.p12` once the secret is set. The keychain copy is the
+  original; the export is a second copy of a private key sitting in a folder.
+
+##### Verifying A `.p12` With Homebrew OpenSSL
+
+`openssl pkcs12 -in <file> -noout -info` fails on a Keychain Access export with
+`Error outputting keys and certificates`. This is not a bad export.
+
+Keychain Access writes `.p12` files with legacy algorithms - 3DES for the key,
+RC2 for the certificates - and OpenSSL 3 refuses them unless asked:
+
+```bash
+openssl pkcs12 -legacy -in <file> -noout -info
+```
+
+A `Shrouded Keybag` line in that output is the private key. macOS ships
+LibreSSL as `/usr/bin/openssl`, which needs no flag; the failure appears when
+Homebrew's OpenSSL 3 is first on `PATH`.
+
+None of this affects CI, which imports with `security import` rather than
+OpenSSL and reads those algorithms natively. It only affects checking the file
+by hand.
+
+#### The API Key Is App Manager, Not Admin
+
+App Store Connect gates the API behind a one-time organization-level unlock -
+`Users and Access`, `Integrations`, `Request Access` - which the Account Holder
+approves for themselves. Until it is granted, no key can exist.
+
+The key is scoped **App Manager**. It has to fetch the App Store provisioning
+profile during `-allowProvisioningUpdates` and upload through `altool`, and it
+never has to create a distribution certificate, because that one is made by
+hand and imported from a secret. Admin would additionally let a leaked key
+revoke certificates, which buys nothing.
+
+If a run ever fails on profile permissions, generate an Admin key and swap the
+three secrets rather than assuming something deeper is wrong. Fifty keys can be
+active at once, so the tighter role costs nothing to get wrong.
 
 ### Not Yet Verified
 
-- **No job has run.** As of 30 August 2026 none of the ten secrets is set, so
-  neither the archive nor the signing path has been executed on a runner. The
-  Android four can be provisioned from the release workstation immediately; the
-  iOS ones are blocked on a distribution certificate that does not exist yet.
+- **No job has run.** Nine of the ten secrets were set on 30 August 2026 - the
+  four Android, the two certificate, and the three App Store Connect - so the
+  jobs are runnable but unrun. `PLAY_SERVICE_ACCOUNT_JSON` is deliberately
+  still unset: it is read only when publishing, which is off by default.
 - The two publishing steps are unexecuted. They are opt-in and off by default.
 - The Xcode version is whatever `macos-latest` carries, so an artifact is
   reproducible against a commit but not against a toolchain.

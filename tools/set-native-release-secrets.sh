@@ -9,10 +9,16 @@
 # apps/bite-tribe-firebase/set-workspace-secrets.sh.
 #
 # Usage:
-#   bash tools/set-native-release-secrets.sh android   # derivable from this machine
-#   bash tools/set-native-release-secrets.sh ios       # needs a distribution .p12 and an API key
-#   bash tools/set-native-release-secrets.sh play      # publishing only
+#   bash tools/set-native-release-secrets.sh android    # derivable from this machine
+#   bash tools/set-native-release-secrets.sh ios-cert   # the distribution .p12
+#   bash tools/set-native-release-secrets.sh ios-key    # the App Store Connect API key
+#   bash tools/set-native-release-secrets.sh ios        # both iOS halves
+#   bash tools/set-native-release-secrets.sh play       # publishing only
 #   bash tools/set-native-release-secrets.sh all
+#
+# The two iOS halves are separate because they are obtained from different
+# places on different days: the certificate from Keychain Access, the API key
+# from App Store Connect.
 
 set -euo pipefail
 
@@ -26,15 +32,21 @@ main() {
 
   case "$SECTION" in
     android) set_android ;;
-    ios) set_ios ;;
+    ios-cert) set_ios_certificate ;;
+    ios-key) set_ios_api_key ;;
+    ios)
+      set_ios_certificate
+      set_ios_api_key
+      ;;
     play) set_play ;;
     all)
       set_android
-      set_ios
+      set_ios_certificate
+      set_ios_api_key
       set_play
       ;;
     *)
-      fail "Unknown section '$SECTION'. Use android, ios, play, or all."
+      fail "Unknown section '$SECTION'. Use android, ios-cert, ios-key, ios, play, or all."
       ;;
   esac
 
@@ -73,7 +85,7 @@ set_android() {
 }
 
 # -------------------------------------------------------------------- iOS ---
-set_ios() {
+set_ios_certificate() {
   echo
   echo "==> iOS distribution certificate"
   echo "    Keychain Access > My Certificates > right-click the Apple Distribution"
@@ -89,7 +101,9 @@ set_ios() {
   base64 < "$p12" | tr -d '\n' | put IOS_DIST_CERTIFICATE_P12_BASE64
   printf '%s' "$p12_password" | put IOS_DIST_CERTIFICATE_PASSWORD
   unset p12_password
+}
 
+set_ios_api_key() {
   echo
   echo "==> App Store Connect API key"
   echo "    App Store Connect > Users and Access > Integrations > App Store Connect API."

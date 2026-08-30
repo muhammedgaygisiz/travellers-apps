@@ -32,7 +32,14 @@ const provenance = {
   app: 'bite-tribe',
   version,
   buildNumber,
-  artifactBaseName: `bite-tribe-${version}-${buildNumber}-${shortCommit}`,
+  // `bitetribe`, not the `bite-tribe` of `app` above, and not by accident.
+  // `bite-tribe` is the value of the NX_APP_BITE_TRIBE_PROJECT_ID secret, and
+  // GitHub redacts a job output containing a secret to an empty string on the
+  // way to the next job. That emptied this name in run #1, which named the
+  // artifact `-android` and staged the bundle as `.aab` - a dotfile that
+  // upload-artifact silently drops. The one-word spelling is the wordmark
+  // anyway; see ssot/pages/Implementation - Store Listing Assets.md.
+  artifactBaseName: `bitetribe-${version}-${buildNumber}-${shortCommit}`,
   commit,
   ref,
   refName,

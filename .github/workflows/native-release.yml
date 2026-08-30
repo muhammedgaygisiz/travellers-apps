@@ -28,7 +28,7 @@ on:
           - android
           - ios
       publish:
-        description: 'Also upload to TestFlight and the Play internal track'
+        description: 'Also upload to TestFlight and Play Open testing'
         required: false
         type: boolean
         default: false
@@ -53,11 +53,6 @@ jobs:
   # release for the same reason.
   web-bundle:
     runs-on: ubuntu-latest
-
-    outputs:
-      version: ${{ steps.provenance.outputs.version }}
-      build-number: ${{ steps.provenance.outputs.build-number }}
-      artifact-base-name: ${{ steps.provenance.outputs.artifact-base-name }}
 
     steps:
       - name: Checkout repository
@@ -146,6 +141,33 @@ jobs:
       - name: Assert the bundle carries no dev-only key
         run: npm run release:verify-bundle
 
+      # Read from the downloaded provenance rather than a job output. A job
+      # output whose value contains a secret is redacted to an empty string
+      # between jobs, and the artifact name legitimately contains the project
+      # name. File contents are never redacted, so this channel cannot be
+      # emptied by a future secret that happens to collide.
+      - name: Read the build provenance
+        run: |
+          set -euo pipefail
+          base="$(jq -r .artifactBaseName dist/build-provenance.json)"
+          version="$(jq -r .version dist/build-provenance.json)"
+          build="$(jq -r .buildNumber dist/build-provenance.json)"
+
+          for value in "$base" "$version" "$build"; do
+            if [ -z "${value}" ] || [ "${value}" = "null" ]; then
+              echo "::error::The provenance is incomplete, so the artifacts cannot be named. Refusing to build something that would be staged as a dotfile and silently dropped."
+              cat dist/build-provenance.json
+              exit 1
+            fi
+          done
+
+          echo "Artifacts will be named: ${base}"
+          {
+            echo "ARTIFACT_BASE_NAME=${base}"
+            echo "RELEASE_VERSION=${version}"
+            echo "RELEASE_BUILD_NUMBER=${build}"
+          } >> "$GITHUB_ENV"
+
       - name: Sync the Android wrapper
         run: npx nx run bite-tribe-android:sync
 
@@ -175,8 +197,6 @@ jobs:
       # provenance, so the artifact answers "which commit is this?" on its own.
       - name: Stage the release artifacts
         id: bundle
-        env:
-          ARTIFACT_BASE_NAME: ${{ needs.web-bundle.outputs.artifact-base-name }}
         run: |
           set -euo pipefail
           staging="${RUNNER_TEMP}/artifacts"
@@ -189,22 +209,35 @@ jobs:
       - name: Upload the Android bundle
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ needs.web-bundle.outputs.artifact-base-name }}-android
+          name: ${{ env.ARTIFACT_BASE_NAME }}-android
           path: ${{ runner.temp }}/artifacts
           retention-days: 90
           if-no-files-found: error
 
       # Opt-in. A build number cannot be reused once a store has seen it, so the
       # default run stops at the artifact above.
-      - name: Upload to the Play internal track
+      #
+      # `beta` is Open testing in the Play Developer API, and Open testing is
+      # where BiteTribe actually distributes on Android. Not `internal`: that
+      # track is paused, abandoned, and still holds a February build 58 - see
+      # ssot/pages/Implementation - Store Listing Assets.md, which records
+      # reading its paused state as a release blocker as a mistake already made
+      # once.
+      #
+      # `draft`, not `completed`, because the release is finished by hand: the
+      # store build notes come from `npm run release:notes` summarized to 230
+      # characters by a person, and the submission for review is a deliberate
+      # click. `completed` would submit a release with no notes.
+      # See ssot/pages/Implementation - Store Release Steps.md.
+      - name: Upload to Play Open testing as a draft
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
         uses: r0adkll/upload-google-play@v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.bitetribe.app
           releaseFiles: ${{ steps.bundle.outputs.aab-path }}
-          track: internal
-          status: completed
+          track: beta
+          status: draft
 
       - name: Remove the keystore
         if: always()
@@ -241,6 +274,33 @@ jobs:
 
       - name: Assert the bundle carries no dev-only key
         run: npm run release:verify-bundle
+
+      # Read from the downloaded provenance rather than a job output. A job
+      # output whose value contains a secret is redacted to an empty string
+      # between jobs, and the artifact name legitimately contains the project
+      # name. File contents are never redacted, so this channel cannot be
+      # emptied by a future secret that happens to collide.
+      - name: Read the build provenance
+        run: |
+          set -euo pipefail
+          base="$(jq -r .artifactBaseName dist/build-provenance.json)"
+          version="$(jq -r .version dist/build-provenance.json)"
+          build="$(jq -r .buildNumber dist/build-provenance.json)"
+
+          for value in "$base" "$version" "$build"; do
+            if [ -z "${value}" ] || [ "${value}" = "null" ]; then
+              echo "::error::The provenance is incomplete, so the artifacts cannot be named. Refusing to build something that would be staged as a dotfile and silently dropped."
+              cat dist/build-provenance.json
+              exit 1
+            fi
+          done
+
+          echo "Artifacts will be named: ${base}"
+          {
+            echo "ARTIFACT_BASE_NAME=${base}"
+            echo "RELEASE_VERSION=${version}"
+            echo "RELEASE_BUILD_NUMBER=${build}"
+          } >> "$GITHUB_ENV"
 
       # Goes through the npm script, which pins LANG and LC_ALL. Without a UTF-8
       # locale CocoaPods aborts pod install while Capacitor still reports the
@@ -330,9 +390,6 @@ jobs:
       # or Xcode-managed build number is cheap to catch here and expensive to
       # catch in App Store Connect.
       - name: Assert the archive names the expected build
-        env:
-          EXPECTED_VERSION: ${{ needs.web-bundle.outputs.version }}
-          EXPECTED_BUILD: ${{ needs.web-bundle.outputs.build-number }}
         run: |
           set -euo pipefail
           plist="${RUNNER_TEMP}/App.xcarchive/Info.plist"
@@ -341,8 +398,8 @@ jobs:
 
           echo "Archive: ${archived_version} (${archived_build})"
 
-          if [ "${archived_version}" != "${EXPECTED_VERSION}" ] || [ "${archived_build}" != "${EXPECTED_BUILD}" ]; then
-            echo "::error::The archive is ${archived_version} (${archived_build}), but the tree is ${EXPECTED_VERSION} (${EXPECTED_BUILD})."
+          if [ "${archived_version}" != "${RELEASE_VERSION}" ] || [ "${archived_build}" != "${RELEASE_BUILD_NUMBER}" ]; then
+            echo "::error::The archive is ${archived_version} (${archived_build}), but the tree is ${RELEASE_VERSION} (${RELEASE_BUILD_NUMBER})."
             exit 1
           fi
 
@@ -351,7 +408,6 @@ jobs:
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          ARTIFACT_BASE_NAME: ${{ needs.web-bundle.outputs.artifact-base-name }}
         run: |
           set -euo pipefail
           xcodebuild -exportArchive \
@@ -373,8 +429,6 @@ jobs:
       # from CI output rather than from whichever workstation happened to build
       # it. See the dSYM findings on issue #1181.
       - name: Collect the dSYMs
-        env:
-          ARTIFACT_BASE_NAME: ${{ needs.web-bundle.outputs.artifact-base-name }}
         run: |
           set -euo pipefail
           ditto -c -k --sequesterRsrc --keepParent \
@@ -384,7 +438,7 @@ jobs:
       - name: Upload the iOS artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ needs.web-bundle.outputs.artifact-base-name }}-ios
+          name: ${{ env.ARTIFACT_BASE_NAME }}-ios
           path: ${{ runner.temp }}/artifacts
           retention-days: 90
           if-no-files-found: error

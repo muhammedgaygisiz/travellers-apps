@@ -97,6 +97,11 @@ describe('notifyOnNewCountryBadge', () => {
           userId: 'user-1',
           countryCode: 'IT',
         },
+        android: { notification: { tag: 'NEW_COUNTRY_BADGE:user-1:IT' } },
+        apns: {
+          headers: { 'apns-collapse-id': 'NEW_COUNTRY_BADGE:user-1:IT' },
+          payload: { aps: { threadId: 'user-1' } },
+        },
       },
     ]);
   });
@@ -117,6 +122,11 @@ describe('notifyOnNewCountryBadge', () => {
         body: 'Mo just unlocked the badge for 🇮🇹 Italy',
       },
       data: { type: 'NEW_COUNTRY_BADGE', userId: 'user-1', countryCode: 'IT' },
+      android: { notification: { tag: 'NEW_COUNTRY_BADGE:user-1:IT' } },
+      apns: {
+        headers: { 'apns-collapse-id': 'NEW_COUNTRY_BADGE:user-1:IT' },
+        payload: { aps: { threadId: 'user-1' } },
+      },
     });
   });
 

@@ -96,6 +96,11 @@ describe('notifyBiteCreatorOnReview', () => {
           biteId: 'bite-1',
           reviewAuthorId: 'mira',
         },
+        android: { notification: { tag: 'NEW_BITE_REVIEW:bite-1' } },
+        apns: {
+          headers: { 'apns-collapse-id': 'NEW_BITE_REVIEW:bite-1' },
+          payload: { aps: { threadId: 'bite-1' } },
+        },
       },
     ]);
   });

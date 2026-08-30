@@ -1,4 +1,4 @@
-import { getMessaging } from 'firebase-admin/messaging';
+import { BaseMessage, getMessaging } from 'firebase-admin/messaging';
 import { logger } from 'firebase-functions';
 import { SupportedLanguage } from '../i18n/supported-languages';
 import { Translate, createTranslate } from '../i18n/translate';
@@ -8,6 +8,7 @@ import { CHUNK_SIZE } from './chunk-size';
 import { cleanupInvalidTokens } from './cleanup-invalid-tokens';
 import { getInvalidTokens } from './get-invalid-tokens';
 import { getTokensByLanguage } from './get-tokens-by-language';
+import { buildCollapseKey, toSurfaceKey } from './notification-collapse';
 
 export interface LocalizedNotification {
   title: string;
@@ -39,6 +40,49 @@ export interface LocalizedNotificationRequest {
     language: SupportedLanguage,
   ) => LocalizedNotification;
 }
+
+/**
+ * APNs rejects a collapse id longer than this, so an over-long key is left off
+ * the header rather than sent to be refused. Android's tag has no such limit and
+ * keeps collapsing either way.
+ */
+const APNS_COLLAPSE_ID_MAX_BYTES = 64;
+
+/**
+ * The per-platform half of a message: how the OS should collapse and group it.
+ *
+ * Both platforms are told the same two things in their own vocabulary. The
+ * collapse key replaces a notification that is the same one restated - Android
+ * by notification `tag`, APNs by `apns-collapse-id`. The surface groups the
+ * notifications that talk about one thing, which iOS renders as a summary via
+ * `thread-id`; Android has no equivalent field in FCM's payload and relies on
+ * the system's own bundling of an app's notifications (issue \#1366).
+ *
+ * A payload with no collapse identity gets no platform config at all, which is
+ * FCM's default of one notification per message.
+ */
+const buildCollapseConfig = (
+  data: Record<string, string>,
+): Pick<BaseMessage, 'android' | 'apns'> => {
+  const collapseKey = buildCollapseKey(data);
+
+  if (!collapseKey) {
+    return {};
+  }
+
+  const isCollapseIdSendable =
+    Buffer.byteLength(collapseKey, 'utf8') <= APNS_COLLAPSE_ID_MAX_BYTES;
+
+  return {
+    android: { notification: { tag: collapseKey } },
+    apns: {
+      headers: isCollapseIdSendable
+        ? { 'apns-collapse-id': collapseKey }
+        : undefined,
+      payload: { aps: { threadId: toSurfaceKey(collapseKey) } },
+    },
+  };
+};
 
 /**
  * Sends one engagement notification to every enabled installation of the given
@@ -82,6 +126,7 @@ export const sendLocalizedNotification = async ({
         tokens: chunk,
         notification: { title, body },
         data,
+        ...buildCollapseConfig(data),
       });
 
       const invalidTokens = getInvalidTokens(res, chunk);

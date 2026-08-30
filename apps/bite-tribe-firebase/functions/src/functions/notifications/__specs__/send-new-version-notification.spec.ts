@@ -110,6 +110,11 @@ describe('sendNewVersionNotification', () => {
         body: 'A new BiteTribe version is ready in the App Store. Update now to get the latest.',
       },
       data: { type: 'NEW_VERSION_AVAILABLE', platform: 'ios' },
+      android: { notification: { tag: 'NEW_VERSION_AVAILABLE' } },
+      apns: {
+        headers: { 'apns-collapse-id': 'NEW_VERSION_AVAILABLE' },
+        payload: { aps: { threadId: 'NEW_VERSION_AVAILABLE' } },
+      },
     });
   });
 

@@ -468,8 +468,16 @@ slot on **Add** — a two-step the App Store does not have. Each tile in the slo
 carries a trash and a move control on hover, so ordering and removal need no
 drag.
 
-Saving stages the listing in **Publishing overview**. Nothing is live, and no
-review has started, until **Send for review** is used there.
+Saving stages the listing in **Publishing overview** only when **managed
+publishing is on**. It is **off** on this account, verified on 30 August 2026, so
+a save goes to review by itself and no `Send for review` step exists. Checked on
+30 August, Publishing overview was empty and reported `Last published on August
+23, 2026`.
+
+This distinction is worth keeping, because the opposite was written here and
+believed for over a week: it produced a to-do to "send the draft for review" that
+had nothing behind it. If managed publishing is ever switched on, saving stops
+publishing and the queue becomes real.
 
 ## Current State
 
@@ -484,7 +492,7 @@ listing, no custom listings, and no additional locales.
 | --------------------- | ------------------------------------- |
 | App name              | `BiteTribe`, 9 / 30                   |
 | Short description     | `Find it. Try it. Share it.`, 26 / 80 |
-| Full description      | 1307 / 4000, in review                |
+| Full description      | 1307 / 4000, live                     |
 | App icon              | present                               |
 | Feature graphic       | present, current palette              |
 | Phone screenshots     | 5 of 8, current palette               |
@@ -493,9 +501,14 @@ listing, no custom listings, and no additional locales.
 | Chromebook, video, XR | none                                  |
 | Website, phone number | empty                                 |
 
-The two stale-palette screenshots were removed and the five current ones added
-on 22 August 2026, saved as a draft change awaiting **Send for review**. Five at
-1620 px clears Play's promotion threshold, which the previous two did not.
+The two stale-palette screenshots were removed and the five current ones added on
+22 August 2026, and they are **published**. Five at 1620 px clears Play's
+promotion threshold, which the previous two did not.
+
+Submission activity, read on 30 August 2026, records the listing changes going
+out on their own: submission **49** on 21 August and submission **50** on 23
+August, both `Store Listing`, both `Published`. There was never a draft waiting
+for anyone.
 
 The feature graphic was recoloured to the current palette the same day, so no
 stale-palette asset remains on either store.
@@ -703,14 +716,14 @@ than a cosmetic one.
 
 As of 22 August 2026, in the order they gate a submission.
 
-| Gap                            | Store | Note                                                       |
-| ------------------------------ | ----- | ---------------------------------------------------------- |
-| Send the listing for review    | Play  | Saved as a draft change, sitting in Publishing overview    |
-| ~~Support URL~~                | Apple | **Done** 30 Aug 2026, `https://bite-tribe.web.app/support` |
-| 7-inch and 10-inch screenshots | Play  | Asterisked, both empty — does not block review             |
-| Light-theme captures           | Both  | The set is dark-theme only; the capture rule asks for both |
-| Ten listing translations       | Both  | Derive from the English copy above                         |
-| App previews                   | Apple | Optional, none captured                                    |
+| Gap                             | Store | Note                                                        |
+| ------------------------------- | ----- | ----------------------------------------------------------- |
+| ~~Send the listing for review~~ | Play  | **Not a step.** Managed publishing is off, so saves publish |
+| ~~Support URL~~                 | Apple | **Done** 30 Aug 2026, `https://bite-tribe.web.app/support`  |
+| 7-inch and 10-inch screenshots  | Play  | Asterisked, both empty — does not block review              |
+| Light-theme captures            | Both  | The set is dark-theme only; the capture rule asks for both  |
+| Ten listing translations        | Both  | Derive from the English copy above                          |
+| App previews                    | Apple | Optional, none captured                                     |
 
 Play's tablet slots carry a required asterisk but do **not** gate submission:
 with both empty, Publishing overview still reports `Your changes can now be sent

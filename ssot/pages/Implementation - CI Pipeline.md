@@ -47,7 +47,10 @@ tests
 |
 +-- bite-tribe-build ----------- deploy-bite-tribe           (develop only)
 +-- bite-tribe-business-build -- deploy-bite-tribe-business  (develop only)
++-- functions-build                                          (no deploy yet)
 ```
+
+`functions-build` compiles the Firebase functions and stops there. It has no deploy counterpart on purpose: gen2 functions have no rollback, and Firestore indexes must be deployed first and separately, so the deploy is a decision rather than a wiring job. See [[Implementation - Firebase Functions]].
 
 The lint, stylelint and tests chain is deliberately sequential so a cheap failure stops the run before the expensive jobs start. Everything after `tests` fans out in parallel.
 
@@ -59,7 +62,7 @@ The lint, stylelint and tests chain is deliberately sequential so a cheap failur
 | ---------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------- |
 | `.github/actions/setup`                  | `setup`, deploys, standalone workflows | Restore `node_modules`, set up Node.js from `.nvmrc`, `npm ci`, save cache |
 | `.github/actions/restore-cache`          | Every pipeline job                     | Exact-key restore of `node_modules`, no fallback                           |
-| `.github/actions/install-if-missing`     | The two build jobs                     | `npm ci` when the restored `node_modules` is unusable                      |
+| `.github/actions/install-if-missing`     | The build jobs                         | `npm ci` when the restored `node_modules` is unusable                      |
 | `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`           | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                  |
 | `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, builds   | Persist and restore the Nx computation cache                               |
 
@@ -90,7 +93,7 @@ Nx names the index after the machine id of the host that wrote it, reading `/var
 
 ## Affected Computation
 
-`lint`, `stylelint` and `tests` run through `nx affected`. Builds, Loki and E2E run unconditionally.
+`lint`, `stylelint` and `tests` run through `nx affected`. Builds, Loki and E2E run unconditionally, which is why `functions-build` is the type check for the Firebase functions rather than an affected-gated target: it compiles them on every run.
 
 `pipeline.yml` sets `NX_BASE: develop` as a workflow-level default. `nrwl/nx-set-shas` then writes the resolved `NX_BASE` and `NX_HEAD` SHAs to `GITHUB_ENV`, which takes precedence for the steps that follow, so the affected jobs compare against the real merge base rather than the branch name. Jobs that need affected must therefore run `setup-env-for-affected` before the Nx command.
 

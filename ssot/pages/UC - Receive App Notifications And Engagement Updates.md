@@ -20,6 +20,8 @@ Users and creators can receive engagement signals around Bites and social activi
 - Backend functions can notify users about meaningful leaderboard ranking changes.
 - Notifications or shared-link behavior keep users connected to activity.
 - Tapping a notification opens the surface it talks about: the Bite, the follower profile, the leaderboard, or the weekly bites page.
+- Notifications about the same thing replace one another instead of stacking, and
+  the ones about a surface are cleared once the user opens it.
 - The weekly summary counts one calendar week (Monday to Sunday, Europe/Zurich) and carries those bounds, so its landing page lists the Bites of exactly that week even when the user opens it days later.
 - Notification text arrives in the language the user chose in settings, not in English.
 - Users learn that a new app version is live from a notification, instead of waiting for TestFlight or Google Play to auto-update them.
@@ -52,6 +54,44 @@ made a tapped notification reliably open its own surface:
 - Route guards still decide. The target goes through the router, so incomplete
   onboarding or a lost session redirects a tapped notification exactly as it
   would redirect the same route reached by hand.
+
+## Notification Collapse Contract
+
+Issue [#1366](https://github.com/muhammedgaygisiz/travellers-apps/issues/1366)
+stopped notifications accumulating in the OS drawer:
+
+- Every notification carries a collapse key, shaped `<type>[:<surface>[:<variant>]]`.
+  Without one, FCM gives each message its own notification id and the OS keeps all
+  of them, which is how a device reached a backlog roughly 35 deep.
+- Two notifications sharing a key are the same notification restated, so the later
+  one replaces the earlier. The daily leaderboard notification is the clearest
+  case: it has no id to name, its key is its type, and it can therefore never be
+  present more than once.
+- Type is always part of the identity. A like and a review on one Bite are
+  different events with different copy, and collapsing them together would lose
+  one of them.
+- The surface is the second segment: the thing the notification opens. Every
+  notification about one Bite shares it, whatever their type, which is what iOS
+  groups on to render them under a summary.
+- Android has no group or summary field in FCM's notification payload, so an
+  app-authored summary is not expressible there. Android collapses per key and
+  otherwise relies on the system's own bundling of an app's notifications.
+- A payload missing the id its key needs is sent uncollapsed rather than
+  collapsed on its type alone, which would merge likes on unrelated Bites into
+  one notification.
+- Opening a surface clears the delivered notifications about it. The OS only
+  dismisses the notification that was tapped, so a Bite reached from the feed
+  otherwise leaves the notification announcing it in the drawer for good.
+- Clearing runs on navigation rather than in each page, so a page cannot forget
+  to clear and a new notification type only has to name the surface its route
+  already has. Pages nested under a Bite count as that Bite.
+- The app matches on the collapse key alone, because that is all a delivered
+  notification still carries: the `tag` on Android, the `id` on iOS. A
+  notification carrying neither predates this contract and is left in the
+  drawer rather than guessed at.
+- Notification channels are deliberately not part of this. Collapsing and
+  clearing need none, and a channel visible in system settings would need a
+  localized name in every catalog.
 
 ## Localization Contract
 
@@ -191,6 +231,11 @@ made notification delivery installation-specific:
 - `loadWeeklyBites`
 - `sendLocalizedNotification` and the notification catalog in
   `apps/bite-tribe-firebase/functions/src/functions/shared/i18n`
+- `buildCollapseKey` and `toSurfaceKey` in
+  `apps/bite-tribe-firebase/functions/src/functions/shared/utils/notification-collapse.ts`
+- `toNotificationSurface`, `isNotificationForSurface` and
+  `clearNotificationsForSurface` in `libs/common/push-notifications`
+- `clearNotificationsOnPageChangeToSurface$` in `AppEffect`
 - `weekly-bites` route, served by `WeeklyBitesContainer` in `libs/bite-tribe/home/page`
 
 ## Related Domains

@@ -20,6 +20,10 @@ import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import { isBase64String, isEmailVerificationPromptVisible, PATH } from 'utils';
 import { stopIfUserIsUndefined } from './utils/stop-if-user-is-undefined';
 import { dispatchGpsPosition } from './utils/dispatch-gps-position';
+import {
+  clearNotificationsForSurface,
+  toNotificationSurface,
+} from 'push-notifications';
 import { initPushNotifications } from './utils/init-push-notifications';
 import { PushNavigationService } from './push-navigation.service';
 import { Store } from '@ngrx/store';
@@ -309,6 +313,37 @@ export class AppEffect {
           action.payload.event.urlAfterRedirects.includes(`/${PATH.NEW_BITE}`),
         ),
         tap(() => this.storeService.reloadGPSPosition()),
+      );
+    },
+    { dispatch: false },
+  );
+
+  /**
+   * Dismisses the notifications about a surface once the user is looking at it.
+   *
+   * The OS only clears the notification that was tapped, so a Bite opened from
+   * the feed leaves the notification announcing it in the drawer for good. That
+   * is what lets a backlog build up rather than drain (issue \#1366).
+   *
+   * It runs on navigation rather than in each page so the rule stays one rule:
+   * a page cannot forget to clear, and a new notification type only has to name
+   * the surface its route already has.
+   */
+  clearNotificationsOnPageChangeToSurface$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(routerNavigatedAction),
+        map((action) =>
+          toNotificationSurface(
+            action.payload.event.urlAfterRedirects,
+            this.storeService.user()?.uid,
+          ),
+        ),
+        filter((surface): surface is string => !!surface),
+        tap(
+          async (surface) =>
+            await clearNotificationsForSurface(this.platform, surface),
+        ),
       );
     },
     { dispatch: false },

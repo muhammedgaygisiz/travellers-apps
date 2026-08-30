@@ -8,6 +8,11 @@ interface MulticastRequest {
   tokens: string[];
   notification: { title: string; body: string };
   data: Record<string, string>;
+  android?: { notification: { tag: string } };
+  apns?: {
+    headers?: Record<string, string>;
+    payload: { aps: { threadId: string } };
+  };
 }
 
 const sendEachForMulticast = jest.fn(async ({ tokens }: MulticastRequest) => ({
@@ -45,7 +50,7 @@ const aFollowerNotification = (
   uids: string[],
 ): LocalizedNotificationRequest => ({
   uids,
-  data: { type: 'NEW_FOLLOWER' },
+  data: { type: 'NEW_FOLLOWER', followerUid: 'follower-1' },
   buildMessage: (translate) => ({
     title: translate('newFollower.title'),
     body: translate('newFollower.body', { follower: 'Mo' }),
@@ -74,7 +79,12 @@ describe('sendLocalizedNotification', () => {
         title: 'Neuer Follower!',
         body: 'Mo folgt dir jetzt.',
       },
-      data: { type: 'NEW_FOLLOWER' },
+      data: { type: 'NEW_FOLLOWER', followerUid: 'follower-1' },
+      android: { notification: { tag: 'NEW_FOLLOWER:follower-1' } },
+      apns: {
+        headers: { 'apns-collapse-id': 'NEW_FOLLOWER:follower-1' },
+        payload: { aps: { threadId: 'follower-1' } },
+      },
     });
   });
 
@@ -113,6 +123,71 @@ describe('sendLocalizedNotification', () => {
         },
       }),
     );
+  });
+
+  it('tells both platforms to replace the notification it supersedes', async () => {
+    // Without this, FCM gives every message its own notification id and the OS
+    // keeps all of them side by side (issue #1366).
+    db.seed('users/user-1/pushTokens/token-a', { enabled: true });
+
+    await sendLocalizedNotification({
+      uids: ['user-1'],
+      data: { type: 'LEADERBOARD_RANK_CHANGE', userId: 'user-1' },
+      buildMessage: (translate) => ({
+        title: translate('leaderboard.title'),
+        body: 'You moved up.',
+      }),
+    });
+
+    expect(sendEachForMulticast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        android: { notification: { tag: 'LEADERBOARD_RANK_CHANGE' } },
+        apns: {
+          headers: { 'apns-collapse-id': 'LEADERBOARD_RANK_CHANGE' },
+          payload: { aps: { threadId: 'LEADERBOARD_RANK_CHANGE' } },
+        },
+      }),
+    );
+  });
+
+  it('groups the notifications about one Bite under a single iOS thread', async () => {
+    db.seed('users/user-1/pushTokens/token-a', { enabled: true });
+
+    await sendLocalizedNotification({
+      uids: ['user-1'],
+      data: {
+        type: 'NEW_REVIEW_REPLY',
+        biteId: 'bite-1',
+        threadId: 'thread-1',
+      },
+      buildMessage: () => ({ title: 'Reply', body: 'Someone replied.' }),
+    });
+
+    expect(sendEachForMulticast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        android: {
+          notification: { tag: 'NEW_REVIEW_REPLY:bite-1:thread-1' },
+        },
+        apns: expect.objectContaining({
+          payload: { aps: { threadId: 'bite-1' } },
+        }),
+      }),
+    );
+  });
+
+  it('leaves a payload it cannot collapse to one notification per message', async () => {
+    db.seed('users/user-1/pushTokens/token-a', { enabled: true });
+
+    await sendLocalizedNotification({
+      uids: ['user-1'],
+      data: { type: 'NEW_BITE_LIKE' },
+      buildMessage: () => ({ title: 'Like', body: 'Someone liked it.' }),
+    });
+
+    const [request] = sendEachForMulticast.mock.calls[0];
+
+    expect(request.android).toBeUndefined();
+    expect(request.apns).toBeUndefined();
   });
 
   it('sends nothing when no recipient has an enabled installation', async () => {

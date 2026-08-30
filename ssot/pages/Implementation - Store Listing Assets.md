@@ -730,14 +730,14 @@ than a cosmetic one.
 
 As of 22 August 2026, in the order they gate a submission.
 
-| Gap                            | Store | Note                                                       |
-| ------------------------------ | ----- | ---------------------------------------------------------- |
-| Send the listing for review    | Play  | Real, and manual. Ten translations staged 30 Aug 2026      |
-| ~~Support URL~~                | Apple | **Done** 30 Aug 2026, `https://bite-tribe.web.app/support` |
-| 7-inch and 10-inch screenshots | Play  | Asterisked, both empty — does not block review             |
-| Light-theme captures           | Both  | The set is dark-theme only; the capture rule asks for both |
-| Ten listing translations       | Both  | **Drafted**, see the translations page; not yet entered    |
-| App previews                   | Apple | Optional, none captured                                    |
+| Gap                            | Store | Note                                                            |
+| ------------------------------ | ----- | --------------------------------------------------------------- |
+| Send the listing for review    | Play  | Real, and manual. Ten translations staged 30 Aug 2026           |
+| ~~Support URL~~                | Apple | **Done** 30 Aug 2026, `https://bite-tribe.web.app/support`      |
+| 7-inch and 10-inch screenshots | Play  | Asterisked, both empty — does not block review                  |
+| Light-theme captures           | Both  | The set is dark-theme only; the capture rule asks for both      |
+| Listing translations           | Both  | **Done.** Play 10 submitted, Apple 9 saved; no Amharic on Apple |
+| App previews                   | Apple | Optional, none captured                                         |
 
 Play's tablet slots carry a required asterisk but do **not** gate submission:
 with both empty, Publishing overview still reports `Your changes can now be sent

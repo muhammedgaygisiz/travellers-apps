@@ -542,6 +542,81 @@ Keywords:
 ምግብ,መብላት,ሜኑ,ጣዕም,አካባቢያዊ,ግምገማ,ማግኘት,ጉዞ,ምግቦች,ካፌ
 ```
 
+## Where They Were Entered
+
+Both stores on 30 August 2026.
+
+### Google Play - ten locales, submitted
+
+All ten went in as `pt-BR`, `es-ES`, `de-DE`, `it-IT`, `tr-TR`, `fr-FR`, `th`,
+`id`, `am`, `ar`, and were **submitted for review** the same day.
+
+Three things worth knowing before repeating this:
+
+- **Play validates every locale at once.** A save is refused with "Some
+  languages have errors" until all ten are complete, so it is one save at the
+  end rather than one per language.
+- **The variant lists are traps.** Searching `French` puts **French (Canada)**
+  first and French (France) second; a blind click on the first result gives
+  `fr-CA` European French. Spanish and Portuguese have no generic entry at all,
+  so `es-ES` and `pt-BR` were chosen deliberately - see the note below.
+- Play's short description cap is 80, so the 30-character subtitle fits both
+  stores unchanged.
+
+### App Store - nine locales, saved but not submitted
+
+**Amharic is not offered by the App Store.** Apple's localization list has no
+`am`, so Amharic speakers get the English product page no matter what. The app
+speaks eleven languages, Play carries ten, Apple can carry nine. This is a
+platform limit, not an omission to fix.
+
+Apple also splits the fields across two pages, which is easy to half-finish:
+
+| Field                                                | Page            |
+| ---------------------------------------------------- | --------------- |
+| Name, Subtitle                                       | App Information |
+| Promotional Text, Description, Keywords, Support URL | version page    |
+
+Two conveniences: a new localization is **pre-filled with the English text**, so
+an unfinished one looks plausible rather than empty, and **screenshots are
+inherited from the primary language**, so no per-locale captures are needed.
+
+The nine are saved. They reach review with the version itself through **Add for
+Review**, not through a separate submission the way Play works.
+
+### The es and pt variants
+
+Play and the App Store both refuse a generic Spanish or Portuguese. The app
+ships plain `es` and `pt`, so a regional choice had to be invented for the
+listings: **es-ES** and **pt-BR**, matching how the copy is written - the
+Portuguese follows `pt.json`, which is Brazilian.
+
+The cost is that Play may show English rather than falling back across regions,
+so a user in Mexico or Portugal could see the English page. Adding `es-419` and
+`pt-PT` with the same text would close that, at the price of Brazilian wording
+sitting in a Portugal listing. Revisit once the soft launch shows where users
+actually come from.
+
+## Verify With A Checksum, Not A Length
+
+Two of the ten reached the Play console corrupted, and **both passed a
+length check**, because every wrong character was still one codepoint:
+
+- Turkish `birikisini` for `birikişini`, then `birikışini` on the first
+  correction attempt - a dotless `ı` for a dotted `i`.
+- Amharic had five substitutions, including `ቀኛንቆችን` for `ቋንቋዎችን`, which is not
+  a word.
+
+Both came from hand-writing `\u` escapes. The fix is to generate the escapes
+mechanically from this page and then verify the field by reading it back and
+comparing **length plus the sum of codepoints** against the source. Every field
+in both stores was checked that way, and all 27 Apple fields and 30 Play fields
+match this page exactly.
+
+This is the reason to draft into the SSOT before touching a console. Without a
+committed source there is nothing to check against, and Amharic would have
+shipped as gibberish to the audience least able to report it.
+
 ## Review Status
 
 Not one of these has been read by a native speaker other than the author.

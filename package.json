@@ -21,6 +21,8 @@
     "increment-build-number": "node tools/increment-build-number.mjs",
     "sync-native-version": "node tools/sync-native-version.mjs",
     "release:android": "node tools/build-android-release.mjs",
+    "release:verify-bundle": "node tools/assert-release-bundle.mjs",
+    "release:provenance": "node tools/write-build-provenance.mjs",
     "analytics:report": "node tools/analytics/report.mjs",
     "analytics:digest": "node tools/analytics/digest.mjs",
     "analytics:provision": "node tools/analytics/provision-ga4.mjs",

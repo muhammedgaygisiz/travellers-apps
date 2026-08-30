@@ -8,15 +8,25 @@ The pipeline is the gate between a pull request and `develop`, and between `deve
 
 ## Workflows
 
-| Workflow                                 | Trigger                                    | Purpose                                                                            |
-| ---------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------- |
-| `.github/workflows/pipeline.yml`         | Push to `develop`, PR to `develop`, manual | The main gate: lint, stylelint, tests, Loki, E2E, and every deploy                 |
-| `.github/workflows/deploy-cv.yml`        | Manual                                     | Build and publish the `cv` app to its own Firebase project                         |
-| `.github/workflows/analytics-digest.yml` | Daily 06:00 UTC, manual                    | Post the launch-analytics digest to a tracking issue, see [[Analytics Operations]] |
+| Workflow                                 | Trigger                                    | Purpose                                                                                              |
+| ---------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `.github/workflows/pipeline.yml`         | Push to `develop`, PR to `develop`, manual | The main gate: lint, stylelint, tests, Loki, E2E, and every deploy                                   |
+| `.github/workflows/deploy-cv.yml`        | Manual                                     | Build and publish the `cv` app to its own Firebase project                                           |
+| `.github/workflows/analytics-digest.yml` | Daily 06:00 UTC, manual                    | Post the launch-analytics digest to a tracking issue, see [[Analytics Operations]]                   |
+| `.github/workflows/native-release.yml`   | Push of a `build-*` tag, manual            | Build the signed Android bundle and iOS archive, see [[Implementation - Release And Build Workflow]] |
 
-Only `pipeline.yml` runs automatically on code changes. Everything else is dispatched by hand or on a schedule.
+`pipeline.yml` is the only workflow that runs on a branch or pull request.
+`native-release.yml` also runs without being dispatched, but on a `build-*`
+tag rather than on a code change. The rest is dispatched by hand or on a
+schedule.
 
 Everything that ships from `develop` ships through `pipeline.yml`. A deploy that lives in its own manually dispatched workflow goes stale, because nothing reminds anyone to dispatch it: the Storybook deploy was a separate `workflow_dispatch` workflow and the published site drifted seven weeks behind `develop`. New deploy targets belong in `pipeline.yml` behind a `github.ref == 'refs/heads/develop'` guard.
+
+`native-release.yml` is the one exception, and it is an exception to the
+reasoning rather than to the rule. It does not ship from `develop`, it is
+fired by the `build-*` tag every release creates, and it needs a macOS runner
+no pull request should pay for. Nothing about it can go stale unnoticed,
+because the release that would notice is the thing that triggers it.
 
 Loki reference images are regenerated locally with `npm run loki:update` and committed in the pull request that changes the stories. There is no reference-update workflow, and one is not needed: [`tools/loki.mjs`](../../tools/loki.mjs) drives Chrome inside Docker, so a local update produces the same renderings that `npm run loki:test` compares against on a runner.
 
@@ -96,6 +106,78 @@ This is why the `deploy-bite-tribe` and `deploy-bite-tribe-business` jobs rebuil
 
 See [[Implementation - Release And Build Workflow]] for how the values reach the bundle and which of them are public by design, and [[Current State - Known Issues]] for the deliberately misspelled `NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID` secret name.
 
+## Repository Visibility And Actions Cost
+
+The repository is **public**, and that is what makes CI free. GitHub charges
+nothing for standard GitHub-hosted runners on a public repository, and
+`macos-latest` is a standard runner. Actions minutes are only billed once a
+repository is private.
+
+This is worth writing down because the intuition runs the other way: the macOS
+`10x` minute multiplier is the number everyone reaches for when the native jobs
+come up, and it does not apply here at all.
+
+### Measured, 30 days to 30 August 2026
+
+| Figure                                            | Value                    |
+| ------------------------------------------------- | ------------------------ |
+| `pipeline.yml` runs                               | 261                      |
+| Billable job-minutes per run, summed over 13 jobs | 20-27, call it 23        |
+| Linux minutes per month                           | ~6,000                   |
+| Analytics digest runs                             | 29, a minute or two each |
+| Cost                                              | **0**                    |
+
+Wall-clock per run is 10-25 minutes, which is not the billable figure: the jobs
+after `tests` fan out in parallel, so billing sums the jobs and the parallelism
+buys latency rather than money.
+
+### What going private would cost
+
+| Line                                                  | Estimate                                   |
+| ----------------------------------------------------- | ------------------------------------------ |
+| Included minutes                                      | 2,000/month Free, 3,000 Pro                |
+| Linux overage, ~3,000-4,000 min at `$0.008`           | `$24-32`/month                             |
+| iOS job, ~25 min per release, `10x`, at `$0.08`/min   | `$8`/month at four releases                |
+| Artifact storage, `.aab` + `.ipa` + dSYMs for 90 days | 500 MB-2 GB included, then `$0.008`/GB/day |
+| Total                                                 | **roughly `$40`/month**                    |
+
+The account plan could not be read when this was measured - `gh api user`
+returns `plan: null` without the right token scope - so the included-minutes row
+is the one figure to confirm before trusting the total.
+
+The shape matters more than the total: **the pipeline is the bill, not the
+native jobs.** The iOS archive is about a fifth of it. Anyone proposing to go
+private to control native build cost has the causation backwards, and anyone
+proposing to drop the native jobs to save money on a public repository is saving
+nothing.
+
+### Public Does Not Mean Exposed
+
+Nothing in `.github/workflows` uses `pull_request_target`, so a pull request from
+a fork never receives secrets. `native-release.yml` triggers only on a `build-*`
+tag push and on `workflow_dispatch`, both of which require write access, so the
+signing secrets are unreachable from a fork under any trigger.
+
+What a reader can see is configuration and identifiers, not credentials: the
+Android signing block, the Apple team id, the upload key's SHA-256 fingerprint -
+which Play publishes anyway under **App signing** - and the Firebase client
+configuration that [[Implementation - Release And Build Workflow]] records as
+public by design.
+
+The one thing a public repository genuinely exposes is `ssot/pages` itself: the
+release-candidate charter, [[Current State - Known Issues]], and the open
+findings, in detail. If visibility is ever revisited, that is the argument.
+It is a disclosure decision, not a cost or a security-of-signing one, and it
+costs about `$40` a month to act on.
+
+### Not The Answer
+
+A self-hosted macOS runner would avoid the multiplier, and it would put the
+store artifact back on one machine's toolchain and signing state - which is the
+thing [issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
+exists to remove. If the bill ever needs cutting, cut it in the pipeline first;
+the Nx-cache gaps under Current Limitations are the larger lever.
+
 ## Rules
 
 - Cache `.nx/cache` and `.nx/workspace-data` together. Either one alone is useless.
@@ -105,8 +187,11 @@ See [[Implementation - Release And Build Workflow]] for how the values reach the
 - Verify a caching change by reading the `Cache: <hits>/<total> hit` line that Nx prints at the end of each run. The first run after a key change is always 0%; the second run on the same branch is the real signal.
 - Pull requests read the cache scope of the default branch. A cache written by a pull request is visible only to that pull request, so a new caching behavior only proves itself once `develop` has run with it.
 - Keep the E2E jobs on separate runners. Both suites drive the same Firebase emulator ports and would fight over them in one job.
-- Add a new deploy to `pipeline.yml` behind `if: github.ref == 'refs/heads/develop'`. Do not give it a manually dispatched workflow of its own.
+- Add a new deploy to `pipeline.yml` behind `if: github.ref == 'refs/heads/develop'`. Do not give it a manually dispatched workflow of its own. A separate workflow needs a trigger that fires on its own, as `native-release.yml`'s tag does.
+- Do not use `.github/actions/setup` or `.github/actions/restore-cache` from a macOS or Windows job. The `node_modules` cache key is `node-modules-<package-lock hash>` with no runner OS in it, so a non-Linux job would restore Linux native binaries, and saving would overwrite the entry every other job depends on. Use `actions/setup-node` and `npm ci` directly, as the `ios` job does.
 - Keep local and CI Node.js versions aligned through `.nvmrc` as defined by [[Current State - Nx And Dependency Migration Roadmap]].
+- Price a change of repository visibility before making one. CI is free because the repository is public, and going private starts a bill dominated by `pipeline.yml` rather than by the native jobs. See Repository Visibility And Actions Cost above.
+- Do not add a self-hosted runner to escape a minute multiplier. It reintroduces the single-workstation build that issue #1181 removed.
 
 ## Code Anchors
 
@@ -114,6 +199,10 @@ See [[Implementation - Release And Build Workflow]] for how the values reach the
 .github/workflows/pipeline.yml
 .github/workflows/deploy-cv.yml
 .github/workflows/analytics-digest.yml
+.github/workflows/native-release.yml
+tools/assert-release-bundle.mjs
+tools/write-build-provenance.mjs
+apps/bite-tribe-ios/ios/App/ExportOptions.plist
 .github/actions/nx-cache/action.yml
 .github/actions/setup/action.yml
 .github/actions/restore-cache/action.yml
@@ -128,7 +217,8 @@ nx.json
 - `loki`, `e2e`, `business-e2e` and `deploy-bite-tribe-storybook` do not restore the Nx cache, so the Storybook build and the E2E app builds re-run on every pipeline run. On `develop` the Storybook is therefore built twice, once in `loki` and once in the deploy, at roughly 80 seconds each. Both Storybook builds are safe to put on the Nx cache; the E2E jobs build with `NX_APP_BITE_TRIBE_IS_DEV=true` and fall under the environment-variable rule above.
 - Only the two build jobs carry `install-if-missing`. Every other job restores `node_modules` with an exact key and no fallback, so a cache miss or an unreachable cache service fails them with `nx: not found` instead of installing.
 - There is no remote cache. Nx Cloud's free tier is exhausted too quickly for this workspace, and the self-hosted cache plugins (`@nx/gcs-cache` and siblings) are deprecated over CVE-2025-36852, an unpatchable cache-poisoning design flaw. The GitHub Actions cache is used instead, and its branch scoping provides the isolation those plugins lack.
-- `pipeline.yml` has no native job, so there is no CI-built Android or iOS artifact. See [[Current State - Release Candidate Test Charter]].
+- The native jobs in `native-release.yml` have never run. The Android and iOS signing secrets are not provisioned, so the workflow is written and reviewed but unexecuted, and the manual workstation release in [[Implementation - Store Release Steps]] is still the one that produces store artifacts. See [[Current State - Release Candidate Test Charter]].
+- `native-release.yml` builds on whatever Xcode `macos-latest` carries. An artifact is reproducible against a commit, not against a toolchain.
 
 ## Related Pages
 

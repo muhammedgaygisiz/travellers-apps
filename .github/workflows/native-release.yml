@@ -54,6 +54,11 @@ jobs:
   web-bundle:
     runs-on: ubuntu-latest
 
+    # `contents: write` for the release-asset upload below, and only on this
+    # job. The native jobs stay read-only.
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -108,6 +113,34 @@ jobs:
             dist/apps/bite-tribe
             dist/build-provenance.json
           retention-days: 30
+
+      # Workflow artifacts expire after 90 days and this file is the durable
+      # answer to which commit a store artifact came from, so on a tag run it is
+      # attached to the GitHub release, which does not expire. Issue #1441.
+      #
+      # The release helper publishes that release moments after pushing the tag
+      # that started this run, so it is usually already there; the retry covers
+      # the case where it is not. A failure here warns rather than fails: the
+      # artifacts are the job's product, and losing them over a missing release
+      # asset would be the wrong trade. It is last in the job for the same
+      # reason.
+      - name: Attach the provenance to the GitHub release
+        if: ${{ github.event_name == 'push' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -uo pipefail
+          for attempt in 1 2 3 4 5; do
+            if gh release view "${TAG}" > /dev/null 2>&1; then
+              gh release upload "${TAG}" dist/build-provenance.json --clobber
+              echo "Attached build-provenance.json to the ${TAG} release."
+              exit 0
+            fi
+            echo "No GitHub release for ${TAG} yet, retrying in 20s (${attempt}/5)."
+            sleep 20
+          done
+          echo "::warning::No GitHub release exists for ${TAG}, so the provenance was not attached. Attach it by hand with: gh release upload ${TAG} build-provenance.json"
 
   android:
     runs-on: ubuntu-latest

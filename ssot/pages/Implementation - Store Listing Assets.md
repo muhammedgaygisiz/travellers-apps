@@ -297,8 +297,16 @@ replaced on 22 August 2026 and no stale-palette asset remains on either store.
 - Capture against the current theme. A screenshot showing `#fec56b` as a header,
   button, or background colour is stale by definition.
 - Capture from seeded, realistic data. An empty account is not a product page.
-- Cover both light and dark, since the app ships both and the dark background
-  (`#1a1c22`) is a deliberate surface.
+- **Shoot one theme, and shoot dark.** This rule previously read "cover both
+  light and dark, since the app ships both", which is not achievable and kept
+  regenerating a to-do that could never be done: a store listing shows **one**
+  set of screenshots to everyone, so light frames cannot be served to
+  light-theme users. The app follows the system theme - `html.dark` plus
+  `@media (prefers-color-scheme: dark)` in `variables.scss` - so a light-mode
+  user's first launch does not match the listing, and that is accepted. Dark
+  wins because the dish photography is the product and it reads far better
+  against `#1a1c22` than against a light ground. If the asset library ever holds
+  light frames, they are reference material, not listing candidates.
 - Keep the sources in the SSOT graph next to this page, so a re-shoot starts from
   the previous framing rather than from scratch. They are in
   `ssot/assets/store-listing/phone-6.9/`.
@@ -335,9 +343,16 @@ land, and each was then corrected only as far as the first three required. They
 do not need to match; the constraint is that the bite detail is above the fold
 on both.
 
-The frames are dark-theme throughout. The capture rule asks for both light and
-dark; this set does not satisfy that half yet, and a light-theme pass is
-outstanding.
+The frames are dark-theme throughout, **by decision on 30 August 2026**, and no
+light-theme pass is outstanding. See the capture rule above for why one set can
+only be one theme.
+
+**The framing is intentional, not a defect.** In frame 1 the first card is
+clipped by the filter row, and the scroll-to-top control and `Create Bite`
+button overlap the second card's restaurant name. That was raised as something
+to fix in a re-shoot and rejected by the maintainer: it reads as a live app mid-
+scroll rather than a staged render, which is the impression the set is meant to
+give. **Do not "fix" it.** A future re-shoot should reproduce it.
 
 Prod content means real people appear. Frame 3 shows another user's Bite, used
 with that creator's consent; frames 4 and 5 are the maintainer's own account.
@@ -735,7 +750,7 @@ As of 22 August 2026, in the order they gate a submission.
 | Send the listing for review    | Play  | Real, and manual. Ten translations staged 30 Aug 2026           |
 | ~~Support URL~~                | Apple | **Done** 30 Aug 2026, `https://bite-tribe.web.app/support`      |
 | 7-inch and 10-inch screenshots | Play  | Asterisked, both empty — does not block review                  |
-| Light-theme captures           | Both  | The set is dark-theme only; the capture rule asks for both      |
+| ~~Light-theme captures~~       | Both  | **Not a task.** One listing, one theme; dark by decision        |
 | Listing translations           | Both  | **Done.** Play 10 submitted, Apple 9 saved; no Amharic on Apple |
 | App previews                   | Apple | Optional, none captured                                         |
 

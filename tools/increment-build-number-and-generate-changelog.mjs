@@ -76,6 +76,40 @@ console.log(
 );
 
 publishGitHubRelease(tagName, buildNumber);
+openReleasePullRequest(version, buildNumber);
+
+/**
+ * Opens the release pull request back to `develop`.
+ *
+ * `--fill` takes the title from the release commit, which is exactly what
+ * [[Release Workflow]] asks for by hand: accept the generated
+ * `chore: prepare build <version>-<x> release`.
+ *
+ * Like the GitHub release above, a failure here is reported and does not undo
+ * the commit, tag and push that already succeeded. A pull request is the
+ * cheapest thing in this script to redo, so it is last.
+ */
+function openReleasePullRequest(version, buildNumber) {
+  try {
+    run('gh', ['pr', 'create', '--base', 'develop', '--fill']);
+  } catch {
+    console.error(
+      [
+        '',
+        'The release is pushed and the GitHub release is published.',
+        'Only the pull request could not be opened. Retry with:',
+        '',
+        '  gh pr create --base develop --fill',
+        '',
+      ].join('\n'),
+    );
+    process.exit(1);
+  }
+
+  console.log(
+    `Release pull request opened for build ${version}-${buildNumber}.`,
+  );
+}
 
 function publishGitHubRelease(tagName, buildNumber) {
   const notes = buildNotes(buildNumber, { includeChores: true });

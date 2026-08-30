@@ -85,7 +85,8 @@ native projects, increments the shared build number to `x+1`, commits as
 `chore: prepare build <version>-<x> release`, creates the annotated tag
 `build-<version>-<x>` **pointing at the commit the release branch started from**,
 verifies that the tagged tree really declares build `x`, pushes the branch and
-the tag, and publishes the GitHub release `Build <x>`.
+the tag, publishes the GitHub release `Build <x>`, and opens the release pull
+request back to `develop`.
 
 - If this release changes the marketing version, bump it in `package.json`
   before running the helper. The helper writes it into both native projects and
@@ -94,9 +95,11 @@ the tag, and publishes the GitHub release `Build <x>`.
   behind, but it names the pre-release commit. If the two ever disagree the
   helper deletes the tag and refuses, rather than pushing a tag that lies about
   what it contains. See issue #1441.
-- If the GitHub release step fails - `gh` not authenticated, for example - the
-  helper says so explicitly and prints the exact retry command. The commit, tag,
-  and push have already succeeded at that point and must not be repeated.
+- If the GitHub release or the pull request fails - `gh` not authenticated, for
+  example - the helper says so explicitly and prints the exact retry command for
+  that step alone. The commit, tag, and push have already succeeded at that
+  point and must not be repeated. Both are ordered after the push for that
+  reason, with the pull request last because it is the cheapest to redo.
 
 3. Wait for the native build, which also uploads.
 
@@ -166,10 +169,9 @@ npm run release:notes
 - Both are detailed in [[Implementation - Store Release Steps]].
 
 6. Merge the release branch.
-   - Open a pull request back to `develop` with `gh pr create`, accepting the
-     generated `chore: prepare build <version>-<x> release` title.
-   - Confirm the PR contains only the changelog section and the build-number
-     bump.
+   - The helper already opened the pull request in step 2, titled from the
+     release commit.
+   - Confirm it contains only the changelog section and the build-number bump.
    - Squash and merge, then delete the branch.
    - Resume normal development on `develop`, where web and development now use
      build `x+1` while native stores still serve build `x`.

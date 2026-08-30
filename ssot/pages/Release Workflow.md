@@ -29,9 +29,18 @@ the version it writes is the one already there. See
 
 Development happens against the next build number.
 
-After native apps are built, released, and published for build `x`, generate the
-release notes for that completed build and bump the shared build number to
-`x+1`. Merge that bump back to `develop` before normal development resumes.
+The release generates the changelog for build `x` and bumps the shared build
+number to `x+1` in the same step, **before** the artifacts are built, because
+that step is also what creates the tag the artifacts are built from. Merge the
+bump back to `develop` before normal development resumes.
+
+This inverts the rule the release used to follow, which was to bump only after
+publication. That rule protected a real property - the build number should
+identify what is in the stores - and the tag now protects it better: it is
+immutable, it points at a tree declaring build `x`, and the helper refuses to
+push it otherwise. What actually changes is that `develop` reaches `x+1` a few
+hours earlier than it used to, and it was going to spend the rest of the week
+there anyway. Decided under issue #1441.
 
 During the following development week:
 
@@ -52,146 +61,104 @@ belong to.
 
 ## Workflow
 
-1. Confirm the release build.
-   - Confirm the build number currently on `develop`; that is the build `x` being
-     released.
-   - Confirm local state with `git status --short --branch`.
-   - Create `bump-version-<x>` from `origin/develop`.
-   - Do not increment the build number yet.
+The tag drives the release. `npm run increment-build-number-and-generate-changelog`
+creates `build-<version>-<x>` pointing at the tree that carries build `x`, and
+pushing it starts `.github/workflows/native-release.yml`, which builds and signs
+both artifacts from exactly that commit. There is no separate dispatch and no
+local native build.
 
-2. Build the web application for the release build.
-
-**CI does steps 2, 3 and 4 in one dispatch.** From build 96 onwards the release
-artifacts are produced by `.github/workflows/native-release.yml`, not on a
-workstation:
+1. Cut the release.
 
 ```bash
-gh workflow run native-release.yml --ref develop -f platform=both -f publish=false
+gh workflow run release.yml -f publish=true
 ```
 
-That runs the production build, the bundle check, both Capacitor syncs, the
-Gradle bundle with its signature verification, and the Xcode archive and
-export - and names the artifacts after the commit. Dispatch it on the commit
-being released, which is `develop` at the point the release branch was cut, not
-on the release branch: the branch is about to carry a changelog and a bump that
-are not in the build. Budget about 25 minutes.
+Or the **Run workflow** button on `BiteTribe Release` in the Actions tab.
 
-The rest of steps 2 and 3 below are the **fallback** for a release that cannot
-use CI, and remain accurate. Read step 4 either way.
+It releases whatever is on `develop`, regardless of which ref the dispatch
+was started from, because the release is defined by the branch rather than by
+whoever pressed the button. It creates `bump-version-<x>`, runs the release
+helper, and calls the native build with the tag the helper made.
+
+The same thing locally, when a workstation is preferred or the workflow is
+unavailable:
 
 ```bash
-NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true npx nx build bite-tribe --configuration=production
+git checkout -b bump-version-<x>
+npm run increment-build-number-and-generate-changelog
 ```
 
-- Fix release-blocking build errors before continuing.
-- The `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` prefix is required. The variable
-  defaults to off and the local `.env` sets it to `false`, so a build without
-  the prefix silently wraps native artifacts with the enforced-mode gate
-  disabled. Decided under
-  [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177).
-- Confirm the bundle is clean before it is wrapped:
+The helper generates the changelog section for build `x`, writes the
+`package.json` marketing version into both native projects, increments the
+shared build number to `x+1`, commits as
+`chore: prepare build <version>-<x> release`, creates the annotated tag
+`build-<version>-<x>` **pointing at the commit the release branch started
+from**, verifies that the tagged tree really declares build `x`, pushes the
+branch and the tag, publishes the GitHub release `Build <x>`, and opens the
+release pull request back to `develop`.
+
+The two paths differ in one place. Run locally, the tag push starts the
+native build. Run as a workflow, `release.yml` **calls** the build instead,
+because a tag pushed by a workflow using `GITHUB_TOKEN` does not trigger
+another workflow - GitHub blocks that to prevent recursion, and relying on it
+would build nothing and do it silently.
+
+- If this release changes the marketing version, bump it in `package.json`
+  before cutting. The helper writes it into both native projects and fails if
+  `package.json`, Android, and iOS do not agree afterwards.
+- The tag is created after the commit, so a failure earlier leaves no tag
+  behind, but it names the pre-release commit. If the two ever disagree the
+  helper deletes the tag and refuses, rather than pushing a tag that lies about
+  what it contains. See issue #1441.
+- If the GitHub release or the pull request fails - `gh` not authenticated, for
+  example - the helper says so explicitly and prints the exact retry command for
+  that step alone. The commit, tag, and push have already succeeded at that
+  point and must not be repeated. Both are ordered after the push for that
+  reason, with the pull request last because it is the cheapest to redo.
+
+2. Wait for the native build, which also uploads.
+
+   Pushing the tag started it. Watch it with `gh run watch`, or:
 
 ```bash
-npm run release:verify-bundle
+gh run list --workflow=native-release.yml --limit 1
 ```
 
-It fails when either dev-only key is inlined, and when the App Check gate is
-not. Prefer it over grepping by hand. The check that was documented here
-looked for `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED:"true"`, and the build of
-commit `297f8be4` emits that value as the template literal `` `true` ``, so
-the "expect a match" half found nothing on a bundle that was entirely
-correct. The script accepts every quote form.
+Budget about 25 minutes; the iOS archive dominates. The run builds the
+production web bundle, asserts it carries no dev-only key and does carry the
+App Check gate, syncs both wrappers, produces a signed bundle whose signature
+it verifies against the Play upload key, archives and exports iOS, attaches
+`build-provenance.json` to the GitHub release, and **uploads both artifacts to
+the stores**: the `.ipa` to TestFlight and the `.aab` to Play Open testing as a
+draft.
 
-What the colon is for still holds, and the script relies on it: the bare key
-names appear in every build as runtime lookup constants, so only the property
-form proves a **value** was inlined. This check is not optional; see
-[[Current State - Release Candidate Test Charter]].
+Neither upload reaches a tester. A TestFlight build is invisible until a group
+is assigned to it, and a Play draft is invisible until it is submitted. Both of
+those are steps 4 and 5 below, and both are deliberate.
 
-3. Sync native apps.
+Publishing is automatic here because a `build-*` tag is already a deliberate
+act - only the release helper makes one, and it refuses a dirty tree, an
+existing tag, or a tree that does not declare the build the tag names. If a
+store's secret is missing the upload is skipped with a warning rather than
+failing the run, so the artifacts survive to be uploaded by hand.
 
-```bash
-npm run cap:sync:ios
-npx nx run bite-tribe-android:sync
-```
+### Inspecting the artifacts
 
-- The iOS sync goes through `npm run cap:sync:ios`, not through
-  `nx run bite-tribe-ios:sync` directly. The script exists only to pin `LANG`
-  and `LC_ALL` to `en_US.UTF-8`, without which CocoaPods aborts `pod install`
-  with `Unicode Normalization not appropriate for ASCII-8BIT`. An interactive
-  terminal already exports a UTF-8 locale, so calling the target directly works
-  by hand and fails in agent shells and CI. See
-  [[Implementation - Store Release Steps]] and [[Architecture - Capacitor]].
-- The wrappers bundle `dist/apps/bite-tribe`, so an unsynced wrapper ships the
-  previous build's web assets silently.
-- Treat generated native changes as sync outputs and review the diffs.
-- Commit or discard any sync output before step 6. The release helper refuses
-  to run against a dirty working tree.
-
-4. Collect the artifacts and upload them.
-
-   From the CI run, download both artifacts into one directory:
+Not required - the run asserts the signature, the build number and the bundle
+contents before uploading anything, and nothing is downloaded that could be
+corrupted in transit. Worth doing when a release-candidate record needs the
+detail:
 
 ```bash
 gh run download <run id> -n bitetribe-<version>-<build>-<sha>-android -D ~/Desktop/release-<build>
 gh run download <run id> -n bitetribe-<version>-<build>-<sha>-ios -D ~/Desktop/release-<build>
 ```
 
-The second download reports an error extracting `build-provenance.json`
-because the first already wrote an identical copy. Everything else extracts;
-the message is noise, not a failed download.
+The second download reports an error extracting `build-provenance.json` because
+the first already wrote an identical copy. Everything else extracts; the message
+is noise, not a failed download.
 
-Verify before uploading, because this is the last cheap place to catch a
-wrong artifact:
-
-- `keytool -printcert -jarfile <aab>` and compare the SHA-256 with the Play
-  upload key recorded in [[Implementation - Store Release Steps]]. The CI job
-  already checked it; this also proves the download is intact.
-- Read `CFBundleShortVersionString`, `CFBundleVersion` and
-  `ITSAppUsesNonExemptEncryption` out of `Payload/App.app/Info.plist` inside
-  the `.ipa`. The last one is what keeps the build row off **Missing
-  Compliance**.
-- `build-provenance.json` names the commit the artifacts came from. Record
-  it; the stores do not.
-
-Then upload. **Transporter** takes the `.ipa` - Xcode's Distribute wizard is
-not involved, because the archive was never on this machine - and the Play
-Console takes the `.aab`. The console procedure is
-[[Implementation - Store Release Steps]].
-
-The fallback path, when CI is unavailable: archive and upload iOS from
-Xcode, and produce the bundle with `npm run release:android`, which verifies
-the signature and refuses to finish on an unsigned or wrong-key bundle.
-Confirm the archived version and build number before distributing.
-
-5. Upload to the test tracks.
-   - iOS to TestFlight through App Store Connect.
-   - Android to Google Play Open Testing.
-   - Confirm both uploads are visible in their store dashboards.
-
-6. Generate release notes, bump, tag, and push.
-   - Run only after the native artifacts for build `x` are uploaded.
-
-```bash
-npm run increment-build-number-and-generate-changelog
-```
-
-- If this release changes the marketing version, bump it in `package.json`
-  before running the helper. The helper writes it into both native projects and
-  fails if `package.json`, Android, and iOS do not agree afterwards.
-
-The helper performs the whole release in one step: it generates the changelog
-section for build `x`, writes the `package.json` marketing version into both
-native projects, increments the shared build number to `x+1`, commits as
-`chore: prepare build <version>-<x> release`, creates the annotated tag
-`build-<version>-<x>`, pushes both the branch and the tag, and publishes the
-GitHub release `Build <x>` from that tag. No separate `git push` is needed, and
-the GitHub release is no longer created by hand.
-
-If the GitHub release step fails — `gh` not authenticated, for example — the
-helper says so explicitly and prints the exact retry command. The commit, tag,
-and push have already succeeded at that point and must not be repeated.
-
-7. Write the store build notes.
+3. Write the store build notes.
 
 ```bash
 npm run release:notes
@@ -199,13 +166,14 @@ npm run release:notes
 
 - That prints the changelog range for store notes: everything from the first
   heading up to, but not including, `### Chores`.
-- Summarize it into user-facing notes of at most 230 characters.
-- The same text is used for App Store Connect _What to Test_ and the Play
-  Console release notes.
+- Summarize it into user-facing notes of at most 230 characters, and keep them
+  free of platform-specific phrasing: the same English text serves both stores.
+- Play needs one block **per listing locale**, not just `en-US`. An unedited
+  block is published verbatim. See [[Implementation - Store Release Steps]].
 - `npm run release:notes -- --full` prints the wider range that the helper
   already used for the GitHub release body.
 
-8. Complete the store submissions.
+4. Complete the store submissions.
 
 - Add the External Testers group with the build notes in App Store Connect and
   submit for beta review. The build must not show **Missing Compliance**; if
@@ -215,27 +183,60 @@ npm run release:notes
   for review.
 - Both are detailed in [[Implementation - Store Release Steps]].
 
-9. Merge the release branch.
-   - Open a pull request back to `develop` with `gh pr create`, accepting the
-     generated `chore: prepare build <version>-<x> release` title.
-   - Confirm the PR contains only the changelog section and the build-number
-     bump.
+5. Merge the release branch.
+   - The helper already opened the pull request in step 1, titled from the
+     release commit.
+   - Confirm it contains only the changelog section and the build-number bump.
    - Squash and merge, then delete the branch.
    - Resume normal development on `develop`, where web and development now use
      build `x+1` while native stores still serve build `x`.
 
-10. Confirm the GitHub release.
+## Building Without CI
 
-- Step 6 already published `Build <x>` from the tag, with the full changelog
-  range as its body. Nothing to create by hand.
-- Only act here if step 6 reported that the release could not be created, in
-  which case run the retry command it printed.
+The fallback, for a release that cannot use the workflow. It produces the same
+artifacts by hand and is the procedure every release used before build 96.
+
+```bash
+NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true npx nx build bite-tribe --configuration=production --skip-nx-cache
+npm run release:verify-bundle
+npm run cap:sync:ios
+npx nx run bite-tribe-android:sync
+npm run release:android
+```
+
+- `--skip-nx-cache` is not belt-and-braces. `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED`
+  is not part of the build target's cache key, so the command can return a
+  cached bundle carrying the gate disabled. See
+  [#1428](https://github.com/muhammedgaygisiz/travellers-apps/issues/1428).
+- `npm run release:verify-bundle` fails when either dev-only key is inlined and
+  when the App Check gate is not. Prefer it over grepping by hand: the quoting
+  the minifier chooses varies, and the double-quoted grep this page used to
+  prescribe misses a correct bundle.
+- The iOS sync goes through `npm run cap:sync:ios`, not
+  `nx run bite-tribe-ios:sync`. The script pins `LANG` and `LC_ALL` to
+  `en_US.UTF-8`, without which CocoaPods aborts `pod install` with
+  `Unicode Normalization not appropriate for ASCII-8BIT`. An interactive
+  terminal already exports a UTF-8 locale, so calling the target directly works
+  by hand and fails in agent shells and CI. See [[Architecture - Capacitor]].
+- The wrappers bundle `dist/apps/bite-tribe`, so an unsynced wrapper ships the
+  previous build's web assets silently.
+- Archive and upload iOS from Xcode. `npm run release:android` verifies the
+  bundle's signature and refuses to finish on an unsigned or wrong-key bundle.
+- Commit or discard any sync output before the helper runs. It refuses a dirty
+  working tree.
+
+A hand-built release loses what the workflow provides: the artifacts correspond
+to a machine rather than a commit, and nothing writes `build-provenance.json`.
+Record the source commit by hand if this path is used.
 
 ## Release Output
 
 Each release should produce:
 
-- native apps built and uploaded with the current release build number
+- native apps built in CI from the tagged commit and uploaded to both stores
+  with the current release build number
+- `build-provenance.json` attached to the GitHub release, naming the source
+  commit
 - generated changelog section for the released build
 - store build notes of at most 230 characters, used for both TestFlight and Play
   Console
@@ -249,10 +250,15 @@ Each release should produce:
 
 ## Checks
 
-- Production web build succeeds and the bundle passes the debug-token check.
-- Both Capacitor syncs complete and their diffs are reviewed.
-- iOS archive and Android signed bundle both succeed.
-- Native uploads complete before the release helper runs.
+- The native release run is green: the bundle check, the signature verification
+  and the archive's build-number assertion all pass.
+- The tag points at a tree declaring the build it is named after. The helper
+  asserts this and refuses to push otherwise, so a release that got this far has
+  it.
+- Both uploads appear in their store dashboards: a TestFlight build finished
+  processing, and a Play draft on Open testing. A skipped upload warns in the
+  run rather than failing it, so a green run is not on its own proof that both
+  landed.
 - Release tag uses the `package.json` version and the build number captured
   before the increment.
 - `package.json`, Android `versionName`, and every iOS `MARKETING_VERSION` name
@@ -267,26 +273,15 @@ Each release should produce:
 These are real deviations, recorded so the page does not assert something the
 release does not do.
 
-- **The tag does not point at the released source.** The helper tags the bump
-  commit, which already carries build `x+1`. Record the source commit for each
-  uploaded artifact separately; the stores do not expose it, and
-  [[Current State - Release Candidate Test Charter]] needs it.
-
-  This is also what stands between the CI native jobs and the released
-  artifacts. `native-release.yml` fires on the `build-*` tag, but under the
-  order below that tag is created in step 6, after step 4 has already uploaded,
-  and on a tree carrying `x+1`. A tag-triggered run therefore builds next
-  week's build, correctly and traceably, but not the one that shipped. Making CI
-  the source of the released artifact means dispatching the workflow on the
-  release branch during step 4, while it still carries build `x`, and leaving
-  the tag as the record it already is. That decision is open; nothing is broken
-  by leaving it open, because the jobs name their artifacts from the tree rather
-  than from the tag.
-
 - **The release PR is merged without waiting for CI.** Bump-only PRs are merged
   with the branch-protection bypass so the next development week is not blocked
-  behind a full pipeline run. The released artifacts were built locally and are
+  behind a full pipeline run. The artifacts were built from the tag and are
   already uploaded by that point, so the pipeline result would not gate them.
+- **The bump commit is not what was built.** The tag names the released tree, so
+  provenance is intact, but the commit that lands on `develop` carries the
+  changelog and the next build number and was never compiled. That is by design
+  and is worth stating, because it is the thing the old tagging behaviour got
+  backwards.
 - **Build notes come from the changelog, not from closed P0 issue titles.** The
   changelog is generated by tooling and the issue list is not, so the changelog
   is the practical source.
@@ -297,11 +292,12 @@ release does not do.
 Intended, but not part of the current release:
 
 - Production source maps generated and retained for issue monitoring.
-- Native build artifacts and source maps attached to the tag or GitHub release.
-- Signed, commit-traceable native artifacts produced in CI. The jobs exist in
-  `.github/workflows/native-release.yml`, but no run has happened: the signing
-  secrets are not provisioned, so step 4 is still a workstation
-  ([issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)).
+- The artifacts themselves attached to the GitHub release. Only
+  `build-provenance.json` is, which is the part that has to outlive the 90-day
+  artifact retention; the `.aab` and `.ipa` stay workflow artifacts.
+- Nothing here is unpractised any more except the two items above. Publishing
+  from CI is wired and automatic on a tag; it becomes practised at the first
+  release that uses it.
 
 ## Related Pages
 

@@ -13,7 +13,8 @@ The pipeline is the gate between a pull request and `develop`, and between `deve
 | `.github/workflows/pipeline.yml`         | Push to `develop`, PR to `develop`, manual | The main gate: lint, stylelint, tests, Loki, E2E, and every deploy                                   |
 | `.github/workflows/deploy-cv.yml`        | Manual                                     | Build and publish the `cv` app to its own Firebase project                                           |
 | `.github/workflows/analytics-digest.yml` | Daily 06:00 UTC, manual                    | Post the launch-analytics digest to a tracking issue, see [[Analytics Operations]]                   |
-| `.github/workflows/native-release.yml`   | Push of a `build-*` tag, manual            | Build the signed Android bundle and iOS archive, see [[Implementation - Release And Build Workflow]] |
+| `.github/workflows/native-release.yml`   | Push of a `build-*` tag, manual, called    | Build the signed Android bundle and iOS archive, see [[Implementation - Release And Build Workflow]] |
+| `.github/workflows/release.yml`          | Manual                                     | Cut a release: branch, changelog, tag, native build, pull request, see [[Release Workflow]]          |
 
 `pipeline.yml` is the only workflow that runs on a branch or pull request.
 `native-release.yml` also runs without being dispatched, but on a `build-*`

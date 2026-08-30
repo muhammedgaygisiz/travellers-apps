@@ -22,6 +22,13 @@ const releaseFiles = [
 
 ensureCleanWorkingTree();
 
+// Captured before anything is written. This is the tree the release artifacts
+// are built from, and the tag has to point here rather than at the bump commit
+// created below - see issue #1441. Tagging the bump commit made the tag name a
+// build it did not contain: `build-1.0.1-96` pointed at a tree carrying 97, so
+// a tag-triggered CI run produced 97 artifacts under a tag named 96.
+const releaseCommit = git(['rev-parse', 'HEAD']).stdout;
+
 const buildNumber = readBuildNumber(process.cwd());
 // `package.json` is the single source of truth for the marketing version
 // (issue #1303). The native projects are written from it below, so reading them
@@ -48,13 +55,61 @@ run('git', [
   '-m',
   `chore: prepare build ${version}-${buildNumber} release`,
 ]);
-run('git', ['tag', '-a', tagName, '-m', `Build ${version} (${buildNumber})`]);
+// The tag is still created after the commit, so a failure above leaves no tag
+// behind, but it names the commit captured before the release touched anything.
+run('git', [
+  'tag',
+  '-a',
+  tagName,
+  releaseCommit,
+  '-m',
+  `Build ${version} (${buildNumber})`,
+]);
+
+ensureTagCarriesTheReleasedBuild(tagName, buildNumber);
+
 run('git', ['push', 'origin', 'HEAD']);
 run('git', ['push', 'origin', tagName]);
 
-console.log(`Release changes committed, tagged, and pushed as ${tagName}.`);
+console.log(
+  `Release changes committed and pushed. ${tagName} points at ${releaseCommit.slice(0, 7)}, which carries build ${buildNumber}.`,
+);
 
 publishGitHubRelease(tagName, buildNumber);
+openReleasePullRequest(version, buildNumber);
+
+/**
+ * Opens the release pull request back to `develop`.
+ *
+ * `--fill` takes the title from the release commit, which is exactly what
+ * [[Release Workflow]] asks for by hand: accept the generated
+ * `chore: prepare build <version>-<x> release`.
+ *
+ * Like the GitHub release above, a failure here is reported and does not undo
+ * the commit, tag and push that already succeeded. A pull request is the
+ * cheapest thing in this script to redo, so it is last.
+ */
+function openReleasePullRequest(version, buildNumber) {
+  try {
+    run('gh', ['pr', 'create', '--base', 'develop', '--fill']);
+  } catch {
+    console.error(
+      [
+        '',
+        'The release is pushed and the GitHub release is published.',
+        'Only the pull request could not be opened. Retry with:',
+        '',
+        '  gh pr create --base develop --fill',
+        '',
+      ].join('\n'),
+    );
+    process.exit(1);
+  }
+
+  console.log(
+    `Release pull request opened for build ${version}-${buildNumber}.`,
+  );
+}
 
 function publishGitHubRelease(tagName, buildNumber) {
   const notes = buildNotes(buildNumber, { includeChores: true });
@@ -97,6 +152,32 @@ function publishGitHubRelease(tagName, buildNumber) {
   console.log(
     `GitHub release "Build ${buildNumber}"${draft ? ' (draft)' : ''} published.`,
   );
+}
+
+/**
+ * Asserts the tag names a tree that declares the build it is named after.
+ *
+ * This is the invariant issue #1441 exists to establish, and it is cheap enough
+ * to check every release rather than trust. `readBuildNumber` takes its own
+ * file reader, so the same parsing that reads the working tree reads the tagged
+ * one, and a future change to either native file cannot make the two disagree.
+ */
+function ensureTagCarriesTheReleasedBuild(tagName, buildNumber) {
+  const taggedBuildNumber = readBuildNumber(
+    '',
+    (path) => git(['show', `${tagName}:${path}`]).stdout,
+  );
+
+  if (taggedBuildNumber !== buildNumber) {
+    run('git', ['tag', '-d', tagName]);
+
+    throw new Error(
+      [
+        `${tagName} points at a tree declaring build ${taggedBuildNumber},`,
+        `not ${buildNumber}. The tag has been deleted; nothing was pushed.`,
+      ].join(' '),
+    );
+  }
 }
 
 function ensureCleanWorkingTree() {

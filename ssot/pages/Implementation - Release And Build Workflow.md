@@ -84,14 +84,22 @@ commit at all. See
 
 ### Triggers
 
-| Trigger                 | Behavior                                                           |
-| ----------------------- | ------------------------------------------------------------------ |
-| Push of a `build-*` tag | Builds both platforms and retains the artifacts. Does not publish. |
-| `workflow_dispatch`     | Same, with a `platform` choice and an opt-in `publish`             |
+| Trigger                 | Behavior                                                                                                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Push of a `build-*` tag | **The release build.** Builds both platforms, retains the artifacts, attaches the provenance to the GitHub release, and uploads to TestFlight and Play Open testing. |
+| `workflow_dispatch`     | Same minus the release attachment, with a `platform` choice; uploading is opt-in through `publish`                                                                   |
 
-Publishing is opt-in even on a tag. A build number cannot be reused once a
-store has seen it, so an accidental upload is not undoable, and the default run
-therefore stops at a retained artifact.
+Publishing is automatic on a tag and opt-in on a dispatch. A `build-*` tag is
+only ever created by the release helper, which refuses a dirty tree, refuses an
+existing tag, and asserts that the tagged tree declares the build the tag names,
+so the tag is already the deliberate act - requiring a second one bought
+nothing. Neither upload reaches a tester on its own: a TestFlight build is
+invisible until a group is assigned, and a Play release is created as a draft.
+
+A missing store secret skips that upload with a warning instead of failing the
+run. The artifacts are the job's product and are already retained by that point,
+and throwing them away over an upload nobody configured would be the wrong
+trade.
 
 This is the one workflow that is deliberately **not** in `pipeline.yml`. The
 rule that keeps deploys there exists because a hand-dispatched workflow goes
@@ -172,21 +180,30 @@ The iOS dSYMs are retained for the same reason. A crash reported against a CI
 artifact can then be symbolicated from CI output rather than from whichever
 workstation happened to build it.
 
-### Tag And Tree Can Disagree, And The Tree Wins
+### The Tag Names What It Contains
 
-The release helper tags the bump commit, so a `build-<version>-<x>` tag names
-build `x` on a tree that already carries `x+1`. A tag-triggered run therefore
-builds `x+1`, not the `x` the tag is named after.
+`build-<version>-<x>` points at a tree that declares build `x`, so a
+tag-triggered run builds the release rather than something adjacent to it, and
+the artifacts come out named to match the tag.
 
-The jobs read the version and build number from the tree, name the artifacts
-from the tree, and emit a warning when the tag disagrees. They do not fail:
-under the current release ordering the tag is created _after_ the artifacts are
-uploaded, so a disagreement is the expected state, not a defect.
+That is a fix, not a given. The release helper used to tag the bump commit,
+which already carried `x+1`, so the tag named one build and pointed at another.
+The consequences were not theoretical: on the build 96 release the tag run
+produced `bitetribe-1.0.1-97-269cb26` artifacts attached to a tag named 96,
+which is a foot-gun for anyone fetching "the artifacts for the tag", and it
+burned a macOS runner every release on a build nobody wanted. Fixed under issue
+#1441 by capturing the commit before the release writes anything and tagging
+that.
 
-Adopting CI artifacts as the released ones means inverting that order —
-dispatch the workflow on the release branch while it still carries build `x`,
-then run the release helper. [[Release Workflow]] records that as the open
-decision; nothing in this workflow depends on it being made.
+The helper asserts the invariant rather than trusting it. After creating the
+tag it reads the build number out of the tagged tree through the same
+`readBuildNumber` parser the working tree uses, and if the two disagree it
+deletes the tag and refuses to push. Against the old `build-1.0.1-96` tag that
+check reports 97, which is the bug it exists to prevent.
+
+`build-provenance.json` is attached to the GitHub release on tag runs, because
+workflow artifacts expire after 90 days and the release does not. A dispatch run
+skips that step: it has no tag, and therefore no release to attach to.
 
 ### Secrets
 
@@ -391,9 +408,10 @@ workflow is not on the pull-request path.
 
 ### Still Not Verified
 
-- **Neither publish step has ever run.** Both are opt-in and off by default,
-  and `PLAY_SERVICE_ACCOUNT_JSON` is still deliberately unset. The TestFlight
-  and Play Open testing uploads are therefore written but unexecuted.
+- **Neither publish step has ever run.** They are wired and automatic on a tag,
+  but no release has used them. The iOS upload has its secrets;
+  `PLAY_SERVICE_ACCOUNT_JSON` is still unset, so until it is provisioned the
+  Android upload skips with a warning and the bundle is uploaded by hand.
 - **No artifact has been installed on a device.** The jobs prove the artifacts
   are produced, signed and named; they do not prove either one runs.
   [issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
@@ -442,7 +460,7 @@ Rules:
 
 - Use the existing build-number scripts instead of editing generated release state manually.
 - Generate changelog and release notes after the current native build is published, but before incrementing the shared build number for the next development week.
-- Run the build-number increment only after the current build has been built, released, and published to native stores.
+- Run the build-number increment as part of the release helper, which also creates the tag the artifacts are built from. It therefore precedes the build rather than following publication, which reverses the older rule deliberately; see [[Release Workflow]].
 - Capture the `package.json` version and the native build number before incrementing when creating release tags. The combined helper tags the release commit as `build-<version>-<build-number>`, for example `build-1.0.1-81`.
 - Use the changelog scripts for SSOT changelog pages.
 - Derive the short TestFlight and Google Play build notes from the generated changelog, using the `### Features` to `### Chores` range and summarizing it to at most 230 characters. The changelog is produced by tooling, so it is the reliable source; closed Priority P0 issue titles from the release week are a cross-check, not the input.

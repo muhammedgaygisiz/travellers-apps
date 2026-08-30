@@ -1,0 +1,104 @@
+name: BiteTribe Release
+
+# Cuts a release without a workstation: creates the release branch, runs the
+# release helper, and builds and uploads the artifacts from the tag it made.
+#
+# It always releases what is on `develop`, whatever ref the dispatch was
+# started from, because the release is defined by the branch rather than by
+# whoever pressed the button.
+#
+# See ssot/pages/Release Workflow.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Upload to TestFlight and Play Open testing'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+# One release at a time. Two concurrent runs would race on the build number and
+# the tag, and the second would fail late rather than early.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  CI: true
+  NX_DAEMON: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      build-number: ${{ steps.build-number.outputs.build-number }}
+
+    steps:
+      # develop explicitly, not the dispatch ref. Full history and tags: the
+      # changelog reads the log, and the helper refuses a tag that already
+      # exists locally or on origin.
+      - name: Checkout develop
+        uses: actions/checkout@v5
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Setup action
+        uses: ./.github/actions/setup
+
+      - name: Identify the committer
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # The branch is named after the build being released, not the one the
+      # release bumps to. See the branch convention in Release Workflow.
+      - name: Create the release branch
+        id: build-number
+        run: |
+          set -euo pipefail
+          build_number="$(node -p "require('./apps/bite-tribe/read-build-number').readBuildNumber(process.cwd())")"
+          echo "Releasing build ${build_number} from $(git rev-parse --short HEAD)."
+          git checkout -b "bump-version-${build_number}"
+          echo "build-number=${build_number}" >> "$GITHUB_OUTPUT"
+
+      # Generates the changelog, syncs the marketing version, bumps the build
+      # number, commits, tags the pre-release commit, asserts the tagged tree
+      # declares the build the tag names, pushes both, publishes the GitHub
+      # release, and opens the pull request back to develop.
+      - name: Prepare the release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_NUMBER: ${{ steps.build-number.outputs.build-number }}
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./package.json').version")"
+          npm run increment-build-number-and-generate-changelog
+          echo "tag=build-${version}-${BUILD_NUMBER}" >> "$GITHUB_OUTPUT"
+
+  # Called rather than left to the tag push: a tag pushed by a workflow using
+  # GITHUB_TOKEN does not trigger another workflow, so relying on the push
+  # would build nothing at all and do it silently.
+  build:
+    needs: prepare
+
+    permissions:
+      contents: write
+
+    uses: ./.github/workflows/native-release.yml
+    with:
+      ref: ${{ needs.prepare.outputs.tag }}
+      publish: ${{ inputs.publish }}
+    secrets: inherit

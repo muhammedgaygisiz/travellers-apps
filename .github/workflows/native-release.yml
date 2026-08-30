@@ -16,6 +16,20 @@ on:
   push:
     tags:
       - 'build-*'
+  # Called by release.yml. A tag pushed by a workflow using GITHUB_TOKEN does
+  # not trigger another workflow - GitHub blocks that to prevent recursion - so
+  # the release cannot rely on its own tag push to start this. It calls it.
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Commit, branch or tag to build. Defaults to the triggering ref.'
+        required: false
+        type: string
+      publish:
+        description: 'Upload to TestFlight and Play Open testing'
+        required: false
+        default: false
+        type: boolean
   workflow_dispatch:
     inputs:
       platform:
@@ -28,7 +42,7 @@ on:
           - android
           - ios
       publish:
-        description: 'Also upload to TestFlight and Play Open testing'
+        description: 'Also upload to TestFlight and Play Open testing (automatic on a tag)'
         required: false
         type: boolean
         default: false
@@ -54,9 +68,19 @@ jobs:
   web-bundle:
     runs-on: ubuntu-latest
 
+    # `contents: write` for the release-asset upload below, and only on this
+    # job. The native jobs stay read-only.
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          # Empty on a push or a dispatch, which makes checkout use the
+          # triggering ref. Set when release.yml calls this with the tag it
+          # just created.
+          ref: ${{ inputs.ref }}
 
       - name: Setup action
         uses: ./.github/actions/setup
@@ -88,6 +112,10 @@ jobs:
 
       - name: Record build provenance
         id: provenance
+        env:
+          # In a workflow_call run GITHUB_REF names the caller's ref, not the
+          # tag being built, so the ref is passed explicitly when there is one.
+          BITETRIBE_RELEASE_REF: ${{ inputs.ref }}
         run: npm run release:provenance
 
       - name: Summarize the build
@@ -109,6 +137,34 @@ jobs:
             dist/build-provenance.json
           retention-days: 30
 
+      # Workflow artifacts expire after 90 days and this file is the durable
+      # answer to which commit a store artifact came from, so on a tag run it is
+      # attached to the GitHub release, which does not expire. Issue #1441.
+      #
+      # The release helper publishes that release moments after pushing the tag
+      # that started this run, so it is usually already there; the retry covers
+      # the case where it is not. A failure here warns rather than fails: the
+      # artifacts are the job's product, and losing them over a missing release
+      # asset would be the wrong trade. It is last in the job for the same
+      # reason.
+      - name: Attach the provenance to the GitHub release
+        if: ${{ github.event_name == 'push' || inputs.ref != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.ref != '' && inputs.ref || github.ref_name }}
+        run: |
+          set -uo pipefail
+          for attempt in 1 2 3 4 5; do
+            if gh release view "${TAG}" > /dev/null 2>&1; then
+              gh release upload "${TAG}" dist/build-provenance.json --clobber
+              echo "Attached build-provenance.json to the ${TAG} release."
+              exit 0
+            fi
+            echo "No GitHub release for ${TAG} yet, retrying in 20s (${attempt}/5)."
+            sleep 20
+          done
+          echo "::warning::No GitHub release exists for ${TAG}, so the provenance was not attached. Attach it by hand with: gh release upload ${TAG} build-provenance.json"
+
   android:
     runs-on: ubuntu-latest
     needs:
@@ -118,6 +174,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          # Empty on a push or a dispatch, which makes checkout use the
+          # triggering ref. Set when release.yml calls this with the tag it
+          # just created.
+          ref: ${{ inputs.ref }}
 
       - name: Setup action
         uses: ./.github/actions/setup
@@ -214,8 +275,47 @@ jobs:
           retention-days: 90
           if-no-files-found: error
 
-      # Opt-in. A build number cannot be reused once a store has seen it, so the
-      # default run stops at the artifact above.
+      # Publishing is automatic on a tag run and opt-in on a dispatch.
+      #
+      # A `build-*` tag is not something that appears by accident: only the
+      # release helper creates one, and it refuses a dirty tree, refuses a tag
+      # that already exists, and asserts that the tagged tree declares the build
+      # the tag is named after. A tag push is therefore already a deliberate
+      # release action, and making it also require a second deliberate action
+      # bought nothing.
+      #
+      # Both uploads land in a pre-submission state - a TestFlight build no
+      # group can see until it is assigned, and a Play draft - so a person still
+      # decides what reaches a tester. The checks that could stop a bad artifact
+      # all run in this workflow before this point: the bundle assertion, the
+      # signature verification against the Play upload key, and the archive's
+      # build-number assertion.
+      #
+      # A missing secret skips rather than fails. The artifacts are the job's
+      # product and are already uploaded; refusing to finish over an upload
+      # nobody configured would throw them away.
+      - name: Decide whether to publish
+        id: publish
+        env:
+          # A tag push is a release. So is a call from release.yml, which sets
+          # `publish` explicitly, because there `github.event_name` is the
+          # caller's dispatch rather than a push.
+          EVENT: ${{ github.event_name }}
+          REQUESTED: ${{ inputs.publish }}
+          REQUIRED_SECRET: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          if [ "${EVENT}" != "push" ] && [ "${REQUESTED}" != "true" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Not publishing: this run did not ask for it."
+          elif [ -z "${REQUIRED_SECRET}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::PLAY_SERVICE_ACCOUNT_JSON is not set, so the artifact was built but not uploaded. Upload it by hand, or set the secret with tools/set-native-release-secrets.sh."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Publishing this run."
+          fi
+
       #
       # `beta` is Open testing in the Play Developer API, and Open testing is
       # where BiteTribe actually distributes on Android. Not `internal`: that
@@ -230,7 +330,7 @@ jobs:
       # click. `completed` would submit a release with no notes.
       # See ssot/pages/Implementation - Store Release Steps.md.
       - name: Upload to Play Open testing as a draft
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+        if: ${{ steps.publish.outputs.enabled == 'true' }}
         uses: r0adkll/upload-google-play@v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
@@ -252,6 +352,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          # Empty on a push or a dispatch, which makes checkout use the
+          # triggering ref. Set when release.yml calls this with the tag it
+          # just created.
+          ref: ${{ inputs.ref }}
 
       # Deliberately not ./.github/actions/setup. That action restores and saves
       # node_modules under a key derived from package-lock.json alone, with no
@@ -443,8 +548,49 @@ jobs:
           retention-days: 90
           if-no-files-found: error
 
+      # Publishing is automatic on a tag run and opt-in on a dispatch.
+      #
+      # A `build-*` tag is not something that appears by accident: only the
+      # release helper creates one, and it refuses a dirty tree, refuses a tag
+      # that already exists, and asserts that the tagged tree declares the build
+      # the tag is named after. A tag push is therefore already a deliberate
+      # release action, and making it also require a second deliberate action
+      # bought nothing.
+      #
+      # Both uploads land in a pre-submission state - a TestFlight build no
+      # group can see until it is assigned, and a Play draft - so a person still
+      # decides what reaches a tester. The checks that could stop a bad artifact
+      # all run in this workflow before this point: the bundle assertion, the
+      # signature verification against the Play upload key, and the archive's
+      # build-number assertion.
+      #
+      # A missing secret skips rather than fails. The artifacts are the job's
+      # product and are already uploaded; refusing to finish over an upload
+      # nobody configured would throw them away.
+      - name: Decide whether to publish
+        id: publish
+        env:
+          # A tag push is a release. So is a call from release.yml, which sets
+          # `publish` explicitly, because there `github.event_name` is the
+          # caller's dispatch rather than a push.
+          EVENT: ${{ github.event_name }}
+          REQUESTED: ${{ inputs.publish }}
+          REQUIRED_SECRET: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+        run: |
+          set -euo pipefail
+          if [ "${EVENT}" != "push" ] && [ "${REQUESTED}" != "true" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Not publishing: this run did not ask for it."
+          elif [ -z "${REQUIRED_SECRET}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::APP_STORE_CONNECT_KEY_ID is not set, so the artifact was built but not uploaded. Upload it by hand, or set the secret with tools/set-native-release-secrets.sh."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Publishing this run."
+          fi
+
       - name: Upload to TestFlight
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+        if: ${{ steps.publish.outputs.enabled == 'true' }}
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}

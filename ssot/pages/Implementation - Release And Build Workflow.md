@@ -84,14 +84,22 @@ commit at all. See
 
 ### Triggers
 
-| Trigger                 | Behavior                                                                                                                              |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Push of a `build-*` tag | **The release build.** Builds both platforms, retains the artifacts, attaches the provenance to the GitHub release. Does not publish. |
-| `workflow_dispatch`     | Same minus the release attachment, with a `platform` choice and an opt-in `publish`                                                   |
+| Trigger                 | Behavior                                                                                                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Push of a `build-*` tag | **The release build.** Builds both platforms, retains the artifacts, attaches the provenance to the GitHub release, and uploads to TestFlight and Play Open testing. |
+| `workflow_dispatch`     | Same minus the release attachment, with a `platform` choice; uploading is opt-in through `publish`                                                                   |
 
-Publishing is opt-in even on a tag. A build number cannot be reused once a
-store has seen it, so an accidental upload is not undoable, and the default run
-therefore stops at a retained artifact.
+Publishing is automatic on a tag and opt-in on a dispatch. A `build-*` tag is
+only ever created by the release helper, which refuses a dirty tree, refuses an
+existing tag, and asserts that the tagged tree declares the build the tag names,
+so the tag is already the deliberate act - requiring a second one bought
+nothing. Neither upload reaches a tester on its own: a TestFlight build is
+invisible until a group is assigned, and a Play release is created as a draft.
+
+A missing store secret skips that upload with a warning instead of failing the
+run. The artifacts are the job's product and are already retained by that point,
+and throwing them away over an upload nobody configured would be the wrong
+trade.
 
 This is the one workflow that is deliberately **not** in `pipeline.yml`. The
 rule that keeps deploys there exists because a hand-dispatched workflow goes
@@ -400,9 +408,10 @@ workflow is not on the pull-request path.
 
 ### Still Not Verified
 
-- **Neither publish step has ever run.** Both are opt-in and off by default,
-  and `PLAY_SERVICE_ACCOUNT_JSON` is still deliberately unset. The TestFlight
-  and Play Open testing uploads are therefore written but unexecuted.
+- **Neither publish step has ever run.** They are wired and automatic on a tag,
+  but no release has used them. The iOS upload has its secrets;
+  `PLAY_SERVICE_ACCOUNT_JSON` is still unset, so until it is provisioned the
+  Android upload skips with a warning and the bundle is uploaded by hand.
 - **No artifact has been installed on a device.** The jobs prove the artifacts
   are produced, signed and named; they do not prove either one runs.
   [issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)

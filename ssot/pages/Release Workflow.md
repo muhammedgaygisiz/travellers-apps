@@ -98,7 +98,7 @@ the tag, and publishes the GitHub release `Build <x>`.
   helper says so explicitly and prints the exact retry command. The commit, tag,
   and push have already succeeded at that point and must not be repeated.
 
-3. Wait for the native build.
+3. Wait for the native build, which also uploads.
 
    Pushing the tag started it. Watch it with `gh run watch`, or:
 
@@ -109,45 +109,38 @@ gh run list --workflow=native-release.yml --limit 1
 Budget about 25 minutes; the iOS archive dominates. The run builds the
 production web bundle, asserts it carries no dev-only key and does carry the
 App Check gate, syncs both wrappers, produces a signed bundle whose signature
-it verifies against the Play upload key, archives and exports iOS, and
-attaches `build-provenance.json` to the GitHub release so the source commit
-outlives the 90-day artifact retention.
+it verifies against the Play upload key, archives and exports iOS, attaches
+`build-provenance.json` to the GitHub release, and **uploads both artifacts to
+the stores**: the `.ipa` to TestFlight and the `.aab` to Play Open testing as a
+draft.
 
-It does not publish to either store. That stays a decision.
+Neither upload reaches a tester. A TestFlight build is invisible until a group
+is assigned to it, and a Play draft is invisible until it is submitted. Both of
+those are steps 4 and 5 below, and both are deliberate.
 
-4. Collect the artifacts and verify them.
+Publishing is automatic here because a `build-*` tag is already a deliberate
+act - only the release helper makes one, and it refuses a dirty tree, an
+existing tag, or a tree that does not declare the build the tag names. If a
+store's secret is missing the upload is skipped with a warning rather than
+failing the run, so the artifacts survive to be uploaded by hand.
+
+### Inspecting the artifacts
+
+Not required - the run asserts the signature, the build number and the bundle
+contents before uploading anything, and nothing is downloaded that could be
+corrupted in transit. Worth doing when a release-candidate record needs the
+detail:
 
 ```bash
 gh run download <run id> -n bitetribe-<version>-<build>-<sha>-android -D ~/Desktop/release-<build>
 gh run download <run id> -n bitetribe-<version>-<build>-<sha>-ios -D ~/Desktop/release-<build>
 ```
 
-The second download reports an error extracting `build-provenance.json`
-because the first already wrote an identical copy. Everything else extracts;
-the message is noise, not a failed download.
+The second download reports an error extracting `build-provenance.json` because
+the first already wrote an identical copy. Everything else extracts; the message
+is noise, not a failed download.
 
-Verify before uploading, because this is the last cheap place to catch a
-wrong artifact:
-
-- `keytool -printcert -jarfile <aab>` and compare the SHA-256 with the Play
-  upload key recorded in [[Implementation - Store Release Steps]]. The job
-  already checked it; this also proves the download is intact.
-- Read `CFBundleShortVersionString`, `CFBundleVersion` and
-  `ITSAppUsesNonExemptEncryption` out of `Payload/App.app/Info.plist` inside
-  the `.ipa`. The last one is what keeps the build row off **Missing
-  Compliance**.
-- Confirm the build number in both matches the tag. It should by
-  construction now, which is the point of the check rather than a reason to
-  skip it.
-
-5. Upload to the test tracks.
-   - The `.ipa` through **Transporter**. Xcode's Distribute wizard is not
-     involved, because the archive was never on this machine.
-   - The `.aab` through the Play Console, to **Open testing**.
-   - Confirm both uploads are visible in their store dashboards.
-   - The console procedure is [[Implementation - Store Release Steps]].
-
-6. Write the store build notes.
+4. Write the store build notes.
 
 ```bash
 npm run release:notes
@@ -162,7 +155,7 @@ npm run release:notes
 - `npm run release:notes -- --full` prints the wider range that the helper
   already used for the GitHub release body.
 
-7. Complete the store submissions.
+5. Complete the store submissions.
 
 - Add the External Testers group with the build notes in App Store Connect and
   submit for beta review. The build must not show **Missing Compliance**; if
@@ -172,7 +165,7 @@ npm run release:notes
   for review.
 - Both are detailed in [[Implementation - Store Release Steps]].
 
-8. Merge the release branch.
+6. Merge the release branch.
    - Open a pull request back to `develop` with `gh pr create`, accepting the
      generated `chore: prepare build <version>-<x> release` title.
    - Confirm the PR contains only the changelog section and the build-number
@@ -223,8 +216,8 @@ Record the source commit by hand if this path is used.
 
 Each release should produce:
 
-- native apps built in CI from the tagged commit and uploaded with the current
-  release build number
+- native apps built in CI from the tagged commit and uploaded to both stores
+  with the current release build number
 - `build-provenance.json` attached to the GitHub release, naming the source
   commit
 - generated changelog section for the released build
@@ -245,9 +238,10 @@ Each release should produce:
 - The tag points at a tree declaring the build it is named after. The helper
   asserts this and refuses to push otherwise, so a release that got this far has
   it.
-- Downloaded artifacts verify locally before upload: bundle signature against
-  the Play upload key, and version, build number and
-  `ITSAppUsesNonExemptEncryption` in the `.ipa`.
+- Both uploads appear in their store dashboards: a TestFlight build finished
+  processing, and a Play draft on Open testing. A skipped upload warns in the
+  run rather than failing it, so a green run is not on its own proof that both
+  landed.
 - Release tag uses the `package.json` version and the build number captured
   before the increment.
 - `package.json`, Android `versionName`, and every iOS `MARKETING_VERSION` name
@@ -284,8 +278,9 @@ Intended, but not part of the current release:
 - The artifacts themselves attached to the GitHub release. Only
   `build-provenance.json` is, which is the part that has to outlive the 90-day
   artifact retention; the `.aab` and `.ipa` stay workflow artifacts.
-- Publishing to the stores from CI. Both steps exist behind the `publish` input
-  and neither has run; the uploads are done by hand.
+- Nothing here is unpractised any more except the two items above. Publishing
+  from CI is wired and automatic on a tag; it becomes practised at the first
+  release that uses it.
 
 ## Related Pages
 

@@ -28,7 +28,7 @@ on:
           - android
           - ios
       publish:
-        description: 'Also upload to TestFlight and Play Open testing'
+        description: 'Also upload to TestFlight and Play Open testing (automatic on a tag)'
         required: false
         type: boolean
         default: false
@@ -247,8 +247,44 @@ jobs:
           retention-days: 90
           if-no-files-found: error
 
-      # Opt-in. A build number cannot be reused once a store has seen it, so the
-      # default run stops at the artifact above.
+      # Publishing is automatic on a tag run and opt-in on a dispatch.
+      #
+      # A `build-*` tag is not something that appears by accident: only the
+      # release helper creates one, and it refuses a dirty tree, refuses a tag
+      # that already exists, and asserts that the tagged tree declares the build
+      # the tag is named after. A tag push is therefore already a deliberate
+      # release action, and making it also require a second deliberate action
+      # bought nothing.
+      #
+      # Both uploads land in a pre-submission state - a TestFlight build no
+      # group can see until it is assigned, and a Play draft - so a person still
+      # decides what reaches a tester. The checks that could stop a bad artifact
+      # all run in this workflow before this point: the bundle assertion, the
+      # signature verification against the Play upload key, and the archive's
+      # build-number assertion.
+      #
+      # A missing secret skips rather than fails. The artifacts are the job's
+      # product and are already uploaded; refusing to finish over an upload
+      # nobody configured would throw them away.
+      - name: Decide whether to publish
+        id: publish
+        env:
+          EVENT: ${{ github.event_name }}
+          REQUESTED: ${{ inputs.publish }}
+          REQUIRED_SECRET: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          if [ "${EVENT}" != "push" ] && [ "${REQUESTED}" != "true" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Not publishing: this run did not ask for it."
+          elif [ -z "${REQUIRED_SECRET}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::PLAY_SERVICE_ACCOUNT_JSON is not set, so the artifact was built but not uploaded. Upload it by hand, or set the secret with tools/set-native-release-secrets.sh."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Publishing this run."
+          fi
+
       #
       # `beta` is Open testing in the Play Developer API, and Open testing is
       # where BiteTribe actually distributes on Android. Not `internal`: that
@@ -263,7 +299,7 @@ jobs:
       # click. `completed` would submit a release with no notes.
       # See ssot/pages/Implementation - Store Release Steps.md.
       - name: Upload to Play Open testing as a draft
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+        if: ${{ steps.publish.outputs.enabled == 'true' }}
         uses: r0adkll/upload-google-play@v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
@@ -476,8 +512,46 @@ jobs:
           retention-days: 90
           if-no-files-found: error
 
+      # Publishing is automatic on a tag run and opt-in on a dispatch.
+      #
+      # A `build-*` tag is not something that appears by accident: only the
+      # release helper creates one, and it refuses a dirty tree, refuses a tag
+      # that already exists, and asserts that the tagged tree declares the build
+      # the tag is named after. A tag push is therefore already a deliberate
+      # release action, and making it also require a second deliberate action
+      # bought nothing.
+      #
+      # Both uploads land in a pre-submission state - a TestFlight build no
+      # group can see until it is assigned, and a Play draft - so a person still
+      # decides what reaches a tester. The checks that could stop a bad artifact
+      # all run in this workflow before this point: the bundle assertion, the
+      # signature verification against the Play upload key, and the archive's
+      # build-number assertion.
+      #
+      # A missing secret skips rather than fails. The artifacts are the job's
+      # product and are already uploaded; refusing to finish over an upload
+      # nobody configured would throw them away.
+      - name: Decide whether to publish
+        id: publish
+        env:
+          EVENT: ${{ github.event_name }}
+          REQUESTED: ${{ inputs.publish }}
+          REQUIRED_SECRET: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+        run: |
+          set -euo pipefail
+          if [ "${EVENT}" != "push" ] && [ "${REQUESTED}" != "true" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Not publishing: this run did not ask for it."
+          elif [ -z "${REQUIRED_SECRET}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::APP_STORE_CONNECT_KEY_ID is not set, so the artifact was built but not uploaded. Upload it by hand, or set the secret with tools/set-native-release-secrets.sh."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Publishing this run."
+          fi
+
       - name: Upload to TestFlight
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+        if: ${{ steps.publish.outputs.enabled == 'true' }}
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}

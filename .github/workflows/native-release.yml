@@ -16,6 +16,20 @@ on:
   push:
     tags:
       - 'build-*'
+  # Called by release.yml. A tag pushed by a workflow using GITHUB_TOKEN does
+  # not trigger another workflow - GitHub blocks that to prevent recursion - so
+  # the release cannot rely on its own tag push to start this. It calls it.
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Commit, branch or tag to build. Defaults to the triggering ref.'
+        required: false
+        type: string
+      publish:
+        description: 'Upload to TestFlight and Play Open testing'
+        required: false
+        default: false
+        type: boolean
   workflow_dispatch:
     inputs:
       platform:
@@ -62,6 +76,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          # Empty on a push or a dispatch, which makes checkout use the
+          # triggering ref. Set when release.yml calls this with the tag it
+          # just created.
+          ref: ${{ inputs.ref }}
 
       - name: Setup action
         uses: ./.github/actions/setup
@@ -93,6 +112,10 @@ jobs:
 
       - name: Record build provenance
         id: provenance
+        env:
+          # In a workflow_call run GITHUB_REF names the caller's ref, not the
+          # tag being built, so the ref is passed explicitly when there is one.
+          BITETRIBE_RELEASE_REF: ${{ inputs.ref }}
         run: npm run release:provenance
 
       - name: Summarize the build
@@ -125,10 +148,10 @@ jobs:
       # asset would be the wrong trade. It is last in the job for the same
       # reason.
       - name: Attach the provenance to the GitHub release
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' || inputs.ref != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ inputs.ref != '' && inputs.ref || github.ref_name }}
         run: |
           set -uo pipefail
           for attempt in 1 2 3 4 5; do
@@ -151,6 +174,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          # Empty on a push or a dispatch, which makes checkout use the
+          # triggering ref. Set when release.yml calls this with the tag it
+          # just created.
+          ref: ${{ inputs.ref }}
 
       - name: Setup action
         uses: ./.github/actions/setup
@@ -269,6 +297,9 @@ jobs:
       - name: Decide whether to publish
         id: publish
         env:
+          # A tag push is a release. So is a call from release.yml, which sets
+          # `publish` explicitly, because there `github.event_name` is the
+          # caller's dispatch rather than a push.
           EVENT: ${{ github.event_name }}
           REQUESTED: ${{ inputs.publish }}
           REQUIRED_SECRET: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
@@ -321,6 +352,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          # Empty on a push or a dispatch, which makes checkout use the
+          # triggering ref. Set when release.yml calls this with the tag it
+          # just created.
+          ref: ${{ inputs.ref }}
 
       # Deliberately not ./.github/actions/setup. That action restores and saves
       # node_modules under a key derived from package-lock.json alone, with no
@@ -534,6 +570,9 @@ jobs:
       - name: Decide whether to publish
         id: publish
         env:
+          # A tag push is a release. So is a call from release.yml, which sets
+          # `publish` explicitly, because there `github.event_name` is the
+          # caller's dispatch rather than a push.
           EVENT: ${{ github.event_name }}
           REQUESTED: ${{ inputs.publish }}
           REQUIRED_SECRET: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}

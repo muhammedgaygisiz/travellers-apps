@@ -67,30 +67,45 @@ pushing it starts `.github/workflows/native-release.yml`, which builds and signs
 both artifacts from exactly that commit. There is no separate dispatch and no
 local native build.
 
-1. Confirm the release build.
-   - Confirm the build number currently on `develop`; that is the build `x` being
-     released.
-   - Confirm local state with `git status --short --branch`.
-   - Create `bump-version-<x>` from `origin/develop`.
-
-2. Generate the changelog, tag, bump and push.
+1. Cut the release.
 
 ```bash
+gh workflow run release.yml -f publish=true
+```
+
+Or the **Run workflow** button on `BiteTribe Release` in the Actions tab.
+
+It releases whatever is on `develop`, regardless of which ref the dispatch
+was started from, because the release is defined by the branch rather than by
+whoever pressed the button. It creates `bump-version-<x>`, runs the release
+helper, and calls the native build with the tag the helper made.
+
+The same thing locally, when a workstation is preferred or the workflow is
+unavailable:
+
+```bash
+git checkout -b bump-version-<x>
 npm run increment-build-number-and-generate-changelog
 ```
 
-The helper performs the whole release step in one go: it generates the changelog
-section for build `x`, writes the `package.json` marketing version into both
-native projects, increments the shared build number to `x+1`, commits as
+The helper generates the changelog section for build `x`, writes the
+`package.json` marketing version into both native projects, increments the
+shared build number to `x+1`, commits as
 `chore: prepare build <version>-<x> release`, creates the annotated tag
-`build-<version>-<x>` **pointing at the commit the release branch started from**,
-verifies that the tagged tree really declares build `x`, pushes the branch and
-the tag, publishes the GitHub release `Build <x>`, and opens the release pull
-request back to `develop`.
+`build-<version>-<x>` **pointing at the commit the release branch started
+from**, verifies that the tagged tree really declares build `x`, pushes the
+branch and the tag, publishes the GitHub release `Build <x>`, and opens the
+release pull request back to `develop`.
+
+The two paths differ in one place. Run locally, the tag push starts the
+native build. Run as a workflow, `release.yml` **calls** the build instead,
+because a tag pushed by a workflow using `GITHUB_TOKEN` does not trigger
+another workflow - GitHub blocks that to prevent recursion, and relying on it
+would build nothing and do it silently.
 
 - If this release changes the marketing version, bump it in `package.json`
-  before running the helper. The helper writes it into both native projects and
-  fails if `package.json`, Android, and iOS do not agree afterwards.
+  before cutting. The helper writes it into both native projects and fails if
+  `package.json`, Android, and iOS do not agree afterwards.
 - The tag is created after the commit, so a failure earlier leaves no tag
   behind, but it names the pre-release commit. If the two ever disagree the
   helper deletes the tag and refuses, rather than pushing a tag that lies about
@@ -101,7 +116,7 @@ request back to `develop`.
   point and must not be repeated. Both are ordered after the push for that
   reason, with the pull request last because it is the cheapest to redo.
 
-3. Wait for the native build, which also uploads.
+2. Wait for the native build, which also uploads.
 
    Pushing the tag started it. Watch it with `gh run watch`, or:
 
@@ -143,7 +158,7 @@ The second download reports an error extracting `build-provenance.json` because
 the first already wrote an identical copy. Everything else extracts; the message
 is noise, not a failed download.
 
-4. Write the store build notes.
+3. Write the store build notes.
 
 ```bash
 npm run release:notes
@@ -158,7 +173,7 @@ npm run release:notes
 - `npm run release:notes -- --full` prints the wider range that the helper
   already used for the GitHub release body.
 
-5. Complete the store submissions.
+4. Complete the store submissions.
 
 - Add the External Testers group with the build notes in App Store Connect and
   submit for beta review. The build must not show **Missing Compliance**; if
@@ -168,8 +183,8 @@ npm run release:notes
   for review.
 - Both are detailed in [[Implementation - Store Release Steps]].
 
-6. Merge the release branch.
-   - The helper already opened the pull request in step 2, titled from the
+5. Merge the release branch.
+   - The helper already opened the pull request in step 1, titled from the
      release commit.
    - Confirm it contains only the changelog section and the build-number bump.
    - Squash and merge, then delete the branch.

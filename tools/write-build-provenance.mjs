@@ -25,8 +25,14 @@ const { version } = require(resolve(workspaceRoot, 'package.json'));
 const buildNumber = readBuildNumber(workspaceRoot);
 const commit = process.env.GITHUB_SHA ?? git('rev-parse', 'HEAD');
 const shortCommit = commit.slice(0, 7);
-const ref = process.env.GITHUB_REF ?? git('rev-parse', '--abbrev-ref', 'HEAD');
-const refName = process.env.GITHUB_REF_NAME ?? ref;
+// In a `workflow_call` run GITHUB_REF names the workflow that did the calling,
+// not the commit being built, so an explicit override wins where one is set.
+// Empty rather than unset is the normal case for an unused workflow input, so
+// this tests truthiness rather than nullishness.
+const releaseRef = process.env.BITETRIBE_RELEASE_REF || null;
+const ref =
+  releaseRef ?? process.env.GITHUB_REF ?? git('rev-parse', '--abbrev-ref', 'HEAD');
+const refName = releaseRef ?? process.env.GITHUB_REF_NAME ?? ref;
 
 const provenance = {
   app: 'bite-tribe',

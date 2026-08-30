@@ -348,21 +348,39 @@ does. The Admin key is the smaller ongoing burden.
 Generating a replacement key is cheap - fifty can be active at once - so a role
 that turns out to be too narrow costs one dispatch, not a rebuild.
 
-### Not Yet Verified
+### Run History
 
-- **Run #1, 30 August 2026, `develop@963e247`.** `web-bundle` passed in 2.2
-  minutes. `android` passed in 5.5 minutes and produced a bundle **signed with
-  the Play upload key**, verified by `release:android`'s fingerprint check -
-  the first native artifact this repository has ever produced without a
-  workstation. `ios` archived successfully, passed the build-number assertion,
-  and failed at `-exportArchive` on the API key's role.
-- Both artifacts were then lost to the naming bug above: the emptied
-  `ARTIFACT_BASE_NAME` staged them as dotfiles, which `upload-artifact` drops
-  in silence. The Android artifact came out as 412 bytes, the provenance JSON
-  alone.
-- Neither publish step has ever run. `PLAY_SERVICE_ACCOUNT_JSON` is still
-  deliberately unset.
-- The two publishing steps are unexecuted. They are opt-in and off by default.
+Both jobs are proven. The workflow produced signed, named, commit-traceable
+Android and iOS artifacts on runners, with no workstation involved, on
+30 August 2026.
+
+| Run | Ref                                               | web-bundle    | android       | ios            |
+| --- | ------------------------------------------------- | ------------- | ------------- | -------------- |
+| #1  | `develop@963e247`                                 | pass, 2.2 min | pass, 5.5 min | fail at export |
+| #2  | `1181-fix-native-release-artifact-naming@1cafbd0` | pass, 1.8 min | pass, 5.2 min | pass, 22.9 min |
+
+Run #2 produced `bitetribe-1.0.1-96-1cafbd0-android` at 15.7 MB and
+`bitetribe-1.0.1-96-1cafbd0-ios` at 118.1 MB, the latter carrying the `.ipa`,
+the dSYMs and the provenance.
+
+Run #1 found two defects, both recorded above: the artifact name emptied by
+secret redaction, and an App Store Connect key scoped too narrowly to export.
+Its Android bundle was correctly built and signed and then dropped, arriving as
+412 bytes of provenance JSON.
+
+Budget the iOS job at roughly 23 minutes and the Android job at 5. The iOS
+figure is dominated by `pod install` and the archive, and it is why this
+workflow is not on the pull-request path.
+
+### Still Not Verified
+
+- **Neither publish step has ever run.** Both are opt-in and off by default,
+  and `PLAY_SERVICE_ACCOUNT_JSON` is still deliberately unset. The TestFlight
+  and Play Open testing uploads are therefore written but unexecuted.
+- **No artifact has been installed on a device.** The jobs prove the artifacts
+  are produced, signed and named; they do not prove either one runs.
+  [issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
+  asks for an install of each, and that is what remains of it.
 - The Xcode version is whatever `macos-latest` carries, so an artifact is
   reproducible against a commit but not against a toolchain.
 

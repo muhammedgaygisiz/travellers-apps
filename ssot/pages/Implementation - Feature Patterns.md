@@ -124,6 +124,7 @@ One detail is easy to get wrong and made the bar invisible during development: `
 | Home feed    | Bite skeleton list     | `showBiteSkeleton()` |
 | Profile      | `profile-skeleton`     | `showSkeleton()`     |
 | Bite details | Inline skeleton fields | `!bite()`            |
+| Restaurant   | Inline skeleton fields | `isLoading()`        |
 | Leaderboard  | Spinner                | `isLoading()`        |
 | Gallery      | Spinner                | `loading()`          |
 | Followers    | Spinner                | `isLoading()`        |

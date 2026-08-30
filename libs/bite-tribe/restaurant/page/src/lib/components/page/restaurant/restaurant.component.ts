@@ -12,6 +12,7 @@ import {
   IonContent,
   IonIcon,
   IonLabel,
+  IonSkeletonText,
 } from '@ionic/angular/standalone';
 import { Bite, LikeClick, Menu, MenuItem, Restaurant } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
@@ -35,6 +36,7 @@ import { TagsInputComponent } from 'common/ui/tags';
     IonContent,
     IonButton,
     IonIcon,
+    IonSkeletonText,
     MapComponent,
     IonLabel,
     TitleCasePipe,
@@ -59,6 +61,23 @@ export class RestaurantComponent {
   readonly biteClick = output<Bite>();
   readonly likeButtonClick = output<LikeClick>();
   readonly selectedSegment = signal<'bites' | 'menu'>('bites');
+
+  /**
+   * The restaurant document has not arrived yet. The page used to assemble
+   * itself as the reads landed, which put its empty states and its menu button
+   * on screen before it was known whether the restaurant was loaded at all. It
+   * now holds a skeleton until the document resolves, the same way Bite details
+   * does. See GitHub issue #1381.
+   */
+  isLoading = computed(() => !this.restaurant());
+
+  /**
+   * Whether the loaded restaurant carries a menu to navigate to. Without one
+   * `navigateToMenu` falls back to a route keyed by place name, which lands on
+   * the empty-menu page even for a restaurant that has a menu, so the button is
+   * gated on this the way the Bites button is gated on its Bite count.
+   */
+  hasMenu = computed(() => !!this.restaurant()?.menuId);
 
   ratedBites = computed(() =>
     (this.bites() || []).filter(

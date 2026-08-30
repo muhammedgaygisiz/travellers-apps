@@ -1,4 +1,5 @@
 @let restaurantData = restaurant();
+@let loading = isLoading();
 @let positionData = position();
 @let biteCountData = bitesCount();
 @let ratedBiteCountData = ratedBiteCount();
@@ -10,171 +11,321 @@
     showHeaderMenu: false,
     showFooter: false,
   }"
+  [loading]="loading"
 >
   <ion-content>
-    <bt-restaurant-image [restaurant]="restaurantData" />
+    @if (loading) {
+      <!-- The page used to build itself up as the reads landed, so its empty
+      states and its menu button were on screen before it was known whether the
+      restaurant was loaded at all. It now holds a skeleton until the document
+      resolves, the same way Bite details does. See GitHub issue #1381. -->
+      <div data-testid="restaurant-loading">
+        <ion-skeleton-text
+          [animated]="true"
+          style="width: 100%; height: 40vh; border-radius: 0; margin: 0"
+        />
 
-    <div class="ion-padding-horizontal">
-      <div
-        class="ion-display-flex ion-justify-content-between ion-align-items-center"
-      >
-        <h1>{{ placeName() }}</h1>
+        <div class="ion-padding-horizontal">
+          <div
+            class="ion-display-flex ion-justify-content-between ion-align-items-center"
+          >
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 32px; width: 172px"
+            />
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 20px; width: 56px"
+            />
+          </div>
 
-        <bt-distance [distance]="placeDistance()" />
-      </div>
+          <div class="ion-margin-bottom">
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 20px; width: 148px"
+            />
+          </div>
 
-      <div
-        class="rating-container ion-display-flex ion-align-items-center ion-margin-bottom"
-      >
-        <ion-icon [src]="starIconPath" class="rating-icon" />
-        @if (ratedBiteCountData) {
-          <span class="rating">{{ averageBiteRating() }}</span>
-          <span class="text-small text-secondary">
-            {{
-              'restaurant-rating' | transloco: { biteCount: ratedBiteCountData }
-            }}
-          </span>
-        } @else {
-          <span class="text-small text-secondary">{{
-            'no-ratings-yet' | transloco
-          }}</span>
-        }
-      </div>
+          <div class="seperator"></div>
 
-      <div class="seperator"></div>
+          <div class="ion-margin-vertical">
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 16px; width: 100%"
+            />
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 16px; width: 82%"
+            />
+          </div>
 
-      @if (restaurantData?.description) {
-        <div class="ion-margin-vertical">
-          <p>{{ restaurantData?.description }}</p>
-        </div>
-      } @else {
-        <div class="ion-margin-vertical">
-          <p class="text-secondary" data-testid="restaurant-description-empty">
-            {{ 'no-description-available' | transloco }}
-          </p>
-        </div>
-      }
+          <div class="ion-margin-vertical">
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 24px; width: 132px"
+            />
+          </div>
 
-      <div class="ion-margin-vertical">
-        @if (restaurantData?.socialMediaLinks?.length) {
-          <div class="ion-display-flex ion-flex-row ion-flex-wrap">
-            @for (
-              link of restaurantData?.socialMediaLinks;
-              track link.network
-            ) {
-              <div
-                class="social-link ion-display-flex ion-align-items-center ion-flex-1 ion-margin-top"
-              >
-                <ion-icon
-                  [name]="'logo-' + link.network"
-                  size="large"
-                  class="ion-margin-end"
+          <div class="seperator"></div>
+
+          <div class="ion-display-flex ion-flex-row ion-margin-vertical">
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 30px; width: 65px; margin-right: 12px"
+            />
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 30px; width: 65px; margin-right: 12px"
+            />
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 30px; width: 65px; margin-right: 12px"
+            />
+          </div>
+
+          <div class="seperator"></div>
+
+          <div class="ion-margin-top">
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 24px; width: 132px"
+            />
+
+            @for (row of [1, 2, 3]; track row) {
+              <div class="ion-display-flex ion-flex-row ion-margin-bottom day">
+                <ion-skeleton-text
+                  class="ion-flex-1"
+                  [animated]="true"
+                  style="height: 20px; margin-right: 12px"
                 />
-                <ion-label>
-                  <a [href]="link.url | ensureProtocol" target="_blank">{{
-                    link.network | titlecase
-                  }}</a>
-                </ion-label>
+                <ion-skeleton-text
+                  class="ion-flex-1"
+                  [animated]="true"
+                  style="height: 20px"
+                />
               </div>
             }
           </div>
-        } @else {
-          <p class="text-secondary" data-testid="restaurant-social-links-empty">
-            {{ 'no-social-media-links' | transloco }}
-          </p>
-        }
+
+          <div class="seperator"></div>
+
+          <div class="ion-margin-top">
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 16px; width: 168px"
+            />
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 16px; width: 124px"
+            />
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 16px; width: 96px"
+            />
+          </div>
+
+          <div class="ion-margin-top">
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 300px; width: 100%"
+            />
+          </div>
+        </div>
+
+        <!-- No action bar while loading: every button here needs the restaurant
+        it acts on, and the menu button in particular dead-ends without it. -->
+        <div class="ion-padding safe-padding-bottom buttons-container">
+          <div class="ion-padding-bottom">
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 44px; width: 100%; margin: 0"
+            />
+          </div>
+        </div>
       </div>
+    } @else {
+      <bt-restaurant-image [restaurant]="restaurantData" />
 
-      <div class="seperator"></div>
+      <div class="ion-padding-horizontal">
+        <div
+          class="ion-display-flex ion-justify-content-between ion-align-items-center"
+        >
+          <h1>{{ placeName() }}</h1>
 
-      @if (uniqueTags().length) {
+          <bt-distance [distance]="placeDistance()" />
+        </div>
+
+        <div
+          class="rating-container ion-display-flex ion-align-items-center ion-margin-bottom"
+        >
+          <ion-icon [src]="starIconPath" class="rating-icon" />
+          @if (ratedBiteCountData) {
+            <span class="rating">{{ averageBiteRating() }}</span>
+            <span class="text-small text-secondary">
+              {{
+                'restaurant-rating'
+                  | transloco: { biteCount: ratedBiteCountData }
+              }}
+            </span>
+          } @else {
+            <span class="text-small text-secondary">{{
+              'no-ratings-yet' | transloco
+            }}</span>
+          }
+        </div>
+
+        <div class="seperator"></div>
+
+        @if (restaurantData?.description) {
+          <div class="ion-margin-vertical">
+            <p>{{ restaurantData?.description }}</p>
+          </div>
+        } @else {
+          <div class="ion-margin-vertical">
+            <p
+              class="text-secondary"
+              data-testid="restaurant-description-empty"
+            >
+              {{ 'no-description-available' | transloco }}
+            </p>
+          </div>
+        }
+
         <div class="ion-margin-vertical">
-          <bt-tags-input [readonly]="true" [tags]="uniqueTags()" />
-        </div>
-
-        <div class="seperator"></div>
-      }
-
-      @if (restaurantData?.openingHours?.length) {
-        <div class="ion-margin-top">
-          <h3>{{ 'opening-hours' | transloco }}</h3>
-          @for (day of restaurantData?.openingHours; track day.day) {
-            <div class="ion-display-flex ion-flex-row ion-margin-bottom day">
-              <ion-label class="ion-flex-1">
-                <span>{{ 'day-' + day.day | transloco }}</span>
-              </ion-label>
-
-              <div class="ion-flex-1">
-                @if (day.isOpen && day.timeRanges.length) {
-                  <span class="time-ranges">
-                    @for (range of day.timeRanges; track $index) {
-                      <div>
-                        <span>{{ range.from }}–{{ range.to }}</span>
-                      </div>
-                    }
-                  </span>
-                } @else if (!day.isOpen) {
-                  <span class="closed">{{ 'closed' | transloco }}</span>
-                }
-              </div>
+          @if (restaurantData?.socialMediaLinks?.length) {
+            <div class="ion-display-flex ion-flex-row ion-flex-wrap">
+              @for (
+                link of restaurantData?.socialMediaLinks;
+                track link.network
+              ) {
+                <div
+                  class="social-link ion-display-flex ion-align-items-center ion-flex-1 ion-margin-top"
+                >
+                  <ion-icon
+                    [name]="'logo-' + link.network"
+                    size="large"
+                    class="ion-margin-end"
+                  />
+                  <ion-label>
+                    <a [href]="link.url | ensureProtocol" target="_blank">{{
+                      link.network | titlecase
+                    }}</a>
+                  </ion-label>
+                </div>
+              }
             </div>
-          }
-        </div>
-
-        <div class="seperator"></div>
-      }
-
-      @if (restaurantData?.address) {
-        <div class="ion-margin-top">
-          @if (restaurantData?.address?.street) {
-            <p class="ion-no-margin">{{ restaurantData?.address?.street }}</p>
-          }
-          @if (
-            restaurantData?.address?.postcode || restaurantData?.address?.city
-          ) {
-            <p class="ion-no-margin">
-              {{ restaurantData?.address?.postcode }}
-              {{ restaurantData?.address?.city }}
+          } @else {
+            <p
+              class="text-secondary"
+              data-testid="restaurant-social-links-empty"
+            >
+              {{ 'no-social-media-links' | transloco }}
             </p>
           }
-          @if (restaurantData?.address?.country) {
-            <p class="ion-no-margin">{{ restaurantData?.address?.country }}</p>
+        </div>
+
+        <div class="seperator"></div>
+
+        @if (uniqueTags().length) {
+          <div class="ion-margin-vertical">
+            <bt-tags-input [readonly]="true" [tags]="uniqueTags()" />
+          </div>
+
+          <div class="seperator"></div>
+        }
+
+        @if (restaurantData?.openingHours?.length) {
+          <div class="ion-margin-top">
+            <h3>{{ 'opening-hours' | transloco }}</h3>
+            @for (day of restaurantData?.openingHours; track day.day) {
+              <div class="ion-display-flex ion-flex-row ion-margin-bottom day">
+                <ion-label class="ion-flex-1">
+                  <span>{{ 'day-' + day.day | transloco }}</span>
+                </ion-label>
+
+                <div class="ion-flex-1">
+                  @if (day.isOpen && day.timeRanges.length) {
+                    <span class="time-ranges">
+                      @for (range of day.timeRanges; track $index) {
+                        <div>
+                          <span>{{ range.from }}–{{ range.to }}</span>
+                        </div>
+                      }
+                    </span>
+                  } @else if (!day.isOpen) {
+                    <span class="closed">{{ 'closed' | transloco }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="seperator"></div>
+        }
+
+        @if (restaurantData?.address) {
+          <div class="ion-margin-top">
+            @if (restaurantData?.address?.street) {
+              <p class="ion-no-margin">{{ restaurantData?.address?.street }}</p>
+            }
+            @if (
+              restaurantData?.address?.postcode || restaurantData?.address?.city
+            ) {
+              <p class="ion-no-margin">
+                {{ restaurantData?.address?.postcode }}
+                {{ restaurantData?.address?.city }}
+              </p>
+            }
+            @if (restaurantData?.address?.country) {
+              <p class="ion-no-margin">
+                {{ restaurantData?.address?.country }}
+              </p>
+            }
+          </div>
+        }
+
+        <div class="ion-margin-top">
+          <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
+        </div>
+      </div>
+
+      <div class="ion-padding safe-padding-bottom buttons-container">
+        <div class="ion-padding-bottom">
+          <!-- Gated on a menu id rather than rendered unconditionally: without
+          one the tap falls through to a route keyed by place name and dead-ends
+          on the empty-menu page. See GitHub issue #1381. -->
+          @if (hasMenu()) {
+            <ion-button
+              expand="full"
+              fill="outline"
+              data-testid="restaurant-menu-button"
+              (click)="showMenuClick.emit(restaurantData)"
+            >
+              <div
+                class="ion-display-flex ion-justify-content-between ion-flex-1"
+              >
+                <span>{{ 'menu' | transloco }}</span>
+                <ion-icon slot="end" name="chevron-forward-outline" />
+              </div>
+            </ion-button>
+          }
+          @if (biteCountData) {
+            <ion-button
+              expand="full"
+              fill="outline"
+              data-testid="restaurant-bites-button"
+              (click)="showBitesClick.emit(restaurantData)"
+            >
+              <div
+                class="ion-display-flex ion-justify-content-between ion-flex-1"
+              >
+                <span>{{ 'bites' | transloco }}</span>
+                <ion-icon slot="end" name="chevron-forward-outline" />
+              </div>
+            </ion-button>
           }
         </div>
-      }
-
-      <div class="ion-margin-top">
-        <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
       </div>
-    </div>
-
-    <div class="ion-padding safe-padding-bottom buttons-container">
-      <div class="ion-padding-bottom">
-        <ion-button
-          expand="full"
-          fill="outline"
-          (click)="showMenuClick.emit(restaurantData)"
-        >
-          <div class="ion-display-flex ion-justify-content-between ion-flex-1">
-            <span>{{ 'menu' | transloco }}</span>
-            <ion-icon slot="end" name="chevron-forward-outline" />
-          </div>
-        </ion-button>
-        @if (biteCountData) {
-          <ion-button
-            expand="full"
-            fill="outline"
-            (click)="showBitesClick.emit(restaurantData)"
-          >
-            <div
-              class="ion-display-flex ion-justify-content-between ion-flex-1"
-            >
-              <span>{{ 'bites' | transloco }}</span>
-              <ion-icon slot="end" name="chevron-forward-outline" />
-            </div>
-          </ion-button>
-        }
-      </div>
-    </div>
+    }
   </ion-content>
 </ta-page>

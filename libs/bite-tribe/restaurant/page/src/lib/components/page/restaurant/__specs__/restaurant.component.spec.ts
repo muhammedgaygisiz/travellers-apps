@@ -304,6 +304,95 @@ describe('RestaurantComponent', () => {
     });
   });
 
+  describe('loading state', () => {
+    it('should render skeletons and no page content while the restaurant is missing', () => {
+      componentRef.setInput('restaurant', undefined);
+      componentRef.setInput('bites', [createBite({ rating: 4 })]);
+      componentRef.changeDetectorRef.detectChanges();
+
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      expect(component.isLoading()).toBe(true);
+      expect(
+        nativeEl.querySelector('[data-testid="restaurant-loading"]'),
+      ).toBeTruthy();
+      expect(
+        nativeEl.querySelector('[data-testid="restaurant-description-empty"]'),
+      ).toBeNull();
+      expect(
+        nativeEl.querySelector('[data-testid="restaurant-social-links-empty"]'),
+      ).toBeNull();
+    });
+
+    it('should not offer the menu or the bites button while the restaurant is missing', () => {
+      componentRef.setInput('restaurant', undefined);
+      uniqueBitesByNameMock.mockReturnValue([createBite()]);
+      componentRef.setInput('bites', [createBite()]);
+      componentRef.changeDetectorRef.detectChanges();
+
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      expect(
+        nativeEl.querySelector('[data-testid="restaurant-menu-button"]'),
+      ).toBeNull();
+      expect(
+        nativeEl.querySelector('[data-testid="restaurant-bites-button"]'),
+      ).toBeNull();
+    });
+
+    it('should drop the skeletons once the restaurant resolves', () => {
+      componentRef.setInput('restaurant', createRestaurant());
+      componentRef.changeDetectorRef.detectChanges();
+
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      expect(component.isLoading()).toBe(false);
+      expect(
+        nativeEl.querySelector('[data-testid="restaurant-loading"]'),
+      ).toBeNull();
+    });
+  });
+
+  describe('menu button', () => {
+    it('should render the menu button when the loaded restaurant has a menu id', () => {
+      componentRef.setInput(
+        'restaurant',
+        createRestaurant({ menuId: '/menus/menu-1' }),
+      );
+      componentRef.changeDetectorRef.detectChanges();
+
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      expect(component.hasMenu()).toBe(true);
+      expect(
+        nativeEl.querySelector('[data-testid="restaurant-menu-button"]'),
+      ).toBeTruthy();
+    });
+
+    it('should not render the menu button when the loaded restaurant has no menu id', () => {
+      componentRef.setInput('restaurant', createRestaurant());
+      componentRef.changeDetectorRef.detectChanges();
+
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      expect(component.hasMenu()).toBe(false);
+      expect(
+        nativeEl.querySelector('[data-testid="restaurant-menu-button"]'),
+      ).toBeNull();
+    });
+
+    it('should emit the loaded restaurant when the menu button is clicked', () => {
+      const restaurant = createRestaurant({ menuId: '/menus/menu-1' });
+      componentRef.setInput('restaurant', restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      const emitted: (Restaurant | undefined)[] = [];
+      component.showMenuClick.subscribe((value) => emitted.push(value));
+
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      nativeEl
+        .querySelector<HTMLElement>('[data-testid="restaurant-menu-button"]')
+        ?.click();
+
+      expect(emitted).toEqual([restaurant]);
+    });
+  });
+
   describe('empty restaurant details', () => {
     it('should render placeholder text when description and social media links are missing', () => {
       componentRef.setInput('restaurant', {

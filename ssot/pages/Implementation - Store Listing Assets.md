@@ -749,7 +749,7 @@ As of 22 August 2026, in the order they gate a submission.
 | ------------------------------ | ----- | --------------------------------------------------------------- |
 | Send the listing for review    | Play  | Real, and manual. Ten translations staged 30 Aug 2026           |
 | ~~Support URL~~                | Apple | **Done** 30 Aug 2026, `https://bite-tribe.web.app/support`      |
-| 7-inch and 10-inch screenshots | Play  | Asterisked, both empty — does not block review                  |
+| 7-inch and 10-inch screenshots | Play  | **Deferred** until the app is run on a tablet                   |
 | ~~Light-theme captures~~       | Both  | **Not a task.** One listing, one theme; dark by decision        |
 | Listing translations           | Both  | **Done.** Play 10 submitted, Apple 9 saved; no Amharic on Apple |
 | App previews                   | Apple | Optional, none captured                                         |
@@ -893,6 +893,42 @@ progress, not when its build is ready.
 
 This is a compliance self-assessment rather than a configuration value, and
 Apple's guidance says to consult a legal advisor where the status is uncertain.
+
+## Tablets Are Deferred, And The iPad Claim Is Untested
+
+Deferred on 30 August 2026: no tablet screenshots for either store until the app
+has actually been run on a tablet. Shipping tablet frames before that would be
+advertising a layout nobody has seen.
+
+**The claim is already live, though, and that is the part worth acting on.**
+`apps/bite-tribe-ios/ios/App/App.xcodeproj/project.pbxproj` sets
+`TARGETED_DEVICE_FAMILY = "1,2"`, which is iPhone **and iPad**. So the App Store
+listing offers an iPad app today, and the eleven-run platform test pass in
+[[Current State - Release Candidate Test Charter]] never touched an iPad - every
+iOS run was an iPhone 12 mini.
+
+Two consequences, in order of how much they cost:
+
+- **App Review may test on iPad.** If a reviewer opens it there and the layout
+  is broken, that is a rejection, and it is a rejection caused by a build setting
+  nobody chose deliberately rather than by the product.
+- **Apple's guidance asks for iPad screenshots when an app supports iPad.** The
+  version page's `Add for Review` is currently enabled with the iPad slots empty,
+  so the console is not enforcing it client-side. Whether submission validation
+  enforces it is unverified, and finding out by being rejected is the expensive
+  way.
+
+The decision to take is not about screenshots. It is whether BiteTribe supports
+iPad at all:
+
+| Option                                | Cost                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------- |
+| Set `TARGETED_DEVICE_FAMILY = "1"`    | One build-setting change, a new build, and the iPad question disappears entirely      |
+| Keep iPad, test it, shoot iPad frames | An iPad or iPad simulator run against the charter, plus a capture session and uploads |
+
+Play's 7-inch and 10-inch slots are the same shape of question and carry a
+required asterisk that does **not** gate submission - Publishing overview reports
+`Your changes can now be sent for review` with both empty.
 
 ## Blockers Outside The Listing
 

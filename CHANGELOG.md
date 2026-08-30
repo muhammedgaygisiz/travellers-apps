@@ -1,5 +1,60 @@
 # Changelog
 
+## build-96 (2026-08-30)
+
+<!-- changelog-start-rev: 39ca8201 -->
+<!-- changelog-end-rev: dcd8d395 -->
+
+### Features
+
+- add a public support page and confirm the support mailbox (#1432) (4d2906cc)
+- onboarding step for photo location (#1410) (78889774)
+- deduplicate across hashtag prefix and case (#1404) (09dd9fc9)
+- readonly-mode likes for own bites (#1403) (6df38567)
+
+### Bug Fixes
+
+- 1416 & 1417 (#1425) (68f8626e)
+- use endonyms for languages (#1424) (7e08a3fa)
+- reading gps from gallery (#1423) (f6804a4d)
+- live location permission state (#1421) (60330d8c)
+- rearrange cancel button for photo source (#1408) (a0d8b439)
+- safe-space under drawer content (#1407) (b31bcd50)
+- retry never times out and retry is offered while offline (#1406) (36f35957)
+- commit tags also on blur, enter and submit (#1405) (01a9c3ff)
+- sync doc language with users selected language (#1400) (9ddf0ecb)
+- native analytics collection stays disabled on devices that ran a dev build (#1399) (17ffb768)
+- android app not reflecting os permission for notifications (#1398) (a1ef4333)
+- delete account on android (#1397) (1a33f88d)
+- menu loading and error state (#1384) (32810c07)
+- fix title for edit bite (#1370) (96272303)
+- keep local image copies in app-private storage (#1229) (#1367) (171b2e6e)
+
+### Documentation
+
+- record the store-asset work and correct four claims it disproved (#1434) (297f8be4)
+- record runs 10 and 11 and close out the platform test pass (#1431) (42e64d62)
+- test run 10 android (#1430) (9f59b8c3)
+- document and skip any adjustments (#1422) (14022581)
+- test run 10 android (#1419) (d926f3d5)
+- test run 9 android (#1396) (a11827c4)
+
+### Continuous Integration
+
+- fix native release artifact naming (#1438) (dcd8d395)
+- signed android ios build jobs and firebase functions (#1436) (963e2473)
+
+### Styles
+
+- spacing on gate page (#1420) (91b3530b)
+
+### Chores
+
+- convert jest and lint to infered (#1383) (13d35d4d)
+- upgrade Angular and NgRx to 22 with TypeScript 6 (#1373) (d7e45edd)
+- remove Organisation properties from the user model (#1371) (#1372) (e6134dc2)
+- prepare build 1.0.1-95 release (#1364) (af94b5e5)
+
 ## build-95 (2026-08-23)
 
 <!-- changelog-start-rev: 4fdf021d -->

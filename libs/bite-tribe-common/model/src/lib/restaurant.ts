@@ -4,6 +4,9 @@ import type { Link } from './link';
 import type { DaySchedule } from './opening-hours';
 import type { Address } from './address';
 
+export type RestaurantClaimStatus =
+  'unclaimed' | 'pending' | 'claimed' | 'disputed' | 'revoked';
+
 export interface Restaurant {
   id: string;
   name: string;
@@ -19,6 +22,11 @@ export interface Restaurant {
   restaurantCandidateId?: string;
   biteIds?: string[];
   bites?: Bite[];
+
+  ownerUserId?: string;
+  claimStatus?: RestaurantClaimStatus;
+  claimedAt?: string;
+  claimedAtTimestamp?: number;
 
   socialMediaLinks?: Link[];
   description?: string;

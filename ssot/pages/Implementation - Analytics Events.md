@@ -69,22 +69,30 @@
   dashboard) or Looker Studio with these tiles. This is executed by the product
   owner against the logged-in console; the taxonomy above drives it.
 
-  | Metric                        | Category          | Source                              |
-  | ----------------------------- | ----------------- | ----------------------------------- |
-  | New activated users / day     | Activation        | `sign_up` count                     |
-  | Bites created / day           | Creation          | `bite_created` count                |
-  | Bucket lists created / day    | Creation          | `bucketlist_created` count          |
-  | Ratings submitted / day       | Creation          | `bucketlist_rated` count            |
-  | Searches / day                | Discovery         | `search_performed` count            |
-  | Restaurant + Bite views / day | Discovery         | `restaurant_viewed` + `bite_viewed` |
-  | D1 / D7 retention             | Retention         | GA4 retention / cohort report       |
-  | Daily active users            | Retention         | GA4 `session_start` / active users  |
-  | Crash-free users              | Launch monitoring | `app_exception` users vs all users  |
-  | Unhandled errors              | Launch monitoring | `exception` count                   |
-  | Top unhandled errors          | Launch monitoring | `exception` by `description`        |
-  | Crash traces and non-fatals   | Launch monitoring | Crashlytics console                 |
+  | Metric                      | Category          | Source                              |
+  | --------------------------- | ----------------- | ----------------------------------- |
+  | New activated users         | Activation        | `sign_up` count                     |
+  | Bites created               | Creation          | `bite_created` count                |
+  | Bucket lists created        | Creation          | `bucketlist_created` count          |
+  | Ratings submitted           | Creation          | `bucketlist_rated` count            |
+  | Searches                    | Discovery         | `search_performed` count            |
+  | Restaurant + Bite views     | Discovery         | `restaurant_viewed` + `bite_viewed` |
+  | D1 / D7 retention           | Retention         | GA4 retention / cohort report       |
+  | Active users                | Retention         | GA4 `activeUsers`                   |
+  | Crash-free users            | Launch monitoring | `app_exception` users vs all users  |
+  | Unhandled errors            | Launch monitoring | `exception` count                   |
+  | Top unhandled errors        | Launch monitoring | `exception` by `description`        |
+  | Crash traces and non-fatals | Launch monitoring | Crashlytics console                 |
 
   Keep the dashboard scoped to launch signals; resist adding vanity metrics.
+
+  Every metric is a **total for the window**, not a per-day rate. Until 31
+  August 2026 six of them were titled "/ day" and one "Daily active users",
+  while the queries divided by nothing: `eventCount` sums the window, and GA4's
+  `activeUsers` counts distinct users inside it, which on this property was 15
+  for one day against 40 for seven. The wrong reading reached three SSOT pages
+  as "5 Bites per day" before it was caught, so the titles now name what is
+  measured and the digest states the basis under its header.
 
   The two stability rows are deliberately separate. `app_exception` is logged by
   Crashlytics when a native process crashes, so a user counted there had the

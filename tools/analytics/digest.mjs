@@ -132,6 +132,8 @@ function toMarkdown({ date, days, propertyId, rows, breakdowns, alerts }) {
     `Window: last ${days} days vs previous ${days} days · property \`${propertyId}\``,
   );
   lines.push('');
+  lines.push('<sub>Values are totals for the window, not per-day rates.</sub>');
+  lines.push('');
   lines.push('| Metric | Category | Now | Prev | Δ |');
   lines.push('| --- | --- | --- | --- | --- |');
   for (const r of rows) {

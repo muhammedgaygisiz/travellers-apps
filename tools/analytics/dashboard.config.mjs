@@ -7,6 +7,12 @@
  * product event taxonomy in
  * `libs/common/ta-firestore/src/lib/analytics/analytics-events.ts`.
  *
+ * Every tile is a total for the window it is queried over, never a per-day
+ * rate. `eventCount` sums the window, and GA4's `activeUsers` counts distinct
+ * users within it - 15 for one day against 40 for seven on the same property -
+ * so a title promising a daily figure would misreport by roughly the window
+ * length. The window is stated in the digest header instead.
+ *
  * Tile `type`:
  * - `eventCount`      GA4 Data API runReport, metric `eventCount`, filtered to
  *                     `events` via the `eventName` dimension.
@@ -53,7 +59,7 @@
 export const DASHBOARD_TILES = [
   {
     id: 'activated-users',
-    title: 'New activated users / day',
+    title: 'New activated users',
     category: 'Activation',
     type: 'eventCount',
     events: ['sign_up'],
@@ -61,7 +67,7 @@ export const DASHBOARD_TILES = [
   },
   {
     id: 'bites-created',
-    title: 'Bites created / day',
+    title: 'Bites created',
     category: 'Creation',
     type: 'eventCount',
     events: ['bite_created'],
@@ -69,21 +75,21 @@ export const DASHBOARD_TILES = [
   },
   {
     id: 'bucketlists-created',
-    title: 'Bucket lists created / day',
+    title: 'Bucket lists created',
     category: 'Creation',
     type: 'eventCount',
     events: ['bucketlist_created'],
   },
   {
     id: 'ratings-submitted',
-    title: 'Ratings submitted / day',
+    title: 'Ratings submitted',
     category: 'Creation',
     type: 'eventCount',
     events: ['bucketlist_rated'],
   },
   {
     id: 'searches',
-    title: 'Searches / day',
+    title: 'Searches',
     category: 'Discovery',
     type: 'eventCount',
     events: ['search_performed'],
@@ -91,14 +97,14 @@ export const DASHBOARD_TILES = [
   },
   {
     id: 'content-views',
-    title: 'Restaurant + Bite views / day',
+    title: 'Restaurant + Bite views',
     category: 'Discovery',
     type: 'eventCount',
     events: ['restaurant_viewed', 'bite_viewed'],
   },
   {
     id: 'active-users',
-    title: 'Daily active users',
+    title: 'Active users',
     category: 'Retention',
     type: 'activeUsers',
     metric: 'activeUsers',

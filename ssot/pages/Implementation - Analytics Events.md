@@ -79,9 +79,22 @@
   | Restaurant + Bite views / day | Discovery         | `restaurant_viewed` + `bite_viewed` |
   | D1 / D7 retention             | Retention         | GA4 retention / cohort report       |
   | Daily active users            | Retention         | GA4 `session_start` / active users  |
-  | Crash-free users              | Launch monitoring | Crashlytics + `exception`           |
+  | Crash-free users              | Launch monitoring | `app_exception` users vs all users  |
+  | Unhandled errors              | Launch monitoring | `exception` count                   |
+  | Top unhandled errors          | Launch monitoring | `exception` by `description`        |
+  | Crash traces and non-fatals   | Launch monitoring | Crashlytics console                 |
 
   Keep the dashboard scoped to launch signals; resist adding vanity metrics.
+
+  The two stability rows are deliberately separate. `app_exception` is logged by
+  Crashlytics when a native process crashes, so a user counted there had the
+  same event the Crashlytics console reports, which makes it the honest basis
+  for a crash-free rate. `exception` is logged by
+  `FirebaseErrorHandlerService` for every unhandled Angular error on all three
+  platforms; those are usually survivable, so folding them into the crash-free
+  rate would understate it against the console. Stack traces and non-fatal
+  `recordException` reports exist only in Crashlytics and stay a console
+  pointer.
 
 - ## Agent-Operable Metrics
 

@@ -34,6 +34,12 @@ const CUSTOM_DIMENSIONS = [
   { parameterName: 'method', displayName: 'Sign up method' },
   { parameterName: 'verified', displayName: 'Restaurant verified' },
   { parameterName: 'rating', displayName: 'BiteTrail rating' },
+  // Stability. `FirebaseErrorHandlerService` sends both parameters on every
+  // `exception` event; without the dimension the digest can count errors but
+  // not name them. GA4 does not backfill, so registering this late means the
+  // top-errors breakdown starts from the day it is applied.
+  { parameterName: 'description', displayName: 'Error description' },
+  { parameterName: 'fatal', displayName: 'Error fatal' },
 ];
 
 const EDITOR_HINT =

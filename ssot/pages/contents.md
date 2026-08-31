@@ -86,6 +86,7 @@
   - [[Implementation - Storybook]]
   - [[Implementation - Testing]]
   - [[Implementation - Release And Build Workflow]]
+  - [[Implementation - iOS Simulator Testing]]
   - [[Implementation - Store Release Steps]]
   - [[Implementation - Store Listing Assets]]
   - [[Implementation - CI Pipeline]]

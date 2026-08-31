@@ -157,8 +157,31 @@ promotion warnings - no R8 deobfuscation file and no native debug symbols - do
 not block release but do degrade crash and ANR stack traces, which is worth
 closing now that stability is monitored daily.
 
-Still outstanding for the soft launch: **iOS**. App Store Connect has no build
-attached, and five screenshots stand for ten slots by decision.
+**iOS was submitted the same evening** and is `Waiting for Review`, with up to
+48 hours quoted. Build 96 was attached, the App Store version corrected from
+`1.0` to `1.0.1` so it matches the binary, and the App Review sign-in and
+contact fields filled - they were **entirely empty**, which for a login-gated
+app is the most common rejection there is.
+
+The submission was blocked once, by a requirement this SSOT had recorded as
+unverified: `Add for Review` refused with `You must upload a screenshot for
+13-inch iPad displays`. App Store Connect **does** enforce it. The cause is
+that `TARGETED_DEVICE_FAMILY = "1,2"` claims iPad support, which is an Xcode
+default rather than a decision anyone made, and no charter run has ever
+exercised an iPad.
+
+That was resolved by running the app on an iPad Pro 13-inch simulator for the
+first time in the project's history and capturing five frames. The result is
+worth recording, because the expectation was wrong: **the signed-in layout
+adapts**. Two-column feed, real top navigation, full-bleed map, menu cards
+using the width. Only the logged-out start page is a centred narrow column, and
+an early reading of that one screen produced a "stretched phone column" finding
+that the rest of the app does not support. Whether BiteTribe should claim iPad
+at all remains open as
+[#1451](https://github.com/muhammedgaygisiz/travellers-apps/issues/1451); what
+is settled is that the claim is not currently embarrassing.
+
+Both stores are therefore in review for the soft launch.
 
 ## Launch Rule
 

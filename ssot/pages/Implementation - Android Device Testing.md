@@ -189,6 +189,7 @@ https://localhost/ are blocked`. The Firebase web API key's HTTP-referrer
 
 ## Related Pages
 
+- [[Implementation - iOS Simulator Testing]]
 - [[Implementation - Store Release Steps]]
 - [[Implementation - Release And Build Workflow]]
 - [[Architecture - Capacitor]]

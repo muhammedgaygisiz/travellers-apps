@@ -276,6 +276,36 @@ Two consequences to keep in mind:
 Play Open Testing releases are not live for testers until Google's review
 completes, in the same way TestFlight external distribution waits on Apple.
 
+## Google Play Console - Promoting To Production
+
+Executed for the first time on 31 August 2026, promoting build 96 for the soft
+launch. Promotion reuses the bundle already on Open Testing; nothing is
+rebuilt or re-uploaded.
+
+1. **Test and release → Testing → Open testing**.
+2. On the release, **Promote release → Production**.
+3. The form arrives pre-filled with the bundle, the release name and the
+   release notes. Confirm it reads `Release notes provided for 11 of 11
+languages` before continuing - the placeholder trap above applies here too.
+4. **Next**, to _Preview and confirm_.
+5. A first production release fails here with `No countries or regions have
+been selected for this track`. Follow **Add countries / regions**, select
+   the scope, and **Save**. The country list is per track: Open Testing's 12
+   countries do not carry over.
+6. **Return to the draft release and save it.** This is the step that is easy
+   to miss. Saving the countries stages only the countries; the release itself
+   is still a draft and does not appear in Publishing overview. Go back to
+   **Production → Releases**, reopen the draft, **Next**, **Save**.
+7. In **Publishing overview**, confirm the release is listed alongside the
+   country changes before submitting. Submitting without it would open the
+   territories with no production build behind them.
+8. **Submit N changes for review** and confirm.
+
+Two warnings appear on every promotion and do not block it: no deobfuscation
+file for R8/proguard, and no native debug symbols. Both degrade the readability
+of crash and ANR stack traces, which matters more now that stability is
+monitored daily - see [[Analytics Operations]].
+
 ### Release Notes Are Eleven Locales, Not One
 
 Play pre-fills the release-notes field with one block per listing locale, and

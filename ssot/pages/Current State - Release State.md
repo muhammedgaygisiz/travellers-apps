@@ -132,6 +132,34 @@ Taken on 31 August 2026, under [issue 912](https://github.com/muhammedgaygisiz/t
 - **No rollback threshold is set in advance.** The hotfix or onboarding call is made on the day from real experience. The alert thresholds in the daily digest - crash-free below 99%, unhandled errors doubling - say look, not act. See [[Current State - Open Questions]].
 - **Two store gaps are accepted rather than filled.** Apple's five screenshots stand for the ten slots, since Apple requires one, and a build is attached only if review demands it. Play's tablet screenshots stay deferred, unchanged from 30 August 2026. See [[Implementation - Store Listing Assets]].
 
+## Soft Launch Execution
+
+**Android went to Production on 31 August 2026** and is in review. Build 96
+(1.0.1) was promoted from Open Testing rather than rebuilt, at **100% rollout**
+across **all 177 countries and regions**. Staging the rollout was considered and
+declined: the tester group is small and the maintainer preferred a single step.
+
+Two facts the promotion exposed, both now in [[Implementation - Store Release Steps]]:
+
+- Production had **no country list at all**. Open Testing's 12 countries do not
+  carry over, and a first production release fails until the track's own list is
+  set. The soft launch therefore widened distribution from 12 territories to 177
+  in the same submission that shipped the build.
+- Saving the countries stages only the countries. The draft release stays a
+  draft and does not reach Publishing overview until it is reopened and saved
+  through _Preview and confirm_. Submitting at that point would have opened 177
+  territories with no production build behind them; it was caught before
+  submission.
+
+Play's listing had already been published on 30 August 2026 under submission 51,
+along with the ten translations, so nothing was outstanding there. The two
+promotion warnings - no R8 deobfuscation file and no native debug symbols - do
+not block release but do degrade crash and ANR stack traces, which is worth
+closing now that stability is monitored daily.
+
+Still outstanding for the soft launch: **iOS**. App Store Connect has no build
+attached, and five screenshots stand for ten slots by decision.
+
 ## Launch Rule
 
 Before public launch, the release should be stable enough to learn from real users without confusing technical failures with product feedback.

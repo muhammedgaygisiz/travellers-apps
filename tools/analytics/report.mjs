@@ -16,7 +16,8 @@
  */
 
 import {
-  buildRequest,
+  breakdownTiles,
+  buildRequests,
   consoleTiles,
   createClient,
   currentWindow,
@@ -24,7 +25,8 @@ import {
   loadEnv,
   queryableTiles,
   resolvePropertyId,
-  runValue,
+  runBreakdown,
+  runTileValue,
 } from './ga4.mjs';
 
 loadEnv();
@@ -71,11 +73,13 @@ function printManual() {
 
 function runDryRun({ days, json }) {
   const propertyId = process.env.GA4_PROPERTY_ID || '<GA4_PROPERTY_ID>';
-  const planned = queryableTiles().map((tile) => ({
+  // A crash-free tile is two requests and a breakdown is a grouped one, so the
+  // plan lists requests per tile rather than assuming one each.
+  const planned = [...queryableTiles(), ...breakdownTiles()].map((tile) => ({
     id: tile.id,
     title: tile.title,
     category: tile.category,
-    request: buildRequest(tile, propertyId, currentWindow(days)),
+    requests: buildRequests(tile, propertyId, currentWindow(days)),
   }));
 
   if (json) {
@@ -92,7 +96,9 @@ function runDryRun({ days, json }) {
   console.log(`DRY RUN — planned GA4 Data API requests (last ${days} days)\n`);
   for (const tile of planned) {
     console.log(`▸ ${tile.id} — ${tile.title} [${tile.category}]`);
-    console.log(`${JSON.stringify(tile.request, null, 2)}\n`);
+    for (const request of tile.requests) {
+      console.log(`${JSON.stringify(request, null, 2)}\n`);
+    }
   }
   printManual();
 }
@@ -103,22 +109,43 @@ async function runLive({ days, json }) {
 
   const results = [];
   for (const tile of queryableTiles()) {
-    const value = await runValue(
+    const value = await runTileValue(
       client,
-      buildRequest(tile, propertyId, currentWindow(days)),
+      tile,
+      propertyId,
+      currentWindow(days),
     );
     results.push({
       id: tile.id,
       title: tile.title,
       category: tile.category,
       value,
+      text:
+        value === null ? 'n/a' : tile.unit === '%' ? `${value}%` : `${value}`,
     });
+  }
+
+  const breakdowns = [];
+  for (const tile of breakdownTiles()) {
+    const result = await runBreakdown(
+      client,
+      tile,
+      propertyId,
+      currentWindow(days),
+    );
+    breakdowns.push({ id: tile.id, title: tile.title, ...result });
   }
 
   if (json) {
     console.log(
       JSON.stringify(
-        { days, propertyId, tiles: results, manual: consoleTiles() },
+        {
+          days,
+          propertyId,
+          tiles: results,
+          breakdowns,
+          manual: consoleTiles(),
+        },
         null,
         2,
       ),
@@ -130,9 +157,20 @@ async function runLive({ days, json }) {
   console.log('| Metric | Category | Value |');
   console.log('| --- | --- | --- |');
   for (const r of results) {
-    console.log(`| ${r.title} | ${r.category} | ${r.value} |`);
+    console.log(`| ${r.title} | ${r.category} | ${r.text} |`);
   }
   console.log('');
+  for (const b of breakdowns) {
+    console.log(`${b.title}:`);
+    if (b.unavailable) {
+      console.log(`- unavailable: ${b.unavailable}`);
+    } else if (b.rows.length === 0) {
+      console.log('- none in window');
+    } else {
+      for (const row of b.rows) console.log(`- ${row.value} × ${row.label}`);
+    }
+    console.log('');
+  }
   printManual();
 }
 

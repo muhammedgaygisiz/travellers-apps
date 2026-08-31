@@ -93,15 +93,17 @@ Moderation questions raised by threading are recorded on [[epic-1284]], not here
 - Which events define retention?
 - Which events show whether users understand Bite creation?
 - Which dashboard metrics are needed for the first two launch weeks?
-- What threshold should trigger a launch rollback, hotfix, or onboarding change?
+- What threshold should trigger a launch rollback, hotfix, or onboarding change? **Decided on 31 August 2026: no threshold is set in advance.** The call is made on the day, from the experience the soft launch produces, rather than from a number chosen before anyone has seen the product meet real users. What makes that workable is that the daily digest on [#991](https://github.com/muhammedgaygisiz/travellers-apps/issues/991) now carries stability as well as growth, so the judgement is made against numbers that arrive on their own: crash-free users alerting below 99%, unhandled errors alerting on a doubling. Those are alert thresholds, not rollback thresholds, and the distinction is deliberate - they say look, not act. Revisit once there is enough history to know what a bad day actually looks like.
 
 ## Release Questions
 
-- What verified request ratio is acceptable before enabling App Check enforcement?
-- Which Android and iOS devices are required for launch testing?
-- What store screenshots and copy are needed for App Store and Google Play?
-- Who is included in the soft launch tester group?
+- What verified request ratio is acceptable before enabling App Check enforcement? **Settled.** The question never became a gate: server-side enforcement has been active for Firestore, Storage and Authentication since before Run 4, and Places API (New) stays in Monitoring by decision under [#1245](https://github.com/muhammedgaygisiz/travellers-apps/issues/1245). See [[Current State - Release State]].
+- Which Android and iOS devices are required for launch testing? **Settled** by the charter: a physical Samsung SM-A566B on Android 16 and an iPhone 12 mini on iOS 26.6, plus web. See [[Current State - Release Candidate Test Charter]].
+- What store screenshots and copy are needed for App Store and Google Play? **Settled** per slot in [[Implementation - Store Listing Assets]], including which gaps are accepted rather than filled.
+- Who is included in the soft launch tester group? **Decided on 31 August 2026: the current users.** No separate cohort is assembled. Growth from there is expected to come through them telling friends and family, which is the point rather than a limitation - the soft launch is meant to grow but not fast, so that a defect reaches a handful of people instead of a few hundred. The property counted 40 active users over the seven days to 31 August 2026, which is the order of magnitude this starts from.
 - Which communities should be contacted during public launch, and in what order?
+- How are soft-launch testers told the app is live? **Decided on 31 August 2026: directly, by the maintainer.** No push campaign, no mailing list, no in-app announcement. The group is small enough that a personal message is both possible and better, and it avoids building an announcement channel for an audience of forty.
+- Who are the soft-launch influencers? **Decided on 31 August 2026: there are none.** No influencer was successfully recruited, so the influencer half of [issue 912](https://github.com/muhammedgaygisiz/travellers-apps/issues/912)'s acceptance criterion is dropped from the soft launch rather than left blocking it. Recruiting is future work and belongs with the public launch campaign, [issue 913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913).
 
 ## Related Pages
 

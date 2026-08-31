@@ -61,7 +61,8 @@ You need a **GA4 property id** and a **service account** that may read it.
 
 `digest.mjs` compares the current window against the previous one, shows deltas,
 and raises threshold alerts defined per tile in `dashboard.config.mjs`
-(`expect: { min, maxDropPct }`).
+(`expect: { min, maxDropPct, maxRisePct }` — `maxRisePct` is for tiles where up
+is the bad direction, such as the error count).
 
 ```bash
 npm run analytics:digest              # Markdown, last 7 days vs previous 7
@@ -81,17 +82,35 @@ Trigger it manually any time from the Actions tab ("Run workflow").
 
 ## What it reports
 
-Event-count and active-user tiles are queried live. Two tiles are console-only
-because a single Data API call can't express them, and are printed as pointers:
+Event-count and active-user tiles are queried live, and so is the stability set:
+
+- **Crash-free users** — GA4 has no crash-free metric, so it is derived from two
+  `activeUsers` calls: everyone in the window, and the subset who triggered
+  `app_exception`, which is the event Crashlytics itself logs on a native crash.
+  Over zero active users it reports `n/a` rather than a flattering 100%.
+- **Unhandled errors** — the count of `exception`, logged by
+  `FirebaseErrorHandlerService` for every unhandled Angular error on all three
+  platforms. Kept out of the crash-free rate because these are usually
+  survivable; folding them in would understate the rate against the console.
+- **Top unhandled errors** — the same event grouped by its `description`
+  parameter. This needs the `description` custom dimension (see below); until it
+  is registered the digest prints a pointer to that command instead of failing,
+  and because GA4 does not backfill a dimension, the breakdown fills from the
+  day it is registered rather than retroactively.
+
+Two tiles stay console-only because the Data API cannot express them at all:
 
 - **D1 / D7 retention** — GA4 → Retention / cohort exploration.
-- **Crash-free users** — Firebase Crashlytics (+ the `exception` event in GA4).
+- **Crash stack traces and non-fatals** — Firebase Crashlytics → Issues. Counts
+  come from GA4; traces and `recordException` reports exist only in Crashlytics.
 
 ## Config-as-code: key events + custom dimensions
 
 `provision-ga4.mjs` registers the launch **key events** (conversions) and the
-**custom dimensions** for event parameters (`method`, `verified`, `rating`) via
-the Analytics Admin API, so they show up in GA4 reports and are queryable.
+**custom dimensions** for event parameters (`method`, `verified`, `rating`,
+`description`, `fatal`) via the Analytics Admin API, so they show up in GA4
+reports and are queryable. `description` is what the top-unhandled-errors
+breakdown groups by.
 
 ```bash
 npm run analytics:provision            # prints the plan (safe, no changes)

@@ -753,6 +753,8 @@ As of 22 August 2026, in the order they gate a submission.
 | ~~Light-theme captures~~       | Both  | **Not a task.** One listing, one theme; dark by decision        |
 | Listing translations           | Both  | **Done.** Play 10 submitted, Apple 9 saved; no Amharic on Apple |
 | App previews                   | Apple | Optional, none captured                                         |
+| ~~Screenshots 6 to 10~~        | Apple | **Accepted** 31 Aug 2026. Five is sufficient; Apple requires 1  |
+| Build attachment               | Apple | Attach only if review requires it                               |
 
 Play's tablet slots carry a required asterisk but do **not** gate submission:
 with both empty, Publishing overview still reports `Your changes can now be sent

@@ -358,6 +358,44 @@ Prod content means real people appear. Frame 3 shows another user's Bite, used
 with that creator's consent; frames 4 and 5 are the maintainer's own account.
 A re-shoot inherits that constraint — consent is per-person, not per-set.
 
+### The iPad 13-Inch Set
+
+Five frames, shot 31 August 2026 on an **iPad Pro 13-inch (M5) simulator, iOS
+26.2**, at 2064 x 2752 against the **production** Firebase project. Sources in
+`ssot/assets/store-listing/ipad-13/`. Uploaded the same day; Apple confirmed it
+serves the 13-inch set to every iPad display size.
+
+| #   | File                            | Shows                                                     |
+| --- | ------------------------------- | --------------------------------------------------------- |
+| 1   | `01-home-feed.png`              | Two-column Bites feed with real distances from Cologne    |
+| 2   | `02-search-map-switzerland.png` | Country search, map view, clustered pins over Switzerland |
+| 3   | `03-restaurant-china-wok.png`   | China Wok: storefront, 4.8 from 26 ratings, tags, map     |
+| 4   | `04-restaurant-menu.png`        | The China Wok menu, categories with prices                |
+| 5   | `05-start-page.png`             | The logged-out start page                                 |
+
+Uploaded in the order menu, restaurant, feed, start page, map. Apple uses only
+the first three on install sheets, which puts prices and then a rated
+restaurant above the fold - the same constraint the phone set is held to.
+
+Two things about this set that a re-shoot should know:
+
+- **The location is set, not real.** A simulator reports no location, so the
+  feed shows a warning banner and `-` for every distance. `xcrun simctl
+location <udid> set 50.9375,6.9603` puts the device in Cologne and the
+  distances become real. The commands are in
+  [[Implementation - iOS Simulator Testing]].
+- **The `Verify your email address` banner is in every signed-in frame**,
+  because the capture account is unverified. **Kept by decision on 31 August
+  2026**, on the same reasoning as the phone set's mid-scroll framing: it reads
+  as a real screen rather than a staged one. Do not "fix" it in a re-shoot.
+
+The set exists because App Store Connect **enforces** the 13-inch requirement:
+`Add for Review` failed with `You must upload a screenshot for 13-inch iPad
+displays`. That answers the question this page previously recorded as unknown.
+Whether BiteTribe should claim iPad support at all is a separate and still-open
+decision, tracked as
+[#1451](https://github.com/muhammedgaygisiz/travellers-apps/issues/1451).
+
 ### Capturing Prod Content Needs A Simulator App Check Provider
 
 A production build points at the production Firebase project, where App Check is
@@ -373,6 +411,9 @@ simulator at all.
 `AppAttestProvider` otherwise. The branch is resolved at compile time, and store
 and TestFlight builds are always compiled for a device, so the debug provider
 cannot reach a release binary even by misconfiguration.
+
+The build, boot and token-registration commands are in
+[[Implementation - iOS Simulator Testing]].
 
 The provider emits a token that has to be registered in the Firebase console
 before it works. That registration is a **standing App Check bypass for whoever
@@ -546,19 +587,20 @@ stale-palette asset remains on either store.
 
 Version 1.0 is in Prepare for Submission and is effectively empty.
 
-| Slot                                    | State                             |
-| --------------------------------------- | --------------------------------- |
-| Name, subtitle                          | set                               |
-| Age rating                              | set, 13+ - was 18+                |
-| Screenshots                             | 5 of 10, 6.9", current            |
-| App previews                            | none                              |
-| Description, promotional text, keywords | set                               |
-| Support URL, marketing URL, copyright   | support URL and copyright **set** |
-| Primary category                        | Food & Drink                      |
-| App Privacy                             | published                         |
-| Pricing, availability                   | free, all 175 regions             |
-| Content Rights                          | declared                          |
-| Build                                   | none attached                     |
+| Slot                                    | State                                           |
+| --------------------------------------- | ----------------------------------------------- |
+| Name, subtitle                          | set                                             |
+| Age rating                              | set, 13+ - was 18+                              |
+| Screenshots, iPhone                     | 5 of 10, 6.9", current                          |
+| Screenshots, iPad                       | 5 of 10, 13", captured and uploaded 31 Aug 2026 |
+| App previews                            | none                                            |
+| Description, promotional text, keywords | set                                             |
+| Support URL, marketing URL, copyright   | support URL and copyright **set**               |
+| Primary category                        | Food & Drink                                    |
+| App Privacy                             | published                                       |
+| Pricing, availability                   | free, all 175 regions                           |
+| Content Rights                          | declared                                        |
+| Build                                   | 96 (1.0.1), attached 31 Aug 2026                |
 
 TestFlight is the exception and is in good shape: internal and external groups
 exist, build 94 (1.0.1) is in Testing, and the beta description, feedback email
@@ -754,7 +796,8 @@ As of 22 August 2026, in the order they gate a submission.
 | Listing translations            | Both  | **Done.** Play 10 submitted, Apple 9 saved; no Amharic on Apple |
 | App previews                    | Apple | Optional, none captured                                         |
 | ~~Screenshots 6 to 10~~         | Apple | **Accepted** 31 Aug 2026. Five is sufficient; Apple requires 1  |
-| Build attachment                | Apple | Attach only if review requires it                               |
+| ~~Build attachment~~            | Apple | **Done** 31 Aug 2026, build 96                                  |
+| ~~13-inch iPad screenshots~~    | Apple | **Was a hard blocker.** Closed 31 Aug 2026, five frames         |
 
 Play's tablet slots carry a required asterisk but do **not** gate submission:
 with both empty, Publishing overview still reports `Your changes can now be sent

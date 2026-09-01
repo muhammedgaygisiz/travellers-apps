@@ -14,6 +14,8 @@ import {
   isServiceWorkerEnabled,
 } from './service-worker';
 import { provideDocumentLanguage } from './document-language';
+import { provideCanonicalUrl } from './canonical-url';
+import { provideDocumentTitle } from './document-title';
 
 export const appConfig = (environment: Environment): ApplicationConfig => ({
   providers: [
@@ -66,5 +68,12 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
     // with that language's rules (issue #1388). Registered after
     // `provideTransloco`, which owns the service it listens to.
     provideDocumentLanguage(),
+    // Narrows the canonical link `index.html` ships to the active public route,
+    // so the pages the sitemap lists do not also declare themselves duplicates
+    // of the site root (issue #1454).
+    provideCanonicalUrl(),
+    // Keeps the product name in the document title once routing replaces the
+    // one `index.html` ships (issue #1454).
+    provideDocumentTitle(),
   ],
 });

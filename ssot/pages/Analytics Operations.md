@@ -29,6 +29,10 @@ Tooling lives in `tools/analytics/` (setup: `tools/analytics/README.md`):
 - **Config-as-code** — `npm run analytics:provision` registers GA4 key events
   and custom dimensions from the taxonomy (needs Editor on the property).
 
+- **Raw event data** — `npm run analytics:bigquery` owns the GA4 → BigQuery
+  export link as config-as-code, and `npm run analytics:query` runs the SQL
+  checked in under `tools/analytics/queries/`. See BigQuery Export below.
+
 Dashboard-as-code and the event taxonomy are documented in
 [[Implementation - Analytics Events]].
 
@@ -69,13 +73,63 @@ A crash-free rate pinned at exactly 100% is worth one console cross-check
 before it is trusted, because an `app_exception` pipeline that never fires and
 an app that never crashes look identical from the Data API.
 
+## BigQuery Export (Tier 2)
+
+The Data API is aggregated, sampled and quota-limited, and cannot express a
+retention cohort or a funnel at all. The GA4 → BigQuery export writes the raw
+event stream into `analytics_<propertyId>`, where SQL can do both and join
+against Firestore data. This is the foundation [[issue-987]] builds on.
+
+The link is config-as-code in `tools/analytics/provision-bigquery.mjs`, so the
+export is a reviewable decision rather than a click someone once made in the
+console. Each default is deliberate:
+
+- **Daily export, not streaming.** Streaming is billed per GB ingested;
+  cohorts and funnels read the daily tables. `--streaming` enables it when a
+  same-day question actually needs it.
+- **Dataset location `EU`.** GA4 fixes this at link creation and cannot move
+  the dataset afterwards. The EU multi-region matches the user base and keeps
+  the raw event data — the data [[issue-989]] has to reason about — in the EU.
+- **No advertising id.** BiteTribe runs no ad attribution, so exporting
+  IDFA/AAID would widen the PII surface for no analytical gain.
+- **All data streams.** `exportStreams` is left unset, so the web, iOS and
+  Android streams are all exported and a fourth needs no code change.
+
+Checked-in SQL lives in `tools/analytics/queries/`, run by
+`npm run analytics:query -- <id>`. Two placeholders keep a query portable:
+`${EVENTS_TABLE}` for the wildcard table, and `@start_date`/`@end_date` for the
+`_TABLE_SUFFIX` window.
+
+The export has **no backfill**: it starts from the day the link is enabled, and
+the first daily table lands up to 24 hours later. Everything before that day
+stays Data-API-only, the same way the `description` dimension did.
+
+### Access tiers
+
+Reporting needed Viewer on the GA4 property and no Cloud IAM at all. BigQuery
+needs more, in two places that are easy to confuse:
+
+| Action                              | Needs                                                       |
+| ----------------------------------- | ----------------------------------------------------------- |
+| `analytics:bigquery` (plan, status) | Viewer on the GA4 property                                  |
+| `analytics:bigquery -- --apply`     | **Administrator** on the property + dataset-create in Cloud |
+| `analytics:query`                   | `roles/bigquery.jobUser` + `roles/bigquery.dataViewer`      |
+
+Editor — the tier [[issue-912]] raised the account to for
+`analytics:provision` — is **not** enough to create a link. With Editor every
+read succeeds and only the create is denied, which reads like a broken script
+rather than a missing grant. Linking from the GA4 console is the equivalent
+path and additionally grants the Analytics service agent its BigQuery
+permissions implicitly.
+
 ## Limits
 
 - GA4 has no API to create visual dashboards/explorations — the config + report
   is the reproducible substitute.
 - The Data API is aggregated and quota-limited; retention cohorts and raw event
   joins need BigQuery.
-- Retention (D1/D7) remains a console tile until BigQuery lands.
+- Retention (D1/D7) remains a console tile until the BigQuery export has
+  delivered enough days to compute a cohort from.
 
 ## Roadmap (Tier 2–3)
 
@@ -94,6 +148,21 @@ Signal above.
 Sequencing: BigQuery export ([[issue-986]]) unblocks funnels/cohorts
 ([[issue-987]]); consent/PII ([[issue-989]]) is launch-sensitive for EU and
 should not slip.
+
+[[issue-986]] shipped the tooling, the checked-in SQL and this documentation,
+and the export was **enabled on 1 September 2026** — link
+`properties/487035057/bigQueryLinks/XHhCGXsiSYmA_SFBzZpf9g`, daily into
+`bite-tribe.analytics_487035057` (EU), all three streams, no advertising id.
+It was created through the GA4 console rather than `--apply`, because the
+service account is Editor on the property and creating a link needs
+Administrator; the console path grants the Analytics service agent its
+BigQuery permissions as a side effect. `--status` reads the result either way.
+
+`roles/bigquery.jobUser` + `roles/bigquery.dataViewer` were granted to
+`analytics-reporter@bite-tribe.iam.gserviceaccount.com` the same day, verified
+by a query job succeeding in the EU location where it previously returned
+`Access Denied: bigquery.jobs.create`. The only thing still gating a query is
+the first daily table, which GA4 delivers up to 24h after linking.
 
 ## Related Pages
 

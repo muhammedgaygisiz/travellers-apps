@@ -213,6 +213,11 @@ version, so it is the field to use for timely messaging.
 Every pin on the map is one real dish, photographed by the person who ate it, with the price they paid and what they honestly thought.
 ```
 
+It is also the web app's meta description and Open Graph description, so the site
+and the stores make the same claim. Change it here first, then in
+`apps/bite-tribe/src/index.html`. See
+[[Implementation - Web Search And Social Metadata]].
+
 ### Keywords
 
 App Store only, 97 of 100 characters. Comma-separated with no spaces, because
@@ -1011,6 +1016,7 @@ These are account-level and gate submission regardless of listing completeness:
 
 - [[Implementation - Store Release Steps]]
 - [[Implementation - Store Listing Translations]]
+- [[Implementation - Web Search And Social Metadata]]
 - [[Implementation - Localization]]
 - [[Implementation - Release And Build Workflow]]
 - [[Current State - Release State]]

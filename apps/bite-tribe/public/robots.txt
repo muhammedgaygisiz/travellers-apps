@@ -1,0 +1,35 @@
+# BiteTribe - https://bitetribe.app
+#
+# Copied to the site root by the `public` asset entry in
+# apps/bite-tribe/project.json, so it is served by all three live hosts.
+#
+# Everything not listed below is crawlable. The disallowed paths sit behind
+# `authGuard` and render a redirect to /start for a signed-out crawler, so
+# indexing them would add nothing but thin duplicates of the start page.
+# Revisit an entry when its surface becomes public.
+
+User-agent: *
+Allow: /
+Disallow: /about
+Disallow: /bite-trail/
+Disallow: /bite/
+Disallow: /edit-profile
+Disallow: /followers/
+Disallow: /gallery
+Disallow: /home
+Disallow: /leaderboard
+Disallow: /market-place
+Disallow: /my-bites
+Disallow: /my-bucketlists
+Disallow: /my-profile
+Disallow: /new-bite
+Disallow: /onboarding
+Disallow: /profile/
+Disallow: /search
+Disallow: /settings
+Disallow: /weekly-bites
+
+# /s/bite/<id> is deliberately not disallowed. It is the shared-link function,
+# which serves its own title, description and image for unfurlers.
+
+Sitemap: https://bitetribe.app/sitemap.xml

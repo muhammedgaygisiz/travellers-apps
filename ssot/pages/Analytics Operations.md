@@ -126,6 +126,86 @@ rather than a missing grant. Linking from the GA4 console is the equivalent
 path and additionally grants the Analytics service agent its BigQuery
 permissions implicitly.
 
+## Consent, Retention And PII (Tier 3)
+
+Collection is gated on an explicit decision as of [[issue-989]]. The
+implementing pieces are `AnalyticsConsentService` in
+`libs/common/ta-firestore/src/lib/analytics/`, the first-run
+`AnalyticsConsentGateComponent`, and a Privacy section on the settings page.
+
+### The undecided state is the point
+
+Consent is a tri-state - `unset`, `granted`, `denied` - not a boolean. `unset`
+is the window between first launch and the answer, and collection is **off**
+during it. A boolean would make "has not been asked" indistinguishable from
+"said no", and the gate could never tell whether it still owed a question.
+
+The decision is device-scoped in Capacitor `Preferences`, not user-scoped like
+[[issue-1016]]'s coach marks, because it must be readable before the first
+analytics call and that happens long before anyone signs in.
+
+`AnalyticsConsentService.initialize()` runs **first** in the startup
+initializer, ahead of App Check. App Check logs its own
+`app_check_startup_started` / `_completed` telemetry, so a later gate would leak
+two events per launch, every launch.
+
+This replaces the unconditional `setEnabled({ enabled: true })` that used to sit
+in `provideFirestoreUtils`. The [[issue-1387]] property it carried is preserved:
+production still _states_ the flag on every startup rather than trusting a
+native default that outlives installs - it now states the user's answer.
+
+Analytics and crash reporting are stored as two answers. Product analytics is
+optional by any reading; crash reporting is what makes a broken release
+diagnosable, and one switch would mean a user declining analytics also silently
+removes the ability to see the app crashing for them. The first-run gate sets
+both together; the settings page is where they come apart.
+
+### Retention
+
+| Store           | Setting                                                                  | Decision                                                                                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GA4 property    | `eventDataRetention: TWO_MONTHS`                                         | **Keep at the two-month minimum.** It is the privacy-forward end of the range, and since the BigQuery export landed the console no longer has to be the place long-window analysis happens. |
+| GA4 property    | `userDataRetention: FOURTEEN_MONTHS`, `resetUserDataOnNewActivity: true` | Unchanged.                                                                                                                                                                                  |
+| BigQuery export | **no table expiration**                                                  | **Set a 14-month default table expiration.** Long enough for the cohort work in [[issue-987]], bounded so the raw per-user event stream does not accumulate forever by default.             |
+
+GA4's retention setting does **not** apply to BigQuery. Before this decision the
+two disagreed completely: GA4 forgot raw events after 60 days while the export
+kept them indefinitely, and neither value had a reason behind it.
+
+The BigQuery expiration is **not yet applied** - the analytics service account
+holds `dataViewer` and `jobUser`, neither of which can update a dataset. It
+needs an account with `bigquery.datasets.update`:
+
+```bash
+bq update --default_table_expiration 36288000 bite-tribe:analytics_487035057
+```
+
+Pre-consent data is a separate question this decision does not settle: events
+collected before the gate shipped are still in the export, and a strict reading
+says those partitions should go.
+
+### PII stance
+
+The event taxonomy came out of review clean. Every parameter is a closed set -
+`method`, `surface`, `reason`, `step`, `rating`, `verified` - and
+`search_performed` deliberately carries no query text, which is the usual leak.
+
+The exception was `exception`. Its `description` is whatever a thrown error
+happened to say, which routinely means an address, a uid, or a URL carrying a
+token, and [[issue-986]] put it in a store with no expiry. It is now passed
+through `redactErrorDescription` before it leaves the device: emails, JWTs,
+query strings and long mixed-case-and-digit ids are replaced, and the result is
+truncated. The rules are blunt on purpose - a redactor that reasons about what
+is _really_ identifying will let something through.
+
+Crashlytics keeps the full message and stack. That is its function, it is behind
+its own consent answer, and redacting a stack would leave a crash report that
+cannot be acted on. GA4 says how many and roughly what; Crashlytics says where.
+
+`setUserId` is gated the same way, and clears rather than skips: a user who
+withdraws needs the uid already sent from that device removed, not left to go
+stale.
+
 ## Limits
 
 - GA4 has no API to create visual dashboards/explorations — the config + report

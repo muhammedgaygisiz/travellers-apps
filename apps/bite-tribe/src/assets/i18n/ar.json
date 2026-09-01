@@ -563,5 +563,17 @@
   "support-report-title": "الإبلاغ عن محتوى",
   "support-report-intro": "إذا رأيت Bite أو مراجعة لا مكان لها في BiteTribe، راسلنا مع رابط أو لقطة شاشة وسننظر في الأمر.",
   "support-links-title": "مفيد أيضًا",
-  "support-links-account-deletion": "حذف حسابك"
+  "support-links-account-deletion": "حذف حسابك",
+  "analytics-consent-title": "ساعدنا في تحسين BiteTribe",
+  "analytics-consent-copy": "يمكننا جمع بيانات استخدام مجهولة لمعرفة ما ينجح وما يتعطل.",
+  "analytics-consent-benefit-features": "الشاشات والميزات التي يتم استخدامها",
+  "analytics-consent-benefit-crashes": "الأعطال والأخطاء، حتى نتمكن من إصلاحها",
+  "analytics-consent-benefit-never-content": "لا تشمل أبدًا الـ Bites أو الصور أو ملفك الشخصي",
+  "analytics-consent-change-later": "يمكنك تغيير ذلك في أي وقت من الإعدادات.",
+  "analytics-consent-allow": "السماح",
+  "analytics-consent-decline": "لا، شكرًا",
+  "privacy": "الخصوصية",
+  "privacy-share-usage-data": "مشاركة بيانات الاستخدام",
+  "privacy-crash-reports": "تقارير الأعطال",
+  "privacy-consent-hint": "إيقاف هذا يوقف الجمع فورًا."
 }

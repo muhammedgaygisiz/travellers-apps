@@ -21,6 +21,7 @@ import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from './provide-firestore-utils';
 import { terminate } from 'firebase/firestore';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
 import { NavController } from '@ionic/angular';
+import { AnalyticsConsentService } from './analytics/analytics-consent.service';
 
 /**
  * How long a caller waits for Firebase to report whether a persisted session
@@ -35,6 +36,7 @@ export class AuthService {
   readonly auth = inject(FIREBASE_AUTH);
   readonly firestore = inject(FIREBASE_FIRESTORE);
   readonly navController = inject(NavController);
+  private readonly analyticsConsent = inject(AnalyticsConsentService);
 
   readonly _authStateChange$ = new BehaviorSubject<AuthStateChange | null>(
     null,
@@ -235,19 +237,35 @@ export class AuthService {
     return await FirebaseAuthentication.signInWithApple({ mode: 'popup' });
   }
 
+  /**
+   * Attaches the signed-in user to the analytics and crash streams, but only
+   * where that was consented to.
+   *
+   * A uid is pseudonymous rather than anonymous - it joins straight back to the
+   * account - so it is exactly the identifier a declined consent is refusing.
+   * The null branch matters as much as the granted one: a user who withdraws in
+   * settings needs the id already sent on this device cleared, not merely left
+   * to go stale.
+   */
   async setupAnalyticsAndCrashlytics(currentUser: User): Promise<void> {
     const user = currentUser;
 
-    if (user && !process.env['NX_APP_BITE_TRIBE_IS_BUSINESS']) {
-      await FirebaseAnalytics.setUserId({
-        userId: user.uid,
-      });
+    if (!user || process.env['NX_APP_BITE_TRIBE_IS_BUSINESS']) {
+      return;
+    }
 
-      if (Capacitor.isNativePlatform()) {
-        await FirebaseCrashlytics.setUserId({
-          userId: user.uid,
-        });
-      }
+    const consent = this.analyticsConsent.consent();
+
+    await FirebaseAnalytics.setUserId({
+      userId: consent.analytics === 'granted' ? user.uid : null,
+    });
+
+    if (Capacitor.isNativePlatform()) {
+      // Crashlytics types the id as a plain string rather than a nullable one,
+      // so an empty string is how the association is cleared here.
+      await FirebaseCrashlytics.setUserId({
+        userId: consent.crashReporting === 'granted' ? user.uid : '',
+      });
     }
   }
 }

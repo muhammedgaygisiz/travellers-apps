@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import * as appCheckUtils from '../initialize-firebase-app-check';
+import { UNSET_CONSENT } from '../analytics/analytics-consent.service';
 import { FirebaseApp, FirebaseOptions, initializeApp } from 'firebase/app';
 import { Firestore } from 'firebase/firestore';
 import { Analytics } from 'firebase/analytics';
@@ -165,6 +166,14 @@ describe(provideFirestoreUtils.name, () => {
     startNavigation: jest.fn(),
   });
 
+  const createConsent = (calls?: string[]): { initialize: jest.Mock } => ({
+    initialize: jest.fn(async () => {
+      calls?.push('consent');
+
+      return UNSET_CONSENT;
+    }),
+  });
+
   it('should initialize App Check, then auth, then start navigation when ready', async () => {
     const calls: string[] = [];
     jest
@@ -186,12 +195,15 @@ describe(provideFirestoreUtils.name, () => {
       { production: true },
       {} as unknown as Analytics,
       authService,
+      createConsent(calls),
       gate,
     );
 
     await initializer();
 
-    expect(calls).toEqual(['app-check', 'auth', 'nav']);
+    // Consent is first on purpose: App Check initialization logs its own
+    // analytics telemetry, so a later gate would leak two events per launch.
+    expect(calls).toEqual(['consent', 'app-check', 'auth', 'nav']);
     expect(gate.readiness.markReady).toHaveBeenCalled();
     expect(gate.readiness.markBlocked).not.toHaveBeenCalled();
   });
@@ -208,6 +220,7 @@ describe(provideFirestoreUtils.name, () => {
       { production: true },
       null,
       authService,
+      createConsent(),
       gate,
     );
 
@@ -237,6 +250,7 @@ describe(provideFirestoreUtils.name, () => {
       { production: true },
       null,
       authService,
+      createConsent(),
       gate,
     );
     await initializer();
@@ -266,6 +280,7 @@ describe(provideFirestoreUtils.name, () => {
       { production: true },
       null,
       authService,
+      createConsent(),
       gate,
     );
     await initializer();
@@ -288,12 +303,15 @@ describe(provideFirestoreUtils.name, () => {
       process.env['NX_APP_BITE_TRIBE_IS_DEV'] = undefined;
     });
 
-    // Native Firebase Analytics persists the collection flag (Android
-    // SharedPreferences, iOS user defaults), so the DEV-only disable outlives
-    // the build that made the call. Production must re-assert it or a device
-    // that once ran a dev build stays silent forever (issue #1387).
+    // The collection flag is no longer asserted while building providers. It
+    // moved to `AnalyticsConsentService`, which the startup initializer runs
+    // first, so the flag now states the user's answer instead of an
+    // unconditional `true` (issue #989). The issue #1387 property it replaced -
+    // that production always states the flag rather than trusting a native
+    // default that outlives installs - is preserved by the gate, and covered in
+    // `analytics-consent.service.spec.ts`.
     describe('the native analytics collection flag', () => {
-      it('should be re-enabled on a native platform', () => {
+      it('should not be asserted while building providers', () => {
         jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
         jest.mocked(FirebaseAnalytics.setEnabled).mockResolvedValue(undefined);
 
@@ -301,9 +319,7 @@ describe(provideFirestoreUtils.name, () => {
           production: true,
         });
 
-        expect(FirebaseAnalytics.setEnabled).toHaveBeenCalledWith({
-          enabled: true,
-        });
+        expect(FirebaseAnalytics.setEnabled).not.toHaveBeenCalled();
       });
 
       it('should not be touched on the web, where nothing persists it', () => {

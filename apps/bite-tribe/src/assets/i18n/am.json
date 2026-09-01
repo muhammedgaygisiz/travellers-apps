@@ -563,5 +563,17 @@
   "support-report-title": "ይዘት ማሳወቅ",
   "support-report-intro": "በBiteTribe ላይ መሆን የሌለበት Bite ወይም ግምገማ ካዩ፣ አገናኝ ወይም ቅጽበታዊ ገጽ እይታ አያይዘው ይላኩልን፤ እንመለከተዋለን።",
   "support-links-title": "እንዲሁም ጠቃሚ",
-  "support-links-account-deletion": "መለያዎን መሰረዝ"
+  "support-links-account-deletion": "መለያዎን መሰረዝ",
+  "analytics-consent-title": "BiteTribe ን እንድናሻሽል እርዱን",
+  "analytics-consent-copy": "ምን እንደሚሠራና ምን እንደሚበላሽ ለማየት ማንነት የማይገልጽ የአጠቃቀም መረጃ መሰብሰብ እንችላለን።",
+  "analytics-consent-benefit-features": "የትኞቹ ማያ ገጾችና ባህሪያት እንደሚጠቀሙ",
+  "analytics-consent-benefit-crashes": "ብልሽቶችና ስህተቶች፣ እንድናስተካክላቸው",
+  "analytics-consent-benefit-never-content": "የእርስዎን Bites፣ ፎቶዎች ወይም መገለጫ በጭራሽ አይደለም",
+  "analytics-consent-change-later": "ይህን በማንኛውም ጊዜ ከቅንብሮች መቀየር ይችላሉ።",
+  "analytics-consent-allow": "ፍቀድ",
+  "analytics-consent-decline": "አይ፣ አመሰግናለሁ",
+  "privacy": "ግላዊነት",
+  "privacy-share-usage-data": "የአጠቃቀም መረጃ አጋራ",
+  "privacy-crash-reports": "የብልሽት ሪፖርቶች",
+  "privacy-consent-hint": "ይህን ማጥፋት መሰብሰብን ወዲያውኑ ያቆማል።"
 }

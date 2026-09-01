@@ -100,9 +100,13 @@ Checked-in SQL lives in `tools/analytics/queries/`, run by
 `${EVENTS_TABLE}` for the wildcard table, and `@start_date`/`@end_date` for the
 `_TABLE_SUFFIX` window.
 
-The export has **no backfill**: it starts from the day the link is enabled, and
-the first daily table lands up to 24 hours later. Everything before that day
-stays Data-API-only, the same way the `description` dimension did.
+History effectively starts at the link. The first delivery reached back one
+day — the link created on 1 September 2026 at 03:10 CEST produced
+`events_20260831` inside 20 hours — but that single prior day is an observation
+rather than a documented backfill window, and it is all there is. Everything
+earlier in the soft launch stays Data-API-only, the same way the `description`
+dimension did, so cohort work under [[issue-987]] accumulates forward from
+31 August 2026 rather than reading the launch retroactively.
 
 ### Access tiers
 
@@ -161,8 +165,13 @@ BigQuery permissions as a side effect. `--status` reads the result either way.
 `roles/bigquery.jobUser` + `roles/bigquery.dataViewer` were granted to
 `analytics-reporter@bite-tribe.iam.gserviceaccount.com` the same day, verified
 by a query job succeeding in the EU location where it previously returned
-`Access Denied: bigquery.jobs.create`. The only thing still gating a query is
-the first daily table, which GA4 delivers up to 24h after linking.
+`Access Denied: bigquery.jobs.create`.
+
+The export was confirmed **delivering on 1 September 2026**: `events_20260831`
+returned 89 `screen_view`, 71 `user_engagement` and 16 `session_start` events
+over 9–13 users for 18 KB scanned, which is the `event-counts` query doing
+exactly what it exists to do. All three acceptance criteria on [[issue-986]]
+are met.
 
 ## Related Pages
 

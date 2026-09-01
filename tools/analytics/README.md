@@ -137,8 +137,12 @@ Defaults, each deliberate:
 - **All data streams.** `exportStreams` is left unset, so a stream added later
   is exported without editing the script.
 
-The first daily table arrives **up to 24 hours** after the link is enabled, and
-GA4 does not backfill: the export starts from the day it is turned on.
+The first daily table arrives **up to 24 hours** after the link is enabled —
+in practice sooner. The link created on 1 September 2026 at 03:10 CEST had
+delivered `events_20260831` inside 20 hours: the first delivery covered the day
+_before_ the link existed. Do not plan around more history than that, though.
+One prior day is what was observed, not a documented backfill window, and
+nothing reaches back to the start of the soft launch.
 
 ### One-time access, and who can do what
 

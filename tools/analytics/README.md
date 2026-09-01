@@ -7,6 +7,10 @@ Agent-operable access to the launch analytics defined in
   (one source of truth for the report and the docs).
 - **`report.mjs`** — queries the tiles against the GA4 Data API and prints the
   metrics. Run it via `npm run analytics:report`.
+- **`provision-bigquery.mjs`** — owns the GA4 → BigQuery export link as
+  config-as-code. Run it via `npm run analytics:bigquery`.
+- **`queries/*.sql`** — checked-in SQL against the export, run by `query.mjs`
+  via `npm run analytics:query`.
 
 ## Quick start
 
@@ -103,6 +107,108 @@ Two tiles stay console-only because the Data API cannot express them at all:
 - **D1 / D7 retention** — GA4 → Retention / cohort exploration.
 - **Crash stack traces and non-fatals** — Firebase Crashlytics → Issues. Counts
   come from GA4; traces and `recordException` reports exist only in Crashlytics.
+
+## BigQuery export (raw event data)
+
+The Data API is aggregated, sampled and quota-limited, and it cannot express a
+retention cohort or a funnel at all. The **GA4 → BigQuery export** writes the
+raw event stream into `analytics_<propertyId>`, where SQL can do those things
+and join against Firestore data. It is the foundation for
+[issue #987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987).
+
+`provision-bigquery.mjs` owns the export link, so it is reproducible rather
+than a click someone once made in the console.
+
+```bash
+npm run analytics:bigquery                 # print the planned link (no creds needed)
+npm run analytics:bigquery -- --status     # current link, dataset, delivered tables
+npm run analytics:bigquery -- --apply      # create the link (idempotent)
+```
+
+Defaults, each deliberate:
+
+- **Daily export only.** Streaming (`--streaming`) is billed per GB ingested and
+  produces `events_intraday_*`; cohorts and funnels read the daily tables.
+- **Dataset location `EU`** (`--location=`, `BIGQUERY_DATASET_LOCATION`). GA4
+  fixes this at link creation and cannot move the dataset afterwards, so it is
+  chosen for the EU user base and for the PII questions in issue #989.
+- **No advertising id.** BiteTribe runs no ad attribution, so exporting
+  IDFA/AAID would only widen the PII surface.
+- **All data streams.** `exportStreams` is left unset, so a stream added later
+  is exported without editing the script.
+
+The first daily table arrives **up to 24 hours** after the link is enabled —
+in practice sooner. The link created on 1 September 2026 at 03:10 CEST had
+delivered `events_20260831` inside 20 hours: the first delivery covered the day
+_before_ the link existed. Do not plan around more history than that, though.
+One prior day is what was observed, not a documented backfill window, and
+nothing reaches back to the start of the soft launch.
+
+### One-time access, and who can do what
+
+`--status` and `--dry-run` need only the **Viewer** the reporting tooling
+already has. Creating the link and querying the export each need a grant beyond
+that, and neither can be self-granted by the service account.
+
+**To create the link** — one of:
+
+- **Raise the service account to Administrator** on the GA4 property (Analytics
+  → Admin → Property Access Management), then `npm run analytics:bigquery --
+--apply`. **Editor is not enough**: with Editor every read in this script
+  succeeds and only the create is denied, which looks like a broken script
+  rather than a missing grant. The account also needs permission to create the
+  dataset in the target Cloud project (`roles/bigquery.admin`, or
+  `bigquery.datasets.create`).
+- **Or link it in the console** — GA4 → Admin → Product links → BigQuery links →
+  _Link_. Pick the `bite-tribe` project, **daily** frequency, dataset location
+  **EU**, advertising id **off**. This is the same link the script would create,
+  and console linking grants the Analytics service agent its BigQuery
+  permissions implicitly. Confirm afterwards with
+  `npm run analytics:bigquery -- --status`.
+
+**In the Cloud project**, whichever path is used:
+
+1. **Billing enabled**, and the **BigQuery API** on (`bigquery.googleapis.com`).
+2. **The Analytics service agent may write the dataset.** Console linking grants
+   this. If the link was created through the API, grant
+   `firebase-measurement@system.gserviceaccount.com` **BigQuery User** and
+   **BigQuery Job User**.
+3. **The analytics service account may read it.** Grant
+   `analytics-reporter@bite-tribe.iam.gserviceaccount.com`
+   `roles/bigquery.jobUser` on the project (to run queries) and
+   `roles/bigquery.dataViewer` on the project or the export dataset (to read
+   it). Reporting needed no project IAM at all; querying does — without this,
+   `npm run analytics:query` fails with `bigquery.jobs.create` denied.
+
+```bash
+gcloud projects add-iam-policy-binding bite-tribe \
+  --member=serviceAccount:analytics-reporter@bite-tribe.iam.gserviceaccount.com \
+  --role=roles/bigquery.jobUser
+gcloud projects add-iam-policy-binding bite-tribe \
+  --member=serviceAccount:analytics-reporter@bite-tribe.iam.gserviceaccount.com \
+  --role=roles/bigquery.dataViewer
+```
+
+### Running checked-in SQL
+
+Queries live in `queries/*.sql` so analysis is reviewable and repeatable. Each
+file may use two placeholders that the runner fills in:
+
+- `${EVENTS_TABLE}` — the fully qualified wildcard events table.
+- `@start_date` / `@end_date` — the window as `YYYYMMDD` strings, for
+  `_TABLE_SUFFIX`.
+
+```bash
+npm run analytics:query -- --list                       # checked-in queries
+npm run analytics:query -- event-counts                 # last 7 days
+npm run analytics:query -- event-counts --days=30 --json
+npm run analytics:query -- event-counts --dry-run       # resolved SQL, no API call
+npm run analytics:query -- event-counts --intraday      # streaming tables
+```
+
+`_TABLE_SUFFIX BETWEEN @start_date AND @end_date` excludes the intraday tables
+on its own, because their suffix under the `events_*` wildcard sorts outside a
+numeric date range. `--intraday` switches the wildcard rather than the filter.
 
 ## Config-as-code: key events + custom dimensions
 

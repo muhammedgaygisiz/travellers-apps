@@ -9,8 +9,8 @@ asset rules behind the App Store and Google Play entries.
 owns what gets uploaded, so the listing is reviewable and versioned instead of
 living only in the two consoles.
 
-Listing content belongs in the SSOT graph. `docs/` is a legacy folder that
-predates the graph and must not gain a store directory.
+Listing content belongs in the SSOT graph rather than a store directory of its
+own, so it is reviewable and versioned alongside everything else.
 
 [Issue #1178](https://github.com/muhammedgaygisiz/travellers-apps/issues/1178)
 tracks filling both entries.

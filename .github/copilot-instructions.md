@@ -312,8 +312,10 @@ import { Utils } from 'utils';
 ## Documentation
 
 - Main README: Project setup and quick start
-- docs/NX.md: Nx-specific documentation
-- docs/weekly_reads.md: Learning resources
+- ssot/pages/: the SSOT graph, which is the source of truth for product, domain,
+  architecture, implementation and release context
+- ssot/pages/Architecture - Nx Workspace.md: apps, library families, boundary rules
+- ssot/pages/Implementation - Testing.md: test and e2e commands
 - Storybook: Component documentation
 
 ## Best Practices

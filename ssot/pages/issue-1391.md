@@ -1,6 +1,6 @@
 - [bug: A typed Bite tag is lost unless a space is pressed](https://github.com/muhammedgaygisiz/travellers-apps/issues/1391) (Issue \#1391)
 - Description
-  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - Found in [[Test Run 09 - Android Build 95]], the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
   - `run9test` typed into the tag field of the Bite form stayed plain text. It was not committed on blur, on Enter, or on submit, and tapping "Paylaş" posted the Bite without it and without a word about it. Only a space turned it into a chip.
 - Findings - only a delimiter ever committed a tag
   - `TagsInputComponent` committed a tag from exactly one place: the `valueChanges` pipe, which calls `inputChange` as soon as the typed text contains one of `DELIMITERS` (`' ', ',', '.', '-', '_', ';'`). Nothing else read the field.

@@ -1,6 +1,6 @@
 - [bug: Photo source action sheet lists Cancel before the real actions](https://github.com/muhammedgaygisiz/travellers-apps/issues/1393) (Issue \#1393)
 - Description
-  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - Found in [[Test Run 09 - Android Build 95]], the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
   - Tapping the photo box on the Bite form opened "Görsel kaynağını seç" with "İptal et" first, then "Fotoğraf çek", then "Galeriden seç". Cancel sat directly under the title, where the first real choice is expected.
   - Nothing was broken - every option worked - so this is presentation only. It costs a moment of reading on the one sheet that stands between the user and the photo of their Bite.
 - Findings - the sheet is an `ion-alert`, and it renders its buttons in array order

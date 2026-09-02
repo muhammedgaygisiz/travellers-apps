@@ -65,7 +65,7 @@
   | ----------------------------------- | --------------------------------------------------------------------------------- |
   | Bite creation and quality           | [[epic-907]]                                                                      |
   | Discovery, search, and navigation   | [[epic-738]]                                                                      |
-  | Restaurant and menu context         | [[epic-734]]                                                                      |
+  | Restaurant and menu context         | [epic 734](https://github.com/muhammedgaygisiz/travellers-apps/issues/734)        |
   | Marketplace and BiteTrails          | [[epic-738]]                                                                      |
   | Platform readiness and data quality | [[epic-907]], [[Current State - Known Issues]], [[Current State - Release State]] |
 

@@ -26,7 +26,7 @@
   - Leaderboard reliability work has landed through issues 966 and 968.
   - Daily ranking-change notifications have landed through issue 971.
   - Profile badge display has landed through issue 975.
-  - Restaurant candidate verification has landed through issue 942 as part of [[epic-778]].
+  - Restaurant candidate verification has landed through issue 942 as part of [epic 778](https://github.com/muhammedgaygisiz/travellers-apps/issues/778).
   - Mandatory Bite restaurant/place selection has landed through issue 943 / PR \#981.
   - Map live-update camera stability has landed through issue 982.
   - Playwright login, registration, and create-Bite E2E coverage has landed through issue 983.

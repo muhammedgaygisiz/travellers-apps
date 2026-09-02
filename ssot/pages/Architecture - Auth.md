@@ -85,7 +85,7 @@ See [[issue-1385]] for what reading these positionally cost.
 
 ## Sign-In Feedback Contract
 
-See [[issue-1273]] for the reasoning. Sign-in is not fast - it is a network
+See [issue 1273](https://github.com/muhammedgaygisiz/travellers-apps/issues/1273) for the reasoning. Sign-in is not fast - it is a network
 round-trip, auth-state propagation, and the guard chain - so it reports itself
 the same way registration does rather than inventing a second pattern.
 

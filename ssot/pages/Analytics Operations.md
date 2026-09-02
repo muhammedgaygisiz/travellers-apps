@@ -63,7 +63,7 @@ instead, using the events Crashlytics and the app already emit:
   Registration changed nothing about what is collected. `description` was
   already being transmitted on every error; it was only unqueryable. That also
   means any PII inside an error message was already reaching GA4, which is
-  evidence for [[issue-989]] rather than something this introduced.
+  evidence for [issue 989](https://github.com/muhammedgaygisiz/travellers-apps/issues/989) rather than something this introduced.
 
 What stays in the console is what only exists there: **stack traces and
 non-fatal `recordException` reports**, in Crashlytics → Issues. GA4 says how
@@ -78,7 +78,7 @@ an app that never crashes look identical from the Data API.
 The Data API is aggregated, sampled and quota-limited, and cannot express a
 retention cohort or a funnel at all. The GA4 → BigQuery export writes the raw
 event stream into `analytics_<propertyId>`, where SQL can do both and join
-against Firestore data. This is the foundation [[issue-987]] builds on.
+against Firestore data. This is the foundation [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) builds on.
 
 The link is config-as-code in `tools/analytics/provision-bigquery.mjs`, so the
 export is a reviewable decision rather than a click someone once made in the
@@ -89,7 +89,7 @@ console. Each default is deliberate:
   same-day question actually needs it.
 - **Dataset location `EU`.** GA4 fixes this at link creation and cannot move
   the dataset afterwards. The EU multi-region matches the user base and keeps
-  the raw event data — the data [[issue-989]] has to reason about — in the EU.
+  the raw event data — the data [issue 989](https://github.com/muhammedgaygisiz/travellers-apps/issues/989) has to reason about — in the EU.
 - **No advertising id.** BiteTribe runs no ad attribution, so exporting
   IDFA/AAID would widen the PII surface for no analytical gain.
 - **All data streams.** `exportStreams` is left unset, so the web, iOS and
@@ -105,7 +105,7 @@ day — the link created on 1 September 2026 at 03:10 CEST produced
 `events_20260831` inside 20 hours — but that single prior day is an observation
 rather than a documented backfill window, and it is all there is. Everything
 earlier in the soft launch stays Data-API-only, the same way the `description`
-dimension did, so cohort work under [[issue-987]] accumulates forward from
+dimension did, so cohort work under [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) accumulates forward from
 31 August 2026 rather than reading the launch retroactively.
 
 ### Access tiers
@@ -137,23 +137,23 @@ permissions implicitly.
 
 ## Roadmap (Tier 2–3)
 
-| Item                                     | Issue         | Tier |
-| ---------------------------------------- | ------------- | ---- |
-| BigQuery export as analytics foundation  | [[issue-986]] | 2    |
-| Activation funnel + retention cohorts    | [[issue-987]] | 2    |
-| Unified growth + stability daily digest  | [[issue-988]] | 2    |
-| GDPR consent mode + PII/retention review | [[issue-989]] | 3    |
+| Item                                     | Issue                                                                       | Tier |
+| ---------------------------------------- | --------------------------------------------------------------------------- | ---- |
+| BigQuery export as analytics foundation  | [issue 986](https://github.com/muhammedgaygisiz/travellers-apps/issues/986) | 2    |
+| Activation funnel + retention cohorts    | [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) | 2    |
+| Unified growth + stability daily digest  | [issue 988](https://github.com/muhammedgaygisiz/travellers-apps/issues/988) | 2    |
+| GDPR consent mode + PII/retention review | [issue 989](https://github.com/muhammedgaygisiz/travellers-apps/issues/989) | 3    |
 
-[[issue-988]] is **done**, landed with the soft-launch monitoring loop under
+[issue 988](https://github.com/muhammedgaygisiz/travellers-apps/issues/988) is **done**, landed with the soft-launch monitoring loop under
 [[issue-912]]: the digest is one artifact answering both "are we growing?" and
 "are we breaking?", and crash-free users carries a threshold. See Stability
 Signal above.
 
-Sequencing: BigQuery export ([[issue-986]]) unblocks funnels/cohorts
-([[issue-987]]); consent/PII ([[issue-989]]) is launch-sensitive for EU and
+Sequencing: BigQuery export ([issue 986](https://github.com/muhammedgaygisiz/travellers-apps/issues/986)) unblocks funnels/cohorts
+([issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987)); consent/PII ([issue 989](https://github.com/muhammedgaygisiz/travellers-apps/issues/989)) is launch-sensitive for EU and
 should not slip.
 
-[[issue-986]] shipped the tooling, the checked-in SQL and this documentation,
+[issue 986](https://github.com/muhammedgaygisiz/travellers-apps/issues/986) shipped the tooling, the checked-in SQL and this documentation,
 and the export was **enabled on 1 September 2026** — link
 `properties/487035057/bigQueryLinks/XHhCGXsiSYmA_SFBzZpf9g`, daily into
 `bite-tribe.analytics_487035057` (EU), all three streams, no advertising id.
@@ -170,7 +170,7 @@ by a query job succeeding in the EU location where it previously returned
 The export was confirmed **delivering on 1 September 2026**: `events_20260831`
 returned 89 `screen_view`, 71 `user_engagement` and 16 `session_start` events
 over 9–13 users for 18 KB scanned, which is the `event-counts` query doing
-exactly what it exists to do. All three acceptance criteria on [[issue-986]]
+exactly what it exists to do. All three acceptance criteria on [issue 986](https://github.com/muhammedgaygisiz/travellers-apps/issues/986)
 are met.
 
 ## Related Pages

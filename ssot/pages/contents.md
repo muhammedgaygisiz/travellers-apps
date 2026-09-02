@@ -97,6 +97,7 @@
   - [[ADR-0003 Nx Monorepo]]
 - Current State
   - [[Current State - Roadmap]]
+  - [[Current State - Product Direction]]
   - [[Current State - E2E Coverage]]
   - [[Current State - Known Issues]]
   - [[Current State - Open Questions]]

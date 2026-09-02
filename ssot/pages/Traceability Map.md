@@ -180,6 +180,7 @@ The rule it adds is recorded on [[Bite]]. The guard is a client affordance only;
   | Current State Page                                      | Use In Planning                                                                                                  |
   | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
   | [[Current State - Roadmap]]                             | Prioritize launch preparation, product intelligence, public launch, and learning work.                           |
+  | [[Current State - Product Direction]]                   | Group unbuilt work into product fronts and find the use cases that belong to one.                                |
   | [[Current State - E2E Coverage]]                        | Select the next uncovered use-case journey and preserve the latest Playwright coverage state.                    |
   | [[Current State - Nx And Dependency Migration Roadmap]] | Sequence Nx, Node.js, Angular, test-tooling, and dependency upgrades without combining unrelated migration risk. |
   | [[Current State - Known Issues]]                        | Check whether a requested change touches an existing launch risk.                                                |

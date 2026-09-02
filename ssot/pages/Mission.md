@@ -32,13 +32,9 @@ Three audiences. [[Personas]] describes each one in full, including travelers an
 
 ## Product Direction
 
-Direction implied by the current sources. [[Current State - Roadmap]] owns the sequencing.
-
-- **Strengthen the bite creation and discovery loop** — make it easy to create high-quality bites and easy to discover relevant bites by feed, map, search, profile, restaurant, and BiteTrail.
-- **Improve search and navigation** — users should be able to find people, bites, restaurants, menus, and curated journeys quickly, even as content grows.
-- **Make restaurant and menu data actionable** — restaurant profiles and menu items should connect users from discovery to a clear next action, such as trying a dish, planning a visit, or creating a bite from a menu item.
-- **Mature the BiteTrail ecosystem** — organisations and creators should be able to curate, publish, and eventually monetize food journeys.
-- **Build trust and quality controls** — location, currency, profile, translation, App Check, and backend data quality work all support the mission by keeping discovery reliable.
+The fronts the product grows along, and the use cases grouped under them, live in
+[[Current State - Product Direction]]. [[Current State - Roadmap]] owns sequencing
+and dates.
 
 ## Strategic Boundary
 

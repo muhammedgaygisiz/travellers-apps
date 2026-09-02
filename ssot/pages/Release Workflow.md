@@ -295,9 +295,15 @@ Intended, but not part of the current release:
 - The artifacts themselves attached to the GitHub release. Only
   `build-provenance.json` is, which is the part that has to outlive the 90-day
   artifact retention; the `.aab` and `.ipa` stay workflow artifacts.
-- Nothing here is unpractised any more except the two items above. Publishing
-  from CI is wired and automatic on a tag; it becomes practised at the first
-  release that uses it.
+- **Publishing to the stores from CI.** The release path itself is practised:
+  build 97 was cut through `release.yml` on 30 August 2026, and `prepare` plus
+  the web-bundle, Android and iOS jobs all passed on runners with no workstation
+  involved. That run was dispatched with `publish` false, so both native jobs
+  logged "Not publishing: this run did not ask for it" and the artifacts went to
+  the stores by hand. A tag push publishes on its own; a run started from
+  `release.yml` publishes only when the dispatch asks for it, and the one release
+  that has used that path did not. See the run history in
+  [[Implementation - Release And Build Workflow]].
 
 ## Related Pages
 

@@ -155,8 +155,9 @@ value side, and the same three around the key.
 This is not defensive padding. The build of commit `297f8be4` emits
 `` NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED:`true` `` — a template literal — so the
 double-quoted grep that [[Release Workflow]] and
-[[Current State - Release Candidate Test Charter]] both document returns **no
-match** on a bundle that is entirely correct. A check whose "expected match"
+[[Current State - Release Candidate Test Charter]] used to prescribe returns **no
+match** on a bundle that is entirely correct. Both pages now warn against it and
+defer to the script. A check whose "expected match"
 half silently never matches is worse than no check. Which quote form the
 minifier picks is not a property the release cares about, so the script does not
 care either.
@@ -377,12 +378,13 @@ Both jobs are proven. The workflow produced signed, named, commit-traceable
 Android and iOS artifacts on runners, with no workstation involved, on
 30 August 2026.
 
-| Run | Ref                                               | Trigger  | web-bundle    | android       | ios            |
-| --- | ------------------------------------------------- | -------- | ------------- | ------------- | -------------- |
-| #1  | `develop@963e247`                                 | dispatch | pass, 2.2 min | pass, 5.5 min | fail at export |
-| #2  | `1181-fix-native-release-artifact-naming@1cafbd0` | dispatch | pass, 1.8 min | pass, 5.2 min | pass, 22.9 min |
-| #3  | `develop@dcd8d39`                                 | dispatch | pass, 1.9 min | pass, 5.3 min | pass, 20.5 min |
-| #4  | `build-1.0.1-96@269cb26`                          | tag push | pass, 1.8 min | pass, 5.6 min | -              |
+| Run | Ref                                               | Trigger       | web-bundle    | android       | ios            |
+| --- | ------------------------------------------------- | ------------- | ------------- | ------------- | -------------- |
+| #1  | `develop@963e247`                                 | dispatch      | pass, 2.2 min | pass, 5.5 min | fail at export |
+| #2  | `1181-fix-native-release-artifact-naming@1cafbd0` | dispatch      | pass, 1.8 min | pass, 5.2 min | pass, 22.9 min |
+| #3  | `develop@dcd8d39`                                 | dispatch      | pass, 1.9 min | pass, 5.3 min | pass, 20.5 min |
+| #4  | `build-1.0.1-96@269cb26`                          | tag push      | pass, 1.8 min | pass, 5.6 min | -              |
+| #5  | `build-1.0.1-97@f301593f`                         | `release.yml` | pass, 2.4 min | pass, 5.8 min | pass, 17.6 min |
 
 **Run #3 produced the artifacts that were actually released** as build 96 on
 30 August 2026: `bitetribe-1.0.1-96-dcd8d39-android` at 15.7 MB and
@@ -399,6 +401,13 @@ named 96 and logged:
 Tag build-1.0.1-96 names build 1.0.1 (96), but this tree is 1.0.1 (97).
 The artifacts are named after the tree, which is what was actually built.
 ```
+
+**Run #5 is the first release actually cut through `release.yml`.** Build 97, on
+30 August 2026: `prepare` made the tag and called the build, and all three build
+jobs passed on runners with no workstation involved. It was dispatched with
+`publish` false, so both native jobs logged "Not publishing: this run did not ask
+for it" and the artifacts went to the stores by hand. The path is proven; the
+upload steps still are not.
 
 That is the designed behaviour and it costs a runner. Expect one such run after
 every release until the ordering question in [[Release Workflow]] is settled.

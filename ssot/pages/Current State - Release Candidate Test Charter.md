@@ -25,35 +25,30 @@ This says nothing about backend protection: Firebase Console enforcement is a se
 
 ## How To Produce The Build
 
-`pipeline.yml` has no native job. CI runs setup, lint, stylelint, tests, loki, e2e, the two web app builds and deploys, and the Storybook deploy, and nothing in it touches Capacitor, Gradle or Xcode.
+The build procedure itself is not charter material. [[Implementation - Release And Build Workflow]]
+owns the npm scripts, the `native-release.yml` jobs, what those jobs assert, artifact
+naming and provenance, and the run history. [[Implementation - Store Release Steps]]
+owns the store console procedure. Follow those; this section states only what the
+pass additionally requires.
 
-A separate workflow, `.github/workflows/native-release.yml`, now does under [issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181). It has never run - its signing secrets are not provisioned - so there is still no CI-built Android or iOS artifact to test, and every step below stands. Re-read this section once a run has produced installable artifacts.
-
-The release-candidate pass must use the same distribution route as testers:
+The pass must use the same distribution route as testers:
 
 - iOS uses the named TestFlight build.
 - Android uses the named Google Play Open Testing release.
 - Web uses the deployed production-configuration build.
 
-The native wrappers bundle `dist/apps/bite-tribe`. Producing the store artifacts starts from a local production build, whose safety comes from the production configuration plus an explicit check:
+Two build properties are part of this charter rather than of the build:
 
-1. `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true npx nx build bite-tribe --configuration=production --skip-nx-cache`. The enforced-mode gate from issue 933 is **on for the release candidate**, decided under [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177). The variable defaults to off and nothing in a local build sets it, so a build produced without it silently ships the gate disabled while every other part of this charter still reads as if it were on. CI sets the same variable on the `deploy-bite-tribe` job, so the web deploy and the native wrappers agree. `--skip-nx-cache` is not belt-and-braces. The variable is **not part of the build target's cache key**, so the command above, written correctly and run with the variable set, still returns a cached bundle carrying `` `ENFORCED:"false"` `` if one exists. Run 11 hit exactly that, and only step 3's grep caught it. See [#1428](https://github.com/muhammedgaygisiz/travellers-apps/issues/1428).
-2. Confirm the bundle is clean before it is wrapped. `npm run release:verify-bundle` does checks 2 and 3 together and exits non-zero on either. The environment plugin strips `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN` and `NX_APP_BITE_TRIBE_IS_DEV` only when `NX_TASK_TARGET_CONFIGURATION` is `production`, so a build made through any other path keeps them. By hand, in `dist/apps/bite-tribe`, grep for the debug token's own value, and for `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN:` and `NX_APP_BITE_TRIBE_IS_DEV:` — **with the trailing colon** — and expect no match.
+- **The App Check enforced-mode gate is on for the release candidate**, decided under
+  [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177).
+  Confirming it reached the bundle is the build-time half of check 12; the device
+  evidence is the runtime half, and neither substitutes for the other.
+- **A bundle carrying a debug token is not testable.** A registered debug token
+  bypasses App Check entirely, which would defeat the gate this pass exists to
+  verify. `npm run release:verify-bundle` must pass before a bundle is wrapped.
 
-   The colon is what makes this check mean anything. Grepping the bare key name always matches even in a correctly stripped bundle, because the app source declares those names as lookup constants and the minifier keeps them as plain strings: a clean production build contains `q="NX_APP_BITE_TRIBE_IS_DEV"` in the App Check chunk. Only the property form proves a **value** was inlined. Checking without the colon reports every build as contaminated, which is worse than not checking, because it trains the reader to wave the result through.
-
-3. Confirm the gate actually reached the bundle. The plugin replaces `process.env` wholesale with the collected object, so the inlined entries land in the emitted JavaScript as object properties. Grep `dist/apps/bite-tribe` for `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED:` followed by a quoted `true`, and expect a match. This is the build-time half of check 12; the device evidence is the runtime half, and neither substitutes for the other.
-
-   **Do not pin the quoting.** The key is unquoted — esbuild minifies the define object with bare identifier keys, so the JSON-shaped `"NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED":"true"` matches nothing — but the _value_ is not reliably double-quoted either. The build of commit `297f8be4` emits `` NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED:`true` `` as a template literal, on which the double-quoted grep this step used to prescribe returns no match for a bundle that is entirely correct. A check whose expected-match half silently never matches trains the reader to wave the result through, which is the same failure mode as grepping without the colon. `npm run release:verify-bundle` accepts all three quote forms and is the reason to prefer it.
-
-4. `npx nx run bite-tribe-ios:sync` and `npx nx run bite-tribe-android:sync`. Use the `run <project>:sync` form: `nx sync` on its own is Nx's built-in workspace sync-generator command, which ignores a project argument and never touches Capacitor.
-5. Archive/upload from Xcode and Android Studio, distribute through TestFlight and Google Play Open Testing, and test the resulting store-installed artifacts. The console procedure is [[Implementation - Store Release Steps]].
-
-Step 2 is not optional. A registered debug token bypasses App Check entirely, which would defeat the enforced-mode gate this pass is meant to verify.
-
-Until issue #1181 lands, every native release artifact is produced manually on a workstation. The explicit production-bundle check makes that acceptable for this release-candidate pass, but it does not make the process reproducible: the store artifact is not automatically tied to a commit, shared toolchain, signing job, or retained CI output. Record the source commit, local toolchain, signing route, and store upload manually for every tested native build.
-
-Web verification against the emulator is a preparation step, not the pass. The web half of the pass runs against a production-configuration build.
+Web verification against the emulator is a preparation step, not the pass. The web
+half of the pass runs against a production-configuration build.
 
 ## Store Distribution Baseline
 

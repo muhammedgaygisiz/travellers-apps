@@ -106,6 +106,7 @@
   - [[Implementation - Release And Build Workflow]]
   - [[Implementation - Store Release Steps]]
   - [[Implementation - Store Listing Assets]]
+  - [[Implementation - Store Declarations]]
   - [[Implementation - Web Search And Social Metadata]]
   - [[Implementation - Social Media Channels]]
   - [[Implementation - CI Pipeline]]

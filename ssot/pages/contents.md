@@ -89,6 +89,7 @@
   - [[Implementation - iOS Simulator Testing]]
   - [[Implementation - Store Release Steps]]
   - [[Implementation - Store Listing Assets]]
+  - [[Implementation - Store Declarations]]
   - [[Implementation - CI Pipeline]]
 - Decisions
   collapsed:: true

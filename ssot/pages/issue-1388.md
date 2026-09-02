@@ -1,6 +1,6 @@
 - [bug: Turkish uppercase drops the dotted I across cards, drawer and restaurant names](https://github.com/muhammedgaygisiz/travellers-apps/issues/1388) (Issue \#1388)
 - Description
-  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - Found in [[Test Run 09 - Android Build 95]], the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
   - With the app in Turkish, a Bite card and the Bitemap drawer showed `ÜMRANIYE, TÜRKIYE` instead of `ÜMRANİYE, TÜRKİYE`, another card showed `BERN, İSVIÇRE` instead of `BERN, İSVİÇRE`, and a restaurant name rendered `KAYSERI MANTI EVI` instead of `KAYSERİ MANTI EVİ`.
   - The lowercase source strings were correct in every case, so only the uppercase transform was wrong. The second example got its leading `İ` right only because the source already began with one.
 - Findings - casing is a property of the language, and the document never named one

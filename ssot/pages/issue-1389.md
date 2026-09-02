@@ -1,6 +1,6 @@
 - [bug: Restaurant page tags are not deduplicated across the # prefix and case](https://github.com/muhammedgaygisiz/travellers-apps/issues/1389) (Issue \#1389)
 - Description
-  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - Found in [[Test Run 09 - Android Build 95]], the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
   - The China Wok restaurant page showed `Chinawok` next to `#Chinawok`, `cologne` next to `#Cologne`, and `asianfood` next to `#asianfood` - six chips for three tags.
 - Findings - the page showed the raw union, and Bites store tags exactly as typed
   - `TagsInputComponent` writes whatever the user types. Nothing strips a `#` or normalizes case on the way into a Bite, so `Chinawok`, `#Chinawok` and `chinawok` are three different strings in Firestore and all three are correct as stored data.

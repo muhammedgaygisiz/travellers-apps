@@ -117,8 +117,9 @@ transform: {
 
 # Table of Content
 
-1. [NX](docs/NX.md)
-2. [Weekly Reads](docs/weekly_reads.md)
+1. [SSOT](ssot/pages/SSOT.md) - product, domain, architecture, implementation and release context
+2. [Agent contract](AGENTS.md) - how coding agents work in this repository
+3. [Nx workspace](<ssot/pages/Architecture - Nx Workspace.md>) - apps, library families and boundary rules
 
 # Quick References
 

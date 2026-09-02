@@ -1,6 +1,6 @@
 - [bug: Offline photo upload retry never times out](https://github.com/muhammedgaygisiz/travellers-apps/issues/1390) (Issue \#1390)
 - Description
-  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - Found in [[Test Run 09 - Android Build 95]], the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
   - A Bite created in airplane mode reached `Fotoğraf yüklenemedi` with a `Yüklemeyi yeniden dene` button inside two minutes, which is the failed-photo state working. Tapping retry while still offline returned the tile to the uploading state, where it stayed for six minutes with no failure and no second retry affordance. Reconnecting completed the upload.
   - The asymmetry was the complaint: the first attempt times out, the retry does not.
 - Findings - the retry never started, so nothing was there to time out

@@ -155,11 +155,18 @@ value side, and the same three around the key.
 This is not defensive padding. The build of commit `297f8be4` emits
 `` NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED:`true` `` — a template literal — so the
 double-quoted grep that [[Release Workflow]] and
-[[Current State - Release Candidate Test Charter]] both document returns **no
-match** on a bundle that is entirely correct. A check whose "expected match"
+[[Current State - Release Candidate Test Charter]] used to prescribe returns **no
+match** on a bundle that is entirely correct. Both pages now warn against it and
+defer to the script. A check whose "expected match"
 half silently never matches is worse than no check. Which quote form the
 minifier picks is not a property the release cares about, so the script does not
 care either.
+
+Grepping by hand needs the trailing colon on the key. The bare key name matches
+even in a correctly stripped bundle, because the app declares those names as
+lookup constants and the minifier keeps them as plain strings: a clean
+production build contains `q="NX_APP_BITE_TRIBE_IS_DEV"`. Only the property
+form proves a value was inlined.
 
 ### Artifact Naming And Provenance
 
@@ -371,12 +378,13 @@ Both jobs are proven. The workflow produced signed, named, commit-traceable
 Android and iOS artifacts on runners, with no workstation involved, on
 30 August 2026.
 
-| Run | Ref                                               | Trigger  | web-bundle    | android       | ios            |
-| --- | ------------------------------------------------- | -------- | ------------- | ------------- | -------------- |
-| #1  | `develop@963e247`                                 | dispatch | pass, 2.2 min | pass, 5.5 min | fail at export |
-| #2  | `1181-fix-native-release-artifact-naming@1cafbd0` | dispatch | pass, 1.8 min | pass, 5.2 min | pass, 22.9 min |
-| #3  | `develop@dcd8d39`                                 | dispatch | pass, 1.9 min | pass, 5.3 min | pass, 20.5 min |
-| #4  | `build-1.0.1-96@269cb26`                          | tag push | pass, 1.8 min | pass, 5.6 min | -              |
+| Run | Ref                                               | Trigger       | web-bundle    | android       | ios            |
+| --- | ------------------------------------------------- | ------------- | ------------- | ------------- | -------------- |
+| #1  | `develop@963e247`                                 | dispatch      | pass, 2.2 min | pass, 5.5 min | fail at export |
+| #2  | `1181-fix-native-release-artifact-naming@1cafbd0` | dispatch      | pass, 1.8 min | pass, 5.2 min | pass, 22.9 min |
+| #3  | `develop@dcd8d39`                                 | dispatch      | pass, 1.9 min | pass, 5.3 min | pass, 20.5 min |
+| #4  | `build-1.0.1-96@269cb26`                          | tag push      | pass, 1.8 min | pass, 5.6 min | -              |
+| #5  | `build-1.0.1-97@f301593f`                         | `release.yml` | pass, 2.4 min | pass, 5.8 min | pass, 17.6 min |
 
 **Run #3 produced the artifacts that were actually released** as build 96 on
 30 August 2026: `bitetribe-1.0.1-96-dcd8d39-android` at 15.7 MB and
@@ -393,6 +401,13 @@ named 96 and logged:
 Tag build-1.0.1-96 names build 1.0.1 (96), but this tree is 1.0.1 (97).
 The artifacts are named after the tree, which is what was actually built.
 ```
+
+**Run #5 is the first release actually cut through `release.yml`.** Build 97, on
+30 August 2026: `prepare` made the tag and called the build, and all three build
+jobs passed on runners with no workstation involved. It was dispatched with
+`publish` false, so both native jobs logged "Not publishing: this run did not ask
+for it" and the artifacts went to the stores by hand. The path is proven; the
+upload steps still are not.
 
 That is the designed behaviour and it costs a runner. Expect one such run after
 every release until the ordering question in [[Release Workflow]] is settled.
@@ -494,6 +509,21 @@ Rules:
 - Add any variable that must not reach production to `DEV_ONLY_ENV_KEYS`. `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN` is there because a registered debug token bypasses App Check entirely; `NX_APP_BITE_TRIBE_IS_DEV` is there because it routes the app at the emulators.
 - Keep values that identify the bundle rather than the deployment in the app plugin's `staticValues`, not in `.env`. `NX_APP_BITE_TRIBE_IS_BUSINESS` is set this way for the business app.
 - Firebase web configuration and the reCAPTCHA site key are public by design and stay in the bundle. Access control comes from Firestore rules and App Check, not from hiding these identifiers.
+
+### The Nx Cache Is Not Keyed On These Variables
+
+The `NX_APP_*` values are not part of the build target's task hash, so a bundle
+built with a different set of them is a legal cache hit for the same command. A
+build written correctly and run with `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true`
+can still return a cached bundle carrying the gate off.
+
+Run 11 of the release-candidate pass hit exactly that, and only the bundle check
+caught it. See [[Test Run 11 - Android Build 96]] and
+[#1428](https://github.com/muhammedgaygisiz/travellers-apps/issues/1428).
+
+Every production build therefore passes `--skip-nx-cache`, in CI and by hand.
+The runner starts without an Nx cache today, and this keeps that from being the
+reason it is safe.
 
 ## Related Pages
 

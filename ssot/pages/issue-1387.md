@@ -1,6 +1,6 @@
 - [bug: Native analytics collection stays disabled on devices that ran a dev build](https://github.com/muhammedgaygisiz/travellers-apps/issues/1387) (Issue \#1387)
 - Description
-  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - Found in [[Test Run 09 - Android Build 95]], the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
   - With `debug.firebase.analytics.app` set to `com.bitetribe.app`, logcat reported `App measurement disabled by setAnalyticsCollectionEnabled(false)` at startup and no `Logging event` line followed while the feed was browsed and a Bite opened.
   - The only call site in the repository is `provide-firestore-utils.ts`, inside the branch reached only when `NX_APP_BITE_TRIBE_IS_DEV === 'true'`. Build 95 has `IS_DEV` stripped from its bundle, so that build cannot be the caller, and nothing anywhere calls `setEnabled({ enabled: true })`.
   - Analytics DebugView could therefore not be verified on Android and was recorded as an evidence gap rather than a pass.

@@ -106,6 +106,7 @@
   - [[Implementation - Release And Build Workflow]]
   - [[Implementation - Store Release Steps]]
   - [[Implementation - Store Listing Assets]]
+  - [[Implementation - Store Declarations]]
   - [[Implementation - Web Search And Social Metadata]]
   - [[Implementation - Social Media Channels]]
   - [[Implementation - CI Pipeline]]
@@ -117,6 +118,7 @@
   - [[Analytics Operations]]
 - Current State
   - [[Current State - Roadmap]]
+  - [[Current State - Product Direction]]
   - [[Current State - E2E Coverage]]
   - [[Current State - Nx And Dependency Migration Roadmap]]
   - [[Current State - Known Issues]]

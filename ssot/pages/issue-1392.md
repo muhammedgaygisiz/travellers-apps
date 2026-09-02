@@ -1,6 +1,6 @@
 - [bug: Bitemap Bite drawer has no bottom safe-area spacing](https://github.com/muhammedgaygisiz/travellers-apps/issues/1392) (Issue \#1392)
 - Description
-  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - Found in [[Test Run 09 - Android Build 95]], the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
   - Selecting a Bite marker on the Bitemap and expanding the drawer put the last row - the star rating and the reaction chip - flush against the system navigation bar. Everything was reachable and the drawer snapped correctly, so this was presentation only.
   - Raised by the tester while working through the map checks; the matrix did not ask for it.
 - Findings - the drawer positions itself against the viewport, so nothing gave it the inset

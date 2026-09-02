@@ -1,6 +1,6 @@
 - [bug: Push notification settings do not reflect or recover the OS permission on Android](https://github.com/muhammedgaygisiz/travellers-apps/issues/1386) (Issue \#1386)
 - Description
-  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
+  - Found in [[Test Run 09 - Android Build 95]], the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16.
   - Onboarding step 6 was correct: it raised the real `GrantPermissionsActivity` dialog and a grant moved the permission to `granted=true, USER_SET`.
   - Settings was not. With `POST_NOTIFICATIONS` revoked at OS level, the device row still showed its toggle fully ON. The section carried no blocked-state explanation, no hint that the OS permission was missing, and no action that opened the Android app notification settings. On a second account the same row read ON while the OS reported `granted=false` and `importance=NONE userSet=false` - the permission had never been requested for that account at all - and toggling the row off and on again raised no prompt.
   - [Issue 1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184)'s OS-permission recovery route existed on iOS and did not exist on Android, which is also why [issue 971](https://github.com/muhammedgaygisiz/travellers-apps/issues/971)'s ranking-change notifications have never been verified as delivered on Android.

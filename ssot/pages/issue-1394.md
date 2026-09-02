@@ -1,6 +1,6 @@
 - [Use the Android Photo Picker for the gallery path](https://github.com/muhammedgaygisiz/travellers-apps/issues/1394) (Issue \#1394)
 - Description
-  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16 (SDK 36).
+  - Found in [[Test Run 09 - Android Build 95]], the Android first execution, on Play Open Testing build 1.0.1 (95), on a physical Samsung SM-A566B running Android 16 (SDK 36).
   - Tapping "Galeriden seç" on the Bite form raised the Android runtime prompt "Allow BiteTribe to access photos and videos on this device?". Under "Allow limited access" the system's grant-these-photos screen opened first and the app's own picker second, so the tester chose the photo twice: "I had to choose the photo twice though...".
   - Filed as an improvement rather than a defect. Under "Allow all" it is a single selection and the flow works; the point was that the app requests a media permission at all.
 - Findings - the picker was already the right one, and the permission is not removable

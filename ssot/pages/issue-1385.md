@@ -1,6 +1,6 @@
 - [bug: Android resolves the sign-in provider to unknown, so account deletion can never re-authenticate](https://github.com/muhammedgaygisiz/travellers-apps/issues/1385) (Issue \#1385)
 - Description
-  - Found in [[Current State - Release Candidate Test Charter]] Run 9, the Android first execution, on Play Open Testing build 1.0.1 (95) from tag `build-1.0.1-95`, on a physical Samsung SM-A566B running Android 16.
+  - Found in [[Test Run 09 - Android Build 95]], the Android first execution, on Play Open Testing build 1.0.1 (95) from tag `build-1.0.1-95`, on a physical Samsung SM-A566B running Android 16.
   - An email/password account could only be deleted within five minutes of signing in. Past that, Settings - Delete Account passed both confirmation gates and then said "We could not delete your account. Please try again." Reproduced twice by the agent and once by the tester, at roughly 24 minutes, 4 hours and 6.5 hours after sign-in.
   - Store policy and GDPR both require a working deletion, so it was accepted as a release-candidate `P0`.
 - Findings - the backend was never at fault

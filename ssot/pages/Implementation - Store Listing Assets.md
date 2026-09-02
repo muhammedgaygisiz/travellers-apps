@@ -40,7 +40,9 @@ new decision recorded on this page, not by editing a console field.
 
 Applied on 21 August 2026: Play's category moved from Entertainment to Food &
 Drink and is in Google's review queue; Apple carries Food & Drink with Social
-Networking as its secondary. Both listings are still English-only.
+Networking as its secondary. Both listings were English-only until 30 August 2026;
+Play now carries ten translations and the App Store nine, written out in
+[[Implementation - Store Listing Translations]].
 
 ## Distribution And Pricing
 
@@ -562,12 +564,15 @@ Budget for that when a listing change is on the critical path.
 
 ## Current State
 
-As inventoried on 21 August 2026, with the screenshot rows updated 22 August.
+First inventoried on 21 August 2026 and kept current since. The rows below carry
+state through 31 August 2026, the day both stores were submitted.
 
 ### Google Play
 
 The default listing is live and has been since 8 February 2026. There is one
-listing, no custom listings, and no additional locales.
+listing and no custom listings. It was English-only until 30 August 2026, when
+submission **51** published the listing along with the ten translations in
+[[Implementation - Store Listing Translations]].
 
 | Slot                  | State                                 |
 | --------------------- | ------------------------------------- |
@@ -588,15 +593,23 @@ promotion threshold, which the previous two did not.
 
 Submission activity, read on 30 August 2026, records the listing changes going
 out on their own: submission **49** on 21 August and submission **50** on 23
-August, both `Store Listing`, both `Published`. There was never a draft waiting
-for anyone.
+August, both `Store Listing`, both `Published`, then **51** on 30 August carrying
+the translations. There was never a draft waiting for anyone.
+
+Build 96 was promoted from Open Testing to **Production on 31 August 2026**, at
+100% rollout across all 177 countries and regions, and is in review. Nothing in
+the listing was outstanding at that point. See [[Current State - Release State]].
 
 The feature graphic was recoloured to the current palette the same day, so no
 stale-palette asset remains on either store.
 
 ### App Store Connect
 
-Version 1.0 is in Prepare for Submission and is effectively empty.
+**Submitted 31 August 2026 and `Waiting for Review`**, with up to 48 hours quoted.
+The version was corrected from `1.0` to `1.0.1` so it matches the binary, and the
+App Review sign-in and contact fields were filled — they had been entirely empty,
+which for a login-gated app is the most common rejection there is. See
+[[Current State - Release State]] for the submission narrative.
 
 | Slot                                    | State                                                                                                     |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -613,10 +626,11 @@ Version 1.0 is in Prepare for Submission and is effectively empty.
 | Content Rights                          | declared                                                                                                  |
 | Build                                   | 96 (1.0.1), attached 31 Aug 2026                                                                          |
 
-TestFlight is the exception and is in good shape: internal and external groups
-exist, build 94 (1.0.1) is in Testing, and the beta description, feedback email
-and reviewer sign-in are all filled. The beta description is the best existing
-draft of the App Store description and should seed it.
+TestFlight is in good shape: internal and external groups exist, and the beta
+description, feedback email and reviewer sign-in are all filled. It carried build
+94 (1.0.1) at the 21 August inventory; builds 95 and 96 have reached it since, the
+latter through Transporter on 30 August 2026. The beta description seeded the App
+Store description, which is now set in the table above.
 
 ## Declarations
 
@@ -796,7 +810,8 @@ than a cosmetic one.
 
 ## What The Listings Still Need
 
-As of 22 August 2026, in the order they gate a submission.
+As of 31 August 2026, the day both stores were submitted, in the order they gated
+that submission. Struck-through rows are closed and kept as a record.
 
 | Gap                             | Store | Note                                                            |
 | ------------------------------- | ----- | --------------------------------------------------------------- |
@@ -1008,8 +1023,9 @@ These are account-level and gate submission regardless of listing completeness:
   candidate.~~ **Not a blocker, and the wrong track.** BiteTribe distributes on
   Android through **Open testing**, not internal testing, which is what every
   Android run in [[Current State - Release Candidate Test Charter]] used. Open
-  testing is `Active`, carrying release **95 (1.0.1)** from 23 August 2026, to
-  unlimited testers across 12 countries. Verified in the console on 30 August 2026.
+  testing is `Active` to unlimited testers across 12 countries; it carried release
+  **95 (1.0.1)** when the console was read on 30 August 2026, and build 96 was
+  promoted from it to **Production** on 31 August 2026.
 
   The internal testing track really is paused with a February build 58 and an
   `Untitled release` draft, and that is simply an abandoned track: nothing

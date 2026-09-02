@@ -118,6 +118,12 @@ name being written down as text:
   would make it assert something that was never true.
 - Historical changelog entries under `build-*` quote past commit subjects.
 
+The rule reaches the social accounts too, and there it does a second job.
+`@bitetribe` on Instagram is an unrelated food business that writes itself
+**Bite Tribe**, with a space, so following our own spelling is also what tells
+the two apart. The handle is `bitetribeapp` and the display name is
+`BiteTribe`; see [[Implementation - Social Media Channels]].
+
 ### Console Follow-Up The Rename Owes
 
 The rename moved two values that live outside this repository, and both must be
@@ -592,20 +598,20 @@ stale-palette asset remains on either store.
 
 Version 1.0 is in Prepare for Submission and is effectively empty.
 
-| Slot                                    | State                                           |
-| --------------------------------------- | ----------------------------------------------- |
-| Name, subtitle                          | set                                             |
-| Age rating                              | set, 13+ - was 18+                              |
-| Screenshots, iPhone                     | 5 of 10, 6.9", current                          |
-| Screenshots, iPad                       | 5 of 10, 13", captured and uploaded 31 Aug 2026 |
-| App previews                            | none                                            |
-| Description, promotional text, keywords | set                                             |
-| Support URL, marketing URL, copyright   | support URL and copyright **set**               |
-| Primary category                        | Food & Drink                                    |
-| App Privacy                             | published                                       |
-| Pricing, availability                   | free, all 175 regions                           |
-| Content Rights                          | declared                                        |
-| Build                                   | 96 (1.0.1), attached 31 Aug 2026                |
+| Slot                                    | State                                                                                                     |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Name, subtitle                          | set                                                                                                       |
+| Age rating                              | set, 13+ - was 18+                                                                                        |
+| Screenshots, iPhone                     | 5 of 10, 6.9", current                                                                                    |
+| Screenshots, iPad                       | 5 of 10, 13", captured and uploaded 31 Aug 2026                                                           |
+| App previews                            | none                                                                                                      |
+| Description, promotional text, keywords | set                                                                                                       |
+| Support URL, marketing URL, copyright   | support URL and copyright **set**, marketing URL blank pending [[Implementation - Social Media Channels]] |
+| Primary category                        | Food & Drink                                                                                              |
+| App Privacy                             | published                                                                                                 |
+| Pricing, availability                   | free, all 175 regions                                                                                     |
+| Content Rights                          | declared                                                                                                  |
+| Build                                   | 96 (1.0.1), attached 31 Aug 2026                                                                          |
 
 TestFlight is the exception and is in good shape: internal and external groups
 exist, build 94 (1.0.1) is in Testing, and the beta description, feedback email
@@ -1017,6 +1023,7 @@ These are account-level and gate submission regardless of listing completeness:
 - [[Implementation - Store Release Steps]]
 - [[Implementation - Store Listing Translations]]
 - [[Implementation - Web Search And Social Metadata]]
+- [[Implementation - Social Media Channels]]
 - [[Implementation - Localization]]
 - [[Implementation - Release And Build Workflow]]
 - [[Current State - Release State]]

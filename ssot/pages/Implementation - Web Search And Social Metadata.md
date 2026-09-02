@@ -63,6 +63,7 @@ canonical on `bite-tribe.web.app`, which is now not the canonical host.
 | `og:image` and its `type`, `width`, `height`, `alt`                          | `/assets/social/og-image.jpg`, `1200x630`               |
 | `og:locale`                                                                  | `en_US`                                                 |
 | `twitter:card`                                                               | `summary_large_image`                                   |
+| `twitter:site`                                                               | `@bitetribeapp`, added under #1455                      |
 | `twitter:title`, `twitter:description`, `twitter:image`, `twitter:image:alt` | Mirror the Open Graph values                            |
 
 They are static on purpose. An unfurler never runs the app's JavaScript, and a
@@ -70,6 +71,12 @@ crawler reads this document before Angular has bootstrapped. Anything the app
 would set at runtime is invisible to the clients this metadata exists for.
 
 `og:image` is absolute. Unfurlers do not resolve relative image URLs.
+
+`twitter:site` arrived after the rest, under
+[issue #1455](https://github.com/muhammedgaygisiz/travellers-apps/issues/1455),
+because #1454 had no account to name. The handle and the constraint that it
+must not ship before the X account is registered both live in
+[[Implementation - Social Media Channels]].
 
 ## The Two Runtime Exceptions
 
@@ -175,6 +182,7 @@ Once deployed:
 ## Related Pages
 
 - [[Implementation - Store Listing Assets]]
+- [[Implementation - Social Media Channels]]
 - [[Implementation - Localization]]
 - [[Architecture - Overview]]
 - [[Current State - Release State]]

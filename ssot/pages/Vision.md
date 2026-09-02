@@ -10,4 +10,4 @@
 
   Beyond discovery, we envision an ecosystem where passionate food creators can build communities, curate food journeys, and earn money from their local knowledge, while businesses benefit from authentic recommendations instead of traditional advertising.
 
-  Our mission is simple: \*\*Show people what to eat, through the experiences of other people.
+  Our mission is simple: **Show people what to eat, through the experiences of other people.**

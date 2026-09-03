@@ -37,7 +37,9 @@ export const createUserOnAuthCreate = beforeUserCreated(async (event) => {
       // stay silent (issue #1212).
       countryCodes: [],
       public: false,
-      subscriptionTier: 1,
+      // Free tier. Every new account starts here and Pro is granted only by an
+      // explicit entitlement, never by the creation default (issue #1127).
+      subscriptionTier: 0,
       ...buildEmailVerificationMetadata(user),
       createdAt: now.toISOString(),
       createdAtTimestamp: now.getTime(),

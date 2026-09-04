@@ -10,6 +10,13 @@ export { provideFirestoreAnalytics } from './lib/analytics/provide-firestore-ana
 export { AnalyticsService } from './lib/analytics/analytics.service';
 export { CrashReportingService } from './lib/analytics/crash-reporting.service';
 export {
+  AnalyticsConsentService,
+  UNSET_CONSENT,
+  type ConsentDecision,
+  type ConsentState,
+} from './lib/analytics/analytics-consent.service';
+export { redactErrorDescription } from './lib/analytics/redact-error-description';
+export {
   AnalyticsEvent,
   type AnalyticsEventName,
   type AnalyticsEventParamMap,
@@ -25,4 +32,5 @@ export { AuthService } from './lib/auth.service';
 export { AppCheckReadinessService } from './lib/app-check-readiness.service';
 export { StartupNavigationService } from './lib/startup-navigation.service';
 export { AppCheckGateComponent } from './lib/app-check-gate/app-check-gate.component';
+export { AnalyticsConsentGateComponent } from './lib/analytics-consent-gate/analytics-consent-gate.component';
 export { isFirebaseAppCheckEnforced } from './lib/initialize-firebase-app-check';

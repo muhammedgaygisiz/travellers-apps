@@ -10,6 +10,10 @@ import { Capacitor } from '@capacitor/core';
 import { TestScheduler } from 'rxjs/testing';
 import { tap } from 'rxjs';
 import { NavController } from '@ionic/angular';
+import {
+  AnalyticsConsentService,
+  type ConsentState,
+} from '../analytics/analytics-consent.service';
 
 jest.mock('@capacitor/core', () => ({
   Capacitor: {
@@ -45,11 +49,14 @@ describe(AuthService.name, () => {
   let service: AuthService;
   let scheduler: TestScheduler;
   let navigateRootMock: jest.Mock;
+  let consentState: ConsentState;
 
   beforeEach(() => {
     jest.clearAllMocks();
     scheduler = new TestScheduler(assertEqual);
     navigateRootMock = jest.fn();
+    consentState = { analytics: 'granted', crashReporting: 'granted' };
+
     TestBed.configureTestingModule({
       providers: [
         { provide: FIREBASE_AUTH, useValue: { signOut: jest.fn() } },
@@ -57,6 +64,10 @@ describe(AuthService.name, () => {
         {
           provide: NavController,
           useValue: { navigateRoot: navigateRootMock },
+        },
+        {
+          provide: AnalyticsConsentService,
+          useValue: { consent: (): ConsentState => consentState },
         },
       ],
     });
@@ -634,6 +645,42 @@ describe(AuthService.name, () => {
           userId: '123',
         });
         expect(FirebaseCrashlytics.setUserId).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('given analytics consent was declined', () => {
+      it('should clear the user id instead of sending it', async () => {
+        jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+        consentState = { analytics: 'denied', crashReporting: 'denied' };
+
+        await service.setupAnalyticsAndCrashlytics({
+          uid: '123',
+        } as unknown as SetupUserArg);
+
+        // Cleared rather than skipped: a user who withdraws needs the id already
+        // on this device removed, not left behind to go stale.
+        expect(FirebaseAnalytics.setUserId).toHaveBeenCalledWith({
+          userId: null,
+        });
+        expect(FirebaseCrashlytics.setUserId).toHaveBeenCalledWith({
+          userId: '',
+        });
+      });
+
+      it('should still send the crash id when only crash reporting is granted', async () => {
+        jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+        consentState = { analytics: 'denied', crashReporting: 'granted' };
+
+        await service.setupAnalyticsAndCrashlytics({
+          uid: '123',
+        } as unknown as SetupUserArg);
+
+        expect(FirebaseAnalytics.setUserId).toHaveBeenCalledWith({
+          userId: null,
+        });
+        expect(FirebaseCrashlytics.setUserId).toHaveBeenCalledWith({
+          userId: '123',
+        });
       });
     });
 

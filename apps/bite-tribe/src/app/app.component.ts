@@ -11,7 +11,12 @@ import {
   NavController,
   Platform,
 } from '@ionic/angular/standalone';
-import { AppCheckGateComponent, AppCheckReadinessService } from 'ta-firestore';
+import {
+  AnalyticsConsentGateComponent,
+  AnalyticsConsentService,
+  AppCheckGateComponent,
+  AppCheckReadinessService,
+} from 'ta-firestore';
 import { addNecessaryIcons, AppForegroundService } from 'bite-tribe/shell';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
@@ -28,18 +33,26 @@ import { Preferences } from '@capacitor/preferences';
     <ion-app>
       @if (appCheckReadiness.isBlocked()) {
         <bite-app-check-gate />
+      } @else if (analyticsConsent.needsDecision()) {
+        <bite-analytics-consent-gate />
       } @else {
         <ion-router-outlet />
       }
     </ion-app>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonApp, IonRouterOutlet, AppCheckGateComponent],
+  imports: [
+    IonApp,
+    IonRouterOutlet,
+    AppCheckGateComponent,
+    AnalyticsConsentGateComponent,
+  ],
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'bite-tribe';
 
   readonly appCheckReadiness = inject(AppCheckReadinessService);
+  readonly analyticsConsent = inject(AnalyticsConsentService);
   platform = inject(Platform);
   navController = inject(NavController);
   private readonly router = inject(Router);

@@ -101,6 +101,7 @@ When finishing, report:
 
 - [[SSOT]]
 - [[GitHub Project Board And Issue Handling]]
+- [[GitHub Issue Format]]
 - [[Traceability Map]]
 - [[Spec To Code Workflow]]
 - [[Feature Delivery Workflow]]

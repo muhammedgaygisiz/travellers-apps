@@ -51,7 +51,7 @@ Do not create priority labels. If a `P0` or `P1` label appears in the repository
 
 ## How To File An Issue
 
-1. Create the issue with `gh issue create`.
+1. Create the issue with `gh issue create`. Write the body per [[GitHub Issue Format]], which owns the shape of the issue text and does not restate the fields below.
 2. Add it to the board and keep the returned item id:
 
    ```

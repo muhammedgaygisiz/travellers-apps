@@ -44,6 +44,7 @@
     - [[UC - Maintain Restaurants In The Business App]]
     - [[UC - Create And Operate BiteTrails In The Business App]]
     - [[UC - Run Operational Migrations]]
+    - [[UC - Operate BiteTribe In The Admin App]]
     - [[UC - Guide New Users After Registration]]
   - Next to implement
     collapsed:: true

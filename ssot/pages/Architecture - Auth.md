@@ -27,6 +27,10 @@ Backend callables validate request.auth where required
   before that answer exists.
 - `withAuthRoutes` provides shared auth routes.
 - `authGuard` protects authenticated routes.
+- `roleGuard(role)` protects the privileged apps' routes on top of `authGuard`,
+  and `NoAccessComponent` is where it sends an account that lacks the role.
+- `setUserRoles` is the admin-only callable that writes roles, and
+  `grant-role.mjs` is the service-account bootstrap behind it.
 - `startGuard` controls the start route.
 - `RequestedUrlService` holds the URL a visitor asked for while auth redirected
   them, so signing in returns them to it instead of to Home.
@@ -54,6 +58,52 @@ Backend callables validate request.auth where required
   that resolves a visitor into the app hands it back. That keeps a shared Bite
   link alive across the whole entry chain. See the Shared Link Entry Contract in
   [[UC - Inspect Bite Details]].
+
+## Roles And Authorization
+
+Authentication answers _who is signed in_. Authorization answers _which app is
+theirs_, and until issue \#1469 nothing answered it: `authGuard` was the only
+check on either privileged app, so any BiteTribe account could open the business
+app and run the operational migrations in it.
+
+- A role is a Firebase Auth **custom claim** carried in the ID token. Claims are
+  written only by the backend, so a client cannot forge one.
+- Two roles exist: `admin` for BiteTribe operators, `business` for a restaurant
+  that has been granted maintenance rights. They are separate rather than a
+  hierarchy — an operator account is not a restaurant, and granting it
+  restaurant rights by implication would defeat the ownership gate for exactly
+  the accounts most able to break it.
+- They live in one array under one claim key, `roles`, because Firebase caps the
+  whole custom-claim payload at 1000 bytes and reserves a fixed set of names.
+- `setUserRoles` is the only callable that writes them, and it requires the
+  caller to already hold `admin`. It replaces the whole role set, so revoking is
+  granting with the role left out, and it refuses to let an admin drop their own
+  `admin` role.
+- `grant-role.mjs` is the way in and the way back. The first operator account
+  has no admin to grant it one, and if every `admin` were lost the tool that
+  grants roles would be unreachable. The script runs on service-account
+  credentials and deliberately checks nothing, because holding those credentials
+  already means holding the project.
+- `roleGuard(role)` is the client half. It is a routing and display answer, not
+  the authorization answer: every privileged callable re-reads the claim from
+  the token Firebase verified. What it buys is that a rejected account is told
+  so rather than reaching a page whose every request then fails.
+- A cached ID token can be an hour old, so `roleGuard` retries once against a
+  freshly minted token before rejecting. That is what makes a role granted
+  moments ago take effect without signing out and back in.
+- A signed-in account without the role goes to `NO_ACCESS`, never back to
+  `START`. `START` offers only a sign-in the account has already completed, so
+  sending it there states the problem wrongly. Note that `startGuard` is used
+  **only** by the consumer shell; the two apps `roleGuard` protects do not
+  route through it, so this is about the message rather than a redirect loop.
+- The role gate shipped **hard, with no backfill**. An account that could sign
+  into the business app before the role existed cannot now unless an operator
+  granted it. See issue \#1469 for the reasoning.
+
+The **backend** half of authorization is still open: `firestore.rules` grants
+read and write on every document to every authenticated user. Replacing it is
+issue \#1078, deliberately kept out of the change that introduced the roles.
+Until it lands, the role gate is a client-side gate over an open database.
 
 ## Supported Auth Modes
 
@@ -113,6 +163,9 @@ the same way registration does rather than inventing a second pattern.
 ```text
 libs/common/ta-firestore/src/lib/auth.service.ts
 libs/common/ta-firestore/src/lib/auth.guard.ts
+libs/common/ta-firestore/src/lib/role.guard.ts
+libs/common/ta-firestore/src/lib/no-access/no-access.component.ts
+libs/common/utils/src/lib/user-role.ts
 libs/common/ta-firestore/src/lib/start.guard.ts
 libs/common/ta-firestore/src/lib/requested-url.service.ts
 libs/bite-tribe/onboarding/guards/src/lib/onboarding.guard.ts
@@ -120,9 +173,13 @@ libs/bite-tribe/onboarding/guards/src/lib/onboarding-completed.guard.ts
 libs/common/ui/auth
 libs/bite-tribe/shell/src/lib/routes.ts
 libs/bite-tribe-business/shell/src/lib/routes.ts
-apps/bite-tribe-firebase/functions/src/functions/create-user-on-auth-create.ts
-apps/bite-tribe-firebase/functions/src/functions/update-last-seen.ts
-apps/bite-tribe-firebase/functions/src/functions/update-user-metadata.ts
+libs/bite-tribe-admin/shell/src/lib/routes.ts
+apps/bite-tribe-firebase/functions/src/functions/shared/roles.ts
+apps/bite-tribe-firebase/functions/src/functions/users/set-user-roles.ts
+apps/bite-tribe-firebase/scripts/grant-role.mjs
+apps/bite-tribe-firebase/functions/src/functions/users/create-user-on-auth-create.ts
+apps/bite-tribe-firebase/functions/src/functions/users/update-last-seen.ts
+apps/bite-tribe-firebase/functions/src/functions/users/update-user-metadata.ts
 apps/bite-tribe-firebase/functions/src/functions/users/resend-email-verification.ts
 apps/bite-tribe-firebase/functions/src/functions/users/sync-email-verification-status.ts
 apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-reminders.ts
@@ -133,3 +190,4 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 - Onboarding after registration is still a product gap.
 - Public/private profile intent needs clearer user guidance.
 - Backend callable auth checks need to remain consistent as more write/query logic moves server-side.
+- Roles are enforced in route guards and in `setUserRoles`, but not yet in Firestore rules (\#1078) or in the other privileged callables. `verifyRestaurantCandidate`, for one, still accepts any authenticated caller.

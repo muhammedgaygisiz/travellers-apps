@@ -70,6 +70,35 @@ Google Maps Platform App Check only accepts tokens minted by the client Maps and
 
 The equivalent verified control is the callable in front of the API: App Check enforced through `onAppCheck`, plus an authenticated caller. `apps/bite-tribe-firebase/functions/src/__specs__/google-maps-request-path.spec.ts` fails the build when a client reaches a Google Maps host, when a native Maps or Places SDK is linked, or when a callable is registered without App Check enforcement. See [[issue-1245]].
 
+## Adding A Web App To The Project
+
+Creating a Firebase Hosting site does **not** authorise the new domain anywhere else. Three separate allowlists have to be edited by hand, in three different consoles, and none of them is mentioned when the site is created. Verified on 5 September 2026 while bringing up `bite-tribe-admin` (issue \#1469).
+
+| Allowlist                        | Where                                                                                 | Format                                    | Symptom when missing                                                                                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API key HTTP referrers           | Cloud Console, APIs & Services, Credentials, "Browser key (auto created by Firebase)" | `https://<domain>/` with a trailing slash | Every Identity Toolkit call returns 403 `API_KEY_HTTP_REFERRER_BLOCKED`. Sign-in does nothing at all: no popup, no network request, no visible error. |
+| Firebase Auth authorized domains | Firebase Console, Authentication, Settings                                            | bare domain, no scheme                    | `auth/unauthorized-domain`                                                                                                                            |
+| reCAPTCHA Enterprise domain list | Cloud Console, Security, reCAPTCHA, the App Check site key                            | bare domain, no scheme                    | `appCheck/recaptcha-error`                                                                                                                            |
+
+Add both `<site>.web.app` and `<site>.firebaseapp.com` to each. Add the dev-server port to the API key list too — it carries `http://localhost:4200/` only, so a second app on another port is blocked locally even though the first one works.
+
+The first of the three is the one that presents worst. A blocked referrer produces **silence**, not an error: `LoginService.loginWithGoogleAccount()` dispatches into the store, the effect's sign-in throws, and the login page shows nothing. "Nothing happens when I click sign in" on a newly deployed app means this list before it means anything else.
+
+### Verifying Without The Console
+
+The project config endpoint is publicly readable with the web API key, so both of the first two lists can be checked from a terminal rather than clicked through:
+
+```bash
+curl -s -H "Referer: https://<domain>/" \
+  "https://identitytoolkit.googleapis.com/v1/projects?key=$API_KEY"
+```
+
+A 403 answers the referrer question; the `authorizedDomains` array in a 200 answers the second. There is no equivalent read for the reCAPTCHA list.
+
+### An Automated Browser Cannot Verify This
+
+A headless or automated browser fails the OAuth popup and App Check the same way a genuinely misconfigured domain does, so it reports a fixed app as still broken. Confirmed by A/B against the working `bite-tribe-business` app, which produced identical symptoms in the same browser. **Sign-in has to be confirmed in a real browser**; the curl probes above are the part that can be automated.
+
 ## Local Development
 
 Firebase emulator targets are defined under `apps/bite-tribe-firebase/project.json`.

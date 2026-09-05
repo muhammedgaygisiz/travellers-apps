@@ -2,6 +2,14 @@ export { SupportedLang } from './lib/supported-lang';
 
 export { PATH } from './lib/paths';
 
+export {
+  BITE_TRIBE_ROLES,
+  ROLES_CLAIM,
+  isBiteTribeRole,
+  rolesFromClaims,
+  type BiteTribeRole,
+} from './lib/user-role';
+
 export { normalize } from './lib/normalize';
 export { currencyCodes } from './lib/currencies';
 export { countries, type Country } from './lib/countries';

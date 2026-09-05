@@ -16,6 +16,11 @@
     "baseUrl": ".",
     "paths": {
       "auth": ["libs/common/ui/auth/src/index.ts"],
+      "bite-tribe-admin/dashboard": [
+        "libs/bite-tribe-admin/dashboard/src/index.ts"
+      ],
+      "bite-tribe-admin/shell": ["libs/bite-tribe-admin/shell/src/index.ts"],
+      "bite-tribe-admin/start": ["libs/bite-tribe-admin/start/src/index.ts"],
       "bite-tribe-business/dashboard": [
         "libs/bite-tribe-business/dashboard/page/src/index.ts"
       ],

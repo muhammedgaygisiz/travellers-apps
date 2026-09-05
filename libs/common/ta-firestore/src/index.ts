@@ -16,6 +16,7 @@ export {
 } from './lib/analytics/analytics-events';
 
 export { authGuard } from './lib/auth.guard';
+export { roleGuard } from './lib/role.guard';
 export { startGuard } from './lib/start.guard';
 export { RequestedUrlService } from './lib/requested-url.service';
 export { freshSessionGuard } from './lib/fresh-session.guard';
@@ -25,4 +26,5 @@ export { AuthService } from './lib/auth.service';
 export { AppCheckReadinessService } from './lib/app-check-readiness.service';
 export { StartupNavigationService } from './lib/startup-navigation.service';
 export { AppCheckGateComponent } from './lib/app-check-gate/app-check-gate.component';
+export { NoAccessComponent } from './lib/no-access/no-access.component';
 export { isFirebaseAppCheckEnforced } from './lib/initialize-firebase-app-check';

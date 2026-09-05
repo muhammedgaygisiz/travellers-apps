@@ -29,4 +29,9 @@ export const PATH = {
   GALLERY: 'gallery',
   LEADERBOARD: 'leaderboard',
   WEEKLY_BITES: 'weekly-bites',
+  // Where `roleGuard` sends a signed-in account that lacks the role a route
+  // requires. It is a destination rather than a bounce back to `START`, so the
+  // account is told what it is missing instead of being cycled through the
+  // login it has already completed (issue #1469).
+  NO_ACCESS: 'no-access',
 };

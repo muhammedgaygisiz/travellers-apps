@@ -19,7 +19,8 @@
       "validSince": "1777910052",
       "email": "organisation@test.com",
       "emailVerified": false,
-      "disabled": false
+      "disabled": false,
+      "customAttributes": "{\"roles\":[\"business\"]}"
     },
     {
       "localId": "helULN26hP9Qeig6NQLIEcEe3AP6",

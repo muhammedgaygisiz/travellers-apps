@@ -4,6 +4,7 @@
   - [[Spec To Code Workflow]]
   - [[Feature Delivery Workflow]]
   - [[GitHub Project Board And Issue Handling]]
+  - [[GitHub Issue Format]]
   - [[Release Workflow]]
 - Product
   - [[Vision]]

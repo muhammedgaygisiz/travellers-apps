@@ -9,6 +9,7 @@ Nx organizes BiteTribe into apps and focused libraries so product features, shar
 ```text
 apps/bite-tribe
 apps/bite-tribe-business
+apps/bite-tribe-admin
 apps/bite-tribe-firebase
 apps/bite-tribe-ios
 apps/bite-tribe-android
@@ -17,11 +18,18 @@ apps/bite-tribe-business-e2e
 apps/storybook-host
 ```
 
+There are **three** web apps, split by who signs into them rather than by what
+they do: `bite-tribe` is the consumer app, `bite-tribe-business` is what a
+restaurant maintains its own data in, and `bite-tribe-admin` is the internal
+operations tool. Only `bite-tribe` has native wrappers. See
+[[UC - Operate BiteTribe In The Admin App]].
+
 ## Library Families
 
 ```text
 libs/bite-tribe
 libs/bite-tribe-business
+libs/bite-tribe-admin
 libs/bite-tribe-common
 libs/common
 ```
@@ -39,11 +47,11 @@ libs/common
 
 Prefer existing library boundaries over new abstractions. Add a new abstraction only when it removes real complexity or matches an existing local pattern.
 
-## Scope Boundaries Between The Two Apps
+## Scope Boundaries Between The Apps
 
-`depConstraints` in `eslint.config.mjs` is what actually holds the app boundary. Both `scope:bite-tribe` and `scope:bite-tribe-business` have an entry; a scope with no entry is unconstrained, not restricted.
+`depConstraints` in `eslint.config.mjs` is what actually holds the app boundary. `scope:bite-tribe`, `scope:bite-tribe-business` and `scope:bite-tribe-admin` each have an entry; a scope with no entry is unconstrained, not restricted.
 
-The two apps share the **platform** layers and nothing else:
+The apps share the **platform** layers and nothing else:
 
 | Shared                                                          | Not shared                                 |
 | --------------------------------------------------------------- | ------------------------------------------ |
@@ -59,6 +67,11 @@ This was learned the expensive way. `scope:bite-tribe-business` had no `depConst
 - `libs/bite-tribe-business/start` was tagged `scope:bite-tribe` despite living in the business app and being routed only by the business shell.
 
 Adding the constraint found all three in one lint run. Two known crossings remain deliberately excused in the rule's `allow` array rather than silently permitted; each names its issue.
+
+`scope:bite-tribe-admin` was given its entry in the same change that created
+the scope, rather than afterwards, precisely because of the three drifts above:
+an operator surface able to reach into either app's feature libraries would make
+the split it exists for cosmetic.
 
 **A tag that disagrees with the directory is a defect.** Nothing derives the scope tag from the path, so `libs/bite-tribe-business/**` carrying `scope:bite-tribe` lints clean and quietly opts that library out of the boundary.
 

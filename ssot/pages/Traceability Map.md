@@ -46,18 +46,18 @@
 
 - ## Domain To Use Cases
 
-  | Domain           | Main Use Cases                                                                                                                    |
-  | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-  | [[Bite]]         | [[UC - Create And Maintain Personal Bites]], [[UC - Discover Bites]], [[UC - Inspect Bite Details]], [[UC - Search In BiteTribe]] |
-  | [[User]]         | [[UC - Manage Profile And Social Graph]], [[UC - Use Account And Legal Flows]], [[UC - Use Gamification Signals]]                 |
-  | [[Restaurant]]   | [[UC - Browse Restaurants And Places]], [[UC - View Restaurant Menus]], [[UC - Maintain Restaurants In The Business App]]         |
-  | [[Bucket List]]  | [[UC - Save And Rate BiteTrails Through Bucket Lists]]                                                                            |
-  | [[Bite Trail]]   | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Create And Operate BiteTrails In The Business App]]                       |
-  | [[Market Place]] | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Mature BiteTrail Marketplace Packages]]                                   |
-  | [[Floor Plan]]   | [[UC - Configure Restaurant Floor Plans And Tables]]                                                                              |
-  | [[Table]]        | [[UC - Configure Restaurant Floor Plans And Tables]], [[UC - Manage Tables During Service]]                                       |
-  | [[Table Visit]]  | [[UC - Manage Tables During Service]], [[UC - Order At The Table Through A QR Code]]                                              |
-  | [[Subscription]] | [[UC - Subscribe To BiteTribe Pro]], [[UC - See Ads As A Free User]], [[UC - Buy A Paid BiteTrail]]                               |
+  | Domain           | Main Use Cases                                                                                                                                                 |
+  | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | [[Bite]]         | [[UC - Create And Maintain Personal Bites]], [[UC - Discover Bites]], [[UC - Inspect Bite Details]], [[UC - Search In BiteTribe]]                              |
+  | [[User]]         | [[UC - Manage Profile And Social Graph]], [[UC - Use Account And Legal Flows]], [[UC - Use Gamification Signals]], [[UC - Operate BiteTribe In The Admin App]] |
+  | [[Restaurant]]   | [[UC - Browse Restaurants And Places]], [[UC - View Restaurant Menus]], [[UC - Maintain Restaurants In The Business App]], [[UC - Own And Claim Restaurants]]  |
+  | [[Bucket List]]  | [[UC - Save And Rate BiteTrails Through Bucket Lists]]                                                                                                         |
+  | [[Bite Trail]]   | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Create And Operate BiteTrails In The Business App]]                                                    |
+  | [[Market Place]] | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Mature BiteTrail Marketplace Packages]]                                                                |
+  | [[Floor Plan]]   | [[UC - Configure Restaurant Floor Plans And Tables]]                                                                                                           |
+  | [[Table]]        | [[UC - Configure Restaurant Floor Plans And Tables]], [[UC - Manage Tables During Service]]                                                                    |
+  | [[Table Visit]]  | [[UC - Manage Tables During Service]], [[UC - Order At The Table Through A QR Code]]                                                                           |
+  | [[Subscription]] | [[UC - Subscribe To BiteTribe Pro]], [[UC - See Ads As A Free User]], [[UC - Buy A Paid BiteTrail]]                                                            |
 
 - ## Use Cases To Open P0 Epics
 
@@ -73,17 +73,19 @@
 
   [[epic-735]] is the umbrella. It and its five stage epics are Priority P1, sequenced behind the P0 launch and migration work.
 
-  | Stage                           | Epic          | Use Case                                             | Domain                          |
-  | ------------------------------- | ------------- | ---------------------------------------------------- | ------------------------------- |
-  | 0 Ownership and authorization   | [[epic-1069]] | [[UC - Own And Claim Restaurants]]                   | [[Restaurant]], [[User]]        |
-  | 1 Floor plan and tables         | [[epic-1070]] | [[UC - Configure Restaurant Floor Plans And Tables]] | [[Floor Plan]], [[Table]]       |
-  | 2 Staff table management        | [[epic-1071]] | [[UC - Manage Tables During Service]]                | [[Table]], [[Table Visit]]      |
-  | 3 QR menu and ordering          | [[epic-1072]] | [[UC - Order At The Table Through A QR Code]]        | [[Table Visit]], [[Restaurant]] |
-  | 4 Payment and Bites from orders | [[epic-1073]] | [[UC - Order At The Table Through A QR Code]]        | [[Table Visit]], [[Bite]]       |
+  | Stage                           | Epic          | Use Case                                                                        | Domain                          |
+  | ------------------------------- | ------------- | ------------------------------------------------------------------------------- | ------------------------------- |
+  | 0 Ownership and authorization   | [[epic-1069]] | [[UC - Own And Claim Restaurants]], [[UC - Operate BiteTribe In The Admin App]] | [[Restaurant]], [[User]]        |
+  | 1 Floor plan and tables         | [[epic-1070]] | [[UC - Configure Restaurant Floor Plans And Tables]]                            | [[Floor Plan]], [[Table]]       |
+  | 2 Staff table management        | [[epic-1071]] | [[UC - Manage Tables During Service]]                                           | [[Table]], [[Table Visit]]      |
+  | 3 QR menu and ordering          | [[epic-1072]] | [[UC - Order At The Table Through A QR Code]]                                   | [[Table Visit]], [[Restaurant]] |
+  | 4 Payment and Bites from orders | [[epic-1073]] | [[UC - Order At The Table Through A QR Code]]                                   | [[Table Visit]], [[Bite]]       |
 
   The 41 child issues (\#1074 to \#1114) have no `issue-*` pages. They are unstarted, and their specifications live on the GitHub issues; the durable product context is in the use-case and domain pages above.
 
   Stage 0 blocks every later stage. Stages 1 and 2 are independently shippable.
+
+  Issue \#1469 delivered the first part of stage 0 outside the child-issue list: the `bite-tribe-admin` app, and the role gate on both privileged apps. It deliberately left \#1078, the Firestore rules replacement, alone — that is the highest-regression-risk change in the epic and needs its own branch.
 
 - ## Monetization (post-launch)
 

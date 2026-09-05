@@ -132,6 +132,26 @@ export default [
                 'type:ui',
               ],
             },
+            // The admin app is a third scope on the same terms as the
+            // business one: it shares the platform layers - one Firebase
+            // client, one NgRx store, one domain model - and nothing else.
+            // Written when the scope was created rather than afterwards,
+            // because a scope with no entry here is unconstrained rather than
+            // restricted, which is exactly how the business libraries came to
+            // import the consumer app's feature-local data-access (issue
+            // #1317). An operator surface that could reach into either app's
+            // features would make the split this scope exists for cosmetic.
+            {
+              sourceTag: 'scope:bite-tribe-admin',
+              onlyDependOnLibsWithTags: [
+                'scope:bite-tribe-admin',
+                'scope:common',
+                'type:api',
+                'type:store',
+                'type:model',
+                'type:ui',
+              ],
+            },
           ],
         },
       ],

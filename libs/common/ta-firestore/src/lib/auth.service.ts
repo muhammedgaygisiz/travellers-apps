@@ -18,6 +18,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from './provide-firestore-utils';
+import { BiteTribeRole, rolesFromClaims } from 'utils';
 import { terminate } from 'firebase/firestore';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
 import { NavController } from '@ionic/angular';
@@ -119,6 +120,47 @@ export class AuthService {
       console.warn('Failed to refresh auth session:', error);
       return false;
     }
+  }
+
+  /**
+   * The roles the current ID token carries, empty when the account has none or
+   * when nobody is signed in.
+   *
+   * This is the **display and routing** answer, not the authorization answer.
+   * A client can only read the token it was given, so nothing here is trusted:
+   * every privileged callable re-reads the claim from the token Firebase
+   * verified server-side. What it buys is that a signed-in account without the
+   * role is told so, instead of reaching a page whose every request then fails.
+   *
+   * `forceRefresh` mints a new token rather than reusing the cached one, which
+   * is how a role granted moments ago becomes visible without waiting out the
+   * hour a Firebase ID token lives. Guards pass it on their first miss only:
+   * refreshing on every navigation would put a network round-trip in front of
+   * each route.
+   *
+   * Never throws. A token read that fails is reported as "no roles", because
+   * the alternative is an unhandled rejection inside a route guard, which
+   * Angular surfaces as a navigation error and a blank page.
+   */
+  async getRoles(forceRefresh = false): Promise<BiteTribeRole[]> {
+    if (!this.getUser()) {
+      return [];
+    }
+
+    try {
+      const { claims } = await FirebaseAuthentication.getIdTokenResult({
+        forceRefresh,
+      });
+
+      return rolesFromClaims(claims);
+    } catch (error) {
+      console.warn('Failed to read roles from the ID token:', error);
+      return [];
+    }
+  }
+
+  async hasRole(role: BiteTribeRole, forceRefresh = false): Promise<boolean> {
+    return (await this.getRoles(forceRefresh)).includes(role);
   }
 
   async initialize(): Promise<void> {

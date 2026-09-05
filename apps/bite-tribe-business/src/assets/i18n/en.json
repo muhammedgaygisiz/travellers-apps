@@ -260,5 +260,8 @@
   "address-saved": "Address saved successfully!",
   "location-saved": "Location saved successfully!",
   "bite-trail-created": "BiteTrail created successfully!",
-  "bucket-list-name-updated": "Bucket list name updated!"
+  "bucket-list-name-updated": "Bucket list name updated!",
+  "no-access-title": "This account has no access",
+  "no-access-message": "Your account is signed in, but it is not allowed to use this app.",
+  "no-access-message-role": "Your account is signed in, but it does not hold the \"{{role}}\" role this app requires. Ask BiteTribe to grant it."
 }

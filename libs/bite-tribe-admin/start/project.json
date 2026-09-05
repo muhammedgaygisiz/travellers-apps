@@ -1,0 +1,8 @@
+{
+  "name": "bt-admin-start",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bite-tribe-admin/start/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["type:feature", "scope:bite-tribe-admin", "framework:ionic"]
+}

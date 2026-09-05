@@ -50,6 +50,23 @@
       ]
     },
     {
+      "target": "bite-tribe-admin",
+      "public": "dist/apps/bite-tribe-admin",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "headers": [
+        {
+          "source": "**",
+          "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+        }
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
       "target": "bite-tribe-storybook",
       "public": "dist/storybook/storybook-host",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],

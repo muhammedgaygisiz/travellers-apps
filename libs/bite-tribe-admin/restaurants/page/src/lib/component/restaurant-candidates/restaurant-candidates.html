@@ -4,39 +4,42 @@
   (logoutClick)="logoutClick.emit()"
 >
   <ion-content class="ion-padding">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title
-          >{{ 'restaurant-candidates' | transloco }}</ion-card-title
-        >
-      </ion-card-header>
-      <ion-card-content>
-        <ion-list lines="full" data-testid="restaurant-candidates">
-          @for (candidate of candidates(); track candidate.id) {
-          <ion-item [button]="true" (click)="candidateClick.emit(candidate)">
-            <ion-label>
-              <h2>{{ candidate.name }}</h2>
-              <p>
-                {{ 'candidate-evidence-count' | transloco: { count:
-                evidenceCount(candidate) } }}
-              </p>
-              @if (biteEvidence(candidate)) {
-              <p>
-                {{ 'candidate-nearby-bite-evidence' | transloco }}: {{
-                biteEvidence(candidate) }}
-              </p>
-              } @if (candidateLocation(candidate)) {
-              <ion-text color="medium">
-                {{ 'location' | transloco }}: {{ candidateLocation(candidate) }}
-              </ion-text>
-              }
-            </ion-label>
-          </ion-item>
-          } @empty {
-          <p>{{ 'no-restaurant-candidates-found' | transloco }}</p>
-          }
-        </ion-list>
-      </ion-card-content>
-    </ion-card>
+    <div class="restaurant-candidates">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title
+            >{{ 'restaurant-candidates' | transloco }}</ion-card-title
+          >
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list lines="full" data-testid="restaurant-candidates">
+            @for (candidate of candidates(); track candidate.id) {
+            <ion-item [button]="true" (click)="candidateClick.emit(candidate)">
+              <ion-label>
+                <h2>{{ candidate.name }}</h2>
+                <p>
+                  {{ 'candidate-evidence-count' | transloco: { count:
+                  evidenceCount(candidate) } }}
+                </p>
+                @if (biteEvidence(candidate)) {
+                <p>
+                  {{ 'candidate-nearby-bite-evidence' | transloco }}: {{
+                  biteEvidence(candidate) }}
+                </p>
+                } @if (candidateLocation(candidate)) {
+                <ion-text color="medium">
+                  {{ 'location' | transloco }}: {{ candidateLocation(candidate)
+                  }}
+                </ion-text>
+                }
+              </ion-label>
+            </ion-item>
+            } @empty {
+            <p>{{ 'no-restaurant-candidates-found' | transloco }}</p>
+            }
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </div>
   </ion-content>
 </ta-page>

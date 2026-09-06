@@ -1,4 +1,4 @@
-import { BiteTribeRole } from 'utils';
+import { BiteTribeRole, SubscriptionTier } from 'utils';
 
 /**
  * One BiteTribe account as the admin app sees it.
@@ -18,6 +18,12 @@ export interface AdminUser {
   providerIds: string[];
   createdAt: string;
   lastSignInAt: string;
+  /**
+   * Free, Pro, or `null` for an account nobody has decided about — one with no
+   * `/users` document, or one whose document predates the tier being written.
+   * `null` is not Free: it is the absence of an answer (issue #1485).
+   */
+  subscriptionTier: SubscriptionTier | null;
 }
 
 export interface ListUsersResult {
@@ -28,4 +34,10 @@ export interface ListUsersResult {
 export interface SetUserRolesResult {
   uid: string;
   roles: BiteTribeRole[];
+}
+
+export interface SetUserSubscriptionTierResult {
+  uid: string;
+  tier: SubscriptionTier;
+  previousTier: SubscriptionTier | null;
 }

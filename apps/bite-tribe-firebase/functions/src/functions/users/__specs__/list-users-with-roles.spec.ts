@@ -1,7 +1,12 @@
 const listUsersMock = jest.fn();
+const getFirestoreMock = jest.fn();
 
 jest.mock('firebase-admin/auth', () => ({
   getAuth: (): { listUsers: jest.Mock } => ({ listUsers: listUsersMock }),
+}));
+
+jest.mock('firebase-admin/firestore', () => ({
+  getFirestore: (): unknown => getFirestoreMock(),
 }));
 
 jest.mock('firebase-functions/https', () => ({
@@ -20,6 +25,9 @@ jest.mock('../../shared/callable-options', () => ({
 }));
 
 import { listUsersWithRolesHandler } from '../list-users-with-roles';
+import { createFakeFirestore, FakeFirestore } from './fake-firestore';
+
+let firestore: FakeFirestore;
 
 interface TestRequest {
   auth?: { uid: string; token: { roles?: unknown } };
@@ -60,6 +68,9 @@ const codeOf = async (promise: Promise<unknown>): Promise<string> => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  firestore = createFakeFirestore();
+  getFirestoreMock.mockImplementation(() => firestore);
+  firestore.seed('users/u1', { userId: 'u1', subscriptionTier: 0 });
   listUsersMock.mockResolvedValue({ users: [userRecord()] });
 });
 
@@ -150,6 +161,63 @@ describe('listUsersWithRoles mapping', () => {
       createdAt: '',
       lastSignInAt: '',
     });
+  });
+});
+
+// The tier is the one field here that does not come from Firebase Auth: it is
+// a `/users` document field, so listing accounts and showing their tier read
+// two different sources (issue #1485).
+describe('listUsersWithRoles subscription tier', () => {
+  it('joins the tier from the user document', async () => {
+    firestore.seed('users/u1', { userId: 'u1', subscriptionTier: 1 });
+
+    const { users } = await handle(asAdmin());
+
+    expect(users[0].subscriptionTier).toBe(1);
+  });
+
+  // A federated account that never completed profile creation is exactly this
+  // case, and showing it as Free would present an absence as a decision.
+  it('reports an account with no user document as having no tier', async () => {
+    listUsersMock.mockResolvedValue({ users: [userRecord({ uid: 'ghost' })] });
+
+    const { users } = await handle(asAdmin());
+
+    expect(users[0].subscriptionTier).toBeNull();
+  });
+
+  it('reports a document with no tier field as having no tier', async () => {
+    firestore.seed('users/u1', { userId: 'u1' });
+
+    expect((await handle(asAdmin())).users[0].subscriptionTier).toBeNull();
+  });
+
+  it('reports a stored tier that is not a tier as having no tier', async () => {
+    firestore.seed('users/u1', { subscriptionTier: 7 });
+
+    expect((await handle(asAdmin())).users[0].subscriptionTier).toBeNull();
+  });
+
+  it('keeps the tier with the account it belongs to', async () => {
+    listUsersMock.mockResolvedValue({
+      users: [userRecord({ uid: 'u1' }), userRecord({ uid: 'u2' })],
+    });
+    firestore.seed('users/u1', { subscriptionTier: 0 });
+    firestore.seed('users/u2', { subscriptionTier: 1 });
+
+    const { users } = await handle(asAdmin());
+
+    expect(users.map((user) => [user.uid, user.subscriptionTier])).toEqual([
+      ['u1', 0],
+      ['u2', 1],
+    ]);
+  });
+
+  // `getAll` rejects an empty argument list, so an empty page must not reach it.
+  it('survives a page with no accounts', async () => {
+    listUsersMock.mockResolvedValue({ users: [] });
+
+    await expect(handle(asAdmin())).resolves.toEqual({ users: [] });
   });
 });
 

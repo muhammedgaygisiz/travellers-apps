@@ -18,6 +18,7 @@ const user = (over: Partial<AdminUser> = {}): AdminUser => ({
   providerIds: ['password'],
   createdAt: '',
   lastSignInAt: '',
+  subscriptionTier: 0,
   ...over,
 });
 
@@ -107,5 +108,26 @@ describe(UserManagementDataAccessService.name, () => {
       name: 'setUserRoles',
       data: { uid: 'u1', roles: [] },
     });
+  });
+
+  it('writes the tier through its own callable, not through setUserRoles', async () => {
+    callByNameMock.mockResolvedValue({
+      data: { uid: 'u1', tier: 1, previousTier: 0 },
+    });
+
+    const result = await service.setSubscriptionTier('u1', 1, 'refund');
+
+    expect(callByNameMock).toHaveBeenCalledWith({
+      name: 'setUserSubscriptionTier',
+      data: { uid: 'u1', tier: 1, reason: 'refund' },
+    });
+    expect(result).toEqual({ uid: 'u1', tier: 1, previousTier: 0 });
+  });
+
+  // `null` is "nobody decided", not Free, and it has to survive the trip.
+  it('keeps an absent tier absent rather than reading it as Free', async () => {
+    const [account] = await loadUsers([user({ subscriptionTier: null })]);
+
+    expect(account.subscriptionTier).toBeNull();
   });
 });

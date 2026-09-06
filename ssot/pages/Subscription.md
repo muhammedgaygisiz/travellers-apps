@@ -98,6 +98,7 @@ Next to implement:
 - [[epic-1122]] entitlement foundation and Pro gating
 - [[epic-1124]] Pro subscriptions
 - [[epic-1125]] paid BiteTrails, which reuses the same rails
+- [[epic-1471]] the operator surface over the tier, ahead of the entitlement it will write ([[issue-1485]])
 
 ## Technical Implementation
 

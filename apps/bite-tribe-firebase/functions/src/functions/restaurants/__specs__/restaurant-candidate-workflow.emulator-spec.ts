@@ -68,8 +68,8 @@ const verifyCandidate = (
 ): ReturnType<typeof verifyRestaurantCandidateHandler> =>
   verifyRestaurantCandidateHandler({
     auth: {
-      uid: 'business-user-1',
-      token: {},
+      uid: 'operator-1',
+      token: { roles: ['admin'] },
     },
     data: {
       candidateId,
@@ -177,7 +177,7 @@ describe('restaurant candidate workflow emulator integration', () => {
     expect(verifiedCandidate).toMatchObject({
       status: 'verified',
       verifiedRestaurantId: restaurantId,
-      verifiedByUserId: 'business-user-1',
+      verifiedByUserId: 'operator-1',
     });
 
     const menuSnapshot = await getFirestore().collection('menus').get();

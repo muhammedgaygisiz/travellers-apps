@@ -108,6 +108,19 @@ app and run the operational migrations in it.
 - Neither path is the authorization answer. Every privileged callable re-reads
   the claim from the token Firebase verified; the client half only decides what
   a browser is shown.
+- **Every HTTP endpoint is classified, and the classification is a test.** A
+  callable runs with admin credentials, so no Firestore rule constrains it and
+  "an authenticated caller" is not an authorization decision - it is the absence
+  of one. Each endpoint in the functions source is named in
+  `src/__specs__/callable-authorization.spec.ts` as `operator`, `authenticated`
+  or `public`, and the spec fails when an operator endpoint does not call
+  `requireAdmin`, when a consumer path does, or when a new endpoint is added
+  that nobody classified. Seven are operator-only: `setUserRoles`,
+  `listUsersWithRoles`, `verifyRestaurantCandidate`, `backfillBiteAddress`,
+  `backfillReviewTimestampsCallable`, `clusterRestaurantCandidateForBite` and
+  `sendNewVersionNotification`. `handleSharedLinkToBite` is the one public
+  endpoint, because it is the redirect a shared Bite link resolves through. See
+  issue \#1472.
 - A cached ID token can be an hour old, so both paths retry once against a
   freshly minted token before rejecting. That is what keeps a role granted
   moments ago from turning away the account it was granted to.
@@ -194,6 +207,7 @@ libs/bite-tribe-business/shell/src/lib/routes.ts
 libs/bite-tribe-admin/shell/src/lib/routes.ts
 apps/bite-tribe-firebase/functions/src/functions/shared/roles.ts
 apps/bite-tribe-firebase/functions/src/functions/users/set-user-roles.ts
+apps/bite-tribe-firebase/functions/src/__specs__/callable-authorization.spec.ts
 apps/bite-tribe-firebase/scripts/grant-role.mjs
 apps/bite-tribe-firebase/functions/src/functions/users/create-user-on-auth-create.ts
 apps/bite-tribe-firebase/functions/src/functions/users/update-last-seen.ts
@@ -208,4 +222,4 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 - Onboarding after registration is still a product gap.
 - Public/private profile intent needs clearer user guidance.
 - Backend callable auth checks need to remain consistent as more write/query logic moves server-side.
-- Roles are enforced in route guards and in `setUserRoles`, but not yet in Firestore rules (\#1078) or in the other privileged callables. `verifyRestaurantCandidate`, for one, still accepts any authenticated caller.
+- Roles are enforced in route guards and in every operator callable, but not yet in Firestore rules (\#1078). Until those land, an account that cannot reach an operator _operation_ can still write documents directly.

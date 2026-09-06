@@ -2,6 +2,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { requireAdmin } from '../shared/roles';
 import {
   aggregateRestaurantCandidateEvidence,
   findPendingRestaurantCandidateDuplicate,
@@ -34,14 +35,16 @@ interface ClusterRestaurantCandidateForBiteResult {
   status: 'created' | 'updated' | 'verified-restaurant-match';
 }
 
+/**
+ * Clusters one Bite into a restaurant candidate on demand.
+ *
+ * Operator-only. It is the manual half of the automatic clustering trigger and
+ * writes candidate documents for Bites the caller does not own; the only
+ * surface that offers it is the admin migrations page (issue #1472).
+ */
 export const clusterRestaurantCandidateForBite =
   onAppCheck<ClusterRestaurantCandidateForBiteRequest>(async (request) => {
-    if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to cluster restaurant candidates.',
-      );
-    }
+    requireAdmin(request);
 
     if (typeof request.data.biteId !== 'string' || !request.data.biteId) {
       throw new HttpsError('invalid-argument', 'biteId must be a string.');

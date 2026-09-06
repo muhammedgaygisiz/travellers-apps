@@ -97,10 +97,15 @@ name in onboarding.
 - `backfillReviewTimestampsCallable`, started from the review-timestamps
   backfill surface.
 
-## Known Gap
+## Authorization
 
-Moving the UI does not secure the callables. `requireAdmin` on each of them is
-issue \#1472 and independent of this move.
+Every migration callable calls `requireAdmin` (issue \#1472). Moving the UI into
+the admin app did not secure them: the callable runs with admin credentials, so
+the only thing that stops a consumer account from posting a crafted payload to
+it is the callable reading the role out of the verified token itself. The
+classification of every endpoint lives in
+`apps/bite-tribe-firebase/functions/src/__specs__/callable-authorization.spec.ts`,
+which fails the build for a new one nobody has classified.
 
 ## Related Domains
 

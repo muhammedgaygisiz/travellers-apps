@@ -69,6 +69,13 @@ describe('listUsersWithRoles authorization', () => {
     expect(listUsersMock).not.toHaveBeenCalled();
   });
 
+  it('rejects a signed-in caller holding no roles', async () => {
+    const request: TestRequest = { auth: { uid: 'x', token: {} }, data: {} };
+
+    expect(await codeOf(handle(request))).toBe('permission-denied');
+    expect(listUsersMock).not.toHaveBeenCalled();
+  });
+
   // Listing every account with its access level is the inventory an attacker
   // would want first, so a business account must not get it either.
   it('rejects a caller holding only the business role', async () => {

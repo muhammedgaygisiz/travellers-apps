@@ -1,4 +1,5 @@
 import {
+  backfillBiteAddress,
   buildBiteAddressUpdate,
   extractBiteAddress,
   getBitePosition,
@@ -123,5 +124,50 @@ describe('enrich bite address helpers', () => {
       addressStatus: 'resolved',
       updatedAt: 'server-timestamp',
     });
+  });
+});
+
+/**
+ * The backfill spends the Google Geocoding key on a Bite the caller does not
+ * have to own, so it is an operator action rather than a signed-in one
+ * (issue #1472).
+ */
+describe('backfillBiteAddress authorization', () => {
+  const handle = (auth: unknown): Promise<unknown> =>
+    (backfillBiteAddress as unknown as (request: unknown) => Promise<unknown>)({
+      auth,
+      data: { biteId: 'bite-1' },
+    });
+
+  const codeOf = async (promise: Promise<unknown>): Promise<string> => {
+    try {
+      await promise;
+    } catch (error) {
+      return (error as { code: string }).code;
+    }
+
+    throw new Error('Expected the callable to reject, but it resolved.');
+  };
+
+  /** A caller the verified ID token says holds `roles`. */
+  const callerWith = (roles: unknown): unknown => ({
+    uid: 'user-1',
+    token: { roles },
+  });
+
+  it('rejects an unauthenticated caller', async () => {
+    expect(await codeOf(handle(undefined))).toBe('unauthenticated');
+  });
+
+  it('rejects a signed-in caller holding no roles', async () => {
+    expect(await codeOf(handle(callerWith(undefined)))).toBe(
+      'permission-denied',
+    );
+  });
+
+  it('rejects a caller holding only the business role', async () => {
+    expect(await codeOf(handle(callerWith(['business'])))).toBe(
+      'permission-denied',
+    );
   });
 });

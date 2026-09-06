@@ -1,6 +1,7 @@
 import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { requireAdmin } from '../shared/roles';
 import {
   NotificationPlatform,
   isNotificationPlatform,
@@ -34,25 +35,20 @@ const NEW_VERSION_MESSAGES: Record<
  * The trigger is manual because nothing observable tells the backend when a
  * TestFlight build or a Play Console review has actually gone live, and the two
  * stores clear at different times - so the operator fires one platform at a
- * time from the business app (issue \#1194).
+ * time from the admin app (issue \#1194).
  *
  * The send is addressed by installation platform rather than by account: the
  * same user can have both an iPhone and an Android phone registered, and only
  * the one whose store already serves the new version should be told to update.
+ *
+ * Operator-only: one call pushes a notification to every installation we have
+ * a token for, which is the loudest thing any account can make the backend do
+ * (issue #1472).
  */
 export const sendNewVersionNotification =
   onAppCheck<SendNewVersionNotificationRequest>(
     async (request): Promise<SendNewVersionNotificationResult> => {
-      if (!request.auth) {
-        logger.warn(
-          'sendNewVersionNotification: unauthenticated request rejected',
-        );
-        throw new HttpsError(
-          'unauthenticated',
-          'You must be signed in to announce a new version.',
-        );
-      }
-
+      const uid = requireAdmin(request);
       const platform = request.data?.platform;
 
       if (!isNotificationPlatform(platform)) {
@@ -62,10 +58,7 @@ export const sendNewVersionNotification =
         );
       }
 
-      logger.info('sendNewVersionNotification: started', {
-        uid: request.auth.uid,
-        platform,
-      });
+      logger.info('sendNewVersionNotification: started', { uid, platform });
 
       const userUids = await getAllUserUids();
 

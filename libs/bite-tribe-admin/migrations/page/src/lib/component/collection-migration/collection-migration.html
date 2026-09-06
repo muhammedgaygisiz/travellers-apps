@@ -1,0 +1,49 @@
+<table class="migration-table" border="1">
+  <thead>
+    <tr>
+      <th>{{ 'migration' | transloco }}</th>
+      <th>{{ 'last-run' | transloco }}</th>
+      <th>{{ 'action' | transloco }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr [attr.data-testid]="'collection-migration-' + migration()">
+      <td>
+        <strong>{{ 'migration-' + migration() | transloco }}</strong>
+        <br />
+        <span>{{ 'migration-' + migration() + '-hint' | transloco }}</span>
+      </td>
+      <td>
+        @switch (state()?.status) { @case ('running') {
+        <span data-testid="migration-running">
+          {{ 'migration-running' | transloco }}
+        </span>
+        } @case ('failed') {
+        <ion-text color="danger" data-testid="migration-failed">
+          {{ 'migration-failed' | transloco }}
+        </ion-text>
+        } @case ('done') {
+        <ul class="migration-counts" data-testid="migration-counts">
+          @for (count of counts(); track count.key) {
+          <li>
+            {{ 'migration-count-' + count.key | transloco }}: {{ count.value }}
+          </li>
+          }
+        </ul>
+        } @default {
+        <span>{{ 'migration-not-run' | transloco }}</span>
+        } }
+      </td>
+      <td>
+        <ion-button
+          fill="outline"
+          data-testid="run-migration"
+          [disabled]="isRunning()"
+          (click)="run.emit(migration())"
+        >
+          {{ 'run-migration' | transloco }}
+        </ion-button>
+      </td>
+    </tr>
+  </tbody>
+</table>

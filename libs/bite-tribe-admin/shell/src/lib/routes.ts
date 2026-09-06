@@ -43,6 +43,78 @@ export const ROUTES: Routes = withAuthRoutes(
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
+      path: 'restaurant-candidates',
+      loadComponent: () =>
+        import('bite-tribe-admin/restaurants').then(
+          (m) => m.RestaurantCandidatesContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
+      path: 'bite-places',
+      loadComponent: () =>
+        import('bite-tribe-admin/restaurants').then(
+          (m) => m.BitePlacesContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
+      path: 'new-restaurant',
+      loadComponent: () =>
+        import('bite-tribe-admin/restaurants').then(
+          (m) => m.NewRestaurantContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
+      path: 'new-version-notification',
+      loadComponent: () =>
+        import('bite-tribe-admin/migrations').then(
+          (m) => m.NewVersionNotificationContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
+      path: 'review-timestamps-backfill',
+      loadComponent: () =>
+        import('bite-tribe-admin/migrations').then(
+          (m) => m.ReviewTimestampsBackfillContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
+      path: 'bite-address-backfill',
+      loadComponent: () =>
+        import('bite-tribe-admin/migrations').then(
+          (m) => m.BiteAddressBackfillContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
+      path: 'restaurant-clustering',
+      loadComponent: () =>
+        import('bite-tribe-admin/migrations').then(
+          (m) => m.RestaurantClusteringContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
+      path: 'image-migration',
+      loadComponent: () =>
+        import('bite-tribe-admin/migrations').then(
+          (m) => m.ImageMigrationContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
+      path: 'geohash-migration',
+      loadComponent: () =>
+        import('bite-tribe-admin/migrations').then(
+          (m) => m.GeohashMigrationContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
       path: '',
       redirectTo: 'dashboard',
       pathMatch: 'full',

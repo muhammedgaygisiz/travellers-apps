@@ -1,0 +1,8 @@
+{
+  "name": "bt-admin-migrations-data-access",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bite-tribe-admin/migrations/data-access/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["type:data-access", "scope:bite-tribe-admin"]
+}

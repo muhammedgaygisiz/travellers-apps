@@ -8,7 +8,10 @@ import { authGuard, roleGuard } from 'ta-firestore';
  * `authGuard` establishes that someone is signed in; `roleGuard('business')`
  * establishes that the account was granted business access by an operator.
  * Until issue #1469 only the first existed, which meant any BiteTribe account
- * could open this app and run the operational migrations in it.
+ * could open this app and run the operational migrations in it. Those
+ * migrations, restaurant-candidate verification and the unmatched Bite places
+ * left for the admin app with issue #1473, so what is behind this gate is now
+ * only what a restaurant does to its own data.
  *
  * The gate is hard and there is no backfill: an account that could sign in
  * before the role existed cannot sign in now unless it has been granted the
@@ -36,10 +39,18 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard, roleGuard('business')],
   },
   {
-    path: 'migrations',
+    path: 'bite-trails',
     loadComponent: () =>
-      import('bite-tribe-business/migrations').then(
-        (m) => m.MigrationsContainer,
+      import('bite-tribe-business/dashboard').then(
+        (m) => m.BiteTrailsContainer,
+      ),
+    canActivate: [authGuard, roleGuard('business')],
+  },
+  {
+    path: 'restaurants',
+    loadComponent: () =>
+      import('bite-tribe-business/dashboard').then(
+        (m) => m.RestaurantsContainer,
       ),
     canActivate: [authGuard, roleGuard('business')],
   },
@@ -48,14 +59,6 @@ export const ROUTES: Routes = withAuthRoutes([
     loadComponent: () =>
       import('bite-tribe-business/create-bite-trail').then(
         (m) => m.CreateBiteTrailContainer,
-      ),
-    canActivate: [authGuard, roleGuard('business')],
-  },
-  {
-    path: 'new-restaurant',
-    loadComponent: () =>
-      import('bite-tribe-business/restaurant').then(
-        (m) => m.NewRestaurantContainer,
       ),
     canActivate: [authGuard, roleGuard('business')],
   },

@@ -50,6 +50,10 @@ Examples:
 - `libs/bite-tribe-business/dashboard/page`
 - `libs/bite-tribe-business/dashboard/data-access`
 
+The business app holds only what a restaurant does to its own data. Migrations,
+restaurant-candidate verification, the unmatched Bite places and the
+new-restaurant form they open left for the admin app with issue \#1473.
+
 ## Admin Feature Libraries
 
 ```text
@@ -69,24 +73,32 @@ Examples:
 - `libs/bite-tribe-admin/dashboard`
 - `libs/bite-tribe-admin/user-management/page`
 - `libs/bite-tribe-admin/user-management/data-access`
+- `libs/bite-tribe-admin/migrations/page`
+- `libs/bite-tribe-admin/migrations/data-access`
+- `libs/bite-tribe-admin/restaurants/page`
+- `libs/bite-tribe-admin/restaurants/data-access`
+
+`migrations/page` holds one page per migration rather than one page listing all
+of them, because each is its own entry on the admin dashboard (issue \#1473).
 
 ## Shared Libraries
 
-| Path                                | Purpose                                                            |
-| ----------------------------------- | ------------------------------------------------------------------ |
-| `libs/bite-tribe/api`               | Shared client-side Firebase, Firestore, Storage, and API helpers   |
-| `libs/bite-tribe/restaurant`        | Restaurant **view** for the consumer app; editing is business-only |
-| `libs/bite-tribe/store`             | App-wide NgRx state, effects, selectors, and router state          |
-| `libs/bite-tribe-common/model`      | Shared domain model types used across multiple libraries           |
-| `libs/bite-tribe-common/bite`       | Shared Bite UI/domain support                                      |
-| `libs/bite-tribe-common/bite-trail` | Shared BiteTrail UI/domain support                                 |
-| `libs/bite-tribe-common/map`        | Shared map functionality                                           |
-| `libs/common/ui`                    | Shared reusable UI components                                      |
-| `libs/common/utils`                 | Shared utilities, paths, icon registration, and helpers            |
-| `libs/common/toast`                 | `ToastService`, the only way either app raises a toast             |
-| `libs/common/ta-firestore`          | Firebase bootstrap and Firestore integration support               |
-| `libs/common/geolocation`           | Shared geolocation support                                         |
-| `libs/common/push-notifications`    | Push notification support                                          |
+| Path                                   | Purpose                                                                                                    |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `libs/bite-tribe/api`                  | Shared client-side Firebase, Firestore, Storage, and API helpers                                           |
+| `libs/bite-tribe/restaurant`           | Restaurant **view** for the consumer app; editing is business-only                                         |
+| `libs/bite-tribe/store`                | App-wide NgRx state, effects, selectors, and router state                                                  |
+| `libs/bite-tribe-common/model`         | Shared domain model types used across multiple libraries                                                   |
+| `libs/bite-tribe-common/bite`          | Shared Bite UI/domain support                                                                              |
+| `libs/bite-tribe-common/bite-trail`    | Shared BiteTrail UI/domain support                                                                         |
+| `libs/bite-tribe-common/map`           | Shared map functionality                                                                                   |
+| `libs/bite-tribe-common/opening-hours` | Weekly opening-hours editor, shared by the business edit-restaurant page and the admin new-restaurant form |
+| `libs/common/ui`                       | Shared reusable UI components                                                                              |
+| `libs/common/utils`                    | Shared utilities, paths, icon registration, and helpers                                                    |
+| `libs/common/toast`                    | `ToastService`, the only way either app raises a toast                                                     |
+| `libs/common/ta-firestore`             | Firebase bootstrap and Firestore integration support                                                       |
+| `libs/common/geolocation`              | Shared geolocation support                                                                                 |
+| `libs/common/push-notifications`       | Push notification support                                                                                  |
 
 ## Backend Functions
 

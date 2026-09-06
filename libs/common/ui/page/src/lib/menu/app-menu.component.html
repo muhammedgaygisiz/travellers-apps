@@ -104,12 +104,6 @@
           <ng-container>{{ 'about' | transloco }}</ng-container>
         </ion-item>
       }
-      @if (showMigrationsButton()) {
-        <ion-item (click)="menuNavigate.emit('migrations')">
-          <ion-icon name="hammer-outline" slot="start" />
-          Migrations
-        </ion-item>
-      }
       <ion-item
         data-testid="btn-logout"
         [button]="true"

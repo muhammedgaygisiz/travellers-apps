@@ -1,0 +1,33 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <h2>{{ 'new-version-notification' | transloco }}</h2>
+    <p>{{ 'new-version-notification-hint' | transloco }}</p>
+    <div class="new-version-actions">
+      <ion-button
+        fill="outline"
+        data-testid="notify-ios"
+        [disabled]="isSending()"
+        (click)="notifyNewVersion('ios')"
+      >
+        {{ 'notify-ios-users' | transloco }}
+      </ion-button>
+      <ion-button
+        fill="outline"
+        data-testid="notify-android"
+        [disabled]="isSending()"
+        (click)="notifyNewVersion('android')"
+      >
+        {{ 'notify-android-users' | transloco }}
+      </ion-button>
+    </div>
+    @if (statusKey(); as key) {
+    <p class="new-version-status" data-testid="new-version-status">
+      {{ key | transloco: statusParams() }}
+    </p>
+    }
+  </ion-content>
+</ta-page>

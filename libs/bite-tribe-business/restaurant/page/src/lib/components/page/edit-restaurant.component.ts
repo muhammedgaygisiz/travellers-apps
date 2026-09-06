@@ -31,7 +31,7 @@ import { map } from 'rxjs';
 import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PositionComponent } from 'bite-tribe-common/map';
-import { OpeningHoursComponent } from '../opening-hours/opening-hours.component';
+import { OpeningHoursComponent } from 'opening-hours';
 
 @Component({
   selector: 'edit-restaurant',

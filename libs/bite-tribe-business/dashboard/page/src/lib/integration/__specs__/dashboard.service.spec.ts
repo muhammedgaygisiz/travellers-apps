@@ -1,12 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { DashboardService } from '../dashboard.service';
-import {
-  DashboardDataAccessService,
-  DashboardRestaurantCandidate,
-} from 'bite-tribe-business/dashboard-data-access';
+import { DashboardDataAccessService } from 'bite-tribe-business/dashboard-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { Restaurant } from 'model';
+import { DashboardSection } from '../../component/page/dashboard.component';
 
 jest.mock('bite-tribe-business/dashboard-data-access');
 jest.mock('@capacitor-firebase/firestore');
@@ -24,12 +22,10 @@ describe('DashboardService', () => {
 
     dataAccessMock = {
       restaurants: mockResource,
-      bitePlaces: mockResource,
-      restaurantCandidates: mockResource,
+      biteTrails: mockResource,
       isAuthenticated: signal(false),
       gpsPosition: signal(null),
       logout: jest.fn(),
-      selectRestaurantToCreate: jest.fn(),
     } as unknown as jest.Mocked<DashboardDataAccessService>;
 
     navControllerMock = {
@@ -98,84 +94,22 @@ describe('DashboardService', () => {
     });
   });
 
-  describe('gotoMigrations', () => {
-    it('should navigate forward to migrations', () => {
-      service.gotoMigrations();
+  describe('createBiteTrailClicked', () => {
+    it('should navigate forward to create-bite-trail', () => {
+      service.createBiteTrailClicked();
 
       expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
-        'migrations',
+        'create-bite-trail',
       ]);
     });
   });
 
-  describe('onMenuNavigate', () => {
-    it('should navigate to migrations for the migrations target', () => {
-      service.onMenuNavigate('migrations');
+  describe('sectionClicked', () => {
+    it('should navigate forward to the section path', () => {
+      service.sectionClicked({ path: '/restaurants' } as DashboardSection);
 
       expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
-        'migrations',
-      ]);
-    });
-
-    it('should not navigate for any other target', () => {
-      service.onMenuNavigate('settings');
-
-      expect(navControllerMock.navigateForward).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('placeClicked', () => {
-    it('should call selectAndNavigateToCreateRestaurantPageClicked with a restaurant containing the place name', () => {
-      service.placeClicked('Pizza Palace');
-
-      expect(dataAccessMock.selectRestaurantToCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: 'Pizza Palace',
-          unsaved: true,
-        }),
-      );
-    });
-
-    it('should navigate forward to new-restaurant', () => {
-      service.placeClicked('Pizza Palace');
-
-      expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
-        'new-restaurant',
-      ]);
-    });
-  });
-
-  describe('restaurantCandidateClicked', () => {
-    it('should select a prefilled unsaved restaurant with candidate Bite evidence', () => {
-      const candidate = {
-        id: 'candidate-1',
-        name: 'Pizza Palace',
-        position: { latitude: 46.948, longitude: 7.4474 },
-        biteIds: ['bite-1'],
-        bites: [{ id: 'bite-1', name: 'Margherita' }],
-      } as DashboardRestaurantCandidate;
-
-      service.restaurantCandidateClicked(candidate);
-
-      expect(dataAccessMock.selectRestaurantToCreate).toHaveBeenCalledWith({
-        id: '',
-        name: 'Pizza Palace',
-        position: { latitude: 46.948, longitude: 7.4474 },
-        restaurantCandidateId: 'candidate-1',
-        biteIds: ['bite-1'],
-        bites: [{ id: 'bite-1', name: 'Margherita' }],
-        unsaved: true,
-      });
-    });
-
-    it('should navigate forward to new-restaurant', () => {
-      service.restaurantCandidateClicked({
-        name: 'Pizza Palace',
-        position: { latitude: 46.948, longitude: 7.4474 },
-      } as DashboardRestaurantCandidate);
-
-      expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
-        'new-restaurant',
+        '/restaurants',
       ]);
     });
   });

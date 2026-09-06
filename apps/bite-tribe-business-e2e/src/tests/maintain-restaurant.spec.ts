@@ -65,6 +65,7 @@ test.describe('Maintain restaurants in the business app', () => {
     await loginAsBusinessUser(page);
 
     const dashboard = new DashboardPage(page);
+    await dashboard.openRestaurants();
     await dashboard.expectRestaurant(restaurantName);
     await dashboard.openRestaurant(restaurantName, restaurantId);
 

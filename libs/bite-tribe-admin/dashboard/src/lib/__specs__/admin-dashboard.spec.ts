@@ -91,6 +91,26 @@ describe(AdminDashboard.name, () => {
     });
   });
 
+  // Each operational surface is its own entry rather than one "migrations"
+  // page (issue #1473). Asserted as the whole list so a surface added later
+  // without an entry — or an entry pointing at a route that does not exist —
+  // shows up here.
+  it('lists every operator surface', () => {
+    createComponent();
+
+    expect(component.tools.map((tool) => tool.path)).toEqual([
+      '/user-management',
+      '/restaurant-candidates',
+      '/bite-places',
+      '/new-version-notification',
+      '/review-timestamps-backfill',
+      '/bite-address-backfill',
+      '/restaurant-clustering',
+      '/image-migration',
+      '/geohash-migration',
+    ]);
+  });
+
   it('renders an entry per tool', () => {
     createComponent();
 

@@ -25,7 +25,43 @@
     flex: 2;
   }
 
-  /* Below the desktop breakpoint the two columns stack rather than squeeze. */
+  /*
+   * Side by side, each column scrolls on its own.
+   *
+   * The page used to scroll as one, so an account list long enough to overflow
+   * pushed the form off the bottom: picking an account near the end of the list
+   * scrolled its form out of view, and editing roles meant scrolling back up
+   * past every row. Binding the row to the content height and giving each
+   * column its own overflow keeps the form where the selection left it.
+   *
+   * `align-items: stretch` is what gives the columns that height to scroll
+   * within; `flex-start` would size them to their content again. The cards
+   * inside keep their natural height either way.
+   */
+  @media (min-width: 768px) {
+    .user-management {
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .column {
+      overflow-y: auto;
+    }
+  }
+
+  /*
+   * Below the desktop breakpoint the columns are meant to stack rather than
+   * squeeze, and the page scrolls as one — two scroll areas stacked in a phone
+   * viewport leaves each too short to be worth scrolling, which is why the rule
+   * above is bounded to desktop widths.
+   *
+   * This rule does not currently win: the element also carries Ionic's
+   * `.ion-flex-row`, which declares `flex-direction: row !important`, so the
+   * columns stay side by side at every width. Left as-is rather than fixed
+   * here, because dropping the utility class or matching its `!important` is a
+   * change to the mobile layout rather than to the scrolling this block is
+   * about.
+   */
   @media (max-width: 767px) {
     .user-management {
       flex-direction: column;

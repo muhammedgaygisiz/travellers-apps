@@ -1,9 +1,7 @@
 <ta-page
   [chrome]="{ showFooter: false, fullWidth: true }"
-  [menuConfig]="{ migrations: true }"
   [isAuthenticated]="isAuthenticated()"
   (logoutClick)="logoutClick.emit()"
-  (menuNavigate)="menuNavigate.emit($event)"
 >
   <ion-content class="ion-padding">
     <div class="ion-display-flex ion-flex-row">
@@ -11,12 +9,14 @@
         class="ion-display-flex ion-flex-column column ion-flex-2 ion-padding"
       >
         <ion-card>
-          <ion-card-header>
-            <ion-card-title></ion-card-title>
-          </ion-card-header>
           <ion-card-content>
-            @if (gpsPosition()) {
-              <bt-map [gpsPosition]="gpsPosition()" enableZoom readonly />
+            @if (showMap()) {
+              <bt-map
+                [gpsPosition]="gpsPosition()"
+                [geopoints]="restaurantPositions()"
+                enableZoom
+                readonly
+              />
             }
           </ion-card-content>
         </ion-card>
@@ -25,104 +25,24 @@
         class="ion-display-flex ion-flex-column column ion-flex-2 ion-padding"
       >
         <ion-card>
-          <ion-card-header>
-            <ion-card-title>{{ 'bite-trails' | transloco }}</ion-card-title>
-          </ion-card-header>
           <ion-card-content>
-            <ion-list lines="full" data-testid="dashboard-bite-trails">
-              @for (biteTrail of biteTrails(); track biteTrail.id) {
-                <ion-item>
-                  <ion-label>{{ biteTrail.name }}</ion-label>
-                </ion-item>
-              } @empty {
-                <p>{{ 'no-bite-trails-found' | transloco }}</p>
-              }
-            </ion-list>
-            <ion-button
-              expand="block"
-              class="ion-margin-top"
-              (click)="createBiteTrailClick.emit()"
-            >
-              {{ 'create-bite-trail' | transloco }}
-            </ion-button>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>{{ 'restaurants' | transloco }}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-list lines="full" data-testid="dashboard-restaurants">
-              @for (restaurant of restaurants(); track restaurant.id) {
+            <ion-list lines="full" data-testid="dashboard-sections">
+              @for (section of sections; track section.path) {
                 <ion-item
                   [button]="true"
-                  (click)="restaurantClick.emit(restaurant)"
+                  [attr.data-testid]="section.testId"
+                  (click)="sectionClick.emit(section)"
                 >
-                  <ion-label>{{ restaurant.name }}</ion-label>
-                </ion-item>
-              } @empty {
-                <p>{{ 'no-restaurants-found' | transloco }}</p>
-              }
-            </ion-list>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>
-              {{ 'restaurant-candidates' | transloco }}
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-list lines="full">
-              @for (candidate of restaurantCandidates(); track candidate.id) {
-                <ion-item
-                  [button]="true"
-                  (click)="restaurantCandidateClick.emit(candidate)"
-                >
+                  <ion-icon
+                    [name]="section.icon"
+                    slot="start"
+                    aria-hidden="true"
+                  />
                   <ion-label>
-                    <h2>{{ candidate.name }}</h2>
-                    <p>
-                      {{
-                        'candidate-evidence-count'
-                          | transloco
-                            : { count: candidateEvidenceCount(candidate) }
-                      }}
-                    </p>
-                    @if (candidateBiteEvidence(candidate)) {
-                      <p>
-                        {{ 'candidate-nearby-bite-evidence' | transloco }}:
-                        {{ candidateBiteEvidence(candidate) }}
-                      </p>
-                    }
-                    @if (candidateLocation(candidate)) {
-                      <ion-text color="medium">
-                        {{ 'location' | transloco }}:
-                        {{ candidateLocation(candidate) }}
-                      </ion-text>
-                    }
+                    <h3>{{ section.titleKey | transloco }}</h3>
+                    <p>{{ section.descriptionKey | transloco }}</p>
                   </ion-label>
                 </ion-item>
-              } @empty {
-                <p>{{ 'no-restaurant-candidates-found' | transloco }}</p>
-              }
-            </ion-list>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Bite Places</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-list lines="full">
-              @for (place of bitePlaces(); track place) {
-                <ion-item [button]="true" (click)="placeClick.emit(place)">
-                  <ion-label>{{ place }}</ion-label>
-                </ion-item>
-              } @empty {
-                <p>No bite places found.</p>
               }
             </ion-list>
           </ion-card-content>

@@ -1,0 +1,51 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <h2>{{ 'bite-address-backfill' | transloco }}</h2>
+    <table
+      class="migration-table"
+      border="1"
+      data-testid="bite-address-backfill-table"
+    >
+      <thead>
+        <tr>
+          <th>{{ 'bite' | transloco }}</th>
+          <th>{{ 'location' | transloco }}</th>
+          <th>{{ 'address-status' | transloco }}</th>
+          <th>{{ 'action' | transloco }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (bite of bitesNeedingAddressBackfill(); let index = $index; track
+        bite.id || index) {
+        <tr>
+          <td>
+            <strong>{{ bite.name || bite.id }}</strong>
+            <br />
+            <span>{{ bite.id }}</span>
+          </td>
+          <td>
+            {{ bite.position?.latitude ?? '-' }}, {{ bite.position?.longitude ??
+            '-' }}
+          </td>
+          <td>{{ bite.addressStatus || 'missing' }}</td>
+          <td>
+            <ion-button fill="outline" (click)="backfillBiteAddress.emit(bite)">
+              {{ 'backfill-bite-address' | transloco }}
+            </ion-button>
+          </td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="4">
+            {{ 'no-bite-address-backfill-eligible-bites' | transloco }}
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </ion-content>
+</ta-page>

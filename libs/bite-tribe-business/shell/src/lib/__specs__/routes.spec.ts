@@ -1,6 +1,5 @@
 import { Route } from '@angular/router';
 import { authGuard } from 'ta-firestore';
-import { PATH } from 'utils';
 import { ROUTES } from '../routes';
 
 /**
@@ -10,14 +9,7 @@ import { ROUTES } from '../routes';
  * forgets the role guard fails here instead of shipping an ungated operator
  * surface (issue #1469).
  */
-const UNGATED_PATHS = [
-  'start',
-  'login',
-  'registration',
-  'forgot-password',
-  PATH.NO_ACCESS,
-  '',
-];
+const UNGATED_PATHS = ['start', 'login', 'registration', 'forgot-password', ''];
 
 const isAuthenticated = (route: Route): boolean =>
   (route.canActivate ?? []).includes(authGuard);
@@ -31,21 +23,12 @@ describe('business ROUTES', () => {
     expect(ungated.map((route) => route.path)).toEqual([]);
   });
 
-  it('leaves only the entry, auth and rejection routes ungated', () => {
+  it('leaves only the entry and auth routes ungated', () => {
     const open = ROUTES.filter((route) => !route.canActivate).map(
       (route) => route.path,
     );
 
     expect(open.sort()).toEqual([...UNGATED_PATHS].sort());
-  });
-
-  // `roleGuard` sends a rejected account here. Gating it would send that
-  // account to a page that rejects it for the same reason.
-  it('serves the no-access route without a guard', () => {
-    const noAccess = ROUTES.find((route) => route.path === PATH.NO_ACCESS);
-
-    expect(noAccess).toBeDefined();
-    expect(noAccess?.canActivate).toBeUndefined();
   });
 
   it('keeps the operational migrations behind the gate', () => {

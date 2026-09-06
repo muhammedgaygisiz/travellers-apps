@@ -36,12 +36,14 @@ Steps 3 and 4 are the point of the split: a restaurant never grants itself busin
 
 1. An operator is granted `admin` through `grant-role.mjs`, run with service-account credentials.
 2. They sign into the admin app with a normal BiteTribe account.
-3. `roleGuard('admin')` admits them to the dashboard, which shows the signed-in account and nothing else yet.
-4. Restaurant-candidate verification and migrations still run in the business app, behind `roleGuard('business')`.
+3. Sign-in verifies the `admin` role before it succeeds; an account without it gets the generic login failure. `roleGuard('admin')` backs that up on the routes for a restored session or a revoked role.
+4. They land on the dashboard, which shows the signed-in account and nothing else yet.
+5. Restaurant-candidate verification and migrations still run in the business app, behind the `business` role.
 
 ## Key Behaviours
 
 - Roles are Firebase Auth custom claims, written only by the backend.
+- **A missing role fails the login rather than blocking a page.** An account signed in and then refused would learn that its password was right, that it exists, and which role guards the app. The generic failure tells it nothing. See [[Architecture - Auth]].
 - `admin` and `business` are separate, not a hierarchy. An operator account holding `admin` does not thereby get restaurant maintenance rights.
 - The admin app is English-only. Its audience is BiteTribe operators, and four locale lists kept in step for no reader is a cost with no reader.
 - The app is `noindex, nofollow` at both the meta tag and the hosting header. It is an internal tool that must never appear in a search result.
@@ -49,8 +51,9 @@ Steps 3 and 4 are the point of the split: a restaurant never grants itself busin
 
 ## Success Criteria
 
-- A signed-in account without `admin` cannot reach an admin route and is told which role it lacks.
-- A signed-in account without `business` cannot reach a business route.
+- An account without `admin` cannot sign into the admin app, and the refusal is indistinguishable from a wrong password.
+- An account without `business` cannot sign into the business app, on the same terms.
+- A rejected sign-in leaves no session behind, so a deep link cannot skip the login page.
 - A role granted through the backend takes effect in the client within one token refresh.
 - An operator locked out of every admin account can recover through `grant-role.mjs` without an existing admin.
 

@@ -27,8 +27,10 @@ Backend callables validate request.auth where required
   before that answer exists.
 - `withAuthRoutes` provides shared auth routes.
 - `authGuard` protects authenticated routes.
-- `roleGuard(role)` protects the privileged apps' routes on top of `authGuard`,
-  and `NoAccessComponent` is where it sends an account that lacks the role.
+- `REQUIRED_ROLE` is the role an app demands of everyone who signs into it;
+  sign-in fails generically when the account does not hold it.
+- `roleGuard(role)` backs that up on the routes for restored sessions and
+  revoked roles.
 - `setUserRoles` is the admin-only callable that writes roles, and
   `grant-role.mjs` is the service-account bootstrap behind it.
 - `startGuard` controls the start route.
@@ -84,18 +86,31 @@ app and run the operational migrations in it.
   grants roles would be unreachable. The script runs on service-account
   credentials and deliberately checks nothing, because holding those credentials
   already means holding the project.
-- `roleGuard(role)` is the client half. It is a routing and display answer, not
-  the authorization answer: every privileged callable re-reads the claim from
-  the token Firebase verified. What it buys is that a rejected account is told
-  so rather than reaching a page whose every request then fails.
-- A cached ID token can be an hour old, so `roleGuard` retries once against a
-  freshly minted token before rejecting. That is what makes a role granted
-  moments ago take effect without signing out and back in.
-- A signed-in account without the role goes to `NO_ACCESS`, never back to
-  `START`. `START` offers only a sign-in the account has already completed, so
-  sending it there states the problem wrongly. Note that `startGuard` is used
-  **only** by the consumer shell; the two apps `roleGuard` protects do not
-  route through it, so this is about the message rather than a redirect loop.
+- **The role is checked at sign-in, and a missing role fails the login.** The
+  sign-in effects verify `REQUIRED_ROLE` before dispatching `loginSucceeded`,
+  end the session, and report the same generic
+  `something-went-wrong-please-try-again` a wrong password produces. Signing an
+  account in and then refusing it a page would tell whoever is trying that the
+  password was right, that the account exists, and which role guards the app. A
+  generic failure tells them nothing.
+- `REQUIRED_ROLE` is an injection token bound per shell: `business` in the
+  business app, `admin` in the admin app, **unbound in the consumer app**. An
+  unbound token means "no role required", not "no role granted", which is what
+  keeps the consumer app ungated.
+- `roleGuard(role)` is the backstop, not the primary gate. Sign-in already
+  refuses these accounts, so it fires only for a session restored on startup
+  (which reports itself as a successful login without running the sign-in
+  effect) or a role revoked mid-session. It reaches the same outcome: end the
+  session, raise the generic failure, return to `/login`.
+- Neither path is the authorization answer. Every privileged callable re-reads
+  the claim from the token Firebase verified; the client half only decides what
+  a browser is shown.
+- A cached ID token can be an hour old, so both paths retry once against a
+  freshly minted token before rejecting. That is what keeps a role granted
+  moments ago from turning away the account it was granted to.
+- `endRejectedSession()` is used rather than `logout()`. `logout()` reloads the
+  document, and the reload would wipe the NgRx store that carries the failure
+  message the login page shows.
 - The role gate shipped **hard, with no backfill**. An account that could sign
   into the business app before the role existed cannot now unless an operator
   granted it. See issue \#1469 for the reasoning.
@@ -164,7 +179,7 @@ the same way registration does rather than inventing a second pattern.
 libs/common/ta-firestore/src/lib/auth.service.ts
 libs/common/ta-firestore/src/lib/auth.guard.ts
 libs/common/ta-firestore/src/lib/role.guard.ts
-libs/common/ta-firestore/src/lib/no-access/no-access.component.ts
+libs/common/ta-firestore/src/lib/ngrx-store/effects.ts
 libs/common/utils/src/lib/user-role.ts
 libs/common/ta-firestore/src/lib/start.guard.ts
 libs/common/ta-firestore/src/lib/requested-url.service.ts

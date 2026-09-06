@@ -163,6 +163,31 @@ export class AuthService {
     return (await this.getRoles(forceRefresh)).includes(role);
   }
 
+  /**
+   * Ends a session that was never allowed to start, without the teardown and
+   * page reload {@link logout} performs.
+   *
+   * Used when sign-in succeeded at Firebase but the account lacks the role the
+   * app requires. The reload in `logout` would wipe the NgRx store, and the
+   * store is what carries the failure message the login page shows — reusing it
+   * here would sign the account out and then hide the reason. There is nothing
+   * to tear down either: the rejected account never reached a page that
+   * registers a Firestore listener.
+   *
+   * Never throws. A sign-out that fails must not turn a clean rejection into an
+   * unhandled error, and the caller reports the same generic failure either
+   * way.
+   */
+  async endRejectedSession(): Promise<void> {
+    try {
+      await FirebaseAuthentication.signOut();
+    } catch (error) {
+      console.warn('Failed to sign out a rejected session:', error);
+    }
+
+    this._authStateChange$.next(null);
+  }
+
   async initialize(): Promise<void> {
     const currentUser = await FirebaseAuthentication.getCurrentUser();
     this._authStateChange$.next(currentUser);

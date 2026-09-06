@@ -21,9 +21,14 @@ import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
 import { RequestedUrlService } from '../requested-url.service';
-import { AFTER_LOGIN_PAGE, AFTER_LOGOUT_PAGE, isAuthEntryPage } from 'utils';
+import {
+  AFTER_LOGIN_PAGE,
+  AFTER_LOGOUT_PAGE,
+  isAuthEntryPage,
+  REQUIRED_ROLE,
+} from 'utils';
 import { SignInResult } from '@capacitor-firebase/authentication';
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 
 type AuthCreds = { authCreds: AuthCredentials };
 
@@ -36,6 +41,21 @@ type AuthCreds = { authCreds: AuthCredentials };
  * it takes.
  */
 const LOGIN_TIMEOUT_MS = 30_000;
+
+/**
+ * Raised when the credentials were right but the account lacks the role this
+ * app requires.
+ *
+ * It is a distinct type only so the provider effects can tell it apart from a
+ * genuine provider error and report the same generic login failure the
+ * email/password path does. Nothing surfaces the distinction to the user: that
+ * is the point (issue #1469).
+ */
+class MissingRequiredRoleError extends Error {
+  constructor() {
+    super('The account does not hold the role this app requires.');
+  }
+}
 
 @Injectable()
 export class AuthEffects {
@@ -53,6 +73,12 @@ export class AuthEffects {
   private readonly pageAfterLogin = inject(AFTER_LOGIN_PAGE, {
     optional: true,
   });
+
+  /**
+   * Unbound in the consumer app, which requires no role of anyone. The two
+   * privileged apps bind it in their shells.
+   */
+  private readonly requiredRole = inject(REQUIRED_ROLE, { optional: true });
 
   checkAuthStatus$ = createEffect(
     () =>
@@ -96,6 +122,10 @@ export class AuthEffects {
       exhaustMap(({ authCreds }: AuthCreds) =>
         from(this.login(authCreds)).pipe(
           timeout(LOGIN_TIMEOUT_MS),
+          // Before `loginSucceeded`, not after: that action is what routes the
+          // visitor into the app, so an account that fails the role check must
+          // never reach it.
+          switchMap(() => from(this.assertRequiredRole())),
           map(() => AuthActions.loginSucceeded()),
           catchError((err) => {
             console.debug('#mo error login: ', err);
@@ -123,14 +153,13 @@ export class AuthEffects {
       ofType(AuthActions.loginWithGoogleAccount),
       exhaustMap(() =>
         from(this.signInWithGoogleAccount()).pipe(
-          map((result) => {
+          switchMap((result) => {
             console.debug('#mo signInResult', result);
-            return AuthActions.loginSucceeded();
+            return from(this.assertRequiredRole());
           }),
+          map(() => AuthActions.loginSucceeded()),
           tap(() => this.navController.navigateBack(['/'])),
-          catchError((err) =>
-            of(AuthActions.registrationFailed({ code: err.code })),
-          ),
+          catchError((err) => of(this.toProviderFailure(err))),
         ),
       ),
     ),
@@ -141,11 +170,10 @@ export class AuthEffects {
       ofType(AuthActions.loginWithAppleAccount),
       exhaustMap(() =>
         from(this.signInWithAppleAccount()).pipe(
+          switchMap(() => from(this.assertRequiredRole())),
           map(() => AuthActions.loginSucceeded()),
           tap(() => this.navController.navigateBack(['/'])),
-          catchError((err) =>
-            of(AuthActions.registrationFailed({ code: err.code })),
-          ),
+          catchError((err) => of(this.toProviderFailure(err))),
         ),
       ),
     ),
@@ -208,6 +236,54 @@ export class AuthEffects {
       ),
     { dispatch: false },
   );
+
+  /**
+   * Rejects a signed-in account that does not hold {@link requiredRole}.
+   *
+   * The session is ended before the error is raised, so a rejected sign-in
+   * leaves nothing behind: no token to deep-link with, no restored session to
+   * pick up on the next load. The caller turns the error into the same generic
+   * failure a wrong password produces.
+   *
+   * A cached ID token can be up to an hour old, so a miss is retried once
+   * against a freshly minted one. Without that, an account granted its role
+   * moments earlier would be turned away here.
+   */
+  private async assertRequiredRole(): Promise<void> {
+    const role = this.requiredRole;
+
+    if (!role) {
+      return;
+    }
+
+    if (await this.authService.hasRole(role)) {
+      return;
+    }
+
+    if (await this.authService.hasRole(role, true)) {
+      return;
+    }
+
+    await this.authService.endRejectedSession();
+
+    throw new MissingRequiredRoleError();
+  }
+
+  /**
+   * A missing role is reported as a login failure, not a registration failure:
+   * `registrationFailed` only releases the pending flag, so the login page
+   * would unlock with no message at all and the rejection would look like
+   * nothing happened.
+   */
+  private toProviderFailure(err: unknown): Action {
+    if (err instanceof MissingRequiredRoleError) {
+      return AuthActions.loginFailed();
+    }
+
+    return AuthActions.registrationFailed({
+      code: (err as { code?: string })?.code ?? 'unknown',
+    });
+  }
 
   private login(authCreds: AuthCredentials): Promise<SignInResult> {
     return this.authService.loginWithUsernameAndPassword(authCreds);

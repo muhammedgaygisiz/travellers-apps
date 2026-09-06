@@ -4,10 +4,10 @@
  * Keep in sync with that export.
  *
  * The business suite drives the `organisation` account. Since issue #1469 the
- * business app is gated on the `business` role, so that account carries a
- * `customAttributes` entry in the export granting it — signing in is no longer
- * enough to reach the dashboard. Without it every business scenario lands on
- * `/no-access?role=business` instead.
+ * business app requires the `business` role at sign-in, so that account carries
+ * a `customAttributes` entry in the export granting it. Without it the login
+ * itself fails — with the same generic error a wrong password produces — and
+ * every business scenario stops at the login page.
  *
  * `withoutRoles` is a seeded consumer account holding no roles at all. It is
  * what the deny case is written against, and it must stay role-less.

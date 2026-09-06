@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { withAuthRoutes } from 'auth';
-import { authGuard, NoAccessComponent, roleGuard } from 'ta-firestore';
-import { PATH } from 'utils';
+import { authGuard, roleGuard } from 'ta-firestore';
 
 /**
  * Every authenticated route carries both guards.
@@ -16,9 +15,13 @@ import { PATH } from 'utils';
  * role through the admin app. That is the intended behaviour, not an
  * oversight - see the rollout decision on the issue.
  *
- * `start`, the auth routes, and `no-access` are deliberately ungated. They are
- * where a visitor who fails those checks is sent, and gating them would send
- * that visitor to a page that rejects them for the same reason.
+ * `start` and the auth routes stay ungated: they are where a visitor who fails
+ * those checks is sent.
+ *
+ * Sign-in itself refuses an account without the role, so these guards are the
+ * backstop for a restored session or a revoked role rather than the primary
+ * gate. A rejected account is signed out and returned to the login page with a
+ * generic failure — never told which role it lacks.
  */
 export const ROUTES: Routes = withAuthRoutes([
   {
@@ -69,10 +72,6 @@ export const ROUTES: Routes = withAuthRoutes([
     loadComponent: () =>
       import('bite-tribe-business/edit-menu').then((m) => m.EditMenuContainer),
     canActivate: [authGuard, roleGuard('business')],
-  },
-  {
-    path: PATH.NO_ACCESS,
-    component: NoAccessComponent,
   },
   {
     path: '',

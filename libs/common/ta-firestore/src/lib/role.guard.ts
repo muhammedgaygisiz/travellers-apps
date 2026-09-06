@@ -1,7 +1,9 @@
 import { CanActivateFn, GuardResult, Router } from '@angular/router';
 import { inject } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { AuthService } from './auth.service';
 import { RequestedUrlService } from './requested-url.service';
+import { AuthActions } from './ngrx-store/actions';
 import { BiteTribeRole, PATH } from 'utils';
 
 /**
@@ -12,28 +14,30 @@ import { BiteTribeRole, PATH } from 'utils';
  * business app and run our operational migrations from it (issue #1469). This
  * guard answers the second question: is it *this* account's app.
  *
+ * Sign-in already refuses an account without the role, so in normal use this
+ * guard never fires. It exists for the two paths that do not go through the
+ * login effects:
+ *
+ * - a session restored on startup, which reports itself as a successful login
+ *   without ever running the sign-in effect;
+ * - a role revoked while a session is live.
+ *
  * It runs **alongside** `authGuard` rather than after it — Angular activates a
  * route's guards concurrently, not in sequence — so it cannot assume auth has
  * been restored just because `authGuard` is on the same route. It waits for
  * restoration itself, exactly as every other guard reading the current user
  * has to (see the Cold Start Rules in `Architecture - Auth`).
  *
- * The two negative answers are deliberately different destinations:
- *
- * - **Signed out** is `authGuard`'s case, and this guard defers to it: it
- *   remembers the requested URL and sends the visitor to `START`, so signing
- *   in returns them to where they were headed.
- * - **Signed in without the role** is not a login problem. `START` offers only
- *   a sign-in the account has already completed, so sending it there states the
- *   problem wrongly and leaves the user with nothing to act on. It goes to
- *   `NO_ACCESS`, which names the missing role. (In the consumer shell `START`
- *   also carries `startGuard`, which forwards a signed-in visitor straight back
- *   out — but the two apps this guard protects do not use that guard, so the
- *   reason here is the misleading message rather than a redirect loop.)
+ * A rejected account is **signed out and returned to the login page with the
+ * same generic failure a wrong password produces**. It is not shown a page
+ * explaining which role it lacks: that would confirm the account exists, that
+ * its credentials were right, and which role guards the app. The session is
+ * ended rather than merely blocked, so there is no token left to retry a deep
+ * link with.
  *
  * A cached ID token can be up to an hour old, so a first miss is retried once
- * against a freshly minted token. That is what makes a role granted through
- * the admin app take effect without the user signing out and back in.
+ * against a freshly minted token. That is what keeps a role granted moments ago
+ * from bouncing the account it was granted to.
  */
 export const roleGuard =
   (role: BiteTribeRole): CanActivateFn =>
@@ -41,6 +45,7 @@ export const roleGuard =
     const authService = inject(AuthService);
     const router = inject(Router);
     const requestedUrlService = inject(RequestedUrlService);
+    const store = inject(Store);
 
     await authService.whenAuthStateRestored();
 
@@ -60,5 +65,8 @@ export const roleGuard =
       return true;
     }
 
-    return router.parseUrl(`/${PATH.NO_ACCESS}?role=${role}`);
+    await authService.endRejectedSession();
+    store.dispatch(AuthActions.loginFailed());
+
+    return router.parseUrl('/login');
   };

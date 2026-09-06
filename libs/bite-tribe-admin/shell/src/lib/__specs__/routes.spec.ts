@@ -13,7 +13,6 @@ const UNGATED_PATHS = [
   'login',
   'registration',
   'forgot-password',
-  PATH.NO_ACCESS,
   '',
 ];
 
@@ -29,19 +28,12 @@ describe('admin ROUTES', () => {
     expect(ungated.map((route) => route.path)).toEqual([]);
   });
 
-  it('leaves only the entry, auth and rejection routes ungated', () => {
+  it('leaves only the entry and auth routes ungated', () => {
     const open = ROUTES.filter((route) => !route.canActivate).map(
       (route) => route.path,
     );
 
     expect(open.sort()).toEqual([...UNGATED_PATHS].sort());
-  });
-
-  it('serves the no-access route without a guard', () => {
-    const noAccess = ROUTES.find((route) => route.path === PATH.NO_ACCESS);
-
-    expect(noAccess).toBeDefined();
-    expect(noAccess?.canActivate).toBeUndefined();
   });
 
   // The admin app has no marketing surface, so a signed-in operator lands on

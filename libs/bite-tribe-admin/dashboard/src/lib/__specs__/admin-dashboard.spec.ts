@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Pipe, PipeTransform, signal } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { AdminDashboard } from '../admin-dashboard';
@@ -16,6 +17,7 @@ describe(AdminDashboard.name, () => {
   let component: AdminDashboard;
   let fixture: ComponentFixture<AdminDashboard>;
   let logout: jest.Mock;
+  let navigateByUrl: jest.Mock;
   let user: ReturnType<typeof signal<{ email: string | null } | undefined>>;
 
   const createComponent = (): void => {
@@ -26,6 +28,7 @@ describe(AdminDashboard.name, () => {
 
   beforeEach(() => {
     logout = jest.fn();
+    navigateByUrl = jest.fn(() => Promise.resolve(true));
     user = signal<{ email: string | null } | undefined>({
       email: 'ops@bitetribe.app',
     });
@@ -34,6 +37,7 @@ describe(AdminDashboard.name, () => {
       providers: [
         provideIonicAngular(),
         { provide: BiteTribeStoreService, useValue: { user, logout } },
+        { provide: Router, useValue: { navigateByUrl, config: [] } },
       ],
     })
       .overrideComponent(AdminDashboard, {
@@ -74,6 +78,35 @@ describe(AdminDashboard.name, () => {
     createComponent();
 
     expect(component.email()).toBeUndefined();
+  });
+
+  // User management is first because nothing else in the tool works until an
+  // account has been granted a role.
+  it('lists user management as the first operator surface', () => {
+    createComponent();
+
+    expect(component.tools[0]).toMatchObject({
+      titleKey: 'admin-tool-user-management',
+      path: '/user-management',
+    });
+  });
+
+  it('renders an entry per tool', () => {
+    createComponent();
+
+    const items = fixture.nativeElement.querySelectorAll(
+      '[data-testid="admin-tools"] ion-item',
+    );
+
+    expect(items).toHaveLength(component.tools.length);
+  });
+
+  it('routes to the tool that was clicked', () => {
+    createComponent();
+
+    component.open(component.tools[0]);
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/user-management');
   });
 
   // Logout goes through the store, not `AuthService` directly, so it runs the

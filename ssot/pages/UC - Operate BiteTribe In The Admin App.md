@@ -2,7 +2,7 @@
 
 ## Status
 
-Partially supported. The app exists, deploys, and is gated on the `admin` role as of issue \#1469. It carries no operator surface yet: claim review, restaurant-candidate verification and role management move into it in follow-ups.
+Partially supported. The app exists, deploys, and is gated on the `admin` role as of issue \#1469. Role management is its first operator surface. Claim review and restaurant-candidate verification move into it in follow-ups.
 
 ## Goal
 
@@ -37,8 +37,10 @@ Steps 3 and 4 are the point of the split: a restaurant never grants itself busin
 1. An operator is granted `admin` through `grant-role.mjs`, run with service-account credentials.
 2. They sign into the admin app with a normal BiteTribe account.
 3. Sign-in verifies the `admin` role before it succeeds; an account without it gets the generic login failure. `roleGuard('admin')` backs that up on the routes for a restored session or a revoked role.
-4. They land on the dashboard, which shows the signed-in account and nothing else yet.
-5. Restaurant-candidate verification and migrations still run in the business app, behind the `business` role.
+4. They land on the dashboard, a list of the operator surfaces the tool offers.
+5. **User management** lists every BiteTribe account with the roles it holds, and grants or revokes them. It reads `listUsersWithRoles` and writes `setUserRoles`, both admin-only.
+
+Only roles are editable. `setUserRoles` is the one admin write that exists, so the identity fields are read-only rather than offering a change nothing can save. 6. Restaurant-candidate verification and migrations still run in the business app, behind the `business` role.
 
 ## Key Behaviours
 

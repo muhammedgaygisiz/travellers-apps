@@ -35,6 +35,14 @@ export const ROUTES: Routes = withAuthRoutes(
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
+      path: 'user-management',
+      loadComponent: () =>
+        import('bite-tribe-admin/user-management').then(
+          (m) => m.UserManagementContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
       path: '',
       redirectTo: 'dashboard',
       pathMatch: 'full',

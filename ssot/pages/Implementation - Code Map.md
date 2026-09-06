@@ -53,18 +53,22 @@ Examples:
 ## Admin Feature Libraries
 
 ```text
-libs/bite-tribe-admin/<feature>
+libs/bite-tribe-admin/<feature>/page
+libs/bite-tribe-admin/<feature>/data-access
 ```
 
-Flat rather than the `page` / `data-access` pair the other two apps use, because
-no admin feature has a read surface of its own yet. The pair is added per
-feature when one does, not pre-emptively.
+A feature with a read surface uses the same `page` / `data-access` pair the
+other two apps do. `shell`, `start` and `dashboard` stay flat because they have
+no reads of their own; the pair is added per feature when one does, not
+pre-emptively.
 
 Examples:
 
 - `libs/bite-tribe-admin/shell`
 - `libs/bite-tribe-admin/start`
 - `libs/bite-tribe-admin/dashboard`
+- `libs/bite-tribe-admin/user-management/page`
+- `libs/bite-tribe-admin/user-management/data-access`
 
 ## Shared Libraries
 

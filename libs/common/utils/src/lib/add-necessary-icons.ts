@@ -67,10 +67,12 @@ import {
   starOutline,
   storefrontOutline,
   trashOutline,
+  peopleOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = (): void => {
   addIcons({
+    peopleOutline,
     pricetagOutline,
     filterOutline,
     logInOutline,

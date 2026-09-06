@@ -78,7 +78,10 @@ app and run the operational migrations in it.
 - They live in one array under one claim key, `roles`, because Firebase caps the
   whole custom-claim payload at 1000 bytes and reserves a fixed set of names.
 - `setUserRoles` is the only callable that writes them, and it requires the
-  caller to already hold `admin`. It replaces the whole role set, so revoking is
+  caller to already hold `admin`. `listUsersWithRoles` is its read counterpart,
+  also admin-only, and reads Firebase Auth rather than the `/users` collection
+  because a claim is not a document — `searchUsers` cannot answer "who is an
+  admin" at all. Both back the admin app's user management. It replaces the whole role set, so revoking is
   granting with the role left out, and it refuses to let an admin drop their own
   `admin` role.
 - `grant-role.mjs` is the way in and the way back. The first operator account

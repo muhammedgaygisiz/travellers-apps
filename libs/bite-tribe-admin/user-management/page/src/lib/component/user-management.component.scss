@@ -1,0 +1,52 @@
+:host {
+  /*
+   * The 1:2 split the admin tool asks for.
+   *
+   * Written as explicit flex values rather than reusing the business
+   * dashboard's `ion-flex-2` class: Ionic ships `.ion-flex-1` but no
+   * `.ion-flex-2`, so that class resolves to nothing and its columns are equal
+   * by accident rather than by ratio.
+   */
+  .user-management {
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .column {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .column--list {
+    flex: 1;
+  }
+
+  .column--detail {
+    flex: 2;
+  }
+
+  /* Below the desktop breakpoint the two columns stack rather than squeeze. */
+  @media (max-width: 767px) {
+    .user-management {
+      flex-direction: column;
+    }
+  }
+
+  .user-management__loading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  .user-management__section {
+    margin: 1.5rem 0 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .user-management__hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+  }
+}

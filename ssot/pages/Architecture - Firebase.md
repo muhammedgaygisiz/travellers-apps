@@ -105,6 +105,23 @@ Firebase emulator targets are defined under `apps/bite-tribe-firebase/project.js
 
 The app environment exposes emulator ports for Firestore, Functions, Auth, and Storage.
 
+### Seeded Accounts
+
+`nx firebase-serve bite-tribe-firebase` imports `apps/bite-tribe-firebase/.firebase-export`. Its auth export seeds four accounts, all with the password `Test4711`:
+
+| Email                   | Roles      | What it is for                                                   |
+| ----------------------- | ---------- | ---------------------------------------------------------------- |
+| `admin@test.com`        | `admin`    | Signing into the admin app locally.                              |
+| `organisation@test.com` | `business` | The business app, and the account the business E2E suite drives. |
+| `test@test.com`         | none       | The consumer app, and the E2E deny case for both role gates.     |
+| `test2@test.com`        | none       | A second consumer account.                                       |
+
+**Roles live in the export, in each account's `customAttributes`.** Since issue \#1469 the two privileged apps require a role _at sign-in_, so an account without one cannot log in at all — and the refusal is the same generic error a wrong password gives, by design. An account whose claim is missing from the export therefore presents as "the password is wrong", which is the confusing failure to expect after regenerating it.
+
+`admin` and `business` are held by different accounts on purpose. A single fixture carrying both would hide a bug where one role is treated as implying the other.
+
+**The emulator does not write roles back.** `firebase-serve` runs without `--export-on-exit`, so a claim granted against the running emulator through the Identity Toolkit REST API lasts only for that session. A durable fixture has to be added to the export file itself.
+
 ## Code Anchors
 
 ```text

@@ -3,4 +3,5 @@ export type {
   AdminUser,
   ListUsersResult,
   SetUserRolesResult,
+  SetUserSubscriptionTierResult,
 } from './lib/admin-user.model';

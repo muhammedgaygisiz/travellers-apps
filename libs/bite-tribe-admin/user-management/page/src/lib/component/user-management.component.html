@@ -37,6 +37,15 @@
                         } @else {
                           {{ 'admin-users-no-roles' | transloco }}
                         }
+                        <ion-badge
+                          class="ion-margin-start"
+                          [color]="
+                            user.subscriptionTier === 1 ? 'success' : 'medium'
+                          "
+                          >{{
+                            tierLabelKey(user.subscriptionTier) | transloco
+                          }}</ion-badge
+                        >
                       </p>
                     </ion-label>
                   </ion-item>
@@ -114,6 +123,63 @@
                   <ion-spinner name="crescent" slot="start" />
                 }
                 {{ 'save' | transloco }}
+              </ion-button>
+
+              <h4 class="user-management__section">
+                {{ 'admin-users-tier' | transloco }}
+              </h4>
+              <ion-list lines="full">
+                <ion-item>
+                  <ion-label>
+                    <p>{{ 'admin-users-tier-current' | transloco }}</p>
+                    <h3 data-testid="admin-user-tier-current">
+                      {{ tierLabelKey(currentTier()) | transloco }}
+                    </h3>
+                  </ion-label>
+                </ion-item>
+                <ion-radio-group
+                  [value]="draftTier()"
+                  (ionChange)="onTierChange($event.detail.value)"
+                >
+                  @for (tier of allTiers; track tier) {
+                    <ion-item>
+                      <ion-radio
+                        [value]="tier"
+                        [attr.data-testid]="'tier-' + tier"
+                      >
+                        {{ tierLabelKey(tier) | transloco }}
+                      </ion-radio>
+                    </ion-item>
+                  }
+                </ion-radio-group>
+                <ion-item>
+                  <ion-input
+                    labelPlacement="stacked"
+                    [label]="'admin-users-tier-reason' | transloco"
+                    [placeholder]="
+                      'admin-users-tier-reason-placeholder' | transloco
+                    "
+                    [value]="tierReason()"
+                    data-testid="admin-user-tier-reason"
+                    (ionInput)="onTierReasonChange($event.detail.value ?? '')"
+                  />
+                </ion-item>
+              </ion-list>
+              <ion-note class="user-management__hint">
+                {{ 'admin-users-tier-hint' | transloco }}
+              </ion-note>
+
+              <ion-button
+                expand="block"
+                class="ion-margin-top"
+                data-testid="admin-user-tier-save"
+                [disabled]="!canSaveTier() || savingTier()"
+                (click)="onSaveTier()"
+              >
+                @if (savingTier()) {
+                  <ion-spinner name="crescent" slot="start" />
+                }
+                {{ 'admin-users-tier-save' | transloco }}
               </ion-button>
             </ion-card-content>
           </ion-card>

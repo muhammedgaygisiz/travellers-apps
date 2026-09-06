@@ -41,6 +41,7 @@ export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-cr
 export { claimDisplayName } from './functions/users/claim-display-name';
 export { setUserRoles } from './functions/users/set-user-roles';
 export { listUsersWithRoles } from './functions/users/list-users-with-roles';
+export { setUserSubscriptionTier } from './functions/users/set-user-subscription-tier';
 export { deleteOwnAccount } from './functions/users/delete-own-account';
 export { checkDisplayNameAvailability } from './functions/users/check-display-name-availability';
 export { loadLeaderboard } from './functions/leaderboard/load-leaderboard';

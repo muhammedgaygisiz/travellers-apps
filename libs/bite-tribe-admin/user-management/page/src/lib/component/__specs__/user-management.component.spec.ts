@@ -23,6 +23,7 @@ const user = (over: Partial<AdminUser> = {}): AdminUser => ({
   providerIds: ['password'],
   createdAt: '',
   lastSignInAt: '',
+  subscriptionTier: 0,
   ...over,
 });
 
@@ -174,5 +175,123 @@ describe(UserManagementComponent.name, () => {
     setInputs({ selected: user({ roles: ['admin'] }) });
 
     expect(component.draftRoles()).toEqual(['admin']);
+  });
+
+  describe('the subscription tier form', () => {
+    beforeEach(() => {
+      setInputs({ users: [user()], selected: user({ subscriptionTier: 0 }) });
+    });
+
+    it('starts from the tier the account holds', () => {
+      expect(component.draftTier()).toBe(0);
+      expect(component.tierDirty()).toBe(false);
+    });
+
+    // The callable requires a reason, and a disabled button says so earlier
+    // than a rejected call does.
+    it('cannot be saved without a reason', () => {
+      component.onTierChange(1);
+
+      expect(component.tierDirty()).toBe(true);
+      expect(component.canSaveTier()).toBe(false);
+    });
+
+    it('cannot be saved on whitespace passing for a reason', () => {
+      component.onTierChange(1);
+      component.onTierReasonChange('   ');
+
+      expect(component.canSaveTier()).toBe(false);
+    });
+
+    it('cannot be saved without a change', () => {
+      component.onTierReasonChange('refund honoured');
+
+      expect(component.canSaveTier()).toBe(false);
+    });
+
+    it('emits the account, the tier and the trimmed reason on save', () => {
+      const emitted: unknown[] = [];
+      component.saveTier.subscribe((event) => emitted.push(event));
+
+      component.onTierChange(1);
+      component.onTierReasonChange('  refund honoured  ');
+      component.onSaveTier();
+
+      expect(emitted).toEqual([
+        { uid: 'u1', tier: 1, reason: 'refund honoured' },
+      ]);
+    });
+
+    it('clears the reason after saving, so it cannot be reused unnoticed', () => {
+      component.onTierChange(1);
+      component.onTierReasonChange('refund honoured');
+      component.onSaveTier();
+
+      expect(component.tierReason()).toBe('');
+    });
+
+    it('emits nothing when the save is not allowed', () => {
+      const emitted: unknown[] = [];
+      component.saveTier.subscribe((event) => emitted.push(event));
+
+      component.onTierChange(1);
+      component.onSaveTier();
+
+      expect(emitted).toEqual([]);
+    });
+
+    // The same carry-over bug the role draft guards against, with a worse
+    // outcome: a reason written about one account attached to another.
+    it('drops a pending tier edit and its reason when another account is selected', () => {
+      component.onTierChange(1);
+      component.onTierReasonChange('refund honoured');
+
+      const other = user({ uid: 'u2', email: 'mia@example.com' });
+      component.onSelect(other);
+      setInputs({ selected: other });
+
+      expect(component.draftTier()).toBe(0);
+      expect(component.tierReason()).toBe('');
+      expect(component.tierDirty()).toBe(false);
+    });
+  });
+
+  describe('an account with no tier', () => {
+    beforeEach(() => {
+      setInputs({
+        users: [user({ subscriptionTier: null })],
+        selected: user({ subscriptionTier: null }),
+      });
+    });
+
+    // `null` is "nobody ever decided", and Free is a decision. Showing the
+    // absence as Free would present a made-up answer as a real one.
+    it('reads as no tier rather than as Free', () => {
+      expect(component.currentTier()).toBeNull();
+      expect(component.tierLabelKey(null)).toBe('admin-users-tier-none');
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="admin-user-tier-current"]',
+        ).textContent,
+      ).toContain('admin-users-tier-none');
+    });
+
+    it('offers no preselected tier, so the operator has to choose one', () => {
+      expect(component.draftTier()).toBeNull();
+      expect(component.canSaveTier()).toBe(false);
+    });
+
+    it('becomes saveable once a tier and a reason are given', () => {
+      component.onTierChange(0);
+      component.onTierReasonChange('confirmed free');
+
+      expect(component.tierDirty()).toBe(true);
+      expect(component.canSaveTier()).toBe(true);
+    });
+  });
+
+  it('labels the tiers it renders', () => {
+    expect(component.tierLabelKey(0)).toBe('admin-users-tier-free');
+    expect(component.tierLabelKey(1)).toBe('admin-users-tier-pro');
   });
 });

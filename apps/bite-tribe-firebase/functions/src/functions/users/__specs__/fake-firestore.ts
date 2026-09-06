@@ -1,10 +1,10 @@
 /**
  * Minimal in-memory stand-in for the Firestore admin API.
  *
- * It covers exactly the surface the account-deletion cascade uses — document
- * get/set/delete, single-equality collection and collection-group queries,
- * subcollections and batched writes — so the cascade can be tested against real
- * document state instead of a wall of call assertions.
+ * It covers exactly the surface the callables under test use — document
+ * get/set/update/delete, `getAll`, single-equality collection and
+ * collection-group queries, subcollections and batched writes — so they can be
+ * tested against real document state instead of a wall of call assertions.
  */
 
 export const DELETE_SENTINEL = { __fakeFirestoreDelete: true } as const;
@@ -34,6 +34,13 @@ interface Filter {
   value: unknown;
 }
 
+interface DocumentSnapshot {
+  exists: boolean;
+  id: string;
+  ref: FakeDocumentReference;
+  data: () => DocData | undefined;
+}
+
 class FakeDocumentReference {
   constructor(
     private readonly store: Map<string, DocData>,
@@ -52,12 +59,7 @@ class FakeDocumentReference {
     return new FakeCollectionReference(this.store, `${this.path}/${name}`);
   }
 
-  async get(): Promise<{
-    exists: boolean;
-    id: string;
-    ref: FakeDocumentReference;
-    data: () => DocData | undefined;
-  }> {
+  async get(): Promise<DocumentSnapshot> {
     const data = this.store.get(this.path);
 
     return {
@@ -206,6 +208,7 @@ class FakeWriteBatch {
 export interface FakeFirestore {
   collection(name: string): FakeCollectionReference;
   doc(path: string): FakeDocumentReference;
+  getAll(...refs: FakeDocumentReference[]): Promise<DocumentSnapshot[]>;
   collectionGroup(name: string): FakeQuery;
   batch(): FakeWriteBatch;
   seed(path: string, data: DocData): void;
@@ -219,6 +222,10 @@ export const createFakeFirestore = (): FakeFirestore => {
   return {
     collection: (name) => new FakeCollectionReference(store, name),
     doc: (path) => new FakeDocumentReference(store, path),
+    // Firestore's `getAll` rejects an empty argument list; the callers under
+    // test guard for that, and the fake mirrors the batched-read shape rather
+    // than the rejection.
+    getAll: (...refs) => Promise.all(refs.map((ref) => ref.get())),
     collectionGroup: (name) =>
       new FakeQuery(store, (path) => {
         const segments = path.split('/');

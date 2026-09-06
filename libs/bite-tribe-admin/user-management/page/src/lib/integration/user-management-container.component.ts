@@ -8,9 +8,13 @@ import { UserManagementService } from './user-management.service';
     [users]="service.users()"
     [loading]="service.loading()"
     [saving]="service.saving()"
+    [savingTier]="service.savingTier()"
     [selected]="service.selected()"
     (selectUser)="service.select($event)"
     (save)="service.save($event.uid, $event.roles)"
+    (saveTier)="
+      service.saveSubscriptionTier($event.uid, $event.tier, $event.reason)
+    "
     (logoutClick)="service.logout()"
   />`,
   changeDetection: ChangeDetectionStrategy.OnPush,

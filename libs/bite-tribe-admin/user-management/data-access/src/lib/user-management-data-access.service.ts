@@ -1,10 +1,11 @@
 import { Injectable, resource } from '@angular/core';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
-import { BiteTribeRole } from 'utils';
+import { BiteTribeRole, SubscriptionTier } from 'utils';
 import {
   AdminUser,
   ListUsersResult,
   SetUserRolesResult,
+  SetUserSubscriptionTierResult,
 } from './admin-user.model';
 
 interface ListUsersRequest {
@@ -15,6 +16,12 @@ interface ListUsersRequest {
 interface SetUserRolesRequest {
   uid: string;
   roles: BiteTribeRole[];
+}
+
+interface SetUserSubscriptionTierRequest {
+  uid: string;
+  tier: SubscriptionTier;
+  reason: string;
 }
 
 /**
@@ -76,6 +83,29 @@ export class UserManagementDataAccessService {
       SetUserRolesRequest,
       SetUserRolesResult
     >({ name: 'setUserRoles', data: { uid, roles } });
+
+    return data;
+  }
+
+  /**
+   * Sets an account's subscription tier for a support case.
+   *
+   * A separate callable from `setRoles`, and a separate action in the UI, for
+   * the reason the epic keeps blocking separate from content removal: one
+   * button with two consequences is harder to reason about and harder to undo.
+   *
+   * The reason is required by the callable rather than optional, because Cloud
+   * Logging is the only record the action leaves (issue #1485).
+   */
+  async setSubscriptionTier(
+    uid: string,
+    tier: SubscriptionTier,
+    reason: string,
+  ): Promise<SetUserSubscriptionTierResult> {
+    const { data } = await FirebaseFunctions.callByName<
+      SetUserSubscriptionTierRequest,
+      SetUserSubscriptionTierResult
+    >({ name: 'setUserSubscriptionTier', data: { uid, tier, reason } });
 
     return data;
   }

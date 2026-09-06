@@ -10,6 +10,14 @@ export {
   type BiteTribeRole,
 } from './lib/user-role';
 
+export {
+  SUBSCRIPTION_TIERS,
+  SUBSCRIPTION_TIER_FREE,
+  SUBSCRIPTION_TIER_PRO,
+  isSubscriptionTier,
+  type SubscriptionTier,
+} from './lib/subscription-tier';
+
 export { normalize } from './lib/normalize';
 export { currencyCodes } from './lib/currencies';
 export { countries, type Country } from './lib/countries';

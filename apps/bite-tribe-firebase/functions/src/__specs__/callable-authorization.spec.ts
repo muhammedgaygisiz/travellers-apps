@@ -32,6 +32,7 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   listUsersWithRoles: 'operator',
   sendNewVersionNotification: 'operator',
   setUserRoles: 'operator',
+  setUserSubscriptionTier: 'operator',
   verifyRestaurantCandidate: 'operator',
 
   // Consumer and business app paths. Each acts for the caller, or reads data

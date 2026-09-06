@@ -1,5 +1,15 @@
-import { getAuth } from 'firebase-admin/auth';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
+
+/**
+ * The guard is deliberately free of the Firebase Admin SDK.
+ *
+ * `firebase-admin/auth` pulls in `jose`, which ships as ESM only, and every
+ * spec that reaches a module importing it has to mock the SDK or fail to parse
+ * under ts-jest. This module is imported by every operator callable, so the
+ * writer that does need the SDK lives next to its own callable in
+ * `users/set-user-roles.ts` instead. Keep it that way: the alternative is a
+ * mock in every callable's spec, added only after CI fails.
+ */
 
 /**
  * The roles BiteTribe grants to an account beyond "is signed in".
@@ -69,31 +79,4 @@ export const requireAdmin = (request: CallableRequest<unknown>): string => {
   }
 
   return request.auth.uid;
-};
-
-/**
- * Replaces an account's roles, preserving every other custom claim it carries.
- *
- * `setCustomUserClaims` overwrites the whole claim object rather than merging
- * into it, so the existing claims are read first. Writing only `{ roles }`
- * would silently drop anything else a future feature stores there.
- *
- * The write takes effect in a client on its next token refresh, which Firebase
- * performs at most hourly on its own — the client forces one when a role check
- * misses, so a grant is visible without signing out and back in.
- */
-export const setRoles = async (
-  uid: string,
-  roles: BiteTribeRole[],
-): Promise<BiteTribeRole[]> => {
-  const auth = getAuth();
-  const user = await auth.getUser(uid);
-  const uniqueRoles = [...new Set(roles)];
-
-  await auth.setCustomUserClaims(uid, {
-    ...(user.customClaims ?? {}),
-    [ROLES_CLAIM]: uniqueRoles,
-  });
-
-  return uniqueRoles;
 };

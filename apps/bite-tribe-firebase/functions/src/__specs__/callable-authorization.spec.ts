@@ -145,6 +145,20 @@ describe('callable authorization', () => {
     expect(overGuarded).toEqual([]);
   });
 
+  // `firebase-admin/auth` pulls in `jose`, which is ESM only, so a spec that
+  // reaches a module importing it fails to parse under ts-jest unless it mocks
+  // the SDK. Every operator callable imports the guard, so the guard importing
+  // the SDK would put that mock in every one of their specs - and the failure
+  // only shows up on a clean install, which is CI.
+  it('keeps the guard free of the Firebase Admin SDK', () => {
+    const guard = readFileSync(
+      join(FUNCTIONS_ROOT, 'shared', 'roles.ts'),
+      'utf8',
+    );
+
+    expect(guard).not.toMatch(/from 'firebase-admin\//);
+  });
+
   it('rejects a request without a session on every non-public endpoint', () => {
     const unchecked = [...named('operator'), ...named('authenticated')]
       .filter((endpoint) => {

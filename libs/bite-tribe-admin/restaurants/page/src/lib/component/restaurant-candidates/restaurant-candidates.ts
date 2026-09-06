@@ -43,6 +43,14 @@ import { AdminRestaurantCandidate } from 'bite-tribe-admin/restaurants-data-acce
     TranslocoPipe,
   ],
   templateUrl: './restaurant-candidates.html',
+  styles: `
+    /* Centred on the same measure as the admin dashboard's operations list, so
+       an operator moving between the two surfaces keeps one column width. */
+    .restaurant-candidates {
+      margin: 0 auto;
+      max-width: 40rem;
+    }
+  `,
 })
 export class RestaurantCandidates {
   readonly candidates = input<AdminRestaurantCandidate[]>([]);

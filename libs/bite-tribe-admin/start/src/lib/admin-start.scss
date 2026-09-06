@@ -1,0 +1,56 @@
+:host {
+  ion-content {
+    .container {
+      max-width: 300px;
+      margin: 160px auto 20px;
+
+      .logo-text-container {
+        display: grid;
+        grid-template-columns: [first] 1fr [line1] 2fr [end];
+        grid-template-rows: [first] 2fr [line1] 1fr [end];
+
+        column-gap: 1rem;
+        row-gap: 0.25rem;
+
+        margin-bottom: 120px;
+
+        .logo {
+          grid-row: 1 / span 2;
+        }
+
+        .company-name {
+          grid-column: 2;
+          grid-row: 1;
+
+          align-self: end;
+
+          font-size: 2.75rem;
+          font-weight: bold;
+          text-align: left;
+        }
+
+        .tagline {
+          grid-column: 2;
+          grid-row: 2;
+
+          color: var(--ion-color-secondary);
+          font-size: 1rem;
+          text-align: left;
+        }
+      }
+
+      /*
+       * There is no Sign Up button here, unlike the other two apps. An operator
+       * account is granted rather than self-served, so an account created from
+       * this app would be rejected by `roleGuard` the moment it signed in. The
+       * hint says so, because the shared login page still offers registration.
+       */
+      .access-hint {
+        margin: 1rem 0 0;
+        color: var(--ion-color-medium, #6b6b6b);
+        font-size: 0.8125rem;
+        text-align: center;
+      }
+    }
+  }
+}

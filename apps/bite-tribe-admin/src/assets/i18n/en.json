@@ -22,10 +22,13 @@
   "sign-up": "Sign Up",
   "something-went-wrong-please-try-again": "Something went wrong. Please try again.",
   "admin-start-title": "BiteTribe Admin",
-  "admin-start-message": "Internal operations tool. Sign in with an operator account.",
   "admin-dashboard-title": "Operations",
   "admin-dashboard-message": "Restaurant claims, candidate verification and role management move in here as they are built.",
   "no-access-title": "This account has no access",
   "no-access-message": "Your account is signed in, but it is not allowed to use this app.",
-  "no-access-message-role": "Your account is signed in, but it does not hold the \"{{role}}\" role this app requires. Ask BiteTribe to grant it."
+  "no-access-message-role": "Your account is signed in, but it does not hold the \"{{role}}\" role this app requires. Ask BiteTribe to grant it.",
+  "admin-start-tagline": "Internal operations tool",
+  "admin-start-hint": "Access is granted by BiteTribe. An account without the operator role cannot sign in here.",
+  "admin-dashboard-signed-in-as": "Signed in as",
+  "login": "Login"
 }

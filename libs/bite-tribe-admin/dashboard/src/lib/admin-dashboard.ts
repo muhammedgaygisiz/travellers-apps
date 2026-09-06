@@ -1,12 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import {
-  IonContent,
-  IonHeader,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { AuthService } from 'ta-firestore';
+import { PageComponent } from 'common/ui/page';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 
 /**
  * The signed-in home of the admin app.
@@ -17,34 +13,47 @@ import { AuthService } from 'ta-firestore';
  * change would have meant shipping a new privileged surface and its access
  * control together, with neither reviewable on its own (issue #1469).
  *
- * What it does show is the signed-in account, so an operator can tell which
- * identity the tool is acting as before it can act at all.
+ * It renders through the shared `ta-page` chrome rather than a bare
+ * `ion-header`, so the admin app carries the same header, logo and account menu
+ * as the other two. Every menu entry is off: the admin app has no settings,
+ * profile or migrations surface yet, and `hideAuth` stays false so the menu
+ * still offers logout.
+ *
+ * The signed-in account is shown in the body because an operator has to be able
+ * to tell which identity the tool is acting as before it acts on anyone's
+ * restaurant.
  */
 @Component({
   selector: 'lib-admin-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, TranslocoPipe],
+  imports: [PageComponent, IonContent, TranslocoPipe],
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>{{ 'admin-dashboard-title' | transloco }}</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="admin-dashboard">
-      <p class="admin-dashboard__message">
-        {{ 'admin-dashboard-message' | transloco }}
-      </p>
-      @if (email(); as signedInEmail) {
-        <p class="admin-dashboard__account">{{ signedInEmail }}</p>
-      }
-    </ion-content>
+    <ta-page
+      [chrome]="{ showFooter: false, fullWidth: true }"
+      [isAuthenticated]="true"
+      (logoutClick)="logout()"
+    >
+      <ion-content class="ion-padding">
+        <h2 class="admin-dashboard__heading">
+          {{ 'admin-dashboard-title' | transloco }}
+        </h2>
+        <p class="admin-dashboard__message">
+          {{ 'admin-dashboard-message' | transloco }}
+        </p>
+        @if (email(); as signedInEmail) {
+          <p class="admin-dashboard__account">
+            {{ 'admin-dashboard-signed-in-as' | transloco }}
+            {{ signedInEmail }}
+          </p>
+        }
+      </ion-content>
+    </ta-page>
   `,
   styles: `
-    .admin-dashboard {
-      --padding-top: 1rem;
-      --padding-bottom: 1rem;
-      --padding-start: 1rem;
-      --padding-end: 1rem;
+    .admin-dashboard__heading {
+      margin: 0 0 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
     }
 
     .admin-dashboard__message {
@@ -53,15 +62,19 @@ import { AuthService } from 'ta-firestore';
     }
 
     .admin-dashboard__account {
-      margin: 1rem 0 0;
+      margin: 1.5rem 0 0;
       color: var(--ion-color-medium, #6b6b6b);
       font-size: 0.875rem;
     }
   `,
 })
 export class AdminDashboard {
-  private readonly authService = inject(AuthService);
+  private readonly storeService = inject(BiteTribeStoreService);
 
   readonly email = (): string | undefined =>
-    this.authService.getUser()?.email ?? undefined;
+    this.storeService.user()?.email ?? undefined;
+
+  logout(): void {
+    this.storeService.logout();
+  }
 }

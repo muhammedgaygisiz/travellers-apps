@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, signal } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { AuthService } from 'ta-firestore';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 import { AdminDashboard } from '../admin-dashboard';
 
 @Pipe({ name: 'transloco' })
@@ -15,7 +15,8 @@ class MockTranslocoPipe implements PipeTransform {
 describe(AdminDashboard.name, () => {
   let component: AdminDashboard;
   let fixture: ComponentFixture<AdminDashboard>;
-  let getUser: jest.Mock;
+  let logout: jest.Mock;
+  let user: ReturnType<typeof signal<{ email: string | null } | undefined>>;
 
   const createComponent = (): void => {
     fixture = TestBed.createComponent(AdminDashboard);
@@ -24,15 +25,15 @@ describe(AdminDashboard.name, () => {
   };
 
   beforeEach(() => {
-    getUser = jest.fn(() => ({
-      uid: 'operator-1',
+    logout = jest.fn();
+    user = signal<{ email: string | null } | undefined>({
       email: 'ops@bitetribe.app',
-    }));
+    });
 
     TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(),
-        { provide: AuthService, useValue: { getUser } },
+        { provide: BiteTribeStoreService, useValue: { user, logout } },
       ],
     })
       .overrideComponent(AdminDashboard, {
@@ -57,7 +58,7 @@ describe(AdminDashboard.name, () => {
   });
 
   it('renders without an account rather than showing an empty line', () => {
-    getUser.mockReturnValue(undefined);
+    user.set(undefined);
 
     createComponent();
 
@@ -68,10 +69,20 @@ describe(AdminDashboard.name, () => {
   });
 
   it('treats a provider account with no email as having none', () => {
-    getUser.mockReturnValue({ uid: 'operator-1', email: null });
+    user.set({ email: null });
 
     createComponent();
 
     expect(component.email()).toBeUndefined();
+  });
+
+  // Logout goes through the store, not `AuthService` directly, so it runs the
+  // same teardown effects the other two apps do.
+  it('logs out through the store', () => {
+    createComponent();
+
+    component.logout();
+
+    expect(logout).toHaveBeenCalled();
   });
 });

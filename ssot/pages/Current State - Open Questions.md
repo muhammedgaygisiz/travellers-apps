@@ -11,6 +11,8 @@ Open questions capture decisions that should become clear before or shortly afte
 - Which Bite quality signals should be required before launch, and which can be learned after launch?
 - How should vacation usage and posting later be represented in the product?
 - How much restaurant and menu context is needed for launch without drifting away from the dish-first product decision?
+- What are the brand characters called, and what does a surface use one for? The seven committed in [issue 1482](https://github.com/muhammedgaygisiz/travellers-apps/issues/1482) carry the design export's filenames, which mix a historical term with national ones, and nothing in the product references them. Both halves are open: the vocabulary, and whether a character becomes an avatar, a BiteTrail marker, an empty state, or stays brand material. See [[Implementation - Brand Characters]].
+- Which palette is the brand's, the logo's or the new characters'? The shipped `logo.svg` outlines a `#F0B967` cookie in `#55422A`; the seven characters use `#402810` over `#F8B850`. They read as one family at thumbnail size and as two drafts side by side, which the `Brand/Characters` Storybook page shows. Re-cutting the logo changes a mark that is already in both stores, so this is a decision rather than a cleanup.
 
 ## Restaurant Interaction Platform Questions
 

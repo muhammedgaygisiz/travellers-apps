@@ -90,6 +90,7 @@
   - [[Implementation - iOS Simulator Testing]]
   - [[Implementation - Store Release Steps]]
   - [[Implementation - Store Listing Assets]]
+  - [[Implementation - Brand Characters]]
   - [[Implementation - Store Declarations]]
   - [[Implementation - CI Pipeline]]
 - Decisions

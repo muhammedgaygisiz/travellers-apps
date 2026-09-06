@@ -155,6 +155,16 @@ reconciling against a stored flag. The rule is on [[Architecture - Capacitor]].
 
 The rule it adds is recorded on [[Bite]]. The guard is a client affordance only; nothing in the Firestore rules or the like triggers enforces it.
 
+## The Brand Characters
+
+[[issue-1482]] versions the seven character SVGs under `ssot/assets/characters/` and renders them, with the logo, as the `Brand/Characters` Storybook page.
+
+| Work           | Implementation                                                        | Owns                                                 |
+| -------------- | --------------------------------------------------------------------- | ---------------------------------------------------- |
+| [[issue-1482]] | [[Implementation - Brand Characters]], [[Implementation - Storybook]] | The set, where it lives, and how a character is made |
+
+This trace has no use case and no domain page, which is the point: a character is brand material, and nothing in the product references one. The naming and the eventual product use are open on [[Current State - Open Questions]]. The day a surface uses a character, the artwork moves into app assets and this row gains the use case that took it.
+
 - ## Decisions To Constraints
 
   | Decision                        | Constraint                                                                                                          |

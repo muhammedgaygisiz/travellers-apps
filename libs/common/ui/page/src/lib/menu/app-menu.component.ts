@@ -45,8 +45,6 @@ export class AppMenuComponent {
 
   showAboutButton = input<boolean | null>(false);
 
-  showMigrationsButton = input<boolean | null>(false);
-
   showMyBites = input<boolean | null>(false);
 
   showMyBucketlists = input<boolean | null>(false);

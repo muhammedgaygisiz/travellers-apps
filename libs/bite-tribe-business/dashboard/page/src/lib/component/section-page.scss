@@ -1,0 +1,18 @@
+/*
+ * The section pages read as one column down the middle of the page, the same
+ * shape the admin dashboard's operations list has. `fullWidth` chrome lets the
+ * content span the viewport, which on a desktop monitor stretches a list of a
+ * handful of restaurants across the whole width.
+ *
+ * Only the column is centred; the list inside it stays left-aligned, because
+ * centred list rows have no common left edge to scan down.
+ */
+.section-page {
+  margin: 0 auto;
+  max-width: 40rem;
+  text-align: center;
+}
+
+.section-page__list {
+  text-align: start;
+}

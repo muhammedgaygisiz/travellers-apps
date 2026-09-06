@@ -9,6 +9,8 @@ import { TEST_USERS } from '../support/test-users';
  * needing the dashboard to get anywhere. Nothing proved the deny path, and the
  * deny path is the whole point of issue #1469 — before it, any BiteTribe
  * account could sign into this app and run the operational migrations in it.
+ * Those migrations moved to the admin app with issue #1473, so what is behind
+ * the gate now is a restaurant's own data.
  *
  * The account here is a seeded consumer user carrying no roles. It is a real
  * sign-in, not a mocked one: the credentials are correct and the claim is
@@ -57,11 +59,9 @@ test.describe('Business app role gate', () => {
     await signInWithoutRoles(new LoginPage(page));
     await expect(page).toHaveURL(/\/login$/);
 
-    // `migrations` is the route that matters most: it runs BiteTribe-internal
-    // operations.
-    await page.goto('/migrations');
+    await page.goto('/restaurants');
 
-    await expect(page).not.toHaveURL(/\/migrations$/);
+    await expect(page).not.toHaveURL(/\/restaurants$/);
     await expect(page).toHaveURL(/\/(login|start)$/);
   });
 });

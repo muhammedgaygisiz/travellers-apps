@@ -2,7 +2,7 @@
 
 ## Status
 
-Partially supported. The app exists, deploys, and is gated on the `admin` role as of issue \#1469. Role management is its first operator surface. Claim review and restaurant-candidate verification move into it in follow-ups.
+Partially supported. The app exists, deploys, and is gated on the `admin` role as of issue \#1469. Role management, restaurant-candidate verification, the unmatched Bite places and the operational migrations are its surfaces today. Claim review moves into it in a follow-up.
 
 ## Goal
 
@@ -14,7 +14,7 @@ The privileged surface used to be one app. `bite-tribe-business` held both what 
 
 Two problems in one, both verified before issue \#1469:
 
-- No separation. `migrations` and restaurant-candidate verification are BiteTribe-internal operations sitting in the app we intend to give restaurants. Any restaurant that logged in could run our migrations.
+- No separation. `migrations` and restaurant-candidate verification are BiteTribe-internal operations sitting in the app we intend to give restaurants. Any restaurant that logged in could run our migrations. Issue \#1473 moved both.
 - No gate. `authGuard` asks whether a user is signed in, never who they are, and `apps/bite-tribe-firebase/firestore.rules` still grants read and write on every document to every authenticated user.
 
 ## Actors
@@ -40,13 +40,17 @@ Steps 3 and 4 are the point of the split: a restaurant never grants itself busin
 4. They land on the dashboard, a list of the operator surfaces the tool offers.
 5. **User management** lists every BiteTribe account with the roles it holds, and grants or revokes them. It reads `listUsersWithRoles` and writes `setUserRoles`, both admin-only.
 
-Only roles are editable. `setUserRoles` is the one admin write that exists, so the identity fields are read-only rather than offering a change nothing can save. 6. Restaurant-candidate verification and migrations still run in the business app, behind the `business` role.
+Only roles are editable. `setUserRoles` is the one admin write that exists, so the identity fields are read-only rather than offering a change nothing can save.
+
+6. **Restaurant candidates** lists the pending candidates with the Bite evidence behind each, and **Bite places** lists place names Bites carry that no verified restaurant answers to yet. Both open the new-restaurant form, which creates the verified restaurant. Both moved out of the business dashboard with issue \#1473.
+7. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
 
 ## Key Behaviours
 
 - Roles are Firebase Auth custom claims, written only by the backend.
 - **A missing role fails the login rather than blocking a page.** An account signed in and then refused would learn that its password was right, that it exists, and which role guards the app. The generic failure tells it nothing. See [[Architecture - Auth]].
 - `admin` and `business` are separate, not a hierarchy. An operator account holding `admin` does not thereby get restaurant maintenance rights.
+- **The dashboard names operations, not pages.** An operator picks the thing they came to do; nothing is a section of something larger. That is why the one migrations page became six entries with issue \#1473.
 - The admin app is English-only. Its audience is BiteTribe operators, and four locale lists kept in step for no reader is a cost with no reader.
 - The app is `noindex, nofollow` at both the meta tag and the hosting header. It is an internal tool that must never appear in a search result.
 - It shares the Firebase project with the other two apps, because it operates on the same Firestore, Auth and Functions. It has its own hosting site and its own `authDomain`.
@@ -69,6 +73,8 @@ Until issue \#1078 replaces the Firestore rules, this is a client-side gate over
 
 - Epic \#1471 - grow the admin app into the BiteTribe operations tool, and the owner of everything below that is not yet built
 - Issue \#1469 - introduce the admin app, deploy it, and gate both privileged apps on roles
+- Issue \#1473 - move the migrations and restaurant-candidate verification out of the business app
+- Issue \#1472 - require the `admin` role on every operator callable, which moving the UI does not do
 - Issue \#1069 - stage 0 of \#735, restaurant ownership, claiming and authorization
 - Issue \#1075 - business roles as verified identity
 - Issue \#1077 - claim review, approval and revocation workflow

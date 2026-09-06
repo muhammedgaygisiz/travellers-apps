@@ -69,7 +69,6 @@ describe('PageComponent', () => {
         myBites: true,
         myBucketlists: true,
         myProfile: true,
-        migrations: true,
         marketPlace: true,
         gallery: true,
         leaderboard: true,
@@ -92,7 +91,6 @@ describe('PageComponent', () => {
       expect(props['showMyBites']()).toBe(true);
       expect(props['showMyBucketlists']()).toBe(true);
       expect(props['showMyProfile']()).toBe(true);
-      expect(props['showMigrationsButton']()).toBe(true);
       expect(props['showMarketPlaceButton']()).toBe(true);
       expect(props['showGalleryButton']()).toBe(true);
       expect(props['showLeaderboardButton']()).toBe(true);

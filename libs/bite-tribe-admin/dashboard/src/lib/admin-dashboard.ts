@@ -26,9 +26,9 @@ interface AdminTool {
  * The admin app's home: a centred list of the operator surfaces it offers.
  *
  * It is a list rather than the business dashboard's data columns because the
- * two answer different questions. The business dashboard shows a restaurant its
- * own content; this shows an operator what the tool can do, and it grows an
- * entry per surface as claim review and candidate verification move in.
+ * two answer different questions. The business dashboard shows a restaurant the
+ * map and its own surfaces; this shows an operator what the tool can do, one
+ * entry per surface.
  */
 @Component({
   selector: 'lib-admin-dashboard',
@@ -128,9 +128,13 @@ export class AdminDashboard {
   private readonly router = inject(Router);
 
   /**
-   * Every operator surface, in the order an operator meets them. User
-   * management is first because nothing else in the tool works until an account
-   * has been granted a role.
+   * Every operator surface, in the order an operator meets them.
+   *
+   * User management is first because nothing else in the tool works until an
+   * account has been granted a role. Restaurant verification comes next because
+   * it is the daily work; the migrations below it are each their own entry
+   * rather than one "migrations" page, so an operator reaches the one they came
+   * for instead of scrolling past five Bite tables (issue #1473).
    */
   readonly tools: readonly AdminTool[] = [
     {
@@ -139,6 +143,62 @@ export class AdminDashboard {
       icon: 'people-outline',
       path: '/user-management',
       testId: 'admin-tool-user-management',
+    },
+    {
+      titleKey: 'admin-tool-restaurant-candidates',
+      descriptionKey: 'admin-tool-restaurant-candidates-description',
+      icon: 'shield-checkmark-outline',
+      path: '/restaurant-candidates',
+      testId: 'admin-tool-restaurant-candidates',
+    },
+    {
+      titleKey: 'admin-tool-bite-places',
+      descriptionKey: 'admin-tool-bite-places-description',
+      icon: 'storefront-outline',
+      path: '/bite-places',
+      testId: 'admin-tool-bite-places',
+    },
+    {
+      titleKey: 'admin-tool-new-version-notification',
+      descriptionKey: 'admin-tool-new-version-notification-description',
+      icon: 'notifications-outline',
+      path: '/new-version-notification',
+      testId: 'admin-tool-new-version-notification',
+    },
+    {
+      titleKey: 'admin-tool-review-timestamps-backfill',
+      descriptionKey: 'admin-tool-review-timestamps-backfill-description',
+      icon: 'time-outline',
+      path: '/review-timestamps-backfill',
+      testId: 'admin-tool-review-timestamps-backfill',
+    },
+    {
+      titleKey: 'admin-tool-bite-address-backfill',
+      descriptionKey: 'admin-tool-bite-address-backfill-description',
+      icon: 'location-outline',
+      path: '/bite-address-backfill',
+      testId: 'admin-tool-bite-address-backfill',
+    },
+    {
+      titleKey: 'admin-tool-restaurant-clustering',
+      descriptionKey: 'admin-tool-restaurant-clustering-description',
+      icon: 'restaurant-outline',
+      path: '/restaurant-clustering',
+      testId: 'admin-tool-restaurant-clustering',
+    },
+    {
+      titleKey: 'admin-tool-image-migration',
+      descriptionKey: 'admin-tool-image-migration-description',
+      icon: 'image-outline',
+      path: '/image-migration',
+      testId: 'admin-tool-image-migration',
+    },
+    {
+      titleKey: 'admin-tool-geohash-migration',
+      descriptionKey: 'admin-tool-geohash-migration-description',
+      icon: 'map-outline',
+      path: '/geohash-migration',
+      testId: 'admin-tool-geohash-migration',
     },
   ];
 

@@ -1,0 +1,63 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <h2>{{ 'image-migration' | transloco }}</h2>
+    <p>{{ 'image-migration-hint' | transloco }}</p>
+    <table
+      class="migration-table"
+      border="1"
+      data-testid="image-migration-table"
+    >
+      <thead>
+        <tr>
+          <th>{{ 'bite' | transloco }}</th>
+          <th>{{ 'image-migration-before' | transloco }}</th>
+          <th>{{ 'image-migration-after' | transloco }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (bite of bitesNeedingMigration(); let index = $index; track bite.id
+        || index) {
+        <tr>
+          <td>
+            <strong>{{ bite.name || bite.id }}</strong>
+            <br />
+            <span>{{ bite.id }}</span>
+            <br />
+            <ion-button
+              class="ion-margin-top"
+              fill="outline"
+              data-testid="migrate-image"
+              [disabled]="!!bite.imagePath"
+              (click)="migrateImage.emit(bite)"
+            >
+              {{ 'run-migration' | transloco }}
+            </ion-button>
+            @if (!bite.imagePath) {
+            <br />
+            <ion-text color="warning">
+              {{ 'migration-needed' | transloco }}
+            </ion-text>
+            }
+          </td>
+          <td>
+            <img alt="{{ bite.name }}" [src]="bite.image" width="100" />
+          </td>
+          <td>
+            <img alt="{{ bite.name }}" [src]="bite.imagePath" width="100" />
+          </td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="3">
+            {{ 'no-image-migration-eligible-bites' | transloco }}
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </ion-content>
+</ta-page>

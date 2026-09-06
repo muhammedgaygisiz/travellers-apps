@@ -65,6 +65,26 @@ describe('admin ROUTES', () => {
       expect(lazyRoutes.length).toBeGreaterThan(0);
     });
 
+    // The surfaces that moved out of the business app with issue #1473. Each
+    // is its own route because each is its own dashboard entry.
+    it('routes every operational surface', () => {
+      const paths = ROUTES.map((route) => route.path);
+
+      expect(paths).toEqual(
+        expect.arrayContaining([
+          'restaurant-candidates',
+          'bite-places',
+          'new-restaurant',
+          'new-version-notification',
+          'review-timestamps-backfill',
+          'bite-address-backfill',
+          'restaurant-clustering',
+          'image-migration',
+          'geohash-migration',
+        ]),
+      );
+    });
+
     it.each(lazyRoutes.map((route) => [route.path, route] as const))(
       'resolves the component for %s',
       async (_path, route) => {

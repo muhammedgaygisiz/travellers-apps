@@ -3,7 +3,6 @@ export type PageMenuTarget =
   | 'settings'
   | 'about'
   | 'profile'
-  | 'migrations'
   | 'my-bites'
   | 'my-bucketlists'
   | 'market-place'
@@ -20,7 +19,6 @@ export interface PageMenuConfig {
   myBites?: boolean;
   myBucketlists?: boolean;
   myProfile?: boolean;
-  migrations?: boolean;
   marketPlace?: boolean;
   gallery?: boolean;
   leaderboard?: boolean;
@@ -53,7 +51,6 @@ export const DEFAULT_PAGE_MENU_CONFIG: Required<PageMenuConfig> = {
   myBites: false,
   myBucketlists: false,
   myProfile: false,
-  migrations: false,
   marketPlace: false,
   gallery: false,
   leaderboard: false,

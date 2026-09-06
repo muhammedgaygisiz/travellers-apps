@@ -31,10 +31,14 @@ describe('business ROUTES', () => {
     expect(open.sort()).toEqual([...UNGATED_PATHS].sort());
   });
 
-  it('keeps the operational migrations behind the gate', () => {
-    const migrations = ROUTES.find((route) => route.path === 'migrations');
+  // The BiteTribe-internal surfaces left for the admin app with issue #1473.
+  // Asserted rather than assumed: a route re-added here would be behind the
+  // `business` role, which every restaurant holds.
+  it('routes nothing BiteTribe-internal', () => {
+    const paths = ROUTES.map((route) => route.path);
 
-    expect(migrations?.canActivate).toHaveLength(2);
+    expect(paths).not.toContain('migrations');
+    expect(paths).not.toContain('new-restaurant');
   });
 
   // Every lazy route names its component as a string on the imported module,

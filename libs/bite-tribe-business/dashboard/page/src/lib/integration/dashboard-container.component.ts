@@ -8,18 +8,11 @@ import { DashboardService } from './dashboard.service';
   template: `
     <bt-business-dashboard
       class="ion-page"
-      [restaurants]="service.restaurantsValue()"
-      [biteTrails]="service.biteTrailsValue()"
-      [bitePlaces]="service.bitePlacesValue()"
-      [restaurantCandidates]="service.restaurantCandidatesValue()"
       [isAuthenticated]="service.isAuthenticated()"
       [gpsPosition]="service.gpsPosition()"
+      [restaurants]="service.restaurantsValue()"
       (logoutClick)="service.logout()"
-      (restaurantClick)="service.restaurantClicked($event)"
-      (createBiteTrailClick)="service.createBiteTrailClicked()"
-      (restaurantCandidateClick)="service.restaurantCandidateClicked($event)"
-      (menuNavigate)="service.onMenuNavigate($event)"
-      (placeClick)="service.placeClicked($event)"
+      (sectionClick)="service.sectionClicked($event)"
     />
   `,
 })

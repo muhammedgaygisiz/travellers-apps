@@ -1,8 +1,0 @@
-{
-  "name": "bite-tribe-business/migrations-data-access",
-  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/bite-tribe-business/migrations/data-access/src",
-  "prefix": "lib",
-  "projectType": "library",
-  "tags": ["scope:bite-tribe-business", "type:data-access"]
-}

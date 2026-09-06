@@ -6,44 +6,60 @@ Supported today.
 
 ## Goal
 
-Admins or maintainers can run operational maintenance tasks from business tooling.
+BiteTribe operators can run operational maintenance tasks from the admin app.
 
 ## Actors
 
-- Admin
-- Business maintainer
+- BiteTribe operator, holding the `admin` role
 
 ## Current Flow
 
-- Admin opens the migrations page.
-- Admin runs or supervises operational migration work.
-- Admin announces a released app version to iPhone or Android users once the
-  matching store serves the new build, and sees how far the announcement
-  reached. See the Release Announcement Contract in
+- The operator signs into the admin app and lands on the dashboard, which
+  lists one entry per migration.
+- The operator opens the migration they came for and runs it. There is no
+  combined migrations page: each migration is its own surface, so reaching one
+  never means scrolling past the others (issue \#1473).
+- **New version notification** announces a released app version to iPhone or
+  Android users once the matching store serves the new build, and reports how
+  far the announcement reached. See the Release Announcement Contract in
   [[UC - Receive App Notifications And Engagement Updates]].
-- Admin starts a collection-wide migration and reads back what it did.
+- **Review timestamps backfill** starts the collection-wide rewrite and reads
+  back what it did.
+- **Bite address backfill**, **Restaurant clustering**, **Image migration** and
+  **Geohash migration** each act on one Bite the operator picks from a table.
+
+### Why this is not one page any more
+
+It was one page in the business app, which put every migration in front of an
+operator who wanted one of them, and put all of them in front of every
+restaurant that signed in. Issue \#1473 moved them behind the `admin` role and
+split them by what they do, so the dashboard names the operation rather than the
+mechanism.
+
+Registering a migration is therefore a name, a runner, its copy, **and its
+dashboard entry**.
 
 ## Collection Migration Contract
 
-The per-Bite actions on the migrations page each take a target the operator
-picks from a table. A collection-wide migration takes none: one press, and the
-callable walks the collection itself.
+The per-Bite migrations each take a target the operator picks from a table. A
+collection-wide migration takes none: one press, and the callable walks the
+collection itself.
 
 - Every collection migration is idempotent, so a second press is safe and
   changes nothing that is already correct. That is what makes a plain button
   enough, with no confirmation step in front of it.
-- A run reports counts, and the page renders whatever counts it is given rather
-  than markup written per migration. A rewrite leaves nothing on the page to
+- A run reports counts, and the shared collection-migration card renders
+  whatever counts it is given rather than markup written per migration. A rewrite leaves nothing on the page to
   look at, so pressing the button again must not be the only way to find out
   whether the first press worked — the same reasoning as the release
   announcement.
-- A failure is shown on the page instead of being rethrown. This page is the
+- A failure is shown on the page instead of being rethrown. The admin app is the
   only place these are triggered from, so a rejected call has nowhere else to
   surface.
 - Each migration holds its own state, so one long run does not block starting
   another.
-- Adding a migration means adding a name, its runner, and its copy — not another
-  copy of the state handling.
+- Adding a migration means adding a name, its runner, its copy and its dashboard
+  entry — not another copy of the state handling.
 
 Registered today: `review-timestamps` ([[issue-1283]]).
 
@@ -75,10 +91,16 @@ name in onboarding.
 
 ## Supported Evidence
 
-- Business `migrations`.
+- `libs/bite-tribe-admin/migrations/{page,data-access}`, routed in the admin
+  shell behind `authGuard` and `roleGuard('admin')`.
 - `sendNewVersionNotification`.
-- `backfillReviewTimestampsCallable`, started from the collection migrations
-  table.
+- `backfillReviewTimestampsCallable`, started from the review-timestamps
+  backfill surface.
+
+## Known Gap
+
+Moving the UI does not secure the callables. `requireAdmin` on each of them is
+issue \#1472 and independent of this move.
 
 ## Related Domains
 

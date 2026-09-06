@@ -107,6 +107,15 @@ Moderation questions raised by threading are recorded on [[epic-1284]], not here
 - How are soft-launch testers told the app is live? **Decided on 31 August 2026: directly, by the maintainer.** No push campaign, no mailing list, no in-app announcement. The group is small enough that a personal message is both possible and better, and it avoids building an announcement channel for an audience of forty.
 - Who are the soft-launch influencers? **Decided on 31 August 2026: there are none.** No influencer was successfully recruited, so the influencer half of [issue 912](https://github.com/muhammedgaygisiz/travellers-apps/issues/912)'s acceptance criterion is dropped from the soft launch rather than left blocking it. Recruiting is future work and belongs with the public launch campaign, [issue 913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913).
 
+## Public Content Questions
+
+These belong to [[epic-1487]], the city landing pages. Each gates the first published page rather than the first commit, and two of them are not engineering questions.
+
+- May a member's Bite photo appear on a public marketing page? In-app display to signed-in members is a different use, and the terms and the privacy policy have to permit the public one. The epic's proposal is that the first pages use restaurant-supplied and operator-supplied imagery only. Google Places photos are not implicated: `get-place-details` keeps `photos` out of its field mask.
+- Does an editorial page published under the company name need an Impressum? The public surface today is support, privacy and account deletion, none of which is editorial. Answer before a page is public, not after.
+- What is the content bar for publishing a page? One production restaurant has a menu. A curated list whose entries have no dishes behind them is the thin-page pattern that costs a domain more than it earns, so the epic proposes a stated minimum of real Bites with photos per entry, and one city in the first release.
+- Does the URL space keep `/eat/<city>/<slug>`? Cheap to change before the first page is indexed and expensive after.
+
 ## Related Pages
 
 - [[Current State - Roadmap]]

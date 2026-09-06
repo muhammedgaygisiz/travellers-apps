@@ -165,6 +165,20 @@ The rule it adds is recorded on [[Bite]]. The guard is a client affordance only;
 
 This trace has no use case and no domain page, which is the point: a character is brand material, and nothing in the product references one. The naming and the eventual product use are open on [[Current State - Open Questions]]. The day a surface uses a character, the artwork moves into app assets and this row gains the use case that took it.
 
+## Public City Landing Pages
+
+[[epic-1487]] gives an operator a way to publish curated, indexable city pages over the data the product already holds. It is Priority `P3`: nothing in the launch path depends on it.
+
+| Work          | Use Case                                                                                                           | Domain                   | Implementation                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------ | -------------------------------------------------------------------------------------------- |
+| [[epic-1487]] | [[UC - Operate BiteTribe In The Admin App]] for curation; [[UC - Browse Restaurants And Places]] for what it shows | [[Restaurant]], [[Bite]] | [[Implementation - Web Search And Social Metadata]], [[Implementation - Firebase Functions]] |
+
+The chain runs backwards through two closed issues rather than an epic. Issue \#894 wrote `city` and `country` onto every Bite and named city pages as the reason; issue \#1454 established the metadata contract the pages have to extend. The epic adds no new metadata page: [[Implementation - Web Search And Social Metadata]] already owns the canonical host, `robots.txt` and `sitemap.xml`, and gains the landing-page section.
+
+Scoping the epic produced one issue that is not part of it. [Issue 1488](https://github.com/muhammedgaygisiz/travellers-apps/issues/1488) is a live stored XSS in the render helper the landing pages would have reused, filed on its own at `P0` because it is a defect in shipped code rather than future work. The epic depends on it and does not own it; it is recorded on [[Current State - Known Issues]].
+
+No use case covers public acquisition today. One is written when the epic starts rather than now, because its shape depends on a product decision that is still open - whether these pages stay operator-curated or eventually generate themselves.
+
 - ## Decisions To Constraints
 
   | Decision                        | Constraint                                                                                                          |

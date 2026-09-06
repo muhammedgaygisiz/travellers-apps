@@ -168,25 +168,57 @@ describe('backfillReviewTimestamps', () => {
   });
 
   describe('callable', () => {
+    const handle = (
+      auth: unknown,
+    ): ReturnType<typeof backfillReviewTimestampsHandler> =>
+      backfillReviewTimestampsHandler({ auth } as unknown as Parameters<
+        typeof backfillReviewTimestampsHandler
+      >[0]);
+
+    const codeOf = async (promise: Promise<unknown>): Promise<string> => {
+      try {
+        await promise;
+      } catch (error) {
+        return (error as { code: string }).code;
+      }
+
+      throw new Error('Expected the callable to reject, but it resolved.');
+    };
+
+    const callerWith = (roles: unknown): unknown => ({
+      uid: 'operator-1',
+      token: { roles },
+    });
+
     it('refuses a caller who is not signed in', async () => {
       seedReview('legacy-1', { createdAt: JUNE_2025 });
 
-      await expect(
-        backfillReviewTimestampsHandler({
-          auth: undefined,
-        } as unknown as Parameters<typeof backfillReviewTimestampsHandler>[0]),
-      ).rejects.toThrow(
-        'You must be signed in to run the review timestamp backfill.',
+      expect(await codeOf(handle(undefined))).toBe('unauthenticated');
+      expect(timestampOf('legacy-1')).toBeUndefined();
+    });
+
+    it('refuses a signed-in caller holding no roles', async () => {
+      seedReview('legacy-1', { createdAt: JUNE_2025 });
+
+      expect(await codeOf(handle(callerWith(undefined)))).toBe(
+        'permission-denied',
       );
       expect(timestampOf('legacy-1')).toBeUndefined();
     });
 
-    it('runs the backfill for a signed-in caller', async () => {
+    it('refuses a caller holding only the business role', async () => {
       seedReview('legacy-1', { createdAt: JUNE_2025 });
 
-      const result = await backfillReviewTimestampsHandler({
-        auth: { uid: 'operator-1' },
-      } as unknown as Parameters<typeof backfillReviewTimestampsHandler>[0]);
+      expect(await codeOf(handle(callerWith(['business'])))).toBe(
+        'permission-denied',
+      );
+      expect(timestampOf('legacy-1')).toBeUndefined();
+    });
+
+    it('runs the backfill for an operator', async () => {
+      seedReview('legacy-1', { createdAt: JUNE_2025 });
+
+      const result = await handle(callerWith(['admin']));
 
       expect(result).toMatchObject({ filled: 1 });
       expect(timestampOf('legacy-1')).toBe(Date.parse(JUNE_2025));

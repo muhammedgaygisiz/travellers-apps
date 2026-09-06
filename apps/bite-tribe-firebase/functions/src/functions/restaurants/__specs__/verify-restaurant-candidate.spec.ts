@@ -50,11 +50,64 @@ jest.mock('firebase-admin/firestore', () => ({
   getFirestore: jest.fn(() => firestoreMock),
 }));
 
-const request = (data: unknown): never =>
+/** A caller the verified ID token says holds `roles`. */
+const callerWith = (roles: unknown): { uid: string; token: unknown } => ({
+  uid: 'user-1',
+  token: { roles },
+});
+
+const request = (data: unknown, caller = callerWith(['admin'])): never =>
   ({
-    auth: { uid: 'user-1' },
+    auth: caller,
     data,
   }) as never;
+
+const codeOf = async (promise: Promise<unknown>): Promise<string> => {
+  try {
+    await promise;
+  } catch (error) {
+    return (error as { code: string }).code;
+  }
+
+  throw new Error('Expected the callable to reject, but it resolved.');
+};
+
+/**
+ * The callable creates restaurants, so the gate on it is the point. A consumer
+ * account reaching it could mint a restaurant from a crafted payload before
+ * issue #1472.
+ */
+describe('verifyRestaurantCandidate authorization', () => {
+  const data = { candidateId: 'candidate-1' };
+
+  it('rejects an unauthenticated caller', async () => {
+    const code = await codeOf(
+      verifyRestaurantCandidate({ data } as never) as Promise<unknown>,
+    );
+
+    expect(code).toBe('unauthenticated');
+  });
+
+  it('rejects a consumer account holding no roles', async () => {
+    const code = await codeOf(
+      verifyRestaurantCandidate(
+        request(data, callerWith(undefined)),
+      ) as Promise<unknown>,
+    );
+
+    expect(code).toBe('permission-denied');
+  });
+
+  it('rejects a caller holding only the business role', async () => {
+    const code = await codeOf(
+      verifyRestaurantCandidate(
+        request(data, callerWith(['business'])),
+      ) as Promise<unknown>,
+    );
+
+    expect(code).toBe('permission-denied');
+  });
+});
 
 describe('verifyRestaurantCandidate', () => {
   const createMock = jest.fn();

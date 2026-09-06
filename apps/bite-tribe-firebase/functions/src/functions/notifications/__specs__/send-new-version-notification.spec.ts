@@ -49,7 +49,7 @@ jest.mock('../../shared/callable-options', () => ({
 }));
 
 interface CallableRequestLike {
-  auth?: { uid: string };
+  auth?: { uid: string; token?: { roles?: unknown } };
   data?: SendNewVersionNotificationRequest;
 }
 
@@ -70,7 +70,15 @@ const sendNewVersionNotification = (
   return handler(request);
 };
 
-const anOperator = { uid: 'operator-1' };
+const anOperator = { uid: 'operator-1', token: { roles: ['admin'] } };
+
+/** A caller the verified ID token says holds `roles`. */
+const callerWith = (
+  roles: unknown,
+): { uid: string; token: { roles: unknown } } => ({
+  uid: 'someone-else',
+  token: { roles },
+});
 
 const seedInstallation = (
   uid: string,
@@ -203,6 +211,34 @@ describe('sendNewVersionNotification', () => {
     await expect(
       sendNewVersionNotification({ data: { platform: 'ios' } }),
     ).rejects.toMatchObject({ code: 'unauthenticated' });
+
+    expect(sendEachForMulticast).not.toHaveBeenCalled();
+  });
+
+  // One call reaches every installation we hold a token for, so the gate is
+  // what keeps a consumer account from pushing to the whole user base.
+  it('rejects a signed-in caller holding no roles', async () => {
+    seedInstallation('user-1', 'token-ios', 'ios');
+
+    await expect(
+      sendNewVersionNotification({
+        auth: callerWith(undefined),
+        data: { platform: 'ios' },
+      }),
+    ).rejects.toMatchObject({ code: 'permission-denied' });
+
+    expect(sendEachForMulticast).not.toHaveBeenCalled();
+  });
+
+  it('rejects a caller holding only the business role', async () => {
+    seedInstallation('user-1', 'token-ios', 'ios');
+
+    await expect(
+      sendNewVersionNotification({
+        auth: callerWith(['business']),
+        data: { platform: 'ios' },
+      }),
+    ).rejects.toMatchObject({ code: 'permission-denied' });
 
     expect(sendEachForMulticast).not.toHaveBeenCalled();
   });

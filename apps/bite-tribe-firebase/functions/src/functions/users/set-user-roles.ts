@@ -5,11 +5,38 @@ import { onAppCheck } from '../shared/callable-options';
 import {
   BITE_TRIBE_ROLES,
   BiteTribeRole,
+  ROLES_CLAIM,
   isBiteTribeRole,
   requireAdmin,
   rolesOf,
-  setRoles,
 } from '../shared/roles';
+
+/**
+ * Replaces an account's roles, preserving every other custom claim it carries.
+ *
+ * `setCustomUserClaims` overwrites the whole claim object rather than merging
+ * into it, so the existing claims are read first. Writing only `{ roles }`
+ * would silently drop anything else a future feature stores there.
+ *
+ * The write takes effect in a client on its next token refresh, which Firebase
+ * performs at most hourly on its own — the client forces one when a role check
+ * misses, so a grant is visible without signing out and back in.
+ */
+export const setRoles = async (
+  uid: string,
+  roles: BiteTribeRole[],
+): Promise<BiteTribeRole[]> => {
+  const auth = getAuth();
+  const user = await auth.getUser(uid);
+  const uniqueRoles = [...new Set(roles)];
+
+  await auth.setCustomUserClaims(uid, {
+    ...(user.customClaims ?? {}),
+    [ROLES_CLAIM]: uniqueRoles,
+  });
+
+  return uniqueRoles;
+};
 
 interface SetUserRolesRequest {
   uid?: unknown;

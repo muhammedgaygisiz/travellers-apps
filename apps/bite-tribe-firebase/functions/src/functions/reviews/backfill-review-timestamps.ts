@@ -1,7 +1,8 @@
 import { DocumentData, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
-import { CallableRequest, HttpsError } from 'firebase-functions/https';
+import { CallableRequest } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { requireAdmin } from '../shared/roles';
 
 const REVIEWS_COLLECTION = 'reviews';
 const WRITE_BATCH_LIMIT = 500;
@@ -115,19 +116,18 @@ export const backfillReviewTimestamps =
     return result;
   };
 
+/**
+ * Runs the review timestamp migration.
+ *
+ * Operator-only: it rewrites every review document in the collection, and the
+ * only surface that offers it is the admin migrations page (issue #1472).
+ */
 export const backfillReviewTimestampsHandler = async (
   request: CallableRequest<void>,
 ): Promise<BackfillReviewTimestampsResult> => {
-  if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to run the review timestamp backfill.',
-    );
-  }
+  const requestedBy = requireAdmin(request);
 
-  logger.info('backfillReviewTimestamps: started', {
-    requestedBy: request.auth.uid,
-  });
+  logger.info('backfillReviewTimestamps: started', { requestedBy });
 
   return backfillReviewTimestamps();
 };

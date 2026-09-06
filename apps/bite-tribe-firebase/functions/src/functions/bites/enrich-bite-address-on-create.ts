@@ -14,6 +14,7 @@ import {
   Position,
   reverseGeocode,
 } from '../shared/utils/reverse-geocode';
+import { requireAdmin } from '../shared/roles';
 import { addCountryCodeToUser } from '../shared/utils/user-country-codes';
 import { notifyOnNewCountryBadge } from '../notifications/notify-on-new-country-badge';
 
@@ -163,19 +164,20 @@ export const enrichBiteAddressOnCreate = onDocumentCreated(
   },
 );
 
+/**
+ * Re-runs address enrichment for one Bite.
+ *
+ * Operator-only: it spends the Google Geocoding key on a Bite the caller does
+ * not have to own, and the only surface that offers it is the admin migrations
+ * page (issue #1472).
+ */
 export const backfillBiteAddress = onCall<BackfillBiteAddressRequest>(
   {
     enforceAppCheck: true,
     secrets: [googleGeocodingApiKey],
   },
   async (request): Promise<BackfillBiteAddressResult> => {
-    if (!request.auth) {
-      logger.warn('backfillBiteAddress: unauthenticated request rejected');
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to backfill Bite addresses.',
-      );
-    }
+    const uid = requireAdmin(request);
 
     if (typeof request.data?.biteId !== 'string' || !request.data.biteId) {
       throw new HttpsError('invalid-argument', 'biteId must be a string.');
@@ -189,10 +191,7 @@ export const backfillBiteAddress = onCall<BackfillBiteAddressRequest>(
       throw new HttpsError('not-found', 'Bite was not found.');
     }
 
-    logger.info('backfillBiteAddress: started', {
-      uid: request.auth.uid,
-      biteId,
-    });
+    logger.info('backfillBiteAddress: started', { uid, biteId });
 
     const status = await enrichBiteAddress(
       biteSnap.id,

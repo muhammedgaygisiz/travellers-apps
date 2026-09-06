@@ -7,6 +7,7 @@ import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { geohashForLocation } from 'geofire-common';
 import { onAppCheck } from '../shared/callable-options';
+import { requireAdmin } from '../shared/roles';
 import {
   buildInitialMenuCategories,
   InitialMenuBite,
@@ -176,15 +177,18 @@ const getExistingVerifiedRestaurantId = async (
   return mergedVerifiedRestaurantId;
 };
 
+/**
+ * Promotes a restaurant candidate into a verified Restaurant.
+ *
+ * Operator-only. The callable creates a Restaurant, seeds its Menu and links
+ * the candidate Bites to it, all with admin credentials, so "any signed-in
+ * caller" was enough to let a consumer account mint restaurants from a crafted
+ * payload (issue #1472). `verifiedByUserId` records the operator who ran it.
+ */
 export const verifyRestaurantCandidateHandler = async (
   request: CallableRequest<VerifyRestaurantCandidateRequest>,
 ): Promise<VerifyRestaurantCandidateResult> => {
-  if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to verify restaurant candidates.',
-    );
-  }
+  const userId = requireAdmin(request);
 
   if (
     typeof request.data.candidateId !== 'string' ||
@@ -194,7 +198,6 @@ export const verifyRestaurantCandidateHandler = async (
   }
 
   const candidateId = request.data.candidateId.trim();
-  const userId = request.auth.uid;
   const db = getFirestore();
   const candidateRef = db
     .collection(RESTAURANT_CANDIDATES_COLLECTION)

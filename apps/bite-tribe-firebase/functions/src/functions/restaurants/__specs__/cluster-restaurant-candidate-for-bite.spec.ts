@@ -93,11 +93,62 @@ const biteDoc = (
   position: { latitude: number; longitude: number },
 ): SeedDoc => ({ id, data: { place, position } });
 
-const request = (biteId: string): never =>
+/** A caller the verified ID token says holds `roles`. */
+const callerWith = (roles: unknown): { uid: string; token: unknown } => ({
+  uid: 'user-1',
+  token: { roles },
+});
+
+const request = (biteId: string, caller = callerWith(['admin'])): never =>
   ({
-    auth: { uid: 'user-1' },
+    auth: caller,
     data: { biteId },
   }) as never;
+
+const codeOf = async (promise: Promise<unknown>): Promise<string> => {
+  try {
+    await promise;
+  } catch (error) {
+    return (error as { code: string }).code;
+  }
+
+  throw new Error('Expected the callable to reject, but it resolved.');
+};
+
+describe('clusterRestaurantCandidateForBite authorization', () => {
+  it('rejects an unauthenticated caller', async () => {
+    const code = await codeOf(
+      clusterRestaurantCandidateForBite({
+        data: { biteId: 'bite-selected' },
+      } as never) as Promise<unknown>,
+    );
+
+    expect(code).toBe('unauthenticated');
+    expect(writes).toHaveLength(0);
+  });
+
+  it('rejects a signed-in caller holding no roles', async () => {
+    const code = await codeOf(
+      clusterRestaurantCandidateForBite(
+        request('bite-selected', callerWith(undefined)),
+      ) as Promise<unknown>,
+    );
+
+    expect(code).toBe('permission-denied');
+    expect(writes).toHaveLength(0);
+  });
+
+  it('rejects a caller holding only the business role', async () => {
+    const code = await codeOf(
+      clusterRestaurantCandidateForBite(
+        request('bite-selected', callerWith(['business'])),
+      ) as Promise<unknown>,
+    );
+
+    expect(code).toBe('permission-denied');
+    expect(writes).toHaveLength(0);
+  });
+});
 
 describe('clusterRestaurantCandidateForBite', () => {
   beforeEach(() => {

@@ -10,6 +10,7 @@ The code map helps contributors find the right implementation surface quickly.
 | ------------------------------------ | ------------------------------------------------------------------------- |
 | `apps/bite-tribe`                    | Consumer BiteTribe app shell, assets, app configuration, and locale files |
 | `apps/bite-tribe-business`           | Business-facing app shell and assets                                      |
+| `apps/bite-tribe-admin`              | Internal operations app shell and assets                                  |
 | `apps/bite-tribe-firebase/functions` | Firebase backend functions, callable APIs, triggers, and scheduled jobs   |
 | `apps/bite-tribe-ios`                | Capacitor iOS wrapper                                                     |
 | `apps/bite-tribe-android`            | Capacitor Android wrapper                                                 |
@@ -48,6 +49,26 @@ Examples:
 - `libs/bite-tribe-business/create-bite-trail/data-access`
 - `libs/bite-tribe-business/dashboard/page`
 - `libs/bite-tribe-business/dashboard/data-access`
+
+## Admin Feature Libraries
+
+```text
+libs/bite-tribe-admin/<feature>/page
+libs/bite-tribe-admin/<feature>/data-access
+```
+
+A feature with a read surface uses the same `page` / `data-access` pair the
+other two apps do. `shell`, `start` and `dashboard` stay flat because they have
+no reads of their own; the pair is added per feature when one does, not
+pre-emptively.
+
+Examples:
+
+- `libs/bite-tribe-admin/shell`
+- `libs/bite-tribe-admin/start`
+- `libs/bite-tribe-admin/dashboard`
+- `libs/bite-tribe-admin/user-management/page`
+- `libs/bite-tribe-admin/user-management/data-access`
 
 ## Shared Libraries
 

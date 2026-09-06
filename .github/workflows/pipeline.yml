@@ -475,6 +475,74 @@ jobs:
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
+  # BiteTribe Admin
+
+  # The internal operations tool (issue 1469). It mirrors the business pair
+  # above rather than sharing a job with it, because the two deploy to separate
+  # hosting sites and a failure in one must not hold the other back.
+  #
+  # Like the business app it is out of release-candidate scope, so
+  # `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` is deliberately absent and
+  # `release:verify-bundle` is not run here.
+
+  bite-tribe-admin-build:
+    runs-on: ubuntu-latest
+    needs:
+      - tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+
+      - name: 'Restore Cache'
+        uses: ./.github/actions/restore-cache
+
+      - name: 'Install dependencies when the cache is unavailable'
+        uses: ./.github/actions/install-if-missing
+
+      - name: 'Nx cache'
+        uses: ./.github/actions/nx-cache
+
+      - name: Build BiteTribe Admin App
+        run: npm run nx -- build bite-tribe-admin
+
+  deploy-bite-tribe-admin:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    needs:
+      - bite-tribe-admin-build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup action
+        uses: ./.github/actions/setup
+
+      - name: Build BiteTribe Admin App
+        run: npm run nx -- build bite-tribe-admin
+        env:
+          NX_APP_BITE_TRIBE_API_KEY: ${{ secrets.NX_APP_BITE_TRIBE_API_KEY }}
+          NX_APP_BITE_TRIBE_ADMIN_AUTH_DOMAIN: ${{ secrets.NX_APP_BITE_TRIBE_ADMIN_AUTH_DOMAIN }}
+          NX_APP_BITE_TRIBE_PROJECT_ID: ${{ secrets.NX_APP_BITE_TRIBE_PROJECT_ID }}
+          NX_APP_BITE_TRIBE_STORAGE_BUCKET: ${{ secrets.NX_APP_BITE_TRIBE_STORAGE_BUCKET }}
+          NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID }}
+          NX_APP_BITE_TRIBE_APP_ID: ${{ secrets.NX_APP_BITE_TRIBE_APP_ID }}
+          NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY: ${{ secrets.NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY }}
+
+      - name: BiteTribe Admin Publish to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0.10.0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE }}'
+          channelId: live
+          projectId: bite-tribe
+          target: bite-tribe-admin
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels
+
   # Firebase Functions
 
   # Compiles the functions with the same tsc the deploy's predeploy hook runs,

@@ -44,6 +44,7 @@
     - [[UC - Maintain Restaurants In The Business App]]
     - [[UC - Create And Operate BiteTrails In The Business App]]
     - [[UC - Run Operational Migrations]]
+    - [[UC - Operate BiteTribe In The Admin App]]
     - [[UC - Guide New Users After Registration]]
   - Next to implement
     collapsed:: true
@@ -79,6 +80,7 @@
   - [[epic-1124]]
   - [[epic-1125]]
   - [[epic-1284]]
+  - [[epic-1471]]
 - Architecture
   - [[Architecture - Overview]]
   - [[Architecture - Firebase]]

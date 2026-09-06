@@ -46,6 +46,13 @@
         "command": "node scripts/set-geocoding-secret.mjs"
       }
     },
+    "firebase-grant-role": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-firebase",
+        "command": "node scripts/grant-role.mjs"
+      }
+    },
     "firebase-kill": {
       "executor": "nx:run-commands",
       "options": {

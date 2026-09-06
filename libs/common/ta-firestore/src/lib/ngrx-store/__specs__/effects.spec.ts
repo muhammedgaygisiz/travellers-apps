@@ -9,7 +9,7 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { AuthActions } from '../actions';
 import { Action } from '@ngrx/store';
 import { NavController } from '@ionic/angular';
-import { isAuthEntryPage } from 'utils';
+import { isAuthEntryPage, REQUIRED_ROLE } from 'utils';
 import { RequestedUrlService } from '../../requested-url.service';
 
 jest.mock('utils', () => ({
@@ -33,6 +33,8 @@ const AuthServiceMock = {
   signInWithAppleAccount: jest.fn(() => Promise.resolve()),
   authState: jest.fn(),
   setupAnalyticsAndCrashlytics: jest.fn(),
+  hasRole: jest.fn(() => Promise.resolve(true)),
+  endRejectedSession: jest.fn(() => Promise.resolve()),
 };
 
 const MockNavController = {
@@ -70,6 +72,8 @@ describe(AuthEffects.name, () => {
     AuthServiceMock.signInWithAppleAccount.mockResolvedValue({
       user: { uid: '123' },
     });
+    AuthServiceMock.hasRole.mockResolvedValue(true);
+    AuthServiceMock.endRejectedSession.mockResolvedValue(undefined);
 
     TestBed.configureTestingModule({
       providers: [
@@ -516,5 +520,186 @@ describe(AuthEffects.name, () => {
         });
       });
     });
+  });
+});
+
+/**
+ * Sign-in refuses an account that lacks the role the app requires, and reports
+ * the refusal as the same generic failure a wrong password produces.
+ *
+ * The point of these tests is what is *not* observable: no `loginSucceeded`, no
+ * navigation, and nothing that distinguishes "wrong password" from "right
+ * password, wrong account" (issue #1469).
+ */
+describe(`${AuthEffects.name} with a required role`, () => {
+  let scheduler: TestScheduler;
+  let effects: AuthEffects;
+  let actions$: Observable<Action>;
+
+  const authCreds = { email: 'q@q.de', password: 'password' };
+
+  const configure = (requiredRole: string | null): void => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        AuthEffects,
+        provideMockActions(() => actions$),
+        { provide: AuthService, useValue: AuthServiceMock },
+        provideMockStore(),
+        { provide: NavController, useValue: MockNavController },
+        ...(requiredRole
+          ? [{ provide: REQUIRED_ROLE, useValue: requiredRole }]
+          : []),
+      ],
+    });
+    effects = TestBed.inject(AuthEffects);
+  };
+
+  const emitted = async (
+    effect$: Observable<Action>,
+    action: Action,
+  ): Promise<Action> => {
+    actions$ = of(action);
+    return firstValueFrom(effect$);
+  };
+
+  beforeEach(() => {
+    scheduler = new TestScheduler(assertDeepEqual);
+    jest.clearAllMocks();
+    (isAuthEntryPage as jest.Mock).mockReturnValue(true);
+    AuthServiceMock.loginWithUsernameAndPassword.mockResolvedValue({
+      user: { uid: '123' },
+    });
+    AuthServiceMock.signInWithGoogleAccount.mockResolvedValue({
+      user: { uid: '123' },
+    });
+    AuthServiceMock.signInWithAppleAccount.mockResolvedValue({
+      user: { uid: '123' },
+    });
+    AuthServiceMock.endRejectedSession.mockResolvedValue(undefined);
+  });
+
+  it('is unused by an app that binds no role', async () => {
+    configure(null);
+    AuthServiceMock.hasRole.mockResolvedValue(false);
+
+    const result = await emitted(
+      effects.loginEffect$,
+      AuthActions.login({ authCreds }),
+    );
+
+    expect(result).toEqual(AuthActions.loginSucceeded());
+    expect(AuthServiceMock.hasRole).not.toHaveBeenCalled();
+  });
+
+  it('signs in an account that holds the required role', async () => {
+    configure('business');
+    AuthServiceMock.hasRole.mockResolvedValue(true);
+
+    const result = await emitted(
+      effects.loginEffect$,
+      AuthActions.login({ authCreds }),
+    );
+
+    expect(result).toEqual(AuthActions.loginSucceeded());
+    expect(AuthServiceMock.endRejectedSession).not.toHaveBeenCalled();
+  });
+
+  describe('given credentials that are right but an account without the role', () => {
+    beforeEach(() => {
+      configure('business');
+      AuthServiceMock.hasRole.mockResolvedValue(false);
+    });
+
+    it('fails the login instead of succeeding it', async () => {
+      const result = await emitted(
+        effects.loginEffect$,
+        AuthActions.login({ authCreds }),
+      );
+
+      expect(result).toEqual(AuthActions.loginFailed());
+    });
+
+    it('ends the session, so nothing is left to deep-link with', async () => {
+      await emitted(effects.loginEffect$, AuthActions.login({ authCreds }));
+
+      expect(AuthServiceMock.endRejectedSession).toHaveBeenCalled();
+    });
+
+    // The wrong-password path emits exactly this. An observer must not be able
+    // to tell the two apart.
+    it('is indistinguishable from a wrong password', async () => {
+      const rejectedByRole = await emitted(
+        effects.loginEffect$,
+        AuthActions.login({ authCreds }),
+      );
+
+      AuthServiceMock.hasRole.mockResolvedValue(true);
+      AuthServiceMock.loginWithUsernameAndPassword.mockRejectedValue(
+        new Error('auth/wrong-password'),
+      );
+      const rejectedByPassword = await emitted(
+        effects.loginEffect$,
+        AuthActions.login({ authCreds }),
+      );
+
+      expect(rejectedByRole).toEqual(rejectedByPassword);
+    });
+
+    it('retries once against a freshly minted token before rejecting', async () => {
+      AuthServiceMock.hasRole
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true);
+
+      const result = await emitted(
+        effects.loginEffect$,
+        AuthActions.login({ authCreds }),
+      );
+
+      expect(result).toEqual(AuthActions.loginSucceeded());
+      expect(AuthServiceMock.hasRole).toHaveBeenNthCalledWith(
+        2,
+        'business',
+        true,
+      );
+    });
+
+    it('rejects a Google sign-in the same way, not as a registration failure', async () => {
+      const result = await emitted(
+        effects.loginWithGoogleAccountEffect$,
+        AuthActions.loginWithGoogleAccount(),
+      );
+
+      expect(result).toEqual(AuthActions.loginFailed());
+      expect(MockNavController.navigateBack).not.toHaveBeenCalled();
+    });
+
+    it('rejects an Apple sign-in the same way', async () => {
+      const result = await emitted(
+        effects.loginWithAppleAccountEffect$,
+        AuthActions.loginWithAppleAccount(),
+      );
+
+      expect(result).toEqual(AuthActions.loginFailed());
+    });
+
+    it('still reports a genuine provider error as a registration failure', async () => {
+      AuthServiceMock.signInWithGoogleAccount.mockRejectedValue({
+        code: 'auth/popup-closed-by-user',
+      });
+
+      const result = await emitted(
+        effects.loginWithGoogleAccountEffect$,
+        AuthActions.loginWithGoogleAccount(),
+      );
+
+      expect(result).toEqual(
+        AuthActions.registrationFailed({ code: 'auth/popup-closed-by-user' }),
+      );
+    });
+  });
+
+  afterAll(() => {
+    scheduler.flush();
   });
 });

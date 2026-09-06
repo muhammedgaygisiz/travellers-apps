@@ -16,6 +16,7 @@ export {
 } from './lib/analytics/analytics-events';
 
 export { authGuard } from './lib/auth.guard';
+export { roleGuard } from './lib/role.guard';
 export { startGuard } from './lib/start.guard';
 export { RequestedUrlService } from './lib/requested-url.service';
 export { freshSessionGuard } from './lib/fresh-session.guard';

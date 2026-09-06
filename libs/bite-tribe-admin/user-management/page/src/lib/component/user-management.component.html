@@ -1,0 +1,130 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="ion-display-flex ion-flex-row user-management">
+      <div class="column column--list ion-padding">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>{{
+              'admin-users-title' | transloco
+            }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            @if (loading()) {
+              <div class="user-management__loading">
+                <ion-spinner name="crescent" />
+              </div>
+            } @else {
+              <ion-list lines="full" data-testid="admin-user-list">
+                @for (user of users(); track user.uid) {
+                  <ion-item
+                    [button]="true"
+                    [color]="user.uid === selected()?.uid ? 'light' : undefined"
+                    (click)="onSelect(user)"
+                  >
+                    <ion-label>
+                      <h3>{{ user.email || user.uid }}</h3>
+                      <p>
+                        @if (user.roles.length) {
+                          @for (role of user.roles; track role) {
+                            <ion-badge class="ion-margin-end">{{
+                              role
+                            }}</ion-badge>
+                          }
+                        } @else {
+                          {{ 'admin-users-no-roles' | transloco }}
+                        }
+                      </p>
+                    </ion-label>
+                  </ion-item>
+                } @empty {
+                  <p>{{ 'admin-users-empty' | transloco }}</p>
+                }
+              </ion-list>
+            }
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <div class="column column--detail ion-padding">
+        @if (selected(); as user) {
+          <ion-card data-testid="admin-user-form">
+            <ion-card-header>
+              <ion-card-title>{{ user.email || user.uid }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-list lines="none">
+                <ion-item>
+                  <ion-label>
+                    <p>{{ 'admin-users-uid' | transloco }}</p>
+                    <h3>{{ user.uid }}</h3>
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label>
+                    <p>{{ 'admin-users-display-name' | transloco }}</p>
+                    <h3>{{ user.displayName || '—' }}</h3>
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label>
+                    <p>{{ 'admin-users-providers' | transloco }}</p>
+                    <h3>{{ user.providerIds.join(', ') || '—' }}</h3>
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label>
+                    <p>{{ 'admin-users-last-sign-in' | transloco }}</p>
+                    <h3>{{ user.lastSignInAt || '—' }}</h3>
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+
+              <h4 class="user-management__section">
+                {{ 'admin-users-roles' | transloco }}
+              </h4>
+              <ion-list lines="full">
+                @for (role of allRoles; track role) {
+                  <ion-item>
+                    <ion-checkbox
+                      [checked]="holds(role)"
+                      [attr.data-testid]="'role-' + role"
+                      (ionChange)="toggleRole(role, $event.detail.checked)"
+                    >
+                      {{ role }}
+                    </ion-checkbox>
+                  </ion-item>
+                }
+              </ion-list>
+              <ion-note class="user-management__hint">
+                {{ 'admin-users-roles-hint' | transloco }}
+              </ion-note>
+
+              <ion-button
+                expand="block"
+                class="ion-margin-top"
+                data-testid="admin-user-save"
+                [disabled]="!dirty() || saving()"
+                (click)="onSave()"
+              >
+                @if (saving()) {
+                  <ion-spinner name="crescent" slot="start" />
+                }
+                {{ 'save' | transloco }}
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        } @else {
+          <ion-card>
+            <ion-card-content>
+              <p>{{ 'admin-users-select-hint' | transloco }}</p>
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
+    </div>
+  </ion-content>
+</ta-page>

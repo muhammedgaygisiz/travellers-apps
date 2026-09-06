@@ -49,6 +49,15 @@ interface AuthCredentialFields {
 export class LoginComponent {
   readonly loginFailed = input(false);
 
+  /**
+   * Whether to offer account creation.
+   *
+   * The container answers this by asking the router whether a registration
+   * route exists, so an app that removed the route cannot still advertise it
+   * (issue #1469).
+   */
+  readonly showSignUp = input(true);
+
   /** Keeps the form locked while a sign-in is in flight (issue #1273). */
   public readonly pending = input(false);
 

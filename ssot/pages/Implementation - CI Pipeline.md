@@ -48,8 +48,15 @@ tests
 |
 +-- bite-tribe-build ----------- deploy-bite-tribe           (develop only)
 +-- bite-tribe-business-build -- deploy-bite-tribe-business  (develop only)
++-- bite-tribe-admin-build ----- deploy-bite-tribe-admin     (develop only)
 +-- functions-build                                          (no deploy yet)
 ```
+
+The three web apps deploy through three independent build/deploy pairs to three
+hosting sites. They are not one job with three targets: a failure deploying one
+app must not hold the other two back, and the consumer app is the only one under
+release-candidate scope, so it is the only one that sets
+`NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` and runs `release:verify-bundle`.
 
 `functions-build` compiles the Firebase functions and stops there. It has no deploy counterpart on purpose: gen2 functions have no rollback, and Firestore indexes must be deployed first and separately, so the deploy is a decision rather than a wiring job. See [[Implementation - Firebase Functions]].
 
@@ -104,7 +111,9 @@ Every checkout in `pipeline.yml` uses `fetch-depth: 0` because affected needs fu
 
 Nx task hashes do **not** include the `NX_APP_*` build-time variables. They are not declared as `env` inputs in `nx.json`, so two builds that differ only in those values share a task hash and Nx will replay either artifact for the other.
 
-This is why the `deploy-bite-tribe` and `deploy-bite-tribe-business` jobs rebuild through the `setup` action instead of restoring the Nx cache: they are the only jobs that build with the production secrets, and a shared cache would let the secret-free bundle from `bite-tribe-build` be replayed into a deploy, or the reverse.
+This is why the `deploy-bite-tribe`, `deploy-bite-tribe-business` and `deploy-bite-tribe-admin` jobs rebuild through the `setup` action instead of restoring the Nx cache: they are the only jobs that build with the production secrets, and a shared cache would let the secret-free bundle from `bite-tribe-build` be replayed into a deploy, or the reverse.
+
+Each app reads its own `authDomain` secret — `NX_APP_BITE_TRIBE_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_ADMIN_AUTH_DOMAIN`. All three hold the same value today, the project's shared `bite-tribe.firebaseapp.com` OAuth handler. They are separate secrets because `authDomain` is what Firebase builds the Google and Apple redirect from, so one app can later be moved to its own handler domain without moving the other two.
 
 `deploy-bite-tribe-storybook` is not subject to this. The Storybook build reads no `NX_APP_*` variables, so it needs no secrets and its artifact is the same whichever job produced it.
 

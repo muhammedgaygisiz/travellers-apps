@@ -19,7 +19,8 @@
       "validSince": "1777910052",
       "email": "organisation@test.com",
       "emailVerified": false,
-      "disabled": false
+      "disabled": false,
+      "customAttributes": "{\"roles\":[\"business\"]}"
     },
     {
       "localId": "helULN26hP9Qeig6NQLIEcEe3AP6",
@@ -59,6 +60,27 @@
       "validSince": "1777910052",
       "email": "test2@test.com",
       "emailVerified": false,
+      "disabled": false
+    },
+    {
+      "localId": "aDm1nOperatorSeedAccount01Xy",
+      "createdAt": "1768318963883",
+      "lastLoginAt": "1777356476148",
+      "passwordHash": "fakeHash:salt=fakeSaltAdm1nOperator4tK9pWzQ:password=Test4711",
+      "salt": "fakeSaltAdm1nOperator4tK9pWzQ",
+      "passwordUpdatedAt": 1777910052586,
+      "providerUserInfo": [
+        {
+          "providerId": "password",
+          "email": "admin@test.com",
+          "federatedId": "admin@test.com",
+          "rawId": "admin@test.com"
+        }
+      ],
+      "validSince": "1777910052",
+      "email": "admin@test.com",
+      "emailVerified": true,
+      "customAttributes": "{\"roles\":[\"admin\"]}",
       "disabled": false
     }
   ]

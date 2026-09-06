@@ -1,0 +1,17 @@
+<div class="ion-page">
+  <ion-content class="ion-padding">
+    <div class="container">
+      <div class="ion-text-center logo-text-container">
+        <img src="assets/icons/logo.svg" alt="BiteTribe Logo" class="logo" />
+        <span class="company-name">{{ 'admin-start-title' | transloco }}</span>
+        <span class="tagline">{{ 'admin-start-tagline' | transloco }}</span>
+      </div>
+
+      <div class="ion-padding-top buttons-container">
+        <ion-button expand="block" color="primary" [routerLink]="loginPath">
+          {{ 'log-in' | transloco }}
+        </ion-button>
+      </div>
+    </div>
+  </ion-content>
+</div>

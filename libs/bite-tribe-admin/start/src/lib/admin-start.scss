@@ -38,19 +38,6 @@
           text-align: left;
         }
       }
-
-      /*
-       * There is no Sign Up button here, unlike the other two apps. An operator
-       * account is granted rather than self-served, so an account created from
-       * this app would be rejected by `roleGuard` the moment it signed in. The
-       * hint says so, because the shared login page still offers registration.
-       */
-      .access-hint {
-        margin: 1rem 0 0;
-        color: var(--ion-color-medium, #6b6b6b);
-        font-size: 0.8125rem;
-        text-align: center;
-      }
     }
   }
 }

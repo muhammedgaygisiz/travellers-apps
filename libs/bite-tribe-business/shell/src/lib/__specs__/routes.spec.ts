@@ -44,6 +44,11 @@ describe('business ROUTES', () => {
   describe('lazy routes', () => {
     const lazyRoutes = ROUTES.filter((route) => route.loadComponent);
 
+    // The business app still offers registration; only the admin app drops it.
+    it('keeps the registration route', () => {
+      expect(ROUTES.map((route) => route.path)).toContain('registration');
+    });
+
     it('has lazy routes to check', () => {
       expect(lazyRoutes.length).toBeGreaterThan(0);
     });

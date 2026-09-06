@@ -107,22 +107,24 @@
           }
         </form>
       </div>
-      <div class="ion-margin-bottom">
-        <div
-          class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
-        >
-          <ion-text>{{
-            'or-if-you-dont-have-an-account-yet' | transloco
-          }}</ion-text>
+      @if (showSignUp()) {
+        <div class="ion-margin-bottom">
+          <div
+            class="ion-display-flex ion-justify-content-center ion-margin-top ion-margin-bottom"
+          >
+            <ion-text>{{
+              'or-if-you-dont-have-an-account-yet' | transloco
+            }}</ion-text>
+          </div>
+          <ion-button
+            class="ion-margin-top"
+            expand="block"
+            (click)="signup.emit()"
+            data-testid="signup"
+            >{{ 'sign-up' | transloco }}</ion-button
+          >
         </div>
-        <ion-button
-          class="ion-margin-top"
-          expand="block"
-          (click)="signup.emit()"
-          data-testid="signup"
-          >{{ 'sign-up' | transloco }}</ion-button
-        >
-      </div>
+      }
     </div>
   </ion-content>
 </ta-page>

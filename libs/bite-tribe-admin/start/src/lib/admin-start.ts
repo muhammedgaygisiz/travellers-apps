@@ -12,10 +12,9 @@ import { TranslocoPipe } from '@jsverse/transloco';
  * operator should recognise it as BiteTribe rather than as a bare form.
  *
  * The one deliberate difference is that it offers no Sign Up. Operator access
- * is granted through the admin app, never self-served, so an account created
- * here would be turned away by `roleGuard` the moment it signed in. The shared
- * login page still shows a Sign Up button, which is why the hint on this page
- * says access is granted rather than requested (issue #1469).
+ * is granted, never self-served, so the admin app drops the registration route
+ * altogether — and the login page, which reads that answer off the router,
+ * drops its Sign Up button with it (issue #1469).
  */
 @Component({
   selector: 'lib-admin-start',

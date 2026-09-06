@@ -8,6 +8,7 @@ import { addIcons } from 'ionicons';
 import { logoApple, logoFacebook, logoGoogle } from 'ionicons/icons';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
+import { provideRouter, Routes } from '@angular/router';
 
 addNecessaryIcons();
 
@@ -140,5 +141,65 @@ describe('LoginContainerComponent', () => {
 
     expect(componentWithoutService.loginFailed()).toBeFalsy();
     expect(componentWithoutService.pending()).toBeFalsy();
+  });
+});
+
+/**
+ * The Sign Up button follows the routing, not a flag of its own.
+ *
+ * `withAuthRoutes({ registration: false })` removes the route; the login page
+ * has to stop advertising it without anyone remembering to turn off a second
+ * switch. Both directions are asserted because a button that is always hidden
+ * would pass a one-sided test (issue #1469).
+ */
+describe('LoginContainerComponent sign-up offer', () => {
+  let fixture: ComponentFixture<LoginContainerComponent>;
+
+  const build = (routes: Routes): LoginContainerComponent => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        provideRouter(routes),
+        { provide: TranslocoService, useValue: MockTranslocoService },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(LoginContainerComponent);
+    fixture.detectChanges();
+    return fixture.componentInstance;
+  };
+
+  const signUpButton = (): HTMLElement | null =>
+    fixture.nativeElement.querySelector('[data-testid="signup"]');
+
+  it('offers Sign Up when a registration route exists', () => {
+    const component = build([
+      { path: 'login', children: [] },
+      { path: 'registration', children: [] },
+    ]);
+
+    expect(component.showSignUp).toBe(true);
+  });
+
+  it('hides Sign Up when the app dropped the registration route', () => {
+    const component = build([
+      { path: 'login', children: [] },
+      { path: 'forgot-password', children: [] },
+    ]);
+
+    expect(component.showSignUp).toBe(false);
+  });
+
+  it('renders the button when registration is routed', () => {
+    build([{ path: 'registration', children: [] }]);
+
+    expect(signUpButton()).not.toBeNull();
+  });
+
+  it('renders no button at all when it is not', () => {
+    build([{ path: 'login', children: [] }]);
+
+    expect(signUpButton()).toBeNull();
   });
 });

@@ -21,21 +21,29 @@ import { PATH } from 'utils';
  * gate. A rejected account is signed out and returned to the login page with a
  * generic failure — never told which role it lacks.
  */
-export const ROUTES: Routes = withAuthRoutes([
-  {
-    path: PATH.START,
-    loadComponent: () =>
-      import('bite-tribe-admin/start').then((m) => m.AdminStart),
-  },
-  {
-    path: 'dashboard',
-    loadComponent: () =>
-      import('bite-tribe-admin/dashboard').then((m) => m.AdminDashboard),
-    canActivate: [authGuard, roleGuard('admin')],
-  },
-  {
-    path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full',
-  },
-]);
+export const ROUTES: Routes = withAuthRoutes(
+  [
+    {
+      path: PATH.START,
+      loadComponent: () =>
+        import('bite-tribe-admin/start').then((m) => m.AdminStart),
+    },
+    {
+      path: 'dashboard',
+      loadComponent: () =>
+        import('bite-tribe-admin/dashboard').then((m) => m.AdminDashboard),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
+      path: '',
+      redirectTo: 'dashboard',
+      pathMatch: 'full',
+    },
+  ],
+  // Operator accounts are granted, never self-served. A registration page here
+  // would create accounts that the very next sign-in refuses, and it rendered
+  // with the consumer app's translation keys because the admin locale never
+  // carried them. Dropping the route also removes the login page's Sign Up
+  // button, which reads its answer off the router.
+  { registration: false },
+);

@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
+import { FirebaseStorage } from '@capacitor-firebase/storage';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { Bite, RestaurantCandidate } from 'model';
 import {
@@ -24,6 +25,7 @@ type AllBitesLoaderArg = Parameters<
 >[0];
 
 jest.mock('@capacitor-firebase/firestore');
+jest.mock('@capacitor-firebase/storage');
 jest.mock('@capacitor-firebase/functions', () => ({
   FirebaseFunctions: {
     callByName: jest.fn(),
@@ -32,6 +34,18 @@ jest.mock('@capacitor-firebase/functions', () => ({
 jest.mock('bite-tribe/store', () => ({
   BiteTribeStoreService: class BiteTribeStoreService {},
 }));
+
+/**
+ * `FirebaseStorage.uploadFile` reports completion through a callback that
+ * neither the plugin nor its mock awaits, so the Firestore write it triggers
+ * lands after `migrateBiteImage` has already resolved.
+ */
+const settleUploadCallback = (): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, 0));
+
+/** A one-pixel PNG, so `dataUrlToBlob` has something real to decode. */
+const INLINE_IMAGE =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
 
 const bite = (override: Partial<Bite>): Bite =>
   ({
@@ -45,7 +59,14 @@ const bite = (override: Partial<Bite>): Bite =>
   }) as Bite;
 
 describe(MigrationsDataAccessService.name, () => {
+  let logout: jest.Mock;
+
   beforeEach(() => {
+    // Several assertions read `mock.calls[0]`, and the Firestore/Storage mocks
+    // are module-level, so usage has to be cleared between tests.
+    jest.clearAllMocks();
+    logout = jest.fn();
+
     TestBed.configureTestingModule({
       providers: [
         MigrationsDataAccessService,
@@ -53,6 +74,7 @@ describe(MigrationsDataAccessService.name, () => {
           provide: BiteTribeStoreService,
           useValue: {
             bites$: of([]),
+            logout,
           },
         },
       ],
@@ -302,6 +324,109 @@ describe(MigrationsDataAccessService.name, () => {
         name: 'sendNewVersionNotification',
         data: { platform: 'android' },
       });
+    });
+  });
+
+  describe('logout', () => {
+    it('should log out through the store', () => {
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      service.logout();
+
+      expect(logout).toHaveBeenCalled();
+    });
+  });
+
+  // These two used to sit in the migrations page component and moved down here
+  // with issue #1473, when that page became one surface per migration.
+  describe('migrateBiteImage', () => {
+    it('should upload the inline image under the Bite, typed and cached', async () => {
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      await service.migrateBiteImage(
+        bite({ id: 'bite-1', image: INLINE_IMAGE }),
+      );
+
+      const [request] = jest.mocked(FirebaseStorage.uploadFile).mock.calls[0];
+      expect(request.path).toMatch(
+        new RegExp(`^images/${BITE_COLLECTION}/bite-1/[0-9a-f-]+\\.png$`),
+      );
+      expect(request.metadata).toEqual({
+        contentType: 'image/png',
+        cacheControl: 'public,max-age=31536000,immutable',
+      });
+    });
+
+    // The document has to stop carrying the base64 copy, or the migration has
+    // moved the image without freeing anything.
+    it('should repoint the document at Storage and drop the inline copy', async () => {
+      const service = TestBed.inject(MigrationsDataAccessService);
+      const reload = jest.spyOn(service.allBites, 'reload');
+
+      await service.migrateBiteImage(
+        bite({ id: 'bite-1', image: INLINE_IMAGE }),
+      );
+      await settleUploadCallback();
+
+      expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
+        reference: `${BITE_COLLECTION}/bite-1`,
+        data: expect.objectContaining({
+          id: 'bite-1',
+          image: '',
+          imagePath: 'https://url-to-mirrored-image.com/avatar.jpg',
+          updatedAt: expect.any(String),
+          updatedAtTimestamp: expect.any(Number),
+        }),
+      });
+      expect(reload).toHaveBeenCalled();
+    });
+
+    it('should leave the document alone when the upload reports an error', async () => {
+      jest
+        .mocked(FirebaseStorage.uploadFile)
+        .mockImplementationOnce((_request, callback) => {
+          callback?.(null, new Error('upload failed'));
+          return Promise.resolve();
+        });
+      const consoleError = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      await service.migrateBiteImage(
+        bite({ id: 'bite-1', image: INLINE_IMAGE }),
+      );
+      await settleUploadCallback();
+
+      expect(FirebaseFirestore.updateDocument).not.toHaveBeenCalled();
+      expect(consoleError).toHaveBeenCalled();
+
+      consoleError.mockRestore();
+    });
+  });
+
+  describe('addGeohashToBite', () => {
+    it('should derive the geohash from the position the Bite already carries', async () => {
+      const service = TestBed.inject(MigrationsDataAccessService);
+      const reload = jest.spyOn(service.allBites, 'reload');
+
+      await service.addGeohashToBite(
+        bite({
+          id: 'bite-1',
+          position: { latitude: 46.948, longitude: 7.4474 },
+        }),
+      );
+
+      expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
+        reference: `${BITE_COLLECTION}/bite-1`,
+        data: expect.objectContaining({
+          id: 'bite-1',
+          geohash: expect.stringMatching(/^[0-9a-z]+$/),
+          updatedAt: expect.any(String),
+          updatedAtTimestamp: expect.any(Number),
+        }),
+      });
+      expect(reload).toHaveBeenCalled();
     });
   });
 });

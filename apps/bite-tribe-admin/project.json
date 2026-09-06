@@ -24,6 +24,11 @@
             "output": "assets"
           },
           {
+            "input": "node_modules/leaflet/dist/images",
+            "glob": "**/*",
+            "output": "assets/leaflet"
+          },
+          {
             "glob": "**/*",
             "input": "libs/bite-tribe-common/assets"
           }

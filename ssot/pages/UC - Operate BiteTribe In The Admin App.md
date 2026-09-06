@@ -67,6 +67,7 @@ Until issue \#1078 replaces the Firestore rules, this is a client-side gate over
 
 ## Related GitHub Scope
 
+- Epic \#1471 - grow the admin app into the BiteTribe operations tool, and the owner of everything below that is not yet built
 - Issue \#1469 - introduce the admin app, deploy it, and gate both privileged apps on roles
 - Issue \#1069 - stage 0 of \#735, restaurant ownership, claiming and authorization
 - Issue \#1075 - business roles as verified identity

@@ -87,6 +87,8 @@
 
   Issue \#1469 delivered the first part of stage 0 outside the child-issue list: the `bite-tribe-admin` app, and the role gate on both privileged apps. It deliberately left \#1078, the Firestore rules replacement, alone — that is the highest-regression-risk change in the epic and needs its own branch.
 
+  [[epic-1471]] owns what the admin app still needs. It is not a stage of \#735: it runs alongside, because moving the operator surfaces out of the business app and hardening the privileged callables are overdue regardless of whether the floor-plan work ever starts.
+
 - ## Monetization (post-launch)
 
   [[epic-1121]] is the umbrella for the three revenue channels. It and its four stage epics are Priority P1, sequenced behind the public launch. [[Monetization]] holds the product decisions and the Free/Pro capability matrix.

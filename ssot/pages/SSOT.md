@@ -80,6 +80,7 @@
   - [[epic-1124]]
   - [[epic-1125]]
   - [[epic-1284]]
+  - [[epic-1471]]
 - Architecture
   - [[Architecture - Overview]]
   - [[Architecture - Firebase]]

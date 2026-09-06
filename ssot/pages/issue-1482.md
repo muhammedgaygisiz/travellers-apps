@@ -1,0 +1,44 @@
+- [feat(brand): version the BiteTribe character set and showcase it in Storybook](https://github.com/muhammedgaygisiz/travellers-apps/issues/1482) (Issue \#1482)
+- Description
+  - The bitten-cookie mark had been extended into a set of seven characters, each wearing a different piece of cultural headwear. They existed only as 1254x1254 raster renders in a local design folder, so the repository recorded neither what the set was, which variants were current, nor that the shipped logo belongs to it.
+  - The request was a format conversion - "I just want them in svg format" - and explicitly not a redesign.
+- Findings - the exported SVGs were not vectors
+  - A set of `.svg` files already existed beside the renders, at roughly 1.5 MB each. Each is a single `<image>` element carrying the PNG as a base64 `data:` URI inside an `<svg>` wrapper. They do not scale, and they carry the whole raster into any consumer that loads them.
+  - This is the failure mode worth naming, because the file extension is the only thing that reports it. Size is the tell: a traced character of this complexity lands between 20 KB and 80 KB.
+- Findings - two colour-clustering traps
+  - **RGB distance collapses dark hues.** The Swiss hat's dark green and the outline brown are 61 RGB units apart, which is inside any threshold loose enough to absorb the renders' compression noise. The first trace produced a brown alpine hat. Clustering in CIE L\*a\*b\* separates the pair while leaving the noise merged.
+  - **Median-cut quantisation loses small saturated details.** It allocates buckets by how much of the image a colour covers, so it spends them on the cookie and folds the Ethiopian headband's green and red stripes, and the red in the Swiss hat band, into their neighbours. Seeding clusters by frequency with a perceptual separation keeps a colour covering 0.07% of the image.
+  - Both were caught by rendering the trace and comparing it to the source, not by reading the SVG. At thumbnail size a merged colour looks like a design choice.
+- Findings - the logo is a character, in an older palette
+  - `apps/bite-tribe/src/assets/icons/logo.svg` is the same bitten cookie wearing a feathered headdress. It is a member of the set rather than the mark the others were derived from, which is what the user's "our logo, which is also a character" already said.
+  - Its palette has drifted from the new seven: `#55422A` outline over a `#F0B967` cookie, against `#402810` over `#F8B850`. Rendering all eight together is the only place this is visible; each reads as correct on its own.
+- Decisions
+  - **Trace, do not re-draw.** The approved artwork is the pixels the design pass produced. A hand-rebuilt vector would be a new design wearing the same description. Fidelity was measured rather than reviewed by eye: mean per-channel difference 2-3 of 255, under 0.6% of pixels differing by more than 60, the residue being antialiased raster edges becoming crisp vector edges.
+  - **The artwork lives in `ssot/assets/characters/`, not in app assets.** Nothing in the product references a character, and Angular's asset glob copies a whole folder into every build, so shipping them beside `logo.svg` would put roughly 320 KB into all three apps to serve nothing. The page records that the file moves - not copies - when a surface uses one.
+  - **Transparent background, interior whites kept.** The canvas white is flood-filled from the four corners and dropped; a white that is not reachable from a border - a keffiyeh, a horn, a hat band - survives as a filled shape. The bite notch is therefore a hole, which is what the artwork means.
+  - **The tracing script is not committed.** It is Python and depends on `potrace` and Pillow; `tools/` is Node. The reproducible part is the parameter set, which the page records.
+  - **The naming is not settled here.** The filenames mix a historical term with national ones. A product vocabulary is a brand decision, so it went to [[Current State - Open Questions]] rather than into an acceptance criterion.
+  - **The palette drift is not resolved here.** Re-cutting the logo changes a mark already live in both stores. Also an open question.
+- Outcome
+  - `ssot/assets/characters/01-viking.svg` through `07-swiss.svg`: the seven traced characters, layered flat-colour paths on a transparent 1254x1254 canvas, 21-79 KB each.
+  - `apps/storybook-host/.storybook/main.ts`: a third `staticDirs` entry maps `ssot/assets/characters/` to `/assets/characters/`, with the reason the artwork is not in app assets.
+  - `apps/storybook-host/src/app/characters/characters.stories.ts`: `Brand/Characters`, rendering all eight with their headwear and the palette note.
+  - `.loki/reference/chrome_laptop_Brand_Characters_Tribe.png` and its iPhone 7 pair: the two new visual references.
+  - [[Implementation - Brand Characters]]: the set, where it lives, how a character is produced, and the two clustering traps.
+  - [[Current State - Open Questions]]: the naming question and the palette question.
+  - [[Traceability Map]] and [[contents]] carry the new page.
+- Validation
+  - `nx lint storybook-host` - clean.
+  - `npm run build:storybook` - succeeds, and `dist/storybook/storybook-host/assets/characters/` contains all seven files. This is the check that matters for the `staticDirs` entry: `fetchFailIgnore` in `loki.config.js` ignores third-party hosts only, so a character that failed to load would fail the story rather than render as a gap.
+  - `node tools/loki.mjs test --storiesFilter "Brand"` - both configurations pass and wrote their references. No existing reference was touched.
+  - Fidelity was checked by rendering each committed SVG back to 1254x1254 and differencing it against its source render, per the numbers above.
+- Open
+  - **No app surface uses a character**, so nothing outside Storybook exercises the files. The placement decision depends on that staying true.
+  - **The tracing script exists only outside the repository.** A re-run needs it recovered or rewritten from the recorded parameters.
+  - **Flat-colour consolidation is not reversible.** The Japanese kabuto's two grey tones became one, which is inherent to tracing a soft render into flat layers. If a character needs both, it has to come from a vector source rather than a raster one.
+  - **The names are the design export's** and are not fit for user-facing copy.
+- Related
+  - [[Implementation - Brand Characters]]
+  - [[Implementation - Storybook]]
+  - [[Implementation - Store Listing Assets]]
+  - [[Current State - Open Questions]]

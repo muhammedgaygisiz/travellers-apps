@@ -15,6 +15,14 @@ const config: StorybookConfig = {
       from: '../../../apps/bite-tribe/src/assets/',
       to: '/assets/',
     },
+    // The brand characters are versioned as SSOT material rather than app
+    // assets, because nothing in the product references them yet and Angular's
+    // asset glob would copy the whole folder into every build regardless. See
+    // Implementation - Brand Characters.
+    {
+      from: '../../../ssot/assets/characters/',
+      to: '/assets/characters/',
+    },
   ],
   framework: {
     name: '@storybook/angular',

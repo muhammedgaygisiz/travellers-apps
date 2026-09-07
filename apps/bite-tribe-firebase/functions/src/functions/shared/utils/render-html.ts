@@ -1,10 +1,14 @@
-const escapeHtml = (s: string): string => {
+// `&` has to go first: the later replacements introduce ampersands of their
+// own, and escaping it last would turn `&lt;` into `&amp;lt;`. Every pattern is
+// a global regex - a string pattern replaces only the first occurrence, which
+// is what let a crafted Bite name break out of a meta tag (issue #1488).
+export const escapeHtml = (s: string): string => {
   return s
-    .replace('&', '&amp;')
-    .replace('<', '&lt;')
-    .replace('>', '&gt;')
-    .replace('"', '&quot;')
-    .replace("'", '&#039;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 };
 
 export const renderHtml = (opts: {

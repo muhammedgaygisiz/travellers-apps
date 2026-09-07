@@ -1,0 +1,154 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="ion-display-flex ion-flex-row bite-search">
+      <div class="column column--list ion-padding">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>{{
+              'admin-bites-title' | transloco
+            }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <!--
+              Submitted, not typed-as-you-go. Every keystroke past the third
+              would be a Firestore collection scan inside the callable, and the
+              operator here has one specific target rather than a list they are
+              browsing.
+            -->
+            <ion-searchbar
+              [value]="term()"
+              [placeholder]="'admin-bites-search-placeholder' | transloco"
+              data-testid="admin-bite-search"
+              (ionInput)="onTermChange($event.detail.value ?? '')"
+              (keyup.enter)="onSearch()"
+            />
+            <ion-button
+              expand="block"
+              data-testid="admin-bite-search-submit"
+              [disabled]="!canSearch() || searching()"
+              (click)="onSearch()"
+            >
+              @if (searching()) {
+                <ion-spinner name="crescent" slot="start" />
+              }
+              {{ 'admin-bites-search' | transloco }}
+            </ion-button>
+
+            @if (tooShort()) {
+              <ion-note class="bite-search__hint" data-testid="admin-bite-hint">
+                {{ 'admin-bites-too-short' | transloco }}
+              </ion-note>
+            }
+
+            @if (searching()) {
+              <div class="bite-search__loading">
+                <ion-spinner name="crescent" />
+              </div>
+            } @else if (failed()) {
+              <p data-testid="admin-bite-failed">
+                {{ 'admin-bites-search-failed' | transloco }}
+              </p>
+            } @else {
+              <ion-list lines="full" data-testid="admin-bite-results">
+                @for (bite of results(); track bite.id) {
+                  <ion-item
+                    [button]="true"
+                    [color]="bite.id === selected()?.id ? 'light' : undefined"
+                    (click)="selectBite.emit(bite)"
+                  >
+                    <ion-label>
+                      <h3>{{ bite.name || bite.id }}</h3>
+                      @if (bite.place) {
+                        <p>{{ bite.place }}</p>
+                      }
+                    </ion-label>
+                  </ion-item>
+                } @empty {
+                  @if (searched()) {
+                    <p data-testid="admin-bite-no-results">
+                      {{ 'admin-bites-no-results' | transloco }}
+                    </p>
+                  } @else {
+                    <p>{{ 'admin-bites-start-hint' | transloco }}</p>
+                  }
+                }
+              </ion-list>
+
+              <!--
+                The cap is the callable's, shared with the consumer app. Saying
+                so is the difference between a complete answer and a truncated
+                one an operator cannot tell apart.
+              -->
+              @if (results().length >= maxResults) {
+                <ion-note
+                  class="bite-search__hint"
+                  data-testid="admin-bite-cap"
+                >
+                  {{ 'admin-bites-capped' | transloco }}
+                </ion-note>
+              }
+            }
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <div class="column column--detail ion-padding">
+        @if (selected(); as bite) {
+          <ion-card data-testid="admin-bite-detail">
+            <ion-card-header>
+              <ion-card-title>{{ bite.name || bite.id }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-list lines="none">
+                <ion-item>
+                  <ion-label>
+                    <p>{{ 'admin-bites-id' | transloco }}</p>
+                    <h3>{{ bite.id }}</h3>
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label>
+                    <p>{{ 'admin-bites-place' | transloco }}</p>
+                    <h3>{{ bite.place || '—' }}</h3>
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label class="ion-text-wrap">
+                    <p>{{ 'admin-bites-description' | transloco }}</p>
+                    <h3>{{ bite.description || '—' }}</h3>
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label class="ion-text-wrap">
+                    <p>{{ 'admin-bites-tags' | transloco }}</p>
+                    @if (bite.tags?.length) {
+                      @for (tag of bite.tags; track tag) {
+                        <ion-badge class="ion-margin-end">{{ tag }}</ion-badge>
+                      }
+                    } @else {
+                      <h3>—</h3>
+                    }
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+
+              <ion-note class="bite-search__hint">
+                {{ 'admin-bites-detail-hint' | transloco }}
+              </ion-note>
+            </ion-card-content>
+          </ion-card>
+        } @else {
+          <ion-card>
+            <ion-card-content>
+              <p>{{ 'admin-bites-select-hint' | transloco }}</p>
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
+    </div>
+  </ion-content>
+</ta-page>

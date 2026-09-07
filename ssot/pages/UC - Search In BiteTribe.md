@@ -26,6 +26,7 @@ Users can find people, Bites, and restaurants quickly.
 - Bite, restaurant, city, and country search results can switch between list and map views.
 - The map view runs the page full width, so on desktop the map is not held to the 720px reading column the result list uses. The controls above it keep that column.
 - Bite markers carry their rating, the same marker the Bite gets on every other map. An unrated Bite keeps the plain pin, and restaurants have no rating of their own.
+- `searchUsers` and `searchBites` have a second caller. The admin app's Bite lookup calls `searchBites` directly, and its account search deliberately does **not** call `searchUsers` — it filters the admin-only `listUsersWithRoles` instead, so an operator sees private profiles without the consumer-facing public-flag filter being relaxed for anyone. Neither the ranking nor the matching of these callables may be changed for an operator's benefit; see [[UC - Operate BiteTribe In The Admin App]] (issue \#1476).
 - Backend search becomes a Pro capability through [[epic-1122]]. A free user keeps client-side search and filtering inside the 15 km result set they already loaded. See [[Monetization]].
 
 ## Supported Evidence
@@ -44,6 +45,7 @@ Users can find people, Bites, and restaurants quickly.
 - Issue \#903 adds a list/map switch for location-aware search results.
 - Issue 974 adds city search.
 - Issue \#722 adds country search.
+- Issue \#1476 reuses `searchBites` for the admin app's operator lookup without changing it.
 
 ## Related Domains
 

@@ -20,7 +20,7 @@ const USERS_COLLECTION = 'users';
  * join to a handful of round trips without turning it into one read per
  * account.
  */
-const TIER_LOOKUP_CHUNK = 300;
+const PROFILE_LOOKUP_CHUNK = 300;
 
 interface ListUsersWithRolesRequest {
   pageToken?: unknown;
@@ -58,57 +58,81 @@ const rolesOfRecord = (user: UserRecord): BiteTribeRole[] => {
   return Array.isArray(raw) ? raw.filter(isBiteTribeRole) : [];
 };
 
+/**
+ * The stored display name wins over the Auth one.
+ *
+ * They disagree for a federated account: Firebase copies the provider's name
+ * into the Auth record at creation, and the account may have chosen a different
+ * BiteTribe display name since. The stored one is what the account is called
+ * everywhere in the product and therefore what an operator was told to look
+ * for; the Auth one is the fallback for an account with no `/users` document.
+ */
 const toSummary = (
   user: UserRecord,
-  subscriptionTier: SubscriptionTier | null,
+  profile: StoredProfile | undefined,
 ): AdminUserSummary => ({
   uid: user.uid,
   email: user.email ?? '',
-  displayName: user.displayName ?? '',
+  displayName: profile?.displayName || (user.displayName ?? ''),
   roles: rolesOfRecord(user),
   disabled: user.disabled,
   emailVerified: user.emailVerified,
   providerIds: user.providerData.map((provider) => provider.providerId),
   createdAt: user.metadata.creationTime ?? '',
   lastSignInAt: user.metadata.lastSignInTime ?? '',
-  subscriptionTier,
+  subscriptionTier: profile?.subscriptionTier ?? null,
 });
 
+/** What the `/users` document adds to the Firebase Auth record. */
+interface StoredProfile {
+  displayName: string;
+  subscriptionTier: SubscriptionTier | null;
+}
+
 /**
- * Joins the subscription tier onto a page of accounts.
+ * Joins the `/users` document onto a page of accounts.
  *
- * The tier is the one attribute here that does **not** live in Firebase Auth:
- * `subscriptionTier` is a field on the `/users` document, so listing accounts
- * and showing their tier are two different sources. The join happens once per
- * page rather than once per account opened, so an operator scanning the list
- * sees the tier without a click.
+ * Two of the fields an operator searches on do **not** live in Firebase Auth.
+ * `subscriptionTier` is a field on the `/users` document, and so is the display
+ * name: BiteTribe writes the name only to `/users` and `/displayNames`
+ * (`claimDisplayName`), never back to the Auth record, so `UserRecord.displayName`
+ * is empty for every email/password account and holds the provider's name for a
+ * federated one. Listing accounts from Auth alone therefore cannot be searched
+ * by the name an operator was given (issue #1476).
  *
- * An account with no `/users` document maps to `null`, not to Free. A federated
- * account that never completed profile creation is exactly that case, and
- * showing it as Free would present an absence as a decision.
+ * The join happens once per page rather than once per account opened, so an
+ * operator scanning or filtering the list sees both without a click.
+ *
+ * An account with no `/users` document maps to no tier and no stored name, and
+ * the tier stays `null` rather than becoming Free. A federated account that
+ * never completed profile creation is exactly that case, and showing it as Free
+ * would present an absence as a decision.
  */
-const readTiers = async (
+const readProfiles = async (
   uids: string[],
-): Promise<Map<string, SubscriptionTier | null>> => {
+): Promise<Map<string, StoredProfile>> => {
   const firestore = getFirestore();
   const users = firestore.collection(USERS_COLLECTION);
-  const tiers = new Map<string, SubscriptionTier | null>();
+  const profiles = new Map<string, StoredProfile>();
 
-  for (let start = 0; start < uids.length; start += TIER_LOOKUP_CHUNK) {
+  for (let start = 0; start < uids.length; start += PROFILE_LOOKUP_CHUNK) {
     const refs = uids
-      .slice(start, start + TIER_LOOKUP_CHUNK)
+      .slice(start, start + PROFILE_LOOKUP_CHUNK)
       .map((uid) => users.doc(uid));
     const snapshots = await firestore.getAll(...refs);
 
     snapshots.forEach((snapshot) => {
-      tiers.set(
-        snapshot.id,
-        snapshot.exists ? tierFromUserData(snapshot.data()) : null,
-      );
+      const data = snapshot.exists ? snapshot.data() : undefined;
+      const storedName = data?.['displayName'];
+
+      profiles.set(snapshot.id, {
+        displayName: typeof storedName === 'string' ? storedName : '',
+        subscriptionTier: tierFromUserData(data),
+      });
     });
   }
 
-  return tiers;
+  return profiles;
 };
 
 const parseLimit = (value: unknown): number => {
@@ -135,10 +159,15 @@ const parseLimit = (value: unknown): number => {
  * admin" at all, and an account that never completed profile creation has no
  * user document to find.
  *
- * The subscription tier is the exception and is joined from `/users`, because
- * that is where it lives. An account present in Auth and absent from Firestore
- * therefore appears in this list with a `null` tier rather than not at all
- * (issue #1485).
+ * The subscription tier and the display name are the exceptions and are joined
+ * from `/users`, because that is where they live. An account present in Auth
+ * and absent from Firestore therefore appears in this list with a `null` tier
+ * and whatever name Auth holds, rather than not at all (issues #1485, #1476).
+ *
+ * The admin app filters this list rather than calling `searchUsers`. That is
+ * what makes an operator's account search see private profiles and accounts
+ * with no `/users` document at all, without touching the consumer-facing
+ * callable or its public-flag filter (issue #1476).
  *
  * Admin-only, like every role surface. Listing every account with its access
  * level is exactly the inventory an attacker would want first.
@@ -160,12 +189,10 @@ export const listUsersWithRolesHandler = async (
       : undefined;
 
   const page = await getAuth().listUsers(limit, pageToken);
-  const tiers = await readTiers(page.users.map((user) => user.uid));
+  const profiles = await readProfiles(page.users.map((user) => user.uid));
 
   return {
-    users: page.users.map((user) =>
-      toSummary(user, tiers.get(user.uid) ?? null),
-    ),
+    users: page.users.map((user) => toSummary(user, profiles.get(user.uid))),
     ...(page.pageToken ? { nextPageToken: page.pageToken } : {}),
   };
 };

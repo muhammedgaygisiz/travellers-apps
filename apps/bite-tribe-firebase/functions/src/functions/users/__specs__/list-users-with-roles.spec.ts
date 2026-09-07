@@ -258,3 +258,65 @@ describe('listUsersWithRoles paging', () => {
     expect((await handle(asAdmin())).nextPageToken).toBeUndefined();
   });
 });
+
+// The display name is the second field that does not come from Firebase Auth.
+// BiteTribe writes it only to `/users` and `/displayNames`, never back to the
+// Auth record, so an operator filtering this list by the name they were given
+// depends entirely on this join (issue #1476).
+describe('listUsersWithRoles display name', () => {
+  it('joins the display name from the user document', async () => {
+    firestore.seed('users/u1', { userId: 'u1', displayName: 'ada-lovelace' });
+
+    const { users } = await handle(asAdmin());
+
+    expect(users[0].displayName).toBe('ada-lovelace');
+  });
+
+  // Firebase copies the provider's name into the Auth record at creation, and
+  // the account may have chosen a different BiteTribe name since. The stored
+  // one is what it is called everywhere in the product.
+  it('prefers the stored name over the one Firebase Auth holds', async () => {
+    firestore.seed('users/u1', { displayName: 'chosen-name' });
+    listUsersMock.mockResolvedValue({
+      users: [userRecord({ displayName: 'Provider Name' })],
+    });
+
+    expect((await handle(asAdmin())).users[0].displayName).toBe('chosen-name');
+  });
+
+  // An account that never completed profile creation has no document to read,
+  // and dropping to the Auth name keeps it findable rather than nameless.
+  it('falls back to the Auth name for an account with no user document', async () => {
+    listUsersMock.mockResolvedValue({
+      users: [userRecord({ uid: 'ghost', displayName: 'Provider Name' })],
+    });
+
+    expect((await handle(asAdmin())).users[0].displayName).toBe(
+      'Provider Name',
+    );
+  });
+
+  it.each([[undefined], [42], [null]])(
+    'falls back to the Auth name for a stored displayName of %p',
+    async (displayName) => {
+      firestore.seed('users/u1', { displayName });
+
+      expect((await handle(asAdmin())).users[0].displayName).toBe('Ada');
+    },
+  );
+
+  it('keeps the name with the account it belongs to', async () => {
+    listUsersMock.mockResolvedValue({
+      users: [userRecord({ uid: 'u1' }), userRecord({ uid: 'u2' })],
+    });
+    firestore.seed('users/u1', { displayName: 'first' });
+    firestore.seed('users/u2', { displayName: 'second' });
+
+    const { users } = await handle(asAdmin());
+
+    expect(users.map((user) => [user.uid, user.displayName])).toEqual([
+      ['u1', 'first'],
+      ['u2', 'second'],
+    ]);
+  });
+});

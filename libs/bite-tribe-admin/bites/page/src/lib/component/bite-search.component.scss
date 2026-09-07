@@ -1,0 +1,59 @@
+:host {
+  /*
+   * The same 1:2 split as user management, and for the same reason: the results
+   * are a column to scan and the selected Bite is the thing being read. Written
+   * as explicit flex values rather than reusing the business dashboard's
+   * `ion-flex-2` class, which resolves to nothing because Ionic ships
+   * `.ion-flex-1` and no `.ion-flex-2`.
+   */
+  .bite-search {
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .column {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .column--list {
+    flex: 1;
+  }
+
+  .column--detail {
+    flex: 2;
+  }
+
+  /*
+   * Side by side, each column scrolls on its own, so selecting a result near
+   * the bottom of the list does not scroll the Bite it opened out of view.
+   */
+  @media (min-width: 768px) {
+    .bite-search {
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .column {
+      overflow-y: auto;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .bite-search {
+      flex-direction: column;
+    }
+  }
+
+  .bite-search__loading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  .bite-search__hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+  }
+}

@@ -131,10 +131,14 @@ export class AdminDashboard {
    * Every operator surface, in the order an operator meets them.
    *
    * User management is first because nothing else in the tool works until an
-   * account has been granted a role. Restaurant verification comes next because
-   * it is the daily work; the migrations below it are each their own entry
-   * rather than one "migrations" page, so an operator reaches the one they came
-   * for instead of scrolling past five Bite tables (issue #1473).
+   * account has been granted a role, and it is also where an operator finds an
+   * account: the filter lives on the page that holds the form, because finding
+   * an account and acting on it are one errand. Bite search is its counterpart
+   * and needs an entry of its own, because there is no Bite list to filter
+   * (issue #1476). Restaurant verification comes next because it is the daily
+   * work; the migrations below it are each their own entry rather than one
+   * "migrations" page, so an operator reaches the one they came for instead of
+   * scrolling past five Bite tables (issue #1473).
    */
   readonly tools: readonly AdminTool[] = [
     {
@@ -143,6 +147,13 @@ export class AdminDashboard {
       icon: 'people-outline',
       path: '/user-management',
       testId: 'admin-tool-user-management',
+    },
+    {
+      titleKey: 'admin-tool-bite-search',
+      descriptionKey: 'admin-tool-bite-search-description',
+      icon: 'search-outline',
+      path: '/bite-search',
+      testId: 'admin-tool-bite-search',
     },
     {
       titleKey: 'admin-tool-restaurant-candidates',

@@ -8,6 +8,23 @@ import {
   SetUserSubscriptionTierResult,
 } from './admin-user.model';
 
+/**
+ * The largest page `listUsersWithRoles` will serve, so the loop below asks for
+ * the fewest round trips the backend allows rather than the 200 it defaults to.
+ */
+const PAGE_SIZE = 1000;
+
+/**
+ * How many pages the loop will follow before it stops.
+ *
+ * A bound rather than "until the token runs out", because the loop is driven by
+ * a value the backend returns: a token that never stops being handed back turns
+ * one page load into an unbounded sequence of calls with nothing on the client
+ * to end it. Twenty pages is 20,000 accounts, which is far past anything this
+ * project has and far short of anything that hangs a browser.
+ */
+const MAX_PAGES = 20;
+
 interface ListUsersRequest {
   pageToken?: string;
   limit?: number;
@@ -52,18 +69,42 @@ export class UserManagementDataAccessService {
    * The loader body, as a plain method so it can be tested without driving a
    * `resource` through a reactive context.
    *
+   * **Every page, not the first one.** The callable pages at up to 1000 and
+   * hands back a token; this client used to send no limit, take the 200 the
+   * callable defaults to and drop the token on the floor, so account 201 did
+   * not exist as far as the admin app was concerned. That was survivable while
+   * the page was only a list to scroll. It stops being survivable once an
+   * operator searches it for the one account someone reported, because a search
+   * that silently covers a prefix of the accounts answers "no such account" for
+   * an account that exists (issue #1476).
+   *
    * Sorted by email because the list is read by a person looking for one
    * account. Firebase returns them in uid order, which is arbitrary to anyone
    * who is not Firebase. An account with no email sorts by uid rather than
    * ahead of everything on an empty string.
    */
   async fetchUsers(): Promise<AdminUser[]> {
-    const { data } = await FirebaseFunctions.callByName<
-      ListUsersRequest,
-      ListUsersResult
-    >({ name: 'listUsersWithRoles', data: {} });
+    const users: AdminUser[] = [];
+    let pageToken: string | undefined;
 
-    return [...(data?.users ?? [])].sort((a, b) =>
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const { data } = await FirebaseFunctions.callByName<
+        ListUsersRequest,
+        ListUsersResult
+      >({
+        name: 'listUsersWithRoles',
+        data: { limit: PAGE_SIZE, ...(pageToken ? { pageToken } : {}) },
+      });
+
+      users.push(...(data?.users ?? []));
+      pageToken = data?.nextPageToken;
+
+      if (!pageToken) {
+        break;
+      }
+    }
+
+    return users.sort((a, b) =>
       (a.email || a.uid).localeCompare(b.email || b.uid),
     );
   }

@@ -34,6 +34,7 @@ apps/bite-tribe-firebase/functions/src/index.ts
 - Use `onAppCheck` from `callable-options.ts` for frontend callable functions so App Check enforcement is applied consistently. `onAppCheck` keeps enforcement enabled by default and disables it only when the Functions emulator sets `FUNCTIONS_EMULATOR=true`.
 - Preserve client-safe fallback behavior where the UI expects empty lists instead of hard failures.
 - Add structured logs for operationally important branches.
+- Every operator action logs through `logOperatorAction` in `shared/operator-log.ts`, and nothing else writes the audit fields. Cloud Logging is the only record of what an operator did to an account or a Bite (epic \#1471), so the fields have to be the same in every callable or the trail is only readable by whoever wrote the one you are looking at - which is what it had become across eight callables and three names for the actor. The helper reads the actor off the request, so call it after `requireAdmin`. `src/__specs__/operator-action-logging.spec.ts` fails the build when an operator callable does not use it, when a callable hand-rolls `callerUid`/`callerRoles`/`requestedBy`/`targetUid` as a key, or when `OPERATOR_ACTIONS` names a callable that no longer exists. A new operator callable adds its name to `OPERATOR_ACTIONS`; a read-only one is exempt only by being named in the spec, and `listUsersWithRoles` is the only one. The shape, the queries it answers and the retention window it depends on are in [[Architecture - Auth]]. See issue \#1477.
 - Export new functions from `src/index.ts`.
 - Backend-only third-party API keys should live in the functions runtime environment; Bite address enrichment expects `GOOGLE_GEOCODING_API_KEY`.
 - Use the `bite-tribe-firebase:firebase-set-geocoding-secret` Nx target to set the production Google Geocoding secret before deploying functions that bind it; the target prompts for the secret value at execution time and must not store the value in `project.json`.
@@ -110,4 +111,5 @@ Rules:
 ## Related Pages
 
 - [[Architecture - Firebase]]
+- [[Architecture - Auth]]
 - [[Implementation - Testing]]

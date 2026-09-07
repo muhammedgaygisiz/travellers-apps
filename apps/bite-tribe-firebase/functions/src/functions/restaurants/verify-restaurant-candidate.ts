@@ -3,10 +3,10 @@ import {
   Transaction,
   getFirestore,
 } from 'firebase-admin/firestore';
-import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { geohashForLocation } from 'geofire-common';
 import { onAppCheck } from '../shared/callable-options';
+import { logOperatorAction } from '../shared/operator-log';
 import { requireAdmin } from '../shared/roles';
 import {
   buildInitialMenuCategories,
@@ -203,7 +203,12 @@ export const verifyRestaurantCandidateHandler = async (
     .collection(RESTAURANT_CANDIDATES_COLLECTION)
     .doc(candidateId);
 
-  logger.info('restaurant candidate verification started', { candidateId });
+  logOperatorAction(request, {
+    action: 'verifyRestaurantCandidate',
+    targetType: 'restaurantCandidate',
+    targetId: candidateId,
+    outcome: 'started',
+  });
 
   const result = await db.runTransaction<VerifyRestaurantCandidateResult>(
     async (transaction) => {
@@ -298,11 +303,16 @@ export const verifyRestaurantCandidateHandler = async (
     },
   );
 
-  logger.info('restaurant candidate verification finished', {
-    candidateId,
-    restaurantId: result.restaurantId,
-    menuItemCount: result.menuItemCount,
-    status: result.status,
+  logOperatorAction(request, {
+    action: 'verifyRestaurantCandidate',
+    targetType: 'restaurantCandidate',
+    targetId: candidateId,
+    outcome: 'succeeded',
+    details: {
+      restaurantId: result.restaurantId,
+      menuItemCount: result.menuItemCount,
+      status: result.status,
+    },
   });
 
   return result;

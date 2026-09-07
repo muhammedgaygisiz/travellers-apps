@@ -115,12 +115,12 @@ app and run the operational migrations in it.
   `src/__specs__/callable-authorization.spec.ts` as `operator`, `authenticated`
   or `public`, and the spec fails when an operator endpoint does not call
   `requireAdmin`, when a consumer path does, or when a new endpoint is added
-  that nobody classified. Seven are operator-only: `setUserRoles`,
-  `listUsersWithRoles`, `verifyRestaurantCandidate`, `backfillBiteAddress`,
-  `backfillReviewTimestampsCallable`, `clusterRestaurantCandidateForBite` and
-  `sendNewVersionNotification`. `handleSharedLinkToBite` is the one public
-  endpoint, because it is the redirect a shared Bite link resolves through. See
-  issue \#1472.
+  that nobody classified. Eight are operator-only: `setUserRoles`,
+  `setUserSubscriptionTier`, `listUsersWithRoles`, `verifyRestaurantCandidate`,
+  `backfillBiteAddress`, `backfillReviewTimestampsCallable`,
+  `clusterRestaurantCandidateForBite` and `sendNewVersionNotification`.
+  `handleSharedLinkToBite` is the one public endpoint, because it is the
+  redirect a shared Bite link resolves through. See issue \#1472.
 - A cached ID token can be an hour old, so both paths retry once against a
   freshly minted token before rejecting. That is what keeps a role granted
   moments ago from turning away the account it was granted to.
@@ -135,6 +135,83 @@ The **backend** half of authorization is still open: `firestore.rules` grants
 read and write on every document to every authenticated user. Replacing it is
 issue \#1078, deliberately kept out of the change that introduced the roles.
 Until it lands, the role gate is a client-side gate over an open database.
+
+## Operator Audit Trail
+
+What an operator did is recorded in Cloud Logging and nowhere else. There is no
+in-app audit surface and none is planned at this scale: with two operators, the
+cost of reading the trail is project access, and epic \#1471 took that over
+building and maintaining a second record of the same events.
+
+The decision is only worth taking while the logs are usable. A trail that has to
+be read three different ways is not a trail, and by the time eight operator
+callables existed there were three names for the actor - `callerUid`,
+`requestedBy` and `uid` - and two callables, `verifyRestaurantCandidate` and
+`clusterRestaurantCandidateForBite`, that named no actor at all. Issue \#1477
+gave every operator action one shape.
+
+- **The shape lives in `functions/src/functions/shared/operator-log.ts`**, and
+  `logOperatorAction` is the only way an operator action reaches the logs. The
+  actor is read off the request inside the helper rather than passed to it, so
+  it cannot be forgotten and cannot be anything other than the identity Firebase
+  verified. Call it after `requireAdmin`, which is what makes `request.auth`
+  certain.
+- **The fields are structured, never interpolated into the message.** Cloud
+  Logging indexes `jsonPayload` paths, so `jsonPayload.targetId="abc"` is a
+  query and the same value inside a formatted string is a substring scan.
+
+  | Field            | Meaning                                                                                                                                        |
+  | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+  | `operatorAction` | The callable's name. Both "this is an operator action" and "which one", so one field carries the marker and the filter.                        |
+  | `callerUid`      | The operator. Named for what `setUserRoles` and `setUserSubscriptionTier` already wrote, so entries from before \#1477 answer the same query.  |
+  | `callerRoles`    | The roles their verified ID token carried at the time.                                                                                         |
+  | `targetType`     | `user`, `bite`, `restaurantCandidate`, `review` or `appInstallation`. An id alone does not say what it identifies.                             |
+  | `targetId`       | The one record acted on. Absent from an action that operates on a whole collection, rather than answered with something invented.              |
+  | `outcome`        | `started`, `succeeded` or `failed`. A `started` with no `succeeded` is an action that crashed or timed out, which the trail should still show. |
+  | `reason`         | Why, where the action takes one. Required by `setUserSubscriptionTier`; absent elsewhere.                                                      |
+  | `details`        | Everything action-specific, nested under one key so it cannot compete with the fields every action shares.                                     |
+
+- **One field name per concept, and the spec enforces it.**
+  `src/__specs__/operator-action-logging.spec.ts` fails the build when an
+  operator callable does not call `logOperatorAction`, and when any callable
+  writes `callerUid`, `callerRoles`, `requestedBy` or `targetUid` as a key of
+  its own - which is what building a second audit shape by hand looks like. A
+  read-only operator endpoint is exempt by being named in the spec, and
+  `listUsersWithRoles` is the only one: a read leaves nothing to audit, and the
+  admin app lists accounts often enough that logging it would bury the writes.
+- **The queries the trail exists to answer**, in the Logs Explorer:
+
+  ```text
+  jsonPayload.operatorAction:*                       every operator action
+  jsonPayload.targetId="<uid>"                       everything done to an account or Bite
+  jsonPayload.callerUid="<uid>"                      everything one operator did
+  jsonPayload.operatorAction="setUserRoles"          one kind of action
+  ```
+
+  **Entries written before \#1477 name the target `targetUid`, not `targetId`,**
+  so a `targetId` query silently misses them. `callerUid` is unaffected, which
+  is why it kept its name. Real examples exist: three
+  `setUserSubscriptionTier` grants on 2026-09-06, the day before the deploy.
+  Until the oldest of them ages out of the retention window, ask for both:
+
+  ```text
+  jsonPayload.targetId="<uid>" OR jsonPayload.targetUid="<uid>"
+  ```
+
+  This is the one place the shape genuinely replaced rather than formalised what
+  was there, and it was unavoidable: \#1474 targets an account and \#1475 a
+  Bite, so a user-specific field name could not carry both.
+
+- **The trail expires, and the retention window is what bounds it.** Cloud
+  Logging keeps the `_Default` bucket for 30 days on Google's default setting
+  and `_Required` for 400, and operator actions land in `_Default`. **This has
+  not been confirmed against the `bite-tribe` project's own configuration** -
+  neither `gcloud` nor the Firebase CLI is installed on the maintainer
+  workstation, so it needs one look at Logging - Logs Storage in the console.
+  Until someone does, treat 30 days as the assumption the logs-only decision
+  rests on rather than as a checked fact. An audit question older than the
+  window has no answer at all, which is the part of this decision that has to be
+  revisited if the operator team grows.
 
 ## Supported Auth Modes
 
@@ -206,8 +283,10 @@ libs/bite-tribe/shell/src/lib/routes.ts
 libs/bite-tribe-business/shell/src/lib/routes.ts
 libs/bite-tribe-admin/shell/src/lib/routes.ts
 apps/bite-tribe-firebase/functions/src/functions/shared/roles.ts
+apps/bite-tribe-firebase/functions/src/functions/shared/operator-log.ts
 apps/bite-tribe-firebase/functions/src/functions/users/set-user-roles.ts
 apps/bite-tribe-firebase/functions/src/__specs__/callable-authorization.spec.ts
+apps/bite-tribe-firebase/functions/src/__specs__/operator-action-logging.spec.ts
 apps/bite-tribe-firebase/scripts/grant-role.mjs
 apps/bite-tribe-firebase/functions/src/functions/users/create-user-on-auth-create.ts
 apps/bite-tribe-firebase/functions/src/functions/users/update-last-seen.ts

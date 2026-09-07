@@ -1,6 +1,7 @@
 import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { logOperatorAction } from '../shared/operator-log';
 import { requireAdmin } from '../shared/roles';
 import {
   NotificationPlatform,
@@ -48,7 +49,7 @@ const NEW_VERSION_MESSAGES: Record<
 export const sendNewVersionNotification =
   onAppCheck<SendNewVersionNotificationRequest>(
     async (request): Promise<SendNewVersionNotificationResult> => {
-      const uid = requireAdmin(request);
+      requireAdmin(request);
       const platform = request.data?.platform;
 
       if (!isNotificationPlatform(platform)) {
@@ -58,12 +59,26 @@ export const sendNewVersionNotification =
         );
       }
 
-      logger.info('sendNewVersionNotification: started', { uid, platform });
+      // No `targetId`: the announcement is addressed to every installation of
+      // one store, so the platform is what it was aimed at, not an id.
+      logOperatorAction(request, {
+        action: 'sendNewVersionNotification',
+        targetType: 'appInstallation',
+        outcome: 'started',
+        details: { platform },
+      });
 
       const userUids = await getAllUserUids();
 
       if (userUids.length === 0) {
         logger.warn('sendNewVersionNotification: no users found');
+
+        logOperatorAction(request, {
+          action: 'sendNewVersionNotification',
+          targetType: 'appInstallation',
+          outcome: 'succeeded',
+          details: { platform, tokenCount: 0, userCount: 0 },
+        });
 
         return { platform, tokenCount: 0, userCount: 0 };
       }
@@ -83,7 +98,12 @@ export const sendNewVersionNotification =
 
       const result = { platform, tokenCount, userCount: userUids.length };
 
-      logger.info('sendNewVersionNotification: finished', result);
+      logOperatorAction(request, {
+        action: 'sendNewVersionNotification',
+        targetType: 'appInstallation',
+        outcome: 'succeeded',
+        details: { ...result },
+      });
 
       return result;
     },

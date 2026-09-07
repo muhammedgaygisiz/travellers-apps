@@ -188,6 +188,20 @@ gave every operator action one shape.
   jsonPayload.operatorAction="setUserRoles"          one kind of action
   ```
 
+  **Entries written before \#1477 name the target `targetUid`, not `targetId`,**
+  so a `targetId` query silently misses them. `callerUid` is unaffected, which
+  is why it kept its name. Real examples exist: three
+  `setUserSubscriptionTier` grants on 2026-09-06, the day before the deploy.
+  Until the oldest of them ages out of the retention window, ask for both:
+
+  ```text
+  jsonPayload.targetId="<uid>" OR jsonPayload.targetUid="<uid>"
+  ```
+
+  This is the one place the shape genuinely replaced rather than formalised what
+  was there, and it was unavoidable: \#1474 targets an account and \#1475 a
+  Bite, so a user-specific field name could not carry both.
+
 - **The trail expires, and the retention window is what bounds it.** Cloud
   Logging keeps the `_Default` bucket for 30 days on Google's default setting
   and `_Required` for 400, and operator actions land in `_Default`. **This has

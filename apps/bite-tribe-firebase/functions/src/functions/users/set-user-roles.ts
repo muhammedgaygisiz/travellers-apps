@@ -1,14 +1,13 @@
 import { getAuth } from 'firebase-admin/auth';
-import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { logOperatorAction } from '../shared/operator-log';
 import {
   BITE_TRIBE_ROLES,
   BiteTribeRole,
   ROLES_CLAIM,
   isBiteTribeRole,
   requireAdmin,
-  rolesOf,
 } from '../shared/roles';
 
 /**
@@ -133,11 +132,12 @@ export const setUserRolesHandler = async (
 
   const writtenRoles = await setRoles(targetUid, roles);
 
-  logger.info('user roles updated', {
-    targetUid,
-    callerUid,
-    roles: writtenRoles,
-    callerRoles: rolesOf(request),
+  logOperatorAction(request, {
+    action: 'setUserRoles',
+    targetType: 'user',
+    targetId: targetUid,
+    outcome: 'succeeded',
+    details: { roles: writtenRoles },
   });
 
   return { uid: targetUid, roles: writtenRoles };

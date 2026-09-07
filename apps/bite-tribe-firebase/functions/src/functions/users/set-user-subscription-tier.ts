@@ -1,8 +1,8 @@
 import { getFirestore } from 'firebase-admin/firestore';
-import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
-import { requireAdmin, rolesOf } from '../shared/roles';
+import { logOperatorAction } from '../shared/operator-log';
+import { requireAdmin } from '../shared/roles';
 import {
   SUBSCRIPTION_TIERS,
   SubscriptionTier,
@@ -99,7 +99,7 @@ const parseReason = (value: unknown): string => {
 export const setUserSubscriptionTierHandler = async (
   request: CallableRequest<SetUserSubscriptionTierRequest>,
 ): Promise<SetUserSubscriptionTierResult> => {
-  const callerUid = requireAdmin(request);
+  requireAdmin(request);
   const targetUid = parseUid(request.data?.uid);
   const tier = parseTier(request.data?.tier);
   const reason = parseReason(request.data?.reason);
@@ -118,13 +118,13 @@ export const setUserSubscriptionTierHandler = async (
 
   await userRef.update({ subscriptionTier: tier });
 
-  logger.info('user subscription tier updated', {
-    targetUid,
-    callerUid,
-    previousTier,
-    tier,
+  logOperatorAction(request, {
+    action: 'setUserSubscriptionTier',
+    targetType: 'user',
+    targetId: targetUid,
+    outcome: 'succeeded',
     reason,
-    callerRoles: rolesOf(request),
+    details: { previousTier, tier },
   });
 
   return { uid: targetUid, tier, previousTier };

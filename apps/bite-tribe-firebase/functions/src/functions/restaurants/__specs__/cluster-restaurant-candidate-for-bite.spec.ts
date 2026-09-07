@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import { clusterRestaurantCandidateForBite } from '../cluster-restaurant-candidate-for-bite';
 
 jest.mock('firebase-functions', () => ({
@@ -209,5 +210,40 @@ describe('clusterRestaurantCandidateForBite', () => {
       },
       status: 'verified-restaurant-match',
     });
+  });
+
+  /**
+   * The manual clustering callable writes candidate documents for Bites the
+   * caller does not own, and until issue #1477 it logged the Bite without ever
+   * naming the operator who asked for it.
+   */
+  it('records the operator, the Bite and the outcome in the audit trail', async () => {
+    seed['bites'] = [
+      biteDoc('bite-selected', 'Pizza Palace', CENTER),
+      biteDoc('bite-1', 'Pizza Palace', nearby(1)),
+    ];
+
+    await clusterRestaurantCandidateForBite(request('bite-selected'));
+
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('clusterRestaurantCandidateForBite started'),
+      expect.objectContaining({
+        operatorAction: 'clusterRestaurantCandidateForBite',
+        callerUid: 'user-1',
+        callerRoles: ['admin'],
+        targetType: 'bite',
+        targetId: 'bite-selected',
+        outcome: 'started',
+      }),
+    );
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('clusterRestaurantCandidateForBite succeeded'),
+      expect.objectContaining({
+        operatorAction: 'clusterRestaurantCandidateForBite',
+        callerUid: 'user-1',
+        targetId: 'bite-selected',
+        outcome: 'succeeded',
+      }),
+    );
   });
 });

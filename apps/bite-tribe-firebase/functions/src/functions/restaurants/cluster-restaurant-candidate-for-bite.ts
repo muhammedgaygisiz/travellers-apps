@@ -1,7 +1,7 @@
 import { getFirestore } from 'firebase-admin/firestore';
-import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { logOperatorAction } from '../shared/operator-log';
 import { requireAdmin } from '../shared/roles';
 import {
   aggregateRestaurantCandidateEvidence,
@@ -68,8 +68,11 @@ export const clusterRestaurantCandidateForBite =
       );
     }
 
-    logger.info('manual restaurant candidate clustering started', {
-      biteId: selectedBite.id,
+    logOperatorAction(request, {
+      action: 'clusterRestaurantCandidateForBite',
+      targetType: 'bite',
+      targetId: selectedBite.id,
+      outcome: 'started',
     });
 
     const bounds = planRestaurantCandidateGeohashBounds(selectedBite.position);
@@ -86,9 +89,15 @@ export const clusterRestaurantCandidateForBite =
     );
 
     if (verifiedRestaurantDuplicate) {
-      logger.info('manual clustering matched verified restaurant', {
-        biteId: selectedBite.id,
-        restaurantId: verifiedRestaurantDuplicate.item.id,
+      logOperatorAction(request, {
+        action: 'clusterRestaurantCandidateForBite',
+        targetType: 'bite',
+        targetId: selectedBite.id,
+        outcome: 'succeeded',
+        details: {
+          restaurantId: verifiedRestaurantDuplicate.item.id,
+          status: 'verified-restaurant-match',
+        },
       });
 
       return {
@@ -130,11 +139,16 @@ export const clusterRestaurantCandidateForBite =
 
     await candidateRef.set(candidateUpdate, { merge: true });
 
-    logger.info('manual restaurant candidate clustering finished', {
-      biteId: selectedBite.id,
-      candidateId: candidateRef.id,
-      evidenceCount: candidateUpdate.evidence?.biteCount,
-      status: pendingDuplicate ? 'updated' : 'created',
+    logOperatorAction(request, {
+      action: 'clusterRestaurantCandidateForBite',
+      targetType: 'bite',
+      targetId: selectedBite.id,
+      outcome: 'succeeded',
+      details: {
+        candidateId: candidateRef.id,
+        evidenceCount: candidateUpdate.evidence?.biteCount,
+        status: pendingDuplicate ? 'updated' : 'created',
+      },
     });
 
     return {

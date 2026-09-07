@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import { verifyRestaurantCandidate } from '../verify-restaurant-candidate';
 
 jest.mock('firebase-functions', () => ({
@@ -381,5 +382,48 @@ describe('verifyRestaurantCandidate', () => {
     });
     expect(createMock).not.toHaveBeenCalled();
     expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  /**
+   * The callable mints a restaurant, and until issue #1477 its logs named the
+   * candidate and never the operator: who ran it survived only as
+   * `verifiedByUserId` on the candidate document, which the trail of an
+   * operator's actions cannot be assembled from.
+   */
+  it('records the operator, the candidate and the outcome in the audit trail', async () => {
+    await verifyRestaurantCandidate(
+      request({
+        candidateId: 'candidate-1',
+        restaurant: {
+          name: 'Pizza Palace',
+          position: { latitude: 46.948, longitude: 7.4474 },
+        },
+      }),
+    );
+
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('verifyRestaurantCandidate started'),
+      expect.objectContaining({
+        operatorAction: 'verifyRestaurantCandidate',
+        callerUid: 'user-1',
+        callerRoles: ['admin'],
+        targetType: 'restaurantCandidate',
+        targetId: 'candidate-1',
+        outcome: 'started',
+      }),
+    );
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('verifyRestaurantCandidate succeeded'),
+      expect.objectContaining({
+        operatorAction: 'verifyRestaurantCandidate',
+        callerUid: 'user-1',
+        targetId: 'candidate-1',
+        outcome: 'succeeded',
+        details: expect.objectContaining({
+          restaurantId: 'restaurants-new-id',
+          status: 'created',
+        }),
+      }),
+    );
   });
 });

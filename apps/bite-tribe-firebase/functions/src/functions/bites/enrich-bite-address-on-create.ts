@@ -14,6 +14,7 @@ import {
   Position,
   reverseGeocode,
 } from '../shared/utils/reverse-geocode';
+import { logOperatorAction } from '../shared/operator-log';
 import { requireAdmin } from '../shared/roles';
 import { addCountryCodeToUser } from '../shared/utils/user-country-codes';
 import { notifyOnNewCountryBadge } from '../notifications/notify-on-new-country-badge';
@@ -177,7 +178,7 @@ export const backfillBiteAddress = onCall<BackfillBiteAddressRequest>(
     secrets: [googleGeocodingApiKey],
   },
   async (request): Promise<BackfillBiteAddressResult> => {
-    const uid = requireAdmin(request);
+    requireAdmin(request);
 
     if (typeof request.data?.biteId !== 'string' || !request.data.biteId) {
       throw new HttpsError('invalid-argument', 'biteId must be a string.');
@@ -191,7 +192,12 @@ export const backfillBiteAddress = onCall<BackfillBiteAddressRequest>(
       throw new HttpsError('not-found', 'Bite was not found.');
     }
 
-    logger.info('backfillBiteAddress: started', { uid, biteId });
+    logOperatorAction(request, {
+      action: 'backfillBiteAddress',
+      targetType: 'bite',
+      targetId: biteId,
+      outcome: 'started',
+    });
 
     const status = await enrichBiteAddress(
       biteSnap.id,
@@ -200,7 +206,13 @@ export const backfillBiteAddress = onCall<BackfillBiteAddressRequest>(
     );
     const backfillResult = { biteId, status };
 
-    logger.info('backfillBiteAddress: finished', backfillResult);
+    logOperatorAction(request, {
+      action: 'backfillBiteAddress',
+      targetType: 'bite',
+      targetId: biteId,
+      outcome: 'succeeded',
+      details: { status },
+    });
 
     return backfillResult;
   },

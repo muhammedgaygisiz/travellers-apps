@@ -2,6 +2,7 @@ import { DocumentData, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { CallableRequest } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { logOperatorAction } from '../shared/operator-log';
 import { requireAdmin } from '../shared/roles';
 
 const REVIEWS_COLLECTION = 'reviews';
@@ -125,11 +126,26 @@ export const backfillReviewTimestamps =
 export const backfillReviewTimestampsHandler = async (
   request: CallableRequest<void>,
 ): Promise<BackfillReviewTimestampsResult> => {
-  const requestedBy = requireAdmin(request);
+  requireAdmin(request);
 
-  logger.info('backfillReviewTimestamps: started', { requestedBy });
+  // No `targetId`: the migration rewrites the whole collection rather than one
+  // review, so the record of what it touched is the counts it returns.
+  logOperatorAction(request, {
+    action: 'backfillReviewTimestamps',
+    targetType: 'review',
+    outcome: 'started',
+  });
 
-  return backfillReviewTimestamps();
+  const result = await backfillReviewTimestamps();
+
+  logOperatorAction(request, {
+    action: 'backfillReviewTimestamps',
+    targetType: 'review',
+    outcome: 'succeeded',
+    details: { ...result },
+  });
+
+  return result;
 };
 
 export const backfillReviewTimestampsCallable = onAppCheck<void>(

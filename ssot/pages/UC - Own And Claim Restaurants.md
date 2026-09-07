@@ -54,7 +54,7 @@ There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it 
 
 - Ownership is held by a normal user carrying an additional business role. There is no organisation entity: the `isOrganisation` and `organisationId` fields this was once going to build on never had a writer and were removed in [[issue-1371]].
 - Roles are Firebase Auth custom claims set only by the backend, so they cannot be forged from the client.
-- Approval is idempotent, matching the existing `verifyRestaurantCandidate` rule.
+- Approval is idempotent, matching the existing `verifyRestaurantCandidate` rule. See [[UC - Verify Restaurant Candidate]].
 - No restaurant can end up claimed by two owners.
 - Existing unowned restaurants keep working for consumer read paths and are visible to admins for triage.
 

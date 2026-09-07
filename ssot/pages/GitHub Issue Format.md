@@ -23,6 +23,17 @@ If it cannot be delivered and demonstrated on its own, split it and name the spl
 
 Section titles are used verbatim, as `##` headings, in the order the shape below gives. A section is omitted only where its `When` column says it is optional.
 
+## Title Format
+
+An issue title is `NN - type(scope): description`.
+
+- `NN` is a two-digit ordinal sequencing the issue within its epic, starting at `01`. It is the dependency order.
+- `type` follows the vocabulary already in use: `feat`, `fix`, `refactor`, `docs`, `security`, `test`, `spec`, `launch`, `ci`, `perf`.
+- `scope` in parentheses names the app or library where the change lands, for example `feat(bite-tribe-admin)` or `fix(backend)`. It is omitted where the change has no single home, as in `docs:`.
+- `description` is lower case and states the outcome, not the task.
+
+An issue filed outside an epic carries no ordinal. `NN -`is optional and only required if sequence is required. 
+
 ## Shape 1 - Spec-Ahead
 
 For work not yet implemented. The body opens with the intent, before the first heading:
@@ -79,7 +90,11 @@ See [[Implementation - Store Declarations]] and [[Implementation - Store Listing
 
 ## Related Issues
 
-Links to issues that bear on this one: a superseded issue, a follow-up, a dependency, or the existing issue found by the search rule below.
+A link states its kind, using one of three forms, in this order:
+
+- `Depends on #1234` - this issue cannot be merged before that one, with the reason stated. An ordinal alone does not survive someone picking issues off the board out of order.
+- `Part of #1234` - the owning epic.
+- `Related to #1234` - everything else: a superseded issue, a follow-up, or the existing issue found by the search rule below.
 
 On GitHub, use `#1234`. On the SSOT mirror page, use `[[issue-1234]]`.
 
@@ -100,9 +115,9 @@ The classification is recorded on the board as `Priority`, not in the issue body
 | Classification | Board `Priority` |
 | --- | --- |
 | `[MVP]` | `P0` |
-| `[Secondary]` | `P1` |
+| `[Secondary]` | `P1` to `P4`, by the scale below |
 
-`P0` remains a decision with a named consequence rather than an observation, as [[GitHub Project Board And Issue Handling]] defines it.
+`P0` is MVP: launch-critical, and a decision with a named consequence rather than an observation, as [[GitHub Project Board And Issue Handling]] defines it. `P1` is what should be done immediately after MVP. `P2` is relevant, but the software works without it. `P3` is relevant in the future. `P4` is close to irrelevant. `P5` is unused.
 
 ## Before Filing
 

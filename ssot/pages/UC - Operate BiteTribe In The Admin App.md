@@ -6,7 +6,7 @@ Partially supported. The app exists, deploys, and is gated on the `admin` role a
 
 ## Goal
 
-BiteTribe-internal operations live in an app only BiteTribe operators can sign into, separate from the app a restaurant maintains its own data in.
+BiteTribe-internal operations live in an app only BiteTribe Operators can sign into, separate from the app a restaurant maintains its own data in.
 
 ## Why It Is Needed
 
@@ -19,7 +19,7 @@ Two problems in one, both verified before issue \#1469:
 
 ## Actors
 
-- BiteTribe operator, holding the `admin` role
+- BiteTribe Operator, holding the `admin` role ([[User Roles]])
 - Restaurant owner, holding the `business` role
 - Signed-in user holding neither
 
@@ -51,7 +51,7 @@ Only roles are editable. `setUserRoles` is the one admin write that exists, so t
 - **A missing role fails the login rather than blocking a page.** An account signed in and then refused would learn that its password was right, that it exists, and which role guards the app. The generic failure tells it nothing. See [[Architecture - Auth]].
 - `admin` and `business` are separate, not a hierarchy. An operator account holding `admin` does not thereby get restaurant maintenance rights.
 - **The dashboard names operations, not pages.** An operator picks the thing they came to do; nothing is a section of something larger. That is why the one migrations page became six entries with issue \#1473.
-- The admin app is English-only. Its audience is BiteTribe operators, and four locale lists kept in step for no reader is a cost with no reader.
+- The admin app is English-only. Its audience is BiteTribe Operators, and four locale lists kept in step for no reader is a cost with no reader.
 - The app is `noindex, nofollow` at both the meta tag and the hosting header. It is an internal tool that must never appear in a search result.
 - It shares the Firebase project with the other two apps, because it operates on the same Firestore, Auth and Functions. It has its own hosting site and its own `authDomain`.
 
@@ -94,6 +94,8 @@ The first `admin` role was granted through the Identity Toolkit REST API from Cl
 ## Related Pages
 
 - [[UC - Own And Claim Restaurants]]
+- [[UC - Verify Restaurant Candidate]]
 - [[UC - Run Operational Migrations]]
+- [[User Roles]]
 - [[Architecture - Auth]]
 - [[Architecture - Nx Workspace]]

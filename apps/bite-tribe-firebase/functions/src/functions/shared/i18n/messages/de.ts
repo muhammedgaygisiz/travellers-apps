@@ -21,10 +21,9 @@ export const de: NotificationMessages = {
   'newReviewReply.body':
     '{{replier}} hat auf eine Bewertung von „{{bite}}“ geantwortet.',
   'weeklyBites.title': '🍽️ Die Bites der Woche sind da 🤩',
-  'weeklyBites.bodyOne':
-    'In der BiteTribe wurde letzte Woche 1 neuer Bite geteilt',
+  'weeklyBites.bodyOne': 'In BiteTribe wurde letzte Woche 1 neuer Bite geteilt',
   'weeklyBites.bodyMany':
-    'In der BiteTribe wurden letzte Woche {{count}} neue Bites geteilt',
+    'In BiteTribe wurden letzte Woche {{count}} neue Bites geteilt',
   'leaderboard.title': 'Bestenliste aktualisiert',
   'leaderboard.enteredTop':
     'Du bist auf Platz {{rank}} in die Top {{limit}} der Bestenliste eingestiegen! 🎉',

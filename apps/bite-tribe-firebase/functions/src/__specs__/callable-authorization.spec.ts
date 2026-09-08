@@ -31,6 +31,7 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   clusterRestaurantCandidateForBite: 'operator',
   listUsersWithRoles: 'operator',
   sendNewVersionNotification: 'operator',
+  setUserBlocked: 'operator',
   setUserRoles: 'operator',
   setUserSubscriptionTier: 'operator',
   verifyRestaurantCandidate: 'operator',

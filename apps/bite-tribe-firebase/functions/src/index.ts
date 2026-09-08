@@ -40,6 +40,7 @@ export { verifyRestaurantCandidate } from './functions/restaurants/verify-restau
 export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-create';
 export { claimDisplayName } from './functions/users/claim-display-name';
 export { setUserRoles } from './functions/users/set-user-roles';
+export { setUserBlocked } from './functions/users/set-user-blocked';
 export { listUsersWithRoles } from './functions/users/list-users-with-roles';
 export { setUserSubscriptionTier } from './functions/users/set-user-subscription-tier';
 export { deleteOwnAccount } from './functions/users/delete-own-account';

@@ -85,4 +85,21 @@
     margin-top: 0.5rem;
     font-size: 0.8125rem;
   }
+
+  /*
+   * Blocking is the one action on this form that takes something away, and it
+   * sits directly under the role checkboxes and the tier radios. The rule and
+   * the heading colour are what stop it reading as a third field of the same
+   * form: the operator has to cross a line to reach it, and the confirmation
+   * behind the button is the second half of the same protection (issue #1474).
+   */
+  .user-management__danger {
+    margin-top: 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+  }
+
+  .user-management__section--danger {
+    color: var(--ion-color-danger);
+  }
 }

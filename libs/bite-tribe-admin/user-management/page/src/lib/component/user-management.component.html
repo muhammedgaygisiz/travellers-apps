@@ -55,6 +55,14 @@
                             tierLabelKey(user.subscriptionTier) | transloco
                           }}</ion-badge
                         >
+                        @if (user.disabled) {
+                          <ion-badge
+                            class="ion-margin-start"
+                            color="danger"
+                            data-testid="admin-user-blocked-badge"
+                            >{{ 'admin-users-blocked' | transloco }}</ion-badge
+                          >
+                        }
                       </p>
                     </ion-label>
                   </ion-item>
@@ -196,6 +204,58 @@
                 }
                 {{ 'admin-users-tier-save' | transloco }}
               </ion-button>
+
+              <div class="user-management__danger">
+                <h4
+                  class="user-management__section user-management__section--danger"
+                >
+                  {{ 'admin-users-access' | transloco }}
+                </h4>
+                <ion-list lines="full">
+                  <ion-item>
+                    <ion-label>
+                      <p>{{ 'admin-users-sign-in' | transloco }}</p>
+                      <h3 data-testid="admin-user-block-state">
+                        @if (blocked()) {
+                          {{ 'admin-users-blocked' | transloco }}
+                        } @else {
+                          {{ 'admin-users-active' | transloco }}
+                        }
+                      </h3>
+                    </ion-label>
+                  </ion-item>
+                </ion-list>
+                <ion-note class="user-management__hint">
+                  {{ 'admin-users-block-hint' | transloco }}
+                </ion-note>
+                @if (blockRefused()) {
+                  <ion-note
+                    class="user-management__hint"
+                    color="danger"
+                    data-testid="admin-user-block-refused"
+                  >
+                    {{ 'admin-users-block-self-hint' | transloco }}
+                  </ion-note>
+                }
+
+                <ion-button
+                  expand="block"
+                  class="ion-margin-top"
+                  [color]="blocked() ? 'medium' : 'danger'"
+                  data-testid="admin-user-block"
+                  [disabled]="blockRefused() || savingBlocked()"
+                  (click)="onToggleBlocked()"
+                >
+                  @if (savingBlocked()) {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+                  @if (blocked()) {
+                    {{ 'admin-users-unblock' | transloco }}
+                  } @else {
+                    {{ 'admin-users-block' | transloco }}
+                  }
+                </ion-button>
+              </div>
             </ion-card-content>
           </ion-card>
         } @else {

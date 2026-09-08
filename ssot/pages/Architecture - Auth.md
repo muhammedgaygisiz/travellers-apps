@@ -115,10 +115,11 @@ app and run the operational migrations in it.
   `src/__specs__/callable-authorization.spec.ts` as `operator`, `authenticated`
   or `public`, and the spec fails when an operator endpoint does not call
   `requireAdmin`, when a consumer path does, or when a new endpoint is added
-  that nobody classified. Eight are operator-only: `setUserRoles`,
-  `setUserSubscriptionTier`, `listUsersWithRoles`, `verifyRestaurantCandidate`,
-  `backfillBiteAddress`, `backfillReviewTimestampsCallable`,
-  `clusterRestaurantCandidateForBite` and `sendNewVersionNotification`.
+  that nobody classified. Nine are operator-only: `setUserRoles`,
+  `setUserBlocked`, `setUserSubscriptionTier`, `listUsersWithRoles`,
+  `verifyRestaurantCandidate`, `backfillBiteAddress`,
+  `backfillReviewTimestampsCallable`, `clusterRestaurantCandidateForBite` and
+  `sendNewVersionNotification`.
   `handleSharedLinkToBite` is the one public endpoint, because it is the
   redirect a shared Bite link resolves through. See issue \#1472.
 - A cached ID token can be an hour old, so both paths retry once against a
@@ -213,6 +214,55 @@ gave every operator action one shape.
   window has no answer at all, which is the part of this decision that has to be
   revisited if the operator team grows.
 
+## Blocking An Account
+
+Blocking is Firebase Auth's `disabled` flag and nothing else. Firebase enforces
+it, so a block needs no Firestore rule and no check in app code — which is what
+made it a whole feature rather than the first half of one. `setUserBlocked` is
+the admin-only callable behind it, and issue \#1474 is the reasoning.
+
+- **Firebase closes the doors it owns, and only those.** A sign-in by a blocked
+  account is refused with `auth/user-disabled`, and a refresh cannot mint a new
+  ID token. Neither recalls the ID token a client already holds.
+- **A live session therefore survives a block for up to an hour.** That is the
+  ID token's lifetime, and it is accepted rather than solved.
+  `revokeRefreshTokens` is called alongside the disable so the revocation time
+  is recorded and any caller verifying with `checkRevoked` rejects that token
+  at once — no callable does today, which is why the window is stated rather
+  than assumed away. It is not called when unblocking: that would sign an
+  account out of a session it does not have.
+- **The operator surface says the hour out loud**, on the form and in the
+  confirmation, because an operator acting on abuse needs to know the block is
+  not instant.
+- **Blocking removes nothing.** The account's Bites, reviews and restaurants
+  are untouched. Removal is a separate operator action with its own log entry
+  (issue \#1475), by decision: one action with hidden consequences is harder to
+  reason about and harder to undo.
+- **An operator may not block themselves**, and the callable refuses it rather
+  than the UI alone. Only an admin can unblock, so the last one to block their
+  own account takes the tool that would let them back in with them, and the
+  recovery is `grant-role.mjs` with service-account credentials. It is the
+  lockout shape `setUserRoles` already refuses for admin self-demotion.
+  Blocking a _different_ operator is allowed: another admin can undo it, and
+  refusing it would mean an abusive operator account could not be stopped by
+  the tool built to stop accounts.
+- **A blocked admin can unblock themselves inside that same hour**, because the
+  callable verifies the ID token without `checkRevoked`. It follows from the
+  window above rather than being a separate hole, and it is why blocking an
+  operator is not a substitute for revoking their `admin` role.
+- **The refused sign-in stays generic, deliberately.** `auth/user-disabled`
+  reaches the login page as "Something went wrong. Please try again.", the same
+  line every other refused sign-in produces, and that is the contract rather
+  than a gap. An account-state message would confirm to whoever typed the
+  address that it is a registered BiteTribe account and that the password was
+  right, and on the shared login component it would give a blocked account a
+  different answer from a role-refused one — the distinction the role gate
+  exists to hide. It is the rule already stated above for a missing role, and
+  it applies here for the same reason. Issue \#1534 proposed the opposite and
+  was closed as not planned. What #1474 did have to verify is that the app does
+  not present the refusal as a crash or a silent failure: it catches the error,
+  releases the form and shows the failure, confirmed against the Auth emulator.
+
 ## Supported Auth Modes
 
 - Email and password.
@@ -285,6 +335,7 @@ libs/bite-tribe-admin/shell/src/lib/routes.ts
 apps/bite-tribe-firebase/functions/src/functions/shared/roles.ts
 apps/bite-tribe-firebase/functions/src/functions/shared/operator-log.ts
 apps/bite-tribe-firebase/functions/src/functions/users/set-user-roles.ts
+apps/bite-tribe-firebase/functions/src/functions/users/set-user-blocked.ts
 apps/bite-tribe-firebase/functions/src/__specs__/callable-authorization.spec.ts
 apps/bite-tribe-firebase/functions/src/__specs__/operator-action-logging.spec.ts
 apps/bite-tribe-firebase/scripts/grant-role.mjs

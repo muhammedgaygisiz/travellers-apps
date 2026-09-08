@@ -5,6 +5,8 @@
   - [[Feature Delivery Workflow]]
   - [[GitHub Project Board And Issue Handling]]
   - [[GitHub Issue Format]]
+  - [[Use Case Format]]
+  - [[Actogram Format]]
   - [[Release Workflow]]
 - Product
   - [[Vision]]

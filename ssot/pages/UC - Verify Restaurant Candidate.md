@@ -7,7 +7,7 @@ Implemented and in use. The backend callable `verifyRestaurantCandidate` is
 `bite-tribe-admin` with issue \#1473.
 
 Four candidate statuses are declared; two have writers. `dismissed` and `merged` are
-read but never written — `merged` is removed by decision `RD-7`, and dismissal is
+read but never written — `merged` is removed by decision `RD-VRC-7`, and dismissal is
 specified but not built. Work in flight: epic \#1495.
 
 **Verified against the code on 7 September 2026**, branch `develop` at `d015d6fa`,
@@ -20,7 +20,7 @@ read-only.
 | `UC-GIM` — Initial Menu | Implemented, but reachable only inside verification |
 | `UC-ARB` — assign Bites | Reachable only inside verification; no standalone writer |
 | `UC-DIS` — dismiss | Not implemented: no writer, no surface |
-| `UC-MRC` — resolve a duplicate | Not implemented. Specified by `RD-7`: a Candidate is resolved against an already verified Restaurant, and `merged` is deleted |
+| `UC-MRC` — resolve a duplicate | Not implemented. Specified by `RD-VRC-7`: a Candidate is resolved against an already verified Restaurant, and `merged` is deleted |
 | `UC-ARO` — assign owner | Not implemented: model only, no writer |
 | Authorization at the data layer | Open. `firestore.rules` grants every authenticated user every write. Owned by \#1078 |
 
@@ -237,7 +237,7 @@ V17  SYS  resolves the already-decided Candidate (idempotency)
           └─ otherwise (e.g. `dismissed`)  → END-E6  `failed-precondition`
           INV:R-7
           NOTE: the code additionally follows a mergedIntoCandidateId here.
-                That branch is deleted by decision RD-7.
+                That branch is deleted by decision RD-VRC-7.
 
 V18  SYS  reads the evidence Bites INSIDE the transaction, before any write
           └─ a Bite deleted after detection is skipped rather than failing the
@@ -331,7 +331,7 @@ V28  DB   end state
 | **R-5** | The Candidate-based save path is **not** the ordinary create-restaurant path. A client saving through the ordinary store path bypasses all of Phase 3. | `new-restaurant.service.ts` |
 | **R-6** | Authorization is enforced in the backend on the verified ID token. The route guard is a convenience, not the gate. | `shared/roles.ts`, `requireAdmin` |
 | **R-7** | Verification is idempotent. A second call for the same Candidate returns the existing Restaurant and creates nothing. | `verify-restaurant-candidate.ts` |
-| **R-8** | `bite.restaurantId` has **four** writers. `V23` is the only transactional one, and the only one inside this Use Case. Two more sit in the Bite form, which carries a `restaurantId` control set when a Bite Creator picks a verified nearby Restaurant: the whole form value is persisted on create **and on edit**. The fourth is the Admin App's Candidate-free save path, which links every listed Bite in a client-side write outside any transaction; it is unreachable today only because the Bite-places surface passes no `biteIds`. Detection is deliberately **not** a writer — see `RD-9` and `UC-DRC` `R-6`. | `verify-restaurant-candidate.ts`; `bite.page.ts`, `onRestaurantSelected`; `restaurant-api.service.ts`, `saveNewRestaurant` |
+| **R-8** | `bite.restaurantId` has **four** writers. `V23` is the only transactional one, and the only one inside this Use Case. Two more sit in the Bite form, which carries a `restaurantId` control set when a Bite Creator picks a verified nearby Restaurant: the whole form value is persisted on create **and on edit**. The fourth is the Admin App's Candidate-free save path, which links every listed Bite in a client-side write outside any transaction; it is unreachable today only because the Bite-places surface passes no `biteIds`. Detection is deliberately **not** a writer — see `RD-VRC-9` and `UC-DRC` `R-6`. | `verify-restaurant-candidate.ts`; `bite.page.ts`, `onRestaurantSelected`; `restaurant-api.service.ts`, `saveNewRestaurant` |
 | **R-9** | `V21` to `V24` are one transaction. No observable state has a Restaurant without its Menu, or Bites pointing at a Restaurant whose Candidate is still `pending`. | `verify-restaurant-candidate.ts` |
 | **R-10** | *Intended, not met.* Everything the Restaurant needs in order to be valid is written inside `R-9`'s transaction. `V26` breaks this. | `restaurants-data-access.service.ts` |
 | **R-11** | The Initial Menu is a **draft derived from evidence**, not a statement about the real menu. Its prices are averages of what Bite Creators reported. | `shared/utils/initial-menu.ts` |
@@ -345,7 +345,7 @@ V28  DB   end state
 | E2 | No evidence Bite has a usable dish name | Empty Menu, no error | Correct |
 | E3 | The same Candidate is verified twice | `END-V5`; the existing Restaurant is returned | Correct |
 | E4 | The Candidate is `dismissed` | `END-E6`; nothing is created | Correct |
-| E5 | The Candidate is `merged` | `V17` resolves via `mergedIntoCandidateId` | To be deleted: nothing writes the status, and it is dropped by `RD-7` |
+| E5 | The Candidate is `merged` | `V17` resolves via `mergedIntoCandidateId` | To be deleted: nothing writes the status, and it is dropped by `RD-VRC-7` |
 | E6 | The image upload at `V26` fails | Candidate verified, Restaurant without image, unhandled rejection | Defect |
 | E7 | An evidence Bite already belongs to another Restaurant | Silently overwritten at `V23` | Defect, reachable today by a Bite Creator editing their own Bite |
 | E8 | More than five Candidates are `pending` | Only five are reachable, and always the same alphabetically-first five | Defect |
@@ -397,16 +397,16 @@ Taken on 7 September 2026.
 
 | # | Decision |
 |---|---|
-| `RD-6` | **Scope.** `V19` and `V23` stay inside the verification transaction but are *referenced* steps, owned by `UC-GIM` and `UC-ARB`. This Use Case covers verification only; dismissal and duplicate resolution are referenced Use Cases with their own terminal states. Owner assignment is an optional step at `V10`, referencing `UC-ARO` |
-| `RD-7` | **`merged` is removed.** `merged` and `mergedIntoCandidateId` go from both model copies, and `V17`'s merge branch with them. A duplicate Candidate is resolved against an **already verified Restaurant**, which needs no status of its own. Real merging already happens by document-id convergence, which unions `biteIds` without any status, event or audit trail |
-| `RD-8` | **`UC-DRC` owns every producer.** Both the automatic trigger and the Operator's on-demand clustering callable belong to detection, so the threshold divergence is stated once, next to the threshold |
-| `RD-9` | **Refused evidence is not rerouted.** When a write onto a non-`pending` Candidate is refused, the refusal is logged and no Bite is written. Those Bites carry no `restaurantId` and therefore stay visible on the Admin App's Bite-places surface. Detection does not become a writer of `bite.restaurantId` |
-| `RD-10` | **The on-demand producer keeps no evidence threshold.** A deliberate Operator action is the safeguard. The collection's invariant is restated instead: every Candidate is either backed by at least five matching Bites within 200 m, **or** marked as Operator-created |
-| `RD-11` | **The derived-menu marker never clears automatically.** Retraction is an explicit confirmation by the Restaurant Owner. Because `ownerUserId` has no writer, that action is sequenced behind owner assignment (`UC-ARO`, \#1069) rather than shipped alongside the marker — so the marker is never a declared state without a writer, which is the mistake `RD-7` removes |
-| `RD-16` | **The Candidate list has one server-side order and no selectable ordering:** `evidence.biteCount` descending, then `createdAtTimestamp` descending. The consumer app's client-side sort criterion reorders an already-fetched array, which cannot affect *which* Candidates a limited query returns — and that is this list's actual defect. A work queue for two Operators also has one defensible default, unlike a discovery feed where preference genuinely varies. Recorded so the divergence from the consumer convention reads as deliberate |
+| `RD-VRC-6` | **Scope.** `V19` and `V23` stay inside the verification transaction but are *referenced* steps, owned by `UC-GIM` and `UC-ARB`. This Use Case covers verification only; dismissal and duplicate resolution are referenced Use Cases with their own terminal states. Owner assignment is an optional step at `V10`, referencing `UC-ARO` |
+| `RD-VRC-7` | **`merged` is removed.** `merged` and `mergedIntoCandidateId` go from both model copies, and `V17`'s merge branch with them. A duplicate Candidate is resolved against an **already verified Restaurant**, which needs no status of its own. Real merging already happens by document-id convergence, which unions `biteIds` without any status, event or audit trail |
+| `RD-VRC-8` | **`UC-DRC` owns every producer.** Both the automatic trigger and the Operator's on-demand clustering callable belong to detection, so the threshold divergence is stated once, next to the threshold |
+| `RD-VRC-9` | **Refused evidence is not rerouted.** When a write onto a non-`pending` Candidate is refused, the refusal is logged and no Bite is written. Those Bites carry no `restaurantId` and therefore stay visible on the Admin App's Bite-places surface. Detection does not become a writer of `bite.restaurantId` |
+| `RD-VRC-10` | **The on-demand producer keeps no evidence threshold.** A deliberate Operator action is the safeguard. The collection's invariant is restated instead: every Candidate is either backed by at least five matching Bites within 200 m, **or** marked as Operator-created |
+| `RD-VRC-11` | **The derived-menu marker never clears automatically.** Retraction is an explicit confirmation by the Restaurant Owner. Because `ownerUserId` has no writer, that action is sequenced behind owner assignment (`UC-ARO`, \#1069) rather than shipped alongside the marker — so the marker is never a declared state without a writer, which is the mistake `RD-VRC-7` removes |
+| `RD-VRC-16` | **The Candidate list has one server-side order and no selectable ordering:** `evidence.biteCount` descending, then `createdAtTimestamp` descending. The consumer app's client-side sort criterion reorders an already-fetched array, which cannot affect *which* Candidates a limited query returns — and that is this list's actual defect. A work queue for two Operators also has one defensible default, unlike a discovery feed where preference genuinely varies. Recorded so the divergence from the consumer convention reads as deliberate |
 
-`RD` ids are project-wide and not contiguous within any single page; the numbers absent
-here belong to other pages.
+`RD` ids are **page-scoped**: the prefix names the owning page, so `RD-UR-6` and
+`RD-VRC-6` are different decisions. Numbers are historical and need not be contiguous.
 
 ## Related Domains
 

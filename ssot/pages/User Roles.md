@@ -19,8 +19,7 @@ personas have no distinct permission set, and one role has no persona.
 **Verified against the code on 7 September 2026**, branch `develop` at `d015d6fa`,
 read-only. Decisions recorded after that reading are dated and are not re-verified.
 
-This page carries facts and decisions. What is missing from the product is either a
-recorded decision below or an issue named in a footnote - never a list of limitations.
+This page carries facts and decisions.
 
 ## Roles
 
@@ -40,7 +39,7 @@ account may hold `admin` and `business` at once), but holding one role does **no
 holding another: `admin` and `business` are deliberately not a hierarchy in the code.
 
 **Hierarchy in two senses, and only one of them holds.** In *capability* the Operator is
-above the Restaurant Owner: `RD-8` gives it maintenance of every Restaurant, claimed or
+above the Restaurant Owner: `RD-UR-6` gives it maintenance of every Restaurant, claimed or
 not. In *claims* it is not: `admin` does not confer `business`, an Operator never signs
 into the Business App and never appears as a `Restaurant.ownerUserId`. The superset is
 delivered by the Operator's own surfaces and an `admin` allowance in the rules, which is
@@ -74,7 +73,7 @@ Granted today: yes. Target state, not implemented: **target**. Not granted: no.
 | Report content and block another user | **target** ⁵ | **target** ⁵ | **target** ⁵ |
 | Act on a report: block an account, delete a Bite | **target** ⁵ | no | no |
 
-¹ `RD-8`: the Operator maintains **every** Restaurant, claimed or unclaimed, from the
+¹ `RD-UR-6`: the Operator maintains **every** Restaurant, claimed or unclaimed, from the
 Admin App - where verification already creates them. It does not reach them through the
 Business App, which requires `business` and is owner-scoped by issue \#1079. **The
 surface does not exist yet**, so today a Restaurant is maintainable by nobody once
@@ -87,9 +86,9 @@ question in [[UC - Verify Restaurant Candidate]] `S-10` and issue \#1164.
 
 ² The intent, not an enforced boundary, because ownership has no writer.
 
-³ `RD-6`: publishing moves to the consumer app behind `authGuard` only, so it becomes a
+³ `RD-UR-4`: publishing moves to the consumer app behind `authGuard` only, so it becomes a
 Bite Creator capability and the Business App route is retired. Implementation is issue
-\#1519, sequenced behind content reporting - see footnote ⁵. `RD-7` covers launch content
+\#1519, sequenced behind content reporting - see footnote ⁵. `RD-UR-5` covers launch content
 without code.
 
 ⁴ Set when the creator picks a verified nearby Restaurant, on create **and** on edit.
@@ -97,7 +96,7 @@ This makes the Bite Creator one of three writers of that field; see
 [[UC - Verify Restaurant Candidate]], rule `R-8`.
 
 ⁵ Nothing here exists in the product today, and Bite Creator carrying no claim means
-there is no grant to revoke either. `RD-9` fixes the required set and classes it `[MVP]`.
+there is no grant to revoke either. `RD-UR-7` fixes the required set and classes it `[MVP]`.
 Operator actions are issues \#1474 (block an account) and \#1475 (delete a Bite),
 children of epic \#1471; the report queue is epic \#1284. **The user-facing report
 action, user-to-user blocking and content filtering have no owning issue**, and the
@@ -133,13 +132,13 @@ for Storage, the more exploitable of the two.
 | Privacy-conscious participant | A settings choice (`PublicUser.public`), not a permission |
 | **Public / Private Profile** | The same visibility choice, not a capability |
 | **BiteTribe Pro** | An entitlement on `PublicUser.subscriptionTier`: `0` = Free, `>= 1` = Pro. Orthogonal to every role. No purchase path exists. See [[Subscription]] |
-| **BiteTrail Creator** | An activity of the *Food curator or vlogger* persona, not a permission. Publishing a BiteTrail becomes a Bite Creator capability under `RD-6`, tracked by issue \#1519; the proposed `curator` claim is retired |
+| **BiteTrail Creator** | An activity of the *Food curator or vlogger* persona, not a permission. Publishing a BiteTrail becomes a Bite Creator capability under `RD-UR-4`, tracked by issue \#1519; the proposed `curator` claim is retired |
 | **Moderator** | Does not exist. Named in [[Glossary]] only to state its absence |
 | **Unauthenticated visitor** | Reaches only `start` and the auth routes |
 | **The backend itself** | Cloud Functions act with admin credentials and no role. It is the actual writer in most flows, which is why the open Firestore rules matter - see the note above the table |
 
 The first four are personas: audiences, not authorization concepts, and they must not
-become roles. BiteTrail Creator was a role for one day - see `RD-4` and `RD-6`.
+become roles. 
 
 ## Recorded Decisions
 
@@ -147,27 +146,16 @@ Taken 7 September 2026 unless stated otherwise.
 
 | # | Decision |
 |---|---|
-| `RD-1` | ~~The authorization vocabulary is four roles~~ - **superseded by `RD-6`**. Three roles: **BiteTribe Operator**, **Restaurant Owner**, **Bite Creator** |
-| `RD-2` | Roles and personas stay separate vocabularies, cross-referenced. Roles live here; personas stay in [[Personas]] |
-| `RD-3` | "Business User" is retired. Every occurrence resolves to Operator or Restaurant Owner |
-| `RD-4` | ~~**BiteTrail Creator becomes a fourth role.**~~ - **superseded by `RD-6`**, same day. The id is retired, not reused |
-| `RD-5` | The Operator role name aligns with the existing "BiteTribe operator" wording rather than introducing "Admin" as a domain term |
-| `RD-6` | **The BiteTrail Creator role is retired and the `curator` claim is not introduced.** Publishing a BiteTrail becomes a Bite Creator capability in the consumer app, and the eventual paid gate is payout onboarding rather than a claim. Implementation: issue \#1519. Correcting epic \#1125, which places the creator flow in the Business App through \#1154 and \#1157, is out of that issue's scope and owned by nothing |
-| `RD-7` | **Curator onboarding for the initial release needs no implementation.** An Operator grants `business` to a BiteTribe-held account, which curates the launch BiteTrails. Acceptable only for accounts BiteTribe controls, because the Business App also hands them every Restaurant-maintenance surface. Closed by decision rather than by work |
-| `RD-8` | **The Operator is above the Restaurant Owner in capability: it may maintain every Restaurant, claimed or unclaimed, without owning any.** Delivered through an Admin App restaurant-edit surface plus an `admin` allowance in the ownership-scoped Firestore rules - **not** by granting the `business` claim, and never by writing `Restaurant.ownerUserId`. `admin` still does not imply `business`. Maintenance of a Restaurant the Operator does not own follows epic \#1471's operator log shape: actor, target, outcome. This closes the hierarchy question rather than deferring it |
-| `RD-9` | **The user-generated-content safeguard set is `[MVP]`, and it is exactly four things:** a report action on Bites, Reviews and user profiles; user-to-user blocking; a reachable contact address for content complaints (\#1429); and a written response-time expectation. "Filtering" is satisfied by human review of reports, **not** by automated or model-assisted classification, which stays out of scope as epic \#1284 already has it. The Operator-side actions \#1474 and \#1475 are a separate half and do not substitute for the user-facing one. Recorded 8 September 2026 |
+| `RD-UR-1` | Roles and personas stay separate vocabularies, cross-referenced. Roles live here; personas stay in [[Personas]] |
+| `RD-UR-2` | "Business User" is retired. Every occurrence resolves to Operator or Restaurant Owner |
+| `RD-UR-3` | The Operator role name aligns with the existing "BiteTribe operator" wording rather than introducing "Admin" as a domain term |
+| `RD-UR-4` | **The BiteTrail Creator role is retired and the `curator` claim is not introduced.** Publishing a BiteTrail becomes a Bite Creator capability in the consumer app, and the eventual paid gate is payout onboarding rather than a claim. Implementation: issue \#1519. Correcting epic \#1125, which places the creator flow in the Business App through \#1154 and \#1157, is out of that issue's scope and owned by nothing |
+| `RD-UR-5` | **Curator onboarding for the initial release needs no implementation.** An Operator grants `business` to a BiteTribe-held account, which curates the launch BiteTrails. Acceptable only for accounts BiteTribe controls, because the Business App also hands them every Restaurant-maintenance surface. Closed by decision rather than by work |
+| `RD-UR-6` | **The Operator is above the Restaurant Owner in capability: it may maintain every Restaurant, claimed or unclaimed, without owning any.** Delivered through an Admin App restaurant-edit surface plus an `admin` allowance in the ownership-scoped Firestore rules - **not** by granting the `business` claim, and never by writing `Restaurant.ownerUserId`. `admin` still does not imply `business`. Maintenance of a Restaurant the Operator does not own follows epic \#1471's operator log shape: actor, target, outcome. This closes the hierarchy question rather than deferring it |
+| `RD-UR-7` | **The user-generated-content safeguard set is `[MVP]`, and it is exactly four things:** a report action on Bites, Reviews and user profiles; user-to-user blocking; a reachable contact address for content complaints (\#1429); and a written response-time expectation. "Filtering" is satisfied by human review of reports, **not** by automated or model-assisted classification, which stays out of scope as epic \#1284 already has it. The Operator-side actions \#1474 and \#1475 are a separate half and do not substitute for the user-facing one. Recorded 8 September 2026 |
 
-`RD-4` was recorded and reversed on the same day, 7 September 2026. It was taken before
-the surface question was answered, and answering it removed the need for the role rather
-than placing it. Both entries stay so the reversal is visible.
-
-`RD-3` in context: "Business User" named *both* the Operator and the Restaurant Owner
-depending on which page you read, which is the ambiguity that made restaurant-candidate
-verification look like a restaurant's job when it has been BiteTribe-internal since
-issue \#1473.
-
-`RD` ids are project-wide and not contiguous within any single page; the numbers absent
-here belong to other pages.
+`RD` ids are **page-scoped**: the prefix names the owning page, so `RD-UR-6` and
+`RD-VRC-6` are different decisions. Numbers are historical and need not be contiguous.
 
 ## Related Pages
 

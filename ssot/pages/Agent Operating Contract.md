@@ -15,6 +15,7 @@ The SSOT is the shared source for:
 - Product intent.
 - Domain language.
 - Use-case boundaries.
+- Use-case and actogram format.
 - Epic and issue context.
 - Architecture constraints.
 - Implementation ownership.
@@ -33,6 +34,11 @@ Before editing code or SSOT content, an agent must:
 4. Read [[SSOT]].
 5. Use [[Traceability Map]] to identify the relevant product, domain, use-case, epic, architecture, implementation, testing, and release context.
 6. Read the owning code surface before editing.
+7. When the change writes or revises a `UC - *` page, read [[Use Case Format]] and [[Actogram Format]] first.
+
+A `UC - *` page must not be written from memory or by imitating another page. Before
+finishing, run the validation checklist in [[Actogram Format]] and report every failure
+by rule id (`AF-n`, `UF-n`).
 
 For analysis-only requests, stop after evidence gathering and report concrete findings without changing files.
 

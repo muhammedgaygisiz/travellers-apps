@@ -88,6 +88,9 @@ Validation rules:
 
 Update the relevant SSOT page when implementation changes the product truth, domain model, architecture rule, workflow, release state, or known issue list.
 
+A touched `UC - *` page follows [[Use Case Format]] and is validated against the
+checklist in [[Actogram Format]] before this step is done.
+
 User-facing release changes should also update changelog output through the existing changelog workflow when requested.
 
 ## Step 8 - Report

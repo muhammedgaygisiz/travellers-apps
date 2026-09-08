@@ -11,7 +11,7 @@ It exists because the format was previously only implicit. Forty `issue-*` pages
 This page governs **GitHub issues**, and only issues.
 
 - **Epics are excluded.** An `epic-*` page keeps its own shape.
-- **Use cases are excluded.** A `UC - *` page keeps its own shape: `Status`, `Goal`, `Actors`, `Related Domains`, and a current or target flow.
+- **Use cases are excluded.** A `UC - *` page has its own format, defined in [[Use Case Format]], with its flow notation in [[Actogram Format]].
 - **It applies to issues created from 4 September 2026 onward.** Existing issues are not retrofitted. Updating an existing issue does not change its structure either: an issue keeps the shape it was filed with for its whole life, and only its content is edited.
 - **The SSOT mirror page is a different artefact.** `issue-*` pages in this graph are Logseq outline blocks, not `##` headings, and they carry context the GitHub issue does not. See Status And The Mirror Page.
 
@@ -32,7 +32,7 @@ An issue title is `NN - type(scope): description`.
 - `scope` in parentheses names the app or library where the change lands, for example `feat(bite-tribe-admin)` or `fix(backend)`. It is omitted where the change has no single home, as in `docs:`.
 - `description` is lower case and states the outcome, not the task.
 
-An issue filed outside an epic carries no ordinal. `NN -`is optional and only required if sequence is required. 
+An issue filed outside an epic carries no ordinal. `NN -`is optional and only required if sequence is relevant. 
 
 ## Shape 1 - Spec-Ahead
 

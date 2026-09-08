@@ -77,7 +77,7 @@ app and run the operational migrations in it.
   hierarchy — an operator account is not a restaurant, and granting it
   restaurant rights by implication would defeat the ownership gate for exactly
   the accounts most able to break it.
-  **This is about claims, not capability.** By `RD-8` in [[User Roles]] the
+  **This is about claims, not capability.** By `RD-UR-6` in [[User Roles]] the
   Operator does maintain every Restaurant, claimed or not — through the Admin App
   and an `admin` allowance in the rules, never by holding `business`.
 - They live in one array under one claim key, `roles`, because Firebase caps the

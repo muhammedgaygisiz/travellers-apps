@@ -5,8 +5,8 @@
 Implemented and in use, with **two producers**: an automatic Firestore trigger on Bite
 creation, and an Operator-initiated callable `clusterRestaurantCandidateForBite`, which
 is `admin`-gated since issue \#1472 and surfaced in `bite-tribe-admin` since issue
-\#1473. Both converge on one shared clustering kernel; per `RD-8` this Use Case owns
-both, and per `RD-18` they are two entries into one page rather than two pages.
+\#1473. Both converge on one shared clustering kernel; per `RD-VRC-8` this Use Case owns
+both, and per `RD-DRC-18` they are two entries into one page rather than two pages.
 
 The kernel is complete and the collection's invariants are not. Nothing records which
 producer created a Candidate, nothing guards a write onto a Candidate that has already
@@ -25,7 +25,7 @@ read-only.
 | `K9` — guard against writing onto a non-`pending` Candidate | Not implemented. `R-8` |
 | Producer marker on the Candidate | Not implemented: no field exists in either model copy, so `G7` cannot be checked |
 | Re-evaluation after a Bite is edited, deleted or detached | Not implemented, and not designed. `R-11` |
-| `merged` status | Still declared in both model copies; removed by `RD-7` |
+| `merged` status | Still declared in both model copies; removed by `RD-VRC-7` |
 | Entry B's eligible-Bite list | Implemented in the client, over the whole `/bites` collection. `R-13` |
 | Authorization at the data layer | Open. `firestore.rules` grants every authenticated user every write, so the collection's invariants are not enforced where the data lives. Owned by \#1078 |
 
@@ -59,7 +59,7 @@ The authorization vocabulary is four roles, defined in [[User Roles]].
 
 **Entry A has no actor at all.** It runs in the Functions runtime with administrative
 credentials, is not callable from any client, and no human is in the loop. This is the
-argument that made `RD-18` a real decision rather than a formality.
+argument that made `RD-DRC-18` a real decision rather than a formality.
 
 ### Non-actor lanes
 
@@ -143,10 +143,10 @@ On the successful path, `END-K4`:
 | G1 | Exactly one document under `/restaurantCandidates` is written, and it carries `status == 'pending'` |
 | G2 | It carries `name`, `normalizedName`, `position`, `geohash`, `biteIds` and `evidence`, satisfying `UC-VRC` `P1` and `P2` |
 | G3 | The document id is a pure function of the normalized name and the geohash bucket, so repeated detection of the same place converges on one document instead of accumulating duplicates |
-| G4 | No Bite is written. Detection is never a writer of `bite.restaurantId` (`RD-9`) |
+| G4 | No Bite is written. Detection is never a writer of `bite.restaurantId` (`RD-VRC-9`) |
 | G5 | No Restaurant and no Menu is created, and no existing Restaurant is modified |
 | G6 | `biteIds` is a union with what the document already held, so it never shrinks |
-| G7 | *Intended, not met.* Every Candidate is either backed by at least five matching Bites within 200 m, or marked as created by an Operator (`RD-10`). No field records the producer, so the second half of the invariant is unrepresentable |
+| G7 | *Intended, not met.* Every Candidate is either backed by at least five matching Bites within 200 m, or marked as created by an Operator (`RD-VRC-10`). No field records the producer, so the second half of the invariant is unrepresentable |
 | G8 | Atomicity is per document and nothing more. One merge write is the entire effect; there is no transaction, because there is nothing else to keep consistent with it |
 
 ---
@@ -269,7 +269,7 @@ K5   SYS  applies the evidence threshold      ← THE STEP THAT DIFFERS BY ENTRY
           │                                                 Candidate written
           ├─ Entry A, 5 or more                  → K6
           └─ Entry B, any number including zero  → K6
-             no threshold, by RD-10: the Operator's deliberate action is the
+             no threshold, by RD-VRC-10: the Operator's deliberate action is the
              safeguard, and the count is returned so it is visible
           INV:R-2
 
@@ -307,7 +307,7 @@ K9   SYS  guard: refuses a write onto a target that is not `pending`
           INV:R-8 is VIOLATED here: this step does not exist in the code.
                The write at K10 is unconditional, so a target that is
                `verified` or `dismissed` is reset to `pending`. See E1.
-          NOTE: RD-9 fixes the behaviour of the refusal: nothing is
+          NOTE: RD-VRC-9 fixes the behaviour of the refusal: nothing is
                 rerouted, no Bite is written, and the refused evidence
                 stays visible on the Admin App's Bite-places surface.
 
@@ -351,11 +351,11 @@ K10  SYS  merge-writes the Candidate
 | ID | Normative statement | Code anchor |
 |---|---|---|
 | **R-1** | The clustering radius is **200 m** and the minimum place-name match score is **0.82**. Both bind both entries, and both are used for three different questions: matching a Bite, matching a verified Restaurant, and matching a pending Candidate. | `shared/utils/restaurant-candidates.ts`, `RESTAURANT_CANDIDATE_RADIUS_IN_M`, `DEFAULT_MATCH_SCORE` |
-| **R-2** | The evidence threshold is **five matching Bites** and applies to **Entry A only** (`RD-10`). The seed Bite is forced into the neighbourhood result and matches itself, so five means the seed plus four others. | `create-restaurant-candidate-on-bite-create.ts`, `RESTAURANT_CANDIDATE_EVIDENCE_THRESHOLD`; `restaurant-candidate-store.ts`, `getNearbyBites` |
+| **R-2** | The evidence threshold is **five matching Bites** and applies to **Entry A only** (`RD-VRC-10`). The seed Bite is forced into the neighbourhood result and matches itself, so five means the seed plus four others. | `create-restaurant-candidate-on-bite-create.ts`, `RESTAURANT_CANDIDATE_EVIDENCE_THRESHOLD`; `restaurant-candidate-store.ts`, `getNearbyBites` |
 | **R-3** | *Intended, not met.* The threshold and the score are each declared once. `0.82` exists twice, as `DEFAULT_MATCH_SCORE` and as `MINIMUM_PLACE_NAME_MATCH_SCORE`, in two files, with nothing checking that they agree. | `restaurant-candidates.ts`; `restaurant-candidate-store.ts` |
 | **R-4** | A Bite that already carries `restaurantId` is never evidence, in either entry. Entry A additionally refuses such a Bite as a seed; Entry B does not. | `restaurant-candidate-store.ts`, `getMatchingBites`; `create-restaurant-candidate-on-bite-create.ts` |
 | **R-5** | Whether a place is already a Restaurant, and whether it is already a Candidate, are both decided by **fuzzy name plus distance and nothing else**. Neither a Restaurant nor a Candidate carries an external place identity, so neither check can be made exact. | `restaurant-candidates.ts`, `findVerifiedRestaurantDuplicate`, `findPendingRestaurantCandidateDuplicate` |
-| **R-6** | Detection's entire effect is **one merge write of one `/restaurantCandidates` document**. It writes no Bite, no Restaurant and no Menu, and per `RD-9` it must never become a writer of `bite.restaurantId`. | both producers, `candidateRef.set(update, { merge: true })` |
+| **R-6** | Detection's entire effect is **one merge write of one `/restaurantCandidates` document**. It writes no Bite, no Restaurant and no Menu, and per `RD-VRC-9` it must never become a writer of `bite.restaurantId`. | both producers, `candidateRef.set(update, { merge: true })` |
 | **R-7** | A Candidate's identity is **derived from its content**: the normalized name with non-alphanumerics collapsed to `-` and capped at 80 characters, plus the first **7** geohash characters — a cell of roughly 150 m against a 200 m radius. A Candidate therefore has no identity independent of the evidence that produced it. | `restaurant-candidate-store.ts`, `buildRestaurantCandidateDocumentId` |
 | **R-8** | *Intended, not met.* A write onto a Candidate that is not `pending` is refused and logged. Today `status: 'pending'` is written unconditionally and the target's current status is never read, so a `verified` or `dismissed` Candidate is silently reset. This is `K9`. | `restaurant-candidate-store.ts`, `buildCandidateUpdate` |
 | **R-9** | `name`, `normalizedName`, `position` and `geohash` are **first-writer-wins**. The name is a majority vote of Bite place strings taken at first clustering and then frozen, and it feeds `R-7`'s document id — so the earliest few Bites' spelling fixes both the name and the identity permanently. | `restaurant-candidate-store.ts`, `buildCandidateUpdate` |
@@ -436,10 +436,10 @@ Taken on 7 September 2026.
 
 | # | Decision |
 |---|---|
-| `RD-18` | **Detection is one Use Case with two entries and one shared kernel,** not two Use Cases. Entry A has no human actor and Entry B is Operator work, which is the argument for splitting; the argument that wins is that both execute the same clustering code, so `R-1`, `R-5`, `R-7`, `R-8`, `R-9` and `R-10` would have to be stated twice and kept in agreement by hand. `K5` is the only step whose behaviour differs by entry, which makes `RD-10` one gated step instead of a fact duplicated across two pages |
+| `RD-DRC-18` | **Detection is one Use Case with two entries and one shared kernel,** not two Use Cases. Entry A has no human actor and Entry B is Operator work, which is the argument for splitting; the argument that wins is that both execute the same clustering code, so `R-1`, `R-5`, `R-7`, `R-8`, `R-9` and `R-10` would have to be stated twice and kept in agreement by hand. `K5` is the only step whose behaviour differs by entry, which makes `RD-VRC-10` one gated step instead of a fact duplicated across two pages |
 
-`RD` ids are project-wide and not contiguous within any single page; the numbers absent
-here belong to other pages.
+`RD` ids are **page-scoped**: the prefix names the owning page, so `RD-UR-6` and
+`RD-VRC-6` are different decisions. Numbers are historical and need not be contiguous.
 
 ## Related Domains
 

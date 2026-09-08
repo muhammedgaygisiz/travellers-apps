@@ -179,6 +179,47 @@ describe(UserManagementDataAccessService.name, () => {
     expect(result).toEqual({ uid: 'u1', tier: 1, previousTier: 0 });
   });
 
+  it('blocks an account through its own callable', async () => {
+    callByNameMock.mockResolvedValue({
+      data: { uid: 'u1', blocked: true, previouslyBlocked: false },
+    });
+
+    const result = await service.setBlocked('u1', true);
+
+    expect(callByNameMock).toHaveBeenCalledWith({
+      name: 'setUserBlocked',
+      data: { uid: 'u1', blocked: true },
+    });
+    expect(result).toEqual({
+      uid: 'u1',
+      blocked: true,
+      previouslyBlocked: false,
+    });
+  });
+
+  // The flag is sent explicitly rather than toggled from whatever the list
+  // happened to say, so a stale list cannot turn an unblock into a block.
+  it('unblocks by sending the flag rather than a toggle', async () => {
+    callByNameMock.mockResolvedValue({
+      data: { uid: 'u1', blocked: false, previouslyBlocked: true },
+    });
+
+    await service.setBlocked('u1', false);
+
+    expect(callByNameMock).toHaveBeenCalledWith({
+      name: 'setUserBlocked',
+      data: { uid: 'u1', blocked: false },
+    });
+  });
+
+  // A blocked account is the one the operator is looking for, so the flag has
+  // to survive the trip rather than being dropped as an Auth detail.
+  it('keeps the blocked state of a listed account', async () => {
+    const [account] = await loadUsers([user({ disabled: true })]);
+
+    expect(account.disabled).toBe(true);
+  });
+
   // `null` is "nobody decided", not Free, and it has to survive the trip.
   it('keeps an absent tier absent rather than reading it as Free', async () => {
     const [account] = await loadUsers([user({ subscriptionTier: null })]);

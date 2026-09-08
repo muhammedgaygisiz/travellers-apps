@@ -1,8 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import {
+  AlertController,
+  AlertOptions,
+  provideIonicAngular,
+} from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AdminUser } from 'bite-tribe-admin/user-management-data-access';
 import { UserManagementComponent } from '../user-management.component';
 
@@ -27,10 +31,30 @@ const user = (over: Partial<AdminUser> = {}): AdminUser => ({
   ...over,
 });
 
+/**
+ * The confirmation alerts, captured rather than rendered: Ionic's overlay
+ * never enters the fixture's DOM, so the options object is what there is to
+ * assert on, and pressing a button means calling the handler it carries.
+ */
+interface AlertButton {
+  text?: string;
+  role?: string;
+  handler?: () => void;
+}
+
 describe(UserManagementComponent.name, () => {
   let component: UserManagementComponent;
   let fixture: ComponentFixture<UserManagementComponent>;
   let ref: ComponentRef<UserManagementComponent>;
+  let alerts: AlertOptions[];
+
+  const lastAlert = (): AlertOptions => alerts[alerts.length - 1];
+
+  const pressAlertButton = (role: string): void => {
+    const buttons = (lastAlert().buttons ?? []) as AlertButton[];
+
+    buttons.find((button) => button.role === role)?.handler?.();
+  };
 
   const setInputs = (inputs: Record<string, unknown>): void => {
     Object.entries(inputs).forEach(([key, value]) => ref.setInput(key, value));
@@ -41,8 +65,26 @@ describe(UserManagementComponent.name, () => {
     // `ta-page` renders an `ion-back-button` here, which injects the Router.
     // (The `Invalid base URL` lines in this suite's output are ionicons
     // resolving svg paths under jsdom, and are unrelated.)
+    alerts = [];
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular(), provideRouter([])],
+      providers: [
+        provideIonicAngular(),
+        provideRouter([]),
+        {
+          provide: AlertController,
+          useValue: {
+            create: jest.fn((options: AlertOptions) => {
+              alerts.push(options);
+
+              return Promise.resolve({ present: jest.fn() });
+            }),
+          },
+        },
+        {
+          provide: TranslocoService,
+          useValue: { translate: (key: string): string => key },
+        },
+      ],
     })
       .overrideComponent(UserManagementComponent, {
         remove: { imports: [TranslocoPipe] },
@@ -293,6 +335,146 @@ describe(UserManagementComponent.name, () => {
   it('labels the tiers it renders', () => {
     expect(component.tierLabelKey(0)).toBe('admin-users-tier-free');
     expect(component.tierLabelKey(1)).toBe('admin-users-tier-pro');
+  });
+
+  // Blocking is the one action on this form that takes something away, and it
+  // sits under the role checkboxes a misclick away (issue #1474).
+  describe('blocking an account', () => {
+    const active = user({ uid: 'u1', disabled: false });
+    const blockedAccount = user({ uid: 'u1', disabled: true });
+
+    const emitted: { uid: string; blocked: boolean }[] = [];
+
+    beforeEach(() => {
+      emitted.length = 0;
+      component.saveBlocked.subscribe((event) => emitted.push(event));
+      setInputs({ users: [active], selected: active });
+    });
+
+    it('reads the state off the account rather than holding its own copy', () => {
+      expect(component.blocked()).toBe(false);
+
+      setInputs({ selected: blockedAccount });
+
+      expect(component.blocked()).toBe(true);
+    });
+
+    it('shows the account as active until it is blocked', () => {
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="admin-user-block-state"]',
+        ).textContent,
+      ).toContain('admin-users-active');
+    });
+
+    it('names a blocked account as blocked', () => {
+      setInputs({ selected: blockedAccount });
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="admin-user-block-state"]',
+        ).textContent,
+      ).toContain('admin-users-blocked');
+    });
+
+    // A single misclick must not block anyone.
+    it('emits nothing until the confirmation is accepted', async () => {
+      await component.onToggleBlocked();
+
+      expect(alerts).toHaveLength(1);
+      expect(emitted).toEqual([]);
+    });
+
+    it('emits the block once the confirmation is accepted', async () => {
+      await component.onToggleBlocked();
+      pressAlertButton('destructive');
+
+      expect(emitted).toEqual([{ uid: 'u1', blocked: true }]);
+    });
+
+    it('emits nothing when the confirmation is cancelled', async () => {
+      await component.onToggleBlocked();
+      pressAlertButton('cancel');
+
+      expect(emitted).toEqual([]);
+    });
+
+    // The alert repeats the account rather than trusting that the form behind
+    // it is still the one being read.
+    it('names the account in the confirmation', async () => {
+      await component.onToggleBlocked();
+
+      expect(lastAlert().subHeader).toBe('ada@example.com');
+      expect(lastAlert().header).toBe('admin-users-block-confirm-title');
+    });
+
+    // Re-admitting an account somebody deliberately stopped is also a decision,
+    // and nothing but the log would show a misclicked one.
+    it('confirms an unblock too, and sends the flag rather than a toggle', async () => {
+      setInputs({ selected: blockedAccount });
+
+      await component.onToggleBlocked();
+
+      expect(lastAlert().header).toBe('admin-users-unblock-confirm-title');
+      pressAlertButton('confirm');
+
+      expect(emitted).toEqual([{ uid: 'u1', blocked: false }]);
+    });
+
+    it('emits nothing with no account selected', async () => {
+      setInputs({ selected: undefined });
+
+      await component.onToggleBlocked();
+
+      expect(alerts).toEqual([]);
+      expect(emitted).toEqual([]);
+    });
+
+    describe('the operator’s own account', () => {
+      beforeEach(() => setInputs({ operatorUid: 'u1' }));
+
+      // Only an admin can unblock, so blocking yourself takes the tool that
+      // would let you back in with you. The callable refuses it as well.
+      it('refuses to block it, and says why', () => {
+        expect(component.isOwnAccount()).toBe(true);
+        expect(component.blockRefused()).toBe(true);
+        expect(
+          fixture.nativeElement.querySelector(
+            '[data-testid="admin-user-block-refused"]',
+          ),
+        ).not.toBeNull();
+      });
+
+      it('opens no confirmation for it', async () => {
+        await component.onToggleBlocked();
+
+        expect(alerts).toEqual([]);
+        expect(emitted).toEqual([]);
+      });
+
+      it('refuses nothing on another operator’s account', () => {
+        setInputs({ operatorUid: 'someone-else' });
+
+        expect(component.blockRefused()).toBe(false);
+      });
+    });
+  });
+
+  // An operator scanning the list has to be able to tell a blocked account from
+  // an active one without opening it.
+  it('marks a blocked account in the list', () => {
+    setInputs({
+      users: [
+        user({ uid: 'u1', email: 'ada@example.com', disabled: true }),
+        user({ uid: 'u2', email: 'mia@example.com' }),
+      ],
+    });
+
+    expect(
+      fixture.nativeElement.querySelectorAll(
+        '[data-testid="admin-user-blocked-badge"]',
+      ),
+    ).toHaveLength(1);
   });
 
   // Finding the account and acting on it are one errand, so the filter lives on

@@ -2,6 +2,7 @@ export { UserManagementDataAccessService } from './lib/user-management-data-acce
 export type {
   AdminUser,
   ListUsersResult,
+  SetUserBlockedResult,
   SetUserRolesResult,
   SetUserSubscriptionTierResult,
 } from './lib/admin-user.model';

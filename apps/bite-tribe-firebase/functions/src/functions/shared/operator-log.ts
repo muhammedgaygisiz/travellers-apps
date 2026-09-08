@@ -35,6 +35,7 @@ export const OPERATOR_ACTIONS = [
   'backfillReviewTimestamps',
   'clusterRestaurantCandidateForBite',
   'sendNewVersionNotification',
+  'setUserBlocked',
   'setUserRoles',
   'setUserSubscriptionTier',
   'verifyRestaurantCandidate',

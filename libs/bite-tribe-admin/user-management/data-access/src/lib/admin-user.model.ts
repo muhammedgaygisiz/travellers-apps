@@ -13,6 +13,11 @@ export interface AdminUser {
   email: string;
   displayName: string;
   roles: BiteTribeRole[];
+  /**
+   * Firebase Auth's `disabled` flag, which is what blocking an account sets and
+   * the only thing it sets. Firebase enforces it on sign-in, so nothing in the
+   * product reads this to decide what the account may do (issue #1474).
+   */
   disabled: boolean;
   emailVerified: boolean;
   providerIds: string[];
@@ -34,6 +39,16 @@ export interface ListUsersResult {
 export interface SetUserRolesResult {
   uid: string;
   roles: BiteTribeRole[];
+}
+
+/**
+ * `previouslyBlocked` answers "was this already the state" for an operator
+ * reading back what their click did, which a bare echo of the flag cannot.
+ */
+export interface SetUserBlockedResult {
+  uid: string;
+  blocked: boolean;
+  previouslyBlocked: boolean;
 }
 
 export interface SetUserSubscriptionTierResult {

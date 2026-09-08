@@ -294,4 +294,102 @@ describe(UserManagementComponent.name, () => {
     expect(component.tierLabelKey(0)).toBe('admin-users-tier-free');
     expect(component.tierLabelKey(1)).toBe('admin-users-tier-pro');
   });
+
+  // Finding the account and acting on it are one errand, so the filter lives on
+  // the page that holds the form rather than on a search surface of its own
+  // (issue #1476).
+  describe('finding an account', () => {
+    const ada = user({
+      uid: 'uid-ada',
+      email: 'ada@example.com',
+      displayName: 'ada-lovelace',
+    });
+    const mia = user({
+      uid: 'uid-mia',
+      email: 'mia@example.com',
+      displayName: 'mia',
+    });
+
+    beforeEach(() => setInputs({ users: [ada, mia] }));
+
+    it('shows every account until something is typed', () => {
+      expect(component.visibleUsers()).toEqual([ada, mia]);
+    });
+
+    it('finds an account by its email', () => {
+      component.onFilterChange('mia@example');
+
+      expect(component.visibleUsers()).toEqual([mia]);
+    });
+
+    // The display name is the field the report usually names, and it lives only
+    // on the `/users` document — the account list joins it in for this.
+    it('finds an account by its display name', () => {
+      component.onFilterChange('lovelace');
+
+      expect(component.visibleUsers()).toEqual([ada]);
+    });
+
+    // An id is not required, but a reported one should still resolve.
+    it('finds an account by its uid', () => {
+      component.onFilterChange('uid-mia');
+
+      expect(component.visibleUsers()).toEqual([mia]);
+    });
+
+    it.each([['ADA@EXAMPLE.COM'], ['  ada  ']])(
+      'matches %p regardless of case and surrounding space',
+      (term) => {
+        component.onFilterChange(term);
+
+        expect(component.visibleUsers()).toEqual([ada]);
+      },
+    );
+
+    it('renders only the matches', () => {
+      component.onFilterChange('lovelace');
+      fixture.detectChanges();
+
+      const text = fixture.nativeElement.querySelector(
+        '[data-testid="admin-user-list"]',
+      ).textContent;
+      expect(text).toContain('ada@example.com');
+      expect(text).not.toContain('mia@example.com');
+    });
+
+    it('opens the form for a match without clearing the term', () => {
+      const emitted: AdminUser[] = [];
+      component.selectUser.subscribe((u) => emitted.push(u));
+      component.onFilterChange('lovelace');
+
+      component.onSelect(ada);
+
+      expect(emitted).toEqual([ada]);
+      expect(component.filter()).toBe('lovelace');
+    });
+
+    // An empty list means opposite things in the two cases, and they read
+    // identically without this.
+    it('says no account matched rather than that there are none', () => {
+      component.onFilterChange('nobody');
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="admin-user-list-empty"]',
+        ).textContent,
+      ).toContain('admin-users-no-matches');
+    });
+
+    it('says there are none when the list itself is empty', () => {
+      setInputs({ users: [] });
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="admin-user-list-empty"]',
+        ).textContent,
+      ).toContain('admin-users-empty');
+    });
+  });
 });

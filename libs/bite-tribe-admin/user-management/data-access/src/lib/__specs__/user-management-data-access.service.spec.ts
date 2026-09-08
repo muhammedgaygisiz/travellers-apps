@@ -76,6 +76,61 @@ describe(UserManagementDataAccessService.name, () => {
     await expect(service.fetchUsers()).resolves.toEqual([]);
   });
 
+  // A search that silently covers only the first page answers "no such
+  // account" for an account that exists (issue #1476).
+  describe('paging', () => {
+    const page = (
+      users: AdminUser[],
+      nextPageToken?: string,
+    ): { data: { users: AdminUser[]; nextPageToken?: string } } => ({
+      data: { users, ...(nextPageToken ? { nextPageToken } : {}) },
+    });
+
+    it('asks for the largest page the callable serves', async () => {
+      await service.fetchUsers();
+
+      expect(callByNameMock).toHaveBeenCalledWith({
+        name: 'listUsersWithRoles',
+        data: { limit: 1000 },
+      });
+    });
+
+    it('follows the page token until there is none', async () => {
+      callByNameMock
+        .mockResolvedValueOnce(page([user({ uid: 'u1' })], 'second'))
+        .mockResolvedValueOnce(page([user({ uid: 'u2' })], 'third'))
+        .mockResolvedValueOnce(page([user({ uid: 'u3' })]));
+
+      const users = await service.fetchUsers();
+
+      expect(users.map((u) => u.uid)).toEqual(['u1', 'u2', 'u3']);
+      expect(callByNameMock).toHaveBeenCalledTimes(3);
+    });
+
+    it('sends the token it was handed back', async () => {
+      callByNameMock
+        .mockResolvedValueOnce(page([user()], 'next'))
+        .mockResolvedValueOnce(page([]));
+
+      await service.fetchUsers();
+
+      expect(callByNameMock).toHaveBeenLastCalledWith({
+        name: 'listUsersWithRoles',
+        data: { limit: 1000, pageToken: 'next' },
+      });
+    });
+
+    // The loop is driven by a value the backend returns, so a token that never
+    // stops coming back must not turn one page load into an endless sequence.
+    it('stops after a bounded number of pages', async () => {
+      callByNameMock.mockResolvedValue(page([user()], 'always-more'));
+
+      await service.fetchUsers();
+
+      expect(callByNameMock).toHaveBeenCalledTimes(20);
+    });
+  });
+
   // The page reloads after a save so the form shows what was stored rather than
   // what was submitted.
   it('exposes a reload that re-runs the resource', () => {

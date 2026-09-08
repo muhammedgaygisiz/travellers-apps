@@ -77,6 +77,8 @@ Examples:
 - `libs/bite-tribe-admin/migrations/data-access`
 - `libs/bite-tribe-admin/restaurants/page`
 - `libs/bite-tribe-admin/restaurants/data-access`
+- `libs/bite-tribe-admin/bites/page`
+- `libs/bite-tribe-admin/bites/data-access`
 
 `migrations/page` holds one page per migration rather than one page listing all
 of them, because each is its own entry on the admin dashboard (issue \#1473).

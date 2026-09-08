@@ -22,6 +22,7 @@ import {
   IonNote,
   IonRadio,
   IonRadioGroup,
+  IonSearchbar,
   IonSpinner,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -51,6 +52,12 @@ import { AdminUser } from 'bite-tribe-admin/user-management-data-access';
  * through one button. The epic keeps blocking separate from content removal for
  * the same reason: an action with more consequences than its label admits is
  * harder to reason about and harder to undo (issue #1485).
+ *
+ * Finding an account happens here rather than on a search page of its own,
+ * because finding it and acting on it are the same errand: an operator who was
+ * given an email opens this page, types it, and is looking at the form. A
+ * separate surface would put a navigation between the two halves of one task
+ * (issue #1476).
  */
 @Component({
   selector: 'lib-user-management',
@@ -71,6 +78,7 @@ import { AdminUser } from 'bite-tribe-admin/user-management-data-access';
     IonRadioGroup,
     IonRadio,
     IonInput,
+    IonSearchbar,
     IonButton,
     IonSpinner,
     TranslocoPipe,
@@ -96,6 +104,56 @@ export class UserManagementComponent {
 
   readonly allRoles = BITE_TRIBE_ROLES;
   readonly allTiers = SUBSCRIPTION_TIERS;
+
+  /**
+   * What the operator typed to narrow the account list.
+   *
+   * Held here rather than emitted, because the list it filters is already
+   * loaded in full: the data-access service follows the callable's page token
+   * until there is none, so every account is in memory and matching them is
+   * display logic rather than a query (issue #1476).
+   *
+   * **An operator sees private profiles.** This filters the admin-only account
+   * list, which reads Firebase Auth joined with `/users`; it does not call
+   * `searchUsers`, whose `public === true` filter is a consumer-facing privacy
+   * control. That is the whole answer to how the two relate: the consumer
+   * callable is untouched, so nothing this adds changes what one BiteTribe user
+   * can find out about another.
+   */
+  readonly filter = signal('');
+
+  /**
+   * The accounts that match, or all of them when nothing is typed.
+   *
+   * Matched on email, display name and uid together rather than through a field
+   * picker. An operator is handed one string by whoever reported the problem and
+   * does not always know which of the three it is, and a picker set to the wrong
+   * field answers "no such account" for an account that is right there.
+   *
+   * The uid is included because a reported id should still resolve, not because
+   * an operator is expected to have one: nothing here requires knowing an id.
+   */
+  readonly visibleUsers = computed<AdminUser[]>(() => {
+    const term = this.filter().trim().toLocaleLowerCase();
+
+    if (!term) {
+      return this.users();
+    }
+
+    return this.users().filter((user) =>
+      [user.email, user.displayName, user.uid].some((field) =>
+        field.toLocaleLowerCase().includes(term),
+      ),
+    );
+  });
+
+  /**
+   * Distinguishes "this project has no accounts" from "none of them match".
+   *
+   * The two read identically as an empty list and mean opposite things: one is a
+   * broken load, the other is a term to retype.
+   */
+  readonly filtered = computed(() => this.filter().trim().length > 0);
 
   /**
    * The roles as edited, before saving.
@@ -158,6 +216,10 @@ export class UserManagementComponent {
       this.draftTier() !== null &&
       this.tierReason().trim().length > 0,
   );
+
+  onFilterChange(term: string): void {
+    this.filter.set(term);
+  }
 
   onSelect(user: AdminUser): void {
     this.draft.set(undefined);

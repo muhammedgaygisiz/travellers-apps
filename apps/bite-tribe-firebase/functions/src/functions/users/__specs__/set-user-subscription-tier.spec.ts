@@ -249,14 +249,16 @@ describe('setUserSubscriptionTier logging', () => {
     await handle(request(validData()));
 
     expect(logger.info).toHaveBeenCalledWith(
-      'user subscription tier updated',
+      expect.stringContaining('setUserSubscriptionTier'),
       expect.objectContaining({
-        targetUid: TARGET_UID,
+        operatorAction: 'setUserSubscriptionTier',
         callerUid: ADMIN_UID,
-        previousTier: 0,
-        tier: 1,
-        reason: REASON,
         callerRoles: ['admin'],
+        targetType: 'user',
+        targetId: TARGET_UID,
+        outcome: 'succeeded',
+        reason: REASON,
+        details: { previousTier: 0, tier: 1 },
       }),
     );
   });
@@ -265,7 +267,7 @@ describe('setUserSubscriptionTier logging', () => {
     await handle(request(validData({ reason: `  ${REASON}  ` })));
 
     expect(logger.info).toHaveBeenCalledWith(
-      'user subscription tier updated',
+      expect.stringContaining('setUserSubscriptionTier'),
       expect.objectContaining({ reason: REASON }),
     );
   });

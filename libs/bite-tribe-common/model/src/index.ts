@@ -3,7 +3,6 @@ export type * from './lib/review';
 export type * from './lib/review-thread';
 export type * from './lib/restaurant';
 export type * from './lib/restaurant-candidate';
-export type * from './lib/restaurant-claim';
 export type * from './lib/user';
 export type * from './lib/settings';
 export type * from './lib/menu';

@@ -83,7 +83,7 @@
 
   The 41 child issues (\#1074 to \#1114) have no `issue-*` pages. They are unstarted, and their specifications live on the GitHub issues; the durable product context is in the use-case and domain pages above.
 
-  Stage 0 was rescoped on 8 September 2026 and its child list no longer matches that range. Ownership is assigned by an operator rather than claimed by a restaurant, so \#1076 is closed as not planned, \#1077 is the assignment workflow, and \#1537 was added for a business account managing its own staff. \#1075 was largely delivered from outside the epic: \#1469 needed the role model for the admin app and built it first. See [[epic-1069]] for what moved and why.
+  Stage 0 was rescoped on 8 September 2026 and its child list no longer matches that range. Ownership is assigned by an operator rather than claimed by a restaurant, so \#1076 is closed as not planned, \#1077 is the assignment workflow and is done, and \#1537 was added for a business account managing its own staff. \#1075 was largely delivered from outside the epic: \#1469 needed the role model for the admin app and built it first. See [[epic-1069]] for what moved and why.
 
   Stage 0 blocks every later stage. Stages 1 and 2 are independently shippable.
 

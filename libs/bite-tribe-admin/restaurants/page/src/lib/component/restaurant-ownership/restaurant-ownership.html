@@ -1,0 +1,205 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="ion-display-flex ion-flex-row restaurant-ownership">
+      <div class="column column--list ion-padding">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title
+              >{{ 'admin-restaurant-ownership-title' | transloco
+              }}</ion-card-title
+            >
+          </ion-card-header>
+          <ion-card-content>
+            <ion-searchbar
+              [value]="filter()"
+              [placeholder]="
+                'admin-restaurant-ownership-filter-placeholder' | transloco
+              "
+              data-testid="admin-restaurant-filter"
+              (ionInput)="onFilterChange($event.detail.value ?? '')"
+            />
+            @if (loading()) {
+            <div class="restaurant-ownership__loading">
+              <ion-spinner name="crescent" />
+            </div>
+            } @else {
+            <ion-list lines="full" data-testid="admin-restaurant-list">
+              @for (restaurant of visibleRestaurants(); track restaurant.id) {
+              <ion-item
+                [button]="true"
+                [color]="
+                      restaurant.id === selected()?.id ? 'light' : undefined
+                    "
+                (click)="onSelect(restaurant)"
+              >
+                <ion-label>
+                  <h3>{{ restaurant.name }}</h3>
+                  @if (restaurant.ownerUserId; as ownerUserId) {
+                  <p>{{ accountLabel(ownerUserId) }}</p>
+                  }
+                  <p>
+                    <ion-badge [color]="claimStatusColor(restaurant)"
+                      >{{ claimStatusKey(restaurant) | transloco }}</ion-badge
+                    >
+                  </p>
+                </ion-label>
+              </ion-item>
+              } @empty {
+              <p data-testid="admin-restaurant-list-empty">
+                @if (filtered()) { {{ 'admin-restaurant-ownership-no-matches' |
+                transloco }} } @else { {{ 'admin-restaurant-ownership-empty' |
+                transloco }} }
+              </p>
+              }
+            </ion-list>
+            }
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <div class="column column--detail ion-padding">
+        @if (selected(); as restaurant) {
+        <ion-card data-testid="admin-restaurant-ownership-form">
+          <ion-card-header>
+            <ion-card-title>{{ restaurant.name }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="none">
+              <ion-item>
+                <ion-label>
+                  <p>{{ 'admin-restaurant-ownership-id' | transloco }}</p>
+                  <h3>{{ restaurant.id }}</h3>
+                </ion-label>
+              </ion-item>
+              <ion-item>
+                <ion-label>
+                  <p>{{ 'admin-restaurant-ownership-owner' | transloco }}</p>
+                  <h3 data-testid="admin-restaurant-owner">
+                    @if (assigned()) { {{ accountLabel(ownerUserId()) }} } @else
+                    { {{ 'admin-restaurant-ownership-status-unclaimed' |
+                    transloco }} }
+                  </h3>
+                </ion-label>
+              </ion-item>
+              @if (restaurant.claimedAt) {
+              <ion-item>
+                <ion-label>
+                  <p>{{ 'admin-restaurant-ownership-since' | transloco }}</p>
+                  <h3>{{ restaurant.claimedAt }}</h3>
+                </ion-label>
+              </ion-item>
+              }
+            </ion-list>
+
+            @if (!assigned()) {
+            <h4 class="restaurant-ownership__section">
+              {{ 'admin-restaurant-ownership-account' | transloco }}
+            </h4>
+            <ion-searchbar
+              [value]="accountFilter()"
+              [placeholder]="
+                    'admin-restaurant-ownership-account-placeholder' | transloco
+                  "
+              data-testid="admin-restaurant-account-filter"
+              (ionInput)="onAccountFilterChange($event.detail.value ?? '')"
+            />
+            <ion-list lines="full" data-testid="admin-restaurant-accounts">
+              <ion-radio-group
+                [value]="draftOwnerUserId()"
+                (ionChange)="onOwnerChange($event.detail.value)"
+              >
+                @for (account of assignableAccounts(); track account.uid) {
+                <ion-item>
+                  <ion-radio
+                    [value]="account.uid"
+                    [attr.data-testid]="'owner-' + account.uid"
+                  >
+                    {{ account.email || account.uid }}
+                  </ion-radio>
+                </ion-item>
+                } @empty {
+                <p data-testid="admin-restaurant-accounts-empty">
+                  @if (accountFiltered()) { {{
+                  'admin-restaurant-ownership-no-account-matches' | transloco }}
+                  } @else { {{ 'admin-restaurant-ownership-no-accounts' |
+                  transloco }} }
+                </p>
+                }
+              </ion-radio-group>
+            </ion-list>
+            <ion-note class="restaurant-ownership__hint">
+              {{ 'admin-restaurant-ownership-account-hint' | transloco }}
+            </ion-note>
+            } @else {
+            <ion-note
+              class="restaurant-ownership__hint"
+              data-testid="admin-restaurant-reassign-hint"
+            >
+              {{ 'admin-restaurant-ownership-reassign-hint' | transloco }}
+            </ion-note>
+            }
+
+            <ion-list lines="full">
+              <ion-item>
+                <ion-input
+                  labelPlacement="stacked"
+                  [label]="'admin-restaurant-ownership-reason' | transloco"
+                  [placeholder]="
+                      'admin-restaurant-ownership-reason-placeholder'
+                        | transloco
+                    "
+                  [value]="reason()"
+                  data-testid="admin-restaurant-reason"
+                  (ionInput)="onReasonChange($event.detail.value ?? '')"
+                />
+              </ion-item>
+            </ion-list>
+            <ion-note class="restaurant-ownership__hint">
+              {{ 'admin-restaurant-ownership-reason-hint' | transloco }}
+            </ion-note>
+
+            @if (!assigned()) {
+            <ion-button
+              expand="block"
+              class="ion-margin-top"
+              data-testid="admin-restaurant-assign"
+              [disabled]="!canAssign() || saving()"
+              (click)="onAssign()"
+            >
+              @if (saving()) {
+              <ion-spinner name="crescent" slot="start" />
+              } {{ 'admin-restaurant-ownership-assign' | transloco }}
+            </ion-button>
+            } @else {
+            <div class="restaurant-ownership__danger">
+              <ion-button
+                expand="block"
+                class="ion-margin-top"
+                color="danger"
+                data-testid="admin-restaurant-revoke"
+                [disabled]="!canRevoke() || saving()"
+                (click)="onRevoke()"
+              >
+                @if (saving()) {
+                <ion-spinner name="crescent" slot="start" />
+                } {{ 'admin-restaurant-ownership-revoke' | transloco }}
+              </ion-button>
+            </div>
+            }
+          </ion-card-content>
+        </ion-card>
+        } @else {
+        <ion-card>
+          <ion-card-content>
+            <p>{{ 'admin-restaurant-ownership-select-hint' | transloco }}</p>
+          </ion-card-content>
+        </ion-card>
+        }
+      </div>
+    </div>
+  </ion-content>
+</ta-page>

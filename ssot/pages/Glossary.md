@@ -68,6 +68,10 @@ existing name already or the term belongs here.
   - Business relevance: Connects business inventory to user-generated bite content and can support conversion flows such as creating a bite from a menu item.
 - **Restaurant claim** — A request by a user with the business role to be recognised as the owner of an existing restaurant in BiteTribe, reviewed and approved before it takes effect.
   - Business relevance: Establishes who is accountable for a restaurant's data and who is allowed to operate it. Every operational restaurant capability depends on it.
+- **Restaurant candidate** — A proposed restaurant, assembled from repeated bites at one place and held for a BiteTribe operator to verify, dismiss, or resolve against a restaurant that already exists. Produced two ways: automatically, once five nearby bites within 200 m name the same place, or on demand by an operator from a single bite. See [[UC - Detect Restaurant Candidate]] and [[UC - Verify Restaurant Candidate]].
+  - Business relevance: The only route by which a restaurant profile comes into existence, so it governs both how fast the restaurant side of the product can grow and how much of it is trustworthy. A wrong verification publishes a page about a real business that was never involved.
+- **Candidate producer** — Which of those two routes created a candidate, recorded on the candidate itself. The automatic route carries evidence from five independent bites; the operator route carries none by design, because a deliberate operator action is its own safeguard.
+  - Business relevance: The two routes hold different standards of evidence, so the producer is what makes the collection's quality claim checkable rather than assumed.
 
 ## Table Service
 

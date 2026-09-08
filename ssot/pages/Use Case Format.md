@@ -75,9 +75,10 @@ defect list and not a work plan. Where it needs one of those, it links to it.
 - **UF-5** A page MUST NOT carry a `Notation` section. It writes one line instead:
   `The flow below is a text actogram; the notation is defined in [[Actogram Format]].`
   A page with several entries MAY add one paragraph declaring its step-id prefixes.
-- **UF-6** A page MUST NOT carry a `Recorded Decisions` section. `RD-*` ids are
-  graph-wide, so a register split across pages cannot be read as a register. Decisions
-  live on one page; the use case links the ones that bind it.
+- **UF-6** A page MUST NOT carry a `Recorded Decisions` section. A register split
+  across pages cannot be read as a register. Decisions live on one page,
+  [[Recorded Decisions]]; the use case links the ones that bind it. Ids carry their
+  register as a prefix - `RD-VRC-7`, never a bare `RD-7`.
 - **UF-7** A page MUST NOT state the same fact in two sections. Every fact has one home
   and the others point at it.
 - **UF-8** A page appears in `Related Domains` or in `Related Pages`, never both.
@@ -93,7 +94,7 @@ defect list and not a work plan. Where it needs one of those, it links to it.
 | Rule / invariant | `R-1` | page | never |
 | Exception | `E1` | page | never |
 | Use-case code | `UC-VRC` | graph | never |
-| Decision | `RD-7` | graph | never |
+| Decision | `RD-VRC-7` | register | never |
 | GitHub issue | `#1472` | GitHub | – |
 
 - **UF-9** A cross-page reference MUST be written `` `UC-DRC` `R-6` `` — the use-case

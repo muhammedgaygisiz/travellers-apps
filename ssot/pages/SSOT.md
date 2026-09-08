@@ -1,6 +1,7 @@
 - Overview
   - [[Agent Operating Contract]]
   - [[Traceability Map]]
+  - [[Recorded Decisions]]
   - [[Spec To Code Workflow]]
   - [[Feature Delivery Workflow]]
   - [[GitHub Project Board And Issue Handling]]

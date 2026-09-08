@@ -25,14 +25,22 @@ Section titles are used verbatim, as `##` headings, in the order the shape below
 
 ## Title Format
 
-An issue title is `NN - type(scope): description`.
+An issue title is `type(scope): description`, optionally prefixed with an ordinal:
+`NN - type(scope): description`.
 
-- `NN` is a two-digit ordinal sequencing the issue within its epic, starting at `01`. It is the dependency order.
 - `type` follows the vocabulary already in use: `feat`, `fix`, `refactor`, `docs`, `security`, `test`, `spec`, `launch`, `ci`, `perf`.
 - `scope` in parentheses names the app or library where the change lands, for example `feat(bite-tribe-admin)` or `fix(backend)`. It is omitted where the change has no single home, as in `docs:`.
 - `description` is lower case and states the outcome, not the task.
 
-An issue filed outside an epic carries no ordinal. `NN -`is optional and only required if sequence is relevant. 
+### The Ordinal
+
+`NN` is a two-digit ordinal starting at `01`, sequencing an issue within its epic.
+
+**It is optional, and omitted by default.** It is carried only where the issues of an epic have an intended working order that a reader benefits from seeing at a glance. Epic membership alone does not call for one: issues that belong to the same epic and can be picked up in any order carry no ordinal.
+
+An ordinal is a reading aid, never the dependency record. Where one issue genuinely cannot be merged before another, that is stated as `Depends on #1234` under `Related Issues`, with the reason.
+
+An issue filed outside an epic never carries an ordinal.
 
 ## Shape 1 - Spec-Ahead
 
@@ -78,6 +86,25 @@ For a defect or a change already implemented. **The user-story form is not used.
 
 A decision that has not yet been taken belongs in [[Current State - Open Questions]], not in an acceptance criterion.
 
+### The Use-Case Assertion
+
+Where an issue closes a gap that a use case carries as a rule, guarantee or exception marked *Intended, not met*, the **last** acceptance criterion asserts that the marker is gone:
+
+```text
+- [ ] `UC - Detect Restaurant Candidate` no longer marks `G7` as *Intended, not met*.
+```
+
+This is an assertion, not the process entry ruled out above. It names one artefact and one identifier, it is false until the work lands, and it is checked by reading a single line. `[ ] Use case updated` is the process form and stays excluded, as does anything that does not name the identifier it settles.
+
+It exists because an id can survive a rewrite while its meaning moves, and because a rule marked *Intended, not met* is the one place the SSOT admits the code and the specification disagree. Nothing else in the issue makes the closing of that admission checkable.
+
+Two limits:
+
+- **It applies only where such a marker exists.** An issue that closes nothing marked in a use case carries no criterion of this kind, and no issue invents a marker in order to have one.
+- **Where two issues together close one marker**, because the rule states both halves, the criterion belongs on the issue that lands second. The first names the half it delivers in its traceability sentence instead.
+
+This is the one exception to the rule that traceability is not recorded in the issue body. It records a *contract*, not a cross-reference: the cross-reference still belongs on the use-case page.
+
 ## App Store Review Area
 
 **This section is never omitted.**
@@ -98,7 +125,7 @@ A link states its kind, using one of three forms, in this order:
 
 On GitHub, use `#1234`. On the SSOT mirror page, use `[[issue-1234]]`.
 
-Domain, use-case, epic and architecture traceability is not recorded here. It belongs on the SSOT mirror page, per [[Agent Operating Contract]] and [[Traceability Map]].
+Domain, use-case, epic and architecture traceability is not recorded here. It belongs on the use-case page, in its `Related GitHub Scope` section, which [[Use Case Format]] `UF-4` requires and never omits.
 
 ## Status And The Mirror Page
 

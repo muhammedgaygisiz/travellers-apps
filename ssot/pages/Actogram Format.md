@@ -58,7 +58,7 @@ A step's **class is derived, not declared**: a step on an `actor` lane is an
           REF:<UC-ID>   <the guarantee that Use Case owes here>
           INV:<R-x>
           INV:<R-x> is VIOLATED here: <how the as-built behaviour breaks it>
-          ENTRY:<X>  <how this step differs when reached from entry X>
+          ENTRY:<X>  <how this step differs when reached by the path whose prefix is X>
           NOTE: <as-built remark that is not a rule>
           → <StepId>                              unconditional successor
           ├─ <condition> → <StepId | END-x>       branch
@@ -148,7 +148,10 @@ lands, and folding it into `UI` makes those questions invisible.
 ### Perception
 
 - **AF-15** A mechanism run that returns control to an actor MUST end with a perception
-  line (`└─◁`) stating what that actor perceives.
+  line (`└─◁`) stating what that actor perceives — **unless the run ends at a terminal
+  state.** There the perception is carried by the terminal table, which `AF-16` already
+  requires and `UF-7` forbids restating on the step. The rule therefore binds a run that
+  hands control back mid-flow, which is where the perception would otherwise go unstated.
 - **AF-16** Every terminal state reachable by an actor MUST name the perception that
   actor is left with.
 - **AF-17** An error code is not a perception. A perception MUST be stated as what the
@@ -169,9 +172,12 @@ lands, and folding it into `UI` makes those questions invisible.
 
 - **AF-21** Two or more consecutive mechanism steps MUST be grouped under
   `### Mechanism - <name>`. Mechanism steps do not count toward `AF-4`.
-- **AF-22** Where several entries converge on shared steps, the entry MUST be carried as
-  state, and a step that behaves differently by entry MUST declare each difference with
-  an `ENTRY:` line rather than in prose or an inline annotation.
+- **AF-22** Where several paths converge on shared steps — entries, mechanisms, or a
+  mixture of the two — the path MUST be carried as state, and a step that behaves
+  differently by path MUST declare each difference with an `ENTRY:` line naming that
+  path's step-id prefix, rather than in prose or an inline annotation. The marker keeps
+  the name `ENTRY:` whichever kind of path it names, because what it records is which
+  way the step was reached.
 
 ### Branches And Terminal States
 
@@ -269,7 +275,7 @@ automated check.
 | 19 | ⚙ At L3, every step has an `@` locus | AF-12 |
 | 20 | ⚙ A completeness claim is present in `Scope` | AF-32 |
 | 21 | No effect line contains an actor action | AF-8 |
-| 22 | Every mechanism run returning to an actor ends in a perception | AF-15 |
+| 22 | Every mechanism run returning to an actor **mid-flow** ends in a perception; a run ending at a terminal is covered by AF-16 | AF-15 |
 | 23 | No perception is stated as an error code | AF-17 |
 | 24 | Every branch set is exhaustive | AF-23 |
 | 25 | Every referenced use case's guarantees name this page's precondition | AF-31 |

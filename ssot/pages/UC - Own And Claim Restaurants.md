@@ -8,7 +8,7 @@ This is the blocking prerequisite for every other stage of the Restaurant Intera
 
 ## Goal
 
-A restaurant has exactly one accountable owner: a normal BiteTribe user carrying an additional business role. Users can only read and write the restaurants they own. Staff can act on those restaurants within a narrower permission set. Admins can review and resolve claims.
+A restaurant has exactly one accountable owner: a normal BiteTribe user carrying an additional business role. Users can only read and write the restaurants they own. Staff can act on those restaurants within a narrower permission set. Admins can review and resolve claims, and maintain every Restaurant regardless of ownership - `RD-8` in [[User Roles]].
 
 ## Why It Is Needed
 
@@ -60,7 +60,7 @@ There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it 
 
 ## Success Criteria
 
-- A restaurant cannot be edited by a user who does not own it, proven with emulator rule tests for both allow and deny.
+- A restaurant cannot be edited by a user who does not own it and does not hold `admin`, proven with emulator rule tests for both allow and deny. The `admin` exception is required by `RD-8` in [[User Roles]] and needs its own allow test.
 - The Firestore rules no longer contain a blanket `allow read, write: if request.auth != null` for all documents.
 - A revoked role stops working within one token refresh cycle.
 - Both apps' existing flows still work end to end after the rules change.

@@ -5,8 +5,13 @@ import { authGuard, roleGuard } from 'ta-firestore';
 /**
  * Every authenticated route carries both guards.
  *
- * `authGuard` establishes that someone is signed in; `roleGuard('business')`
- * establishes that the account was granted business access by an operator.
+ * `authGuard` establishes that someone is signed in;
+ * `roleGuard('business', 'staff')` establishes that the account was granted
+ * business access by an operator, or was put on a restaurant as staff. The two
+ * are alternatives, not a hierarchy: a staff account holds `staff` and *not*
+ * `business`, so naming only `business` here would sign it out at the door
+ * (issue #1075). What a staff account may then *do* is narrower, and that is
+ * issue #1078's and #1079's to enforce - this gate is the door, not the rules.
  * Until issue #1469 only the first existed, which meant any BiteTribe account
  * could open this app and run the operational migrations in it. Those
  * migrations, restaurant-candidate verification and the unmatched Bite places
@@ -36,7 +41,7 @@ export const ROUTES: Routes = withAuthRoutes([
     path: 'dashboard',
     loadComponent: () =>
       import('bite-tribe-business/dashboard').then((m) => m.DashboardContainer),
-    canActivate: [authGuard, roleGuard('business')],
+    canActivate: [authGuard, roleGuard('business', 'staff')],
   },
   {
     path: 'bite-trails',
@@ -44,7 +49,7 @@ export const ROUTES: Routes = withAuthRoutes([
       import('bite-tribe-business/dashboard').then(
         (m) => m.BiteTrailsContainer,
       ),
-    canActivate: [authGuard, roleGuard('business')],
+    canActivate: [authGuard, roleGuard('business', 'staff')],
   },
   {
     path: 'restaurants',
@@ -52,7 +57,7 @@ export const ROUTES: Routes = withAuthRoutes([
       import('bite-tribe-business/dashboard').then(
         (m) => m.RestaurantsContainer,
       ),
-    canActivate: [authGuard, roleGuard('business')],
+    canActivate: [authGuard, roleGuard('business', 'staff')],
   },
   {
     path: 'create-bite-trail',
@@ -60,7 +65,7 @@ export const ROUTES: Routes = withAuthRoutes([
       import('bite-tribe-business/create-bite-trail').then(
         (m) => m.CreateBiteTrailContainer,
       ),
-    canActivate: [authGuard, roleGuard('business')],
+    canActivate: [authGuard, roleGuard('business', 'staff')],
   },
   {
     path: 'restaurant/:restaurantId',
@@ -68,13 +73,13 @@ export const ROUTES: Routes = withAuthRoutes([
       import('bite-tribe-business/restaurant').then(
         (m) => m.EditRestaurantContainer,
       ),
-    canActivate: [authGuard, roleGuard('business')],
+    canActivate: [authGuard, roleGuard('business', 'staff')],
   },
   {
     path: 'restaurant/:restaurantId/menu/:menuId',
     loadComponent: () =>
       import('bite-tribe-business/edit-menu').then((m) => m.EditMenuContainer),
-    canActivate: [authGuard, roleGuard('business')],
+    canActivate: [authGuard, roleGuard('business', 'staff')],
   },
   {
     path: '',

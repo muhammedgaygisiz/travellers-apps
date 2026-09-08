@@ -61,6 +61,10 @@ describe(UserManagementComponent.name, () => {
     fixture.detectChanges();
   };
 
+  const textOf = (testId: string): string =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`)
+      ?.textContent ?? '';
+
   beforeEach(() => {
     // `ta-page` renders an `ion-back-button` here, which injects the Router.
     // (The `Invalid base URL` lines in this suite's output are ionicons
@@ -182,6 +186,82 @@ describe(UserManagementComponent.name, () => {
       expect(emitted).toEqual([
         { uid: 'u1', roles: expect.arrayContaining(['business', 'admin']) },
       ]);
+    });
+
+    it('offers the staff role, because it renders from the role list', () => {
+      expect(component.allRoles).toContain('staff');
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="role-staff"]'),
+      ).not.toBeNull();
+    });
+
+    // `setUserRoles` refuses the pair and stays the authority. This is so the
+    // refusal reads as a reason next to the checkboxes rather than as a failed
+    // save afterwards (issue #1075).
+    describe('business and staff together', () => {
+      const saveDisabled = (): boolean =>
+        fixture.nativeElement.querySelector('[data-testid="admin-user-save"]')
+          .disabled;
+
+      it('is reported as a conflict', () => {
+        component.toggleRole('staff', true);
+        fixture.detectChanges();
+
+        expect(component.rolesConflict()).toBe(true);
+        expect(textOf('admin-user-roles-conflict')).toContain(
+          'admin-users-roles-conflict-hint',
+        );
+      });
+
+      it('disables the save even though the form is dirty', () => {
+        component.toggleRole('staff', true);
+        fixture.detectChanges();
+
+        expect(component.dirty()).toBe(true);
+        expect(saveDisabled()).toBe(true);
+      });
+
+      it('emits nothing if a queued click lands anyway', () => {
+        const emitted: unknown[] = [];
+        component.save.subscribe((event) => emitted.push(event));
+
+        component.toggleRole('staff', true);
+        component.onSave();
+
+        expect(emitted).toEqual([]);
+      });
+
+      it('clears once one of the two is unticked', () => {
+        component.toggleRole('staff', true);
+        component.toggleRole('business', false);
+        fixture.detectChanges();
+
+        expect(component.rolesConflict()).toBe(false);
+        expect(saveDisabled()).toBe(false);
+        expect(
+          fixture.nativeElement.querySelector(
+            '[data-testid="admin-user-roles-conflict"]',
+          ),
+        ).toBeNull();
+      });
+
+      // `admin` is in conflict with neither: an operator account may also run
+      // a restaurant.
+      it('does not flag admin alongside either role', () => {
+        component.toggleRole('admin', true);
+        fixture.detectChanges();
+
+        expect(component.rolesConflict()).toBe(false);
+      });
+
+      it('says nothing about a conflict on an untouched form', () => {
+        expect(component.rolesConflict()).toBe(false);
+        expect(
+          fixture.nativeElement.querySelector(
+            '[data-testid="admin-user-roles-conflict"]',
+          ),
+        ).toBeNull();
+      });
     });
   });
 

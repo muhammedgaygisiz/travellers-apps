@@ -34,6 +34,7 @@
   "admin-users-last-sign-in": "Last sign-in",
   "admin-users-roles": "Roles",
   "admin-users-roles-hint": "A role takes effect on the account’s next sign-in, or within an hour on an open session.",
+  "admin-users-roles-conflict-hint": "An account cannot be both business and staff. Business operates a restaurant; staff is the narrower set of what can be done on one.",
   "admin-users-saved": "Roles saved.",
   "admin-users-save-failed": "The roles could not be saved. Please try again.",
   "admin-users-tier": "Subscription tier",

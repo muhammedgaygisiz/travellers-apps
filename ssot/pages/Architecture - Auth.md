@@ -27,9 +27,9 @@ Backend callables validate request.auth where required
   before that answer exists.
 - `withAuthRoutes` provides shared auth routes.
 - `authGuard` protects authenticated routes.
-- `REQUIRED_ROLE` is the role an app demands of everyone who signs into it;
-  sign-in fails generically when the account does not hold it.
-- `roleGuard(role)` backs that up on the routes for restored sessions and
+- `REQUIRED_ROLES` is the set of roles an app admits, any one of which is enough
+  to sign in; sign-in fails generically when the account holds none of them.
+- `roleGuard(...roles)` backs that up on the routes for restored sessions and
   revoked roles.
 - `setUserRoles` is the admin-only callable that writes roles, and
   `grant-role.mjs` is the service-account bootstrap behind it.
@@ -90,21 +90,35 @@ app and run the operational migrations in it.
   credentials and deliberately checks nothing, because holding those credentials
   already means holding the project.
 - **The role is checked at sign-in, and a missing role fails the login.** The
-  sign-in effects verify `REQUIRED_ROLE` before dispatching `loginSucceeded`,
+  sign-in effects verify `REQUIRED_ROLES` before dispatching `loginSucceeded`,
   end the session, and report the same generic
   `something-went-wrong-please-try-again` a wrong password produces. Signing an
   account in and then refusing it a page would tell whoever is trying that the
   password was right, that the account exists, and which role guards the app. A
   generic failure tells them nothing.
-- `REQUIRED_ROLE` is an injection token bound per shell: `business` in the
-  business app, `admin` in the admin app, **unbound in the consumer app**. An
-  unbound token means "no role required", not "no role granted", which is what
-  keeps the consumer app ungated.
-- `roleGuard(role)` is the backstop, not the primary gate. Sign-in already
+- `REQUIRED_ROLES` is an injection token bound per shell: `business` and `staff`
+  in the business app, `admin` in the admin app, **unbound in the consumer
+  app**. An unbound token, and a bound-but-empty list, both mean "no role
+  required" rather than "no role granted", which is what keeps the consumer app
+  ungated.
+- **The roles an app admits are alternatives, not a hierarchy.** The business
+  app takes two because a staff account holds `staff` and **not** `business`.
+  Any one of the listed roles admits the account; what it may then _do_ is
+  narrower and belongs to the rules of issue \#1078 and the scoped dashboard of
+  \#1079, not to the door.
+- `roleGuard(...roles)` is the backstop, not the primary gate. Sign-in already
   refuses these accounts, so it fires only for a session restored on startup
   (which reports itself as a successful login without running the sign-in
   effect) or a role revoked mid-session. It reaches the same outcome: end the
   session, raise the generic failure, return to `/login`.
+- **There are two gates, and widening one is not widening the app.** They are
+  independent: `REQUIRED_ROLES` refuses the sign-in, `roleGuard` covers the two
+  paths that never run the sign-in effect. Issue \#1075 widened the guard alone
+  and the unit tests were green, because each gate's tests only exercise its own
+  gate; the staff account was still turned away at the door, and the only thing
+  that showed it was signing one in against the emulator. **A change to which
+  roles an app admits has to touch the shell's `REQUIRED_ROLES` and the routes'
+  `roleGuard` together, and be proven by a real sign-in.**
 - Neither path is the authorization answer. Every privileged callable re-reads
   the claim from the token Firebase verified; the client half only decides what
   a browser is shown.

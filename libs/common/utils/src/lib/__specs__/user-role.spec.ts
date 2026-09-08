@@ -1,7 +1,21 @@
-import { isBiteTribeRole, rolesFromClaims } from '../user-role';
+import {
+  BITE_TRIBE_ROLES,
+  isBiteTribeRole,
+  rolesFromClaims,
+} from '../user-role';
+
+describe('BITE_TRIBE_ROLES', () => {
+  // The list is duplicated in the Functions project, which cannot import this
+  // one: its `tsconfig.json` carries no workspace path mappings. The two are
+  // kept in step by `apps/bite-tribe-firebase/functions/src/__specs__/role-list-parity.spec.ts`,
+  // and this assertion is the half of that pair which lives with the type.
+  it('holds the three roles BiteTribe grants', () => {
+    expect(BITE_TRIBE_ROLES).toEqual(['admin', 'business', 'staff']);
+  });
+});
 
 describe('isBiteTribeRole', () => {
-  it.each(['admin', 'business'])('accepts the known role %s', (role) => {
+  it.each([...BITE_TRIBE_ROLES])('accepts the known role %s', (role) => {
     expect(isBiteTribeRole(role)).toBe(true);
   });
 
@@ -45,6 +59,19 @@ describe('rolesFromClaims', () => {
     expect(rolesFromClaims({ roles: ['admin', 'superuser', 7, null] })).toEqual(
       ['admin'],
     );
+  });
+
+  // `staff` has to survive the read before anything gates on it, so a
+  // restaurant's staff can be recorded ahead of issue #1078 and #1079.
+  it('reads the staff role', () => {
+    expect(rolesFromClaims({ roles: ['staff'] })).toEqual(['staff']);
+  });
+
+  it('reads a mixed set in the order the token carries it', () => {
+    expect(rolesFromClaims({ roles: ['staff', 'admin'] })).toEqual([
+      'staff',
+      'admin',
+    ]);
   });
 
   it('ignores other claims in the same payload', () => {

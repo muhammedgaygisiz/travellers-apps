@@ -34,6 +34,7 @@ export const OPERATOR_ACTIONS = [
   'backfillBiteAddress',
   'backfillReviewTimestamps',
   'clusterRestaurantCandidateForBite',
+  'deleteBiteAsOperator',
   'sendNewVersionNotification',
   'setUserBlocked',
   'setUserRoles',

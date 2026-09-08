@@ -19,6 +19,29 @@ interface SearchBitesRequest {
   searchText: string;
 }
 
+interface DeleteBiteRequest {
+  biteId: string;
+  reason: string;
+}
+
+/**
+ * What the cascade removed, as `deleteBiteAsOperator` reports it.
+ *
+ * The counts are surfaced rather than dropped because the deletion is
+ * irreversible and reaches further than the Bite: an operator who removes one
+ * improper Bite and is told it also took two reviews out of somebody's thread
+ * and a stop out of a BiteTrail knows what they did (issue #1475).
+ */
+export interface DeleteBiteResult {
+  biteId: string;
+  deletedLikes: number;
+  deletedReviews: number;
+  deletedImages: number;
+  updatedRestaurantCandidates: number;
+  updatedBucketlists: number;
+  updatedBiteTrails: number;
+}
+
 /**
  * The Bite search behind the admin app's Bite lookup.
  *
@@ -64,5 +87,27 @@ export class BiteSearchDataAccessService {
     >({ name: 'searchBites', data: { searchText: term } });
 
     return data ?? [];
+  }
+
+  /**
+   * Deletes a Bite that should not be on BiteTribe.
+   *
+   * The Bite is gone, not hidden: there is nothing to restore and nothing to
+   * show an author who disputes it. The reason is required by the callable
+   * because Cloud Logging is the only record the action leaves.
+   *
+   * Errors are not swallowed. An operator who is told a Bite was removed when
+   * it was not will not look again.
+   */
+  async deleteBite(biteId: string, reason: string): Promise<DeleteBiteResult> {
+    const { data } = await FirebaseFunctions.callByName<
+      DeleteBiteRequest,
+      DeleteBiteResult
+    >({
+      name: 'deleteBiteAsOperator',
+      data: { biteId, reason: reason.trim() },
+    });
+
+    return data;
   }
 }

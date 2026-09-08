@@ -211,5 +211,15 @@
   "admin-bites-place": "Place",
   "admin-bites-description": "Description",
   "admin-bites-tags": "Tags",
-  "admin-bites-detail-hint": "Read-only. Removing an improper Bite is not built yet."
+  "admin-bites-detail-hint": "Read-only: only the author can edit a Bite. An operator can only remove it.",
+  "admin-bites-no-image": "This Bite has no image.",
+  "admin-bites-remove": "Remove this Bite",
+  "admin-bites-delete": "Delete Bite",
+  "admin-bites-delete-reason": "Reason",
+  "admin-bites-delete-reason-placeholder": "Why this Bite has to come down",
+  "admin-bites-delete-hint": "The Bite is deleted outright, together with its image, its reactions and its reviews. It cannot be restored, and the author is not told. The reason is required because the log is the only record.",
+  "admin-bites-delete-confirm-title": "Delete this Bite?",
+  "admin-bites-delete-confirm-message": "The Bite, its image, its reactions and its reviews are removed for good. Nothing can be restored.",
+  "admin-bites-deleted": "Bite deleted.",
+  "admin-bites-delete-failed": "The Bite could not be deleted. It is still there — try again."
 }

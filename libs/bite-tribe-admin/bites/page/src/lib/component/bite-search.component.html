@@ -58,7 +58,7 @@
                   <ion-item
                     [button]="true"
                     [color]="bite.id === selected()?.id ? 'light' : undefined"
-                    (click)="selectBite.emit(bite)"
+                    (click)="onSelect(bite)"
                   >
                     <ion-label>
                       <h3>{{ bite.name || bite.id }}</h3>
@@ -103,6 +103,27 @@
               <ion-card-title>{{ bite.name || bite.id }}</ion-card-title>
             </ion-card-header>
             <ion-card-content>
+              <!--
+                Leading with the image, because on an improper Bite the image is
+                usually the thing that has to be judged — no text field answers
+                "is this food".
+              -->
+              @if (imageSrc(); as src) {
+                <img
+                  class="bite-search__image"
+                  data-testid="admin-bite-image"
+                  alt="{{ bite.name || bite.id }}"
+                  [src]="src"
+                />
+              } @else {
+                <ion-note
+                  class="bite-search__hint"
+                  data-testid="admin-bite-no-image"
+                >
+                  {{ 'admin-bites-no-image' | transloco }}
+                </ion-note>
+              }
+
               <ion-list lines="none">
                 <ion-item>
                   <ion-label>
@@ -139,6 +160,43 @@
               <ion-note class="bite-search__hint">
                 {{ 'admin-bites-detail-hint' | transloco }}
               </ion-note>
+
+              <div class="bite-search__danger">
+                <h4 class="bite-search__section">
+                  {{ 'admin-bites-remove' | transloco }}
+                </h4>
+                <ion-list lines="full">
+                  <ion-item>
+                    <ion-input
+                      labelPlacement="stacked"
+                      [label]="'admin-bites-delete-reason' | transloco"
+                      [placeholder]="
+                        'admin-bites-delete-reason-placeholder' | transloco
+                      "
+                      [value]="reason()"
+                      data-testid="admin-bite-delete-reason"
+                      (ionInput)="onReasonChange($event.detail.value ?? '')"
+                    />
+                  </ion-item>
+                </ion-list>
+                <ion-note class="bite-search__hint">
+                  {{ 'admin-bites-delete-hint' | transloco }}
+                </ion-note>
+
+                <ion-button
+                  expand="block"
+                  class="ion-margin-top"
+                  color="danger"
+                  data-testid="admin-bite-delete"
+                  [disabled]="!canDelete() || deleting()"
+                  (click)="onDelete()"
+                >
+                  @if (deleting()) {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+                  {{ 'admin-bites-delete' | transloco }}
+                </ion-button>
+              </div>
             </ion-card-content>
           </ion-card>
         } @else {

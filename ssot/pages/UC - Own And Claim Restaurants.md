@@ -2,7 +2,7 @@
 
 ## Status
 
-Partially implemented. The roles exist: \#1469 delivered `admin` and `business` as Firebase Auth custom claims and \#1472 guarded every operator callable, both driven by the admin app rather than by this use case. The shared model carries the ownership fields as of \#1074, and **an operator writes them** as of \#1077: `assignRestaurantOwner` and `revokeRestaurantOwner`, behind a surface in the admin app. **No rule enforces anything and nothing reads the field yet**: \#1078 replaces the open Firestore rules and \#1079 scopes the business dashboard, both unstarted. Specified through issue \#1069 as stage 0 of issue \#735.
+Partially implemented. The roles exist: \#1469 delivered `admin` and `business` as Firebase Auth custom claims and \#1472 guarded every operator callable, both driven by the admin app rather than by this use case. The shared model carries the ownership fields as of \#1074, and **an operator writes them** as of \#1077: `assignRestaurantOwner` and `revokeRestaurantOwner`, behind a surface in the admin app. **No rule enforces anything and nothing reads the field yet**: \#1078 replaces the open Firestore rules and \#1079 scopes the business dashboard, both unstarted. Under the open rules any signed-in account can write `ownerUserId` itself, so today the callables record ownership decisions rather than enforcing them - demonstrated against the emulator on 8 September 2026 and recorded on [[Current State - Known Issues]]. Specified through issue \#1069 as stage 0 of issue \#735.
 
 This is the blocking prerequisite for every other stage of the Restaurant Interaction Platform.
 
@@ -36,6 +36,8 @@ Rewritten on 8 September 2026, and implemented by \#1077 down to the two lines m
 - Ownership is revoked by an operator with an attributable reason. Revoking deletes the owner and the grant timestamps and sets `claimStatus: revoked`; revoking a restaurant nobody holds is refused rather than writing `revoked` over `unclaimed`.
 - **Still to come.** The business account adds and removes the `staff` on the restaurants it holds, and cannot touch a restaurant it does not hold (\#1537). The business dashboard shows only the restaurants assigned to the caller (\#1079).
 
+**Until \#1079 lands, an assignment changes nothing a business account can see, and revoking one changes nothing either.** Verified against the emulator on 8 September 2026: `DashboardDataAccessService.restaurantsLoader` reads the whole `restaurants` collection with no owner filter, so a business account was shown a restaurant assigned to a _different_ account and could open its edit form. The list has never been ownership-driven, so this is not something \#1077 regressed - it is the half of the epic's "the effect is visible in the business app" criterion that \#1079 owns, over the open rules \#1078 owns.
+
 Verification happens off-system, on the call the operator is already having. That is the "manual admin review for the first iteration" \#1069 proposed, with the review queue removed: a queue exists to hold information the operator has in front of them, and it brings a claim document, a five-state machine, contested and superseded states with it. See [[issue-1076]] for what was given up.
 
 ## Data Model
@@ -60,6 +62,7 @@ There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it 
 - Assignment is idempotent, matching the existing `verifyRestaurantCandidate` rule.
 - No restaurant can end up claimed by two owners. The read and the write are one transaction, so two operators assigning the same restaurant cannot both see it unowned and both write.
 - Existing unowned restaurants keep working for consumer read paths and are visible to admins for triage.
+- **\#1079 ships the strict filter: a business account sees the restaurants assigned to it and nothing else.** Decided 8 September 2026, when \#1077 gave the assignment a writer. The alternative considered was falling back to the unowned restaurants so that nobody loses access on the day it deploys - refused, because it is a rule that \#1078 then has to contradict, and a boundary with an exception is not a boundary. The consequence is accepted rather than designed around: nothing in production is assigned today, so every business account sees an empty list until an operator assigns it something. Assigning the existing restaurants is operator work that has to happen before or alongside \#1079, not a migration.
 
 ## Success Criteria
 

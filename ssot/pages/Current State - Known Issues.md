@@ -18,7 +18,17 @@
 
   **Storage is the more exploitable of the two.** Any account can overwrite another user's Bite photo or profile image, leaving no trace in Firestore because the write never touches a document, and can read the profile images of accounts whose visibility is private. Revisit immediately after launch: the risk is bounded today only by every account belonging to a trusted tester, and the soft launch is precisely the event that removes that bound.
 
+  **The restaurant ownership fields are forgeable, which makes \#1078 more urgent rather than less.** Issue \#1077 writes `ownerUserId` and `claimStatus` onto the restaurant document through admin-only callables that require a reason and log who decided what. Under these rules any signed-in account can write the same fields itself. Demonstrated against the emulator on 8 September 2026: signed in as a `business` account, one `PATCH` to `restaurants/{id}` with an update mask over `ownerUserId` and `claimStatus` made that account the owner of a restaurant an operator had just revoked, and left nothing in the operator log because no operator was involved. So an ownership model exists, and until \#1078 lands it records decisions rather than enforcing them. The rules have to make those four fields client-writable by nobody, not merely owner-writable — they are written by the Admin SDK inside the callables, which rules do not constrain, so denying every client write to them costs nothing.
+
   Two authorization surfaces are already closed and are not part of this gap. Every operator callable requires the `admin` role, enforced by a build-failing classification test (\#1472), and the role model itself is live (\#1469). See [[Architecture - Auth]].
+
+- ### A restaurant can be owned by an account that no longer holds `business`
+
+  **Why it matters:** the assignment callable refuses to _create_ this state, and nothing stops it _becoming_ this state, so the invariant holds only at the moment it is written.
+
+  `assignRestaurantOwner` refuses a target that does not hold `business` (\#1077). `setUserRoles` then revokes that role without looking at what the account owns, so the restaurant keeps an `ownerUserId` pointing at an account that can no longer sign into the business app. Found by testing \#1077 against the emulator on 8 September 2026: assign to an account, revoke its role, and the assignment survives.
+
+  Harmless today, because nothing reads `ownerUserId` yet. It stops being harmless with [issue 1079](https://github.com/muhammedgaygisiz/travellers-apps/issues/1079), which scopes the business dashboard by it, and with [issue 1078](https://github.com/muhammedgaygisiz/travellers-apps/issues/1078), whose rules grant writes on it — a restaurant would then be writable by an account the role gate turns away at the door. **No issue owns this.** The fix is a decision rather than a patch: either `setUserRoles` refuses to revoke `business` from an account holding restaurants, or it revokes the assignments with it, and the second is an operator action with consequences that deserves its own log entry.
 
 - ### A blocked account keeps a live session for up to an hour
 

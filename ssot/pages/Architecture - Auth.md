@@ -169,7 +169,7 @@ gave every operator action one shape.
   | `targetType`     | `user`, `bite`, `restaurantCandidate`, `review` or `appInstallation`. An id alone does not say what it identifies.                             |
   | `targetId`       | The one record acted on. Absent from an action that operates on a whole collection, rather than answered with something invented.              |
   | `outcome`        | `started`, `succeeded` or `failed`. A `started` with no `succeeded` is an action that crashed or timed out, which the trail should still show. |
-  | `reason`         | Why, where the action takes one. Required by `setUserSubscriptionTier`; absent elsewhere.                                                      |
+  | `reason`         | Why, where the action takes one. Required by `setUserSubscriptionTier` and `deleteBiteAsOperator`; absent elsewhere.                           |
   | `details`        | Everything action-specific, nested under one key so it cannot compete with the fields every action shares.                                     |
 
 - **One field name per concept, and the spec enforces it.**
@@ -202,6 +202,14 @@ gave every operator action one shape.
   This is the one place the shape genuinely replaced rather than formalised what
   was there, and it was unavoidable: \#1474 targets an account and \#1475 a
   Bite, so a user-specific field name could not carry both.
+
+- **One action's entry is the record of something that no longer exists.**
+  `deleteBiteAsOperator` deletes the Bite outright, so its `succeeded` entry
+  carries the Bite's name, its author's uid and the Storage objects that were
+  removed inside `details` — there is no document left to look any of them up
+  in. Every other operator action leaves its target behind to be inspected, and
+  this is why the trail's retention window is the real bound on how long a
+  removal can be explained.
 
 - **The trail expires, and the retention window is what bounds it.** Cloud
   Logging keeps the `_Default` bucket for 30 days on Google's default setting

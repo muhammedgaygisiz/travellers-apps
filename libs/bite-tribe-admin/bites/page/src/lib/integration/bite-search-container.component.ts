@@ -10,8 +10,10 @@ import { BiteSearchService } from './bite-search.service';
     [searched]="service.searched()"
     [failed]="service.failed()"
     [selected]="service.selected()"
+    [deleting]="service.deleting()"
     (searchSubmit)="service.search($event)"
     (selectBite)="service.select($event)"
+    (deleteBite)="service.deleteBite($event.biteId, $event.reason)"
     (logoutClick)="service.logout()"
   />`,
   changeDetection: ChangeDetectionStrategy.OnPush,

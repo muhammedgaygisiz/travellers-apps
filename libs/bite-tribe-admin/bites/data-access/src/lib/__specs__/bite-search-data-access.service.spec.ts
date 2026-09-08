@@ -78,4 +78,53 @@ describe(BiteSearchDataAccessService.name, () => {
 
     await expect(service.search('ramen')).rejects.toThrow('unavailable');
   });
+
+  describe('deleting a Bite', () => {
+    const result = {
+      biteId: 'b1',
+      deletedLikes: 2,
+      deletedReviews: 1,
+      deletedImages: 1,
+      updatedRestaurantCandidates: 1,
+      updatedBucketlists: 0,
+      updatedBiteTrails: 0,
+    };
+
+    beforeEach(() => callByNameMock.mockResolvedValue({ data: result }));
+
+    it('calls the operator-only callable with the id and the reason', async () => {
+      await service.deleteBite('b1', 'Not food');
+
+      expect(callByNameMock).toHaveBeenCalledWith({
+        name: 'deleteBiteAsOperator',
+        data: { biteId: 'b1', reason: 'Not food' },
+      });
+    });
+
+    it('trims the reason before sending it', async () => {
+      await service.deleteBite('b1', '  Not food  ');
+
+      expect(callByNameMock).toHaveBeenCalledWith({
+        name: 'deleteBiteAsOperator',
+        data: { biteId: 'b1', reason: 'Not food' },
+      });
+    });
+
+    // The deletion reaches further than the Bite, so what it took is worth
+    // handing back rather than dropping.
+    it('returns what the cascade removed', async () => {
+      await expect(service.deleteBite('b1', 'Not food')).resolves.toEqual(
+        result,
+      );
+    });
+
+    // An operator told a Bite was removed when it was not will not look again.
+    it('lets a failure reach the caller', async () => {
+      callByNameMock.mockRejectedValue(new Error('permission-denied'));
+
+      await expect(service.deleteBite('b1', 'Not food')).rejects.toThrow(
+        'permission-denied',
+      );
+    });
+  });
 });

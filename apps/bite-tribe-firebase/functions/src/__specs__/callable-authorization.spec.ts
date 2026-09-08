@@ -29,6 +29,7 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   backfillBiteAddress: 'operator',
   backfillReviewTimestampsCallable: 'operator',
   clusterRestaurantCandidateForBite: 'operator',
+  deleteBiteAsOperator: 'operator',
   listUsersWithRoles: 'operator',
   sendNewVersionNotification: 'operator',
   setUserBlocked: 'operator',

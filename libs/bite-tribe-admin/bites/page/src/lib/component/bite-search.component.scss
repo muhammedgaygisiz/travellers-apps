@@ -56,4 +56,39 @@
     margin-top: 0.5rem;
     font-size: 0.8125rem;
   }
+
+  /*
+   * The image is what an operator came to judge, so it gets the width of the
+   * detail column rather than a thumbnail's. Capped by height rather than
+   * aspect ratio: a Bite photo can be either orientation, and cropping the
+   * subject out of the frame is the one thing this surface must not do.
+   */
+  .bite-search__image {
+    display: block;
+    width: 100%;
+    max-height: 22rem;
+    object-fit: contain;
+    border-radius: 0.5rem;
+    background: var(--ion-color-step-100, #f2f2f2);
+  }
+
+  .bite-search__section {
+    margin: 1.5rem 0 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ion-color-danger);
+  }
+
+  /*
+   * The deletion is irreversible and takes the image, the likes and the reviews
+   * with it. The rule and the heading colour are what stop it reading as one
+   * more field of the same card: the operator has to cross a line to reach it,
+   * and the required reason and the confirmation behind the button are the rest
+   * of the same protection (issue #1475).
+   */
+  .bite-search__danger {
+    margin-top: 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+  }
 }

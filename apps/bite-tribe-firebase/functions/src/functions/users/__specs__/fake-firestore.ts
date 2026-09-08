@@ -2,16 +2,69 @@
  * Minimal in-memory stand-in for the Firestore admin API.
  *
  * It covers exactly the surface the callables under test use — document
- * get/set/update/delete, `getAll`, single-equality collection and
- * collection-group queries, subcollections and batched writes — so they can be
- * tested against real document state instead of a wall of call assertions.
+ * get/set/update/delete, `getAll`, `==`/`in`/`array-contains` collection and
+ * collection-group queries, subcollections, dotted field paths and batched
+ * writes — so they can be tested against real document state instead of a wall
+ * of call assertions.
  */
 
 export const DELETE_SENTINEL = { __fakeFirestoreDelete: true } as const;
 
+/**
+ * Stands in for `FieldValue.arrayRemove`, which is a server-side operation
+ * rather than a value: the callable sends the instruction and never reads the
+ * array, so a fake that stored the sentinel verbatim would report the field as
+ * the sentinel instead of the array with one entry gone.
+ */
+export const arrayRemove = (...values: unknown[]): unknown => ({
+  __fakeFirestoreArrayRemove: values,
+});
+
 type DocData = Record<string, unknown>;
 
 const isDeleteSentinel = (value: unknown): boolean => value === DELETE_SENTINEL;
+
+const arrayRemoveValues = (value: unknown): unknown[] | undefined => {
+  const removal = (value as { __fakeFirestoreArrayRemove?: unknown[] })
+    ?.__fakeFirestoreArrayRemove;
+
+  return Array.isArray(removal) ? removal : undefined;
+};
+
+/**
+ * Writes one field, resolving `a.b` against nested objects the way Firestore's
+ * dotted field paths do. `update({ 'evidence.biteCount': 3 })` has to leave the
+ * rest of `evidence` alone rather than replacing the object with one key.
+ */
+const writeField = (target: DocData, path: string, value: unknown): void => {
+  const segments = path.split('.');
+  const last = segments.pop() as string;
+  const parent = segments.reduce<DocData>((node, segment) => {
+    const child = node[segment];
+    const next: DocData =
+      typeof child === 'object' && child !== null && !Array.isArray(child)
+        ? { ...(child as DocData) }
+        : {};
+
+    node[segment] = next;
+
+    return next;
+  }, target);
+
+  const removal = arrayRemoveValues(value);
+
+  if (removal) {
+    const current = parent[last];
+
+    parent[last] = (Array.isArray(current) ? current : []).filter(
+      (entry) => !removal.includes(entry),
+    );
+
+    return;
+  }
+
+  parent[last] = value;
+};
 
 const applyData = (target: DocData, data: DocData): DocData => {
   const next = { ...target };
@@ -23,7 +76,7 @@ const applyData = (target: DocData, data: DocData): DocData => {
       return;
     }
 
-    next[key] = value;
+    writeField(next, key, value);
   });
 
   return next;
@@ -31,8 +84,25 @@ const applyData = (target: DocData, data: DocData): DocData => {
 
 interface Filter {
   field: string;
+  operator: string;
   value: unknown;
 }
+
+const matchesFilter = (data: DocData, filter: Filter): boolean => {
+  const stored = data[filter.field];
+
+  switch (filter.operator) {
+    case 'in':
+      return (
+        Array.isArray(filter.value) &&
+        (filter.value as unknown[]).includes(stored)
+      );
+    case 'array-contains':
+      return Array.isArray(stored) && stored.includes(filter.value);
+    default:
+      return stored === filter.value;
+  }
+};
 
 interface DocumentSnapshot {
   exists: boolean;
@@ -93,11 +163,11 @@ class FakeQuery {
     private readonly limitCount?: number,
   ) {}
 
-  where(field: string, _operator: string, value: unknown): FakeQuery {
+  where(field: string, operator: string, value: unknown): FakeQuery {
     return new FakeQuery(
       this.store,
       this.matchesPath,
-      [...this.filters, { field, value }],
+      [...this.filters, { field, operator, value }],
       this.limitCount,
     );
   }
@@ -118,7 +188,7 @@ class FakeQuery {
     const matched = [...this.store.entries()]
       .filter(([path]) => this.matchesPath(path))
       .filter(([, data]) =>
-        this.filters.every((filter) => data[filter.field] === filter.value),
+        this.filters.every((filter) => matchesFilter(data, filter)),
       )
       .map(([path, data]) => ({
         id: path.split('/').pop() as string,

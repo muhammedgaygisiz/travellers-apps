@@ -2,7 +2,7 @@
 
 ## Status
 
-Partially supported. The app exists, deploys, and is gated on the `admin` role as of issue \#1469. Account management — roles, subscription tier and blocking — Bite search and removal, restaurant-candidate verification, the unmatched Bite places and the operational migrations are its surfaces today. Claim review moves into it in a follow-up.
+Partially supported. The app exists, deploys, and is gated on the `admin` role as of issue \#1469. Account management — roles, subscription tier and blocking — Bite search and removal, restaurant-candidate verification, restaurant ownership, the unmatched Bite places and the operational migrations are its surfaces today.
 
 ## Goal
 
@@ -45,9 +45,13 @@ Only the roles, the subscription tier and the account's access are editable. The
 Blocking sits below both editable sections, separated by a rule and behind a confirmation that names the account. It is the one action on the form that takes something away, and it would otherwise be a misclick away from the role checkboxes.
 
 6. **Restaurant candidates** lists the pending candidates with the Bite evidence behind each, and **Bite places** lists place names Bites carry that no verified restaurant answers to yet. Both open the new-restaurant form, which creates the verified restaurant. Both moved out of the business dashboard with issue \#1473.
-7. **Bite search** finds a Bite by its name or one of its tags and shows what BiteTribe holds about it. It calls `searchBites`, the same callable the consumer app's search drives. The selected Bite leads with its image, because on an improper Bite the image is usually the thing that has to be judged and no text field answers "is this food".
+7. **Restaurant ownership** assigns a verified restaurant to an account holding `business`, and revokes that assignment. Both go through admin-only callables that write the fields on the restaurant document (issue \#1077). The surface reuses the account list user management already loads rather than adding a second way to find an account, and offers only accounts holding the role.
 
-The same card removes it. A required reason and a confirmation sit between the operator and `deleteBiteAsOperator`, below a rule, because the deletion is irreversible and reaches further than the Bite (issue \#1475). 8. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
+A restaurant that already has an owner offers no picker at all: reassignment is revoke and then assign, so the operator log carries a reason for the removal and a reason for the grant. Revoking sits below a rule and behind a confirmation naming the restaurant and the account, on the same terms as blocking.
+
+8. **Bite search** finds a Bite by its name or one of its tags and shows what BiteTribe holds about it. It calls `searchBites`, the same callable the consumer app's search drives. The selected Bite leads with its image, because on an improper Bite the image is usually the thing that has to be judged and no text field answers "is this food".
+
+The same card removes it. A required reason and a confirmation sit between the operator and `deleteBiteAsOperator`, below a rule, because the deletion is irreversible and reaches further than the Bite (issue \#1475). 9. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
 
 ## Key Behaviours
 
@@ -92,7 +96,7 @@ Until issue \#1078 replaces the Firestore rules, this is a client-side gate over
 - Issue \#1485 - see and change an account's subscription tier for a support case
 - Issue \#1069 - stage 0 of \#735, restaurant ownership, claiming and authorization
 - Issue \#1075 - business roles as verified identity
-- Issue \#1077 - claim review, approval and revocation workflow
+- Issue \#1077 - assign and revoke restaurant ownership, and the admin-app surface for it; done
 - Issue \#1078 - ownership-scoped Firestore rules
 
 ## Related Domains

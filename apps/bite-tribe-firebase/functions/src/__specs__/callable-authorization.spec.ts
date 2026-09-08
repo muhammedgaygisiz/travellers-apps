@@ -26,11 +26,13 @@ type Access =
 const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // Operator actions. Each one writes or spends on behalf of the whole
   // product, and each is reachable only from the admin app.
+  assignRestaurantOwner: 'operator',
   backfillBiteAddress: 'operator',
   backfillReviewTimestampsCallable: 'operator',
   clusterRestaurantCandidateForBite: 'operator',
   deleteBiteAsOperator: 'operator',
   listUsersWithRoles: 'operator',
+  revokeRestaurantOwner: 'operator',
   sendNewVersionNotification: 'operator',
   setUserBlocked: 'operator',
   setUserRoles: 'operator',

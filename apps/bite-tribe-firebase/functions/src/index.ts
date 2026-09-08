@@ -38,6 +38,10 @@ export { getCurrencyByPosition } from './functions/location/get-currency-by-posi
 export { clusterRestaurantCandidateForBite } from './functions/restaurants/cluster-restaurant-candidate-for-bite';
 export { createRestaurantCandidateOnBiteCreate } from './functions/restaurants/create-restaurant-candidate-on-bite-create';
 export { verifyRestaurantCandidate } from './functions/restaurants/verify-restaurant-candidate';
+export {
+  assignRestaurantOwner,
+  revokeRestaurantOwner,
+} from './functions/restaurants/restaurant-ownership';
 export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-create';
 export { claimDisplayName } from './functions/users/claim-display-name';
 export { setUserRoles } from './functions/users/set-user-roles';

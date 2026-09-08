@@ -31,10 +31,12 @@ import { BiteTribeRole, rolesOf } from './roles';
  * of review that says "this is a new thing we can do to an account".
  */
 export const OPERATOR_ACTIONS = [
+  'assignRestaurantOwner',
   'backfillBiteAddress',
   'backfillReviewTimestamps',
   'clusterRestaurantCandidateForBite',
   'deleteBiteAsOperator',
+  'revokeRestaurantOwner',
   'sendNewVersionNotification',
   'setUserBlocked',
   'setUserRoles',
@@ -52,7 +54,12 @@ export type OperatorAction = (typeof OPERATOR_ACTIONS)[number];
  * whether `abc123` was the account or a Bite that happened to share a prefix.
  */
 export type OperatorTargetType =
-  'appInstallation' | 'bite' | 'restaurantCandidate' | 'review' | 'user';
+  | 'appInstallation'
+  | 'bite'
+  | 'restaurant'
+  | 'restaurantCandidate'
+  | 'review'
+  | 'user';
 
 /**
  * `started` and `succeeded` bracket an action that does enough work to fail
@@ -83,7 +90,9 @@ export interface OperatorActionLog {
    * Why the operator did it, where the action takes a reason.
    *
    * Required by `setUserSubscriptionTier`, because a manually granted Pro is
-   * otherwise indistinguishable from a purchased one. Absent elsewhere.
+   * otherwise indistinguishable from a purchased one, and by
+   * `assignRestaurantOwner` and `revokeRestaurantOwner`, because an ownership
+   * change leaves no other record of why it happened. Absent elsewhere.
    */
   reason?: string;
   /**

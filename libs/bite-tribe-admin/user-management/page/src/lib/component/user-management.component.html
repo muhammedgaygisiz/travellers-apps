@@ -134,12 +134,21 @@
               <ion-note class="user-management__hint">
                 {{ 'admin-users-roles-hint' | transloco }}
               </ion-note>
+              @if (rolesConflict()) {
+                <ion-note
+                  class="user-management__hint"
+                  color="danger"
+                  data-testid="admin-user-roles-conflict"
+                >
+                  {{ 'admin-users-roles-conflict-hint' | transloco }}
+                </ion-note>
+              }
 
               <ion-button
                 expand="block"
                 class="ion-margin-top"
                 data-testid="admin-user-save"
-                [disabled]="!dirty() || saving()"
+                [disabled]="!dirty() || rolesConflict() || saving()"
                 (click)="onSave()"
               >
                 @if (saving()) {

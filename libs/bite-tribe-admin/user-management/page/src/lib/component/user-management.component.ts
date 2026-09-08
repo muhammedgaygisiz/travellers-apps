@@ -50,6 +50,10 @@ import { AdminUser } from 'bite-tribe-admin/user-management-data-access';
  * read-only because nothing on the backend writes them, and a form offering to
  * change an email it cannot save would be a lie (issue #1469).
  *
+ * The role checkboxes are not independent: `business` and `staff` are mutually
+ * exclusive, so ticking both disables the save and says why rather than letting
+ * the callable refuse it (issue #1075).
+ *
  * Roles, tier and account access save separately, through separate callables,
  * rather than through one button. The epic keeps blocking separate from content
  * removal for the same reason: an action with more consequences than its label
@@ -204,6 +208,22 @@ export class UserManagementComponent {
     return uid && pending ? pending : (this.selected()?.roles ?? []);
   });
 
+  /**
+   * Whether the edited role set holds a pair the callable will refuse.
+   *
+   * `business` operates a restaurant and `staff` is the narrowed set of what
+   * can be done on one, so an account holding both is asking to be treated as
+   * owner and employee at once. `setUserRoles` refuses it and stays the
+   * authority; this is so the refusal reads as a reason next to the checkboxes
+   * rather than as a failed save afterwards — the same shape the self-block
+   * refusal uses (issue #1075).
+   */
+  readonly rolesConflict = computed(
+    () =>
+      this.draftRoles().includes('business') &&
+      this.draftRoles().includes('staff'),
+  );
+
   readonly dirty = computed(() => {
     const original = [...(this.selected()?.roles ?? [])].sort();
     const current = [...this.draftRoles()].sort();
@@ -283,7 +303,7 @@ export class UserManagementComponent {
   onSave(): void {
     const user = this.selected();
 
-    if (!user) {
+    if (!user || this.rolesConflict()) {
       return;
     }
 

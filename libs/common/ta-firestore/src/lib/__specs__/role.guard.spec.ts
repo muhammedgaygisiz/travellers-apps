@@ -15,19 +15,19 @@ import { BiteTribeRole } from 'utils';
 describe('roleGuard', () => {
   let getUser: jest.Mock;
   let whenAuthStateRestored: jest.Mock;
-  let hasRole: jest.Mock;
+  let hasAnyRole: jest.Mock;
   let endRejectedSession: jest.Mock;
   let parseUrl: jest.Mock;
   let dispatch: jest.Mock;
   let requestedUrlService: RequestedUrlService;
 
   const runGuard = (
-    role: BiteTribeRole = 'business',
+    roles: BiteTribeRole[] = ['business'],
     url = '/dashboard',
   ): Promise<boolean | UrlTree> =>
     TestBed.runInInjectionContext(
       () =>
-        roleGuard(role)(
+        roleGuard(...roles)(
           {} as ActivatedRouteSnapshot,
           { url } as RouterStateSnapshot,
         ) as Promise<boolean | UrlTree>,
@@ -37,7 +37,7 @@ describe('roleGuard', () => {
   const grantedAfter = (times: number): void => {
     let remaining = times;
 
-    hasRole.mockImplementation(async () => {
+    hasAnyRole.mockImplementation(async () => {
       if (remaining > 0) {
         remaining -= 1;
         return false;
@@ -51,7 +51,7 @@ describe('roleGuard', () => {
     jest.clearAllMocks();
 
     getUser = jest.fn(() => ({ uid: 'user-1' }));
-    hasRole = jest.fn(async () => true);
+    hasAnyRole = jest.fn(async () => true);
     endRejectedSession = jest.fn(async () => undefined);
     dispatch = jest.fn();
     parseUrl = jest.fn(
@@ -66,7 +66,7 @@ describe('roleGuard', () => {
           useValue: {
             getUser,
             whenAuthStateRestored,
-            hasRole,
+            hasAnyRole,
             endRejectedSession,
           },
         },
@@ -79,15 +79,15 @@ describe('roleGuard', () => {
   });
 
   it('allows an account holding the required role', async () => {
-    await expect(runGuard('business')).resolves.toBe(true);
-    expect(hasRole).toHaveBeenCalledWith('business');
+    await expect(runGuard(['business'])).resolves.toBe(true);
+    expect(hasAnyRole).toHaveBeenCalledWith(['business']);
     expect(endRejectedSession).not.toHaveBeenCalled();
   });
 
-  it('asks for the role the route requires, not a fixed one', async () => {
-    await runGuard('admin');
+  it('asks for the roles the route requires, not a fixed one', async () => {
+    await runGuard(['admin']);
 
-    expect(hasRole).toHaveBeenCalledWith('admin');
+    expect(hasAnyRole).toHaveBeenCalledWith(['admin']);
   });
 
   // Angular activates a route's guards concurrently, so this guard cannot lean
@@ -112,32 +112,32 @@ describe('roleGuard', () => {
   it('sends a signed-out visitor to start and remembers where they were going', async () => {
     getUser.mockReturnValue(undefined);
 
-    await expect(runGuard('business', '/restaurant/42')).resolves.toEqual({
+    await expect(runGuard(['business'], '/restaurant/42')).resolves.toEqual({
       url: '/start',
     });
     expect(requestedUrlService.consume()).toBe('/restaurant/42');
-    expect(hasRole).not.toHaveBeenCalled();
+    expect(hasAnyRole).not.toHaveBeenCalled();
   });
 
   describe('an account without the required role', () => {
     beforeEach(() => {
-      hasRole.mockResolvedValue(false);
+      hasAnyRole.mockResolvedValue(false);
     });
 
     // Telling it which role it lacks would confirm the account exists, that its
     // credentials were right, and which role guards the app.
     it('goes to the login page rather than an explanatory one', async () => {
-      await expect(runGuard('business')).resolves.toEqual({ url: '/login' });
+      await expect(runGuard(['business'])).resolves.toEqual({ url: '/login' });
     });
 
     it('is signed out, so no token is left to retry a deep link with', async () => {
-      await runGuard('business');
+      await runGuard(['business']);
 
       expect(endRejectedSession).toHaveBeenCalled();
     });
 
     it('is reported with the same generic failure a wrong password produces', async () => {
-      await runGuard('business');
+      await runGuard(['business']);
 
       expect(dispatch).toHaveBeenCalledWith(AuthActions.loginFailed());
     });
@@ -152,21 +152,21 @@ describe('roleGuard', () => {
         return { url } as unknown as UrlTree;
       });
 
-      await runGuard('business');
+      await runGuard(['business']);
 
       expect(order).toEqual(['signOut', 'redirect']);
     });
 
     it('does not remember the URL it was rejected from', async () => {
-      await runGuard('business', '/restaurant/42');
+      await runGuard(['business'], '/restaurant/42');
 
       expect(requestedUrlService.consume()).toBeUndefined();
     });
 
     it('gives up after the forced refresh rather than retrying forever', async () => {
-      await runGuard('business');
+      await runGuard(['business']);
 
-      expect(hasRole).toHaveBeenCalledTimes(2);
+      expect(hasAnyRole).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -175,15 +175,50 @@ describe('roleGuard', () => {
   it('retries once against a freshly minted token before rejecting', async () => {
     grantedAfter(1);
 
-    await expect(runGuard('business')).resolves.toBe(true);
-    expect(hasRole).toHaveBeenNthCalledWith(1, 'business');
-    expect(hasRole).toHaveBeenNthCalledWith(2, 'business', true);
+    await expect(runGuard(['business'])).resolves.toBe(true);
+    expect(hasAnyRole).toHaveBeenNthCalledWith(1, ['business']);
+    expect(hasAnyRole).toHaveBeenNthCalledWith(2, ['business'], true);
     expect(endRejectedSession).not.toHaveBeenCalled();
   });
 
   it('does not force a token refresh when the cached token already carries the role', async () => {
-    await runGuard('business');
+    await runGuard(['business']);
 
-    expect(hasRole).toHaveBeenCalledTimes(1);
+    expect(hasAnyRole).toHaveBeenCalledTimes(1);
+  });
+
+  // The business app admits `business` and `staff`. A staff account holds
+  // `staff` and *not* `business`, so a guard on one role would sign it out at
+  // the door with the generic login failure and no way to tell why (#1075).
+  describe('a route admitting more than one role', () => {
+    it('passes every named role to the check, in order', async () => {
+      await runGuard(['business', 'staff']);
+
+      expect(hasAnyRole).toHaveBeenCalledWith(['business', 'staff']);
+    });
+
+    it('admits an account holding either of them', async () => {
+      await expect(runGuard(['business', 'staff'])).resolves.toBe(true);
+    });
+
+    it('rejects an account holding neither', async () => {
+      hasAnyRole.mockResolvedValue(false);
+
+      await expect(runGuard(['business', 'staff'])).resolves.toEqual({
+        url: '/login',
+      });
+      expect(endRejectedSession).toHaveBeenCalled();
+    });
+
+    it('still retries once against a fresh token before rejecting', async () => {
+      grantedAfter(1);
+
+      await expect(runGuard(['business', 'staff'])).resolves.toBe(true);
+      expect(hasAnyRole).toHaveBeenNthCalledWith(
+        2,
+        ['business', 'staff'],
+        true,
+      );
+    });
   });
 });

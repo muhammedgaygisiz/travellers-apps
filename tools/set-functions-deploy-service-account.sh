@@ -32,6 +32,15 @@ ACCOUNT_ID=functions-deploy
 ACCOUNT="${ACCOUNT_ID}@${PROJECT}.iam.gserviceaccount.com"
 SECRET=FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS
 
+# The key never outlives the script. The trap covers a failure between creating
+# the key and handing it to `gh`; the happy path removes it inline. It is set
+# here rather than inside the function that uses it, because a `local` is out of
+# scope by the time an EXIT trap runs and `set -u` then fails the trap itself -
+# which reports an error after a run that fully succeeded, and makes the script
+# exit non-zero.
+KEY_FILE=''
+trap 'rm -f "$KEY_FILE"' EXIT
+
 # A gen2 deploy touches far more than Cloud Functions. Each of these is reached
 # by some part of the deploy the CLI performs on its own:
 #
@@ -135,20 +144,16 @@ set_secret() {
   echo
   echo "==> Creating a key and storing it as $SECRET"
 
-  local key_file
-  key_file="$(mktemp -t functions-deploy-key)"
-  # Removed on any exit, including a failure between here and `gh secret set`.
-  trap 'rm -f "$key_file"' EXIT
+  KEY_FILE="$(mktemp -t functions-deploy-key)"
+  chmod 600 "$KEY_FILE"
 
-  chmod 600 "$key_file"
-
-  gcloud iam service-accounts keys create "$key_file" \
+  gcloud iam service-accounts keys create "$KEY_FILE" \
     --iam-account "$ACCOUNT" \
     --project "$PROJECT" \
     > /dev/null
 
-  gh secret set "$SECRET" < "$key_file" > /dev/null
-  rm -f "$key_file"
+  gh secret set "$SECRET" < "$KEY_FILE" > /dev/null
+  rm -f "$KEY_FILE"
 
   echo "    set $SECRET"
   echo

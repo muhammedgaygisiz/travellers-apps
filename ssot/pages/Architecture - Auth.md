@@ -70,11 +70,16 @@ app and run the operational migrations in it.
 
 - A role is a Firebase Auth **custom claim** carried in the ID token. Claims are
   written only by the backend, so a client cannot forge one.
-- Two roles exist: `admin` for BiteTribe operators, `business` for a restaurant
+- The authorization vocabulary is three roles, defined in [[User Roles]]. Two of
+  them are claims in the code today; Bite Creator is the absence of a claim.
+- Two claims exist: `admin` for BiteTribe Operators, `business` for a restaurant
   that has been granted maintenance rights. They are separate rather than a
   hierarchy — an operator account is not a restaurant, and granting it
   restaurant rights by implication would defeat the ownership gate for exactly
   the accounts most able to break it.
+  **This is about claims, not capability.** By `RD-UR-6` in [[User Roles]] the
+  Operator does maintain every Restaurant, claimed or not — through the Admin App
+  and an `admin` allowance in the rules, never by holding `business`.
 - They live in one array under one claim key, `roles`, because Firebase caps the
   whole custom-claim payload at 1000 bytes and reserves a fixed set of names.
 - `setUserRoles` is the only callable that writes them, and it requires the

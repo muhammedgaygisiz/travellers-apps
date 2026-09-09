@@ -11,7 +11,7 @@ It exists because the format was previously only implicit. Forty `issue-*` pages
 This page governs **GitHub issues**, and only issues.
 
 - **Epics are excluded.** An `epic-*` page keeps its own shape.
-- **Use cases are excluded.** A `UC - *` page keeps its own shape: `Status`, `Goal`, `Actors`, `Related Domains`, and a current or target flow.
+- **Use cases are excluded.** A `UC - *` page has its own format, defined in [[Use Case Format]], with its flow notation in [[Actogram Format]].
 - **It applies to issues created from 4 September 2026 onward.** Existing issues are not retrofitted. Updating an existing issue does not change its structure either: an issue keeps the shape it was filed with for its whole life, and only its content is edited.
 - **The SSOT mirror page is a different artefact.** `issue-*` pages in this graph are Logseq outline blocks, not `##` headings, and they carry context the GitHub issue does not. See Status And The Mirror Page.
 
@@ -22,6 +22,25 @@ An issue is written in English, in standard Markdown, and respects the **INVEST*
 If it cannot be delivered and demonstrated on its own, split it and name the split in `Out Of Scope`.
 
 Section titles are used verbatim, as `##` headings, in the order the shape below gives. A section is omitted only where its `When` column says it is optional.
+
+## Title Format
+
+An issue title is `type(scope): description`, optionally prefixed with an ordinal:
+`NN - type(scope): description`.
+
+- `type` follows the vocabulary already in use: `feat`, `fix`, `refactor`, `docs`, `security`, `test`, `spec`, `launch`, `ci`, `perf`.
+- `scope` in parentheses names the app or library where the change lands, for example `feat(bite-tribe-admin)` or `fix(backend)`. It is omitted where the change has no single home, as in `docs:`.
+- `description` is lower case and states the outcome, not the task.
+
+### The Ordinal
+
+`NN` is a two-digit ordinal starting at `01`, sequencing an issue within its epic.
+
+**It is optional, and omitted by default.** It is carried only where the issues of an epic have an intended working order that a reader benefits from seeing at a glance. Epic membership alone does not call for one: issues that belong to the same epic and can be picked up in any order carry no ordinal.
+
+An ordinal is a reading aid, never the dependency record. Where one issue genuinely cannot be merged before another, that is stated as `Depends on #1234` under `Related Issues`, with the reason.
+
+An issue filed outside an epic never carries an ordinal.
 
 ## Shape 1 - Spec-Ahead
 
@@ -67,6 +86,25 @@ For a defect or a change already implemented. **The user-story form is not used.
 
 A decision that has not yet been taken belongs in [[Current State - Open Questions]], not in an acceptance criterion.
 
+### The Use-Case Assertion
+
+Where an issue closes a gap that a use case carries as a rule, guarantee or exception marked *Intended, not met*, the **last** acceptance criterion asserts that the marker is gone:
+
+```text
+- [ ] `UC - Detect Restaurant Candidate` no longer marks `G7` as *Intended, not met*.
+```
+
+This is an assertion, not the process entry ruled out above. It names one artefact and one identifier, it is false until the work lands, and it is checked by reading a single line. `[ ] Use case updated` is the process form and stays excluded, as does anything that does not name the identifier it settles.
+
+It exists because an id can survive a rewrite while its meaning moves, and because a rule marked *Intended, not met* is the one place the SSOT admits the code and the specification disagree. Nothing else in the issue makes the closing of that admission checkable.
+
+Two limits:
+
+- **It applies only where such a marker exists.** An issue that closes nothing marked in a use case carries no criterion of this kind, and no issue invents a marker in order to have one.
+- **Where two issues together close one marker**, because the rule states both halves, the criterion belongs on the issue that lands second. The first names the half it delivers in its traceability sentence instead.
+
+This is the one exception to the rule that traceability is not recorded in the issue body. It records a *contract*, not a cross-reference: the cross-reference still belongs on the use-case page.
+
 ## App Store Review Area
 
 **This section is never omitted.**
@@ -79,11 +117,15 @@ See [[Implementation - Store Declarations]] and [[Implementation - Store Listing
 
 ## Related Issues
 
-Links to issues that bear on this one: a superseded issue, a follow-up, a dependency, or the existing issue found by the search rule below.
+A link states its kind, using one of three forms, in this order:
+
+- `Depends on #1234` - this issue cannot be merged before that one, with the reason stated. An ordinal alone does not survive someone picking issues off the board out of order.
+- `Part of #1234` - the owning epic.
+- `Related to #1234` - everything else: a superseded issue, a follow-up, or the existing issue found by the search rule below.
 
 On GitHub, use `#1234`. On the SSOT mirror page, use `[[issue-1234]]`.
 
-Domain, use-case, epic and architecture traceability is not recorded here. It belongs on the SSOT mirror page, per [[Agent Operating Contract]] and [[Traceability Map]].
+Domain, use-case, epic and architecture traceability is not recorded here. It belongs on the use-case page, in its `Related GitHub Scope` section, which [[Use Case Format]] `UF-4` requires and never omits.
 
 ## Status And The Mirror Page
 
@@ -100,9 +142,9 @@ The classification is recorded on the board as `Priority`, not in the issue body
 | Classification | Board `Priority` |
 | --- | --- |
 | `[MVP]` | `P0` |
-| `[Secondary]` | `P1` |
+| `[Secondary]` | `P1` to `P4`, by the scale below |
 
-`P0` remains a decision with a named consequence rather than an observation, as [[GitHub Project Board And Issue Handling]] defines it.
+`P0` is MVP: launch-critical, and a decision with a named consequence rather than an observation, as [[GitHub Project Board And Issue Handling]] defines it. `P1` is what should be done immediately after MVP. `P2` is relevant, but the software works without it. `P3` is relevant in the future. `P4` is close to irrelevant. `P5` is unused.
 
 ## Before Filing
 

@@ -4,6 +4,8 @@
   - [[Spec To Code Workflow]]
   - [[Feature Delivery Workflow]]
   - [[GitHub Issue Format]]
+  - [[Use Case Format]]
+  - [[Actogram Format]]
   - [[Release Workflow]]
 - [[Vision]]
 - [[Mission]]

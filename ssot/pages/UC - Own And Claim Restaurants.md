@@ -66,7 +66,7 @@ There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it 
 
 ## Success Criteria
 
-- A restaurant cannot be edited by a user who does not own it, proven with emulator rule tests for both allow and deny.
+- A restaurant cannot be edited by a user who does not own it and does not hold `admin`, proven with emulator rule tests for both allow and deny. The `admin` exception is required by `RD-UR-6` in [[User Roles]] and needs its own allow test.
 - The Firestore rules no longer contain a blanket `allow read, write: if request.auth != null` for all documents.
 - A revoked role stops working within one token refresh cycle.
 - Both apps' existing flows still work end to end after the rules change.

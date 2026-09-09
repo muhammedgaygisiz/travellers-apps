@@ -13,7 +13,8 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
    - Write the issue body per [[GitHub Issue Format]].
    - Add it to the `Bite Tribe` project board. `gh issue create` does not do this, and an issue that is not on the board has no priority and no status. See [[GitHub Project Board And Issue Handling]].
    - Link it to the relevant epic or roadmap item when applicable.
-   - Set the board's `Priority` field, `P0` when it is launch-critical or currently selected for execution and `P1` otherwise. Priority is a board field, never a label.
+   - Set the board's `Priority` field on the `P0` to `P4` scale defined in [[GitHub Issue Format]]. Priority is a board field, never a label.
+   - Set the board's `Size` field.
    - Set Status to `In progress` when work starts.
 
 2. Prepare the implementation branch.

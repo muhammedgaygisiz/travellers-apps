@@ -41,6 +41,7 @@
   | [[Mission]]      | [[Bite]], [[User]], [[Restaurant]], [[Bucket List]], [[Bite Trail]] | Keeps the product centered on real food experiences. |
   | [[Principles]]   | [[ADR-0001 Dish First Product]]                                     | Turns product values into decision rules.            |
   | [[Glossary]]     | All domain pages                                                    | Keeps business language consistent.                  |
+  | [[User Roles]]   | [[User]], every privileged Use Case                                  | Defines what an account may do, as distinct from who it is.  |
   | [[Personas]]     | Use Cases section in [[SSOT]]                                       | Explains who each supported workflow serves.         |
   | [[Monetization]] | [[Subscription]], [[Bite Trail]], [[Market Place]], [[User]]        | Defines what is sold, what stays free, and why.      |
 
@@ -50,7 +51,7 @@
   | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
   | [[Bite]]         | [[UC - Create And Maintain Personal Bites]], [[UC - Discover Bites]], [[UC - Inspect Bite Details]], [[UC - Search In BiteTribe]]                              |
   | [[User]]         | [[UC - Manage Profile And Social Graph]], [[UC - Use Account And Legal Flows]], [[UC - Use Gamification Signals]], [[UC - Operate BiteTribe In The Admin App]] |
-  | [[Restaurant]]   | [[UC - Browse Restaurants And Places]], [[UC - View Restaurant Menus]], [[UC - Maintain Restaurants In The Business App]], [[UC - Own And Claim Restaurants]]  |
+  | [[Restaurant]]   | [[UC - Browse Restaurants And Places]], [[UC - View Restaurant Menus]], [[UC - Maintain Restaurants In The Business App]], [[UC - Own And Claim Restaurants]], [[UC - Detect Restaurant Candidate]], [[UC - Verify Restaurant Candidate]]  |
   | [[Bucket List]]  | [[UC - Save And Rate BiteTrails Through Bucket Lists]]                                                                                                         |
   | [[Bite Trail]]   | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Create And Operate BiteTrails In The Business App]]                                                    |
   | [[Market Place]] | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Mature BiteTrail Marketplace Packages]]                                                                |

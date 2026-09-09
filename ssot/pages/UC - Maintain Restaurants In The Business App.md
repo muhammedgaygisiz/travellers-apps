@@ -42,7 +42,7 @@ candidate creates a Restaurant out of other people's Bites.
 ## Related GitHub Scope
 
 - Issue \#734 includes opening hours, social links, verified/unverified restaurant handling, menu cleanup, and admin restaurant workflows.
-- Issue \#778 / \#942 covers verifying restaurant candidates discovered from repeated Bite evidence into real Restaurants.
+- Issue \#778 / \#942 covers verifying restaurant candidates discovered from repeated Bite evidence into real Restaurants. That flow is Operator work in the Admin App; see [[UC - Verify Restaurant Candidate]].
 - Issue \#1003 seeds the initial Menu of a verified candidate from its Bites.
 
 ## Related Domains

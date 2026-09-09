@@ -62,6 +62,10 @@ apps/storybook-host/src/assets/temp/**/*
 
 # Logseq backup pages
 ssot/logseq/bak/
+ssot/Claude outputs/
+
+# Files delivered into the repo folder by the Claude desktop app
+/Claude outputs/
 /.claude/
 
 # Analytics service-account credentials (never commit keys)

@@ -1,10 +1,13 @@
 - Overview
   - [[Agent Operating Contract]]
   - [[Traceability Map]]
+  - [[Recorded Decisions]]
   - [[Spec To Code Workflow]]
   - [[Feature Delivery Workflow]]
   - [[GitHub Project Board And Issue Handling]]
   - [[GitHub Issue Format]]
+  - [[Use Case Format]]
+  - [[Actogram Format]]
   - [[Release Workflow]]
 - Product
   - [[Vision]]
@@ -16,6 +19,7 @@
 - Domain
   - [[Bite]]
   - [[User]]
+  - [[User Roles]]
   - [[Subscription]]
   - [[Restaurant]]
   - [[Bucket List]]
@@ -45,6 +49,8 @@
     - [[UC - Create And Operate BiteTrails In The Business App]]
     - [[UC - Run Operational Migrations]]
     - [[UC - Operate BiteTribe In The Admin App]]
+    - [[UC - Detect Restaurant Candidate]]
+    - [[UC - Verify Restaurant Candidate]]
     - [[UC - Guide New Users After Registration]]
   - Next to implement
     collapsed:: true

@@ -14,13 +14,17 @@ Open questions capture decisions that should become clear before or shortly afte
 - What are the brand characters called, and what does a surface use one for? The seven committed in [issue 1482](https://github.com/muhammedgaygisiz/travellers-apps/issues/1482) carry the design export's filenames, which mix a historical term with national ones, and nothing in the product references them. Both halves are open: the vocabulary, and whether a character becomes an avatar, a BiteTrail marker, an empty state, or stays brand material. See [[Implementation - Brand Characters]].
 - Which palette is the brand's, the logo's or the new characters'? The shipped `logo.svg` outlines a `#F0B967` cookie in `#55422A`; the seven characters use `#402810` over `#F8B850`. They read as one family at thumbnail size and as two drafts side by side, which the `Brand/Characters` Storybook page shows. Re-cutting the logo changes a mark that is already in both stores, so this is a decision rather than a cleanup.
 
+## Glossary And Naming Questions
+
+- Is the reaction on a Bite called a **Like** or a **Reaction**? Both wordings are permitted in [[Glossary]] until this is decided. The concept is one reaction per user and Bite, chosen from three emoji, where choosing another replaces the previous one. The app's own onboarding copy already says "reactions"; the model, its fields and its counters say `likes`. Deciding late costs a rename of the user-facing copy **or** of the data model, and deciding it now costs neither.
+
 ## Restaurant Interaction Platform Questions
 
 Post-launch. These belong to issue \#735 and its stage epics. Each blocks the stage named next to it, and the proposals recorded on the epics are proposals, not decisions.
 
 Ownership, stage 0, issue \#1069:
 
-- What evidence is required before a restaurant claim is approved?
+- What does an operator record as the reason for a restaurant ownership assignment, and what evidence backs it? There is no approval step to gate: \#1076 declined the self-service claim and the decision is settled off-system. Both `assignRestaurantOwner` and `revokeRestaurantOwner` require a reason and Cloud Logging is the only record they leave, so the reason *is* the audit trail. See [[UC - Own And Claim Restaurants]].
 - What happens to a restaurant's Bites and menu when ownership changes or is revoked?
 
 Table management, stage 2, issue \#1071:

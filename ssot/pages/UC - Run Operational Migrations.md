@@ -6,11 +6,11 @@ Supported today.
 
 ## Goal
 
-BiteTribe operators can run operational maintenance tasks from the admin app.
+BiteTribe Operators can run operational maintenance tasks from the admin app.
 
 ## Actors
 
-- BiteTribe operator, holding the `admin` role
+- BiteTribe Operator, holding the `admin` role ([[User Roles]])
 
 ## Current Flow
 

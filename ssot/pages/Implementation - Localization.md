@@ -35,7 +35,7 @@ apps/bite-tribe-admin/src/assets/i18n/en.json
 ```
 
 Both internal apps are English-only on purpose. Their audience is restaurants
-we onboard by phone and BiteTribe operators, and a locale list kept in step for
+we onboard by phone and BiteTribe Operators, and a locale list kept in step for
 no reader is cost without benefit. Copy added to a shared `scope:common`
 component that only these two render therefore belongs in these two files, not
 in the consumer app's eleven — an English string dropped into `de.json` is

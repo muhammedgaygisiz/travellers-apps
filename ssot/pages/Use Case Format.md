@@ -179,7 +179,7 @@ is secondary. See [[GitHub Issue Format]] for the `P0`–`P4` board mapping.
    branches surface.
 7. **Move `Supported Evidence` onto the steps** as `@` loci, then delete the section.
 8. **Write `Guarantees` last**, from the success terminal, and check the handshake
-   against every referenced use case (`AF-31`).
+   against every referenced use case (`AF-31`, and `AF-34` for those that answer back).
 9. **Do not add code anchors** unless the page reaches L3 in the same sitting. An anchor
    without a provenance line is an unverifiable claim.
 10. **Run the checklist** in [[Actogram Format]] and report failures by rule id.

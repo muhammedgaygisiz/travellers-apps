@@ -198,15 +198,35 @@ lands, and folding it into `UI` makes those questions invisible.
 
 ### Boundaries
 
-- **AF-30** A referenced use case MUST appear as `REF:` with the guarantee it owes, and
-  MUST NOT be described in terms of how it works.
-- **AF-31** For every referenced use case, that use case's guarantees MUST name the
-  precondition of this one that they satisfy, and this one's preconditions MUST name it
-  as owner. Both directions.
+- **AF-30** A referenced use case that attaches to a step MUST appear as `REF:` at that
+  step, with the guarantee it owes, and MUST NOT be described in terms of how it works.
+  A use case that attaches to no step is named in the `Scope` out-of-scope table with its
+  attachment point instead — a precondition id, a terminal id, or the point in the
+  lifecycle it sits at. It MUST NOT be given a step to carry a `REF:`: a step exists only
+  for a domain effect, a decision, a boundary crossing or a perception (`AF-10`), and one
+  invented to hold a reference is not a step. The `Referenced at` column therefore carries
+  a step id where `Direction` is `Invoked step`, `Optional step` or `Alternative outcome`,
+  and a precondition or terminal id where it is `Upstream`, `Downstream` or `Enclosing`.
+  **It is never empty:** a use case worth listing has an attachment point, and if none can
+  be named it does not belong in the table.
+- **AF-31** For every referenced use case and every precondition, the page MUST name the
+  counterparty and state, in its own words, the guarantee that counterparty owes at that
+  point. A `REF:` carries it inline (`AF-30`); a precondition carries it in the `Owner`
+  column together with the precondition's own text. This is a statement about *this* page
+  and is decidable from it alone. Whether the counterparty has written its side back is
+  governed by `AF-34` and is never a conformance condition of this page.
 - **AF-32** The actogram MUST carry a completeness claim: every writer of the aggregate
   is either represented as a step, or named as excluded with a reason.
 - **AF-33** The actogram MUST be as-built at L3 and as-agreed at L2. Intent that is not
   built is a rule marked *Intended, not met*, never a step — except under `AF-13`.
+- **AF-34** Where a referenced use case has a page that carries numbered guarantees, that
+  guarantee MUST name this page's precondition, and the two statements MUST agree. A
+  disagreement is a conformance failure on **both** pages. Where the counterparty has no
+  page, or has one carrying no numbered guarantees, the obligation is *unanswered*: it is
+  recorded where the page states its handshake, and it is a claim on `UF-20`'s migration
+  order rather than a defect in this page. **A page does not reach a level by waiting for
+  another page to reach one** — `UF-3` makes L1 a legitimate resting level, so a rule that
+  made L2 conditional on a counterparty's level would make L2 unreachable by design.
 
 ## Terminal State Kinds
 
@@ -271,14 +291,16 @@ automated check.
 | 15 | ⚙ Every `[not implemented]` step has an `INV: … is VIOLATED here` line | AF-13 |
 | 16 | ⚙ Every `INV:` names a rule in `Rules And Invariants` | AF-33 |
 | 17 | ⚙ Every `REF:` names a use-case code in the registry in [[Use Case Format]] | AF-30 |
-| 18 | ⚙ Every run of ≥2 mechanism steps sits under a `### Mechanism` heading | AF-21 |
-| 19 | ⚙ At L3, every step has an `@` locus | AF-12 |
-| 20 | ⚙ A completeness claim is present in `Scope` | AF-32 |
-| 21 | No effect line contains an actor action | AF-8 |
-| 22 | Every mechanism run returning to an actor **mid-flow** ends in a perception; a run ending at a terminal is covered by AF-16 | AF-15 |
-| 23 | No perception is stated as an error code | AF-17 |
-| 24 | Every branch set is exhaustive | AF-23 |
-| 25 | Every referenced use case's guarantees name this page's precondition | AF-31 |
+| 18 | ⚙ Every `Scope` out-of-scope row names an attachment point | AF-30 |
+| 19 | ⚙ Every run of ≥2 mechanism steps sits under a `### Mechanism` heading | AF-21 |
+| 20 | ⚙ At L3, every step has an `@` locus | AF-12 |
+| 21 | ⚙ A completeness claim is present in `Scope` | AF-32 |
+| 22 | ⚙ Every `REF:` and every precondition names a counterparty and the guarantee it owes | AF-31 |
+| 23 | No effect line contains an actor action | AF-8 |
+| 24 | Every mechanism run returning to an actor **mid-flow** ends in a perception; a run ending at a terminal is covered by AF-16 | AF-15 |
+| 25 | No perception is stated as an error code | AF-17 |
+| 26 | Every branch set is exhaustive | AF-23 |
+| 27 | Where a referenced page carries numbered guarantees, the two statements agree | AF-34 |
 
 ## Worked Example
 

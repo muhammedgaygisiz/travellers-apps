@@ -4,14 +4,23 @@
  * A role is a Firebase Auth **custom claim**, written only by the backend and
  * carried in the ID token. The client can read it, and a client that lies about
  * it changes nothing: every privileged callable re-reads the claim from the
- * verified token, and the eventual ownership-scoped Firestore rules read it
- * from `request.auth.token`. See GitHub issue #1469 and #1075.
+ * verified token, and the ownership-scoped Firestore rules read it from
+ * `request.auth.token`. See GitHub issue #1469 and #1075.
  *
  * The three are deliberately separate rather than a hierarchy.
  *
  * An operator account is not a restaurant, and granting it restaurant
  * maintenance rights by implication would make the business app's "only what
  * you own" gate meaningless for the one set of accounts most able to break it.
+ *
+ * **That question is settled rather than open** (issue #1164, decided by
+ * `RD-UR-6` on the `User Roles` SSOT page). The Operator is above the
+ * Restaurant Owner in *capability* and not in *claims*: it maintains every
+ * restaurant through the admin app and an `admin` clause named in
+ * `firestore.rules`, never by holding `business`, and it is admitted to the
+ * business app nowhere. Anything that changes it has to change four places
+ * together - the claim checks in the callables, the sign-in gate, the route
+ * guards, and the rules.
  *
  * `staff` is the narrowed business permission set, and a staff account holds
  * `staff` **instead of** `business` rather than in addition to it. That is why
@@ -20,10 +29,13 @@
  * are mutually exclusive on one account — one operates a restaurant, the other
  * is the narrowed set — and `setUserRoles` refuses the pair.
  *
- * `staff` grants nothing yet. It is assertable and grantable ahead of the rules
- * that give it meaning, so a restaurant's staff can be recorded before issue
- * #1078 and #1079 land. Reading it as a working permission is the mistake to
- * avoid until then.
+ * `staff` still grants nothing at the data layer, and issue #1078 left it that
+ * way on purpose. The rules scope a write by `Restaurant.ownerUserId`, and
+ * there is no equivalent record of which restaurant a staff account works at:
+ * writing it is issue #1537. A rule admitting `staff` before that record exists
+ * could only admit every staff account to every restaurant, which is the shape
+ * of hole #1078 closed. The role opens the business app and reads; reading it
+ * as a working write permission is the mistake to avoid until #1537 lands.
  */
 export const BITE_TRIBE_ROLES = ['admin', 'business', 'staff'] as const;
 

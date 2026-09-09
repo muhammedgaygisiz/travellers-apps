@@ -94,7 +94,7 @@ Monetization
 
 - Nothing in this page is implemented yet. All of it is Priority P1 and post-launch.
 - `subscriptionTier` exists on the public user document but is not enforced anywhere, and `createUserOnAuthCreate` currently writes tier 1 for every new account.
-- `firestore.rules` still allows every authenticated user to write every document, so no gate is trustworthy until [[epic-1122]] and issue \#1078 land.
+- Issue \#1078 made `subscriptionTier` refuse every client write, so an account can no longer grant itself Pro with one document write. The remaining gap is [[epic-1122]]: the entitlement has a writer nobody buys through yet. The rules deploy by hand, so the field is protected in production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
 - There is no ad, purchase or payout dependency in the workspace.
 - Free-tier position enforcement is best-effort. A client can report any coordinates, so the radius gate resists casual bypass rather than a determined one.
 

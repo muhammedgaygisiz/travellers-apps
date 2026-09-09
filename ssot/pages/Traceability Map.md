@@ -35,30 +35,30 @@
 
 - ## Product To Domain
 
-  | Product Source   | Connects To                                                         | Meaning                                              |
-  | ---------------- | ------------------------------------------------------------------- | ---------------------------------------------------- |
-  | [[Vision]]       | [[Bite]], [[Bite Trail]], [[Market Place]]                          | Defines the long-term product direction.             |
-  | [[Mission]]      | [[Bite]], [[User]], [[Restaurant]], [[Bucket List]], [[Bite Trail]] | Keeps the product centered on real food experiences. |
-  | [[Principles]]   | [[ADR-0001 Dish First Product]]                                     | Turns product values into decision rules.            |
-  | [[Glossary]]     | All domain pages                                                    | Keeps business language consistent.                  |
-  | [[User Roles]]   | [[User]], every privileged Use Case                                  | Defines what an account may do, as distinct from who it is.  |
-  | [[Personas]]     | Use Cases section in [[SSOT]]                                       | Explains who each supported workflow serves.         |
-  | [[Monetization]] | [[Subscription]], [[Bite Trail]], [[Market Place]], [[User]]        | Defines what is sold, what stays free, and why.      |
+  | Product Source   | Connects To                                                         | Meaning                                                     |
+  | ---------------- | ------------------------------------------------------------------- | ----------------------------------------------------------- |
+  | [[Vision]]       | [[Bite]], [[Bite Trail]], [[Market Place]]                          | Defines the long-term product direction.                    |
+  | [[Mission]]      | [[Bite]], [[User]], [[Restaurant]], [[Bucket List]], [[Bite Trail]] | Keeps the product centered on real food experiences.        |
+  | [[Principles]]   | [[ADR-0001 Dish First Product]]                                     | Turns product values into decision rules.                   |
+  | [[Glossary]]     | All domain pages                                                    | Keeps business language consistent.                         |
+  | [[User Roles]]   | [[User]], every privileged Use Case                                 | Defines what an account may do, as distinct from who it is. |
+  | [[Personas]]     | Use Cases section in [[SSOT]]                                       | Explains who each supported workflow serves.                |
+  | [[Monetization]] | [[Subscription]], [[Bite Trail]], [[Market Place]], [[User]]        | Defines what is sold, what stays free, and why.             |
 
 - ## Domain To Use Cases
 
-  | Domain           | Main Use Cases                                                                                                                                                 |
-  | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | [[Bite]]         | [[UC - Create And Maintain Personal Bites]], [[UC - Discover Bites]], [[UC - Inspect Bite Details]], [[UC - Search In BiteTribe]]                              |
-  | [[User]]         | [[UC - Manage Profile And Social Graph]], [[UC - Use Account And Legal Flows]], [[UC - Use Gamification Signals]], [[UC - Operate BiteTribe In The Admin App]] |
-  | [[Restaurant]]   | [[UC - Browse Restaurants And Places]], [[UC - View Restaurant Menus]], [[UC - Maintain Restaurants In The Business App]], [[UC - Own And Claim Restaurants]], [[UC - Detect Restaurant Candidate]], [[UC - Verify Restaurant Candidate]]  |
-  | [[Bucket List]]  | [[UC - Save And Rate BiteTrails Through Bucket Lists]]                                                                                                         |
-  | [[Bite Trail]]   | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Create And Operate BiteTrails In The Business App]]                                                    |
-  | [[Market Place]] | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Mature BiteTrail Marketplace Packages]]                                                                |
-  | [[Floor Plan]]   | [[UC - Configure Restaurant Floor Plans And Tables]]                                                                                                           |
-  | [[Table]]        | [[UC - Configure Restaurant Floor Plans And Tables]], [[UC - Manage Tables During Service]]                                                                    |
-  | [[Table Visit]]  | [[UC - Manage Tables During Service]], [[UC - Order At The Table Through A QR Code]]                                                                           |
-  | [[Subscription]] | [[UC - Subscribe To BiteTribe Pro]], [[UC - See Ads As A Free User]], [[UC - Buy A Paid BiteTrail]]                                                            |
+  | Domain           | Main Use Cases                                                                                                                                                                                                                            |
+  | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | [[Bite]]         | [[UC - Create And Maintain Personal Bites]], [[UC - Discover Bites]], [[UC - Inspect Bite Details]], [[UC - Search In BiteTribe]]                                                                                                         |
+  | [[User]]         | [[UC - Manage Profile And Social Graph]], [[UC - Use Account And Legal Flows]], [[UC - Use Gamification Signals]], [[UC - Operate BiteTribe In The Admin App]]                                                                            |
+  | [[Restaurant]]   | [[UC - Browse Restaurants And Places]], [[UC - View Restaurant Menus]], [[UC - Maintain Restaurants In The Business App]], [[UC - Own And Claim Restaurants]], [[UC - Detect Restaurant Candidate]], [[UC - Verify Restaurant Candidate]] |
+  | [[Bucket List]]  | [[UC - Save And Rate BiteTrails Through Bucket Lists]]                                                                                                                                                                                    |
+  | [[Bite Trail]]   | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Create And Operate BiteTrails In The Business App]]                                                                                                                               |
+  | [[Market Place]] | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Mature BiteTrail Marketplace Packages]]                                                                                                                                           |
+  | [[Floor Plan]]   | [[UC - Configure Restaurant Floor Plans And Tables]]                                                                                                                                                                                      |
+  | [[Table]]        | [[UC - Configure Restaurant Floor Plans And Tables]], [[UC - Manage Tables During Service]]                                                                                                                                               |
+  | [[Table Visit]]  | [[UC - Manage Tables During Service]], [[UC - Order At The Table Through A QR Code]]                                                                                                                                                      |
+  | [[Subscription]] | [[UC - Subscribe To BiteTribe Pro]], [[UC - See Ads As A Free User]], [[UC - Buy A Paid BiteTrail]]                                                                                                                                       |
 
 - ## Use Cases To Open P0 Epics
 
@@ -88,7 +88,7 @@
 
   Stage 0 blocks every later stage. Stages 1 and 2 are independently shippable.
 
-  Issue \#1469 delivered the first part of stage 0 outside the child-issue list: the `bite-tribe-admin` app, and the role gate on both privileged apps. It deliberately left \#1078, the Firestore rules replacement, alone — that is the highest-regression-risk change in the epic and needs its own branch.
+  Issue \#1469 delivered the first part of stage 0 outside the child-issue list: the `bite-tribe-admin` app, and the role gate on both privileged apps. It deliberately left \#1078, the Firestore rules replacement, alone — that is the highest-regression-risk change in the epic and needed its own branch. It got one, together with \#1164: `firestore.rules` is now ownership-scoped, the role hierarchy question is settled by `RD-UR-6`, and the rules have their own emulator suite and CI job. The rules deploy by hand, so stage 0 is not finished until that deploy has run. See [[Architecture - Firebase]].
 
   [[epic-1471]] owns what the admin app still needs. It is not a stage of \#735: it runs alongside, because moving the operator surfaces out of the business app and hardening the privileged callables are overdue regardless of whether the floor-plan work ever starts.
 

@@ -334,8 +334,8 @@ describe(BiteTribeApiService.name, () => {
       (service: BiteTribeApiService, menuApiService: MenuApiService) => {
         const saveMenuSpy = jest.spyOn(menuApiService, 'saveMenu');
         const menu = { id: 'menu-id', items: [] } as any;
-        service.saveMenu(menu);
-        expect(saveMenuSpy).toHaveBeenCalledWith(menu);
+        service.saveMenu(menu, 'restaurant-id');
+        expect(saveMenuSpy).toHaveBeenCalledWith(menu, 'restaurant-id');
       },
     ));
   });

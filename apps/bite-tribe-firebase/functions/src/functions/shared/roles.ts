@@ -109,6 +109,13 @@ export const requireAdmin = (request: CallableRequest<unknown>): string =>
  * only in the role list and in deny tests. Its first caller is the staff
  * management callable in issue #1537, which needs a business caller and must
  * not be reachable by every signed-in account.
+ *
+ * **`requireAdmin` is not a superset of this, and must not become one.** The
+ * two roles are not a hierarchy (issue #1164, settled by `RD-UR-6` on the
+ * `User Roles` SSOT page): an operator reaches a restaurant through its own
+ * admin-app surfaces and the `admin` clause in `firestore.rules`, never by
+ * being admitted where a restaurant owner is expected. A callable that accepts
+ * either role is a callable that cannot say which one acted.
  */
 export const requireBusiness = (request: CallableRequest<unknown>): string =>
   requireRole(request, 'business');

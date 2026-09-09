@@ -52,6 +52,7 @@ npx jest --config libs/bite-tribe/search/data-access/jest.config.ts --runInBand
 | Change Type                      | Check                                                                            |
 | -------------------------------- | -------------------------------------------------------------------------------- |
 | Firebase Functions               | `npm run build` and `npm run lint` from `apps/bite-tribe-firebase/functions`     |
+| `firestore.rules`                | `npx nx firebase-test-rules bite-tribe-firebase`                                 |
 | Locale JSON                      | Parse all touched locale files with Node                                         |
 | Storybook UI                     | `npm run build:storybook`; add direct `npx loki test` when visual output matters |
 | Consumer app E2E                 | `NX_DAEMON=false npx nx e2e bite-tribe-e2e`                                      |

@@ -272,6 +272,15 @@ export class ProfileApiService {
     };
   }
 
+  /**
+   * **Unreachable, and refused by the rules if it is ever wired up.** Nothing in
+   * either app calls this. It mirrors another account's IdP avatar into our own
+   * Storage and then writes it back to `users/{bite.userId}` - a write to a
+   * document belonging to somebody else, which the ownership-scoped rules deny
+   * (GitHub issue #1078). Mirroring somebody else's avatar has to move to a
+   * Function before this can be used; wiring it up as it stands would surface as
+   * a permission error on an ordinary Bite detail view.
+   */
   async getUserByBiteId(bite: Bite | undefined): Promise<PublicUser | void> {
     if (!bite?.userId) {
       return Promise.resolve();

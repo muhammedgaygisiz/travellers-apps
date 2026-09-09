@@ -46,6 +46,8 @@ tests
 +-- e2e -------------+-- report (pull requests only)
 +-- business-e2e ----+
 |
++-- firestore-rules
+|
 +-- bite-tribe-build ----------- deploy-bite-tribe           (develop only)
 +-- bite-tribe-business-build -- deploy-bite-tribe-business  (develop only)
 +-- bite-tribe-admin-build ----- deploy-bite-tribe-admin     (develop only)
@@ -75,6 +77,14 @@ deploy needs Cloud Run, Artifact Registry, Cloud Build, Eventarc, Cloud
 Scheduler and Secret Manager admin, and putting all of that on the credential
 that otherwise publishes static files makes one leaked secret worth far more.
 The script's role list is also where the reasoning for each role lives.
+
+**Firestore rules are deployed by hand and no job deploys them.** `firestore-rules`
+runs the emulator suite over `apps/bite-tribe-firebase/firestore.rules` on every pull
+request, and stops there. A rules deploy takes effect the moment it lands and cannot be
+staged, so it stays a deliberate act with a verification pass behind it - see the rules
+section on [[Architecture - Firebase]]. The job installs the functions package as well as
+the workspace root: the suite needs `@firebase/rules-unit-testing` from the first and
+jest, ts-jest and the Firebase client SDK from the second.
 
 **Firestore indexes are still deployed by hand, and the job asserts it.**
 `firebase deploy --only functions` never touches them, and the Firestore API

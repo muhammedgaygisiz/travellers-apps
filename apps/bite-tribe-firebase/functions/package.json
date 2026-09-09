@@ -7,11 +7,14 @@
     "test": "jest --config jest.config.cjs --runInBand",
     "test:emulator:jest": "jest --config jest.emulator.config.cjs --runInBand",
     "test:emulator": "firebase --config ../firebase.emulator-test.json emulators:exec --project bite-tribe-emulator-tests --only firestore \"npm run test:emulator:jest\"",
+    "test:rules:jest": "jest --config jest.emulator.config.cjs --runInBand --testPathPatterns firestore-rules",
+    "test:rules": "firebase --config ../firebase.emulator-test.json emulators:exec --project bite-tribe-emulator-tests --only firestore \"npm run test:rules:jest\"",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "deploy:indexes": "firebase deploy --only firestore:indexes",
+    "deploy:rules": "firebase deploy --only firestore:rules",
     "logs": "firebase functions:log"
   },
   "engines": {
@@ -24,6 +27,7 @@
     "geofire-common": "6.0.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.5.0",
     "firebase-functions-test": "^3.5.0",

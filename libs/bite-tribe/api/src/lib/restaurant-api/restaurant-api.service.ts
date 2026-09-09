@@ -30,10 +30,14 @@ export class RestaurantApiService {
 
     const newRestaurantId = addRestaurantResult.reference.id;
 
-    // Add a new menu for the restaurant
+    // Add a new menu for the restaurant. It names the restaurant it belongs
+    // to, which is what the ownership-scoped rules authorise a menu write from
+    // (issue #1078); the restaurant document already exists at this point, so
+    // there is a document for the rule to read.
     const addMenuResult = await FirebaseFirestore.addDocument({
       reference: MENU_COLLECTION,
       data: {
+        restaurantId: newRestaurantId,
         categories: [],
         createdAt: new Date().toISOString(),
         createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
@@ -102,6 +106,9 @@ export class RestaurantApiService {
     const addMenuResult = await FirebaseFirestore.addDocument({
       reference: MENU_COLLECTION,
       data: {
+        // Names the restaurant so the rules can authorise this write and every
+        // later edit of the menu (issue #1078).
+        restaurantId,
         categories: [],
         createdAt: new Date().toISOString(),
         createdAtTimestamp: Date.now(),

@@ -16,8 +16,13 @@ export class MenuService {
   isMenuLoading = this.dataAccess.isMenuLoading;
   isMenuUnavailable = this.dataAccess.isMenuUnavailable;
 
-  saveMenu(menu: Menu): void {
-    this.dataAccess.saveMenu(menu);
+  /**
+   * Leaves the menu only once the save has landed. A menu save can be refused
+   * by the ownership-scoped rules (issue #1078), and navigating back on a
+   * refusal would report success for a change that was thrown away.
+   */
+  async saveMenu(menu: Menu): Promise<void> {
+    await this.dataAccess.saveMenu(menu);
 
     this.navController.back();
   }

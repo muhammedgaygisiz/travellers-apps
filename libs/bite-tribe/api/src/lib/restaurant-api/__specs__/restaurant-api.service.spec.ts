@@ -113,9 +113,12 @@ describe(RestaurantApiService.name, () => {
           },
         });
 
+        // The menu names the restaurant it belongs to, which is what the
+        // ownership-scoped rules authorise a menu write from (issue #1078).
         expect(addDocumentSpy).toHaveBeenNthCalledWith(2, {
           reference: 'menus',
           data: {
+            restaurantId: 'New Resto',
             categories: [],
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
@@ -180,9 +183,12 @@ describe(RestaurantApiService.name, () => {
           },
         });
 
+        // The menu names the restaurant it belongs to, which is what the
+        // ownership-scoped rules authorise a menu write from (issue #1078).
         expect(addDocumentSpy).toHaveBeenNthCalledWith(2, {
           reference: 'menus',
           data: {
+            restaurantId: 'New Resto',
             categories: [],
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
@@ -315,6 +321,7 @@ describe(RestaurantApiService.name, () => {
       expect(addDocumentSpy).toHaveBeenCalledWith({
         reference: 'menus',
         data: {
+          restaurantId: 'resto-123',
           categories: [],
           createdAt: '2024-03-15T12:00:00.000Z',
           createdAtTimestamp: 1710504000000,

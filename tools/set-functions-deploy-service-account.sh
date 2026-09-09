@@ -14,7 +14,10 @@
 # removed. It is never echoed and never passed as a command argument.
 #
 # Requires gcloud authenticated as a project owner, and gh authenticated with
-# write access to the repository.
+# write access to the repository. On macOS:
+#
+#   brew install --cask gcloud-cli
+#   gcloud auth login
 #
 # Usage:
 #   bash tools/set-functions-deploy-service-account.sh          # create, grant, set the secret

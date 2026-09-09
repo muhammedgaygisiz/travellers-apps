@@ -34,7 +34,7 @@ settings
 - Function exports live in `apps/bite-tribe-firebase/functions/src/index.ts`.
 - Backend functions live under `apps/bite-tribe-firebase/functions/src/functions`.
 - Callable functions should validate `request.auth` before user-scoped reads.
-- Firestore index configuration is code. `apps/bite-tribe-firebase/firestore.indexes.json` holds the composite indexes and the single-field exemptions that collection-group queries need, and deploys on its own through the `bite-tribe-firebase:firebase-deploy-indexes` Nx target (`npm run deploy:indexes`), separately from functions and rules.
+- Firestore index configuration is code. `apps/bite-tribe-firebase/firestore.indexes.json` holds the composite indexes and the single-field exemptions that collection-group queries need, and deploys on its own through the `bite-tribe-firebase:firebase-deploy-indexes` Nx target (`npm run deploy:indexes`), separately from functions and rules. That one deploy stays manual while functions deploy from CI, because the Firestore API builds an index in the background and the CLI returns before it is usable. The pipeline's `deploy-functions` job asserts the declared indexes are already live instead of deploying them. See [[Implementation - Firebase Functions]].
 
 ## Current Function Examples
 

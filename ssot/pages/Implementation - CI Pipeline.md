@@ -49,7 +49,7 @@ tests
 +-- bite-tribe-build ----------- deploy-bite-tribe           (develop only)
 +-- bite-tribe-business-build -- deploy-bite-tribe-business  (develop only)
 +-- bite-tribe-admin-build ----- deploy-bite-tribe-admin     (develop only)
-+-- functions-build                                          (no deploy yet)
++-- functions-build ------------ deploy-functions            (develop only)
 ```
 
 The three web apps deploy through three independent build/deploy pairs to three
@@ -58,7 +58,47 @@ app must not hold the other two back, and the consumer app is the only one under
 release-candidate scope, so it is the only one that sets
 `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` and runs `release:verify-bundle`.
 
-`functions-build` compiles the Firebase functions and stops there. It has no deploy counterpart on purpose: gen2 functions have no rollback, and Firestore indexes must be deployed first and separately, so the deploy is a decision rather than a wiring job. See [[Implementation - Firebase Functions]].
+`functions-build` compiles the Firebase functions and `deploy-functions` ships
+them, so backend behaviour reaches production on the same push as the web bundle
+that calls it. Until [issue #1464](https://github.com/muhammedgaygisiz/travellers-apps/issues/1464)
+the pipeline built them and threw the result away, and the deploy was a command
+someone remembered to run on a workstation - which meant a merged function could
+sit undeployed indefinitely, and the artifact came from whatever state that
+machine was in rather than from the commit CI verified.
+
+Three decisions shape that job, and none of them is the obvious one.
+
+**It has its own service account.** `FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS`,
+provisioned by `tools/set-functions-deploy-service-account.sh`, not the
+`FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE` the three hosting deploys share. A gen2
+deploy needs Cloud Run, Artifact Registry, Cloud Build, Eventarc, Cloud
+Scheduler and Secret Manager admin, and putting all of that on the credential
+that otherwise publishes static files makes one leaked secret worth far more.
+The script's role list is also where the reasoning for each role lives.
+
+**Firestore indexes are still deployed by hand, and the job asserts it.**
+`firebase deploy --only functions` never touches them, and the Firestore API
+builds an index in the background while the CLI returns immediately, so folding
+the index deploy into this job would only look like it had solved the ordering.
+`npm run firestore:assert-indexes-deployed` instead compares
+`apps/bite-tribe-firebase/firestore.indexes.json` against what the project
+actually has and fails the deploy when something it declares is missing. It
+reads live state rather than the diff of the push, so re-running the job after
+the manual index deploy passes. The deploy account holds `datastore.viewer` and
+not `datastore.indexAdmin`: CI can check indexes and cannot deploy them.
+[Issue #1227](https://github.com/muhammedgaygisiz/travellers-apps/issues/1227)
+is the failure this prevents.
+
+**A failed deploy fails the run, and nothing more.** There is no
+`continue-on-error`, and the hosting deploys do not wait for this job. A
+functions deploy that fails after three successful hosting deploys therefore
+leaves a live frontend calling backend code that is not there, and the recovery
+is to re-run the job or deploy locally. Serialising the web deploys behind this
+one would trade that window for a functions problem blocking every web deploy,
+which is the worse of the two on a repository where the web deploy runs about a
+hundred times a month.
+
+See [[Implementation - Firebase Functions]].
 
 The lint, stylelint and tests chain is deliberately sequential so a cheap failure stops the run before the expensive jobs start. Everything after `tests` fans out in parallel.
 
@@ -201,6 +241,10 @@ the Nx-cache gaps under Current Limitations are the larger lever.
 - Pull requests read the cache scope of the default branch. A cache written by a pull request is visible only to that pull request, so a new caching behavior only proves itself once `develop` has run with it.
 - Keep the E2E jobs on separate runners. Both suites drive the same Firebase emulator ports and would fight over them in one job.
 - Add a new deploy to `pipeline.yml` behind `if: github.ref == 'refs/heads/develop'`. Do not give it a manually dispatched workflow of its own. A separate workflow needs a trigger that fires on its own, as `native-release.yml`'s tag does.
+- Never put `continue-on-error` on a deploy job. A deploy that is allowed to fail quietly is the manual deploy again, with extra steps.
+- Give a deploy the narrowest credential that can perform it, and grant a new permission to that deploy's own service account. Widening `FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE` is how a hosting secret ends up worth a project.
+- Deploy a new Firestore index before the function that queries through it, and wait for it to reach `READY`. `deploy-functions` refuses to run while a declared index is missing from the project, so this is enforced rather than remembered. See [[Implementation - Firebase Functions]].
+- Do not grant the functions deploy account `datastore.indexAdmin`. The index deploy is deliberately outside CI, and a read-only `datastore.viewer` is all the preflight needs.
 - Do not use `.github/actions/setup` or `.github/actions/restore-cache` from a macOS or Windows job. The `node_modules` cache key is `node-modules-<package-lock hash>` with no runner OS in it, so a non-Linux job would restore Linux native binaries, and saving would overwrite the entry every other job depends on. Use `actions/setup-node` and `npm ci` directly, as the `ios` job does.
 - Keep local and CI Node.js versions aligned through `.nvmrc` as defined by [[Current State - Nx And Dependency Migration Roadmap]].
 - Price a change of repository visibility before making one. CI is free because the repository is public, and going private starts a bill dominated by `pipeline.yml` rather than by the native jobs. See Repository Visibility And Actions Cost above.
@@ -214,6 +258,8 @@ the Nx-cache gaps under Current Limitations are the larger lever.
 .github/workflows/analytics-digest.yml
 .github/workflows/native-release.yml
 tools/assert-release-bundle.mjs
+tools/assert-firestore-indexes-deployed.mjs
+tools/set-functions-deploy-service-account.sh
 tools/write-build-provenance.mjs
 apps/bite-tribe-ios/ios/App/ExportOptions.plist
 .github/actions/nx-cache/action.yml
@@ -232,6 +278,10 @@ nx.json
 - There is no remote cache. Nx Cloud's free tier is exhausted too quickly for this workspace, and the self-hosted cache plugins (`@nx/gcs-cache` and siblings) are deprecated over CVE-2025-36852, an unpatchable cache-poisoning design flaw. The GitHub Actions cache is used instead, and its branch scoping provides the isolation those plugins lack.
 - The native jobs in `native-release.yml` have never run. The Android and iOS signing secrets are not provisioned, so the workflow is written and reviewed but unexecuted, and the manual workstation release in [[Implementation - Store Release Steps]] is still the one that produces store artifacts. See [[Current State - Release Candidate Test Charter]].
 - `native-release.yml` builds on whatever Xcode `macos-latest` carries. An artifact is reproducible against a commit, not against a toolchain.
+- The two jobs that compile the Firebase functions use different compilers. `functions-build` does not install the functions package, so it compiles with the workspace TypeScript 6; `deploy-functions` installs it and therefore compiles with the `^5.7.3` that package pins, which is also what a workstation deploy uses. An error only one of them reports passes the pull request and fails the deploy. The version split is described in [[Current State - Nx And Dependency Migration Roadmap]].
+- A second push to `develop` cancels a functions deploy in flight. The workflow-level `cancel-in-progress` supersedes the whole run, and a job-level `concurrency` group cannot override that; it only keeps a deploy started from another run from overlapping. A cancelled gen2 deploy leaves the already-updated functions updated, and the next push deploys the rest.
+- CI never deletes a function. `--non-interactive` turns the deletion prompt into a failure, so removing an export from `src/index.ts` makes the deploy fail rather than silently take a live endpoint away. Delete it locally and deliberately, then push.
+- Gen2 functions have no rollback. Recovery from a bad deploy is a forward deploy of the reverted commit, not a console action.
 
 ## Related Pages
 

@@ -18,6 +18,13 @@
         "command": "firebase emulators:start --only auth,firestore,storage --import .firebase-export --export-on-exit .firebase-export"
       }
     },
+    "firebase-test-rules": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-firebase/functions",
+        "command": "npm run test:rules"
+      }
+    },
     "firebase-build": {
       "executor": "nx:run-commands",
       "options": {
@@ -30,6 +37,13 @@
       "options": {
         "cwd": "apps/bite-tribe-firebase/functions",
         "command": "npm run deploy"
+      }
+    },
+    "firebase-deploy-rules": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-firebase/functions",
+        "command": "npm run deploy:rules"
       }
     },
     "firebase-deploy-indexes": {

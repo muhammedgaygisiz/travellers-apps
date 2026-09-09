@@ -17,6 +17,7 @@ describe(MenuDataAccessService.name, () => {
     menu$: Observable<unknown>;
     isMenuLoading$: Observable<boolean>;
     isMenuUnavailable$: Observable<boolean>;
+    restaurantIdFromUrl: jest.Mock;
     cacheBite: jest.Mock;
     retryMenuLoad: jest.Mock;
   };
@@ -29,6 +30,7 @@ describe(MenuDataAccessService.name, () => {
       menu$: of(),
       isMenuLoading$: of(true),
       isMenuUnavailable$: of(false),
+      restaurantIdFromUrl: jest.fn().mockReturnValue('restaurant-1'),
       cacheBite: jest.fn(),
       retryMenuLoad: jest.fn(),
     };
@@ -49,12 +51,22 @@ describe(MenuDataAccessService.name, () => {
   });
 
   describe('saveMenu', () => {
-    it('should call saveMenu on BiteTribeApiService directly', () => {
+    /**
+     * The restaurant is passed alongside the menu because the ownership-scoped
+     * Firestore rules read the write's authority from it: a menu document says
+     * nothing about who may write it (issue #1078).
+     *
+     * `restaurant$` is deliberately empty here. The id comes from the route
+     * parameter, and the loaded restaurant is a derived selector that resolves
+     * to `undefined` without a GPS position — reading the id off it would fail
+     * the save for anyone who declined the location permission.
+     */
+    it('should call saveMenu on BiteTribeApiService with the restaurant from the route', () => {
       const menu = { id: 'menu-1', categories: [] } as unknown as Menu;
 
       service.saveMenu(menu);
 
-      expect(apiMock.saveMenu).toHaveBeenCalledWith(menu);
+      expect(apiMock.saveMenu).toHaveBeenCalledWith(menu, 'restaurant-1');
     });
   });
 

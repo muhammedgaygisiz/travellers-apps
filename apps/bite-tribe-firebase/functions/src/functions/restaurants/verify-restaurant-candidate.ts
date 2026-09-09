@@ -266,7 +266,13 @@ export const verifyRestaurantCandidateHandler = async (
       );
 
       transaction.create(restaurantRef, restaurantDocument);
+      // The menu names its restaurant. Nothing here reads it back - this
+      // transaction runs with the Admin SDK and is not subject to rules - but a
+      // menu the client later edits is authorised through the restaurant, and a
+      // menu created without the field would be inconsistent with every menu
+      // the apps write (issue #1078).
       transaction.create(menuRef, {
+        restaurantId: restaurantRef.id,
         categories,
         createdAt: now.toISOString(),
         createdAtTimestamp: now.getTime(),

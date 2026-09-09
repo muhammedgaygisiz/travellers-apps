@@ -38,7 +38,7 @@ Steps 3 and 4 are the point of the split: a restaurant never grants itself busin
 2. They sign into the admin app with a normal BiteTribe account.
 3. Sign-in verifies the `admin` role before it succeeds; an account without it gets the generic login failure. `roleGuard('admin')` backs that up on the routes for a restored session or a revoked role.
 4. They land on the dashboard, a list of the operator surfaces the tool offers.
-5. **User management** lists every BiteTribe account with the roles it holds, and grants or revokes them. It reads `listUsersWithRoles` and writes `setUserRoles`, both admin-only. 
+5. **User management** lists every BiteTribe account with the roles it holds, and grants or revokes them. It reads `listUsersWithRoles` and writes `setUserRoles`, both admin-only.
 
 Only the roles, the subscription tier and the account's access are editable. The identity fields are read-only rather than offering a change nothing can save.
 
@@ -46,12 +46,12 @@ Blocking sits below both editable sections, separated by a rule and behind a con
 
 6. **Restaurant candidates** lists the pending candidates with the Bite evidence behind each, and **Bite places** lists place names Bites carry that no verified restaurant answers to yet. Both open the new-restaurant form, which creates the verified restaurant. Both moved out of the business dashboard with issue \#1473.
 7. **Restaurant ownership** assigns a verified restaurant to an account holding `business`, and revokes that assignment. Both go through admin-only callables that write the fields on the restaurant document (issue \#1077). The surface reuses the account list user management already loads rather than adding a second way to find an account, and offers only accounts holding the role.
-8. 
-A restaurant that already has an owner offers no picker at all: reassignment is revoke and then assign, so the operator log carries a reason for the removal and a reason for the grant. Revoking sits below a rule and behind a confirmation naming the restaurant and the account, on the same terms as blocking.
-8. **Bite search** finds a Bite by its name or one of its tags and shows what BiteTribe holds about it. It calls `searchBites`, the same callable the consumer app's search drives. Selecting a Bite is where deleting an improper one will attach (issue \#1475).
+8.
+
+A restaurant that already has an owner offers no picker at all: reassignment is revoke and then assign, so the operator log carries a reason for the removal and a reason for the grant. Revoking sits below a rule and behind a confirmation naming the restaurant and the account, on the same terms as blocking. 8. **Bite search** finds a Bite by its name or one of its tags and shows what BiteTribe holds about it. It calls `searchBites`, the same callable the consumer app's search drives. Selecting a Bite is where deleting an improper one will attach (issue \#1475).
 
 9. The same card removes it. A required reason and a confirmation sit between the operator and `deleteBiteAsOperator`, below a rule, because the deletion is irreversible and reaches further than the Bite (issue \#1475). 9. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
-9. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
+10. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
 
 ## Key Behaviours
 
@@ -82,7 +82,7 @@ A restaurant that already has an owner offers no picker at all: reassignment is 
 
 The role gate is a lockout change, and the tool that grants roles is behind it. The bootstrap script is the recovery path and has to keep working after the gate is live; `setUserRoles` refusing to let an admin drop their own `admin` role is the cheaper half of the same protection.
 
-Until issue \#1078 replaces the Firestore rules, this is a client-side gate over an open database. It stops an account from reaching a page; it does not stop a determined caller from writing a document.
+Issue \#1078 replaced the Firestore rules, so this gate is no longer alone: a caller that goes around the admin app is now scoped by the account named on the document, and the `admin` role is a clause the rules read for themselves. Two things still hold. The gate stops an account from reaching a page and the rules stop it from writing a document, and they are independent — a change to one is not a change to the other. And the rules deploy by hand, so until `npx nx firebase-deploy-rules bite-tribe-firebase` has run against the live project this is still a client-side gate over an open database. `storage.rules` is open regardless (\#1350).
 
 ## Related GitHub Scope
 

@@ -1,11 +1,417 @@
 rules_version = '2';
 
+/**
+ * Ownership-scoped access rules for BiteTribe (GitHub issue #1078).
+ *
+ * Until this file was written, every collection was covered by one match on
+ * `/{document=**}` allowing read and write to any signed-in account. That made
+ * the ownership model decorative: a business account could write
+ * `ownerUserId` onto any restaurant and hold it, without going near the
+ * operator callables that exist to make the decision accountable.
+ *
+ * Three rules of thumb hold everywhere below, and reading them once is cheaper
+ * than reading them per collection:
+ *
+ * 1. **Reads stay where they were.** Every collection a signed-in account
+ *    could read before, it can still read. Narrowing reads is issue #1079's
+ *    visible scope, not this one's, and mixing the two would make a regression
+ *    here indistinguishable from a regression there. The two exceptions are
+ *    named at their own match blocks: `accountDeletions` and the `pushTokens`
+ *    index are cross-account identifiers no client ever read.
+ *
+ * 2. **A write is allowed by ownership, not by a role.** The account named on
+ *    the document writes it. The one role that appears here is `admin`, and it
+ *    appears as an explicit clause rather than as an implied `business` — see
+ *    the operator note on `isOperator()`.
+ *
+ * 3. **Backend-owned fields are named, not assumed.** A field the Admin SDK
+ *    owns can sit on a document the client may otherwise write, so the rule has
+ *    to name the field. Callables bypass rules entirely, so denying every
+ *    client write to such a field costs the backend nothing.
+ */
 service cloud.firestore {
   match /databases/{database}/documents {
-// Allow authenticated users to read any document
+
+    // ---------------------------------------------------------------- helpers
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function uid() {
+      return request.auth.uid;
+    }
+
+    /**
+     * The roles on the verified ID token, as a list.
+     *
+     * An account that was never granted a role carries no `roles` key at all,
+     * and a malformed claim is possible because claims are written by a
+     * callable rather than by a schema, so the absent and the wrong-shape cases
+     * both have to resolve to "no roles" rather than to an error. An error in a
+     * rule denies the request, which would be the right answer here by accident
+     * and the wrong one anywhere this helper is later reused.
+     */
+    function roleList() {
+      return signedIn() && request.auth.token.get('roles', []) is list
+        ? request.auth.token.get('roles', [])
+        : [];
+    }
+
+    /**
+     * A BiteTribe operator.
+     *
+     * **`admin` does not imply `business`** (GitHub issue #1164). The roles are
+     * deliberately not a hierarchy: an operator account is not a restaurant,
+     * and granting it restaurant maintenance by implication would make the
+     * business app's only-what-you-own gate meaningless for the accounts most
+     * able to break it. So an operator is admitted here by name, at the
+     * specific collections the admin app writes — creating a restaurant,
+     * running a Bite migration — and is admitted to the business app nowhere.
+     * Restaurant maintenance always goes through an assigned owner, which
+     * `assignRestaurantOwner` provides (issue #1077).
+     *
+     * The consequence to accept with it: an operator write from the admin app
+     * lands as a plain client write and leaves nothing in the operator log,
+     * unlike the ownership callables. Attributability for those surfaces is the
+     * part of #1164 this branch does not close.
+     */
+    function isOperator() {
+      return 'admin' in roleList();
+    }
+
+    function isSelf(userId) {
+      return signedIn() && uid() == userId;
+    }
+
+    /** The field naming the account behind a document, absent-safe. */
+    function ownerOf(data, field) {
+      return data.get(field, '');
+    }
+
+    function owns(data, field) {
+      return signedIn() && ownerOf(data, field) == uid();
+    }
+
+    /** True when the write leaves every one of `fields` at its current value. */
+    function unchangedAll(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    function absentAll(fields) {
+      return !request.resource.data.keys().hasAny(fields);
+    }
+
+    // ------------------------------------------------------------ restaurants
+
+    /**
+     * Written only by `assignRestaurantOwner` and `revokeRestaurantOwner`
+     * through the Admin SDK, which is not subject to these rules.
+     *
+     * They are listed rather than protected by the document's owner check,
+     * because they live on a document the owner may otherwise write: without
+     * naming them, the account holding a restaurant could hand it to another
+     * account, and any business account could take an unheld one.
+     */
+    function ownershipFields() {
+      return ['ownerUserId', 'claimStatus', 'claimedAt', 'claimedAtTimestamp'];
+    }
+
+    function restaurantData(restaurantId) {
+      return get(/databases/$(database)/documents/restaurants/$(restaurantId)).data;
+    }
+
+    function restaurantExists(restaurantId) {
+      return restaurantId is string
+        && restaurantId.size() > 0
+        && exists(/databases/$(database)/documents/restaurants/$(restaurantId));
+    }
+
+    function ownsRestaurant(restaurantId) {
+      return restaurantExists(restaurantId)
+        && owns(restaurantData(restaurantId), 'ownerUserId');
+    }
+
+    match /restaurants/{restaurantId} {
+      allow read: if signedIn();
+
+      /**
+       * Creating a restaurant is an operator action.
+       *
+       * The only client that creates one is the admin app's new-restaurant
+       * page; `verifyRestaurantCandidate` creates the rest through the Admin
+       * SDK. A business account acquires a restaurant by being assigned one,
+       * never by writing one for itself — which is also why a create may not
+       * carry the ownership fields.
+       */
+      allow create: if isOperator() && absentAll(ownershipFields());
+
+      allow update: if unchangedAll(ownershipFields())
+        && (isOperator() || owns(resource.data, 'ownerUserId'));
+
+      allow delete: if isOperator();
+    }
+
+    // ------------------------------------------------------------------ menus
+
+    /**
+     * A menu document says nothing about who may write it: it holds categories
+     * and timestamps, and the only link to a restaurant is `Restaurant.menuId`
+     * pointing the other way. Rules cannot query, so the caller names the
+     * restaurant it is acting for and the rule verifies the claim against that
+     * restaurant document — which already carries both `ownerUserId` and
+     * `menuId`. Checking `menuId` is what stops an owner naming their own
+     * restaurant to reach somebody else's menu.
+     *
+     * Reading the restaurant rather than a field on the menu is also what makes
+     * this work with no backfill: menus written before this rule carry no
+     * `restaurantId`, and the check never reads one off the menu.
+     */
+    function ownsMenu(menuId) {
+      return ownsRestaurant(request.resource.data.get('restaurantId', ''))
+        && restaurantData(request.resource.data.get('restaurantId', '')).get('menuId', '') == menuId;
+    }
+
+    match /menus/{menuId} {
+      allow read: if signedIn();
+
+      /**
+       * At create time the restaurant does not point at the menu yet — the
+       * client writes `menuId` back onto it immediately afterwards — so the
+       * create can only check ownership of the named restaurant, and the
+       * `menuId` half of the check starts holding from the first update.
+       */
+      allow create: if isOperator()
+        || ownsRestaurant(request.resource.data.get('restaurantId', ''));
+
+      allow update: if isOperator() || ownsMenu(menuId);
+
+      allow delete: if isOperator();
+    }
+
+    // ------------------------------------------------------------------ bites
+
+    match /bites/{biteId} {
+      allow read: if signedIn();
+
+      allow create: if owns(request.resource.data, 'userId');
+
+      /**
+       * The operator clause is the admin app's Bite migrations — geohash,
+       * address backfill, the image migration — which rewrite Bites belonging
+       * to every account.
+       *
+       * The like counters (`thumbup`, `drooling`, `mindblown`) are written by
+       * Functions and are deliberately **not** protected here. The edit-Bite
+       * path sends the whole Bite back, counters included, so naming them would
+       * fail an ordinary edit whenever a like landed between the read and the
+       * save. They are cosmetic, they feed no entitlement, and the Bite's own
+       * owner is the only account that can touch them.
+       */
+      allow update: if isOperator() || owns(resource.data, 'userId');
+
+      allow delete: if isOperator() || owns(resource.data, 'userId');
+
+      /** One reaction document per account, named by the account's own uid. */
+      match /likes/{likeUserId} {
+        allow read: if signedIn();
+        allow create, update: if isSelf(likeUserId)
+          && owns(request.resource.data, 'userId');
+        allow delete: if isSelf(likeUserId);
+      }
+    }
+
+    // ---------------------------------------------------------------- reviews
+
+    match /reviews/{reviewId} {
+      allow read: if signedIn();
+      allow create: if owns(request.resource.data, 'authorId');
+      allow update, delete: if isOperator() || owns(resource.data, 'authorId');
+    }
+
+    // ----------------------------------------------------------- bucket lists
+
+    match /bucketlists/{bucketlistId} {
+      allow read: if signedIn();
+      allow create: if owns(request.resource.data, 'userId');
+      allow update, delete: if isOperator() || owns(resource.data, 'userId');
+    }
+
+    // ------------------------------------------------------------ bite trails
+
+    match /biteTrails/{biteTrailId} {
+      allow read: if signedIn();
+      allow create: if owns(request.resource.data, 'ownerId');
+      allow update, delete: if isOperator() || owns(resource.data, 'ownerId');
+
+      /**
+       * A purchase record, written by the buyer and never rewritten. `soldCount`
+       * is derived from how many of these exist rather than stored, so an
+       * update path would have nothing to update.
+       */
+      match /sells/{sellId} {
+        allow read: if signedIn();
+        allow create: if owns(request.resource.data, 'userId');
+        allow update: if false;
+        allow delete: if isOperator();
+      }
+
+      /** One rating per account, named by the account's own uid. */
+      match /ratings/{ratingUserId} {
+        allow read: if signedIn();
+        allow write: if isSelf(ratingUserId);
+      }
+    }
+
+    // ------------------------------------------------------------------ users
+
+    /**
+     * Fields on the user document that the backend owns.
+     *
+     * Every one of them is written by a Function through the Admin SDK, and
+     * every one of them is read as a fact about the account rather than as
+     * something the account said about itself: an entitlement
+     * (`subscriptionTier`), a leaderboard input (`biteCount`), a social count,
+     * the display-name reservation, or the email-verification state that gates
+     * parts of the app. `subscriptionTier` is the sharpest of them — under the
+     * blanket rule an account could grant itself Pro with one write.
+     *
+     * The comparison is by value, so a client that reads a profile and writes
+     * the same numbers back is unaffected; only a changed value is refused.
+     */
+    function backendOwnedUserFields() {
+      return [
+        'biteCount',
+        'followersCount',
+        'followingCount',
+        'subscriptionTier',
+        'normalizedDisplayName',
+        'countryCodes',
+        'lastSeen',
+        'lastSeenTimestamp',
+        'appVersion',
+        'appBuildNumber',
+        'emailVerified',
+        'emailVerificationRequired',
+        'emailVerificationProvider',
+        'emailVerificationReminderCount',
+        'emailVerificationLastSentAt',
+        'emailVerificationLastSentAtTimestamp',
+        'emailVerificationManualLastSentAt',
+        'emailVerificationManualLastSentAtTimestamp'
+      ];
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+
+      /**
+       * The document is created by `createUserOnAuthCreate` before the account
+       * exists to write anything. The create clause is here for the account's
+       * own first write in the case where that trigger has not landed yet, and
+       * it may not seed the backend-owned fields.
+       */
+      allow create: if isSelf(userId) && absentAll(backendOwnedUserFields());
+
+      allow update: if isSelf(userId) && unchangedAll(backendOwnedUserFields());
+
+      /** Account deletion runs in `deleteOwnAccount` with the Admin SDK. */
+      allow delete: if false;
+
+      /**
+       * The follow relationship is written on both accounts: the follower's
+       * `following` and the followed account's `followers`. The second is a
+       * write to a document under somebody else's user document, which is why
+       * the document is named by the follower's uid — that name is the whole
+       * authorisation.
+       */
+      match /followers/{followerId} {
+        allow read: if signedIn();
+        allow write: if isSelf(followerId);
+      }
+
+      match /following/{followedId} {
+        allow read: if signedIn();
+        allow write: if isSelf(userId);
+      }
+
+      /** One document per registered installation of this account. */
+      match /pushTokens/{token} {
+        allow read, write: if isSelf(userId);
+      }
+    }
+
+    // --------------------------------------------------------------- settings
+
+    match /settings/{userId} {
+      allow read, write: if isSelf(userId);
+    }
+
+    // ------------------------------------------------- push token index
+
+    /**
+     * Maps an FCM token to the account that registered it, so a rotated or
+     * reassigned token can be found without walking every account.
+     *
+     * **Not readable**, unlike everything else here: it is the one collection
+     * whose rows are cross-account identifiers, and no client has ever read it.
+     * Writes are allowed only for a row naming the writer.
+     */
+    match /pushTokens/{token} {
+      allow read: if isOperator();
+      allow create, update: if owns(request.resource.data, 'userUid');
+      allow delete: if isOperator() || owns(resource.data, 'userUid');
+    }
+
+    // ----------------------------------------------- backend-owned collections
+
+    /**
+     * Read by the apps, written only by Functions through the Admin SDK.
+     *
+     * `meta` holds the leaderboard snapshots and the exchange-rate table;
+     * `displayNames` is the reservation index behind `claimDisplayName`;
+     * `restaurantCandidates` is produced by the clustering trigger and consumed
+     * by the admin app's verification surface, which acts through
+     * `verifyRestaurantCandidate` rather than by writing the candidate.
+     */
+    match /meta/{documentId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /displayNames/{normalizedDisplayName} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /restaurantCandidates/{candidateId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    /**
+     * The record of a deleted account, kept for the retention window.
+     *
+     * Neither readable nor writable by a client. It was readable under the
+     * blanket rule and nothing read it; leaving it readable would publish, to
+     * every signed-in account, that a given account asked to be deleted.
+     */
+    match /accountDeletions/{deletionId} {
+      allow read, write: if false;
+    }
+
+    // ------------------------------------------------------------------- rest
+
+    /**
+     * Anything not named above.
+     *
+     * A collection this file does not know about is a collection whose
+     * ownership nobody has decided, so it is denied rather than left open.
+     * Adding a collection to the product means adding it here, and the rules
+     * test suite is where that is noticed.
+     */
     match /{document=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }

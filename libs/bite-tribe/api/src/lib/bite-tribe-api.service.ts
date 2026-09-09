@@ -165,8 +165,15 @@ export class BiteTribeApiService {
     return this.restaurantApiService.createMenuForRestaurant(restaurantId);
   }
 
-  saveMenu(menu: Menu): void {
-    this.menuApiService.saveMenu(menu);
+  /**
+   * Returns the promise rather than dropping it. A menu save can now be
+   * *refused* — by the ownership-scoped rules, if the caller does not hold the
+   * restaurant (issue #1078) — and a caller that cannot see the rejection
+   * navigates away from the editor as though the save had worked, losing the
+   * change without saying so.
+   */
+  saveMenu(menu: Menu, restaurantId: string | undefined): Promise<void> {
+    return this.menuApiService.saveMenu(menu, restaurantId);
   }
 
   loadMenu(menuId: string): Promise<Menu | undefined> {

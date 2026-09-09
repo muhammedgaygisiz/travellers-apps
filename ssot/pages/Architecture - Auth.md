@@ -76,7 +76,11 @@ app and run the operational migrations in it.
   that has been granted maintenance rights. They are separate rather than a
   hierarchy — an operator account is not a restaurant, and granting it
   restaurant rights by implication would defeat the ownership gate for exactly
-  the accounts most able to break it.
+  the accounts most able to break it. **Settled, not open**: issue \#1164 asked
+  which of three ways out to take, and `RD-UR-6` answers it. The answer now
+  holds in all four places the issue named — the claim checks in the callables,
+  the sign-in gate, the route guards, and the Firestore rules of \#1078, where
+  the Operator appears as an explicit `admin` clause.
   **This is about claims, not capability.** By `RD-UR-6` in [[User Roles]] the
   Operator does maintain every Restaurant, claimed or not — through the Admin App
   and an `admin` allowance in the rules, never by holding `business`.
@@ -110,7 +114,10 @@ app and run the operational migrations in it.
   app takes two because a staff account holds `staff` and **not** `business`.
   Any one of the listed roles admits the account; what it may then _do_ is
   narrower and belongs to the rules of issue \#1078 and the scoped dashboard of
-  \#1079, not to the door.
+  \#1079, not to the door. \#1078 has landed and gives `staff` **no write
+  authority at all**, because the record of which restaurant a staff account
+  works at is \#1537 and does not exist yet. A staff account opens the business
+  app and reads.
 - `roleGuard(...roles)` is the backstop, not the primary gate. Sign-in already
   refuses these accounts, so it fires only for a session restored on startup
   (which reports itself as a successful login without running the sign-in
@@ -151,10 +158,19 @@ app and run the operational migrations in it.
   into the business app before the role existed cannot now unless an operator
   granted it. See issue \#1469 for the reasoning.
 
-The **backend** half of authorization is still open: `firestore.rules` grants
-read and write on every document to every authenticated user. Replacing it is
-issue \#1078, deliberately kept out of the change that introduced the roles.
-Until it lands, the role gate is a client-side gate over an open database.
+The **backend** half of authorization is issue \#1078, deliberately kept out of
+the change that introduced the roles and delivered on its own branch.
+`firestore.rules` no longer grants read and write on every document to every
+authenticated user: every write is scoped by the account named on the document,
+and the four restaurant ownership fields are writable by no client at all. See
+the rules section on [[Architecture - Firebase]] for the contract, the test
+suite and the deploy.
+
+**The rules deploy by hand.** Nothing in CI deploys `firestore.rules`, so
+merging \#1078 does not change production — running
+`npx nx firebase-deploy-rules bite-tribe-firebase` does. Until that deploy runs,
+the role gate is still a client-side gate over an open database.
+`storage.rules` remains open and is issue \#1350.
 
 ## Operator Audit Trail
 
@@ -379,4 +395,5 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 - Onboarding after registration is still a product gap.
 - Public/private profile intent needs clearer user guidance.
 - Backend callable auth checks need to remain consistent as more write/query logic moves server-side.
-- Roles are enforced in route guards and in every operator callable, but not yet in Firestore rules (\#1078). Until those land, an account that cannot reach an operator _operation_ can still write documents directly.
+- Ownership, not the role, is what the Firestore rules enforce (\#1078). An account that holds `business` but is assigned no restaurant can write no restaurant, which is the intended boundary rather than a gap. `storage.rules` is still open (\#1350), so an image can still be written by any signed-in account.
+- The rules are deployed by hand and by nobody else. A merged rules change is live only after `npx nx firebase-deploy-rules bite-tribe-firebase` runs against the project.

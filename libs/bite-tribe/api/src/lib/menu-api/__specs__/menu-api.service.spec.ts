@@ -110,16 +110,37 @@ describe(MenuApiService.name, () => {
         name: 'Updated Menu',
       } as unknown as Menu;
 
-      await service.saveMenu(menuData);
+      await service.saveMenu(menuData, 'restaurantId');
 
       expect(updateDocumentSpy).toHaveBeenCalledWith({
         data: {
+          restaurantId: 'restaurantId',
           categories: undefined,
           updatedAt: '2024-03-15T12:00:00.000Z',
           updatedAtTimestamp: 1710504000000,
         },
         reference: 'menus/menuId',
       });
+    });
+
+    /**
+     * The restaurant is what the ownership-scoped rules read the write's
+     * authority from (issue #1078), so a save without one cannot succeed. It is
+     * refused here rather than at Firestore, where it would come back as a
+     * permission error the user cannot act on.
+     */
+    it('refuses a save that names no restaurant', async () => {
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue(undefined);
+      updateDocumentSpy.mockClear();
+
+      const menuData = { id: 'menuId' } as unknown as Menu;
+
+      await expect(service.saveMenu(menuData, undefined)).rejects.toThrow(
+        'Cannot save a menu without the restaurant it belongs to',
+      );
+      expect(updateDocumentSpy).not.toHaveBeenCalled();
     });
   });
 });

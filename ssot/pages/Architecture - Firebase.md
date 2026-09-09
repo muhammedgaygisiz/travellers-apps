@@ -17,15 +17,100 @@ Firebase provides backend persistence, authentication integration, storage, func
 ## Firestore Collections
 
 ```text
-bites
-users
+bites               bites/{id}/likes
+users               users/{id}/followers, users/{id}/following, users/{id}/pushTokens
 restaurants
 menus
 bucketlists
-biteTrails
+biteTrails          biteTrails/{id}/sells, biteTrails/{id}/ratings
 reviews
 settings
+restaurantCandidates
+displayNames
+meta
+accountDeletions
+pushTokens
 ```
+
+Every one of these is named in `firestore.rules`, and anything not named there
+is denied. Adding a collection to the product means adding it to the rules.
+
+## Firestore Security Rules
+
+Until issue \#1078 the whole database was one match on `/{document=**}` allowing
+read and write to any signed-in account. `apps/bite-tribe-firebase/firestore.rules`
+now scopes every write by ownership. Three rules of thumb carry the file:
+
+- **Reads are where they were.** Every collection a signed-in account could read
+  before, it can still read. Narrowing reads is issue \#1079. The two exceptions
+  are `accountDeletions` and the top-level `pushTokens` index, which are
+  cross-account identifiers no client ever read.
+- **A write is allowed by ownership, not by a role.** The document names the
+  account that may write it: `Restaurant.ownerUserId`, `Bite.userId`,
+  `Review.authorId`, `Bucketlist.userId`, `BiteTrail.ownerId`, or the document
+  id itself for the per-account documents (`settings/{uid}`, a reaction, a
+  rating, a follow relationship, a push installation).
+- **Backend-owned fields are named.** A field the Admin SDK owns can sit on a
+  document the client may otherwise write, so the rule names the field.
+  `ownerUserId`, `claimStatus`, `claimedAt` and `claimedAtTimestamp` on a
+  restaurant are **writable by no client at all**, including the account that
+  owns it, because they are written by `assignRestaurantOwner` and
+  `revokeRestaurantOwner` — which bypass rules entirely, so denying every client
+  write to them costs the backend nothing and closes the forgery path recorded
+  on [[Current State - Known Issues]]. The same holds for the entitlement and
+  counter fields on `/users`: `subscriptionTier`, `biteCount`, the follow
+  counts, `normalizedDisplayName`, `countryCodes`, the last-seen stamps and the
+  email-verification state. The comparison is by value, so a client that reads a
+  profile and writes the same numbers back is unaffected.
+
+The one role in the file is `admin`, and it appears as an explicit clause rather
+than as an implied `business`. That is `RD-UR-6` in [[User Roles]]: the Operator
+is above the Restaurant Owner in capability and not in claims. It is what lets
+the admin app create a restaurant and run the Bite migrations while the business
+app stays owner-scoped.
+
+**Menus are authorised through their restaurant.** A menu document holds
+categories and timestamps and nothing that says who may write it — the only link
+is `Restaurant.menuId`, pointing the other way — and rules cannot query. So the
+client names the restaurant on every menu write and the rule reads that
+restaurant, requiring both that the caller owns it and that its `menuId` is this
+menu. Reading the restaurant rather than a field on the menu is what makes this
+work with no backfill: a menu written before the field existed is still writable
+by its owner and gains the field on its next save.
+
+**`staff` grants nothing here.** The rules scope a write by
+`Restaurant.ownerUserId` and there is no equivalent record of which restaurant a
+staff account works at — writing it is issue \#1537. A rule admitting `staff`
+before that record exists could only admit every staff account to every
+restaurant. The role still opens the business app and reads.
+
+### Testing And Deploying The Rules
+
+`apps/bite-tribe-firebase/functions/src/firestore-rules/__specs__/firestore-rules.emulator-spec.ts`
+runs the real rules file against the Firestore emulator through
+`@firebase/rules-unit-testing`, with an allow case and a deny case for every
+protected collection. A rules file is only half tested by proving it refuses
+things: a rule that refuses everything passes every deny test and breaks the
+product.
+
+```bash
+npx nx firebase-test-rules bite-tribe-firebase
+```
+
+The `firestore-rules` job in `.github/workflows/pipeline.yml` runs it on every
+pull request. The two e2e suites exercise the rules along the paths they walk,
+but neither can assert that something is _refused_.
+
+**The rules deploy by hand, and nothing in CI deploys them.** That is
+deliberate, and it is the rollout step issue \#1078 asks for: merge, then run
+the suite, then deploy, then watch production for newly denied legitimate paths.
+
+```bash
+npx nx firebase-deploy-rules bite-tribe-firebase
+```
+
+Rolling back is deploying the previous version of the file, which takes about a
+minute. `storage.rules` is still open and is issue \#1350, filed separately.
 
 ## Functions Pattern
 

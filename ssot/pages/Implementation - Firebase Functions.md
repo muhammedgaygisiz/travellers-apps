@@ -65,8 +65,45 @@ apps/bite-tribe-firebase/functions/src/index.ts
 - The mail's visible sender is configuration of its own, never the delegated mailbox. `GOOGLE_WORKSPACE_DELEGATED_USER` says which Workspace account performs the Gmail API delegation and is infrastructure; `GOOGLE_WORKSPACE_SENDER_ADDRESS` says what a recipient sees, and `createRawEmail` builds `From: BiteTribe <sender>` from that one alone. Building `From` from the delegated user published a maintainer's personal mailbox to every user who requested a resend, and made the visible sender change whenever the delegation account changed; see issue \#1265. A missing sender address throws rather than falling back to the delegated user, because a fallback would keep sending from the personal address with nothing to surface it. Gmail rewrites `From` to the authenticated mailbox unless the address is on the delegated mailbox's `Send mail as` list, or is that mailbox itself, so setting the secret is only half the configuration. Two Workspace settings are needed and they are not the same one: an Admin-console **alternate email address (alias)** makes `noreply@bitetribe.app` exist and receive, while the **`Send mail as`** entry under Gmail - Settings - Accounts and Import is what authorises sending as it. An alias does not reliably propagate into that list, and between 2026-08-09 and 2026-08-18 it had not, so a correct header was rewritten in transit and the shipped fix changed nothing a recipient saw. Verify the `Send mail as` list, not the alias, and verify it by a real send: the rewrite happens after the code under test has produced its header, so no spec can catch it. The subject of the console-owned Firebase Auth registration template is kept at the catalog's English wording, `Verify your BiteTribe email address`, so one operation does not present two subjects; that template is console configuration, not repository code. The one-word spelling settled in [[Implementation - Store Listing Assets]] moved that wording, so two console settings have to follow the catalog before the next functions deploy, or the two mails disagree again exactly as [[issue-1265]] describes: the Firebase Auth template subject, and the `Send mail as` display name on the delegated mailbox, which must match `SENDER_NAME` or Gmail rewrites what the recipient sees. The registration mail's `bite-tribe.firebaseapp.com` action link stays for now: it is `authDomain`, which is also the Google and Apple OAuth redirect origin, so moving it is a Hosting, DNS, provider and app-config change sequenced after 1.0.1 rather than an RC-time edit.
 - The verification mail is localized, not hardcoded English. Subject, body, and link label come from the `emailVerification.*` keys of the shared i18n catalog, and both senders - `resendEmailVerification` and the scheduled `sendEmailVerificationReminders` - resolve the recipient's language through `shared/utils/get-user-language.ts`, the same `settings/{uid}.language` read that push notifications use. An unknown or missing language falls back to English rather than blocking the send, because an account-security mail in the wrong language still beats none. Translated copy is MIME-encoded on the way out: the subject as an RFC 2047 encoded word when it leaves ASCII, the body as base64 with a matching `Content-Transfer-Encoding`, because the default 7-bit encoding would deliver anything non-English as mojibake. See issue \#1264.
 - Display name uniqueness is backend-owned. `claimDisplayName` normalizes the name (trim + lowercase), then writes a `/displayNames/{normalizedName}` claim document inside a transaction so concurrent claims of the same normalized name cannot both succeed; the same transaction releases the caller's previous claim on rename and keeps `/users/{uid}.displayName` and `normalizedDisplayName` consistent. `checkDisplayNameAvailability` is a read-only advisory check that treats a name already owned by the caller as available. There is no display name backfill: both checks also scan `/users`, so a user who registered before claims existed is protected without one, and claims their own name when onboarding next runs. See [[UC - Run Operational Migrations]]. Reuse `normalizeDisplayName`/`isValidNormalizedDisplayName` from `users/display-name-utils.ts` rather than re-implementing normalization. Emulator specs (`display-name-claims.emulator-spec.ts`) cover concurrent claims, rename/release, and the unclaimed legacy name.
-- A collection-group query needs its single-field index exemption committed in `apps/bite-tribe-firebase/firestore.indexes.json`. Firestore indexes every scalar field at collection scope automatically, but never at collection-group scope, so a `collectionGroup(x).where(field, ...)` without an exemption compiles, passes the emulator, passes every unit test, and then fails in production with `FAILED_PRECONDITION`. The account-deletion cascade shipped that way and could not delete likes or anonymize BiteTrail sales; see issue \#1227. `src/__specs__/firestore-collection-group-indexes.spec.ts` pairs every collection-group filter in the functions source with an exemption so the gap fails the build instead. Deploy index changes with `npm run deploy:indexes` from `apps/bite-tribe-firebase/functions`, or the `bite-tribe-firebase:firebase-deploy-indexes` Nx target that wraps it - `firebase deploy --only functions` never touches them. Keep the two deploys separate and run the index deploy first: the Firestore API builds an index in the background and the CLI returns without waiting for `READY`, so a function that needs a new index must not go live in the same step. Verify a deployed exemption under Firestore - Indexes - `Automatic` - Exemptions, in either console: `https://console.firebase.google.com/project/bite-tribe/firestore/databases/-default-/indexes/automatic?selectedTab=automatic` or `https://console.cloud.google.com/firestore/databases/-default-/indexes/automatic?project=bite-tribe`. The default `Manual` view lists only composite indexes, so an exemption looks missing until the `Automatic` toggle is selected. `firebase firestore:indexes --pretty` confirms an exemption exists but prints no build state for field overrides, because the Firestore `Field` resource carries none.
+- A collection-group query needs its single-field index exemption committed in `apps/bite-tribe-firebase/firestore.indexes.json`. Firestore indexes every scalar field at collection scope automatically, but never at collection-group scope, so a `collectionGroup(x).where(field, ...)` without an exemption compiles, passes the emulator, passes every unit test, and then fails in production with `FAILED_PRECONDITION`. The account-deletion cascade shipped that way and could not delete likes or anonymize BiteTrail sales; see issue \#1227. `src/__specs__/firestore-collection-group-indexes.spec.ts` pairs every collection-group filter in the functions source with an exemption so the gap fails the build instead. Deploy index changes with `npm run deploy:indexes` from `apps/bite-tribe-firebase/functions`, or the `bite-tribe-firebase:firebase-deploy-indexes` Nx target that wraps it - `firebase deploy --only functions` never touches them. Keep the two deploys separate and run the index deploy first: the Firestore API builds an index in the background and the CLI returns without waiting for `READY`, so a function that needs a new index must not go live in the same step. That ordering is now enforced rather than remembered: `deploy-functions` runs `npm run firestore:assert-indexes-deployed` first, and refuses to deploy while anything `firestore.indexes.json` declares is absent from the project. It compares live state rather than the diff of the push, so the fix is to deploy the indexes, wait for `READY`, and re-run the job. Verify a deployed exemption under Firestore - Indexes - `Automatic` - Exemptions, in either console: `https://console.firebase.google.com/project/bite-tribe/firestore/databases/-default-/indexes/automatic?selectedTab=automatic` or `https://console.cloud.google.com/firestore/databases/-default-/indexes/automatic?project=bite-tribe`. The default `Manual` view lists only composite indexes, so an exemption looks missing until the `Automatic` toggle is selected. `firebase firestore:indexes --pretty` confirms an exemption exists but prints no build state for field overrides, because the Firestore `Field` resource carries none.
 - Account deletion is backend-owned. `deleteOwnAccount` proves the sign-in is recent from `request.auth.token.auth_time` (five minutes) rather than relying on Firebase's client-side recent-login rule, because the cascade runs with admin privileges; a stale token returns `failed-precondition`/`reauth_required` so the app can re-authenticate and retry. Progress is recorded in `/accountDeletions/{uid}` and an already completed job returns immediately, so a retried call is a no-op. Data is removed before the Firebase Auth account, never after, so a failure leaves a signed-in user who can retry rather than an unreachable data set. A deletion that keeps content alive must also refresh anything cached about the user: this one prunes `/meta/leaderboardDaily` and calls `rebuildLeaderboard`, because those snapshots hold display names and emails and are otherwise only rebuilt by a Bite create or delete. The per-category contract is in [[UC - Use Account And Legal Flows]].
+
+## Deploy
+
+A push to `develop` deploys the functions. The `deploy-functions` job in
+`.github/workflows/pipeline.yml` installs this package, runs the `predeploy`
+lint and `tsc` from `apps/bite-tribe-firebase/firebase.json`, and runs
+`firebase deploy --only functions` against `bite-tribe` under its own service
+account. Nobody runs a command for a normal change, and the deployed revision
+corresponds to the commit CI verified rather than to a workstation. Before
+[issue #1464](https://github.com/muhammedgaygisiz/travellers-apps/issues/1464)
+this was `npx nx run bite-tribe-firebase:firebase-deploy`, run by hand, which
+is why a merged function could sit undeployed for as long as nobody remembered.
+
+Four things stay outside that job on purpose.
+
+- **Firestore indexes.** Deployed first, separately, and by hand, for the
+  reason under the collection-group rule above. The job asserts they are there
+  before it deploys anything.
+- **Deleting a function.** Removing an export makes the CI deploy fail rather
+  than take a live endpoint away, because the CLI runs `--non-interactive` and
+  the deletion prompt becomes an error. Deploy the removal locally and
+  deliberately.
+- **Secret values.** `GOOGLE_GEOCODING_API_KEY` and the four
+  `GOOGLE_WORKSPACE_*` secrets live in Secret Manager and bind at deploy time.
+  CI triggers the binding and never sees a value, so a rotated secret needs no
+  pipeline change. A binding that fails surfaces as a runtime send failure, not
+  as a deploy error - after a deploy that touches the mail path, prove it with a
+  real `resendEmailVerification` call rather than a green job.
+- **Rollback.** Gen2 has none. Recovery from a bad deploy is a forward deploy of
+  the reverted commit.
+
+The local deploy remains the fallback for those cases and for an outage in the
+pipeline:
+
+```bash
+npx nx run bite-tribe-firebase:firebase-deploy
+```
 
 ## Validation
 
@@ -100,6 +137,12 @@ That error used to reach `develop` green and surface in the `predeploy` hook of
 `functions-build` job in `pipeline.yml` now compiles them on every pull request,
 which is what closes it.
 
+The two jobs do not compile with the same compiler, and that is worth knowing
+before trusting a green pull request. `functions-build` does not install this
+package, so its `tsc` resolves to the workspace TypeScript 6; `deploy-functions`
+installs it and compiles with the `^5.7.3` pinned here, which is also what a
+workstation deploy uses. See [[Current State - Nx And Dependency Migration Roadmap]].
+
 Rules:
 
 - `functions-build` is the type check, not a formality. It exists because
@@ -116,4 +159,5 @@ Rules:
 
 - [[Architecture - Firebase]]
 - [[Architecture - Auth]]
+- [[Implementation - CI Pipeline]]
 - [[Implementation - Testing]]

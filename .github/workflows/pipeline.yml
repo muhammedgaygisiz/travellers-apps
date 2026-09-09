@@ -545,10 +545,13 @@ jobs:
 
   # Firebase Functions
 
-  # Compiles the functions with the same tsc the deploy's predeploy hook runs,
-  # so a compile error fails here rather than at deploy time on a workstation.
-  # There is no deploy job yet: gen2 has no rollback, and firestore indexes have
-  # to be deployed first and separately, so that step is a decision of its own.
+  # Compiles the functions, so a compile error fails on the pull request rather
+  # than at deploy time. Nothing else in CI compiles this project: the specs are
+  # transpiled per file and the linter checks style, not assignability.
+  #
+  # It compiles with the workspace TypeScript, because it does not install the
+  # functions package. `deploy-functions` does install it and therefore compiles
+  # with the version that package pins, so the two can disagree.
   # See ssot/pages/Implementation - Firebase Functions.md.
   functions-build:
     runs-on: ubuntu-latest
@@ -572,6 +575,103 @@ jobs:
 
       - name: Build Firebase Functions
         run: npm run nx -- build functions
+
+  # Deploys the compiled functions to the live project, so backend behaviour
+  # reaches production on the same push that shipped the web bundle calling it.
+  # Before this job the deploy ran from a workstation, which meant a merged
+  # function could sit undeployed indefinitely and the artifact came from
+  # whatever state that machine was in. See issue 1464.
+  #
+  # It runs its own credential rather than reusing
+  # `FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE`. A gen2 deploy needs Cloud Run,
+  # Artifact Registry, Cloud Build, Eventarc, Cloud Scheduler and Secret Manager
+  # admin; granting all of that to the hosting credential would widen the blast
+  # radius of a secret three other jobs already use to publish static files.
+  # Provision it with `bash tools/set-functions-deploy-service-account.sh`.
+  deploy-functions:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    needs:
+      - functions-build
+
+    # Two function deploys must not overlap. The workflow-level group already
+    # supersedes an older run on the same ref; this one also covers a deploy
+    # started from a different run, and `cancel-in-progress: false` queues it
+    # rather than killing a deploy halfway through.
+    concurrency:
+      group: deploy-functions-bite-tribe
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup action
+        uses: ./.github/actions/setup
+
+      # The functions package carries its own package.json and package-lock.json
+      # and is not part of the root install, while the `predeploy` hook in
+      # apps/bite-tribe-firebase/firebase.json runs lint and `tsc` inside it.
+      #
+      # Installing here is also what picks the compiler. The workspace root has
+      # TypeScript 6 and this package pins ^5.7.3, so a job that skips this step
+      # compiles the deploy artifact with a different compiler than a workstation
+      # deploy does. See [[Current State - Nx And Dependency Migration Roadmap]].
+      - name: Install Firebase Functions dependencies
+        working-directory: apps/bite-tribe-firebase/functions
+        run: npm ci
+
+      # Written from an environment variable rather than passed as an argument,
+      # so the value never reaches a process list, and to a file because
+      # firebase-tools authenticates through GOOGLE_APPLICATION_CREDENTIALS.
+      - name: Write the deploy credentials
+        env:
+          FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS" ]; then
+            echo '::error::FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS is not set. Run tools/set-functions-deploy-service-account.sh.'
+            exit 1
+          fi
+
+          umask 077
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS" > "$RUNNER_TEMP/functions-deploy-key.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/functions-deploy-key.json" >> "$GITHUB_ENV"
+
+      # `firebase deploy --only functions` never touches Firestore indexes, and
+      # the Firestore API builds one in the background while the CLI returns
+      # immediately - so the index deploy stays manual and has to finish first.
+      # This asserts that it did, rather than shipping a function whose query
+      # then fails in production with FAILED_PRECONDITION. That is issue 1227.
+      #
+      # It reads deployed state, not the diff of this push, so re-running the
+      # job after the index deploy passes.
+      - name: Assert the committed Firestore indexes are deployed
+        run: npm run firestore:assert-indexes-deployed
+
+      # No continue-on-error. A failed functions deploy after three successful
+      # hosting deploys leaves a live frontend calling backend code that is not
+      # there, and the only thing worse than that is not being told.
+      #
+      # `--non-interactive` matters beyond hanging: a function removed from the
+      # source prompts for confirmation before deletion, and this fails instead.
+      # Deleting a deployed function stays a deliberate local command.
+      - name: Deploy Firebase Functions
+        working-directory: apps/bite-tribe-firebase
+        run: npx --no-install firebase deploy --only functions --project bite-tribe --non-interactive
+
+      - name: Record the deployed commit
+        run: |
+          {
+            echo '### Firebase Functions deployed'
+            echo
+            echo "Commit \`${GITHUB_SHA}\` to \`bite-tribe\`."
+            echo
+            echo 'Confirm the running revision with `npx firebase functions:log --project bite-tribe`.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the deploy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/functions-deploy-key.json"
 
   # BiteTribe Storybook
 

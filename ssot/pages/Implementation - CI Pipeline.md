@@ -114,6 +114,60 @@ The lint, stylelint and tests chain is deliberately sequential so a cheap failur
 | `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`           | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                  |
 | `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, builds   | Persist and restore the Nx computation cache                               |
 
+## Action Versions
+
+**This page owns the versions of the GitHub Actions used in CI.** Not
+[[Current State - Nx And Dependency Migration Roadmap]], which pins Node and Nx:
+that page describes a migration with an end state, while action versions are a
+permanent property of the workflows, and this page already owns the workflow
+inventory and the composite actions that call them.
+
+Current, as of the bump under
+[issue #1437](https://github.com/muhammedgaygisiz/travellers-apps/issues/1437).
+Every one declares `using: node24`.
+
+| Action                      | Version | Uses |
+| --------------------------- | ------- | ---- |
+| `actions/checkout`          | v7      | 22   |
+| `actions/upload-artifact`   | v7      | 6    |
+| `actions/setup-java`        | v6      | 3    |
+| `actions/setup-node`        | v7      | 2    |
+| `actions/download-artifact` | v8      | 2    |
+| `actions/cache`             | v6      | 2    |
+| `actions/cache/restore`     | v6      | 1    |
+| `actions/github-script`     | v9      | 1    |
+
+Third-party actions are versioned by their own projects and are not in this
+table: `FirebaseExtended/action-hosting-deploy`, `r0adkll/upload-google-play`,
+`nrwl/nx-set-shas`, `codecov/codecov-action`.
+
+### How Drift Is Noticed
+
+`.github/dependabot.yml` opens one grouped pull request a month when any of
+them moves. That is the mechanism, and the choice of a mechanism over a
+documented cadence is the same reasoning that puts every deploy in
+`pipeline.yml`: nothing reminds anyone to perform a review, so a review that
+depends on remembering does not happen. Seven actions went stale before anyone
+looked, and what surfaced it was a runner deprecation warning.
+
+A grouped pull request is a prompt, not an instruction. A major bump still needs
+its breaking changes read before it is merged.
+
+### What A Bump Has To Preserve
+
+Two behaviours in `native-release.yml` are load-bearing and neither is obvious
+from a diff. During issue #1181 an artifact was staged as a dotfile and dropped
+in silence while the step reported success, and the guard added afterwards
+assumes both:
+
+- `actions/upload-artifact` **excludes hidden files by default**. In v7 that is
+  `include-hidden-files`, default `false`.
+- `if-no-files-found: error` still fails the step rather than warning.
+
+`actions/download-artifact` v8 changed one default in the other direction: a
+digest mismatch now fails the run instead of logging a warning, configurable
+through `digest-mismatch`. That is the safer default and it is kept.
+
 ## Caching Layers
 
 Three independent caches, each with its own key:
@@ -245,6 +299,8 @@ the Nx-cache gaps under Current Limitations are the larger lever.
 - Give a deploy the narrowest credential that can perform it, and grant a new permission to that deploy's own service account. Widening `FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE` is how a hosting secret ends up worth a project.
 - Deploy a new Firestore index before the function that queries through it, and wait for it to reach `READY`. `deploy-functions` refuses to run while a declared index is missing from the project, so this is enforced rather than remembered. See [[Implementation - Firebase Functions]].
 - Do not grant the functions deploy account `datastore.indexAdmin`. The index deploy is deliberately outside CI, and a read-only `datastore.viewer` is all the preflight needs.
+- Keep every `actions/*` use on the version this page's table names, and update the table in the same pull request that moves one. A version that appears in a workflow and not in the table is drift by definition.
+- Read a major bump's breaking changes before merging the Dependabot pull request. Grouped means one review, not no review.
 - Do not use `.github/actions/setup` or `.github/actions/restore-cache` from a macOS or Windows job. The `node_modules` cache key is `node-modules-<package-lock hash>` with no runner OS in it, so a non-Linux job would restore Linux native binaries, and saving would overwrite the entry every other job depends on. Use `actions/setup-node` and `npm ci` directly, as the `ios` job does.
 - Keep local and CI Node.js versions aligned through `.nvmrc` as defined by [[Current State - Nx And Dependency Migration Roadmap]].
 - Price a change of repository visibility before making one. CI is free because the repository is public, and going private starts a bill dominated by `pipeline.yml` rather than by the native jobs. See Repository Visibility And Actions Cost above.
@@ -260,6 +316,7 @@ the Nx-cache gaps under Current Limitations are the larger lever.
 tools/assert-release-bundle.mjs
 tools/assert-firestore-indexes-deployed.mjs
 tools/set-functions-deploy-service-account.sh
+.github/dependabot.yml
 tools/write-build-provenance.mjs
 apps/bite-tribe-ios/ios/App/ExportOptions.plist
 .github/actions/nx-cache/action.yml
@@ -282,6 +339,7 @@ nx.json
 - A second push to `develop` cancels a functions deploy in flight. The workflow-level `cancel-in-progress` supersedes the whole run, and a job-level `concurrency` group cannot override that; it only keeps a deploy started from another run from overlapping. A cancelled gen2 deploy leaves the already-updated functions updated, and the next push deploys the rest.
 - CI never deletes a function. `--non-interactive` turns the deletion prompt into a failure, so removing an export from `src/index.ts` makes the deploy fail rather than silently take a live endpoint away. Delete it locally and deliberately, then push.
 - Gen2 functions have no rollback. Recovery from a bad deploy is a forward deploy of the reverted commit, not a console action.
+- One Node 20 deprecation warning cannot be removed from this repository. `codecov/codecov-action@v5` pins `actions/github-script` at v7.0.1 by commit SHA, so the `tests` job reports the warning no matter what versions this page's table holds. It is Codecov's to fix, v5 is their latest, and the run is not affected - the runner executes the action on Node 24 regardless.
 
 ## Related Pages
 

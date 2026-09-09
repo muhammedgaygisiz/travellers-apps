@@ -1,0 +1,36 @@
+# Keeps the GitHub Actions this repository uses from drifting silently.
+#
+# Seven `actions/*` uses went stale unnoticed before issue #1437, some by three
+# major versions, and what surfaced it was a runner deprecation warning rather
+# than anyone reviewing them. A documented review cadence would have the same
+# failure mode as the Storybook deploy did: nothing reminds anyone to perform
+# it. This does the reminding.
+#
+# Monthly rather than weekly, and grouped into one pull request rather than one
+# per action, because the point is to see the drift and decide, not to spend a
+# review a week on it. A major bump still needs its breaking changes read - see
+# the Action Versions section of ssot/pages/Implementation - CI Pipeline.md.
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    # `/` covers .github/workflows. The composite actions under
+    # .github/actions each carry their own action.yml and are not scanned by
+    # the root entry, so they are matched separately.
+    directories:
+      - '/'
+      - '/.github/actions/*'
+    schedule:
+      interval: monthly
+    groups:
+      github-actions:
+        patterns:
+          - '*'
+    # commitlint runs @commitlint/config-nx-scopes on every commit, and the
+    # squash merge takes the pull request title. `ci` is the type this work
+    # has always used.
+    commit-message:
+      prefix: ci
+    labels:
+      - enhancement
+    open-pull-requests-limit: 3

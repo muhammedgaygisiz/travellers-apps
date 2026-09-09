@@ -48,6 +48,27 @@ A good Bite makes one concrete dish understandable enough that another person ca
 - A Bite should have an image because the image is a core trust signal.
 - Deleting a Bite currently deletes the Firestore document and attempts to delete its stored image.
 - Deleting a Bite must decrement the creator's `biteCount` aggregate because Bite creation increments it.
+- A Bite can be deleted by its creator, and by a BiteTribe operator. The
+  operator path is `deleteBiteAsOperator`, it requires the `admin` role and a
+  short reason, and it exists so content that has to come down — abusive,
+  illegal, or simply not food — has a removal path short of the Firebase
+  console. See [[UC - Operate BiteTribe In The Admin App]] and issue \#1475.
+- **An operator removal is a delete, not a hide.** There is no `hidden` field
+  and no tombstone: hiding would need a flag respected by every read path, and
+  every read path is the expensive part. The cost accepted in exchange is that a
+  wrongly deleted Bite cannot be restored and there is nothing to show an author
+  who disputes it, which is why the reason is required rather than optional —
+  Cloud Logging is the only record the action leaves.
+- **Nothing downstream may be left referring to a deleted Bite.** The operator
+  delete removes the likes subcollection, every review and reply in the thread,
+  and every Storage object under the Bite's prefix; and it drops the stale id
+  from every restaurant candidate, bucket list and BiteTrail that named it. The
+  candidate's `evidence.biteCount` is rewritten to match what is left, because it
+  is the length of that array and an operator deciding whether to verify reads
+  it. Removing the reference from a bucket list or a BiteTrail is part of the
+  contract rather than a nicety: `loadBitesByBucketlist` resolves each id and its
+  filter cannot drop a missing one, so a stale id renders as a nameless,
+  imageless Bite instead of being absent.
 - Historical references after deletion are a product question, not a fully established current rule.
 
 ## Required Data
@@ -150,6 +171,8 @@ Current implementation notes:
 - `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized.
 - A photo upload that fails is offered back to the poster as a retry, but only when the device reports a connection. Offline the failed tile says so instead, because a retry started with no network cannot upload and only earns the poster another thirty-second stall before the same failure. `BiteImageStatusComponent` owns that rule for every surface that shows a Bite photo. See [[issue-1390]].
 - The current delete flow removes the Bite document and attempts to remove the image file.
+- The operator delete removes children and references first and the Bite document **last**. Every read path resolves through the document, so while it exists the Bite is still findable and a failed run is a retry; the other way round, a failure halfway would leave an image, a set of likes and a pile of reviews with no document left to reach them from. `deleteOwnAccount` orders its cascade the same way and for the same reason.
+- The operator delete unions two sources for the image: everything under `images/bites/{biteId}/` — which catches the object an edited Bite replaced, since each upload is a fresh UUID under one prefix — and the object `imagePath` names, added unconditionally so the one image whose survival would be visible does not depend on the listing succeeding.
 
 ## Permissions
 
@@ -166,7 +189,10 @@ Current product expectation:
   - Save Bite to bucket list.
   - Discover Bites through feed, map, search, restaurant, profile, bucket list, and BiteTrail flows.
 - Admin
-  - Moderation is a future or operational capability, not a clearly modeled Bite permission in the current code.
+  - Delete any Bite, through `deleteBiteAsOperator` with a reason. This is the one modeled operator capability over a Bite.
+  - Editing somebody else's Bite is deliberately not one: an operator can remove a Bite or leave it, and nothing in between.
+  - Hiding, tombstoning and notifying the author are out of scope by decision, not by omission. See [[epic-1471]].
+  - The report queue that would surface the Bites needing removal belongs to [[epic-1284]].
 
 ## Use Cases
 
@@ -249,6 +275,8 @@ decrementBiteLikeCountOnLikeDelete
 updateBiteLikeCountOnLikeUpdate
 notifyBiteCreatorOnReview
 incrementBiteCountOnBiteCreate
+decrementBiteCountOnBiteDelete
+deleteBiteAsOperator
 handleSharedLinkToBite
 sendWeeklyBiteNotification
 ```

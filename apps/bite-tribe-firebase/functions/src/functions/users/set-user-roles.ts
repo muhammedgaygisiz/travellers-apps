@@ -65,6 +65,46 @@ const parseRoles = (value: unknown): BiteTribeRole[] => {
   return value as BiteTribeRole[];
 };
 
+/**
+ * The role pairs that cannot be held by one account.
+ *
+ * `business` operates a restaurant; `staff` is the narrowed set of what can be
+ * done on one. An account holding both is asking to be treated as an owner and
+ * as an employee at once, and every reader — the route guards, the rules of
+ * issue #1078, the scoped dashboard of #1079 — would need the same precedence
+ * rule to resolve it. Refusing the pair here means there is no precedence rule
+ * to keep in step across three places.
+ *
+ * `admin` is not in conflict with either. An operator account may also run a
+ * restaurant, and epic #1471 keeps operator actions on their own callables
+ * rather than inferring them from the absence of another role.
+ */
+const EXCLUSIVE_ROLE_PAIRS: readonly (readonly [
+  BiteTribeRole,
+  BiteTribeRole,
+])[] = [['business', 'staff']];
+
+/**
+ * Rejects a submitted set that holds both halves of an exclusive pair.
+ *
+ * Checked against the whole submitted set rather than against the delta,
+ * because the callable replaces rather than merges: what arrives is the account's
+ * intended role set in full, so the conflict is visible without reading what it
+ * held before.
+ */
+const assertRolesCompatible = (roles: BiteTribeRole[]): void => {
+  const conflict = EXCLUSIVE_ROLE_PAIRS.find(
+    ([first, second]) => roles.includes(first) && roles.includes(second),
+  );
+
+  if (conflict) {
+    throw new HttpsError(
+      'failed-precondition',
+      `An account cannot hold both the ${conflict[0]} and ${conflict[1]} roles.`,
+    );
+  }
+};
+
 const getString = (value: unknown): string =>
   typeof value === 'string' ? value.trim() : '';
 
@@ -115,12 +155,19 @@ const resolveTargetUid = async (data: SetUserRolesRequest): Promise<string> => {
  * that grants it, and the only way back is the bootstrap script running with
  * service-account credentials. Refusing the self-demotion is cheaper than the
  * recovery.
+ *
+ * `business` and `staff` cannot be granted together. The two are mutually
+ * exclusive on one account, and the refusal happens before the target is even
+ * resolved so a conflicting payload cannot cost an Auth lookup (issue #1075).
  */
 export const setUserRolesHandler = async (
   request: CallableRequest<SetUserRolesRequest>,
 ): Promise<SetUserRolesResult> => {
   const callerUid = requireAdmin(request);
   const roles = parseRoles(request.data.roles);
+
+  assertRolesCompatible(roles);
+
   const targetUid = await resolveTargetUid(request.data);
 
   if (targetUid === callerUid && !roles.includes('admin')) {

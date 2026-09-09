@@ -25,7 +25,7 @@ import {
   AFTER_LOGIN_PAGE,
   AFTER_LOGOUT_PAGE,
   isAuthEntryPage,
-  REQUIRED_ROLE,
+  REQUIRED_ROLES,
 } from 'utils';
 import { SignInResult } from '@capacitor-firebase/authentication';
 import { Action, Store } from '@ngrx/store';
@@ -78,7 +78,9 @@ export class AuthEffects {
    * Unbound in the consumer app, which requires no role of anyone. The two
    * privileged apps bind it in their shells.
    */
-  private readonly requiredRole = inject(REQUIRED_ROLE, { optional: true });
+  private readonly requiredRoles = inject(REQUIRED_ROLES, {
+    optional: true,
+  });
 
   checkAuthStatus$ = createEffect(
     () =>
@@ -238,7 +240,7 @@ export class AuthEffects {
   );
 
   /**
-   * Rejects a signed-in account that does not hold {@link requiredRole}.
+   * Rejects a signed-in account that holds none of {@link requiredRoles}.
    *
    * The session is ended before the error is raised, so a rejected sign-in
    * leaves nothing behind: no token to deep-link with, no restored session to
@@ -248,19 +250,22 @@ export class AuthEffects {
    * A cached ID token can be up to an hour old, so a miss is retried once
    * against a freshly minted one. Without that, an account granted its role
    * moments earlier would be turned away here.
+   *
+   * Any one of the roles is enough. The business app admits `business` and
+   * `staff`, and a staff account holds `staff` and not `business` (#1075).
    */
   private async assertRequiredRole(): Promise<void> {
-    const role = this.requiredRole;
+    const roles = this.requiredRoles;
 
-    if (!role) {
+    if (!roles?.length) {
       return;
     }
 
-    if (await this.authService.hasRole(role)) {
+    if (await this.authService.hasAnyRole(roles)) {
       return;
     }
 
-    if (await this.authService.hasRole(role, true)) {
+    if (await this.authService.hasAnyRole(roles, true)) {
       return;
     }
 

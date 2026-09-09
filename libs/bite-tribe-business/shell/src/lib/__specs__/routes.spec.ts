@@ -1,5 +1,15 @@
-import { Route } from '@angular/router';
-import { authGuard } from 'ta-firestore';
+import { TestBed } from '@angular/core/testing';
+import {
+  ActivatedRouteSnapshot,
+  CanActivateFn,
+  Route,
+  Router,
+  RouterStateSnapshot,
+  UrlTree,
+} from '@angular/router';
+import { Store } from '@ngrx/store';
+import { authGuard, AuthService } from 'ta-firestore';
+import { BiteTribeRole } from 'utils';
 import { ROUTES } from '../routes';
 
 /**
@@ -39,6 +49,105 @@ describe('business ROUTES', () => {
 
     expect(paths).not.toContain('migrations');
     expect(paths).not.toContain('new-restaurant');
+  });
+
+  /**
+   * The role guard is a closure, so the route table cannot say which roles it
+   * admits — the assertions above only prove that a second guard is present.
+   * These run it.
+   *
+   * The business app admits `business` **and** `staff`: a staff account holds
+   * `staff` and not `business`, so a gate on `business` alone would sign it out
+   * at the door with the generic login failure and nothing to tell it why
+   * (issue #1075). An allow test passes just as happily with the deny case
+   * broken, so both are here.
+   */
+  describe('which roles the gate admits', () => {
+    let held: BiteTribeRole[];
+    let endRejectedSession: jest.Mock;
+
+    const roleGuardOf = (route: Route): CanActivateFn =>
+      (route.canActivate ?? [])[1] as CanActivateFn;
+
+    const firstGatedRoute = (): Route =>
+      ROUTES.find((route) => isAuthenticated(route)) as Route;
+
+    const run = (route: Route): Promise<boolean | UrlTree> =>
+      TestBed.runInInjectionContext(
+        () =>
+          roleGuardOf(route)(
+            {} as ActivatedRouteSnapshot,
+            { url: '/dashboard' } as RouterStateSnapshot,
+          ) as Promise<boolean | UrlTree>,
+      );
+
+    beforeEach(() => {
+      held = [];
+      endRejectedSession = jest.fn(async () => undefined);
+
+      TestBed.configureTestingModule({
+        providers: [
+          {
+            provide: AuthService,
+            useValue: {
+              getUser: (): { uid: string } => ({ uid: 'user-1' }),
+              whenAuthStateRestored: (): Promise<void> => Promise.resolve(),
+              hasAnyRole: async (
+                roles: readonly BiteTribeRole[],
+              ): Promise<boolean> => roles.some((role) => held.includes(role)),
+              endRejectedSession,
+            },
+          },
+          {
+            provide: Router,
+            useValue: {
+              parseUrl: (url: string): UrlTree =>
+                ({ url }) as unknown as UrlTree,
+            },
+          },
+          { provide: Store, useValue: { dispatch: jest.fn() } },
+        ],
+      });
+    });
+
+    it('admits a business account', async () => {
+      held = ['business'];
+
+      await expect(run(firstGatedRoute())).resolves.toBe(true);
+    });
+
+    it('admits a staff account', async () => {
+      held = ['staff'];
+
+      await expect(run(firstGatedRoute())).resolves.toBe(true);
+    });
+
+    // An operator is not a restaurant. `admin` and `business` are separate
+    // rather than a hierarchy, so holding `admin` is not business access.
+    it('does not admit an operator account', async () => {
+      held = ['admin'];
+
+      await expect(run(firstGatedRoute())).resolves.toEqual({ url: '/login' });
+      expect(endRejectedSession).toHaveBeenCalled();
+    });
+
+    it('does not admit an account holding no roles', async () => {
+      held = [];
+
+      await expect(run(firstGatedRoute())).resolves.toEqual({ url: '/login' });
+    });
+
+    // Written over every gated route rather than one, because a route is added
+    // by copying the one above it and the copy is where a narrower gate lands.
+    it('admits staff on every gated route, not just the first', async () => {
+      held = ['staff'];
+
+      const gated = ROUTES.filter((route) => isAuthenticated(route));
+      const outcomes = await Promise.all(gated.map((route) => run(route)));
+
+      expect(gated.length).toBeGreaterThan(1);
+      expect(outcomes).toEqual(gated.map(() => true));
+    });
   });
 
   // Every lazy route names its component as a string on the imported module,

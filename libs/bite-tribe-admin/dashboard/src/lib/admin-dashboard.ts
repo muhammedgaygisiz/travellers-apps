@@ -138,7 +138,9 @@ export class AdminDashboard {
    * (issue #1476). Restaurant verification comes next because it is the daily
    * work; the migrations below it are each their own entry rather than one
    * "migrations" page, so an operator reaches the one they came for instead of
-   * scrolling past five Bite tables (issue #1473).
+   * scrolling past five Bite tables (issue #1473). Restaurant ownership sits
+   * next to verification because it is the step after it: a restaurant is
+   * verified, then handed to the account that runs it (issue #1077).
    */
   readonly tools: readonly AdminTool[] = [
     {
@@ -161,6 +163,13 @@ export class AdminDashboard {
       icon: 'shield-checkmark-outline',
       path: '/restaurant-candidates',
       testId: 'admin-tool-restaurant-candidates',
+    },
+    {
+      titleKey: 'admin-tool-restaurant-ownership',
+      descriptionKey: 'admin-tool-restaurant-ownership-description',
+      icon: 'business-outline',
+      path: '/restaurant-ownership',
+      testId: 'admin-tool-restaurant-ownership',
     },
     {
       titleKey: 'admin-tool-bite-places',

@@ -9,7 +9,7 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { AuthActions } from '../actions';
 import { Action } from '@ngrx/store';
 import { NavController } from '@ionic/angular';
-import { isAuthEntryPage, REQUIRED_ROLE } from 'utils';
+import { BiteTribeRole, isAuthEntryPage, REQUIRED_ROLES } from 'utils';
 import { RequestedUrlService } from '../../requested-url.service';
 
 jest.mock('utils', () => ({
@@ -33,7 +33,7 @@ const AuthServiceMock = {
   signInWithAppleAccount: jest.fn(() => Promise.resolve()),
   authState: jest.fn(),
   setupAnalyticsAndCrashlytics: jest.fn(),
-  hasRole: jest.fn(() => Promise.resolve(true)),
+  hasAnyRole: jest.fn(() => Promise.resolve(true)),
   endRejectedSession: jest.fn(() => Promise.resolve()),
 };
 
@@ -72,7 +72,7 @@ describe(AuthEffects.name, () => {
     AuthServiceMock.signInWithAppleAccount.mockResolvedValue({
       user: { uid: '123' },
     });
-    AuthServiceMock.hasRole.mockResolvedValue(true);
+    AuthServiceMock.hasAnyRole.mockResolvedValue(true);
     AuthServiceMock.endRejectedSession.mockResolvedValue(undefined);
 
     TestBed.configureTestingModule({
@@ -538,7 +538,7 @@ describe(`${AuthEffects.name} with a required role`, () => {
 
   const authCreds = { email: 'q@q.de', password: 'password' };
 
-  const configure = (requiredRole: string | null): void => {
+  const configure = (requiredRoles: BiteTribeRole[] | null): void => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -547,8 +547,8 @@ describe(`${AuthEffects.name} with a required role`, () => {
         { provide: AuthService, useValue: AuthServiceMock },
         provideMockStore(),
         { provide: NavController, useValue: MockNavController },
-        ...(requiredRole
-          ? [{ provide: REQUIRED_ROLE, useValue: requiredRole }]
+        ...(requiredRoles
+          ? [{ provide: REQUIRED_ROLES, useValue: requiredRoles }]
           : []),
       ],
     });
@@ -581,7 +581,7 @@ describe(`${AuthEffects.name} with a required role`, () => {
 
   it('is unused by an app that binds no role', async () => {
     configure(null);
-    AuthServiceMock.hasRole.mockResolvedValue(false);
+    AuthServiceMock.hasAnyRole.mockResolvedValue(false);
 
     const result = await emitted(
       effects.loginEffect$,
@@ -589,12 +589,28 @@ describe(`${AuthEffects.name} with a required role`, () => {
     );
 
     expect(result).toEqual(AuthActions.loginSucceeded());
-    expect(AuthServiceMock.hasRole).not.toHaveBeenCalled();
+    expect(AuthServiceMock.hasAnyRole).not.toHaveBeenCalled();
+  });
+
+  // An unbound token and a bound-but-empty list both mean "no role required".
+  // The consumer app relies on the first; the second is what a shell would
+  // produce if it built the list from configuration and got nothing.
+  it('is unused by an app that binds an empty role list', async () => {
+    configure([]);
+    AuthServiceMock.hasAnyRole.mockResolvedValue(false);
+
+    const result = await emitted(
+      effects.loginEffect$,
+      AuthActions.login({ authCreds }),
+    );
+
+    expect(result).toEqual(AuthActions.loginSucceeded());
+    expect(AuthServiceMock.hasAnyRole).not.toHaveBeenCalled();
   });
 
   it('signs in an account that holds the required role', async () => {
-    configure('business');
-    AuthServiceMock.hasRole.mockResolvedValue(true);
+    configure(['business']);
+    AuthServiceMock.hasAnyRole.mockResolvedValue(true);
 
     const result = await emitted(
       effects.loginEffect$,
@@ -607,8 +623,8 @@ describe(`${AuthEffects.name} with a required role`, () => {
 
   describe('given credentials that are right but an account without the role', () => {
     beforeEach(() => {
-      configure('business');
-      AuthServiceMock.hasRole.mockResolvedValue(false);
+      configure(['business']);
+      AuthServiceMock.hasAnyRole.mockResolvedValue(false);
     });
 
     it('fails the login instead of succeeding it', async () => {
@@ -634,7 +650,7 @@ describe(`${AuthEffects.name} with a required role`, () => {
         AuthActions.login({ authCreds }),
       );
 
-      AuthServiceMock.hasRole.mockResolvedValue(true);
+      AuthServiceMock.hasAnyRole.mockResolvedValue(true);
       AuthServiceMock.loginWithUsernameAndPassword.mockRejectedValue(
         new Error('auth/wrong-password'),
       );
@@ -647,7 +663,7 @@ describe(`${AuthEffects.name} with a required role`, () => {
     });
 
     it('retries once against a freshly minted token before rejecting', async () => {
-      AuthServiceMock.hasRole
+      AuthServiceMock.hasAnyRole
         .mockResolvedValueOnce(false)
         .mockResolvedValueOnce(true);
 
@@ -657,11 +673,41 @@ describe(`${AuthEffects.name} with a required role`, () => {
       );
 
       expect(result).toEqual(AuthActions.loginSucceeded());
-      expect(AuthServiceMock.hasRole).toHaveBeenNthCalledWith(
+      expect(AuthServiceMock.hasAnyRole).toHaveBeenNthCalledWith(
         2,
-        'business',
+        ['business'],
         true,
       );
+    });
+
+    // The gap #1075 caught in the emulator: the route guard admitted a staff
+    // account that this gate had already turned away, so a staff account could
+    // not sign into the business app at all.
+    it('admits an account holding the second of two roles', async () => {
+      configure(['business', 'staff']);
+      AuthServiceMock.hasAnyRole.mockImplementation(
+        async (roles: BiteTribeRole[]) => roles.includes('staff'),
+      );
+
+      const result = await emitted(
+        effects.loginEffect$,
+        AuthActions.login({ authCreds }),
+      );
+
+      expect(result).toEqual(AuthActions.loginSucceeded());
+      expect(AuthServiceMock.endRejectedSession).not.toHaveBeenCalled();
+    });
+
+    it('passes every admitted role to the check', async () => {
+      configure(['business', 'staff']);
+      AuthServiceMock.hasAnyRole.mockResolvedValue(true);
+
+      await emitted(effects.loginEffect$, AuthActions.login({ authCreds }));
+
+      expect(AuthServiceMock.hasAnyRole).toHaveBeenCalledWith([
+        'business',
+        'staff',
+      ]);
     });
 
     it('rejects a Google sign-in the same way, not as a registration failure', async () => {

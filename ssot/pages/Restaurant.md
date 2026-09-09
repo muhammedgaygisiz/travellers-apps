@@ -27,8 +27,15 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - The initial Menu is a draft built from evidence, not a claim about the real menu: one item per distinct Bite dish name, priced with the average of the prices users reported, in a single `Bites` category the business user edits afterwards.
 - Candidate-backed Restaurant creation should be idempotent: repeated verification of an already verified or merged candidate must return the existing verified Restaurant instead of creating another one.
 - Verified versus unverified restaurant behavior is an active product area.
-- A Restaurant can record an owner and a claim state, but nothing writes them yet. `ownerUserId` and `claimStatus` exist on the model as of issue \#1074, and a missing `claimStatus` means `unclaimed`. Ownership, claiming, and authorization are specified in [[UC - Own And Claim Restaurants]] and are the prerequisite for every operational restaurant capability.
+- A Restaurant records an owner and a claim state. `ownerUserId` and `claimStatus` exist on the model as of issue \#1074 and are written by an operator as of issue \#1077; a missing `claimStatus` means `unclaimed`. Ownership, assignment, and authorization are specified in [[UC - Own And Claim Restaurants]] and are the prerequisite for every operational restaurant capability.
 - Ownership is held by a normal user carrying an additional business role. There is no organisation entity; see [[issue-1371]].
+- **Ownership is assigned by an operator, never requested by a restaurant.** Verification happens off-system, on the call the operator is already having, so there is no claim document, no queue and no contested state. Issue \#1076 is closed as not planned.
+- A Restaurant has at most one owner. Assigning a Restaurant that already has one is refused and the refusal names the current owner; reassignment is revoke then assign, so the operator log carries two decisions with two reasons.
+- Assigning is idempotent: repeating the same assignment returns the current state instead of writing a second grant, matching the `verifyRestaurantCandidate` rule below.
+- An assignment target has to hold the `business` role. An owner without it would be named on a restaurant they cannot open, because every business-app route is gated on the role.
+- Revoking deletes `ownerUserId`, `claimedAt` and `claimedAtTimestamp` and sets `claimStatus: revoked`. Revoking a Restaurant nobody holds is refused rather than writing `revoked` over `unclaimed`, because "it was taken away" and "nobody ever held it" are different answers.
+- Both operator actions require a reason. Cloud Logging is the only record an ownership change leaves; see [[Implementation - Firebase Functions]].
+- Ownership grants maintenance rights only. Nothing moves when it changes: the Restaurant's Bites, menu and profile are untouched.
 - A Restaurant will be able to have one Floor Plan, containing Rooms and Tables. See [[Floor Plan]] and [[Table]].
 - Restaurant tags are derived from the Bites at the place and are not stored on the Restaurant. Bites keep tags exactly as they were typed, so the derived list compares them with a leading `#` stripped and case folded, shows the first spelling that survives that folding, and never shows the `#`. See issue \#1389 and [[issue-1389]].
 
@@ -68,7 +75,6 @@ Current model fields:
 Future or expanding data:
 
 - verification status
-- claim request documents and the review workflow that writes `ownerUserId` and `claimStatus` (issues \#1076 and \#1077); the model fields themselves landed in issue \#1074
 - floor plan rooms and tables (issue \#1080)
 - table-ordering enablement flag (issue \#1100)
 - derived tags from Bites
@@ -119,6 +125,8 @@ Current implementation notes:
 - Candidate-backed creation uses `verifyRestaurantCandidate` so restaurant creation, menu creation, Bite linking, and candidate status changes happen in one backend transaction.
 - Candidate verification stores `verifiedRestaurantId`, `verifiedAt`, `verifiedAtTimestamp`, and `verifiedByUserId` on `/restaurantCandidates/{candidateId}`.
 - Restaurant image upload stores an `imagePath`.
+- Ownership is assigned and revoked through `assignRestaurantOwner` and `revokeRestaurantOwner`, both admin-only, both transactional, and both logging through `logOperatorAction`. The operator surface is `restaurant-ownership` in the admin app, which reuses the account list issue \#1476 built rather than adding a second way to find an account.
+- The assignment is a Firestore document field, never a custom claim. It then takes effect immediately rather than after up to an hour of token lifetime, there is no 1000-byte claim payload to grow into, and issue \#1078's rules read documents anyway — a claim copy would be a second version of one fact that can disagree with it.
 
 ## Permissions
 
@@ -132,7 +140,8 @@ Current implementation notes:
   - Edit Restaurant.
   - Maintain image, address, position, opening hours, social links, description, and menu.
 - Admin
-  - Verification and moderation are future or operational capabilities, not fully modeled as permissions today.
+  - Assign a verified Restaurant to a business account, and revoke that assignment.
+  - Verification and moderation are otherwise future or operational capabilities, not fully modeled as permissions today.
 
 ## Use Cases
 
@@ -144,7 +153,8 @@ Supported today:
 - View Restaurant menu.
 - Search Restaurants.
 - Create Restaurant in business app.
-- Verify Restaurant candidate in business app.
+- Verify Restaurant candidate in admin app.
+- Assign and revoke Restaurant ownership in admin app.
 - Edit Restaurant in business app.
 - Maintain address, position, social links, opening hours, description, image, and menu.
 
@@ -183,12 +193,13 @@ Frontend and shared model:
 
 ```text
 libs/bite-tribe-common/model/src/lib/restaurant.ts
-libs/bite-tribe-common/model/src/lib/restaurant-claim.ts
 libs/bite-tribe-common/model/src/lib/menu.ts
 libs/bite-tribe/api/src/lib/restaurant-api/restaurant-api.service.ts
 libs/bite-tribe/api/src/lib/menu-api/menu-api.service.ts
 libs/bite-tribe/restaurant/page
 libs/bite-tribe/menu/page
+libs/bite-tribe-admin/restaurants/page
+libs/bite-tribe-admin/restaurants/data-access
 libs/bite-tribe-business/restaurant/page
 libs/bite-tribe-business/edit-menu/page
 ```
@@ -198,6 +209,8 @@ Cloud Functions:
 ```text
 searchRestaurants
 verifyRestaurantCandidate
+assignRestaurantOwner
+revokeRestaurantOwner
 ```
 
 Storage:
@@ -208,7 +221,8 @@ images/restaurants/{restaurantId}/{filename}
 
 ## Current Limitations
 
-- Restaurants cannot be claimed yet. `Restaurant` now carries `ownerUserId` and `claimStatus`, and `RestaurantClaim` models a claim request, but no writer, collection, role, or rule exists for either: no roles or custom claims exist in the Functions codebase, and `apps/bite-tribe-firebase/firestore.rules` still allows every authenticated user to write every document. Every stored restaurant is `unclaimed` by absence. Product descriptions that assume a claimed restaurant describe a capability that does not exist yet. See [[UC - Own And Claim Restaurants]].
+- **Ownership is written but not enforced.** An operator can assign and revoke a Restaurant as of issue \#1077, and the roles exist as custom claims, but `apps/bite-tribe-firebase/firestore.rules` still allows every authenticated user to write every document. Until issue \#1078 lands, `ownerUserId` is a field the rules do not protect: it says who is accountable, not who may write. Nothing reads it yet either — scoping the business dashboard to the assigned restaurants is issue \#1079. See [[UC - Own And Claim Restaurants]].
+- The `RestaurantClaim` model was removed with issue \#1077. It was added in \#1074 for the self-service claim flow of \#1076, never had an importer, and direct assignment produces no claim document. `RestaurantClaimStatus` lost `pending` and `disputed` with it: both existed only because of the review queue.
 - `MenuItem` has no stable identifier. Items are array entries inside `Menu.categories[]`, addressable only by name and index, so nothing can safely reference a menu item over time. See issue \#1099.
 - Verified versus unverified Restaurant rules are still evolving.
 - A Bite can use `place` without a `restaurantId`, so restaurant matching can be fuzzy or incomplete.
@@ -223,7 +237,7 @@ images/restaurants/{restaurantId}/{filename}
 - Menu item to Bite creation.
 - Restaurant tags from Bites.
 - Availability and reservation flows.
-- Ownership and business role management.
+- Staff management by the business account holding a restaurant (issue \#1537).
 - Better Restaurant data quality checks.
 
 ## Sources Used

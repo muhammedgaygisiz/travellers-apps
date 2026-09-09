@@ -7,7 +7,7 @@ import { AuthActions } from './ngrx-store/actions';
 import { BiteTribeRole, PATH } from 'utils';
 
 /**
- * Requires a role on top of a session.
+ * Requires one of `roles` on top of a session.
  *
  * `authGuard` answers "is anyone signed in". It is the only check either
  * privileged app had, which is why any BiteTribe account could open the
@@ -38,9 +38,16 @@ import { BiteTribeRole, PATH } from 'utils';
  * A cached ID token can be up to an hour old, so a first miss is retried once
  * against a freshly minted token. That is what keeps a role granted moments ago
  * from bouncing the account it was granted to.
+ *
+ * **More than one role may be named, and they are alternatives.** The business
+ * app admits `business` and `staff`: a staff account holds `staff` and *not*
+ * `business`, so a guard on `business` alone would sign it out at the door with
+ * the generic login failure and no way to tell why (issue #1075). A route
+ * requiring two roles at once has never existed, and the one pair that could
+ * express it is refused by `setUserRoles`.
  */
 export const roleGuard =
-  (role: BiteTribeRole): CanActivateFn =>
+  (...roles: BiteTribeRole[]): CanActivateFn =>
   async (_route, state): Promise<GuardResult> => {
     const authService = inject(AuthService);
     const router = inject(Router);
@@ -55,13 +62,13 @@ export const roleGuard =
       return router.parseUrl(`/${PATH.START}`);
     }
 
-    if (await authService.hasRole(role)) {
+    if (await authService.hasAnyRole(roles)) {
       return true;
     }
 
     // The cached token predates the grant, not the grant the token. Only a
     // miss pays for the refresh.
-    if (await authService.hasRole(role, true)) {
+    if (await authService.hasAnyRole(roles, true)) {
       return true;
     }
 

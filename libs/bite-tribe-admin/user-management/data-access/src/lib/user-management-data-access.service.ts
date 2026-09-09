@@ -4,6 +4,7 @@ import { BiteTribeRole, SubscriptionTier } from 'utils';
 import {
   AdminUser,
   ListUsersResult,
+  SetUserBlockedResult,
   SetUserRolesResult,
   SetUserSubscriptionTierResult,
 } from './admin-user.model';
@@ -33,6 +34,11 @@ interface ListUsersRequest {
 interface SetUserRolesRequest {
   uid: string;
   roles: BiteTribeRole[];
+}
+
+interface SetUserBlockedRequest {
+  uid: string;
+  blocked: boolean;
 }
 
 interface SetUserSubscriptionTierRequest {
@@ -124,6 +130,28 @@ export class UserManagementDataAccessService {
       SetUserRolesRequest,
       SetUserRolesResult
     >({ name: 'setUserRoles', data: { uid, roles } });
+
+    return data;
+  }
+
+  /**
+   * Blocks or unblocks an account.
+   *
+   * One callable for both directions, because they are one decision with a
+   * sign: the flag is sent explicitly rather than toggled from whatever the
+   * list happened to say, so a stale list cannot turn an unblock into a block.
+   *
+   * The account's content is untouched either way — removing it is a separate
+   * operator action (issue #1474).
+   */
+  async setBlocked(
+    uid: string,
+    blocked: boolean,
+  ): Promise<SetUserBlockedResult> {
+    const { data } = await FirebaseFunctions.callByName<
+      SetUserBlockedRequest,
+      SetUserBlockedResult
+    >({ name: 'setUserBlocked', data: { uid, blocked } });
 
     return data;
   }

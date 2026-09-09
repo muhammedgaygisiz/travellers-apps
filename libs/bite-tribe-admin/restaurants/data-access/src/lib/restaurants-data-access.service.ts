@@ -15,6 +15,7 @@ import { isBase64String, resourceValue } from 'utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 export const BITE_COLLECTION = 'bites';
+export const RESTAURANT_COLLECTION = 'restaurants';
 export const RESTAURANT_CANDIDATES_COLLECTION = 'restaurantCandidates';
 export const RESTAURANT_CANDIDATES_LIMIT = 5;
 export const BITE_PLACES_LIMIT = 10;
@@ -38,6 +39,32 @@ export interface VerifyRestaurantCandidateResult {
   status: 'created' | 'already-verified';
 }
 
+export interface AssignRestaurantOwnerRequest {
+  restaurantId: string;
+  ownerUserId: string;
+  reason: string;
+}
+
+export interface AssignRestaurantOwnerResult {
+  restaurantId: string;
+  ownerUserId: string;
+  claimStatus: 'claimed';
+  /** `already-assigned` is the idempotent repeat: nothing was written. */
+  status: 'assigned' | 'already-assigned';
+}
+
+export interface RevokeRestaurantOwnerRequest {
+  restaurantId: string;
+  reason: string;
+}
+
+export interface RevokeRestaurantOwnerResult {
+  restaurantId: string;
+  /** Who held it. The document no longer says. */
+  previousOwnerUserId: string;
+  claimStatus: 'revoked';
+}
+
 const toRestaurantCandidate = (doc: {
   id: string;
   data: unknown;
@@ -52,6 +79,12 @@ const toBite = (doc: { id: string; data: unknown }): Bite =>
     id: doc.id,
     ...(doc.data as Record<string, unknown>),
   }) as Bite;
+
+const toRestaurant = (doc: { id: string; data: unknown }): Restaurant =>
+  ({
+    ...(doc.data as Record<string, unknown>),
+    id: doc.id,
+  }) as Restaurant;
 
 /**
  * The reads and writes behind restaurant verification in the admin app.
@@ -154,12 +187,45 @@ export class RestaurantsDataAccessService {
     loader: this.bitePlacesLoader.bind(this),
   });
 
+  /**
+   * Every verified restaurant, with the ownership fields on it.
+   *
+   * Read whole rather than paged or queried, because the surface over it is a
+   * filter an operator types into and a filter that covers a prefix of the
+   * collection answers "no such restaurant" for one that exists — the bug issue
+   * #1476 fixed in the account list. The collection is small enough for that:
+   * `searchRestaurants` already reads all of it on every consumer search.
+   *
+   * The unowned restaurants are in it too. They are the ones an operator is
+   * usually looking for, and hiding them behind a filter would make the surface
+   * useless for the thing it exists to do.
+   *
+   * Sorted by name, because the list is read by a person looking for one
+   * restaurant. Firestore returns them in document-id order, which is arbitrary
+   * to anyone who is not Firestore.
+   */
+  restaurantsLoader: ResourceLoader<Restaurant[] | undefined, unknown> =
+    async () => {
+      const docs = await FirebaseFirestore.getCollection({
+        reference: RESTAURANT_COLLECTION,
+      });
+
+      return (docs?.snapshots ?? [])
+        .map(toRestaurant)
+        .sort((a, b) => (a.name || a.id).localeCompare(b.name || b.id));
+    };
+
+  restaurants = resource({
+    loader: this.restaurantsLoader.bind(this),
+  });
+
   // Guarded reads: `value()` throws once a read has failed (issue #1232).
   restaurantCandidatesValue = resourceValue(
     this.restaurantCandidates,
     [] as AdminRestaurantCandidate[],
   );
   bitePlacesValue = resourceValue(this.bitePlaces, [] as string[]);
+  restaurantsValue = resourceValue(this.restaurants, [] as Restaurant[]);
 
   selectRestaurantToCreate(restaurant: Restaurant): void {
     this.storeService.selectRestaurantToCreate(restaurant);
@@ -223,6 +289,57 @@ export class RestaurantsDataAccessService {
     this.restaurantCandidates.reload();
 
     return verification;
+  }
+
+  /**
+   * Assigns a restaurant to a business account.
+   *
+   * The callable is the authority on every rule this cannot see: that the
+   * account holds `business`, that the restaurant is not already held by
+   * somebody else, and that the two writes happen together. What this adds is
+   * the reload, so the list stops showing an assignment that has changed.
+   */
+  async assignRestaurantOwner(
+    restaurantId: string,
+    ownerUserId: string,
+    reason: string,
+  ): Promise<AssignRestaurantOwnerResult> {
+    const { data } = await FirebaseFunctions.callByName<
+      AssignRestaurantOwnerRequest,
+      AssignRestaurantOwnerResult
+    >({
+      name: 'assignRestaurantOwner',
+      data: { restaurantId, ownerUserId, reason },
+    });
+
+    this.restaurants.reload();
+
+    return data;
+  }
+
+  /**
+   * Takes a restaurant back from the account holding it.
+   *
+   * Its own callable rather than `assignRestaurantOwner` with an empty owner,
+   * because reassignment is deliberately two decisions: the operator log then
+   * carries a reason for the removal and a reason for the grant instead of one
+   * write that quietly replaced an accountable party (issue #1077).
+   */
+  async revokeRestaurantOwner(
+    restaurantId: string,
+    reason: string,
+  ): Promise<RevokeRestaurantOwnerResult> {
+    const { data } = await FirebaseFunctions.callByName<
+      RevokeRestaurantOwnerRequest,
+      RevokeRestaurantOwnerResult
+    >({
+      name: 'revokeRestaurantOwner',
+      data: { restaurantId, reason },
+    });
+
+    this.restaurants.reload();
+
+    return data;
   }
 
   logout(): void {

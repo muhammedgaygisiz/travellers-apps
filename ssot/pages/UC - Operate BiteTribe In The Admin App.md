@@ -2,7 +2,7 @@
 
 ## Status
 
-Partially supported. The app exists, deploys, and is gated on the `admin` role as of issue \#1469. Role management, restaurant-candidate verification, the unmatched Bite places and the operational migrations are its surfaces today. Claim review moves into it in a follow-up.
+Partially supported. The app exists, deploys, and is gated on the `admin` role as of issue \#1469. Account management — roles, subscription tier and blocking — Bite search and removal, restaurant-candidate verification, restaurant ownership, the unmatched Bite places and the operational migrations are its surfaces today.
 
 ## Goal
 
@@ -38,13 +38,20 @@ Steps 3 and 4 are the point of the split: a restaurant never grants itself busin
 2. They sign into the admin app with a normal BiteTribe account.
 3. Sign-in verifies the `admin` role before it succeeds; an account without it gets the generic login failure. `roleGuard('admin')` backs that up on the routes for a restored session or a revoked role.
 4. They land on the dashboard, a list of the operator surfaces the tool offers.
-5. **User management** lists every BiteTribe account with the roles it holds, and grants or revokes them. It reads `listUsersWithRoles` and writes `setUserRoles`, both admin-only.
+5. **User management** lists every BiteTribe account with the roles it holds, and grants or revokes them. It reads `listUsersWithRoles` and writes `setUserRoles`, both admin-only. 
 
-Only roles are editable. `setUserRoles` is the one admin write that exists, so the identity fields are read-only rather than offering a change nothing can save.
+Only the roles, the subscription tier and the account's access are editable. The identity fields are read-only rather than offering a change nothing can save.
+
+Blocking sits below both editable sections, separated by a rule and behind a confirmation that names the account. It is the one action on the form that takes something away, and it would otherwise be a misclick away from the role checkboxes.
 
 6. **Restaurant candidates** lists the pending candidates with the Bite evidence behind each, and **Bite places** lists place names Bites carry that no verified restaurant answers to yet. Both open the new-restaurant form, which creates the verified restaurant. Both moved out of the business dashboard with issue \#1473.
-7. **Bite search** finds a Bite by its name or one of its tags and shows what BiteTribe holds about it. It calls `searchBites`, the same callable the consumer app's search drives. Selecting a Bite is where deleting an improper one will attach (issue \#1475).
-8. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
+7. **Restaurant ownership** assigns a verified restaurant to an account holding `business`, and revokes that assignment. Both go through admin-only callables that write the fields on the restaurant document (issue \#1077). The surface reuses the account list user management already loads rather than adding a second way to find an account, and offers only accounts holding the role.
+8. 
+A restaurant that already has an owner offers no picker at all: reassignment is revoke and then assign, so the operator log carries a reason for the removal and a reason for the grant. Revoking sits below a rule and behind a confirmation naming the restaurant and the account, on the same terms as blocking.
+8. **Bite search** finds a Bite by its name or one of its tags and shows what BiteTribe holds about it. It calls `searchBites`, the same callable the consumer app's search drives. Selecting a Bite is where deleting an improper one will attach (issue \#1475).
+
+9. The same card removes it. A required reason and a confirmation sit between the operator and `deleteBiteAsOperator`, below a rule, because the deletion is irreversible and reaches further than the Bite (issue \#1475). 9. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
+9. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
 
 ## Key Behaviours
 
@@ -54,7 +61,10 @@ Only roles are editable. `setUserRoles` is the one admin write that exists, so t
 - **The dashboard names operations, not pages.** An operator picks the thing they came to do; nothing is a section of something larger. That is why the one migrations page became six entries with issue \#1473.
 - **An operator sees private profiles, and `searchUsers` was not touched to allow it.** Account search filters `listUsersWithRoles`, which reads Firebase Auth joined with `/users` and is already admin-only, so the `public === true` filter in the consumer-facing `searchUsers` never applies to an operator and never had to be relaxed. The alternative — a flag on `searchUsers` that only an admin caller may set — would have put an operator-only branch inside the callable the consumer app depends on, and any change to what it returns touches the privacy nutrition label. This way the consumer callable is untouched and nothing an operator can do changes what one BiteTribe user can find out about another (issue \#1476).
 - **Reading accounts from Firebase Auth is also what makes every account findable.** An account that never completed profile creation has no `/users` document, so `searchUsers` cannot see it at all; the Auth-backed list shows it with whatever name Auth holds and a `null` tier. The display name is joined in from `/users` because that is the only place BiteTribe writes it — `claimDisplayName` writes `/users` and `/displayNames` and never the Auth record, so `UserRecord.displayName` is empty for every email/password account.
+- **Blocking is Firebase Auth's `disabled` flag, and a live session survives it for up to an hour.** Firebase refuses a blocked account's sign-in and refuses to mint it a new token, but it cannot recall an ID token already issued. The operator surface says so on the form and in the confirmation rather than implying the block is instant. The full contract — what `revokeRefreshTokens` does and does not buy, why an operator cannot block themselves, and why they can block another operator — is on [[Architecture - Auth]].
+- **Blocking and content removal are two actions, and the log shows two entries.** An operator who wants both does both. One action with hidden consequences is harder to reason about and harder to undo, and it is the same reason roles, tier and access save through three buttons rather than one.
 - **The account list loads every page.** `listUsersWithRoles` pages at up to 1000 and returns a token; the client follows it, bounded at twenty pages. It used to take the first 200 and drop the token, which is survivable for a list to scroll and not survivable for a list to search: a search over a prefix answers "no such account" for an account that exists.
+- **Removing a Bite is a delete, and the reason is what makes it auditable.** The Bite, its image in Storage, its reactions and its whole review thread are gone, and the stale id is dropped from every restaurant candidate, bucket list and BiteTrail that named it. Nothing is restorable and the author is not told, so `deleteBiteAsOperator` requires a short reason and refuses without one — Cloud Logging is the only record the action leaves, and the entry also keeps the Bite's name, its author and the Storage objects that were removed, because the Bite itself no longer holds them. The full contract, including why removing the reference from a bucket list and a BiteTrail is part of it, is on [[Bite]].
 - **Bite search is the consumer callable, limits included.** `searchBites` matches name and tags, needs three characters and returns at most twenty results. Those are consumer-facing choices, and changing them would change the consumer app's search, which issue \#1476 puts out of scope. The operator surface states both rather than hiding them: a term that is too short says so instead of showing an empty list, and a result set that fills the cap says it was capped. Searching Bites by id, by place or by author is not possible; nothing in the operator flow requires an id, but a report that carries only one cannot currently be resolved through this surface.
 - The admin app is English-only. Its audience is BiteTribe Operators, and four locale lists kept in step for no reader is a cost with no reader.
 - The app is `noindex, nofollow` at both the meta tag and the hosting header. It is an internal tool that must never appear in a search result.
@@ -80,15 +90,19 @@ Until issue \#1078 replaces the Firestore rules, this is a client-side gate over
 - Issue \#1469 - introduce the admin app, deploy it, and gate both privileged apps on roles
 - Issue \#1473 - move the migrations and restaurant-candidate verification out of the business app
 - Issue \#1472 - require the `admin` role on every operator callable, which moving the UI does not do; done, and the classification of every endpoint is now a test
+- Issue \#1474 - block and unblock an account, the first operator action that takes something away
+- Issue \#1475 - delete an improper Bite, and the cascade that keeps the derived state correct
+- Issue \#1485 - see and change an account's subscription tier for a support case
 - Issue \#1069 - stage 0 of \#735, restaurant ownership, claiming and authorization
 - Issue \#1075 - business roles as verified identity
-- Issue \#1077 - claim review, approval and revocation workflow
+- Issue \#1077 - assign and revoke restaurant ownership, and the admin-app surface for it; done
 - Issue \#1078 - ownership-scoped Firestore rules
 
 ## Related Domains
 
 - [[User]]
 - [[Restaurant]]
+- [[Bite]]
 
 ## Operational Notes
 

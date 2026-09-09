@@ -137,6 +137,118 @@ describe(AuthService.name, () => {
     });
   });
 
+  describe('getRoles, hasRole and hasAnyRole', () => {
+    let getIdTokenResultMock: jest.Mock;
+
+    const signedIn = (): void => {
+      jest
+        .spyOn(service, 'authState')
+        .mockReturnValue({ user: { uid: '123' } } as unknown as ReturnType<
+          typeof service.authState
+        >);
+    };
+
+    const tokenCarrying = (roles: unknown): void => {
+      getIdTokenResultMock.mockResolvedValue({ claims: { roles } });
+    };
+
+    beforeEach(() => {
+      getIdTokenResultMock = jest.fn();
+      (
+        FirebaseAuthentication as unknown as { getIdTokenResult: jest.Mock }
+      ).getIdTokenResult = getIdTokenResultMock;
+      signedIn();
+      tokenCarrying(['business']);
+    });
+
+    it('reads the roles off the ID token', async () => {
+      tokenCarrying(['admin', 'staff']);
+
+      await expect(service.getRoles()).resolves.toEqual(['admin', 'staff']);
+    });
+
+    it('answers no roles when nobody is signed in, without reading a token', async () => {
+      jest
+        .spyOn(service, 'authState')
+        .mockReturnValue({ user: null } as unknown as ReturnType<
+          typeof service.authState
+        >);
+
+      await expect(service.getRoles()).resolves.toEqual([]);
+      expect(getIdTokenResultMock).not.toHaveBeenCalled();
+    });
+
+    // A token read that throws inside a route guard surfaces as a navigation
+    // error and a blank page, so it is reported as "no roles" instead.
+    it('answers no roles rather than throwing when the token cannot be read', async () => {
+      const warn = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => undefined);
+      getIdTokenResultMock.mockRejectedValue(new Error('no current user'));
+
+      await expect(service.getRoles()).resolves.toEqual([]);
+
+      warn.mockRestore();
+    });
+
+    it('drops a claim value that is not a role', async () => {
+      tokenCarrying(['business', 'owner', 7]);
+
+      await expect(service.getRoles()).resolves.toEqual(['business']);
+    });
+
+    it('reuses the cached token unless a refresh is asked for', async () => {
+      await service.getRoles();
+
+      expect(getIdTokenResultMock).toHaveBeenCalledWith({
+        forceRefresh: false,
+      });
+    });
+
+    it('mints a fresh token when asked, so a new grant is visible', async () => {
+      await service.getRoles(true);
+
+      expect(getIdTokenResultMock).toHaveBeenCalledWith({
+        forceRefresh: true,
+      });
+    });
+
+    it('hasRole is true only for a role the token carries', async () => {
+      await expect(service.hasRole('business')).resolves.toBe(true);
+      await expect(service.hasRole('staff')).resolves.toBe(false);
+    });
+
+    // The business app admits `business` and `staff`, and a staff account holds
+    // `staff` and not `business` (#1075).
+    it('hasAnyRole is true when the token carries either alternative', async () => {
+      tokenCarrying(['staff']);
+
+      await expect(service.hasAnyRole(['business', 'staff'])).resolves.toBe(
+        true,
+      );
+    });
+
+    it('hasAnyRole is false when the token carries none of them', async () => {
+      tokenCarrying(['admin']);
+
+      await expect(service.hasAnyRole(['business', 'staff'])).resolves.toBe(
+        false,
+      );
+    });
+
+    it('hasAnyRole with an empty list admits nobody', async () => {
+      await expect(service.hasAnyRole([])).resolves.toBe(false);
+    });
+
+    it('hasAnyRole forwards the refresh flag', async () => {
+      await service.hasAnyRole(['business'], true);
+
+      expect(getIdTokenResultMock).toHaveBeenCalledWith({
+        forceRefresh: true,
+      });
+    });
+  });
+
   describe('initialize', () => {
     let authStateChangeNextSpy: jest.SpyInstance;
 

@@ -33,6 +33,7 @@ jest.mock('../../shared/callable-options', () => ({
   onAppCheck: jest.fn((handler) => handler),
 }));
 
+import { logger } from 'firebase-functions';
 import { setUserRolesHandler } from '../set-user-roles';
 
 const ADMIN_UID = 'admin-uid';
@@ -238,5 +239,78 @@ describe('setUserRoles writes', () => {
     );
 
     expect(result.roles).toEqual(['admin', 'business']);
+  });
+});
+
+describe('setUserRoles mutually exclusive roles', () => {
+  // `business` operates a restaurant and `staff` is the narrowed set of what
+  // can be done on one. Refusing the pair here is what saves a precedence rule
+  // that would otherwise have to be honoured identically in the route guards,
+  // the rules of #1078 and the dashboard of #1079.
+  it('refuses business and staff on one account', async () => {
+    const code = await codeOf(
+      handle(request({ uid: TARGET_UID, roles: ['business', 'staff'] })),
+    );
+
+    expect(code).toBe('failed-precondition');
+    expect(setCustomUserClaimsMock).not.toHaveBeenCalled();
+  });
+
+  it('refuses the pair whichever order it arrives in', async () => {
+    const code = await codeOf(
+      handle(request({ uid: TARGET_UID, roles: ['staff', 'business'] })),
+    );
+
+    expect(code).toBe('failed-precondition');
+  });
+
+  it('refuses the pair even alongside admin', async () => {
+    const code = await codeOf(
+      handle(
+        request({ uid: TARGET_UID, roles: ['admin', 'business', 'staff'] }),
+      ),
+    );
+
+    expect(code).toBe('failed-precondition');
+  });
+
+  // Refused before the target is resolved, so a conflicting payload cannot
+  // cost an Auth lookup — and an operator who also mistyped the email is told
+  // about the conflict rather than about the address.
+  it('refuses it before resolving the target account', async () => {
+    await codeOf(
+      handle(
+        request({ email: 'ghost@test.com', roles: ['business', 'staff'] }),
+      ),
+    );
+
+    expect(getUserByEmailMock).not.toHaveBeenCalled();
+  });
+
+  it('does not log a refused write', async () => {
+    await codeOf(
+      handle(request({ uid: TARGET_UID, roles: ['business', 'staff'] })),
+    );
+
+    expect(logger.info).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [['business']],
+    [['staff']],
+    [['admin', 'staff']],
+    [['admin', 'business']],
+  ])('accepts the role set %p', async (roles) => {
+    await expect(
+      handle(request({ uid: TARGET_UID, roles })),
+    ).resolves.toMatchObject({ roles });
+  });
+
+  // The role has to be grantable before anything gates on it, so a restaurant's
+  // staff can be recorded ahead of #1078 and #1079.
+  it('accepts staff as a known role', async () => {
+    await expect(
+      handle(request({ uid: TARGET_UID, roles: ['staff'] })),
+    ).resolves.toEqual({ uid: TARGET_UID, roles: ['staff'] });
   });
 });

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { SearchBite } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { ToastService } from 'toast';
 import { BiteSearchDataAccessService } from 'bite-tribe-admin/bites-data-access';
 import { BiteSearchService } from '../bite-search.service';
 
@@ -14,17 +15,25 @@ const bite = (over: Partial<SearchBite> = {}): SearchBite => ({
 describe(BiteSearchService.name, () => {
   let service: BiteSearchService;
   let search: jest.Mock;
+  let deleteBite: jest.Mock;
   let logout: jest.Mock;
+  let present: jest.Mock;
 
   beforeEach(() => {
     search = jest.fn().mockResolvedValue([]);
+    deleteBite = jest.fn().mockResolvedValue({ biteId: 'b1' });
     logout = jest.fn();
+    present = jest.fn().mockResolvedValue(undefined);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
     TestBed.configureTestingModule({
       providers: [
-        { provide: BiteSearchDataAccessService, useValue: { search } },
+        {
+          provide: BiteSearchDataAccessService,
+          useValue: { search, deleteBite },
+        },
         { provide: BiteTribeStoreService, useValue: { logout } },
+        { provide: ToastService, useValue: { present } },
       ],
     });
     service = TestBed.inject(BiteSearchService);
@@ -90,6 +99,88 @@ describe(BiteSearchService.name, () => {
 
       expect(service.failed()).toBe(false);
       expect(service.results()).toHaveLength(1);
+    });
+  });
+
+  describe('deleting a Bite', () => {
+    beforeEach(async () => {
+      search.mockResolvedValue([bite(), bite({ id: 'b2', name: 'Gyoza' })]);
+      await service.search('a');
+      service.select(bite());
+    });
+
+    it('sends the id and the reason to the callable', async () => {
+      await service.deleteBite('b1', 'Not food');
+
+      expect(deleteBite).toHaveBeenCalledWith('b1', 'Not food');
+    });
+
+    // Re-running the search would send a second collection scan through the
+    // callable to confirm what this call already knows.
+    it('drops the Bite from the results without searching again', async () => {
+      await service.deleteBite('b1', 'Not food');
+
+      expect(service.results().map((result) => result.id)).toEqual(['b2']);
+      expect(search).toHaveBeenCalledTimes(1);
+    });
+
+    // The selection is resolved out of the results, so the detail column
+    // empties on its own: there is nothing left to show.
+    it('leaves the detail column empty', async () => {
+      await service.deleteBite('b1', 'Not food');
+
+      expect(service.selected()).toBeUndefined();
+    });
+
+    it('says it deleted the Bite', async () => {
+      await service.deleteBite('b1', 'Not food');
+
+      expect(present).toHaveBeenCalledWith({
+        messageKey: 'admin-bites-deleted',
+        outcome: 'success',
+      });
+    });
+
+    it('reports it is working while the call is in flight', async () => {
+      let release = (): void => undefined;
+      deleteBite.mockReturnValue(
+        new Promise<void>((resolve) => {
+          release = (): void => resolve();
+        }),
+      );
+
+      const pending = service.deleteBite('b1', 'Not food');
+      expect(service.deleting()).toBe(true);
+
+      release();
+      await pending;
+
+      expect(service.deleting()).toBe(false);
+    });
+
+    // An operator told a Bite was removed when it was not will not look again.
+    describe('a failed delete', () => {
+      beforeEach(() => deleteBite.mockRejectedValue(new Error('unavailable')));
+
+      it('says so rather than reporting a success', async () => {
+        await service.deleteBite('b1', 'Not food');
+
+        expect(present).toHaveBeenCalledWith({
+          messageKey: 'admin-bites-delete-failed',
+          outcome: 'failure',
+        });
+      });
+
+      it('keeps the Bite in the results', async () => {
+        await service.deleteBite('b1', 'Not food');
+
+        expect(service.results().map((result) => result.id)).toEqual([
+          'b1',
+          'b2',
+        ]);
+        expect(service.selected()?.id).toBe('b1');
+        expect(service.deleting()).toBe(false);
+      });
     });
   });
 

@@ -160,7 +160,25 @@ export class AuthService {
   }
 
   async hasRole(role: BiteTribeRole, forceRefresh = false): Promise<boolean> {
-    return (await this.getRoles(forceRefresh)).includes(role);
+    return this.hasAnyRole([role], forceRefresh);
+  }
+
+  /**
+   * Whether the token carries **any** of `roles`.
+   *
+   * The business app admits two roles rather than one: a staff account holds
+   * `staff` and not `business`, so a check for `business` alone would sign it
+   * out at the door. "Any" rather than "all" because the roles a route admits
+   * are alternatives — a route needing two roles at once has never existed, and
+   * the pair that could express it is refused by `setUserRoles`.
+   */
+  async hasAnyRole(
+    roles: readonly BiteTribeRole[],
+    forceRefresh = false,
+  ): Promise<boolean> {
+    const held = await this.getRoles(forceRefresh);
+
+    return roles.some((role) => held.includes(role));
   }
 
   /**

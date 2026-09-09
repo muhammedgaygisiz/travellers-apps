@@ -27,9 +27,9 @@ Backend callables validate request.auth where required
   before that answer exists.
 - `withAuthRoutes` provides shared auth routes.
 - `authGuard` protects authenticated routes.
-- `REQUIRED_ROLE` is the role an app demands of everyone who signs into it;
-  sign-in fails generically when the account does not hold it.
-- `roleGuard(role)` backs that up on the routes for restored sessions and
+- `REQUIRED_ROLES` is the set of roles an app admits, any one of which is enough
+  to sign in; sign-in fails generically when the account holds none of them.
+- `roleGuard(...roles)` backs that up on the routes for restored sessions and
   revoked roles.
 - `setUserRoles` is the admin-only callable that writes roles, and
   `grant-role.mjs` is the service-account bootstrap behind it.
@@ -95,21 +95,35 @@ app and run the operational migrations in it.
   credentials and deliberately checks nothing, because holding those credentials
   already means holding the project.
 - **The role is checked at sign-in, and a missing role fails the login.** The
-  sign-in effects verify `REQUIRED_ROLE` before dispatching `loginSucceeded`,
+  sign-in effects verify `REQUIRED_ROLES` before dispatching `loginSucceeded`,
   end the session, and report the same generic
   `something-went-wrong-please-try-again` a wrong password produces. Signing an
   account in and then refusing it a page would tell whoever is trying that the
   password was right, that the account exists, and which role guards the app. A
   generic failure tells them nothing.
-- `REQUIRED_ROLE` is an injection token bound per shell: `business` in the
-  business app, `admin` in the admin app, **unbound in the consumer app**. An
-  unbound token means "no role required", not "no role granted", which is what
-  keeps the consumer app ungated.
-- `roleGuard(role)` is the backstop, not the primary gate. Sign-in already
+- `REQUIRED_ROLES` is an injection token bound per shell: `business` and `staff`
+  in the business app, `admin` in the admin app, **unbound in the consumer
+  app**. An unbound token, and a bound-but-empty list, both mean "no role
+  required" rather than "no role granted", which is what keeps the consumer app
+  ungated.
+- **The roles an app admits are alternatives, not a hierarchy.** The business
+  app takes two because a staff account holds `staff` and **not** `business`.
+  Any one of the listed roles admits the account; what it may then _do_ is
+  narrower and belongs to the rules of issue \#1078 and the scoped dashboard of
+  \#1079, not to the door.
+- `roleGuard(...roles)` is the backstop, not the primary gate. Sign-in already
   refuses these accounts, so it fires only for a session restored on startup
   (which reports itself as a successful login without running the sign-in
   effect) or a role revoked mid-session. It reaches the same outcome: end the
   session, raise the generic failure, return to `/login`.
+- **There are two gates, and widening one is not widening the app.** They are
+  independent: `REQUIRED_ROLES` refuses the sign-in, `roleGuard` covers the two
+  paths that never run the sign-in effect. Issue \#1075 widened the guard alone
+  and the unit tests were green, because each gate's tests only exercise its own
+  gate; the staff account was still turned away at the door, and the only thing
+  that showed it was signing one in against the emulator. **A change to which
+  roles an app admits has to touch the shell's `REQUIRED_ROLES` and the routes'
+  `roleGuard` together, and be proven by a real sign-in.**
 - Neither path is the authorization answer. Every privileged callable re-reads
   the claim from the token Firebase verified; the client half only decides what
   a browser is shown.
@@ -120,10 +134,11 @@ app and run the operational migrations in it.
   `src/__specs__/callable-authorization.spec.ts` as `operator`, `authenticated`
   or `public`, and the spec fails when an operator endpoint does not call
   `requireAdmin`, when a consumer path does, or when a new endpoint is added
-  that nobody classified. Eight are operator-only: `setUserRoles`,
-  `setUserSubscriptionTier`, `listUsersWithRoles`, `verifyRestaurantCandidate`,
-  `backfillBiteAddress`, `backfillReviewTimestampsCallable`,
-  `clusterRestaurantCandidateForBite` and `sendNewVersionNotification`.
+  that nobody classified. Nine are operator-only: `setUserRoles`,
+  `setUserBlocked`, `setUserSubscriptionTier`, `listUsersWithRoles`,
+  `verifyRestaurantCandidate`, `backfillBiteAddress`,
+  `backfillReviewTimestampsCallable`, `clusterRestaurantCandidateForBite` and
+  `sendNewVersionNotification`.
   `handleSharedLinkToBite` is the one public endpoint, because it is the
   redirect a shared Bite link resolves through. See issue \#1472.
 - A cached ID token can be an hour old, so both paths retry once against a
@@ -173,7 +188,7 @@ gave every operator action one shape.
   | `targetType`     | `user`, `bite`, `restaurantCandidate`, `review` or `appInstallation`. An id alone does not say what it identifies.                             |
   | `targetId`       | The one record acted on. Absent from an action that operates on a whole collection, rather than answered with something invented.              |
   | `outcome`        | `started`, `succeeded` or `failed`. A `started` with no `succeeded` is an action that crashed or timed out, which the trail should still show. |
-  | `reason`         | Why, where the action takes one. Required by `setUserSubscriptionTier`; absent elsewhere.                                                      |
+  | `reason`         | Why, where the action takes one. Required by `setUserSubscriptionTier` and `deleteBiteAsOperator`; absent elsewhere.                           |
   | `details`        | Everything action-specific, nested under one key so it cannot compete with the fields every action shares.                                     |
 
 - **One field name per concept, and the spec enforces it.**
@@ -207,6 +222,14 @@ gave every operator action one shape.
   was there, and it was unavoidable: \#1474 targets an account and \#1475 a
   Bite, so a user-specific field name could not carry both.
 
+- **One action's entry is the record of something that no longer exists.**
+  `deleteBiteAsOperator` deletes the Bite outright, so its `succeeded` entry
+  carries the Bite's name, its author's uid and the Storage objects that were
+  removed inside `details` — there is no document left to look any of them up
+  in. Every other operator action leaves its target behind to be inspected, and
+  this is why the trail's retention window is the real bound on how long a
+  removal can be explained.
+
 - **The trail expires, and the retention window is what bounds it.** Cloud
   Logging keeps the `_Default` bucket for 30 days on Google's default setting
   and `_Required` for 400, and operator actions land in `_Default`. **This has
@@ -217,6 +240,55 @@ gave every operator action one shape.
   rests on rather than as a checked fact. An audit question older than the
   window has no answer at all, which is the part of this decision that has to be
   revisited if the operator team grows.
+
+## Blocking An Account
+
+Blocking is Firebase Auth's `disabled` flag and nothing else. Firebase enforces
+it, so a block needs no Firestore rule and no check in app code — which is what
+made it a whole feature rather than the first half of one. `setUserBlocked` is
+the admin-only callable behind it, and issue \#1474 is the reasoning.
+
+- **Firebase closes the doors it owns, and only those.** A sign-in by a blocked
+  account is refused with `auth/user-disabled`, and a refresh cannot mint a new
+  ID token. Neither recalls the ID token a client already holds.
+- **A live session therefore survives a block for up to an hour.** That is the
+  ID token's lifetime, and it is accepted rather than solved.
+  `revokeRefreshTokens` is called alongside the disable so the revocation time
+  is recorded and any caller verifying with `checkRevoked` rejects that token
+  at once — no callable does today, which is why the window is stated rather
+  than assumed away. It is not called when unblocking: that would sign an
+  account out of a session it does not have.
+- **The operator surface says the hour out loud**, on the form and in the
+  confirmation, because an operator acting on abuse needs to know the block is
+  not instant.
+- **Blocking removes nothing.** The account's Bites, reviews and restaurants
+  are untouched. Removal is a separate operator action with its own log entry
+  (issue \#1475), by decision: one action with hidden consequences is harder to
+  reason about and harder to undo.
+- **An operator may not block themselves**, and the callable refuses it rather
+  than the UI alone. Only an admin can unblock, so the last one to block their
+  own account takes the tool that would let them back in with them, and the
+  recovery is `grant-role.mjs` with service-account credentials. It is the
+  lockout shape `setUserRoles` already refuses for admin self-demotion.
+  Blocking a _different_ operator is allowed: another admin can undo it, and
+  refusing it would mean an abusive operator account could not be stopped by
+  the tool built to stop accounts.
+- **A blocked admin can unblock themselves inside that same hour**, because the
+  callable verifies the ID token without `checkRevoked`. It follows from the
+  window above rather than being a separate hole, and it is why blocking an
+  operator is not a substitute for revoking their `admin` role.
+- **The refused sign-in stays generic, deliberately.** `auth/user-disabled`
+  reaches the login page as "Something went wrong. Please try again.", the same
+  line every other refused sign-in produces, and that is the contract rather
+  than a gap. An account-state message would confirm to whoever typed the
+  address that it is a registered BiteTribe account and that the password was
+  right, and on the shared login component it would give a blocked account a
+  different answer from a role-refused one — the distinction the role gate
+  exists to hide. It is the rule already stated above for a missing role, and
+  it applies here for the same reason. Issue \#1534 proposed the opposite and
+  was closed as not planned. What #1474 did have to verify is that the app does
+  not present the refusal as a crash or a silent failure: it catches the error,
+  releases the form and shows the failure, confirmed against the Auth emulator.
 
 ## Supported Auth Modes
 
@@ -290,6 +362,7 @@ libs/bite-tribe-admin/shell/src/lib/routes.ts
 apps/bite-tribe-firebase/functions/src/functions/shared/roles.ts
 apps/bite-tribe-firebase/functions/src/functions/shared/operator-log.ts
 apps/bite-tribe-firebase/functions/src/functions/users/set-user-roles.ts
+apps/bite-tribe-firebase/functions/src/functions/users/set-user-blocked.ts
 apps/bite-tribe-firebase/functions/src/__specs__/callable-authorization.spec.ts
 apps/bite-tribe-firebase/functions/src/__specs__/operator-action-logging.spec.ts
 apps/bite-tribe-firebase/scripts/grant-role.mjs

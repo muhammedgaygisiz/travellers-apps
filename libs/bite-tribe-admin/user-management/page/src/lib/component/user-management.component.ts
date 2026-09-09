@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
 import {
+  AlertController,
   IonBadge,
   IonButton,
   IonCard,
@@ -25,7 +27,7 @@ import {
   IonSearchbar,
   IonSpinner,
 } from '@ionic/angular/standalone';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
 import {
   BITE_TRIBE_ROLES,
@@ -48,10 +50,18 @@ import { AdminUser } from 'bite-tribe-admin/user-management-data-access';
  * read-only because nothing on the backend writes them, and a form offering to
  * change an email it cannot save would be a lie (issue #1469).
  *
- * Roles and tier save separately, through separate callables, rather than
- * through one button. The epic keeps blocking separate from content removal for
- * the same reason: an action with more consequences than its label admits is
- * harder to reason about and harder to undo (issue #1485).
+ * The role checkboxes are not independent: `business` and `staff` are mutually
+ * exclusive, so ticking both disables the save and says why rather than letting
+ * the callable refuse it (issue #1075).
+ *
+ * Roles, tier and account access save separately, through separate callables,
+ * rather than through one button. The epic keeps blocking separate from content
+ * removal for the same reason: an action with more consequences than its label
+ * admits is harder to reason about and harder to undo (issue #1485).
+ *
+ * Blocking sits below both, in its own section and behind a confirmation,
+ * because it is the one action here that takes something away and it would
+ * otherwise be a misclick away from the role checkboxes (issue #1474).
  *
  * Finding an account happens here rather than on a search page of its own,
  * because finding it and acting on it are the same errand: an operator who was
@@ -87,11 +97,24 @@ import { AdminUser } from 'bite-tribe-admin/user-management-data-access';
   styleUrl: './user-management.component.scss',
 })
 export class UserManagementComponent {
+  private readonly alertController = inject(AlertController);
+  private readonly transloco = inject(TranslocoService);
+
   readonly users = input<AdminUser[]>([]);
   readonly loading = input(false);
   readonly saving = input(false);
   readonly savingTier = input(false);
+  readonly savingBlocked = input(false);
   readonly selected = input<AdminUser | undefined>(undefined);
+
+  /**
+   * The operator using the page.
+   *
+   * Only used to keep them from blocking themselves. The callable refuses it
+   * too and stays the authority; this is so the refusal reads as a reason next
+   * to the button rather than as a failed save afterwards.
+   */
+  readonly operatorUid = input<string | undefined>(undefined);
 
   readonly selectUser = output<AdminUser>();
   readonly save = output<{ uid: string; roles: BiteTribeRole[] }>();
@@ -100,6 +123,7 @@ export class UserManagementComponent {
     tier: SubscriptionTier;
     reason: string;
   }>();
+  readonly saveBlocked = output<{ uid: string; blocked: boolean }>();
   readonly logoutClick = output<void>();
 
   readonly allRoles = BITE_TRIBE_ROLES;
@@ -184,6 +208,22 @@ export class UserManagementComponent {
     return uid && pending ? pending : (this.selected()?.roles ?? []);
   });
 
+  /**
+   * Whether the edited role set holds a pair the callable will refuse.
+   *
+   * `business` operates a restaurant and `staff` is the narrowed set of what
+   * can be done on one, so an account holding both is asking to be treated as
+   * owner and employee at once. `setUserRoles` refuses it and stays the
+   * authority; this is so the refusal reads as a reason next to the checkboxes
+   * rather than as a failed save afterwards — the same shape the self-block
+   * refusal uses (issue #1075).
+   */
+  readonly rolesConflict = computed(
+    () =>
+      this.draftRoles().includes('business') &&
+      this.draftRoles().includes('staff'),
+  );
+
   readonly dirty = computed(() => {
     const original = [...(this.selected()?.roles ?? [])].sort();
     const current = [...this.draftRoles()].sort();
@@ -217,6 +257,24 @@ export class UserManagementComponent {
       this.tierReason().trim().length > 0,
   );
 
+  /** Whether the selected account is blocked from signing in. */
+  readonly blocked = computed(() => this.selected()?.disabled ?? false);
+
+  readonly isOwnAccount = computed(() => {
+    const operatorUid = this.operatorUid();
+
+    return !!operatorUid && this.selected()?.uid === operatorUid;
+  });
+
+  /**
+   * An operator may not block themselves: only an admin can unblock, so the
+   * last one to do it takes the tool that would let them back in with them.
+   * Unblocking is never refused, which is why this is not simply "own account".
+   */
+  readonly blockRefused = computed(
+    () => this.isOwnAccount() && !this.blocked(),
+  );
+
   onFilterChange(term: string): void {
     this.filter.set(term);
   }
@@ -245,7 +303,7 @@ export class UserManagementComponent {
   onSave(): void {
     const user = this.selected();
 
-    if (!user) {
+    if (!user || this.rolesConflict()) {
       return;
     }
 
@@ -276,6 +334,52 @@ export class UserManagementComponent {
     });
     this.tierDraft.set(undefined);
     this.tierReason.set('');
+  }
+
+  /**
+   * Blocking and unblocking both confirm.
+   *
+   * Blocking because a misclick next to the role checkboxes would cut an
+   * account off; unblocking because a misclick would silently re-admit an
+   * account somebody deliberately stopped, and nothing but the log would show
+   * it. The alert repeats the account rather than trusting that the form behind
+   * it is still the one being read.
+   */
+  async onToggleBlocked(): Promise<void> {
+    const user = this.selected();
+
+    if (!user || this.blockRefused()) {
+      return;
+    }
+
+    const blocked = !user.disabled;
+    const alert = await this.alertController.create({
+      header: this.transloco.translate(
+        blocked
+          ? 'admin-users-block-confirm-title'
+          : 'admin-users-unblock-confirm-title',
+      ),
+      subHeader: user.email || user.uid,
+      message: this.transloco.translate(
+        blocked
+          ? 'admin-users-block-confirm-message'
+          : 'admin-users-unblock-confirm-message',
+      ),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate(
+            blocked ? 'admin-users-block' : 'admin-users-unblock',
+          ),
+          role: blocked ? 'destructive' : 'confirm',
+          handler: (): void => {
+            this.saveBlocked.emit({ uid: user.uid, blocked });
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
   /**

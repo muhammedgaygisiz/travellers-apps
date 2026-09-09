@@ -18,6 +18,7 @@ export {
 } from './functions/bites/enrich-bite-address-on-create';
 export { searchUsers } from './functions/users/search-users';
 export { searchBites } from './functions/bites/search-bites';
+export { deleteBiteAsOperator } from './functions/bites/delete-bite-as-operator';
 export { searchBitesByCity } from './functions/bites/search-bites-by-city';
 export { searchBitesByCountry } from './functions/bites/search-bites-by-country';
 export { searchRestaurants } from './functions/restaurants/search-restaurants';
@@ -37,9 +38,14 @@ export { getCurrencyByPosition } from './functions/location/get-currency-by-posi
 export { clusterRestaurantCandidateForBite } from './functions/restaurants/cluster-restaurant-candidate-for-bite';
 export { createRestaurantCandidateOnBiteCreate } from './functions/restaurants/create-restaurant-candidate-on-bite-create';
 export { verifyRestaurantCandidate } from './functions/restaurants/verify-restaurant-candidate';
+export {
+  assignRestaurantOwner,
+  revokeRestaurantOwner,
+} from './functions/restaurants/restaurant-ownership';
 export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-create';
 export { claimDisplayName } from './functions/users/claim-display-name';
 export { setUserRoles } from './functions/users/set-user-roles';
+export { setUserBlocked } from './functions/users/set-user-blocked';
 export { listUsersWithRoles } from './functions/users/list-users-with-roles';
 export { setUserSubscriptionTier } from './functions/users/set-user-subscription-tier';
 export { deleteOwnAccount } from './functions/users/delete-own-account';

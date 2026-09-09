@@ -48,7 +48,7 @@ jobs:
       # changelog reads the log, and the helper refuses a tag that already
       # exists locally or on origin.
       - name: Checkout develop
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           ref: develop
           fetch-depth: 0

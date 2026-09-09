@@ -152,7 +152,7 @@ for discovery.
 
 **Next opportunities**
 
-- More complete restaurant profile maintenance, verified and unverified distinction, menu item states, menu-to-bite linking, reservation, contact and visit planning, and restaurant data-quality support.
+- More complete restaurant maintenance, verified and unverified distinction, menu item states, menu-to-bite linking, reservation, contact and visit planning, and restaurant data-quality support.
 
 ## New user
 

@@ -14,7 +14,7 @@ Three pages, three questions - do not merge them:
 | [[Glossary]] | *What does this word mean?* Domain terms |
 
 They do not map one to one, which is the reason for the split: five of the seven
-personas have no distinct permission set, and one role has no persona.
+personas have no distinct permission set, and two roles have no persona.
 
 **Verified against the code on 7 September 2026**, branch `develop` at `d015d6fa`,
 read-only. Decisions recorded after that reading are dated and are not re-verified.
@@ -29,14 +29,17 @@ re-reads the claim from the verified token.
 
 | Role (EN) | Role (DE) | Claim | Definition | Persona |
 |---|---|---|---|---|
-| **BiteTribe Operator** | BiteTribe-Betreiber | `admin` | BiteTribe-internal superuser administering the entire application: verifies RestaurantCandidates, grants and revokes roles, runs the operational migrations and - planned - reviews RestaurantClaims. Required to sign into the Admin App. | *none* |
+| **BiteTribe Operator** | BiteTribe-Betreiber | `admin` | BiteTribe-internal superuser administering the entire application: verifies RestaurantCandidates, grants and revokes roles, assigns and revokes Restaurant ownership (\#1077), runs the operational migrations. Required to sign into the Admin App. | *none* |
 | **Restaurant Owner** | Restaurant-Inhaber | `business` | The verified owner of one Restaurant, responsible for that Restaurant's own data: Menu, opening hours, address, description, image, social links. Required to sign into the Business App. | Restaurant owner or business maintainer |
 | **Bite Creator** | Bite-Ersteller | *none* | A registered user allowed to create a Bite. Carries **no** claim: in the code this role is the *absence* of a role, so it is neither grantable nor revocable. | Bite creator |
+| **Restaurant Staff** | Restaurant-Mitarbeiter | `staff` | **Target** (`RD-UR-8`). A member of a restaurant's team, acting on the restaurants its Restaurant Owner holds within a narrower permission set. Granted by that Restaurant Owner rather than by an Operator (\#1537). No backend guard exists yet (\#1075). | *none* |
 
 How they compose: **Bite Creator is the base every account holds**, because the consumer
 app has no role gate - only `authGuard`. Roles are additive rather than exclusive (one
 account may hold `admin` and `business` at once), but holding one role does **not** imply
 holding another: `admin` and `business` are deliberately not a hierarchy in the code.
+`staff` is the exception to additivity - it *is* the narrowed set, so holding it together
+with `business` is contradictory and `setUserRoles` refuses the combination.
 
 **Hierarchy in two senses, and only one of them holds.** In *capability* the Operator is
 above the Restaurant Owner: `RD-UR-6` gives it maintenance of every Restaurant, claimed or
@@ -49,8 +52,13 @@ truthful.
 *Operator* is the accepted short form in prose, matching
 [[UC - Operate BiteTribe In The Admin App]]; the other two are used in full.
 
-Ownership itself is **modelled, not implemented**: `Restaurant.ownerUserId` and
-`claimStatus` have no writer, so every Restaurant is `unclaimed`. See
+Ownership itself is **written but not yet enforced**: \#1077 gave `Restaurant.ownerUserId`
+and `claimStatus` an operator writer - `assignRestaurantOwner` and `revokeRestaurantOwner`,
+behind an admin-app surface. The other half is missing: no rule reads the field (\#1078)
+and the business dashboard is not scoped to it (\#1079), so an assignment records
+accountability rather than granting or withholding access, and nothing in production is
+assigned today. There is **no self-service claim** - \#1076 was closed as not planned and
+\#1077 removed the `RestaurantClaim` model with it. See
 [[UC - Own And Claim Restaurants]].
 
 ## What each role may do
@@ -84,7 +92,8 @@ the ownership-scoped rules in issue \#1078 need an explicit `admin` allowance, a
 it"* needs that exception written into its deny tests. Supersedes the three-way hierarchy
 question in [[UC - Verify Restaurant Candidate]] `S-10` and issue \#1164.
 
-² The intent, not an enforced boundary, because ownership has no writer.
+² Assigned and recorded since \#1077, but not yet an enforced boundary: the rules do not
+read `ownerUserId` (\#1078) and the business dashboard is not scoped to it (\#1079).
 
 ³ `RD-UR-4`: publishing moves to the consumer app behind `authGuard` only, so it becomes a
 Bite Creator capability and the Business App route is retired. Implementation is issue
@@ -133,12 +142,26 @@ for Storage, the more exploitable of the two.
 | **Public / Private Profile** | The same visibility choice, not a capability |
 | **BiteTribe Pro** | An entitlement on `PublicUser.subscriptionTier`: `0` = Free, `>= 1` = Pro. Orthogonal to every role. No purchase path exists. See [[Subscription]] |
 | **BiteTrail Creator** | An activity of the *Food curator or vlogger* persona, not a permission. Publishing a BiteTrail becomes a Bite Creator capability under `RD-UR-4`, tracked by issue \#1519; the proposed `curator` claim is retired |
-| **Moderator** | Does not exist. Named in [[Glossary]] only to state its absence |
+| **Moderator** | Does not exist. There is no moderation role: content reports are acted on by the Operator under `RD-UR-7`. Stated here rather than in [[Glossary]], which carries the terms the product *has* |
 | **Unauthenticated visitor** | Reaches only `start` and the auth routes |
 | **The backend itself** | Cloud Functions act with admin credentials and no role. It is the actual writer in most flows, which is why the open Firestore rules matter - see the note above the table |
 
 The first four are personas: audiences, not authorization concepts, and they must not
-become roles. 
+become roles.
+
+**Three categories, and the test between them is mechanical.** A **persona** carries no
+authorization: remove it and nothing an account may do changes. A **role** is a custom
+claim: it gates surfaces and callables, and it is grantable and revocable. An
+**entitlement** is a server-owned record of what an account is allowed: it gates features
+rather than surfaces, is orthogonal to every role, and is not written by `setUserRoles`.
+BiteTribe Pro is the entitlement - which is why it sits in the table above without being a
+persona either. See `RD-UR-1`.
+
+**Restaurant Staff has no column in the matrix above, deliberately.** The role is decided
+(`RD-UR-8`); its permission set is not. The graph says only that it is narrower than
+Restaurant Owner's, and narrowing it is \#1537's work - a column of guesses would state a
+boundary nobody has decided. What is fixed: staff acts on the restaurants its granting
+Restaurant Owner holds and on no others.
 
 ## Recorded Decisions
 

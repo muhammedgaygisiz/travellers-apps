@@ -14,13 +14,17 @@ Open questions capture decisions that should become clear before or shortly afte
 - What are the brand characters called, and what does a surface use one for? The seven committed in [issue 1482](https://github.com/muhammedgaygisiz/travellers-apps/issues/1482) carry the design export's filenames, which mix a historical term with national ones, and nothing in the product references them. Both halves are open: the vocabulary, and whether a character becomes an avatar, a BiteTrail marker, an empty state, or stays brand material. See [[Implementation - Brand Characters]].
 - Which palette is the brand's, the logo's or the new characters'? The shipped `logo.svg` outlines a `#F0B967` cookie in `#55422A`; the seven characters use `#402810` over `#F8B850`. They read as one family at thumbnail size and as two drafts side by side, which the `Brand/Characters` Storybook page shows. Re-cutting the logo changes a mark that is already in both stores, so this is a decision rather than a cleanup.
 
+## Glossary And Naming Questions
+
+- Is the reaction on a Bite called a **Like** or a **Reaction**? Both wordings are permitted in [[Glossary]] until this is decided. The concept is one reaction per user and Bite, chosen from three emoji, where choosing another replaces the previous one. The app's own onboarding copy already says "reactions"; the model, its fields and its counters say `likes`. Deciding late costs a rename of the user-facing copy **or** of the data model, and deciding it now costs neither.
+
 ## Restaurant Interaction Platform Questions
 
 Post-launch. These belong to issue \#735 and its stage epics. Each blocks the stage named next to it, and the proposals recorded on the epics are proposals, not decisions.
 
 Ownership, stage 0, issue \#1069:
 
-- What evidence is required before a restaurant claim is approved?
+- What does an operator record as the reason for a restaurant ownership assignment, and what evidence backs it? There is no approval step to gate: \#1076 declined the self-service claim and the decision is settled off-system. Both `assignRestaurantOwner` and `revokeRestaurantOwner` require a reason and Cloud Logging is the only record they leave, so the reason *is* the audit trail. See [[UC - Own And Claim Restaurants]].
 - What happens to a restaurant's Bites and menu when ownership changes or is revoked?
 
 Table management, stage 2, issue \#1071:
@@ -104,7 +108,6 @@ Moderation questions raised by threading are recorded on [[epic-1284]], not here
 - What store screenshots and copy are needed for App Store and Google Play? **Settled** per slot in [[Implementation - Store Listing Assets]], including which gaps are accepted rather than filled.
 - Who is included in the soft launch tester group? **Decided on 31 August 2026: the current users.** No separate cohort is assembled. Growth from there is expected to come through them telling friends and family, which is the point rather than a limitation - the soft launch is meant to grow but not fast, so that a defect reaches a handful of people instead of a few hundred. The property counted 40 active users over the seven days to 31 August 2026, which is the order of magnitude this starts from.
 - Which communities should be contacted during public launch, and in what order?
-- How does a real restaurant that never reaches five Bites become a Restaurant at launch? **Settled on 9 September 2026: the premise does not hold.** The property carries over 3000 Bites, and places already exceed the five-Bite threshold, so automatic detection fires in practice and not only in theory - the thin market this question was written for is not the market the app is in. The on-demand producer therefore stays `[Secondary]` in [[UC - Detect Restaurant Candidate]] without that classification costing anything at launch. What remains open is narrower and is **not** a launch gate: the Admin App's Bite-places creation path still seeds `position: {latitude: 0, longitude: 0}`, creates no Candidate, and writes a Restaurant through five client-side writes with no transaction and no backend validation. Whether that path is retired is a cleanup decision - epic \#1495 declines the `{0, 0}` defect and epic \#1523 declines the decision, so it still has no owner. Recorded 8 September 2026 from `E13` on that page; settled 9 September 2026.
 - How are soft-launch testers told the app is live? **Decided on 31 August 2026: directly, by the maintainer.** No push campaign, no mailing list, no in-app announcement. The group is small enough that a personal message is both possible and better, and it avoids building an announcement channel for an audience of forty.
 - Who are the soft-launch influencers? **Decided on 31 August 2026: there are none.** No influencer was successfully recruited, so the influencer half of [issue 912](https://github.com/muhammedgaygisiz/travellers-apps/issues/912)'s acceptance criterion is dropped from the soft launch rather than left blocking it. Recruiting is future work and belongs with the public launch campaign, [issue 913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913).
 

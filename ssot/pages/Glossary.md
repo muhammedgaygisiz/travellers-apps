@@ -23,16 +23,16 @@ existing name already or the term belongs here.
 
 - **BiteTribe** — Community-driven food discovery product focused on real dishes people ate, not only restaurants they visited.
   - Business relevance: Core product and brand. The promise is authentic food discovery through user-generated bite experiences.
-- **Bite** — A shared food experience for a specific dish, including context such as photo, review, price, location, restaurant, and creator. See [[Bite]].
+- **Bite** — A shared food experience for a specific dish, including context such as photo, description, star rating, price, place, restaurant, and creator. See [[Bite]].
   - Business relevance: Primary content unit. More high-quality bites increase discovery value, engagement, and data quality.
-- **Bite creator** — A user who creates and publishes bites. See [[User]].
+- **Bite creator** — A user who creates and publishes bites. Both a persona and a role, and the two are not interchangeable: the persona in [[Personas]] describes the audience, the role in [[User Roles]] describes what the account may do. See [[User]].
   - Business relevance: Supply-side contributor. Creator motivation, trust, and retention directly affect content growth.
 - **Review** — User-written opinion or evaluation attached to a bite.
   - Business relevance: Adds qualitative trust and helps other users decide whether a dish is worth trying.
-- **Like** — Lightweight positive signal on bite content.
+- **Like** — A persisted reaction to a Bite: one per user and Bite, chosen from a small set of emoji, where choosing another replaces the previous one. **Also written *Reaction*, and both wordings are permitted until the naming is decided** — the app's own onboarding copy already says "reactions" while the model and its counters say `likes`. See [[Current State - Open Questions]].
   - Business relevance: Engagement signal that can support ranking, recommendations, and creator feedback.
-- **Star** — Stronger save, favorite, or rating-like signal depending on product context.
-  - Business relevance: Helps distinguish casual engagement from stronger intent or preference.
+- **Star** — The rating a Bite creator gives the dish, shown as stars on the Bite and on Bite detail. Optional. Distinct from a BiteTrail rating, which rates a curated trail rather than a dish. See [[Bite]].
+  - Business relevance: The one comparable quality signal a Bite carries. Everything else on a Bite is description, price or place, none of which ranks.
 - **Content quality** — Usefulness, authenticity, completeness, and trustworthiness of bites and related profile data.
   - Business relevance: Determines whether discovery feels reliable enough for users and businesses.
 
@@ -62,14 +62,18 @@ existing name already or the term belongs here.
 
 ## Restaurants And Menus
 
-- **Restaurant profile** — Public restaurant presence that groups business information, location, menu-related content, and bites connected to that restaurant. See [[Restaurant]].
+- **Place** — Where a Bite was eaten, carried on every Bite as a human-readable name. A place is not a record of its own: it is either unmatched, or it has become a restaurant candidate, or it has been verified into a restaurant. See [[Bite]].
+  - Business relevance: Every Bite has a place and only a few places ever become restaurants. Keeping the two apart is what lets the product carry thousands of Bites without thousands of restaurant pages, and it is why a Bite is complete even where no restaurant exists.
+- **Restaurant** — A verified or managed place: the record that groups business information, location, menu-related content, and the bites connected to that place. *Restaurant profile* is retired as a domain term — the public restaurant page is a surface, not a second concept. See [[Restaurant]].
   - Business relevance: Anchor for business-side value, discovery, and potential monetization.
 - **Menu item** — A dish or product offered by a restaurant.
   - Business relevance: Connects business inventory to user-generated bite content and can support conversion flows such as creating a bite from a menu item.
-- **Restaurant claim** — A request by a user with the business role to be recognised as the owner of an existing restaurant in BiteTribe, reviewed and approved before it takes effect.
-  - Business relevance: Establishes who is accountable for a restaurant's data and who is allowed to operate it. Every operational restaurant capability depends on it.
+- **Restaurant claim** — The step before ownership: settling who should own a restaurant that has none. **Not a record in the product.** The self-service claim was declined (\#1076) and the `RestaurantClaim` model removed with it (\#1077), so a claim is settled off-system, on the call the operator is already having, and reaches BiteTribe only as the operator's assignment and its stated reason. See [[UC - Own And Claim Restaurants]].
+  - Business relevance: A restaurant with no owner has nobody accountable for its data, and a claim is how that gap closes. Where it is settled decides how much evidence anyone can point to afterwards.
+- **Restaurant ownership** — The state a claim leads to: one account, holding the business role, is accountable for one restaurant's data. An operator assigns it with a stated reason and can revoke it; `claimStatus` is `unclaimed`, `claimed` or `revoked`. A restaurant is assigned, never self-requested. See [[UC - Own And Claim Restaurants]].
+  - Business relevance: Every operational restaurant capability depends on ownership. Assignment is recorded today, but no rule enforces it (\#1078) and nothing reads it yet (\#1079), so it names who is accountable rather than who may write.
 - **Restaurant candidate** — A proposed restaurant, assembled from repeated bites at one place and held for a BiteTribe operator to verify, dismiss, or resolve against a restaurant that already exists. Produced two ways: automatically, once five nearby bites within 200 m name the same place, or on demand by an operator from a single bite. See [[UC - Detect Restaurant Candidate]] and [[UC - Verify Restaurant Candidate]].
-  - Business relevance: The only route by which a restaurant profile comes into existence, so it governs both how fast the restaurant side of the product can grow and how much of it is trustworthy. A wrong verification publishes a page about a real business that was never involved.
+  - Business relevance: The only route by which a restaurant comes into existence, so it governs both how fast the restaurant side of the product can grow and how much of it is trustworthy. A wrong verification publishes a page about a real business that was never involved.
 - **Candidate producer** — Which of those two routes created a candidate, recorded on the candidate itself. The automatic route carries evidence from five independent bites; the operator route carries none by design, because a deliberate operator action is its own safeguard.
   - Business relevance: The two routes hold different standards of evidence, so the producer is what makes the collection's quality claim checkable rather than assumed.
 
@@ -123,6 +127,10 @@ See [[Monetization]] for the free and paid boundary and the revenue share.
   authoritative model is the Domain section of [[SSOT]].
 - Terms with an owning domain page are linked; the rest exist only here. A term
   that grows rules rather than just a meaning should get its own page.
+- **A term here is human-readable; a code identifier is an attribute of it, not a rival
+  name.** `RestaurantCandidate`, `Bucketlist` and `bucketlistId` are spellings of
+  *Restaurant candidate* and *Bucket list*, not competing terms, so a difference in case
+  or spacing between this page and the code is not drift. See `RD-GL-4`.
 
 ## Related Pages
 

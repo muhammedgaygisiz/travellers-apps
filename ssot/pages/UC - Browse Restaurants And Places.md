@@ -61,7 +61,7 @@ screen before the state backing them existed.
 
 ## Related GitHub Scope
 
-- Issue \#734 covers richer restaurant menu and restaurant profile behavior.
+- Issue \#734 covers richer restaurant menu and restaurant page behavior.
 
 ## Related Domains
 

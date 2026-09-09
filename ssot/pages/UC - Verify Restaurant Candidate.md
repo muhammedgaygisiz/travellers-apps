@@ -20,7 +20,7 @@ flight: epic \#1495.
 | `UC-ARB` — assign Bites | Reachable only inside verification; no standalone writer, see `R-8` |
 | `UC-DIS` — dismiss | Not implemented, see `R-13`. Owned by #1501, #1508 and #1502 |
 | `UC-MRC` — resolve a duplicate | Not implemented, see `R-14` |
-| `UC-ARO` — assign owner | Not implemented, see `R-15` |
+| `UC-ARO` — assign owner | Implemented (\#1077) as a separate Operator action, **outside this flow**; see `R-15` |
 | Authorization at the data layer | Open; see `Authorization`. Owned by #1078 |
 | `AF-31` / `AF-34` handshake | `AF-31` satisfied. `AF-34` closed with `UC-DRC`; unanswered against seven counterparties. See `Guarantees` |
 
@@ -42,8 +42,9 @@ them acts here.
 
 - **BiteTribe Operator** (short: *Operator*), holding the `admin` claim. The only
   actor: it decides, completes the proposal and submits it. Lane `OP`.
-- **Restaurant Owner** — not an actor here. Named because `V10` would assign one, and
-  because the Restaurant this flow creates is the object `UC-MRB` hands them.
+- **Restaurant Owner** — not an actor here. Named because the Restaurant this flow
+  creates `unclaimed` (`G7`) is the object `UC-ARO` later assigns and `UC-MRB` hands
+  them.
 - **Bite Creator** — not an actor here: not notified, holding no rights, and seeing no
   state change beyond their Bite appearing under a Restaurant (`R-12`). Named because
   it is one of the four writers of `bite.restaurantId` (`R-8`).
@@ -98,7 +99,8 @@ proposed Restaurant data, and the transactional creation of the Restaurant.
 `RD-VRC-6` sets that boundary: `V19` and `V23` stay inside the verification
 transaction but are *referenced* steps, owned by `UC-GIM` and `UC-ARB`; dismissal and
 duplicate resolution are referenced Use Cases with their own terminal states; owner
-assignment is an optional step at `V10`.
+assignment is **not** part of this Use Case at all — it is a separate Operator action
+afterwards (`UC-ARO`, `R-15`).
 
 **Completeness.** `/restaurantCandidates` is written by exactly four things. `UC-DRC`
 creates every Candidate, through both of its producers. This Use Case writes the
@@ -116,7 +118,7 @@ Out of scope. Each of these is its own Use Case, referenced from the step it bel
 | `UC-DRC` | [[UC - Detect Restaurant Candidate]] | `P1`, `P2` | Upstream, and the sole owner of every way a Candidate comes into existence — the automatic trigger *and* the Operator's on-demand clustering callable (`RD-VRC-8`) |
 | `UC-DIS` | Dismiss Restaurant Candidate | `V4a` | Alternative outcome |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant | `V4b` | Alternative outcome |
-| `UC-ARO` | [[UC - Own And Claim Restaurants]] | `V10` | Optional step inside this Use Case |
+| `UC-ARO` | [[UC - Own And Claim Restaurants]] | `G7`, `R-15` | Downstream — a separate Operator action after `END-V4`, not a step here |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence | `V19` | Invoked step |
 | `UC-ARB` | Assign Bites To Restaurant | `V23` | Invoked step |
 | `UC-MRB` | [[UC - Maintain Restaurants In The Business App]] | After `END-V4` | Downstream |
@@ -158,7 +160,7 @@ On the successful path, `END-V4`:
 | G4 | The Candidate carries `status == 'verified'`, `verifiedRestaurantId`, `verifiedAt`, `verifiedAtTimestamp`, `verifiedByUserId` |
 | G5 | G1 to G4 are atomic. No intermediate state is observable |
 | G6 | The decision is attributable to one Operator account |
-| G7 | The Restaurant is `unclaimed` unless `V10` was performed |
+| G7 | The Restaurant is created `unclaimed`. Ownership is assigned afterwards, outside this flow (`UC-ARO`) |
 
 **Handshake.** `AF-31` is satisfied: every `REF:` and every precondition names its
 counterparty and the guarantee that counterparty owes. `AF-34` is closed in both
@@ -175,7 +177,8 @@ writing; and `UC-DIS`, `UC-MRC`, `UC-GIM` and `UC-ARB` have no pages at all, so 
 Under `AF-34` these seven counterparties are **unanswered**, not conformance failures:
 this page has stated its side, and the other side is theirs to state. Each is a claim on
 `UF-20`'s migration order, and each closes the day that page carries numbered guarantees.
-`UC-ARO` is the one to take first — it already contradicts `R-15` in writing.
+`UC-ARO` is the one to take first: it is the only one of the seven already implemented
+(\#1077), so its guarantees can be written from the code rather than proposed.
 
 `G1` and `G3` hold at `END-V4` and are not durable afterwards. `G1` is falsified by a
 second verification of the same Candidate, which `R-18` closes. `G3` is falsified by a
@@ -290,14 +293,9 @@ V8   OP   completes the mandatory data: name and position
 
 V9   OP   completes the optional data — image, description, address, opening hours
           and social media links                                          [optional]
-          → V10
-
-V10  OP   assigns a Restaurant Owner                      [optional] [not implemented]
-          REF:UC-ARO   must set restaurant.ownerUserId and claimStatus and grant the
-                       owner account the `business` role, as one action with the same
-                       atomicity as the verification transaction
-          INV:R-15 is VIOLATED here: no writer exists, so every Restaurant leaves this
-               flow unclaimed and G7's exception is unreachable
+          NOTE: owner assignment is deliberately not a step of this flow. It is its
+                own Operator action in the Admin App, performed afterwards against a
+                Restaurant that already exists (`UC-ARO`, #1077). See `R-15`.
           → V11
 
 V11  OP   judges whether the draft is ready to submit                     [decision]
@@ -464,7 +462,7 @@ V25  SYS  returns { restaurantId, menuId, menuItemCount, candidateId, skippedBit
 | **R-12** | A Bite Creator is never notified and sees no state change from this Use Case, other than their Bite now appearing under a Restaurant. |
 | **R-13** | *Intended, not met.* A Candidate the Operator judges not to be a restaurant is left `dismissed` (`V4a`, `UC-DIS`). No surface and no writer exist, so `dismissed` is a declared status that nothing can reach. Owned in three parts, all in epic #1495 and all `[Secondary]`: #1501 the backend writer, #1508 the Operator surface, #1502 un-dismissal. |
 | **R-14** | *Intended, not met.* A Candidate for a place that already has a verified Restaurant is resolved against that Restaurant (`V4b`, `UC-MRC`), creating no second Restaurant. No writer exists. |
-| **R-15** | *Intended, not met.* Owner assignment at `V10` sets `restaurant.ownerUserId` and `claimStatus` and grants the `business` role, as one action with the atomicity of `R-9`. No writer exists, so every Restaurant leaves this flow unclaimed. |
+| **R-15** | Verification does **not** assign an owner. Every Restaurant leaves this flow `unclaimed` (`G7`), and ownership is a separate Operator action afterwards — `assignRestaurantOwner` in the Admin App (`UC-ARO`, #1077). Corrected 9 September 2026 against that delivery, which contradicts the earlier intent twice: the target account must **already** hold `business`, because assignment does not grant the role and is refused otherwise (`setUserRoles` grants it); and the write is its own transaction, not part of `R-9`'s. |
 | **R-16** | An evidence Bite deleted after detection is skipped at `V18`, rather than failing the transaction and stranding the Candidate in `pending`. |
 | **R-17** | *Intended, not met.* The Candidate list has one server-side order and no selectable ordering — `evidence.biteCount` descending, then `createdAtTimestamp` descending — and it pages rather than truncating, so every `pending` Candidate is reachable. Ordering without paging satisfies neither half. The single fixed order, and the absence of a selectable one, is `RD-VRC-16`. |
 | **R-18** | *Intended, not met.* Idempotency is keyed on `verifiedRestaurantId`, not on `status`. A Candidate that names a Restaurant has already been verified whatever its status says: `status` is a label any writer can rewrite, the field is the fact. Today `V16` branches on `status` alone, so a Candidate returned to `pending` while still naming a Restaurant is verified a second time. |
@@ -527,7 +525,6 @@ Candidate to `verified`, without ever calling the callable. The guard protects t
 - `V7`, `V7a`, `V7b` — the Google Places prefill. A convenience: `V8` covers the same
   fields by hand.
 - `V9` — the optional Restaurant data.
-- `V10`, and `G7`'s exception — owner assignment (`R-15`, `UC-ARO`, \#1069).
 - `V4b` and `END-V2` — duplicate resolution (`R-14`, `UC-MRC`). A duplicate Restaurant
   is a data-quality defect, not a blocked flow: the Operator can defer at `END-V3`.
 - `R-19`'s recording of a corrected `position` (`E10`). The correction itself works at
@@ -553,8 +550,10 @@ app, which *is* reviewed:
    derived from Bite reports, per `R-11`, not from the business, and nothing marks it
    as such. A reviewer comparing a listed price to the real one sees an inaccuracy
    attributed to a named business. `RD-VRC-11` decides that marker and its retraction:
-   the marker is owned by \#1511, and retraction is sequenced behind owner assignment,
-   which has no writer (`R-15`).
+   the marker is owned by \#1511, and retraction is sequenced behind owner assignment.
+   That assignment has a writer since \#1077, but no Restaurant is assigned in
+   production and the Business App is not ownership-scoped (\#1079), so no Restaurant
+   Owner can reach the Menu to retract.
 2. **The Restaurant is created unclaimed,** per `G7`. `V21` publishes a page about a
    real, named business that has not been involved. That is a data-protection and
    business-representation question rather than a store-review one; it belongs to
@@ -575,7 +574,7 @@ discovered in review.
 - \#1078 — `firestore.rules` grants every authenticated user every write. The
   "Not enforced" half of `Authorization`, and what the post-transaction image write
   depends on today (`R-10`, `E11`).
-- \#1069 — owner assignment. `V10`, `R-15`, `UC-ARO`.
+- \#1069 / \#1077 — owner assignment, delivered outside this flow. `G7`, `R-15`, `UC-ARO`.
 - \#1506 and \#1507 — the ordered, paged Candidate list. `V2`, `R-17`, `E8`. MVP
   release blocker.
 - \#1521 — `V16`'s guard on `verifiedRestaurantId`. `R-18`, `E9`. MVP release blocker.

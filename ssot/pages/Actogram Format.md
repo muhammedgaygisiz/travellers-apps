@@ -113,7 +113,6 @@ several entries. A page with one entry uses one prefix.
 | `GU` | actor | Guest, unauthenticated visitor |
 | `OP` | actor | BiteTribe Operator (`admin`) |
 | `RO` | actor | Restaurant Owner (`business`) |
-| `TC` | actor | BiteTrail Creator (proposed `curator`) |
 | `UI` | system | A client app, named in the lane declaration |
 | `NAT` | system | The native layer: Capacitor plugin, OS permission dialog, store client |
 | `SYS` | system | Backend, the function named at the step |

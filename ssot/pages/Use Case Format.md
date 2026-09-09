@@ -127,7 +127,7 @@ is secondary. See [[GitHub Issue Format]] for the `P0`–`P4` board mapping.
 
 ```
 **[MVP]** — the success path V1 to V25 and the terminal states END-V3 to END-V5.
-**[Secondary]** — V10 owner assignment (UC-ARO, \#1069), END-V1 dismissal (UC-DIS).
+**[Secondary]** — V7 to V7b the Places prefill, V4a and END-V1 dismissal (UC-DIS).
 ```
 
 - **UF-15** A step or terminal state that is `[Secondary]` and unimplemented needs no

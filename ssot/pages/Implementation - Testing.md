@@ -33,6 +33,10 @@ Two consequences for validation:
 - `nx show project <name>` is the only accurate view of a `test` target. Reading `project.json` will show you no Jest target at all.
 - The Nx target now shells out to `jest` with `cwd` set to the project root, so the direct fallback below runs the same Jest that Nx runs.
 
+`model` gained a `test` target with issue #1080 and is the workspace's one non-Angular Jest config: it takes the `ts-jest` transform straight from `jest.preset.js` instead of overriding it with `jest-preset-angular`, because a types-only library has no component to compile. Its `tsconfig.spec.json` sets `allowJs`, since `jest.preset.js` adds the workspace `__mocks__` directory to every project's roots and `ts-jest` otherwise warns twice per run about compiling `fetch.js` and `resize-observer.js`.
+
+Its specs are compile-time assertions: `ts-jest` type-checks the spec, so a shape the model can no longer express fails the run before any expectation is evaluated. A coverage run collects nothing, which the 80% threshold in `jest.preset.js` tolerates because there is no instrumented file to measure.
+
 ## Direct Jest Fallback
 
 Find the touched project's `jest.config.ts` or `jest.config.cts` in its root, then run it directly.

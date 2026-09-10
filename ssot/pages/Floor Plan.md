@@ -33,28 +33,31 @@ The Floor Plan is deliberately not an architecturally exact construction plan. I
 
 Coordinates are stored as room-relative integer millimetres.
 
-| Property       | Rule                        |
-| -------------- | --------------------------- |
-| Origin         | Top-left corner of the room |
-| x              | Increases to the right      |
-| y              | Increases downward          |
-| Unit           | Millimetres, integer        |
-| Rotation       | Degrees clockwise, 0 to 359 |
-| Table position | Centre of the table         |
+| Property | Rule                                         |
+| -------- | -------------------------------------------- |
+| Origin   | Top-left corner of the room                  |
+| x        | Increases to the right                       |
+| y        | Increases downward                           |
+| Unit     | Millimetres, integer                         |
+| Rotation | Degrees clockwise, 0 to 359                  |
+| Position | Centre of the shape's unrotated bounding box |
 
 Physical units rather than pixels or normalised values, because real dimensions let the plan be checked for plausibility, printed to scale, and reasoned about for capacity. Integers avoid floating-point drift when snapping. Rendering uses an SVG `viewBox` in millimetres, so desktop, tablet, and mobile scale from identical stored data.
+
+A position is the centre and not a corner, for geometry objects exactly as for tables, so that `rotation` means one thing everywhere: the shape turns about its own position, and a rotated object keeps the anchor the editor dragged. Issue \#1080 made that explicit when the model was written; the earlier wording named only the table and left an object's anchor undecided.
 
 ## Required Data
 
 Room:
 
-| Field     | Description                                       |
-| --------- | ------------------------------------------------- |
-| `id`      | Unique room identifier                            |
-| `name`    | Display name, such as main dining room or terrace |
-| `size`    | `{ width, height }` in millimetres                |
-| `objects` | Geometry objects in the room                      |
-| `version` | Optimistic concurrency version                    |
+| Field     | Description                                          |
+| --------- | ---------------------------------------------------- |
+| `id`      | Unique room identifier                               |
+| `name`    | Display name, such as main dining room or terrace    |
+| `order`   | Ascending display order among the restaurant's rooms |
+| `size`    | `{ width, height }` in millimetres                   |
+| `objects` | Geometry objects in the room                         |
+| `version` | Optimistic concurrency version                       |
 
 Floor plan object:
 
@@ -62,7 +65,7 @@ Floor plan object:
 | ---------- | ------------------------------------------------------------------ |
 | `id`       | Unique object identifier                                           |
 | `type`     | `wall`, `door`, `counter`, `bar`, `blocked`, `decoration`, `chair` |
-| `position` | `{ x, y }` in room millimetres                                     |
+| `position` | `{ x, y }` in room millimetres, centre of the object               |
 | `size`     | `{ width, height }` in millimetres                                 |
 | `rotation` | Degrees clockwise                                                  |
 | `label`    | Optional display label                                             |
@@ -70,7 +73,6 @@ Floor plan object:
 ## Optional Data
 
 - Floor or level grouping across rooms
-- Room display order
 - Grid spacing preference
 - Per-room capacity summary
 
@@ -132,7 +134,7 @@ Planned Firestore layout:
 
 Non-table geometry lives as an array inside its room document because it is always loaded and saved together. Tables are separate documents because they are business entities with independent lifecycles, referenced by live state, visits, and orders.
 
-Planned libraries:
+Libraries, of which only the shared model exists today:
 
 ```text
 libs/bite-tribe-common/model            floor plan, room, table types
@@ -141,12 +143,16 @@ libs/bite-tribe-business/floor-plan/ui
 libs/bite-tribe-business/floor-plan/data-access
 ```
 
+Issue \#1080 wrote the model as two files in `libs/bite-tribe-common/model/src/lib`: `floor-plan.ts` holds `Room`, `FloorPlanObject`, and the coordinate-system primitives `Millimetres`, `FloorPlanPoint`, `FloorPlanSize`, and `FloorPlanRotation`; `restaurant-table.ts` holds `RestaurantTable`. The coordinate system above is repeated as the file header of `floor-plan.ts`, because the rule has to be readable where the fields are.
+
+`RestaurantTable` is a union discriminated on `shape`, so a `round` table carries a `diameter` and a `rectangle` carries a `size` and neither can carry both. That library is types only, so nothing in it can drift into a helper the persistence layer should own.
+
 Rendering uses SVG rather than canvas: object counts are low, hit-testing and accessibility come for free, and it prints cleanly for QR sheets.
 
 ## Current Limitations
 
-- Not implemented yet. This page describes the agreed model, not shipped behaviour.
-- Blocked by restaurant ownership and authorization. `apps/bite-tribe-firebase/firestore.rules` currently allows every authenticated user to write every document, so no restaurant-scoped data can be trusted until issue \#1069 lands.
+- No behaviour is shipped. Issue \#1080 landed the shared types and this page's coordinate system; there is no persistence, no editor, and no QR token yet.
+- Depends on restaurant ownership and authorization. `apps/bite-tribe-firebase/firestore.rules` is ownership-scoped since issue \#1078, but it is deployed by hand, so restaurant-scoped data is only trustworthy in production once `npx nx firebase-deploy-rules bite-tribe-firebase` has run. The rules also say nothing about rooms or tables yet; issue \#1081 owns that.
 - Multi-floor grouping is modelled but may ship after single-room support.
 - No CAD import, no exact scale drawing, and no automatic layout.
 

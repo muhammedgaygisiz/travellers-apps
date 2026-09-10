@@ -40,12 +40,15 @@ These two are different and must not be conflated.
 | `label`     | Public table number or name shown to staff and guests             |
 | `roomId`    | Owning room                                                       |
 | `position`  | `{ x, y }` in room millimetres, centre of the table               |
-| `size`      | `{ width, height }` in millimetres, or diameter for a round table |
 | `shape`     | `rectangle` or `round`                                            |
+| `size`      | `{ width, height }` in millimetres, on a `rectangle` table        |
+| `diameter`  | Millimetres, on a `round` table, instead of `size`                |
 | `rotation`  | Degrees clockwise                                                 |
 | `seats`     | Seating capacity                                                  |
 | `enabled`   | Whether the table is in service                                   |
-| `qrTokenId` | Reference to the active opaque QR token                           |
+| `qrTokenId` | Reference to the active opaque QR token, absent before publishing |
+
+`size` and `diameter` are alternatives rather than both being optional: a round table has no width and height to disagree about, and allowing both would let a plan describe an ellipse no renderer has a rule for.
 
 ## Live Table State
 
@@ -137,9 +140,11 @@ Planned Firestore layout:
 
 `/tableTokens/{token}` is top-level and publicly readable so a scan resolves in a single read. It exposes only what a scan needs and is never client-writable.
 
+The shared type is `RestaurantTable` in `libs/bite-tribe-common/model/src/lib/restaurant-table.ts`, added by issue \#1080. It is named for its restaurant rather than as `Table`, because `Table` is taken by the DOM library in every consumer. Per `RD-GL-4` that is a code identifier and not a competing domain term. It is a union discriminated on `shape`, and its geometry follows the coordinate system on [[Floor Plan]].
+
 ## Current Limitations
 
-- Not implemented yet.
+- Not implemented yet. Issue \#1080 added the shared type; nothing reads or writes a table.
 - A QR code identifies a table context. It does not prove that the guest is physically present, and no design should assume otherwise.
 - Presence hardening such as rotating codes, staff confirmation, and session expiry is planned in issue \#1107, not guaranteed by the token itself.
 

@@ -1,0 +1,92 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="isAuthenticated()"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="restaurant-staff">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ 'staff-title' | transloco }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          @if (restaurantName()) {
+            <ion-note class="restaurant-staff__subtitle">{{
+              restaurantName()
+            }}</ion-note>
+          }
+
+          @if (loading()) {
+            <div class="restaurant-staff__loading">
+              <ion-spinner name="crescent" />
+            </div>
+          } @else {
+            <ion-list lines="full" data-testid="restaurant-staff-list">
+              @for (member of staff(); track member.uid) {
+                <ion-item>
+                  <ion-label>
+                    <h3>{{ label(member) }}</h3>
+                    @if (member.displayName && member.email) {
+                      <p>{{ member.displayName }}</p>
+                    }
+                  </ion-label>
+                  <ion-button
+                    slot="end"
+                    fill="clear"
+                    color="danger"
+                    [disabled]="saving()"
+                    [attr.data-testid]="'remove-staff-' + member.uid"
+                    (click)="onRemove(member)"
+                  >
+                    {{ 'staff-remove' | transloco }}
+                  </ion-button>
+                </ion-item>
+              } @empty {
+                <p data-testid="restaurant-staff-empty">
+                  {{ 'staff-empty' | transloco }}
+                </p>
+              }
+            </ion-list>
+          }
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ 'staff-add-title' | transloco }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list lines="full">
+            <ion-item>
+              <ion-input
+                type="email"
+                labelPlacement="stacked"
+                autocomplete="off"
+                [label]="'email' | transloco"
+                [placeholder]="'staff-add-placeholder' | transloco"
+                [value]="email()"
+                data-testid="staff-email"
+                (ionInput)="onEmailChange($event.detail.value ?? '')"
+              />
+            </ion-item>
+          </ion-list>
+          <ion-note class="restaurant-staff__hint">
+            {{ 'staff-add-hint' | transloco }}
+          </ion-note>
+          <ion-button
+            expand="block"
+            class="ion-margin-top"
+            data-testid="staff-add"
+            [disabled]="!canAdd()"
+            (click)="onAdd()"
+          >
+            @if (saving()) {
+              <ion-spinner name="crescent" slot="start" />
+            }
+            {{ 'staff-add' | transloco }}
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </ion-content>
+</ta-page>

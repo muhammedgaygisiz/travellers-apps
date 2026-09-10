@@ -30,9 +30,19 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { Restaurant, RestaurantClaimStatus } from 'model';
 import { PageComponent } from 'common/ui/page';
 import { AdminUser } from 'bite-tribe-admin/user-management-data-access';
+import { RestaurantStaffMember } from 'bite-tribe-admin/restaurants-data-access';
 
 /** The role an account has to hold before a restaurant can be assigned to it. */
 const OWNER_ROLE = 'business';
+
+/**
+ * Accepts anything with an `@` and a dot after it, and nothing else.
+ *
+ * The callable is the authority on whether an account exists; this only stops
+ * the obvious typo from costing a round trip. The same pattern the business
+ * app's staff form uses, for the same reason.
+ */
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Two columns: the restaurants on the left, the selected one's ownership on the
@@ -105,6 +115,19 @@ export class RestaurantOwnership {
   readonly saving = input(false);
   readonly selected = input<Restaurant | undefined>(undefined);
 
+  /**
+   * The staff on the selected restaurant (issue #1537).
+   *
+   * The operator surface exists as the way back: a restaurant that removed its
+   * last account with access cannot fix that from the business app, because
+   * the route that would let it is gated on holding the restaurant. It is not
+   * gated on the restaurant being assigned at all - an unowned restaurant can
+   * be given staff, which is the case an operator is most likely to meet.
+   */
+  readonly staff = input<RestaurantStaffMember[]>([]);
+  readonly staffLoading = input(false);
+  readonly staffSaving = input(false);
+
   readonly selectRestaurant = output<Restaurant>();
   readonly assign = output<{
     restaurantId: string;
@@ -112,11 +135,17 @@ export class RestaurantOwnership {
     reason: string;
   }>();
   readonly revoke = output<{ restaurantId: string; reason: string }>();
+  readonly addStaff = output<{ restaurantId: string; email: string }>();
+  readonly removeStaff = output<{
+    restaurantId: string;
+    member: RestaurantStaffMember;
+  }>();
   readonly logoutClick = output<void>();
 
   readonly filter = signal('');
   readonly accountFilter = signal('');
   readonly reason = signal('');
+  readonly staffEmail = signal('');
 
   private readonly ownerDraft = signal<string | undefined>(undefined);
 
@@ -238,10 +267,67 @@ export class RestaurantOwnership {
     this.reason.set(reason);
   }
 
+  readonly canAddStaff = computed(
+    () => EMAIL_PATTERN.test(this.staffEmail().trim()) && !this.staffSaving(),
+  );
+
+  /** Email first, uid only when there is nothing better — never a blank line. */
+  staffLabel(member: RestaurantStaffMember): string {
+    return member.email || member.displayName || member.uid;
+  }
+
+  onStaffEmailChange(email: string): void {
+    this.staffEmail.set(email);
+  }
+
+  onAddStaff(): void {
+    const restaurant = this.selected();
+
+    if (!restaurant || !this.canAddStaff()) {
+      return;
+    }
+
+    this.addStaff.emit({
+      restaurantId: restaurant.id,
+      email: this.staffEmail().trim(),
+    });
+    this.staffEmail.set('');
+  }
+
+  async onRemoveStaff(member: RestaurantStaffMember): Promise<void> {
+    const restaurant = this.selected();
+
+    if (!restaurant) {
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: this.transloco.translate(
+        'admin-restaurant-staff-remove-confirm-title',
+      ),
+      subHeader: `${restaurant.name} — ${this.staffLabel(member)}`,
+      message: this.transloco.translate(
+        'admin-restaurant-staff-remove-confirm-message',
+      ),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('admin-restaurant-staff-remove'),
+          role: 'destructive',
+          handler: (): void =>
+            this.removeStaff.emit({ restaurantId: restaurant.id, member }),
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
   onSelect(restaurant: Restaurant): void {
     this.ownerDraft.set(undefined);
     this.accountFilter.set('');
     this.reason.set('');
+    this.staffEmail.set('');
     this.selectRestaurant.emit(restaurant);
   }
 

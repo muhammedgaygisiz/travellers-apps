@@ -106,6 +106,27 @@ export const ROUTES: Routes = withAuthRoutes([
       ownedRestaurantGuard,
     ],
   },
+  /**
+   * Managing staff is the **owner's** route, not the restaurant's.
+   *
+   * `ownedRestaurantGuard` checks `Restaurant.ownerUserId`, which a staff
+   * account never holds, so a staff account cannot reach the page that would
+   * let it add more staff — and the callables behind it refuse the same
+   * account for the same reason (issue #1537). The guard is what makes that
+   * true of a shared or bookmarked URL as well as of the links.
+   */
+  {
+    path: 'restaurant/:restaurantId/staff',
+    loadComponent: () =>
+      import('bite-tribe-business/staff').then(
+        (m) => m.RestaurantStaffContainer,
+      ),
+    canActivate: [
+      authGuard,
+      roleGuard('business', 'staff'),
+      ownedRestaurantGuard,
+    ],
+  },
   {
     path: 'restaurant/:restaurantId/menu/:menuId',
     loadComponent: () =>

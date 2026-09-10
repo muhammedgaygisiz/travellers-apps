@@ -60,6 +60,12 @@
       "bite-tribe-business/restaurant-data-access": [
         "libs/bite-tribe-business/restaurant/data-access/src/index.ts"
       ],
+      "bite-tribe-business/staff": [
+        "libs/bite-tribe-business/staff/page/src/index.ts"
+      ],
+      "bite-tribe-business/staff-data-access": [
+        "libs/bite-tribe-business/staff/data-access/src/index.ts"
+      ],
       "bite-tribe-business/shell": [
         "libs/bite-tribe-business/shell/src/index.ts"
       ],

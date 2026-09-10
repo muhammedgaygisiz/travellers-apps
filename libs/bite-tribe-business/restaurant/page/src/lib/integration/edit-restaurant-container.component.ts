@@ -15,6 +15,7 @@ import { EditRestaurantService } from './edit-restaurant.service';
       (submitPosition)="service.submitPosition($event)"
       (createMenu)="service.createMenu()"
       (editMenu)="service.gotoEditMenu($event.id, $event.menuId)"
+      (manageStaff)="service.gotoStaff()"
     />
   `,
   imports: [EditRestaurantComponent],

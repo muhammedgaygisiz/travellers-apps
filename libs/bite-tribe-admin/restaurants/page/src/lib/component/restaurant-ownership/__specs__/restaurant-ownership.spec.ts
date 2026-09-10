@@ -9,6 +9,7 @@ import {
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { Restaurant } from 'model';
 import { AdminUser } from 'bite-tribe-admin/user-management-data-access';
+import { RestaurantStaffMember } from 'bite-tribe-admin/restaurants-data-access';
 import { RestaurantOwnership } from '../restaurant-ownership';
 
 @Pipe({ name: 'transloco' })
@@ -312,5 +313,113 @@ describe(RestaurantOwnership.name, () => {
     component.onFilterChange('nothing');
 
     expect(component.filtered()).toBe(true);
+  });
+
+  /**
+   * The operator's staff surface (issue #1537). It is on the same screen as
+   * ownership because it answers the same question — who may act on this
+   * restaurant — and an operator opening it is usually there because a
+   * restaurant has locked itself out.
+   */
+  describe('staff', () => {
+    const member = (
+      over: Partial<RestaurantStaffMember> = {},
+    ): RestaurantStaffMember => ({
+      uid: 'waiter-1',
+      email: 'waiter@example.com',
+      displayName: 'Sam',
+      addedBy: 'owner-1',
+      addedAt: '2026-09-10T09:00:00.000Z',
+      ...over,
+    });
+
+    it('shows no staff card until a restaurant is selected', () => {
+      setInputs({ restaurants: [restaurant()] });
+
+      expect(query('admin-restaurant-staff')).toBeNull();
+    });
+
+    it('lists the staff of the selected restaurant', () => {
+      setInputs({ selected: restaurant(), staff: [member()] });
+
+      expect(fixture.nativeElement.textContent).toContain('waiter@example.com');
+    });
+
+    /**
+     * An unowned restaurant can be given staff. It is the case an operator is
+     * most likely to meet, so the card is not hidden behind an assignment.
+     */
+    it('offers the staff form on a restaurant nobody holds', () => {
+      setInputs({ selected: restaurant(), staff: [] });
+
+      expect(query('admin-restaurant-staff-add')).not.toBeNull();
+      expect(query('admin-restaurant-staff-empty')).not.toBeNull();
+    });
+
+    it('refuses to submit until the address looks like one', () => {
+      setInputs({ selected: restaurant() });
+
+      component.onStaffEmailChange('waiter');
+
+      expect(component.canAddStaff()).toBe(false);
+
+      component.onStaffEmailChange('waiter@example.com');
+
+      expect(component.canAddStaff()).toBe(true);
+    });
+
+    it('emits the restaurant and the trimmed address', () => {
+      const added: { restaurantId: string; email: string }[] = [];
+      component.addStaff.subscribe((value) => added.push(value));
+
+      setInputs({ selected: restaurant() });
+      component.onStaffEmailChange('  waiter@example.com  ');
+      component.onAddStaff();
+
+      expect(added).toEqual([
+        { restaurantId: 'r1', email: 'waiter@example.com' },
+      ]);
+      expect(component.staffEmail()).toBe('');
+    });
+
+    it('clears a typed address when another restaurant is picked', () => {
+      setInputs({ selected: restaurant() });
+      component.onStaffEmailChange('waiter@example.com');
+
+      component.onSelect(restaurant({ id: 'r2' }));
+
+      expect(component.staffEmail()).toBe('');
+    });
+
+    it('asks before removing, and names the restaurant and the account', async () => {
+      setInputs({ selected: restaurant(), staff: [member()] });
+
+      await component.onRemoveStaff(member());
+
+      expect(lastAlert().subHeader).toBe('Pizza Palace — waiter@example.com');
+    });
+
+    it('emits nothing when the confirmation is cancelled', async () => {
+      const removed: unknown[] = [];
+      component.removeStaff.subscribe((value) => removed.push(value));
+
+      setInputs({ selected: restaurant(), staff: [member()] });
+      await component.onRemoveStaff(member());
+      pressAlertButton('cancel');
+
+      expect(removed).toEqual([]);
+    });
+
+    it('emits the member once the removal is confirmed', async () => {
+      const removed: { restaurantId: string; member: RestaurantStaffMember }[] =
+        [];
+      component.removeStaff.subscribe((value) => removed.push(value));
+
+      setInputs({ selected: restaurant(), staff: [member()] });
+      await component.onRemoveStaff(member());
+      pressAlertButton('destructive');
+
+      expect(removed).toEqual([{ restaurantId: 'r1', member: member() }]);
+    });
   });
 });

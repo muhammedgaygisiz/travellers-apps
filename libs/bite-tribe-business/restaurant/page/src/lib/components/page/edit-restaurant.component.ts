@@ -74,6 +74,15 @@ export class EditRestaurantComponent {
   readonly createMenu = output<void>();
   readonly editMenu = output<Restaurant>();
 
+  /**
+   * The way to the staff of this restaurant (issue #1537).
+   *
+   * A button on the restaurant rather than a dashboard section, because staff
+   * belongs to one restaurant: a top-level entry would have to ask which one
+   * first, and the answer is already on the screen.
+   */
+  readonly manageStaff = output<void>();
+
   readonly socialMediaForm = this.formBuilder.group({
     links: this.formBuilder.array([]),
   });

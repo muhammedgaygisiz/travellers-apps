@@ -156,14 +156,20 @@ describe('business ROUTES', () => {
 
   /**
    * The role gate admits every restaurant to the app; the ownership gate
-   * decides which restaurant it may open once inside. Only the two routes that
-   * edit one carry it, and they carry it by direct URL rather than by being
+   * decides which restaurant it may open once inside. Only the routes that act
+   * on one carry it, and they carry it by direct URL rather than by being
    * unlinked from the list (issue #1079).
+   *
+   * The staff route is here rather than under the role gate alone because
+   * `Restaurant.ownerUserId` is the only thing that separates the owner from
+   * its own staff: both hold a role the app admits, and only one of them may
+   * hire (issue #1537).
    */
   describe('which restaurants the edit routes admit', () => {
     const EDIT_PATHS = [
       'restaurant/:restaurantId',
       'restaurant/:restaurantId/menu/:menuId',
+      'restaurant/:restaurantId/staff',
     ];
 
     const ownerGuardOf = (route: Route): CanActivateFn =>

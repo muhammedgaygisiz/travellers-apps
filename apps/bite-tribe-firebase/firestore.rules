@@ -189,6 +189,39 @@ service cloud.firestore {
       allow delete: if isOperator();
     }
 
+    // ------------------------------------------------------- restaurant staff
+
+    /**
+     * Who works at a restaurant: one document per staff account, named by that
+     * account's own uid (GitHub issue #1537).
+     *
+     * **Written by nobody.** `addRestaurantStaff` and `removeRestaurantStaff`
+     * write it through the Admin SDK, and they have to: the association only
+     * makes sense together with the `staff` custom claim, and a claim is not
+     * something a client can write at all. A client create here would be an
+     * account putting itself on a restaurant.
+     *
+     * Reads are narrow, unlike everywhere else in this file. The three rules of
+     * thumb at the top say reads stay where they were - and this collection has
+     * no "where they were": it is new, so nothing regresses by starting closed.
+     * What it holds is who works where, which is a fact about a person rather
+     * than about a restaurant, and that is exactly why it is not a
+     * `staffUserIds` array on the world-readable restaurant document.
+     *
+     * Three readers, and each is someone the fact is already about: the account
+     * itself, the operator, and the account holding the restaurant. The last
+     * one costs a `get()` on the restaurant, which is why the business app
+     * reads its staff list through `listRestaurantStaff` instead of querying
+     * this collection - a query would pay that `get()` per result.
+     */
+    match /restaurantStaff/{staffUserId} {
+      allow read: if isSelf(staffUserId)
+        || isOperator()
+        || ownsRestaurant(resource.data.get('restaurantId', ''));
+
+      allow write: if false;
+    }
+
     // ------------------------------------------------------------------ bites
 
     match /bites/{biteId} {

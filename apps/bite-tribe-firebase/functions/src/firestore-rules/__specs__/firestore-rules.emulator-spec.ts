@@ -172,6 +172,15 @@ beforeEach(async () => {
     });
     await setDoc(doc(db, 'settings', CONSUMER), { theme: 'dark' });
 
+    // Written only by `addRestaurantStaff` through the Admin SDK (issue #1537).
+    await setDoc(doc(db, 'restaurantStaff', STRANGER), {
+      userId: STRANGER,
+      restaurantId: OWNED_RESTAURANT,
+      addedBy: OWNER,
+      addedAt: '2026-09-10T09:00:00.000Z',
+      addedAtTimestamp: 1789030800000,
+    });
+
     await setDoc(doc(db, 'meta', 'leaderboard'), { entries: [] });
     await setDoc(doc(db, 'displayNames', 'consumer'), { userId: CONSUMER });
     await setDoc(doc(db, 'restaurantCandidates', 'candidate-1'), {
@@ -384,6 +393,62 @@ describe('staff', () => {
   it('still lets a staff account read a restaurant', async () => {
     await assertSucceeds(
       getDoc(doc(asStaff(), 'restaurants', OWNED_RESTAURANT)),
+    );
+  });
+
+  /**
+   * The association between a staff account and its restaurant (issue #1537).
+   *
+   * Three readers and no writer, which is the whole rule: the association only
+   * means anything alongside the `staff` custom claim, and no client can write
+   * a claim — so a client that could write this document could only ever
+   * produce half of a grant.
+   */
+  it('lets a staff account read its own association', async () => {
+    await assertSucceeds(getDoc(doc(asStaff(), 'restaurantStaff', STRANGER)));
+  });
+
+  it('lets the restaurant owner read the association of its staff', async () => {
+    await assertSucceeds(getDoc(doc(asOwner(), 'restaurantStaff', STRANGER)));
+  });
+
+  it('lets an operator read any association', async () => {
+    await assertSucceeds(
+      getDoc(doc(asOperator(), 'restaurantStaff', STRANGER)),
+    );
+  });
+
+  it('refuses a business account reading the staff of a restaurant it does not hold', async () => {
+    await assertFails(
+      getDoc(doc(asOtherBusiness(), 'restaurantStaff', STRANGER)),
+    );
+  });
+
+  it('refuses a consumer account reading who works where', async () => {
+    await assertFails(getDoc(doc(asConsumer(), 'restaurantStaff', STRANGER)));
+  });
+
+  it('refuses an account writing its own association', async () => {
+    await assertFails(
+      setDoc(doc(asStaff(), 'restaurantStaff', STRANGER), {
+        userId: STRANGER,
+        restaurantId: FOREIGN_RESTAURANT,
+      }),
+    );
+  });
+
+  it('refuses a restaurant owner writing an association by hand', async () => {
+    await assertFails(
+      setDoc(doc(asOwner(), 'restaurantStaff', CONSUMER), {
+        userId: CONSUMER,
+        restaurantId: OWNED_RESTAURANT,
+      }),
+    );
+  });
+
+  it('refuses an operator writing an association by hand', async () => {
+    await assertFails(
+      deleteDoc(doc(asOperator(), 'restaurantStaff', STRANGER)),
     );
   });
 });

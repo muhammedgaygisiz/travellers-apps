@@ -126,7 +126,9 @@
 
           <div class="ion-margin-top">
             <bt-opening-hours
-              [openingHours]="$safeNavigationMigration(restaurantData?.openingHours)"
+              [openingHours]="
+                $safeNavigationMigration(restaurantData?.openingHours)
+              "
               (submitOpeningHours)="submitOpeningHours.emit($event)"
             />
           </div>
@@ -149,6 +151,16 @@
             Edit Menu
           </ion-button>
         }
+
+        <ion-button
+          class="ion-margin-top"
+          fill="outline"
+          data-testid="edit-restaurant-staff"
+          [attr.aria-label]="'staff-manage' | transloco"
+          (click)="manageStaff.emit()"
+        >
+          {{ 'staff-manage' | transloco }}
+        </ion-button>
 
         @if (links.length) {
           <ion-button

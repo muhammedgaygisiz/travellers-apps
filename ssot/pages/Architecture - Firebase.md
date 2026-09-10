@@ -80,11 +80,24 @@ menu. Reading the restaurant rather than a field on the menu is what makes this
 work with no backfill: a menu written before the field existed is still writable
 by its owner and gains the field on its next save.
 
-**`staff` grants nothing here.** The rules scope a write by
-`Restaurant.ownerUserId` and there is no equivalent record of which restaurant a
-staff account works at — writing it is issue \#1537. A rule admitting `staff`
-before that record exists could only admit every staff account to every
-restaurant. The role still opens the business app and reads.
+**`staff` still grants no write here.** The rules scope a write by
+`Restaurant.ownerUserId`, and a staff account never holds it. Issue \#1537 wrote
+the record that was missing — `/restaurantStaff/{uid}`, one document per staff
+account naming its restaurant — and deliberately did not make the rules read it:
+what a staff account may write is \#1078's scope and \#1079's, and widening it
+from inside a grant surface would have been two changes in one. The role still
+opens the business app and reads.
+
+**`/restaurantStaff` is the one collection with narrow reads.** Reads stayed
+where they were everywhere else because narrowing them is a regression risk with
+no new information; this collection is new, so it starts closed. It holds who
+works where, which is a fact about a person rather than about a restaurant, and
+that is why it is not a `staffUserIds` array on the world-readable restaurant
+document. Three readers — the account itself, the operator, and the account
+holding the restaurant — and **no writer at all**: the association only means
+anything alongside the `staff` custom claim, which no client can write, so a
+client that could write the document could only ever produce half of a grant.
+`addRestaurantStaff` and `removeRestaurantStaff` write it through the Admin SDK.
 
 ### Testing And Deploying The Rules
 

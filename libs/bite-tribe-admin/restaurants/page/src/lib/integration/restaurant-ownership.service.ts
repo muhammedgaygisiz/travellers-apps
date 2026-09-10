@@ -2,7 +2,10 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Restaurant } from 'model';
 import { ToastService } from 'toast';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { RestaurantsDataAccessService } from 'bite-tribe-admin/restaurants-data-access';
+import {
+  RestaurantStaffMember,
+  RestaurantsDataAccessService,
+} from 'bite-tribe-admin/restaurants-data-access';
 import {
   AdminUser,
   UserManagementDataAccessService,
@@ -28,6 +31,7 @@ export class RestaurantOwnershipService {
 
   private readonly selectedId = signal<string | undefined>(undefined);
   private readonly savingId = signal<string | undefined>(undefined);
+  private readonly staffPending = signal(false);
 
   readonly restaurants = this.dataAccess.restaurantsValue;
 
@@ -56,8 +60,75 @@ export class RestaurantOwnershipService {
       : undefined;
   });
 
+  readonly staff = this.dataAccess.restaurantStaffValue;
+
+  readonly staffLoading = computed(() =>
+    this.dataAccess.restaurantStaff.isLoading(),
+  );
+
+  readonly staffSaving = computed(() => this.staffPending());
+
   select(restaurant: Restaurant): void {
     this.selectedId.set(restaurant.id);
+    this.dataAccess.staffRestaurantId.set(restaurant.id);
+  }
+
+  /**
+   * The operator's copy of what a restaurant owner can already do.
+   *
+   * It exists so a restaurant that removed its last account with access, or
+   * handed `staff` to the wrong person, has a way back that does not depend on
+   * the account it lost (issue #1537). `RD-UR-6` is what admits the operator:
+   * it maintains every restaurant, claimed or not, from the admin app.
+   */
+  async addStaff(restaurantId: string, email: string): Promise<void> {
+    this.staffPending.set(true);
+
+    try {
+      const result = await this.dataAccess.addRestaurantStaff(
+        restaurantId,
+        email,
+      );
+
+      await this.toastService.present({
+        messageKey:
+          result.status === 'added'
+            ? 'admin-restaurant-staff-added'
+            : 'admin-restaurant-staff-already-added',
+        outcome: 'success',
+      });
+    } catch (error) {
+      console.error('Failed to add the staff account:', error);
+      await this.toastService.present({
+        messageKey: 'admin-restaurant-staff-add-failed',
+        outcome: 'failure',
+      });
+    } finally {
+      this.staffPending.set(false);
+    }
+  }
+
+  async removeStaff(
+    restaurantId: string,
+    member: RestaurantStaffMember,
+  ): Promise<void> {
+    this.staffPending.set(true);
+
+    try {
+      await this.dataAccess.removeRestaurantStaff(restaurantId, member.uid);
+      await this.toastService.present({
+        messageKey: 'admin-restaurant-staff-removed',
+        outcome: 'success',
+      });
+    } catch (error) {
+      console.error('Failed to remove the staff account:', error);
+      await this.toastService.present({
+        messageKey: 'admin-restaurant-staff-remove-failed',
+        outcome: 'failure',
+      });
+    } finally {
+      this.staffPending.set(false);
+    }
   }
 
   /**

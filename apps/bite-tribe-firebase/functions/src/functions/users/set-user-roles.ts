@@ -9,6 +9,7 @@ import {
   isBiteTribeRole,
   requireAdmin,
 } from '../shared/roles';
+import { TargetUserRequest, resolveTargetUid } from '../shared/target-user';
 
 /**
  * Replaces an account's roles, preserving every other custom claim it carries.
@@ -37,9 +38,7 @@ export const setRoles = async (
   return uniqueRoles;
 };
 
-interface SetUserRolesRequest {
-  uid?: unknown;
-  email?: unknown;
+interface SetUserRolesRequest extends TargetUserRequest {
   roles?: unknown;
 }
 
@@ -102,39 +101,6 @@ const assertRolesCompatible = (roles: BiteTribeRole[]): void => {
       'failed-precondition',
       `An account cannot hold both the ${conflict[0]} and ${conflict[1]} roles.`,
     );
-  }
-};
-
-const getString = (value: unknown): string =>
-  typeof value === 'string' ? value.trim() : '';
-
-/**
- * Resolves the account the roles are being written to.
- *
- * An operator working from a phone call has the restaurant's email address, not
- * its Firebase uid, so the callable accepts either. `uid` wins when both are
- * given, because it is the unambiguous one.
- */
-const resolveTargetUid = async (data: SetUserRolesRequest): Promise<string> => {
-  const uid = getString(data.uid);
-
-  if (uid) {
-    return uid;
-  }
-
-  const email = getString(data.email);
-
-  if (!email) {
-    throw new HttpsError(
-      'invalid-argument',
-      'Either uid or email is required.',
-    );
-  }
-
-  try {
-    return (await getAuth().getUserByEmail(email)).uid;
-  } catch {
-    throw new HttpsError('not-found', `No account found for ${email}.`);
   }
 };
 

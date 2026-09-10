@@ -15,6 +15,8 @@
   (pointerup)="onPointerUp()"
   (pointercancel)="onPointerUp()"
   (wheel)="onWheel($event)"
+  (dragover)="onDragOver($event)"
+  (drop)="onDrop($event)"
   (keydown)="onKeyDown($event)"
 >
   @if (room(); as plan) {
@@ -77,10 +79,102 @@
       />
 
       <!--
-        Geometry and tables are projected rather than drawn here, so the
-        placement work of issue #1083 draws into this millimetre space instead
-        of replacing it. Projected SVG needs the `svg:` prefix in the caller's
-        template.
+        The geometry and the tables. One `<g>` per item, turned about its own
+        centre, so `rotation` is a number in the model rather than a transform
+        string parsed back out of the DOM.
+      -->
+      <g data-testid="floor-plan-items">
+        @for (item of itemViews(); track item.id) {
+          <g
+            [attr.class]="item.classes"
+            [attr.transform]="item.transform"
+            [attr.data-item-id]="item.id"
+          >
+            @if (item.round) {
+              <circle
+                [attr.cx]="item.cx"
+                [attr.cy]="item.cy"
+                [attr.r]="item.radius"
+                [attr.stroke-width]="hairline() * 2"
+              />
+            } @else {
+              <rect
+                [attr.x]="item.x"
+                [attr.y]="item.y"
+                [attr.width]="item.width"
+                [attr.height]="item.height"
+                [attr.stroke-width]="hairline() * 2"
+              />
+            }
+
+            @if (item.label) {
+              <text
+                class="floor-plan-canvas__item-label"
+                [attr.x]="item.cx"
+                [attr.y]="item.cy"
+                [attr.font-size]="item.labelSize"
+                text-anchor="middle"
+                dominant-baseline="central"
+              >
+                {{ item.label }}
+              </text>
+            }
+          </g>
+        }
+      </g>
+
+      @if (selectionOverlay(); as overlay) {
+        <g
+          class="floor-plan-canvas__overlay"
+          [attr.transform]="overlay.transform"
+          data-testid="floor-plan-handles"
+        >
+          <rect
+            class="floor-plan-canvas__outline"
+            [attr.x]="overlay.x"
+            [attr.y]="overlay.y"
+            [attr.width]="overlay.width"
+            [attr.height]="overlay.height"
+            [attr.stroke-width]="hairline() * 2"
+          />
+
+          <line
+            class="floor-plan-canvas__rotate-arm"
+            [attr.x1]="overlay.rotateX"
+            [attr.y1]="overlay.rotateAnchorY"
+            [attr.x2]="overlay.rotateX"
+            [attr.y2]="overlay.rotateY"
+            [attr.stroke-width]="hairline() * 2"
+          />
+          <circle
+            class="floor-plan-canvas__handle floor-plan-canvas__handle--rotate"
+            [attr.cx]="overlay.rotateX"
+            [attr.cy]="overlay.rotateY"
+            [attr.r]="overlay.size / 2"
+            [attr.stroke-width]="hairline()"
+            data-handle="rotate"
+            data-testid="floor-plan-handle-rotate"
+          />
+
+          @for (handle of overlay.handles; track handle.handle) {
+            <rect
+              class="floor-plan-canvas__handle"
+              [attr.x]="handle.x"
+              [attr.y]="handle.y"
+              [attr.width]="overlay.size"
+              [attr.height]="overlay.size"
+              [attr.stroke-width]="hairline()"
+              [attr.data-handle]="handle.handle"
+              [attr.data-testid]="'floor-plan-handle-' + handle.handle"
+            />
+          }
+        </g>
+      }
+
+      <!--
+        Anything the caller projects is drawn in this same millimetre space,
+        above the plan. It is where an overlay that is not part of the stored
+        layout belongs, such as the validation markers of issue #1088.
       -->
       <ng-content />
 

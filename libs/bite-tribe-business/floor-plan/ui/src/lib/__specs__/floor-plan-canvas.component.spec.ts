@@ -2,8 +2,9 @@ import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { Room } from 'model';
+import { FloorPlanPoint, Room } from 'model';
 import { FloorPlanCanvasComponent } from '../floor-plan-canvas.component';
+import { FloorPlanItem } from '../floor-plan-item';
 import { DEFAULT_GRID_SPACING } from '../floor-plan-grid';
 import { MAX_ZOOM, MIN_ZOOM, fitViewportSize } from '../floor-plan-viewport';
 
@@ -31,6 +32,27 @@ const room = (over: Partial<Room> = {}): Room => ({
  */
 const pointerEvent = (type: string, init: MouseEventInit = {}): PointerEvent =>
   Object.assign(new MouseEvent(type, init), { pointerId: 1 }) as PointerEvent;
+
+const table: FloorPlanItem = {
+  id: 'table-1',
+  kind: 'table',
+  variant: 'table-round',
+  position: { x: 2000, y: 2000 },
+  size: { width: 900, height: 900 },
+  rotation: 0,
+  label: '7',
+  round: true,
+};
+
+const wall: FloorPlanItem = {
+  id: 'wall-1',
+  kind: 'object',
+  variant: 'wall',
+  position: { x: 3000, y: 6000 },
+  size: { width: 2000, height: 100 },
+  rotation: 0,
+  round: false,
+};
 
 /** `viewBox` is four numbers in one attribute; specs want them apart. */
 interface ViewBox {
@@ -407,6 +429,396 @@ describe(FloorPlanCanvasComponent.name, () => {
 
       expect(scale).not.toBeNull();
       expect(scale?.textContent?.trim()).toMatch(/^[\d.]+ m$/);
+    });
+  });
+
+  describe('with objects in the room', () => {
+    let selections: string[][];
+    let changed: FloorPlanItem[][];
+    let commands: string[];
+    let placements: { variant: string; position: FloorPlanPoint }[];
+
+    /**
+     * The room is 8 m by 12 m, so the fitted viewBox is 8960 by 12 960 and an
+     * element of 800 by 1200 device pixels maps one pixel to 11.2 mm. Every
+     * client coordinate below is chosen against that scale, because jsdom lays
+     * nothing out and the canvas correctly refuses to work without a measured
+     * element.
+     */
+    const measure = (): void => {
+      surface().getBoundingClientRect = (): DOMRect =>
+        ({ width: 800, height: 1200, left: 0, top: 0 }) as DOMRect;
+    };
+
+    const press = (testId: string, init: MouseEventInit = {}): void => {
+      const target = query(testId) ?? surface();
+
+      target.dispatchEvent(
+        pointerEvent('pointerdown', { bubbles: true, ...init }),
+      );
+    };
+
+    const itemElement = (id: string): Element | null =>
+      fixture.nativeElement.querySelector(`[data-item-id="${id}"]`);
+
+    beforeEach(() => {
+      selections = [];
+      changed = [];
+      commands = [];
+      placements = [];
+
+      setInputs({ room: room(), items: [table, wall], snapSpacing: 500 });
+
+      component.selectionChange.subscribe((ids) => selections.push(ids));
+      component.itemsChange.subscribe((items) => changed.push(items));
+      component.commandRequest.subscribe((name) => commands.push(name));
+      component.placeRequest.subscribe((place) => placements.push(place));
+
+      measure();
+    });
+
+    it('draws every item with a class naming what it is', () => {
+      expect(itemElement('table-1')?.getAttribute('class')).toContain(
+        'floor-plan-canvas__item--table-round',
+      );
+      expect(itemElement('wall-1')?.getAttribute('class')).toContain(
+        'floor-plan-canvas__item--wall',
+      );
+    });
+
+    /**
+     * The acceptance criterion that rotation is a number in the model rather
+     * than a transform string. The transform is a rendering detail derived from
+     * the field, and it turns the shape about its own centre.
+     */
+    it('turns an item about its own centre from its degrees', () => {
+      setInputs({ items: [{ ...wall, rotation: 45 }] });
+
+      expect(itemElement('wall-1')?.getAttribute('transform')).toBe(
+        'rotate(45 3000 6000)',
+      );
+    });
+
+    it('draws a round table as a circle and a wall as a rectangle', () => {
+      expect(itemElement('table-1')?.querySelector('circle')).not.toBeNull();
+      expect(itemElement('wall-1')?.querySelector('rect')).not.toBeNull();
+    });
+
+    it('selects the item a pointer goes down on', () => {
+      itemElement('wall-1')?.dispatchEvent(
+        pointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 400,
+          clientY: 600,
+        }),
+      );
+
+      expect(selections).toEqual([['wall-1']]);
+    });
+
+    it('adds to the selection when shift is held', () => {
+      setInputs({ selectedIds: ['table-1'] });
+
+      itemElement('wall-1')?.dispatchEvent(
+        pointerEvent('pointerdown', {
+          bubbles: true,
+          shiftKey: true,
+          clientX: 400,
+          clientY: 600,
+        }),
+      );
+
+      expect(selections).toEqual([['table-1', 'wall-1']]);
+    });
+
+    it('takes an already selected item back out on a shift-press', () => {
+      setInputs({ selectedIds: ['table-1', 'wall-1'] });
+
+      itemElement('wall-1')?.dispatchEvent(
+        pointerEvent('pointerdown', {
+          bubbles: true,
+          shiftKey: true,
+          clientX: 400,
+          clientY: 600,
+        }),
+      );
+
+      expect(selections).toEqual([['table-1']]);
+    });
+
+    /** So a group can be dragged by any of its members. */
+    it('keeps a group selected when one of its members is pressed', () => {
+      setInputs({ selectedIds: ['table-1', 'wall-1'] });
+
+      itemElement('wall-1')?.dispatchEvent(
+        pointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 400,
+          clientY: 600,
+        }),
+      );
+
+      expect(selections).toEqual([['table-1', 'wall-1']]);
+    });
+
+    it('clears the selection when the bare floor is pressed', () => {
+      setInputs({ selectedIds: ['wall-1'] });
+
+      press('floor-plan-canvas', { clientX: 10, clientY: 10 });
+
+      expect(selections).toEqual([[]]);
+      expect(component.panning()).toBe(true);
+    });
+
+    /**
+     * The acceptance criterion that a drag rewrites nothing until it ends: one
+     * gesture is one emission, whatever it passed over on the way.
+     */
+    it('reports a drag once, when the pointer is released', () => {
+      itemElement('wall-1')?.dispatchEvent(
+        pointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 400,
+          clientY: 600,
+        }),
+      );
+      setInputs({ selectedIds: ['wall-1'] });
+
+      component.onPointerMove(
+        pointerEvent('pointermove', { clientX: 420, clientY: 600 }),
+      );
+      component.onPointerMove(
+        pointerEvent('pointermove', { clientX: 450, clientY: 620 }),
+      );
+
+      expect(changed).toHaveLength(0);
+
+      component.onPointerUp();
+
+      expect(changed).toHaveLength(1);
+      expect(changed[0]).toHaveLength(1);
+      expect(changed[0][0].id).toBe('wall-1');
+    });
+
+    it('lands a drag on the grid it was given', () => {
+      // Alone in the room, so the only edges in range are the walls it is
+      // nowhere near and the grid is the thing that decides.
+      setInputs({ items: [wall] });
+
+      itemElement('wall-1')?.dispatchEvent(
+        pointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 400,
+          clientY: 600,
+        }),
+      );
+      setInputs({ selectedIds: ['wall-1'] });
+
+      component.onPointerMove(
+        pointerEvent('pointermove', { clientX: 460, clientY: 600 }),
+      );
+      component.onPointerUp();
+
+      expect(changed[0][0].position.x % 500).toBe(0);
+    });
+
+    /** Selecting is not a mutation, so a press and release reports nothing. */
+    it('reports nothing for a click that never moved', () => {
+      itemElement('wall-1')?.dispatchEvent(
+        pointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 400,
+          clientY: 600,
+        }),
+      );
+      component.onPointerUp();
+
+      expect(changed).toHaveLength(0);
+    });
+
+    it('abandons a gesture on escape without reporting it', () => {
+      itemElement('wall-1')?.dispatchEvent(
+        pointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 400,
+          clientY: 600,
+        }),
+      );
+      setInputs({ selectedIds: ['wall-1'] });
+
+      component.onPointerMove(
+        pointerEvent('pointermove', { clientX: 500, clientY: 700 }),
+      );
+      component.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
+      component.onPointerUp();
+
+      expect(changed).toHaveLength(0);
+      expect(selections).toEqual([['wall-1']]);
+    });
+
+    it('clears the selection on escape when no gesture is in flight', () => {
+      setInputs({ selectedIds: ['wall-1'] });
+
+      component.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+      expect(selections).toEqual([[]]);
+    });
+
+    describe('the handles', () => {
+      it('appear for one selected item and not for two', () => {
+        setInputs({ selectedIds: ['wall-1'] });
+        expect(query('floor-plan-handles')).not.toBeNull();
+
+        setInputs({ selectedIds: ['wall-1', 'table-1'] });
+        expect(query('floor-plan-handles')).toBeNull();
+
+        setInputs({ selectedIds: [] });
+        expect(query('floor-plan-handles')).toBeNull();
+      });
+
+      it('turn with the item they belong to', () => {
+        setInputs({
+          items: [{ ...wall, rotation: 30 }],
+          selectedIds: ['wall-1'],
+        });
+
+        expect(query('floor-plan-handles')?.getAttribute('transform')).toBe(
+          'rotate(30 3000 6000)',
+        );
+      });
+
+      it('resize from a corner and report the new size once', () => {
+        setInputs({ selectedIds: ['wall-1'] });
+
+        press('floor-plan-handle-e', { clientX: 400, clientY: 600 });
+        component.onPointerMove(
+          pointerEvent('pointermove', { clientX: 500, clientY: 600 }),
+        );
+        component.onPointerUp();
+
+        expect(changed).toHaveLength(1);
+        expect(changed[0][0].size.width).toBeGreaterThan(wall.size.width);
+      });
+
+      it('rotate from the rotate handle, in whole degrees', () => {
+        setInputs({ selectedIds: ['wall-1'] });
+
+        press('floor-plan-handle-rotate', { clientX: 400, clientY: 400 });
+        component.onPointerMove(
+          pointerEvent('pointermove', { clientX: 700, clientY: 600 }),
+        );
+        component.onPointerUp();
+
+        const rotation = changed[0][0].rotation;
+
+        expect(Number.isInteger(rotation)).toBe(true);
+        expect(rotation).toBeGreaterThan(0);
+        expect(rotation).toBeLessThan(360);
+      });
+    });
+
+    describe('the keyboard', () => {
+      beforeEach(() => setInputs({ selectedIds: ['wall-1'] }));
+
+      it('nudges the selection by one grid cell instead of panning', () => {
+        const before = viewBox();
+
+        component.onKeyDown(
+          new KeyboardEvent('keydown', { key: 'ArrowRight' }),
+        );
+
+        expect(viewBox()).toEqual(before);
+        expect(changed[0][0].position.x).toBe(wall.position.x + 500);
+      });
+
+      it('nudges further with shift held', () => {
+        component.onKeyDown(
+          new KeyboardEvent('keydown', { key: 'ArrowRight', shiftKey: true }),
+        );
+
+        expect(changed[0][0].position.x).toBe(wall.position.x + 2500);
+      });
+
+      it('pans again once nothing is selected', () => {
+        setInputs({ selectedIds: [] });
+        const before = viewBox();
+
+        component.onKeyDown(
+          new KeyboardEvent('keydown', { key: 'ArrowRight' }),
+        );
+        fixture.detectChanges();
+
+        expect(viewBox().x).toBeGreaterThan(before.x);
+        expect(changed).toHaveLength(0);
+      });
+
+      it.each([['Delete'], ['Backspace']])('deletes on %s', (key) => {
+        component.onKeyDown(new KeyboardEvent('keydown', { key }));
+
+        expect(commands).toEqual(['delete']);
+      });
+
+      it.each([
+        [{ key: 'z', ctrlKey: true }, 'undo'],
+        [{ key: 'z', metaKey: true }, 'undo'],
+        [{ key: 'z', ctrlKey: true, shiftKey: true }, 'redo'],
+        [{ key: 'y', ctrlKey: true }, 'redo'],
+        [{ key: 'd', ctrlKey: true }, 'duplicate'],
+        [{ key: 'a', ctrlKey: true }, 'select-all'],
+      ])('asks the editor for %p', (init, expected) => {
+        component.onKeyDown(new KeyboardEvent('keydown', init));
+
+        expect(commands).toEqual([expected]);
+      });
+    });
+
+    describe('placing from the palette', () => {
+      const dropEvent = (variant: string, init: MouseEventInit): DragEvent =>
+        Object.assign(new MouseEvent('drop', init), {
+          dataTransfer: { getData: (): string => variant, dropEffect: '' },
+        }) as unknown as DragEvent;
+
+      it('places the dragged entry at the millimetre under the pointer', () => {
+        component.onDrop(dropEvent('chair', { clientX: 400, clientY: 600 }));
+
+        expect(placements).toHaveLength(1);
+        expect(placements[0].variant).toBe('chair');
+        expect(placements[0].position.x).toBeCloseTo(4000, 0);
+        expect(placements[0].position.y).toBeCloseTo(6000, 0);
+      });
+
+      it('ignores a drop carrying nothing it can place', () => {
+        component.onDrop(dropEvent('', { clientX: 400, clientY: 600 }));
+
+        expect(placements).toHaveLength(0);
+      });
+
+      /** The default action of `dragover` is to refuse the drop. */
+      it('accepts a drag passing over the plan', () => {
+        const event = Object.assign(new MouseEvent('dragover'), {
+          dataTransfer: { dropEffect: '' },
+        }) as unknown as DragEvent;
+        const prevented = jest.spyOn(event, 'preventDefault');
+
+        component.onDragOver(event);
+
+        expect(prevented).toHaveBeenCalled();
+      });
+    });
+
+    /**
+     * The canvas cannot write, and this asserts it does not mutate what it was
+     * handed either: a gesture reports new items rather than editing the old.
+     */
+    it('leaves the items it was given untouched', () => {
+      const given = [{ ...wall }];
+      const snapshot = JSON.parse(JSON.stringify(given));
+
+      setInputs({ items: given, selectedIds: ['wall-1'] });
+
+      component.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+
+      expect(given).toEqual(snapshot);
     });
   });
 });

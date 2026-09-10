@@ -119,6 +119,15 @@
               {{ 'floor-plan-stored-size' | transloco: { size: storedSize() } }}
             </ion-note>
 
+            @if (unsavedChanges()) {
+              <ion-note
+                class="floor-plan__hint floor-plan__unsaved"
+                data-testid="floor-plan-unsaved"
+              >
+                {{ 'floor-plan-unsaved-changes' | transloco }}
+              </ion-note>
+            }
+
             <div class="floor-plan__actions">
               <ion-button
                 [disabled]="!canSave()"
@@ -143,15 +152,209 @@
           </ion-card-content>
         </ion-card>
 
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>{{
+              'floor-plan-objects' | transloco
+            }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-note class="floor-plan__hint">
+              {{ 'floor-plan-palette-hint' | transloco }}
+            </ion-note>
+
+            <ul class="floor-plan__palette" data-testid="floor-plan-palette">
+              @for (entry of palette(); track entry.variant) {
+                <li>
+                  <button
+                    type="button"
+                    class="floor-plan__palette-entry"
+                    draggable="true"
+                    [attr.data-testid]="'floor-plan-place-' + entry.variant"
+                    [title]="entry.caption"
+                    (dragstart)="onPaletteDragStart($event, entry.variant)"
+                    (click)="onPaletteActivate(entry.variant)"
+                  >
+                    <svg
+                      class="floor-plan__palette-preview"
+                      [attr.viewBox]="
+                        '0 0 ' + paletteExtent + ' ' + paletteExtent
+                      "
+                      preserveAspectRatio="xMidYMid meet"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      @if (entry.round) {
+                        <circle
+                          [attr.cx]="entry.centre"
+                          [attr.cy]="entry.centre"
+                          [attr.r]="entry.radius"
+                        />
+                      } @else {
+                        <rect
+                          [attr.x]="entry.x"
+                          [attr.y]="entry.y"
+                          [attr.width]="entry.width"
+                          [attr.height]="entry.height"
+                        />
+                      }
+                    </svg>
+                    <span class="floor-plan__palette-name">{{
+                      entry.labelKey | transloco
+                    }}</span>
+                    <span class="floor-plan__palette-size">{{
+                      entry.caption
+                    }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </ion-card-content>
+        </ion-card>
+
         <ion-card class="floor-plan__canvas-card">
           <ion-card-content class="floor-plan__canvas-content">
+            <div class="floor-plan__toolbar" data-testid="floor-plan-toolbar">
+              <ion-button
+                size="small"
+                fill="clear"
+                [disabled]="!canUndo()"
+                [attr.aria-label]="'floor-plan-undo' | transloco"
+                [title]="'floor-plan-undo' | transloco"
+                data-testid="floor-plan-undo"
+                (click)="commandRequest.emit('undo')"
+              >
+                <ion-icon name="arrow-undo-outline" slot="icon-only" />
+              </ion-button>
+              <ion-button
+                size="small"
+                fill="clear"
+                [disabled]="!canRedo()"
+                [attr.aria-label]="'floor-plan-redo' | transloco"
+                [title]="'floor-plan-redo' | transloco"
+                data-testid="floor-plan-redo"
+                (click)="commandRequest.emit('redo')"
+              >
+                <ion-icon name="arrow-redo-outline" slot="icon-only" />
+              </ion-button>
+              <ion-button
+                size="small"
+                fill="clear"
+                [disabled]="selectionCount() === 0"
+                [attr.aria-label]="'floor-plan-duplicate' | transloco"
+                [title]="'floor-plan-duplicate' | transloco"
+                data-testid="floor-plan-duplicate"
+                (click)="commandRequest.emit('duplicate')"
+              >
+                <ion-icon name="copy-outline" slot="icon-only" />
+              </ion-button>
+              <ion-button
+                size="small"
+                fill="clear"
+                color="danger"
+                [disabled]="selectionCount() === 0"
+                [attr.aria-label]="'floor-plan-delete-selection' | transloco"
+                [title]="'floor-plan-delete-selection' | transloco"
+                data-testid="floor-plan-delete-selection"
+                (click)="commandRequest.emit('delete')"
+              >
+                <ion-icon name="trash-outline" slot="icon-only" />
+              </ion-button>
+
+              <ion-note class="floor-plan__selection-count">
+                {{
+                  'floor-plan-selection-count'
+                    | transloco: { count: selectionCount() }
+                }}
+              </ion-note>
+            </div>
+
             <bt-business-floor-plan-canvas
               class="floor-plan__canvas"
               [room]="room"
               [gridSpacing]="gridSpacing()"
+              [snapSpacing]="snapSpacing()"
+              [items]="items()"
+              [selectedIds]="selectedIds()"
+              (selectionChange)="selectionChange.emit($event)"
+              (itemsChange)="itemsChange.emit($event)"
+              (placeRequest)="placeRequest.emit($event)"
+              (commandRequest)="commandRequest.emit($event)"
             />
           </ion-card-content>
         </ion-card>
+
+        @if (selectedItem(); as item) {
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>{{
+                'floor-plan-object-properties' | transloco
+              }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-note
+                class="floor-plan__subtitle"
+                data-testid="floor-plan-object-kind"
+              >
+                {{ 'floor-plan-object-' + item.variant | transloco }}
+              </ion-note>
+
+              <ion-item>
+                <ion-input
+                  type="number"
+                  inputmode="decimal"
+                  labelPlacement="stacked"
+                  [label]="
+                    (item.round
+                      ? 'floor-plan-object-diameter'
+                      : 'floor-plan-object-width'
+                    ) | transloco
+                  "
+                  [value]="itemWidth()"
+                  data-testid="floor-plan-object-width"
+                  (ionInput)="itemWidth.set($event.detail.value ?? '')"
+                  (ionChange)="onItemSizeChange()"
+                />
+              </ion-item>
+
+              @if (!item.round) {
+                <ion-item>
+                  <ion-input
+                    type="number"
+                    inputmode="decimal"
+                    labelPlacement="stacked"
+                    [label]="'floor-plan-object-height' | transloco"
+                    [value]="itemHeight()"
+                    data-testid="floor-plan-object-height"
+                    (ionInput)="itemHeight.set($event.detail.value ?? '')"
+                    (ionChange)="onItemSizeChange()"
+                  />
+                </ion-item>
+              }
+
+              <ion-item>
+                <ion-input
+                  type="number"
+                  inputmode="numeric"
+                  labelPlacement="stacked"
+                  [label]="'floor-plan-object-rotation' | transloco"
+                  [min]="0"
+                  [max]="359"
+                  [value]="itemRotation()"
+                  data-testid="floor-plan-object-rotation"
+                  (ionInput)="itemRotation.set($event.detail.value ?? '')"
+                  (ionChange)="onItemRotationChange()"
+                />
+              </ion-item>
+
+              @if (isTable(item.variant)) {
+                <ion-note class="floor-plan__hint">
+                  {{ 'floor-plan-object-table-hint' | transloco }}
+                </ion-note>
+              }
+            </ion-card-content>
+          </ion-card>
+        }
 
         <ion-card>
           <ion-card-header>

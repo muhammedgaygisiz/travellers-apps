@@ -65,7 +65,11 @@ in the `scope:bite-tribe-business` scope - the shape `libs/bite-tribe/coach-mark
 already uses in the consumer scope - rather than another component inside the
 page library, because `@nx/enforce-module-boundaries` forbids `type:ui` from
 importing `type:data-access`. That makes the canvas structurally unable to read
-or write a room: it takes a `Room` from `model` and draws it. See [[Floor Plan]].
+or write a room: it takes a `Room` and the items standing in it, draws them, and
+reports back the geometry a gesture produced. Issue \#1083 added the palette and
+the edit geometry beside it - pure functions over millimetres for snapping,
+clamping, resizing and rotation - while the layout being edited, its undo history
+and every write stayed in `page`. See [[Floor Plan]].
 
 The business app holds only what a restaurant does to its own data. Migrations,
 restaurant-candidate verification, the unmatched Bite places and the

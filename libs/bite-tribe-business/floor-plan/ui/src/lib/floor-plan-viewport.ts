@@ -68,12 +68,16 @@ export const clampZoom = (zoom: number): number =>
   Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
 
 /**
- * A pan target kept inside the room.
+ * A point kept inside the room.
  *
- * The centre of the viewport may sit anywhere on the floor but not off it, so
- * an owner who drags too far still has the plan on screen. Clamping the centre
- * rather than the edges means a zoomed-out plan is never pushed out of view and
- * a zoomed-in one can still reach every corner.
+ * Two callers, one rule. The centre of the *viewport* may sit anywhere on the
+ * floor but not off it, so an owner who drags too far still has the plan on
+ * screen; clamping the centre rather than the edges means a zoomed-out plan is
+ * never pushed out of view and a zoomed-in one can still reach every corner.
+ * The centre of an *object* obeys the same clamp from issue #1083 onward, and
+ * for the same shape of reason: a shape whose centre is on the floor overlaps
+ * the floor, so nothing can be dragged off the plan and lost, while a bar
+ * counter can still overhang the wall it is built into.
  */
 export const clampCentre = (
   centre: FloorPlanPoint,
@@ -159,4 +163,42 @@ export const millimetresPerPixel = (
     1 /
     Math.min(element.width / viewport.width, element.height / viewport.height)
   );
+};
+
+/**
+ * A client pixel turned into the room millimetre under it.
+ *
+ * `preserveAspectRatio="xMidYMid meet"` fits the whole viewBox inside the
+ * element and centres it, so the spare room along the other axis has to be
+ * taken off before the scale is applied — measuring from the element's own
+ * corner puts every drop and every resize handle out by half of that gap.
+ *
+ * Reports nothing rather than a point when there is no scale to measure with,
+ * for the reasons on {@link millimetresPerPixel}. A gesture with no scale is a
+ * gesture the caller should ignore, not one it should place at the origin.
+ */
+export const viewportPointAt = (
+  viewport: CanvasViewport,
+  element: { left: number; top: number; width: number; height: number },
+  client: { clientX: number; clientY: number },
+): FloorPlanPoint | undefined => {
+  const perPixel = millimetresPerPixel(viewport, element);
+
+  if (perPixel === undefined) {
+    return undefined;
+  }
+
+  const drawnWidth = viewport.width / perPixel;
+  const drawnHeight = viewport.height / perPixel;
+
+  return {
+    x:
+      viewport.x +
+      (client.clientX - element.left - (element.width - drawnWidth) / 2) *
+        perPixel,
+    y:
+      viewport.y +
+      (client.clientY - element.top - (element.height - drawnHeight) / 2) *
+        perPixel,
+  };
 };

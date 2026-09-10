@@ -60,4 +60,88 @@
     min-height: 24rem;
     max-height: 40rem;
   }
+
+  /*
+   * The palette (GitHub issue #1083).
+   *
+   * A grid of fixed cells rather than a row, because the entries are nine and
+   * their names are long enough to wrap at any sensible width. Auto-fill keeps
+   * it one row on a wide monitor and reflows rather than scrolling sideways.
+   */
+  .floor-plan__palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+    gap: 0.5rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .floor-plan__palette-entry {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    width: 100%;
+    padding: 0.5rem 0.25rem;
+    border: 1px solid rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.15);
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--ion-text-color);
+    cursor: grab;
+    font: inherit;
+    text-align: center;
+
+    &:hover {
+      border-color: var(--ion-color-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ion-color-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  /*
+   * Every preview shares one viewBox, so the entries are to scale against each
+   * other: a chair is visibly a fraction of a bar counter before the owner has
+   * placed either of them.
+   */
+  .floor-plan__palette-preview {
+    width: 100%;
+    height: 2.5rem;
+
+    rect,
+    circle {
+      fill: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.18);
+      stroke: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.6);
+      stroke-width: 60;
+    }
+  }
+
+  .floor-plan__palette-name {
+    font-size: 0.8125rem;
+    line-height: 1.2;
+  }
+
+  .floor-plan__palette-size {
+    font-size: 0.6875rem;
+    opacity: 0.65;
+  }
+
+  .floor-plan__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .floor-plan__selection-count {
+    margin-left: auto;
+    font-size: 0.8125rem;
+  }
+
+  .floor-plan__unsaved {
+    color: var(--ion-color-warning-shade, var(--ion-color-warning));
+  }
 }

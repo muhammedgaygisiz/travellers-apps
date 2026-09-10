@@ -47,7 +47,7 @@ apps/storybook-host/.storybook
 ## Code Anchors
 
 ```text
-.codex/skills/travellers-apps/references/validation.md
+skills/travellers-apps/references/validation.md
 libs/bite-tribe/store
 libs/bite-tribe/api
 apps/bite-tribe-firebase/functions

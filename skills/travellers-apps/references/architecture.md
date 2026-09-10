@@ -12,6 +12,33 @@ Prefer existing Nx library boundaries:
 - `apps/bite-tribe-firebase/functions`: backend callable/storage/pubsub functions. Export new functions from `src/index.ts`.
 - `apps/bite-tribe/src/assets/i18n/*.json`: BiteTribe translations. If visible UI text is added, add keys for every app locale, not only English.
 
+## Creating New Page Libraries
+
+Scaffold with the repo's Nx generators so `project.json`, tsconfigs, Jest setup, tags, and path
+mappings are created consistently:
+
+```bash
+nx g @nx/angular:lib libs/<scope>/<page-name>/page --name=<scope>/<page-name> --tags=scope:<scope>,type:feature
+nx g @nx/angular:lib libs/<scope>/<page-name>/data-access --name=<scope>/<page-name>-data-access --tags=scope:<scope>,type:data-access
+```
+
+After generation:
+
+1. Delete the default content from `src/lib`.
+2. Create the `integration` and `components` folders.
+3. Export the container component from `index.ts`.
+4. Add the route in the app's `routes.ts` with the container component.
+
+The resulting shape, with specs colocated in `__specs__/` next to what they cover:
+
+```text
+libs/<scope>/<page-name>/
+├── page/src/lib/
+│   ├── integration/        # *.container.ts, *.service.ts, __specs__/
+│   └── components/         # <name>/<name>.component.{ts,html,scss}, __specs__/
+└── data-access/src/lib/    # <page-name>-data-access.service.ts
+```
+
 ## Common Flow
 
 1. Read the current feature's component, container, service, data-access service, tests, and related Firebase/API function before editing.

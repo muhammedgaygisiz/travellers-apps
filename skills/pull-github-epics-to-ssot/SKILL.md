@@ -1,11 +1,13 @@
 ---
 name: pull-github-epics-to-ssot
-description: Pull GitHub issues whose titles start with "epic:" into the repo SSOT Logseq graph. Use when the user asks to refresh, generate, update, or maintain the Epics section in /Users/mo/DEV/travellers-apps from GitHub issues, especially for SSOT epic indexing.
+description: Pull GitHub issues whose titles start with "epic:" into the repo SSOT Logseq graph. Use when the user asks to refresh, generate, update, or maintain the Epics section of the muhammedgaygisiz/travellers-apps SSOT from GitHub issues, especially for SSOT epic indexing.
 ---
 
 # Pull GitHub Epics To SSOT
 
-Use this skill in `/Users/mo/DEV/travellers-apps` to refresh the Logseq epic section in `ssot/pages/SSOT.md` and one detail page per open Priority P0 epic from GitHub issues in `muhammedgaygisiz/travellers-apps` whose titles start with `epic:`.
+Use this skill in this repository to refresh the Logseq epic section in `ssot/pages/SSOT.md` and one detail page per open Priority P0 epic from GitHub issues in `muhammedgaygisiz/travellers-apps` whose titles start with `epic:`.
+
+All paths in this skill are relative to the repository root. Resolve it with `git rev-parse --show-toplevel` when an absolute path is needed, and run repository commands from there.
 
 ## Workflow
 
@@ -58,13 +60,13 @@ Use `scripts/render_epics_page.mjs` when possible. It can either:
 - call GitHub through `gh issue list` plus GraphQL `Issue.subIssues`, which may require network approval:
 
 ```bash
-node .codex/skills/pull-github-epics-to-ssot/scripts/render_epics_page.mjs
+node skills/pull-github-epics-to-ssot/scripts/render_epics_page.mjs
 ```
 
 - render connector/search JSON from a file or stdin:
 
 ```bash
-node .codex/skills/pull-github-epics-to-ssot/scripts/render_epics_page.mjs --input /tmp/issues.json
+node skills/pull-github-epics-to-ssot/scripts/render_epics_page.mjs --input /tmp/issues.json
 ```
 
 The input JSON may be either an array of issue objects or an object with an `issues` array. Recognized issue fields are `title`, `body`, `url`, `display_url`, `html_url`, `number`, `issue_number`, `labels`, `milestone`, `state`, and `projectItems`.

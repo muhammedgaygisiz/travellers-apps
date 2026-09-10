@@ -129,6 +129,31 @@ describe('floor plan model', () => {
     expect(room).not.toHaveProperty('tables');
   });
 
+  /**
+   * The level a room sits on (GitHub issue #1085).
+   *
+   * Optional, so a restaurant on one floor describes its rooms without it, and
+   * a name rather than a number because a restaurant says `Terrace level` as
+   * readily as it says `1`.
+   */
+  it('lets a room name the level it sits on, and lets it name none', () => {
+    const ground: Room = {
+      id: 'main',
+      name: 'Main dining room',
+      order: 0,
+      floor: 'Ground floor',
+      size: { width: 8000, height: 5000 },
+      objects: [],
+      version: 1,
+    };
+    const terrace: Room = { ...ground, id: 'terrace', name: 'Terrace' };
+
+    delete terrace.floor;
+
+    expect(ground.floor).toBe('Ground floor');
+    expect(terrace).not.toHaveProperty('floor');
+  });
+
   it('narrows a table by its shape discriminant', () => {
     const widthOf = (table: RestaurantTable): Millimetres =>
       table.shape === 'round' ? table.diameter : table.size.width;

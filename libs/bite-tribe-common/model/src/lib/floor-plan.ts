@@ -114,6 +114,20 @@ export interface Room {
   name: string;
   /** Ascending display order among the rooms of one restaurant. */
   order: number;
+  /**
+   * The level this room sits on, such as `Ground floor` or `First floor`.
+   *
+   * Optional, and a name rather than a number, because a restaurant says
+   * `Terrace level` and `Basement` as readily as it says `1`. Rooms carrying
+   * the same name are shown as one group in the editor, which is the whole of
+   * what the field does: grouping is a display arrangement over `order`, so a
+   * room's position among the rooms of the restaurant is still `order` alone
+   * and adding or clearing a floor never reshuffles the plan.
+   *
+   * Absent means the room belongs to no named level, which is the ordinary
+   * case for a restaurant on one floor.
+   */
+  floor?: string;
   /** Physical extent of the room. */
   size: FloorPlanSize;
   /** Non-table geometry standing in the room. */

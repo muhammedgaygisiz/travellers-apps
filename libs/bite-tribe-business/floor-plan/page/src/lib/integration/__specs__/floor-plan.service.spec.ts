@@ -910,6 +910,301 @@ describe(FloorPlanService.name, () => {
     });
   });
 
+  describe('several rooms and floors', () => {
+    /** A dining room and a smaller terrace, with one table in each. */
+    const twoRooms = async (): Promise<void> => {
+      stored = [
+        room(),
+        room({
+          id: 'terrace',
+          name: 'Terrace',
+          order: 1,
+          size: { width: 2000, height: 2000 },
+        }),
+      ];
+      storedTables = [
+        table({ qrTokenId: 'token-1' }),
+        table({ id: 'table-7', label: '7', roomId: 'terrace', seats: 2 }),
+      ];
+      service.rooms.reload();
+      service.tables.reload();
+      await loaded();
+    };
+
+    const movedTable = (): RestaurantTable | undefined =>
+      service.layout().tables.find((entry) => entry.id === 'table-1');
+
+    describe('moving a table to another room', () => {
+      /**
+       * The acceptance criterion of issue #1085.
+       *
+       * The identity and the token are what a printed QR sheet points at, so a
+       * move that reissued either would mean reprinting a code for a table that
+       * never changed.
+       */
+      it('keeps the id, the label and the QR token of the table', async () => {
+        await twoRooms();
+        service.select(['table-1']);
+
+        await service.moveSelectedTableToRoom('terrace');
+
+        expect(movedTable()).toMatchObject({
+          id: 'table-1',
+          label: '1',
+          qrTokenId: 'token-1',
+          roomId: 'terrace',
+        });
+      });
+
+      /**
+       * A room-relative coordinate means something else in a smaller room.
+       *
+       * The stored table stands at 3000 mm across a room eight metres wide; the
+       * terrace is two metres square, so an uncorrected move would put it a
+       * metre beyond the far wall, where the owner would never find it.
+       */
+      it('brings the centre inside the room it moved to', async () => {
+        await twoRooms();
+        service.select(['table-1']);
+
+        await service.moveSelectedTableToRoom('terrace');
+
+        expect(movedTable()?.position).toEqual({ x: 2000, y: 2000 });
+      });
+
+      /** The other way round, into a larger room, nothing is clamped at all. */
+      it('leaves the centre alone when the room it moved to is big enough', async () => {
+        await twoRooms();
+        service.selectRoom('terrace');
+        await loaded();
+        service.select(['table-7']);
+
+        await service.moveSelectedTableToRoom('room-1');
+
+        expect(
+          service.layout().tables.find((entry) => entry.id === 'table-7'),
+        ).toMatchObject({ roomId: 'room-1', position: { x: 3000, y: 3000 } });
+      });
+
+      it('takes the table off the canvas and out of the selection', async () => {
+        await twoRooms();
+        service.select(['table-1']);
+
+        await service.moveSelectedTableToRoom('terrace');
+
+        expect(service.items().map((item) => item.id)).toEqual([]);
+        expect(service.selectedIds()).toEqual([]);
+        expect(service.selectedTable()).toBeUndefined();
+      });
+
+      it('says where the table went', async () => {
+        await twoRooms();
+        service.select(['table-1']);
+
+        await service.moveSelectedTableToRoom('terrace');
+
+        expect(toasts[toasts.length - 1]).toMatchObject({
+          messageKey: 'floor-plan-table-moved',
+          params: { label: '1', room: 'Terrace' },
+        });
+      });
+
+      /**
+       * The move is a plan edit, not a write of its own.
+       *
+       * It is therefore undoable like every other edit, and it lands with the
+       * save the owner presses once - which is also what stops the save
+       * mistaking a moved table for a deleted one.
+       */
+      it('writes the table with its new room, and deletes nothing', async () => {
+        await twoRooms();
+        service.select(['table-1']);
+        await service.moveSelectedTableToRoom('terrace');
+
+        expect(service.unsavedChanges()).toBe(true);
+
+        await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+        await loaded();
+
+        expect(saveTable).toHaveBeenCalledWith(
+          'china-wok',
+          expect.objectContaining({ id: 'table-1', roomId: 'terrace' }),
+        );
+        expect(deleteTable).not.toHaveBeenCalled();
+
+        // One table, in one room. The moved table is written from the layout
+        // and taken off the room it left, so the restaurant does not end up
+        // holding two copies of it at two `roomId`s.
+        expect(
+          service
+            .tablesValue()
+            .filter((entry) => entry.id === 'table-1')
+            .map((entry) => entry.roomId),
+        ).toEqual(['terrace']);
+        expect(service.restaurantCapacity().tables).toBe(2);
+      });
+
+      it('undoes back into the room it came from', async () => {
+        await twoRooms();
+        service.select(['table-1']);
+        await service.moveSelectedTableToRoom('terrace');
+
+        service.undo();
+
+        expect(movedTable()?.roomId).toBe('room-1');
+        expect(service.items().map((item) => item.id)).toEqual(['table-1']);
+      });
+
+      it('moves nothing to the room the table already stands in', async () => {
+        await twoRooms();
+        service.select(['table-1']);
+        const before = service.layout();
+
+        await service.moveSelectedTableToRoom('room-1');
+        await service.moveSelectedTableToRoom('nowhere');
+
+        expect(service.layout()).toBe(before);
+      });
+
+      it('moves nothing while several tables or none are selected', async () => {
+        await twoRooms();
+        const before = service.layout();
+
+        await service.moveSelectedTableToRoom('terrace');
+
+        expect(service.layout()).toBe(before);
+      });
+    });
+
+    describe('the room order', () => {
+      it('writes the rooms that moved and puts the list in the new order', async () => {
+        await twoRooms();
+
+        await service.moveRoom('terrace', -1);
+
+        expect(saveRoom).toHaveBeenCalledTimes(2);
+        expect(service.roomsValue().map((entry) => entry.id)).toEqual([
+          'terrace',
+          'room-1',
+        ]);
+        expect(service.roomsValue().map((entry) => entry.order)).toEqual([
+          0, 1,
+        ]);
+        expect(messageKeys()).toContain('floor-plan-rooms-reordered');
+      });
+
+      it('writes nothing when the room is already at the end it moved to', async () => {
+        await twoRooms();
+
+        await service.moveRoom('room-1', -1);
+        await service.moveRoom('terrace', 1);
+
+        expect(saveRoom).not.toHaveBeenCalled();
+      });
+
+      it('stops and reports when a room lost a race mid-reorder', async () => {
+        await twoRooms();
+        saveRoom.mockRejectedValueOnce(
+          new FloorPlanConflictError('terrace', 1, room({ id: 'terrace' })),
+        );
+
+        await service.moveRoom('terrace', -1);
+
+        expect(saveRoom).toHaveBeenCalledTimes(1);
+        expect(messageKeys()).toContain('floor-plan-room-conflict');
+      });
+
+      it('writes nothing while the route carries no restaurant', async () => {
+        await twoRooms();
+        restaurantId.set(undefined);
+        await loaded();
+
+        await service.moveRoom('terrace', -1);
+
+        expect(saveRoom).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('the capacity summary', () => {
+      it('counts each room, and the restaurant across them', async () => {
+        await twoRooms();
+
+        expect(service.roomCapacities()['room-1']).toEqual({
+          tables: 1,
+          seats: 4,
+          disabled: 0,
+        });
+        expect(service.roomCapacities()['terrace']).toEqual({
+          tables: 1,
+          seats: 2,
+          disabled: 0,
+        });
+        expect(service.restaurantCapacity()).toEqual({
+          rooms: 2,
+          tables: 2,
+          seats: 6,
+          disabled: 0,
+        });
+      });
+
+      it('follows an edit that is not written yet', async () => {
+        await twoRooms();
+        service.select(['table-1']);
+
+        service.setTableEnabled(false);
+
+        expect(service.roomCapacities()['room-1']).toEqual({
+          tables: 1,
+          seats: 0,
+          disabled: 1,
+        });
+
+        await service.moveSelectedTableToRoom('terrace');
+
+        expect(service.roomCapacities()['room-1'].tables).toBe(0);
+        expect(service.roomCapacities()['terrace'].tables).toBe(2);
+        expect(service.restaurantCapacity().tables).toBe(2);
+      });
+    });
+
+    describe('the floor a room sits on', () => {
+      it('stores it when a room is created', async () => {
+        await service.createRoom({
+          name: 'Gallery',
+          width: 6000,
+          height: 8000,
+          floor: 'Upstairs',
+        });
+
+        expect(createRoom).toHaveBeenCalledWith(
+          'china-wok',
+          expect.objectContaining({ floor: 'Upstairs' }),
+        );
+      });
+
+      it('stores it when a room is saved, and clears it when it is emptied', async () => {
+        await service.saveRoom({
+          name: 'Main',
+          width: 8000,
+          height: 12_000,
+          floor: 'Ground floor',
+        });
+
+        expect(saveRoom).toHaveBeenCalledWith(
+          'china-wok',
+          expect.objectContaining({ floor: 'Ground floor' }),
+        );
+
+        await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+
+        expect(saveRoom).toHaveBeenLastCalledWith(
+          'china-wok',
+          expect.objectContaining({ floor: undefined }),
+        );
+      });
+    });
+  });
+
   it('hands a sign-out to the store rather than doing it itself', () => {
     const store = TestBed.inject(BiteTribeStoreService);
 

@@ -20,6 +20,7 @@ import {
   IonIcon,
   IonInput,
   IonItem,
+  IonItemDivider,
   IonLabel,
   IonList,
   IonNote,
@@ -56,6 +57,13 @@ import {
   TableShape,
 } from 'model';
 import {
+  EMPTY_CAPACITY,
+  RestaurantCapacity,
+  RoomCapacity,
+  floorGroups,
+  hasFloors,
+} from '../integration/floor-plan-rooms';
+import {
   FIRST_TABLE_NUMBER,
   MAX_TABLE_SEATS,
   MIN_TABLE_SEATS,
@@ -91,8 +99,31 @@ interface RoomFormValues {
   id: string;
   version: number;
   name: string;
+  floor: string;
   width: string;
   height: string;
+}
+
+/** One room in the switcher: what it holds, and where it can still move to. */
+export interface RoomRow {
+  room: Room;
+  capacity: RoomCapacity;
+  /** Already the first room of the restaurant, so it cannot move up. */
+  first: boolean;
+  /** Already the last, so it cannot move down. */
+  last: boolean;
+}
+
+/** One level of the restaurant in the switcher, and the rooms on it. */
+export interface RoomGroupView {
+  floor?: string;
+  rows: RoomRow[];
+}
+
+/** A room moved one place towards the top or the bottom of the list. */
+export interface RoomMove {
+  roomId: string;
+  offset: number;
 }
 
 /** The geometry inputs of the properties panel, and the item they came from. */
@@ -163,6 +194,7 @@ interface PaletteView {
     IonCardTitle,
     IonCardContent,
     IonItem,
+    IonItemDivider,
     IonLabel,
     IonNote,
     IonList,
@@ -232,10 +264,26 @@ export class FloorPlanComponent {
   /** The room already holding the refused label, so the message can name it. */
   readonly labelConflictRoom = input<string | undefined>(undefined);
 
+  /**
+   * Table count and seating per room, keyed by room id
+   * (GitHub issue #1085).
+   *
+   * Beside the room's name rather than inside the room, because the question it
+   * answers - how many people does the terrace seat - is asked while looking at
+   * the dining room.
+   */
+  readonly roomCapacities = input<Record<string, RoomCapacity>>({});
+
+  /** The same numbers across every room of the restaurant. */
+  readonly restaurantCapacity = input<RestaurantCapacity | undefined>(
+    undefined,
+  );
+
   readonly selectRoom = output<string>();
   readonly createRoom = output<RoomDraft>();
   readonly saveRoom = output<RoomDraft>();
   readonly deleteRoom = output<Room>();
+  readonly moveRoom = output<RoomMove>();
   readonly gridSpacingChange = output<Millimetres>();
   readonly snapChange = output<boolean>();
   readonly logoutClick = output<void>();
@@ -252,6 +300,9 @@ export class FloorPlanComponent {
   readonly tableShapeChange = output<TableShape>();
   readonly tableEnabledChange = output<boolean>();
   readonly numberTables = output<number>();
+
+  /** The room the selected table should stand in from now on. */
+  readonly moveTable = output<string>();
 
   readonly minSeats = MIN_TABLE_SEATS;
   readonly maxSeats = MAX_TABLE_SEATS;
@@ -300,6 +351,7 @@ export class FloorPlanComponent {
         id: room?.id ?? '',
         version: room?.version ?? 0,
         name: room?.name ?? '',
+        floor: room?.floor ?? '',
         width: this.metresField(room?.size.width),
         height: this.metresField(room?.size.height),
       };
@@ -313,6 +365,19 @@ export class FloorPlanComponent {
   readonly name = linkedSignal<RoomFormValues, string>({
     source: this.formValues,
     computation: (values) => values.name,
+  });
+
+  /**
+   * The level the open room sits on, as typed.
+   *
+   * Free text rather than a picker over the levels already in use: the second
+   * room of a restaurant has no list to pick from, and a picker that had to
+   * offer "a new one" as an option would be a text field with a step in front
+   * of it.
+   */
+  readonly floor = linkedSignal<RoomFormValues, string>({
+    source: this.formValues,
+    computation: (values) => values.floor,
   });
 
   readonly width = linkedSignal<RoomFormValues, string>({
@@ -413,6 +478,55 @@ export class FloorPlanComponent {
 
   readonly hasRooms = computed(() => this.rooms().length > 0);
 
+  /**
+   * The room switcher: the rooms grouped by level, each with what it holds.
+   *
+   * Built here rather than in the template because the two facts a row needs -
+   * its capacity, and whether it can still move up or down - are about the room
+   * list as a whole, and a template computing them from `$index` inside a group
+   * would be computing them from the wrong list.
+   */
+  readonly roomGroups = computed<RoomGroupView[]>(() => {
+    const rooms = this.rooms();
+    const capacities = this.roomCapacities();
+    const last = rooms.length - 1;
+
+    return floorGroups(rooms).map((group) => ({
+      floor: group.floor,
+      rows: group.rooms.map((room) => {
+        const index = rooms.indexOf(room);
+
+        return {
+          room,
+          capacity: capacities[room.id] ?? EMPTY_CAPACITY,
+          first: index === 0,
+          last: index === last,
+        };
+      }),
+    }));
+  });
+
+  /**
+   * Whether the switcher shows level headings at all.
+   *
+   * Only once a room names one. A restaurant on a single floor would otherwise
+   * get a heading saying its rooms are on no floor, which is a grouping that
+   * groups nothing.
+   */
+  readonly showFloors = computed(() => hasFloors(this.rooms()));
+
+  /** Whether the room order can be changed right now. */
+  readonly canReorder = computed(
+    () => this.rooms().length > 1 && !this.saving() && !this.unsavedChanges(),
+  );
+
+  /** The rooms the selected table could move to: every room but its own. */
+  readonly otherRooms = computed<Room[]>(() => {
+    const current = this.selectedRoom()?.id;
+
+    return this.rooms().filter((room) => room.id !== current);
+  });
+
   readonly canSave = computed(
     () =>
       !this.saving() &&
@@ -430,10 +544,80 @@ export class FloorPlanComponent {
       : '';
   });
 
+  /**
+   * Opens another room, asking first when this one has unsaved changes
+   * (GitHub issue #1085).
+   *
+   * Switching rooms reseeds the editor from the room that was opened, so
+   * whatever was arranged and not saved is gone. A restaurant with a terrace
+   * and two dining rooms switches often enough that losing an afternoon's
+   * arranging to one mis-click is a real outcome, so the owner is asked - and
+   * asked only when there is something to lose, because a confirmation that
+   * appears every time is one nobody reads.
+   */
   onSelectRoom(roomId: string | undefined): void {
-    if (roomId) {
-      this.selectRoom.emit(roomId);
+    if (!roomId || roomId === this.selectedRoom()?.id) {
+      return;
     }
+
+    if (!this.unsavedChanges()) {
+      this.selectRoom.emit(roomId);
+
+      return;
+    }
+
+    void this.confirmDiscard(() => this.selectRoom.emit(roomId));
+  }
+
+  /**
+   * Moves a room one place up or down the list.
+   *
+   * Stops the click reaching the row it sits in, which would otherwise open the
+   * room the owner was only reordering.
+   *
+   * No confirmation, because there is nothing to confirm: reordering writes the
+   * rooms whose position changed, and the editor reseeds from a room whose
+   * version moved, so the control is closed while the open room has unsaved
+   * changes rather than offered with a warning attached. `canReorder` is that
+   * rule, and the note beside the list says so.
+   */
+  onMoveRoom(event: Event, roomId: string, offset: number): void {
+    event.stopPropagation();
+
+    if (this.canReorder()) {
+      this.moveRoom.emit({ roomId, offset });
+    }
+  }
+
+  /** Sends the room the owner picked for the selected table. */
+  onMoveTable(roomId: string | number | undefined): void {
+    if (typeof roomId === 'string' && roomId !== this.selectedRoom()?.id) {
+      this.moveTable.emit(roomId);
+    }
+  }
+
+  /**
+   * The alert that stands between an unsaved plan and losing it.
+   *
+   * The destructive button carries the action rather than the cancel one, so
+   * dismissing the alert any other way - the backdrop, the escape key - keeps
+   * the changes.
+   */
+  private async confirmDiscard(proceed: () => void): Promise<void> {
+    const alert = await this.alertController.create({
+      header: this.transloco.translate('floor-plan-discard-title'),
+      message: this.transloco.translate('floor-plan-discard-message'),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('floor-plan-discard-confirm'),
+          role: 'destructive',
+          handler: (): void => proceed(),
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
   /**
@@ -457,10 +641,15 @@ export class FloorPlanComponent {
       return;
     }
 
+    const floor = this.floor().trim();
+
     this.saveRoom.emit({
       name: this.name().trim(),
       width: metresToMillimetres(Number(this.width())),
       height: metresToMillimetres(Number(this.height())),
+      // A cleared field is no floor rather than an empty one, so the room stops
+      // being grouped instead of joining a level with a blank name.
+      floor: floor.length > 0 ? floor : undefined,
     });
   }
 

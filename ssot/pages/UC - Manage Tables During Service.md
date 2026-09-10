@@ -19,6 +19,7 @@ Restaurant staff open one screen during service and see the room as it is: which
 
 - Staff sign in and land directly on the live room view, not the owner dashboard.
 - The published floor plan renders read-only, with each table showing its live state.
+- This is the floor-plan surface that carries a small screen. The editor of [[UC - Configure Restaurant Floor Plans And Tables]] was locked to a desktop width, because an owner laying out twenty tables to the millimetre is at a desk while a host greeting guests is holding a tablet at the door. Touch drag, pinch zoom, two-finger pan and long-press belong here, designed for seating a party rather than for moving a wall (issue \#1093).
 - Staff tap a table and see only the transitions currently allowed.
 - Seating a party opens a visit and records the guest count.
 - Staff mark tables reserved, cleaning, or disabled as service demands.

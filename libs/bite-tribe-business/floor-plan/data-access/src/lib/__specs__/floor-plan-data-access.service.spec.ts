@@ -249,6 +249,32 @@ describe(FloorPlanDataAccessService.name, () => {
       ]);
     });
 
+    /**
+     * The level a room sits on (GitHub issue #1085).
+     *
+     * Stored only once a room names one, and a room save replaces the whole
+     * document - so clearing the field is what removes the field, rather than
+     * leaving a level with a blank name behind.
+     */
+    it('stores a floor only when the room names one', async () => {
+      jest.spyOn(FirebaseFirestore, 'setDocument').mockResolvedValue();
+
+      await service.saveRoom(RESTAURANT_ID, { ...ROOM, floor: 'Upstairs' });
+
+      expect(FirebaseFirestore.setDocument).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ floor: 'Upstairs' }),
+        }),
+      );
+
+      await service.saveRoom(RESTAURANT_ID, { ...ROOM, floor: undefined });
+
+      const calls = jest.mocked(FirebaseFirestore.setDocument).mock.calls;
+      const [last] = calls[calls.length - 1];
+
+      expect(last.data as object).not.toHaveProperty('floor');
+    });
+
     it('reports a conflict when the stored room has moved on', async () => {
       jest
         .spyOn(FirebaseFirestore, 'setDocument')

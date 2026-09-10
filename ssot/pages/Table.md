@@ -154,10 +154,21 @@ Bulk numbering is an action over a selection rather than a field per table, beca
 
 The plan draws what the fields mean. A table carries its number in the middle and its capacity under it, behind a seated figure - a pictograph rather than the word, because a 900 mm round table is about three characters wide at zoom-to-fit and the figure is what stops two numbers on one table being ambiguous. The words are in the SVG `<title>`, where a hover and a screen reader both find them. A disabled table is hatched rather than faded: a fade reads as "loading" and vanishes in the print a QR sheet is made from.
 
+Issue \#1085 made the move real. The owner picks the table's room in the same
+card that holds its number and its capacity, and the table keeps its `id`, its
+`label` and its `qrTokenId` - so a code already printed and stuck to the table
+still resolves to it. The move is an ordinary plan edit rather than an immediate
+write: it goes through the undo history and lands with the save the owner
+presses once, and the moved table stays in the edited layout instead of being
+dropped from it, because a table missing from the layout is indistinguishable
+from a deleted one and the save would delete the very document the printed code
+points at. Its centre is clamped into the target room, since a room-relative
+coordinate means something else in a room of a different size.
+
 ## Current Limitations
 
 - Uniqueness is held by the client, not by the database. Security rules cannot query, so no rule can ask whether a label is already taken; the editor refuses a duplicate and the publish validation of issue \#1088 refuses a plan that reached that state another way. A second device editing a second room at the same moment can still produce two tables with one number, because neither editor sees the other's unsaved plan.
-- A table cannot be moved to another room. `roomId` is a field and the model has always allowed the move; the editor has no control for it, because issue \#1085 owns the move together with keeping `id` and `qrTokenId` valid across it.
+- A table moves out of the room the owner is looking at, never into it. The control is on the selected table's card, so it is reachable only for a table on the open canvas; there is no way to reach into another room and pull a table across (issue \#1085).
 - `enabled` is configuration and nothing reads it yet. It is drawn on the plan and stored on the table; refusing orders at a disabled table and withholding its QR token belong to issues \#1086 and \#1072.
 - `qrTokenId` is writable by the owner like any other field. Making it backend-only belongs with the tokens themselves, in issue \#1086, because there is nothing to protect until something issues one.
 - A QR code identifies a table context. It does not prove that the guest is physically present, and no design should assume otherwise.

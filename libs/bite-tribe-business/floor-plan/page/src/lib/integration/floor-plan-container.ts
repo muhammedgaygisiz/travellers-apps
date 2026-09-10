@@ -26,11 +26,14 @@ import { FloorPlanService } from './floor-plan.service';
       [selectedTableCount]="service.selectedTables().length"
       [labelConflict]="service.labelConflict()"
       [labelConflictRoom]="service.labelConflictRoom()"
+      [roomCapacities]="service.roomCapacities()"
+      [restaurantCapacity]="service.restaurantCapacity()"
       [isAuthenticated]="service.isAuthenticated()"
       (selectRoom)="service.selectRoom($event)"
       (createRoom)="service.createRoom($event)"
       (saveRoom)="service.saveRoom($event)"
       (deleteRoom)="service.deleteRoom($event)"
+      (moveRoom)="service.moveRoom($event.roomId, $event.offset)"
       (gridSpacingChange)="service.setGridSpacing($event)"
       (snapChange)="service.setSnapEnabled($event)"
       (placeRequest)="service.place($event)"
@@ -44,6 +47,7 @@ import { FloorPlanService } from './floor-plan.service';
       (tableShapeChange)="service.setTableShape($event)"
       (tableEnabledChange)="service.setTableEnabled($event)"
       (numberTables)="service.numberSelection($event)"
+      (moveTable)="service.moveSelectedTableToRoom($event)"
       (logoutClick)="service.logout()"
     />
   `,

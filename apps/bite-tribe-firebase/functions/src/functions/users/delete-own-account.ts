@@ -10,6 +10,7 @@ import {
 import { getStorage } from 'firebase-admin/storage';
 import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
+import { RESTAURANT_STAFF_COLLECTION } from '../restaurants/restaurant-staff';
 import { onAppCheck } from '../shared/callable-options';
 import {
   LEADERBOARD_DAILY_DOC,
@@ -283,6 +284,36 @@ export const deletePushTokensForUser = async (
  * becomes available again. The claim is only released when it still points at
  * this user, so a name already re-claimed by someone else is left alone.
  */
+/**
+ * Takes the account off the restaurant it works at, if it works at one.
+ *
+ * `/restaurantStaff/{uid}` is half of a staff grant (issue #1537); the other
+ * half is the `staff` custom claim, which goes with the Auth account a few
+ * steps below. Without this the surviving half is an association naming a uid
+ * that no longer exists, and the restaurant's own staff list — which reads the
+ * email off Firebase Auth — would show it as a blank row its owner cannot
+ * remove, because removal resolves the same deleted account.
+ *
+ * The document is named by the uid, so this is one read and one delete rather
+ * than a query. The read is only there to make the count honest: deleting a
+ * document that is not there succeeds silently, and the job record would then
+ * claim a removal that never happened.
+ */
+export const deleteRestaurantStaffForUser = async (
+  db: Firestore,
+  uid: string,
+): Promise<number> => {
+  const staffRef = db.collection(RESTAURANT_STAFF_COLLECTION).doc(uid);
+
+  if (!(await staffRef.get()).exists) {
+    return 0;
+  }
+
+  await staffRef.delete();
+
+  return 1;
+};
+
 export const deleteUserProfileAndClaim = async (
   db: Firestore,
   uid: string,
@@ -403,6 +434,7 @@ export const deleteAccountForUser = async (
     const anonymizedSales = await anonymizeBiteTrailSalesByUser(db, uid);
     const deletedFollowEdges = await deleteFollowEdgesForUser(db, uid);
     const deletedPushTokens = await deletePushTokensForUser(db, uid);
+    const deletedRestaurantStaff = await deleteRestaurantStaffForUser(db, uid);
 
     await deleteSettingsForUser(db, uid);
     await deleteProfileImagesForUser(uid);
@@ -426,6 +458,7 @@ export const deleteAccountForUser = async (
         anonymizedSales,
         deletedFollowEdges,
         deletedPushTokens,
+        deletedRestaurantStaff,
       },
       { merge: true },
     );
@@ -440,6 +473,7 @@ export const deleteAccountForUser = async (
       anonymizedSales,
       deletedFollowEdges,
       deletedPushTokens,
+      deletedRestaurantStaff,
     });
 
     return { status: 'completed' };

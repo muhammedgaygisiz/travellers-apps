@@ -238,6 +238,13 @@ conversation for every new waiter will either wait or share a login.
   unknown address is account enumeration by a caller already trusted with
   granting a role, and it is accepted: the alternative is a grant that silently
   does nothing when an address is mistyped.
+- **Deleting the account deletes the association with it.** The claim goes with
+  the Auth record; the document would not, and the surviving half is a row in
+  its restaurant's staff list naming a uid nobody can look up and its owner
+  cannot remove — removal resolves the same deleted account. `deleteOwnAccount`
+  clears it as part of the cascade, and `delete-own-account.ts` imports the
+  collection name from the module that owns it rather than repeating the
+  string.
 - **`listRestaurantStaff` is a callable rather than a client query.** The rules
   do allow the owner to read one association document, but authorising a
   _collection_ query that way costs a `get()` on the restaurant per result — and

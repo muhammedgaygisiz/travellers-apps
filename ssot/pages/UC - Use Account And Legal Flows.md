@@ -51,7 +51,7 @@ See [[issue-1385]] for the reasoning.
 
 Each user-owned data category is handled deliberately. See [[issue-1182]] for the reasoning and [[User]] for the paths.
 
-- Removed: public profile and its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes given, bucket lists, BiteTrail ratings, profile images, and the Firebase Auth account.
+- Removed: public profile and its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes given, bucket lists, BiteTrail ratings, profile images, the staff association at `/restaurantStaff/{uid}` if the account works at a restaurant (\#1537), and the Firebase Auth account.
 - Kept with the identifier cleared: Bites (the Bite and its image stay, `userId` is removed) and BiteTrail purchase records (the document stays so the seller's `soldCount` holds).
 - Kept untouched: restaurants, menus and restaurant candidates, which are shared place data.
 - Cannot be removed in band: analytics and Crashlytics data already keyed to the uid. The in-app copy says so.

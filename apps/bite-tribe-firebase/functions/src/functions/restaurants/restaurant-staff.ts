@@ -29,8 +29,13 @@ const USERS_COLLECTION = 'users';
  * restaurant, because `/restaurants` is readable by every signed-in account:
  * an array there would publish each restaurant's staff list to the consumer
  * app.
+ *
+ * Exported rather than repeated as a second string literal in
+ * `users/delete-own-account.ts`, which has to clear the association when the
+ * account behind it is deleted. A collection this module owns and another
+ * module names by hand is a collection the two can silently disagree about.
  */
-const RESTAURANT_STAFF_COLLECTION = 'restaurantStaff';
+export const RESTAURANT_STAFF_COLLECTION = 'restaurantStaff';
 
 const STAFF_ROLE: BiteTribeRole = 'staff';
 

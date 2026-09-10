@@ -196,6 +196,11 @@ describe('deleteAccountForUser', () => {
     db.seed('biteTrails/trail-1', { ownerId: 'someone-else' });
     db.seed(`biteTrails/trail-1/ratings/${UID}`, { rating: 4 });
     db.seed('biteTrails/trail-1/sells/sell-1', { userId: UID, soldAt: 'x' });
+    db.seed(`restaurantStaff/${UID}`, {
+      userId: UID,
+      restaurantId: 'restaurant-1',
+      addedBy: 'owner-1',
+    });
   };
 
   it('keeps the bites and clears their author', async () => {
@@ -237,6 +242,43 @@ describe('deleteAccountForUser', () => {
     expect(db.exists(`biteTrails/trail-1/ratings/${UID}`)).toBe(false);
   });
 
+  /**
+   * The other half of a staff grant is the `staff` custom claim, which goes
+   * with the Auth account. Leaving the association behind would put a row in
+   * its restaurant's staff list naming a uid nobody can look up and its owner
+   * cannot remove (issue #1537).
+   */
+  it('takes the account off the restaurant it works at', async () => {
+    seedFullAccount();
+
+    await deleteAccountForUser(UID, NOW);
+
+    expect(db.exists(`restaurantStaff/${UID}`)).toBe(false);
+  });
+
+  it("leaves another account's association alone", async () => {
+    seedFullAccount();
+    db.seed('restaurantStaff/someone-else', {
+      userId: 'someone-else',
+      restaurantId: 'restaurant-1',
+    });
+
+    await deleteAccountForUser(UID, NOW);
+
+    expect(db.exists('restaurantStaff/someone-else')).toBe(true);
+  });
+
+  /** Most accounts work at no restaurant, and the count has to say so. */
+  it('records no removal for an account that is not staff', async () => {
+    db.seed(`users/${UID}`, { displayName: 'Gone User' });
+
+    await deleteAccountForUser(UID, NOW);
+
+    expect(db.read(`accountDeletions/${UID}`)).toMatchObject({
+      deletedRestaurantStaff: 0,
+    });
+  });
+
   it('deletes the profile images and the auth account', async () => {
     seedFullAccount();
 
@@ -276,6 +318,7 @@ describe('deleteAccountForUser', () => {
       anonymizedSales: 1,
       deletedFollowEdges: 0,
       deletedPushTokens: 1,
+      deletedRestaurantStaff: 1,
     });
   });
 

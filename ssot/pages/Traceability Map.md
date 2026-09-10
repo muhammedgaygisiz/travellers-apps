@@ -88,6 +88,10 @@
 
   Stage 0 blocks every later stage. Stages 1 and 2 are independently shippable.
 
+  Stage 1 has started at its model. Issue \#1080 added `Room`, `FloorPlanObject` and `RestaurantTable` to `libs/bite-tribe-common/model` and made the coordinate system of [[Floor Plan]] the file header of `floor-plan.ts`, so the editor of \#1082, the staff view of [[epic-1071]] and the guest ordering flow of [[epic-1072]] all read one set of shapes. It changed no behaviour: there is no persistence, no rule and no surface, and the trace for those runs on through \#1081.
+
+  Writing it settled two things the pages had left open. A `position` is the centre of a shape for geometry objects as well as for tables, so `rotation` has a single meaning; and a room's display order is a required field rather than an optional nicety, because a plan with more than one room has to list them in some order the owner chose.
+
 Every child of stage 0 has now landed, and the stage is still not finished. Two things
 remain and neither has an owning issue: the rules deploy by hand, so \#1078 binds
 production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run, and the

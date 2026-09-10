@@ -4,6 +4,7 @@ import { RestaurantTable, Room } from 'model';
 import {
   FIRST_ROOM_VERSION,
   FloorPlanDataAccessService,
+  TABLE_LABEL_FIELD,
   TABLE_ROOM_FIELD,
 } from '../floor-plan-data-access.service';
 import {
@@ -120,6 +121,51 @@ describe(FloorPlanDataAccessService.name, () => {
 
       await expect(
         service.loadRoomPlan(RESTAURANT_ID, ROOM_ID),
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('loadTableByLabel', () => {
+    /**
+     * The acceptance criterion of issue #1084: "table 12" resolves to one
+     * table, without anybody parsing a plan or scanning a collection.
+     */
+    it('returns the one table carrying the label', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'getCollection')
+        .mockResolvedValue(
+          asCollection([{ id: ROUND_TABLE.id, data: ROUND_TABLE }]),
+        );
+
+      const table = await service.loadTableByLabel(RESTAURANT_ID, '12');
+
+      expect(FirebaseFirestore.getCollection).toHaveBeenCalledTimes(1);
+      expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
+        reference: `restaurants/${RESTAURANT_ID}/tables`,
+        compositeFilter: {
+          type: 'and',
+          queryConstraints: [
+            {
+              type: 'where',
+              fieldPath: TABLE_LABEL_FIELD,
+              opStr: '==',
+              value: '12',
+            },
+          ],
+        },
+      });
+      expect(table?.id).toBe('table-12');
+      expect(table?.seats).toBe(4);
+      expect(table?.roomId).toBe(ROOM_ID);
+    });
+
+    it('reports a label nothing carries rather than throwing', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'getCollection')
+        .mockResolvedValue(asCollection([]));
+
+      await expect(
+        service.loadTableByLabel(RESTAURANT_ID, '404'),
       ).resolves.toBeUndefined();
     });
   });

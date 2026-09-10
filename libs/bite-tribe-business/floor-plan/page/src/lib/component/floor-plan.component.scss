@@ -227,3 +227,14 @@
     border-left: 3px solid var(--ion-color-primary);
   }
 }
+
+/*
+ * A refused table label (GitHub issue #1084).
+ *
+ * Danger-coloured because it is a refusal rather than a hint: the label the
+ * owner typed was not written, and a note in the same grey as the snap
+ * explanation beside it would read as advice they can ignore.
+ */
+.floor-plan__conflict {
+  color: var(--ion-color-danger, #eb445a);
+}

@@ -573,6 +573,106 @@ describe(FloorPlanCanvasComponent.name, () => {
       );
     });
 
+    describe('what a table says about itself', () => {
+      const labelOf = (id: string): string =>
+        itemElement(id)
+          ?.querySelector('.floor-plan-canvas__item-label')
+          ?.textContent?.trim() ?? '';
+
+      const seatsOf = (id: string): string =>
+        itemElement(id)
+          ?.querySelector('.floor-plan-canvas__item-seats text')
+          ?.textContent?.trim() ?? '';
+
+      /**
+       * Digits behind a figure, not a sentence: a 900 mm round table is about
+       * three characters wide at zoom-to-fit, so "4 seats" written across one
+       * runs off both sides. The words are in the `<title>`, where a hover and
+       * a screen reader both find them.
+       */
+      it('draws the table number and the capacity under it', () => {
+        setInputs({ items: [{ ...table, seats: 4 }] });
+
+        expect(labelOf('table-1')).toBe('7');
+        expect(seatsOf('table-1')).toBe('4');
+        expect(
+          itemElement('table-1')?.querySelector('title')?.textContent,
+        ).toContain('floor-plan-table-seats-count');
+      });
+
+      it('keeps the figure and the digits centred on the table together', () => {
+        setInputs({ items: [{ ...table, seats: 4 }] });
+        const single = component.itemViews()[0];
+
+        setInputs({ items: [{ ...table, seats: 12 }] });
+        const double = component.itemViews()[0];
+
+        // A wider capacity pushes the figure left rather than sliding the pair
+        // off to one side of the table it is supposed to be written on.
+        expect(double.seatHeadX).toBeLessThan(single.seatHeadX);
+        expect(double.seatsTextX).toBeLessThan(single.seatsTextX);
+      });
+
+      it('draws the seated figure beside the digits', () => {
+        setInputs({ items: [{ ...table, seats: 4 }] });
+        const group = itemElement('table-1')?.querySelector(
+          '.floor-plan-canvas__item-seats',
+        );
+
+        expect(group?.querySelector('circle')).not.toBeNull();
+        expect(group?.querySelector('path')?.getAttribute('d')).toContain('M ');
+      });
+
+      /**
+       * The number is a share of the viewport rather than a pixel size, which
+       * is what keeps it legible at zoom-to-fit — the zoom level the acceptance
+       * criterion names — as well as zoomed in.
+       */
+      it('sizes the number against the viewport, and the capacity under it', () => {
+        setInputs({ items: [{ ...table, seats: 4 }] });
+
+        const view = component.itemViews()[0];
+
+        expect(view.labelSize).toBeCloseTo(component.viewport().height * 0.03);
+        expect(view.seatsSize).toBeLessThan(view.labelSize);
+      });
+
+      it('centres a number that stands alone and lifts one with a capacity under it', () => {
+        setInputs({ items: [{ ...table, seats: undefined }] });
+        expect(component.itemViews()[0].labelY).toBe(2000);
+
+        setInputs({ items: [{ ...table, seats: 4 }] });
+        expect(component.itemViews()[0].labelY).toBeLessThan(2000);
+        expect(component.itemViews()[0].seatsY).toBeGreaterThan(2000);
+      });
+
+      it('writes no number and no capacity on geometry', () => {
+        expect(labelOf('wall-1')).toBe('');
+        expect(seatsOf('wall-1')).toBe('');
+      });
+
+      /**
+       * A disabled table stays in the plan and is drawn differently: it is a
+       * real place in the room that is not taking guests.
+       */
+      it('marks a table that is out of service without removing it', () => {
+        setInputs({ items: [{ ...table, seats: 4, enabled: false }] });
+
+        expect(itemElement('table-1')).not.toBeNull();
+        expect(itemElement('table-1')?.getAttribute('class')).toContain(
+          'floor-plan-canvas__item--disabled',
+        );
+      });
+
+      it('marks a table in service as ordinary', () => {
+        setInputs({ items: [{ ...table, seats: 4, enabled: true }] });
+
+        expect(itemElement('table-1')?.getAttribute('class')).not.toContain(
+          'floor-plan-canvas__item--disabled',
+        );
+      });
+    });
+
     /**
      * The acceptance criterion that rotation is a number in the model rather
      * than a transform string. The transform is a rendering detail derived from

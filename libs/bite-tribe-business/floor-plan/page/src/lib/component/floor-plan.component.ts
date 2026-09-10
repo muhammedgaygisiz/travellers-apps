@@ -6,6 +6,7 @@ import {
   input,
   linkedSignal,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import {
@@ -24,6 +25,8 @@ import {
   IonNote,
   IonSelect,
   IonSelectOption,
+  IonSegment,
+  IonSegmentButton,
   IonSpinner,
   IonToggle,
 } from '@ionic/angular/standalone';
@@ -45,7 +48,19 @@ import {
   roomCentre,
 } from 'bite-tribe-business/floor-plan-ui';
 import { PageComponent } from 'common/ui/page';
-import { FloorPlanSize, Millimetres, Room } from 'model';
+import {
+  FloorPlanSize,
+  Millimetres,
+  RestaurantTable,
+  Room,
+  TableShape,
+} from 'model';
+import {
+  FIRST_TABLE_NUMBER,
+  MAX_TABLE_SEATS,
+  MIN_TABLE_SEATS,
+  TableLabelConflict,
+} from '../integration/floor-plan-tables';
 import { RoomDraft } from '../integration/room-draft';
 
 /**
@@ -87,6 +102,15 @@ interface ItemFormValues {
   height: string;
   rotation: string;
   round: boolean;
+}
+
+/** The table inputs of the properties panel, and the table they came from. */
+interface TableFormValues {
+  id: string;
+  label: string;
+  seats: string;
+  shape: TableShape | '';
+  enabled: boolean;
 }
 
 /** One palette entry, drawn to scale against every other entry. */
@@ -147,6 +171,8 @@ interface PaletteView {
     IonIcon,
     IonSelect,
     IonSelectOption,
+    IonSegment,
+    IonSegmentButton,
     IonSpinner,
     IonToggle,
     TranslocoPipe,
@@ -187,6 +213,25 @@ export class FloorPlanComponent {
   readonly canRedo = input(false);
   readonly unsavedChanges = input(false);
 
+  /**
+   * The one selected table, as the entity rather than as a drawn item
+   * (GitHub issue #1084).
+   *
+   * A `RestaurantTable` and not a `FloorPlanItem`, because these fields *are*
+   * the table: a capacity and a service state are not geometry and deliberately
+   * never reach the canvas's item on the way to being edited.
+   */
+  readonly selectedTable = input<RestaurantTable | undefined>(undefined);
+
+  /** How many of the selected items are tables, for the numbering helper. */
+  readonly selectedTableCount = input(0);
+
+  /** A label the editor refused, until the owner types one it accepts. */
+  readonly labelConflict = input<TableLabelConflict | undefined>(undefined);
+
+  /** The room already holding the refused label, so the message can name it. */
+  readonly labelConflictRoom = input<string | undefined>(undefined);
+
   readonly selectRoom = output<string>();
   readonly createRoom = output<RoomDraft>();
   readonly saveRoom = output<RoomDraft>();
@@ -201,6 +246,15 @@ export class FloorPlanComponent {
   readonly commandRequest = output<FloorPlanCanvasCommand>();
   readonly resizeSelected = output<FloorPlanSize>();
   readonly rotateSelected = output<number>();
+
+  readonly renameTable = output<string>();
+  readonly tableSeatsChange = output<number>();
+  readonly tableShapeChange = output<TableShape>();
+  readonly tableEnabledChange = output<boolean>();
+  readonly numberTables = output<number>();
+
+  readonly minSeats = MIN_TABLE_SEATS;
+  readonly maxSeats = MAX_TABLE_SEATS;
 
   readonly gridSpacings = GRID_SPACINGS;
 
@@ -318,6 +372,45 @@ export class FloorPlanComponent {
     computation: (values) => values.rotation,
   });
 
+  /**
+   * The table inputs, refilled whenever the selected table's own fields move.
+   *
+   * The same decision as the geometry inputs above: everything is in the
+   * source, so bulk numbering and an undo both show up in the label field the
+   * owner is looking at. A refused label is the one thing that does *not*
+   * refill it — the editor kept the old label, and overwriting what the owner
+   * typed would hide the very text the conflict message is about.
+   */
+  private readonly tableValues = computed<TableFormValues>(() => {
+    const table = this.selectedTable();
+
+    return {
+      id: table?.id ?? '',
+      label: table?.label ?? '',
+      seats: table ? String(table.seats) : '',
+      shape: table?.shape ?? '',
+      enabled: table?.enabled ?? true,
+    };
+  });
+
+  readonly tableLabel = linkedSignal<TableFormValues, string>({
+    source: this.tableValues,
+    computation: (values) => values.label,
+  });
+
+  readonly tableSeats = linkedSignal<TableFormValues, string>({
+    source: this.tableValues,
+    computation: (values) => values.seats,
+  });
+
+  /**
+   * The first number a bulk renumber assigns.
+   *
+   * Plain component state rather than a linked signal: it is the owner's
+   * intention for the next action, and nothing on the plan is its source.
+   */
+  readonly numberFrom = signal(String(FIRST_TABLE_NUMBER));
+
   readonly hasRooms = computed(() => this.rooms().length > 0);
 
   readonly canSave = computed(
@@ -413,6 +506,35 @@ export class FloorPlanComponent {
       variant,
       position: this.canvas()?.centre() ?? roomCentre(room.size),
     });
+  }
+
+  /** Sends the typed label, refused or not: the editor owns the uniqueness rule. */
+  onLabelChange(): void {
+    this.renameTable.emit(this.tableLabel());
+  }
+
+  onSeatsChange(): void {
+    const seats = this.numberField(this.tableSeats());
+
+    if (seats !== undefined) {
+      this.tableSeatsChange.emit(seats);
+    }
+  }
+
+  onShapeChange(shape: string | number | undefined): void {
+    if (shape === 'round' || shape === 'rectangle') {
+      this.tableShapeChange.emit(shape);
+    }
+  }
+
+  onEnabledChange(enabled: boolean): void {
+    this.tableEnabledChange.emit(enabled);
+  }
+
+  onNumberTables(): void {
+    this.numberTables.emit(
+      this.numberField(this.numberFrom()) ?? FIRST_TABLE_NUMBER,
+    );
   }
 
   onItemSizeChange(): void {

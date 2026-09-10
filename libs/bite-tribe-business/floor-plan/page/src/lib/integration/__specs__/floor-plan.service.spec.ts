@@ -437,14 +437,20 @@ describe(FloorPlanService.name, () => {
   describe('editing the plan', () => {
     const idsOf = (): string[] => service.items().map((item) => item.id);
 
-    it('draws the geometry of the open room and the tables beside it', async () => {
+    it('draws the geometry of the open room and the tables standing in it', async () => {
       stored = [room({ objects: [wall] })];
-      storedTables = [table()];
+      storedTables = [
+        table(),
+        table({ id: 'table-9', label: '9', roomId: 'room-9' }),
+      ];
       service.rooms.reload();
       service.tables.reload();
       await loaded();
 
-      expect(loadTables).toHaveBeenCalledWith('china-wok', 'room-1');
+      // Every table of the restaurant is read, because a label is unique across
+      // rooms and cannot be checked against tables that were never loaded. Only
+      // the open room's tables are drawn.
+      expect(loadTables).toHaveBeenCalledWith('china-wok');
       expect(idsOf()).toEqual(['wall-1', 'table-1']);
     });
 
@@ -644,6 +650,185 @@ describe(FloorPlanService.name, () => {
       await loaded();
 
       expect(service.unsavedChanges()).toBe(false);
+    });
+  });
+
+  describe('the table as a business entity', () => {
+    /** One table in the open room and one on the terrace, holding number 7. */
+    const twoRooms = async (): Promise<void> => {
+      stored = [room(), room({ id: 'terrace', name: 'Terrace', order: 1 })];
+      storedTables = [
+        table(),
+        table({ id: 'table-7', label: '7', roomId: 'terrace' }),
+      ];
+      service.rooms.reload();
+      service.tables.reload();
+      await loaded();
+      service.select(['table-1']);
+    };
+
+    const labelOf = (id: string): string | undefined =>
+      service.layout().tables.find((entry) => entry.id === id)?.label;
+
+    it('draws only the open room while holding every table of the restaurant', async () => {
+      await twoRooms();
+
+      expect(service.layout().tables.map((entry) => entry.id)).toEqual([
+        'table-1',
+      ]);
+      expect(service.otherRoomTables().map((entry) => entry.id)).toEqual([
+        'table-7',
+      ]);
+    });
+
+    it('renames a table to a free label', async () => {
+      await twoRooms();
+
+      service.renameTable(' 12 ');
+
+      expect(labelOf('table-1')).toBe('12');
+      expect(service.labelConflict()).toBeUndefined();
+    });
+
+    /** The acceptance criterion: two tables in one restaurant, one label. */
+    it('refuses a label held in another room and names that room', async () => {
+      await twoRooms();
+
+      service.renameTable('7');
+
+      expect(labelOf('table-1')).toBe('1');
+      expect(service.labelConflict()?.issue).toBe('duplicate');
+      expect(service.labelConflictRoom()).toBe('Terrace');
+    });
+
+    it('refuses an empty label', async () => {
+      await twoRooms();
+
+      service.renameTable('  ');
+
+      expect(labelOf('table-1')).toBe('1');
+      expect(service.labelConflict()?.issue).toBe('empty');
+    });
+
+    it('drops a refused label once a usable one arrives', async () => {
+      await twoRooms();
+
+      service.renameTable('7');
+      service.renameTable('8');
+
+      expect(service.labelConflict()).toBeUndefined();
+      expect(labelOf('table-1')).toBe('8');
+    });
+
+    it('drops a refused label when another item is selected', async () => {
+      await twoRooms();
+
+      service.renameTable('7');
+      service.select([]);
+
+      expect(service.labelConflict()).toBeUndefined();
+    });
+
+    it('sets a capacity, bounded rather than trusted', async () => {
+      await twoRooms();
+
+      service.setTableSeats(0);
+
+      expect(service.layout().tables[0].seats).toBe(1);
+    });
+
+    it('takes a table out of service without taking it off the plan', async () => {
+      await twoRooms();
+
+      service.setTableEnabled(false);
+
+      expect(service.layout().tables).toHaveLength(1);
+      expect(service.layout().tables[0].enabled).toBe(false);
+    });
+
+    it('switches the shape and drops the fields of the shape it left', async () => {
+      await twoRooms();
+
+      service.setTableShape('round');
+
+      expect(service.layout().tables[0]).toMatchObject({
+        shape: 'round',
+        diameter: 1200,
+        label: '1',
+        seats: 4,
+      });
+      expect(service.layout().tables[0]).not.toHaveProperty('size');
+    });
+
+    it('leaves the geometry alone when the table itself is edited', async () => {
+      await twoRooms();
+      const before = service.layout().tables[0].position;
+
+      service.renameTable('12');
+      service.setTableSeats(6);
+
+      expect(service.layout().tables[0].position).toEqual(before);
+      expect(service.layout().objects).toEqual([]);
+    });
+
+    it('records each table edit as its own undo step', async () => {
+      await twoRooms();
+
+      service.setTableSeats(6);
+      service.undo();
+
+      expect(service.layout().tables[0].seats).toBe(4);
+    });
+
+    it('gives a newly placed table a number the other rooms have not taken', async () => {
+      stored = [room()];
+      storedTables = [
+        table({ id: 'terrace-1', label: '1', roomId: 'terrace' }),
+        table({ id: 'terrace-2', label: '2', roomId: 'terrace' }),
+      ];
+      service.rooms.reload();
+      service.tables.reload();
+      await loaded();
+
+      service.place({
+        variant: 'table-round',
+        position: { x: 2000, y: 2000 },
+      });
+
+      expect(service.layout().tables[0].label).toBe('3');
+    });
+
+    it('gives a duplicated table a number the other rooms have not taken', async () => {
+      await twoRooms();
+
+      service.duplicateSelection();
+
+      expect(service.layout().tables.map((entry) => entry.label)).toEqual([
+        '1',
+        '2',
+      ]);
+    });
+
+    it('numbers the selected tables consecutively from the start the owner gave', async () => {
+      await twoRooms();
+      service.place({ variant: 'table-round', position: { x: 5000, y: 5000 } });
+      service.selectAll();
+
+      service.numberSelection(20);
+
+      expect(service.layout().tables.map((entry) => entry.label)).toEqual([
+        '20',
+        '21',
+      ]);
+    });
+
+    it('skips a number the terrace already holds while numbering', async () => {
+      await twoRooms();
+      service.selectAll();
+
+      service.numberSelection(7);
+
+      expect(labelOf('table-1')).toBe('8');
     });
   });
 

@@ -201,6 +201,62 @@
   pointer-events: none;
 }
 
+/*
+ * The capacity, quieter than the number above it.
+ *
+ * Ink rather than a hue, for the reason the objects are: a plan is printed for
+ * QR sheets and read across a room, so weight and tone are the distinctions
+ * that survive greyscale and colour-blindness. The seated figure and the digits
+ * are one colour, because they are one statement.
+ */
+.floor-plan-canvas__item-seats {
+  pointer-events: none;
+
+  circle,
+  path {
+    fill: rgba(var(--floor-plan-ink-rgb), 0.7);
+    stroke: none;
+  }
+
+  text {
+    fill: rgba(var(--floor-plan-ink-rgb), 0.7);
+    font-family: var(--ion-font-family, sans-serif);
+    font-weight: 600;
+  }
+}
+
+/*
+ * A table out of service (GitHub issue #1084).
+ *
+ * It stays in the plan and stays selectable - it is a real place in the room
+ * that is not taking guests, not a mistake to be hidden. Hatched rather than
+ * merely faded, because a fade reads as "loading" and disappears entirely in a
+ * print; the hatch is the same vocabulary the blocked-area object already uses
+ * for floor that cannot be sat at.
+ */
+.floor-plan-canvas__item--disabled {
+  rect,
+  circle {
+    fill: rgba(var(--floor-plan-ink-rgb), 0.12);
+    stroke: rgba(var(--floor-plan-ink-rgb), 0.45);
+    stroke-dasharray: 180 140;
+  }
+
+  .floor-plan-canvas__item-label {
+    fill: rgba(var(--floor-plan-ink-rgb), 0.45);
+  }
+
+  .floor-plan-canvas__item-seats {
+    circle,
+    path,
+    text {
+      fill: rgba(var(--floor-plan-ink-rgb), 0.4);
+      stroke: none;
+      stroke-dasharray: none;
+    }
+  }
+}
+
 .floor-plan-canvas__item--selected {
   rect,
   circle {

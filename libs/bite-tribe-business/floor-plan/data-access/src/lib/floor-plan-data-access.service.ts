@@ -7,8 +7,18 @@ export const RESTAURANT_COLLECTION = 'restaurants';
 export const ROOMS_COLLECTION = 'rooms';
 export const TABLES_COLLECTION = 'tables';
 
-/** The field a table names its room with, and the only one this library queries on. */
+/** The field a table names its room with. */
 export const TABLE_ROOM_FIELD = 'roomId';
+
+/**
+ * The field a table carries its public number in (GitHub issue #1084).
+ *
+ * Queried rather than only read, because "table 12" is how staff and guests
+ * name a table and the label is what a support request, a printed sheet and a
+ * scan resolution all start from. [[Table]] makes it unique within the
+ * restaurant, so a query on it answers with one table.
+ */
+export const TABLE_LABEL_FIELD = 'label';
 
 /**
  * The version a room is created at.
@@ -181,30 +191,65 @@ export class FloorPlanDataAccessService {
       : undefined;
   }
 
-  /**
-   * The tables of one restaurant, or of one room when `roomId` is given.
-   *
-   * The filter is a `where` on the table rather than a table subcollection of
-   * the room, because a table keeps its identity when it moves to another
-   * room: moving it is one field change here, where a nested path would mean
-   * deleting and recreating the document its QR token and its history point at.
-   */
+  /** The tables of one restaurant, or of one room when `roomId` is given. */
   async loadTables(
     restaurantId: string,
     roomId?: string,
   ): Promise<RestaurantTable[]> {
+    return this.queryTables(
+      restaurantId,
+      roomId === undefined
+        ? undefined
+        : { field: TABLE_ROOM_FIELD, value: roomId },
+    );
+  }
+
+  /**
+   * The one table carrying a label, or `undefined`.
+   *
+   * "Table 12" is the name a staff member says out loud, and [[Table]] makes it
+   * unique within the restaurant, so this returns a single table rather than a
+   * list. Uniqueness is held by the editor rather than by Firestore - security
+   * rules cannot query, so no rule can ask whether a label is already taken -
+   * and the first match is therefore the answer rather than a choice between
+   * candidates.
+   */
+  async loadTableByLabel(
+    restaurantId: string,
+    label: string,
+  ): Promise<RestaurantTable | undefined> {
+    const [table] = await this.queryTables(restaurantId, {
+      field: TABLE_LABEL_FIELD,
+      value: label,
+    });
+
+    return table;
+  }
+
+  /**
+   * The tables of one restaurant, optionally narrowed to one equal field.
+   *
+   * A `where` on the table rather than a table subcollection of the room,
+   * because a table keeps its identity when it moves to another room: moving it
+   * is one field change here, where a nested path would mean deleting and
+   * recreating the document its QR token and its history point at.
+   */
+  private async queryTables(
+    restaurantId: string,
+    match?: { field: string; value: string },
+  ): Promise<RestaurantTable[]> {
     const result = await FirebaseFirestore.getCollection({
       reference: this.tablesReference(restaurantId),
-      ...(roomId
+      ...(match
         ? {
             compositeFilter: {
               type: 'and' as const,
               queryConstraints: [
                 {
                   type: 'where' as const,
-                  fieldPath: TABLE_ROOM_FIELD,
+                  fieldPath: match.field,
                   opStr: '==' as const,
-                  value: roomId,
+                  value: match.value,
                 },
               ],
             },

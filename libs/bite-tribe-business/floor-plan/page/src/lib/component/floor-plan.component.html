@@ -373,6 +373,162 @@
             </ion-card>
           }
 
+          <!--
+            The table as a business entity, in its own card beside the geometry
+            one. Separate because the two are separate: where a table stands is
+            the drawing, and what it is called and how many people it seats are
+            facts about the table that outlive every rearrangement.
+          -->
+          @if (selectedTable(); as table) {
+            <ion-card data-testid="floor-plan-table-properties">
+              <ion-card-header>
+                <ion-card-title>{{
+                  'floor-plan-table-properties' | transloco
+                }}</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <ion-item>
+                  <ion-input
+                    labelPlacement="stacked"
+                    autocomplete="off"
+                    [label]="'floor-plan-table-label' | transloco"
+                    [value]="tableLabel()"
+                    data-testid="floor-plan-table-label"
+                    (ionInput)="tableLabel.set($event.detail.value ?? '')"
+                    (ionChange)="onLabelChange()"
+                  />
+                </ion-item>
+
+                @if (labelConflict(); as conflict) {
+                  <ion-note
+                    class="floor-plan__hint floor-plan__conflict"
+                    data-testid="floor-plan-table-label-conflict"
+                  >
+                    @if (conflict.issue === 'empty') {
+                      {{ 'floor-plan-table-label-empty' | transloco }}
+                    } @else {
+                      {{
+                        'floor-plan-table-label-taken'
+                          | transloco
+                            : {
+                                label: conflict.label,
+                                room: labelConflictRoom() ?? '',
+                              }
+                      }}
+                    }
+                  </ion-note>
+                }
+
+                <ion-item>
+                  <ion-input
+                    type="number"
+                    inputmode="numeric"
+                    labelPlacement="stacked"
+                    [label]="'floor-plan-table-seats' | transloco"
+                    [min]="minSeats"
+                    [max]="maxSeats"
+                    [value]="tableSeats()"
+                    data-testid="floor-plan-table-seats"
+                    (ionInput)="tableSeats.set($event.detail.value ?? '')"
+                    (ionChange)="onSeatsChange()"
+                  />
+                </ion-item>
+
+                <ion-item lines="none">
+                  <ion-label position="stacked">{{
+                    'floor-plan-table-shape' | transloco
+                  }}</ion-label>
+                  <ion-segment
+                    [value]="table.shape"
+                    data-testid="floor-plan-table-shape"
+                    (ionChange)="onShapeChange($event.detail.value)"
+                  >
+                    <ion-segment-button value="rectangle">
+                      <ion-label>{{
+                        'floor-plan-object-table-rectangle' | transloco
+                      }}</ion-label>
+                    </ion-segment-button>
+                    <ion-segment-button value="round">
+                      <ion-label>{{
+                        'floor-plan-object-table-round' | transloco
+                      }}</ion-label>
+                    </ion-segment-button>
+                  </ion-segment>
+                </ion-item>
+
+                <ion-item lines="none">
+                  <!--
+                    The text is slotted straight into the toggle rather than
+                    wrapped in an `ion-label`: a label is not one of the
+                    toggle's slots, so a wrapped one renders as nothing at all
+                    and leaves a switch nobody can name.
+                  -->
+                  <ion-toggle
+                    [checked]="table.enabled"
+                    data-testid="floor-plan-table-enabled"
+                    (ionChange)="onEnabledChange($event.detail.checked)"
+                  >
+                    {{ 'floor-plan-table-enabled' | transloco }}
+                  </ion-toggle>
+                </ion-item>
+
+                @if (!table.enabled) {
+                  <ion-note
+                    class="floor-plan__hint"
+                    data-testid="floor-plan-table-disabled-hint"
+                  >
+                    {{ 'floor-plan-table-disabled-hint' | transloco }}
+                  </ion-note>
+                }
+              </ion-card-content>
+            </ion-card>
+          }
+
+          <!--
+            Numbering a selection, which is how a room of twenty tables gets its
+            numbers: duplicate one table into a grid, then number the grid in
+            one action rather than opening twenty panels.
+          -->
+          @if (selectedTableCount() > 1) {
+            <ion-card data-testid="floor-plan-numbering">
+              <ion-card-header>
+                <ion-card-title>{{
+                  'floor-plan-numbering' | transloco
+                }}</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <ion-note class="floor-plan__hint">
+                  {{
+                    'floor-plan-numbering-hint'
+                      | transloco: { count: selectedTableCount() }
+                  }}
+                </ion-note>
+
+                <ion-item>
+                  <ion-input
+                    type="number"
+                    inputmode="numeric"
+                    labelPlacement="stacked"
+                    [label]="'floor-plan-numbering-start' | transloco"
+                    [min]="1"
+                    [value]="numberFrom()"
+                    data-testid="floor-plan-numbering-start"
+                    (ionInput)="numberFrom.set($event.detail.value ?? '')"
+                  />
+                </ion-item>
+
+                <ion-button
+                  class="ion-margin-top"
+                  fill="outline"
+                  data-testid="floor-plan-number-tables"
+                  (click)="onNumberTables()"
+                >
+                  {{ 'floor-plan-number-tables' | transloco }}
+                </ion-button>
+              </ion-card-content>
+            </ion-card>
+          }
+
           <ion-card>
             <ion-card-header>
               <ion-card-title>{{
@@ -402,7 +558,7 @@
                   data-testid="floor-plan-snap"
                   (ionChange)="onSnapChange($event.detail.checked)"
                 >
-                  <ion-label>{{ 'floor-plan-snap' | transloco }}</ion-label>
+                  {{ 'floor-plan-snap' | transloco }}
                 </ion-toggle>
               </ion-item>
               <ion-note class="floor-plan__hint">

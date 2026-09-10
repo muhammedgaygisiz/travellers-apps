@@ -37,6 +37,7 @@ import {
   Restaurant,
   RestaurantTable,
   Room,
+  TableShape,
 } from 'model';
 import { ToastService } from 'toast';
 import { resourceFailed, resourceValue } from 'utils';
@@ -60,6 +61,16 @@ import {
   withItemGeometry,
   withoutIds,
 } from './floor-plan-layout';
+import {
+  FIRST_TABLE_NUMBER,
+  TableLabelConflict,
+  labelConflict,
+  numberedTables,
+  withTableEnabled,
+  withTableLabel,
+  withTableSeats,
+  withTableShapeChanged,
+} from './floor-plan-tables';
 import { RoomDraft } from './room-draft';
 
 export const RESTAURANT_COLLECTION = 'restaurants';
@@ -184,33 +195,79 @@ export class FloorPlanService {
   });
 
   /**
-   * The tables standing in the open room.
+   * Every table of the restaurant, not only the ones in the open room.
    *
-   * Keyed on the room rather than on the restaurant, because that is the query
-   * `loadTables` runs and because the editor draws one room at a time. Reading
-   * every table of a restaurant to draw one terrace would grow with the whole
-   * business instead of with the room on screen.
+   * Issue #1082 keyed this on the room, because the editor draws one room at a
+   * time. Issue #1084 made a table's label unique across the *restaurant*,
+   * including across rooms ([[Table]]), and a uniqueness rule cannot be checked
+   * against data that is not loaded: the terrace's table 7 has to refuse the
+   * dining room's second table 7 even though the terrace is not on screen.
+   *
+   * It is still one query per plan load rather than one per room, and it is
+   * bounded by the tables of one restaurant rather than by the business. It
+   * also means switching rooms re-reads nothing.
    */
   readonly tablesLoader: ResourceLoader<
     RestaurantTable[] | undefined,
-    { restaurantId: string | undefined; roomId: string | undefined }
+    { restaurantId: string | undefined }
   > = async ({ params }) => {
-    const { restaurantId, roomId } = params;
+    const { restaurantId } = params;
 
-    return restaurantId && roomId
-      ? this.dataAccess.loadTables(restaurantId, roomId)
-      : [];
+    return restaurantId ? this.dataAccess.loadTables(restaurantId) : [];
   };
 
   readonly tables = resource({
-    params: () => ({
-      restaurantId: this.restaurantId(),
-      roomId: this.selectedRoom()?.id,
-    }),
+    params: () => ({ restaurantId: this.restaurantId() }),
     loader: this.tablesLoader.bind(this),
   });
 
   readonly tablesValue = resourceValue(this.tables, [] as RestaurantTable[]);
+
+  /**
+   * The stored tables of the open room, and of every other room.
+   *
+   * Compared element by element rather than by array identity, so a room list
+   * rebuilt with the same contents does not hand `storedPlan` a new array and
+   * throw away the owner's undo stack mid-edit.
+   */
+  private readonly sameTables = (
+    before: readonly RestaurantTable[],
+    after: readonly RestaurantTable[],
+  ): boolean =>
+    before.length === after.length &&
+    before.every((table, index) => table === after[index]);
+
+  readonly roomTables = computed<RestaurantTable[]>(
+    () => {
+      const roomId = this.selectedRoom()?.id;
+
+      return roomId
+        ? this.tablesValue().filter((table) => table.roomId === roomId)
+        : [];
+    },
+    { equal: this.sameTables },
+  );
+
+  /**
+   * The tables standing in the restaurant's other rooms.
+   *
+   * Their labels are what the editor has to avoid: a number taken on the
+   * terrace is taken in the dining room too, and the owner never sees it while
+   * they are editing this room.
+   */
+  readonly otherRoomTables = computed<RestaurantTable[]>(
+    () => {
+      const roomId = this.selectedRoom()?.id;
+
+      return this.tablesValue().filter((table) => table.roomId !== roomId);
+    },
+    { equal: this.sameTables },
+  );
+
+  /** The labels a new or renumbered table in this room may not take. */
+  private readonly reservedLabels = computed(() =>
+    this.otherRoomTables().map((table) => table.label),
+  );
 
   /**
    * The room and its tables exactly as they are stored, and what makes them a
@@ -234,7 +291,7 @@ export class FloorPlanService {
   }>(
     () => {
       const room = this.selectedRoom();
-      const tables = this.tablesValue();
+      const tables = this.roomTables();
 
       return {
         roomId: room?.id ?? '',
@@ -297,6 +354,54 @@ export class FloorPlanService {
     return this.items().filter((item) => chosen.has(item.id));
   });
 
+  /**
+   * The one table the table properties edit, or nothing.
+   *
+   * Exactly one, like the geometry inputs beside it: with two tables selected
+   * there is no single number to type into a field, and renaming whichever came
+   * first is worse than doing nothing. Read off the layout rather than off the
+   * canvas items, because these fields are the table itself.
+   */
+  readonly selectedTable = computed<RestaurantTable | undefined>(() => {
+    const ids = this.selection();
+
+    return ids.length === 1
+      ? this.layout().tables.find((table) => table.id === ids[0])
+      : undefined;
+  });
+
+  /** The tables in the current selection, for the bulk numbering helper. */
+  readonly selectedTables = computed<RestaurantTable[]>(() => {
+    const chosen = new Set(this.selection());
+
+    return this.layout().tables.filter((table) => chosen.has(table.id));
+  });
+
+  /**
+   * The label the owner typed that was refused, until they type a usable one.
+   *
+   * Held here rather than derived, because it is the record of a rejected
+   * *attempt*: the table still carries the label it had, so nothing in the
+   * layout remembers what was refused, and a message that vanished on the next
+   * render would leave the owner wondering why their typing did not stick.
+   *
+   * Not in the undo history. A refused edit changed nothing to undo.
+   */
+  private readonly rejectedLabel = signal<TableLabelConflict | undefined>(
+    undefined,
+  );
+
+  readonly labelConflict = this.rejectedLabel.asReadonly();
+
+  /** The room a conflicting label already lives in, for the message. */
+  readonly labelConflictRoom = computed<string | undefined>(() => {
+    const holder = this.rejectedLabel()?.holder;
+
+    return holder
+      ? this.roomsValue().find((room) => room.id === holder.roomId)?.name
+      : undefined;
+  });
+
   readonly canUndo = computed(() => canUndo(this.history()));
   readonly canRedo = computed(() => canRedo(this.history()));
 
@@ -340,6 +445,9 @@ export class FloorPlanService {
   // -------------------------------------------------------- editing the plan
 
   select(ids: readonly string[]): void {
+    // A refused label belongs to the table that refused it, so selecting a
+    // different one must not leave its message over somebody else's field.
+    this.rejectedLabel.set(undefined);
     this.selection.set([...ids]);
   }
 
@@ -369,6 +477,7 @@ export class FloorPlanService {
         room.size,
       ),
       room.id,
+      this.reservedLabels(),
     );
 
     this.mutate(layout);
@@ -420,6 +529,97 @@ export class FloorPlanService {
     }
   }
 
+  // ------------------------------------------------- the table as an entity
+
+  /**
+   * Renames a table, or refuses and says why.
+   *
+   * The refusal is the point. [[Table]] makes a label unique within the
+   * restaurant across all rooms, and a check that only warned would leave the
+   * plan holding two tables called 12 until somebody tried to publish it — by
+   * which time the owner has forgotten which one they meant. So a duplicate
+   * label never reaches the layout: the table keeps the label it had, and the
+   * conflict names the room that already holds the number.
+   *
+   * An empty label is refused for the same reason rather than as validation
+   * politeness: a table with no number cannot be printed on a QR sheet, called
+   * out by staff, or found by the label query.
+   */
+  renameTable(label: string): void {
+    const table = this.selectedTable();
+
+    if (!table) {
+      return;
+    }
+
+    const conflict = labelConflict(label, table.id, [
+      ...this.layout().tables,
+      ...this.otherRoomTables(),
+    ]);
+
+    if (conflict) {
+      this.rejectedLabel.set(conflict);
+
+      return;
+    }
+
+    this.rejectedLabel.set(undefined);
+    this.mutate(withTableLabel(this.layout(), table.id, label));
+  }
+
+  /** Seating capacity, bounded here rather than trusted from an `<input>`. */
+  setTableSeats(seats: number): void {
+    const table = this.selectedTable();
+
+    if (table) {
+      this.mutate(withTableSeats(this.layout(), table.id, seats));
+    }
+  }
+
+  /**
+   * Takes a table in or out of service.
+   *
+   * A configuration decision, not the operational "blocked right now" of a live
+   * view: the table stays in the plan, keeps its number and is drawn
+   * differently, because it is still a real place in the room.
+   */
+  setTableEnabled(enabled: boolean): void {
+    const table = this.selectedTable();
+
+    if (table) {
+      this.mutate(withTableEnabled(this.layout(), table.id, enabled));
+    }
+  }
+
+  setTableShape(shape: TableShape): void {
+    const table = this.selectedTable();
+
+    if (table) {
+      this.mutate(withTableShapeChanged(this.layout(), table.id, shape));
+    }
+  }
+
+  /**
+   * Numbers the selected tables consecutively from `start`.
+   *
+   * The selection rather than the room, so an owner can number one row, one
+   * section or the whole plan with the same control. Numbers held elsewhere in
+   * the restaurant are skipped, so the helper cannot produce the collision
+   * {@link renameTable} refuses one table at a time.
+   */
+  numberSelection(start: number = FIRST_TABLE_NUMBER): void {
+    const ids = this.selectedTables().map((table) => table.id);
+
+    if (ids.length === 0) {
+      return;
+    }
+
+    this.rejectedLabel.set(undefined);
+    this.mutate(
+      numberedTables(this.layout(), ids, start, this.reservedLabels()),
+    );
+  }
+
   duplicateSelection(): void {
     const room = this.selectedRoom();
     const ids = this.selection();
@@ -432,7 +632,13 @@ export class FloorPlanService {
     // and still on the grid the original was placed on.
     const step = this.snapSpacing() > 0 ? this.snapSpacing() : DUPLICATE_OFFSET;
     const offset: FloorPlanPoint = { x: step, y: step };
-    const duplicated = duplicateIds(this.layout(), ids, offset, room.size);
+    const duplicated = duplicateIds(
+      this.layout(),
+      ids,
+      offset,
+      room.size,
+      this.reservedLabels(),
+    );
 
     this.mutate(duplicated.layout);
     this.selection.set(duplicated.ids);
@@ -455,12 +661,24 @@ export class FloorPlanService {
 
   undo(): void {
     this.history.update(undo);
-    this.pruneSelection();
+    this.afterHistoryStep();
   }
 
   redo(): void {
     this.history.update(redo);
+    this.afterHistoryStep();
+  }
+
+  /**
+   * What has to be true again after the history moves.
+   *
+   * The selection is pruned of what the step took away, and a refused label is
+   * dropped: it was a message about an edit that never landed, and the plan the
+   * owner is now looking at is a different one.
+   */
+  private afterHistoryStep(): void {
     this.pruneSelection();
+    this.rejectedLabel.set(undefined);
   }
 
   /** The keyboard shortcuts the canvas cannot answer for itself. */
@@ -578,7 +796,9 @@ export class FloorPlanService {
 
       await this.writeTables(restaurantId, layout.tables);
 
-      this.tables.set(layout.tables);
+      // The whole restaurant's tables, because that is what the resource holds:
+      // the rooms nobody touched, plus this room as it now stands.
+      this.tables.set([...this.otherRoomTables(), ...layout.tables]);
       this.replaceRoom(saved);
 
       await this.toast.present({
@@ -603,7 +823,7 @@ export class FloorPlanService {
     restaurantId: string,
     tables: readonly RestaurantTable[],
   ): Promise<void> {
-    const { changed, deleted } = tableWrites(this.tablesValue(), tables);
+    const { changed, deleted } = tableWrites(this.roomTables(), tables);
 
     await Promise.all([
       ...changed.map((table) => this.dataAccess.saveTable(restaurantId, table)),

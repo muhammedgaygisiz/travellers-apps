@@ -30,7 +30,10 @@ import { join } from 'node:path';
  * Adding a name here is the claim that the endpoint performs no operator
  * action. Anything that writes, spends or sends belongs in the trail instead.
  */
-const READ_ONLY_OPERATOR_ENDPOINTS = ['listUsersWithRoles'];
+const READ_ONLY_OPERATOR_ENDPOINTS = [
+  'listUsersWithRoles',
+  'listRestaurantStaff',
+];
 
 /**
  * The actor and target names the callables logged before the helper existed:
@@ -103,11 +106,26 @@ const declaredActions = (): string[] => {
   return [...(list?.[1] ?? '').matchAll(/'([^']+)'/g)].map((match) => match[1]);
 };
 
+/**
+ * The guards that make an endpoint privileged enough to belong in the trail.
+ *
+ * `requireAdmin` was the only one when issue #1477 wrote this. Issue #1537
+ * added the second: the two staff callables change what an account may do
+ * exactly as `setUserRoles` does, and they are performed by a restaurant owner
+ * rather than by an operator — so leaving them out would put the one privileged
+ * action a non-operator can take outside the only record of it.
+ */
+const PRIVILEGED_GUARDS = ['requireAdmin(', 'requireAnyRole('];
+
 describe('operator action logging', () => {
   const sources = listTypeScriptFiles(FUNCTIONS_ROOT);
   const operatorEndpoints = sources
     .flatMap(findEndpoints)
-    .filter((endpoint) => sourceOf(endpoint.file).includes('requireAdmin('));
+    .filter((endpoint) =>
+      PRIVILEGED_GUARDS.some((guard) =>
+        sourceOf(endpoint.file).includes(guard),
+      ),
+    );
 
   it('finds the operator endpoints in the functions source', () => {
     expect(operatorEndpoints.length).toBeGreaterThan(5);

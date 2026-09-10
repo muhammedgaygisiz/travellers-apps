@@ -119,3 +119,42 @@ export const requireAdmin = (request: CallableRequest<unknown>): string =>
  */
 export const requireBusiness = (request: CallableRequest<unknown>): string =>
   requireRole(request, 'business');
+
+/**
+ * Rejects any caller that holds none of `roles`, and returns the caller's uid.
+ *
+ * The one-role {@link requireRole} covers the common case, where a callable
+ * belongs to exactly one audience. This covers the other one: an action a
+ * restaurant performs on its own data that an operator must also be able to
+ * perform, so that a restaurant which locks itself out has a way back
+ * (issue #1537).
+ *
+ * **It is not a hierarchy, and it must not be read as one.** The roles named at
+ * a call site are alternatives, and the callable still has to decide what each
+ * of them is allowed to reach - `RD-UR-6` gives the operator every restaurant
+ * and the restaurant owner only the ones it holds. Anything that treats
+ * "admitted" as "authorised" has skipped the half of the decision this helper
+ * deliberately does not make.
+ */
+export const requireAnyRole = (
+  request: CallableRequest<unknown>,
+  ...roles: BiteTribeRole[]
+): string => {
+  if (!request.auth) {
+    throw new HttpsError(
+      'unauthenticated',
+      'You must be signed in to perform this operation.',
+    );
+  }
+
+  const held = rolesOf(request);
+
+  if (!roles.some((role) => held.includes(role))) {
+    throw new HttpsError(
+      'permission-denied',
+      `This operation requires one of these roles: ${roles.join(', ')}.`,
+    );
+  }
+
+  return request.auth.uid;
+};

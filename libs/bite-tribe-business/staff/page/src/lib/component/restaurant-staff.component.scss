@@ -1,0 +1,29 @@
+:host {
+  /*
+   * One column down the middle, the same shape the business app's other
+   * section pages use: `fullWidth` chrome lets the content span the viewport,
+   * and a list of a handful of people stretched across a desktop monitor has
+   * no left edge to scan down.
+   */
+  .restaurant-staff {
+    margin: 0 auto;
+    max-width: 40rem;
+  }
+
+  .restaurant-staff__subtitle {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .restaurant-staff__loading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  .restaurant-staff__hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+  }
+}

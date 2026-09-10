@@ -3,7 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { Restaurant } from 'model';
 import { ToastService } from 'toast';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { RestaurantsDataAccessService } from 'bite-tribe-admin/restaurants-data-access';
+import {
+  RestaurantStaffMember,
+  RestaurantsDataAccessService,
+} from 'bite-tribe-admin/restaurants-data-access';
 import { UserManagementDataAccessService } from 'bite-tribe-admin/user-management-data-access';
 import { RestaurantOwnershipService } from '../restaurant-ownership.service';
 
@@ -26,6 +29,11 @@ describe(RestaurantOwnershipService.name, () => {
     restaurants: { isLoading: jest.Mock };
     assignRestaurantOwner: jest.Mock;
     revokeRestaurantOwner: jest.Mock;
+    staffRestaurantId: ReturnType<typeof signal<string | undefined>>;
+    restaurantStaff: { isLoading: jest.Mock };
+    restaurantStaffValue: () => RestaurantStaffMember[];
+    addRestaurantStaff: jest.Mock;
+    removeRestaurantStaff: jest.Mock;
   };
   let toastMock: { present: jest.Mock };
 
@@ -45,6 +53,13 @@ describe(RestaurantOwnershipService.name, () => {
         previousOwnerUserId: 'owner-1',
         claimStatus: 'revoked',
       }),
+      staffRestaurantId: signal<string | undefined>(undefined),
+      restaurantStaff: { isLoading: jest.fn().mockReturnValue(false) },
+      restaurantStaffValue: (): RestaurantStaffMember[] => [],
+      addRestaurantStaff: jest
+        .fn()
+        .mockResolvedValue({ restaurantId: 'r1', uid: 'w1', status: 'added' }),
+      removeRestaurantStaff: jest.fn().mockResolvedValue(undefined),
     };
     toastMock = { present: jest.fn().mockResolvedValue(undefined) };
 
@@ -165,6 +180,82 @@ describe(RestaurantOwnershipService.name, () => {
     expect(toastMock.present).toHaveBeenCalledWith({
       messageKey: 'admin-restaurant-ownership-revoke-failed',
       outcome: 'failure',
+    });
+  });
+
+  /**
+   * The operator's copy of what a restaurant owner can already do, so a
+   * restaurant that removed its last account with access has a way back
+   * (issue #1537).
+   */
+  describe('staff', () => {
+    it('loads the staff of the restaurant that was picked', () => {
+      service.select(restaurant());
+
+      expect(dataAccessMock.staffRestaurantId()).toBe('r1');
+    });
+
+    it('reports a grant as a grant', async () => {
+      await service.addStaff('r1', 'waiter@example.com');
+
+      expect(dataAccessMock.addRestaurantStaff).toHaveBeenCalledWith(
+        'r1',
+        'waiter@example.com',
+      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'admin-restaurant-staff-added',
+        outcome: 'success',
+      });
+    });
+
+    it('distinguishes the idempotent repeat', async () => {
+      dataAccessMock.addRestaurantStaff.mockResolvedValue({
+        restaurantId: 'r1',
+        uid: 'w1',
+        status: 'already-staff',
+      });
+
+      await service.addStaff('r1', 'waiter@example.com');
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'admin-restaurant-staff-already-added',
+        outcome: 'success',
+      });
+    });
+
+    it('reports a refused grant and releases the form', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => undefined);
+      dataAccessMock.addRestaurantStaff.mockRejectedValue(
+        new Error('failed-precondition'),
+      );
+
+      await service.addStaff('r1', 'operator@example.com');
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'admin-restaurant-staff-add-failed',
+        outcome: 'failure',
+      });
+      expect(service.staffSaving()).toBe(false);
+      jest.restoreAllMocks();
+    });
+
+    it('removes by uid', async () => {
+      await service.removeStaff('r1', {
+        uid: 'w1',
+        email: 'waiter@example.com',
+        displayName: 'Sam',
+        addedBy: 'owner-1',
+        addedAt: '',
+      });
+
+      expect(dataAccessMock.removeRestaurantStaff).toHaveBeenCalledWith(
+        'r1',
+        'w1',
+      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'admin-restaurant-staff-removed',
+        outcome: 'success',
+      });
     });
   });
 });

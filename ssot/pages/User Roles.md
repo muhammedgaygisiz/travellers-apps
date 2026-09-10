@@ -27,12 +27,12 @@ A role is a **Firebase Auth custom claim**, written only by the backend and carr
 the ID token. A client that lies about it changes nothing: every privileged callable
 re-reads the claim from the verified token.
 
-| Role (EN)              | Role (DE)              | Claim      | Definition                                                                                                                                                                                                                                                  | Persona                                 |
-| ---------------------- | ---------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| **BiteTribe Operator** | BiteTribe-Betreiber    | `admin`    | BiteTribe-internal superuser administering the entire application: verifies RestaurantCandidates, grants and revokes roles, assigns and revokes Restaurant ownership (\#1077), runs the operational migrations. Required to sign into the Admin App.        | _none_                                  |
-| **Restaurant Owner**   | Restaurant-Inhaber     | `business` | The verified owner of one Restaurant, responsible for that Restaurant's own data: Menu, opening hours, address, description, image, social links. Required to sign into the Business App.                                                                   | Restaurant owner or business maintainer |
-| **Bite Creator**       | Bite-Ersteller         | _none_     | A registered user allowed to create a Bite. Carries **no** claim: in the code this role is the _absence_ of a role, so it is neither grantable nor revocable.                                                                                               | Bite creator                            |
-| **Restaurant Staff**   | Restaurant-Mitarbeiter | `staff`    | **Target** (`RD-UR-8`). A member of a restaurant's team, acting on the restaurants its Restaurant Owner holds within a narrower permission set. Granted by that Restaurant Owner rather than by an Operator (\#1537). No backend guard exists yet (\#1075). | _none_                                  |
+| Role (EN)              | Role (DE)              | Claim      | Definition                                                                                                                                                                                                                                                                           | Persona                                 |
+| ---------------------- | ---------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- |
+| **BiteTribe Operator** | BiteTribe-Betreiber    | `admin`    | BiteTribe-internal superuser administering the entire application: verifies RestaurantCandidates, grants and revokes roles, assigns and revokes Restaurant ownership (\#1077), runs the operational migrations. Required to sign into the Admin App.                                 | _none_                                  |
+| **Restaurant Owner**   | Restaurant-Inhaber     | `business` | The verified owner of one Restaurant, responsible for that Restaurant's own data: Menu, opening hours, address, description, image, social links. Required to sign into the Business App.                                                                                            | Restaurant owner or business maintainer |
+| **Bite Creator**       | Bite-Ersteller         | _none_     | A registered user allowed to create a Bite. Carries **no** claim: in the code this role is the _absence_ of a role, so it is neither grantable nor revocable.                                                                                                                        | Bite creator                            |
+| **Restaurant Staff**   | Restaurant-Mitarbeiter | `staff`    | A member of a restaurant's team, acting on the restaurants its Restaurant Owner holds. **Grantable since \#1537**: the Restaurant Owner grants and revokes it for the restaurants it holds, not an Operator. What it may then _do_ is still nothing — see the note below the matrix. | _none_                                  |
 
 How they compose: **Bite Creator is the base every account holds**, because the consumer
 app has no role gate - only `authGuard`. Roles are additive rather than exclusive (one
@@ -52,14 +52,15 @@ truthful.
 _Operator_ is the accepted short form in prose, matching
 [[UC - Operate BiteTribe In The Admin App]]; the other two are used in full.
 
-Ownership is **written and enforced at the data layer, and not yet visible**: \#1077 gave
+Ownership is **written, enforced and visible**: \#1077 gave
 `Restaurant.ownerUserId` and `claimStatus` an operator writer - `assignRestaurantOwner`
-and `revokeRestaurantOwner`, behind an admin-app surface - and \#1078 made
-`firestore.rules` read the field, so an assignment now grants and withholds writes rather
-than only recording accountability. Two caveats: the rules deploy by hand and are live
-only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run, and the business
-dashboard is still not scoped to the field (\#1079), so an account is shown restaurants it
-cannot write. Nothing in production is assigned today. There is **no self-service claim** - \#1076 was closed as not planned and
+and `revokeRestaurantOwner`, behind an admin-app surface - \#1078 made
+`firestore.rules` read the field, so an assignment grants and withholds writes rather
+than only recording accountability, and \#1079 scoped the business dashboard and its edit
+routes to it. Since \#1537 the field authorises a third thing: which restaurant's staff an
+account may change. One caveat: the rules deploy by hand and are live
+only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
+Nothing in production is assigned today. There is **no self-service claim** - \#1076 was closed as not planned and
 \#1077 removed the `RestaurantClaim` model with it. See
 [[UC - Own And Claim Restaurants]].
 
@@ -74,6 +75,7 @@ Granted today: yes. Target state, not implemented: **target**. Not granted: no.
 | Sign into the Business App                                                                  | no ¹                      | yes              | no                       |
 | Verify a RestaurantCandidate                                                                | yes                       | no               | no                       |
 | Grant and revoke roles                                                                      | yes                       | no               | no                       |
+| Grant and revoke `staff` on a Restaurant                                                    | yes, any Restaurant ⁶     | yes, own only ⁶  | no                       |
 | Run the operational migrations                                                              | yes                       | no               | no                       |
 | Cluster a Bite into a Candidate on demand                                                   | yes                       | no               | no                       |
 | Maintain a Restaurant's menu, hours, address, links                                         | **target**, all of them ¹ | yes, own only ²  | no                       |
@@ -129,6 +131,12 @@ at a **13+** age rating, and Apple's user-generated-content guideline asks for f
 timely reporting, blocking and published contact details, with an equivalent Google Play
 policy.
 
+⁶ Issue \#1537. The Restaurant Owner is authorised by `Restaurant.ownerUserId` rather than
+by holding `business`, so the role alone reaches no restaurant. The Operator is authorised
+by `RD-UR-6` and reaches every one, which is the way back when a Restaurant removes its
+last account with access. Neither can grant `admin` or `business` through these callables,
+and neither can act on an account that holds one.
+
 **Store position, checked 8 September 2026 against public store data only.** Google Play
 **has published the build**: the listing is live with an install button, last updated
 31 August 2026, rated 12+ on Play's own scale. So Play raised no objection to shipping
@@ -172,10 +180,19 @@ BiteTribe Pro is the entitlement - which is why it sits in the table above witho
 persona either. See `RD-UR-1`.
 
 **Restaurant Staff has no column in the matrix above, deliberately.** The role is decided
-(`RD-UR-8`); its permission set is not. The graph says only that it is narrower than
-Restaurant Owner's, and narrowing it is \#1537's work - a column of guesses would state a
-boundary nobody has decided. What is fixed: staff acts on the restaurants its granting
-Restaurant Owner holds and on no others.
+(`RD-UR-8`) and grantable (\#1537); its permission set is not. A column of guesses would
+state a boundary nobody has decided. What is fixed: staff acts on the restaurants its
+granting Restaurant Owner holds and on no others.
+
+**Checked 10 September 2026: a staff account can do nothing yet, and that is what \#1537
+shipped.** The issue's own scope was the grant, not the permission — "this makes the role
+and the association writable by the right caller, not meaningful". So today a Restaurant
+Owner can put an account on a restaurant, the `staff` claim and the
+`/restaurantStaff/{uid}` record are written together and audited, `firestore.rules`
+protects the record, and the account can sign into the Business App — where the dashboard
+lists restaurants by `Restaurant.ownerUserId` (\#1079) and therefore shows it nothing, and
+the rules give it no write (\#1078). Making the role mean something is a change to those
+two, and it has no owning issue.
 
 ## Recorded Decisions
 

@@ -23,6 +23,18 @@ export class EditRestaurantService {
     }
   }
 
+  gotoStaff(): void {
+    const restaurant = this.restaurant();
+
+    if (restaurant) {
+      void this.navController.navigateForward([
+        'restaurant',
+        restaurant.id,
+        'staff',
+      ]);
+    }
+  }
+
   async createMenu(): Promise<void> {
     const restaurant = this.restaurant();
     if (!restaurant) {

@@ -1,4 +1,10 @@
-import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
+import {
+  inject,
+  Injectable,
+  resource,
+  ResourceLoader,
+  signal,
+} from '@angular/core';
 import {
   Bite,
   Geopoint,
@@ -56,6 +62,39 @@ export interface AssignRestaurantOwnerResult {
 export interface RevokeRestaurantOwnerRequest {
   restaurantId: string;
   reason: string;
+}
+
+/** One account on one restaurant (issue #1537). */
+export interface RestaurantStaffMember {
+  uid: string;
+  email: string;
+  displayName: string;
+  addedBy: string;
+  addedAt: string;
+}
+
+interface RestaurantStaffRequest {
+  restaurantId: string;
+}
+
+interface ListRestaurantStaffResult {
+  restaurantId: string;
+  staff: RestaurantStaffMember[];
+}
+
+interface AddRestaurantStaffRequest extends RestaurantStaffRequest {
+  email: string;
+}
+
+export interface AddRestaurantStaffResult {
+  restaurantId: string;
+  uid: string;
+  roles: string[];
+  status: 'added' | 'already-staff';
+}
+
+interface RemoveRestaurantStaffRequest extends RestaurantStaffRequest {
+  uid: string;
 }
 
 export interface RevokeRestaurantOwnerResult {
@@ -226,6 +265,89 @@ export class RestaurantsDataAccessService {
   );
   bitePlacesValue = resourceValue(this.bitePlaces, [] as string[]);
   restaurantsValue = resourceValue(this.restaurants, [] as Restaurant[]);
+
+  /**
+   * The restaurant whose staff the operator is looking at.
+   *
+   * Its own signal rather than the ownership surface's selection, because the
+   * staff list is loaded for whichever restaurant is open and the selection
+   * lives in the integration service. Set by that service when a restaurant is
+   * picked.
+   */
+  staffRestaurantId = signal<string | undefined>(undefined);
+
+  /**
+   * The staff of one restaurant, through the callable.
+   *
+   * The operator reads it the same way the restaurant's own owner does
+   * (issue #1537). `firestore.rules` would let an operator read
+   * `/restaurantStaff` directly, but the email address behind each uid lives
+   * in Firebase Auth and no client query reaches it - which is the same reason
+   * the account list goes through `listUsersWithRoles`.
+   */
+  restaurantStaffLoader: ResourceLoader<
+    RestaurantStaffMember[] | undefined,
+    { restaurantId: string | undefined }
+  > = async ({ params }) => {
+    const { restaurantId } = params;
+
+    if (!restaurantId) {
+      return [];
+    }
+
+    const { data } = await FirebaseFunctions.callByName<
+      RestaurantStaffRequest,
+      ListRestaurantStaffResult
+    >({ name: 'listRestaurantStaff', data: { restaurantId } });
+
+    return data.staff ?? [];
+  };
+
+  restaurantStaff = resource({
+    params: () => ({ restaurantId: this.staffRestaurantId() }),
+    loader: this.restaurantStaffLoader.bind(this),
+  });
+
+  restaurantStaffValue = resourceValue(
+    this.restaurantStaff,
+    [] as RestaurantStaffMember[],
+  );
+
+  /**
+   * Puts an account on a restaurant as staff, as an operator.
+   *
+   * The same callable the restaurant's own owner uses, admitted by `RD-UR-6`
+   * rather than by ownership. It is the way back for a restaurant that removed
+   * its last account with access, which is why the operator has this at all -
+   * `setUserRoles` can grant `staff` but cannot write the association, and the
+   * role without the association is an account inside the business app with
+   * nothing to do there.
+   */
+  async addRestaurantStaff(
+    restaurantId: string,
+    email: string,
+  ): Promise<AddRestaurantStaffResult> {
+    const { data } = await FirebaseFunctions.callByName<
+      AddRestaurantStaffRequest,
+      AddRestaurantStaffResult
+    >({ name: 'addRestaurantStaff', data: { restaurantId, email } });
+
+    this.restaurantStaff.reload();
+
+    return data;
+  }
+
+  async removeRestaurantStaff(
+    restaurantId: string,
+    uid: string,
+  ): Promise<void> {
+    await FirebaseFunctions.callByName<RemoveRestaurantStaffRequest, unknown>({
+      name: 'removeRestaurantStaff',
+      data: { restaurantId, uid },
+    });
+
+    this.restaurantStaff.reload();
+  }
 
   selectRestaurantToCreate(restaurant: Restaurant): void {
     this.storeService.selectRestaurantToCreate(restaurant);

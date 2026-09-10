@@ -253,5 +253,19 @@
   "admin-restaurant-ownership-already-assigned": "That account already holds this restaurant. Nothing was changed.",
   "admin-restaurant-ownership-assign-failed": "The restaurant could not be assigned. Please try again.",
   "admin-restaurant-ownership-revoked": "Ownership revoked.",
-  "admin-restaurant-ownership-revoke-failed": "The ownership could not be revoked. Please try again."
+  "admin-restaurant-ownership-revoke-failed": "The ownership could not be revoked. Please try again.",
+  "admin-restaurant-staff-title": "Staff",
+  "admin-restaurant-staff-empty": "Nobody works at this restaurant on BiteTribe yet.",
+  "admin-restaurant-staff-remove": "Remove",
+  "admin-restaurant-staff-email": "Email",
+  "admin-restaurant-staff-email-placeholder": "name@example.com",
+  "admin-restaurant-staff-hint": "The account has to exist already, and it may not hold admin or business. This is the operator's way back when a restaurant has locked itself out.",
+  "admin-restaurant-staff-add": "Add to staff",
+  "admin-restaurant-staff-added": "Added to the staff of this restaurant.",
+  "admin-restaurant-staff-already-added": "That account is already staff here. Nothing changed.",
+  "admin-restaurant-staff-add-failed": "Could not add that account as staff.",
+  "admin-restaurant-staff-remove-confirm-title": "Remove from staff?",
+  "admin-restaurant-staff-remove-confirm-message": "The account loses the staff role and its place on this restaurant. A session it already has open can survive for up to an hour.",
+  "admin-restaurant-staff-removed": "Removed from the staff of this restaurant.",
+  "admin-restaurant-staff-remove-failed": "Could not remove that account."
 }

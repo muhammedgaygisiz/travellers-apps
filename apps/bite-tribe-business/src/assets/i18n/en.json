@@ -207,5 +207,20 @@
   "bite-trail-created": "BiteTrail created successfully!",
   "bucket-list-name-updated": "Bucket list name updated!",
   "dashboard-bite-trails-description": "The BiteTrails you own, and the way to create another.",
-  "dashboard-restaurants-description": "The restaurants you maintain: profile, address, opening hours and menu."
+  "dashboard-restaurants-description": "The restaurants you maintain: profile, address, opening hours and menu.",
+  "staff-manage": "Manage Staff",
+  "staff-title": "Staff",
+  "staff-empty": "Nobody works at this restaurant on BiteTribe yet.",
+  "staff-add-title": "Add someone",
+  "staff-add": "Add to staff",
+  "staff-add-placeholder": "name@example.com",
+  "staff-add-hint": "The person needs a BiteTribe account already. Add them with the email address they signed up with.",
+  "staff-added": "Added to your staff.",
+  "staff-already-added": "That account is already on your staff. Nothing changed.",
+  "staff-add-failed": "We couldn't add that account. Check the email address and try again.",
+  "staff-remove": "Remove",
+  "staff-remove-confirm-title": "Remove from staff?",
+  "staff-remove-confirm-message": "They lose access to the business app, but it can take up to an hour for a session they already have open to end.",
+  "staff-removed": "Removed from your staff.",
+  "staff-remove-failed": "We couldn't remove that account. Please try again."
 }

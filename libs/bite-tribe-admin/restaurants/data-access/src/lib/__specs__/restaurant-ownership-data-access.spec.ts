@@ -159,4 +159,75 @@ describe(`${RestaurantsDataAccessService.name} ownership`, () => {
       expect(result.previousOwnerUserId).toBe('owner-1');
     });
   });
+
+  /**
+   * Staff, through the same callables the restaurant's own owner uses. The
+   * operator is admitted by `RD-UR-6` rather than by ownership, which is what
+   * makes this the way back for a restaurant that locked itself out
+   * (issue #1537).
+   */
+  describe('restaurant staff', () => {
+    it('reads the staff of one restaurant through the callable', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: {
+          restaurantId: 'r1',
+          staff: [{ uid: 'w1', email: 'waiter@example.com' }],
+        },
+      });
+
+      const staff = await service.restaurantStaffLoader({
+        params: { restaurantId: 'r1' },
+      } as never);
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'listRestaurantStaff',
+        data: { restaurantId: 'r1' },
+      });
+      expect(staff).toHaveLength(1);
+    });
+
+    it('calls nothing until a restaurant is selected', async () => {
+      const staff = await service.restaurantStaffLoader({
+        params: { restaurantId: undefined },
+      } as never);
+
+      expect(staff).toEqual([]);
+      expect(FirebaseFunctions.callByName).not.toHaveBeenCalled();
+    });
+
+    it('adds by email', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: {
+          restaurantId: 'r1',
+          uid: 'w1',
+          roles: ['staff'],
+          status: 'added',
+        },
+      });
+
+      const result = await service.addRestaurantStaff(
+        'r1',
+        'waiter@example.com',
+      );
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'addRestaurantStaff',
+        data: { restaurantId: 'r1', email: 'waiter@example.com' },
+      });
+      expect(result.status).toBe('added');
+    });
+
+    it('removes by uid', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: { restaurantId: 'r1', uid: 'w1', roles: [] },
+      });
+
+      await service.removeRestaurantStaff('r1', 'w1');
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'removeRestaurantStaff',
+        data: { restaurantId: 'r1', uid: 'w1' },
+      });
+    });
+  });
 });

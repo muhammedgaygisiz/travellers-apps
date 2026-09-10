@@ -49,6 +49,8 @@ Examples:
 - `libs/bite-tribe-business/create-bite-trail/data-access`
 - `libs/bite-tribe-business/dashboard/page`
 - `libs/bite-tribe-business/dashboard/data-access`
+- `libs/bite-tribe-business/staff/page`
+- `libs/bite-tribe-business/staff/data-access`
 
 The business app holds only what a restaurant does to its own data. Migrations,
 restaurant-candidate verification, the unmatched Bite places and the

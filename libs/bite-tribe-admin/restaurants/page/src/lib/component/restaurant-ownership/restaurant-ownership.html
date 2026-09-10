@@ -192,6 +192,77 @@
             }
           </ion-card-content>
         </ion-card>
+
+        <ion-card data-testid="admin-restaurant-staff">
+          <ion-card-header>
+            <ion-card-title
+              >{{ 'admin-restaurant-staff-title' | transloco }}</ion-card-title
+            >
+          </ion-card-header>
+          <ion-card-content>
+            @if (staffLoading()) {
+            <div class="restaurant-ownership__loading">
+              <ion-spinner name="crescent" />
+            </div>
+            } @else {
+            <ion-list lines="full" data-testid="admin-restaurant-staff-list">
+              @for (member of staff(); track member.uid) {
+              <ion-item>
+                <ion-label>
+                  <h3>{{ staffLabel(member) }}</h3>
+                  <p>{{ member.uid }}</p>
+                </ion-label>
+                <ion-button
+                  slot="end"
+                  fill="clear"
+                  color="danger"
+                  [disabled]="staffSaving()"
+                  [attr.data-testid]="'admin-remove-staff-' + member.uid"
+                  (click)="onRemoveStaff(member)"
+                >
+                  {{ 'admin-restaurant-staff-remove' | transloco }}
+                </ion-button>
+              </ion-item>
+              } @empty {
+              <p data-testid="admin-restaurant-staff-empty">
+                {{ 'admin-restaurant-staff-empty' | transloco }}
+              </p>
+              }
+            </ion-list>
+            }
+
+            <ion-list lines="full">
+              <ion-item>
+                <ion-input
+                  type="email"
+                  labelPlacement="stacked"
+                  autocomplete="off"
+                  [label]="'admin-restaurant-staff-email' | transloco"
+                  [placeholder]="
+                      'admin-restaurant-staff-email-placeholder' | transloco
+                    "
+                  [value]="staffEmail()"
+                  data-testid="admin-restaurant-staff-email"
+                  (ionInput)="onStaffEmailChange($event.detail.value ?? '')"
+                />
+              </ion-item>
+            </ion-list>
+            <ion-note class="restaurant-ownership__hint">
+              {{ 'admin-restaurant-staff-hint' | transloco }}
+            </ion-note>
+            <ion-button
+              expand="block"
+              class="ion-margin-top"
+              data-testid="admin-restaurant-staff-add"
+              [disabled]="!canAddStaff()"
+              (click)="onAddStaff()"
+            >
+              @if (staffSaving()) {
+              <ion-spinner name="crescent" slot="start" />
+              } {{ 'admin-restaurant-staff-add' | transloco }}
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
         } @else {
         <ion-card>
           <ion-card-content>

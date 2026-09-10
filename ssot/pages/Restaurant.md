@@ -36,6 +36,9 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - Revoking deletes `ownerUserId`, `claimedAt` and `claimedAtTimestamp` and sets `claimStatus: revoked`. Revoking a Restaurant nobody holds is refused rather than writing `revoked` over `unclaimed`, because "it was taken away" and "nobody ever held it" are different answers.
 - Both operator actions require a reason. Cloud Logging is the only record an ownership change leaves; see [[Implementation - Firebase Functions]].
 - Ownership grants maintenance rights only. Nothing moves when it changes: the Restaurant's Bites, menu and profile are untouched.
+- **A Restaurant has staff, and the account holding it decides who they are.** Staff turns over with ordinary hiring, so it is not an operator decision (issue \#1537). An owner adds and removes staff on the Restaurants it holds and on no others; an operator can do the same on any Restaurant, which is the way back when a Restaurant locks itself out.
+- The staff record lives outside the Restaurant, one document per staff account naming its Restaurant. An account is staff at one Restaurant at a time, and being staff means holding the `staff` role and that record together — neither exists without the other. See [[User Roles]] and [[Architecture - Auth]].
+- An account holding `admin` or `business` cannot be made staff, and cannot have a role taken from it through the staff surface. Staff is the narrowed set, so an account that already holds a wider one is not a staff account.
 - A Restaurant will be able to have one Floor Plan, containing Rooms and Tables. See [[Floor Plan]] and [[Table]].
 - Restaurant tags are derived from the Bites at the place and are not stored on the Restaurant. Bites keep tags exactly as they were typed, so the derived list compares them with a leading `#` stripped and case folded, shows the first spelling that survives that folding, and never shows the `#`. See issue \#1389 and [[issue-1389]].
 
@@ -126,6 +129,7 @@ Current implementation notes:
 - Candidate verification stores `verifiedRestaurantId`, `verifiedAt`, `verifiedAtTimestamp`, and `verifiedByUserId` on `/restaurantCandidates/{candidateId}`.
 - Restaurant image upload stores an `imagePath`.
 - Ownership is assigned and revoked through `assignRestaurantOwner` and `revokeRestaurantOwner`, both admin-only, both transactional, and both logging through `logOperatorAction`. The operator surface is `restaurant-ownership` in the admin app, which reuses the account list issue \#1476 built rather than adding a second way to find an account.
+- Staff is `addRestaurantStaff`, `removeRestaurantStaff` and `listRestaurantStaff`, admitting `business` or `admin` and then reading `ownerUserId` to decide which Restaurant the caller reaches. They write `/restaurantStaff/{uid}` and the `staff` claim together, and log through `logOperatorAction` like the ownership pair. The surfaces are `restaurant/:restaurantId/staff` in the business app and the staff card on `restaurant-ownership` in the admin app.
 - The assignment is a Firestore document field, never a custom claim. It then takes effect immediately rather than after up to an hour of token lifetime, there is no 1000-byte claim payload to grow into, and issue \#1078's rules read documents anyway — a claim copy would be a second version of one fact that can disagree with it.
 
 ## Permissions
@@ -139,8 +143,11 @@ Current implementation notes:
   - Create Restaurant.
   - Edit Restaurant.
   - Maintain image, address, position, opening hours, social links, description, and menu.
+- Business user, on a Restaurant it holds
+  - Add and remove the staff on that Restaurant.
 - Admin
   - Assign a verified Restaurant to a business account, and revoke that assignment.
+  - Add and remove the staff on any Restaurant, held or not.
   - Verification and moderation are otherwise future or operational capabilities, not fully modeled as permissions today.
 
 ## Use Cases
@@ -237,7 +244,6 @@ images/restaurants/{restaurantId}/{filename}
 - Menu item to Bite creation.
 - Restaurant tags from Bites.
 - Availability and reservation flows.
-- Staff management by the business account holding a restaurant (issue \#1537).
 - Better Restaurant data quality checks.
 
 ## Sources Used

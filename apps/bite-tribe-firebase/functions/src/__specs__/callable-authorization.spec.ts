@@ -18,6 +18,17 @@ import { join } from 'node:path';
 type Access =
   /** Requires the `admin` role: a BiteTribe operator action. */
   | 'operator'
+  /**
+   * Requires `business` or `admin`, and then decides for itself which
+   * restaurants that reaches.
+   *
+   * The second half is the part a classification cannot check, so this class
+   * is deliberately narrow: it is for a callable that acts on one restaurant
+   * and reads the authority off `Restaurant.ownerUserId` (issue #1537). An
+   * operator is admitted alongside the owner by `RD-UR-6`, and that is a
+   * decision per callable rather than a property of the `business` role.
+   */
+  | 'restaurantAuthority'
   /** Requires a session, and does the same thing for every account. */
   | 'authenticated'
   /** Deliberately reachable without a session. */
@@ -38,6 +49,13 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   setUserRoles: 'operator',
   setUserSubscriptionTier: 'operator',
   verifyRestaurantCandidate: 'operator',
+
+  // A restaurant acting on its own staff, and an operator acting on any
+  // restaurant's. Not `operator`: widening those callables to `admin` only
+  // would put a restaurant back on a support conversation for every hire.
+  addRestaurantStaff: 'restaurantAuthority',
+  listRestaurantStaff: 'restaurantAuthority',
+  removeRestaurantStaff: 'restaurantAuthority',
 
   // Consumer and business app paths. Each acts for the caller, or reads data
   // every signed-in account may read, so requiring `admin` here would break
@@ -150,6 +168,29 @@ describe('callable authorization', () => {
     expect(overGuarded).toEqual([]);
   });
 
+  it('guards every restaurant-authority endpoint with requireAnyRole', () => {
+    const unguarded = named('restaurantAuthority')
+      .filter(
+        (endpoint) => !sourceOf(endpoint.file).includes('requireAnyRole('),
+      )
+      .map((endpoint) => endpoint.name);
+
+    expect(unguarded).toEqual([]);
+  });
+
+  /**
+   * `requireAdmin` on one of these would take the restaurant owner off its own
+   * staff surface and leave only the operator - which is the support
+   * conversation issue #1537 exists to remove.
+   */
+  it('admits more than an operator on every restaurant-authority endpoint', () => {
+    const operatorOnly = named('restaurantAuthority')
+      .filter((endpoint) => sourceOf(endpoint.file).includes('requireAdmin('))
+      .map((endpoint) => endpoint.name);
+
+    expect(operatorOnly).toEqual([]);
+  });
+
   // `firebase-admin/auth` pulls in `jose`, which is ESM only, so a spec that
   // reaches a module importing it fails to parse under ts-jest unless it mocks
   // the SDK. Every operator callable imports the guard, so the guard importing
@@ -165,12 +206,18 @@ describe('callable authorization', () => {
   });
 
   it('rejects a request without a session on every non-public endpoint', () => {
-    const unchecked = [...named('operator'), ...named('authenticated')]
+    const unchecked = [
+      ...named('operator'),
+      ...named('restaurantAuthority'),
+      ...named('authenticated'),
+    ]
       .filter((endpoint) => {
         const source = sourceOf(endpoint.file);
 
         return (
-          !source.includes('requireAdmin(') && !source.includes('!request.auth')
+          !source.includes('requireAdmin(') &&
+          !source.includes('requireAnyRole(') &&
+          !source.includes('!request.auth')
         );
       })
       .map((endpoint) => endpoint.name);

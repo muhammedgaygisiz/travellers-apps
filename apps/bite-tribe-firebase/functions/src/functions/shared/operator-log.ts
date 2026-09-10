@@ -29,13 +29,23 @@ import { BiteTribeRole, rolesOf } from './roles';
  * The union is deliberate rather than a free-form string: a query per action
  * needs the set of actions to be knowable, and adding a member is the one line
  * of review that says "this is a new thing we can do to an account".
+ *
+ * **Two of them are not operator actions**, and they are here on purpose.
+ * `addRestaurantStaff` and `removeRestaurantStaff` are performed by a
+ * restaurant owner as well as by an operator (issue #1537), and they change
+ * what an account may do just as `setUserRoles` does. Giving them a second log
+ * shape would mean "everything done to this account" had two answers, which is
+ * the thing issue #1477 removed. `callerRoles` is what says which kind of
+ * caller acted, and it is already on every entry.
  */
 export const OPERATOR_ACTIONS = [
+  'addRestaurantStaff',
   'assignRestaurantOwner',
   'backfillBiteAddress',
   'backfillReviewTimestamps',
   'clusterRestaurantCandidateForBite',
   'deleteBiteAsOperator',
+  'removeRestaurantStaff',
   'revokeRestaurantOwner',
   'sendNewVersionNotification',
   'setUserBlocked',
@@ -132,8 +142,8 @@ interface OperatorActionPayload extends Omit<OperatorActionLog, 'action'> {
  *
  * The actor is read off the request rather than passed in, so it cannot be
  * forgotten, and cannot be anything other than the identity Firebase verified.
- * Call this after `requireAdmin`, which is what guarantees `request.auth`
- * exists.
+ * Call this after the guard — `requireAdmin`, or `requireAnyRole` for the two
+ * staff actions — which is what guarantees `request.auth` exists.
  *
  * The fields are structured rather than interpolated into the message. Cloud
  * Logging indexes `jsonPayload` fields, so `jsonPayload.targetId="abc"` is a

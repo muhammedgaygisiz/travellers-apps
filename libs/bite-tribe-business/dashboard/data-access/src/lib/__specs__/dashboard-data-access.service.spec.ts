@@ -6,6 +6,7 @@ import {
   BITE_TRAIL_COLLECTION,
   DashboardDataAccessService,
   RESTAURANT_COLLECTION,
+  RESTAURANT_OWNER_FIELD,
 } from '../dashboard-data-access.service';
 import { BiteTrail } from 'model';
 import { signal } from '@angular/core';
@@ -48,7 +49,10 @@ describe(DashboardDataAccessService.name, () => {
   });
 
   describe('restaurantsLoader', () => {
-    it('should load restaurants from Firestore', async () => {
+    const createParams = (userId?: string): never =>
+      ({ params: { userId } }) as never;
+
+    it('should load only the restaurants assigned to the signed-in account', async () => {
       jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
         snapshots: [
           {
@@ -62,10 +66,21 @@ describe(DashboardDataAccessService.name, () => {
       } as unknown as FirestoreCollection);
 
       const service = TestBed.inject(DashboardDataAccessService);
-      const result = await service.restaurantsLoader({} as never);
+      const result = await service.restaurantsLoader(createParams('user-1'));
 
       expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
         reference: RESTAURANT_COLLECTION,
+        compositeFilter: {
+          type: 'and',
+          queryConstraints: [
+            {
+              type: 'where',
+              fieldPath: RESTAURANT_OWNER_FIELD,
+              opStr: '==',
+              value: 'user-1',
+            },
+          ],
+        },
       });
       expect(result).toEqual([
         {
@@ -76,13 +91,28 @@ describe(DashboardDataAccessService.name, () => {
       ]);
     });
 
+    /**
+     * The filter is strict: without a uid there is nothing to scope by, so the
+     * answer is an empty list rather than the whole collection. Reading it
+     * unfiltered "just until the user arrives" is exactly the leak issue #1079
+     * closes, and it would show for the moment between boot and restoration.
+     */
+    it('should return an empty list without a signed-in user', async () => {
+      const service = TestBed.inject(DashboardDataAccessService);
+
+      const result = await service.restaurantsLoader(createParams());
+
+      expect(FirebaseFirestore.getCollection).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
+    });
+
     it('should return an empty list when restaurant snapshots are missing', async () => {
       jest
         .spyOn(FirebaseFirestore, 'getCollection')
         .mockResolvedValue({} as unknown as FirestoreCollection);
 
       const service = TestBed.inject(DashboardDataAccessService);
-      const result = await service.restaurantsLoader({} as never);
+      const result = await service.restaurantsLoader(createParams('user-1'));
 
       expect(result).toEqual([]);
     });

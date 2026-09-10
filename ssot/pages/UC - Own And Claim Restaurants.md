@@ -2,7 +2,7 @@
 
 ## Status
 
-Partially implemented. The roles exist: \#1469 delivered `admin` and `business` as Firebase Auth custom claims and \#1472 guarded every operator callable, both driven by the admin app rather than by this use case. The shared model carries the ownership fields as of \#1074, and **an operator writes them** as of \#1077: `assignRestaurantOwner` and `revokeRestaurantOwner`, behind a surface in the admin app. **The rules enforce it and nothing reads it yet**: \#1078 replaced the open Firestore rules, so a Restaurant and its Menu are writable by the assigned account and by an Operator and by nobody else, and `ownerUserId`, `claimStatus`, `claimedAt` and `claimedAtTimestamp` are writable by no client at all - the forgery demonstrated against the emulator on 8 September 2026 is now a deny test. \#1079, which scopes the business dashboard, is still unstarted, so an account is still shown restaurants it cannot write. The rules deploy by hand: they bind production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run. Specified through issue \#1069 as stage 0 of issue \#735.
+Implemented for a single owner. The roles exist: \#1469 delivered `admin` and `business` as Firebase Auth custom claims and \#1472 guarded every operator callable, both driven by the admin app rather than by this use case. The shared model carries the ownership fields as of \#1074, and **an operator writes them** as of \#1077: `assignRestaurantOwner` and `revokeRestaurantOwner`, behind a surface in the admin app. **The rules enforce it** as of \#1078: a Restaurant and its Menu are writable by the assigned account and by an Operator and by nobody else, and `ownerUserId`, `claimStatus`, `claimedAt` and `claimedAtTimestamp` are writable by no client at all - the forgery demonstrated against the emulator on 8 September 2026 is now a deny test. **The business app reads it** as of \#1079: the dashboard lists only the restaurants assigned to the caller, and the two routes that edit one refuse a restaurant assigned elsewhere by direct URL. What is left is \#1537, the `staff` a business account puts on its own restaurant. The rules deploy by hand: they bind production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run. Specified through issue \#1069 as stage 0 of issue \#735.
 
 This is the blocking prerequisite for every other stage of the Restaurant Interaction Platform.
 
@@ -16,9 +16,9 @@ Verified in the codebase on 25 July 2026, and re-checked on 8 September 2026:
 
 - `Restaurant` in `libs/bite-tribe-common/model/src/lib/restaurant.ts` had no owner or claim field. Issue \#1074 added `ownerUserId`, `claimStatus`, `claimedAt`, and `claimedAtTimestamp` as optional fields, plus a `RestaurantClaim` model. ~~Nothing writes any of them.~~ **\#1077 is the writer**, and it removed `RestaurantClaim` with its barrel export: the model never had an importer, and direct assignment produces no claim document.
 - ~~No roles, custom claims, or membership checks exist in `apps/bite-tribe-firebase/functions/src`.~~ **No longer true.** \#1469 delivered the `admin` and `business` roles as custom claims written only by `setUserRoles`, and \#1472 put `requireAdmin` on every operator callable with a build-failing endpoint classification. Two gaps remain and \#1075 owns them: there is no `staff` role, and there is **no backend guard for `business`** \- across the whole functions source `'business'` appears only in the role list and in deny tests, so the business app's gate is client-side only.
-- `apps/bite-tribe-firebase/firestore.rules` grants read and write on every document to every authenticated user. **Still true.**
+- `apps/bite-tribe-firebase/firestore.rules` granted read and write on every document to every authenticated user. **No longer true** since \#1078 replaced it with ownership-scoped rules. Reads stayed where they were on purpose: narrowing them is \#1079's visible scope, and \#1079 narrows them in the client query rather than in the rules, so an unowned restaurant is still readable and simply not listed.
 
-Any floor plan, table state, visit, or order written under those rules is writable by any logged-in user. The product vision for claimed restaurants assumes a capability that does not exist.
+Under those rules any floor plan, table state, visit, or order was writable by any logged-in user, which is why this stage blocks the rest of \#735: the product vision for claimed restaurants assumed a capability that did not exist.
 
 ## Actors
 
@@ -28,15 +28,18 @@ Any floor plan, table state, visit, or order written under those rules is writab
 
 ## Flow
 
-Rewritten on 8 September 2026, and implemented by \#1077 down to the two lines marked below. There is **no self-service claim**: a restaurant is assigned by an operator, not requested by the restaurant.
+Rewritten on 8 September 2026, implemented by \#1077, \#1078 and \#1079 down to the one line marked below. There is **no self-service claim**: a restaurant is assigned by an operator, not requested by the restaurant.
 
 - An operator picks a verified restaurant and an account holding `business` on the `restaurant-ownership` surface in the admin app, and links them with a reason. Both lists are the ones that already exist — the account list \#1476 built, and the restaurants collection — rather than a third way to find either.
 - Assignment sets `ownerUserId`, `claimStatus: claimed` and the timestamps in one transaction. A restaurant that already has an owner is refused and the refusal names the current owner; reassignment is revoke then assign, so the log shows two decisions. Repeating the same assignment returns the current state rather than writing again.
 - An account that does not hold `business` is refused as an assignment target, because every business-app route is gated on the role and an owner without it could not open the restaurant they own.
 - Ownership is revoked by an operator with an attributable reason. Revoking deletes the owner and the grant timestamps and sets `claimStatus: revoked`; revoking a restaurant nobody holds is refused rather than writing `revoked` over `unclaimed`.
-- **Still to come.** The business account adds and removes the `staff` on the restaurants it holds, and cannot touch a restaurant it does not hold (\#1537). The business dashboard shows only the restaurants assigned to the caller (\#1079).
+- The assignment becomes visible to the assigned account on its next load. `DashboardDataAccessService.restaurantsLoader` queries `restaurants` where `ownerUserId` equals the caller's uid, so the dashboard map and the restaurants list hold exactly what the account was given. There is no token to refresh, because ownership is a document field rather than a claim.
+- A restaurant assigned elsewhere is absent from that list **and refused at the route**. `documentOwnerGuard` sits on `restaurant/:restaurantId` and `restaurant/:restaurantId/menu/:menuId` and reads the same field, so a bookmark, a shared link, or a session that outlived a revocation lands back on the account's own list with one sentence and no detail about who does hold the restaurant.
+- An account holding nothing sees an empty state naming BiteTribe support rather than an empty list, because there is nothing it can do here to fix it: self-service claiming is closed as not planned (\#1076).
+- **Still to come.** The business account adds and removes the `staff` on the restaurants it holds, and cannot touch a restaurant it does not hold (\#1537).
 
-**Until \#1079 lands, an assignment changes nothing a business account can _see_.** Verified against the emulator on 8 September 2026: `DashboardDataAccessService.restaurantsLoader` reads the whole `restaurants` collection with no owner filter, so a business account was shown a restaurant assigned to a _different_ account and could open its edit form. The list has never been ownership-driven, so this is not something \#1077 regressed - it is the half of the epic's "the effect is visible in the business app" criterion that \#1079 owns. Since \#1078 the _save_ is refused, so the account now reaches a form it cannot submit and is told only that something went wrong. That is a worse experience than the open rules gave and a better boundary; \#1079 removes the form from the list rather than improving the message.
+**\#1079 closed the gap between the assignment and what the account can _see_.** Verified against the emulator on 8 September 2026, before it: `restaurantsLoader` read the whole `restaurants` collection with no owner filter, so a business account was shown a restaurant assigned to a _different_ account and could open its edit form. The list had never been ownership-driven, so that was not something \#1077 regressed - it was the half of the epic's "the effect is visible in the business app" criterion \#1079 owned. \#1078 had already refused the _save_, which left the account reaching a form it could not submit and being told only that something went wrong; \#1079 removed the form from the list rather than improving that message.
 
 Verification happens off-system, on the call the operator is already having. That is the "manual admin review for the first iteration" \#1069 proposed, with the review queue removed: a queue exists to hold information the operator has in front of them, and it brings a claim document, a five-state machine, contested and superseded states with it. See [[issue-1076]] for what was given up.
 
@@ -62,7 +65,7 @@ There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it 
 - Assignment is idempotent, matching the existing `verifyRestaurantCandidate` rule.
 - No restaurant can end up claimed by two owners. The read and the write are one transaction, so two operators assigning the same restaurant cannot both see it unowned and both write.
 - Existing unowned restaurants keep working for consumer read paths and are visible to admins for triage.
-- **\#1079 ships the strict filter: a business account sees the restaurants assigned to it and nothing else.** Decided 8 September 2026, when \#1077 gave the assignment a writer. The alternative considered was falling back to the unowned restaurants so that nobody loses access on the day it deploys - refused, because it is a rule that \#1078 then has to contradict, and a boundary with an exception is not a boundary. The consequence is accepted rather than designed around: nothing in production is assigned today, so every business account sees an empty list until an operator assigns it something. Assigning the existing restaurants is operator work that has to happen before or alongside \#1079, not a migration.
+- **\#1079 shipped the strict filter: a business account sees the restaurants assigned to it and nothing else.** Decided 8 September 2026, when \#1077 gave the assignment a writer. The alternative considered was falling back to the unowned restaurants so that nobody loses access on the day it deploys - refused, because it is a rule that \#1078 then has to contradict, and a boundary with an exception is not a boundary. The consequence is accepted rather than designed around: nothing in production is assigned today, so every business account sees an empty list until an operator assigns it something. Assigning the existing restaurants is operator work that has to happen before or alongside \#1079, not a migration.
 
 ## Success Criteria
 
@@ -81,6 +84,8 @@ Replacing the open Firestore rules is the highest-regression-risk change in the 
 - Issue \#1075 - the three roles as verified identity, mostly delivered by \#1469 and \#1472
 - Issue \#1076 - self-service restaurant claiming, closed as not planned
 - Issue \#1077 - assign and revoke restaurant ownership, and remove the claim model; done
+- Issue \#1078 - ownership-scoped Firestore rules replacing the open ones; done
+- Issue \#1079 - scope the business app to the restaurants assigned to the caller; done
 - Issue \#1537 - a business account manages the staff on its restaurant
 - Issue \#1371 - removed the organisation fields this was first specified against
 - Issue \#288 - concept of restaurant as a business entity

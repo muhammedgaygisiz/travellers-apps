@@ -16,3 +16,17 @@
 .section-page__list {
   text-align: start;
 }
+
+/*
+ * The empty state is prose rather than a row, so it keeps the centred column's
+ * alignment instead of inheriting the list's left edge, and its second line —
+ * who to contact — is set back as a note (issue #1079).
+ */
+.section-page__empty {
+  text-align: center;
+
+  p:last-child {
+    color: var(--ion-color-medium);
+    font-size: 0.875rem;
+  }
+}

@@ -8,9 +8,13 @@ import {
   UrlTree,
 } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { ToastService } from 'toast';
 import { authGuard, AuthService } from 'ta-firestore';
 import { BiteTribeRole } from 'utils';
 import { ROUTES } from '../routes';
+
+jest.mock('@capacitor-firebase/firestore');
 
 /**
  * The gate is only as good as its weakest route, and a route is added by
@@ -148,6 +152,91 @@ describe('business ROUTES', () => {
       expect(gated.length).toBeGreaterThan(1);
       expect(outcomes).toEqual(gated.map(() => true));
     });
+  });
+
+  /**
+   * The role gate admits every restaurant to the app; the ownership gate
+   * decides which restaurant it may open once inside. Only the two routes that
+   * edit one carry it, and they carry it by direct URL rather than by being
+   * unlinked from the list (issue #1079).
+   */
+  describe('which restaurants the edit routes admit', () => {
+    const EDIT_PATHS = [
+      'restaurant/:restaurantId',
+      'restaurant/:restaurantId/menu/:menuId',
+    ];
+
+    const ownerGuardOf = (route: Route): CanActivateFn =>
+      (route.canActivate ?? [])[2] as CanActivateFn;
+
+    const routeFor = (path: string): Route =>
+      ROUTES.find((route) => route.path === path) as Route;
+
+    const run = (path: string): Promise<boolean | UrlTree> =>
+      TestBed.runInInjectionContext(
+        () =>
+          ownerGuardOf(routeFor(path))(
+            {
+              paramMap: { get: (): string => 'restaurant-1' },
+            } as unknown as ActivatedRouteSnapshot,
+            { url: `/${path}` } as RouterStateSnapshot,
+          ) as Promise<boolean | UrlTree>,
+      );
+
+    const assignedTo = (ownerUserId: string): void => {
+      jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        snapshot: { id: 'restaurant-1', data: { ownerUserId } },
+      } as unknown as Awaited<
+        ReturnType<typeof FirebaseFirestore.getDocument>
+      >);
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      TestBed.configureTestingModule({
+        providers: [
+          {
+            provide: AuthService,
+            useValue: {
+              getUser: (): { uid: string } => ({ uid: 'user-1' }),
+              whenAuthStateRestored: (): Promise<void> => Promise.resolve(),
+            },
+          },
+          {
+            provide: Router,
+            useValue: {
+              parseUrl: (url: string): UrlTree =>
+                ({ url }) as unknown as UrlTree,
+            },
+          },
+          { provide: ToastService, useValue: { present: jest.fn() } },
+        ],
+      });
+    });
+
+    it('guards exactly the routes that edit one restaurant', () => {
+      const guarded = ROUTES.filter(
+        (route) => (route.canActivate ?? []).length > 2,
+      ).map((route) => route.path);
+
+      expect(guarded.sort()).toEqual([...EDIT_PATHS].sort());
+    });
+
+    it.each(EDIT_PATHS)('admits the assigned account on %s', async (path) => {
+      assignedTo('user-1');
+
+      await expect(run(path)).resolves.toBe(true);
+    });
+
+    it.each(EDIT_PATHS)(
+      'sends an account the restaurant is not assigned to back to its own list from %s',
+      async (path) => {
+        assignedTo('another-business-account');
+
+        await expect(run(path)).resolves.toEqual({ url: '/restaurants' });
+      },
+    );
   });
 
   // Every lazy route names its component as a string on the imported module,

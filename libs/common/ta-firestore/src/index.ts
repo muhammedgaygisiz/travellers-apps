@@ -18,6 +18,10 @@ export {
 export { authGuard } from './lib/auth.guard';
 export { roleGuard } from './lib/role.guard';
 export { startGuard } from './lib/start.guard';
+export {
+  documentOwnerGuard,
+  type DocumentOwnerGuardOptions,
+} from './lib/document-owner.guard';
 export { RequestedUrlService } from './lib/requested-url.service';
 export { freshSessionGuard } from './lib/fresh-session.guard';
 

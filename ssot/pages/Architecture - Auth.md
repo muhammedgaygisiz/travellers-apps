@@ -33,6 +33,14 @@ Backend callables validate request.auth where required
   revoked roles.
 - `setUserRoles` is the admin-only callable that writes roles, and
   `grant-role.mjs` is the service-account bootstrap behind it.
+- `documentOwnerGuard({...})` admits only the account named on the document a
+  route addresses. `roleGuard` answers _which app is theirs_; this answers
+  _which document is theirs_, which the role cannot: every restaurant holds
+  `business`, so the role alone opens every restaurant's edit form. The
+  business app puts it on `restaurant/:restaurantId` and its menu route
+  (issue \#1079). It fails closed - a read that is rejected, empty, or missing
+  the owner field is a refusal - and it refuses with a toast and a redirect
+  rather than an error screen, naming nothing about who does hold the document.
 - `startGuard` controls the start route.
 - `RequestedUrlService` holds the URL a visitor asked for while auth redirected
   them, so signing in returns them to it instead of to Home.
@@ -114,10 +122,12 @@ app and run the operational migrations in it.
   app takes two because a staff account holds `staff` and **not** `business`.
   Any one of the listed roles admits the account; what it may then _do_ is
   narrower and belongs to the rules of issue \#1078 and the scoped dashboard of
-  \#1079, not to the door. \#1078 has landed and gives `staff` **no write
+  \#1079, not to the door. Both have landed. \#1078 gives `staff` **no write
   authority at all**, because the record of which restaurant a staff account
-  works at is \#1537 and does not exist yet. A staff account opens the business
-  app and reads.
+  works at is \#1537 and does not exist yet, and \#1079 scopes the list and the
+  edit routes by `Restaurant.ownerUserId` \- which a staff account never holds.
+  A staff account therefore opens the business app to an empty list until
+  \#1537 gives it a restaurant to be on.
 - `roleGuard(...roles)` is the backstop, not the primary gate. Sign-in already
   refuses these accounts, so it fires only for a session restored on startup
   (which reports itself as a successful login without running the sign-in

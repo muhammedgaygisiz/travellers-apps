@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { DashboardPage } from '../pages/dashboard.page';
 import { EditRestaurantPage } from '../pages/edit-restaurant.page';
 import { loginAsBusinessUser } from '../support/auth';
@@ -22,8 +22,9 @@ const POSITION = { latitude: 48.137154, longitude: 11.576124 };
 test.describe('Maintain restaurants in the business app', () => {
   const seededRestaurantIds: string[] = [];
 
-  // The emulator keeps every write for the whole run and the dashboard lists
-  // every restaurant, so hand the fixtures back after each test.
+  // The emulator keeps every write for the whole run, and a fixture assigned
+  // to the suite's account stays on its list, so hand them back after each
+  // test.
   test.afterEach(async ({ page }) => {
     const ids = seededRestaurantIds.splice(0);
 
@@ -95,18 +96,23 @@ test.describe('Maintain restaurants in the business app', () => {
   });
 
   /**
-   * The other half of the ownership boundary. Every scenario above proves the
-   * allow path incidentally, by needing a save to land; nothing proved that a
-   * restaurant the account does not hold is refused, and that refusal is what
-   * issue #1078 is for. Before it, this save succeeded.
+   * The other half of the ownership boundary: [[UC - Own And Claim Restaurants]].
    *
-   * It is driven through the app rather than through the Firestore REST API,
-   * because what matters is that the refusal reaches the user as the ordinary
-   * failure toast rather than as an unhandled error - the dashboard still lists
-   * every restaurant until issue #1079 scopes it, so a business account can
-   * reach this screen for a restaurant it does not hold.
+   * Every scenario above proves the allow path incidentally, by needing a save
+   * to land. This one proves that a restaurant assigned to another account is
+   * both absent from the list and refused by direct URL, which is what issue
+   * #1079 is for - before it, this account was shown the restaurant and could
+   * open its edit form.
+   *
+   * The URL is typed rather than clicked on purpose. Scoping the list only
+   * hides the route; a bookmark, a shared link or a revocation that happened
+   * mid-session all arrive at the route directly, and only the guard answers
+   * those. The earlier version of this test drove the *save* and asserted the
+   * failure toast issue #1078's rules produce; that deny case now lives in
+   * `firestore-rules.emulator-spec.ts`, which can reach the write without a
+   * form to reach it through.
    */
-  test('refuses to save a restaurant the account does not hold', async ({
+  test('hides a restaurant assigned to another account and refuses it by direct URL', async ({
     page,
   }) => {
     test.setTimeout(90_000);
@@ -136,20 +142,20 @@ test.describe('Maintain restaurants in the business app', () => {
 
     const dashboard = new DashboardPage(page);
     await dashboard.openRestaurants();
-    await dashboard.expectRestaurant(restaurantName);
-    await dashboard.openRestaurant(restaurantName, restaurantId);
+    // Nothing else is assigned to this account, so the list is not merely
+    // missing one row - it is the empty state that says who to contact, which
+    // is what the helper waits for before judging the row absent.
+    await dashboard.expectRestaurantMissing(restaurantName);
 
-    const editRestaurant = new EditRestaurantPage(page);
-    await editRestaurant.expectRestaurantName(restaurantName);
+    await page.goto(`/restaurant/${restaurantId}`);
 
-    await editRestaurant.fillDescription('Written by an account that may not.');
-    await editRestaurant.expectSavedToast(
-      'Something went wrong. Please try again.',
-    );
-
-    // The refusal has to leave the document alone, not merely report a failure.
-    await expectFirestoreDocument(page, `restaurants/${restaurantId}`, {
-      description: '',
-    });
+    await expect(page).toHaveURL(/\/restaurants$/, { timeout: 20_000 });
+    await expect(
+      page
+        .locator('ion-toast')
+        .getByText('That restaurant is not assigned to this account.', {
+          exact: true,
+        }),
+    ).toBeVisible();
   });
 });

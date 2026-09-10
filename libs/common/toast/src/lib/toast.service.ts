@@ -4,6 +4,7 @@ import { inject, Injectable } from '@angular/core';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ToastController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
+import { firstValueFrom } from 'rxjs';
 
 /**
  * Whether the action the toast reports worked.
@@ -138,12 +139,12 @@ export class ToastService {
   }: ToastRequest): Promise<void> {
     await this.dismissCurrent();
 
+    const text = messageKey ? await this.resolve(messageKey, params) : message;
+
     try {
       const toast = await withTimeout(
         this.toastController.create({
-          message: messageKey
-            ? this.transloco.translate(messageKey, params)
-            : message,
+          message: text,
           position: TOAST_POSITION,
           color: outcome === 'success' ? 'success' : 'danger',
           duration:
@@ -176,6 +177,36 @@ export class ToastService {
     } catch {
       // Nothing left to fall back to; the caller already handled the outcome.
       this.currentToast = null;
+    }
+  }
+
+  /**
+   * The message text, waiting for the active language if it is still loading.
+   *
+   * `translate()` is synchronous and answers with the key itself when the
+   * translation file has not arrived, which is what a toast raised during a
+   * cold load gets: a route guard that refuses a deep link runs while the
+   * shell is still booting, so the user was shown the bare key instead of a
+   * sentence (issue #1079). Every other caller runs after a page the user has
+   * already interacted with, which is why this went unnoticed.
+   *
+   * Bounded like every other await here: a language that never loads gives the
+   * key back rather than holding the toast, because the toast must never be
+   * what a flow waits on.
+   */
+  private async resolve(
+    messageKey: string,
+    params?: Record<string, unknown>,
+  ): Promise<string> {
+    try {
+      return await withTimeout(
+        firstValueFrom(
+          this.transloco.selectTranslate<string>(messageKey, params),
+        ),
+        OVERLAY_TIMEOUT_MS,
+      );
+    } catch {
+      return this.transloco.translate(messageKey, params);
     }
   }
 

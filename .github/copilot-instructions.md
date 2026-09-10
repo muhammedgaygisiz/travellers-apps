@@ -20,9 +20,8 @@ The source of truth is not Copilot-specific. Follow `AGENTS.md` and the SSOT pag
 
 ## Task-Scoped Guidance
 
-Detailed guidance lives in `skills/travellers-apps/SKILL.md` and its `references/` files:
-architecture, validation, Firebase functions, Storybook, Capacitor, and analytics. Read the
-reference that matches the task rather than relying on this file.
+Detailed guidance lives in `skills/travellers-apps/SKILL.md` and its `references/` files. Read
+the reference that matches the task rather than relying on this file.
 
 ## Copilot-Specific Note
 

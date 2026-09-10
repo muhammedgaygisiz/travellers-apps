@@ -245,6 +245,15 @@ every member stays on the floor - because clamping each centre separately would
 let the item that hit the wall stop while the rest slid on, rearranging spacing
 the owner built deliberately.
 
+Issue \#1084 made the table an entity. The editor's table read moved from the
+open room to the whole restaurant, because a label unique across rooms cannot be
+checked against tables that were never loaded; the open room is filtered out of
+that one query, so a plan load is still one room document plus one tables query
+and switching rooms re-reads nothing. Geometry and identity stay on separate
+paths that share no field, which is what makes "editing capacity never changes
+geometry" a structural fact rather than a promise. See [[Table]] for the label
+rule, the numbering helper and what the plan draws.
+
 Snapping runs grid first and edges second. An owner pushing a table towards a
 wall means the wall, and a grid line 40 mm short of it is not what they were
 aiming at. The room's own walls are in the neighbour list like any other edge. A

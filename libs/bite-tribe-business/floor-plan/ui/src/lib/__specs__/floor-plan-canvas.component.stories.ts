@@ -46,6 +46,7 @@ const roundTable = (
   x: number,
   y: number,
   label: string,
+  over: Partial<FloorPlanItem> = {},
 ): FloorPlanItem => ({
   id,
   kind: 'table',
@@ -55,6 +56,9 @@ const roundTable = (
   rotation: 0,
   label,
   round: true,
+  seats: 4,
+  enabled: true,
+  ...over,
 });
 
 const rectangularTable = (
@@ -63,6 +67,7 @@ const rectangularTable = (
   y: number,
   label: string,
   rotation = 0,
+  over: Partial<FloorPlanItem> = {},
 ): FloorPlanItem => ({
   id,
   kind: 'table',
@@ -72,6 +77,9 @@ const rectangularTable = (
   rotation,
   label,
   round: false,
+  seats: 4,
+  enabled: true,
+  ...over,
 });
 
 /**
@@ -93,7 +101,7 @@ const furnished: FloorPlanItem[] = [
   roundTable('table-3', 5300, 3000, '3'),
   roundTable('table-4', 1500, 5200, '4'),
   roundTable('table-5', 3400, 5200, '5'),
-  rectangularTable('table-6', 2200, 9000, '6'),
+  rectangularTable('table-6', 2200, 9000, '6', 0, { seats: 6 }),
   rectangularTable('table-7', 5400, 9600, '7', 30),
 ];
 
@@ -245,6 +253,29 @@ export const Empty: Story = {
  */
 export const Furnished: Story = {
   args: { items: furnished },
+};
+
+/**
+ * Tables in and out of service.
+ *
+ * A disabled table keeps its number and its place and is hatched, because it is
+ * a real place in the room that is not taking guests. Fading it would read as
+ * "loading" and would vanish altogether in the print a QR sheet is made from,
+ * so the distinction is a stroke pattern rather than a tone.
+ */
+export const DisabledTables: Story = {
+  args: {
+    items: [
+      ...furnished.slice(0, 8),
+      roundTable('table-1', 1500, 3000, '1'),
+      roundTable('table-2', 3400, 3000, '2', { enabled: false }),
+      roundTable('table-3', 5300, 3000, '3'),
+      roundTable('table-4', 1500, 5200, '4', { enabled: false, seats: 2 }),
+      roundTable('table-5', 3400, 5200, '5'),
+      rectangularTable('table-6', 2200, 9000, '6', 0, { seats: 6 }),
+      rectangularTable('table-7', 5400, 9600, '7', 30),
+    ],
+  },
 };
 
 /**

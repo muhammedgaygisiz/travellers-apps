@@ -110,13 +110,51 @@
               <text
                 class="floor-plan-canvas__item-label"
                 [attr.x]="item.cx"
-                [attr.y]="item.cy"
+                [attr.y]="item.labelY"
                 [attr.font-size]="item.labelSize"
                 text-anchor="middle"
                 dominant-baseline="central"
               >
                 {{ item.label }}
               </text>
+            }
+
+            <!--
+              The capacity, under the number, behind a seated figure. Drawn on
+              the table rather than in a legend beside the plan, because the
+              question it answers - does this party fit here - is asked while
+              looking at the room. A pictograph and digits rather than a
+              sentence, because a round table is about three characters wide at
+              zoom-to-fit; the words are in the `<title>`, where a hover and a
+              screen reader both find them.
+            -->
+            @if (item.seats !== undefined) {
+              <g
+                class="floor-plan-canvas__item-seats"
+                [attr.data-testid]="'floor-plan-seats-' + item.id"
+              >
+                <title>
+                  {{
+                    'floor-plan-table-seats-count'
+                      | transloco: { count: item.seats }
+                  }}
+                </title>
+                <circle
+                  [attr.cx]="item.seatHeadX"
+                  [attr.cy]="item.seatHeadY"
+                  [attr.r]="item.seatHeadRadius"
+                />
+                <path [attr.d]="item.seatShoulders" />
+                <text
+                  [attr.x]="item.seatsTextX"
+                  [attr.y]="item.seatsY"
+                  [attr.font-size]="item.seatsSize"
+                  text-anchor="start"
+                  dominant-baseline="central"
+                >
+                  {{ item.seatsText }}
+                </text>
+              </g>
             }
           </g>
         }

@@ -16,6 +16,7 @@ import {
   Room,
 } from 'model';
 import { v4 as uuid } from 'uuid';
+import { labelKey } from './floor-plan-tables';
 
 /**
  * One room's contents while the owner is editing them (GitHub issue #1083).
@@ -50,27 +51,42 @@ export const layoutOf = (
  *
  * The smallest unused positive integer rather than "one more than the count",
  * so deleting table 3 out of five and placing another gives table 3 back
- * instead of a second table 5. Uniqueness within the restaurant, its conflict
- * message and the owner's own naming are issue #1084 — this only has to be a
- * plausible label that does not collide with the room the owner is looking at.
+ * instead of a second table 5.
+ *
+ * `reserved` carries the labels of the restaurant's *other* rooms, because
+ * [[Table]] makes a label unique across the whole restaurant: a generated `3`
+ * that collided with the terrace's table 3 would hand the owner a conflict they
+ * did not cause and would have to hunt for (issue #1084).
  */
-export const nextTableLabel = (tables: readonly RestaurantTable[]): string => {
-  const taken = new Set(tables.map((table) => table.label));
+export const nextTableLabel = (
+  tables: readonly RestaurantTable[],
+  reserved: readonly string[] = [],
+): string => {
+  const taken = new Set([
+    ...tables.map((table) => labelKey(table.label)),
+    ...reserved.map(labelKey),
+  ]);
   let number = 1;
 
-  while (taken.has(String(number))) {
+  while (taken.has(labelKey(String(number)))) {
     number += 1;
   }
 
   return String(number);
 };
 
-/** A new object or table from a palette entry, dropped at `position`. */
+/**
+ * A new object or table from a palette entry, dropped at `position`.
+ *
+ * `reserved` is the labels held by the restaurant's other rooms, so a table
+ * placed in the terrace does not take a number the dining room already uses.
+ */
 export const placeEntry = (
   layout: FloorPlanLayout,
   entry: FloorPlanPaletteEntry,
   position: FloorPlanPoint,
   roomId: string,
+  reserved: readonly string[] = [],
 ): { layout: FloorPlanLayout; id: string } => {
   const id = uuid();
   const shape = tableShapeOf(entry.variant);
@@ -92,7 +108,7 @@ export const placeEntry = (
 
   const base = {
     id,
-    label: nextTableLabel(layout.tables),
+    label: nextTableLabel(layout.tables, reserved),
     roomId,
     position,
     rotation: 0,
@@ -170,6 +186,7 @@ export const duplicateIds = (
   ids: readonly string[],
   delta: FloorPlanPoint,
   room: FloorPlanSize,
+  reserved: readonly string[] = [],
 ): { layout: FloorPlanLayout; ids: string[] } => {
   const chosen = new Set(ids);
   const moved = <T extends { position: FloorPlanPoint }>(source: T): T => ({
@@ -195,7 +212,7 @@ export const duplicateIds = (
         moved({
           ...table,
           id: uuid(),
-          label: nextTableLabel([...layout.tables, ...created]),
+          label: nextTableLabel([...layout.tables, ...created], reserved),
         }),
       ],
       [],

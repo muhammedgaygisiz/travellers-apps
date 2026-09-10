@@ -67,6 +67,47 @@ const HAIRLINE_RATIO = 1 / 500;
 const HANDLE_RATIO = 0.022;
 const ITEM_LABEL_RATIO = 0.03;
 
+/**
+ * The seat count, as a share of the table's number (GitHub issue #1084).
+ *
+ * Smaller, because the two are not equals: a staff member scanning the plan is
+ * looking for a number, and a capacity that competed with it for the same
+ * glance would make neither readable. Large enough to survive zoom-to-fit,
+ * which is the zoom level the acceptance criterion names.
+ */
+const SEATS_LABEL_RATIO = 0.62;
+
+/**
+ * How far the number and the seat count sit either side of the table's centre.
+ *
+ * As a share of the label's own size, so the pair stays a pair at every zoom
+ * level rather than drifting apart as the viewBox shrinks.
+ */
+const LABEL_STACK_RATIO = 0.5;
+
+/**
+ * The seated figure drawn beside the capacity, sized against the digits.
+ *
+ * A pictograph rather than the word, because a 900 mm round table is about
+ * three characters wide at zoom-to-fit and "4 seats" written across one runs
+ * off both sides. It is also what stops two numbers on one table being
+ * ambiguous: the large one in the middle is what staff call the table, and the
+ * small one behind a figure is how many people fit. The words are still there,
+ * in the `<title>`, where a hover and a screen reader both find them.
+ *
+ * A head and a pair of shoulders in two primitives, so it survives the
+ * greyscale of a printed QR sheet the way the rest of this drawing does.
+ */
+const SEAT_GLYPH_WIDTH_RATIO = 0.5;
+const SEAT_GLYPH_GAP_RATIO = 0.18;
+const SEAT_HEAD_RADIUS_RATIO = 0.16;
+const SEAT_HEAD_OFFSET_RATIO = 0.2;
+const SEAT_SHOULDER_TOP_RATIO = 0.06;
+const SEAT_SHOULDER_BOTTOM_RATIO = 0.36;
+
+/** Roughly how wide one digit is in the sans-serif face the plan is drawn in. */
+const DIGIT_WIDTH_RATIO = 0.62;
+
 /** How far above the item's top edge the rotate handle stands. */
 const ROTATE_HANDLE_GAP_RATIO = 0.05;
 
@@ -127,6 +168,20 @@ interface ItemView {
   round: boolean;
   label: string;
   labelSize: Millimetres;
+  labelY: Millimetres;
+  /** Seating capacity, on a table that has one, drawn under the number. */
+  seats?: number;
+  /** The capacity as digits, which is all that fits on a table at plan scale. */
+  seatsText: string;
+  seatsSize: Millimetres;
+  seatsY: Millimetres;
+  /** Where the digits start, to the right of the seated figure. */
+  seatsTextX: Millimetres;
+  seatHeadX: Millimetres;
+  seatHeadY: Millimetres;
+  seatHeadRadius: Millimetres;
+  /** The figure's shoulders, as a filled arc under its head. */
+  seatShoulders: string;
 }
 
 /** A resize handle, ready to draw, in the selected item's rotated frame. */
@@ -401,16 +456,32 @@ export class FloorPlanCanvasComponent {
     const viewport = this.viewport();
     const labelSize =
       Math.max(viewport.width, viewport.height) * ITEM_LABEL_RATIO;
+    const seatsSize = labelSize * SEATS_LABEL_RATIO;
+    const stack = labelSize * LABEL_STACK_RATIO;
     const selection = this.selection();
 
     return this.drawnItems().map((item) => {
       const selected = selection.has(item.id);
+      // Only a table carries a label worth drawing at plan scale; a wall's
+      // optional label is a note for the owner, not a sign in the room.
+      const isTable = item.kind === 'table';
+      const seats = isTable ? item.seats : undefined;
+      const seatsText = seats === undefined ? '' : String(seats);
+      const seatsY = item.position.y + stack;
+      // The figure and the digits are one block, centred on the table together,
+      // so a two-digit capacity does not push the pair off to one side.
+      const glyphWidth = seatsSize * SEAT_GLYPH_WIDTH_RATIO;
+      const gap = seatsSize * SEAT_GLYPH_GAP_RATIO;
+      const textWidth = seatsText.length * seatsSize * DIGIT_WIDTH_RATIO;
+      const blockLeft = item.position.x - (glyphWidth + gap + textWidth) / 2;
+      const shoulderTop = seatsY + seatsSize * SEAT_SHOULDER_TOP_RATIO;
+      const shoulderBottom = seatsY + seatsSize * SEAT_SHOULDER_BOTTOM_RATIO;
 
       return {
         id: item.id,
         classes: `floor-plan-canvas__item floor-plan-canvas__item--${item.variant}${
           selected ? ' floor-plan-canvas__item--selected' : ''
-        }`,
+        }${item.enabled === false ? ' floor-plan-canvas__item--disabled' : ''}`,
         selected,
         transform: `rotate(${item.rotation} ${item.position.x} ${item.position.y})`,
         x: item.position.x - item.size.width / 2,
@@ -421,10 +492,24 @@ export class FloorPlanCanvasComponent {
         cy: item.position.y,
         radius: item.size.width / 2,
         round: item.round,
-        // Only a table carries a label worth drawing at plan scale; a wall's
-        // optional label is a note for the owner, not a sign in the room.
-        label: item.kind === 'table' ? (item.label ?? '') : '',
+        label: isTable ? (item.label ?? '') : '',
         labelSize,
+        // Centred when the number stands alone, lifted when a seat count is
+        // drawn under it, so a table without a capacity is not off-centre.
+        labelY: seats === undefined ? item.position.y : item.position.y - stack,
+        seats,
+        seatsText,
+        seatsSize,
+        seatsY,
+        seatsTextX: blockLeft + glyphWidth + gap,
+        seatHeadX: blockLeft + glyphWidth / 2,
+        seatHeadY: seatsY - seatsSize * SEAT_HEAD_OFFSET_RATIO,
+        seatHeadRadius: seatsSize * SEAT_HEAD_RADIUS_RATIO,
+        seatShoulders: `M ${blockLeft} ${shoulderBottom} L ${blockLeft} ${shoulderTop} A ${glyphWidth / 2} ${
+          shoulderBottom - shoulderTop
+        } 0 0 1 ${blockLeft + glyphWidth} ${shoulderTop} L ${
+          blockLeft + glyphWidth
+        } ${shoulderBottom} Z`,
       };
     });
   });

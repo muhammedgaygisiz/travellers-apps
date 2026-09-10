@@ -7,6 +7,7 @@ import {
   objectWithItemGeometry,
   tableShapeOf,
   tableWithItemGeometry,
+  tableWithShape,
 } from '../floor-plan-item';
 
 const wall: FloorPlanObject = {
@@ -155,6 +156,59 @@ describe('floor plan items', () => {
 
       expect(resized).toMatchObject({ shape: 'round', diameter: 1200 });
       expect(resized).not.toHaveProperty('size');
+    });
+  });
+
+  describe('the shape a table is drawn as', () => {
+    it('carries the seating capacity and the service state on to the item', () => {
+      const item = itemFromTable(rectangularTable);
+
+      expect(item.seats).toBe(4);
+      expect(item.enabled).toBe(false);
+    });
+
+    it('leaves geometry with no capacity and no service state', () => {
+      const item = itemFromObject(wall);
+
+      expect(item.seats).toBeUndefined();
+      expect(item.enabled).toBeUndefined();
+    });
+
+    it('turns a rectangle into a round table of its width', () => {
+      const round = tableWithShape(rectangularTable, 'round');
+
+      expect(round).toMatchObject({ shape: 'round', diameter: 1200 });
+      expect(round).not.toHaveProperty('size');
+    });
+
+    it('turns a round table into the square it was drawn in', () => {
+      const rectangle = tableWithShape(roundTable, 'rectangle');
+
+      expect(rectangle).toMatchObject({
+        shape: 'rectangle',
+        size: { width: 900, height: 900 },
+      });
+      expect(rectangle).not.toHaveProperty('diameter');
+    });
+
+    /** A shape change is the drawing, so the business entity has to survive it. */
+    it('keeps the identity, the label, the capacity and the token', () => {
+      const round = tableWithShape(rectangularTable, 'round');
+
+      expect(round).toMatchObject({
+        id: 'table-2',
+        label: '8',
+        roomId: 'room-1',
+        seats: 4,
+        enabled: false,
+        qrTokenId: 'token-1',
+        position: { x: 2000, y: 3000 },
+        rotation: 90,
+      });
+    });
+
+    it('leaves a table that is already the asked-for shape alone', () => {
+      expect(tableWithShape(roundTable, 'round')).toBe(roundTable);
     });
   });
 });

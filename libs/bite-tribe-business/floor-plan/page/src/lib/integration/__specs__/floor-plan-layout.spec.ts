@@ -99,6 +99,15 @@ describe('the floor plan layout', () => {
 
       expect(nextTableLabel(tables)).toBe('3');
     });
+
+    /**
+     * A label is unique across the restaurant, so a number held by the terrace
+     * is not free in the dining room either (issue #1084). Generating one that
+     * collided would hand the owner a conflict they did not cause.
+     */
+    it('skips a number another room of the restaurant already holds', () => {
+      expect(nextTableLabel([table({ label: '1' })], ['2', '3'])).toBe('4');
+    });
   });
 
   describe('placeEntry', () => {

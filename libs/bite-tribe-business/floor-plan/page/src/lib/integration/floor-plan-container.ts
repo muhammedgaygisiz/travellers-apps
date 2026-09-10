@@ -22,6 +22,10 @@ import { FloorPlanService } from './floor-plan.service';
       [canUndo]="service.canUndo()"
       [canRedo]="service.canRedo()"
       [unsavedChanges]="service.unsavedChanges()"
+      [selectedTable]="service.selectedTable()"
+      [selectedTableCount]="service.selectedTables().length"
+      [labelConflict]="service.labelConflict()"
+      [labelConflictRoom]="service.labelConflictRoom()"
       [isAuthenticated]="service.isAuthenticated()"
       (selectRoom)="service.selectRoom($event)"
       (createRoom)="service.createRoom($event)"
@@ -35,6 +39,11 @@ import { FloorPlanService } from './floor-plan.service';
       (commandRequest)="service.runCommand($event)"
       (resizeSelected)="service.resizeSelected($event)"
       (rotateSelected)="service.rotateSelected($event)"
+      (renameTable)="service.renameTable($event)"
+      (tableSeatsChange)="service.setTableSeats($event)"
+      (tableShapeChange)="service.setTableShape($event)"
+      (tableEnabledChange)="service.setTableEnabled($event)"
+      (numberTables)="service.numberSelection($event)"
       (logoutClick)="service.logout()"
     />
   `,

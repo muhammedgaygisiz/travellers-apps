@@ -55,6 +55,24 @@ export interface FloorPlanItem {
   label?: string;
   /** Drawn as a circle rather than a rectangle. */
   round: boolean;
+  /**
+   * Seating capacity, on a table. Absent on geometry, which seats nobody.
+   *
+   * Here for the same reason `label` is: the canvas has to *draw* it. A plan is
+   * read at a glance across a room and printed on to QR sheets, and a table
+   * whose number and capacity are only in a side panel is a rectangle again as
+   * soon as the panel is closed. Nothing in a gesture reads either field, so
+   * carrying them costs the shared geometry nothing.
+   */
+  seats?: number;
+  /**
+   * `false` on a table the owner has taken out of service.
+   *
+   * Absent on geometry, which has no service state. A disabled table stays on
+   * the plan and is drawn differently, because it is still a real place in the
+   * room ([[Table]]).
+   */
+  enabled?: boolean;
 }
 
 /** Whether a variant is a table rather than a piece of geometry. */
@@ -95,6 +113,8 @@ export const itemFromTable = (table: RestaurantTable): FloorPlanItem => ({
   rotation: table.rotation,
   label: table.label,
   round: table.shape === 'round',
+  seats: table.seats,
+  enabled: table.enabled,
 });
 
 /**
@@ -139,3 +159,47 @@ export const tableWithItemGeometry = (
         rotation: item.rotation,
         size: item.size,
       };
+
+/**
+ * The same table drawn as the other shape (GitHub issue #1084).
+ *
+ * A shape change is geometry rather than business: the table keeps its id, its
+ * label, its capacity and its service state, and only what it is drawn as
+ * moves. The union is the point - a round table cannot keep a `size` it no
+ * longer has a meaning for, and a rectangle cannot keep a `diameter`.
+ *
+ * The width is what becomes the diameter and what a diameter becomes again,
+ * because the width is already the single side every other path reads for a
+ * round table (see {@link tableWithItemGeometry}). Taking the height instead
+ * would make a rectangle-round-rectangle round trip depend on which of two
+ * numbers the code happened to prefer. The height of a rectangle made from a
+ * round table is the diameter too, which is the square the circle was drawn in.
+ */
+export const tableWithShape = (
+  table: RestaurantTable,
+  shape: TableShape,
+): RestaurantTable => {
+  if (table.shape === shape) {
+    return table;
+  }
+
+  const side = table.shape === 'round' ? table.diameter : table.size.width;
+
+  // Field by field rather than by spreading `table`, because a spread would
+  // carry the `size` or the `diameter` of the shape being left straight into
+  // the shape being adopted, and the union exists to make that impossible.
+  const base = {
+    id: table.id,
+    label: table.label,
+    roomId: table.roomId,
+    position: table.position,
+    rotation: table.rotation,
+    seats: table.seats,
+    enabled: table.enabled,
+    ...(table.qrTokenId === undefined ? {} : { qrTokenId: table.qrTokenId }),
+  };
+
+  return shape === 'round'
+    ? { ...base, shape: 'round', diameter: side }
+    : { ...base, shape: 'rectangle', size: { width: side, height: side } };
+};

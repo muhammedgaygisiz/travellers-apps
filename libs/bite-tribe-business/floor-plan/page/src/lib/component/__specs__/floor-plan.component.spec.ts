@@ -13,7 +13,7 @@ import {
   FloorPlanItem,
   FloorPlanPlacement,
 } from 'bite-tribe-business/floor-plan-ui';
-import { FloorPlanSize, Room } from 'model';
+import { FloorPlanSize, RestaurantTable, Room, TableShape } from 'model';
 import { RoomDraft } from '../../integration/room-draft';
 import {
   DEFAULT_ROOM_HEIGHT_MM,
@@ -575,6 +575,161 @@ describe(FloorPlanComponent.name, () => {
 
         expect(sizes).toEqual([]);
         expect(degrees).toEqual([]);
+      });
+    });
+
+    describe('the selected table', () => {
+      const table = (over: Partial<RestaurantTable> = {}): RestaurantTable =>
+        ({
+          id: 'table-1',
+          label: '7',
+          roomId: 'room-1',
+          shape: 'rectangle',
+          size: { width: 1200, height: 800 },
+          position: { x: 2000, y: 2000 },
+          rotation: 0,
+          seats: 4,
+          enabled: true,
+          ...over,
+        }) as RestaurantTable;
+
+      beforeEach(() => setInputs({ selectedTable: table() }));
+
+      it('opens the table card only when one table is selected', () => {
+        expect(query('floor-plan-table-properties')).not.toBeNull();
+
+        setInputs({ selectedTable: undefined });
+        expect(query('floor-plan-table-properties')).toBeNull();
+      });
+
+      it('fills the fields from the table', () => {
+        expect(component.tableLabel()).toBe('7');
+        expect(component.tableSeats()).toBe('4');
+      });
+
+      it('reports the typed label, and lets the editor rule on it', () => {
+        const labels: string[] = [];
+        component.renameTable.subscribe((label) => labels.push(label));
+
+        component.tableLabel.set('12');
+        component.onLabelChange();
+
+        expect(labels).toEqual(['12']);
+      });
+
+      it('reports a capacity as a number', () => {
+        const seats: number[] = [];
+        component.tableSeatsChange.subscribe((value) => seats.push(value));
+
+        component.tableSeats.set('6');
+        component.onSeatsChange();
+
+        expect(seats).toEqual([6]);
+      });
+
+      it('reports nothing for a capacity field that is being cleared', () => {
+        const seats: number[] = [];
+        component.tableSeatsChange.subscribe((value) => seats.push(value));
+
+        component.tableSeats.set('');
+        component.onSeatsChange();
+
+        expect(seats).toEqual([]);
+      });
+
+      it.each([['round'], ['rectangle']])('reports the %p shape', (shape) => {
+        const shapes: TableShape[] = [];
+        component.tableShapeChange.subscribe((value) => shapes.push(value));
+
+        component.onShapeChange(shape);
+
+        expect(shapes).toEqual([shape]);
+      });
+
+      it('reports nothing for a segment value that is not a shape', () => {
+        const shapes: TableShape[] = [];
+        component.tableShapeChange.subscribe((value) => shapes.push(value));
+
+        component.onShapeChange(undefined);
+
+        expect(shapes).toEqual([]);
+      });
+
+      it('reports the service state', () => {
+        const states: boolean[] = [];
+        component.tableEnabledChange.subscribe((value) => states.push(value));
+
+        component.onEnabledChange(false);
+
+        expect(states).toEqual([false]);
+      });
+
+      it('says a disabled table stays on the plan', () => {
+        expect(query('floor-plan-table-disabled-hint')).toBeNull();
+
+        setInputs({ selectedTable: table({ enabled: false }) });
+
+        expect(query('floor-plan-table-disabled-hint')).not.toBeNull();
+      });
+
+      /**
+       * The refused label is the one thing the fields do not refill from: the
+       * table kept its old label, and overwriting the owner's text would hide
+       * exactly what the message is about.
+       */
+      it('names the room already holding a refused label', () => {
+        setInputs({
+          labelConflict: { issue: 'duplicate', label: '7' },
+          labelConflictRoom: 'Terrace',
+        });
+
+        expect(query('floor-plan-table-label-conflict')?.textContent).toContain(
+          'floor-plan-table-label-taken',
+        );
+      });
+
+      it('says an empty label is not a table number', () => {
+        setInputs({ labelConflict: { issue: 'empty', label: '' } });
+
+        expect(query('floor-plan-table-label-conflict')?.textContent).toContain(
+          'floor-plan-table-label-empty',
+        );
+      });
+
+      it('shows no conflict message while nothing was refused', () => {
+        expect(query('floor-plan-table-label-conflict')).toBeNull();
+      });
+    });
+
+    describe('numbering several tables', () => {
+      it('offers the helper only for more than one table', () => {
+        setInputs({ selectedTableCount: 1 });
+        expect(query('floor-plan-numbering')).toBeNull();
+
+        setInputs({ selectedTableCount: 3 });
+        expect(query('floor-plan-numbering')).not.toBeNull();
+      });
+
+      it('reports the start number the owner typed', () => {
+        setInputs({ selectedTableCount: 3 });
+        const starts: number[] = [];
+        component.numberTables.subscribe((start) => starts.push(start));
+
+        component.numberFrom.set('20');
+        component.onNumberTables();
+
+        expect(starts).toEqual([20]);
+      });
+
+      it('falls back to one when the start field is empty', () => {
+        setInputs({ selectedTableCount: 3 });
+        const starts: number[] = [];
+        component.numberTables.subscribe((start) => starts.push(start));
+
+        component.numberFrom.set('');
+        component.onNumberTables();
+
+        expect(starts).toEqual([1]);
       });
     });
 

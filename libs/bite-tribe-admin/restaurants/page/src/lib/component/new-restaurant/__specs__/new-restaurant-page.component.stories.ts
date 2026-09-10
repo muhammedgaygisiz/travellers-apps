@@ -1,7 +1,7 @@
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
-import { addNecessaryIcons, getIonicConfig } from 'utils';
+import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import { Restaurant } from 'model';
 import { NewRestaurantPageComponent } from '../new-restaurant-page.component';
 
@@ -23,11 +23,15 @@ const restaurant: Restaurant = {
 } as Restaurant;
 
 export default {
-  title: 'Pages/New Restaurant',
+  title: 'Admin/New Restaurant',
   component: NewRestaurantPageComponent,
   decorators: [
     applicationConfig({
-      providers: [provideIonicAngular(getIonicConfig()), provideRouter([])],
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        provideRouter([]),
+        { provide: APP_TITLE, useValue: 'BiteTribe Admin' },
+      ],
     }),
   ],
   args: {
@@ -42,39 +46,17 @@ export default {
 type Story = StoryObj<NewRestaurantPageComponent>;
 
 /**
- * Two-column layout at the Ionic `lg` breakpoint (>= 992px): form fields and
- * opening hours on the left, map and bite list on the right.
+ * The page at the laptop width Loki baselines it at: form fields and opening
+ * hours on the left, map and bite list on the right, which is the two-column
+ * layout Ionic's `lg` breakpoint (>= 992px) produces.
+ *
+ * This was two stories, `TwoColumn` and `Stacked`, each declaring a viewport
+ * through `parameters.viewport`. Loki loads `iframe.html?id=...` directly and
+ * sizes the browser itself from `configurations` in `loki.config.js`, so the
+ * viewport addon never runs and both stories rendered at the configuration's
+ * width - the two committed references were byte-identical. Below `lg` the page
+ * stacks into one column; that is browsed through the Storybook viewport
+ * toolbar rather than baselined, because the admin app is a desktop product
+ * (issue #1547).
  */
-export const TwoColumn: Story = {
-  parameters: {
-    viewport: {
-      viewports: {
-        desktop: {
-          name: 'Desktop',
-          styles: { width: '1200px', height: '900px' },
-          type: 'desktop',
-        },
-      },
-      defaultViewport: 'desktop',
-    },
-  },
-};
-
-/**
- * Stacked single-column layout below `lg`: form fields, then opening hours,
- * then map, then bites.
- */
-export const Stacked: Story = {
-  parameters: {
-    viewport: {
-      viewports: {
-        mobile: {
-          name: 'Mobile',
-          styles: { width: '390px', height: '844px' },
-          type: 'mobile',
-        },
-      },
-      defaultViewport: 'mobile',
-    },
-  },
-};
+export const Default: Story = {};

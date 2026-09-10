@@ -168,6 +168,18 @@ The rule it adds is recorded on [[Bite]]. The guard is a client affordance only;
 
 This trace has no use case and no domain page, which is the point: a character is brand material, and nothing in the product references one. The naming and the eventual product use are open on [[Current State - Open Questions]]. The day a surface uses a character, the artwork moves into app assets and this row gains the use case that took it.
 
+## The Admin And Business Visual Baseline
+
+Issue \#1547 gives `bite-tribe-admin` and `bite-tribe-business` Storybook stories and Loki references. Before it, all 466 committed reference images belonged to the consumer app or to shared `common/ui` components: the business app had no stories at all, and the admin app had one.
+
+| Work   | Implementation                                               | Owns                                                         |
+| ------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| \#1547 | [[Implementation - Storybook]], [[Implementation - Testing]] | The `Admin/*` and `Business/*` namespaces and their baseline |
+
+This trace has no use case and no domain page, and that is correct: nothing the two apps do changed. It is test material for surfaces whose behaviour is already traced through [[UC - Operate BiteTribe In The Admin App]] and [[UC - Maintain Restaurants In The Business App]].
+
+Three constraints came out of it and are recorded rather than rediscovered: a story-level `viewport` parameter never reaches Loki, `parameters.loki.skip` cannot narrow a story to one configuration, and Storybook has to serve all three Transloco catalogues or the two privileged apps baseline raw keys.
+
 ## Public City Landing Pages
 
 [[epic-1487]] gives an operator a way to publish curated, indexable city pages over the data the product already holds. It is Priority `P3`: nothing in the launch path depends on it.

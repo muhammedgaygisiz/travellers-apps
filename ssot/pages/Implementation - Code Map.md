@@ -51,6 +51,12 @@ Examples:
 - `libs/bite-tribe-business/dashboard/data-access`
 - `libs/bite-tribe-business/staff/page`
 - `libs/bite-tribe-business/staff/data-access`
+- `libs/bite-tribe-business/floor-plan/data-access`
+
+`floor-plan` is the one pair that is currently half a pair: issue \#1081 added
+the data-access half so persistence, rules and conflict handling could be
+settled and tested before an editor exists, and the `page` half arrives with
+the editor of issue \#1082.
 
 The business app holds only what a restaurant does to its own data. Migrations,
 restaurant-candidate verification, the unmatched Bite places and the

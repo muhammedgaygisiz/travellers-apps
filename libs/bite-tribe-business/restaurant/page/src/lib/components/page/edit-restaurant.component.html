@@ -162,6 +162,16 @@
           {{ 'staff-manage' | transloco }}
         </ion-button>
 
+        <ion-button
+          class="ion-margin-top"
+          fill="outline"
+          data-testid="edit-restaurant-floor-plan"
+          [attr.aria-label]="'floor-plan-manage' | transloco"
+          (click)="editFloorPlan.emit()"
+        >
+          {{ 'floor-plan-manage' | transloco }}
+        </ion-button>
+
         @if (links.length) {
           <ion-button
             class="ion-margin-top"

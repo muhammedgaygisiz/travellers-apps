@@ -1,0 +1,91 @@
+/*
+ * Colours come from `--ion-background-color` and `--ion-text-color-rgb` only.
+ *
+ * The `--ion-color-step-*` ladder is tempting for a panel like this and is not
+ * reliable here: it is generated per theme and is simply absent in a bare
+ * Storybook story, so a floor painted with `--ion-color-step-50` fell back to
+ * a hard-coded grey while the walls around it resolved from a real variable —
+ * a light floor inside dark walls. The two variables below are set by Ionic's
+ * core CSS in both themes, so the plan follows the theme it is rendered in.
+ */
+:host {
+  position: relative;
+  display: block;
+  width: 100%;
+  /*
+   * The canvas has no intrinsic height: its `viewBox` is in millimetres and
+   * carries no device size, so the plan is as tall as the surface it is given.
+   * A minimum keeps it from collapsing to nothing on a short viewport, and the
+   * page decides the rest.
+   */
+  min-height: 20rem;
+  height: 100%;
+
+  --floor-plan-ink: var(--ion-text-color, #000000);
+  --floor-plan-ink-rgb: var(--ion-text-color-rgb, 0, 0, 0);
+}
+
+.floor-plan-canvas__surface {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  /*
+   * Dragging the plan otherwise selects the scale reference's label, which
+   * leaves the canvas with a highlighted `5 m` sitting on it after every pan.
+   */
+  user-select: none;
+  -webkit-user-select: none;
+  border-radius: 0.5rem;
+  background: var(--ion-background-color, #ffffff);
+
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+.floor-plan-canvas__surface--panning {
+  cursor: grabbing;
+}
+
+/* The floor itself, so a room reads as a surface rather than as an outline. */
+.floor-plan-canvas__floor {
+  fill: rgba(var(--floor-plan-ink-rgb), 0.04);
+}
+
+.floor-plan-canvas__grid-line {
+  fill: none;
+  stroke: rgba(var(--floor-plan-ink-rgb), 0.22);
+}
+
+.floor-plan-canvas__wall {
+  fill: none;
+  stroke: var(--floor-plan-ink);
+}
+
+.floor-plan-canvas__scale {
+  line {
+    stroke: var(--floor-plan-ink);
+  }
+
+  text {
+    fill: var(--floor-plan-ink);
+    /*
+     * `font-size` is set per render as a share of the viewport, so the label
+     * keeps one size on screen at every zoom level. Only the family is fixed
+     * here.
+     */
+    font-family: var(--ion-font-family, sans-serif);
+  }
+}
+
+.floor-plan-canvas__controls {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}

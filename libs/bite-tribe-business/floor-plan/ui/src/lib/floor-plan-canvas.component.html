@@ -1,0 +1,158 @@
+<svg
+  #floorPlanCanvas
+  class="floor-plan-canvas__surface"
+  [class.floor-plan-canvas__surface--panning]="panning()"
+  [attr.viewBox]="viewBox()"
+  preserveAspectRatio="xMidYMid meet"
+  role="application"
+  tabindex="0"
+  [attr.aria-label]="
+    'floor-plan-canvas-label' | transloco: { room: room()?.name ?? '' }
+  "
+  data-testid="floor-plan-canvas"
+  (pointerdown)="onPointerDown($event)"
+  (pointermove)="onPointerMove($event)"
+  (pointerup)="onPointerUp()"
+  (pointercancel)="onPointerUp()"
+  (wheel)="onWheel($event)"
+  (keydown)="onKeyDown($event)"
+>
+  @if (room(); as plan) {
+    @let bar = scaleBar();
+    @let view = viewport();
+
+    <defs>
+      <clipPath [attr.id]="clipPathId">
+        <rect
+          [attr.x]="view.x"
+          [attr.y]="view.y"
+          [attr.width]="view.width"
+          [attr.height]="view.height"
+        />
+      </clipPath>
+
+      <pattern
+        [attr.id]="gridPatternId"
+        [attr.width]="gridSpacing()"
+        [attr.height]="gridSpacing()"
+        patternUnits="userSpaceOnUse"
+      >
+        <path
+          class="floor-plan-canvas__grid-line"
+          [attr.d]="gridPath()"
+          [attr.stroke-width]="hairline()"
+        />
+      </pattern>
+    </defs>
+
+    <g [attr.clip-path]="clipPathUrl">
+      <rect
+        class="floor-plan-canvas__floor"
+        x="0"
+        y="0"
+        [attr.width]="plan.size.width"
+        [attr.height]="plan.size.height"
+      />
+
+      @if (showGrid()) {
+        <rect
+          class="floor-plan-canvas__grid"
+          x="0"
+          y="0"
+          [attr.width]="plan.size.width"
+          [attr.height]="plan.size.height"
+          [attr.fill]="gridPatternUrl"
+          data-testid="floor-plan-grid"
+        />
+      }
+
+      <rect
+        class="floor-plan-canvas__wall"
+        x="0"
+        y="0"
+        [attr.width]="plan.size.width"
+        [attr.height]="plan.size.height"
+        [attr.stroke-width]="hairline() * 3"
+        data-testid="floor-plan-room-outline"
+      />
+
+      <!--
+        Geometry and tables are projected rather than drawn here, so the
+        placement work of issue #1083 draws into this millimetre space instead
+        of replacing it. Projected SVG needs the `svg:` prefix in the caller's
+        template.
+      -->
+      <ng-content />
+
+      <g class="floor-plan-canvas__scale" data-testid="floor-plan-scale">
+        <line
+          [attr.x1]="bar.x"
+          [attr.y1]="bar.y"
+          [attr.x2]="bar.end"
+          [attr.y2]="bar.y"
+          [attr.stroke-width]="hairline() * 2"
+        />
+        <line
+          [attr.x1]="bar.x"
+          [attr.y1]="bar.y - bar.tick"
+          [attr.x2]="bar.x"
+          [attr.y2]="bar.y"
+          [attr.stroke-width]="hairline() * 2"
+        />
+        <line
+          [attr.x1]="bar.end"
+          [attr.y1]="bar.y - bar.tick"
+          [attr.x2]="bar.end"
+          [attr.y2]="bar.y"
+          [attr.stroke-width]="hairline() * 2"
+        />
+        <text
+          [attr.x]="bar.labelX"
+          [attr.y]="bar.labelY"
+          [attr.font-size]="bar.fontSize"
+        >
+          {{ bar.caption }}
+        </text>
+      </g>
+    </g>
+  }
+</svg>
+
+<div class="floor-plan-canvas__controls">
+  <ion-button
+    size="small"
+    fill="solid"
+    color="light"
+    [disabled]="!room()"
+    [attr.aria-label]="'floor-plan-zoom-in' | transloco"
+    [title]="'floor-plan-zoom-in' | transloco"
+    data-testid="floor-plan-zoom-in"
+    (click)="zoomIn()"
+  >
+    <ion-icon name="add-outline" slot="icon-only" />
+  </ion-button>
+  <ion-button
+    size="small"
+    fill="solid"
+    color="light"
+    [disabled]="!room()"
+    [attr.aria-label]="'floor-plan-zoom-out' | transloco"
+    [title]="'floor-plan-zoom-out' | transloco"
+    data-testid="floor-plan-zoom-out"
+    (click)="zoomOut()"
+  >
+    <ion-icon name="remove-outline" slot="icon-only" />
+  </ion-button>
+  <ion-button
+    size="small"
+    fill="solid"
+    color="light"
+    [disabled]="!room()"
+    [attr.aria-label]="'floor-plan-zoom-fit' | transloco"
+    [title]="'floor-plan-zoom-fit' | transloco"
+    data-testid="floor-plan-zoom-fit"
+    (click)="zoomToFit()"
+  >
+    <ion-icon name="scan-outline" slot="icon-only" />
+  </ion-button>
+</div>

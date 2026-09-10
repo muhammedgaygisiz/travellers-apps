@@ -82,6 +82,7 @@ export class EditRestaurantComponent {
    * first, and the answer is already on the screen.
    */
   readonly manageStaff = output<void>();
+  readonly editFloorPlan = output<void>();
 
   readonly socialMediaForm = this.formBuilder.group({
     links: this.formBuilder.array([]),

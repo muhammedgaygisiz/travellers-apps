@@ -127,7 +127,7 @@ Published plan is read by staff live view and by guest QR resolution
 
 ## Technical Implementation
 
-Planned Firestore layout:
+Firestore layout, real since issue \#1081:
 
 ```text
 /restaurants/{restaurantId}/rooms/{roomId}
@@ -136,13 +136,13 @@ Planned Firestore layout:
 
 Non-table geometry lives as an array inside its room document because it is always loaded and saved together. Tables are separate documents because they are business entities with independent lifecycles, referenced by live state, visits, and orders.
 
-Libraries, of which the shared model and the data-access layer exist today:
+Libraries:
 
 ```text
 libs/bite-tribe-common/model                        floor plan, room, table types
 libs/bite-tribe-business/floor-plan/data-access     load, save, conflict signalling
-libs/bite-tribe-business/floor-plan/page            planned, issue #1082
-libs/bite-tribe-business/floor-plan/ui              planned, issue #1082
+libs/bite-tribe-business/floor-plan/page            the editor page and its workflow
+libs/bite-tribe-business/floor-plan/ui              the canvas, the grid, the units
 ```
 
 Issue \#1080 wrote the model as two files in `libs/bite-tribe-common/model/src/lib`: `floor-plan.ts` holds `Room`, `FloorPlanObject`, and the coordinate-system primitives `Millimetres`, `FloorPlanPoint`, `FloorPlanSize`, and `FloorPlanRotation`; `restaurant-table.ts` holds `RestaurantTable`. The coordinate system above is repeated as the file header of `floor-plan.ts`, because the rule has to be readable where the fields are.
@@ -159,12 +159,57 @@ The room-cannot-be-deleted-while-it-holds-tables rule is the one business rule t
 
 Rendering uses SVG rather than canvas: object counts are low, hit-testing and accessibility come for free, and it prints cleanly for QR sheets.
 
+Issue \#1082 built the surface. `libs/bite-tribe-business/floor-plan/ui` holds
+the canvas and the geometry helpers around it; `.../floor-plan/page` holds the
+editor page, its integration service and the room form. The split is enforced
+rather than agreed: the `ui` library is tagged `type:ui`, and
+`@nx/enforce-module-boundaries` forbids `type:ui` from importing
+`type:data-access`, so the canvas is structurally unable to read or write a
+room. It takes a `Room` and draws it.
+
+The SVG `viewBox` **is** the viewport, expressed in room millimetres. Pan moves
+its origin and zoom scales its extent, so one stored room renders identically at
+any container size and on paper, and nothing in the canvas converts a millimetre
+into a pixel to decide what to draw. Pixels enter in one place, turning a
+pointer's travel into a pan, where the browser has already measured the element.
+Line weights and the scale reference are sized as a share of the viewport, which
+is what holds them at one width on screen across the zoom range: zooming in
+halves the viewBox and doubles the pixels each millimetre is drawn with. The
+viewport is component state and is stored nowhere - a `viewBox` in the room
+document would mean two owners on two screens fighting over one scroll position.
+
+Metres and millimetres meet in exactly two places, both in
+`floor-plan-units.ts`: the room form, and the canvas's scale label. An owner
+knows their room in metres and the model stores integer millimetres, so a
+millimetre reaching an input or a metre reaching Firestore is the bug that
+module exists to prevent.
+
+Snapping is a decision about where the _next_ edit lands. Turning the grid on
+never walks through a plan an owner already arranged, so nothing snaps on load;
+in issue \#1082 the only coordinates an owner can enter are the room's own
+dimensions, and object placement uses the same `snapToGrid` from issue \#1083
+onward.
+
+The editor is the first reader of issue \#1081's `FloorPlanConflictError`. It
+takes the stored room off the error rather than re-reading it - the read already
+happened when the refusal was explained - and puts it on screen, so an owner who
+lost the race is shown what is there instead of a failure they cannot act on. A
+room deleted mid-save has no stored room to show, so the list is reloaded
+instead.
+
+The editor lives at `restaurant/:restaurantId/floor-plan` behind `authGuard`,
+`roleGuard('business', 'staff')` and `ownedRestaurantGuard`. The last of those
+checks `Restaurant.ownerUserId`, which a staff account never holds, so the
+Permissions table above holds for a shared or bookmarked URL and not only for
+the links.
+
 ## Current Limitations
 
-- Nothing user-visible is shipped. Issue \#1080 landed the shared types and this page's coordinate system, issue \#1081 the persistence, the rules and the conflict handling; there is no editor and no QR token yet, so no owner can reach any of it.
+- A plan holds nothing but rooms. Issue \#1082 shipped the canvas, the grid and room create, rename, resize and delete; there is no way to place a wall, a chair or a table yet (issues \#1083 and \#1084), and no QR token (issue \#1086). An owner can draw the shape of a room and nothing that stands in it.
 - The rules are deployed by hand. `npx nx firebase-deploy-rules bite-tribe-firebase` has to run before the floor-plan rules mean anything in production; merging them changes nothing on its own.
 - Draft and published are not separated yet (issue \#1088), which is why staff read nothing and why every saved room is live to whatever reads it.
-- Multi-floor grouping is modelled but may ship after single-room support.
+- Multi-floor grouping is modelled but may ship after single-room support. The editor opens one room at a time and switches between them; floor and level grouping, and moving a table between rooms, are issue \#1085.
+- The canvas is baselined at desktop only. `Business/*` stories are visually referenced at `chrome.laptop` alone, because the business app is a desktop product (issue \#1547). The `viewBox` scales from the same stored data at any width, but the responsive and accessibility hardening is issue \#1089.
 - No CAD import, no exact scale drawing, and no automatic layout.
 
 ## Future Ideas

@@ -222,6 +222,105 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ------------------------------------------------------------ floor plans
+
+    /**
+     * A restaurant's floor plan: rooms with their geometry, and one document
+     * per table (GitHub issue #1081).
+     *
+     * ```text
+     * /restaurants/{restaurantId}/rooms/{roomId}
+     * /restaurants/{restaurantId}/tables/{tableId}
+     * ```
+     *
+     * Nothing above matched these paths before, so the catch-all at the bottom
+     * denied them: the plan is new, and like `restaurantStaff` it has no "where
+     * reads were" to preserve. Rule of thumb 1 therefore does not apply, and
+     * reads start scoped to the account holding the restaurant. That is what
+     * makes the plan a plan and not a public map of a business's interior.
+     *
+     * **No staff read yet.** [[Floor Plan]] gives staff the *published* plan,
+     * and there is no published state until issue #1088 splits draft from
+     * published. Admitting staff now would hand them the draft an owner is
+     * halfway through rearranging, which is precisely what that split exists to
+     * prevent. The clause belongs with the state it depends on.
+     *
+     * **An operator reads and does not write.** Support has to be able to see
+     * what an owner is describing on the phone, and that is a read. Editing the
+     * plan is restaurant maintenance, and per the note on `isOperator()` the
+     * `admin` role never acquires restaurant maintenance by implication - it
+     * goes through the assigned owner.
+     */
+    function readsFloorPlan(restaurantId) {
+      return isOperator() || ownsRestaurant(restaurantId);
+    }
+
+    /**
+     * The optimistic-concurrency version of a room, absent-safe.
+     *
+     * Absent reads as `0` rather than erroring, so a document that predates the
+     * field - or a write that forgets it - fails the comparison below instead
+     * of failing the whole rule evaluation, which would deny reads too.
+     */
+    function roomVersion(data) {
+      return data.get('version', 0);
+    }
+
+    match /restaurants/{restaurantId}/rooms/{roomId} {
+      allow read: if readsFloorPlan(restaurantId);
+
+      /**
+       * A room is born at version 1, so "version 1" in a conflict message means
+       * the first saved state and not the absence of one.
+       */
+      allow create: if ownsRestaurant(restaurantId)
+        && roomVersion(request.resource.data) == 1;
+
+      /**
+       * Optimistic concurrency, enforced here rather than in the client.
+       *
+       * The editor reads a room at version `n` and saves `n + 1`. Two devices
+       * that both read `n` both try to write `n + 1`; the first one lands and
+       * the room becomes `n + 1`, so the second is now asking to write a
+       * version that is no longer the successor of what is stored, and is
+       * refused. The loser is told to reload instead of silently overwriting a
+       * rearrangement it never saw.
+       *
+       * A rule rather than a transaction because a transaction protects only
+       * the client that opens one. This refuses the write whatever wrote it.
+       */
+      allow update: if ownsRestaurant(restaurantId)
+        && roomVersion(request.resource.data) == roomVersion(resource.data) + 1;
+
+      /**
+       * A room with tables still in it must not be deleted ([[Floor Plan]]),
+       * and that cannot be checked here: rules read named documents and cannot
+       * query, so no rule can ask whether a collection is empty. The guard
+       * lives in `FloorPlanDataAccessService.deleteRoom`, which is the right
+       * place for it - an owner orphaning their own tables is a data-integrity
+       * mistake, not an account reaching data it does not hold, and that part
+       * is refused here.
+       */
+      allow delete: if ownsRestaurant(restaurantId);
+    }
+
+    /**
+     * One document per table, not a subcollection of its room, because a table
+     * keeps its identity when it moves between rooms: `roomId` is a field, and
+     * moving the table is a field change rather than a delete and recreate of
+     * the document its QR token, visits and orders point at.
+     *
+     * Carrying no version is deliberate. A room holds the geometry both devices
+     * edit as one blob, which is where a silent overwrite hurts; a table is one
+     * small document changed by one deliberate action. `qrTokenId` is not
+     * protected here yet - nothing writes a token until issue #1086, which owns
+     * making it backend-only.
+     */
+    match /restaurants/{restaurantId}/tables/{tableId} {
+      allow read: if readsFloorPlan(restaurantId);
+      allow write: if ownsRestaurant(restaurantId);
+    }
+
     // ------------------------------------------------------------------ bites
 
     match /bites/{biteId} {

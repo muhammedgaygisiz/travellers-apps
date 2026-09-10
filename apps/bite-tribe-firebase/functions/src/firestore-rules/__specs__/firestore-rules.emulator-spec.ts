@@ -12,8 +12,13 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
+  query,
   setDoc,
   updateDoc,
+  where,
+  CollectionReference,
+  DocumentReference,
   Firestore,
 } from 'firebase/firestore';
 
@@ -48,6 +53,55 @@ const OWNED_MENU = 'owned-menu';
 const FOREIGN_RESTAURANT = 'foreign-restaurant';
 const FOREIGN_MENU = 'foreign-menu';
 const LEGACY_MENU = 'legacy-menu';
+
+const OWNED_ROOM = 'owned-room';
+const OWNED_TABLE = 'owned-table';
+const FOREIGN_ROOM = 'foreign-room';
+
+/** The version the owned room is stored at, so a stale save has one to miss. */
+const STORED_ROOM_VERSION = 3;
+
+/** The floor-plan room the owned restaurant is stored with. */
+interface RoomFixture {
+  name: string;
+  order: number;
+  size: { width: number; height: number };
+  objects: {
+    id: string;
+    type: string;
+    position: { x: number; y: number };
+    size: { width: number; height: number };
+    rotation: number;
+  }[];
+  version: number;
+}
+
+const roomAtVersion = (version: number): RoomFixture => ({
+  name: 'Main dining room',
+  order: 0,
+  size: { width: 8000, height: 6000 },
+  objects: [
+    {
+      id: 'wall-1',
+      type: 'wall',
+      position: { x: 4000, y: 0 },
+      size: { width: 8000, height: 120 },
+      rotation: 0,
+    },
+  ],
+  version,
+});
+
+const TABLE_FIXTURE = {
+  label: '12',
+  roomId: OWNED_ROOM,
+  position: { x: 2000, y: 3000 },
+  rotation: 0,
+  seats: 4,
+  enabled: true,
+  shape: 'round',
+  diameter: 900,
+};
 
 let testEnv: RulesTestEnvironment;
 
@@ -180,6 +234,21 @@ beforeEach(async () => {
       addedAt: '2026-09-10T09:00:00.000Z',
       addedAtTimestamp: 1789030800000,
     });
+
+    // The floor plan of the owned restaurant, plus one belonging to another
+    // account, so a cross-account read has something real to be refused (#1081).
+    await setDoc(
+      doc(db, 'restaurants', OWNED_RESTAURANT, 'rooms', OWNED_ROOM),
+      roomAtVersion(STORED_ROOM_VERSION),
+    );
+    await setDoc(
+      doc(db, 'restaurants', OWNED_RESTAURANT, 'tables', OWNED_TABLE),
+      TABLE_FIXTURE,
+    );
+    await setDoc(
+      doc(db, 'restaurants', FOREIGN_RESTAURANT, 'rooms', FOREIGN_ROOM),
+      roomAtVersion(1),
+    );
 
     await setDoc(doc(db, 'meta', 'leaderboard'), { entries: [] });
     await setDoc(doc(db, 'displayNames', 'consumer'), { userId: CONSUMER });
@@ -450,6 +519,234 @@ describe('staff', () => {
     await assertFails(
       deleteDoc(doc(asOperator(), 'restaurantStaff', STRANGER)),
     );
+  });
+});
+
+describe('floor plans', () => {
+  const roomDoc = (
+    db: Firestore,
+    restaurantId: string,
+    roomId: string,
+  ): DocumentReference => doc(db, 'restaurants', restaurantId, 'rooms', roomId);
+
+  const tablesOf = (db: Firestore, restaurantId: string): CollectionReference =>
+    collection(db, 'restaurants', restaurantId, 'tables');
+
+  describe('reads', () => {
+    it('lets the owner load a room and query its tables', async () => {
+      await assertSucceeds(
+        getDoc(roomDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+      await assertSucceeds(
+        getDocs(
+          query(
+            tablesOf(asOwner(), OWNED_RESTAURANT),
+            where('roomId', '==', OWNED_ROOM),
+          ),
+        ),
+      );
+    });
+
+    it('lets an operator read a plan for support', async () => {
+      await assertSucceeds(
+        getDoc(roomDoc(asOperator(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+    });
+
+    /**
+     * The acceptance criterion of issue #1081, and the reason this collection
+     * departs from the file's "reads stay where they were": the plan is new, so
+     * nothing regresses by starting closed, and a restaurant's interior layout
+     * is not something every signed-in account should be able to enumerate.
+     */
+    it('refuses a business account reading a plan it does not hold', async () => {
+      await assertFails(
+        getDoc(roomDoc(asOtherBusiness(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+      await assertFails(getDocs(tablesOf(asOtherBusiness(), OWNED_RESTAURANT)));
+    });
+
+    it('refuses a consumer account reading a plan', async () => {
+      await assertFails(
+        getDoc(roomDoc(asConsumer(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+    });
+
+    /**
+     * Staff read the *published* plan, and there is no published state until
+     * issue #1088 splits draft from published. Admitting staff now would hand
+     * them the draft an owner is halfway through rearranging.
+     */
+    it('refuses a staff account reading the plan before there is a published one', async () => {
+      await assertFails(
+        getDoc(roomDoc(asStaff(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+    });
+  });
+
+  describe('writes', () => {
+    it('lets the owner create a room at version 1', async () => {
+      await assertSucceeds(
+        setDoc(
+          roomDoc(asOwner(), OWNED_RESTAURANT, 'terrace'),
+          roomAtVersion(1),
+        ),
+      );
+    });
+
+    it('refuses a room created at any other version', async () => {
+      await assertFails(
+        setDoc(
+          roomDoc(asOwner(), OWNED_RESTAURANT, 'terrace'),
+          roomAtVersion(7),
+        ),
+      );
+    });
+
+    it('lets the owner place a table', async () => {
+      await assertSucceeds(
+        setDoc(doc(tablesOf(asOwner(), OWNED_RESTAURANT), 'table-13'), {
+          ...TABLE_FIXTURE,
+          label: '13',
+        }),
+      );
+    });
+
+    it('lets the owner delete a table and an empty room', async () => {
+      await assertSucceeds(
+        deleteDoc(doc(tablesOf(asOwner(), OWNED_RESTAURANT), OWNED_TABLE)),
+      );
+      await assertSucceeds(
+        deleteDoc(roomDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+    });
+
+    it('refuses a business account writing a plan it does not hold', async () => {
+      await assertFails(
+        updateDoc(roomDoc(asOtherBusiness(), OWNED_RESTAURANT, OWNED_ROOM), {
+          ...roomAtVersion(STORED_ROOM_VERSION + 1),
+        }),
+      );
+      await assertFails(
+        setDoc(doc(tablesOf(asOtherBusiness(), OWNED_RESTAURANT), 'table-14'), {
+          ...TABLE_FIXTURE,
+          label: '14',
+        }),
+      );
+    });
+
+    it('refuses a room under a restaurant nobody holds', async () => {
+      await assertFails(
+        setDoc(
+          roomDoc(asOwner(), 'unowned-restaurant', 'room-1'),
+          roomAtVersion(1),
+        ),
+      );
+    });
+
+    /**
+     * Editing the plan is restaurant maintenance, and `admin` never acquires
+     * that by implication — see the operator note in the rules file. An
+     * operator sees the plan and does not rearrange it.
+     */
+    it('refuses an operator editing a plan', async () => {
+      await assertFails(
+        setDoc(
+          roomDoc(asOperator(), OWNED_RESTAURANT, OWNED_ROOM),
+          roomAtVersion(STORED_ROOM_VERSION + 1),
+        ),
+      );
+    });
+  });
+
+  describe('optimistic concurrency', () => {
+    it('accepts a save carrying the successor of the stored version', async () => {
+      await assertSucceeds(
+        setDoc(
+          roomDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM),
+          roomAtVersion(STORED_ROOM_VERSION + 1),
+        ),
+      );
+    });
+
+    /**
+     * The conflict this issue exists for. The second device read the room at
+     * version 3, the first device already saved 4, and the second device's save
+     * still claims 4 — which is no longer the successor of what is stored, so
+     * it is refused rather than quietly replacing a rearrangement it never saw.
+     */
+    it('refuses a save from a device that read an older version', async () => {
+      await assertSucceeds(
+        setDoc(
+          roomDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM),
+          roomAtVersion(STORED_ROOM_VERSION + 1),
+        ),
+      );
+
+      await assertFails(
+        setDoc(
+          roomDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM),
+          roomAtVersion(STORED_ROOM_VERSION + 1),
+        ),
+      );
+    });
+
+    it('refuses a save that leaves the version where it was', async () => {
+      await assertFails(
+        setDoc(
+          roomDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM),
+          roomAtVersion(STORED_ROOM_VERSION),
+        ),
+      );
+    });
+
+    it('refuses a save that skips a version', async () => {
+      await assertFails(
+        setDoc(
+          roomDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM),
+          roomAtVersion(STORED_ROOM_VERSION + 2),
+        ),
+      );
+    });
+
+    /**
+     * A partial write is a save too. Renaming the room without advancing the
+     * version leaves the stored version in place, which is not its own
+     * successor - so there is no way to touch a room without declaring which
+     * version the change was made against.
+     */
+    it('refuses a partial update that does not advance the version', async () => {
+      await assertFails(
+        updateDoc(roomDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM), {
+          name: 'Renamed without a version',
+        }),
+      );
+    });
+
+    /**
+     * The layout split earning its keep: a geometry save writes the room
+     * document and nothing else, so the table documents the QR tokens, visits
+     * and orders point at come through a rearrangement untouched.
+     */
+    it('leaves table documents untouched when the room geometry is saved', async () => {
+      const before = await getDoc(
+        doc(tablesOf(asOwner(), OWNED_RESTAURANT), OWNED_TABLE),
+      );
+
+      await assertSucceeds(
+        setDoc(roomDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM), {
+          ...roomAtVersion(STORED_ROOM_VERSION + 1),
+          objects: [],
+        }),
+      );
+
+      const after = await getDoc(
+        doc(tablesOf(asOwner(), OWNED_RESTAURANT), OWNED_TABLE),
+      );
+
+      expect(after.data()).toEqual(before.data());
+      expect(after.data()).toEqual(TABLE_FIXTURE);
+    });
   });
 });
 

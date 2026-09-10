@@ -125,7 +125,7 @@ A link states its kind, using one of three forms, in this order:
 
 On GitHub, use `#1234`. On the SSOT mirror page, use `[[issue-1234]]`.
 
-Domain, use-case, epic and architecture traceability is not recorded here. It belongs on the use-case page, in its `Related GitHub Scope` section, which [[Use Case Format]] `UF-4` requires and never omits.
+Domain, use-case, epic and architecture traceability is not recorded here. It belongs on the use-case page, in its `Related GitHub Scope` section, which [[Use Case Format]] `UF-4` requires and never omits from L1 up (optional while a page is still at `L0`).
 
 ## Status And The Mirror Page
 

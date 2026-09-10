@@ -224,7 +224,7 @@ lands, and folding it into `UI` makes those questions invisible.
   page, or has one carrying no numbered guarantees, the obligation is *unanswered*: it is
   recorded where the page states its handshake, and it is a claim on `UF-20`'s migration
   order rather than a defect in this page. **A page does not reach a level by waiting for
-  another page to reach one** — `UF-3` makes L1 a legitimate resting level, so a rule that
+  another page to reach one** — `UF-3` makes L0 and L1 legitimate resting levels, so a rule that
   made L2 conditional on a counterparty's level would make L2 unreachable by design.
 
 ## Terminal State Kinds

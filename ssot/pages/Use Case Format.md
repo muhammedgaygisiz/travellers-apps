@@ -32,45 +32,48 @@ defect list and not a work plan. Where it needs one of those, it links to it.
 ## Maturity Levels
 
 - **UF-1** Every use-case page MUST declare a level in the first line of `## Status`,
-  as `**Level:** L1` / `L2` / `L3`.
+  as `**Level:** L0` / `L1` / `L2` / `L3`.
 
 | Level | Name | What it asserts | Flow written as |
 |---|---|---|---|
+| **L0** | Idea | A behaviour worth naming has been proposed. No claim that the team agrees on it, that it is scoped, or that any flow is settled | Optional prose bullets under `Current Flow`, `Target Flow` or `Planned Flow` — or no flow at all |
 | **L1** | Narrative | The behaviour as the team understands it. No claim of completeness | Prose bullets under `Current Flow`, `Target Flow` or `Planned Flow` |
 | **L2** | Actogram | Every path, including every failure path, is enumerated and ends in a named terminal state. No claim about the code | Actogram, as-agreed |
 | **L3** | Verified actogram | L2, and the flow was read against a named commit on a named date, with code anchors and a locus per step | Actogram, as-built |
 
-- **UF-2** A use case that is not implemented MUST NOT be L3, and SHOULD stay L1 until it
-  is built. Forcing an actogram onto unbuilt behaviour invents branches no code has had.
-- **UF-3** L1 is a legitimate resting level. A page is migrated because a decision needs
-  it, not to reach uniformity.
+- **UF-2** A use case that is not implemented MUST NOT be L3, and SHOULD stay at L0 or L1
+  until it is built. Forcing an actogram onto unbuilt behaviour invents branches no code
+  has had.
+- **UF-3** L0 and L1 are legitimate resting levels. A page is migrated because a decision
+  needs it, not to reach uniformity.
 
 ## Page Shape
 
 - **UF-4** Section titles MUST be used verbatim, as `##` headings, in this order.
-  `–` means the section is not used at that level.
+  `–` means the section is not used at that level; `opt` means the section may be
+  included or left out entirely, and carries no minimum content when it is included.
 
-| # | Section | L1 | L2 | L3 | Content |
-|---|---|---|---|---|---|
-| 1 | `Status` | ✓ | ✓ | ✓ | Level; at L3 the provenance line; one paragraph of snapshot; optionally an aspect/state table. A snapshot only — never the only place a fact lives |
-| 2 | `Goal` | ✓ | ✓ | ✓ | What becomes true for whom, and what this page therefore owns. Two paragraphs at most |
-| 3 | `Actors` | ✓ | ✓ | ✓ | Roles from [[User Roles]] only. For each: whether it acts, and if not, why it is named at all |
-| 4 | `Lanes` | – | ✓ | ✓ | Code, kind and binding per lane. `AF-2` |
-| 5 | `Aggregate` | – | ✓ | ✓ | The object the flow acts on, its collections, and the states it can be left in. `AF-1` |
-| 6 | `Scope` | – | ✓ | ✓ | In scope in prose; the completeness claim (`AF-32`); out of scope as the referenced-use-case table |
-| 7 | `Trigger` | – | ✓ | ✓ | What starts the flow. States explicitly whether any automatic trigger exists |
-| 8 | `Preconditions` | – | ✓ | ✓ | `P1..Pn`, each with an owner: another use case, or `Platform` |
-| 9 | `Guarantees` | – | ✓ | ✓ | `G1..Gn`, true at the success terminal state and nowhere else |
-| 10 | `Actogram` | – | ✓ | ✓ | Per [[Actogram Format]]. Phases, mechanism sections, terminal table |
-| 11 | `Rules And Invariants` | opt | ✓ | ✓ | `R-1..R-n`. Normative statements. Code-anchor column at L3 only |
-| 12 | `Exceptions And Failure Modes` | – | opt | ✓ | Only what the actogram cannot express. See `UF-12` |
-| 13 | `Authorization` | – | ✓ | ✓ | What is enforced, where, and what is not |
-| 14 | `MVP Classification` | ✓ | ✓ | ✓ | Never omitted. See below |
-| 15 | `App Store Review Area` | ✓ | ✓ | ✓ | Never omitted. Same rule as [[GitHub Issue Format]]: if not relevant, "not relevant, because …" |
-| 16 | `Supported Evidence` | ✓ | – | – | L1 only. At L2 and L3 the `@` locus on each step replaces it |
-| 17 | `Related GitHub Scope` | ✓ | ✓ | ✓ | Never omitted. The issue and epic links that close the chain in [[Agent Operating Contract]] |
-| 18 | `Related Domains` | ✓ | ✓ | ✓ | Domain pages only |
-| 19 | `Related Pages` | opt | ✓ | ✓ | Everything that is not a domain page |
+| # | Section | L0 | L1 | L2 | L3 | Content |
+|---|---|---|---|---|---|---|
+| 1 | `Status` | ✓ | ✓ | ✓ | ✓ | Level; at L3 the provenance line; one paragraph of snapshot; optionally an aspect/state table. A snapshot only — never the only place a fact lives |
+| 2 | `Goal` | ✓ | ✓ | ✓ | ✓ | What becomes true for whom, and what this page therefore owns. Two paragraphs at most |
+| 3 | `Actors` | ✓ | ✓ | ✓ | ✓ | Roles from [[User Roles]] only. For each: whether it acts, and if not, why it is named at all. At L0 this may be a provisional guess |
+| 4 | `Lanes` | – | – | ✓ | ✓ | Code, kind and binding per lane. `AF-2` |
+| 5 | `Aggregate` | – | – | ✓ | ✓ | The object the flow acts on, its collections, and the states it can be left in. `AF-1` |
+| 6 | `Scope` | – | – | ✓ | ✓ | In scope in prose; the completeness claim (`AF-32`); out of scope as the referenced-use-case table |
+| 7 | `Trigger` | – | – | ✓ | ✓ | What starts the flow. States explicitly whether any automatic trigger exists |
+| 8 | `Preconditions` | – | – | ✓ | ✓ | `P1..Pn`, each with an owner: another use case, or `Platform` |
+| 9 | `Guarantees` | – | – | ✓ | ✓ | `G1..Gn`, true at the success terminal state and nowhere else |
+| 10 | `Actogram` | opt | opt | ✓ | ✓ | Per [[Actogram Format]]. Phases, mechanism sections, terminal table. At L0/L1, when present, may be a partial sketch rather than a complete enumeration — `UF-2` |
+| 11 | `Rules And Invariants` | opt | opt | ✓ | ✓ | `R-1..R-n`. Normative statements. Code-anchor column at L3 only |
+| 12 | `Exceptions And Failure Modes` | – | – | opt | ✓ | Only what the actogram cannot express. See `UF-12` |
+| 13 | `Authorization` | – | – | ✓ | ✓ | What is enforced, where, and what is not |
+| 14 | `MVP Classification` | ✓ | ✓ | ✓ | ✓ | Never omitted. See below |
+| 15 | `App Store Review Area` | opt | ✓ | ✓ | ✓ | Never omitted from L1 up. Same rule as [[GitHub Issue Format]]: if not relevant, "not relevant, because …" |
+| 16 | `Supported Evidence` | opt | ✓ | – | – | Optional at L0, required at L1. At L2 and L3 the `@` locus on each step replaces it |
+| 17 | `Related GitHub Scope` | opt | ✓ | ✓ | ✓ | Never omitted from L1 up. The issue and epic links that close the chain in [[Agent Operating Contract]] |
+| 18 | `Related Domains` | ✓ | ✓ | ✓ | ✓ | Domain pages only |
+| 19 | `Related Pages` | opt | opt | ✓ | ✓ | Everything that is not a domain page |
 
 - **UF-5** A page MUST NOT carry a `Notation` section. It writes one line instead:
   `The flow below is a text actogram; the notation is defined in [[Actogram Format]].`
@@ -161,6 +164,20 @@ is secondary. See [[GitHub Issue Format]] for the `P0`–`P4` board mapping.
 
 ## Migrating An Existing Page
 
+### L0 → L1
+
+1. **Settle the actors.** Replace any placeholder or provisional names in `Actors` with
+   the real roles from [[User Roles]], and state for each whether it acts.
+2. **Check the idea is actually agreed**, not just proposed. If nothing beyond the idea
+   is settled, the page stays at L0 — do not add prose bullets just to move the number.
+3. **Write `Current Flow`, `Target Flow` or `Planned Flow`** as prose bullets once the
+   team shares an understanding of the behaviour, even without a completeness claim.
+4. **Add what L1 requires and L0 left optional:** `App Store Review Area`,
+   `Supported Evidence` and `Related GitHub Scope` all become required (`UF-4`);
+   `Related Pages` stays optional.
+5. **Do not add an Actogram** unless the page is ready to enumerate every path — that is
+   what makes it L2, not this migration.
+
 ### L1 → L2
 
 1. **Name the aggregate** and the states it can be left in (`AF-1`).
@@ -204,6 +221,44 @@ A new use-case page starts from this skeleton. It is kept here rather than as a
 
 Inside the skeleton the actogram blocks are fenced with `~~~` so that they nest inside
 the skeleton's own block. Replace them with ordinary backtick fences when you copy it out.
+
+### L0 Skeleton
+
+An L0 page needs only the sections `UF-4` requires at that level; everything else in
+the full skeleton below is legitimately absent until the page earns it.
+
+```markdown
+# UC - <Verb Phrase Naming The Outcome>
+
+## Status
+
+**Level:** L0.
+<the idea, and what would have to be true for it to become a narrative>
+
+## Goal
+
+<what becomes true, for whom, if this is ever built>
+
+## Actors
+
+- **<Role>** — <provisional guess at its part, or why it is named anyway>.
+
+## MVP Classification
+
+**[MVP]** or **[Secondary]** — <best guess; revisit once the page reaches L1>
+
+## Related Domains
+
+- [[<Domain>]]
+```
+
+`App Store Review Area`, `Supported Evidence`, `Related GitHub Scope`, `Related Pages`
+and `Actogram` may all be added at L0 (`UF-4`) but none is required to bring the page
+into existence.
+
+### Full Skeleton
+
+Used from L1 upward; trim the sections a lower level does not require.
 
 ```markdown
 # UC - <Verb Phrase Naming The Outcome>

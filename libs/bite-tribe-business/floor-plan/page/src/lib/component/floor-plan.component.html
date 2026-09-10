@@ -4,190 +4,413 @@
   (logoutClick)="logoutClick.emit()"
 >
   <ion-content class="ion-padding">
-    <div class="floor-plan">
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>{{ 'floor-plan-title' | transloco }}</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          @if (restaurantName()) {
-            <ion-note class="floor-plan__subtitle">{{
-              restaurantName()
-            }}</ion-note>
-          }
-
-          @if (loading()) {
-            <div class="floor-plan__loading">
-              <ion-spinner name="crescent" />
-            </div>
-          } @else if (hasRooms()) {
-            <ion-item lines="none">
-              <ion-select
-                interface="popover"
-                labelPlacement="stacked"
-                [label]="'floor-plan-room' | transloco"
-                [value]="selectedRoom()?.id"
-                data-testid="floor-plan-room-select"
-                (ionChange)="onSelectRoom($event.detail.value)"
-              >
-                @for (room of rooms(); track room.id) {
-                  <ion-select-option [value]="room.id">{{
-                    room.name
-                  }}</ion-select-option>
-                }
-              </ion-select>
-            </ion-item>
-
-            <ion-button
-              class="ion-margin-top"
-              fill="outline"
-              [disabled]="saving()"
-              data-testid="floor-plan-add-room"
-              (click)="onAddRoom()"
-            >
-              {{ 'floor-plan-add-room' | transloco }}
-            </ion-button>
-          } @else if (loadFailed()) {
-            <p class="floor-plan__failed" data-testid="floor-plan-failed">
-              {{ 'floor-plan-load-failed' | transloco }}
-            </p>
-          } @else {
-            <p data-testid="floor-plan-empty">
-              {{ 'floor-plan-empty' | transloco }}
-            </p>
-            <ion-button
-              expand="block"
-              [disabled]="saving()"
-              data-testid="floor-plan-create-first-room"
-              (click)="onAddRoom()"
-            >
-              @if (saving()) {
-                <ion-spinner name="crescent" slot="start" />
-              }
-              {{ 'floor-plan-create-first-room' | transloco }}
-            </ion-button>
-          }
-        </ion-card-content>
-      </ion-card>
-
-      @if (selectedRoom(); as room) {
+    <div class="floor-plan" [class.floor-plan--single]="!selectedRoom()">
+      <div class="floor-plan__side">
         <ion-card>
           <ion-card-header>
             <ion-card-title>{{
-              'floor-plan-room-details' | transloco
+              'floor-plan-title' | transloco
             }}</ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            <ion-item>
-              <ion-input
-                labelPlacement="stacked"
-                autocomplete="off"
-                [label]="'floor-plan-room-name' | transloco"
-                [value]="name()"
-                data-testid="floor-plan-room-name"
-                (ionInput)="name.set($event.detail.value ?? '')"
-              />
-            </ion-item>
-            <ion-item>
-              <ion-input
-                type="number"
-                inputmode="decimal"
-                labelPlacement="stacked"
-                [label]="'floor-plan-room-width' | transloco"
-                [min]="0.5"
-                [max]="200"
-                [value]="width()"
-                data-testid="floor-plan-room-width"
-                (ionInput)="width.set($event.detail.value ?? '')"
-              />
-            </ion-item>
-            <ion-item>
-              <ion-input
-                type="number"
-                inputmode="decimal"
-                labelPlacement="stacked"
-                [label]="'floor-plan-room-height' | transloco"
-                [min]="0.5"
-                [max]="200"
-                [value]="height()"
-                data-testid="floor-plan-room-height"
-                (ionInput)="height.set($event.detail.value ?? '')"
-              />
-            </ion-item>
+            @if (restaurantName()) {
+              <ion-note class="floor-plan__subtitle">{{
+                restaurantName()
+              }}</ion-note>
+            }
 
-            <ion-note class="floor-plan__hint" data-testid="floor-plan-stored">
-              {{ 'floor-plan-stored-size' | transloco: { size: storedSize() } }}
-            </ion-note>
+            @if (loading()) {
+              <div class="floor-plan__loading">
+                <ion-spinner name="crescent" />
+              </div>
+            } @else if (hasRooms()) {
+              <ion-list
+                class="floor-plan__rooms"
+                lines="full"
+                [attr.aria-label]="'floor-plan-rooms' | transloco"
+                data-testid="floor-plan-room-list"
+              >
+                @for (room of rooms(); track room.id) {
+                  @let current = room.id === selectedRoom()?.id;
 
-            <div class="floor-plan__actions">
+                  <ion-item
+                    button
+                    [detail]="false"
+                    [class.floor-plan__room--current]="current"
+                    [attr.aria-current]="current ? 'true' : null"
+                    [attr.data-testid]="'floor-plan-room-' + room.id"
+                    (click)="onSelectRoom(room.id)"
+                  >
+                    <ion-label>{{ room.name }}</ion-label>
+                  </ion-item>
+                }
+              </ion-list>
+
               <ion-button
-                [disabled]="!canSave()"
-                data-testid="floor-plan-save-room"
-                (click)="onSave()"
+                class="ion-margin-top"
+                fill="outline"
+                [disabled]="saving()"
+                data-testid="floor-plan-add-room"
+                (click)="onAddRoom()"
+              >
+                {{ 'floor-plan-add-room' | transloco }}
+              </ion-button>
+            } @else if (loadFailed()) {
+              <p class="floor-plan__failed" data-testid="floor-plan-failed">
+                {{ 'floor-plan-load-failed' | transloco }}
+              </p>
+            } @else {
+              <p data-testid="floor-plan-empty">
+                {{ 'floor-plan-empty' | transloco }}
+              </p>
+              <ion-button
+                expand="block"
+                [disabled]="saving()"
+                data-testid="floor-plan-create-first-room"
+                (click)="onAddRoom()"
               >
                 @if (saving()) {
                   <ion-spinner name="crescent" slot="start" />
                 }
-                {{ 'floor-plan-save-room' | transloco }}
+                {{ 'floor-plan-create-first-room' | transloco }}
               </ion-button>
-              <ion-button
-                fill="clear"
-                color="danger"
-                [disabled]="saving()"
-                data-testid="floor-plan-delete-room"
-                (click)="onDelete()"
-              >
-                {{ 'floor-plan-delete-room' | transloco }}
-              </ion-button>
-            </div>
+            }
           </ion-card-content>
         </ion-card>
 
-        <ion-card class="floor-plan__canvas-card">
-          <ion-card-content class="floor-plan__canvas-content">
-            <bt-business-floor-plan-canvas
-              class="floor-plan__canvas"
-              [room]="room"
-              [gridSpacing]="gridSpacing()"
-            />
-          </ion-card-content>
-        </ion-card>
+        @if (selectedRoom(); as room) {
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>{{
+                'floor-plan-room-details' | transloco
+              }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-item>
+                <ion-input
+                  labelPlacement="stacked"
+                  autocomplete="off"
+                  [label]="'floor-plan-room-name' | transloco"
+                  [value]="name()"
+                  data-testid="floor-plan-room-name"
+                  (ionInput)="name.set($event.detail.value ?? '')"
+                />
+              </ion-item>
+              <ion-item>
+                <ion-input
+                  type="number"
+                  inputmode="decimal"
+                  labelPlacement="stacked"
+                  [label]="'floor-plan-room-width' | transloco"
+                  [min]="0.5"
+                  [max]="200"
+                  [value]="width()"
+                  data-testid="floor-plan-room-width"
+                  (ionInput)="width.set($event.detail.value ?? '')"
+                />
+              </ion-item>
+              <ion-item>
+                <ion-input
+                  type="number"
+                  inputmode="decimal"
+                  labelPlacement="stacked"
+                  [label]="'floor-plan-room-height' | transloco"
+                  [min]="0.5"
+                  [max]="200"
+                  [value]="height()"
+                  data-testid="floor-plan-room-height"
+                  (ionInput)="height.set($event.detail.value ?? '')"
+                />
+              </ion-item>
 
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>{{ 'floor-plan-grid' | transloco }}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-item lines="none">
-              <ion-select
-                interface="popover"
-                labelPlacement="stacked"
-                [label]="'floor-plan-grid-spacing' | transloco"
-                [value]="gridSpacing()"
-                data-testid="floor-plan-grid-spacing"
-                (ionChange)="onGridSpacingChange($event.detail.value)"
+              <ion-note
+                class="floor-plan__hint"
+                data-testid="floor-plan-stored"
               >
-                @for (spacing of gridSpacings; track spacing) {
-                  <ion-select-option [value]="spacing">{{
-                    spacingLabel(spacing)
-                  }}</ion-select-option>
+                {{
+                  'floor-plan-stored-size' | transloco: { size: storedSize() }
+                }}
+              </ion-note>
+
+              @if (unsavedChanges()) {
+                <ion-note
+                  class="floor-plan__hint floor-plan__unsaved"
+                  data-testid="floor-plan-unsaved"
+                >
+                  {{ 'floor-plan-unsaved-changes' | transloco }}
+                </ion-note>
+              }
+
+              <div class="floor-plan__actions">
+                <ion-button
+                  [disabled]="!canSave()"
+                  data-testid="floor-plan-save-room"
+                  (click)="onSave()"
+                >
+                  @if (saving()) {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+                  {{ 'floor-plan-save-room' | transloco }}
+                </ion-button>
+                <ion-button
+                  fill="clear"
+                  color="danger"
+                  [disabled]="saving()"
+                  data-testid="floor-plan-delete-room"
+                  (click)="onDelete()"
+                >
+                  {{ 'floor-plan-delete-room' | transloco }}
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
+
+      @if (selectedRoom(); as room) {
+        <div class="floor-plan__main">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>{{
+                'floor-plan-objects' | transloco
+              }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-note class="floor-plan__hint">
+                {{ 'floor-plan-palette-hint' | transloco }}
+              </ion-note>
+
+              <ul class="floor-plan__palette" data-testid="floor-plan-palette">
+                @for (entry of palette(); track entry.variant) {
+                  <li>
+                    <button
+                      type="button"
+                      class="floor-plan__palette-entry"
+                      draggable="true"
+                      [attr.data-testid]="'floor-plan-place-' + entry.variant"
+                      [title]="entry.caption"
+                      (dragstart)="onPaletteDragStart($event, entry.variant)"
+                      (click)="onPaletteActivate(entry.variant)"
+                    >
+                      <svg
+                        class="floor-plan__palette-preview"
+                        [attr.viewBox]="
+                          '0 0 ' + paletteExtent + ' ' + paletteExtent
+                        "
+                        preserveAspectRatio="xMidYMid meet"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        @if (entry.round) {
+                          <circle
+                            [attr.cx]="entry.centre"
+                            [attr.cy]="entry.centre"
+                            [attr.r]="entry.radius"
+                          />
+                        } @else {
+                          <rect
+                            [attr.x]="entry.x"
+                            [attr.y]="entry.y"
+                            [attr.width]="entry.width"
+                            [attr.height]="entry.height"
+                          />
+                        }
+                      </svg>
+                      <span class="floor-plan__palette-name">{{
+                        entry.labelKey | transloco
+                      }}</span>
+                      <span class="floor-plan__palette-size">{{
+                        entry.caption
+                      }}</span>
+                    </button>
+                  </li>
                 }
-              </ion-select>
-            </ion-item>
-            <ion-item lines="none">
-              <ion-toggle
-                [checked]="snapEnabled()"
-                data-testid="floor-plan-snap"
-                (ionChange)="onSnapChange($event.detail.checked)"
-              >
-                <ion-label>{{ 'floor-plan-snap' | transloco }}</ion-label>
-              </ion-toggle>
-            </ion-item>
-            <ion-note class="floor-plan__hint">
-              {{ 'floor-plan-snap-hint' | transloco }}
-            </ion-note>
-          </ion-card-content>
-        </ion-card>
+              </ul>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="floor-plan__canvas-card">
+            <ion-card-content class="floor-plan__canvas-content">
+              <div class="floor-plan__toolbar" data-testid="floor-plan-toolbar">
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  [disabled]="!canUndo()"
+                  [attr.aria-label]="'floor-plan-undo' | transloco"
+                  [title]="'floor-plan-undo' | transloco"
+                  data-testid="floor-plan-undo"
+                  (click)="commandRequest.emit('undo')"
+                >
+                  <ion-icon name="arrow-undo-outline" slot="icon-only" />
+                </ion-button>
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  [disabled]="!canRedo()"
+                  [attr.aria-label]="'floor-plan-redo' | transloco"
+                  [title]="'floor-plan-redo' | transloco"
+                  data-testid="floor-plan-redo"
+                  (click)="commandRequest.emit('redo')"
+                >
+                  <ion-icon name="arrow-redo-outline" slot="icon-only" />
+                </ion-button>
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  [disabled]="selectionCount() === 0"
+                  [attr.aria-label]="'floor-plan-duplicate' | transloco"
+                  [title]="'floor-plan-duplicate' | transloco"
+                  data-testid="floor-plan-duplicate"
+                  (click)="commandRequest.emit('duplicate')"
+                >
+                  <ion-icon name="copy-outline" slot="icon-only" />
+                </ion-button>
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  color="danger"
+                  [disabled]="selectionCount() === 0"
+                  [attr.aria-label]="'floor-plan-delete-selection' | transloco"
+                  [title]="'floor-plan-delete-selection' | transloco"
+                  data-testid="floor-plan-delete-selection"
+                  (click)="commandRequest.emit('delete')"
+                >
+                  <ion-icon name="trash-outline" slot="icon-only" />
+                </ion-button>
+
+                <ion-note class="floor-plan__selection-count">
+                  {{
+                    'floor-plan-selection-count'
+                      | transloco: { count: selectionCount() }
+                  }}
+                </ion-note>
+              </div>
+
+              <bt-business-floor-plan-canvas
+                class="floor-plan__canvas"
+                [room]="room"
+                [gridSpacing]="gridSpacing()"
+                [snapSpacing]="snapSpacing()"
+                [items]="items()"
+                [selectedIds]="selectedIds()"
+                (selectionChange)="selectionChange.emit($event)"
+                (itemsChange)="itemsChange.emit($event)"
+                (placeRequest)="placeRequest.emit($event)"
+                (commandRequest)="commandRequest.emit($event)"
+              />
+            </ion-card-content>
+          </ion-card>
+
+          @if (selectedItem(); as item) {
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>{{
+                  'floor-plan-object-properties' | transloco
+                }}</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <ion-note
+                  class="floor-plan__subtitle"
+                  data-testid="floor-plan-object-kind"
+                >
+                  {{ 'floor-plan-object-' + item.variant | transloco }}
+                </ion-note>
+
+                <ion-item>
+                  <ion-input
+                    type="number"
+                    inputmode="decimal"
+                    labelPlacement="stacked"
+                    [label]="
+                      (item.round
+                        ? 'floor-plan-object-diameter'
+                        : 'floor-plan-object-width'
+                      ) | transloco
+                    "
+                    [value]="itemWidth()"
+                    data-testid="floor-plan-object-width"
+                    (ionInput)="itemWidth.set($event.detail.value ?? '')"
+                    (ionChange)="onItemSizeChange()"
+                  />
+                </ion-item>
+
+                @if (!item.round) {
+                  <ion-item>
+                    <ion-input
+                      type="number"
+                      inputmode="decimal"
+                      labelPlacement="stacked"
+                      [label]="'floor-plan-object-height' | transloco"
+                      [value]="itemHeight()"
+                      data-testid="floor-plan-object-height"
+                      (ionInput)="itemHeight.set($event.detail.value ?? '')"
+                      (ionChange)="onItemSizeChange()"
+                    />
+                  </ion-item>
+                }
+
+                <ion-item>
+                  <ion-input
+                    type="number"
+                    inputmode="numeric"
+                    labelPlacement="stacked"
+                    [label]="'floor-plan-object-rotation' | transloco"
+                    [min]="0"
+                    [max]="359"
+                    [value]="itemRotation()"
+                    data-testid="floor-plan-object-rotation"
+                    (ionInput)="itemRotation.set($event.detail.value ?? '')"
+                    (ionChange)="onItemRotationChange()"
+                  />
+                </ion-item>
+
+                @if (isTable(item.variant)) {
+                  <ion-note class="floor-plan__hint">
+                    {{ 'floor-plan-object-table-hint' | transloco }}
+                  </ion-note>
+                }
+              </ion-card-content>
+            </ion-card>
+          }
+
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>{{
+                'floor-plan-grid' | transloco
+              }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-item lines="none">
+                <ion-select
+                  interface="popover"
+                  labelPlacement="stacked"
+                  [label]="'floor-plan-grid-spacing' | transloco"
+                  [value]="gridSpacing()"
+                  data-testid="floor-plan-grid-spacing"
+                  (ionChange)="onGridSpacingChange($event.detail.value)"
+                >
+                  @for (spacing of gridSpacings; track spacing) {
+                    <ion-select-option [value]="spacing">{{
+                      spacingLabel(spacing)
+                    }}</ion-select-option>
+                  }
+                </ion-select>
+              </ion-item>
+              <ion-item lines="none">
+                <ion-toggle
+                  [checked]="snapEnabled()"
+                  data-testid="floor-plan-snap"
+                  (ionChange)="onSnapChange($event.detail.checked)"
+                >
+                  <ion-label>{{ 'floor-plan-snap' | transloco }}</ion-label>
+                </ion-toggle>
+              </ion-item>
+              <ion-note class="floor-plan__hint">
+                {{ 'floor-plan-snap-hint' | transloco }}
+              </ion-note>
+            </ion-card-content>
+          </ion-card>
+        </div>
       }
     </div>
   </ion-content>

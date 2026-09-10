@@ -8,7 +8,11 @@ import {
   RoomNotEmptyError,
 } from 'bite-tribe-business/floor-plan-data-access';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { Room } from 'model';
+import {
+  MAX_ITEM_SIDE,
+  MIN_ITEM_SIDE,
+} from 'bite-tribe-business/floor-plan-ui';
+import { FloorPlanObject, RestaurantTable, Room } from 'model';
 import { of } from 'rxjs';
 import { ToastRequest, ToastService } from 'toast';
 import { FloorPlanService } from '../floor-plan.service';
@@ -29,6 +33,28 @@ const room = (over: Partial<Room> = {}): Room => ({
   ...over,
 });
 
+const wall: FloorPlanObject = {
+  id: 'wall-1',
+  type: 'wall',
+  position: { x: 1000, y: 1000 },
+  size: { width: 2000, height: 100 },
+  rotation: 0,
+};
+
+const table = (over: Partial<RestaurantTable> = {}): RestaurantTable =>
+  ({
+    id: 'table-1',
+    label: '1',
+    roomId: 'room-1',
+    shape: 'rectangle',
+    size: { width: 1200, height: 800 },
+    position: { x: 3000, y: 3000 },
+    rotation: 0,
+    seats: 4,
+    enabled: true,
+    ...over,
+  }) as RestaurantTable;
+
 describe(FloorPlanService.name, () => {
   let service: FloorPlanService;
   let toasts: ToastRequest[];
@@ -39,22 +65,32 @@ describe(FloorPlanService.name, () => {
   let createRoom: jest.Mock;
   let saveRoom: jest.Mock;
   let deleteRoom: jest.Mock;
+  let loadTables: jest.Mock;
+  let saveTable: jest.Mock;
+  let deleteTable: jest.Mock;
+  let storedTables: RestaurantTable[];
 
   /**
-   * Lets the room resource's loader settle before the assertion.
+   * Lets the resources settle before the assertion.
    *
    * A `resource` runs its loader from an effect and resolves through a chain of
    * microtasks, so one flushed effect is not enough — the same shape the home
    * data-access spec uses for its failed reads.
+   *
+   * Twice around, because the reads are chained: the tables resource is keyed
+   * on the room the rooms resource produces, so it does not start until that
+   * one has settled and a single round leaves it loading.
    */
   const loaded = async (): Promise<void> => {
-    TestBed.tick();
+    for (let round = 0; round < 2; round += 1) {
+      TestBed.tick();
 
-    for (let tick = 0; tick < 20; tick += 1) {
-      await Promise.resolve();
+      for (let tick = 0; tick < 20; tick += 1) {
+        await Promise.resolve();
+      }
+
+      TestBed.tick();
     }
-
-    TestBed.tick();
   };
 
   const messageKeys = (): (string | undefined)[] =>
@@ -78,13 +114,27 @@ describe(FloorPlanService.name, () => {
       Promise.resolve({ ...next, version: next.version + 1 }),
     );
     deleteRoom = jest.fn(() => Promise.resolve());
+    storedTables = [];
+    loadTables = jest.fn(() => Promise.resolve(storedTables));
+    saveTable = jest.fn((_restaurantId: string, next: RestaurantTable) =>
+      Promise.resolve(next),
+    );
+    deleteTable = jest.fn(() => Promise.resolve());
 
     TestBed.configureTestingModule({
       providers: [
         FloorPlanService,
         {
           provide: FloorPlanDataAccessService,
-          useValue: { loadRooms, createRoom, saveRoom, deleteRoom },
+          useValue: {
+            loadRooms,
+            createRoom,
+            saveRoom,
+            deleteRoom,
+            loadTables,
+            saveTable,
+            deleteTable,
+          },
         },
         {
           provide: BiteTribeStoreService,
@@ -381,6 +431,297 @@ describe(FloorPlanService.name, () => {
 
       expect(service.roomsValue()).toEqual(stored);
       expect(messageKeys()).toEqual(['floor-plan-room-delete-failed']);
+    });
+  });
+
+  describe('editing the plan', () => {
+    const idsOf = (): string[] => service.items().map((item) => item.id);
+
+    it('draws the geometry of the open room and the tables beside it', async () => {
+      stored = [room({ objects: [wall] })];
+      storedTables = [table()];
+      service.rooms.reload();
+      service.tables.reload();
+      await loaded();
+
+      expect(loadTables).toHaveBeenCalledWith('china-wok', 'room-1');
+      expect(idsOf()).toEqual(['wall-1', 'table-1']);
+    });
+
+    it('places a palette entry and selects it', () => {
+      service.place({ variant: 'chair', position: { x: 1240, y: 2760 } });
+
+      expect(service.layout().objects).toHaveLength(1);
+      expect(service.selectedIds()).toEqual([service.layout().objects[0].id]);
+    });
+
+    it('lands a placement on the grid and inside the room', () => {
+      service.place({ variant: 'chair', position: { x: 1240, y: 2760 } });
+      service.place({ variant: 'chair', position: { x: 99_000, y: 99_000 } });
+
+      const [first, second] = service.layout().objects;
+
+      expect(first.position).toEqual({ x: 1000, y: 3000 });
+      expect(second.position).toEqual({ x: 8000, y: 12_000 });
+    });
+
+    it('places a table as a table rather than as geometry', () => {
+      service.place({ variant: 'table-round', position: { x: 1000, y: 1000 } });
+
+      expect(service.layout().tables).toHaveLength(1);
+      expect(service.layout().objects).toHaveLength(0);
+    });
+
+    it('ignores a palette entry it has never heard of', () => {
+      service.place({ variant: 'helicopter', position: { x: 0, y: 0 } });
+
+      expect(service.layout()).toEqual({ objects: [], tables: [] });
+    });
+
+    /**
+     * The acceptance criterion that undo restores the exact prior geometry,
+     * rotation included, and that redo puts it back.
+     */
+    it('undoes and redoes a move down to the millimetre', () => {
+      service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+      const [placed] = service.items();
+
+      service.applyItems([
+        { ...placed, position: { x: 2340, y: 4560 }, rotation: 137 },
+      ]);
+      expect(service.layout().objects[0].position).toEqual({
+        x: 2340,
+        y: 4560,
+      });
+
+      service.undo();
+      expect(service.layout().objects[0]).toEqual({
+        id: placed.id,
+        type: 'chair',
+        position: { x: 1000, y: 1000 },
+        size: { width: 450, height: 450 },
+        rotation: 0,
+      });
+
+      service.redo();
+      expect(service.layout().objects[0].rotation).toBe(137);
+    });
+
+    it('undoes a placement, and stops selecting what is no longer there', () => {
+      service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+
+      service.undo();
+
+      expect(service.layout().objects).toEqual([]);
+      expect(service.selectedIds()).toEqual([]);
+    });
+
+    it('says whether there is anything to undo or redo', () => {
+      expect(service.canUndo()).toBe(false);
+      expect(service.canRedo()).toBe(false);
+
+      service.place({ variant: 'chair', position: { x: 0, y: 0 } });
+      expect(service.canUndo()).toBe(true);
+
+      service.undo();
+      expect(service.canRedo()).toBe(true);
+    });
+
+    /**
+     * The acceptance criterion that selection, the grid and the snap toggle are
+     * viewport state: none of them is a step an owner can undo.
+     */
+    it('keeps selecting and the grid out of the history', () => {
+      service.place({ variant: 'chair', position: { x: 0, y: 0 } });
+      const after = service.layout();
+
+      service.select([]);
+      service.selectAll();
+      service.setGridSpacing(250);
+      service.setSnapEnabled(false);
+
+      service.undo();
+
+      expect(after.objects).toHaveLength(1);
+      expect(service.layout().objects).toEqual([]);
+      expect(service.canUndo()).toBe(false);
+    });
+
+    it('duplicates the selection beside itself, and selects the copies', () => {
+      service.place({ variant: 'table-round', position: { x: 1000, y: 1000 } });
+      const original = service.selectedIds();
+
+      service.duplicateSelection();
+
+      expect(service.layout().tables).toHaveLength(2);
+      expect(service.selectedIds()).not.toEqual(original);
+      expect(service.layout().tables[1].position).toEqual({
+        x: 1500,
+        y: 1500,
+      });
+    });
+
+    it('deletes the selection and selects nothing after it', () => {
+      service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+
+      service.deleteSelection();
+
+      expect(service.layout().objects).toEqual([]);
+      expect(service.selectedIds()).toEqual([]);
+    });
+
+    it('selects everything in the room at once', () => {
+      service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+      service.place({ variant: 'table-round', position: { x: 2000, y: 2000 } });
+
+      service.selectAll();
+
+      expect(service.selectedIds()).toEqual(idsOf());
+    });
+
+    it.each([
+      ['delete' as const, (): number => service.layout().objects.length, 0],
+      ['duplicate' as const, (): number => service.layout().objects.length, 2],
+    ])('runs the %p command from the canvas', (command, count, expected) => {
+      service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+
+      service.runCommand(command);
+
+      expect(count()).toBe(expected);
+    });
+
+    it('resizes and rotates the one selected item from the inputs', () => {
+      service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+
+      service.resizeSelected({ width: 1200, height: 700 });
+      service.rotateSelected(-90);
+
+      expect(service.layout().objects[0]).toMatchObject({
+        size: { width: 1200, height: 700 },
+        rotation: 270,
+      });
+    });
+
+    it('keeps a round table circular however the inputs are filled in', () => {
+      service.place({ variant: 'table-round', position: { x: 1000, y: 1000 } });
+
+      service.resizeSelected({ width: 1200, height: 400 });
+
+      expect(service.layout().tables[0]).toMatchObject({ diameter: 1200 });
+    });
+
+    it('refuses a side outside the editor limits', () => {
+      service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+
+      service.resizeSelected({ width: 5, height: 900_000 });
+
+      expect(service.layout().objects[0].size).toEqual({
+        width: MIN_ITEM_SIDE,
+        height: MAX_ITEM_SIDE,
+      });
+    });
+
+    it('edits nothing while several items or none are selected', () => {
+      service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+      service.selectAll();
+      service.place({ variant: 'chair', position: { x: 2000, y: 2000 } });
+      service.selectAll();
+
+      const before = service.layout();
+      service.resizeSelected({ width: 1200, height: 700 });
+      service.rotateSelected(45);
+
+      expect(service.layout()).toBe(before);
+    });
+
+    it('notices unsaved changes, and stops once they are written', async () => {
+      expect(service.unsavedChanges()).toBe(false);
+
+      service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+      expect(service.unsavedChanges()).toBe(true);
+
+      await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+      await loaded();
+
+      expect(service.unsavedChanges()).toBe(false);
+    });
+  });
+
+  describe('saving the plan', () => {
+    it('writes the geometry on to the room document', async () => {
+      service.place({ variant: 'wall', position: { x: 1000, y: 1000 } });
+
+      await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+
+      expect(saveRoom.mock.calls[0][1].objects).toEqual([
+        expect.objectContaining({
+          type: 'wall',
+          position: { x: 1000, y: 1000 },
+        }),
+      ]);
+      expect(saveTable).not.toHaveBeenCalled();
+    });
+
+    /**
+     * The acceptance criterion that placing a table writes one table document.
+     * `saveRoom` sends only the room, so rearranging furniture never rewrites a
+     * table, and a table write never touches the room's geometry.
+     */
+    it('writes a placed table as its own document', async () => {
+      service.place({ variant: 'table-round', position: { x: 1000, y: 1000 } });
+
+      await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+
+      expect(saveTable).toHaveBeenCalledTimes(1);
+      expect(saveTable.mock.calls[0][1]).toMatchObject({
+        shape: 'round',
+        roomId: 'room-1',
+        label: '1',
+      });
+      expect(saveRoom.mock.calls[0][1].objects).toEqual([]);
+    });
+
+    it('writes only the tables that actually changed', async () => {
+      storedTables = [table(), table({ id: 'table-2', label: '2' })];
+      service.tables.reload();
+      await loaded();
+
+      const [first] = service.items();
+      service.applyItems([{ ...first, rotation: 90 }]);
+
+      await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+
+      expect(saveTable).toHaveBeenCalledTimes(1);
+      expect(saveTable.mock.calls[0][1].id).toBe('table-1');
+    });
+
+    it('deletes the tables the owner removed', async () => {
+      storedTables = [table()];
+      service.tables.reload();
+      await loaded();
+
+      service.selectAll();
+      service.deleteSelection();
+
+      await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+
+      expect(deleteTable).toHaveBeenCalledWith('china-wok', 'table-1');
+    });
+
+    /**
+     * The room document carries the version rule, so it goes first: a save that
+     * lost the race must be refused before any table is written.
+     */
+    it('writes no table when the room save was refused', async () => {
+      saveRoom.mockRejectedValueOnce(
+        new FloorPlanConflictError('room-1', 4, room({ version: 9 })),
+      );
+      service.place({ variant: 'table-round', position: { x: 1000, y: 1000 } });
+
+      await service.saveRoom({ name: 'Mine', width: 8000, height: 12_000 });
+
+      expect(saveTable).not.toHaveBeenCalled();
+      expect(messageKeys()).toEqual(['floor-plan-room-conflict']);
     });
   });
 

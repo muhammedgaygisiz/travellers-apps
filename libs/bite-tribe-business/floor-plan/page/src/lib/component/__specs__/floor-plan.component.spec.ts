@@ -1,13 +1,19 @@
 import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import {
   AlertController,
   AlertOptions,
   provideIonicAngular,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { FloorPlanCanvasComponent } from 'bite-tribe-business/floor-plan-ui';
-import { Room } from 'model';
+import {
+  FLOOR_PLAN_PALETTE,
+  FloorPlanCanvasComponent,
+  FloorPlanItem,
+  FloorPlanPlacement,
+} from 'bite-tribe-business/floor-plan-ui';
+import { FloorPlanSize, Room } from 'model';
 import { RoomDraft } from '../../integration/room-draft';
 import {
   DEFAULT_ROOM_HEIGHT_MM,
@@ -56,6 +62,17 @@ describe(FloorPlanComponent.name, () => {
 
   const query = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+  /**
+   * An Ionic button's own `disabled` input.
+   *
+   * Read off the component rather than off the attribute: `ion-button` is not
+   * upgraded in jsdom, so the attribute it was first rendered with stays on the
+   * element after the binding turns it off again.
+   */
+  const buttonDisabled = (testId: string): boolean =>
+    fixture.debugElement.query(By.css(`[data-testid="${testId}"]`))
+      .componentInstance.disabled;
 
   const pressAlertButton = (role: string): void => {
     const buttons = (alerts[alerts.length - 1].buttons ?? []) as AlertButton[];
@@ -119,7 +136,7 @@ describe(FloorPlanComponent.name, () => {
     it('invites the owner to make the first one', () => {
       expect(query('floor-plan-empty')).not.toBeNull();
       expect(query('floor-plan-create-first-room')).not.toBeNull();
-      expect(query('floor-plan-room-select')).toBeNull();
+      expect(query('floor-plan-room-list')).toBeNull();
     });
 
     it('creates it at the default size, under a name that can be picked out', () => {
@@ -177,7 +194,7 @@ describe(FloorPlanComponent.name, () => {
     );
 
     it('shows the room and its canvas', () => {
-      expect(query('floor-plan-room-select')).not.toBeNull();
+      expect(query('floor-plan-room-list')).not.toBeNull();
       expect(query('floor-plan-canvas')).not.toBeNull();
       expect(query('floor-plan-empty')).toBeNull();
     });
@@ -339,6 +356,31 @@ describe(FloorPlanComponent.name, () => {
         expect(component.spacingLabel(1000)).toBe('1 m');
       });
 
+      it('lists every room and marks the open one', () => {
+        setInputs({ rooms: [room(), room({ id: 'room-2', name: 'Terrace' })] });
+
+        const list = query('floor-plan-room-list');
+
+        expect(list?.children).toHaveLength(2);
+        expect(
+          query('floor-plan-room-room-1')?.getAttribute('aria-current'),
+        ).toBe('true');
+        expect(
+          query('floor-plan-room-room-2')?.getAttribute('aria-current'),
+        ).toBeNull();
+      });
+
+      it('opens the room that was pressed', () => {
+        setInputs({ rooms: [room(), room({ id: 'room-2', name: 'Terrace' })] });
+
+        const picked: string[] = [];
+        component.selectRoom.subscribe((id) => picked.push(id));
+
+        query('floor-plan-room-room-2')?.click();
+
+        expect(picked).toEqual(['room-2']);
+      });
+
       it('reports the snap toggle', () => {
         const toggles: boolean[] = [];
         component.snapChange.subscribe((value) => toggles.push(value));
@@ -346,6 +388,243 @@ describe(FloorPlanComponent.name, () => {
         component.onSnapChange(false);
 
         expect(toggles).toEqual([false]);
+      });
+    });
+
+    describe('the object palette', () => {
+      let placements: FloorPlanPlacement[];
+
+      beforeEach(() => {
+        placements = [];
+        component.placeRequest.subscribe((place) => placements.push(place));
+      });
+
+      it('offers every entry of the palette', () => {
+        expect(query('floor-plan-palette')?.children).toHaveLength(
+          FLOOR_PLAN_PALETTE.length,
+        );
+        expect(query('floor-plan-place-table-round')).not.toBeNull();
+        expect(query('floor-plan-place-wall')).not.toBeNull();
+      });
+
+      /**
+       * One viewBox across the whole palette, so a 450 mm chair is drawn as a
+       * fraction of a 3 m bar rather than at the same width as it.
+       */
+      it('draws every entry against the same extent', () => {
+        const bar = component
+          .palette()
+          .find((entry) => entry.variant === 'bar');
+        const chair = component
+          .palette()
+          .find((entry) => entry.variant === 'chair');
+
+        expect(bar?.width).toBe(3000);
+        expect(chair?.width).toBe(450);
+        expect(component.paletteExtent).toBe(3000);
+      });
+
+      it('names each entry in metres', () => {
+        const table = component
+          .palette()
+          .find((entry) => entry.variant === 'table-rectangle');
+
+        expect(table?.caption).toBe('1.2 m × 0.8 m');
+      });
+
+      /**
+       * The keyboard path. Dragging needs a pointer, and every mutation has to
+       * be reachable without one.
+       */
+      it('places an entry in the middle of the view when it is activated', () => {
+        query('floor-plan-place-chair')?.click();
+
+        expect(placements).toEqual([
+          { variant: 'chair', position: { x: 4000, y: 6000 } },
+        ]);
+      });
+
+      it('places nothing while no room is open', () => {
+        setInputs({ selectedRoom: undefined });
+
+        component.onPaletteActivate('chair');
+
+        expect(placements).toEqual([]);
+      });
+
+      it('hands the dragged entry to the drop target', () => {
+        const data: Record<string, string> = {};
+        const event = {
+          dataTransfer: {
+            setData: (type: string, value: string): void => {
+              data[type] = value;
+            },
+            effectAllowed: '',
+          },
+        } as unknown as DragEvent;
+
+        component.onPaletteDragStart(event, 'wall');
+
+        expect(data['text/plain']).toBe('wall');
+      });
+    });
+
+    describe('the selected object', () => {
+      const chair: FloorPlanItem = {
+        id: 'chair-1',
+        kind: 'object',
+        variant: 'chair',
+        position: { x: 1000, y: 1000 },
+        size: { width: 450, height: 450 },
+        rotation: 30,
+        round: false,
+      };
+
+      const roundTable: FloorPlanItem = {
+        id: 'table-1',
+        kind: 'table',
+        variant: 'table-round',
+        position: { x: 2000, y: 2000 },
+        size: { width: 900, height: 900 },
+        rotation: 0,
+        label: '7',
+        round: true,
+      };
+
+      beforeEach(() =>
+        setInputs({ items: [chair, roundTable], selectedIds: ['chair-1'] }),
+      );
+
+      it('shows the panel for one selected object and hides it for two', () => {
+        expect(query('floor-plan-object-width')).not.toBeNull();
+
+        setInputs({ selectedIds: ['chair-1', 'table-1'] });
+        expect(query('floor-plan-object-width')).toBeNull();
+
+        setInputs({ selectedIds: [] });
+        expect(query('floor-plan-object-width')).toBeNull();
+      });
+
+      it('fills the inputs from the object in metres and degrees', () => {
+        expect(component.itemWidth()).toBe('0.45');
+        expect(component.itemHeight()).toBe('0.45');
+        expect(component.itemRotation()).toBe('30');
+      });
+
+      /** The fields are a readout of a shape the owner may be dragging. */
+      it('follows the object as a gesture moves it', () => {
+        setInputs({
+          items: [
+            { ...chair, rotation: 90, size: { width: 900, height: 450 } },
+          ],
+        });
+
+        expect(component.itemWidth()).toBe('0.9');
+        expect(component.itemRotation()).toBe('90');
+      });
+
+      it('offers one measurement for a round table and two for a rectangle', () => {
+        setInputs({ selectedIds: ['table-1'] });
+
+        expect(query('floor-plan-object-width')).not.toBeNull();
+        expect(query('floor-plan-object-height')).toBeNull();
+      });
+
+      it('reports a resize in millimetres', () => {
+        const sizes: FloorPlanSize[] = [];
+        component.resizeSelected.subscribe((size) => sizes.push(size));
+
+        component.itemWidth.set('1.2');
+        component.itemHeight.set('0.7');
+        component.onItemSizeChange();
+
+        expect(sizes).toEqual([{ width: 1200, height: 700 }]);
+      });
+
+      it('keeps a round table circular from one input', () => {
+        setInputs({ selectedIds: ['table-1'] });
+        const sizes: FloorPlanSize[] = [];
+        component.resizeSelected.subscribe((size) => sizes.push(size));
+
+        component.itemWidth.set('1.4');
+        component.onItemSizeChange();
+
+        expect(sizes).toEqual([{ width: 1400, height: 1400 }]);
+      });
+
+      it('reports a rotation in degrees', () => {
+        const degrees: number[] = [];
+        component.rotateSelected.subscribe((value) => degrees.push(value));
+
+        component.itemRotation.set('45');
+        component.onItemRotationChange();
+
+        expect(degrees).toEqual([45]);
+      });
+
+      it.each([['abc'], ['']])('reports nothing for %p', (typed) => {
+        const sizes: FloorPlanSize[] = [];
+        const degrees: number[] = [];
+        component.resizeSelected.subscribe((size) => sizes.push(size));
+        component.rotateSelected.subscribe((value) => degrees.push(value));
+
+        component.itemWidth.set(typed);
+        component.itemRotation.set(typed);
+        component.onItemSizeChange();
+        component.onItemRotationChange();
+
+        expect(sizes).toEqual([]);
+        expect(degrees).toEqual([]);
+      });
+    });
+
+    describe('the editor toolbar', () => {
+      let commands: string[];
+
+      beforeEach(() => {
+        commands = [];
+        component.commandRequest.subscribe((name) => commands.push(name));
+      });
+
+      it('offers undo and redo only when there is something to undo', () => {
+        expect(buttonDisabled('floor-plan-undo')).toBe(true);
+        expect(buttonDisabled('floor-plan-redo')).toBe(true);
+
+        setInputs({ canUndo: true, canRedo: true });
+
+        expect(buttonDisabled('floor-plan-undo')).toBe(false);
+        expect(buttonDisabled('floor-plan-redo')).toBe(false);
+      });
+
+      it('offers duplicate and delete only for a selection', () => {
+        expect(buttonDisabled('floor-plan-duplicate')).toBe(true);
+        expect(buttonDisabled('floor-plan-delete-selection')).toBe(true);
+
+        setInputs({ selectedIds: ['chair-1'] });
+
+        expect(buttonDisabled('floor-plan-duplicate')).toBe(false);
+        expect(buttonDisabled('floor-plan-delete-selection')).toBe(false);
+      });
+
+      it.each([
+        ['floor-plan-undo', 'undo', { canUndo: true }],
+        ['floor-plan-redo', 'redo', { canRedo: true }],
+        ['floor-plan-duplicate', 'duplicate', { selectedIds: ['chair-1'] }],
+        ['floor-plan-delete-selection', 'delete', { selectedIds: ['chair-1'] }],
+      ])('asks the editor for %p on a press', (testId, expected, inputs) => {
+        setInputs(inputs);
+
+        query(testId)?.click();
+
+        expect(commands).toEqual([expected]);
+      });
+
+      it('says nothing about unsaved changes until there are some', () => {
+        expect(query('floor-plan-unsaved')).toBeNull();
+
+        setInputs({ unsavedChanges: true });
+
+        expect(query('floor-plan-unsaved')).not.toBeNull();
       });
     });
   });

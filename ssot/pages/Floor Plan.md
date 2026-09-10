@@ -142,7 +142,7 @@ Libraries:
 libs/bite-tribe-common/model                        floor plan, room, table types
 libs/bite-tribe-business/floor-plan/data-access     load, save, conflict signalling
 libs/bite-tribe-business/floor-plan/page            the editor page and its workflow
-libs/bite-tribe-business/floor-plan/ui              the canvas, the grid, the units
+libs/bite-tribe-business/floor-plan/ui              the canvas, the grid, the units, the palette, the edit geometry
 ```
 
 Issue \#1080 wrote the model as two files in `libs/bite-tribe-common/model/src/lib`: `floor-plan.ts` holds `Room`, `FloorPlanObject`, and the coordinate-system primitives `Millimetres`, `FloorPlanPoint`, `FloorPlanSize`, and `FloorPlanRotation`; `restaurant-table.ts` holds `RestaurantTable`. The coordinate system above is repeated as the file header of `floor-plan.ts`, because the rule has to be readable where the fields are.
@@ -185,10 +185,10 @@ millimetre reaching an input or a metre reaching Firestore is the bug that
 module exists to prevent.
 
 Snapping is a decision about where the _next_ edit lands. Turning the grid on
-never walks through a plan an owner already arranged, so nothing snaps on load;
-in issue \#1082 the only coordinates an owner can enter are the room's own
-dimensions, and object placement uses the same `snapToGrid` from issue \#1083
-onward.
+never walks through a plan an owner already arranged, so nothing snaps on load.
+In issue \#1082 the only coordinates an owner could enter were the room's own
+dimensions; issue \#1083 put every placement, drag, nudge and resize through the
+same `snapToGrid`.
 
 The editor is the first reader of issue \#1081's `FloorPlanConflictError`. It
 takes the stored room off the error rather than re-reading it - the read already
@@ -203,9 +203,71 @@ checks `Restaurant.ownerUserId`, which a staff account never holds, so the
 Permissions table above holds for a shared or bookmarked URL and not only for
 the links.
 
+Issue \#1083 put things in the room. The palette, the geometry of an edit and
+the canvas's gestures are in the `ui` library; the layout being edited, its undo
+history and the writes are in `page`. The split is the same one the tag enforces:
+`floor-plan-geometry.ts` is pure functions over millimetres, so snapping,
+clamping, resizing and rotation are asserted without rendering anything, and the
+canvas turns a gesture into numbers and asks that module what they mean.
+
+The canvas draws a `FloorPlanItem`, which is the geometry a wall and a table
+genuinely share. The model keeps the two apart for good reasons and the editor
+has the opposite problem: a selection holds whatever the owner shift-clicked, one
+drag moves all of it, and one undo puts all of it back, so a canvas that branched
+on "wall or table" would carry that branch through selection, snapping, resizing,
+rotation and the history. The branch happens twice instead, on the way in and on
+the way out.
+
+**A gesture in flight is held by the canvas and nowhere else.** The dragged
+selection is previewed as component state, the rest of the plan is untouched, and
+the parent hears about the move exactly once, when the pointer is released - so
+one gesture is one undo step and a drag does not write through the whole plan on
+every pointer move. A press and release that never moved reports nothing at all,
+because selecting is not a mutation.
+
+**Undo stores snapshots rather than inverse operations.** Half of these
+mutations are not invertible on their own: a resize snaps a side to the grid and
+clamps it, a move is trimmed by the room's edge, and a delete has to put an
+object back at a position it never recorded. Every inverse would have to be
+written and kept in step with the forward path, and its failure mode is an undo
+that lands an object a few millimetres out. A layout is a handful of small plain
+objects, so fifty whole copies cost less than that bookkeeping. Selection, pan,
+zoom, the grid spacing and the snap toggle are viewport state and are not in the
+history.
+
+**An object's centre stays inside the room.** That is the whole of "nothing may
+be positioned entirely outside its room": a shape whose centre is on the floor
+necessarily overlaps the floor. Clamping the _bounds_ instead would refuse to let
+a bar counter overhang the wall it is built into, and a rotated object's bounds
+grow as it turns, so a table would shove itself away from a wall as the owner
+rotated it. A group is clamped as one rigid thing - the translation is trimmed so
+every member stays on the floor - because clamping each centre separately would
+let the item that hit the wall stop while the rest slid on, rearranging spacing
+the owner built deliberately.
+
+Snapping runs grid first and edges second. An owner pushing a table towards a
+wall means the wall, and a grid line 40 mm short of it is not what they were
+aiming at. The room's own walls are in the neighbour list like any other edge. A
+resize snaps the _side_ rather than the dragged edge's position, because a
+rotated item's edge does not lie on a room axis at all, and it works in the
+item's own frame so a handle on a table standing at 30 degrees grows it along its
+own length.
+
+Every mutation has a keyboard path, which is what makes the palette place two
+ways: dragging an entry on to the plan needs a pointer, so activating the entry
+places the same object in the middle of the current view. Resize and rotation
+have degree and metre inputs beside the canvas that go through the same code the
+handles do.
+
+Placing a table writes one table document and placing geometry writes only the
+room document, which is issue \#1081's split doing its job. The room goes first
+in a save because it is the one the version rule guards: a save that lost the
+race is refused before any table is written.
+
 ## Current Limitations
 
-- A plan holds nothing but rooms. Issue \#1082 shipped the canvas, the grid and room create, rename, resize and delete; there is no way to place a wall, a chair or a table yet (issues \#1083 and \#1084), and no QR token (issue \#1086). An owner can draw the shape of a room and nothing that stands in it.
+- A plan can be built but not described. Issue \#1083 shipped the palette, placement, move, resize, rotate, multi-select, duplicate, delete, snapping and undo, so an owner can lay out a real dining area. A table placed this way is a real document with a generated number and four seats, and nothing yet lets the owner change either, nor the shape or the enabled state (issue \#1084). No QR token (issue \#1086).
+- A room that is resized does not move what stands in it. Shrinking a room can leave an object outside its new outline, and the editor neither refuses it nor drags the geometry in. "No table lies outside its room" is a publish rule, and publishing is issue \#1088.
 - The rules are deployed by hand. `npx nx firebase-deploy-rules bite-tribe-firebase` has to run before the floor-plan rules mean anything in production; merging them changes nothing on its own.
 - Draft and published are not separated yet (issue \#1088), which is why staff read nothing and why every saved room is live to whatever reads it.
 - Multi-floor grouping is modelled but may ship after single-room support. The editor opens one room at a time and switches between them; floor and level grouping, and moving a table between rooms, are issue \#1085.

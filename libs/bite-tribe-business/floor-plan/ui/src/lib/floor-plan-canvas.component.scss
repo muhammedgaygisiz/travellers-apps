@@ -38,7 +38,19 @@
   user-select: none;
   -webkit-user-select: none;
   border-radius: 0.5rem;
-  background: var(--ion-background-color, #ffffff);
+  /*
+   * The drawing surface is a panel, not more card.
+   *
+   * Painted in the card's own background it had no edge at all: the plan
+   * floated in the middle of a surface that ended somewhere nobody could see,
+   * and the room's outline was the only thing saying where the canvas was. So
+   * the area outside the room is the most tinted thing here and the room is the
+   * least, which puts a three-step ladder between the board, the floor standing
+   * on it and the tables standing on that - in either theme, since all three
+   * are mixed from the same ink.
+   */
+  background: rgba(var(--floor-plan-ink-rgb), 0.12);
+  border: 1px solid rgba(var(--floor-plan-ink-rgb), 0.2);
 
   &:focus-visible {
     outline: 2px solid var(--ion-color-primary);
@@ -65,20 +77,43 @@
   stroke: var(--floor-plan-ink);
 }
 
+/*
+ * The scale reference, pinned to the bottom-left of the element the way the
+ * zoom controls are pinned to the top-right.
+ *
+ * A plate under it, because a room whose shape matches the panel has no
+ * letterbox to sit in and the bar would then be over the plan.
+ */
 .floor-plan-canvas__scale {
-  line {
-    stroke: var(--floor-plan-ink);
-  }
+  position: absolute;
+  left: 0.5rem;
+  bottom: 0.5rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.375rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.375rem;
+  background: var(--ion-background-color, #ffffff);
+  border: 1px solid rgba(var(--floor-plan-ink-rgb), 0.2);
+  color: var(--floor-plan-ink);
+  font-family: var(--ion-font-family, sans-serif);
+  font-size: 0.75rem;
+  line-height: 1;
+  /* Never swallows a drag that starts in the corner it stands in. */
+  pointer-events: none;
+}
 
-  text {
-    fill: var(--floor-plan-ink);
-    /*
-     * `font-size` is set per render as a share of the viewport, so the label
-     * keeps one size on screen at every zoom level. Only the family is fixed
-     * here.
-     */
-    font-family: var(--ion-font-family, sans-serif);
-  }
+/*
+ * The bar is three sides of a box: the baseline and the two end ticks, which is
+ * what a scale bar is. Its width is the one measurement on this canvas that is
+ * in pixels, because a round metric distance has to be drawn at the scale the
+ * plan is currently rendered at.
+ */
+.floor-plan-canvas__scale-bar {
+  display: block;
+  height: 0.375rem;
+  border: 1px solid var(--floor-plan-ink);
+  border-top: none;
 }
 
 .floor-plan-canvas__controls {
@@ -88,4 +123,109 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+/*
+ * The objects standing in the room (GitHub issue #1083).
+ *
+ * Three tones of the same ink and two stroke styles carry every type, rather
+ * than nine hues. A floor plan is printed for QR sheets and read at a glance
+ * across a room, so the distinctions that survive are solid against hollow and
+ * heavy against light - and the same ladder keeps working in dark mode, in
+ * greyscale, and for the colour-blind. Object type as a legible shape is the
+ * accessibility work of issue #1089; this is the part that has to hold up
+ * anyway.
+ */
+.floor-plan-canvas__item {
+  cursor: move;
+
+  rect,
+  circle {
+    fill: rgba(var(--floor-plan-ink-rgb), 0.1);
+    stroke: rgba(var(--floor-plan-ink-rgb), 0.55);
+  }
+}
+
+/* Structure: solid, because a wall is the one thing that is not a surface. */
+.floor-plan-canvas__item--wall rect {
+  fill: var(--floor-plan-ink);
+  stroke: var(--floor-plan-ink);
+}
+
+/* A doorway is a gap in a wall, so it is drawn as an opening rather than a slab. */
+.floor-plan-canvas__item--door rect {
+  fill: var(--ion-background-color, #ffffff);
+  stroke: var(--floor-plan-ink);
+  stroke-dasharray: 200 120;
+}
+
+.floor-plan-canvas__item--counter rect,
+.floor-plan-canvas__item--bar rect {
+  fill: rgba(var(--floor-plan-ink-rgb), 0.35);
+  stroke: var(--floor-plan-ink);
+}
+
+/* Floor no table may occupy, hatched the way a drawing hatches a void. */
+.floor-plan-canvas__item--blocked rect {
+  fill: rgba(var(--floor-plan-ink-rgb), 0.18);
+  stroke: rgba(var(--floor-plan-ink-rgb), 0.7);
+  stroke-dasharray: 150 150;
+}
+
+.floor-plan-canvas__item--decoration rect {
+  fill: rgba(var(--floor-plan-ink-rgb), 0.08);
+  stroke: rgba(var(--floor-plan-ink-rgb), 0.4);
+  stroke-dasharray: 100 100;
+}
+
+.floor-plan-canvas__item--chair rect {
+  fill: rgba(var(--floor-plan-ink-rgb), 0.22);
+  stroke: rgba(var(--floor-plan-ink-rgb), 0.6);
+}
+
+/*
+ * A table is the figure of this drawing and everything else is its ground, so
+ * it is the one thing painted in the page's own background: it reads as an
+ * object standing on the floor rather than as another patch of it.
+ */
+.floor-plan-canvas__item--table-rectangle rect,
+.floor-plan-canvas__item--table-round circle {
+  fill: var(--ion-background-color, #ffffff);
+  stroke: var(--floor-plan-ink);
+}
+
+.floor-plan-canvas__item-label {
+  fill: var(--floor-plan-ink);
+  font-family: var(--ion-font-family, sans-serif);
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.floor-plan-canvas__item--selected {
+  rect,
+  circle {
+    stroke: var(--ion-color-primary, #3880ff);
+  }
+}
+
+.floor-plan-canvas__outline {
+  fill: none;
+  stroke: var(--ion-color-primary, #3880ff);
+  stroke-dasharray: 200 150;
+  pointer-events: none;
+}
+
+.floor-plan-canvas__rotate-arm {
+  stroke: var(--ion-color-primary, #3880ff);
+  pointer-events: none;
+}
+
+.floor-plan-canvas__handle {
+  fill: var(--ion-background-color, #ffffff);
+  stroke: var(--ion-color-primary, #3880ff);
+  cursor: pointer;
+}
+
+.floor-plan-canvas__handle--rotate {
+  fill: var(--ion-color-primary, #3880ff);
 }

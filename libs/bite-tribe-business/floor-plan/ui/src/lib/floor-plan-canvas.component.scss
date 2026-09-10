@@ -38,7 +38,19 @@
   user-select: none;
   -webkit-user-select: none;
   border-radius: 0.5rem;
-  background: var(--ion-background-color, #ffffff);
+  /*
+   * The drawing surface is a panel, not more card.
+   *
+   * Painted in the card's own background it had no edge at all: the plan
+   * floated in the middle of a surface that ended somewhere nobody could see,
+   * and the room's outline was the only thing saying where the canvas was. So
+   * the area outside the room is the most tinted thing here and the room is the
+   * least, which puts a three-step ladder between the board, the floor standing
+   * on it and the tables standing on that - in either theme, since all three
+   * are mixed from the same ink.
+   */
+  background: rgba(var(--floor-plan-ink-rgb), 0.12);
+  border: 1px solid rgba(var(--floor-plan-ink-rgb), 0.2);
 
   &:focus-visible {
     outline: 2px solid var(--ion-color-primary);
@@ -65,20 +77,43 @@
   stroke: var(--floor-plan-ink);
 }
 
+/*
+ * The scale reference, pinned to the bottom-left of the element the way the
+ * zoom controls are pinned to the top-right.
+ *
+ * A plate under it, because a room whose shape matches the panel has no
+ * letterbox to sit in and the bar would then be over the plan.
+ */
 .floor-plan-canvas__scale {
-  line {
-    stroke: var(--floor-plan-ink);
-  }
+  position: absolute;
+  left: 0.5rem;
+  bottom: 0.5rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.375rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.375rem;
+  background: var(--ion-background-color, #ffffff);
+  border: 1px solid rgba(var(--floor-plan-ink-rgb), 0.2);
+  color: var(--floor-plan-ink);
+  font-family: var(--ion-font-family, sans-serif);
+  font-size: 0.75rem;
+  line-height: 1;
+  /* Never swallows a drag that starts in the corner it stands in. */
+  pointer-events: none;
+}
 
-  text {
-    fill: var(--floor-plan-ink);
-    /*
-     * `font-size` is set per render as a share of the viewport, so the label
-     * keeps one size on screen at every zoom level. Only the family is fixed
-     * here.
-     */
-    font-family: var(--ion-font-family, sans-serif);
-  }
+/*
+ * The bar is three sides of a box: the baseline and the two end ticks, which is
+ * what a scale bar is. Its width is the one measurement on this canvas that is
+ * in pixels, because a round metric distance has to be drawn at the scale the
+ * plan is currently rendered at.
+ */
+.floor-plan-canvas__scale-bar {
+  display: block;
+  height: 0.375rem;
+  border: 1px solid var(--floor-plan-ink);
+  border-top: none;
 }
 
 .floor-plan-canvas__controls {

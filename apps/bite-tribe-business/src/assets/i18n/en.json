@@ -229,7 +229,7 @@
   "floor-plan-load-failed": "We couldn't load this floor plan. Please try again.",
   "floor-plan-create-first-room": "Create the first room",
   "floor-plan-add-room": "Add room",
-  "floor-plan-room": "Room",
+  "floor-plan-rooms": "Rooms",
   "floor-plan-room-default-name": "Room {{number}}",
   "floor-plan-room-details": "Room",
   "floor-plan-room-name": "Name",

@@ -1,15 +1,72 @@
 :host {
   /*
-   * One column down the middle, the shape the business app's other section
-   * pages use: `fullWidth` chrome lets the content span the viewport, and a
-   * form stretched across a desktop monitor has no left edge to scan down.
+   * Three columns: the room the owner picked and its dimensions down the left,
+   * everything they do to the plan across the other two.
    *
-   * Wider than the staff page's 40rem, because the canvas below the form is
-   * the point of this page and a plan drawn 40rem wide is a thumbnail.
+   * Expressed as two tracks rather than three, because nothing in the layout
+   * ever divides the right-hand pair - the palette, the canvas and the panels
+   * under it all want the full width of it. `1fr 2fr` is the same geometry with
+   * one fewer place for a card to be placed wrongly.
+   *
+   * Wider than the 60rem this page used while it was a form: the canvas is the
+   * point of it, and a third of 60rem is a sidebar too narrow for a select and
+   * two number fields.
    */
   .floor-plan {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    /*
+     * Cards are as tall as their own content. Without this the two columns
+     * stretch to match each other, which leaves the room form floating in the
+     * middle of a column as tall as the canvas.
+     */
+    align-items: start;
+    gap: 1rem;
     margin: 0 auto;
-    max-width: 60rem;
+    max-width: 90rem;
+  }
+
+  .floor-plan__side,
+  .floor-plan__main {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    /*
+     * `minmax(0, ...)` on the tracks above stops a grid item from refusing to
+     * shrink below its content; this stops the same thing one level down, where
+     * the canvas and the palette are the wide children.
+     */
+    min-width: 0;
+  }
+
+  /*
+   * The grid's own gap does the spacing, so Ionic's card margin would double it
+   * - and, at the top of a column, indent one card from the edge its neighbour
+   * sits flush against.
+   */
+  .floor-plan ion-card {
+    margin: 0;
+  }
+
+  /*
+   * Before a room is open there is nothing to put in the other two columns, and
+   * an empty-state card holding a third of the page reads as a layout that
+   * failed to load rather than as an invitation.
+   */
+  .floor-plan--single {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 40rem;
+  }
+
+  /*
+   * Narrow enough that a third of it is unusable, so the columns become one and
+   * the reading order is the source order. The business app is baselined at
+   * desktop (issue #1547); this is for a split window, not for a phone.
+   */
+  @media (max-width: 60rem) {
+    .floor-plan {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   .floor-plan__subtitle {
@@ -143,5 +200,30 @@
 
   .floor-plan__unsaved {
     color: var(--ion-color-warning-shade, var(--ion-color-warning));
+  }
+
+  /*
+   * The rooms as a list rather than a dropdown.
+   *
+   * A dropdown hides how many rooms a restaurant has behind a control that has
+   * to be opened to answer the question, and it costs two interactions to move
+   * between two rooms. The left column has the height to spend on showing them,
+   * and switching rooms is the thing an owner does most on this page.
+   */
+  .floor-plan__rooms {
+    margin: 0 -1rem;
+    padding: 0;
+    background: transparent;
+  }
+
+  /*
+   * The open room, marked by weight and a bar rather than by colour alone, so
+   * it survives greyscale and the print of a QR sheet review.
+   */
+  .floor-plan__room--current {
+    --background: rgba(var(--ion-color-primary-rgb), 0.12);
+    --color: var(--ion-color-primary);
+    font-weight: 600;
+    border-left: 3px solid var(--ion-color-primary);
   }
 }

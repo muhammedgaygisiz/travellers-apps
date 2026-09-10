@@ -20,7 +20,6 @@
   (keydown)="onKeyDown($event)"
 >
   @if (room(); as plan) {
-    @let bar = scaleBar();
     @let view = viewport();
 
     <defs>
@@ -177,40 +176,26 @@
         layout belongs, such as the validation markers of issue #1088.
       -->
       <ng-content />
-
-      <g class="floor-plan-canvas__scale" data-testid="floor-plan-scale">
-        <line
-          [attr.x1]="bar.x"
-          [attr.y1]="bar.y"
-          [attr.x2]="bar.end"
-          [attr.y2]="bar.y"
-          [attr.stroke-width]="hairline() * 2"
-        />
-        <line
-          [attr.x1]="bar.x"
-          [attr.y1]="bar.y - bar.tick"
-          [attr.x2]="bar.x"
-          [attr.y2]="bar.y"
-          [attr.stroke-width]="hairline() * 2"
-        />
-        <line
-          [attr.x1]="bar.end"
-          [attr.y1]="bar.y - bar.tick"
-          [attr.x2]="bar.end"
-          [attr.y2]="bar.y"
-          [attr.stroke-width]="hairline() * 2"
-        />
-        <text
-          [attr.x]="bar.labelX"
-          [attr.y]="bar.labelY"
-          [attr.font-size]="bar.fontSize"
-        >
-          {{ bar.caption }}
-        </text>
-      </g>
     </g>
   }
 </svg>
+
+@if (room()) {
+  @let bar = scaleBar();
+
+  <!--
+    The scale reference is pinned to the element rather than drawn on the plan,
+    because the letterbox it stands in is outside the viewBox. Inert to the
+    pointer, so it cannot swallow a drag that starts in the corner it sits in.
+  -->
+  <div class="floor-plan-canvas__scale" data-testid="floor-plan-scale">
+    <span
+      class="floor-plan-canvas__scale-bar"
+      [style.width.px]="bar.pixels"
+    ></span>
+    <span>{{ bar.caption }}</span>
+  </div>
+}
 
 <div class="floor-plan-canvas__controls">
   <ion-button

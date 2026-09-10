@@ -54,6 +54,32 @@ const wall: FloorPlanItem = {
   round: false,
 };
 
+/** What the canvas reads off a `ResizeObserver` entry. */
+interface SizeEntry {
+  contentRect: { width: number; height: number };
+}
+
+/**
+ * jsdom implements no `ResizeObserver` and lays nothing out to observe, so the
+ * canvas skips it entirely there. Installing this one is what puts the measured
+ * path - the only pixel measurement the scale bar has - under test.
+ */
+let observers: ((entries: SizeEntry[]) => void)[] = [];
+
+class FakeResizeObserver {
+  constructor(callback: (entries: SizeEntry[]) => void) {
+    observers.push(callback);
+  }
+
+  observe(): void {
+    /* nothing to watch: the spec fires the callback itself */
+  }
+
+  disconnect(): void {
+    /* nothing to release */
+  }
+}
+
 /** `viewBox` is four numbers in one attribute; specs want them apart. */
 interface ViewBox {
   x: number;
@@ -87,6 +113,10 @@ describe(FloorPlanCanvasComponent.name, () => {
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
 
   beforeEach(async () => {
+    observers = [];
+    (globalThis as unknown as { ResizeObserver: unknown }).ResizeObserver =
+      FakeResizeObserver;
+
     await TestBed.configureTestingModule({
       imports: [FloorPlanCanvasComponent],
       providers: [provideIonicAngular()],
@@ -424,11 +454,68 @@ describe(FloorPlanCanvasComponent.name, () => {
       expect(viewBox().width).toBeCloseTo(refit.width);
     });
 
-    it('carries a scale reference labelled in metres', () => {
-      const scale = query('floor-plan-scale');
+    describe('the scale reference', () => {
+      const bar = (): HTMLElement | null =>
+        fixture.nativeElement.querySelector('.floor-plan-canvas__scale-bar');
 
-      expect(scale).not.toBeNull();
-      expect(scale?.textContent?.trim()).toMatch(/^[\d.]+ m$/);
+      const measure = (width: number, height: number): void => {
+        observers.forEach((notify) =>
+          notify([{ contentRect: { width, height } }]),
+        );
+        fixture.detectChanges();
+      };
+
+      it('is labelled in metres', () => {
+        const scale = query('floor-plan-scale');
+
+        expect(scale).not.toBeNull();
+        expect(scale?.textContent?.trim()).toMatch(/^[\d.]+ m$/);
+      });
+
+      /**
+       * It is pinned to the element rather than drawn on the plan, because the
+       * letterbox it stands in is outside the viewBox. Drawn in millimetres it
+       * straddled the room's bottom-left corner with its label on the wall.
+       */
+      it('is drawn outside the plan, not in it', () => {
+        expect(
+          surface().querySelector('[data-testid="floor-plan-scale"]'),
+        ).toBeNull();
+        expect(query('floor-plan-scale')).not.toBeNull();
+      });
+
+      /**
+       * The room is 8 m by 12 m, so the fitted viewBox is 8960 by 12 960. An
+       * element of 800 by 1200 fits it by width, one pixel covering 11.2 mm, so
+       * the round metre the bar settles on is 89 pixels wide.
+       */
+      it('is as wide on screen as the distance it claims', () => {
+        measure(800, 1200);
+
+        expect(parseFloat(bar()?.style.width ?? '')).toBeCloseTo(
+          1000 / 11.2,
+          0,
+        );
+        expect(query('floor-plan-scale')?.textContent?.trim()).toBe('1 m');
+      });
+
+      it('grows as the plan is zoomed into', () => {
+        measure(800, 1200);
+        const fitted = parseFloat(bar()?.style.width ?? '');
+
+        component.zoomIn();
+        fixture.detectChanges();
+
+        expect(parseFloat(bar()?.style.width ?? '')).toBeGreaterThan(fitted);
+      });
+
+      /** A bar of no width is honest about not knowing the scale yet. */
+      it('has no width before the element has been measured', () => {
+        expect(parseFloat(bar()?.style.width ?? '0')).toBe(0);
+        expect(query('floor-plan-scale')?.textContent?.trim()).toMatch(
+          /^[\d.]+ m$/,
+        );
+      });
     });
   });
 

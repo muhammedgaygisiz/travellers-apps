@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   computed,
+  effect,
   input,
   linkedSignal,
   output,
@@ -45,31 +46,6 @@ const ZOOM_STEP = 1.5;
 
 /** How far one arrow key pans, as a share of the visible width or height. */
 const KEYBOARD_PAN_RATIO = 0.1;
-
-/**
- * Inset of the scale reference from the viewport edge, taken per axis as a
- * share of that axis's own extent.
- *
- * Per axis rather than one number for both, because a room is rarely square.
- * Measured off the shorter side, the bar came out 13 device pixels above the
- * bottom of a room taller than it is wide and its label was half off the
- * canvas; measured off the longer side, a 2 m by 30 m room would have pushed
- * the bar most of the way across its own width.
- */
-const SCALE_BAR_INSET_RATIO = 0.05;
-
-/**
- * Height of the end ticks and size of the label, as a share of the viewport's
- * *longer* side.
- *
- * The longer side, because `preserveAspectRatio="xMidYMid meet"` fits the whole
- * viewBox into the element: whichever axis is longer is the one that maps to
- * the element's full extent, so a share of it is close to a fixed share of the
- * rendered canvas. Taken from the shorter side instead, the label came out at
- * two thirds of that size on a room taller than it is wide.
- */
-const SCALE_BAR_TICK_RATIO = 0.012;
-const SCALE_BAR_FONT_RATIO = 0.028;
 
 /**
  * Stroke width of a grid line, as a share of the viewport's longer side.
@@ -183,14 +159,20 @@ interface SelectionOverlay {
  * The SVG `viewBox` *is* the viewport, expressed in room millimetres, so the
  * component draws a plan without ever asking how large it is on screen: the
  * browser scales the whole thing, one stored room renders identically on a
- * laptop and on paper, and there is no device assumption to get wrong. Even the
- * scale reference, the resize handles and the labels are sized as a share of
- * the viewport rather than in pixels, which is what keeps them a constant size
- * on screen at every zoom level.
+ * laptop and on paper, and there is no device assumption to get wrong. The
+ * resize handles and the item labels are sized as a share of the viewport
+ * rather than in pixels, which is what keeps them a constant size on screen at
+ * every zoom level.
  *
- * Pixels enter in two places, both of them the same conversion: turning a
- * pointer's travel into a pan, and turning the pointer's position into the
- * millimetre under it, where the browser has already measured the element.
+ * Pixels enter for the things that are *not* part of the drawing. Two of them
+ * are the same conversion - turning a pointer's travel into a pan, and turning
+ * the pointer's position into the millimetre under it. The third is the scale
+ * reference, which is an overlay pinned to the element rather than a mark on
+ * the plan: `preserveAspectRatio="xMidYMid meet"` letterboxes a portrait
+ * viewBox inside a landscape element, and that letterbox is not addressable in
+ * viewBox coordinates, so a bar placed there has to be measured in pixels. It
+ * used to be drawn in millimetres and straddled the room's bottom-left corner
+ * with its label on the wall, while the empty letterbox sat beside it.
  *
  * ## What it does not do
  *
@@ -305,6 +287,43 @@ export class FloorPlanCanvasComponent {
   private panFrom?: { x: number; y: number };
 
   private readonly gesture = signal<CanvasGesture | undefined>(undefined);
+
+  /**
+   * The element's own size in CSS pixels, or nothing before it is measured.
+   *
+   * The plan is still drawn without it. This exists for the two overlays that
+   * sit *outside* the viewBox - the zoom buttons and the scale reference - and
+   * the scale reference is the only one that needs a number: a millimetre
+   * length has to become a pixel width somewhere, and the letterbox it stands
+   * in is not addressable in viewBox coordinates at all.
+   *
+   * Observed rather than read once, so the bar is still right after a window
+   * resize instead of only on the render that happened to measure.
+   */
+  private readonly elementSize = signal<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+
+  constructor() {
+    effect((onCleanup) => {
+      const element = this.svg()?.nativeElement;
+
+      // Absent in jsdom, where there is no layout to observe either.
+      if (!element || typeof ResizeObserver === 'undefined') {
+        return;
+      }
+
+      const observer = new ResizeObserver(([entry]) => {
+        const { width, height } = entry.contentRect;
+
+        this.elementSize.set({ width, height });
+      });
+
+      observer.observe(element);
+      onCleanup(() => observer.disconnect());
+    });
+  }
 
   readonly panning = computed(() => this.gesture()?.kind === 'pan');
 
@@ -473,30 +492,25 @@ export class FloorPlanCanvasComponent {
     };
   });
 
+  /**
+   * The scale reference: a round distance, and how wide it is on screen.
+   *
+   * The distance is still chosen from the viewport, so it is a round number of
+   * metres that fits in about a fifth of what is visible. Only the *drawn*
+   * length is a pixel measurement, which is the one thing an overlay outside
+   * the viewBox cannot express any other way.
+   *
+   * Reports zero width before the element has been measured. A bar of no width
+   * is honest about knowing no scale yet, and the caption beside it still says
+   * what one is being drawn.
+   */
   readonly scaleBar = computed(() => {
     const viewport = this.viewport();
     const length = scaleBarLength(viewport.width);
-    const longSide = Math.max(viewport.width, viewport.height);
-    const tick = longSide * SCALE_BAR_TICK_RATIO;
-    const x = viewport.x + viewport.width * SCALE_BAR_INSET_RATIO;
-    const y = viewport.y + viewport.height * (1 - SCALE_BAR_INSET_RATIO);
-
-    const end = x + length;
-    const fontSize = longSide * SCALE_BAR_FONT_RATIO;
+    const perPixel = millimetresPerPixel(viewport, this.elementSize());
 
     return {
-      x,
-      y,
-      end,
-      tick,
-      fontSize,
-      /*
-       * The label sits beside the bar rather than above it. Above, it landed
-       * on the room's bottom wall - the bar is drawn in the margin under the
-       * plan, and a label a font-size higher is back inside the room.
-       */
-      labelX: end + tick,
-      labelY: y + fontSize * 0.35,
+      pixels: perPixel === undefined ? 0 : length / perPixel,
       caption: formatMetres(length),
     };
   });

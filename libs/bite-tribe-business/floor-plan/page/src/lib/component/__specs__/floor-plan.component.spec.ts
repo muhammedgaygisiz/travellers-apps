@@ -136,7 +136,7 @@ describe(FloorPlanComponent.name, () => {
     it('invites the owner to make the first one', () => {
       expect(query('floor-plan-empty')).not.toBeNull();
       expect(query('floor-plan-create-first-room')).not.toBeNull();
-      expect(query('floor-plan-room-select')).toBeNull();
+      expect(query('floor-plan-room-list')).toBeNull();
     });
 
     it('creates it at the default size, under a name that can be picked out', () => {
@@ -194,7 +194,7 @@ describe(FloorPlanComponent.name, () => {
     );
 
     it('shows the room and its canvas', () => {
-      expect(query('floor-plan-room-select')).not.toBeNull();
+      expect(query('floor-plan-room-list')).not.toBeNull();
       expect(query('floor-plan-canvas')).not.toBeNull();
       expect(query('floor-plan-empty')).toBeNull();
     });
@@ -354,6 +354,31 @@ describe(FloorPlanComponent.name, () => {
       it('labels each spacing in metres', () => {
         expect(component.spacingLabel(500)).toBe('0.5 m');
         expect(component.spacingLabel(1000)).toBe('1 m');
+      });
+
+      it('lists every room and marks the open one', () => {
+        setInputs({ rooms: [room(), room({ id: 'room-2', name: 'Terrace' })] });
+
+        const list = query('floor-plan-room-list');
+
+        expect(list?.children).toHaveLength(2);
+        expect(
+          query('floor-plan-room-room-1')?.getAttribute('aria-current'),
+        ).toBe('true');
+        expect(
+          query('floor-plan-room-room-2')?.getAttribute('aria-current'),
+        ).toBeNull();
+      });
+
+      it('opens the room that was pressed', () => {
+        setInputs({ rooms: [room(), room({ id: 'room-2', name: 'Terrace' })] });
+
+        const picked: string[] = [];
+        component.selectRoom.subscribe((id) => picked.push(id));
+
+        query('floor-plan-room-room-2')?.click();
+
+        expect(picked).toEqual(['room-2']);
       });
 
       it('reports the snap toggle', () => {

@@ -22,9 +22,13 @@ another one already holds and names the room that holds it. A selection can be
 numbered consecutively in one action, and the plan draws each table's number
 with its capacity under it.
 
-The planned flow from "adds further rooms or floors" onward is still
-specification. Moving a table between rooms is issue \#1085, publishing is issue
-\#1088, and QR tokens are issue \#1086.
+Issue \#1085 made the plan a restaurant rather than a room. The switcher orders
+the rooms, groups them by an optional floor name, and shows what each one holds;
+a table moves to another room from its own card and keeps its number and its QR
+token when it goes; and the plan is summarised for the restaurant as a whole.
+
+The planned flow from "validates the plan and publishes it" onward is still
+specification. Publishing is issue \#1088 and QR tokens are issue \#1086.
 
 No longer blocked. [[UC - Own And Claim Restaurants]] was the prerequisite,
 because floor-plan data is restaurant-scoped and could not be trusted while the
@@ -46,7 +50,7 @@ This is not a construction plan. It is a practical, easy-to-maintain top-down re
 
 ## Planned Flow
 
-The first five steps are implemented; the rest are specification.
+The first six steps are implemented; the rest are specification.
 
 - Owner opens the floor-plan editor for a restaurant they own.
 - Owner creates a room and sets its width and height in metres.
@@ -60,7 +64,9 @@ The first five steps are implemented; the rest are specification.
 
 ## Key Behaviours
 
-- Coordinates are stored in room-relative integer millimetres, so the same plan renders consistently on desktop, tablet, and mobile. The editor's SVG `viewBox` is in those same millimetres, and the owner types metres: the conversion happens at the form boundary and in the canvas's scale label, and nowhere else.
+- Coordinates are stored in room-relative integer millimetres, so the same stored plan renders consistently wherever it is drawn. The editor's SVG `viewBox` is in those same millimetres, and the owner types metres: the conversion happens at the form boundary and in the canvas's scale label, and nowhere else. Rendering the plan on a phone is what the staff live view does with that data, not what this editor does.
+- The editor is a desktop tool and does not collapse. It holds a minimum width and scrolls sideways below it, because a millimetre-accurate drag surface folded into one column is a reading order nobody designed. See [[UC - Manage Tables During Service]] for the small-screen surface: a host at the door wants the plan read-only with a service's operations on it, which is a different screen rather than a narrower one.
+- The cards are arranged by what they describe. What the restaurant _is_ runs down the left: its rooms, the open room's fields, the selected table. What the owner _does_ to it runs down the right: the palette, the canvas, and one row under it holding whatever the selection calls for beside the grid settings, which stay put so the controls reached for most never move.
 - Pan, zoom and the grid are viewport state and are stored nowhere. Moving over a plan changes no stored field, and turning snapping on decides where the next measurement lands rather than moving anything already drawn.
 - A save that lost a race against another device shows the room as it is stored, not a failure message. See [[Floor Plan]].
 - The plan is structured data. Every object stays individually identifiable and editable. It is never stored as an image.
@@ -71,6 +77,10 @@ The first five steps are implemented; the rest are specification.
 - Geometry and identity are edited by different paths and neither touches the other. Dragging a table cannot rename it, and renaming it cannot move it.
 - A table taken out of service stays on the plan and is drawn differently. It is a real place in the room that is not taking guests, so hiding it would leave the owner rearranging around something they cannot see.
 - Numbering is an action over a selection rather than a field per table, because a room of twenty tables is built by duplicating one. It runs in reading order and skips numbers held elsewhere in the restaurant, so it cannot create the collision a single rename refuses.
+- A table moves between rooms without becoming a different table. Its identity, its number and its QR token all survive, so a code already printed and stuck to the table keeps resolving to it. That is what makes `roomId` a field rather than the table being a document under its room, and the move is an ordinary plan edit that the owner can undo and that lands with the save they press once.
+- Room order is a decision the owner makes and the system stores, so the list reads the same after a reload. A floor name groups the rooms for display without reordering them, and a group appears where its first room already stood - naming a level never reshuffles a plan somebody arranged.
+- Each room says how many tables it holds and how many guests it seats, and the restaurant says the same across all of them. The numbers are derived from the tables the editor already holds rather than stored, so they follow a table that was placed or moved a minute ago, and seats count only the tables in service.
+- No unsaved arrangement is discarded without the owner saying so. Opening another room asks first, and only when there is something to lose; reordering the rooms is closed until the open one is saved, because it writes rooms and a room whose version moved reseeds the editor.
 - Draft and published states are separate, so rearranging during service does not affect the live view.
 - Publishing is blocked by duplicate table labels, zero capacity, or tables outside their room. Overlapping tables warn but do not block, because real rooms have odd arrangements. The editor already refuses all three as they are typed; the publish gate of issue \#1088 is what catches a plan that reached that state another way.
 - Editing the plan never writes live table state.
@@ -96,7 +106,7 @@ Implemented:
 
 Still planned:
 
-- QR tokens, printable sheets, multi-room grouping and cross-room moves, and the draft/published split
+- QR tokens, printable sheets, and the draft/published split
 
 ## Related GitHub Scope
 
@@ -108,6 +118,9 @@ Still planned:
 - Issue \#1082 - the editor canvas, rooms and the grid, delivered
 - Issue \#1083 - placing, moving, resizing and rotating floor-plan objects, delivered
 - Issue \#1084 - table properties, label uniqueness, numbering and capacity, delivered
+- Issue \#1085 - multiple rooms and floors, room order, cross-room table moves, capacity summaries and the desktop-locked layout, delivered
+- Issue \#1089 - accessibility of the editor; its responsive half was moved to issue \#1093 rather than deferred
+- Issue \#1093 - the staff live view, which owns the small-screen and touch rendering of a published plan
 
 ## Related Domains
 

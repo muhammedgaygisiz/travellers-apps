@@ -54,7 +54,6 @@ import {
   FloorPlanLayout,
   duplicateIds,
   layoutChanged,
-  layoutIds,
   layoutOf,
   placeEntry,
   tableWrites,
@@ -62,12 +61,21 @@ import {
   withoutIds,
 } from './floor-plan-layout';
 import {
+  RestaurantCapacity,
+  RoomCapacity,
+  capacityByRoom,
+  reorderWrites,
+  reorderedRooms,
+  restaurantCapacity,
+} from './floor-plan-rooms';
+import {
   FIRST_TABLE_NUMBER,
   TableLabelConflict,
   labelConflict,
   numberedTables,
   withTableEnabled,
   withTableLabel,
+  withTableRoom,
   withTableSeats,
   withTableShapeChanged,
 } from './floor-plan-tables';
@@ -327,15 +335,32 @@ export class FloorPlanService {
 
   readonly layout = computed(() => this.history().present);
 
-  /** The layout flattened into what the canvas draws: geometry first, tables above it. */
-  readonly items = computed<FloorPlanItem[]>(() => {
-    const layout = this.layout();
+  /**
+   * The tables of the layout that still stand in the open room.
+   *
+   * Every table in the layout does, until the owner moves one to another room:
+   * a move is an ordinary layout edit, so the table stays in the layout with
+   * its new `roomId` until the save writes it, which is what keeps it undoable
+   * and what stops the save mistaking it for a deleted table (issue #1085).
+   * It is no longer part of *this* room, so it is not drawn, not selectable
+   * and not counted here.
+   */
+  private readonly layoutRoomTables = computed<RestaurantTable[]>(() => {
+    const roomId = this.selectedRoom()?.id;
 
-    return [
-      ...layout.objects.map(itemFromObject),
-      ...layout.tables.map(itemFromTable),
-    ];
+    return this.layout().tables.filter((table) => table.roomId === roomId);
   });
+
+  /** The layout flattened into what the canvas draws: geometry first, tables above it. */
+  readonly items = computed<FloorPlanItem[]>(() => [
+    ...this.layout().objects.map(itemFromObject),
+    ...this.layoutRoomTables().map(itemFromTable),
+  ]);
+
+  /** Everything the owner can currently select, which is everything drawn. */
+  private readonly visibleIds = computed<string[]>(() =>
+    this.items().map((item) => item.id),
+  );
 
   /**
    * Which items are selected.
@@ -366,7 +391,7 @@ export class FloorPlanService {
     const ids = this.selection();
 
     return ids.length === 1
-      ? this.layout().tables.find((table) => table.id === ids[0])
+      ? this.layoutRoomTables().find((table) => table.id === ids[0])
       : undefined;
   });
 
@@ -374,7 +399,7 @@ export class FloorPlanService {
   readonly selectedTables = computed<RestaurantTable[]>(() => {
     const chosen = new Set(this.selection());
 
-    return this.layout().tables.filter((table) => chosen.has(table.id));
+    return this.layoutRoomTables().filter((table) => chosen.has(table.id));
   });
 
   /**
@@ -408,6 +433,39 @@ export class FloorPlanService {
   /** Whether the plan on screen differs from the plan in Firestore. */
   readonly unsavedChanges = computed(() =>
     layoutChanged(this.storedPlan().layout, this.layout()),
+  );
+
+  /**
+   * Every table of the restaurant as the owner currently sees it
+   * (GitHub issue #1085).
+   *
+   * The stored tables of the rooms nobody has open, plus the *edited* tables of
+   * the one that is. A summary built on the stored tables alone would count a
+   * table the owner placed a minute ago as belonging to no room and would leave
+   * a table they just moved to the terrace on the dining-room total, which is
+   * the one thing a capacity summary must not do while the plan is being
+   * arranged.
+   */
+  private readonly currentTables = computed<RestaurantTable[]>(() =>
+    this.selectedRoom()
+      ? [...this.otherRoomTables(), ...this.layout().tables]
+      : this.tablesValue(),
+  );
+
+  /**
+   * Table count and seating, per room, keyed by room id.
+   *
+   * Answers the question an owner has while building a second room — "how many
+   * people does the terrace actually seat" — without opening it, which is what
+   * makes a plan of several rooms readable from the room list.
+   */
+  readonly roomCapacities = computed<Record<string, RoomCapacity>>(() =>
+    capacityByRoom(this.roomsValue(), this.currentTables()),
+  );
+
+  /** The same numbers for the whole restaurant, across every room. */
+  readonly restaurantCapacity = computed<RestaurantCapacity>(() =>
+    restaurantCapacity(this.roomsValue(), this.currentTables()),
   );
 
   readonly gridSpacing = signal<Millimetres>(DEFAULT_GRID_SPACING);
@@ -591,6 +649,50 @@ export class FloorPlanService {
     }
   }
 
+  /**
+   * Moves the selected table to another room (GitHub issue #1085).
+   *
+   * An ordinary layout edit rather than an immediate write, so it is undoable
+   * and lands with the same save as everything else the owner changed. The
+   * table keeps its `id`, its `label` and its `qrTokenId`, so a printed QR code
+   * stays valid — that is the whole reason `roomId` is a field on the table
+   * rather than the table being a document under its room.
+   *
+   * The centre is clamped into the target room, because a room-relative
+   * coordinate means something else in a different room and a table carried
+   * from a hall into a small terrace would otherwise land beyond its far wall.
+   *
+   * The selection is dropped afterwards: the table is no longer drawn on this
+   * room's canvas, and a properties panel editing something the owner cannot
+   * see is the state `pruneSelection` exists to avoid.
+   */
+  async moveSelectedTableToRoom(roomId: string): Promise<void> {
+    const table = this.selectedTable();
+    const current = this.selectedRoom();
+    const target = this.roomsValue().find((room) => room.id === roomId);
+
+    if (!table || !current || !target || target.id === current.id) {
+      return;
+    }
+
+    this.rejectedLabel.set(undefined);
+    this.mutate(
+      withTableRoom(
+        this.layout(),
+        table.id,
+        target.id,
+        clampCentre(table.position, target.size),
+      ),
+    );
+    this.selection.set([]);
+
+    await this.toast.present({
+      messageKey: 'floor-plan-table-moved',
+      params: { label: table.label, room: target.name },
+      outcome: 'success',
+    });
+  }
+
   setTableShape(shape: TableShape): void {
     const table = this.selectedTable();
 
@@ -656,7 +758,7 @@ export class FloorPlanService {
   }
 
   selectAll(): void {
-    this.selection.set(layoutIds(this.layout()));
+    this.selection.set(this.visibleIds());
   }
 
   undo(): void {
@@ -716,7 +818,7 @@ export class FloorPlanService {
    * panel would then be editing a table that is not in the plan.
    */
   private pruneSelection(): void {
-    const present = new Set(layoutIds(this.layout()));
+    const present = new Set(this.visibleIds());
 
     this.selection.update((ids) => ids.filter((id) => present.has(id)));
   }
@@ -736,6 +838,7 @@ export class FloorPlanService {
         order: this.nextOrder(),
         size: this.sizeOf(draft),
         objects: [],
+        floor: draft.floor,
       });
 
       this.rooms.set([...this.roomsValue(), created]);
@@ -792,6 +895,7 @@ export class FloorPlanService {
         name: draft.name,
         size: this.sizeOf(draft),
         objects: layout.objects,
+        floor: draft.floor,
       });
 
       await this.writeTables(restaurantId, layout.tables);
@@ -829,6 +933,67 @@ export class FloorPlanService {
       ...changed.map((table) => this.dataAccess.saveTable(restaurantId, table)),
       ...deleted.map((id) => this.dataAccess.deleteTable(restaurantId, id)),
     ]);
+  }
+
+  /**
+   * Moves a room up or down among the rooms of the restaurant
+   * (GitHub issue #1085).
+   *
+   * The order the owner arranged is the order the room list, the room switcher
+   * and every later reader see, so it is stored rather than derived: `order` is
+   * reassigned from the room's new position and written, which is what makes it
+   * survive a reload. A restaurant whose stored orders somehow collide or leave
+   * gaps is healed by the first move, because the whole list is renumbered from
+   * the top and only the documents that actually moved are written.
+   *
+   * Written one at a time rather than in parallel. Each write carries the
+   * version rule of issue #1081, and a room that lost a race has to stop the
+   * reorder rather than let the rest of the list land around it.
+   *
+   * A room whose version moves is a room the editor reseeds from, so an open
+   * room with unsaved changes would lose them here. The page asks the owner
+   * before that happens; nothing in this method can, because a toast cannot ask
+   * a question.
+   */
+  async moveRoom(roomId: string, offset: number): Promise<void> {
+    const restaurantId = this.restaurantId();
+
+    if (!restaurantId) {
+      return;
+    }
+
+    const before = this.roomsValue();
+    const writes = reorderWrites(
+      before,
+      reorderedRooms(before, roomId, offset),
+    );
+
+    if (writes.length === 0) {
+      return;
+    }
+
+    this.pending.set(true);
+
+    try {
+      for (const room of writes) {
+        this.replaceRoom(await this.dataAccess.saveRoom(restaurantId, room));
+      }
+
+      await this.toast.present({
+        messageKey: 'floor-plan-rooms-reordered',
+        outcome: 'success',
+      });
+    } catch (error) {
+      await this.reportSaveFailure(error);
+    } finally {
+      // Whatever landed, the list on screen is put in the order the stored
+      // rooms now carry. A reorder that stopped half way through has moved some
+      // of them, and showing the old arrangement would misreport what is saved.
+      this.rooms.set(
+        [...this.roomsValue()].sort((left, right) => left.order - right.order),
+      );
+      this.pending.set(false);
+    }
   }
 
   async deleteRoom(room: Room): Promise<void> {

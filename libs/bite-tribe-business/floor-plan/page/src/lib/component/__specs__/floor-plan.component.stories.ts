@@ -24,6 +24,14 @@ const terrace = room({
   size: { width: 6000, height: 4000 },
 });
 
+/** What each room holds, as the switcher shows it (GitHub issue #1085). */
+const capacities = {
+  'room-1': { tables: 3, seats: 12, disabled: 0 },
+  'room-2': { tables: 4, seats: 14, disabled: 1 },
+};
+
+const total = { rooms: 2, tables: 7, seats: 26, disabled: 1 };
+
 const roundTable = (
   id: string,
   x: number,
@@ -96,6 +104,8 @@ export default {
   args: {
     rooms: [room(), terrace],
     selectedRoom: room(),
+    roomCapacities: capacities,
+    restaurantCapacity: total,
     restaurantName: 'Trattoria Roma',
     gridSpacing: 500,
     snapEnabled: true,
@@ -108,6 +118,38 @@ type Story = StoryObj<FloorPlanComponent>;
 
 /** Two rooms, the first one open, and its dimensions in the form in metres. */
 export const Default: Story = {};
+
+/**
+ * A restaurant on two levels (GitHub issue #1085).
+ *
+ * The switcher heads each level once a room names one, and a group is shown
+ * where its first room already stood — naming a floor groups the list without
+ * reordering it. A room that names no level keeps its own heading rather than
+ * being folded into one, because "no floor" is an answer and not a gap.
+ */
+export const SeveralFloors: Story = {
+  args: {
+    rooms: [
+      room({ floor: 'Ground floor' }),
+      { ...terrace, floor: 'Ground floor' },
+      room({
+        id: 'room-3',
+        name: 'Private gallery',
+        order: 2,
+        floor: 'Upstairs',
+        size: { width: 5000, height: 5000 },
+      }),
+      room({ id: 'room-4', name: 'Cellar', order: 3 }),
+    ],
+    roomCapacities: {
+      ...capacities,
+      'room-3': { tables: 2, seats: 10, disabled: 0 },
+      'room-4': { tables: 0, seats: 0, disabled: 0 },
+    },
+    restaurantCapacity: { rooms: 4, tables: 9, seats: 36, disabled: 1 },
+    items: furnished,
+  },
+};
 
 /**
  * The ordinary starting state.
@@ -158,6 +200,10 @@ export const WithObjects: Story = {
  * called, how many people it seats and whether it is in service. Two cards
  * rather than one, because the two outlive each other: rearranging a room never
  * renames a table, and renaming one never moves it.
+ *
+ * The room the table stands in is on the table card too (GitHub issue #1085):
+ * a restaurant with a second room can move it there, and it keeps its number
+ * and its QR token when it goes.
  */
 export const ObjectSelected: Story = {
   args: {

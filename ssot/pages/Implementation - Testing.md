@@ -126,7 +126,18 @@ Two boundary details keep direct Loki working against the Angular Storybook 10 h
 
 ### Operating Loki
 
-Four behaviours that have each cost a wrong conclusion at least once.
+Six behaviours that have each cost a wrong conclusion at least once.
+
+**Build Storybook with `--skip-nx-cache` before every Loki run.** Nx restores a
+cached `dist/storybook/storybook-host` whose hash does not track the component
+libraries the stories render, so a build that reports `Cache: 1/1 hit` can hand
+Loki the previous UI. Loki then validates a build that predates the change and
+reports PASS, or fails against references it should have matched. `npm run
+build:storybook` does not protect against this - on 2026-09-11 it hit the cache
+immediately after three source files changed, and `grep -rl` on the built bundle
+found none of the new markup. Delete the directory, build with
+`npm run build:storybook -- --skip-nx-cache`, and confirm a token from the change
+is actually in `dist/storybook/storybook-host` before trusting a Loki result.
 
 **Use `loki:approve`, not `loki:update`, to accept a diff.** `tools/loki.mjs`
 forwards its command straight to the upstream CLI with no story filter, so
@@ -136,6 +147,34 @@ with the one being fixed, which can bless a real regression that nobody looked
 at. `loki approve` promotes only what is sitting in `.loki/difference`. If
 `loki:update` has already been run, restore the references that were not part of
 the failure set before committing.
+
+**`loki approve` after a filtered test run deletes every reference outside the
+filter.** It reconciles the reference directory against the stories of the _last_
+run, so a run narrowed with `--storiesFilter` leaves it believing the rest of the
+suite no longer exists. On 2026-09-10, approving eight genuinely changed
+floor-plan references also deleted 500 untouched ones and the newly written
+reference for a story added in the same change. The recovery is
+`git checkout --` over the deletions - the approved references survive it,
+because they are modifications rather than deletions - followed by a plain
+`loki test` for the same filter, which rewrites any missing reference and
+confirms the approved ones match.
+
+That test run is also how a **new** story gets its first reference: `loki test`
+writes a reference it cannot find and reports the story as passing, so a story
+added alongside a UI change needs no separate update step.
+
+The safest way to accept a diff avoids both commands. `loki test` leaves the
+freshly captured image in `.loki/current` and names the failures in
+`.loki/difference`, so copying `current` over `reference` for exactly the files
+in `difference` promotes what changed and touches nothing else:
+
+```bash
+for f in .loki/difference/*.png; do
+  n=$(basename "$f"); cp ".loki/current/$n" ".loki/reference/$n";
+done
+```
+
+Then re-run `loki test` with no filter and confirm it is green.
 
 **A story that renders the Leaflet map must set `parameters: { loki: { skip: true } }`.**
 Markers never paint in Loki's Docker Chrome, so a baseline locks in a blank grey

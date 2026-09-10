@@ -64,6 +64,10 @@ const toRoomDocument = (room: Omit<Room, 'id'>): Omit<Room, 'id'> => ({
   size: room.size,
   objects: room.objects,
   version: room.version,
+  // Absent rather than `undefined`, and absent is what clears it: a room save
+  // replaces the document, so a floor the owner emptied stops being stored
+  // instead of being stored as an empty name (issue #1085).
+  ...(room.floor === undefined ? {} : { floor: room.floor }),
 });
 
 /** The fields a table carries whatever shape it is drawn as. */

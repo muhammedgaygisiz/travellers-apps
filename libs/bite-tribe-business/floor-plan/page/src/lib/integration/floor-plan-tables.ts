@@ -1,5 +1,10 @@
 import { tableWithShape } from 'bite-tribe-business/floor-plan-ui';
-import { Millimetres, RestaurantTable, TableShape } from 'model';
+import {
+  FloorPlanPoint,
+  Millimetres,
+  RestaurantTable,
+  TableShape,
+} from 'model';
 // A type-only import, so the two modules do not form a runtime cycle:
 // the layout module reads `labelKey` from here.
 import type { FloorPlanLayout } from './floor-plan-layout';
@@ -142,6 +147,32 @@ export const withTableSeats = (
     ...table,
     seats: clampSeats(seats),
   }));
+
+/**
+ * The layout with one table standing in another room (GitHub issue #1085).
+ *
+ * The table is changed rather than replaced: its `id`, its `label`, its
+ * capacity, its shape and its `qrTokenId` all survive, which is the whole point
+ * of the move. [[Table]] requires it — a printed QR code carries the token, and
+ * a code that stopped resolving because the owner carried the table on to the
+ * terrace would have to be reprinted for a table that never changed.
+ *
+ * `position` is passed in rather than kept, because a room-relative coordinate
+ * means something different in a different room: the caller clamps the centre
+ * into the target room, so a table moved from a hall into a small terrace lands
+ * on the terrace rather than beyond its far wall.
+ *
+ * The moved table stays in the layout. Dropping it here would make it
+ * indistinguishable from a deleted one on the way to Firestore, and a save
+ * would then delete the document the printed code points at.
+ */
+export const withTableRoom = (
+  layout: FloorPlanLayout,
+  tableId: string,
+  roomId: string,
+  position: FloorPlanPoint,
+): FloorPlanLayout =>
+  withTable(layout, tableId, (table) => ({ ...table, roomId, position }));
 
 export const withTableEnabled = (
   layout: FloorPlanLayout,

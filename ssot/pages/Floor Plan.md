@@ -25,6 +25,8 @@ The Floor Plan is deliberately not an architecturally exact construction plan. I
 - A Table is a business entity, not a shape. See [[Table]].
 - Chairs are geometry. Seating capacity is a number on the Table.
 - A Room cannot be deleted while it still contains Tables.
+- Rooms have an owner-chosen order that is stored, not derived, so it survives a reload.
+- A Room may name the floor or level it sits on. The name groups Rooms for display and never changes their order.
 - A Floor Plan has a draft state and a published state. Only the published state is read by staff and guest surfaces.
 - Editing the Floor Plan never writes live table state, and a live state change never writes the Floor Plan.
 - Only the owner of the Restaurant may edit the Floor Plan.
@@ -55,6 +57,7 @@ Room:
 | `id`      | Unique room identifier                               |
 | `name`    | Display name, such as main dining room or terrace    |
 | `order`   | Ascending display order among the restaurant's rooms |
+| `floor`   | Optional level name, such as `Ground floor`          |
 | `size`    | `{ width, height }` in millimetres                   |
 | `objects` | Geometry objects in the room                         |
 | `version` | Optimistic concurrency version                       |
@@ -72,9 +75,12 @@ Floor plan object:
 
 ## Optional Data
 
-- Floor or level grouping across rooms
 - Grid spacing preference
-- Per-room capacity summary
+
+Floor grouping and the per-room capacity summary were on this list until issue
+\#1085 delivered both. `floor` is now a field of the Room and the summary is
+derived rather than stored, because a table count that had to be maintained
+alongside the tables is a count that goes wrong.
 
 ## Relationships
 
@@ -273,14 +279,87 @@ room document, which is issue \#1081's split doing its job. The room goes first
 in a save because it is the one the version rule guards: a save that lost the
 race is refused before any table is written.
 
+Issue \#1085 made the plan a restaurant rather than a room. Four things changed
+and one deliberately did not.
+
+**A table moves rooms as an ordinary plan edit.** `roomId` is a field on the
+table, so the move is one field change on the document a printed QR code, a
+visit and an order already point at - which is the whole reason the table is not
+a document under its room. It goes through the undo history and lands with the
+same save as everything else, and the moved table stays in the edited layout
+rather than being dropped from it: a table missing from the layout is
+indistinguishable from a deleted one on the way to Firestore, and the save would
+then delete the document the printed code resolves to. Its centre is clamped
+into the target room, because a room-relative coordinate means something else in
+a different room.
+
+**Room order is stored and renumbered from position.** Moving a room reassigns
+`order` from the new array position for every room whose position changed, and
+writes only those, so a restaurant whose stored orders collide or leave gaps is
+healed by the first move instead of sorting differently on the next read. The
+writes are sequential rather than parallel, because each one carries issue
+\#1081's version rule and a room that lost a race has to stop the reorder rather
+than let the rest of the list land around it.
+
+**A floor is a display grouping over the order, not a second ordering.** A group
+is shown where its first room already stood, so naming a level groups the list
+without reshuffling it, and clearing one does not either. Headings appear only
+once a room names a level, because a single heading saying the rooms are on no
+floor groups nothing.
+
+**Capacity is derived, never stored.** The editor already holds every table of
+the restaurant for issue \#1084's label rule, so the summary costs no read: the
+stored tables of the rooms nobody has open, plus the _edited_ tables of the one
+that is, which is what makes the numbers follow a table the owner placed or
+moved a minute ago. Seats count only tables in service, because the number
+answers how many guests can sit there.
+
+**The editor is a desktop tool and no longer collapses.** It holds a minimum
+width and scrolls sideways below it, rather than folding three columns into one.
+The breakpoint that used to do that was the only media query in the whole
+`libs/bite-tribe-business` tree, so the editor was the inconsistent surface
+rather than the responsive one, and issue \#1547 had already baselined the
+`Business/*` stories at `chrome.laptop` alone on the same grounds. Ionic's
+`ion-content` ships `overflow-x: hidden`, so the minimum width needs `scrollX`
+turned on with it; without that the right-hand column is clipped at a narrow
+window with no way to reach it, which is worse than the collapse it replaces.
+
+**The responsive promise is dead for the editor, and alive for the staff view.**
+Issue \#1089 owned "responsive and accessible floor plan rendering" and has been
+split: the accessibility half stays there, and the responsive half moved to
+issue \#1093, the staff live view. The reason is a product one rather than a
+technical one. A host greeting guests at the door has a tablet in one hand and
+wants the published plan read-only with the operations of a service on it; an
+owner laying out twenty tables to the millimetre is sitting at a desk. Those are
+two surfaces with two gesture vocabularies, not one surface at two widths.
+
+**The cards are arranged by what they describe, not by what they are.** The left
+column carries the rooms, the open room's own fields and the selected table -
+things that describe the restaurant and outlive any rearrangement. The right
+column carries the palette, the canvas and the panels that act on a selection.
+Under the canvas, one row holds whatever the selection calls for on the left and
+the grid settings anchored on the right: the object panel and the numbering
+helper can never both be present, since one needs exactly one item selected and
+the other needs two or more, so they share a slot. The grid keeps its half in
+every state including the empty one, because it is the only card always on
+screen and a card that grew to full width and shrank again as the owner clicked
+around would move the two controls they reach for most.
+
+**What did not change is the reseeding rule.** Switching rooms, and a room whose
+version moved, both reseed the editor from what is stored - so an unsaved plan
+would be lost. Switching asks the owner first, and only when there is something
+to lose; reordering closes its control instead, because a toast cannot ask a
+question and a confirmation that appears every time is one nobody reads.
+
 ## Current Limitations
 
 - A plan can be built but not described. Issue \#1083 shipped the palette, placement, move, resize, rotate, multi-select, duplicate, delete, snapping and undo, so an owner can lay out a real dining area. A table placed this way is a real document with a generated number and four seats, and nothing yet lets the owner change either, nor the shape or the enabled state (issue \#1084). No QR token (issue \#1086).
 - A room that is resized does not move what stands in it. Shrinking a room can leave an object outside its new outline, and the editor neither refuses it nor drags the geometry in. "No table lies outside its room" is a publish rule, and publishing is issue \#1088.
 - The rules are deployed by hand. `npx nx firebase-deploy-rules bite-tribe-firebase` has to run before the floor-plan rules mean anything in production; merging them changes nothing on its own.
 - Draft and published are not separated yet (issue \#1088), which is why staff read nothing and why every saved room is live to whatever reads it.
-- Multi-floor grouping is modelled but may ship after single-room support. The editor opens one room at a time and switches between them; floor and level grouping, and moving a table between rooms, are issue \#1085.
-- The canvas is baselined at desktop only. `Business/*` stories are visually referenced at `chrome.laptop` alone, because the business app is a desktop product (issue \#1547). The `viewBox` scales from the same stored data at any width, but the responsive and accessibility hardening is issue \#1089.
+- A table moves out of the open room but never into it. Issue \#1085 moves a table by picking its new room in the table card, which is reachable only for a table the owner can see; there is no way to reach into another room and pull a table across, and no multi-room view to do it from.
+- A room can be reordered only while the open room has no unsaved changes. Reordering writes rooms, a room whose version moved reseeds the editor, and closing the control is the honest answer rather than warning after the fact.
+- The canvas is baselined at desktop only, and now locked to it. `Business/*` stories are visually referenced at `chrome.laptop` alone, because the business app is a desktop product (issue \#1547), and since issue \#1085 the editor holds a 60rem minimum and scrolls sideways rather than collapsing. The `viewBox` still scales from the same stored data at any width, which is what the staff view of issue \#1093 will read it with. Accessibility hardening - keyboard paths, accessible names, greyscale, dark mode - is issue \#1089.
 - No CAD import, no exact scale drawing, and no automatic layout.
 
 ## Future Ideas

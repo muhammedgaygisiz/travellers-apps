@@ -1,20 +1,44 @@
 :host {
   /*
-   * Three columns: the room the owner picked and its dimensions down the left,
-   * everything they do to the plan across the other two.
+   * Two columns. What the plan *is* down the left, what the owner does to it
+   * across the right.
    *
-   * Expressed as two tracks rather than three, because nothing in the layout
-   * ever divides the right-hand pair - the palette, the canvas and the panels
-   * under it all want the full width of it. `1fr 2fr` is the same geometry with
-   * one fewer place for a card to be placed wrongly.
+   * The left column carries the rooms, the open room's own fields and the
+   * selected table - three things that describe the restaurant and outlive any
+   * rearrangement. The right column carries the palette, the canvas and the
+   * controls that act on a selection. Issue #1085 moved the table card across
+   * to make that the rule rather than a coincidence: a table's number, its
+   * capacity and the room it stands in are facts about the table, and they sit
+   * with the room's name and dimensions rather than beside the handles that
+   * drag it.
    *
-   * Wider than the 60rem this page used while it was a form: the canvas is the
-   * point of it, and a third of 60rem is a sidebar too narrow for a select and
-   * two number fields.
+   * The right-hand track is `2fr` because the canvas is the point of the page.
+   * Only one thing ever divides it, the row of panels under the canvas, and
+   * that row halves the track itself rather than adding a third column here.
+   *
+   * Wider than the 60rem this page used while it was a form: a third of 60rem
+   * is a sidebar too narrow for a select and two number fields.
    */
   .floor-plan {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    /*
+     * The editor does not collapse (GitHub issue #1085).
+     *
+     * Below this width the page scrolls sideways instead of stacking. A
+     * millimetre-accurate drag surface is a desktop tool: three columns
+     * squeezed into one produced a reading order nobody was designing for, and
+     * every other surface in the business app already never collapses, so the
+     * breakpoint that used to be here was the inconsistent thing rather than
+     * the responsive one.
+     *
+     * The responsive case is real, but it is not this screen. A host greeting
+     * guests at the door on a tablet wants the plan read-only with the
+     * operations of a service on it, which is the staff live view of issue
+     * #1093 - a different surface with different gestures, not a narrower
+     * version of an editor.
+     */
+    min-width: 60rem;
     /*
      * Cards are as tall as their own content. Without this the two columns
      * stretch to match each other, which leaves the room form floating in the
@@ -56,17 +80,33 @@
   .floor-plan--single {
     grid-template-columns: minmax(0, 1fr);
     max-width: 40rem;
+    /*
+     * The one state that fits anywhere. There is no canvas yet, so the empty
+     * state is a sentence and a button and has no reason to hold a desktop
+     * width open.
+     */
+    min-width: 0;
   }
 
   /*
-   * Narrow enough that a third of it is unusable, so the columns become one and
-   * the reading order is the source order. The business app is baselined at
-   * desktop (issue #1547); this is for a split window, not for a phone.
+   * The row under the canvas: what the selection calls for, and the grid.
+   *
+   * Two fixed halves rather than a flex line, because the point of the row is
+   * that the grid settings do not move. `1fr 1fr` holds the second column open
+   * whether or not the first one has a card in it, so an owner clicking between
+   * nothing, one table and a whole row of them never watches the two controls
+   * they reach for most slide across the page.
    */
-  @media (max-width: 60rem) {
-    .floor-plan {
-      grid-template-columns: minmax(0, 1fr);
-    }
+  .floor-plan__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 1rem;
+  }
+
+  /* Anchored in the right half, including when the left half is empty. */
+  .floor-plan__grid-card {
+    grid-column: 2;
   }
 
   .floor-plan__subtitle {
@@ -225,6 +265,20 @@
     --color: var(--ion-color-primary);
     font-weight: 600;
     border-left: 3px solid var(--ion-color-primary);
+  }
+
+  /*
+   * What a room holds, under its name (GitHub issue #1085).
+   *
+   * Smaller and lighter than the name and never bold, including in the open
+   * room: the name is what the owner is picking between, and a capacity set in
+   * the same weight would compete with it in a list read at a glance.
+   */
+  .floor-plan__room-summary {
+    display: block;
+    margin-top: 0.125rem;
+    font-size: 0.75rem;
+    font-weight: 400;
   }
 }
 

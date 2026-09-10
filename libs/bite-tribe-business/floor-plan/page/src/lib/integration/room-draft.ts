@@ -16,4 +16,12 @@ export interface RoomDraft {
   name: string;
   width: Millimetres;
   height: Millimetres;
+  /**
+   * The level the room sits on, absent when the owner named none.
+   *
+   * A cleared field arrives as `undefined` rather than as an empty string, so
+   * "this room is on no named floor" is one value on the way to Firestore
+   * instead of two (issue #1085).
+   */
+  floor?: string;
 }

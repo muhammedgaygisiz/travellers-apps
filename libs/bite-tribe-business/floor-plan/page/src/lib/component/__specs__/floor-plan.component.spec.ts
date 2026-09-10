@@ -391,6 +391,269 @@ describe(FloorPlanComponent.name, () => {
       });
     });
 
+    /**
+     * Where each card lives (GitHub issue #1085).
+     *
+     * Asserted as containment rather than as pixels, because the columns are
+     * CSS grid and jsdom lays out nothing. What these protect is the rule the
+     * layout encodes: the left column describes the restaurant, the right
+     * column acts on a selection, and the grid settings are anchored so they
+     * do not move as the selection changes.
+     */
+    describe('the arrangement of the cards', () => {
+      const chair: FloorPlanItem = {
+        id: 'chair-1',
+        kind: 'object',
+        variant: 'chair',
+        position: { x: 1000, y: 1000 },
+        size: { width: 450, height: 450 },
+        rotation: 0,
+        round: false,
+      };
+
+      const seatedTable: RestaurantTable = {
+        id: 'table-1',
+        label: '7',
+        roomId: 'room-1',
+        shape: 'rectangle',
+        size: { width: 1200, height: 800 },
+        position: { x: 2000, y: 2000 },
+        rotation: 0,
+        seats: 4,
+        enabled: true,
+      };
+
+      const row = (): HTMLElement =>
+        fixture.nativeElement.querySelector('.floor-plan__row');
+
+      it('keeps the table beside the room it belongs to, in the left column', () => {
+        setInputs({ selectedTable: seatedTable });
+
+        const side = fixture.nativeElement.querySelector('.floor-plan__side');
+
+        expect(query('floor-plan-table-properties')).not.toBeNull();
+        expect(side.contains(query('floor-plan-table-properties'))).toBe(true);
+      });
+
+      it('puts the object panel and the grid in one row under the canvas', () => {
+        setInputs({ items: [chair], selectedIds: ['chair-1'] });
+
+        expect(row().contains(query('floor-plan-object-width'))).toBe(true);
+        expect(row().contains(query('floor-plan-grid-spacing'))).toBe(true);
+      });
+
+      it('leaves the grid in the row when nothing is selected', () => {
+        setInputs({ items: [chair], selectedIds: [] });
+
+        expect(query('floor-plan-object-width')).toBeNull();
+        expect(row().contains(query('floor-plan-grid-spacing'))).toBe(true);
+      });
+
+      /** The numbering helper takes the object panel's slot, not a new one. */
+      it('puts the numbering helper in the same slot for a multi-selection', () => {
+        setInputs({
+          items: [chair],
+          selectedIds: ['chair-1', 'table-1'],
+          selectedTableCount: 2,
+        });
+
+        expect(query('floor-plan-object-width')).toBeNull();
+        expect(row().contains(query('floor-plan-numbering-start'))).toBe(true);
+        expect(row().contains(query('floor-plan-grid-spacing'))).toBe(true);
+      });
+    });
+
+    describe('several rooms and floors', () => {
+      const terrace = room({ id: 'room-2', name: 'Terrace', order: 1 });
+      const gallery = room({ id: 'room-3', name: 'Gallery', order: 2 });
+
+      const capacities = {
+        'room-1': { tables: 3, seats: 12, disabled: 1 },
+        'room-2': { tables: 2, seats: 8, disabled: 0 },
+      };
+
+      it('shows what each room holds, and the restaurant across them', () => {
+        setInputs({
+          rooms: [room(), terrace],
+          roomCapacities: capacities,
+          restaurantCapacity: {
+            rooms: 2,
+            tables: 5,
+            seats: 20,
+            disabled: 1,
+          },
+        });
+
+        expect(query('floor-plan-room-summary-room-1')?.textContent).toContain(
+          'floor-plan-room-summary',
+        );
+        expect(query('floor-plan-room-summary-room-1')?.textContent).toContain(
+          'floor-plan-capacity-disabled',
+        );
+        expect(
+          query('floor-plan-room-summary-room-2')?.textContent,
+        ).not.toContain('floor-plan-capacity-disabled');
+        expect(query('floor-plan-restaurant-summary')).not.toBeNull();
+      });
+
+      /**
+       * A restaurant on one floor gets no headings.
+       *
+       * A single heading saying the rooms are on no floor is a grouping that
+       * groups nothing, and it costs a line above every room list in the
+       * product.
+       */
+      it('heads the list by level only once a room names one', () => {
+        setInputs({ rooms: [room(), terrace] });
+
+        expect(query('floor-plan-floor-none')).toBeNull();
+
+        setInputs({
+          rooms: [room({ floor: 'Ground floor' }), terrace],
+        });
+
+        expect(query('floor-plan-floor-Ground floor')?.textContent).toContain(
+          'Ground floor',
+        );
+        expect(query('floor-plan-floor-none')?.textContent).toContain(
+          'floor-plan-floor-unassigned',
+        );
+      });
+
+      it('reports the level the owner typed, and no level once it is cleared', () => {
+        const drafts: RoomDraft[] = [];
+        component.saveRoom.subscribe((draft) => drafts.push(draft));
+
+        component.floor.set('  Upstairs  ');
+        component.onSave();
+
+        component.floor.set('   ');
+        component.onSave();
+
+        expect(drafts[0].floor).toBe('Upstairs');
+        expect(drafts[1].floor).toBeUndefined();
+      });
+
+      it('fills the floor field from the room that is open', () => {
+        setInputs({
+          rooms: [room(), terrace],
+          selectedRoom: room({ id: 'room-2', floor: 'Upstairs', version: 2 }),
+        });
+
+        expect(component.floor()).toBe('Upstairs');
+      });
+
+      describe('reordering', () => {
+        const moves: { roomId: string; offset: number }[] = [];
+
+        beforeEach(() => {
+          moves.length = 0;
+          component.moveRoom.subscribe((move) => moves.push(move));
+          setInputs({ rooms: [room(), terrace, gallery] });
+        });
+
+        it('moves a room one place up or down', () => {
+          query('floor-plan-room-down-room-1')?.click();
+          query('floor-plan-room-up-room-3')?.click();
+
+          expect(moves).toEqual([
+            { roomId: 'room-1', offset: 1 },
+            { roomId: 'room-3', offset: -1 },
+          ]);
+        });
+
+        /**
+         * The reorder control sits inside the row that opens the room, so its
+         * click must not also switch rooms - an owner tidying the list would
+         * otherwise lose the room they were editing.
+         */
+        it('does not open the room it is reordering', () => {
+          const picked: string[] = [];
+          component.selectRoom.subscribe((id) => picked.push(id));
+
+          query('floor-plan-room-down-room-2')?.click();
+
+          expect(picked).toEqual([]);
+        });
+
+        it('closes the ends of the list', () => {
+          expect(buttonDisabled('floor-plan-room-up-room-1')).toBe(true);
+          expect(buttonDisabled('floor-plan-room-down-room-1')).toBe(false);
+          expect(buttonDisabled('floor-plan-room-down-room-3')).toBe(true);
+        });
+
+        /**
+         * Reordering writes rooms, and a room whose version moves reseeds the
+         * editor. Closing the control while there is something to lose is the
+         * honest answer, and the note beside the list says why.
+         */
+        it('waits for an unsaved room to be written, and says so', () => {
+          setInputs({ unsavedChanges: true });
+
+          expect(buttonDisabled('floor-plan-room-down-room-1')).toBe(true);
+          expect(query('floor-plan-reorder-blocked')).not.toBeNull();
+        });
+
+        it('offers no reordering for a restaurant with one room', () => {
+          setInputs({ rooms: [room()] });
+
+          expect(query('floor-plan-room-down-room-1')).toBeNull();
+        });
+      });
+
+      describe('switching rooms with unsaved changes', () => {
+        beforeEach(() => {
+          setInputs({ rooms: [room(), terrace], unsavedChanges: true });
+        });
+
+        /** The acceptance criterion: no unsaved change is lost silently. */
+        it('asks before leaving, and leaves once the owner agrees', async () => {
+          const picked: string[] = [];
+          component.selectRoom.subscribe((id) => picked.push(id));
+
+          query('floor-plan-room-room-2')?.click();
+          await fixture.whenStable();
+
+          expect(picked).toEqual([]);
+          expect(alerts).toHaveLength(1);
+
+          pressAlertButton('destructive');
+
+          expect(picked).toEqual(['room-2']);
+        });
+
+        it('stays where it is when the owner cancels', async () => {
+          const picked: string[] = [];
+          component.selectRoom.subscribe((id) => picked.push(id));
+
+          query('floor-plan-room-room-2')?.click();
+          await fixture.whenStable();
+          pressAlertButton('cancel');
+
+          expect(picked).toEqual([]);
+        });
+
+        it('asks nothing when the room is already open', async () => {
+          component.onSelectRoom('room-1');
+          await fixture.whenStable();
+
+          expect(alerts).toHaveLength(0);
+        });
+
+        it('asks nothing when there is nothing to lose', async () => {
+          setInputs({ unsavedChanges: false });
+          const picked: string[] = [];
+          component.selectRoom.subscribe((id) => picked.push(id));
+
+          query('floor-plan-room-room-2')?.click();
+          await fixture.whenStable();
+
+          expect(alerts).toHaveLength(0);
+          expect(picked).toEqual(['room-2']);
+        });
+      });
+    });
+
     describe('the object palette', () => {
       let placements: FloorPlanPlacement[];
 
@@ -605,6 +868,27 @@ describe(FloorPlanComponent.name, () => {
       it('fills the fields from the table', () => {
         expect(component.tableLabel()).toBe('7');
         expect(component.tableSeats()).toBe('4');
+      });
+
+      describe('moving it to another room', () => {
+        it('offers the choice only once there is another room', () => {
+          expect(query('floor-plan-table-room')).toBeNull();
+
+          setInputs({ rooms: [room(), room({ id: 'room-2' })] });
+
+          expect(query('floor-plan-table-room')).not.toBeNull();
+        });
+
+        it('reports the room the owner picked', () => {
+          const picked: string[] = [];
+          component.moveTable.subscribe((roomId) => picked.push(roomId));
+
+          component.onMoveTable('room-2');
+          component.onMoveTable('room-1');
+          component.onMoveTable(undefined);
+
+          expect(picked).toEqual(['room-2']);
+        });
       });
 
       it('reports the typed label, and lets the editor rule on it', () => {

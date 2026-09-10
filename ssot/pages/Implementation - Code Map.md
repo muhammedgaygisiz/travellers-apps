@@ -51,12 +51,21 @@ Examples:
 - `libs/bite-tribe-business/dashboard/data-access`
 - `libs/bite-tribe-business/staff/page`
 - `libs/bite-tribe-business/staff/data-access`
+- `libs/bite-tribe-business/floor-plan/page`
 - `libs/bite-tribe-business/floor-plan/data-access`
+- `libs/bite-tribe-business/floor-plan/ui`
 
-`floor-plan` is the one pair that is currently half a pair: issue \#1081 added
-the data-access half so persistence, rules and conflict handling could be
-settled and tested before an editor exists, and the `page` half arrives with
-the editor of issue \#1082.
+`floor-plan` is the one feature with a third library. It was also the one that
+existed as half a pair for a while: issue \#1081 added the data-access half so
+persistence, rules and conflict handling could be settled and tested before an
+editor existed, and issue \#1082 added the `page` half with the editor.
+
+The third library, `floor-plan/ui`, holds the canvas. It is a `type:ui` library
+in the `scope:bite-tribe-business` scope - the shape `libs/bite-tribe/coach-mark`
+already uses in the consumer scope - rather than another component inside the
+page library, because `@nx/enforce-module-boundaries` forbids `type:ui` from
+importing `type:data-access`. That makes the canvas structurally unable to read
+or write a room: it takes a `Room` from `model` and draws it. See [[Floor Plan]].
 
 The business app holds only what a restaurant does to its own data. Migrations,
 restaurant-candidate verification, the unmatched Bite places and the

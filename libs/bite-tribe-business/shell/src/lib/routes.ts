@@ -9,9 +9,9 @@ import { authGuard, documentOwnerGuard, roleGuard } from 'ta-firestore';
  * restaurant it does not hold is already unreachable by clicking. That is not
  * the same as being refused: the id is in the URL, links get shared, and a
  * revocation leaves an account with a bookmark to a page it may no longer
- * open. So the routes that edit a restaurant - the restaurant itself and its
- * menu - check the assignment rather than trusting the list that led here
- * (issue #1079).
+ * open. So every route that edits a restaurant - the restaurant itself, its
+ * menu, its staff and its floor plan - checks the assignment rather than
+ * trusting the list that led here (issue #1079).
  *
  * The menu route is checked against its `restaurantId` too. A menu document
  * carries no owner; the restaurant does, and it is the restaurant's `menuId`
@@ -27,7 +27,7 @@ const ownedRestaurantGuard = documentOwnerGuard({
 });
 
 /**
- * Every authenticated route carries the same two guards, and the two that
+ * Every authenticated route carries the same two guards, and the ones that
  * edit one restaurant carry `ownedRestaurantGuard` on top.
  *
  * `authGuard` establishes that someone is signed in;
@@ -120,6 +120,28 @@ export const ROUTES: Routes = withAuthRoutes([
     loadComponent: () =>
       import('bite-tribe-business/staff').then(
         (m) => m.RestaurantStaffContainer,
+      ),
+    canActivate: [
+      authGuard,
+      roleGuard('business', 'staff'),
+      ownedRestaurantGuard,
+    ],
+  },
+  /**
+   * The floor plan is the **owner's** route too.
+   *
+   * [[Floor Plan]] gives staff a read of the *published* plan and no write, and
+   * there is no published state until issue #1088 splits draft from published —
+   * so admitting staff here would hand them the draft an owner is halfway
+   * through rearranging. `ownedRestaurantGuard` checks
+   * `Restaurant.ownerUserId`, which a staff account never holds, and issue
+   * #1081's rules refuse the same account for the same reason (issue #1082).
+   */
+  {
+    path: 'restaurant/:restaurantId/floor-plan',
+    loadComponent: () =>
+      import('bite-tribe-business/floor-plan').then(
+        (m) => m.FloorPlanContainer,
       ),
     canActivate: [
       authGuard,

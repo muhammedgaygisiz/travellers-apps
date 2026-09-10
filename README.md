@@ -17,8 +17,8 @@ npm install
 
 - Get the .env file from one of the developers and copy it to the root of the app `apps/bite-tribe/.env`
 
-- **Windows only:** the agent skills in `skills/` are exposed to Codex and Claude Code through
-  the symlinks `.codex/skills` and `.claude/skills`. Enable Developer Mode
+- **Windows only:** the agent skills in `skills/` are exposed to Codex, Gemini and Claude Code
+  through the symlinks `.agents/skills` and `.claude/skills`. Enable Developer Mode
   (Settings -> System -> For developers) and clone with symlink support:
 
 ```
@@ -31,8 +31,8 @@ git clone -c core.symlinks=true git@github.com:muhammedgaygisiz/travellers-apps.
 
 ```
 git config core.symlinks true
-rm -f .codex/skills .claude/skills
-git checkout -- .codex/skills .claude/skills
+rm -f .agents/skills .claude/skills
+git checkout -- .agents/skills .claude/skills
 ```
 
   macOS and Linux need none of this.

@@ -54,8 +54,14 @@
       "bite-tribe-business/edit-menu": [
         "libs/bite-tribe-business/edit-menu/page/src/index.ts"
       ],
+      "bite-tribe-business/floor-plan": [
+        "libs/bite-tribe-business/floor-plan/page/src/index.ts"
+      ],
       "bite-tribe-business/floor-plan-data-access": [
         "libs/bite-tribe-business/floor-plan/data-access/src/index.ts"
+      ],
+      "bite-tribe-business/floor-plan-ui": [
+        "libs/bite-tribe-business/floor-plan/ui/src/index.ts"
       ],
       "bite-tribe-business/restaurant": [
         "libs/bite-tribe-business/restaurant/page/src/index.ts"

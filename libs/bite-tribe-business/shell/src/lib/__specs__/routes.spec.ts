@@ -164,12 +164,18 @@ describe('business ROUTES', () => {
    * `Restaurant.ownerUserId` is the only thing that separates the owner from
    * its own staff: both hold a role the app admits, and only one of them may
    * hire (issue #1537).
+   *
+   * The floor-plan route is here for the same reason. [[Floor Plan]] gives
+   * staff a read of the *published* plan and no write, and there is no
+   * published state until issue #1088 — so until then the editor is the
+   * owner's alone (issue #1082).
    */
   describe('which restaurants the edit routes admit', () => {
     const EDIT_PATHS = [
       'restaurant/:restaurantId',
       'restaurant/:restaurantId/menu/:menuId',
       'restaurant/:restaurantId/staff',
+      'restaurant/:restaurantId/floor-plan',
     ];
 
     const ownerGuardOf = (route: Route): CanActivateFn =>

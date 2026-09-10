@@ -58,8 +58,10 @@ import {
   notificationsOffOutline,
   notificationsOutline,
   pricetagOutline,
+  removeOutline,
   restaurantOutline,
   repeat,
+  scanOutline,
   searchOutline,
   settingsOutline,
   shareSocialOutline,
@@ -144,5 +146,7 @@ export const addNecessaryIcons = (): void => {
     earthOutline,
     lockClosedOutline,
     arrowUndoOutline,
+    removeOutline,
+    scanOutline,
   });
 };

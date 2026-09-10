@@ -1,0 +1,63 @@
+:host {
+  /*
+   * One column down the middle, the shape the business app's other section
+   * pages use: `fullWidth` chrome lets the content span the viewport, and a
+   * form stretched across a desktop monitor has no left edge to scan down.
+   *
+   * Wider than the staff page's 40rem, because the canvas below the form is
+   * the point of this page and a plan drawn 40rem wide is a thumbnail.
+   */
+  .floor-plan {
+    margin: 0 auto;
+    max-width: 60rem;
+  }
+
+  .floor-plan__subtitle {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .floor-plan__loading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  .floor-plan__hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .floor-plan__failed {
+    color: var(--ion-color-danger);
+  }
+
+  .floor-plan__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  /*
+   * The canvas card gives the plan its height. The canvas itself has none of
+   * its own - its `viewBox` is in millimetres and says nothing about pixels -
+   * so the surface it is drawn on is decided here, once.
+   */
+  .floor-plan__canvas-content {
+    padding: 0.5rem;
+  }
+
+  /*
+   * Everything on the canvas - grid lines, walls, the scale label - is sized
+   * as a share of the drawing, so it grows with the surface. Bounded here so a
+   * very tall viewport does not turn the wall into a stripe.
+   */
+  .floor-plan__canvas {
+    height: 60vh;
+    min-height: 24rem;
+    max-height: 40rem;
+  }
+}

@@ -35,6 +35,18 @@ export class EditRestaurantService {
     }
   }
 
+  gotoFloorPlan(): void {
+    const restaurant = this.restaurant();
+
+    if (restaurant) {
+      void this.navController.navigateForward([
+        'restaurant',
+        restaurant.id,
+        'floor-plan',
+      ]);
+    }
+  }
+
   async createMenu(): Promise<void> {
     const restaurant = this.restaurant();
     if (!restaurant) {

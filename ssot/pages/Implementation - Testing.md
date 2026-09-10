@@ -122,7 +122,7 @@ Two boundary details keep direct Loki working against the Angular Storybook 10 h
 
 ### Operating Loki
 
-Three behaviours that have each cost a wrong conclusion at least once.
+Four behaviours that have each cost a wrong conclusion at least once.
 
 **Use `loki:approve`, not `loki:update`, to accept a diff.** `tools/loki.mjs`
 forwards its command straight to the upstream CLI with no story filter, so
@@ -139,6 +139,17 @@ rectangle instead of the markers the story exists to show. See
 `libs/bite-tribe-common/map/src/lib/map/__specs__/map.component.stories.ts`, which
 carries the skip and the reason. The device is where map rendering gets confirmed
 instead — see [[Implementation - Android Device Testing]].
+
+**A story-level `viewport` parameter does not narrow a Loki capture, and
+`parameters.loki.skip` does not narrow it to one configuration.** Loki sizes the
+browser from `configurations` in `loki.config.js` and loads the story iframe
+directly, so the viewport addon never runs; `skip` removes a story from every
+configuration at once. To baseline a story on some configurations and not
+others, use that configuration's `skipStories` regex, which is matched against
+`kind + ' ' + name`. `chrome.iphone7` carries `'^(Admin|Business)/'` so the
+admin and business apps - desktop products, neither shipped as a native build -
+are baselined at `chrome.laptop` only. See [[Implementation - Storybook]] and
+issue \#1547.
 
 **A skeleton in a reference image is not automatically a regression.**
 `loki-getstories-shim.ts` carries a settle gate precisely because an `@defer`

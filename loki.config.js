@@ -36,6 +36,17 @@ module.exports = {
     'chrome.iphone7': {
       target: 'chrome.docker',
       preset: 'iPhone 7',
+      // The admin and business apps are desktop products: an operator or a
+      // restaurant opens them on a laptop, and neither ships as a native
+      // build. A phone reference for them asserts a layout nobody uses, so
+      // their stories are baselined at `chrome.laptop` only (issue #1547).
+      //
+      // `skipStories` is matched per configuration against `kind + ' ' + name`
+      // (see @loki/runner/src/commands/test/run-tests.js), which is why the
+      // two apps carry top-level story titles of their own. The story-level
+      // `parameters.loki.skip` is the wrong tool here - it would drop the
+      // story from every configuration, including this one's laptop sibling.
+      skipStories: '^(Admin|Business)/',
     },
   },
 };

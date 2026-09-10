@@ -1,17 +1,44 @@
 import { Routes } from '@angular/router';
 import { withAuthRoutes } from 'auth';
-import { authGuard, roleGuard } from 'ta-firestore';
+import { authGuard, documentOwnerGuard, roleGuard } from 'ta-firestore';
 
 /**
- * Every authenticated route carries both guards.
+ * The second half of the ownership boundary, and the half a link cannot dodge.
+ *
+ * The dashboard lists only the restaurants assigned to the account, so a
+ * restaurant it does not hold is already unreachable by clicking. That is not
+ * the same as being refused: the id is in the URL, links get shared, and a
+ * revocation leaves an account with a bookmark to a page it may no longer
+ * open. So the routes that edit a restaurant - the restaurant itself and its
+ * menu - check the assignment rather than trusting the list that led here
+ * (issue #1079).
+ *
+ * The menu route is checked against its `restaurantId` too. A menu document
+ * carries no owner; the restaurant does, and it is the restaurant's `menuId`
+ * that says which menu belongs to it, which is the same shape issue #1078's
+ * rules use for a menu write.
+ */
+const ownedRestaurantGuard = documentOwnerGuard({
+  collection: 'restaurants',
+  paramName: 'restaurantId',
+  ownerField: 'ownerUserId',
+  refusalMessageKey: 'restaurant-not-assigned-to-account',
+  redirectTo: '/restaurants',
+});
+
+/**
+ * Every authenticated route carries the same two guards, and the two that
+ * edit one restaurant carry `ownedRestaurantGuard` on top.
  *
  * `authGuard` establishes that someone is signed in;
  * `roleGuard('business', 'staff')` establishes that the account was granted
  * business access by an operator, or was put on a restaurant as staff. The two
  * are alternatives, not a hierarchy: a staff account holds `staff` and *not*
  * `business`, so naming only `business` here would sign it out at the door
- * (issue #1075). What a staff account may then *do* is narrower, and that is
- * issue #1078's and #1079's to enforce - this gate is the door, not the rules.
+ * (issue #1075). What a staff account may then *do* is narrower: issue #1078's
+ * rules decide what it may write, and `ownedRestaurantGuard` above decides
+ * which restaurant it may open at all.
+ *
  * Until issue #1469 only the first existed, which meant any BiteTribe account
  * could open this app and run the operational migrations in it. Those
  * migrations, restaurant-candidate verification and the unmatched Bite places
@@ -73,13 +100,21 @@ export const ROUTES: Routes = withAuthRoutes([
       import('bite-tribe-business/restaurant').then(
         (m) => m.EditRestaurantContainer,
       ),
-    canActivate: [authGuard, roleGuard('business', 'staff')],
+    canActivate: [
+      authGuard,
+      roleGuard('business', 'staff'),
+      ownedRestaurantGuard,
+    ],
   },
   {
     path: 'restaurant/:restaurantId/menu/:menuId',
     loadComponent: () =>
       import('bite-tribe-business/edit-menu').then((m) => m.EditMenuContainer),
-    canActivate: [authGuard, roleGuard('business', 'staff')],
+    canActivate: [
+      authGuard,
+      roleGuard('business', 'staff'),
+      ownedRestaurantGuard,
+    ],
   },
   {
     path: '',

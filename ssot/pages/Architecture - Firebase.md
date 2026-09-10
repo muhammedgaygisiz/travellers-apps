@@ -42,9 +42,11 @@ read and write to any signed-in account. `apps/bite-tribe-firebase/firestore.rul
 now scopes every write by ownership. Three rules of thumb carry the file:
 
 - **Reads are where they were.** Every collection a signed-in account could read
-  before, it can still read. Narrowing reads is issue \#1079. The two exceptions
-  are `accountDeletions` and the top-level `pushTokens` index, which are
-  cross-account identifiers no client ever read.
+  before, it can still read. Issue \#1079 narrowed what the business app _sees_
+  in the client query rather than here, so an unowned restaurant is still
+  readable and simply not listed. The two exceptions are `accountDeletions` and
+  the top-level `pushTokens` index, which are cross-account identifiers no
+  client ever read.
 - **A write is allowed by ownership, not by a role.** The document names the
   account that may write it: `Restaurant.ownerUserId`, `Bite.userId`,
   `Review.authorId`, `Bucketlist.userId`, `BiteTrail.ownerId`, or the document

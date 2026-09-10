@@ -18,6 +18,11 @@ Business users or admins can maintain Restaurant and menu context that improves 
   surface: **BiteTrails** and **Restaurants**.
 - The business user opens Restaurants and edits one of them.
 - The business user maintains menu and Restaurant metadata.
+- Both the map and the list hold **only the Restaurants assigned to the
+  signed-in account** since issue \#1079. An account that holds none sees an
+  empty state naming BiteTribe support, not an empty list: assignment is
+  operator work in the admin app, and there is nothing the account can do here
+  to change it.
 - The initial Menu saves the business user the first round of typing: each distinct Bite dish name becomes one item, priced with the average of the prices users reported, in a single `Bites` category. The business user then corrects, renames, and structures it in the edit-menu page.
 
 ### What A Restaurant No Longer Does Here
@@ -32,15 +37,23 @@ That was not a tidy-up. The `business` role is held by every restaurant, so
 anything behind it is something every restaurant can do, and verifying a
 candidate creates a Restaurant out of other people's Bites.
 
+And, since issue \#1079, maintaining a Restaurant it was not assigned. The edit
+routes - `restaurant/:restaurantId` and its menu - carry `documentOwnerGuard` on
+top of the role gate, so a Restaurant assigned to another account is refused by
+direct URL rather than merely being unlinked from the list. The refusal is a
+toast and a return to the account's own list; it never says who does hold the
+Restaurant. See [[UC - Own And Claim Restaurants]].
+
 ## Supported Evidence
 
 - Business `dashboard`, `bite-trails` and `restaurants`
 - `restaurant/:restaurantId`
 - `restaurant/:restaurantId/menu/:menuId`
-- `apps/bite-tribe-business-e2e/src/tests/maintain-restaurant.spec.ts` covers the business login, the dashboard, the restaurants section, opening a Restaurant, and persisting its About text and address
+- `apps/bite-tribe-business-e2e/src/tests/maintain-restaurant.spec.ts` covers the business login, the dashboard, the restaurants section, opening a Restaurant, and persisting its About text and address, plus the ownership boundary: a Restaurant assigned to another account is absent from the list, the empty state renders, and the direct URL is refused
 
 ## Related GitHub Scope
 
+- Issue \#1079 scopes this app to the Restaurants assigned to the caller and guards the edit routes; the assignment itself is [[UC - Own And Claim Restaurants]].
 - Issue \#734 includes opening hours, social links, verified/unverified restaurant handling, menu cleanup, and admin restaurant workflows.
 - Issue \#778 / \#942 covers verifying restaurant candidates discovered from repeated Bite evidence into real Restaurants. That flow is Operator work in the Admin App; see [[UC - Verify Restaurant Candidate]].
 - Issue \#1003 seeds the initial Menu of a verified candidate from its Bites.
@@ -49,3 +62,4 @@ candidate creates a Restaurant out of other people's Bites.
 
 - [[Restaurant]]
 - [[Bite]]
+- [[User Roles]]

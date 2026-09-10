@@ -496,7 +496,8 @@ is recorded as `verifiedByUserId`, satisfying `G6`.
 
 **Enforced at the data layer since \#1078.** `V2`'s direct client read of
 `/restaurantCandidates` still works — reads were deliberately left where they were, and
-narrowing them is \#1079 — but the collection is client-writable by nobody, and
+\#1079 narrowed what the business app _lists_ in its own query rather than in the rules —
+but the collection is client-writable by nobody, and
 `/restaurants` is writable only by the Operator or the assigned owner. A signed-in Bite
 Creator can no longer create a Restaurant, nor set a Candidate to `verified`, without
 calling the callable. The guard still protects the _flow_; the rules now protect the
@@ -556,9 +557,10 @@ app, which _is_ reviewed:
    as such. A reviewer comparing a listed price to the real one sees an inaccuracy
    attributed to a named business. `RD-VRC-11` decides that marker and its retraction:
    the marker is owned by \#1511, and retraction is sequenced behind owner assignment.
-   That assignment has a writer since \#1077, but no Restaurant is assigned in
-   production and the Business App is not ownership-scoped (\#1079), so no Restaurant
-   Owner can reach the Menu to retract.
+   That assignment has a writer since \#1077 and the Business App is ownership-scoped
+   since \#1079, so the path exists; what is still missing is the assignments
+   themselves. No Restaurant is assigned in production, so no Restaurant Owner can
+   reach the Menu to retract until an operator assigns one.
 2. **The Restaurant is created unclaimed,** per `G7`. `V21` publishes a page about a
    real, named business that has not been involved. That is a data-protection and
    business-representation question rather than a store-review one; it belongs to

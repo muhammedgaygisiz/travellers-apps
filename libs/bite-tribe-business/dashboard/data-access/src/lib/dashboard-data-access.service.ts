@@ -6,6 +6,8 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { resourceValue } from 'utils';
 
 export const RESTAURANT_COLLECTION = 'restaurants';
+/** The field naming the account a restaurant is assigned to (issue #1074). */
+export const RESTAURANT_OWNER_FIELD = 'ownerUserId';
 export const BITE_TRAIL_COLLECTION = 'biteTrails';
 
 @Injectable({
@@ -14,26 +16,69 @@ export const BITE_TRAIL_COLLECTION = 'biteTrails';
 export class DashboardDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
-  restaurantsLoader: ResourceLoader<Restaurant[] | undefined, unknown> =
-    async () => {
-      const docs = await FirebaseFirestore.getCollection({
-        reference: RESTAURANT_COLLECTION,
-      });
+  /**
+   * The restaurants assigned to the signed-in account, and nothing else.
+   *
+   * This read used to return the whole collection, which made the business app
+   * a view over every restaurant in BiteTribe: an account was listed - and
+   * could open the edit form of - a restaurant assigned to somebody else
+   * (issue #1079). Ownership is `Restaurant.ownerUserId`, written by the
+   * operator callables of issue #1077, and the same field issue #1078's rules
+   * authorise a write from. The filter is strict and has no fallback to the
+   * unowned restaurants: an account holding nothing sees nothing, which is the
+   * empty state the restaurants page renders.
+   *
+   * Filtering here rather than after the read is what keeps this honest once
+   * the rules narrow reads too. Until they do, the rules still allow any
+   * signed-in account to read any restaurant, so this is the visible boundary
+   * rather than the enforced one - the enforced one is the route guard and the
+   * write rules.
+   */
+  restaurantsLoader: ResourceLoader<
+    Restaurant[] | undefined,
+    { userId: string | undefined }
+  > = async ({ params }) => {
+    const { userId } = params;
 
-      if (!docs?.snapshots) {
-        return [];
-      }
+    if (!userId) {
+      return [];
+    }
 
-      return docs.snapshots.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data,
-          }) as Restaurant,
-      );
-    };
+    const docs = await FirebaseFirestore.getCollection({
+      reference: RESTAURANT_COLLECTION,
+      compositeFilter: {
+        type: 'and',
+        queryConstraints: [
+          {
+            type: 'where',
+            fieldPath: RESTAURANT_OWNER_FIELD,
+            opStr: '==',
+            value: userId,
+          },
+        ],
+      },
+    });
 
+    if (!docs?.snapshots) {
+      return [];
+    }
+
+    return docs.snapshots.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data,
+        }) as Restaurant,
+    );
+  };
+
+  /**
+   * Keyed on the uid, so an assignment or a revocation lands on the next load
+   * without a re-login: ownership is a document field rather than a custom
+   * claim, so there is no token to refresh (issue #1069).
+   */
   restaurants = resource({
+    params: () => ({ userId: this.storeService.user()?.uid }),
     loader: this.restaurantsLoader.bind(this),
   });
 

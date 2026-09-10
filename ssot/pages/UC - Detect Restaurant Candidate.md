@@ -460,8 +460,9 @@ behind `B2` and the eligibility filter at `B3` are conveniences.
 a Bite Creator can no longer write a Candidate with any `evidence`, any `biteIds` and any
 `status`. The invariants on this page are now properties of the collection as well as of
 this code. `B3`'s whole-collection read of `/bites` still works: reads were deliberately
-left where they were, and narrowing them is \#1079. **The rules deploy by hand**, so this
-holds in production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
+left where they were, and \#1079 narrowed what the business app _lists_ in its own query
+rather than in the rules. **The rules deploy by hand**, so this holds in production only
+once `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
 
 ## MVP Classification
 

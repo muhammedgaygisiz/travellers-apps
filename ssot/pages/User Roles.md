@@ -85,7 +85,7 @@ Granted today: yes. Target state, not implemented: **target**. Not granted: no.
 
 ¹ `RD-UR-6`: the Operator maintains **every** Restaurant, claimed or unclaimed, from the
 Admin App - where verification already creates them. It does not reach them through the
-Business App, which requires `business` and is owner-scoped by issue \#1079. **The
+Business App, which requires `business` and is owner-scoped since issue \#1079. **The
 surface does not exist yet**, so today a Restaurant is maintainable by nobody once
 created: the Operator's only control is correcting the data during verification, and a
 Firebase console edit afterwards. No issue owns the surface. Two consequences elsewhere -
@@ -101,10 +101,10 @@ gap that remains is attributability: an operator write from the admin app lands 
 client write and leaves nothing in the operator log, unlike the ownership callables. That
 is the half of \#1164 no issue owns yet.
 
-² Assigned since \#1077 and enforced since \#1078: `firestore.rules` allows a restaurant,
-menu or Bite-trail write only from the account named on the document. Not yet a _visible_
-boundary - the business dashboard is not scoped to it (\#1079), so an account can still
-open the edit form for a restaurant it does not hold and is refused on save. The write is
+² Assigned since \#1077, enforced since \#1078 and visible since \#1079:
+`firestore.rules` allows a restaurant, menu or Bite-trail write only from the account
+named on the document, the business dashboard lists only the restaurants assigned to the
+caller, and the two routes that edit one refuse anything else by direct URL. The write is
 authorised by ownership alone rather than by ownership _and_ the `business` role, so an
 account whose role was revoked while it still held a restaurant keeps write access through
 the API; \#1539 removes that state at the source.

@@ -5,11 +5,13 @@ description: Repo operating guide for muhammedgaygisiz/travellers-apps. Use when
 
 # Travellers Apps
 
-Use this skill when working in `/Users/mo/DEV/travellers-apps`. Keep changes scoped to the requested surface, preserve existing behavior unless the user asks otherwise, and prefer the repo's established Nx library boundaries.
+Use this skill when working in this repository (`muhammedgaygisiz/travellers-apps`). Keep changes scoped to the requested surface, preserve existing behavior unless the user asks otherwise, and prefer the repo's established Nx library boundaries.
+
+All paths in this skill are relative to the repository root. Resolve it with `git rev-parse --show-toplevel` when an absolute path is needed, and run repository commands from there.
 
 ## Start Here
 
-This skill is a Codex adapter to the shared, model-agnostic contract. It does not define a separate product or implementation truth. Follow these first:
+This skill is an adapter to the shared, model-agnostic contract. It does not define a separate product or implementation truth. Follow these first:
 
 1. Read `AGENTS.md`.
 2. Read `ssot/pages/SSOT.md`.
@@ -19,7 +21,7 @@ This skill is a Codex adapter to the shared, model-agnostic contract. It does no
 6. Follow `ssot/pages/Feature Delivery Workflow.md` for issue-to-merge work.
 7. Follow `ssot/pages/Release Workflow.md` for Sunday release work.
 
-The sections below are Codex-specific operational notes. When they seem to conflict with the SSOT, the SSOT wins.
+The sections below are operational notes for this repository. When they seem to conflict with the SSOT, the SSOT wins.
 
 ## Reference Map
 

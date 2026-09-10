@@ -5,14 +5,17 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 
 const repo = 'muhammedgaygisiz/travellers-apps';
-const pagesPath = resolve('ssot/pages');
+const repoRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], {
+  encoding: 'utf8',
+}).trim();
+const pagesPath = join(repoRoot, 'ssot/pages');
 const epicsIndexPath = join(pagesPath, 'Epics.md');
 const ssotPath = join(pagesPath, 'SSOT.md');
 const contentsPath = join(pagesPath, 'contents.md');
-const backupPath = resolve('ssot/logseq/bak');
+const backupPath = join(repoRoot, 'ssot/logseq/bak');
 const projectNumber = '4';
 const projectOwner = 'muhammedgaygisiz';
 const projectOwnerFallback = '@me';

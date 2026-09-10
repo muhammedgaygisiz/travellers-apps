@@ -66,7 +66,9 @@ ssot/Claude outputs/
 
 # Files delivered into the repo folder by the Claude desktop app
 /Claude outputs/
-/.claude/
+# Claude Code local state, except the shared skills symlink
+/.claude/*
+!/.claude/skills
 
 # Analytics service-account credentials (never commit keys)
 service-account*.json

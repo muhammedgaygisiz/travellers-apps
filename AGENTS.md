@@ -16,7 +16,7 @@ This contract is model-agnostic. Codex, Claude, GPT, local IDE agents, and futur
 4. Follow `ssot/pages/Feature Delivery Workflow.md` for normal issue-to-merge work.
 5. Follow `ssot/pages/Release Workflow.md` for Sunday release work.
 6. Use `ssot/pages/Spec To Code Workflow.md` for implementation details.
-7. Use tool-specific guidance, such as `.codex/skills/travellers-apps/SKILL.md` or `CLAUDE.md`, only as an adapter to this shared workflow.
+7. Use tool-specific guidance, such as the skills in `skills/` or `CLAUDE.md`, only as an adapter to this shared workflow.
 
 ## Core Rules
 
@@ -71,7 +71,7 @@ ssot/pages/Traceability Map.md
 ssot/pages/Spec To Code Workflow.md
 ssot/pages/Feature Delivery Workflow.md
 ssot/pages/Release Workflow.md
-.codex/skills/travellers-apps/SKILL.md
+skills/travellers-apps/SKILL.md
 CLAUDE.md
 apps/bite-tribe
 apps/bite-tribe-business

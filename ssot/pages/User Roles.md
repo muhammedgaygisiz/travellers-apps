@@ -83,7 +83,7 @@ Granted today: yes. Target state, not implemented: **target**. Not granted: no.
 | Acquire a BiteTrail as a Bucketlist                                                         | yes                       | yes              | yes                      |
 | Write `bite.restaurantId`                                                                   | yes, via verification     | no               | yes, via the Bite form ⁴ |
 | Report content and block another user                                                       | **target** ⁵              | **target** ⁵     | **target** ⁵             |
-| Act on a report: block an account, delete a Bite                                            | **target** ⁵              | no               | no                       |
+| Act on a report: block an account, delete a Bite                                            | yes ⁵                     | no               | no                       |
 
 ¹ `RD-UR-6`: the Operator maintains **every** Restaurant, claimed or unclaimed, from the
 Admin App - where verification already creates them. It does not reach them through the
@@ -101,7 +101,7 @@ than implying `business`, and the rules suite carries the exception as its own a
 alongside the deny case for a business account writing a restaurant it does not hold. The
 gap that remains is attributability: an operator write from the admin app lands as a plain
 client write and leaves nothing in the operator log, unlike the ownership callables. That
-is the half of \#1164 no issue owns yet.
+half of \#1164 is owned by \#1546, which is open.
 
 ² Assigned since \#1077, enforced since \#1078 and visible since \#1079:
 `firestore.rules` allows a restaurant, menu or Bite-trail write only from the account
@@ -120,12 +120,12 @@ without code.
 This makes the Bite Creator one of three writers of that field; see
 [[UC - Verify Restaurant Candidate]], rule `R-8`.
 
-⁵ Nothing here exists in the product today, and Bite Creator carrying no claim means
-there is no grant to revoke either. `RD-UR-7` fixes the required set and classes it `[MVP]`.
-Operator actions are issues \#1474 (block an account) and \#1475 (delete a Bite),
-children of epic \#1471; the report queue is epic \#1284. **The user-facing report
-action, user-to-user blocking and content filtering have no owning issue**, and the
-contact address waits on \#1429. Store requirement rather than product polish:
+⁵ `RD-UR-7` fixes the required set and classes it `[MVP]`. Bite Creator carrying no claim
+means there is no grant to revoke either. **The operator half shipped**: block an account
+(\#1474) and delete a Bite (\#1475) with epic \#1471, the contact address with \#1429;
+the report queue is epic \#1284, open. **The user-facing half - reporting, user-to-user
+blocking, content filtering - does not exist and has no owning issue.** Store requirement
+rather than product polish:
 [[Implementation - Store Declarations]] declares the **Social Media** data-use category
 at a **13+** age rating, and Apple's user-generated-content guideline asks for filtering,
 timely reporting, blocking and published contact details, with an equivalent Google Play
@@ -146,12 +146,13 @@ with none of the four safeguards present. The iOS app is **not findable** by bun
 **not** evidence of a rejection. Apple's actual position is still unread - it is in App
 Store Connect, not in public data.
 
-**Every gate above is a route guard or a callable check, not a data-layer one.**
-`firestore.rules` grants read and write on every document to every authenticated user, so
-a role gate stops an account reaching a page rather than stopping a determined caller
-writing a document. Accepted as a documented launch risk on 19 August 2026 under issue
-\#1177; owned by [[Current State - Known Issues]], with \#1078 for Firestore and \#1350
-for Storage, the more exploitable of the two.
+**The gates above are route guards and callable checks; since \#1078 the data layer backs
+them too.** `firestore.rules` scopes every write by the account named on the document, and
+that ruleset is live - confirmed in the Firebase console on 11 September 2026, where it
+ends in a default-deny rather than the old `allow read, write: if request.auth != null`.
+`storage.rules` is untouched and still open to any signed-in account; that half is \#1350.
+Nothing in CI deploys either ruleset. The detail, and the launch risk accepted under the
+now-closed \#1177, are owned by [[Current State - Known Issues]].
 
 ## Not roles
 

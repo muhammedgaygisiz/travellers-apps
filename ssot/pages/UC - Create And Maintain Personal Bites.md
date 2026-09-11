@@ -2,18 +2,23 @@
 
 ## Status
 
-Supported today.
+**Level:** L0.
+Supported today. The create and edit flows, the photo upload states and their retry, and
+the five-source position picker are all shipped. The one deferred capability is the
+storage of resolved candidate positions, \#1290.
 
 ## Goal
 
-Users can create and maintain real dish-level food experiences.
+Users can create and maintain real dish-level food experiences. This is the core
+contribution loop: every account can perform it, and the Bites it produces are what the
+rest of the product reads.
 
 ## Actors
 
-- Bite creator
-- Food lover
+- **Bite Creator** — creates a Bite, edits it later, and is the only account offered the
+  retry on a failed photo upload, because the photo is on their device.
 
-## Current Flow
+## Flow
 
 - User creates a new Bite.
 - Entering the flow is not instant: `new-bite` sits behind `freshSessionGuard`,
@@ -109,6 +114,27 @@ Users can create and maintain real dish-level food experiences.
 - User can post the Bite and stay on the form to add another Bite at the same place. Restaurant, currency, and position stay; image, dish name, price, rating, description, and tags reset, and the tags of the Bites already posted in that session become suggestions.
 - User can edit the Bite later.
 
+## MVP Classification
+
+**[MVP]** — creating a Bite and editing it later, the photo requirement with its three
+upload states and the poster-only retry, restaurant and position selection, and the
+currency and suspicious-price handling. This is the core contribution loop and all of it
+ships today.
+
+**[Secondary]** — storing the resolved candidate positions on the Bite so a source can be
+re-chosen while editing, deferred under \#1290. Nothing else on this page is
+unimplemented.
+
+## App Store Review Area
+
+Relevant. This is where the camera, photo library and location permissions are exercised
+and where their purpose strings have to hold up. On Android the gallery is the system
+Photo Picker, which raises no permission prompt of its own, and `ACCESS_MEDIA_LOCATION` is
+collected by the onboarding photos step rather than here - see [[Architecture - Capacitor]]
+and GitHub issue #1409. Both data types this flow writes are already declared in
+[[Implementation - Store Declarations]]: **Photos or Videos** and **Precise Location**,
+each under App Functionality.
+
 ## Supported Evidence
 
 - `new-bite`
@@ -143,3 +169,11 @@ Users can create and maintain real dish-level food experiences.
 - [[Bite]]
 - [[User]]
 - [[Restaurant]]
+
+## Related Pages
+
+- [[Personas]] - the audiences this loop serves: Food lover, Traveler, Bite creator
+- [[Implementation - Feature Patterns]] - the Entry Feedback Contract
+- [[Architecture - Capacitor]] - the Media Permission Rule
+- [[Implementation - Store Declarations]]
+- [[Current State - Known Issues]]

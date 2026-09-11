@@ -28,6 +28,9 @@ The Floor Plan is deliberately not an architecturally exact construction plan. I
 - Rooms have an owner-chosen order that is stored, not derived, so it survives a reload.
 - A Room may name the floor or level it sits on. The name groups Rooms for display and never changes their order.
 - A Floor Plan has a draft state and a published state. Only the published state is read by staff and guest surfaces.
+- A draft belongs to a Room, and a Room has at most one. It is autosaved as the owner works, so closing the browser mid-edit and coming back opens on what they left.
+- Publishing is explicit, and it is refused while the plan carries a blocking error: a table with no number, two tables with one number, a capacity below one, or a table whose centre is outside its room. Overlapping tables warn instead, because real rooms have tables pushed together.
+- Discarding a draft returns the room to the published plan. It is the only action in the editor that destroys work the owner cannot get back, so it is the only one that asks.
 - Editing the Floor Plan never writes live table state, and a live state change never writes the Floor Plan.
 - Only the owner of the Restaurant may edit the Floor Plan.
 
@@ -62,6 +65,18 @@ Room:
 | `objects` | Geometry objects in the room                         |
 | `version` | Optimistic concurrency version                       |
 
+Draft (issue \#1088):
+
+| Field       | Description                                                            |
+| ----------- | ---------------------------------------------------------------------- |
+| `name`      | The room's name as the owner has it now                                |
+| `floor`     | The level, absent when the owner named none                            |
+| `size`      | The room's dimensions as the owner has them now                        |
+| `objects`   | The geometry standing in the room                                      |
+| `tables`    | The tables of the room, as whole entities                              |
+| `revision`  | Optimistic concurrency for the draft, counted separately from the room |
+| `updatedAt` | When the draft was last written, epoch milliseconds                    |
+
 Floor plan object:
 
 | Field      | Description                                                        |
@@ -87,9 +102,10 @@ alongside the tables is a count that goes wrong.
 ```text
 Restaurant
 |-- Floor Plan
-    |-- Rooms
-        |-- Floor plan objects (geometry)
-        |-- Tables (business entities)
+    |-- Rooms                       the published plan
+    |   |-- Floor plan objects (geometry)
+    |   |-- Draft                   the arrangement in progress
+    |-- Tables (business entities)  the published tables
 ```
 
 ## Lifecycle
@@ -116,9 +132,11 @@ Published plan is read by staff live view and by guest QR resolution
 - Registered user: no access.
 - Restaurant staff: read the published plan. No write access.
 - Restaurant owner: full read and write.
-- Admin: read for support and moderation. Editing the plan is restaurant maintenance, and `admin` does not imply `business` (issue \#1164), so an edit goes through the assigned owner.
+- Admin: read the published plan for support and moderation, and not the draft. Editing the plan is restaurant maintenance, and `admin` does not imply `business` (issue \#1164), so an edit goes through the assigned owner.
 
-`firestore.rules` enforces all of this since issue \#1081, with one clause deliberately missing: staff read nothing yet. A staff read is a read of the _published_ plan, there is no published state until issue \#1088 splits draft from published, and admitting staff before then would hand them the draft an owner is halfway through rearranging. The clause belongs with the state it depends on.
+`firestore.rules` enforces all of this since issue \#1081, and the staff clause it deliberately left out arrived with issue \#1088. A staff read is a read of the _published_ plan, and admitting staff before there was a published state would have handed them the draft an owner was halfway through rearranging. It now cannot: the draft is a document of its own at `rooms/{roomId}/drafts/current`, with its own match block and no staff clause in it, and an unpublished table has no document under `tables` at all. The read is scoped to the one restaurant the account works at rather than to `staff` as a role - a blanket clause would make the role a key to every restaurant's interior in BiteTribe, which is the shape of hole issue \#1537 closed for the restaurant document.
+
+The operator is refused the draft as well, and for a narrower reason: support answers questions about the plan a restaurant is running, and an owner's unpublished rearrangement is not that plan.
 
 ## Use Cases
 
@@ -133,21 +151,24 @@ Published plan is read by staff live view and by guest QR resolution
 
 ## Technical Implementation
 
-Firestore layout, real since issue \#1081:
+Firestore layout, real since issue \#1081 and extended by issue \#1088:
 
 ```text
-/restaurants/{restaurantId}/rooms/{roomId}
-/restaurants/{restaurantId}/tables/{tableId}
+/restaurants/{restaurantId}/rooms/{roomId}                 published room
+/restaurants/{restaurantId}/rooms/{roomId}/drafts/current  work in progress
+/restaurants/{restaurantId}/tables/{tableId}               published table
 ```
 
 Non-table geometry lives as an array inside its room document because it is always loaded and saved together. Tables are separate documents because they are business entities with independent lifecycles, referenced by live state, visits, and orders.
 
+The draft is a document of its own rather than a field of the room, and that is what makes "staff never see the draft" a structural fact rather than a promise: security rules cannot hide one field of a document from one reader, so a draft on the room document would have been readable by everybody who reads the room. A subcollection has its own match block, and staff are not in it.
+
 Libraries:
 
 ```text
-libs/bite-tribe-common/model                        floor plan, room, table types
-libs/bite-tribe-business/floor-plan/data-access     load, save, conflict signalling
-libs/bite-tribe-business/floor-plan/page            the editor page and its workflow
+libs/bite-tribe-common/model                        floor plan, room, table and draft types
+libs/bite-tribe-business/floor-plan/data-access     load, save, draft, conflict signalling
+libs/bite-tribe-business/floor-plan/page            the editor page, its workflow, the publish validation
 libs/bite-tribe-business/floor-plan/ui              the canvas, the grid, the units, the palette, the edit geometry
 ```
 
@@ -351,15 +372,96 @@ would be lost. Switching asks the owner first, and only when there is something
 to lose; reordering closes its control instead, because a toast cannot ask a
 question and a confirmation that appears every time is one nobody reads.
 
+Issue \#1088 made the plan two states. Five decisions carry it, and one
+deliberately reversed something issue \#1085 had decided.
+
+**The draft is a whole room, not a patch.** It carries the room's name, its
+level, its dimensions, its geometry and its tables, as values rather than as a
+diff against what is published. A patch would have to be rebased every time
+another device published, and the rebase of "this table moved 200 mm" against
+"that table was deleted" is a conflict resolution nobody asked for. A layout is
+a handful of small plain objects, so a whole copy costs less than the
+bookkeeping - the same reasoning that made the undo history of issue \#1083
+store snapshots rather than inverse operations.
+
+It carries the tables in particular because they are otherwise documents of
+their own. A table moved in a draft must not move in
+`/restaurants/{restaurantId}/tables/{tableId}`, because that collection **is**
+the published state a scanned QR code resolves against. A table the owner
+placed in a draft therefore has no document at all until the plan is published,
+which is also what keeps it out of QR token issuing.
+
+**The draft counts separately from the room.** `Room.version` guards the
+published plan and moves only when somebody publishes; the draft carries its own
+`revision` and the rules apply the same successor rule to it. Sharing the
+counter was the obvious alternative and is wrong: an autosave writes every few
+seconds, every write would look like a publish to anything watching the version,
+and the editor reseeds from a room whose version moved - so the owner's undo
+history would empty itself while they worked.
+
+**A refused draft write reseeds nothing.** The two refusals have two different
+answers. A publish that lost a race shows the owner the room _as stored_,
+because the published plan genuinely became something else and they have to see
+it before overwriting it. An autosave that lost a race leaves everything exactly
+where it is and stops writing: the arrangement on screen is the only copy of
+itself, and throwing it away is precisely what autosave exists to prevent. The
+owner is told a second device has the draft, and can publish theirs or discard
+it.
+
+**Validation blocks four things and warns about two.** An empty label, a
+duplicate label, a capacity below one and a table whose centre is outside its
+room are errors, because each is a state something downstream cannot recover
+from: a sheet cannot print a table with no number, a scan cannot resolve one of
+two tables called 12, and a table outside its room is not in the room staff are
+told to look in. A table that overhangs the outline and two tables that overlap
+are warnings, because those are a table against a wall and a party of ten - an
+editor that refused them would be arguing with the room it describes.
+
+The editor already refuses three of the four as they are typed, so the gate
+exists for the plans that reached the state another way, and there are three
+real ones: a room that was made smaller (resizing moves nothing standing in it),
+a second device arranging a second room it cannot see, and a draft stored before
+a rule existed. Each finding names a table and jumps to it, opening its room
+first, because a finding an owner has to hunt for is a finding they publish
+around.
+
+**Publishing asks for the QR codes.** [[Table]] gives every enabled table an
+active code, and until this issue the only thing that asked was the sheet page
+of issue \#1087 - so a plan carried codes from the first time somebody opened
+the printable sheet. Publishing is the moment the plan becomes real, so it is
+the moment to ask. Issuing is idempotent, which is what lets both ask without
+either invalidating what the other printed. A token failure does not fail the
+publish: the plan is written by then, and unpublishing a correct plan because a
+callable timed out would be the worse answer. The tables are re-read
+afterwards, because `qrTokenId` is backend-owned and a later publish that wrote
+them back without it would be refused by the rules.
+
+**What issue \#1085 decided and this issue reversed.** Switching rooms asked
+the owner first, and reordering the rooms was closed while the open room had
+unsaved changes. Both existed because the editor reseeds from what is stored and
+an unsaved arrangement was therefore lost. It no longer is: the editor stores
+whatever is still inside the autosave's debounce window before it switches or
+reorders, and then reseeds from the draft. The question and the block both
+answered a problem that is gone, and a confirmation that protects nothing is one
+that trains an owner to click through the next one.
+
+Discarding a draft is now the only action in the editor that destroys work the
+owner cannot get back, and it is the only one that asks. It also needs the
+editor to be told explicitly to start again: the room is the same room at the
+same version and its tables did not move, so nothing in the stored plan's
+identity changes, and without a seed token the editor would go on showing the
+arrangement that was just thrown away.
+
 ## Current Limitations
 
 - A plan can be built but not described. Issue \#1083 shipped the palette, placement, move, resize, rotate, multi-select, duplicate, delete, snapping and undo, so an owner can lay out a real dining area. A table placed this way is a real document with a generated number and four seats, and nothing yet lets the owner change either, nor the shape or the enabled state (issue \#1084).
-- A room that is resized does not move what stands in it. Shrinking a room can leave an object outside its new outline, and the editor neither refuses it nor drags the geometry in. "No table lies outside its room" is a publish rule, and publishing is issue \#1088.
+- A room that is resized still does not move what stands in it. Shrinking a room can leave an object outside its new outline, and the editor neither refuses it nor drags the geometry in. What issue \#1088 added is the consequence: a _table_ left outside now blocks the publish and says which one, so the plan cannot go live describing a table that is not in the room. Geometry is not validated at all - a wall half outside the room is a wall of the room.
 - The rules are deployed by hand. `npx nx firebase-deploy-rules bite-tribe-firebase` has to run before the floor-plan rules mean anything in production; merging them changes nothing on its own. Since issue \#1086 that also covers the public read on `/tableTokens` and the backend-only `qrTokenId`, so an undeployed rules file leaves a scanned code unresolvable.
-- A table's code is asked for by the sheet and by nothing else. Issue \#1087's `restaurant/:restaurantId/floor-plan/qr-codes` calls `issueTableQrTokens` as it loads, so a plan carries codes from the first time somebody opens the sheet; the publish step of issue \#1088 will ask again, and because issuing is idempotent neither invalidates what the other printed. Rotation still has no surface.
-- Draft and published are not separated yet (issue \#1088), which is why staff read nothing and why every saved room is live to whatever reads it.
+- Rotating a token still has no surface. `rotateTableQrToken` has existed since issue \#1086 and nothing calls it: replacing a code that was photographed is a different decision with a different consequence, and needs a confirmation of its own rather than a second button beside Print. Issuing is now asked for by two surfaces - the sheet page of issue \#1087 and the publish step of issue \#1088 - and because it is idempotent, neither invalidates what the other printed.
+- A draft is per room, and publishing is per room. An owner rearranging a terrace and a dining room in one sitting publishes twice, and there is no "publish the whole restaurant". That follows the shape of the editor, which holds one room at a time; a restaurant-wide publish would have to validate and write rooms the owner has not looked at.
+- The autosave's debounce window is the one thing that can still lose work, and only to a crash. A room switch, a reorder and a publish all store the draft first; nothing stores it when the browser is closed mid-gesture, so the last second and a half is what a power cut costs.
 - A table moves out of the open room but never into it. Issue \#1085 moves a table by picking its new room in the table card, which is reachable only for a table the owner can see; there is no way to reach into another room and pull a table across, and no multi-room view to do it from.
-- A room can be reordered only while the open room has no unsaved changes. Reordering writes rooms, a room whose version moved reseeds the editor, and closing the control is the honest answer rather than warning after the fact.
+- Reordering the rooms still reseeds the editor, and now reseeds it from the stored draft rather than from the published plan - which is why the control is no longer closed while the plan is unpublished (issue \#1088). What it still costs is the undo history of the open room.
 - The canvas is baselined at desktop only, and now locked to it. `Business/*` stories are visually referenced at `chrome.laptop` alone, because the business app is a desktop product (issue \#1547), and since issue \#1085 the editor holds a 60rem minimum and scrolls sideways rather than collapsing. The `viewBox` still scales from the same stored data at any width, which is what the staff view of issue \#1093 will read it with. Accessibility hardening - keyboard paths, accessible names, greyscale, dark mode - is issue \#1089.
 - No CAD import, no exact scale drawing, and no automatic layout.
 

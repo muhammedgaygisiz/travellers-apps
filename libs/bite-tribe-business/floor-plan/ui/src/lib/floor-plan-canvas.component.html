@@ -211,7 +211,9 @@
       <!--
         Anything the caller projects is drawn in this same millimetre space,
         above the plan. It is where an overlay that is not part of the stored
-        layout belongs, such as the validation markers of issue #1088.
+        layout belongs. The validation findings of issue #1088 are listed
+        beside the canvas rather than drawn on it, for the same reason: the
+        canvas is handed a room and draws it.
       -->
       <ng-content />
     </g>

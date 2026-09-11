@@ -111,6 +111,8 @@ export default {
     snapEnabled: true,
     snapSpacing: 500,
     isAuthenticated: true,
+    publishedRoom: room(),
+    canPublish: true,
   },
 } as Meta<FloorPlanComponent>;
 
@@ -273,12 +275,92 @@ export const SelectionOfSeveral: Story = {
   },
 };
 
-/** Edits made and not written yet, which is the state the save button is for. */
-export const UnsavedChanges: Story = {
+/**
+ * Arranged and stored, but not live yet (GitHub issue #1088).
+ *
+ * The state the editor is in for most of an afternoon: everything the owner
+ * has done is in a stored draft, nothing of it has reached staff or a scanned
+ * QR code, and the Publish button is what closes the gap. The autosave note
+ * says so rather than leaving it to be inferred, because an owner who cannot
+ * see that their arranging is stored keeps looking for a save button.
+ */
+export const UnpublishedChanges: Story = {
   args: {
     items: furnished,
     selectedIds: ['table-2'],
     canUndo: true,
-    unsavedChanges: true,
+    unpublishedChanges: true,
+    hasDraft: true,
+    autosaveStatus: 'saved',
+    draftSavedAt: Date.UTC(2026, 8, 11, 9, 30),
+  },
+};
+
+/**
+ * A plan that cannot be published, and one that can be published anyway.
+ *
+ * Both severities at once, because the distinction is the whole of the card:
+ * the errors close the Publish button and the warning does not. Overlapping
+ * tables warn rather than block, because a party of ten is two tables pushed
+ * together and an editor that refused that would be arguing with the room it
+ * describes.
+ */
+export const ValidationFindings: Story = {
+  args: {
+    items: furnished,
+    unpublishedChanges: true,
+    hasDraft: true,
+    autosaveStatus: 'saved',
+    canPublish: false,
+    validation: {
+      errors: [
+        {
+          severity: 'error',
+          code: 'label-duplicate',
+          tableId: 'table-2',
+          label: '2',
+          roomId: 'room-1',
+          otherTableId: 'terrace-2',
+          otherLabel: '2',
+          otherRoomId: 'terrace',
+        },
+        {
+          severity: 'error',
+          code: 'table-outside-room',
+          tableId: 'table-3',
+          label: '3',
+          roomId: 'room-1',
+        },
+      ],
+      warnings: [
+        {
+          severity: 'warning',
+          code: 'tables-overlap',
+          tableId: 'table-1',
+          label: '1',
+          roomId: 'room-1',
+          otherTableId: 'table-2',
+          otherLabel: '2',
+          otherRoomId: 'room-1',
+        },
+      ],
+      publishable: false,
+    },
+  },
+};
+
+/**
+ * A second device has the draft, so this one has stopped writing.
+ *
+ * The state that has to be said out loud rather than shown as a spinner that
+ * never settles: the arrangement on screen is the only copy of itself, and the
+ * owner has to decide whether to publish it or discard it.
+ */
+export const AutosaveBlocked: Story = {
+  args: {
+    items: furnished,
+    unpublishedChanges: true,
+    hasDraft: true,
+    autosaveStatus: 'blocked',
   },
 };

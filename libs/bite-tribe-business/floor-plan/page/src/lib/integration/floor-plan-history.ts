@@ -28,8 +28,10 @@
  * How many steps back the editor remembers.
  *
  * Deep enough to cover a session of arranging a room and shallow enough that
- * the layouts are never a memory question. There is no autosave to fall back on
- * until issue #1088, so the limit is the only thing that discards work.
+ * the layouts are never a memory question. Falling off the end of it is the
+ * only way an edit stops being recoverable in the editor: since issue #1088
+ * the arrangement itself is autosaved as a draft, so what the limit discards
+ * is the ability to *undo*, not the work.
  */
 export const HISTORY_LIMIT = 50;
 

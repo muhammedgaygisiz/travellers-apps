@@ -151,15 +151,6 @@
                 </ion-note>
               }
 
-              @if (rooms().length > 1 && unsavedChanges()) {
-                <ion-note
-                  class="floor-plan__hint"
-                  data-testid="floor-plan-reorder-blocked"
-                >
-                  {{ 'floor-plan-reorder-blocked' | transloco }}
-                </ion-note>
-              }
-
               <ion-button
                 class="ion-margin-top"
                 fill="outline"
@@ -171,23 +162,25 @@
               </ion-button>
 
               <!--
-                Closed while anything is unsaved, the same way reordering the
-                rooms is. A table placed a minute ago has no document yet, so
-                it has no QR token either, and a sheet printed now would be a
-                sheet missing exactly the tables the owner has just added
-                (issue #1087).
+                Closed while anything is unpublished. A table placed a minute
+                ago is in the draft and has no document yet, so it has no QR
+                token either, and a sheet printed now would be a sheet missing
+                exactly the tables the owner has just added (issue #1087). The
+                condition moved from "unsaved" to "unpublished" with issue
+                #1088, which is the same rule said about the state that now
+                exists: a draft is saved and still has no tokens.
               -->
               <ion-button
                 class="ion-margin-top"
                 fill="outline"
-                [disabled]="saving() || unsavedChanges()"
+                [disabled]="saving() || unpublishedChanges()"
                 data-testid="floor-plan-qr-codes"
                 (click)="printQrCodes.emit()"
               >
                 {{ 'floor-plan-qr-codes' | transloco }}
               </ion-button>
 
-              @if (unsavedChanges()) {
+              @if (unpublishedChanges()) {
                 <ion-note
                   class="floor-plan__hint"
                   data-testid="floor-plan-qr-codes-blocked"
@@ -233,7 +226,9 @@
                   [label]="'floor-plan-room-name' | transloco"
                   [value]="name()"
                   data-testid="floor-plan-room-name"
-                  (ionInput)="name.set($event.detail.value ?? '')"
+                  (ionInput)="
+                    name.set($event.detail.value ?? ''); onRoomFieldsChange()
+                  "
                 />
               </ion-item>
               <ion-item>
@@ -243,7 +238,9 @@
                   [label]="'floor-plan-room-floor' | transloco"
                   [value]="floor()"
                   data-testid="floor-plan-room-floor"
-                  (ionInput)="floor.set($event.detail.value ?? '')"
+                  (ionInput)="
+                    floor.set($event.detail.value ?? ''); onRoomFieldsChange()
+                  "
                 />
               </ion-item>
 
@@ -261,7 +258,9 @@
                   [max]="200"
                   [value]="width()"
                   data-testid="floor-plan-room-width"
-                  (ionInput)="width.set($event.detail.value ?? '')"
+                  (ionInput)="
+                    width.set($event.detail.value ?? ''); onRoomFieldsChange()
+                  "
                 />
               </ion-item>
               <ion-item>
@@ -274,7 +273,9 @@
                   [max]="200"
                   [value]="height()"
                   data-testid="floor-plan-room-height"
-                  (ionInput)="height.set($event.detail.value ?? '')"
+                  (ionInput)="
+                    height.set($event.detail.value ?? ''); onRoomFieldsChange()
+                  "
                 />
               </ion-item>
 
@@ -283,29 +284,56 @@
                 data-testid="floor-plan-stored"
               >
                 {{
-                  'floor-plan-stored-size' | transloco: { size: storedSize() }
+                  'floor-plan-published-size'
+                    | transloco: { size: publishedSize() }
                 }}
               </ion-note>
 
-              @if (unsavedChanges()) {
+              @if (unpublishedChanges()) {
                 <ion-note
                   class="floor-plan__hint floor-plan__unsaved"
-                  data-testid="floor-plan-unsaved"
+                  data-testid="floor-plan-unpublished"
                 >
-                  {{ 'floor-plan-unsaved-changes' | transloco }}
+                  {{ 'floor-plan-unpublished-changes' | transloco }}
                 </ion-note>
               }
 
+              <!--
+                What the autosave is doing (issue #1088). Said out loud rather
+                than left to be inferred, because an owner who cannot see that
+                their arranging is stored will keep looking for a save button —
+                and because `blocked` is a state they have to act on: a second
+                device holds the draft and this one has stopped writing.
+              -->
+              <ion-note
+                class="floor-plan__hint floor-plan__autosave"
+                [class.floor-plan__autosave--blocked]="
+                  autosaveStatus() === 'blocked' ||
+                  autosaveStatus() === 'failed'
+                "
+                data-testid="floor-plan-autosave"
+              >
+                {{ 'floor-plan-autosave-' + autosaveStatus() | transloco }}
+              </ion-note>
+
               <div class="floor-plan__actions">
                 <ion-button
-                  [disabled]="!canSave()"
-                  data-testid="floor-plan-save-room"
-                  (click)="onSave()"
+                  [disabled]="!canPublishNow()"
+                  data-testid="floor-plan-publish"
+                  (click)="onPublish()"
                 >
                   @if (saving()) {
                     <ion-spinner name="crescent" slot="start" />
                   }
-                  {{ 'floor-plan-save-room' | transloco }}
+                  {{ 'floor-plan-publish' | transloco }}
+                </ion-button>
+                <ion-button
+                  fill="clear"
+                  [disabled]="!hasDraft() || saving()"
+                  data-testid="floor-plan-discard-draft"
+                  (click)="onDiscardDraft()"
+                >
+                  {{ 'floor-plan-discard-draft' | transloco }}
                 </ion-button>
                 <ion-button
                   fill="clear"
@@ -317,6 +345,63 @@
                   {{ 'floor-plan-delete-room' | transloco }}
                 </ion-button>
               </div>
+
+              <!--
+                The findings, under the action they gate. Errors first, because
+                errors are what close the button above; each one names its
+                table and jumps to it, since a finding an owner has to hunt for
+                is a finding they publish around.
+              -->
+              @if (issues().length > 0) {
+                <ion-list
+                  class="floor-plan__issues"
+                  data-testid="floor-plan-issues"
+                >
+                  <ion-item-divider>
+                    <ion-label>{{ 'floor-plan-issues' | transloco }}</ion-label>
+                  </ion-item-divider>
+                  @for (issue of issues(); track issue.code + issue.tableId) {
+                    <ion-item
+                      button
+                      [attr.data-testid]="'floor-plan-issue-' + issue.severity"
+                      (click)="onShowIssue(issue)"
+                    >
+                      <!--
+                        Two static icons rather than one with a bound name.
+                        `ion-icon` resolves its icon when it is connected and
+                        does not re-resolve when the name arrives afterwards,
+                        which is exactly what an Angular property binding does
+                        - it renders an empty box. A circle for an error and a
+                        triangle for a warning, so the two are told apart by
+                        shape as well as by colour and survive greyscale.
+                      -->
+                      @if (issue.severity === 'error') {
+                        <ion-icon
+                          slot="start"
+                          color="danger"
+                          name="alert-circle-outline"
+                        />
+                      } @else {
+                        <ion-icon
+                          slot="start"
+                          color="warning"
+                          name="warning-outline"
+                        />
+                      }
+                      <ion-label class="ion-text-wrap">
+                        {{
+                          issueKey(issue)
+                            | transloco
+                              : {
+                                  label: issue.label,
+                                  other: issue.otherLabel ?? '',
+                                }
+                        }}
+                      </ion-label>
+                    </ion-item>
+                  }
+                </ion-list>
+              }
             </ion-card-content>
           </ion-card>
 

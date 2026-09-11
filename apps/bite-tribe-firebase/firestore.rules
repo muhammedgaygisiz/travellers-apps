@@ -239,11 +239,18 @@ service cloud.firestore {
      * reads start scoped to the account holding the restaurant. That is what
      * makes the plan a plan and not a public map of a business's interior.
      *
-     * **No staff read yet.** [[Floor Plan]] gives staff the *published* plan,
-     * and there is no published state until issue #1088 splits draft from
-     * published. Admitting staff now would hand them the draft an owner is
-     * halfway through rearranging, which is precisely what that split exists to
-     * prevent. The clause belongs with the state it depends on.
+     * **Staff read the published plan** (GitHub issue #1088). The clause was
+     * parked until there was a published state to give them, because until the
+     * draft moved out of the room document a staff read would have handed them
+     * the arrangement an owner was halfway through. It now cannot: an
+     * unpublished change lives at `rooms/{roomId}/drafts/current`, which has
+     * its own match block below and no staff clause in it, and an unpublished
+     * table has no document under `tables` at all.
+     *
+     * Scoped to the one restaurant the account works at, never to `staff` as a
+     * role. A blanket any-staff-reads-any-plan clause would make the role a
+     * key to every restaurant's interior in BiteTribe, which is the shape of
+     * hole issue #1537 closed for the restaurant document.
      *
      * **An operator reads and does not write.** Support has to be able to see
      * what an owner is describing on the phone, and that is a read. Editing the
@@ -252,7 +259,27 @@ service cloud.firestore {
      * goes through the assigned owner.
      */
     function readsFloorPlan(restaurantId) {
-      return isOperator() || ownsRestaurant(restaurantId);
+      return isOperator() || ownsRestaurant(restaurantId) || worksAt(restaurantId);
+    }
+
+    /**
+     * Whether the caller is staff of this one restaurant (GitHub issue #1537).
+     *
+     * Both halves are required, because either alone is a hole. The claim
+     * without the association is "some restaurant employs this account", which
+     * says nothing about *this* restaurant; the association without the claim
+     * is a document that outlived the grant it was written with, and
+     * `removeRestaurantStaff` is not the only way a role can end.
+     *
+     * The association is read by the caller's own uid, so this is one `get()`
+     * on a document named in advance rather than a query - which is what lets
+     * it sit in a rule at all.
+     */
+    function worksAt(restaurantId) {
+      return signedIn()
+        && 'staff' in roleList()
+        && exists(/databases/$(database)/documents/restaurantStaff/$(uid()))
+        && get(/databases/$(database)/documents/restaurantStaff/$(uid())).data.get('restaurantId', '') == restaurantId;
     }
 
     /**
@@ -301,6 +328,57 @@ service cloud.firestore {
        * mistake, not an account reaching data it does not hold, and that part
        * is refused here.
        */
+      allow delete: if ownsRestaurant(restaurantId);
+    }
+
+    /**
+     * The revision of a room's draft, absent-safe.
+     *
+     * Absent reads as `0`, so the first draft of a room is written at revision
+     * 1 through the same successor check that governs every later write, and a
+     * draft that carries no revision at all fails that check rather than
+     * failing the whole rule evaluation.
+     */
+    function draftRevision(data) {
+      return data.get('revision', 0);
+    }
+
+    /**
+     * A room's unpublished arrangement (GitHub issue #1088).
+     *
+     * ```text
+     * /restaurants/{restaurantId}/rooms/{roomId}/drafts/current
+     * ```
+     *
+     * **The owner and nobody else, not even the operator.** A subcollection is
+     * not covered by its parent's match block, so this starts from nothing and
+     * every reader is admitted by name. Staff are deliberately absent: this
+     * document is the whole reason `readsFloorPlan` can now admit them to the
+     * room, and letting them read it would put the half-finished plan back in
+     * front of exactly the people the split protects. The operator is absent
+     * for a narrower reason - support answers questions about the plan a
+     * restaurant is running, and an owner's unpublished rearrangement is not
+     * that plan.
+     *
+     * **Its own counter, not the room's version.** An autosave writes this
+     * document every few seconds, and a shared counter would make each one
+     * look like a publish. The successor rule is the same otherwise, so two
+     * devices arranging one room cannot silently overwrite each other's work.
+     *
+     * **A delete carries no revision check.** Discarding is what the owner does
+     * to throw the arrangement away, and publishing is what the editor does
+     * once the room document has been written; neither is a state a stale
+     * revision could make wrong, because both end with "there is no draft".
+     */
+    match /restaurants/{restaurantId}/rooms/{roomId}/drafts/{draftId} {
+      allow read: if ownsRestaurant(restaurantId);
+
+      allow create: if ownsRestaurant(restaurantId)
+        && draftRevision(request.resource.data) == 1;
+
+      allow update: if ownsRestaurant(restaurantId)
+        && draftRevision(request.resource.data) == draftRevision(resource.data) + 1;
+
       allow delete: if ownsRestaurant(restaurantId);
     }
 

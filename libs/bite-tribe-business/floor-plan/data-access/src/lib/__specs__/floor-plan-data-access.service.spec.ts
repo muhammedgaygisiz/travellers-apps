@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { RestaurantTable, Room } from 'model';
+import { FloorPlanDraft } from 'model';
 import {
   FIRST_ROOM_VERSION,
   FloorPlanDataAccessService,
@@ -9,10 +11,16 @@ import {
 } from '../floor-plan-data-access.service';
 import {
   FloorPlanConflictError,
+  FloorPlanDraftConflictError,
   RoomNotEmptyError,
 } from '../floor-plan-errors';
 
 jest.mock('@capacitor-firebase/firestore');
+// Auto-mocking the plugin leaves it without `callByName` in this environment,
+// so the one method this service calls is declared here.
+jest.mock('@capacitor-firebase/functions', () => ({
+  FirebaseFunctions: { callByName: jest.fn() },
+}));
 
 type FirestoreCollection = Awaited<
   ReturnType<typeof FirebaseFirestore.getCollection>
@@ -54,6 +62,17 @@ const ROUND_TABLE: RestaurantTable = {
   diameter: 900,
 };
 
+const DRAFT_REFERENCE = `restaurants/${RESTAURANT_ID}/rooms/${ROOM_ID}/drafts/current`;
+
+const DRAFT: FloorPlanDraft = {
+  name: 'Main dining room',
+  size: { width: 8000, height: 6000 },
+  objects: [],
+  tables: [ROUND_TABLE],
+  revision: 2,
+  updatedAt: 1_700_000_000_000,
+};
+
 const asDocument = (id: string, data: unknown): FirestoreDocument =>
   ({ snapshot: { id, data } }) as unknown as FirestoreDocument;
 
@@ -75,8 +94,13 @@ describe(FloorPlanDataAccessService.name, () => {
   });
 
   describe('loadRoomPlan', () => {
-    /** The acceptance criterion: one room read plus one tables query. */
-    it('costs one document read and one query, whatever the plan contains', async () => {
+    /**
+     * The acceptance criterion: the plan costs a fixed number of reads however
+     * many objects are drawn. Two documents since issue #1088 rather than one,
+     * because the draft is a document of its own - which is what keeps it out
+     * of every read of the published room.
+     */
+    it('costs two document reads and one query, whatever the plan contains', async () => {
       jest
         .spyOn(FirebaseFirestore, 'getDocument')
         .mockResolvedValue(asDocument(ROOM_ID, { ...ROOM, id: undefined }));
@@ -88,9 +112,12 @@ describe(FloorPlanDataAccessService.name, () => {
 
       const plan = await service.loadRoomPlan(RESTAURANT_ID, ROOM_ID);
 
-      expect(FirebaseFirestore.getDocument).toHaveBeenCalledTimes(1);
+      expect(FirebaseFirestore.getDocument).toHaveBeenCalledTimes(2);
       expect(FirebaseFirestore.getDocument).toHaveBeenCalledWith({
         reference: `restaurants/${RESTAURANT_ID}/rooms/${ROOM_ID}`,
+      });
+      expect(FirebaseFirestore.getDocument).toHaveBeenCalledWith({
+        reference: DRAFT_REFERENCE,
       });
       expect(FirebaseFirestore.getCollection).toHaveBeenCalledTimes(1);
       expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
@@ -333,6 +360,267 @@ describe(FloorPlanDataAccessService.name, () => {
         .mockRejectedValue(new Error('PERMISSION_DENIED'));
 
       await expect(service.saveRoom(RESTAURANT_ID, ROOM)).rejects.toBe(denied);
+    });
+  });
+
+  /**
+   * The draft: a document of its own under the room (GitHub issue #1088).
+   */
+  describe('the draft', () => {
+    it('reads it from the drafts subcollection of the room', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockResolvedValue(asDocument('current', DRAFT));
+
+      await expect(service.loadDraft(RESTAURANT_ID, ROOM_ID)).resolves.toEqual(
+        DRAFT,
+      );
+      expect(FirebaseFirestore.getDocument).toHaveBeenCalledWith({
+        reference: DRAFT_REFERENCE,
+      });
+    });
+
+    /** A room nobody is halfway through rearranging has no draft, and that is
+     * an ordinary answer rather than a failure. */
+    it('answers with nothing for a room that has no draft', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockResolvedValue(asDocument('current', undefined));
+
+      await expect(
+        service.loadDraft(RESTAURANT_ID, ROOM_ID),
+      ).resolves.toBeUndefined();
+    });
+
+    it('writes the successor of the revision it read, and stamps the time', async () => {
+      jest.spyOn(FirebaseFirestore, 'setDocument').mockResolvedValue();
+      jest.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
+
+      const saved = await service.saveDraft(
+        RESTAURANT_ID,
+        ROOM_ID,
+        {
+          name: 'Main dining room',
+          size: { width: 8000, height: 6000 },
+          objects: [],
+          tables: [ROUND_TABLE],
+        },
+        2,
+      );
+
+      expect(saved.revision).toBe(3);
+      expect(saved.updatedAt).toBe(1_700_000_000_000);
+      expect(FirebaseFirestore.setDocument).toHaveBeenCalledWith({
+        reference: DRAFT_REFERENCE,
+        data: expect.objectContaining({ revision: 3 }),
+      });
+    });
+
+    /** The same reason `saveRoom` writes a room field by field: a transient
+     * editor field riding on a table object would otherwise reach Firestore
+     * through the draft. */
+    it('stores only the fields of a room and its tables', async () => {
+      jest.spyOn(FirebaseFirestore, 'setDocument').mockResolvedValue();
+
+      await service.saveDraft(
+        RESTAURANT_ID,
+        ROOM_ID,
+        {
+          name: 'Main dining room',
+          size: { width: 8000, height: 6000 },
+          objects: [],
+          tables: [
+            { ...ROUND_TABLE, dragging: true } as unknown as RestaurantTable,
+          ],
+        },
+        0,
+      );
+
+      const [[call]] = jest.mocked(FirebaseFirestore.setDocument).mock.calls;
+      const data = call.data as FloorPlanDraft;
+
+      expect(Object.keys(data.tables[0])).not.toContain('dragging');
+      expect(data.tables[0].id).toBe(ROUND_TABLE.id);
+      expect('floor' in data).toBe(false);
+    });
+
+    it('reports a conflict when another device wrote the draft first', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'setDocument')
+        .mockRejectedValue(new Error('permission-denied'));
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockResolvedValue(asDocument('current', { ...DRAFT, revision: 9 }));
+
+      await expect(
+        service.saveDraft(
+          RESTAURANT_ID,
+          ROOM_ID,
+          { name: 'x', size: { width: 1, height: 1 }, objects: [], tables: [] },
+          2,
+        ),
+      ).rejects.toBeInstanceOf(FloorPlanDraftConflictError);
+    });
+
+    it('rethrows the original error when the stored revision still matches', async () => {
+      const denied = new Error('permission-denied');
+
+      jest.spyOn(FirebaseFirestore, 'setDocument').mockRejectedValue(denied);
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockResolvedValue(asDocument('current', DRAFT));
+
+      await expect(
+        service.saveDraft(
+          RESTAURANT_ID,
+          ROOM_ID,
+          { name: 'x', size: { width: 1, height: 1 }, objects: [], tables: [] },
+          DRAFT.revision,
+        ),
+      ).rejects.toBe(denied);
+    });
+
+    it('stores a floor only when the draft names one', async () => {
+      jest.spyOn(FirebaseFirestore, 'setDocument').mockResolvedValue();
+
+      await service.saveDraft(
+        RESTAURANT_ID,
+        ROOM_ID,
+        {
+          name: 'Terrace',
+          floor: 'Upstairs',
+          size: { width: 1, height: 1 },
+          objects: [],
+          tables: [],
+        },
+        0,
+      );
+
+      expect(FirebaseFirestore.setDocument).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ floor: 'Upstairs' }),
+        }),
+      );
+    });
+
+    /** The other device discarded the draft rather than writing one, which is
+     * still a race this one lost. */
+    it('reports a conflict when the stored draft is gone', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'setDocument')
+        .mockRejectedValue(new Error('permission-denied'));
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockResolvedValue(asDocument('current', undefined));
+
+      const rejection = await service
+        .saveDraft(
+          RESTAURANT_ID,
+          ROOM_ID,
+          { name: 'x', size: { width: 1, height: 1 }, objects: [], tables: [] },
+          2,
+        )
+        .catch((error: unknown) => error);
+
+      expect(rejection).toBeInstanceOf(FloorPlanDraftConflictError);
+      expect(
+        (rejection as FloorPlanDraftConflictError).currentDraft,
+      ).toBeUndefined();
+      expect(String(rejection)).toContain('gone');
+    });
+
+    /** The read failed too, so nothing can be said about the revision - and the
+     * write's own error describes that better than a guess would. */
+    it('rethrows the original error when the draft cannot be read back either', async () => {
+      const denied = new Error('permission-denied');
+
+      jest.spyOn(FirebaseFirestore, 'setDocument').mockRejectedValue(denied);
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockRejectedValue(new Error('offline'));
+
+      await expect(
+        service.saveDraft(
+          RESTAURANT_ID,
+          ROOM_ID,
+          { name: 'x', size: { width: 1, height: 1 }, objects: [], tables: [] },
+          2,
+        ),
+      ).rejects.toBe(denied);
+    });
+
+    /** Deleting rather than writing an empty one, so "no draft" has exactly
+     * one representation. */
+    it('discards it by deleting the document', async () => {
+      jest.spyOn(FirebaseFirestore, 'deleteDocument').mockResolvedValue();
+
+      await service.discardDraft(RESTAURANT_ID, ROOM_ID);
+
+      expect(FirebaseFirestore.deleteDocument).toHaveBeenCalledWith({
+        reference: DRAFT_REFERENCE,
+      });
+    });
+  });
+
+  describe('the table documents', () => {
+    it('creates a table and returns it with the id Firestore assigned', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'addDocument')
+        .mockResolvedValue({ reference: { id: 'table-99' } } as FirestoreAdd);
+
+      const { id, ...rest } = ROUND_TABLE;
+      const created = await service.createTable(RESTAURANT_ID, rest);
+
+      expect(created.id).toBe('table-99');
+      expect(FirebaseFirestore.addDocument).toHaveBeenCalledWith({
+        reference: `restaurants/${RESTAURANT_ID}/tables`,
+        data: expect.objectContaining({ shape: 'round', diameter: 900 }),
+      });
+      expect(id).toBe(ROUND_TABLE.id);
+    });
+
+    it('deletes a table by its own reference', async () => {
+      jest.spyOn(FirebaseFirestore, 'deleteDocument').mockResolvedValue();
+
+      await service.deleteTable(RESTAURANT_ID, ROUND_TABLE.id);
+
+      expect(FirebaseFirestore.deleteDocument).toHaveBeenCalledWith({
+        reference: `restaurants/${RESTAURANT_ID}/tables/${ROUND_TABLE.id}`,
+      });
+    });
+  });
+
+  /**
+   * The callable the publish step of issue #1088 and the sheet page of issue
+   * #1087 both make. It is a callable rather than a write from here because
+   * `qrTokenId` is backend-owned (issue #1086).
+   */
+  describe('issueTableQrTokens', () => {
+    it('asks the backend for the codes of one restaurant', async () => {
+      const result = {
+        restaurantId: RESTAURANT_ID,
+        tokens: [
+          {
+            tableId: ROUND_TABLE.id,
+            label: '12',
+            token: 'ABC',
+            status: 'existing' as const,
+          },
+        ],
+        skippedTableIds: [],
+      };
+
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: result,
+      } as never);
+
+      await expect(service.issueTableQrTokens(RESTAURANT_ID)).resolves.toEqual(
+        result,
+      );
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'issueTableQrTokens',
+        data: { restaurantId: RESTAURANT_ID },
+      });
     });
   });
 

@@ -166,9 +166,11 @@ describe('business ROUTES', () => {
    * hire (issue #1537).
    *
    * The floor-plan route is here for the same reason. [[Floor Plan]] gives
-   * staff a read of the *published* plan and no write, and there is no
-   * published state until issue #1088 — so until then the editor is the
-   * owner's alone (issue #1082).
+   * staff a read of the *published* plan and no write, and this route is the
+   * editor: it writes drafts and it publishes them, which is the owner's
+   * alone. Issue #1088 opened the staff *read* in `firestore.rules` and left
+   * this gate exactly where it was, because reading the published plan is the
+   * staff live view of issue #1093 rather than this page (issue #1082).
    *
    * Its QR-code sheet carries the same gate, and needs it more plainly than
    * the editor does: the page prints the live token of every table in the

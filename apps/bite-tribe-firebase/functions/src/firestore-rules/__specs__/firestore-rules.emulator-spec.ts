@@ -113,6 +113,26 @@ const roomAtVersion = (version: number): RoomFixture => ({
   version,
 });
 
+const STORED_DRAFT_REVISION = 2;
+
+interface DraftFixture {
+  name: string;
+  size: { width: number; height: number };
+  objects: unknown[];
+  tables: unknown[];
+  revision: number;
+  updatedAt: number;
+}
+
+const draftAtRevision = (revision: number): DraftFixture => ({
+  name: 'Main dining room',
+  size: { width: 8000, height: 6000 },
+  objects: [],
+  tables: [],
+  revision,
+  updatedAt: 1789030800000,
+});
+
 const TABLE_FIXTURE = {
   label: '12',
   roomId: OWNED_ROOM,
@@ -273,6 +293,21 @@ beforeEach(async () => {
     await setDoc(
       doc(db, 'restaurants', FOREIGN_RESTAURANT, 'rooms', FOREIGN_ROOM),
       roomAtVersion(1),
+    );
+
+    // The owner's unpublished arrangement, in its own subcollection so that a
+    // staff read of the published room cannot reach it (issue #1088).
+    await setDoc(
+      doc(
+        db,
+        'restaurants',
+        OWNED_RESTAURANT,
+        'rooms',
+        OWNED_ROOM,
+        'drafts',
+        'current',
+      ),
+      draftAtRevision(STORED_DRAFT_REVISION),
     );
 
     // Written only by `issueTableQrTokens`, `rotateTableQrToken` and
@@ -582,6 +617,13 @@ describe('floor plans', () => {
   const tablesOf = (db: Firestore, restaurantId: string): CollectionReference =>
     collection(db, 'restaurants', restaurantId, 'tables');
 
+  const draftDoc = (
+    db: Firestore,
+    restaurantId: string,
+    roomId: string,
+  ): DocumentReference =>
+    doc(db, 'restaurants', restaurantId, 'rooms', roomId, 'drafts', 'current');
+
   describe('reads', () => {
     it('lets the owner load a room and query its tables', async () => {
       await assertSucceeds(
@@ -623,13 +665,124 @@ describe('floor plans', () => {
     });
 
     /**
-     * Staff read the *published* plan, and there is no published state until
-     * issue #1088 splits draft from published. Admitting staff now would hand
-     * them the draft an owner is halfway through rearranging.
+     * Staff read the published plan, which is the clause issue #1081 parked
+     * until there was a published state to give them (issue #1088). The room
+     * document and the table documents are that state; the draft is not in
+     * either, which is what makes this safe to open.
      */
-    it('refuses a staff account reading the plan before there is a published one', async () => {
-      await assertFails(
+    it('lets a staff account read the published plan of the restaurant it works at', async () => {
+      await assertSucceeds(
         getDoc(roomDoc(asStaff(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+      await assertSucceeds(getDocs(tablesOf(asStaff(), OWNED_RESTAURANT)));
+    });
+
+    /**
+     * The point of the whole split. A staff account reads the room and is
+     * refused the arrangement the owner is halfway through, because the draft
+     * is a document of its own with no staff clause on it.
+     */
+    it('refuses a staff account the draft of that same room', async () => {
+      await assertFails(
+        getDoc(draftDoc(asStaff(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+    });
+
+    /**
+     * Scoped to the restaurant the account works at, never to `staff` as a
+     * role - a blanket clause would make the role a key to every restaurant's
+     * interior in BiteTribe.
+     */
+    it('refuses a staff account the plan of a restaurant it does not work at', async () => {
+      await assertFails(
+        getDoc(roomDoc(asStaff(), FOREIGN_RESTAURANT, FOREIGN_ROOM)),
+      );
+    });
+
+    it('lets the owner read its own draft', async () => {
+      await assertSucceeds(
+        getDoc(draftDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+    });
+
+    /**
+     * Support answers questions about the plan a restaurant is running, and an
+     * owner's unpublished rearrangement is not that plan.
+     */
+    it('refuses an operator the draft, while leaving it the published room', async () => {
+      await assertSucceeds(
+        getDoc(roomDoc(asOperator(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+      await assertFails(
+        getDoc(draftDoc(asOperator(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+    });
+  });
+
+  /**
+   * The draft's own counter (GitHub issue #1088).
+   *
+   * The same successor rule as the room's `version`, on a separate field,
+   * because an autosave writes this document every few seconds and a shared
+   * counter would make each one read as a publish.
+   */
+  describe('the draft', () => {
+    it('accepts a draft write carrying the successor of the stored revision', async () => {
+      await assertSucceeds(
+        setDoc(
+          draftDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM),
+          draftAtRevision(STORED_DRAFT_REVISION + 1),
+        ),
+      );
+    });
+
+    it('refuses a draft write from a device that read an older revision', async () => {
+      await assertFails(
+        setDoc(
+          draftDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM),
+          draftAtRevision(STORED_DRAFT_REVISION),
+        ),
+      );
+      await assertFails(
+        setDoc(
+          draftDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM),
+          draftAtRevision(STORED_DRAFT_REVISION + 2),
+        ),
+      );
+    });
+
+    it('creates the first draft of a room at revision 1 and at no other', async () => {
+      await assertSucceeds(
+        setDoc(
+          draftDoc(asOwner(), OWNED_RESTAURANT, 'terrace'),
+          draftAtRevision(1),
+        ),
+      );
+      await assertFails(
+        setDoc(
+          draftDoc(asOwner(), OWNED_RESTAURANT, 'gallery'),
+          draftAtRevision(4),
+        ),
+      );
+    });
+
+    /** Discarding and publishing both end with "there is no draft", and
+     * neither is a state a stale revision could make wrong. */
+    it('lets the owner delete the draft whatever revision it is at', async () => {
+      await assertSucceeds(
+        deleteDoc(draftDoc(asOwner(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+    });
+
+    it('refuses a business account the draft of a plan it does not hold', async () => {
+      await assertFails(
+        getDoc(draftDoc(asOtherBusiness(), OWNED_RESTAURANT, OWNED_ROOM)),
+      );
+      await assertFails(
+        setDoc(
+          draftDoc(asOtherBusiness(), OWNED_RESTAURANT, OWNED_ROOM),
+          draftAtRevision(STORED_DRAFT_REVISION + 1),
+        ),
       );
     });
   });

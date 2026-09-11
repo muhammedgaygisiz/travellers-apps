@@ -1,12 +1,33 @@
 import { Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
-import { RestaurantTable, Room } from 'model';
-import { FloorPlanConflictError, RoomNotEmptyError } from './floor-plan-errors';
+import { FloorPlanDraft, RestaurantTable, Room } from 'model';
+import {
+  FloorPlanConflictError,
+  FloorPlanDraftConflictError,
+  RoomNotEmptyError,
+} from './floor-plan-errors';
 
 export const RESTAURANT_COLLECTION = 'restaurants';
 export const ROOMS_COLLECTION = 'rooms';
 export const TABLES_COLLECTION = 'tables';
+
+/**
+ * Where a room's unpublished arrangement lives (GitHub issue #1088).
+ *
+ * ```text
+ * /restaurants/{restaurantId}/rooms/{roomId}/drafts/current
+ * ```
+ *
+ * A subcollection of the room rather than a field on it, so the rules can
+ * admit staff to the published room document without handing them the draft.
+ * One document with a fixed name rather than a collection of them, because a
+ * room has one arrangement in progress: a second draft would be a second
+ * answer to "what does this room look like", and nothing in the product asks
+ * that question.
+ */
+export const DRAFTS_COLLECTION = 'drafts';
+export const DRAFT_DOCUMENT = 'current';
 
 /** The field a table names its room with. */
 export const TABLE_ROOM_FIELD = 'roomId';
@@ -31,6 +52,15 @@ export const TABLE_LABEL_FIELD = 'label';
 export const FIRST_ROOM_VERSION = 1;
 
 /**
+ * The revision a draft is created at.
+ *
+ * One rather than zero for the same reason as {@link FIRST_ROOM_VERSION}, and
+ * because the rules read an absent revision as zero: a draft written without
+ * one therefore fails the successor check rather than passing it by default.
+ */
+export const FIRST_DRAFT_REVISION = 1;
+
+/**
  * `Omit` that survives a discriminated union.
  *
  * `Omit<RestaurantTable, 'id'>` would not: `keyof` a union is the keys the
@@ -50,6 +80,8 @@ export type NewTable = WithoutId<RestaurantTable>;
 export interface RoomPlan {
   room: Room;
   tables: RestaurantTable[];
+  /** The unpublished arrangement, when the owner left one (issue #1088). */
+  draft?: FloorPlanDraft;
 }
 
 /**
@@ -129,14 +161,40 @@ const toTableDocument = (table: NewTable): NewTable =>
       };
 
 /**
+ * A draft as it is stored (GitHub issue #1088).
+ *
+ * Field by field for the reason {@link toRoomDocument} gives, and with the
+ * tables put through {@link toTableDocument} as well: a draft holds whole
+ * tables, so an editor field riding on a table object would reach Firestore
+ * through the draft even though the table document itself is protected.
+ */
+const toDraftDocument = (
+  draft: Omit<FloorPlanDraft, 'revision' | 'updatedAt'>,
+): Omit<FloorPlanDraft, 'revision' | 'updatedAt'> => ({
+  name: draft.name,
+  size: draft.size,
+  objects: draft.objects,
+  tables: draft.tables.map(
+    (table) => ({ ...toTableDocument(table), id: table.id }) as RestaurantTable,
+  ),
+  ...(draft.floor === undefined ? {} : { floor: draft.floor }),
+});
+
+/**
  * Loading and saving one restaurant's floor plan (GitHub issue #1081).
  *
  * ## What it stores where
  *
  * ```text
- * /restaurants/{restaurantId}/rooms/{roomId}    dimensions and geometry
- * /restaurants/{restaurantId}/tables/{tableId}  one document per table
+ * /restaurants/{restaurantId}/rooms/{roomId}                 published room
+ * /restaurants/{restaurantId}/rooms/{roomId}/drafts/current  work in progress
+ * /restaurants/{restaurantId}/tables/{tableId}               one per table
  * ```
+ *
+ * The room document and the table documents are the *published* plan, which is
+ * what staff and a scanned QR code read. The draft is what the owner is
+ * arranging right now, and it is a document of its own so that a reader of the
+ * published plan cannot see it (issue #1088).
  *
  * Geometry lives inline in its room because a plan is edited and saved as a
  * whole room, so `loadRoomPlan` costs one document read plus one query however
@@ -162,6 +220,11 @@ const toTableDocument = (table: NewTable): NewTable =>
  * document, and the edit that a second device can silently lose is the room
  * geometry both devices hold a whole copy of.
  *
+ * The draft counts separately, in `revision`. It is written every few seconds
+ * by an autosave, so sharing the room's `version` would make every autosave
+ * read as a publish to anything watching it — including the editor, which
+ * reseeds from a room whose version moved.
+ *
  * ## Why no `resource()`
  *
  * The other data-access services in this workspace expose Angular resources
@@ -185,6 +248,10 @@ export class FloorPlanDataAccessService {
 
   private tableReference(restaurantId: string, tableId: string): string {
     return `${this.tablesReference(restaurantId)}/${tableId}`;
+  }
+
+  private draftReference(restaurantId: string, roomId: string): string {
+    return `${this.roomReference(restaurantId, roomId)}/${DRAFTS_COLLECTION}/${DRAFT_DOCUMENT}`;
   }
 
   /**
@@ -300,12 +367,119 @@ export class FloorPlanDataAccessService {
     restaurantId: string,
     roomId: string,
   ): Promise<RoomPlan | undefined> {
-    const [room, tables] = await Promise.all([
+    const [room, tables, draft] = await Promise.all([
       this.loadRoom(restaurantId, roomId),
       this.loadTables(restaurantId, roomId),
+      this.loadDraft(restaurantId, roomId),
     ]);
 
-    return room ? { room, tables } : undefined;
+    return room ? { room, tables, draft } : undefined;
+  }
+
+  /**
+   * The room's unpublished arrangement, or `undefined` when there is none
+   * (GitHub issue #1088).
+   *
+   * `undefined` is the ordinary answer, not a failure: a room nobody is
+   * halfway through rearranging has no draft, and the editor then starts from
+   * the published plan.
+   */
+  async loadDraft(
+    restaurantId: string,
+    roomId: string,
+  ): Promise<FloorPlanDraft | undefined> {
+    const { snapshot } = await FirebaseFirestore.getDocument({
+      reference: this.draftReference(restaurantId, roomId),
+    });
+
+    return snapshot?.data ? (snapshot.data as FloorPlanDraft) : undefined;
+  }
+
+  /**
+   * Writes the draft, carrying the successor of the revision it was read at.
+   *
+   * `draft` is the arrangement as the editor holds it; the revision and the
+   * timestamp are set here, so nothing upstream has to remember to move a
+   * counter it does not own. Returns the draft as it now stands, so the caller
+   * can keep editing and autosave again without re-reading.
+   *
+   * Throws {@link FloorPlanDraftConflictError} when a second device wrote the
+   * draft first. Writing nothing is the right answer there: the editor keeps
+   * what is on screen and tells the owner autosave has stopped, because the
+   * arrangement in front of them is the only copy of itself.
+   */
+  async saveDraft(
+    restaurantId: string,
+    roomId: string,
+    draft: Omit<FloorPlanDraft, 'revision' | 'updatedAt'>,
+    baseRevision: number,
+  ): Promise<FloorPlanDraft> {
+    const next: FloorPlanDraft = {
+      ...toDraftDocument(draft),
+      revision: baseRevision + 1,
+      updatedAt: Date.now(),
+    };
+
+    try {
+      await FirebaseFirestore.setDocument({
+        reference: this.draftReference(restaurantId, roomId),
+        data: next,
+      });
+    } catch (error) {
+      throw await this.explainRejectedDraft(
+        restaurantId,
+        roomId,
+        baseRevision,
+        error,
+      );
+    }
+
+    return next;
+  }
+
+  /**
+   * Why a draft write was rejected: a conflict, or something else.
+   *
+   * The same reasoning as {@link explainRejectedSave}. The rules refuse a
+   * stale write and an unauthorised one identically, so the reason is worked
+   * out from what is stored rather than parsed out of an error message whose
+   * shape differs between the web and the native plugin.
+   */
+  private async explainRejectedDraft(
+    restaurantId: string,
+    roomId: string,
+    baseRevision: number,
+    error: unknown,
+  ): Promise<unknown> {
+    let stored: FloorPlanDraft | undefined;
+
+    try {
+      stored = await this.loadDraft(restaurantId, roomId);
+    } catch {
+      return error;
+    }
+
+    // An absent draft at revision 0 is the first write, not a conflict: the
+    // owner started arranging a room nobody had a draft for.
+    const storedRevision = stored?.revision ?? 0;
+
+    return storedRevision === baseRevision
+      ? error
+      : new FloorPlanDraftConflictError(roomId, baseRevision, stored);
+  }
+
+  /**
+   * Throws the draft away, leaving the published room as the only plan.
+   *
+   * Deleting the document rather than writing an empty one, so "no draft" has
+   * one representation: the editor asks whether a draft exists and an empty
+   * draft would answer yes. It is also what a publish does once the room has
+   * been written, because the draft it was made from is now the room.
+   */
+  async discardDraft(restaurantId: string, roomId: string): Promise<void> {
+    await FirebaseFirestore.deleteDocument({
+      reference: this.draftReference(restaurantId, roomId),
+    });
   }
 
   /** Creates a room at {@link FIRST_ROOM_VERSION} and returns it with its id. */

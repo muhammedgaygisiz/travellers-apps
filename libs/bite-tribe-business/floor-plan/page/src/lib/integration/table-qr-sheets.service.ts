@@ -87,7 +87,7 @@ const sheetOrder =
  * back unchanged and nothing is written. So the page asks as part of loading
  * rather than behind a button, and an owner who has just built a plan reaches
  * a sheet that is ready to print instead of one that first explains it needs
- * codes. The same call is what issue \#1088's publish step will make, and
+ * codes. The same call is what issue \#1088's publish step makes, and
  * neither invalidates what the other printed.
  *
  * ## Why the tokens come off the call and not off the tables

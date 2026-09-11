@@ -4,6 +4,7 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import {
   FloorPlanConflictError,
   FloorPlanDataAccessService,
+  FloorPlanDraftConflictError,
   NewRoom,
   RoomNotEmptyError,
 } from 'bite-tribe-business/floor-plan-data-access';
@@ -12,10 +13,14 @@ import {
   MAX_ITEM_SIDE,
   MIN_ITEM_SIDE,
 } from 'bite-tribe-business/floor-plan-ui';
-import { FloorPlanObject, RestaurantTable, Room } from 'model';
+import { FloorPlanDraft, FloorPlanObject, RestaurantTable, Room } from 'model';
 import { of } from 'rxjs';
 import { ToastRequest, ToastService } from 'toast';
-import { FloorPlanService } from '../floor-plan.service';
+import {
+  DRAFT_AUTOSAVE_DELAY_MS,
+  FloorPlanService,
+} from '../floor-plan.service';
+import { RoomDraft } from '../room-draft';
 
 // Only the restaurant name is read this way; the rooms go through the
 // data-access mock below.
@@ -69,6 +74,11 @@ describe(FloorPlanService.name, () => {
   let saveTable: jest.Mock;
   let deleteTable: jest.Mock;
   let storedTables: RestaurantTable[];
+  let loadDraft: jest.Mock;
+  let saveDraft: jest.Mock;
+  let discardDraft: jest.Mock;
+  let issueTableQrTokens: jest.Mock;
+  let storedDraft: FloorPlanDraft | undefined;
 
   /**
    * Lets the resources settle before the assertion.
@@ -96,6 +106,18 @@ describe(FloorPlanService.name, () => {
   const messageKeys = (): (string | undefined)[] =>
     toasts.map((toast) => toast.messageKey);
 
+  /**
+   * Publishes the open room with the form values an owner would have typed.
+   *
+   * The room's own fields reach the editor as the owner changes them since
+   * issue #1088, because the draft carries them too, so a publish is two steps
+   * where it used to be one call carrying the form.
+   */
+  const publishWith = async (fields: RoomDraft): Promise<void> => {
+    service.setRoomFields(fields);
+    await service.publish();
+  };
+
   beforeEach(async () => {
     toasts = [];
     stored = [room()];
@@ -116,11 +138,64 @@ describe(FloorPlanService.name, () => {
     deleteRoom = jest.fn(() => Promise.resolve());
     storedTables = [];
     loadTables = jest.fn(() => Promise.resolve(storedTables));
-    saveTable = jest.fn((_restaurantId: string, next: RestaurantTable) =>
-      Promise.resolve(next),
-    );
-    deleteTable = jest.fn(() => Promise.resolve());
+    // The table mocks write into `storedTables`, because publishing re-reads
+    // them: `qrTokenId` is backend-owned, so the editor has to pick up what the
+    // backend wrote (issue #1086). A mock that ignored the write would answer
+    // that reload with the plan as it was before the publish.
+    saveTable = jest.fn((_restaurantId: string, next: RestaurantTable) => {
+      const index = storedTables.findIndex((entry) => entry.id === next.id);
 
+      storedTables =
+        index === -1
+          ? [...storedTables, next]
+          : storedTables.map((entry) => (entry.id === next.id ? next : entry));
+
+      return Promise.resolve(next);
+    });
+    deleteTable = jest.fn((_restaurantId: string, tableId: string) => {
+      storedTables = storedTables.filter((entry) => entry.id !== tableId);
+
+      return Promise.resolve();
+    });
+    storedDraft = undefined;
+    loadDraft = jest.fn(() => Promise.resolve(storedDraft));
+    saveDraft = jest.fn(
+      (
+        _restaurantId: string,
+        _roomId: string,
+        next: Omit<FloorPlanDraft, 'revision' | 'updatedAt'>,
+        baseRevision: number,
+      ) =>
+        Promise.resolve({
+          ...next,
+          revision: baseRevision + 1,
+          updatedAt: 1_700_000_000_000,
+        } as FloorPlanDraft),
+    );
+    discardDraft = jest.fn(() => Promise.resolve());
+    issueTableQrTokens = jest.fn(() =>
+      Promise.resolve({
+        restaurantId: 'china-wok',
+        tokens: [],
+        skippedTableIds: [],
+      }),
+    );
+
+    configure();
+
+    service = TestBed.inject(FloorPlanService);
+    await loaded();
+  });
+
+  /**
+   * The providers, in a function so a test can start the editor again.
+   *
+   * The draft of a room is read once, when the room is opened, and nothing in
+   * the product re-reads it for the same room - so a test that needs the
+   * editor to *open* on a stored draft has to open it again rather than push
+   * one in behind it.
+   */
+  function configure(): void {
     TestBed.configureTestingModule({
       providers: [
         FloorPlanService,
@@ -134,6 +209,10 @@ describe(FloorPlanService.name, () => {
             loadTables,
             saveTable,
             deleteTable,
+            loadDraft,
+            saveDraft,
+            discardDraft,
+            issueTableQrTokens,
           },
         },
         {
@@ -156,10 +235,7 @@ describe(FloorPlanService.name, () => {
         },
       ],
     });
-
-    service = TestBed.inject(FloorPlanService);
-    await loaded();
-  });
+  }
 
   it('reads the rooms of the restaurant in the route', () => {
     expect(loadRooms).toHaveBeenCalledWith('china-wok');
@@ -232,13 +308,13 @@ describe(FloorPlanService.name, () => {
 
       expect(service.selectedRoom()?.id).toBe('room-1');
 
-      service.selectRoom('room-2');
+      await service.selectRoom('room-2');
 
       expect(service.selectedRoom()?.name).toBe('Terrace');
     });
 
     it('falls back to the first room when the pick no longer exists', async () => {
-      service.selectRoom('room-deleted-elsewhere');
+      await service.selectRoom('room-deleted-elsewhere');
 
       expect(service.selectedRoom()?.id).toBe('room-1');
     });
@@ -278,9 +354,9 @@ describe(FloorPlanService.name, () => {
     });
   });
 
-  describe('saving a room', () => {
+  describe('publishing a room', () => {
     it('carries the version it was read at, and keeps the geometry', async () => {
-      await service.saveRoom({ name: 'Terrace', width: 6000, height: 9000 });
+      await publishWith({ name: 'Terrace', width: 6000, height: 9000 });
 
       expect(saveRoom).toHaveBeenCalledWith('china-wok', {
         ...room(),
@@ -288,7 +364,7 @@ describe(FloorPlanService.name, () => {
         size: { width: 6000, height: 9000 },
       });
       expect(service.selectedRoom()?.version).toBe(5);
-      expect(messageKeys()).toEqual(['floor-plan-room-saved']);
+      expect(messageKeys()).toEqual(['floor-plan-published']);
     });
 
     /**
@@ -303,7 +379,7 @@ describe(FloorPlanService.name, () => {
         new FloorPlanConflictError('room-1', 4, theirs),
       );
 
-      await service.saveRoom({ name: 'Mine', width: 6000, height: 9000 });
+      await publishWith({ name: 'Mine', width: 6000, height: 9000 });
 
       expect(service.selectedRoom()).toEqual(theirs);
       expect(messageKeys()).toEqual(['floor-plan-room-conflict']);
@@ -316,7 +392,7 @@ describe(FloorPlanService.name, () => {
         new FloorPlanConflictError('room-1', 4, undefined),
       );
 
-      await service.saveRoom({ name: 'Mine', width: 6000, height: 9000 });
+      await publishWith({ name: 'Mine', width: 6000, height: 9000 });
       await loaded();
 
       expect(service.roomsValue()).toEqual([]);
@@ -327,7 +403,7 @@ describe(FloorPlanService.name, () => {
       jest.spyOn(console, 'error').mockImplementation(() => undefined);
       saveRoom.mockRejectedValueOnce(new Error('permission-denied'));
 
-      await service.saveRoom({ name: 'Mine', width: 6000, height: 9000 });
+      await publishWith({ name: 'Mine', width: 6000, height: 9000 });
 
       expect(messageKeys()).toEqual(['floor-plan-room-save-failed']);
     });
@@ -337,15 +413,15 @@ describe(FloorPlanService.name, () => {
       service.rooms.reload();
       await loaded();
 
-      await service.saveRoom({ name: 'Mine', width: 6000, height: 9000 });
+      await publishWith({ name: 'Mine', width: 6000, height: 9000 });
 
       expect(saveRoom).not.toHaveBeenCalled();
     });
   });
 
   describe('snapping', () => {
-    it('moves a saved dimension to the nearest grid line while it is on', async () => {
-      await service.saveRoom({ name: 'Terrace', width: 6140, height: 9260 });
+    it('moves a published dimension to the nearest grid line while it is on', async () => {
+      await publishWith({ name: 'Terrace', width: 6140, height: 9260 });
 
       expect(saveRoom.mock.calls[0][1].size).toEqual({
         width: 6000,
@@ -356,7 +432,7 @@ describe(FloorPlanService.name, () => {
     it('stores the exact dimension once it is off', async () => {
       service.setSnapEnabled(false);
 
-      await service.saveRoom({ name: 'Terrace', width: 6140, height: 9260 });
+      await publishWith({ name: 'Terrace', width: 6140, height: 9260 });
 
       expect(saveRoom.mock.calls[0][1].size).toEqual({
         width: 6140,
@@ -367,7 +443,7 @@ describe(FloorPlanService.name, () => {
     it('follows the spacing the owner chose', async () => {
       service.setGridSpacing(1000);
 
-      await service.saveRoom({ name: 'Terrace', width: 6400, height: 9600 });
+      await publishWith({ name: 'Terrace', width: 6400, height: 9600 });
 
       expect(saveRoom.mock.calls[0][1].size).toEqual({
         width: 6000,
@@ -387,6 +463,391 @@ describe(FloorPlanService.name, () => {
 
       expect(saveRoom).not.toHaveBeenCalled();
       expect(service.selectedRoom()).toEqual(room());
+    });
+  });
+
+  /**
+   * The draft: what the editor opens on, what it stores as the owner works,
+   * and what publishing does with it (GitHub issue #1088).
+   */
+  describe('the draft', () => {
+    const storedDraftOf = (
+      over: Partial<FloorPlanDraft> = {},
+    ): FloorPlanDraft => ({
+      name: 'Main dining room',
+      size: { width: 8000, height: 12_000 },
+      objects: [wall],
+      tables: [table({ label: '12' })],
+      revision: 3,
+      updatedAt: 1_700_000_000_000,
+      ...over,
+    });
+
+    /** Opens the editor again with a draft already stored for the open room. */
+    const withDraft = async (
+      over: Partial<FloorPlanDraft> = {},
+    ): Promise<void> => {
+      storedDraft = storedDraftOf(over);
+
+      TestBed.resetTestingModule();
+      configure();
+
+      service = TestBed.inject(FloorPlanService);
+      await loaded();
+      await loaded();
+    };
+
+    /** Runs the debounce out and lets the write settle. */
+    const autosave = async (): Promise<void> => {
+      jest.advanceTimersByTime(DRAFT_AUTOSAVE_DELAY_MS);
+      await loaded();
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers({ doNotFake: ['nextTick', 'queueMicrotask'] });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    /**
+     * The acceptance criterion behind "closing the browser mid-edit and
+     * returning restores the draft". The editor opens on what the owner left,
+     * not on the plan everybody else is reading.
+     */
+    it('opens on the draft rather than on the published plan', async () => {
+      await withDraft();
+
+      expect(loadDraft).toHaveBeenCalledWith('china-wok', 'room-1');
+      expect(service.layout().objects).toEqual([wall]);
+      expect(service.layout().tables[0].label).toBe('12');
+      expect(service.hasDraft()).toBe(true);
+      expect(service.unpublishedChanges()).toBe(true);
+    });
+
+    it('opens on the published plan when the owner left no draft', async () => {
+      expect(service.hasDraft()).toBe(false);
+      expect(service.unpublishedChanges()).toBe(false);
+    });
+
+    it('takes the room name and dimensions off the draft too', async () => {
+      await withDraft({ name: 'Terrace', size: { width: 6000, height: 6000 } });
+
+      expect(service.editedRoom()?.name).toBe('Terrace');
+      expect(service.editedRoom()?.size).toEqual({
+        width: 6000,
+        height: 6000,
+      });
+    });
+
+    /**
+     * A room is opened once, on the plan the owner left. Seeding from the
+     * published plan first and correcting it when the draft arrived would
+     * flash a plan they did not leave, and would throw away anything they did
+     * in between.
+     */
+    it('waits for the draft answer before it opens the room', async () => {
+      let release: (draft: FloorPlanDraft | undefined) => void = () =>
+        undefined;
+      loadDraft.mockReturnValueOnce(
+        new Promise<FloorPlanDraft | undefined>((resolve) => {
+          release = resolve;
+        }),
+      );
+      stored = [room({ id: 'room-2', name: 'Terrace', order: 1 }), room()];
+      service.rooms.reload();
+      await loaded();
+
+      expect(service.readyRoom()).toBeUndefined();
+      expect(service.loading()).toBe(true);
+
+      release(undefined);
+      await loaded();
+
+      expect(service.readyRoom()?.id).toBe('room-2');
+    });
+
+    describe('autosaving', () => {
+      it('stores the arrangement a moment after the owner stops', async () => {
+        service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+
+        expect(saveDraft).not.toHaveBeenCalled();
+
+        await autosave();
+
+        expect(saveDraft).toHaveBeenCalledTimes(1);
+        expect(saveDraft.mock.calls[0][1]).toBe('room-1');
+        expect(saveDraft.mock.calls[0][2].objects).toHaveLength(1);
+        expect(saveDraft.mock.calls[0][3]).toBe(0);
+        expect(service.autosaveStatus()).toBe('saved');
+      });
+
+      /** A drag across a room is one write rather than one per edit. */
+      it('writes once for a burst of edits', async () => {
+        service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+        service.place({ variant: 'chair', position: { x: 2000, y: 1000 } });
+        service.place({ variant: 'chair', position: { x: 3000, y: 1000 } });
+
+        await autosave();
+
+        expect(saveDraft).toHaveBeenCalledTimes(1);
+        expect(saveDraft.mock.calls[0][2].objects).toHaveLength(3);
+      });
+
+      it('carries the successor of the revision it read', async () => {
+        await withDraft();
+        service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+        await autosave();
+
+        expect(saveDraft.mock.calls[0][3]).toBe(3);
+      });
+
+      it('stores the room fields the owner typed', async () => {
+        service.setRoomFields({ name: 'Terrace', width: 6000, height: 9000 });
+        await autosave();
+
+        expect(saveDraft.mock.calls[0][2]).toMatchObject({
+          name: 'Terrace',
+          size: { width: 6000, height: 9000 },
+        });
+      });
+
+      it('writes nothing while the plan matches what is stored', async () => {
+        await autosave();
+
+        expect(saveDraft).not.toHaveBeenCalled();
+      });
+
+      /**
+       * The reason the room switch no longer asks anything: whatever is still
+       * inside the debounce window is stored before the editor reseeds.
+       */
+      it('stores the draft before another room is opened', async () => {
+        stored = [room(), room({ id: 'room-2', name: 'Terrace', order: 1 })];
+        service.rooms.reload();
+        await loaded();
+
+        service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+        await service.selectRoom('room-2');
+        await loaded();
+
+        expect(saveDraft).toHaveBeenCalledTimes(1);
+        expect(service.selectedRoom()?.id).toBe('room-2');
+      });
+
+      /**
+       * A second device has the draft. Nothing is reseeded, because the
+       * arrangement on screen is the only copy of itself - which is exactly
+       * what autosave exists to protect.
+       */
+      it('stops and says so when another device wrote the draft first', async () => {
+        saveDraft.mockRejectedValueOnce(
+          new FloorPlanDraftConflictError('room-1', 0, storedDraftOf()),
+        );
+        service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+        await autosave();
+
+        expect(service.autosaveStatus()).toBe('blocked');
+        expect(messageKeys()).toEqual(['floor-plan-draft-conflict']);
+        expect(service.layout().objects).toHaveLength(1);
+
+        service.place({ variant: 'chair', position: { x: 4000, y: 1000 } });
+        await autosave();
+
+        expect(saveDraft).toHaveBeenCalledTimes(1);
+      });
+
+      it('reports any other failure without stopping', async () => {
+        jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        saveDraft.mockRejectedValueOnce(new Error('offline'));
+        service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
+        await autosave();
+
+        expect(service.autosaveStatus()).toBe('failed');
+
+        service.place({ variant: 'chair', position: { x: 4000, y: 1000 } });
+        await autosave();
+
+        expect(saveDraft).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('publishing', () => {
+      it('writes the room, the tables and then throws the draft away', async () => {
+        await withDraft();
+        await service.publish();
+        await loaded();
+
+        expect(saveRoom).toHaveBeenCalledTimes(1);
+        expect(discardDraft).toHaveBeenCalledWith('china-wok', 'room-1');
+        expect(service.hasDraft()).toBe(false);
+        expect(service.unpublishedChanges()).toBe(false);
+        expect(messageKeys()).toEqual(['floor-plan-published']);
+      });
+
+      /**
+       * [[Table]] gives every enabled table a code, and until this issue the
+       * only thing that asked was the printable sheet. Issuing is idempotent,
+       * so both can ask without either invalidating what the other printed.
+       */
+      it('asks for the QR codes of what it just published', async () => {
+        await withDraft();
+        await service.publish();
+        await loaded();
+
+        expect(issueTableQrTokens).toHaveBeenCalledWith('china-wok');
+        // `qrTokenId` is backend-owned, so the editor re-reads what was written.
+        expect(loadTables.mock.calls.length).toBeGreaterThan(1);
+      });
+
+      it('keeps the published plan when the codes cannot be issued', async () => {
+        jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        issueTableQrTokens.mockRejectedValueOnce(new Error('unavailable'));
+        await withDraft();
+
+        await service.publish();
+
+        expect(messageKeys()).toEqual(['floor-plan-published']);
+      });
+
+      /** The acceptance criterion: publishing with a blocking error is
+       * impossible rather than discouraged. */
+      it('refuses a plan with a blocking error', async () => {
+        await withDraft({
+          tables: [table({ seats: 0 })],
+        });
+
+        expect(service.validation().publishable).toBe(false);
+        expect(service.canPublish()).toBe(false);
+
+        await service.publish();
+
+        expect(saveRoom).not.toHaveBeenCalled();
+        expect(messageKeys()).toEqual(['floor-plan-publish-blocked']);
+      });
+
+      /** Overlapping tables warn and do not block, because real rooms have
+       * odd arrangements. */
+      it('publishes a plan whose only findings are warnings', async () => {
+        await withDraft({
+          tables: [
+            table({ label: '12' }),
+            table({
+              id: 'table-2',
+              label: '13',
+              position: { x: 3200, y: 3000 },
+            }),
+          ],
+        });
+
+        expect(service.validation().warnings).toHaveLength(1);
+        expect(service.canPublish()).toBe(true);
+
+        await service.publish();
+
+        expect(saveRoom).toHaveBeenCalledTimes(1);
+      });
+
+      it('summarises what it would change', async () => {
+        await withDraft({ name: 'Terrace' });
+
+        expect(service.changeSummary()).toMatchObject({
+          roomRenamed: true,
+          tablesAdded: 1,
+          objectsAdded: 1,
+          changed: true,
+        });
+      });
+
+      it('leaves the draft alone when the room save was refused', async () => {
+        await withDraft();
+        saveRoom.mockRejectedValueOnce(
+          new FloorPlanConflictError('room-1', 4, room({ version: 9 })),
+        );
+
+        await service.publish();
+
+        expect(discardDraft).not.toHaveBeenCalled();
+        expect(messageKeys()).toEqual(['floor-plan-room-conflict']);
+      });
+    });
+
+    describe('discarding', () => {
+      it('deletes the draft and puts the published plan back on screen', async () => {
+        await withDraft();
+
+        expect(service.layout().objects).toHaveLength(1);
+
+        await service.discardDraft();
+        await loaded();
+
+        expect(discardDraft).toHaveBeenCalledWith('china-wok', 'room-1');
+        expect(service.layout().objects).toEqual([]);
+        expect(service.hasDraft()).toBe(false);
+        expect(service.unpublishedChanges()).toBe(false);
+        expect(messageKeys()).toEqual(['floor-plan-draft-discarded']);
+      });
+
+      it('discards nothing when there is no draft', async () => {
+        await service.discardDraft();
+
+        expect(discardDraft).not.toHaveBeenCalled();
+      });
+
+      it('reports a failure and keeps the draft on screen', async () => {
+        jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        await withDraft();
+        discardDraft.mockRejectedValueOnce(new Error('offline'));
+
+        await service.discardDraft();
+
+        expect(service.layout().objects).toHaveLength(1);
+        expect(messageKeys()).toEqual(['floor-plan-draft-discard-failed']);
+      });
+    });
+
+    /**
+     * A finding an owner has to hunt for is a finding they publish around, so
+     * the list jumps: the room it names is opened and the table is selected.
+     */
+    describe('jumping to a finding', () => {
+      it('selects the table in the room that is already open', async () => {
+        await withDraft();
+
+        await service.showIssue({
+          severity: 'error',
+          code: 'seats-too-few',
+          tableId: 'table-1',
+          label: '12',
+          roomId: 'room-1',
+        });
+
+        expect(service.selectedIds()).toEqual(['table-1']);
+      });
+
+      it('opens the room the finding names first', async () => {
+        stored = [room(), room({ id: 'terrace', name: 'Terrace', order: 1 })];
+        storedTables = [
+          table({ id: 'terrace-7', label: '7', roomId: 'terrace' }),
+        ];
+        service.rooms.reload();
+        service.tables.reload();
+        await loaded();
+        await loaded();
+
+        await service.showIssue({
+          severity: 'error',
+          code: 'label-duplicate',
+          tableId: 'terrace-7',
+          label: '7',
+          roomId: 'terrace',
+        });
+        await loaded();
+
+        expect(service.selectedRoom()?.id).toBe('terrace');
+        expect(service.selectedIds()).toEqual(['terrace-7']);
+      });
     });
   });
 
@@ -640,16 +1101,16 @@ describe(FloorPlanService.name, () => {
       expect(service.layout()).toBe(before);
     });
 
-    it('notices unsaved changes, and stops once they are written', async () => {
-      expect(service.unsavedChanges()).toBe(false);
+    it('notices unpublished changes, and stops once they are published', async () => {
+      expect(service.unpublishedChanges()).toBe(false);
 
       service.place({ variant: 'chair', position: { x: 1000, y: 1000 } });
-      expect(service.unsavedChanges()).toBe(true);
+      expect(service.unpublishedChanges()).toBe(true);
 
-      await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+      await publishWith({ name: 'Main', width: 8000, height: 12_000 });
       await loaded();
 
-      expect(service.unsavedChanges()).toBe(false);
+      expect(service.unpublishedChanges()).toBe(false);
     });
   });
 
@@ -832,11 +1293,11 @@ describe(FloorPlanService.name, () => {
     });
   });
 
-  describe('saving the plan', () => {
+  describe('publishing the plan', () => {
     it('writes the geometry on to the room document', async () => {
       service.place({ variant: 'wall', position: { x: 1000, y: 1000 } });
 
-      await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+      await publishWith({ name: 'Main', width: 8000, height: 12_000 });
 
       expect(saveRoom.mock.calls[0][1].objects).toEqual([
         expect.objectContaining({
@@ -855,7 +1316,7 @@ describe(FloorPlanService.name, () => {
     it('writes a placed table as its own document', async () => {
       service.place({ variant: 'table-round', position: { x: 1000, y: 1000 } });
 
-      await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+      await publishWith({ name: 'Main', width: 8000, height: 12_000 });
 
       expect(saveTable).toHaveBeenCalledTimes(1);
       expect(saveTable.mock.calls[0][1]).toMatchObject({
@@ -874,7 +1335,7 @@ describe(FloorPlanService.name, () => {
       const [first] = service.items();
       service.applyItems([{ ...first, rotation: 90 }]);
 
-      await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+      await publishWith({ name: 'Main', width: 8000, height: 12_000 });
 
       expect(saveTable).toHaveBeenCalledTimes(1);
       expect(saveTable.mock.calls[0][1].id).toBe('table-1');
@@ -888,7 +1349,7 @@ describe(FloorPlanService.name, () => {
       service.selectAll();
       service.deleteSelection();
 
-      await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+      await publishWith({ name: 'Main', width: 8000, height: 12_000 });
 
       expect(deleteTable).toHaveBeenCalledWith('china-wok', 'table-1');
     });
@@ -903,7 +1364,7 @@ describe(FloorPlanService.name, () => {
       );
       service.place({ variant: 'table-round', position: { x: 1000, y: 1000 } });
 
-      await service.saveRoom({ name: 'Mine', width: 8000, height: 12_000 });
+      await publishWith({ name: 'Mine', width: 8000, height: 12_000 });
 
       expect(saveTable).not.toHaveBeenCalled();
       expect(messageKeys()).toEqual(['floor-plan-room-conflict']);
@@ -975,7 +1436,7 @@ describe(FloorPlanService.name, () => {
       /** The other way round, into a larger room, nothing is clamped at all. */
       it('leaves the centre alone when the room it moved to is big enough', async () => {
         await twoRooms();
-        service.selectRoom('terrace');
+        await service.selectRoom('terrace');
         await loaded();
         service.select(['table-7']);
 
@@ -1021,9 +1482,9 @@ describe(FloorPlanService.name, () => {
         service.select(['table-1']);
         await service.moveSelectedTableToRoom('terrace');
 
-        expect(service.unsavedChanges()).toBe(true);
+        expect(service.unpublishedChanges()).toBe(true);
 
-        await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+        await publishWith({ name: 'Main', width: 8000, height: 12_000 });
         await loaded();
 
         expect(saveTable).toHaveBeenCalledWith(
@@ -1182,8 +1643,8 @@ describe(FloorPlanService.name, () => {
         );
       });
 
-      it('stores it when a room is saved, and clears it when it is emptied', async () => {
-        await service.saveRoom({
+      it('stores it when a room is published, and clears it when it is emptied', async () => {
+        await publishWith({
           name: 'Main',
           width: 8000,
           height: 12_000,
@@ -1195,7 +1656,7 @@ describe(FloorPlanService.name, () => {
           expect.objectContaining({ floor: 'Ground floor' }),
         );
 
-        await service.saveRoom({ name: 'Main', width: 8000, height: 12_000 });
+        await publishWith({ name: 'Main', width: 8000, height: 12_000 });
 
         expect(saveRoom).toHaveBeenLastCalledWith(
           'china-wok',
@@ -1221,11 +1682,9 @@ describe(FloorPlanService.name, () => {
       }),
     );
 
-    const saving = service.saveRoom({
-      name: 'Terrace',
-      width: 6000,
-      height: 9000,
-    });
+    service.setRoomFields({ name: 'Terrace', width: 6000, height: 9000 });
+
+    const saving = service.publish();
 
     expect(service.saving()).toBe(true);
 

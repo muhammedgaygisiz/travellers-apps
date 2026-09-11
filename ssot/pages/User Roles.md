@@ -147,8 +147,9 @@ with none of the four safeguards present. The iOS app is **not findable** by bun
 Store Connect, not in public data.
 
 **The gates above are route guards and callable checks; since \#1078 the data layer backs
-them too.** `firestore.rules` scopes every write by the account named on the document, and
-that ruleset is live - confirmed in the Firebase console on 11 September 2026, where it
+them too.** `firestore.rules` scopes every write by the account named on the document - reads
+it largely does not, and `bites` still allows read to any signed-in account. That ruleset
+is live - confirmed in the Firebase console on 11 September 2026, where it
 ends in a default-deny rather than the old `allow read, write: if request.auth != null`.
 `storage.rules` is untouched and still open to any signed-in account; that half is \#1350.
 Nothing in CI deploys either ruleset. The detail, and the launch risk accepted under the

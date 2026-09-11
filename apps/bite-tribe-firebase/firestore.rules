@@ -305,6 +305,25 @@ service cloud.firestore {
     }
 
     /**
+     * The field naming a table's active QR token.
+     *
+     * Written only by `issueTableQrTokens`, `rotateTableQrToken` and
+     * `syncTableQrTokenOnTableWrite` through the Admin SDK (issue #1086). It is
+     * named here for the same reason as `ownershipFields()`: it sits on a
+     * document the owner may otherwise write, and without naming it an owner
+     * could point their table at another restaurant's token, or at a token that
+     * was never issued - which is a table whose printed code resolves to
+     * somewhere else, or to nothing.
+     *
+     * The comparison is by value, so an ordinary table save is unaffected. The
+     * editor reads a table and writes it back whole, token field included, and
+     * `diff()` reports only a *changed* value as affected.
+     */
+    function tokenFields() {
+      return ['qrTokenId'];
+    }
+
+    /**
      * One document per table, not a subcollection of its room, because a table
      * keeps its identity when it moves between rooms: `roomId` is a field, and
      * moving the table is a field change rather than a delete and recreate of
@@ -312,13 +331,58 @@ service cloud.firestore {
      *
      * Carrying no version is deliberate. A room holds the geometry both devices
      * edit as one blob, which is where a silent overwrite hurts; a table is one
-     * small document changed by one deliberate action. `qrTokenId` is not
-     * protected here yet - nothing writes a token until issue #1086, which owns
-     * making it backend-only.
+     * small document changed by one deliberate action.
+     *
+     * A delete is still the owner's, and it is what revokes the table's token:
+     * `syncTableQrTokenOnTableWrite` ends the token rather than the rule
+     * refusing the delete, because a table that is gone must not keep a code
+     * that still resolves.
      */
     match /restaurants/{restaurantId}/tables/{tableId} {
       allow read: if readsFloorPlan(restaurantId);
-      allow write: if ownsRestaurant(restaurantId);
+
+      allow create: if ownsRestaurant(restaurantId)
+        && absentAll(tokenFields());
+
+      allow update: if ownsRestaurant(restaurantId)
+        && unchangedAll(tokenFields());
+
+      allow delete: if ownsRestaurant(restaurantId);
+    }
+
+    // ------------------------------------------------------- table qr tokens
+
+    /**
+     * What a scanned table QR code resolves to (GitHub issue #1086).
+     *
+     * ```text
+     * /tableTokens/{token}
+     * ```
+     *
+     * **The one collection an unauthenticated client may read**, and it has to
+     * be: a guest scanning a code at a table has no session, and the scan is
+     * what establishes which restaurant they would be signing in to. Top-level
+     * and named by the token, so the resolution is one document read rather
+     * than a query the guest has no rights to run.
+     *
+     * **`get` and not `list`.** That distinction is the whole enumeration
+     * defence. A token can be read by whoever physically holds the code; the
+     * set of tokens cannot be walked, so a restaurant's table count, its room
+     * layout and its live codes stay unavailable to anyone who was not given
+     * one. The token itself carries 130 bits, so guessing one is not the other
+     * half of the same attack.
+     *
+     * **Never client-writable, by anyone, including the restaurant that owns
+     * the table.** A token is created by the backend or not at all: an owner
+     * able to write here could mint a code pointing at another restaurant's
+     * table, or resurrect one that was revoked. Rotation and revocation go
+     * through the callables and the trigger, which is also what keeps the token
+     * document and `RestaurantTable.qrTokenId` two halves of one write.
+     */
+    match /tableTokens/{token} {
+      allow get: if true;
+      allow list: if false;
+      allow write: if false;
     }
 
     // ------------------------------------------------------------------ bites

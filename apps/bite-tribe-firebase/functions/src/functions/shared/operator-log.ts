@@ -30,13 +30,16 @@ import { BiteTribeRole, rolesOf } from './roles';
  * needs the set of actions to be knowable, and adding a member is the one line
  * of review that says "this is a new thing we can do to an account".
  *
- * **Two of them are not operator actions**, and they are here on purpose.
+ * **Four of them are not operator actions**, and they are here on purpose.
  * `addRestaurantStaff` and `removeRestaurantStaff` are performed by a
  * restaurant owner as well as by an operator (issue #1537), and they change
- * what an account may do just as `setUserRoles` does. Giving them a second log
- * shape would mean "everything done to this account" had two answers, which is
- * the thing issue #1477 removed. `callerRoles` is what says which kind of
- * caller acted, and it is already on every entry.
+ * what an account may do just as `setUserRoles` does. `issueTableQrTokens` and
+ * `rotateTableQrToken` are the same kind of action on a restaurant rather than
+ * on an account (issue #1086): a rotation invalidates every code printed for a
+ * table, so "who reprinted this and when" needs an answer. Giving any of them
+ * a second log shape would mean "everything done to this restaurant" had two
+ * answers, which is the thing issue #1477 removed. `callerRoles` is what says
+ * which kind of caller acted, and it is already on every entry.
  */
 export const OPERATOR_ACTIONS = [
   'addRestaurantStaff',
@@ -45,8 +48,10 @@ export const OPERATOR_ACTIONS = [
   'backfillReviewTimestamps',
   'clusterRestaurantCandidateForBite',
   'deleteBiteAsOperator',
+  'issueTableQrTokens',
   'removeRestaurantStaff',
   'revokeRestaurantOwner',
+  'rotateTableQrToken',
   'sendNewVersionNotification',
   'setUserBlocked',
   'setUserRoles',
@@ -69,6 +74,7 @@ export type OperatorTargetType =
   | 'restaurant'
   | 'restaurantCandidate'
   | 'review'
+  | 'table'
   | 'user';
 
 /**
@@ -88,7 +94,8 @@ export interface OperatorActionLog {
   action: OperatorAction;
   targetType: OperatorTargetType;
   /**
-   * The single account, Bite, candidate or review the action was performed on.
+   * The single account, Bite, candidate, review or table the action was
+   * performed on.
    *
    * Omitted by an action that operates on a whole collection rather than on one
    * record — the review timestamp migration, the new-version announcement — so

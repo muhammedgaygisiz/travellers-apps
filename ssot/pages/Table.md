@@ -130,11 +130,11 @@ Table returns to an available state
 
 ## Technical Implementation
 
-Planned Firestore layout:
+Firestore layout:
 
 ```text
 /restaurants/{restaurantId}/tables/{tableId}
-/restaurants/{restaurantId}/tableStates/{tableId}
+/restaurants/{restaurantId}/tableStates/{tableId}   planned, issue #1071
 /tableTokens/{token}
 ```
 
@@ -165,12 +165,54 @@ from a deleted one and the save would delete the very document the printed code
 points at. Its centre is clamped into the target room, since a room-relative
 coordinate means something else in a room of a different size.
 
+Issue \#1086 issued the tokens. A token is 130 bits from the system CSPRNG
+rendered in Crockford base32, and the generator takes no argument at all - which
+is how "cannot be derived from a table number" is delivered, rather than by a
+rule somebody has to keep obeying. Uppercase alphanumeric so a QR code encodes
+it in alphanumeric mode instead of byte mode, and without `I`, `L`, `O` or `U`
+so a code read aloud during a support call has no confusable pair.
+
+The document is read by `get` and never by `list`. That is the enumeration
+defence: whoever holds a printed code can read what it resolves to, and nobody
+can walk the set, so a restaurant's table count and its live codes stay
+unavailable to an account that was never given one. It is also the one thing in
+the database an unauthenticated client may read, because a guest scanning a code
+has no account yet and the scan is what establishes which restaurant they would
+be signing in to.
+
+A token document is never deleted. Rotating marks the old one `superseded` and
+names its successor; deleting the table marks it `revoked`. Deleting the
+document instead would make a retired table's sticker indistinguishable from a
+code that was never issued, and those need different answers on screen. `active`,
+`superseded` and `revoked` are therefore three states rather than two: a guest
+holding an old sheet is told the code was replaced, and support can see the
+table was reprinted rather than retired.
+
+The token copies `roomId`, `label` and `enabled` from the table, and
+`syncTableQrTokenOnTableWrite` keeps the copy true. A table keeps its token when
+it moves room or is renamed, which is what makes a code already stuck to it keep
+working - so a token holding only `tableId` would resolve in one read and then
+need a second one, against a collection a guest may not read at all, to say
+where the guest is sitting. Mirroring `enabled` is what lets a table taken out of
+service after its sheet was printed resolve to "not in service" rather than to
+nothing; refusing the order is issue \#1072.
+
+Issuing is idempotent, and that is the point rather than a nicety: the publish
+step of issue \#1088 and the sheet page of issue \#1087 both ask for tokens, and
+a second call that minted new ones would invalidate every sheet already printed.
+The token and the table's `qrTokenId` are written in one transaction, because a
+table pointing at a token that was never written resolves to nothing and a token
+nothing points at can never be rotated - rotation finds the current token
+through the table.
+
 ## Current Limitations
 
 - Uniqueness is held by the client, not by the database. Security rules cannot query, so no rule can ask whether a label is already taken; the editor refuses a duplicate and the publish validation of issue \#1088 refuses a plan that reached that state another way. A second device editing a second room at the same moment can still produce two tables with one number, because neither editor sees the other's unsaved plan.
 - A table moves out of the room the owner is looking at, never into it. The control is on the selected table's card, so it is reachable only for a table on the open canvas; there is no way to reach into another room and pull a table across (issue \#1085).
-- `enabled` is configuration and nothing reads it yet. It is drawn on the plan and stored on the table; refusing orders at a disabled table and withholding its QR token belong to issues \#1086 and \#1072.
-- `qrTokenId` is writable by the owner like any other field. Making it backend-only belongs with the tokens themselves, in issue \#1086, because there is nothing to protect until something issues one.
+- `enabled` decides whether a table gets a code and nothing else yet. A disabled table is skipped when a plan is issued tokens and refused when it is named, and one disabled after its code was printed resolves to "not in service" - but nothing reads that answer, because refusing the order is issue \#1072.
+- Nothing calls the token callables yet. `issueTableQrTokens` and `rotateTableQrToken` are the backend half; the business-app surfaces that reach them are the printable sheet of issue \#1087 and the publish step of issue \#1088, so today a token is issued only by a direct call.
+- An editor holding a plan from before a token was issued cannot save that table. The rules compare `qrTokenId` by value, so a client writing back the value it read is fine and a client writing back the _absence_ of a token the backend has since written is refused. Nothing reaches that state today, because no surface issues a token yet; it becomes reachable with issue \#1087, and the answer is the reseed the editor already does for a room whose version moved.
+- Revocation follows a delete and nothing else. There is no "kill this code now" action that keeps the table: the paths are rotating it, which prints a new one, and deleting the table, which ends it.
 - A QR code identifies a table context. It does not prove that the guest is physically present, and no design should assume otherwise.
 - Presence hardening such as rotating codes, staff confirmation, and session expiry is planned in issue \#1107, not guaranteed by the token itself.
 

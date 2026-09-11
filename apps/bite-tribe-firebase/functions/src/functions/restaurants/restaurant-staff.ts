@@ -3,17 +3,16 @@ import { DocumentData, getFirestore } from 'firebase-admin/firestore';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { logOperatorAction } from '../shared/operator-log';
-import {
-  BiteTribeRole,
-  hasRole,
-  isBiteTribeRole,
-  requireAnyRole,
-  ROLES_CLAIM,
-} from '../shared/roles';
+import { BiteTribeRole, isBiteTribeRole, ROLES_CLAIM } from '../shared/roles';
 import { TargetUserRequest, resolveTargetUid } from '../shared/target-user';
 import { setRoles } from '../users/set-user-roles';
+import {
+  RESTAURANT_COLLECTION,
+  holdsRestaurant,
+  parseRequiredString,
+  requireRestaurantAuthority,
+} from './restaurant-authority';
 
-const RESTAURANT_COLLECTION = 'restaurants';
 const USERS_COLLECTION = 'users';
 
 /**
@@ -50,9 +49,6 @@ const STAFF_ROLE: BiteTribeRole = 'staff';
  * by naming them as staff to remove.
  */
 const PROTECTED_ROLES: readonly BiteTribeRole[] = ['admin', 'business'];
-
-/** The roles the caller must hold one of. See the note on `requireAnyRole`. */
-const STAFF_MANAGEMENT_ROLES: readonly BiteTribeRole[] = ['business', 'admin'];
 
 export interface AddRestaurantStaffRequest extends TargetUserRequest {
   restaurantId?: unknown;
@@ -100,16 +96,6 @@ export interface ListRestaurantStaffResult {
 const getString = (data: DocumentData, field: string): string =>
   typeof data[field] === 'string' ? data[field] : '';
 
-const parseRequired = (value: unknown, field: string): string => {
-  const parsed = typeof value === 'string' ? value.trim() : '';
-
-  if (!parsed) {
-    throw new HttpsError('invalid-argument', `${field} is required.`);
-  }
-
-  return parsed;
-};
-
 /** The roles on an account's Auth record, absent- and malformed-safe. */
 const rolesOfAccount = async (uid: string): Promise<BiteTribeRole[]> => {
   let claims: Record<string, unknown>;
@@ -134,54 +120,6 @@ const assertNotPrivileged = (uid: string, roles: BiteTribeRole[]): void => {
       `Account ${uid} holds the ${held.join(' and ')} role and cannot be managed as staff.`,
     );
   }
-};
-
-/**
- * Admits the caller and decides which restaurants it may act on.
- *
- * Two roles reach this callable and they are admitted for opposite reasons.
- * A `business` caller is authorised by **the restaurant document, not the
- * token**: `Restaurant.ownerUserId`, written by `assignRestaurantOwner`
- * (issue #1077), is the same field issue #1078's rules read, and a claim copy
- * of it would be a second version of one fact that can disagree. It also means
- * a revoked assignment stops authorising immediately instead of at the end of
- * the token's hour.
- *
- * An `admin` caller is authorised by `RD-UR-6`: the operator maintains every
- * restaurant, claimed or not. That is what keeps a restaurant which removed
- * its last account with access - or handed `staff` to the wrong person - from
- * having no way back.
- *
- * Being admitted is not being authorised. `requireAnyRole` only says the caller
- * holds one of the two; which restaurant that reaches is decided here.
- */
-const requireRestaurantAuthority = async (
-  request: CallableRequest<unknown>,
-  restaurantId: string,
-): Promise<string> => {
-  const callerUid = requireAnyRole(request, ...STAFF_MANAGEMENT_ROLES);
-
-  const snapshot = await getFirestore()
-    .collection(RESTAURANT_COLLECTION)
-    .doc(restaurantId)
-    .get();
-
-  if (!snapshot.exists) {
-    throw new HttpsError('not-found', 'Restaurant was not found.');
-  }
-
-  if (hasRole(request, 'admin')) {
-    return callerUid;
-  }
-
-  if (getString(snapshot.data() ?? {}, 'ownerUserId') !== callerUid) {
-    throw new HttpsError(
-      'permission-denied',
-      'This restaurant is not assigned to your account.',
-    );
-  }
-
-  return callerUid;
 };
 
 /**
@@ -259,7 +197,7 @@ const compensate = async (undo: () => Promise<unknown>): Promise<void> => {
 export const addRestaurantStaffHandler = async (
   request: CallableRequest<AddRestaurantStaffRequest>,
 ): Promise<AddRestaurantStaffResult> => {
-  const restaurantId = parseRequired(
+  const restaurantId = parseRequiredString(
     request.data?.restaurantId,
     'restaurantId',
   );
@@ -286,7 +224,6 @@ export const addRestaurantStaffHandler = async (
   const db = getFirestore();
   const restaurantRef = db.collection(RESTAURANT_COLLECTION).doc(restaurantId);
   const staffRef = db.collection(RESTAURANT_STAFF_COLLECTION).doc(targetUid);
-  const isOperator = hasRole(request, 'admin');
 
   const status = await db.runTransaction<AddRestaurantStaffResult['status']>(
     async (transaction) => {
@@ -300,10 +237,7 @@ export const addRestaurantStaffHandler = async (
       // between the authorisation check and this commit, and a staff account
       // added by an account that no longer holds the restaurant is exactly the
       // write the ownership boundary exists to refuse.
-      if (
-        !isOperator &&
-        getString(restaurant.data() ?? {}, 'ownerUserId') !== actingUid
-      ) {
+      if (!holdsRestaurant(request, restaurant.data() ?? {}, actingUid)) {
         throw new HttpsError(
           'permission-denied',
           'This restaurant is not assigned to your account.',
@@ -378,7 +312,7 @@ export const addRestaurantStaffHandler = async (
 export const removeRestaurantStaffHandler = async (
   request: CallableRequest<RemoveRestaurantStaffRequest>,
 ): Promise<RemoveRestaurantStaffResult> => {
-  const restaurantId = parseRequired(
+  const restaurantId = parseRequiredString(
     request.data?.restaurantId,
     'restaurantId',
   );
@@ -413,7 +347,6 @@ export const removeRestaurantStaffHandler = async (
   // delete then fails, the account is left associated and roleless, which
   // grants nothing.
   const roles = await writeStaffRole(targetUid, false);
-  const isOperator = hasRole(request, 'admin');
 
   try {
     await db.runTransaction(async (transaction) => {
@@ -421,10 +354,7 @@ export const removeRestaurantStaffHandler = async (
         db.collection(RESTAURANT_COLLECTION).doc(restaurantId),
       );
 
-      if (
-        !isOperator &&
-        getString(restaurant.data() ?? {}, 'ownerUserId') !== actingUid
-      ) {
+      if (!holdsRestaurant(request, restaurant.data() ?? {}, actingUid)) {
         throw new HttpsError(
           'permission-denied',
           'This restaurant is not assigned to your account.',
@@ -502,7 +432,7 @@ const readDisplayNames = async (
 export const listRestaurantStaffHandler = async (
   request: CallableRequest<ListRestaurantStaffRequest>,
 ): Promise<ListRestaurantStaffResult> => {
-  const restaurantId = parseRequired(
+  const restaurantId = parseRequiredString(
     request.data?.restaurantId,
     'restaurantId',
   );

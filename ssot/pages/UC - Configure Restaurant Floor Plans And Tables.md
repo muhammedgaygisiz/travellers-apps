@@ -27,8 +27,15 @@ the rooms, groups them by an optional floor name, and shows what each one holds;
 a table moves to another room from its own card and keeps its number and its QR
 token when it goes; and the plan is summarised for the restaurant as a whole.
 
+Issue \#1086 built the QR tokens, backend only. A table gets an opaque,
+non-guessable code that resolves in one public read to its restaurant, room and
+number; rotating one supersedes the code it replaces instead of erasing it, and
+deleting a table revokes its code rather than leaving a sticker that resolves to
+nothing. No editor surface reaches those callables yet: printing the sheets is
+issue \#1087 and the publish step that asks for the tokens is issue \#1088.
+
 The planned flow from "validates the plan and publishes it" onward is still
-specification. Publishing is issue \#1088 and QR tokens are issue \#1086.
+specification.
 
 No longer blocked. [[UC - Own And Claim Restaurants]] was the prerequisite,
 because floor-plan data is restaurant-scoped and could not be trusted while the
@@ -50,7 +57,8 @@ This is not a construction plan. It is a practical, easy-to-maintain top-down re
 
 ## Planned Flow
 
-The first six steps are implemented; the rest are specification.
+The first six steps are implemented, and the token generation behind the eighth
+is built without a surface that calls it. The rest are specification.
 
 - Owner opens the floor-plan editor for a restaurant they own.
 - Owner creates a room and sets its width and height in metres.
@@ -83,6 +91,9 @@ The first six steps are implemented; the rest are specification.
 - No unsaved arrangement is discarded without the owner saying so. Opening another room asks first, and only when there is something to lose; reordering the rooms is closed until the open one is saved, because it writes rooms and a room whose version moved reseeds the editor.
 - Draft and published states are separate, so rearranging during service does not affect the live view.
 - Publishing is blocked by duplicate table labels, zero capacity, or tables outside their room. Overlapping tables warn but do not block, because real rooms have odd arrangements. The editor already refuses all three as they are typed; the publish gate of issue \#1088 is what catches a plan that reached that state another way.
+- A table's QR code says which table it is and nothing about which table it is. The code carries 130 random bits and no part of the number printed beside it, so holding the sheet from table 11 tells a guest nothing about the code on table 12. It is read one document at a time and the collection cannot be listed, so the set of a restaurant's live codes is not something an account can collect.
+- A code outlives the table's arrangement and not the table. It survives a move to another room, a rename and being taken out of service, because a sticker already on a table cannot be reprinted every time the plan changes; it is superseded when the owner deliberately replaces it, and revoked when the table is deleted. Both leave a code that still resolves, to "this was replaced" and "this is no longer valid" rather than to nothing - a scan that finds no document at all would be the answer to a code BiteTribe never issued, which is a different thing to tell a guest.
+- Asking for codes twice gives the same codes. Publishing a plan and opening the sheet both ask, and a second ask that minted new tokens would invalidate every sheet already printed.
 - Editing the plan never writes live table state.
 
 ## Success Criteria
@@ -90,6 +101,7 @@ The first six steps are implemented; the rest are specification.
 - An owner can build a two-room plan with at least twenty tables and reload it identically.
 - Table 12 is retrievable as a business entity with its room, capacity, and position, without parsing an image.
 - Every enabled table has exactly one active QR token, and tokens are not derivable from the table number.
+- A guest with no BiteTribe account resolves a scanned code in one read, and a replaced or revoked code tells them so rather than failing.
 - A printed QR sheet is legible and identifies restaurant, room, and table in human-readable text next to the code.
 
 ## Supported Evidence
@@ -101,12 +113,14 @@ Implemented:
 - `libs/bite-tribe-business/floor-plan/ui` the canvas, the grid, the metre/millimetre conversion, the object palette, the edit geometry, the shape conversion
 - `libs/bite-tribe-business/floor-plan/page` the editor page, its workflow, the label rule and the bulk numbering
 - `libs/bite-tribe-business/shell` the `restaurant/:restaurantId/floor-plan` route and its owner gate
-- `apps/bite-tribe-firebase/firestore.rules` room and table scoping, and the version rule
-- `/restaurants/{restaurantId}/rooms/{roomId}` and `/restaurants/{restaurantId}/tables/{tableId}`
+- `apps/bite-tribe-firebase/firestore.rules` room and table scoping, the version rule, the backend-only `qrTokenId`, and the public `get` on `/tableTokens`
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/table-qr-tokens.ts` the token generator and the issue and rotate callables
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/sync-table-qr-token-on-table-write.ts` the mirror and the revocation on delete
+- `/restaurants/{restaurantId}/rooms/{roomId}`, `/restaurants/{restaurantId}/tables/{tableId}` and `/tableTokens/{token}`
 
 Still planned:
 
-- QR tokens, printable sheets, and the draft/published split
+- Printable QR sheets, the surface that asks for the tokens, and the draft/published split
 
 ## Related GitHub Scope
 
@@ -119,6 +133,8 @@ Still planned:
 - Issue \#1083 - placing, moving, resizing and rotating floor-plan objects, delivered
 - Issue \#1084 - table properties, label uniqueness, numbering and capacity, delivered
 - Issue \#1085 - multiple rooms and floors, room order, cross-room table moves, capacity summaries and the desktop-locked layout, delivered
+- Issue \#1086 - opaque table QR tokens, their lifecycle and the rules that keep them backend-owned, delivered as backend only
+- Issue \#1087 - printable table QR sheets, the first caller of those callables
 - Issue \#1089 - accessibility of the editor; its responsive half was moved to issue \#1093 rather than deferred
 - Issue \#1093 - the staff live view, which owns the small-screen and touch rendering of a published plan
 

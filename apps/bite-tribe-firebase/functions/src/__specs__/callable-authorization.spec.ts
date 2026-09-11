@@ -57,6 +57,13 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   listRestaurantStaff: 'restaurantAuthority',
   removeRestaurantStaff: 'restaurantAuthority',
 
+  // A restaurant printing and reprinting the QR codes of its own tables
+  // (issue #1086). Same shape and same reason: an owner who has to open a
+  // support ticket to replace a photographed code will keep using the
+  // photographed code.
+  issueTableQrTokens: 'restaurantAuthority',
+  rotateTableQrToken: 'restaurantAuthority',
+
   // Consumer and business app paths. Each acts for the caller, or reads data
   // every signed-in account may read, so requiring `admin` here would break
   // the consumer app.
@@ -86,6 +93,32 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
 };
 
 const FUNCTIONS_ROOT = join(__dirname, '..', 'functions');
+
+/**
+ * The shared guard the restaurant-authority endpoints reach `requireAnyRole`
+ * through (issue #1086).
+ *
+ * Until then the guard was inline in `restaurant-staff.ts` and this file could
+ * look for `requireAnyRole(` in the endpoint's own source. A second surface
+ * asking the same question - may this caller act on this restaurant - made a
+ * second copy of that answer the greater risk, so the decision was extracted
+ * and the checks below follow it one hop.
+ *
+ * The hop is not a hole: `guards the shared restaurant authority with
+ * requireAnyRole` asserts that the extracted module is itself the guard it
+ * claims to be, so an endpoint calling it cannot be admitting anyone the
+ * inline version would not have.
+ */
+const RESTAURANT_AUTHORITY_MODULE = join(
+  FUNCTIONS_ROOT,
+  'restaurants',
+  'restaurant-authority.ts',
+);
+
+const RESTAURANT_AUTHORITY_GUARDS = [
+  'requireAnyRole(',
+  'requireRestaurantAuthority(',
+];
 
 interface Endpoint {
   name: string;
@@ -171,11 +204,18 @@ describe('callable authorization', () => {
   it('guards every restaurant-authority endpoint with requireAnyRole', () => {
     const unguarded = named('restaurantAuthority')
       .filter(
-        (endpoint) => !sourceOf(endpoint.file).includes('requireAnyRole('),
+        (endpoint) =>
+          !RESTAURANT_AUTHORITY_GUARDS.some((guard) =>
+            sourceOf(endpoint.file).includes(guard),
+          ),
       )
       .map((endpoint) => endpoint.name);
 
     expect(unguarded).toEqual([]);
+  });
+
+  it('guards the shared restaurant authority with requireAnyRole', () => {
+    expect(sourceOf(RESTAURANT_AUTHORITY_MODULE)).toContain('requireAnyRole(');
   });
 
   /**
@@ -216,7 +256,9 @@ describe('callable authorization', () => {
 
         return (
           !source.includes('requireAdmin(') &&
-          !source.includes('requireAnyRole(') &&
+          !RESTAURANT_AUTHORITY_GUARDS.some((guard) =>
+            source.includes(guard),
+          ) &&
           !source.includes('!request.auth')
         );
       })

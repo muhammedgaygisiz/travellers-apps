@@ -114,8 +114,18 @@ const declaredActions = (): string[] => {
  * exactly as `setUserRoles` does, and they are performed by a restaurant owner
  * rather than by an operator — so leaving them out would put the one privileged
  * action a non-operator can take outside the only record of it.
+ *
+ * Issue #1086 added the third. It is the same guard as the second, reached
+ * through the shared `requireRestaurantAuthority` rather than written inline,
+ * and an endpoint that calls it is exactly as privileged as one that did not.
+ * Leaving it out would have silently dropped the staff callables out of this
+ * list the moment their guard moved.
  */
-const PRIVILEGED_GUARDS = ['requireAdmin(', 'requireAnyRole('];
+const PRIVILEGED_GUARDS = [
+  'requireAdmin(',
+  'requireAnyRole(',
+  'requireRestaurantAuthority(',
+];
 
 describe('operator action logging', () => {
   const sources = listTypeScriptFiles(FUNCTIONS_ROOT);

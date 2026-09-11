@@ -104,6 +104,10 @@ defect list and not a work plan. Where it needs one of those, it links to it.
   code, then the local id. A bare `R-6` always means this page's `R-6`.
 - **UF-10** A `UC-ID` MUST be claimed in the registry at the end of this page before it
   is used in a `Scope` table.
+- **UF-10a** The registry's `Page` cell MUST hold either a `[[page]]` link or exactly
+  `none`. A code whose behaviour is documented on a page links that page, whatever the
+  page is named. A code MUST NOT be claimed for behaviour that an existing page
+  already owns — that page's own code is the reference target (`UF-9`).
 - **UF-11** In Logseq, an issue number that opens a line or follows a space is escaped
   as `\#1472`; inside a table cell or after a word, plain `#1472`. Prefer
   `[[issue-1472]]` where a mirror page exists.
@@ -429,14 +433,15 @@ X5   SYS  <action>
 | `UC-ROM` | Run Operational Migrations | [[UC - Run Operational Migrations]] |
 | `UC-CMB` | Create And Maintain Personal Bites | [[UC - Create And Maintain Personal Bites]] |
 | `UC-MRB` | Maintain Restaurants In The Business App | [[UC - Maintain Restaurants In The Business App]] |
-| `UC-ARO` | Assign Restaurant Owner | none — see [[UC - Own And Claim Restaurants]] |
+| `UC-ARO` | Own And Claim Restaurants | [[UC - Own And Claim Restaurants]] |
 | `UC-DIS` | Dismiss Restaurant Candidate | none |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant | none |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence | none |
 | `UC-ARB` | Assign Bites To Restaurant | none |
 
-Five codes have no page. They are referenced by `UC-VRC` and `UC-DRC` for rules those
-flows depend on, which makes writing them visible work rather than an omission.
+Codes whose `Page` cell reads `none` have no page yet. They are referenced by `UC-VRC`
+and `UC-DRC` for rules those flows depend on, which makes writing them visible work
+rather than an omission.
 
 A deleted page's row goes with it (`UF-23`). The code is then unclaimed, and `UF-10`
 governs it again like any other: it is claimed here before it is used, which is what

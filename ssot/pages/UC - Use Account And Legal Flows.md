@@ -2,18 +2,33 @@
 
 ## Status
 
-Supported today.
+**Level:** L0.
+Supported today. The privacy policy and its language fallback, in-app account deletion
+with re-authentication and the full data cascade, the public `/account-deletion` route,
+the email verification prompt with its throttled manual resend, and the monthly reminder
+job all ship. The contracts below hold the detail: what the cascade leaves behind is
+`Deletion Contract`'s fact, and the state of the policy translations is
+`Policy Language Contract`'s.
 
 ## Goal
 
-Users can access legal and account lifecycle information.
+Any account can read the legal terms it is subject to and end its own participation from
+inside the app, without asking anyone and without depending on an account it can still
+sign into - the guarantee the privacy-conscious participant is looking for, and the one
+both stores require be reachable. This page owns the privacy policy's entry points and
+language resolution, the account deletion flow and what deletion does to each category of
+data, and email verification.
 
 ## Actors
 
-- User
-- Privacy-conscious participant
+- **Bite Creator** - reads the privacy policy, deletes its own account, and verifies its
+  email address.
+- **Restaurant Staff** - acts no differently here, but is named because the account it
+  deletes carries a staff association the cascade has to remove with it.
+- **Restaurant Owner** - acts no differently here, but is named because a restaurant it
+  holds records its account on the restaurant document, which outlives the deletion.
 
-## Current Flow
+## Flow
 
 - User opens the privacy policy from the About page, or from the public `/privacy` route.
 - The privacy policy is shown in the selected app language. It is published in all eleven app languages, and both entry points share the same component, so the in-app and web routes resolve the language identically.
@@ -55,8 +70,47 @@ Each user-owned data category is handled deliberately. See [[issue-1182]] for th
 - Kept with the identifier cleared: Bites (the Bite and its image stay, `userId` is removed) and BiteTrail purchase records (the document stays so the seller's `soldCount` holds).
 - Kept untouched: restaurants, menus and restaurant candidates, which are shared place data.
 - Cannot be removed in band: analytics and Crashlytics data already keyed to the uid. The in-app copy says so.
+- Not decided yet, each owned by its own issue: a restaurant's ownership fields, which stay on the restaurant carrying the deleted account's uid (\#1568); a BiteTrail the account owns, which falls into none of the categories above (\#1569); and the job record at `/accountDeletions/{uid}`, which survives the account it names and has no stated retention (\#1570).
 
 The cascade also prunes the deleted user from `/meta/leaderboardDaily` and rebuilds `/meta/leaderboard`, because those snapshots cache display names and emails and are otherwise only rebuilt by a Bite create or delete.
+
+## Policy Language Contract
+
+See [[issue-1218]] for the reasoning.
+
+- `PUBLISHED_PRIVACY_POLICY_LANGUAGES` in `libs/bite-tribe/privacy-policy` is the published set. A language belongs there only once its policy copy exists in that locale file with legal coverage equivalent to the English original. It currently matches `availableLangs` and has to be extended with it.
+- Everything outside that set - including an unknown or missing app language - resolves to English and reports the fallback, so the page can disclose it. This is what keeps a newly added locale from rendering raw keys inside a legal document.
+- Regional tags resolve to their base language: `de-CH` gets the German policy.
+- The policy translations outside English and German have not been through a human legal review yet.
+
+## MVP Classification
+
+**[MVP]** - the privacy policy with its language fallback and both entry points, in-app
+account deletion end to end, and the public `/account-deletion` route. Apple requires the
+in-app path and Google requires the web link, so neither is a candidate for a later
+release.
+
+**[Secondary]** - the monthly automatic reminder job. The verification prompt and the
+manual resend stay `[MVP]`, because an email/password account that never received its
+first verification mail has no other way back; the job only shortens how long that takes.
+
+## App Store Review Area
+
+Relevant, and exercised more directly than on any other page.
+
+- Apple `5.1.1(v)`: an app that supports account creation must offer account deletion
+  within the app. `settings/delete-account` is that offer.
+- Google Play's data-deletion policy wants both an in-app path and a web link at which
+  deletion can be requested, the link declared in the Data safety form. The public
+  `/account-deletion` route is that link, which is why it has to stay reachable without a
+  sign-in and after the app is uninstalled.
+- Apple `5.1.1(i)`: the privacy policy must be linked in App Store Connect metadata _and_
+  reachable inside the app, and must explain the data retention and deletion policy. The
+  entry point from About and the public `/privacy` route answer the first half; the second
+  half is only as good as `Deletion Contract`, because a category that contract does not
+  decide is a category the policy cannot describe.
+- The categories the cascade removes, keeps, or cannot reach have to agree with the data
+  types declared in [[Implementation - Store Declarations]].
 
 ## Supported Evidence
 
@@ -70,15 +124,18 @@ The cascade also prunes the deleted user from `/meta/leaderboardDaily` and rebui
 - `apps/bite-tribe-e2e/src/tests/account-and-legal.spec.ts` covers in-app privacy navigation, deletion cancellation, and the completed emulator-backed cascade with a retained anonymized Bite.
 - `libs/bite-tribe/privacy-policy/src/lib/privacy-policy/__specs__` covers the policy language contract: German and Turkish apps render their own policy, a language without published policy copy renders the English one with the disclosed notice in its own language, and a late language preference rebuilds the document.
 
-## Policy Language Contract
-
-See [[issue-1218]] for the reasoning.
-
-- `PUBLISHED_PRIVACY_POLICY_LANGUAGES` in `libs/bite-tribe/privacy-policy` is the published set. A language belongs there only once its policy copy exists in that locale file with legal coverage equivalent to the English original. It currently matches `availableLangs` and has to be extended with it.
-- Everything outside that set - including an unknown or missing app language - resolves to English and reports the fallback, so the page can disclose it. This is what keeps a newly added locale from rendering raw keys inside a legal document.
-- Regional tags resolve to their base language: `de-CH` gets the German policy.
-- The policy translations outside English and German have not been through a human legal review yet.
-
 ## Related Domains
 
 - [[User]]
+
+## Related Pages
+
+- [[Personas]] - the audiences this page serves: the privacy-conscious participant the
+  deletion guarantee exists for, and the new user who meets the verification prompt
+- [[UC - Own And Claim Restaurants]] - where a restaurant's ownership fields are written
+- [[Implementation - Store Declarations]] - the declared data types the deletion contract
+  has to agree with
+- [[issue-1182]]
+- [[issue-1218]]
+- [[issue-1234]]
+- [[issue-1385]]

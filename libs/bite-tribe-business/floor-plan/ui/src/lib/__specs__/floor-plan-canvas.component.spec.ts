@@ -8,10 +8,17 @@ import { FloorPlanItem } from '../floor-plan-item';
 import { DEFAULT_GRID_SPACING } from '../floor-plan-grid';
 import { MAX_ZOOM, MIN_ZOOM, fitViewportSize } from '../floor-plan-viewport';
 
+/**
+ * Renders the key, and the parameters after it where there are any.
+ *
+ * The accessible name of an object is a key *and* what is interpolated into
+ * it - a table's number, its capacity - so a mock that dropped the parameters
+ * would let a name that says nothing about the table pass.
+ */
 @Pipe({ name: 'transloco' })
 class MockTranslocoPipe implements PipeTransform {
-  transform(value: string): string {
-    return value;
+  transform(value: string, params?: Record<string, unknown>): string {
+    return params === undefined ? value : `${value} ${JSON.stringify(params)}`;
   }
 }
 
@@ -573,6 +580,26 @@ describe(FloorPlanCanvasComponent.name, () => {
       );
     });
 
+    /**
+     * Selection used to be a hue and nothing else (GitHub issue #1089), which
+     * says nothing in greyscale - on a printed plan, or to an owner who does
+     * not separate blue from grey. The dashed outline that might have carried
+     * it is drawn only around a single selected item, so a selected group said
+     * nothing at all.
+     */
+    it('draws a selected item with a heavier line as well as another colour', () => {
+      const strokeOf = (id: string): number =>
+        Number(
+          itemElement(id)
+            ?.querySelector('rect, circle')
+            ?.getAttribute('stroke-width'),
+        );
+
+      setInputs({ selectedIds: ['table-1'] });
+
+      expect(strokeOf('table-1')).toBeGreaterThan(strokeOf('wall-1'));
+    });
+
     describe('what a table says about itself', () => {
       const labelOf = (id: string): string =>
         itemElement(id)
@@ -670,6 +697,183 @@ describe(FloorPlanCanvasComponent.name, () => {
         expect(itemElement('table-1')?.getAttribute('class')).not.toContain(
           'floor-plan-canvas__item--disabled',
         );
+      });
+    });
+
+    /**
+     * What the plan says to somebody who cannot see it (GitHub issue #1089).
+     *
+     * A shape with no accessible name is announced as nothing at all, so a plan
+     * a screen reader walked through used to be a row of identical silences.
+     */
+    describe('the accessible name of an object', () => {
+      const nameOf = (id: string): string =>
+        itemElement(id)?.getAttribute('aria-label') ?? '';
+
+      it('names a table by its number and its capacity', () => {
+        setInputs({ items: [{ ...table, seats: 4 }] });
+
+        expect(nameOf('table-1')).toContain('floor-plan-item-table');
+        expect(nameOf('table-1')).toContain('"label":"7"');
+        expect(nameOf('table-1')).toContain('"seats":4');
+        expect(nameOf('table-1')).toContain(
+          '"type":"floor-plan-object-table-round"',
+        );
+      });
+
+      it('says when a table is out of service', () => {
+        setInputs({ items: [{ ...table, seats: 4, enabled: false }] });
+
+        expect(nameOf('table-1')).toContain('floor-plan-item-table-disabled');
+      });
+
+      /**
+       * The label is a fragment rather than an empty string, because a table
+       * can be left without a number - the editor refuses to publish it, and
+       * says so - and "Round table , 4 seats" is a sentence with a hole in it.
+       */
+      it('says so when a table has no number yet', () => {
+        setInputs({ items: [{ ...table, seats: 4, label: '' }] });
+
+        expect(nameOf('table-1')).toContain(
+          '"label":"floor-plan-item-unnumbered"',
+        );
+      });
+
+      /** Geometry is named by what it is, which is all there is to say. */
+      it('names geometry by its type', () => {
+        expect(nameOf('wall-1')).toContain('floor-plan-object-wall');
+        expect(nameOf('wall-1')).not.toContain('floor-plan-item-table');
+      });
+
+      it('is what the canvas points at while the object is selected', () => {
+        setInputs({ selectedIds: ['wall-1'] });
+
+        const active = surface().getAttribute('aria-activedescendant');
+
+        expect(active).not.toBeNull();
+        expect(itemElement('wall-1')?.getAttribute('id')).toBe(active);
+      });
+
+      it('points at the last of several, and at nothing when none', () => {
+        setInputs({ selectedIds: ['wall-1', 'table-1'] });
+
+        expect(surface().getAttribute('aria-activedescendant')).toBe(
+          itemElement('table-1')?.getAttribute('id'),
+        );
+
+        setInputs({ selectedIds: [] });
+
+        expect(surface().getAttribute('aria-activedescendant')).toBeNull();
+      });
+    });
+
+    /**
+     * Selecting without a pointer (GitHub issue #1089).
+     *
+     * Every other mutation already had a keyboard path and every one of them
+     * needs something selected first, so this is what makes the editor usable
+     * without a mouse rather than merely operable.
+     */
+    describe('walking the plan with tab', () => {
+      const tab = (shiftKey = false): KeyboardEvent => {
+        const event = new KeyboardEvent('keydown', { key: 'Tab', shiftKey });
+
+        jest.spyOn(event, 'preventDefault');
+        component.onKeyDown(event);
+
+        return event;
+      };
+
+      it('starts at the first object and walks forwards', () => {
+        tab();
+
+        expect(selections).toEqual([['table-1']]);
+
+        setInputs({ selectedIds: ['table-1'] });
+        tab();
+
+        expect(selections[1]).toEqual(['wall-1']);
+      });
+
+      it('walks backwards with shift held', () => {
+        setInputs({ selectedIds: ['wall-1'] });
+        tab(true);
+
+        expect(selections).toEqual([['table-1']]);
+      });
+
+      /**
+       * The end of the plan is the end of the tab stop: the selection is
+       * dropped and the key is left alone, so the focus moves on to the next
+       * control. A canvas that cycled for ever would be a keyboard trap.
+       */
+      it('lets go of the key after the last object', () => {
+        setInputs({ selectedIds: ['wall-1'] });
+
+        const event = tab();
+
+        expect(selections).toEqual([[]]);
+        expect(event.preventDefault).not.toHaveBeenCalled();
+      });
+
+      it('lets go backwards before the first object', () => {
+        setInputs({ selectedIds: ['table-1'] });
+
+        const event = tab(true);
+
+        expect(selections).toEqual([[]]);
+        expect(event.preventDefault).not.toHaveBeenCalled();
+      });
+
+      /** Nothing is selected and there is nothing behind, so it is a plain tab. */
+      it('leaves backwards from an untouched plan', () => {
+        const event = tab(true);
+
+        expect(selections).toEqual([]);
+        expect(event.preventDefault).not.toHaveBeenCalled();
+      });
+
+      it('leaves from the edge of a selection of several', () => {
+        setInputs({ selectedIds: ['table-1', 'wall-1'] });
+        tab(true);
+
+        expect(selections).toEqual([[]]);
+      });
+
+      /**
+       * A pointer can only press what is on screen, so selecting used to imply
+       * seeing. Tabbing does not, and nudging a table nobody can see is not an
+       * edit an owner can check.
+       */
+      it('brings an object outside the view into it', () => {
+        component.zoomIn();
+        component.zoomIn();
+        component.zoomIn();
+        fixture.detectChanges();
+
+        const before = viewBox();
+
+        expect(table.position.y).toBeLessThan(before.y);
+
+        setInputs({ selectedIds: ['wall-1'] });
+        tab(true);
+        fixture.detectChanges();
+
+        const after = viewBox();
+
+        expect(table.position.y).toBeGreaterThan(after.y);
+        expect(table.position.y).toBeLessThan(after.y + after.height);
+      });
+
+      it('leaves the view alone for an object already on screen', () => {
+        const before = viewBox();
+
+        setInputs({ selectedIds: ['table-1'] });
+        tab();
+        fixture.detectChanges();
+
+        expect(viewBox()).toEqual(before);
       });
     });
 

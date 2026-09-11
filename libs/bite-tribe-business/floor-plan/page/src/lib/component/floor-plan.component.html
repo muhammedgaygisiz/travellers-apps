@@ -685,6 +685,19 @@
                 (placeRequest)="placeRequest.emit($event)"
                 (commandRequest)="commandRequest.emit($event)"
               />
+
+              <!--
+                The keyboard, written down (GitHub issue #1089).
+
+                The canvas announces its own shortcuts through its accessible
+                name, which reaches a screen reader and nobody else. An owner
+                working without a mouse but looking at the screen is the case
+                that hint misses, and a shortcut nobody can discover is not a
+                path to anything.
+              -->
+              <ion-note class="floor-plan__hint">
+                {{ 'floor-plan-canvas-hint' | transloco }}
+              </ion-note>
             </ion-card-content>
           </ion-card>
 

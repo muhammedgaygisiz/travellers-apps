@@ -126,6 +126,34 @@ pair. A responsive split is browsed through the viewport toolbar; it is
 baselined by adding a Loki configuration, never by adding a story (issue
 \#1547).
 
+## A Dark Story Cannot Switch The Document
+
+Both apps carry their dark palette on `html.dark` and on
+`prefers-color-scheme`, and a story that needs a dark reference can reach
+neither. Loki selects one story after another **without reloading the page**,
+so a class left on `document.documentElement` darkens every reference captured
+after it, and a media query is the runner's setting rather than the story's.
+
+Put the palette on the story's own element instead, and list only the variables
+the component actually draws from - for the canvas that is the background, the
+ink, the ink as `rgb` components and the primary colour:
+
+```ts
+const DARK = '--ion-background-color: #1a1c22; --ion-text-color: #ffffff';
+
+componentWrapperDecorator((story) => `<div style="${DARK}">${story}</div>`);
+```
+
+The floor-plan canvas is baselined this way (issue \#1089). The same decorator
+shape gives a `filter: grayscale(1)` story, which is how a plan that must not
+carry meaning in a colour alone is asserted rather than promised - and it is
+the state the plan is printed in.
+
+Note what this does **not** prove: a component whose dark rendering comes from
+a variable it does not name here renders light inside the wrapper, so the list
+is part of the assertion. It is worth writing the story only for a surface
+whose colours all resolve from a handful of variables.
+
 ## Storybook Serves Three Translation Catalogues
 
 Each app ships its own Transloco catalogue, and all three are named `en.json`,

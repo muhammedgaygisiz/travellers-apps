@@ -6,7 +6,7 @@ import {
 } from 'model';
 import { snapToGrid } from './floor-plan-grid';
 import { FloorPlanItem } from './floor-plan-item';
-import { clampCentre } from './floor-plan-viewport';
+import { CanvasViewport, clampCentre } from './floor-plan-viewport';
 
 /**
  * The geometry of editing a floor plan (GitHub issue #1083).
@@ -113,6 +113,24 @@ export const rotatePoint = (
     y: origin.y + dx * sin + dy * cos,
   };
 };
+
+/**
+ * Whether a box is wholly inside the visible rectangle.
+ *
+ * Asked by the keyboard, which is the one way to select an object the owner
+ * cannot already see: a pointer can only press what is on screen, so until
+ * issue #1089 nothing had to bring anything into view. Wholly rather than
+ * partly, because a table with a corner showing is one whose number is off the
+ * edge, and the number is what the owner is looking for.
+ */
+export const isWithinViewport = (
+  bounds: FloorPlanBounds,
+  viewport: CanvasViewport,
+): boolean =>
+  bounds.left >= viewport.x &&
+  bounds.top >= viewport.y &&
+  bounds.right <= viewport.x + viewport.width &&
+  bounds.bottom <= viewport.y + viewport.height;
 
 export const roomBounds = (room: FloorPlanSize): FloorPlanBounds => ({
   left: 0,

@@ -19,7 +19,9 @@ Firebase provides backend persistence, authentication integration, storage, func
 ```text
 bites               bites/{id}/likes
 users               users/{id}/followers, users/{id}/following, users/{id}/pushTokens
-restaurants
+restaurants         restaurants/{id}/rooms, restaurants/{id}/tables
+restaurantStaff
+tableTokens
 menus
 bucketlists
 biteTrails          biteTrails/{id}/sells, biteTrails/{id}/ratings
@@ -98,6 +100,29 @@ holding the restaurant — and **no writer at all**: the association only means
 anything alongside the `staff` custom claim, which no client can write, so a
 client that could write the document could only ever produce half of a grant.
 `addRestaurantStaff` and `removeRestaurantStaff` write it through the Admin SDK.
+
+**`/tableTokens` is the one collection a client with no session may read.** It
+has to be: a guest scanning the QR code on a table has no account, and the scan
+is what establishes which restaurant they would be signing in to. The document
+is top-level and named by the token itself, so resolving one is a single
+`get` - nesting it under the restaurant would require the scanner to already
+know the fact the scan exists to establish.
+
+The rule is `get` without `list`, and that distinction is the whole enumeration
+defence (issue \#1086). Whoever physically holds a printed code can read what it
+resolves to; nobody can walk the set, so a restaurant's table count and its live
+codes stay unavailable to an account that was never given one. Guessing is the
+other half and is answered by the token rather than by the rule: 130 bits drawn
+from the system CSPRNG, rendered in Crockford base32.
+
+**Nothing client-writable, including the restaurant that owns the table**, and
+`RestaurantTable.qrTokenId` is backend-owned on the table document for the same
+reason. An owner able to write either could point a table at another
+restaurant's token or revive a revoked one, and both are a printed code
+resolving somewhere it should not. `issueTableQrTokens`, `rotateTableQrToken`
+and `syncTableQrTokenOnTableWrite` write both fields through the Admin SDK. The
+`qrTokenId` comparison is by value, so the editor saving a table back whole is
+unaffected.
 
 ### Testing And Deploying The Rules
 

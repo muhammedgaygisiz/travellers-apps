@@ -47,6 +47,11 @@ export {
   listRestaurantStaff,
   removeRestaurantStaff,
 } from './functions/restaurants/restaurant-staff';
+export {
+  issueTableQrTokens,
+  rotateTableQrToken,
+} from './functions/restaurants/table-qr-tokens';
+export { syncTableQrTokenOnTableWrite } from './functions/restaurants/sync-table-qr-token-on-table-write';
 export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-create';
 export { claimDisplayName } from './functions/users/claim-display-name';
 export { setUserRoles } from './functions/users/set-user-roles';

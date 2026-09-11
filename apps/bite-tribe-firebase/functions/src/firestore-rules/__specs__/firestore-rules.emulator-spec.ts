@@ -58,6 +58,27 @@ const OWNED_ROOM = 'owned-room';
 const OWNED_TABLE = 'owned-table';
 const FOREIGN_ROOM = 'foreign-room';
 
+/**
+ * A table that already carries a QR token, kept apart from `OWNED_TABLE` so
+ * that both halves of the `qrTokenId` rule have something real to act on: a
+ * table with no token may not gain one from a client, and a table with one may
+ * be saved back whole without losing it (issue #1086).
+ */
+const TOKENED_TABLE = 'tokened-table';
+
+/**
+ * The length a real token has, and deliberately nothing else about one.
+ *
+ * `generateTableQrToken` draws 26 characters of Crockford base32 at random, and
+ * a fixture that looked like that is a fixture the repository's secret scanner
+ * reports as a leaked credential - the correct behaviour from a scanner, and a
+ * false alarm every reviewer afterwards has to dismiss. What a fixture here has
+ * to be is 26 characters the rules accept as a document id, so it is that and
+ * visibly nothing more.
+ */
+const ACTIVE_TOKEN = 'TEST-ACTIVE-TABLE-TOKEN-01';
+const REVOKED_TOKEN = 'TEST-REVOKED-TABLE-TOKEN-1';
+
 /** The version the owned room is stored at, so a stale save has one to miss. */
 const STORED_ROOM_VERSION = 3;
 
@@ -246,9 +267,38 @@ beforeEach(async () => {
       TABLE_FIXTURE,
     );
     await setDoc(
+      doc(db, 'restaurants', OWNED_RESTAURANT, 'tables', TOKENED_TABLE),
+      { ...TABLE_FIXTURE, label: '14', qrTokenId: ACTIVE_TOKEN },
+    );
+    await setDoc(
       doc(db, 'restaurants', FOREIGN_RESTAURANT, 'rooms', FOREIGN_ROOM),
       roomAtVersion(1),
     );
+
+    // Written only by `issueTableQrTokens`, `rotateTableQrToken` and
+    // `syncTableQrTokenOnTableWrite` through the Admin SDK (issue #1086).
+    await setDoc(doc(db, 'tableTokens', ACTIVE_TOKEN), {
+      restaurantId: OWNED_RESTAURANT,
+      roomId: OWNED_ROOM,
+      tableId: TOKENED_TABLE,
+      tableLabel: '14',
+      tableEnabled: true,
+      status: 'active',
+      issuedAt: '2026-09-10T09:00:00.000Z',
+      issuedAtTimestamp: 1789030800000,
+    });
+    await setDoc(doc(db, 'tableTokens', REVOKED_TOKEN), {
+      restaurantId: OWNED_RESTAURANT,
+      roomId: OWNED_ROOM,
+      tableId: 'a-table-that-was-deleted',
+      tableLabel: '21',
+      tableEnabled: false,
+      status: 'revoked',
+      issuedAt: '2026-08-01T09:00:00.000Z',
+      issuedAtTimestamp: 1785574800000,
+      endedAt: '2026-09-01T09:00:00.000Z',
+      endedAtTimestamp: 1788253200000,
+    });
 
     await setDoc(doc(db, 'meta', 'leaderboard'), { entries: [] });
     await setDoc(doc(db, 'displayNames', 'consumer'), { userId: CONSUMER });
@@ -612,6 +662,54 @@ describe('floor plans', () => {
       );
     });
 
+    /**
+     * `qrTokenId` is backend-owned (issue #1086). Naming it in the rules is
+     * what stops an owner pointing their table at another restaurant's token,
+     * or resurrecting one that was revoked - both of which are a printed code
+     * resolving somewhere it should not.
+     */
+    it('refuses a client changing a table QR token', async () => {
+      await assertFails(
+        updateDoc(doc(tablesOf(asOwner(), OWNED_RESTAURANT), TOKENED_TABLE), {
+          qrTokenId: REVOKED_TOKEN,
+        }),
+      );
+    });
+
+    it('refuses a client giving an untokened table a token', async () => {
+      await assertFails(
+        updateDoc(doc(tablesOf(asOwner(), OWNED_RESTAURANT), OWNED_TABLE), {
+          qrTokenId: ACTIVE_TOKEN,
+        }),
+      );
+    });
+
+    it('refuses a table created carrying a token', async () => {
+      await assertFails(
+        setDoc(doc(tablesOf(asOwner(), OWNED_RESTAURANT), 'table-15'), {
+          ...TABLE_FIXTURE,
+          label: '15',
+          qrTokenId: ACTIVE_TOKEN,
+        }),
+      );
+    });
+
+    /**
+     * The half that has to keep working. The editor reads a table and writes it
+     * back whole, token field included, so a rule comparing keys rather than
+     * values would fail every ordinary save of a table that has a code.
+     */
+    it('accepts a table save that carries the token it read', async () => {
+      await assertSucceeds(
+        setDoc(doc(tablesOf(asOwner(), OWNED_RESTAURANT), TOKENED_TABLE), {
+          ...TABLE_FIXTURE,
+          label: '14',
+          seats: 6,
+          qrTokenId: ACTIVE_TOKEN,
+        }),
+      );
+    });
+
     it('lets the owner delete a table and an empty room', async () => {
       await assertSucceeds(
         deleteDoc(doc(tablesOf(asOwner(), OWNED_RESTAURANT), OWNED_TABLE)),
@@ -747,6 +845,101 @@ describe('floor plans', () => {
       expect(after.data()).toEqual(before.data());
       expect(after.data()).toEqual(TABLE_FIXTURE);
     });
+  });
+});
+
+describe('table qr tokens', () => {
+  const tokens = (db: Firestore): CollectionReference =>
+    collection(db, 'tableTokens');
+
+  /**
+   * The one collection an unauthenticated client may read, and the reason it
+   * is top-level: a guest scanning a code at a table has no session, and the
+   * scan is what establishes which restaurant they would be signing in to.
+   */
+  it('lets a guest with no session resolve a token in one read', async () => {
+    const snapshot = await assertSucceeds(
+      getDoc(doc(tokens(anonymously()), ACTIVE_TOKEN)),
+    );
+
+    expect(snapshot.data()).toMatchObject({
+      restaurantId: OWNED_RESTAURANT,
+      roomId: OWNED_ROOM,
+      tableId: TOKENED_TABLE,
+      tableLabel: '14',
+      status: 'active',
+    });
+  });
+
+  /**
+   * A revoked token is still a document, so the scan resolves to "no longer
+   * valid" rather than to nothing. Deleting it would make a retired table's
+   * sticker indistinguishable from a code that was never issued.
+   */
+  it('resolves a revoked token to a document that says so', async () => {
+    const snapshot = await assertSucceeds(
+      getDoc(doc(tokens(anonymously()), REVOKED_TOKEN)),
+    );
+
+    expect(snapshot.data()).toMatchObject({ status: 'revoked' });
+  });
+
+  it('resolves a token that was never issued to a missing document', async () => {
+    const snapshot = await assertSucceeds(
+      getDoc(doc(tokens(anonymously()), 'NEVERISSUEDNEVERISSUED00')),
+    );
+
+    expect(snapshot.exists()).toBe(false);
+  });
+
+  /**
+   * The enumeration defence, and the acceptance criterion of issue #1086.
+   * `get` is allowed and `list` is not, so a token can be read by whoever holds
+   * the printed code and the set of them cannot be walked - not by a guest, not
+   * by the restaurant, not by an operator.
+   */
+  it('refuses listing the collection to everyone', async () => {
+    await assertFails(getDocs(tokens(anonymously())));
+    await assertFails(getDocs(tokens(asConsumer())));
+    await assertFails(getDocs(tokens(asOwner())));
+    await assertFails(getDocs(tokens(asOperator())));
+  });
+
+  it('refuses a filtered query as firmly as an unfiltered one', async () => {
+    await assertFails(
+      getDocs(
+        query(tokens(asOwner()), where('restaurantId', '==', OWNED_RESTAURANT)),
+      ),
+    );
+  });
+
+  /**
+   * Never client-writable, by anyone, including the restaurant that owns the
+   * table. A token is created by the backend or not at all.
+   */
+  it('refuses every client write, including the restaurant owner', async () => {
+    const forged = {
+      restaurantId: OWNED_RESTAURANT,
+      roomId: OWNED_ROOM,
+      tableId: TOKENED_TABLE,
+      tableLabel: '14',
+      tableEnabled: true,
+      status: 'active',
+      issuedAt: '2026-09-11T09:00:00.000Z',
+      issuedAtTimestamp: 1789117200000,
+    };
+
+    await assertFails(setDoc(doc(tokens(anonymously()), 'FORGED'), forged));
+    await assertFails(setDoc(doc(tokens(asConsumer()), 'FORGED'), forged));
+    await assertFails(setDoc(doc(tokens(asOwner()), 'FORGED'), forged));
+    await assertFails(setDoc(doc(tokens(asOperator()), 'FORGED'), forged));
+  });
+
+  it('refuses reviving a revoked token and deleting an active one', async () => {
+    await assertFails(
+      updateDoc(doc(tokens(asOwner()), REVOKED_TOKEN), { status: 'active' }),
+    );
+    await assertFails(deleteDoc(doc(tokens(asOwner()), ACTIVE_TOKEN)));
   });
 });
 

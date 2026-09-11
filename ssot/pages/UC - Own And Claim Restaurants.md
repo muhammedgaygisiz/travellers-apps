@@ -2,6 +2,7 @@
 
 ## Status
 
+**Level:** L0.
 Implemented for a single owner. The roles exist: \#1469 delivered `admin` and `business` as Firebase Auth custom claims and \#1472 guarded every operator callable, both driven by the admin app rather than by this use case. The shared model carries the ownership fields as of \#1074, and **an operator writes them** as of \#1077: `assignRestaurantOwner` and `revokeRestaurantOwner`, behind a surface in the admin app. **The rules enforce it** as of \#1078: a Restaurant and its Menu are writable by the assigned account and by an Operator and by nobody else, and `ownerUserId`, `claimStatus`, `claimedAt` and `claimedAtTimestamp` are writable by no client at all - the forgery demonstrated against the emulator on 8 September 2026 is now a deny test. **The business app reads it** as of \#1079: the dashboard lists only the restaurants assigned to the caller, and the two routes that edit one refuse a restaurant assigned elsewhere by direct URL. **The business account manages its own staff** as of \#1537: `addRestaurantStaff` and `removeRestaurantStaff` write the `staff` claim and a `/restaurantStaff/{uid}` record together, authorised by `ownerUserId` for a restaurant owner and by `RD-UR-6` for an operator. What that role may then _do_ is still nothing, deliberately - \#1537 scoped itself to the grant. The rules deploy by hand: they bind production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run. Specified through issue \#1069 as stage 0 of issue \#735.
 
 This is the blocking prerequisite for every other stage of the Restaurant Interaction Platform.
@@ -10,21 +11,20 @@ This is the blocking prerequisite for every other stage of the Restaurant Intera
 
 A restaurant has exactly one accountable owner: a normal BiteTribe user carrying the `business` role. Users can only read and write the restaurants assigned to them. Staff can act on those restaurants within a narrower permission set. Operators assign and revoke ownership.
 
-## Why It Is Needed
-
-Verified in the codebase on 25 July 2026, and re-checked on 8 September 2026:
-
-- `Restaurant` in `libs/bite-tribe-common/model/src/lib/restaurant.ts` had no owner or claim field. Issue \#1074 added `ownerUserId`, `claimStatus`, `claimedAt`, and `claimedAtTimestamp` as optional fields, plus a `RestaurantClaim` model. ~~Nothing writes any of them.~~ **\#1077 is the writer**, and it removed `RestaurantClaim` with its barrel export: the model never had an importer, and direct assignment produces no claim document.
-- ~~No roles, custom claims, or membership checks exist in `apps/bite-tribe-firebase/functions/src`.~~ **No longer true.** \#1469 delivered the `admin` and `business` roles as custom claims written only by `setUserRoles`, and \#1472 put `requireAdmin` on every operator callable with a build-failing endpoint classification. Two gaps remain and \#1075 owns them: there is no `staff` role, and there is **no backend guard for `business`** \- across the whole functions source `'business'` appears only in the role list and in deny tests, so the business app's gate is client-side only.
-- `apps/bite-tribe-firebase/firestore.rules` granted read and write on every document to every authenticated user. **No longer true** since \#1078 replaced it with ownership-scoped rules. Reads stayed where they were on purpose: narrowing them is \#1079's visible scope, and \#1079 narrows them in the client query rather than in the rules, so an unowned restaurant is still readable and simply not listed.
-
-Under those rules any floor plan, table state, visit, or order was writable by any logged-in user, which is why this stage blocks the rest of \#735: the product vision for claimed restaurants assumed a capability that did not exist.
+This page owns who holds a restaurant, how that hold is granted and revoked, and what
+reads and writes it gates - in the callables, in `firestore.rules`, and in the business
+app's own scope. What an account may then _do_ with a restaurant it holds belongs to the
+pages for those behaviours.
 
 ## Actors
 
-- BiteTribe operator assigning and revoking ownership
-- User with the `business` role holding a restaurant
-- Restaurant staff member, holding the `staff` role
+- **BiteTribe Operator** - assigns and revokes ownership with an attributable reason, and
+  can act on any restaurant under `RD-UR-6`, so a restaurant that removes its last account
+  with access has a way back.
+- **Restaurant Owner** - holds the `business` role and the restaurants assigned to it, edits
+  those restaurants and their menus, and adds and removes their staff.
+- **Restaurant Staff** - holds the `staff` role, granted by the Restaurant Owner. Named here
+  because this page is where the grant is made, not because the role can yet act on anything.
 
 ## Flow
 
@@ -43,7 +43,33 @@ Rewritten on 8 September 2026, implemented by \#1077, \#1078, \#1079 and \#1537.
 
 **\#1079 closed the gap between the assignment and what the account can _see_.** Verified against the emulator on 8 September 2026, before it: `restaurantsLoader` read the whole `restaurants` collection with no owner filter, so a business account was shown a restaurant assigned to a _different_ account and could open its edit form. The list had never been ownership-driven, so that was not something \#1077 regressed - it was the half of the epic's "the effect is visible in the business app" criterion \#1079 owned. \#1078 had already refused the _save_, which left the account reaching a form it could not submit and being told only that something went wrong; \#1079 removed the form from the list rather than improving that message.
 
-Verification happens off-system, on the call the operator is already having. That is the "manual admin review for the first iteration" \#1069 proposed, with the review queue removed: a queue exists to hold information the operator has in front of them, and it brings a claim document, a five-state machine, contested and superseded states with it. See [[issue-1076]] for what was given up.
+Verification happens off-system, on the call the operator is already having. That is the "manual admin review for the first iteration" \#1069 proposed, with the review queue removed: a queue exists to hold information the operator has in front of them, and it brings a claim document, a five-state machine, contested and superseded states with it. See \#1076 for what was given up.
+
+## Why It Is Needed
+
+When this stage was specified on 25 July 2026, nothing in the system could say who a
+restaurant belonged to. Three gaps, each now closed:
+
+- **The model carried no owner.** `Restaurant` in
+  `libs/bite-tribe-common/model/src/lib/restaurant.ts` had no owner or claim field. \#1074
+  added `ownerUserId`, `claimStatus`, `claimedAt` and `claimedAtTimestamp` as optional
+  fields, and \#1077 became their writer. See `Data Model`.
+- **The backend asserted no roles.** \#1469 delivered `admin` and `business` as custom claims
+  written only by `setUserRoles`; \#1472 put `requireAdmin` on every operator callable, with
+  an endpoint classification that fails the build for an unguarded one; and \#1075 added
+  `staff`, generalised `requireAdmin` into `requireRole`, and made `business` and `staff`
+  mutually exclusive. A `business` caller is guarded by `requireRestaurantAuthority`, which
+  admits `business` or `admin` through `requireAnyRole` and then decides _which_ restaurant
+  by `Restaurant.ownerUserId`; it guards the staff callables and the QR-token callables of
+  \#1086.
+- **The rules granted read and write on every document to every authenticated user.** \#1078
+  replaced them with ownership-scoped rules. Reads stayed where they were on purpose:
+  narrowing them is \#1079's visible scope, and \#1079 narrows them in the client query
+  rather than in the rules, so an unowned restaurant is still readable and simply not listed.
+
+Under the old rules any floor plan, table state, visit, or order was writable by any
+logged-in user, which is why this stage blocks the rest of \#735: the product vision for
+claimed restaurants assumed a capability that did not exist.
 
 ## Data Model
 
@@ -53,7 +79,7 @@ Added in issue \#1074, all optional so existing documents stay valid:
 - `Restaurant.claimStatus` - `unclaimed`, `claimed`, `revoked` after \#1077 reduced it. A missing value means `unclaimed`.
 - `Restaurant.claimedAt` and `claimedAtTimestamp` - when the current ownership was granted, deleted when it is revoked.
 
-~~`RestaurantClaim` in `libs/bite-tribe-common/model/src/lib/restaurant-claim.ts`.~~ **Removed by \#1077 rather than filled in.** It was added for the self-service flow, never had an importer, and direct assignment produces no claim document, so it went with its barrel export. `claimStatus` reduced with it \- `pending` and `disputed` existed only because of a review queue, so `unclaimed`, `claimed` and `revoked` are what assignment can produce.
+`RestaurantClaim`, once at `libs/bite-tribe-common/model/src/lib/restaurant-claim.ts`, was **removed by \#1077 rather than filled in**. It was added for the self-service flow, never had an importer, and direct assignment produces no claim document, so it went with its barrel export. `claimStatus` reduced with it \- `pending` and `disputed` existed only because of a review queue, so `unclaimed`, `claimed` and `revoked` are what assignment can produce.
 
 There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it would duplicate `ownerUserId`, and who assigned it and why is in the operator log rather than on the document: both callables require a reason and log through `logOperatorAction`, the shape every operator action shares. See [[Implementation - Firebase Functions]].
 
@@ -63,7 +89,7 @@ There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it 
 - Roles are Firebase Auth custom claims set only by the backend, so they cannot be forged from the client. See [[Architecture - Auth]].
 - **`admin`, `business` and `staff` are independent roles, not a hierarchy.** A staff account holds `staff` and **not** `business`, which is why `roleGuard` has to accept a set of roles: every business-app route is gated on `roleGuard('business')` today, so a staff account would otherwise be signed out at the door. Holding `business` and `staff` together is contradictory \- one operates a restaurant, the other is the narrowed set \- and `setUserRoles` refuses it.
 - **Which restaurants an account is assigned to is a Firestore document, never a custom claim.** An assignment change then takes effect immediately rather than after up to an hour, there is no 1000-byte claim payload to grow into, and \#1078's rules read the same field \- a claim copy would be a second version of one fact that can silently disagree with it.
-- **Who may grant which role is not uniform.** `admin` and `business` are operator decisions through the admin-only `setUserRoles`. `staff` turns over with ordinary hiring, so a business account grants it itself, for the restaurants it holds only \- a callable that let any `business` caller grant `staff` to any uid would be a privilege-escalation path into the business app dressed as a convenience. See [[issue-1537]].
+- **Who may grant which role is not uniform.** `admin` and `business` are operator decisions through the admin-only `setUserRoles`. `staff` turns over with ordinary hiring, so a business account grants it itself, for the restaurants it holds only \- a callable that let any `business` caller grant `staff` to any uid would be a privilege-escalation path into the business app dressed as a convenience. See \#1537.
 - Assignment is idempotent, matching the existing `verifyRestaurantCandidate` rule.
 - No restaurant can end up claimed by two owners. The read and the write are one transaction, so two operators assigning the same restaurant cannot both see it unowned and both write.
 - Existing unowned restaurants keep working for consumer read paths and are visible to admins for triage.
@@ -81,10 +107,33 @@ There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it 
 
 Replacing the open Firestore rules is the highest-regression-risk change in the epic. It needs its own branch, its own verification pass against both apps in the emulator, and a rollback plan. It must not be combined with feature work.
 
+## MVP Classification
+
+**[Secondary]** - the whole page. Operator assignment and revocation, the business app's
+scoping to the caller, and staff management are stage 0 of the Restaurant Interaction
+Platform: nothing in production is assigned today, and the epic they unblock is post-launch.
+
+Not on this page: the ownership-scoped Firestore rules themselves. \#1078 replaced rules
+under which any signed-in account could write any document, which is launch-critical, but
+the rules are a whole-database artefact rather than this page's - see
+[[Architecture - Firebase]], `Firestore Security Rules`.
+
+## App Store Review Area
+
+Not relevant, because nothing on this page reaches a store surface. Ownership is decided in
+the callables and in `firestore.rules`, and the two apps that exercise it - the admin app
+and the business app - are web surfaces: only `bite-tribe-ios` and `bite-tribe-android`
+are packaged with Capacitor, and [[Implementation - Store Declarations]] covers that
+consumer client alone.
+
+This stops being true the moment a business or admin client is submitted to a store, at
+which point the empty list a staff account is shown becomes a minimum-functionality
+question rather than a known limitation.
+
 ## Related GitHub Scope
 
 - Issue \#1069 - Restaurant ownership, claiming and authorization, with seven child issues
-- Issue \#1075 - the three roles as verified identity, mostly delivered by \#1469 and \#1472
+- Issue \#1075 - the three roles as verified identity; `admin` and `business` came from \#1469 and \#1472, and \#1075 itself added `staff`, generalised `requireAdmin` into `requireRole`, and made `business` and `staff` mutually exclusive; done
 - Issue \#1076 - self-service restaurant claiming, closed as not planned
 - Issue \#1077 - assign and revoke restaurant ownership, and remove the claim model; done
 - Issue \#1078 - ownership-scoped Firestore rules replacing the open ones; done
@@ -99,3 +148,14 @@ Replacing the open Firestore rules is the highest-regression-risk change in the 
 - [[Restaurant]]
 - [[User]]
 - [[Floor Plan]]
+- [[User Roles]]
+
+## Related Pages
+
+- [[Personas]] - the audience the `Actors` mapping displaced: the restaurant owner or
+  business maintainer
+- [[Architecture - Auth]] - how the roles are carried, and what each app binds
+- [[Architecture - Firebase]] - the Firestore security rules as a whole
+- [[Implementation - Firebase Functions]] - `logOperatorAction` and the operator callables
+- \#1076 - self-service claiming, closed as not planned
+- [[issue-1371]] - removed the organisation fields this was first specified against

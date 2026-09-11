@@ -309,5 +309,21 @@
   "floor-plan-duplicate": "Duplicate the selection",
   "floor-plan-delete-selection": "Delete the selection",
   "floor-plan-selection-count": "{{count}} selected",
-  "floor-plan-unsaved-changes": "This plan has changes that are not saved yet."
+  "floor-plan-unsaved-changes": "This plan has changes that are not saved yet.",
+  "floor-plan-qr-codes": "Print QR codes",
+  "floor-plan-qr-codes-blocked": "Save this plan before printing QR codes, so every table has a code.",
+  "qr-sheets-title": "Table QR codes",
+  "qr-sheets-load-failed": "We couldn't load the codes for this restaurant. Please try again.",
+  "qr-sheets-empty": "There are no tables in service to print a code for. Add tables to the floor plan and put them in service first.",
+  "qr-sheets-layout-sticker": "Sticker sheet",
+  "qr-sheets-layout-tent": "Table tents",
+  "qr-sheets-layout-sticker-hint": "Twelve codes to an A4 sheet. Print on label paper and stick one on each table.",
+  "qr-sheets-layout-tent-hint": "One large code per A4 page, for a card that stands on the table.",
+  "qr-sheets-room": "Room",
+  "qr-sheets-room-all": "All rooms",
+  "qr-sheets-tables": "Tables to print",
+  "qr-sheets-select-all": "All tables",
+  "qr-sheets-disabled": "{{count}} table(s) are out of service and get no code: {{labels}}.",
+  "qr-sheets-missing": "These tables have no code yet: {{labels}}. Reload the page to try again.",
+  "qr-sheets-print": "Print {{count}} code(s)"
 }

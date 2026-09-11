@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { RestaurantTable, Room } from 'model';
 import { FloorPlanConflictError, RoomNotEmptyError } from './floor-plan-errors';
 
@@ -49,6 +50,27 @@ export type NewTable = WithoutId<RestaurantTable>;
 export interface RoomPlan {
   room: Room;
   tables: RestaurantTable[];
+}
+
+/**
+ * One table's QR token, as `issueTableQrTokens` reports it (issue \#1086).
+ *
+ * `existing` is the idempotent repeat and the reason the sheet page may ask on
+ * every visit: the table already held an active token, nothing was written,
+ * and the codes already printed and stuck to tables stay valid.
+ */
+export interface TableQrTokenResult {
+  tableId: string;
+  label: string;
+  token: string;
+  status: 'issued' | 'existing' | 'rotated';
+}
+
+export interface IssueTableQrTokensResult {
+  restaurantId: string;
+  tokens: TableQrTokenResult[];
+  /** Tables that were asked for and are not in service, so got no token. */
+  skippedTableIds: string[];
 }
 
 /**
@@ -408,5 +430,35 @@ export class FloorPlanDataAccessService {
     await FirebaseFirestore.deleteDocument({
       reference: this.tableReference(restaurantId, tableId),
     });
+  }
+
+  /**
+   * Asks the backend for the QR tokens of a restaurant's enabled tables.
+   *
+   * A callable rather than a write from here, and that is the shape of the
+   * feature rather than a preference: issue \#1086 made `qrTokenId`
+   * backend-owned in `firestore.rules`, and a token has to be minted from the
+   * system CSPRNG and written in the same transaction as the table's pointer
+   * at it. A client can do neither.
+   *
+   * Called every time the sheet page opens, which is safe because issuing is
+   * idempotent — a table already holding an active token is reported as
+   * `existing` and nothing is written. That is what lets the page ask without
+   * a button, instead of making an owner press "generate" and wonder whether
+   * pressing it twice invalidates the sheet they printed last week.
+   *
+   * Disabled tables come back in `skippedTableIds` rather than as a failure.
+   * [[Table]] gives a code to every *enabled* table, and a plan that holds one
+   * table out of service is an ordinary plan.
+   */
+  async issueTableQrTokens(
+    restaurantId: string,
+  ): Promise<IssueTableQrTokensResult> {
+    const { data } = await FirebaseFunctions.callByName<
+      { restaurantId: string },
+      IssueTableQrTokensResult
+    >({ name: 'issueTableQrTokens', data: { restaurantId } });
+
+    return data;
   }
 }

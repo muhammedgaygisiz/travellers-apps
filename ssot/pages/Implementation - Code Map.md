@@ -71,6 +71,13 @@ the edit geometry beside it - pure functions over millimetres for snapping,
 clamping, resizing and rotation - while the layout being edited, its undo history
 and every write stayed in `page`. See [[Floor Plan]].
 
+Issue \#1087 put the printed QR code in the same library, for the same reason:
+`table-qr-code.ts` turns a token into an SVG path and knows nothing about where
+the token came from, and `TableQrCodeComponent` draws it. The sheet that decides
+which tables to print, asks the backend for their tokens and carries the print
+stylesheet is in `page`, and its route is
+`restaurant/:restaurantId/floor-plan/qr-codes`.
+
 The business app holds only what a restaurant does to its own data. Migrations,
 restaurant-candidate verification, the unmatched Bite places and the
 new-restaurant form they open left for the admin app with issue \#1473.

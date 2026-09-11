@@ -288,6 +288,9 @@ export class FloorPlanComponent {
   readonly snapChange = output<boolean>();
   readonly logoutClick = output<void>();
 
+  /** Leaves the editor for the printable table codes (issue #1087). */
+  readonly printQrCodes = output<void>();
+
   readonly placeRequest = output<FloorPlanPlacement>();
   readonly selectionChange = output<string[]>();
   readonly itemsChange = output<FloorPlanItem[]>();

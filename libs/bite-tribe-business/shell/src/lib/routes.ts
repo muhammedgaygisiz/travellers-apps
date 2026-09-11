@@ -149,6 +149,29 @@ export const ROUTES: Routes = withAuthRoutes([
       ownedRestaurantGuard,
     ],
   },
+  /**
+   * The printable table codes, under the floor plan and behind the same gate
+   * (issue #1087).
+   *
+   * A route of its own rather than a dialog inside the editor, for two
+   * reasons. A print stylesheet can strip the app's chrome off a page it owns
+   * and cannot reliably do it through an overlay's stacking and scroll
+   * container. And a sticker that was scraped off table 12 is reprinted months
+   * after the plan was last edited, by an owner who wants the sheet rather
+   * than the editor — so it is a place that can be bookmarked and returned to.
+   */
+  {
+    path: 'restaurant/:restaurantId/floor-plan/qr-codes',
+    loadComponent: () =>
+      import('bite-tribe-business/floor-plan').then(
+        (m) => m.TableQrSheetsContainer,
+      ),
+    canActivate: [
+      authGuard,
+      roleGuard('business', 'staff'),
+      ownedRestaurantGuard,
+    ],
+  },
   {
     path: 'restaurant/:restaurantId/menu/:menuId',
     loadComponent: () =>

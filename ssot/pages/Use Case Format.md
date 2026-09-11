@@ -68,7 +68,7 @@ defect list and not a work plan. Where it needs one of those, it links to it.
 | 11 | `Rules And Invariants` | opt | opt | ✓ | ✓ | `R-1..R-n`. Normative statements. Code-anchor column at L3 only |
 | 12 | `Exceptions And Failure Modes` | – | – | opt | ✓ | Only what the actogram cannot express. See `UF-12` |
 | 13 | `Authorization` | – | – | ✓ | ✓ | What is enforced, where, and what is not |
-| 14 | `MVP Classification` | ✓ | ✓ | ✓ | ✓ | Never omitted. See below |
+| 14 | `MVP Classification` | ✓ | ✓ | ✓ | ✓ | Never omitted. `[MVP]`, `[Secondary]` or `[Obsolete]`. See below |
 | 15 | `App Store Review Area` | opt | ✓ | ✓ | ✓ | Never omitted from L1 up. Same rule as [[GitHub Issue Format]]: if not relevant, "not relevant, because …" |
 | 16 | `Supported Evidence` | opt | ✓ | – | – | Optional at L0, required at L1. At L2 and L3 the `@` locus on each step replaces it |
 | 17 | `Related GitHub Scope` | opt | ✓ | ✓ | ✓ | Never omitted from L1 up. The issue and epic links that close the chain in [[Agent Operating Contract]] |
@@ -135,7 +135,10 @@ is secondary. See [[GitHub Issue Format]] for the `P0`–`P4` board mapping.
 
 - **UF-15** A step or terminal state that is `[Secondary]` and unimplemented needs no
   defect entry. One that is `[MVP]` and unimplemented is a release blocker and MUST
-  carry an issue.
+  carry an issue. Nothing on an `[Obsolete]` page is a release blocker (`UF-21`).
+
+Where the behaviour the page describes has left scope, the section carries the single
+`[Obsolete]` line instead. See Obsolete Pages.
 
 ## Provenance
 
@@ -212,6 +215,28 @@ was not L2-correct.
 - **UF-20** Migration order MUST follow release risk, not the page list. A page is
   migrated when a decision depends on it, when it is referenced by an L2 or L3 page and
   must hold up its end of a contract, or when Apple or Google exercise it directly.
+
+## Obsolete Pages
+
+A use case becomes obsolete when the behaviour it describes leaves scope. The page is
+deleted once the code is gone; the marker is what keeps that deletion on a list rather
+than in someone's memory.
+
+- **UF-21** An obsolete page is classified `**[Obsolete]**` in `MVP Classification`. The
+  classification applies to the whole page and MUST be the only one on it: never mixed
+  with `[MVP]` or `[Secondary]` lines, and never applied to a single step or terminal state.
+- **UF-22** The line MUST name the issue that removes the code, or state `no issue yet`.
+
+```
+**[Obsolete]** — the business app let a restaurant run backfills on its own data, a
+workaround for the missing `admin` role. Removed by \#1473.
+```
+
+- **UF-23** An `[Obsolete]` page is deleted once the code it describes is gone. Before it
+  goes: no other page may reference its `UC-ID` — a reference in another page's `Scope`
+  table is a contract, and it is removed or re-pointed first (`UF-9`); and the entry is
+  removed from [[SSOT]], [[contents]], from [[Traceability Map]] where it appears, and
+  from the registry at the end of this page.
 
 ## Template
 
@@ -373,6 +398,8 @@ X5   SYS  <action>
 
 **[MVP]** — <steps and terminals>
 **[Secondary]** — <steps and terminals, with the issue that owns each>
+<or, instead of both lines above — UF-21>
+**[Obsolete]** — <one line reason, with the issue that owns the deletion>
 
 ## App Store Review Area
 
@@ -410,6 +437,10 @@ X5   SYS  <action>
 
 Five codes have no page. They are referenced by `UC-VRC` and `UC-DRC` for rules those
 flows depend on, which makes writing them visible work rather than an omission.
+
+A deleted page's row goes with it (`UF-23`). The code is then unclaimed, and `UF-10`
+governs it again like any other: it is claimed here before it is used, which is what
+stops it being reused while anything still refers to it.
 
 ## Related Pages
 

@@ -2,19 +2,25 @@
 
 ## Status
 
-Supported today.
+**Level:** L0.
+Supported today. The detail page, its share and deep-link entry, the bucket-list and
+directions actions, the header photo's upload state, and the six contracts below all ship.
+Editing, deleting and reporting a review are not on this page at all — [[epic-1284]] owns
+them.
 
 ## Goal
 
-Users can inspect one Bite deeply enough to decide whether the dish is relevant.
+Any account can inspect one Bite deeply enough to decide whether the dish is relevant.
+This page owns the Bite detail surface: what it renders, how it answers a read that finds
+nothing, and how a review and its thread are attributed.
 
 ## Actors
 
-- Food lover
-- Traveler
-- Bite creator
+- **Bite Creator** — opens the Bite, shares it, saves it to a bucket list, and writes or
+  answers a review on it. Marked inside a thread when it is their own Bite, and offered the
+  retry when their own header photo failed to upload.
 
-## Current Flow
+## Flow
 
 - User opens a Bite detail page.
 - The page shows the food experience in context.
@@ -33,7 +39,10 @@ Users can inspect one Bite deeply enough to decide whether the dish is relevant.
   replaced by skeleton placeholders rather than shown as tappable icons, so the
   user cannot trigger an action against a Bite that is not there yet. The
   first-visit coach marks for those actions are gated on the loaded Bite, so
-  they are unaffected. See GitHub issue #1166.
+  they are unaffected. This predates GitHub issue #1166, which cites the details
+  page as the model when introducing the same loading state on the profile page;
+  see [[UC - Manage Profile And Social Graph]]. No issue in this page's
+  references owns the behaviour itself.
 - The header photo reports its upload state exactly as the feed card does: an
   uploading Bite shows the wait message (addressed to the poster, neutral for
   everyone else) and a failed or long-abandoned upload says so, instead of
@@ -229,6 +238,23 @@ than displays.
   blanking them would remove the only attribution they have. The existing data
   is small enough that no backfill was written for it.
 
+## MVP Classification
+
+**[MVP]** — the whole page: everything it renders, every way its read can end, and the
+review threads. Attribution is release-critical rather than polish — \#1308 was accepted
+as a release blocker because reviews published the name the identity provider holds.
+
+Not on this page: editing, deleting and reporting a review or reply, owned by
+[[epic-1284]].
+
+## App Store Review Area
+
+Relevant on two counts. The `/s/bite/*` deep link is registered in the iOS Associated
+Domains entitlement and an Android App Links intent filter, so it is part of the shipped
+build's configuration — see [[issue-1190]]. And review attribution is a privacy matter
+rather than a cosmetic one: \#1308 published the name the identity provider holds. The
+data types this page renders are declared in [[Implementation - Store Declarations]].
+
 ## Supported Evidence
 
 - `bite/:biteId`
@@ -260,3 +286,15 @@ than displays.
 - [[Bite]]
 - [[User]]
 - [[Restaurant]]
+
+## Related Pages
+
+- [[Personas]] — the audiences this page serves: Food lover, Traveler, Bite creator
+- [[UC - Create And Maintain Personal Bites]] — the upload-status rules the header reuses
+- [[UC - Manage Profile And Social Graph]] — the same two-names confusion, on a surface
+  that displays rather than publishes
+- [[UC - Receive App Notifications And Engagement Updates]] — the tapped-notification
+  entry that lands on a highlighted thread
+- [[epic-1284]]
+- [[issue-1190]]
+- [[Implementation - Store Declarations]]

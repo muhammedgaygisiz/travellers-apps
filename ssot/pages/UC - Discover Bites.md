@@ -40,10 +40,11 @@ them.
 **[MVP]** — the home feed and its map view, search and filter, the distinct empty-feed and
 empty-search states, nearby loading at the fixed 15 km radius, the bounded load with its
 separated location and synchronization errors, and the resynchronization on regaining
-connectivity.
+connectivity. All of it ships today.
 
 **[Secondary]** — loading a position other than the current one, and any radius beyond
-15 km, specified as a Pro capability under [[epic-1122]]. See [[Monetization]].
+15 km. Specified as a Pro capability under [[epic-1122]] and not built. See
+[[Monetization]].
 
 ## App Store Review Area
 

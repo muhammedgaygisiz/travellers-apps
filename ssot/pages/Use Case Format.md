@@ -377,23 +377,26 @@ On the successful path, `END-X<n>`:
 The flow below is a text actogram; the notation is defined in [[Actogram Format]].
 
 ### Phase 1 - <the actor's sub-goal>
-
 ```
-X1   <LANE>  <action>
-          @ <locus>
-          └─→ <LANE>  <effect>
-          └─◁ <LANE>  <perception>
-          INV:R-1
-          → X2
+
+X1 <LANE> <action>
+@ <locus>
+└─→ <LANE> <effect>
+└─◁ <LANE> <perception>
+INV:R-1
+→ X2
+
 ```
 
 ### Mechanism - <name>
 
 ```
-X5   SYS  <action>
-          @ <function, file>
-          ├─ <condition> → END-X<n>
-          └─ <condition> → X6
+
+X5 SYS <action>
+@ <function, file>
+├─ <condition> → END-X<n>
+└─ <condition> → X6
+
 ```
 
 ### Terminal States
@@ -457,6 +460,7 @@ X5   SYS  <action>
 | `UC-MRB` | Maintain Restaurants In The Business App         | [[UC - Maintain Restaurants In The Business App]] |
 | `UC-ARO` | Own And Claim Restaurants                        | [[UC - Own And Claim Restaurants]]                |
 | `UC-DSB` | Discover Bites                                   | [[UC - Discover Bites]]                           |
+| `UC-IBD` | Inspect Bite Details                             | [[UC - Inspect Bite Details]]                     |
 | `UC-DIS` | Dismiss Restaurant Candidate                     | none                                              |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant | none                                              |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence         | none                                              |

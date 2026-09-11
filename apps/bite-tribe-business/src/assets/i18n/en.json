@@ -325,5 +325,6 @@
   "qr-sheets-select-all": "All tables",
   "qr-sheets-disabled": "{{count}} table(s) are out of service and get no code: {{labels}}.",
   "qr-sheets-missing": "These tables have no code yet: {{labels}}. Reload the page to try again.",
+  "qr-sheets-page": "Page {{page}} of {{pages}}",
   "qr-sheets-print": "Print {{count}} code(s)"
 }

@@ -34,6 +34,19 @@ const rows: TableQrSheetRow[] = TOKENS.map((token, index) => ({
   token,
 }));
 
+/**
+ * Fifteen tables for the pagination story. The tokens repeat through the six
+ * above, because what that story is about is where the page break falls rather
+ * than which code is on which table.
+ */
+const manyRows: TableQrSheetRow[] = Array.from({ length: 15 }, (_, index) => ({
+  tableId: `table-${index + 1}`,
+  label: `${index + 1}`,
+  roomId: room(index).id,
+  roomName: room(index).name,
+  token: TOKENS[index % TOKENS.length],
+}));
+
 export default {
   title: 'Business/Table QR Sheets',
   component: TableQrSheetsComponent,
@@ -64,6 +77,21 @@ type Story = StoryObj<TableQrSheetsComponent>;
 
 /** Six tables across two rooms, laid out three stickers to a row. */
 export const StickerSheet: Story = {};
+
+/**
+ * Fifteen tables, which is two sheets of label paper.
+ *
+ * The preview draws the pages the printer will produce rather than one long
+ * strip, so an owner knows it is two sheets before they load the paper instead
+ * of after. Twelve fit on the first page and three start the second.
+ */
+export const TwoPages: Story = {
+  args: {
+    visibleRows: manyRows,
+    selectedRows: manyRows,
+    selectedIds: new Set(manyRows.map((entry) => entry.tableId)),
+  },
+};
 
 /**
  * The large format, one code per page.

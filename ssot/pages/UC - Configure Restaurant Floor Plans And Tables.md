@@ -35,8 +35,9 @@ nothing.
 
 Issue \#1087 put them on paper, and is the first caller of those callables.
 `restaurant/:restaurantId/floor-plan/qr-codes` asks for the tokens as it loads,
-draws one code per table in service, and prints either a sheet of twelve
-stickers or one large tent card per page. The owner filters by room and ticks
+draws one code per table in service, and lays them out as the A4 pages they
+will print as - twelve stickers to a sheet, or one large tent card per page.
+The owner filters by room and ticks
 individual tables, which is how a single replacement is reprinted; nothing on
 the page rotates, so every other table keeps the code already stuck to it. A
 print stylesheet takes the app's header, its controls and Ionic's own scroll
@@ -109,7 +110,7 @@ a publish.
 - Asking for codes twice gives the same codes. Publishing a plan and opening the sheet both ask, and a second ask that minted new tokens would invalidate every sheet already printed. That is what lets the sheet page ask as it loads rather than behind a button an owner has to be told is safe to press.
 - A printed code is a physical object and is designed as one. A phone resolves a QR code from roughly ten times its own width, so the sticker on the table is 38 mm and read at arm's length, while the tent card standing on it is 80 mm and read from a seated 600 to 700 mm. One size for both would be too small to read across the table or too large to put twelve on a sheet.
 - A person holding a printed code can tell which table it is without scanning it, and the layout says which fact matters most: the table number is the largest thing on the sheet, the room and the restaurant are under it, and the token itself is in small monospace for the support call where the camera is what is broken.
-- What goes on paper is what is on screen. The sheet is one set of elements relaid by a print stylesheet rather than a second document, so the preview cannot drift from the print and `Ctrl`/`Cmd`+`P` gives exactly what the Print button gives. The codes are drawn in literal black on white rather than in theme colours: this is the one surface in the app that must ignore dark mode, because a scanner needs the contrast and an inverted code scans as nothing.
+- What goes on paper is what is on screen, down to the page. The preview draws real A4 pages at 210 mm by 297 mm with the print margin as padding, splits the selection across them, and hands the same boxes to the printer as the page breaks - so an owner feeding label paper knows it is two sheets before they load it, and the preview and the paper cannot disagree about where a page ends. `Ctrl`/`Cmd`+`P` gives exactly what the Print button gives, because there is one set of elements rather than two documents. The codes are drawn in literal black on white rather than in theme colours: this is the one surface in the app that must ignore dark mode, because a scanner needs the contrast and an inverted code scans as nothing.
 - A sheet is printed and thrown away; the plan outlives it. Which layout, which room and which tables are selected are viewport state stored nowhere, in the same way pan, zoom and the grid are.
 - Printing is closed while the plan has unsaved changes. A table placed a minute ago has no document, so it has no token, and a sheet printed then would be missing exactly the tables the owner has just added.
 - Editing the plan never writes live table state.

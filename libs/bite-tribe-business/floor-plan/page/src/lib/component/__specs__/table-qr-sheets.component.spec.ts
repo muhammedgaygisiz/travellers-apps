@@ -27,6 +27,12 @@ const ROWS = [
   row({ tableId: 'table-2', label: '13', token: 'QZ5V8T2W7YRNJ0HDBM3XKC9FPA' }),
 ];
 
+/** `count` rows, each with its own id, for the pagination assertions. */
+const manyRows = (count: number): TableQrSheetRow[] =>
+  Array.from({ length: count }, (_, index) =>
+    row({ tableId: `table-${index + 1}`, label: `${index + 1}` }),
+  );
+
 describe(TableQrSheetsComponent.name, () => {
   let component: TableQrSheetsComponent;
   let fixture: ComponentFixture<TableQrSheetsComponent>;
@@ -116,6 +122,47 @@ describe(TableQrSheetsComponent.name, () => {
       expect(query('qr-sheets-code-table-1')?.textContent).toContain(
         '7K3QMXB2VZ0HNDR5TWY9FC8AJP',
       );
+    });
+
+    it('draws one A4 page for a selection that fits on one', () => {
+      setInputs({ visibleRows: ROWS, selectedRows: ROWS });
+
+      expect(
+        fixture.nativeElement.querySelectorAll(
+          '[data-testid^="qr-sheets-page-"]',
+        ),
+      ).toHaveLength(1);
+    });
+
+    it('splits stickers onto a second page at thirteen', () => {
+      // Twelve to an A4 sheet. The preview pages have to be the printer's
+      // pages: an owner feeding label paper wants to know it is two sheets
+      // before they load the paper.
+      setInputs({ visibleRows: manyRows(13), selectedRows: manyRows(13) });
+
+      expect(query('qr-sheets-page-1')).not.toBeNull();
+      expect(query('qr-sheets-page-2')).not.toBeNull();
+      expect(query('qr-sheets-page-3')).toBeNull();
+    });
+
+    it('keeps twelve stickers on one page', () => {
+      setInputs({ visibleRows: manyRows(12), selectedRows: manyRows(12) });
+
+      expect(query('qr-sheets-page-2')).toBeNull();
+    });
+
+    it('gives every tent a page of its own', () => {
+      setInputs({
+        layout: 'tent',
+        visibleRows: manyRows(3),
+        selectedRows: manyRows(3),
+      });
+
+      expect(
+        fixture.nativeElement.querySelectorAll(
+          '[data-testid^="qr-sheets-page-"]',
+        ),
+      ).toHaveLength(3);
     });
 
     it('switches the sheet between the two layouts', () => {

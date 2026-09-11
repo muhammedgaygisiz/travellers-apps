@@ -236,6 +236,15 @@ behind the floor-plan route; neither app's initial bundle carries it.
 
 A sheet is one DOM tree relaid by a print stylesheet rather than a second
 document, so `Ctrl`/`Cmd`+`P` produces exactly what the Print button produces.
+The preview is the paper: the page draws real A4 boxes at 210 mm by 297 mm with
+the print margin as padding, one per sheet that will come out of the printer,
+and splits the selection across them itself rather than leaving it to the
+printer. So an owner feeding label paper knows it is two sheets and where the
+second one starts before they load it, and the same boxes carry the page breaks
+in print - the preview and the paper cannot disagree about where a page ends.
+The page is laid out on one track for what the owner chooses and two for what
+they get, the same `1fr`/`2fr` split the editor uses, because an A4 page shown
+at less than 210 mm is not a preview of a printed page.
 Two shapes: a sticker at 38 mm across, twelve to an A4 sheet, read at arm's
 length by someone already reaching for it; and a tent at 80 mm, one per page,
 read from a seated 600 to 700 mm without leaning in. A phone resolves a QR code

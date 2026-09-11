@@ -1,0 +1,246 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="isAuthenticated()"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="qr-sheets" [class.qr-sheets--single]="!hasRows()">
+      <!--
+        The left track, and everything in it is hidden by the print stylesheet.
+        It is the owner's side of the page: what to print, of which room, in
+        which shape.
+      -->
+      <div class="qr-sheets__side qr-sheets__screen">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>{{ 'qr-sheets-title' | transloco }}</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            @if (restaurantName()) {
+              <ion-note class="qr-sheets__subtitle">{{
+                restaurantName()
+              }}</ion-note>
+            }
+
+            @if (loading()) {
+              <div class="qr-sheets__loading">
+                <ion-spinner name="crescent" />
+              </div>
+            } @else if (loadFailed()) {
+              <ion-note
+                color="danger"
+                class="qr-sheets__message"
+                data-testid="qr-sheets-load-failed"
+              >
+                {{ 'qr-sheets-load-failed' | transloco }}
+              </ion-note>
+            } @else if (!hasRows()) {
+              <ion-note
+                class="qr-sheets__message"
+                data-testid="qr-sheets-empty"
+              >
+                {{ 'qr-sheets-empty' | transloco }}
+              </ion-note>
+            } @else {
+              <ion-segment
+                class="qr-sheets__layout"
+                [value]="layout()"
+                (ionChange)="onLayoutChange($event.detail.value)"
+              >
+                <ion-segment-button
+                  value="sticker"
+                  data-testid="qr-sheets-layout-sticker"
+                >
+                  <ion-label>{{
+                    'qr-sheets-layout-sticker' | transloco
+                  }}</ion-label>
+                </ion-segment-button>
+                <ion-segment-button
+                  value="tent"
+                  data-testid="qr-sheets-layout-tent"
+                >
+                  <ion-label>{{
+                    'qr-sheets-layout-tent' | transloco
+                  }}</ion-label>
+                </ion-segment-button>
+              </ion-segment>
+
+              <ion-note class="qr-sheets__hint">{{
+                (layout() === 'tent'
+                  ? 'qr-sheets-layout-tent-hint'
+                  : 'qr-sheets-layout-sticker-hint'
+                ) | transloco
+              }}</ion-note>
+
+              @if (filterRooms().length > 1) {
+                <ion-item lines="full">
+                  <ion-select
+                    interface="popover"
+                    data-testid="qr-sheets-room"
+                    [label]="'qr-sheets-room' | transloco"
+                    [value]="room()"
+                    (ionChange)="onRoomChange($event.detail.value)"
+                  >
+                    <ion-select-option [value]="allRooms">{{
+                      'qr-sheets-room-all' | transloco
+                    }}</ion-select-option>
+                    @for (entry of filterRooms(); track entry.id) {
+                      <ion-select-option [value]="entry.id">{{
+                        entry.name
+                      }}</ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+              }
+
+              <!--
+              The list is how a single replacement is reprinted: untick the
+              room, tick the one table whose sticker was scraped off, print.
+            -->
+              <ion-list
+                class="qr-sheets__tables"
+                lines="full"
+                [attr.aria-label]="'qr-sheets-tables' | transloco"
+              >
+                <ion-item>
+                  <ion-checkbox
+                    justify="start"
+                    labelPlacement="end"
+                    data-testid="qr-sheets-select-all"
+                    [checked]="allSelected()"
+                    [indeterminate]="someSelected()"
+                    (ionChange)="selectAll.emit($event.detail.checked)"
+                  >
+                    {{ 'qr-sheets-select-all' | transloco }}
+                  </ion-checkbox>
+                </ion-item>
+
+                @for (row of visibleRows(); track row.tableId) {
+                  <ion-item>
+                    <ion-checkbox
+                      justify="start"
+                      labelPlacement="end"
+                      [attr.data-testid]="'qr-sheets-table-' + row.tableId"
+                      [checked]="isSelected(row.tableId)"
+                      (ionChange)="toggleTable.emit(row.tableId)"
+                    >
+                      {{ row.label }}
+                      <ion-note class="qr-sheets__room-note">{{
+                        row.roomName
+                      }}</ion-note>
+                    </ion-checkbox>
+                  </ion-item>
+                }
+              </ion-list>
+
+              @if (disabledLabels().length) {
+                <ion-note
+                  class="qr-sheets__message"
+                  data-testid="qr-sheets-disabled"
+                >
+                  {{
+                    'qr-sheets-disabled'
+                      | transloco
+                        : {
+                            count: disabledLabels().length,
+                            labels: disabledLabels().join(', '),
+                          }
+                  }}
+                </ion-note>
+              }
+
+              @if (missingTokenLabels().length) {
+                <ion-note
+                  color="warning"
+                  class="qr-sheets__message"
+                  data-testid="qr-sheets-missing"
+                >
+                  {{
+                    'qr-sheets-missing'
+                      | transloco: { labels: missingTokenLabels().join(', ') }
+                  }}
+                </ion-note>
+              }
+
+              <ion-button
+                class="ion-margin-top"
+                expand="block"
+                data-testid="qr-sheets-print"
+                [disabled]="!canPrint()"
+                (click)="printRequest.emit()"
+              >
+                {{
+                  'qr-sheets-print'
+                    | transloco: { count: selectedRows().length }
+                }}
+              </ion-button>
+            }
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!--
+        The right track: the sheet itself, drawn as the A4 pages it will print
+        as. On screen each page is a sheet of paper with the page margin as
+        padding; in print the same boxes carry the page breaks and lose their
+        framing. Nothing outside this element reaches the printer.
+      -->
+      <div
+        class="qr-sheets__sheet"
+        [class.qr-sheets__sheet--tent]="layout() === 'tent'"
+        [class.qr-sheets__sheet--sticker]="layout() === 'sticker'"
+        data-testid="qr-sheets-sheet"
+      >
+        @for (page of pages(); track page.number) {
+          <!--
+            Which sheet of paper this is, above it and outside it, and hidden
+            from the printer. An owner loading label paper counts the pages
+            before they press Print, not after.
+          -->
+          <p class="qr-sheets__page-number qr-sheets__screen">
+            {{
+              'qr-sheets-page'
+                | transloco: { page: page.number, pages: pages().length }
+            }}
+          </p>
+
+          <section
+            class="qr-sheets__page"
+            [attr.data-testid]="'qr-sheets-page-' + page.number"
+          >
+            <div class="qr-sheets__page-body">
+              @for (row of page.rows; track row.tableId) {
+                <article
+                  class="qr-sheets__code"
+                  [attr.data-testid]="'qr-sheets-code-' + row.tableId"
+                >
+                  <bt-business-table-qr-code
+                    class="qr-sheets__code-image"
+                    [token]="row.token"
+                  />
+
+                  <p class="qr-sheets__table">{{ row.label }}</p>
+
+                  @if (row.roomName) {
+                    <p class="qr-sheets__room">{{ row.roomName }}</p>
+                  }
+
+                  <p class="qr-sheets__restaurant">{{ restaurantName() }}</p>
+
+                  <!--
+                    The token in readable characters, for the support call
+                    where somebody has the sticker in their hand and no working
+                    camera. Issue #1086 drew it without I, L, O or U so it can
+                    be read aloud.
+                  -->
+                  <p class="qr-sheets__token">{{ row.token }}</p>
+                </article>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    </div>
+  </ion-content>
+</ta-page>

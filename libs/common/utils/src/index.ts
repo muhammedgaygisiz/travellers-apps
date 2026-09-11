@@ -2,6 +2,8 @@ export { SupportedLang } from './lib/supported-lang';
 
 export { PATH } from './lib/paths';
 
+export { BITE_TRIBE_ORIGIN } from './lib/bite-tribe-origin';
+
 export {
   BITE_TRIBE_ROLES,
   ROLES_CLAIM,

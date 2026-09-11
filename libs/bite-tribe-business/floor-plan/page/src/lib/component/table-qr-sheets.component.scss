@@ -1,0 +1,411 @@
+/* The printable table codes (GitHub issue #1087).
+ *
+ * The organising idea is that there is one layout, not two. An A4 page is
+ * drawn at 210 mm by 297 mm on screen and printed at 210 mm by 297 mm, holding
+ * the same cells at the same millimetre sizes, so the `@media print` block at
+ * the bottom only takes the page's *framing* off - its shadow, its own margin,
+ * the app around it - and adds the breaks between pages. Nothing in it moves a
+ * code or resizes one, which is what makes the preview a preview rather than
+ * an approximation.
+ *
+ * Millimetres throughout the sheet, and not a single `rem`. A QR code has to
+ * come out of the printer at a known physical size or it stops scanning from
+ * the distance it was designed for, and a root-relative unit is whatever the
+ * browser's print stylesheet decided it was that day.
+ */
+
+/* A4, and the margin the `@page` rule at the bottom prints with. The preview
+ * carries the margin as padding, so the codes are laid out in the same 190 mm
+ * by 277 mm in both media. */
+$page-width: 210mm;
+$page-height: 297mm;
+$page-margin: 10mm;
+
+/* The code's printed width in each layout, and the two numbers this whole file
+ * exists to deliver.
+ *
+ * A phone camera resolves a QR code from roughly ten times the width of the
+ * code itself. These are the widths of the whole printed square, which is 41
+ * modules across: a version-4 code's 33 plus the four-module quiet zone at
+ * each side. So 38 mm of paper carries 30.6 mm of code and is read from about
+ * 300 mm, by someone already reaching for the sticker on the table; 80 mm
+ * carries 64.4 mm and is read from a seated 600 to 700 mm without anyone
+ * leaning in, which is what a tent card standing on the table is for.
+ *
+ * That puts a module at 0.93 mm and 1.95 mm, both past the 0.5 mm at which
+ * consumer inkjets start losing one. Measured rather than derived: both
+ * layouts were printed to PDF, rasterised at 300 dpi and decoded, and the
+ * sticker's code came back 363 px wide - 30.7 mm. */
+$sticker-code-width: 38mm;
+$tent-code-width: 80mm;
+
+/* Three across and four down inside the printable area: 180 mm by 272 mm used
+ * of the 190 mm by 277 mm available. The remainder is what absorbs a printer
+ * whose unprintable edge is wider than it claims. `STICKER_CODES_PER_PAGE` in
+ * the component is the same 3 x 4 and has to move with these. */
+$sticker-width: 60mm;
+$sticker-height: 68mm;
+
+/* A tent fills its page so the card is centred on the paper rather than
+ * pressed against the top of it. 270 mm rather than the 277 mm the printable
+ * area offers, and the 7 mm is not a rounding allowance but the fix for a real
+ * defect: a box of exactly the printable height does not fit on its own page
+ * in Chrome and is pushed to the next one, so three tents printed as four
+ * pages with the first blank. Measured with a standalone probe at both
+ * heights - 277 mm gives n+1 pages, 270 mm gives n. */
+$tent-height: 270mm;
+
+:host {
+  /* A page component is a block. Declared because the print layout depends on
+   * it: an inline host measures zero once its `.ion-page` is released into
+   * normal flow, which is a blank sheet of paper rather than a layout quirk.
+   * See the `@media print` block in the business app's `global.scss`. */
+  display: block;
+
+  /*
+   * One track for what the owner chooses, two for what they get - the same
+   * split and the same proportion the editor beside it uses, and for the same
+   * reason: the sheet is the point of this page as the canvas is the point of
+   * that one. An A4 page is 210 mm wide and is shown at that width rather than
+   * shrunk, because a preview of a printed page that is not the size of the
+   * printed page cannot answer the question it exists to answer.
+   *
+   * That width is what sets the minimum. Below it the page scrolls sideways
+   * instead of stacking, which is what every other surface in the business app
+   * does - it is a desktop product, and the editor this page is reached from
+   * holds a minimum of its own for the same reason.
+   */
+  .qr-sheets {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    align-items: start;
+    gap: 1rem;
+    margin: 0 auto;
+    min-width: 75rem;
+    max-width: 90rem;
+  }
+
+  /*
+   * Nothing to preview, so nothing to hold a second track open for. An empty
+   * state beside an empty column reads as a layout that failed to load.
+   */
+  .qr-sheets--single {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+    max-width: 40rem;
+  }
+
+  .qr-sheets__side {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  /* The grid's own gap does the spacing, so Ionic's card margin would double
+   * it and indent the card from the edge the sheet sits flush against. */
+  .qr-sheets ion-card {
+    margin: 0;
+  }
+
+  .qr-sheets__subtitle,
+  .qr-sheets__hint,
+  .qr-sheets__message {
+    display: block;
+    margin-block-end: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .qr-sheets__room-note {
+    margin-inline-start: 0.5rem;
+  }
+
+  .qr-sheets__loading {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 0;
+  }
+
+  .qr-sheets__layout {
+    margin-block-end: 0.75rem;
+  }
+
+  /* The stack of pages. Scrolls sideways rather than reflowing, because a
+   * preview that reflowed would stop being a preview of the paper. */
+  .qr-sheets__sheet {
+    display: block;
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  .qr-sheets__page-number {
+    margin: 0 0 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--ion-color-medium, #808289);
+  }
+
+  .qr-sheets__page-number:not(:first-child) {
+    margin-top: 1.5rem;
+  }
+
+  /*
+   * One sheet of paper. The padding is the page margin, so the space the codes
+   * are laid out in is the same the printer gives them.
+   *
+   * White and shadowed on screen, which is also the only way the page says out
+   * loud that the codes print on white whatever theme the app is running in.
+   */
+  .qr-sheets__page {
+    box-sizing: border-box;
+    width: $page-width;
+    height: $page-height;
+    padding: $page-margin;
+    background: #fff;
+    box-shadow: 0 1px 6px rgb(0 0 0 / 35%);
+  }
+
+  .qr-sheets__page-body {
+    height: 100%;
+  }
+
+  /*
+   * One printed code and its text. `avoid` is what stops a sticker being cut
+   * in half by a page break; it is inert on screen and load-bearing on paper.
+   *
+   * Literal black on white rather than Ionic's theme variables. This is the
+   * one surface in the app that must ignore dark mode: the owner previews what
+   * the printer will do, and a theme-coloured preview of a black-on-white
+   * sheet is a preview of something else.
+   */
+  .qr-sheets__code {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: #000;
+    background: #fff;
+  }
+
+  .qr-sheets__code-image {
+    display: block;
+  }
+
+  .qr-sheets__table {
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 2mm 0 0;
+  }
+
+  .qr-sheets__room,
+  .qr-sheets__restaurant {
+    margin: 0.5mm 0 0;
+    line-height: 1.2;
+  }
+
+  .qr-sheets__restaurant {
+    opacity: 0.75;
+  }
+
+  /* The token, for a support call. Monospace so the characters line up when
+   * somebody reads them out, and small enough that it never competes with the
+   * table number a guest is looking for. */
+  .qr-sheets__token {
+    font-family: ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
+    letter-spacing: 0.04em;
+    margin: 1mm 0 0;
+    opacity: 0.55;
+    word-break: break-all;
+  }
+
+  /*
+   * Stickers flow as inline blocks rather than as a grid, on screen as well as
+   * on paper. Chrome still fragments grid and flex containers across a page
+   * break unreliably, which on paper means a sticker cut in half by the page
+   * edge - and using one layout in the preview and another in the print is
+   * exactly the drift this file is arranged to avoid. Three fixed-width cells
+   * per line reproduce the same 3 x 4 grid in the flow browsers implement.
+   *
+   * `font-size: 0` removes the whitespace between the cells, which inline
+   * layout would otherwise render as a gap wide enough to drop the third
+   * sticker onto the next line. Every cell sets its own sizes in millimetres,
+   * so nothing inherits the zero.
+   */
+  .qr-sheets__sheet--sticker {
+    .qr-sheets__page-body {
+      font-size: 0;
+    }
+
+    .qr-sheets__code {
+      display: inline-flex;
+      vertical-align: top;
+      width: $sticker-width;
+      height: $sticker-height;
+      justify-content: center;
+    }
+
+    .qr-sheets__code-image {
+      width: $sticker-code-width;
+    }
+
+    .qr-sheets__table {
+      font-size: 5mm;
+    }
+
+    .qr-sheets__room,
+    .qr-sheets__restaurant {
+      font-size: 2.6mm;
+    }
+
+    .qr-sheets__token {
+      font-size: 1.9mm;
+    }
+  }
+
+  .qr-sheets__sheet--tent {
+    .qr-sheets__code {
+      height: $tent-height;
+      justify-content: center;
+    }
+
+    .qr-sheets__code-image {
+      width: $tent-code-width;
+    }
+
+    .qr-sheets__table {
+      font-size: 14mm;
+    }
+
+    .qr-sheets__room {
+      font-size: 6mm;
+    }
+
+    .qr-sheets__restaurant {
+      font-size: 4.5mm;
+    }
+
+    .qr-sheets__token {
+      font-size: 3mm;
+    }
+  }
+}
+
+/* A4 with a 10 mm margin on every edge, matching the preview's page box.
+ * Declared outside `:host`, because `@page` is a document-level rule that
+ * Angular's component scoping has nothing to attach to - it applies to the
+ * printed page box itself.
+ *
+ * Which also means it outlives the page: Angular keeps a component's styles in
+ * the document after the last instance is destroyed, so an owner who opens the
+ * sheet and then prints some other page of the business app gets A4 at 10 mm
+ * rather than the browser default. That is a reasonable default for a European
+ * restaurant and nothing else in the app sets a page box, so it is left as is
+ * rather than moved somewhere it would be no less global. */
+@page {
+  size: A4;
+  margin: $page-margin;
+}
+
+@media print {
+  /* The app's own chrome, and the acceptance criterion these two rules are.
+   * `ta-page` renders a header carrying a back button and the BiteTribe logo,
+   * and the left track is every control on the page. None of it is part of a
+   * table's QR code. */
+  :host ::ng-deep ion-header,
+  :host ::ng-deep ion-footer,
+  :host .qr-sheets__screen {
+    display: none !important;
+  }
+
+  /* Ionic lays a page out as a fixed-height flex column filling the viewport,
+   * with the content an absolutely positioned scroll container inside it. A
+   * browser printing that produces the one screenful that happened to be
+   * visible, which is how a twenty-four sticker sheet comes out as four
+   * stickers and a blank page.
+   *
+   * So the whole column goes back into normal flow. `::part(scroll)` is the
+   * hook Ionic exposes on its shadow-DOM viewport for exactly this, and
+   * `contain: none` matters as much as the overflow does: Ionic sets
+   * `contain: size style` there, which pins the part's height to the viewport
+   * and would clip the sheet to one page even in static flow.
+   *
+   * Two `ion-content` elements are covered, not one. `ta-page` renders its own
+   * and projects this page's into it, so the selector is deliberately
+   * unqualified. The `html`, `body`, `ion-app` and `ta-page` half of the same
+   * release is in the business app's `global.scss`, because those sit above
+   * every component and no component-scoped stylesheet can reach them. */
+  :host ::ng-deep .ion-page,
+  :host ::ng-deep ion-content {
+    position: static !important;
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    contain: none !important;
+  }
+
+  :host ::ng-deep ion-content {
+    --offset-top: 0 !important;
+    --offset-bottom: 0 !important;
+    --padding-top: 0 !important;
+    --padding-bottom: 0 !important;
+    --padding-start: 0 !important;
+    --padding-end: 0 !important;
+    --background: #fff;
+  }
+
+  :host ::ng-deep ion-content::part(scroll) {
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+    contain: none !important;
+    padding: 0 !important;
+  }
+
+  :host {
+    .qr-sheets {
+      display: block;
+      min-width: 0;
+      max-width: none;
+      gap: 0;
+    }
+
+    .qr-sheets__sheet {
+      overflow: visible;
+    }
+
+    /*
+     * The paper takes its framing off and hands its margin to `@page`. The
+     * width and the height go with it: the page box is the printer's now, and
+     * a box declared at exactly the printable height is the one Chrome pushes
+     * onto the next page - see `$tent-height` above for the measurement.
+     *
+     * `break-after` on every page but the last, so the sheet paginates exactly
+     * where the preview said it would and the last page is not followed by a
+     * blank one.
+     */
+    .qr-sheets__page {
+      width: auto;
+      height: auto;
+      padding: 0;
+      background: transparent;
+      box-shadow: none;
+      break-after: page;
+      page-break-after: always;
+
+      &:last-child {
+        break-after: auto;
+        page-break-after: auto;
+      }
+    }
+
+    /* Forces the printed code to carry its own ink even when the browser is
+     * set to print without background graphics, which is the default in
+     * Chrome's print dialog. Without it the quiet zone is transparent and a
+     * coloured paper or a tinted PDF viewer eats the contrast a scanner needs. */
+    .qr-sheets__code {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+  }
+}

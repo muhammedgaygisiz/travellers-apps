@@ -205,14 +205,71 @@ table pointing at a token that was never written resolves to nothing and a token
 nothing points at can never be rotated - rotation finds the current token
 through the table.
 
+Issue \#1087 printed them, and in doing so fixed the address every code carries:
+`https://bitetribe.app/t/{token}`, built in
+`libs/bite-tribe-business/floor-plan/ui/src/lib/table-qr-code.ts`. The origin is
+`BITE_TRIBE_ORIGIN` in `libs/common/utils`, the same constant the consumer shell
+canonicalises search-engine URLs against, because a second copy that drifted
+would retire a room full of stickers nobody can correct. The path is two
+characters because every character costs modules and every module costs printed
+millimetres. Nothing serves it yet; issue \#1072 mounts the resolver there, and
+a sticker printed today is what commits it to.
+
+The code is drawn as two QR segments rather than one, which is where the
+Crockford base32 alphabet pays for itself: a byte segment for the origin and an
+alphanumeric segment for the token costs 143 bits where 26 bytes would cost 208,
+and the 52 bits saved after the second segment's header are what fit error
+correction level `Q` into QR version 4 instead of version 5. A token outside the
+alphanumeric set falls back to one byte segment and simply prints larger, so the
+saving is an optimisation rather than a rule the generator has to keep obeying.
+
+The encoding itself comes from `qrcode-generator`, the workspace's only new
+runtime dependency for this: MIT, no dependencies of its own, and about 15 kB.
+Hand-rolling it would mean Reed-Solomon, mask selection and BCH format
+information, where a subtle bug does not throw - it prints a room full of
+stickers that no camera reads, and the cost of finding out is physical. The
+package publishes both a CommonJS and an ES build behind `export =`, and this
+workspace compiles the file under two tsconfigs that disagree about
+`esModuleInterop`, so `table-qr-code.ts` takes the default export when there is
+one and the namespace itself when there is not. It lands in the lazy chunk
+behind the floor-plan route; neither app's initial bundle carries it.
+
+A sheet is one DOM tree relaid by a print stylesheet rather than a second
+document, so `Ctrl`/`Cmd`+`P` produces exactly what the Print button produces.
+The preview is the paper: the page draws real A4 boxes at 210 mm by 297 mm with
+the print margin as padding, one per sheet that will come out of the printer,
+and splits the selection across them itself rather than leaving it to the
+printer. So an owner feeding label paper knows it is two sheets and where the
+second one starts before they load it, and the same boxes carry the page breaks
+in print - the preview and the paper cannot disagree about where a page ends.
+The page is laid out on one track for what the owner chooses and two for what
+they get, the same `1fr`/`2fr` split the editor uses, because an A4 page shown
+at less than 210 mm is not a preview of a printed page.
+Two shapes: a sticker at 38 mm across, twelve to an A4 sheet, read at arm's
+length by someone already reaching for it; and a tent at 80 mm, one per page,
+read from a seated 600 to 700 mm without leaning in. A phone resolves a QR code
+from roughly ten times its own width, which is the whole of why there are two
+sizes rather than one compromise. Each code prints the table number largest, the
+room and the restaurant under it, and the token itself in small monospace - for
+the support call where somebody is holding the sticker and the camera is the
+thing that is broken.
+
+The sheet asks for tokens as part of loading, without a button, and takes each
+token off that call rather than off the table document it just read - issuing
+writes `qrTokenId`, so the tables read a moment earlier are stale for exactly
+the tables that matter. Reprinting one table selects it and prints it; nothing
+on the page rotates, so the codes already stuck to the other tables are
+untouched.
+
 ## Current Limitations
 
 - Uniqueness is held by the client, not by the database. Security rules cannot query, so no rule can ask whether a label is already taken; the editor refuses a duplicate and the publish validation of issue \#1088 refuses a plan that reached that state another way. A second device editing a second room at the same moment can still produce two tables with one number, because neither editor sees the other's unsaved plan.
 - A table moves out of the room the owner is looking at, never into it. The control is on the selected table's card, so it is reachable only for a table on the open canvas; there is no way to reach into another room and pull a table across (issue \#1085).
 - `enabled` decides whether a table gets a code and nothing else yet. A disabled table is skipped when a plan is issued tokens and refused when it is named, and one disabled after its code was printed resolves to "not in service" - but nothing reads that answer, because refusing the order is issue \#1072.
-- Nothing calls the token callables yet. `issueTableQrTokens` and `rotateTableQrToken` are the backend half; the business-app surfaces that reach them are the printable sheet of issue \#1087 and the publish step of issue \#1088, so today a token is issued only by a direct call.
-- An editor holding a plan from before a token was issued cannot save that table. The rules compare `qrTokenId` by value, so a client writing back the value it read is fine and a client writing back the _absence_ of a token the backend has since written is refused. Nothing reaches that state today, because no surface issues a token yet; it becomes reachable with issue \#1087, and the answer is the reseed the editor already does for a room whose version moved.
+- `rotateTableQrToken` still has no caller. Issue \#1087 reaches `issueTableQrTokens` from the sheet page, and deliberately not the rotation beside it: the sheet is where a code is printed, and replacing a code that was photographed is a different decision with a different consequence, which needs a confirmation and a surface of its own rather than a second button next to Print.
+- An editor holding a plan from before a token was issued cannot save that table. The rules compare `qrTokenId` by value, so a client writing back the value it read is fine and a client writing back the _absence_ of a token the backend has since written is refused. The sheet page issues tokens, so an editor left open while somebody prints in another tab can reach it; the editor's QR-code button is closed while the plan holds unsaved changes, which keeps the ordinary path clear of it, and the answer to the rest is the reseed the editor already does for a room whose version moved.
 - Revocation follows a delete and nothing else. There is no "kill this code now" action that keeps the table: the paths are rotating it, which prints a new one, and deleting the table, which ends it.
+- A printed sheet points at a URL nothing answers. `/t/{token}` is fixed and encoded into every code, and the page behind it is issue \#1072. A guest scanning a sticker printed today reaches the consumer app's own not-found handling rather than a table context.
 - A QR code identifies a table context. It does not prove that the guest is physically present, and no design should assume otherwise.
 - Presence hardening such as rotating codes, staff confirmation, and session expiry is planned in issue \#1107, not guaranteed by the token itself.
 

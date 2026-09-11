@@ -21,3 +21,59 @@
 @import '@ionic/angular/css/text-alignment.css';
 @import '@ionic/angular/css/text-transformation.css';
 @import '@ionic/angular/css/flex-utils.css';
+
+/* Printing (GitHub issue #1087).
+ *
+ * Ionic builds an app as a viewport-sized box that never scrolls the document:
+ * `structure.css` gives `html` a height of 100% and pins `body` with
+ * `position: fixed`, `max-height: 100%` and `overflow: hidden`, and every
+ * `ion-page` is `position: absolute` with `contain: layout size style`. On
+ * screen that is the whole point - the page is fixed and the content scrolls
+ * inside it. Sent to a printer it means the document is exactly one viewport
+ * tall, so a print job is the one screenful that happened to be visible and
+ * nothing else, however many pages of content there are.
+ *
+ * Measured rather than assumed: a standalone probe with three page-height
+ * cards printed three pages, and the same probe with Ionic's `html`/`body`
+ * rules printed one. Releasing them here printed three again.
+ *
+ * This lives in the app's global sheet because `html`, `body` and `ion-app`
+ * are above every component, so no component-scoped stylesheet can reach them.
+ * It is inert until something is actually printed, and the table QR sheets of
+ * issue #1087 are the surface that depends on it - see
+ * `table-qr-sheets.component.scss` for the rest, which is scoped to that page.
+ */
+@media print {
+  html {
+    height: auto;
+  }
+
+  body {
+    position: static;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+
+    /* `translateZ(0)` makes `body` a containing block for anything fixed or
+     * absolute inside it, which keeps the page boxes from being laid out
+     * against the document the printer is paginating. */
+    transform: none;
+  }
+
+  /* `ta-page` is in this list for a reason that is invisible on screen. An
+   * Angular component host has no default display, so it is an inline box, and
+   * that never mattered because the `.ion-page` inside it is absolutely
+   * positioned and escapes it. Released into normal flow for printing, a block
+   * of content inside an inline box leaves the box - and therefore `body` and
+   * `html` - measuring zero, and Chrome prints a single blank page. */
+  ion-app,
+  ion-page,
+  .ion-page,
+  ta-page {
+    position: static;
+    display: block;
+    height: auto;
+    overflow: visible;
+    contain: none;
+  }
+}

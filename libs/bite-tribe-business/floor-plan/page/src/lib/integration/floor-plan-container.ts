@@ -48,6 +48,7 @@ import { FloorPlanService } from './floor-plan.service';
       (tableEnabledChange)="service.setTableEnabled($event)"
       (numberTables)="service.numberSelection($event)"
       (moveTable)="service.moveSelectedTableToRoom($event)"
+      (printQrCodes)="service.gotoQrCodes()"
       (logoutClick)="service.logout()"
     />
   `,

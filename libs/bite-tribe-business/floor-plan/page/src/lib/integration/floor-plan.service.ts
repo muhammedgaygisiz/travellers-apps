@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { NavController } from '@ionic/angular/standalone';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import {
   FloorPlanConflictError,
@@ -117,6 +118,7 @@ export const RESTAURANT_COLLECTION = 'restaurants';
 export class FloorPlanService {
   private readonly dataAccess = inject(FloorPlanDataAccessService);
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly navController = inject(NavController);
   private readonly toast = inject(ToastService);
 
   readonly restaurantId = this.storeService.restaurantIdFromUrl;
@@ -1038,6 +1040,32 @@ export class FloorPlanService {
     } finally {
       this.pending.set(false);
     }
+  }
+
+  /**
+   * Leaves the editor for the printable table codes (issue #1087).
+   *
+   * `navigateForward` rather than a plain `Router.navigate`, so the sheet
+   * arrives with Ionic's forward animation and its back button returns to the
+   * editor — the sheet is a step further into the plan, not a sibling page.
+   *
+   * The button that reaches this is closed while the plan holds unsaved
+   * changes, because a table with no document has no token, so nothing here
+   * has to decide what to do about one.
+   */
+  gotoQrCodes(): void {
+    const restaurantId = this.restaurantId();
+
+    if (!restaurantId) {
+      return;
+    }
+
+    void this.navController.navigateForward([
+      'restaurant',
+      restaurantId,
+      'floor-plan',
+      'qr-codes',
+    ]);
   }
 
   logout(): void {

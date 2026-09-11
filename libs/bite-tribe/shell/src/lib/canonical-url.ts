@@ -7,14 +7,18 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
-import { PATH } from 'utils';
+import { BITE_TRIBE_ORIGIN, PATH } from 'utils';
 
 /**
  * The one host search engines should credit, decided 1 September 2026 in issue
  * \#1454. `www.bitetribe.app` and `bite-tribe.web.app` serve the same build, so
  * without a canonical the ranking signal splits three ways.
+ *
+ * Named here and defined in `utils`, because the business app prints the same
+ * origin into every table QR code (issue \#1087) and a printed sticker cannot
+ * be corrected after the two copies drift.
  */
-export const CANONICAL_ORIGIN = 'https://bitetribe.app';
+export const CANONICAL_ORIGIN = BITE_TRIBE_ORIGIN;
 
 /**
  * The routes that render without a session, and are therefore the only ones

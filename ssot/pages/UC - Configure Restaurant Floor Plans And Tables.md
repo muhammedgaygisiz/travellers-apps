@@ -31,11 +31,22 @@ Issue \#1086 built the QR tokens, backend only. A table gets an opaque,
 non-guessable code that resolves in one public read to its restaurant, room and
 number; rotating one supersedes the code it replaces instead of erasing it, and
 deleting a table revokes its code rather than leaving a sticker that resolves to
-nothing. No editor surface reaches those callables yet: printing the sheets is
-issue \#1087 and the publish step that asks for the tokens is issue \#1088.
+nothing.
 
-The planned flow from "validates the plan and publishes it" onward is still
-specification.
+Issue \#1087 put them on paper, and is the first caller of those callables.
+`restaurant/:restaurantId/floor-plan/qr-codes` asks for the tokens as it loads,
+draws one code per table in service, and lays them out as the A4 pages they
+will print as - twelve stickers to a sheet, or one large tent card per page.
+The owner filters by room and ticks
+individual tables, which is how a single replacement is reprinted; nothing on
+the page rotates, so every other table keeps the code already stuck to it. A
+print stylesheet takes the app's header, its controls and Ionic's own scroll
+container out of the way, so what leaves the printer is black codes on white
+paper and the three lines of text beside each one.
+
+Publishing is still specification. So is the page a scan lands on: \#1087 fixed
+the address at `https://bitetribe.app/t/{token}` because a sticker cannot be
+corrected afterwards, and issue \#1072 is what answers it.
 
 No longer blocked. [[UC - Own And Claim Restaurants]] was the prerequisite,
 because floor-plan data is restaurant-scoped and could not be trusted while the
@@ -57,8 +68,11 @@ This is not a construction plan. It is a practical, easy-to-maintain top-down re
 
 ## Planned Flow
 
-The first six steps are implemented, and the token generation behind the eighth
-is built without a surface that calls it. The rest are specification.
+The first six steps are implemented, and so are the last two: issue \#1087's
+sheet page asks for the tokens of step eight and prints them as step nine. Step
+seven, the validate-and-publish gate, is the one still specified rather than
+built, which is why an owner reaches the sheet from the editor rather than from
+a publish.
 
 - Owner opens the floor-plan editor for a restaurant they own.
 - Owner creates a room and sets its width and height in metres.
@@ -93,12 +107,19 @@ is built without a surface that calls it. The rest are specification.
 - Publishing is blocked by duplicate table labels, zero capacity, or tables outside their room. Overlapping tables warn but do not block, because real rooms have odd arrangements. The editor already refuses all three as they are typed; the publish gate of issue \#1088 is what catches a plan that reached that state another way.
 - A table's QR code says which table it is and nothing about which table it is. The code carries 130 random bits and no part of the number printed beside it, so holding the sheet from table 11 tells a guest nothing about the code on table 12. It is read one document at a time and the collection cannot be listed, so the set of a restaurant's live codes is not something an account can collect.
 - A code outlives the table's arrangement and not the table. It survives a move to another room, a rename and being taken out of service, because a sticker already on a table cannot be reprinted every time the plan changes; it is superseded when the owner deliberately replaces it, and revoked when the table is deleted. Both leave a code that still resolves, to "this was replaced" and "this is no longer valid" rather than to nothing - a scan that finds no document at all would be the answer to a code BiteTribe never issued, which is a different thing to tell a guest.
-- Asking for codes twice gives the same codes. Publishing a plan and opening the sheet both ask, and a second ask that minted new tokens would invalidate every sheet already printed.
+- Asking for codes twice gives the same codes. Publishing a plan and opening the sheet both ask, and a second ask that minted new tokens would invalidate every sheet already printed. That is what lets the sheet page ask as it loads rather than behind a button an owner has to be told is safe to press.
+- A printed code is a physical object and is designed as one. A phone resolves a QR code from roughly ten times its own width, so the sticker on the table is 38 mm and read at arm's length, while the tent card standing on it is 80 mm and read from a seated 600 to 700 mm. One size for both would be too small to read across the table or too large to put twelve on a sheet.
+- A person holding a printed code can tell which table it is without scanning it, and the layout says which fact matters most: the table number is the largest thing on the sheet, the room and the restaurant are under it, and the token itself is in small monospace for the support call where the camera is what is broken.
+- What goes on paper is what is on screen, down to the page. The preview draws real A4 pages at 210 mm by 297 mm with the print margin as padding, splits the selection across them, and hands the same boxes to the printer as the page breaks - so an owner feeding label paper knows it is two sheets before they load it, and the preview and the paper cannot disagree about where a page ends. `Ctrl`/`Cmd`+`P` gives exactly what the Print button gives, because there is one set of elements rather than two documents. The codes are drawn in literal black on white rather than in theme colours: this is the one surface in the app that must ignore dark mode, because a scanner needs the contrast and an inverted code scans as nothing.
+- A sheet is printed and thrown away; the plan outlives it. Which layout, which room and which tables are selected are viewport state stored nowhere, in the same way pan, zoom and the grid are.
+- Printing is closed while the plan has unsaved changes. A table placed a minute ago has no document, so it has no token, and a sheet printed then would be missing exactly the tables the owner has just added.
 - Editing the plan never writes live table state.
 
 ## Success Criteria
 
 - An owner can build a two-room plan with at least twenty tables and reload it identically.
+- A printed code scans from a normal seated distance with an ordinary phone camera, and the print output carries no navigation, no buttons and no dark-mode artefacts.
+- Reprinting one table's code leaves every other table's code untouched.
 - Table 12 is retrievable as a business entity with its room, capacity, and position, without parsing an image.
 - Every enabled table has exactly one active QR token, and tokens are not derivable from the table number.
 - A guest with no BiteTribe account resolves a scanned code in one read, and a replaced or revoked code tells them so rather than failing.
@@ -110,9 +131,10 @@ Implemented:
 
 - `libs/bite-tribe-common/model` room, table, and floor-plan-object types
 - `libs/bite-tribe-business/floor-plan/data-access` load, save, conflict signalling
-- `libs/bite-tribe-business/floor-plan/ui` the canvas, the grid, the metre/millimetre conversion, the object palette, the edit geometry, the shape conversion
-- `libs/bite-tribe-business/floor-plan/page` the editor page, its workflow, the label rule and the bulk numbering
-- `libs/bite-tribe-business/shell` the `restaurant/:restaurantId/floor-plan` route and its owner gate
+- `libs/bite-tribe-business/floor-plan/ui` the canvas, the grid, the metre/millimetre conversion, the object palette, the edit geometry, the shape conversion, and the QR code renderer
+- `libs/bite-tribe-business/floor-plan/page` the editor page, its workflow, the label rule, the bulk numbering, and the printable sheet with its print stylesheet
+- `libs/common/utils` `BITE_TRIBE_ORIGIN`, the one origin a printed code and the consumer app's canonical URL share
+- `libs/bite-tribe-business/shell` the `restaurant/:restaurantId/floor-plan` and `.../qr-codes` routes and their owner gate
 - `apps/bite-tribe-firebase/firestore.rules` room and table scoping, the version rule, the backend-only `qrTokenId`, and the public `get` on `/tableTokens`
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/table-qr-tokens.ts` the token generator and the issue and rotate callables
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/sync-table-qr-token-on-table-write.ts` the mirror and the revocation on delete
@@ -120,7 +142,7 @@ Implemented:
 
 Still planned:
 
-- Printable QR sheets, the surface that asks for the tokens, and the draft/published split
+- The draft/published split, the publish gate, and the page a scanned code lands on
 
 ## Related GitHub Scope
 
@@ -134,7 +156,7 @@ Still planned:
 - Issue \#1084 - table properties, label uniqueness, numbering and capacity, delivered
 - Issue \#1085 - multiple rooms and floors, room order, cross-room table moves, capacity summaries and the desktop-locked layout, delivered
 - Issue \#1086 - opaque table QR tokens, their lifecycle and the rules that keep them backend-owned, delivered as backend only
-- Issue \#1087 - printable table QR sheets, the first caller of those callables
+- Issue \#1087 - printable table QR sheets, the first caller of those callables, delivered
 - Issue \#1089 - accessibility of the editor; its responsive half was moved to issue \#1093 rather than deferred
 - Issue \#1093 - the staff live view, which owns the small-screen and touch rendering of a published plan
 

@@ -52,6 +52,19 @@ Each failure returns a distinct, actionable reason, not a generic error.
 - Submission carries an idempotency key, so a double tap on a flaky restaurant network produces one order.
 - Prices from a real order are stronger evidence than a typed price and bypass the suspicious-price warning from issue \#967 during Bite creation.
 
+## The Address A Code Already Carries
+
+The scan URL is not this use case's to choose any more. Issue \#1087 prints
+stickers, and a sticker glued to a table cannot be corrected, so it fixed the
+address at `https://bitetribe.app/t/{token}` - the origin from
+`BITE_TRIBE_ORIGIN` in `libs/common/utils`, and a two-character path because
+every character in the URL costs QR modules and every module costs printed
+millimetres at the distance the code has to be read from.
+
+Nothing answers `/t/:token` yet. A guest scanning a code printed today reaches
+the consumer app's own handling of an unknown route, so mounting the resolver
+there is the first thing this use case owes the codes already in restaurants.
+
 ## Prerequisite In The Existing Model
 
 `MenuItem` in `libs/bite-tribe-common/model/src/lib/menu.ts` has no identifier. Items are array entries inside `Menu.categories[]`, addressable only by name and array index, so renaming or reordering would silently repoint historic orders and menu-item-to-Bite links. Issue \#1099 adds stable ids and a migration before anything else in this use case.
@@ -71,6 +84,7 @@ Tracked in [[Current State - Open Questions]]. Several block specific child issu
 ## Related GitHub Scope
 
 - Issue \#1072 - QR table menu and table ordering, with ten child issues
+- Issue \#1087 - printable table QR sheets, which fixed the scan URL this use case has to serve
 - Issue \#1073 - Table payment and Bite creation from orders, with six child issues
 - Issue \#345 - Kavi wants to offer a QR code at the table to order digitally
 - Issue \#371 - business wants the menu accessible via QR code

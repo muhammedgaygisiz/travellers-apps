@@ -169,6 +169,32 @@
               >
                 {{ 'floor-plan-add-room' | transloco }}
               </ion-button>
+
+              <!--
+                Closed while anything is unsaved, the same way reordering the
+                rooms is. A table placed a minute ago has no document yet, so
+                it has no QR token either, and a sheet printed now would be a
+                sheet missing exactly the tables the owner has just added
+                (issue #1087).
+              -->
+              <ion-button
+                class="ion-margin-top"
+                fill="outline"
+                [disabled]="saving() || unsavedChanges()"
+                data-testid="floor-plan-qr-codes"
+                (click)="printQrCodes.emit()"
+              >
+                {{ 'floor-plan-qr-codes' | transloco }}
+              </ion-button>
+
+              @if (unsavedChanges()) {
+                <ion-note
+                  class="floor-plan__hint"
+                  data-testid="floor-plan-qr-codes-blocked"
+                >
+                  {{ 'floor-plan-qr-codes-blocked' | transloco }}
+                </ion-note>
+              }
             } @else if (loadFailed()) {
               <p class="floor-plan__failed" data-testid="floor-plan-failed">
                 {{ 'floor-plan-load-failed' | transloco }}

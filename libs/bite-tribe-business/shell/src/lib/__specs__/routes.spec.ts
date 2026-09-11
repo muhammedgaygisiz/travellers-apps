@@ -169,6 +169,11 @@ describe('business ROUTES', () => {
    * staff a read of the *published* plan and no write, and there is no
    * published state until issue #1088 — so until then the editor is the
    * owner's alone (issue #1082).
+   *
+   * Its QR-code sheet carries the same gate, and needs it more plainly than
+   * the editor does: the page prints the live token of every table in the
+   * restaurant, and a token is the one thing in this product that works
+   * without an account (issue #1087).
    */
   describe('which restaurants the edit routes admit', () => {
     const EDIT_PATHS = [
@@ -176,6 +181,7 @@ describe('business ROUTES', () => {
       'restaurant/:restaurantId/menu/:menuId',
       'restaurant/:restaurantId/staff',
       'restaurant/:restaurantId/floor-plan',
+      'restaurant/:restaurantId/floor-plan/qr-codes',
     ];
 
     const ownerGuardOf = (route: Route): CanActivateFn =>

@@ -124,11 +124,9 @@ This makes the Bite Creator one of three writers of that field; see
 means there is no grant to revoke either. **The operator half shipped**: block an account
 (\#1474) and delete a Bite (\#1475) with epic \#1471, the contact address with \#1429;
 the report queue is epic \#1284, open. **The user-facing half - reporting, user-to-user
-blocking, content filtering - does not exist**, and each part has had an owning issue since
-14 September 2026: \#1608 reporting a Bite, \#1609 blocking another user, \#1610 filtering
-before publication. Epic \#1284 is narrower than it looks - it moderates review threads, so it
-covers reporting inside a thread and nothing else. Store requirement rather than product
-polish: [[Implementation - Store Declarations]] declares the **Social Media** data-use category
+blocking, content filtering - does not exist and has no owning issue.** Store requirement
+rather than product polish:
+[[Implementation - Store Declarations]] declares the **Social Media** data-use category
 at a **13+** age rating, and Apple's user-generated-content guideline asks for filtering,
 timely reporting, blocking and published contact details, with an equivalent Google Play
 policy.
@@ -149,9 +147,8 @@ with none of the four safeguards present. The iOS app is **not findable** by bun
 Store Connect, not in public data.
 
 **The gates above are route guards and callable checks; since \#1078 the data layer backs
-them too.** `firestore.rules` scopes every write by the account named on the document - reads
-it largely does not, and `bites` still allows read to any signed-in account. That ruleset
-is live - confirmed in the Firebase console on 11 September 2026, where it
+them too.** `firestore.rules` scopes every write by the account named on the document, and
+that ruleset is live - confirmed in the Firebase console on 11 September 2026, where it
 ends in a default-deny rather than the old `allow read, write: if request.auth != null`.
 `storage.rules` is untouched and still open to any signed-in account; that half is \#1350.
 Nothing in CI deploys either ruleset. The detail, and the launch risk accepted under the

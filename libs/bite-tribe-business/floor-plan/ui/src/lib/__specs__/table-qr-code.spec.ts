@@ -5,8 +5,21 @@ import {
   tableScanUrl,
 } from '../table-qr-code';
 
-/** A token of the shape issue \#1086 issues: 26 Crockford base32 characters. */
-const TOKEN = '7K3QMXB2VZ0HNDR5TWY9FC8AJP';
+/**
+ * The length a real token has, and deliberately nothing else about one.
+ *
+ * `generateTableQrToken` draws 26 characters of Crockford base32 at random, and
+ * a fixture that looked like that is a fixture the repository's secret scanner
+ * reports as a leaked credential - the correct behaviour from a scanner, and a
+ * false alarm every reviewer afterwards has to dismiss. What a fixture here has
+ * to be is 26 characters a QR code encodes in alphanumeric mode, which decides
+ * the version these specs assert on, so it is that and visibly nothing more.
+ * The same choice issue \#1086 made for the rules spec's `/tableTokens` seeds.
+ */
+const testToken = (table: number): string =>
+  `TEST-TABLE-QR-TOKEN-${String(table).padStart(6, '0')}`;
+
+const TOKEN = testToken(1);
 
 describe('tableScanUrl', () => {
   it('puts the token on the public origin', () => {
@@ -71,9 +84,7 @@ describe('tableQrCode', () => {
   });
 
   it('gives two tables two different codes', () => {
-    expect(tableQrCode(TOKEN).path).not.toBe(
-      tableQrCode('QZ5V8T2W7YRNJ0HDBM3XKC9FPA').path,
-    );
+    expect(tableQrCode(TOKEN).path).not.toBe(tableQrCode(testToken(2)).path);
   });
 
   it('names the origin the consumer app is canonicalised to', () => {

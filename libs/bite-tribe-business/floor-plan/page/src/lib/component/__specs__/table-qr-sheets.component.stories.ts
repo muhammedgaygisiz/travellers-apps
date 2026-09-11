@@ -7,19 +7,21 @@ import { TableQrSheetsComponent } from '../table-qr-sheets.component';
 addNecessaryIcons();
 
 /**
- * Tokens of the shape issue \#1086 issues: 26 Crockford base32 characters,
- * drawn here so the stories render real codes rather than placeholders — a
- * blurred or oversized code is the defect this page can actually have, and it
- * is only visible against a payload of the right length.
+ * Stand-ins for tokens: the 26 characters a real one has, and nothing else
+ * about one.
+ *
+ * The length is what these stories need — a blurred or oversized code is the
+ * defect this page can actually have, and it only shows against a payload that
+ * makes the encoder choose the version a printed code will be. 26 *random*
+ * characters is what the repository's secret scanner correctly reports as a
+ * leaked credential, and a fixture that trips it is a false alarm every
+ * reviewer afterwards has to dismiss. The same choice issue \#1086 made for the
+ * rules spec's `/tableTokens` seeds.
  */
-const TOKENS = [
-  '7K3QMXB2VZ0HNDR5TWY9FC8AJP',
-  'QZ5V8T2W7YRNJ0HDBM3XKC9FPA',
-  'JM0R7XA4TCK92WPZBY6HND5VQF',
-  'X2B9HKQ7MJ4CRZ0FNTVW3YPD85',
-  'V8YJ3ZTQ5RW7K0NBXMC2HFPA96',
-  'D4NQ8MZ0YR7KTJXB596VWCHPF2',
-];
+const TOKENS = Array.from(
+  { length: 6 },
+  (_, index) => `TEST-TABLE-QR-TOKEN-${String(index + 1).padStart(6, '0')}`,
+);
 
 const room = (index: number): { id: string; name: string } =>
   index < 4

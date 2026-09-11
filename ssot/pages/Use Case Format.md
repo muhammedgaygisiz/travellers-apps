@@ -462,6 +462,7 @@ X5 SYS <action>
 | `UC-DSB` | Discover Bites                                   | [[UC - Discover Bites]]                           |
 | `UC-IBD` | Inspect Bite Details                             | [[UC - Inspect Bite Details]]                     |
 | `UC-MPS` | Manage Profile And Social Graph                  | [[UC - Manage Profile And Social Graph]]          |
+| `UC-ALF` | Use Account And Legal Flows                      | [[UC - Use Account And Legal Flows]]              |
 | `UC-DIS` | Dismiss Restaurant Candidate                     | none                                              |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant | none                                              |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence         | none                                              |

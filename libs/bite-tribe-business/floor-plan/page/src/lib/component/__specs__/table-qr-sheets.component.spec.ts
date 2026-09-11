@@ -61,6 +61,22 @@ describe(TableQrSheetsComponent.name, () => {
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
 
   /**
+   * One of Ionic's own events, dispatched at the element that listens for it.
+   *
+   * An `ion-segment` and an `ion-select` are not upgraded in jsdom, so there
+   * is no control to operate: what the component binds is a DOM listener for
+   * `ionChange`, and dispatching the event is what exercises the handler
+   * behind it. A selector rather than a test id, because the layout segment
+   * carries the binding while its two buttons carry the ids.
+   */
+  const dispatchIonChange = (selector: string, detail: unknown): void => {
+    fixture.nativeElement
+      .querySelector(selector)
+      ?.dispatchEvent(new CustomEvent('ionChange', { detail }));
+    fixture.detectChanges();
+  };
+
+  /**
    * An Ionic button's own `disabled` input, read off the component: an
    * `ion-button` is not upgraded in jsdom, so the attribute it first rendered
    * with stays on the element after the binding turns it off again.
@@ -270,6 +286,49 @@ describe(TableQrSheetsComponent.name, () => {
       });
 
       expect(query('qr-sheets-room')).not.toBeNull();
+    });
+
+    it('reports the layout the owner picked', () => {
+      const chosen = jest.fn();
+
+      component.layoutChange.subscribe(chosen);
+      setInputs({ visibleRows: ROWS, selectedRows: ROWS });
+      dispatchIonChange('ion-segment.qr-sheets__layout', { value: 'tent' });
+
+      expect(chosen).toHaveBeenCalledWith('tent');
+    });
+
+    /**
+     * A segment reports whatever value it carries, and the two this page has
+     * are the only two the sheet can be laid out as. Anything else is dropped
+     * rather than passed on, because the layout decides the millimetre sizes
+     * the codes print at and there is no sheet for a third answer.
+     */
+    it('ignores a layout it cannot lay a sheet out as', () => {
+      const chosen = jest.fn();
+
+      component.layoutChange.subscribe(chosen);
+      setInputs({ visibleRows: ROWS, selectedRows: ROWS });
+      dispatchIonChange('ion-segment.qr-sheets__layout', { value: undefined });
+
+      expect(chosen).not.toHaveBeenCalled();
+    });
+
+    it('reports the room the owner filtered to', () => {
+      const chosen = jest.fn();
+
+      component.roomChange.subscribe(chosen);
+      setInputs({
+        visibleRows: ROWS,
+        selectedRows: ROWS,
+        filterRooms: [
+          { id: 'room-1', name: 'Main dining room' },
+          { id: 'room-2', name: 'Terrace' },
+        ],
+      });
+      dispatchIonChange('[data-testid="qr-sheets-room"]', { value: 'room-2' });
+
+      expect(chosen).toHaveBeenCalledWith('room-2');
     });
   });
 

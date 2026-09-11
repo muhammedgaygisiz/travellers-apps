@@ -202,6 +202,20 @@ describe('floor plan geometry', () => {
       expect(moved[0].position.x - moved[1].position.x).toBe(5000);
       expect(moved[0].position.x).toBe(10_000);
     });
+
+    /**
+     * Nothing selected is nothing to trim against.
+     *
+     * The delta comes back untouched rather than zeroed, because the caller is
+     * the pan gesture as well as the drag: a viewport move has no items in it,
+     * and returning zero here would stop the plan scrolling.
+     */
+    it('leaves a translation alone when there is nothing to move', () => {
+      expect(clampDeltaToRoom([], { x: 5000, y: -200 }, ROOM)).toEqual({
+        x: 5000,
+        y: -200,
+      });
+    });
   });
 
   describe('moveItems', () => {
@@ -266,6 +280,11 @@ describe('floor plan geometry', () => {
       );
 
       expect(moved.position).toEqual({ x: ROOM.width, y: ROOM.height });
+    });
+
+    /** A drag of nothing moves nothing, rather than moving item zero. */
+    it('has nothing to drag when the selection is empty', () => {
+      expect(moveItems([], 'item-1', { x: 500, y: 500 }, context)).toEqual([]);
     });
   });
 

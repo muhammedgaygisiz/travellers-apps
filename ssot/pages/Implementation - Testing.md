@@ -104,6 +104,34 @@ npx nx firebase-kill bite-tribe-firebase
 
 Never run two E2E suites at once — including `bite-tribe-e2e` alongside `bite-tribe-business-e2e`. They share the emulator ports, and the results of both become meaningless.
 
+### A Long-Lived Emulator Drifts
+
+The emulator keeps every write until it is restarted, and the `--import`
+seed is only what it started from. A spec whose precondition is what an
+account does _not_ own therefore fails against an emulator that has been used
+for a day of manual work, without anything being wrong with the code.
+
+The case that has actually cost time: `maintain-restaurant.spec.ts` asserts
+that the business account's restaurant list is _empty_ before checking that a
+restaurant belonging to somebody else is refused. The seeded restaurant
+`Sam's` carries no `ownerUserId` in the export, so any earlier session that
+claimed or assigned it to `organisation@test.com` leaves that row on the list
+and the spec red.
+
+Restart the emulators from the seed before believing that red, and check the
+state rather than the spec:
+
+```bash
+curl -s -H 'Authorization: Bearer owner' \
+  'http://127.0.0.1:8080/v1/projects/bite-tribe/databases/(default)/documents/restaurants'
+```
+
+The same applies to what a suite leaves behind. `/tableTokens` is top level
+and shared by every restaurant, so a floor-plan journey deletes the codes it
+minted along with the plan — see `apps/bite-tribe-business-e2e/src/support/floor-plan.ts`,
+which reads the tokens off the tables rather than from what the test asserted,
+so a run that fails half way through still cleans up after itself.
+
 ## Loki Visual Regression
 
 Storybook visual regression uses the upstream `loki` package from `oblador/loki` directly.

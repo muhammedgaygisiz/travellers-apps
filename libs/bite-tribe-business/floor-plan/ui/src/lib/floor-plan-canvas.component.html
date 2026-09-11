@@ -9,6 +9,7 @@
   [attr.aria-label]="
     'floor-plan-canvas-label' | transloco: { room: room()?.name ?? '' }
   "
+  [attr.aria-activedescendant]="activeDescendant()"
   data-testid="floor-plan-canvas"
   (pointerdown)="onPointerDown($event)"
   (pointermove)="onPointerMove($event)"
@@ -84,7 +85,28 @@
       -->
       <g data-testid="floor-plan-items">
         @for (item of itemViews(); track item.id) {
+          <!--
+            Named rather than merely drawn (GitHub issue #1089). A shape with no
+            accessible name is announced as nothing at all, so a plan a screen
+            reader walked through was twenty identical silences. The name is
+            what the object *is* - its type, and for a table its number, its
+            capacity and whether it is in service - because that is what the
+            owner is looking for; where it stands is the drawing's job.
+          -->
           <g
+            [attr.id]="item.domId"
+            role="img"
+            [attr.aria-label]="
+              item.nameKey
+                | transloco
+                  : {
+                      type: item.typeKey | transloco,
+                      label:
+                        item.label ||
+                        ('floor-plan-item-unnumbered' | transloco),
+                      seats: item.seats,
+                    }
+            "
             [attr.class]="item.classes"
             [attr.transform]="item.transform"
             [attr.data-item-id]="item.id"
@@ -94,7 +116,7 @@
                 [attr.cx]="item.cx"
                 [attr.cy]="item.cy"
                 [attr.r]="item.radius"
-                [attr.stroke-width]="hairline() * 2"
+                [attr.stroke-width]="item.strokeWidth"
               />
             } @else {
               <rect
@@ -102,7 +124,7 @@
                 [attr.y]="item.y"
                 [attr.width]="item.width"
                 [attr.height]="item.height"
-                [attr.stroke-width]="hairline() * 2"
+                [attr.stroke-width]="item.strokeWidth"
               />
             }
 

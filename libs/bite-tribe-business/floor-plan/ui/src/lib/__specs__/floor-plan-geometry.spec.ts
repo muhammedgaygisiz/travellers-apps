@@ -7,6 +7,7 @@ import {
   MIN_ITEM_SIDE,
   clampDeltaToRoom,
   edgeSnapOffset,
+  isWithinViewport,
   itemBounds,
   moveItems,
   normaliseRotation,
@@ -331,6 +332,38 @@ describe('floor plan geometry', () => {
       const resized = resizeItem(item(), 'e', { x: 4000, y: 4000 }, context);
 
       expect(resized.size.width).toBe(MIN_ITEM_SIDE);
+    });
+  });
+
+  describe('isWithinViewport', () => {
+    const viewport = { x: 1000, y: 1000, width: 4000, height: 4000 };
+
+    it('holds a box inside the view', () => {
+      expect(
+        isWithinViewport(
+          itemBounds(item({ position: { x: 3000, y: 3000 } })),
+          viewport,
+        ),
+      ).toBe(true);
+    });
+
+    /** Wholly, not partly: a table with a corner showing has its number off the edge. */
+    it('refuses a box hanging over the edge', () => {
+      expect(
+        isWithinViewport(
+          itemBounds(item({ position: { x: 1500, y: 3000 } })),
+          viewport,
+        ),
+      ).toBe(false);
+    });
+
+    it('refuses a box the view has left behind entirely', () => {
+      expect(
+        isWithinViewport(
+          itemBounds(item({ position: { x: 9000, y: 7000 } })),
+          viewport,
+        ),
+      ).toBe(false);
     });
   });
 

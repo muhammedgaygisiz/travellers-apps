@@ -19,6 +19,7 @@ import {
   ResizeHandle,
   ROTATION_SNAP_DEGREES,
   itemBounds,
+  isWithinViewport,
   moveItems,
   nudgeStep,
   offsetItems,
@@ -28,6 +29,7 @@ import {
 } from './floor-plan-geometry';
 import { DEFAULT_GRID_SPACING } from './floor-plan-grid';
 import { FloorPlanItem } from './floor-plan-item';
+import { paletteEntry } from './floor-plan-palette';
 import { formatMetres } from './floor-plan-units';
 import {
   CanvasViewport,
@@ -112,6 +114,19 @@ const DIGIT_WIDTH_RATIO = 0.62;
 const ROTATE_HANDLE_GAP_RATIO = 0.05;
 
 /**
+ * How many hairlines an item is drawn with, and a selected one (issue #1089).
+ *
+ * Selection was a hue and nothing else: the same stroke in the primary colour.
+ * Printed, photocopied or read by an owner who does not separate blue from
+ * grey, that is no distinction at all, and the dashed outline that would have
+ * carried it is drawn only around a *single* selected item - so a selected
+ * group said nothing. A heavier line says it in the vocabulary the rest of this
+ * drawing already uses, and says it in greyscale.
+ */
+const ITEM_HAIRLINES = 2;
+const SELECTED_HAIRLINES = 4;
+
+/**
  * Ids have to be unique per instance: an SVG `<pattern>` and a `<clipPath>`
  * are referenced by id, and two canvases on one page — Storybook shows
  * several — would otherwise share whichever pair was defined last.
@@ -155,8 +170,22 @@ type CanvasGesture =
 /** One item, ready to draw. */
 interface ItemView {
   id: string;
+  /**
+   * The element's own id, so `aria-activedescendant` can point at it.
+   *
+   * Carries the canvas instance as well as the item, because two canvases on
+   * one page - Storybook shows several - draw the same plan and would
+   * otherwise give two elements one id.
+   */
+  domId: string;
   classes: string;
+  /** The copy key naming what the item is, which is the palette's own. */
+  typeKey: string;
+  /** The copy key the accessible name is built from. */
+  nameKey: string;
   selected: boolean;
+  /** Stroke width in millimetres, heavier while the item is selected. */
+  strokeWidth: Millimetres;
   transform: string;
   x: Millimetres;
   y: Millimetres;
@@ -302,6 +331,32 @@ export class FloorPlanCanvasComponent {
   readonly clipPathId = `floor-plan-clip-${this.instance}`;
 
   readonly clipPathUrl = `url(#${this.clipPathId})`;
+
+  /** The element id of one item on this canvas. */
+  private itemDomId(id: string): string {
+    return `floor-plan-item-${this.instance}-${id}`;
+  }
+
+  /**
+   * The item a screen reader should read out, or nothing.
+   *
+   * The canvas is one tab stop and the objects inside it are not focusable -
+   * SVG focus is inconsistent across browsers, and twenty tables in the page's
+   * tab order would bury every control after them. So focus stays on the
+   * drawing and `aria-activedescendant` says which object it is on, which is
+   * the same thing the selection already says visually.
+   *
+   * The last selected item rather than the first, because that is the one the
+   * keyboard just walked on to, and the one a shift-click just added.
+   */
+  readonly activeDescendant = computed<string | null>(() => {
+    const ids = this.selectedIds();
+    const last = ids[ids.length - 1];
+
+    return this.items().some((item) => item.id === last)
+      ? this.itemDomId(last)
+      : null;
+  });
 
   /** One cell of the grid, drawn as its top and left edge. */
   readonly gridPath = computed(() => {
@@ -454,6 +509,7 @@ export class FloorPlanCanvasComponent {
 
   readonly itemViews = computed<ItemView[]>(() => {
     const viewport = this.viewport();
+    const hairline = this.hairline();
     const labelSize =
       Math.max(viewport.width, viewport.height) * ITEM_LABEL_RATIO;
     const seatsSize = labelSize * SEATS_LABEL_RATIO;
@@ -462,6 +518,17 @@ export class FloorPlanCanvasComponent {
 
     return this.drawnItems().map((item) => {
       const selected = selection.has(item.id);
+      /*
+       * The name an owner would use for this thing, which is the name the
+       * palette placed it under. Read from the palette rather than restated
+       * here, so a renamed object is renamed everywhere it is spoken about.
+       * The fallback is unreachable - the palette covers every variant the
+       * union has - and is a real key rather than the raw variant, so a future
+       * variant added to one list and not the other says "Objects" instead of
+       * reading out `table-round`.
+       */
+      const typeKey =
+        paletteEntry(item.variant)?.labelKey ?? 'floor-plan-objects';
       // Only a table carries a label worth drawing at plan scale; a wall's
       // optional label is a note for the owner, not a sign in the room.
       const isTable = item.kind === 'table';
@@ -479,10 +546,19 @@ export class FloorPlanCanvasComponent {
 
       return {
         id: item.id,
+        domId: this.itemDomId(item.id),
         classes: `floor-plan-canvas__item floor-plan-canvas__item--${item.variant}${
           selected ? ' floor-plan-canvas__item--selected' : ''
         }${item.enabled === false ? ' floor-plan-canvas__item--disabled' : ''}`,
+        typeKey,
+        nameKey: !isTable
+          ? typeKey
+          : item.enabled === false
+            ? 'floor-plan-item-table-disabled'
+            : 'floor-plan-item-table',
         selected,
+        strokeWidth:
+          hairline * (selected ? SELECTED_HAIRLINES : ITEM_HAIRLINES),
         transform: `rotate(${item.rotation} ${item.position.x} ${item.position.y})`,
         x: item.position.x - item.size.width / 2,
         y: item.position.y - item.size.height / 2,
@@ -793,9 +869,17 @@ export class FloorPlanCanvasComponent {
    * puts every mutation on this switch: place, move, resize and rotate all have
    * a keyboard path, so the arrow keys mean the selection whenever there is
    * one and the viewport only when there is not.
+   *
+   * Tab walks the objects, which is the one thing that had no keyboard path at
+   * all until issue #1089: every one of those mutations needs something
+   * selected first, and selecting was a press on a shape.
    */
   onKeyDown(event: KeyboardEvent): void {
-    if (this.handleCommandKey(event) || this.handleSelectionKey(event)) {
+    if (
+      this.handleTraversalKey(event) ||
+      this.handleCommandKey(event) ||
+      this.handleSelectionKey(event)
+    ) {
       event.preventDefault();
 
       return;
@@ -833,6 +917,84 @@ export class FloorPlanCanvasComponent {
     }
 
     event.preventDefault();
+  }
+
+  /**
+   * Tab walks the plan object by object, and off either end of it.
+   *
+   * Stepping past the last object drops the selection and lets the key through,
+   * so the focus leaves for the next control the way it would from any other
+   * element - a keyboard is never shut inside the drawing, and no separate
+   * "press escape to get out" rule has to be learned or announced. Tab into the
+   * canvas therefore starts at the first object and shift-tab out of the first
+   * one leaves backwards.
+   *
+   * The order is the order the plan is stored and drawn in, not reading order
+   * across the room. A reading order would be recomputed from the positions,
+   * so nudging a table 200 mm could put it before the one the owner had just
+   * come from, and the next press would walk backwards.
+   */
+  private handleTraversalKey(event: KeyboardEvent): boolean {
+    if (event.key !== 'Tab' || !this.room()) {
+      return false;
+    }
+
+    const next = this.itemAfterSelection(event.shiftKey);
+
+    if (!next) {
+      if (this.selectedIds().length > 0) {
+        this.selectionChange.emit([]);
+      }
+
+      return false;
+    }
+
+    this.selectionChange.emit([next.id]);
+    this.reveal(next);
+
+    return true;
+  }
+
+  /**
+   * The object one step from the selection, or nothing at either end.
+   *
+   * A step from a group of several leaves from its edge - forwards from the
+   * last of them and backwards from the first - so walking out of a
+   * select-all covers the plan rather than restarting in the middle of it.
+   */
+  private itemAfterSelection(backwards: boolean): FloorPlanItem | undefined {
+    const items = this.items();
+    const selection = this.selection();
+    const selected = items
+      .map((item, index) => (selection.has(item.id) ? index : -1))
+      .filter((index) => index >= 0);
+
+    if (selected.length === 0) {
+      return backwards ? undefined : items[0];
+    }
+
+    const from = backwards ? Math.min(...selected) : Math.max(...selected);
+
+    return items[backwards ? from - 1 : from + 1];
+  }
+
+  /**
+   * Brings an object the keyboard has just landed on into view.
+   *
+   * Only the keyboard needs this. A pointer can only press what is already on
+   * screen, so selecting used to imply seeing; tabbing through a plan zoomed
+   * in on one corner does not, and nudging a table nobody can see is not an
+   * edit an owner can check. The pan is the same clamped centre a drag
+   * produces, so the plan cannot be pushed off the canvas by it either.
+   */
+  private reveal(item: FloorPlanItem): void {
+    const room = this.room();
+
+    if (!room || isWithinViewport(itemBounds(item), this.viewport())) {
+      return;
+    }
+
+    this.pannedCentre.set(clampCentre(item.position, room.size));
   }
 
   /** The editor commands, which change which items exist rather than where. */

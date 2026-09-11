@@ -155,6 +155,29 @@ const drag = async (
   );
 };
 
+/**
+ * The business app's dark palette, put on the story instead of on the document
+ * (GitHub issue #1089).
+ *
+ * `html.dark` is what the app switches on, and a story that set it would set it
+ * for every story rendered afterwards in the same iframe - Loki selects stories
+ * without reloading the page, so the next reference would be captured dark by
+ * accident. These are the four variables the canvas actually draws from, so
+ * scoping them to one element renders the same drawing the theme would.
+ *
+ * The surface behind it is painted the same background the canvas fills a table
+ * with, which is the case the light stories already show inverted: the object
+ * and the page are one colour and the floor between them is the other, so what
+ * separates them is the floor rather than the table.
+ */
+const DARK_PALETTE = [
+  'background: #1a1c22',
+  '--ion-background-color: #1a1c22',
+  '--ion-text-color: #ffffff',
+  '--ion-text-color-rgb: 255, 255, 255',
+  '--ion-color-primary: #4a90d9',
+].join('; ');
+
 export default {
   title: 'Business/Floor Plan Canvas',
   component: FloorPlanCanvasComponent,
@@ -336,4 +359,61 @@ export const Resizing: Story = {
   args: { items: furnished, selectedIds: ['table-6'], snapSpacing: 500 },
   play: ({ canvasElement }) =>
     drag(canvasElement, '[data-handle="e"]', { x: 0.12, y: 0 }),
+};
+
+/**
+ * The same room in dark mode.
+ *
+ * Every colour on this canvas resolves from `--ion-background-color` and
+ * `--ion-text-color-rgb`, which Ionic sets in both themes, so the plan follows
+ * the theme it is rendered in rather than carrying colours of its own. What is
+ * worth looking at here is that the ladder survives the inversion: the walls
+ * are still the heaviest mark, the tables still read as objects standing on the
+ * floor, and the numbers are still the thing the eye lands on.
+ */
+export const Dark: Story = {
+  args: { items: furnished, selectedIds: ['table-2'] },
+  decorators: [
+    componentWrapperDecorator(
+      (story) => `<div style="height: 100%; ${DARK_PALETTE}">${story}</div>`,
+    ),
+  ],
+};
+
+/**
+ * The plan with the colour taken out of it (GitHub issue #1089).
+ *
+ * Nothing on this canvas may carry meaning by colour alone, and this is the
+ * reference that proves it: a wall is still solid, a doorway still a gap, a
+ * blocked area still hatched, a table out of service still hatched against one
+ * in service - and the selected table is still the heaviest line on the plan,
+ * which before this issue was a blue stroke of the same weight as every other.
+ *
+ * Two tables are selected rather than one, because a single selection also
+ * draws handles around itself and those would carry the state on their own.
+ * Two is the case the handles are deliberately not drawn for, so the weight of
+ * the line is the only thing left saying which tables the next command applies
+ * to.
+ *
+ * It is also the state the plan is printed in, on the QR sheets of issue #1087
+ * and on any office printer.
+ */
+export const Greyscale: Story = {
+  args: {
+    items: [
+      ...furnished.slice(0, 8),
+      roundTable('table-1', 1500, 3000, '1'),
+      roundTable('table-2', 3400, 3000, '2', { enabled: false }),
+      roundTable('table-3', 5300, 3000, '3'),
+      rectangularTable('table-6', 2200, 9000, '6', 0, { seats: 6 }),
+      rectangularTable('table-7', 5400, 9600, '7', 30),
+    ],
+    selectedIds: ['table-1', 'table-3'],
+  },
+  decorators: [
+    componentWrapperDecorator(
+      (story) =>
+        `<div style="height: 100%; filter: grayscale(1);">${story}</div>`,
+    ),
+  ],
 };

@@ -461,6 +461,64 @@ same version and its tables did not move, so nothing in the stored plan's
 identity changes, and without a seed token the editor would go on showing the
 arrangement that was just thrown away.
 
+Issue \#1089 made the editor usable without a mouse, and made nothing on the
+plan carry its meaning in a colour alone.
+
+**Tab walks the plan, and walks off the end of it.** Every mutation already had
+a keyboard path, and every one of them needs something selected first - which
+was a press on a shape, so the editor was operable by keyboard without being
+usable by one. Tab now steps through the objects, and a step past the last one
+drops the selection and lets the key through, so the focus leaves for the next
+control the way it would from any other element. That is what keeps the canvas
+from being a keyboard trap, and it needs no "press escape to get out" rule for
+an owner to be told about and to forget. The order is the order the plan is
+stored and drawn in rather than reading order across the room, because a reading
+order is recomputed from the positions: nudging a table 200 mm could put it
+behind the one the owner had just come from, and the next press would walk
+backwards.
+
+**Selecting by keyboard has to bring the object into view.** A pointer can only
+press what is on screen, so until this issue selecting implied seeing. Tabbing
+through a plan zoomed into one corner does not, and nudging a table nobody can
+see is not an edit an owner can check - so a step on to an object outside the
+viewport pans to it, by the same clamped centre a drag already uses.
+
+**The focus stays on the drawing, and `aria-activedescendant` says where it is
+inside it.** The objects are not focusable themselves: focus on an SVG element
+is inconsistent across browsers, and twenty tables in the page's tab order would
+bury every control after the canvas. Each object carries an accessible name
+instead, and the name is what the object _is_ - its type, and for a table its
+number, its capacity and whether it is in service. A shape with no accessible
+name is announced as nothing at all, so a plan a screen reader walked through
+was a row of identical silences.
+
+**Selection is a weight as well as a colour.** It used to be the primary hue on
+the same stroke every other object is drawn with, which says nothing in
+greyscale - printed on a QR sheet, photocopied, or read by an owner who does not
+separate blue from grey. The dashed outline that might have carried it is drawn
+only around a _single_ selected item, so a selected group said nothing at all. A
+selected object now draws at twice the line weight, which is the vocabulary the
+rest of the plan already uses for everything else it distinguishes.
+
+**Dark mode was right and was never captured.** The canvas has drawn from
+`--ion-background-color` and `--ion-text-color-rgb` since issue \#1082, so it
+follows the theme it is rendered in, and the relationship it depends on holds
+inverted: the table is painted in the page's own background and the floor is the
+ink at 4%, so in either theme the floor is what separates a table from the page
+behind it. The story that proves it scopes the dark palette to its own element
+rather than switching `html.dark`, because Loki selects stories without
+reloading the page and a class left on the document would darken every reference
+captured after it. A greyscale story stands beside it with two tables selected,
+which is the state the handles are deliberately not drawn for and therefore the
+one where the line weight is the only thing left saying what the next command
+applies to.
+
+**The shortcut is written under the canvas as well as into its name.** The
+canvas has always announced its own keys through its accessible name, which
+reaches a screen reader and nobody else. An owner working without a mouse but
+looking at the screen is the case that misses, and a shortcut nobody can
+discover is not a path to anything.
+
 ## Current Limitations
 
 - A plan can be built but not described. Issue \#1083 shipped the palette, placement, move, resize, rotate, multi-select, duplicate, delete, snapping and undo, so an owner can lay out a real dining area. A table placed this way is a real document with a generated number and four seats, and nothing yet lets the owner change either, nor the shape or the enabled state (issue \#1084).
@@ -471,7 +529,8 @@ arrangement that was just thrown away.
 - The autosave's debounce window is the one thing that can still lose work, and only to a crash. A room switch, a reorder and a publish all store the draft first; nothing stores it when the browser is closed mid-gesture, so the last second and a half is what a power cut costs.
 - A table moves out of the open room but never into it. Issue \#1085 moves a table by picking its new room in the table card, which is reachable only for a table the owner can see; there is no way to reach into another room and pull a table across, and no multi-room view to do it from.
 - Reordering the rooms still reseeds the editor, and now reseeds it from the stored draft rather than from the published plan - which is why the control is no longer closed while the plan is unpublished (issue \#1088). What it still costs is the undo history of the open room.
-- The canvas is baselined at desktop only, and now locked to it. `Business/*` stories are visually referenced at `chrome.laptop` alone, because the business app is a desktop product (issue \#1547), and since issue \#1085 the editor holds a 60rem minimum and scrolls sideways rather than collapsing. The `viewBox` still scales from the same stored data at any width, which is what the staff view of issue \#1093 will read it with. Accessibility hardening - keyboard paths, accessible names, greyscale, dark mode - is issue \#1089.
+- The canvas is baselined at desktop only, and now locked to it. `Business/*` stories are visually referenced at `chrome.laptop` alone, because the business app is a desktop product (issue \#1547), and since issue \#1085 the editor holds a 60rem minimum and scrolls sideways rather than collapsing. The `viewBox` still scales from the same stored data at any width, which is what the staff view of issue \#1093 will read it with.
+- A keyboard can select one object at a time, or all of them. Issue \#1089 put tab on the plan and `Ctrl`/`Cmd`+`A` was already there, so the numbering helper - which needs two or more selected - is reachable without a pointer only by numbering the whole room. Adding a member to a selection without shift-clicking it has no key, because the obvious ones are taken: shift walks backwards and the platform modifier already carries undo, redo, duplicate and select-all.
 - No CAD import, no exact scale drawing, and no automatic layout.
 
 ## Future Ideas

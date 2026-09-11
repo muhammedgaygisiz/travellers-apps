@@ -48,6 +48,8 @@
     - [[UC - Subscribe To BiteTribe Pro]]
     - [[UC - See Ads As A Free User]]
     - [[UC - Buy A Paid BiteTrail]]
+  - Obsolete - pending deletion
+    - none
 - Epics
   - [[epic-735]]
   - [[epic-738]]

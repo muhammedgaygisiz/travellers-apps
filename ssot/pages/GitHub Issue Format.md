@@ -103,6 +103,14 @@ Two limits:
 - **It applies only where such a marker exists.** An issue that closes nothing marked in a use case carries no criterion of this kind, and no issue invents a marker in order to have one.
 - **Where two issues together close one marker**, because the rule states both halves, the criterion belongs on the issue that lands second. The first names the half it delivers in its traceability sentence instead.
 
+The same form applies to deletion. Where an issue removes the code behind a use case marked `[Obsolete]` ([[Use Case Format]] `UF-21`), the **last** acceptance criterion asserts the page is gone:
+
+```text
+- [ ] `UC - <name>` is deleted, with its entries removed from [[SSOT]], [[contents]] and the use-case code registry.
+```
+
+The deletion itself is defined by [[Use Case Format]] `UF-23`; the criterion only makes it checkable from the issue.
+
 This is the one exception to the rule that traceability is not recorded in the issue body. It records a *contract*, not a cross-reference: the cross-reference still belongs on the use-case page.
 
 ## App Store Review Area

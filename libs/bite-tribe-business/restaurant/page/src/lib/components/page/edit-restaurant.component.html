@@ -1,28 +1,35 @@
 @let restaurantData = restaurant();
 
+<!--
+  The same two-column shape as the admin app's Create Restaurant page
+  (GitHub issue #1572). `fullWidth` releases `PageComponent`'s 720 px cap, and
+  the page then constrains itself to 78 rem - the two surfaces edit
+  substantially the same fields and should not look like different products.
+-->
 <ta-page
   [chrome]="{
     enableBackButton: true,
     showHeaderMenu: false,
     showFooter: false,
+    fullWidth: true,
   }"
 >
-  <ion-content>
-    <bt-restaurant-image [restaurant]="restaurantData" />
+  <ion-content class="ion-padding">
+    <h1 data-testid="restaurant-name">{{ placeName() }}</h1>
 
-    <div class="ion-padding">
-      <div
-        class="header-container ion-display-flex ion-justify-content-between ion-align-items-center ion-margin-bottom"
-      >
-        <h1 data-testid="restaurant-name">{{ placeName() }}</h1>
-      </div>
+    <div class="layout">
+      <!--
+        The left column is what the restaurant *is*: its picture, how it is
+        reached, what it says about itself and where it is.
+      -->
+      <div class="left-column">
+        <bt-restaurant-image [restaurant]="restaurantData" />
 
-      <div [formGroup]="socialMediaForm">
-        @if (links.length === 0) {
-          <ion-text>{{ 'no-social-media-links' | transloco }}</ion-text>
-        }
+        <div [formGroup]="socialMediaForm" class="ion-margin-top">
+          @if (links.length === 0) {
+            <ion-text>{{ 'no-social-media-links' | transloco }}</ion-text>
+          }
 
-        <div class="ion-margin-top">
           <ion-list lines="full" formArrayName="links">
             @for (socialMedia of links.controls; track $index; let i = $index) {
               <ion-item [formGroupName]="i">
@@ -47,141 +54,164 @@
                 <ion-input placeholder="Link" formControlName="url"></ion-input>
               </ion-item>
             }
-
-            <ion-button class="ion-margin-top" (click)="addSocialMedia()"
-              >Add Link
-            </ion-button>
           </ion-list>
 
-          <div class="ion-margin-top" [formGroup]="descriptionForm">
-            <ion-textarea
-              label="{{ 'about-restaurant' | transloco }}"
-              formControlName="description"
-              fill="outline"
-              auto-grow="true"
-              [maxlength]="500"
-              [rows]="6"
-              mode="md"
-              data-testid="restaurant-description"
-            />
-            <ion-button
-              class="ion-margin-top"
-              data-testid="save-description"
-              (click)="saveDescription()"
-            >
-              {{ 'save' | transloco }}
-            </ion-button>
-          </div>
+          <!--
+            Add and Save sit together under the list they belong to. The Save
+            used to be at the very bottom of the page, under the navigation
+            buttons; in two columns that put it beside the opening hours and
+            nowhere near the links it writes.
+          -->
+          <div class="section-actions">
+            <ion-button (click)="addSocialMedia()">Add Link</ion-button>
 
-          <div class="ion-margin-top" [formGroup]="addressForm">
-            <ion-input
-              label="{{ 'street' | transloco }}"
-              formControlName="street"
-              fill="outline"
-              class="ion-margin-top"
-              mode="md"
-              data-testid="restaurant-street"
-            />
-            <div class="ion-display-flex ion-gap-2 ion-margin-top">
-              <ion-input
-                label="{{ 'postcode' | transloco }}"
-                formControlName="postcode"
-                fill="outline"
-                mode="md"
-                class="ion-flex-1 ion-margin-end"
-                data-testid="restaurant-postcode"
-              />
-              <ion-input
-                label="{{ 'city' | transloco }}"
-                formControlName="city"
-                fill="outline"
-                mode="md"
-                class="ion-flex-1"
-                data-testid="restaurant-city"
-              />
-            </div>
-            <ion-input
-              label="{{ 'country' | transloco }}"
-              formControlName="country"
-              fill="outline"
-              class="ion-margin-top"
-              mode="md"
-              data-testid="restaurant-country"
-            />
-            <ion-button
-              class="ion-margin-top"
-              data-testid="save-address"
-              (click)="saveAddress()"
-            >
-              {{ 'save' | transloco }}
-            </ion-button>
-          </div>
-
-          <div class="ion-margin-top" [formGroup]="positionForm">
-            <position formControlName="position" />
-            <ion-button class="ion-margin-top" (click)="savePosition()">
-              {{ 'save' | transloco }}
-            </ion-button>
-          </div>
-
-          <div class="ion-margin-top">
-            <bt-opening-hours
-              [openingHours]="
-                $safeNavigationMigration(restaurantData?.openingHours)
-              "
-              (submitOpeningHours)="submitOpeningHours.emit($event)"
-            />
+            @if (links.length) {
+              <ion-button
+                data-testid="save-social-media"
+                [disabled]="isInvalid()"
+                (click)="saveSocialMediaLinks()"
+              >
+                {{ 'save' | transloco }}
+              </ion-button>
+            }
           </div>
         </div>
 
-        @if (!hasMenu()) {
+        <div class="ion-margin-top" [formGroup]="descriptionForm">
+          <ion-textarea
+            label="{{ 'about-restaurant' | transloco }}"
+            formControlName="description"
+            fill="outline"
+            auto-grow="true"
+            [maxlength]="500"
+            [rows]="6"
+            mode="md"
+            data-testid="restaurant-description"
+          />
           <ion-button
             class="ion-margin-top"
-            aria-label="Create a new menu for this restaurant"
-            (click)="createMenu.emit()"
+            data-testid="save-description"
+            (click)="saveDescription()"
           >
-            Create Menu
+            {{ 'save' | transloco }}
           </ion-button>
-        } @else {
+        </div>
+
+        <div class="ion-margin-top" [formGroup]="addressForm">
+          <ion-input
+            label="{{ 'street' | transloco }}"
+            formControlName="street"
+            fill="outline"
+            class="ion-margin-top"
+            mode="md"
+            data-testid="restaurant-street"
+          />
+          <div class="ion-display-flex ion-gap-2 ion-margin-top">
+            <ion-input
+              label="{{ 'postcode' | transloco }}"
+              formControlName="postcode"
+              fill="outline"
+              mode="md"
+              class="ion-flex-1 ion-margin-end"
+              data-testid="restaurant-postcode"
+            />
+            <ion-input
+              label="{{ 'city' | transloco }}"
+              formControlName="city"
+              fill="outline"
+              mode="md"
+              class="ion-flex-1"
+              data-testid="restaurant-city"
+            />
+          </div>
+          <ion-input
+            label="{{ 'country' | transloco }}"
+            formControlName="country"
+            fill="outline"
+            class="ion-margin-top"
+            mode="md"
+            data-testid="restaurant-country"
+          />
           <ion-button
             class="ion-margin-top"
-            aria-label="Edit the menu for this restaurant"
-            (click)="gotoEditMenu()"
+            data-testid="save-address"
+            (click)="saveAddress()"
           >
-            Edit Menu
+            {{ 'save' | transloco }}
           </ion-button>
-        }
-
-        <ion-button
-          class="ion-margin-top"
-          fill="outline"
-          data-testid="edit-restaurant-staff"
-          [attr.aria-label]="'staff-manage' | transloco"
-          (click)="manageStaff.emit()"
-        >
-          {{ 'staff-manage' | transloco }}
-        </ion-button>
-
-        <ion-button
-          class="ion-margin-top"
-          fill="outline"
-          data-testid="edit-restaurant-floor-plan"
-          [attr.aria-label]="'floor-plan-manage' | transloco"
-          (click)="editFloorPlan.emit()"
-        >
-          {{ 'floor-plan-manage' | transloco }}
-        </ion-button>
-
-        @if (links.length) {
-          <ion-button
-            class="ion-margin-top"
-            [disabled]="isInvalid()"
-            (click)="saveSocialMediaLinks()"
-          >
-            Save
-          </ion-button>
-        }
+        </div>
       </div>
+
+      <!--
+        The right column is the two blocks that want width and height rather
+        than a label and a field: the map, and the week. The admin page fills
+        this column with its Bite evidence, which this page has no equivalent
+        of - and the opening hours are the tallest thing here, so putting them
+        beside the map balances the columns instead of adding four hundred
+        pixels to the bottom of the form.
+      -->
+      <div class="right-column">
+        <div [formGroup]="positionForm">
+          <position formControlName="position" />
+          <ion-button
+            class="ion-margin-top"
+            data-testid="save-position"
+            (click)="savePosition()"
+          >
+            {{ 'save' | transloco }}
+          </ion-button>
+        </div>
+
+        <div class="ion-margin-top">
+          <bt-opening-hours
+            [openingHours]="
+              $safeNavigationMigration(restaurantData?.openingHours)
+            "
+            (submitOpeningHours)="submitOpeningHours.emit($event)"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!--
+      Where the admin page puts its Save: under both columns, full width. These
+      are the ways *out* of this page rather than edits to it, so they belong to
+      neither column.
+    -->
+    <div class="page-actions">
+      @if (!hasMenu()) {
+        <ion-button
+          aria-label="Create a new menu for this restaurant"
+          (click)="createMenu.emit()"
+        >
+          Create Menu
+        </ion-button>
+      } @else {
+        <ion-button
+          aria-label="Edit the menu for this restaurant"
+          (click)="gotoEditMenu()"
+        >
+          Edit Menu
+        </ion-button>
+      }
+
+      <ion-button
+        fill="outline"
+        data-testid="edit-restaurant-staff"
+        [attr.aria-label]="'staff-manage' | transloco"
+        (click)="manageStaff.emit()"
+      >
+        {{ 'staff-manage' | transloco }}
+      </ion-button>
+
+      <ion-button
+        fill="outline"
+        data-testid="edit-restaurant-floor-plan"
+        [attr.aria-label]="'floor-plan-manage' | transloco"
+        (click)="editFloorPlan.emit()"
+      >
+        {{ 'floor-plan-manage' | transloco }}
+      </ion-button>
     </div>
   </ion-content>
 </ta-page>

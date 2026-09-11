@@ -1,7 +1,69 @@
 :host {
-  .header-container {
-    h1 {
-      margin: 0;
+  /*
+   * The same measure as the admin app's Create Restaurant page
+   * (GitHub issue #1572).
+   *
+   * The page opts into `fullWidth` chrome, which releases `PageComponent`'s
+   * 720px cap, and then holds its own width here. Without the second half the
+   * form would run the full width of a laptop and the address fields would be
+   * a metre long; without the first it stays the phone column it was.
+   */
+  h1,
+  .layout,
+  .page-actions {
+    max-width: 78rem;
+    margin-inline: auto;
+  }
+
+  h1 {
+    margin-block: 0 1rem;
+  }
+
+  .layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .left-column,
+  .right-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* Add and Save sit side by side under the list they belong to. */
+  .section-actions,
+  .page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  /*
+   * Two columns from the Ionic `lg` breakpoint (>= 992px), matching the admin
+   * page: the fields on the left, the map and the week on the right. Below it
+   * the columns stack in reading order, which is the order they are written in.
+   */
+  @media (min-width: 992px) {
+    .layout {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 2rem;
+    }
+
+    /*
+     * The map and the opening-hours table want width more than a labelled
+     * input does - a street name does not read better at 600px than at 400px,
+     * and a week of times does.
+     */
+    .left-column {
+      flex: 2;
+    }
+
+    .right-column {
+      flex: 3;
     }
   }
 }

@@ -2,19 +2,29 @@
 
 ## Status
 
-Supported today.
+**Level:** L0.
+Supported today. Every notification named in `Supported Evidence` ships, together with the
+seven contracts below: how a tap resolves to a surface, how notifications collapse and clear,
+the language they arrive in, how a release is announced, the country badge, the review-thread
+fan-out, and per-installation delivery. The release announcement is the only one a person
+fires; everything else runs from a backend trigger or a schedule.
 
 ## Goal
 
-Users and creators can receive engagement signals around Bites and social activity.
+An account learns that something happened around its Bites, its followers and its standing
+without opening the app, and reaches the thing that happened in one tap. This page owns which
+events produce a notification, what each says and in which language, how they collapse and
+clear, and which installations they are delivered to.
 
 ## Actors
 
-- Bite creator
-- User
-- Food lover
+- **Bite Creator** - receives notifications about its Bites, its followers and its standing,
+  taps them to reach the surface they name, and decides which of its installations are
+  delivered to.
+- **BiteTribe Operator** - fires the release announcement by hand once a store serves a new
+  build. No other notification on this page is triggered by a person.
 
-## Current Flow
+## Flow
 
 - Backend functions react to new Bites, likes, reviews, followers, and weekly activity.
 - Backend functions can notify users about meaningful leaderboard ranking changes.
@@ -116,7 +126,7 @@ added a manually triggered notification for a released app version:
 
 - The trigger is manual. Nothing observable tells the backend when a TestFlight
   build or a Play Console review has actually gone live, so an operator fires it
-  from the business migrations page once the store serves the new build.
+  from its own surface in the admin app once the store serves the new build.
 - iOS and Android are announced separately, because the two stores clear their
   review at different times.
 - The announcement is addressed by installation platform, not by account: the
@@ -126,7 +136,7 @@ added a manually triggered notification for a released app version:
   guessing would announce an App Store release to an Android device.
 - The copy still follows the Localization Contract: every recipient reads it in
   the language they chose.
-- The business page reports how far the announcement reached, since a broadcast
+- The admin surface reports how far the announcement reached, since a broadcast
   leaves nothing else behind to verify it by.
 
 ## Country Badge Contract
@@ -216,6 +226,34 @@ made notification delivery installation-specific:
   current device, never the management of the others.
 - `Settings.pushNotifications` is not part of delivery eligibility.
 
+## MVP Classification
+
+**[MVP]** - the Installation Contract and the Notification Navigation Contract. If any
+notification ships at all, an account has to be able to stop delivery to one installation, and
+a tap has to open the surface it names rather than landing on Home.
+
+**[Secondary]** - which notifications exist: followers on a new Bite, likes, reviews and
+replies, the weekly summary, the daily leaderboard, the country badge, and the release
+announcement. Each drives engagement and none is required for the app to work. The Collapse,
+Localization, Release Announcement, Country Badge and Review Thread contracts are secondary
+with the notifications they shape.
+
+Not on this page: the settings surface that lists installations and switches them. That is
+[[UC - Configure Personal Settings]], which owns the UI this page's delivery state feeds.
+
+## App Store Review Area
+
+Relevant.
+
+- The notification permission is a user-facing OS prompt on both platforms. iOS asks through
+  `UNUserNotificationCenter`; Android 13 and later require `POST_NOTIFICATIONS`, which reaches
+  the app by manifest merge from `@capacitor-firebase/messaging` rather than being declared in
+  the app's own manifest. The contextual prompt, and the way back from a device the user has
+  muted, belong to [[UC - Configure Personal Settings]].
+- The FCM token and the installation UUID are device identifiers, covered by the `device IDs`
+  entry in [[Implementation - Store Declarations]]. An identifier introduced here would have to
+  be added there.
+
 ## Supported Evidence
 
 - `notifyFollowersOnNewBite`
@@ -225,7 +263,8 @@ made notification delivery installation-specific:
 - `notifyUserOnNewFollower`
 - `sendWeeklyBiteNotification`
 - `sendDailyLeaderboardNotification`
-- `sendNewVersionNotification`, triggered from the business `migrations` page
+- `sendNewVersionNotification`, guarded by `requireAdmin` and triggered from its own
+  surface in the admin app
 - `notifyOnNewCountryBadge`, awarded from `enrichBiteAddressOnCreate`
 - `handleSharedLinkToBite`
 - `loadWeeklyBites`
@@ -242,3 +281,14 @@ made notification delivery installation-specific:
 
 - [[User]]
 - [[Bite]]
+
+## Related Pages
+
+- [[Personas]] - the audiences this page serves: the food lover and the Bite creator, whose
+  engagement these signals exist to return
+- [[UC - Configure Personal Settings]] - the settings surface that lists installations and
+  switches delivery, and where `Settings.pushNotifications` was retired
+- [[UC - Inspect Bite Details]] - the surface a tapped Bite or review-reply notification opens
+- [[UC - Run Operational Migrations]] - where the release announcement is fired
+- [[UC - Use Gamification Signals]] - the leaderboard the daily notification reports on
+- [[Implementation - Store Declarations]]

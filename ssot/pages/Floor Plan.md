@@ -337,13 +337,22 @@ answers how many guests can sit there.
 
 **The editor is a desktop tool and no longer collapses.** It holds a minimum
 width and scrolls sideways below it, rather than folding three columns into one.
-The breakpoint that used to do that was the only media query in the whole
-`libs/bite-tribe-business` tree, so the editor was the inconsistent surface
-rather than the responsive one, and issue \#1547 had already baselined the
-`Business/*` stories at `chrome.laptop` alone on the same grounds. Ionic's
+The breakpoint that used to do that was, at the time, the only media query in
+the whole `libs/bite-tribe-business` tree, so the editor was the inconsistent
+surface rather than the responsive one, and issue \#1547 had already baselined
+the `Business/*` stories at `chrome.laptop` alone on the same grounds. Ionic's
 `ion-content` ships `overflow-x: hidden`, so the minimum width needs `scrollX`
 turned on with it; without that the right-hand column is clipped at a narrow
 window with no way to reach it, which is worse than the collapse it replaces.
+
+Issue \#1572 put a second one in the tree, on the restaurant page, and the two
+say opposite things for a reason. That page is a form: its columns stack in
+reading order below the breakpoint and lose nothing, because a labelled input
+is a labelled input at any width. This one is a millimetre-accurate drag
+surface whose three columns have a spatial relationship to each other, and
+stacking them is a reading order nobody designed. The rule is not "the business
+app never collapses"; it is that a surface collapses when collapsing still
+leaves it usable.
 
 **The responsive promise is dead for the editor, and alive for the staff view.**
 Issue \#1089 owned "responsive and accessible floor plan rendering" and has been

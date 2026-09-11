@@ -25,6 +25,32 @@ Business users or admins can maintain Restaurant and menu context that improves 
   to change it.
 - The initial Menu saves the business user the first round of typing: each distinct Bite dish name becomes one item, priced with the average of the prices users reported, in a single `Bites` category. The business user then corrects, renames, and structures it in the edit-menu page.
 
+### How The Restaurant Page Is Laid Out
+
+Two columns inside a centred 78 rem measure, from the Ionic `lg` breakpoint
+(issue \#1572). The picture, the social links, the About text and the address
+run down the left; the map and the opening hours run down the right; and the
+ways _out_ of the page - the menu, the staff, the floor plan - sit in a row
+under both.
+
+It is the shape the admin app's Create Restaurant page already had. The two
+surfaces edit substantially the same fields, and before this the business one
+inherited `PageComponent`'s default 720 px cap and rendered on a laptop as a
+phone screen stretched to roughly two thousand pixels: the owner scrolled past
+the whole form to reach the buttons. The map and the week are what went right,
+because they are the two blocks that want width and height rather than a label
+and a field - and because the opening-hours table is the tallest thing on the
+page, so beside the map it balances the columns instead of lengthening them.
+
+The columns stack below the breakpoint, in the order they are written. That is
+the opposite of what the floor-plan editor does in the same app, and
+deliberately: this page is a form, and a labelled input is a labelled input at
+any width. See [[Floor Plan]] for why a drag surface is not.
+
+Each field group keeps its own Save, unlike the admin page's single one. The
+admin page creates a restaurant in one write; this one edits an existing
+restaurant a field group at a time, through a service call per group.
+
 ### What A Restaurant No Longer Does Here
 
 Creating a Restaurant is operator work. Restaurant-candidate verification, the
@@ -57,6 +83,7 @@ Restaurant. See [[UC - Own And Claim Restaurants]].
 - Issue \#734 includes opening hours, social links, verified/unverified restaurant handling, menu cleanup, and admin restaurant workflows.
 - Issue \#778 / \#942 covers verifying restaurant candidates discovered from repeated Bite evidence into real Restaurants. That flow is Operator work in the Admin App; see [[UC - Verify Restaurant Candidate]].
 - Issue \#1003 seeds the initial Menu of a verified candidate from its Bites.
+- Issue \#1572 gives `restaurant/:restaurantId` the two-column layout the admin app's Create Restaurant page already had.
 
 ## Related Domains
 

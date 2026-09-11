@@ -45,8 +45,9 @@ export type Millimetres = number;
  * Degrees clockwise, `0` to `359`.
  *
  * The range is a contract, not a type: TypeScript cannot express it without
- * 360 literals, so the editor and the publish validation of issue #1088 keep
- * it. A value outside the range is a bug, not a second convention.
+ * 360 literals, so the editor keeps it - every path that produces a rotation
+ * ends in `normaliseRotation`. A value outside the range is a bug, not a
+ * second convention.
  */
 export type FloorPlanRotation = number;
 

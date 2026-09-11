@@ -131,11 +131,14 @@ export const ROUTES: Routes = withAuthRoutes([
    * The floor plan is the **owner's** route too.
    *
    * [[Floor Plan]] gives staff a read of the *published* plan and no write, and
-   * there is no published state until issue #1088 splits draft from published —
-   * so admitting staff here would hand them the draft an owner is halfway
-   * through rearranging. `ownedRestaurantGuard` checks
-   * `Restaurant.ownerUserId`, which a staff account never holds, and issue
-   * #1081's rules refuse the same account for the same reason (issue #1082).
+   * this route is neither: it is the editor, which writes a draft as the owner
+   * arranges and publishes it when they say so. Issue #1088 opened the staff
+   * read in `firestore.rules` once there was a published state to open it to,
+   * and deliberately left this gate alone - the surface staff get is the live
+   * view of issue #1093, not the editor at a different permission.
+   * `ownedRestaurantGuard` checks `Restaurant.ownerUserId`, which a staff
+   * account never holds, and the rules refuse a draft write from the same
+   * account for the same reason (issue #1082).
    */
   {
     path: 'restaurant/:restaurantId/floor-plan',

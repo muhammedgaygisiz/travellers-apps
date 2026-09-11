@@ -30,3 +30,4 @@ export type * from './lib/nearby-restaurant';
 export type * from './lib/weekly-bites';
 export type * from './lib/floor-plan';
 export type * from './lib/restaurant-table';
+export type * from './lib/floor-plan-draft';

@@ -3,6 +3,7 @@ import {
   add,
   addCircleOutline,
   addOutline,
+  alertCircleOutline,
   alertOutline,
   arrowBackOutline,
   arrowForwardOutline,
@@ -74,6 +75,7 @@ import {
   timeOutline,
   trashOutline,
   peopleOutline,
+  warningOutline,
 } from 'ionicons/icons';
 
 export const addNecessaryIcons = (): void => {
@@ -128,7 +130,10 @@ export const addNecessaryIcons = (): void => {
     heart,
     heartOutline,
     chevronExpandOutline,
+    // The two severities of the floor-plan publish gate (issue #1088).
+    alertCircleOutline,
     alertOutline,
+    warningOutline,
     searchOutline,
     shareSocialOutline,
     storefrontOutline,

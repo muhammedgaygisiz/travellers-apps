@@ -14,6 +14,7 @@ import {
   FloorPlanPlacement,
 } from 'bite-tribe-business/floor-plan-ui';
 import { FloorPlanSize, RestaurantTable, Room, TableShape } from 'model';
+import { FloorPlanIssue } from '../../integration/floor-plan-validation';
 import { RoomDraft } from '../../integration/room-draft';
 import {
   DEFAULT_ROOM_HEIGHT_MM,
@@ -162,8 +163,8 @@ describe(FloorPlanComponent.name, () => {
       expect(alerts).toEqual([]);
     });
 
-    it('describes no stored size', () => {
-      expect(component.storedSize()).toBe('');
+    it('describes no published size', () => {
+      expect(component.publishedSize()).toBe('');
     });
   });
 
@@ -190,7 +191,13 @@ describe(FloorPlanComponent.name, () => {
 
   describe('with a room open', () => {
     beforeEach(() =>
-      setInputs({ rooms: [room()], selectedRoom: room(), gridSpacing: 500 }),
+      setInputs({
+        rooms: [room()],
+        selectedRoom: room(),
+        publishedRoom: room(),
+        gridSpacing: 500,
+        canPublish: true,
+      }),
     );
 
     it('shows the room and its canvas', () => {
@@ -199,34 +206,39 @@ describe(FloorPlanComponent.name, () => {
       expect(query('floor-plan-empty')).toBeNull();
     });
 
-    it('fills the form with the stored dimensions in metres', () => {
+    it('fills the form with the published dimensions in metres', () => {
       expect(component.name()).toBe('Main dining room');
       expect(component.width()).toBe('8');
       expect(component.height()).toBe('12');
-      expect(component.storedSize()).toBe('8 m × 12 m');
+      expect(component.publishedSize()).toBe('8 m × 12 m');
     });
 
-    /** Metres in the form, millimetres in the draft, and nowhere else. */
-    it('emits a save in millimetres', () => {
+    /** Metres in the form, millimetres on the way out, and nowhere else. */
+    it('reports the room fields in millimetres as they change', () => {
       const drafts: RoomDraft[] = [];
-      component.saveRoom.subscribe((draft) => drafts.push(draft));
+      component.roomFieldsChange.subscribe((draft) => drafts.push(draft));
 
       component.name.set('  Terrace  ');
       component.width.set('6.5');
       component.height.set('9');
-      component.onSave();
+      component.onRoomFieldsChange();
 
       expect(drafts).toEqual([{ name: 'Terrace', width: 6500, height: 9000 }]);
     });
 
-    it('refuses to save a nameless room', () => {
+    /**
+     * A field being typed into is not a room dimension. Reporting one would
+     * autosave a nameless room half a metre wide, which is the state the draft
+     * exists to avoid rather than the state it should store.
+     */
+    it('reports nothing while a field is unusable', () => {
       const drafts: RoomDraft[] = [];
-      component.saveRoom.subscribe((draft) => drafts.push(draft));
+      component.roomFieldsChange.subscribe((draft) => drafts.push(draft));
 
       component.name.set('   ');
-      component.onSave();
+      component.onRoomFieldsChange();
 
-      expect(component.canSave()).toBe(false);
+      expect(component.formUsable()).toBe(false);
       expect(drafts).toEqual([]);
     });
 
@@ -238,13 +250,13 @@ describe(FloorPlanComponent.name, () => {
     ])('refuses a width that is %s', (_case, width) => {
       component.width.set(width);
 
-      expect(component.canSave()).toBe(false);
+      expect(component.formUsable()).toBe(false);
     });
 
-    it('locks the form while a write is in flight', () => {
-      setInputs({ saving: true });
+    it('locks publishing while a write is in flight', () => {
+      setInputs({ saving: true, canPublish: false });
 
-      expect(component.canSave()).toBe(false);
+      expect(component.canPublishNow()).toBe(false);
     });
 
     it('follows the room the owner switches to', () => {
@@ -522,13 +534,13 @@ describe(FloorPlanComponent.name, () => {
 
       it('reports the level the owner typed, and no level once it is cleared', () => {
         const drafts: RoomDraft[] = [];
-        component.saveRoom.subscribe((draft) => drafts.push(draft));
+        component.roomFieldsChange.subscribe((draft) => drafts.push(draft));
 
         component.floor.set('  Upstairs  ');
-        component.onSave();
+        component.onRoomFieldsChange();
 
         component.floor.set('   ');
-        component.onSave();
+        component.onRoomFieldsChange();
 
         expect(drafts[0].floor).toBe('Upstairs');
         expect(drafts[1].floor).toBeUndefined();
@@ -583,15 +595,16 @@ describe(FloorPlanComponent.name, () => {
         });
 
         /**
-         * Reordering writes rooms, and a room whose version moves reseeds the
-         * editor. Closing the control while there is something to lose is the
-         * honest answer, and the note beside the list says why.
+         * Reordering used to be closed while the open room had unsaved
+         * changes, because it writes rooms and a room whose version moves
+         * reseeds the editor. Since issue #1088 the editor reseeds from the
+         * draft, and the page stores that first, so there is nothing left to
+         * lose and the control stays open.
          */
-        it('waits for an unsaved room to be written, and says so', () => {
-          setInputs({ unsavedChanges: true });
+        it('stays open while the plan is unpublished', () => {
+          setInputs({ unpublishedChanges: true });
 
-          expect(buttonDisabled('floor-plan-room-down-room-1')).toBe(true);
-          expect(query('floor-plan-reorder-blocked')).not.toBeNull();
+          expect(buttonDisabled('floor-plan-room-down-room-1')).toBe(false);
         });
 
         it('offers no reordering for a restaurant with one room', () => {
@@ -601,55 +614,214 @@ describe(FloorPlanComponent.name, () => {
         });
       });
 
-      describe('switching rooms with unsaved changes', () => {
+      /**
+       * Issue #1085 asked before leaving a room with unsaved changes, because
+       * switching reseeded the editor and the arrangement was gone. Issue
+       * #1088 stores that arrangement as a draft and flushes it before the
+       * switch, so there is nothing to lose and the question is one nobody
+       * needs to answer.
+       */
+      describe('switching rooms while the plan is unpublished', () => {
         beforeEach(() => {
-          setInputs({ rooms: [room(), terrace], unsavedChanges: true });
+          setInputs({ rooms: [room(), terrace], unpublishedChanges: true });
         });
 
-        /** The acceptance criterion: no unsaved change is lost silently. */
-        it('asks before leaving, and leaves once the owner agrees', async () => {
+        it('leaves without asking', async () => {
           const picked: string[] = [];
           component.selectRoom.subscribe((id) => picked.push(id));
 
           query('floor-plan-room-room-2')?.click();
           await fixture.whenStable();
 
-          expect(picked).toEqual([]);
-          expect(alerts).toHaveLength(1);
-
-          pressAlertButton('destructive');
-
+          expect(alerts).toHaveLength(0);
           expect(picked).toEqual(['room-2']);
         });
 
-        it('stays where it is when the owner cancels', async () => {
+        it('does nothing when the room is already open', async () => {
           const picked: string[] = [];
           component.selectRoom.subscribe((id) => picked.push(id));
 
-          query('floor-plan-room-room-2')?.click();
-          await fixture.whenStable();
-          pressAlertButton('cancel');
-
-          expect(picked).toEqual([]);
-        });
-
-        it('asks nothing when the room is already open', async () => {
           component.onSelectRoom('room-1');
           await fixture.whenStable();
 
-          expect(alerts).toHaveLength(0);
+          expect(picked).toEqual([]);
+        });
+      });
+    });
+
+    /**
+     * Draft, publish and the gate between them (GitHub issue #1088).
+     */
+    describe('publishing', () => {
+      const issue = (over: Partial<FloorPlanIssue> = {}): FloorPlanIssue => ({
+        severity: 'error',
+        code: 'label-duplicate',
+        tableId: 'table-2',
+        label: '2',
+        roomId: 'room-1',
+        ...over,
+      });
+
+      it('says what the autosave is doing', () => {
+        setInputs({ autosaveStatus: 'saved' });
+
+        expect(query('floor-plan-autosave')?.textContent).toContain(
+          'floor-plan-autosave-saved',
+        );
+      });
+
+      it('offers no discard until there is a draft to discard', () => {
+        expect(buttonDisabled('floor-plan-discard-draft')).toBe(true);
+
+        setInputs({ hasDraft: true });
+
+        expect(buttonDisabled('floor-plan-discard-draft')).toBe(false);
+      });
+
+      /** The one action in the editor that destroys work an owner cannot undo,
+       * so it is the one that asks. */
+      it('asks before discarding, and discards once the owner agrees', async () => {
+        const discards: void[] = [];
+        component.discardDraft.subscribe(() => discards.push(undefined));
+        setInputs({ hasDraft: true });
+
+        await component.onDiscardDraft();
+
+        expect(alerts).toHaveLength(1);
+        expect(discards).toEqual([]);
+
+        pressAlertButton('destructive');
+
+        expect(discards).toHaveLength(1);
+      });
+
+      it('keeps the draft when the owner cancels', async () => {
+        const discards: void[] = [];
+        component.discardDraft.subscribe(() => discards.push(undefined));
+        setInputs({ hasDraft: true });
+
+        await component.onDiscardDraft();
+        pressAlertButton('cancel');
+
+        expect(discards).toEqual([]);
+      });
+
+      /** The acceptance criterion: publishing with a blocking error is
+       * impossible rather than discouraged. */
+      it('closes the publish button while the editor refuses the plan', () => {
+        setInputs({ canPublish: false });
+
+        expect(buttonDisabled('floor-plan-publish')).toBe(true);
+      });
+
+      it('closes it while the room form holds something unusable', () => {
+        component.width.set('0');
+        fixture.detectChanges();
+
+        expect(component.canPublishNow()).toBe(false);
+      });
+
+      /**
+       * The summary is the point of the confirmation rather than the caution.
+       * Only the lines that apply are shown: a list with six zeroes in it is a
+       * list nobody reads to the end.
+       */
+      it('names what publishing would change, and nothing it would not', async () => {
+        setInputs({
+          changeSummary: {
+            roomRenamed: true,
+            roomResized: false,
+            floorChanged: false,
+            tablesAdded: 2,
+            tablesChanged: 0,
+            tablesRemoved: 1,
+            objectsAdded: 0,
+            objectsChanged: 0,
+            objectsRemoved: 0,
+            changed: true,
+          },
         });
 
-        it('asks nothing when there is nothing to lose', async () => {
-          setInputs({ unsavedChanges: false });
-          const picked: string[] = [];
-          component.selectRoom.subscribe((id) => picked.push(id));
+        await component.onPublish();
 
-          query('floor-plan-room-room-2')?.click();
-          await fixture.whenStable();
+        const message = String(alerts[0].message);
 
-          expect(alerts).toHaveLength(0);
-          expect(picked).toEqual(['room-2']);
+        expect(message).toContain('floor-plan-change-renamed');
+        expect(message).toContain('floor-plan-change-tables-added:{"count":2}');
+        expect(message).toContain(
+          'floor-plan-change-tables-removed:{"count":1}',
+        );
+        expect(message).not.toContain('floor-plan-change-resized');
+        expect(message).not.toContain('floor-plan-change-tables-changed');
+      });
+
+      it('publishes once the owner confirms', async () => {
+        const published: void[] = [];
+        component.publish.subscribe(() => published.push(undefined));
+
+        await component.onPublish();
+        (alerts[0].buttons as AlertButton[])
+          .find((button) => !button.role)
+          ?.handler?.();
+
+        expect(published).toHaveLength(1);
+      });
+
+      it('asks nothing while publishing is closed', async () => {
+        setInputs({ canPublish: false });
+
+        await component.onPublish();
+
+        expect(alerts).toEqual([]);
+      });
+
+      describe('the findings', () => {
+        it('lists nothing while there is nothing wrong', () => {
+          expect(query('floor-plan-issues')).toBeNull();
+        });
+
+        /** Both severities in one list, errors first, because the errors are
+         * what close the button above them. */
+        it('lists the errors before the warnings', () => {
+          setInputs({
+            validation: {
+              errors: [issue()],
+              warnings: [
+                issue({
+                  severity: 'warning',
+                  code: 'tables-overlap',
+                  tableId: 'table-1',
+                }),
+              ],
+              publishable: false,
+            },
+          });
+
+          expect(query('floor-plan-issues')).not.toBeNull();
+          expect(component.issues().map((entry) => entry.severity)).toEqual([
+            'error',
+            'warning',
+          ]);
+          expect(query('floor-plan-issue-error')).not.toBeNull();
+          expect(query('floor-plan-issue-warning')).not.toBeNull();
+        });
+
+        it('jumps to the table a finding is about', () => {
+          const jumps: { tableId: string }[] = [];
+          component.showIssue.subscribe((entry) => jumps.push(entry));
+          setInputs({
+            validation: { errors: [issue()], warnings: [], publishable: false },
+          });
+
+          query('floor-plan-issue-error')?.click();
+
+          expect(jumps.map((entry) => entry.tableId)).toEqual(['table-2']);
+        });
+
+        it('names one copy key per kind of finding', () => {
+          expect(component.issueKey(issue())).toBe(
+            'floor-plan-issue-label-duplicate',
+          );
         });
       });
     });
@@ -1058,12 +1230,12 @@ describe(FloorPlanComponent.name, () => {
         expect(commands).toEqual([expected]);
       });
 
-      it('says nothing about unsaved changes until there are some', () => {
-        expect(query('floor-plan-unsaved')).toBeNull();
+      it('says nothing about unpublished changes until there are some', () => {
+        expect(query('floor-plan-unpublished')).toBeNull();
 
-        setInputs({ unsavedChanges: true });
+        setInputs({ unpublishedChanges: true });
 
-        expect(query('floor-plan-unsaved')).not.toBeNull();
+        expect(query('floor-plan-unpublished')).not.toBeNull();
       });
     });
   });

@@ -1,4 +1,4 @@
-import { Room } from 'model';
+import { FloorPlanDraft, Room } from 'model';
 
 /**
  * A save that lost the race against another device (GitHub issue #1081).
@@ -60,6 +60,45 @@ export class RoomNotEmptyError extends Error {
   ) {
     super(
       `Room ${roomId} still contains ${tableCount} table(s). Move or delete them first.`,
+    );
+  }
+}
+
+/**
+ * A draft write that lost the race against another device
+ * (GitHub issue #1088).
+ *
+ * The draft has its own counter and therefore its own conflict. Thrown by
+ * `FloorPlanDataAccessService.saveDraft` when the stored draft has moved past
+ * the revision the caller read, which happens when a second device is
+ * arranging the same room.
+ *
+ * It is deliberately *not* answered the way {@link FloorPlanConflictError} is.
+ * A publish that lost a race is shown the stored room, because the published
+ * plan genuinely became something else and the owner has to see it before
+ * overwriting it. An autosave that lost a race must not reseed anything: the
+ * arrangement on screen is the only copy of itself, and throwing it away is
+ * precisely what autosave exists to prevent. The editor stops autosaving and
+ * says so instead.
+ *
+ * `currentDraft` is the draft as stored now, carried on the error so a caller
+ * that does want to show it has not got to read it again. It is absent when
+ * the other device discarded the draft rather than writing one.
+ */
+export class FloorPlanDraftConflictError extends Error {
+  override readonly name = 'FloorPlanDraftConflictError';
+
+  constructor(
+    readonly roomId: string,
+    /** The revision the rejected draft write was based on. */
+    readonly baseRevision: number,
+    /** The draft as stored now, or `undefined` when it was discarded. */
+    readonly currentDraft: FloorPlanDraft | undefined,
+  ) {
+    super(
+      `The draft of room ${roomId} was written from revision ${baseRevision}, but the stored revision is ${
+        currentDraft ? currentDraft.revision : 'gone'
+      }.`,
     );
   }
 }

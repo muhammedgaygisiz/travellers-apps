@@ -4,7 +4,10 @@
 
 **Level:** L1
 
-Partly implemented. Specified through issue \#1070 as stage 1 of issue \#735.
+Implemented. Specified through issue \#1070 as stage 1 of issue \#735, and
+every step of the planned flow below is now built. What remains inside the epic
+is hardening rather than behaviour: accessibility of the editor (issue \#1089)
+and its unit, Storybook and Playwright coverage (issue \#1090).
 
 An owner can reach the editor, build the room and describe its tables:
 `restaurant/:restaurantId/floor-plan` in the business app creates, renames,
@@ -44,9 +47,17 @@ print stylesheet takes the app's header, its controls and Ionic's own scroll
 container out of the way, so what leaves the printer is black codes on white
 paper and the three lines of text beside each one.
 
-Publishing is still specification. So is the page a scan lands on: \#1087 fixed
-the address at `https://bitetribe.app/t/{token}` because a sticker cannot be
-corrected afterwards, and issue \#1072 is what answers it.
+Issue \#1088 made the plan two states. Nothing an owner does in the editor is
+live any more: every edit goes into a draft that is stored as they work, and
+publishing is the one deliberate action that makes it the room staff and a
+scanned code read. It is refused while the plan carries a blocking error, each
+finding names its table and jumps to it, and discarding returns the room to the
+published plan. Staff got their read of that published plan in the same issue,
+scoped to the one restaurant they work at.
+
+The page a scan lands on is still specification: \#1087 fixed the address at
+`https://bitetribe.app/t/{token}` because a sticker cannot be corrected
+afterwards, and issue \#1072 is what answers it.
 
 No longer blocked. [[UC - Own And Claim Restaurants]] was the prerequisite,
 because floor-plan data is restaurant-scoped and could not be trusted while the
@@ -68,11 +79,11 @@ This is not a construction plan. It is a practical, easy-to-maintain top-down re
 
 ## Planned Flow
 
-The first six steps are implemented, and so are the last two: issue \#1087's
-sheet page asks for the tokens of step eight and prints them as step nine. Step
-seven, the validate-and-publish gate, is the one still specified rather than
-built, which is why an owner reaches the sheet from the editor rather than from
-a publish.
+Every step is implemented. Issue \#1088 built step seven, and publishing asks
+for the tokens of step eight as it lands - so an owner now reaches the sheet of
+step nine from a plan that already carries codes, rather than from a page that
+had to ask for them itself. It still asks, because issuing is idempotent and
+neither ask invalidates what the other printed.
 
 - Owner opens the floor-plan editor for a restaurant they own.
 - Owner creates a room and sets its width and height in metres.
@@ -102,9 +113,12 @@ a publish.
 - A table moves between rooms without becoming a different table. Its identity, its number and its QR token all survive, so a code already printed and stuck to the table keeps resolving to it. That is what makes `roomId` a field rather than the table being a document under its room, and the move is an ordinary plan edit that the owner can undo and that lands with the save they press once.
 - Room order is a decision the owner makes and the system stores, so the list reads the same after a reload. A floor name groups the rooms for display without reordering them, and a group appears where its first room already stood - naming a level never reshuffles a plan somebody arranged.
 - Each room says how many tables it holds and how many guests it seats, and the restaurant says the same across all of them. The numbers are derived from the tables the editor already holds rather than stored, so they follow a table that was placed or moved a minute ago, and seats count only the tables in service.
-- No unsaved arrangement is discarded without the owner saying so. Opening another room asks first, and only when there is something to lose; reordering the rooms is closed until the open one is saved, because it writes rooms and a room whose version moved reseeds the editor.
-- Draft and published states are separate, so rearranging during service does not affect the live view.
-- Publishing is blocked by duplicate table labels, zero capacity, or tables outside their room. Overlapping tables warn but do not block, because real rooms have odd arrangements. The editor already refuses all three as they are typed; the publish gate of issue \#1088 is what catches a plan that reached that state another way.
+- No arrangement is discarded without the owner saying so, and since issue \#1088 almost nothing can be. The plan is stored as a draft while the owner works, so closing the browser mid-edit and coming back opens on what they left. Opening another room and reordering the rooms both store the draft first and then reseed from it, which is why neither asks any longer: the question issue \#1085 put there protected an arrangement that can no longer be lost, and a confirmation that protects nothing trains an owner to click through the next one. Discarding the draft is the one action that destroys work, and it is the one that asks.
+- Draft and published states are separate, so rearranging during service does not affect the live view. The separation is structural rather than promised: the draft is a document of its own, and a table placed in a draft has no table document at all until the plan is published.
+- Publishing is blocked by a missing table number, duplicate table numbers, a capacity below one, or a table whose centre is outside its room. Overlapping tables and a table overhanging the room outline warn but do not block, because real rooms have odd arrangements. The editor already refuses three of the four as they are typed; the publish gate catches a plan that reached that state another way - a room that was made smaller, or a second device arranging a room this one cannot see.
+- A finding names its table and jumps to it, opening the table's room first when it is not the one on screen. A finding an owner has to hunt for is a finding they publish around.
+- Publishing is what asks for the QR codes. Until issue \#1088 the only thing that asked was the printable sheet, so a plan carried codes from the first time somebody opened it; the codes now exist from the moment the plan goes live. A failure to issue them does not unpublish a correct plan.
+- An owner whose draft is refused keeps what is on screen. A second device arranging the same room stops this one's autosave rather than replacing the arrangement with theirs - the opposite of what a refused publish does, and for the opposite reason: a published plan that moved is something the owner has to see, while an unpublished arrangement is the only copy of itself.
 - A table's QR code says which table it is and nothing about which table it is. The code carries 130 random bits and no part of the number printed beside it, so holding the sheet from table 11 tells a guest nothing about the code on table 12. It is read one document at a time and the collection cannot be listed, so the set of a restaurant's live codes is not something an account can collect.
 - A code outlives the table's arrangement and not the table. It survives a move to another room, a rename and being taken out of service, because a sticker already on a table cannot be reprinted every time the plan changes; it is superseded when the owner deliberately replaces it, and revoked when the table is deleted. Both leave a code that still resolves, to "this was replaced" and "this is no longer valid" rather than to nothing - a scan that finds no document at all would be the answer to a code BiteTribe never issued, which is a different thing to tell a guest.
 - Asking for codes twice gives the same codes. Publishing a plan and opening the sheet both ask, and a second ask that minted new tokens would invalidate every sheet already printed. That is what lets the sheet page ask as it loads rather than behind a button an owner has to be told is safe to press.
@@ -112,7 +126,7 @@ a publish.
 - A person holding a printed code can tell which table it is without scanning it, and the layout says which fact matters most: the table number is the largest thing on the sheet, the room and the restaurant are under it, and the token itself is in small monospace for the support call where the camera is what is broken.
 - What goes on paper is what is on screen, down to the page. The preview draws real A4 pages at 210 mm by 297 mm with the print margin as padding, splits the selection across them, and hands the same boxes to the printer as the page breaks - so an owner feeding label paper knows it is two sheets before they load it, and the preview and the paper cannot disagree about where a page ends. `Ctrl`/`Cmd`+`P` gives exactly what the Print button gives, because there is one set of elements rather than two documents. The codes are drawn in literal black on white rather than in theme colours: this is the one surface in the app that must ignore dark mode, because a scanner needs the contrast and an inverted code scans as nothing.
 - A sheet is printed and thrown away; the plan outlives it. Which layout, which room and which tables are selected are viewport state stored nowhere, in the same way pan, zoom and the grid are.
-- Printing is closed while the plan has unsaved changes. A table placed a minute ago has no document, so it has no token, and a sheet printed then would be missing exactly the tables the owner has just added.
+- Printing is closed while the plan has unpublished changes. A table placed a minute ago is in the draft and has no document, so it has no token, and a sheet printed then would be missing exactly the tables the owner has just added.
 - Editing the plan never writes live table state.
 
 ## Success Criteria
@@ -122,6 +136,8 @@ a publish.
 - Reprinting one table's code leaves every other table's code untouched.
 - Table 12 is retrievable as a business entity with its room, capacity, and position, without parsing an image.
 - Every enabled table has exactly one active QR token, and tokens are not derivable from the table number.
+- A plan carrying a blocking error cannot be published, and an owner who closes the browser mid-edit returns to the arrangement they left.
+- Staff and a scanned QR code read the published plan and never the draft.
 - A guest with no BiteTribe account resolves a scanned code in one read, and a replaced or revoked code tells them so rather than failing.
 - A printed QR sheet is legible and identifies restaurant, room, and table in human-readable text next to the code.
 
@@ -130,19 +146,19 @@ a publish.
 Implemented:
 
 - `libs/bite-tribe-common/model` room, table, and floor-plan-object types
-- `libs/bite-tribe-business/floor-plan/data-access` load, save, conflict signalling
+- `libs/bite-tribe-business/floor-plan/data-access` load, save, the draft document, conflict signalling
 - `libs/bite-tribe-business/floor-plan/ui` the canvas, the grid, the metre/millimetre conversion, the object palette, the edit geometry, the shape conversion, and the QR code renderer
-- `libs/bite-tribe-business/floor-plan/page` the editor page, its workflow, the label rule, the bulk numbering, and the printable sheet with its print stylesheet
+- `libs/bite-tribe-business/floor-plan/page` the editor page, its workflow, the label rule, the bulk numbering, the autosaved draft, the publish validation and change summary, and the printable sheet with its print stylesheet
 - `libs/common/utils` `BITE_TRIBE_ORIGIN`, the one origin a printed code and the consumer app's canonical URL share
 - `libs/bite-tribe-business/shell` the `restaurant/:restaurantId/floor-plan` and `.../qr-codes` routes and their owner gate
-- `apps/bite-tribe-firebase/firestore.rules` room and table scoping, the version rule, the backend-only `qrTokenId`, and the public `get` on `/tableTokens`
+- `apps/bite-tribe-firebase/firestore.rules` room and table scoping, the version rule, the draft's own revision rule, the staff read of the published plan, the backend-only `qrTokenId`, and the public `get` on `/tableTokens`
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/table-qr-tokens.ts` the token generator and the issue and rotate callables
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/sync-table-qr-token-on-table-write.ts` the mirror and the revocation on delete
-- `/restaurants/{restaurantId}/rooms/{roomId}`, `/restaurants/{restaurantId}/tables/{tableId}` and `/tableTokens/{token}`
+- `/restaurants/{restaurantId}/rooms/{roomId}`, `/restaurants/{restaurantId}/rooms/{roomId}/drafts/current`, `/restaurants/{restaurantId}/tables/{tableId}` and `/tableTokens/{token}`
 
 Still planned:
 
-- The draft/published split, the publish gate, and the page a scanned code lands on
+- The page a scanned code lands on, and the staff live view that reads the published plan
 
 ## Related GitHub Scope
 
@@ -157,6 +173,7 @@ Still planned:
 - Issue \#1085 - multiple rooms and floors, room order, cross-room table moves, capacity summaries and the desktop-locked layout, delivered
 - Issue \#1086 - opaque table QR tokens, their lifecycle and the rules that keep them backend-owned, delivered as backend only
 - Issue \#1087 - printable table QR sheets, the first caller of those callables, delivered
+- Issue \#1088 - the draft/published split, the autosaved draft, the publish validation and the staff read of the published plan, delivered
 - Issue \#1089 - accessibility of the editor; its responsive half was moved to issue \#1093 rather than deferred
 - Issue \#1093 - the staff live view, which owns the small-screen and touch rendering of a published plan
 

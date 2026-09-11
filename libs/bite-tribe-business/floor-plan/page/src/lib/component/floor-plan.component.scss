@@ -243,6 +243,35 @@
   }
 
   /*
+   * The autosave note (issue #1088).
+   *
+   * Quiet by default, because "your work is stored" is reassurance rather than
+   * news, and coloured only when it stops being true - a draft that is no
+   * longer being written is the one state the owner has to act on.
+   */
+  .floor-plan__autosave {
+    display: block;
+    margin-top: 0.25rem;
+  }
+
+  .floor-plan__autosave--blocked {
+    color: var(--ion-color-danger-shade, var(--ion-color-danger));
+  }
+
+  /*
+   * The findings, under the Publish button they gate.
+   *
+   * Pulled out to the card's edges like the room list, so a finding reads as a
+   * row that can be pressed rather than as a paragraph of prose with a colour
+   * on it.
+   */
+  .floor-plan__issues {
+    margin: 0.5rem -1rem 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  /*
    * The rooms as a list rather than a dropdown.
    *
    * A dropdown hides how many rooms a restaurant has behind a control that has

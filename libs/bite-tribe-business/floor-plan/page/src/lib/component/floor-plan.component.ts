@@ -63,12 +63,18 @@ import {
   floorGroups,
   hasFloors,
 } from '../integration/floor-plan-rooms';
+import { FloorPlanChangeSummary } from '../integration/floor-plan-publish';
 import {
   FIRST_TABLE_NUMBER,
   MAX_TABLE_SEATS,
   MIN_TABLE_SEATS,
   TableLabelConflict,
 } from '../integration/floor-plan-tables';
+import {
+  EMPTY_VALIDATION,
+  FloorPlanIssue,
+  FloorPlanValidation,
+} from '../integration/floor-plan-validation';
 import { RoomDraft } from '../integration/room-draft';
 
 /**
@@ -98,6 +104,8 @@ export const MAX_ROOM_SIDE_METRES = 200;
 interface RoomFormValues {
   id: string;
   version: number;
+  /** Moves when the editor reseeds without the room's version moving. */
+  seed: number;
   name: string;
   floor: string;
   width: string;
@@ -219,7 +227,27 @@ export class FloorPlanComponent {
   private readonly canvas = viewChild(FloorPlanCanvasComponent);
 
   readonly rooms = input<Room[]>([]);
+  /**
+   * The open room at the dimensions the owner has given it.
+   *
+   * The edited room rather than the published one, because the canvas has to
+   * draw the room as it is being changed: an owner typing a smaller width sees
+   * the outline move in, and the tables their room no longer holds.
+   */
   readonly selectedRoom = input<Room | undefined>(undefined);
+
+  /** The same room exactly as it is published, for the note under the form. */
+  readonly publishedRoom = input<Room | undefined>(undefined);
+
+  /**
+   * Moves whenever the editor has started again from what is stored.
+   *
+   * Discarding a draft is the case it exists for: the room is the same room at
+   * the same version, so nothing else in {@link formValues}' identity changes,
+   * and the form would go on showing the name and the dimensions the owner
+   * just threw away (issue #1088).
+   */
+  readonly formSeed = input(0);
   readonly restaurantName = input('');
   readonly loading = input(false);
 
@@ -234,6 +262,32 @@ export class FloorPlanComponent {
    */
   readonly loadFailed = input(false);
   readonly saving = input(false);
+
+  /**
+   * What the editor is doing about the draft (GitHub issue #1088).
+   *
+   * Shown rather than hidden, because autosave that says nothing is autosave
+   * an owner does not trust: the one state that matters is `blocked`, where a
+   * second device has the draft and this one has stopped writing.
+   */
+  readonly autosaveStatus = input<
+    'idle' | 'saving' | 'saved' | 'failed' | 'blocked'
+  >('idle');
+
+  /** When the draft was last stored, in epoch milliseconds. */
+  readonly draftSavedAt = input<number | undefined>(undefined);
+
+  /** Whether an unpublished arrangement is stored, which is what to discard. */
+  readonly hasDraft = input(false);
+
+  /** Everything wrong with the plan, and whether it may be published. */
+  readonly validation = input<FloorPlanValidation>(EMPTY_VALIDATION);
+
+  /** What publishing would change, for the confirmation that precedes it. */
+  readonly changeSummary = input<FloorPlanChangeSummary | undefined>(undefined);
+
+  /** Whether the publish action is open right now. */
+  readonly canPublish = input(false);
   readonly isAuthenticated = input(false);
   readonly gridSpacing = input<Millimetres>(0);
   readonly snapEnabled = input(true);
@@ -243,7 +297,13 @@ export class FloorPlanComponent {
   readonly selectedIds = input<readonly string[]>([]);
   readonly canUndo = input(false);
   readonly canRedo = input(false);
-  readonly unsavedChanges = input(false);
+  /**
+   * Whether the plan on screen differs from the published one.
+   *
+   * Not "unsaved": since issue #1088 an arrangement is stored continuously as
+   * a draft. What it is not is live, and that is the state the owner acts on.
+   */
+  readonly unpublishedChanges = input(false);
 
   /**
    * The one selected table, as the entity rather than as a drawn item
@@ -281,7 +341,18 @@ export class FloorPlanComponent {
 
   readonly selectRoom = output<string>();
   readonly createRoom = output<RoomDraft>();
-  readonly saveRoom = output<RoomDraft>();
+
+  /** The room form's values, on every change the editor can use. */
+  readonly roomFieldsChange = output<RoomDraft>();
+
+  /** Makes the arrangement on screen the plan everyone else reads. */
+  readonly publish = output<void>();
+
+  /** Throws the unpublished arrangement away. */
+  readonly discardDraft = output<void>();
+
+  /** Opens the room a validation finding names and selects its table. */
+  readonly showIssue = output<FloorPlanIssue>();
   readonly deleteRoom = output<Room>();
   readonly moveRoom = output<RoomMove>();
   readonly gridSpacingChange = output<Millimetres>();
@@ -353,6 +424,7 @@ export class FloorPlanComponent {
       return {
         id: room?.id ?? '',
         version: room?.version ?? 0,
+        seed: this.formSeed(),
         name: room?.name ?? '',
         floor: room?.floor ?? '',
         width: this.metresField(room?.size.width),
@@ -361,7 +433,9 @@ export class FloorPlanComponent {
     },
     {
       equal: (before, after) =>
-        before.id === after.id && before.version === after.version,
+        before.id === after.id &&
+        before.version === after.version &&
+        before.seed === after.seed,
     },
   );
 
@@ -518,9 +592,17 @@ export class FloorPlanComponent {
    */
   readonly showFloors = computed(() => hasFloors(this.rooms()));
 
-  /** Whether the room order can be changed right now. */
+  /**
+   * Whether the room order can be changed right now.
+   *
+   * Only the room count and a write in flight, since issue #1088. Reordering
+   * still moves the version of every room it touches and still reseeds the
+   * editor, but the editor now reseeds from the *draft* - which the page
+   * stores before it reorders - so there is nothing left to lose and nothing
+   * left to block.
+   */
   readonly canReorder = computed(
-    () => this.rooms().length > 1 && !this.saving() && !this.unsavedChanges(),
+    () => this.rooms().length > 1 && !this.saving(),
   );
 
   /** The rooms the selected table could move to: every room but its own. */
@@ -530,17 +612,36 @@ export class FloorPlanComponent {
     return this.rooms().filter((room) => room.id !== current);
   });
 
-  readonly canSave = computed(
+  /** Whether the form currently holds a room the editor can work with. */
+  readonly formUsable = computed(
     () =>
-      !this.saving() &&
       this.name().trim().length > 0 &&
       this.isValidSide(this.width()) &&
       this.isValidSide(this.height()),
   );
 
-  /** The stored dimensions, so the form's numbers can be checked against them. */
-  readonly storedSize = computed(() => {
-    const room = this.selectedRoom();
+  /** Whether the Publish button does anything. */
+  readonly canPublishNow = computed(
+    () => this.canPublish() && this.formUsable(),
+  );
+
+  /** The findings, errors first, because the errors are what block. */
+  readonly issues = computed<FloorPlanIssue[]>(() => [
+    ...this.validation().errors,
+    ...this.validation().warnings,
+  ]);
+
+  /**
+   * The published dimensions, so the form's numbers can be checked against
+   * them.
+   *
+   * The *published* ones rather than the stored ones, since issue #1088: a
+   * draft is stored too, and a note saying "saved as" beside a number the
+   * owner has already changed would be answering the wrong question. What they
+   * are checking is what the room is to everybody else.
+   */
+  readonly publishedSize = computed(() => {
+    const room = this.publishedRoom();
 
     return room
       ? `${formatMetres(room.size.width)} × ${formatMetres(room.size.height)}`
@@ -548,28 +649,20 @@ export class FloorPlanComponent {
   });
 
   /**
-   * Opens another room, asking first when this one has unsaved changes
-   * (GitHub issue #1085).
+   * Opens another room.
    *
-   * Switching rooms reseeds the editor from the room that was opened, so
-   * whatever was arranged and not saved is gone. A restaurant with a terrace
-   * and two dining rooms switches often enough that losing an afternoon's
-   * arranging to one mis-click is a real outcome, so the owner is asked - and
-   * asked only when there is something to lose, because a confirmation that
-   * appears every time is one nobody reads.
+   * No confirmation since issue #1088. Issue #1085 asked here because
+   * switching reseeded the editor and an unsaved arrangement was gone; the
+   * arrangement is now stored as a draft, and the editor stores whatever is
+   * still inside the autosave window before it switches, so there is nothing
+   * to lose and nothing to ask about.
    */
   onSelectRoom(roomId: string | undefined): void {
     if (!roomId || roomId === this.selectedRoom()?.id) {
       return;
     }
 
-    if (!this.unsavedChanges()) {
-      this.selectRoom.emit(roomId);
-
-      return;
-    }
-
-    void this.confirmDiscard(() => this.selectRoom.emit(roomId));
+    this.selectRoom.emit(roomId);
   }
 
   /**
@@ -600,13 +693,19 @@ export class FloorPlanComponent {
   }
 
   /**
-   * The alert that stands between an unsaved plan and losing it.
+   * The alert that stands between a stored draft and losing it
+   * (GitHub issue #1088).
    *
-   * The destructive button carries the action rather than the cancel one, so
-   * dismissing the alert any other way - the backdrop, the escape key - keeps
-   * the changes.
+   * The one action in the editor that destroys work an owner cannot undo, so
+   * it is the one that asks. The destructive button carries the action rather
+   * than the cancel one, so dismissing the alert any other way - the backdrop,
+   * the escape key - keeps the draft.
    */
-  private async confirmDiscard(proceed: () => void): Promise<void> {
+  async onDiscardDraft(): Promise<void> {
+    if (!this.hasDraft() || this.saving()) {
+      return;
+    }
+
     const alert = await this.alertController.create({
       header: this.transloco.translate('floor-plan-discard-title'),
       message: this.transloco.translate('floor-plan-discard-message'),
@@ -615,12 +714,120 @@ export class FloorPlanComponent {
         {
           text: this.transloco.translate('floor-plan-discard-confirm'),
           role: 'destructive',
-          handler: (): void => proceed(),
+          handler: (): void => this.discardDraft.emit(),
         },
       ],
     });
 
     await alert.present();
+  }
+
+  /**
+   * Publishing, with a summary of what it would change.
+   *
+   * The summary is the point of the confirmation rather than the caution. An
+   * owner arranges for twenty minutes and then has to decide whether *this* is
+   * what the restaurant should run on, and "6 tables changed, 1 removed, the
+   * room is 0.5 m narrower" is the sentence that answers it. A dialog that
+   * only said "are you sure" would be one they click through.
+   */
+  async onPublish(): Promise<void> {
+    if (!this.canPublishNow()) {
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: this.transloco.translate('floor-plan-publish-confirm-title'),
+      subHeader: this.selectedRoom()?.name,
+      message: this.publishMessage(),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('floor-plan-publish'),
+          handler: (): void => this.publish.emit(),
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  /**
+   * The change summary as a sentence per kind of change.
+   *
+   * Built here rather than in the template because an Ionic alert takes a
+   * string, and because the lines an owner sees are only the ones that apply:
+   * a list with six zeroes in it is a list nobody reads to the end.
+   */
+  private publishMessage(): string {
+    const summary = this.changeSummary();
+    const lines: string[] = [];
+
+    if (!summary) {
+      return this.transloco.translate('floor-plan-publish-confirm-message');
+    }
+
+    const say = (key: string, params?: Record<string, unknown>): void => {
+      lines.push(this.transloco.translate(key, params));
+    };
+
+    if (summary.roomRenamed) {
+      say('floor-plan-change-renamed');
+    }
+
+    if (summary.roomResized) {
+      say('floor-plan-change-resized');
+    }
+
+    if (summary.floorChanged) {
+      say('floor-plan-change-floor');
+    }
+
+    if (summary.tablesAdded > 0) {
+      say('floor-plan-change-tables-added', { count: summary.tablesAdded });
+    }
+
+    if (summary.tablesChanged > 0) {
+      say('floor-plan-change-tables-changed', { count: summary.tablesChanged });
+    }
+
+    if (summary.tablesRemoved > 0) {
+      say('floor-plan-change-tables-removed', { count: summary.tablesRemoved });
+    }
+
+    if (summary.objectsAdded > 0) {
+      say('floor-plan-change-objects-added', { count: summary.objectsAdded });
+    }
+
+    if (summary.objectsChanged > 0) {
+      say('floor-plan-change-objects-changed', {
+        count: summary.objectsChanged,
+      });
+    }
+
+    if (summary.objectsRemoved > 0) {
+      say('floor-plan-change-objects-removed', {
+        count: summary.objectsRemoved,
+      });
+    }
+
+    if (lines.length === 0) {
+      say('floor-plan-change-nothing');
+    }
+
+    return `${this.transloco.translate(
+      'floor-plan-publish-confirm-message',
+    )}<ul><li>${lines.join('</li><li>')}</li></ul>`;
+  }
+
+  /** Sends a finding's table to the editor, which opens its room and selects it. */
+  onShowIssue(issue: FloorPlanIssue): void {
+    this.showIssue.emit(issue);
+  }
+
+  /** The copy key for one finding, so the rules stay out of the template. */
+  issueKey(issue: FloorPlanIssue): string {
+    return `floor-plan-issue-${issue.code}`;
   }
 
   /**
@@ -639,14 +846,25 @@ export class FloorPlanComponent {
     });
   }
 
-  onSave(): void {
-    if (!this.canSave()) {
+  /**
+   * Reports the room form to the editor, on every change it can use
+   * (GitHub issue #1088).
+   *
+   * On change rather than on a button, because the draft carries the room's
+   * own fields and the autosave has to see them. Nothing is sent while a field
+   * is unusable - a name the owner has just cleared, a width mid-keystroke -
+   * so the last usable values stand until there are new ones. A field being
+   * typed into is not a room dimension, and storing one would autosave a room
+   * half a metre wide.
+   */
+  onRoomFieldsChange(): void {
+    if (!this.formUsable()) {
       return;
     }
 
     const floor = this.floor().trim();
 
-    this.saveRoom.emit({
+    this.roomFieldsChange.emit({
       name: this.name().trim(),
       width: metresToMillimetres(Number(this.width())),
       height: metresToMillimetres(Number(this.height())),

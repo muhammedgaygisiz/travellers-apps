@@ -31,6 +31,7 @@ import {
   downloadOutline,
   earthOutline,
   filter,
+  fastFoodOutline,
   filterOutline,
   flameOutline,
   footstepsOutline,
@@ -82,6 +83,7 @@ import {
 
 export const addNecessaryIcons = (): void => {
   addIcons({
+    fastFoodOutline,
     peopleOutline,
     pricetagOutline,
     filterOutline,

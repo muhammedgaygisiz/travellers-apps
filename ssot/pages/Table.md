@@ -52,7 +52,7 @@ These two are different and must not be conflated.
 
 ## Live Table State
 
-Stored separately from the Table. Proposed states:
+Stored separately from the Table, at `/restaurants/{restaurantId}/tableStates/{tableId}`, one document per table. Issue \#1091 made these states the model rather than a proposal.
 
 | State             | Meaning                                         |
 | ----------------- | ----------------------------------------------- |
@@ -76,7 +76,11 @@ cleaning        -> available | disabled
 disabled        -> available
 ```
 
+A status never lists itself. Re-applying the status a table already holds is a retry rather than a transition, settled by the idempotency key on the request; allowing it here would let a replayed seating reset the clock the live view reads.
+
 A Table with no state document is treated as `available`. Every transition is applied by the backend, validated against this matrix, and recorded with actor and timestamp, so two staff members acting at once produce one outcome and a disputed table has a history.
+
+A Table State carries `tableId`, `restaurantId`, `status`, `since`, `updatedByUserId`, an optional `visitId` while a party is seated, and an optional free-text `note`. `since` is the moment of the last accepted transition rather than the last write, because what a host reads off the screen is a duration: table 6 has been awaiting payment for twenty minutes.
 
 ## Relationships
 
@@ -120,6 +124,7 @@ Table returns to an available state
 ## Use Cases
 
 - [[UC - Configure Restaurant Floor Plans And Tables]]
+- [[UC - Manage Tables During Service]]
 - [[UC - Order At The Table Through A QR Code]]
 
 ## Related Epics
@@ -134,7 +139,7 @@ Firestore layout:
 
 ```text
 /restaurants/{restaurantId}/tables/{tableId}
-/restaurants/{restaurantId}/tableStates/{tableId}   planned, issue #1071
+/restaurants/{restaurantId}/tableStates/{tableId}   modelled, issue #1091
 /tableTokens/{token}
 ```
 
@@ -261,8 +266,32 @@ the tables that matter. Reprinting one table selects it and prints it; nothing
 on the page rotates, so the codes already stuck to the other tables are
 untouched.
 
+Issue \#1091 opened stage 2 at the model, and the separation it exists to enforce is now a
+fact about the shapes rather than a rule about call sites. `TableState` in
+`libs/bite-tribe-common/model/src/lib/table-state.ts` shares no field name with
+`RestaurantTable`: it carries no `position`, `size`, `seats` or `label`, and the table
+carries no `status`. So a state write has nothing to say about geometry and a plan write
+has nothing to say about occupancy, however carelessly either caller is written, and the
+test asserts the two key sets are disjoint rather than trusting that they stay so.
+
+It is also the first value export from the model library, which until now was
+`export type *` throughout. `TABLE_STATE_TRANSITIONS` is data the backend and the UI both
+run, not a shape they compile against: the backend validates a requested transition, the
+staff view offers only the transitions currently legal, and a matrix spread across
+conditionals in those two places is exactly the drift that produces a button the backend
+refuses. It is tested over all forty-nine ordered pairs against a matrix transcribed
+independently from this page, because a test that reads the matrix to decide what to
+expect passes whatever the matrix says.
+
+A status never lists itself, and that is a decision rather than an omission. `canTransitionTableStatus('occupied', 'occupied')` is `false`: a replayed seating is a retry, answered by the idempotency key of issue \#1096, and admitting it to the matrix would reset `since` and lose the duration the staff view is built to show.
+
+`tableStatusOf` is the single reader of "no document means available", so the default is one decision rather than one per call site with one of them forgotten. `isTableStatus` narrows a status that arrived over a callable, which is how a stale app version is kept from writing a status no view has a colour for.
+
 ## Current Limitations
 
+- Live state is a model and nothing else. No document is written, no rule permits one, and no surface reads one: the callable that applies a transition is issue \#1092, the rules that scope `tableStates` to staff go with it, and the live view is issue \#1093. Nothing in the workspace can currently produce a `TableState`.
+- The matrix is exported from the Nx model library, which Firebase Functions cannot import. `apps/bite-tribe-firebase/functions` compiles with `rootDir: src` and no path mapping, so issue \#1092 has to reach the single definition rather than retype it - a second copy in the backend would be the drift this issue exists to prevent, and it would drift silently because both copies would pass their own tests.
+- Nothing enforces that `visitId` is present exactly when the status implies a seated party. The model marks it optional and the prose says which statuses carry it; making it structural means a discriminated union on `status`, which is worth doing once visits exist (issue \#1095) and not before.
 - Uniqueness is held by the client, not by the database. Security rules cannot query, so no rule can ask whether a label is already taken; the editor refuses a duplicate as it is typed, and the publish validation of issue \#1088 refuses a plan that reached that state another way. A second device editing a second room at the same moment can still produce two tables with one number, because neither editor sees the other's unpublished plan - but neither can publish one, because the gate reads every table of the restaurant and reports the collision on the table in the room being published.
 - A table moves out of the room the owner is looking at, never into it. The control is on the selected table's card, so it is reachable only for a table on the open canvas; there is no way to reach into another room and pull a table across (issue \#1085).
 - `enabled` decides whether a table gets a code and nothing else yet. A disabled table is skipped when a plan is issued tokens and refused when it is named, and one disabled after its code was printed resolves to "not in service" - but nothing reads that answer, because refusing the order is issue \#1072.

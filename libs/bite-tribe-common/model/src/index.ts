@@ -31,3 +31,9 @@ export type * from './lib/weekly-bites';
 export type * from './lib/floor-plan';
 export type * from './lib/restaurant-table';
 export type * from './lib/floor-plan-draft';
+/**
+ * A value export rather than `export type *`: the transition matrix and its
+ * helpers are data the backend and the UI both run, not shapes they compile
+ * against.
+ */
+export * from './lib/table-state';

@@ -17,6 +17,8 @@ The Table is the unit that connects the physical restaurant to everything digita
 - A Table has a seating capacity of at least one.
 - A Table can be enabled or disabled. A disabled Table stays in the plan and is not orderable.
 - A Table can be moved between Rooms while keeping its identity, its label, and its QR token, so printed codes stay valid.
+- **A scan resolves to a Table only if the Restaurant behind it can take the order.** Six rules, in order: the Restaurant exists and is held by a business account, it has table ordering enabled, the Table is in the published plan and in service, the token is active, the Restaurant is accepting orders right now, and the menu has something on it. A scan that fails one of them is answered with which one, not with a generic error - a guest at a table who is told "something went wrong" puts their phone away. See [[UC - Order At The Table Through A QR Code]] and issue \#1100.
+- **A scanned code never proves the guest is there.** Resolution reads and writes nothing, so the worst a remote scan can do is learn that a restaurant is open. What a scan costs the restaurant starts at the session (issue \#1101).
 - Every enabled Table has exactly one active QR token.
 - A QR token is opaque and non-guessable. It never encodes the table number.
 - Rotating a QR token revokes the previous one and does not change the Table's identity or history.
@@ -201,7 +203,9 @@ working - so a token holding only `tableId` would resolve in one read and then
 need a second one, against a collection a guest may not read at all, to say
 where the guest is sitting. Mirroring `enabled` is what lets a table taken out of
 service after its sheet was printed resolve to "not in service" rather than to
-nothing; refusing the order is issue \#1072.
+nothing; refusing the order is issue \#1100, and it refuses on the **table
+document** rather than on the mirror - a mirror can say what the table was when
+it was last written and cannot say the table is gone.
 
 Issuing is idempotent, and that is the point rather than a nicety: the publish
 step of issue \#1088 and the sheet page of issue \#1087 both ask for tokens, and
@@ -218,8 +222,11 @@ Issue \#1087 printed them, and in doing so fixed the address every code carries:
 canonicalises search-engine URLs against, because a second copy that drifted
 would retire a room full of stickers nobody can correct. The path is two
 characters because every character costs modules and every module costs printed
-millimetres. Nothing serves it yet; issue \#1072 mounts the resolver there, and
-a sticker printed today is what commits it to.
+millimetres. Issue \#1100 gave that address a backend: `resolveTableQrToken`
+turns a token into an ordering context or into a reason it is not one. No route
+serves `/t/:token` in the consumer app yet - that screen is issue \#1101 - so a
+sticker printed today reaches an unknown route and the resolution behind it is
+called by nothing.
 
 The code is drawn as two QR segments rather than one, which is where the
 Crockford base32 alphabet pays for itself: a byte segment for the origin and an

@@ -3,6 +3,7 @@ import type { Bite } from './bite';
 import type { Link } from './link';
 import type { DaySchedule } from './opening-hours';
 import type { Address } from './address';
+import type { TableOrderingSettings } from './table-ordering';
 
 /**
  * What an operator's assignment can have made of a restaurant.
@@ -47,6 +48,20 @@ export interface Restaurant {
   socialMediaLinks?: Link[];
   description?: string;
   openingHours?: DaySchedule[];
+
+  /**
+   * How the restaurant offers ordering from the table (GitHub issue #1100).
+   *
+   * Absent on every restaurant that has never been asked, and absent reads as
+   * off, so a scanned QR code at a restaurant which never opted in is refused
+   * rather than starting an order nobody is watching for.
+   *
+   * A nested object rather than three fields, because the three are written
+   * together by one surface and read together by one caller, and because
+   * `openingHours` above has no time zone of its own - the zone belongs to
+   * whoever has to evaluate the schedule, which is this.
+   */
+  tableOrdering?: TableOrderingSettings;
 
   createdAt?: string;
   createdAtTimestamp?: number;

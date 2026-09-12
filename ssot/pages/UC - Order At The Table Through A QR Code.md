@@ -2,9 +2,20 @@
 
 ## Status
 
-Not implemented. Specified through issue \#1072 as stage 3 of issue \#735, and issue \#1073 as stage 4.
+Partly implemented. Specified through issue \#1072 as stage 3 of issue \#735, and issue \#1073 as stage 4.
 
-Blocked by stages 0, 1, and 2.
+Two of the ten children have landed and both are backend or model work. Issue
+\#1099 gave menu items the identity an order line hangs from, and issue \#1100
+made a scanned token resolve: `resolveTableQrToken` validates the six rules
+below and answers with a restaurant, a room, a table and a menu, or with one of
+twelve distinct refusal reasons.
+
+Nothing a guest can see uses either. No route answers `/t/:token`, no surface
+turns `Restaurant.tableOrdering.enabled` on, and the refusal reasons have no
+copy in the locale files - so a code scanned in a restaurant today reaches the
+consumer app's unknown-route handling, and the resolution behind it would refuse
+with `tableOrderingDisabled` if it were called. The scan screen is issue \#1101
+and the menu it leads to is issue \#1102.
 
 ## Goal
 
@@ -32,16 +43,44 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 
 ## Validation On Every Scan
 
-The backend validates, in order:
+`resolveTableQrToken` validates, in this order (issue \#1100):
 
-- The restaurant exists and is active
-- Table ordering is enabled for that restaurant
-- The table exists, is published, and is enabled
-- The QR token is valid, active, and not revoked
-- The restaurant is currently accepting orders
-- The requested menu exists and is available
+| #   | Rule                                           | Refusal reasons                            | Next step          |
+| --- | ---------------------------------------------- | ------------------------------------------ | ------------------ |
+| 0   | The token exists                               | `unknownToken`                             | ask staff          |
+| 1   | The restaurant exists and is active            | `restaurantNotFound`, `restaurantInactive` | ask staff          |
+| 2   | Table ordering is enabled for that restaurant  | `tableOrderingDisabled`                    | ask staff          |
+| 3   | The table exists, is published, and is enabled | `tableNotFound`, `tableDisabled`           | ask staff          |
+| 4   | The QR token is active and not revoked         | `tokenSuperseded`, `tokenRevoked`          | rescan / ask staff |
+| 5   | The restaurant is currently accepting orders   | `orderingPaused`, `restaurantClosed`       | try later          |
+| 6   | The requested menu exists and is available     | `menuMissing`, `menuUnavailable`           | ask staff          |
 
-Each failure returns a distinct, actionable reason, not a generic error.
+Each failure returns a distinct, actionable reason, not a generic error, and the
+reason carries the next step with it - ask staff, try later, or look at the
+table again. A refusal is a returned value rather than a thrown error, because a
+callable error code comes from a fixed list of sixteen that says nothing about
+restaurants.
+
+**The order is the contract.** Several rules are false at once often enough to
+matter - a retired table at a restaurant that closed for the season and let its
+assignment lapse fails three of them - and the guest gets one sentence, so which
+one has to be decided here rather than by however an implementation nested its
+conditions. It runs outside-in, so the answer is the largest true thing.
+
+Three of the rules had no data behind them and now do. "Active" is not a field:
+a restaurant is active while a business account holds it, which
+`assignRestaurantOwner` and `revokeRestaurantOwner` already write. "Table
+ordering is enabled" is `Restaurant.tableOrdering.enabled`, absent everywhere and
+absent meaning off. "Currently accepting orders" is a staff-side
+`pausedUntilTimestamp` **and** the opening hours evaluated in
+`tableOrdering.timeZone` - `DaySchedule` carries no zone, and the server runs in
+UTC, so without one a Jakarta restaurant would close at four in the afternoon.
+
+A refusal never says more than it has to, and a resolution says only what the
+guest needs: the restaurant's name and picture, the room's name, the table's
+label and seats, and the menu's id. The answer is built field by field and is
+never a spread of the documents it came from, so `ownerUserId` on the restaurant
+and the floor-plan geometry on the table stay where they are.
 
 ## Key Behaviours
 
@@ -61,9 +100,11 @@ address at `https://bitetribe.app/t/{token}` - the origin from
 every character in the URL costs QR modules and every module costs printed
 millimetres at the distance the code has to be read from.
 
-Nothing answers `/t/:token` yet. A guest scanning a code printed today reaches
-the consumer app's own handling of an unknown route, so mounting the resolver
-there is the first thing this use case owes the codes already in restaurants.
+Nothing answers `/t/:token` yet. Issue \#1100 gave the address a backend but not
+a route: a guest scanning a code printed today still reaches the consumer app's
+own handling of an unknown route. Mounting that route on the resolution is the
+first thing this use case owes the codes already in restaurants, and it is issue
+\#1101's opening move.
 
 ## The Identity An Order Line Hangs From
 
@@ -125,6 +166,8 @@ Tracked in [[Current State - Open Questions]]. Several block specific child issu
 
 - Issue \#1072 - QR table menu and table ordering, with ten child issues
 - Issue \#1099 - stable menu item identifiers, availability and price snapshots, the model this use case hangs its order lines from
+- Issue \#1100 - resolve and validate a table QR token, the backend every later child calls before it does anything
+- Issue \#1107 - QR token abuse protection, which owns the durable rate limit the resolution only approximates
 - Issue \#1087 - printable table QR sheets, which fixed the scan URL this use case has to serve
 - Issue \#1073 - Table payment and Bite creation from orders, with six child issues
 - Issue \#345 - Kavi wants to offer a QR code at the table to order digitally

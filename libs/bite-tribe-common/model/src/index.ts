@@ -54,3 +54,9 @@ export * from './lib/table-state';
  * the staff view predicts.
  */
 export * from './lib/table-visit';
+/**
+ * A value export rather than `export type *`: the refusal reasons and the next
+ * step each one calls for are data the backend applies and a scan screen
+ * renders, not shapes they compile against (issue #1100).
+ */
+export * from './lib/table-ordering';

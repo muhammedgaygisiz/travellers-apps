@@ -114,6 +114,15 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // The redirect target of a shared Bite link. It is opened by whoever was
   // sent the link, which is the point of sharing one.
   handleSharedLinkToBite: 'public',
+
+  // The scan of a table QR code (issue #1100). Public because a guest at a
+  // table has no BiteTribe account and may never want one, and the scan is
+  // what establishes which restaurant they would be signing in to - so an
+  // auth requirement here would make the account a precondition of finding
+  // out whether the restaurant even takes orders at the table. It writes
+  // nothing, and it assembles its answer field by field rather than handing
+  // back the documents it read.
+  resolveTableQrToken: 'public',
 };
 
 const FUNCTIONS_ROOT = join(__dirname, '..', 'functions');

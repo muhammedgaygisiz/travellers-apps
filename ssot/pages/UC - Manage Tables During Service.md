@@ -27,7 +27,22 @@ things is true - connecting, live, offline, or not current and how long since - 
 what makes "staff can always tell whether what they are looking at is live" checkable
 rather than assumed.
 
-What no issue has added yet is a **surface** for any of that. Seating a table through issue \#1094's sheet opens a visit, and nothing shows it. The guest count is still optional in the sheet and still travels as the audit entry's `reason`; `TableVisit.guestCount` now exists to hold it and `transitionTableState` now takes it, so moving it across is a change to the business app rather than to the backend.
+Issue \#1097 settled what the role may do, and where it starts. Most of the
+permission set had arrived ahead of it, one piece per issue that needed it -
+\#1537 the grant and the staff list, \#1088 the published-plan read, \#1092 the
+one write - so what \#1097 added is the two things nobody had reached: the
+entry, and the proof. Signing in now lands a staff account in the room it works
+in rather than on the owner's dashboard, which lists restaurants by
+`Restaurant.ownerUserId` and therefore showed it nothing; `staffEntryGuard`
+reads the association on `/dashboard` and redirects, so a restored session and a
+bookmark land there too. And the refusals are now under test rather than
+asserted: a staff account writing a room, a table, a room draft, a menu or
+another account's association is refused by `firestore.rules` in the emulator
+suite, and every read the role has ends the moment the association is deleted -
+with the `staff` claim still on its token, which is what makes revocation take
+effect before the token refreshes rather than an hour after it.
+
+What no issue has added yet is a **surface** for the visit. Seating a table through issue \#1094's sheet opens a visit, and nothing shows it. The guest count is still optional in the sheet and still travels as the audit entry's `reason`; `TableVisit.guestCount` now exists to hold it and `transitionTableState` now takes it, so moving it across is a change to the business app rather than to the backend.
 
 [[UC - Configure Restaurant Floor Plans And Tables]] is complete and no longer blocks this. [[UC - Own And Claim Restaurants]] no longer blocks it either: the `staff` role now has its first write, through the callable rather than through the rules, and \#1093 gives a staff member somewhere to sign in to.
 
@@ -42,7 +57,7 @@ Restaurant staff open one screen during service and see the room as it is: which
 
 ## Planned Flow
 
-- Staff sign in and land directly on the live room view, not the owner dashboard.
+- Staff sign in and land directly on the live room view, not the owner dashboard (issue \#1097).
 - The published floor plan renders read-only, with each table showing its live state.
 - This is the floor-plan surface that carries a small screen. The editor of [[UC - Configure Restaurant Floor Plans And Tables]] was locked to a desktop width, because an owner laying out twenty tables to the millimetre is at a desk while a host greeting guests is holding a tablet at the door. Touch drag, pinch zoom, two-finger pan and long-press belong here, designed for seating a party rather than for moving a wall (issue \#1093).
 - Staff hold a table, or press enter on it, and see only the transitions currently allowed (issue \#1094).
@@ -72,7 +87,9 @@ Restaurant staff open one screen during service and see the room as it is: which
 - The queue drains one entry at a time, in the order it was made, because a host who seated table 12 and then marked it ordering queued two transitions whose second expects the first to have landed. The end-of-service reset sends its tables in parallel for the opposite reason: those are independent tables, each its own transaction on its own document.
 - A table waiting to be sent is drawn as the status the host asked for and _said_ to be waiting only in the detail panel, not on the plan. The plan already answers "what is this table doing"; "has anyone else been told" is a different question, and a second mark on a 900 mm circle would compete with the status glyph beside it. The clock on such a table runs from when the host acted, not from when the queue drains - a party seated twenty minutes before the signal came back has been there twenty minutes.
 - Whether the room is live is answered in four states rather than two, because the two no answers lead to different next moves. `connecting` is before the first snapshot. `offline` is a connection that has just gone, where what is on screen was true moments ago. `stale` is the same connection still gone a minute later, and it carries the age - "not current" without a number is a warning nobody can act on. Liveness is not read off the states themselves: a quiet Tuesday afternoon and a listener the SDK detached both look like silence, so the delivery carries its own arrival time and the health of the listener, and the device's network state is read from the one `NetworkStatusService` in `libs/common` rather than from a second connectivity mechanism.
-- Staff have a narrower permission set than owners, enforced by security rules and not only by hidden UI.
+- Staff have a narrower permission set than owners, enforced by security rules and not only by hidden UI (issue \#1097). The narrowing is made almost entirely of refusals, so the rules suite carries them as its own cases rather than relying on the allow cases to imply them: the floor plan, the restaurant, the menu and the staff association are all read-only or closed to a staff account, and the one thing the role writes it writes through `transitionTableState`, which bypasses the rules. The full matrix is [[User Roles]].
+- Revocation takes effect at the data layer immediately, not at the next token refresh (issue \#1097). `worksAt()` in `firestore.rules` requires the `staff` claim **and** the `/restaurantStaff/{uid}` document naming this restaurant, and `removeRestaurantStaff` deletes the document at once - so the hour a stale ID token can still claim the role buys nothing. What the hour does still cost is the sign-out: the account keeps the business app open, reading nothing, until `roleGuard` sees a refreshed token without the claim.
+- The entry is a guard rather than a second landing page (issue \#1097). `AFTER_LOGIN_PAGE` is one string for the whole app and the answer depends on the account, and a redirect written into the sign-in effect would have covered only the sign-in - leaving a restored session and a bookmark on the empty dashboard.
 
 ## Success Criteria
 

@@ -138,6 +138,8 @@ Published plan is read by staff live view and by guest QR resolution
 
 The operator is refused the draft as well, and for a narrower reason: support answers questions about the plan a restaurant is running, and an owner's unpublished rearrangement is not that plan.
 
+"No write access" for staff is under test rather than asserted since issue \#1097. A staff account rearranging a room, adding a room, moving a table, adding one, deleting one or writing the draft is refused by the rules in the emulator suite - the room and the table documents specifically, because those are the published plan the role _reads_, and a rule that leaked `readsFloorPlan` into the write clause would pass every read test in that file. The editor routes were already closed to it by `ownedRestaurantGuard`, but a route guard decides what is rendered rather than what is reachable by a fetch.
+
 ## Use Cases
 
 - [[UC - Configure Restaurant Floor Plans And Tables]]

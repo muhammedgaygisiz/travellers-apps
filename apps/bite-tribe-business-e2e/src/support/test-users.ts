@@ -11,6 +11,14 @@
  *
  * `withoutRoles` is a seeded consumer account holding no roles at all. It is
  * what the deny case is written against, and it must stay role-less.
+ *
+ * `staff` carries `{"roles":["staff"]}` and **not** `business`: the two are
+ * mutually exclusive in `setUserRoles`, and an account holding both would prove
+ * nothing about the narrowed role (issue #1097). The claim alone reaches
+ * nothing — `worksAt()` in `firestore.rules` wants the claim *and* a
+ * `/restaurantStaff/{uid}` document naming the restaurant — so the association
+ * is seeded per journey against that journey's own restaurant rather than
+ * exported here, which is also what lets the revocation case delete it.
  */
 export const TEST_USERS = {
   organisation: {
@@ -21,6 +29,11 @@ export const TEST_USERS = {
   withoutRoles: {
     uid: 'helULN26hP9Qeig6NQLIEcEe3AP6',
     email: 'test@test.com',
+    password: 'Test4711',
+  },
+  staff: {
+    uid: 'sTaFfSeedAccount01RestaurantX',
+    email: 'staff@test.com',
     password: 'Test4711',
   },
 } as const;

@@ -1,14 +1,11 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, GuardResult, Router } from '@angular/router';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { AuthService } from 'ta-firestore';
 import { ToastService } from 'toast';
-
-/** Where the account-to-restaurant association lives (issue #1537). */
-const RESTAURANT_STAFF_COLLECTION = 'restaurantStaff';
-const RESTAURANT_COLLECTION = 'restaurants';
-const RESTAURANT_OWNER_FIELD = 'ownerUserId';
-const STAFF_RESTAURANT_FIELD = 'restaurantId';
+import {
+  holdsRestaurant,
+  staffRestaurantIdOf,
+} from './restaurant-staff-association';
 
 /**
  * Admits the account that **holds** this restaurant, or one that **works at**
@@ -61,35 +58,12 @@ export const restaurantAccessGuard =
       return router.parseUrl(redirectTo);
     }
 
-    const fieldOf = async (
-      reference: string,
-      field: string,
-    ): Promise<unknown> => {
-      try {
-        const { snapshot } = await FirebaseFirestore.getDocument({ reference });
-
-        return snapshot?.data?.[field];
-      } catch {
-        return undefined;
-      }
-    };
-
     if (restaurantId) {
-      const owner = await fieldOf(
-        `${RESTAURANT_COLLECTION}/${restaurantId}`,
-        RESTAURANT_OWNER_FIELD,
-      );
-
-      if (owner === uid) {
+      if (await holdsRestaurant(uid, restaurantId)) {
         return true;
       }
 
-      const worksAt = await fieldOf(
-        `${RESTAURANT_STAFF_COLLECTION}/${uid}`,
-        STAFF_RESTAURANT_FIELD,
-      );
-
-      if (worksAt === restaurantId) {
+      if ((await staffRestaurantIdOf(uid)) === restaurantId) {
         return true;
       }
     }

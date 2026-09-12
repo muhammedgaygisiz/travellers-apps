@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { withAuthRoutes } from 'auth';
 import { authGuard, documentOwnerGuard, roleGuard } from 'ta-firestore';
 import { restaurantAccessGuard } from './restaurant-access.guard';
+import { staffEntryGuard } from './staff-entry.guard';
 
 /**
  * The second half of the ownership boundary, and the half a link cannot dodge.
@@ -65,11 +66,26 @@ export const ROUTES: Routes = withAuthRoutes([
     loadComponent: () =>
       import('bite-tribe-business/start').then((m) => m.Start),
   },
+  /**
+   * Where a sign-in lands, and where a staff account does not stay
+   * (issue #1097).
+   *
+   * `AFTER_LOGIN_PAGE` is one string for the whole app, and this page is the
+   * owner's: it lists restaurants by `Restaurant.ownerUserId`, which a staff
+   * account never holds. `staffEntryGuard` reads the association and sends
+   * such an account to the room it works in before this component is ever
+   * constructed, so the live view is one step after sign-in rather than a URL
+   * a waiter has to be told.
+   *
+   * Third guard rather than a replacement for the second: the role gate still
+   * decides who may be here, and this only decides where "here" is worth being
+   * for one kind of account. An owner has no association and falls through.
+   */
   {
     path: 'dashboard',
     loadComponent: () =>
       import('bite-tribe-business/dashboard').then((m) => m.DashboardContainer),
-    canActivate: [authGuard, roleGuard('business', 'staff')],
+    canActivate: [authGuard, roleGuard('business', 'staff'), staffEntryGuard()],
   },
   {
     path: 'bite-trails',

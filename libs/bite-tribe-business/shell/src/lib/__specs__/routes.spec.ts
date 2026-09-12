@@ -255,13 +255,25 @@ describe('business ROUTES', () => {
      * only two of them: the owner-only gate on everything that edits, and the
      * owner-or-staff gate on the live view of issue #1093. A new route about a
      * restaurant that forgets both fails here.
+     *
+     * Scoped to the routes carrying `:restaurantId` rather than to "has three
+     * guards", because the dashboard now carries a third guard of its own that
+     * is about the account rather than about a restaurant (issue #1097). The
+     * second assertion is what keeps that scoping honest: it fixes the set of
+     * restaurant routes, so a new one cannot slip past by being unlisted.
      */
     it('guards every route that is about one restaurant', () => {
-      const guarded = ROUTES.filter(
-        (route) => (route.canActivate ?? []).length > 2,
-      ).map((route) => route.path);
+      const aboutOneRestaurant = ROUTES.filter((route) =>
+        route.path?.includes(':restaurantId'),
+      );
+      const guarded = aboutOneRestaurant
+        .filter((route) => (route.canActivate ?? []).length > 2)
+        .map((route) => route.path);
 
       expect(guarded.sort()).toEqual([...EDIT_PATHS, TABLES_PATH].sort());
+      expect(aboutOneRestaurant.map((route) => route.path).sort()).toEqual(
+        [...EDIT_PATHS, TABLES_PATH].sort(),
+      );
     });
 
     it.each(EDIT_PATHS)('admits the assigned account on %s', async (path) => {
@@ -364,6 +376,117 @@ describe('business ROUTES', () => {
         });
         expect(present).toHaveBeenCalled();
       });
+    });
+  });
+
+  /**
+   * Where a sign-in lands, for an account the landing page has nothing to show
+   * (issue #1097).
+   *
+   * The dashboard lists restaurants by `Restaurant.ownerUserId`, so a staff
+   * account has so far arrived at an empty map and two sections leading to two
+   * more empty lists, with the one surface its role has reachable only by
+   * typing a URL. The guard turns the association into that URL.
+   *
+   * It refuses nothing, which is the half worth testing hardest: an owner, a
+   * signed-out visitor and an unreadable association all fall through to the
+   * page they would have got, because `roleGuard` on the same route is what
+   * decides who may be here at all.
+   */
+  describe('where the dashboard sends a staff account', () => {
+    const DASHBOARD_PATH = 'dashboard';
+
+    let signedOut = false;
+
+    const entryGuardOf = (path: string): CanActivateFn =>
+      ((ROUTES.find((route) => route.path === path) as Route).canActivate ??
+        [])[2] as CanActivateFn;
+
+    const run = (path: string): Promise<boolean | UrlTree> =>
+      TestBed.runInInjectionContext(
+        () =>
+          entryGuardOf(path)(
+            {} as ActivatedRouteSnapshot,
+            { url: `/${path}` } as RouterStateSnapshot,
+          ) as Promise<boolean | UrlTree>,
+      );
+
+    const worksAt = (restaurantId: string | undefined): void => {
+      jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        snapshot: { id: 'user-1', data: { restaurantId } },
+      } as unknown as Awaited<
+        ReturnType<typeof FirebaseFirestore.getDocument>
+      >);
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      signedOut = false;
+
+      TestBed.configureTestingModule({
+        providers: [
+          {
+            provide: AuthService,
+            useValue: {
+              getUser: (): { uid: string } | undefined =>
+                signedOut ? undefined : { uid: 'user-1' },
+              whenAuthStateRestored: (): Promise<void> => Promise.resolve(),
+            },
+          },
+          {
+            provide: Router,
+            useValue: {
+              parseUrl: (url: string): UrlTree =>
+                ({ url }) as unknown as UrlTree,
+            },
+          },
+        ],
+      });
+    });
+
+    it('sends it straight to the room it works in', async () => {
+      worksAt('restaurant-1');
+
+      await expect(run(DASHBOARD_PATH)).resolves.toEqual({
+        url: '/restaurant/restaurant-1/tables',
+      });
+    });
+
+    /**
+     * An owner has no association, and the dashboard is its page. Asserted
+     * rather than assumed, because a guard that redirected everyone would pass
+     * the test above and break the app for the accounts it is built around.
+     */
+    it('leaves an owner on the dashboard', async () => {
+      worksAt(undefined);
+
+      await expect(run(DASHBOARD_PATH)).resolves.toBe(true);
+    });
+
+    /** Not a gate: an unreadable association gets the page it used to get. */
+    it('leaves the account alone when the association cannot be read', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockRejectedValue(new Error('offline'));
+
+      await expect(run(DASHBOARD_PATH)).resolves.toBe(true);
+    });
+
+    it('leaves a signed-out visitor to authGuard', async () => {
+      signedOut = true;
+
+      await expect(run(DASHBOARD_PATH)).resolves.toBe(true);
+    });
+
+    /**
+     * The redirect target is a real route in this table, not a string that
+     * merely looks like one. A typo here is a sign-in that ends on a blank
+     * page for every staff account and for nobody else.
+     */
+    it('redirects to a path this table serves', () => {
+      expect(ROUTES.map((route) => route.path)).toContain(
+        'restaurant/:restaurantId/tables',
+      );
     });
   });
 

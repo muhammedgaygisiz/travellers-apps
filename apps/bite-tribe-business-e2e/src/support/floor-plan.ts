@@ -3,6 +3,7 @@ import {
   deleteFirestoreCollection,
   deleteFirestoreDocument,
   listFirestoreDocuments,
+  seedFirestoreDocument,
 } from './firestore';
 
 /**
@@ -48,5 +49,117 @@ export const deleteFloorPlan = async (
 
   for (const token of tokens) {
     await deleteFirestoreDocument(page, `tableTokens/${token}`);
+  }
+};
+
+/** One room of a seeded plan. */
+export interface SeededRoom {
+  id: string;
+  name: string;
+}
+
+/** One table of a seeded plan. */
+export interface SeededTable {
+  id: string;
+  label: string;
+  roomId: string;
+  seats: number;
+}
+
+export interface SeedPublishedPlanOptions {
+  restaurantId: string;
+  restaurantName: string;
+  /** The account named on `Restaurant.ownerUserId`. */
+  ownerUserId: string;
+  rooms: readonly SeededRoom[];
+  tables: readonly SeededTable[];
+  position?: { latitude: number; longitude: number };
+}
+
+/** Roughly central Munich, the position the whole business suite pins. */
+const DEFAULT_POSITION = { latitude: 48.137154, longitude: 11.576124 };
+
+/**
+ * A published plan: the restaurant, its rooms, and its tables.
+ *
+ * Written as documents rather than built in the editor, because the journeys
+ * that read a plan need a room that already exists - reaching one is the editor
+ * journey's subject. No table carries a `qrTokenId`: that field is
+ * backend-owned and nothing here asks for one.
+ *
+ * Shared by the live-table journey and the staff-entry one (issue \#1097),
+ * which need the same fixture for opposite reasons: one is about what the room
+ * shows, the other about who is allowed to arrive at it.
+ */
+export const seedPublishedPlan = async (
+  page: Page,
+  {
+    restaurantId,
+    restaurantName,
+    ownerUserId,
+    rooms,
+    tables,
+    position = DEFAULT_POSITION,
+  }: SeedPublishedPlanOptions,
+): Promise<void> => {
+  await seedFirestoreDocument(page, `restaurants/${restaurantId}`, {
+    id: { stringValue: restaurantId },
+    name: { stringValue: restaurantName },
+    description: { stringValue: '' },
+    ownerUserId: { stringValue: ownerUserId },
+    claimStatus: { stringValue: 'claimed' },
+    position: {
+      mapValue: {
+        fields: {
+          latitude: { doubleValue: position.latitude },
+          longitude: { doubleValue: position.longitude },
+        },
+      },
+    },
+  });
+
+  for (const [order, room] of rooms.entries()) {
+    await seedFirestoreDocument(
+      page,
+      `restaurants/${restaurantId}/rooms/${room.id}`,
+      {
+        name: { stringValue: room.name },
+        order: { integerValue: String(order) },
+        version: { integerValue: '1' },
+        objects: { arrayValue: {} },
+        size: {
+          mapValue: {
+            fields: {
+              width: { integerValue: '8000' },
+              height: { integerValue: '6000' },
+            },
+          },
+        },
+      },
+    );
+  }
+
+  for (const [index, table] of tables.entries()) {
+    await seedFirestoreDocument(
+      page,
+      `restaurants/${restaurantId}/tables/${table.id}`,
+      {
+        label: { stringValue: table.label },
+        roomId: { stringValue: table.roomId },
+        shape: { stringValue: 'round' },
+        diameter: { integerValue: '900' },
+        seats: { integerValue: String(table.seats) },
+        enabled: { booleanValue: true },
+        rotation: { integerValue: '0' },
+        position: {
+          mapValue: {
+            fields: {
+              x: { integerValue: String(1500 + (index % 3) * 2500) },
+              y: { integerValue: String(1500 + Math.floor(index / 3) * 2500) },
+            },
+          },
+        },
+      },
+    );
   }
 };

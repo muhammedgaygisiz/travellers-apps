@@ -582,12 +582,20 @@ describe('menus', () => {
 
 describe('staff', () => {
   /**
-   * `staff` grants nothing at the data layer yet, and that is deliberate: the
-   * record of which restaurant a staff account works at is issue #1537 and does
-   * not exist, so there is nothing for a rule to scope the role against. A rule
-   * admitting `staff` to restaurants at all would be a blanket
-   * any-staff-writes-any-restaurant permission - the shape of hole this issue
-   * closes. The role still opens the business app and reads.
+   * What the role reaches, stated in one place (GitHub issue #1097).
+   *
+   * `staff` is a *narrowed* set rather than a smaller version of `business`,
+   * and the narrowing is almost entirely made of refusals - so a suite that
+   * only tested what the role can do would leave the permission set undefined
+   * in exactly the direction that matters. What it may do at the data layer is
+   * read: the published plan, the live state, the history and the visits of
+   * the one restaurant it works at, each asserted in that collection's own
+   * block. What it writes, it writes through `transitionTableState`, which
+   * bypasses these rules entirely.
+   *
+   * Everything else is a deny case, and the ones below are the four the issue
+   * names: the floor plan, the restaurant profile, the menu, and who works
+   * here.
    */
   it('refuses a staff account writing a restaurant', async () => {
     await assertFails(
@@ -657,6 +665,182 @@ describe('staff', () => {
     await assertFails(
       deleteDoc(doc(asOperator(), 'restaurantStaff', STRANGER)),
     );
+  });
+
+  /**
+   * The acceptance criterion of issue #1097, written as rules rather than as
+   * hidden UI: the editor routes are already closed to a staff account by
+   * `ownedRestaurantGuard`, and a guard is a decision about what to render.
+   * These are the same decision where it cannot be bypassed by a fetch.
+   *
+   * Every write a staff account could reach the room with, not one of them:
+   * the room geometry, a table, a new table, deleting a table, and the
+   * unpublished draft. The room and the table are the published plan the role
+   * *reads*, which is exactly why the write needs proving separately - a rule
+   * that widened `readsFloorPlan` into the write clause would pass every read
+   * test in this file.
+   */
+  describe('the floor plan is read-only to staff', () => {
+    const room = (): DocumentReference =>
+      doc(asStaff(), 'restaurants', OWNED_RESTAURANT, 'rooms', OWNED_ROOM);
+
+    const tables = (): CollectionReference =>
+      collection(asStaff(), 'restaurants', OWNED_RESTAURANT, 'tables');
+
+    it('refuses rearranging a room', async () => {
+      await assertFails(
+        updateDoc(room(), roomAtVersion(STORED_ROOM_VERSION + 1)),
+      );
+    });
+
+    it('refuses adding a room', async () => {
+      await assertFails(
+        setDoc(
+          doc(asStaff(), 'restaurants', OWNED_RESTAURANT, 'rooms', 'new-room'),
+          roomAtVersion(1),
+        ),
+      );
+    });
+
+    it('refuses moving a table', async () => {
+      await assertFails(
+        updateDoc(doc(tables(), OWNED_TABLE), {
+          position: { x: 100, y: 100 },
+        }),
+      );
+    });
+
+    it('refuses adding a table', async () => {
+      await assertFails(addDoc(tables(), TABLE_FIXTURE));
+    });
+
+    /**
+     * A delete is the write with no undo, and it is also what revokes the
+     * table's printed QR token.
+     */
+    it('refuses deleting a table', async () => {
+      await assertFails(deleteDoc(doc(tables(), OWNED_TABLE)));
+    });
+
+    /**
+     * The draft is refused a read already; refused a write is the other half,
+     * and it is the one that would let a staff account publish an arrangement
+     * the owner never saw.
+     */
+    it('refuses writing the owner unpublished draft', async () => {
+      await assertFails(
+        setDoc(
+          doc(
+            asStaff(),
+            'restaurants',
+            OWNED_RESTAURANT,
+            'rooms',
+            OWNED_ROOM,
+            'drafts',
+            'current',
+          ),
+          draftAtRevision(STORED_DRAFT_REVISION + 1),
+        ),
+      );
+    });
+  });
+
+  /**
+   * The menu is the restaurant's own data and the role is an operational one.
+   * A menu carries no owner field, so its rule reads the restaurant's - which
+   * means the staff clause could only ever arrive here by someone widening
+   * `ownsMenu`, and this is what would catch that.
+   */
+  it('refuses a staff account writing the menu', async () => {
+    await assertFails(
+      updateDoc(doc(asStaff(), 'menus', OWNED_MENU), { categories: [] }),
+    );
+  });
+
+  /**
+   * Hiring is the owner's, and a staff account adding staff is the escalation
+   * the whole association is shaped to prevent: `addRestaurantStaff` refuses
+   * the caller, and this refuses the write that would go round it.
+   */
+  it('refuses a staff account putting another account on its restaurant', async () => {
+    await assertFails(
+      setDoc(doc(asStaff(), 'restaurantStaff', CONSUMER), {
+        userId: CONSUMER,
+        restaurantId: OWNED_RESTAURANT,
+      }),
+    );
+  });
+
+  it('refuses a staff account deleting its own association', async () => {
+    await assertFails(deleteDoc(doc(asStaff(), 'restaurantStaff', STRANGER)));
+  });
+
+  /**
+   * "Revoking a staff member ends their access within one token refresh"
+   * (issue #1097), and at the data layer it does not even take that long.
+   *
+   * `removeRestaurantStaff` writes two things: it drops the `staff` claim, and
+   * it deletes the association. The claim lives in an ID token that stays
+   * valid for up to an hour, so a revoked account keeps *saying* it is staff
+   * until the token refreshes - which is why `worksAt()` requires both halves
+   * rather than trusting the claim. This is that requirement under test: the
+   * context below still carries the claim, exactly as a not-yet-refreshed
+   * token would, and every read the role had is gone the moment the
+   * association is.
+   *
+   * The remaining hour is a UI fact, not a data one: `roleGuard` returns the
+   * account to the login page once the refreshed token arrives without the
+   * claim.
+   */
+  describe('once the association is removed', () => {
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await deleteDoc(doc(context.firestore(), 'restaurantStaff', STRANGER));
+      });
+    });
+
+    it('ends the plan read that the claim alone would still allow', async () => {
+      await assertFails(
+        getDoc(
+          doc(asStaff(), 'restaurants', OWNED_RESTAURANT, 'rooms', OWNED_ROOM),
+        ),
+      );
+      await assertFails(
+        getDocs(
+          collection(asStaff(), 'restaurants', OWNED_RESTAURANT, 'tables'),
+        ),
+      );
+    });
+
+    it('ends the live state and visit reads too', async () => {
+      await assertFails(
+        getDoc(
+          doc(
+            asStaff(),
+            'restaurants',
+            OWNED_RESTAURANT,
+            'tableStates',
+            OWNED_TABLE,
+          ),
+        ),
+      );
+      await assertFails(
+        getDocs(
+          collection(asStaff(), 'restaurants', OWNED_RESTAURANT, 'visits'),
+        ),
+      );
+    });
+
+    /**
+     * And the account is not locked out of BiteTribe, only out of this
+     * restaurant's operational data. The restaurant document stays readable to
+     * every signed-in account, as it is to any diner.
+     */
+    it('leaves the account its ordinary reads', async () => {
+      await assertSucceeds(
+        getDoc(doc(asStaff(), 'restaurants', OWNED_RESTAURANT)),
+      );
+    });
   });
 });
 

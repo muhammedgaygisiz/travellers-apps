@@ -137,6 +137,17 @@ app and run the operational migrations in it.
   would have been two changes in one. The role and the association are now
   writable by the right caller; making them mean something is the work that is
   left.
+  **That work is done as of \#1097, and the empty list is still there.** The
+  fix was not to widen the dashboard but to stop routing a staff account to it:
+  `staffEntryGuard` on `/dashboard` reads `/restaurantStaff/{uid}` and
+  redirects to `restaurant/{restaurantId}/tables`, the surface \#1093 and
+  \#1094 built. A guard rather than a second `AFTER_LOGIN_PAGE`, because that
+  token is one string for the whole app while the answer depends on the
+  account - and because a guard also covers the restored session and the
+  bookmark, which a redirect inside the sign-in effect would have missed. It
+  refuses nothing: an owner has no association, an unreadable one falls through
+  to the dashboard, and `roleGuard` on the same route remains the gate. The
+  permission set it fixed is in [[User Roles]].
 - `roleGuard(...roles)` is the backstop, not the primary gate. Sign-in already
   refuses these accounts, so it fires only for a session restored on startup
   (which reports itself as a successful login without running the sign-in
@@ -232,6 +243,14 @@ conversation for every new waiter will either wait or share a login.
   lifetime, and is then returned to the login page by `roleGuard` rather than to
   a broken screen. It is the same window blocking an account has, and both
   surfaces say it out loud rather than implying the removal is instant.
+  **The hour buys no access, and \#1097 proved it.** `worksAt()` in
+  `firestore.rules` requires the claim **and** the `/restaurantStaff/{uid}`
+  document naming that restaurant, and the removal deletes the document
+  immediately - so the stale token still says `staff` and reaches nothing. The
+  rules suite asserts exactly that: with the claim on the context and the
+  association deleted, every read the role had is refused, while the ordinary
+  reads any signed-in account has are untouched. What the hour still costs is
+  the sign-out, not the data.
 - **The target is an existing account, found by email.** That is the identifier
   the restaurant has. An email invitation that creates an account is a separate
   problem with its own abuse surface and is out of scope. `not-found` on an

@@ -14,7 +14,7 @@ import {
 } from 'bite-tribe-business/table-management-data-access';
 import { RestaurantTable, Room, TableState, TableStatus } from 'model';
 import { BehaviorSubject, of } from 'rxjs';
-import { AuthService } from 'ta-firestore';
+import { AnalyticsService, AuthService } from 'ta-firestore';
 import { ToastService } from 'toast';
 import { v4 as uuid } from 'uuid';
 import { STALE_AFTER_MS, TablePlanService } from '../table-plan.service';
@@ -115,6 +115,7 @@ describe(TablePlanService.name, () => {
 
   let transition: jest.Mock;
   let present: jest.Mock;
+  let logEvent: jest.Mock;
   let logout: jest.Mock;
   let getDocument: jest.SpyInstance;
   let currentRestaurantId: WritableSignal<string | undefined>;
@@ -155,6 +156,7 @@ describe(TablePlanService.name, () => {
     preferences['remove'].mockResolvedValue(undefined);
     logout = jest.fn();
     present = jest.fn().mockResolvedValue(undefined);
+    logEvent = jest.fn();
     transition = jest
       .fn()
       .mockImplementation(({ tableId, status, expectedStatus }) =>
@@ -226,6 +228,7 @@ describe(TablePlanService.name, () => {
           useValue: { getUser: (): { uid: string } => ({ uid: 'host-1' }) },
         },
         { provide: ToastService, useValue: { present } },
+        { provide: AnalyticsService, useValue: { logEvent } },
         {
           provide: BiteTribeStoreService,
           useValue: {
@@ -931,6 +934,232 @@ describe(TablePlanService.name, () => {
         messageKey: 'table-bulk-queued',
         params: { count: 2, total: 2 },
         outcome: 'failure',
+      });
+    });
+  });
+
+  /**
+   * What the room did, as the analytics taxonomy records it
+   * (GitHub issue #1098).
+   *
+   * Every assertion here is about a transition the backend *confirmed*. The
+   * epic's question is how restaurants actually use the live view, and an
+   * answer that counted refusals, replays or taps the queue is still holding
+   * would answer a different one.
+   */
+  describe('table operation analytics', () => {
+    /** The three parameters every table event carries. */
+    const where = {
+      restaurant_id: 'restaurant-1',
+      table_id: 'table-1',
+      // The restaurant's tables across both rooms, not the open room's two:
+      // a service uses the terrace as well as the dining room.
+      table_count: 3,
+    };
+
+    const withVisit = (visitId: string, visitStatus: string): void => {
+      transition.mockImplementation(({ tableId, status, expectedStatus }) =>
+        Promise.resolve({
+          restaurantId: 'restaurant-1',
+          tableId,
+          from: expectedStatus,
+          to: status,
+          since: NOW + 500,
+          transitionId: `transition-${tableId}`,
+          visitId,
+          visitStatus,
+        }),
+      );
+    };
+
+    it('counts a seating with its party size', async () => {
+      states.next([state('table-1', 'available')]);
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied', guests: 4 });
+
+      expect(logEvent).toHaveBeenCalledWith('table_seated', {
+        ...where,
+        from_status: 'available',
+        guests: 4,
+      });
+    });
+
+    /** Absent rather than zero: nobody recorded a number, which is true. */
+    it('leaves the party size out when none was entered', async () => {
+      states.next([state('table-1', 'available')]);
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      expect(logEvent).toHaveBeenCalledWith('table_seated', {
+        ...where,
+        from_status: 'available',
+      });
+    });
+
+    /**
+     * Freeing an occupied table and putting a blocked one back into service
+     * are one event with two readings rather than two events, which is what
+     * `from_status` is for.
+     */
+    it('names the status the table came from', async () => {
+      states.next([state('table-1', 'disabled')]);
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'available' });
+
+      expect(logEvent).toHaveBeenCalledWith('table_freed', {
+        ...where,
+        from_status: 'disabled',
+      });
+    });
+
+    it.each([
+      ['reserved', 'table_reserved'],
+      ['cleaning', 'table_cleaning_started'],
+      ['disabled', 'table_disabled'],
+    ] as const)('counts %s as %s', async (to, event) => {
+      states.next([state('table-1', 'available')]);
+      service.activateTable('table-1');
+      await service.applyAction({ to });
+
+      expect(logEvent).toHaveBeenCalledWith(event, {
+        ...where,
+        from_status: 'available',
+      });
+    });
+
+    /**
+     * `ordering` and `awaitingPayment` are in the matrix and the sheet offers
+     * them, but the events that reach them are the QR ordering of issue #1072.
+     * The transition still happens and is still in the audit trail.
+     */
+    it('measures nothing for the statuses stage three owns', async () => {
+      states.next([state('table-1', 'occupied')]);
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'awaitingPayment' });
+
+      expect(logEvent).not.toHaveBeenCalled();
+    });
+
+    it('counts nothing when the backend refuses', async () => {
+      states.next([state('table-1', 'available')]);
+      transition.mockRejectedValue({ code: 'functions/aborted' });
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      expect(logEvent).not.toHaveBeenCalled();
+    });
+
+    /**
+     * A transition made offline is counted when it lands, not when it was
+     * made: the total is the same and the timing is the device's.
+     */
+    it('counts a queued transition once it lands', async () => {
+      states.next([state('table-1', 'available')]);
+      goOffline();
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      expect(logEvent).not.toHaveBeenCalled();
+
+      await reconnect();
+
+      expect(logEvent).toHaveBeenCalledWith('table_seated', {
+        ...where,
+        from_status: 'available',
+      });
+    });
+
+    /**
+     * A replayed answer is the backend saying it already applied this intent
+     * (issue #1096). The transition happened once, so it is counted once.
+     */
+    it('counts a replayed transition no second time', async () => {
+      states.next([state('table-1', 'available')]);
+      goOffline();
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      transition.mockResolvedValue({
+        restaurantId: 'restaurant-1',
+        tableId: 'table-1',
+        from: 'available',
+        to: 'occupied',
+        since: NOW + 500,
+        transitionId: 'transition-table-1',
+        replayed: true,
+      });
+      await reconnect();
+
+      expect(logEvent).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Seating a table is opening a visit, and the two are counted apart
+     * because they measure different objects - a place in the room, and a
+     * party that will carry orders and a bill.
+     */
+    it('counts the visit a seating opened', async () => {
+      states.next([state('table-1', 'available')]);
+      withVisit('visit-1', 'open');
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      expect(logEvent).toHaveBeenCalledWith('table_visit_opened', {
+        ...where,
+        visit_id: 'visit-1',
+      });
+    });
+
+    /**
+     * A visit carried between the party statuses keeps its id, so the same
+     * party moving along is not a new one.
+     */
+    it('counts no visit for a party that was already there', async () => {
+      states.next([state('table-1', 'ordering', { visitId: 'visit-1' })]);
+      withVisit('visit-1', 'open');
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      expect(logEvent).toHaveBeenCalledWith(
+        'table_seated',
+        expect.objectContaining({ from_status: 'ordering' }),
+      );
+      expect(logEvent).not.toHaveBeenCalledWith(
+        'table_visit_opened',
+        expect.anything(),
+      );
+    });
+
+    it('counts the visit a turnover ended, and how it ended', async () => {
+      states.next([state('table-1', 'occupied', { visitId: 'visit-1' })]);
+      withVisit('visit-1', 'closed');
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'cleaning' });
+
+      expect(logEvent).toHaveBeenCalledWith('table_cleaning_started', {
+        ...where,
+        from_status: 'occupied',
+      });
+      expect(logEvent).toHaveBeenCalledWith('table_visit_closed', {
+        ...where,
+        visit_id: 'visit-1',
+        outcome: 'closed',
+      });
+    });
+
+    /**
+     * Most transitions name no visit at all - a table made ready at the end of
+     * a service is not a party doing anything.
+     */
+    it('counts no visit where the transition named none', async () => {
+      states.next([state('table-1', 'cleaning')]);
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'available' });
+
+      expect(logEvent).toHaveBeenCalledTimes(1);
+      expect(logEvent).toHaveBeenCalledWith('table_freed', {
+        ...where,
+        from_status: 'cleaning',
       });
     });
   });

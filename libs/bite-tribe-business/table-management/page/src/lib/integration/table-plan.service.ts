@@ -21,6 +21,7 @@ import {
   TableStateDataAccessService,
   TableTransitionFailure,
   TableTransitionQueueService,
+  TableTransitionResult,
 } from 'bite-tribe-business/table-management-data-access';
 import {
   Restaurant,
@@ -30,6 +31,11 @@ import {
   TableStatus,
 } from 'model';
 import { EMPTY, switchMap } from 'rxjs';
+import {
+  AnalyticsEvent,
+  AnalyticsService,
+  TableOperationParams,
+} from 'ta-firestore';
 import { ToastRequest, ToastService } from 'toast';
 import { resourceFailed, resourceValue } from 'utils';
 import {
@@ -89,6 +95,43 @@ export const FAILURE_KEYS: Readonly<Record<TableTransitionFailure, string>> = {
   // failure ship with no sentence at all.
   offline: 'table-action-queued',
   unknown: 'table-action-failed',
+};
+
+/** The five events keyed on a target status in {@link OPERATION_EVENTS}. */
+type TableOperationEvent =
+  | typeof AnalyticsEvent.TableSeated
+  | typeof AnalyticsEvent.TableFreed
+  | typeof AnalyticsEvent.TableReserved
+  | typeof AnalyticsEvent.TableCleaningStarted
+  | typeof AnalyticsEvent.TableDisabled;
+
+/**
+ * What each table operation is called in the analytics taxonomy
+ * (GitHub issue #1098).
+ *
+ * Keyed on the status the table lands in, because that is what the staff
+ * member picked: the sheet of issue #1094 offers a target, and "seated",
+ * "freed", "reserved", "cleaning" and "disabled" are the five names issue #1098
+ * asks for. The status the table came *from* travels as a parameter rather than
+ * as a second set of event names, which is what keeps re-enabling a blocked
+ * table and freeing an occupied one one event with two readings instead of two
+ * events.
+ *
+ * `ordering` and `awaitingPayment` are absent on purpose. They are in the
+ * matrix and the sheet offers them (issue #1094), but the events that reach
+ * them are the QR ordering of issue #1072, and naming them here would put two
+ * events in the launch taxonomy that nothing yet produces in anger. The
+ * transitions still happen and are still in the audit trail; what they are not
+ * is measured, until the stage that owns them says what it wants measured.
+ */
+const OPERATION_EVENTS: Readonly<
+  Partial<Record<TableStatus, TableOperationEvent>>
+> = {
+  occupied: AnalyticsEvent.TableSeated,
+  available: AnalyticsEvent.TableFreed,
+  reserved: AnalyticsEvent.TableReserved,
+  cleaning: AnalyticsEvent.TableCleaningStarted,
+  disabled: AnalyticsEvent.TableDisabled,
 };
 
 /**
@@ -200,6 +243,7 @@ export class TablePlanService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly transloco = inject(TranslocoService);
   private readonly toast = inject(ToastService);
+  private readonly analytics = inject(AnalyticsService);
 
   readonly restaurantId = this.storeService.restaurantIdFromUrl;
 
@@ -459,13 +503,29 @@ export class TablePlanService {
      * delivering - the flicker back to the old status that the optimistic
      * layer exists to prevent, multiplied by however many tables were queued.
      */
-    this.queue.applied$.pipe(takeUntilDestroyed()).subscribe((result) =>
+    this.queue.applied$.pipe(takeUntilDestroyed()).subscribe((result) => {
       this.show(result.tableId, {
         status: result.to,
         since: result.since,
         confirmedSince: result.since,
-      }),
-    );
+      });
+
+      /*
+       * A replayed transition is counted when it lands, not when it was made
+       * (GitHub issue #1098).
+       *
+       * The visit the table held before it is read here rather than carried
+       * from the intent, because the queue entry of issue #1096 records the
+       * status the device was showing and not the visit behind it. The listener
+       * could in principle have delivered this very transition already, and
+       * then the pointer read is the new visit rather than the old one - which
+       * loses a `table_visit_opened` and can never invent one, because a
+       * carried visit keeps its id and so never looks new.
+       */
+      this.track(result, {
+        visitBefore: this.liveStates().get(result.tableId)?.visitId,
+      });
+    });
 
     /*
      * What is written down goes out when there is a signal to send it on.
@@ -891,6 +951,10 @@ export class TablePlanService {
     }
 
     const since = Date.now();
+    // Read before the guess goes on the plan: `liveStates` is the server's own
+    // answer rather than the merged view, and it is the only pointer at the
+    // visit this table held going in (issue #1095).
+    const visitBefore = this.liveStates().get(tableId)?.visitId;
 
     this.show(tableId, { status: to, since });
 
@@ -912,6 +976,8 @@ export class TablePlanService {
         confirmedSince: outcome.result.since,
       });
 
+      this.track(outcome.result, { visitBefore, guests });
+
       return 'applied';
     }
 
@@ -928,6 +994,110 @@ export class TablePlanService {
     await this.reportFailure(outcome.failure, outcome.error);
 
     return 'failed';
+  }
+
+  /**
+   * Records what the room actually did, once the backend has confirmed it
+   * (GitHub issue #1098).
+   *
+   * ## Only what happened
+   *
+   * Called from the two places a transition is *confirmed* - the callable
+   * answering, and a queued transition landing on reconnect - and from neither
+   * of the places one is merely asked for. A refused transition did not happen
+   * and must not be counted; a queued one has not happened yet and is counted
+   * when it lands, which is also why the acting device being offline changes
+   * the timing of the event and not the total.
+   *
+   * A `replayed` answer is the backend saying it already applied this exact
+   * intent (issue #1096). The transition happened once, so it is counted once:
+   * the second answer is a question the device asked, not an operation a staff
+   * member performed.
+   *
+   * ## Two events for one commit, on purpose
+   *
+   * Seating a table *is* opening a visit, so a seating produces both
+   * `table_seated` and `table_visit_opened`. They are kept apart because they
+   * measure different objects: the first is what happened to a place in the
+   * room, the second is a party that will carry orders (issue #1072) and a bill
+   * (issue #1073) and can outlive the table it started at. Any count of
+   * seatings therefore reads one of the two names and never their sum.
+   */
+  private track(
+    result: TableTransitionResult,
+    context: { visitBefore?: string; guests?: number },
+  ): void {
+    if (result.replayed) {
+      return;
+    }
+
+    const where: TableOperationParams = {
+      restaurant_id: result.restaurantId,
+      table_id: result.tableId,
+      // The restaurant's tables, not the open room's: turnover and the share
+      // of tables ever used are questions about a service, and a service uses
+      // the terrace as well as the dining room.
+      //
+      // Zero where a queue restored at startup replays before the tables
+      // resource has resolved. `table-operations.sql` takes the MAX per
+      // restaurant per day, so the real count wins wherever the day has any
+      // other event, and a day made only of such a replay divides by zero and
+      // reports nothing rather than reporting a wrong ratio.
+      table_count: this.tablesValue().length,
+    };
+
+    const operation = OPERATION_EVENTS[result.to];
+
+    if (operation) {
+      this.analytics.logEvent(operation, {
+        ...where,
+        from_status: result.from,
+        ...(context.guests === undefined ? {} : { guests: context.guests }),
+      });
+    }
+
+    this.trackVisit(result, where, context.visitBefore);
+  }
+
+  /**
+   * The party behind the status, where this transition started or ended one.
+   *
+   * Read off `visitId` and `visitStatus` rather than re-deciding it here: the
+   * backend writes the state, the audit entry and the visit in one commit
+   * (issue #1095) and then says what it did, and a second opinion computed from
+   * the statuses would be a copy of the rule free to disagree with the commit.
+   *
+   * A visit that was already open and is merely carried between the party
+   * statuses keeps its id, so comparing against the pointer the table held
+   * going in is what separates a new party from the same party moving along.
+   */
+  private trackVisit(
+    result: TableTransitionResult,
+    where: TableOperationParams,
+    visitBefore: string | undefined,
+  ): void {
+    const { visitId, visitStatus } = result;
+
+    if (!visitId || !visitStatus) {
+      return;
+    }
+
+    if (visitStatus === 'open') {
+      if (visitId !== visitBefore) {
+        this.analytics.logEvent(AnalyticsEvent.TableVisitOpened, {
+          ...where,
+          visit_id: visitId,
+        });
+      }
+
+      return;
+    }
+
+    this.analytics.logEvent(AnalyticsEvent.TableVisitClosed, {
+      ...where,
+      visit_id: visitId,
+      outcome: visitStatus,
+    });
   }
 
   private show(tableId: string, entry: OptimisticTransition): void {

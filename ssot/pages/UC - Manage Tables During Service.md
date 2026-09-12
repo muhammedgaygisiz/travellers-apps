@@ -42,6 +42,22 @@ suite, and every read the role has ends the moment the association is deleted -
 with the `staff` claim still on its token, which is what makes revocation take
 effect before the token refreshes rather than an hour after it.
 
+Issue \#1098 made the room measurable. Seven `table_*` events now record what
+staff actually do during a service - a table seated, freed, reserved, sent for
+cleaning or taken out of service, and a visit opened or ended - and they record
+it only when the backend has confirmed the transition, so a refusal is not a
+seating and a transition made offline is counted when it lands rather than twice
+or never. Three measures fall out of them per restaurant per service day: table
+turnover, the share of tables that were used at all, and how long a party
+occupied a table. They are computed over the BigQuery export
+(`tools/analytics/queries/table-operations.sql`) rather than as launch-dashboard
+tiles, because the dashboard is scoped to launch signals and how a restaurant
+works its room is not one. No guest is named in any of it: the parameters are the
+restaurant's own ids, a party size and an opaque visit id, and who moved a
+disputed table stays the audit trail's answer rather than analytics'. The one
+event the issue named and did not get is `table_visit_moved`, for the reason
+below - there is nothing to move a visit from.
+
 What no issue has added yet is a **surface** for the visit. Seating a table through issue \#1094's sheet opens a visit, and nothing shows it. The guest count is still optional in the sheet and still travels as the audit entry's `reason`; `TableVisit.guestCount` now exists to hold it and `transitionTableState` now takes it, so moving it across is a change to the business app rather than to the backend.
 
 [[UC - Configure Restaurant Floor Plans And Tables]] is complete and no longer blocks this. [[UC - Own And Claim Restaurants]] no longer blocks it either: the `staff` role now has its first write, through the callable rather than through the rules, and \#1093 gives a staff member somewhere to sign in to.
@@ -87,6 +103,7 @@ Restaurant staff open one screen during service and see the room as it is: which
 - The queue drains one entry at a time, in the order it was made, because a host who seated table 12 and then marked it ordering queued two transitions whose second expects the first to have landed. The end-of-service reset sends its tables in parallel for the opposite reason: those are independent tables, each its own transaction on its own document.
 - A table waiting to be sent is drawn as the status the host asked for and _said_ to be waiting only in the detail panel, not on the plan. The plan already answers "what is this table doing"; "has anyone else been told" is a different question, and a second mark on a 900 mm circle would compete with the status glyph beside it. The clock on such a table runs from when the host acted, not from when the queue drains - a party seated twenty minutes before the signal came back has been there twenty minutes.
 - Whether the room is live is answered in four states rather than two, because the two no answers lead to different next moves. `connecting` is before the first snapshot. `offline` is a connection that has just gone, where what is on screen was true moments ago. `stale` is the same connection still gone a minute later, and it carries the age - "not current" without a number is a warning nobody can act on. Liveness is not read off the states themselves: a quiet Tuesday afternoon and a listener the SDK detached both look like silence, so the delivery carries its own arrival time and the health of the listener, and the device's network state is read from the one `NetworkStatusService` in `libs/common` rather than from a second connectivity mechanism.
+- What the room did is measured from the **confirmed** transition and never from the tap (issue \#1098). The staff view is optimistic by design: it draws a transition the moment it is asked for and takes it back if the backend disagrees, and a taxonomy that counted the drawing would count every refusal as a seating and every offline queue as a loss. So the events are emitted where the callable answers and where a queued transition lands, a `replayed` answer is counted once, and the five table events are keyed on the status the staff member picked with the status they left travelling as a parameter - freeing an occupied table and putting a blocked one back into service are the same transition and not the same sentence. A seating produces `table_seated` **and** `table_visit_opened`, because a place in the room and a party that will carry orders are different objects; any count of seatings therefore reads one of the two names and never their sum.
 - Staff have a narrower permission set than owners, enforced by security rules and not only by hidden UI (issue \#1097). The narrowing is made almost entirely of refusals, so the rules suite carries them as its own cases rather than relying on the allow cases to imply them: the floor plan, the restaurant, the menu and the staff association are all read-only or closed to a staff account, and the one thing the role writes it writes through `transitionTableState`, which bypasses the rules. The full matrix is [[User Roles]].
 - Revocation takes effect at the data layer immediately, not at the next token refresh (issue \#1097). `worksAt()` in `firestore.rules` requires the `staff` claim **and** the `/restaurantStaff/{uid}` document naming this restaurant, and `removeRestaurantStaff` deletes the document at once - so the hour a stale ID token can still claim the role buys nothing. What the hour does still cost is the sign-out: the account keeps the business app open, reading nothing, until `roleGuard` sees a refreshed token without the claim.
 - The entry is a guard rather than a second landing page (issue \#1097). `AFTER_LOGIN_PAGE` is one string for the whole app and the answer depends on the account, and a redirect written into the sign-in effect would have covered only the sign-in - leaving a restored session and a bookmark on the empty dashboard.
@@ -111,6 +128,7 @@ These block implementation and are tracked in [[Current State - Open Questions]]
 ## Related GitHub Scope
 
 - Issue \#1071 - Staff table management and live table state, with eight child issues
+- Issue \#1098 - Analytics on table operations. `table_visit_moved` is deferred to the issue that gives a visit somewhere to move to
 
 ## Related Domains
 

@@ -10,9 +10,14 @@ export { provideFirestoreAnalytics } from './lib/analytics/provide-firestore-ana
 export { AnalyticsService } from './lib/analytics/analytics.service';
 export { CrashReportingService } from './lib/analytics/crash-reporting.service';
 export {
+  ANALYTICS_EVENT_SURFACE,
+  ANALYTICS_SURFACE_USER_PROPERTY,
   AnalyticsEvent,
   type AnalyticsEventName,
   type AnalyticsEventParamMap,
+  type AnalyticsSurface,
+  type TableOperationParams,
+  type TableOperationStatus,
 } from './lib/analytics/analytics-events';
 
 export { authGuard } from './lib/auth.guard';

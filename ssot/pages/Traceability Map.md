@@ -106,11 +106,17 @@
 
   Writing it settled one thing the pages had left open and made one separation structural. The self-transition is refused: re-applying the status a table already holds is a retry, answered by the idempotency key of \#1096, and admitting it to the matrix would reset the `since` clock the live view is built to display. And "the floor plan never writes state, and state never writes the floor plan" stopped being a rule a caller has to obey - `TableState` and `RestaurantTable` share no field name at all, so neither shape can carry the other's data. See [[Table]], which carries the state table, the matrix and the two meanings of `disabled`.
 
+  Issue \#1092 gave the model a writer, and gave the `staff` role its first write of any kind. `transitionTableState` validates a requested transition against the matrix and the caller's staff membership, applies it in a transaction against the status the caller says it saw, and appends an audit entry naming the actor, the capacity, the instant and the reason. Two hosts seating one table produce one seating and one `aborted` carrying what the table holds now - the sentence the view renders as "someone else just seated this table" rather than a generic failure. `firestore.rules` refuses every client write to `tableStates` and `tableStateTransitions`, so the callable is the only path there is, and admits the plan's own readers to both.
+
+  Two decisions in it are worth finding again. The guard is a **separate** function from `requireRestaurantAuthority` rather than that one with `staff` added, because the two answer different questions - may you configure this restaurant, and may you operate it during service - and one function taking a role list would put that difference in an argument at each call site. And the matrix now exists twice, because Firebase Functions cannot import the model library: `table-state-parity.spec.ts` compares both copies row by row, following the precedent `role-list-parity.spec.ts` set for the role list. Stage 2's backend is done and none of it is reachable from a screen; the live view is \#1093 and the staff actions are \#1094.
+
 Every child of stage 0 has now landed, and the stage is still not finished. Two things
 remain and neither has an owning issue: the rules deploy by hand, so \#1078 binds
 production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run, and the
-`staff` role \#1537 made grantable can still do nothing — the dashboard scopes by
-`Restaurant.ownerUserId` and the rules give `staff` no write. See [[User Roles]].
+`staff` role \#1537 made grantable still opens nothing a staff member can use. \#1092
+gave the role its first write — a table transition through a callable — but no screen
+calls it and the dashboard still scopes by `Restaurant.ownerUserId`, so a staff account
+signing in today lands on an empty app. See [[User Roles]].
 
 Issue \#1469 delivered the first part of stage 0 outside the child-issue list: the `bite-tribe-admin` app, and the role gate on both privileged apps. It deliberately left \#1078, the Firestore rules replacement, alone — that is the highest-regression-risk change in the epic and needed its own branch. It got one, together with \#1164: `firestore.rules` is now ownership-scoped, the role hierarchy question is settled by `RD-UR-6`, and the rules have their own emulator suite and CI job. The rules deploy by hand, so stage 0 is not finished until that deploy has run. See [[Architecture - Firebase]].
 

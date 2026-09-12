@@ -428,6 +428,58 @@ service cloud.firestore {
       allow delete: if ownsRestaurant(restaurantId);
     }
 
+    // ----------------------------------------------------- live table state
+
+    /**
+     * What each table is doing right now, and how it got there
+     * (GitHub issue #1092).
+     *
+     * ```text
+     * /restaurants/{restaurantId}/tableStates/{tableId}
+     * /restaurants/{restaurantId}/tableStateTransitions/{transitionId}
+     * ```
+     *
+     * **Written by nobody**, exactly like `restaurantStaff` above and for a
+     * sharper reason. Two hosts tapping "seat" on table 12 in the same second
+     * is the case the whole feature is built around: with client writes the
+     * later one lands and the restaurant has one table and two parties, with no
+     * record that it happened. `transitionTableState` applies the change in a
+     * transaction against the state the caller says it saw, so exactly one of
+     * the two commits and the other is told what the table holds now. A client
+     * write here would be a way round that, so there is not one - the callable
+     * is not merely the path the app takes, it is the only path there is.
+     *
+     * The audit entries are append-only for the same reason they exist: a
+     * disputed table is answered by a history nobody could have edited
+     * afterwards. The Admin SDK bypasses rules, so "append-only" is this rule
+     * refusing every client write plus `transitionTableState` using `create`
+     * rather than `set` on the entry.
+     *
+     * **Reads go to whoever reads the floor plan**, which is what makes the
+     * live view of issue #1093 a plain realtime subscription rather than a
+     * second callable: staff of this restaurant, the account holding it, and
+     * the operator for support. Deliberately the same `readsFloorPlan` the
+     * tables use - a table's live state is worth no more protection than the
+     * table, and worth no less, and two lists of readers for one room would
+     * drift.
+     *
+     * Unlike the room draft, the transitions are **not** withheld from staff.
+     * A draft is an owner's unfinished thinking; this is what the people on
+     * shift did during service, and the person asking "who freed table 6" is
+     * usually one of them.
+     */
+    match /restaurants/{restaurantId}/tableStates/{tableId} {
+      allow read: if readsFloorPlan(restaurantId);
+
+      allow write: if false;
+    }
+
+    match /restaurants/{restaurantId}/tableStateTransitions/{transitionId} {
+      allow read: if readsFloorPlan(restaurantId);
+
+      allow write: if false;
+    }
+
     // ------------------------------------------------------- table qr tokens
 
     /**

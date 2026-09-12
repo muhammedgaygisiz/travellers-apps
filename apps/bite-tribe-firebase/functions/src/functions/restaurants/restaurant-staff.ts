@@ -8,33 +8,13 @@ import { TargetUserRequest, resolveTargetUid } from '../shared/target-user';
 import { setRoles } from '../users/set-user-roles';
 import {
   RESTAURANT_COLLECTION,
+  RESTAURANT_STAFF_COLLECTION,
   holdsRestaurant,
   parseRequiredString,
   requireRestaurantAuthority,
 } from './restaurant-authority';
 
 const USERS_COLLECTION = 'users';
-
-/**
- * One document per staff account, named by the account's own uid.
- *
- * The name is the whole "one restaurant per staff account" rule: a second
- * restaurant has nowhere to be written. Out of scope until issue #1079 shows
- * whether more is needed (issue #1537), and this shape means allowing it later
- * is a schema change somebody has to make on purpose rather than a state the
- * data can drift into.
- *
- * It is a collection of its own rather than a `staffUserIds` array on the
- * restaurant, because `/restaurants` is readable by every signed-in account:
- * an array there would publish each restaurant's staff list to the consumer
- * app.
- *
- * Exported rather than repeated as a second string literal in
- * `users/delete-own-account.ts`, which has to clear the association when the
- * account behind it is deleted. A collection this module owns and another
- * module names by hand is a collection the two can silently disagree about.
- */
-export const RESTAURANT_STAFF_COLLECTION = 'restaurantStaff';
 
 const STAFF_ROLE: BiteTribeRole = 'staff';
 

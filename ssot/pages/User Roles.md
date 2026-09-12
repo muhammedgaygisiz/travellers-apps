@@ -191,8 +191,19 @@ Owner can put an account on a restaurant, the `staff` claim and the
 `/restaurantStaff/{uid}` record are written together and audited, `firestore.rules`
 protects the record, and the account can sign into the Business App — where the dashboard
 lists restaurants by `Restaurant.ownerUserId` (\#1079) and therefore shows it nothing, and
-the rules give it no write (\#1078). Making the role mean something is a change to those
-two, and it has no owning issue.
+the rules give it no write (\#1078).
+
+**Updated 12 September 2026: the role has a permission, and no screen.** \#1088 gave
+`staff` its first read — the published floor plan of the one restaurant it works at, never
+a plan of any restaurant, because `worksAt()` pairs the claim with the association naming
+that restaurant. \#1092 gave it its first write, and deliberately not through the rules: a
+staff account changes a table's live state by calling `transitionTableState`, which admits
+`staff`, `business` or `admin` and then decides which restaurant each of them reaches.
+Live state is written by a callable rather than by a client because two hosts seating one
+table at once has to resolve to one outcome. What is still missing is a surface: the live
+view is \#1093 and the staff actions are \#1094, so a staff account signing in today still
+lands on a dashboard that lists nothing. The dashboard's own scoping by
+`Restaurant.ownerUserId` has no owning issue.
 
 ## Recorded Decisions
 

@@ -52,6 +52,7 @@ export {
   rotateTableQrToken,
 } from './functions/restaurants/table-qr-tokens';
 export { syncTableQrTokenOnTableWrite } from './functions/restaurants/sync-table-qr-token-on-table-write';
+export { transitionTableState } from './functions/restaurants/transition-table-state';
 export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-create';
 export { claimDisplayName } from './functions/users/claim-display-name';
 export { setUserRoles } from './functions/users/set-user-roles';

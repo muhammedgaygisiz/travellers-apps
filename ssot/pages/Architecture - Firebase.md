@@ -181,6 +181,19 @@ and `syncTableQrTokenOnTableWrite` write both fields through the Admin SDK. The
 `qrTokenId` comparison is by value, so the editor saving a table back whole is
 unaffected.
 
+**The public `get` is not the resolution, and was never meant to be.** It gives a
+phone a restaurant id, a room id and a table label. Whether the restaurant is
+still held by anyone, whether it takes orders at the table, whether the table is
+still in the published plan, whether the kitchen is open and whether there is a
+menu all live in documents a guest may not read, and three of them change without
+the token being touched. `resolveTableQrToken` (issue \#1100) is the callable
+that answers, and it is the one `public` endpoint that reads restaurant data: a
+guest at a table has no account, so requiring one would make the account a
+precondition of finding out whether the restaurant even takes orders. App Check
+is enforced on it like every other endpoint, it writes nothing, and it assembles
+its answer field by field rather than handing back the documents it read. See
+[[Implementation - Firebase Functions]].
+
 ### Testing And Deploying The Rules
 
 `apps/bite-tribe-firebase/functions/src/firestore-rules/__specs__/firestore-rules.emulator-spec.ts`

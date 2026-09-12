@@ -24,7 +24,7 @@ Post-launch. These belong to issue \#735 and its stage epics. Each blocks the st
 
 Ownership, stage 0, issue \#1069:
 
-- What does an operator record as the reason for a restaurant ownership assignment, and what evidence backs it? There is no approval step to gate: \#1076 declined the self-service claim and the decision is settled off-system. Both `assignRestaurantOwner` and `revokeRestaurantOwner` require a reason and Cloud Logging is the only record they leave, so the reason *is* the audit trail. See [[UC - Own And Claim Restaurants]].
+- What does an operator record as the reason for a restaurant ownership assignment, and what evidence backs it? There is no approval step to gate: \#1076 declined the self-service claim and the decision is settled off-system. Both `assignRestaurantOwner` and `revokeRestaurantOwner` require a reason and Cloud Logging is the only record they leave, so the reason _is_ the audit trail. See [[UC - Own And Claim Restaurants]].
 - What happens to a restaurant's Bites and menu when ownership changes or is revoked?
 
 Table management, stage 2, issue \#1071:
@@ -43,9 +43,10 @@ QR ordering, stage 3, issue \#1072:
 - Can a QR code be used from outside the restaurant, and does that matter?
 - When does a table session expire?
 - How are table changes handled after ordering has started?
-- How are unavailable menu items communicated?
+- How are unavailable menu items communicated? **Partly settled by issue \#1100 for the scan itself:** a menu whose every dish is off resolves to `menuUnavailable` rather than to an empty menu screen. Marking individual items in the browsing surface is still issue \#1102's.
 - How are cancelled or incorrect orders corrected?
 - How are restaurant staff notified about new orders?
+- **Where does a restaurant turn table ordering on?** Issue \#1100 added `Restaurant.tableOrdering` - `enabled`, the `timeZone` the opening hours are written in, and a staff-side `pausedUntilTimestamp` - and made the scan resolution gate on it. Nothing writes it. No issue owns the business-app surface, so every scan in production is refused with `tableOrderingDisabled` until one exists. The open part is whether the switch belongs on the restaurant profile page, on the floor-plan page next to the QR sheets, or on a surface of its own that the pause belongs to as well - the pause is a staff action during service and the other two are owner configuration, so one page may not be the right home for all three.
 
 Payment and Bites, stage 4, issue \#1073:
 

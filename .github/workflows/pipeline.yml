@@ -461,6 +461,14 @@ jobs:
           NX_APP_BITE_TRIBE_PROJECT_ID: ${{ secrets.NX_APP_BITE_TRIBE_PROJECT_ID }}
           NX_APP_BITE_TRIBE_STORAGE_BUCKET: ${{ secrets.NX_APP_BITE_TRIBE_STORAGE_BUCKET }}
           NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID }}
+          # Needed since the table operations of issue 1098, which are the first
+          # events this app sends. Without it `measurementId` is absent from the
+          # Firebase options and the web SDK has to recover it from a runtime
+          # `webConfig` fetch keyed on the app id - a path nothing here asserts
+          # and whose failure is silent, because `AnalyticsService` swallows a
+          # send that throws. The consumer deploy and the native release have
+          # always passed it; this app simply had no analytics to need it.
+          NX_APP_BITE_TRIBE_MEASSUREMENT_ID: ${{ secrets.NX_APP_BITE_TRIBE_MEASSUREMENT_ID }}
           NX_APP_BITE_TRIBE_APP_ID: ${{ secrets.NX_APP_BITE_TRIBE_APP_ID }}
           NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY: ${{ secrets.NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY }}
 

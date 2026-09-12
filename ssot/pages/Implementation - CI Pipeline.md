@@ -219,6 +219,10 @@ This is why the `deploy-bite-tribe`, `deploy-bite-tribe-business` and `deploy-bi
 
 Each app reads its own `authDomain` secret — `NX_APP_BITE_TRIBE_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_ADMIN_AUTH_DOMAIN`. All three hold the same value today, the project's shared `bite-tribe.firebaseapp.com` OAuth handler. They are separate secrets because `authDomain` is what Firebase builds the Google and Apple redirect from, so one app can later be moved to its own handler domain without moving the other two.
 
+The three deploy jobs do **not** pass the same set. `NX_APP_BITE_TRIBE_MEASSUREMENT_ID` reaches `deploy-bite-tribe` and the native release, and reached `deploy-bite-tribe-business` only from issue \#1588 - the table operations of \#1098 are the first events that app sends, and until then it had no analytics to need one. `deploy-bite-tribe-admin` still omits it deliberately: nothing in the admin app emits a product event, and `AnalyticsService` initializes analytics lazily on the first one, so it initializes none.
+
+The failure mode is worth knowing, because it is silent. Without `measurementId` in the Firebase options the web SDK recovers one from a runtime `webConfig` fetch keyed on the app id, and if that fetch does not answer, `getAnalytics()` throws inside `AnalyticsService.emit`, which swallows it by design - tracking must never break a user flow. So the app works, the events do not arrive, and nothing says so. An app that emits events states the value rather than trusting the recovery.
+
 `deploy-bite-tribe-storybook` is not subject to this. The Storybook build reads no `NX_APP_*` variables, so it needs no secrets and its artifact is the same whichever job produced it.
 
 See [[Implementation - Release And Build Workflow]] for how the values reach the bundle and which of them are public by design, and [[Current State - Known Issues]] for the deliberately misspelled `NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID` secret name.

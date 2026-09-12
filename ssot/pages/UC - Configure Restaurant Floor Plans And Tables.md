@@ -5,9 +5,8 @@
 **Level:** L1
 
 Implemented. Specified through issue \#1070 as stage 1 of issue \#735, and
-every step of the planned flow below is now built. What remains inside the epic
-is hardening rather than behaviour: accessibility of the editor (issue \#1089)
-and its unit, Storybook and Playwright coverage (issue \#1090).
+every step of the planned flow below is now built, accessible (issue \#1089)
+and covered (issue \#1090).
 
 An owner can reach the editor, build the room and describe its tables:
 `restaurant/:restaurantId/floor-plan` in the business app creates, renames,
@@ -54,6 +53,18 @@ scanned code read. It is refused while the plan carries a blocking error, each
 finding names its table and jumps to it, and discarding returns the room to the
 published plan. Staff got their read of that published plan in the same issue,
 scoped to the one restaurant they work at.
+
+Issue \#1090 locked the behaviour down before stage 2 builds on it. The
+geometry, the table rules, the validation and the draft/publish state machine
+are unit-covered as the pure functions they were written as, every reusable
+editor component has its Storybook states including the QR code renderer's two
+print sizes, and two Playwright journeys run the editor as an owner does:
+`floor-plan-editor.spec.ts` builds a room, places and numbers two tables,
+publishes and reloads, and `table-qr-codes.spec.ts` prints their codes. Both
+assert the stored room, table and `/tableTokens` documents rather than a
+picture of the editor, because a plan that renders correctly and stores nothing
+is the failure that matters here. What stays on the unit tests is listed in
+[[Current State - E2E Coverage]].
 
 The page a scan lands on is still specification: \#1087 fixed the address at
 `https://bitetribe.app/t/{token}` because a sticker cannot be corrected
@@ -155,6 +166,7 @@ Implemented:
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/table-qr-tokens.ts` the token generator and the issue and rotate callables
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/sync-table-qr-token-on-table-write.ts` the mirror and the revocation on delete
 - `/restaurants/{restaurantId}/rooms/{roomId}`, `/restaurants/{restaurantId}/rooms/{roomId}/drafts/current`, `/restaurants/{restaurantId}/tables/{tableId}` and `/tableTokens/{token}`
+- `apps/bite-tribe-business-e2e/src/tests/floor-plan-editor.spec.ts` the build, publish and reload journey, and `.../table-qr-codes.spec.ts` the printable-sheet journey, both against the stored documents
 
 Still planned:
 
@@ -174,7 +186,8 @@ Still planned:
 - Issue \#1086 - opaque table QR tokens, their lifecycle and the rules that keep them backend-owned, delivered as backend only
 - Issue \#1087 - printable table QR sheets, the first caller of those callables, delivered
 - Issue \#1088 - the draft/published split, the autosaved draft, the publish validation and the staff read of the published plan, delivered
-- Issue \#1089 - accessibility of the editor; its responsive half was moved to issue \#1093 rather than deferred
+- Issue \#1089 - accessibility of the editor, delivered; its responsive half was moved to issue \#1093 rather than deferred
+- Issue \#1090 - the unit, Storybook and Playwright coverage that closes the epic, delivered
 - Issue \#1093 - the staff live view, which owns the small-screen and touch rendering of a published plan
 
 ## Related Domains

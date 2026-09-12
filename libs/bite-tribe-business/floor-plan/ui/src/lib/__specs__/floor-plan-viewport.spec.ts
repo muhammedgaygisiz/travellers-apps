@@ -11,6 +11,7 @@ import {
   roomCentre,
   scaleBarLength,
   viewportFor,
+  viewportPointAt,
 } from '../floor-plan-viewport';
 
 /** The room the acceptance criteria of issue #1082 are written about. */
@@ -143,6 +144,34 @@ describe('floor plan viewport', () => {
         millimetresPerPixel(
           { x: 0, y: 0, width: 0, height: 0 },
           { width: 500, height: 500 },
+        ),
+      ).toBeUndefined();
+    });
+  });
+
+  describe(viewportPointAt.name, () => {
+    const viewport = { x: 0, y: 0, width: 10_000, height: 5000 };
+    const element = { left: 20, top: 10, width: 500, height: 250 };
+
+    it('reads a pointer position as a point in the room', () => {
+      expect(
+        viewportPointAt(viewport, element, { clientX: 270, clientY: 135 }),
+      ).toEqual({ x: 5000, y: 2500 });
+    });
+
+    /**
+     * A gesture the caller should ignore rather than place at the origin.
+     *
+     * An element with no size has no scale to measure a pointer against, and
+     * it is a state the canvas genuinely passes through: a pointer event can
+     * arrive on the frame the plan is first laid out in.
+     */
+    it('reports nothing before the canvas has been laid out', () => {
+      expect(
+        viewportPointAt(
+          viewport,
+          { left: 0, top: 0, width: 0, height: 0 },
+          { clientX: 270, clientY: 135 },
         ),
       ).toBeUndefined();
     });

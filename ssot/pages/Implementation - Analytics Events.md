@@ -198,13 +198,24 @@
   filter added later over traffic that never carried the property would
   exclude nothing.
 
-  **Still open:** the `Active users` and `Crash-free users` tiles below query
-  `activeUsers` with no event filter, so they will include staff sessions until
-  they filter `customUser:app_surface = consumer`. That filter is not added
-  here on purpose: `digest.mjs` degrades gracefully only for `breakdown` tiles,
-  so a filter on a dimension nobody has registered yet would take the live
-  daily digest down until `npm run analytics:provision -- --apply` is run. See
-  [[Current State - Known Issues]].
+  The `Active users` and `Crash-free users` tiles below are the only two that
+  count _people_ rather than events, and therefore the only two that had to say
+  whose. Issue 1584 scoped them, and issue 1586 corrected how: the filter is
+  `NOT app_surface IN (business)` rather than `app_surface = consumer`.
+
+  That distinction is the whole of it. GA4 does not backfill a custom
+  dimension, so every session collected before `app_surface` was registered
+  carries no value at all - and so does every session from an app release that
+  predates the property being set. `= consumer` excludes all of it: `Active
+users` read **0** and `Crash-free users` **n/a** within a minute of the
+  dimension being registered on 12 September 2026. The exclusion form keeps
+  unlabelled traffic, which is the right answer, because unlabelled traffic
+  _is_ consumer traffic - the business app sent nothing at all until issue 1098.
+
+  One artefact to know when reading the numbers: `activeUsers` is an
+  approximate distinct count and filtering changes the aggregation path, so a
+  filtered figure differs slightly from an unfiltered one - 70 against 66 over
+  the same window on the day it landed. The step is the filter, not traffic.
 
 - ### Auto-collected (no code)
 

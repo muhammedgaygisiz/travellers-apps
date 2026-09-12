@@ -72,6 +72,17 @@ const INVALID_ARGUMENT = 3;
  */
 const SURFACE_DIMENSION = 'customUser:app_surface';
 
+/**
+ * Every value the apps write to {@link SURFACE_DIMENSION}.
+ *
+ * A copy of `AnalyticsSurface` in
+ * `libs/common/ta-firestore/src/lib/analytics/analytics-events.ts`, which this
+ * file cannot import: the tooling is plain `.mjs` run by node and the taxonomy
+ * is TypeScript behind an Nx path mapping. Two values that change when an app
+ * is added, which is the same day somebody is editing this list anyway.
+ */
+const ANALYTICS_SURFACES = ['consumer', 'business'];
+
 /** GA4 dimension filter restricting a request to a tile's event names. */
 function eventNameFilter(events) {
   return {
@@ -82,12 +93,36 @@ function eventNameFilter(events) {
   };
 }
 
-/** GA4 dimension filter restricting a request to one app's sessions. */
+/**
+ * GA4 dimension filter restricting a request to one app's sessions.
+ *
+ * Written as "not the other apps" rather than "is this app", which is the
+ * difference between a working filter and a tile that reads zero (issue #1586).
+ * GA4 does not backfill a custom dimension: every session collected before
+ * `app_surface` was registered carries no value at all, and so does every
+ * session from an app release that predates the property being set. `EXACT`
+ * on `consumer` excludes all of it - `Active users` went from 66 to 0 the
+ * minute the dimension was registered - while a `notExpression` keeps it,
+ * which is the right answer because unlabelled traffic *is* consumer traffic:
+ * the business app sent nothing at all until issue #1098.
+ *
+ * Over the full surface list rather than a literal `business`, so adding an
+ * admin surface narrows this filter instead of silently leaking into it.
+ *
+ * One caveat worth knowing when reading the numbers. `activeUsers` is an
+ * approximate distinct count, and filtering changes the aggregation path, so
+ * the filtered figure differs a little from the unfiltered one - 70 against 66
+ * on the same window here. The step is an artefact of the filter, not traffic.
+ */
 function surfaceFilter(surface) {
+  const others = ANALYTICS_SURFACES.filter((value) => value !== surface);
+
   return {
-    filter: {
-      fieldName: SURFACE_DIMENSION,
-      stringFilter: { matchType: 'EXACT', value: surface },
+    notExpression: {
+      filter: {
+        fieldName: SURFACE_DIMENSION,
+        inListFilter: { values: others },
+      },
     },
   };
 }
@@ -140,7 +175,8 @@ export const SURFACE_UNAVAILABLE_NOTE =
   `GA4 does not know the \`${SURFACE_DIMENSION}\` dimension yet, so the user ` +
   'counts in this run are unfiltered and include business-app sessions. ' +
   'Register it with `npm run analytics:provision -- --apply`; GA4 does not ' +
-  'backfill, so the separation starts from the day it is registered.';
+  'backfill, so sessions collected before that carry no surface and are ' +
+  'counted as consumer traffic, which is what they are.';
 
 /**
  * Build a GA4 Data API `runReport` request for a queryable tile over a date

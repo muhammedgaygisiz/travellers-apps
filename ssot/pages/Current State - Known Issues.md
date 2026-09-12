@@ -159,30 +159,29 @@
 - Narrowing the radius is a weak lever: cutting it from 15 km to 10 km removed only a tenth of the result, because Bites cluster where the user already is. The fix is the staged search in [issue \#1294](https://github.com/muhammedgaygisiz/travellers-apps/issues/1294), not further radius tuning.
 - Attaching the likes server-side traded feed latency for feed correctness. Time to a full feed moved from about 4.0 s to about 6.7 s, and in exchange a liked Bite can no longer render as unliked. Bounding the result set is what recovers the latency.
 
-- ## Business App Traffic Reaches The Launch Property
+- ## Business App Traffic On The Launch Property
 
-  **Why it matters:** two launch tiles count users without filtering, and the
-  business app has started sending users.
+  **Why it matters:** the separation works, and the two user counts are not
+  comparable across the day it started.
 
   All three apps read one `measurementId`, so one GA4 property carries all of
-  them. Until issue \#1098 that was harmless: the business app initialized no
-  analytics at all, so it sent neither product nor auto-collected events. Its
-  first `table_*` event initializes the web SDK, and from then on the
-  auto-collected `session_start`, `page_view` and `user_engagement` of every
-  staff shift land on the property [[Analytics Operations]] reads daily.
+  them. Until issue \#1098 that was harmless - the business app initialized no
+  analytics at all - and since it, the auto-collected session of every staff
+  shift lands on the property [[Analytics Operations]] reads daily. `Active
+users` and `Crash-free users` are the two tiles that count people rather than
+  events, and issue \#1584 scoped them to the consumer surface.
 
-  `Active users` and `Crash-free users` in `dashboard.config.mjs` query
-  `activeUsers` with no event filter, so both now include staff sessions. Every
-  other tile filters by event name and is unaffected.
+  **Closed, in two steps.** \#1584 added the filter, and \#1586 corrected its
+  form after the live run: `= consumer` matched nothing, because GA4 does not
+  backfill and no session collected before the dimension existed carries a
+  value. `NOT IN (business)` keeps that traffic, which is what it is. The
+  dimension was registered on the property on 12 September 2026.
 
-  Both apps now set the user-scoped property `app_surface`
-  (`consumer` / `business`) so the two can be told apart, and it is registered
-  in `provision-ga4.mjs`. **What is not done is the filter.** It was left out on
-  purpose: `digest.mjs` degrades gracefully only for `breakdown` tiles, so a
-  filter on a dimension nobody has registered on the property yet would take
-  the live daily digest down until `npm run analytics:provision -- --apply` has
-  run. The order is therefore provision first, filter second. GA4 does not
-  backfill, so sessions before the provisioning run report `(not set)`.
+  **What remains is a reading caveat, not a risk.** `activeUsers` is an
+  approximate distinct count and a dimension filter changes its aggregation
+  path, so the filtered figure is not the unfiltered one - 70 against 66 over
+  the same window on the day it landed. The digest's delta column shows that as
+  a one-off step. It is the filter, not traffic, and it does not recur.
 
 - ## Operational Issues To Watch
 - Crashlytics should be monitored daily during soft launch.

@@ -81,6 +81,7 @@ const REVOKED_TOKEN = 'TEST-REVOKED-TABLE-TOKEN-1';
 
 /** The audit entry the owned table's state was reached by (issue #1092). */
 const STORED_TRANSITION = 'stored-transition';
+const STORED_VISIT = 'stored-visit';
 
 /** The version the owned room is stored at, so a stale save has one to miss. */
 const STORED_ROOM_VERSION = 3;
@@ -342,6 +343,23 @@ beforeEach(async () => {
         actorRoles: ['staff'],
         at: 1789030800000,
         atIso: '2026-09-10T09:00:00.000Z',
+      },
+    );
+
+    // The party at that table, written only by `transitionTableState` and
+    // `moveTableVisit` through the Admin SDK (issue #1095). Under the
+    // restaurant rather than under the table, so deleting the table from the
+    // plan does not take the record of what happened at it.
+    await setDoc(
+      doc(db, 'restaurants', OWNED_RESTAURANT, 'visits', STORED_VISIT),
+      {
+        id: STORED_VISIT,
+        restaurantId: OWNED_RESTAURANT,
+        tableId: OWNED_TABLE,
+        status: 'open',
+        openedAt: 1789030800000,
+        guestCount: 4,
+        openedByUserId: STRANGER,
       },
     );
 
@@ -1140,6 +1158,99 @@ describe('live table state', () => {
           doc(transitions(asOwner(), OWNED_RESTAURANT), STORED_TRANSITION),
         ),
       );
+    });
+  });
+});
+
+describe('table visits', () => {
+  const visits = (db: Firestore, restaurantId: string): CollectionReference =>
+    collection(db, 'restaurants', restaurantId, 'visits');
+
+  const visitDoc = (db: Firestore, restaurantId: string): DocumentReference =>
+    doc(visits(db, restaurantId), STORED_VISIT);
+
+  /**
+   * Reads follow the published plan, the same list as the tables and their
+   * live state, so the staff view follows the `visitId` on a state document it
+   * is already subscribed to without a callable in the way.
+   */
+  describe('reads', () => {
+    it('lets the staff of this restaurant read a visit', async () => {
+      const snapshot = await assertSucceeds(
+        getDoc(visitDoc(asStaff(), OWNED_RESTAURANT)),
+      );
+
+      expect(snapshot.data()).toMatchObject({
+        tableId: OWNED_TABLE,
+        status: 'open',
+        guestCount: 4,
+      });
+    });
+
+    it('lets the owner and an operator read them', async () => {
+      await assertSucceeds(getDocs(visits(asOwner(), OWNED_RESTAURANT)));
+      await assertSucceeds(getDocs(visits(asOperator(), OWNED_RESTAURANT)));
+    });
+
+    it('refuses a business account that does not hold this restaurant', async () => {
+      await assertFails(getDocs(visits(asOtherBusiness(), OWNED_RESTAURANT)));
+    });
+
+    /**
+     * A guest reading their own visit is issue #1072, which has a scanned
+     * session to scope it with. Until then this is staff-side data.
+     */
+    it('refuses a consumer account', async () => {
+      await assertFails(getDoc(visitDoc(asConsumer(), OWNED_RESTAURANT)));
+    });
+  });
+
+  /**
+   * **The half that matters.** A client able to write here could open a second
+   * visit at a table that already has one, and the orders of issue #1072 and
+   * the bill of issue #1073 hang from the visit - a party billed for the next
+   * party's dinner is what that hole looks like from the dining room.
+   */
+  describe('writes', () => {
+    const openVisit = {
+      id: 'forged-visit',
+      restaurantId: OWNED_RESTAURANT,
+      tableId: OWNED_TABLE,
+      status: 'open',
+      openedAt: 1789030900000,
+      openedByUserId: STRANGER,
+    };
+
+    it('refuses a staff account opening a visit', async () => {
+      await assertFails(addDoc(visits(asStaff(), OWNED_RESTAURANT), openVisit));
+      await assertFails(
+        setDoc(visitDoc(asStaff(), OWNED_RESTAURANT), openVisit),
+      );
+    });
+
+    it('refuses the owner and the operator the same write', async () => {
+      await assertFails(addDoc(visits(asOwner(), OWNED_RESTAURANT), openVisit));
+      await assertFails(
+        addDoc(visits(asOperator(), OWNED_RESTAURANT), openVisit),
+      );
+    });
+
+    it('refuses closing a visit from a client', async () => {
+      await assertFails(
+        updateDoc(visitDoc(asStaff(), OWNED_RESTAURANT), {
+          status: 'closed',
+          closedAt: 1789030900000,
+          closedByUserId: STRANGER,
+        }),
+      );
+    });
+
+    /**
+     * A visit is the receipt context of stage 4, so a restaurant cannot delete
+     * the evening it is later asked about.
+     */
+    it('refuses the owner deleting a visit', async () => {
+      await assertFails(deleteDoc(visitDoc(asOwner(), OWNED_RESTAURANT)));
     });
   });
 });

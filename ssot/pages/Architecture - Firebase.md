@@ -21,7 +21,8 @@ bites               bites/{id}/likes
 users               users/{id}/followers, users/{id}/following, users/{id}/pushTokens
 restaurants         restaurants/{id}/rooms, restaurants/{id}/tables,
                     restaurants/{id}/tableStates,
-                    restaurants/{id}/tableStateTransitions
+                    restaurants/{id}/tableStateTransitions,
+                    restaurants/{id}/visits
 restaurantStaff
 tableTokens
 menus
@@ -129,6 +130,24 @@ table holds now. A client write would be the way round that, so there is not one
 - not for the host, not for the owner, not for the operator. The audit trail is
   append-only for the same reason it exists: a disputed table is answered by a
   history nobody could have edited afterwards.
+
+**A table visit is stored beside the state and written by nobody either**
+(issue \#1095). `/restaurants/{id}/visits/{visitId}` is the party at a table
+over time, and it admits the same readers as the plan and the live state.
+
+It is under the restaurant rather than under the table, and that placement is
+the requirement rather than a preference: deleting a table from the floor plan
+takes its subcollections with it, and the record of what happened at that table
+in November is the one thing that must not go. `tableId` is therefore a plain
+string that keeps naming a table nobody can find any more.
+
+Client writes are refused for a sharper reason than for the state. A client able
+to write here could open a second visit at a table that already has one, and the
+orders of issue \#1072 and the bill of issue \#1073 hang from the visit - a
+party billed for the next party's dinner is what that hole looks like from the
+dining room. `transitionTableState` opens and ends visits alongside the state
+change that caused them, in one transaction, and `moveTableVisit` walks an open
+visit to another table without ending it.
 
 **`/tableTokens` is the one collection a client with no session may read.** It
 has to be: a guest scanning the QR code on a table has no account, and the scan

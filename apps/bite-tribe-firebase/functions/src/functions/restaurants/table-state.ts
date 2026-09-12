@@ -1,4 +1,5 @@
 import { DocumentData } from 'firebase-admin/firestore';
+import { HttpsError } from 'firebase-functions/https';
 
 /**
  * The live state of a table, as the backend has to know it
@@ -85,6 +86,30 @@ export const canTransitionTableStatus = (
 export const isTableStatus = (value: unknown): value is TableStatus =>
   typeof value === 'string' &&
   (TABLE_STATUSES as readonly string[]).includes(value);
+
+/**
+ * A status argument that arrived over a callable, narrowed or refused.
+ *
+ * Here rather than in `transition-table-state.ts`, where it started, because
+ * `move-table-visit.ts` asks the same question of the same wire format and two
+ * copies of an argument check are two chances to disagree about what a client
+ * may send.
+ */
+export const parseTableStatus = (
+  value: unknown,
+  field: string,
+): TableStatus => {
+  const status = typeof value === 'string' ? value.trim() : '';
+
+  if (!isTableStatus(status)) {
+    throw new HttpsError(
+      'invalid-argument',
+      `${field} must be a known table status.`,
+    );
+  }
+
+  return status;
+};
 
 /**
  * The statuses that hold a party at a table.
@@ -186,6 +211,16 @@ export interface TableStateTransition {
   actorRoles: string[];
   at: number;
   atIso: string;
+  /**
+   * The visit this transition opened, carried or ended (issue #1095).
+   *
+   * Absent when the table had no party either side of the change. It is what
+   * makes the trail the *visit's* history as well as the table's: "which tables
+   * did this party sit at" is one `where` on `visitId`, which is how a moved
+   * visit keeps a history without copying one onto the visit document where it
+   * could disagree with this.
+   */
+  visitId?: string;
   /** Why, where the caller gave a reason. Absent otherwise. */
   reason?: string;
 }

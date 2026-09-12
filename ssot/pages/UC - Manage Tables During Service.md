@@ -10,7 +10,9 @@ Issue \#1093 put the first surface on it. `restaurant/:restaurantId/tables` in t
 
 Issue \#1094 closed the loop. Holding a table, or pressing enter on it, opens a sheet of exactly the transitions the matrix allows from the status that table holds right now, and picking one calls `transitionTableState`. The table changes colour on the press rather than on the answer, and a refusal takes the change back and says why - a conflict names the colleague who got there first rather than reading as a generic failure. An end-of-service reset frees a batch of tables in one press. The staff member who could see that table 6 had been awaiting payment for twenty minutes can now do something about it from the same screen.
 
-What \#1094 did **not** add is a field for the party size. The guest count is optional in the sheet and travels as the audit entry's `reason`, because the durable home for it is `TableVisit.guestCount` and the visit is issue \#1095. Inventing a field on `TableState` for it would have been a field \#1095 then had to migrate.
+Issue \#1095 put the party behind the status. A `TableVisit` at `/restaurants/{restaurantId}/visits/{visitId}` is the party at a table over time, and seating a table now _is_ opening one: a transition into `occupied` from a status that held no party writes the visit, the state and the audit entry in one commit, and a transition out of the party statuses ends it. A table cannot have two open visits, ending one lands the table on `cleaning` rather than `available`, and `moveTableVisit` walks a party to another table keeping the visit's id - which is what will keep its orders when issue \#1072 gives it some. The visit outlives its table: it lives under the restaurant, and `tableId` is a plain string that keeps naming a table deleted from the plan.
+
+What no issue has added yet is a **surface** for any of that. Seating a table through issue \#1094's sheet opens a visit, and nothing shows it. The guest count is still optional in the sheet and still travels as the audit entry's `reason`; `TableVisit.guestCount` now exists to hold it and `transitionTableState` now takes it, so moving it across is a change to the business app rather than to the backend.
 
 [[UC - Configure Restaurant Floor Plans And Tables]] is complete and no longer blocks this. [[UC - Own And Claim Restaurants]] no longer blocks it either: the `staff` role now has its first write, through the callable rather than through the rules, and \#1093 gives a staff member somewhere to sign in to.
 
@@ -29,10 +31,10 @@ Restaurant staff open one screen during service and see the room as it is: which
 - The published floor plan renders read-only, with each table showing its live state.
 - This is the floor-plan surface that carries a small screen. The editor of [[UC - Configure Restaurant Floor Plans And Tables]] was locked to a desktop width, because an owner laying out twenty tables to the millimetre is at a desk while a host greeting guests is holding a tablet at the door. Touch drag, pinch zoom, two-finger pan and long-press belong here, designed for seating a party rather than for moving a wall (issue \#1093).
 - Staff hold a table, or press enter on it, and see only the transitions currently allowed (issue \#1094).
-- Seating a party opens a visit and records the guest count. Half of this happens: the sheet takes an optional count and writes it to the audit entry, and the visit it belongs on is issue \#1095.
+- Seating a party opens a visit and records the guest count. The visit opens (issue \#1095); the count is still written to the audit entry rather than to the visit, because no surface sends it there yet.
 - Staff mark tables reserved, cleaning, or disabled as service demands (issue \#1094).
-- Freeing a table closes its visit. The freeing happens; the visit is issue \#1095.
-- A party that moves takes its visit and its orders with it.
+- Freeing a table closes its visit (issue \#1095), and lands the table on `cleaning` rather than `available`, so no table is silently reused.
+- A party that moves takes its visit and its orders with it. `moveTableVisit` exists and keeps the visit's identity (issue \#1095); the orders are issue \#1072, and no surface calls the move yet.
 - End-of-service reset is available as a bulk action (issue \#1094).
 
 ## Key Behaviours
@@ -41,7 +43,8 @@ Restaurant staff open one screen during service and see the room as it is: which
 - Transitions are applied by the backend against a single exported transition matrix, so two staff members seating the same table produce one seating and one explicit conflict. The matrix is `TABLE_STATE_TRANSITIONS` in `libs/bite-tribe-common/model`, tested over every ordered pair of statuses (issue \#1091); Firebase Functions cannot import the library, so it holds a copy that `table-state-parity.spec.ts` compares row by row (issue \#1092).
 - The conflict is explicit because the caller names the state it saw. `transitionTableState` requires it, compares it inside the transaction, and refuses `aborted` with the status the table holds now, who set it and when - which is what the view renders as "someone else just seated this table" (issue \#1092).
 - Every transition records who made it, in what capacity, when, from which state, and why, so a disputed table has a history. The entries are append-only, live under the restaurant rather than under the table, and survive the table being deleted (issue \#1092).
-- A table the owner has taken out of service can be neither reserved nor seated, and a party already at one can still be freed (issue \#1092).
+- A table the owner has taken out of service can be neither reserved nor seated, and a party already at one can still be freed (issue \#1092). A party cannot be moved onto one either (issue \#1095).
+- The party, not the table, is what orders and payment will hang from. A visit is opened by seating and ended by freeing, a table has at most one open visit at a time, and a move keeps the visit's id so nothing that pointed at it has to be rewritten (issue \#1095). The tables a party sat at are read off the audit trail by its `visitId` rather than copied onto the visit, where a second list could disagree with the trail a disputed evening is read from.
 - Status is conveyed by colour, icon, and text together, never by colour alone. The three are not all in the same place, and that is deliberate (issue \#1093). The _plan_ carries the colour and a silhouette per status, because everything drawn on the floor-plan canvas is a share of its `viewBox` and a status word at plan scale is about eight pixels high - legible neither zoomed in nor out, since the ratio is zoom-invariant by design. The _word_ is in the summary bar above the plan, which lists every status the room is currently in, in the detail panel beside it, and in each table's accessible name. All three are on screen at once, so nothing is a hover away. What the criterion asks - that colour is never the sole carrier - is met by the silhouettes, which differ in shape and in filled-against-hollow and therefore survive greyscale, a print and a colour-vision deficiency.
 - The time a table has been in its status is drawn on the table, in place of its seat count. It is what staff scan a room for, and a table already holding a party is not one a host is sizing up. A free table shows its capacity instead, because "free since" is a number nobody is looking for.
 - The live view is the floor-plan surface that carries a small screen, and it collapses to one column rather than scrolling sideways. The layout switch is a **container** query rather than a media query: the page is what changes shape, and the question it asks is how much room it has rather than what device it is on (issue \#1093).
@@ -67,7 +70,7 @@ These block implementation and are tracked in [[Current State - Open Questions]]
 - Must staff confirm occupancy, or may a guest scan occupy a table automatically?
 - Can guests choose a table themselves?
 - When is a table considered available again?
-- Who can close or reopen a visit?
+- Who can close or reopen a visit? Half-answered by issue \#1095: any staff member of that restaurant can close one, recorded in the audit trail, and **nobody** can reopen one - a closed visit is not reopened, because the party that comes back for a coffee is a new party at that table.
 
 ## Related GitHub Scope
 

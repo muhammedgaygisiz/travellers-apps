@@ -37,3 +37,9 @@ export type * from './lib/floor-plan-draft';
  * against.
  */
 export * from './lib/table-state';
+/**
+ * A value export for the same reason: the visit statuses, the end set and the
+ * status a table lands on when a visit ends are data the backend applies and
+ * the staff view predicts.
+ */
+export * from './lib/table-visit';

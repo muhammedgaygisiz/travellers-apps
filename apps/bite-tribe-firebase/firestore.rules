@@ -480,6 +480,43 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ----------------------------------------------------------- table visits
+
+    /**
+     * A party at a table over time (GitHub issue #1095).
+     *
+     * ```text
+     * /restaurants/{restaurantId}/visits/{visitId}
+     * ```
+     *
+     * **Written by nobody**, for the same reason as the state document it is
+     * paired with. A visit and the `tableStates` pointer at it are written in
+     * one transaction by `transitionTableState` and `moveTableVisit`, and a
+     * client able to write here could open a second visit at a table that
+     * already has one - which is the single rule the whole feature rests on,
+     * because the orders of issue #1072 and the bill of issue #1073 hang from
+     * the visit. A party billed for the next party's dinner is what that hole
+     * looks like from the dining room.
+     *
+     * Under the restaurant rather than under the table, so a table deleted
+     * from the floor plan does not take the record of what happened at it.
+     * That is also why this is a `match` of its own rather than a
+     * subcollection of the `tables` rule above.
+     *
+     * **Reads go to whoever reads the floor plan**, the same list as the
+     * tables and their live state, so the staff view follows the pointer on a
+     * state document it is already subscribed to without a callable in the
+     * way. The guest who scanned the QR code is not on that list and does not
+     * need to be yet; a guest reading their own visit is issue #1072, which
+     * has a session to scope it with and no shape to write against until the
+     * orders exist.
+     */
+    match /restaurants/{restaurantId}/visits/{visitId} {
+      allow read: if readsFloorPlan(restaurantId);
+
+      allow write: if false;
+    }
+
     // ------------------------------------------------------- table qr tokens
 
     /**

@@ -18,11 +18,18 @@ import {
   TableStatus,
   canTransitionTableStatus,
   holdsParty,
-  isTableStatus,
+  parseTableStatus,
   seatsParty,
   tableStatusOf,
   visitIdOf,
 } from './table-state';
+import {
+  TABLE_STATUS_AFTER_VISIT,
+  TABLE_VISITS_COLLECTION,
+  TABLE_VISIT_END_STATUSES,
+  TableVisit,
+  TableVisitStatus,
+} from './table-visit';
 
 /**
  * The one writer of live table state (GitHub issue #1092).
@@ -58,7 +65,23 @@ import {
  * The state document is **replaced rather than merged**, so it says exactly
  * what the last accepted transition said and cannot carry a note left on the
  * table three parties ago. The one field carried forward is `visitId`, and only
- * into a status that still holds a party - see {@link nextVisitId}.
+ * into a status that still holds a party.
+ *
+ * ## Seating is opening a visit
+ *
+ * Since issue #1095 a third document can land in the same commit: the visit at
+ * `/restaurants/{restaurantId}/visits/{visitId}`. Seating a table **is**
+ * opening a visit and freeing it **is** ending one - not two actions a host has
+ * to remember to pair, but one transition that writes both, so a table cannot
+ * be occupied by nobody and a party cannot outlive the table state that points
+ * at it.
+ *
+ * That also settles "a table has at most one open visit" without a uniqueness
+ * check anywhere. The state's `visitId` is the only pointer at an open visit,
+ * and it is written and dropped by the same commit that moves the status - so
+ * the two hosts racing to seat table 12 contend on that one document, and the
+ * loser re-reads it and fails its `expectedStatus` check before it can create a
+ * second visit.
  *
  * ## Why this is not an operator action
  *
@@ -92,6 +115,25 @@ export interface TransitionTableStateRequest {
    * transition sends.
    */
   expectedStatus?: unknown;
+  /**
+   * The party size, where the host recorded one. Used only when this
+   * transition opens a visit.
+   *
+   * Optional, because a host tapping a table mid-rush has not been asked for a
+   * number, and refusing the seating over it would cost more than the field is
+   * worth.
+   */
+  guestCount?: unknown;
+  /**
+   * How the visit this transition ends should be recorded: `closed` or
+   * `abandoned`. Defaults to `closed`, and is ignored when no visit ends.
+   *
+   * `abandoned` is the table found still open at the end of service, or the
+   * party that walked out. It is kept apart from `closed` because a bill
+   * reconciled and a bill nobody ever looked at are different facts, and the
+   * payment of issue #1073 charges for one of them.
+   */
+  visitOutcome?: unknown;
   /** Why, recorded on the audit entry. Optional free text. */
   reason?: unknown;
   /** A short note for the next person on shift, written onto the state. */
@@ -107,6 +149,16 @@ export interface TransitionTableStateResult {
   since: number;
   /** The appended audit entry, so a caller can cite the transition it made. */
   transitionId: string;
+  /**
+   * The visit this transition opened, carried forward or ended.
+   *
+   * Absent when the table had no party before and has none now - a table going
+   * `available` to `cleaning` at the end of service names no visit because
+   * there was never one to name.
+   */
+  visitId?: string;
+  /** What the visit named by `visitId` is now. */
+  visitStatus?: TableVisitStatus;
 }
 
 /**
@@ -127,19 +179,6 @@ export interface TableStateConflict {
 
 /** The free-text fields, capped so a note cannot be used as storage. */
 const MAX_TEXT_LENGTH = 280;
-
-const parseStatus = (value: unknown, field: string): TableStatus => {
-  const status = typeof value === 'string' ? value.trim() : '';
-
-  if (!isTableStatus(status)) {
-    throw new HttpsError(
-      'invalid-argument',
-      `${field} must be a known table status.`,
-    );
-  }
-
-  return status;
-};
 
 /**
  * An optional free-text field, trimmed and length-capped.
@@ -169,28 +208,157 @@ const parseOptionalText = (value: unknown, field: string): string => {
   return text;
 };
 
+/** The largest party a single visit can plausibly record. */
+const MAX_GUEST_COUNT = 200;
+
 /**
- * The visit the new state should point at.
+ * The party size, or `0` for "not recorded".
  *
- * Carried forward from the current state while the party is still there, and
- * dropped otherwise. A table going `occupied` to `ordering` to
- * `awaitingPayment` is one party throughout, so the pointer has to survive; a
- * table going to `available`, `cleaning` or `disabled` has no party, and a
- * pointer left behind would have the live view opening a visit that ended.
- *
- * Nothing creates a visit yet - that is issue #1095 - so today this always
- * resolves to absent. It is written now because the alternative is a transition
- * callable that silently drops the pointer, which would be a bug discovered by
- * whoever builds visits rather than a rule stated here.
- *
- * `visitId` is deliberately not accepted from the request: there is no visit
- * for a caller to name, and a client-supplied pointer to a document nothing
- * validates is worse than an absent field.
+ * Whole and at least one, because half a guest is a typo and a party of zero is
+ * a host who meant to cancel. Both arrive as `invalid-argument` rather than
+ * being rounded or ignored: a seating recorded with a wrong number is worse
+ * than one recorded with none, which is what absent means.
  */
-const nextVisitId = (
+const parseGuestCount = (value: unknown): number => {
+  if (value === undefined || value === null || value === '') {
+    return 0;
+  }
+
+  if (
+    typeof value !== 'number' ||
+    !Number.isInteger(value) ||
+    value < 1 ||
+    value > MAX_GUEST_COUNT
+  ) {
+    throw new HttpsError(
+      'invalid-argument',
+      `guestCount must be a whole number between 1 and ${MAX_GUEST_COUNT}.`,
+    );
+  }
+
+  return value;
+};
+
+/**
+ * How an ending visit should be recorded.
+ *
+ * `closed` by default, so every caller written before issue #1095 - the staff
+ * actions of issue #1094 among them - keeps freeing tables the ordinary way
+ * without sending a field it does not know about.
+ */
+const parseVisitOutcome = (value: unknown): TableVisitStatus => {
+  if (value === undefined || value === null || value === '') {
+    return 'closed';
+  }
+
+  if (!TABLE_VISIT_END_STATUSES.includes(value as TableVisitStatus)) {
+    throw new HttpsError(
+      'invalid-argument',
+      `visitOutcome must be one of ${TABLE_VISIT_END_STATUSES.join(', ')}.`,
+    );
+  }
+
+  return value as TableVisitStatus;
+};
+
+/**
+ * The open visit at this table, taken from the state document.
+ *
+ * The state's `visitId` is the only pointer there is, and the pointer is what
+ * makes "a table has at most one open visit" true rather than merely checked.
+ * A visit is created only by a transition into `occupied` from a status holding
+ * no party, and that same commit writes the pointer; a transition out of the
+ * party statuses ends the visit and drops it. Both are one write of the one
+ * state document the two racing hosts contend on, so a second visit at a table
+ * would need a state write that did not come from here - and `firestore.rules`
+ * refuses every client write to `tableStates`.
+ *
+ * Deliberately *not* a query over `visits` for the open one. That would be a
+ * second answer to a question the state already answers, free to disagree with
+ * it, and it would put a whole collection in the read set of every transition -
+ * so a party seated at table 5 would invalidate a transaction about table 12.
+ *
+ * `holdsParty(from)` rather than the raw field: a status that holds no party
+ * has no business carrying a pointer, so one found there is ignored rather than
+ * acted on.
+ */
+const carriedVisitId = (
+  from: TableStatus,
   current: DocumentData | undefined,
-  to: TableStatus,
-): string => (holdsParty(to) ? visitIdOf(current) : '');
+): string => (holdsParty(from) ? visitIdOf(current) : '');
+
+/**
+ * Whether this transition is a table acquiring a party it did not have.
+ *
+ * `occupied` and not `reserved`: a held table has nobody sitting at it, and a
+ * visit opened when the booking was taken would have its `openedAt` an hour
+ * before the party walked in. The party arriving is `reserved -> occupied`,
+ * which is where the visit starts.
+ */
+const opensVisit = (to: TableStatus, carried: string): boolean =>
+  to === 'occupied' && !carried;
+
+/**
+ * Whether this transition ends the party that was at the table.
+ *
+ * Leaving the statuses that hold a party, while there is a visit to end. A
+ * table whose party was already ended ends nothing - the alternative is a
+ * second `closedAt`, an hour later, describing an instant at which nothing
+ * happened.
+ */
+const endsVisit = (to: TableStatus, carried: string): boolean =>
+  Boolean(carried) && !holdsParty(to);
+
+/**
+ * `visitId` is deliberately not accepted from the request. A caller has no
+ * visit to name that this callable did not give it, and a client-supplied
+ * pointer to a document nothing validates is worse than an absent field.
+ */
+const nextVisitId = (to: TableStatus, visitId: string): string =>
+  holdsParty(to) ? visitId : '';
+
+/**
+ * What the visit named in the result is, once this transition has landed.
+ *
+ * Open when the transition opened or carried it, the requested outcome when it
+ * ended it, and absent when there is no visit to describe - which is most
+ * transitions, because most of a table's day happens with nobody at it.
+ */
+const visitStatusAfter = (
+  visitId: string,
+  ending: boolean,
+  outcome: TableVisitStatus,
+): TableVisitStatus | undefined => {
+  if (!visitId) {
+    return undefined;
+  }
+
+  return ending ? outcome : 'open';
+};
+
+/**
+ * Refuses freeing a table that still has a party recorded at it, other than by
+ * turning it over.
+ *
+ * The acceptance criterion of issue #1095: "closing a visit sets the table to a
+ * state that requires an explicit next action, so tables are not silently
+ * reused". The matrix of issue #1091 allows `occupied -> available` and
+ * `awaitingPayment -> available`, and it is right to - that is what a table
+ * wrongly seated and immediately corrected does. What it must not be is how a
+ * real party ends, because a table that goes straight to `available` is offered
+ * to the next party with the last one's plates still on it.
+ *
+ * So the matrix stays as it is and this narrows it for the one case it cannot
+ * see: a table with an open visit. A table without one is unaffected.
+ */
+const assertEndsByTurningOver = (to: TableStatus): void => {
+  if (to !== TABLE_STATUS_AFTER_VISIT) {
+    throw new HttpsError(
+      'failed-precondition',
+      `A table with an open visit becomes ${TABLE_STATUS_AFTER_VISIT} when the party leaves, not ${to}.`,
+    );
+  }
+};
 
 /**
  * Refuses a transition the matrix does not allow.
@@ -264,8 +432,13 @@ export const transitionTableStateHandler = async (
     'restaurantId',
   );
   const tableId = parseRequiredString(request.data?.tableId, 'tableId');
-  const to = parseStatus(request.data?.status, 'status');
-  const expected = parseStatus(request.data?.expectedStatus, 'expectedStatus');
+  const to = parseTableStatus(request.data?.status, 'status');
+  const expected = parseTableStatus(
+    request.data?.expectedStatus,
+    'expectedStatus',
+  );
+  const guestCount = parseGuestCount(request.data?.guestCount);
+  const visitOutcome = parseVisitOutcome(request.data?.visitOutcome);
   const reason = parseOptionalText(request.data?.reason, 'reason');
   const note = parseOptionalText(request.data?.note, 'note');
 
@@ -285,6 +458,7 @@ export const transitionTableStateHandler = async (
   const transitionRef = restaurantRef
     .collection(TABLE_STATE_TRANSITIONS_COLLECTION)
     .doc();
+  const visits = restaurantRef.collection(TABLE_VISITS_COLLECTION);
 
   return firestore.runTransaction(async (transaction) => {
     const [restaurant, staffAssociation, table, state] = await Promise.all([
@@ -351,8 +525,18 @@ export const transitionTableStateHandler = async (
     assertAllowed(from, to);
     assertInService(tableData, tableId, to);
 
+    const carried = carriedVisitId(from, current);
+    const opening = opensVisit(to, carried);
+    const ending = endsVisit(to, carried);
+
+    if (ending) {
+      assertEndsByTurningOver(to);
+    }
+
     const at = Date.now();
-    const visitId = nextVisitId(current, to);
+    const openedVisitRef = opening ? visits.doc() : undefined;
+    const visitId = openedVisitRef?.id ?? carried;
+    const visitStatus = visitStatusAfter(visitId, ending, visitOutcome);
 
     const nextState: TableState = {
       tableId,
@@ -360,7 +544,7 @@ export const transitionTableStateHandler = async (
       status: to,
       since: at,
       updatedByUserId: actingUid,
-      ...(visitId ? { visitId } : {}),
+      ...(nextVisitId(to, visitId) ? { visitId } : {}),
       ...(note ? { note } : {}),
     };
 
@@ -373,8 +557,34 @@ export const transitionTableStateHandler = async (
       actorRoles: rolesOf(request),
       at,
       atIso: new Date(at).toISOString(),
+      ...(visitId ? { visitId } : {}),
       ...(reason ? { reason } : {}),
     };
+
+    if (openedVisitRef) {
+      const opened: TableVisit = {
+        id: openedVisitRef.id,
+        restaurantId,
+        tableId,
+        status: 'open',
+        openedAt: at,
+        ...(guestCount ? { guestCount } : {}),
+        openedByUserId: actingUid,
+      };
+
+      transaction.create(openedVisitRef, opened);
+    }
+
+    if (ending) {
+      // An update rather than a replacement: the visit keeps the `openedAt`,
+      // the party size and the opener it was created with, and gains only how
+      // and when it ended.
+      transaction.update(visits.doc(carried), {
+        status: visitOutcome,
+        closedAt: at,
+        closedByUserId: actingUid,
+      });
+    }
 
     transaction.set(stateRef, nextState);
     transaction.create(transitionRef, entry);
@@ -386,6 +596,8 @@ export const transitionTableStateHandler = async (
       to,
       since: at,
       transitionId: transitionRef.id,
+      ...(visitId ? { visitId } : {}),
+      ...(visitStatus ? { visitStatus } : {}),
     };
   });
 };

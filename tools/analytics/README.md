@@ -92,9 +92,24 @@ Event-count and active-user tiles are queried live, and so is the stability set:
   _people_ rather than events, and therefore the only two that have to say
   whose. All three apps report to one property through one measurement id, and
   the business app started reporting at all with the table operations of issue
-  #1098 — so both are scoped to `app_surface = consumer` through the user-scoped
-  custom dimension both apps set. Every other tile filters by event name, and
-  each of those names consumer events only.
+  #1098 — so both are scoped to the consumer surface through the user-scoped
+  `app_surface` dimension both apps set. Every other tile filters by event name,
+  and each of those names consumer events only.
+
+  The filter is written as **not the other surfaces** rather than as
+  `= consumer`, which is the difference between a working filter and a tile that
+  reads zero. GA4 does not backfill a custom dimension, so every session
+  collected before `app_surface` was registered carries no value, and so does
+  every session from an app release predating it; `= consumer` excluded all of
+  it and dropped `Active users` to 0 the minute the dimension was registered.
+  Unlabelled traffic is consumer traffic — the business app sent nothing at all
+  before #1098 — so it is kept.
+
+  `activeUsers` is an approximate distinct count and filtering changes the
+  aggregation path, so the filtered figure differs slightly from the unfiltered
+  one (70 against 66 on the same window when this landed). The step is the
+  filter, not traffic.
+
 - **Crash-free users** — GA4 has no crash-free metric, so it is derived from two
   `activeUsers` calls: everyone in the window, and the subset who triggered
   `app_exception`, which is the event Crashlytics itself logs on a native crash.

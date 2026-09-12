@@ -59,6 +59,38 @@ export interface OptimisticTransition {
 }
 
 /**
+ * Two layers of guess, flattened, with the upper one winning
+ * (GitHub issue #1096).
+ *
+ * There are two now, because a transition can be waiting on two different
+ * things. One is in flight and will be answered in a moment; one is in the
+ * offline queue and will be answered when the signal comes back, possibly
+ * after the tablet has been restarted. They are kept apart because only the
+ * second survives a reload, and joined here because the plan draws one status
+ * per table.
+ *
+ * The in-flight layer wins, and that ordering is the whole reason this
+ * function exists rather than a spread. A replayed transition is confirmed
+ * into the in-flight layer *before* it leaves the queue, so for an instant a
+ * table is in both - and the confirmed entry is the one that knows the server
+ * agreed.
+ */
+export const overlaid = (
+  lower: ReadonlyMap<string, OptimisticTransition>,
+  upper: ReadonlyMap<string, OptimisticTransition>,
+): ReadonlyMap<string, OptimisticTransition> => {
+  if (lower.size === 0) {
+    return upper;
+  }
+
+  if (upper.size === 0) {
+    return lower;
+  }
+
+  return new Map([...lower, ...upper]);
+};
+
+/**
  * Whether the listener has caught up with a guess, so the guess can go.
  *
  * `>=` rather than `>`: the delivered state *is* the transition's own state in

@@ -284,7 +284,7 @@ refuses. It is tested over all forty-nine ordered pairs against a matrix transcr
 independently from this page, because a test that reads the matrix to decide what to
 expect passes whatever the matrix says.
 
-A status never lists itself, and that is a decision rather than an omission. `canTransitionTableStatus('occupied', 'occupied')` is `false`: a replayed seating is a retry, answered by the idempotency key of issue \#1096, and admitting it to the matrix would reset `since` and lose the duration the staff view is built to show.
+A status never lists itself, and that is a decision rather than an omission. `canTransitionTableStatus('occupied', 'occupied')` is `false`: a replayed seating is a retry, answered by the `requestId` idempotency key issue \#1096 added to `transitionTableState`, and admitting it to the matrix would reset `since` and lose the duration the staff view is built to show.
 
 `tableStatusOf` is the single reader of "no document means available", so the default is one decision rather than one per call site with one of them forgotten. `isTableStatus` narrows a status that arrived over a callable, which is how a stale app version is kept from writing a status no view has a colour for.
 
@@ -354,6 +354,15 @@ because the two answer different questions: may you configure this restaurant,
 which staff must never pass, and may you operate it during service, which is the
 only thing staff may do.
 
+One transition is written once, however many times it is sent. `transitionTableState`
+takes an optional `requestId`, uses it as the audit entry's document id, and reads that
+document inside the same transaction it would write it in (issue \#1096) - so a replay
+finds the entry and is answered with what it recorded, and two copies of one request
+racing each other contend on that one document. The answer carries `replayed: true`, so
+a caller can tell the outcome from the event: the same transition, and not a second one
+to count or announce. The entry also stores the key and, where a visit ended, its
+outcome, so the replayed answer names the visit the first attempt ended and how.
+
 Firestore refuses every client write to both collections, so the callable is not
 merely the path the app takes - it is the only path there is. The transition
 matrix is duplicated into `apps/bite-tribe-firebase/functions` because the
@@ -367,7 +376,7 @@ uses.
 - The rules deploy by hand. `npx nx firebase-deploy-rules bite-tribe-firebase` has to run before the `tableStates`, `tableStateTransitions` and `visits` clauses mean anything in production; merging them changes nothing on its own. Until that deploy, the catch-all at the bottom of the file denies both collections outright, so the reads issue \#1093 needs are refused - the callable's own writes are unaffected, because the Admin SDK bypasses rules.
 - The party size has a field now and no caller. `TableVisit.guestCount` exists and `transitionTableState` takes a `guestCount` argument (issue \#1095), but issue \#1094's sheet still sends the count as the audit entry's `reason`. Moving it across is a change to the business app, not to the backend, and belongs with the surface that renders visits.
 - The matrix exists twice. Firebase Functions cannot import the Nx model library - `rootDir: src`, no path mappings, and a deploy that uploads `lib/` alone - so issue \#1092 copied it and made the copy checked instead of trusted. `src/__specs__/table-state-parity.spec.ts` compares the statuses, their order and every row of both files, following the precedent `role-list-parity.spec.ts` set for `BITE_TRIBE_ROLES`. A row changed in one file and not the other fails the build rather than reaching a dining room.
-- A replayed transition is still a second transition. There is no idempotency key yet, so an offline queue that sends the same seating twice gets one success and one `aborted` rather than one success and one "already done". That is the safe failure and not the right one; the key is issue \#1096.
+- The idempotency key is optional, and a caller that omits one gets the old behaviour. Issue \#1096 added `requestId` to `transitionTableState`: the key names the audit entry the transition writes, prefixed `req-`, so a replay reads the entry it would have written and is answered with what that entry recorded - before the table is checked and before `expectedStatus` is compared, because a replay arrives after the world has moved on. A request without a key is still applied twice if it is sent twice, which is what every caller written before issue \#1096 does; the staff view is not one of them.
 - The audit trail is written and never read. Nothing queries `tableStateTransitions`, no index exists for a per-table history, and no surface renders one. Adding either is issue \#1093's or issue \#1098's, and a `where` on `tableId` ordered by `at` will need a composite index before it runs.
 - Nothing enforces in the _type_ that `visitId` is present exactly when the status implies a seated party. The backend enforces it - the pointer is written only into a status that holds a party, and dropped by the same commit that leaves one (issue \#1095) - but the model still marks the field optional, and making it structural means a discriminated union on `status`.
 - Uniqueness is held by the client, not by the database. Security rules cannot query, so no rule can ask whether a label is already taken; the editor refuses a duplicate as it is typed, and the publish validation of issue \#1088 refuses a plan that reached that state another way. A second device editing a second room at the same moment can still produce two tables with one number, because neither editor sees the other's unpublished plan - but neither can publish one, because the gate reads every table of the restaurant and reports the collision on the table in the room being published.

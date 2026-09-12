@@ -355,6 +355,188 @@ describe('table state transitions', () => {
     });
   });
 
+  /**
+   * The idempotency key behind the offline staff view (GitHub issue #1096).
+   *
+   * A host seats two tables in a basement dining room and the tablet sends
+   * them again when the signal comes back. Without a key the backend cannot
+   * tell the second attempt from a second seating, so two tables seated
+   * offline would land as four transitions - and the extra two would be
+   * refused as `occupied -> occupied`, which is a failure message for work
+   * that succeeded.
+   */
+  describe('replaying a transition', () => {
+    const KEY = 'a1b2c3d4-queued-seating';
+
+    /** The claim, in the shape a test can fail. */
+    it('applies a repeated request once and answers the same thing twice', async () => {
+      const first = await move('occupied', 'available', asHost, {
+        requestId: KEY,
+      });
+      const second = await move('occupied', 'available', asHost, {
+        requestId: KEY,
+      });
+
+      expect(await readTransitions()).toHaveLength(1);
+      expect(second).toMatchObject({
+        from: 'available',
+        to: 'occupied',
+        since: first.since,
+        transitionId: first.transitionId,
+        replayed: true,
+      });
+      expect(first.replayed).toBeUndefined();
+    });
+
+    /**
+     * A replay arrives after the world has moved on. The `expectedStatus` it
+     * was queued with is long gone, and refusing it over that would be
+     * refusing a transition that already happened.
+     */
+    it('answers a replay even after the table has moved on', async () => {
+      const first = await move('occupied', 'available', asHost, {
+        requestId: KEY,
+      });
+      await move('cleaning', 'occupied', asSecondHost);
+
+      const replay = await move('occupied', 'available', asHost, {
+        requestId: KEY,
+      });
+
+      expect(replay).toMatchObject({ replayed: true, since: first.since });
+      // The colleague's transition stands: the replay wrote nothing.
+      expect((await readState())?.['status']).toBe('cleaning');
+      expect(await readTransitions()).toHaveLength(2);
+    });
+
+    /** And after the table has been deleted from the published plan. */
+    it('answers a replay for a table that is no longer on the plan', async () => {
+      await move('occupied', 'available', asHost, { requestId: KEY });
+      await tableRef(TABLE_12).delete();
+
+      expect(
+        await move('occupied', 'available', asHost, { requestId: KEY }),
+      ).toMatchObject({ replayed: true });
+    });
+
+    /**
+     * Two tables seated offline are two transitions on reconnect, whichever
+     * order the replays arrive in.
+     */
+    it('keeps two queued seatings to two transitions', async () => {
+      const seat = (tableId: string, requestId: string): Promise<unknown> =>
+        transition(asHost, {
+          restaurantId: RESTAURANT,
+          tableId,
+          status: 'occupied',
+          expectedStatus: 'available',
+          requestId,
+        });
+
+      await seat(TABLE_12, 'queued-one');
+      await seat(TABLE_13, 'queued-two');
+      await seat(TABLE_12, 'queued-one');
+      await seat(TABLE_13, 'queued-two');
+
+      expect(await readTransitions()).toHaveLength(2);
+    });
+
+    /**
+     * The entry carries the key as well as being named after it, so the trail
+     * is readable without consulting document names.
+     */
+    it('records the key on the entry it wrote', async () => {
+      const { transitionId } = await move('cleaning', 'available', asHost, {
+        requestId: KEY,
+      });
+
+      expect(transitionId).toBe(`req-${KEY}`);
+      expect((await readTransitions())[0]['requestId']).toBe(KEY);
+    });
+
+    /**
+     * A key reused across tables is a client bug, and answering it with the
+     * other table's transition would be worse than refusing: the caller would
+     * take a seating of table 12 as a seating of table 13 and stop retrying
+     * the one it actually meant.
+     */
+    it('refuses a key that already names another table', async () => {
+      await move('occupied', 'available', asHost, { requestId: KEY });
+
+      expect(
+        await codeOf(
+          transition(asHost, {
+            restaurantId: RESTAURANT,
+            tableId: TABLE_13,
+            status: 'occupied',
+            expectedStatus: 'available',
+            requestId: KEY,
+          }),
+        ),
+      ).toBe('failed-precondition');
+    });
+
+    /**
+     * The key becomes a document name, so it is narrow rather than "any
+     * string": a slash would address a subcollection and a long one is a way
+     * to store data in a document name.
+     */
+    it.each([['no'], ['../escape'], ['has/slash'], [42], ['x'.repeat(129)]])(
+      'refuses %p as a key',
+      async (requestId) => {
+        expect(
+          await codeOf(move('occupied', 'available', asHost, { requestId })),
+        ).toBe('invalid-argument');
+      },
+    );
+
+    /** Every caller written before the key existed keeps working without one. */
+    it('applies a transition that carries no key at all', async () => {
+      await move('occupied', 'available');
+
+      expect(await readTransitions()).toHaveLength(1);
+      expect((await readTransitions())[0]).not.toHaveProperty('requestId');
+    });
+
+    /**
+     * A replay of a seating names the visit the first attempt opened, rather
+     * than opening a second one for the same party (issue #1095).
+     */
+    it('names the visit the first attempt opened', async () => {
+      const first = await move('occupied', 'available', asHost, {
+        requestId: KEY,
+      });
+      const replay = await move('occupied', 'available', asHost, {
+        requestId: KEY,
+      });
+
+      expect(replay.visitId).toBe(first.visitId);
+      expect(replay.visitStatus).toBe('open');
+      expect(
+        (await restaurantRef(RESTAURANT).collection('visits').get()).size,
+      ).toBe(1);
+    });
+
+    /** And a replay of a freeing says how the visit ended, not the default. */
+    it('answers a replayed freeing with the outcome it recorded', async () => {
+      await move('occupied', 'available');
+
+      const first = await move('cleaning', 'occupied', asHost, {
+        requestId: KEY,
+        visitOutcome: 'abandoned',
+      });
+      const replay = await move('cleaning', 'occupied', asHost, {
+        requestId: KEY,
+      });
+
+      expect(replay).toMatchObject({
+        visitId: first.visitId,
+        visitStatus: 'abandoned',
+        replayed: true,
+      });
+    });
+  });
+
   describe('two staff acting at once', () => {
     /**
      * The loser of a race does not fail fast, and the wait is the Admin SDK's

@@ -131,6 +131,15 @@ table holds now. A client write would be the way round that, so there is not one
   append-only for the same reason it exists: a disputed table is answered by a
   history nobody could have edited afterwards.
 
+The audit entry is also the **dedupe record** (issue \#1096). A caller may name
+its transition with a `requestId`, which becomes that entry's document id
+prefixed `req-`; the callable reads the document it would write inside the same
+transaction, so a request sent twice - the ordinary shape of an offline queue
+draining - is applied once and answered twice with what the first attempt
+recorded. It needed no second collection and no lock: the record of what
+happened was already there, and naming it after the intent is what makes it
+findable.
+
 **A table visit is stored beside the state and written by nobody either**
 (issue \#1095). `/restaurants/{id}/visits/{visitId}` is the party at a table
 over time, and it admits the same readers as the plan and the live state.

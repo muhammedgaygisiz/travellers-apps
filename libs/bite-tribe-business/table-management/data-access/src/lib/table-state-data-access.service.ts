@@ -34,6 +34,17 @@ export interface TableTransitionRequest {
    * the very document at the moment the button is pressed.
    */
   expectedStatus: TableStatus;
+  /**
+   * The idempotency key for this transition (GitHub issue #1096).
+   *
+   * Minted once per *intent* rather than once per attempt, so the send that
+   * follows a reconnect carries the same key as the send that never arrived -
+   * and the backend answers the second with what the first recorded instead of
+   * seating the table twice. Required rather than optional: every caller here
+   * goes through `TableTransitionQueueService`, which mints one, and a request
+   * without a key is a request that cannot be safely retried.
+   */
+  requestId: string;
   /** Why, recorded on the audit entry. Absent when there is nothing to add. */
   reason?: string;
 }
@@ -47,6 +58,43 @@ export interface TableTransitionResult {
   /** The moment the backend says the table entered `to`. */
   since: number;
   transitionId: string;
+  /**
+   * True when the backend answered from the audit entry rather than by
+   * applying the transition now (GitHub issue #1096).
+   *
+   * The outcome is the same and the event is not: a replayed transition is one
+   * the staff member already made, so it must not be counted or announced a
+   * second time.
+   */
+  replayed?: boolean;
+}
+
+/**
+ * One delivery of the whole restaurant's table state, and what it says about
+ * the connection (GitHub issue #1096).
+ *
+ * The states alone were enough while the only question was what to draw. The
+ * question this issue adds is whether what is drawn is *current*, and neither
+ * half of that answer is in the list: a room nobody has touched for an hour
+ * delivers nothing and is perfectly live, and a listener that died on a
+ * refused token delivers nothing and is not. So the arrival time and the
+ * health of the listener travel with the data rather than being inferred from
+ * its absence.
+ */
+export interface TableStateSnapshot {
+  /** Every table state of the restaurant, as the last delivery described them. */
+  states: TableState[];
+  /** When that delivery arrived, in epoch milliseconds. */
+  at: number;
+  /**
+   * Whether the listener is still delivering.
+   *
+   * False once it has reported an error. A snapshot listener that errors is
+   * detached by the SDK rather than retried, so what follows is a plan that
+   * has silently stopped updating - which is the one thing the staff view must
+   * never show without saying so.
+   */
+  live: boolean;
 }
 
 /**
@@ -102,36 +150,48 @@ export class TableStateDataAccessService {
    * ordinary case rather than a gap - `tableStatusOf` in the model reads it as
    * `available` - and it is why nothing backfills a document per table before
    * this view can render.
+   *
+   * Each delivery carries the moment it arrived and whether the listener is
+   * still delivering (GitHub issue #1096), because "is this room live" cannot
+   * be read off the states themselves: a quiet room and a dead listener both
+   * look like silence.
    */
-  tableStates$(restaurantId: string): Observable<TableState[]> {
-    return new Observable<TableState[]>((subscriber) => {
+  tableStates$(restaurantId: string): Observable<TableStateSnapshot> {
+    return new Observable<TableStateSnapshot>((subscriber) => {
       let callbackId: string | undefined;
       let unsubscribed = false;
+      let last: TableStateSnapshot = { states: [], at: 0, live: true };
 
       void FirebaseFirestore.addCollectionSnapshotListener(
         { reference: this.statesReference(restaurantId) },
         (event, error) => {
           if (error) {
-            // Reported rather than thrown at the subscriber: a listener that
-            // errors once - a dropped connection, a token being refreshed -
-            // recovers on its own, and completing the stream would leave the
-            // view holding the last states it saw with nothing listening for
-            // the next. What staff must never see is a plan that has silently
-            // stopped updating, and that is the live indicator's job rather
-            // than this stream's.
+            // Reported rather than thrown at the subscriber: completing the
+            // stream would leave the view holding the last states it saw with
+            // nothing listening for the next, and with no way to say so. What
+            // staff must never see is a plan that has silently stopped
+            // updating - so the states are re-emitted unchanged with `live`
+            // taken off them, and the indicator says what the plan cannot.
             this.errorHandler.handleError(error);
+
+            last = { ...last, live: false };
+            subscriber.next(last);
 
             return;
           }
 
-          subscriber.next(
-            (event?.snapshots ?? [])
+          last = {
+            states: (event?.snapshots ?? [])
               .filter((snapshot) => snapshot.data)
               .map(
                 (snapshot) =>
                   ({ ...snapshot.data, tableId: snapshot.id }) as TableState,
               ),
-          );
+            at: Date.now(),
+            live: true,
+          };
+
+          subscriber.next(last);
         },
       ).then((id) => {
         callbackId = id;

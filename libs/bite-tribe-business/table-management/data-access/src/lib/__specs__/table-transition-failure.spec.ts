@@ -45,11 +45,42 @@ describe('tableTransitionFailure', () => {
     ).toBe('not-allowed');
   });
 
-  /** A request that never left the device has no code and no message. */
-  it.each([[undefined], [null], ['offline'], [{}]])(
+  /** A rejection carrying nothing to read is the one nobody can explain. */
+  it.each([[undefined], [null], ['something went wrong'], [{}]])(
     'falls back to unknown for %p',
     (error) => {
       expect(tableTransitionFailure(error)).toBe('unknown');
     },
   );
+
+  /**
+   * The failures that mean "not yet" rather than "no" (GitHub issue #1096).
+   *
+   * These are the ones the queue keeps instead of reporting: the call never
+   * reached the backend, so nothing was decided and sending it again is the
+   * right move. Every SDK in the stack says it differently, which is why the
+   * codes and the wording are both read.
+   */
+  it.each([
+    [{ code: 'functions/unavailable', message: 'Service unavailable' }],
+    [{ code: 'functions/deadline-exceeded', message: 'Deadline exceeded' }],
+    [new Error('Failed to fetch')],
+    [new Error('The Internet connection appears to be offline.')],
+    [{ code: '', message: 'Network error' }],
+  ])('reads %p as a call that never left the device', (error) => {
+    expect(tableTransitionFailure(error)).toBe('offline');
+  });
+
+  /**
+   * A definite answer is never mistaken for a dropped connection, however its
+   * message is worded. The offline check runs last for exactly this case.
+   */
+  it('keeps a refusal a refusal even when it mentions the network', () => {
+    expect(
+      tableTransitionFailure({
+        code: 'functions/permission-denied',
+        message: 'You do not work at this restaurant. Check your network.',
+      }),
+    ).toBe('permission');
+  });
 });

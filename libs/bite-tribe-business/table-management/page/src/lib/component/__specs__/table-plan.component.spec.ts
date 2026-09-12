@@ -144,7 +144,7 @@ describe(TablePlanComponent.name, () => {
         items: [item],
         roomTableCount: 1,
         summary,
-        isLive: true,
+        liveStatus: 'live',
       }),
     );
 
@@ -189,15 +189,71 @@ describe(TablePlanComponent.name, () => {
       expect(asked).toEqual(['room-2']);
     });
 
-    it('says whether the room on screen is live', () => {
-      expect(query('table-plan-live')?.textContent).toContain(
-        'table-plan-live',
+    /**
+     * Four states rather than two (GitHub issue #1096), because "is this live"
+     * has two different no answers and staff act differently on them.
+     */
+    it.each([
+      ['live', 'table-plan-live'],
+      ['connecting', 'table-plan-connecting'],
+      ['offline', 'table-plan-offline'],
+      ['stale', 'table-plan-stale'],
+    ])('says the room is %s in its own words', (liveStatus, key) => {
+      setInputs({ liveStatus });
+
+      expect(query('table-plan-live')?.textContent).toContain(key);
+    });
+
+    /** Never colour alone: the icon changes shape as well as hue. */
+    it('draws a different icon for every connection state', () => {
+      const icons = new Set<string>();
+
+      (['live', 'connecting', 'offline', 'stale'] as const).forEach(
+        (liveStatus) => {
+          setInputs({ liveStatus });
+          // Read as a property: `ion-icon` declares `name` as one, so Angular
+          // sets it there rather than leaving an attribute to read back.
+          icons.add(
+            (
+              query('table-plan-live')?.querySelector(
+                'ion-icon',
+              ) as unknown as { name?: string }
+            )?.name ?? '',
+          );
+        },
       );
 
-      setInputs({ isLive: false });
+      expect(icons.size).toBe(4);
+    });
 
-      expect(query('table-plan-live')?.textContent).toContain(
-        'table-plan-connecting',
+    /**
+     * "Not current" without a number is a warning nobody can act on, and an
+     * age beside a room that *is* current is noise.
+     */
+    it('names the age only once the room has gone stale', () => {
+      setInputs({ liveStatus: 'offline', lastUpdated: '6 min' });
+
+      expect(query('table-plan-stale')).toBeNull();
+
+      setInputs({ liveStatus: 'stale' });
+
+      expect(query('table-plan-stale')?.textContent).toContain(
+        'table-plan-last-updated',
+      );
+    });
+
+    /**
+     * What is written down and not yet sent, kept apart from the connection:
+     * one says whether the room is current, the other whether the host's own
+     * changes have left the tablet (GitHub issue #1096).
+     */
+    it('says how many changes are waiting to be sent', () => {
+      expect(query('table-plan-queued')).toBeNull();
+
+      setInputs({ pendingCount: 3 });
+
+      expect(query('table-plan-queued')?.textContent).toContain(
+        'table-plan-queued',
       );
     });
 

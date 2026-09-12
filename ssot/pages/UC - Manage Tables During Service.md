@@ -2,7 +2,7 @@
 
 ## Status
 
-Readable, not yet writable. Specified through issue \#1071 as stage 2 of issue \#735.
+Readable and writable, and now usable in a room with no signal. Specified through issue \#1071 as stage 2 of issue \#735.
 
 Issue \#1091 added the live state and the transition matrix to `libs/bite-tribe-common/model`. Issue \#1092 made the backend their only writer: `transitionTableState` validates a requested transition against the matrix and the caller's staff membership, applies it transactionally against the state the caller says it saw, and appends an audit entry per transition. Two staff members seating one table produce one seating and one explicit conflict. `firestore.rules` refuses every client write to the state and the trail, and admits the staff of that restaurant, the account holding it and the operator to read both.
 
@@ -11,6 +11,21 @@ Issue \#1093 put the first surface on it. `restaurant/:restaurantId/tables` in t
 Issue \#1094 closed the loop. Holding a table, or pressing enter on it, opens a sheet of exactly the transitions the matrix allows from the status that table holds right now, and picking one calls `transitionTableState`. The table changes colour on the press rather than on the answer, and a refusal takes the change back and says why - a conflict names the colleague who got there first rather than reading as a generic failure. An end-of-service reset frees a batch of tables in one press. The staff member who could see that table 6 had been awaiting payment for twenty minutes can now do something about it from the same screen.
 
 Issue \#1095 put the party behind the status. A `TableVisit` at `/restaurants/{restaurantId}/visits/{visitId}` is the party at a table over time, and seating a table now _is_ opening one: a transition into `occupied` from a status that held no party writes the visit, the state and the audit entry in one commit, and a transition out of the party statuses ends it. A table cannot have two open visits, ending one lands the table on `cleaning` rather than `available`, and `moveTableVisit` walks a party to another table keeping the visit's id - which is what will keep its orders when issue \#1072 gives it some. The visit outlives its table: it lives under the restaurant, and `tableId` is a plain string that keeps naming a table deleted from the plan.
+
+Issue \#1096 made the view survive the room it is used in. Firestore offline
+persistence was already on in every production build, so the plan keeps drawing without
+a signal; what was missing was everything about the _writes_. A transition made offline
+is now written to device storage rather than sent, carries an idempotency key minted
+once per intent, and is replayed in order when the signal comes back - so two tables
+seated in a basement dining room are two transitions on reconnect and not four, and a
+tablet locked or reloaded inside the gap comes back showing the tables the host seated.
+`transitionTableState` answers a replay off its own audit trail, before it checks the
+table and before it compares `expectedStatus`, because a replay arrives after the world
+has moved on. A queued transition the table has genuinely moved past is refused and
+named to the host rather than forced or dropped. And the header now says which of four
+things is true - connecting, live, offline, or not current and how long since - which is
+what makes "staff can always tell whether what they are looking at is live" checkable
+rather than assumed.
 
 What no issue has added yet is a **surface** for any of that. Seating a table through issue \#1094's sheet opens a visit, and nothing shows it. The guest count is still optional in the sheet and still travels as the audit entry's `reason`; `TableVisit.guestCount` now exists to hold it and `transitionTableState` now takes it, so moving it across is a change to the business app rather than to the backend.
 
@@ -52,16 +67,20 @@ Restaurant staff open one screen during service and see the room as it is: which
 - The table changes on the press and is put back if the backend disagrees (issue \#1094). A plan that waits for the round trip reads as a tap that missed, which is answered with a second tap the backend then refuses - so the feedback for a _successful_ seating would have been an error message. The guess is a layer over the listener rather than a write into it, so a rollback is a deletion and the true status is still underneath. It comes off when the listener delivers the transition itself, not when the callable answers, because the gap between the two is a visible flicker back to the old status.
 - The end-of-service reset applies to the tables it can apply to and leaves the rest alone (issue \#1094). A table already free has nothing to reset and a party still ordering is not one anybody meant to clear, so neither is sent to the backend to be refused; the button names how many tables it will actually free. Each table is its own transition, so thirty tables cleared is thirty audit entries naming who cleared them rather than one entry naming a room.
 - Assembling that batch is a **mode** rather than a modifier key (issue \#1094). The canvas reports every read-only tap as "this table alone", because a shift-click is not a gesture a host holding a tablet has.
-- The view keeps working offline: transitions queue, carry an idempotency key, and reconcile on reconnect rather than being silently forced or dropped.
+- The view keeps working offline, and three separate things make that true (issue \#1096). The _reads_ survive on Firestore's own cache, which every production build already enabled. The _writes_ survive in a durable queue keyed per account in device storage, because the gap can be the length of a service and a tablet gets locked, killed and reloaded inside it - and because the transitions of the lunchtime host must not be replayed under the evening host's name into a trail whose purpose is saying who moved a disputed table. And the _replay_ cannot double-apply, because every attempt carries the key minted when the intent was recorded and the backend answers the second attempt with what the first one wrote.
+- A queued transition is refused rather than forced when the table has moved. Every entry carries the status the device was showing when the host acted, not the status the server holds now, and the backend compares that inside its transaction. One refusal takes the rest of _that table's_ queue with it and leaves every other table alone: the moves behind it were expecting a status the table never reached, so they are the same problem rather than a second one. Each is still reported, and the host is told which tables it happened to.
+- The queue drains one entry at a time, in the order it was made, because a host who seated table 12 and then marked it ordering queued two transitions whose second expects the first to have landed. The end-of-service reset sends its tables in parallel for the opposite reason: those are independent tables, each its own transaction on its own document.
+- A table waiting to be sent is drawn as the status the host asked for and _said_ to be waiting only in the detail panel, not on the plan. The plan already answers "what is this table doing"; "has anyone else been told" is a different question, and a second mark on a 900 mm circle would compete with the status glyph beside it. The clock on such a table runs from when the host acted, not from when the queue drains - a party seated twenty minutes before the signal came back has been there twenty minutes.
+- Whether the room is live is answered in four states rather than two, because the two no answers lead to different next moves. `connecting` is before the first snapshot. `offline` is a connection that has just gone, where what is on screen was true moments ago. `stale` is the same connection still gone a minute later, and it carries the age - "not current" without a number is a warning nobody can act on. Liveness is not read off the states themselves: a quiet Tuesday afternoon and a listener the SDK detached both look like silence, so the delivery carries its own arrival time and the health of the listener, and the device's network state is read from the one `NetworkStatusService` in `libs/common` rather than from a second connectivity mechanism.
 - Staff have a narrower permission set than owners, enforced by security rules and not only by hidden UI.
 
 ## Success Criteria
 
 - A state change on one device is visible on another within about a second.
 - Two simultaneous seatings of the same table never produce two conflicting states.
-- Going offline, seating two tables, and reconnecting results in exactly two transitions.
+- Going offline, seating two tables, and reconnecting results in exactly two transitions (met by issue \#1096).
 - Moving or deleting a table in the editor does not lose or corrupt its live state.
-- Staff can always tell whether what they are looking at is live.
+- Staff can always tell whether what they are looking at is live, and how long ago it stopped being so (met by issue \#1096).
 
 ## Open Product Questions
 

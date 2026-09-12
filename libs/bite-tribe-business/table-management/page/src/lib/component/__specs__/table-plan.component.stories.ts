@@ -226,7 +226,7 @@ export default {
     selectedRoom: room(),
     restaurantName: 'Trattoria Roma',
     isAuthenticated: true,
-    isLive: true,
+    liveStatus: 'live' as const,
     items: inService,
     roomTableCount: 15,
     summary: counts(inService),
@@ -293,7 +293,46 @@ export const TableSelectedOnPhone: Story = {
  * heard about yet.
  */
 export const Connecting: Story = {
-  args: { isLive: false },
+  args: { liveStatus: 'connecting' as const },
+  decorators: [at('1280px')],
+};
+
+/**
+ * The signal has gone, and the host has kept working (GitHub issue #1096).
+ *
+ * Two badges, because they answer different questions: the room is no longer
+ * confirmed by the server, and four of the host's own changes have not left
+ * the tablet. Neither is a failure, and neither may be silent.
+ */
+export const Offline: Story = {
+  args: { liveStatus: 'offline' as const, pendingCount: 4 },
+  decorators: [at('1280px')],
+};
+
+/**
+ * The same gap, a minute later.
+ *
+ * The explicit stale indicator: the plan is a picture of the past, it says so,
+ * and it says how far past - "not current" without a number is a warning
+ * nobody can act on.
+ */
+export const Stale: Story = {
+  args: {
+    liveStatus: 'stale' as const,
+    lastUpdated: '6 min',
+    pendingCount: 4,
+  },
+  decorators: [at('1280px')],
+};
+
+/** A picked table whose own change is still waiting on the tablet. */
+export const TableWaitingToSend: Story = {
+  args: {
+    liveStatus: 'offline' as const,
+    pendingCount: 1,
+    selectedIds: ['t5'],
+    selectedTable: { ...detail, pending: true },
+  },
   decorators: [at('1280px')],
 };
 

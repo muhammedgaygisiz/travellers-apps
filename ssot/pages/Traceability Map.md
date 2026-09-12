@@ -154,7 +154,47 @@
 
   Stage 2's model and backend are now complete and no screen uses the visit half.
   Seating through \#1094's sheet opens a visit that nothing displays, and nothing
-  calls the move. That is \#1096 and the surfaces after it.
+  calls the move. That is a surface after \#1096 rather than \#1096 itself.
+
+  Issue \#1096 made the staff view survive the room it is used in. Reads already
+  did: `enableMultiTabIndexedDbPersistence` runs in every production build, so the
+  plan keeps drawing from Firestore's own cache without a signal. What had no
+  answer was the writes. A transition made offline is now written to device
+  storage rather than sent, carries an idempotency key minted once per _intent_,
+  and is replayed one at a time in the order it was made - so two tables seated in
+  a basement dining room are two transitions on reconnect and not four, and a
+  tablet locked or reloaded inside the gap comes back showing the tables the host
+  seated rather than showing them free. The key reaches the backend as
+  `transitionTableState`'s new `requestId`, which names the audit entry the
+  transition writes; a replay reads that entry inside the same transaction it
+  would have written it in and is answered with what it recorded.
+
+  Four decisions in it are worth finding again. The replay is answered **before**
+  the table is checked and before `expectedStatus` is compared, because a replay
+  arrives after the world has moved on - the table may have been freed by somebody
+  else or deleted from the plan, and neither makes the transition that already
+  happened untrue. A queued transition the table has _genuinely_ moved past is
+  refused and named to the host rather than forced: forcing it would mean
+  re-sending it with whatever the table holds now as the expectation, which is the
+  same as having no expectation at all. The queue drains sequentially, unlike
+  \#1094's end-of-service reset, because two transitions on one table are ordered
+  and thirty tables are not. And the queue is keyed per **account**, because a
+  tablet at the host stand is signed into by whoever is on shift and the backend
+  records the transition against the account that finally sends it - a shared
+  queue would let the evening host replay the lunchtime host's seatings under
+  their own name, into the one trail whose purpose is answering who moved a
+  disputed table.
+
+  Two decisions about what the screen says. "Is this room live" is answered in
+  four states rather than two - connecting, live, offline, and stale with the age
+  on it - because the two no answers lead to different next moves, and "not
+  current" without a number is a warning nobody can act on. And liveness is not
+  inferred from the states: a quiet Tuesday afternoon and a listener the SDK
+  detached both look like silence, so `tableStates$` now delivers a snapshot
+  carrying its own arrival time and the health of the listener, and the device's
+  network state is read from the one `NetworkStatusService` in `libs/common` -
+  which the business app had never fed, so it had answered "connected" for the
+  whole of every session whatever the wifi did.
 
 Every child of stage 0 has now landed, and the stage is still not finished. Two things
 remain and neither has an owning issue: the rules deploy by hand, so \#1078 binds

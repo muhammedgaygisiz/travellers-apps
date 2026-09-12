@@ -69,28 +69,79 @@
 }
 
 /*
- * Whether the plan is live.
+ * Whether the plan is live, and whether the tablet has anything still to send
+ * (GitHub issues #1093, #1096).
  *
  * A word and an icon rather than a coloured dot, because "is what I am looking
  * at current" is the question a host asks when a table has not changed for a
  * while, and a dot answers it only for whoever already knows what the dot
  * means.
+ *
+ * The two badges are right-aligned and wrap, so a header that has gained a
+ * second one on a phone drops it under the first rather than squeezing the
+ * restaurant's name.
  */
-.table-plan__live {
+.table-plan__connection {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.table-plan__live,
+.table-plan__queued {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
   background: rgba(var(--table-plan-ink-rgb), 0.06);
-  color: var(--ion-color-success, #2dd36f);
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
 }
 
-.table-plan__live--waiting {
+/*
+  Never colour alone: each tone comes with its own icon and its own word, and
+  this only reinforces them. A greyscale print, or a reader who cannot separate
+  the amber from the green, still has both of the other two.
+*/
+.table-plan__live[data-tone='live'] {
+  color: var(--ion-color-success, #2dd36f);
+}
+
+.table-plan__live[data-tone='waiting'] {
   color: rgba(var(--table-plan-ink-rgb), 0.6);
+}
+
+.table-plan__live[data-tone='offline'] {
+  color: var(--ion-color-warning-shade, #cc9500);
+}
+
+.table-plan__live[data-tone='stale'] {
+  color: var(--ion-color-danger, #eb445a);
+  background: rgba(235, 68, 90, 0.12);
+}
+
+.table-plan__live-age {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.table-plan__queued {
+  color: var(--ion-color-warning-shade, #cc9500);
+}
+
+/* The one thing the plan cannot say about a table: nobody else knows yet. */
+.table-plan__detail-pending {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.25rem 0 0;
+  color: var(--ion-color-warning-shade, #cc9500);
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 .table-plan__loading {

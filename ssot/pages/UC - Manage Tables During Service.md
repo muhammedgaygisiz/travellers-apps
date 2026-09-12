@@ -2,9 +2,11 @@
 
 ## Status
 
-Not implemented. Specified through issue \#1071 as stage 2 of issue \#735.
+Started at the model. Specified through issue \#1071 as stage 2 of issue \#735.
 
-Blocked by [[UC - Own And Claim Restaurants]] and [[UC - Configure Restaurant Floor Plans And Tables]].
+Issue \#1091 added the live state and the transition matrix to `libs/bite-tribe-common/model`. Nothing writes or reads a state document yet: the callable that applies a transition is issue \#1092 and the live view is issue \#1093, so none of the flow below is reachable.
+
+[[UC - Configure Restaurant Floor Plans And Tables]] is complete and no longer blocks this. [[UC - Own And Claim Restaurants]] still does: the `staff` role is grantable and the security rules give it no write, so a staff member has nothing to sign in to.
 
 ## Goal
 
@@ -30,7 +32,7 @@ Restaurant staff open one screen during service and see the room as it is: which
 ## Key Behaviours
 
 - Live state lives in its own documents and is never written by the floor-plan editor. The editor never writes state, and state changes never write geometry.
-- Transitions are applied by the backend against a single exported transition matrix, so two staff members seating the same table produce one seating and one explicit conflict.
+- Transitions are applied by the backend against a single exported transition matrix, so two staff members seating the same table produce one seating and one explicit conflict. The matrix is `TABLE_STATE_TRANSITIONS` in `libs/bite-tribe-common/model`, tested over every ordered pair of statuses (issue \#1091).
 - Every transition records who made it, when, from which state, and why, so a disputed table has a history.
 - Status is conveyed by colour, icon, and text together, never by colour alone.
 - The view keeps working offline: transitions queue, carry an idempotency key, and reconcile on reconnect rather than being silently forced or dropped.

@@ -83,6 +83,7 @@ export class EditRestaurantComponent {
    */
   readonly manageStaff = output<void>();
   readonly editFloorPlan = output<void>();
+  readonly openTablePlan = output<void>();
 
   readonly socialMediaForm = this.formBuilder.group({
     links: this.formBuilder.array([]),

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { withAuthRoutes } from 'auth';
 import { authGuard, documentOwnerGuard, roleGuard } from 'ta-firestore';
+import { restaurantAccessGuard } from './restaurant-access.guard';
 
 /**
  * The second half of the ownership boundary, and the half a link cannot dodge.
@@ -150,6 +151,33 @@ export const ROUTES: Routes = withAuthRoutes([
       authGuard,
       roleGuard('business', 'staff'),
       ownedRestaurantGuard,
+    ],
+  },
+  /**
+   * The live room, and the one route in this app a **staff** account is meant
+   * to reach (issue #1093).
+   *
+   * Not `ownedRestaurantGuard`, which checks `Restaurant.ownerUserId` and would
+   * therefore refuse every account this page exists for.
+   * `restaurantAccessGuard` admits the owner and the staff of the one
+   * restaurant, which is the two halves of `worksAt()` in `firestore.rules`, so
+   * the gate and the rules agree about who may look at a room.
+   *
+   * It sits beside the floor plan rather than under it because it is not part
+   * of it: the editor writes a draft of a plan, this reads the published one
+   * and never writes it, and the two are opened by different people at
+   * different times of day.
+   */
+  {
+    path: 'restaurant/:restaurantId/tables',
+    loadComponent: () =>
+      import('bite-tribe-business/table-management').then(
+        (m) => m.TablePlanContainer,
+      ),
+    canActivate: [
+      authGuard,
+      roleGuard('business', 'staff'),
+      restaurantAccessGuard('/restaurants'),
     ],
   },
   /**

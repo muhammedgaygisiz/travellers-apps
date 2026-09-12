@@ -75,6 +75,12 @@
       "bite-tribe-business/staff-data-access": [
         "libs/bite-tribe-business/staff/data-access/src/index.ts"
       ],
+      "bite-tribe-business/table-management": [
+        "libs/bite-tribe-business/table-management/page/src/index.ts"
+      ],
+      "bite-tribe-business/table-management-data-access": [
+        "libs/bite-tribe-business/table-management/data-access/src/index.ts"
+      ],
       "bite-tribe-business/shell": [
         "libs/bite-tribe-business/shell/src/index.ts"
       ],

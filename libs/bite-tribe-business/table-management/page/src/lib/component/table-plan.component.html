@@ -1,0 +1,243 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="isAuthenticated()"
+  (logoutClick)="logoutClick.emit()"
+>
+  <!--
+    No sideways scrolling, unlike the editor. The editor does not collapse
+    below a desktop width and turns `scrollX` on so its right-hand column stays
+    reachable; this page has one column at phone width and must never scroll
+    sideways, because a host is reading it one-handed on a moving tablet.
+  -->
+  <ion-content class="ion-padding">
+    <div class="table-plan">
+      <header class="table-plan__header">
+        <div class="table-plan__heading">
+          <h1 class="table-plan__title">
+            {{ 'table-plan-title' | transloco }}
+          </h1>
+          @if (restaurantName()) {
+            <ion-note class="table-plan__subtitle">{{
+              restaurantName()
+            }}</ion-note>
+          }
+        </div>
+
+        <!--
+          Whether what is on screen has been confirmed by the server.
+          A plan drawn before the first snapshot is a plan of defaults, and a
+          room where everything looks free has to be distinguishable from a
+          room nothing has been heard about yet.
+        -->
+        <span
+          class="table-plan__live"
+          [class.table-plan__live--waiting]="!isLive()"
+          role="status"
+          data-testid="table-plan-live"
+        >
+          <ion-icon
+            [name]="isLive() ? 'radio-button-on-outline' : 'time-outline'"
+            aria-hidden="true"
+          />
+          {{
+            (isLive() ? 'table-plan-live' : 'table-plan-connecting') | transloco
+          }}
+        </span>
+      </header>
+
+      @if (loading()) {
+        <div class="table-plan__loading">
+          <ion-spinner name="crescent" />
+        </div>
+      } @else if (loadFailed()) {
+        <ion-note class="table-plan__message" data-testid="table-plan-failed">{{
+          'table-plan-load-failed' | transloco
+        }}</ion-note>
+      } @else if (!hasRooms()) {
+        <ion-note class="table-plan__message" data-testid="table-plan-empty">{{
+          'table-plan-empty' | transloco
+        }}</ion-note>
+      } @else {
+        <!--
+          The room switcher. A segment rather than a list, because switching is
+          the only thing done to a room here and a segment is one tap wide
+          enough for a thumb. It scrolls itself on a phone, which is what keeps
+          a restaurant of six rooms from widening the page.
+        -->
+        @if (rooms().length > 1) {
+          <ion-segment
+            class="table-plan__rooms"
+            scrollable="true"
+            [value]="selectedRoom()?.id"
+            [attr.aria-label]="'table-plan-rooms' | transloco"
+            data-testid="table-plan-rooms"
+            (ionChange)="onSelectRoom($any($event.detail.value))"
+          >
+            @for (room of rooms(); track room.id) {
+              <ion-segment-button
+                [value]="room.id"
+                [attr.data-testid]="'table-plan-room-' + room.id"
+              >
+                {{ room.name }}
+              </ion-segment-button>
+            }
+          </ion-segment>
+        }
+
+        <!--
+          What the room adds up to. Read before looking down at the plan, so it
+          stands above it rather than beside it at every width.
+        -->
+        <ul
+          class="table-plan__summary"
+          [attr.aria-label]="'table-plan-summary' | transloco"
+          data-testid="table-plan-summary"
+        >
+          @for (chip of chips(); track chip.status) {
+            <li
+              class="table-plan__chip"
+              [style.--chip-colour]="chip.colour"
+              [style.--chip-tint]="chip.tint"
+              [attr.data-testid]="'table-plan-count-' + chip.status"
+            >
+              <svg
+                class="table-plan__chip-glyph"
+                [attr.viewBox]="chip.viewBox"
+                aria-hidden="true"
+              >
+                <path
+                  [attr.d]="chip.glyphPath"
+                  [attr.fill]="chip.glyphFill"
+                  [attr.stroke]="chip.colour"
+                  [attr.stroke-width]="chip.strokeWidth"
+                />
+              </svg>
+              <span class="table-plan__chip-count">{{ chip.count }}</span>
+              <span class="table-plan__chip-label">{{
+                chip.labelKey | transloco
+              }}</span>
+            </li>
+          }
+        </ul>
+
+        <div
+          class="table-plan__body"
+          [class.table-plan__body--with-detail]="!!selectedTable()"
+        >
+          <div class="table-plan__canvas">
+            @if (roomTableCount() === 0) {
+              <ion-note
+                class="table-plan__message"
+                data-testid="table-plan-room-empty"
+                >{{ 'table-plan-room-empty' | transloco }}</ion-note
+              >
+            }
+
+            <!--
+              The canvas is given a definite height rather than left to grow.
+              It draws in millimetres and has no size of its own, and
+              `preserveAspectRatio` fits the whole room inside whatever it is
+              given - so a height the page decides is what makes "the whole room
+              at a glance" true instead of a plan that runs off the bottom.
+            -->
+            <div class="table-plan__plan">
+              <bt-business-floor-plan-canvas
+                readOnly
+                [room]="selectedRoom()"
+                [items]="items()"
+                [selectedIds]="selectedIds()"
+                [showGrid]="false"
+                (selectionChange)="selectionChange.emit($event)"
+                (longPress)="activateTable.emit($event)"
+              />
+            </div>
+
+            <p class="table-plan__hint">{{ 'table-plan-hint' | transloco }}</p>
+          </div>
+
+          <!--
+            The table staff picked, with the two things the plan has no room
+            for: the note somebody left on it, and who last changed it.
+          -->
+          @if (selectedTable(); as detail) {
+            <aside
+              class="table-plan__detail"
+              [attr.aria-label]="'table-plan-detail' | transloco"
+              data-testid="table-plan-detail"
+            >
+              <div class="table-plan__detail-head">
+                <h2 class="table-plan__detail-title">
+                  {{
+                    'table-plan-detail-title'
+                      | transloco: { label: detail.table.label }
+                  }}
+                </h2>
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  [attr.aria-label]="'table-plan-detail-close' | transloco"
+                  data-testid="table-plan-detail-close"
+                  (click)="clearSelection.emit()"
+                >
+                  <ion-icon name="close-outline" slot="icon-only" />
+                </ion-button>
+              </div>
+
+              @if (detailMark(); as mark) {
+                <p
+                  class="table-plan__detail-status"
+                  [style.--chip-colour]="mark.colour"
+                >
+                  <svg
+                    class="table-plan__chip-glyph"
+                    [attr.viewBox]="mark.viewBox"
+                    aria-hidden="true"
+                  >
+                    <path
+                      [attr.d]="mark.glyphPath"
+                      [attr.fill]="mark.glyphFill"
+                      [attr.stroke]="mark.colour"
+                      [attr.stroke-width]="mark.strokeWidth"
+                    />
+                  </svg>
+                  <span>{{ detail.statusLabel }}</span>
+                  @if (detail.duration) {
+                    <ion-badge
+                      class="table-plan__detail-duration"
+                      color="light"
+                      data-testid="table-plan-detail-duration"
+                      >{{ detail.duration }}</ion-badge
+                    >
+                  }
+                </p>
+              }
+
+              <ion-note class="table-plan__detail-seats">{{
+                'floor-plan-table-seats-count'
+                  | transloco: { count: detail.table.seats }
+              }}</ion-note>
+
+              @if (detail.note) {
+                <p
+                  class="table-plan__detail-note"
+                  data-testid="table-plan-detail-note"
+                >
+                  {{ detail.note }}
+                </p>
+              }
+
+              <!--
+                The actions themselves are issue #1094. Saying so on the surface
+                rather than leaving a panel that looks like it should do
+                something and does not.
+              -->
+              <ion-note class="table-plan__detail-pending">{{
+                'table-plan-actions-pending' | transloco
+              }}</ion-note>
+            </aside>
+          }
+        </div>
+      }
+    </div>
+  </ion-content>
+</ta-page>

@@ -257,6 +257,67 @@
   }
 }
 
+/*
+ * A table under service (GitHub issue #1093).
+ *
+ * The colour itself is bound on the element, because it belongs to the status
+ * and the statuses are enumerated in the model - seven rules here would be a
+ * second list to keep in step with `TABLE_STATUSES`. What is left for the
+ * stylesheet is everything that is true of *every* status: the table is not
+ * draggable, its number goes back to full ink over a tinted fill, and the
+ * hatch a disabled table carries in the editor is dropped, because on this
+ * view "out of service" is a status with its own mark.
+ */
+.floor-plan-canvas__item--status {
+  cursor: pointer;
+
+  .floor-plan-canvas__item-label {
+    fill: var(--floor-plan-ink);
+  }
+
+  &.floor-plan-canvas__item--disabled {
+    rect,
+    circle {
+      stroke-dasharray: none;
+    }
+  }
+}
+
+.floor-plan-canvas__item-status {
+  pointer-events: none;
+
+  text {
+    font-family: var(--ion-font-family, sans-serif);
+    font-weight: 600;
+  }
+}
+
+/*
+ * The time in state, quieter than the number it stands under and louder than
+ * the seat count it replaces, because it is the thing staff scan a room for.
+ */
+.floor-plan-canvas__item-duration {
+  fill: rgba(var(--floor-plan-ink-rgb), 0.75);
+  font-family: var(--ion-font-family, sans-serif);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/*
+ * Read-only, which is the live view of issue #1093.
+ *
+ * The plan is dragged to move the view rather than to move the room, so the
+ * whole surface takes the grab cursor and the tables take a pointer - the
+ * ordinary vocabulary for "this is draggable scenery" and "this is a thing you
+ * can pick".
+ */
+.floor-plan-canvas__surface--read-only {
+  .floor-plan-canvas__item {
+    cursor: pointer;
+  }
+}
+
 .floor-plan-canvas__item--selected {
   rect,
   circle {

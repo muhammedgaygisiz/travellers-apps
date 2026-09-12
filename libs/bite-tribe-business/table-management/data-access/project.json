@@ -1,0 +1,8 @@
+{
+  "name": "bite-tribe-business/table-management-data-access",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bite-tribe-business/table-management/data-access/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:bite-tribe-business", "type:data-access"]
+}

@@ -98,7 +98,15 @@ console. Each default is deliberate:
 Checked-in SQL lives in `tools/analytics/queries/`, run by
 `npm run analytics:query -- <id>`. Two placeholders keep a query portable:
 `${EVENTS_TABLE}` for the wildcard table, and `@start_date`/`@end_date` for the
-`_TABLE_SUFFIX` window.
+`_TABLE_SUFFIX` window. `npm run analytics:query -- --list` names them.
+
+`table-operations` is the one query that is not a raw-data equivalent of a
+dashboard tile. It computes the table turnover, the share of tables used and the
+average occupancy duration of [issue 1098](https://github.com/muhammedgaygisiz/travellers-apps/issues/1098) per restaurant per service day, and it
+lives here rather than on the launch dashboard for two reasons: all three are
+ratios over an event parameter and two need a distinct count of one, which the
+Data API cannot express, and the dashboard is scoped to launch signals on
+purpose.
 
 History effectively starts at the link. The first delivery reached back one
 day — the link created on 1 September 2026 at 03:10 CEST produced

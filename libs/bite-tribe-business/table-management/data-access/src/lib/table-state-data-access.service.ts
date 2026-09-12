@@ -1,7 +1,7 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
-import { TableState, TableStatus } from 'model';
+import { TableState, TableStatus, TableVisitStatus } from 'model';
 import { Observable } from 'rxjs';
 
 export const RESTAURANT_COLLECTION = 'restaurants';
@@ -67,6 +67,19 @@ export interface TableTransitionResult {
    * second time.
    */
   replayed?: boolean;
+  /**
+   * The visit this transition opened, carried forward, or ended
+   * (GitHub issue #1095).
+   *
+   * Absent where the transition named no visit - `cleaning` to `available` at
+   * the end of a service is a table being made ready, not a party doing
+   * anything. `transitionTableState` has answered with both fields since issue
+   * #1095; they are declared here by issue #1098, which is the first caller
+   * with a use for them.
+   */
+  visitId?: string;
+  /** What the visit named by {@link visitId} is now. */
+  visitStatus?: TableVisitStatus;
 }
 
 /**

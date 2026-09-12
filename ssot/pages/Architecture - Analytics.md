@@ -64,8 +64,7 @@ exception
 
 Launch-critical product events are defined once as a typed taxonomy and emitted
 through `AnalyticsService` from the owning integration layer (not from UI
-components). The service wraps `FirebaseAnalytics.logEvent`, never throws, and
-no-ops in the business app.
+components). The service wraps `FirebaseAnalytics.logEvent` and never throws.
 
 | Category   | Event                | Trigger                         |
 | ---------- | -------------------- | ------------------------------- |
@@ -76,10 +75,41 @@ no-ops in the business app.
 | Discovery  | `search_performed`   | Search query becomes meaningful |
 | Discovery  | `restaurant_viewed`  | Restaurant / place page entered |
 | Discovery  | `bite_viewed`        | Bite details page entered       |
+| Table ops  | `table_*` (7 events) | Staff change a table or a visit |
 
 Retention and launch monitoring rely on GA4 auto-collected events
 (`first_open`, `session_start`) plus the existing `exception` event, so they
 need no additional instrumentation.
+
+## Surface Rule
+
+The taxonomy spans two apps, and each event names the one it belongs to in
+`ANALYTICS_EVENT_SURFACE`. An event whose surface is not the running bundle is
+dropped, which is what keeps a `sign_up` from a staff tablet out of the
+activation count and a `table_seated` out of the consumer app. The bundle is
+read from the `NX_APP_BITE_TRIBE_IS_BUSINESS` flag `env-var-plugin.js` compiles
+in; the admin app has no flag of its own and reads as `consumer`, which is what
+it already was.
+
+Before issue 1098 the guard was per app: the whole service returned early in
+the business app, because every event it knew belonged to the consumer one. The
+table operations of [[epic-1071]] are the first events the business app owns.
+
+## One Property, Two Apps
+
+All three shells read the same `measurementId`, so the business app's events
+land on the property the launch dashboard reads. Until issue 1098 nothing
+initialized analytics there at all, so the business app sent neither product
+nor auto-collected events; its first `table_*` event initializes the web SDK,
+and the auto-collected `session_start` and `page_view` of every staff shift
+follow.
+
+Those carry no event name that distinguishes them, so both apps set the
+user-scoped property `app_surface` (`consumer` / `business`) before their first
+event. It is set from both now even though nothing filters on it yet: GA4 does
+not backfill, and a filter added later over traffic that never carried the
+property would exclude nothing. See [[Implementation - Analytics Events]] for
+what still has to be filtered.
 
 See [[Implementation - Analytics Events]] for the full parameter table, the
 launch dashboard spec, and DebugView verification steps.
@@ -94,6 +124,7 @@ libs/common/ta-firestore/src/lib/analytics/firebase-error-handler.service.ts
 libs/common/ta-firestore/src/lib/auth.service.ts
 libs/common/ta-firestore/src/lib/provide-firestore-utils.ts
 libs/bite-tribe/**/page/src/lib/integration
+libs/bite-tribe-business/table-management/page/src/lib/integration/table-plan.service.ts
 ```
 
 ## Current Limitations

@@ -29,7 +29,19 @@ const KEY_EVENTS = [
   'bucketlist_rated',
 ];
 
-/** Event parameters promoted to event-scoped custom dimensions. */
+/**
+ * Parameters and properties promoted to custom dimensions.
+ *
+ * `scope` defaults to `EVENT`. A `USER`-scoped entry describes the person
+ * rather than the event, which is what a filter over `activeUsers` needs.
+ *
+ * Only low-cardinality values are registered. GA4 allows 50 event-scoped
+ * dimensions and collapses a high-cardinality one into `(other)` rows, so the
+ * ids the table operations of issue #1098 carry - `restaurant_id`, `table_id`,
+ * `visit_id` - are deliberately absent: they are read from the BigQuery export
+ * by `queries/table-operations.sql`, which carries every parameter whether GA4
+ * knows it or not.
+ */
 const CUSTOM_DIMENSIONS = [
   { parameterName: 'method', displayName: 'Sign up method' },
   { parameterName: 'verified', displayName: 'Restaurant verified' },
@@ -40,6 +52,20 @@ const CUSTOM_DIMENSIONS = [
   // top-errors breakdown starts from the day it is applied.
   { parameterName: 'description', displayName: 'Error description' },
   { parameterName: 'fatal', displayName: 'Error fatal' },
+  // Table operations (issue #1098). `from_status` is what separates freeing an
+  // occupied table from putting a blocked one back into service, and `outcome`
+  // a visit staff closed from one nobody ever looked at.
+  { parameterName: 'from_status', displayName: 'Table status left' },
+  { parameterName: 'outcome', displayName: 'Visit outcome' },
+  // Which app the session came from (issue #1098). Both apps report to one
+  // property through one measurement id, so this is the only thing separating
+  // a staff shift from a diner's session - and `activeUsers` counts people,
+  // which is why it is user-scoped rather than event-scoped.
+  {
+    parameterName: 'app_surface',
+    displayName: 'App surface',
+    scope: 'USER',
+  },
 ];
 
 const EDITOR_HINT =
@@ -70,9 +96,11 @@ function printPlan() {
   console.log('Planned GA4 config (derived from the event taxonomy):\n');
   console.log('Key events (conversions):');
   for (const e of KEY_EVENTS) console.log(`- ${e}`);
-  console.log('\nCustom dimensions (event-scoped):');
+  console.log('\nCustom dimensions:');
   for (const d of CUSTOM_DIMENSIONS) {
-    console.log(`- ${d.parameterName} — "${d.displayName}"`);
+    console.log(
+      `- ${d.parameterName} — "${d.displayName}" [${scopeOf(d)}-scoped]`,
+    );
   }
 }
 
@@ -134,6 +162,11 @@ async function provisionKeyEvents(client, parent) {
   }
 }
 
+/** A dimension's scope, defaulting to the event it was sent with. */
+function scopeOf(dimension) {
+  return dimension.scope ?? 'EVENT';
+}
+
 async function provisionCustomDimensions(client, parent) {
   console.log('\nCustom dimensions:');
   const [existing] = await client.listCustomDimensions({ parent });
@@ -148,10 +181,10 @@ async function provisionCustomDimensions(client, parent) {
       customDimension: {
         parameterName: dim.parameterName,
         displayName: dim.displayName,
-        scope: 'EVENT',
+        scope: scopeOf(dim),
       },
     });
-    console.log(`- ${dim.parameterName} (created)`);
+    console.log(`- ${dim.parameterName} (created, ${scopeOf(dim)}-scoped)`);
   }
 }
 

@@ -563,5 +563,17 @@
   "support-report-title": "Reporting content",
   "support-report-intro": "If you see a Bite or a review that does not belong on BiteTribe, email us with a link or a screenshot and we will look at it.",
   "support-links-title": "Also useful",
-  "support-links-account-deletion": "Deleting your account"
+  "support-links-account-deletion": "Deleting your account",
+  "analytics-consent-title": "Help us improve BiteTribe",
+  "analytics-consent-copy": "We can collect anonymous usage data to see which features work and what breaks.",
+  "analytics-consent-benefit-features": "Which screens and features get used",
+  "analytics-consent-benefit-crashes": "Crashes and errors, so we can fix them",
+  "analytics-consent-benefit-never-content": "Never your Bites, photos or profile",
+  "analytics-consent-change-later": "You can change this any time in Settings.",
+  "analytics-consent-allow": "Allow",
+  "analytics-consent-decline": "No thanks",
+  "privacy": "Privacy",
+  "privacy-share-usage-data": "Share usage data",
+  "privacy-crash-reports": "Crash reports",
+  "privacy-consent-hint": "Turning these off stops collection straight away."
 }

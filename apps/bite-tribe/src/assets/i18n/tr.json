@@ -563,5 +563,17 @@
   "support-report-title": "İçerik bildirme",
   "support-report-intro": "BiteTribe’ta olmaması gereken bir Bite veya değerlendirme görürsen bize bağlantı ya da ekran görüntüsüyle yaz, inceleyelim.",
   "support-links-title": "Ayrıca faydalı",
-  "support-links-account-deletion": "Hesabını silme"
+  "support-links-account-deletion": "Hesabını silme",
+  "analytics-consent-title": "BiteTribe'ı geliştirmemize yardım et",
+  "analytics-consent-copy": "Neyin işe yaradığını ve neyin çöktüğünü görmek için anonim kullanım verileri toplayabiliriz.",
+  "analytics-consent-benefit-features": "Hangi ekranların ve özelliklerin kullanıldığı",
+  "analytics-consent-benefit-crashes": "Çökmeler ve hatalar, düzeltebilmemiz için",
+  "analytics-consent-benefit-never-content": "Bite'ların, fotoğrafların veya profilin asla",
+  "analytics-consent-change-later": "Bunu istediğin zaman Ayarlar'dan değiştirebilirsin.",
+  "analytics-consent-allow": "İzin ver",
+  "analytics-consent-decline": "Hayır, teşekkürler",
+  "privacy": "Gizlilik",
+  "privacy-share-usage-data": "Kullanım verilerini paylaş",
+  "privacy-crash-reports": "Çökme raporları",
+  "privacy-consent-hint": "Kapattığında veri toplama hemen durur."
 }

@@ -399,6 +399,38 @@
       </form>
     </section>
 
+    <!-- Consent applies the moment it is toggled, deliberately outside the
+    form and its save button. A withdrawal that waits for "save preferences" is
+    a withdrawal that silently keeps collecting until the user notices. -->
+    <section class="privacy-section">
+      <h2>{{ 'privacy' | transloco }}</h2>
+
+      <div class="settings-section">
+        <ion-item>
+          <ion-label>{{ 'privacy-share-usage-data' | transloco }}</ion-label>
+          <ion-toggle
+            slot="end"
+            data-testid="settings-analytics-consent"
+            [checked]="analyticsConsent.analyticsGranted()"
+            (ionChange)="onAnalyticsConsentChange($event)"
+          />
+        </ion-item>
+        <ion-item>
+          <ion-label>{{ 'privacy-crash-reports' | transloco }}</ion-label>
+          <ion-toggle
+            slot="end"
+            data-testid="settings-crash-consent"
+            [checked]="analyticsConsent.crashReportingGranted()"
+            (ionChange)="onCrashReportingConsentChange($event)"
+          />
+        </ion-item>
+      </div>
+
+      <p class="privacy-section__hint">
+        {{ 'privacy-consent-hint' | transloco }}
+      </p>
+    </section>
+
     <section class="account-section">
       <h2>{{ 'account' | transloco }}</h2>
 

@@ -563,5 +563,17 @@
   "support-report-title": "Denunciar conteúdo",
   "support-report-intro": "Se vir um Bite ou uma avaliação que não deveria estar no BiteTribe, escreva para nós com um link ou print e vamos analisar.",
   "support-links-title": "Também útil",
-  "support-links-account-deletion": "Excluir sua conta"
+  "support-links-account-deletion": "Excluir sua conta",
+  "analytics-consent-title": "Ajude a melhorar o BiteTribe",
+  "analytics-consent-copy": "Podemos coletar dados de uso anônimos para ver o que funciona e o que falha.",
+  "analytics-consent-benefit-features": "Quais telas e recursos são usados",
+  "analytics-consent-benefit-crashes": "Falhas e erros, para podermos corrigi-los",
+  "analytics-consent-benefit-never-content": "Nunca seus Bites, fotos ou perfil",
+  "analytics-consent-change-later": "Você pode mudar isso quando quiser nas Configurações.",
+  "analytics-consent-allow": "Permitir",
+  "analytics-consent-decline": "Não, obrigado",
+  "privacy": "Privacidade",
+  "privacy-share-usage-data": "Compartilhar dados de uso",
+  "privacy-crash-reports": "Relatórios de falhas",
+  "privacy-consent-hint": "Ao desativar, a coleta para imediatamente."
 }

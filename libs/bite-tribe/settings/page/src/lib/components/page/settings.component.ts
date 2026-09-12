@@ -36,6 +36,7 @@ import { currencyCodes } from 'utils';
 import { User } from '@capacitor-firebase/authentication';
 import { CardComponent } from 'common/ui/card';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { AnalyticsConsentService } from 'ta-firestore';
 import type { PushPermissionState } from 'push-notifications';
 import type { MediaLocationPermissionState } from 'media-location';
 
@@ -126,6 +127,14 @@ export class PageSettings {
   openPhotoLocationSettings = output<void>();
 
   private readonly formBuilder = inject(FormBuilder);
+
+  /**
+   * Injected directly rather than lifted into the container. Consent is device
+   * state that applies immediately on both apps, not part of the saved settings
+   * document, so routing it through an output and back would add a round trip
+   * without adding a decision point.
+   */
+  readonly analyticsConsent = inject(AnalyticsConsentService);
 
   currencies = currencyCodes;
 
@@ -445,4 +454,19 @@ export class PageSettings {
   getTheme(matches: boolean): 'dark' | 'light' {
     return matches ? 'dark' : 'light';
   }
+
+  async onAnalyticsConsentChange(event: Event): Promise<void> {
+    await this.analyticsConsent.update({
+      analytics: isToggleChecked(event) ? 'granted' : 'denied',
+    });
+  }
+
+  async onCrashReportingConsentChange(event: Event): Promise<void> {
+    await this.analyticsConsent.update({
+      crashReporting: isToggleChecked(event) ? 'granted' : 'denied',
+    });
+  }
 }
+
+const isToggleChecked = (event: Event): boolean =>
+  (event as CustomEvent<{ checked: boolean }>).detail.checked;

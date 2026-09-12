@@ -563,5 +563,17 @@
   "support-report-title": "Melaporkan konten",
   "support-report-intro": "Jika kamu melihat Bite atau ulasan yang tidak pantas ada di BiteTribe, kirimi kami tautan atau tangkapan layar dan kami akan memeriksanya.",
   "support-links-title": "Juga berguna",
-  "support-links-account-deletion": "Menghapus akunmu"
+  "support-links-account-deletion": "Menghapus akunmu",
+  "analytics-consent-title": "Bantu kami menyempurnakan BiteTribe",
+  "analytics-consent-copy": "Kami dapat mengumpulkan data penggunaan anonim untuk melihat apa yang berhasil dan apa yang bermasalah.",
+  "analytics-consent-benefit-features": "Layar dan fitur mana yang digunakan",
+  "analytics-consent-benefit-crashes": "Kerusakan dan galat, agar bisa kami perbaiki",
+  "analytics-consent-benefit-never-content": "Tidak pernah Bite, foto, atau profil Anda",
+  "analytics-consent-change-later": "Anda dapat mengubahnya kapan saja di Pengaturan.",
+  "analytics-consent-allow": "Izinkan",
+  "analytics-consent-decline": "Tidak, terima kasih",
+  "privacy": "Privasi",
+  "privacy-share-usage-data": "Bagikan data penggunaan",
+  "privacy-crash-reports": "Laporan kerusakan",
+  "privacy-consent-hint": "Menonaktifkannya menghentikan pengumpulan data seketika."
 }

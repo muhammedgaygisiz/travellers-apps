@@ -6,6 +6,7 @@ import { ComponentRef } from '@angular/core';
 import { PublicUser, Settings } from 'model';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
+import { AnalyticsConsentService } from 'ta-firestore';
 
 const setupMockForWindowMatchMedia = (value?: boolean): void => {
   Object.defineProperty(window, 'matchMedia', {
@@ -35,15 +36,27 @@ describe(PageSettings.name, () => {
   let component: PageSettings;
   let fixture: ComponentFixture<PageSettings>;
   let compRef: ComponentRef<PageSettings>;
+  let consentServiceMock: {
+    update: jest.Mock;
+    analyticsGranted: () => boolean;
+    crashReportingGranted: () => boolean;
+  };
 
   beforeEach(() => {
     // Mock window.matchMedia
     setupMockForWindowMatchMedia(false);
 
+    consentServiceMock = {
+      update: jest.fn(async () => undefined),
+      analyticsGranted: (): boolean => true,
+      crashReportingGranted: (): boolean => false,
+    };
+
     TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(getIonicConfig()),
         { provide: TranslocoService, useValue: MockTranslocoService },
+        { provide: AnalyticsConsentService, useValue: consentServiceMock },
       ],
     });
     fixture = TestBed.createComponent(PageSettings);
@@ -844,6 +857,35 @@ describe(PageSettings.name, () => {
       button?.click();
 
       expect(resendSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('privacy consent toggles', () => {
+    const toggleEvent = (checked: boolean): Event =>
+      new CustomEvent('ionChange', { detail: { checked } });
+
+    it('should record an analytics withdrawal without touching crash reporting', async () => {
+      await component.onAnalyticsConsentChange(toggleEvent(false));
+
+      expect(consentServiceMock.update).toHaveBeenCalledWith({
+        analytics: 'denied',
+      });
+    });
+
+    it('should record an analytics grant', async () => {
+      await component.onAnalyticsConsentChange(toggleEvent(true));
+
+      expect(consentServiceMock.update).toHaveBeenCalledWith({
+        analytics: 'granted',
+      });
+    });
+
+    it('should record a crash reporting grant on its own', async () => {
+      await component.onCrashReportingConsentChange(toggleEvent(true));
+
+      expect(consentServiceMock.update).toHaveBeenCalledWith({
+        crashReporting: 'granted',
+      });
     });
   });
 });

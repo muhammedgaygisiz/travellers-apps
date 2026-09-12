@@ -44,6 +44,7 @@ import { provideFirestoreSimulator } from './provide-firestore-simulator';
 import { Emulators } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { Analytics } from 'firebase/analytics';
+import { AnalyticsConsentService } from './analytics/analytics-consent.service';
 import { AuthService } from './auth.service';
 import { StartupNavigationService } from './startup-navigation.service';
 
@@ -57,34 +58,6 @@ export const FIREBASE_AUTH = new InjectionToken<Auth>('FIREBASE_AUTH');
 
 export type FirebaseAppCheckRuntimeContext = {
   production?: boolean;
-};
-
-/**
- * Re-asserts native Firebase Analytics collection on every non-dev startup.
- *
- * The native SDKs persist the flag set by `setEnabled` - Android in the app's
- * SharedPreferences, iOS in its user defaults - so the DEV-only
- * `setEnabled({ enabled: false })` below outlives the process, the build, and
- * the install that made the call. A device that once ran a dev build
- * therefore kept native collection off in every later production build, which
- * is exactly what run 9 of the release-candidate charter observed on Android
- * (`App measurement disabled by setAnalyticsCollectionEnabled(false)`, issue
- * #1387). Production has to state the flag rather than trust the SDK default.
- *
- * Only native platforms are touched. On web the same plugin call sets a
- * per-page-load `ga-disable-*` window flag that nothing persists, so there is
- * no leak to undo there, and calling it here would eagerly initialize web
- * analytics for apps - the business app among them - that never asked for it.
- */
-const enableNativeAnalyticsCollection = (): void => {
-  if (!Capacitor.isNativePlatform()) {
-    return;
-  }
-
-  FirebaseAnalytics.setEnabled({ enabled: true }).catch((error) => {
-    // Analytics is best-effort; a failed flag must not break startup.
-    console.warn('Failed to enable native analytics collection:', error);
-  });
 };
 
 export const provideFirestoreUtils = (
@@ -101,8 +74,12 @@ export const provideFirestoreUtils = (
   );
 
   if (process.env['NX_APP_BITE_TRIBE_IS_DEV'] !== 'true') {
-    enableNativeAnalyticsCollection();
-
+    // Collection is no longer asserted here. `AnalyticsConsentService` states
+    // the flag from the stored decision inside the startup initializer below,
+    // which is the first thing that runs and therefore closes the window where
+    // an un-consented event could be logged. It keeps the issue #1387 fix -
+    // production still asserts the flag on every startup rather than trusting a
+    // native default that outlives installs - it just asserts the user's answer.
     return [
       startupInitializer,
       ...provideStandardFirestoreUtils(app, firestore, Boolean(withAnalytics)),
@@ -154,6 +131,7 @@ const provideFirebaseStartupInitializer = (
       optional: true,
     }) as Analytics | null;
     const authService = inject(AuthService);
+    const consent = inject(AnalyticsConsentService);
     const readiness = inject(AppCheckReadinessService);
     const router = inject(Router);
     const startupNavigation = inject(StartupNavigationService);
@@ -163,6 +141,7 @@ const provideFirebaseStartupInitializer = (
       runtimeContext,
       analytics,
       authService,
+      consent,
       {
         readiness,
         startNavigation: () => runInitialNavigation(router, startupNavigation),
@@ -204,9 +183,16 @@ export const createFirebaseStartupInitializer =
     runtimeContext: FirebaseAppCheckRuntimeContext | undefined,
     analytics: Analytics | null | undefined,
     authService: Pick<AuthService, 'initialize'>,
+    consent: Pick<AnalyticsConsentService, 'initialize'>,
     gate: AppCheckStartupGate,
   ): (() => Promise<void>) =>
   async () => {
+    // First, and before App Check: `initializeFirebaseAppCheck` logs its own
+    // `app_check_startup_started` / `_completed` telemetry, so applying the
+    // stored decision any later would let those two events escape the gate on
+    // every single launch.
+    await consent.initialize();
+
     const readiness: AppCheckReadiness =
       await createFirebaseAppCheckInitializer(app, runtimeContext, analytics)();
 

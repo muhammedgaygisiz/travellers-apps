@@ -563,5 +563,17 @@
   "support-report-title": "Signaler un contenu",
   "support-report-intro": "Si vous voyez un Bite ou un avis qui n’a pas sa place sur BiteTribe, écrivez-nous avec un lien ou une capture d’écran et nous l’examinerons.",
   "support-links-title": "Également utile",
-  "support-links-account-deletion": "Supprimer votre compte"
+  "support-links-account-deletion": "Supprimer votre compte",
+  "analytics-consent-title": "Aidez-nous à améliorer BiteTribe",
+  "analytics-consent-copy": "Nous pouvons collecter des données d'usage anonymes pour voir ce qui fonctionne et ce qui plante.",
+  "analytics-consent-benefit-features": "Quels écrans et fonctionnalités sont utilisés",
+  "analytics-consent-benefit-crashes": "Les plantages et erreurs, pour les corriger",
+  "analytics-consent-benefit-never-content": "Jamais vos Bites, photos ni votre profil",
+  "analytics-consent-change-later": "Vous pouvez changer cela à tout moment dans les Réglages.",
+  "analytics-consent-allow": "Autoriser",
+  "analytics-consent-decline": "Non merci",
+  "privacy": "Confidentialité",
+  "privacy-share-usage-data": "Partager les données d'usage",
+  "privacy-crash-reports": "Rapports de plantage",
+  "privacy-consent-hint": "En désactivant, la collecte s'arrête immédiatement."
 }

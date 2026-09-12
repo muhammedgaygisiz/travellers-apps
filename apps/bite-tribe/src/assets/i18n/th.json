@@ -563,5 +563,17 @@
   "support-report-title": "รายงานเนื้อหา",
   "support-report-intro": "หากคุณเห็น Bite หรือรีวิวที่ไม่ควรอยู่บน BiteTribe ส่งอีเมลพร้อมลิงก์หรือภาพหน้าจอมาให้เรา แล้วเราจะตรวจสอบ",
   "support-links-title": "มีประโยชน์เช่นกัน",
-  "support-links-account-deletion": "การลบบัญชีของคุณ"
+  "support-links-account-deletion": "การลบบัญชีของคุณ",
+  "analytics-consent-title": "ช่วยเราพัฒนา BiteTribe",
+  "analytics-consent-copy": "เราสามารถเก็บข้อมูลการใช้งานแบบไม่ระบุตัวตน เพื่อดูว่าอะไรใช้ได้ดีและอะไรมีปัญหา",
+  "analytics-consent-benefit-features": "หน้าจอและฟีเจอร์ใดที่ถูกใช้งาน",
+  "analytics-consent-benefit-crashes": "ข้อขัดข้องและข้อผิดพลาด เพื่อให้เราแก้ไขได้",
+  "analytics-consent-benefit-never-content": "ไม่รวม Bites รูปภาพ หรือโปรไฟล์ของคุณ",
+  "analytics-consent-change-later": "คุณเปลี่ยนได้ทุกเมื่อในการตั้งค่า",
+  "analytics-consent-allow": "อนุญาต",
+  "analytics-consent-decline": "ไม่ ขอบคุณ",
+  "privacy": "ความเป็นส่วนตัว",
+  "privacy-share-usage-data": "แชร์ข้อมูลการใช้งาน",
+  "privacy-crash-reports": "รายงานข้อขัดข้อง",
+  "privacy-consent-hint": "การปิดจะหยุดการเก็บข้อมูลทันที"
 }

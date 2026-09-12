@@ -7,6 +7,7 @@ import {
   StackFrame,
 } from '@capacitor-firebase/crashlytics';
 import { Capacitor } from '@capacitor/core';
+import { redactErrorDescription } from './redact-error-description';
 
 @Injectable()
 export class FirebaseErrorHandlerService {
@@ -54,7 +55,14 @@ export class FirebaseErrorHandlerService {
    * analytics is unsupported.
    */
   private logException(description: string): void {
-    const params = { description, fatal: true };
+    // Redacted before it leaves the device. `description` is the only free-text
+    // parameter in the taxonomy, and since issue #986 it lands in a BigQuery
+    // export that has no expiry, so anything personal in a thrown message would
+    // be kept indefinitely and be queryable. See `redact-error-description.ts`.
+    const params = {
+      description: redactErrorDescription(description),
+      fatal: true,
+    };
 
     if (Capacitor.isNativePlatform()) {
       FirebaseAnalytics.logEvent({ name: 'exception', params }).catch(

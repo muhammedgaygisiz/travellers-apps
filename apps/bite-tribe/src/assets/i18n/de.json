@@ -563,5 +563,17 @@
   "support-report-title": "Inhalte melden",
   "support-report-intro": "Wenn du einen Bite oder eine Bewertung siehst, die nicht auf BiteTribe gehört, schreib uns mit Link oder Screenshot, und wir sehen uns das an.",
   "support-links-title": "Ebenfalls nützlich",
-  "support-links-account-deletion": "Konto löschen"
+  "support-links-account-deletion": "Konto löschen",
+  "analytics-consent-title": "Hilf uns, BiteTribe zu verbessern",
+  "analytics-consent-copy": "Wir können anonyme Nutzungsdaten erfassen, um zu sehen, was funktioniert und was abstürzt.",
+  "analytics-consent-benefit-features": "Welche Bildschirme und Funktionen genutzt werden",
+  "analytics-consent-benefit-crashes": "Abstürze und Fehler, damit wir sie beheben können",
+  "analytics-consent-benefit-never-content": "Niemals deine Bites, Fotos oder dein Profil",
+  "analytics-consent-change-later": "Du kannst das jederzeit in den Einstellungen ändern.",
+  "analytics-consent-allow": "Erlauben",
+  "analytics-consent-decline": "Nein danke",
+  "privacy": "Datenschutz",
+  "privacy-share-usage-data": "Nutzungsdaten teilen",
+  "privacy-crash-reports": "Absturzberichte",
+  "privacy-consent-hint": "Wenn du das ausschaltest, wird die Erfassung sofort gestoppt."
 }

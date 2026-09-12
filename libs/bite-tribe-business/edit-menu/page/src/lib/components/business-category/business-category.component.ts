@@ -16,6 +16,7 @@ import {
   IonReorderGroup,
 } from '@ionic/angular/standalone';
 import type { Category, MenuItem } from 'model';
+import { createEntityId } from 'utils';
 import { NgTemplateOutlet } from '@angular/common';
 import { BusinessMenuVariantComponent } from '../business-menu-item-editor/business-menu-variant.component';
 import { BusinessMenuItemComponent } from '../business-menu-item/business-menu-item.component';
@@ -87,9 +88,12 @@ export class BusinessCategoryComponent {
       newTitle !== linkedCategory?.title ||
       newSubtitle !== linkedCategory?.subtitle
     ) {
+      // The id travels with the rename (issue #1099). The editor keys by it,
+      // and the title being edited is precisely the thing it used to key by.
       this.categoryChanged.emit({
-        ...this.linkedCategory(),
-        items: this.linkedCategory()?.items || [],
+        ...linkedCategory,
+        id: linkedCategory?.id ?? createEntityId(),
+        items: linkedCategory?.items || [],
         title: newTitle,
         subtitle: newSubtitle,
       });
@@ -119,6 +123,7 @@ export class BusinessCategoryComponent {
     updatedItems[index] = item;
     this.categoryChanged.emit({
       ...category,
+      id: category?.id ?? createEntityId(),
       title: category?.title || '',
       items: updatedItems,
     });

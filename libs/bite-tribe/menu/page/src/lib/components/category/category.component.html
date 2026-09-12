@@ -7,7 +7,7 @@
   }
   @if (categoryData?.items?.length) {
     <ion-reorder-group [disabled]="false">
-      @for (item of categoryData?.items; track item.name) {
+      @for (item of categoryData?.items; track item.id) {
         <div class="menu-item">
           <menu-item
             [item]="item"

@@ -87,5 +87,56 @@ describe('MenuItemComponent', () => {
         component.isUnavailable({ isAvailable: false } as unknown as MenuItem),
       ).toBe(true);
     });
+
+    /**
+     * Availability travels down (issue #1099). A dish taken off the menu takes
+     * its sizes with it, so the guest is not shown an orderable variant of an
+     * unorderable dish.
+     */
+    it('should treat a variant of an unavailable dish as unavailable', () => {
+      fixture.componentRef.setInput('parentItem', {
+        name: 'Plate',
+        isAvailable: false,
+      } as unknown as MenuItem);
+
+      expect(
+        component.isUnavailable({
+          name: 'with Beef',
+          isAvailable: true,
+        } as unknown as MenuItem),
+      ).toBe(true);
+    });
+
+    it('should leave a variant of an available dish on its own flag', () => {
+      fixture.componentRef.setInput('parentItem', {
+        name: 'Plate',
+        isAvailable: true,
+      } as unknown as MenuItem);
+
+      expect(
+        component.isUnavailable({ name: 'with Beef' } as unknown as MenuItem),
+      ).toBe(false);
+      expect(
+        component.isUnavailable({
+          name: 'with Chicken',
+          isAvailable: false,
+        } as unknown as MenuItem),
+      ).toBe(true);
+    });
+
+    it('should refuse a Bite from a variant of an unavailable dish', () => {
+      const emitSpy = jest.spyOn(component.createBiteClick, 'emit');
+      fixture.componentRef.setInput('parentItem', {
+        name: 'Plate',
+        isAvailable: false,
+      } as unknown as MenuItem);
+
+      component.onCreateBiteClick({
+        name: 'with Beef',
+        isAvailable: true,
+      } as unknown as MenuItem);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
   });
 });

@@ -97,6 +97,14 @@ export const ROUTES: Routes = withAuthRoutes(
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
+      path: 'menu-item-ids-backfill',
+      loadComponent: () =>
+        import('bite-tribe-admin/migrations').then(
+          (m) => m.MenuItemIdsBackfillContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
       path: 'bite-address-backfill',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(

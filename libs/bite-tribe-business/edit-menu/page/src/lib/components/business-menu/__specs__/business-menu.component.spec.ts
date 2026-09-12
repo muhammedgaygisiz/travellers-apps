@@ -123,11 +123,16 @@ describe('BusinessMenuComponent', () => {
 
   describe('onAddItemToCategory', () => {
     it('should add a new item to the matching category', () => {
-      const category = { title: 'Pizza', items: [] } as Category;
+      const category = {
+        id: 'category-pizza',
+        title: 'Pizza',
+        items: [],
+      } as unknown as Category;
       const menu = { categories: [category] } as unknown as Menu;
       componentRef.setInput('menu', menu);
 
       const newItem = {
+        id: 'item-margherita',
         name: 'Margherita',
         price: 8,
       } as unknown as MenuItem;
@@ -136,10 +141,45 @@ describe('BusinessMenuComponent', () => {
       expect(component.linkedMenu()?.categories[0].items).toEqual([newItem]);
     });
 
+    /**
+     * Matching by id rather than by title is what makes this work at all: the
+     * category on the menu has been renamed since the editor handed it out, and
+     * before issue #1099 the addition landed nowhere.
+     */
+    it('should add to the right category even after it was renamed', () => {
+      const category = {
+        id: 'category-pizza',
+        title: 'Pizze',
+        items: [],
+      } as unknown as Category;
+      componentRef.setInput('menu', {
+        categories: [category],
+      } as unknown as Menu);
+
+      const newItem = {
+        id: 'item-margherita',
+        name: 'Margherita',
+        price: 8,
+      } as unknown as MenuItem;
+      component.onAddItemToCategory({
+        item: newItem,
+        category: { ...category, title: 'Pizza' },
+      });
+
+      expect(component.linkedMenu()?.categories[0].items).toEqual([newItem]);
+    });
+
     it('should update variants for a matching item when isVariant is true', () => {
       const category = {
+        id: 'category-pizza',
         title: 'Pizza',
-        items: [{ name: 'Margherita', variants: [{ name: 'S', price: 8 }] }],
+        items: [
+          {
+            id: 'item-margherita',
+            name: 'Margherita',
+            variants: [{ id: 'variant-s', name: 'S', price: 8 }],
+          },
+        ],
       } as unknown as Category;
       componentRef.setInput('menu', {
         categories: [category],
@@ -147,35 +187,39 @@ describe('BusinessMenuComponent', () => {
 
       component.onAddItemToCategory({
         item: {
+          id: 'item-margherita',
           name: 'Margherita',
-          variants: [{ name: 'L', price: 12 }],
+          variants: [{ id: 'variant-l', name: 'L', price: 12 }],
         } as unknown as MenuItem,
         category,
         isVariant: true,
       });
 
       expect(component.linkedMenu()?.categories[0].items[0].variants).toEqual([
-        { name: 'L', price: 12 },
+        { id: 'variant-l', name: 'L', price: 12 },
       ]);
     });
 
-    it('should keep item unchanged when isVariant is true but item name does not match', () => {
+    it('should keep item unchanged when isVariant is true but item id does not match', () => {
       const originalItem = {
+        id: 'item-margherita',
         name: 'Margherita',
-        variants: [{ name: 'S', price: 8 }],
+        variants: [{ id: 'variant-s', name: 'S', price: 8 }],
       } as unknown as MenuItem;
       const category = {
+        id: 'category-pizza',
         title: 'Pizza',
         items: [originalItem],
-      } as Category;
+      } as unknown as Category;
       componentRef.setInput('menu', {
         categories: [category],
       } as unknown as Menu);
 
       component.onAddItemToCategory({
         item: {
+          id: 'item-pepperoni',
           name: 'Pepperoni',
-          variants: [{ name: 'L', price: 12 }],
+          variants: [{ id: 'variant-l', name: 'L', price: 12 }],
         } as unknown as MenuItem,
         category,
         isVariant: true,
@@ -186,14 +230,52 @@ describe('BusinessMenuComponent', () => {
       );
     });
 
-    it('should keep menu unchanged when no matching category title exists', () => {
-      const existingCategory = { title: 'Pasta', items: [] } as Category;
+    /**
+     * Two categories that were given the same title must stay two categories.
+     * Title matching sent the addition to whichever came first.
+     */
+    it('should not add to a different category that shares a title', () => {
+      const menu = {
+        categories: [
+          { id: 'category-lunch', title: 'Pizza', items: [] },
+          { id: 'category-dinner', title: 'Pizza', items: [] },
+        ],
+      } as unknown as Menu;
+      componentRef.setInput('menu', menu);
+
+      const newItem = {
+        id: 'item-margherita',
+        name: 'Margherita',
+        price: 8,
+      } as unknown as MenuItem;
+      component.onAddItemToCategory({
+        item: newItem,
+        category: menu.categories[1],
+      });
+
+      expect(component.linkedMenu()?.categories[0].items).toEqual([]);
+      expect(component.linkedMenu()?.categories[1].items).toEqual([newItem]);
+    });
+
+    it('should keep menu unchanged when no matching category id exists', () => {
+      const existingCategory = {
+        id: 'category-pasta',
+        title: 'Pasta',
+        items: [],
+      } as unknown as Category;
       const menu = { categories: [existingCategory] } as unknown as Menu;
       componentRef.setInput('menu', menu);
 
       component.onAddItemToCategory({
-        item: { name: 'Margherita', price: 8 } as unknown as MenuItem,
-        category: { title: 'Pizza' } as unknown as Category,
+        item: {
+          id: 'item-margherita',
+          name: 'Margherita',
+          price: 8,
+        } as unknown as MenuItem,
+        category: {
+          id: 'category-pizza',
+          title: 'Pizza',
+        } as unknown as Category,
       });
 
       expect(component.linkedMenu()).toEqual(menu);
@@ -203,8 +285,15 @@ describe('BusinessMenuComponent', () => {
       componentRef.setInput('menu', undefined);
 
       component.onAddItemToCategory({
-        item: { name: 'Margherita', price: 8 } as unknown as MenuItem,
-        category: { title: 'Pizza' } as unknown as Category,
+        item: {
+          id: 'item-margherita',
+          name: 'Margherita',
+          price: 8,
+        } as unknown as MenuItem,
+        category: {
+          id: 'category-pizza',
+          title: 'Pizza',
+        } as unknown as Category,
       });
 
       expect(component.linkedMenu()).toBeUndefined();
@@ -215,19 +304,21 @@ describe('BusinessMenuComponent', () => {
     it('should reorder categories and update their indices', () => {
       componentRef.setInput('menu', {
         categories: [
-          { title: 'Pizza', index: 0 },
-          { title: 'Pasta', index: 1 },
-          { title: 'Dessert', index: 2 },
+          { id: 'category-pizza', title: 'Pizza', index: 0 },
+          { id: 'category-pasta', title: 'Pasta', index: 1 },
+          { id: 'category-dessert', title: 'Dessert', index: 2 },
         ],
       } as unknown as Menu);
 
       const complete = jest.fn();
       component.handleReorder(createReorderEvent(2, 0, complete));
 
+      // The third acceptance criterion of issue #1099: a reorder moves the
+      // index and nothing else, so every id is where it was.
       expect(component.linkedMenu()?.categories).toEqual([
-        { title: 'Dessert', index: 0 },
-        { title: 'Pizza', index: 1 },
-        { title: 'Pasta', index: 2 },
+        { id: 'category-dessert', title: 'Dessert', index: 0 },
+        { id: 'category-pizza', title: 'Pizza', index: 1 },
+        { id: 'category-pasta', title: 'Pasta', index: 2 },
       ]);
       expect(complete).toHaveBeenCalled();
     });
@@ -272,14 +363,16 @@ describe('BusinessMenuComponent', () => {
   });
 
   describe('updateCategory', () => {
-    it('should replace the category with the same title', () => {
+    it('should replace the category with the same id', () => {
       const original = {
+        id: 'category-pizza',
         title: 'Pizza',
-        items: [{ name: 'Old' }],
+        items: [{ id: 'item-old', name: 'Old' }],
       } as unknown as Category;
       const updated = {
+        id: 'category-pizza',
         title: 'Pizza',
-        items: [{ name: 'New' }],
+        items: [{ id: 'item-new', name: 'New' }],
       } as unknown as Category;
       componentRef.setInput('menu', { categories: [original] });
 
@@ -288,15 +381,41 @@ describe('BusinessMenuComponent', () => {
       expect(component.linkedMenu()?.categories[0]).toEqual(updated);
     });
 
-    it('should keep menu unchanged when category title does not match', () => {
+    /**
+     * The second acceptance criterion of issue #1099, at the point it is
+     * actually at risk: renaming a category is an update of that category, and
+     * title matching could not tell it apart from an update of a different one.
+     */
+    it('should apply a rename to the category that was renamed', () => {
       const original = {
+        id: 'category-pizza',
         title: 'Pizza',
-        items: [{ name: 'Old' }],
+        items: [{ id: 'item-margherita', name: 'Margherita' }],
+      } as unknown as Category;
+      componentRef.setInput('menu', { categories: [original] });
+
+      component.updateCategory({ ...original, title: 'Pizze' });
+
+      expect(component.linkedMenu()?.categories[0]).toEqual({
+        ...original,
+        title: 'Pizze',
+      });
+    });
+
+    it('should keep menu unchanged when category id does not match', () => {
+      const original = {
+        id: 'category-pizza',
+        title: 'Pizza',
+        items: [{ id: 'item-old', name: 'Old' }],
       } as unknown as Category;
       const menu = { categories: [original] } as unknown as Menu;
       componentRef.setInput('menu', menu);
 
-      component.updateCategory({ title: 'Pasta', items: [] });
+      component.updateCategory({
+        id: 'category-pasta',
+        title: 'Pasta',
+        items: [],
+      });
 
       expect(component.linkedMenu()).toEqual(menu);
     });
@@ -304,7 +423,11 @@ describe('BusinessMenuComponent', () => {
     it('should handle undefined menu safely', () => {
       componentRef.setInput('menu', undefined);
 
-      component.updateCategory({ title: 'Pizza', items: [] });
+      component.updateCategory({
+        id: 'category-pizza',
+        title: 'Pizza',
+        items: [],
+      });
 
       expect(component.linkedMenu()).toBeUndefined();
     });

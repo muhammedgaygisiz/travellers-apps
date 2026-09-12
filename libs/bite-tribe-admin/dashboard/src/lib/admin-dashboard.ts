@@ -193,6 +193,13 @@ export class AdminDashboard {
       testId: 'admin-tool-review-timestamps-backfill',
     },
     {
+      titleKey: 'admin-tool-menu-item-ids-backfill',
+      descriptionKey: 'admin-tool-menu-item-ids-backfill-description',
+      icon: 'fast-food-outline',
+      path: '/menu-item-ids-backfill',
+      testId: 'admin-tool-menu-item-ids-backfill',
+    },
+    {
       titleKey: 'admin-tool-bite-address-backfill',
       descriptionKey: 'admin-tool-bite-address-backfill-description',
       icon: 'location-outline',

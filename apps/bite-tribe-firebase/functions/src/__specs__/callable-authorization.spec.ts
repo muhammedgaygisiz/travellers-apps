@@ -51,6 +51,7 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // product, and each is reachable only from the admin app.
   assignRestaurantOwner: 'operator',
   backfillBiteAddress: 'operator',
+  backfillMenuItemIdsCallable: 'operator',
   backfillReviewTimestampsCallable: 'operator',
   clusterRestaurantCandidateForBite: 'operator',
   deleteBiteAsOperator: 'operator',

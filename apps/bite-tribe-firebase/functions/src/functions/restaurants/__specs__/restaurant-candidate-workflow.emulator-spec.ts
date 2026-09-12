@@ -182,18 +182,34 @@ describe('restaurant candidate workflow emulator integration', () => {
 
     const menuSnapshot = await getFirestore().collection('menus').get();
 
+    // The category and every dish are born with an id (issue #1099), so a menu
+    // created here never needs the admin backfill.
     expect(menuSnapshot.docs[0].data()['categories']).toEqual([
       {
+        id: expect.any(String),
         title: 'Bites',
         items: [
-          { name: 'Calzone', description: '', price: 14, isAvailable: true },
           {
+            id: expect.any(String),
+            name: 'Calzone',
+            description: '',
+            price: 14,
+            isAvailable: true,
+          },
+          {
+            id: expect.any(String),
             name: 'Margherita',
             description: '',
             price: 12.5,
             isAvailable: true,
           },
-          { name: 'Tiramisu', description: '', price: 7, isAvailable: true },
+          {
+            id: expect.any(String),
+            name: 'Tiramisu',
+            description: '',
+            price: 7,
+            isAvailable: true,
+          },
         ],
       },
     ]);

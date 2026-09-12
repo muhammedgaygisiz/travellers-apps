@@ -12,8 +12,20 @@ describe('initial menu helpers', () => {
     ]);
 
     expect(items).toEqual([
-      { name: 'Margherita', description: '', price: 12, isAvailable: true },
-      { name: 'Tiramisu', description: '', price: 7, isAvailable: true },
+      {
+        id: expect.any(String),
+        name: 'Margherita',
+        description: '',
+        price: 12,
+        isAvailable: true,
+      },
+      {
+        id: expect.any(String),
+        name: 'Tiramisu',
+        description: '',
+        price: 7,
+        isAvailable: true,
+      },
     ]);
   });
 
@@ -25,8 +37,20 @@ describe('initial menu helpers', () => {
     ]);
 
     expect(items).toEqual([
-      { name: 'Margherita', description: '', price: 12.5, isAvailable: true },
-      { name: 'Tiramisu', description: '', price: 7, isAvailable: true },
+      {
+        id: expect.any(String),
+        name: 'Margherita',
+        description: '',
+        price: 12.5,
+        isAvailable: true,
+      },
+      {
+        id: expect.any(String),
+        name: 'Tiramisu',
+        description: '',
+        price: 7,
+        isAvailable: true,
+      },
     ]);
   });
 
@@ -101,6 +125,22 @@ describe('initial menu helpers', () => {
     expect(categories).toHaveLength(1);
     expect(categories[0].title).toBe(INITIAL_MENU_CATEGORY_TITLE);
     expect(categories[0].items).toHaveLength(2);
+  });
+
+  /**
+   * A menu is born with ids rather than created without them and migrated
+   * moments later by the admin backfill (issue #1099).
+   */
+  it('gives the category and every dish an id of its own', () => {
+    const [category] = buildInitialMenuCategories([
+      { name: 'Margherita', price: 12 },
+      { name: 'Tiramisu', price: 7 },
+    ]);
+
+    const ids = [category.id, ...category.items.map((item) => item.id)];
+
+    expect(ids.every(Boolean)).toBe(true);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it('keeps the menu empty when no Bite evidence is usable', () => {

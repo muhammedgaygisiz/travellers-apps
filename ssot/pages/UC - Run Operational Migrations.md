@@ -25,6 +25,9 @@ BiteTribe Operators can run operational maintenance tasks from the admin app.
   [[UC - Receive App Notifications And Engagement Updates]].
 - **Review timestamps backfill** starts the collection-wide rewrite and reads
   back what it did.
+- **Menu item ids backfill** gives every stored category, menu item and variant
+  the stable id an order line references, and reports how many of each it had
+  to fill.
 - **Bite address backfill**, **Restaurant clustering**, **Image migration** and
   **Geohash migration** each act on one Bite the operator picks from a table.
 
@@ -61,7 +64,17 @@ collection itself.
 - Adding a migration means adding a name, its runner, its copy and its dashboard
   entry — not another copy of the state handling.
 
-Registered today: `review-timestamps` ([[issue-1283]]).
+Registered today: `review-timestamps` ([[issue-1283]]) and `menu-item-ids`
+(issue \#1099).
+
+`menu-item-ids` is the second registration, and it is the first evidence that
+the contract above holds: it added a name, a runner, its copy and its dashboard
+entry, and no markup at all. The shared card renders its five counts without
+knowing what a menu is.
+
+Its idempotence carries more weight than most. An id that already exists is
+never replaced, because replacing one would move the target of every order line
+already pointing at it - see [[UC - Order At The Table Through A QR Code]].
 
 ### Why There Is No Display Name Backfill
 
@@ -96,6 +109,8 @@ name in onboarding.
 - `sendNewVersionNotification`.
 - `backfillReviewTimestampsCallable`, started from the review-timestamps
   backfill surface.
+- `backfillMenuItemIdsCallable`, started from the menu item ids backfill
+  surface.
 
 ## Authorization
 

@@ -3,7 +3,7 @@
 <div class="menu-container">
   @if (menuData?.categories?.length) {
     <ion-reorder-group [disabled]="true">
-      @for (category of menuData?.categories; track category.title) {
+      @for (category of menuData?.categories; track category.id) {
         <div class="menu-item">
           <category
             [category]="category"

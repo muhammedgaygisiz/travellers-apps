@@ -82,6 +82,19 @@ export interface SendNewVersionNotificationResult {
  */
 export type CollectionMigrationResult = Record<string, number>;
 
+export interface BackfillMenuItemIdsResult extends CollectionMigrationResult {
+  /** Every menu document the migration looked at. */
+  processed: number;
+  /** Menus that gained at least one id. */
+  updated: number;
+  /** Menus that already had an id on everything. */
+  skipped: number;
+  /** Categories that gained an id, across every menu. */
+  categories: number;
+  /** Items and variants that gained an id, counted together. */
+  items: number;
+}
+
 export interface BackfillReviewTimestampsResult extends CollectionMigrationResult {
   /** Every review document the migration looked at. */
   processed: number;
@@ -270,6 +283,22 @@ export class MigrationsDataAccessService {
       void,
       BackfillReviewTimestampsResult
     >({ name: 'backfillReviewTimestampsCallable' });
+
+    return result.data;
+  }
+
+  /**
+   * Gives every stored category, menu item and variant the stable id an order
+   * line references (issue #1099).
+   *
+   * No resource is reloaded: this app shows Bites and users, and the migration
+   * touches the `menus` collection, which nothing here reads.
+   */
+  async backfillMenuItemIds(): Promise<BackfillMenuItemIdsResult> {
+    const result = await FirebaseFunctions.callByName<
+      void,
+      BackfillMenuItemIdsResult
+    >({ name: 'backfillMenuItemIdsCallable' });
 
     return result.data;
   }

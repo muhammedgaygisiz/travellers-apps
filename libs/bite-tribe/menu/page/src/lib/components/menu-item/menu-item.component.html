@@ -40,8 +40,8 @@
   </div>
   @if (itemData?.variants?.length) {
     <div class="variants">
-      @for (variant of itemData?.variants; track $index) {
-        <menu-item [item]="variant" isVariant />
+      @for (variant of itemData?.variants; track variant.id) {
+        <menu-item [item]="variant" [parentItem]="itemData" isVariant />
       }
     </div>
   }

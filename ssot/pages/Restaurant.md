@@ -202,6 +202,7 @@ Frontend and shared model:
 ```text
 libs/bite-tribe-common/model/src/lib/restaurant.ts
 libs/bite-tribe-common/model/src/lib/menu.ts
+libs/bite-tribe-common/model/src/lib/order-line.ts
 libs/bite-tribe/api/src/lib/restaurant-api/restaurant-api.service.ts
 libs/bite-tribe/api/src/lib/menu-api/menu-api.service.ts
 libs/bite-tribe/restaurant/page
@@ -219,6 +220,7 @@ searchRestaurants
 verifyRestaurantCandidate
 assignRestaurantOwner
 revokeRestaurantOwner
+backfillMenuItemIdsCallable
 ```
 
 Storage:
@@ -231,7 +233,7 @@ images/restaurants/{restaurantId}/{filename}
 
 - **Ownership is written and enforced, and not yet visible.** An operator assigns and revokes a Restaurant as of issue \#1077, and issue \#1078 made `apps/bite-tribe-firebase/firestore.rules` read `ownerUserId`: a Restaurant, its Menu and its Bite trails are writable by the account named on the document and by an Operator, and by nobody else. The four ownership fields themselves are writable by no client at all, so an assignment can only be made through the callables. Two things are still true: the rules deploy by hand, so they bind production only after `npx nx firebase-deploy-rules bite-tribe-firebase` has run, and nothing _reads_ the field in the UI — scoping the business dashboard to the assigned restaurants is issue \#1079, so an account can still open the edit form for a Restaurant it does not hold and is refused on save. See [[UC - Own And Claim Restaurants]].
 - The `RestaurantClaim` model was removed with issue \#1077. It was added in \#1074 for the self-service claim flow of \#1076, never had an importer, and direct assignment produces no claim document. `RestaurantClaimStatus` lost `pending` and `disputed` with it: both existed only because of the review queue.
-- `MenuItem` has no stable identifier. Items are array entries inside `Menu.categories[]`, addressable only by name and index, so nothing can safely reference a menu item over time. See issue \#1099.
+- **A menu item can be referenced now, and its currency still cannot be read.** Issue \#1099 gave `MenuItem`, `Category` and every variant an `id`, generated once and never reused, and made the business editor and both renderers key by it rather than by `title` and `name` - so renaming a dish or reordering a category no longer moves the entry anything else points at. `backfillMenuItemIds` on the admin migrations surface fills in menus written before that, and the client fills in whatever it still finds missing on read. What a menu still carries nowhere is a currency: the consumer menu hardcodes a euro sign, the business editor labels the price with a dollar sign, and `MenuService.prepareBiteFromMenuItem` hardcodes `EUR`. `OrderLineSnapshot` names the field an answer has to land in; choosing the source is issue \#1103.
 - Verified versus unverified Restaurant rules are still evolving.
 - A Bite can use `place` without a `restaurantId`, so restaurant matching can be fuzzy or incomplete.
 - Candidate verification currently relies on a business-user workflow and callable auth; explicit role-based authorization is not fully modeled here.

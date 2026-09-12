@@ -48,6 +48,7 @@ export class MigrationsService {
     () => Promise<CollectionMigrationResult>
   > = {
     'review-timestamps': () => this.dataAccess.backfillReviewTimestamps(),
+    'menu-item-ids': () => this.dataAccess.backfillMenuItemIds(),
   };
 
   /** What the last run of one migration did, or nothing if it never ran here. */

@@ -10,7 +10,10 @@ export { type CollectionMigrationResult };
  * idempotent, so a second press is safe — which is what makes a plain button
  * enough, with no confirmation step in front of it.
  */
-export const COLLECTION_MIGRATIONS = ['review-timestamps'] as const;
+export const COLLECTION_MIGRATIONS = [
+  'review-timestamps',
+  'menu-item-ids',
+] as const;
 
 export type CollectionMigrationName = (typeof COLLECTION_MIGRATIONS)[number];
 

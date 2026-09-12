@@ -14,6 +14,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import type { Category } from 'model';
+import { createEntityId } from 'utils';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,9 +44,21 @@ export class BusinessAddCategoryComponent {
     { initialValue: !this.newCategoryForm.valid },
   );
 
+  /**
+   * A category is born with its id (issue #1099).
+   *
+   * Generated here rather than assigned when the category is saved, because the
+   * editor keys by id from the moment the category exists - an id handed out
+   * later would leave the first edits keyed by title, which is the repointing
+   * the ids exist to prevent.
+   */
   onAddCategory(): void {
     if (this.newCategoryForm.valid) {
-      this.addCategory.emit(this.newCategoryForm.value as Category);
+      this.addCategory.emit({
+        ...(this.newCategoryForm.value as Category),
+        id: createEntityId(),
+        items: [],
+      });
     }
   }
 }

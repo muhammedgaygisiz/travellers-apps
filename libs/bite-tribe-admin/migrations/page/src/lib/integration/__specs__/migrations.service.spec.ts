@@ -10,6 +10,7 @@ const aDataAccess = (
   restaurantClusteringEligibleBites: jest.fn(),
   sendNewVersionNotification: jest.fn(),
   backfillReviewTimestamps: jest.fn(),
+  backfillMenuItemIds: jest.fn(),
   ...override,
 });
 
@@ -193,6 +194,66 @@ describe(MigrationsService.name, () => {
 
       expect(service.collectionMigrations()).toEqual({
         'review-timestamps': { status: 'failed' },
+      });
+    });
+
+    /**
+     * The second registered migration (issue #1099), covered here for the same
+     * reason the first is: the runner map is the whole of what "registering a
+     * migration is a name and a runner" means, and a name wired to the wrong
+     * callable is invisible until an operator presses the button.
+     */
+    it('should call the menu id backfill for its own name', async () => {
+      const result = {
+        processed: 4,
+        updated: 2,
+        skipped: 2,
+        categories: 3,
+        items: 9,
+      };
+      const backfillMenuItemIds = jest.fn().mockResolvedValue(result);
+      const backfillReviewTimestamps = jest.fn();
+      const service = configure(
+        aDataAccess({
+          backfillMenuItemIds,
+          backfillReviewTimestamps,
+        } as Partial<MigrationsDataAccessService>),
+      );
+
+      await service.runCollectionMigration('menu-item-ids');
+
+      expect(backfillMenuItemIds).toHaveBeenCalledTimes(1);
+      expect(backfillReviewTimestamps).not.toHaveBeenCalled();
+      expect(service.collectionMigrations()).toEqual({
+        'menu-item-ids': { status: 'done', result },
+      });
+    });
+
+    /**
+     * Each migration holds its own state, so one long run does not block or
+     * overwrite another - the contract in `UC - Run Operational Migrations`,
+     * which only became checkable once a second migration existed.
+     */
+    it('should keep the two migrations states apart', async () => {
+      const service = configure(
+        aDataAccess({
+          backfillReviewTimestamps: jest
+            .fn()
+            .mockResolvedValue({ processed: 1 }),
+          backfillMenuItemIds: jest.fn().mockResolvedValue({ processed: 2 }),
+        } as Partial<MigrationsDataAccessService>),
+      );
+
+      await service.runCollectionMigration('review-timestamps');
+      await service.runCollectionMigration('menu-item-ids');
+
+      expect(service.collectionMigrations()).toEqual({
+        'review-timestamps': { status: 'done', result: { processed: 1 } },
+        'menu-item-ids': { status: 'done', result: { processed: 2 } },
+      });
+      expect(service.collectionMigrationState('menu-item-ids')).toEqual({
+        status: 'done',
+        result: { processed: 2 },
       });
     });
   });

@@ -2,19 +2,22 @@
   #floorPlanCanvas
   class="floor-plan-canvas__surface"
   [class.floor-plan-canvas__surface--panning]="panning()"
+  [class.floor-plan-canvas__surface--read-only]="readOnly()"
   [attr.viewBox]="viewBox()"
   preserveAspectRatio="xMidYMid meet"
   role="application"
   tabindex="0"
   [attr.aria-label]="
-    'floor-plan-canvas-label' | transloco: { room: room()?.name ?? '' }
+    (readOnly() ? 'table-plan-canvas-label' : 'floor-plan-canvas-label')
+      | transloco: { room: room()?.name ?? '' }
   "
   [attr.aria-activedescendant]="activeDescendant()"
   data-testid="floor-plan-canvas"
   (pointerdown)="onPointerDown($event)"
   (pointermove)="onPointerMove($event)"
-  (pointerup)="onPointerUp()"
-  (pointercancel)="onPointerUp()"
+  (pointerup)="onPointerUp($event)"
+  (pointercancel)="onPointerUp($event)"
+  (contextmenu)="onContextMenu($event)"
   (wheel)="onWheel($event)"
   (dragover)="onDragOver($event)"
   (drop)="onDrop($event)"
@@ -105,18 +108,30 @@
                         item.label ||
                         ('floor-plan-item-unnumbered' | transloco),
                       seats: item.seats,
+                      status: item.statusName,
+                      duration: item.durationText,
                     }
             "
             [attr.class]="item.classes"
             [attr.transform]="item.transform"
             [attr.data-item-id]="item.id"
           >
+            <!--
+              The status tint and outline are bound rather than written in the
+              stylesheet, because the colour belongs to the status and the
+              status vocabulary is the model's: seven rules restating seven
+              colours is a second list to keep in step with `TABLE_STATUSES`.
+              Both are absent in the editor, where the stylesheet paints the
+              table as it always has.
+            -->
             @if (item.round) {
               <circle
                 [attr.cx]="item.cx"
                 [attr.cy]="item.cy"
                 [attr.r]="item.radius"
                 [attr.stroke-width]="item.strokeWidth"
+                [style.fill]="item.status?.tint"
+                [style.stroke]="item.status?.colour"
               />
             } @else {
               <rect
@@ -125,7 +140,33 @@
                 [attr.width]="item.width"
                 [attr.height]="item.height"
                 [attr.stroke-width]="item.strokeWidth"
+                [style.fill]="item.status?.tint"
+                [style.stroke]="item.status?.colour"
               />
+            }
+
+            <!--
+              The status, above the number: the silhouette for it, and the word
+              in the `<title>` where a hover and a screen reader both find it.
+              Three channels carry a status - colour, shape and text - and only
+              the last two survive greyscale and a colour-vision deficiency, so
+              the shape is drawn here and the word is in the summary bar above
+              the plan, which is on screen at the same time and is large enough
+              to read. See `table-status-marks.ts`.
+            -->
+            @if (item.status; as status) {
+              <g
+                class="floor-plan-canvas__item-status"
+                [attr.data-testid]="'floor-plan-status-' + item.id"
+              >
+                <title>{{ item.statusName }}</title>
+                <path
+                  [attr.d]="status.glyphPath"
+                  [attr.fill]="status.glyphFilled ? status.colour : 'none'"
+                  [attr.stroke]="status.colour"
+                  [attr.stroke-width]="status.glyphStrokeWidth"
+                />
+              </g>
             }
 
             @if (item.label) {
@@ -150,7 +191,7 @@
               zoom-to-fit; the words are in the `<title>`, where a hover and a
               screen reader both find them.
             -->
-            @if (item.seats !== undefined) {
+            @if (item.seatsText) {
               <g
                 class="floor-plan-canvas__item-seats"
                 [attr.data-testid]="'floor-plan-seats-' + item.id"
@@ -177,6 +218,26 @@
                   {{ item.seatsText }}
                 </text>
               </g>
+            }
+
+            <!--
+              How long the table has been in its status, where the capacity
+              would otherwise stand. It is what staff actually scan a room for:
+              the table that has been awaiting payment for twenty minutes is
+              the one they walk to next.
+            -->
+            @if (item.durationText) {
+              <text
+                class="floor-plan-canvas__item-duration"
+                [attr.x]="item.cx"
+                [attr.y]="item.seatsY"
+                [attr.font-size]="item.durationSize"
+                text-anchor="middle"
+                dominant-baseline="central"
+                [attr.data-testid]="'floor-plan-duration-' + item.id"
+              >
+                {{ item.durationText }}
+              </text>
             }
           </g>
         }

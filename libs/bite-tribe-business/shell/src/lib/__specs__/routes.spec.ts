@@ -186,18 +186,29 @@ describe('business ROUTES', () => {
       'restaurant/:restaurantId/floor-plan/qr-codes',
     ];
 
+    /** The live room, which is the one of them a staff account may open. */
+    const TABLES_PATH = 'restaurant/:restaurantId/tables';
+
     const ownerGuardOf = (route: Route): CanActivateFn =>
       (route.canActivate ?? [])[2] as CanActivateFn;
 
     const routeFor = (path: string): Route =>
       ROUTES.find((route) => route.path === path) as Route;
 
+    /** Set by the two cases that are about the caller rather than the document. */
+    let signedOut = false;
+    let withoutRestaurantId = false;
+    let present: jest.Mock;
+
     const run = (path: string): Promise<boolean | UrlTree> =>
       TestBed.runInInjectionContext(
         () =>
           ownerGuardOf(routeFor(path))(
             {
-              paramMap: { get: (): string => 'restaurant-1' },
+              paramMap: {
+                get: (): string | null =>
+                  withoutRestaurantId ? null : 'restaurant-1',
+              },
             } as unknown as ActivatedRouteSnapshot,
             { url: `/${path}` } as RouterStateSnapshot,
           ) as Promise<boolean | UrlTree>,
@@ -213,13 +224,17 @@ describe('business ROUTES', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      signedOut = false;
+      withoutRestaurantId = false;
+      present = jest.fn();
 
       TestBed.configureTestingModule({
         providers: [
           {
             provide: AuthService,
             useValue: {
-              getUser: (): { uid: string } => ({ uid: 'user-1' }),
+              getUser: (): { uid: string } | undefined =>
+                signedOut ? undefined : { uid: 'user-1' },
               whenAuthStateRestored: (): Promise<void> => Promise.resolve(),
             },
           },
@@ -230,17 +245,23 @@ describe('business ROUTES', () => {
                 ({ url }) as unknown as UrlTree,
             },
           },
-          { provide: ToastService, useValue: { present: jest.fn() } },
+          { provide: ToastService, useValue: { present } },
         ],
       });
     });
 
-    it('guards exactly the routes that edit one restaurant', () => {
+    /**
+     * Every route about one restaurant carries a third guard, and there are
+     * only two of them: the owner-only gate on everything that edits, and the
+     * owner-or-staff gate on the live view of issue #1093. A new route about a
+     * restaurant that forgets both fails here.
+     */
+    it('guards every route that is about one restaurant', () => {
       const guarded = ROUTES.filter(
         (route) => (route.canActivate ?? []).length > 2,
       ).map((route) => route.path);
 
-      expect(guarded.sort()).toEqual([...EDIT_PATHS].sort());
+      expect(guarded.sort()).toEqual([...EDIT_PATHS, TABLES_PATH].sort());
     });
 
     it.each(EDIT_PATHS)('admits the assigned account on %s', async (path) => {
@@ -257,6 +278,93 @@ describe('business ROUTES', () => {
         await expect(run(path)).resolves.toEqual({ url: '/restaurants' });
       },
     );
+
+    /**
+     * The live view is the one route in this app a **staff** account is meant
+     * to reach (issue #1093), so it carries the owner-or-staff gate rather than
+     * the owner-only one. Asserted here rather than trusted, because the two
+     * guards are one line apart in the route table and swapping them would be
+     * invisible until a waiter signed in.
+     */
+    describe('the live table view', () => {
+      const worksAt = (restaurantId: string | undefined): void => {
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockImplementation(({ reference }) =>
+            Promise.resolve({
+              snapshot: reference.startsWith('restaurantStaff/')
+                ? { id: 'user-1', data: { restaurantId } }
+                : { id: 'restaurant-1', data: { ownerUserId: 'someone-else' } },
+            } as unknown as Awaited<
+              ReturnType<typeof FirebaseFirestore.getDocument>
+            >),
+          );
+      };
+
+      it('admits the account that holds the restaurant', async () => {
+        assignedTo('user-1');
+
+        await expect(run(TABLES_PATH)).resolves.toBe(true);
+      });
+
+      it('admits an account that works at the restaurant', async () => {
+        worksAt('restaurant-1');
+
+        await expect(run(TABLES_PATH)).resolves.toBe(true);
+      });
+
+      it('refuses an account that works somewhere else', async () => {
+        worksAt('another-restaurant');
+
+        await expect(run(TABLES_PATH)).resolves.toEqual({
+          url: '/restaurants',
+        });
+      });
+
+      /** Guards fail closed: a read that failed is never "and therefore yours". */
+      it('refuses when neither document can be read', async () => {
+        jest
+          .spyOn(FirebaseFirestore, 'getDocument')
+          .mockRejectedValue(new Error('offline'));
+
+        await expect(run(TABLES_PATH)).resolves.toEqual({
+          url: '/restaurants',
+        });
+      });
+
+      /** And the editor stays the owner's, however the live view is gated. */
+      it('still refuses the floor-plan editor to that staff account', async () => {
+        worksAt('restaurant-1');
+
+        await expect(
+          run('restaurant/:restaurantId/floor-plan'),
+        ).resolves.toEqual({ url: '/restaurants' });
+      });
+
+      /**
+       * No session is `authGuard`'s answer to give, and it is on the same
+       * route. Redirecting without a toast keeps the two from talking over
+       * each other.
+       */
+      it('redirects a signed-out visitor without explaining', async () => {
+        signedOut = true;
+
+        await expect(run(TABLES_PATH)).resolves.toEqual({
+          url: '/restaurants',
+        });
+        expect(present).not.toHaveBeenCalled();
+      });
+
+      /** A route without the parameter names no restaurant to admit anyone to. */
+      it('refuses a route carrying no restaurant', async () => {
+        withoutRestaurantId = true;
+
+        await expect(run(TABLES_PATH)).resolves.toEqual({
+          url: '/restaurants',
+        });
+        expect(present).toHaveBeenCalled();
+      });
+    });
   });
 
   // Every lazy route names its component as a string on the imported module,

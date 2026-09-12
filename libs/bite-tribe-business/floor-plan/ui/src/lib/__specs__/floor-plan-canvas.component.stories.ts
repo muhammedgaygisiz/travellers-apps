@@ -5,7 +5,7 @@ import {
   Meta,
   StoryObj,
 } from '@storybook/angular';
-import { Room } from 'model';
+import { Room, TABLE_STATUSES, TableStatus } from 'model';
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import { FloorPlanCanvasComponent } from '../floor-plan-canvas.component';
 import { FloorPlanItem, FloorPlanItemVariant } from '../floor-plan-item';
@@ -414,6 +414,81 @@ export const Greyscale: Story = {
     componentWrapperDecorator(
       (story) =>
         `<div style="height: 100%; filter: grayscale(1);">${story}</div>`,
+    ),
+  ],
+};
+
+/**
+ * The words the live view would have translated (GitHub issue #1093).
+ *
+ * Spelled out rather than pulled off the Transloco catalogue, so a visual
+ * reference fails on a layout rather than on a translation.
+ */
+const STATUS_WORDS: Record<TableStatus, string> = {
+  available: 'Free',
+  reserved: 'Reserved',
+  occupied: 'Occupied',
+  ordering: 'Ordering',
+  awaitingPayment: 'Paying',
+  cleaning: 'Cleaning',
+  disabled: 'Blocked',
+};
+
+/** One table per status, laid out in the order the lifecycle visits them. */
+const liveTables: FloorPlanItem[] = TABLE_STATUSES.map((status, index) =>
+  roundTable(
+    `table-${index + 1}`,
+    1400 + (index % 3) * 2800,
+    2400 + Math.floor(index / 3) * 3400,
+    String(index + 1),
+    {
+      size: { width: 1100, height: 1100 },
+      status,
+      statusLabel: STATUS_WORDS[status],
+      ...(status === 'available'
+        ? {}
+        : { statusDuration: `${(index + 1) * 7} min` }),
+    },
+  ),
+);
+
+/**
+ * The same canvas under service (GitHub issue #1093).
+ *
+ * A table carries three rows now: what it is doing, what it is called, and how
+ * long it has been doing it. The status is said three ways at once - a tint, a
+ * silhouette and the word - and the time in state takes the seat count's place,
+ * because a table already holding a party is not one a host is sizing up.
+ */
+export const LiveStatuses: Story = {
+  args: { items: liveTables, readOnly: true, showGrid: false },
+};
+
+/**
+ * The live plan with the colour taken out of it.
+ *
+ * The reference the acceptance criterion is read against: in greyscale the
+ * tints collapse towards each other and the statuses are still legible, because
+ * the silhouettes differ in shape and in filled-against-hollow and every one of
+ * them carries its word. This is also what a staff member with a common
+ * colour-vision deficiency is looking at.
+ */
+export const LiveStatusesGreyscale: Story = {
+  args: { items: liveTables, readOnly: true, showGrid: false },
+  decorators: [
+    componentWrapperDecorator(
+      (story) =>
+        `<div style="height: 100%; filter: grayscale(1);">${story}</div>`,
+    ),
+  ],
+};
+
+/** And in dark mode, where the same tints have to hold against near-black. */
+export const LiveStatusesDark: Story = {
+  args: { items: liveTables, readOnly: true, showGrid: false },
+  decorators: [
+    componentWrapperDecorator(
+      (story) => `<div style="height: 100%; ${DARK_PALETTE}">${story}</div>`,
     ),
   ],
 };

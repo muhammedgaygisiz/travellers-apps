@@ -6,6 +6,7 @@ import {
   FloorPlanSize,
   RestaurantTable,
   TableShape,
+  TableStatus,
 } from 'model';
 
 /**
@@ -73,6 +74,39 @@ export interface FloorPlanItem {
    * room ([[Table]]).
    */
   enabled?: boolean;
+  /**
+   * What the table is doing right now, on the live view (GitHub issue #1093).
+   *
+   * Absent in the editor, and absent on geometry. It is here rather than in a
+   * second array beside the items for the reason `label` and `seats` are: the
+   * canvas has to *draw* it on the table, and a parallel structure keyed by id
+   * would be a second thing to keep in step through every gesture and every
+   * room switch.
+   *
+   * Not to be confused with {@link enabled}. That is the owner taking a table
+   * out of service indefinitely; this is what is happening at the table during
+   * one service, and the two are separate documents on purpose - see
+   * `table-state.ts` in the model.
+   */
+  status?: TableStatus;
+  /**
+   * The status as staff read it, already translated.
+   *
+   * Translated by the caller rather than here, so the canvas holds no status
+   * vocabulary: the same word is drawn on the plan, listed in the summary bar
+   * and printed in the table detail, and only one of those three is this
+   * component.
+   */
+  statusLabel?: string;
+  /**
+   * How long the table has been in that status, already formatted.
+   *
+   * Absent on a table whose clock says nothing - an available table has been
+   * free since whenever it was last cleared, and nobody is looking for that
+   * number. Where it is present it takes the place of the seat count, because
+   * a table already holding a party is not one a host is sizing up.
+   */
+  statusDuration?: string;
 }
 
 /** Whether a variant is a table rather than a piece of geometry. */

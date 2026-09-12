@@ -61,6 +61,7 @@ import {
   notificationsOffOutline,
   notificationsOutline,
   pricetagOutline,
+  radioButtonOnOutline,
   removeOutline,
   restaurantOutline,
   repeat,
@@ -157,5 +158,7 @@ export const addNecessaryIcons = (): void => {
     copyOutline,
     removeOutline,
     scanOutline,
+    // The live indicator on the staff table view (issue #1093).
+    radioButtonOnOutline,
   });
 };

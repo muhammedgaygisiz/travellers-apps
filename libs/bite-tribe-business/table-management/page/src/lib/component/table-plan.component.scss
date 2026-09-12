@@ -1,0 +1,257 @@
+/*
+ * The live room (GitHub issue #1093).
+ *
+ * One column on a phone and two from a tablet up, and the switch is a grid
+ * template rather than a set of hidden elements: the same markup is laid out
+ * differently, so a table selected on a phone is still selected when the tablet
+ * is turned to landscape. Nothing here has a fixed width, which is what keeps
+ * the page from ever scrolling sideways - the acceptance criterion the editor
+ * deliberately does not meet.
+ */
+:host {
+  display: block;
+
+  --table-plan-ink-rgb: var(--ion-text-color-rgb, 0, 0, 0);
+}
+
+.table-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  /* The one rule that makes "no horizontal page scroll" structural. */
+  max-width: 100%;
+  /*
+   * The layout below asks about the *page's* width rather than the window's.
+   *
+   * A media query would have been the obvious tool and is the wrong one here.
+   * The page is what changes shape, and a container query is what a Storybook
+   * reference can drive: the phone and tablet references are the page drawn at
+   * 390 and 834 CSS pixels inside a laptop-sized runner, and under a media
+   * query all three would have rendered the laptop layout at three widths.
+   * It is also the honest question - the plan cares how much room it has, not
+   * what device the room is on.
+   */
+  container-type: inline-size;
+}
+
+.table-plan__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.table-plan__heading {
+  min-width: 0;
+}
+
+.table-plan__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.table-plan__subtitle {
+  display: block;
+  font-size: 0.875rem;
+}
+
+/*
+ * Whether the plan is live.
+ *
+ * A word and an icon rather than a coloured dot, because "is what I am looking
+ * at current" is the question a host asks when a table has not changed for a
+ * while, and a dot answers it only for whoever already knows what the dot
+ * means.
+ */
+.table-plan__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(var(--table-plan-ink-rgb), 0.06);
+  color: var(--ion-color-success, #2dd36f);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.table-plan__live--waiting {
+  color: rgba(var(--table-plan-ink-rgb), 0.6);
+}
+
+.table-plan__loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.table-plan__message {
+  display: block;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.table-plan__rooms {
+  /* Never wider than the page, however many rooms a restaurant has. */
+  max-width: 100%;
+}
+
+/*
+ * The summary bar: one chip per status, wrapping rather than scrolling.
+ *
+ * Wrapping, because the counts are read as a set - "nine free, four occupied" -
+ * and a set that runs off the edge of a phone is a set with a number missing
+ * from it.
+ */
+.table-plan__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.table-plan__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--chip-colour);
+  border-radius: 999px;
+  background: var(--chip-tint);
+  font-size: 0.8125rem;
+  line-height: 1.2;
+}
+
+.table-plan__chip-glyph {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.table-plan__chip-count {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-plan__chip-label {
+  color: rgba(var(--table-plan-ink-rgb), 0.8);
+}
+
+.table-plan__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.table-plan__canvas {
+  /*
+   * `min-width: 0` on a grid child is what stops the canvas from refusing to
+   * shrink below its content and pushing the page wider than the viewport.
+   */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/*
+ * The height the plan is drawn into.
+ *
+ * Set on a wrapper rather than on the canvas element, because the canvas's own
+ * `:host` already claims `height: 100%` and a competing rule from this
+ * stylesheet would be settled by whichever component's styles happened to be
+ * inserted last. A wrapper with a definite height is what that `100%` resolves
+ * against, and the answer is the same however the two are ordered.
+ *
+ * `vh` rather than pixels, so the plan grows with the device instead of being
+ * pinned to a laptop's idea of a canvas. The floor is above the canvas's own
+ * `min-height`, so the drawing never overflows the box it was given.
+ */
+.table-plan__plan {
+  min-height: 21rem;
+  height: 55vh;
+}
+
+.table-plan__hint {
+  margin: 0;
+  color: rgba(var(--table-plan-ink-rgb), 0.6);
+  font-size: 0.75rem;
+}
+
+.table-plan__detail {
+  min-width: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(var(--table-plan-ink-rgb), 0.15);
+  border-radius: 0.5rem;
+  background: rgba(var(--table-plan-ink-rgb), 0.03);
+}
+
+.table-plan__detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.table-plan__detail-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.table-plan__detail-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.25rem 0 0;
+  color: var(--chip-colour);
+  font-weight: 600;
+}
+
+.table-plan__detail-duration {
+  font-variant-numeric: tabular-nums;
+}
+
+.table-plan__detail-seats {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+}
+
+.table-plan__detail-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+}
+
+.table-plan__detail-pending {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+}
+
+/*
+ * From a tablet up the detail stands beside the plan instead of under it.
+ *
+ * 48rem rather than a device name: the number is where a second column stops
+ * squeezing the plan, and a phone held in landscape is welcome to have one.
+ */
+@container (min-width: 48rem) {
+  /*
+   * Only when there is a detail to stand there. A reserved second column with
+   * nothing in it would squeeze the plan by a third for every minute nobody
+   * has a table picked, which is most of a service.
+   */
+  .table-plan__body--with-detail {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+    align-items: start;
+  }
+
+  .table-plan__plan {
+    height: 60vh;
+  }
+}

@@ -1,0 +1,378 @@
+import { signal, WritableSignal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { TranslocoService } from '@jsverse/transloco';
+import { BiteTribeStoreService } from 'bite-tribe/store';
+import { FloorPlanDataAccessService } from 'bite-tribe-business/floor-plan-data-access';
+import { TableStateDataAccessService } from 'bite-tribe-business/table-management-data-access';
+import { RestaurantTable, Room, TableState, TableStatus } from 'model';
+import { BehaviorSubject, of } from 'rxjs';
+import { TablePlanService } from '../table-plan.service';
+
+const NOW = 1_760_000_000_000;
+
+const room = (id: string, name: string, order: number): Room => ({
+  id,
+  name,
+  order,
+  size: { width: 8000, height: 12_000 },
+  objects: [],
+  version: 1,
+});
+
+const table = (id: string, roomId: string): RestaurantTable => ({
+  id,
+  label: id.replace('table-', ''),
+  roomId,
+  position: { x: 1500, y: 3000 },
+  rotation: 0,
+  seats: 4,
+  enabled: true,
+  shape: 'round',
+  diameter: 900,
+});
+
+const state = (
+  tableId: string,
+  status: TableStatus,
+  over: Partial<TableState> = {},
+): TableState => ({
+  tableId,
+  restaurantId: 'restaurant-1',
+  status,
+  since: NOW,
+  updatedByUserId: 'host-1',
+  ...over,
+});
+
+/**
+ * The live view during service (GitHub issue #1093).
+ *
+ * Everything here is a read. The one thing the whole surface must never do is
+ * write the floor plan, so the data access is a set of spies and the absence of
+ * a call is asserted rather than assumed.
+ */
+describe(TablePlanService.name, () => {
+  let service: TablePlanService;
+  let states: BehaviorSubject<TableState[]>;
+  let floorPlan: Record<string, jest.Mock>;
+  let logout: jest.Mock;
+  let getDocument: jest.SpyInstance;
+  let currentRestaurantId: WritableSignal<string | undefined>;
+  const restaurantId = new BehaviorSubject<string | undefined>('restaurant-1');
+
+  /**
+   * Lets the resources notice a changed parameter, run their loader and settle.
+   *
+   * Three rounds rather than one: a `resource` reloads from an effect, so the
+   * parameter change, the loader's promise and the status it resolves to are
+   * three separate turns of the microtask queue.
+   */
+  const settle = async (): Promise<void> => {
+    for (let round = 0; round < 3; round += 1) {
+      TestBed.tick();
+      await Promise.resolve();
+      await Promise.resolve();
+    }
+
+    TestBed.tick();
+  };
+
+  beforeEach(async () => {
+    jest.useFakeTimers().setSystemTime(NOW);
+    states = new BehaviorSubject<TableState[]>([]);
+    logout = jest.fn();
+    currentRestaurantId = signal<string | undefined>('restaurant-1');
+    restaurantId.next('restaurant-1');
+
+    // The restaurant is read for its name alone, and through Firestore rather
+    // than the floor-plan data access, so it is stubbed apart from the plan.
+    getDocument = jest
+      .spyOn(FirebaseFirestore, 'getDocument')
+      .mockResolvedValue({
+        snapshot: { id: 'restaurant-1', data: { name: 'Trattoria Roma' } },
+      } as unknown as Awaited<
+        ReturnType<typeof FirebaseFirestore.getDocument>
+      >);
+
+    floorPlan = {
+      loadRooms: jest
+        .fn()
+        .mockResolvedValue([
+          room('room-1', 'Dining', 0),
+          room('room-2', 'Terrace', 1),
+        ]),
+      loadTables: jest
+        .fn()
+        .mockResolvedValue([
+          table('table-1', 'room-1'),
+          table('table-2', 'room-1'),
+          table('table-9', 'room-2'),
+        ]),
+      saveRoom: jest.fn(),
+      saveTable: jest.fn(),
+      saveDraft: jest.fn(),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        TablePlanService,
+        { provide: FloorPlanDataAccessService, useValue: floorPlan },
+        {
+          provide: TableStateDataAccessService,
+          useValue: { tableStates$: jest.fn(() => states.asObservable()) },
+        },
+        {
+          provide: BiteTribeStoreService,
+          useValue: {
+            restaurantIdFromUrl: currentRestaurantId,
+            restaurantIdFromUrl$: restaurantId.asObservable(),
+            isAuthenticated$: of(true),
+            logout,
+          },
+        },
+        {
+          provide: TranslocoService,
+          useValue: {
+            langChanges$: of('en'),
+            getActiveLang: (): string => 'en',
+            translate: (
+              key: string,
+              params?: Record<string, number>,
+            ): string =>
+              params === undefined ? key : `${key}:${params['minutes']}`,
+          },
+        },
+      ],
+    });
+
+    service = TestBed.inject(TablePlanService);
+    await settle();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it('opens on the first room without anybody choosing one', () => {
+    expect(service.selectedRoom()?.id).toBe('room-1');
+  });
+
+  /**
+   * A page headed "Tables" showing a room called "Terrace" does not say whose
+   * terrace it is, and a staff account may work at a restaurant whose name is
+   * the only thing distinguishing it from the last shift.
+   */
+  it('names the restaurant the room belongs to', () => {
+    expect(getDocument).toHaveBeenCalledWith({
+      reference: 'restaurants/restaurant-1',
+    });
+    expect(service.restaurantName()).toBe('Trattoria Roma');
+    expect(service.isAuthenticated()).toBe(true);
+  });
+
+  it('names nothing when the restaurant document is gone', async () => {
+    getDocument.mockResolvedValue({ snapshot: undefined } as unknown as Awaited<
+      ReturnType<typeof FirebaseFirestore.getDocument>
+    >);
+    currentRestaurantId.set('restaurant-2');
+    await settle();
+
+    expect(service.restaurantName()).toBe('');
+  });
+
+  /**
+   * The route parameter is absent for one frame on a cold start, and nothing
+   * may be read against a restaurant nobody has named yet.
+   */
+  it('reads nothing before the route names a restaurant', async () => {
+    getDocument.mockClear();
+    currentRestaurantId.set(undefined);
+    restaurantId.next(undefined);
+    await settle();
+
+    expect(service.roomsValue()).toEqual([]);
+    expect(service.tablesValue()).toEqual([]);
+    expect(service.restaurantName()).toBe('');
+    expect(getDocument).not.toHaveBeenCalled();
+  });
+
+  it('draws only the tables of the open room', () => {
+    expect(service.items().map((item) => item.id)).toEqual([
+      'table-1',
+      'table-2',
+    ]);
+  });
+
+  it('switches rooms without reading anything again', () => {
+    service.selectRoom('room-2');
+
+    expect(service.selectedRoom()?.id).toBe('room-2');
+    expect(service.items().map((item) => item.id)).toEqual(['table-9']);
+    expect(floorPlan['loadTables']).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * The acceptance criterion the whole view turns on: a change made on another
+   * device is on this one without anything being asked for again.
+   */
+  it('redraws when a state arrives from another device', () => {
+    expect(service.items()[0].status).toBe('available');
+
+    states.next([state('table-1', 'occupied')]);
+
+    expect(service.items()[0].status).toBe('occupied');
+    expect(service.items()[0].statusLabel).toBe('table-status-occupied');
+  });
+
+  it('counts the open room for the summary bar', () => {
+    states.next([state('table-1', 'occupied')]);
+
+    expect(service.summary()).toEqual([
+      { status: 'available', count: 1 },
+      { status: 'occupied', count: 1 },
+      { status: 'reserved', count: 0 },
+      { status: 'cleaning', count: 0 },
+    ]);
+  });
+
+  /**
+   * A plan drawn before the first snapshot is a plan of defaults, and a room
+   * where everything looks free has to be distinguishable from a room nothing
+   * has been heard about yet.
+   */
+  it('says whether what is on screen is live', () => {
+    expect(service.isLive()).toBe(true);
+  });
+
+  /**
+   * A failed read resolves to an empty list through `resourceValue`, and a page
+   * that took that at face value would tell staff their restaurant has no rooms
+   * in the middle of a service. Either read failing is the terminal state.
+   */
+  it.each([['loadRooms'], ['loadTables']])(
+    'reports a failed %s as a failure rather than as an empty room',
+    async (reader) => {
+      expect(service.loadFailed()).toBe(false);
+
+      floorPlan[reader].mockRejectedValue(new Error('offline'));
+      currentRestaurantId.set('restaurant-2');
+      await settle();
+
+      expect(service.loadFailed()).toBe(true);
+    },
+  );
+
+  it('advances the time in state as the clock moves', () => {
+    states.next([state('table-1', 'occupied', { since: NOW - 60_000 })]);
+
+    expect(service.items()[0].statusDuration).toBe(
+      'table-status-elapsed-minutes:1',
+    );
+
+    jest.setSystemTime(NOW + 4 * 60_000);
+    jest.advanceTimersByTime(30_000);
+
+    expect(service.items()[0].statusDuration).toBe(
+      'table-status-elapsed-minutes:5',
+    );
+  });
+
+  it('runs no clock on a free table', () => {
+    expect(service.items()[0].statusDuration).toBeUndefined();
+  });
+
+  describe('selection', () => {
+    it('describes the one table staff picked', () => {
+      states.next([state('table-1', 'cleaning', { note: 'Wobbly leg' })]);
+      service.select(['table-1']);
+
+      expect(service.selectedTable()).toEqual(
+        expect.objectContaining({
+          status: 'cleaning',
+          statusLabel: 'table-status-cleaning',
+          note: 'Wobbly leg',
+        }),
+      );
+    });
+
+    /**
+     * Selecting a wall in the editor is how it is moved; on this view it would
+     * open a detail panel about a wall.
+     */
+    it('refuses to select anything that is not a table', () => {
+      service.select(['wall-1']);
+
+      expect(service.selectedIds()).toEqual([]);
+      expect(service.selectedTable()).toBeUndefined();
+    });
+
+    it('describes nothing while several are selected', () => {
+      service.select(['table-1', 'table-2']);
+
+      expect(service.selectedTable()).toBeUndefined();
+    });
+
+    /** A held table is a picked table, which is what #1094 opens its sheet on. */
+    it('picks the table a long press landed on', () => {
+      service.activateTable('table-2');
+
+      expect(service.selectedIds()).toEqual(['table-2']);
+    });
+
+    /**
+     * The selection belongs to the room it was made in: keeping it would leave
+     * the detail panel describing a table in a room that is no longer on
+     * screen.
+     */
+    it('drops the selection when the room changes', () => {
+      service.select(['table-1']);
+      service.selectRoom('room-2');
+
+      expect(service.selectedIds()).toEqual([]);
+    });
+
+    it('puts the detail away on request', () => {
+      service.select(['table-1']);
+      service.clearSelection();
+
+      expect(service.selectedIds()).toEqual([]);
+      expect(service.selectedTable()).toBeUndefined();
+    });
+
+    /** A table with no note and a stopped clock still describes itself. */
+    it('describes a free table without a clock or a note', () => {
+      service.select(['table-1']);
+
+      expect(service.selectedTable()).toEqual(
+        expect.objectContaining({ status: 'available' }),
+      );
+      expect(service.selectedTable()?.duration).toBeUndefined();
+      expect(service.selectedTable()?.note).toBeUndefined();
+    });
+  });
+
+  it('signs the account out', () => {
+    service.logout();
+
+    expect(logout).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * The acceptance criterion that is easiest to lose and hardest to notice:
+   * the view never writes the floor plan. Nothing in the surface calls a
+   * writer, and the rules would refuse a state write anyway - this asserts the
+   * first half.
+   */
+  it('never writes the plan', () => {
+    states.next([state('table-1', 'occupied')]);
+    service.selectRoom('room-2');
+    service.select(['table-9']);
+    service.activateTable('table-9');
+
+    expect(floorPlan['saveRoom']).not.toHaveBeenCalled();
+    expect(floorPlan['saveTable']).not.toHaveBeenCalled();
+    expect(floorPlan['saveDraft']).not.toHaveBeenCalled();
+  });
+});

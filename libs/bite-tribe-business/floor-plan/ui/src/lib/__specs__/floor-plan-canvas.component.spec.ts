@@ -1211,5 +1211,313 @@ describe(FloorPlanCanvasComponent.name, () => {
 
       expect(given).toEqual(snapshot);
     });
+
+    /**
+     * The live view staff open during service (GitHub issue #1093).
+     *
+     * The same drawing and none of the same gestures: the plan is the published
+     * one, so a press that would move a table moves the *view*, and a table is
+     * picked by tapping it rather than by dragging it somewhere.
+     */
+    describe('read-only', () => {
+      let selections: string[][];
+      let changes: FloorPlanItem[][];
+      let commands: string[];
+      let holds: string[];
+
+      /** A pointer event that reaches the surface by bubbling, as a real one does. */
+      const at = (
+        type: string,
+        pointerId: number,
+        init: MouseEventInit,
+        element: Element = surface(),
+      ): void => {
+        element.dispatchEvent(
+          Object.assign(new MouseEvent(type, { bubbles: true, ...init }), {
+            pointerId,
+          }) as unknown as PointerEvent,
+        );
+      };
+
+      beforeEach(() => {
+        selections = [];
+        changes = [];
+        commands = [];
+        holds = [];
+
+        component.selectionChange.subscribe((ids) => selections.push(ids));
+        component.itemsChange.subscribe((items) => changes.push(items));
+        component.commandRequest.subscribe((command) => commands.push(command));
+        component.longPress.subscribe((id) => holds.push(id));
+
+        setInputs({ readOnly: true, items: [table, wall] });
+      });
+
+      /** A press that stayed put picked the table it stayed on. */
+      it('selects the table a tap landed on', () => {
+        at(
+          'pointerdown',
+          1,
+          { clientX: 100, clientY: 100 },
+          itemElement('table-1') as Element,
+        );
+        at('pointerup', 1, {});
+
+        expect(selections).toEqual([['table-1']]);
+      });
+
+      /** A tap on bare floor puts the detail panel away again. */
+      it('clears the selection on a tap beside the tables', () => {
+        at('pointerdown', 1, { clientX: 10, clientY: 10 });
+        at('pointerup', 1, {});
+
+        expect(selections).toEqual([[]]);
+      });
+
+      /**
+       * The same press, once it has travelled: the plan was dragged into view
+       * and nothing was picked. Without this a host could not pan a room whose
+       * tables cover most of it.
+       */
+      it('pans instead of selecting once the press has travelled', () => {
+        at(
+          'pointerdown',
+          1,
+          { clientX: 100, clientY: 100 },
+          itemElement('table-1') as Element,
+        );
+        at('pointermove', 1, { clientX: 400, clientY: 380 });
+        at('pointerup', 1, {});
+
+        expect(selections).toEqual([]);
+        expect(changes).toEqual([]);
+      });
+
+      /** Nothing on this view can change the plan, by pointer or by key. */
+      it('never reports a geometry change or an editor command', () => {
+        setInputs({ selectedIds: ['table-1'] });
+
+        component.onKeyDown(
+          new KeyboardEvent('keydown', { key: 'ArrowRight' }),
+        );
+        component.onKeyDown(new KeyboardEvent('keydown', { key: 'Delete' }));
+        component.onKeyDown(
+          new KeyboardEvent('keydown', { key: 'z', ctrlKey: true }),
+        );
+        component.onKeyDown(
+          new KeyboardEvent('keydown', { key: 'd', ctrlKey: true }),
+        );
+
+        expect(changes).toEqual([]);
+        expect(commands).toEqual([]);
+      });
+
+      it('refuses a dropped palette entry', () => {
+        const event = Object.assign(new MouseEvent('drop'), {
+          dataTransfer: { getData: (): string => 'chair' },
+        }) as unknown as DragEvent;
+        const prevented = jest.spyOn(event, 'preventDefault');
+        const placements: unknown[] = [];
+
+        component.placeRequest.subscribe((placement) =>
+          placements.push(placement),
+        );
+        component.onDrop(event);
+
+        expect(placements).toEqual([]);
+        expect(prevented).not.toHaveBeenCalled();
+      });
+
+      /** No resize or rotate grips, because neither gesture exists here. */
+      it('draws no handles around the selected table', () => {
+        setInputs({ selectedIds: ['table-1'] });
+
+        expect(query('floor-plan-handles')).toBeNull();
+      });
+
+      /**
+       * Enter is the keyboard's long press. The canvas is one tab stop with
+       * `aria-activedescendant` on it, so there is nothing focused to click and
+       * without this the table's actions would be reachable by touch and by
+       * pointer and by neither of the keys a keyboard user tries first.
+       */
+      it('raises a hold from the keyboard', () => {
+        setInputs({ selectedIds: ['table-1'] });
+
+        component.onKeyDown(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+        expect(holds).toEqual(['table-1']);
+      });
+
+      it('raises a hold from a right-click and opens no browser menu', () => {
+        const event = new MouseEvent('contextmenu', { bubbles: true });
+        const prevented = jest.spyOn(event, 'preventDefault');
+
+        itemElement('table-1')?.dispatchEvent(event);
+
+        expect(prevented).toHaveBeenCalled();
+        expect(holds).toEqual(['table-1']);
+        expect(selections).toEqual([['table-1']]);
+      });
+
+      /** The editor keeps the browser's own menu, which it always had. */
+      it('leaves the context menu alone in the editor', () => {
+        setInputs({ readOnly: false });
+
+        const event = new MouseEvent('contextmenu', { bubbles: true });
+        const prevented = jest.spyOn(event, 'preventDefault');
+
+        itemElement('table-1')?.dispatchEvent(event);
+
+        expect(prevented).not.toHaveBeenCalled();
+        expect(holds).toEqual([]);
+      });
+
+      /**
+       * Two fingers spread apart zoom in. The gesture the whole responsive
+       * scope of issue #1093 turns on: a host holding a tablet zooms with a
+       * pinch, not with a button in the corner.
+       */
+      it('zooms in on a pinch opened', () => {
+        const before = viewBox().width;
+
+        at('pointerdown', 1, { clientX: 100, clientY: 100 });
+        at('pointerdown', 2, { clientX: 200, clientY: 100 });
+        at('pointermove', 2, { clientX: 400, clientY: 100 });
+        fixture.detectChanges();
+
+        expect(viewBox().width).toBeLessThan(before);
+      });
+
+      it('zooms out on a pinch closed', () => {
+        const before = viewBox().width;
+
+        at('pointerdown', 1, { clientX: 100, clientY: 100 });
+        at('pointerdown', 2, { clientX: 500, clientY: 100 });
+        at('pointermove', 2, { clientX: 200, clientY: 100 });
+        fixture.detectChanges();
+
+        expect(viewBox().width).toBeGreaterThan(before);
+      });
+
+      /**
+       * A second finger landing cancels whatever one was doing, so a pinch
+       * begun with a thumb resting on a table leaves the table where it was and
+       * selects nothing when the fingers come off.
+       */
+      it('abandons the press a second finger interrupts', () => {
+        at(
+          'pointerdown',
+          1,
+          { clientX: 100, clientY: 100 },
+          itemElement('table-1') as Element,
+        );
+        at('pointerdown', 2, { clientX: 200, clientY: 100 });
+        at('pointerup', 2, {});
+        at('pointerup', 1, {});
+
+        expect(selections).toEqual([]);
+        expect(changes).toEqual([]);
+      });
+    });
+
+    /**
+     * A table under service, drawn with what it is doing on it
+     * (GitHub issue #1093).
+     */
+    describe('live table status', () => {
+      const occupied: FloorPlanItem = {
+        ...table,
+        seats: 4,
+        enabled: true,
+        status: 'occupied',
+        statusLabel: 'Occupied',
+        statusDuration: '22 min',
+      };
+
+      it('tints the table and draws the status silhouette on it', () => {
+        setInputs({ items: [occupied] });
+
+        const shape = fixture.nativeElement.querySelector(
+          '[data-item-id="table-1"] circle',
+        ) as SVGCircleElement;
+        const status = query('floor-plan-status-table-1');
+
+        expect(shape.style.fill).toContain('rgba');
+        expect(status?.querySelector('path')?.getAttribute('d')).toBeTruthy();
+      });
+
+      /**
+       * The word is not drawn on the table, because everything on this canvas
+       * is a share of the `viewBox` and a status word at plan scale is about
+       * eight pixels. It is in the `<title>`, where a hover and a screen reader
+       * find it, in the accessible name, and in the summary bar beside the
+       * plan - none of which are a hover away from each other.
+       */
+      it('names the status without drawing the word on the plan', () => {
+        setInputs({ items: [occupied] });
+
+        const status = query('floor-plan-status-table-1');
+
+        expect(status?.querySelector('title')?.textContent).toContain(
+          'Occupied',
+        );
+        expect(status?.querySelector('text')).toBeNull();
+      });
+
+      /**
+       * The time in state takes the seat count's place: one small number under
+       * a table is readable across a room and two are not, and a table already
+       * holding a party is not one a host is sizing up.
+       */
+      it('draws the time in state instead of the capacity', () => {
+        setInputs({ items: [occupied] });
+
+        expect(query('floor-plan-duration-table-1')?.textContent).toContain(
+          '22 min',
+        );
+        expect(query('floor-plan-seats-table-1')).toBeNull();
+      });
+
+      it('keeps the capacity on a table with no clock running', () => {
+        setInputs({
+          items: [
+            { ...occupied, status: 'available', statusDuration: undefined },
+          ],
+        });
+
+        expect(query('floor-plan-duration-table-1')).toBeNull();
+        expect(query('floor-plan-seats-table-1')).not.toBeNull();
+      });
+
+      /**
+       * The drawing says what the table is doing, so the accessible name has
+       * to as well - otherwise a screen reader describes the editor's plan
+       * while the sighted half of the room reads the live one.
+       */
+      it('names the table by what it is doing', () => {
+        setInputs({ items: [occupied] });
+
+        const name = fixture.nativeElement
+          .querySelector('[data-item-id="table-1"]')
+          ?.getAttribute('aria-label');
+
+        expect(name).toContain('table-plan-item-table-timed');
+        expect(name).toContain('Occupied');
+        expect(name).toContain('22 min');
+      });
+
+      /** Nothing of the sort in the editor, which knows no statuses. */
+      it('draws no status on a table that has none', () => {
+        setInputs({ items: [table] });
+
+        expect(query('floor-plan-status-table-1')).toBeNull();
+        expect(
+          fixture.nativeElement
+            .querySelector('[data-item-id="table-1"]')
+            ?.getAttribute('aria-label'),
+        ).toContain('floor-plan-item-table');
+      });
+    });
   });
 });

@@ -47,6 +47,18 @@ export class EditRestaurantService {
     }
   }
 
+  gotoTablePlan(): void {
+    const restaurant = this.restaurant();
+
+    if (restaurant) {
+      void this.navController.navigateForward([
+        'restaurant',
+        restaurant.id,
+        'tables',
+      ]);
+    }
+  }
+
   async createMenu(): Promise<void> {
     const restaurant = this.restaurant();
     if (!restaurant) {

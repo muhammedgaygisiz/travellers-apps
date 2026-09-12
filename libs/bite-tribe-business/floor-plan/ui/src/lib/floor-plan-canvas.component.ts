@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -12,7 +13,7 @@ import {
 } from '@angular/core';
 import { IonButton, IonIcon } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { FloorPlanPoint, Millimetres, Room } from 'model';
+import { FloorPlanPoint, Millimetres, Room, TableStatus } from 'model';
 import {
   FloorPlanBounds,
   RESIZE_HANDLES,
@@ -30,6 +31,12 @@ import {
 import { DEFAULT_GRID_SPACING } from './floor-plan-grid';
 import { FloorPlanItem } from './floor-plan-item';
 import { paletteEntry } from './floor-plan-palette';
+import {
+  STATUS_TINT_ALPHA,
+  tableStatusGlyphPath,
+  tableStatusMark,
+  withAlpha,
+} from './table-status-marks';
 import { formatMetres } from './floor-plan-units';
 import {
   CanvasViewport,
@@ -110,6 +117,72 @@ const SEAT_SHOULDER_BOTTOM_RATIO = 0.36;
 /** Roughly how wide one digit is in the sans-serif face the plan is drawn in. */
 const DIGIT_WIDTH_RATIO = 0.62;
 
+/**
+ * Roughly how wide one character of a word is in that face.
+ *
+ * Wider than a digit, because a status word is mixed case with ascenders and
+ * descenders rather than tabular figures. It is an estimate rather than a
+ * measurement, because measuring text means rendering it first and this runs
+ * while the viewport is being computed - so it errs slightly wide, which shrinks
+ * a word a little more than it strictly needed rather than letting it run off
+ * the table.
+ */
+const CHARACTER_WIDTH_RATIO = 0.58;
+
+/**
+ * How much of a table's width an annotation may take (GitHub issue #1093).
+ *
+ * A rectangle offers nearly all of it; a circle offers a chord rather than its
+ * diameter at any row above or below the centre, so a word that fitted across
+ * the middle of a round table would still leave the shape at the row the status
+ * is drawn on.
+ *
+ * The status word and the time in state are both shrunk to fit this. Without
+ * it, `Occupied` and `1 h 12 min` are simply wider than a 1000 mm table at
+ * zoom-to-fit, and a room of occupied tables becomes one long smear of
+ * overlapping words - which is what the first render of this looked like.
+ */
+const RECTANGLE_TEXT_FIT = 0.92;
+const ROUND_TEXT_FIT = 0.78;
+
+/**
+ * The status silhouette, as a share of the table's number
+ * (GitHub issue #1093).
+ *
+ * Smaller than the number, because the number is what a staff member calls out
+ * and everything else on the table is an annotation on it. Large enough that a
+ * filled circle and a hollow square are still different shapes at the size a
+ * whole room is drawn at, which is the size the mark has to work at.
+ */
+const STATUS_GLYPH_RATIO = 0.7;
+
+/**
+ * Where the three rows of a table under service sit, as shares of the stack
+ * step.
+ *
+ * A table with a live status carries a row above the number and a row below it,
+ * where the editor's table carries only the row below. The number stays nearly
+ * centred, because it is still the thing the table is identified by; the two
+ * annotations are pushed out either side of it far enough that no glyph touches
+ * a digit at any zoom level.
+ */
+const STATUS_ROW_OFFSET = 1.9;
+const STATUS_NUMBER_OFFSET = 0.1;
+const STATUS_FOOT_OFFSET = 1.5;
+
+/**
+ * How far a press may travel and still count as a tap, in CSS pixels.
+ *
+ * A finger on glass never holds still, so a tap on a table with no tolerance at
+ * all would be a one-pixel pan that selected nothing. Small enough that a
+ * deliberate drag to pan the plan is never mistaken for a tap on whatever it
+ * started over.
+ */
+const TAP_SLOP_PIXELS = 8;
+
+/** How long a finger rests on a table before it counts as a long press. */
+const LONG_PRESS_MS = 500;
+
 /** How far above the item's top edge the rotate handle stands. */
 const ROTATE_HANDLE_GAP_RATIO = 0.05;
 
@@ -125,6 +198,23 @@ const ROTATE_HANDLE_GAP_RATIO = 0.05;
  */
 const ITEM_HAIRLINES = 2;
 const SELECTED_HAIRLINES = 4;
+
+/**
+ * How wide an annotation drawn on one item may be, in millimetres.
+ *
+ * A circle is measured against a chord rather than its diameter, because the
+ * status row and the duration row are drawn above and below the centre where
+ * the shape is already narrowing.
+ */
+const textRoom = (item: FloorPlanItem): Millimetres =>
+  item.size.width * (item.round ? ROUND_TEXT_FIT : RECTANGLE_TEXT_FIT);
+
+/**
+ * How much a run of text has to shrink to fit the room it is given, never
+ * growing it past its natural size.
+ */
+const fitScale = (natural: Millimetres, available: Millimetres): number =>
+  natural > 0 ? Math.min(1, available / natural) : 1;
 
 /**
  * Ids have to be unique per instance: an SVG `<pattern>` and a `<clipPath>`
@@ -157,6 +247,23 @@ export const PALETTE_DRAG_TYPE = 'text/plain';
  */
 type CanvasGesture =
   | { kind: 'pan' }
+  | {
+      /**
+       * Two fingers on the plan (GitHub issue #1093).
+       *
+       * A gesture of its own rather than two pans, because what the second
+       * finger changes is the *scale*, and a pan that kept running beside it
+       * would fight the zoom for the same viewport. Whatever single-pointer
+       * gesture was in flight is abandoned when the second pointer lands, so
+       * a pinch started with a finger already resting on a table cannot leave
+       * the table somewhere new.
+       */
+      kind: 'pinch';
+      /** How far apart the two fingers were on the last frame, in pixels. */
+      spread: number;
+      /** Where their midpoint was on the last frame, in client pixels. */
+      centre: { x: number; y: number };
+    }
   | {
       kind: 'move';
       primaryId: string;
@@ -211,6 +318,60 @@ interface ItemView {
   seatHeadRadius: Millimetres;
   /** The figure's shoulders, as a filled arc under its head. */
   seatShoulders: string;
+  /** The live status row, on a table the live view has one for (issue #1093). */
+  status?: StatusView;
+  /**
+   * How long the table has been in its status, drawn where the seat count is.
+   *
+   * Empty when there is nothing to say, which is also when the seat count is
+   * drawn instead.
+   */
+  durationText: string;
+  /** Shrunk from the seat count's size when the table is too small for it. */
+  durationSize: Millimetres;
+  /**
+   * The status in full, whether or not the drawing had room for the word.
+   *
+   * Separate from {@link StatusView.text}, which is what is *drawn* and is
+   * dropped on a table too small to hold it. A screen reader has no such
+   * constraint, and a table whose name stopped saying what it was doing because
+   * the table was small would be the accessibility bug this whole row exists to
+   * avoid.
+   */
+  statusName: string;
+}
+
+/**
+ * One table's live status, ready to draw.
+ *
+ * A colour and a silhouette, and deliberately no word.
+ *
+ * The word was drawn here first and had to come out. Everything on this canvas
+ * is a share of the `viewBox`, which is what holds it at one size on screen
+ * across the zoom range - so a status word is the same handful of pixels
+ * however far the plan is zoomed in, and in a 12 m room that is about eight of
+ * them. `Occupied` at eight pixels is a smudge, and a rule that drew it only
+ * when it fitted the table drew `Free` and `Paying` and not `Occupied` or
+ * `Reserved`, which made one room look like two conventions.
+ *
+ * So the plan says the status in colour and in shape, and the *word* for it is
+ * in three places that are all on screen at once: the summary bar above the
+ * plan lists every status the room is currently in, the detail panel names the
+ * picked table's, and the table's accessible name says it in full. The
+ * criterion is that colour is never the sole carrier, and the silhouette is
+ * what carries it here - in greyscale, in a print, and for a reader who does
+ * not separate blue from grey.
+ */
+interface StatusView {
+  /** The status colour at full strength, for the outline and the glyph. */
+  colour: string;
+  /** The same colour washed over the table's own fill. */
+  tint: string;
+  /** The silhouette, as path data in the table's own frame. */
+  glyphPath: string;
+  /** Painted rather than outlined. */
+  glyphFilled: boolean;
+  glyphStrokeWidth: Millimetres;
 }
 
 /** A resize handle, ready to draw, in the selected item's rotated frame. */
@@ -302,6 +463,27 @@ export class FloorPlanCanvasComponent {
    */
   readonly snapSpacing = input<Millimetres>(0);
 
+  /**
+   * Draws the plan without letting anything move it (GitHub issue #1093).
+   *
+   * The live view staff open during service is the same drawing as the editor
+   * and none of the same gestures: a host reading the room must not be able to
+   * shove a table 200 mm because their thumb slid while they were looking for
+   * table 6, and the plan they are reading is the *published* one, which this
+   * component could not write even if it wanted to. So a press that would start
+   * a move starts a pan instead, the resize and rotate handles are not drawn at
+   * all, and the keys that delete, duplicate, undo, redo and nudge do nothing.
+   *
+   * Selection stays, because it is how a table is picked up to act on, and Tab
+   * still walks the room for the same reason it does in the editor. Pan, zoom,
+   * pinch and the long press stay too: they are how the plan is read rather
+   * than how it is changed.
+   *
+   * A boolean attribute, so the live view writes `readOnly` on the tag the way
+   * `disabled` is written rather than binding the literal `true`.
+   */
+  readonly readOnly = input(false, { transform: booleanAttribute });
+
   readonly selectionChange = output<string[]>();
 
   /** The items a gesture changed, at their final geometry. */
@@ -310,6 +492,16 @@ export class FloorPlanCanvasComponent {
   readonly placeRequest = output<FloorPlanPlacement>();
 
   readonly commandRequest = output<FloorPlanCanvasCommand>();
+
+  /**
+   * One item, held rather than tapped (GitHub issue #1093).
+   *
+   * The touch equivalent of a right-click, and the gesture staff reach for when
+   * they want to *do* something to a table rather than look at it. The canvas
+   * only reports it: what a long press opens is the caller's decision, and the
+   * actions themselves are issue #1094.
+   */
+  readonly longPress = output<string>();
 
   private readonly instance = ++instanceCount;
 
@@ -395,6 +587,34 @@ export class FloorPlanCanvasComponent {
 
   /** Where the last pan gesture started, in client pixels. */
   private panFrom?: { x: number; y: number };
+
+  /**
+   * Every pointer currently down on the canvas, in client pixels.
+   *
+   * Kept so a second finger can be noticed at all: a pointer event says only
+   * where *it* is, and a pinch is a fact about two of them. The map is the
+   * single source for how many are down, so a finger lifted outside the element
+   * is removed by the same path as one lifted on it.
+   */
+  private readonly pointers = new Map<number, { x: number; y: number }>();
+
+  /**
+   * The press in flight: what it started over, and whether it has become
+   * something other than a tap (GitHub issue #1093).
+   *
+   * `travelled` and `longPressed` are both "this is no longer a tap", recorded
+   * separately because they end differently: a press that travelled panned the
+   * plan and selects nothing, and one that was held already opened the actions
+   * and must not then also select on release.
+   */
+  private press?: {
+    itemId?: string;
+    from: { x: number; y: number };
+    travelled: boolean;
+    longPressed: boolean;
+  };
+
+  private longPressTimer?: ReturnType<typeof setTimeout>;
 
   private readonly gesture = signal<CanvasGesture | undefined>(undefined);
 
@@ -499,7 +719,13 @@ export class FloorPlanCanvasComponent {
   private readonly previewById = computed<ReadonlyMap<string, FloorPlanItem>>(
     () => {
       const gesture = this.gesture();
-      const preview = gesture && gesture.kind !== 'pan' ? gesture.preview : [];
+      // Pan and pinch move the *view*, so neither previews an item. Listing
+      // them rather than testing for `'pan'` alone is what makes a third such
+      // gesture a compile error here instead of a crash on the first frame.
+      const preview =
+        gesture && gesture.kind !== 'pan' && gesture.kind !== 'pinch'
+          ? gesture.preview
+          : [];
 
       return new Map(preview.map((item) => [item.id, item]));
     },
@@ -532,9 +758,22 @@ export class FloorPlanCanvasComponent {
       // Only a table carries a label worth drawing at plan scale; a wall's
       // optional label is a note for the owner, not a sign in the room.
       const isTable = item.kind === 'table';
+      // A status pushes the seat count down a row and lifts the number back
+      // towards the middle, so the three annotations stack without touching.
+      const live = isTable ? item.status : undefined;
+      const duration = live === undefined ? undefined : item.statusDuration;
       const seats = isTable ? item.seats : undefined;
-      const seatsText = seats === undefined ? '' : String(seats);
-      const seatsY = item.position.y + stack;
+      /*
+       * The duration takes the seat count's place rather than sharing its row:
+       * one small number under a table is readable across a room and two are
+       * not, and a table with a party at it is not one a host is sizing up.
+       * The capacity is still on {@link ItemView.seats}, and so still in the
+       * accessible name - it is the drawing that has no room for it, not the
+       * reader.
+       */
+      const seatsText = seats === undefined || duration ? '' : String(seats);
+      const footY = item.position.y + stack * (live ? STATUS_FOOT_OFFSET : 1);
+      const seatsY = footY;
       // The figure and the digits are one block, centred on the table together,
       // so a two-digit capacity does not push the pair off to one side.
       const glyphWidth = seatsSize * SEAT_GLYPH_WIDTH_RATIO;
@@ -549,13 +788,27 @@ export class FloorPlanCanvasComponent {
         domId: this.itemDomId(item.id),
         classes: `floor-plan-canvas__item floor-plan-canvas__item--${item.variant}${
           selected ? ' floor-plan-canvas__item--selected' : ''
-        }${item.enabled === false ? ' floor-plan-canvas__item--disabled' : ''}`,
+        }${item.enabled === false ? ' floor-plan-canvas__item--disabled' : ''}${
+          live
+            ? ` floor-plan-canvas__item--status floor-plan-canvas__item--status-${live}`
+            : ''
+        }`,
         typeKey,
+        /*
+         * Under service the name says what the table is *doing*, because that
+         * is what the drawing now says and a screen reader that only read out
+         * "table 6, 4 seats" would be describing the editor's plan while the
+         * sighted half of the room reads the live one.
+         */
         nameKey: !isTable
           ? typeKey
-          : item.enabled === false
-            ? 'floor-plan-item-table-disabled'
-            : 'floor-plan-item-table',
+          : live === undefined
+            ? item.enabled === false
+              ? 'floor-plan-item-table-disabled'
+              : 'floor-plan-item-table'
+            : duration
+              ? 'table-plan-item-table-timed'
+              : 'table-plan-item-table',
         selected,
         strokeWidth:
           hairline * (selected ? SELECTED_HAIRLINES : ITEM_HAIRLINES),
@@ -570,9 +823,35 @@ export class FloorPlanCanvasComponent {
         round: item.round,
         label: isTable ? (item.label ?? '') : '',
         labelSize,
-        // Centred when the number stands alone, lifted when a seat count is
-        // drawn under it, so a table without a capacity is not off-centre.
-        labelY: seats === undefined ? item.position.y : item.position.y - stack,
+        /*
+         * Centred when the number stands alone, lifted when a seat count is
+         * drawn under it, so a table without a capacity is not off-centre.
+         * Under service it goes back towards the middle, because a status row
+         * above it balances the row below.
+         */
+        labelY: live
+          ? item.position.y - stack * STATUS_NUMBER_OFFSET
+          : seats === undefined
+            ? item.position.y
+            : item.position.y - stack,
+        status:
+          live === undefined
+            ? undefined
+            : this.statusView(item, live, labelSize, stack, hairline),
+        statusName: (live === undefined ? '' : item.statusLabel) ?? '',
+        durationText: duration ?? '',
+        /*
+         * Shrunk to the table rather than clipped by it. `1 h 12 min` is wider
+         * than a 1000 mm table at zoom-to-fit, and a duration that ran past the
+         * edge would collide with whatever stands beside it - which is the
+         * table a host is comparing it against.
+         */
+        durationSize:
+          seatsSize *
+          fitScale(
+            (duration ?? '').length * seatsSize * CHARACTER_WIDTH_RATIO,
+            textRoom(item),
+          ),
         seats,
         seatsText,
         seatsSize,
@@ -591,6 +870,41 @@ export class FloorPlanCanvasComponent {
   });
 
   /**
+   * One table's live status, laid out above its number (GitHub issue #1093).
+   *
+   * The glyph and the word are one block centred on the table, for the same
+   * reason the seated figure and the capacity are: a long status pushed off to
+   * one side would make a room of mixed statuses look like a room of misaligned
+   * tables. The word's width is estimated rather than measured, because
+   * measuring text means rendering it first and this runs while the viewport is
+   * being computed - and an estimate that errs wide nudges a long word left,
+   * which is the harmless direction.
+   */
+  private statusView(
+    item: FloorPlanItem,
+    status: TableStatus,
+    labelSize: Millimetres,
+    stack: Millimetres,
+    hairline: Millimetres,
+  ): StatusView {
+    const mark = tableStatusMark(status);
+    const size = labelSize * STATUS_GLYPH_RATIO;
+
+    return {
+      colour: mark.colour,
+      tint: withAlpha(mark.colour, STATUS_TINT_ALPHA),
+      glyphPath: tableStatusGlyphPath(
+        mark.glyph,
+        item.position.x,
+        item.position.y - stack * STATUS_ROW_OFFSET,
+        size,
+      ),
+      glyphFilled: mark.filled,
+      glyphStrokeWidth: hairline * ITEM_HAIRLINES,
+    };
+  }
+
+  /**
    * The one item handles are drawn on, or nothing.
    *
    * Resize and rotation are single-item gestures. Eight handles per item across
@@ -601,7 +915,11 @@ export class FloorPlanCanvasComponent {
   private readonly handledItem = computed<FloorPlanItem | undefined>(() => {
     const ids = this.selectedIds();
 
-    return ids.length === 1
+    // Nothing is resized or rotated on the live view, so a selected table there
+    // gets the heavier outline every selection gets and no handles at all —
+    // eight grips round a table staff are about to seat a party at would invite
+    // exactly the gesture the view exists to refuse.
+    return ids.length === 1 && !this.readOnly()
       ? this.drawnItems().find((item) => item.id === ids[0])
       : undefined;
   });
@@ -712,6 +1030,13 @@ export class FloorPlanCanvasComponent {
    * clears the selection. Read off the event's target rather than bound per
    * element, because SVG events bubble to the root and one router here beats a
    * handler on every rect the plan contains.
+   *
+   * On the live view of issue #1093 nothing moves, so every press pans and
+   * whether it lands on a table is decided when the pointer comes *up*: a press
+   * that stayed put is a tap on that table, and a press that travelled is
+   * somebody dragging the room into view. Deciding on the way down would have
+   * meant choosing between a plan that cannot be panned by starting on a table
+   * and a tap that selects nothing.
    */
   onPointerDown(event: PointerEvent): void {
     const element = this.svg()?.nativeElement;
@@ -723,8 +1048,25 @@ export class FloorPlanCanvasComponent {
     // Captured so a gesture that leaves the canvas keeps going, rather than
     // stopping at the edge and leaving the plan half-moved.
     element.setPointerCapture?.(event.pointerId);
+    this.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (this.pointers.size >= 2) {
+      this.startPinch();
+
+      return;
+    }
 
     const target = event.target instanceof Element ? event.target : undefined;
+    const itemId =
+      target?.closest('[data-item-id]')?.getAttribute('data-item-id') ??
+      undefined;
+
+    if (this.readOnly()) {
+      this.startRead(itemId, event);
+
+      return;
+    }
+
     const handle = target
       ?.closest('[data-handle]')
       ?.getAttribute('data-handle');
@@ -734,10 +1076,6 @@ export class FloorPlanCanvasComponent {
 
       return;
     }
-
-    const itemId = target
-      ?.closest('[data-item-id]')
-      ?.getAttribute('data-item-id');
 
     if (itemId) {
       this.startMove(itemId, event);
@@ -756,6 +1094,21 @@ export class FloorPlanCanvasComponent {
     if (!gesture) {
       return;
     }
+
+    if (this.pointers.has(event.pointerId)) {
+      this.pointers.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+      });
+    }
+
+    if (gesture.kind === 'pinch') {
+      this.pinchWith(gesture);
+
+      return;
+    }
+
+    this.trackTravel(event);
 
     if (gesture.kind === 'pan') {
       this.panWith(event);
@@ -785,14 +1138,74 @@ export class FloorPlanCanvasComponent {
    * implicitly on `pointerup` and `pointercancel`, and calling
    * `releasePointerCapture` for a pointer that is no longer captured throws.
    */
-  onPointerUp(): void {
+  onPointerUp(event?: PointerEvent): void {
     const gesture = this.gesture();
+    const press = this.press;
 
+    if (event) {
+      this.pointers.delete(event.pointerId);
+    } else {
+      this.pointers.clear();
+    }
+
+    // A pinch that loses one finger leaves the other resting on the plan. It
+    // does not become a pan: the remaining finger has not travelled since the
+    // pinch began, so resuming would jump the plan by however far it moved
+    // while the two were spread.
+    if (gesture?.kind === 'pinch' && this.pointers.size > 0) {
+      return;
+    }
+
+    this.endPress();
     this.panFrom = undefined;
     this.gesture.set(undefined);
 
-    if (gesture && gesture.kind !== 'pan' && this.hasMoved(gesture.preview)) {
+    if (press && !press.travelled && !press.longPressed && press.itemId) {
+      this.selectionChange.emit([press.itemId]);
+
+      return;
+    }
+
+    if (press && !press.travelled && !press.longPressed) {
+      this.selectionChange.emit([]);
+
+      return;
+    }
+
+    if (
+      gesture &&
+      gesture.kind !== 'pan' &&
+      gesture.kind !== 'pinch' &&
+      this.hasMoved(gesture.preview)
+    ) {
       this.itemsChange.emit(gesture.preview);
+    }
+  }
+
+  /**
+   * The browser's own long-press and right-click menu, turned into the
+   * canvas's (GitHub issue #1093).
+   *
+   * Two things arrive here: a right-click on a table, and - on the platforms
+   * that synthesise it - a finger held on one. Both mean "what can I do with
+   * this table", so both raise {@link longPress} and neither is allowed to open
+   * the browser's menu over the plan. The held-finger timer below covers the
+   * platforms that synthesise nothing.
+   */
+  onContextMenu(event: MouseEvent): void {
+    if (!this.readOnly()) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const target = event.target instanceof Element ? event.target : undefined;
+    const itemId = target
+      ?.closest('[data-item-id]')
+      ?.getAttribute('data-item-id');
+
+    if (itemId) {
+      this.raiseLongPress(itemId);
     }
   }
 
@@ -828,7 +1241,7 @@ export class FloorPlanCanvasComponent {
    * is what makes the canvas a drop target at all.
    */
   onDragOver(event: DragEvent): void {
-    if (!this.room()) {
+    if (!this.room() || this.readOnly()) {
       return;
     }
 
@@ -840,7 +1253,7 @@ export class FloorPlanCanvasComponent {
   }
 
   onDrop(event: DragEvent): void {
-    if (!this.room()) {
+    if (!this.room() || this.readOnly()) {
       return;
     }
 
@@ -999,6 +1412,13 @@ export class FloorPlanCanvasComponent {
 
   /** The editor commands, which change which items exist rather than where. */
   private handleCommandKey(event: KeyboardEvent): boolean {
+    // None of them exist on the live view. Letting them through unhandled is
+    // what keeps the platform's own shortcuts - select all, undo in a field
+    // elsewhere on the page - working over a plan that has nothing to undo.
+    if (this.readOnly()) {
+      return false;
+    }
+
     const modified = event.ctrlKey || event.metaKey;
     const key = event.key.toLowerCase();
 
@@ -1047,6 +1467,25 @@ export class FloorPlanCanvasComponent {
     const selected = this.selectedItems();
 
     if (selected.length === 0) {
+      return false;
+    }
+
+    /*
+     * Enter and space are the keyboard's long press (GitHub issue #1093).
+     *
+     * The canvas is one tab stop with `aria-activedescendant` on it, so the
+     * table a keyboard has walked on to cannot be "clicked" - there is nothing
+     * focused to press. Without this, every action on a table would be
+     * reachable by touch and by pointer and by neither of the two keys a
+     * keyboard user tries first.
+     */
+    if (this.readOnly()) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        this.longPress.emit(selected[selected.length - 1].id);
+
+        return true;
+      }
+
       return false;
     }
 
@@ -1224,6 +1663,152 @@ export class FloorPlanCanvasComponent {
         },
       ],
     });
+  }
+
+  /**
+   * A press on the live view: pan now, decide what it was on release
+   * (GitHub issue #1093).
+   *
+   * The long-press timer starts here and only over a table, because holding a
+   * finger on bare floor has nothing to offer. It is cleared by any travel, so
+   * a drag that begins on a table pans the plan instead of opening its actions
+   * under a moving finger.
+   */
+  private startRead(itemId: string | undefined, event: PointerEvent): void {
+    this.press = {
+      itemId,
+      from: { x: event.clientX, y: event.clientY },
+      travelled: false,
+      longPressed: false,
+    };
+    this.panFrom = { x: event.clientX, y: event.clientY };
+    this.gesture.set({ kind: 'pan' });
+
+    if (itemId) {
+      this.longPressTimer = setTimeout(() => {
+        const press = this.press;
+
+        if (press && !press.travelled) {
+          press.longPressed = true;
+          this.raiseLongPress(itemId);
+        }
+      }, LONG_PRESS_MS);
+    }
+  }
+
+  /** Whether the press has moved far enough to stop being a tap. */
+  private trackTravel(event: PointerEvent): void {
+    const press = this.press;
+
+    if (!press || press.travelled) {
+      return;
+    }
+
+    const moved =
+      Math.abs(event.clientX - press.from.x) > TAP_SLOP_PIXELS ||
+      Math.abs(event.clientY - press.from.y) > TAP_SLOP_PIXELS;
+
+    if (moved) {
+      press.travelled = true;
+      this.clearLongPressTimer();
+    }
+  }
+
+  private endPress(): void {
+    this.press = undefined;
+    this.clearLongPressTimer();
+  }
+
+  private clearLongPressTimer(): void {
+    if (this.longPressTimer !== undefined) {
+      clearTimeout(this.longPressTimer);
+      this.longPressTimer = undefined;
+    }
+  }
+
+  /**
+   * Selects the table first, then reports the hold.
+   *
+   * In that order, because whatever the caller opens is about *this* table and
+   * the plan should already be showing which one it means by the time it
+   * appears.
+   */
+  private raiseLongPress(itemId: string): void {
+    if (!this.selectedIds().includes(itemId)) {
+      this.selectionChange.emit([itemId]);
+    }
+
+    this.longPress.emit(itemId);
+  }
+
+  /**
+   * Two fingers: from here the plan is zoomed and panned together
+   * (GitHub issue #1093).
+   *
+   * Whatever one finger had started is abandoned rather than finished, so a
+   * pinch that began with a thumb resting on a table leaves the table where it
+   * was. In the editor that also means no half-move is emitted, which is the
+   * behaviour `Escape` already has.
+   */
+  private startPinch(): void {
+    this.clearLongPressTimer();
+    this.press = undefined;
+    this.panFrom = undefined;
+
+    const [first, second] = [...this.pointers.values()];
+
+    this.gesture.set({
+      kind: 'pinch',
+      spread: Math.hypot(second.x - first.x, second.y - first.y),
+      centre: {
+        x: (first.x + second.x) / 2,
+        y: (first.y + second.y) / 2,
+      },
+    });
+  }
+
+  /**
+   * The plan follows the two fingers: the spread sets the zoom, the midpoint
+   * sets the pan.
+   *
+   * The zoom is applied about the viewport's own centre and the drift of the
+   * midpoint is applied as a pan on top, rather than zooming about the point
+   * between the fingers. The two are the same gesture to a hand holding a
+   * tablet, and the viewport is already clamped to the room, so anchoring on
+   * the pinch point would mostly mean fighting that clamp at the edges of a
+   * plan.
+   */
+  private pinchWith(gesture: Extract<CanvasGesture, { kind: 'pinch' }>): void {
+    const room = this.room();
+    const element = this.svg()?.nativeElement;
+    const [first, second] = [...this.pointers.values()];
+
+    if (!room || !element || !first || !second) {
+      return;
+    }
+
+    const spread = Math.hypot(second.x - first.x, second.y - first.y);
+    const centre = {
+      x: (first.x + second.x) / 2,
+      y: (first.y + second.y) / 2,
+    };
+    const perPixel = millimetresPerPixel(
+      this.viewport(),
+      element.getBoundingClientRect(),
+    );
+
+    if (gesture.spread > 0 && spread > 0) {
+      this.zoom.update((zoom) => clampZoom((zoom * spread) / gesture.spread));
+    }
+
+    if (perPixel !== undefined) {
+      this.panBy(
+        -(centre.x - gesture.centre.x) * perPixel,
+        -(centre.y - gesture.centre.y) * perPixel,
+      );
+    }
+
+    this.gesture.set({ kind: 'pinch', spread, centre });
   }
 
   private panWith(event: PointerEvent): void {

@@ -187,6 +187,13 @@ because they are modifications rather than deletions - followed by a plain
 `loki test` for the same filter, which rewrites any missing reference and
 confirms the approved ones match.
 
+**An unfiltered run is not safe either.** On 2026-09-12 a full `loki test` had
+exactly three genuine failures; `npm run loki:approve` modified seventeen
+references - fourteen of which had passed - and deleted the eleven freshly
+written references for a story kind added in the same change. Treat `loki
+approve` as unusable for adopting a small failure set, whatever the preceding
+run looked like, and use the copy below instead.
+
 That test run is also how a **new** story gets its first reference: `loki test`
 writes a reference it cannot find and reports the story as passing, so a story
 added alongside a UI change needs no separate update step.

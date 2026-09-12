@@ -54,6 +54,8 @@ Examples:
 - `libs/bite-tribe-business/floor-plan/page`
 - `libs/bite-tribe-business/floor-plan/data-access`
 - `libs/bite-tribe-business/floor-plan/ui`
+- `libs/bite-tribe-business/table-management/page`
+- `libs/bite-tribe-business/table-management/data-access`
 
 `floor-plan` is the one feature with a third library. It was also the one that
 existed as half a pair for a while: issue \#1081 added the data-access half so
@@ -77,6 +79,22 @@ the token came from, and `TableQrCodeComponent` draws it. The sheet that decides
 which tables to print, asks the backend for their tokens and carries the print
 stylesheet is in `page`, and its route is
 `restaurant/:restaurantId/floor-plan/qr-codes`.
+
+`table-management` is the live room staff open during service (issue \#1093).
+It has no `ui` library of its own and deliberately reuses `floor-plan/ui`: the
+plan an owner arranges and the plan a host reads are the same drawing, and they
+are the same drawing because they are the same renderer. The canvas gained a
+`readOnly` mode and a status mark per table for it; everything about _what_ a
+table is doing - which room is open, how the states are listened to, how long a
+table has held its status - is in `table-management`.
+
+Its `data-access` half only listens. Issue \#1092 made `transitionTableState`
+the only writer of a table state and `firestore.rules` refuses every client
+write to the collection, so there is no write path here to add by accident. Its
+route, `restaurant/:restaurantId/tables`, is also the one route in the business
+app a **staff** account is meant to reach, so it carries
+`restaurantAccessGuard` (owner or staff of that restaurant) rather than the
+owner-only `ownedRestaurantGuard` every editing route carries.
 
 The business app holds only what a restaurant does to its own data. Migrations,
 restaurant-candidate verification, the unmatched Bite places and the

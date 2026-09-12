@@ -6,4 +6,5 @@ export * from './lib/floor-plan-palette';
 export * from './lib/floor-plan-units';
 export * from './lib/floor-plan-viewport';
 export * from './lib/table-qr-code';
+export * from './lib/table-status-marks';
 export * from './lib/table-qr-code.component';

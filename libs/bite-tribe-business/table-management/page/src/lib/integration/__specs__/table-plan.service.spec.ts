@@ -7,6 +7,7 @@ import { FloorPlanDataAccessService } from 'bite-tribe-business/floor-plan-data-
 import { TableStateDataAccessService } from 'bite-tribe-business/table-management-data-access';
 import { RestaurantTable, Room, TableState, TableStatus } from 'model';
 import { BehaviorSubject, of } from 'rxjs';
+import { ToastService } from 'toast';
 import { TablePlanService } from '../table-plan.service';
 
 const NOW = 1_760_000_000_000;
@@ -56,6 +57,8 @@ describe(TablePlanService.name, () => {
   let service: TablePlanService;
   let states: BehaviorSubject<TableState[]>;
   let floorPlan: Record<string, jest.Mock>;
+  let transition: jest.Mock;
+  let present: jest.Mock;
   let logout: jest.Mock;
   let getDocument: jest.SpyInstance;
   let currentRestaurantId: WritableSignal<string | undefined>;
@@ -82,6 +85,19 @@ describe(TablePlanService.name, () => {
     jest.useFakeTimers().setSystemTime(NOW);
     states = new BehaviorSubject<TableState[]>([]);
     logout = jest.fn();
+    present = jest.fn().mockResolvedValue(undefined);
+    transition = jest
+      .fn()
+      .mockImplementation(({ tableId, status, expectedStatus }) =>
+        Promise.resolve({
+          restaurantId: 'restaurant-1',
+          tableId,
+          from: expectedStatus,
+          to: status,
+          since: NOW + 500,
+          transitionId: `transition-${tableId}`,
+        }),
+      );
     currentRestaurantId = signal<string | undefined>('restaurant-1');
     restaurantId.next('restaurant-1');
 
@@ -120,8 +136,12 @@ describe(TablePlanService.name, () => {
         { provide: FloorPlanDataAccessService, useValue: floorPlan },
         {
           provide: TableStateDataAccessService,
-          useValue: { tableStates$: jest.fn(() => states.asObservable()) },
+          useValue: {
+            tableStates$: jest.fn(() => states.asObservable()),
+            transition,
+          },
         },
+        { provide: ToastService, useValue: { present } },
         {
           provide: BiteTribeStoreService,
           useValue: {
@@ -350,6 +370,307 @@ describe(TablePlanService.name, () => {
       );
       expect(service.selectedTable()?.duration).toBeUndefined();
       expect(service.selectedTable()?.note).toBeUndefined();
+    });
+  });
+
+  /**
+   * The actions (GitHub issue #1094).
+   *
+   * The backend is the only writer, so everything here is about what the view
+   * sends it, what the view shows meanwhile, and what it does when the answer
+   * is no.
+   */
+  describe('acting on a table', () => {
+    /**
+     * A held table opens the sheet, which is the criterion about one
+     * interaction: the table and its actions are one gesture apart.
+     */
+    it('opens the actions on the table a long press landed on', () => {
+      service.activateTable('table-1');
+
+      expect(service.actionTarget()?.table.id).toBe('table-1');
+      expect(service.selectedIds()).toEqual(['table-1']);
+    });
+
+    /**
+     * The criterion that matters most: a disallowed transition is not offered
+     * rather than offered and then rejected.
+     */
+    it('offers only what the table can currently do', () => {
+      states.next([state('table-1', 'cleaning')]);
+      service.activateTable('table-1');
+
+      expect(service.actions().map((action) => action.to)).toEqual([
+        'available',
+        'disabled',
+      ]);
+    });
+
+    /** A table somebody else moves re-offers itself under the open sheet. */
+    it('re-offers the table when it changes under the sheet', () => {
+      service.activateTable('table-1');
+      expect(service.actions().map((action) => action.to)).toContain(
+        'occupied',
+      );
+
+      states.next([state('table-1', 'disabled')]);
+
+      expect(service.actions().map((action) => action.to)).toEqual([
+        'available',
+      ]);
+    });
+
+    it('closes the sheet on request and on a cleared selection', () => {
+      service.activateTable('table-1');
+      service.closeActions();
+      expect(service.actionTarget()).toBeUndefined();
+
+      service.activateTable('table-1');
+      service.clearSelection();
+      expect(service.actionTarget()).toBeUndefined();
+    });
+
+    /**
+     * The expected status is what turns a race into a sentence, and it is the
+     * status the view was showing at the moment the button was pressed.
+     */
+    it('asks the backend to move the table from what it was showing', async () => {
+      states.next([state('table-1', 'occupied')]);
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'cleaning' });
+
+      expect(transition).toHaveBeenCalledWith({
+        restaurantId: 'restaurant-1',
+        tableId: 'table-1',
+        status: 'cleaning',
+        expectedStatus: 'occupied',
+      });
+      expect(service.actionTarget()).toBeUndefined();
+    });
+
+    /**
+     * The count has nowhere durable to live until the visit of issue #1095,
+     * and the audit entry's reason is the field whose purpose is why a
+     * transition happened.
+     */
+    it('records a party size on the audit entry', async () => {
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied', guests: 4 });
+
+      expect(transition).toHaveBeenCalledWith(
+        expect.objectContaining({ reason: 'Party of 4' }),
+      );
+    });
+
+    it('sends no reason when no count was entered', async () => {
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      expect(transition).toHaveBeenCalledWith(
+        expect.not.objectContaining({ reason: expect.anything() }),
+      );
+    });
+
+    /**
+     * The table changes on the tap, because a plan that waits for the round
+     * trip reads as a tap that missed - and is answered with a second tap the
+     * backend then refuses.
+     */
+    it('shows the new status before the backend has answered', async () => {
+      let settle: (value: unknown) => void = () => undefined;
+
+      transition.mockReturnValue(
+        new Promise((resolve) => {
+          settle = resolve;
+        }),
+      );
+
+      service.activateTable('table-1');
+      const applied = service.applyAction({ to: 'occupied' });
+
+      expect(service.items()[0].status).toBe('occupied');
+
+      settle({ since: NOW + 500 });
+      await applied;
+    });
+
+    /**
+     * Not when the callable resolves - when the snapshot carrying it arrives.
+     * Dropping the guess early is the flicker that makes staff doubt the
+     * screen.
+     */
+    it('keeps it on screen until the listener delivers the same thing', async () => {
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      expect(service.items()[0].status).toBe('occupied');
+
+      states.next([state('table-1', 'occupied', { since: NOW + 500 })]);
+
+      expect(service.items()[0].status).toBe('occupied');
+      expect(service.items()[0].statusDuration).toBeDefined();
+    });
+
+    /**
+     * The rollback is a deletion, because the true status was never
+     * overwritten - it is still underneath.
+     */
+    it('rolls back and says who got there first on a conflict', async () => {
+      states.next([state('table-1', 'available')]);
+      transition.mockRejectedValue({
+        code: 'functions/aborted',
+        message: 'The table is occupied now, not available.',
+      });
+
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      expect(service.items()[0].status).toBe('available');
+      expect(present).toHaveBeenCalledWith({
+        messageKey: 'table-action-conflict',
+        outcome: 'failure',
+      });
+    });
+
+    it.each([
+      ['functions/failed-precondition', 'table-action-not-allowed'],
+      ['functions/permission-denied', 'table-action-permission'],
+      ['functions/internal', 'table-action-failed'],
+    ])('explains %s in its own words', async (code, messageKey) => {
+      transition.mockRejectedValue({ code, message: '' });
+
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      expect(service.items()[0].status).toBe('available');
+      expect(present).toHaveBeenCalledWith({ messageKey, outcome: 'failure' });
+    });
+
+    it('asks for nothing when the sheet is not open', async () => {
+      await service.applyAction({ to: 'occupied' });
+
+      expect(transition).not.toHaveBeenCalled();
+    });
+  });
+
+  /** The end-of-service reset (GitHub issue #1094). */
+  describe('the batch', () => {
+    it('starts empty and leaves empty', () => {
+      service.select(['table-1']);
+      service.toggleBulkMode();
+
+      expect(service.bulkMode()).toBe(true);
+      expect(service.selectedIds()).toEqual([]);
+
+      service.select(['table-1']);
+      service.toggleBulkMode();
+
+      expect(service.bulkMode()).toBe(false);
+      expect(service.selectedIds()).toEqual([]);
+    });
+
+    /**
+     * The canvas reports every read-only tap as "this table alone", because a
+     * shift-click is not a gesture a host holding a tablet has. The toggle is
+     * the service's.
+     */
+    it('adds and removes a table per tap while assembling one', () => {
+      service.toggleBulkMode();
+
+      service.select(['table-1']);
+      service.select(['table-2']);
+      expect(service.selectedIds()).toEqual(['table-1', 'table-2']);
+
+      service.select(['table-1']);
+      expect(service.selectedIds()).toEqual(['table-2']);
+
+      // Tapping the plan beside a table clears, in both modes.
+      service.select([]);
+      expect(service.selectedIds()).toEqual([]);
+    });
+
+    /** A held table is one more table in the batch, not one to act on alone. */
+    it('opens no sheet while a batch is being assembled', () => {
+      service.toggleBulkMode();
+      service.activateTable('table-1');
+
+      expect(service.actionTarget()).toBeUndefined();
+      expect(service.selectedIds()).toEqual(['table-1']);
+    });
+
+    it('takes the whole open room in one press', () => {
+      service.toggleBulkMode();
+      service.selectAllInRoom();
+
+      expect(service.selectedIds()).toEqual(['table-1', 'table-2']);
+    });
+
+    /**
+     * A table already free has nothing to reset and a party still ordering is
+     * not one anybody meant to clear, so neither is sent to the backend to be
+     * refused.
+     */
+    it('counts only the tables the reset would actually free', () => {
+      states.next([state('table-1', 'occupied'), state('table-2', 'ordering')]);
+      service.toggleBulkMode();
+      service.selectAllInRoom();
+
+      expect(service.selectedCount()).toBe(2);
+      expect(service.freeableCount()).toBe(1);
+    });
+
+    it('frees every table in the batch that can be freed', async () => {
+      states.next([
+        state('table-1', 'occupied'),
+        state('table-2', 'awaitingPayment'),
+      ]);
+      service.toggleBulkMode();
+      service.selectAllInRoom();
+      await service.freeSelectedTables();
+
+      expect(transition).toHaveBeenCalledTimes(2);
+      expect(transition).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tableId: 'table-2',
+          status: 'available',
+          expectedStatus: 'awaitingPayment',
+        }),
+      );
+      expect(service.selectedIds()).toEqual([]);
+      expect(present).toHaveBeenCalledWith({
+        messageKey: 'table-bulk-freed',
+        params: { count: 2 },
+        outcome: 'success',
+      });
+    });
+
+    /**
+     * One toast for the batch rather than one per table, and a batch that half
+     * worked has to say so - the tables it could not free are still on the
+     * plan, showing what they are actually doing.
+     */
+    it('says how much of a half-finished reset worked', async () => {
+      states.next([state('table-1', 'occupied'), state('table-2', 'occupied')]);
+      transition.mockRejectedValueOnce({ code: 'functions/aborted' });
+
+      service.toggleBulkMode();
+      service.selectAllInRoom();
+      await service.freeSelectedTables();
+
+      expect(present).toHaveBeenLastCalledWith({
+        messageKey: 'table-bulk-freed-partial',
+        params: { count: 1, total: 2 },
+        outcome: 'failure',
+      });
+    });
+
+    it('does nothing when the batch has nothing to free', async () => {
+      service.toggleBulkMode();
+      service.selectAllInRoom();
+      await service.freeSelectedTables();
+
+      expect(transition).not.toHaveBeenCalled();
+      expect(present).not.toHaveBeenCalled();
     });
   });
 

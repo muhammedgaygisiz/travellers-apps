@@ -32,6 +32,17 @@
    * what device the room is on.
    */
   container-type: inline-size;
+  /*
+   * The containing block for the action sheet, which covers the page rather
+   * than the window (GitHub issue #1094).
+   *
+   * `container-type` already makes this element one, because it carries layout
+   * containment - but that is a side effect of a property declared for an
+   * entirely different reason, and a sheet that escaped to the viewport the day
+   * somebody swapped the container query for a media query would be a puzzle.
+   * Saying it outright costs one line.
+   */
+  position: relative;
 }
 
 .table-plan__header {
@@ -228,10 +239,38 @@
   font-size: 0.875rem;
 }
 
-.table-plan__detail-pending {
-  display: block;
-  margin-top: 0.5rem;
-  font-size: 0.75rem;
+.table-plan__detail-actions {
+  margin-top: 0.75rem;
+}
+
+/*
+ * The batch row: one quiet button most of the time, a bar while a reset is
+ * being assembled.
+ *
+ * It wraps rather than scrolls, for the reason the summary above it does - a
+ * count and the buttons acting on it are read as one thing, and a button that
+ * has run off the edge of a phone is a button nobody knows is there.
+ */
+.table-plan__batch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  min-height: 2rem;
+}
+
+.table-plan__batch-count {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.table-plan__batch-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin-inline-start: auto;
 }
 
 /*

@@ -1,0 +1,213 @@
+/*
+ * The action sheet (GitHub issue #1094).
+ *
+ * It covers the page rather than floating over the viewport, and that is the
+ * one positioning decision worth stating. `.table-plan` is the containing
+ * block - it says `position: relative` for this, and its `container-type`
+ * would have made it one anyway - so the sheet fills the page and nothing
+ * else. A `fixed` sheet would have resolved against the same box in the app
+ * and against the whole window in a Storybook frame, which is a reference
+ * picture that stops matching what a host sees.
+ */
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  --table-actions-ink-rgb: var(--ion-text-color-rgb, 0, 0, 0);
+}
+
+.table-actions__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/*
+ * The sheet itself, at the bottom because that is where a thumb is.
+ *
+ * A host holding a tablet at the door reaches the lower third of it without
+ * regripping, and every action here is one they take while standing up. It
+ * stops short of the full width on a wide screen, where a row of buttons
+ * spanning a laptop would put the first and the last of them a mouse-journey
+ * apart.
+ */
+.table-actions__panel {
+  position: relative;
+  width: 100%;
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 0.75rem 1rem 1rem;
+  border-radius: 1rem 1rem 0 0;
+  background: var(--ion-background-color, #fff);
+  box-shadow: 0 -0.5rem 1.5rem rgba(0, 0, 0, 0.25);
+  /* A sheet taller than the page scrolls itself rather than pushing the plan. */
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.table-actions__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.table-actions__heading {
+  min-width: 0;
+}
+
+.table-actions__title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.table-actions__status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.15rem 0 0;
+  color: var(--mark-colour);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.table-actions__duration {
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(var(--table-actions-ink-rgb), 0.08);
+  color: rgba(var(--table-actions-ink-rgb), 0.7);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.table-actions__glyph {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/*
+ * Every control is a native button, so the focus trap can find it. They are
+ * stripped back to nothing here and rebuilt, which is what keeps them looking
+ * like the rest of the app rather than like a form.
+ */
+.table-actions__close,
+.table-actions__step,
+.table-actions__action {
+  margin: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.table-actions__close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  color: rgba(var(--table-actions-ink-rgb), 0.6);
+  font-size: 1.25rem;
+}
+
+.table-actions__guests {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.4rem 0.5rem 0.4rem 0.75rem;
+  border: 1px solid rgba(var(--table-actions-ink-rgb), 0.15);
+  border-radius: 0.75rem;
+}
+
+.table-actions__guests-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: rgba(var(--table-actions-ink-rgb), 0.75);
+  font-size: 0.875rem;
+}
+
+.table-actions__stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.table-actions__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /*
+   * A thumb target, not an icon. The stepper is pressed repeatedly, standing
+   * up, by somebody holding a tablet in the other hand.
+   */
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  background: rgba(var(--table-actions-ink-rgb), 0.06);
+  font-size: 1.125rem;
+}
+
+.table-actions__guests-count {
+  min-width: 2.25rem;
+  text-align: center;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-actions__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * One full-width row per action.
+ *
+ * Full width rather than a grid of chips: the sheet is read top to bottom
+ * under time pressure, and a row whose whole width is pressable cannot be
+ * missed by a thumb aimed at the word.
+ */
+.table-actions__action {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid rgba(var(--table-actions-ink-rgb), 0.12);
+  border-left: 0.25rem solid var(--mark-colour);
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: start;
+}
+
+.table-actions__action:hover {
+  background: rgba(var(--table-actions-ink-rgb), 0.04);
+}
+
+/*
+ * The focus ring is the app's own accent rather than the platform default,
+ * because the sheet is the one surface here that is driven by a keyboard as a
+ * first-class way in - enter on a table is how it opens.
+ */
+.table-actions__close:focus-visible,
+.table-actions__step:focus-visible,
+.table-actions__action:focus-visible {
+  outline: 2px solid var(--ion-color-primary, #3880ff);
+  outline-offset: 2px;
+}

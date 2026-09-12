@@ -120,6 +120,72 @@
           }
         </ul>
 
+        <!--
+          The end-of-service reset (GitHub issue #1094).
+
+          A mode rather than a modifier key: clearing a room of thirty covers
+          is thirty taps and one button, and nobody at the end of a service is
+          holding shift on a tablet. Out of the mode this is one quiet button,
+          because most of a service is spent acting on one table at a time.
+        -->
+        @if (bulkMode()) {
+          <div class="table-plan__batch" data-testid="table-plan-batch">
+            <span class="table-plan__batch-count">{{
+              'table-bulk-selected' | transloco: { count: selectedCount() }
+            }}</span>
+
+            <span class="table-plan__batch-buttons">
+              <ion-button
+                size="small"
+                fill="clear"
+                data-testid="table-plan-select-all"
+                (click)="selectAllRequested.emit()"
+              >
+                {{ 'table-bulk-select-all' | transloco }}
+              </ion-button>
+
+              <!--
+                Offered only when it would do something. A reset that names a
+                number staff can see is a reset they can check before pressing:
+                eight tables selected and six of them freeable is six, and the
+                two already free are not failures to report afterwards.
+              -->
+              @if (freeableCount() > 0) {
+                <ion-button
+                  size="small"
+                  [disabled]="bulkBusy()"
+                  data-testid="table-plan-free-selected"
+                  (click)="freeSelected.emit()"
+                >
+                  {{
+                    'table-bulk-free' | transloco: { count: freeableCount() }
+                  }}
+                </ion-button>
+              }
+
+              <ion-button
+                size="small"
+                fill="clear"
+                data-testid="table-plan-batch-done"
+                (click)="bulkModeToggled.emit()"
+              >
+                {{ 'table-bulk-done' | transloco }}
+              </ion-button>
+            </span>
+          </div>
+        } @else {
+          <div class="table-plan__batch">
+            <ion-button
+              size="small"
+              fill="clear"
+              data-testid="table-plan-batch-start"
+              (click)="bulkModeToggled.emit()"
+            >
+              {{ 'table-bulk-start' | transloco }}
+            </ion-button>
+          </div>
+        }
+
         <div
           class="table-plan__body"
           [class.table-plan__body--with-detail]="!!selectedTable()"
@@ -140,7 +206,7 @@
               given - so a height the page decides is what makes "the whole room
               at a glance" true instead of a plan that runs off the bottom.
             -->
-            <div class="table-plan__plan">
+            <div #canvasHost class="table-plan__plan">
               <bt-business-floor-plan-canvas
                 readOnly
                 [room]="selectedRoom()"
@@ -227,16 +293,37 @@
               }
 
               <!--
-                The actions themselves are issue #1094. Saying so on the surface
-                rather than leaving a panel that looks like it should do
-                something and does not.
+                The second way into the actions, for whoever tapped rather than
+                held. The first is the table itself: holding it, or pressing
+                enter on it, opens the same sheet without coming through here.
               -->
-              <ion-note class="table-plan__detail-pending">{{
-                'table-plan-actions-pending' | transloco
-              }}</ion-note>
+              <ion-button
+                expand="block"
+                size="small"
+                class="table-plan__detail-actions"
+                data-testid="table-plan-detail-actions"
+                (click)="activateTable.emit(detail.table.id)"
+              >
+                {{ 'table-plan-detail-actions' | transloco }}
+              </ion-button>
             </aside>
           }
         </div>
+      }
+
+      <!--
+        The actions, over the plan rather than beside it. Outside the branches
+        above because it is about a table rather than about the room: nothing
+        that empties the room can leave a sheet open, because the table it was
+        opened on is gone from the detail too.
+      -->
+      @if (actionTarget(); as target) {
+        <bt-business-table-actions
+          [table]="target"
+          [actions]="actions()"
+          (actionPicked)="actionPicked.emit($event)"
+          (dismissed)="onActionsDismissed()"
+        />
       }
     </div>
   </ion-content>

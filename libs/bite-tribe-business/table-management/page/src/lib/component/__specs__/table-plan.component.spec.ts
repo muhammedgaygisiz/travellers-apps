@@ -8,8 +8,10 @@ import {
   FloorPlanItem,
 } from 'bite-tribe-business/floor-plan-ui';
 import { RestaurantTable, Room } from 'model';
+import { tableActions } from '../../integration/table-actions';
 import { TableDetail } from '../../integration/table-plan.service';
 import { TableStatusCount } from '../../integration/table-plan-summary';
+import { TableActionsComponent } from '../table-actions.component';
 import { TablePlanComponent } from '../table-plan.component';
 
 @Pipe({ name: 'transloco' })
@@ -96,6 +98,11 @@ describe(TablePlanComponent.name, () => {
       // The canvas is a child component with a catalogue of its own, and the
       // real pipe would want a real `TranslocoService` behind it.
       .overrideComponent(FloorPlanCanvasComponent, {
+        remove: { imports: [TranslocoPipe] },
+        add: { imports: [MockTranslocoPipe] },
+      })
+      // The sheet is a child with a catalogue of its own too (issue #1094).
+      .overrideComponent(TableActionsComponent, {
         remove: { imports: [TranslocoPipe] },
         add: { imports: [MockTranslocoPipe] },
       })
@@ -235,6 +242,110 @@ describe(TablePlanComponent.name, () => {
         // The mark is the panel's own, so there is none to draw either. Read
         // directly, because the template never reaches it without a detail.
         expect(component.detailMark()).toBeUndefined();
+      });
+
+      /**
+       * The second way into the actions, for whoever tapped rather than held.
+       * It asks for the same thing a long press does, so there is one path to
+       * the sheet rather than two that can diverge.
+       */
+      it('opens the actions from the detail panel', () => {
+        const activated: string[] = [];
+
+        component.activateTable.subscribe((id) => activated.push(id));
+        (query('table-plan-detail-actions') as HTMLElement).click();
+
+        expect(activated).toEqual(['table-1']);
+      });
+    });
+
+    /** The actions themselves (GitHub issue #1094). */
+    describe('the action sheet', () => {
+      it('is drawn only for the table it was opened on', () => {
+        expect(query('table-actions')).toBeNull();
+
+        setInputs({
+          actionTarget: detail,
+          actions: tableActions('occupied'),
+        });
+
+        expect(query('table-actions')).not.toBeNull();
+        expect(query('table-action-available')).not.toBeNull();
+        // Not in the matrix from `occupied`, so not on screen either.
+        expect(query('table-action-reserved')).toBeNull();
+      });
+
+      it('passes the picked action on', () => {
+        const picked: unknown[] = [];
+
+        component.actionPicked.subscribe((request) => picked.push(request));
+        setInputs({ actionTarget: detail, actions: tableActions('occupied') });
+        (query('table-action-cleaning') as HTMLElement).click();
+
+        expect(picked).toEqual([{ to: 'cleaning' }]);
+      });
+
+      /**
+       * Closing hands focus back to the plan. The canvas is one tab stop
+       * driven by `aria-activedescendant`, so a keyboard user who pressed
+       * enter on a table and then escape would otherwise have nothing focused
+       * at all.
+       */
+      it('returns focus to the plan when it closes', () => {
+        let closed = 0;
+
+        component.actionsDismissed.subscribe(() => (closed += 1));
+        setInputs({ actionTarget: detail, actions: tableActions('occupied') });
+        (query('table-actions-close') as HTMLElement).click();
+        fixture.detectChanges();
+
+        expect(closed).toBe(1);
+        expect(document.activeElement).toBe(
+          fixture.nativeElement.querySelector(
+            '[data-testid="floor-plan-canvas"]',
+          ),
+        );
+      });
+    });
+
+    /** The end-of-service reset (GitHub issue #1094). */
+    describe('the batch', () => {
+      it('offers one quiet button until staff ask for it', () => {
+        let toggled = 0;
+
+        component.bulkModeToggled.subscribe(() => (toggled += 1));
+
+        expect(query('table-plan-batch')).toBeNull();
+        (query('table-plan-batch-start') as HTMLElement).click();
+
+        expect(toggled).toBe(1);
+      });
+
+      it('says how many are selected and offers the reset', () => {
+        const asked: string[] = [];
+
+        setInputs({ bulkMode: true, selectedCount: 8, freeableCount: 6 });
+        component.freeSelected.subscribe(() => asked.push('free'));
+        component.selectAllRequested.subscribe(() => asked.push('all'));
+
+        expect(query('table-plan-batch')?.textContent).toContain('8');
+        expect(query('table-plan-free-selected')?.textContent).toContain('6');
+
+        (query('table-plan-select-all') as HTMLElement).click();
+        (query('table-plan-free-selected') as HTMLElement).click();
+
+        expect(asked).toEqual(['all', 'free']);
+      });
+
+      /**
+       * A reset that would free nothing is not offered. Eight tables selected
+       * and none of them freeable is a button that can only disappoint.
+       */
+      it('hides the reset when it would free nothing', () => {
+        setInputs({ bulkMode: true, selectedCount: 2, freeableCount: 0 });
+
+        expect(query('table-plan-free-selected')).toBeNull();
+        expect(query('table-plan-batch-done')).not.toBeNull();
       });
     });
   });

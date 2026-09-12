@@ -110,11 +110,14 @@ Restaurant staff open one screen during service and see the room as it is: which
 
 ## Success Criteria
 
-- A state change on one device is visible on another within about a second.
-- Two simultaneous seatings of the same table never produce two conflicting states.
-- Going offline, seating two tables, and reconnecting results in exactly two transitions (met by issue \#1096).
-- Moving or deleting a table in the editor does not lose or corrupt its live state.
-- Staff can always tell whether what they are looking at is live, and how long ago it stopped being so (met by issue \#1096).
+Each criterion names what verifies it. Read against the suite on 12 September 2026, after the last child issue merged.
+
+- A state change on one device is visible on another within about a second. **Mechanism verified**, by `live-table-view.spec.ts` → "shows the room as it stands and follows it as it changes": a state written to the emulator by something that is not the browser appears without anything being asked for again. That is the Firestore listener, which makes the delay a round trip rather than a poll interval. The _one second_ is the round trip and not a measured bound - nothing asserts a latency figure, and a criterion stated as a number should say so.
+- Two simultaneous seatings of the same table never produce two conflicting states. **Verified**, by `transition-table-state.emulator-spec.ts` → `describe('two staff acting at once')`: "produces one seating and one conflict", "resolves a seating against a reservation to one outcome", "tells the loser what the table holds and who changed it", and "lets two tables be seated at once" for the case that must _not_ conflict.
+- Going offline, seating two tables, and reconnecting results in exactly two transitions. **Verified** (issue \#1096), by "keeps two queued seatings to two transitions".
+- Moving or deleting a table in the editor does not lose or corrupt its live state. **Met in substance, one half untested.** A move keeps the table's id, so the state document - keyed on that id - is untouched by construction. A deletion is tested from the record's side: "survives the deletion of the table it describes" for the audit trail, "answers a replay for a table that is no longer on the plan" for the queue, and `TableVisit.tableId` is a plain string precisely so a visit outlives its table. What nothing tests, and nothing does, is **clean up** `tableStates/{tableId}` when the table goes: no trigger deletes it, so an orphaned state document is left behind. Nothing is lost and nothing is corrupted - the live view draws states only for tables that exist, so an orphan is invisible - but orphans accumulate silently. Recorded in [[Current State - Known Issues]].
+- Staff can always tell whether what they are looking at is live, and how long ago it stopped being so. **Verified** (issue \#1096), by the four-state indicator and its specs.
+- Table operations are measured. **Verified in production** on 12 September 2026 - see [[Implementation - Analytics Events]] for the run.
 
 ## Open Product Questions
 

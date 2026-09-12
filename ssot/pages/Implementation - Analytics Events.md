@@ -325,6 +325,59 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
     `onboarding_assistant_completed`.
   - Dismiss a coach mark → `coach_mark_dismissed` with the matching `surface`. 5. Disable debug mode when done (Android: set the prop to `.none`).
 
+- ### Verified in production, 12 September 2026
+
+  All seven events confirmed against the deployed business app with a signed-in
+  staff account, on restaurant `2k3pjK8y279XFlMrS1ke`.
+
+  Read from the `g/collect` request payloads in the browser's network panel
+  rather than from DebugView. That is the better instrument here and not a
+  shortcut: the payload carries **every** parameter whether or not it is
+  registered as a GA4 custom dimension, which is the only way to see
+  `restaurant_id`, `table_id`, `visit_id`, `table_count` and `guests` at all -
+  they are deliberately unregistered, so no GA4 report will ever show them.
+  DebugView would have shown the event names and a subset of the parameters.
+
+  | Event                    | Confirmed parameters                                                |
+  | ------------------------ | ------------------------------------------------------------------- |
+  | `table_seated`           | `from_status=available`, `guests=4`                                 |
+  | `table_freed`            | `from_status=cleaning`, and `from_status=disabled` on the re-enable |
+  | `table_reserved`         | `from_status=available`                                             |
+  | `table_cleaning_started` | `from_status=occupied`                                              |
+  | `table_disabled`         | `from_status=available`                                             |
+  | `table_visit_opened`     | `visit_id`                                                          |
+  | `table_visit_closed`     | `visit_id`, `outcome=closed`                                        |
+
+  Every event carried `restaurant_id`, `table_id` and `table_count`.
+
+  Four things the run established beyond the parameter table.
+
+  **The visit ids chain.** Across two full cycles, each `table_visit_closed`
+  named the visit its preceding `table_visit_opened` had opened, and the next
+  seating opened a different one. No visit was opened or closed twice. That is
+  the `visitBefore` comparison holding in production, which is the one piece of
+  this taxonomy a unit test can only approximate.
+
+  **`guests` is absent rather than zero.** The first seating was made without a
+  party size and carried no `guests` parameter at all, which is the documented
+  behaviour rather than a miss.
+
+  **`from_status` earns its place.** `table_disabled` then `table_freed` with
+  `from_status=disabled` is a table taken out of service and put back, and it is
+  one event pair rather than two invented event names.
+
+  **The measurement id is present.** Each request carried
+  `tid=G-R05N7EW09S`, which is what issue 1588 fixed - the bundle deployed before
+  it had no `NX_APP_BITE_TRIBE_MEASSUREMENT_ID` in its env object at all.
+
+  One note for a future run: a newly registered GA4 custom dimension is not
+  queryable through the Data API for up to 24 hours, and the realtime report
+  rejects `customEvent:` dimensions outright. So the API can confirm that an
+  event **arrived** within a minute or two, and cannot confirm its parameters at
+  all on the day it was registered. Use the request payload for parameters, the
+  realtime report for arrival, and `analytics:query -- table-operations` from the
+  next day for the measures.
+
 - ### DebugView, business app (table operations)
 
   The business app is web-only and its table events need a **non-dev** build to

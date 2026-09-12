@@ -159,6 +159,29 @@
 - Narrowing the radius is a weak lever: cutting it from 15 km to 10 km removed only a tenth of the result, because Bites cluster where the user already is. The fix is the staged search in [issue \#1294](https://github.com/muhammedgaygisiz/travellers-apps/issues/1294), not further radius tuning.
 - Attaching the likes server-side traded feed latency for feed correctness. Time to a full feed moved from about 4.0 s to about 6.7 s, and in exchange a liked Bite can no longer render as unliked. Bounding the result set is what recovers the latency.
 
+- ## A Deleted Table Leaves Its Live State Behind
+
+  **Why it matters:** it is the untested half of an epic success criterion, and
+  the leak is silent.
+
+  Deleting a table in the floor-plan editor does not delete
+  `/restaurants/{restaurantId}/tableStates/{tableId}`. No trigger cleans it up -
+  `sync-table-qr-token-on-table-write.ts` is the only document trigger on the
+  table, and it handles the QR token alone.
+
+  Nothing is lost and nothing is corrupted, which is what the criterion of
+  [[epic-1071]] actually asks: the live view draws states only for tables that
+  exist, so an orphan is invisible, and a table _moved_ between rooms keeps its
+  id and therefore its state. The record side is tested - "survives the deletion
+  of the table it describes" for the audit trail, "answers a replay for a table
+  that is no longer on the plan" for the queue, and `TableVisit.tableId` is a
+  plain string so a visit outlives its table.
+
+  What is left is an orphaned document per deleted table, accumulating quietly.
+  Small, and worth a cleanup trigger or a migration the day a restaurant
+  rearranges a dining room often enough to notice. Recorded rather than fixed
+  because no behaviour depends on it today.
+
 - ## Business App Traffic On The Launch Property
 
   **Why it matters:** the separation works, and the two user counts are not

@@ -27,6 +27,8 @@ import {
   resolvePropertyId,
   runBreakdown,
   runTileValue,
+  SURFACE_UNAVAILABLE_NOTE,
+  surfaceFilterUnavailable,
 } from './ga4.mjs';
 
 loadEnv();
@@ -145,6 +147,9 @@ async function runLive({ days, json }) {
           tiles: results,
           breakdowns,
           manual: consoleTiles(),
+          ...(surfaceFilterUnavailable()
+            ? { surfaceFilterUnavailable: SURFACE_UNAVAILABLE_NOTE }
+            : {}),
         },
         null,
         2,
@@ -160,6 +165,9 @@ async function runLive({ days, json }) {
     console.log(`| ${r.title} | ${r.category} | ${r.text} |`);
   }
   console.log('');
+  if (surfaceFilterUnavailable()) {
+    console.log(`note: ${SURFACE_UNAVAILABLE_NOTE}\n`);
+  }
   for (const b of breakdowns) {
     console.log(`${b.title}:`);
     if (b.unavailable) {

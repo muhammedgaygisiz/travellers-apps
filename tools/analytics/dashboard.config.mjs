@@ -42,6 +42,12 @@
  * @property {string} [metric]    GA4 metric (for `activeUsers`)
  * @property {string} [dimension] GA4 dimension to group by (for `breakdown`)
  * @property {number} [limit]     rows to keep (for `breakdown`, default 5)
+ * @property {'consumer'|'business'} [surface]
+ *           Restrict the tile to sessions from one app, through the user-scoped
+ *           `app_surface` dimension. Only needed where a tile counts *users*:
+ *           every event-name tile already names one app's events. Absent means
+ *           the whole property, which is what every tile meant before the
+ *           business app started reporting to it.
  * @property {'%'} [unit]         display unit; percentages format and compare
  *                                in percentage points
  * @property {string} [source]    human description for `console` tiles
@@ -102,12 +108,16 @@ export const DASHBOARD_TILES = [
     type: 'eventCount',
     events: ['restaurant_viewed', 'bite_viewed'],
   },
+  // The two tiles that count people rather than events, and therefore the two
+  // that have to say which app's people (issue #1584). Every other tile filters
+  // by event name, and every one of those names consumer events.
   {
     id: 'active-users',
     title: 'Active users',
     category: 'Retention',
     type: 'activeUsers',
     metric: 'activeUsers',
+    surface: 'consumer',
   },
   {
     id: 'retention',
@@ -125,12 +135,18 @@ export const DASHBOARD_TILES = [
   //   unhandled Angular error, on all three platforms. Those are usually
   //   survivable, so folding them into the crash-free rate would understate it
   //   against the Crashlytics console. They get their own count instead.
+  //
+  // The crash-free rate is scoped to the consumer app on *both* halves. A
+  // native crash cannot happen in the web-only business app, so leaving staff
+  // sessions in the denominator alone would inflate the rate by however many
+  // of them there were.
   {
     id: 'crash-free-users',
     title: 'Crash-free users',
     category: 'Launch monitoring',
     type: 'crashFreeUsers',
     events: ['app_exception'],
+    surface: 'consumer',
     unit: '%',
     expect: { min: 99 },
   },

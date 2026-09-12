@@ -88,10 +88,20 @@ Trigger it manually any time from the Actions tab ("Run workflow").
 
 Event-count and active-user tiles are queried live, and so is the stability set:
 
+- **Active users** and **Crash-free users** are the only two tiles that count
+  _people_ rather than events, and therefore the only two that have to say
+  whose. All three apps report to one property through one measurement id, and
+  the business app started reporting at all with the table operations of issue
+  #1098 — so both are scoped to `app_surface = consumer` through the user-scoped
+  custom dimension both apps set. Every other tile filters by event name, and
+  each of those names consumer events only.
 - **Crash-free users** — GA4 has no crash-free metric, so it is derived from two
   `activeUsers` calls: everyone in the window, and the subset who triggered
   `app_exception`, which is the event Crashlytics itself logs on a native crash.
-  Over zero active users it reports `n/a` rather than a flattering 100%.
+  Over zero active users it reports `n/a` rather than a flattering 100%. The
+  surface filter goes on **both** calls: a total over everyone against an
+  affected subset over one app is a rate over two populations, and the error
+  flatters.
 - **Unhandled errors** — the count of `exception`, logged by
   `FirebaseErrorHandlerService` for every unhandled Angular error on all three
   platforms. Kept out of the crash-free rate because these are usually
@@ -101,6 +111,14 @@ Event-count and active-user tiles are queried live, and so is the stability set:
   is registered the digest prints a pointer to that command instead of failing,
   and because GA4 does not backfill a dimension, the breakdown fills from the
   day it is registered rather than retroactively.
+
+The surface filter degrades rather than fails. GA4 answers a dimension it has
+not been told about with `INVALID_ARGUMENT`, so a scoped tile whose dimension is
+not registered yet re-runs unfiltered and the run prints a warning naming the
+provisioning command — the same tolerance `description` has had, extended to the
+tiles that resolve to a single number, because those had exited and would have
+taken the live 06:00 digest down. Until it is registered, the two user counts are
+the unfiltered figures they always were and the digest says so above the table.
 
 Two tiles stay console-only because the Data API cannot express them at all:
 

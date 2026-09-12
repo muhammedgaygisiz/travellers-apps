@@ -1,9 +1,18 @@
 import { ErrorHandler } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { TableState } from 'model';
 import { Subscription } from 'rxjs';
 import { TableStateDataAccessService } from '../table-state-data-access.service';
+
+// The Firestore plugin is spied on in place below; the functions plugin has no
+// callable to spy on in a Node test, so it is replaced outright.
+jest.mock('@capacitor-firebase/functions', () => ({
+  FirebaseFunctions: { callByName: jest.fn() },
+}));
+
+const callByName = FirebaseFunctions.callByName as jest.Mock;
 
 type Listener = (event: unknown, error: unknown) => void;
 
@@ -168,5 +177,63 @@ describe(TableStateDataAccessService.name, () => {
     await settle();
 
     expect(handleError).toHaveBeenCalled();
+  });
+
+  /**
+   * The one write, and it is not a write to Firestore (GitHub issue #1094).
+   *
+   * `transitionTableState` is the only writer of the collection this service
+   * listens to, and `firestore.rules` refuses every client write to it - so a
+   * `set` here would not fail review, it would fail at the database.
+   */
+  describe('asking the backend to move a table', () => {
+    it('calls the one callable that may write the state', async () => {
+      callByName.mockResolvedValue({
+        data: {
+          restaurantId: 'restaurant-1',
+          tableId: 'table-1',
+          from: 'available',
+          to: 'occupied',
+          since: 1_760_000_000_000,
+          transitionId: 'transition-1',
+        },
+      });
+
+      const result = await service.transition({
+        restaurantId: 'restaurant-1',
+        tableId: 'table-1',
+        status: 'occupied',
+        expectedStatus: 'available',
+      });
+
+      expect(callByName).toHaveBeenCalledWith({
+        name: 'transitionTableState',
+        data: {
+          restaurantId: 'restaurant-1',
+          tableId: 'table-1',
+          status: 'occupied',
+          expectedStatus: 'available',
+        },
+      });
+      expect(result.since).toBe(1_760_000_000_000);
+    });
+
+    /**
+     * Rejects rather than swallowing: every failure here changes what is on
+     * screen, and a caller that could not tell a conflict from a refusal would
+     * have nothing to roll back to or to say.
+     */
+    it('lets a refusal reach the caller', async () => {
+      callByName.mockRejectedValue({ code: 'functions/aborted' });
+
+      await expect(
+        service.transition({
+          restaurantId: 'restaurant-1',
+          tableId: 'table-1',
+          status: 'occupied',
+          expectedStatus: 'available',
+        }),
+      ).rejects.toEqual({ code: 'functions/aborted' });
+    });
   });
 });

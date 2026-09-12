@@ -24,10 +24,12 @@ type TableStatus =
  *
  * Two things about this page decide how everything below is written.
  *
- * It never writes. There is no save, no publish and no action - issue \#1094
- * adds the transitions - so every helper here reads, and the one thing a
- * journey *does* to change the room is write a state document straight to the
- * emulator and watch the page notice.
+ * It never writes the plan. There is no save and no publish, and the one write
+ * it has is a table state transition through the callable of issue \#1092,
+ * reached from the sheet of issue \#1094. Every helper below reads, and the one
+ * thing the journey *does* to change the room is write a state document
+ * straight to the emulator and watch the page notice - which is a stand-in for
+ * another device rather than for the sheet.
  *
  * And the plan is an SVG in room millimetres rather than a list. A table is
  * addressed by the `data-item-id` the canvas puts on its group, and what a

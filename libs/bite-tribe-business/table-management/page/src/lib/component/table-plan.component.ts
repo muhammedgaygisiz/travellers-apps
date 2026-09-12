@@ -2,8 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   input,
   output,
+  viewChild,
 } from '@angular/core';
 import {
   IonBadge,
@@ -26,8 +28,10 @@ import {
 } from 'bite-tribe-business/floor-plan-ui';
 import { PageComponent } from 'common/ui/page';
 import { Room, TableStatus } from 'model';
+import { TableAction, TableActionRequest } from '../integration/table-actions';
 import { TableDetail } from '../integration/table-plan.service';
 import { TableStatusCount } from '../integration/table-plan-summary';
+import { TableActionsComponent } from './table-actions.component';
 
 /** The size the summary chip's glyph is drawn at, in its own tiny viewBox. */
 const CHIP_GLYPH_BOX = 16;
@@ -85,6 +89,7 @@ interface SummaryChip {
     IonNote,
     IonSpinner,
     TranslocoPipe,
+    TableActionsComponent,
   ],
   templateUrl: './table-plan.component.html',
   styleUrl: './table-plan.component.scss',
@@ -102,13 +107,31 @@ export class TablePlanComponent {
   readonly summary = input<TableStatusCount[]>([]);
   readonly roomTableCount = input(0);
   readonly selectedTable = input<TableDetail | undefined>(undefined);
+  /** The table whose action sheet is open, or nothing (GitHub issue #1094). */
+  readonly actionTarget = input<TableDetail | undefined>(undefined);
+  /** What that table may be asked to do, already filtered to the legal moves. */
+  readonly actions = input<TableAction[]>([]);
+  /** Whether taps are assembling an end-of-service batch. */
+  readonly bulkMode = input(false);
+  readonly selectedCount = input(0);
+  /** How many of the selected tables the reset would actually free. */
+  readonly freeableCount = input(0);
+  readonly bulkBusy = input(false);
   readonly isAuthenticated = input(false);
 
   readonly selectRoom = output<string>();
   readonly selectionChange = output<string[]>();
   readonly activateTable = output<string>();
   readonly clearSelection = output<void>();
+  readonly actionPicked = output<TableActionRequest>();
+  readonly actionsDismissed = output<void>();
+  readonly bulkModeToggled = output<void>();
+  readonly selectAllRequested = output<void>();
+  readonly freeSelected = output<void>();
   readonly logoutClick = output<void>();
+
+  private readonly canvasHost =
+    viewChild<ElementRef<HTMLElement>>('canvasHost');
 
   readonly hasRooms = computed(() => this.rooms().length > 0);
 
@@ -172,5 +195,20 @@ export class TablePlanComponent {
     if (roomId && roomId !== this.selectedRoom()?.id) {
       this.selectRoom.emit(roomId);
     }
+  }
+
+  /**
+   * Closing the sheet puts focus back where it came from.
+   *
+   * The plan is a single tab stop driven by `aria-activedescendant`, so a
+   * keyboard user who pressed enter on table 6 and then escape has nothing
+   * focused unless it is handed back - the next tab would start again from the
+   * top of the page, and the table they were standing on is forgotten.
+   */
+  onActionsDismissed(): void {
+    this.actionsDismissed.emit();
+    this.canvasHost()
+      ?.nativeElement.querySelector<HTMLElement>('[tabindex]')
+      ?.focus();
   }
 }

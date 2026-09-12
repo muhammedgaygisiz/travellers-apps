@@ -1,0 +1,161 @@
+<!--
+  The scrim closes the sheet for a pointer and is hidden from everything else.
+  A keyboard has the close button and escape, both inside the dialog, so there
+  is nothing here for a screen reader to find and nothing it would gain by
+  finding it.
+-->
+<div
+  class="table-actions__scrim"
+  aria-hidden="true"
+  data-testid="table-actions-scrim"
+  (click)="dismissed.emit()"
+></div>
+
+<section
+  #panel
+  class="table-actions__panel"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="titleId"
+  data-testid="table-actions"
+  (keydown)="onKeydown($event)"
+>
+  <header class="table-actions__head">
+    <div class="table-actions__heading">
+      <h2 class="table-actions__title" [id]="titleId">
+        {{ 'table-actions-title' | transloco: { label: table().table.label } }}
+      </h2>
+
+      <!--
+        The status the table is in right now, said the plan's way: the colour,
+        the silhouette and the word together. It is the premise of every button
+        below, and a sheet that only listed the moves would leave a host
+        working out which table they held.
+      -->
+      @if (currentMark(); as mark) {
+        <p
+          class="table-actions__status"
+          [style.--mark-colour]="mark.colour"
+          data-testid="table-actions-status"
+        >
+          <svg
+            class="table-actions__glyph"
+            [attr.viewBox]="mark.viewBox"
+            aria-hidden="true"
+          >
+            <path
+              [attr.d]="mark.glyphPath"
+              [attr.fill]="mark.glyphFill"
+              [attr.stroke]="mark.colour"
+              [attr.stroke-width]="mark.strokeWidth"
+            />
+          </svg>
+          <span>{{ table().statusLabel }}</span>
+          @if (table().duration) {
+            <span class="table-actions__duration">{{ table().duration }}</span>
+          }
+        </p>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="table-actions__close"
+      [attr.aria-label]="'table-actions-close' | transloco"
+      data-testid="table-actions-close"
+      (click)="dismissed.emit()"
+    >
+      <ion-icon name="close-outline" aria-hidden="true" />
+    </button>
+  </header>
+
+  <!--
+    The party size, offered only where a party can actually be seated.
+    Optional throughout: it starts at no count at all, and seating without one
+    is a single press of the button below rather than a step to skip.
+  -->
+  @if (seatable()) {
+    <div
+      class="table-actions__guests"
+      role="group"
+      [attr.aria-label]="'table-actions-guests' | transloco"
+      data-testid="table-actions-guests"
+    >
+      <span class="table-actions__guests-label">
+        <ion-icon name="people-outline" aria-hidden="true" />
+        {{ 'table-actions-guests' | transloco }}
+      </span>
+
+      <span class="table-actions__stepper">
+        <button
+          type="button"
+          class="table-actions__step"
+          [attr.aria-label]="'table-actions-guests-fewer' | transloco"
+          data-testid="table-actions-guests-fewer"
+          (click)="fewerGuests()"
+        >
+          <ion-icon name="remove-outline" aria-hidden="true" />
+        </button>
+
+        <!--
+          Announced on change, because the two buttons beside it say what they
+          do and not what happened.
+        -->
+        <output
+          class="table-actions__guests-count"
+          aria-live="polite"
+          data-testid="table-actions-guests-count"
+        >
+          {{
+            guests() === undefined
+              ? ('table-actions-guests-none' | transloco)
+              : guests()
+          }}
+        </output>
+
+        <button
+          type="button"
+          class="table-actions__step"
+          [attr.aria-label]="'table-actions-guests-more' | transloco"
+          data-testid="table-actions-guests-more"
+          (click)="moreGuests()"
+        >
+          <ion-icon name="add-outline" aria-hidden="true" />
+        </button>
+      </span>
+    </div>
+  }
+
+  <!--
+    One button per legal move, in the order they are reached for rather than in
+    the order the lifecycle visits them. The list comes from the transition
+    matrix, so there is nothing here the backend would refuse.
+  -->
+  <ul class="table-actions__list">
+    @for (action of buttons(); track action.to) {
+      <li>
+        <button
+          type="button"
+          class="table-actions__action"
+          [style.--mark-colour]="action.colour"
+          [attr.data-testid]="'table-action-' + action.to"
+          (click)="pick(action)"
+        >
+          <svg
+            class="table-actions__glyph"
+            [attr.viewBox]="action.viewBox"
+            aria-hidden="true"
+          >
+            <path
+              [attr.d]="action.glyphPath"
+              [attr.fill]="action.glyphFill"
+              [attr.stroke]="action.colour"
+              [attr.stroke-width]="action.strokeWidth"
+            />
+          </svg>
+          {{ action.labelKey | transloco }}
+        </button>
+      </li>
+    }
+  </ul>
+</section>

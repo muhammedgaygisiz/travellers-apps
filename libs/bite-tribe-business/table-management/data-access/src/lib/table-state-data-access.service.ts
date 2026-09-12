@@ -1,6 +1,7 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { TableState } from 'model';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
+import { TableState, TableStatus } from 'model';
 import { Observable } from 'rxjs';
 
 export const RESTAURANT_COLLECTION = 'restaurants';
@@ -13,6 +14,40 @@ export const RESTAURANT_COLLECTION = 'restaurants';
  * ```
  */
 export const TABLE_STATES_COLLECTION = 'tableStates';
+
+/** The only writer of that collection (GitHub issue #1092). */
+export const TRANSITION_TABLE_STATE_CALLABLE = 'transitionTableState';
+
+/** One asked-for move, as `transitionTableState` takes it. */
+export interface TableTransitionRequest {
+  restaurantId: string;
+  tableId: string;
+  /** Where the table should end up. */
+  status: TableStatus;
+  /**
+   * The status the caller believes the table holds right now.
+   *
+   * Required by the callable, and it is what turns a race into a sentence: the
+   * loser of two simultaneous seatings is told the table is occupied and it
+   * was looking at available, rather than being refused for a transition the
+   * matrix does not contain. The live view always has it - it is subscribed to
+   * the very document at the moment the button is pressed.
+   */
+  expectedStatus: TableStatus;
+  /** Why, recorded on the audit entry. Absent when there is nothing to add. */
+  reason?: string;
+}
+
+/** What the callable answers with when the move was accepted. */
+export interface TableTransitionResult {
+  restaurantId: string;
+  tableId: string;
+  from: TableStatus;
+  to: TableStatus;
+  /** The moment the backend says the table entered `to`. */
+  since: number;
+  transitionId: string;
+}
 
 /**
  * The live state of every table in one restaurant, as the staff view reads it
@@ -27,12 +62,14 @@ export const TABLE_STATES_COLLECTION = 'tableStates';
  * a restaurant of forty tables would also bill forty document reads a second
  * per device on shift, for a room that changes a few dozen times a service.
  *
- * ## Read-only, and not by convention
+ * ## Nothing here writes Firestore
  *
- * Nothing here writes. Issue #1092 made `transitionTableState` the only writer
- * and `firestore.rules` refuses every client write to this collection, so a
- * `set` added here would not fail review, it would fail at the database. The
- * staff actions of issue #1094 call the callable; this service only listens.
+ * Issue #1092 made `transitionTableState` the only writer and
+ * `firestore.rules` refuses every client write to this collection, so a `set`
+ * added here would not fail review, it would fail at the database. The staff
+ * actions of issue #1094 therefore go through {@link transition}, which calls
+ * the callable: the listener below and that one call are the whole of this
+ * service's contact with table state.
  *
  * ## Whoever subscribes owns the listener
  *
@@ -114,6 +151,28 @@ export class TableStateDataAccessService {
         }
       };
     });
+  }
+
+  /**
+   * Asks the backend to move one table, and answers what it decided
+   * (GitHub issue #1094).
+   *
+   * Rejects rather than swallowing, and deliberately so: every failure here
+   * changes what is on screen. A refused transition has to roll the optimistic
+   * state back and say why, and a service that returned `undefined` on failure
+   * would leave the caller unable to tell a conflict from a table the owner
+   * took out of service. `tableTransitionFailure` turns the rejection into the
+   * sentence the staff member is owed.
+   */
+  async transition(
+    request: TableTransitionRequest,
+  ): Promise<TableTransitionResult> {
+    const { data } = await FirebaseFunctions.callByName<
+      TableTransitionRequest,
+      TableTransitionResult
+    >({ name: TRANSITION_TABLE_STATE_CALLABLE, data: request });
+
+    return data;
   }
 
   private async removeListener(callbackId: string): Promise<void> {

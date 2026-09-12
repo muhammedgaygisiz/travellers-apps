@@ -51,8 +51,10 @@ const TWENTY_TWO_MINUTES_MS = 22 * 60_000;
  *
  * The state is written straight to the emulator rather than through the app.
  * That is not a shortcut: `firestore.rules` refuses every client write to
- * `tableStates`, so there is no way to make one from a browser, and the
- * callable that does write them has no caller until issue \#1094.
+ * `tableStates`, so there is no way to make one from a browser. Issue \#1094
+ * gave the callable that does write them a caller, but a seeded document is
+ * still the faithful stand-in for *another device* - which is what the
+ * criterion below is about.
  */
 test.describe('Live table view', () => {
   /** The restaurant this run seeded its published plan under. */

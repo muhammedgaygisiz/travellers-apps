@@ -200,10 +200,13 @@ that restaurant. \#1092 gave it its first write, and deliberately not through th
 staff account changes a table's live state by calling `transitionTableState`, which admits
 `staff`, `business` or `admin` and then decides which restaurant each of them reaches.
 Live state is written by a callable rather than by a client because two hosts seating one
-table at once has to resolve to one outcome. What is still missing is a surface: the live
-view is \#1093 and the staff actions are \#1094, so a staff account signing in today still
-lands on a dashboard that lists nothing. The dashboard's own scoping by
-`Restaurant.ownerUserId` has no owning issue.
+table at once has to resolve to one outcome. \#1093 and \#1094 then gave the role its
+surface: `restaurant/:restaurantId/tables` draws the room a staff account works in, and
+holding a table opens the transitions it is allowed to make. So the write the role was
+granted is now one a staff member can actually reach - and it is still the only one, since
+the floor plan, the QR codes and the staff list remain closed to it. What a staff account
+signing in today still lands on is a dashboard that lists nothing, because the dashboard
+scopes by `Restaurant.ownerUserId`; that scoping has no owning issue.
 
 ## Recorded Decisions
 

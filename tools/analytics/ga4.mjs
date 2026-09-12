@@ -61,6 +61,17 @@ export function consoleTiles() {
 /** gRPC status code GA4 returns for a dimension it does not know. */
 const INVALID_ARGUMENT = 3;
 
+/**
+ * The user-scoped dimension naming which app a session came from (#1098).
+ *
+ * All three apps report to one property through one measurement id, and since
+ * issue 1098 the business app reports at all - so `activeUsers` counts staff
+ * shifts alongside app users unless a request says otherwise. Auto-collected
+ * events carry no name that distinguishes them, which is why the separation is
+ * a user property rather than an event filter.
+ */
+const SURFACE_DIMENSION = 'customUser:app_surface';
+
 /** GA4 dimension filter restricting a request to a tile's event names. */
 function eventNameFilter(events) {
   return {
@@ -70,6 +81,66 @@ function eventNameFilter(events) {
     },
   };
 }
+
+/** GA4 dimension filter restricting a request to one app's sessions. */
+function surfaceFilter(surface) {
+  return {
+    filter: {
+      fieldName: SURFACE_DIMENSION,
+      stringFilter: { matchType: 'EXACT', value: surface },
+    },
+  };
+}
+
+/**
+ * The filters a request needs, as one expression.
+ *
+ * Returns the single filter unwrapped and `undefined` for none, so a tile that
+ * declares no surface builds exactly the request it built before this existed -
+ * which is what keeps a change to the user-count tiles from quietly restating
+ * every other one.
+ */
+function allOf(filters) {
+  const present = filters.filter(Boolean);
+
+  if (present.length === 0) return undefined;
+  if (present.length === 1) return present[0];
+
+  return { andGroup: { expressions: present } };
+}
+
+/** The same tile with its surface dropped, for the unfiltered fallback. */
+function unscoped(tile) {
+  return { ...tile, surface: undefined };
+}
+
+/**
+ * Whether a surface filter had to be dropped because GA4 does not know the
+ * dimension yet.
+ *
+ * Module state rather than a changed return type, because the value a caller
+ * needs back is still a number and threading a second one through
+ * `runTileValue` would reach `digest.mjs`'s alert arithmetic for a fact that
+ * belongs in its prose. The flag is set at most once per process and read after
+ * every tile has run.
+ */
+let surfaceFilterDropped = false;
+
+/**
+ * True once any tile fell back to an unfiltered request.
+ *
+ * `report.mjs` and `digest.mjs` print a line when it is, so a figure that looks
+ * scoped to the consumer app and one that is not are never indistinguishable.
+ */
+export function surfaceFilterUnavailable() {
+  return surfaceFilterDropped;
+}
+
+export const SURFACE_UNAVAILABLE_NOTE =
+  `GA4 does not know the \`${SURFACE_DIMENSION}\` dimension yet, so the user ` +
+  'counts in this run are unfiltered and include business-app sessions. ' +
+  'Register it with `npm run analytics:provision -- --apply`; GA4 does not ' +
+  'backfill, so the separation starts from the day it is registered.';
 
 /**
  * Build a GA4 Data API `runReport` request for a queryable tile over a date
@@ -82,14 +153,21 @@ export function buildRequest(tile, propertyId, dateRange) {
     dateRanges: [dateRange],
   };
 
+  const surface = tile.surface ? surfaceFilter(tile.surface) : undefined;
+
   if (tile.type === 'activeUsers') {
     request.metrics = [{ name: tile.metric ?? 'activeUsers' }];
+
+    if (surface) {
+      request.dimensionFilter = surface;
+    }
+
     return request;
   }
 
   // eventCount
   request.metrics = [{ name: 'eventCount' }];
-  request.dimensionFilter = eventNameFilter(tile.events);
+  request.dimensionFilter = allOf([eventNameFilter(tile.events), surface]);
   return request;
 }
 
@@ -104,9 +182,17 @@ export function buildCrashFreeRequests(tile, propertyId, dateRange) {
     dateRanges: [dateRange],
     metrics: [{ name: 'activeUsers' }],
   };
+  // On both halves or on neither. A total counted over everyone against an
+  // affected subset counted over one app is a rate over two populations, and
+  // the direction of the error is the flattering one.
+  const surface = tile.surface ? surfaceFilter(tile.surface) : undefined;
+
   return {
-    total: { ...base },
-    affected: { ...base, dimensionFilter: eventNameFilter(tile.events) },
+    total: { ...base, ...(surface ? { dimensionFilter: surface } : {}) },
+    affected: {
+      ...base,
+      dimensionFilter: allOf([eventNameFilter(tile.events), surface]),
+    },
   };
 }
 
@@ -186,12 +272,30 @@ export async function createClient() {
   return new BetaAnalyticsDataClient();
 }
 
-/** Run a request and return the single scalar metric value as a number. */
-export async function runValue(client, request) {
+/**
+ * Run a request and return the single scalar metric value as a number.
+ *
+ * `unfiltered` is the same request without its surface filter. GA4 answers a
+ * dimension it has not been told about with `INVALID_ARGUMENT`, and that is a
+ * provisioning gap rather than a broken digest - `runBreakdown` below has
+ * degraded gracefully for exactly that since the `description` dimension, and
+ * the scalar tiles now do too, because a filter that exits would take the live
+ * 06:00 run down until somebody ran the provisioning command. The fallback is
+ * recorded rather than swallowed: {@link surfaceFilterUnavailable} is what the
+ * CLIs print from. Every other failure still exits, because a credential or
+ * quota problem should be loud.
+ */
+export async function runValue(client, request, unfiltered) {
   try {
     const [response] = await client.runReport(request);
     return Number(response.rows?.[0]?.metricValues?.[0]?.value ?? '0');
   } catch (error) {
+    if (error?.code === INVALID_ARGUMENT && unfiltered) {
+      surfaceFilterDropped = true;
+
+      return runValue(client, unfiltered);
+    }
+
     handleApiError(error);
     return 0; // unreachable — handleApiError exits
   }
@@ -206,8 +310,16 @@ export async function runValue(client, request) {
  * bill of health.
  */
 export async function runTileValue(client, tile, propertyId, dateRange) {
+  // Only a tile that asked to be scoped has a fallback to offer, so an
+  // `INVALID_ARGUMENT` from anything else still exits.
+  const fallback = tile.surface ? unscoped(tile) : undefined;
+
   if (tile.type !== 'crashFreeUsers') {
-    return runValue(client, buildRequest(tile, propertyId, dateRange));
+    return runValue(
+      client,
+      buildRequest(tile, propertyId, dateRange),
+      fallback && buildRequest(fallback, propertyId, dateRange),
+    );
   }
 
   const { total, affected } = buildCrashFreeRequests(
@@ -215,10 +327,14 @@ export async function runTileValue(client, tile, propertyId, dateRange) {
     propertyId,
     dateRange,
   );
-  const totalUsers = await runValue(client, total);
+  const plain = fallback
+    ? buildCrashFreeRequests(fallback, propertyId, dateRange)
+    : undefined;
+
+  const totalUsers = await runValue(client, total, plain?.total);
   if (totalUsers === 0) return null;
 
-  const affectedUsers = await runValue(client, affected);
+  const affectedUsers = await runValue(client, affected, plain?.affected);
   const rate = ((totalUsers - affectedUsers) / totalUsers) * 100;
   return Math.round(rate * 100) / 100;
 }

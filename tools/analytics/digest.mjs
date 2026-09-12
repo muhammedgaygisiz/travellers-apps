@@ -26,6 +26,8 @@ import {
   resolvePropertyId,
   runBreakdown,
   runTileValue,
+  SURFACE_UNAVAILABLE_NOTE,
+  surfaceFilterUnavailable,
 } from './ga4.mjs';
 
 loadEnv();
@@ -124,7 +126,15 @@ function formatDelta(tile, now, prev) {
   return `${sign}${diff}`;
 }
 
-function toMarkdown({ date, days, propertyId, rows, breakdowns, alerts }) {
+function toMarkdown({
+  date,
+  days,
+  propertyId,
+  rows,
+  breakdowns,
+  alerts,
+  surfaceNote,
+}) {
   const lines = [];
   lines.push(`## Launch analytics digest — ${date}`);
   lines.push('');
@@ -142,6 +152,13 @@ function toMarkdown({ date, days, propertyId, rows, breakdowns, alerts }) {
     );
   }
   lines.push('');
+  // Above the breakdowns and the alerts rather than in a footnote: it changes
+  // what the two user rows mean, and a reader who stops at the table has to
+  // have seen it.
+  if (surfaceNote) {
+    lines.push(`> ⚠️ ${surfaceNote}`);
+    lines.push('');
+  }
   for (const b of breakdowns) {
     lines.push(`### ${b.title}`);
     lines.push('');
@@ -241,7 +258,17 @@ async function runLive({ days, json }) {
   }
 
   const date = new Date().toISOString().slice(0, 10);
-  const payload = { date, days, propertyId, rows, breakdowns, alerts };
+  const payload = {
+    date,
+    days,
+    propertyId,
+    rows,
+    breakdowns,
+    alerts,
+    ...(surfaceFilterUnavailable()
+      ? { surfaceNote: SURFACE_UNAVAILABLE_NOTE }
+      : {}),
+  };
 
   if (json) {
     console.log(

@@ -179,10 +179,48 @@ rather than surfaces, is orthogonal to every role, and is not written by `setUse
 BiteTribe Pro is the entitlement - which is why it sits in the table above without being a
 persona either. See `RD-UR-1`.
 
-**Restaurant Staff has no column in the matrix above, deliberately.** The role is decided
-(`RD-UR-8`) and grantable (\#1537); its permission set is not. A column of guesses would
-state a boundary nobody has decided. What is fixed: staff acts on the restaurants its
-granting Restaurant Owner holds and on no others.
+**Restaurant Staff now has a column, as of \#1097.** It had none for as long as its
+permission set was undecided, because a column of guesses would state a boundary nobody
+had taken. The set below is decided, enforced and under test; what is fixed above it, and
+was fixed from the start, is that staff acts on the one restaurant its granting Restaurant
+Owner holds and on no other.
+
+| Capability                                                    | Restaurant Staff      |
+| ------------------------------------------------------------- | --------------------- |
+| Consumer app: create and edit own Bites, browse, search, etc. | yes                   |
+| Sign into the Business App                                    | yes ⁷                 |
+| Read the **published** floor plan                             | yes, own restaurant ⁸ |
+| Read the owner's unpublished floor-plan draft                 | no ⁸                  |
+| Read live table state, the audit trail and visits             | yes, own restaurant   |
+| Change live table state, open and close visits                | yes, own restaurant ⁹ |
+| Edit the floor plan, or print its QR codes                    | no                    |
+| Maintain the restaurant profile, menu, hours, address, links  | no                    |
+| Grant or revoke `staff`, or see the staff list                | no                    |
+| Create and publish a BiteTrail                                | no                    |
+
+⁷ And lands in the room it works at rather than on the owner dashboard (\#1097):
+`staffEntryGuard` reads `/restaurantStaff/{uid}` on `/dashboard` and redirects to
+`restaurant/{restaurantId}/tables`. The dashboard lists restaurants by
+`Restaurant.ownerUserId`, so without the redirect a staff account arrives at an empty
+page and the one surface its role has is reachable only by typing a URL.
+
+⁸ The split is what made the read safe to open at all (\#1088). The published arrangement
+is the room document and the table documents; the owner's half-finished one lives at
+`rooms/{roomId}/drafts/current`, which has no staff clause. Scoped by `worksAt()` - the
+claim **and** the association naming that restaurant - never by the `staff` role alone,
+which would make the role a key to every restaurant's interior in BiteTribe.
+
+⁹ The role's only write, and it does not go through `firestore.rules`: every client write
+to `tableStates`, `tableStateTransitions` and `visits` is refused, and the change is made
+by calling `transitionTableState` (\#1092, \#1095). A callable rather than a rule because
+two hosts seating one table at the same second has to resolve to one outcome.
+
+**Revocation is immediate at the data layer, and lags by up to an hour in the app.**
+`removeRestaurantStaff` drops the claim and deletes the association together, and every
+rule above requires both, so the deleted association ends the access even while the
+account's unrefreshed ID token still carries `staff`. What the token's remaining life
+still costs is the sign-out: the account keeps the app open, reading nothing, until
+`roleGuard` sees a refreshed token without the claim. The rules suite covers both halves.
 
 **Checked 10 September 2026: a staff account can do nothing yet, and that is what \#1537
 shipped.** The issue's own scope was the grant, not the permission — "this makes the role
@@ -207,6 +245,15 @@ granted is now one a staff member can actually reach - and it is still the only 
 the floor plan, the QR codes and the staff list remain closed to it. What a staff account
 signing in today still lands on is a dashboard that lists nothing, because the dashboard
 scopes by `Restaurant.ownerUserId`; that scoping has no owning issue.
+
+**Superseded the same day by \#1097, which owned it after all.** The dashboard still
+scopes by `Restaurant.ownerUserId` and still lists a staff account nothing — the fix was
+not to widen the list but to stop sending the account there. `staffEntryGuard` redirects
+to `restaurant/{restaurantId}/tables` on the way in, so the surface \#1093 and \#1094
+built is where a staff account starts rather than somewhere it has to be told the URL of.
+\#1097 also wrote the permission set into the matrix above and put its refusals under
+test; the gap that closed was the entry and the proof, not the permissions, which had
+already arrived one issue at a time.
 
 ## Recorded Decisions
 

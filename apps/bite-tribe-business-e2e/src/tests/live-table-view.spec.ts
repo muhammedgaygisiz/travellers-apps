@@ -5,7 +5,7 @@ import {
   deleteFirestoreCollection,
   seedFirestoreDocument,
 } from '../support/firestore';
-import { deleteFloorPlan } from '../support/floor-plan';
+import { deleteFloorPlan, seedPublishedPlan } from '../support/floor-plan';
 import { TEST_USERS } from '../support/test-users';
 
 const POSITION = { latitude: 48.137154, longitude: 11.576124 };
@@ -82,7 +82,7 @@ test.describe('Live table view', () => {
     const runId = Date.now();
 
     restaurantId = `live-tables-restaurant-${runId}`;
-    await seedPublishedPlan(page, restaurantId, `Service Bistro ${runId}`);
+    await seedPlanForThisRoom(page, restaurantId, `Service Bistro ${runId}`);
 
     // Three of the four tables in the dining room are doing something; the
     // fourth has no document at all.
@@ -193,79 +193,23 @@ test.describe('Live table view', () => {
 });
 
 /**
- * A published plan: the restaurant, two rooms, and five tables.
- *
- * Written as documents rather than built in the editor, because what this
- * journey needs is a room that already exists - reaching one is the editor
- * journey's subject. No table carries a `qrTokenId`: that field is
- * backend-owned and nothing here asks for one.
+ * This journey's plan: two rooms and five tables, under the organisation
+ * account. The shape of the fixture lives in `support/floor-plan.ts`, shared
+ * with the staff-entry journey of issue \#1097.
  */
-const seedPublishedPlan = async (
+const seedPlanForThisRoom = (
   page: Page,
   restaurantId: string,
   restaurantName: string,
-): Promise<void> => {
-  await seedFirestoreDocument(page, `restaurants/${restaurantId}`, {
-    id: { stringValue: restaurantId },
-    name: { stringValue: restaurantName },
-    description: { stringValue: '' },
-    ownerUserId: { stringValue: TEST_USERS.organisation.uid },
-    claimStatus: { stringValue: 'claimed' },
-    position: {
-      mapValue: {
-        fields: {
-          latitude: { doubleValue: POSITION.latitude },
-          longitude: { doubleValue: POSITION.longitude },
-        },
-      },
-    },
+): Promise<void> =>
+  seedPublishedPlan(page, {
+    restaurantId,
+    restaurantName,
+    ownerUserId: TEST_USERS.organisation.uid,
+    rooms: [DINING, TERRACE],
+    tables: TABLES,
+    position: POSITION,
   });
-
-  for (const [order, room] of [DINING, TERRACE].entries()) {
-    await seedFirestoreDocument(
-      page,
-      `restaurants/${restaurantId}/rooms/${room.id}`,
-      {
-        name: { stringValue: room.name },
-        order: { integerValue: String(order) },
-        version: { integerValue: '1' },
-        objects: { arrayValue: {} },
-        size: {
-          mapValue: {
-            fields: {
-              width: { integerValue: '8000' },
-              height: { integerValue: '6000' },
-            },
-          },
-        },
-      },
-    );
-  }
-
-  for (const [index, table] of TABLES.entries()) {
-    await seedFirestoreDocument(
-      page,
-      `restaurants/${restaurantId}/tables/${table.id}`,
-      {
-        label: { stringValue: table.label },
-        roomId: { stringValue: table.roomId },
-        shape: { stringValue: 'round' },
-        diameter: { integerValue: '900' },
-        seats: { integerValue: String(table.seats) },
-        enabled: { booleanValue: true },
-        rotation: { integerValue: '0' },
-        position: {
-          mapValue: {
-            fields: {
-              x: { integerValue: String(1500 + (index % 3) * 2500) },
-              y: { integerValue: String(1500 + Math.floor(index / 3) * 2500) },
-            },
-          },
-        },
-      },
-    );
-  }
-};
 
 /**
  * One table's live state, written the way the backend would have.

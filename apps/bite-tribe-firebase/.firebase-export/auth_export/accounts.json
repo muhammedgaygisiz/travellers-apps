@@ -82,6 +82,27 @@
       "emailVerified": true,
       "customAttributes": "{\"roles\":[\"admin\"]}",
       "disabled": false
+    },
+    {
+      "localId": "sTaFfSeedAccount01RestaurantX",
+      "createdAt": "1768318963883",
+      "lastLoginAt": "1777356476148",
+      "passwordHash": "fakeHash:salt=fakeSaltSt4ffWaiter7pQm2Lx:password=Test4711",
+      "salt": "fakeSaltSt4ffWaiter7pQm2Lx",
+      "passwordUpdatedAt": 1777910052586,
+      "providerUserInfo": [
+        {
+          "providerId": "password",
+          "email": "staff@test.com",
+          "federatedId": "staff@test.com",
+          "rawId": "staff@test.com"
+        }
+      ],
+      "validSince": "1777910052",
+      "email": "staff@test.com",
+      "emailVerified": true,
+      "customAttributes": "{\"roles\":[\"staff\"]}",
+      "disabled": false
     }
   ]
 }

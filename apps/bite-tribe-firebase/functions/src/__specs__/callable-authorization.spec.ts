@@ -29,6 +29,18 @@ type Access =
    * decision per callable rather than a property of the `business` role.
    */
   | 'restaurantAuthority'
+  /**
+   * Requires `staff`, `business` or `admin`, and then decides for itself which
+   * restaurant that reaches (issue #1092).
+   *
+   * A wider door than `restaurantAuthority`, onto a narrower room. It is the
+   * only class a `staff` account may enter, and what lies behind it is live
+   * table state: a host seats and frees tables and cannot touch the floor plan,
+   * the QR codes or the staff list. A staff account reaches its restaurant
+   * through `/restaurantStaff/{uid}` and never through the role alone, which is
+   * the same pair `worksAt()` in `firestore.rules` checks.
+   */
+  | 'staffAuthority'
   /** Requires a session, and does the same thing for every account. */
   | 'authenticated'
   /** Deliberately reachable without a session. */
@@ -63,6 +75,12 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // photographed code.
   issueTableQrTokens: 'restaurantAuthority',
   rotateTableQrToken: 'restaurantAuthority',
+
+  // A restaurant operating its own dining room during service (issue #1092).
+  // Not `restaurantAuthority`: the caller is usually a host rather than the
+  // account the restaurant is assigned to, and requiring `business` here would
+  // mean the owner's own login being passed round the floor.
+  transitionTableState: 'staffAuthority',
 
   // Consumer and business app paths. Each acts for the caller, or reads data
   // every signed-in account may read, so requiring `admin` here would break
@@ -119,6 +137,20 @@ const RESTAURANT_AUTHORITY_GUARDS = [
   'requireAnyRole(',
   'requireRestaurantAuthority(',
 ];
+
+/**
+ * The staff-authority guard, in the same shared module and checked the same
+ * way (issue #1092).
+ *
+ * It is deliberately a *different* function from `requireRestaurantAuthority`
+ * rather than that one with a wider role list, because the two answer different
+ * questions - may you configure this restaurant, and may you operate it during
+ * service. One function taking a role list would put that difference in an
+ * argument at each call site, and the call site that got it wrong would be the
+ * one that handed a host the QR rotation. Naming them separately here is what
+ * makes an endpoint that reaches for the wrong one visible.
+ */
+const STAFF_AUTHORITY_GUARDS = ['requireTableStateAuthority('];
 
 interface Endpoint {
   name: string;
@@ -214,6 +246,33 @@ describe('callable authorization', () => {
     expect(unguarded).toEqual([]);
   });
 
+  it('guards every staff-authority endpoint with requireTableStateAuthority', () => {
+    const unguarded = named('staffAuthority')
+      .filter(
+        (endpoint) =>
+          !STAFF_AUTHORITY_GUARDS.some((guard) =>
+            sourceOf(endpoint.file).includes(guard),
+          ),
+      )
+      .map((endpoint) => endpoint.name);
+
+    expect(unguarded).toEqual([]);
+  });
+
+  /**
+   * The staff guard is the one place in this project where the `staff` role
+   * reaches a write. If it ever stopped checking the association, the role
+   * would become a key to every dining room in BiteTribe - the shape of hole
+   * issue #1537 closed for the restaurant document.
+   */
+  it('scopes the staff authority to the caller association and not to the role', () => {
+    const authority = sourceOf(RESTAURANT_AUTHORITY_MODULE);
+
+    expect(authority).toContain('requireTableStateAuthority');
+    expect(authority).toContain('RESTAURANT_STAFF_COLLECTION');
+    expect(authority).toContain("hasRole(request, 'staff')");
+  });
+
   it('guards the shared restaurant authority with requireAnyRole', () => {
     expect(sourceOf(RESTAURANT_AUTHORITY_MODULE)).toContain('requireAnyRole(');
   });
@@ -224,7 +283,10 @@ describe('callable authorization', () => {
    * conversation issue #1537 exists to remove.
    */
   it('admits more than an operator on every restaurant-authority endpoint', () => {
-    const operatorOnly = named('restaurantAuthority')
+    const operatorOnly = [
+      ...named('restaurantAuthority'),
+      ...named('staffAuthority'),
+    ]
       .filter((endpoint) => sourceOf(endpoint.file).includes('requireAdmin('))
       .map((endpoint) => endpoint.name);
 
@@ -249,6 +311,7 @@ describe('callable authorization', () => {
     const unchecked = [
       ...named('operator'),
       ...named('restaurantAuthority'),
+      ...named('staffAuthority'),
       ...named('authenticated'),
     ]
       .filter((endpoint) => {
@@ -256,8 +319,8 @@ describe('callable authorization', () => {
 
         return (
           !source.includes('requireAdmin(') &&
-          !RESTAURANT_AUTHORITY_GUARDS.some((guard) =>
-            source.includes(guard),
+          ![...RESTAURANT_AUTHORITY_GUARDS, ...STAFF_AUTHORITY_GUARDS].some(
+            (guard) => source.includes(guard),
           ) &&
           !source.includes('!request.auth')
         );

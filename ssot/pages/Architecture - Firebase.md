@@ -19,7 +19,9 @@ Firebase provides backend persistence, authentication integration, storage, func
 ```text
 bites               bites/{id}/likes
 users               users/{id}/followers, users/{id}/following, users/{id}/pushTokens
-restaurants         restaurants/{id}/rooms, restaurants/{id}/tables
+restaurants         restaurants/{id}/rooms, restaurants/{id}/tables,
+                    restaurants/{id}/tableStates,
+                    restaurants/{id}/tableStateTransitions
 restaurantStaff
 tableTokens
 menus
@@ -82,13 +84,19 @@ menu. Reading the restaurant rather than a field on the menu is what makes this
 work with no backfill: a menu written before the field existed is still writable
 by its owner and gains the field on its next save.
 
-**`staff` still grants no write here.** The rules scope a write by
-`Restaurant.ownerUserId`, and a staff account never holds it. Issue \#1537 wrote
-the record that was missing — `/restaurantStaff/{uid}`, one document per staff
-account naming its restaurant — and deliberately did not make the rules read it:
-what a staff account may write is \#1078's scope and \#1079's, and widening it
-from inside a grant surface would have been two changes in one. The role still
-opens the business app and reads.
+**`staff` still grants no write here, and now has one anyway.** The rules scope
+a write by `Restaurant.ownerUserId`, and a staff account never holds it. Issue
+\#1537 wrote the record that was missing — `/restaurantStaff/{uid}`, one document
+per staff account naming its restaurant — and deliberately did not make the
+rules read it. Issue \#1092 gave the role its first write, and deliberately did
+not put it here either: a host changes a table's live state through
+`transitionTableState`, a callable, because the outcome of two hosts acting at
+once has to be decided by one transaction rather than by the later write
+landing. The rules do now read the association, for **reads**: `worksAt()` pairs
+the `staff` claim with the association naming that one restaurant, which is what
+lets a staff account see a published plan and its live state and nothing else.
+The pair is deliberate - the claim alone says "some restaurant employs this
+account", and the association alone is a document that outlived its grant.
 
 **`/restaurantStaff` is the one collection with narrow reads.** Reads stayed
 where they were everywhere else because narrowing them is a regression risk with
@@ -100,6 +108,27 @@ holding the restaurant — and **no writer at all**: the association only means
 anything alongside the `staff` custom claim, which no client can write, so a
 client that could write the document could only ever produce half of a grant.
 `addRestaurantStaff` and `removeRestaurantStaff` write it through the Admin SDK.
+
+**Live table state is read like the plan and written by nobody** (issue
+\#1092). `/restaurants/{id}/tableStates/{tableId}` is what each table is doing
+right now and
+`/restaurants/{id}/tableStateTransitions/{transitionId}` is how it got there,
+and both admit exactly the readers of the published plan: the staff of that
+restaurant, the account holding it, and the operator. A table's live state is
+worth no more protection than the table and no less, and two lists of readers
+for one room would drift.
+
+Every client write to both is refused, which is not a tidy default but the
+mechanism. Two hosts tapping "seat" on table 12 in the same second is the case
+the feature exists for: with client writes the later one lands and the
+restaurant has one table and two parties, with no record that it happened.
+`transitionTableState` applies the change in a transaction against the state the
+caller says it saw, so one of the two commits and the other is told what the
+table holds now. A client write would be the way round that, so there is not one
+
+- not for the host, not for the owner, not for the operator. The audit trail is
+  append-only for the same reason it exists: a disputed table is answered by a
+  history nobody could have edited afterwards.
 
 **`/tableTokens` is the one collection a client with no session may read.** It
 has to be: a guest scanning the QR code on a table has no account, and the scan

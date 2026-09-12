@@ -10,7 +10,7 @@ import {
 import { getStorage } from 'firebase-admin/storage';
 import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
-import { RESTAURANT_STAFF_COLLECTION } from '../restaurants/restaurant-staff';
+import { RESTAURANT_STAFF_COLLECTION } from '../restaurants/restaurant-authority';
 import { onAppCheck } from '../shared/callable-options';
 import {
   LEADERBOARD_DAILY_DOC,

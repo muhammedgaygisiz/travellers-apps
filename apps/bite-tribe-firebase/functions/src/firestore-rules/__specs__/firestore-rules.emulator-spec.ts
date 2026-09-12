@@ -79,6 +79,9 @@ const TOKENED_TABLE = 'tokened-table';
 const ACTIVE_TOKEN = 'TEST-ACTIVE-TABLE-TOKEN-01';
 const REVOKED_TOKEN = 'TEST-REVOKED-TABLE-TOKEN-1';
 
+/** The audit entry the owned table's state was reached by (issue #1092). */
+const STORED_TRANSITION = 'stored-transition';
+
 /** The version the owned room is stored at, so a stale save has one to miss. */
 const STORED_ROOM_VERSION = 3;
 
@@ -308,6 +311,38 @@ beforeEach(async () => {
         'current',
       ),
       draftAtRevision(STORED_DRAFT_REVISION),
+    );
+
+    // Written only by `transitionTableState` through the Admin SDK, which is
+    // what makes two staff seating one table resolve to one outcome (#1092).
+    await setDoc(
+      doc(db, 'restaurants', OWNED_RESTAURANT, 'tableStates', OWNED_TABLE),
+      {
+        tableId: OWNED_TABLE,
+        restaurantId: OWNED_RESTAURANT,
+        status: 'occupied',
+        since: 1789030800000,
+        updatedByUserId: STRANGER,
+      },
+    );
+    await setDoc(
+      doc(
+        db,
+        'restaurants',
+        OWNED_RESTAURANT,
+        'tableStateTransitions',
+        STORED_TRANSITION,
+      ),
+      {
+        tableId: OWNED_TABLE,
+        restaurantId: OWNED_RESTAURANT,
+        from: 'available',
+        to: 'occupied',
+        actorUserId: STRANGER,
+        actorRoles: ['staff'],
+        at: 1789030800000,
+        atIso: '2026-09-10T09:00:00.000Z',
+      },
     );
 
     // Written only by `issueTableQrTokens`, `rotateTableQrToken` and
@@ -997,6 +1032,114 @@ describe('floor plans', () => {
 
       expect(after.data()).toEqual(before.data());
       expect(after.data()).toEqual(TABLE_FIXTURE);
+    });
+  });
+});
+
+describe('live table state', () => {
+  const stateDoc = (db: Firestore, restaurantId: string): DocumentReference =>
+    doc(db, 'restaurants', restaurantId, 'tableStates', OWNED_TABLE);
+
+  const transitions = (
+    db: Firestore,
+    restaurantId: string,
+  ): CollectionReference =>
+    collection(db, 'restaurants', restaurantId, 'tableStateTransitions');
+
+  /**
+   * Reads follow the published plan exactly (issue #1092). A table's live state
+   * is worth no more protection than the table and no less, and two lists of
+   * readers for one room would drift.
+   */
+  describe('reads', () => {
+    it('lets the staff of this restaurant read the state and the history', async () => {
+      await assertSucceeds(getDoc(stateDoc(asStaff(), OWNED_RESTAURANT)));
+      await assertSucceeds(getDocs(transitions(asStaff(), OWNED_RESTAURANT)));
+    });
+
+    it('lets the owner and an operator read them', async () => {
+      await assertSucceeds(getDoc(stateDoc(asOwner(), OWNED_RESTAURANT)));
+      await assertSucceeds(getDoc(stateDoc(asOperator(), OWNED_RESTAURANT)));
+    });
+
+    it('refuses a business account that does not hold this restaurant', async () => {
+      await assertFails(getDoc(stateDoc(asOtherBusiness(), OWNED_RESTAURANT)));
+      await assertFails(
+        getDocs(transitions(asOtherBusiness(), OWNED_RESTAURANT)),
+      );
+    });
+
+    it('refuses a consumer account', async () => {
+      await assertFails(getDoc(stateDoc(asConsumer(), OWNED_RESTAURANT)));
+    });
+  });
+
+  /**
+   * **The half that matters.** Two hosts tapping "seat" on one table in the
+   * same second is the case the feature is built around, and a client write
+   * here would be the way round the transaction that resolves it. So there is
+   * not one - not for staff, not for the owner, not for the operator.
+   * `transitionTableState` writes through the Admin SDK, which bypasses rules.
+   */
+  describe('writes', () => {
+    it('refuses a staff account writing a table state', async () => {
+      await assertFails(
+        setDoc(stateDoc(asStaff(), OWNED_RESTAURANT), {
+          tableId: OWNED_TABLE,
+          restaurantId: OWNED_RESTAURANT,
+          status: 'available',
+          since: 1789030900000,
+          updatedByUserId: STRANGER,
+        }),
+      );
+    });
+
+    it('refuses the owner and the operator the same write', async () => {
+      await assertFails(
+        updateDoc(stateDoc(asOwner(), OWNED_RESTAURANT), {
+          status: 'available',
+        }),
+      );
+      await assertFails(
+        updateDoc(stateDoc(asOperator(), OWNED_RESTAURANT), {
+          status: 'available',
+        }),
+      );
+    });
+
+    it('refuses the owner deleting a table state', async () => {
+      await assertFails(deleteDoc(stateDoc(asOwner(), OWNED_RESTAURANT)));
+    });
+
+    /**
+     * A disputed table is answered by a history nobody could have edited
+     * afterwards, so the audit trail refuses an appended entry as firmly as it
+     * refuses a rewritten one.
+     */
+    it('refuses anyone appending to or rewriting the audit trail', async () => {
+      await assertFails(
+        addDoc(transitions(asStaff(), OWNED_RESTAURANT), {
+          tableId: OWNED_TABLE,
+          restaurantId: OWNED_RESTAURANT,
+          from: 'occupied',
+          to: 'available',
+          actorUserId: STRANGER,
+          actorRoles: ['staff'],
+          at: 1789030900000,
+          atIso: '2026-09-10T09:01:40.000Z',
+        }),
+      );
+      await assertFails(
+        updateDoc(
+          doc(transitions(asOwner(), OWNED_RESTAURANT), STORED_TRANSITION),
+          { to: 'available' },
+        ),
+      );
+      await assertFails(
+        deleteDoc(
+          doc(transitions(asOwner(), OWNED_RESTAURANT), STORED_TRANSITION),
+        ),
+      );
     });
   });
 });

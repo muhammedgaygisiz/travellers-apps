@@ -139,7 +139,8 @@ Firestore layout:
 
 ```text
 /restaurants/{restaurantId}/tables/{tableId}
-/restaurants/{restaurantId}/tableStates/{tableId}   modelled, issue #1091
+/restaurants/{restaurantId}/tableStates/{tableId}
+/restaurants/{restaurantId}/tableStateTransitions/{transitionId}
 /tableTokens/{token}
 ```
 
@@ -287,10 +288,72 @@ A status never lists itself, and that is a decision rather than an omission. `ca
 
 `tableStatusOf` is the single reader of "no document means available", so the default is one decision rather than one per call site with one of them forgotten. `isTableStatus` narrows a status that arrived over a callable, which is how a stale app version is kept from writing a status no view has a colour for.
 
+Issue \#1092 made the state real, and made the backend its only writer.
+`transitionTableState` takes the table, the status asked for, and **the status
+the caller believes the table holds right now**, and applies the change in a
+transaction. The expected status is required rather than optional, and it is
+what turns a race into a sentence somebody can act on: without it the loser of
+two simultaneous seatings is refused for attempting `occupied` to `occupied`,
+which is a remark about the matrix, and with it the refusal is "the table is
+occupied and you were looking at available". Every caller has it, because the
+live view is a realtime subscription to these very documents.
+
+Two documents land in one commit: the state, replaced, and one append-only
+entry under `tableStateTransitions` carrying `from`, `to`, the actor, the
+actor's roles, the instant and an optional reason. They land together because a
+state nobody can account for is the disputed table the trail exists to answer,
+and an entry describing a state that was never written is worse than no entry.
+The entries sit under the **restaurant** rather than under the table's own state
+document, so deleting a table does not take its history with it - and because
+the question a disputed evening asks is "what happened in this room tonight",
+which is one ordered read here and a fan-out across every table the other way.
+
+The state document is replaced rather than merged, so it says exactly what the
+last accepted transition said and cannot carry a note left on the table three
+parties ago. The one field carried forward is `visitId`, and only into a status
+that still holds a party: a table going `occupied` to `ordering` to
+`awaitingPayment` is one party throughout, while a table going to `available`,
+`cleaning` or `disabled` has none. Nothing creates a visit yet - that is issue
+\#1095 - so today it always resolves to absent; it is written now because the
+alternative is a callable that silently drops the pointer, found by whoever
+builds visits rather than stated here. `visitId` is deliberately not accepted
+from the request: there is no visit for a caller to name, and a client-supplied
+pointer to a document nothing validates is worse than an absent field.
+
+`enabled` finally decides something beyond a QR code. A table the owner has
+taken out of service refuses `reserved` and `occupied`, which is the epic's
+"disabling a table in the editor blocks seating", and those two are the only way
+in - `ordering` and `awaitingPayment` are reachable only from `occupied`. It
+refuses nothing else, so a party already seated when the owner disables the
+table can still be moved to `awaitingPayment`, `cleaning` and `available`. The
+alternative is a seated party the staff view cannot clear.
+
+Authorisation is the role's first write of any kind. `requireTableStateAuthority`
+admits `staff`, `business` and `admin` and then decides which restaurant each of
+them reaches: the owner and the operator through `Restaurant.ownerUserId` as
+everywhere else, and a staff account only through `/restaurantStaff/{uid}`
+naming this restaurant - the same pair `worksAt()` checks in `firestore.rules`,
+never the `staff` role alone. It is a separate function from
+`requireRestaurantAuthority` rather than that one with a wider role list,
+because the two answer different questions: may you configure this restaurant,
+which staff must never pass, and may you operate it during service, which is the
+only thing staff may do.
+
+Firestore refuses every client write to both collections, so the callable is not
+merely the path the app takes - it is the only path there is. The transition
+matrix is duplicated into `apps/bite-tribe-firebase/functions` because the
+project compiles with `rootDir: src` and ships `lib/` alone, and
+`table-state-parity.spec.ts` compares both files' statuses and every row so the
+copy is checked rather than trusted, the same answer `BITE_TRIBE_ROLES` already
+uses.
+
 ## Current Limitations
 
-- Live state is a model and nothing else. No document is written, no rule permits one, and no surface reads one: the callable that applies a transition is issue \#1092, the rules that scope `tableStates` to staff go with it, and the live view is issue \#1093. Nothing in the workspace can currently produce a `TableState`.
-- The matrix is exported from the Nx model library, which Firebase Functions cannot import. `apps/bite-tribe-firebase/functions` compiles with `rootDir: src` and no path mapping, so issue \#1092 has to reach the single definition rather than retype it - a second copy in the backend would be the drift this issue exists to prevent, and it would drift silently because both copies would pass their own tests.
+- The rules deploy by hand. `npx nx firebase-deploy-rules bite-tribe-firebase` has to run before the `tableStates` and `tableStateTransitions` clauses mean anything in production; merging them changes nothing on its own. Until that deploy, the catch-all at the bottom of the file denies both collections outright, so the reads issue \#1093 needs are refused - the callable's own writes are unaffected, because the Admin SDK bypasses rules.
+- Live state has a writer and no reader. `transitionTableState` writes the documents and the rules admit staff, the owner and the operator to read them, but no surface does: the live view is issue \#1093 and the staff actions are issue \#1094, so nothing in either app can reach a transition yet. The callable is exercised by its emulator spec and by nothing else.
+- The matrix exists twice. Firebase Functions cannot import the Nx model library - `rootDir: src`, no path mappings, and a deploy that uploads `lib/` alone - so issue \#1092 copied it and made the copy checked instead of trusted. `src/__specs__/table-state-parity.spec.ts` compares the statuses, their order and every row of both files, following the precedent `role-list-parity.spec.ts` set for `BITE_TRIBE_ROLES`. A row changed in one file and not the other fails the build rather than reaching a dining room.
+- A replayed transition is still a second transition. There is no idempotency key yet, so an offline queue that sends the same seating twice gets one success and one `aborted` rather than one success and one "already done". That is the safe failure and not the right one; the key is issue \#1096.
+- The audit trail is written and never read. Nothing queries `tableStateTransitions`, no index exists for a per-table history, and no surface renders one. Adding either is issue \#1093's or issue \#1098's, and a `where` on `tableId` ordered by `at` will need a composite index before it runs.
 - Nothing enforces that `visitId` is present exactly when the status implies a seated party. The model marks it optional and the prose says which statuses carry it; making it structural means a discriminated union on `status`, which is worth doing once visits exist (issue \#1095) and not before.
 - Uniqueness is held by the client, not by the database. Security rules cannot query, so no rule can ask whether a label is already taken; the editor refuses a duplicate as it is typed, and the publish validation of issue \#1088 refuses a plan that reached that state another way. A second device editing a second room at the same moment can still produce two tables with one number, because neither editor sees the other's unpublished plan - but neither can publish one, because the gate reads every table of the restaurant and reports the collision on the table in the room being published.
 - A table moves out of the room the owner is looking at, never into it. The control is on the selected table's card, so it is reachable only for a table on the open canvas; there is no way to reach into another room and pull a table across (issue \#1085).

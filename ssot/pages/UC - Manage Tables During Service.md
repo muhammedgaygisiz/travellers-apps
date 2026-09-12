@@ -2,11 +2,13 @@
 
 ## Status
 
-Started at the model. Specified through issue \#1071 as stage 2 of issue \#735.
+Backend complete, no surface. Specified through issue \#1071 as stage 2 of issue \#735.
 
-Issue \#1091 added the live state and the transition matrix to `libs/bite-tribe-common/model`. Nothing writes or reads a state document yet: the callable that applies a transition is issue \#1092 and the live view is issue \#1093, so none of the flow below is reachable.
+Issue \#1091 added the live state and the transition matrix to `libs/bite-tribe-common/model`. Issue \#1092 made the backend their only writer: `transitionTableState` validates a requested transition against the matrix and the caller's staff membership, applies it transactionally against the state the caller says it saw, and appends an audit entry per transition. Two staff members seating one table produce one seating and one explicit conflict. `firestore.rules` refuses every client write to the state and the trail, and admits the staff of that restaurant, the account holding it and the operator to read both.
 
-[[UC - Configure Restaurant Floor Plans And Tables]] is complete and no longer blocks this. [[UC - Own And Claim Restaurants]] still does: the `staff` role is grantable and the security rules give it no write, so a staff member has nothing to sign in to.
+Nothing in either app reaches it. The live view is issue \#1093 and the staff actions are issue \#1094, so none of the flow below is reachable from a screen; the callable is exercised by its emulator spec and by nothing else.
+
+[[UC - Configure Restaurant Floor Plans And Tables]] is complete and no longer blocks this. [[UC - Own And Claim Restaurants]] no longer blocks it either: the `staff` role now has its first write, through the callable rather than through the rules, so a staff member has something to sign in for once \#1093 renders it.
 
 ## Goal
 
@@ -32,8 +34,10 @@ Restaurant staff open one screen during service and see the room as it is: which
 ## Key Behaviours
 
 - Live state lives in its own documents and is never written by the floor-plan editor. The editor never writes state, and state changes never write geometry.
-- Transitions are applied by the backend against a single exported transition matrix, so two staff members seating the same table produce one seating and one explicit conflict. The matrix is `TABLE_STATE_TRANSITIONS` in `libs/bite-tribe-common/model`, tested over every ordered pair of statuses (issue \#1091).
-- Every transition records who made it, when, from which state, and why, so a disputed table has a history.
+- Transitions are applied by the backend against a single exported transition matrix, so two staff members seating the same table produce one seating and one explicit conflict. The matrix is `TABLE_STATE_TRANSITIONS` in `libs/bite-tribe-common/model`, tested over every ordered pair of statuses (issue \#1091); Firebase Functions cannot import the library, so it holds a copy that `table-state-parity.spec.ts` compares row by row (issue \#1092).
+- The conflict is explicit because the caller names the state it saw. `transitionTableState` requires it, compares it inside the transaction, and refuses `aborted` with the status the table holds now, who set it and when - which is what the view renders as "someone else just seated this table" (issue \#1092).
+- Every transition records who made it, in what capacity, when, from which state, and why, so a disputed table has a history. The entries are append-only, live under the restaurant rather than under the table, and survive the table being deleted (issue \#1092).
+- A table the owner has taken out of service can be neither reserved nor seated, and a party already at one can still be freed (issue \#1092).
 - Status is conveyed by colour, icon, and text together, never by colour alone.
 - The view keeps working offline: transitions queue, carry an idempotency key, and reconcile on reconnect rather than being silently forced or dropped.
 - Staff have a narrower permission set than owners, enforced by security rules and not only by hidden UI.

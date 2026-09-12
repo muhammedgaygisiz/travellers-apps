@@ -87,8 +87,12 @@ export class BusinessMenuComponent {
       if (currMenu) {
         return {
           ...currMenu,
+          // Matched by id rather than by title or name (issue #1099). An
+          // owner who renames a category or a dish and then adds an item to it
+          // is the ordinary case, and matching on the text meant the addition
+          // landed in whatever still carried the old string - or nowhere.
           categories: currMenu.categories.map((category) => {
-            if (category.title === $event.category.title) {
+            if (category.id === $event.category.id) {
               if (!$event.isVariant) {
                 return {
                   ...category,
@@ -99,7 +103,7 @@ export class BusinessMenuComponent {
               return {
                 ...category,
                 items: category.items.map((item) => {
-                  if (item.name === $event.item.name) {
+                  if (item.id === $event.item.id) {
                     return {
                       ...item,
                       variants: [...($event.item.variants || [])],
@@ -177,7 +181,7 @@ export class BusinessMenuComponent {
         return {
           ...menu,
           categories: menu.categories.map((cat) =>
-            cat.title === categoryWithNewOrderOfItems.title
+            cat.id === categoryWithNewOrderOfItems.id
               ? categoryWithNewOrderOfItems
               : cat,
           ),

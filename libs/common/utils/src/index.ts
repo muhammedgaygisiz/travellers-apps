@@ -4,6 +4,8 @@ export { PATH } from './lib/paths';
 
 export { BITE_TRIBE_ORIGIN } from './lib/bite-tribe-origin';
 
+export { createEntityId } from './lib/create-entity-id';
+
 export {
   BITE_TRIBE_ROLES,
   ROLES_CLAIM,

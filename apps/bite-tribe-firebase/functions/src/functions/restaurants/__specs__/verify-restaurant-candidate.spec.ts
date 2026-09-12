@@ -181,9 +181,11 @@ describe('verifyRestaurantCandidate', () => {
       expect.objectContaining({
         categories: [
           {
+            id: expect.any(String),
             title: 'Bites',
             items: [
               {
+                id: expect.any(String),
                 name: 'Margherita',
                 description: '',
                 price: 12.5,
@@ -243,9 +245,11 @@ describe('verifyRestaurantCandidate', () => {
       expect.objectContaining({
         categories: [
           {
+            id: expect.any(String),
             title: 'Bites',
             items: [
               {
+                id: expect.any(String),
                 name: 'Margherita',
                 description: '',
                 price: 12,

@@ -1,3 +1,4 @@
+import { createMenuEntityId } from './menu-ids';
 import { normalizePlaceName } from './restaurant-candidates';
 
 /**
@@ -13,6 +14,13 @@ export interface InitialMenuBite {
 }
 
 export interface InitialMenuItem {
+  /**
+   * The stable id an order line references (issue #1099).
+   *
+   * Generated here rather than left to the backfill, so a menu is born with
+   * ids instead of being created without them and migrated moments later.
+   */
+  id: string;
   name: string;
   description: string;
   price: number;
@@ -20,6 +28,8 @@ export interface InitialMenuItem {
 }
 
 export interface InitialMenuCategory {
+  /** Stable id, on the same terms as {@link InitialMenuItem.id}. */
+  id: string;
   title: string;
   items: InitialMenuItem[];
 }
@@ -47,6 +57,7 @@ const isUsablePrice = (price: unknown): price is number =>
 const toRoundedPrice = (price: number): number => Math.round(price * 100) / 100;
 
 const toInitialMenuItem = (draft: InitialMenuItemDraft): InitialMenuItem => ({
+  id: createMenuEntityId(),
   name: draft.name,
   description: '',
   price: draft.pricedBiteCount
@@ -108,5 +119,7 @@ export const buildInitialMenuCategories = (
 ): InitialMenuCategory[] => {
   const items = buildInitialMenuItems(bites);
 
-  return items.length ? [{ title: INITIAL_MENU_CATEGORY_TITLE, items }] : [];
+  return items.length
+    ? [{ id: createMenuEntityId(), title: INITIAL_MENU_CATEGORY_TITLE, items }]
+    : [];
 };

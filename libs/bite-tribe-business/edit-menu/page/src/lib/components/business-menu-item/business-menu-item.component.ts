@@ -104,8 +104,11 @@ export class BusinessMenuItemComponent {
       return;
     }
 
+    // Merged rather than replaced: the editor form holds the editable fields,
+    // so assigning its value over the variant dropped everything the form does
+    // not carry - the variant's own id included (issue #1099).
     const newVariants = [...item.variants];
-    newVariants[index] = changes;
+    newVariants[index] = { ...newVariants[index], ...changes };
     this.itemChanged.emit({
       ...item,
       variants: newVariants,

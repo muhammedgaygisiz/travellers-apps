@@ -1,8 +1,10 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, Signal } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { withMenuIds } from 'model';
 import type { Bite, Menu } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { createEntityId } from 'utils';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +15,27 @@ export class MenuDataAccessService {
 
   bite = toSignal(this.storeService.bite$);
   restaurant = toSignal(this.storeService.restaurant$);
-  menu = toSignal(this.storeService.menu$);
+
+  private readonly storedMenu = toSignal(this.storeService.menu$);
+
+  /**
+   * The route's menu, with an id on every category, item and variant.
+   *
+   * Menus written before issue #1099 carry none, and the admin backfill closes
+   * that for the collection at rest - but only once an operator has pressed it,
+   * and only for menus that existed when they did. Filling in what is missing
+   * on read means the editor is keying by id from the first render either way,
+   * and the ids it generated are persisted by the owner's next save.
+   *
+   * `withMenuIds` returns the menu it was given when nothing was missing, so a
+   * menu that has been backfilled passes through by identity and the
+   * `linkedSignal` chain the editor is built on is not restarted on every read.
+   */
+  menu: Signal<Menu | undefined> = computed(() => {
+    const stored = this.storedMenu();
+
+    return stored ? withMenuIds(stored, createEntityId) : stored;
+  });
 
   /** True while the route's menu has neither arrived nor been given up on. */
   isMenuLoading = toSignal(this.storeService.isMenuLoading$, {

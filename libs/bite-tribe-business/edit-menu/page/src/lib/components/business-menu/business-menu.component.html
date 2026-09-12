@@ -3,7 +3,7 @@
 <div class="menu-container">
   @if (menuData?.categories?.length) {
     <ion-reorder-group (ionItemReorder)="handleReorder($event)">
-      @for (category of menuData?.categories; track category.title) {
+      @for (category of menuData?.categories; track category.id) {
         <div class="reorder-container ion-padding">
           <div class="reorder-anchor">
             <ion-reorder>

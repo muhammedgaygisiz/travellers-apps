@@ -106,6 +106,7 @@ describe(AdminDashboard.name, () => {
       '/bite-places',
       '/new-version-notification',
       '/review-timestamps-backfill',
+      '/menu-item-ids-backfill',
       '/bite-address-backfill',
       '/restaurant-clustering',
       '/image-migration',

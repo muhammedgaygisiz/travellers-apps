@@ -11,6 +11,7 @@ import {
   arrowUndoOutline,
   bookmark,
   bookmarkOutline,
+  businessOutline,
   cameraOutline,
   checkmarkCircleOutline,
   checkmarkOutline,
@@ -31,6 +32,7 @@ import {
   downloadOutline,
   earthOutline,
   filter,
+  fastFoodOutline,
   filterOutline,
   flameOutline,
   footstepsOutline,
@@ -82,6 +84,8 @@ import {
 
 export const addNecessaryIcons = (): void => {
   addIcons({
+    businessOutline,
+    fastFoodOutline,
     peopleOutline,
     pricetagOutline,
     filterOutline,

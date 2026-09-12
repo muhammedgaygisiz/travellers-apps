@@ -45,6 +45,7 @@ export const OPERATOR_ACTIONS = [
   'addRestaurantStaff',
   'assignRestaurantOwner',
   'backfillBiteAddress',
+  'backfillMenuItemIds',
   'backfillReviewTimestamps',
   'clusterRestaurantCandidateForBite',
   'deleteBiteAsOperator',
@@ -71,6 +72,7 @@ export type OperatorAction = (typeof OPERATOR_ACTIONS)[number];
 export type OperatorTargetType =
   | 'appInstallation'
   | 'bite'
+  | 'menu'
   | 'restaurant'
   | 'restaurantCandidate'
   | 'review'

@@ -143,6 +143,42 @@ describe('migration surfaces', () => {
           .disabled,
       ).toBe(true);
     });
+
+    /**
+     * The menu id backfill, registered by issue #1099, adds no markup of its
+     * own: it is this card given a different name and a different set of
+     * counts. Asserting that here is what says the "a name, a runner and its
+     * copy" contract still holds for the migration added after it was written.
+     */
+    it('renders a second migration from the same card', async () => {
+      const { fixture, ref } = await render(CollectionMigration, {
+        migration: 'menu-item-ids',
+      });
+      const run = jest.fn();
+
+      fixture.componentInstance.run.subscribe(run);
+      ref.setInput('state', {
+        status: 'done',
+        result: { processed: 4, updated: 2, categories: 3, items: 9 },
+      });
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="collection-migration-menu-item-ids"]',
+        ),
+      ).toBeTruthy();
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="migration-counts"]')
+          .textContent,
+      ).toContain('migration-count-categories: 3');
+
+      fixture.nativeElement
+        .querySelector('[data-testid="run-migration"]')
+        .click();
+
+      expect(run).toHaveBeenCalledWith('menu-item-ids');
+    });
   });
 
   describe(BiteAddressBackfill.name, () => {

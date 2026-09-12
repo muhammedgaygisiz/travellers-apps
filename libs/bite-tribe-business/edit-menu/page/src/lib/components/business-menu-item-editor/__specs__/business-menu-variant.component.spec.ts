@@ -117,6 +117,31 @@ describe('BusinessAddItemComponent', () => {
       component.onUpdateItem();
       expect(itemChangedEmitSpy).not.toHaveBeenCalled();
     });
+
+    /**
+     * The first acceptance criterion of issue #1099. The form model holds the
+     * editable fields and nothing else, so emitting its value as the item was
+     * a rename that replaced the field saying which item this is.
+     */
+    it('should keep the item id across a rename', () => {
+      componentRef.setInput('item', {
+        id: 'item-margherita',
+        name: 'Margherita',
+        description: '',
+        price: 12,
+      });
+      fixture.detectChanges();
+
+      component.itemForm.name().value.set('Pizza Margherita');
+      component.onUpdateItem();
+
+      expect(itemChangedEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'item-margherita',
+          name: 'Pizza Margherita',
+        }),
+      );
+    });
   });
 
   describe('onAddItem', () => {
@@ -132,6 +157,7 @@ describe('BusinessAddItemComponent', () => {
       component.onAddItem();
 
       expect(component.addItem.emit).toHaveBeenCalledWith({
+        id: expect.any(String),
         name: 'New Item',
         description: 'description',
         ingredients: '',

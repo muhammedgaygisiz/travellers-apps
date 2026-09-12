@@ -104,7 +104,9 @@ An Order belongs to a visit, not to a table.
 
 An order line snapshots the menu item at the moment of submission: item id, name at time of order, price at time of order, currency, variant, quantity, and notes. The snapshot is immutable once submitted, so the price the guest saw is the price they are charged, even if the menu changes mid-session.
 
-This requires stable menu item identifiers, which do not exist today. `MenuItem` in `libs/bite-tribe-common/model/src/lib/menu.ts` has no `id`; items are array entries addressable only by name and index. Issue \#1099 adds them.
+That shape exists. Issue \#1099 added `OrderLineSnapshot` to `libs/bite-tribe-common/model/src/lib/order-line.ts`, with every field `readonly`, and gave `MenuItem`, `Category` and every variant the `id` it references. `menuItemId` names the dish rather than the variant - "large Margherita" and "small Margherita" are one thing on the menu - and `variantId` says which size, so a line renders as two fields rather than one string a reader has to take apart.
+
+The snapshot is what makes a line survive its dish. `findMenuItemById` answers `undefined` for an item that has since been deleted, which is an ordinary outcome rather than an error: the link goes and the record stays, so a receipt from before the deletion reads exactly as it did. Nothing writes one yet - the order collection and the submission callable are issue \#1103.
 
 ## Relationships
 

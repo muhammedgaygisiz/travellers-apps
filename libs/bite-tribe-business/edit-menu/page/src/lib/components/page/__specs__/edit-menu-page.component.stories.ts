@@ -22,16 +22,19 @@ const menu: Menu = {
   restaurantId: trattoria.id,
   categories: [
     {
+      id: 'category-antipasti',
       title: 'Antipasti',
       subtitle: 'To share, or not',
       items: [
         {
+          id: 'item-bruschetta',
           name: 'Bruschetta al pomodoro',
           description: 'Grilled sourdough, datterini, basil.',
           price: 6.5,
           isAvailable: true,
         },
         {
+          id: 'item-burrata',
           name: 'Burrata pugliese',
           description: 'With Cetara anchovies and taralli.',
           ingredients: 'Burrata, anchovy, olive oil',
@@ -41,15 +44,18 @@ const menu: Menu = {
       ],
     },
     {
+      id: 'category-pizze',
       title: 'Pizze',
       items: [
         {
+          id: 'item-margherita',
           name: 'Margherita',
           description: 'San Marzano, fior di latte, basil.',
           price: 9,
           isAvailable: true,
           variants: [
             {
+              id: 'variant-margherita-bufala',
               name: 'Margherita con bufala',
               description: 'Buffalo mozzarella instead of fior di latte.',
               price: 12,
@@ -58,6 +64,7 @@ const menu: Menu = {
           ],
         },
         {
+          id: 'item-diavola',
           name: 'Diavola',
           description: 'Spicy salame, chilli, oregano.',
           notes: 'Hot.',

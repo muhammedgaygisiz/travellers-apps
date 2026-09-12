@@ -8,6 +8,7 @@ import SpyInstance = jest.SpyInstance;
 const createMenuItem = (
   overrides: Partial<MenuItem> & Record<string, unknown> = {},
 ): MenuItem => ({
+  id: 'item-test',
   name: 'Test Item',
   description: '',
   price: 0,
@@ -17,6 +18,7 @@ const createMenuItem = (
 const createCategory = (
   overrides: Partial<Category> & Record<string, unknown> = {},
 ): Category => ({
+  id: 'category-test',
   title: 'Test Category',
   items: [],
   ...overrides,
@@ -215,7 +217,12 @@ describe('BusinessCategoryComponent', () => {
     it('should set form title and subtitle from category when form title is empty', () => {
       component.categoryForm.title().value.set('');
       component.categoryForm.subtitle().value.set('');
-      const cat: Category = { title: 'Test', subtitle: 'Sub', items: [] };
+      const cat: Category = {
+        id: 'category-test',
+        title: 'Test',
+        subtitle: 'Sub',
+        items: [],
+      };
       componentRef.setInput('category', cat);
       componentRef.changeDetectorRef.detectChanges();
       expect(component.categoryForm.title().value()).toBe('Test');
@@ -223,7 +230,12 @@ describe('BusinessCategoryComponent', () => {
     });
 
     it('should set form title and subtitle category if provided', () => {
-      const cat: Category = { title: 'Test', subtitle: 'Sub', items: [] };
+      const cat: Category = {
+        id: 'category-test',
+        title: 'Test',
+        subtitle: 'Sub',
+        items: [],
+      };
       componentRef.setInput('category', cat);
       componentRef.changeDetectorRef.detectChanges();
       expect(component.categoryForm.title().value()).toBe('Test');
@@ -249,7 +261,12 @@ describe('BusinessCategoryComponent', () => {
     });
 
     it('should emit categoryChanged when title or subtitle changes', () => {
-      const cat: Category = { title: 'Test', subtitle: 'Sub', items: [] };
+      const cat: Category = {
+        id: 'category-test',
+        title: 'Test',
+        subtitle: 'Sub',
+        items: [],
+      };
       componentRef.setInput('category', cat);
       component.categoryForm.title().value.set('New Title');
       component.categoryForm.subtitle().value.set('New Subtitle');
@@ -263,7 +280,12 @@ describe('BusinessCategoryComponent', () => {
     });
 
     it('should not emit categoryChanged if title and subtitle are unchanged', () => {
-      const cat: Category = { title: 'Test', subtitle: 'Sub', items: [] };
+      const cat: Category = {
+        id: 'category-test',
+        title: 'Test',
+        subtitle: 'Sub',
+        items: [],
+      };
       componentRef.setInput('category', cat);
       component.categoryForm.title().value.set('Test');
       component.categoryForm.subtitle().value.set('Sub');

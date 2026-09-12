@@ -118,6 +118,44 @@
 
   Two decisions in it are worth finding again. The plan changes on the **press** rather than on the answer, because a table that does not move while a party stands in front of the host reads as a tap that missed and is answered with a second tap the backend refuses - so the feedback for a successful seating would have been an error. The guess is a layer over the Firestore listener rather than a write into it, which makes a rollback a deletion and leaves the true status underneath; it is dropped when the listener delivers the transition, not when the callable answers, because the gap between those two is a visible flicker. And the optional guest count travels as the audit entry's `reason` rather than as a new field on `TableState`, because the durable home for a party size is `TableVisit.guestCount` and the visit is \#1095 - a field invented here would be a field \#1095 had to migrate.
 
+  Issue \#1095 put the party behind the status. `TableVisit` at
+  `/restaurants/{restaurantId}/visits/{visitId}` is the entity orders (\#1072)
+  and payment (\#1073) will hang from, and the decision that shapes everything
+  else is that it is **not a second action**: seating a table _is_ opening a
+  visit and freeing it _is_ ending one, written by `transitionTableState` in the
+  same commit as the state and the audit entry. Two callables and a pairing rule
+  would have let a table be occupied by nobody the first time a host closed the
+  app between them.
+
+  Three consequences are worth finding again. "A table has at most one open visit"
+  is held by `TableState.visitId` being the only pointer at one, written and
+  dropped by the commits that seat and free the table - so a second visit needs a
+  second seating of an `occupied` table, which loses the `expectedStatus` check
+  against the one document both hosts contend on. Querying `visits` for the open
+  one would be a second answer to a question the state already answers, and would
+  put a whole collection in the read set of every transition. Ending a visit lands
+  the table on `cleaning` and never on `available`, which narrows the \#1091
+  matrix for the one case the matrix cannot see: it says what a _table_ may do and
+  is right as it stands, but a real party ending must leave an explicit next action
+  or the next party gets the table with the last one's plates on it. And the
+  visit's own history - which tables it sat at - is read off
+  `tableStateTransitions` by `visitId` rather than copied onto the visit, because a
+  second list is a second version of one fact.
+
+  `moveTableVisit` is the one operation that is not a single table's transition.
+  It changes the visit's `tableId` and nothing else about the visit, so every order
+  that will point at it still does; closing and reopening would have given the
+  party a new id, an `openedAt` twenty minutes late and a bill missing its starters.
+  It also has the one check the matrix cannot make: a destination that is
+  `ordering` would legally accept `occupied`, being a party sending the waiter
+  away, so a second party walked onto it would overwrite its pointer and strand
+  the party already there. `moveTableVisit` reads the destination's `visitId` and
+  refuses.
+
+  Stage 2's model and backend are now complete and no screen uses the visit half.
+  Seating through \#1094's sheet opens a visit that nothing displays, and nothing
+  calls the move. That is \#1096 and the surfaces after it.
+
 Every child of stage 0 has now landed, and the stage is still not finished. Two things
 remain and neither has an owning issue: the rules deploy by hand, so \#1078 binds
 production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run, and the

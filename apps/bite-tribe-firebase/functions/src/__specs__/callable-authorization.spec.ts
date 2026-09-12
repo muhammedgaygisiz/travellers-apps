@@ -82,6 +82,11 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // mean the owner's own login being passed round the floor.
   transitionTableState: 'staffAuthority',
 
+  // Walking a party to another table while keeping its visit (issue #1095).
+  // Same door and same room: it is the host's job, and it writes live state
+  // and the visit that hangs from it and nothing else.
+  moveTableVisit: 'staffAuthority',
+
   // Consumer and business app paths. Each acts for the caller, or reads data
   // every signed-in account may read, so requiring `admin` here would break
   // the consumer app.

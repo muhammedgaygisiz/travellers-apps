@@ -80,7 +80,7 @@ A status never lists itself. Re-applying the status a table already holds is a r
 
 A Table with no state document is treated as `available`. Every transition is applied by the backend, validated against this matrix, and recorded with actor and timestamp, so two staff members acting at once produce one outcome and a disputed table has a history.
 
-A Table State carries `tableId`, `restaurantId`, `status`, `since`, `updatedByUserId`, an optional `visitId` while a party is seated, and an optional free-text `note`. `since` is the moment of the last accepted transition rather than the last write, because what a host reads off the screen is a duration: table 6 has been awaiting payment for twenty minutes.
+A Table State carries `tableId`, `restaurantId`, `status`, `since`, `updatedByUserId`, an optional `visitId` naming the open [[Table Visit]] while a party is seated, and an optional free-text `note`. `since` is the moment of the last accepted transition rather than the last write, because what a host reads off the screen is a duration: table 6 has been awaiting payment for twenty minutes.
 
 ## Relationships
 
@@ -313,12 +313,27 @@ last accepted transition said and cannot carry a note left on the table three
 parties ago. The one field carried forward is `visitId`, and only into a status
 that still holds a party: a table going `occupied` to `ordering` to
 `awaitingPayment` is one party throughout, while a table going to `available`,
-`cleaning` or `disabled` has none. Nothing creates a visit yet - that is issue
-\#1095 - so today it always resolves to absent; it is written now because the
-alternative is a callable that silently drops the pointer, found by whoever
-builds visits rather than stated here. `visitId` is deliberately not accepted
-from the request: there is no visit for a caller to name, and a client-supplied
-pointer to a document nothing validates is worse than an absent field.
+`cleaning` or `disabled` has none. `visitId` is deliberately not accepted from
+the request: there is no visit for a caller to name that the callable did not
+give it, and a client-supplied pointer to a document nothing validates is worse
+than an absent field.
+
+Since issue \#1095 the pointer has something to point at, and the same
+transition writes it. A table becoming `occupied` from a status that held no
+party **opens** a visit at `/restaurants/{id}/visits/{visitId}`; a table leaving
+the party statuses **ends** the one it was pointing at. Seating is opening a
+visit and freeing is ending one - not two actions a host has to pair, but one
+commit that writes the state, the audit entry and the visit together, so a table
+occupied by nobody cannot exist. The audit entry carries the `visitId` too,
+which is what makes the trail the visit's history as well as the table's.
+
+One narrowing follows. A table with an **open visit** may not go straight to
+`available`, even though the matrix allows `occupied -> available` and
+`awaitingPayment -> available`: it lands on `cleaning`, so the next party cannot
+be seated at it without somebody looking at it first. The matrix is right as it
+stands - that transition is the table wrongly seated and immediately corrected -
+and the narrowing applies only while there is a party to end. See
+[[Table Visit]].
 
 `enabled` finally decides something beyond a QR code. A table the owner has
 taken out of service refuses `reserved` and `occupied`, which is the epic's
@@ -349,12 +364,12 @@ uses.
 
 ## Current Limitations
 
-- The rules deploy by hand. `npx nx firebase-deploy-rules bite-tribe-firebase` has to run before the `tableStates` and `tableStateTransitions` clauses mean anything in production; merging them changes nothing on its own. Until that deploy, the catch-all at the bottom of the file denies both collections outright, so the reads issue \#1093 needs are refused - the callable's own writes are unaffected, because the Admin SDK bypasses rules.
-- The party size has no field. Issue \#1094's sheet takes an optional guest count and sends it as the audit entry's `reason`, because `TableState` deliberately carries no party data - it points at a visit, and the visit is issue \#1095. Nothing parses the text back, and the count becomes `TableVisit.guestCount` when there is a visit to put it on.
+- The rules deploy by hand. `npx nx firebase-deploy-rules bite-tribe-firebase` has to run before the `tableStates`, `tableStateTransitions` and `visits` clauses mean anything in production; merging them changes nothing on its own. Until that deploy, the catch-all at the bottom of the file denies both collections outright, so the reads issue \#1093 needs are refused - the callable's own writes are unaffected, because the Admin SDK bypasses rules.
+- The party size has a field now and no caller. `TableVisit.guestCount` exists and `transitionTableState` takes a `guestCount` argument (issue \#1095), but issue \#1094's sheet still sends the count as the audit entry's `reason`. Moving it across is a change to the business app, not to the backend, and belongs with the surface that renders visits.
 - The matrix exists twice. Firebase Functions cannot import the Nx model library - `rootDir: src`, no path mappings, and a deploy that uploads `lib/` alone - so issue \#1092 copied it and made the copy checked instead of trusted. `src/__specs__/table-state-parity.spec.ts` compares the statuses, their order and every row of both files, following the precedent `role-list-parity.spec.ts` set for `BITE_TRIBE_ROLES`. A row changed in one file and not the other fails the build rather than reaching a dining room.
 - A replayed transition is still a second transition. There is no idempotency key yet, so an offline queue that sends the same seating twice gets one success and one `aborted` rather than one success and one "already done". That is the safe failure and not the right one; the key is issue \#1096.
 - The audit trail is written and never read. Nothing queries `tableStateTransitions`, no index exists for a per-table history, and no surface renders one. Adding either is issue \#1093's or issue \#1098's, and a `where` on `tableId` ordered by `at` will need a composite index before it runs.
-- Nothing enforces that `visitId` is present exactly when the status implies a seated party. The model marks it optional and the prose says which statuses carry it; making it structural means a discriminated union on `status`, which is worth doing once visits exist (issue \#1095) and not before.
+- Nothing enforces in the _type_ that `visitId` is present exactly when the status implies a seated party. The backend enforces it - the pointer is written only into a status that holds a party, and dropped by the same commit that leaves one (issue \#1095) - but the model still marks the field optional, and making it structural means a discriminated union on `status`.
 - Uniqueness is held by the client, not by the database. Security rules cannot query, so no rule can ask whether a label is already taken; the editor refuses a duplicate as it is typed, and the publish validation of issue \#1088 refuses a plan that reached that state another way. A second device editing a second room at the same moment can still produce two tables with one number, because neither editor sees the other's unpublished plan - but neither can publish one, because the gate reads every table of the restaurant and reports the collision on the table in the room being published.
 - A table moves out of the room the owner is looking at, never into it. The control is on the selected table's card, so it is reachable only for a table on the open canvas; there is no way to reach into another room and pull a table across (issue \#1085).
 - `enabled` decides whether a table gets a code and nothing else yet. A disabled table is skipped when a plan is issued tokens and refused when it is named, and one disabled after its code was printed resolves to "not in service" - but nothing reads that answer, because refusing the order is issue \#1072.

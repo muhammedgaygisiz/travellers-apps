@@ -18,6 +18,7 @@ import {
   TableStatus,
   canTransitionTableStatus,
   holdsParty,
+  isTableStatus,
   parseTableStatus,
   seatsParty,
   tableStatusOf,
@@ -134,6 +135,23 @@ export interface TransitionTableStateRequest {
    * payment of issue #1073 charges for one of them.
    */
   visitOutcome?: unknown;
+  /**
+   * The caller's idempotency key for this transition (GitHub issue #1096).
+   *
+   * Optional, and the whole of what makes a replay safe. The staff view queues
+   * transitions made in a basement dining room and sends them again when the
+   * signal comes back, and the request it sends again is indistinguishable
+   * from a second seating unless it is labelled - so two tables seated offline
+   * would land as four transitions, and the second pair would be refused for
+   * being `occupied -> occupied` after the first pair had already moved the
+   * tables.
+   *
+   * With a key, the second attempt finds the entry the first one wrote and is
+   * answered with what it recorded. The key is minted by the caller, once per
+   * *intent* rather than once per attempt, and survives the device being
+   * restarted mid-queue.
+   */
+  requestId?: unknown;
   /** Why, recorded on the audit entry. Optional free text. */
   reason?: unknown;
   /** A short note for the next person on shift, written onto the state. */
@@ -159,6 +177,16 @@ export interface TransitionTableStateResult {
   visitId?: string;
   /** What the visit named by `visitId` is now. */
   visitStatus?: TableVisitStatus;
+  /**
+   * True when this answer came from the audit entry rather than from a
+   * transition applied now (GitHub issue #1096).
+   *
+   * The caller is told, because the two are the same outcome and not the same
+   * event: a replayed transition must not be counted, announced or analysed as
+   * a fresh one. Absent on the ordinary path rather than `false`, so a caller
+   * reading it is reading a deliberate field.
+   */
+  replayed?: boolean;
 }
 
 /**
@@ -206,6 +234,54 @@ const parseOptionalText = (value: unknown, field: string): string => {
   }
 
   return text;
+};
+
+/**
+ * How an idempotency key is spelled, and where it is stored.
+ *
+ * The key becomes the audit entry's document id, which is what turns the
+ * dedupe into a `create` on one document rather than a query over a
+ * collection: the replay reads the id it would write, and two copies of one
+ * request racing each other contend on it. So it has to be a legal Firestore
+ * document name, and it has to be one no auto-generated id could ever be -
+ * hence the prefix. Without it a client could hand in a twenty-character
+ * alphanumeric string that happens to name somebody else's entry, and be
+ * answered with their transition.
+ *
+ * The shape is deliberately narrow rather than "any string": a slash would
+ * address a subcollection, a leading `.` is refused by Firestore, and a
+ * thousand-character key is a way to store data in a document name.
+ */
+export const TRANSITION_REQUEST_ID_PREFIX = 'req-';
+
+const REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
+
+/** The caller's idempotency key, or `''` when it sent none. */
+const parseRequestId = (value: unknown): string => {
+  if (value === undefined || value === null || value === '') {
+    return '';
+  }
+
+  if (typeof value !== 'string' || !REQUEST_ID_PATTERN.test(value)) {
+    throw new HttpsError(
+      'invalid-argument',
+      'requestId must be 8 to 128 characters of letters, digits, hyphens or underscores.',
+    );
+  }
+
+  return value;
+};
+
+/** A status read back off an audit entry this callable wrote. */
+const recordedStatus = (value: unknown, field: string): TableStatus => {
+  if (!isTableStatus(value)) {
+    throw new HttpsError(
+      'internal',
+      `The recorded transition has no readable ${field}.`,
+    );
+  }
+
+  return value;
 };
 
 /** The largest party a single visit can plausibly record. */
@@ -337,6 +413,63 @@ const visitStatusAfter = (
 };
 
 /**
+ * The answer to a transition that already happened (GitHub issue #1096).
+ *
+ * Built from the audit entry rather than from the state document, because the
+ * entry is the record of *this* transition and the state is only the record of
+ * the last one. A host who seated table 12 offline and then freed it before
+ * the signal came back replays two requests, and the first of them has to be
+ * answered with the seating it made - not with the table being free now.
+ *
+ * Nothing is written. That is the point: the state, the trail and the visit
+ * were all written by the first attempt, in one commit, and the second attempt
+ * is a question rather than an action.
+ */
+const replayedResult = (
+  entry: DocumentData,
+  transitionId: string,
+  restaurantId: string,
+  tableId: string,
+): TransitionTableStateResult => {
+  if (entry['tableId'] !== tableId) {
+    // A key reused across tables is a client bug, and answering it with the
+    // other table's transition would be a worse outcome than refusing: the
+    // caller would take a seating of table 12 as a seating of table 13 and
+    // stop retrying the one it actually meant.
+    throw new HttpsError(
+      'failed-precondition',
+      'That requestId already names a transition of another table.',
+    );
+  }
+
+  const from = recordedStatus(entry['from'], 'from');
+  const to = recordedStatus(entry['to'], 'to');
+  const visitId = typeof entry['visitId'] === 'string' ? entry['visitId'] : '';
+  const outcome = TABLE_VISIT_END_STATUSES.includes(
+    entry['visitOutcome'] as TableVisitStatus,
+  )
+    ? (entry['visitOutcome'] as TableVisitStatus)
+    : 'closed';
+  const visitStatus = visitStatusAfter(
+    visitId,
+    Boolean(visitId) && !holdsParty(to),
+    outcome,
+  );
+
+  return {
+    restaurantId,
+    tableId,
+    from,
+    to,
+    since: typeof entry['at'] === 'number' ? entry['at'] : 0,
+    transitionId,
+    replayed: true,
+    ...(visitId ? { visitId } : {}),
+    ...(visitStatus ? { visitStatus } : {}),
+  };
+};
+
+/**
  * Refuses freeing a table that still has a party recorded at it, other than by
  * turning it over.
  *
@@ -439,6 +572,7 @@ export const transitionTableStateHandler = async (
   );
   const guestCount = parseGuestCount(request.data?.guestCount);
   const visitOutcome = parseVisitOutcome(request.data?.visitOutcome);
+  const requestId = parseRequestId(request.data?.requestId);
   const reason = parseOptionalText(request.data?.reason, 'reason');
   const note = parseOptionalText(request.data?.note, 'note');
 
@@ -455,18 +589,30 @@ export const transitionTableStateHandler = async (
   const stateRef = restaurantRef
     .collection(TABLE_STATES_COLLECTION)
     .doc(tableId);
-  const transitionRef = restaurantRef
-    .collection(TABLE_STATE_TRANSITIONS_COLLECTION)
-    .doc();
+  const transitions = restaurantRef.collection(
+    TABLE_STATE_TRANSITIONS_COLLECTION,
+  );
+  // Named after the key when there is one, so the entry this request would
+  // write is the entry a replay of it reads. Without a key it is an ordinary
+  // auto-id, which is what every caller written before issue #1096 sends.
+  const transitionRef = requestId
+    ? transitions.doc(`${TRANSITION_REQUEST_ID_PREFIX}${requestId}`)
+    : transitions.doc();
   const visits = restaurantRef.collection(TABLE_VISITS_COLLECTION);
 
   return firestore.runTransaction(async (transaction) => {
-    const [restaurant, staffAssociation, table, state] = await Promise.all([
-      transaction.get(restaurantRef),
-      transaction.get(staffRef),
-      transaction.get(tableRef),
-      transaction.get(stateRef),
-    ]);
+    const [restaurant, staffAssociation, table, state, alreadyApplied] =
+      await Promise.all([
+        transaction.get(restaurantRef),
+        transaction.get(staffRef),
+        transaction.get(tableRef),
+        transaction.get(stateRef),
+        // Read inside the transaction rather than before it, so two copies of
+        // one request arriving together contend on this document: the loser's
+        // read set is touched by the winner's `create`, Firestore retries it,
+        // and the retry finds the entry and answers with it.
+        requestId ? transaction.get(transitionRef) : Promise.resolve(undefined),
+      ]);
 
     if (!restaurant.exists) {
       throw new HttpsError('not-found', 'Restaurant was not found.');
@@ -484,6 +630,19 @@ export const transitionTableStateHandler = async (
       throw new HttpsError(
         'permission-denied',
         'You do not work at this restaurant.',
+      );
+    }
+
+    // Before the table is checked and before `expectedStatus` is compared, and
+    // deliberately: a replay arrives after the world has moved on. The table
+    // may have been freed by somebody else, or deleted from the plan, and
+    // neither makes the transition this request already made untrue.
+    if (alreadyApplied?.exists) {
+      return replayedResult(
+        alreadyApplied.data() ?? {},
+        alreadyApplied.id,
+        restaurantId,
+        tableId,
       );
     }
 
@@ -558,7 +717,9 @@ export const transitionTableStateHandler = async (
       at,
       atIso: new Date(at).toISOString(),
       ...(visitId ? { visitId } : {}),
+      ...(ending ? { visitOutcome } : {}),
       ...(reason ? { reason } : {}),
+      ...(requestId ? { requestId } : {}),
     };
 
     if (openedVisitRef) {

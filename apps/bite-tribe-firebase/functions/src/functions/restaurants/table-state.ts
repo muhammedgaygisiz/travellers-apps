@@ -223,6 +223,29 @@ export interface TableStateTransition {
   visitId?: string;
   /** Why, where the caller gave a reason. Absent otherwise. */
   reason?: string;
+  /**
+   * How the visit this transition ended was recorded (issue #1095).
+   *
+   * Written only where a visit actually ended, so a replay of this transition
+   * can be answered with the outcome the first attempt produced rather than
+   * with the default. See `requestId` below for why a replay is answered at
+   * all.
+   */
+  visitOutcome?: string;
+  /**
+   * The caller's idempotency key, where it sent one (issue #1096).
+   *
+   * It is also this document's id, which is what makes the dedupe a `create`
+   * rather than a query: a replay of a transition that already landed finds
+   * this entry and is answered with what it recorded, and two copies of one
+   * request racing each other contend on this one document. The field is
+   * written as well as used as the id so the trail is readable without
+   * consulting document names.
+   *
+   * Absent on an entry written before the key existed, and on any caller that
+   * does not send one.
+   */
+  requestId?: string;
 }
 
 /**

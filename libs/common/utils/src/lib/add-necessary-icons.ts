@@ -23,6 +23,7 @@ import {
   closeCircleOutline,
   closeOutline,
   cloudOfflineOutline,
+  cloudUploadOutline,
   construct,
   copyOutline,
   createOutline,
@@ -158,7 +159,11 @@ export const addNecessaryIcons = (): void => {
     copyOutline,
     removeOutline,
     scanOutline,
-    // The live indicator on the staff table view (issue #1093).
+    // The live indicator on the staff table view (issue #1093), and the two
+    // it gained when that view learned to work offline (issue #1096): the
+    // connection that has gone, and the changes waiting on the tablet for it
+    // to come back.
     radioButtonOnOutline,
+    cloudUploadOutline,
   });
 };

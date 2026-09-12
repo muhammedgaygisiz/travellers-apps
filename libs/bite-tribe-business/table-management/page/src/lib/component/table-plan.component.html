@@ -24,25 +24,57 @@
         </div>
 
         <!--
-          Whether what is on screen has been confirmed by the server.
+          Whether what is on screen is current (GitHub issues #1093, #1096).
+
           A plan drawn before the first snapshot is a plan of defaults, and a
           room where everything looks free has to be distinguishable from a
-          room nothing has been heard about yet.
+          room nothing has been heard about yet - and from a room whose last
+          news is an hour old because the wifi went at the far end of the
+          terrace. `role="status"` so the change is announced rather than only
+          drawn: the reader most likely to miss a small amber label is the one
+          who cannot see it.
         -->
-        <span
-          class="table-plan__live"
-          [class.table-plan__live--waiting]="!isLive()"
-          role="status"
-          data-testid="table-plan-live"
-        >
-          <ion-icon
-            [name]="isLive() ? 'radio-button-on-outline' : 'time-outline'"
-            aria-hidden="true"
-          />
-          {{
-            (isLive() ? 'table-plan-live' : 'table-plan-connecting') | transloco
-          }}
-        </span>
+        <div class="table-plan__connection">
+          <span
+            class="table-plan__live"
+            [attr.data-tone]="live().tone"
+            role="status"
+            data-testid="table-plan-live"
+          >
+            <ion-icon [name]="live().icon" aria-hidden="true" />
+            {{ live().labelKey | transloco }}
+
+            <!--
+              The age, only where it changes what to do. "Not current" with no
+              number is a warning nobody can act on.
+            -->
+            @if (liveStatus() === 'stale' && lastUpdated()) {
+              <span class="table-plan__live-age" data-testid="table-plan-stale">
+                {{
+                  'table-plan-last-updated'
+                    | transloco: { elapsed: lastUpdated() }
+                }}
+              </span>
+            }
+          </span>
+
+          <!--
+            What is written down and not yet sent (GitHub issue #1096). Kept
+            beside the connection rather than folded into it, because the two
+            answer different questions: one is whether the room is current, the
+            other is whether the host's own changes have left the tablet.
+          -->
+          @if (pendingCount() > 0) {
+            <span
+              class="table-plan__queued"
+              role="status"
+              data-testid="table-plan-queued"
+            >
+              <ion-icon name="cloud-upload-outline" aria-hidden="true" />
+              {{ 'table-plan-queued' | transloco: { count: pendingCount() } }}
+            </span>
+          }
+        </div>
       </header>
 
       @if (loading()) {
@@ -289,6 +321,22 @@
                   data-testid="table-plan-detail-note"
                 >
                   {{ detail.note }}
+                </p>
+              }
+
+              <!--
+                The table's own change is still on the tablet (issue #1096).
+                On the detail rather than on the plan: the plan already draws
+                the status the host asked for, and a second mark on a 900 mm
+                circle would compete with the status glyph it exists beside.
+              -->
+              @if (detail.pending) {
+                <p
+                  class="table-plan__detail-pending"
+                  data-testid="table-plan-detail-pending"
+                >
+                  <ion-icon name="cloud-upload-outline" aria-hidden="true" />
+                  {{ 'table-plan-detail-pending' | transloco }}
                 </p>
               }
 

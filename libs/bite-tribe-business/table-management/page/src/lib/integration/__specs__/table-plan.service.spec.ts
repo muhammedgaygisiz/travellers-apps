@@ -4,11 +4,34 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { TranslocoService } from '@jsverse/transloco';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FloorPlanDataAccessService } from 'bite-tribe-business/floor-plan-data-access';
-import { TableStateDataAccessService } from 'bite-tribe-business/table-management-data-access';
+import { ConnectionStatus } from '@capacitor/network';
+import { Preferences } from '@capacitor/preferences';
+import { NetworkStatusService } from 'common/networkstatus';
+import {
+  TableStateDataAccessService,
+  TableStateSnapshot,
+  TableTransitionQueueService,
+} from 'bite-tribe-business/table-management-data-access';
 import { RestaurantTable, Room, TableState, TableStatus } from 'model';
 import { BehaviorSubject, of } from 'rxjs';
+import { AuthService } from 'ta-firestore';
 import { ToastService } from 'toast';
-import { TablePlanService } from '../table-plan.service';
+import { v4 as uuid } from 'uuid';
+import { STALE_AFTER_MS, TablePlanService } from '../table-plan.service';
+
+// The real queue runs in these specs rather than a stand-in, because what the
+// page does with a transition now depends on what the queue decided to do with
+// it. Only the device storage under it is replaced (GitHub issue #1096).
+jest.mock('@capacitor/preferences', () => ({
+  Preferences: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
+}));
+
+// Keys minted in order and reset per test, so two transitions queued in one
+// test are two entries rather than one overwriting the other.
+jest.mock('uuid', () => ({ v4: jest.fn() }));
+
+const preferences = Preferences as unknown as Record<string, jest.Mock>;
+const mintKey = uuid as jest.Mock;
 
 const NOW = 1_760_000_000_000;
 
@@ -55,8 +78,41 @@ const state = (
  */
 describe(TablePlanService.name, () => {
   let service: TablePlanService;
-  let states: BehaviorSubject<TableState[]>;
+  let feed: BehaviorSubject<TableStateSnapshot>;
+  let connection: WritableSignal<ConnectionStatus | undefined>;
   let floorPlan: Record<string, jest.Mock>;
+
+  /**
+   * One delivery of the listener, as the data access now shapes it.
+   *
+   * Kept behind the same `states.next([...])` the specs were written against:
+   * what changed with issue #1096 is that a delivery carries when it arrived
+   * and whether the listener is still alive, not what the room looks like.
+   */
+  const states = {
+    next: (list: TableState[], over: Partial<TableStateSnapshot> = {}): void =>
+      feed.next({ states: list, at: Date.now(), live: true, ...over }),
+  };
+
+  const goOffline = (): void => connection.set({ connected: false } as never);
+
+  /**
+   * The signal coming back, and the queue draining behind it.
+   *
+   * The replay is one round trip per entry, chained rather than fanned out, so
+   * it needs more turns of the microtask queue than {@link settle} gives a
+   * resource - and it is started by an effect rather than awaited by the
+   * caller, so there is no promise to hold on to.
+   */
+  const reconnect = async (): Promise<void> => {
+    connection.set({ connected: true } as never);
+
+    for (let round = 0; round < 20; round += 1) {
+      TestBed.tick();
+      await Promise.resolve();
+    }
+  };
+
   let transition: jest.Mock;
   let present: jest.Mock;
   let logout: jest.Mock;
@@ -83,7 +139,20 @@ describe(TablePlanService.name, () => {
 
   beforeEach(async () => {
     jest.useFakeTimers().setSystemTime(NOW);
-    states = new BehaviorSubject<TableState[]>([]);
+    feed = new BehaviorSubject<TableStateSnapshot>({
+      states: [],
+      at: NOW,
+      live: true,
+    });
+    connection = signal<ConnectionStatus | undefined>({
+      connected: true,
+    } as never);
+    let minted = 0;
+
+    mintKey.mockImplementation(() => `request-${++minted}`);
+    preferences['get'].mockResolvedValue({ value: null });
+    preferences['set'].mockResolvedValue(undefined);
+    preferences['remove'].mockResolvedValue(undefined);
     logout = jest.fn();
     present = jest.fn().mockResolvedValue(undefined);
     transition = jest
@@ -130,16 +199,31 @@ describe(TablePlanService.name, () => {
       saveDraft: jest.fn(),
     };
 
+    await configure();
+  });
+
+  /**
+   * The injector, built apart from the fixtures above so a spec can throw it
+   * away and open the page again - which is what a tablet reloaded mid-service
+   * does, and the only way to exercise a queue read back from device storage.
+   */
+  const configure = async (): Promise<void> => {
     TestBed.configureTestingModule({
       providers: [
         TablePlanService,
         { provide: FloorPlanDataAccessService, useValue: floorPlan },
+        TableTransitionQueueService,
         {
           provide: TableStateDataAccessService,
           useValue: {
-            tableStates$: jest.fn(() => states.asObservable()),
+            tableStates$: jest.fn(() => feed.asObservable()),
             transition,
           },
+        },
+        { provide: NetworkStatusService, useValue: { status: connection } },
+        {
+          provide: AuthService,
+          useValue: { getUser: (): { uid: string } => ({ uid: 'host-1' }) },
         },
         { provide: ToastService, useValue: { present } },
         {
@@ -168,7 +252,7 @@ describe(TablePlanService.name, () => {
 
     service = TestBed.inject(TablePlanService);
     await settle();
-  });
+  };
 
   afterEach(() => {
     jest.useRealTimers();
@@ -258,12 +342,48 @@ describe(TablePlanService.name, () => {
   });
 
   /**
+   * Whether what is on screen is current (GitHub issues #1093, #1096).
+   *
    * A plan drawn before the first snapshot is a plan of defaults, and a room
    * where everything looks free has to be distinguishable from a room nothing
-   * has been heard about yet.
+   * has been heard about yet - and from a room whose last news is an hour old.
    */
-  it('says whether what is on screen is live', () => {
-    expect(service.isLive()).toBe(true);
+  describe('saying whether the room is live', () => {
+    it('is live once the listener has delivered and the device is connected', () => {
+      expect(service.liveStatus()).toBe('live');
+    });
+
+    /** A listener the SDK detached is a plan that has silently stopped. */
+    it('is not live when the listener has stopped delivering', () => {
+      states.next([], { live: false });
+
+      expect(service.liveStatus()).toBe('offline');
+    });
+
+    it('is not live when the device has lost its connection', () => {
+      goOffline();
+
+      expect(service.liveStatus()).toBe('offline');
+    });
+
+    /**
+     * Age alone says nothing: a room nobody has touched for an hour delivers
+     * nothing and is perfectly live. The threshold applies only once the
+     * connection is known to be gone.
+     */
+    it('stays live through a quiet room', () => {
+      jest.advanceTimersByTime(STALE_AFTER_MS * 4);
+
+      expect(service.liveStatus()).toBe('live');
+    });
+
+    it('calls the room stale once the gap outlasts the threshold', () => {
+      goOffline();
+      jest.advanceTimersByTime(STALE_AFTER_MS * 2);
+
+      expect(service.liveStatus()).toBe('stale');
+      expect(service.lastUpdated()).toBeDefined();
+    });
   });
 
   /**
@@ -444,6 +564,7 @@ describe(TablePlanService.name, () => {
         tableId: 'table-1',
         status: 'cleaning',
         expectedStatus: 'occupied',
+        requestId: 'request-1',
       });
       expect(service.actionTarget()).toBeUndefined();
     });
@@ -671,6 +792,146 @@ describe(TablePlanService.name, () => {
 
       expect(transition).not.toHaveBeenCalled();
       expect(present).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * The staff view in a basement dining room (GitHub issue #1096).
+   *
+   * The queue underneath is tested on its own; what is asserted here is what
+   * the *room* looks like while it is holding something - because the claim
+   * the issue makes is that the view keeps working, not merely that the
+   * transitions survive.
+   */
+  describe('working without a signal', () => {
+    /**
+     * The table changes on the tap whether or not there is a network, and it
+     * stays changed: the guess moves from the in-flight layer to the queue,
+     * which survives the tablet being reloaded.
+     */
+    it('keeps the table showing what the host asked for', async () => {
+      goOffline();
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      expect(transition).not.toHaveBeenCalled();
+      expect(service.items()[0].status).toBe('occupied');
+      expect(service.pendingCount()).toBe(1);
+    });
+
+    it('says the table has not been sent yet', async () => {
+      goOffline();
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+      service.select(['table-1']);
+
+      expect(service.selectedTable()?.pending).toBe(true);
+    });
+
+    /**
+     * The clock on a queued table runs from when the host acted. A party
+     * seated before the signal went is not a party that has just sat down.
+     */
+    it("runs the table's clock from when the host acted", async () => {
+      goOffline();
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      jest.advanceTimersByTime(4 * 60_000);
+
+      expect(service.items()[0].statusDuration).toBe(
+        'table-status-elapsed-minutes:4',
+      );
+    });
+
+    /**
+     * The acceptance criterion, from the view's side: two tables seated
+     * offline are two transitions when the signal comes back.
+     */
+    it('sends what is waiting when the signal comes back', async () => {
+      goOffline();
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+      service.activateTable('table-2');
+      await service.applyAction({ to: 'occupied' });
+
+      await reconnect();
+
+      expect(transition).toHaveBeenCalledTimes(2);
+      expect(service.pendingCount()).toBe(0);
+    });
+
+    /**
+     * A queued transition the table has moved past is shown rather than
+     * forced: the overlay comes off, which puts the table back to what the
+     * server says, and the host is told which table it happened to.
+     */
+    it('surfaces a queued change the table has moved past', async () => {
+      states.next([state('table-1', 'available')]);
+      goOffline();
+      service.activateTable('table-1');
+      await service.applyAction({ to: 'occupied' });
+
+      transition.mockRejectedValue({ code: 'functions/aborted' });
+      states.next([state('table-1', 'occupied', { since: NOW + 100 })]);
+      await reconnect();
+
+      expect(service.pendingCount()).toBe(0);
+      expect(present).toHaveBeenCalledWith({
+        messageKey: 'table-queue-unapplied-one',
+        params: { label: '1' },
+        outcome: 'failure',
+      });
+    });
+
+    /**
+     * A tablet reloaded in the basement has a queue and no connection, and the
+     * room has to come back showing the tables the host seated rather than
+     * showing them free.
+     */
+    it('comes back showing what was queued before the reload', async () => {
+      preferences['get'].mockResolvedValue({
+        value: JSON.stringify([
+          {
+            requestId: 'request-from-earlier',
+            restaurantId: 'restaurant-1',
+            tableId: 'table-1',
+            status: 'occupied',
+            expectedStatus: 'available',
+            queuedAt: NOW - 60_000,
+          },
+        ]),
+      });
+      goOffline();
+
+      TestBed.resetTestingModule();
+      await configure();
+
+      expect(service.pendingCount()).toBe(1);
+      expect(service.items()[0].status).toBe('occupied');
+    });
+
+    /**
+     * A reset made offline is not a failure and must not read as one. A host
+     * told "we couldn't free 6 of 30" would go round the room tapping again.
+     */
+    it('says a reset made offline is saved rather than failed', async () => {
+      states.next([
+        state('table-1', 'occupied'),
+        state('table-2', 'awaitingPayment'),
+      ]);
+      goOffline();
+
+      service.toggleBulkMode();
+      service.selectAllInRoom();
+      await service.freeSelectedTables();
+
+      expect(transition).not.toHaveBeenCalled();
+      expect(present).toHaveBeenLastCalledWith({
+        messageKey: 'table-bulk-queued',
+        params: { count: 2, total: 2 },
+        outcome: 'failure',
+      });
     });
   });
 

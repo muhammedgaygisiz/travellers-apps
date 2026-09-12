@@ -29,7 +29,10 @@ import {
 import { PageComponent } from 'common/ui/page';
 import { Room, TableStatus } from 'model';
 import { TableAction, TableActionRequest } from '../integration/table-actions';
-import { TableDetail } from '../integration/table-plan.service';
+import {
+  TableDetail,
+  TableLiveStatus,
+} from '../integration/table-plan.service';
 import { TableStatusCount } from '../integration/table-plan-summary';
 import { TableActionsComponent } from './table-actions.component';
 
@@ -37,6 +40,32 @@ import { TableActionsComponent } from './table-actions.component';
 const CHIP_GLYPH_BOX = 16;
 const CHIP_GLYPH_SIZE = 10;
 const CHIP_GLYPH_STROKE = 2;
+
+/** How each connection state is drawn and named. */
+const LIVE_MARKS: Readonly<
+  Record<TableLiveStatus, { icon: string; labelKey: string; tone: string }>
+> = {
+  connecting: {
+    icon: 'time-outline',
+    labelKey: 'table-plan-connecting',
+    tone: 'waiting',
+  },
+  live: {
+    icon: 'radio-button-on-outline',
+    labelKey: 'table-plan-live',
+    tone: 'live',
+  },
+  offline: {
+    icon: 'cloud-offline-outline',
+    labelKey: 'table-plan-offline',
+    tone: 'offline',
+  },
+  stale: {
+    icon: 'warning-outline',
+    labelKey: 'table-plan-stale',
+    tone: 'stale',
+  },
+};
 
 /** One entry of the summary bar, ready to draw. */
 interface SummaryChip {
@@ -100,8 +129,12 @@ export class TablePlanComponent {
   readonly restaurantName = input('');
   readonly loading = input(false);
   readonly loadFailed = input(false);
-  /** Whether the states on screen have been confirmed by the server. */
-  readonly isLive = input(false);
+  /** Whether what is drawn is current, and if not, how far from it. */
+  readonly liveStatus = input<TableLiveStatus>('connecting');
+  /** How long ago the server last confirmed the room. */
+  readonly lastUpdated = input<string | undefined>(undefined);
+  /** How many changes are written down and not yet sent. */
+  readonly pendingCount = input(0);
   readonly items = input<FloorPlanItem[]>([]);
   readonly selectedIds = input<readonly string[]>([]);
   readonly summary = input<TableStatusCount[]>([]);
@@ -134,6 +167,21 @@ export class TablePlanComponent {
     viewChild<ElementRef<HTMLElement>>('canvasHost');
 
   readonly hasRooms = computed(() => this.rooms().length > 0);
+
+  /**
+   * The connection indicator, said three ways (GitHub issue #1096).
+   *
+   * The same rule the statuses on the plan follow: never colour alone. The
+   * icon differs in shape, the word differs, and the tint is the third signal
+   * rather than the only one - a host glancing at a tablet in a dim dining
+   * room is the reader this is for, and so is one who cannot tell the amber
+   * from the green.
+   *
+   * `stale` is the one that carries the age. "Not current" without a number is
+   * a warning nobody can act on; "not current, last seen 6 min ago" is the
+   * difference between carrying on and going to look at the room.
+   */
+  readonly live = computed(() => LIVE_MARKS[this.liveStatus()]);
 
   /**
    * The summary bar.

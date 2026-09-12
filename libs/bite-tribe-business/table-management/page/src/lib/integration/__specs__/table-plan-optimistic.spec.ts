@@ -3,6 +3,7 @@ import {
   isSuperseded,
   mergeOptimistic,
   OptimisticTransition,
+  overlaid,
   prunedOptimistic,
 } from '../table-plan-optimistic';
 
@@ -200,5 +201,51 @@ describe('prunedOptimistic', () => {
     );
 
     expect(next && [...next.keys()]).toEqual(['table-2']);
+  });
+
+  /**
+   * Two layers of guess, flattened (GitHub issue #1096).
+   *
+   * There are two because a transition can be waiting on two different things:
+   * one is in flight and will be answered in a moment, one is in the offline
+   * queue and will be answered when the signal comes back.
+   */
+  describe('flattening the two layers', () => {
+    const queued: OptimisticTransition = { status: 'occupied', since: NOW };
+    const inFlight: OptimisticTransition = {
+      status: 'cleaning',
+      since: NOW + 100,
+      confirmedSince: NOW + 100,
+    };
+
+    /**
+     * A replayed transition is confirmed into the in-flight layer *before* it
+     * leaves the queue, so for an instant a table is in both - and the
+     * confirmed entry is the one that knows the server agreed.
+     */
+    it('lets the in-flight guess win over the queued one', () => {
+      const merged = overlaid(
+        new Map([['table-1', queued]]),
+        new Map([['table-1', inFlight]]),
+      );
+
+      expect(merged.get('table-1')).toEqual(inFlight);
+    });
+
+    it('keeps the tables only one layer knows about', () => {
+      const merged = overlaid(
+        new Map([['table-1', queued]]),
+        new Map([['table-2', inFlight]]),
+      );
+
+      expect([...merged.keys()].sort()).toEqual(['table-1', 'table-2']);
+    });
+
+    it('answers the other layer itself when one is empty', () => {
+      const only = new Map([['table-1', queued]]);
+
+      expect(overlaid(new Map(), only)).toBe(only);
+      expect(overlaid(only, new Map())).toBe(only);
+    });
   });
 });

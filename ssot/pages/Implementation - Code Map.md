@@ -88,9 +88,15 @@ are the same drawing because they are the same renderer. The canvas gained a
 table is doing - which room is open, how the states are listened to, how long a
 table has held its status - is in `table-management`.
 
-Its `data-access` half only listens. Issue \#1092 made `transitionTableState`
-the only writer of a table state and `firestore.rules` refuses every client
-write to the collection, so there is no write path here to add by accident. Its
+Its `data-access` half listens and calls one callable. Issue \#1092 made
+`transitionTableState` the only writer of a table state and `firestore.rules`
+refuses every client write to the collection, so there is no Firestore write
+path here to add by accident. It also holds `TableTransitionQueueService`
+(issue \#1096), which is where a transition goes when there is no signal to send
+it on: a durable queue in device storage, keyed per account, minting the
+idempotency key and replaying in order when the connection returns. Sending,
+persisting and classifying a failure are data-access work; _when_ to replay and
+what to say about a refusal stay in the page's integration service. Its
 route, `restaurant/:restaurantId/tables`, is also the one route in the business
 app a **staff** account is meant to reach, so it carries
 `restaurantAccessGuard` (owner or staff of that restaurant) rather than the

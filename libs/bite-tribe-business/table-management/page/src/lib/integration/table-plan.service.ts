@@ -8,7 +8,7 @@ import {
   ResourceLoader,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { TranslocoService } from '@jsverse/transloco';
 import { BiteTribeStoreService } from 'bite-tribe/store';
@@ -19,8 +19,8 @@ import {
 } from 'bite-tribe-business/floor-plan-ui';
 import {
   TableStateDataAccessService,
-  tableTransitionFailure,
   TableTransitionFailure,
+  TableTransitionQueueService,
 } from 'bite-tribe-business/table-management-data-access';
 import {
   Restaurant,
@@ -30,7 +30,7 @@ import {
   TableStatus,
 } from 'model';
 import { EMPTY, switchMap } from 'rxjs';
-import { ToastService } from 'toast';
+import { ToastRequest, ToastService } from 'toast';
 import { resourceFailed, resourceValue } from 'utils';
 import {
   canFreeTable,
@@ -47,6 +47,7 @@ import {
 import {
   mergeOptimistic,
   OptimisticTransition,
+  overlaid,
   prunedOptimistic,
 } from './table-plan-optimistic';
 import {
@@ -82,8 +83,52 @@ export const FAILURE_KEYS: Readonly<Record<TableTransitionFailure, string>> = {
   conflict: 'table-action-conflict',
   'not-allowed': 'table-action-not-allowed',
   permission: 'table-action-permission',
+  // Never reached from the single-table path: a transition that could not be
+  // delivered is queued rather than refused (issue #1096). It is here because
+  // the map is total over the failures, and a partial one would let a new
+  // failure ship with no sentence at all.
+  offline: 'table-action-queued',
   unknown: 'table-action-failed',
 };
+
+/**
+ * How old the last delivery may get before the plan stops claiming to be
+ * current (GitHub issue #1096).
+ *
+ * A minute, and it only ever applies while the connection is known to be down:
+ * a room nobody has touched for an hour delivers nothing and is perfectly
+ * live, so age alone says nothing. What it measures is how long staff have
+ * been looking at a picture the server has not confirmed - which after a
+ * minute is long enough that somebody else may have seated a table in it.
+ *
+ * Crossed on the duration tick rather than on its own timer, so the label can
+ * lag the threshold by up to {@link DURATION_TICK_MS}. A second timer for a
+ * warning that is already approximate would cost a tablet its battery through
+ * a whole service to say "not current" half a minute sooner.
+ */
+export const STALE_AFTER_MS = 60_000;
+
+/**
+ * What the indicator in the header says (GitHub issue #1096).
+ *
+ * Four states rather than two, because "is this live" has two different no
+ * answers and staff act differently on them. `connecting` is before the first
+ * snapshot: the room is drawn from defaults and nothing has been heard yet.
+ * `offline` is a connection that has just gone, where what is on screen was
+ * true moments ago. `stale` is the same connection still gone a minute later,
+ * where what is on screen is a picture of the past and the acceptance
+ * criterion demands it says so.
+ */
+export type TableLiveStatus = 'connecting' | 'live' | 'offline' | 'stale';
+
+/**
+ * What became of one transition the view asked for.
+ *
+ * Three outcomes rather than a boolean, because the end-of-service reset has
+ * to report the difference. Thirty tables freed and thirty tables written down
+ * to be freed are both successes, and only one of them is finished.
+ */
+type TransitionOutcomeKind = 'applied' | 'queued' | 'failed';
 
 /** One table as the detail beside the plan shows it. */
 export interface TableDetail {
@@ -95,6 +140,17 @@ export interface TableDetail {
   duration?: string;
   /** The free-text note staff left on it, when there is one. */
   note?: string;
+  /**
+   * Whether this table's last change is still waiting to be sent
+   * (GitHub issue #1096).
+   *
+   * On the detail rather than on the plan. The plan already draws the status
+   * the host asked for, which is the answer to "what is this table doing"; the
+   * question this answers is "has anyone else been told", and that is worth a
+   * line of text next to the table rather than a second mark on a 900 mm
+   * circle competing with the status glyph.
+   */
+  pending?: boolean;
 }
 
 /**
@@ -140,6 +196,7 @@ export interface TableDetail {
 export class TablePlanService {
   private readonly floorPlan = inject(FloorPlanDataAccessService);
   private readonly tableStates = inject(TableStateDataAccessService);
+  private readonly queue = inject(TableTransitionQueueService);
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly transloco = inject(TranslocoService);
   private readonly toast = inject(ToastService);
@@ -246,11 +303,11 @@ export class TablePlanService {
    * The live states, pushed by Firestore rather than polled.
    *
    * `undefined` until the first snapshot arrives, which is what
-   * {@link isLive} reports: a plan drawn from no snapshot at all is a plan of
-   * defaults, and staff have to be able to tell that from a room where
-   * everything genuinely is free.
+   * {@link liveStatus} reports as `connecting`: a plan drawn from no snapshot
+   * at all is a plan of defaults, and staff have to be able to tell that from a
+   * room where everything genuinely is free.
    */
-  private readonly states = toSignal(
+  private readonly feed = toSignal(
     this.storeService.restaurantIdFromUrl$.pipe(
       switchMap((restaurantId) =>
         restaurantId ? this.tableStates.tableStates$(restaurantId) : EMPTY,
@@ -258,12 +315,54 @@ export class TablePlanService {
     ),
   );
 
-  /** Whether what is on screen has been confirmed by the server. */
-  readonly isLive = computed(() => this.states() !== undefined);
+  /**
+   * Whether what is on screen is current, and if not, how far from it
+   * (GitHub issue #1096).
+   *
+   * Two independent things have to hold for a plan to be live: the device has
+   * a connection, and the listener on it is still delivering. Either one
+   * failing leaves the same picture on screen and the same silence around it,
+   * which is exactly why neither can be inferred from the states themselves.
+   *
+   * The threshold is only consulted once something is known to be wrong. Age
+   * on its own would call a quiet Tuesday afternoon stale.
+   */
+  readonly liveStatus = computed<TableLiveStatus>(() => {
+    const feed = this.feed();
+
+    if (!feed) {
+      return 'connecting';
+    }
+
+    if (feed.live && this.queue.isOnline()) {
+      return 'live';
+    }
+
+    return this.now() - feed.at >= STALE_AFTER_MS ? 'stale' : 'offline';
+  });
+
+  /** How long ago the server last confirmed the room, for the indicator. */
+  readonly lastUpdated = computed<string | undefined>(() => {
+    const feed = this.feed();
+
+    if (!feed || feed.at === 0) {
+      return undefined;
+    }
+
+    // Read so the label is retranslated when the language changes.
+    this.language();
+
+    const { key, params } = elapsedParts(feed.at, this.now());
+
+    return this.transloco.translate(key, params);
+  });
+
+  /** How many changes are written down and not yet sent. */
+  readonly pendingCount = this.queue.pendingCount;
 
   /** The states exactly as the server last described them. */
   private readonly liveStates = computed(() =>
-    statesByTable(this.states() ?? []),
+    statesByTable(this.feed()?.states ?? []),
   );
 
   /**
@@ -277,11 +376,47 @@ export class TablePlanService {
     ReadonlyMap<string, OptimisticTransition>
   >(new Map());
 
+  /**
+   * The tables whose change is written down, waiting for a signal
+   * (GitHub issue #1096).
+   *
+   * The second optimistic layer, and the one that survives the tablet being
+   * reloaded: it is derived from the durable queue rather than from anything
+   * this service holds, so a host who seated four tables in the basement and
+   * then locked the screen comes back to a room that still shows them seated.
+   *
+   * The clock on such a table runs from when the host acted, not from when the
+   * queue finally drains - a party seated twenty minutes ago has been there
+   * twenty minutes whatever the wifi was doing.
+   *
+   * A table with two queued changes shows the later one. The earlier is still
+   * in the queue and still replays first; what it is not is what the table
+   * looks like now.
+   */
+  private readonly queued = computed<ReadonlyMap<string, OptimisticTransition>>(
+    () => {
+      const restaurantId = this.restaurantId();
+      const entries = new Map<string, OptimisticTransition>();
+
+      this.queue
+        .pending()
+        .filter((entry) => entry.restaurantId === restaurantId)
+        .forEach((entry) =>
+          entries.set(entry.tableId, {
+            status: entry.status,
+            since: entry.queuedAt,
+          }),
+        );
+
+      return entries;
+    },
+  );
+
   /** What the view draws: the server's answer, with the guesses laid over it. */
   private readonly statesByTable = computed(() =>
     mergeOptimistic(
       this.liveStates(),
-      this.optimistic(),
+      overlaid(this.queued(), this.optimistic()),
       this.restaurantId() ?? '',
     ),
   );
@@ -312,6 +447,51 @@ export class TablePlanService {
     const tick = setInterval(() => this.now.set(Date.now()), DURATION_TICK_MS);
 
     inject(DestroyRef).onDestroy(() => clearInterval(tick));
+
+    /*
+     * A replayed transition becomes a confirmed guess the instant it lands
+     * (GitHub issue #1096).
+     *
+     * Subscribed rather than awaited at the end of the replay, because the
+     * queue drops each entry as soon as the backend takes it. Learning about
+     * the whole batch afterwards would leave every replayed table without an
+     * overlay for the gap between the callable answering and the listener
+     * delivering - the flicker back to the old status that the optimistic
+     * layer exists to prevent, multiplied by however many tables were queued.
+     */
+    this.queue.applied$.pipe(takeUntilDestroyed()).subscribe((result) =>
+      this.show(result.tableId, {
+        status: result.to,
+        since: result.since,
+        confirmedSince: result.since,
+      }),
+    );
+
+    /*
+     * What is written down goes out when there is a signal to send it on.
+     *
+     * An effect on the network state rather than a listener of its own: the
+     * issue is explicit that this reuses `NetworkStatusService` instead of
+     * adding a second connectivity mechanism, and reading it as a signal means
+     * the first run also covers the ordinary case of opening the page with a
+     * queue left over from the last shift.
+     */
+    effect(() => {
+      if (this.queue.isOnline()) {
+        void this.replayQueue();
+      }
+    });
+
+    /*
+     * What the last session left unsent, read back whether or not there is a
+     * signal to send it on.
+     *
+     * The replay above would read it too, and only when online - which is
+     * exactly the case this covers: a tablet reloaded in the basement has a
+     * queue and no connection, and the room has to come back showing the
+     * tables the host seated rather than showing them free.
+     */
+    void this.queue.restore();
 
     /*
      * A guess comes off once the listener is saying the same thing.
@@ -452,6 +632,7 @@ export class TablePlanService {
       statusLabel: label,
       ...(duration === undefined ? {} : { duration }),
       ...(state?.note === undefined ? {} : { note: state.note }),
+      ...(this.queued().has(table.id) ? { pending: true } : {}),
     };
   }
 
@@ -624,26 +805,49 @@ export class TablePlanService {
           this.transition(table.id, status, 'available'),
         ),
       );
-      const freed = outcomes.filter(Boolean).length;
+      const freed = outcomes.filter((outcome) => outcome === 'applied').length;
+      const queued = outcomes.filter((outcome) => outcome === 'queued').length;
 
       this.selected.set([]);
 
-      await this.toast.present(
-        freed === targets.length
-          ? {
-              messageKey: 'table-bulk-freed',
-              params: { count: freed },
-              outcome: 'success',
-            }
-          : {
-              messageKey: 'table-bulk-freed-partial',
-              params: { count: freed, total: targets.length },
-              outcome: 'failure',
-            },
-      );
+      await this.toast.present(this.bulkMessage(freed, queued, targets.length));
     } finally {
       this.resetting.set(false);
     }
+  }
+
+  /**
+   * What the reset says it did.
+   *
+   * A batch made offline is not a failure and must not read as one: the tables
+   * are written down and will be freed, and a host told "we couldn't free 6 of
+   * 30" would go round the room tapping them again. A batch that was partly
+   * sent and partly refused is still the failure it always was.
+   */
+  private bulkMessage(
+    freed: number,
+    queued: number,
+    total: number,
+  ): ToastRequest {
+    if (queued > 0) {
+      return {
+        messageKey: 'table-bulk-queued',
+        params: { count: queued, total },
+        outcome: 'failure',
+      };
+    }
+
+    return freed === total
+      ? {
+          messageKey: 'table-bulk-freed',
+          params: { count: freed },
+          outcome: 'success',
+        }
+      : {
+          messageKey: 'table-bulk-freed-partial',
+          params: { count: freed, total },
+          outcome: 'failure',
+        };
   }
 
   /**
@@ -679,38 +883,51 @@ export class TablePlanService {
     from: TableStatus,
     to: TableStatus,
     guests?: number,
-  ): Promise<boolean> {
+  ): Promise<TransitionOutcomeKind> {
     const restaurantId = this.restaurantId();
 
     if (!restaurantId) {
-      return false;
+      return 'failed';
     }
 
     const since = Date.now();
 
     this.show(tableId, { status: to, since });
 
-    try {
-      const result = await this.tableStates.transition({
-        restaurantId,
-        tableId,
-        status: to,
-        expectedStatus: from,
-        ...(guests === undefined ? {} : { reason: guestCountReason(guests) }),
-      });
+    const outcome = await this.queue.submit({
+      restaurantId,
+      tableId,
+      status: to,
+      expectedStatus: from,
+      ...(guests === undefined ? {} : { reason: guestCountReason(guests) }),
+    });
 
+    if (outcome.outcome === 'applied') {
       // Kept on screen until the listener delivers the transition itself, so
       // the table does not flick back to its old status in the gap between the
       // callable answering and the snapshot arriving.
-      this.show(tableId, { status: to, since, confirmedSince: result.since });
+      this.show(tableId, {
+        status: to,
+        since,
+        confirmedSince: outcome.result.since,
+      });
 
-      return true;
-    } catch (error) {
-      this.rollback(tableId);
-      await this.reportFailure(error);
-
-      return false;
+      return 'applied';
     }
+
+    if (outcome.outcome === 'queued') {
+      // The in-flight guess hands over to the queued one, which says the same
+      // thing and survives the tablet being reloaded. Two overlays for one
+      // table would be one to remove twice.
+      this.rollback(tableId);
+
+      return 'queued';
+    }
+
+    this.rollback(tableId);
+    await this.reportFailure(outcome.failure, outcome.error);
+
+    return 'failed';
   }
 
   private show(tableId: string, entry: OptimisticTransition): void {
@@ -744,13 +961,60 @@ export class TablePlanService {
    * and the plan is already showing what. Saying "try again" there would send
    * a host to re-seat a table that is occupied.
    */
-  private async reportFailure(error: unknown): Promise<void> {
+  private async reportFailure(
+    failure: TableTransitionFailure,
+    error: unknown,
+  ): Promise<void> {
     console.error('Failed to change the table state:', error);
 
     await this.toast.present({
-      messageKey: FAILURE_KEYS[tableTransitionFailure(error)],
+      messageKey: FAILURE_KEYS[failure],
       outcome: 'failure',
     });
+  }
+
+  /**
+   * Sends what the queue is holding, and says what would not go
+   * (GitHub issue #1096).
+   *
+   * A refused replay is the case the acceptance criterion is about: the table
+   * moved while this device was away, so the change cannot be applied and must
+   * not be forced. The overlay comes off, which puts the table back to whatever
+   * the server says, and one sentence names how many tables that happened to -
+   * one per refused transition would be three toasts for a host who made three
+   * changes to one table.
+   */
+  private async replayQueue(): Promise<void> {
+    const unapplied = await this.queue.replay();
+
+    if (unapplied.length === 0) {
+      return;
+    }
+
+    const tables = [...new Set(unapplied.map(({ entry }) => entry.tableId))];
+
+    tables.forEach((tableId) => this.rollback(tableId));
+
+    await this.toast.present(
+      tables.length === 1
+        ? {
+            messageKey: 'table-queue-unapplied-one',
+            params: { label: this.labelOf(tables[0]) },
+            outcome: 'failure',
+          }
+        : {
+            messageKey: 'table-queue-unapplied-many',
+            params: { count: tables.length },
+            outcome: 'failure',
+          },
+    );
+  }
+
+  /** What a table is called, or its id where the plan no longer has it. */
+  private labelOf(tableId: string): string {
+    return (
+      this.tablesValue().find((table) => table.id === tableId)?.label ?? tableId
+    );
   }
 
   logout(): void {

@@ -111,6 +111,16 @@ const en = {
   'table-session-try-again': 'Try again',
   'table-session-failed-title': "We couldn't reach the restaurant",
   'table-session-failed-offline': "Your phone couldn't get through.",
+  'table-assistance-heading': 'Need something?',
+  'table-assistance-callStaff-idle': 'Call a waiter',
+  'table-assistance-callStaff-open': 'A waiter has been called',
+  'table-assistance-callStaff-acknowledged': 'Somebody is on their way.',
+  'table-assistance-requestBill-idle': 'Ask for the bill',
+  'table-assistance-requestBill-open': 'The bill has been asked for',
+  'table-assistance-requestBill-acknowledged': 'Your bill is on its way.',
+  'table-assistance-refused-cooldown':
+    "You've only just asked. Give them a moment before asking again.",
+  'table-assistance-stale': "We've lost touch with the restaurant.",
   'menu-item-not-available': 'Not available',
   'create-bite': 'Create Bite',
   'no-menu-yet': 'No menu yet',
@@ -126,6 +136,12 @@ describe(TableOrder.name, () => {
   let orders: WritableSignal<TableOrderModel[]>;
   let sessionStatus: WritableSignal<TableSessionStatus | undefined>;
   let isStale: WritableSignal<boolean>;
+  let assistanceState: WritableSignal<
+    Record<'callStaff' | 'requestBill', 'idle' | 'open' | 'acknowledged'>
+  >;
+  let assistanceRefusal: WritableSignal<{ reason: 'cooldown' } | undefined>;
+  let assistanceStale: WritableSignal<boolean>;
+  let ask: jest.Mock;
 
   const show = (next: TableOrderView): void => {
     state.set(next);
@@ -161,6 +177,13 @@ describe(TableOrder.name, () => {
     orders = signal<TableOrderModel[]>([]);
     sessionStatus = signal<TableSessionStatus | undefined>('active');
     isStale = signal(false);
+    assistanceState = signal({
+      callStaff: 'idle' as const,
+      requestBill: 'idle' as const,
+    });
+    assistanceRefusal = signal<{ reason: 'cooldown' } | undefined>(undefined);
+    assistanceStale = signal(false);
+    ask = jest.fn().mockResolvedValue(undefined);
 
     // The history is signals all the way down, so the fake is the four the
     // template reads. What is being checked here is what a guest sees, and the
@@ -171,11 +194,30 @@ describe(TableOrder.name, () => {
       total: computed(() => tableOrdersTotal(orders())),
       status: sessionStatus,
       isStale,
+      // The same predicate the send button uses: a table the restaurant closed
+      // and a party staff have not seated are exactly the states in which the
+      // backend refuses a signal (GitHub issue #1106).
+      acceptsOrders: computed(
+        () => sessionStatus() === undefined || sessionStatus() === 'active',
+      ),
+    };
+
+    // Signals all the way down, like the history: what is checked here is what
+    // a guest sees, and the listeners behind them have their own spec.
+    const assistance = {
+      busy: signal<'callStaff' | 'requestBill' | undefined>(undefined),
+      lastRefusal: assistanceRefusal,
+      lastFailure: signal<string | undefined>(undefined),
+      isStale: assistanceStale,
+      stateOf: (kind: 'callStaff' | 'requestBill'): string =>
+        assistanceState()[kind],
+      ask,
     };
 
     const service = {
       cart,
       history,
+      assistance,
       state,
       lastRefusal,
       isBusy: signal(false),
@@ -595,6 +637,102 @@ describe(TableOrder.name, () => {
       show(ORDERING);
 
       expect(text()).toContain('Ordering opens when staff confirm your table.');
+    });
+  });
+
+  describe('asking for a waiter or the bill', () => {
+    it('offers both, named for what they do', () => {
+      render();
+      show(ORDERING);
+
+      expect(has('table-assistance')).toBe(true);
+      expect(text()).toContain('Call a waiter');
+      expect(text()).toContain('Ask for the bill');
+    });
+
+    it('sends the request when the guest taps one', () => {
+      render();
+      show(ORDERING);
+      click('table-assistance-callStaff');
+
+      expect(ask).toHaveBeenCalledWith('callStaff');
+    });
+
+    /**
+     * The signal is up, so the button says so and stops being pressable: the
+     * tap the guest is about to make again would do nothing, and a button that
+     * looks live is what makes people make it.
+     */
+    it('says a waiter has been called and stops taking taps', () => {
+      render();
+      assistanceState.set({ callStaff: 'open', requestBill: 'idle' });
+      show(ORDERING);
+
+      expect(text()).toContain('A waiter has been called');
+      // The property rather than the attribute: `ion-button` keeps `disabled`
+      // as a property and mirrors it to `aria-disabled`, which is also what the
+      // business e2e suite had to learn to assert on.
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="table-assistance-callStaff"]',
+        )?.disabled,
+      ).toBe(true);
+    });
+
+    /**
+     * The second half of "the guest sees that their request was received and
+     * then acknowledged": the button goes back to its ordinary label, because
+     * the guest may need somebody again, and the note says somebody is coming.
+     */
+    it('says somebody is on their way once staff answer', () => {
+      render();
+      assistanceState.set({ callStaff: 'acknowledged', requestBill: 'idle' });
+      show(ORDERING);
+
+      expect(has('table-assistance-callStaff-note')).toBe(true);
+      expect(text()).toContain('Somebody is on their way.');
+      expect(text()).toContain('Call a waiter');
+    });
+
+    it('explains a request that came back refused', () => {
+      render();
+      assistanceRefusal.set({ reason: 'cooldown' });
+      show(ORDERING);
+
+      expect(text()).toContain("You've only just asked.");
+    });
+
+    it('warns when the answer may be out of date', () => {
+      render();
+      assistanceStale.set(true);
+      show(ORDERING);
+
+      expect(has('table-assistance-stale')).toBe(true);
+    });
+
+    /**
+     * A table the restaurant closed cannot be answered, and a button that is
+     * always there and always refused teaches a guest to ignore the screen.
+     */
+    it('withdraws both when the table has been closed', () => {
+      render();
+      sessionStatus.set('closed');
+      show(ORDERING);
+
+      expect(has('table-assistance')).toBe(false);
+    });
+
+    /** A guest who has sent an order sits on the confirmation, and still waves. */
+    it('offers them on the confirmation too', () => {
+      render();
+
+      show({
+        kind: 'placed',
+        context: CONTEXT,
+        order: { total: 12, currency: 'EUR' } as never,
+      });
+
+      expect(has('table-assistance')).toBe(true);
     });
   });
 

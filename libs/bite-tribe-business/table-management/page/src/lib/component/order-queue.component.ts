@@ -16,6 +16,7 @@ import {
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
+import type { AssistanceRow } from '../integration/assistance-rows';
 import type {
   OrderAction,
   OrderTableGroup,
@@ -107,6 +108,19 @@ const LIVE_MARKS: Readonly<
 export class OrderQueueComponent {
   readonly groups = input<OrderTableGroup[]>([]);
   readonly openCount = input(0);
+
+  /**
+   * The tables waiting for somebody, longest first (GitHub issue #1106).
+   *
+   * A list of its own above the tickets rather than a row inside a table's
+   * group, and that is the point: a guest can call for a waiter having ordered
+   * nothing, so a signal folded into the order groups would be invisible at
+   * exactly the tables that have nothing else on the screen.
+   */
+  readonly assistance = input<AssistanceRow[]>([]);
+
+  /** The signal whose press has not been answered yet, if any. */
+  readonly busyAssistanceId = input<string | undefined>(undefined);
   readonly loading = input(false);
   readonly labelsFailed = input(false);
   readonly liveStatus = input<OrderQueueLiveStatus>('connecting');
@@ -129,6 +143,7 @@ export class OrderQueueComponent {
   readonly isAuthenticated = input(false);
 
   readonly actionPicked = output<OrderActionRequest>();
+  readonly assistanceAcknowledged = output<AssistanceRow>();
   readonly cancellationConfirmed = output<string>();
   readonly cancellationDismissed = output<void>();
   readonly alertToggled = output<void>();
@@ -138,7 +153,14 @@ export class OrderQueueComponent {
 
   readonly hasOrders = computed(() => this.groups().length > 0);
 
+  /** Whether any table is calling, which is what draws the list at all. */
+  readonly hasAssistance = computed(() => this.assistance().length > 0);
+
   pick(group: OrderTableGroup, order: QueuedOrder, action: OrderAction): void {
     this.actionPicked.emit({ group, order, action });
+  }
+
+  acknowledge(row: AssistanceRow): void {
+    this.assistanceAcknowledged.emit(row);
   }
 }

@@ -6,14 +6,15 @@
 
 Partly implemented. Specified through issue \#1072 as stage 3 of issue \#735, and issue \#1073 as stage 4.
 
-Seven of the ten children have landed. Issue \#1099 gave menu items the identity
+Eight of the ten children have landed. Issue \#1099 gave menu items the identity
 an order line hangs from; issue \#1100 made a scanned token resolve, validating
 the six rules below and answering with a restaurant, a room, a table and a menu
 or one of twelve distinct refusal reasons; issue \#1101 gave the guest a
 screen, a session and an identity to hold it with; issue \#1103 gave them a
 cart and a way to send it; issue \#1104 gave them a way to watch what happens
-to it and to order again; and issue \#1105 gave the restaurant the screen that
-answers them.
+to it and to order again; issue \#1105 gave the restaurant the screen that
+answers them; and issue \#1106 gave the guest a way to ask for a person without
+waving.
 
 **A scanned code now reaches something.** `/t/:token` is a public route in the
 consumer app, the twelve refusal reasons have copy in all eleven locale files,
@@ -53,6 +54,18 @@ the people on shift as a push through the existing notification infrastructure,
 with a per-device audible alert that is off until somebody turns it on. Four
 decisions shaped it, `RD-TS-14` to `RD-TS-17`.
 
+**Issue \#1106 closed the part that is not about food at all.** A guest with an
+active session taps once for a waiter or once for the bill; a marker appears on
+the room view within seconds and a row appears above the tickets in the queue;
+a member of staff presses **On my way** and it goes from every device. A bill
+request moves the table to `awaitingPayment` in the same commit, which is also
+what stops it taking further orders. The signal lives at
+`/restaurants/{id}/assistanceRequests/{n}_{tableId}_{kind}` - a **derived**
+name, which is what makes a repeated tap join the signal that is up rather than
+raise a second one, bounds the collection at two documents per table so the
+staff screens read it whole with no index, and lets the guest's phone subscribe
+to the answer. Six decisions shaped it, `RD-TS-18` to `RD-TS-23`.
+
 **One gap remains, and it is staff-facing.** Nothing shows staff a **pending
 session** - the guest who scanned while waiting to be seated - which sits with
 issue \#1107. Table ordering is off for every restaurant until an owner turns it
@@ -83,7 +96,7 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 - Staff see the order in a queue attached to the correct table, accept it, and update its status. Implemented, issue \#1105.
 - The guest watches each order move along its status, and is told when one is cancelled and why. Implemented, issues \#1104 and \#1105.
 - The guest orders again into the same visit without rescanning. Implemented, issue \#1104.
-- The guest requests assistance or the bill.
+- The guest requests assistance or the bill. Implemented, issue \#1106.
 - The guest pays in the app or asks staff to settle, and the visit closes.
 - The guest sees a receipt listing the dishes they ordered.
 - The guest selects a dish and creates a Bite prefilled with restaurant, dish, price, and currency, adding only a photo, rating, and comment.
@@ -144,6 +157,12 @@ and the floor-plan geometry on the table stay where they are.
 - **Cancellations are explained, not silent** (`RD-TS-16`). The queue asks for a sentence before it sends one, the backend refuses a cancellation without one, and the guest's screen renders it beside the order.
 - Staff see a new order **within seconds**, attached to the correct table, and are told about it wherever they are: the queue is a live listener, and `notifyStaffOnNewTableOrder` pushes to the owner and to every account associated with the restaurant through the same `sendLocalizedNotification` every other trigger uses - so an installation with notifications switched off stays off (issue \#1184) and everyone is written to in their own language (issue \#1200).
 - **The room view stays the primary screen.** Each table on the live floor plan carries a badge counting the orders the kitchen still owes it, and the header links to the queue, so which tables are waiting is answered without leaving the plan and what they are waiting for is one press away.
+- **A call for a waiter is a table signal, not a message** (`RD-TS-18`). Two kinds, `callStaff` and `requestBill`, one document per table per kind at a name derived from both - so a repeated tap addresses the signal that is already up, across every phone at the table, and two guests asking for the bill are one bill. The collection is bounded by the room at two documents per table, which is why the room view and the queue read it whole with no query, no index and no collection-group rule.
+- **A signal hangs from the table and an order hangs from the visit** (`RD-TS-19`). An order is money and belongs to the party, so a party that moves keeps it; a signal means _come to this table_, so a party that moves leaves it behind. Both are written against the **visit's** `tableId` rather than the scanned one, because that is where the party is sitting now.
+- **Asking for the bill moves the table and acknowledging moves nothing** (`RD-TS-21`). `requestBill` writes `awaitingPayment` in the commit that raises the signal, which is also what stops the table taking further orders; `awaitingPayment` is still a status a signal may be raised _from_, because a party whose waiter has not come asks again.
+- **The rate limit is the document name plus one clock** (`RD-TS-20`). A minute, measured from when a signal was raised rather than from when it was answered, so a restaurant is not punished for being quick; joining a signal that is still open is not rate limited at all.
+- **An acknowledgement is one destination, so a second press is not a conflict** (`RD-TS-22`). No `expectedStatus`, no dialog, and no reason to type: a cancellation takes something away from a guest and owes them a sentence, and this gives them one.
+- **The two staff lists sort in opposite directions** (`RD-TS-23`). The tickets newest first, because the one that just landed is the one nobody has read; the tables that are calling oldest first, because the guest who has been waving longest is the one nobody has walked to. A repeated tap moves `lastRequestedAt` and not `requestedAt`, so tapping cannot push a table up the list - the row says "asked again" instead.
 - Prices from a real order are stronger evidence than a typed price and bypass the suspicious-price warning from issue \#967 during Bite creation. The evidence now exists - `OrderLineSnapshot` records a price the backend checked against the menu - and nothing reads it yet; that is issue \#1073's.
 
 ## The Address A Code Already Carries
@@ -445,6 +464,81 @@ move the matrix does not contain, and it has no offline queue: a transition made
 with no signal is reported and not written down, because unlike a seating it is
 not a fact about the room that somebody is standing in front of.
 
+## The Two Things A Guest Still Needs A Person For
+
+Issue \#1106 is the part of the table that is not about food. A guest taps once
+for a waiter or once for the bill, and a member of staff walks over.
+
+**The name is the rate limit** (`RD-TS-18`). The document is
+`/restaurants/{id}/assistanceRequests/{n}_{tableId}_{kind}`, derived exactly as
+`tableSessionId` names one guest at one table, and a repeated tap therefore
+addresses the first tap's document rather than writing a second one. That holds
+across phones as well as across taps - two guests at one table asking for the
+bill are one bill - and it is why the acceptance criterion is satisfied by the
+address rather than by a check a later caller could forget.
+
+Two more things follow from the same name, and each of them is a thing not
+built. The collection is **bounded by the room** at two documents per table, so
+the room view and the queue read it whole with no `where`, no composite index
+and no collection-group match - the machinery `RD-TS-14` needed for orders, not
+needed here. And the guest's phone can **derive the name and subscribe**, which
+is what makes "received, then acknowledged" a listener rather than a poll: the
+acknowledgement happens on somebody else's device, minutes later, and arrives
+without the guest touching anything.
+
+What the name costs is history: a new request of the same kind at the same table
+replaces the answered one. That is the right trade for a signal, and the one
+durable consequence a request has - the table moving to `awaitingPayment` - is
+recorded in `tableStateTransitions`, which nothing overwrites.
+
+**It checks the party and not the kitchen.** An active session, an open visit,
+and a table the floor agrees somebody is sitting at. It deliberately does _not_
+check `orderingAvailability`: a kitchen that has closed, paused or never took
+orders at the table has nothing to do with whether somebody in the dining room
+may ask for the bill, and the moment they most need to is after the kitchen
+shuts. A guest whose table staff have not seated yet holds a `pending` session
+and is refused here, because making that visible to the floor is issue \#1107's
+and two rows for one person waiting at the door is worse than one.
+
+**The bill closes the ordering** (`RD-TS-21`). `requestBill` writes
+`awaitingPayment` in the same commit, from the same types and against the same
+matrix `submitTableOrder` uses, and `ORDERABLE_TABLE_STATUSES` excludes it - so
+a dish added after the bill was asked for is a conversation with a member of
+staff rather than a tap. The same status is still one a signal may be raised
+_from_, which is the one place the two lists disagree and is deliberate: the
+second request is the one a guest makes because nobody came.
+
+**On the floor it is one mark and two lists.** The plan draws a pulsing disc on
+the table's opposite top corner from the order badge - movement, because on a
+drawing already carrying a status colour, a status glyph, a number, a duration
+and an order badge, a sixth static mark is a sixth thing to notice rather than
+something unmistakable. What it is asking for is a sentence, which is not
+readable at the size a 900 mm table gives it at zoom-to-fit, so the mark says
+_this table is waiting_ and the queue one press away says what for - the same
+split the order badge makes between a count and the ticket behind it. The
+sentence is in the tooltip and the accessible name, read by people the size
+constraint was never about.
+
+**Answering it is one press** (`RD-TS-22`). No confirmation, no reason to type,
+and no expectation to send: an acknowledgement has one destination, so two
+people pressing it in the same second both wanted what happened, and the second
+press is answered with the stored values rather than with an error about a race
+that cost nobody anything.
+
+**What this does not do.** It does not take payment or close the visit, which is
+issue \#1073's. It does not reach a guest who has not been seated, which is
+issue \#1107's. It sends **no push**, unlike a new order: a raised hand is
+answered by somebody who is in the room, and the queue's own listener and its
+per-device alert are what a tablet at the pass hears - a notification to a phone
+in a pocket would be a second channel for the same fact with none of the
+urgency. And the selected-table panel beside the plan does not name the call; the
+mark on the table and the row in the queue do.
+
+It changes nothing in production until
+`npx nx firebase-deploy-rules bite-tribe-firebase` has run, because the rule
+that admits the two reads is deployed by hand. No index deploy is needed, which
+is the point of the derived name.
+
 ## Success Criteria
 
 - Scanning a table QR resolves to exactly one restaurant, room, and table, confirmed on screen before any order can be placed. **Met** by issues \#1100 and \#1101.
@@ -452,13 +546,15 @@ not a fact about the room that somebody is standing in front of.
 - A guest without an account can view the menu and order, if the restaurant allows it. **Met** - the viewing half by issue \#1102 and the ordering half by issue \#1103, both with no account and no install.
 - Staff see a new order within seconds, attached to the correct table. **Met** by issue \#1105: a live collection-group listener on the restaurant's open orders, grouped by the table the order was placed from, plus a push to the owner and every associated staff account.
 - A staff status change is visible to the guest within seconds. **Met**, both halves: issue \#1104 gave the guest the listener and issue \#1105 gave a status something that changes it. Observed end to end against the emulators - see `Supported Evidence`.
+- A guest can ask for a waiter or for the bill, and the request is unmistakable on the room view within seconds. **Met** by issue \#1106: a pulsing mark on the table's corner on the live plan, a row above the tickets in the queue, and a second count on the header link. Acknowledging clears it on every device, because every device is reading one document.
+- Repeated taps do not create repeated signals. **Met** by issue \#1106, and by the address rather than by a check: the document is named after the table and the kind, so the second tap lands on the first tap's document - across phones as well as across taps.
 - An order submitted twice because of a flaky network creates one order. **Not met.** Issue \#1103 left it to issue \#1108 rather than half-solving it.
 - A revoked or rotated token stops working immediately.
 - A Bite created from an order needs only a photo, a rating, and a comment, and carries the verified `restaurantId`.
 
 ## Open Product Questions
 
-Tracked in [[Current State - Open Questions]]. Thirteen are settled and recorded as `RD-TS-1` to `RD-TS-17` in [[Recorded Decisions]]: occupancy confirmation, shared sessions, ordering without an account, session expiry, what a scan at a menu-only restaurant does, where a menu's currency lives, and - on 13 September 2026 with issues \#1103, \#1104 and \#1105 - order attribution, price integrity, who moves the table when an order lands, whose orders a guest's screen shows, where the cancellation reason is declared, how the staff queue reads a restaurant's orders, whether a queue row moves ahead of the backend, what a cancellation has to carry, and what a busy-service alert may do without being asked.
+Tracked in [[Current State - Open Questions]]. Nineteen are settled and recorded as `RD-TS-1` to `RD-TS-23` in [[Recorded Decisions]]: occupancy confirmation, shared sessions, ordering without an account, session expiry, what a scan at a menu-only restaurant does, where a menu's currency lives, and - on 13 September 2026 with issues \#1103, \#1104 and \#1105 - order attribution, price integrity, who moves the table when an order lands, whose orders a guest's screen shows, where the cancellation reason is declared, how the staff queue reads a restaurant's orders, whether a queue row moves ahead of the backend, what a cancellation has to carry, what a busy-service alert may do without being asked, and - with issue \#1106 - how a call for a waiter is addressed, what it hangs from, how it is rate limited, what asking for the bill does to the table, why an acknowledgement needs no expectation, and why the two staff lists sort in opposite directions.
 
 The last two of the epic's proposals are now answered rather than open: a cancelled order is corrected by a staff-side cancellation carrying a reason the guest is shown, and staff are notified by an in-app queue plus a push through the existing infrastructure. What remains open is the payment model, which is issue \#1073's.
 
@@ -583,6 +679,38 @@ consumer app signed into the same account. The queue's own listener and its
 per-device alert are what a tablet at the pass actually hears. See
 [[Current State - Open Questions]].
 
+Read again on 13 September 2026 while implementing issue \#1106, on branch
+`1105-incoming-order-queue-for-staff`:
+
+- `libs/bite-tribe-common/model/src/lib/table-assistance.ts` and its checked copy in the Functions project
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/request-table-assistance.ts` - the guest's callable, the dedupe, the cooldown and the table move
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/acknowledge-table-assistance.ts` - the one writer of a signal's status
+- `apps/bite-tribe-firebase/firestore.rules` - the `assistanceRequests` match, and the `resource == null` clause that lets a phone watch a signal it has not raised
+- `libs/bite-tribe/api/src/lib/table-assistance-api/` and `libs/bite-tribe/table-order/data-access/src/lib/table-assistance.service.ts` - the call out and the two listeners back
+- `libs/bite-tribe-business/table-management/` - the plain collection listener, the rows, the acknowledgement and the two badges
+- `libs/bite-tribe-business/floor-plan/ui/src/lib/floor-plan-canvas.component.*` - the pulsing mark on a calling table
+
+Its claims are covered three ways. The rules half - that a guest reads the
+signal they are named on and not one raised at another table, that a missing
+document is readable so a listener attaching before anything is asked does not
+detach, that no `list` is admitted to a guest, and that nobody may write - is
+asserted against the Firestore emulator in `firestore-rules.emulator-spec.ts`.
+The callable half - that a repeated tap joins rather than raises, that the age
+does not reset when it does, that the cooldown refuses and names when, that a
+bill request moves the table and a waiter call does not, that a table awaiting
+payment may still call, that a `pending` session is refused, that a paused
+kitchen is not, and that a second acknowledgement answers with what the first
+one wrote - is asserted in `table-assistance.emulator-spec.ts`. The screens are
+covered by unit specs and by four new Loki references under
+`Business/Order Queue`, plus the fourteen `Business/Table Plan` references the
+mark and the second header badge changed.
+
+**It was not driven through the running app.** What is therefore unobserved is
+the sequence itself: a guest tapping on a phone while a member of staff watches
+the mark appear on a plan and clears it. The rules and the callable are
+asserted against the real database and the screens against faked listeners, so
+what is untested is the wiring between them.
+
 ## Related GitHub Scope
 
 - Issue \#1072 - QR table menu and table ordering, with ten child issues
@@ -593,6 +721,7 @@ per-device alert are what a tablet at the pass actually hears. See
 - Issue \#1103 - table cart and order submission, which gave the guest something to do with the menu and the restaurant something to cook
 - Issue \#1104 - guest order status and follow-up ordering, which gave the guest the live list of what they sent, the sentence a cancellation is explained with, and a second order into the same visit
 - Issue \#1105 - incoming order queue for staff, which gave the restaurant the screen that answers a guest: the queue, every order status after `submitted`, the badge on the floor plan and the push that reaches the people on shift
+- Issue \#1106 - request staff assistance and request the bill, which gave the guest a way to ask for a person without waving and the floor a way to see it and clear it
 - Issue \#1108 - offline-tolerant and idempotent order submission, which owns the duplicate an order submitted twice still creates
 - Issue \#1598 - orderable menu extras, split out of \#1103 because `Category.extrasBlock` has no ids, no renderer and no editor
 - Issue \#1107 - QR token abuse protection, which owns the durable rate limit the resolution only approximates

@@ -23,6 +23,22 @@
               data-testid="order-queue-count"
               >{{ openCount() }}</ion-badge
             >
+
+            <!--
+              How many tables are waiting for a person rather than for a dish
+              (GitHub issue #1106). Beside the order count and in the danger
+              tone, because they are two different debts: the kitchen being
+              behind is ordinary, and a raised hand nobody has walked to is not.
+              Drawn only when there is one, so a quiet room has one badge.
+            -->
+            @if (hasAssistance()) {
+              <ion-badge
+                class="order-queue__count order-queue__count--calling"
+                color="danger"
+                data-testid="order-queue-assistance-count"
+                >{{ assistance().length }}</ion-badge
+              >
+            }
           </h1>
           @if (restaurantName()) {
             <ion-note class="order-queue__subtitle">{{
@@ -96,6 +112,97 @@
           data-testid="order-queue-labels-failed"
           >{{ 'order-queue-labels-failed' | transloco }}</ion-note
         >
+      }
+
+      <!--
+        The tables that are calling, above the tickets and sorted the other way
+        round (GitHub issue #1106). A pass works its tickets newest first,
+        because the one that just landed is the one nobody has read; a floor
+        answers its room oldest first, because the guest who has been waving
+        longest is the one nobody has walked to. The two lists share a screen
+        and disagree about their order on purpose.
+
+        It is outside the loading branch below: a guest can call for a waiter
+        having ordered nothing, so a room with an empty queue is exactly where
+        this list matters most.
+      -->
+      @if (hasAssistance()) {
+        <section
+          class="order-queue__calling"
+          data-testid="order-queue-assistance"
+        >
+          <h2 class="order-queue__calling-title">
+            {{ 'assistance-queue-title' | transloco }}
+          </h2>
+
+          <ul class="order-queue__calling-list">
+            @for (row of assistance(); track row.id) {
+              <li
+                class="order-queue__calling-row"
+                [class.order-queue__calling-row--urgent]="row.urgent"
+                [attr.data-testid]="'assistance-' + row.id"
+              >
+                <div class="order-queue__calling-what">
+                  <span class="order-queue__table">
+                    {{
+                      row.label
+                        ? ('order-queue-table'
+                          | transloco: { label: row.label })
+                        : ('order-queue-table-unknown' | transloco)
+                    }}
+                  </span>
+
+                  <span
+                    class="order-queue__calling-kind"
+                    [attr.data-testid]="'assistance-kind-' + row.id"
+                  >
+                    {{ row.kindKey | transloco }}
+                  </span>
+                </div>
+
+                <div class="order-queue__calling-when">
+                  <span
+                    class="order-queue__age"
+                    [attr.data-testid]="'assistance-age-' + row.id"
+                  >
+                    {{ row.waiting.key | transloco: row.waiting.params }}
+                  </span>
+
+                  <!--
+                    A guest who tapped again is a guest who thinks nobody heard
+                    them. The row's age deliberately does not reset when they
+                    do, so this note is the only place the second tap shows.
+                  -->
+                  @if (row.askedAgain) {
+                    <span
+                      class="order-queue__calling-again"
+                      [attr.data-testid]="'assistance-again-' + row.id"
+                    >
+                      {{ 'assistance-asked-again' | transloco }}
+                    </span>
+                  }
+                </div>
+
+                <!--
+                  One button and no dialog, which is the whole difference from
+                  cancelling an order. A cancellation takes something away from
+                  a guest and owes them a sentence; this gives them one.
+                -->
+                <ion-button
+                  size="small"
+                  [disabled]="busyAssistanceId() === row.id"
+                  [attr.data-testid]="'assistance-acknowledge-' + row.id"
+                  (click)="acknowledge(row)"
+                >
+                  @if (busyAssistanceId() === row.id) {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+                  {{ 'assistance-acknowledge' | transloco }}
+                </ion-button>
+              </li>
+            }
+          </ul>
+        </section>
       }
 
       @if (loading()) {

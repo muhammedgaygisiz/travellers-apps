@@ -24,6 +24,7 @@ import type {
   TableScanNextStep,
   TableScanRefusalReason,
 } from 'model';
+import { TableAssistanceService } from './table-assistance.service';
 import { TableCartService, type TableCartLine } from './table-cart.service';
 import { TableOrderHistoryService } from './table-order-history.service';
 
@@ -145,6 +146,16 @@ export class TableOrderService {
    */
   readonly history = inject(TableOrderHistoryService);
 
+  /**
+   * The two things the guest can ask a waiter for (GitHub issue #1106).
+   *
+   * Injected here rather than by the screen for the reason the history is: this
+   * is where the restaurant and the table are first known, and a screen that
+   * had to hand them over would be a second place the pair could be started
+   * from with different arguments.
+   */
+  readonly assistance = inject(TableAssistanceService);
+
   private readonly view = signal<TableOrderView>({ kind: 'loading' });
   private readonly busy = signal(false);
   private readonly refusal = signal<TableOrderRefusal | undefined>(undefined);
@@ -246,6 +257,7 @@ export class TableOrderService {
     // has no session id, no visit id and no order ids in hand; the table and
     // their uid are enough to find all three.
     this.history.watch(restaurantId, scan.table.id);
+    this.assistance.watch(restaurantId, scan.table.id);
 
     this.view.set({
       kind: 'ordering',

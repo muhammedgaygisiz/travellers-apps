@@ -653,5 +653,15 @@
   "table-order-refused-itemMissing": "{{item}} ከምናሌው ላይ የለም። አውጥተው የቀረውን ይላኩ።",
   "table-order-refused-itemUnavailable": "{{item}} አሁን አይገኝም። አውጥተው የቀረውን ይላኩ።",
   "table-order-refused-priceChanged": "የ{{item}} ዋጋ ተለውጧል። ተመልክተው እንደገና ይላኩ።",
-  "table-order-refused-currencyChanged": "የምናሌው ዋጋዎች ገንዘብ ተለውጧል። ትዕዛዝዎን አይተው እንደገና ይላኩ።"
+  "table-order-refused-currencyChanged": "የምናሌው ዋጋዎች ገንዘብ ተለውጧል። ትዕዛዝዎን አይተው እንደገና ይላኩ።",
+  "table-assistance-heading": "የሚያስፈልግዎት ነገር አለ?",
+  "table-assistance-callStaff-idle": "አስተናጋጅ ይጥሩ",
+  "table-assistance-callStaff-open": "አስተናጋጅ ተጠርታል",
+  "table-assistance-callStaff-acknowledged": "አንድ ሰው እየመጣ ነው።",
+  "table-assistance-requestBill-idle": "ሂሳብ ይጠይቁ",
+  "table-assistance-requestBill-open": "ሂሳብ ተጠይቁአል",
+  "table-assistance-requestBill-acknowledged": "ሂሳብዎ እየመጣ ነው።",
+  "table-assistance-refused-tableNotAttended": "ምግብ ቤቱ በዚህ ጠረጨዛ ላይ እንደተቀመጡ አልመዝገበም። ሰራተኛ ይጠይቁ።",
+  "table-assistance-refused-cooldown": "አሁን ጠይቀውአል። እንደገና ከመጠየቅዎ በፊት ትንሽ ይጠብቁ።",
+  "table-assistance-stale": "ከምግብ ቤቱ ጋር ግንኛነት ተቁርጧል፣ ስለዚህ ይህ ወቅታዋይ ላይሆን ይችላል።"
 }

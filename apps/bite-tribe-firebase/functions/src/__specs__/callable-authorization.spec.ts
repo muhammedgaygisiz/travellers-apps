@@ -94,6 +94,11 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // and the visit that hangs from it and nothing else.
   moveTableVisit: 'staffAuthority',
 
+  // Clearing the signal a guest raised from their table (issue #1106). The
+  // same door again: answering a table is the job of whoever is on the floor,
+  // and the callable decides for itself which restaurant each caller reaches.
+  acknowledgeTableAssistance: 'staffAuthority',
+
   // Consumer and business app paths. Each acts for the caller, or reads data
   // every signed-in account may read, so requiring `admin` here would break
   // the consumer app.
@@ -136,6 +141,13 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // There is nothing in the request a caller could choose that would reach
   // another party's dinner.
   submitTableOrder: 'authenticated',
+
+  // A guest asking for a waiter or for the bill (issue #1106). The fourth
+  // callable an anonymous session is enough for, and the narrowest of them:
+  // the request carries a restaurant, the table the caller scanned and one of
+  // two kinds, and everything else - the visit, the table the marker is drawn
+  // on, who asked - comes off the session named after the caller's own uid.
+  requestTableAssistance: 'authenticated',
 
   // The redirect target of a shared Bite link. It is opened by whoever was
   // sent the link, which is the point of sharing one.

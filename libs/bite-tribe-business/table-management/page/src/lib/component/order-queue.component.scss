@@ -160,6 +160,98 @@
 }
 
 /*
+ * The tables that are calling (GitHub issue #1106).
+ *
+ * A block of its own above the tickets, in the danger tone, and deliberately
+ * denser than a ticket: a signal is one fact - this table wants somebody - so
+ * the row is a line rather than a card, and a floor can hold the whole list in
+ * one glance instead of scrolling a room.
+ */
+.order-queue__calling {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--ion-color-danger, #eb445a);
+  border-left-width: 0.25rem;
+  border-radius: 0.5rem;
+}
+
+.order-queue__calling-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--ion-color-danger, #eb445a);
+}
+
+.order-queue__calling-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/*
+ * A grid rather than a wrapping flex row, because a flex row wraps each row of
+ * the list at a different point - the button drops under one table and sits
+ * beside the next - and a list a floor scans has to have one shape. Narrow: the
+ * table and what it wants on the first line, the clock beside them, the button
+ * across the second. Wide enough and the three sit on one line.
+ */
+.order-queue__calling-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+}
+
+.order-queue__calling-what {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.order-queue__calling-when {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.order-queue__calling-row ion-button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-inline: 0;
+}
+
+@media (min-width: 560px) {
+  .order-queue__calling-row {
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .order-queue__calling-row ion-button {
+    grid-column: auto;
+  }
+}
+
+/*
+ * The one that has been waiting past the threshold, coloured rather than
+ * bordered: the block around it is already the floor's colour, so a second
+ * border inside it would say nothing.
+ */
+.order-queue__calling-row--urgent .order-queue__age,
+.order-queue__calling-again {
+  color: var(--ion-color-danger, #eb445a);
+  font-weight: 700;
+  opacity: 1;
+}
+
+.order-queue__calling-again {
+  font-size: 0.8125rem;
+}
+
+/*
  * The table that has been waiting too long, marked on its edge.
  *
  * A border rather than a fill, so it reads across a kitchen without making the

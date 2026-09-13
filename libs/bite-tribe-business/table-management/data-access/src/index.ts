@@ -1,4 +1,5 @@
 export * from './lib/order-alert.service';
+export * from './lib/table-assistance-queue.service';
 export * from './lib/table-order-failure';
 export * from './lib/table-order-queue.service';
 export * from './lib/table-state-data-access.service';

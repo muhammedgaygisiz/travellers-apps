@@ -96,11 +96,18 @@
             capacity and whether it is in service - because that is what the
             owner is looking for; where it stands is the drawing's job.
           -->
+          <!--
+            The calling sentence is appended to the accessible name rather than
+            interpolated into a sentence of its own, because it is already a
+            sentence - the caller translates it - and folding it into `nameKey`
+            would double four keys into eight to say one extra thing
+            (GitHub issue #1106).
+          -->
           <g
             [attr.id]="item.domId"
             role="img"
             [attr.aria-label]="
-              item.nameKey
+              (item.nameKey
                 | transloco
                   : {
                       type: item.typeKey | transloco,
@@ -111,7 +118,7 @@
                       status: item.statusName,
                       duration: item.durationText,
                       orders: item.orderCount,
-                    }
+                    }) + (item.callingName ? '. ' + item.callingName : '')
             "
             [attr.class]="item.classes"
             [attr.transform]="item.transform"
@@ -260,6 +267,39 @@
                   dominant-baseline="central"
                 >
                   {{ item.orderBadgeText }}
+                </text>
+              </g>
+            }
+
+            <!--
+              A table calling for somebody (GitHub issue #1106). A disc on the
+              opposite top corner from the order badge, so a table that is both
+              behind and waiting carries two marks rather than one cluster, and
+              a single `!` rather than a word for what it is asking: the drawing
+              answers "which tables are waiting" and the queue one press away
+              answers what for. The sentence is in the tooltip and in the
+              accessible name, which are read by people the size constraint was
+              never about.
+            -->
+            @if (item.callingName) {
+              <g
+                class="floor-plan-canvas__item-calling"
+                [attr.data-testid]="'floor-plan-calling-' + item.id"
+              >
+                <title>{{ item.callingName }}</title>
+                <circle
+                  [attr.cx]="item.callingBadgeX"
+                  [attr.cy]="item.callingBadgeY"
+                  [attr.r]="item.callingBadgeRadius"
+                />
+                <text
+                  [attr.x]="item.callingBadgeX"
+                  [attr.y]="item.callingBadgeY"
+                  [attr.font-size]="item.callingBadgeTextSize"
+                  text-anchor="middle"
+                  dominant-baseline="central"
+                >
+                  !
                 </text>
               </g>
             }

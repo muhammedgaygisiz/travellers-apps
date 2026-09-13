@@ -136,3 +136,38 @@
   font-weight: 600;
   text-align: end;
 }
+
+/*
+ * The two calls for a waiter (GitHub issue #1106).
+ *
+ * Side by side on anything wider than a small phone and stacked below that,
+ * because the two are a pair a guest chooses between rather than a list they
+ * read down - and at 320px two buttons on one row leave neither of them a
+ * readable label. `block` on the buttons makes each fill its own column.
+ */
+.assistance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.assistance-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+@media (min-width: 480px) {
+  .assistance-actions {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+/*
+ * The margin Ionic gives a block button is horizontal, which would inset the
+ * pair from the sections above and below them.
+ */
+.assistance-button {
+  margin-inline: 0;
+}

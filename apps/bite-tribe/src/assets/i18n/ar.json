@@ -653,5 +653,15 @@
   "table-order-refused-itemMissing": "لم يعد {{item}} في القائمة. أزِله وأرسِل البقية.",
   "table-order-refused-itemUnavailable": "{{item}} غير متاح الآن. أزِله وأرسِل البقية.",
   "table-order-refused-priceChanged": "تغيّر سعر {{item}}. راجِعه ثم أرسِل مرة أخرى.",
-  "table-order-refused-currencyChanged": "تغيّرت عملة أسعار القائمة. راجِع طلبك ثم أرسِل مرة أخرى."
+  "table-order-refused-currencyChanged": "تغيّرت عملة أسعار القائمة. راجِع طلبك ثم أرسِل مرة أخرى.",
+  "table-assistance-heading": "هل تحتاج شيئًا؟",
+  "table-assistance-callStaff-idle": "اطلب نادلًا",
+  "table-assistance-callStaff-open": "تم طلب نادل",
+  "table-assistance-callStaff-acknowledged": "هناك من في الطريق إليك.",
+  "table-assistance-requestBill-idle": "اطلب الحساب",
+  "table-assistance-requestBill-open": "تم طلب الحساب",
+  "table-assistance-requestBill-acknowledged": "حسابك في الطريق.",
+  "table-assistance-refused-tableNotAttended": "المطعم لا يسجل جلوسك على هذه الطاولة. اسأل أحد العاملين.",
+  "table-assistance-refused-cooldown": "لقد طلبت للتو. انتظر قليلًا قبل أن تطلب مرة أخرى.",
+  "table-assistance-stale": "فقدنا الاتصال بالمطعم، لذا قد تكون هذه المعلومات قديمة."
 }

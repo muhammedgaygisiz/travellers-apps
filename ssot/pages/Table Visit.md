@@ -216,6 +216,66 @@ The caller is admitted by `requireTableStateAuthority`, deliberately the same gu
 
 Staff read them through a **collection group** rather than through the visit (`RD-TS-14`). `collectionGroup('orders').where('restaurantId', '==', id)`, with a second constraint narrowing to the open statuses, and a rule reading `resource.data.restaurantId` because a collection-group match has no `{restaurantId}` in its path. That makes the `where` the permission rather than a filter, in the way `RD-TS-12` makes the guest's own. It needs a collection-group index exemption, declared in `firestore.indexes.json`, and indexes deploy by hand.
 
+## Calls For A Waiter
+
+Issue \#1106 added the two things a guest most often needs a person for, and put
+them **beside** the visit rather than under it.
+
+```text
+/restaurants/{restaurantId}/assistanceRequests/{n}_{tableId}_{kind}
+```
+
+Under the restaurant and named after the **table** and the kind, which is the
+opposite of where an order lives and is the same fact read the other way
+(`RD-TS-19`). An order is money and belongs to the party, so a party walked to
+another table keeps it; a signal means _come to this table_, so a party that has
+moved wants somebody at the new one and leaves the old signal behind. Both are
+written against the visit's `tableId` rather than the one the guest scanned,
+because that is where the party is sitting now.
+
+The name is derived rather than generated (`RD-TS-18`), exactly as
+`tableSessionId` names one guest at one table, and three things follow from it.
+A repeated tap **addresses the first tap's document**, across phones as well as
+across taps, which is what makes "repeated taps do not create repeated signals"
+true of the address rather than of a check. The collection is **bounded by the
+room** at two documents per table, so the staff screens read it whole with no
+`where`, no index and no collection-group match. And the guest's phone can
+**derive the name and subscribe**, which is what makes "received, then
+acknowledged" a listener rather than a poll. What it costs is history: a new
+request of the same kind at the same table replaces the answered one.
+
+Two kinds and two statuses. `callStaff` draws a mark and nothing else;
+`requestBill` also writes `awaitingPayment` on the table in the same commit
+(`RD-TS-21`), which is what stops the table taking further orders - a dish added
+after the bill was asked for is a conversation rather than a tap. `open` becomes
+`acknowledged` through `acknowledgeTableAssistance` and never back; a second
+press answers with the stored values rather than with a conflict, because an
+acknowledgement has one destination and two people pressing it both wanted what
+happened (`RD-TS-22`).
+
+Neither callable checks whether the kitchen is taking orders. A restaurant that
+has closed, paused, or never took orders at the table has nothing to do with
+whether somebody in the dining room may ask for the bill - and the moment they
+most need to is after the kitchen shuts. What both check is the **party**: an
+active session, an open visit, and a table the floor agrees somebody is sitting
+at. A `pending` session is refused, because making that visible to the floor is
+issue \#1107's.
+
+The rate limit is the name plus one clock (`RD-TS-20`): a signal raised within a
+minute of the last one of that kind at that table is refused, with the moment it
+may be asked for again. Measured from when it was **raised** rather than from
+when it was answered, so a restaurant that answers in ten seconds does not lock
+the table out for the following fifty. Joining a signal that is still open is not
+rate limited at all.
+
+The statuses, the kinds, the refusal reasons, the cooldown, the collection name
+and the id derivation are declared as data in `table-assistance.ts`, in both the
+library and the backend copy, with `src/__specs__/table-assistance-parity.spec.ts`
+comparing them as text. The id is the one that drifts worst: it is computed on
+both sides, so a separator changed in one file leaves a guest watching a document
+nothing ever writes while the restaurant sees a mark the guest is never told
+about.
+
 ## Relationships
 
 ```text
@@ -302,6 +362,7 @@ staff keep an unconditional `list` over the whole table.
 - The model, the storage and the backend exist (issue \#1095). **No app surface uses them yet.** The staff view of issue \#1093 and the actions of issue \#1094 read and write live table state, so seating a table already opens a visit, but nothing shows the visit, its party size or its duration, and nothing calls `moveTableVisit`.
 - The party size is therefore never recorded through the UI. The sheet of issue \#1094 takes an optional count and writes it to the audit entry's `reason`; moving it onto `TableVisit.guestCount`, which now exists to hold it, is left to the surface that consumes visits.
 - **An order placed before a party moved stays grouped under the table it was ordered from.** Issue \#1105's queue groups by `TableOrder.tableId`, which is what the kitchen wrote on the ticket and is right for the pass; it is not what a waiter carrying the plates reads, and nothing yet says "this party is now at table 9". Recorded in [[Current State - Open Questions]].
+- **A signal keeps no history.** Issue \#1106's derived document name means a new request of the same kind at the same table replaces the answered one, so "how often did table 12 have to ask for a waiter last Saturday" is not a question this collection can answer. The one durable consequence a request has - the table moving to `awaitingPayment` - is in `tableStateTransitions`, which nothing overwrites.
 - **Indexes are deployed by hand, like the rules.** Issue \#1105's queue query is a collection group, and Firestore creates no exemption for one on its own - so merging the change does nothing in production until `npx nx firebase-deploy-indexes bite-tribe-firebase` has run, and a queue opened before that is refused rather than empty.
 - **An order sent twice creates two orders.** Idempotency and offline tolerance are issue \#1108. `TableOrder` carries no `idempotencyKey` yet, deliberately: a key the client would have to unlearn is worse than the absence.
 - **A guest's phone cannot read the visit, and no longer needs to.** Issue \#1104 decided it (`RD-TS-12`): the running total on the guest's screen is a sum over their own orders, cancelled ones excluded, and the shared bill is settled at the table. What a guest is shown when their party is **moved** is still unowned - the session goes on naming the table they scanned, and nothing tells them the table number on their screen has changed.

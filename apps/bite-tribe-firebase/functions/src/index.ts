@@ -62,6 +62,8 @@ export { submitTableOrder } from './functions/restaurants/submit-table-order';
 export { transitionTableState } from './functions/restaurants/transition-table-state';
 export { transitionTableOrderStatus } from './functions/restaurants/transition-table-order-status';
 export { moveTableVisit } from './functions/restaurants/move-table-visit';
+export { requestTableAssistance } from './functions/restaurants/request-table-assistance';
+export { acknowledgeTableAssistance } from './functions/restaurants/acknowledge-table-assistance';
 export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-create';
 export { claimDisplayName } from './functions/users/claim-display-name';
 export { setUserRoles } from './functions/users/set-user-roles';

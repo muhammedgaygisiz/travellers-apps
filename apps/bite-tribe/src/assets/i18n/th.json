@@ -653,5 +653,15 @@
   "table-order-refused-itemMissing": "{{item}} ไม่มีในเมนูแล้ว นำออกแล้วส่งรายการที่เหลือ",
   "table-order-refused-itemUnavailable": "{{item}} ตอนนี้ไม่มีให้บริการ นำออกแล้วส่งรายการที่เหลือ",
   "table-order-refused-priceChanged": "ราคาของ {{item}} เปลี่ยนไป ตรวจสอบแล้วส่งใหม่อีกครั้ง",
-  "table-order-refused-currencyChanged": "สกุลเงินของราคาในเมนูเปลี่ยนไป ตรวจสอบรายการแล้วส่งใหม่อีกครั้ง"
+  "table-order-refused-currencyChanged": "สกุลเงินของราคาในเมนูเปลี่ยนไป ตรวจสอบรายการแล้วส่งใหม่อีกครั้ง",
+  "table-assistance-heading": "ต้องการอะไรไหม",
+  "table-assistance-callStaff-idle": "เรียกพนักงาน",
+  "table-assistance-callStaff-open": "เรียกพนักงานแล้ว",
+  "table-assistance-callStaff-acknowledged": "มีคนกำลังไป",
+  "table-assistance-requestBill-idle": "ขอเช็คบิล",
+  "table-assistance-requestBill-open": "ขอเช็คบิลแล้ว",
+  "table-assistance-requestBill-acknowledged": "เช็คบิลของคุณกำลังมา",
+  "table-assistance-refused-tableNotAttended": "ร้านไม่ได้บันทึกว่าคุณนั่งอยู่โต๊ะนี้ กรุณาสอบถามพนักงาน",
+  "table-assistance-refused-cooldown": "คุณเพิ่งขอไป รอสักครู่ก่อนขออีกครั้ง",
+  "table-assistance-stale": "เราขาดการติดต่อกับร้าน ข้อมูลนี้อาจไม่เป็นปัจจุบัน"
 }

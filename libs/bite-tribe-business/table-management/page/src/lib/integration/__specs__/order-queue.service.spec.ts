@@ -5,10 +5,16 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FloorPlanDataAccessService } from 'bite-tribe-business/floor-plan-data-access';
 import {
   OrderAlertService,
+  TableAssistanceQueueService,
+  TableAssistanceSnapshot,
   TableOrderQueueService,
   TableOrderQueueSnapshot,
 } from 'bite-tribe-business/table-management-data-access';
-import type { RestaurantTable, TableOrder } from 'model';
+import type {
+  RestaurantTable,
+  TableAssistanceRequest,
+  TableOrder,
+} from 'model';
 import type { OrderAction, OrderTableGroup } from '../order-queue-groups';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { ToastService } from 'toast';
@@ -39,6 +45,21 @@ const table = (id: string, label: string): RestaurantTable =>
     shape: 'round',
     diameter: 900,
   }) as unknown as RestaurantTable;
+
+const calling = (
+  overrides: Partial<TableAssistanceRequest> = {},
+): TableAssistanceRequest => ({
+  id: '8_table-12_callStaff',
+  restaurantId: 'restaurant-1',
+  tableId: 'table-12',
+  visitId: 'visit-1',
+  kind: 'callStaff',
+  status: 'open',
+  requestedAt: NOW - MINUTE,
+  lastRequestedAt: NOW - MINUTE,
+  requestedByUserIds: ['guest-1'],
+  ...overrides,
+});
 
 const order = (id: string, overrides: Partial<TableOrder> = {}): TableOrder =>
   ({
@@ -79,18 +100,37 @@ const settle = async (): Promise<void> => {
 describe(OrderQueueService.name, () => {
   let service: OrderQueueService;
   let feed: Subject<TableOrderQueueSnapshot>;
+  let assistanceFeed: Subject<TableAssistanceSnapshot>;
   let transition: jest.Mock;
+  let acknowledge: jest.Mock;
   let present: jest.Mock;
   let alertEnabled: WritableSignal<boolean>;
   let alert: jest.Mock;
   let setEnabled: jest.Mock;
   let restaurantId: BehaviorSubject<string | undefined>;
 
+  /**
+   * One delivery on both listeners.
+   *
+   * The header makes one promise - what is on screen is current - and it is
+   * broken by either listener going quiet, so `liveStatus` waits for both
+   * (GitHub issue #1106). A helper that fed only the orders would leave the
+   * screen reporting `connecting` through every test that never mentions a
+   * signal.
+   */
   const deliver = (
     orders: TableOrder[],
     over: Partial<TableOrderQueueSnapshot> = {},
   ): void => {
     feed.next({ orders, at: Date.now(), live: true, ...over });
+    deliverAssistance([]);
+  };
+
+  const deliverAssistance = (
+    requests: TableAssistanceRequest[],
+    over: Partial<TableAssistanceSnapshot> = {},
+  ): void => {
+    assistanceFeed.next({ requests, at: Date.now(), live: true, ...over });
     TestBed.tick();
   };
 
@@ -102,7 +142,9 @@ describe(OrderQueueService.name, () => {
     // empty delivery would make the screen say the kitchen is up to date before
     // it has heard anything at all.
     feed = new Subject<TableOrderQueueSnapshot>();
+    assistanceFeed = new Subject<TableAssistanceSnapshot>();
     transition = jest.fn().mockResolvedValue({});
+    acknowledge = jest.fn().mockResolvedValue({ changed: true });
     present = jest.fn().mockResolvedValue(undefined);
     alertEnabled = signal(false);
     alert = jest.fn();
@@ -119,6 +161,13 @@ describe(OrderQueueService.name, () => {
           useValue: {
             openOrders$: jest.fn(() => feed.asObservable()),
             transition,
+          },
+        },
+        {
+          provide: TableAssistanceQueueService,
+          useValue: {
+            requests$: jest.fn(() => assistanceFeed.asObservable()),
+            acknowledge,
           },
         },
         {
@@ -198,17 +247,135 @@ describe(OrderQueueService.name, () => {
   it('reports a dead listener rather than emptying the queue', () => {
     deliver([order('a')]);
     feed.next({ orders: [order('a')], at: NOW, live: false });
+    TestBed.tick();
 
     expect(service.groups()).toHaveLength(1);
     expect(service.liveStatus()).toBe('offline');
   });
 
+  /**
+   * Either listener going quiet breaks the header's promise, so the worse of
+   * the two wins: a header reading `live` because the tickets are still
+   * arriving would be true about half the screen (GitHub issue #1106).
+   */
+  it('reports the signals listener dying even while orders still arrive', () => {
+    deliver([order('a')]);
+    deliverAssistance([], { live: false });
+
+    expect(service.liveStatus()).toBe('offline');
+  });
+
   it('calls itself out of date once the last delivery is old enough', () => {
     feed.next({ orders: [], at: NOW - 5 * MINUTE, live: false });
+    assistanceFeed.next({ requests: [], at: NOW - 5 * MINUTE, live: false });
     jest.setSystemTime(NOW + 5 * MINUTE);
     jest.advanceTimersByTime(30_000);
 
     expect(service.liveStatus()).toBe('stale');
+  });
+
+  describe('the tables that are calling', () => {
+    it('lists them with their numbers, longest first', () => {
+      deliverAssistance([
+        calling({ tableId: 't5', requestedAt: NOW - MINUTE }),
+        calling({ tableId: 'table-12', requestedAt: NOW - 8 * MINUTE }),
+      ]);
+
+      expect(service.assistance().map((row) => row.label)).toEqual(['12', '5']);
+      expect(service.assistanceCount()).toBe(2);
+    });
+
+    it('sends the table and the kind when somebody answers one', async () => {
+      deliverAssistance([calling()]);
+
+      await service.acknowledge(service.assistance()[0]);
+
+      expect(acknowledge).toHaveBeenCalledWith({
+        restaurantId: 'restaurant-1',
+        tableId: 'table-12',
+        kind: 'callStaff',
+      });
+    });
+
+    /**
+     * Per row rather than over the whole list, for the reason the order busy
+     * flag is per order: one slow call about table 12 must leave the rest of
+     * the floor answerable.
+     */
+    it('marks only the pressed row busy while the call is in flight', async () => {
+      deliverAssistance([calling(), calling({ kind: 'requestBill' })]);
+
+      let resolve: () => void = () => undefined;
+      acknowledge.mockReturnValue(
+        new Promise<void>((done) => {
+          resolve = (): void => done();
+        }),
+      );
+
+      const pending = service.acknowledge(service.assistance()[0]);
+
+      expect(service.busyAssistanceId()).toBe('table-12:callStaff');
+
+      resolve();
+      await pending;
+
+      expect(service.busyAssistanceId()).toBeUndefined();
+    });
+
+    /**
+     * The row is about to be corrected by the listener either way, so what the
+     * staff member is owed is the sentence rather than a retry.
+     */
+    it('explains a failure and leaves the row to the listener', async () => {
+      deliverAssistance([calling()]);
+      acknowledge.mockRejectedValue({ code: 'functions/permission-denied' });
+
+      await service.acknowledge(service.assistance()[0]);
+
+      expect(present).toHaveBeenCalledWith(
+        expect.objectContaining({ outcome: 'failure' }),
+      );
+    });
+
+    /**
+     * The same chime and the same flash as a new order: both mean somebody in
+     * this room is waiting on you, and a second sound would ask a floor to
+     * learn which of two noises meant what mid-service.
+     */
+    it('announces a table that starts calling, and only once', () => {
+      deliverAssistance([]);
+
+      expect(alert).not.toHaveBeenCalled();
+
+      deliverAssistance([calling()]);
+
+      expect(alert).toHaveBeenCalledTimes(1);
+      expect(service.justArrived()).toBe(true);
+
+      deliverAssistance([calling()]);
+
+      expect(alert).toHaveBeenCalledTimes(1);
+    });
+
+    /**
+     * A count rises when a guest asks and falls when somebody answers, so a
+     * count-watcher would chime at the person who had just pressed Acknowledge.
+     */
+    it('stays silent when a signal is answered', () => {
+      deliverAssistance([calling()]);
+      alert.mockClear();
+
+      deliverAssistance([]);
+
+      expect(alert).not.toHaveBeenCalled();
+    });
+
+    /** Opening the screen must not announce every table already waiting. */
+    it('says nothing about the tables already calling when it opens', () => {
+      deliverAssistance([calling(), calling({ kind: 'requestBill' })]);
+
+      expect(alert).not.toHaveBeenCalled();
+    });
   });
 
   describe('moving an order along', () => {
@@ -463,6 +630,13 @@ describe('when the table numbers cannot be read', () => {
           useValue: {
             openOrders$: jest.fn(() => feed.asObservable()),
             transition: jest.fn(),
+          },
+        },
+        {
+          provide: TableAssistanceQueueService,
+          useValue: {
+            requests$: jest.fn(() => new Subject().asObservable()),
+            acknowledge: jest.fn(),
           },
         },
         {

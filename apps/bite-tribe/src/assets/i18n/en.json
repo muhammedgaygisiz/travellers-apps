@@ -653,5 +653,15 @@
   "table-order-refused-itemMissing": "{{item}} is no longer on the menu. Take it out and send the rest.",
   "table-order-refused-itemUnavailable": "{{item}} isn't available right now. Take it out and send the rest.",
   "table-order-refused-priceChanged": "The price of {{item}} has changed. Check it and send again.",
-  "table-order-refused-currencyChanged": "The menu's prices have changed currency. Check your order and send again."
+  "table-order-refused-currencyChanged": "The menu's prices have changed currency. Check your order and send again.",
+  "table-assistance-heading": "Need something?",
+  "table-assistance-callStaff-idle": "Call a waiter",
+  "table-assistance-callStaff-open": "A waiter has been called",
+  "table-assistance-callStaff-acknowledged": "Somebody is on their way.",
+  "table-assistance-requestBill-idle": "Ask for the bill",
+  "table-assistance-requestBill-open": "The bill has been asked for",
+  "table-assistance-requestBill-acknowledged": "Your bill is on its way.",
+  "table-assistance-refused-tableNotAttended": "The restaurant doesn't have you seated at this table. Ask a member of staff.",
+  "table-assistance-refused-cooldown": "You've only just asked. Give them a moment before asking again.",
+  "table-assistance-stale": "We've lost touch with the restaurant, so this may be out of date."
 }

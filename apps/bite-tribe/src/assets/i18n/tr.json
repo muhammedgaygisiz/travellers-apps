@@ -653,5 +653,15 @@
   "table-order-refused-itemMissing": "{{item}} artık menüde değil. Çıkar ve kalanını gönder.",
   "table-order-refused-itemUnavailable": "{{item}} şu anda mevcut değil. Çıkar ve kalanını gönder.",
   "table-order-refused-priceChanged": "{{item}} ürününün fiyatı değişti. Kontrol edip tekrar gönder.",
-  "table-order-refused-currencyChanged": "Menünün fiyatları başka bir para birimine geçti. Siparişini kontrol edip tekrar gönder."
+  "table-order-refused-currencyChanged": "Menünün fiyatları başka bir para birimine geçti. Siparişini kontrol edip tekrar gönder.",
+  "table-assistance-heading": "Bir şeye mi ihtiyacın var?",
+  "table-assistance-callStaff-idle": "Garson çağır",
+  "table-assistance-callStaff-open": "Garson çağrıldı",
+  "table-assistance-callStaff-acknowledged": "Biri yola çıktı.",
+  "table-assistance-requestBill-idle": "Hesabı iste",
+  "table-assistance-requestBill-open": "Hesap istendi",
+  "table-assistance-requestBill-acknowledged": "Hesabın yolda.",
+  "table-assistance-refused-tableNotAttended": "Restoran seni bu masada oturuyor olarak görmüyor. Bir görevliye sor.",
+  "table-assistance-refused-cooldown": "Az önce istedin. Tekrar istemeden önce biraz bekle.",
+  "table-assistance-stale": "Restoranla bağlantımız koptu, bu yüzden bu bilgi güncel olmayabilir."
 }

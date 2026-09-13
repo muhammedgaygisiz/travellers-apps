@@ -3,6 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   BiteTribeApiService,
+  TableAssistanceApiService,
   TableOrderApiService,
   TableSessionApiService,
 } from 'bite-tribe/api';
@@ -10,6 +11,7 @@ import { AuthService } from 'ta-firestore';
 import type { Menu, MenuItem, TableScanContext, TableSession } from 'model';
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import { TableCartService } from '../table-cart.service';
+import { TableAssistanceService } from '../table-assistance.service';
 import { TableOrderHistoryService } from '../table-order-history.service';
 import {
   TABLE_ORDER_BLOCKED_KEYS,
@@ -88,6 +90,17 @@ describe(TableOrderService.name, () => {
         TableCartService,
         TableOrderService,
         TableOrderHistoryService,
+        // Provided but not exercised here: `TableOrderService` injects it so
+        // that the restaurant and the table are learned once (issue #1106),
+        // and its own behaviour is asserted in its own spec.
+        TableAssistanceService,
+        {
+          provide: TableAssistanceApiService,
+          useValue: {
+            request: jest.fn(),
+            request$: (): typeof EMPTY => EMPTY,
+          },
+        },
         {
           provide: TableSessionApiService,
           useValue: {

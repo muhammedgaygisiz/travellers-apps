@@ -64,6 +64,18 @@ export const liveRoomItems = (
    * plan opened a moment early draws no badges rather than a row of noughts.
    */
   openOrders: ReadonlyMap<string, number> = new Map(),
+  /**
+   * What each table is calling for, already in the reader's language
+   * (GitHub issue #1106).
+   *
+   * A map for the reason the order counts are one, and translated for the
+   * reason the status label is: the canvas is a `type:ui` library and holds no
+   * vocabulary. A table missing from the map is not calling, which is the
+   * ordinary case and also what an empty map means before the first delivery -
+   * so a plan opened a moment early draws no markers rather than marking every
+   * table.
+   */
+  assistance: ReadonlyMap<string, string> = new Map(),
 ): FloorPlanItem[] => {
   if (!room) {
     return [];
@@ -78,6 +90,7 @@ export const liveRoomItems = (
       const { label, duration } = copy(status, state);
 
       const orders = openOrders.get(table.id) ?? 0;
+      const calling = assistance.get(table.id) ?? '';
 
       return {
         ...itemFromTable(table),
@@ -87,6 +100,8 @@ export const liveRoomItems = (
         // Absent rather than `0`, so "no badge" is one state on the item
         // rather than two the canvas has to tell apart.
         ...(orders > 0 ? { openOrders: orders } : {}),
+        // Absent rather than empty, for the same reason.
+        ...(calling ? { assistanceLabel: calling } : {}),
       };
     });
 

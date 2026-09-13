@@ -653,5 +653,15 @@
   "table-order-refused-itemMissing": "{{item}} non è più nel menu. Toglilo e manda il resto.",
   "table-order-refused-itemUnavailable": "{{item}} non è disponibile in questo momento. Toglilo e manda il resto.",
   "table-order-refused-priceChanged": "Il prezzo di {{item}} è cambiato. Controllalo e manda di nuovo.",
-  "table-order-refused-currencyChanged": "I prezzi del menu hanno cambiato valuta. Controlla l'ordine e manda di nuovo."
+  "table-order-refused-currencyChanged": "I prezzi del menu hanno cambiato valuta. Controlla l'ordine e manda di nuovo.",
+  "table-assistance-heading": "Ti serve qualcosa?",
+  "table-assistance-callStaff-idle": "Chiama un cameriere",
+  "table-assistance-callStaff-open": "È stato chiamato un cameriere",
+  "table-assistance-callStaff-acknowledged": "Qualcuno sta arrivando.",
+  "table-assistance-requestBill-idle": "Chiedi il conto",
+  "table-assistance-requestBill-open": "Il conto è stato richiesto",
+  "table-assistance-requestBill-acknowledged": "Il tuo conto sta arrivando.",
+  "table-assistance-refused-tableNotAttended": "Il ristorante non ti ha seduto a questo tavolo. Chiedi a un membro del personale.",
+  "table-assistance-refused-cooldown": "Hai appena chiesto. Aspetta un momento prima di chiedere di nuovo.",
+  "table-assistance-stale": "Abbiamo perso il contatto con il ristorante, quindi questo potrebbe non essere aggiornato."
 }

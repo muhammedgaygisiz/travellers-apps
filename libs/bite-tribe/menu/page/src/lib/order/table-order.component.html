@@ -245,6 +245,77 @@
           </section>
         }
 
+        <!--
+          The two things a guest most often needs a waiter for, without waving
+          (GitHub issue #1106). Above the orders rather than in the footer
+          beside the send button: asking for the bill is the opposite of
+          ordering, and a guest reaching for it is usually finished with the
+          menu.
+
+          Each button carries its own state as its label, because the guest is
+          holding the phone they tapped and what they are looking for is that
+          the tap did something. A note somewhere else on the screen is a note
+          they scroll past and then tap again.
+        -->
+        @if (canAskForHelp()) {
+          <section class="assistance" data-testid="table-assistance">
+            <h2>{{ 'table-assistance-heading' | transloco }}</h2>
+
+            <div class="assistance-actions">
+              @for (kind of assistanceKinds; track kind) {
+                <ion-button
+                  class="assistance-button"
+                  expand="block"
+                  [fill]="isAssistanceOpen(kind) ? 'solid' : 'outline'"
+                  [disabled]="
+                    assistance.busy() !== undefined || isAssistanceOpen(kind)
+                  "
+                  [attr.data-testid]="'table-assistance-' + kind"
+                  (click)="askFor(kind)"
+                >
+                  @if (assistance.busy() === kind) {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+
+                  {{ assistanceKey(kind) | transloco }}
+                </ion-button>
+
+                @if (assistanceNoteKey(kind); as note) {
+                  <p
+                    class="note"
+                    [attr.data-testid]="'table-assistance-' + kind + '-note'"
+                  >
+                    {{ note | transloco }}
+                  </p>
+                }
+              }
+            </div>
+
+            @if (assistance.lastRefusal(); as declined) {
+              <p class="note" data-testid="table-assistance-refusal">
+                {{ assistanceRefusalKey(declined.reason) | transloco }}
+              </p>
+            }
+
+            @if (assistance.lastFailure(); as failed) {
+              <p class="note" data-testid="table-assistance-failed">
+                {{ 'table-session-failed-' + failed | transloco }}
+              </p>
+            }
+
+            <!--
+              A listener the SDK detached is a button that has quietly stopped
+              updating, which for "somebody is on their way" is worse than a
+              button that never moved.
+            -->
+            @if (assistance.isStale()) {
+              <p class="note" data-testid="table-assistance-stale">
+                {{ 'table-assistance-stale' | transloco }}
+              </p>
+            }
+          </section>
+        }
+
         @if (history.hasOrders()) {
           <section class="orders" data-testid="table-order-history">
             <h2>{{ 'table-order-your-orders' | transloco }}</h2>

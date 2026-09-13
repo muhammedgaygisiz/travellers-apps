@@ -1,3 +1,4 @@
+import { provideRouter } from '@angular/router';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import {
   applicationConfig,
@@ -72,6 +73,7 @@ const table = (
   label: string,
   status: TableStatus,
   duration?: string,
+  openOrders?: number,
 ): FloorPlanItem => ({
   id,
   kind: 'table',
@@ -86,6 +88,7 @@ const table = (
   status,
   statusLabel: WORDS[status],
   ...(duration === undefined ? {} : { statusDuration: duration }),
+  ...(openOrders === undefined ? {} : { openOrders }),
 });
 
 const geometry: FloorPlanItem[] = [
@@ -140,12 +143,13 @@ const inService: FloorPlanItem[] = [
   table('t2', 4000, 1800, '2', 'occupied', '18 min'),
   table('t3', 6500, 1800, '3', 'available'),
   table('t4', 1500, 4200, '4', 'awaitingPayment', '6 min'),
-  table('t5', 4000, 4200, '5', 'occupied', '1 h 12 min'),
+  table('t5', 4000, 4200, '5', 'occupied', '1 h 12 min', 2),
   table('t6', 6500, 4200, '6', 'reserved', '25 min'),
   table('t7', 1500, 6400, '7', 'cleaning', '3 min'),
   table('t8', 4000, 6400, '8', 'available'),
-  table('t9', 6500, 6400, '9', 'ordering', '4 min'),
-  table('t10', 1500, 8800, '10', 'occupied', '55 min'),
+  table('t9', 6500, 6400, '9', 'ordering', '4 min', 1),
+  // More than the badge spells out, which is what `9+` is for (issue #1105).
+  table('t10', 1500, 8800, '10', 'occupied', '55 min', 12),
   table('t11', 4000, 8800, '11', 'available'),
   table('t12', 6500, 8800, '12', 'disabled', '2 h 3 min'),
   table('t13', 1500, 11_000, '13', 'occupied', '9 min'),
@@ -217,6 +221,10 @@ export default {
     applicationConfig({
       providers: [
         provideIonicAngular(getIonicConfig()),
+        // The header links to the restaurant's order queue (issue #1105), and
+        // a `routerLink` with no router is a directive that throws on
+        // construction rather than a link that goes nowhere.
+        provideRouter([]),
         { provide: APP_TITLE, useValue: 'Bite Tribe Business' },
       ],
     }),
@@ -225,9 +233,11 @@ export default {
     rooms: [room(), terrace],
     selectedRoom: room(),
     restaurantName: 'Trattoria Roma',
+    restaurantId: 'restaurant-1',
     isAuthenticated: true,
     liveStatus: 'live' as const,
     items: inService,
+    openOrderCount: 15,
     roomTableCount: 15,
     summary: counts(inService),
   },

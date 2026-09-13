@@ -28,6 +28,8 @@ import { TablePlanService } from './table-plan.service';
       [freeableCount]="service.freeableCount()"
       [bulkBusy]="service.bulkBusy()"
       [isAuthenticated]="service.isAuthenticated()"
+      [restaurantId]="service.restaurantId()"
+      [openOrderCount]="service.openOrderCount()"
       (selectRoom)="service.selectRoom($event)"
       (selectionChange)="service.select($event)"
       (activateTable)="service.activateTable($event)"

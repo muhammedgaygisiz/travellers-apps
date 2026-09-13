@@ -33,6 +33,9 @@ export const en: NotificationMessages = {
   'countryBadge.followerTitle': '🌍 New country badge',
   'countryBadge.followerBody':
     '{{user}} just unlocked the badge for {{country}}',
+  'newTableOrder.title': '🔔 New order',
+  'newTableOrder.body': 'Table {{table}} just ordered.',
+  'newTableOrder.bodyWithoutTable': 'A table just ordered.',
   'newVersion.title': '🚀 New version available',
   'newVersion.bodyIos':
     'A new BiteTribe version is ready in the App Store. Update now to get the latest.',

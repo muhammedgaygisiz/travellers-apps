@@ -5,11 +5,11 @@ import { rolesOf } from '../shared/roles';
 import {
   RESTAURANT_COLLECTION,
   RESTAURANT_STAFF_COLLECTION,
+  TABLES_COLLECTION,
   holdsTableStateAuthority,
   parseRequiredString,
   requireTableStateAuthority,
 } from './restaurant-authority';
-import { TABLES_COLLECTION } from './table-qr-tokens';
 import {
   TABLE_STATES_COLLECTION,
   TABLE_STATE_TRANSITIONS_COLLECTION,

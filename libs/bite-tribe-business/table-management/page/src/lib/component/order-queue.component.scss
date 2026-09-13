@@ -1,0 +1,307 @@
+/*
+ * The incoming order queue (GitHub issue #1105).
+ *
+ * One column at every width, unlike the plan. A ticket is a list read top to
+ * bottom, and a pass with two columns of them is a pass where the newest order
+ * can be on either side of the screen - so the page widens its rows rather than
+ * splitting them, and the groups sit in a grid only once there is room for two
+ * whole tickets side by side.
+ */
+:host {
+  display: block;
+
+  --order-queue-ink-rgb: var(--ion-text-color-rgb, 0, 0, 0);
+}
+
+.order-queue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  /* The one rule that makes "no horizontal page scroll" structural. */
+  max-width: 100%;
+  container-type: inline-size;
+  position: relative;
+}
+
+/*
+ * The visual half of the busy-service alert.
+ *
+ * Independent of the sound, and not behind the same switch: a kitchen loud
+ * enough to need a chime is a kitchen where the chime alone is not enough, and
+ * a count that changes colour for a tick costs nobody anything.
+ *
+ * A **colour** change rather than a pulse, deliberately. Motion would need a
+ * `prefers-reduced-motion` escape and would still be running when the next
+ * order arrived; a colour that holds until the next tick says "something just
+ * happened" to a reader who has asked for no animation as loudly as to one who
+ * has not.
+ */
+.order-queue--arrived .order-queue__count {
+  --background: var(--ion-color-warning, #ffc409);
+  --color: var(--ion-color-warning-contrast, #000);
+}
+
+.order-queue__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.order-queue__heading {
+  min-width: 0;
+}
+
+.order-queue__subtitle {
+  font-size: 0.875rem;
+}
+
+.order-queue__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.order-queue__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.order-queue__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(var(--order-queue-ink-rgb), 0.06);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/*
+  Never colour alone: each tone comes with its own icon and its own word, and
+  this only reinforces them. Deliberately the plan's four tones and the plan's
+  four words - a queue and a room that described one connection differently
+  would be two answers to one question.
+*/
+.order-queue__live[data-tone='live'] {
+  color: var(--ion-color-success, #2dd36f);
+}
+
+.order-queue__live[data-tone='waiting'] {
+  color: rgba(var(--order-queue-ink-rgb), 0.6);
+}
+
+.order-queue__live[data-tone='offline'] {
+  color: var(--ion-color-warning-shade, #cc9500);
+}
+
+.order-queue__live[data-tone='stale'] {
+  color: var(--ion-color-danger, #eb445a);
+  background: rgba(235, 68, 90, 0.12);
+}
+
+.order-queue__live-age {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.order-queue__alert {
+  --handle-width: 1.25rem;
+
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.order-queue__loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.order-queue__message {
+  display: block;
+  padding: 1rem 0;
+}
+
+.order-queue__groups,
+.order-queue__orders,
+.order-queue__lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.order-queue__groups {
+  display: grid;
+  gap: 0.75rem;
+}
+
+/* Two whole tickets side by side, and never half of a third. */
+@container (min-width: 56rem) {
+  .order-queue__groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+.order-queue__group {
+  border: 1px solid rgba(var(--order-queue-ink-rgb), 0.12);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(var(--order-queue-ink-rgb), 0.02);
+}
+
+/*
+ * The table that has been waiting too long, marked on its edge.
+ *
+ * A border rather than a fill, so it reads across a kitchen without making the
+ * ticket underneath any harder to read - which is the same trade the plan makes
+ * with its status tint.
+ */
+.order-queue__group--urgent {
+  border-color: var(--ion-color-danger, #eb445a);
+  border-left-width: 0.25rem;
+}
+
+.order-queue__group-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.order-queue__table {
+  font-weight: 700;
+}
+
+.order-queue__group-age {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.order-queue__group--urgent .order-queue__group-age,
+.order-queue__order--urgent .order-queue__age {
+  color: var(--ion-color-danger, #eb445a);
+  opacity: 1;
+}
+
+.order-queue__orders {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.order-queue__order {
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  background: var(--ion-background-color, #fff);
+  border: 1px solid rgba(var(--order-queue-ink-rgb), 0.08);
+}
+
+.order-queue__order-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/*
+ * The status, as a word and a weight rather than as a colour alone.
+ *
+ * Three statuses reach this screen and they are steps of one process, so they
+ * differ in emphasis rather than in hue: what has not been looked at is the
+ * loudest thing on the row, and what the kitchen is already cooking recedes.
+ */
+.order-queue__status {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.order-queue__status[data-status='submitted'] {
+  color: var(--ion-color-primary, #3880ff);
+}
+
+.order-queue__status[data-status='accepted'],
+.order-queue__status[data-status='preparing'] {
+  color: rgba(var(--order-queue-ink-rgb), 0.55);
+}
+
+.order-queue__age {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+.order-queue__order--urgent .order-queue__age {
+  font-weight: 700;
+}
+
+.order-queue__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.4rem 0;
+}
+
+.order-queue__line {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.order-queue__quantity {
+  min-width: 2ch;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-queue__dish {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.order-queue__variant {
+  font-size: 0.8125rem;
+  opacity: 0.7;
+}
+
+.order-queue__line,
+.order-queue__message,
+.order-cancel__lead {
+  font-size: 0.9375rem;
+}
+
+/*
+ * What the guest asked for, and the one line on a ticket that changes what
+ * goes on the plate. It is quoted and set apart rather than run on, so a
+ * "no onions" is never read as part of the dish's own name.
+ */
+.order-queue__note {
+  margin-top: 0.15rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--ion-color-warning, #ffc409);
+  font-size: 0.8125rem;
+  font-style: italic;
+}
+
+.order-queue__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}

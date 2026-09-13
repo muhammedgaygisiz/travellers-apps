@@ -9,6 +9,7 @@ export { notifyThreadParticipantsOnReviewReply } from './functions/notifications
 export { backfillReviewTimestampsCallable } from './functions/reviews/backfill-review-timestamps';
 export { backfillMenuItemIdsCallable } from './functions/menus/backfill-menu-item-ids';
 export { notifyUserOnNewFollower } from './functions/notifications/notify-user-on-new-follower';
+export { notifyStaffOnNewTableOrder } from './functions/notifications/notify-staff-on-new-table-order';
 export { handleSharedLinkToBite } from './functions/bites/handle-shared-link-to-bite';
 export { sendWeeklyBiteNotification } from './functions/notifications/send-weekly-bite-notification';
 export { sendNewVersionNotification } from './functions/notifications/send-new-version-notification';
@@ -59,6 +60,7 @@ export { startTableSession } from './functions/restaurants/start-table-session';
 export { leaveTableSession } from './functions/restaurants/leave-table-session';
 export { submitTableOrder } from './functions/restaurants/submit-table-order';
 export { transitionTableState } from './functions/restaurants/transition-table-state';
+export { transitionTableOrderStatus } from './functions/restaurants/transition-table-order-status';
 export { moveTableVisit } from './functions/restaurants/move-table-visit';
 export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-create';
 export { claimDisplayName } from './functions/users/claim-display-name';

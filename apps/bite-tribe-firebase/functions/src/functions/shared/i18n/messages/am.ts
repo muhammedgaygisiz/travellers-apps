@@ -31,6 +31,9 @@ export const am: NotificationMessages = {
   'countryBadge.body': 'እንኳን ደስ አለዎት! የ{{country}} ባጅ ከፍተዋል',
   'countryBadge.followerTitle': '🌍 አዲስ የአገር ባጅ',
   'countryBadge.followerBody': '{{user}} የ{{country}} ባጅ ከፍቷል',
+  'newTableOrder.title': '🔔 አዲስ ትዕዛዝ',
+  'newTableOrder.body': 'ጠረጴዛ {{table}} አሁን አዘዘ።',
+  'newTableOrder.bodyWithoutTable': 'አንድ ጠረጴዛ አሁን አዘዘ።',
   'newVersion.title': '🚀 አዲስ ስሪት ወጥቷል',
   'newVersion.bodyIos': 'አዲሱ የBiteTribe ስሪት በApp Store ላይ ደርሷል። አሁን ያዘምኑት።',
   'newVersion.bodyAndroid':

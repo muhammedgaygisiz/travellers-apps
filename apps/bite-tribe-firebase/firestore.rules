@@ -590,6 +590,54 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    /**
+     * Every open order in one restaurant, across every visit
+     * (GitHub issue #1105).
+     *
+     * ```text
+     * collectionGroup('orders').where('restaurantId', '==', ...)
+     * ```
+     *
+     * The staff queue is the read the block above anticipated and deliberately
+     * did not admit: a member of staff coming on shift wants tonight's orders,
+     * and those are spread over one subcollection per party in the room. One
+     * listener per open visit is the alternative, and it is a listener attached
+     * and detached on every seating and every clearing - so the queue is a
+     * collection-group query and this is the match that admits it.
+     *
+     * **The restaurant comes off the document, because it is not in the path.**
+     * A collection-group match has no `{restaurantId}` to read, so the rule
+     * reads `resource.data.restaurantId` - the field `submitTableOrder` writes
+     * on to every order for exactly this reason. Firestore admits the query
+     * only when its constraints prove the condition, so the phone has to send
+     * `where('restaurantId', '==', id)` and a query without it is refused
+     * whole rather than returning every order in BiteTribe. That is the same
+     * mechanism `RD-TS-12` rests on, pointed at a restaurant instead of at a
+     * guest.
+     *
+     * **`list` and nothing else.** A `get` through this match would be a second
+     * way to reach one order document, and there is already one - the block
+     * above, path-scoped, where the guest's own clause lives. Two paths to one
+     * document are two rules to keep in step.
+     *
+     * **No write clause**, which leaves the `allow write: if false` above as the
+     * whole answer: `transitionTableOrderStatus` moves the status through the
+     * Admin SDK, and a member of staff able to write here could rewrite the
+     * lines of an order after the guest agreed to them.
+     *
+     * The readers are `readsFloorPlan`, the same list as the tables, their live
+     * state, the visits and the sessions. Two lists of readers for one dining
+     * room would drift.
+     *
+     * It needs an index the automatic ones do not cover: a single-field index is
+     * created per collection, and a collection-group query needs the scope
+     * declared. `firestore.indexes.json` carries `orders.restaurantId` and
+     * `orders.status` at `COLLECTION_GROUP` scope, and indexes deploy by hand.
+     */
+    match /{path=**}/orders/{orderId} {
+      allow list: if readsFloorPlan(resource.data.restaurantId);
+    }
+
     // -------------------------------------------------------- table sessions
 
     /**

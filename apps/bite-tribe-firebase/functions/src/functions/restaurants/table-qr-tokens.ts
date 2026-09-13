@@ -10,6 +10,7 @@ import { onAppCheck } from '../shared/callable-options';
 import { logOperatorAction } from '../shared/operator-log';
 import {
   RESTAURANT_COLLECTION,
+  TABLES_COLLECTION,
   holdsRestaurant,
   parseRequiredString,
   requireRestaurantAuthority,
@@ -33,8 +34,6 @@ import {
  * set of them cannot be walked.
  */
 export const TABLE_TOKENS_COLLECTION = 'tableTokens';
-
-export const TABLES_COLLECTION = 'tables';
 
 /**
  * Crockford base32, uppercase.

@@ -31,6 +31,9 @@ export const ar: NotificationMessages = {
   'countryBadge.body': 'تهانينا! لقد فتحت شارة {{country}}',
   'countryBadge.followerTitle': '🌍 شارة دولة جديدة',
   'countryBadge.followerBody': '{{user}} فتح شارة {{country}}',
+  'newTableOrder.title': '🔔 طلب جديد',
+  'newTableOrder.body': 'الطاولة {{table}} أرسلت طلبًا الآن.',
+  'newTableOrder.bodyWithoutTable': 'إحدى الطاولات أرسلت طلبًا الآن.',
   'newVersion.title': '🚀 يتوفر إصدار جديد',
   'newVersion.bodyIos':
     'إصدار جديد من BiteTribe متاح الآن في App Store. حدّث التطبيق لتحصل على أحدث المزايا.',

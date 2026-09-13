@@ -186,8 +186,17 @@ describe('business ROUTES', () => {
       'restaurant/:restaurantId/floor-plan/qr-codes',
     ];
 
-    /** The live room, which is the one of them a staff account may open. */
+    /**
+     * The two a staff account may open, both behind the owner-or-staff gate.
+     *
+     * The live room (issue \#1093) and the order queue (issue \#1105). They are
+     * listed apart from `EDIT_PATHS` because the guard differs: those check
+     * `Restaurant.ownerUserId`, which a staff account never holds, and these
+     * check the two halves of `worksAt()`.
+     */
     const TABLES_PATH = 'restaurant/:restaurantId/tables';
+    const ORDERS_PATH = 'restaurant/:restaurantId/orders';
+    const STAFF_PATHS = [TABLES_PATH, ORDERS_PATH];
 
     const ownerGuardOf = (route: Route): CanActivateFn =>
       (route.canActivate ?? [])[2] as CanActivateFn;
@@ -270,9 +279,9 @@ describe('business ROUTES', () => {
         .filter((route) => (route.canActivate ?? []).length > 2)
         .map((route) => route.path);
 
-      expect(guarded.sort()).toEqual([...EDIT_PATHS, TABLES_PATH].sort());
+      expect(guarded.sort()).toEqual([...EDIT_PATHS, ...STAFF_PATHS].sort());
       expect(aboutOneRestaurant.map((route) => route.path).sort()).toEqual(
-        [...EDIT_PATHS, TABLES_PATH].sort(),
+        [...EDIT_PATHS, ...STAFF_PATHS].sort(),
       );
     });
 
@@ -298,7 +307,7 @@ describe('business ROUTES', () => {
      * guards are one line apart in the route table and swapping them would be
      * invisible until a waiter signed in.
      */
-    describe('the live table view', () => {
+    describe('the live table view and the order queue', () => {
       const worksAt = (restaurantId: string | undefined): void => {
         jest
           .spyOn(FirebaseFirestore, 'getDocument')
@@ -313,25 +322,32 @@ describe('business ROUTES', () => {
           );
       };
 
-      it('admits the account that holds the restaurant', async () => {
-        assignedTo('user-1');
+      it.each(STAFF_PATHS)(
+        'admits the account that holds the restaurant on %s',
+        async (path) => {
+          assignedTo('user-1');
 
-        await expect(run(TABLES_PATH)).resolves.toBe(true);
-      });
+          await expect(run(path)).resolves.toBe(true);
+        },
+      );
 
-      it('admits an account that works at the restaurant', async () => {
-        worksAt('restaurant-1');
+      it.each(STAFF_PATHS)(
+        'admits an account that works at the restaurant on %s',
+        async (path) => {
+          worksAt('restaurant-1');
 
-        await expect(run(TABLES_PATH)).resolves.toBe(true);
-      });
+          await expect(run(path)).resolves.toBe(true);
+        },
+      );
 
-      it('refuses an account that works somewhere else', async () => {
-        worksAt('another-restaurant');
+      it.each(STAFF_PATHS)(
+        'refuses an account that works somewhere else on %s',
+        async (path) => {
+          worksAt('another-restaurant');
 
-        await expect(run(TABLES_PATH)).resolves.toEqual({
-          url: '/restaurants',
-        });
-      });
+          await expect(run(path)).resolves.toEqual({ url: '/restaurants' });
+        },
+      );
 
       /** Guards fail closed: a read that failed is never "and therefore yours". */
       it('refuses when neither document can be read', async () => {

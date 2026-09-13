@@ -1,0 +1,437 @@
+import {
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  Injectable,
+  resource,
+  ResourceLoader,
+  signal,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoService } from '@jsverse/transloco';
+import { BiteTribeStoreService } from 'bite-tribe/store';
+import { FloorPlanDataAccessService } from 'bite-tribe-business/floor-plan-data-access';
+import {
+  OrderAlertService,
+  tableOrderFailure,
+  TableOrderQueueService,
+  type TableOrderFailure,
+} from 'bite-tribe-business/table-management-data-access';
+import type { RestaurantTable, TableOrder, TableOrderStatus } from 'model';
+import { EMPTY, switchMap } from 'rxjs';
+import { ToastService } from 'toast';
+import { resourceFailed, resourceValue } from 'utils';
+import {
+  groupOrdersByTable,
+  openOrderCount,
+  type OrderAction,
+  type OrderTableGroup,
+} from './order-queue-groups';
+import { elapsedParts } from './table-status-duration';
+
+/**
+ * How often the ages on the queue are recomputed.
+ *
+ * Half a minute, exactly as the plan ticks and for the same reason: the numbers
+ * are whole minutes, so a shorter tick re-renders the list to redraw the same
+ * text and a longer one leaves a row reading `4 min` for most of its fifth.
+ */
+const AGE_TICK_MS = 30_000;
+
+/** How long without a delivery before the queue calls itself out of date. */
+const STALE_AFTER_MS = 60_000;
+
+/** What the header says about the connection. Deliberately the plan's four. */
+export type OrderQueueLiveStatus = 'connecting' | 'live' | 'offline' | 'stale';
+
+/** The cancellation a staff member is part way through explaining. */
+export interface PendingCancellation {
+  visitId: string;
+  orderId: string;
+  /** The table's number, so the dialog can name what is being cancelled. */
+  label: string;
+}
+
+/** The sentence a failure is reported with. */
+const FAILURE_KEYS: Readonly<Record<TableOrderFailure, string>> = {
+  conflict: 'order-action-conflict',
+  'not-allowed': 'order-action-not-allowed',
+  'not-found': 'order-action-not-found',
+  'reason-required': 'order-action-reason-required',
+  permission: 'order-action-permission',
+  unknown: 'order-action-failed',
+};
+
+/**
+ * The incoming order queue, as staff work it (GitHub issue #1105).
+ *
+ * ## What it is, next to the plan
+ *
+ * The plan answers "what is this room doing"; this answers "what does the
+ * kitchen owe it". They are the same restaurant read two ways, and they are two
+ * screens rather than one panel because a pass and a host stand are two places:
+ * the plan is geometry read from across a room, and a ticket is a list of
+ * dishes read at arm's length. What connects them is the count the plan draws
+ * per table and the link in its header, so the room view stays the primary
+ * screen and the queue is one press away from it.
+ *
+ * ## Why there is no optimistic layer
+ *
+ * The plan has one, and deliberately (issue #1094): a table that does not
+ * change colour while a party stands in front of the host reads as a tap that
+ * missed. A queue row is not that. The press is answered by the callable within
+ * a round trip and by the listener a moment later, the row is under the
+ * presser's finger rather than across a room, and an order that appeared to
+ * move and then moved back would be a kitchen that has already started cooking.
+ * So the row shows that it is busy and waits - and `busy` is per order, so one
+ * slow call does not freeze the rest of the pass.
+ *
+ * ## Cancelling asks first
+ *
+ * "Cancellations are explained, not silent" is an acceptance criterion, and the
+ * backend enforces it by refusing a cancellation with no reason. The dialog is
+ * what stops that refusal ever being reached: the action is held here as a
+ * {@link PendingCancellation} until somebody has typed a sentence, and only
+ * then is anything sent.
+ */
+@Injectable({ providedIn: 'root' })
+export class OrderQueueService {
+  private readonly queue = inject(TableOrderQueueService);
+  private readonly floorPlan = inject(FloorPlanDataAccessService);
+  private readonly storeService = inject(BiteTribeStoreService);
+  private readonly alerts = inject(OrderAlertService);
+  private readonly transloco = inject(TranslocoService);
+  private readonly toast = inject(ToastService);
+
+  readonly restaurantId = this.storeService.restaurantIdFromUrl;
+
+  readonly tablesLoader: ResourceLoader<
+    RestaurantTable[] | undefined,
+    { restaurantId: string | undefined }
+  > = async ({ params }) => {
+    const { restaurantId } = params;
+
+    return restaurantId ? this.floorPlan.loadTables(restaurantId) : [];
+  };
+
+  /**
+   * The tables, read for their numbers alone.
+   *
+   * An order carries a `tableId`, and a queue that printed one would be asking
+   * a kitchen to read a generated string. Every table of the restaurant rather
+   * than of one room, because a queue is not a room: a party on the terrace and
+   * a party in the cellar are one pass.
+   */
+  readonly tables = resource({
+    params: () => ({ restaurantId: this.restaurantId() }),
+    loader: this.tablesLoader.bind(this),
+  });
+
+  // Guarded reads: `value()` throws once a read has failed (issue #1232).
+  private readonly tablesValue = resourceValue(
+    this.tables,
+    [] as RestaurantTable[],
+  );
+
+  /**
+   * True once the table numbers could not be read.
+   *
+   * It does not empty the queue. The orders come from their own listener, and a
+   * pass that can see the dishes and not the table numbers is worse than one
+   * with both and better than one with neither - so the rows still render and
+   * the header says the numbers are missing.
+   */
+  readonly labelsFailed = resourceFailed(this.tables);
+
+  readonly isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
+    initialValue: false,
+  });
+
+  /**
+   * The open orders, pushed by Firestore rather than polled.
+   *
+   * `undefined` until the first delivery arrives, which {@link liveStatus}
+   * reports as `connecting`: an empty list drawn from no delivery at all is
+   * indistinguishable from a kitchen with nothing to cook, and a pass has to be
+   * able to tell those apart.
+   */
+  private readonly feed = toSignal(
+    this.storeService.restaurantIdFromUrl$.pipe(
+      switchMap((restaurantId) =>
+        restaurantId ? this.queue.openOrders$(restaurantId) : EMPTY,
+      ),
+    ),
+  );
+
+  private readonly orders = computed<TableOrder[]>(
+    () => this.feed()?.orders ?? [],
+  );
+
+  /**
+   * The wall clock, ticked so the ages on the rows advance.
+   *
+   * An interval rather than an animation frame, for the reason the plan gives:
+   * the numbers are whole minutes, and a list redrawn sixty times a second to
+   * show the same text costs a tablet its battery through a whole service.
+   */
+  private readonly now = signal(Date.now());
+
+  /**
+   * The language, so the ages and status words are recomputed when it changes.
+   *
+   * Read as a signal because `translate()` is a plain call: a computed that
+   * made one would never re-run, and the queue would keep the words of whatever
+   * language was active when it was opened.
+   */
+  private readonly language = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang(),
+  });
+
+  /** The queue itself: one group per table, newest first. */
+  readonly groups = computed<OrderTableGroup[]>(() =>
+    groupOrdersByTable(this.orders(), this.tablesValue(), this.now()),
+  );
+
+  /** How many open orders there are, across every table. */
+  readonly openCount = computed(() => openOrderCount(this.groups()));
+
+  readonly loading = computed(() => this.feed() === undefined);
+
+  /** Whether this device alerts on a new order. Off until turned on. */
+  readonly alertEnabled = this.alerts.enabled;
+
+  /**
+   * The order whose press has not been answered yet.
+   *
+   * One at a time and by id rather than a boolean over the whole queue, so a
+   * slow call on table 12 leaves the rest of the pass working.
+   */
+  readonly busyOrderId = signal<string | undefined>(undefined);
+
+  /** The cancellation waiting for its reason, or nothing. */
+  readonly pendingCancellation = signal<PendingCancellation | undefined>(
+    undefined,
+  );
+
+  /**
+   * The visual half of the busy-service alert.
+   *
+   * A flash on the header rather than a sound, and independent of
+   * {@link alertEnabled}: a kitchen loud enough to need the chime is a kitchen
+   * where the chime alone is not enough, and a screen that lights up costs
+   * nobody anything. It is cleared by the tick that follows it.
+   */
+  readonly justArrived = signal(false);
+
+  /**
+   * Whether what is on screen is current, and if not, how far from it.
+   *
+   * Deliberately the plan's four states rather than two (issue #1096): a
+   * listener the SDK detached and a quiet kitchen both look like an empty
+   * queue, and "not current" without a number is a warning nobody can act on.
+   */
+  readonly liveStatus = computed<OrderQueueLiveStatus>(() => {
+    const feed = this.feed();
+
+    if (!feed) {
+      return 'connecting';
+    }
+
+    if (feed.live) {
+      return 'live';
+    }
+
+    return this.now() - feed.at >= STALE_AFTER_MS ? 'stale' : 'offline';
+  });
+
+  /** How long ago the server last confirmed the queue, for the indicator. */
+  readonly lastUpdated = computed<string | undefined>(() => {
+    const feed = this.feed();
+
+    if (!feed || feed.at === 0) {
+      return undefined;
+    }
+
+    // Read so the label is retranslated when the language changes.
+    this.language();
+
+    const { key, params } = elapsedParts(feed.at, this.now());
+
+    return this.transloco.translate(key, params);
+  });
+
+  constructor() {
+    const tick = setInterval(() => {
+      this.now.set(Date.now());
+      this.justArrived.set(false);
+    }, AGE_TICK_MS);
+
+    inject(DestroyRef).onDestroy(() => clearInterval(tick));
+
+    void this.alerts.restore();
+
+    /*
+     * A new order announces itself once (GitHub issue #1105).
+     *
+     * Watched by *id* rather than by count, because a count rises when an order
+     * arrives and falls when one is served - and a queue that alerted on every
+     * change would chime at the person who had just pressed Served. Ids that
+     * were not there before are the arrivals, and nothing else is.
+     *
+     * The first delivery is deliberately silent: opening the screen at the
+     * start of a shift would otherwise announce the whole pass at once, which
+     * is a sound that says nothing about what just happened.
+     */
+    effect(() => {
+      const delivery = this.feed();
+
+      // Read off the *delivery* rather than off `orders()`, which answers `[]`
+      // both before the listener has said anything and when the kitchen is
+      // genuinely up to date. Taking the empty one as a first delivery would
+      // make every order of the real first snapshot an arrival, and opening the
+      // screen mid-service would announce the whole pass at once.
+      if (!delivery) {
+        return;
+      }
+
+      const ids = new Set(delivery.orders.map((order) => order.id));
+
+      if (!this.seen) {
+        this.seen = ids;
+
+        return;
+      }
+
+      const arrived = [...ids].some((id) => !this.seen?.has(id));
+
+      this.seen = ids;
+
+      if (arrived) {
+        this.alerts.alert();
+        this.justArrived.set(true);
+      }
+    });
+  }
+
+  /** The order ids of the previous delivery. `undefined` before the first. */
+  private seen?: Set<string>;
+
+  /** Turns this device's alert on or off, and remembers it. */
+  async toggleAlert(): Promise<void> {
+    await this.alerts.setEnabled(!this.alerts.enabled());
+  }
+
+  /**
+   * Acts on one order, asking for a reason first where one is needed.
+   *
+   * The reason check is read off the action rather than decided here, so
+   * "cancelling explains itself" stays one rule in `order-queue-groups.ts`
+   * rather than a condition every call site has to remember.
+   */
+  async pick(
+    group: OrderTableGroup,
+    orderId: string,
+    action: OrderAction,
+    status: TableOrderStatus,
+  ): Promise<void> {
+    const visitId = group.orders.find((order) => order.id === orderId)?.visitId;
+
+    if (!visitId) {
+      return;
+    }
+
+    if (action.needsReason) {
+      this.pendingCancellation.set({ visitId, orderId, label: group.label });
+
+      return;
+    }
+
+    await this.send(visitId, orderId, action.to, status);
+  }
+
+  /** Abandons a cancellation before a reason was given. */
+  dismissCancellation(): void {
+    this.pendingCancellation.set(undefined);
+  }
+
+  /**
+   * Sends the cancellation the dialog collected a reason for.
+   *
+   * The status is read again here rather than captured when the dialog opened,
+   * because the dialog is open for as long as somebody takes to type - and an
+   * `expectedStatus` from a minute ago is exactly the stale expectation the
+   * backend is built to refuse. Reading it now means the refusal happens only
+   * when the order genuinely moved while the sentence was being written.
+   */
+  async confirmCancellation(reason: string): Promise<void> {
+    const pending = this.pendingCancellation();
+
+    if (!pending) {
+      return;
+    }
+
+    const status = this.statusOf(pending.orderId);
+
+    this.pendingCancellation.set(undefined);
+
+    if (!status) {
+      return;
+    }
+
+    await this.send(
+      pending.visitId,
+      pending.orderId,
+      'cancelled',
+      status,
+      reason,
+    );
+  }
+
+  private statusOf(orderId: string): TableOrderStatus | undefined {
+    return this.orders().find((order) => order.id === orderId)?.status;
+  }
+
+  private async send(
+    visitId: string,
+    orderId: string,
+    to: TableOrderStatus,
+    expectedStatus: TableOrderStatus,
+    reason?: string,
+  ): Promise<void> {
+    const restaurantId = this.restaurantId();
+
+    if (!restaurantId) {
+      return;
+    }
+
+    this.busyOrderId.set(orderId);
+
+    try {
+      await this.queue.transition({
+        restaurantId,
+        visitId,
+        orderId,
+        status: to,
+        expectedStatus,
+        ...(reason ? { reason } : {}),
+      });
+    } catch (error) {
+      // Every failure changes what is on screen, and the row is about to be
+      // corrected by the listener either way - so what the staff member is
+      // owed is the sentence, not a retry.
+      console.error('Failed to move the order:', error);
+
+      await this.toast.present({
+        messageKey: FAILURE_KEYS[tableOrderFailure(error)],
+        outcome: 'failure',
+      });
+    } finally {
+      this.busyOrderId.set(undefined);
+    }
+  }
+
+  logout(): void {
+    this.storeService.logout();
+  }
+}

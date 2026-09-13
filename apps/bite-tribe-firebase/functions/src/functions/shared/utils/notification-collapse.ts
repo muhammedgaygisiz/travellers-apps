@@ -71,6 +71,15 @@ export const buildCollapseKey = (
     case 'NEW_FOLLOWER':
       return buildKey(type, data['followerUid']);
 
+    case 'NEW_TABLE_ORDER':
+      // The restaurant is the surface - one queue per restaurant - and the
+      // table is the variant, so a second round from table 12 replaces the
+      // first while table 9 ordering stacks beside it (issue \#1105). The
+      // other shape, collapsing the whole restaurant into one notification,
+      // would tell a waiter that *a* table has ordered and hide which others
+      // did while their phone was in their pocket.
+      return buildKey(type, data['restaurantId'], data['tableId']);
+
     case 'NEW_COUNTRY_BADGE':
       // Two countries earned by the same person are two achievements, so the
       // country is a variant rather than part of the surface. Both still clear

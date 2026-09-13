@@ -124,6 +124,26 @@
   background: rgba(235, 68, 90, 0.12);
 }
 
+/*
+ * The way to the pass (GitHub issue #1105).
+ *
+ * In the header beside the connection indicator rather than in the summary bar,
+ * because it is navigation and the bar is a legend. The badge is on the button
+ * so the number and the way to it are one target.
+ */
+.table-plan__orders {
+  --padding-start: 0.6rem;
+  --padding-end: 0.6rem;
+
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.table-plan__orders-count {
+  margin-inline-start: 0.35rem;
+}
+
 .table-plan__live-age {
   font-weight: 500;
   opacity: 0.85;

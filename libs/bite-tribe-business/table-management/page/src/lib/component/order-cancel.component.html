@@ -1,0 +1,78 @@
+<!--
+  The scrim closes the dialog for a pointer and is hidden from everything else.
+  A keyboard has the "Keep it" button inside the dialog, so there is nothing
+  here for a screen reader to find and nothing it would gain by finding it.
+-->
+<div class="order-cancel" data-testid="order-cancel">
+  <div
+    class="order-cancel__scrim"
+    aria-hidden="true"
+    (click)="dismissed.emit()"
+  ></div>
+
+  <section
+    class="order-cancel__panel"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'order-cancel-title' | transloco"
+  >
+    <h2 class="order-cancel__title">
+      {{ 'order-cancel-title' | transloco }}
+    </h2>
+
+    <p class="order-cancel__lead">
+      {{
+        pending().label
+          ? ('order-cancel-lead' | transloco: { label: pending().label })
+          : ('order-cancel-lead-unknown' | transloco)
+      }}
+    </p>
+
+    <!--
+      Outlined, and in Material mode to get the outline at all: `fill` is a
+      Material-mode feature and this app runs in iOS mode, so without the
+      override the field draws no border and reads as empty space under its
+      label - which, on the one screen whose whole point is that somebody types
+      a sentence, is the difference between a dialog and a dead end. The same
+      pair the Bite trail form uses.
+    -->
+    <ion-textarea
+      mode="md"
+      fill="outline"
+      [rows]="3"
+      [label]="'order-cancel-reason' | transloco"
+      labelPlacement="stacked"
+      [autoGrow]="true"
+      [maxlength]="maxReason"
+      [value]="reason()"
+      data-testid="order-cancel-reason"
+      (ionInput)="onReason($any($event.detail.value))"
+    />
+
+    <div class="order-cancel__buttons">
+      <ion-button
+        fill="clear"
+        data-testid="order-cancel-dismiss"
+        (click)="dismissed.emit()"
+      >
+        {{ 'order-cancel-keep' | transloco }}
+      </ion-button>
+
+      <!--
+        Out of reach until a reason has been typed, which is the markup's half
+        of "cancellations are explained, not silent". The backend refuses one
+        without a reason as well; this is what stops that refusal ever being
+        what a kitchen sees.
+      -->
+      <ion-button
+        color="danger"
+        [disabled]="!reasonGiven()"
+        [attr.aria-disabled]="!reasonGiven()"
+        data-testid="order-cancel-confirm"
+        (click)="confirm()"
+      >
+        {{ 'order-cancel-confirm' | transloco }}
+      </ion-button>
+    </div>
+  </section>
+</div>

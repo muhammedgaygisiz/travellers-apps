@@ -9,6 +9,7 @@ import {
 import {
   addDoc,
   collection,
+  collectionGroup,
   deleteDoc,
   doc,
   getDoc,
@@ -18,8 +19,10 @@ import {
   updateDoc,
   where,
   CollectionReference,
+  DocumentData,
   DocumentReference,
   Firestore,
+  Query,
 } from 'firebase/firestore';
 
 /**
@@ -1790,6 +1793,58 @@ describe('table orders', () => {
 
     it('refuses an unauthenticated reader entirely', async () => {
       await assertFails(getDoc(orderDoc(anonymously(), CONSUMER_ORDER)));
+    });
+  });
+
+  /**
+   * The staff queue's read (GitHub issue #1105).
+   *
+   * A collection-group query, because tonight's orders are spread over one
+   * subcollection per party and a listener per visit would be attached and
+   * detached on every seating and every clearing. The match has no
+   * `{restaurantId}` in its path, so the rule reads the field off the document
+   * - which makes the `where` the permission rather than a filter over the
+   * answer, exactly as the guest's own `list` works one block up.
+   */
+  describe('the staff queue lists every open order of one restaurant', () => {
+    const openOrders = (db: Firestore): Query<DocumentData> =>
+      query(
+        collectionGroup(db, 'orders'),
+        where('restaurantId', '==', OWNED_RESTAURANT),
+        where('status', 'in', ['submitted', 'accepted', 'preparing']),
+      );
+
+    it('lets staff, the owner and an operator run it', async () => {
+      await assertSucceeds(getDocs(openOrders(asStaff())));
+      await assertSucceeds(getDocs(openOrders(asOwner())));
+      await assertSucceeds(getDocs(openOrders(asOperator())));
+    });
+
+    it('returns the orders of that restaurant and no others', async () => {
+      const snapshot = await assertSucceeds(getDocs(openOrders(asStaff())));
+
+      expect(snapshot.docs.length).toBeGreaterThan(0);
+      snapshot.docs.forEach((entry) => {
+        expect(entry.data()['restaurantId']).toBe(OWNED_RESTAURANT);
+      });
+    });
+
+    /**
+     * Without the constraint the query could return any order in BiteTribe, so
+     * it is refused whole. This is the assertion that makes the rule a rule
+     * rather than a habit of one call site.
+     */
+    it('refuses the same query with no restaurant named', async () => {
+      await assertFails(getDocs(collectionGroup(asStaff(), 'orders')));
+    });
+
+    it('refuses a business account that does not hold the restaurant', async () => {
+      await assertFails(getDocs(openOrders(asOtherBusiness())));
+    });
+
+    it('refuses a guest and a signed-out reader', async () => {
+      await assertFails(getDocs(openOrders(asConsumer())));
+      await assertFails(getDocs(openOrders(anonymously())));
     });
   });
 

@@ -32,6 +32,9 @@ export const th: NotificationMessages = {
   'countryBadge.body': 'ยินดีด้วย! คุณปลดล็อกเหรียญตรา {{country}} แล้ว',
   'countryBadge.followerTitle': '🌍 เหรียญตราประเทศใหม่',
   'countryBadge.followerBody': '{{user}} ปลดล็อกเหรียญตรา {{country}} แล้ว',
+  'newTableOrder.title': '🔔 ออร์เดอร์ใหม่',
+  'newTableOrder.body': 'โต๊ะ {{table}} เพิ่งสั่งอาหาร',
+  'newTableOrder.bodyWithoutTable': 'มีโต๊ะเพิ่งสั่งอาหาร',
   'newVersion.title': '🚀 มีเวอร์ชันใหม่แล้ว',
   'newVersion.bodyIos':
     'BiteTribe เวอร์ชันใหม่พร้อมใช้งานบน App Store แล้ว อัปเดตเลยเพื่อไม่พลาดของใหม่',

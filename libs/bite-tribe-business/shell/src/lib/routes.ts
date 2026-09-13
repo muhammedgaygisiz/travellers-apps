@@ -170,8 +170,8 @@ export const ROUTES: Routes = withAuthRoutes([
     ],
   },
   /**
-   * The live room, and the one route in this app a **staff** account is meant
-   * to reach (issue #1093).
+   * The live room, and the first route in this app a **staff** account was
+   * meant to reach (issue #1093). The order queue below is the second.
    *
    * Not `ownedRestaurantGuard`, which checks `Restaurant.ownerUserId` and would
    * therefore refuse every account this page exists for.
@@ -189,6 +189,34 @@ export const ROUTES: Routes = withAuthRoutes([
     loadComponent: () =>
       import('bite-tribe-business/table-management').then(
         (m) => m.TablePlanContainer,
+      ),
+    canActivate: [
+      authGuard,
+      roleGuard('business', 'staff'),
+      restaurantAccessGuard('/restaurants'),
+    ],
+  },
+  /**
+   * The incoming order queue, beside the room rather than inside it
+   * (issue #1105).
+   *
+   * The same gate as the live view and for the same reason: `restaurantAccessGuard`
+   * admits the owner **or** the staff of this one restaurant, which is the two
+   * halves of `worksAt()` in `firestore.rules` - and the collection-group rule
+   * the queue's query is admitted by reads the same `readsFloorPlan`. A queue
+   * behind `ownedRestaurantGuard` would have been a pass no chef could open.
+   *
+   * A route of its own rather than a panel on the plan, because a pass and a
+   * host stand are two places: the plan is geometry read from across a room and
+   * a ticket is a list of dishes read at arm's length, and the tablet clamped
+   * by the grill wants one of them on screen all evening. The room stays the
+   * primary screen - it carries the per-table order count and the link here.
+   */
+  {
+    path: 'restaurant/:restaurantId/orders',
+    loadComponent: () =>
+      import('bite-tribe-business/table-management').then(
+        (m) => m.OrderQueueContainer,
       ),
     canActivate: [
       authGuard,

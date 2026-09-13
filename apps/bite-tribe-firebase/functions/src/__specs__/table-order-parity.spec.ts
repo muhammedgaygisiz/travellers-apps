@@ -220,4 +220,37 @@ describe('table order parity', () => {
       );
     }
   });
+
+  /**
+   * The queue's own two constants (GitHub issue #1105).
+   *
+   * `OPEN_TABLE_ORDER_STATUSES` is what the staff queue queries on, so a copy
+   * that held a different set would give the backend and the screen different
+   * answers to "is this order still outstanding" - and the screen's answer is
+   * the one a kitchen works from. It is *derived* in both files rather than
+   * listed, so the assertion is on the derivation: a literal in either copy is
+   * a list that can drift from the end statuses beside it.
+   *
+   * The reason cap bounds a string staff type and a guest is shown. A backend
+   * that accepted longer than the client offers would store a sentence no
+   * screen renders whole; a backend that accepted shorter would refuse a
+   * cancellation after the dish was already off.
+   */
+  it('derives the open statuses the same way in both files', () => {
+    for (const file of BOTH) {
+      const source = readFileSync(file, 'utf8').replace(/\s+/g, ' ');
+
+      expect(source).toContain(
+        'OPEN_TABLE_ORDER_STATUSES: readonly TableOrderStatus[] = TABLE_ORDER_STATUSES.filter( (status) => !TABLE_ORDER_END_STATUSES.includes(status), )',
+      );
+    }
+  });
+
+  it('caps a cancellation reason at the same length in both files', () => {
+    for (const file of BOTH) {
+      expect(readFileSync(file, 'utf8')).toContain(
+        'MAX_TABLE_ORDER_CANCELLATION_REASON_LENGTH = 200',
+      );
+    }
+  });
 });

@@ -157,6 +157,33 @@ const ROUND_TEXT_FIT = 0.78;
 const STATUS_GLYPH_RATIO = 0.7;
 
 /**
+ * The open-order badge on a table, as shares of the number's size
+ * (GitHub issue #1105).
+ *
+ * It sits on the table's top-right corner rather than in the stack of rows
+ * below the number, and that is the whole of why it is a badge and not a fourth
+ * row. The three rows are already full at zoom-to-fit - a status glyph, a
+ * number and a duration - and a fourth would either shrink all four or push one
+ * off the table. A corner is empty space that scales with the table, which
+ * makes the count readable at the zoom a whole room is drawn at while leaving
+ * the number the loudest thing on the table.
+ *
+ * A disc with the count in it rather than a bare digit, because a stray `2`
+ * beside a table number is a table number.
+ */
+const ORDER_BADGE_RADIUS_RATIO = 0.62;
+const ORDER_BADGE_TEXT_RATIO = 0.72;
+
+/**
+ * The most the badge will spell out.
+ *
+ * A table with more open orders than this is a table with a problem, and the
+ * exact figure is not what the plan is for - it is in the queue, which is one
+ * press away. What the disc has room for is two characters.
+ */
+const ORDER_BADGE_MAX = 9;
+
+/**
  * Where the three rows of a table under service sit, as shares of the stack
  * step.
  *
@@ -339,6 +366,20 @@ interface ItemView {
    * avoid.
    */
   statusName: string;
+  /**
+   * How many orders the kitchen still owes this table, as the badge draws it
+   * (GitHub issue #1105).
+   *
+   * Empty when there is nothing outstanding, so the template's one `@if` covers
+   * both "no orders" and "the editor, which has no orders at all".
+   */
+  orderBadgeText: string;
+  /** The count itself, for the accessible name, which needs the real number. */
+  orderCount: number;
+  orderBadgeX: Millimetres;
+  orderBadgeY: Millimetres;
+  orderBadgeRadius: Millimetres;
+  orderBadgeTextSize: Millimetres;
 }
 
 /**
@@ -782,6 +823,10 @@ export class FloorPlanCanvasComponent {
       const blockLeft = item.position.x - (glyphWidth + gap + textWidth) / 2;
       const shoulderTop = seatsY + seatsSize * SEAT_SHOULDER_TOP_RATIO;
       const shoulderBottom = seatsY + seatsSize * SEAT_SHOULDER_BOTTOM_RATIO;
+      // Zero is drawn as nothing rather than as a nought, so a table the
+      // kitchen owes nothing has no badge at all.
+      const orderCount = (isTable ? item.openOrders : undefined) ?? 0;
+      const orderBadgeRadius = labelSize * ORDER_BADGE_RADIUS_RATIO;
 
       return {
         id: item.id,
@@ -807,8 +852,12 @@ export class FloorPlanCanvasComponent {
               ? 'floor-plan-item-table-disabled'
               : 'floor-plan-item-table'
             : duration
-              ? 'table-plan-item-table-timed'
-              : 'table-plan-item-table',
+              ? orderCount > 0
+                ? 'table-plan-item-table-timed-orders'
+                : 'table-plan-item-table-timed'
+              : orderCount > 0
+                ? 'table-plan-item-table-orders'
+                : 'table-plan-item-table',
         selected,
         strokeWidth:
           hairline * (selected ? SELECTED_HAIRLINES : ITEM_HAIRLINES),
@@ -865,6 +914,23 @@ export class FloorPlanCanvasComponent {
         } 0 0 1 ${blockLeft + glyphWidth} ${shoulderTop} L ${
           blockLeft + glyphWidth
         } ${shoulderBottom} Z`,
+        orderCount,
+        orderBadgeText:
+          orderCount === 0
+            ? ''
+            : orderCount > ORDER_BADGE_MAX
+              ? `${ORDER_BADGE_MAX}+`
+              : String(orderCount),
+        /*
+         * The corner of the item's own box, for a round table as much as for a
+         * rectangular one. A circle's bounding corner is outside the shape, and
+         * a badge half off the edge of a round table is how a badge reads -
+         * pinned to the thing rather than printed on it.
+         */
+        orderBadgeX: item.position.x + item.size.width / 2,
+        orderBadgeY: item.position.y - item.size.height / 2,
+        orderBadgeRadius,
+        orderBadgeTextSize: orderBadgeRadius * ORDER_BADGE_TEXT_RATIO,
       };
     });
   });

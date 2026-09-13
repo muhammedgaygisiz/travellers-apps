@@ -32,6 +32,9 @@ export const tr: NotificationMessages = {
   'countryBadge.body': 'Tebrikler! {{country}} rozetinin kilidini açtın',
   'countryBadge.followerTitle': '🌍 Yeni ülke rozeti',
   'countryBadge.followerBody': '{{user}}, {{country}} rozetinin kilidini açtı',
+  'newTableOrder.title': '🔔 Yeni sipariş',
+  'newTableOrder.body': '{{table}} numaralı masa sipariş verdi.',
+  'newTableOrder.bodyWithoutTable': 'Bir masa sipariş verdi.',
   'newVersion.title': '🚀 Yeni sürüm hazır',
   'newVersion.bodyIos':
     'BiteTribe’ın yeni sürümü App Store’da. Hemen güncelle, hiçbir yeniliği kaçırma.',

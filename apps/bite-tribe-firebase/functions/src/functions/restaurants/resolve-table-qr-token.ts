@@ -8,10 +8,12 @@ import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { evaluateOpeningHours } from '../shared/utils/opening-hours';
 import { withinScanRateLimit } from '../shared/utils/scan-rate-limit';
-import { RESTAURANT_COLLECTION } from './restaurant-authority';
+import {
+  RESTAURANT_COLLECTION,
+  TABLES_COLLECTION,
+} from './restaurant-authority';
 import {
   TABLE_TOKENS_COLLECTION,
-  TABLES_COLLECTION,
   TOKEN_ALPHABET,
   TOKEN_LENGTH,
 } from './table-qr-tokens';

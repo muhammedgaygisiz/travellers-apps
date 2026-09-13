@@ -6,13 +6,14 @@
 
 Partly implemented. Specified through issue \#1072 as stage 3 of issue \#735, and issue \#1073 as stage 4.
 
-Six of the ten children have landed. Issue \#1099 gave menu items the identity
+Seven of the ten children have landed. Issue \#1099 gave menu items the identity
 an order line hangs from; issue \#1100 made a scanned token resolve, validating
 the six rules below and answering with a restaurant, a room, a table and a menu
 or one of twelve distinct refusal reasons; issue \#1101 gave the guest a
 screen, a session and an identity to hold it with; issue \#1103 gave them a
-cart and a way to send it; and issue \#1104 gave them a way to watch what
-happens to it and to order again.
+cart and a way to send it; issue \#1104 gave them a way to watch what happens
+to it and to order again; and issue \#1105 gave the restaurant the screen that
+answers them.
 
 **A scanned code now reaches something.** `/t/:token` is a public route in the
 consumer app, the twelve refusal reasons have copy in all eleven locale files,
@@ -43,12 +44,23 @@ reason where staff gave one; and a table that stops taking orders withdraws the
 send button within seconds rather than refusing a cart the guest has already
 built. Two decisions shaped it, `RD-TS-12` and `RD-TS-13`.
 
-**Two gaps remain, and both are staff-facing.** Nothing shows staff a pending
-session, which sits with issue \#1107. And nothing shows them an order: the
-queue, and every status after `submitted`, is issue \#1105. So a guest can now
-send an order that no screen in the restaurant draws, and watch it sit at
-"sent to the kitchen" for the rest of the meal - which is why table ordering
-stays off for every restaurant until \#1105 lands.
+**Issue \#1105 closed the restaurant's end of the loop.** Orders reach a queue at
+`restaurant/{id}/orders`, grouped by table and newest first, each row carrying
+its whole ticket and the time since the guest sent it; staff accept, start
+preparing, serve, or cancel with a reason the guest is shown; the room view
+badges each table with what the kitchen still owes it; and a new order reaches
+the people on shift as a push through the existing notification infrastructure,
+with a per-device audible alert that is off until somebody turns it on. Four
+decisions shaped it, `RD-TS-14` to `RD-TS-17`.
+
+**One gap remains, and it is staff-facing.** Nothing shows staff a **pending
+session** - the guest who scanned while waiting to be seated - which sits with
+issue \#1107. Table ordering is off for every restaurant until an owner turns it
+on, and what still has to happen before one should is the deploy: the rules and
+the indexes this issue adds are applied by hand, so a queue opened against
+production today would be refused until
+`npx nx firebase-deploy-rules bite-tribe-firebase` and
+`npx nx firebase-deploy-indexes bite-tribe-firebase` have run.
 
 ## Goal
 
@@ -68,8 +80,8 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 - The guest joins the table's open visit, or raises a pending signal that staff confirm. Implemented, issue \#1101.
 - The guest browses the menu, with unavailable items marked and not addable, a variant of an unavailable dish included. Implemented, issues \#1102 and \#1103.
 - The guest builds a cart and submits an order. Implemented, issue \#1103.
-- Staff see the order in a queue attached to the correct table, accept it, and update its status.
-- The guest watches each order move along its status, and is told when one is cancelled and why. Implemented, issue \#1104 - nothing writes a status past `submitted` until issue \#1105.
+- Staff see the order in a queue attached to the correct table, accept it, and update its status. Implemented, issue \#1105.
+- The guest watches each order move along its status, and is told when one is cancelled and why. Implemented, issues \#1104 and \#1105.
 - The guest orders again into the same visit without rescanning. Implemented, issue \#1104.
 - The guest requests assistance or the bill.
 - The guest pays in the app or asks staff to settle, and the visit closes.
@@ -127,6 +139,11 @@ and the floor-plan geometry on the table stay where they are.
 - Order lines snapshot the menu item name, price, and currency at submission, so the price the guest saw is the price they are charged. Delivered by issue \#1103 and recorded as `RD-TS-10`: the phone sends the prices it displayed, the backend compares each to the live menu, and a difference refuses the whole order naming the item and both prices - so what is stored is always the menu's number, and it is only ever stored when the two agree.
 - Submission carries an idempotency key, so a double tap on a flaky restaurant network produces one order.
 - A guest sees the orders **their own phone** sent, and not the party's (`RD-TS-12`). The bill is shared and is settled at the table; what the screen runs a total over is what this guest ordered, with cancelled orders excluded from it.
+- An order's status is the **restaurant's** to move, and only along the matrix. `transitionTableOrderStatus` is the only writer of it, `firestore.rules` refuses every client write to the collection, and the transition matrix lives once in `libs/bite-tribe-common/model` with a checked copy in the Functions project - so the buttons the queue offers and the moves the backend accepts cannot disagree.
+- An order is **immutable except for its status**. A correction is a cancellation with a reason, never a rewrite of the lines: a bill that can be edited after the fact is a bill nobody can dispute. The staff callable updates four fields and touches nothing the guest agreed to.
+- **Cancellations are explained, not silent** (`RD-TS-16`). The queue asks for a sentence before it sends one, the backend refuses a cancellation without one, and the guest's screen renders it beside the order.
+- Staff see a new order **within seconds**, attached to the correct table, and are told about it wherever they are: the queue is a live listener, and `notifyStaffOnNewTableOrder` pushes to the owner and to every account associated with the restaurant through the same `sendLocalizedNotification` every other trigger uses - so an installation with notifications switched off stays off (issue \#1184) and everyone is written to in their own language (issue \#1200).
+- **The room view stays the primary screen.** Each table on the live floor plan carries a badge counting the orders the kitchen still owes it, and the header links to the queue, so which tables are waiting is answered without leaving the plan and what they are waiting for is one press away.
 - Prices from a real order are stronger evidence than a typed price and bypass the suspicious-price warning from issue \#967 during Bite creation. The evidence now exists - `OrderLineSnapshot` records a price the backend checked against the menu - and nothing reads it yet; that is issue \#1073's.
 
 ## The Address A Code Already Carries
@@ -364,21 +381,88 @@ runs the scan again before offering an "add" button, because a kitchen can
 pause while somebody eats a starter. The orders already sent stay on screen
 through it.
 
+## The Queue An Order Reaches
+
+Issue \#1105 is the restaurant's half of the loop, and the first surface in
+BiteTribe that a kitchen rather than a host works at.
+
+**One collection-group query, scoped by a field** (`RD-TS-14`). Orders hang from
+the visit, so tonight's are spread over one subcollection per party and no path
+holds them all. The queue asks for them as
+`collectionGroup('orders').where('restaurantId', '==', id)` with a second
+constraint on the open statuses, rather than opening a listener per seated table
+and closing it again on every clearing. The rule that admits it reads
+`resource.data.restaurantId`, because a collection-group match has no
+`{restaurantId}` in its path - which makes the `where` the permission rather
+than a filter, the same mechanism `RD-TS-12` rests on turned towards a
+restaurant. It needs a collection-group index exemption that Firestore does not
+create on its own, and indexes here deploy by hand.
+
+**Grouped by the table the order was placed from.** A party that moves keeps its
+visit and changes its `tableId`, and the kitchen's question is "what goes to
+table 12" - so the group is the table on the ticket. A table deleted from the
+floor plan since the order was sent still gets a group, named as unknown: losing
+an order somebody is waiting for in order to tidy up a number is the wrong
+trade.
+
+**Newest first, with the age on every row.** The thing that just arrived is the
+thing nobody has looked at; everything already accepted has somebody working on
+it. The group carries its **oldest** order's age beside the table number and
+marks itself once that passes twelve minutes, so the round that has been sitting
+there since before the rush is the loudest thing in its group rather than
+something staff have to scroll for. The threshold changes nothing but what the
+screen says.
+
+**The row waits for the backend** (`RD-TS-15`), which is the opposite of what
+the floor plan does with a table transition - and for a reason that only applies
+to a plan. A table that does not change colour while a party stands in front of
+the host reads as a tap that missed; a queue row is under the presser's finger,
+and an order that appeared to move and then moved back is a kitchen that has
+already started cooking. The busy state is per order, so one slow call does not
+freeze the pass.
+
+**Two people working one queue get one outcome.** `transitionTableOrderStatus`
+applies the move in a transaction against the status the caller says it saw, so
+a waiter pressing Served while the kitchen presses Cancelled produces one change
+and one sentence naming what the order holds now. That expectation is also what
+makes a replay safe, which is why this callable has no idempotency key where the
+table transition of issue \#1096 needed one.
+
+**The notification is a trigger, not a send inside the callable.** An order has
+to land whatever the push does, and every other notification in this codebase is
+shaped the same way. It fires on **create** alone: an order whose status moves is
+the restaurant acting on its own decision, and announcing that to the people who
+made it would be a notification per press. It collapses per restaurant and
+table, so a second round from table 12 replaces the first while table 9 stacks
+beside it.
+
+**The alert is a device preference, off by default** (`RD-TS-17`), and the
+visual half of it is not behind the same switch - a kitchen loud enough to need
+a chime is a kitchen where the chime alone is not enough.
+
+**What the queue does not do.** It never writes Firestore directly, it offers no
+move the matrix does not contain, and it has no offline queue: a transition made
+with no signal is reported and not written down, because unlike a seating it is
+not a fact about the room that somebody is standing in front of.
+
 ## Success Criteria
 
 - Scanning a table QR resolves to exactly one restaurant, room, and table, confirmed on screen before any order can be placed. **Met** by issues \#1100 and \#1101.
 - Two guests scanning the same table end up in one visit, not two. **Met** by issue \#1101.
-- A guest without an account can view the menu and order, if the restaurant allows it. **Met** - the viewing half by issue \#1102 and the ordering half by issue \#1103, both with no account and no install. What the restaurant cannot yet do is _see_ the order, which is issue \#1105.
-- A staff status change is visible to the guest within seconds. **Met by the guest's half** (issue \#1104), and unobservable until issue \#1105 gives a status something to change it with: the listener delivers whatever the collection holds, and nothing yet writes a second status.
+- A guest without an account can view the menu and order, if the restaurant allows it. **Met** - the viewing half by issue \#1102 and the ordering half by issue \#1103, both with no account and no install.
+- Staff see a new order within seconds, attached to the correct table. **Met** by issue \#1105: a live collection-group listener on the restaurant's open orders, grouped by the table the order was placed from, plus a push to the owner and every associated staff account.
+- A staff status change is visible to the guest within seconds. **Met**, both halves: issue \#1104 gave the guest the listener and issue \#1105 gave a status something that changes it. Observed end to end against the emulators - see `Supported Evidence`.
 - An order submitted twice because of a flaky network creates one order. **Not met.** Issue \#1103 left it to issue \#1108 rather than half-solving it.
 - A revoked or rotated token stops working immediately.
 - A Bite created from an order needs only a photo, a rating, and a comment, and carries the verified `restaurantId`.
 
 ## Open Product Questions
 
-Tracked in [[Current State - Open Questions]]. Nine are settled and recorded as `RD-TS-1` to `RD-TS-13` in [[Recorded Decisions]]: occupancy confirmation, shared sessions, ordering without an account, session expiry, what a scan at a menu-only restaurant does, where a menu's currency lives, and - on 13 September 2026 with issues \#1103 and \#1104 - order attribution, price integrity, who moves the table when an order lands, whose orders a guest's screen shows, and where the cancellation reason is declared.
+Tracked in [[Current State - Open Questions]]. Thirteen are settled and recorded as `RD-TS-1` to `RD-TS-17` in [[Recorded Decisions]]: occupancy confirmation, shared sessions, ordering without an account, session expiry, what a scan at a menu-only restaurant does, where a menu's currency lives, and - on 13 September 2026 with issues \#1103, \#1104 and \#1105 - order attribution, price integrity, who moves the table when an order lands, whose orders a guest's screen shows, where the cancellation reason is declared, how the staff queue reads a restaurant's orders, whether a queue row moves ahead of the backend, what a cancellation has to carry, and what a busy-service alert may do without being asked.
 
-What still blocks a child issue is how cancelled orders are corrected and how staff are notified, both of which are issue \#1105's to answer, and the payment model. What is newly open is smaller and belongs to a guest whose party is **moved**: their session goes on naming the table they scanned, and nothing tells them the table number on their screen has changed.
+The last two of the epic's proposals are now answered rather than open: a cancelled order is corrected by a staff-side cancellation carrying a reason the guest is shown, and staff are notified by an in-app queue plus a push through the existing infrastructure. What remains open is the payment model, which is issue \#1073's.
+
+What is newly open is smaller and belongs to a guest whose party is **moved**: their session goes on naming the table they scanned, and nothing tells them the table number on their screen has changed. Beside it sits a second small one from this issue: an order placed before a party moved stays grouped under the table it was ordered from, which is right for the kitchen and is not what a waiter carrying the plates reads.
 
 ## MVP Classification
 
@@ -441,10 +525,63 @@ Issue \#1104 was **not** driven through the running app. Its two claims that a
 database can hold - that a guest may list the orders naming them and may not
 list the rest - are asserted against the Firestore emulator in
 `firestore-rules.emulator-spec.ts`, and the screen is covered by unit specs over
-a faked pair of listeners. What is therefore unobserved is the sequence itself:
-a real snapshot arriving on a real phone while a status changes underneath it.
-Nothing can change one until issue \#1105 exists, so the observation is that
-issue's to make.
+a faked pair of listeners. What was therefore unobserved was the sequence
+itself: a real snapshot arriving on a real phone while a status changes
+underneath it.
+
+Read again on 13 September 2026 while implementing issue \#1105, on branch
+`1105-incoming-order-queue-for-staff`:
+
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/transition-table-order-status.ts` - the one writer of an order's status
+- `apps/bite-tribe-firebase/functions/src/functions/notifications/notify-staff-on-new-table-order.ts` - the trigger, and who it resolves as staff
+- `apps/bite-tribe-firebase/firestore.rules` - the `match /{path=**}/orders/{orderId}` collection group
+- `apps/bite-tribe-firebase/firestore.indexes.json` - the exemption that query needs
+- `libs/bite-tribe-business/table-management/data-access/src/lib/` - `table-order-queue.service.ts`, `table-order-failure.ts`, `order-alert.service.ts`
+- `libs/bite-tribe-business/table-management/page/src/lib/` - the queue's component, container, grouping and integration service
+- `libs/bite-tribe-business/floor-plan/ui/src/lib/floor-plan-canvas.component.*` - the order badge on a table
+
+Its claims are covered three ways. The rules half - that the owner, the staff of
+that restaurant and an operator may run the collection-group query, that a query
+naming no restaurant is refused whole, and that a business account holding
+another restaurant is refused - is asserted against the Firestore emulator in
+`firestore-rules.emulator-spec.ts`. The callable half - the matrix, the race, the
+cancellation reason, who may work the pass, and that nothing but the four status
+fields moves - is asserted against the emulator in
+`table-order-queue.emulator-spec.ts`. The screens are covered by unit specs and
+by ten Loki references under `Business/Order Queue`.
+
+**Behaviour was observed as well as read**, which closes the observation issue
+\#1104 left to this one. The business app was driven against the Firestore, Auth
+and Functions emulators as the seeded `staff@test.com`, on a restaurant with a
+published room, two tables, a menu in euros, an open visit and two orders on it.
+Signing in landed on the live room, where table 12 drew its `ordering` status,
+a badge reading `2`, an accessible name ending "2 open order(s)", and a header
+counting the restaurant's open orders. The queue at
+`restaurant/{id}/orders` drew the table's group with both tickets, the variant,
+the guest's note and the age on each row, marked red past the threshold.
+Pressing Accept moved the row to `Accepted` and the stored order to
+`status: accepted` with `statusChangedByUserId` naming the staff account and the
+lines, the total and `submittedAt` untouched. Cancelling opened a dialog whose
+send button was disabled until a sentence was typed, and the stored order then
+carried `cancelled` and the sentence, where the guest's screen of \#1104 reads
+it. Writing a third order behind the screen's back put it at the top of the
+queue within seconds, raised the count and fired the arrival flash, and
+`notifyStaffOnNewTableOrder` ran in the Functions emulator and resolved two
+recipients - the owner and the staff account.
+
+One defect was found that way and fixed: the cancellation dialog's reason field
+drew no border at all. `fill="outline"` is a Material-mode feature and this app
+runs in iOS mode, so the field read as empty space under its label - on the one
+screen whose whole point is that somebody types a sentence. It carries
+`mode="md"` now, the pair the Bite trail form already used.
+
+What is still unobserved is delivery of the push itself. The emulator has no
+registered installation to deliver to, and the business app runs in a browser
+where `@capacitor/push-notifications` registers no token at all - so in
+production the trigger reaches a member of staff only on an installation of the
+consumer app signed into the same account. The queue's own listener and its
+per-device alert are what a tablet at the pass actually hears. See
+[[Current State - Open Questions]].
 
 ## Related GitHub Scope
 
@@ -455,7 +592,7 @@ issue's to make.
 - Issue \#1102 - public table menu browsing without an account, which gave the flag a writer and the menu a page of its own
 - Issue \#1103 - table cart and order submission, which gave the guest something to do with the menu and the restaurant something to cook
 - Issue \#1104 - guest order status and follow-up ordering, which gave the guest the live list of what they sent, the sentence a cancellation is explained with, and a second order into the same visit
-- Issue \#1105 - incoming order queue for staff, which owns every order status after `submitted` and is what an order currently reaches nobody without
+- Issue \#1105 - incoming order queue for staff, which gave the restaurant the screen that answers a guest: the queue, every order status after `submitted`, the badge on the floor plan and the push that reaches the people on shift
 - Issue \#1108 - offline-tolerant and idempotent order submission, which owns the duplicate an order submitted twice still creates
 - Issue \#1598 - orderable menu extras, split out of \#1103 because `Category.extrasBlock` has no ids, no renderer and no editor
 - Issue \#1107 - QR token abuse protection, which owns the durable rate limit the resolution only approximates
@@ -475,8 +612,8 @@ issue's to make.
 
 ## Related Pages
 
-- [[Recorded Decisions]] - `RD-TS-1` to `RD-TS-13` bind this page
+- [[Recorded Decisions]] - `RD-TS-1` to `RD-TS-17` bind this page
 - [[Architecture - Auth]] - the anonymous guest
-- [[Architecture - Firebase]] - the rules on `tableSessions`
+- [[Architecture - Firebase]] - the rules on `tableSessions`, and the collection-group rule and index the staff queue reads through
 - [[Implementation - Firebase Functions]] - the callables
 - [[Current State - Open Questions]]

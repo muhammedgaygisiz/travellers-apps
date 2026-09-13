@@ -38,6 +38,9 @@ export type NotificationMessageKey =
   | 'countryBadge.body'
   | 'countryBadge.followerTitle'
   | 'countryBadge.followerBody'
+  | 'newTableOrder.title'
+  | 'newTableOrder.body'
+  | 'newTableOrder.bodyWithoutTable'
   | 'newVersion.title'
   | 'newVersion.bodyIos'
   | 'newVersion.bodyAndroid';

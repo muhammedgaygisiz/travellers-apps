@@ -1,0 +1,70 @@
+.table-order {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.centred {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem 0;
+}
+
+.note {
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+}
+
+/*
+ * The refusal is loud enough to read past the menu below it and is still part
+ * of the same page: a guest has to be able to see the row it names.
+ */
+.refusal {
+  border-inline-start: 4px solid var(--ion-color-danger);
+  padding: 0.75rem 1rem;
+  background: var(--ion-color-light);
+}
+
+.cart-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cart-line {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-block-end: 1px solid var(--ion-color-light-shade);
+  padding-block-end: 1rem;
+}
+
+.cart-line-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-weight: 600;
+}
+
+.cart-line-quantity {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.send-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-inline: 1rem;
+}
+
+.send-total {
+  font-weight: 600;
+}

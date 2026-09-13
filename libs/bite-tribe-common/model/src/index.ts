@@ -73,3 +73,9 @@ export * from './lib/public-menu';
  * one function rather than one subtraction per reader (issue #1101).
  */
 export * from './lib/table-session';
+/**
+ * A value export rather than `export type *`: the order statuses, the
+ * transition matrix, the total and the refusal reasons are data the backend
+ * applies, the staff queue predicts and the cart renders (issue #1103).
+ */
+export * from './lib/table-order';

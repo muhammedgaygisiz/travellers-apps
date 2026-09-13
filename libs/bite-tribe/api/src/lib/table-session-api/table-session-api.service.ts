@@ -61,10 +61,22 @@ const failureOf = (error: unknown): TableSessionCallFailure => {
   return code.includes('resource-exhausted') ? 'rateLimited' : 'unknown';
 };
 
-const failed = (error: unknown): TableSessionCallError => ({
+/**
+ * A rejected callable, as the value a screen renders.
+ *
+ * Exported because the table order of issue #1103 fails in exactly these three
+ * ways and is rendered by the same three sentences. A second copy would be a
+ * second place for "the phone never got through" to drift from "we could not
+ * reach the restaurant".
+ */
+export const tableSessionCallFailed = (
+  error: unknown,
+): TableSessionCallError => ({
   ok: false,
   failure: failureOf(error),
 });
+
+const failed = tableSessionCallFailed;
 
 /** Whether a call failed in transport rather than resolving to an answer. */
 export const isTableSessionCallError = (

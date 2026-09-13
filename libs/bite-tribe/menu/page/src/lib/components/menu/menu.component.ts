@@ -10,6 +10,7 @@ import {
 import type { Menu, MenuItem } from 'model';
 import { IonReorderGroup } from '@ionic/angular/standalone';
 import { CategoryComponent } from '../category/category.component';
+import type { MenuItemSelection } from '../menu-item/menu-item.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
@@ -34,5 +35,16 @@ export class MenuComponent {
 
   canCreateBite = input(true, { transform: booleanAttribute });
 
+  /**
+   * Whether the dishes offer an "add" button (GitHub issue #1103).
+   *
+   * Off by default, so the authenticated page and the public menu are
+   * unchanged. Only the ordering screen of a guest at a table turns it on.
+   */
+  canAddToCart = input(false, { transform: booleanAttribute });
+
   createBiteClick = output<MenuItem>();
+
+  /** The dish, and the size where the guest chose one. */
+  addToCartClick = output<MenuItemSelection>();
 }

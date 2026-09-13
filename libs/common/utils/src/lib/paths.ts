@@ -31,6 +31,20 @@ export const PATH = {
    */
   TABLE_SCAN: 't',
   /**
+   * Ordering at the table the code was scanned at (GitHub issue #1103).
+   *
+   * A segment under {@link PATH.TABLE_SCAN} rather than a route of its own,
+   * because the token is what the screen needs: it re-resolves it on arrival,
+   * so a reload, a backgrounded phone or a link the guest kept lands on a page
+   * that can still name the restaurant and the table. A top-level route would
+   * have had to carry the same token anyway, under a longer address that a
+   * restaurant would never print.
+   *
+   * Never printed on a sticker itself - the guest reaches it by tapping through
+   * from the scan - so the extra characters cost no QR modules.
+   */
+  TABLE_ORDER: 'order',
+  /**
    * A restaurant's menu, read without an account (GitHub issue #1102).
    *
    * One letter for the same reason `TABLE_SCAN` is: a restaurant publishes this

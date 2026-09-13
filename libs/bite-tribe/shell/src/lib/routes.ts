@@ -258,6 +258,27 @@ const APP_ROUTES: Routes = [
     title: 'Table',
   },
   /**
+   * Ordering at a table, from the menu of the restaurant behind the code
+   * (GitHub issue #1103).
+   *
+   * **No auth guard**, for the same reason as the scan screen it is reached
+   * from: the guest is signed in anonymously when they confirm their table, and
+   * `authGuard` does not accept an anonymous session - so a guard here would
+   * lock out the only people the route exists for. It sits outside
+   * `gateAuthenticatedRoutes` for the same reason.
+   *
+   * It loads from `bite-tribe/menu` rather than `bite-tribe/table-session`,
+   * because the screen renders `bt-menu` and the Nx boundary rules refuse a
+   * `type:feature` library depending on another one. A second copy of the menu
+   * renderer is how two menus start disagreeing about what an unavailable dish
+   * looks like.
+   */
+  {
+    path: `${PATH.TABLE_SCAN}/:token/${PATH.TABLE_ORDER}`,
+    loadComponent: () => import('bite-tribe/menu').then((m) => m.TableOrder),
+    title: 'Order',
+  },
+  /**
    * A restaurant's menu, read without an account (GitHub issue #1102).
    *
    * **No auth guard**, for the reason issues #370 and #371 state outright: the

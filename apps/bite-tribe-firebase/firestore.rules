@@ -517,6 +517,57 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    /**
+     * What one party sent to the kitchen (GitHub issue #1103).
+     *
+     * ```text
+     * /restaurants/{restaurantId}/visits/{visitId}/orders/{orderId}
+     * ```
+     *
+     * **Written by nobody**, like the visit it hangs from. `submitTableOrder`
+     * creates it through the Admin SDK, in the commit that moves the table to
+     * `ordering`. A client able to write here would be a client able to name
+     * its own prices - which is the one thing the whole revalidation exists to
+     * prevent - and, one document over, able to mark somebody else's order
+     * `served`.
+     *
+     * There is no `update` either, and that is the order lifecycle rather than
+     * an omission. `submitted` to `accepted` to `served` is a restaurant's
+     * decision about its own kitchen, and it is made through the staff callable
+     * of issue #1105; a rule permitting the guest to write the status field
+     * would let a party mark its own dinner served.
+     *
+     * **The guest reads their own, by `get` and never by `list`**, exactly as
+     * they read their own session. The order id comes back from the callable
+     * that wrote it, so a guest watching their dinner needs no query - and
+     * `list` would hand them every order at their table, which is the rest of
+     * the party's, and then the restaurant's.
+     *
+     * **Staff list them**, through the same `readsFloorPlan` as the tables,
+     * their live state, the visits and the sessions - two lists of readers for
+     * one dining room would drift from each other.
+     *
+     * That `list` is scoped to one visit, which is all this issue needs: the
+     * guest holds one, and a staff member looking at a table follows its
+     * `visitId` to reach exactly this collection. The restaurant-wide queue of
+     * issue #1105 wants every open order at once, which is a collection-group
+     * query and therefore a `match /{path=**}/orders/{orderId}` of its own,
+     * plus an index exemption. It is not written here, because a rule admitting
+     * a query nothing yet makes is a rule nothing yet tests.
+     */
+    match /restaurants/{restaurantId}/visits/{visitId}/orders/{orderId} {
+      // The guest's own clause first, because it costs no document reads at
+      // all - `readsFloorPlan` reaches a `get()` on the staff association, and
+      // a guest watching their own order should not pay for a question about a
+      // restaurant's payroll.
+      allow get: if (signedIn() && resource.data.get('guestUserId', '') == uid())
+        || readsFloorPlan(restaurantId);
+
+      allow list: if readsFloorPlan(restaurantId);
+
+      allow write: if false;
+    }
+
     // -------------------------------------------------------- table sessions
 
     /**

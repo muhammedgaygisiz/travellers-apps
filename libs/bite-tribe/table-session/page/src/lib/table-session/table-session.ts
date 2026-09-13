@@ -157,4 +157,17 @@ export class TableSession implements OnInit {
   protected menuPath(restaurantId: string): string[] {
     return ['/', PATH.PUBLIC_MENU, restaurantId];
   }
+
+  /**
+   * Where the guest orders, once they are attached to the party
+   * (GitHub issue #1103).
+   *
+   * Under the token rather than under the restaurant, because the ordering
+   * screen re-resolves it: a guest whose phone slept through the starters comes
+   * back to a page that can still name their table, and a restaurant-scoped
+   * address could not.
+   */
+  protected orderPath(): string[] {
+    return ['/', PATH.TABLE_SCAN, this.service.token, PATH.TABLE_ORDER];
+  }
 }

@@ -29,6 +29,22 @@ libs/bite-tribe/<feature>/page
 libs/bite-tribe/<feature>/data-access
 ```
 
+**A `type:feature` library may not import another `type:feature` library.** The
+`depConstraints` in `eslint.config.mjs` allow a feature to reach `type:ui`,
+`type:data-access`, `type:model`, `type:store` and `scope:common`, and nothing
+else. A component two features both need therefore belongs in a `type:ui`
+library - or, where extracting one is out of proportion to the change, both
+screens live in the one feature library that already owns the component.
+
+Issue \#1103 is the worked example. The table ordering screen renders `bt-menu`,
+which lives in `libs/bite-tribe/menu/page` beside the public menu of issue
+\#1102, so the screen was written there rather than in
+`libs/bite-tribe/table-session`. The alternative - a second copy of the menu
+renderer - is how two menus start disagreeing about what an unavailable dish
+looks like. Its cart and its submission are a `type:data-access` library of their
+own, `bite-tribe/table-order-data-access`, which both the ordering screen and
+anything later can reach.
+
 ## Business App Libraries
 
 Business functionality lives under `libs/bite-tribe-business`.

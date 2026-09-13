@@ -9,7 +9,9 @@
             [category]="category"
             [currency]="currency()"
             [canCreateBite]="canCreateBite()"
+            [canAddToCart]="canAddToCart()"
             (createBiteClick)="createBiteClick.emit($event)"
+            (addToCartClick)="addToCartClick.emit($event)"
           />
         </div>
       }

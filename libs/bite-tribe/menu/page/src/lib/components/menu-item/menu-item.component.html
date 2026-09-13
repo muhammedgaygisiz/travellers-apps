@@ -22,7 +22,7 @@
   </div>
   <div class="price-actions">
     @if (itemData?.price !== 0) {
-      <div class="price">{{ itemData?.price }} {{ currencySymbol() }}</div>
+      <div class="price">{{ priceLabel() }}</div>
     }
     @if (isItemUnavailable) {
       <span class="availability-label">

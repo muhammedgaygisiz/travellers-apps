@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { isPublicMenuResolved } from 'model';
+import { PUBLIC_MENU_RESTAURANT_PARAM } from 'utils';
 import type {
   Menu,
   PublicMenuRefusalReason,
@@ -45,13 +46,17 @@ export class PublicMenuService {
   readonly state = this.view.asReadonly();
 
   /**
-   * The restaurant from `/m/:restaurantId`.
+   * The restaurant the public menu route names.
    *
    * Read off the snapshot rather than subscribed to: reaching a different
    * restaurant means following a different link, which is a fresh navigation.
+   *
+   * The parameter name comes from the constant the route declares it with, and
+   * is deliberately not `restaurantId` - see
+   * {@link PUBLIC_MENU_RESTAURANT_PARAM}.
    */
   private readonly restaurantId =
-    this.route.snapshot.paramMap.get('restaurantId') ?? '';
+    this.route.snapshot.paramMap.get(PUBLIC_MENU_RESTAURANT_PARAM) ?? '';
 
   /** The menu on screen, where there is one. */
   readonly menu = computed<Menu | undefined>(() => {

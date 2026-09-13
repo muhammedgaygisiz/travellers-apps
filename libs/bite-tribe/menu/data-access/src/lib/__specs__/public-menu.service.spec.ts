@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { PUBLIC_MENU_RESTAURANT_PARAM } from 'utils';
 import { PublicMenuService } from '../public-menu.service';
 
 /**
@@ -29,7 +30,17 @@ describe(PublicMenuService.name, () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            snapshot: { paramMap: { get: (): string | null => restaurantId } },
+            // Key-aware on purpose. A mock that answers any key would let the
+            // route and the service drift apart over the parameter's name, and
+            // that name is load-bearing: `restaurantId` is what the NgRx router
+            // selector keys on, so calling it that puts a refused Firestore
+            // read on every load of a route meant for readers with no account.
+            snapshot: {
+              paramMap: {
+                get: (name: string): string | null =>
+                  name === PUBLIC_MENU_RESTAURANT_PARAM ? restaurantId : null,
+              },
+            },
           },
         },
       ],

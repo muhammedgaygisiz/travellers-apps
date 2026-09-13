@@ -51,3 +51,21 @@ export const PATH = {
   LEADERBOARD: 'leaderboard',
   WEEKLY_BITES: 'weekly-bites',
 };
+
+/**
+ * The route parameter naming the restaurant on the public menu route
+ * (GitHub issue #1102).
+ *
+ * **Deliberately not `restaurantId`**, and it must not be renamed to it. The
+ * NgRx router selector in `bite-tribe/store` keys on that exact parameter name,
+ * and `RestaurantEffects.loadRestaurantById$` fires on every navigation that
+ * carries it - reading `/restaurants/{id}` straight from Firestore, which
+ * `firestore.rules` allows only to a signed-in caller. Naming it `restaurantId`
+ * therefore put one refused read on the single route whose whole premise is
+ * that the reader has no account, on every single load.
+ *
+ * Shared rather than written twice, because the route that declares it and the
+ * service that reads it live in different libraries, and a typo between them
+ * shows up as a menu that never loads.
+ */
+export const PUBLIC_MENU_RESTAURANT_PARAM = 'publicRestaurantId';

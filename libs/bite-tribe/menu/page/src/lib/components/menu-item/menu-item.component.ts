@@ -67,6 +67,30 @@ export class MenuItemComponent {
     return currencyCodes.find((entry) => entry.code === code)?.symbol ?? code;
   });
 
+  /**
+   * The price as it is read, with the symbol only where there is one.
+   *
+   * Built here rather than as `{{ price }} {{ symbol }}` in the template,
+   * because that interpolation always emits the separator: a menu that states
+   * no currency rendered `"1200 "`, with a space nothing follows. Harmless
+   * where the block ends there and not where it does not - a right-aligned or
+   * width-measured cell keeps it, and so does anything reading `textContent`.
+   *
+   * A price that is absent renders as nothing at all, rather than as the lone
+   * symbol the old interpolation produced for it.
+   */
+  readonly priceLabel = computed(() => {
+    const price = this.item()?.price;
+
+    if (price === undefined || price === null) {
+      return '';
+    }
+
+    const symbol = this.currencySymbol();
+
+    return symbol ? `${price} ${symbol}` : `${price}`;
+  });
+
   createBiteClick = output<MenuItem>();
 
   onCreateBiteClick(itemData: MenuItem | undefined): void {

@@ -46,8 +46,25 @@ export interface LoadPublicMenuRequest {
   restaurantId?: unknown;
 }
 
+/**
+ * Why a menu could not be shown.
+ *
+ * A declared list rather than a bare union, so `public-menu-parity.spec.ts` can
+ * read it the way it reads `TABLE_SCAN_REFUSAL_REASONS`: the library copy in
+ * `libs/bite-tribe-common/model/src/lib/public-menu.ts` is the definition this
+ * one cannot import, and an unchecked copy is one free to drift. A reason the
+ * backend returns and the client has no sentence for renders as a heading above
+ * a blank line.
+ */
+export const PUBLIC_MENU_REFUSAL_REASONS = [
+  'restaurantNotFound',
+  'restaurantInactive',
+  'menuMissing',
+  'menuEmpty',
+] as const;
+
 export type PublicMenuRefusalReason =
-  'restaurantNotFound' | 'restaurantInactive' | 'menuMissing' | 'menuEmpty';
+  (typeof PUBLIC_MENU_REFUSAL_REASONS)[number];
 
 export interface PublicMenuResolved {
   ok: true;

@@ -72,36 +72,50 @@ describe(EditMenuPage.name, () => {
     component.currency.set('JPY');
 
     const saved = jest.fn();
-    component.saveMenu.subscribe(saved);
+    component.saveCurrencyCode.subscribe(saved);
     component.saveCurrency();
 
-    expect(saved).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'menu-1', currency: 'JPY' }),
-    );
+    expect(saved).toHaveBeenCalledWith('JPY');
   });
 
   /**
-   * "Not set" is a real answer, and the model reads a missing field as "not
-   * stated". Writing `''` would be a third value every reader then has to know
-   * about, so the field goes rather than emptying.
+   * "Not set" is a real answer, and the model reads a *missing field* as "not
+   * stated". Only the write can express that, so the page reports the empty
+   * choice and the API removes the field. Reporting a menu with the key
+   * stripped said nothing at all to a merging update, which is what made
+   * unsetting a silent no-op.
    */
-  it('drops the field entirely when the owner unsets it', () => {
+  it('reports the empty choice when the owner unsets it', () => {
     withMenu(MENU);
     component.currency.set('');
 
     const saved = jest.fn();
-    component.saveMenu.subscribe(saved);
+    component.saveCurrencyCode.subscribe(saved);
     component.saveCurrency();
 
-    const [menu] = saved.mock.calls[0] as [Menu];
-    expect('currency' in menu).toBe(false);
+    expect(saved).toHaveBeenCalledWith('');
+  });
+
+  /**
+   * Choosing a currency must not end the editing session, so it is not a menu
+   * save. Emitting one routed the owner off the page they were editing.
+   */
+  it('never reports it as a menu save', () => {
+    withMenu(MENU);
+    component.currency.set('JPY');
+
+    const savedMenu = jest.fn();
+    component.saveMenu.subscribe(savedMenu);
+    component.saveCurrency();
+
+    expect(savedMenu).not.toHaveBeenCalled();
   });
 
   it('saves nothing when there is no menu to save', () => {
     withMenu(undefined);
 
     const saved = jest.fn();
-    component.saveMenu.subscribe(saved);
+    component.saveCurrencyCode.subscribe(saved);
     component.saveCurrency();
 
     expect(saved).not.toHaveBeenCalled();

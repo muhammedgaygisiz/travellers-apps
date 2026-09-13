@@ -44,6 +44,9 @@ export class EditMenuPage {
 
   saveMenu = output<Menu>();
 
+  /** The currency the owner chose, or `''` for "Not set" (issue #1102). */
+  saveCurrencyCode = output<string>();
+
   placeName = computed(() => this.restaurant()?.name);
 
   /**
@@ -73,22 +76,24 @@ export class EditMenuPage {
     return [...currencyCodes.filter(({ code }) => code === suggested), ...rest];
   });
 
+  /**
+   * The chosen currency, as an ISO 4217 code, or `''` for "Not set".
+   *
+   * Its own output rather than a {@link saveMenu} carrying the whole menu.
+   * Emitting a menu made choosing a currency a full menu save: it wrote back a
+   * categories array the owner might still have been editing, and it ended the
+   * editing session, because that is what a menu save means here - so picking a
+   * currency routed the owner off the page. "Not set" is `''` rather than a
+   * menu with the key stripped, because the model reads a *missing field* as
+   * "not stated" and only the write can express that; a stripped key on the way
+   * to a merging update says nothing at all, which is what made unsetting a
+   * silent no-op.
+   */
   saveCurrency(): void {
-    const menu = this.menu();
-
-    if (!menu) {
+    if (!this.menu()) {
       return;
     }
 
-    const currency = this.currency();
-
-    // Absent rather than empty. "Not set" is a real answer here and the model
-    // reads a missing field as "not stated"; writing `''` would be a third
-    // value every reader then has to know about.
-    const { currency: _dropped, ...withoutCurrency } = menu;
-
-    this.saveMenu.emit(
-      currency ? { ...withoutCurrency, currency } : withoutCurrency,
-    );
+    this.saveCurrencyCode.emit(this.currency());
   }
 }

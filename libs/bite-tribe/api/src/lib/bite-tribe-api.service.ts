@@ -194,6 +194,15 @@ export class BiteTribeApiService {
     return this.menuApiService.saveMenu(menu, restaurantId);
   }
 
+  /** The currency this menu's prices are stated in (GitHub issue #1102). */
+  saveMenuCurrency(
+    menuId: string,
+    restaurantId: string | undefined,
+    currency: string,
+  ): Promise<void> {
+    return this.menuApiService.saveMenuCurrency(menuId, restaurantId, currency);
+  }
+
   loadMenu(menuId: string): Promise<Menu | undefined> {
     return this.menuApiService.loadMenu(menuId);
   }

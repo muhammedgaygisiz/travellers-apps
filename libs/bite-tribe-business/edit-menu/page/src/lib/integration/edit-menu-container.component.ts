@@ -9,6 +9,7 @@ import { EditMenuService } from './edit-menu.service';
       [restaurant]="service.restaurant()"
       [menu]="service.menu()"
       (saveMenu)="service.saveMenu($event)"
+      (saveCurrencyCode)="service.saveCurrency($event)"
     />
   `,
   imports: [EditMenuPage],

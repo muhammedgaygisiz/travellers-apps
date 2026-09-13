@@ -25,6 +25,7 @@ import type {
   TableScanRefusalReason,
 } from 'model';
 import { TableCartService, type TableCartLine } from './table-cart.service';
+import { TableOrderHistoryService } from './table-order-history.service';
 
 /**
  * What a guest sees between joining a table and their order reaching the
@@ -133,6 +134,17 @@ export class TableOrderService {
 
   readonly cart = inject(TableCartService);
 
+  /**
+   * What the guest has already ordered, and whether they may order again
+   * (GitHub issue #1104).
+   *
+   * Injected rather than left to the screen, because {@link canSubmit} and
+   * {@link submit} both have to ask it: a state machine whose transitions are
+   * enforced only by which buttons are on screen is one a second entry point
+   * walks straight through - the same reason the guards below exist at all.
+   */
+  readonly history = inject(TableOrderHistoryService);
+
   private readonly view = signal<TableOrderView>({ kind: 'loading' });
   private readonly busy = signal(false);
   private readonly refusal = signal<TableOrderRefusal | undefined>(undefined);
@@ -151,10 +163,20 @@ export class TableOrderService {
   /** The token from `/t/:token/order`, off the snapshot as the scan screen does. */
   private readonly token = this.route.snapshot.paramMap.get('token') ?? '';
 
-  /** Whether the guest may send what they have built. */
+  /**
+   * Whether the guest may send what they have built.
+   *
+   * The history's answer is the live half: a table the restaurant closed while
+   * the guest was reading the dessert list stops the send button within seconds
+   * of the host pressing the button, instead of letting them build a cart and
+   * be refused after they tap it (GitHub issue #1104).
+   */
   readonly canSubmit = computed(
     () =>
-      this.view().kind === 'ordering' && !this.cart.isEmpty() && !this.busy(),
+      this.view().kind === 'ordering' &&
+      !this.cart.isEmpty() &&
+      !this.busy() &&
+      this.history.acceptsOrders(),
   );
 
   async load(): Promise<void> {
@@ -219,6 +241,12 @@ export class TableOrderService {
       return;
     }
 
+    // Watched from here rather than from the screen, because this is where the
+    // restaurant and the table are first known. A guest who reloaded the page
+    // has no session id, no visit id and no order ids in hand; the table and
+    // their uid are enough to find all three.
+    this.history.watch(restaurantId, scan.table.id);
+
     this.view.set({
       kind: 'ordering',
       context: {
@@ -270,7 +298,12 @@ export class TableOrderService {
   async submit(): Promise<void> {
     const state = this.view();
 
-    if (state.kind !== 'ordering' || this.cart.isEmpty() || this.busy()) {
+    if (
+      state.kind !== 'ordering' ||
+      this.cart.isEmpty() ||
+      this.busy() ||
+      !this.history.acceptsOrders()
+    ) {
       return;
     }
 
@@ -307,6 +340,13 @@ export class TableOrderService {
     }
 
     this.cart.clear();
+
+    // The first watch can have run before the guest had an identity - the
+    // screen is public and the anonymous sign-in belongs to the scan before it
+    // - and an order proves they have one now. A repeat call on the same table
+    // and uid does nothing.
+    this.history.watch(state.context.restaurant.id, state.context.table.id);
+
     this.view.set({
       kind: 'placed',
       order: result.order,

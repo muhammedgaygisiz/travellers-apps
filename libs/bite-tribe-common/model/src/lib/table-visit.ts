@@ -104,6 +104,21 @@ export const TABLE_VISIT_END_STATUSES: readonly TableVisitStatus[] = [
 export const TABLE_STATUS_AFTER_VISIT: TableStatus = 'cleaning';
 
 /**
+ * One subcollection per restaurant, holding its parties.
+ *
+ * ```text
+ * /restaurants/{restaurantId}/visits/{visitId}
+ * ```
+ *
+ * Spelled here by issue #1104, which gave the guest's phone the first reason to
+ * build the path on this side: the orders it subscribes to are a subcollection
+ * of one visit. The backend has held the same constant since issue #1095, and
+ * `table-visit-parity.spec.ts` pins its value to the literal in
+ * `firestore.rules`.
+ */
+export const TABLE_VISITS_COLLECTION = 'visits';
+
+/**
  * A party at a table, from the moment staff seat it until the moment they end
  * it.
  *

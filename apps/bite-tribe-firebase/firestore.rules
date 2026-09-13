@@ -537,17 +537,38 @@ service cloud.firestore {
      * of issue #1105; a rule permitting the guest to write the status field
      * would let a party mark its own dinner served.
      *
-     * **The guest reads their own, by `get` and never by `list`**, exactly as
-     * they read their own session. The order id comes back from the callable
-     * that wrote it, so a guest watching their dinner needs no query - and
-     * `list` would hand them every order at their table, which is the rest of
-     * the party's, and then the restaurant's.
+     * **The guest reads their own**, exactly as they read their own session -
+     * by `get`, and since issue #1104 by a `list` that names them.
+     *
+     * The `list` is what makes a status screen survive a reload. Issue #1103
+     * needed none: the order id came back from the callable that wrote it, so
+     * the phone that had just sent one could watch it. A guest who reloads the
+     * page, or comes back to it after their starter arrived, holds no ids at
+     * all - and there is nothing to derive them from, because an order id is
+     * generated rather than named after anything the guest knows.
+     *
+     * `resource.data.guestUserId == uid()` is a condition on the *query* rather
+     * than a filter over the answer. Firestore admits the query only when its
+     * constraints prove every document it could return satisfies this, so the
+     * phone has to send `where('guestUserId', '==', uid)` and a query without
+     * it is refused whole. That is the rest of the party's dinner staying
+     * private without a second rule saying so (`RD-TS-12`).
+     *
+     * Written in the plain `resource.data.field` form rather than through
+     * `.get(field, default)` as the `get` clause above is, and that difference
+     * is load-bearing: the constraint matching recognises the plain comparison,
+     * and a defaulted read would leave the query unprovable and refuse every
+     * guest. Nothing is risked by dropping the default here - every order
+     * `submitTableOrder` writes carries the field, and a document without one
+     * cannot match an equality on it anyway.
      *
      * **Staff list them**, through the same `readsFloorPlan` as the tables,
      * their live state, the visits and the sessions - two lists of readers for
-     * one dining room would drift from each other.
+     * one dining room would drift from each other. Their clause carries no
+     * condition on the document, so a staff query needs no `where` and returns
+     * the whole table's orders.
      *
-     * That `list` is scoped to one visit, which is all this issue needs: the
+     * Both `list`s are scoped to one visit, which is all this issue needs: the
      * guest holds one, and a staff member looking at a table follows its
      * `visitId` to reach exactly this collection. The restaurant-wide queue of
      * issue #1105 wants every open order at once, which is a collection-group
@@ -563,7 +584,8 @@ service cloud.firestore {
       allow get: if (signedIn() && resource.data.get('guestUserId', '') == uid())
         || readsFloorPlan(restaurantId);
 
-      allow list: if readsFloorPlan(restaurantId);
+      allow list: if (signedIn() && resource.data.guestUserId == uid())
+        || readsFloorPlan(restaurantId);
 
       allow write: if false;
     }

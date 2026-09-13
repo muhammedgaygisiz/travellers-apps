@@ -17,17 +17,39 @@ import {
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { RouterLink } from '@angular/router';
+import { NgTemplateOutlet } from '@angular/common';
 import { PageComponent } from 'common/ui/page';
 import { PATH, currencyCodes } from 'utils';
 import {
   TABLE_ORDER_BLOCKED_KEYS,
+  TABLE_ORDER_CLOSED_KEYS,
+  TABLE_ORDER_STATUS_KEYS,
   TableCartService,
+  TableOrderHistoryService,
   TableOrderService,
   type TableCartLine,
   type TableOrderView,
 } from 'bite-tribe/table-order-data-access';
+// Aliased because the screen's own class is called `TableOrder` too, and a
+// merged declaration of the two is a compile error rather than a shadowing.
+import type { OrderLineSnapshot, TableOrder as TableOrderModel } from 'model';
 import { MenuComponent } from '../components/menu/menu.component';
 import type { MenuItemSelection } from '../components/menu-item/menu-item.component';
+
+/**
+ * The symbol for a currency code, or the code itself where none is known.
+ *
+ * A free function because two things need it now: the menu's currency, which
+ * the whole screen is priced in, and the currency each *sent* order carries -
+ * and an order outlives the menu state it was built from.
+ */
+const symbolOf = (code: string): string => {
+  if (!code) {
+    return '';
+  }
+
+  return currencyCodes.find((entry) => entry.code === code)?.symbol ?? code;
+};
 
 /**
  * The screen a guest at a table orders from (GitHub issue #1103).
@@ -70,6 +92,7 @@ import type { MenuItemSelection } from '../components/menu-item/menu-item.compon
     IonSpinner,
     TranslocoPipe,
     RouterLink,
+    NgTemplateOutlet,
     MenuComponent,
   ],
   // Both, and at the component rather than at the root. A cart belongs to the
@@ -78,7 +101,12 @@ import type { MenuItemSelection } from '../components/menu-item/menu-item.compon
   // `TableOrderService` injects the cart, so listing only the service leaves it
   // with nothing to inject - which is a runtime failure on arrival, not a
   // compile error.
-  providers: [TableCartService, TableOrderService],
+  //
+  // The history joins them for the same reason and with the same lifetime: its
+  // two Firestore listeners belong to the screen, and rooting them would keep a
+  // guest's session and orders on a listener after they walked out of the
+  // restaurant (GitHub issue #1104).
+  providers: [TableCartService, TableOrderHistoryService, TableOrderService],
   templateUrl: 'table-order.component.html',
   styleUrl: 'table-order.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -87,6 +115,7 @@ export class TableOrder implements OnInit {
   protected readonly service = inject(TableOrderService);
 
   protected readonly cart = this.service.cart;
+  protected readonly history = this.service.history;
   protected readonly isBusy = this.service.isBusy;
   protected readonly canSubmit = this.service.canSubmit;
   protected readonly refusal = this.service.lastRefusal;
@@ -130,14 +159,47 @@ export class TableOrder implements OnInit {
    * The same fallback `menu-item` uses, and deliberately: the cart and the
    * dishes above it show one price each and must not show them differently.
    */
-  protected readonly currencySymbol = computed(() => {
-    const code = this.currencyCode();
+  protected readonly currencySymbol = computed(() =>
+    symbolOf(this.currencyCode()),
+  );
 
-    if (!code) {
-      return '';
-    }
+  /**
+   * The currency every order so far is priced in, or nothing where they differ.
+   *
+   * Two currencies in one visit is close to impossible and not quite: an owner
+   * who restates the menu mid-meal has the guest's next order refused as
+   * `currencyChanged` (issue #1103), and the guest who re-adds the dish then
+   * holds one order in each. Summing those would put one number under two
+   * currencies, so the running total is simply not shown - each order still
+   * states its own, which is the part that must never be ambiguous.
+   */
+  protected readonly historyCurrency = computed(() => {
+    const currencies = new Set(this.history.orders().map((o) => o.currency));
 
-    return currencyCodes.find((entry) => entry.code === code)?.symbol ?? code;
+    return currencies.size === 1 ? [...currencies][0] : '';
+  });
+
+  /**
+   * Whether a running total across orders is worth a line of its own.
+   *
+   * One order does not need one: its own total says the same thing, one line
+   * higher up.
+   */
+  protected readonly showsRunningTotal = computed(
+    () => this.history.orders().length > 1 && this.historyCurrency() !== '',
+  );
+
+  /**
+   * The sentence for a session that can send nothing further, or none.
+   *
+   * Driven by the session listener rather than by the last refusal, which is
+   * what makes it arrive while the guest is still reading the menu instead of
+   * after they have built a cart and tapped send (GitHub issue #1104).
+   */
+  protected readonly closedNoteKey = computed(() => {
+    const status = this.history.status();
+
+    return status && status !== 'active' ? TABLE_ORDER_CLOSED_KEYS[status] : '';
   });
 
   ngOnInit(): void {
@@ -163,6 +225,28 @@ export class TableOrder implements OnInit {
     const symbol = this.currencySymbol();
 
     return symbol ? `${amount} ${symbol}` : `${amount}`;
+  }
+
+  /** A price in a currency of its own, for a row the menu no longer prices. */
+  protected priceLabelIn(amount: number, currency: string): string {
+    const symbol = symbolOf(currency);
+
+    return symbol ? `${amount} ${symbol}` : `${amount}`;
+  }
+
+  /** The sentence one order's status is told with. */
+  protected statusKey(order: TableOrderModel): string {
+    return TABLE_ORDER_STATUS_KEYS[order.status];
+  }
+
+  /** One line of a sent order, with the size where the guest chose one. */
+  protected orderLineName(line: OrderLineSnapshot): string {
+    return line.variantName ? `${line.name} (${line.variantName})` : line.name;
+  }
+
+  /** What one line of a sent order came to. */
+  protected orderLineTotal(line: OrderLineSnapshot): number {
+    return line.price * line.quantity;
   }
 
   /** What one row of the cart comes to. */

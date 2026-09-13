@@ -209,6 +209,55 @@ describe(AppComponent.name, () => {
       });
     });
 
+    describe('given a scanned table code', () => {
+      /**
+       * The sticker glued to a restaurant table carries
+       * `https://bitetribe.app/t/{token}` (issue #1087), so a guest with the
+       * app installed opens it here rather than in a browser tab - and has to
+       * land on the same public screen either way (issue #1101).
+       *
+       * `navigateRoot` and not `navigateForward`: the guest arrived by pointing
+       * a camera at a table, so there is no history behind them, and a back
+       * button would offer a page they never visited.
+       */
+      it('should open the table session at the root', () => {
+        const navigateRootSpy = jest
+          .spyOn(component.navController, 'navigateRoot')
+          .mockImplementation();
+
+        const testUrl = 'https://bitetribe.app/t/ABCDEFGHJKMNPQRSTVWXYZ0123';
+        const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
+        const whereAppUrlOpen = ([event]: [string]): boolean =>
+          event === 'appUrlOpen';
+        const appUrlOpenListener = addListenerCalls.find(whereAppUrlOpen)[1];
+        appUrlOpenListener({ url: testUrl });
+
+        expect(navigateRootSpy).toHaveBeenCalledWith([
+          't',
+          'ABCDEFGHJKMNPQRSTVWXYZ0123',
+        ]);
+      });
+
+      /**
+       * The prefix without a token is the route's own address, which resolves
+       * to nothing. Navigating to `/t/` would land on the app's unknown-route
+       * handling, which is worse than staying put.
+       */
+      it('should ignore the prefix with no token behind it', () => {
+        const navigateRootSpy = jest
+          .spyOn(component.navController, 'navigateRoot')
+          .mockImplementation();
+
+        const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
+        const whereAppUrlOpen = ([event]: [string]): boolean =>
+          event === 'appUrlOpen';
+        const appUrlOpenListener = addListenerCalls.find(whereAppUrlOpen)[1];
+        appUrlOpenListener({ url: 'https://bitetribe.app/t/' });
+
+        expect(navigateRootSpy).not.toHaveBeenCalled();
+      });
+    });
+
     describe('given another link', () => {
       it('should not navigate', () => {
         const navControllerNavigateForwardSpy = jest

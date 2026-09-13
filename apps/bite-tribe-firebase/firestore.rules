@@ -517,6 +517,57 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // -------------------------------------------------------- table sessions
+
+    /**
+     * A guest's attachment to a table (GitHub issue #1101).
+     *
+     * ```text
+     * /restaurants/{restaurantId}/tableSessions/{n}_{tableId}_{guestUserId}
+     * ```
+     *
+     * **Written by nobody**, like the state and the visit it sits beside.
+     * `startTableSession` and `leaveTableSession` write it through the Admin
+     * SDK, and `transitionTableState` activates and closes it in the commit
+     * that opens and ends the visit. A client able to write here could set its
+     * own status to `active` and name any visit it liked, which is the whole
+     * of what the pending signal exists to prevent: a guest who never got up
+     * from their sofa ordering at a table in a restaurant.
+     *
+     * **The guest reads their own, by `get` and never by `list`.** The
+     * document is named the derived name, so the phone that started the
+     * session can derive the name and subscribe to it without a callable in
+     * the way - which is the whole reason a guest signs in anonymously rather
+     * than being handed an opaque secret to replay. `list` would hand them the
+     * other people at their table, and then, one query later, the other tables
+     * in the restaurant.
+     *
+     * `resource.data` is the session as stored, so the clause reads the uid
+     * the backend wrote rather than one the caller supplied. There is no
+     * `create`, `update` or `delete` to protect, because there is no client
+     * write at all.
+     *
+     * **Staff list them**, through the same `readsFloorPlan` as the tables,
+     * their live state and the visits. A pending session is a signal to the
+     * people on the floor and is worth exactly what the table it names is
+     * worth - two lists of readers for one dining room would drift.
+     */
+    function ownTableSession() {
+      return signedIn() && resource.data.get('guestUserId', '') == uid();
+    }
+
+    match /restaurants/{restaurantId}/tableSessions/{sessionId} {
+      // The guest's own clause first, because it is the common read and it
+      // costs no document reads at all - `readsFloorPlan` reaches a `get()` on
+      // the staff association, and a guest watching their own session should
+      // not pay for a question about a restaurant's payroll.
+      allow get: if ownTableSession() || readsFloorPlan(restaurantId);
+
+      allow list: if readsFloorPlan(restaurantId);
+
+      allow write: if false;
+    }
+
     // ------------------------------------------------------- table qr tokens
 
     /**

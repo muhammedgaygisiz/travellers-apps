@@ -25,6 +25,12 @@ import {
   visitIdOf,
 } from './table-state';
 import {
+  TABLE_SESSIONS_COLLECTION,
+  isExpiredSession,
+  tableOrderingOf,
+  tableSessionIdleTimeoutMs,
+} from './table-session';
+import {
   TABLE_STATUS_AFTER_VISIT,
   TABLE_VISITS_COLLECTION,
   TABLE_VISIT_END_STATUSES,
@@ -83,6 +89,15 @@ import {
  * the two hosts racing to seat table 12 contend on that one document, and the
  * loser re-reads it and fails its `expectedStatus` check before it can create a
  * second visit.
+ *
+ * ## Seating is also confirming the guests who scanned
+ *
+ * Since issue #1101 the same commit reaches a fourth collection,
+ * `tableSessions`. A guest scanning a table nobody has seated gets a `pending`
+ * session, which cannot order and which staff confirm - and the confirmation is
+ * the seating itself rather than a second thing a host has to do. So opening a
+ * visit activates the table's pending sessions onto it, and ending one closes
+ * the sessions it carried. See {@link syncTableSessions}.
  *
  * ## Why this is not an operator action
  *
@@ -542,6 +557,98 @@ const assertInService = (
 };
 
 /**
+ * Brings the guests' sessions into line with the visit this transition opens or
+ * ends (GitHub issue #1101).
+ *
+ * ## Why it belongs in this commit
+ *
+ * A guest's session is `pending` until staff confirm the table, and confirming
+ * is exactly what seating it is. Making that a second action - a host who seats
+ * a table and then has to admit the three people who scanned while they waited
+ * - would be asking the restaurant a question the restaurant has already
+ * answered. So the seating activates them, in the same transaction that writes
+ * the state, the trail and the visit: a guest active at a visit that was never
+ * opened cannot exist, and neither can a party seated with its scanners left
+ * waiting.
+ *
+ * The ending half is the same argument read backwards. "A session expires when
+ * the visit closes" is a rule about two documents, and the only place both are
+ * already held is here.
+ *
+ * ## What it costs
+ *
+ * One query, and only on the two transitions that open or end a visit. Most of
+ * a table's day is neither - a table goes `available` to `reserved`, `occupied`
+ * to `ordering`, `cleaning` to `available` - and those pay nothing. The query
+ * is equality-only and scoped to one restaurant, so it needs no composite index
+ * and its result is bounded by the number of phones at one table.
+ *
+ * A pending session that went idle while it waited is written `expired` instead
+ * of being activated. Somebody who scanned the sticker at lunch is not part of
+ * the party seated at dinner, and admitting them would attach a stranger to a
+ * bill.
+ */
+const syncTableSessions = async (
+  transaction: FirebaseFirestore.Transaction,
+  sessions: FirebaseFirestore.CollectionReference,
+  restaurant: DocumentData,
+  {
+    tableId,
+    visitId,
+    opening,
+    ending,
+    at,
+  }: {
+    tableId: string;
+    visitId: string;
+    opening: boolean;
+    ending: boolean;
+    at: number;
+  },
+): Promise<void> => {
+  if (!opening && !ending) {
+    return;
+  }
+
+  const idleTimeoutMs = tableSessionIdleTimeoutMs(
+    tableOrderingOf(restaurant)['sessionIdleTimeoutMinutes'],
+  );
+
+  // Opening looks for the table's pending sessions, because a pending one has
+  // no visit to be found by. Ending looks for the visit's, because a party that
+  // moved tables is at a different table from the one its sessions named when
+  // they started - the visit is the identity that survives a move, which is the
+  // whole reason orders hang from it.
+  const query = opening
+    ? sessions.where('tableId', '==', tableId).where('status', '==', 'pending')
+    : sessions.where('visitId', '==', visitId).where('status', '==', 'active');
+
+  const found = await transaction.get(query);
+
+  for (const session of found.docs) {
+    if (ending) {
+      transaction.update(session.ref, { status: 'closed', endedAt: at });
+      continue;
+    }
+
+    if (isExpiredSession(session.data(), idleTimeoutMs, at)) {
+      transaction.update(session.ref, { status: 'expired', endedAt: at });
+      continue;
+    }
+
+    // `lastActiveAt` is pushed forward as well as the status. The guest spent
+    // the wait doing nothing, which is what being seated is, and letting that
+    // wait count against the idle timeout would expire a party at the moment
+    // it sat down.
+    transaction.update(session.ref, {
+      status: 'active',
+      visitId,
+      lastActiveAt: at,
+    });
+  }
+};
+
+/**
  * Applies one transition, or explains why it did not happen.
  *
  * Everything that decides the outcome is read inside the transaction: the
@@ -721,6 +828,13 @@ export const transitionTableStateHandler = async (
       ...(reason ? { reason } : {}),
       ...(requestId ? { requestId } : {}),
     };
+
+    await syncTableSessions(
+      transaction,
+      restaurantRef.collection(TABLE_SESSIONS_COLLECTION),
+      restaurant.data() ?? {},
+      { tableId, visitId, opening, ending, at },
+    );
 
     if (openedVisitRef) {
       const opened: TableVisit = {

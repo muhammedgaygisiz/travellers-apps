@@ -20,10 +20,10 @@ The Table Visit is also the bridge back to the core product: the dishes ordered 
 - A Table has at most one open visit at a time, enforced by the backend.
 - Seating a party opens a visit. Freeing the table closes it.
 - A visit can be moved to a different Table while keeping its identity and its orders.
-- Multiple guests can join the same visit by scanning the same table QR code. Proposed, see open questions.
-- A guest scan does not open a visit by itself. It raises a pending signal that staff confirm. Proposed, see open questions.
-- A guest may participate without a BiteTribe account, through anonymous authentication. Proposed, see open questions.
-- A session expires when the visit closes, or after a configurable idle timeout.
+- Multiple guests can join the same visit by scanning the same table QR code. Decided, `RD-TS-3`.
+- A guest scan does not open a visit by itself. It raises a pending signal that staff confirm. Decided, `RD-TS-1`.
+- A guest may participate without a BiteTribe account, through anonymous authentication. Decided, `RD-TS-4`.
+- A session expires when the visit closes, or after a configurable idle timeout. Decided, `RD-TS-5`.
 - Closing a visit with an unpaid bill requires explicit staff confirmation.
 - A visit is retained after it closes, because it becomes the receipt context and the Bite-creation entry point.
 - A visit survives the deletion of its Table, keeping the historical record readable.
@@ -90,6 +90,90 @@ is one `where` on `visitId`. A list copied onto the visit would be a second
 version of one fact, free to disagree with the trail a disputed evening is
 actually read from.
 
+## Table Sessions
+
+A visit is the party. A **Table Session** is one guest's attachment to it: one
+document per phone, naming the visit it orders into.
+
+They are deliberately not one record. A party of four with two phones out is one
+visit and two sessions, and a guest who closes their browser must not end the
+meal. Equally, a visit is opened by staff and a session is opened by a scan, and
+those are different events with different authority behind them.
+
+| Field              | Description                                             |
+| ------------------ | ------------------------------------------------------- |
+| `id`               | Equal to the document id, derived from the two below    |
+| `restaurantId`     | Owning restaurant, repeated from the path               |
+| `tableId`          | The table that was scanned. A plain id, as on the visit |
+| `guestUserId`      | The account that scanned, anonymous or not              |
+| `status`           | `pending`, `active`, `left`, `expired`, `closed`        |
+| `visitId`          | The visit being ordered into. Absent while `pending`    |
+| `startedAt`        | When the guest first scanned, epoch milliseconds        |
+| `lastActiveAt`     | What the idle timeout is measured from                  |
+| `endedAt`          | When it ended. Absent while `pending` or `active`       |
+| `isAnonymousGuest` | Whether the guest had no account when it started        |
+
+The five statuses are five sentences a guest is shown, which is why the three
+endings are three statuses rather than one ending plus a reason field: "you
+left", "you were away too long" and "your table was closed" are different facts,
+and a two-field state is a state two readers can disagree about.
+
+`pending` is the one that carries the product decision. It is _live_ - the
+session is still the guest's and has not ended - and it still cannot order,
+because staff have not confirmed anybody is at that table. Reading "may order"
+as "has not ended" is exactly the hole `RD-TS-1` closes.
+
+### The lifecycle, and who moves it
+
+| Transition            | Written by                                |
+| --------------------- | ----------------------------------------- |
+| → `pending`           | `startTableSession`, table not seated     |
+| → `active` on arrival | `startTableSession`, table already seated |
+| `pending` → `active`  | `transitionTableState`, opening the visit |
+| `pending` → `expired` | `transitionTableState`, idle when seated  |
+| → `left`              | `leaveTableSession`                       |
+| → `closed`            | `transitionTableState`, ending the visit  |
+| → `expired`           | Whichever callable next observes it       |
+
+Nothing else writes one, and `firestore.rules` refuses every client write.
+
+**Leaving is one phone leaving.** `leaveTableSession` touches neither the visit,
+the table, nor anybody else's session: the friend still at the table is still
+ordering, and the party is still the restaurant's to close. A guest who could
+end a visit by tapping "leave" could clear a table they were never sitting at,
+since the QR code never proved they were.
+
+**Expiry is computed rather than swept.** `isTableSessionExpired` is a pure
+predicate over `lastActiveAt` and the restaurant's
+`TableOrderingSettings.sessionIdleTimeoutMinutes`, and the next callable that
+observes an expired session persists the status. There is no scheduled job,
+because a session nobody touches costs nothing and matters to nobody; the moment
+expiry matters is the moment somebody asks.
+
+### Storage
+
+```text
+/restaurants/{restaurantId}/tableSessions/{length}_{tableId}_{guestUserId}
+```
+
+Under the restaurant rather than under the visit, because a `pending` session has
+no visit to live under, and moving the document once it gained one would change
+the id a guest is already watching.
+
+The name is derived rather than generated, which is what makes re-scanning
+idempotent: one phone scanning one code twice addresses one document instead of
+opening a second session. The leading length is what makes the derivation
+injective - with a plain separator, `table_` with `guest` and `table` with
+`_guest` name the same document, and two guests at one table would share a
+session. Neither generator produces such an id today, which is an accident of a
+v4 UUID and an alphanumeric uid rather than a rule anybody stated.
+
+The guest reads their own by `get` and never by `list`: the phone derives the
+name and subscribes to it, which is the whole reason a guest signs in
+anonymously rather than being handed an opaque secret to replay. `list` would
+hand them the other people at their table. Staff list them through the same
+`readsFloorPlan` as the tables, their live state and the visits.
+
 ## Orders
 
 An Order belongs to a visit, not to a table.
@@ -123,9 +207,9 @@ Restaurant
 ## Lifecycle
 
 ```text
-Staff seat a party -> visit opens
+Guests scan the table QR code -> pending sessions
 |
-Guests scan the table QR code and join the visit
+Staff seat a party -> visit opens, pending sessions become active
 |
 Guests browse the menu and submit orders
 |
@@ -140,7 +224,7 @@ Guest creates a Bite from a dish they ordered
 
 ## Permissions
 
-- Guest: join a visit at a table they scanned, see the visit's orders and total, submit orders, request assistance and the bill, and later create a Bite from a dish. No access to other visits.
+- Guest: join a visit at a table they scanned, see the visit's orders and total, submit orders, request assistance and the bill, and later create a Bite from a dish. No access to other visits, and no access to the sessions of the other guests at their own table.
 - Restaurant staff: open, move, and close visits, change order status, cancel with a reason, and confirm payment.
 - Restaurant owner: everything staff can do, plus configuration.
 - Admin: full access for support.
@@ -162,8 +246,11 @@ Firestore layout. The first line exists; the second is issue \#1072.
 
 ```text
 /restaurants/{restaurantId}/visits/{visitId}
+/restaurants/{restaurantId}/tableSessions/{sessionId}
 /restaurants/{restaurantId}/visits/{visitId}/orders/{orderId}
 ```
+
+The first two lines exist; the third is still issue \#1072's.
 
 Under the restaurant and not under the table, which is the whole of how a visit
 survives its table being deleted from the floor plan: a subcollection of the
@@ -182,6 +269,8 @@ the app takes but the only path there is.
 
 ## Current Limitations
 
+- **Nothing shows staff a pending session.** Issue \#1101 writes the signal and the rules admit every reader of the floor plan to it, but the business app does not render it. Until something does, "a scan raises a signal staff confirm" is a signal no screen draws, and a guest who scans an unseated table waits for a confirmation nobody has been asked for. Recorded in [[Current State - Open Questions]].
+- **Nothing writes `sessionIdleTimeoutMinutes`.** Every restaurant therefore uses the two-hour default, which is the intended default rather than a gap - but a restaurant that wants a shorter one has no way to say so.
 - The model, the storage and the backend exist (issue \#1095). **No app surface uses them yet.** The staff view of issue \#1093 and the actions of issue \#1094 read and write live table state, so seating a table already opens a visit, but nothing shows the visit, its party size or its duration, and nothing calls `moveTableVisit`.
 - The party size is therefore never recorded through the UI. The sheet of issue \#1094 takes an optional count and writes it to the audit entry's `reason`; moving it onto `TableVisit.guestCount`, which now exists to hold it, is left to the surface that consumes visits.
 - Orders do not exist. `/restaurants/{restaurantId}/visits/{visitId}/orders` is issue \#1072, and until it does, "the party keeps its orders when it moves" is a property of the identity rather than something with data behind it.

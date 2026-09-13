@@ -68,6 +68,16 @@ import { TableScanResult, refuseScan } from './table-scan';
  * Nothing here is written. A scan resolves; starting or joining a session is
  * issue #1101, and it is where an unproven presence first costs the restaurant
  * anything.
+ *
+ * ## Two callers, one set of checks
+ *
+ * {@link resolveScan} is the twelve checks on their own, and `startTableSession`
+ * runs them again before it writes. That is not belt and braces. The client
+ * holds the resolution this callable gave it for as long as the guest takes to
+ * read the confirmation screen, and three of the checks move inside a service:
+ * the kitchen pauses, the clock passes closing time, the owner turns the
+ * feature off. Trusting the earlier answer would let a session start at a
+ * restaurant that shut while the guest was deciding.
  */
 
 export const MENUS_COLLECTION = 'menus';
@@ -201,38 +211,40 @@ const readContext = async (
   return { room, menu };
 };
 
-/** The clock, injectable so the opening-hours cases are testable. */
-export const resolveTableQrTokenHandler = async (
-  request: CallableRequest<ResolveTableQrTokenRequest>,
-  now: Date = new Date(),
-): Promise<TableScanResult> => {
-  const raw = request.data?.token;
+/**
+ * What one scan established, for a caller that has to act on it.
+ *
+ * The restaurant document travels with the result because the caller that
+ * writes - `startTableSession` - needs a field off it that no guest is entitled
+ * to see, the idle timeout, and re-reading the same document a line later would
+ * be a sixth read and a second version of the same instant.
+ *
+ * It is present only on a resolved scan. A refusal establishes nothing about a
+ * restaurant, including on the two refusals that read one.
+ */
+export interface ScanResolution {
+  result: TableScanResult;
+  restaurant?: DocumentData;
+}
 
-  if (typeof raw !== 'string' || !raw.trim()) {
-    throw new HttpsError('invalid-argument', 'A token is required.');
-  }
-
-  // Counted before the shape check, so a flood of malformed tokens costs the
-  // sender its quota rather than nothing.
-  if (
-    !withinScanRateLimit({
-      token: raw.trim().toUpperCase(),
-      client: clientOf(request),
-      now: now.getTime(),
-    })
-  ) {
-    logger.warn('resolveTableQrToken: rate limit reached');
-
-    throw new HttpsError(
-      'resource-exhausted',
-      'Too many scans. Try again in a moment.',
-    );
-  }
-
+/**
+ * The twelve checks, with no rate limiting and no argument validation.
+ *
+ * Split out so `startTableSession` runs exactly this and not a paraphrase of
+ * it. The two callers differ in what they do afterwards and must not differ in
+ * what they check, and an order of checks that is "part of the contract" in one
+ * file and re-derived in another is an order that will drift.
+ *
+ * The clock is a parameter so the opening-hours cases are testable.
+ */
+export const resolveScan = async (
+  raw: unknown,
+  now: Date,
+): Promise<ScanResolution> => {
   const token = normalizeScannedToken(raw);
 
   if (!token) {
-    return refuseScan('unknownToken');
+    return { result: refuseScan('unknownToken') };
   }
 
   const firestore = getFirestore();
@@ -242,7 +254,7 @@ export const resolveTableQrTokenHandler = async (
     .get();
 
   if (!tokenSnapshot.exists) {
-    return refuseScan('unknownToken');
+    return { result: refuseScan('unknownToken') };
   }
 
   const tokenData = tokenSnapshot.data() ?? {};
@@ -254,7 +266,7 @@ export const resolveTableQrTokenHandler = async (
   // empty document path, so a token document missing the field would be an
   // unhandled error instead of the refusal it plainly is.
   if (!restaurantId) {
-    return refuseScan('restaurantNotFound');
+    return { result: refuseScan('restaurantNotFound') };
   }
 
   const restaurantSnapshot = await firestore
@@ -263,23 +275,23 @@ export const resolveTableQrTokenHandler = async (
     .get();
 
   if (!restaurantSnapshot.exists) {
-    return refuseScan('restaurantNotFound');
+    return { result: refuseScan('restaurantNotFound') };
   }
 
   const restaurant = restaurantSnapshot.data() ?? {};
 
   if (!isRestaurantActive(restaurant)) {
-    return refuseScan('restaurantInactive');
+    return { result: refuseScan('restaurantInactive') };
   }
 
   const tableOrdering = (restaurant['tableOrdering'] ?? {}) as DocumentData;
 
   if (tableOrdering['enabled'] !== true) {
-    return refuseScan('tableOrderingDisabled');
+    return { result: refuseScan('tableOrderingDisabled') };
   }
 
   if (!tableId) {
-    return refuseScan('tableNotFound');
+    return { result: refuseScan('tableNotFound') };
   }
 
   const tableSnapshot = await firestore
@@ -295,21 +307,23 @@ export const resolveTableQrTokenHandler = async (
   // mirrored `tableEnabled` is the point - the mirror cannot say the table is
   // gone, only what it was when it was last written.
   if (!tableSnapshot.exists) {
-    return refuseScan('tableNotFound');
+    return { result: refuseScan('tableNotFound') };
   }
 
   const table = tableSnapshot.data() ?? {};
 
   if (table['enabled'] !== true) {
-    return refuseScan('tableDisabled');
+    return { result: refuseScan('tableDisabled') };
   }
 
   const status = getString(tokenData, 'status');
 
   if (status !== 'active') {
-    return refuseScan(
-      status === 'superseded' ? 'tokenSuperseded' : 'tokenRevoked',
-    );
+    return {
+      result: refuseScan(
+        status === 'superseded' ? 'tokenSuperseded' : 'tokenRevoked',
+      ),
+    };
   }
 
   const pausedUntilTimestamp =
@@ -318,7 +332,7 @@ export const resolveTableQrTokenHandler = async (
       : 0;
 
   if (pausedUntilTimestamp > now.getTime()) {
-    return refuseScan('orderingPaused', { pausedUntilTimestamp });
+    return { result: refuseScan('orderingPaused', { pausedUntilTimestamp }) };
   }
 
   const opening = evaluateOpeningHours(
@@ -328,26 +342,28 @@ export const resolveTableQrTokenHandler = async (
   );
 
   if (!opening.open) {
-    return refuseScan(
-      'restaurantClosed',
-      opening.reopensAt ? { reopensAt: opening.reopensAt } : {},
-    );
+    return {
+      result: refuseScan(
+        'restaurantClosed',
+        opening.reopensAt ? { reopensAt: opening.reopensAt } : {},
+      ),
+    };
   }
 
   const menuId = getString(restaurant, 'menuId');
 
   if (!menuId) {
-    return refuseScan('menuMissing');
+    return { result: refuseScan('menuMissing') };
   }
 
   const { room, menu } = await readContext(restaurantId, roomId, menuId);
 
   if (!menu.exists) {
-    return refuseScan('menuMissing');
+    return { result: refuseScan('menuMissing') };
   }
 
   if (!hasOrderableItem(menu.data() ?? {})) {
-    return refuseScan('menuUnavailable');
+    return { result: refuseScan('menuUnavailable') };
   }
 
   const roomName = getString(room?.data(), 'name');
@@ -358,22 +374,85 @@ export const resolveTableQrTokenHandler = async (
   // is entitled to neither - so nothing below is a spread of a document, and a
   // field added to one of them tomorrow does not reach a guest by accident.
   return {
-    ok: true,
-    token,
-    restaurant: {
-      id: restaurantId,
-      name: getString(restaurant, 'name'),
-      ...(image ? { image } : {}),
+    result: {
+      ok: true,
+      token,
+      restaurant: {
+        id: restaurantId,
+        name: getString(restaurant, 'name'),
+        ...(image ? { image } : {}),
+      },
+      room: { id: roomId, ...(roomName ? { name: roomName } : {}) },
+      table: {
+        id: tableId,
+        label: getString(table, 'label'),
+        seats:
+          typeof table['seats'] === 'number' ? (table['seats'] as number) : 0,
+      },
+      menu: { id: menuId },
     },
-    room: { id: roomId, ...(roomName ? { name: roomName } : {}) },
-    table: {
-      id: tableId,
-      label: getString(table, 'label'),
-      seats:
-        typeof table['seats'] === 'number' ? (table['seats'] as number) : 0,
-    },
-    menu: { id: menuId },
+    restaurant,
   };
+};
+
+/**
+ * A token argument that is present and looks like it could be one.
+ *
+ * Shared with `startTableSession`, which takes the same field and has to refuse
+ * an absent one the same way: an empty `token` is a client that did not send
+ * one, which is a bug in the caller rather than a scan of anything, so it is an
+ * `invalid-argument` failure and not one of the twelve refusals.
+ */
+export const parseScannedToken = (value: unknown): string => {
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new HttpsError('invalid-argument', 'A token is required.');
+  }
+
+  return value.trim().toUpperCase();
+};
+
+/**
+ * The rate-limit gate both scan callables pass through.
+ *
+ * Counted before the shape check, so a flood of malformed tokens costs the
+ * sender its quota rather than nothing. The two callables share one bucket per
+ * token and per client on purpose: a loop that alternates between them is the
+ * same loop, and two buckets would double what it is allowed.
+ */
+export const assertWithinScanRateLimit = (
+  request: CallableRequest<unknown>,
+  token: string,
+  now: Date,
+  callable: string,
+): void => {
+  if (
+    withinScanRateLimit({
+      token,
+      client: clientOf(request),
+      now: now.getTime(),
+    })
+  ) {
+    return;
+  }
+
+  logger.warn(`${callable}: rate limit reached`);
+
+  throw new HttpsError(
+    'resource-exhausted',
+    'Too many scans. Try again in a moment.',
+  );
+};
+
+/** The clock, injectable so the opening-hours cases are testable. */
+export const resolveTableQrTokenHandler = async (
+  request: CallableRequest<ResolveTableQrTokenRequest>,
+  now: Date = new Date(),
+): Promise<TableScanResult> => {
+  const raw = parseScannedToken(request.data?.token);
+
+  assertWithinScanRateLimit(request, raw, now, 'resolveTableQrToken');
+
+  return (await resolveScan(raw, now)).result;
 };
 
 export const resolveTableQrToken = onAppCheck<ResolveTableQrTokenRequest>(

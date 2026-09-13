@@ -1,0 +1,47 @@
+:host {
+  --pad: 20px;
+
+  // Derived from the Ionic theme rather than fixed light values, following the
+  // public pages next door: the screen renders inside the themed app and has to
+  // follow the light/dark switch.
+  --muted: var(--ion-text-color-step-400);
+
+  .table-session {
+    // Centred in a column narrower than the page, because this screen is read
+    // at arm's length at a table with one thumb free. Everything on it is one
+    // sentence and one button.
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 60vh;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: calc(var(--pad) * 1.4) var(--pad);
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    line-height: 1.25;
+    margin: 0 0 0.6rem 0;
+  }
+
+  p {
+    margin: 0 0 0.9rem 0;
+  }
+
+  .note {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .centred {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  ion-button {
+    margin-top: 0.8rem;
+  }
+}

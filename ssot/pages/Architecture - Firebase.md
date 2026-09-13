@@ -22,7 +22,8 @@ users               users/{id}/followers, users/{id}/following, users/{id}/pushT
 restaurants         restaurants/{id}/rooms, restaurants/{id}/tables,
                     restaurants/{id}/tableStates,
                     restaurants/{id}/tableStateTransitions,
-                    restaurants/{id}/visits
+                    restaurants/{id}/visits,
+                    restaurants/{id}/tableSessions
 restaurantStaff
 tableTokens
 menus
@@ -158,6 +159,31 @@ dining room. `transitionTableState` opens and ends visits alongside the state
 change that caused them, in one transaction, and `moveTableVisit` walks an open
 visit to another table without ending it.
 
+**A guest's table session is the one collection a signed-in stranger reads a
+single document of and nothing more** (issue \#1101). A session lives at
+`/restaurants/{restaurantId}/tableSessions/{sessionId}`, its name derived from
+the table and the guest's uid, and the guest clause matches
+`resource.data.guestUserId` against `request.auth.uid`. So the phone that
+started a session derives the name and subscribes to it directly, which is the
+whole reason a guest signs in anonymously rather than being handed an opaque
+secret to replay - without a uid, every read of their own session would need a
+callable.
+
+`get` without `list`, for the same reason the tokens are: one query would hand a
+guest everybody at their table, and the next one every table in the restaurant.
+Staff reach the collection through `readsFloorPlan`, the same list as the
+tables, their live state and the visits - a pending session is a signal to the
+people on the floor and is worth exactly what the table it names is worth.
+
+**Written by nobody.** A client able to write here could set its own status to
+`active` and name any visit it liked, which is precisely what the pending signal
+exists to prevent: somebody who never left their sofa ordering at a table in a
+restaurant. `startTableSession`, `leaveTableSession` and `transitionTableState`
+write it through the Admin SDK. The clause a rule checking ownership alone would
+miss is the guest promoting their _own_ `pending` session to `active` - they do
+own that document, and activating it is exactly the confirmation staff are meant
+to give.
+
 **`/tableTokens` is the one collection a client with no session may read.** It
 has to be: a guest scanning the QR code on a table has no account, and the scan
 is what establishes which restaurant they would be signing in to. The document
@@ -191,8 +217,16 @@ that answers, and it is the one `public` endpoint that reads restaurant data: a
 guest at a table has no account, so requiring one would make the account a
 precondition of finding out whether the restaurant even takes orders. App Check
 is enforced on it like every other endpoint, it writes nothing, and it assembles
-its answer field by field rather than handing back the documents it read. See
-[[Implementation - Firebase Functions]].
+its answer field by field rather than handing back the documents it read.
+
+`startTableSession` (issue \#1101) runs the same twelve checks again before it
+writes, through the same `resolveScan` rather than a copy of it. That is not
+belt and braces: the client holds the earlier resolution for as long as the
+guest takes to read the confirmation screen, and three of the checks move inside
+a service - the kitchen pauses, the clock passes closing time, the owner turns
+the feature off. It requires a session where the scan does not, and an anonymous
+one is enough; what the door opens onto is one document named after the caller's
+own uid. See [[Implementation - Firebase Functions]].
 
 ### Testing And Deploying The Rules
 

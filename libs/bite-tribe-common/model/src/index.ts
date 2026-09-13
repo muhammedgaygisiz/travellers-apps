@@ -60,3 +60,10 @@ export * from './lib/table-visit';
  * renders, not shapes they compile against (issue #1100).
  */
 export * from './lib/table-ordering';
+/**
+ * A value export for the same reason: the session statuses, the id derivation
+ * and the expiry predicate are run by the backend, by the scan screen and by
+ * the staff view that draws a pending list, and expiry in particular has to be
+ * one function rather than one subtraction per reader (issue #1101).
+ */
+export * from './lib/table-session';

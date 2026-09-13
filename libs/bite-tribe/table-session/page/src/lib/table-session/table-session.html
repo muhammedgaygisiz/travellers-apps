@@ -1,0 +1,148 @@
+<ta-page
+  [chrome]="{
+    enableBackButton: false,
+    showHeaderMenu: false,
+    showFooter: false
+  }"
+>
+  <ion-content class="ion-padding">
+    <main class="table-session">
+      @if (loading()) {
+      <div class="centred" data-testid="table-session-loading">
+        <ion-spinner name="crescent" />
+        <p>{{ 'table-session-checking' | transloco }}</p>
+      </div>
+      }
+
+      <!--
+        The acceptance criterion: the restaurant and the table are named, and
+        acknowledged, before anything else is possible. A sticker swapped
+        between two tables is caught by the person sitting at one of them.
+      -->
+      @if (confirmation(); as confirmed) {
+      <section data-testid="table-session-confirm">
+        <h1>
+          {{ 'table-session-confirm-heading' | transloco:
+          placeOf(confirmed.context) }}
+        </h1>
+
+        @if (confirmed.context.room.name) {
+        <p class="note">
+          {{ 'table-session-confirm-room' | transloco:
+          placeOf(confirmed.context) }}
+        </p>
+        }
+
+        <p>{{ 'table-session-confirm-intro' | transloco }}</p>
+
+        <ion-button
+          expand="block"
+          data-testid="table-session-confirm-action"
+          [disabled]="isBusy()"
+          (click)="confirm()"
+        >
+          {{ 'table-session-confirm-action' | transloco }}
+        </ion-button>
+      </section>
+      } @if (joined(); as session) {
+      <section data-testid="table-session-joined">
+        @if (session.status === 'active') {
+        <h1>
+          {{ 'table-session-active-heading' | transloco:
+          placeOf(session.context) }}
+        </h1>
+        <p>
+          {{ 'table-session-active-intro' | transloco: placeOf(session.context)
+          }}
+        </p>
+        } @else {
+        <h1>
+          {{ 'table-session-pending-heading' | transloco:
+          placeOf(session.context) }}
+        </h1>
+        <p>{{ 'table-session-pending-intro' | transloco }}</p>
+        }
+
+        <!--
+          Browsing the menu is issue #1102 and ordering is issue #1103. The line
+          says so rather than offering a button that goes nowhere, which is the
+          one thing worse than not offering it.
+        -->
+        <p class="note">{{ 'table-session-menu-soon' | transloco }}</p>
+
+        <ion-button
+          expand="block"
+          fill="clear"
+          data-testid="table-session-leave"
+          [disabled]="isBusy()"
+          (click)="leave()"
+        >
+          {{ 'table-session-leave' | transloco }}
+        </ion-button>
+      </section>
+      } @if (left(); as ended) {
+      <section data-testid="table-session-left">
+        <h1>{{ 'table-session-left-heading' | transloco }}</h1>
+        <p>
+          {{ 'table-session-left-intro' | transloco: placeOf(ended.context) }}
+        </p>
+
+        <ion-button
+          expand="block"
+          data-testid="table-session-retry"
+          [disabled]="isBusy()"
+          (click)="retry()"
+        >
+          {{ 'table-session-rejoin' | transloco }}
+        </ion-button>
+      </section>
+      } @if (refusal(); as refused) {
+      <section data-testid="table-session-refused">
+        <h1>{{ 'table-session-refused-title' | transloco }}</h1>
+
+        <p data-testid="table-session-reason">
+          {{ 'table-session-refused-' + refused.reason | transloco }}
+        </p>
+
+        @if (refused.reopensAt; as reopensAt) {
+        <p class="note" data-testid="table-session-reopens-at">
+          {{ 'table-session-reopens-at' | transloco : { day:
+          dayKey(reopensAt.day) | transloco, time: reopensAt.time } }}
+        </p>
+        }
+
+        <p class="note" data-testid="table-session-next-step">
+          {{ 'table-session-next-' + refused.nextStep | transloco }}
+        </p>
+
+        <ion-button
+          expand="block"
+          fill="clear"
+          data-testid="table-session-retry"
+          [disabled]="isBusy()"
+          (click)="retry()"
+        >
+          {{ 'table-session-try-again' | transloco }}
+        </ion-button>
+      </section>
+      } @if (failure(); as failed) {
+      <section data-testid="table-session-failed">
+        <h1>{{ 'table-session-failed-title' | transloco }}</h1>
+
+        <p data-testid="table-session-failure">
+          {{ 'table-session-failed-' + failed.failure | transloco }}
+        </p>
+
+        <ion-button
+          expand="block"
+          data-testid="table-session-retry"
+          [disabled]="isBusy()"
+          (click)="retry()"
+        >
+          {{ 'table-session-try-again' | transloco }}
+        </ion-button>
+      </section>
+      }
+    </main>
+  </ion-content>
+</ta-page>

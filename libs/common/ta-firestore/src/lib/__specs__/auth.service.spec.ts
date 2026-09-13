@@ -108,6 +108,77 @@ describe(AuthService.name, () => {
     });
   });
 
+  /**
+   * The distinction issue #1101 introduced. A guest at a table signs in
+   * anonymously so their table session has an identity to belong to, so
+   * "somebody is signed in" and "a member is signed in" stopped being one
+   * question - and the route guards ask the second one.
+   */
+  describe('getMember', () => {
+    const signedInAs = (user: unknown): void => {
+      jest
+        .spyOn(service, 'authState')
+        .mockReturnValue({ user } as unknown as ReturnType<
+          typeof service.authState
+        >);
+    };
+
+    it('returns a member who signed in with an account', () => {
+      signedInAs({ uid: '123', isAnonymous: false });
+
+      expect(service.getMember()).toEqual({ uid: '123', isAnonymous: false });
+    });
+
+    it('answers null for a guest holding an anonymous session', () => {
+      signedInAs({ uid: 'guest', isAnonymous: true });
+
+      expect(service.getMember()).toBeNull();
+      expect(service.getUser()).toEqual({ uid: 'guest', isAnonymous: true });
+    });
+
+    it('answers null when nobody is signed in', () => {
+      signedInAs(null);
+
+      expect(service.getMember()).toBeNull();
+    });
+  });
+
+  describe('signInAsGuest', () => {
+    beforeEach(() => {
+      (
+        FirebaseAuthentication as unknown as { signInAnonymously: jest.Mock }
+      ).signInAnonymously = jest
+        .fn()
+        .mockResolvedValue({ user: { uid: 'guest', isAnonymous: true } });
+    });
+
+    it('signs in anonymously when nobody is signed in', async () => {
+      jest.spyOn(service, 'authState').mockReturnValue(undefined);
+
+      await expect(service.signInAsGuest()).resolves.toEqual({
+        uid: 'guest',
+        isAnonymous: true,
+      });
+      expect(FirebaseAuthentication.signInAnonymously).toHaveBeenCalled();
+    });
+
+    /**
+     * A member who scans a code at a table orders as themselves, and a guest
+     * who scans a second table keeps the uid their first session belongs to.
+     * Signing in again would mint a new uid and orphan both.
+     */
+    it('keeps an existing session rather than minting a second identity', async () => {
+      jest
+        .spyOn(service, 'authState')
+        .mockReturnValue({ user: { uid: 'member' } } as unknown as ReturnType<
+          typeof service.authState
+        >);
+
+      await expect(service.signInAsGuest()).resolves.toEqual({ uid: 'member' });
+      expect(FirebaseAuthentication.signInAnonymously).not.toHaveBeenCalled();
+    });
+  });
+
   describe('refreshSession', () => {
     let getIdTokenMock: jest.Mock;
 

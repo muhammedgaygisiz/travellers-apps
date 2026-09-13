@@ -10,7 +10,7 @@ import { AuthService } from '../auth.service';
 import { RequestedUrlService } from '../requested-url.service';
 
 describe('startGuard', () => {
-  let authState: jest.Mock;
+  let getMember: jest.Mock;
   let parseUrl: jest.Mock;
   let requestedUrlService: RequestedUrlService;
 
@@ -22,14 +22,14 @@ describe('startGuard', () => {
     );
 
   beforeEach(() => {
-    authState = jest.fn(() => undefined);
+    getMember = jest.fn(() => undefined);
     parseUrl = jest.fn(
       (url: string): UrlTree => ({ url }) as unknown as UrlTree,
     );
 
     TestBed.configureTestingModule({
       providers: [
-        { provide: AuthService, useValue: { authState } },
+        { provide: AuthService, useValue: { getMember } },
         { provide: Router, useValue: { parseUrl } },
       ],
     });
@@ -42,16 +42,29 @@ describe('startGuard', () => {
   });
 
   it('forwards a signed-in visitor to home', () => {
-    authState.mockReturnValue({ user: { uid: 'user-1' } });
+    getMember.mockReturnValue({ uid: 'user-1' });
 
     expect(runGuard()).toEqual({ url: '/home' });
   });
 
   it('forwards a signed-in visitor to the URL they originally asked for', () => {
-    authState.mockReturnValue({ user: { uid: 'user-1' } });
+    getMember.mockReturnValue({ uid: 'user-1' });
     requestedUrlService.remember('/bite/shared-123');
 
     expect(runGuard()).toEqual({ url: '/bite/shared-123' });
     expect(requestedUrlService.consume()).toBeUndefined();
+  });
+
+  /**
+   * A guest who scanned a table code holds an anonymous session, and it must
+   * not carry them into the app. `getMember` answers `null` for one, so they
+   * see the welcome page like any other visitor - which is the whole point of
+   * the anonymous session being an identity for a table and not a login
+   * (issue #1101).
+   */
+  it('shows the welcome page to a guest holding an anonymous session', () => {
+    getMember.mockReturnValue(null);
+
+    expect(runGuard()).toBe(true);
   });
 });

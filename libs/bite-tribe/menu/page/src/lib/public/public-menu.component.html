@@ -1,0 +1,59 @@
+<ta-page
+  [chrome]="{
+    enableBackButton: false,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
+>
+  <ion-content class="ion-padding">
+    <main class="public-menu">
+      @if (loading()) {
+        <div class="centred" data-testid="public-menu-loading">
+          <ion-spinner name="crescent" />
+          <p>{{ 'public-menu-loading' | transloco }}</p>
+        </div>
+      }
+
+      @if (loaded(); as page) {
+        <header data-testid="public-menu-header">
+          <h1>{{ page.restaurant.name }}</h1>
+        </header>
+
+        <!--
+          The same renderer the authenticated menu uses, with the Bite button
+          off: the reader may have no account, and offering it would open a
+          sign-up for a product they came here to read a menu of.
+        -->
+        <bt-menu
+          [menu]="page.menu"
+          [canCreateBite]="false"
+          data-testid="public-menu-body"
+        />
+      }
+
+      @if (refusal(); as refused) {
+        <section data-testid="public-menu-refused">
+          <h1>{{ 'public-menu-refused-title' | transloco }}</h1>
+          <p data-testid="public-menu-reason">
+            {{ 'public-menu-refused-' + refused.reason | transloco }}
+          </p>
+        </section>
+      }
+
+      @if (failure()) {
+        <section data-testid="public-menu-failed">
+          <h1>{{ 'public-menu-failed-title' | transloco }}</h1>
+          <p>{{ 'public-menu-failed-body' | transloco }}</p>
+
+          <ion-button
+            expand="block"
+            data-testid="public-menu-retry"
+            (click)="retry()"
+          >
+            {{ 'public-menu-try-again' | transloco }}
+          </ion-button>
+        </section>
+      }
+    </main>
+  </ion-content>
+</ta-page>

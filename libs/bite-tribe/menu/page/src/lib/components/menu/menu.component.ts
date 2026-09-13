@@ -1,6 +1,8 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   linkedSignal,
   output,
@@ -21,6 +23,16 @@ export class MenuComponent {
   menu = input<Menu>();
 
   linkedMenu = linkedSignal(() => this.menu());
+
+  /**
+   * The currency the menu's prices are stated in (issue #1102).
+   *
+   * Read off the menu by default, so the authenticated page needs no change and
+   * a public page that already has the menu need not pass it twice.
+   */
+  readonly currency = computed(() => this.menu()?.currency);
+
+  canCreateBite = input(true, { transform: booleanAttribute });
 
   createBiteClick = output<MenuItem>();
 }

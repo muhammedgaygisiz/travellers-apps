@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   input,
@@ -20,6 +21,11 @@ export class CategoryComponent {
   category = input<Category>();
 
   linkedCategory = linkedSignal(() => this.category());
+
+  /** Threaded to the items, which price and offer them (issue #1102). */
+  currency = input<string>();
+
+  canCreateBite = input(true, { transform: booleanAttribute });
 
   createBiteClick = output<MenuItem>();
 }

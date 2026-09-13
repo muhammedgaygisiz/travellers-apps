@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import type { Category, Menu, MenuItem } from 'model';
+import { currencyCodes } from 'utils';
 import {
   IonButton,
   IonIcon,
@@ -38,6 +39,22 @@ import { TranslocoPipe } from '@jsverse/transloco';
 })
 export class BusinessMenuComponent {
   menu = input<Menu>();
+
+  /**
+   * The symbol the menu's prices are stated in (issue #1102).
+   *
+   * Derived from the menu rather than passed in, so the editor cannot disagree
+   * with the currency control at the top of the same page.
+   */
+  readonly currencySymbol = computed(() => {
+    const code = this.menu()?.currency;
+
+    if (!code) {
+      return '';
+    }
+
+    return currencyCodes.find((entry) => entry.code === code)?.symbol ?? code;
+  });
 
   linkedMenu = linkedSignal(() => this.menu());
 

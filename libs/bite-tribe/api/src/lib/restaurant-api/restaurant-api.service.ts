@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import type { Address, DaySchedule, Geopoint, Link, Restaurant } from 'model';
+import type {
+  Address,
+  DaySchedule,
+  Geopoint,
+  Link,
+  Restaurant,
+  TableOrderingSettings,
+} from 'model';
 import { MENU_COLLECTION } from '../menu-api/menu-api.service';
 import { BITE_COLLECTION, RESTAURANT_COLLECTION } from '../utils/constants';
 import { getRestaurantById } from './utils/get-restaurant-by-id';
@@ -166,6 +173,28 @@ export class RestaurantApiService {
       reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
       data: {
         openingHours,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(),
+      },
+    });
+  }
+
+  /**
+   * How this restaurant uses its QR codes (GitHub issue #1102).
+   *
+   * The whole `tableOrdering` object on every save, including a staff-side
+   * pause the owner's form never shows: `updateDocument` replaces a map rather
+   * than merging into it, so writing only `enabled` and `timeZone` would clear
+   * a pause somebody set during service.
+   */
+  async saveTableOrderingForRestaurant(
+    restaurantId: string,
+    tableOrdering: TableOrderingSettings,
+  ): Promise<void> {
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        tableOrdering,
         updatedAt: new Date().toISOString(),
         updatedAtTimestamp: Date.now(),
       },

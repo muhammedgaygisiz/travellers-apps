@@ -1,6 +1,6 @@
 export { SupportedLang } from './lib/supported-lang';
 
-export { PATH } from './lib/paths';
+export { PATH, PUBLIC_MENU_RESTAURANT_PARAM } from './lib/paths';
 
 export { BITE_TRIBE_ORIGIN } from './lib/bite-tribe-origin';
 

@@ -22,26 +22,34 @@
   </div>
   <div class="price-actions">
     @if (itemData?.price !== 0) {
-      <div class="price">{{ itemData?.price }} €</div>
+      <div class="price">{{ priceLabel() }}</div>
     }
     @if (isItemUnavailable) {
       <span class="availability-label">
         {{ 'menu-item-not-available' | transloco }}
       </span>
     }
-    <ion-button
-      size="small"
-      fill="clear"
-      [disabled]="isItemUnavailable"
-      (click)="onCreateBiteClick(itemData)"
-    >
-      {{ 'create-bite' | transloco }}
-    </ion-button>
+    @if (canCreateBite()) {
+      <ion-button
+        size="small"
+        fill="clear"
+        [disabled]="isItemUnavailable"
+        (click)="onCreateBiteClick(itemData)"
+      >
+        {{ 'create-bite' | transloco }}
+      </ion-button>
+    }
   </div>
   @if (itemData?.variants?.length) {
     <div class="variants">
       @for (variant of itemData?.variants; track variant.id) {
-        <menu-item [item]="variant" [parentItem]="itemData" isVariant />
+        <menu-item
+          [item]="variant"
+          [parentItem]="itemData"
+          [currency]="currency()"
+          [canCreateBite]="canCreateBite()"
+          isVariant
+        />
       }
     </div>
   }

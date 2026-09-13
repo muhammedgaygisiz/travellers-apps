@@ -11,6 +11,9 @@ import { EditRestaurantService } from './edit-restaurant.service';
       (submitSocialMediaLinks)="service.submitSocialMediaLinks($event)"
       (submitDescription)="service.submitDescription($event)"
       (submitOpeningHours)="service.submitOpeningHours($event)"
+      (submitTableOrderingSettings)="
+        service.submitTableOrderingSettings($event)
+      "
       (submitAddress)="service.submitAddress($event)"
       (submitPosition)="service.submitPosition($event)"
       (createMenu)="service.createMenu()"

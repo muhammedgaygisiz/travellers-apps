@@ -700,25 +700,70 @@ describe('guest table sessions', () => {
     });
   });
 
-  describe('a scan that does not resolve', () => {
-    /**
-     * Starting re-runs the twelve checks rather than trusting the resolution
-     * the client is holding, because the kitchen can pause while the guest
-     * reads the confirmation screen. Nothing is written when they fail.
-     */
-    it('refuses with the scan reason and writes nothing', async () => {
+  /**
+   * A scan can resolve and still not be orderable since issue #1102. A session
+   * exists in order to place orders, so one at a restaurant that takes none is
+   * a session that can never be used - and a row on a screen in a restaurant
+   * that is not watching one.
+   *
+   * The client already knows, because the scan told it. These cover the backend
+   * declining to take the client's word for it.
+   */
+  describe('a scan that resolves without ordering', () => {
+    it('refuses a menu-only restaurant and writes nothing', async () => {
       await restaurantRef().update({ 'tableOrdering.enabled': false });
 
-      const result = await refused();
+      const result = await start();
 
-      expect(result).toMatchObject({
+      expect(result).toEqual({
         ok: false,
-        reason: 'tableOrderingDisabled',
-        nextStep: 'askStaff',
+        ordering: { available: false, reason: 'tableOrderingDisabled' },
       });
       expect(await readSessions()).toEqual([]);
     });
 
+    it('refuses while the kitchen is paused, and says until when', async () => {
+      const pausedUntilTimestamp = LUNCHTIME.getTime() + 20 * MINUTE;
+
+      await restaurantRef().update({
+        'tableOrdering.pausedUntilTimestamp': pausedUntilTimestamp,
+      });
+
+      expect(await start()).toEqual({
+        ok: false,
+        ordering: {
+          available: false,
+          reason: 'orderingPaused',
+          pausedUntilTimestamp,
+        },
+      });
+      expect(await readSessions()).toEqual([]);
+    });
+
+    /**
+     * The case the guard is really for: the kitchen pauses while the guest is
+     * reading the confirmation screen, so the resolution the client holds says
+     * ordering was fine and the session must still be refused.
+     */
+    it('refuses a pause that began after the guest read the screen', async () => {
+      const context = await started(alice);
+      expect(context.status).toBe('pending');
+
+      await restaurantRef().update({
+        'tableOrdering.pausedUntilTimestamp': LUNCHTIME.getTime() + MINUTE,
+      });
+
+      expect(await start(bob)).toMatchObject({ ok: false });
+      expect(await readSession(bob)).toBeUndefined();
+    });
+  });
+
+  describe('a scan that does not resolve', () => {
+    /**
+     * Starting re-runs the ten checks rather than trusting the resolution the
+     * client is holding, because a restaurant can close while the guest reads
+     * the confirmation screen. Nothing is written when they fail.
+     */
     it('refuses a token that resolves to nothing', async () => {
       expect((await refused(alice, 'ZZZZZZZZZZZZZZZZZZZZZZZZZZ')).reason).toBe(
         'unknownToken',

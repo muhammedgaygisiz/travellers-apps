@@ -1,6 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { RestaurantDataAccessService } from 'bite-tribe-business/restaurant-data-access';
-import { Address, DaySchedule, Geopoint, Link } from 'model';
+import {
+  Address,
+  DaySchedule,
+  Geopoint,
+  Link,
+  TableOrderingSettings,
+} from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import { ToastService } from 'toast';
 
@@ -114,6 +120,34 @@ export class EditRestaurantService {
         await this.dataAccess.submitOpeningHours(restaurant.id, openingHours);
         await this.toast.present({
           messageKey: 'opening-hours-saved',
+          outcome: 'success',
+        });
+      } catch {
+        await this.showFailureToast();
+      }
+    }
+  }
+
+  /**
+   * Turning ordering at the table on, or leaving the menu readable without it
+   * (GitHub issue #1102).
+   *
+   * The first writer `Restaurant.tableOrdering` has ever had. Issue #1100 added
+   * the field and gated every scan on it, so until this existed a scan in
+   * production always refused - the restaurant had no way to say yes.
+   */
+  async submitTableOrderingSettings(
+    tableOrdering: TableOrderingSettings,
+  ): Promise<void> {
+    const restaurant = this.restaurant();
+    if (restaurant) {
+      try {
+        await this.dataAccess.submitTableOrderingSettings(
+          restaurant.id,
+          tableOrdering,
+        );
+        await this.toast.present({
+          messageKey: 'table-ordering-saved',
           outcome: 'success',
         });
       } catch {

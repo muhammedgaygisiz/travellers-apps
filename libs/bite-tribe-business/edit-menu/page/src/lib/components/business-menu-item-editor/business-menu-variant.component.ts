@@ -41,6 +41,15 @@ export class BusinessMenuVariantComponent {
 
   isVariant = input(false, { transform: booleanAttribute });
 
+  /**
+   * The symbol the menu's prices are stated in (GitHub issue #1102).
+   *
+   * The field used to carry a hardcoded dollar sign, which now sits directly
+   * beneath the currency the owner chose and contradicted it. Empty renders no
+   * suffix, matching what a guest sees on a menu that states no currency.
+   */
+  currencySymbol = input('');
+
   itemChanged = output<MenuItem>();
 
   addItem = output<MenuItem>();

@@ -13,6 +13,7 @@
       />
     </h3>
     <business-menu-variant
+      [currencySymbol]="currencySymbol()"
       [item]="itemData"
       (addItem)="onAddVariant($event)"
       (itemChanged)="onEditVariant($event)"
@@ -22,6 +23,7 @@
       <div class="ion-margin-top">
         @for (variant of itemData?.variants; track $index) {
           <business-menu-variant
+            [currencySymbol]="currencySymbol()"
             class="variant-margin"
             [item]="variant"
             (itemChanged)="onEditVariant($event, $index)"
@@ -33,6 +35,7 @@
   </div>
   @if (showNewVariantComponent()) {
     <business-menu-variant
+      [currencySymbol]="currencySymbol()"
       isVariant
       class="variant-margin"
       (addItem)="onAddVariant($event)"

@@ -60,6 +60,21 @@ export class MenuDataAccessService {
     return this.api.saveMenu(menu, this.storeService.restaurantIdFromUrl());
   }
 
+  /**
+   * The currency this menu's prices are stated in (GitHub issue #1102).
+   *
+   * Takes the restaurant off the route for the same reason {@link saveMenu}
+   * does, and an empty `currency` means "not stated" - the field is removed
+   * rather than emptied.
+   */
+  saveMenuCurrency(menuId: string, currency: string): Promise<void> {
+    return this.api.saveMenuCurrency(
+      menuId,
+      this.storeService.restaurantIdFromUrl(),
+      currency,
+    );
+  }
+
   retryMenuLoad(): void {
     this.storeService.retryMenuLoad();
   }

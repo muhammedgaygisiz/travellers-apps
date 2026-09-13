@@ -30,6 +30,16 @@ export const PATH = {
    * sheet is the other half of this constant and has to agree with it.
    */
   TABLE_SCAN: 't',
+  /**
+   * A restaurant's menu, read without an account (GitHub issue #1102).
+   *
+   * One letter for the same reason `TABLE_SCAN` is: a restaurant publishes this
+   * address as a link and sometimes prints it, and every character costs QR
+   * modules. It takes a restaurant rather than a table, because a restaurant
+   * that publishes a menu link may have no floor plan and no printed codes at
+   * all - which is what "menu-only mode requires no floor plan" means.
+   */
+  PUBLIC_MENU: 'm',
   // Public store-review URL. It explains the flow; it does not perform it.
   ACCOUNT_DELETION: 'account-deletion',
   // Authenticated in-app flow that actually deletes the account.
@@ -41,3 +51,21 @@ export const PATH = {
   LEADERBOARD: 'leaderboard',
   WEEKLY_BITES: 'weekly-bites',
 };
+
+/**
+ * The route parameter naming the restaurant on the public menu route
+ * (GitHub issue #1102).
+ *
+ * **Deliberately not `restaurantId`**, and it must not be renamed to it. The
+ * NgRx router selector in `bite-tribe/store` keys on that exact parameter name,
+ * and `RestaurantEffects.loadRestaurantById$` fires on every navigation that
+ * carries it - reading `/restaurants/{id}` straight from Firestore, which
+ * `firestore.rules` allows only to a signed-in caller. Naming it `restaurantId`
+ * therefore put one refused read on the single route whose whole premise is
+ * that the reader has no account, on every single load.
+ *
+ * Shared rather than written twice, because the route that declares it and the
+ * service that reads it live in different libraries, and a typo between them
+ * shows up as a menu that never loads.
+ */
+export const PUBLIC_MENU_RESTAURANT_PARAM = 'publicRestaurantId';

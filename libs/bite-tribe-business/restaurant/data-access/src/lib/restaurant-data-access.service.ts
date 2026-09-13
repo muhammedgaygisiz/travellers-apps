@@ -1,7 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Address, DaySchedule, Geopoint, Link } from 'model';
+import {
+  Address,
+  DaySchedule,
+  Geopoint,
+  Link,
+  TableOrderingSettings,
+} from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
 
 @Injectable({
@@ -37,6 +43,13 @@ export class RestaurantDataAccessService {
     openingHours: DaySchedule[],
   ): Promise<void> {
     await this.api.saveOpeningHoursForRestaurant(restaurantId, openingHours);
+  }
+
+  async submitTableOrderingSettings(
+    restaurantId: string,
+    tableOrdering: TableOrderingSettings,
+  ): Promise<void> {
+    await this.api.saveTableOrderingForRestaurant(restaurantId, tableOrdering);
   }
 
   async submitAddress(restaurantId: string, address: Address): Promise<void> {

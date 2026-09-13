@@ -11,6 +11,8 @@
         <div class="menu-item">
           <menu-item
             [item]="item"
+            [currency]="currency()"
+            [canCreateBite]="canCreateBite()"
             (createBiteClick)="createBiteClick.emit($event)"
           />
         </div>

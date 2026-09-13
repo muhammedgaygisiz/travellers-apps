@@ -206,6 +206,7 @@ describe('resolve table QR token', () => {
         room: { id: DINING_ROOM, name: 'Main dining room' },
         table: { id: TABLE_12, label: '12', seats: 4 },
         menu: { id: MENU },
+        ordering: { available: true },
       });
     });
 
@@ -252,6 +253,103 @@ describe('resolve table QR token', () => {
 
       expect(context.ok).toBe(true);
       expect(context.room).toEqual({ id: '' });
+    });
+  });
+
+  /**
+   * The two conditions that stopped refusing in issue #1102.
+   *
+   * Both resolve, and both say ordering is shut. That is the whole of menu-only
+   * mode: the guest scanned a real code at a real table, and the menu behind it
+   * is what they wanted - the restaurant simply takes the order from a person
+   * with a notepad.
+   */
+  describe('a scan that resolves without ordering', () => {
+    it('resolves a menu-only restaurant, naming the menu', async () => {
+      await restaurantRef().update({
+        tableOrdering: { enabled: false, timeZone: 'Europe/Berlin' },
+      });
+
+      const context = await resolved();
+
+      expect(context.ok).toBe(true);
+      expect(context.menu).toEqual({ id: MENU });
+      expect(context.ordering).toEqual({
+        available: false,
+        reason: 'tableOrderingDisabled',
+      });
+    });
+
+    /** A restaurant that has never been asked is not opted in. */
+    it('reads an absent settings object as menu-only rather than refusing', async () => {
+      await restaurantRef().set(
+        {
+          name: 'Owned Bistro',
+          ownerUserId: OWNER,
+          claimStatus: 'claimed',
+          menuId: MENU,
+        },
+        { merge: false },
+      );
+
+      expect((await resolved()).ordering).toEqual({
+        available: false,
+        reason: 'tableOrderingDisabled',
+      });
+    });
+
+    it('resolves while staff have paused, and says until when', async () => {
+      const pausedUntilTimestamp = LUNCHTIME.getTime() + 20 * 60_000;
+
+      await restaurantRef().update({
+        tableOrdering: {
+          enabled: true,
+          timeZone: 'Europe/Berlin',
+          pausedUntilTimestamp,
+        },
+      });
+
+      expect((await resolved()).ordering).toEqual({
+        available: false,
+        reason: 'orderingPaused',
+        pausedUntilTimestamp,
+      });
+    });
+
+    /**
+     * A restaurant that never turned ordering on has no meaningful pause: the
+     * field could hold anything, and "not taking orders just now" would promise
+     * a resumption that is not coming.
+     */
+    it('prefers menu-only over a pause left behind on a disabled restaurant', async () => {
+      await restaurantRef().update({
+        tableOrdering: {
+          enabled: false,
+          timeZone: 'Europe/Berlin',
+          pausedUntilTimestamp: LUNCHTIME.getTime() + 20 * 60_000,
+        },
+      });
+
+      expect((await resolved()).ordering).toMatchObject({
+        reason: 'tableOrderingDisabled',
+      });
+    });
+
+    /**
+     * Closed is not menu-only. It is a statement about the restaurant rather
+     * than about ordering, so it stays a refusal - the line issue #1102 drew.
+     */
+    it('still refuses a closed restaurant rather than showing a menu', async () => {
+      /** 09:00 Berlin, before the 11:30 service. */
+      const beforeService = new Date('2026-09-16T07:00:00Z');
+
+      await restaurantRef().update({
+        tableOrdering: { enabled: false, timeZone: 'Europe/Berlin' },
+      });
+
+      expect(await refused(TOKEN, beforeService)).toMatchObject({
+        reason: 'restaurantClosed',
+      });
     });
   });
 
@@ -334,29 +432,6 @@ describe('resolve table QR token', () => {
       });
     });
 
-    it('refuses a restaurant that does not offer ordering at the table', async () => {
-      await restaurantRef().update({
-        tableOrdering: { enabled: false, timeZone: 'Europe/Berlin' },
-      });
-
-      expect(await refused()).toMatchObject({
-        reason: 'tableOrderingDisabled',
-        nextStep: 'askStaff',
-      });
-    });
-
-    /** A restaurant that has never been asked is not opted in. */
-    it('refuses a restaurant with no table-ordering settings at all', async () => {
-      await restaurantRef().set(
-        { name: 'Owned Bistro', ownerUserId: OWNER, menuId: MENU },
-        { merge: false },
-      );
-
-      expect(await refused()).toMatchObject({
-        reason: 'tableOrderingDisabled',
-      });
-    });
-
     /**
      * The published `tables` collection is what "is published" means. A table
      * removed from the plan and a table that only ever existed in a draft read
@@ -404,25 +479,6 @@ describe('resolve table QR token', () => {
       });
     });
 
-    it('refuses while staff have paused new orders, and says until when', async () => {
-      const pausedUntilTimestamp = LUNCHTIME.getTime() + 20 * 60_000;
-
-      await restaurantRef().update({
-        tableOrdering: {
-          enabled: true,
-          timeZone: 'Europe/Berlin',
-          pausedUntilTimestamp,
-        },
-      });
-
-      expect(await refused()).toEqual({
-        ok: false,
-        reason: 'orderingPaused',
-        nextStep: 'tryLater',
-        pausedUntilTimestamp,
-      });
-    });
-
     it('resolves again once the pause has lapsed', async () => {
       await restaurantRef().update({
         tableOrdering: {
@@ -432,7 +488,7 @@ describe('resolve table QR token', () => {
         },
       });
 
-      expect((await resolved()).ok).toBe(true);
+      expect((await resolved()).ordering).toEqual({ available: true });
     });
 
     it('refuses outside opening hours, and names the next opening', async () => {

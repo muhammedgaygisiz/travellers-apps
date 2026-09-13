@@ -2,6 +2,7 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   output,
 } from '@angular/core';
@@ -9,6 +10,7 @@ import { IonButton } from '@ionic/angular/standalone';
 import { isMenuVariantAvailable } from 'model';
 import type { MenuItem } from 'model';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { currencyCodes } from 'utils';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +33,63 @@ export class MenuItemComponent {
    * separately puts an unorderable item in front of the guest (issue #1099).
    */
   parentItem = input<MenuItem>();
+
+  /**
+   * The currency this menu's prices are stated in, as an ISO 4217 code
+   * (GitHub issue #1102).
+   *
+   * Absent renders a bare number. The price used to carry a hardcoded euro
+   * sign, which was wrong for every restaurant outside the euro zone and wrong
+   * silently - a guest reading `1200 €` at a Tokyo counter has no way to know
+   * the symbol was a placeholder. A number with no symbol is something they can
+   * ask about; a wrong symbol is something they believe.
+   */
+  currency = input<string>();
+
+  /**
+   * Whether to offer turning this dish into a Bite.
+   *
+   * False on the public menu of issue #1102, where the reader may have no
+   * BiteTribe account at all - the button would open a flow that asks them to
+   * sign up for a product they came to read a menu of. Defaults to true so the
+   * authenticated menu is unchanged.
+   */
+  canCreateBite = input(true, { transform: booleanAttribute });
+
+  /** The symbol for {@link currency}, or the code where none is known. */
+  readonly currencySymbol = computed(() => {
+    const code = this.currency();
+
+    if (!code) {
+      return '';
+    }
+
+    return currencyCodes.find((entry) => entry.code === code)?.symbol ?? code;
+  });
+
+  /**
+   * The price as it is read, with the symbol only where there is one.
+   *
+   * Built here rather than as `{{ price }} {{ symbol }}` in the template,
+   * because that interpolation always emits the separator: a menu that states
+   * no currency rendered `"1200 "`, with a space nothing follows. Harmless
+   * where the block ends there and not where it does not - a right-aligned or
+   * width-measured cell keeps it, and so does anything reading `textContent`.
+   *
+   * A price that is absent renders as nothing at all, rather than as the lone
+   * symbol the old interpolation produced for it.
+   */
+  readonly priceLabel = computed(() => {
+    const price = this.item()?.price;
+
+    if (price === undefined || price === null) {
+      return '';
+    }
+
+    const symbol = this.currencySymbol();
+
+    return symbol ? `${price} ${symbol}` : `${price}`;
+  });
 
   createBiteClick = output<MenuItem>();
 

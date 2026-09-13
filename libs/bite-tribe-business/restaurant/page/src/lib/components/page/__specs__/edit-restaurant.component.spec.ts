@@ -42,6 +42,105 @@ describe('EditRestaurantComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  /**
+   * How this restaurant uses its QR codes (GitHub issue #1102).
+   *
+   * The first writer `Restaurant.tableOrdering` has ever had: issue #1100 added
+   * the field and gated every scan on it, so until this control existed a scan
+   * in production always refused.
+   */
+  describe('table ordering', () => {
+    const withOrdering = (tableOrdering: Restaurant['tableOrdering']): void => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        tableOrdering,
+      } as Restaurant);
+      fixture.detectChanges();
+    };
+
+    it('offers menu-only to a restaurant that has never been asked', () => {
+      withOrdering(undefined);
+
+      expect(component.tableOrderingForm.value.enabled).toBe(false);
+    });
+
+    /**
+     * A restaurant with no configured zone is offered the one its owner is
+     * sitting in - right far more often than wrong, and wrong is visible,
+     * because the opening hours are read in it.
+     */
+    it('pre-fills the zone the browser is in', () => {
+      withOrdering(undefined);
+
+      expect(component.tableOrderingForm.value.timeZone).toBe(
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+      );
+    });
+
+    it('shows what the restaurant already chose', () => {
+      withOrdering({ enabled: true, timeZone: 'Asia/Tokyo' });
+
+      expect(component.tableOrderingForm.value).toEqual({
+        enabled: true,
+        timeZone: 'Asia/Tokyo',
+      });
+    });
+
+    it('emits the settings the owner saved', () => {
+      withOrdering({ enabled: false, timeZone: 'Europe/Berlin' });
+      component.tableOrderingForm.patchValue({ enabled: true });
+
+      const emitted = jest.fn();
+      component.submitTableOrderingSettings.subscribe(emitted);
+      component.submitTableOrdering();
+
+      expect(emitted).toHaveBeenCalledWith({
+        enabled: true,
+        timeZone: 'Europe/Berlin',
+      });
+    });
+
+    /**
+     * The pause is a staff action during service and this form never shows it.
+     * `updateDocument` replaces a map rather than merging into it, so a save
+     * that carried only what the form owns would clear a pause somebody set
+     * twenty minutes ago.
+     */
+    it('carries a staff-side pause through a save it never showed', () => {
+      withOrdering({
+        enabled: true,
+        timeZone: 'Europe/Berlin',
+        pausedUntilTimestamp: 1789030800000,
+      });
+
+      const emitted = jest.fn();
+      component.submitTableOrderingSettings.subscribe(emitted);
+      component.submitTableOrdering();
+
+      expect(emitted).toHaveBeenCalledWith({
+        enabled: true,
+        timeZone: 'Europe/Berlin',
+        pausedUntilTimestamp: 1789030800000,
+      });
+    });
+
+    it('saves nothing without a zone', () => {
+      withOrdering({ enabled: true, timeZone: 'Europe/Berlin' });
+      component.tableOrderingForm.patchValue({ timeZone: '' });
+
+      const emitted = jest.fn();
+      component.submitTableOrderingSettings.subscribe(emitted);
+      component.submitTableOrdering();
+
+      expect(emitted).not.toHaveBeenCalled();
+    });
+
+    it('offers a list of zones to choose from', () => {
+      expect(component.timeZones().length).toBeGreaterThan(0);
+    });
+  });
+
   describe('links', () => {
     it('should return empty array if no links', () => {
       componentRef.setInput('restaurant', {
@@ -262,7 +361,11 @@ describe('EditRestaurantComponent', () => {
     it('should emit opening hours when called', () => {
       const emitSpy = jest.spyOn(component.submitOpeningHours, 'emit');
       const hours: DaySchedule[] = [
-        { day: 'monday', isOpen: true, timeRanges: [{ from: '09:00', to: '17:00' }] },
+        {
+          day: 'monday',
+          isOpen: true,
+          timeRanges: [{ from: '09:00', to: '17:00' }],
+        },
       ];
       component.submitOpeningHours.emit(hours);
       expect(emitSpy).toHaveBeenCalledWith(hours);

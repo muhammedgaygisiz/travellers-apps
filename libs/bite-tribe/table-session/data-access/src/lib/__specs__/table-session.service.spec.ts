@@ -20,6 +20,13 @@ const CONTEXT: TableScanContext = {
   room: { id: 'room-1', name: 'Main dining room' },
   table: { id: 'table-12', label: '12', seats: 4 },
   menu: { id: 'menu-1' },
+  ordering: { available: true },
+};
+
+/** The same table at a restaurant that takes no orders here (issue #1102). */
+const MENU_ONLY: TableScanContext = {
+  ...CONTEXT,
+  ordering: { available: false, reason: 'tableOrderingDisabled' },
 };
 
 describe(TableSessionService.name, () => {
@@ -51,14 +58,12 @@ describe(TableSessionService.name, () => {
 
   beforeEach(() => {
     resolveToken = jest.fn().mockResolvedValue({ ok: true, ...CONTEXT });
-    start = jest
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        status: 'active',
-        session: {},
-        context: CONTEXT,
-      });
+    start = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 'active',
+      session: {},
+      context: CONTEXT,
+    });
     leave = jest.fn().mockResolvedValue('left');
   });
 
@@ -119,6 +124,62 @@ describe(TableSessionService.name, () => {
     });
   });
 
+  /**
+   * A scan can resolve and still not be orderable since issue #1102. The screen
+   * lands on a state of its own rather than on the confirmation, because there
+   * is nothing to confirm: no session is started and no table is claimed, and
+   * the one thing the guest can do is read the menu.
+   */
+  describe('a restaurant that takes no orders here', () => {
+    it('offers the menu rather than a confirmation', async () => {
+      resolveToken.mockResolvedValue({ ok: true, ...MENU_ONLY });
+      service = build();
+
+      await service.resolve();
+
+      expect(service.state()).toEqual({
+        kind: 'menuOnly',
+        context: MENU_ONLY,
+        ordering: { available: false, reason: 'tableOrderingDisabled' },
+      });
+    });
+
+    it('does not start a session', async () => {
+      resolveToken.mockResolvedValue({ ok: true, ...MENU_ONLY });
+      service = build();
+
+      await service.resolve();
+      await service.confirm();
+
+      expect(start).not.toHaveBeenCalled();
+    });
+
+    /**
+     * The sharp case: ordering was open when the guest read the screen and the
+     * kitchen paused before they tapped. The backend refuses the session, and
+     * what comes back is a menu to read rather than a refusal to apologise for.
+     */
+    it('falls back to the menu when ordering closed while the guest read', async () => {
+      start.mockResolvedValue({
+        ok: false,
+        ordering: {
+          available: false,
+          reason: 'orderingPaused',
+          pausedUntilTimestamp: 1789030800000,
+        },
+      });
+      service = build();
+      await service.resolve();
+
+      await service.confirm();
+
+      expect(service.state()).toMatchObject({
+        kind: 'menuOnly',
+        ordering: { reason: 'orderingPaused' },
+      });
+    });
+  });
+
   describe('confirming', () => {
     /**
      * The acceptance criterion the confirmation screen exists for: nothing is
@@ -171,9 +232,9 @@ describe(TableSessionService.name, () => {
     it('replaces the confirmation when the scan no longer resolves', async () => {
       start.mockResolvedValue({
         ok: false,
-        reason: 'orderingPaused',
+        reason: 'restaurantClosed',
         nextStep: 'tryLater',
-        pausedUntilTimestamp: 1789030800000,
+        reopensAt: { day: 'thursday', time: '11:30' },
       });
       service = build();
       await service.resolve();
@@ -182,9 +243,9 @@ describe(TableSessionService.name, () => {
 
       expect(service.state()).toEqual({
         kind: 'refused',
-        reason: 'orderingPaused',
+        reason: 'restaurantClosed',
         nextStep: 'tryLater',
-        pausedUntilTimestamp: 1789030800000,
+        reopensAt: { day: 'thursday', time: '11:30' },
       });
     });
 

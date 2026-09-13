@@ -103,21 +103,71 @@ describe('table scan parity', () => {
     );
   });
 
-  it('carries the twelve reasons that exist', () => {
+  /**
+   * Ten, and it was twelve until issue #1102. `tableOrderingDisabled` and
+   * `orderingPaused` left the list because neither is a reason to withhold a
+   * menu - they are an answer about *ordering*, carried on a scan that
+   * resolved. `restaurantClosed` stayed: it is a statement about the restaurant
+   * rather than about ordering, and a menu under a "closed" heading reads as an
+   * invitation with nobody there to correct it.
+   */
+  it('carries the ten reasons that exist', () => {
     expect(reasonsIn(LIBRARY_TABLE_ORDERING)).toEqual([
       'unknownToken',
       'restaurantNotFound',
       'restaurantInactive',
-      'tableOrderingDisabled',
       'tableNotFound',
       'tableDisabled',
       'tokenSuperseded',
       'tokenRevoked',
-      'orderingPaused',
       'restaurantClosed',
       'menuMissing',
       'menuUnavailable',
     ]);
+  });
+
+  /**
+   * The pair that left, checked in both files for the same reason the refusals
+   * are: a screen renders one sentence per member, and a member the client has
+   * no sentence for is a blank line in front of a guest.
+   */
+  it('holds the same ordering-unavailable reasons in both files', () => {
+    const unavailableIn = (file: string): string[] => {
+      const source = readFileSync(file, 'utf8');
+      const list =
+        /TABLE_ORDERING_UNAVAILABLE_REASONS[^=]*= \[([\s\S]*?)\] as const/.exec(
+          source,
+        );
+
+      if (!list) {
+        throw new Error(
+          `No TABLE_ORDERING_UNAVAILABLE_REASONS declaration found in ${file}`,
+        );
+      }
+
+      return [...list[1].matchAll(/^\s*'([^']+)',/gm)].map((m) => m[1]);
+    };
+
+    expect(unavailableIn(FUNCTIONS_TABLE_SCAN)).toEqual([
+      'tableOrderingDisabled',
+      'orderingPaused',
+    ]);
+    expect(unavailableIn(LIBRARY_TABLE_ORDERING)).toEqual(
+      unavailableIn(FUNCTIONS_TABLE_SCAN),
+    );
+  });
+
+  /**
+   * No member may be in both lists. A reason that refused *and* described an
+   * ordering verdict would be a scan that is simultaneously shown and withheld,
+   * and whichever branch an implementation reached first would decide it.
+   */
+  it('never lets a reason be both a refusal and an ordering verdict', () => {
+    const refusals = new Set(reasonsIn(LIBRARY_TABLE_ORDERING));
+
+    for (const reason of ['tableOrderingDisabled', 'orderingPaused']) {
+      expect(refusals.has(reason)).toBe(false);
+    }
   });
 
   /**

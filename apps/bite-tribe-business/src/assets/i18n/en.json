@@ -419,5 +419,15 @@
   "qr-sheets-disabled": "{{count}} table(s) are out of service and get no code: {{labels}}.",
   "qr-sheets-missing": "These tables have no code yet: {{labels}}. Reload the page to try again.",
   "qr-sheets-page": "Page {{page}} of {{pages}}",
-  "qr-sheets-print": "Print {{count}} code(s)"
+  "qr-sheets-print": "Print {{count}} code(s)",
+  "table-ordering": "Ordering at the table",
+  "table-ordering-enabled": "Take orders from the table",
+  "table-ordering-enabled-hint": "Guests who scan a table code can read your menu and send you an order from their phone.",
+  "table-ordering-menu-only-hint": "Guests who scan a table code can read your menu. Orders still come to you the way they do now.",
+  "table-ordering-time-zone": "Time zone",
+  "table-ordering-saved": "Ordering settings saved",
+  "menu-currency": "Currency",
+  "menu-currency-hint": "Every price on this menu is shown in this currency. Leave it unset and prices show as plain numbers.",
+  "menu-currency-none": "Not set",
+  "menu-currency-saved": "Currency saved"
 }

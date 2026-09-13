@@ -7,6 +7,8 @@
         <div class="menu-item">
           <category
             [category]="category"
+            [currency]="currency()"
+            [canCreateBite]="canCreateBite()"
             (createBiteClick)="createBiteClick.emit($event)"
           />
         </div>

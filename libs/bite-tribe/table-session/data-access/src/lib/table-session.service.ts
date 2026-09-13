@@ -8,10 +8,12 @@ import {
 import {
   isTableScanResolved,
   isTableSessionStarted,
+  isTableOrderingUnavailable,
   type TableScanContext,
   type TableScanNextStep,
   type TableScanRefusalReason,
   type TableScanReopensAt,
+  type TableOrderingAvailability,
 } from 'model';
 
 /**
@@ -48,6 +50,19 @@ export type TableSessionView =
   /** Resolved. The guest is asked to confirm the restaurant and table. */
   | { kind: 'confirm'; context: TableScanContext }
   /**
+   * Resolved, and this restaurant does not take orders here (issue #1102).
+   *
+   * A separate state from `confirm` rather than a flag on it, because there is
+   * nothing to confirm: no session is started, no table is claimed, and the one
+   * thing the guest can do is read the menu. Collapsing the two would put a
+   * "yes, this is my table" button in front of somebody it does nothing for.
+   */
+  | {
+      kind: 'menuOnly';
+      context: TableScanContext;
+      ordering: Extract<TableOrderingAvailability, { available: false }>;
+    }
+  /**
    * Attached. `active` means staff have the table seated and ordering is open;
    * `pending` means the restaurant has been told and has not confirmed yet.
    */
@@ -64,7 +79,6 @@ export type TableSessionView =
       reason: TableScanRefusalReason;
       nextStep: TableScanNextStep;
       reopensAt?: TableScanReopensAt;
-      pausedUntilTimestamp?: number;
     }
   /** The call never got an answer. Not a refusal, and worded differently. */
   | { kind: 'failed'; failure: TableSessionCallFailure };
@@ -85,6 +99,7 @@ const contextOf = (resolved: TableScanContext): TableScanContext => ({
   room: resolved.room,
   table: resolved.table,
   menu: resolved.menu,
+  ordering: resolved.ordering,
 });
 
 @Injectable()
@@ -118,6 +133,7 @@ export class TableSessionService {
     const state = this.view();
 
     return state.kind === 'confirm' ||
+      state.kind === 'menuOnly' ||
       state.kind === 'joined' ||
       state.kind === 'left'
       ? state.context
@@ -145,18 +161,23 @@ export class TableSessionService {
       return;
     }
 
+    if (!isTableScanResolved(result)) {
+      this.view.set({
+        kind: 'refused',
+        reason: result.reason,
+        nextStep: result.nextStep,
+        ...(result.reopensAt ? { reopensAt: result.reopensAt } : {}),
+      });
+
+      return;
+    }
+
+    const context = contextOf(result);
+
     this.view.set(
-      isTableScanResolved(result)
-        ? { kind: 'confirm', context: contextOf(result) }
-        : {
-            kind: 'refused',
-            reason: result.reason,
-            nextStep: result.nextStep,
-            ...(result.reopensAt ? { reopensAt: result.reopensAt } : {}),
-            ...(result.pausedUntilTimestamp
-              ? { pausedUntilTimestamp: result.pausedUntilTimestamp }
-              : {}),
-          },
+      result.ordering.available
+        ? { kind: 'confirm', context }
+        : { kind: 'menuOnly', context, ordering: result.ordering },
     );
   }
 
@@ -170,7 +191,11 @@ export class TableSessionService {
    * are closed" at once.
    */
   async confirm(): Promise<void> {
-    if (this.busy()) {
+    // Only from the confirmation. A guest at a restaurant that takes no orders
+    // here has no button for this, and `leave` guards the same way - a state
+    // machine whose transitions are enforced only by which buttons are on
+    // screen is one a second entry point walks straight through.
+    if (this.view().kind !== 'confirm' || this.busy()) {
       return;
     }
 
@@ -185,14 +210,32 @@ export class TableSessionService {
     }
 
     if (!isTableSessionStarted(result)) {
+      // The backend re-runs the checks, so it can answer "resolved, but this
+      // restaurant takes no orders" to a confirmation the guest was offered a
+      // moment ago - the kitchen pausing while they read the screen is exactly
+      // that. The menu is still theirs to read, so this lands on `menuOnly`
+      // rather than on a refusal (issue #1102).
+      if (isTableOrderingUnavailable(result)) {
+        const context = this.context();
+
+        this.view.set(
+          context
+            ? {
+                kind: 'menuOnly',
+                context: { ...context, ordering: result.ordering },
+                ordering: result.ordering,
+              }
+            : { kind: 'failed', failure: 'unknown' },
+        );
+
+        return;
+      }
+
       this.view.set({
         kind: 'refused',
         reason: result.reason,
         nextStep: result.nextStep,
         ...(result.reopensAt ? { reopensAt: result.reopensAt } : {}),
-        ...(result.pausedUntilTimestamp
-          ? { pausedUntilTimestamp: result.pausedUntilTimestamp }
-          : {}),
       });
 
       return;

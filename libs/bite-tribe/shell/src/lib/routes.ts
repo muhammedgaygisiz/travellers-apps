@@ -7,7 +7,7 @@ import {
   onboardingCompletedGuard,
 } from 'bite-tribe/onboarding-guards';
 import { OnboardingContainerComponent } from 'bite-tribe/onboarding';
-import { PATH } from 'utils';
+import { PATH, PUBLIC_MENU_RESTAURANT_PARAM } from 'utils';
 
 const APP_ROUTES: Routes = [
   {
@@ -256,6 +256,25 @@ const APP_ROUTES: Routes = [
     loadComponent: () =>
       import('bite-tribe/table-session').then((m) => m.TableSession),
     title: 'Table',
+  },
+  /**
+   * A restaurant's menu, read without an account (GitHub issue #1102).
+   *
+   * **No auth guard**, for the reason issues #370 and #371 state outright: the
+   * guest is reading a menu on a phone, with no download and no sign-up. Two
+   * ways in reach it - a scanned table code at a restaurant that takes no
+   * orders, and a link the restaurant published - and a restaurant that
+   * publishes the second may have no floor plan and no printed codes at all.
+   *
+   * The parameter is {@link PUBLIC_MENU_RESTAURANT_PARAM} and not
+   * `restaurantId`, which the NgRx router selector keys on: that name makes
+   * `loadRestaurantById$` read `/restaurants/{id}` on arrival, and the rules
+   * refuse that read to the very reader this route exists for.
+   */
+  {
+    path: `${PATH.PUBLIC_MENU}/:${PUBLIC_MENU_RESTAURANT_PARAM}`,
+    loadComponent: () => import('bite-tribe/menu').then((m) => m.PublicMenu),
+    title: 'Menu',
   },
   {
     path: PATH.SUPPORT,

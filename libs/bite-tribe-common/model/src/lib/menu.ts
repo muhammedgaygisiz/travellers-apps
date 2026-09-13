@@ -124,6 +124,29 @@ export interface Menu {
    */
   restaurantId?: string;
 
+  /**
+   * The currency every price on this menu is stated in, as an ISO 4217 code
+   * (GitHub issue #1102).
+   *
+   * On the menu rather than on the restaurant, because a price is a property of
+   * the menu it is written on: a restaurant that keeps a second menu for an
+   * airport terminal prices it in that terminal's currency, and the field would
+   * have had to move the first time somebody did.
+   *
+   * **Optional, and absent means "not stated" rather than a default.** Every
+   * menu written before this carries none, and guessing one would put a wrong
+   * currency symbol next to a real price, which is worse than the bare number a
+   * reader can ask about. The owner sets it in the business editor, where the
+   * control is pre-filled from the restaurant's country and still has to be
+   * confirmed - so the value is one somebody chose rather than one the product
+   * inferred.
+   *
+   * It is also the field `OrderLineSnapshot.currency` has been waiting for
+   * (issue #1103): a line records what the guest was charged, and until a menu
+   * said what its prices were in, there was nowhere honest to read that from.
+   */
+  currency?: string;
+
   createdAt?: string;
   createdAtTimestamp?: number;
   updatedAt?: string;

@@ -41,9 +41,17 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { OpeningHoursComponent } from 'opening-hours';
 
-/** The zone this browser is in, as a starting point rather than an answer. */
+/**
+ * The zone this browser is in, as a starting point rather than an answer.
+ *
+ * Falls back to `UTC` rather than to nothing. A runtime that reports no zone
+ * would otherwise leave the owner with an empty select on a required field -
+ * a form they cannot satisfy and no way to see why. `UTC` is visibly a
+ * placeholder rather than a plausible wrong answer, which is what a restaurant
+ * needs in order to notice and change it.
+ */
 const detectedTimeZone = (): string =>
-  Intl.DateTimeFormat().resolvedOptions().timeZone ?? '';
+  Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
 @Component({
   selector: 'edit-restaurant',
@@ -146,12 +154,18 @@ export class EditRestaurantComponent {
    */
   readonly timeZones = computed(() => {
     const detected = detectedTimeZone();
+    // Reached through a local type rather than `Intl.supportedValuesOf`: the
+    // method is newer than the `lib` some of this workspace's tsconfigs target,
+    // and the Storybook build is one of them. The guard is needed at runtime
+    // anyway, so nothing is lost by not having the type.
     const supported =
-      typeof Intl.supportedValuesOf === 'function'
-        ? Intl.supportedValuesOf('timeZone')
-        : [];
+      (
+        Intl as { supportedValuesOf?: (key: string) => string[] }
+      ).supportedValuesOf?.('timeZone') ?? [];
 
-    return supported.length ? supported : [detected].filter(Boolean);
+    // The detected zone is guaranteed to be offered even when the runtime has a
+    // list, because a list that somehow omits it would strand the pre-fill.
+    return supported.includes(detected) ? supported : [detected, ...supported];
   });
 
   initTableOrdering = effect(() => {

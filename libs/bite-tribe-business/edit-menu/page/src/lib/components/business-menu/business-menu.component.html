@@ -11,6 +11,7 @@
             </ion-reorder>
           </div>
           <business-category
+            [currencySymbol]="currencySymbol()"
             [category]="category"
             (addItemToCategory)="onAddItemToCategory($event)"
             (categoryChanged)="updateCategory($event)"

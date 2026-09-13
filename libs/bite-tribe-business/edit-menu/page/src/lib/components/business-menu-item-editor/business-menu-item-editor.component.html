@@ -15,7 +15,7 @@
     <ion-item>
       <ion-input type="number" inputmode="decimal" [formField]="itemForm.price">
         <div class="label" slot="label">Price</div>
-        <span slot="end">$</span>
+        <span slot="end">{{ currencySymbol() }}</span>
       </ion-input>
     </ion-item>
     <ion-item>

@@ -45,6 +45,8 @@ import { debounce, FormField, form, required } from '@angular/forms/signals';
 })
 export class BusinessCategoryComponent {
   category = input<Category>();
+  /** The symbol the menu's prices are stated in (issue #1102). */
+  currencySymbol = input('');
 
   linkedCategory = linkedSignal(() => this.category());
 

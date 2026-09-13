@@ -73,6 +73,7 @@ export const WithMenu: Story = {
   args: {
     ...Empty.args,
     menu: {
+      currency: 'EUR',
       categories: [
         {
           id: 'category-pizza',
@@ -100,6 +101,22 @@ export const WithMenu: Story = {
   },
 };
 
+/**
+ * A menu that has never stated its currency (GitHub issue #1102).
+ *
+ * Prices render as bare numbers, which is the deliberate answer rather than a
+ * gap: the renderer used to print a hardcoded euro sign at every restaurant on
+ * earth, and a number a reader can ask about is better than a symbol they
+ * believe. Every menu written before #1102 looks like this until its owner
+ * chooses one.
+ */
+export const WithoutCurrency: Story = {
+  args: {
+    ...WithMenu.args,
+    menu: { ...WithMenu.args?.menu, currency: undefined } as unknown as Menu,
+  },
+};
+
 export const WithDishVariants: Story = {
   args: {
     restaurant: {
@@ -111,6 +128,7 @@ export const WithDishVariants: Story = {
       },
     } as Restaurant,
     menu: {
+      currency: 'EUR',
       categories: [
         {
           id: 'category-toasties',
@@ -213,6 +231,7 @@ export const WithUnavailableDishVariants: Story = {
   args: {
     ...Empty.args,
     menu: {
+      currency: 'EUR',
       categories: [
         {
           id: 'category-kebabs',

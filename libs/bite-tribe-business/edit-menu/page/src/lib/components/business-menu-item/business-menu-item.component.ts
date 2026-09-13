@@ -22,6 +22,8 @@ import { debounce, FormField, form, required } from '@angular/forms/signals';
 })
 export class BusinessMenuItemComponent {
   item = input<MenuItem>();
+  /** The symbol the menu's prices are stated in (issue #1102). */
+  currencySymbol = input('');
 
   isVariant = input(false, { transform: booleanAttribute });
 

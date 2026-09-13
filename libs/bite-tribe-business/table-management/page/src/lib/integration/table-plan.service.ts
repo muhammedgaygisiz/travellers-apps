@@ -18,6 +18,7 @@ import {
   tableStatusMark,
 } from 'bite-tribe-business/floor-plan-ui';
 import {
+  TableAssistanceQueueService,
   TableOrderQueueService,
   TableStateDataAccessService,
   TableTransitionFailure,
@@ -46,6 +47,10 @@ import {
   TableActionRequest,
   tableActions,
 } from './table-actions';
+import {
+  ASSISTANCE_KIND_KEYS,
+  openAssistanceKindsByTable,
+} from './assistance-rows';
 import { openOrdersByTable } from './order-queue-groups';
 import {
   isTimedStatus,
@@ -242,6 +247,7 @@ export class TablePlanService {
   private readonly floorPlan = inject(FloorPlanDataAccessService);
   private readonly tableStates = inject(TableStateDataAccessService);
   private readonly orderQueue = inject(TableOrderQueueService);
+  private readonly assistanceQueue = inject(TableAssistanceQueueService);
   private readonly queue = inject(TableTransitionQueueService);
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly transloco = inject(TranslocoService);
@@ -624,6 +630,73 @@ export class TablePlanService {
   );
 
   /**
+   * The tables calling for somebody, pushed by their own listener
+   * (GitHub issue #1106).
+   *
+   * A third listener beside the states and the orders, for the same reason the
+   * second one exists: three facts with three writers. A table's status is the
+   * floor's, an order's is the kitchen's, and a signal is the guest's - and a
+   * plan that folded any of them into another would have to decide which
+   * writer won.
+   */
+  private readonly assistanceFeed = toSignal(
+    this.storeService.restaurantIdFromUrl$.pipe(
+      switchMap((restaurantId) =>
+        restaurantId ? this.assistanceQueue.requests$(restaurantId) : EMPTY,
+      ),
+    ),
+  );
+
+  /** What each table is calling for. Empty until the first delivery. */
+  private readonly assistanceByTable = computed(() =>
+    openAssistanceKindsByTable(this.assistanceFeed()?.requests ?? []),
+  );
+
+  /**
+   * The same, as the sentence the marker's tooltip and the accessible name
+   * read out.
+   *
+   * Translated here rather than in the canvas, which is a `type:ui` library and
+   * holds no vocabulary - the same split the status label already makes. The
+   * language signal is read so a change retranslates the plan rather than
+   * leaving it in whichever language was active when the room was opened.
+   */
+  private readonly assistanceLabels = computed<ReadonlyMap<string, string>>(
+    () => {
+      // Read so this re-runs on a language change.
+      this.language();
+
+      return new Map(
+        [...this.assistanceByTable()].map(([tableId, kinds]) => [
+          tableId,
+          kinds
+            .map((kind) => this.transloco.translate(ASSISTANCE_KIND_KEYS[kind]))
+            .join(', '),
+        ]),
+      );
+    },
+  );
+
+  /**
+   * How many calls are outstanding in the restaurant, for the header badge.
+   *
+   * The restaurant and not the open room, like the order count beside it: the
+   * queue the badge leads to is the restaurant's, and a host reading the
+   * terrace still has the cellar to answer.
+   *
+   * Signals rather than tables, so the number matches the list the badge leads
+   * to. A table asking for a waiter *and* for the bill is two things somebody
+   * has to do, and a plan that counted it once would send a host to a queue
+   * showing one row more than the badge promised.
+   */
+  readonly assistanceCount = computed(
+    () =>
+      (this.assistanceFeed()?.requests ?? []).filter(
+        (request) => request.status === 'open',
+      ).length,
+  );
+
+  /**
    * How many orders the kitchen owes the whole restaurant, for the header link.
    *
    * The restaurant and not the open room, because the queue it leads to is the
@@ -642,6 +715,7 @@ export class TablePlanService {
       this.statesByTable(),
       (status, state) => this.statusCopy(status, state),
       this.ordersByTable(),
+      this.assistanceLabels(),
     ),
   );
 

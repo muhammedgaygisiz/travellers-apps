@@ -79,3 +79,10 @@ export * from './lib/table-session';
  * applies, the staff queue predicts and the cart renders (issue #1103).
  */
 export * from './lib/table-order';
+/**
+ * A value export for the same reason the order model is one: the kinds, the
+ * derived document name, the cooldown and the grouping are run by the backend,
+ * by the guest's phone and by the two staff screens that draw a signal
+ * (issue #1106).
+ */
+export * from './lib/table-assistance';

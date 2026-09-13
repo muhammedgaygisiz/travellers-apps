@@ -102,6 +102,18 @@ const CONSUMER_ORDER = 'consumer-order';
 const OTHER_GUEST_ORDER = 'other-guest-order';
 const OTHER_GUEST_SESSION = `${OWNED_TABLE.length}_${OWNED_TABLE}_${OTHER_GUEST}`;
 
+/**
+ * The signal the consumer raised from that table (GitHub issue #1106).
+ *
+ * Named `{length}_{tableId}_{kind}`, so the phone that raised it derives the
+ * name and subscribes to the answer - the same trick the session name plays,
+ * pointed at a table instead of at a guest.
+ */
+const CONSUMER_CALL = `${OWNED_TABLE.length}_${OWNED_TABLE}_callStaff`;
+
+/** One raised by somebody else at a table this consumer is not at. */
+const OTHER_CALL = `${TOKENED_TABLE.length}_${TOKENED_TABLE}_requestBill`;
+
 /** The version the owned room is stored at, so a stale save has one to miss. */
 const STORED_ROOM_VERSION = 3;
 
@@ -494,6 +506,50 @@ beforeEach(async () => {
         total: 12,
         submittedAt: 1789030900000,
         statusChangedAt: 1789030900000,
+      },
+    );
+
+    // The two things a guest asks a waiter for, written only by
+    // `requestTableAssistance` and `acknowledgeTableAssistance` through the
+    // Admin SDK (issue #1106). Named after the table and the kind, which is
+    // what makes a repeated tap join a signal rather than raise a second one.
+    await setDoc(
+      doc(
+        db,
+        'restaurants',
+        OWNED_RESTAURANT,
+        'assistanceRequests',
+        CONSUMER_CALL,
+      ),
+      {
+        id: CONSUMER_CALL,
+        restaurantId: OWNED_RESTAURANT,
+        tableId: OWNED_TABLE,
+        visitId: STORED_VISIT,
+        kind: 'callStaff',
+        status: 'open',
+        requestedAt: 1789030900000,
+        lastRequestedAt: 1789030900000,
+        requestedByUserIds: [CONSUMER],
+      },
+    );
+    await setDoc(
+      doc(
+        db,
+        'restaurants',
+        OWNED_RESTAURANT,
+        'assistanceRequests',
+        OTHER_CALL,
+      ),
+      {
+        id: OTHER_CALL,
+        restaurantId: OWNED_RESTAURANT,
+        tableId: TOKENED_TABLE,
+        kind: 'requestBill',
+        status: 'open',
+        requestedAt: 1789030900000,
+        lastRequestedAt: 1789030900000,
+        requestedByUserIds: [OTHER_GUEST],
       },
     );
 
@@ -1927,6 +1983,155 @@ describe('table orders', () => {
       );
       await assertFails(deleteDoc(orderDoc(asOwner(), CONSUMER_ORDER)));
       await assertFails(addDoc(orders(asOperator()), forged));
+    });
+  });
+});
+
+describe('table assistance requests', () => {
+  const requests = (db: Firestore, restaurantId: string): CollectionReference =>
+    collection(db, 'restaurants', restaurantId, 'assistanceRequests');
+
+  const requestDoc = (db: Firestore, requestId: string): DocumentReference =>
+    doc(requests(db, OWNED_RESTAURANT), requestId);
+
+  describe('the guest reads the one they asked for', () => {
+    /**
+     * The whole of "the guest sees that their request was received and then
+     * acknowledged": the phone derives the document name from the table and the
+     * kind it asked for, and watches it. No callable and no poll.
+     */
+    it('lets a guest read the signal they are named on', async () => {
+      const snapshot = await assertSucceeds(
+        getDoc(requestDoc(asConsumer(), CONSUMER_CALL)),
+      );
+
+      expect(snapshot.data()).toMatchObject({
+        kind: 'callStaff',
+        status: 'open',
+        tableId: OWNED_TABLE,
+      });
+    });
+
+    /**
+     * The reader list is read off the *stored* document, so a guest who guesses
+     * a document name still fails the clause. The name is derivable from a
+     * table id and a kind from a list of two, which is exactly why the uid has
+     * to be in the document rather than in the path.
+     */
+    it('refuses a guest a signal raised at another table', async () => {
+      await assertFails(getDoc(requestDoc(asConsumer(), OTHER_CALL)));
+    });
+
+    /**
+     * A missing document is readable, and has to be: the phone subscribes when
+     * the ordering screen opens and the guest may never tap anything. A denied
+     * read would detach the listener and leave the screen reporting itself out
+     * of date for the whole meal.
+     */
+    it('lets a guest watch a signal that has never been raised', async () => {
+      const snapshot = await assertSucceeds(
+        getDoc(
+          requestDoc(
+            asConsumer(),
+            `${OWNED_TABLE.length}_${OWNED_TABLE}_requestBill`,
+          ),
+        ),
+      );
+
+      expect(snapshot.exists()).toBe(false);
+    });
+
+    /**
+     * `get` and not `list`, for the reason the sessions are: one query would
+     * hand a guest every table in the restaurant that is calling, which is the
+     * shape of the room and who is in it.
+     */
+    it('refuses a guest listing the collection', async () => {
+      await assertFails(getDocs(requests(asConsumer(), OWNED_RESTAURANT)));
+    });
+
+    it('refuses an unauthenticated reader entirely', async () => {
+      await assertFails(getDoc(requestDoc(anonymously(), CONSUMER_CALL)));
+    });
+  });
+
+  describe('staff read them', () => {
+    /**
+     * The whole collection with no `where`, which is what the derived document
+     * name buys: two documents per table means the room view and the queue can
+     * read it entire, with no collection-group match and no index to deploy.
+     */
+    it('lets staff, the owner and an operator list them', async () => {
+      await assertSucceeds(getDocs(requests(asStaff(), OWNED_RESTAURANT)));
+      await assertSucceeds(getDocs(requests(asOwner(), OWNED_RESTAURANT)));
+      await assertSucceeds(getDocs(requests(asOperator(), OWNED_RESTAURANT)));
+    });
+
+    it('refuses a business account that does not hold this restaurant', async () => {
+      await assertFails(getDocs(requests(asOtherBusiness(), OWNED_RESTAURANT)));
+    });
+  });
+
+  /**
+   * **The half that matters.** A guest able to write here could raise a signal
+   * at a table they are not sitting at, clear their own to get round the
+   * cooldown, or forge the `requestedAt` the whole rate limit is measured from.
+   */
+  describe('writes', () => {
+    const forged = {
+      id: 'forged-request',
+      restaurantId: OWNED_RESTAURANT,
+      tableId: OWNED_TABLE,
+      kind: 'callStaff',
+      status: 'open',
+      requestedAt: 1789030900000,
+      lastRequestedAt: 1789030900000,
+      requestedByUserIds: [CONSUMER],
+    };
+
+    it('refuses a guest raising one for themselves', async () => {
+      await assertFails(
+        addDoc(requests(asConsumer(), OWNED_RESTAURANT), forged),
+      );
+      await assertFails(
+        setDoc(requestDoc(asConsumer(), 'forged-request'), forged),
+      );
+    });
+
+    /**
+     * The one a rule that only checked the reader list would let through: the
+     * guest is named on this document, and clearing it is how they would ask
+     * again inside the minute.
+     */
+    it('refuses a guest acknowledging or deleting their own', async () => {
+      await assertFails(
+        updateDoc(requestDoc(asConsumer(), CONSUMER_CALL), {
+          status: 'acknowledged',
+          acknowledgedAt: 1789030910000,
+          acknowledgedByUserId: CONSUMER,
+        }),
+      );
+      await assertFails(deleteDoc(requestDoc(asConsumer(), CONSUMER_CALL)));
+    });
+
+    /**
+     * Staff clear a signal through `acknowledgeTableAssistance` and nowhere
+     * else, so that when a table asked is a number nobody on the floor can
+     * rewrite - which is the one figure a complaint about slow service turns
+     * on.
+     */
+    it('refuses staff, the owner and the operator the same writes', async () => {
+      await assertFails(
+        updateDoc(requestDoc(asStaff(), CONSUMER_CALL), {
+          status: 'acknowledged',
+        }),
+      );
+      await assertFails(
+        updateDoc(requestDoc(asOwner(), CONSUMER_CALL), {
+          requestedAt: 1789031900000,
+        }),
+      );
+      await assertFails(deleteDoc(requestDoc(asOperator(), CONSUMER_CALL)));
     });
   });
 });

@@ -6,6 +6,7 @@ import {
   StoryObj,
 } from '@storybook/angular';
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
+import type { AssistanceRow } from '../../integration/assistance-rows';
 import type {
   OrderAction,
   OrderTableGroup,
@@ -151,6 +152,48 @@ const busy: OrderTableGroup[] = [
 ];
 
 /**
+ * Three tables waiting for a person rather than for a dish
+ * (GitHub issue #1106).
+ *
+ * Oldest first, which is the opposite of the tickets below them: a floor
+ * answers whoever has waited longest, and a pass reads whatever just arrived.
+ * One of them has asked twice and one has been waiting past the three minutes
+ * that make a raised hand a problem.
+ */
+const waving: AssistanceRow[] = [
+  {
+    id: 'table-3:requestBill',
+    tableId: 'table-3',
+    label: '3',
+    kind: 'requestBill',
+    kindKey: 'assistance-kind-requestBill',
+    waiting: waiting(5),
+    urgent: true,
+    askedAgain: true,
+  },
+  {
+    id: 'table-7:callStaff',
+    tableId: 'table-7',
+    label: '7',
+    kind: 'callStaff',
+    kindKey: 'assistance-kind-callStaff',
+    waiting: waiting(2),
+    urgent: false,
+    askedAgain: false,
+  },
+  {
+    id: 'table-12:callStaff',
+    tableId: 'table-12',
+    label: '12',
+    kind: 'callStaff',
+    kindKey: 'assistance-kind-callStaff',
+    waiting: waiting(0),
+    urgent: false,
+    askedAgain: false,
+  },
+];
+
+/**
  * The page at one device width, drawn inside a frame of that width.
  *
  * The width is set here rather than left to a Loki viewport, for the reason the
@@ -280,5 +323,47 @@ export const UnknownTable: Story = {
 /** The alert this device has switched on for a busy service. */
 export const AlertOn: Story = {
   args: { alertEnabled: true, justArrived: true },
+  decorators: [at('1280px')],
+};
+
+/**
+ * A dining room with its hand up (GitHub issue #1106).
+ *
+ * Above the tickets and in the floor's colour, because they are two different
+ * debts: a kitchen behind on an order is ordinary, and a guest nobody has
+ * walked to is not.
+ */
+export const Calling: Story = {
+  args: { assistance: waving },
+  decorators: [at('1280px')],
+};
+
+/**
+ * The same room on a phone, which is what a waiter carries.
+ *
+ * The row wraps rather than truncating: the table number, what it wants and how
+ * long it has waited are three facts a waiter needs before walking over, and a
+ * row that hid one of them would send them to the wrong table.
+ */
+export const CallingOnPhone: Story = {
+  args: { assistance: waving },
+  decorators: [at('390px', '900px')],
+};
+
+/**
+ * A guest calling from a table that has ordered nothing.
+ *
+ * The list is drawn outside the loading branch for exactly this: a room with an
+ * empty queue is where a raised hand matters most, and folding the signals into
+ * the order groups would hide them at the tables with nothing else on screen.
+ */
+export const CallingWithNothingCooking: Story = {
+  args: { assistance: waving, groups: [], openCount: 0 },
+  decorators: [at('1280px')],
+};
+
+/** The row whose acknowledgement has not been answered yet. */
+export const CallingBusy: Story = {
+  args: { assistance: waving, busyAssistanceId: 'table-3:requestBill' },
   decorators: [at('1280px')],
 };

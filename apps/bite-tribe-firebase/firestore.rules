@@ -689,6 +689,77 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // --------------------------------------------------- table assistance
+
+    /**
+     * A guest asking for a waiter, or for the bill (GitHub issue #1106).
+     *
+     * ```text
+     * /restaurants/{restaurantId}/assistanceRequests/{n}_{tableId}_{kind}
+     * ```
+     *
+     * **Written by nobody**, like the state, the visit, the orders and the
+     * sessions around it. `requestTableAssistance` raises one and
+     * `acknowledgeTableAssistance` clears it, both through the Admin SDK. A
+     * guest able to write here could raise a signal at a table they are not
+     * sitting at, clear their own to get round the cooldown, or forge the
+     * `requestedAt` the whole rate limit is measured from - and a member of
+     * staff able to write here could rewrite when a table asked, which is the
+     * one number a complaint about slow service turns on.
+     *
+     * **The document name is the rate limit.** It is derived from the table and
+     * the kind, so a repeated tap addresses the signal that is already up
+     * rather than raising a second one. That also bounds the collection at two
+     * documents per table, which is what lets the staff screens read it whole
+     * with no `where`, no composite index and no collection-group match - the
+     * machinery the order queue needed because orders hang from the visit and
+     * are unbounded.
+     *
+     * **The guest reads the one they asked for, by `get` and never by `list`.**
+     * Their phone derives the name from the restaurant, the table and the kind,
+     * exactly as it derives its own session's name, which is what makes
+     * "received, then acknowledged" a subscription rather than a poll.
+     *
+     * The reader is whoever is *in* `requestedByUserIds`, rather than a single
+     * `requestedByUserId`, because a signal belongs to a table and a table has
+     * several phones at it: the second guest to tap joins the first guest's
+     * signal, and would otherwise be unable to see the answer to their own tap.
+     * `.get(..., [])` so a document written before the field existed denies
+     * rather than errors.
+     *
+     * **A missing document is readable**, which is what `resource == null`
+     * admits. The phone subscribes before it has asked anything, and a denied
+     * read would detach the listener and leave the screen reporting itself out
+     * of date for the whole meal. There is nothing to leak from a document that
+     * does not exist; what it costs is that a guest at the table can tell
+     * whether a signal of that kind is up without being able to read it, which
+     * is a fact they can also establish by looking at the table.
+     *
+     * `list` is withheld for the reason it is withheld on the sessions: one
+     * query would hand a guest every table in the restaurant that is calling.
+     *
+     * **Staff list them**, through the same `readsFloorPlan` as the tables,
+     * their live state, the visits, the orders and the sessions. A signal is
+     * worth exactly what the table it names is worth, and two lists of readers
+     * for one dining room would drift.
+     */
+    function ownTableAssistanceRequest() {
+      return signedIn()
+        && (resource == null || uid() in resource.data.get('requestedByUserIds', []));
+    }
+
+    match /restaurants/{restaurantId}/assistanceRequests/{requestId} {
+      // The guest's own clause first, because it is the common read and costs
+      // no document reads at all - `readsFloorPlan` reaches a `get()` on the
+      // staff association, and a guest watching the answer to their own tap
+      // should not pay for a question about a restaurant's payroll.
+      allow get: if ownTableAssistanceRequest() || readsFloorPlan(restaurantId);
+
+      allow list: if readsFloorPlan(restaurantId);
+
+      allow write: if false;
+    }
+
     // ------------------------------------------------------- table qr tokens
 
     /**

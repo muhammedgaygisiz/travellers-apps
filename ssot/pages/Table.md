@@ -376,8 +376,23 @@ a caller can tell the outcome from the event: the same transition, and not a sec
 to count or announce. The entry also stores the key and, where a visit ended, its
 outcome, so the replayed answer names the visit the first attempt ended and how.
 
-Firestore refuses every client write to both collections, so the callable is not
-merely the path the app takes - it is the only path there is. The transition
+Two callables now write a table's status without being that one, and both belong
+to a guest. `submitTableOrder` moves `occupied -> ordering` in the commit that
+records an order (issue \#1103), and `requestTableAssistance` moves a table to
+`awaitingPayment` in the commit that records a bill request (issue \#1106,
+`RD-TS-21`). Neither could go through `transitionTableState`: it is guarded by
+`requireTableStateAuthority`, which admits `staff`, `business` and `admin`, and a
+guest holds none of them - widening that guard would hand the floor's state
+machine to whoever photographed a QR code. So both write from the same
+`TableState` and `TableStateTransition` types and check the same
+`canTransitionTableStatus` matrix, which is the drift protection that matters: a
+field added to either type is a compile error in every writer. The trail records
+them like any other move, with the guest's uid as the actor and no `reason` -
+free text written by a backend would appear untranslated on a German
+restaurant's floor.
+
+Firestore refuses every client write to both collections, so the callables are
+not merely the path the app takes - they are the only path there is. The transition
 matrix is duplicated into `apps/bite-tribe-firebase/functions` because the
 project compiles with `rootDir: src` and ships `lib/` alone, and
 `table-state-parity.spec.ts` compares both files' statuses and every row so the

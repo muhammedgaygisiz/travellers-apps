@@ -74,6 +74,7 @@ const table = (
   status: TableStatus,
   duration?: string,
   openOrders?: number,
+  calling?: string,
 ): FloorPlanItem => ({
   id,
   kind: 'table',
@@ -89,6 +90,7 @@ const table = (
   statusLabel: WORDS[status],
   ...(duration === undefined ? {} : { statusDuration: duration }),
   ...(openOrders === undefined ? {} : { openOrders }),
+  ...(calling === undefined ? {} : { assistanceLabel: calling }),
 });
 
 const geometry: FloorPlanItem[] = [
@@ -142,8 +144,20 @@ const inService: FloorPlanItem[] = [
   table('t1', 1500, 1800, '1', 'occupied', '42 min'),
   table('t2', 4000, 1800, '2', 'occupied', '18 min'),
   table('t3', 6500, 1800, '3', 'available'),
-  table('t4', 1500, 4200, '4', 'awaitingPayment', '6 min'),
-  table('t5', 4000, 4200, '5', 'occupied', '1 h 12 min', 2),
+  // A table that asked for the bill and is still waiting for somebody to come
+  // with it, which is the pair the mark and the status make together
+  // (GitHub issue #1106).
+  table(
+    't4',
+    1500,
+    4200,
+    '4',
+    'awaitingPayment',
+    '6 min',
+    undefined,
+    'Wants the bill',
+  ),
+  table('t5', 4000, 4200, '5', 'occupied', '1 h 12 min', 2, 'Wants a waiter'),
   table('t6', 6500, 4200, '6', 'reserved', '25 min'),
   table('t7', 1500, 6400, '7', 'cleaning', '3 min'),
   table('t8', 4000, 6400, '8', 'available'),
@@ -238,6 +252,9 @@ export default {
     liveStatus: 'live' as const,
     items: inService,
     openOrderCount: 15,
+    // Two tables with their hands up, which is what the second header badge
+    // counts (GitHub issue #1106).
+    assistanceCount: 2,
     roomTableCount: 15,
     summary: counts(inService),
   },

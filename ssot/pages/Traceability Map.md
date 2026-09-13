@@ -197,9 +197,9 @@
   whole of every session whatever the wifi did.
 
   Stage 3 is nearly complete, and its narrative lives on
-  [[UC - Order At The Table Through A QR Code]] rather than here: seven of its ten
-  children have landed, each one a section of that page, and the thirteen product
-  decisions they settled are `RD-TS-1` to `RD-TS-17` in [[Recorded Decisions]].
+  [[UC - Order At The Table Through A QR Code]] rather than here: eight of its ten
+  children have landed, each one a section of that page, and the nineteen product
+  decisions they settled are `RD-TS-1` to `RD-TS-23` in [[Recorded Decisions]].
 
   Issue \#1105 is the one worth finding from this side, because it is where the
   two halves of the epic meet. Until it landed a guest could send an order that
@@ -220,11 +220,22 @@
   host reads as a tap that missed, and an order that appeared to move and then
   moved back is a kitchen that has already started cooking.
 
-  What stage 3 still owes is issue \#1106's assistance and bill requests, issue
-  \#1107's abuse protection - which also owns the pending-session signal no screen
-  draws - and issue \#1108's idempotent submission. And, as everywhere else in
-  this epic, the rules and now the indexes deploy by hand, so none of it binds
-  production until both deploys have run.
+  Issue \#1106 is worth finding from this side for the opposite reason: it is
+  where the epic did **less** machinery rather than more. A call for a waiter is
+  named after the table and the kind (`RD-TS-18`), which bounds the collection at
+  two documents per table - so the room view and the queue read it whole with no
+  query, no index and no collection-group rule, where the orders of \#1105 needed
+  all three. The same name is the rate limit: a repeated tap addresses the first
+  tap's document, across phones as well as across taps. It also crosses into
+  [[epic-1071]] twice - a pulsing mark on the live floor plan and a second count
+  on its header link - and into the floor's state machine once: asking for the
+  bill writes `awaitingPayment` from the guest's own callable (`RD-TS-21`),
+  because `transitionTableState` admits three roles a guest holds none of.
+
+  What stage 3 still owes is issue \#1107's abuse protection - which also owns
+  the pending-session signal no screen draws - and issue \#1108's idempotent
+  submission. And, as everywhere else in this epic, the rules and the indexes
+  deploy by hand, so none of it binds production until both deploys have run.
 
 Every child of stage 0 has now landed, and the stage is still not finished. Two things
 remain and neither has an owning issue: the rules deploy by hand, so \#1078 binds

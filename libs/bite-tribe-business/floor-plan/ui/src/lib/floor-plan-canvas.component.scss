@@ -336,6 +336,61 @@
 }
 
 /*
+ * A table calling for somebody (GitHub issue #1106).
+ *
+ * The order badge's shape in the danger colour, and the one thing on this
+ * canvas that moves. "A request is visible on the room view within seconds and
+ * is unmistakable" is an acceptance criterion, and on a plan already carrying a
+ * status colour, a status glyph, a number, a duration and an order badge, a
+ * sixth *static* mark is not unmistakable - it is a sixth thing to notice.
+ * Movement is the one channel nothing else on the drawing uses.
+ *
+ * `stroke-width: 0` for the same reason the order badge sets it: a selected
+ * item paints every `circle` under it with the selection stroke, and a ring
+ * round the marker would read as a second state.
+ */
+.floor-plan-canvas__item-calling {
+  pointer-events: none;
+}
+
+.floor-plan-canvas__item-calling circle {
+  fill: var(--ion-color-danger, #eb445a);
+  stroke-width: 0;
+  animation: floor-plan-calling-pulse 1.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.floor-plan-canvas__item-calling text {
+  fill: var(--ion-color-danger-contrast, #fff);
+  font-family: var(--ion-font-family, sans-serif);
+  font-weight: 700;
+}
+
+@keyframes floor-plan-calling-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.18);
+    opacity: 0.72;
+  }
+}
+
+/*
+ * A pulse is an attention signal and, for some readers, a migraine. The colour
+ * and the glyph carry the same fact on their own, so the motion is what goes.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .floor-plan-canvas__item-calling circle {
+    animation: none;
+  }
+}
+
+/*
  * Read-only, which is the live view of issue #1093.
  *
  * The plan is dragged to move the view rather than to move the room, so the

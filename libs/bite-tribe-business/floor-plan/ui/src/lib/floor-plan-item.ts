@@ -106,6 +106,29 @@ export interface FloorPlanItem {
    */
   openOrders?: number;
   /**
+   * What this table is calling for, already translated
+   * (GitHub issue #1106).
+   *
+   * Absent in the editor, absent on geometry, and absent rather than empty on a
+   * table that is not calling - so "no marker" is one state rather than two.
+   *
+   * **One field and one marker, whatever a table is asking for.** The plan is
+   * scanned from across a room, and what it has to answer there is *which
+   * tables are calling*; whether one wants a waiter or the bill is a sentence,
+   * and a sentence is not readable at the size a 900 mm table gives it at
+   * zoom-to-fit. So the drawing says "this table is waiting" and the queue one
+   * press away says what for - the same split the order badge makes between a
+   * count and the ticket behind it.
+   *
+   * The sentence is still here, because it is what the marker's tooltip and the
+   * item's accessible name read out: a reader who cannot see the marker is not
+   * the reader the size constraint was about.
+   *
+   * Translated by the caller rather than here, exactly as {@link statusLabel}
+   * is, so the canvas holds no vocabulary of its own.
+   */
+  assistanceLabel?: string;
+  /**
    * The status as staff read it, already translated.
    *
    * Translated by the caller rather than here, so the canvas holds no status

@@ -653,5 +653,15 @@
   "table-order-refused-itemMissing": "{{item}} n'est plus à la carte. Retirez-le et envoyez le reste.",
   "table-order-refused-itemUnavailable": "{{item}} n'est pas disponible en ce moment. Retirez-le et envoyez le reste.",
   "table-order-refused-priceChanged": "Le prix de {{item}} a changé. Vérifiez-le et renvoyez.",
-  "table-order-refused-currencyChanged": "Les prix de la carte ont changé de devise. Vérifiez votre commande et renvoyez."
+  "table-order-refused-currencyChanged": "Les prix de la carte ont changé de devise. Vérifiez votre commande et renvoyez.",
+  "table-assistance-heading": "Besoin de quelque chose ?",
+  "table-assistance-callStaff-idle": "Appeler un serveur",
+  "table-assistance-callStaff-open": "Un serveur a été appelé",
+  "table-assistance-callStaff-acknowledged": "Quelqu'un arrive.",
+  "table-assistance-requestBill-idle": "Demander l'addition",
+  "table-assistance-requestBill-open": "L'addition a été demandée",
+  "table-assistance-requestBill-acknowledged": "Votre addition arrive.",
+  "table-assistance-refused-tableNotAttended": "Le restaurant ne vous a pas installé à cette table. Adressez-vous à un membre du personnel.",
+  "table-assistance-refused-cooldown": "Vous venez de demander. Patientez un instant avant de redemander.",
+  "table-assistance-stale": "Nous avons perdu le contact avec le restaurant, ceci peut donc être périmé."
 }

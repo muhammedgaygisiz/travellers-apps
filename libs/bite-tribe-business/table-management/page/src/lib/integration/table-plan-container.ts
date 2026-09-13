@@ -30,6 +30,7 @@ import { TablePlanService } from './table-plan.service';
       [isAuthenticated]="service.isAuthenticated()"
       [restaurantId]="service.restaurantId()"
       [openOrderCount]="service.openOrderCount()"
+      [assistanceCount]="service.assistanceCount()"
       (selectRoom)="service.selectRoom($event)"
       (selectionChange)="service.select($event)"
       (activateTable)="service.activateTable($event)"

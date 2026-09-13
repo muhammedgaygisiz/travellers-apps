@@ -653,5 +653,15 @@
   "table-order-refused-itemMissing": "{{item}} steht nicht mehr auf der Karte. Nimm es heraus und sende den Rest.",
   "table-order-refused-itemUnavailable": "{{item}} ist gerade nicht verfügbar. Nimm es heraus und sende den Rest.",
   "table-order-refused-priceChanged": "Der Preis von {{item}} hat sich geändert. Sieh ihn dir an und sende noch einmal.",
-  "table-order-refused-currencyChanged": "Die Preise der Karte sind jetzt in einer anderen Währung. Prüfe deine Bestellung und sende noch einmal."
+  "table-order-refused-currencyChanged": "Die Preise der Karte sind jetzt in einer anderen Währung. Prüfe deine Bestellung und sende noch einmal.",
+  "table-assistance-heading": "Brauchst du etwas?",
+  "table-assistance-callStaff-idle": "Bedienung rufen",
+  "table-assistance-callStaff-open": "Die Bedienung wurde gerufen",
+  "table-assistance-callStaff-acknowledged": "Jemand ist unterwegs.",
+  "table-assistance-requestBill-idle": "Rechnung anfordern",
+  "table-assistance-requestBill-open": "Die Rechnung wurde angefordert",
+  "table-assistance-requestBill-acknowledged": "Deine Rechnung ist unterwegs.",
+  "table-assistance-refused-tableNotAttended": "Das Restaurant hat dich nicht an diesem Tisch sitzen. Frag eine Mitarbeiterin oder einen Mitarbeiter.",
+  "table-assistance-refused-cooldown": "Du hast gerade erst gefragt. Warte einen Moment, bevor du erneut fragst.",
+  "table-assistance-stale": "Wir haben die Verbindung zum Restaurant verloren, das hier kann also veraltet sein."
 }

@@ -184,6 +184,21 @@ const ORDER_BADGE_TEXT_RATIO = 0.72;
 const ORDER_BADGE_MAX = 9;
 
 /**
+ * The marker on a table that is calling for somebody (GitHub issue #1106).
+ *
+ * The order badge's disc, mirrored to the other top corner and a touch larger.
+ * Larger because it has to be *unmistakable* across a room, which is what that
+ * issue asks for and what a count of outstanding dishes does not: a kitchen
+ * behind on a ticket is ordinary, and a guest with their hand up who nobody has
+ * walked to is not.
+ *
+ * The other corner rather than beside it, so a table doing both carries two
+ * marks a reader can separate rather than one cluster.
+ */
+const CALLING_BADGE_RADIUS_RATIO = 0.72;
+const CALLING_BADGE_TEXT_RATIO = 0.9;
+
+/**
  * Where the three rows of a table under service sit, as shares of the stack
  * step.
  *
@@ -380,6 +395,20 @@ interface ItemView {
   orderBadgeY: Millimetres;
   orderBadgeRadius: Millimetres;
   orderBadgeTextSize: Millimetres;
+  /**
+   * What this table is calling for, already translated
+   * (GitHub issue #1106).
+   *
+   * Empty when it is not calling, so the template's one `@if` covers both that
+   * and the editor, which has no signals at all. It is the tooltip and part of
+   * the accessible name; the *drawing* is the mark below, which says only that
+   * the table is waiting.
+   */
+  callingName: string;
+  callingBadgeX: Millimetres;
+  callingBadgeY: Millimetres;
+  callingBadgeRadius: Millimetres;
+  callingBadgeTextSize: Millimetres;
 }
 
 /**
@@ -827,6 +856,9 @@ export class FloorPlanCanvasComponent {
       // kitchen owes nothing has no badge at all.
       const orderCount = (isTable ? item.openOrders : undefined) ?? 0;
       const orderBadgeRadius = labelSize * ORDER_BADGE_RADIUS_RATIO;
+      // Empty is drawn as nothing, so a table nobody is waiting at has no mark.
+      const callingName = (isTable ? item.assistanceLabel : undefined) ?? '';
+      const callingBadgeRadius = labelSize * CALLING_BADGE_RADIUS_RATIO;
 
       return {
         id: item.id,
@@ -837,7 +869,7 @@ export class FloorPlanCanvasComponent {
           live
             ? ` floor-plan-canvas__item--status floor-plan-canvas__item--status-${live}`
             : ''
-        }`,
+        }${callingName ? ' floor-plan-canvas__item--calling' : ''}`,
         typeKey,
         /*
          * Under service the name says what the table is *doing*, because that
@@ -931,6 +963,13 @@ export class FloorPlanCanvasComponent {
         orderBadgeY: item.position.y - item.size.height / 2,
         orderBadgeRadius,
         orderBadgeTextSize: orderBadgeRadius * ORDER_BADGE_TEXT_RATIO,
+        callingName,
+        // The opposite top corner from the order badge, so a table that is both
+        // behind and calling carries two marks a reader can tell apart.
+        callingBadgeX: item.position.x - item.size.width / 2,
+        callingBadgeY: item.position.y - item.size.height / 2,
+        callingBadgeRadius,
+        callingBadgeTextSize: callingBadgeRadius * CALLING_BADGE_TEXT_RATIO,
       };
     });
   });

@@ -158,6 +158,17 @@ export class TablePlanComponent {
   /** How many open orders the restaurant has, for the badge on that link. */
   readonly openOrderCount = input(0);
 
+  /**
+   * How many tables are calling for somebody (GitHub issue #1106).
+   *
+   * A second badge on the same link rather than a number added to the first,
+   * because they are two different debts: a kitchen behind on a ticket is
+   * ordinary, and a raised hand nobody has walked to is not. The tables that
+   * are calling are marked on the plan itself; this is the count for the room
+   * a host is not currently looking at.
+   */
+  readonly assistanceCount = input(0);
+
   readonly selectRoom = output<string>();
   readonly selectionChange = output<string[]>();
   readonly activateTable = output<string>();

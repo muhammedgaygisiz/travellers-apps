@@ -15,6 +15,7 @@ import { FloorPlanDataAccessService } from 'bite-tribe-business/floor-plan-data-
 import {
   OrderAlertService,
   tableOrderFailure,
+  TableAssistanceQueueService,
   TableOrderQueueService,
   type TableOrderFailure,
 } from 'bite-tribe-business/table-management-data-access';
@@ -22,6 +23,7 @@ import type { RestaurantTable, TableOrder, TableOrderStatus } from 'model';
 import { EMPTY, switchMap } from 'rxjs';
 import { ToastService } from 'toast';
 import { resourceFailed, resourceValue } from 'utils';
+import { assistanceRows, type AssistanceRow } from './assistance-rows';
 import {
   groupOrdersByTable,
   openOrderCount,
@@ -98,6 +100,7 @@ const FAILURE_KEYS: Readonly<Record<TableOrderFailure, string>> = {
 @Injectable({ providedIn: 'root' })
 export class OrderQueueService {
   private readonly queue = inject(TableOrderQueueService);
+  private readonly assistanceQueue = inject(TableAssistanceQueueService);
   private readonly floorPlan = inject(FloorPlanDataAccessService);
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly alerts = inject(OrderAlertService);
@@ -169,6 +172,23 @@ export class OrderQueueService {
   );
 
   /**
+   * The tables that are calling, pushed by Firestore (GitHub issue #1106).
+   *
+   * A listener of its own rather than a field folded into the order feed,
+   * because they are two collections with two lifetimes: a table can call for
+   * a waiter having ordered nothing, and an order can be cooking at a table
+   * that wants nothing. One feed would have had to decide what an empty half
+   * of it meant.
+   */
+  private readonly assistanceFeed = toSignal(
+    this.storeService.restaurantIdFromUrl$.pipe(
+      switchMap((restaurantId) =>
+        restaurantId ? this.assistanceQueue.requests$(restaurantId) : EMPTY,
+      ),
+    ),
+  );
+
+  /**
    * The wall clock, ticked so the ages on the rows advance.
    *
    * An interval rather than an animation frame, for the reason the plan gives:
@@ -196,6 +216,25 @@ export class OrderQueueService {
   /** How many open orders there are, across every table. */
   readonly openCount = computed(() => openOrderCount(this.groups()));
 
+  /**
+   * The tables waiting for somebody, longest first.
+   *
+   * Above the tickets on the screen and sorted the other way round, which is
+   * the difference between a kitchen and a dining room: a ticket that just
+   * arrived is the one nobody has read, and a guest who has been waving for
+   * four minutes is the one nobody has answered.
+   */
+  readonly assistance = computed<AssistanceRow[]>(() =>
+    assistanceRows(
+      this.assistanceFeed()?.requests ?? [],
+      this.tablesValue(),
+      this.now(),
+    ),
+  );
+
+  /** How many tables are calling. The badge beside the open order count. */
+  readonly assistanceCount = computed(() => this.assistance().length);
+
   readonly loading = computed(() => this.feed() === undefined);
 
   /** Whether this device alerts on a new order. Off until turned on. */
@@ -208,6 +247,14 @@ export class OrderQueueService {
    * slow call on table 12 leaves the rest of the pass working.
    */
   readonly busyOrderId = signal<string | undefined>(undefined);
+
+  /**
+   * The signal whose acknowledgement has not been answered yet, by row id.
+   *
+   * Per row for the reason `busyOrderId` is per order: a slow call about table
+   * 12 must leave the rest of the floor answerable.
+   */
+  readonly busyAssistanceId = signal<string | undefined>(undefined);
 
   /** The cancellation waiting for its reason, or nothing. */
   readonly pendingCancellation = signal<PendingCancellation | undefined>(
@@ -233,30 +280,47 @@ export class OrderQueueService {
    */
   readonly liveStatus = computed<OrderQueueLiveStatus>(() => {
     const feed = this.feed();
+    const assistance = this.assistanceFeed();
 
-    if (!feed) {
+    if (!feed || !assistance) {
       return 'connecting';
     }
 
-    if (feed.live) {
+    if (feed.live && assistance.live) {
       return 'live';
     }
 
-    return this.now() - feed.at >= STALE_AFTER_MS ? 'stale' : 'offline';
+    // The worse of the two, and the older of the two instants. The screen makes
+    // one promise - what is on it is current - and it is broken by either
+    // listener going quiet, so a header reading `live` because the orders are
+    // still arriving would be true about half the screen (issue #1106).
+    const at = Math.min(
+      feed.live ? Number.POSITIVE_INFINITY : feed.at,
+      assistance.live ? Number.POSITIVE_INFINITY : assistance.at,
+    );
+
+    return this.now() - at >= STALE_AFTER_MS ? 'stale' : 'offline';
   });
 
   /** How long ago the server last confirmed the queue, for the indicator. */
   readonly lastUpdated = computed<string | undefined>(() => {
     const feed = this.feed();
+    const assistance = this.assistanceFeed();
 
-    if (!feed || feed.at === 0) {
+    if (!feed || feed.at === 0 || !assistance || assistance.at === 0) {
       return undefined;
     }
 
     // Read so the label is retranslated when the language changes.
     this.language();
 
-    const { key, params } = elapsedParts(feed.at, this.now());
+    // The older of the two, for the reason `liveStatus` takes the worse of
+    // them: "last updated" about one of two listeners is a reassurance the
+    // other one has not earned.
+    const { key, params } = elapsedParts(
+      Math.min(feed.at, assistance.at),
+      this.now(),
+    );
 
     return this.transloco.translate(key, params);
   });
@@ -312,10 +376,56 @@ export class OrderQueueService {
         this.justArrived.set(true);
       }
     });
+
+    /*
+     * A table starting to call announces itself the same way (issue #1106).
+     *
+     * The same chime and the same flash as a new order, deliberately. Both
+     * mean "somebody in this room is waiting on you", both are answered by
+     * walking to a table, and a second sound would ask a floor to learn which
+     * of two noises meant what while a service was running.
+     *
+     * Watched by row id for the reason the orders are watched by order id: a
+     * count rises when a guest asks and falls when somebody answers, so a
+     * count-watcher would chime at the person who had just pressed
+     * Acknowledge. The first delivery is silent - opening the screen would
+     * otherwise announce every table that was already waiting.
+     */
+    effect(() => {
+      const delivery = this.assistanceFeed();
+
+      if (!delivery) {
+        return;
+      }
+
+      const ids = new Set(
+        delivery.requests
+          .filter((request) => request.status === 'open')
+          .map((request) => `${request.tableId}:${request.kind}`),
+      );
+
+      if (!this.seenAssistance) {
+        this.seenAssistance = ids;
+
+        return;
+      }
+
+      const arrived = [...ids].some((id) => !this.seenAssistance?.has(id));
+
+      this.seenAssistance = ids;
+
+      if (arrived) {
+        this.alerts.alert();
+        this.justArrived.set(true);
+      }
+    });
   }
 
   /** The order ids of the previous delivery. `undefined` before the first. */
   private seen?: Set<string>;
+
+  /** The open signal ids of the previous delivery. `undefined` before the first. */
+  private seenAssistance?: Set<string>;
 
   /** Turns this device's alert on or off, and remembers it. */
   async toggleAlert(): Promise<void> {
@@ -428,6 +538,50 @@ export class OrderQueueService {
       });
     } finally {
       this.busyOrderId.set(undefined);
+    }
+  }
+
+  /**
+   * Tells the guest that somebody is coming, and clears the marker everywhere
+   * (GitHub issue #1106).
+   *
+   * There is no confirmation and no reason to type, which is the whole
+   * difference from cancelling an order. A cancellation takes something away
+   * from a guest and owes them a sentence; an acknowledgement gives them one,
+   * and a dialog in front of it would be a second tap between a member of
+   * staff and a table they are already walking to.
+   *
+   * A second press, or somebody else's press landing first, is not an error:
+   * the backend answers with what it holds, the listener removes the row, and
+   * both people wanted the same thing.
+   */
+  async acknowledge(row: AssistanceRow): Promise<void> {
+    const restaurantId = this.restaurantId();
+
+    if (!restaurantId || this.busyAssistanceId()) {
+      return;
+    }
+
+    this.busyAssistanceId.set(row.id);
+
+    try {
+      await this.assistanceQueue.acknowledge({
+        restaurantId,
+        tableId: row.tableId,
+        kind: row.kind,
+      });
+    } catch (error) {
+      // The row is about to be corrected by the listener either way, so what
+      // the staff member is owed is the sentence rather than a retry - the
+      // same judgement `send` makes about an order.
+      console.error('Failed to acknowledge the request:', error);
+
+      await this.toast.present({
+        messageKey: FAILURE_KEYS[tableOrderFailure(error)],
+        outcome: 'failure',
+      });
+    } finally {
+      this.busyAssistanceId.set(undefined);
     }
   }
 

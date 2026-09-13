@@ -653,5 +653,15 @@
   "table-order-refused-itemMissing": "{{item}} sudah tidak ada di menu. Keluarkan dan kirim sisanya.",
   "table-order-refused-itemUnavailable": "{{item}} sedang tidak tersedia. Keluarkan dan kirim sisanya.",
   "table-order-refused-priceChanged": "Harga {{item}} berubah. Periksa lalu kirim lagi.",
-  "table-order-refused-currencyChanged": "Mata uang harga di menu berubah. Periksa pesananmu lalu kirim lagi."
+  "table-order-refused-currencyChanged": "Mata uang harga di menu berubah. Periksa pesananmu lalu kirim lagi.",
+  "table-assistance-heading": "Butuh sesuatu?",
+  "table-assistance-callStaff-idle": "Panggil pelayan",
+  "table-assistance-callStaff-open": "Pelayan sudah dipanggil",
+  "table-assistance-callStaff-acknowledged": "Seseorang sedang menuju ke meja Anda.",
+  "table-assistance-requestBill-idle": "Minta bon",
+  "table-assistance-requestBill-open": "Bon sudah diminta",
+  "table-assistance-requestBill-acknowledged": "Bon Anda sedang disiapkan.",
+  "table-assistance-refused-tableNotAttended": "Restoran tidak mencatat Anda duduk di meja ini. Tanyakan kepada staf.",
+  "table-assistance-refused-cooldown": "Anda baru saja meminta. Tunggu sebentar sebelum meminta lagi.",
+  "table-assistance-stale": "Kami kehilangan kontak dengan restoran, jadi ini mungkin sudah tidak berlaku."
 }

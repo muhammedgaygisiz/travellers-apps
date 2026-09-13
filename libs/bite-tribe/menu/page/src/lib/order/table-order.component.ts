@@ -21,18 +21,25 @@ import { NgTemplateOutlet } from '@angular/common';
 import { PageComponent } from 'common/ui/page';
 import { PATH, currencyCodes } from 'utils';
 import {
+  TABLE_ASSISTANCE_REFUSAL_KEYS,
   TABLE_ORDER_BLOCKED_KEYS,
   TABLE_ORDER_CLOSED_KEYS,
   TABLE_ORDER_STATUS_KEYS,
+  TableAssistanceService,
   TableCartService,
   TableOrderHistoryService,
   TableOrderService,
   type TableCartLine,
   type TableOrderView,
 } from 'bite-tribe/table-order-data-access';
+import { TABLE_ASSISTANCE_KINDS } from 'model';
 // Aliased because the screen's own class is called `TableOrder` too, and a
 // merged declaration of the two is a compile error rather than a shadowing.
-import type { OrderLineSnapshot, TableOrder as TableOrderModel } from 'model';
+import type {
+  OrderLineSnapshot,
+  TableAssistanceKind,
+  TableOrder as TableOrderModel,
+} from 'model';
 import { MenuComponent } from '../components/menu/menu.component';
 import type { MenuItemSelection } from '../components/menu-item/menu-item.component';
 
@@ -106,7 +113,17 @@ const symbolOf = (code: string): string => {
   // two Firestore listeners belong to the screen, and rooting them would keep a
   // guest's session and orders on a listener after they walked out of the
   // restaurant (GitHub issue #1104).
-  providers: [TableCartService, TableOrderHistoryService, TableOrderService],
+  //
+  // The assistance pair joins them for the same reason and with the same
+  // lifetime: two more Firestore listeners that belong to the screen, and
+  // rooting them would leave a guest's table on a listener after they walked
+  // out of the restaurant (GitHub issue #1106).
+  providers: [
+    TableCartService,
+    TableOrderHistoryService,
+    TableAssistanceService,
+    TableOrderService,
+  ],
   templateUrl: 'table-order.component.html',
   styleUrl: 'table-order.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,6 +133,10 @@ export class TableOrder implements OnInit {
 
   protected readonly cart = this.service.cart;
   protected readonly history = this.service.history;
+  protected readonly assistance = this.service.assistance;
+
+  /** The two things the guest can ask for, in the order they are offered. */
+  protected readonly assistanceKinds = TABLE_ASSISTANCE_KINDS;
   protected readonly isBusy = this.service.isBusy;
   protected readonly canSubmit = this.service.canSubmit;
   protected readonly refusal = this.service.lastRefusal;
@@ -201,6 +222,70 @@ export class TableOrder implements OnInit {
 
     return status && status !== 'active' ? TABLE_ORDER_CLOSED_KEYS[status] : '';
   });
+
+  /**
+   * Whether asking for a waiter is worth offering at all.
+   *
+   * The same predicate the send button uses, and deliberately: a table the
+   * restaurant has closed, a session that timed out and a party staff have not
+   * seated yet are exactly the states in which the backend refuses a signal,
+   * and a button that is always there and always refused teaches a guest to
+   * ignore the screen. An unknown session answers yes, as it does for an order
+   * - the backend's reason is truer than one invented here.
+   */
+  protected readonly canAskForHelp = computed(() =>
+    this.history.acceptsOrders(),
+  );
+
+  /**
+   * What one button says, which is its state as much as its label.
+   *
+   * Two labels rather than three. A signal that is up disables the button and
+   * says so on it, because the tap the guest is about to make again would do
+   * nothing; an acknowledged one re-enables the button at its ordinary label
+   * and puts "somebody is on their way" beside it - a button reading that
+   * sentence would be a button promising to fetch somebody who is already
+   * walking over.
+   */
+  protected assistanceKey(kind: TableAssistanceKind): string {
+    const state = this.isAssistanceOpen(kind) ? 'open' : 'idle';
+
+    return `table-assistance-${kind}-${state}`;
+  }
+
+  /** The line under a button somebody has already answered, or none. */
+  protected assistanceNoteKey(kind: TableAssistanceKind): string {
+    return this.isAssistanceAcknowledged(kind)
+      ? `table-assistance-${kind}-acknowledged`
+      : '';
+  }
+
+  /** Whether this kind's signal is still waiting for somebody. */
+  protected isAssistanceOpen(kind: TableAssistanceKind): boolean {
+    return this.assistance.stateOf(kind) === 'open';
+  }
+
+  /** Whether staff have said they are coming. */
+  protected isAssistanceAcknowledged(kind: TableAssistanceKind): boolean {
+    return this.assistance.stateOf(kind) === 'acknowledged';
+  }
+
+  /**
+   * The sentence a declined request is told with.
+   *
+   * Read off one table rather than built from a prefix here, so a reason the
+   * backend can return and no locale file covers is a compile error in the
+   * table instead of a blank line in front of a guest trying to pay.
+   */
+  protected assistanceRefusalKey(
+    reason: keyof typeof TABLE_ASSISTANCE_REFUSAL_KEYS,
+  ): string {
+    return TABLE_ASSISTANCE_REFUSAL_KEYS[reason];
+  }
+
+  protected askFor(kind: TableAssistanceKind): void {
+    void this.assistance.ask(kind);
+  }
 
   ngOnInit(): void {
     void this.service.load();

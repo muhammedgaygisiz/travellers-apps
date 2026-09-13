@@ -58,6 +58,21 @@
                 >{{ openOrderCount() }}</ion-badge
               >
             }
+
+            <!--
+              And how many tables are waiting for a person rather than a dish
+              (GitHub issue #1106). In the danger tone beside the order count,
+              because the two are different debts and a floor reads one of them
+              as urgent.
+            -->
+            @if (assistanceCount() > 0) {
+              <ion-badge
+                class="table-plan__orders-count"
+                color="danger"
+                data-testid="table-plan-assistance-count"
+                >{{ assistanceCount() }}</ion-badge
+              >
+            }
           </ion-button>
 
           <span

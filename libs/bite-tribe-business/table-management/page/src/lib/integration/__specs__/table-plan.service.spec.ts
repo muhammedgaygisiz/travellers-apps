@@ -8,6 +8,8 @@ import { ConnectionStatus } from '@capacitor/network';
 import { Preferences } from '@capacitor/preferences';
 import { NetworkStatusService } from 'common/networkstatus';
 import {
+  TableAssistanceQueueService,
+  TableAssistanceSnapshot,
   TableOrderQueueService,
   TableOrderQueueSnapshot,
   TableStateDataAccessService,
@@ -17,6 +19,7 @@ import {
 import {
   RestaurantTable,
   Room,
+  TableAssistanceRequest,
   TableOrder,
   TableState,
   TableStatus,
@@ -88,6 +91,7 @@ describe(TablePlanService.name, () => {
   let service: TablePlanService;
   let feed: BehaviorSubject<TableStateSnapshot>;
   let orderFeed: BehaviorSubject<TableOrderQueueSnapshot>;
+  let assistanceFeed: BehaviorSubject<TableAssistanceSnapshot>;
   let connection: WritableSignal<ConnectionStatus | undefined>;
   let floorPlan: Record<string, jest.Mock>;
 
@@ -108,6 +112,16 @@ describe(TablePlanService.name, () => {
     next: (list: Partial<TableOrder>[]): void =>
       orderFeed.next({
         orders: list as TableOrder[],
+        at: Date.now(),
+        live: true,
+      }),
+  };
+
+  /** One delivery of the signals listener (GitHub issue #1106). */
+  const assistance = {
+    next: (list: Partial<TableAssistanceRequest>[]): void =>
+      assistanceFeed.next({
+        requests: list as TableAssistanceRequest[],
         at: Date.now(),
         live: true,
       }),
@@ -161,6 +175,11 @@ describe(TablePlanService.name, () => {
     jest.useFakeTimers().setSystemTime(NOW);
     orderFeed = new BehaviorSubject<TableOrderQueueSnapshot>({
       orders: [],
+      at: NOW,
+      live: true,
+    });
+    assistanceFeed = new BehaviorSubject<TableAssistanceSnapshot>({
+      requests: [],
       at: NOW,
       live: true,
     });
@@ -251,6 +270,14 @@ describe(TablePlanService.name, () => {
         {
           provide: TableOrderQueueService,
           useValue: { openOrders$: jest.fn(() => orderFeed.asObservable()) },
+        },
+        // And the signals through theirs, so it can mark the tables that are
+        // calling for somebody (GitHub issue #1106).
+        {
+          provide: TableAssistanceQueueService,
+          useValue: {
+            requests$: jest.fn(() => assistanceFeed.asObservable()),
+          },
         },
         { provide: NetworkStatusService, useValue: { status: connection } },
         {
@@ -390,6 +417,89 @@ describe(TablePlanService.name, () => {
       orders.next([queued('a', 'table-1'), queued('b', 'table-9')]);
 
       expect(service.openOrderCount()).toBe(2);
+    });
+  });
+
+  /**
+   * A guest calling for somebody, marked on the plan (GitHub issue #1106).
+   *
+   * The sentence rather than the kinds, because the canvas is a `type:ui`
+   * library and holds no vocabulary: what it draws is one mark, and what it
+   * reads out is what the caller translated.
+   */
+  describe('the tables that are calling', () => {
+    const calling = (
+      tableId: string,
+      kind: 'callStaff' | 'requestBill' = 'callStaff',
+      status: 'open' | 'acknowledged' = 'open',
+    ): Partial<TableAssistanceRequest> => ({
+      id: `${tableId.length}_${tableId}_${kind}`,
+      restaurantId: 'restaurant-1',
+      tableId,
+      kind,
+      status,
+      requestedAt: NOW,
+      lastRequestedAt: NOW,
+      requestedByUserIds: ['guest-1'],
+    });
+
+    it('marks the table with what it is asking for, translated', () => {
+      assistance.next([calling('table-1')]);
+
+      expect(
+        service.items().find((item) => item.id === 'table-1')?.assistanceLabel,
+      ).toBe('assistance-kind-callStaff');
+    });
+
+    it('names both where a table is asking for both', () => {
+      assistance.next([calling('table-1'), calling('table-1', 'requestBill')]);
+
+      expect(
+        service.items().find((item) => item.id === 'table-1')?.assistanceLabel,
+      ).toBe('assistance-kind-callStaff, assistance-kind-requestBill');
+    });
+
+    /**
+     * Absent rather than empty, so the canvas has one state for "no marker" -
+     * and a plan opened before the listener has delivered marks nothing rather
+     * than marking every table.
+     */
+    it('leaves a table nobody is calling from unmarked', () => {
+      assistance.next([calling('table-1')]);
+
+      expect(
+        service.items().find((item) => item.id === 'table-2')?.assistanceLabel,
+      ).toBeUndefined();
+    });
+
+    it('clears the mark once somebody has answered', () => {
+      assistance.next([calling('table-1', 'callStaff', 'acknowledged')]);
+
+      expect(
+        service.items().find((item) => item.id === 'table-1')?.assistanceLabel,
+      ).toBeUndefined();
+      expect(service.assistanceCount()).toBe(0);
+    });
+
+    /**
+     * The restaurant and not the open room, like the order count beside it: the
+     * queue the badge leads to is the restaurant's, and a host reading the
+     * terrace still has the cellar to answer.
+     */
+    it('counts the whole restaurant for the header badge', () => {
+      assistance.next([calling('table-1'), calling('table-9')]);
+
+      expect(service.assistanceCount()).toBe(2);
+    });
+
+    /**
+     * Signals rather than tables, so the number matches the list the badge
+     * leads to: a table asking for both is two things somebody has to do.
+     */
+    it('counts a table asking for both twice', () => {
+      assistance.next([calling('table-1'), calling('table-1', 'requestBill')]);
+
+      expect(service.assistanceCount()).toBe(2);
     });
   });
 

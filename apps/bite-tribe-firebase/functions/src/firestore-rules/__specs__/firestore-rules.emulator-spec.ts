@@ -1744,11 +1744,48 @@ describe('table orders', () => {
     });
 
     /**
-     * `get` and not `list`, exactly as for the sessions. One query would hand a
-     * guest every order at their table, and the next one the restaurant's.
+     * The `list` issue #1104 added, and the constraint that admits it.
+     *
+     * A status screen that survives a reload holds no order ids: they are
+     * generated, so there is nothing to derive them from. The query is
+     * therefore how the guest finds their own orders again - and the `where`
+     * on their uid is not a filter over the answer but the condition the rule
+     * is proved against.
      */
-    it('refuses a guest listing the orders of their visit', async () => {
+    it('lets a guest list the orders that name them', async () => {
+      const snapshot = await assertSucceeds(
+        getDocs(
+          query(orders(asConsumer()), where('guestUserId', '==', CONSUMER)),
+        ),
+      );
+
+      expect(snapshot.docs.map((entry) => entry.id)).toEqual([CONSUMER_ORDER]);
+    });
+
+    /**
+     * The rest of the party's dinner, refused whole rather than filtered.
+     * Firestore admits a query only when its constraints prove every document
+     * it could return satisfies the rule, so a guest who drops the `where`
+     * gets an error and never a shortened list.
+     */
+    it('refuses a guest listing every order of their visit', async () => {
       await assertFails(getDocs(orders(asConsumer())));
+    });
+
+    it('refuses a guest listing the orders of the friend beside them', async () => {
+      await assertFails(
+        getDocs(
+          query(orders(asConsumer()), where('guestUserId', '==', OTHER_GUEST)),
+        ),
+      );
+    });
+
+    it('refuses an unauthenticated reader the same query', async () => {
+      await assertFails(
+        getDocs(
+          query(orders(anonymously()), where('guestUserId', '==', CONSUMER)),
+        ),
+      );
     });
 
     it('refuses an unauthenticated reader entirely', async () => {

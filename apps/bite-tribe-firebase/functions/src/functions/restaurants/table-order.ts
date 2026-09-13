@@ -121,6 +121,16 @@ export interface TableOrder {
   submittedAt: number;
   /** Equal to `submittedAt` on a new order rather than absent. */
   statusChangedAt: number;
+  /**
+   * Why the restaurant cancelled it (GitHub issue #1104).
+   *
+   * Declared here and written by nothing yet. The guest's screen renders it,
+   * which is where the shape was decided; the staff cancellation that fills it
+   * is issue #1105, and it writes through this side. Declaring it with the
+   * reader rather than with the writer is what stops the two from meeting as
+   * two different fields.
+   */
+  cancellationReason?: string;
 }
 
 /**

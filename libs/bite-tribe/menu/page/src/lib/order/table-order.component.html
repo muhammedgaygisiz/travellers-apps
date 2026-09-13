@@ -19,6 +19,8 @@
           <h1>{{ 'table-order-heading' | transloco: placeOf(page) }}</h1>
         </header>
 
+        <ng-container [ngTemplateOutlet]="tableStatus" />
+
         <!--
           The refusal sits above the menu rather than replacing it. A guest told
           their Margherita sold out needs the cart they built and the menu they
@@ -148,12 +150,14 @@
             }}
           </p>
 
-          <!--
-            Where the order has got to is issue #1104. The line says so rather
-            than offering a button that goes nowhere.
-          -->
-          <p class="note">{{ 'table-order-status-soon' | transloco }}</p>
+          <ng-container [ngTemplateOutlet]="tableStatus" />
 
+          <!--
+            Ordering again goes back through the resolution rather than simply
+            reopening the menu, so a kitchen that stopped taking orders while
+            the guest ate their starter is read again before an "add" button is
+            offered.
+          -->
           <ion-button
             expand="block"
             data-testid="table-order-again"
@@ -219,6 +223,118 @@
           </ion-button>
         </section>
       }
+
+      <!--
+        One block, rendered in two states. The guest browsing the menu and the
+        guest who has just sent something are looking at the same table, and a
+        second copy of this markup is how the two start disagreeing about what
+        a cancelled order looks like (GitHub issue #1104).
+      -->
+      <ng-template #tableStatus>
+        <!--
+          Said while the guest is still reading the menu, rather than after they
+          have built a cart and tapped send. The session listener reports the
+          table closing within seconds of a host pressing the button, and the
+          send button below is withdrawn by the same answer.
+        -->
+        @if (closedNoteKey(); as closed) {
+          <section class="closed" data-testid="table-order-closed">
+            <p data-testid="table-order-closed-reason">
+              {{ closed | transloco }}
+            </p>
+          </section>
+        }
+
+        @if (history.hasOrders()) {
+          <section class="orders" data-testid="table-order-history">
+            <h2>{{ 'table-order-your-orders' | transloco }}</h2>
+
+            <!--
+              A listener the SDK detached is a screen that has quietly stopped
+              updating, which for a status screen is worse than an empty one.
+            -->
+            @if (history.isStale()) {
+              <p class="note" data-testid="table-order-stale">
+                {{ 'table-order-status-stale' | transloco }}
+              </p>
+            }
+
+            <ul class="orders-list">
+              @for (order of history.orders(); track order.id) {
+                <li
+                  class="order"
+                  [class.order-cancelled]="order.status === 'cancelled'"
+                  data-testid="table-order-entry"
+                >
+                  <div class="order-head">
+                    <span
+                      class="order-status"
+                      data-testid="table-order-entry-status"
+                    >
+                      {{ statusKey(order) | transloco }}
+                    </span>
+
+                    <span
+                      class="order-total"
+                      data-testid="table-order-entry-total"
+                    >
+                      {{ priceLabelIn(order.total, order.currency) }}
+                    </span>
+                  </div>
+
+                  <ul class="order-lines">
+                    @for (line of order.lines; track $index) {
+                      <li class="order-line">
+                        <span>
+                          {{ line.quantity }} &times; {{ orderLineName(line) }}
+                        </span>
+                        <span>
+                          {{
+                            priceLabelIn(orderLineTotal(line), order.currency)
+                          }}
+                        </span>
+                      </li>
+                    }
+                  </ul>
+
+                  <!--
+                    A cancellation is explained where staff gave a reason and
+                    named as one where they did not. Silence is the one thing
+                    it must never be.
+                  -->
+                  @if (order.status === 'cancelled') {
+                    <p class="note" data-testid="table-order-cancelled">
+                      @if (order.cancellationReason; as reason) {
+                        {{
+                          'table-order-cancelled-reason'
+                            | transloco: { reason: reason }
+                        }}
+                      } @else {
+                        {{ 'table-order-cancelled-no-reason' | transloco }}
+                      }
+                    </p>
+                  }
+                </li>
+              }
+            </ul>
+
+            @if (showsRunningTotal()) {
+              <p class="orders-total" data-testid="table-order-running-total">
+                {{
+                  'table-order-orders-total'
+                    | transloco
+                      : {
+                          total: priceLabelIn(
+                            history.total(),
+                            historyCurrency()
+                          ),
+                        }
+                }}
+              </p>
+            }
+          </section>
+        }
+      </ng-template>
     </main>
   </ion-content>
 

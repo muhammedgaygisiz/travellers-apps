@@ -204,6 +204,10 @@ Issue \#1103 gave it a writer. `submitTableOrder` is the only one, and it revali
 
 The status transitions are declared as data in `table-order.ts`, in both the library and the backend copy, with `src/__specs__/table-order-parity.spec.ts` comparing the statuses, the end set, every row of the matrix, the refusal reasons and the total as text. A row the staff queue of issue \#1105 believes is legal and the backend refuses would otherwise be a button that does nothing.
 
+Issue \#1104 gave the guest a reader. `firestore.rules` admits a guest to `list` the orders of a visit **only when the query names their own uid**, so the phone sends `where('guestUserId', '==', uid)` and a query without it is refused whole rather than quietly shortened - which is what makes "their own orders, not the party's" a rule rather than a habit of one call site (`RD-TS-12`). The screen subscribes to that query and to the guest's own session document beside it, and reads the visit id off the session: an order id is generated, so a phone that reloads holds nothing to derive one from, and the derived session name is the one thing it can always find its way back through.
+
+`TableOrder.cancellationReason` is declared by the same issue and written by none: the guest's screen renders it and the staff cancellation of \#1105 fills it (`RD-TS-13`). An absent one is ordinary rather than a gap - a kitchen mid-rush is not always going to type a sentence, so the screen names the cancellation either way and adds the reason where there is one.
+
 ## Relationships
 
 ```text
@@ -225,7 +229,7 @@ Staff seat a party -> visit opens, pending sessions become active
 |
 Guests browse the menu and submit orders
 |
-Staff accept, prepare, and serve
+Staff accept, prepare, and serve, the guest watching it happen and ordering again
 |
 Guest requests the bill or pays in the app
 |
@@ -276,10 +280,12 @@ ends a visit and `TABLE_STATUS_AFTER_VISIT` as text.
 readers of the published plan. `transitionTableState` and `moveTableVisit` write
 through the Admin SDK, which bypasses rules, so the callables are not the path
 the app takes but the only path there is. The orders subcollection follows the
-same shape, with one addition: a guest may `get` their own order, by the
-`guestUserId` on the stored document, exactly as they read their own session -
-and `list` stays with the readers of the floor plan, because one query would hand
-a guest the rest of the party's dinner.
+same shape, with one addition: a guest may read their own orders, by the
+`guestUserId` on the stored document, exactly as they read their own session.
+Issue \#1103 gave them `get`; issue \#1104 added a `list` conditioned on that same
+field, which Firestore admits only against a query that names the caller - so the
+rest of the party's dinner stays private without a second rule saying so, while
+staff keep an unconditional `list` over the whole table.
 
 ## Current Limitations
 
@@ -287,9 +293,9 @@ a guest the rest of the party's dinner.
 - **Nothing writes `sessionIdleTimeoutMinutes`.** Every restaurant therefore uses the two-hour default, which is the intended default rather than a gap - but a restaurant that wants a shorter one has no way to say so.
 - The model, the storage and the backend exist (issue \#1095). **No app surface uses them yet.** The staff view of issue \#1093 and the actions of issue \#1094 read and write live table state, so seating a table already opens a visit, but nothing shows the visit, its party size or its duration, and nothing calls `moveTableVisit`.
 - The party size is therefore never recorded through the UI. The sheet of issue \#1094 takes an optional count and writes it to the audit entry's `reason`; moving it onto `TableVisit.guestCount`, which now exists to hold it, is left to the surface that consumes visits.
-- **Nothing shows staff an order.** Issue \#1103 writes it and the rules admit every reader of the floor plan, but the business app draws no queue and nothing moves an order past `submitted`. That is issue \#1105, and until it lands a guest can send an order that reaches no screen - which is why table ordering stays off for every restaurant.
+- **Nothing shows staff an order.** Issue \#1103 writes it and the rules admit every reader of the floor plan, but the business app draws no queue and nothing moves an order past `submitted`. That is issue \#1105, and until it lands a guest can send an order that reaches no screen - which is why table ordering stays off for every restaurant. The guest's half of that lifecycle is ready and idle: issue \#1104 renders every status live, so the first thing \#1105 writes will show up on a phone without a further release.
 - **An order sent twice creates two orders.** Idempotency and offline tolerance are issue \#1108. `TableOrder` carries no `idempotencyKey` yet, deliberately: a key the client would have to unlearn is worse than the absence.
-- A guest reads their own **order** through the rules and still has no rule for the **visit** itself, so the visit's running total is not something a guest's phone can subscribe to. It is issue \#1104's to decide whether it needs one.
+- **A guest's phone cannot read the visit, and no longer needs to.** Issue \#1104 decided it (`RD-TS-12`): the running total on the guest's screen is a sum over their own orders, cancelled ones excluded, and the shared bill is settled at the table. What a guest is shown when their party is **moved** is still unowned - the session goes on naming the table they scanned, and nothing tells them the table number on their screen has changed.
 - Rules are deployed by hand. Merging a change to `firestore.rules` changes nothing in production until somebody runs the deploy - see [[Architecture - Firebase]].
 - Several of the business rules above are proposals awaiting a product decision. They are listed in [[Current State - Open Questions]].
 - Payment behaviour is undecided until the ADR from issue \#1109 exists. Whether BiteTribe is ever in the money flow changes the architecture.

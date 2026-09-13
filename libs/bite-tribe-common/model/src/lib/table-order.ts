@@ -195,6 +195,28 @@ export interface TableOrder {
    * coalesce at every call site.
    */
   statusChangedAt: number;
+  /**
+   * Why the restaurant cancelled it, in the words staff used
+   * (GitHub issue #1104).
+   *
+   * Read here and written by issue #1105, which is the one thing in this model
+   * that is the other way round - and deliberately. "Cancellations are
+   * explained, not silent" is a guarantee about a *screen*, so the shape it is
+   * rendered from belongs with the renderer; the alternative is the staff
+   * queue choosing a shape with nothing reading it, which is how a reason ends
+   * up recorded in a field no guest is ever shown.
+   *
+   * Optional, and absent is an ordinary outcome rather than a gap: a kitchen
+   * cancelling a dish mid-rush is not always going to type a sentence, and
+   * every order cancelled before #1105 lands has none. The screen says the
+   * order was cancelled either way and adds the reason where there is one, so
+   * the absence costs the guest a detail rather than the fact.
+   *
+   * Never set on an order that is not `cancelled`. A reason attached to a
+   * served dish would be a second, contradictory account of what happened to
+   * it.
+   */
+  cancellationReason?: string;
 }
 
 /**
@@ -208,6 +230,33 @@ export interface TableOrder {
 export const tableOrderTotal = (
   lines: readonly Pick<OrderLineSnapshot, 'price' | 'quantity'>[],
 ): number => lines.reduce((sum, line) => sum + line.price * line.quantity, 0);
+
+/**
+ * What a guest has run up over several orders, in one currency
+ * (GitHub issue #1104).
+ *
+ * A second function rather than a `reduce` on the screen, for the reason
+ * {@link tableOrderTotal} is one: the running total under a list of orders and
+ * the total on each row of it have to agree, and two sums written at two call
+ * sites are two chances to disagree in front of somebody about to be charged.
+ *
+ * **A cancelled order counts for nothing.** It is the only status that changes
+ * the arithmetic: a dish that will not be cooked will not be billed, and a
+ * total that kept it would tell a guest they owe for the Margherita the kitchen
+ * ran out of. Everything else counts from the moment it is sent - a guest who
+ * has ordered and not yet been served still owes for it, and a total that waited
+ * for `served` would read as zero for the whole first half of a meal.
+ *
+ * It is not the *bill*. The party shares one (`RD-TS-9`), and this sums one
+ * phone's orders because that is what the phone can read (`RD-TS-12`); what the
+ * table owes is settled at the table, and is issue #1073's.
+ */
+export const tableOrdersTotal = (
+  orders: readonly Pick<TableOrder, 'status' | 'total'>[],
+): number =>
+  orders
+    .filter((order) => order.status !== 'cancelled')
+    .reduce((sum, order) => sum + order.total, 0);
 
 /** The largest quantity one line may carry. */
 export const MAX_ORDER_LINE_QUANTITY = 99;

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   WritableSignal,
+  computed,
   provideZonelessChangeDetection,
   signal,
 } from '@angular/core';
@@ -8,8 +9,15 @@ import { provideRouter } from '@angular/router';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
+import { tableOrdersTotal } from 'model';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
-import type { Menu, MenuItem, TableScanContext } from 'model';
+import type {
+  Menu,
+  MenuItem,
+  TableOrder as TableOrderModel,
+  TableScanContext,
+  TableSessionStatus,
+} from 'model';
 import {
   TableCartService,
   TableOrderService,
@@ -76,7 +84,19 @@ const en = {
   'table-order-placed-heading': 'Your order is with the kitchen',
   'table-order-placed-intro': '{{restaurant}} has it for table {{table}}.',
   'table-order-placed-total': 'Total {{total}}',
-  'table-order-status-soon': 'Following your order is on its way.',
+  'table-order-your-orders': 'Your orders',
+  'table-order-status-submitted': 'Sent to the kitchen',
+  'table-order-status-preparing': 'Being made',
+  'table-order-status-served': 'Served',
+  'table-order-status-accepted': 'The kitchen has taken it',
+  'table-order-status-cancelled': 'Cancelled',
+  'table-order-cancelled-reason': 'The restaurant said: {{reason}}',
+  'table-order-cancelled-no-reason': 'The restaurant cancelled this one.',
+  'table-order-orders-total': 'Ordered so far {{total}}',
+  'table-order-status-stale': "We've lost touch with the restaurant.",
+  'table-order-refused-sessionNotActive': 'Your table has been closed.',
+  'table-session-pending-intro':
+    'Ordering opens when staff confirm your table.',
   'table-order-again': 'Order something else',
   'table-order-blocked-title': "You can't order here right now",
   'table-order-blocked-menuCurrencyMissing': 'This menu states no currency.',
@@ -103,6 +123,9 @@ describe(TableOrder.name, () => {
   let cart: TableCartService;
   let load: jest.Mock;
   let submit: jest.Mock;
+  let orders: WritableSignal<TableOrderModel[]>;
+  let sessionStatus: WritableSignal<TableSessionStatus | undefined>;
+  let isStale: WritableSignal<boolean>;
 
   const show = (next: TableOrderView): void => {
     state.set(next);
@@ -135,9 +158,24 @@ describe(TableOrder.name, () => {
     // is faked. `TableCartService` reaches for nothing, so `new` is the whole
     // of its construction.
     cart = new TableCartService();
+    orders = signal<TableOrderModel[]>([]);
+    sessionStatus = signal<TableSessionStatus | undefined>('active');
+    isStale = signal(false);
+
+    // The history is signals all the way down, so the fake is the four the
+    // template reads. What is being checked here is what a guest sees, and the
+    // chain of listeners behind those signals has its own spec.
+    const history = {
+      orders,
+      hasOrders: computed(() => orders().length > 0),
+      total: computed(() => tableOrdersTotal(orders())),
+      status: sessionStatus,
+      isStale,
+    };
 
     const service = {
       cart,
+      history,
       state,
       lastRefusal,
       isBusy: signal(false),
@@ -384,6 +422,180 @@ describe(TableOrder.name, () => {
     show({ kind: 'failed', failure: 'offline' });
 
     expect(text()).toContain("Your phone couldn't get through.");
+  });
+
+  /**
+   * What the guest ordered, where it has got to, and whether they can send
+   * another (GitHub issue #1104).
+   */
+  describe('the orders already sent', () => {
+    const sent = (over: Partial<TableOrderModel> = {}): TableOrderModel =>
+      ({
+        id: 'order-1',
+        status: 'submitted',
+        currency: 'EUR',
+        total: 12,
+        submittedAt: 1_757_664_000_000,
+        lines: [
+          {
+            menuItemId: MARGHERITA.id,
+            name: 'Margherita',
+            price: 12,
+            currency: 'EUR',
+            quantity: 1,
+          },
+        ],
+        ...over,
+      }) as TableOrderModel;
+
+    it('shows nothing at all before the guest has ordered', () => {
+      render();
+      show(ORDERING);
+
+      expect(has('table-order-history')).toBe(false);
+    });
+
+    it('lists an order with its status, its lines and its total', () => {
+      render();
+      orders.set([sent({ status: 'preparing' })]);
+      show(ORDERING);
+
+      expect(text()).toContain('Your orders');
+      expect(text()).toContain('Being made');
+      expect(text()).toContain('1 × Margherita');
+      expect(text()).toContain('12 €');
+    });
+
+    /**
+     * The same list, on the confirmation as well as on the menu. A guest who
+     * has just sent a second round is looking at the same orders.
+     */
+    it('shows the list on the confirmation too', () => {
+      render();
+      orders.set([sent()]);
+
+      show({
+        kind: 'placed',
+        context: CONTEXT,
+        order: { total: 12, currency: 'EUR' } as never,
+      });
+
+      expect(has('table-order-history')).toBe(true);
+      expect(text()).toContain('Sent to the kitchen');
+    });
+
+    it('follows a status change without anything being tapped', () => {
+      render();
+      orders.set([sent()]);
+      show(ORDERING);
+
+      expect(text()).toContain('Sent to the kitchen');
+
+      orders.set([sent({ status: 'served' })]);
+      fixture.detectChanges();
+
+      expect(text()).toContain('Served');
+      expect(text()).not.toContain('Sent to the kitchen');
+    });
+
+    /** Cancellations are explained, not silent. */
+    it('explains a cancellation in the words staff used', () => {
+      render();
+      orders.set([
+        sent({
+          status: 'cancelled',
+          cancellationReason: 'We have run out of mozzarella',
+        }),
+      ]);
+      show(ORDERING);
+
+      expect(text()).toContain('Cancelled');
+      expect(text()).toContain(
+        'The restaurant said: We have run out of mozzarella',
+      );
+    });
+
+    it('still names a cancellation staff gave no reason for', () => {
+      render();
+      orders.set([sent({ status: 'cancelled' })]);
+      show(ORDERING);
+
+      expect(text()).toContain('The restaurant cancelled this one.');
+    });
+
+    /** Its own total already says it, one line higher up. */
+    it('adds no running total under a single order', () => {
+      render();
+      orders.set([sent()]);
+      show(ORDERING);
+
+      expect(has('table-order-running-total')).toBe(false);
+    });
+
+    it('runs a total across several orders, cancelled ones excluded', () => {
+      render();
+      orders.set([
+        sent(),
+        sent({ id: 'order-2', total: 30 }),
+        sent({ id: 'order-3', status: 'cancelled', total: 99 }),
+      ]);
+      show(ORDERING);
+
+      expect(text()).toContain('Ordered so far 42 €');
+    });
+
+    /**
+     * A status screen that has quietly stopped updating is worse than an empty
+     * one: the guest reads an hour-old `submitted` as though it were current.
+     */
+    it('warns when it may be showing something out of date', () => {
+      render();
+      orders.set([sent()]);
+      isStale.set(true);
+      show(ORDERING);
+
+      expect(has('table-order-stale')).toBe(true);
+    });
+  });
+
+  describe('a table that stops taking orders', () => {
+    it('says nothing while the session is active', () => {
+      render();
+      show(ORDERING);
+
+      expect(has('table-order-closed')).toBe(false);
+    });
+
+    it('says the table has been closed, above the menu', () => {
+      render();
+      sessionStatus.set('closed');
+      show(ORDERING);
+
+      expect(text()).toContain('Your table has been closed.');
+      expect(has('table-order-menu')).toBe(true);
+    });
+
+    /** The same sentence on the confirmation, where a guest sits after sending. */
+    it('says it on the confirmation as well as on the menu', () => {
+      render();
+      sessionStatus.set('closed');
+
+      show({
+        kind: 'placed',
+        context: CONTEXT,
+        order: { total: 12, currency: 'EUR' } as never,
+      });
+
+      expect(has('table-order-closed')).toBe(true);
+    });
+
+    it('says ordering opens when staff confirm the table', () => {
+      render();
+      sessionStatus.set('pending');
+      show(ORDERING);
+
+      expect(text()).toContain('Ordering opens when staff confirm your table.');
+    });
   });
 
   it('reports the screen to analytics', () => {

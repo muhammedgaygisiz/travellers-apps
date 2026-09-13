@@ -6,8 +6,11 @@ import {
   TableOrderApiService,
   TableSessionApiService,
 } from 'bite-tribe/api';
-import type { Menu, MenuItem, TableScanContext } from 'model';
+import { AuthService } from 'ta-firestore';
+import type { Menu, MenuItem, TableScanContext, TableSession } from 'model';
+import { BehaviorSubject, EMPTY } from 'rxjs';
 import { TableCartService } from '../table-cart.service';
+import { TableOrderHistoryService } from '../table-order-history.service';
 import {
   TABLE_ORDER_BLOCKED_KEYS,
   TableOrderService,
@@ -59,11 +62,24 @@ const CONTEXT: TableScanContext = {
   ordering: { available: true },
 };
 
+const SESSION: TableSession = {
+  id: '8_table-12_guest-alice',
+  restaurantId: CONTEXT.restaurant.id,
+  tableId: CONTEXT.table.id,
+  guestUserId: 'guest-alice',
+  status: 'active',
+  visitId: 'visit-1',
+  startedAt: 1_757_664_000_000,
+  lastActiveAt: 1_757_664_000_000,
+  isAnonymousGuest: true,
+};
+
 describe(TableOrderService.name, () => {
   let service: TableOrderService;
   let resolveToken: jest.Mock;
   let loadPublicMenu: jest.Mock;
   let submit: jest.Mock;
+  let session$: BehaviorSubject<{ session?: TableSession; live: boolean }>;
 
   const build = (token: string | null = CONTEXT.token): TableOrderService => {
     TestBed.configureTestingModule({
@@ -71,9 +87,25 @@ describe(TableOrderService.name, () => {
         provideZonelessChangeDetection(),
         TableCartService,
         TableOrderService,
-        { provide: TableSessionApiService, useValue: { resolveToken } },
+        TableOrderHistoryService,
+        {
+          provide: TableSessionApiService,
+          useValue: {
+            resolveToken,
+            session$: (): typeof session$ => session$,
+          },
+        },
         { provide: BiteTribeApiService, useValue: { loadPublicMenu } },
-        { provide: TableOrderApiService, useValue: { submit } },
+        {
+          provide: TableOrderApiService,
+          useValue: { submit, orders$: (): typeof EMPTY => EMPTY },
+        },
+        {
+          provide: AuthService,
+          useValue: {
+            getUser: (): { uid: string } => ({ uid: SESSION.guestUserId }),
+          },
+        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -94,6 +126,10 @@ describe(TableOrderService.name, () => {
   };
 
   beforeEach(() => {
+    session$ = new BehaviorSubject<{ session?: TableSession; live: boolean }>({
+      session: SESSION,
+      live: true,
+    });
     resolveToken = jest.fn().mockResolvedValue({ ok: true, ...CONTEXT });
     loadPublicMenu = jest.fn().mockResolvedValue({
       ok: true,
@@ -348,6 +384,74 @@ describe(TableOrderService.name, () => {
 
       expect(service.cart.total()).toBe(12);
       expect(service.cart.toRequestLines('EUR')[0].price).toBe(12);
+    });
+  });
+
+  /**
+   * The live half of the send button (GitHub issue #1104).
+   *
+   * A guest whose table the restaurant closed while they were reading the
+   * dessert list must be stopped by the screen rather than by a refusal after
+   * they tap send. The session listener is what makes that arrive within
+   * seconds, and the guard is on the service rather than on the button because
+   * a state machine enforced only by markup is one a second entry point walks
+   * straight through.
+   */
+  describe('a table that stops taking orders', () => {
+    it('offers the send button while the session is active', async () => {
+      await ordering();
+      service.add({ item: MARGHERITA });
+
+      expect(service.canSubmit()).toBe(true);
+    });
+
+    it('withdraws it the moment the visit closes', async () => {
+      await ordering();
+      service.add({ item: MARGHERITA });
+
+      session$.next({ session: { ...SESSION, status: 'closed' }, live: true });
+
+      expect(service.canSubmit()).toBe(false);
+    });
+
+    it('withdraws it while staff have not seated the table', async () => {
+      await ordering();
+      service.add({ item: MARGHERITA });
+
+      session$.next({
+        session: { ...SESSION, status: 'pending', visitId: undefined },
+        live: true,
+      });
+
+      expect(service.canSubmit()).toBe(false);
+    });
+
+    it('sends nothing even when something calls submit anyway', async () => {
+      await ordering();
+      service.add({ item: MARGHERITA });
+      session$.next({ session: { ...SESSION, status: 'expired' }, live: true });
+
+      await service.submit();
+
+      expect(submit).not.toHaveBeenCalled();
+    });
+
+    /**
+     * A guest whose listener has not delivered yet, or who reached the screen
+     * by a kept link and never scanned, is not somebody to stop with a sentence
+     * invented here: the backend revalidates and refuses with one that is true.
+     */
+    it('lets an unknown session through to the backend', async () => {
+      session$.next({ live: true });
+
+      await ordering();
+      service.add({ item: MARGHERITA });
+
+      expect(service.canSubmit()).toBe(true);
+
+      await service.submit();
+
+      expect(submit).toHaveBeenCalled();
     });
   });
 

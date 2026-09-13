@@ -13,6 +13,7 @@ import {
   isTableOrderStatus,
   isTableOrderSubmitted,
   tableOrderTotal,
+  tableOrdersTotal,
 } from '../../index';
 import type {
   OrderLineSnapshot,
@@ -200,6 +201,74 @@ describe('table orders', () => {
       expect(large.price).toBe(16);
       expect(large.name).toBe('Margherita');
       expect(tableOrderTotal([large])).toBe(32);
+    });
+  });
+
+  describe('the running total across orders', () => {
+    const second: TableOrder = {
+      ...order,
+      id: 'order-4472',
+      lines: [tiramisu],
+      total: 6,
+      submittedAt: submittedAt + 600_000,
+      statusChangedAt: submittedAt + 600_000,
+    };
+
+    it('sums what has been ordered so far', () => {
+      expect(tableOrdersTotal([order, second])).toBe(36);
+    });
+
+    it('is zero before anything has been ordered', () => {
+      expect(tableOrdersTotal([])).toBe(0);
+    });
+
+    /**
+     * The one status that changes the arithmetic. A dish that will not be
+     * cooked will not be billed, and a total that kept it would tell a guest
+     * they owe for the Margherita the kitchen ran out of.
+     */
+    it('leaves out an order the restaurant cancelled', () => {
+      expect(
+        tableOrdersTotal([{ ...order, status: 'cancelled' }, second]),
+      ).toBe(6);
+    });
+
+    /**
+     * Everything else counts from the moment it is sent. A total that waited
+     * for `served` would read as zero for the first half of a meal.
+     */
+    it('counts an order at every status that is not cancelled', () => {
+      const counted = TABLE_ORDER_STATUSES.filter(
+        (status) => status !== 'cancelled',
+      ).map((status) => ({ ...order, status }));
+
+      expect(tableOrdersTotal(counted)).toBe(30 * counted.length);
+    });
+  });
+
+  /**
+   * Declared here and written by issue #1105, which is what makes it worth a
+   * case of its own: the guarantee is that a cancellation is explained rather
+   * than silent, and the screen renders this field to keep it.
+   */
+  describe('a cancellation', () => {
+    it('carries the reason staff gave, where they gave one', () => {
+      const cancelled: TableOrder = {
+        ...order,
+        status: 'cancelled',
+        cancellationReason: 'The kitchen has run out of tiramisu',
+      };
+
+      expect(cancelled.cancellationReason).toBe(
+        'The kitchen has run out of tiramisu',
+      );
+      expect(isTableOrderEnded(cancelled)).toBe(true);
+    });
+
+    it('is a complete order without one', () => {
+      const cancelled: TableOrder = { ...order, status: 'cancelled' };
+
+      expect(cancelled.cancellationReason).toBeUndefined();
     });
   });
 

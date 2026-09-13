@@ -44,6 +44,34 @@
           {{ 'table-session-confirm-action' | transloco }}
         </ion-button>
       </section>
+      }
+
+      <!--
+        Resolved, and this restaurant does not take orders here (issue #1102).
+        Nothing is confirmed and no session is started - the one useful thing on
+        this screen is the way through to the menu.
+      -->
+      @if (menuOnly(); as browsing) {
+      <section data-testid="table-session-menu-only">
+        <h1>
+          {{ 'table-session-menu-only-heading' | transloco:
+          placeOf(browsing.context) }}
+        </h1>
+
+        @if (browsing.ordering.reason === 'orderingPaused') {
+        <p>{{ 'table-session-menu-only-paused' | transloco }}</p>
+        } @else {
+        <p>{{ 'table-session-menu-only-disabled' | transloco }}</p>
+        }
+
+        <ion-button
+          expand="block"
+          data-testid="table-session-browse-menu"
+          [routerLink]="menuPath(browsing.context.restaurant.id)"
+        >
+          {{ 'table-session-browse-menu' | transloco }}
+        </ion-button>
+      </section>
       } @if (joined(); as session) {
       <section data-testid="table-session-joined">
         @if (session.status === 'active') {

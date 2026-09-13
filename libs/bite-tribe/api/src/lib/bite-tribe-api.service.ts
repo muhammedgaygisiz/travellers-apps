@@ -21,7 +21,9 @@ import {
   Restaurant,
   Review,
   SaveToBucketListParams,
+  PublicMenuResult,
   Settings,
+  TableOrderingSettings,
   WeekRange,
   WeeklyBites,
 } from 'model';
@@ -113,6 +115,22 @@ export class BiteTribeApiService {
     return this.restaurantApiService.saveOpeningHoursForRestaurant(
       restaurantId,
       openingHours,
+    );
+  }
+
+  /** A restaurant's menu, read without an account (GitHub issue #1102). */
+  loadPublicMenu(restaurantId: string): Promise<PublicMenuResult | undefined> {
+    return this.menuApiService.loadPublicMenu(restaurantId);
+  }
+
+  /** How this restaurant uses its QR codes (GitHub issue #1102). */
+  saveTableOrderingForRestaurant(
+    restaurantId: string,
+    tableOrdering: TableOrderingSettings,
+  ): Promise<void> {
+    return this.restaurantApiService.saveTableOrderingForRestaurant(
+      restaurantId,
+      tableOrdering,
     );
   }
 

@@ -27,12 +27,10 @@ export const TABLE_SCAN_REFUSAL_REASONS = [
   'unknownToken',
   'restaurantNotFound',
   'restaurantInactive',
-  'tableOrderingDisabled',
   'tableNotFound',
   'tableDisabled',
   'tokenSuperseded',
   'tokenRevoked',
-  'orderingPaused',
   'restaurantClosed',
   'menuMissing',
   'menuUnavailable',
@@ -50,12 +48,10 @@ export const TABLE_SCAN_NEXT_STEPS: Readonly<
   unknownToken: 'askStaff',
   restaurantNotFound: 'askStaff',
   restaurantInactive: 'askStaff',
-  tableOrderingDisabled: 'askStaff',
   tableNotFound: 'askStaff',
   tableDisabled: 'askStaff',
   tokenSuperseded: 'rescanCode',
   tokenRevoked: 'askStaff',
-  orderingPaused: 'tryLater',
   restaurantClosed: 'tryLater',
   menuMissing: 'askStaff',
   menuUnavailable: 'askStaff',
@@ -66,12 +62,38 @@ export interface TableScanReopensAt {
   time: string;
 }
 
+/**
+ * Why a resolved scan still cannot be ordered from (GitHub issue #1102).
+ *
+ * Both were refusal reasons until #1102 moved them here. Neither is a reason to
+ * withhold a menu: the code is valid, the table is real, and the dishes and
+ * prices are what the guest wanted to read.
+ */
+export const TABLE_ORDERING_UNAVAILABLE_REASONS = [
+  'tableOrderingDisabled',
+  'orderingPaused',
+] as const;
+
+export type TableOrderingUnavailableReason =
+  (typeof TABLE_ORDERING_UNAVAILABLE_REASONS)[number];
+
+export type TableOrderingAvailability =
+  | { available: true }
+  | { available: false; reason: 'tableOrderingDisabled' }
+  | {
+      available: false;
+      reason: 'orderingPaused';
+      pausedUntilTimestamp: number;
+    };
+
 export interface TableScanContext {
   token: string;
   restaurant: { id: string; name: string; image?: string };
   room: { id: string; name?: string };
   table: { id: string; label: string; seats: number };
   menu: { id: string };
+  /** Whether ordering is open here, and if not, why (issue #1102). */
+  ordering: TableOrderingAvailability;
 }
 
 export interface TableScanResolved extends TableScanContext {
@@ -82,7 +104,6 @@ export interface TableScanRefused {
   ok: false;
   reason: TableScanRefusalReason;
   nextStep: TableScanNextStep;
-  pausedUntilTimestamp?: number;
   reopensAt?: TableScanReopensAt;
 }
 
@@ -91,7 +112,7 @@ export type TableScanResult = TableScanResolved | TableScanRefused;
 /**
  * A refusal, with its next step filled in from the one table above.
  *
- * A function rather than an object literal at each of the twelve return sites,
+ * A function rather than an object literal at each of the ten return sites,
  * so no branch can answer with a reason and the wrong next step - which is the
  * mistake a reviewer would have to check twelve times to catch.
  */

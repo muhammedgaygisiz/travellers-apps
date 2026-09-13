@@ -162,6 +162,62 @@
           </ion-button>
         </div>
 
+        <!--
+          How this restaurant uses its QR codes (issue #1102). Two modes, not
+          three: the flag is one boolean, and a scan with it off shows the menu
+          either way.
+        -->
+        <div class="ion-margin-top" [formGroup]="tableOrderingForm">
+          <ion-text
+            ><h2>{{ 'table-ordering' | transloco }}</h2></ion-text
+          >
+
+          <ion-item>
+            <ion-toggle
+              formControlName="enabled"
+              data-testid="table-ordering-enabled"
+            >
+              {{ 'table-ordering-enabled' | transloco }}
+            </ion-toggle>
+          </ion-item>
+
+          <ion-text>
+            <p class="note">
+              @if (tableOrderingForm.controls.enabled.value) {
+                {{ 'table-ordering-enabled-hint' | transloco }}
+              } @else {
+                {{ 'table-ordering-menu-only-hint' | transloco }}
+              }
+            </p>
+          </ion-text>
+
+          <!--
+            Required, and it is the restaurant's zone rather than the owner's.
+            The opening hours above are read in it, so a wrong one closes a
+            Jakarta restaurant at four in the afternoon (issue #1100).
+          -->
+          <ion-item>
+            <ion-select
+              formControlName="timeZone"
+              [label]="'table-ordering-time-zone' | transloco"
+              data-testid="table-ordering-time-zone"
+            >
+              @for (zone of timeZones(); track zone) {
+                <ion-select-option [value]="zone">{{ zone }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+
+          <ion-button
+            class="ion-margin-top"
+            data-testid="save-table-ordering"
+            [disabled]="tableOrderingForm.invalid"
+            (click)="submitTableOrdering()"
+          >
+            {{ 'save' | transloco }}
+          </ion-button>
+        </div>
+
         <div class="ion-margin-top">
           <bt-opening-hours
             [openingHours]="

@@ -111,6 +111,18 @@ export interface TableOrderingSettings {
  * the guest gets exactly one sentence, so which one they get has to be decided
  * once here rather than by whichever condition an implementation happened to
  * test first.
+ *
+ * ## A refusal means there is nothing to show (issue #1102)
+ *
+ * The list was twelve and is ten. `tableOrderingDisabled` and `orderingPaused`
+ * left it, because neither is a reason to withhold a menu: the code is valid,
+ * the table is real and the dishes and prices are exactly what the guest wanted
+ * to read. They are now {@link TableOrderingAvailability}, an answer about
+ * *ordering* carried on a scan that resolved.
+ *
+ * `restaurantClosed` stayed. It is a statement about the restaurant rather than
+ * about ordering, and a menu under a "closed" heading reads as an invitation -
+ * with nobody there to correct it, which is the difference from a pause.
  */
 export const TABLE_SCAN_REFUSAL_REASONS = [
   /** No token document. A code that was never ours, or a mistyped URL. */
@@ -124,8 +136,6 @@ export const TABLE_SCAN_REFUSAL_REASONS = [
    * end of an order, and the orders would sit in a queue no account can open.
    */
   'restaurantInactive',
-  /** The restaurant does not offer ordering from the table. */
-  'tableOrderingDisabled',
   /**
    * No table document under the restaurant.
    *
@@ -146,8 +156,6 @@ export const TABLE_SCAN_REFUSAL_REASONS = [
   'tokenSuperseded',
   /** The code was withdrawn. A retired table, or a code that leaked. */
   'tokenRevoked',
-  /** Staff have paused new orders. */
-  'orderingPaused',
   /** The restaurant is outside its opening hours. */
   'restaurantClosed',
   /** The restaurant has no menu document. */
@@ -184,6 +192,53 @@ export interface TableScanReopensAt {
 }
 
 /**
+ * Why a resolved scan still cannot be ordered from (GitHub issue #1102).
+ *
+ * Both members were refusal reasons until #1102. They are not refusals, because
+ * in both cases everything the guest scanned is real and the menu behind it is
+ * worth reading - a restaurant that has never turned table ordering on still
+ * has dishes and prices, and a kitchen that paused for twenty minutes still has
+ * the same menu it will take orders from again.
+ *
+ * Kept as a closed set for the same reason the refusals are: the guest is shown
+ * one sentence for it, and a member with no sentence renders as nothing at all.
+ */
+export const TABLE_ORDERING_UNAVAILABLE_REASONS = [
+  /**
+   * The restaurant does not offer ordering from the table at all.
+   *
+   * The menu-only restaurant of issue #1102: it publishes a QR menu and takes
+   * orders the way it always has, from a person with a notepad.
+   */
+  'tableOrderingDisabled',
+  /** Staff have paused new orders. Temporary, and it says until when. */
+  'orderingPaused',
+] as const;
+
+export type TableOrderingUnavailableReason =
+  (typeof TABLE_ORDERING_UNAVAILABLE_REASONS)[number];
+
+/**
+ * Whether the guest may order from the menu this scan resolved to.
+ *
+ * A discriminated union rather than a boolean and an optional reason, so a
+ * screen that has narrowed to `available: false` has the reason in hand and one
+ * that has not cannot read a stale one.
+ */
+export type TableOrderingAvailability =
+  | { available: true }
+  | {
+      available: false;
+      reason: Extract<TableOrderingUnavailableReason, 'tableOrderingDisabled'>;
+    }
+  | {
+      available: false;
+      reason: Extract<TableOrderingUnavailableReason, 'orderingPaused'>;
+      /** When the pause ends, in epoch milliseconds. */
+      pausedUntilTimestamp: number;
+    };
+
+/**
  * The ordering context a good scan resolves to.
  *
  * Assembled field by field rather than by handing back the documents it was
@@ -218,6 +273,15 @@ export interface TableScanContext {
    * for a document the guest never sees.
    */
   menu: { id: string };
+  /**
+   * Whether ordering is open here, and if not, why (issue #1102).
+   *
+   * Present on every resolved scan, including the ones where ordering is fine,
+   * so a caller reads one field rather than inferring availability from the
+   * absence of something. The menu-only restaurant resolves exactly like an
+   * ordering one and differs here.
+   */
+  ordering: TableOrderingAvailability;
 }
 
 /** A scan that resolved. */
@@ -230,8 +294,6 @@ export interface TableScanRefused {
   ok: false;
   reason: TableScanRefusalReason;
   nextStep: TableScanNextStep;
-  /** On `orderingPaused`, when the pause ends. Epoch milliseconds. */
-  pausedUntilTimestamp?: number;
   /** On `restaurantClosed`, when the restaurant next opens. */
   reopensAt?: TableScanReopensAt;
 }
@@ -257,12 +319,10 @@ export const TABLE_SCAN_NEXT_STEPS: Readonly<
   unknownToken: 'askStaff',
   restaurantNotFound: 'askStaff',
   restaurantInactive: 'askStaff',
-  tableOrderingDisabled: 'askStaff',
   tableNotFound: 'askStaff',
   tableDisabled: 'askStaff',
   tokenSuperseded: 'rescanCode',
   tokenRevoked: 'askStaff',
-  orderingPaused: 'tryLater',
   restaurantClosed: 'tryLater',
   menuMissing: 'askStaff',
   menuUnavailable: 'askStaff',

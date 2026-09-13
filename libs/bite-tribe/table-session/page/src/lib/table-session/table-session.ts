@@ -10,6 +10,8 @@ import { IonButton, IonContent, IonSpinner } from '@ionic/angular/standalone';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
+import { PATH } from 'utils';
+import { RouterLink } from '@angular/router';
 import {
   TableSessionService,
   type TableSessionView,
@@ -49,7 +51,14 @@ import {
  */
 @Component({
   selector: 'lib-table-session',
-  imports: [PageComponent, IonContent, IonButton, IonSpinner, TranslocoPipe],
+  imports: [
+    PageComponent,
+    IonContent,
+    IonButton,
+    IonSpinner,
+    TranslocoPipe,
+    RouterLink,
+  ],
   providers: [TableSessionService],
   templateUrl: 'table-session.html',
   styleUrl: 'table-session.scss',
@@ -76,6 +85,7 @@ export class TableSession implements OnInit {
 
   protected readonly loading = this.whenKind('loading');
   protected readonly confirmation = this.whenKind('confirm');
+  protected readonly menuOnly = this.whenKind('menuOnly');
   protected readonly joined = this.whenKind('joined');
   protected readonly left = this.whenKind('left');
   protected readonly refusal = this.whenKind('refused');
@@ -134,5 +144,17 @@ export class TableSession implements OnInit {
 
   protected retry(): void {
     void this.service.retry();
+  }
+
+  /**
+   * Where the menu lives, for a restaurant that does not take orders here.
+   *
+   * The scan screen links to the public menu rather than rendering one, so a
+   * guest who arrived by scanning and a guest who followed a published link
+   * read the same screen. Two menu renderers is how two menus start disagreeing
+   * about what an unavailable dish looks like.
+   */
+  protected menuPath(restaurantId: string): string[] {
+    return ['/', PATH.PUBLIC_MENU, restaurantId];
   }
 }

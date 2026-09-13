@@ -30,6 +30,16 @@ export const PATH = {
    * sheet is the other half of this constant and has to agree with it.
    */
   TABLE_SCAN: 't',
+  /**
+   * A restaurant's menu, read without an account (GitHub issue #1102).
+   *
+   * One letter for the same reason `TABLE_SCAN` is: a restaurant publishes this
+   * address as a link and sometimes prints it, and every character costs QR
+   * modules. It takes a restaurant rather than a table, because a restaurant
+   * that publishes a menu link may have no floor plan and no printed codes at
+   * all - which is what "menu-only mode requires no floor plan" means.
+   */
+  PUBLIC_MENU: 'm',
   // Public store-review URL. It explains the flow; it does not perform it.
   ACCOUNT_DELETION: 'account-deletion',
   // Authenticated in-app flow that actually deletes the account.

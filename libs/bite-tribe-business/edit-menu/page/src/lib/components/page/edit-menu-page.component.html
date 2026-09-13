@@ -13,6 +13,29 @@
 
     <h1>{{ placeName() }}</h1>
 
+    <!--
+      Asked once, at the top: a menu is priced in one currency, and a control
+      per price would invite two (issue #1102).
+    -->
+    <ion-item>
+      <ion-select
+        [label]="'menu-currency' | transloco"
+        [ngModel]="currency()"
+        (ngModelChange)="currency.set($event); saveCurrency()"
+        data-testid="menu-currency"
+      >
+        <ion-select-option value="">
+          {{ 'menu-currency-none' | transloco }}
+        </ion-select-option>
+        @for (option of currencies(); track option.code) {
+          <ion-select-option [value]="option.code">
+            {{ option.code }} — {{ option.symbol }}
+          </ion-select-option>
+        }
+      </ion-select>
+    </ion-item>
+    <p class="note">{{ 'menu-currency-hint' | transloco }}</p>
+
     <business-menu [menu]="menu()" (menuChange)="saveMenu.emit($event)" />
   </ion-content>
 </ta-page>

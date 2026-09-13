@@ -1,4 +1,8 @@
-import type { TableScanContext, TableScanRefused } from './table-ordering';
+import type {
+  TableOrderingAvailability,
+  TableScanContext,
+  TableScanRefused,
+} from './table-ordering';
 
 /**
  * A guest's attachment to a table, from the scan until they leave it
@@ -314,16 +318,46 @@ export interface TableSessionStarted {
 }
 
 /**
+ * A scan that resolved to a restaurant the guest cannot order from
+ * (GitHub issue #1102).
+ *
+ * A third outcome, because #1102 made "resolved" and "orderable" two different
+ * things. A menu-only restaurant resolves - the code is valid, the table is
+ * real, the menu is worth reading - and takes no orders, so a session there is
+ * one that can never be used.
+ *
+ * The client already knows, because the scan said so. This is what comes back
+ * when it asks anyway, which it will: the kitchen can pause between the scan
+ * and the tap.
+ */
+export interface TableSessionOrderingUnavailable {
+  ok: false;
+  ordering: Extract<TableOrderingAvailability, { available: false }>;
+}
+
+/**
  * What `startTableSession` answers with.
  *
  * The refusal is {@link TableScanRefused} unchanged, and deliberately not a
  * second reason list. Starting a session *is* a scan plus a write, so every way
  * it can fail before the write is a way the scan can fail, and a guest at a
- * table is owed the same twelve sentences whichever call produced them. A
- * parallel set would be twelve more strings to translate that mean the same
- * things.
+ * table is owed the same ten sentences whichever call produced them. A parallel
+ * set would be ten more strings to translate that mean the same things.
  */
-export type StartTableSessionResult = TableSessionStarted | TableScanRefused;
+export type StartTableSessionResult =
+  TableSessionStarted | TableSessionOrderingUnavailable | TableScanRefused;
+
+/**
+ * Whether a start failed because the restaurant takes no orders here.
+ *
+ * A guard rather than an `'ordering' in result`, so the three-way narrowing is
+ * written once: a screen that gets this back has a menu to offer, and one that
+ * gets a refusal has nothing.
+ */
+export const isTableOrderingUnavailable = (
+  result: StartTableSessionResult,
+): result is TableSessionOrderingUnavailable =>
+  !result.ok && 'ordering' in result;
 
 /** Whether a start resolved, as a type guard. */
 export const isTableSessionStarted = (

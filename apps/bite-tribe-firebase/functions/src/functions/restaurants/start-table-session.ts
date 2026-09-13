@@ -7,7 +7,12 @@ import {
   parseScannedToken,
   resolveScan,
 } from './resolve-table-qr-token';
-import { TableScanContext, TableScanResult, refuseScan } from './table-scan';
+import {
+  TableOrderingAvailability,
+  TableScanContext,
+  TableScanResult,
+  refuseScan,
+} from './table-scan';
 import {
   TABLE_SESSIONS_COLLECTION,
   TableSession,
@@ -90,15 +95,37 @@ export interface TableSessionStarted {
 }
 
 /**
+ * A scan that resolved to a restaurant the guest cannot order from
+ * (GitHub issue #1102).
+ *
+ * A third outcome, and it exists because #1102 made "resolved" and "orderable"
+ * two different things. A menu-only restaurant resolves: the code is valid, the
+ * table is real and the menu is worth reading. What it does not do is take
+ * orders, and a session is the thing that exists in order to place them - so
+ * starting one here would hand a guest a session that can never be used, and
+ * put a row on a screen in a restaurant that is not watching one.
+ *
+ * The client already knows, because the scan told it. This is the backend
+ * declining to take the client's word for it, which is the same reason the scan
+ * is resolved a second time here at all.
+ */
+export interface TableSessionOrderingUnavailable {
+  ok: false;
+  ordering: Extract<TableOrderingAvailability, { available: false }>;
+}
+
+/**
  * The refusal is the scan's, unchanged.
  *
  * Starting a session is a scan plus a write, so every way it fails before the
- * write is a way the scan fails, and the guest is owed the same twelve
- * sentences whichever call produced them. A parallel reason list would be
- * twelve more strings meaning the same twelve things.
+ * write is a way the scan fails, and the guest is owed the same ten sentences
+ * whichever call produced them. A parallel reason list would be ten more
+ * strings meaning the same ten things.
  */
 export type StartTableSessionResult =
-  TableSessionStarted | Extract<TableScanResult, { ok: false }>;
+  | TableSessionStarted
+  | TableSessionOrderingUnavailable
+  | Extract<TableScanResult, { ok: false }>;
 
 /**
  * The uid the session belongs to, and whether it is an anonymous one.
@@ -200,12 +227,20 @@ export const startTableSessionHandler = async (
     return refuseScan('restaurantNotFound');
   }
 
+  // Resolved is not orderable since issue #1102. A menu-only restaurant, and a
+  // kitchen that has paused, both resolve - and neither takes an order, so a
+  // session at either is a session that can never be used.
+  if (!result.ordering.available) {
+    return { ok: false, ordering: result.ordering };
+  }
+
   const context: TableScanContext = {
     token: result.token,
     restaurant: result.restaurant,
     room: result.room,
     table: result.table,
     menu: result.menu,
+    ordering: result.ordering,
   };
   const restaurantId = result.restaurant.id;
   const tableId = result.table.id;

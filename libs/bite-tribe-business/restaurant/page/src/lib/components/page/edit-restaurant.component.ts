@@ -17,9 +17,17 @@ import {
   IonSelect,
   IonSelectOption,
   IonText,
+  IonToggle,
   IonTextarea,
 } from '@ionic/angular/standalone';
-import { Address, DaySchedule, Geopoint, Link, Restaurant } from 'model';
+import {
+  Address,
+  DaySchedule,
+  Geopoint,
+  Link,
+  Restaurant,
+  TableOrderingSettings,
+} from 'model';
 import {
   FormArray,
   FormBuilder,
@@ -32,6 +40,10 @@ import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.c
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { OpeningHoursComponent } from 'opening-hours';
+
+/** The zone this browser is in, as a starting point rather than an answer. */
+const detectedTimeZone = (): string =>
+  Intl.DateTimeFormat().resolvedOptions().timeZone ?? '';
 
 @Component({
   selector: 'edit-restaurant',
@@ -46,6 +58,7 @@ import { OpeningHoursComponent } from 'opening-hours';
     IonItem,
     IonSelect,
     IonSelectOption,
+    IonToggle,
     IonInput,
     IonText,
     IonTextarea,
@@ -82,6 +95,7 @@ export class EditRestaurantComponent {
    * first, and the answer is already on the screen.
    */
   readonly manageStaff = output<void>();
+  readonly submitTableOrderingSettings = output<TableOrderingSettings>();
   readonly editFloorPlan = output<void>();
   readonly openTablePlan = output<void>();
 
@@ -103,6 +117,73 @@ export class EditRestaurantComponent {
   readonly positionForm = this.formBuilder.group({
     position: [null as Geopoint | null],
   });
+
+  /**
+   * How this restaurant uses its QR codes (GitHub issue #1102).
+   *
+   * **Two modes and not three.** `Restaurant.tableOrdering.enabled` is one
+   * boolean, and a scan at a restaurant with it off shows the menu either way -
+   * so "no table QR" is not a third setting but the absence of a floor plan,
+   * and offering it here would be inventing a state the data cannot hold.
+   *
+   * This is the only writer of the flag. Until it existed, the field #1100
+   * added was one nothing set, so every scan in production refused with
+   * `tableOrderingDisabled` - the gap recorded in
+   * [[Current State - Open Questions]].
+   */
+  readonly tableOrderingForm = this.formBuilder.group({
+    enabled: [false],
+    timeZone: ['', Validators.required],
+  });
+
+  /**
+   * The zones an owner can choose from, newest-browser list first.
+   *
+   * `Intl.supportedValuesOf` is the real IANA set and is what a chain operator
+   * abroad needs, because the zone is not theirs but their restaurant's. Where
+   * the runtime has no such list, the detected zone is still offered on its own
+   * rather than leaving an empty select.
+   */
+  readonly timeZones = computed(() => {
+    const detected = detectedTimeZone();
+    const supported =
+      typeof Intl.supportedValuesOf === 'function'
+        ? Intl.supportedValuesOf('timeZone')
+        : [];
+
+    return supported.length ? supported : [detected].filter(Boolean);
+  });
+
+  initTableOrdering = effect(() => {
+    const tableOrdering = this.restaurant()?.tableOrdering;
+
+    this.tableOrderingForm.patchValue({
+      enabled: tableOrdering?.enabled ?? false,
+      // An unconfigured restaurant is offered the zone its owner is sitting in,
+      // which is right far more often than it is wrong - and wrong is visible,
+      // because the opening hours below are read in it.
+      timeZone: tableOrdering?.timeZone || detectedTimeZone(),
+    });
+  });
+
+  submitTableOrdering(): void {
+    const { enabled, timeZone } = this.tableOrderingForm.getRawValue();
+
+    if (!timeZone) {
+      return;
+    }
+
+    // The whole settings object, with the staff-side pause carried through.
+    // `updateDocument` replaces a map rather than merging into it, so writing
+    // only what this form owns would clear a pause somebody set during service.
+    const paused = this.restaurant()?.tableOrdering?.pausedUntilTimestamp;
+
+    this.submitTableOrderingSettings.emit({
+      enabled: !!enabled,
+      timeZone,
+      ...(paused ? { pausedUntilTimestamp: paused } : {}),
+    });
+  }
 
   get links(): FormArray {
     return this.socialMediaForm.get('links') as FormArray;

@@ -15,7 +15,11 @@ import {
   TOKEN_ALPHABET,
   TOKEN_LENGTH,
 } from './table-qr-tokens';
-import { TableScanResult, refuseScan } from './table-scan';
+import {
+  TableOrderingAvailability,
+  TableScanResult,
+  refuseScan,
+} from './table-scan';
 
 /**
  * Turns a scanned table QR code into an ordering context, or into a reason it
@@ -39,8 +43,13 @@ import { TableScanResult, refuseScan } from './table-scan';
  * three of them. The guest gets one sentence, so which one has to be a decision
  * rather than an accident of how the conditions were nested. The order is the
  * one issue #1072 states, and it runs outside-in - the restaurant, then the
- * feature, then the table, then the code, then the clock, then the menu - so
- * the answer a guest gets is the largest true thing rather than the smallest.
+ * table, then the code, then the clock, then the menu - so the answer a guest
+ * gets is the largest true thing rather than the smallest.
+ *
+ * Two checks left that sequence in issue #1102. Whether the restaurant offers
+ * table ordering, and whether staff have paused it, no longer refuse anything:
+ * they are read at the end into {@link orderingAvailability} and carried on a
+ * scan that resolved, because neither is a reason to withhold a menu.
  *
  * The token document is read before any of it, because it is what names the
  * restaurant, but its *status* is not judged until its own turn. That is not an
@@ -170,6 +179,42 @@ const hasOrderableItem = (menu: DocumentData): boolean => {
   });
 };
 
+/**
+ * Whether the guest may order here, and if not, why (GitHub issue #1102).
+ *
+ * These two conditions used to refuse the scan outright, and refusing them
+ * meant a guest at a menu-only restaurant being told to ask a member of staff
+ * instead of being shown the menu they had just scanned a code for. Neither is
+ * a statement about whether there is anything to show: the restaurant is real,
+ * the table is real, and the prices are the ones the guest wanted.
+ *
+ * `restaurantClosed` deliberately stayed a refusal. It says something about the
+ * *restaurant* rather than about ordering, and a menu under a "closed" heading
+ * reads as an invitation - with nobody on the premises to correct it, which is
+ * exactly the difference from a pause.
+ *
+ * Disabled is read before paused, because a restaurant that never turned
+ * ordering on has no meaningful pause: the field could hold anything, and
+ * "not taking orders just now" would promise a resumption that is not coming.
+ */
+export const orderingAvailability = (
+  tableOrdering: DocumentData,
+  now: Date,
+): TableOrderingAvailability => {
+  if (tableOrdering['enabled'] !== true) {
+    return { available: false, reason: 'tableOrderingDisabled' };
+  }
+
+  const pausedUntilTimestamp =
+    typeof tableOrdering['pausedUntilTimestamp'] === 'number'
+      ? (tableOrdering['pausedUntilTimestamp'] as number)
+      : 0;
+
+  return pausedUntilTimestamp > now.getTime()
+    ? { available: false, reason: 'orderingPaused', pausedUntilTimestamp }
+    : { available: true };
+};
+
 /** Who is asking, for the rate limiter. Never stored, never returned. */
 const clientOf = (request: CallableRequest<unknown>): string =>
   request.auth?.uid ||
@@ -286,10 +331,6 @@ export const resolveScan = async (
 
   const tableOrdering = (restaurant['tableOrdering'] ?? {}) as DocumentData;
 
-  if (tableOrdering['enabled'] !== true) {
-    return { result: refuseScan('tableOrderingDisabled') };
-  }
-
   if (!tableId) {
     return { result: refuseScan('tableNotFound') };
   }
@@ -326,15 +367,6 @@ export const resolveScan = async (
     };
   }
 
-  const pausedUntilTimestamp =
-    typeof tableOrdering['pausedUntilTimestamp'] === 'number'
-      ? (tableOrdering['pausedUntilTimestamp'] as number)
-      : 0;
-
-  if (pausedUntilTimestamp > now.getTime()) {
-    return { result: refuseScan('orderingPaused', { pausedUntilTimestamp }) };
-  }
-
   const opening = evaluateOpeningHours(
     restaurant['openingHours'],
     tableOrdering['timeZone'],
@@ -368,6 +400,7 @@ export const resolveScan = async (
 
   const roomName = getString(room?.data(), 'name');
   const image = getString(restaurant, 'image');
+  const ordering = orderingAvailability(tableOrdering, now);
 
   // Assembled field by field. The restaurant document carries `ownerUserId`
   // and the table document carries the geometry of a floor plan, and a guest
@@ -390,6 +423,7 @@ export const resolveScan = async (
           typeof table['seats'] === 'number' ? (table['seats'] as number) : 0,
       },
       menu: { id: menuId },
+      ordering,
     },
     restaurant,
   };

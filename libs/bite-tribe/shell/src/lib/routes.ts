@@ -257,6 +257,20 @@ const APP_ROUTES: Routes = [
       import('bite-tribe/table-session').then((m) => m.TableSession),
     title: 'Table',
   },
+  /**
+   * A restaurant's menu, read without an account (GitHub issue #1102).
+   *
+   * **No auth guard**, for the reason issues #370 and #371 state outright: the
+   * guest is reading a menu on a phone, with no download and no sign-up. Two
+   * ways in reach it - a scanned table code at a restaurant that takes no
+   * orders, and a link the restaurant published - and a restaurant that
+   * publishes the second may have no floor plan and no printed codes at all.
+   */
+  {
+    path: `${PATH.PUBLIC_MENU}/:restaurantId`,
+    loadComponent: () => import('bite-tribe/menu').then((m) => m.PublicMenu),
+    title: 'Menu',
+  },
   {
     path: PATH.SUPPORT,
     loadComponent: () => import('bite-tribe/support').then((m) => m.Support),

@@ -219,7 +219,7 @@ precondition of finding out whether the restaurant even takes orders. App Check
 is enforced on it like every other endpoint, it writes nothing, and it assembles
 its answer field by field rather than handing back the documents it read.
 
-`startTableSession` (issue \#1101) runs the same twelve checks again before it
+`startTableSession` (issue \#1101) runs the same checks again before it
 writes, through the same `resolveScan` rather than a copy of it. That is not
 belt and braces: the client holds the earlier resolution for as long as the
 guest takes to read the confirmation screen, and three of the checks move inside
@@ -227,6 +227,17 @@ a service - the kitchen pauses, the clock passes closing time, the owner turns
 the feature off. It requires a session where the scan does not, and an anonymous
 one is enough; what the door opens onto is one document named after the caller's
 own uid. See [[Implementation - Firebase Functions]].
+
+**`/menus` stayed shut, and that is the decision rather than an omission**
+(issue \#1102, `RD-TS-7`). A public menu page needs the restaurant's name as
+well as its dishes, and `/restaurants/{id}` carries `ownerUserId`,
+`claimStatus` and the whole `tableOrdering` configuration - so opening a read
+rule wide enough to render the page would publish operations data with it.
+`loadPublicMenu` assembles both halves field by field instead, which is what
+keeps "the public path exposes the menu only" true as those documents grow. It
+is `public`, App-Check enforced, writes nothing, and refuses on four grounds
+that are all about there being nothing to read - never about ordering, because
+a restaurant that takes no orders is the case it exists for.
 
 ### Testing And Deploying The Rules
 

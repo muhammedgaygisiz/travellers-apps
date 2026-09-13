@@ -135,6 +135,14 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // nothing, and it assembles its answer field by field rather than handing
   // back the documents it read.
   resolveTableQrToken: 'public',
+
+  // A restaurant's menu, read without an account (issue #1102). `public` for
+  // the reason issues #370 and #371 state outright: the guest is reading a menu
+  // on a phone, with no download and no sign-up. It writes nothing, and it
+  // assembles both the restaurant and the menu field by field rather than
+  // handing back the documents it read - the restaurant document carries
+  // ownership and ordering configuration a reader is not entitled to.
+  loadPublicMenu: 'public',
 };
 
 const FUNCTIONS_ROOT = join(__dirname, '..', 'functions');

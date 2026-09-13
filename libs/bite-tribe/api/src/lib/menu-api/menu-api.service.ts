@@ -1,7 +1,8 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { EMPTY } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import type { Menu } from 'model';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
+import type { LoadPublicMenuRequest, Menu, PublicMenuResult } from 'model';
 import { getMenuById } from './utils/get-menu-by-id';
 
 export const MENU_COLLECTION = 'menus';
@@ -49,5 +50,35 @@ export class MenuApiService {
         updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
     });
+  }
+
+  /**
+   * A restaurant's menu, read without an account (GitHub issue #1102).
+   *
+   * A callable rather than a Firestore read, because a public menu page needs
+   * the restaurant's name too and `/restaurants/{id}` carries ownership and
+   * ordering configuration a guest is not entitled to. The backend assembles
+   * both halves field by field.
+   *
+   * A refusal comes back as a resolved value, like a refused scan: a restaurant
+   * that has not written a menu is not an error, and the reader is owed a
+   * sentence rather than an apology.
+   */
+  async loadPublicMenu(
+    restaurantId: string,
+  ): Promise<PublicMenuResult | undefined> {
+    try {
+      const result = await FirebaseFunctions.callByName<
+        LoadPublicMenuRequest,
+        PublicMenuResult
+      >({ name: 'loadPublicMenu', data: { restaurantId } });
+
+      return result.data;
+    } catch {
+      // The transport failed rather than the menu being unreadable, and the
+      // two get different sentences. `undefined` is the caller's signal to say
+      // so rather than to blame the restaurant.
+      return undefined;
+    }
   }
 }

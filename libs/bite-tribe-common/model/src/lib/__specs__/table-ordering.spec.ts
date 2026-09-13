@@ -3,6 +3,7 @@ import {
   TABLE_SCAN_REFUSAL_REASONS,
   isTableScanRefusalReason,
   isTableScanResolved,
+  TABLE_ORDERING_UNAVAILABLE_REASONS,
 } from '../../index';
 import type {
   TableOrderingSettings,
@@ -32,6 +33,7 @@ describe('table ordering', () => {
     room: { id: 'room-1', name: 'Main dining room' },
     table: { id: 'table-12', label: '12', seats: 4 },
     menu: { id: 'menu-1' },
+    ordering: { available: true },
   };
 
   const refused: TableScanRefused = {
@@ -58,8 +60,12 @@ describe('table ordering', () => {
     });
 
     /**
-     * The two refusals that pass on their own. Everything else needs a person,
+     * The one refusal that passes on its own. Everything else needs a person,
      * because nothing the guest does with their phone changes it.
+     *
+     * It was two until issue #1102 moved `orderingPaused` out of this list: a
+     * paused kitchen is a reason not to order and never a reason to withhold
+     * the menu, so it is an {@link TableOrderingAvailability} now.
      */
     it('tells a guest to wait only where waiting is the answer', () => {
       const waits = Object.entries(TABLE_SCAN_NEXT_STEPS)
@@ -67,7 +73,20 @@ describe('table ordering', () => {
         .map(([reason]) => reason)
         .sort();
 
-      expect(waits).toEqual(['orderingPaused', 'restaurantClosed']);
+      expect(waits).toEqual(['restaurantClosed']);
+    });
+
+    /**
+     * The line issue #1102 drew, as an assertion rather than as prose. A
+     * refusal means there is nothing to show the guest; being unable to *order*
+     * is a different answer, carried on a scan that resolved.
+     */
+    it('keeps the ordering answers out of the refusals', () => {
+      for (const reason of TABLE_ORDERING_UNAVAILABLE_REASONS) {
+        expect(isTableScanRefusalReason(reason)).toBe(false);
+      }
+
+      expect([...TABLE_SCAN_REFUSAL_REASONS]).toHaveLength(10);
     });
 
     it('names no reason twice', () => {
@@ -94,6 +113,36 @@ describe('table ordering', () => {
       }
     });
 
+    /**
+     * A menu-only restaurant resolves exactly like an ordering one and differs
+     * in one field, which is the whole point of the shape: the screen that
+     * renders a menu does not have to know which kind of restaurant it is.
+     */
+    it('resolves a menu-only restaurant with ordering unavailable', () => {
+      const menuOnly: TableScanResolved = {
+        ...resolved,
+        ordering: { available: false, reason: 'tableOrderingDisabled' },
+      };
+
+      expect(isTableScanResolved(menuOnly)).toBe(true);
+      expect(menuOnly.menu.id).toBe('menu-1');
+    });
+
+    it('carries the end of a pause with the reason that needs it', () => {
+      const paused: TableScanResolved = {
+        ...resolved,
+        ordering: {
+          available: false,
+          reason: 'orderingPaused',
+          pausedUntilTimestamp: 1789030800000,
+        },
+      };
+
+      if (!paused.ordering.available) {
+        expect(paused.ordering.reason).toBe('orderingPaused');
+      }
+    });
+
     it('narrows a refusal to its reason', () => {
       const result: TableScanResult = refused;
 
@@ -111,10 +160,11 @@ describe('table ordering', () => {
      * is assembled field by field, so a field added to the restaurant document
      * tomorrow cannot reach a guest by being spread into it.
      */
-    it('carries only the four contexts a scan establishes', () => {
+    it('carries only the contexts a scan establishes, and its verdict', () => {
       expect(Object.keys(resolved).sort()).toEqual([
         'menu',
         'ok',
+        'ordering',
         'restaurant',
         'room',
         'table',

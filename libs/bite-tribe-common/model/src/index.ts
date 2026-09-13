@@ -61,6 +61,12 @@ export * from './lib/table-visit';
  */
 export * from './lib/table-ordering';
 /**
+ * A value export rather than `export type *`: the refusal reasons and the two
+ * predicates over a menu's content are data the backend gates on and a public
+ * menu screen renders (issue #1102).
+ */
+export * from './lib/public-menu';
+/**
  * A value export for the same reason: the session statuses, the id derivation
  * and the expiry predicate are run by the backend, by the scan screen and by
  * the staff view that draws a pending list, and expiry in particular has to be

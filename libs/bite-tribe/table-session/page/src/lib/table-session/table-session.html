@@ -92,11 +92,21 @@
         }
 
         <!--
-          Browsing the menu is issue #1102 and ordering is issue #1103. The line
-          says so rather than offering a button that goes nowhere, which is the
-          one thing worse than not offering it.
+          Ordering is open only once staff have the table seated (issue #1103).
+          A `pending` guest is told what they are waiting for rather than being
+          handed a button that leads to a screen which would refuse them.
         -->
+        @if (session.status === 'active') {
+        <ion-button
+          expand="block"
+          data-testid="table-session-order"
+          [routerLink]="orderPath()"
+        >
+          {{ 'table-session-order' | transloco }}
+        </ion-button>
+        } @else {
         <p class="note">{{ 'table-session-menu-soon' | transloco }}</p>
+        }
 
         <ion-button
           expand="block"

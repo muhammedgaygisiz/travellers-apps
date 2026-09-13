@@ -57,6 +57,7 @@ export { resolveTableQrToken } from './functions/restaurants/resolve-table-qr-to
 export { loadPublicMenu } from './functions/menus/load-public-menu';
 export { startTableSession } from './functions/restaurants/start-table-session';
 export { leaveTableSession } from './functions/restaurants/leave-table-session';
+export { submitTableOrder } from './functions/restaurants/submit-table-order';
 export { transitionTableState } from './functions/restaurants/transition-table-state';
 export { moveTableVisit } from './functions/restaurants/move-table-visit';
 export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-create';

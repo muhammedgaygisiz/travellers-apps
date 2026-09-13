@@ -12,6 +12,20 @@ import type { MenuItem } from 'model';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { currencyCodes } from 'utils';
 
+/**
+ * A dish a guest picked, with the size where they picked one
+ * (GitHub issue #1103).
+ *
+ * Structural rather than a class, so the cart of
+ * `bite-tribe/table-order-data-access` takes it without this library and that
+ * one depending on each other - which the Nx boundary rules would refuse in one
+ * direction and which nothing needs in the other.
+ */
+export interface MenuItemSelection {
+  item: MenuItem;
+  variant?: MenuItem;
+}
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'menu-item',
@@ -91,7 +105,43 @@ export class MenuItemComponent {
     return symbol ? `${price} ${symbol}` : `${price}`;
   });
 
+  /**
+   * Whether to offer adding this dish to a table cart (GitHub issue #1103).
+   *
+   * False everywhere but the ordering screen, so the authenticated menu and the
+   * public one are unchanged: a reader who is not at a table has nothing to add
+   * a dish to, and a button that opens a cart nobody can send is worse than no
+   * button.
+   *
+   * Deliberately independent of {@link canCreateBite}. The ordering screen
+   * offers one and not the other - the guest may have no account - and a single
+   * "is this interactive" flag would have made those two decisions one.
+   */
+  canAddToCart = input(false, { transform: booleanAttribute });
+
   createBiteClick = output<MenuItem>();
+
+  /**
+   * The dish, and the variant where the row is one.
+   *
+   * Both, rather than the row's own item, because a cart line is a dish *and* a
+   * size: "large Margherita" is one thing to order and two things on the menu,
+   * and a row that emitted only itself would make the cart guess which dish the
+   * large belongs to.
+   */
+  addToCartClick = output<MenuItemSelection>();
+
+  onAddToCartClick(itemData: MenuItem | undefined): void {
+    const parent = this.parentItem();
+
+    if (!itemData || this.isUnavailable(itemData)) {
+      return;
+    }
+
+    this.addToCartClick.emit(
+      parent ? { item: parent, variant: itemData } : { item: itemData },
+    );
+  }
 
   onCreateBiteClick(itemData: MenuItem | undefined): void {
     if (itemData && !this.isUnavailable(itemData)) {

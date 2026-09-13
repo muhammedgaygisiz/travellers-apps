@@ -178,19 +178,31 @@ hand them the other people at their table. Staff list them through the same
 
 An Order belongs to a visit, not to a table.
 
-| Field            | Description                                                 |
-| ---------------- | ----------------------------------------------------------- |
-| `id`             | Unique order identifier                                     |
-| `status`         | `submitted`, `accepted`, `preparing`, `served`, `cancelled` |
-| `items`          | Order lines                                                 |
-| `submittedAt`    | Submission timestamp                                        |
-| `idempotencyKey` | Prevents duplicate submission on a flaky network            |
+| Field             | Description                                                                   |
+| ----------------- | ----------------------------------------------------------------------------- |
+| `id`              | Unique order identifier, equal to the document id                             |
+| `restaurantId`    | Repeated from the path so a query can filter it                               |
+| `visitId`         | The visit this order belongs to, which is also the parent document            |
+| `tableId`         | Where the party was sitting when they sent it. A record, not an address       |
+| `sessionId`       | The session that placed it                                                    |
+| `guestUserId`     | The phone that placed it, anonymous or not (`RD-TS-9`)                        |
+| `status`          | `submitted`, `accepted`, `preparing`, `served`, `cancelled`                   |
+| `lines`           | Order lines, as `OrderLineSnapshot`                                           |
+| `currency`        | ISO 4217, read off the menu and equal on every line                           |
+| `total`           | `tableOrderTotal(lines)` at the moment of writing                             |
+| `submittedAt`     | Submission timestamp, in epoch milliseconds                                   |
+| `statusChangedAt` | When `status` last changed. Equal to `submittedAt` on a new order             |
+| `idempotencyKey`  | Prevents duplicate submission on a flaky network. **Not written yet** - #1108 |
 
 An order line snapshots the menu item at the moment of submission: item id, name at time of order, price at time of order, currency, variant, quantity, and notes. The snapshot is immutable once submitted, so the price the guest saw is the price they are charged, even if the menu changes mid-session.
 
 That shape exists. Issue \#1099 added `OrderLineSnapshot` to `libs/bite-tribe-common/model/src/lib/order-line.ts`, with every field `readonly`, and gave `MenuItem`, `Category` and every variant the `id` it references. `menuItemId` names the dish rather than the variant - "large Margherita" and "small Margherita" are one thing on the menu - and `variantId` says which size, so a line renders as two fields rather than one string a reader has to take apart.
 
-The snapshot is what makes a line survive its dish. `findMenuItemById` answers `undefined` for an item that has since been deleted, which is an ordinary outcome rather than an error: the link goes and the record stays, so a receipt from before the deletion reads exactly as it did. Nothing writes one yet - the order collection and the submission callable are issue \#1103.
+The snapshot is what makes a line survive its dish. `findMenuItemById` answers `undefined` for an item that has since been deleted, which is an ordinary outcome rather than an error: the link goes and the record stays, so a receipt from before the deletion reads exactly as it did.
+
+Issue \#1103 gave it a writer. `submitTableOrder` is the only one, and it revalidates before it writes anything: the session must be `active` and not idle, the visit must still be open and must be the one the table's state points at, the restaurant must still be taking orders, and every line must name a dish that is still on the menu, still being served, and still at the price the guest's phone displayed. A difference on any of those refuses the whole order and names the item (`RD-TS-10`). The order and the table's move to `ordering` land in one commit (`RD-TS-11`), and `firestore.rules` refuses every client write to the collection - so the status lifecycle above is a restaurant's to move and never a guest's.
+
+The status transitions are declared as data in `table-order.ts`, in both the library and the backend copy, with `src/__specs__/table-order-parity.spec.ts` comparing the statuses, the end set, every row of the matrix, the refusal reasons and the total as text. A row the staff queue of issue \#1105 believes is legal and the backend refuses would otherwise be a button that does nothing.
 
 ## Relationships
 
@@ -242,15 +254,13 @@ Guest creates a Bite from a dish they ordered
 
 ## Technical Implementation
 
-Firestore layout. The first line exists; the second is issue \#1072.
+Firestore layout. All three exist.
 
 ```text
 /restaurants/{restaurantId}/visits/{visitId}
 /restaurants/{restaurantId}/tableSessions/{sessionId}
 /restaurants/{restaurantId}/visits/{visitId}/orders/{orderId}
 ```
-
-The first two lines exist; the third is still issue \#1072's.
 
 Under the restaurant and not under the table, which is the whole of how a visit
 survives its table being deleted from the floor plan: a subcollection of the
@@ -265,7 +275,11 @@ ends a visit and `TABLE_STATUS_AFTER_VISIT` as text.
 `firestore.rules` refuses every client write to `visits` and admits exactly the
 readers of the published plan. `transitionTableState` and `moveTableVisit` write
 through the Admin SDK, which bypasses rules, so the callables are not the path
-the app takes but the only path there is.
+the app takes but the only path there is. The orders subcollection follows the
+same shape, with one addition: a guest may `get` their own order, by the
+`guestUserId` on the stored document, exactly as they read their own session -
+and `list` stays with the readers of the floor plan, because one query would hand
+a guest the rest of the party's dinner.
 
 ## Current Limitations
 
@@ -273,8 +287,9 @@ the app takes but the only path there is.
 - **Nothing writes `sessionIdleTimeoutMinutes`.** Every restaurant therefore uses the two-hour default, which is the intended default rather than a gap - but a restaurant that wants a shorter one has no way to say so.
 - The model, the storage and the backend exist (issue \#1095). **No app surface uses them yet.** The staff view of issue \#1093 and the actions of issue \#1094 read and write live table state, so seating a table already opens a visit, but nothing shows the visit, its party size or its duration, and nothing calls `moveTableVisit`.
 - The party size is therefore never recorded through the UI. The sheet of issue \#1094 takes an optional count and writes it to the audit entry's `reason`; moving it onto `TableVisit.guestCount`, which now exists to hold it, is left to the surface that consumes visits.
-- Orders do not exist. `/restaurants/{restaurantId}/visits/{visitId}/orders` is issue \#1072, and until it does, "the party keeps its orders when it moves" is a property of the identity rather than something with data behind it.
-- `firestore.rules` admits only the readers of the published plan. A guest reading their own visit needs the scanned session of issue \#1072 and has no rule yet.
+- **Nothing shows staff an order.** Issue \#1103 writes it and the rules admit every reader of the floor plan, but the business app draws no queue and nothing moves an order past `submitted`. That is issue \#1105, and until it lands a guest can send an order that reaches no screen - which is why table ordering stays off for every restaurant.
+- **An order sent twice creates two orders.** Idempotency and offline tolerance are issue \#1108. `TableOrder` carries no `idempotencyKey` yet, deliberately: a key the client would have to unlearn is worse than the absence.
+- A guest reads their own **order** through the rules and still has no rule for the **visit** itself, so the visit's running total is not something a guest's phone can subscribe to. It is issue \#1104's to decide whether it needs one.
 - Rules are deployed by hand. Merging a change to `firestore.rules` changes nothing in production until somebody runs the deploy - see [[Architecture - Firebase]].
 - Several of the business rules above are proposals awaiting a product decision. They are listed in [[Current State - Open Questions]].
 - Payment behaviour is undecided until the ADR from issue \#1109 exists. Whether BiteTribe is ever in the money flow changes the architecture.

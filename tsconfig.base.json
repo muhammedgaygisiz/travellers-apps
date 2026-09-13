@@ -210,6 +210,9 @@
       "bite-tribe/table-session": [
         "libs/bite-tribe/table-session/page/src/index.ts"
       ],
+      "bite-tribe/table-order-data-access": [
+        "libs/bite-tribe/table-order/data-access/src/index.ts"
+      ],
       "bite-tribe/table-session-data-access": [
         "libs/bite-tribe/table-session/data-access/src/index.ts"
       ],

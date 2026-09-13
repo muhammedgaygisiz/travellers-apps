@@ -123,6 +123,14 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   startTableSession: 'authenticated',
   leaveTableSession: 'authenticated',
 
+  // A guest sending the order they built to the kitchen (issue #1103). The
+  // same door and the same reason: the session it writes against is named
+  // after the caller's own uid, the visit comes off that session, the table
+  // comes off that visit, and every price comes off the restaurant's own menu.
+  // There is nothing in the request a caller could choose that would reach
+  // another party's dinner.
+  submitTableOrder: 'authenticated',
+
   // The redirect target of a shared Bite link. It is opened by whoever was
   // sent the link, which is the point of sharing one.
   handleSharedLinkToBite: 'public',

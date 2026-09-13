@@ -95,6 +95,8 @@ const STORED_VISIT = 'stored-visit';
  */
 const OTHER_GUEST = 'other-guest-uid';
 const CONSUMER_SESSION = `${OWNED_TABLE.length}_${OWNED_TABLE}_${CONSUMER}`;
+const CONSUMER_ORDER = 'consumer-order';
+const OTHER_GUEST_ORDER = 'other-guest-order';
 const OTHER_GUEST_SESSION = `${OWNED_TABLE.length}_${OWNED_TABLE}_${OTHER_GUEST}`;
 
 /** The version the owned room is stored at, so a stale save has one to miss. */
@@ -419,6 +421,76 @@ beforeEach(async () => {
         startedAt: 1789030800000,
         lastActiveAt: 1789030800000,
         isAnonymousGuest: true,
+      },
+    );
+
+    // What those two guests sent to the kitchen, written only by
+    // `submitTableOrder` through the Admin SDK (issue #1103). Under the visit
+    // and not the table, so a party walked to another table keeps them.
+    await setDoc(
+      doc(
+        db,
+        'restaurants',
+        OWNED_RESTAURANT,
+        'visits',
+        STORED_VISIT,
+        'orders',
+        CONSUMER_ORDER,
+      ),
+      {
+        id: CONSUMER_ORDER,
+        restaurantId: OWNED_RESTAURANT,
+        visitId: STORED_VISIT,
+        tableId: OWNED_TABLE,
+        sessionId: CONSUMER_SESSION,
+        guestUserId: CONSUMER,
+        status: 'submitted',
+        lines: [
+          {
+            menuItemId: 'item-margherita',
+            name: 'Margherita',
+            price: 12,
+            currency: 'EUR',
+            quantity: 1,
+          },
+        ],
+        currency: 'EUR',
+        total: 12,
+        submittedAt: 1789030900000,
+        statusChangedAt: 1789030900000,
+      },
+    );
+    await setDoc(
+      doc(
+        db,
+        'restaurants',
+        OWNED_RESTAURANT,
+        'visits',
+        STORED_VISIT,
+        'orders',
+        OTHER_GUEST_ORDER,
+      ),
+      {
+        id: OTHER_GUEST_ORDER,
+        restaurantId: OWNED_RESTAURANT,
+        visitId: STORED_VISIT,
+        tableId: OWNED_TABLE,
+        sessionId: OTHER_GUEST_SESSION,
+        guestUserId: OTHER_GUEST,
+        status: 'submitted',
+        lines: [
+          {
+            menuItemId: 'item-tiramisu',
+            name: 'Tiramisu',
+            price: 6,
+            currency: 'EUR',
+            quantity: 2,
+          },
+        ],
+        currency: 'EUR',
+        total: 12,
+        submittedAt: 1789030900000,
+        statusChangedAt: 1789030900000,
       },
     );
 
@@ -1626,6 +1698,143 @@ describe('table sessions', () => {
         addDoc(sessions(asOperator(), OWNED_RESTAURANT), forged),
       );
       await assertFails(deleteDoc(sessionDoc(asOwner(), CONSUMER_SESSION)));
+    });
+  });
+});
+
+describe('table orders', () => {
+  const orders = (db: Firestore): CollectionReference =>
+    collection(
+      db,
+      'restaurants',
+      OWNED_RESTAURANT,
+      'visits',
+      STORED_VISIT,
+      'orders',
+    );
+
+  const orderDoc = (db: Firestore, orderId: string): DocumentReference =>
+    doc(orders(db), orderId);
+
+  describe('the guest reads their own', () => {
+    /**
+     * The order id comes back from the callable that wrote it, so a guest
+     * watching their dinner needs no query at all - which is what lets the
+     * clause be `get` alone.
+     */
+    it('lets a guest read the order they placed', async () => {
+      const snapshot = await assertSucceeds(
+        getDoc(orderDoc(asConsumer(), CONSUMER_ORDER)),
+      );
+
+      expect(snapshot.data()).toMatchObject({
+        guestUserId: CONSUMER,
+        status: 'submitted',
+        total: 12,
+      });
+    });
+
+    /**
+     * The uid is read off the stored document, so the friend at the same table
+     * fails the clause even though they are in the same visit and the document
+     * name is one a guest could guess.
+     */
+    it('refuses a guest the order of the friend beside them', async () => {
+      await assertFails(getDoc(orderDoc(asConsumer(), OTHER_GUEST_ORDER)));
+    });
+
+    /**
+     * `get` and not `list`, exactly as for the sessions. One query would hand a
+     * guest every order at their table, and the next one the restaurant's.
+     */
+    it('refuses a guest listing the orders of their visit', async () => {
+      await assertFails(getDocs(orders(asConsumer())));
+    });
+
+    it('refuses an unauthenticated reader entirely', async () => {
+      await assertFails(getDoc(orderDoc(anonymously(), CONSUMER_ORDER)));
+    });
+  });
+
+  describe('staff read them', () => {
+    it('lets staff, the owner and an operator list them', async () => {
+      await assertSucceeds(getDocs(orders(asStaff())));
+      await assertSucceeds(getDocs(orders(asOwner())));
+      await assertSucceeds(getDocs(orders(asOperator())));
+    });
+
+    it('refuses a business account that does not hold this restaurant', async () => {
+      await assertFails(getDocs(orders(asOtherBusiness())));
+    });
+  });
+
+  /**
+   * **The half that matters.** A client able to write here could name its own
+   * prices, which is the one thing the whole revalidation in `submitTableOrder`
+   * exists to prevent - and, one field over, mark somebody else's dinner
+   * served.
+   */
+  describe('writes', () => {
+    const forged = {
+      id: 'forged-order',
+      restaurantId: OWNED_RESTAURANT,
+      visitId: STORED_VISIT,
+      tableId: OWNED_TABLE,
+      sessionId: CONSUMER_SESSION,
+      guestUserId: CONSUMER,
+      status: 'submitted',
+      lines: [
+        {
+          menuItemId: 'item-margherita',
+          name: 'Margherita',
+          price: 0,
+          currency: 'EUR',
+          quantity: 1,
+        },
+      ],
+      currency: 'EUR',
+      total: 0,
+      submittedAt: 1789030900000,
+      statusChangedAt: 1789030900000,
+    };
+
+    it('refuses a guest placing an order by writing the document', async () => {
+      await assertFails(addDoc(orders(asConsumer()), forged));
+      await assertFails(setDoc(orderDoc(asConsumer(), 'forged-order'), forged));
+    });
+
+    /**
+     * The one a rule that only checked ownership would let through: the guest
+     * owns this document, and the price on it is the whole point of the
+     * backend checking prices at all.
+     */
+    it('refuses a guest repricing the order they placed', async () => {
+      await assertFails(
+        updateDoc(orderDoc(asConsumer(), CONSUMER_ORDER), { total: 0 }),
+      );
+    });
+
+    /**
+     * The status lifecycle is a restaurant's decision about its own kitchen,
+     * made through the staff callable of issue #1105. A guest able to write it
+     * could mark their own dinner served.
+     */
+    it('refuses a guest moving their own order along the lifecycle', async () => {
+      await assertFails(
+        updateDoc(orderDoc(asConsumer(), CONSUMER_ORDER), {
+          status: 'served',
+          statusChangedAt: 1789030900000,
+        }),
+      );
+    });
+
+    it('refuses staff, the owner and the operator the same writes', async () => {
+      await assertFails(addDoc(orders(asStaff()), forged));
+      await assertFails(
+        updateDoc(orderDoc(asStaff(), CONSUMER_ORDER), { status: 'accepted' }),
+      );
+      await assertFails(deleteDoc(orderDoc(asOwner(), CONSUMER_ORDER)));
+      await assertFails(addDoc(orders(asOperator()), forged));
     });
   });
 });

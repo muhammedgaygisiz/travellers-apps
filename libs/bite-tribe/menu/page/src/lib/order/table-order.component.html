@@ -1,0 +1,252 @@
+<ta-page
+  [chrome]="{
+    enableBackButton: false,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
+>
+  <ion-content class="ion-padding">
+    <main class="table-order">
+      @if (loading()) {
+        <div class="centred" data-testid="table-order-loading">
+          <ion-spinner name="crescent" />
+          <p>{{ 'table-order-loading' | transloco }}</p>
+        </div>
+      }
+
+      @if (ordering(); as page) {
+        <header data-testid="table-order-header">
+          <h1>{{ 'table-order-heading' | transloco: placeOf(page) }}</h1>
+        </header>
+
+        <!--
+          The refusal sits above the menu rather than replacing it. A guest told
+          their Margherita sold out needs the cart they built and the menu they
+          built it from, both still on screen, so they can take that one row out
+          and send the rest.
+        -->
+        @if (refusal(); as refused) {
+          <section class="refusal" data-testid="table-order-refusal">
+            <p data-testid="table-order-refusal-reason">
+              {{
+                'table-order-refused-' + refused.reason
+                  | transloco: { item: refusedName() }
+              }}
+            </p>
+
+            @if (
+              refused.reason === 'priceChanged' && refused.item;
+              as changed
+            ) {
+              <p class="note" data-testid="table-order-price-change">
+                {{
+                  'table-order-price-was'
+                    | transloco
+                      : {
+                          was: priceLabel(changed.shownPrice ?? 0),
+                          now: priceLabel(changed.currentPrice ?? 0),
+                        }
+                }}
+              </p>
+            }
+          </section>
+        }
+
+        <bt-menu
+          [menu]="page.menu"
+          [canCreateBite]="false"
+          canAddToCart
+          data-testid="table-order-menu"
+          (addToCartClick)="addToCart($event)"
+        />
+
+        <!--
+          The cart, under the menu rather than behind a button. A guest at a
+          table is looking at one screen on one phone, and a cart they have to
+          open is a cart they forget they are building.
+        -->
+        <section class="cart" data-testid="table-order-cart">
+          <h2>{{ 'table-order-cart-heading' | transloco }}</h2>
+
+          @if (cart.isEmpty()) {
+            <p class="note" data-testid="table-order-cart-empty">
+              {{ 'table-order-cart-empty' | transloco }}
+            </p>
+          } @else {
+            <ul class="cart-lines">
+              @for (line of cart.lines(); track line.key) {
+                <li class="cart-line" [attr.data-testid]="'cart-line'">
+                  <div class="cart-line-head">
+                    <span class="cart-line-name">{{ lineName(line) }}</span>
+                    <span class="cart-line-total">
+                      {{ priceLabel(lineTotal(line)) }}
+                    </span>
+                  </div>
+
+                  <div class="cart-line-quantity">
+                    <ion-button
+                      size="small"
+                      fill="outline"
+                      data-testid="cart-line-decrease"
+                      [attr.aria-label]="'table-order-decrease' | transloco"
+                      (click)="service.decrease(line.key)"
+                    >
+                      <ion-icon name="remove-outline" slot="icon-only" />
+                    </ion-button>
+
+                    <span data-testid="cart-line-quantity">
+                      {{ line.quantity }}
+                    </span>
+
+                    <ion-button
+                      size="small"
+                      fill="outline"
+                      data-testid="cart-line-increase"
+                      [attr.aria-label]="'table-order-increase' | transloco"
+                      (click)="service.increase(line.key)"
+                    >
+                      <ion-icon name="add-outline" slot="icon-only" />
+                    </ion-button>
+
+                    <ion-button
+                      size="small"
+                      fill="clear"
+                      data-testid="cart-line-remove"
+                      (click)="service.remove(line.key)"
+                    >
+                      {{ 'table-order-remove' | transloco }}
+                    </ion-button>
+                  </div>
+
+                  <ion-input
+                    fill="outline"
+                    data-testid="cart-line-notes"
+                    [value]="line.notes"
+                    [label]="'table-order-notes' | transloco"
+                    labelPlacement="floating"
+                    [placeholder]="'table-order-notes-hint' | transloco"
+                    (ionInput)="onNotes(line.key, $event.detail.value ?? '')"
+                  />
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      @if (placed(); as sent) {
+        <section data-testid="table-order-placed">
+          <h1>{{ 'table-order-placed-heading' | transloco }}</h1>
+          <p>
+            {{ 'table-order-placed-intro' | transloco: placeOf(sent) }}
+          </p>
+
+          <p class="note" data-testid="table-order-placed-total">
+            {{
+              'table-order-placed-total'
+                | transloco: { total: priceLabel(sent.order.total) }
+            }}
+          </p>
+
+          <!--
+            Where the order has got to is issue #1104. The line says so rather
+            than offering a button that goes nowhere.
+          -->
+          <p class="note">{{ 'table-order-status-soon' | transloco }}</p>
+
+          <ion-button
+            expand="block"
+            data-testid="table-order-again"
+            [disabled]="isBusy()"
+            (click)="orderAgain()"
+          >
+            {{ 'table-order-again' | transloco }}
+          </ion-button>
+        </section>
+      }
+
+      @if (blocked(); as stopped) {
+        <section data-testid="table-order-blocked">
+          <h1>{{ 'table-order-blocked-title' | transloco }}</h1>
+
+          <p data-testid="table-order-blocked-reason">
+            {{ blockedKey(stopped.reason) | transloco }}
+          </p>
+
+          @if (stopped.nextStep; as nextStep) {
+            <p class="note" data-testid="table-order-next-step">
+              {{ 'table-session-next-' + nextStep | transloco }}
+            </p>
+          }
+
+          @if (stopped.restaurantId) {
+            <ion-button
+              expand="block"
+              data-testid="table-order-browse-menu"
+              [routerLink]="menuPath(stopped.restaurantId)"
+            >
+              {{ 'table-session-browse-menu' | transloco }}
+            </ion-button>
+          }
+
+          <ion-button
+            expand="block"
+            fill="clear"
+            data-testid="table-order-retry"
+            [disabled]="isBusy()"
+            (click)="retry()"
+          >
+            {{ 'table-session-try-again' | transloco }}
+          </ion-button>
+        </section>
+      }
+
+      @if (failure(); as failed) {
+        <section data-testid="table-order-failed">
+          <h1>{{ 'table-session-failed-title' | transloco }}</h1>
+
+          <p data-testid="table-order-failure">
+            {{ 'table-session-failed-' + failed.failure | transloco }}
+          </p>
+
+          <ion-button
+            expand="block"
+            data-testid="table-order-retry"
+            [disabled]="isBusy()"
+            (click)="retry()"
+          >
+            {{ 'table-session-try-again' | transloco }}
+          </ion-button>
+        </section>
+      }
+    </main>
+  </ion-content>
+
+  <!--
+    The total and the send button stay in view while the guest scrolls the
+    menu. A running total the guest has to scroll to find is a running total
+    they stop reading.
+  -->
+  @if (ordering()) {
+    <ion-footer>
+      <ion-toolbar>
+        <div class="send-bar">
+          <span class="send-total" data-testid="table-order-total">
+            {{
+              'table-order-total'
+                | transloco: { total: priceLabel(cart.total()) }
+            }}
+          </span>
+
+          <ion-button
+            data-testid="table-order-submit"
+            [disabled]="!canSubmit()"
+            (click)="submit()"
+          >
+            {{ 'table-order-send' | transloco }}
+          </ion-button>
+        </div>
+      </ion-toolbar>
+    </ion-footer>
+  }
+</ta-page>

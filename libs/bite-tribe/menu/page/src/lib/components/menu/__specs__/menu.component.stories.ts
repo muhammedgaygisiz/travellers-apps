@@ -9,10 +9,11 @@ addNecessaryIcons();
 /**
  * The renderer both menus share (GitHub issue #1102).
  *
- * One renderer serves the authenticated page and the public one, so these cover
- * the two inputs that differ between them: the currency the prices are stated
- * in, and whether a dish can be turned into a Bite. Two renderers is how two
- * menus start disagreeing about what an unavailable dish looks like.
+ * One renderer serves the authenticated page, the public one and the ordering
+ * screen of issue #1103, so these cover the three inputs that differ between
+ * them: the currency the prices are stated in, whether a dish can be turned
+ * into a Bite, and whether it can be added to a table cart. Three renderers is
+ * how three menus start disagreeing about what an unavailable dish looks like.
  */
 export default {
   title: 'Components/Menu',
@@ -67,4 +68,63 @@ export const InTheApp: Story = {
  */
 export const ReadOnlyForAGuest: Story = {
   args: { menu: MENU, canCreateBite: false },
+};
+
+/**
+ * The same menu with a dish that has sizes, one of them sold out.
+ *
+ * A fixture of its own rather than an addition to `MENU`, so the two stories
+ * above keep the visual references they already have: a shared fixture gaining
+ * a dish would fail both of them for a change that is about neither.
+ */
+const ORDERING_MENU: Menu = {
+  ...MENU,
+  categories: [
+    {
+      ...MENU.categories[0],
+      items: [
+        ...MENU.categories[0].items,
+        {
+          id: 'item-tsukemen',
+          name: 'Tsukemen',
+          description: 'Dipping noodles, served cold',
+          price: 1300,
+          variants: [
+            {
+              id: 'variant-tsukemen-large',
+              name: 'Large',
+              description: '',
+              price: 1600,
+            },
+            {
+              id: 'variant-tsukemen-extra',
+              name: 'Extra large',
+              description: '',
+              price: 1900,
+              isAvailable: false,
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+/**
+ * The ordering screen of issue #1103, where a guest at a table adds dishes to a
+ * cart.
+ *
+ * The two flags are deliberately independent and this is what that buys: the
+ * add button is on and the Bite button is off, because the guest may have no
+ * BiteTribe account at all. A single "is this interactive" flag would have made
+ * those one decision.
+ *
+ * The unavailable dish and the sold-out size are what the story is really for.
+ * Both carry a disabled add button rather than no button - a dish that vanishes
+ * when the kitchen runs out reads as a menu that changed, and a guest looking
+ * for it would ask a member of staff about a dish that is still on the printed
+ * card.
+ */
+export const OrderingAtATable: Story = {
+  args: { menu: ORDERING_MENU, canCreateBite: false, canAddToCart: true },
 };

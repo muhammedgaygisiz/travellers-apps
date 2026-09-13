@@ -6,11 +6,12 @@
 
 Partly implemented. Specified through issue \#1072 as stage 3 of issue \#735, and issue \#1073 as stage 4.
 
-Four of the ten children have landed. Issue \#1099 gave menu items the identity
+Five of the ten children have landed. Issue \#1099 gave menu items the identity
 an order line hangs from; issue \#1100 made a scanned token resolve, validating
 the six rules below and answering with a restaurant, a room, a table and a menu
-or one of twelve distinct refusal reasons; and issue \#1101 gave the guest a
-screen, a session and an identity to hold it with.
+or one of twelve distinct refusal reasons; issue \#1101 gave the guest a
+screen, a session and an identity to hold it with; and issue \#1103 gave them a
+cart and a way to send it.
 
 **A scanned code now reaches something.** `/t/:token` is a public route in the
 consumer app, the twelve refusal reasons have copy in all eleven locale files,
@@ -26,9 +27,19 @@ readable without an account at `/m/{restaurantId}`, which is what \#370 and
 \#371 asked for, and it settled what a scan at a restaurant that takes no orders
 should do: show the way to the menu rather than tell the guest to ask a waiter.
 
-**One gap remains.** Nothing shows staff a pending session, so the signal a scan
-raises is one no screen draws. It sits with issue \#1107, which this epic's own
-proposal for fraudulent scans names. Ordering itself is issue \#1103.
+**Issue \#1103 closed the middle of the flow.** A guest with an active session
+builds a cart at `/t/{token}/order` and sends it to `submitTableOrder`, which
+revalidates the session, the visit, the table, the restaurant's ordering
+availability and every line against the live menu before it writes anything. The
+order lands under the visit rather than the table, and the same commit moves the
+table to `ordering`. The three decisions that shaped it are `RD-TS-9` to
+`RD-TS-11`.
+
+**Two gaps remain, and both are staff-facing.** Nothing shows staff a pending
+session, which sits with issue \#1107. And nothing shows them an order: the
+queue, and every status after `submitted`, is issue \#1105. So a guest can now
+send an order that no screen in the restaurant draws - which is why table
+ordering stays off for every restaurant until \#1105 lands.
 
 ## Goal
 
@@ -46,8 +57,8 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 - The backend resolves the opaque token to a restaurant, room, table, and menu.
 - The guest confirms an unambiguous context screen: "You are ordering at Sakura Kitchen, table 12". Implemented, issue \#1101.
 - The guest joins the table's open visit, or raises a pending signal that staff confirm. Implemented, issue \#1101.
-- The guest browses the menu, with unavailable items marked and not addable, a variant of an unavailable dish included.
-- The guest builds a cart and submits an order.
+- The guest browses the menu, with unavailable items marked and not addable, a variant of an unavailable dish included. Implemented, issues \#1102 and \#1103.
+- The guest builds a cart and submits an order. Implemented, issue \#1103.
 - Staff see the order in a queue attached to the correct table, accept it, and update its status.
 - The guest can order again without rescanning, request assistance, or request the bill.
 - The guest pays in the app or asks staff to settle, and the visit closes.
@@ -102,9 +113,9 @@ and the floor-plan geometry on the table stay where they are.
 - A guest is signed in **anonymously**, and an anonymous account is not a member (`RD-TS-4`). The uid is what the rules match the guest's own session document against and what `linkWith*` upgrades in place; it writes no `/users` document and does not pass the app's route guards.
 - The confirmation screen is acknowledged before anything else is possible, because the sticker is a thing anybody can point a camera at - so a code swapped between two tables is caught by the person sitting at one of them rather than by the kitchen.
 - An order belongs to a visit, not directly to a table, so a party that moves keeps its orders.
-- Order lines snapshot the menu item name, price, and currency at submission, so the price the guest saw is the price they are charged.
+- Order lines snapshot the menu item name, price, and currency at submission, so the price the guest saw is the price they are charged. Delivered by issue \#1103 and recorded as `RD-TS-10`: the phone sends the prices it displayed, the backend compares each to the live menu, and a difference refuses the whole order naming the item and both prices - so what is stored is always the menu's number, and it is only ever stored when the two agree.
 - Submission carries an idempotency key, so a double tap on a flaky restaurant network produces one order.
-- Prices from a real order are stronger evidence than a typed price and bypass the suspicious-price warning from issue \#967 during Bite creation.
+- Prices from a real order are stronger evidence than a typed price and bypass the suspicious-price warning from issue \#967 during Bite creation. The evidence now exists - `OrderLineSnapshot` records a price the backend checked against the menu - and nothing reads it yet; that is issue \#1073's.
 
 ## The Address A Code Already Carries
 
@@ -240,18 +251,78 @@ not arrive from anywhere inside it. The renderer itself is the one the
 authenticated menu uses, so the two cannot disagree about what an unavailable
 dish looks like.
 
+## Building And Sending An Order
+
+Issue \#1103 is where the guest first asks the restaurant for something.
+
+**An order hangs from the visit, not the table.**
+`/restaurants/{id}/visits/{visitId}/orders/{orderId}`, which is what lets a party
+that is walked to a bigger table keep its starters. `TableOrder.tableId` is
+recorded as a plain string beside it, because "which table did this reach the
+pass from" is a question the kitchen asks - a record of where the party was
+sitting, not the address the order lives at. `submitTableOrder` reads that table
+off the **visit** and never off the session, since a session goes on naming the
+table its guest scanned.
+
+**One order per phone, one visit per party** (`RD-TS-9`). That is the last
+unsettled half of the sharing question, answered at the grain that actually
+exists: the party shares a visit and a bill, and each order says which phone sent
+it. Per-line attribution was refused because a cart row merges repeated taps, so
+un-merging it would give a round of the same beer one line per person.
+
+**The prices the guest saw are the prices recorded, or nothing is recorded**
+(`RD-TS-10`). The phone sends what it displayed as a _claim_; the callable checks
+each line against the live menu; a difference refuses the whole order and names
+the item and both prices. Snapshotting whatever the menu says would silently
+recharge a guest whose dish was repriced while they read its description, and
+trusting the client's number would let a client name its own price - so neither.
+The same shape covers an item that has gone, an item marked off, a variant of a
+dish that is off, and a menu whose currency has moved.
+
+**A menu that states no currency cannot be ordered from.** `Menu.currency` is
+optional and absent means "not stated" rather than a default, which is right for
+a menu somebody is reading and impossible for one somebody is ordering from: a
+line has to record what it charged, and the only alternative is guessing a
+currency and printing it on a receipt. The ordering screen says so before the
+guest builds a cart, and the backend says so again.
+
+**The order moves the table, and writes that move itself** (`RD-TS-11`). A guest
+holds no staff authority, so `submitTableOrder` writes the `occupied -> ordering`
+transition in its own transaction, from the same types and against the same
+matrix the staff callable uses. The audit entry names the guest and carries no
+roles, which is the signature of a guest-driven change. A table already
+`ordering` is left alone.
+
+**The cart is never stored.** It is a few minutes of somebody changing their
+mind, and a write per tap would cost the restaurant for a document nobody reads.
+The cost is that a reload loses it, which is the honest trade until issue \#1108
+owns offline tolerance and has somewhere to put it.
+
+**A refusal does not take the menu away.** The ordering screen keeps the cart and
+the menu on screen and puts the refusal above them, because a guest told their
+Margherita sold out needs the row they have to remove and the page they built it
+from. The menu is re-read in the same breath, and only the rows the reloaded menu
+no longer _offers_ are dropped - a dish still there at a new price stays at the
+price the guest agreed to, since agreeing to the new one is theirs to do.
+
+**Sending twice makes two orders.** Idempotency is issue \#1108, and it is
+deliberately not half-solved here: a key the client would have to unlearn is
+worse than an absence the next issue fills.
+
 ## Success Criteria
 
 - Scanning a table QR resolves to exactly one restaurant, room, and table, confirmed on screen before any order can be placed. **Met** by issues \#1100 and \#1101.
 - Two guests scanning the same table end up in one visit, not two. **Met** by issue \#1101.
-- A guest without an account can view the menu and order, if the restaurant allows it. **The viewing half is met** by issue \#1102, with no account and no install; ordering is issue \#1103.
-- An order submitted twice because of a flaky network creates one order.
+- A guest without an account can view the menu and order, if the restaurant allows it. **Met** - the viewing half by issue \#1102 and the ordering half by issue \#1103, both with no account and no install. What the restaurant cannot yet do is _see_ the order, which is issue \#1105.
+- An order submitted twice because of a flaky network creates one order. **Not met.** Issue \#1103 left it to issue \#1108 rather than half-solving it.
 - A revoked or rotated token stops working immediately.
 - A Bite created from an order needs only a photo, a rating, and a comment, and carries the verified `restaurantId`.
 
 ## Open Product Questions
 
-Tracked in [[Current State - Open Questions]]. Four were settled on 13 September 2026 and are now `RD-TS-1` to `RD-TS-5` in [[Recorded Decisions]]: occupancy confirmation, shared sessions, ordering without an account, and session expiry. What still blocks a child issue is shared versus per-guest order attribution (issue \#1103), how cancelled orders are corrected, how staff are notified, and the payment model.
+Tracked in [[Current State - Open Questions]]. Seven are settled and recorded as `RD-TS-1` to `RD-TS-11` in [[Recorded Decisions]]: occupancy confirmation, shared sessions, ordering without an account, session expiry, what a scan at a menu-only restaurant does, where a menu's currency lives, and - on 13 September 2026 with issue \#1103 - order attribution, price integrity and who moves the table when an order lands.
+
+What still blocks a child issue is how cancelled orders are corrected and how staff are notified, both of which are issue \#1105's to answer, and the payment model.
 
 ## MVP Classification
 
@@ -279,8 +350,9 @@ territory that the ADR of issue \#1109 has to settle first. See
 
 ## Supported Evidence
 
-Read on 13 September 2026 while implementing issues \#1101 and \#1102, on
-branches `1101-guest-table-session` and `1102-public-table-menu`:
+Read on 13 September 2026 while implementing issues \#1101, \#1102 and \#1103,
+on branches `1101-guest-table-session`, `1102-public-table-menu` and
+`1103-table-cart-and-order-submission`:
 
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/` — `resolve-table-qr-token.ts`, `start-table-session.ts`, `leave-table-session.ts`, `transition-table-state.ts`, `table-session.ts`
 - `apps/bite-tribe-firebase/firestore.rules` — the `tableSessions` match
@@ -291,10 +363,19 @@ branches `1101-guest-table-session` and `1102-public-table-menu`:
 - `libs/bite-tribe-common/model/src/lib/public-menu.ts` and `menu.ts`
 - `libs/bite-tribe/menu/` — the public page and its data-access
 - `libs/bite-tribe-business/restaurant/page/` and `edit-menu/page/` — the switch and the currency control
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/submit-table-order.ts` and `table-order.ts`
+- `apps/bite-tribe-firebase/firestore.rules` — the `visits/{visitId}/orders` match
+- `libs/bite-tribe-common/model/src/lib/table-order.ts` and `order-line.ts`
+- `libs/bite-tribe/table-order/data-access/` — the cart and the submission
+- `libs/bite-tribe/menu/page/src/lib/order/` — the ordering screen
 
 Behaviour was observed as well as read: the flow was driven end to end against
 the Firestore, Auth and Functions emulators with a seeded restaurant, through
-the running consumer app.
+the running consumer app. For issue \#1103 that run covered scanning, confirming,
+building a cart of three dishes with a note, sending it, and reading back the
+stored order, the `occupied -> ordering` transition and its audit entry - then
+repricing a dish behind the screen's back and watching the next submission be
+refused by name, with both prices shown and nothing written.
 
 ## Related GitHub Scope
 
@@ -303,6 +384,10 @@ the running consumer app.
 - Issue \#1100 - resolve and validate a table QR token, the backend every later child calls before it does anything
 - Issue \#1101 - guest table session start and join, which gave the printed address a screen and the guest an identity to hold a session with
 - Issue \#1102 - public table menu browsing without an account, which gave the flag a writer and the menu a page of its own
+- Issue \#1103 - table cart and order submission, which gave the guest something to do with the menu and the restaurant something to cook
+- Issue \#1105 - incoming order queue for staff, which owns every order status after `submitted` and is what an order currently reaches nobody without
+- Issue \#1108 - offline-tolerant and idempotent order submission, which owns the duplicate an order submitted twice still creates
+- Issue \#1598 - orderable menu extras, split out of \#1103 because `Category.extrasBlock` has no ids, no renderer and no editor
 - Issue \#1107 - QR token abuse protection, which owns the durable rate limit the resolution only approximates
 - Issue \#1087 - printable table QR sheets, which fixed the scan URL this use case has to serve
 - Issue \#1073 - Table payment and Bite creation from orders, with six child issues

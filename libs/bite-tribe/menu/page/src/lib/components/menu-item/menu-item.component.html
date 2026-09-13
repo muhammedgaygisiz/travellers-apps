@@ -39,6 +39,20 @@
         {{ 'create-bite' | transloco }}
       </ion-button>
     }
+    <!--
+      Ordering at a table (issue #1103). Off everywhere else, so the
+      authenticated menu and the public one render exactly as before.
+    -->
+    @if (canAddToCart()) {
+      <ion-button
+        size="small"
+        data-testid="menu-item-add-to-cart"
+        [disabled]="isItemUnavailable"
+        (click)="onAddToCartClick(itemData)"
+      >
+        {{ 'table-order-add' | transloco }}
+      </ion-button>
+    }
   </div>
   @if (itemData?.variants?.length) {
     <div class="variants">
@@ -48,6 +62,8 @@
           [parentItem]="itemData"
           [currency]="currency()"
           [canCreateBite]="canCreateBite()"
+          [canAddToCart]="canAddToCart()"
+          (addToCartClick)="addToCartClick.emit($event)"
           isVariant
         />
       }

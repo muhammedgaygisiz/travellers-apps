@@ -120,8 +120,12 @@ export class TableSessionService {
    *
    * Read off the snapshot rather than subscribed to: the only way to reach a
    * different token is another scan, which is a fresh navigation.
+   *
+   * Public since issue #1103, because the screen builds the ordering route from
+   * it. The alternative was reading the same parameter twice, in two libraries,
+   * off two snapshots that are the same snapshot.
    */
-  private readonly token = this.route.snapshot.paramMap.get('token') ?? '';
+  readonly token = this.route.snapshot.paramMap.get('token') ?? '';
 
   /**
    * The table context, wherever the current state has one.

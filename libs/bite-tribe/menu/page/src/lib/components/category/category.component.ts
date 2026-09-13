@@ -8,7 +8,10 @@ import {
 } from '@angular/core';
 import { IonReorderGroup } from '@ionic/angular/standalone';
 import type { Category, MenuItem } from 'model';
-import { MenuItemComponent } from '../menu-item/menu-item.component';
+import {
+  MenuItemComponent,
+  type MenuItemSelection,
+} from '../menu-item/menu-item.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,5 +30,10 @@ export class CategoryComponent {
 
   canCreateBite = input(true, { transform: booleanAttribute });
 
+  /** Threaded to the items, which are what a guest adds (issue #1103). */
+  canAddToCart = input(false, { transform: booleanAttribute });
+
   createBiteClick = output<MenuItem>();
+
+  addToCartClick = output<MenuItemSelection>();
 }

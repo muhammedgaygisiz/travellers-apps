@@ -77,6 +77,21 @@ export const canTransitionTableOrderStatus = (
   to: TableOrderStatus,
 ): boolean => TABLE_ORDER_STATUS_TRANSITIONS[from].includes(to);
 
+/**
+ * The statuses the staff queue is a list of (GitHub issue #1105).
+ *
+ * Everything that is not an end status, derived rather than restated. The queue
+ * reads every order of one restaurant in this set, which is what keeps that
+ * read bounded; an order that is served or cancelled leaves it.
+ */
+export const OPEN_TABLE_ORDER_STATUSES: readonly TableOrderStatus[] =
+  TABLE_ORDER_STATUSES.filter(
+    (status) => !TABLE_ORDER_END_STATUSES.includes(status),
+  );
+
+/** The longest cancellation reason staff may record. */
+export const MAX_TABLE_ORDER_CANCELLATION_REASON_LENGTH = 200;
+
 /** Whether an unknown value is an order status this backend knows. */
 export const isTableOrderStatus = (value: unknown): value is TableOrderStatus =>
   typeof value === 'string' &&
@@ -131,6 +146,8 @@ export interface TableOrder {
    * two different fields.
    */
   cancellationReason?: string;
+  /** The staff account that last moved `status` (GitHub issue #1105). */
+  statusChangedByUserId?: string;
 }
 
 /**

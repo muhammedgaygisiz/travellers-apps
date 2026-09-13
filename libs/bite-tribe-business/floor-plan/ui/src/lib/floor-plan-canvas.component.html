@@ -110,6 +110,7 @@
                       seats: item.seats,
                       status: item.statusName,
                       duration: item.durationText,
+                      orders: item.orderCount,
                     }
             "
             [attr.class]="item.classes"
@@ -226,6 +227,43 @@
               the table that has been awaiting payment for twenty minutes is
               the one they walk to next.
             -->
+            <!--
+              How many orders the kitchen still owes this table
+              (GitHub issue #1105). A disc on the corner rather than a fourth
+              row under the number: the three rows are already full at
+              zoom-to-fit, and a bare digit beside a table number reads as part
+              of the table number. The count is also in the accessible name,
+              because the badge is the one annotation a reader cannot infer from
+              the status.
+            -->
+            @if (item.orderBadgeText) {
+              <g
+                class="floor-plan-canvas__item-orders"
+                [attr.data-testid]="'floor-plan-orders-' + item.id"
+              >
+                <title>
+                  {{
+                    'table-plan-orders-count'
+                      | transloco: { count: item.orderCount }
+                  }}
+                </title>
+                <circle
+                  [attr.cx]="item.orderBadgeX"
+                  [attr.cy]="item.orderBadgeY"
+                  [attr.r]="item.orderBadgeRadius"
+                />
+                <text
+                  [attr.x]="item.orderBadgeX"
+                  [attr.y]="item.orderBadgeY"
+                  [attr.font-size]="item.orderBadgeTextSize"
+                  text-anchor="middle"
+                  dominant-baseline="central"
+                >
+                  {{ item.orderBadgeText }}
+                </text>
+              </g>
+            }
+
             @if (item.durationText) {
               <text
                 class="floor-plan-canvas__item-duration"

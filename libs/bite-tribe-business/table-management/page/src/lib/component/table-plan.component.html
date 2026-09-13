@@ -35,6 +35,31 @@
           who cannot see it.
         -->
         <div class="table-plan__connection">
+          <!--
+            The way to the pass, from the room (GitHub issue #1105). The room
+            stays the primary screen and the queue is one press from it, which
+            is what the badges on the tables are for as well: which tables have
+            open orders is answered here, and what those orders are is answered
+            there.
+          -->
+          <ion-button
+            class="table-plan__orders"
+            size="small"
+            fill="outline"
+            [routerLink]="['/restaurant', restaurantId(), 'orders']"
+            data-testid="table-plan-orders"
+          >
+            <ion-icon name="receipt-outline" slot="start" aria-hidden="true" />
+            {{ 'table-plan-orders' | transloco }}
+            @if (openOrderCount() > 0) {
+              <ion-badge
+                class="table-plan__orders-count"
+                data-testid="table-plan-orders-count"
+                >{{ openOrderCount() }}</ion-badge
+              >
+            }
+          </ion-button>
+
           <span
             class="table-plan__live"
             [attr.data-tone]="live().tone"

@@ -18,6 +18,7 @@ import {
   tableStatusMark,
 } from 'bite-tribe-business/floor-plan-ui';
 import {
+  TableOrderQueueService,
   TableStateDataAccessService,
   TableTransitionFailure,
   TableTransitionQueueService,
@@ -45,6 +46,7 @@ import {
   TableActionRequest,
   tableActions,
 } from './table-actions';
+import { openOrdersByTable } from './order-queue-groups';
 import {
   isTimedStatus,
   liveRoomItems,
@@ -239,6 +241,7 @@ export interface TableDetail {
 export class TablePlanService {
   private readonly floorPlan = inject(FloorPlanDataAccessService);
   private readonly tableStates = inject(TableStateDataAccessService);
+  private readonly orderQueue = inject(TableOrderQueueService);
   private readonly queue = inject(TableTransitionQueueService);
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly transloco = inject(TranslocoService);
@@ -592,6 +595,45 @@ export class TablePlanService {
     return rooms.find((room) => room.id === requested) ?? rooms[0];
   });
 
+  /**
+   * The open orders of the restaurant, pushed by their own listener
+   * (GitHub issue #1105).
+   *
+   * A second listener beside the table states rather than a field on them,
+   * because they are two facts with two writers: a table's status is the
+   * floor's, an order's is the kitchen's, and issue #1091 made "the floor plan
+   * never writes state, and state never writes the floor plan" structural
+   * rather than a rule a caller has to obey. The plan reads both and draws
+   * them together.
+   *
+   * The whole restaurant, filtered to the open room by the item builder, for
+   * the reason the states are read whole: a room switch is then a
+   * recomputation rather than a new subscription.
+   */
+  private readonly orderFeed = toSignal(
+    this.storeService.restaurantIdFromUrl$.pipe(
+      switchMap((restaurantId) =>
+        restaurantId ? this.orderQueue.openOrders$(restaurantId) : EMPTY,
+      ),
+    ),
+  );
+
+  /** How many open orders each table has. Empty until the first delivery. */
+  private readonly ordersByTable = computed(() =>
+    openOrdersByTable(this.orderFeed()?.orders ?? []),
+  );
+
+  /**
+   * How many orders the kitchen owes the whole restaurant, for the header link.
+   *
+   * The restaurant and not the open room, because the queue it leads to is the
+   * restaurant's: a chef reading the terrace's plan still has the cellar's
+   * orders to cook.
+   */
+  readonly openOrderCount = computed(
+    () => this.orderFeed()?.orders.length ?? 0,
+  );
+
   /** The published plan of the open room, with the service drawn on it. */
   readonly items = computed<FloorPlanItem[]>(() =>
     liveRoomItems(
@@ -599,6 +641,7 @@ export class TablePlanService {
       this.tablesValue(),
       this.statesByTable(),
       (status, state) => this.statusCopy(status, state),
+      this.ordersByTable(),
     ),
   );
 

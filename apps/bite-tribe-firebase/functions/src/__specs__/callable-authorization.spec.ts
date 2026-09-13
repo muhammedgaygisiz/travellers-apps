@@ -83,6 +83,12 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // mean the owner's own login being passed round the floor.
   transitionTableState: 'staffAuthority',
 
+  // Moving an order along the kitchen's own lifecycle (issue #1105). The same
+  // door as a table transition and for the same reason: whoever is working the
+  // pass presses Accept, and that is a host or a chef rather than the account
+  // the restaurant is assigned to.
+  transitionTableOrderStatus: 'staffAuthority',
+
   // Walking a party to another table while keeping its visit (issue #1095).
   // Same door and same room: it is the host's job, and it writes live state
   // and the visit that hangs from it and nothing else.

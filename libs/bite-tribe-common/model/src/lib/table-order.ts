@@ -119,6 +119,42 @@ export const canTransitionTableOrderStatus = (
   to: TableOrderStatus,
 ): boolean => TABLE_ORDER_STATUS_TRANSITIONS[from].includes(to);
 
+/**
+ * The statuses the staff queue of issue #1105 is a list of.
+ *
+ * Everything that is not an end status, and derived from that list rather than
+ * written out beside it: "open" and "not finished with" are one fact, and a
+ * second literal would let a sixth status be added to one of them alone.
+ *
+ * It is a *query* as much as a definition. The queue reads every order of one
+ * restaurant whose status is in this set, so the set is what keeps the read
+ * bounded - a queue that read every order the restaurant had ever taken would
+ * grow without limit and would be re-read in full every time a device opened
+ * the screen. An order that is served or cancelled leaves the queue, which is
+ * also what the queue means.
+ */
+export const OPEN_TABLE_ORDER_STATUSES: readonly TableOrderStatus[] =
+  TABLE_ORDER_STATUSES.filter(
+    (status) => !TABLE_ORDER_END_STATUSES.includes(status),
+  );
+
+/** Whether this order is still something the kitchen owes the table. */
+export const isTableOrderOpen = (order: Pick<TableOrder, 'status'>): boolean =>
+  !isTableOrderEnded(order);
+
+/**
+ * The statuses an order currently in `from` may move to.
+ *
+ * What a UI asks, exactly as `allowedTableStatusTransitions` is for a table:
+ * the queue renders one action per returned status, so an order that cannot be
+ * accepted twice offers no Accept button rather than a button the backend then
+ * refuses. Reading the matrix rather than restating it is what keeps `#1091`'s
+ * rule - the matrix is the single definition - true of this surface too.
+ */
+export const allowedTableOrderStatusTransitions = (
+  from: TableOrderStatus,
+): readonly TableOrderStatus[] => TABLE_ORDER_STATUS_TRANSITIONS[from];
+
 /** Whether an unknown value is an order status this model knows. */
 export const isTableOrderStatus = (value: unknown): value is TableOrderStatus =>
   typeof value === 'string' &&
@@ -217,6 +253,22 @@ export interface TableOrder {
    * it.
    */
   cancellationReason?: string;
+  /**
+   * The staff account that last moved {@link status} (GitHub issue #1105).
+   *
+   * Absent on an order nobody has moved yet, which is every order in
+   * `submitted`: the guest placed it, and `guestUserId` already says who that
+   * was. Present from the first staff action onwards, so "who cancelled the
+   * main course" is answerable from the order rather than from a separate log.
+   *
+   * There is no per-transition history the way `tableStateTransitions` is one
+   * for a table, and that is a deliberate limit rather than an omission. A
+   * table is contended - two hosts seat it in the same second, and the trail is
+   * how the argument is settled. An order moves forward through four statuses
+   * under one kitchen, and the current status plus who last set it answers
+   * every question service actually asks of it.
+   */
+  statusChangedByUserId?: string;
 }
 
 /**
@@ -421,3 +473,70 @@ export type SubmitTableOrderResult = TableOrderSubmitted | TableOrderRefused;
 export const isTableOrderSubmitted = (
   result: SubmitTableOrderResult,
 ): result is TableOrderSubmitted => result.ok;
+
+/**
+ * The longest cancellation reason staff may record (GitHub issue #1105).
+ *
+ * A sentence, not a note. The reason exists so a guest reading "cancelled"
+ * knows *why* - "the kitchen has run out of sea bass" - and the field is
+ * rendered inline under an order row on a phone. A cap here is what stops that
+ * row becoming an essay nobody reads, and it is also the only bound on a string
+ * a client sends into a document the guest will be shown.
+ */
+export const MAX_TABLE_ORDER_CANCELLATION_REASON_LENGTH = 200;
+
+/**
+ * One move along the order lifecycle, as `transitionTableOrderStatus` takes it
+ * (GitHub issue #1105).
+ *
+ * Deliberately the shape `TableTransitionRequest` has for a table, because the
+ * two are the same operation on different documents and a staff member meets
+ * them on the same screen: name where it should end up, name what you believed
+ * it was, and say why where saying why is the point.
+ *
+ * What it does *not* carry is a `requestId`. A table transition is queued
+ * offline and replayed (issue #1096), so its key is minted per intent; an order
+ * transition is not queued, because the thing a replayed order transition would
+ * protect against - a second identical move - is already refused by
+ * {@link expectedStatus}. An order that has moved past `accepted` cannot be
+ * accepted again whatever the network did.
+ */
+export interface TransitionTableOrderRequest {
+  restaurantId: string;
+  /** The visit the order hangs from, which is the parent of its document. */
+  visitId: string;
+  orderId: string;
+  /** Where the order should end up. */
+  status: TableOrderStatus;
+  /**
+   * The status the caller believes the order holds right now.
+   *
+   * The same race protection the table has, and needed for the same reason: two
+   * members of staff with the queue open both press Accept, or one presses
+   * Served while the other cancels. Exactly one commits, and the other is told
+   * what the order holds now instead of overwriting it.
+   */
+  expectedStatus: TableOrderStatus;
+  /**
+   * Why, in the words staff used. **Required when cancelling** and refused
+   * otherwise.
+   *
+   * Required because "cancellations are explained, not silent" is an acceptance
+   * criterion of this issue and a guarantee the guest's screen renders. Refused
+   * on every other status because {@link TableOrder.cancellationReason} is the
+   * field it lands in, and a reason on a served dish would be a second,
+   * contradictory account of what happened to it.
+   */
+  reason?: string;
+}
+
+/** What `transitionTableOrderStatus` answers with when the move was accepted. */
+export interface TransitionTableOrderResult {
+  restaurantId: string;
+  visitId: string;
+  orderId: string;
+  from: TableOrderStatus;
+  to: TableOrderStatus;
+  /** The moment the backend says the order entered `to`, in epoch milliseconds. */
+  statusChangedAt: number;
+}

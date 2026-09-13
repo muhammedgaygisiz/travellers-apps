@@ -305,6 +305,37 @@
 }
 
 /*
+ * The open-order badge (GitHub issue #1105).
+ *
+ * The one thing on the plan drawn in a colour that is not a status colour, and
+ * deliberately: a status says what the *table* is doing and this says what the
+ * *kitchen* owes it, so a badge tinted like a status would read as a seventh
+ * status. The disc is the app's own accent at full strength with the count
+ * knocked out of it, which is the one mark on the plan that is meant to be seen
+ * before anything else on its table.
+ *
+ * Not carried by colour alone: the count is a numeral inside a shape that
+ * nothing else on the plan has, and the table's accessible name says how many.
+ */
+.floor-plan-canvas__item-orders {
+  pointer-events: none;
+}
+
+.floor-plan-canvas__item-orders circle {
+  fill: var(--ion-color-primary, #3880ff);
+  stroke: var(--ion-background-color, #fff);
+  stroke-width: 0;
+  paint-order: stroke;
+}
+
+.floor-plan-canvas__item-orders text {
+  fill: var(--ion-color-primary-contrast, #fff);
+  font-family: var(--ion-font-family, sans-serif);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
  * Read-only, which is the live view of issue #1093.
  *
  * The plan is dragged to move the view rather than to move the room, so the

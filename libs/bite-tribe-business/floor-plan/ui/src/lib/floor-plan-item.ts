@@ -90,6 +90,22 @@ export interface FloorPlanItem {
    */
   status?: TableStatus;
   /**
+   * How many orders the kitchen still owes this table (GitHub issue #1105).
+   *
+   * Absent in the editor and on geometry, and absent rather than `0` on a table
+   * with nothing outstanding - so "no badge" is one state rather than two, and
+   * a plan opened before the order listener has delivered draws no badges
+   * rather than drawing a nought on every table.
+   *
+   * A **count** and not a list, because of where this is read from. The plan is
+   * scanned across a room, and what it has to answer there is which tables the
+   * kitchen is still working on; the dishes are one press away in the queue.
+   * It is here for the reason `status` and `seats` are - the canvas has to draw
+   * it, and a parallel structure keyed by id would be a second thing to keep in
+   * step through every gesture and every room switch.
+   */
+  openOrders?: number;
+  /**
    * The status as staff read it, already translated.
    *
    * Translated by the caller rather than here, so the canvas holds no status

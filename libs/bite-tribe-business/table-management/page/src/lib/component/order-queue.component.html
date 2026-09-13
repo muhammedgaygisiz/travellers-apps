@@ -1,0 +1,253 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="isAuthenticated()"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div
+      class="order-queue"
+      [class.order-queue--arrived]="justArrived()"
+      data-testid="order-queue"
+    >
+      <header class="order-queue__header">
+        <div class="order-queue__heading">
+          <h1 class="order-queue__title">
+            {{ 'order-queue-title' | transloco }}
+            <!--
+              The count beside the title rather than in the list, because it is
+              the number a passing glance is for: how much the kitchen owes the
+              room right now.
+            -->
+            <ion-badge
+              class="order-queue__count"
+              data-testid="order-queue-count"
+              >{{ openCount() }}</ion-badge
+            >
+          </h1>
+          @if (restaurantName()) {
+            <ion-note class="order-queue__subtitle">{{
+              restaurantName()
+            }}</ion-note>
+          }
+        </div>
+
+        <div class="order-queue__controls">
+          <!--
+            Whether what is on screen is current, said in the plan's four
+            states and with the plan's words (GitHub issue #1096). A queue that
+            has silently stopped updating looks exactly like a kitchen that has
+            caught up, and only one of those means staff can stop reading it.
+          -->
+          <span
+            class="order-queue__live"
+            [attr.data-tone]="live().tone"
+            role="status"
+            data-testid="order-queue-live"
+          >
+            <ion-icon [name]="live().icon" aria-hidden="true" />
+            {{ live().labelKey | transloco }}
+
+            @if (liveStatus() === 'stale' && lastUpdated()) {
+              <span
+                class="order-queue__live-age"
+                data-testid="order-queue-stale"
+              >
+                {{
+                  'table-plan-last-updated'
+                    | transloco: { elapsed: lastUpdated() }
+                }}
+              </span>
+            }
+          </span>
+
+          <!--
+            The busy-service alert, off until somebody turns it on. A device
+            preference rather than an account one: the tablet clamped to the
+            pass wants the chime and the one at the host stand does not, and
+            both are signed into by whoever is on shift.
+          -->
+          <ion-toggle
+            class="order-queue__alert"
+            justify="start"
+            [checked]="alertEnabled()"
+            data-testid="order-queue-alert"
+            (ionChange)="alertToggled.emit()"
+          >
+            <ion-icon
+              [name]="
+                alertEnabled() ? 'volume-high-outline' : 'volume-mute-outline'
+              "
+              aria-hidden="true"
+            />
+            {{ 'order-queue-alert' | transloco }}
+          </ion-toggle>
+        </div>
+      </header>
+
+      <!--
+        The table numbers failing to load does not empty the queue: a pass that
+        can see the dishes and not the numbers is worse than one with both and
+        far better than one with neither.
+      -->
+      @if (labelsFailed()) {
+        <ion-note
+          class="order-queue__message"
+          role="status"
+          data-testid="order-queue-labels-failed"
+          >{{ 'order-queue-labels-failed' | transloco }}</ion-note
+        >
+      }
+
+      @if (loading()) {
+        <div class="order-queue__loading">
+          <ion-spinner name="crescent" />
+        </div>
+      } @else if (!hasOrders()) {
+        <ion-note
+          class="order-queue__message"
+          data-testid="order-queue-empty"
+          >{{ 'order-queue-empty' | transloco }}</ion-note
+        >
+      } @else {
+        <ul class="order-queue__groups">
+          @for (group of groups(); track group.tableId) {
+            <li
+              class="order-queue__group"
+              [class.order-queue__group--urgent]="group.urgent"
+              [attr.data-testid]="'order-group-' + group.tableId"
+            >
+              <h2 class="order-queue__group-head">
+                <span class="order-queue__table">
+                  {{
+                    group.label
+                      ? ('order-queue-table'
+                        | transloco: { label: group.label })
+                      : ('order-queue-table-unknown' | transloco)
+                  }}
+                </span>
+
+                <!--
+                  The oldest order in the group, which is the number that says
+                  whether this table is a problem. The per-order age is on each
+                  row below; this is the one a head chef scans for.
+                -->
+                <span
+                  class="order-queue__group-age"
+                  [attr.data-testid]="'order-group-age-' + group.tableId"
+                >
+                  {{ 'order-queue-waiting' | transloco }}
+                  {{ group.oldest.key | transloco: group.oldest.params }}
+                </span>
+              </h2>
+
+              <ul class="order-queue__orders">
+                @for (order of group.orders; track order.id) {
+                  <li
+                    class="order-queue__order"
+                    [class.order-queue__order--urgent]="order.urgent"
+                    [attr.data-testid]="'order-' + order.id"
+                  >
+                    <div class="order-queue__order-head">
+                      <span
+                        class="order-queue__status"
+                        [attr.data-status]="order.status"
+                        [attr.data-testid]="'order-status-' + order.id"
+                      >
+                        {{ order.statusKey | transloco }}
+                      </span>
+
+                      <span
+                        class="order-queue__age"
+                        [attr.data-testid]="'order-age-' + order.id"
+                      >
+                        {{
+                          order.waiting.key | transloco: order.waiting.params
+                        }}
+                      </span>
+                    </div>
+
+                    <!--
+                      The whole ticket, printed. A kitchen at a pass reads the
+                      screen at arm's length with both hands full, so nothing
+                      here is behind a tap - least of all the note, which is the
+                      one line that changes what goes on the plate.
+                    -->
+                    <ul class="order-queue__lines">
+                      @for (line of order.lines; track $index) {
+                        <li class="order-queue__line">
+                          <span class="order-queue__quantity"
+                            >{{ line.quantity }}&times;</span
+                          >
+                          <span class="order-queue__dish">
+                            {{ line.name }}
+                            @if (line.variantName) {
+                              <span class="order-queue__variant">{{
+                                line.variantName
+                              }}</span>
+                            }
+                            @if (line.notes) {
+                              <span
+                                class="order-queue__note"
+                                [attr.data-testid]="'order-note-' + order.id"
+                                >{{ line.notes }}</span
+                              >
+                            }
+                          </span>
+                        </li>
+                      }
+                    </ul>
+
+                    <!--
+                      One button per legal move, built from the transition
+                      matrix - so there is nothing here the backend would
+                      refuse. The row shows that it is busy rather than moving
+                      ahead of the answer: an order that appeared to move and
+                      then moved back is a kitchen that has already started
+                      cooking.
+                    -->
+                    <div class="order-queue__actions">
+                      @if (busyOrderId() === order.id) {
+                        <ion-spinner
+                          name="crescent"
+                          [attr.data-testid]="'order-busy-' + order.id"
+                        />
+                      } @else {
+                        @for (action of order.actions; track action.to) {
+                          <ion-button
+                            size="small"
+                            [fill]="action.needsReason ? 'outline' : 'solid'"
+                            [color]="action.needsReason ? 'danger' : 'primary'"
+                            [attr.data-testid]="
+                              'order-action-' + order.id + '-' + action.to
+                            "
+                            (click)="pick(group, order, action)"
+                          >
+                            {{ action.labelKey | transloco }}
+                          </ion-button>
+                        }
+                      }
+                    </div>
+                  </li>
+                }
+              </ul>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!--
+      The cancellation dialog, in its own component beside the queue - as the
+      action sheet of issue #1094 sits beside the table plan. The one action
+      that asks before it acts, because a dish that vanishes off a guest's
+      screen with no sentence beside it is worse than one that was never cooked.
+    -->
+    @if (pendingCancellation(); as pending) {
+      <bt-business-order-cancel
+        [pending]="pending"
+        (confirmed)="cancellationConfirmed.emit($event)"
+        (dismissed)="cancellationDismissed.emit()"
+      />
+    }
+  </ion-content>
+</ta-page>

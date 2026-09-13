@@ -33,6 +33,9 @@ export const id: NotificationMessages = {
   'countryBadge.body': 'Selamat! Kamu membuka lencana {{country}}',
   'countryBadge.followerTitle': '🌍 Lencana negara baru',
   'countryBadge.followerBody': '{{user}} membuka lencana {{country}}',
+  'newTableOrder.title': '🔔 Pesanan baru',
+  'newTableOrder.body': 'Meja {{table}} baru saja memesan.',
+  'newTableOrder.bodyWithoutTable': 'Sebuah meja baru saja memesan.',
   'newVersion.title': '🚀 Versi baru tersedia',
   'newVersion.bodyIos':
     'Versi baru BiteTribe sudah ada di App Store. Perbarui sekarang agar tidak ketinggalan.',

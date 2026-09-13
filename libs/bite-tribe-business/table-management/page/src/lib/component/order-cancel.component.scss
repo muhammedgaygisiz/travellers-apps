@@ -1,0 +1,62 @@
+/*
+ * The cancellation dialog (GitHub issue #1105).
+ *
+ * Its own component beside the queue, exactly as the action sheet of issue
+ * #1094 sits beside the table plan - and for the same two reasons. A modal is a
+ * separate thing with its own focus and its own escape, and the queue's own
+ * stylesheet is already at the size where a reviewer stops reading.
+ */
+:host {
+  display: contents;
+}
+
+.order-cancel {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.order-cancel__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.order-cancel__panel {
+  position: relative;
+  width: min(32rem, 100%);
+  padding: 1rem;
+  border-radius: 1rem 1rem 0 0;
+  background: var(--ion-background-color, #fff);
+}
+
+@media (min-width: 48rem) {
+  .order-cancel {
+    align-items: center;
+  }
+
+  .order-cancel__panel {
+    border-radius: 1rem;
+  }
+}
+
+.order-cancel__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.order-cancel__lead {
+  margin: 0 0 0.5rem;
+  opacity: 0.8;
+}
+
+.order-cancel__buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}

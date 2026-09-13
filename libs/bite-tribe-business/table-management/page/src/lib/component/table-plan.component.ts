@@ -17,6 +17,7 @@ import {
   IonSegmentButton,
   IonSpinner,
 } from '@ionic/angular/standalone';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
   FloorPlanCanvasComponent,
@@ -117,6 +118,7 @@ interface SummaryChip {
     IonIcon,
     IonNote,
     IonSpinner,
+    RouterLink,
     TranslocoPipe,
     TableActionsComponent,
   ],
@@ -151,6 +153,10 @@ export class TablePlanComponent {
   readonly freeableCount = input(0);
   readonly bulkBusy = input(false);
   readonly isAuthenticated = input(false);
+  /** Which restaurant, so the header can link to its order queue (issue #1105). */
+  readonly restaurantId = input<string | undefined>(undefined);
+  /** How many open orders the restaurant has, for the badge on that link. */
+  readonly openOrderCount = input(0);
 
   readonly selectRoom = output<string>();
   readonly selectionChange = output<string[]>();

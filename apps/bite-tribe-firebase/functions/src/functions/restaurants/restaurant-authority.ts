@@ -25,6 +25,23 @@ export const RESTAURANT_COLLECTION = 'restaurants';
 export const RESTAURANT_STAFF_COLLECTION = 'restaurantStaff';
 
 /**
+ * The tables of one restaurant.
+ *
+ * ```text
+ * /restaurants/{restaurantId}/tables/{tableId}
+ * ```
+ *
+ * Here rather than in `table-qr-tokens.ts`, which is where it was written and
+ * which still reads it, for a reason that is about imports rather than about
+ * meaning. That module defines callables, so importing it to borrow one string
+ * registers `issueTableQrTokens` and `rotateTableQrToken` as a side effect -
+ * harmless in another callable and fatal in the new-order notification trigger
+ * of issue #1105, which is not a callable at all and whose spec cannot load
+ * `firebase-functions/https`. A collection name is not a callable's to own.
+ */
+export const TABLES_COLLECTION = 'tables';
+
+/**
  * The roles a caller acting for one restaurant must hold one of.
  *
  * Two roles and two reasons. A `business` caller is the account a restaurant

@@ -178,21 +178,23 @@ hand them the other people at their table. Staff list them through the same
 
 An Order belongs to a visit, not to a table.
 
-| Field             | Description                                                                   |
-| ----------------- | ----------------------------------------------------------------------------- |
-| `id`              | Unique order identifier, equal to the document id                             |
-| `restaurantId`    | Repeated from the path so a query can filter it                               |
-| `visitId`         | The visit this order belongs to, which is also the parent document            |
-| `tableId`         | Where the party was sitting when they sent it. A record, not an address       |
-| `sessionId`       | The session that placed it                                                    |
-| `guestUserId`     | The phone that placed it, anonymous or not (`RD-TS-9`)                        |
-| `status`          | `submitted`, `accepted`, `preparing`, `served`, `cancelled`                   |
-| `lines`           | Order lines, as `OrderLineSnapshot`                                           |
-| `currency`        | ISO 4217, read off the menu and equal on every line                           |
-| `total`           | `tableOrderTotal(lines)` at the moment of writing                             |
-| `submittedAt`     | Submission timestamp, in epoch milliseconds                                   |
-| `statusChangedAt` | When `status` last changed. Equal to `submittedAt` on a new order             |
-| `idempotencyKey`  | Prevents duplicate submission on a flaky network. **Not written yet** - #1108 |
+| Field                   | Description                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| `id`                    | Unique order identifier, equal to the document id                             |
+| `restaurantId`          | Repeated from the path so a query can filter it                               |
+| `visitId`               | The visit this order belongs to, which is also the parent document            |
+| `tableId`               | Where the party was sitting when they sent it. A record, not an address       |
+| `sessionId`             | The session that placed it                                                    |
+| `guestUserId`           | The phone that placed it, anonymous or not (`RD-TS-9`)                        |
+| `status`                | `submitted`, `accepted`, `preparing`, `served`, `cancelled`                   |
+| `lines`                 | Order lines, as `OrderLineSnapshot`                                           |
+| `currency`              | ISO 4217, read off the menu and equal on every line                           |
+| `total`                 | `tableOrderTotal(lines)` at the moment of writing                             |
+| `submittedAt`           | Submission timestamp, in epoch milliseconds                                   |
+| `statusChangedAt`       | When `status` last changed. Equal to `submittedAt` on a new order             |
+| `statusChangedByUserId` | The staff account that last moved `status`. Absent until one has              |
+| `cancellationReason`    | Why the restaurant cancelled it, in the words staff used. Only on `cancelled` |
+| `idempotencyKey`        | Prevents duplicate submission on a flaky network. **Not written yet** - #1108 |
 
 An order line snapshots the menu item at the moment of submission: item id, name at time of order, price at time of order, currency, variant, quantity, and notes. The snapshot is immutable once submitted, so the price the guest saw is the price they are charged, even if the menu changes mid-session.
 
@@ -206,7 +208,13 @@ The status transitions are declared as data in `table-order.ts`, in both the lib
 
 Issue \#1104 gave the guest a reader. `firestore.rules` admits a guest to `list` the orders of a visit **only when the query names their own uid**, so the phone sends `where('guestUserId', '==', uid)` and a query without it is refused whole rather than quietly shortened - which is what makes "their own orders, not the party's" a rule rather than a habit of one call site (`RD-TS-12`). The screen subscribes to that query and to the guest's own session document beside it, and reads the visit id off the session: an order id is generated, so a phone that reloads holds nothing to derive one from, and the derived session name is the one thing it can always find its way back through.
 
-`TableOrder.cancellationReason` is declared by the same issue and written by none: the guest's screen renders it and the staff cancellation of \#1105 fills it (`RD-TS-13`). An absent one is ordinary rather than a gap - a kitchen mid-rush is not always going to type a sentence, so the screen names the cancellation either way and adds the reason where there is one.
+`TableOrder.cancellationReason` is declared by the same issue and filled by issue \#1105's staff cancellation (`RD-TS-13`). An absent one is ordinary rather than a gap - a kitchen mid-rush is not always going to type a sentence, so the screen names the cancellation either way and adds the reason where there is one.
+
+Issue \#1105 gave the status a writer. `transitionTableOrderStatus` is the only one: it validates the move against the matrix, applies it in a transaction against the status the caller says it saw, and updates four fields - `status`, `statusChangedAt`, `statusChangedByUserId` and, on a cancellation and nowhere else, `cancellationReason`. The lines, the prices, the total, the visit and the guest are what the order **is**, which is the whole of "immutable except for its status" enforced rather than promised. Two members of staff pressing different buttons in the same second produce one change and one sentence naming what the order holds now, which is what `expectedStatus` is for - and is also why this callable needs no idempotency key where the table transition of issue \#1096 needed one.
+
+The caller is admitted by `requireTableStateAuthority`, deliberately the same guard a table transition uses: operating a restaurant during service is one permission, and a second list of who may work the pass would be free to disagree with who may seat a table. A cancellation carries a reason of at most 200 characters, required when cancelling and refused on every other status (`RD-TS-16`) - a reason attached to a served dish would be a second, contradictory account of what happened to it.
+
+Staff read them through a **collection group** rather than through the visit (`RD-TS-14`). `collectionGroup('orders').where('restaurantId', '==', id)`, with a second constraint narrowing to the open statuses, and a rule reading `resource.data.restaurantId` because a collection-group match has no `{restaurantId}` in its path. That makes the `where` the permission rather than a filter, in the way `RD-TS-12` makes the guest's own. It needs a collection-group index exemption, declared in `firestore.indexes.json`, and indexes deploy by hand.
 
 ## Relationships
 
@@ -293,7 +301,8 @@ staff keep an unconditional `list` over the whole table.
 - **Nothing writes `sessionIdleTimeoutMinutes`.** Every restaurant therefore uses the two-hour default, which is the intended default rather than a gap - but a restaurant that wants a shorter one has no way to say so.
 - The model, the storage and the backend exist (issue \#1095). **No app surface uses them yet.** The staff view of issue \#1093 and the actions of issue \#1094 read and write live table state, so seating a table already opens a visit, but nothing shows the visit, its party size or its duration, and nothing calls `moveTableVisit`.
 - The party size is therefore never recorded through the UI. The sheet of issue \#1094 takes an optional count and writes it to the audit entry's `reason`; moving it onto `TableVisit.guestCount`, which now exists to hold it, is left to the surface that consumes visits.
-- **Nothing shows staff an order.** Issue \#1103 writes it and the rules admit every reader of the floor plan, but the business app draws no queue and nothing moves an order past `submitted`. That is issue \#1105, and until it lands a guest can send an order that reaches no screen - which is why table ordering stays off for every restaurant. The guest's half of that lifecycle is ready and idle: issue \#1104 renders every status live, so the first thing \#1105 writes will show up on a phone without a further release.
+- **An order placed before a party moved stays grouped under the table it was ordered from.** Issue \#1105's queue groups by `TableOrder.tableId`, which is what the kitchen wrote on the ticket and is right for the pass; it is not what a waiter carrying the plates reads, and nothing yet says "this party is now at table 9". Recorded in [[Current State - Open Questions]].
+- **Indexes are deployed by hand, like the rules.** Issue \#1105's queue query is a collection group, and Firestore creates no exemption for one on its own - so merging the change does nothing in production until `npx nx firebase-deploy-indexes bite-tribe-firebase` has run, and a queue opened before that is refused rather than empty.
 - **An order sent twice creates two orders.** Idempotency and offline tolerance are issue \#1108. `TableOrder` carries no `idempotencyKey` yet, deliberately: a key the client would have to unlearn is worse than the absence.
 - **A guest's phone cannot read the visit, and no longer needs to.** Issue \#1104 decided it (`RD-TS-12`): the running total on the guest's screen is a sum over their own orders, cancelled ones excluded, and the shared bill is settled at the table. What a guest is shown when their party is **moved** is still unowned - the session goes on naming the table they scanned, and nothing tells them the table number on their screen has changed.
 - Rules are deployed by hand. Merging a change to `firestore.rules` changes nothing in production until somebody runs the deploy - see [[Architecture - Firebase]].

@@ -8,11 +8,19 @@ import { ConnectionStatus } from '@capacitor/network';
 import { Preferences } from '@capacitor/preferences';
 import { NetworkStatusService } from 'common/networkstatus';
 import {
+  TableOrderQueueService,
+  TableOrderQueueSnapshot,
   TableStateDataAccessService,
   TableStateSnapshot,
   TableTransitionQueueService,
 } from 'bite-tribe-business/table-management-data-access';
-import { RestaurantTable, Room, TableState, TableStatus } from 'model';
+import {
+  RestaurantTable,
+  Room,
+  TableOrder,
+  TableState,
+  TableStatus,
+} from 'model';
 import { BehaviorSubject, of } from 'rxjs';
 import { AnalyticsService, AuthService } from 'ta-firestore';
 import { ToastService } from 'toast';
@@ -79,6 +87,7 @@ const state = (
 describe(TablePlanService.name, () => {
   let service: TablePlanService;
   let feed: BehaviorSubject<TableStateSnapshot>;
+  let orderFeed: BehaviorSubject<TableOrderQueueSnapshot>;
   let connection: WritableSignal<ConnectionStatus | undefined>;
   let floorPlan: Record<string, jest.Mock>;
 
@@ -92,6 +101,16 @@ describe(TablePlanService.name, () => {
   const states = {
     next: (list: TableState[], over: Partial<TableStateSnapshot> = {}): void =>
       feed.next({ states: list, at: Date.now(), live: true, ...over }),
+  };
+
+  /** One delivery of the order listener, as the queue's data access shapes it. */
+  const orders = {
+    next: (list: Partial<TableOrder>[]): void =>
+      orderFeed.next({
+        orders: list as TableOrder[],
+        at: Date.now(),
+        live: true,
+      }),
   };
 
   const goOffline = (): void => connection.set({ connected: false } as never);
@@ -140,6 +159,11 @@ describe(TablePlanService.name, () => {
 
   beforeEach(async () => {
     jest.useFakeTimers().setSystemTime(NOW);
+    orderFeed = new BehaviorSubject<TableOrderQueueSnapshot>({
+      orders: [],
+      at: NOW,
+      live: true,
+    });
     feed = new BehaviorSubject<TableStateSnapshot>({
       states: [],
       at: NOW,
@@ -221,6 +245,12 @@ describe(TablePlanService.name, () => {
             tableStates$: jest.fn(() => feed.asObservable()),
             transition,
           },
+        },
+        // The plan reads the open orders through their own listener so it can
+        // badge the tables the kitchen still owes (GitHub issue #1105).
+        {
+          provide: TableOrderQueueService,
+          useValue: { openOrders$: jest.fn(() => orderFeed.asObservable()) },
         },
         { provide: NetworkStatusService, useValue: { status: connection } },
         {
@@ -310,6 +340,57 @@ describe(TablePlanService.name, () => {
       'table-1',
       'table-2',
     ]);
+  });
+
+  /**
+   * The room view stays the primary screen (GitHub issue #1105): which tables
+   * the kitchen still owes is answered here, and what those orders are is one
+   * press away in the queue.
+   */
+  describe('the open orders on the plan', () => {
+    const queued = (id: string, tableId: string): Partial<TableOrder> => ({
+      id,
+      restaurantId: 'restaurant-1',
+      visitId: 'visit-1',
+      tableId,
+      status: 'submitted',
+      submittedAt: NOW,
+    });
+
+    it('badges a table with what the kitchen still owes it', () => {
+      orders.next([
+        queued('a', 'table-1'),
+        queued('b', 'table-1'),
+        queued('c', 'table-2'),
+      ]);
+
+      expect(service.items().map((item) => [item.id, item.openOrders])).toEqual(
+        [
+          ['table-1', 2],
+          ['table-2', 1],
+        ],
+      );
+    });
+
+    /**
+     * Absent rather than zero, so the canvas has one state for "no badge"
+     * rather than two - and a plan opened before the order listener has
+     * delivered draws no badges instead of a nought on every table.
+     */
+    it('leaves a table with nothing outstanding unbadged', () => {
+      orders.next([queued('a', 'table-1')]);
+
+      expect(
+        service.items().find((item) => item.id === 'table-2')?.openOrders,
+      ).toBeUndefined();
+      expect(service.openOrderCount()).toBe(1);
+    });
+
+    it('counts the whole restaurant, not the open room', () => {
+      orders.next([queued('a', 'table-1'), queued('b', 'table-9')]);
+
+      expect(service.openOrderCount()).toBe(2);
+    });
   });
 
   it('switches rooms without reading anything again', () => {

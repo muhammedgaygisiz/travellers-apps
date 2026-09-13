@@ -196,6 +196,36 @@
   which the business app had never fed, so it had answered "connected" for the
   whole of every session whatever the wifi did.
 
+  Stage 3 is nearly complete, and its narrative lives on
+  [[UC - Order At The Table Through A QR Code]] rather than here: seven of its ten
+  children have landed, each one a section of that page, and the thirteen product
+  decisions they settled are `RD-TS-1` to `RD-TS-17` in [[Recorded Decisions]].
+
+  Issue \#1105 is the one worth finding from this side, because it is where the
+  two halves of the epic meet. Until it landed a guest could send an order that
+  no screen in the restaurant drew; it gave the restaurant the queue, every order
+  status after `submitted`, the cancellation reason issue \#1104 had declared and
+  left empty, an order-count badge on the live floor plan of [[epic-1071]], and a
+  push through the notification infrastructure of [[epic-850]] to the owner and
+  every account associated with the restaurant.
+
+  Two decisions in it cross stage boundaries. The queue is a **collection-group**
+  query scoped by a field on the order rather than a listener per open visit
+  (`RD-TS-14`), which makes it the first client query in this repository whose
+  `where` is the permission rather than a filter - the mechanism `RD-TS-12` had
+  introduced for a guest, turned towards a restaurant, and the reason
+  [[Architecture - Firebase]] now states the pattern. And a queue row deliberately
+  does **not** get the optimistic layer issue \#1094 built for a table
+  (`RD-TS-15`): a table that does not move while a party stands in front of the
+  host reads as a tap that missed, and an order that appeared to move and then
+  moved back is a kitchen that has already started cooking.
+
+  What stage 3 still owes is issue \#1106's assistance and bill requests, issue
+  \#1107's abuse protection - which also owns the pending-session signal no screen
+  draws - and issue \#1108's idempotent submission. And, as everywhere else in
+  this epic, the rules and now the indexes deploy by hand, so none of it binds
+  production until both deploys have run.
+
 Every child of stage 0 has now landed, and the stage is still not finished. Two things
 remain and neither has an owning issue: the rules deploy by hand, so \#1078 binds
 production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run, and the

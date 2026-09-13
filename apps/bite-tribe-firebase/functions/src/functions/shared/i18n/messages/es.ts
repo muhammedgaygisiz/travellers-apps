@@ -37,6 +37,9 @@ export const es: NotificationMessages = {
   'countryBadge.followerTitle': '🌍 Nueva insignia de país',
   'countryBadge.followerBody':
     '{{user}} ha desbloqueado la insignia de {{country}}',
+  'newTableOrder.title': '🔔 Nuevo pedido',
+  'newTableOrder.body': 'La mesa {{table}} acaba de pedir.',
+  'newTableOrder.bodyWithoutTable': 'Una mesa acaba de pedir.',
   'newVersion.title': '🚀 Nueva versión disponible',
   'newVersion.bodyIos':
     'Ya está la nueva versión de BiteTribe en la App Store. Actualiza ahora para no perderte nada.',

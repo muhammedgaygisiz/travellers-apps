@@ -38,6 +38,9 @@ export const de: NotificationMessages = {
   'countryBadge.followerTitle': '🌍 Neues Länder-Badge',
   'countryBadge.followerBody':
     '{{user}} hat das Badge für {{country}} freigeschaltet',
+  'newTableOrder.title': '🔔 Neue Bestellung',
+  'newTableOrder.body': 'Tisch {{table}} hat gerade bestellt.',
+  'newTableOrder.bodyWithoutTable': 'Ein Tisch hat gerade bestellt.',
   'newVersion.title': '🚀 Neue Version verfügbar',
   'newVersion.bodyIos':
     'Eine neue BiteTribe-Version ist im App Store bereit. Jetzt aktualisieren und nichts verpassen.',

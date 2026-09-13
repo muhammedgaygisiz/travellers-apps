@@ -53,6 +53,17 @@ export const liveRoomItems = (
   tables: readonly RestaurantTable[],
   states: ReadonlyMap<string, TableState>,
   copy: (status: TableStatus, state: TableState | undefined) => TableStatusCopy,
+  /**
+   * How many orders the kitchen still owes each table (GitHub issue #1105).
+   *
+   * A map rather than a field on the table, because it comes from a different
+   * listener with a different lifetime: the plan draws from the moment the
+   * rooms load and the order count arrives whenever its own first snapshot
+   * does. A table missing from the map has nothing outstanding, which is the
+   * ordinary case and also what an empty map means before that snapshot - so a
+   * plan opened a moment early draws no badges rather than a row of noughts.
+   */
+  openOrders: ReadonlyMap<string, number> = new Map(),
 ): FloorPlanItem[] => {
   if (!room) {
     return [];
@@ -66,11 +77,16 @@ export const liveRoomItems = (
       const status = statusOfTable(table, states);
       const { label, duration } = copy(status, state);
 
+      const orders = openOrders.get(table.id) ?? 0;
+
       return {
         ...itemFromTable(table),
         status,
         statusLabel: label,
         ...(duration === undefined ? {} : { statusDuration: duration }),
+        // Absent rather than `0`, so "no badge" is one state on the item
+        // rather than two the canvas has to tell apart.
+        ...(orders > 0 ? { openOrders: orders } : {}),
       };
     });
 

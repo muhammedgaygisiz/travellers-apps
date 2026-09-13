@@ -18,6 +18,13 @@ import { isPrivacyPage, isAccountDeletionPage, PATH } from 'utils';
  * So the guard waits on the restoration itself rather than a timer, and when
  * the visitor really is signed out it remembers where they were headed, so
  * signing in returns them to it.
+ *
+ * It asks for a **member** and not merely for a session (issue #1101). A guest
+ * who scanned a table QR code signs in anonymously to hold their table session,
+ * and that session must not be a way into the app: `getUser()` would report
+ * them as signed in and hand them the feed, the gallery and a profile page with
+ * nobody behind it. The table route is public and carries no auth guard, so it
+ * is unaffected.
  */
 export const authGuard: CanActivateFn = async (
   _route,
@@ -35,13 +42,13 @@ export const authGuard: CanActivateFn = async (
     return true;
   }
 
-  if (authService.getUser()) {
+  if (authService.getMember()) {
     return true;
   }
 
   await authService.whenAuthStateRestored();
 
-  if (authService.getUser()) {
+  if (authService.getMember()) {
     return true;
   }
 

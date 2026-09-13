@@ -85,6 +85,21 @@ export interface TableOrderingSettings {
    * case of a flag is one that never does.
    */
   pausedUntilTimestamp?: number;
+  /**
+   * How long a guest's table session survives with nothing happening on it, in
+   * minutes (issue #1101).
+   *
+   * Absent on every restaurant, and absent means
+   * `DEFAULT_TABLE_SESSION_IDLE_MINUTES` rather than "no timeout" - a session
+   * that never expires is one a party who left without anybody closing the
+   * table keeps forever, which is precisely the case the timeout exists for.
+   *
+   * Here rather than on the restaurant because it is an ordering setting: a
+   * restaurant with `enabled: false` has no sessions for it to govern, and a
+   * field that only means something when another field is true belongs beside
+   * that field.
+   */
+  sessionIdleTimeoutMinutes?: number;
 }
 
 /**

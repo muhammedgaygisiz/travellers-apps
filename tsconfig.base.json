@@ -207,6 +207,12 @@
         "libs/bite-tribe/privacy-policy/src/index.ts"
       ],
       "bite-tribe/support": ["libs/bite-tribe/support/src/index.ts"],
+      "bite-tribe/table-session": [
+        "libs/bite-tribe/table-session/page/src/index.ts"
+      ],
+      "bite-tribe/table-session-data-access": [
+        "libs/bite-tribe/table-session/data-access/src/index.ts"
+      ],
       "bite-tribe/delete-account": [
         "libs/bite-tribe/delete-account/src/index.ts"
       ],

@@ -83,6 +83,20 @@ const REVOKED_TOKEN = 'TEST-REVOKED-TABLE-TOKEN-1';
 const STORED_TRANSITION = 'stored-transition';
 const STORED_VISIT = 'stored-visit';
 
+/**
+ * The two guests at the owned table, and the names their sessions are stored
+ * under (issue #1101).
+ *
+ * The names are derived by `tableSessionId`, which this project's specs cannot
+ * import - the model library is outside the `rootDir` - so they are spelled out
+ * here and `table-session-parity.spec.ts` is what keeps the derivation itself
+ * honest. `CONSUMER` is one of them, because the guest who reads their own
+ * session is an ordinary account with no role at all.
+ */
+const OTHER_GUEST = 'other-guest-uid';
+const CONSUMER_SESSION = `${OWNED_TABLE.length}_${OWNED_TABLE}_${CONSUMER}`;
+const OTHER_GUEST_SESSION = `${OWNED_TABLE.length}_${OWNED_TABLE}_${OTHER_GUEST}`;
+
 /** The version the owned room is stored at, so a stale save has one to miss. */
 const STORED_ROOM_VERSION = 3;
 
@@ -360,6 +374,51 @@ beforeEach(async () => {
         openedAt: 1789030800000,
         guestCount: 4,
         openedByUserId: STRANGER,
+      },
+    );
+
+    // Two guests at that table, written only by `startTableSession`,
+    // `leaveTableSession` and `transitionTableState` through the Admin SDK
+    // (issue #1101). Named `{length}_{tableId}_{uid}`, so the phone that
+    // started a session can derive the name and read its own back.
+    await setDoc(
+      doc(
+        db,
+        'restaurants',
+        OWNED_RESTAURANT,
+        'tableSessions',
+        CONSUMER_SESSION,
+      ),
+      {
+        id: CONSUMER_SESSION,
+        restaurantId: OWNED_RESTAURANT,
+        tableId: OWNED_TABLE,
+        guestUserId: CONSUMER,
+        status: 'active',
+        visitId: STORED_VISIT,
+        startedAt: 1789030800000,
+        lastActiveAt: 1789030800000,
+        isAnonymousGuest: true,
+      },
+    );
+    await setDoc(
+      doc(
+        db,
+        'restaurants',
+        OWNED_RESTAURANT,
+        'tableSessions',
+        OTHER_GUEST_SESSION,
+      ),
+      {
+        id: OTHER_GUEST_SESSION,
+        restaurantId: OWNED_RESTAURANT,
+        tableId: OWNED_TABLE,
+        guestUserId: OTHER_GUEST,
+        status: 'active',
+        visitId: STORED_VISIT,
+        startedAt: 1789030800000,
+        lastActiveAt: 1789030800000,
+        isAnonymousGuest: true,
       },
     );
 
@@ -1435,6 +1494,138 @@ describe('table visits', () => {
      */
     it('refuses the owner deleting a visit', async () => {
       await assertFails(deleteDoc(visitDoc(asOwner(), OWNED_RESTAURANT)));
+    });
+  });
+});
+
+describe('table sessions', () => {
+  const sessions = (db: Firestore, restaurantId: string): CollectionReference =>
+    collection(db, 'restaurants', restaurantId, 'tableSessions');
+
+  const sessionDoc = (db: Firestore, sessionId: string): DocumentReference =>
+    doc(sessions(db, OWNED_RESTAURANT), sessionId);
+
+  describe('the guest reads their own', () => {
+    /**
+     * The whole reason a guest signs in anonymously rather than being handed an
+     * opaque secret to replay: with a uid, the phone derives the document name
+     * and subscribes to it, and the screen that says "the restaurant has
+     * confirmed your table" is a realtime listener rather than a poll against a
+     * callable.
+     */
+    it('lets a guest read the session named after them', async () => {
+      const snapshot = await assertSucceeds(
+        getDoc(sessionDoc(asConsumer(), CONSUMER_SESSION)),
+      );
+
+      expect(snapshot.data()).toMatchObject({
+        guestUserId: CONSUMER,
+        status: 'active',
+        visitId: STORED_VISIT,
+      });
+    });
+
+    /**
+     * The uid is read off the stored document rather than off the path, so a
+     * guest who guesses a document name still fails the clause. The friend at
+     * the same table is the case that has to fail: the name is derivable from a
+     * table id the guest knows and a uid they might.
+     */
+    it('refuses a guest the session of the friend beside them', async () => {
+      await assertFails(getDoc(sessionDoc(asConsumer(), OTHER_GUEST_SESSION)));
+    });
+
+    /**
+     * `get` and not `list`. One query would hand a guest everybody at their
+     * table, and the next one every table in the restaurant - which is the
+     * enumeration defence the QR tokens are built on, applied to the people.
+     */
+    it('refuses a guest listing the collection', async () => {
+      await assertFails(getDocs(sessions(asConsumer(), OWNED_RESTAURANT)));
+    });
+
+    it('refuses an unauthenticated reader entirely', async () => {
+      await assertFails(getDoc(sessionDoc(anonymously(), CONSUMER_SESSION)));
+    });
+  });
+
+  describe('staff read them', () => {
+    /**
+     * A pending session is a signal to the people on the floor, so it goes to
+     * whoever reads the floor plan - the same list as the tables, their live
+     * state and the visits. Two lists of readers for one dining room would
+     * drift.
+     */
+    it('lets staff, the owner and an operator list them', async () => {
+      await assertSucceeds(getDocs(sessions(asStaff(), OWNED_RESTAURANT)));
+      await assertSucceeds(getDocs(sessions(asOwner(), OWNED_RESTAURANT)));
+      await assertSucceeds(getDocs(sessions(asOperator(), OWNED_RESTAURANT)));
+    });
+
+    it('refuses a business account that does not hold this restaurant', async () => {
+      await assertFails(getDocs(sessions(asOtherBusiness(), OWNED_RESTAURANT)));
+    });
+  });
+
+  /**
+   * **The half that matters.** A client able to write here could set its own
+   * status to `active` and name any visit it liked - which is the whole of what
+   * the pending signal exists to prevent: somebody who never got up from their
+   * sofa ordering at a table in a restaurant.
+   */
+  describe('writes', () => {
+    const forged = {
+      id: 'forged-session',
+      restaurantId: OWNED_RESTAURANT,
+      tableId: OWNED_TABLE,
+      guestUserId: CONSUMER,
+      status: 'active',
+      visitId: STORED_VISIT,
+      startedAt: 1789030900000,
+      lastActiveAt: 1789030900000,
+      isAnonymousGuest: true,
+    };
+
+    it('refuses a guest creating a session for themselves', async () => {
+      await assertFails(
+        addDoc(sessions(asConsumer(), OWNED_RESTAURANT), forged),
+      );
+      await assertFails(
+        setDoc(sessionDoc(asConsumer(), 'forged-session'), forged),
+      );
+    });
+
+    /**
+     * The one a rule that only checked ownership would let through: the guest
+     * owns this document, and promoting it from `pending` to `active` is
+     * exactly the confirmation staff are supposed to give.
+     */
+    it('refuses a guest activating their own pending session', async () => {
+      await assertFails(
+        updateDoc(sessionDoc(asConsumer(), CONSUMER_SESSION), {
+          status: 'active',
+          visitId: STORED_VISIT,
+        }),
+      );
+    });
+
+    it('refuses a guest leaving by writing the document', async () => {
+      await assertFails(
+        updateDoc(sessionDoc(asConsumer(), CONSUMER_SESSION), {
+          status: 'left',
+          endedAt: 1789030900000,
+        }),
+      );
+      await assertFails(deleteDoc(sessionDoc(asConsumer(), CONSUMER_SESSION)));
+    });
+
+    it('refuses staff, the owner and the operator the same writes', async () => {
+      await assertFails(addDoc(sessions(asStaff(), OWNED_RESTAURANT), forged));
+      await assertFails(addDoc(sessions(asOwner(), OWNED_RESTAURANT), forged));
+      await assertFails(
+        addDoc(sessions(asOperator(), OWNED_RESTAURANT), forged),
+      );
+      await assertFails(deleteDoc(sessionDoc(asOwner(), CONSUMER_SESSION)));
     });
   });
 });

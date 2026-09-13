@@ -19,6 +19,17 @@ export const PATH = {
   // Public store-review URL. The App Store's Support URL field takes a page,
   // not an address, and publishes it on the product page.
   SUPPORT: 'support',
+  /**
+   * The scanned table QR code (GitHub issue #1101).
+   *
+   * One letter, because the whole address is printed on a sticker and encoded
+   * in a QR code: `https://bitetribe.app/t/{token}`. The token is 26 characters
+   * of Crockford base32 and the code is denser and more forgiving the shorter
+   * the URL is, so every character of path is one the guest's camera has to
+   * read in a dim restaurant. `TABLE_SCAN_PREFIX` in the business app's QR
+   * sheet is the other half of this constant and has to agree with it.
+   */
+  TABLE_SCAN: 't',
   // Public store-review URL. It explains the flow; it does not perform it.
   ACCOUNT_DELETION: 'account-deletion',
   // Authenticated in-app flow that actually deletes the account.

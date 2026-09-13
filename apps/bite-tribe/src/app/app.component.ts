@@ -100,6 +100,25 @@ export class AppComponent implements OnInit, OnDestroy {
       if (path.startsWith('/s/bite/')) {
         const biteId = path.split('/s/bite/')[1];
         void this.navController.navigateForward(['bite', biteId]);
+
+        return;
+      }
+
+      // A scanned table QR code (GitHub issue #1101). The sticker carries
+      // `https://bitetribe.app/t/{token}`, so a guest with the app installed
+      // opens it here rather than in a browser tab - and lands on the same
+      // public screen either way. `navigateRoot` and not `navigateForward`: the
+      // guest arrived by pointing a camera at a table, so there is no history
+      // behind them and a back button offering one would be offering a page
+      // they never visited.
+      const tablePrefix = `/${PATH.TABLE_SCAN}/`;
+
+      if (path.startsWith(tablePrefix)) {
+        const token = path.slice(tablePrefix.length);
+
+        if (token) {
+          void this.navController.navigateRoot([PATH.TABLE_SCAN, token]);
+        }
       }
     });
   }

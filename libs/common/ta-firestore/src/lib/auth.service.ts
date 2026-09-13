@@ -107,6 +107,62 @@ export class AuthService {
   }
 
   /**
+   * The signed-in **member**, or nothing (GitHub issue #1101).
+   *
+   * Since a guest at a table signs in anonymously to hold a table session,
+   * "somebody is signed in" and "a BiteTribe member is signed in" stopped being
+   * the same question. {@link getUser} answers the first, which is what every
+   * caller that writes a document for the current account needs; this answers
+   * the second, which is what the route guards need.
+   *
+   * A separate method rather than a narrowing of `getUser`, because the twenty
+   * or so callers of that one are asking the first question and are right to.
+   * An anonymous guest *does* have a uid, and their session document is written
+   * against it.
+   */
+  getMember(): User | null | undefined {
+    const user = this.getUser();
+
+    return user?.isAnonymous ? null : user;
+  }
+
+  /**
+   * Signs in anonymously, so a guest who scanned a table code has an identity
+   * to hold a session against (GitHub issue #1101).
+   *
+   * Called only from the table-scan flow, and only when nobody is signed in -
+   * an existing session is kept, so a member who scans a code orders as
+   * themselves and a guest who scans a second table keeps the uid their first
+   * session belongs to.
+   *
+   * What the anonymity buys is not privacy but a *stable* identity without an
+   * account: the uid is what `firestore.rules` matches a session document
+   * against, and what `linkWith*` later upgrades in place, so the guest who
+   * decides at the end of the meal to keep the Bite they just ate does not lose
+   * the session that knows what they ordered.
+   *
+   * `createUserOnAuthCreate` skips a provider-less account, so this writes no
+   * `/users` document. A guest who never registers leaves a Firebase Auth
+   * record and nothing in the product.
+   */
+  async signInAsGuest(): Promise<User | null> {
+    const existing = this.getUser();
+
+    if (existing) {
+      return existing;
+    }
+
+    const { user } = await FirebaseAuthentication.signInAnonymously();
+
+    if (user) {
+      this._authStateChange$.next({ user });
+      this.markAuthStateRestored();
+    }
+
+    return user ?? null;
+  }
+
+  /**
    * Force-refreshes the current user's ID token. Returns `true` when the token
    * was refreshed, `false` when the session is no longer valid (e.g. the
    * refresh token was revoked, or went stale after long inactivity or an app
@@ -223,8 +279,17 @@ export class AuthService {
     );
   }
 
+  /**
+   * Whether a **member** is signed in.
+   *
+   * An anonymous guest is not one (issue #1101). Everything downstream of this
+   * - the menu, the shell, the account surface - is built for somebody with a
+   * profile, and a guest who scanned a table code has none: reporting them as
+   * logged in would walk them into an app they never signed up for, with an
+   * empty name at the top of it.
+   */
   isLoggedIn$ = this.authStateChange$.pipe(
-    map((authState) => !!authState?.user),
+    map((authState) => !!authState?.user && !authState.user.isAnonymous),
     distinctUntilChanged(),
     shareReplay(1),
   );

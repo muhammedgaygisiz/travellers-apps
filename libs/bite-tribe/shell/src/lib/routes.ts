@@ -237,6 +237,26 @@ const APP_ROUTES: Routes = [
       import('bite-tribe/privacy-policy').then((m) => m.PrivacyPolicy),
     title: 'Privacy Policy',
   },
+  /**
+   * Where a scanned table QR code lands (GitHub issue #1101).
+   *
+   * **No auth guard, deliberately.** A guest at a table has no BiteTribe
+   * account and may never want one, and the code printed on the table is a
+   * `bitetribe.app` address - so a sign-in wall here would be a wall in front
+   * of a restaurant's own menu. The screen signs them in anonymously when they
+   * confirm the table, and `authGuard` does not accept an anonymous session, so
+   * that identity opens nothing else.
+   *
+   * It therefore also sits outside `gateAuthenticatedRoutes`, which appends the
+   * onboarding gate to every route carrying the auth guard: a guest who never
+   * signed up must not be asked to finish an onboarding they never started.
+   */
+  {
+    path: `${PATH.TABLE_SCAN}/:token`,
+    loadComponent: () =>
+      import('bite-tribe/table-session').then((m) => m.TableSession),
+    title: 'Table',
+  },
   {
     path: PATH.SUPPORT,
     loadComponent: () => import('bite-tribe/support').then((m) => m.Support),

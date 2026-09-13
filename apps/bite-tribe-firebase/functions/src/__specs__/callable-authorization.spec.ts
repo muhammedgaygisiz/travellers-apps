@@ -111,6 +111,18 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   updateLastSeen: 'authenticated',
   updateUserMetadata: 'authenticated',
 
+  // A guest attaching to, or leaving, the party at a table they scanned
+  // (issue #1101). `authenticated` rather than `public`, and the only two
+  // callables for which an *anonymous* session is enough: a session has to
+  // belong to somebody, or the guest's phone could not read it back through
+  // the rules and `linkWith*` could not turn it into an account later without
+  // the session changing hands. What the door opens onto is one document named
+  // after the caller's own uid - neither callable takes a `guestUserId`, and
+  // the restaurant, table and visit all come from a token the caller had to
+  // hold, checked against the twelve rules of issue #1100.
+  startTableSession: 'authenticated',
+  leaveTableSession: 'authenticated',
+
   // The redirect target of a shared Bite link. It is opened by whoever was
   // sent the link, which is the point of sharing one.
   handleSharedLinkToBite: 'public',

@@ -1,0 +1,8 @@
+{
+  "name": "bite-tribe/table-session-data-access",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bite-tribe/table-session/data-access/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:bite-tribe", "type:data-access"]
+}

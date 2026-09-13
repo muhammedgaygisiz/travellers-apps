@@ -18,7 +18,7 @@ The Table is the unit that connects the physical restaurant to everything digita
 - A Table can be enabled or disabled. A disabled Table stays in the plan and is not orderable.
 - A Table can be moved between Rooms while keeping its identity, its label, and its QR token, so printed codes stay valid.
 - **A scan resolves to a Table only if the Restaurant behind it can take the order.** Six rules, in order: the Restaurant exists and is held by a business account, it has table ordering enabled, the Table is in the published plan and in service, the token is active, the Restaurant is accepting orders right now, and the menu has something on it. A scan that fails one of them is answered with which one, not with a generic error - a guest at a table who is told "something went wrong" puts their phone away. See [[UC - Order At The Table Through A QR Code]] and issue \#1100.
-- **A scanned code never proves the guest is there.** Resolution reads and writes nothing, so the worst a remote scan can do is learn that a restaurant is open. What a scan costs the restaurant starts at the session (issue \#1101).
+- **A scanned code never proves the guest is there.** Resolution reads and writes nothing, so the worst a remote scan can do is learn that a restaurant is open. **A scan still does not occupy the table** (issue \#1101, `RD-TS-1`): starting a session writes one document naming the guest, and the table's live state is untouched until staff seat it. So what a remote scan costs the restaurant is one row on a screen, and never a table the next party cannot be given.
 - Every enabled Table has exactly one active QR token.
 - A QR token is opaque and non-guessable. It never encodes the table number.
 - Rotating a QR token revokes the previous one and does not change the Table's identity or history.
@@ -118,7 +118,7 @@ Table returns to an available state
 
 ## Permissions
 
-- Guest: resolve one Table through a valid QR token and see restaurant, room, and table label. No other table data.
+- Guest: resolve one Table through a valid QR token and see restaurant, room, and table label; hold one session at that table and read that session and no other. No other table data.
 - Restaurant staff: read tables, read and change live table state, open and close visits. No floor-plan writes.
 - Restaurant owner: full configuration of tables, labels, capacities, enablement, and QR rotation.
 - Admin: read for support. Configuring tables is restaurant maintenance, and `admin` does not imply `business` (issue \#1164), so a change goes through the assigned owner.
@@ -143,8 +143,13 @@ Firestore layout:
 /restaurants/{restaurantId}/tables/{tableId}
 /restaurants/{restaurantId}/tableStates/{tableId}
 /restaurants/{restaurantId}/tableStateTransitions/{transitionId}
+/restaurants/{restaurantId}/tableSessions/{sessionId}
 /tableTokens/{token}
 ```
+
+`tableSessions` is a guest's attachment to a table rather than anything about
+the table itself, and it is documented on [[Table Visit]] with the visit it
+attaches to.
 
 `/tableTokens/{token}` is top-level and publicly readable so a scan resolves in a single read. It exposes only what a scan needs and is never client-writable.
 

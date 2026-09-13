@@ -2,20 +2,33 @@
 
 ## Status
 
+**Level:** L1
+
 Partly implemented. Specified through issue \#1072 as stage 3 of issue \#735, and issue \#1073 as stage 4.
 
-Two of the ten children have landed and both are backend or model work. Issue
-\#1099 gave menu items the identity an order line hangs from, and issue \#1100
-made a scanned token resolve: `resolveTableQrToken` validates the six rules
-below and answers with a restaurant, a room, a table and a menu, or with one of
-twelve distinct refusal reasons.
+Three of the ten children have landed. Issue \#1099 gave menu items the identity
+an order line hangs from; issue \#1100 made a scanned token resolve, validating
+the six rules below and answering with a restaurant, a room, a table and a menu
+or one of twelve distinct refusal reasons; and issue \#1101 gave the guest a
+screen, a session and an identity to hold it with.
 
-Nothing a guest can see uses either. No route answers `/t/:token`, no surface
-turns `Restaurant.tableOrdering.enabled` on, and the refusal reasons have no
-copy in the locale files - so a code scanned in a restaurant today reaches the
-consumer app's unknown-route handling, and the resolution behind it would refuse
-with `tableOrderingDisabled` if it were called. The scan screen is issue \#1101
-and the menu it leads to is issue \#1102.
+**A scanned code now reaches something.** `/t/:token` is a public route in the
+consumer app, the twelve refusal reasons have copy in all eleven locale files,
+and a guest who confirms the table is signed in anonymously and attached to the
+table's visit - or, when staff have not seated it, to a pending session that
+says so. The four product decisions this use case was waiting on are settled and
+recorded as `RD-TS-1` to `RD-TS-5` in [[Recorded Decisions]].
+
+**Two things still stop it working in a real restaurant.** Nothing turns
+`Restaurant.tableOrdering.enabled` on, so every scan in production refuses with
+`tableOrderingDisabled`; and nothing shows staff a pending session, so the
+signal a scan raises is one no screen draws. Both sit with later children rather
+than nowhere - the switch with issue \#1102, whose menu-only mode is that flag
+seen from the guest's side, and the staff-visible session with issue \#1107,
+which this epic's own proposal for fraudulent scans names. Both are recorded in
+[[Current State - Open Questions]], together with two places where those issues
+as written disagree with what this one built. The menu the confirmation leads to
+is issue \#1102, and ordering is issue \#1103.
 
 ## Goal
 
@@ -31,8 +44,8 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 
 - The guest scans the QR code on the table.
 - The backend resolves the opaque token to a restaurant, room, table, and menu.
-- The guest confirms an unambiguous context screen: "You are ordering at Sakura Kitchen, table 12".
-- The guest joins the table's open visit, or raises a pending signal that staff confirm.
+- The guest confirms an unambiguous context screen: "You are ordering at Sakura Kitchen, table 12". Implemented, issue \#1101.
+- The guest joins the table's open visit, or raises a pending signal that staff confirm. Implemented, issue \#1101.
 - The guest browses the menu, with unavailable items marked and not addable, a variant of an unavailable dish included.
 - The guest builds a cart and submits an order.
 - Staff see the order in a queue attached to the correct table, accept it, and update its status.
@@ -85,7 +98,9 @@ and the floor-plan geometry on the table stay where they are.
 ## Key Behaviours
 
 - A QR token is opaque and non-guessable, and never encodes the table number.
-- A QR code identifies a table context. It does not prove the guest is physically present. The operational flow is designed so a remote scan cannot cause harm beyond a rejected or staff-visible pending session.
+- A QR code identifies a table context. It does not prove the guest is physically present. The operational flow is designed so a remote scan cannot cause harm beyond a rejected or staff-visible pending session. Delivered by issue \#1101 and recorded as `RD-TS-1`: starting a session writes one document naming the guest and leaves the table's live state untouched, so what a scan from the car park costs the restaurant is one row on a screen.
+- A guest is signed in **anonymously**, and an anonymous account is not a member (`RD-TS-4`). The uid is what the rules match the guest's own session document against and what `linkWith*` upgrades in place; it writes no `/users` document and does not pass the app's route guards.
+- The confirmation screen is acknowledged before anything else is possible, because the sticker is a thing anybody can point a camera at - so a code swapped between two tables is caught by the person sitting at one of them rather than by the kitchen.
 - An order belongs to a visit, not directly to a table, so a party that moves keeps its orders.
 - Order lines snapshot the menu item name, price, and currency at submission, so the price the guest saw is the price they are charged.
 - Submission carries an idempotency key, so a double tap on a flaky restaurant network produces one order.
@@ -100,11 +115,16 @@ address at `https://bitetribe.app/t/{token}` - the origin from
 every character in the URL costs QR modules and every module costs printed
 millimetres at the distance the code has to be read from.
 
-Nothing answers `/t/:token` yet. Issue \#1100 gave the address a backend but not
-a route: a guest scanning a code printed today still reaches the consumer app's
-own handling of an unknown route. Mounting that route on the resolution is the
-first thing this use case owes the codes already in restaurants, and it is issue
-\#1101's opening move.
+Issue \#1101 answered it. `/t/:token` is a public route in the consumer shell,
+carrying no auth guard and therefore outside `gateAuthenticatedRoutes` - a guest
+who never signed up must not be asked to finish an onboarding they never
+started. The deep-link handler in `app.component.ts` sends the same address to
+the same screen for a guest who has the app installed.
+
+The two constants are now one. `TABLE_SCAN_PATH` in the business app's QR sheet
+is built from `PATH.TABLE_SCAN` rather than spelled beside it, because two
+constants naming one printed URL can disagree and the disagreement would be
+discovered on a sticker already glued to a table.
 
 ## The Identity An Order Line Hangs From
 
@@ -150,23 +170,102 @@ whatever is still missing on read, so an owner editing an unmigrated menu is
 editing by id from the first render and persists the ids on their next save. See
 [[UC - Run Operational Migrations]].
 
+## The Session A Confirmation Opens
+
+Confirming the table is what first costs the restaurant anything, and issue
+\#1101 is where that cost is bounded.
+
+A **Table Session** is one guest's attachment to a visit - one document per
+phone, at `/restaurants/{id}/tableSessions/{sessionId}`, named from the table and
+the guest's uid so that re-scanning is idempotent. It is deliberately not the
+same record as the visit: a party of four with two phones out is one visit and
+two sessions, and a guest who closes their browser must not end the meal. The
+model, the five statuses and the storage are on [[Table Visit]].
+
+Three of its properties are this use case's rather than the domain page's.
+
+**A scan is a request, not an occupation.** With no open visit at the table the
+session is `pending`, which is live and still cannot order. That is the whole
+answer to "a QR code does not prove presence": the restaurant learns somebody is
+waiting, and nothing about the table changes until a member of staff seats it.
+
+**Confirming is the seating.** `transitionTableState` activates a table's
+pending sessions in the same commit that opens its visit, so a host who sits a
+party down has already admitted every guest who scanned while waiting. Nobody is
+asked about any of them, because the restaurant has answered the question by
+sitting the party down. A pending session that went idle in the meantime is
+expired instead of activated - somebody who scanned the sticker at lunch is not
+part of the party seated at dinner.
+
+**Joining is by construction.** The second guest to scan reaches the first one's
+visit because `TableState.visitId` is the only place to look, and it is written
+and dropped by the commit that moves the table's status. The same fact makes
+"a guest cannot join a closed visit" true rather than checked: ending the visit
+dropped the pointer, so a later scan is a new pending session - which is the
+honest description of a party that came back after the table was cleared.
+
+Leaving ends one phone and nothing else. `leaveTableSession` touches neither the
+visit, the table, nor anybody else's session, because a guest who could end a
+visit by tapping "leave" could clear a table they were never sitting at.
+
 ## Success Criteria
 
-- Scanning a table QR resolves to exactly one restaurant, room, and table, confirmed on screen before any order can be placed.
-- A guest without an account can view the menu and order, if the restaurant allows it.
+- Scanning a table QR resolves to exactly one restaurant, room, and table, confirmed on screen before any order can be placed. **Met** by issues \#1100 and \#1101.
+- Two guests scanning the same table end up in one visit, not two. **Met** by issue \#1101.
+- A guest without an account can view the menu and order, if the restaurant allows it. Half met: the account is no longer needed (issue \#1101), and the menu is issue \#1102.
 - An order submitted twice because of a flaky network creates one order.
 - A revoked or rotated token stops working immediately.
 - A Bite created from an order needs only a photo, a rating, and a comment, and carries the verified `restaurantId`.
 
 ## Open Product Questions
 
-Tracked in [[Current State - Open Questions]]. Several block specific child issues, including shared versus per-guest orders, ordering without an account, session expiry, and the payment model.
+Tracked in [[Current State - Open Questions]]. Four were settled on 13 September 2026 and are now `RD-TS-1` to `RD-TS-5` in [[Recorded Decisions]]: occupancy confirmation, shared sessions, ordering without an account, and session expiry. What still blocks a child issue is shared versus per-guest order attribution (issue \#1103), how cancelled orders are corrected, how staff are notified, and the payment model.
+
+## MVP Classification
+
+**[Secondary]** — the whole page. Ordering at the table is stage 3 of issue
+\#735 and explicitly post-launch: the initial release ships without a restaurant
+taking a single order through BiteTribe, and [[Current State - Open Questions]]
+files every question on this page under a post-launch heading.
+
+Nothing here is therefore a release blocker under `UF-15`, including the two
+gaps named in `Status`.
+
+## App Store Review Area
+
+**Relevant, and nothing new is claimed yet.** No permission is added: the scan
+arrives as a URL, through the camera app or the OS deep-link handler, so the app
+declares no camera use for it and the Capacitor plugin set is unchanged. The
+route is a public web page in the consumer app and is reachable in the PWA
+without a store build.
+
+Two things will need an answer before ordering ships, and neither is this page's
+to settle today: an anonymous account is account creation as far as the privacy
+nutrition label is concerned, and taking payment at the table is in-app-purchase
+territory that the ADR of issue \#1109 has to settle first. See
+[[Implementation - Store Declarations]].
+
+## Supported Evidence
+
+Read on 13 September 2026 while implementing issue \#1101, on branch
+`1101-guest-table-session`:
+
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/` — `resolve-table-qr-token.ts`, `start-table-session.ts`, `leave-table-session.ts`, `transition-table-state.ts`, `table-session.ts`
+- `apps/bite-tribe-firebase/firestore.rules` — the `tableSessions` match
+- `libs/bite-tribe-common/model/src/lib/table-session.ts` and `table-ordering.ts`
+- `libs/bite-tribe/table-session/` — the page and its data-access
+- `libs/common/ta-firestore/src/lib/` — `auth.service.ts`, `auth.guard.ts`, `start.guard.ts`
+
+Behaviour was observed as well as read: the flow was driven end to end against
+the Firestore, Auth and Functions emulators with a seeded restaurant, through
+the running consumer app.
 
 ## Related GitHub Scope
 
 - Issue \#1072 - QR table menu and table ordering, with ten child issues
 - Issue \#1099 - stable menu item identifiers, availability and price snapshots, the model this use case hangs its order lines from
 - Issue \#1100 - resolve and validate a table QR token, the backend every later child calls before it does anything
+- Issue \#1101 - guest table session start and join, which gave the printed address a screen and the guest an identity to hold a session with
 - Issue \#1107 - QR token abuse protection, which owns the durable rate limit the resolution only approximates
 - Issue \#1087 - printable table QR sheets, which fixed the scan URL this use case has to serve
 - Issue \#1073 - Table payment and Bite creation from orders, with six child issues
@@ -181,3 +280,11 @@ Tracked in [[Current State - Open Questions]]. Several block specific child issu
 - [[Table]]
 - [[Restaurant]]
 - [[Bite]]
+
+## Related Pages
+
+- [[Recorded Decisions]] - `RD-TS-1` to `RD-TS-5` bind this page
+- [[Architecture - Auth]] - the anonymous guest
+- [[Architecture - Firebase]] - the rules on `tableSessions`
+- [[Implementation - Firebase Functions]] - the callables
+- [[Current State - Open Questions]]

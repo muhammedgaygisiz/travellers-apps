@@ -24,7 +24,14 @@ Backend callables validate request.auth where required
 
 - `AuthService` wraps Capacitor Firebase Authentication, and reports when the
   persisted session has been restored so nothing decides on the current user
-  before that answer exists.
+  before that answer exists. Since issue \#1101 it answers **two** questions
+  rather than one: `getUser()` is "is somebody signed in", which every caller
+  that writes a document for the current account needs, and `getMember()` is "is
+  a BiteTribe member signed in", which the route guards need. See Anonymous
+  Guests below.
+- `signInAsGuest()` signs in anonymously, and only from the table-scan flow. It
+  keeps an existing session rather than replacing it, so a member who scans a
+  code orders as themselves.
 - `withAuthRoutes` provides shared auth routes.
 - `authGuard` protects authenticated routes.
 - `REQUIRED_ROLES` is the set of roles an app admits, any one of which is enough
@@ -41,7 +48,9 @@ Backend callables validate request.auth where required
   (issue \#1079). It fails closed - a read that is rejected, empty, or missing
   the owner field is a refusal - and it refuses with a toast and a redirect
   rather than an error screen, naming nothing about who does hold the document.
-- `startGuard` controls the start route.
+- `startGuard` controls the start route. Like `authGuard` it asks for a member:
+  a guest holding an anonymous session belongs on the welcome page, and bouncing
+  them to Home would be bouncing them into an account they do not have.
 - `RequestedUrlService` holds the URL a visitor asked for while auth redirected
   them, so signing in returns them to it instead of to Home.
 - `createUserOnAuthCreate` initializes profile-related backend behavior.
@@ -68,6 +77,43 @@ Backend callables validate request.auth where required
   that resolves a visitor into the app hands it back. That keeps a shared Bite
   link alive across the whole entry chain. See the Shared Link Entry Contract in
   [[UC - Inspect Bite Details]].
+
+## Anonymous Guests
+
+A guest who scans the QR code on a restaurant table signs in anonymously
+(issue \#1101, `RD-TS-4`). This is the one place in the product where a session
+exists without anybody having decided to join BiteTribe, and three things follow
+from that.
+
+**The uid is the point, not the anonymity.** A table session has to belong to
+somebody: it is what `firestore.rules` matches the session document against, so
+the guest's phone can subscribe to its own session directly instead of polling a
+callable, and it is what `linkWith*` upgrades in place, so the guest who decides
+at the end of the meal to keep the Bite they just ate does not lose the session
+that knows what they ordered. The alternative - a server-issued secret the
+client replays - was refused for exactly that: with no uid, every guest read
+needs a callable.
+
+**An anonymous account is not a member.** `authGuard` and `startGuard` ask
+`getMember()`, which answers `null` for one, so an anonymous session cannot
+carry a guest into the feed, the gallery or a profile page with nobody behind
+it. `isLoggedIn$` is the same answer. The table route is public and carries no
+auth guard, so the scan itself is unaffected. `getUser()` deliberately keeps its
+old meaning, because its twenty-odd callers are asking the other question and
+are right to: an anonymous guest does have a uid, and their session is written
+against it.
+
+**No profile document is written.** `createUserOnAuthCreate` returns early for
+an account with no identity provider, so a scan does not put a member with no
+name, no email and no photo into the collection every count, every search and
+every follower list reads - one per scan, including the scans that are somebody's
+script. The document is deferred rather than lost: upgrading the account keeps
+the uid and takes the ordinary sign-up path. An absent email is **not** the
+signal used, because an account created with a phone number has none either and
+is a member.
+
+What is left behind is a Firebase Auth record per guest who never registers.
+That is the accepted cost of the decision, and it is recorded rather than solved.
 
 ## Roles And Authorization
 

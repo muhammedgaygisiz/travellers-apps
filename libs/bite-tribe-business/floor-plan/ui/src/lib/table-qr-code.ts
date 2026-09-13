@@ -1,5 +1,5 @@
 import * as qrcodeModule from 'qrcode-generator';
-import { BITE_TRIBE_ORIGIN } from 'utils';
+import { BITE_TRIBE_ORIGIN, PATH } from 'utils';
 
 /** The two QR encoding modes a table code uses. See {@link addUrl}. */
 type QrMode = 'Byte' | 'Alphanumeric';
@@ -42,11 +42,12 @@ const qrcode = ((qrcodeModule as unknown as { default?: unknown }).default ??
  * characters longer for nothing a guest ever reads - the URL is behind a
  * camera, not in an address bar.
  *
- * Nothing serves it yet. [[UC - Order At The Table Through A QR Code]] mounts
- * the resolver here in issue \#1072, and this constant is what a sticker
- * printed today commits that issue to.
+ * The consumer app now serves it: issue \#1101 mounted the scan screen on
+ * `PATH.TABLE_SCAN`, which this is built from rather than spelled beside. Two
+ * constants naming one printed URL is two constants that can disagree, and the
+ * disagreement would be discovered on a sticker already glued to a table.
  */
-export const TABLE_SCAN_PATH = '/t/';
+export const TABLE_SCAN_PATH = `/${PATH.TABLE_SCAN}/`;
 
 /** The full prefix every printed code carries, before the token. */
 export const TABLE_SCAN_PREFIX = `${BITE_TRIBE_ORIGIN}${TABLE_SCAN_PATH}`;

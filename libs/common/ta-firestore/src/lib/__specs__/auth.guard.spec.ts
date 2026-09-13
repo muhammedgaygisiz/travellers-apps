@@ -17,7 +17,7 @@ jest.mock('utils', () => ({
 }));
 
 describe('authGuard', () => {
-  let getUser: jest.Mock;
+  let getMember: jest.Mock;
   let whenAuthStateRestored: jest.Mock;
   let parseUrl: jest.Mock;
   let requestedUrlService: RequestedUrlService;
@@ -38,7 +38,7 @@ describe('authGuard', () => {
     (isPrivacyPage as jest.Mock).mockReturnValue(false);
     (isAccountDeletionPage as jest.Mock).mockReturnValue(false);
 
-    getUser = jest.fn(() => undefined);
+    getMember = jest.fn(() => undefined);
     parseUrl = jest.fn(
       (url: string): UrlTree => ({ url }) as unknown as UrlTree,
     );
@@ -52,7 +52,7 @@ describe('authGuard', () => {
       providers: [
         {
           provide: AuthService,
-          useValue: { getUser, whenAuthStateRestored },
+          useValue: { getMember, whenAuthStateRestored },
         },
         { provide: Router, useValue: { parseUrl } },
       ],
@@ -62,7 +62,7 @@ describe('authGuard', () => {
   });
 
   it('allows navigation for a session that is already restored', async () => {
-    getUser.mockReturnValue({ uid: 'user-1' });
+    getMember.mockReturnValue({ uid: 'user-1' });
 
     await expect(runGuard()).resolves.toBe(true);
     expect(whenAuthStateRestored).not.toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe('authGuard', () => {
     // while the persisted session is read out of IndexedDB.
     const result = runGuard();
 
-    getUser.mockReturnValue({ uid: 'user-1' });
+    getMember.mockReturnValue({ uid: 'user-1' });
     resolveRestored();
 
     await expect(result).resolves.toBe(true);
@@ -87,6 +87,23 @@ describe('authGuard', () => {
 
     expect(await result).toEqual({ url: '/start' });
     expect(requestedUrlService.consume()).toBe('/bite/shared-123');
+  });
+
+  /**
+   * The guest at a table. They hold an anonymous session so their table session
+   * has an identity, and that must not be a way into the member surface - so
+   * the guard sends them to the welcome page like a visitor with no session at
+   * all (issue #1101). The table route itself is public and carries no auth
+   * guard, so their scan is unaffected.
+   */
+  it('turns away a guest holding an anonymous session', async () => {
+    getMember.mockReturnValue(null);
+
+    const result = runGuard('/home');
+
+    resolveRestored();
+
+    expect(await result).toEqual({ url: '/start' });
   });
 
   it('remembers the query string of the requested URL', async () => {

@@ -1,0 +1,280 @@
+import { DocumentData, getFirestore } from 'firebase-admin/firestore';
+import { CallableRequest, HttpsError } from 'firebase-functions/https';
+import { onAppCheck } from '../shared/callable-options';
+import { RESTAURANT_COLLECTION } from './restaurant-authority';
+import {
+  assertWithinScanRateLimit,
+  parseScannedToken,
+  resolveScan,
+} from './resolve-table-qr-token';
+import { TableScanContext, TableScanResult, refuseScan } from './table-scan';
+import {
+  TABLE_SESSIONS_COLLECTION,
+  TableSession,
+  TableSessionStatus,
+  isEndedSession,
+  isExpiredSession,
+  tableOrderingOf,
+  tableSessionId,
+  tableSessionIdleTimeoutMs,
+} from './table-session';
+import { TABLE_STATES_COLLECTION, visitIdOf } from './table-state';
+import { TABLE_VISITS_COLLECTION, isOpenVisit } from './table-visit';
+
+/**
+ * Attaches the guest who scanned a code to the party at that table
+ * (GitHub issue #1101).
+ *
+ * ## What this costs the restaurant, and why that is the whole design
+ *
+ * `resolveTableQrToken` writes nothing, so the worst a scan of a photographed
+ * sticker can do is learn that a restaurant is open. This is the first call
+ * that writes, and a QR code still proves nothing about where the guest is
+ * standing. So the answer is not "trust the scan" and not "refuse the scan" but
+ * a third thing: the session is `pending` until staff seat the table, and
+ * `pending` cannot order. A remote scan therefore produces one row on a screen
+ * in the restaurant, and never a table marked occupied by somebody who is not
+ * there.
+ *
+ * When the table *is* already seated, the guest is `active` immediately. There
+ * is nothing left to confirm - staff have confirmed that a party is at this
+ * table, and which of them is holding the phone is not a question the
+ * restaurant should be asked.
+ *
+ * ## One visit, however many phones
+ *
+ * The join is not a check. It follows `TableState.visitId`, which is the single
+ * pointer at an open visit and is written and dropped by the same commit that
+ * moves the table's status (issue #1095) - so the second guest to scan reaches
+ * the visit the first one is in because there is only one place to look. It
+ * also makes "a guest cannot join a closed visit" true rather than enforced:
+ * ending the visit dropped the pointer, so there is nothing to join and the
+ * next scan is a new pending session, which is the honest description of a
+ * party that came back after the table was cleared.
+ *
+ * The pointer is still checked against the visit document inside the
+ * transaction. A state pointing at a visit that is not open should not exist,
+ * and if one ever does, the guest must not be attached to it.
+ *
+ * ## Re-scanning
+ *
+ * Idempotent by the document name: the session is the derived name, so a
+ * guest who scans the code again - because they reloaded, or because the
+ * confirmation screen was the last thing they had open - addresses the session
+ * they already have. It keeps its `startedAt`, has its `lastActiveAt` pushed
+ * forward, and gains the visit if the table has been seated since. A second
+ * document for one phone at one table is not reachable.
+ *
+ * A session that has *ended* is replaced rather than revived. Ending is
+ * one-way, here as on the visit: the guest who left and scanned again is
+ * starting something new, and the `closed` session that names the visit they
+ * were in stays the record of the one they were in.
+ *
+ * ## Why the scan is resolved again
+ *
+ * Because the client's resolution is as old as the time the guest spent reading
+ * the confirmation screen, and the kitchen can pause in that time. The checks
+ * are `resolveScan` itself rather than a copy, so the order of them - which
+ * issue #1100 calls the contract - cannot differ between the two callables.
+ */
+
+export interface StartTableSessionRequest {
+  token?: unknown;
+}
+
+export interface TableSessionStarted {
+  ok: true;
+  status: Extract<TableSessionStatus, 'pending' | 'active'>;
+  session: TableSession;
+  context: TableScanContext;
+}
+
+/**
+ * The refusal is the scan's, unchanged.
+ *
+ * Starting a session is a scan plus a write, so every way it fails before the
+ * write is a way the scan fails, and the guest is owed the same twelve
+ * sentences whichever call produced them. A parallel reason list would be
+ * twelve more strings meaning the same twelve things.
+ */
+export type StartTableSessionResult =
+  TableSessionStarted | Extract<TableScanResult, { ok: false }>;
+
+/**
+ * The uid the session belongs to, and whether it is an anonymous one.
+ *
+ * Auth is required and the account may be anonymous, which is the one place in
+ * the backend where that is deliberately true. A guest at a table has no
+ * BiteTribe account and may never want one; what the session needs is a
+ * *stable* identity, so that the guest's phone can read its own session
+ * document through the rules and so that `linkWith*` can turn it into an
+ * account later without the session changing hands.
+ *
+ * `provider_id` is `anonymous` on a token minted by `signInAnonymously`. It is
+ * read rather than inferred from an absent email, because an account created
+ * with a phone number has no email either and is not anonymous.
+ */
+const guestOf = (
+  request: CallableRequest<unknown>,
+): { uid: string; isAnonymous: boolean } => {
+  if (!request.auth?.uid) {
+    throw new HttpsError(
+      'unauthenticated',
+      'Sign in, anonymously or otherwise, before starting a table session.',
+    );
+  }
+
+  return {
+    uid: request.auth.uid,
+    isAnonymous:
+      request.auth?.token?.firebase?.sign_in_provider === 'anonymous',
+  };
+};
+
+/**
+ * The visit the guest joins, or `''` when the table is not seated.
+ *
+ * Both halves are required. The pointer says which visit, and the visit
+ * document says whether it is still open - and a pointer left behind by a
+ * commit that should have dropped it must not seat a guest at a party that
+ * ended.
+ */
+const openVisitAt = async (
+  transaction: FirebaseFirestore.Transaction,
+  restaurantRef: FirebaseFirestore.DocumentReference,
+  tableId: string,
+): Promise<string> => {
+  const state = await transaction.get(
+    restaurantRef.collection(TABLE_STATES_COLLECTION).doc(tableId),
+  );
+  const visitId = visitIdOf(state.data());
+
+  if (!visitId) {
+    return '';
+  }
+
+  const visit = await transaction.get(
+    restaurantRef.collection(TABLE_VISITS_COLLECTION).doc(visitId),
+  );
+
+  return isOpenVisit(visit.data()) ? visitId : '';
+};
+
+/**
+ * Whether the guest already holds this session, or is starting a new one.
+ *
+ * An expired session counts as a new one. It has gone idle, so its `startedAt`
+ * describes a meal that is over; carrying it forward would give the new session
+ * a start time hours before the guest sat down, and the duration a staff screen
+ * renders from it would be a lie.
+ */
+const isResumable = (
+  existing: DocumentData | undefined,
+  idleTimeoutMs: number,
+  now: number,
+): boolean =>
+  existing !== undefined &&
+  !isEndedSession(existing) &&
+  !isExpiredSession(existing, idleTimeoutMs, now);
+
+export const startTableSessionHandler = async (
+  request: CallableRequest<StartTableSessionRequest>,
+  now: Date = new Date(),
+): Promise<StartTableSessionResult> => {
+  const raw = parseScannedToken(request.data?.token);
+  const guest = guestOf(request);
+
+  assertWithinScanRateLimit(request, raw, now, 'startTableSession');
+
+  const { result, restaurant } = await resolveScan(raw, now);
+
+  if (!result.ok) {
+    return result;
+  }
+
+  // Unreachable: `resolveScan` returns the restaurant on every resolved path.
+  // Written as a refusal rather than a cast, because the cast that made this
+  // one branch would hand the client an `ok: true` with no session on it - a
+  // screen waiting forever for a confirmation that already arrived.
+  if (!restaurant) {
+    return refuseScan('restaurantNotFound');
+  }
+
+  const context: TableScanContext = {
+    token: result.token,
+    restaurant: result.restaurant,
+    room: result.room,
+    table: result.table,
+    menu: result.menu,
+  };
+  const restaurantId = result.restaurant.id;
+  const tableId = result.table.id;
+  const idleTimeoutMs = tableSessionIdleTimeoutMs(
+    tableOrderingOf(restaurant)['sessionIdleTimeoutMinutes'],
+  );
+
+  const firestore = getFirestore();
+  const restaurantRef = firestore
+    .collection(RESTAURANT_COLLECTION)
+    .doc(restaurantId);
+  const sessionRef = restaurantRef
+    .collection(TABLE_SESSIONS_COLLECTION)
+    .doc(tableSessionId(tableId, guest.uid));
+
+  const session = await firestore.runTransaction(async (transaction) => {
+    // The state and the visit are read inside the transaction because a host
+    // can seat or free this table between the resolution above and the commit.
+    // The guest being attached to a visit that ended a second ago is precisely
+    // the case the pointer exists to close.
+    const visitId = await openVisitAt(transaction, restaurantRef, tableId);
+    const existing = (await transaction.get(sessionRef)).data();
+    const at = now.getTime();
+    const resuming = isResumable(existing, idleTimeoutMs, at);
+
+    const next: TableSession = {
+      id: sessionRef.id,
+      restaurantId,
+      tableId,
+      guestUserId: guest.uid,
+      status: visitId ? 'active' : 'pending',
+      ...(visitId ? { visitId } : {}),
+      startedAt:
+        resuming && typeof existing?.['startedAt'] === 'number'
+          ? (existing['startedAt'] as number)
+          : at,
+      lastActiveAt: at,
+      // Read off the token that is starting the session rather than carried
+      // forward from the stored document. A guest who registered between two
+      // scans is no longer anonymous, and the session that says otherwise is
+      // the one a later reader would trust.
+      isAnonymousGuest: guest.isAnonymous,
+    };
+
+    // Replaced rather than merged, for the reason the table state is: a
+    // resumed session must not keep an `endedAt` or a `visitId` from a party
+    // that is over, and a merge is how one of those survives.
+    transaction.set(sessionRef, next);
+
+    return next;
+  });
+
+  return {
+    ok: true,
+    status: session.status as Extract<TableSessionStatus, 'pending' | 'active'>,
+    session,
+    context,
+  };
+};
+
+/**
+ * Classified `authenticated` in `callable-authorization.spec.ts`, and it is the
+ * only callable there for which an *anonymous* session is enough.
+ *
+ * That is the widest door in the backend by design, and what is behind it is
+ * one document naming the caller's own uid. The caller cannot choose the
+ * restaurant, the table or the visit: all three come from a token it had to
+ * hold, checked against the twelve rules of issue #1100.
+ */
+export const startTableSession = onAppCheck<StartTableSessionRequest>(
+  (request) => startTableSessionHandler(request),
+);

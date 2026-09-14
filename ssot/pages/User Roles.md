@@ -110,7 +110,10 @@ This makes the Bite Creator one of three writers of that field; see
 means there is no grant to revoke either. **The operator half shipped**: block an account
 (\#1474) and delete a Bite (\#1475) with epic \#1471, the contact address with \#1429;
 the report queue is epic \#1284, open. **The user-facing half - reporting, user-to-user
-blocking, content filtering - does not exist and has no owning issue.** Store requirement
+blocking, content filtering - does not exist**, and each part has had an owning issue since
+14 September 2026: \#1608 reporting a Bite, \#1609 blocking another user, \#1610 filtering
+before publication. Epic \#1284 is narrower than it looks - it moderates review threads, so it
+covers reporting inside a thread and nothing else. Store requirement
 rather than product polish:
 [[Implementation - Store Declarations]] declares the **Social Media** data-use category
 at a **13+** age rating, and Apple's user-generated-content guideline asks for filtering,

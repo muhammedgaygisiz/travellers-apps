@@ -68,7 +68,7 @@ defect list and not a work plan. Where it needs one of those, it links to it.
 | 11  | `Actogram`                     | opt | opt | ✓   | ✓   | Per [[Actogram Format]]. Phases, mechanism sections, terminal table. At L0/L1, when present, may be a partial sketch rather than a complete enumeration — `UF-2`                                                      |
 | 12  | `Rules And Invariants`         | opt | opt | ✓   | ✓   | `R-1..R-n`. Normative statements. Code-anchor column at L3 only                                                                                                                                                       |
 | 13  | `Exceptions And Failure Modes` | –   | –   | opt | ✓   | Only what the actogram cannot express. See `UF-12`                                                                                                                                                                    |
-| 14  | `Authorization`                | –   | –   | ✓   | ✓   | What is enforced, where, and what is not                                                                                                                                                                              |
+| 14  | `Authorization`                | opt | opt | ✓   | ✓   | What is enforced, where, and what is not. At L0 and L1 it states the boundary as the page understands it; the per-step enforcement is written at L2                                                                   |
 | 15  | `MVP Classification`           | ✓   | ✓   | ✓   | ✓   | Never omitted. `[MVP]`, `[Secondary]` or `[Obsolete]`. See below                                                                                                                                                      |
 | 16  | `App Store Review Area`        | opt | ✓   | ✓   | ✓   | Never omitted from L1 up. Same rule as [[GitHub Issue Format]]: if not relevant, "not relevant, because …"                                                                                                            |
 | 17  | `Supported Evidence`           | opt | ✓   | –   | –   | Optional at L0, required at L1. At L2 and L3 the `@` locus on each step replaces it                                                                                                                                   |
@@ -463,6 +463,11 @@ X5 SYS <action>
 | `UC-IBD` | Inspect Bite Details                             | [[UC - Inspect Bite Details]]                             |
 | `UC-MPS` | Manage Profile And Social Graph                  | [[UC - Manage Profile And Social Graph]]                  |
 | `UC-ALF` | Use Account And Legal Flows                      | [[UC - Use Account And Legal Flows]]                      |
+| `UC-CPS` | Configure Personal Settings                      | [[UC - Configure Personal Settings]]                      |
+| `UC-SIB` | Search In BiteTribe                              | [[UC - Search In BiteTribe]]                              |
+| `UC-CUS` | Complete Universal Search                        | [[UC - Complete Universal Search]]                        |
+| `UC-GNU` | Guide New Users After Registration               | [[UC - Guide New Users After Registration]]               |
+| `UC-HPT` | Harden Platform And Backend Trust                | [[UC - Harden Platform And Backend Trust]]                |
 | `UC-RAN` | Receive App Notifications And Engagement Updates | [[UC - Receive App Notifications And Engagement Updates]] |
 | `UC-DIS` | Dismiss Restaurant Candidate                     | none                                                      |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant | none                                                      |

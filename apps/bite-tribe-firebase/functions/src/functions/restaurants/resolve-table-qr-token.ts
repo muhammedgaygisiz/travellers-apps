@@ -253,17 +253,28 @@ const rateLimitedTableOf = async (
     return { restaurantId: '', tableId: '', tableLabel: '' };
   }
 
-  const snapshot = await getFirestore()
-    .collection(TABLE_TOKENS_COLLECTION)
-    .doc(token)
-    .get();
-  const data = snapshot.data();
+  try {
+    const snapshot = await getFirestore()
+      .collection(TABLE_TOKENS_COLLECTION)
+      .doc(token)
+      .get();
+    const data = snapshot.data();
 
-  return {
-    restaurantId: getString(data, 'restaurantId'),
-    tableId: getString(data, 'tableId'),
-    tableLabel: getString(data, 'tableLabel'),
-  };
+    return {
+      restaurantId: getString(data, 'restaurantId'),
+      tableId: getString(data, 'tableId'),
+      tableLabel: getString(data, 'tableLabel'),
+    };
+  } catch (error) {
+    // The caller is already being refused, and the refusal is the answer they
+    // are owed. A read that fails here must not replace `resource-exhausted`
+    // with whatever Firestore threw - that would turn a limit working as
+    // designed into an internal error, on the one path a caller can reach as
+    // often as they like.
+    logger.warn('rateLimitedTableOf: could not read the token', { error });
+
+    return { restaurantId: '', tableId: '', tableLabel: '' };
+  }
 };
 
 /**

@@ -593,6 +593,49 @@ describe('QR token abuse protection', () => {
     });
   });
 
+  describe('when the reporting itself cannot run', () => {
+    /**
+     * The query `liveSessionsAt` makes needs a composite index, indexes in this
+     * repository **deploy by hand**, and the emulator does not enforce them - so
+     * the day the functions deploy and the index deploy has not run is a day
+     * this call fails for a reason that has nothing to do with the guest. Before
+     * the guard, that would have committed the session and then answered with
+     * `FAILED_PRECONDITION`: a session that exists, reported as a failure,
+     * because a row on a staff screen could not be counted.
+     *
+     * Forced rather than waited for, by rejecting the one `Query` this handler
+     * makes - `resolveScan` reads documents and `getAll`, and the transaction
+     * uses its own `get`, so a single rejection lands exactly here.
+     */
+    it('still starts the session when the count cannot be read', async () => {
+      const queryPrototype = Object.getPrototypeOf(
+        restaurantRef()
+          .collection('tableSessions')
+          .where('tableId', '==', TABLE_12),
+      );
+      const get = jest
+        .spyOn(queryPrototype, 'get')
+        .mockRejectedValueOnce(new Error('9 FAILED_PRECONDITION: no index'));
+
+      try {
+        const result = await start();
+
+        expect(get).toHaveBeenCalled();
+        expect(result).toMatchObject({ ok: true, status: 'pending' });
+        expect(
+          (
+            await restaurantRef()
+              .collection('tableSessions')
+              .doc(tableSessionId(TABLE_12, ALICE))
+              .get()
+          ).data(),
+        ).toMatchObject({ status: 'pending' });
+      } finally {
+        get.mockRestore();
+      }
+    });
+  });
+
   describe('the coarse position, when the guest shares one', () => {
     /**
      * The acceptance criterion in full: a guest who declines scans, sits down

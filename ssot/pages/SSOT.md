@@ -15,11 +15,11 @@
   - [[Principles]]
   - [[Glossary]]
   - [[Personas]]
+  - [[User Roles]]
   - [[Monetization]]
 - Domain
   - [[Bite]]
   - [[User]]
-  - [[User Roles]]
   - [[Subscription]]
   - [[Restaurant]]
   - [[Bucket List]]

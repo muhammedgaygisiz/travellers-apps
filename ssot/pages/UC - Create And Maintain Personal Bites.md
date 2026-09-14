@@ -118,12 +118,10 @@ rest of the product reads.
 
 **[MVP]** — creating a Bite and editing it later, the photo requirement with its three
 upload states and the poster-only retry, restaurant and position selection, and the
-currency and suspicious-price handling. This is the core contribution loop and all of it
-ships today.
+currency and suspicious-price handling.
 
-**[Secondary]** — storing the resolved candidate positions on the Bite so a source can be
-re-chosen while editing, deferred under \#1290. Nothing else on this page is
-unimplemented.
+**[Secondary]** — storing the resolved candidate positions so a source can be re-chosen
+while editing, deferred under \#1290.
 
 ## App Store Review Area
 

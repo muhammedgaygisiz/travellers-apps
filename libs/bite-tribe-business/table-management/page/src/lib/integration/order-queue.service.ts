@@ -14,6 +14,8 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FloorPlanDataAccessService } from 'bite-tribe-business/floor-plan-data-access';
 import {
   OrderAlertService,
+  PendingSessionQueueService,
+  ScanAnomalyQueueService,
   tableOrderFailure,
   TableAssistanceQueueService,
   TableOrderQueueService,
@@ -24,6 +26,12 @@ import { EMPTY, switchMap } from 'rxjs';
 import { ToastService } from 'toast';
 import { resourceFailed, resourceValue } from 'utils';
 import { assistanceRows, type AssistanceRow } from './assistance-rows';
+import {
+  pendingSessionRows,
+  scanAnomalyRows,
+  type PendingSessionRow,
+  type ScanAnomalyRow,
+} from './scan-signal-rows';
 import {
   groupOrdersByTable,
   openOrderCount,
@@ -101,6 +109,8 @@ const FAILURE_KEYS: Readonly<Record<TableOrderFailure, string>> = {
 export class OrderQueueService {
   private readonly queue = inject(TableOrderQueueService);
   private readonly assistanceQueue = inject(TableAssistanceQueueService);
+  private readonly anomalyQueue = inject(ScanAnomalyQueueService);
+  private readonly pendingSessions = inject(PendingSessionQueueService);
   private readonly floorPlan = inject(FloorPlanDataAccessService);
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly alerts = inject(OrderAlertService);
@@ -189,6 +199,42 @@ export class OrderQueueService {
   );
 
   /**
+   * What the restaurant is told about its codes, pushed by Firestore
+   * (GitHub issue #1107).
+   *
+   * A third listener rather than a field on either of the two above, for the
+   * reason they are two: three collections with three lifetimes. A code can be
+   * hammered at a table nobody is sitting at, and a table can be calling for a
+   * waiter while nothing at all is wrong with its sticker.
+   */
+  private readonly anomalyFeed = toSignal(
+    this.storeService.restaurantIdFromUrl$.pipe(
+      switchMap((restaurantId) =>
+        restaurantId ? this.anomalyQueue.anomalies$(restaurantId) : EMPTY,
+      ),
+    ),
+  );
+
+  /**
+   * The guests who have scanned and are waiting to be seated
+   * (GitHub issue #1107).
+   *
+   * The fourth listener, and the one that is not about anything going wrong.
+   * `RD-TS-1` says a scan at an unseated table raises a signal staff confirm;
+   * issue #1101 wrote that signal and nothing drew it, so until this feed
+   * existed the confirming was asked of a screen that did not show it.
+   */
+  private readonly pendingFeed = toSignal(
+    this.storeService.restaurantIdFromUrl$.pipe(
+      switchMap((restaurantId) =>
+        restaurantId
+          ? this.pendingSessions.pendingSessions$(restaurantId)
+          : EMPTY,
+      ),
+    ),
+  );
+
+  /**
    * The wall clock, ticked so the ages on the rows advance.
    *
    * An interval rather than an animation frame, for the reason the plan gives:
@@ -235,6 +281,43 @@ export class OrderQueueService {
   /** How many tables are calling. The badge beside the open order count. */
   readonly assistanceCount = computed(() => this.assistance().length);
 
+  /**
+   * The tables whose codes are being scanned oddly, most recently first.
+   *
+   * Below the two lists that are about people, because nobody is waiting on it:
+   * a guest at the door and a guest with their hand up are both owed a walk
+   * within the minute, and a code that was hammered is owed a decision at some
+   * point this evening.
+   */
+  readonly anomalies = computed<ScanAnomalyRow[]>(() =>
+    scanAnomalyRows(
+      this.anomalyFeed()?.anomalies ?? [],
+      this.tablesValue(),
+      this.now(),
+    ),
+  );
+
+  /** How many rows the restaurant has not read yet. */
+  readonly anomalyCount = computed(() => this.anomalies().length);
+
+  /**
+   * The guests waiting to be seated, longest first, one row per table.
+   *
+   * Grouped by table rather than by phone: three friends who each scanned the
+   * code on table 12 at the door are one party, and three rows would ask a host
+   * to seat one table three times.
+   */
+  readonly waitingParties = computed<PendingSessionRow[]>(() =>
+    pendingSessionRows(
+      this.pendingFeed()?.sessions ?? [],
+      this.tablesValue(),
+      this.now(),
+    ),
+  );
+
+  /** How many parties are waiting. The badge beside the other two counts. */
+  readonly waitingCount = computed(() => this.waitingParties().length);
+
   readonly loading = computed(() => this.feed() === undefined);
 
   /** Whether this device alerts on a new order. Off until turned on. */
@@ -256,6 +339,14 @@ export class OrderQueueService {
    */
   readonly busyAssistanceId = signal<string | undefined>(undefined);
 
+  /**
+   * The anomaly whose dismissal has not been answered yet, by row id.
+   *
+   * Per row for the reason the other two are: a slow call about table 12 must
+   * leave the rest of the list answerable.
+   */
+  readonly busyAnomalyId = signal<string | undefined>(undefined);
+
   /** The cancellation waiting for its reason, or nothing. */
   readonly pendingCancellation = signal<PendingCancellation | undefined>(
     undefined,
@@ -272,6 +363,34 @@ export class OrderQueueService {
   readonly justArrived = signal(false);
 
   /**
+   * The four listeners' last deliveries, or `undefined` until all four have
+   * arrived.
+   *
+   * One place rather than a pair of `Math.min` calls that have to be kept in
+   * step by hand. It is what {@link liveStatus} and {@link lastUpdated} are
+   * both computed from, and adding this issue's two feeds to a screen that had
+   * two was exactly the change where a forgotten line would have left the
+   * header promising something about listeners it had stopped watching.
+   */
+  private readonly deliveries = computed<
+    { live: boolean; at: number }[] | undefined
+  >(() => {
+    const feeds = [
+      this.feed(),
+      this.assistanceFeed(),
+      this.anomalyFeed(),
+      this.pendingFeed(),
+    ];
+
+    return feeds.every((delivery) => delivery !== undefined)
+      ? feeds.map((delivery) => ({
+          live: delivery?.live ?? false,
+          at: delivery?.at ?? 0,
+        }))
+      : undefined;
+  });
+
+  /**
    * Whether what is on screen is current, and if not, how far from it.
    *
    * Deliberately the plan's four states rather than two (issue #1096): a
@@ -279,24 +398,25 @@ export class OrderQueueService {
    * queue, and "not current" without a number is a warning nobody can act on.
    */
   readonly liveStatus = computed<OrderQueueLiveStatus>(() => {
-    const feed = this.feed();
-    const assistance = this.assistanceFeed();
+    const deliveries = this.deliveries();
 
-    if (!feed || !assistance) {
+    if (!deliveries) {
       return 'connecting';
     }
 
-    if (feed.live && assistance.live) {
+    if (deliveries.every(({ live }) => live)) {
       return 'live';
     }
 
-    // The worse of the two, and the older of the two instants. The screen makes
-    // one promise - what is on it is current - and it is broken by either
-    // listener going quiet, so a header reading `live` because the orders are
-    // still arriving would be true about half the screen (issue #1106).
+    // The worst of the four, and the oldest of the four instants. The screen
+    // makes one promise - what is on it is current - and it is broken by any
+    // one listener going quiet, so a header reading `live` because the orders
+    // are still arriving would be true about a quarter of the screen
+    // (issues #1106 and #1107).
     const at = Math.min(
-      feed.live ? Number.POSITIVE_INFINITY : feed.at,
-      assistance.live ? Number.POSITIVE_INFINITY : assistance.at,
+      ...deliveries.map(({ live, at: arrived }) =>
+        live ? Number.POSITIVE_INFINITY : arrived,
+      ),
     );
 
     return this.now() - at >= STALE_AFTER_MS ? 'stale' : 'offline';
@@ -304,21 +424,20 @@ export class OrderQueueService {
 
   /** How long ago the server last confirmed the queue, for the indicator. */
   readonly lastUpdated = computed<string | undefined>(() => {
-    const feed = this.feed();
-    const assistance = this.assistanceFeed();
+    const deliveries = this.deliveries();
 
-    if (!feed || feed.at === 0 || !assistance || assistance.at === 0) {
+    if (!deliveries || deliveries.some(({ at }) => at === 0)) {
       return undefined;
     }
 
     // Read so the label is retranslated when the language changes.
     this.language();
 
-    // The older of the two, for the reason `liveStatus` takes the worse of
-    // them: "last updated" about one of two listeners is a reassurance the
-    // other one has not earned.
+    // The oldest of the four, for the reason `liveStatus` takes the worst of
+    // them: "last updated" about one of four listeners is a reassurance the
+    // other three have not earned.
     const { key, params } = elapsedParts(
-      Math.min(feed.at, assistance.at),
+      Math.min(...deliveries.map(({ at }) => at)),
       this.now(),
     );
 
@@ -582,6 +701,54 @@ export class OrderQueueService {
       });
     } finally {
       this.busyAssistanceId.set(undefined);
+    }
+  }
+
+  /**
+   * Marks one anomaly read, and clears it from every device
+   * (GitHub issue #1107).
+   *
+   * No confirmation and nothing to type, exactly as an acknowledgement has
+   * none: the press means "we have seen this", which is a statement about the
+   * person pressing it rather than a change to anything a guest is owed.
+   *
+   * It deliberately does **not** rotate the code. The row says when rotating is
+   * the answer, and that action lives on the QR sheet behind the restaurant's
+   * own authority - a dismissal is read by whoever is on the floor, and
+   * reprinting a sticker is not a decision a shift makes by pressing the button
+   * that clears a list.
+   *
+   * A second press, or somebody else's press landing first, is not an error:
+   * the backend answers with what it holds, the listener removes the row, and
+   * both people wanted the same thing.
+   */
+  async dismissAnomaly(row: ScanAnomalyRow): Promise<void> {
+    const restaurantId = this.restaurantId();
+
+    if (!restaurantId || this.busyAnomalyId()) {
+      return;
+    }
+
+    this.busyAnomalyId.set(row.id);
+
+    try {
+      await this.anomalyQueue.dismiss({
+        restaurantId,
+        tableId: row.tableId,
+        kind: row.kind,
+      });
+    } catch (error) {
+      // The row is about to be corrected by the listener either way, so what
+      // the staff member is owed is the sentence rather than a retry - the same
+      // judgement `send` and `acknowledge` both make.
+      console.error('Failed to dismiss the signal:', error);
+
+      await this.toast.present({
+        messageKey: FAILURE_KEYS[tableOrderFailure(error)],
+        outcome: 'failure',
+      });
+    } finally {
+      this.busyAnomalyId.set(undefined);
     }
   }
 

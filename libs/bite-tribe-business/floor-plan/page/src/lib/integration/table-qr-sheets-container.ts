@@ -19,12 +19,17 @@ import { TableQrSheetsService } from './table-qr-sheets.service';
       [disabledLabels]="service.disabledLabels()"
       [loading]="service.loading()"
       [loadFailed]="service.loadFailed()"
+      [confirmingRotation]="service.confirmingRotation()"
+      [rotating]="service.rotating()"
       [isAuthenticated]="service.isAuthenticated()"
       (layoutChange)="service.setLayout($event)"
       (roomChange)="service.setRoom($event)"
       (toggleTable)="service.toggleTable($event)"
       (selectAll)="service.selectAll($event)"
       (printRequest)="service.print()"
+      (rotateRequest)="service.askToRotate()"
+      (rotateConfirm)="service.rotateSelected()"
+      (rotateCancel)="service.cancelRotation()"
       (logoutClick)="service.logout()"
     />
   `,

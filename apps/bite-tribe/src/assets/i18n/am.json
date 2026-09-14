@@ -568,6 +568,7 @@
   "table-session-confirm-heading": "በ{{restaurant}}፣ ጠረጴዛ {{table}} ላይ እያዘዙ ነው",
   "table-session-confirm-room": "{{room}}",
   "table-session-confirm-intro": "ከመቀጠልዎ በፊት የተቀመጡበት ጠረጴዛ ይህ መሆኑን ያረጋግጡ።",
+  "table-session-share-location": "በፈቃደኝነት፦ የት እንዳሉ በግምት ያጋሩ፤ ሬስቶራንቱ በአግባቡ ያልተጠቀሙ ኮዶችን እንዲያስተውል። በትዕዛዝዎ ላይ ምንም አይለውጥም።",
   "table-session-confirm-action": "አዎ፣ ይህ የእኔ ጠረጴዛ ነው",
   "table-session-active-heading": "በጠረጴዛ {{table}} ላይ ነዎት",
   "table-session-active-intro": "{{restaurant}} ጠረጴዛዎን ከፍቷል፣ ስለዚህ ከዚህ ማዘዝ ይችላሉ።",

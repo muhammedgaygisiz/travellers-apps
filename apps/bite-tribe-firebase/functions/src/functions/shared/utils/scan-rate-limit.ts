@@ -11,15 +11,19 @@
  * It counts **in the function instance's own memory**, which bounds what it can
  * honestly claim: it stops a loop run against a warm instance and it does not
  * stop a distributed one, because Cloud Functions scales out and each instance
- * starts counting from zero. That is deliberate rather than overlooked. A
- * durable limit means a write per scan, and the whole point of the resolution
- * is that it stays a handful of reads; issue #1107 owns the abuse protection
- * that is allowed to cost more, and it is the place to put a shared counter, a
- * blocklist and staff visibility of pending sessions.
+ * starts counting from zero.
+ *
+ * Issue #1107 added the counter that does, in
+ * `durable-scan-rate-limit.ts`, and deliberately left this one in front of it.
+ * The order is the cost argument: a flood against one warm instance is absorbed
+ * here for free after the thirtieth request - no reads, no writes, nothing that
+ * grows with how hard somebody is trying - and only traffic spread thinly
+ * enough to look ordinary to each instance reaches the counters that cost
+ * something. The durable limits are correspondingly *higher* than these, being
+ * the aggregate across however many instances are running.
  *
  * So: cheap, no reads, no writes, and worth having on its own terms. What it
- * must not become is the thing anybody points at when asked whether QR abuse is
- * handled.
+ * must not be mistaken for is the whole answer.
  *
  * ## Why two limits rather than one
  *
@@ -74,13 +78,27 @@ const sweep = (now: number): void => {
 };
 
 /**
+ * What counting one hit against one limit established.
+ *
+ * `crossed` is true on the single hit that took a bucket past its limit, and
+ * false on every one after it. Issue #1107 is what needs the distinction: an
+ * anomaly is raised on the crossing rather than on the refusal, so reporting a
+ * flood to the restaurant costs one row and one pair of reads rather than a
+ * pair per request on a path the caller controls the frequency of.
+ */
+interface Hit {
+  within: boolean;
+  crossed: boolean;
+}
+
+/**
  * Counts one hit and says whether it is over the limit.
  *
  * The hit is counted either way. A caller that keeps trying keeps its window
  * alive, so hammering does not become a way to reset the count by waiting for
  * refusals to stop being counted.
  */
-const hit = (key: string, limit: number, now: number): boolean => {
+const hit = (key: string, limit: number, now: number): Hit => {
   sweep(now);
 
   const current = windows.get(key);
@@ -88,12 +106,15 @@ const hit = (key: string, limit: number, now: number): boolean => {
   if (!current || now - current.startedAt >= RATE_LIMIT_WINDOW_MS) {
     windows.set(key, { count: 1, startedAt: now });
 
-    return true;
+    return { within: limit >= 1, crossed: limit === 0 };
   }
 
   current.count++;
 
-  return current.count <= limit;
+  return {
+    within: current.count <= limit,
+    crossed: current.count === limit + 1,
+  };
 };
 
 export interface ScanRateLimitCheck {
@@ -109,20 +130,46 @@ export interface ScanRateLimitCheck {
   now: number;
 }
 
-/** Whether this scan is within both limits. Counts it against both either way. */
-export const withinScanRateLimit = ({
+/** What counting one scan against both limits established. */
+export interface ScanRateLimitState {
+  /** Whether this scan is within both limits. */
+  within: boolean;
+  /**
+   * Whether this is the scan that took either bucket past its limit.
+   *
+   * True once per bucket per window on this instance. Issue #1107 raises the
+   * `rateLimited` anomaly from it rather than from every refusal, so a flood is
+   * one row on a staff screen instead of a Firestore round trip per request.
+   */
+  crossed: boolean;
+}
+
+/**
+ * Counts one scan against both limits and reports what that established.
+ *
+ * Both are evaluated; `&&` would let a token over its limit hide a client that
+ * is also over its own, and the client window is the one that matters for the
+ * next token.
+ */
+export const scanRateLimitState = ({
   token,
   client,
   now,
-}: ScanRateLimitCheck): boolean => {
-  // Both are evaluated; `&&` would let a token over its limit hide a client
-  // that is also over its own, and the client window is the one that matters
-  // for the next token.
-  const tokenOk = hit(`token:${token}`, TOKEN_LIMIT_PER_WINDOW, now);
-  const clientOk = hit(`client:${client}`, CLIENT_LIMIT_PER_WINDOW, now);
+}: ScanRateLimitCheck): ScanRateLimitState => {
+  const counted = [
+    hit(`token:${token}`, TOKEN_LIMIT_PER_WINDOW, now),
+    hit(`client:${client}`, CLIENT_LIMIT_PER_WINDOW, now),
+  ];
 
-  return tokenOk && clientOk;
+  return {
+    within: counted.every(({ within }) => within),
+    crossed: counted.some(({ crossed }) => crossed),
+  };
 };
+
+/** Whether this scan is within both limits. Counts it against both either way. */
+export const withinScanRateLimit = (check: ScanRateLimitCheck): boolean =>
+  scanRateLimitState(check).within;
 
 /** Empties the counters. For tests; nothing in production calls it. */
 export const resetScanRateLimit = (): void => windows.clear();

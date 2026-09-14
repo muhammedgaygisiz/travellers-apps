@@ -86,3 +86,10 @@ export * from './lib/table-order';
  * (issue #1106).
  */
 export * from './lib/table-assistance';
+/**
+ * A value export for the same reason again: the kinds, the derived document
+ * name, the quiet window, the session threshold and the distance rule are run
+ * by the backend that raises a row and by the staff screen that draws one
+ * (issue #1107).
+ */
+export * from './lib/scan-anomaly';

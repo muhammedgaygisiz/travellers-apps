@@ -1,3 +1,4 @@
+import type { ScanPosition } from './scan-anomaly';
 import type {
   TableOrderingAvailability,
   TableScanContext,
@@ -292,6 +293,20 @@ export const isTableSessionExpired = (
 export interface StartTableSessionRequest {
   /** The scanned token, exactly as `resolveTableQrToken` takes it. */
   token: string;
+  /**
+   * A coarse position the guest chose to share (GitHub issue #1107).
+   *
+   * Optional in the strong sense: nothing about the session, the status, the
+   * visit or the menu differs between a request that carries one and a request
+   * that does not. The only thing it can produce is a row on a screen the guest
+   * never sees, and only when the scan was far enough away to be worth one.
+   *
+   * Absent for a guest who did not tick the box, one whose device has no fix,
+   * and one on a build that predates the field. The coordinates are compared to
+   * the restaurant's and discarded - see `scan-anomaly.ts`, which owns the
+   * shape and the reasoning.
+   */
+  position?: ScanPosition;
 }
 
 /** What the client sends to end its own session. */

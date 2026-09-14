@@ -1,12 +1,20 @@
 import { DocumentData, getFirestore } from 'firebase-admin/firestore';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { recordScanAnomaly } from './record-scan-anomaly';
 import { RESTAURANT_COLLECTION } from './restaurant-authority';
 import {
   assertWithinScanRateLimit,
   parseScannedToken,
   resolveScan,
 } from './resolve-table-qr-token';
+import {
+  ScanPosition,
+  isDistantScan,
+  manySessionsThreshold,
+  parseScanPosition,
+  scanDistanceMeters,
+} from './scan-anomaly';
 import {
   TableOrderingAvailability,
   TableScanContext,
@@ -15,6 +23,7 @@ import {
 } from './table-scan';
 import {
   TABLE_SESSIONS_COLLECTION,
+  TABLE_SESSION_LIVE_STATUSES,
   TableSession,
   TableSessionStatus,
   isEndedSession,
@@ -85,6 +94,20 @@ import { TABLE_VISITS_COLLECTION, isOpenVisit } from './table-visit';
 
 export interface StartTableSessionRequest {
   token?: unknown;
+  /**
+   * A coarse position the guest chose to share (GitHub issue #1107).
+   *
+   * Absent for every guest who declined the permission, whose device had no
+   * fix, or whose client predates the field - and absent has to behave exactly
+   * like present-and-nearby, because a check that penalises a refusal is not
+   * optional. Nothing below branches on it except the anomaly it may raise:
+   * the session, the status, the visit and the menu are identical either way.
+   *
+   * The coordinates are compared to the restaurant's and discarded. What can
+   * survive is a rounded distance on an anomaly row, and only when the scan was
+   * far enough away for one - see `scan-anomaly.ts` in the model library.
+   */
+  position?: unknown;
 }
 
 export interface TableSessionStarted {
@@ -204,14 +227,112 @@ const isResumable = (
   !isEndedSession(existing) &&
   !isExpiredSession(existing, idleTimeoutMs, now);
 
+/**
+ * How many live sessions the table holds, capped at one past the threshold
+ * (GitHub issue #1107).
+ *
+ * A query rather than a counter on the table, because a counter is a second
+ * version of a fact the session documents already hold and would have to be
+ * decremented by three different ways of ending a session. `limit` is what
+ * keeps it cheap: the question is "is it more than this", so reading one past
+ * the threshold answers it and a table with two hundred sessions costs the same
+ * as a table with seven.
+ *
+ * It needs an index the automatic ones do not cover - a composite on `tableId`
+ * and `status`, in `firestore.indexes.json`, and indexes deploy by hand.
+ */
+const liveSessionsAt = async (
+  restaurantRef: FirebaseFirestore.DocumentReference,
+  tableId: string,
+  cap: number,
+): Promise<number> =>
+  (
+    await restaurantRef
+      .collection(TABLE_SESSIONS_COLLECTION)
+      .where('tableId', '==', tableId)
+      .where('status', 'in', [...TABLE_SESSION_LIVE_STATUSES])
+      .limit(cap)
+      .get()
+  ).size;
+
+/**
+ * The rows a session that started perfectly normally may still be worth
+ * (GitHub issue #1107).
+ *
+ * Run **after** the commit and never inside it, which is the decision worth
+ * finding again. An anomaly is a report about a session that already exists, so
+ * folding these reads into the transaction would put a collection query in the
+ * read set of every scan in the product, and a contended retry on the one
+ * document a guest is waiting for - to decide something no caller reads.
+ *
+ * Both kinds are computed here rather than at the caller because they share the
+ * one condition that matters: neither is evaluated for a guest who was merely
+ * resuming a session they already had. A phone that reloads the confirmation
+ * screen has not added a person to the table and has not moved.
+ */
+const reportSessionAnomalies = async (
+  restaurantRef: FirebaseFirestore.DocumentReference,
+  subject: { restaurantId: string; tableId: string; tableLabel: string },
+  seats: number,
+  restaurantPosition: unknown,
+  position: ScanPosition | undefined,
+  now: number,
+): Promise<void> => {
+  const threshold = manySessionsThreshold(seats);
+  const sessionCount = await liveSessionsAt(
+    restaurantRef,
+    subject.tableId,
+    threshold + 1,
+  );
+
+  if (sessionCount > threshold) {
+    await recordScanAnomaly({
+      ...subject,
+      kind: 'manySessions',
+      now,
+      sessionCount,
+    });
+  }
+
+  const restaurantAt = restaurantPosition as
+    { latitude?: unknown; longitude?: unknown } | undefined;
+
+  if (
+    !position ||
+    typeof restaurantAt?.latitude !== 'number' ||
+    typeof restaurantAt?.longitude !== 'number'
+  ) {
+    return;
+  }
+
+  const distanceMeters = scanDistanceMeters(position, {
+    latitude: restaurantAt.latitude,
+    longitude: restaurantAt.longitude,
+  });
+
+  if (isDistantScan(distanceMeters, position.accuracyMeters)) {
+    await recordScanAnomaly({
+      ...subject,
+      kind: 'distantScan',
+      now,
+      distanceMeters,
+    });
+  }
+};
+
 export const startTableSessionHandler = async (
   request: CallableRequest<StartTableSessionRequest>,
   now: Date = new Date(),
 ): Promise<StartTableSessionResult> => {
   const raw = parseScannedToken(request.data?.token);
   const guest = guestOf(request);
+  // Parsed before anything is checked and used after everything is written. A
+  // malformed position is dropped rather than refused, for the reason an absent
+  // one is: the field is optional, so sending a bad one must cost the guest no
+  // more than sending none.
+  const position = parseScanPosition(request.data?.position);
 
-  assertWithinScanRateLimit(request, raw, now, 'startTableSession');
+  await assertWithinScanRateLimit(request, raw, now, 'startTableSession');
 
   const { result, restaurant } = await resolveScan(raw, now);
 
@@ -256,42 +377,59 @@ export const startTableSessionHandler = async (
     .collection(TABLE_SESSIONS_COLLECTION)
     .doc(tableSessionId(tableId, guest.uid));
 
-  const session = await firestore.runTransaction(async (transaction) => {
-    // The state and the visit are read inside the transaction because a host
-    // can seat or free this table between the resolution above and the commit.
-    // The guest being attached to a visit that ended a second ago is precisely
-    // the case the pointer exists to close.
-    const visitId = await openVisitAt(transaction, restaurantRef, tableId);
-    const existing = (await transaction.get(sessionRef)).data();
-    const at = now.getTime();
-    const resuming = isResumable(existing, idleTimeoutMs, at);
+  const { session, created } = await firestore.runTransaction(
+    async (transaction) => {
+      // The state and the visit are read inside the transaction because a host
+      // can seat or free this table between the resolution above and the commit.
+      // The guest being attached to a visit that ended a second ago is precisely
+      // the case the pointer exists to close.
+      const visitId = await openVisitAt(transaction, restaurantRef, tableId);
+      const existing = (await transaction.get(sessionRef)).data();
+      const at = now.getTime();
+      const resuming = isResumable(existing, idleTimeoutMs, at);
 
-    const next: TableSession = {
-      id: sessionRef.id,
-      restaurantId,
-      tableId,
-      guestUserId: guest.uid,
-      status: visitId ? 'active' : 'pending',
-      ...(visitId ? { visitId } : {}),
-      startedAt:
-        resuming && typeof existing?.['startedAt'] === 'number'
-          ? (existing['startedAt'] as number)
-          : at,
-      lastActiveAt: at,
-      // Read off the token that is starting the session rather than carried
-      // forward from the stored document. A guest who registered between two
-      // scans is no longer anonymous, and the session that says otherwise is
-      // the one a later reader would trust.
-      isAnonymousGuest: guest.isAnonymous,
-    };
+      const next: TableSession = {
+        id: sessionRef.id,
+        restaurantId,
+        tableId,
+        guestUserId: guest.uid,
+        status: visitId ? 'active' : 'pending',
+        ...(visitId ? { visitId } : {}),
+        startedAt:
+          resuming && typeof existing?.['startedAt'] === 'number'
+            ? (existing['startedAt'] as number)
+            : at,
+        lastActiveAt: at,
+        // Read off the token that is starting the session rather than carried
+        // forward from the stored document. A guest who registered between two
+        // scans is no longer anonymous, and the session that says otherwise is
+        // the one a later reader would trust.
+        isAnonymousGuest: guest.isAnonymous,
+      };
 
-    // Replaced rather than merged, for the reason the table state is: a
-    // resumed session must not keep an `endedAt` or a `visitId` from a party
-    // that is over, and a merge is how one of those survives.
-    transaction.set(sessionRef, next);
+      // Replaced rather than merged, for the reason the table state is: a
+      // resumed session must not keep an `endedAt` or a `visitId` from a party
+      // that is over, and a merge is how one of those survives.
+      transaction.set(sessionRef, next);
 
-    return next;
-  });
+      return { session: next, created: !resuming };
+    },
+  );
+
+  // After the commit, and never allowed to change what it produced. A guest
+  // whose session is real must not be told it failed because a row on a staff
+  // screen could not be written, so `recordScanAnomaly` answers rather than
+  // throwing and this is the last thing that happens (issue #1107).
+  if (created) {
+    await reportSessionAnomalies(
+      restaurantRef,
+      { restaurantId, tableId, tableLabel: result.table.label },
+      result.table.seats,
+      restaurant['position'],
+      position,
+      now.getTime(),
+    );
+  }
 
   return {
     ok: true,

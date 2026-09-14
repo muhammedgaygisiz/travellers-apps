@@ -8,6 +8,10 @@ import {
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import type { AssistanceRow } from '../../integration/assistance-rows';
 import type {
+  PendingSessionRow,
+  ScanAnomalyRow,
+} from '../../integration/scan-signal-rows';
+import type {
   OrderAction,
   OrderTableGroup,
   QueuedOrder,
@@ -194,6 +198,89 @@ const waving: AssistanceRow[] = [
 ];
 
 /**
+ * Two parties at the door, waiting for somebody to seat them
+ * (GitHub issue #1107).
+ *
+ * One of them has been standing there past the three minutes that make a wait a
+ * problem, and one of them is three phones rather than one - which is the count
+ * a host needs in order to bring the right number of menus.
+ */
+const atTheDoor: PendingSessionRow[] = [
+  {
+    id: '7_table-4_guest-1',
+    tableId: 'table-4',
+    label: '4',
+    waiting: waiting(6),
+    urgent: true,
+    guests: 3,
+  },
+  {
+    id: '8_table-19_guest-9',
+    tableId: 'table-19',
+    label: '19',
+    waiting: waiting(1),
+    urgent: false,
+    guests: 1,
+  },
+];
+
+/**
+ * What the restaurant is told about its own codes (GitHub issue #1107).
+ *
+ * One of each half of the list: two that are still happening and say that
+ * replacing the code ends them, and two that carry a figure instead - a number
+ * of guests and a distance - and suggest nothing at all.
+ */
+const signals: ScanAnomalyRow[] = [
+  {
+    id: 'table-3:rateLimited',
+    tableId: 'table-3',
+    label: '3',
+    kind: 'rateLimited',
+    kindKey: 'scan-anomaly-rateLimited',
+    lastSeen: waiting(0),
+    active: true,
+    count: 14,
+    suggestsRotation: true,
+  },
+  {
+    id: 'table-21:disabledTable',
+    tableId: 'table-21',
+    label: '21',
+    kind: 'disabledTable',
+    kindKey: 'scan-anomaly-disabledTable',
+    lastSeen: waiting(2),
+    active: true,
+    count: 3,
+    suggestsRotation: true,
+  },
+  {
+    id: 'table-7:manySessions',
+    tableId: 'table-7',
+    label: '7',
+    kind: 'manySessions',
+    kindKey: 'scan-anomaly-manySessions',
+    lastSeen: waiting(9),
+    active: false,
+    count: 1,
+    suggestsRotation: false,
+    sessionCount: 9,
+  },
+  {
+    id: 'table-12:distantScan',
+    tableId: 'table-12',
+    label: '12',
+    kind: 'distantScan',
+    kindKey: 'scan-anomaly-distantScan',
+    lastSeen: waiting(30),
+    active: false,
+    count: 2,
+    suggestsRotation: false,
+    distanceMeters: 4200,
+  },
+];
+
+/**
  * The page at one device width, drawn inside a frame of that width.
  *
  * The width is set here rather than left to a Loki viewport, for the reason the
@@ -365,5 +452,67 @@ export const CallingWithNothingCooking: Story = {
 /** The row whose acknowledgement has not been answered yet. */
 export const CallingBusy: Story = {
   args: { assistance: waving, busyAssistanceId: 'table-3:requestBill' },
+  decorators: [at('1280px')],
+};
+
+/**
+ * The guests who scanned at the door (GitHub issue #1107).
+ *
+ * Above the tables that are calling, in the warning tone rather than the danger
+ * one: somebody standing at the door is a thing to do something about, and not
+ * a thing that has gone wrong.
+ */
+export const Waiting: Story = {
+  args: { waiting: atTheDoor },
+  decorators: [at('1280px')],
+};
+
+/**
+ * A room with people at the door and nothing cooking.
+ *
+ * The case the list exists for. A pending guest cannot order and cannot even
+ * ask for a waiter - the backend refuses a call from a pending session - so a
+ * screen that only drew tickets would have shown an empty page to a restaurant
+ * with two parties standing in it.
+ */
+export const WaitingWithNothingCooking: Story = {
+  args: { waiting: atTheDoor, groups: [], openCount: 0 },
+  decorators: [at('1280px')],
+};
+
+/**
+ * What the restaurant is told about its own codes (GitHub issue #1107).
+ *
+ * At the foot of the screen and in a neutral tone, because nobody is waiting on
+ * it: a guest at the door and a guest with their hand up are each owed a walk
+ * within the minute, and a code that was hammered is owed a decision at some
+ * point this evening.
+ */
+export const ScanSignals: Story = {
+  args: { anomalies: signals },
+  decorators: [at('1280px')],
+};
+
+/** The same rows on a phone, where each one wraps rather than truncating. */
+export const ScanSignalsOnPhone: Story = {
+  args: { anomalies: signals, groups: [], openCount: 0 },
+  decorators: [at('390px', '900px')],
+};
+
+/** The row whose dismissal has not been answered yet. */
+export const ScanSignalsBusy: Story = {
+  args: { anomalies: signals, busyAnomalyId: 'table-3:rateLimited' },
+  decorators: [at('1280px')],
+};
+
+/**
+ * Everything at once: tickets, raised hands, people at the door and signals.
+ *
+ * The reference that proves the three lists stay distinguishable on one screen,
+ * which is the whole reason they are three lists with three tones rather than
+ * one list of things a member of staff should look at.
+ */
+export const EverythingAtOnce: Story = {
+  args: { assistance: waving, waiting: atTheDoor, anomalies: signals },
   decorators: [at('1280px')],
 };

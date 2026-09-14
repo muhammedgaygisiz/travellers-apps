@@ -568,6 +568,7 @@
   "table-session-confirm-heading": "Estás a pedir no {{restaurant}}, mesa {{table}}",
   "table-session-confirm-room": "{{room}}",
   "table-session-confirm-intro": "Confirma que é esta a mesa onde estás sentado antes de continuares.",
+  "table-session-share-location": "Opcional: partilhe aproximadamente onde está, para o restaurante detetar códigos usados indevidamente. Não muda nada no seu pedido.",
   "table-session-confirm-action": "Sim, é a minha mesa",
   "table-session-active-heading": "Estás na mesa {{table}}",
   "table-session-active-intro": "O {{restaurant}} tem a tua mesa aberta, podes pedir a partir daqui.",

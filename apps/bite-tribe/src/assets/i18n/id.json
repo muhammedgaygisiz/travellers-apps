@@ -568,6 +568,7 @@
   "table-session-confirm-heading": "Kamu memesan di {{restaurant}}, meja {{table}}",
   "table-session-confirm-room": "{{room}}",
   "table-session-confirm-intro": "Pastikan ini meja tempat kamu duduk sebelum melanjutkan.",
+  "table-session-share-location": "Opsional: bagikan perkiraan lokasimu agar restoran bisa mengenali kode yang disalahgunakan. Pesananmu tidak berubah sama sekali.",
   "table-session-confirm-action": "Ya, ini mejaku",
   "table-session-active-heading": "Kamu di meja {{table}}",
   "table-session-active-intro": "{{restaurant}} sudah membuka mejamu, jadi kamu bisa memesan dari sini.",

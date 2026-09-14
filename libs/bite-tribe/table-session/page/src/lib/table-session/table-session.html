@@ -43,6 +43,34 @@
         >
           {{ 'table-session-confirm-action' | transloco }}
         </ion-button>
+
+        <!--
+          The one optional thing on this screen (GitHub issue #1107).
+
+          Off until the guest turns it on, because a default of on would be
+          consent inferred from somebody not reading a line on a screen they are
+          trying to get past. It never asks for a permission either: the read
+          refuses rather than prompting when the app has no location grant, so a
+          guest who has never given the app their location ticks the box, shares
+          nothing, and gets exactly the same session.
+
+          Below the button rather than above it, deliberately. Confirming the
+          table is what this screen is for; this is small print a guest may
+          ignore entirely without losing anything at all.
+        -->
+        <ion-checkbox
+          class="table-session__share"
+          justify="start"
+          labelPlacement="end"
+          data-testid="table-session-share-location"
+          [checked]="sharingLocation()"
+          [disabled]="isBusy()"
+          (ionChange)="toggleLocationSharing($event.detail.checked)"
+        >
+          <span class="note">
+            {{ 'table-session-share-location' | transloco }}
+          </span>
+        </ion-checkbox>
       </section>
       }
 

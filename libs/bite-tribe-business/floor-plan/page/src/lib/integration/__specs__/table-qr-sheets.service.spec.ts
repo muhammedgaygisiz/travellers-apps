@@ -8,6 +8,7 @@ import {
 } from 'bite-tribe-business/floor-plan-data-access';
 import { RestaurantTable, Room } from 'model';
 import { of } from 'rxjs';
+import { ToastService } from 'toast';
 import { ALL_ROOMS, TableQrSheetsService } from '../table-qr-sheets.service';
 
 // Only the restaurant name is read this way; everything else goes through the
@@ -51,6 +52,9 @@ describe(TableQrSheetsService.name, () => {
   let loadRooms: jest.Mock;
   let loadTables: jest.Mock;
   let issueTableQrTokens: jest.Mock;
+  let rotateTableQrToken: jest.Mock;
+  let rotateTableQrTokens: jest.Mock;
+  let present: jest.Mock;
 
   /**
    * Lets the resources settle before the assertion.
@@ -103,13 +107,33 @@ describe(TableQrSheetsService.name, () => {
       }),
     );
 
+    rotateTableQrToken = jest.fn().mockResolvedValue({
+      tableId: 'table-12',
+      label: '12',
+      token: 'ROTATED0000000000000000001',
+      status: 'rotated' as const,
+    });
+    rotateTableQrTokens = jest.fn().mockResolvedValue({
+      restaurantId: 'china-wok',
+      tokens: [],
+      skippedTableIds: [],
+    });
+    present = jest.fn().mockResolvedValue(undefined);
+
     TestBed.configureTestingModule({
       providers: [
         TableQrSheetsService,
         {
           provide: FloorPlanDataAccessService,
-          useValue: { loadRooms, loadTables, issueTableQrTokens },
+          useValue: {
+            loadRooms,
+            loadTables,
+            issueTableQrTokens,
+            rotateTableQrToken,
+            rotateTableQrTokens,
+          },
         },
+        { provide: ToastService, useValue: { present } },
         {
           provide: BiteTribeStoreService,
           useValue: {
@@ -317,6 +341,106 @@ describe(TableQrSheetsService.name, () => {
 
       expect(print).toHaveBeenCalled();
       print.mockRestore();
+    });
+  });
+
+  /**
+   * Replacing the codes of the ticked tables (GitHub issue #1107).
+   *
+   * The acceptance criterion this closes is "a leaked code can be invalidated
+   * by the restaurant in one action, without reprinting the whole room", and
+   * the reason it needed a surface at all is that `rotateTableQrToken` had
+   * existed since issue #1086 with no caller anywhere in the workspace.
+   */
+  describe('replacing codes', () => {
+    it('asks before it acts, and can be backed out of', async () => {
+      await loaded();
+
+      service.askToRotate();
+      expect(service.confirmingRotation()).toBe(true);
+
+      service.cancelRotation();
+      expect(service.confirmingRotation()).toBe(false);
+      expect(rotateTableQrToken).not.toHaveBeenCalled();
+      expect(rotateTableQrTokens).not.toHaveBeenCalled();
+    });
+
+    /**
+     * One table takes the single-table callable, because that one logs against
+     * the **table** - and "who reprinted table 12 and when" is the question
+     * that trail exists to answer. A bulk call with one id in it would answer
+     * it with a restaurant-level entry.
+     */
+    it('uses the single-table callable for one ticked table', async () => {
+      await loaded();
+
+      await service.rotateSelected();
+
+      expect(rotateTableQrToken).toHaveBeenCalledWith('china-wok', 'table-1');
+      expect(rotateTableQrTokens).not.toHaveBeenCalled();
+    });
+
+    /**
+     * A room is the filter plus Select all, which is why there is one control
+     * rather than two: the selection the owner already made is the scope.
+     */
+    it('uses the bulk callable for a room, and names every ticked table', async () => {
+      storedTables = [table(), table({ id: 'table-2', label: '2' })];
+      await loaded();
+
+      const ticked = service.selectedRows().map((row) => row.tableId);
+
+      expect(ticked).toHaveLength(2);
+
+      await service.rotateSelected();
+
+      expect(rotateTableQrTokens).toHaveBeenCalledWith({
+        restaurantId: 'china-wok',
+        tableIds: ticked,
+      });
+      expect(rotateTableQrToken).not.toHaveBeenCalled();
+    });
+
+    /**
+     * A reprint follows a rotation immediately, so the sheet on screen has to
+     * be the codes that are now valid rather than the ones that just stopped
+     * working.
+     */
+    it('redraws the sheet from the backend afterwards', async () => {
+      await loaded();
+      const before = issueTableQrTokens.mock.calls.length;
+
+      await service.rotateSelected();
+      await loaded();
+
+      expect(issueTableQrTokens.mock.calls.length).toBeGreaterThan(before);
+      expect(service.confirmingRotation()).toBe(false);
+    });
+
+    /**
+     * An owner told nothing would reprint the codes on screen believing they
+     * had been replaced, which is the one outcome worse than the leak.
+     */
+    it('says so when the backend refuses, and leaves the sheet alone', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => undefined);
+      await loaded();
+      rotateTableQrToken.mockRejectedValue(new Error('nope'));
+
+      await service.rotateSelected();
+
+      expect(present).toHaveBeenCalledWith(
+        expect.objectContaining({ outcome: 'failure' }),
+      );
+    });
+
+    it('does nothing at all when no table is ticked', async () => {
+      await loaded();
+      service.selectAll(false);
+
+      await service.rotateSelected();
+
+      expect(rotateTableQrToken).not.toHaveBeenCalled();
+      expect(rotateTableQrTokens).not.toHaveBeenCalled();
     });
   });
 

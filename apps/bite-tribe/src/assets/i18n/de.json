@@ -568,6 +568,7 @@
   "table-session-confirm-heading": "Du bestellst bei {{restaurant}}, Tisch {{table}}",
   "table-session-confirm-room": "{{room}}",
   "table-session-confirm-intro": "Prüfe, ob das der Tisch ist, an dem du sitzt, bevor du weitergehst.",
+  "table-session-share-location": "Optional: Teile ungefähr, wo du bist, damit das Restaurant missbrauchte Codes erkennen kann. An deiner Bestellung ändert das nichts.",
   "table-session-confirm-action": "Ja, das ist mein Tisch",
   "table-session-active-heading": "Du bist an Tisch {{table}}",
   "table-session-active-intro": "{{restaurant}} hat deinen Tisch geöffnet, du kannst von hier aus bestellen.",

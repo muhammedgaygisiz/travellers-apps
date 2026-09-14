@@ -77,6 +77,13 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   issueTableQrTokens: 'restaurantAuthority',
   rotateTableQrToken: 'restaurantAuthority',
 
+  // Replacing the codes of a whole room in one action (issue #1107). The same
+  // door as the single rotation and deliberately *not* the `staffAuthority`
+  // that clears the anomaly row prompting it: every other action on those
+  // screens moves something on a floor and is undone by moving it back, and
+  // this one invalidates a printed sticker.
+  rotateTableQrTokens: 'restaurantAuthority',
+
   // A restaurant operating its own dining room during service (issue #1092).
   // Not `restaurantAuthority`: the caller is usually a host rather than the
   // account the restaurant is assigned to, and requiring `business` here would
@@ -98,6 +105,12 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // same door again: answering a table is the job of whoever is on the floor,
   // and the callable decides for itself which restaurant each caller reaches.
   acknowledgeTableAssistance: 'staffAuthority',
+
+  // Clearing a row saying a table's code is being worked on (issue #1107).
+  // The same door again: the rows sit on the screens the floor is already
+  // being read from, and a second list of who may clear one would be free to
+  // disagree with who may answer a table.
+  dismissScanAnomaly: 'staffAuthority',
 
   // Consumer and business app paths. Each acts for the caller, or reads data
   // every signed-in account may read, so requiring `admin` here would break

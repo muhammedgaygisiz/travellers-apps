@@ -10,6 +10,7 @@ import { TABLE_SESSIONS_COLLECTION, tableSessionId } from 'model';
 import type {
   LeaveTableSessionRequest,
   ResolveTableQrTokenRequest,
+  ScanPosition,
   StartTableSessionRequest,
   StartTableSessionResult,
   TableScanResult,
@@ -151,6 +152,7 @@ export class TableSessionApiService {
    */
   async start(
     token: string,
+    position?: ScanPosition,
   ): Promise<StartTableSessionResult | TableSessionCallError> {
     try {
       await this.authService.signInAsGuest();
@@ -158,7 +160,13 @@ export class TableSessionApiService {
       const result = await FirebaseFunctions.callByName<
         StartTableSessionRequest,
         StartTableSessionResult
-      >({ name: 'startTableSession', data: { token } });
+      >({
+        name: 'startTableSession',
+        // Omitted rather than sent as `undefined`, so a guest who shared
+        // nothing and a guest whose fix failed are one request on the wire and
+        // not two (issue #1107).
+        data: position ? { token, position } : { token },
+      });
 
       return result.data;
     } catch (error) {

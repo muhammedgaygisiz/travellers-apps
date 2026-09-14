@@ -568,6 +568,7 @@
   "table-session-confirm-heading": "คุณกำลังสั่งอาหารที่ {{restaurant}} โต๊ะ {{table}}",
   "table-session-confirm-room": "{{room}}",
   "table-session-confirm-intro": "ตรวจสอบว่านี่คือโต๊ะที่คุณนั่งอยู่ก่อนไปต่อ",
+  "table-session-share-location": "ไม่บังคับ: แชร์ตำแหน่งคร่าว ๆ ของคุณ เพื่อให้ร้านสังเกตเห็นโค้ดที่ถูกนำไปใช้ผิด ไม่มีผลต่อการสั่งอาหารของคุณ",
   "table-session-confirm-action": "ใช่ นี่คือโต๊ะของฉัน",
   "table-session-active-heading": "คุณอยู่ที่โต๊ะ {{table}}",
   "table-session-active-intro": "{{restaurant}} เปิดโต๊ะของคุณแล้ว คุณสั่งอาหารจากที่นี่ได้เลย",

@@ -4,6 +4,7 @@ import {
   DocumentReference,
   getFirestore,
 } from 'firebase-admin/firestore';
+import { resetDurableScanRateLimit } from '../../shared/utils/durable-scan-rate-limit';
 import { resetScanRateLimit } from '../../shared/utils/scan-rate-limit';
 import { startTableSessionHandler } from '../start-table-session';
 import {
@@ -313,6 +314,7 @@ describe('table cart and order submission', () => {
 
   beforeEach(async () => {
     resetScanRateLimit();
+    await resetDurableScanRateLimit();
     await clear();
     await seed();
   });

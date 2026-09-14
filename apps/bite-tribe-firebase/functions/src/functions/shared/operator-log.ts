@@ -30,13 +30,14 @@ import { BiteTribeRole, rolesOf } from './roles';
  * needs the set of actions to be knowable, and adding a member is the one line
  * of review that says "this is a new thing we can do to an account".
  *
- * **Four of them are not operator actions**, and they are here on purpose.
+ * **Five of them are not operator actions**, and they are here on purpose.
  * `addRestaurantStaff` and `removeRestaurantStaff` are performed by a
  * restaurant owner as well as by an operator (issue #1537), and they change
- * what an account may do just as `setUserRoles` does. `issueTableQrTokens` and
- * `rotateTableQrToken` are the same kind of action on a restaurant rather than
- * on an account (issue #1086): a rotation invalidates every code printed for a
- * table, so "who reprinted this and when" needs an answer. Giving any of them
+ * what an account may do just as `setUserRoles` does. `issueTableQrTokens`,
+ * `rotateTableQrToken` and `rotateTableQrTokens` are the same kind of action on
+ * a restaurant rather than on an account (issues #1086 and #1107): a rotation
+ * invalidates every code printed for a table - a whole room of them, in the
+ * bulk case - so "who reprinted this and when" needs an answer. Giving any of them
  * a second log shape would mean "everything done to this restaurant" had two
  * answers, which is the thing issue #1477 removed. `callerRoles` is what says
  * which kind of caller acted, and it is already on every entry.
@@ -53,6 +54,7 @@ export const OPERATOR_ACTIONS = [
   'removeRestaurantStaff',
   'revokeRestaurantOwner',
   'rotateTableQrToken',
+  'rotateTableQrTokens',
   'sendNewVersionNotification',
   'setUserBlocked',
   'setUserRoles',

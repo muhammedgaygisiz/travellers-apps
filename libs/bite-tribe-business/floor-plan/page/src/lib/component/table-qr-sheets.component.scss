@@ -409,3 +409,25 @@ $tent-height: 270mm;
     }
   }
 }
+
+/*
+ * Replacing the codes of the ticked tables (GitHub issue #1107).
+ *
+ * Separated from the print button by a rule rather than by colour alone,
+ * because the two buttons sit a centimetre apart and do opposite things: one
+ * puts the current codes on paper and the other stops them working. The rule is
+ * what a hand reaching for Print has to cross.
+ */
+.qr-sheets__rotate {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.12);
+}
+
+.qr-sheets__rotate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}

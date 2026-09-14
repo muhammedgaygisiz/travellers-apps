@@ -115,6 +115,80 @@
       }
 
       <!--
+        The guests who scanned at the door and are waiting to be seated
+        (GitHub issue #1107). Above the tables that are calling, because a
+        pending guest has nothing at all yet: no table, no menu they can order
+        from, and no way to ask for a waiter - the backend refuses a call from a
+        pending session and names this list as the reason. Everything the
+        product can do for them is done by somebody walking over.
+
+        Not in the signals list at the bottom, and that is the decision worth
+        seeing on screen: two guests waiting at table 12 is the flow working.
+      -->
+      @if (hasWaiting()) {
+        <section
+          class="order-queue__calling order-queue__calling--waiting"
+          data-testid="order-queue-pending"
+        >
+          <h2
+            class="order-queue__calling-title order-queue__calling-title--waiting"
+          >
+            {{ 'pending-session-title' | transloco }}
+          </h2>
+
+          <ion-note class="order-queue__calling-hint">
+            {{ 'pending-session-hint' | transloco }}
+          </ion-note>
+
+          <ul class="order-queue__calling-list">
+            @for (row of waiting(); track row.id) {
+              <li
+                class="order-queue__calling-row"
+                [class.order-queue__calling-row--urgent]="row.urgent"
+                [attr.data-testid]="'pending-' + row.id"
+              >
+                <div class="order-queue__calling-what">
+                  <span class="order-queue__table">
+                    {{
+                      row.label
+                        ? ('order-queue-table'
+                          | transloco: { label: row.label })
+                        : ('order-queue-table-unknown' | transloco)
+                    }}
+                  </span>
+
+                  <!--
+                    How many phones are waiting, because it is what a host needs
+                    in order to bring the right number of menus. One row per
+                    table rather than per phone: three friends who each scanned
+                    the same code at the door are one party.
+                  -->
+                  <span
+                    class="order-queue__calling-kind"
+                    [attr.data-testid]="'pending-guests-' + row.id"
+                  >
+                    {{
+                      'pending-session-guests'
+                        | transloco: { count: row.guests }
+                    }}
+                  </span>
+                </div>
+
+                <div class="order-queue__calling-when">
+                  <span
+                    class="order-queue__age"
+                    [attr.data-testid]="'pending-age-' + row.id"
+                  >
+                    {{ row.waiting.key | transloco: row.waiting.params }}
+                  </span>
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      <!--
         The tables that are calling, above the tickets and sorted the other way
         round (GitHub issue #1106). A pass works its tickets newest first,
         because the one that just landed is the one nobody has read; a floor
@@ -340,6 +414,134 @@
             </li>
           }
         </ul>
+      }
+
+      <!--
+        What the restaurant is told about its own codes (GitHub issue #1107).
+
+        At the foot of the screen and not at the head of it, because nobody is
+        waiting on a row here: a guest at the door and a guest with their hand
+        up are each owed a walk within the minute, and a code that was hammered
+        is owed a decision at some point this evening. Putting it above the
+        tickets would have bought the least urgent thing on the page the most
+        prominent place on it.
+
+        Neutral rather than in the danger tone the call list uses, for the same
+        reason. A list that shouts is a list that gets dismissed unread, and
+        most of what lands here has an ordinary explanation.
+      -->
+      @if (hasAnomalies()) {
+        <section
+          class="order-queue__calling order-queue__calling--signal"
+          data-testid="order-queue-anomalies"
+        >
+          <h2
+            class="order-queue__calling-title order-queue__calling-title--signal"
+          >
+            {{ 'scan-anomaly-title' | transloco }}
+          </h2>
+
+          <ion-note class="order-queue__calling-hint">
+            {{ 'scan-anomaly-hint' | transloco }}
+          </ion-note>
+
+          <ul class="order-queue__calling-list">
+            @for (row of anomalies(); track row.id) {
+              <li
+                class="order-queue__calling-row"
+                [attr.data-testid]="'anomaly-' + row.id"
+              >
+                <div class="order-queue__calling-what">
+                  <span class="order-queue__table">
+                    {{
+                      row.label
+                        ? ('order-queue-table'
+                          | transloco: { label: row.label })
+                        : ('order-queue-table-unknown' | transloco)
+                    }}
+                  </span>
+
+                  <span
+                    class="order-queue__calling-kind"
+                    [attr.data-testid]="'anomaly-kind-' + row.id"
+                  >
+                    {{ row.kindKey | transloco }}
+                  </span>
+
+                  <!--
+                    The two kinds that carry a number say it, because "more
+                    sessions than seats" and "far away" are claims a member of
+                    staff can only judge with the figure behind them.
+                  -->
+                  @if (row.sessionCount !== undefined) {
+                    <span class="order-queue__calling-detail">
+                      {{
+                        'scan-anomaly-sessions'
+                          | transloco: { count: row.sessionCount }
+                      }}
+                    </span>
+                  }
+                  @if (row.distanceMeters !== undefined) {
+                    <span class="order-queue__calling-detail">
+                      {{
+                        'scan-anomaly-distance'
+                          | transloco: { meters: row.distanceMeters }
+                      }}
+                    </span>
+                  }
+
+                  <!--
+                    The answer to the row, where there is one. The button is not
+                    here: rotating a code reprints a sticker, so it lives on the
+                    QR sheet behind the restaurant's own authority rather than
+                    behind the button a shift presses to clear a list.
+                  -->
+                  @if (row.suggestsRotation) {
+                    <span
+                      class="order-queue__calling-detail"
+                      [attr.data-testid]="'anomaly-rotate-' + row.id"
+                    >
+                      {{ 'scan-anomaly-rotate-hint' | transloco }}
+                    </span>
+                  }
+                </div>
+
+                <div class="order-queue__calling-when">
+                  <!--
+                    Raisings and not requests. A burst inside a minute is one,
+                    which the model states and this word has to mean, or the
+                    figure reads as a request count that is wrong by orders of
+                    magnitude.
+                  -->
+                  <span class="order-queue__calling-detail">
+                    {{ 'scan-anomaly-count' | transloco: { count: row.count } }}
+                  </span>
+
+                  <span
+                    class="order-queue__age"
+                    [class.order-queue__age--active]="row.active"
+                    [attr.data-testid]="'anomaly-age-' + row.id"
+                  >
+                    {{ row.lastSeen.key | transloco: row.lastSeen.params }}
+                  </span>
+                </div>
+
+                <ion-button
+                  size="small"
+                  fill="outline"
+                  [disabled]="busyAnomalyId() === row.id"
+                  [attr.data-testid]="'anomaly-dismiss-' + row.id"
+                  (click)="dismiss(row)"
+                >
+                  @if (busyAnomalyId() === row.id) {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+                  {{ 'scan-anomaly-dismiss' | transloco }}
+                </ion-button>
+              </li>
+            }
+          </ul>
+        </section>
       }
     </div>
 

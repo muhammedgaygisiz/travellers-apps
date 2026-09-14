@@ -103,6 +103,25 @@ export interface RotateTableQrTokenRequest {
   tableId?: unknown;
 }
 
+/**
+ * What a bulk rotation names (GitHub issue #1107).
+ *
+ * One of `roomId` or `tableIds`, and never neither. "Rotate every code in the
+ * restaurant" is deliberately not reachable by leaving an argument out: it is
+ * the one action here that invalidates every sticker in the building at once,
+ * and a caller that meant a room and sent an empty object would get it.
+ * `issueTableQrTokens` defaults to the whole restaurant because issuing is
+ * idempotent and costs nothing when there is nothing to do; this one is the
+ * opposite of idempotent.
+ */
+export interface RotateTableQrTokensRequest {
+  restaurantId?: unknown;
+  /** Every enabled table of one room. */
+  roomId?: unknown;
+  /** Named tables, which may span rooms. A disabled one is refused. */
+  tableIds?: unknown;
+}
+
 export interface TableQrTokenResult {
   tableId: string;
   label: string;
@@ -127,6 +146,19 @@ export interface IssueTableQrTokensResult {
 export type RotateTableQrTokenResult = TableQrTokenResult & {
   restaurantId: string;
 };
+
+/**
+ * What a bulk rotation answers with.
+ *
+ * `IssueTableQrTokensResult`'s shape rather than a new one, because the QR
+ * sheet reads both through the same code path: it asks for tokens on load and
+ * may rotate some of them afterwards, and two shapes for "here are the tokens
+ * of these tables" would be two renderers of one sheet.
+ */
+export interface RotateTableQrTokensResult extends IssueTableQrTokensResult {
+  /** The room the rotation was scoped to, where it was scoped to one. */
+  roomId?: string;
+}
 
 const getString = (data: DocumentData, field: string): string =>
   typeof data[field] === 'string' ? data[field] : '';
@@ -489,12 +521,136 @@ export const rotateTableQrTokenHandler = async (
 };
 
 /**
- * Both callables are the restaurant's own, not an operator's.
+ * Replaces the codes of a whole room, or of a named set of tables
+ * (GitHub issue #1107).
+ *
+ * ## Why this exists when single rotation already did
+ *
+ * Because the two answer different incidents. One code on somebody's feed is
+ * `rotateTableQrToken`, and reprinting one sticker is the right cost. A sheet
+ * of codes photographed on the pass, a printout that left the building, a
+ * member of staff who walked out with the terrace - those are a room, and doing
+ * them one table at a time is twenty presses during which the room is half
+ * rotated and the guest at table 14 is holding a code that has just stopped
+ * working while table 15's still does.
+ *
+ * ## Why it is still one transaction per table
+ *
+ * Each table's token document and its `qrTokenId` are two halves of one fact
+ * and have to land together - that is `issueTokenForTable`'s argument and it is
+ * unchanged here. What a single outer transaction would add is the guarantee
+ * that the *room* moves at once, and it cannot honestly be had: Firestore
+ * transactions are bounded, a large room would exceed them, and an owner
+ * whose rotation failed at table 19 of 24 is better served by 18 rotated tables
+ * and an error than by nothing.
+ *
+ * So the guarantee this makes is the weaker true one: every table it reports is
+ * rotated, and a failure stops the run rather than continuing past it. The
+ * sheet is reprinted from what comes back.
+ *
+ * ## Disabled tables
+ *
+ * Skipped when the scope is a room and refused when a table is named, which is
+ * exactly what `issueTableQrTokens` does and for the same reason: "there was
+ * nothing to do here" and "you asked for a code that must not be printed" are
+ * different answers.
+ */
+export const rotateTableQrTokensHandler = async (
+  request: CallableRequest<RotateTableQrTokensRequest>,
+): Promise<RotateTableQrTokensResult> => {
+  const restaurantId = parseRequiredString(
+    request.data?.restaurantId,
+    'restaurantId',
+  );
+  const requested = parseTableIds(request.data?.tableIds);
+  const roomId =
+    typeof request.data?.roomId === 'string' ? request.data.roomId.trim() : '';
+
+  if (!roomId && !requested.length) {
+    throw new HttpsError(
+      'invalid-argument',
+      'A bulk rotation names a room or a set of tables.',
+    );
+  }
+
+  const actingUid = await requireRestaurantAuthority(request, restaurantId);
+
+  logOperatorAction(request, {
+    action: 'rotateTableQrTokens',
+    targetType: 'restaurant',
+    targetId: restaurantId,
+    outcome: 'started',
+    details: { roomId, requestedTables: requested.length },
+  });
+
+  const tables = await readTables(restaurantId, requested);
+
+  // A room scope drops the tables of other rooms and the ones out of service; a
+  // named set drops nothing, so a disabled table reaches `issueTokenForTable`
+  // and is refused there.
+  const targets = requested.length
+    ? tables
+    : tables.filter(
+        (table) =>
+          table.data()?.['enabled'] === true &&
+          getString(table.data() ?? {}, 'roomId') === roomId,
+      );
+  const skippedTableIds = tables
+    .filter((table) => !targets.includes(table))
+    .map((table) => table.id);
+
+  const tokens: TableQrTokenResult[] = [];
+
+  // Sequential rather than `Promise.all`. Each iteration is a transaction that
+  // reads and writes the same restaurant document, and running twenty of them
+  // at once is twenty transactions contending on one row - which Firestore
+  // answers with retries and then with failures, on the operation that most
+  // needs to either finish or stop somewhere reportable.
+  for (const table of targets) {
+    tokens.push(
+      await issueTokenForTable(
+        request,
+        actingUid,
+        restaurantId,
+        table.id,
+        true,
+      ),
+    );
+  }
+
+  logOperatorAction(request, {
+    action: 'rotateTableQrTokens',
+    targetType: 'restaurant',
+    targetId: restaurantId,
+    outcome: 'succeeded',
+    details: {
+      roomId,
+      rotated: tokens.length,
+      skipped: skippedTableIds.length,
+    },
+  });
+
+  return {
+    restaurantId,
+    ...(roomId ? { roomId } : {}),
+    tokens,
+    skippedTableIds,
+  };
+};
+
+/**
+ * All three callables are the restaurant's own, not an operator's.
  *
  * An owner prints and reprints their own table codes without a support
  * conversation, and an operator is admitted alongside them by `RD-UR-6` so
  * that a restaurant which has lost access has a way back - the classification
  * `restaurantAuthority` in `callable-authorization.spec.ts`.
+ *
+ * Deliberately **not** the `staff` authority that clears a `rateLimited` row in
+ * `dismissScanAnomaly`, even though that row is what prompts a rotation. Every
+ * other action on those screens moves something on a floor and is undone by
+ * moving it back; this one invalidates a printed sticker and is undone by a
+ * trip to the printer, which is a decision for whoever owns the restaurant.
  */
 export const issueTableQrTokens = onAppCheck<IssueTableQrTokensRequest>(
   issueTableQrTokensHandler,
@@ -502,4 +658,8 @@ export const issueTableQrTokens = onAppCheck<IssueTableQrTokensRequest>(
 
 export const rotateTableQrToken = onAppCheck<RotateTableQrTokenRequest>(
   rotateTableQrTokenHandler,
+);
+
+export const rotateTableQrTokens = onAppCheck<RotateTableQrTokensRequest>(
+  rotateTableQrTokensHandler,
 );

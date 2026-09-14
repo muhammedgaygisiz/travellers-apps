@@ -6,15 +6,16 @@
 
 Partly implemented. Specified through issue \#1072 as stage 3 of issue \#735, and issue \#1073 as stage 4.
 
-Eight of the ten children have landed. Issue \#1099 gave menu items the identity
+Nine of the ten children have landed. Issue \#1099 gave menu items the identity
 an order line hangs from; issue \#1100 made a scanned token resolve, validating
 the six rules below and answering with a restaurant, a room, a table and a menu
 or one of twelve distinct refusal reasons; issue \#1101 gave the guest a
 screen, a session and an identity to hold it with; issue \#1103 gave them a
 cart and a way to send it; issue \#1104 gave them a way to watch what happens
 to it and to order again; issue \#1105 gave the restaurant the screen that
-answers them; and issue \#1106 gave the guest a way to ask for a person without
-waving.
+answers them; issue \#1106 gave the guest a way to ask for a person without
+waving; and issue \#1107 assumed the code is already public and made that
+boring.
 
 **A scanned code now reaches something.** `/t/:token` is a public route in the
 consumer app, the twelve refusal reasons have copy in all eleven locale files,
@@ -66,14 +67,23 @@ raise a second one, bounds the collection at two documents per table so the
 staff screens read it whole with no index, and lets the guest's phone subscribe
 to the answer. Six decisions shaped it, `RD-TS-18` to `RD-TS-23`.
 
-**One gap remains, and it is staff-facing.** Nothing shows staff a **pending
-session** - the guest who scanned while waiting to be seated - which sits with
-issue \#1107. Table ordering is off for every restaurant until an owner turns it
-on, and what still has to happen before one should is the deploy: the rules and
-the indexes this issue adds are applied by hand, so a queue opened against
-production today would be refused until
-`npx nx firebase-deploy-rules bite-tribe-firebase` and
-`npx nx firebase-deploy-indexes bite-tribe-firebase` have run.
+**Issue \#1107 closed the last gap this page carried, and it was two gaps at
+once.** Staff can now see a **pending session** - the guest who scanned while
+waiting to be seated, which issue \#1101 had been writing since it landed and
+nothing drew - and a restaurant can replace the code of one table or of a whole
+room in one action, which is the answer to a code that has been photographed and
+posted. Resolution is throttled across function instances rather than within
+one, and what is throttled is reported to the restaurant as a row it can act on.
+Five decisions shaped it, `RD-TS-24` to `RD-TS-28`.
+
+Table ordering is off for every restaurant until an owner turns it on, and what
+still has to happen before one should is the deploy: the rules and the indexes
+are applied by hand, so a queue opened against production today would be refused
+until `npx nx firebase-deploy-rules bite-tribe-firebase` and
+`npx nx firebase-deploy-indexes bite-tribe-firebase` have run. Issue \#1107 adds
+a third manual step with no Nx target at all - a TTL policy on
+`scanRateLimits.expiresAt` - without which the durable counters are written and
+never removed.
 
 ## Goal
 
@@ -539,6 +549,88 @@ It changes nothing in production until
 that admits the two reads is deployed by hand. No index deploy is needed, which
 is the point of the derived name.
 
+## What A Code On The Internet Costs
+
+Issue \#1107 is the part of this use case that assumes the sticker has already
+been photographed, shared and posted, and makes that boring. Nothing in it
+depends on the token staying secret, which is the acceptance criterion it was
+written against.
+
+**The limit is two counters, cheapest first** (`RD-TS-24`). The in-memory
+counter issue \#1100 shipped with its own limits written on it - it stops a loop
+against a warm instance and not a distributed one - stays in front of a durable
+counter in `/scanRateLimits/{dimension}_{bucket}_{windowStartedAt}`, because a
+flood against one instance is absorbed for free after the thirtieth request and
+only traffic spread thinly enough to look ordinary reaches Firestore at all. The
+durable limits are correspondingly higher: they count the aggregate across
+however many instances are running. A third dimension, the IP, is added because
+`clientOf` answers the uid **or** the address, so an attacker holding one
+throwaway anonymous account per request was bucketed by neither. What that
+dimension is worth is stated rather than assumed - `X-Forwarded-For` reaches
+`req.ip`, so it raises the cost and is not a boundary - and the address is
+hashed, because an IP appears in no other document in this product.
+
+**What is throttled is also visible** (`RD-TS-25`). A scan that does not look
+ordinary raises a row at
+`/restaurants/{id}/scanAnomalies/{n}_{tableId}_{kind}` - `RD-TS-18`'s address,
+for `RD-TS-18`'s reasons: one document per table per kind, a repeat joins the
+row that is up, and the staff screen reads the whole collection with no query,
+no index and no collection-group rule. The log this replaces would have grown
+**with the attack**, which is a denial of service wearing the costume of a
+security feature. Five kinds: a token past its limit, a code scanned while the
+restaurant is shut, a code scanned at a table out of service, more live sessions
+on one table than it can seat, and a consented position far from the restaurant.
+The first three say that replacing the code ends it; the other two report a
+figure and suggest nothing, because eight phones at a four-top is usually eight
+phones at a four-top.
+
+The writer is bounded twice, and has to be, because the one thing an attacker
+fully controls is how often they call: only the request that takes a bucket past
+its limit raises a row, and a row raised inside `SCAN_ANOMALY_QUIET_MS` is not
+written again. So `ScanAnomaly.count` counts **raisings and not requests** - the
+row says so, and forty thousand resolutions inside a minute are one.
+
+**The answer to a row is one action, and it now exists.**
+`rotateTableQrToken` had existed since issue \#1086 with no caller anywhere in
+the workspace, so "a leaked code can be invalidated in one action" was satisfied
+by no surface at all. The QR sheet now replaces the codes of the tables an owner
+has ticked - one table for a code on somebody's feed, the room filter plus
+Select all for a sheet that left the building - and `rotateTableQrTokens` is the
+bulk half. It refuses a call naming neither a room nor a set of tables, because
+"rotate every code in the building" must not be what a caller gets by leaving an
+argument out (`RD-TS-28`). The old token is superseded rather than deleted, so a
+guest at the sticker still on the table is told to look at it again.
+
+**The pending session is finally drawn** (`RD-TS-26`), which closes the gap this
+page carried from issue \#1101 onward. It is its own list above the tables that
+are calling, in the warning tone rather than the danger one, one row per
+**table** rather than per phone - three friends who each scan the code at the
+door are one party. It is deliberately not an anomaly: a guest waiting to be
+seated is the flow working, and putting them among the rows about codes being
+hammered would make the ordinary case look like an incident.
+
+**The coarse location is a signal and never a gate** (`RD-TS-27`). A guest may
+tick a box on the confirmation screen; one who does not, whose device has no fix
+or whose app has no location grant starts the same session, reads the same menu
+and places the same order. It never prompts - the OS prompt belongs to
+onboarding - and the coordinates are compared to the restaurant's and discarded,
+leaving a rounded distance on the rows far enough away to be worth one.
+
+**The residual risk, stated rather than implied.** A QR code identifies a table
+context and never proves physical presence. Nothing here changes that, and
+nothing here tries to: `RD-TS-1` is what bounds it - a scan at a table nobody has
+seated writes one row and cannot order - and everything above raises the cost of
+working through a code that is already public. A restaurant that wants presence
+proved has to prove it with a person.
+
+It changes nothing in production until
+`npx nx firebase-deploy-rules bite-tribe-firebase` and
+`npx nx firebase-deploy-indexes bite-tribe-firebase` have run, and one more
+thing is applied by hand with no Nx target at all: a TTL policy on
+`scanRateLimits.expiresAt`. Until that policy exists the counters are never
+removed - a document per bucket per minute, which is a handful an hour for an
+ordinary restaurant and three a minute under attack.
+
 ## Success Criteria
 
 - Scanning a table QR resolves to exactly one restaurant, room, and table, confirmed on screen before any order can be placed. **Met** by issues \#1100 and \#1101.
@@ -549,12 +641,14 @@ is the point of the derived name.
 - A guest can ask for a waiter or for the bill, and the request is unmistakable on the room view within seconds. **Met** by issue \#1106: a pulsing mark on the table's corner on the live plan, a row above the tickets in the queue, and a second count on the header link. Acknowledging clears it on every device, because every device is reading one document.
 - Repeated taps do not create repeated signals. **Met** by issue \#1106, and by the address rather than by a check: the document is named after the table and the kind, so the second tap lands on the first tap's document - across phones as well as across taps.
 - An order submitted twice because of a flaky network creates one order. **Not met.** Issue \#1103 left it to issue \#1108 rather than half-solving it.
-- A revoked or rotated token stops working immediately.
+- A revoked or rotated token stops working immediately. **Met** by issues \#1086 and \#1107: the backend has superseded a rotated token since \#1086 and `resolveTableQrToken` answers `tokenSuperseded` with "look at the table again"; \#1107 gave a restaurant the surface that does it, for one table or for a whole room.
+- Automated resolution attempts are throttled across instances and leave a record the restaurant can read. **Met** by issue \#1107.
+- A guest who declines to share their location scans, sits down and orders exactly as one who allows it. **Met** by issue \#1107.
 - A Bite created from an order needs only a photo, a rating, and a comment, and carries the verified `restaurantId`.
 
 ## Open Product Questions
 
-Tracked in [[Current State - Open Questions]]. Nineteen are settled and recorded as `RD-TS-1` to `RD-TS-23` in [[Recorded Decisions]]: occupancy confirmation, shared sessions, ordering without an account, session expiry, what a scan at a menu-only restaurant does, where a menu's currency lives, and - on 13 September 2026 with issues \#1103, \#1104 and \#1105 - order attribution, price integrity, who moves the table when an order lands, whose orders a guest's screen shows, where the cancellation reason is declared, how the staff queue reads a restaurant's orders, whether a queue row moves ahead of the backend, what a cancellation has to carry, what a busy-service alert may do without being asked, and - with issue \#1106 - how a call for a waiter is addressed, what it hangs from, how it is rate limited, what asking for the bill does to the table, why an acknowledgement needs no expectation, and why the two staff lists sort in opposite directions.
+Tracked in [[Current State - Open Questions]]. Twenty-four are settled and recorded as `RD-TS-1` to `RD-TS-28` in [[Recorded Decisions]]: occupancy confirmation, shared sessions, ordering without an account, session expiry, what a scan at a menu-only restaurant does, where a menu's currency lives, and - on 13 September 2026 with issues \#1103, \#1104 and \#1105 - order attribution, price integrity, who moves the table when an order lands, whose orders a guest's screen shows, where the cancellation reason is declared, how the staff queue reads a restaurant's orders, whether a queue row moves ahead of the backend, what a cancellation has to carry, what a busy-service alert may do without being asked, and - with issue \#1106 - how a call for a waiter is addressed, what it hangs from, how it is rate limited, what asking for the bill does to the table, why an acknowledgement needs no expectation, and why the two staff lists sort in opposite directions; and - with issue \#1107 - how a scan endpoint is limited across instances, what a restaurant is told about scans that do not look ordinary, where a pending session is drawn, what a shared position may and may not do, and which authority replaces a printed code.
 
 The last two of the epic's proposals are now answered rather than open: a cancelled order is corrected by a staff-side cancellation carrying a reason the guest is shown, and staff are notified by an in-app queue plus a push through the existing infrastructure. What remains open is the payment model, which is issue \#1073's.
 
@@ -724,7 +818,7 @@ what is untested is the wiring between them.
 - Issue \#1106 - request staff assistance and request the bill, which gave the guest a way to ask for a person without waving and the floor a way to see it and clear it
 - Issue \#1108 - offline-tolerant and idempotent order submission, which owns the duplicate an order submitted twice still creates
 - Issue \#1598 - orderable menu extras, split out of \#1103 because `Category.extrasBlock` has no ids, no renderer and no editor
-- Issue \#1107 - QR token abuse protection, which owns the durable rate limit the resolution only approximates
+- Issue \#1107 - QR token abuse protection, which made the resolution limit durable, gave the restaurant the rows and the rotation that answer a public code, and drew the pending session the epic had been writing since \#1101
 - Issue \#1087 - printable table QR sheets, which fixed the scan URL this use case has to serve
 - Issue \#1073 - Table payment and Bite creation from orders, with six child issues
 - Issue \#345 - Kavi wants to offer a QR code at the table to order digitally
@@ -741,7 +835,7 @@ what is untested is the wiring between them.
 
 ## Related Pages
 
-- [[Recorded Decisions]] - `RD-TS-1` to `RD-TS-17` bind this page
+- [[Recorded Decisions]] - `RD-TS-1` to `RD-TS-28` bind this page
 - [[Architecture - Auth]] - the anonymous guest
 - [[Architecture - Firebase]] - the rules on `tableSessions`, and the collection-group rule and index the staff queue reads through
 - [[Implementation - Firebase Functions]] - the callables

@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import { DocumentData, getFirestore } from 'firebase-admin/firestore';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
@@ -269,8 +270,51 @@ const liveSessionsAt = async (
  * one condition that matters: neither is evaluated for a guest who was merely
  * resuming a session they already had. A phone that reloads the confirmation
  * screen has not added a person to the table and has not moved.
+ *
+ * ## Why the whole of it is caught, and not just the writes
+ *
+ * `recordScanAnomaly` swallows its own failures, which made the *writes* safe
+ * and left {@link liveSessionsAt} exposed - and that query is the one call here
+ * that can fail for a reason having nothing to do with this restaurant. It
+ * needs a composite index, indexes in this repository deploy by hand, and the
+ * emulator does not enforce them: so on the day the functions deploy and the
+ * index deploy has not run, every new guest session would commit and then
+ * answer the guest with `FAILED_PRECONDITION`. A session that exists, reported
+ * as a failure, because a row on a staff screen could not be counted.
+ *
+ * So the guarantee is made here rather than assembled from the guarantees of
+ * the things called: **nothing this function does can change what the caller
+ * got.** That is what the sentence above it always claimed, and it is now true
+ * by construction rather than by every callee happening to be careful.
  */
 const reportSessionAnomalies = async (
+  restaurantRef: FirebaseFirestore.DocumentReference,
+  subject: { restaurantId: string; tableId: string; tableLabel: string },
+  seats: number,
+  restaurantPosition: unknown,
+  position: ScanPosition | undefined,
+  now: number,
+): Promise<void> => {
+  try {
+    await reportSessionAnomaliesOrThrow(
+      restaurantRef,
+      subject,
+      seats,
+      restaurantPosition,
+      position,
+      now,
+    );
+  } catch (error) {
+    logger.warn('startTableSession: could not report session anomalies', {
+      restaurantId: subject.restaurantId,
+      tableId: subject.tableId,
+      error,
+    });
+  }
+};
+
+/** The reporting itself, which is allowed to fail because nothing sees it. */
+const reportSessionAnomaliesOrThrow = async (
   restaurantRef: FirebaseFirestore.DocumentReference,
   subject: { restaurantId: string; tableId: string; tableLabel: string },
   seats: number,

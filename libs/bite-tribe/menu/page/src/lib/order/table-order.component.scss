@@ -27,6 +27,24 @@
   background: var(--ion-color-light);
 }
 
+/*
+ * An order the phone could not confirm (GitHub issue #1108).
+ *
+ * Louder than the refusal below it, and above everything, because it is the
+ * only message on this screen about money the guest may already have committed
+ * - everything else is about a cart they can still change.
+ */
+.unconfirmed {
+  border-inline-start: 4px solid var(--ion-color-warning);
+  padding: 0.75rem 1rem;
+  background: var(--ion-color-warning-tint);
+  font-weight: 600;
+
+  .note {
+    font-weight: 400;
+  }
+}
+
 .cart-lines {
   list-style: none;
   margin: 0;

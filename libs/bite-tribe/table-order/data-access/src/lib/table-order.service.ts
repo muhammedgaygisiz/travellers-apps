@@ -2,7 +2,6 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   BiteTribeApiService,
-  TableOrderApiService,
   TableSessionApiService,
   isTableSessionCallError,
   type TableSessionCallFailure,
@@ -10,7 +9,6 @@ import {
 import {
   findMenuItemById,
   isPublicMenuResolved,
-  isTableOrderSubmitted,
   isTableScanResolved,
 } from 'model';
 import type {
@@ -27,6 +25,11 @@ import type {
 import { TableAssistanceService } from './table-assistance.service';
 import { TableCartService, type TableCartLine } from './table-cart.service';
 import { TableOrderHistoryService } from './table-order-history.service';
+import {
+  TableOrderSubmissionService,
+  type TableOrderOutcome,
+} from './table-order-submission.service';
+import type { TableOrderDelivery } from './pending-table-order';
 
 /**
  * What a guest sees between joining a table and their order reaching the
@@ -54,6 +57,21 @@ import { TableOrderHistoryService } from './table-order-history.service';
  * and send the rest. So the refusal is a signal beside the ordering state, and
  * it is cleared the moment the guest changes anything - because a message about
  * a cart that no longer exists is a message about nothing.
+ *
+ * ## Why an unconfirmed submission is a signal too, and freezes the cart
+ *
+ * A send that could not be resolved sits beside the ordering state for the
+ * reason a refusal does: the guest needs the cart and the menu in front of
+ * them, not a screen that took both away (GitHub issue #1108).
+ *
+ * What it does take away is the *editing*. While a submission is unresolved the
+ * cart cannot be changed, because the order it describes may already be with
+ * the kitchen - and a guest who adds a dessert to a cart whose first version is
+ * being cooked has built something that cannot be sent: the key already names
+ * an order, so the dessert would be answered with the order that does not have
+ * it in. Freezing is the honest shape - you cannot change an order you might
+ * already have placed - and the way out is one tap, which either confirms it or
+ * releases the cart.
  */
 
 /** Why this screen cannot take an order at all. */
@@ -107,7 +125,17 @@ export type TableOrderView =
       currency: string;
     }
   /** Sent. The kitchen has it. */
-  | { kind: 'placed'; order: TableOrder; context: TableScanContext }
+  | {
+      kind: 'placed';
+      order: TableOrder;
+      context: TableScanContext;
+      /**
+       * True when the kitchen already had it before this attempt
+       * (GitHub issue #1108). A retry that found its own order is told apart
+       * from a fresh send, because "sent" said twice reads as two dinners.
+       */
+      replayed?: boolean;
+    }
   /** Nothing can be ordered here, for one of fourteen reasons. */
   | {
       kind: 'blocked';
@@ -126,12 +154,34 @@ export interface TableOrderRefusal {
   item?: TableOrderRefusedItem;
 }
 
+/**
+ * A submission the phone could not resolve (GitHub issue #1108).
+ *
+ * {@link TableOrderUnconfirmed.delivery} is the field that matters, and it is
+ * the issue's "explicit failure state telling the guest whether the order
+ * reached the restaurant". The transport failure travels beside it so the
+ * screen can say what went wrong as well as what is unknown.
+ */
+export interface TableOrderUnconfirmed {
+  delivery: TableOrderDelivery;
+  failure: TableSessionCallFailure;
+}
+
 @Injectable()
 export class TableOrderService {
   private readonly sessionApi = inject(TableSessionApiService);
-  private readonly orderApi = inject(TableOrderApiService);
   private readonly api = inject(BiteTribeApiService);
   private readonly route = inject(ActivatedRoute);
+
+  /**
+   * The key, the retries and the written-down submission (GitHub issue #1108).
+   *
+   * Injected rather than inlined, because what it owns outlives this screen: a
+   * submission recorded before a reload is read back by the next instance of
+   * this service, and a retry policy living in a method here would be a policy
+   * with no name and nothing able to test it on its own.
+   */
+  private readonly submission = inject(TableOrderSubmissionService);
 
   readonly cart = inject(TableCartService);
 
@@ -159,9 +209,36 @@ export class TableOrderService {
   private readonly view = signal<TableOrderView>({ kind: 'loading' });
   private readonly busy = signal(false);
   private readonly refusal = signal<TableOrderRefusal | undefined>(undefined);
+  private readonly unresolved = signal<TableOrderUnconfirmed | undefined>(
+    undefined,
+  );
 
   readonly state = this.view.asReadonly();
   readonly isBusy = this.busy.asReadonly();
+
+  /**
+   * The submission the phone could not resolve, while there is one
+   * (GitHub issue #1108).
+   *
+   * Cleared only by an answer - the restaurant taking the order or declining
+   * it - and never by the guest editing around it, which is the difference
+   * between this and {@link lastRefusal}. A refusal is about a cart the guest
+   * can fix; this is about an order that may already exist.
+   */
+  readonly unconfirmed = this.unresolved.asReadonly();
+
+  /** Which attempt is running, so a long send can say it has not given up. */
+  readonly attempt = this.submission.attempt;
+
+  /**
+   * Whether the cart may still be changed.
+   *
+   * False while a submission is unresolved. The buttons read it rather than
+   * being trusted to be absent: the menu renders its own "add" and a second
+   * entry point into a frozen cart is how a guest builds a round nobody can
+   * send.
+   */
+  readonly canEditCart = computed(() => this.unresolved() === undefined);
 
   /**
    * The last refusal, until the guest changes something.
@@ -182,13 +259,23 @@ export class TableOrderService {
    * of the host pressing the button, instead of letting them build a cart and
    * be refused after they tap it (GitHub issue #1104).
    */
-  readonly canSubmit = computed(
-    () =>
-      this.view().kind === 'ordering' &&
-      !this.cart.isEmpty() &&
-      !this.busy() &&
-      this.history.acceptsOrders(),
-  );
+  readonly canSubmit = computed(() => {
+    if (this.view().kind !== 'ordering' || this.busy()) {
+      return false;
+    }
+
+    // An unresolved submission is sendable whatever the cart and the session
+    // say (GitHub issue #1108). It may already be an order, and the tap is a
+    // question about that order rather than a new one - so a table the
+    // restaurant closed underneath the guest, or a cart the reloaded menu
+    // emptied, must not be what stops them finding out what happened to their
+    // dinner.
+    if (this.unresolved() !== undefined) {
+      return true;
+    }
+
+    return !this.cart.isEmpty() && this.history.acceptsOrders();
+  });
 
   async load(): Promise<void> {
     if (!this.token) {
@@ -259,7 +346,7 @@ export class TableOrderService {
     this.history.watch(restaurantId, scan.table.id);
     this.assistance.watch(restaurantId, scan.table.id);
 
-    this.view.set({
+    const state: Extract<TableOrderView, { kind: 'ordering' }> = {
       kind: 'ordering',
       context: {
         token: scan.token,
@@ -271,76 +358,169 @@ export class TableOrderService {
       },
       menu: menu.menu,
       currency,
-    });
+    };
+
+    this.view.set(state);
+
+    // The cart the phone was holding, rebuilt against the menu that is on
+    // screen now (GitHub issue #1108). After the view is set rather than
+    // before, so a guest looking at a spinner is not also waiting on device
+    // storage to answer.
+    this.cart.useTable(restaurantId, scan.table.id);
+    await this.cart.restore(menu.menu);
+
+    await this.resolvePendingOrder(state, restaurantId, scan.table.id);
+  }
+
+  /**
+   * Finds out what became of a submission a previous screen could not confirm
+   * (GitHub issue #1108).
+   *
+   * Sending it again *is* the question. There is no separate "did it arrive"
+   * call and there does not need to be: the backend answers a key it has
+   * already seen with the order it wrote, so one request either reconciles the
+   * phone with the truth or places the order the guest asked for and never got
+   * an answer to.
+   *
+   * It runs without being asked, which is the reconciliation the issue wants on
+   * reconnect. What bounds it is the record's own age: `restore` drops a
+   * submission older than a meal rather than handing it back, so a phone that
+   * finds one has a guest who is still at the table waiting for it.
+   */
+  private async resolvePendingOrder(
+    state: Extract<TableOrderView, { kind: 'ordering' }>,
+    restaurantId: string,
+    tableId: string,
+  ): Promise<void> {
+    const pending = await this.submission.restore(restaurantId, tableId);
+
+    if (!pending) {
+      return;
+    }
+
+    // Shown before the attempt rather than after it. The guest is looking at a
+    // cart they remember sending, and a screen that says nothing until the
+    // round trip finishes is a screen they tap send on again.
+    this.unresolved.set({ delivery: 'unknown', failure: 'offline' });
+    this.busy.set(true);
+
+    const outcome = await this.submission.resend(pending);
+
+    this.busy.set(false);
+    await this.apply(outcome, state);
   }
 
   /** Adding to the cart, which also clears whatever the last refusal said. */
   add(line: Pick<TableCartLine, 'item' | 'variant'>): void {
-    this.refusal.set(undefined);
-    this.cart.add(line.item, line.variant);
+    this.edit(() => this.cart.add(line.item, line.variant));
   }
 
   increase(key: string): void {
-    this.refusal.set(undefined);
-    this.cart.increase(key);
+    this.edit(() => this.cart.increase(key));
   }
 
   decrease(key: string): void {
-    this.refusal.set(undefined);
-    this.cart.decrease(key);
+    this.edit(() => this.cart.decrease(key));
   }
 
   remove(key: string): void {
-    this.refusal.set(undefined);
-    this.cart.remove(key);
+    this.edit(() => this.cart.remove(key));
   }
 
   setNotes(key: string, notes: string): void {
-    this.refusal.set(undefined);
-    this.cart.setNotes(key, notes);
+    this.edit(() => this.cart.setNotes(key, notes));
   }
 
   /**
-   * Sending the cart.
+   * One change to the cart, and the refusal it makes untrue.
+   *
+   * Every edit goes through here so the freeze of {@link canEditCart} is one
+   * decision rather than five. The buttons are disabled while a submission is
+   * unresolved, so reaching here in that state means a second entry point - and
+   * the same answer the cart service gives an impossible row: nothing.
+   */
+  private edit(change: () => void): void {
+    if (!this.canEditCart()) {
+      return;
+    }
+
+    this.refusal.set(undefined);
+    change();
+  }
+
+  /**
+   * Sending the cart, or sending again what could not be confirmed.
    *
    * The guard is the same shape the scan screen's `confirm` uses: a state
    * machine whose transitions are enforced only by which buttons are on screen
    * is one a second entry point walks straight through.
+   *
+   * A submission that is already written down is sent again under **its own
+   * key** rather than as a new order (GitHub issue #1108). That is what makes
+   * the retry safe: the backend either answers with the order that key already
+   * names, or places it for the first time. What it never does is both.
    */
   async submit(): Promise<void> {
     const state = this.view();
+    const pending = this.submission.pending();
 
-    if (
-      state.kind !== 'ordering' ||
-      this.cart.isEmpty() ||
-      this.busy() ||
-      !this.history.acceptsOrders()
-    ) {
+    if (state.kind !== 'ordering' || this.busy()) {
+      return;
+    }
+
+    // The session guard applies to a *new* order only. A replay is answered
+    // before the session is looked at, so a guest whose table was closed while
+    // their submission was in flight still gets to find out what happened.
+    if (!pending && (this.cart.isEmpty() || !this.history.acceptsOrders())) {
       return;
     }
 
     this.busy.set(true);
     this.refusal.set(undefined);
 
-    const result = await this.orderApi.submit({
-      restaurantId: state.context.restaurant.id,
-      tableId: state.context.table.id,
-      currency: state.currency,
-      lines: this.cart.toRequestLines(state.currency),
-    });
+    const outcome = pending
+      ? await this.submission.resend(pending)
+      : await this.submission.send({
+          restaurantId: state.context.restaurant.id,
+          tableId: state.context.table.id,
+          currency: state.currency,
+          lines: this.cart.toRequestLines(state.currency),
+        });
 
     this.busy.set(false);
 
-    if (isTableSessionCallError(result)) {
-      this.view.set({ kind: 'failed', failure: result.failure });
+    await this.apply(outcome, state);
+  }
+
+  /**
+   * What the screen becomes once a submission has an answer, or has not.
+   *
+   * One place rather than two, because the first send and the resend after a
+   * reload reach exactly the same three outcomes and a second copy of this is
+   * how a replayed order ends up announced as a fresh one on one path and not
+   * the other.
+   */
+  private async apply(
+    outcome: TableOrderOutcome,
+    state: Extract<TableOrderView, { kind: 'ordering' }>,
+  ): Promise<void> {
+    if (outcome.outcome === 'unconfirmed') {
+      this.unresolved.set({
+        delivery: outcome.delivery,
+        failure: outcome.failure,
+      });
 
       return;
     }
 
-    if (!isTableOrderSubmitted(result)) {
+    // The restaurant has spoken either way, so there is nothing left that might
+    // be an order. The cart is released whether it was taken or declined.
+    this.unresolved.set(undefined);
+
+    if (outcome.outcome === 'refused') {
       this.refusal.set({
-        reason: result.reason,
-        ...(result.item ? { item: result.item } : {}),
+        reason: outcome.reason,
+        ...(outcome.item ? { item: outcome.item } : {}),
       });
 
       // The menu the refusal is about has moved, so it is fetched again before
@@ -361,8 +541,9 @@ export class TableOrderService {
 
     this.view.set({
       kind: 'placed',
-      order: result.order,
+      order: outcome.result.order,
       context: state.context,
+      ...(outcome.result.replayed ? { replayed: true } : {}),
     });
   }
 
@@ -370,6 +551,7 @@ export class TableOrderService {
   orderAgain(): Promise<void> {
     this.view.set({ kind: 'loading' });
     this.refusal.set(undefined);
+    this.unresolved.set(undefined);
 
     return this.load();
   }

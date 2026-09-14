@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   BiteTribeApiService,
@@ -10,28 +10,42 @@ import {
 import { AuthService } from 'ta-firestore';
 import type { Menu, MenuItem, TableScanContext, TableSession } from 'model';
 import { BehaviorSubject, EMPTY } from 'rxjs';
+import { NetworkStatusService } from 'common/networkstatus';
 import { TableCartService } from '../table-cart.service';
 import { TableAssistanceService } from '../table-assistance.service';
 import { TableOrderHistoryService } from '../table-order-history.service';
+import { TableOrderSubmissionService } from '../table-order-submission.service';
 import {
   TABLE_ORDER_BLOCKED_KEYS,
   TableOrderService,
 } from '../table-order.service';
 
 /**
- * What a guest sees between joining a table and their order reaching the
- * kitchen (GitHub issue #1103).
- *
- * Two claims are worth holding open here and the emulator spec cannot hold
- * either, because both are about the screen rather than the database.
- *
- * **A refusal does not replace the menu.** A guest told their Margherita sold
- * out needs the cart they built and the menu they built it from, both still on
- * screen. If a refusal ever became a state the view moves *to*, these fail.
- *
- * **The scan is re-asked.** The screen is reached from one that already
- * resolved the token, and the kitchen can pause in the walk back to the table.
+ * Device storage is a Capacitor plugin, so it is mocked rather than spied on:
+ * the real one reaches a web implementation this environment has no window
+ * for. What is kept is the behaviour the screen depends on - a value written
+ * comes back - and the store is cleared between tests, because a cart or a
+ * submission left behind by one test is exactly what the code under test is
+ * built to find and act on.
  */
+const mockDeviceStorage = new Map<string, string>();
+
+jest.mock('@capacitor/preferences', () => ({
+  Preferences: {
+    get: ({ key }: { key: string }): Promise<{ value: string | null }> =>
+      Promise.resolve({ value: mockDeviceStorage.get(key) ?? null }),
+    set: ({ key, value }: { key: string; value: string }): Promise<void> => {
+      mockDeviceStorage.set(key, value);
+
+      return Promise.resolve();
+    },
+    remove: ({ key }: { key: string }): Promise<void> => {
+      mockDeviceStorage.delete(key);
+
+      return Promise.resolve();
+    },
+  },
+}));
 
 const MARGHERITA: MenuItem = {
   id: 'item-margherita',
@@ -90,6 +104,13 @@ describe(TableOrderService.name, () => {
         TableCartService,
         TableOrderService,
         TableOrderHistoryService,
+        TableOrderSubmissionService,
+        {
+          provide: NetworkStatusService,
+          useValue: {
+            status: signal({ connected: true, connectionType: 'wifi' }),
+          },
+        },
         // Provided but not exercised here: `TableOrderService` injects it so
         // that the restaurant and the table are learned once (issue #1106),
         // and its own behaviour is asserted in its own spec.
@@ -139,6 +160,7 @@ describe(TableOrderService.name, () => {
   };
 
   beforeEach(() => {
+    mockDeviceStorage.clear();
     session$ = new BehaviorSubject<{ session?: TableSession; live: boolean }>({
       session: SESSION,
       live: true,
@@ -265,6 +287,10 @@ describe(TableOrderService.name, () => {
         tableId: CONTEXT.table.id,
         currency: 'EUR',
         lines: [{ menuItemId: MARGHERITA.id, quantity: 2, price: 12 }],
+        // Minted by the submission service, so the value is not predictable
+        // here; that it is *there* on every send is asserted in that service's
+        // own spec (GitHub issue #1108).
+        requestId: expect.any(String),
       });
     });
 
@@ -476,5 +502,194 @@ describe(TableOrderService.name, () => {
   it('has a sentence for every reason that can block the screen', () => {
     expect(Object.values(TABLE_ORDER_BLOCKED_KEYS).every(Boolean)).toBe(true);
     expect(Object.keys(TABLE_ORDER_BLOCKED_KEYS)).toHaveLength(14);
+  });
+
+  /**
+   * An order the phone could not confirm (GitHub issue #1108).
+   *
+   * Three claims live here because all three are about the *screen* rather
+   * than about the key or the backend, both of which have their own specs.
+   *
+   * **The menu does not go away.** A refusal leaves it on screen and so does
+   * this, for the stronger reason: the guest has to be able to see what they
+   * sent.
+   *
+   * **The cart freezes.** You cannot change an order you might already have
+   * placed, and a cart that accepted an edit would build a round that can never
+   * be sent - the key already names an order without it.
+   *
+   * **A reload resolves it.** The record outlives the page, and the screen that
+   * finds one asks the restaurant what became of it without being told to.
+   */
+  describe('an order the phone could not confirm', () => {
+    const lost = { ok: false, failure: 'offline' } as const;
+
+    /** Runs a send to completion, letting every retry backoff pass. */
+    const settle = async <TResult>(
+      running: Promise<TResult>,
+    ): Promise<TResult> => {
+      await jest.advanceTimersByTimeAsync(10_000);
+
+      return running;
+    };
+
+    /** A cart built, sent, and left unresolved by a network that dropped it. */
+    const unresolved = async (): Promise<TableOrderService> => {
+      await ordering();
+      service.add({ item: MARGHERITA });
+      submit.mockResolvedValue(lost);
+      await settle(service.submit());
+
+      return service;
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('keeps the menu and the cart on screen', async () => {
+      await unresolved();
+
+      expect(service.state().kind).toBe('ordering');
+      expect(service.cart.isEmpty()).toBe(false);
+    });
+
+    it('says the order may or may not have arrived', async () => {
+      await unresolved();
+
+      expect(service.unconfirmed()).toEqual({
+        delivery: 'unknown',
+        failure: 'offline',
+      });
+    });
+
+    it('freezes the cart until it is resolved', async () => {
+      await unresolved();
+
+      service.add({ item: TIRAMISU });
+      service.increase(MARGHERITA.id);
+
+      expect(service.canEditCart()).toBe(false);
+      expect(service.cart.toRequestLines('EUR')).toEqual([
+        { menuItemId: MARGHERITA.id, quantity: 1, price: 12 },
+      ]);
+    });
+
+    /**
+     * The retry is the check. One request either reconciles the phone with the
+     * truth or places the order nobody ever answered - and the key is what
+     * stops it being both.
+     */
+    it('sends the same key again rather than a new order', async () => {
+      await unresolved();
+      const sent = submit.mock.calls[0][0].requestId;
+
+      submit.mockResolvedValue({
+        ok: true,
+        order: { id: `req-${sent}`, total: 12, currency: 'EUR' },
+        tableStatus: 'ordering',
+        replayed: true,
+      });
+      await settle(service.submit());
+
+      expect(submit.mock.calls.at(-1)?.[0].requestId).toBe(sent);
+    });
+
+    /** "Sent" said twice reads as two dinners to somebody who tapped twice. */
+    it('tells the guest the kitchen already had it', async () => {
+      await unresolved();
+
+      submit.mockResolvedValue({
+        ok: true,
+        order: { id: 'req-abcdefgh', total: 12, currency: 'EUR' },
+        tableStatus: 'ordering',
+        replayed: true,
+      });
+      await settle(service.submit());
+
+      expect(service.state()).toMatchObject({
+        kind: 'placed',
+        replayed: true,
+      });
+      expect(service.unconfirmed()).toBeUndefined();
+    });
+
+    /**
+     * A refusal is an answer too. The restaurant has spoken, so there is
+     * nothing left that might be an order and the cart is the guest's again.
+     */
+    it('releases the cart when the restaurant declines it', async () => {
+      await unresolved();
+
+      submit.mockResolvedValue({
+        ok: false,
+        reason: 'itemUnavailable',
+        item: { menuItemId: MARGHERITA.id, name: 'Margherita' },
+      });
+      await settle(service.submit());
+
+      expect(service.unconfirmed()).toBeUndefined();
+      expect(service.canEditCart()).toBe(true);
+      expect(service.lastRefusal()?.reason).toBe('itemUnavailable');
+    });
+
+    /**
+     * The send button stays available even when the session says no. A replay
+     * is answered before the session is looked at, so a guest whose table was
+     * closed while their submission was in flight still gets to find out what
+     * happened to their dinner.
+     */
+    it('still offers the send button when the table has closed', async () => {
+      await unresolved();
+
+      session$.next({ session: { ...SESSION, status: 'closed' }, live: true });
+
+      expect(service.canSubmit()).toBe(true);
+    });
+
+    /**
+     * And not even when the cart it was built from is gone. A reloaded menu
+     * that no longer offers the dish empties the cart, and an empty cart must
+     * not be what stops a guest finding out whether they already ordered.
+     */
+    it('still offers the send button when the cart has emptied', async () => {
+      await unresolved();
+      service.cart.clear();
+
+      expect(service.canSubmit()).toBe(true);
+    });
+
+    /**
+     * The record outlives the page. A screen that finds one asks the restaurant
+     * what became of it rather than waiting for the guest to wonder.
+     */
+    it('resolves a submission a reload found, without being asked', async () => {
+      await unresolved();
+      const sent = submit.mock.calls[0][0].requestId;
+
+      submit.mockResolvedValue({
+        ok: true,
+        order: { id: `req-${sent}`, total: 12, currency: 'EUR' },
+        tableStatus: 'ordering',
+        replayed: true,
+      });
+
+      // A new module as well as a new service: the record is on the device, and
+      // an instance that kept the old one in memory would prove nothing.
+      TestBed.resetTestingModule();
+
+      const reloaded = build();
+      await settle(reloaded.load());
+
+      expect(submit.mock.calls.at(-1)?.[0].requestId).toBe(sent);
+      expect(reloaded.state()).toMatchObject({
+        kind: 'placed',
+        replayed: true,
+      });
+    });
   });
 });

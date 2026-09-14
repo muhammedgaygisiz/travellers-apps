@@ -254,10 +254,25 @@
   different problem - bounds the collection at the size of the room however hard
   the endpoint is worked.
 
-  What stage 3 still owes is issue \#1108's idempotent submission. And, as
-  everywhere else in this epic, the rules and the indexes deploy by hand, so none
-  of it binds production until both deploys have run - plus, since \#1107, a TTL
-  policy on `scanRateLimits.expiresAt` that has no Nx target at all.
+  Issue \#1108 closed the stage, on the criterion \#1103 had deliberately left
+  open. A submission carries a key the phone mints once per tap, and the key
+  names the order document - so a retry reads the order the first attempt wrote
+  instead of writing a second, and the replay is answered before the session,
+  the visit, the table and the lines are looked at. Around it sit the three
+  things that make a retry worth having: a cart kept on the phone and rebuilt
+  from the live menu, three attempts behind a button that cannot be
+  double-triggered, and a sentence that says whether the order left the phone at
+  all. Six decisions, `RD-TS-29` to `RD-TS-34`.
+
+  The decision in it worth taking to other features is `RD-TS-29`, which is
+  \#1096's trick pointed at a third problem: an idempotency key that is a
+  **document name** turns deduplication into a read of one document and makes
+  two racing copies contend on it, with no query, no index and no lock.
+
+  What stage 3 still owes is nothing of its own. As everywhere else in this
+  epic, the rules and the indexes deploy by hand, so none of it binds production
+  until both deploys have run - plus, since \#1107, a TTL policy on
+  `scanRateLimits.expiresAt` that has no Nx target at all.
 
 Every child of stage 0 has now landed, and the stage is still not finished. Two things
 remain and neither has an owning issue: the rules deploy by hand, so \#1078 binds

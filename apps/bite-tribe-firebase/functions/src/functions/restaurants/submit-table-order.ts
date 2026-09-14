@@ -22,9 +22,11 @@ import {
   ORDERABLE_TABLE_STATUSES,
   OrderLineSnapshot,
   TABLE_ORDERS_COLLECTION,
+  TABLE_ORDER_REQUEST_ID_PATTERN,
   TableOrder,
   TableOrderRefused,
   refuseOrder,
+  tableOrderDocumentId,
   tableOrderTotal,
 } from './table-order';
 import {
@@ -105,9 +107,25 @@ import { TABLE_VISITS_COLLECTION, isOpenVisit } from './table-visit';
  * /restaurants/{id}/tableStateTransitions/{transitionId}  appended, when moving
  * ```
  *
- * Sending the same order twice creates two orders. That is issue #1108, which
- * owns idempotency and offline tolerance, and it is deliberately not solved
- * here with a half-measure the client would then have to unlearn.
+ * ## Sending the same order twice (GitHub issue #1108)
+ *
+ * A restaurant's wifi drops answers as readily as it drops requests, so a
+ * submission that timed out is, from the phone, indistinguishable from one that
+ * never arrived. The honest response to both is to send it again, and
+ * unlabelled that second send is a second dinner.
+ *
+ * So the phone mints a key once per *intent* - one cart, one tap - and every
+ * attempt carries it. The key names the order document, which turns the dedupe
+ * into a read of one document rather than a search for an order that looks
+ * similar: the replay reads the id it would write, and two copies of one
+ * request racing each other contend on it because the read is inside the
+ * transaction.
+ *
+ * The replay is answered **before** the session status, the visit, the table
+ * and the menu are checked, and deliberately. A replay arrives after the world
+ * has moved on - the kitchen may have paused, the party may have been moved,
+ * the dish may have sold out - and none of that makes the order that already
+ * landed untrue. What it must not do is land twice.
  */
 
 /** One line, as the guest's phone sends it. Parsed, never trusted. */
@@ -127,6 +145,15 @@ export interface SubmitTableOrderRequest {
   /** The currency the phone displayed, checked like the prices. */
   currency?: unknown;
   lines?: unknown;
+  /**
+   * The phone's idempotency key for this submission (GitHub issue #1108).
+   *
+   * Optional, so every client written before that issue goes on working, and
+   * the whole of what makes a retry safe for the ones that send it. Minted once
+   * per intent and reused by every attempt, including attempts made after the
+   * phone was locked, reloaded or carried out of range and back.
+   */
+  requestId?: unknown;
 }
 
 export interface TableOrderSubmitted {
@@ -134,6 +161,15 @@ export interface TableOrderSubmitted {
   order: TableOrder;
   /** What the table is once the order landed. `ordering`, on every path. */
   tableStatus: TableStatus;
+  /**
+   * True when the order already existed under this key (GitHub issue #1108).
+   *
+   * Absent on the ordinary path rather than `false`, so a caller reading it is
+   * reading a deliberate field. The guest's screen renders it as a different
+   * sentence: an order that was already with the kitchen is not a second
+   * confirmation of one they placed once.
+   */
+  replayed?: boolean;
 }
 
 export type SubmitTableOrderResult = TableOrderSubmitted | TableOrderRefused;
@@ -182,6 +218,33 @@ const parseOptionalId = (value: unknown, field: string): string => {
   }
 
   return value.trim();
+};
+
+/**
+ * The caller's idempotency key, or `''` when it sent none
+ * (GitHub issue #1108).
+ *
+ * The shape is deliberately narrow rather than "any string", for the reason
+ * `transitionTableState` gives: the key becomes a document name, so a slash
+ * would address a subcollection, a leading `.` is refused by Firestore, and a
+ * thousand-character key is a way to store data in a document id.
+ */
+const parseRequestId = (value: unknown): string => {
+  if (value === undefined || value === null || value === '') {
+    return '';
+  }
+
+  if (
+    typeof value !== 'string' ||
+    !TABLE_ORDER_REQUEST_ID_PATTERN.test(value)
+  ) {
+    throw new HttpsError(
+      'invalid-argument',
+      'requestId must be 8 to 128 characters of letters, digits, hyphens or underscores.',
+    );
+  }
+
+  return value;
 };
 
 const parseNotes = (value: unknown): string => {
@@ -375,6 +438,38 @@ const isRefusal = (
   checked: OrderLineSnapshot | TableOrderRefused,
 ): checked is TableOrderRefused => 'ok' in checked;
 
+/**
+ * The status a landed order leaves the table in.
+ *
+ * One constant rather than two literals, because the replay of issue #1108
+ * answers with it without re-reading the floor: a submission that landed made
+ * the table `ordering`, and that is what this answer describes - what that
+ * submission did, not what the table holds an hour later.
+ */
+const ORDERED_TABLE_STATUS: TableStatus = 'ordering';
+
+/**
+ * The answer to an order that already landed (GitHub issue #1108).
+ *
+ * Built from the stored order rather than from anything read now, which is the
+ * shape `replayedResult` takes in `transitionTableState` and for the same
+ * reason: the record of *this* submission is the order it wrote, and nothing
+ * the restaurant has done since changes what the guest sent.
+ *
+ * Nothing is written. That is the point - the order, the session touch and the
+ * table move were all written by the first attempt, in one commit, and the
+ * second attempt is a question rather than an action.
+ */
+const replayedOrder = (
+  stored: DocumentData,
+  id: string,
+): TableOrderSubmitted => ({
+  ok: true,
+  order: { ...(stored as TableOrder), id },
+  tableStatus: ORDERED_TABLE_STATUS,
+  replayed: true,
+});
+
 /** The currency a menu states its prices in, normalised. */
 const menuCurrencyOf = (menu: DocumentData): string =>
   typeof menu['currency'] === 'string' ? menu['currency'].trim() : '';
@@ -390,6 +485,7 @@ export const submitTableOrderHandler = async (
   const scannedTableId = parseRequiredString(request.data?.tableId, 'tableId');
   const shownCurrency = parseRequiredString(request.data?.currency, 'currency');
   const lines = parseLines(request.data?.lines);
+  const requestId = parseRequestId(request.data?.requestId);
   const guestUserId = guestUidOf(request);
 
   if (!lines.length) {
@@ -424,6 +520,35 @@ export const submitTableOrderHandler = async (
     const restaurant = restaurantSnapshot.data() ?? {};
 
     const session = sessionSnapshot.data();
+
+    // Read off the session before anything is checked, because the replay
+    // below needs the visit the order would live under - and a replay must not
+    // be refused for the state of a meal it already happened in.
+    const visitId =
+      typeof session?.['visitId'] === 'string' ? session['visitId'] : '';
+    const orders = restaurantRef
+      .collection(TABLE_VISITS_COLLECTION)
+      .doc(visitId || scannedTableId)
+      .collection(TABLE_ORDERS_COLLECTION);
+    const orderRef = requestId
+      ? orders.doc(tableOrderDocumentId(requestId))
+      : orders.doc();
+
+    // Inside the transaction rather than before it, so two copies of one
+    // request arriving together contend on this document: the loser's read set
+    // is touched by the winner's `create`, Firestore retries it, and the retry
+    // finds the order and answers with it (GitHub issue #1108).
+    //
+    // A session with no visit has nothing to have ordered into, so there is
+    // nothing to read - the placeholder path above exists only so a reference
+    // can be built, and `visitClosed` below is what such a session is told.
+    const alreadyPlaced =
+      requestId && visitId ? await transaction.get(orderRef) : undefined;
+
+    if (alreadyPlaced?.exists) {
+      return replayedOrder(alreadyPlaced.data() ?? {}, alreadyPlaced.id);
+    }
+
     const idleTimeoutMs = tableSessionIdleTimeoutMs(
       tableOrderingOf(restaurant)['sessionIdleTimeoutMinutes'],
     );
@@ -451,9 +576,6 @@ export const submitTableOrderHandler = async (
     if (!ordering.available) {
       return refuseOrder('orderingUnavailable');
     }
-
-    const visitId =
-      typeof session?.['visitId'] === 'string' ? session['visitId'] : '';
 
     if (!visitId) {
       // An active session with no visit should not exist - the commit that
@@ -543,7 +665,6 @@ export const submitTableOrderHandler = async (
       snapshots.push(result);
     }
 
-    const orderRef = visitRef.collection(TABLE_ORDERS_COLLECTION).doc();
     const order: TableOrder = {
       id: orderRef.id,
       restaurantId,
@@ -557,6 +678,7 @@ export const submitTableOrderHandler = async (
       total: tableOrderTotal(snapshots),
       submittedAt: at,
       statusChangedAt: at,
+      ...(requestId ? { requestId } : {}),
     };
 
     transaction.create(orderRef, order);
@@ -566,7 +688,7 @@ export const submitTableOrderHandler = async (
     // anybody is still there.
     transaction.update(sessionRef, { lastActiveAt: at });
 
-    const to: TableStatus = 'ordering';
+    const to: TableStatus = ORDERED_TABLE_STATUS;
 
     if (from !== to) {
       // Checked against the same matrix the staff callable uses rather than

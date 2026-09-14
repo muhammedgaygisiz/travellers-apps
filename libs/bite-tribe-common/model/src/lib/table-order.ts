@@ -269,7 +269,59 @@ export interface TableOrder {
    * every question service actually asks of it.
    */
   statusChangedByUserId?: string;
+  /**
+   * The idempotency key the phone minted for this submission
+   * (GitHub issue #1108).
+   *
+   * It is also what this document is named after, through
+   * {@link tableOrderDocumentId}, which is what makes a replay a read of one
+   * document rather than a search for an order that looks similar. The field
+   * is written as well as used as the id so the record is readable without
+   * consulting document names, exactly as `TableStateTransition.requestId` is.
+   *
+   * Absent on an order placed by a client that sent no key - every order
+   * written before issue #1108, and any future caller that does not need one.
+   */
+  requestId?: string;
 }
+
+/**
+ * How an order's idempotency key is spelled, and what it names
+ * (GitHub issue #1108).
+ *
+ * The prefix and the pattern are the same ones issue #1096 chose for a table
+ * transition, and for the same two reasons. The key becomes a document id, so
+ * it has to be a legal Firestore document name - no slash, no leading dot, no
+ * thousand-character string being used as storage. And it has to be one no
+ * auto-generated id could ever be, so that a client cannot hand in a
+ * twenty-character alphanumeric string that happens to name somebody else's
+ * order and be answered with their dinner.
+ *
+ * Declared here rather than only in the backend because the guest's phone
+ * needs it too: an order's document id is derivable from the key, so a phone
+ * that sent one can recognise its own order in the list it is already
+ * listening to - which is the reconciliation this issue asks for, done by
+ * address rather than by guesswork.
+ */
+export const TABLE_ORDER_REQUEST_ID_PREFIX = 'req-';
+
+/** The shape of a key. Letters, digits, hyphens and underscores, 8 to 128. */
+export const TABLE_ORDER_REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
+
+/** Whether a value is a key both sides would accept. */
+export const isTableOrderRequestId = (value: unknown): value is string =>
+  typeof value === 'string' && TABLE_ORDER_REQUEST_ID_PATTERN.test(value);
+
+/**
+ * The document an order submitted under this key lives at.
+ *
+ * One function rather than an interpolation at each call site, because the
+ * backend writes the name and the phone reads it: two spellings of the same
+ * rule would make a landed order invisible to the screen that sent it, which
+ * is the exact uncertainty this issue exists to remove.
+ */
+export const tableOrderDocumentId = (requestId: string): string =>
+  `${TABLE_ORDER_REQUEST_ID_PREFIX}${requestId}`;
 
 /**
  * What one order comes to.
@@ -359,6 +411,22 @@ export interface SubmitTableOrderRequest {
    */
   currency: string;
   lines: SubmitTableOrderLine[];
+  /**
+   * The phone's idempotency key for this submission (GitHub issue #1108).
+   *
+   * Optional, and the whole of what makes a retry safe. A restaurant's wifi
+   * drops answers as readily as it drops requests, so a submission that timed
+   * out is, from the phone, indistinguishable from one that never arrived -
+   * and the honest response to both is to send it again. Unlabelled, that
+   * second send is a second dinner.
+   *
+   * With a key, the second send finds the order the first one wrote and is
+   * answered with it, marked {@link TableOrderSubmitted.replayed}. The key is
+   * minted once per *intent* - one cart, one tap - and reused by every attempt,
+   * including attempts made after the phone was locked, reloaded or carried out
+   * of range and back.
+   */
+  requestId?: string;
 }
 
 /**
@@ -464,6 +532,20 @@ export interface TableOrderSubmitted {
    * honest reason it is here, and why it is a status rather than a boolean.
    */
   tableStatus: TableStatus;
+  /**
+   * True when this answer came from an order that already existed
+   * (GitHub issue #1108).
+   *
+   * The caller is told, because the two are the same outcome and not the same
+   * event - the distinction `transitionTableState` draws for the same reason.
+   * Here it is also a sentence: a guest whose phone gave up and retried is
+   * shown "this was already with the kitchen" rather than a second
+   * confirmation of an order they only placed once.
+   *
+   * Absent on the ordinary path rather than `false`, so a caller reading it is
+   * reading a deliberate field.
+   */
+  replayed?: boolean;
 }
 
 /** What `submitTableOrder` answers with. */

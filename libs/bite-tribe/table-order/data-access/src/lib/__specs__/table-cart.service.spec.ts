@@ -1,7 +1,36 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import type { MenuItem } from 'model';
-import { TableCartService, cartLineKey } from '../table-cart.service';
+import type { Menu, MenuItem } from 'model';
+import {
+  TABLE_CART_KEY_PREFIX,
+  TableCartService,
+  cartLineKey,
+} from '../table-cart.service';
+
+/**
+ * Device storage is a Capacitor plugin, so it is mocked rather than spied on.
+ * What is kept is the behaviour the cart depends on - a value written comes
+ * back - and the store is cleared between tests, since a cart left behind by
+ * one test is exactly what the code under test looks for.
+ */
+const mockDeviceStorage = new Map<string, string>();
+
+jest.mock('@capacitor/preferences', () => ({
+  Preferences: {
+    get: ({ key }: { key: string }): Promise<{ value: string | null }> =>
+      Promise.resolve({ value: mockDeviceStorage.get(key) ?? null }),
+    set: ({ key, value }: { key: string; value: string }): Promise<void> => {
+      mockDeviceStorage.set(key, value);
+
+      return Promise.resolve();
+    },
+    remove: ({ key }: { key: string }): Promise<void> => {
+      mockDeviceStorage.delete(key);
+
+      return Promise.resolve();
+    },
+  },
+}));
 
 /**
  * The cart a guest builds at a table (GitHub issue #1103).
@@ -41,6 +70,8 @@ describe(TableCartService.name, () => {
   let cart: TableCartService;
 
   beforeEach(() => {
+    mockDeviceStorage.clear();
+
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection(), TableCartService],
     });
@@ -245,6 +276,189 @@ describe(TableCartService.name, () => {
         },
         { menuItemId: TIRAMISU.id, quantity: 1, price: 6 },
       ]);
+    });
+  });
+
+  /**
+   * The cart survives a reload (GitHub issue #1108).
+   *
+   * Issue #1103 left this open with its reasoning intact: a cart must not cost
+   * the restaurant a Firestore write per tap, and the phone's own storage costs
+   * it nothing. What these hold is the part that could go wrong - a row is put
+   * back together from the *live* menu, so a cart restored after the kitchen
+   * changed something cannot carry a dish the guest can no longer order.
+   */
+  describe('a cart that survives a reload', () => {
+    const RESTAURANT = 'restaurant-1';
+    const TABLE = 'table-12';
+    const KEY = `${TABLE_CART_KEY_PREFIX}${RESTAURANT}:${TABLE}`;
+
+    const menuOf = (...items: MenuItem[]): Menu => ({
+      id: 'menu-1',
+      currency: 'EUR',
+      categories: [{ id: 'category-1', title: 'Everything', items }],
+    });
+
+    const MENU = menuOf({ ...MARGHERITA, variants: [LARGE] }, TIRAMISU);
+
+    /**
+     * A second instance, as a reloaded page builds one.
+     *
+     * The module is reset rather than the service re-injected, because the
+     * whole point is a cart that knows nothing: an instance that kept its rows
+     * would restore over its own memory and prove nothing about storage.
+     */
+    const fresh = (): TableCartService => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [provideZonelessChangeDetection(), TableCartService],
+      });
+
+      return TestBed.inject(TableCartService);
+    };
+
+    /** A second cart on the same table, as a reloaded screen would build it. */
+    const reloaded = (): TableCartService => {
+      const next = fresh();
+
+      next.useTable(RESTAURANT, TABLE);
+
+      return next;
+    };
+
+    beforeEach(() => {
+      cart.useTable(RESTAURANT, TABLE);
+    });
+
+    it('writes nothing until the screen names a table', async () => {
+      const unnamed = fresh();
+
+      unnamed.add(MARGHERITA);
+      await Promise.resolve();
+
+      expect(mockDeviceStorage.size).toBe(0);
+    });
+
+    it('keeps the rows, the quantities and the notes', async () => {
+      cart.add(MARGHERITA);
+      cart.add(MARGHERITA);
+      cart.setNotes(MARGHERITA.id, 'no basil');
+      await Promise.resolve();
+
+      const next = reloaded();
+      await next.restore(MENU);
+
+      expect(next.toRequestLines('EUR')).toEqual([
+        {
+          menuItemId: MARGHERITA.id,
+          quantity: 2,
+          notes: 'no basil',
+          price: 12,
+        },
+      ]);
+    });
+
+    it('keeps the variant a guest chose', async () => {
+      cart.add({ ...MARGHERITA, variants: [LARGE] }, LARGE);
+      await Promise.resolve();
+
+      const next = reloaded();
+      await next.restore(MENU);
+
+      expect(next.toRequestLines('EUR')).toEqual([
+        {
+          menuItemId: MARGHERITA.id,
+          variantId: LARGE.id,
+          quantity: 1,
+          price: 16,
+        },
+      ]);
+    });
+
+    /**
+     * The stored row is ids, so the price comes off the menu the guest is
+     * looking at now. Restoring the old number would be ordering from a copy of
+     * the menu kept on the phone, which is the price problem this whole flow
+     * refuses with the stale data one layer further away.
+     */
+    it('prices a restored row from the menu on screen now', async () => {
+      cart.add(MARGHERITA);
+      await Promise.resolve();
+
+      const next = reloaded();
+      await next.restore(menuOf({ ...MARGHERITA, price: 14 }, TIRAMISU));
+
+      expect(next.total()).toBe(14);
+    });
+
+    it('drops a row the menu no longer has', async () => {
+      cart.add(MARGHERITA);
+      cart.add(TIRAMISU);
+      await Promise.resolve();
+
+      const next = reloaded();
+      await next.restore(menuOf(TIRAMISU));
+
+      expect(next.lines().map((line) => line.item.id)).toEqual([TIRAMISU.id]);
+    });
+
+    it('drops a row the kitchen has marked off', async () => {
+      cart.add(TIRAMISU);
+      await Promise.resolve();
+
+      const next = reloaded();
+      await next.restore(menuOf(SOLD_OUT));
+
+      expect(next.isEmpty()).toBe(true);
+    });
+
+    /**
+     * The restore is asynchronous and a guest can tap "add" while it is still
+     * reading. A read that overwrote what they just did would lose the one row
+     * they were watching.
+     */
+    it('leaves alone a row the guest added while it was reading', async () => {
+      cart.add(MARGHERITA);
+      await Promise.resolve();
+
+      const next = reloaded();
+      next.add(MARGHERITA);
+      await next.restore(MENU);
+
+      expect(next.toRequestLines('EUR')).toEqual([
+        { menuItemId: MARGHERITA.id, quantity: 1, price: 12 },
+      ]);
+    });
+
+    it('forgets the cart once it is empty again', async () => {
+      cart.add(MARGHERITA);
+      await Promise.resolve();
+      cart.remove(MARGHERITA.id);
+      await Promise.resolve();
+
+      expect(mockDeviceStorage.get(KEY)).toBeUndefined();
+    });
+
+    /** A sent cart is cleared, so the next screen must not put it back. */
+    it('forgets it when the order goes through', async () => {
+      cart.add(MARGHERITA);
+      await Promise.resolve();
+      cart.clear();
+      await Promise.resolve();
+
+      const next = reloaded();
+      await next.restore(MENU);
+
+      expect(next.isEmpty()).toBe(true);
+    });
+
+    it('survives an entry it cannot read', async () => {
+      mockDeviceStorage.set(KEY, 'not json at all');
+
+      const next = reloaded();
+      await next.restore(MENU);
+
+      expect(next.isEmpty()).toBe(true);
     });
   });
 });

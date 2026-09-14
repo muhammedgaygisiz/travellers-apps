@@ -2,37 +2,40 @@
 
 ## Status
 
-Partially supported. The app exists, deploys, and is gated on the `admin` role as of issue \#1469. Account management — roles, subscription tier and blocking — Bite search and removal, restaurant-candidate verification, restaurant ownership, the unmatched Bite places and the operational migrations are its surfaces today.
+**Level:** L0.
+Supported today. The app exists, deploys, and is gated on the `admin` role as of issue \#1469.
+Account management - roles, subscription tier and blocking - Bite search and removal,
+restaurant-candidate verification, restaurant ownership, the unmatched Bite places and the
+operational migrations are its surfaces. Epic \#1471, which grew the app into the operations
+tool, is closed with every issue under it complete.
 
 ## Goal
 
-BiteTribe-internal operations live in an app only BiteTribe Operators can sign into, separate from the app a restaurant maintains its own data in.
-
-## Why It Is Needed
-
-The privileged surface used to be one app. `bite-tribe-business` held both what a **restaurant** does to its own data and what **we** do to the platform, and the only check on it was "is signed in".
-
-Two problems in one, both verified before issue \#1469:
-
-- No separation. `migrations` and restaurant-candidate verification are BiteTribe-internal operations sitting in the app we intend to give restaurants. Any restaurant that logged in could run our migrations. Issue \#1473 moved both.
-- No gate. `authGuard` asks whether a user is signed in, never who they are, and `apps/bite-tribe-firebase/firestore.rules` still grants read and write on every document to every authenticated user.
+BiteTribe-internal operations live in an app only BiteTribe Operators can sign into, separate
+from the app a restaurant maintains its own data in. This page owns which operator surfaces
+exist and what each one may do; what an operator's action then means for the data it touches
+belongs to the page that owns that data.
 
 ## Actors
 
-- BiteTribe Operator, holding the `admin` role ([[User Roles]])
-- Restaurant owner, holding the `business` role
-- Signed-in user holding neither
+- **BiteTribe Operator** - the only actor. Holds `admin`, signs in, and works from the
+  dashboard.
+- **Restaurant Owner** - does not act here, but is named because operator work grants and
+  revokes the `business` role and the restaurants it holds.
+- **Bite Creator** - does not act here either, and is named because an operator can block the
+  account and remove its Bites without it being told.
 
-## Target Flow
+## Flow
 
-1. A restaurant calls BiteTribe and asks to claim a place.
-2. The operator verifies the claim on the call, and optionally identifies the Bites that belong to that place.
-3. In the admin app the operator creates the verified restaurant, sets its owner, and grants that owner the `business` role in one backend action.
-4. The restaurant signs into the business app and maintains its own opening hours, menu, and profile.
+The workflow this app exists to make possible: a restaurant calls BiteTribe and asks to claim a
+place; the operator verifies the claim on the call, and optionally identifies the Bites that
+belong to that place; in the admin app the operator creates the verified restaurant, sets its
+owner, and grants that owner the `business` role in one backend action; the restaurant then
+signs into the business app and maintains its own opening hours, menu and profile. The third
+and fourth steps are the point of the split - a restaurant never grants itself business access,
+and an operator never needs the business app to do operator work.
 
-Steps 3 and 4 are the point of the split: a restaurant never grants itself business access, and an operator never needs the business app to do operator work.
-
-## Current Flow
+What ships today:
 
 1. An operator is granted `admin` through `grant-role.mjs`, run with service-account credentials.
 2. They sign into the admin app with a normal BiteTribe account.
@@ -46,12 +49,23 @@ Blocking sits below both editable sections, separated by a rule and behind a con
 
 6. **Restaurant candidates** lists the pending candidates with the Bite evidence behind each, and **Bite places** lists place names Bites carry that no verified restaurant answers to yet. Both open the new-restaurant form, which creates the verified restaurant. Both moved out of the business dashboard with issue \#1473.
 7. **Restaurant ownership** assigns a verified restaurant to an account holding `business`, and revokes that assignment. Both go through admin-only callables that write the fields on the restaurant document (issue \#1077). The surface reuses the account list user management already loads rather than adding a second way to find an account, and offers only accounts holding the role.
-8.
 
-A restaurant that already has an owner offers no picker at all: reassignment is revoke and then assign, so the operator log carries a reason for the removal and a reason for the grant. Revoking sits below a rule and behind a confirmation naming the restaurant and the account, on the same terms as blocking. 8. **Bite search** finds a Bite by its name or one of its tags and shows what BiteTribe holds about it. It calls `searchBites`, the same callable the consumer app's search drives. Selecting a Bite is where deleting an improper one will attach (issue \#1475).
+A restaurant that already has an owner offers no picker at all: reassignment is revoke and then assign, so the operator log carries a reason for the removal and a reason for the grant. Revoking sits below a rule and behind a confirmation naming the restaurant and the account, on the same terms as blocking.
 
-9. The same card removes it. A required reason and a confirmation sit between the operator and `deleteBiteAsOperator`, below a rule, because the deletion is irreversible and reaches further than the Bite (issue \#1475). 9. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
-10. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
+8. **Bite search** finds a Bite by its name or one of its tags and shows what BiteTribe holds about it. It calls `searchBites`, the same callable the consumer app's search drives. Selecting a Bite is where deleting an improper one will attach (issue \#1475).
+
+The same card removes it. A required reason and a confirmation sit between the operator and `deleteBiteAsOperator`, below a rule, because the deletion is irreversible and reaches further than the Bite (issue \#1475).
+
+9. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [[UC - Run Operational Migrations]].
+
+## Why It Is Needed
+
+The privileged surface used to be one app. `bite-tribe-business` held both what a **restaurant** does to its own data and what **we** do to the platform, and the only check on it was "is signed in".
+
+Two problems in one, both verified before issue \#1469:
+
+- No separation. `migrations` and restaurant-candidate verification are BiteTribe-internal operations sitting in the app we intend to give restaurants. Any restaurant that logged in could run our migrations. Issue \#1473 moved both.
+- No gate. `authGuard` asks whether a user is signed in, never who they are, and `apps/bite-tribe-firebase/firestore.rules` still grants read and write on every document to every authenticated user.
 
 ## Key Behaviours
 
@@ -84,9 +98,43 @@ The role gate is a lockout change, and the tool that grants roles is behind it. 
 
 Issue \#1078 replaced the Firestore rules, so this gate is no longer alone: a caller that goes around the admin app is now scoped by the account named on the document, and the `admin` role is a clause the rules read for themselves. Two things still hold. The gate stops an account from reaching a page and the rules stop it from writing a document, and they are independent — a change to one is not a change to the other. And the rules deploy by hand, so until `npx nx firebase-deploy-rules bite-tribe-firebase` has run against the live project this is still a client-side gate over an open database. `storage.rules` is open regardless (\#1350).
 
+## Operational Notes
+
+Bringing the app up needed three domain allowlists edited by hand that creating the Hosting site did not touch. See Adding A Web App To The Project in [[Architecture - Firebase]] — that checklist exists because this app was silently unable to sign anyone in until all three were done.
+
+The first `admin` role was granted through the Identity Toolkit REST API from Cloud Shell rather than through `grant-role.mjs`, because Cloud Shell already holds the caller's credentials and no service-account key has to be downloaded to a workstation. User credentials need an `x-goog-user-project` header there; without it the call fails with `SERVICE_DISABLED`.
+
+## MVP Classification
+
+**[MVP]** - the `admin` gate itself, and the two moderation surfaces: blocking an account
+(\#1474) and removing an improper Bite (\#1475). An app that publishes what its users write
+cannot ship without someone able to take content down.
+
+**[Secondary]** - the rest of the tooling: role and subscription-tier editing, restaurant
+candidates and Bite places, restaurant ownership, Bite search as a lookup, and the migrations.
+Each saves operator effort rather than being required for a first release.
+
+## App Store Review Area
+
+Relevant, and the gap is larger than this page. BiteTribe publishes user-generated content, and
+Apple's user-generated-content guideline asks for four things: content filtering, timely
+reporting, user-to-user blocking, and published contact details. Google Play has an equivalent
+policy, and [[Implementation - Store Declarations]] declares the **Social Media** data-use
+category at a **13+** age rating.
+
+**This page owns the operator half, and it ships**: an operator removes a Bite (\#1475) and
+blocks an account (\#1474), with the contact address delivered by \#1429.
+
+**The user-facing half does not exist**, and `RD-UR-7` classes the set `[MVP]`. Reporting,
+user-to-user blocking and content filtering have no surface in the consumer app; each is owned
+by an issue as of 14 September 2026 - \#1608 reporting a Bite, \#1609 blocking another user,
+\#1610 filtering before publication. Epic \#1284 covers reporting inside a review thread only.
+Not this page's behaviour, but this page is where the half that exists lives.
+
 ## Related GitHub Scope
 
-- Epic \#1471 - grow the admin app into the BiteTribe operations tool, and the owner of everything below that is not yet built
+- Epic \#1471 - grew the admin app into the BiteTribe operations tool; closed, with every issue
+  under it complete
 - Issue \#1469 - introduce the admin app, deploy it, and gate both privileged apps on roles
 - Issue \#1473 - move the migrations and restaurant-candidate verification out of the business app
 - Issue \#1472 - require the `admin` role on every operator callable, which moving the UI does not do; done, and the classification of every endpoint is now a test
@@ -104,12 +152,6 @@ Issue \#1078 replaced the Firestore rules, so this gate is no longer alone: a ca
 - [[Restaurant]]
 - [[Bite]]
 
-## Operational Notes
-
-Bringing the app up needed three domain allowlists edited by hand that creating the Hosting site did not touch. See Adding A Web App To The Project in [[Architecture - Firebase]] — that checklist exists because this app was silently unable to sign anyone in until all three were done.
-
-The first `admin` role was granted through the Identity Toolkit REST API from Cloud Shell rather than through `grant-role.mjs`, because Cloud Shell already holds the caller's credentials and no service-account key has to be downloaded to a workstation. User credentials need an `x-goog-user-project` header there; without it the call fails with `SERVICE_DISABLED`.
-
 ## Related Pages
 
 - [[UC - Own And Claim Restaurants]]
@@ -118,3 +160,5 @@ The first `admin` role was granted through the Identity Toolkit REST API from Cl
 - [[User Roles]]
 - [[Architecture - Auth]]
 - [[Architecture - Nx Workspace]]
+- [[Personas]] - the audiences the `Actors` mapping displaced
+- [[Implementation - Store Declarations]]

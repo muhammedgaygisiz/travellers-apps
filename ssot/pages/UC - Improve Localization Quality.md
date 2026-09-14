@@ -16,10 +16,13 @@ formatted values are localized through the document language and `Intl`.
 What is not done is the manual review of AI-generated copy, which epic \#738 tracks with one
 story per language and which is outstanding for some of them, and the rule at
 `Implementation - Localization.md:122` - "avoid hardcoded visible English in templates" -
-which fourteen strings in shipping consumer surfaces still break. Two more bypass the pipe
-without consequence, carrying the brand term `Bitemap` that every locale keeps in English.
-Nothing enforces that rule; the guards that exist compare locale files with each other and
-never read a template.
+which a sweep of the consumer templates found broken in two shapes: visible text nodes, in
+nine components, and copy in `alt`, `title`, `placeholder` and `aria-label` attributes, which
+a screen reader announces in English whatever the account language is. The issues below carry
+the enumerated list. Brand terms are not among them - `BiteTribe`, `Bitemap`, `PRO` and, in
+ten of the eleven locales, `Bites` are kept in English by the catalogs themselves. Nothing
+enforces the rule; the guards that exist compare locale files with each other and never read
+a template.
 
 ## Goal
 
@@ -68,8 +71,10 @@ back to English in a dialog the reviewer sees. And the listing locale set is bou
   the manual review of AI-generated copy that this page's first Flow bullet asks for
 - Issue \#1264 - the verification mail ignored the account language. Closed as completed, and
   the fourth Flow bullet describes the state after it
-- The fourteen hardcoded strings have no issue yet; two are being filed, split by whether the
-  component is wired to Transloco at all
+- Issue \#1612 - the five components that already use Transloco and carry one stray literal
+  each. Open
+- Issue \#1613 - the four consumer components that import no Transloco at all, whose every
+  visible string and announced attribute is English in all eleven locales. Open
 
 ## Related Domains
 
@@ -81,7 +86,7 @@ back to English in a dialog the reviewer sees. And the listing locale set is bou
 - [[Personas]] - the food lover, the traveler and the new user this page used to name as
   actors
 - [[Implementation - Localization]] - the mechanism: catalogs, the pipe, the backend list,
-  `Intl`, `InfoPlist.strings`, and the rule the fourteen strings break
+  `Intl`, `InfoPlist.strings`, and the rule the hardcoded template copy breaks
 - [[Implementation - Store Listing Assets]] - the listing locales bound to `availableLangs`,
   English-only today
 - [[Implementation - Store Listing Translations]] - the listing copy itself

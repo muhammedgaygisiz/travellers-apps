@@ -760,6 +760,46 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ------------------------------------------------------- scan anomalies
+
+    /**
+     * What the restaurant is told about scans that do not look ordinary
+     * (GitHub issue #1107).
+     *
+     * ```text
+     * /restaurants/{restaurantId}/scanAnomalies/{n}_{tableId}_{kind}
+     * ```
+     *
+     * **Written by nobody**, like the state, the visit, the orders, the
+     * sessions and the signals around it. `recordScanAnomaly` raises one from
+     * the scan callables and `dismissScanAnomaly` clears it, both through the
+     * Admin SDK. The reason here is narrower than for most of those and worth
+     * stating: this collection is the only record a restaurant has that its
+     * codes are being worked on, so a client able to write to it could raise a
+     * row against a table it has nothing to do with - or, far worse, rewrite
+     * the `firstSeenAt` and `count` on one it would like to look ordinary.
+     *
+     * **No guest clause at all**, which is where it differs from the
+     * assistance requests it otherwise copies. A signal is something a guest
+     * raised and is owed an answer to; an anomaly is something said *about* a
+     * guest's scan, and handing them a way to find out whether they tripped it
+     * would be handing an attacker the feedback loop for tuning around it.
+     *
+     * **Staff list them**, through the same `readsFloorPlan` as the tables,
+     * their live state, the visits, the orders, the sessions and the signals.
+     * Two lists of readers for one dining room would drift.
+     *
+     * The collection needs no index and no collection-group rule: the document
+     * name is derived from the table and the kind, so it holds one document per
+     * table per kind however hard the endpoint is worked, and the staff screen
+     * reads the whole of it from the path alone.
+     */
+    match /restaurants/{restaurantId}/scanAnomalies/{anomalyId} {
+      allow get, list: if readsFloorPlan(restaurantId);
+
+      allow write: if false;
+    }
+
     // ------------------------------------------------------- table qr tokens
 
     /**
@@ -793,6 +833,37 @@ service cloud.firestore {
       allow get: if true;
       allow list: if false;
       allow write: if false;
+    }
+
+    // --------------------------------------------------- scan rate limits
+
+    /**
+     * The durable counters behind the QR scan endpoint (GitHub issue #1107).
+     *
+     * ```text
+     * /scanRateLimits/{dimension}_{bucket}_{windowStartedAt}
+     * ```
+     *
+     * **Server-only in every direction**, and the one collection here that no
+     * client role reads either. Two reasons, and the second is the load-bearing
+     * one.
+     *
+     * A readable counter is a readable answer to "how much of my allowance is
+     * left", which is the single most useful thing an attacker could be handed:
+     * it turns a limit that has to be discovered by tripping it - and tripping
+     * it raises a row on a staff screen - into one that can be run right up to
+     * and never crossed.
+     *
+     * And the `ip` dimension names a bucket derived from an address. It is a
+     * truncated hash rather than the address, and every document in here is
+     * dead inside two minutes, but a guest's network is not something a
+     * restaurant's staff have any business reading even in that form.
+     *
+     * The documents are removed by a TTL policy on `scanRateLimits.expiresAt`,
+     * which is **created by hand** like the indexes and this file's own deploy.
+     */
+    match /scanRateLimits/{bucketId} {
+      allow read, write: if false;
     }
 
     // ------------------------------------------------------------------ bites

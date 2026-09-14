@@ -197,9 +197,10 @@
   whole of every session whatever the wifi did.
 
   Stage 3 is nearly complete, and its narrative lives on
-  [[UC - Order At The Table Through A QR Code]] rather than here: eight of its ten
-  children have landed, each one a section of that page, and the nineteen product
-  decisions they settled are `RD-TS-1` to `RD-TS-23` in [[Recorded Decisions]].
+  [[UC - Order At The Table Through A QR Code]] rather than here: nine of its ten
+  children have landed, each one a section of that page, and the twenty-four
+  product decisions they settled are `RD-TS-1` to `RD-TS-28` in
+  [[Recorded Decisions]].
 
   Issue \#1105 is the one worth finding from this side, because it is where the
   two halves of the epic meet. Until it landed a guest could send an order that
@@ -232,10 +233,31 @@
   bill writes `awaitingPayment` from the guest's own callable (`RD-TS-21`),
   because `transitionTableState` admits three roles a guest holds none of.
 
-  What stage 3 still owes is issue \#1107's abuse protection - which also owns
-  the pending-session signal no screen draws - and issue \#1108's idempotent
-  submission. And, as everywhere else in this epic, the rules and the indexes
-  deploy by hand, so none of it binds production until both deploys have run.
+  Issue \#1107 is worth finding from this side for a third reason again: it is
+  where the epic stopped adding to the flow and started assuming the flow had
+  already leaked. It made the scan limit durable across function instances
+  rather than within one, added the per-IP dimension that a supply of free
+  anonymous accounts had been walking through, turned what is throttled into
+  rows a restaurant reads, and gave `rotateTableQrToken` - a callable that had
+  existed since \#1086 with **no caller anywhere in the workspace** - the
+  surface that finally satisfies its own acceptance criterion, plus a bulk half
+  for a whole room. It also closed the gap this epic had carried since \#1101:
+  the pending session, written all along and drawn by nothing, is now a list on
+  the staff screens, deliberately beside the tables that are calling rather than
+  among the anomalies (`RD-TS-26`) - a guest at the door is a person waiting and
+  not an incident.
+
+  The decision in it worth taking to other features is `RD-TS-25`. A log of scan
+  attempts is the obvious shape for reporting an attack and it is the wrong one,
+  because reading the screen then costs more the harder somebody tries. Naming
+  the document after the table and the kind - \#1106's trick, pointed at a
+  different problem - bounds the collection at the size of the room however hard
+  the endpoint is worked.
+
+  What stage 3 still owes is issue \#1108's idempotent submission. And, as
+  everywhere else in this epic, the rules and the indexes deploy by hand, so none
+  of it binds production until both deploys have run - plus, since \#1107, a TTL
+  policy on `scanRateLimits.expiresAt` that has no Nx target at all.
 
 Every child of stage 0 has now landed, and the stage is still not finished. Two things
 remain and neither has an owning issue: the rules deploy by hand, so \#1078 binds

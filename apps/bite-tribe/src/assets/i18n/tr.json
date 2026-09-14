@@ -568,6 +568,7 @@
   "table-session-confirm-heading": "{{restaurant}} restoranında {{table}} numaralı masadan sipariş veriyorsun",
   "table-session-confirm-room": "{{room}}",
   "table-session-confirm-intro": "Devam etmeden önce oturduğun masanın bu olduğunu kontrol et.",
+  "table-session-share-location": "İsteğe bağlı: Restoranın kötüye kullanılan kodları fark edebilmesi için yaklaşık konumunu paylaş. Siparişinde hiçbir şey değişmez.",
   "table-session-confirm-action": "Evet, masam bu",
   "table-session-active-heading": "{{table}} numaralı masadasın",
   "table-session-active-intro": "{{restaurant}} masanı açtı, buradan sipariş verebilirsin.",

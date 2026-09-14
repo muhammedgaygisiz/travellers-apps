@@ -52,6 +52,7 @@ export {
 export {
   issueTableQrTokens,
   rotateTableQrToken,
+  rotateTableQrTokens,
 } from './functions/restaurants/table-qr-tokens';
 export { syncTableQrTokenOnTableWrite } from './functions/restaurants/sync-table-qr-token-on-table-write';
 export { resolveTableQrToken } from './functions/restaurants/resolve-table-qr-token';
@@ -64,6 +65,7 @@ export { transitionTableOrderStatus } from './functions/restaurants/transition-t
 export { moveTableVisit } from './functions/restaurants/move-table-visit';
 export { requestTableAssistance } from './functions/restaurants/request-table-assistance';
 export { acknowledgeTableAssistance } from './functions/restaurants/acknowledge-table-assistance';
+export { dismissScanAnomaly } from './functions/restaurants/dismiss-scan-anomaly';
 export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-create';
 export { claimDisplayName } from './functions/users/claim-display-name';
 export { setUserRoles } from './functions/users/set-user-roles';

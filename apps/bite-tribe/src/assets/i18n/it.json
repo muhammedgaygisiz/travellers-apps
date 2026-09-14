@@ -568,6 +568,7 @@
   "table-session-confirm-heading": "Stai ordinando da {{restaurant}}, tavolo {{table}}",
   "table-session-confirm-room": "{{room}}",
   "table-session-confirm-intro": "Controlla che sia il tavolo a cui sei seduto prima di andare avanti.",
+  "table-session-share-location": "Facoltativo: condividi all'incirca dove ti trovi, così il ristorante può individuare i codici usati in modo improprio. Non cambia nulla del tuo ordine.",
   "table-session-confirm-action": "Sì, è il mio tavolo",
   "table-session-active-heading": "Sei al tavolo {{table}}",
   "table-session-active-intro": "{{restaurant}} ha aperto il tuo tavolo, puoi ordinare da qui.",

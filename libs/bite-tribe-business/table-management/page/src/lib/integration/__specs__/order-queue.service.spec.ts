@@ -5,6 +5,10 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FloorPlanDataAccessService } from 'bite-tribe-business/floor-plan-data-access';
 import {
   OrderAlertService,
+  PendingSessionQueueService,
+  PendingSessionSnapshot,
+  ScanAnomalyQueueService,
+  ScanAnomalySnapshot,
   TableAssistanceQueueService,
   TableAssistanceSnapshot,
   TableOrderQueueService,
@@ -12,8 +16,10 @@ import {
 } from 'bite-tribe-business/table-management-data-access';
 import type {
   RestaurantTable,
+  ScanAnomaly,
   TableAssistanceRequest,
   TableOrder,
+  TableSession,
 } from 'model';
 import type { OrderAction, OrderTableGroup } from '../order-queue-groups';
 import { BehaviorSubject, of, Subject } from 'rxjs';
@@ -61,6 +67,33 @@ const calling = (
   ...overrides,
 });
 
+const anomaly = (overrides: Partial<ScanAnomaly> = {}): ScanAnomaly => ({
+  id: '8_table-12_rateLimited',
+  restaurantId: 'restaurant-1',
+  tableId: 'table-12',
+  tableLabel: '12',
+  kind: 'rateLimited',
+  status: 'open',
+  firstSeenAt: NOW - 10 * MINUTE,
+  lastSeenAt: NOW - MINUTE,
+  count: 3,
+  ...overrides,
+});
+
+const pendingSession = (
+  overrides: Partial<TableSession> = {},
+): TableSession => ({
+  id: '8_table-12_guest-1',
+  restaurantId: 'restaurant-1',
+  tableId: 'table-12',
+  guestUserId: 'guest-1',
+  status: 'pending',
+  startedAt: NOW - MINUTE,
+  lastActiveAt: NOW - MINUTE,
+  isAnonymousGuest: true,
+  ...overrides,
+});
+
 const order = (id: string, overrides: Partial<TableOrder> = {}): TableOrder =>
   ({
     id,
@@ -101,6 +134,9 @@ describe(OrderQueueService.name, () => {
   let service: OrderQueueService;
   let feed: Subject<TableOrderQueueSnapshot>;
   let assistanceFeed: Subject<TableAssistanceSnapshot>;
+  let anomalyFeed: Subject<ScanAnomalySnapshot>;
+  let pendingFeed: Subject<PendingSessionSnapshot>;
+  let dismiss: jest.Mock;
   let transition: jest.Mock;
   let acknowledge: jest.Mock;
   let present: jest.Mock;
@@ -110,13 +146,13 @@ describe(OrderQueueService.name, () => {
   let restaurantId: BehaviorSubject<string | undefined>;
 
   /**
-   * One delivery on both listeners.
+   * One delivery on all four listeners.
    *
    * The header makes one promise - what is on screen is current - and it is
-   * broken by either listener going quiet, so `liveStatus` waits for both
-   * (GitHub issue #1106). A helper that fed only the orders would leave the
+   * broken by any one of them going quiet, so `liveStatus` waits for all four
+   * (issues #1106 and #1107). A helper that fed only the orders would leave the
    * screen reporting `connecting` through every test that never mentions a
-   * signal.
+   * signal, a row or a guest at the door.
    */
   const deliver = (
     orders: TableOrder[],
@@ -124,6 +160,8 @@ describe(OrderQueueService.name, () => {
   ): void => {
     feed.next({ orders, at: Date.now(), live: true, ...over });
     deliverAssistance([]);
+    deliverAnomalies([]);
+    deliverPending([]);
   };
 
   const deliverAssistance = (
@@ -131,6 +169,22 @@ describe(OrderQueueService.name, () => {
     over: Partial<TableAssistanceSnapshot> = {},
   ): void => {
     assistanceFeed.next({ requests, at: Date.now(), live: true, ...over });
+    TestBed.tick();
+  };
+
+  const deliverAnomalies = (
+    anomalies: ScanAnomaly[],
+    over: Partial<ScanAnomalySnapshot> = {},
+  ): void => {
+    anomalyFeed.next({ anomalies, at: Date.now(), live: true, ...over });
+    TestBed.tick();
+  };
+
+  const deliverPending = (
+    sessions: TableSession[],
+    over: Partial<PendingSessionSnapshot> = {},
+  ): void => {
+    pendingFeed.next({ sessions, at: Date.now(), live: true, ...over });
     TestBed.tick();
   };
 
@@ -143,6 +197,9 @@ describe(OrderQueueService.name, () => {
     // it has heard anything at all.
     feed = new Subject<TableOrderQueueSnapshot>();
     assistanceFeed = new Subject<TableAssistanceSnapshot>();
+    anomalyFeed = new Subject<ScanAnomalySnapshot>();
+    pendingFeed = new Subject<PendingSessionSnapshot>();
+    dismiss = jest.fn().mockResolvedValue({ changed: true });
     transition = jest.fn().mockResolvedValue({});
     acknowledge = jest.fn().mockResolvedValue({ changed: true });
     present = jest.fn().mockResolvedValue(undefined);
@@ -168,6 +225,19 @@ describe(OrderQueueService.name, () => {
           useValue: {
             requests$: jest.fn(() => assistanceFeed.asObservable()),
             acknowledge,
+          },
+        },
+        {
+          provide: ScanAnomalyQueueService,
+          useValue: {
+            anomalies$: jest.fn(() => anomalyFeed.asObservable()),
+            dismiss,
+          },
+        },
+        {
+          provide: PendingSessionQueueService,
+          useValue: {
+            pendingSessions$: jest.fn(() => pendingFeed.asObservable()),
           },
         },
         {
@@ -254,9 +324,10 @@ describe(OrderQueueService.name, () => {
   });
 
   /**
-   * Either listener going quiet breaks the header's promise, so the worse of
-   * the two wins: a header reading `live` because the tickets are still
-   * arriving would be true about half the screen (GitHub issue #1106).
+   * Any one listener going quiet breaks the header's promise, so the worst of
+   * the four wins: a header reading `live` because the tickets are still
+   * arriving would be true about a quarter of the screen (issues #1106
+   * and #1107).
    */
   it('reports the signals listener dying even while orders still arrive', () => {
     deliver([order('a')]);
@@ -268,10 +339,128 @@ describe(OrderQueueService.name, () => {
   it('calls itself out of date once the last delivery is old enough', () => {
     feed.next({ orders: [], at: NOW - 5 * MINUTE, live: false });
     assistanceFeed.next({ requests: [], at: NOW - 5 * MINUTE, live: false });
+    anomalyFeed.next({ anomalies: [], at: NOW - 5 * MINUTE, live: false });
+    pendingFeed.next({ sessions: [], at: NOW - 5 * MINUTE, live: false });
     jest.setSystemTime(NOW + 5 * MINUTE);
     jest.advanceTimersByTime(30_000);
 
     expect(service.liveStatus()).toBe('stale');
+  });
+
+  describe('the guests waiting to be seated', () => {
+    /**
+     * `RD-TS-1` says a scan at an unseated table raises a signal staff confirm.
+     * Issue #1101 wrote that signal and nothing drew it, so until this list
+     * existed the confirming was asked of a screen that did not show it.
+     */
+    it('lists them with their table numbers, longest wait first', () => {
+      deliver([]);
+      deliverPending([
+        pendingSession({ id: 'b', tableId: 't5', startedAt: NOW - MINUTE }),
+        pendingSession({ id: 'a', startedAt: NOW - 10 * MINUTE }),
+      ]);
+
+      expect(
+        service.waitingParties().map(({ tableId, label }) => [tableId, label]),
+      ).toEqual([
+        ['table-12', '12'],
+        ['t5', '5'],
+      ]);
+      expect(service.waitingCount()).toBe(2);
+    });
+
+    it('counts one party per table rather than one per phone', () => {
+      deliver([]);
+      deliverPending([
+        pendingSession({ id: 'a', guestUserId: 'guest-1' }),
+        pendingSession({ id: 'b', guestUserId: 'guest-2' }),
+      ]);
+
+      expect(service.waitingParties()).toHaveLength(1);
+      expect(service.waitingParties()[0].guests).toBe(2);
+    });
+  });
+
+  describe('what the restaurant is told about its codes', () => {
+    it('lists the open rows, most recently seen first', () => {
+      deliver([]);
+      deliverAnomalies([
+        anomaly({ lastSeenAt: NOW - 10 * MINUTE }),
+        anomaly({
+          id: '2_t5_disabledTable',
+          tableId: 't5',
+          kind: 'disabledTable',
+          lastSeenAt: NOW - 100,
+        }),
+      ]);
+
+      expect(service.anomalies().map(({ kind }) => kind)).toEqual([
+        'disabledTable',
+        'rateLimited',
+      ]);
+      expect(service.anomalyCount()).toBe(2);
+    });
+
+    it('drops the ones somebody has already read', () => {
+      deliver([]);
+      deliverAnomalies([anomaly({ status: 'dismissed' })]);
+
+      expect(service.anomalies()).toEqual([]);
+    });
+
+    it('sends the table and the kind rather than the document name', async () => {
+      deliver([]);
+      deliverAnomalies([anomaly()]);
+
+      await service.dismissAnomaly(service.anomalies()[0]);
+
+      expect(dismiss).toHaveBeenCalledWith({
+        restaurantId: 'restaurant-1',
+        tableId: 'table-12',
+        kind: 'rateLimited',
+      });
+    });
+
+    /**
+     * Per row rather than a flag over the whole list, so a slow call about
+     * table 12 leaves the rest of it answerable.
+     */
+    it('marks only the row being dismissed as busy', async () => {
+      deliver([]);
+      deliverAnomalies([anomaly()]);
+
+      let release = (): void => undefined;
+      dismiss.mockReturnValue(
+        new Promise<void>((resolve) => {
+          release = (): void => resolve();
+        }),
+      );
+
+      const pending = service.dismissAnomaly(service.anomalies()[0]);
+
+      expect(service.busyAnomalyId()).toBe('table-12:rateLimited');
+
+      release();
+      await pending;
+
+      expect(service.busyAnomalyId()).toBeUndefined();
+    });
+
+    /**
+     * The listener corrects the row either way, so what the staff member is
+     * owed is the sentence rather than a retry - the same judgement the order
+     * actions and the acknowledgement both make.
+     */
+    it('says so when the backend refuses, and stops being busy', async () => {
+      deliver([]);
+      deliverAnomalies([anomaly()]);
+      dismiss.mockRejectedValue(new Error('nope'));
+
+      await service.dismissAnomaly(service.anomalies()[0]);
+
+      expect(present).toHaveBeenCalled();
+      expect(service.busyAnomalyId()).toBeUndefined();
+    });
   });
 
   describe('the tables that are calling', () => {
@@ -637,6 +826,19 @@ describe('when the table numbers cannot be read', () => {
           useValue: {
             requests$: jest.fn(() => new Subject().asObservable()),
             acknowledge: jest.fn(),
+          },
+        },
+        {
+          provide: ScanAnomalyQueueService,
+          useValue: {
+            anomalies$: jest.fn(() => new Subject().asObservable()),
+            dismiss: jest.fn(),
+          },
+        },
+        {
+          provide: PendingSessionQueueService,
+          useValue: {
+            pendingSessions$: jest.fn(() => new Subject().asObservable()),
           },
         },
         {

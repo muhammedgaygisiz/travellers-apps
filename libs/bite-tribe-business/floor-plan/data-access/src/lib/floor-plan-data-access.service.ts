@@ -106,6 +106,25 @@ export interface IssueTableQrTokensResult {
 }
 
 /**
+ * What a bulk rotation names (GitHub issue \#1107).
+ *
+ * One of the two, never neither. The backend refuses a rotation with no scope,
+ * because "rotate every code in the building" is the one action here that
+ * cannot be undone without a trip to the printer, and a caller that meant a
+ * room and sent an empty object would have got it.
+ */
+export interface RotateTableQrTokensRequest {
+  restaurantId: string;
+  roomId?: string;
+  tableIds?: string[];
+}
+
+/** What a bulk rotation answers with. `IssueTableQrTokensResult` plus a room. */
+export interface RotateTableQrTokensResult extends IssueTableQrTokensResult {
+  roomId?: string;
+}
+
+/**
  * A room as it is stored: every field of `Room` except its id.
  *
  * Written field by field rather than by spreading the object, so the editor
@@ -632,6 +651,56 @@ export class FloorPlanDataAccessService {
       { restaurantId: string },
       IssueTableQrTokensResult
     >({ name: 'issueTableQrTokens', data: { restaurantId } });
+
+    return data;
+  }
+
+  /**
+   * Replaces one table's code with a new one (GitHub issue \#1107).
+   *
+   * The callable has existed since issue \#1086 and nothing in the workspace
+   * called it, which meant the acceptance criterion it was written for - a
+   * leaked code can be invalidated by the restaurant in one action - was
+   * satisfied by no surface at all. This is that action.
+   *
+   * A callable and not a write from here, for the reason issuing is one: the
+   * token document and the table's pointer at it are two halves of one
+   * transaction, and `firestore.rules` refuses every client write to
+   * `/tableTokens` including the restaurant's own.
+   *
+   * The old token is superseded rather than deleted, so a guest scanning the
+   * sticker that is still on the table is told the code was replaced and to
+   * look again, rather than being told the code means nothing.
+   */
+  async rotateTableQrToken(
+    restaurantId: string,
+    tableId: string,
+  ): Promise<TableQrTokenResult> {
+    const { data } = await FirebaseFunctions.callByName<
+      { restaurantId: string; tableId: string },
+      TableQrTokenResult
+    >({ name: 'rotateTableQrToken', data: { restaurantId, tableId } });
+
+    return data;
+  }
+
+  /**
+   * Replaces the codes of a whole room, or of a named set of tables
+   * (GitHub issue \#1107).
+   *
+   * For the incident a single rotation is the wrong size for: a sheet
+   * photographed on the pass, a printout that left the building, the terrace
+   * somebody walked off with. Doing those one table at a time is twenty presses
+   * during which the room is half rotated and the guest at table 14 is holding
+   * a code that has just stopped working while table 15's still does.
+   */
+  async rotateTableQrTokens(
+    request: RotateTableQrTokensRequest,
+  ): Promise<RotateTableQrTokensResult> {
+    const { data } = await FirebaseFunctions.callByName<
+      RotateTableQrTokensRequest,
+      RotateTableQrTokensResult
+    >({ name: 'rotateTableQrTokens', data: request });
 
     return data;
   }

@@ -175,6 +175,85 @@
                     | transloco: { count: selectedRows().length }
                 }}
               </ion-button>
+
+              <!--
+                Replacing the codes of the ticked tables (GitHub issue #1107).
+
+                It reuses the selection above rather than adding a second way to
+                choose tables, and that is what makes one control answer two
+                different incidents. One code photographed and put online is one
+                table ticked; a sheet that left the building is the room filter
+                plus Select all. Neither needs the other's screen, and neither
+                reprints a code that was not asked for.
+
+                Below Print, because printing is what an owner comes here for
+                and replacing is what they come here for on a bad day.
+              -->
+              <div class="qr-sheets__rotate" data-testid="qr-sheets-rotate">
+                <ion-note class="qr-sheets__message">
+                  {{ 'qr-sheets-rotate-hint' | transloco }}
+                </ion-note>
+
+                @if (confirmingRotation()) {
+                  <!--
+                    The confirmation says the count rather than asking "are you
+                    sure": the number of stickers about to stop working is the
+                    fact the decision turns on, and it is the one thing a
+                    generic dialog would have left off.
+                  -->
+                  <ion-note
+                    color="warning"
+                    class="qr-sheets__message"
+                    data-testid="qr-sheets-rotate-confirm-lead"
+                  >
+                    {{
+                      'qr-sheets-rotate-confirm'
+                        | transloco: { count: selectedRows().length }
+                    }}
+                  </ion-note>
+
+                  <div class="qr-sheets__rotate-actions">
+                    <ion-button
+                      size="small"
+                      fill="clear"
+                      data-testid="qr-sheets-rotate-cancel"
+                      (click)="rotateCancel.emit()"
+                    >
+                      {{ 'qr-sheets-rotate-keep' | transloco }}
+                    </ion-button>
+
+                    <ion-button
+                      size="small"
+                      color="danger"
+                      data-testid="qr-sheets-rotate-confirm"
+                      [disabled]="rotating()"
+                      (click)="rotateConfirm.emit()"
+                    >
+                      @if (rotating()) {
+                        <ion-spinner name="crescent" slot="start" />
+                      }
+                      {{
+                        'qr-sheets-rotate-do'
+                          | transloco: { count: selectedRows().length }
+                      }}
+                    </ion-button>
+                  </div>
+                } @else {
+                  <ion-button
+                    expand="block"
+                    fill="outline"
+                    color="danger"
+                    data-testid="qr-sheets-rotate-ask"
+                    [disabled]="!canPrint() || rotating()"
+                    (click)="rotateRequest.emit()"
+                  >
+                    {{
+                      'qr-sheets-rotate'
+                        | transloco: { count: selectedRows().length }
+                    }}
+                  </ion-button>
+                }
+              </div>
             }
           </ion-card-content>
         </ion-card>

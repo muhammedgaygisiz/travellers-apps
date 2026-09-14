@@ -568,6 +568,7 @@
   "table-session-confirm-heading": "Tu commandes chez {{restaurant}}, table {{table}}",
   "table-session-confirm-room": "{{room}}",
   "table-session-confirm-intro": "Vérifie que c'est bien la table à laquelle tu es assis avant de continuer.",
+  "table-session-share-location": "Facultatif : partagez approximativement où vous êtes, pour que le restaurant repère les codes détournés. Cela ne change rien à votre commande.",
   "table-session-confirm-action": "Oui, c'est ma table",
   "table-session-active-heading": "Tu es à la table {{table}}",
   "table-session-active-intro": "{{restaurant}} a ouvert ta table, tu peux commander d'ici.",

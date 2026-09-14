@@ -85,6 +85,7 @@ describe(TableSession.name, () => {
   let confirm: jest.Mock;
   let leave: jest.Mock;
   let retry: jest.Mock;
+  let toggleLocationSharing: jest.Mock;
 
   const show = (next: TableSessionView): void => {
     state.set(next);
@@ -117,6 +118,7 @@ describe(TableSession.name, () => {
     confirm = jest.fn().mockResolvedValue(undefined);
     leave = jest.fn().mockResolvedValue(undefined);
     retry = jest.fn().mockResolvedValue(undefined);
+    toggleLocationSharing = jest.fn();
 
     TestBed.configureTestingModule({
       imports: [
@@ -141,10 +143,16 @@ describe(TableSession.name, () => {
             state,
             isBusy: signal(false),
             context: signal(CONTEXT),
+            // Off by default, exactly as the real service holds it: sharing a
+            // coarse position is opt-in, and a stub that started it on would
+            // make the screen assert about a state no guest reaches by
+            // default (issue #1107).
+            sharingLocation: signal(false),
             resolve,
             confirm,
             leave,
             retry,
+            toggleLocationSharing,
           },
         },
       ],

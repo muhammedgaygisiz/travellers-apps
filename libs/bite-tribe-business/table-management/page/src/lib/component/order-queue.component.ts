@@ -18,6 +18,10 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
 import type { AssistanceRow } from '../integration/assistance-rows';
 import type {
+  PendingSessionRow,
+  ScanAnomalyRow,
+} from '../integration/scan-signal-rows';
+import type {
   OrderAction,
   OrderTableGroup,
   QueuedOrder,
@@ -121,6 +125,28 @@ export class OrderQueueComponent {
 
   /** The signal whose press has not been answered yet, if any. */
   readonly busyAssistanceId = input<string | undefined>(undefined);
+
+  /**
+   * The guests who have scanned and are waiting to be seated
+   * (GitHub issue #1107).
+   *
+   * Above the tables that are calling, because a guest at the door has nothing
+   * yet - no table, no menu they can order from, and no way to ask for a waiter,
+   * since `requestTableAssistance` refuses a `pending` session. Everything that
+   * screen can do for them is done by somebody walking over.
+   *
+   * It is deliberately **not** in the anomaly list below. Two guests waiting at
+   * table 12 is the flow working; putting it among the rows about codes being
+   * hammered would make the ordinary case look like an incident, which is the
+   * reliable way to get a list stopped being read.
+   */
+  readonly waiting = input<PendingSessionRow[]>([]);
+
+  /** What the restaurant is told about its own codes (GitHub issue #1107). */
+  readonly anomalies = input<ScanAnomalyRow[]>([]);
+
+  /** The anomaly whose press has not been answered yet, if any. */
+  readonly busyAnomalyId = input<string | undefined>(undefined);
   readonly loading = input(false);
   readonly labelsFailed = input(false);
   readonly liveStatus = input<OrderQueueLiveStatus>('connecting');
@@ -144,6 +170,7 @@ export class OrderQueueComponent {
 
   readonly actionPicked = output<OrderActionRequest>();
   readonly assistanceAcknowledged = output<AssistanceRow>();
+  readonly anomalyDismissed = output<ScanAnomalyRow>();
   readonly cancellationConfirmed = output<string>();
   readonly cancellationDismissed = output<void>();
   readonly alertToggled = output<void>();
@@ -156,11 +183,21 @@ export class OrderQueueComponent {
   /** Whether any table is calling, which is what draws the list at all. */
   readonly hasAssistance = computed(() => this.assistance().length > 0);
 
+  /** Whether anybody is waiting to be seated. */
+  readonly hasWaiting = computed(() => this.waiting().length > 0);
+
+  /** Whether the restaurant has anything to read about its codes. */
+  readonly hasAnomalies = computed(() => this.anomalies().length > 0);
+
   pick(group: OrderTableGroup, order: QueuedOrder, action: OrderAction): void {
     this.actionPicked.emit({ group, order, action });
   }
 
   acknowledge(row: AssistanceRow): void {
     this.assistanceAcknowledged.emit(row);
+  }
+
+  dismiss(row: ScanAnomalyRow): void {
+    this.anomalyDismissed.emit(row);
   }
 }

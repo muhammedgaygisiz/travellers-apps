@@ -568,6 +568,7 @@
   "table-session-confirm-heading": "You are ordering at {{restaurant}}, table {{table}}",
   "table-session-confirm-room": "{{room}}",
   "table-session-confirm-intro": "Check that this is the table you are sitting at before you go on.",
+  "table-session-share-location": "Optional: share roughly where you are, so the restaurant can spot codes being misused. It changes nothing about your order.",
   "table-session-confirm-action": "Yes, this is my table",
   "table-session-active-heading": "You're at table {{table}}",
   "table-session-active-intro": "{{restaurant}} has your table open, so you can order from here.",

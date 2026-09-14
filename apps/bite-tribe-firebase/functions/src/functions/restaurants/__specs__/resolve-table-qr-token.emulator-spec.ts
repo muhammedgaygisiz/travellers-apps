@@ -5,6 +5,7 @@ import {
   getFirestore,
 } from 'firebase-admin/firestore';
 import { CallableRequest } from 'firebase-functions/https';
+import { resetDurableScanRateLimit } from '../../shared/utils/durable-scan-rate-limit';
 import { resetScanRateLimit } from '../../shared/utils/scan-rate-limit';
 import { TABLE_TOKENS_COLLECTION } from '../table-qr-tokens';
 import { TableScanRefused, TableScanResolved } from '../table-scan';
@@ -184,6 +185,7 @@ describe('resolve table QR token', () => {
 
   beforeEach(async () => {
     resetScanRateLimit();
+    await resetDurableScanRateLimit();
     await clear();
     await seed();
   });

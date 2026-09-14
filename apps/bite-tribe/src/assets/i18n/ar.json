@@ -568,6 +568,7 @@
   "table-session-confirm-heading": "أنت تطلب في {{restaurant}}، الطاولة {{table}}",
   "table-session-confirm-room": "{{room}}",
   "table-session-confirm-intro": "تأكّد من أن هذه هي الطاولة التي تجلس إليها قبل المتابعة.",
+  "table-session-share-location": "اختياري: شارك موقعك التقريبي حتى يتمكن المطعم من رصد الرموز المُساء استخدامها. لن يتغيّر أي شيء في طلبك.",
   "table-session-confirm-action": "نعم، هذه طاولتي",
   "table-session-active-heading": "أنت على الطاولة {{table}}",
   "table-session-active-intro": "فتح {{restaurant}} طاولتك، لذا يمكنك الطلب من هنا.",

@@ -23,9 +23,13 @@ restaurants         restaurants/{id}/rooms, restaurants/{id}/tables,
                     restaurants/{id}/tableStates,
                     restaurants/{id}/tableStateTransitions,
                     restaurants/{id}/visits,
-                    restaurants/{id}/tableSessions
+                    restaurants/{id}/tableSessions,
+                    restaurants/{id}/visits/{id}/orders,
+                    restaurants/{id}/assistanceRequests,
+                    restaurants/{id}/scanAnomalies
 restaurantStaff
 tableTokens
+scanRateLimits
 menus
 bucketlists
 biteTrails          biteTrails/{id}/sells, biteTrails/{id}/ratings
@@ -227,6 +231,45 @@ a service - the kitchen pauses, the clock passes closing time, the owner turns
 the feature off. It requires a session where the scan does not, and an anonymous
 one is enough; what the door opens onto is one document named after the caller's
 own uid. See [[Implementation - Firebase Functions]].
+
+**Two collections exist because the codes are assumed to leak** (issue \#1107).
+
+`/restaurants/{id}/scanAnomalies/{n}_{tableId}_{kind}` is what the restaurant is
+told about scans that do not look ordinary - a token past its limit, a code
+scanned while the restaurant is shut or at a table out of service, more live
+sessions than a table can seat, a consented position far away. Nobody writes it
+from a client and **no guest reads it**, which is where it differs from the
+assistance requests it otherwise copies: an assistance request is something a
+guest raised and is owed the answer to, and an anomaly is something said _about_
+their scan - handing them a way to find out whether they tripped one would hand
+an attacker the feedback loop for tuning around it. Staff read it through
+`readsFloorPlan`, the same list as everything else about one dining room.
+
+The address is issue \#1106's, and the reason is worth stating on this page
+because it is a rule about shape rather than about this feature. A log of scan
+attempts is the obvious way to report an attack and it is the wrong one: reading
+the screen then costs more the harder somebody tries. Naming the document after
+the table and the kind bounds the collection at the size of the room forever, so
+the staff screen reads the whole of it with no `where`, no composite index and
+no collection-group rule - and a restaurant under sustained attack holds exactly
+as many documents as one that is not.
+
+`/scanRateLimits/{dimension}_{bucket}_{windowStartedAt}` is the durable half of
+the scan limit, and is the one collection in the rules file that **no role reads
+and no role writes**, the operator included. A readable counter is a readable
+answer to "how much of my allowance is left", which turns a limit that has to be
+discovered by tripping it - and tripping it raises a row a restaurant sees - into
+one that can be run right up to and never crossed. The `ip` dimension also names
+a bucket derived from an address; it is a truncated hash rather than the address
+and every document is dead inside two minutes, but a guest's network is not
+something a restaurant's staff have any business reading even in that form.
+
+The documents are named after the window they count rather than reset in place,
+so every instance computes the same name from the same clock and they share a
+counter without coordinating. They are removed by a **TTL policy on
+`scanRateLimits.expiresAt`**, which is created by hand and has no Nx target -
+the third manual step in this epic, beside the rules and the indexes. Until it
+exists the collection grows: a document per bucket per minute.
 
 **`/menus` stayed shut, and that is the decision rather than an omission**
 (issue \#1102, `RD-TS-7`). A public menu page needs the restaurant's name as

@@ -5,16 +5,19 @@ import {
   isTableSessionCallError,
   type TableSessionCallFailure,
 } from 'bite-tribe/api';
+import { getCurrentPosition } from 'geolocation';
 import {
   isTableScanResolved,
   isTableSessionStarted,
   isTableOrderingUnavailable,
+  type ScanPosition,
   type TableScanContext,
   type TableScanNextStep,
   type TableScanRefusalReason,
   type TableScanReopensAt,
   type TableOrderingAvailability,
 } from 'model';
+import { lastValueFrom } from 'rxjs';
 
 /**
  * What a guest sees between scanning a table code and being able to order
@@ -112,6 +115,24 @@ export class TableSessionService {
   /** True while a call is in flight, so the confirm button cannot be double-tapped. */
   private readonly busy = signal(false);
 
+  /**
+   * Whether the guest has offered to share roughly where they are
+   * (GitHub issue #1107).
+   *
+   * **Off until they turn it on**, which is what "explicit consent" has to mean
+   * here: a default of on would be consent inferred from somebody not reading a
+   * line on a confirmation screen they are trying to get past.
+   *
+   * What it buys the restaurant is one anomaly signal among five, and what it
+   * costs the guest is nothing they can notice - the session, the menu and the
+   * order are identical either way, and the coordinates are compared to the
+   * restaurant's and thrown away. That asymmetry is why the control is a line
+   * of small print with a switch rather than a step in the flow.
+   */
+  private readonly sharesLocation = signal(false);
+
+  readonly sharingLocation = this.sharesLocation.asReadonly();
+
   readonly state = this.view.asReadonly();
   readonly isBusy = this.busy.asReadonly();
 
@@ -185,6 +206,49 @@ export class TableSessionService {
     );
   }
 
+  /** Turns sharing on or off. Reachable only from the confirmation screen. */
+  toggleLocationSharing(shares: boolean): void {
+    this.sharesLocation.set(shares);
+  }
+
+  /**
+   * The coarse position to send, or nothing at all.
+   *
+   * Three things can leave this empty and all three are ordinary: the guest did
+   * not tick the box, the app has no location grant, or the device produced no
+   * fix in time. None of them changes anything the guest experiences, which is
+   * the property the whole feature rests on - a check that penalises a refusal
+   * is not optional, it is a gate with an opt-out.
+   *
+   * **It never prompts.** `getCurrentPosition` refuses rather than asking when
+   * the grant is undetermined, and that is exactly the behaviour wanted here:
+   * the OS prompt is owned by onboarding, which explains what a position is for
+   * before spending it (issue #1023). Asking for a location permission on a
+   * confirmation screen, in order to raise a signal on a staff screen, would be
+   * the least explicable moment in the app to ask.
+   */
+  private async scanPosition(): Promise<ScanPosition | undefined> {
+    if (!this.sharesLocation()) {
+      return undefined;
+    }
+
+    try {
+      const { coords } = await lastValueFrom(getCurrentPosition());
+
+      return {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        accuracyMeters: coords.accuracy,
+      };
+    } catch {
+      // Deliberately silent. There is nothing to tell the guest: they are about
+      // to get exactly the session they asked for, and a toast about a failed
+      // location read would turn an invisible extra into an error they have to
+      // dismiss on their way to a menu.
+      return undefined;
+    }
+  }
+
   /**
    * The guest agreeing to the restaurant and table they were shown.
    *
@@ -204,7 +268,7 @@ export class TableSessionService {
     }
 
     this.busy.set(true);
-    const result = await this.api.start(this.token);
+    const result = await this.api.start(this.token, await this.scanPosition());
     this.busy.set(false);
 
     if (isTableSessionCallError(result)) {

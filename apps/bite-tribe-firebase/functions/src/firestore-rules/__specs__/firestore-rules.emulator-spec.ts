@@ -114,6 +114,16 @@ const CONSUMER_CALL = `${OWNED_TABLE.length}_${OWNED_TABLE}_callStaff`;
 /** One raised by somebody else at a table this consumer is not at. */
 const OTHER_CALL = `${TOKENED_TABLE.length}_${TOKENED_TABLE}_requestBill`;
 
+/**
+ * A row saying that table's code is being worked on (GitHub issue #1107).
+ *
+ * Named `{length}_{tableId}_{kind}` like the signal above, and readable by an
+ * entirely different set of people: an anomaly is something said *about* a
+ * guest's scan rather than something a guest asked for, so no guest clause
+ * admits anybody to it.
+ */
+const RATE_LIMITED_ANOMALY = `${OWNED_TABLE.length}_${OWNED_TABLE}_rateLimited`;
+
 /** The version the owned room is stored at, so a stale save has one to miss. */
 const STORED_ROOM_VERSION = 3;
 
@@ -552,6 +562,39 @@ beforeEach(async () => {
         requestedByUserIds: [OTHER_GUEST],
       },
     );
+
+    // What the restaurant is told about scans that do not look ordinary,
+    // written only by `recordScanAnomaly` and `dismissScanAnomaly` through the
+    // Admin SDK (issue #1107).
+    await setDoc(
+      doc(
+        db,
+        'restaurants',
+        OWNED_RESTAURANT,
+        'scanAnomalies',
+        RATE_LIMITED_ANOMALY,
+      ),
+      {
+        id: RATE_LIMITED_ANOMALY,
+        restaurantId: OWNED_RESTAURANT,
+        tableId: OWNED_TABLE,
+        tableLabel: '12',
+        kind: 'rateLimited',
+        status: 'open',
+        firstSeenAt: 1789030900000,
+        lastSeenAt: 1789030900000,
+        count: 3,
+      },
+    );
+
+    // The durable scan counters, which no client reads and no client writes
+    // (issue #1107). Seeded so the refusals below are refusals about a document
+    // that exists rather than about one that does not.
+    await setDoc(doc(db, 'scanRateLimits', 'token_ABCDEFGH_1789030860000'), {
+      dimension: 'token',
+      windowStartedAt: 1789030860000,
+      count: 12,
+    });
 
     // Written only by `issueTableQrTokens`, `rotateTableQrToken` and
     // `syncTableQrTokenOnTableWrite` through the Admin SDK (issue #1086).
@@ -2133,6 +2176,135 @@ describe('table assistance requests', () => {
       );
       await assertFails(deleteDoc(requestDoc(asOperator(), CONSUMER_CALL)));
     });
+  });
+});
+
+describe('scan anomalies', () => {
+  const anomalies = (
+    db: Firestore,
+    restaurantId: string,
+  ): CollectionReference =>
+    collection(db, 'restaurants', restaurantId, 'scanAnomalies');
+
+  const anomalyDoc = (db: Firestore, anomalyId: string): DocumentReference =>
+    doc(anomalies(db, OWNED_RESTAURANT), anomalyId);
+
+  describe('staff read them', () => {
+    /**
+     * The whole collection with no `where`, which is what the derived document
+     * name buys here as it does for the signals beside it: one document per
+     * table per kind means the staff screen reads it entire, with no
+     * collection-group match and no index to deploy.
+     */
+    it('lets staff, the owner and an operator list them', async () => {
+      await assertSucceeds(getDocs(anomalies(asStaff(), OWNED_RESTAURANT)));
+      await assertSucceeds(getDocs(anomalies(asOwner(), OWNED_RESTAURANT)));
+      await assertSucceeds(getDocs(anomalies(asOperator(), OWNED_RESTAURANT)));
+    });
+
+    it('refuses a business account that does not hold this restaurant', async () => {
+      await assertFails(
+        getDocs(anomalies(asOtherBusiness(), OWNED_RESTAURANT)),
+      );
+    });
+  });
+
+  /**
+   * **Where this differs from the signals it otherwise copies.** A guest is
+   * admitted to an assistance request because they raised it and are owed the
+   * answer. An anomaly is something said *about* their scan, and handing them a
+   * way to find out whether they tripped one would hand an attacker the
+   * feedback loop for tuning around it.
+   */
+  describe('no guest reads them', () => {
+    it('refuses the guest whose own table the row names', async () => {
+      await assertFails(getDoc(anomalyDoc(asConsumer(), RATE_LIMITED_ANOMALY)));
+    });
+
+    it('refuses an unauthenticated reader entirely', async () => {
+      await assertFails(
+        getDoc(anomalyDoc(anonymously(), RATE_LIMITED_ANOMALY)),
+      );
+    });
+  });
+
+  /**
+   * **The half that matters.** This collection is the only record a restaurant
+   * has that its codes are being worked on. A client able to write here could
+   * raise a row against a table it has nothing to do with - or rewrite the
+   * `firstSeenAt` and the `count` on one it would like to look ordinary.
+   */
+  describe('writes', () => {
+    const forged = {
+      id: RATE_LIMITED_ANOMALY,
+      restaurantId: OWNED_RESTAURANT,
+      tableId: OWNED_TABLE,
+      tableLabel: '12',
+      kind: 'rateLimited',
+      status: 'open',
+      firstSeenAt: 1789030900000,
+      lastSeenAt: 1789030900000,
+      count: 1,
+    };
+
+    it('refuses a guest raising or clearing one', async () => {
+      await assertFails(
+        setDoc(anomalyDoc(asConsumer(), 'forged-anomaly'), forged),
+      );
+      await assertFails(
+        updateDoc(anomalyDoc(asConsumer(), RATE_LIMITED_ANOMALY), {
+          status: 'dismissed',
+        }),
+      );
+    });
+
+    /**
+     * Staff clear a row through `dismissScanAnomaly` and nowhere else, so that
+     * how long a code has been hammered and how often is a figure nobody on the
+     * floor can quietly reset.
+     */
+    it('refuses staff, the owner and the operator the same writes', async () => {
+      await assertFails(
+        updateDoc(anomalyDoc(asStaff(), RATE_LIMITED_ANOMALY), {
+          status: 'dismissed',
+        }),
+      );
+      await assertFails(
+        updateDoc(anomalyDoc(asOwner(), RATE_LIMITED_ANOMALY), { count: 0 }),
+      );
+      await assertFails(
+        deleteDoc(anomalyDoc(asOperator(), RATE_LIMITED_ANOMALY)),
+      );
+    });
+  });
+});
+
+describe('scan rate limits', () => {
+  const counter = (db: Firestore): DocumentReference =>
+    doc(db, 'scanRateLimits', 'token_ABCDEFGH_1789030860000');
+
+  /**
+   * The one collection in this file that nobody reads, including the operator.
+   *
+   * A readable counter is a readable answer to "how much of my allowance is
+   * left", which turns a limit that has to be discovered by tripping it - and
+   * tripping it raises a row a restaurant sees - into one that can be run right
+   * up to and never crossed. The `ip` dimension also names a bucket derived
+   * from an address, which a restaurant's staff have no business reading even
+   * as a hash.
+   */
+  it('refuses every reader there is', async () => {
+    await assertFails(getDoc(counter(anonymously())));
+    await assertFails(getDoc(counter(asConsumer())));
+    await assertFails(getDoc(counter(asStaff())));
+    await assertFails(getDoc(counter(asOwner())));
+    await assertFails(getDoc(counter(asOperator())));
+  });
+
+  it('refuses every writer there is', async () => {
+    await assertFails(setDoc(counter(asConsumer()), { count: 0 }));
+    await assertFails(updateDoc(counter(asOwner()), { count: 0 }));
+    await assertFails(deleteDoc(counter(asOperator())));
   });
 });
 

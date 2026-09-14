@@ -12,6 +12,7 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FloorPlanDataAccessService } from 'bite-tribe-business/floor-plan-data-access';
 import { Restaurant, RestaurantTable, Room } from 'model';
+import { ToastService } from 'toast';
 import { resourceFailed, resourceValue } from 'utils';
 
 export const RESTAURANT_COLLECTION = 'restaurants';
@@ -109,6 +110,7 @@ const sheetOrder =
 export class TableQrSheetsService {
   private readonly dataAccess = inject(FloorPlanDataAccessService);
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly toast = inject(ToastService);
 
   /**
    * The route parameter, for the reason `FloorPlanService` reads it that way:
@@ -329,6 +331,105 @@ export class TableQrSheetsService {
         ? new Set(this.visibleRows().map((row) => row.tableId))
         : new Set<string>(),
     );
+  }
+
+  /**
+   * Whether the owner has asked to replace codes and not yet confirmed
+   * (GitHub issue #1107).
+   *
+   * A confirmation and not a plain button, which is the one place this page
+   * asks before it acts. Every other control here changes what is on paper next
+   * time; this one invalidates the codes already stuck to tables, and a guest
+   * sitting at one of them mid-meal is told to look at the table again.
+   *
+   * Inline rather than a modal, because the sentence that matters is a count of
+   * the tables currently ticked - which is on screen a centimetre above the
+   * button, and which a modal would have covered up.
+   */
+  private readonly confirming = signal(false);
+
+  readonly confirmingRotation = this.confirming.asReadonly();
+
+  /** True while the backend is replacing codes. */
+  private readonly rotatingNow = signal(false);
+
+  readonly rotating = this.rotatingNow.asReadonly();
+
+  /** Nothing ticked is a reachable state, and rotating it would do nothing. */
+  readonly canRotate = computed(
+    () => this.selectedRows().length > 0 && !this.rotatingNow(),
+  );
+
+  askToRotate(): void {
+    if (this.canRotate()) {
+      this.confirming.set(true);
+    }
+  }
+
+  cancelRotation(): void {
+    this.confirming.set(false);
+  }
+
+  /**
+   * Replaces the codes of every ticked table, and redraws the sheet.
+   *
+   * ## Why one table takes the other callable
+   *
+   * `rotateTableQrToken` logs against the **table** and `rotateTableQrTokens`
+   * against the restaurant, and "who reprinted table 12 and when" is the
+   * question the single-table trail exists to answer. A bulk call with one id
+   * in it would answer it with a restaurant-level entry that happens to have
+   * rotated one table, which is a worse record of the commonest case: one code
+   * on somebody's feed.
+   *
+   * ## Why the sheet is reloaded rather than patched
+   *
+   * The rotation answers with the new tokens, so patching the rows in place
+   * would work and would be one fewer read. It would also leave the page
+   * holding a sheet assembled from two different moments, at exactly the point
+   * where being sure that what is on screen is what is now valid is the whole
+   * value of the feature. A reprint follows a rotation immediately, and the
+   * reload is what makes the paper and the database the same thing.
+   */
+  async rotateSelected(): Promise<void> {
+    const restaurantId = this.restaurantId();
+    const tableIds = this.selectedRows().map((row) => row.tableId);
+
+    this.confirming.set(false);
+
+    if (!restaurantId || !tableIds.length || this.rotatingNow()) {
+      return;
+    }
+
+    this.rotatingNow.set(true);
+
+    try {
+      if (tableIds.length === 1) {
+        await this.dataAccess.rotateTableQrToken(restaurantId, tableIds[0]);
+      } else {
+        await this.dataAccess.rotateTableQrTokens({ restaurantId, tableIds });
+      }
+
+      this.sheet.reload();
+
+      await this.toast.present({
+        messageKey: 'qr-sheets-rotated',
+        params: { count: tableIds.length },
+        outcome: 'success',
+      });
+    } catch (error) {
+      // Reported rather than swallowed, and the sheet is left alone: an owner
+      // who is told nothing would reprint the codes on screen believing they
+      // had been replaced, which is the one outcome worse than the leak.
+      console.error('Failed to replace the table codes:', error);
+
+      await this.toast.present({
+        messageKey: 'qr-sheets-rotate-failed',
+        outcome: 'failure',
+      });
+    } finally {
+      this.rotatingNow.set(false);
+    }
   }
 
   /**

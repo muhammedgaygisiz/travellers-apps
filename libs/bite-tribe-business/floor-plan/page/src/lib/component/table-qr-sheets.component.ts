@@ -128,6 +128,12 @@ export interface TableQrSheetPage {
 })
 export class TableQrSheetsComponent {
   readonly restaurantName = input('');
+  /** Whether the owner has asked to replace codes and not yet confirmed. */
+  readonly confirmingRotation = input(false);
+
+  /** True while the backend is replacing codes. */
+  readonly rotating = input(false);
+
   readonly layout = input<TableQrSheetLayout>('sticker');
   readonly room = input<string>(ALL_ROOMS);
   readonly filterRooms = input<{ id: string; name: string }[]>([]);
@@ -145,6 +151,18 @@ export class TableQrSheetsComponent {
   readonly toggleTable = output<string>();
   readonly selectAll = output<boolean>();
   readonly printRequest = output<void>();
+
+  /**
+   * Replacing the codes of the ticked tables (GitHub issue #1107).
+   *
+   * Three events rather than one, because this is the only control on the page
+   * that asks before it acts. Every other one changes what comes out of the
+   * printer next time; this one invalidates the codes already stuck to tables,
+   * and a guest sitting at one of them mid-meal is told to look again.
+   */
+  readonly rotateRequest = output<void>();
+  readonly rotateConfirm = output<void>();
+  readonly rotateCancel = output<void>();
   readonly logoutClick = output<void>();
 
   protected readonly allRooms = ALL_ROOMS;

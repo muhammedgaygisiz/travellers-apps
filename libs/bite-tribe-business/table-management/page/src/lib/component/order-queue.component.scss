@@ -397,3 +397,71 @@
   gap: 0.35rem;
   margin-top: 0.25rem;
 }
+
+/*
+ * The two lists issue #1107 adds, as tones on the call list's own shape.
+ *
+ * The structure is shared deliberately. All three are the same object - a table
+ * number, a fact about it, a clock, sometimes a button - and three sets of
+ * geometry would have drifted into three densities on one screen. What differs
+ * is the colour, and the colour is the whole message.
+ *
+ * The guests waiting to be seated are in the warning tone rather than the
+ * danger one: somebody is standing at the door, which is a thing to do
+ * something about and not a thing that has gone wrong.
+ */
+.order-queue__calling--waiting {
+  border-color: var(--ion-color-warning, #ffc409);
+}
+
+.order-queue__calling-title--waiting {
+  color: var(--ion-color-warning-shade, #e0ac08);
+}
+
+/*
+ * The signals about the codes are neutral, and that is the judgement rather
+ * than a shortage of colours. Most of what lands there has an ordinary
+ * explanation - a sheet that was never thrown away, a guest who sent a friend a
+ * link - and a list that shouts is a list that gets cleared unread. The row
+ * that is still happening is marked instead, which is the only distinction the
+ * eye needs here.
+ */
+.order-queue__calling--signal {
+  border-color: rgba(var(--order-queue-ink-rgb), 0.25);
+}
+
+.order-queue__calling-title--signal {
+  color: rgba(var(--order-queue-ink-rgb), 0.75);
+}
+
+/*
+ * The sentence under a list's heading, saying what the rows are for.
+ *
+ * Neither of these lists explains itself from its rows alone: "table 12, six
+ * sessions" and "table 12, two guests" are both readable and neither says what
+ * the reader is expected to do. The call list needs no such line because a
+ * raised hand is self-explanatory.
+ */
+.order-queue__calling-hint {
+  display: block;
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+}
+
+/* The figures a signal row carries: a count, a distance, a suggestion. */
+.order-queue__calling-detail {
+  font-size: 0.8125rem;
+  opacity: 0.75;
+}
+
+/*
+ * A row that is still being raised, against one that stopped.
+ *
+ * Weight rather than colour, so the distinction survives a greyscale screen and
+ * does not borrow the danger tone the list above has earned - the same trade
+ * the floor plan makes when it marks a selection.
+ */
+.order-queue__age--active {
+  font-weight: 700;
+  opacity: 1;
+}

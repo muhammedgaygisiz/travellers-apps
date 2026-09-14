@@ -4,6 +4,7 @@ import {
   DocumentReference,
   getFirestore,
 } from 'firebase-admin/firestore';
+import { resetDurableScanRateLimit } from '../../shared/utils/durable-scan-rate-limit';
 import { resetScanRateLimit } from '../../shared/utils/scan-rate-limit';
 import { acknowledgeTableAssistanceHandler } from '../acknowledge-table-assistance';
 import {
@@ -275,6 +276,7 @@ describe('request staff assistance and request the bill', () => {
 
   beforeEach(async () => {
     resetScanRateLimit();
+    await resetDurableScanRateLimit();
     await clear();
     await seed();
   });

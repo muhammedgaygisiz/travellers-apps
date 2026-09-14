@@ -7,7 +7,12 @@ import {
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { evaluateOpeningHours } from '../shared/utils/opening-hours';
-import { withinScanRateLimit } from '../shared/utils/scan-rate-limit';
+import {
+  ipOf,
+  withinDurableScanRateLimit,
+} from '../shared/utils/durable-scan-rate-limit';
+import { scanRateLimitState } from '../shared/utils/scan-rate-limit';
+import { recordScanAnomaly } from './record-scan-anomaly';
 import {
   RESTAURANT_COLLECTION,
   TABLES_COLLECTION,
@@ -17,6 +22,7 @@ import {
   TOKEN_ALPHABET,
   TOKEN_LENGTH,
 } from './table-qr-tokens';
+import { ScanAnomalyKind } from './scan-anomaly';
 import {
   TableOrderingAvailability,
   TableScanResult,
@@ -217,14 +223,64 @@ export const orderingAvailability = (
     : { available: true };
 };
 
-/** Who is asking, for the rate limiter. Never stored, never returned. */
+/** Who is asking, for the memory rate limiter. Never stored, never returned. */
 const clientOf = (request: CallableRequest<unknown>): string =>
   request.auth?.uid ||
-  (request.rawRequest as { ip?: string } | undefined)?.ip ||
+  ipOf(request) ||
   // Deliberately not the App Check app id: every install of the consumer app
   // shares one, so bucketing by it would throttle every guest in the product
   // the moment one of them looped.
   'unknown';
+
+/**
+ * What a refused scan is a refusal *about*, for the anomaly it raises.
+ *
+ * One read of the token document, which is the only thing a rate-limited
+ * request has said about itself - it never reached `resolveScan`, so there is
+ * no restaurant, no table and no label anywhere else to name. A token that is
+ * not shaped like one names nothing and is not looked up, which is what keeps a
+ * flood of rubbish from costing a read each.
+ *
+ * Reached only on the request that *crosses* a limit rather than on every
+ * refused one. See {@link assertWithinScanRateLimit}.
+ */
+const rateLimitedTableOf = async (
+  raw: string,
+): Promise<{ restaurantId: string; tableId: string; tableLabel: string }> => {
+  const token = normalizeScannedToken(raw);
+
+  if (!token) {
+    return { restaurantId: '', tableId: '', tableLabel: '' };
+  }
+
+  const snapshot = await getFirestore()
+    .collection(TABLE_TOKENS_COLLECTION)
+    .doc(token)
+    .get();
+  const data = snapshot.data();
+
+  return {
+    restaurantId: getString(data, 'restaurantId'),
+    tableId: getString(data, 'tableId'),
+    tableLabel: getString(data, 'tableLabel'),
+  };
+};
+
+/**
+ * Raises one anomaly against the table a token names, and never fails.
+ *
+ * The refusal has already been decided by the time this runs, on its own
+ * grounds. Nothing reads an anomaly back, so a row that cannot be written costs
+ * the restaurant a row and costs the guest nothing - which is the property that
+ * lets this be called from the paths an attacker controls the frequency of.
+ */
+const raiseScanAnomaly = async (
+  subject: { restaurantId: string; tableId: string; tableLabel: string },
+  kind: ScanAnomalyKind,
+  now: Date,
+): Promise<void> => {
+  await recordScanAnomaly({ ...subject, kind, now: now.getTime() });
+};
 
 /**
  * The two documents only a resolved scan needs, in one round trip.
@@ -354,8 +410,20 @@ export const resolveScan = async (
   }
 
   const table = tableSnapshot.data() ?? {};
+  // Named once, because the three refusals below all report against the same
+  // table and the label is what a staff screen draws rather than the id.
+  const subject = {
+    restaurantId,
+    tableId,
+    tableLabel: getString(table, 'label'),
+  };
 
   if (table['enabled'] !== true) {
+    // A table the restaurant believes it took out of circulation, still being
+    // scanned. The refusal is the guest's answer; the row is the restaurant's,
+    // and says the sticker outlived the table (issue #1107).
+    await raiseScanAnomaly(subject, 'disabledTable', now);
+
     return { result: refuseScan('tableDisabled') };
   }
 
@@ -376,6 +444,12 @@ export const resolveScan = async (
   );
 
   if (!opening.open) {
+    // One scan at ten past closing is somebody who walked up to a locked door,
+    // and the quiet window makes that one row rather than none. Forty of them
+    // overnight is the same row with a count on it, which is the case worth
+    // telling a restaurant about (issue #1107).
+    await raiseScanAnomaly(subject, 'outsideOpeningHours', now);
+
     return {
       result: refuseScan(
         'restaurantClosed',
@@ -454,29 +528,75 @@ export const parseScannedToken = (value: unknown): string => {
  * sender its quota rather than nothing. The two callables share one bucket per
  * token and per client on purpose: a loop that alternates between them is the
  * same loop, and two buckets would double what it is allowed.
+ *
+ * ## Two counters, cheapest first
+ *
+ * The memory counter of issue #1100 runs first because it costs nothing, and a
+ * request it refuses never reaches Firestore at all - which is what stops a
+ * flood against one warm instance from turning into a round trip per request.
+ * The durable counters of issue #1107 run on what it admitted, and are what a
+ * loop spread over many instances cannot outrun. Their limits are higher,
+ * because they count the aggregate rather than one instance's share.
+ *
+ * ## The anomaly is raised on the crossing, not on the refusal
+ *
+ * Both counters report the single request that took a bucket past its limit.
+ * That request reads the token document and raises a `rateLimited` row against
+ * the table it names; the thousandth request after it reads nothing and writes
+ * nothing. Reporting every refusal instead would have made the report cost more
+ * the harder somebody tried, which is the shape of a denial of service rather
+ * than of a defence.
+ *
+ * A restaurant therefore learns that one of its codes is being worked on, and
+ * has one action that ends it - rotate the code - which is the whole point of
+ * throttling something being observable rather than merely effective.
  */
-export const assertWithinScanRateLimit = (
+export const assertWithinScanRateLimit = async (
   request: CallableRequest<unknown>,
   token: string,
   now: Date,
   callable: string,
-): void => {
-  if (
-    withinScanRateLimit({
-      token,
-      client: clientOf(request),
-      now: now.getTime(),
-    })
-  ) {
-    return;
+): Promise<void> => {
+  const refuse = async (
+    dimension: string,
+    crossed: boolean,
+  ): Promise<never> => {
+    logger.warn(`${callable}: rate limit reached`, { dimension });
+
+    if (crossed) {
+      await raiseScanAnomaly(
+        await rateLimitedTableOf(token),
+        'rateLimited',
+        now,
+      );
+    }
+
+    throw new HttpsError(
+      'resource-exhausted',
+      'Too many scans. Try again in a moment.',
+    );
+  };
+
+  const memory = scanRateLimitState({
+    token,
+    client: clientOf(request),
+    now: now.getTime(),
+  });
+
+  if (!memory.within) {
+    await refuse('instance', memory.crossed);
   }
 
-  logger.warn(`${callable}: rate limit reached`);
+  const durable = await withinDurableScanRateLimit({
+    token,
+    client: request.auth?.uid ?? '',
+    ip: ipOf(request),
+    now: now.getTime(),
+  });
 
-  throw new HttpsError(
-    'resource-exhausted',
-    'Too many scans. Try again in a moment.',
-  );
+  if (!durable.within) {
+    await refuse(durable.exceeded ?? 'durable', durable.crossed);
+  }
 };
 
 /** The clock, injectable so the opening-hours cases are testable. */
@@ -486,7 +606,7 @@ export const resolveTableQrTokenHandler = async (
 ): Promise<TableScanResult> => {
   const raw = parseScannedToken(request.data?.token);
 
-  assertWithinScanRateLimit(request, raw, now, 'resolveTableQrToken');
+  await assertWithinScanRateLimit(request, raw, now, 'resolveTableQrToken');
 
   return (await resolveScan(raw, now)).result;
 };

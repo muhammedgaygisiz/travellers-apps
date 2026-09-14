@@ -6,7 +6,12 @@ import {
   inject,
 } from '@angular/core';
 import type { TableScanContext } from 'model';
-import { IonButton, IonContent, IonSpinner } from '@ionic/angular/standalone';
+import {
+  IonButton,
+  IonCheckbox,
+  IonContent,
+  IonSpinner,
+} from '@ionic/angular/standalone';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
@@ -55,6 +60,7 @@ import {
     PageComponent,
     IonContent,
     IonButton,
+    IonCheckbox,
     IonSpinner,
     TranslocoPipe,
     RouterLink,
@@ -68,6 +74,9 @@ export class TableSession implements OnInit {
   protected readonly service = inject(TableSessionService);
 
   protected readonly isBusy = this.service.isBusy;
+
+  /** Whether the guest has offered a coarse position (GitHub issue #1107). */
+  protected readonly sharingLocation = this.service.sharingLocation;
 
   private readonly state = this.service.state;
 
@@ -132,6 +141,10 @@ export class TableSession implements OnInit {
 
   ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({ screenName: 'Table Session' });
+  }
+
+  protected toggleLocationSharing(shares: boolean): void {
+    this.service.toggleLocationSharing(shares);
   }
 
   protected confirm(): void {

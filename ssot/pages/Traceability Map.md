@@ -47,10 +47,14 @@
 
 - ## Domain To Use Cases
 
-  | Domain           | Main Use Cases                                                                                                                                                                                                                            |
+  The `Use Cases` column is the inverse of each use-case page's `Related Domains`: a page
+  appears under exactly the domains it declares there, and `Related Domains` is the source.
+  This is a view rather than an index - [[SSOT]] and [[contents]] list every use-case page.
+
+  | Domain           | Use Cases                                                                                                                                                                                                                                 |
   | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
   | [[Bite]]         | [[UC - Create And Maintain Personal Bites]], [[UC - Discover Bites]], [[UC - Inspect Bite Details]], [[UC - Search In BiteTribe]]                                                                                                         |
-  | [[User]]         | [[UC - Manage Profile And Social Graph]], [[UC - Use Account And Legal Flows]], [[UC - Use Gamification Signals]], [[UC - Operate BiteTribe In The Admin App]]                                                                            |
+  | [[User]]         | [[UC - Manage Profile And Social Graph]], [[UC - Use Account And Legal Flows]], [[UC - Use Gamification Signals]], [[UC - Operate BiteTribe In The Admin App]], [[UC - Configure Personal Settings]]                                      |
   | [[Restaurant]]   | [[UC - Browse Restaurants And Places]], [[UC - View Restaurant Menus]], [[UC - Maintain Restaurants In The Business App]], [[UC - Own And Claim Restaurants]], [[UC - Detect Restaurant Candidate]], [[UC - Verify Restaurant Candidate]] |
   | [[Bucket List]]  | [[UC - Save And Rate BiteTrails Through Bucket Lists]]                                                                                                                                                                                    |
   | [[Bite Trail]]   | [[UC - Discover BiteTrails In The Marketplace]], [[UC - Create And Operate BiteTrails In The Business App]]                                                                                                                               |

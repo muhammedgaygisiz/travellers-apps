@@ -464,6 +464,7 @@ X5 SYS <action>
 | `UC-MPS` | Manage Profile And Social Graph                  | [[UC - Manage Profile And Social Graph]]                  |
 | `UC-ALF` | Use Account And Legal Flows                      | [[UC - Use Account And Legal Flows]]                      |
 | `UC-RAN` | Receive App Notifications And Engagement Updates | [[UC - Receive App Notifications And Engagement Updates]] |
+| `UC-CPS` | Configure Personal Settings                      | [[UC - Configure Personal Settings]]                      |
 | `UC-DIS` | Dismiss Restaurant Candidate                     | none                                                      |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant | none                                                      |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence         | none                                                      |

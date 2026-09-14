@@ -2,17 +2,26 @@
 
 ## Status
 
-Supported today.
+**Level:** L0.
+Supported today. Every migration runs from its own surface in the admin app behind
+`roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Two collection-wide
+migrations are registered - `review-timestamps` and `menu-item-ids` - alongside the four
+per-Bite migrations and the new version announcement. The display-name claim backfill was
+removed rather than carried over, for the reasons below.
 
 ## Goal
 
-BiteTribe Operators can run operational maintenance tasks from the admin app.
+A BiteTribe Operator can repair or prepare data the product cannot fix from the inside, from
+one place and without a deployment. This page owns which migrations exist, what registering one
+means, and what an operator is shown when a run succeeds or fails.
 
 ## Actors
 
-- BiteTribe Operator, holding the `admin` role ([[User Roles]])
+- **BiteTribe Operator** - the only actor, holding the `admin` role. Signs into the admin app,
+  opens the migration's own surface from the dashboard, and runs it. No other role reaches any
+  of this: the routes and the callables check the role separately.
 
-## Current Flow
+## Flow
 
 - The operator signs into the admin app and lands on the dashboard, which
   lists one entry per migration.
@@ -102,16 +111,6 @@ dormant users. Between protecting a dormant name forever and freeing it, the
 decision is to free it. A returning user whose case variant was taken picks a new
 name in onboarding.
 
-## Supported Evidence
-
-- `libs/bite-tribe-admin/migrations/{page,data-access}`, routed in the admin
-  shell behind `authGuard` and `roleGuard('admin')`.
-- `sendNewVersionNotification`.
-- `backfillReviewTimestampsCallable`, started from the review-timestamps
-  backfill surface.
-- `backfillMenuItemIdsCallable`, started from the menu item ids backfill
-  surface.
-
 ## Authorization
 
 Every migration callable calls `requireAdmin` (issue \#1472). Moving the UI into
@@ -122,8 +121,41 @@ classification of every endpoint lives in
 `apps/bite-tribe-firebase/functions/src/__specs__/callable-authorization.spec.ts`,
 which fails the build for a new one nobody has classified.
 
+## MVP Classification
+
+**[Secondary]** - the whole page. These are operator tools that repair or prepare data behind
+the product, not surfaces a user reaches, and the app works at release whether or not any of
+them has been run. The one with release-day timing is the new version announcement, and that is
+a convenience over the stores' own update prompts rather than a release gate.
+
+## App Store Review Area
+
+Not relevant, because nothing here reaches a store surface. Every migration runs from the admin
+app, which is a web surface, and each callable is operator-only. The one thing on this page that
+reaches a device is the new version announcement, whose store considerations belong to
+[[UC - Receive App Notifications And Engagement Updates]].
+
+## Supported Evidence
+
+- `libs/bite-tribe-admin/migrations/{page,data-access}`, routed in the admin
+  shell behind `authGuard` and `roleGuard('admin')`.
+- `sendNewVersionNotification`.
+- `backfillReviewTimestampsCallable`, started from the review-timestamps
+  backfill surface.
+- `backfillMenuItemIdsCallable`, started from the menu item ids backfill
+  surface.
+
 ## Related Domains
 
 - [[User]]
 - [[Restaurant]]
 - [[Bite]]
+
+## Related Pages
+
+- [[User Roles]] - the `admin` role every route and callable here checks
+- [[UC - Receive App Notifications And Engagement Updates]] - the Release Announcement Contract,
+  which owns what the announcement says and to which installations
+- [[UC - Order At The Table Through A QR Code]] - the order lines that point at the menu item
+  ids `menu-item-ids` fills
+- [[issue-1283]]

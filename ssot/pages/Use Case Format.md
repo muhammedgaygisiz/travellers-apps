@@ -473,6 +473,7 @@ X5 SYS <action>
 | `UC-RAN` | Receive App Notifications And Engagement Updates       | [[UC - Receive App Notifications And Engagement Updates]]       |
 | `UC-LCQ` | Strengthen Location Currency And Data Quality Guidance | [[UC - Strengthen Location Currency And Data Quality Guidance]] |
 | `UC-BRP` | Browse Restaurants And Places                          | [[UC - Browse Restaurants And Places]]                          |
+| `UC-VRM` | View Restaurant Menus                                  | [[UC - View Restaurant Menus]]                                  |
 | `UC-DIS` | Dismiss Restaurant Candidate                           | none                                                            |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | none                                                            |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                            |

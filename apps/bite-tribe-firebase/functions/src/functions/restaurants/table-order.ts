@@ -148,7 +148,34 @@ export interface TableOrder {
   cancellationReason?: string;
   /** The staff account that last moved `status` (GitHub issue #1105). */
   statusChangedByUserId?: string;
+  /**
+   * The phone's idempotency key for this submission (GitHub issue #1108).
+   *
+   * Also what the document is named after, through `tableOrderDocumentId`,
+   * which is what makes a replay a read of one document. Absent on an order
+   * placed by a client that sent no key.
+   */
+  requestId?: string;
 }
+
+/**
+ * How an order's idempotency key is spelled, and what it names
+ * (GitHub issue #1108).
+ *
+ * The same prefix and pattern issue #1096 chose for a table transition. The key
+ * becomes a document id, so it has to be a legal Firestore document name and
+ * one no auto-generated id could ever be - otherwise a client could hand in a
+ * twenty-character alphanumeric string that happens to name somebody else's
+ * order and be answered with their dinner.
+ */
+export const TABLE_ORDER_REQUEST_ID_PREFIX = 'req-';
+
+/** The shape of a key. Letters, digits, hyphens and underscores, 8 to 128. */
+export const TABLE_ORDER_REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
+
+/** The document an order submitted under this key lives at. */
+export const tableOrderDocumentId = (requestId: string): string =>
+  `${TABLE_ORDER_REQUEST_ID_PREFIX}${requestId}`;
 
 /**
  * What one order comes to.

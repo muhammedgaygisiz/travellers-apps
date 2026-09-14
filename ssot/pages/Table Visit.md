@@ -178,23 +178,23 @@ hand them the other people at their table. Staff list them through the same
 
 An Order belongs to a visit, not to a table.
 
-| Field                   | Description                                                                   |
-| ----------------------- | ----------------------------------------------------------------------------- |
-| `id`                    | Unique order identifier, equal to the document id                             |
-| `restaurantId`          | Repeated from the path so a query can filter it                               |
-| `visitId`               | The visit this order belongs to, which is also the parent document            |
-| `tableId`               | Where the party was sitting when they sent it. A record, not an address       |
-| `sessionId`             | The session that placed it                                                    |
-| `guestUserId`           | The phone that placed it, anonymous or not (`RD-TS-9`)                        |
-| `status`                | `submitted`, `accepted`, `preparing`, `served`, `cancelled`                   |
-| `lines`                 | Order lines, as `OrderLineSnapshot`                                           |
-| `currency`              | ISO 4217, read off the menu and equal on every line                           |
-| `total`                 | `tableOrderTotal(lines)` at the moment of writing                             |
-| `submittedAt`           | Submission timestamp, in epoch milliseconds                                   |
-| `statusChangedAt`       | When `status` last changed. Equal to `submittedAt` on a new order             |
-| `statusChangedByUserId` | The staff account that last moved `status`. Absent until one has              |
-| `cancellationReason`    | Why the restaurant cancelled it, in the words staff used. Only on `cancelled` |
-| `idempotencyKey`        | Prevents duplicate submission on a flaky network. **Not written yet** - #1108 |
+| Field                   | Description                                                                                                                        |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                    | Unique order identifier, equal to the document id                                                                                  |
+| `restaurantId`          | Repeated from the path so a query can filter it                                                                                    |
+| `visitId`               | The visit this order belongs to, which is also the parent document                                                                 |
+| `tableId`               | Where the party was sitting when they sent it. A record, not an address                                                            |
+| `sessionId`             | The session that placed it                                                                                                         |
+| `guestUserId`           | The phone that placed it, anonymous or not (`RD-TS-9`)                                                                             |
+| `status`                | `submitted`, `accepted`, `preparing`, `served`, `cancelled`                                                                        |
+| `lines`                 | Order lines, as `OrderLineSnapshot`                                                                                                |
+| `currency`              | ISO 4217, read off the menu and equal on every line                                                                                |
+| `total`                 | `tableOrderTotal(lines)` at the moment of writing                                                                                  |
+| `submittedAt`           | Submission timestamp, in epoch milliseconds                                                                                        |
+| `statusChangedAt`       | When `status` last changed. Equal to `submittedAt` on a new order                                                                  |
+| `statusChangedByUserId` | The staff account that last moved `status`. Absent until one has                                                                   |
+| `cancellationReason`    | Why the restaurant cancelled it, in the words staff used. Only on `cancelled`                                                      |
+| `requestId`             | The phone's idempotency key, which is also what the document is named after. Absent on an order placed by a client that sends none |
 
 An order line snapshots the menu item at the moment of submission: item id, name at time of order, price at time of order, currency, variant, quantity, and notes. The snapshot is immutable once submitted, so the price the guest saw is the price they are charged, even if the menu changes mid-session.
 
@@ -203,6 +203,8 @@ That shape exists. Issue \#1099 added `OrderLineSnapshot` to `libs/bite-tribe-co
 The snapshot is what makes a line survive its dish. `findMenuItemById` answers `undefined` for an item that has since been deleted, which is an ordinary outcome rather than an error: the link goes and the record stays, so a receipt from before the deletion reads exactly as it did.
 
 Issue \#1103 gave it a writer. `submitTableOrder` is the only one, and it revalidates before it writes anything: the session must be `active` and not idle, the visit must still be open and must be the one the table's state points at, the restaurant must still be taking orders, and every line must name a dish that is still on the menu, still being served, and still at the price the guest's phone displayed. A difference on any of those refuses the whole order and names the item (`RD-TS-10`). The order and the table's move to `ordering` land in one commit (`RD-TS-11`), and `firestore.rules` refuses every client write to the collection - so the status lifecycle above is a restaurant's to move and never a guest's.
+
+Issue \#1108 gave the same writer a memory. A submission carries a key the phone mints once per tap, and the key **names the order document** - so the second copy of one request reads the first one's document instead of writing a second, and two copies racing each other contend on it because the read is inside the transaction. The replay is answered before the session status, the visit, the table and the lines are checked, because it arrives after the world has moved on and none of that makes the order that already landed untrue (`RD-TS-29`, `RD-TS-30`). The answer says `replayed`, so a guest who tapped once is not told twice that they have ordered.
 
 The status transitions are declared as data in `table-order.ts`, in both the library and the backend copy, with `src/__specs__/table-order-parity.spec.ts` comparing the statuses, the end set, every row of the matrix, the refusal reasons and the total as text. A row the staff queue of issue \#1105 believes is legal and the backend refuses would otherwise be a button that does nothing.
 
@@ -364,7 +366,7 @@ staff keep an unconditional `list` over the whole table.
 - **An order placed before a party moved stays grouped under the table it was ordered from.** Issue \#1105's queue groups by `TableOrder.tableId`, which is what the kitchen wrote on the ticket and is right for the pass; it is not what a waiter carrying the plates reads, and nothing yet says "this party is now at table 9". Recorded in [[Current State - Open Questions]].
 - **A signal keeps no history.** Issue \#1106's derived document name means a new request of the same kind at the same table replaces the answered one, so "how often did table 12 have to ask for a waiter last Saturday" is not a question this collection can answer. The one durable consequence a request has - the table moving to `awaitingPayment` - is in `tableStateTransitions`, which nothing overwrites.
 - **Indexes are deployed by hand, like the rules.** Issue \#1105's queue query is a collection group, and Firestore creates no exemption for one on its own - so merging the change does nothing in production until `npx nx firebase-deploy-indexes bite-tribe-firebase` has run, and a queue opened before that is refused rather than empty.
-- **An order sent twice creates two orders.** Idempotency and offline tolerance are issue \#1108. `TableOrder` carries no `idempotencyKey` yet, deliberately: a key the client would have to unlearn is worse than the absence.
+- **An order sent twice creates one order** (issue \#1108). The phone mints a key once per tap and reuses it on every attempt, and `submitTableOrder` writes the order at `visits/{visitId}/orders/req-{requestId}` - so a replay reads the document it would write rather than creating a second one, and is answered before the session, the visit, the table and the lines are looked at. The field is called `requestId` rather than `idempotencyKey`, matching the transition trail of issue \#1096. What is still unowned is a **guest whose party was moved**: the order follows the visit, and the retry that finds it names the table it was ordered from.
 - **A guest's phone cannot read the visit, and no longer needs to.** Issue \#1104 decided it (`RD-TS-12`): the running total on the guest's screen is a sum over their own orders, cancelled ones excluded, and the shared bill is settled at the table. What a guest is shown when their party is **moved** is still unowned - the session goes on naming the table they scanned, and nothing tells them the table number on their screen has changed.
 - Rules are deployed by hand. Merging a change to `firestore.rules` changes nothing in production until somebody runs the deploy - see [[Architecture - Firebase]].
 - Several of the business rules above are proposals awaiting a product decision. They are listed in [[Current State - Open Questions]].

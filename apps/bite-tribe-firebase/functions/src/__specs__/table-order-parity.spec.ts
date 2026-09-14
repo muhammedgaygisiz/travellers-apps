@@ -246,6 +246,30 @@ describe('table order parity', () => {
     }
   });
 
+  /**
+   * The idempotency key's spelling (GitHub issue #1108).
+   *
+   * The backend names an order document after the key and the guest's phone
+   * derives that same name to recognise its own order in the list it is
+   * already listening to. Two spellings of one rule would make a landed order
+   * invisible to the screen that sent it - which is the exact uncertainty the
+   * key exists to remove - so the prefix, the pattern and the derivation are
+   * compared as text.
+   */
+  it('spells an order idempotency key the same way in both files', () => {
+    for (const file of BOTH) {
+      const source = readFileSync(file, 'utf8').replace(/\s+/g, ' ');
+
+      expect(source).toContain("TABLE_ORDER_REQUEST_ID_PREFIX = 'req-'");
+      expect(source).toContain(
+        'TABLE_ORDER_REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{8,128}$/',
+      );
+      expect(source).toContain(
+        'tableOrderDocumentId = (requestId: string): string => `${TABLE_ORDER_REQUEST_ID_PREFIX}${requestId}`',
+      );
+    }
+  });
+
   it('caps a cancellation reason at the same length in both files', () => {
     for (const file of BOTH) {
       expect(readFileSync(file, 'utf8')).toContain(

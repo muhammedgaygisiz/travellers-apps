@@ -38,6 +38,7 @@
     - [[UC - Guide New Users After Registration]]
     - [[UC - Own And Claim Restaurants]]
     - [[UC - Strengthen Location Currency And Data Quality Guidance]]
+    - [[UC - Manage Tables During Service]]
   - Next to implement
     - [[UC - Complete Universal Search]]
     - [[UC - Expand Restaurant Menus Into Actionable Menu Journeys]]
@@ -46,7 +47,6 @@
     - [[UC - Add BiteTrail Gamification]]
     - [[UC - Improve Localization Quality]]
     - [[UC - Configure Restaurant Floor Plans And Tables]]
-    - [[UC - Manage Tables During Service]]
     - [[UC - Order At The Table Through A QR Code]]
     - [[UC - Subscribe To BiteTribe Pro]]
     - [[UC - See Ads As A Free User]]

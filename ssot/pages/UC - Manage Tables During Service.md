@@ -2,9 +2,11 @@
 
 ## Status
 
+**Level:** L0.
+
 Readable and writable, and now usable in a room with no signal. Specified through issue \#1071 as stage 2 of issue \#735.
 
-Issue \#1091 added the live state and the transition matrix to `libs/bite-tribe-common/model`. Issue \#1092 made the backend their only writer: `transitionTableState` validates a requested transition against the matrix and the caller's staff membership, applies it transactionally against the state the caller says it saw, and appends an audit entry per transition. Two staff members seating one table produce one seating and one explicit conflict. `firestore.rules` refuses every client write to the state and the trail, and admits the staff of that restaurant, the account holding it and the operator to read both.
+Issue \#1091 added the live state and the transition matrix to `libs/bite-tribe-common/model`. Issue \#1092 made the backend their only writer: `transitionTableState` validates a requested transition against the matrix and the caller's authority over this restaurant - the staff association, the account named on the Restaurant, or the operator - applies it transactionally against the state the caller says it saw, and appends an audit entry per transition. Two staff members seating one table produce one seating and one explicit conflict. `firestore.rules` refuses every client write to the state and the trail, and admits the staff of that restaurant, the account holding it and the operator to read both.
 
 Issue \#1093 put the first surface on it. `restaurant/:restaurantId/tables` in the business app draws the published plan read-only with each table's live status on it, updated by a Firestore listener rather than a poll, and it is the first route in that app a staff account is meant to reach. It reads and never writes: there is no write path through `bite-tribe-business/table-management` at all.
 
@@ -66,12 +68,26 @@ What no issue has added yet is a **surface** for the visit. Seating a table thro
 
 Restaurant staff open one screen during service and see the room as it is: which tables are free, occupied, reserved, or being cleaned, and can change that in a single interaction.
 
+This page owns a table's live state, the transition that changes it, the audit trail that
+records it, and the visit a seating opens. Drawing and publishing the plan those tables sit
+on is [[UC - Configure Restaurant Floor Plans And Tables]]; the guest side of a table, and
+the orders a visit will carry, is [[UC - Order At The Table Through A QR Code]]; how an
+account comes to hold the Restaurant at all is [[UC - Own And Claim Restaurants]].
+
 ## Actors
 
-- Restaurant staff member
-- Restaurant owner
+- **Restaurant Staff** - acts: signs in, lands on the room it works in through
+  `staffEntryGuard`, and changes a table through `transitionTableState`. This was the first
+  write the `staff` role had anywhere (issue \#1092).
+- **Restaurant Owner** - acts: opens the same room view and makes the same transitions,
+  because a small restaurant is its own host. `restaurantAccessGuard` and
+  `holdsTableStateAuthority` admit it beside the staff of that Restaurant.
+- **BiteTribe Operator** - acts: admitted to `transitionTableState` by `RD-UR-6`, so a
+  restaurant in trouble has a way back, and the audit entry records `admin` as the capacity
+  it acted in. It has no screen of its own: no business-app route admits it, because the gate
+  is `roleGuard('business', 'staff')`, and the admin app carries no table surface.
 
-## Planned Flow
+## Flow
 
 - Staff sign in and land directly on the live room view, not the owner dashboard (issue \#1097).
 - The published floor plan renders read-only, with each table showing its live state.
@@ -128,6 +144,23 @@ These block implementation and are tracked in [[Current State - Open Questions]]
 - When is a table considered available again?
 - Who can close or reopen a visit? Half-answered by issue \#1095: any staff member of that restaurant can close one, recorded in the audit trail, and **nobody** can reopen one - a closed visit is not reopened, because the party that comes back for a coffee is a new party at that table.
 
+## MVP Classification
+
+**[Secondary]** - the whole page. Its only surface is `restaurant/:restaurantId/tables` in the
+business app, which is out of scope for this release candidate by decision and gets its own
+soft launch; [[Current State - Release Candidate Test Charter]] records that.
+
+Not on this page: the guest side of a table and the orders a visit will carry, both
+[[UC - Order At The Table Through A QR Code]].
+
+## App Store Review Area
+
+Not relevant, because nothing this page describes is store-distributed: the live view is a
+route in the business app, and only `apps/bite-tribe-ios` and `apps/bite-tribe-android` carry a
+native project. It would become relevant the moment a guest reached a table from a store
+build - the session a seating activates is already written by `transitionTableState` - and
+that surface is [[UC - Order At The Table Through A QR Code]]'s.
+
 ## Related GitHub Scope
 
 - Issue \#1071 - Staff table management and live table state, with eight child issues
@@ -138,3 +171,21 @@ These block implementation and are tracked in [[Current State - Open Questions]]
 - [[Table]]
 - [[Table Visit]]
 - [[Floor Plan]]
+
+## Related Pages
+
+- [[UC - Configure Restaurant Floor Plans And Tables]] - draws and publishes the plan this
+  view reads, and never writes a live state
+- [[UC - Order At The Table Through A QR Code]] - the guest side of a table, and the orders a
+  visit will carry
+- [[UC - Own And Claim Restaurants]] - how an account comes to hold the Restaurant whose room
+  this is
+- [[User Roles]] - the full permission matrix behind the three roles above
+- [[Recorded Decisions]] - `RD-UR-6`, why the operator is admitted to a Restaurant it does not
+  own
+- [[Current State - Release Candidate Test Charter]] - the business app's scope for this
+  release candidate
+- [[Current State - Known Issues]] - the orphaned `tableStates` document a deleted table
+  leaves behind
+- [[Current State - Open Questions]] - the four questions in `Open Product Questions`
+- [[Implementation - Analytics Events]] - the production run of the seven `table_*` events

@@ -468,6 +468,7 @@ X5 SYS <action>
 | `UC-CUS` | Complete Universal Search                        | [[UC - Complete Universal Search]]                        |
 | `UC-GNU` | Guide New Users After Registration               | [[UC - Guide New Users After Registration]]               |
 | `UC-HPT` | Harden Platform And Backend Trust                | [[UC - Harden Platform And Backend Trust]]                |
+| `UC-LGS` | Use Local Gallery Support                        | [[UC - Use Local Gallery Support]]                        |
 | `UC-RAN` | Receive App Notifications And Engagement Updates | [[UC - Receive App Notifications And Engagement Updates]] |
 | `UC-DIS` | Dismiss Restaurant Candidate                     | none                                                      |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant | none                                                      |

@@ -475,6 +475,7 @@ X5 SYS <action>
 | `UC-BRP` | Browse Restaurants And Places                          | [[UC - Browse Restaurants And Places]]                          |
 | `UC-VRM` | View Restaurant Menus                                  | [[UC - View Restaurant Menus]]                                  |
 | `UC-SBL` | Save And Rate BiteTrails Through Bucket Lists          | [[UC - Save And Rate BiteTrails Through Bucket Lists]]          |
+| `UC-DBM` | Discover BiteTrails In The Marketplace                 | [[UC - Discover BiteTrails In The Marketplace]]                 |
 | `UC-DIS` | Dismiss Restaurant Candidate                           | none                                                            |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | none                                                            |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                            |

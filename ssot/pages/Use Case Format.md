@@ -479,6 +479,7 @@ X5 SYS <action>
 | `UC-MTS` | Manage Tables During Service                           | [[UC - Manage Tables During Service]]                           |
 | `UC-ILQ` | Improve Localization Quality                           | [[UC - Improve Localization Quality]]                           |
 | `UC-SBP` | Subscribe To BiteTribe Pro                             | [[UC - Subscribe To BiteTribe Pro]]                             |
+| `UC-SAF` | See Ads As A Free User                                 | [[UC - See Ads As A Free User]]                                 |
 | `UC-DIS` | Dismiss Restaurant Candidate                           | none                                                            |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | none                                                            |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                            |

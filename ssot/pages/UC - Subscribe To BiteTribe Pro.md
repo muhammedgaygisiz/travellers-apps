@@ -83,8 +83,10 @@ Not implemented. The surfaces this will touch are:
 
 ## Related GitHub Scope
 
-- Issue \#1124 is the epic. Open
-- Issue \#1122 is the entitlement foundation and Pro feature gating this depends on. Open,
+- Issue \#1124 is the epic, BiteTribe Pro subscriptions, and stage 2 of the monetization
+  umbrella \#1121. Open
+- Issue \#1122 is the entitlement foundation and Pro feature gating this depends on, stage 0
+  of the same umbrella. Open,
   with its own ordered children - issue \#1126 specifies the entitlement model and the
   Free/Pro capability matrix and is open, and issue \#1127 stopped new accounts being created
   at tier 1 and is closed as completed
@@ -101,6 +103,10 @@ Not implemented. The surfaces this will touch are:
 - [[Personas]] - the food lover and the traveler this page used to name as actors
 - [[Monetization]] - the free and paid boundary, and why reach is the thing sold. A product
   page, not a domain
+- [[epic-1121]] - the monetization umbrella, which sequences the three revenue channels and
+  holds the product decisions the stage epics share
+- [[epic-1124]] - this page's stage epic
+- [[epic-1122]] - the entitlement foundation it waits on
 - [[UC - See Ads As A Free User]] - what a subscription switches off
 - [[UC - Buy A Paid BiteTrail]] - the one-off purchase that reuses these rails
 - [[Implementation - Store Declarations]] - the revenue line this page makes false

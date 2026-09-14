@@ -467,6 +467,7 @@ X5 SYS <action>
 | `UC-CPS` | Configure Personal Settings                      | [[UC - Configure Personal Settings]]                      |
 | `UC-SIB` | Search In BiteTribe                              | [[UC - Search In BiteTribe]]                              |
 | `UC-CUS` | Complete Universal Search                        | [[UC - Complete Universal Search]]                        |
+| `UC-GNU` | Guide New Users After Registration               | [[UC - Guide New Users After Registration]]               |
 | `UC-DIS` | Dismiss Restaurant Candidate                     | none                                                      |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant | none                                                      |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence         | none                                                      |

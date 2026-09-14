@@ -450,31 +450,32 @@ X5 SYS <action>
 
 ## Use Case Code Registry
 
-| UC-ID    | Use Case                                         | Page                                                      |
-| -------- | ------------------------------------------------ | --------------------------------------------------------- |
-| `UC-DRC` | Detect Restaurant Candidate                      | [[UC - Detect Restaurant Candidate]]                      |
-| `UC-VRC` | Verify Restaurant Candidate                      | [[UC - Verify Restaurant Candidate]]                      |
-| `UC-OPS` | Operate BiteTribe In The Admin App               | [[UC - Operate BiteTribe In The Admin App]]               |
-| `UC-ROM` | Run Operational Migrations                       | [[UC - Run Operational Migrations]]                       |
-| `UC-CMB` | Create And Maintain Personal Bites               | [[UC - Create And Maintain Personal Bites]]               |
-| `UC-MRB` | Maintain Restaurants In The Business App         | [[UC - Maintain Restaurants In The Business App]]         |
-| `UC-ARO` | Own And Claim Restaurants                        | [[UC - Own And Claim Restaurants]]                        |
-| `UC-DSB` | Discover Bites                                   | [[UC - Discover Bites]]                                   |
-| `UC-IBD` | Inspect Bite Details                             | [[UC - Inspect Bite Details]]                             |
-| `UC-MPS` | Manage Profile And Social Graph                  | [[UC - Manage Profile And Social Graph]]                  |
-| `UC-ALF` | Use Account And Legal Flows                      | [[UC - Use Account And Legal Flows]]                      |
-| `UC-CPS` | Configure Personal Settings                      | [[UC - Configure Personal Settings]]                      |
-| `UC-SIB` | Search In BiteTribe                              | [[UC - Search In BiteTribe]]                              |
-| `UC-CUS` | Complete Universal Search                        | [[UC - Complete Universal Search]]                        |
-| `UC-GNU` | Guide New Users After Registration               | [[UC - Guide New Users After Registration]]               |
-| `UC-HPT` | Harden Platform And Backend Trust                | [[UC - Harden Platform And Backend Trust]]                |
-| `UC-LGS` | Use Local Gallery Support                        | [[UC - Use Local Gallery Support]]                        |
-| `UC-UGS` | Use Gamification Signals                         | [[UC - Use Gamification Signals]]                         |
-| `UC-RAN` | Receive App Notifications And Engagement Updates | [[UC - Receive App Notifications And Engagement Updates]] |
-| `UC-DIS` | Dismiss Restaurant Candidate                     | none                                                      |
-| `UC-MRC` | Resolve Candidate Against An Existing Restaurant | none                                                      |
-| `UC-GIM` | Generate Initial Menu From Bite Evidence         | none                                                      |
-| `UC-ARB` | Assign Bites To Restaurant                       | none                                                      |
+| UC-ID    | Use Case                                               | Page                                                            |
+| -------- | ------------------------------------------------------ | --------------------------------------------------------------- |
+| `UC-DRC` | Detect Restaurant Candidate                            | [[UC - Detect Restaurant Candidate]]                            |
+| `UC-VRC` | Verify Restaurant Candidate                            | [[UC - Verify Restaurant Candidate]]                            |
+| `UC-OPS` | Operate BiteTribe In The Admin App                     | [[UC - Operate BiteTribe In The Admin App]]                     |
+| `UC-ROM` | Run Operational Migrations                             | [[UC - Run Operational Migrations]]                             |
+| `UC-CMB` | Create And Maintain Personal Bites                     | [[UC - Create And Maintain Personal Bites]]                     |
+| `UC-MRB` | Maintain Restaurants In The Business App               | [[UC - Maintain Restaurants In The Business App]]               |
+| `UC-ARO` | Own And Claim Restaurants                              | [[UC - Own And Claim Restaurants]]                              |
+| `UC-DSB` | Discover Bites                                         | [[UC - Discover Bites]]                                         |
+| `UC-IBD` | Inspect Bite Details                                   | [[UC - Inspect Bite Details]]                                   |
+| `UC-MPS` | Manage Profile And Social Graph                        | [[UC - Manage Profile And Social Graph]]                        |
+| `UC-ALF` | Use Account And Legal Flows                            | [[UC - Use Account And Legal Flows]]                            |
+| `UC-CPS` | Configure Personal Settings                            | [[UC - Configure Personal Settings]]                            |
+| `UC-SIB` | Search In BiteTribe                                    | [[UC - Search In BiteTribe]]                                    |
+| `UC-CUS` | Complete Universal Search                              | [[UC - Complete Universal Search]]                              |
+| `UC-GNU` | Guide New Users After Registration                     | [[UC - Guide New Users After Registration]]                     |
+| `UC-HPT` | Harden Platform And Backend Trust                      | [[UC - Harden Platform And Backend Trust]]                      |
+| `UC-LGS` | Use Local Gallery Support                              | [[UC - Use Local Gallery Support]]                              |
+| `UC-UGS` | Use Gamification Signals                               | [[UC - Use Gamification Signals]]                               |
+| `UC-RAN` | Receive App Notifications And Engagement Updates       | [[UC - Receive App Notifications And Engagement Updates]]       |
+| `UC-LCQ` | Strengthen Location Currency And Data Quality Guidance | [[UC - Strengthen Location Currency And Data Quality Guidance]] |
+| `UC-DIS` | Dismiss Restaurant Candidate                           | none                                                            |
+| `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | none                                                            |
+| `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                            |
+| `UC-ARB` | Assign Bites To Restaurant                             | none                                                            |
 
 Codes whose `Page` cell reads `none` have no page yet. They are referenced by `UC-VRC`
 and `UC-DRC` for rules those flows depend on, which makes writing them visible work

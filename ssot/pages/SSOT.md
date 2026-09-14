@@ -52,6 +52,7 @@
     - [[UC - Detect Restaurant Candidate]]
     - [[UC - Verify Restaurant Candidate]]
     - [[UC - Guide New Users After Registration]]
+    - [[UC - Strengthen Location Currency And Data Quality Guidance]]
   - Next to implement
     collapsed:: true
     - [[UC - Complete Universal Search]]
@@ -60,7 +61,6 @@
     - [[UC - Mature BiteTrail Marketplace Packages]]
     - [[UC - Add BiteTrail Gamification]]
     - [[UC - Improve Localization Quality]]
-    - [[UC - Strengthen Location Currency And Data Quality Guidance]]
     - [[UC - Harden Platform And Backend Trust]]
     - [[UC - Own And Claim Restaurants]]
     - [[UC - Configure Restaurant Floor Plans And Tables]]

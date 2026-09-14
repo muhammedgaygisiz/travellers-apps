@@ -148,12 +148,12 @@ question rather than a known limitation.
 - [[Restaurant]]
 - [[User]]
 - [[Floor Plan]]
-- [[User Roles]]
 
 ## Related Pages
 
 - [[Personas]] - the audience the `Actors` mapping displaced: the restaurant owner or
   business maintainer
+- [[User Roles]] - `RD-UR-6`, the `admin` exception the rules below rest on
 - [[Architecture - Auth]] - how the roles are carried, and what each app binds
 - [[Architecture - Firebase]] - the Firestore security rules as a whole
 - [[Implementation - Firebase Functions]] - `logOperatorAction` and the operator callables

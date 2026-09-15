@@ -19,7 +19,7 @@ const baseURL = process.env['BASE_URL'] ?? 'http://localhost:4300';
  *      because NX_APP_BITE_TRIBE_IS_DEV=true
  *
  * Both suites share the emulator ports, so never run them at the same time.
- * See ssot/pages/Implementation - Testing.md.
+ * See ssot/implementation/testing.md.
  */
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './src/tests' }),

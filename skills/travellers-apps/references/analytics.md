@@ -1,7 +1,7 @@
 # Analytics
 
 How to check product analytics and reason about the launch metrics from the
-repo. Source of truth: `ssot/pages/Implementation - Analytics Events.md`.
+repo. Source of truth: `ssot/implementation/analytics-events.md`.
 
 ## Event taxonomy
 

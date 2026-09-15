@@ -5,14 +5,14 @@ import { extname, join, relative, resolve } from 'node:path';
 /**
  * Asserts that a production web bundle is fit to be wrapped natively.
  *
- * This is the check step 2 of ssot/pages/Release Workflow.md describes as a
+ * This is the check step 2 of ssot/overview/release-workflow.md describes as a
  * pair of greps. A human running it by hand is exactly the part issue #1181
  * set out to remove, so the native release jobs run this instead and fail on a
  * bad bundle rather than shipping it.
  *
  * The dev-only key list is imported from the env-var plugin rather than
  * repeated here, so adding a key to `DEV_ONLY_ENV_KEYS` also starts asserting
- * it. See ssot/pages/Implementation - Release And Build Workflow.md.
+ * it. See ssot/implementation/release-and-build-workflow.md.
  */
 const require = createRequire(import.meta.url);
 const { DEV_ONLY_ENV_KEYS } = require('./env-var-plugin');

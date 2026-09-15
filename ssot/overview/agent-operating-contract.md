@@ -1,0 +1,131 @@
+# Agent Operating Contract
+
+## Purpose
+
+This page defines the model-agnostic working contract for coding agents in this repository.
+
+It applies to Codex, Claude, GPT, local assistants, IDE agents, and any future model used for implementation, review, release, or SSOT maintenance.
+
+## Core Contract
+
+Every coding agent must use the SSOT before making repository changes.
+
+The SSOT is the shared source for:
+
+- Product intent.
+- Domain language.
+- Use-case boundaries.
+- Use-case and actogram format.
+- Epic and issue context.
+- Architecture constraints.
+- Implementation ownership.
+- Testing expectations.
+- Release state and known risks.
+
+Tool-specific files such as `AGENTS.md`, `CLAUDE.md`, IDE rules, or agent skills are adapters. They may explain how a tool should discover the workflow, but they must not define a separate product or implementation truth.
+
+## Required Intake
+
+Before editing code or SSOT content, an agent must:
+
+1. Read the user request or linked issue.
+2. Fetch current GitHub issue or PR text when one is referenced.
+3. Check local state with `git status --short --branch`.
+4. Read [SSOT](../README.md).
+5. Use [Traceability Map](traceability-map.md) to identify the relevant product, domain, use-case, epic, architecture, implementation, testing, and release context.
+6. Read the owning code surface before editing.
+7. When the change writes or revises a `UC - *` page, read [Use Case Format](use-case-format.md) and [Actogram Format](actogram-format.md) first.
+
+A `UC - *` page must not be written from memory or by imitating another page. Before
+finishing, run the validation checklist in [Actogram Format](actogram-format.md) and report every failure
+by rule id (`AF-n`, `UF-n`).
+
+For analysis-only requests, stop after evidence gathering and report concrete findings without changing files.
+
+## GitHub Operations
+
+Use the authenticated `gh` CLI for GitHub issue, pull request, project, label, and status reads or writes in this repository.
+
+Connector-backed GitHub tools may be used only as supplementary read helpers when they are already available and clearly sufficient, but durable issue or PR updates should go through `gh` so repository permissions match the user's local setup.
+
+Issues belong on the `Bite Tribe` project board, and their priority is a board field rather than a label. Filing an issue without adding it to the board leaves it invisible to planning. See [GitHub Project Board And Issue Handling](github-project-board-and-issue-handling.md) for the board, the fields, and the commands.
+
+## Traceability Requirement
+
+Every implementation should be traceable through this chain:
+
+```text
+Spec or issue
+|
+SSOT product/domain/use-case context
+|
+Epic or current-state driver
+|
+Architecture and implementation rules
+|
+Touched code and tests
+|
+Validation result
+```
+
+If the trace is missing or outdated, update the relevant SSOT page before or alongside the implementation.
+
+## Implementation Rules
+
+- Keep changes scoped to the requested surface.
+- Preserve existing behavior unless the spec explicitly changes it.
+- Prefer existing Nx library boundaries and local patterns.
+- Do not invent a parallel workflow when an existing app, migration page, callable pattern, component, or service already owns the behavior.
+- Do not revert unrelated user or agent changes.
+- Use Transloco keys for visible UI text and update every relevant locale file.
+- Update Storybook when shared UI gains visible states, inputs, modes, or layout behavior.
+- Use Capacitor sync commands for native wrapper dependency changes.
+- Do not hand-edit a generated page. `tools/README.md` names which scripts write into `ssot/`; change the generator instead.
+
+## Validation Rules
+
+Run the smallest validation that proves the touched contract.
+
+Preferred order:
+
+1. Focused Nx target for the owning project.
+2. Direct Jest, build, or lint fallback when Nx is silent or blocked.
+3. Specialized checks for Firebase Functions, locale JSON, Storybook, or Capacitor changes.
+4. `git diff --check` before finishing.
+
+## Reporting Rules
+
+When finishing, report:
+
+- The user-visible result.
+- The SSOT or code areas updated.
+- The validation commands that ran.
+- Whether Nx was used or bypassed.
+- Any warnings, skipped checks, or remaining risks.
+
+### Where The Report Goes
+
+The report has two halves and two destinations, and neither of them is a page named after
+an issue.
+
+- **The event** - what was found, what changed, what was validated, and what was
+  deliberately not run - is posted as a **comment on the GitHub issue the work closes**,
+  in the shape [GitHub Issue Format](github-issue-format.md) defines under
+  `Closing Report`. It has an author and a date, which is what a comment is for.
+- **The durable rule** the work established - a constraint, an invariant, a corrected
+  fact - is written onto the SSOT page that owns it, and nowhere else.
+
+The SSOT does not mirror GitHub. When the current state of an issue is needed, ask GitHub
+for it (`gh issue view <number>`) rather than reading a copy. Reports written before this
+rule was stated are kept in [records/](../records/README.md) and are not extended.
+
+## Related Pages
+
+- [SSOT](../README.md)
+- [GitHub Project Board And Issue Handling](github-project-board-and-issue-handling.md)
+- [GitHub Issue Format](github-issue-format.md)
+- [Traceability Map](traceability-map.md)
+- [Spec To Code Workflow](spec-to-code-workflow.md)
+- [Feature Delivery Workflow](feature-delivery-workflow.md)
+- [Release Workflow](release-workflow.md)
+- [Implementation - Testing](../implementation/testing.md)

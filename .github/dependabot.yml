@@ -9,7 +9,7 @@
 # Monthly rather than weekly, and grouped into one pull request rather than one
 # per action, because the point is to see the drift and decide, not to spend a
 # review a week on it. A major bump still needs its breaking changes read - see
-# the Action Versions section of ssot/pages/Implementation - CI Pipeline.md.
+# the Action Versions section of ssot/implementation/ci-pipeline.md.
 version: 2
 
 updates:

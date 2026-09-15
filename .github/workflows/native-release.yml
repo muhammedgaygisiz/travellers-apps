@@ -9,7 +9,7 @@ name: BiteTribe Native Release
 # pull request. The staleness argument that keeps deploys in pipeline.yml does
 # not apply either: a release creates a build-* tag, and the tag fires this.
 #
-# See ssot/pages/Implementation - Release And Build Workflow.md for the secrets
+# See ssot/implementation/release-and-build-workflow.md for the secrets
 # and the release-ordering note.
 
 on:
@@ -63,7 +63,7 @@ env:
 jobs:
   # One production web build, shared by both wrappers. Building it twice would
   # let the Android and iOS artifacts wrap different bundles, which
-  # ssot/pages/Implementation - Store Release Steps.md forbids for the manual
+  # ssot/implementation/store-release-steps.md forbids for the manual
   # release for the same reason.
   web-bundle:
     runs-on: ubuntu-latest
@@ -238,7 +238,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${BITETRIBE_KEYSTORE_BASE64}" ]; then
-            echo "::error::BITETRIBE_KEYSTORE_BASE64 is not set. The native release secrets are listed in ssot/pages/Implementation - Release And Build Workflow.md."
+            echo "::error::BITETRIBE_KEYSTORE_BASE64 is not set. The native release secrets are listed in ssot/implementation/release-and-build-workflow.md."
             exit 1
           fi
           printf '%s' "${BITETRIBE_KEYSTORE_BASE64}" | base64 --decode > "${RUNNER_TEMP}/bitetribe-upload.jks"
@@ -320,7 +320,7 @@ jobs:
       # `beta` is Open testing in the Play Developer API, and Open testing is
       # where BiteTribe actually distributes on Android. Not `internal`: that
       # track is paused, abandoned, and still holds a February build 58 - see
-      # ssot/pages/Implementation - Store Listing Assets.md, which records
+      # ssot/implementation/store-listing-assets.md, which records
       # reading its paused state as a release blocker as a mistake already made
       # once.
       #
@@ -328,7 +328,7 @@ jobs:
       # store build notes come from `npm run release:notes` summarized to 230
       # characters by a person, and the submission for review is a deliberate
       # click. `completed` would submit a release with no notes.
-      # See ssot/pages/Implementation - Store Release Steps.md.
+      # See ssot/implementation/store-release-steps.md.
       - name: Upload to Play Open testing as a draft
         if: ${{ steps.publish.outputs.enabled == 'true' }}
         uses: r0adkll/upload-google-play@v1.1.5
@@ -420,7 +420,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${IOS_DIST_CERTIFICATE_P12_BASE64}" ]; then
-            echo "::error::IOS_DIST_CERTIFICATE_P12_BASE64 is not set. The native release secrets are listed in ssot/pages/Implementation - Release And Build Workflow.md."
+            echo "::error::IOS_DIST_CERTIFICATE_P12_BASE64 is not set. The native release secrets are listed in ssot/implementation/release-and-build-workflow.md."
             exit 1
           fi
 
@@ -460,7 +460,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${APP_STORE_CONNECT_PRIVATE_KEY_BASE64}" ]; then
-            echo "::error::APP_STORE_CONNECT_PRIVATE_KEY_BASE64 is not set. The native release secrets are listed in ssot/pages/Implementation - Release And Build Workflow.md."
+            echo "::error::APP_STORE_CONNECT_PRIVATE_KEY_BASE64 is not set. The native release secrets are listed in ssot/implementation/release-and-build-workflow.md."
             exit 1
           fi
 

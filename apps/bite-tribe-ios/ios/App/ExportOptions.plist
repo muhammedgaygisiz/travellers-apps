@@ -5,7 +5,7 @@
 	<!-- Export settings for the CI archive in .github/workflows/native-release.yml.
 	     Xcode's Distribute App wizard asks these on a workstation; xcodebuild
 	     needs them written down. See
-	     ssot/pages/Implementation - Release And Build Workflow.md. -->
+	     ssot/implementation/release-and-build-workflow.md. -->
 	<key>method</key>
 	<string>app-store-connect</string>
 	<!-- Export the .ipa and keep it. Uploading is a separate, opt-in step, so a

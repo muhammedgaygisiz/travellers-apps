@@ -89,7 +89,7 @@ export interface RoundTable extends RestaurantTableBase {
  * The geometry fields use the coordinate system documented in
  * `floor-plan.ts`: room-relative integer millimetres, origin top-left, and a
  * `position` that is the centre of the table. The product rules are in
- * `ssot/pages/Table.md`.
+ * `ssot/domain/table.md`.
  *
  * Live state is deliberately absent. A table is configuration, written by the
  * owner while editing the plan; whether a party is sitting at it right now is

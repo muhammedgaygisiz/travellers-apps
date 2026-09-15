@@ -155,7 +155,7 @@ set_play() {
 # to the end of its line, so there is never one inside a value, and sed adds one
 # on the way out. Leaving it there would set an alias of "First Key\n" and fail
 # signing with the same misleading `No key with alias` that quoting the value
-# causes - see ssot/pages/Implementation - Store Release Steps.md.
+# causes - see ssot/implementation/store-release-steps.md.
 read_property() {
   sed -n "s/^$1=//p" "$KEYSTORE_PROPERTIES" | tr -d '\r\n'
 }

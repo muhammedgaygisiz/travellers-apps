@@ -533,7 +533,7 @@ export const deleteOwnAccountHandler = async (
  * The contract is deliberate per data category: Bites survive with the author
  * cleared, BiteTrail purchase records survive with the buyer cleared, and
  * everything else that identifies the user is removed. See
- * `ssot/pages/UC - Use Account And Legal Flows.md`.
+ * `ssot/use-cases/uc-use-account-and-legal-flows.md`.
  */
 export const deleteOwnAccount = onAppCheck(
   { timeoutSeconds: 540, memory: '512MiB' },

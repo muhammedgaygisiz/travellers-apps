@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 //             release notes.
 //   full    - every heading in the section. Used as the GitHub release body.
 //
-// See ssot/pages/Release Workflow.md.
+// See ssot/overview/release-workflow.md.
 
 const CHORES_HEADING = /^### Chores$/m;
 const FIRST_HEADING = /^### /m;

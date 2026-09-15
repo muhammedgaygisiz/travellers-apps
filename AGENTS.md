@@ -10,12 +10,12 @@ This contract is model-agnostic. Codex, Claude, GPT, local IDE agents, and futur
 
 ## Start Here
 
-1. Read `ssot/pages/SSOT.md`.
-2. Read `ssot/pages/Agent Operating Contract.md`.
-3. Use `ssot/pages/Traceability Map.md` to connect the request to product, domain, use case, epic, architecture, implementation, testing, and release context.
-4. Follow `ssot/pages/Feature Delivery Workflow.md` for normal issue-to-merge work.
-5. Follow `ssot/pages/Release Workflow.md` for Sunday release work.
-6. Use `ssot/pages/Spec To Code Workflow.md` for implementation details.
+1. Read `ssot/README.md`.
+2. Read `ssot/overview/agent-operating-contract.md`.
+3. Use `ssot/overview/traceability-map.md` to connect the request to product, domain, use case, epic, architecture, implementation, testing, and release context.
+4. Follow `ssot/overview/feature-delivery-workflow.md` for normal issue-to-merge work.
+5. Follow `ssot/overview/release-workflow.md` for Sunday release work.
+6. Use `ssot/overview/spec-to-code-workflow.md` for implementation details.
 7. Use tool-specific guidance, such as the skills in `skills/` or `CLAUDE.md`, only as an adapter to this shared workflow.
 
 ## Core Rules
@@ -26,7 +26,7 @@ This contract is model-agnostic. Codex, Claude, GPT, local IDE agents, and futur
 - Prefer existing Nx library boundaries and local patterns.
 - Use Transloco keys for visible UI text.
 - Update every relevant locale file when adding user-facing copy.
-- Adding a language means four lists, not one: Transloco locales, the Firebase Functions notification catalog, the published privacy-policy languages, and the iOS `InfoPlist.strings` variant group. Follow the checklist in `ssot/pages/Implementation - Localization.md`; a missed list silently falls back to English instead of failing.
+- Adding a language means four lists, not one: Transloco locales, the Firebase Functions notification catalog, the published privacy-policy languages, and the iOS `InfoPlist.strings` variant group. Follow the checklist in `ssot/implementation/localization.md`; a missed list silently falls back to English instead of failing.
 - Update Storybook when shared UI gains visible states, inputs, modes, or layout behavior.
 - Use Capacitor sync commands for native wrapper dependency changes.
 - Keep Logseq backup pages out of the committed SSOT graph.
@@ -65,12 +65,12 @@ Preferred order:
 ## Important Paths
 
 ```text
-ssot/pages/SSOT.md
-ssot/pages/Agent Operating Contract.md
-ssot/pages/Traceability Map.md
-ssot/pages/Spec To Code Workflow.md
-ssot/pages/Feature Delivery Workflow.md
-ssot/pages/Release Workflow.md
+ssot/README.md
+ssot/overview/agent-operating-contract.md
+ssot/overview/traceability-map.md
+ssot/overview/spec-to-code-workflow.md
+ssot/overview/feature-delivery-workflow.md
+ssot/overview/release-workflow.md
 skills/travellers-apps/SKILL.md
 CLAUDE.md
 apps/bite-tribe

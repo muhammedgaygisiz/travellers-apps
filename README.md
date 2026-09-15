@@ -25,9 +25,9 @@ npm install
 git clone -c core.symlinks=true git@github.com:muhammedgaygisiz/travellers-apps.git
 ```
 
-  Set it once for all future clones with `git config --global core.symlinks true`. If you already
-  cloned without it, the symlinks are checked out as plain text files and `git status` stays clean,
-  so restore them explicitly:
+Set it once for all future clones with `git config --global core.symlinks true`. If you already
+cloned without it, the symlinks are checked out as plain text files and `git status` stays clean,
+so restore them explicitly:
 
 ```
 git config core.symlinks true
@@ -35,7 +35,7 @@ rm -f .agents/skills .claude/skills
 git checkout -- .agents/skills .claude/skills
 ```
 
-  macOS and Linux need none of this.
+macOS and Linux need none of this.
 
 # Run the application locally:
 
@@ -137,9 +137,9 @@ transform: {
 
 # Table of Content
 
-1. [SSOT](ssot/pages/SSOT.md) - product, domain, architecture, implementation and release context
+1. [SSOT](ssot/README.md) - product, domain, architecture, implementation and release context
 2. [Agent contract](AGENTS.md) - how coding agents work in this repository
-3. [Nx workspace](<ssot/pages/Architecture - Nx Workspace.md>) - apps, library families and boundary rules
+3. [Nx workspace](ssot/architecture/nx-workspace.md) - apps, library families and boundary rules
 
 # Quick References
 

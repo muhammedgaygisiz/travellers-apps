@@ -22,7 +22,7 @@ import type { RectangularTable, TableState, TableStatus } from '../../index';
  */
 describe('live table state', () => {
   /**
-   * The matrix as prose, transcribed from `ssot/pages/Table.md` rather than
+   * The matrix as prose, transcribed from `ssot/domain/table.md` rather than
    * derived from the code under test. A test that reads
    * `TABLE_STATE_TRANSITIONS` to decide what to expect passes whatever the
    * matrix says, including a matrix somebody edited by accident.

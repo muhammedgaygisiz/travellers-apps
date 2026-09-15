@@ -600,7 +600,7 @@ jobs:
   # It compiles with the workspace TypeScript, because it does not install the
   # functions package. `deploy-functions` does install it and therefore compiles
   # with the version that package pins, so the two can disagree.
-  # See ssot/pages/Implementation - Firebase Functions.md.
+  # See ssot/implementation/firebase-functions.md.
   functions-build:
     runs-on: ubuntu-latest
     needs:

@@ -8,7 +8,7 @@ import { dirname, resolve } from 'node:path';
  *
  * Neither store exposes the source commit, and reconstructing it afterwards
  * has needed a local reflog on one workstation
- * (see ssot/pages/Current State - Release Candidate Test Charter.md). This
+ * (see ssot/current-state/release-candidate-test-charter.md). This
  * writes it next to the artifacts instead, so the answer survives the machine.
  *
  * It also names the artifacts. `bite-tribe-1.0.1-96-ac217b9.aab` says which
@@ -44,7 +44,7 @@ const provenance = {
   // way to the next job. That emptied this name in run #1, which named the
   // artifact `-android` and staged the bundle as `.aab` - a dotfile that
   // upload-artifact silently drops. The one-word spelling is the wordmark
-  // anyway; see ssot/pages/Implementation - Store Listing Assets.md.
+  // anyway; see ssot/implementation/store-listing-assets.md.
   artifactBaseName: `bitetribe-${version}-${buildNumber}-${shortCommit}`,
   commit,
   ref,
@@ -73,7 +73,7 @@ if (provenance.tag && !provenance.tag.matchesTree) {
       `(${provenance.tag.buildNumber}), but this tree is ${version} ` +
       `(${buildNumber}). The artifacts are named after the tree, which is ` +
       'what was actually built. See the release-ordering note in ' +
-      'ssot/pages/Implementation - Release And Build Workflow.md.',
+      'ssot/implementation/release-and-build-workflow.md.',
   );
 }
 

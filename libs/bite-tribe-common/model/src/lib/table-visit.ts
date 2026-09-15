@@ -44,7 +44,7 @@ import type { TableStatus } from './table-state';
  * would be a second version of one fact, free to disagree with the trail a
  * disputed evening is actually read from.
  *
- * The product rules are in `ssot/pages/Table Visit.md`.
+ * The product rules are in `ssot/domain/table-visit.md`.
  */
 
 /**

@@ -11,9 +11,9 @@ const repo = 'muhammedgaygisiz/travellers-apps';
 const repoRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], {
   encoding: 'utf8',
 }).trim();
-const pagesPath = join(repoRoot, 'ssot/pages');
-const epicsIndexPath = join(pagesPath, 'Epics.md');
-const ssotPath = join(pagesPath, 'SSOT.md');
+const pagesPath = join(repoRoot, 'ssot/github');
+const epicsIndexPath = join(pagesPath, 'epics.md');
+const ssotPath = join(repoRoot, 'ssot/README.md');
 const backupPath = join(repoRoot, 'ssot/logseq/bak');
 const projectNumber = '4';
 const projectOwner = 'muhammedgaygisiz';

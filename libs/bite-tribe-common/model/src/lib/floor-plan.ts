@@ -30,7 +30,7 @@
  * own space and one stored plan draws identically on desktop, tablet, mobile
  * and paper.
  *
- * The product rules behind these shapes are in `ssot/pages/Floor Plan.md`.
+ * The product rules behind these shapes are in `ssot/domain/floor-plan.md`.
  */
 
 /**

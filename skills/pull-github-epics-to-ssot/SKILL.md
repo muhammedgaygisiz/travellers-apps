@@ -5,7 +5,7 @@ description: Pull GitHub issues whose titles start with "epic:" into the repo SS
 
 # Pull GitHub Epics To SSOT
 
-Use this skill in this repository to refresh the Logseq epic section in `ssot/pages/SSOT.md` and one detail page per open Priority P0 epic from GitHub issues in `muhammedgaygisiz/travellers-apps` whose titles start with `epic:`.
+Use this skill in this repository to refresh the Logseq epic section in `ssot/README.md` and one detail page per open Priority P0 epic from GitHub issues in `muhammedgaygisiz/travellers-apps` whose titles start with `epic:`.
 
 All paths in this skill are relative to the repository root. Resolve it with `git rev-parse --show-toplevel` when an absolute path is needed, and run repository commands from there.
 
@@ -20,18 +20,18 @@ All paths in this skill are relative to the repository root. Resolve it with `gi
    - topn: at least `100`
    - Priority must be `P0` in GitHub Projects, or mirrored as an issue label such as `Priority P0`
    - reading GitHub Project priority requires `gh` auth with `read:project`
-3. Render the `Epics` section in `ssot/pages/SSOT.md`:
+3. Render the `Epics` section in `ssot/README.md`:
    - `Epics` is a plain bullet, not `[[Epics]]`
    - one nested bullet per open Priority P0 epic
    - each nested bullet links to `[[epic-<issue-number>]]`
-   - do not create `ssot/pages/Epics.md`
-4. Render each epic page as `ssot/pages/epic-<issue-number>.md`:
+   - do not create `ssot/github/epics.md`
+4. Render each epic page as `ssot/github/epic-<issue-number>.md`:
    - first bullet links to the GitHub epic issue
    - `Description` contains the GitHub issue body as nested bullets
    - `Related issues` contains local links to sub-issue pages
    - if there is no description, write `No description provided.`
    - if no related issues are found, write `No linked issues found.`
-5. Render each open Priority P0 sub-issue page as `ssot/pages/issue-<issue-number>.md`:
+5. Render each open Priority P0 sub-issue page as `ssot/github/issue-<issue-number>.md`:
    - first bullet links to the GitHub issue
    - `Description` contains the GitHub issue body as nested bullets
    - do not include a sub-issues/related-issues section on sub-issue pages
@@ -49,7 +49,7 @@ All paths in this skill are relative to the repository root. Resolve it with `gi
    - do not use Logseq properties such as `date::`, `github-issue::`, or `status::`
    - escape `#` in displayed text as `\#`
    - avoid namespaces like `epics/...` or `releases/...` unless the user explicitly asks
-8. Ensure `ssot/pages/SSOT.md` contains exactly one plain `- Epics` section and no `[[Epics]]` page link.
+8. Ensure `ssot/README.md` contains exactly one plain `- Epics` section and no `[[Epics]]` page link.
 9. Remove `ssot/logseq/bak` if Logseq recreated backup pages during the refresh.
 10. Run `git diff --check`.
 
@@ -73,14 +73,14 @@ The input JSON may be either an array of issue objects or an object with an `iss
 
 ## Output Contract
 
-The Epics section in `ssot/pages/SSOT.md` should look like:
+The Epics section in `ssot/README.md` should look like:
 
 ```markdown
 - Epics
   - [[epic-123]]
 ```
 
-`ssot/pages/epic-123.md` should look like:
+`ssot/github/epic-123.md` should look like:
 
 ```markdown
 - [epic: Example title](https://github.com/muhammedgaygisiz/travellers-apps/issues/123) (Issue \#123)
@@ -90,7 +90,7 @@ The Epics section in `ssot/pages/SSOT.md` should look like:
   - [feat: Child issue]([[issue-124]]) (Issue \#124)
 ```
 
-`ssot/pages/issue-124.md` should look like:
+`ssot/github/issue-124.md` should look like:
 
 ```markdown
 - [feat: Child issue](https://github.com/muhammedgaygisiz/travellers-apps/issues/124) (Issue \#124)

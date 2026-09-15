@@ -2,18 +2,17 @@ import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-const pagesPath = resolve('ssot/pages');
-const outputPath = resolve('ssot/pages/Changelog.md');
-const oldReleasesPath = resolve('ssot/pages/releases');
+const releasesPath = resolve('ssot/releases');
+const outputPath = resolve('ssot/releases/changelog.md');
 const tags = getTags();
 
-mkdirSync(pagesPath, { recursive: true });
+mkdirSync(releasesPath, { recursive: true });
 clearReleasePages();
 writeFileSync(outputPath, renderIndex(tags));
 
 for (const release of buildReleases(tags)) {
   writeFileSync(
-    join(pagesPath, getReleaseFileName(release.tag.name)),
+    join(releasesPath, getReleaseFileName(release.tag.name)),
     renderRelease(release),
   );
 }
@@ -34,14 +33,9 @@ function getTags() {
 }
 
 function clearReleasePages() {
-  rmSync(oldReleasesPath, { force: true, recursive: true });
-
-  for (const entry of readdirSync(pagesPath, { withFileTypes: true })) {
-    if (
-      entry.isFile() &&
-      (/^releases___.+\.md$/.test(entry.name) || /^build-.+\.md$/.test(entry.name))
-    ) {
-      rmSync(join(pagesPath, entry.name));
+  for (const entry of readdirSync(releasesPath, { withFileTypes: true })) {
+    if (entry.isFile() && /^build-.+\.md$/.test(entry.name)) {
+      rmSync(join(releasesPath, entry.name));
     }
   }
 }

@@ -285,7 +285,7 @@ which Play publishes anyway under **App signing** - and the Firebase client
 configuration that [[Implementation - Release And Build Workflow]] records as
 public by design.
 
-The one thing a public repository genuinely exposes is `ssot/pages` itself: the
+The one thing a public repository genuinely exposes is `ssot` itself: the
 release-candidate charter, [[Current State - Known Issues]], and the open
 findings, in detail. If visibility is ever revisited, that is the argument.
 It is a disclosure decision, not a cost or a security-of-signing one, and it

@@ -5,7 +5,7 @@ apply plugin: 'com.google.firebase.crashlytics'
 // gitignored, or from the matching environment variables so CI can sign without
 // a file. When neither is present the release build stays unsigned instead of
 // failing, so debug work and contributors without the key are unaffected.
-// See ssot/pages/Implementation - Store Release Steps.md.
+// See ssot/implementation/store-release-steps.md.
 def keystorePropertiesFile = rootProject.file('keystore.properties')
 def keystoreProperties = new Properties()
 if (keystorePropertiesFile.exists()) {

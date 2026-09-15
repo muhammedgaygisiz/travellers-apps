@@ -6,7 +6,7 @@
 
 Partly built, and the unbuilt half is a review rather than a feature. The consumer app ships
 eleven locales - `en`, `de`, `fr`, `tr`, `es`, `it`, `ar`, `am`, `id`, `pt`, `th` - and the
-catalogs are healthy: every locale file carries the same 666 keys, and `locale-copy.spec.ts`
+catalogs are healthy: every locale file carries the same key set, and `locale-copy.spec.ts`
 and `language-names.spec.ts` fail the build when one drifts. The mechanics around them are
 settled too, each with its own rule in [[Implementation - Localization]]: push and verification
 mail read a backend catalog bound to the account language, the privacy policy has its own

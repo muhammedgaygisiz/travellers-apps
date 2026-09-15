@@ -255,14 +255,13 @@ workaround for the missing `admin` role. Removed by \#1473.
 - **UF-23** An `[Obsolete]` page is deleted once the code it describes is gone. Before it
   goes: no other page may reference its `UC-ID` — a reference in another page's `Scope`
   table is a contract, and it is removed or re-pointed first (`UF-9`); and the entry is
-  removed from [[SSOT]], [[contents]], from [[Traceability Map]] where it appears, and
+  removed from [[SSOT]], from [[Traceability Map]] where it appears, and
   from the registry at the end of this page.
 
 ## Template
 
 A new use-case page starts from this skeleton. It is kept here rather than as a
-`UC - Template` page so that it does not appear in the use-case lists in [[SSOT]] and
-[[contents]].
+`UC - Template` page so that it does not appear in the use-case list in [[SSOT]].
 
 Inside the skeleton the actogram blocks are fenced with `~~~` so that they nest inside
 the skeleton's own block. Replace them with ordinary backtick fences when you copy it out.

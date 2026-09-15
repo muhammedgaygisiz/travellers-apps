@@ -15,7 +15,8 @@ what each one is allowed to claim. Maintaining a menu is not done here -
 Users can inspect menu information connected to a Restaurant and its Bites.
 
 This page owns what the consumer menu page shows and how it answers a read that is slow,
-empty or unresolvable. Editing a menu belongs to
+empty or unresolvable - including whether an item the kitchen has taken off today reads as
+unavailable, which it does not yet. Editing a menu belongs to
 [[UC - Maintain Restaurants In The Business App]], the Bite the prefilled form goes on to
 create to [[UC - Create And Maintain Personal Bites]], and ordering from a menu at a table
 to [[UC - Order At The Table Through A QR Code]].
@@ -31,6 +32,7 @@ to [[UC - Order At The Table Through A QR Code]].
 - User opens a restaurant menu from a Bite.
 - User can create a Bite from a menu item, which opens the Bite form prefilled with that Restaurant and dish. The prefilled draft is scoped to that one creation session; see [[UC - Create And Maintain Personal Bites]].
 - Business users can maintain menus from the business app.
+- An item the kitchen is not serving reads as unavailable. **Intended, not met.** The flag exists and is written - `MenuItem.isAvailable`, absent meaning available, read through `isMenuItemAvailable` - and the business menu editor sets it, but no consumer surface reads it: a dish marked sold out renders on this page exactly as one that is not. The backend does read it, so [[UC - Order At The Table Through A QR Code]] refuses to order such a dish; a diner browsing the menu cannot tell. Unreachable in production today, because the business app has not launched and nothing sets the flag.
 
 ## Menu Page State Contract
 

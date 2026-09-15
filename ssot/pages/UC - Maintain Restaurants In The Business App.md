@@ -14,7 +14,9 @@ admin app with issue \#1473.
 
 Business users can maintain Restaurant and menu context that improves Bite discovery.
 
-This page owns what an account may do to a Restaurant it already holds. Being given one is
+This page owns what an account may do to a Restaurant it already holds, including taking a
+dish off today's menu - `MenuItem.isAvailable` is written here and nowhere else. How an
+unavailable dish then reads to a diner is [[UC - View Restaurant Menus]]. Being given one is
 [[UC - Own And Claim Restaurants]], creating one and verifying a candidate into one is
 [[UC - Operate BiteTribe In The Admin App]], and what a menu looks like to a diner is
 [[UC - View Restaurant Menus]].

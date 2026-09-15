@@ -42,7 +42,6 @@
   - Next to implement
     - [[UC - Complete Universal Search]]
     - [[UC - Expand Restaurant Menus Into Actionable Menu Journeys]]
-    - [[UC - Finish Restaurant Profile And Menu Completeness]]
     - [[UC - Price And Publish A BiteTrail]]
     - [[UC - Add BiteTrail Gamification]]
     - [[UC - Improve Localization Quality]]

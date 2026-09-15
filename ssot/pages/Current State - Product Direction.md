@@ -42,7 +42,6 @@ No epic owns this front yet.
 
 ## Restaurant And Menu Completeness
 
-- [[UC - Finish Restaurant Profile And Menu Completeness]]
 - [[UC - Expand Restaurant Menus Into Actionable Menu Journeys]]
 - [[UC - Own And Claim Restaurants]] — [[epic-1069]]
 

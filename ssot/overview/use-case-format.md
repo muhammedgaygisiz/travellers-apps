@@ -296,8 +296,11 @@ the full skeleton below is legitimately absent until the page earns it.
 
 ## Related Domains
 
-- [<Domain>](../domain/<domain>.md)
+- [Bite](../domain/bite.md)
 ```
+
+The links in both skeletons are real examples rather than placeholders, so that a copied
+page resolves from the start; replace them with the pages the use case actually touches.
 
 `Flow` (`UF-4a`), `Guarantees`, `App Store Review Area`, `Supported Evidence`,
 `Related GitHub Scope`, `Related Pages` and `Actogram` may all be added at L0 (`UF-4`)
@@ -444,11 +447,11 @@ X5 SYS <action>
 
 ## Related Domains
 
-- [<Domain>](../domain/<domain>.md)
+- [Bite](../domain/bite.md)
 
 ## Related Pages
 
-- [<Page>](<relative-path>.md)
+- [Architecture - Firebase](../architecture/firebase.md)
 
 [#<n>]: https://github.com/muhammedgaygisiz/travellers-apps/issues/<n>
 ```

@@ -2,19 +2,24 @@
 
 ## Status
 
-Supported today.
+**Level:** L0.
+Supported today. Profile view and edit, public profiles, follow and unfollow with their
+lists, the visibility choice, and the two identity contracts below all ship. Onboarding
+has collected an optional home city since \#1271, so a profile without one stays the
+normal case.
 
 ## Goal
 
-Users can maintain their identity and use profile/social context to build trust around food experiences.
+Any account can maintain its identity and read profile and social context to judge whether
+to trust a food experience. This page owns what a profile renders, what identifies the
+signed-in account, and the follow relation.
 
 ## Actors
 
-- User
-- Bite creator
-- Food lover
+- **Bite Creator** — views and edits its own profile, sets its visibility, opens other
+  public profiles, and follows or unfollows them.
 
-## Current Flow
+## Flow
 
 - User views or edits their own profile.
 - User opens public profiles.
@@ -59,12 +64,13 @@ city — so that line only earns its space when it has something of its own.
 - A real name that genuinely differs still shows, which is the case the line
   exists for: `Mo` in the heading over `Muhammed Gaygisiz, Bern`.
 - A profile with no city shows no city. The former "no location" placeholder
-  announced missing data for something the app never asked the user for, which
+  announced missing data for something the app did not ask for at the time, which
   reads as a fact about that person rather than as an unfilled optional field.
   With neither a distinct real name nor a city the line is not rendered at all.
-- Onboarding collecting no home location is the product half of this and is
-  tracked separately in issue #1271. This contract covers only what the profile
-  renders for a location it does not have.
+- Onboarding was the product half of this and shipped as issue #1271, which added
+  an optional home city step. Optional is the operative word: a profile with no
+  city is still the ordinary case, so this contract still governs what is
+  rendered when there is none.
 
 ## Account Identity In The Menu
 
@@ -72,9 +78,9 @@ Issue
 [#1260](https://github.com/muhammedgaygisiz/travellers-apps/issues/1260) moved
 the answer to "who am I signed in as" out of the profile page and into the app
 menu. Release-candidate Run 5 could not name the account it was testing with
-without leaving the menu, and #1240 already established that the app should name
-the account before consequential actions; knowing who you are is the same
-question asked earlier.
+without leaving the menu, and pull request #1240 had already established that the
+app should name the account before consequential actions, by identifying it in the
+deletion flow; knowing who you are is the same question asked earlier.
 
 - The signed-in account is named on the profile entry rather than in a header
   block of its own. The account photo replaces that entry's icon at the icon's
@@ -104,6 +110,23 @@ question asked earlier.
   decision with its own privacy handling, not a completion of existing work. See
   [[issue-1190]] and [[UC - Inspect Bite Details]].
 
+## MVP Classification
+
+**[MVP]** — profile view and edit, public profiles, the public/private visibility choice
+readable off the profile itself, the loading skeleton that withholds placeholder facts, and
+both identity contracts. Visibility is a privacy control the product offers, so getting
+identity wrong here is the \#1308 class of defect rather than polish.
+
+**[Secondary]** — the social graph: follow and unfollow, and the follower and following
+lists. Shipped, but the contribution loop does not depend on it for the initial release.
+
+## App Store Review Area
+
+Relevant. The public/private profile is a privacy control, and the profile photo uses the
+photo library — the permission itself is collected in onboarding rather than here, see
+[[UC - Guide New Users After Registration]]. The identity data this page renders is covered
+by the name, photo and user-ID entries declared in [[Implementation - Store Declarations]].
+
 ## Supported Evidence
 
 - `my-profile`
@@ -119,3 +142,14 @@ question asked earlier.
 
 - [[User]]
 - [[Bite]]
+
+## Related Pages
+
+- [[Personas]] — the audiences this page serves: Food lover, Bite creator, and the
+  privacy-conscious participant the visibility choice exists for
+- [[UC - Inspect Bite Details]] — the same two-names confusion on a surface that publishes
+- [[UC - Guide New Users After Registration]] — where the photo and location permissions
+  are collected
+- [[issue-1118]]
+- [[issue-1190]]
+- [[Implementation - Store Declarations]]

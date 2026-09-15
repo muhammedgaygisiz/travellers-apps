@@ -2,19 +2,27 @@
 
 ## Status
 
-Supported today and still expanding.
+**Level:** L0.
+Supported today. Search across accounts, Bites and restaurants ships, with category separation,
+city and country search, the list/map switch, and infinite-scroll paging. What is specified and
+not built is the Pro gating of backend search; the broader fuzzy, typo-tolerant search is a
+separate page, [[UC - Complete Universal Search]].
 
 ## Goal
 
-Users can find people, Bites, and restaurants quickly.
+Anyone can find a person, a Bite or a restaurant by name, and can narrow to a city or a country
+without knowing where they are standing. This page owns what search matches, how results are
+categorised and paged, and the two views they can be read in.
 
 ## Actors
 
-- Food lover
-- Traveler
-- Bite creator
+- **Bite Creator** - searches, switches category, picks a country from the list, and reads the
+  results as a list or on a map.
+- **BiteTribe Operator** - does not search here, but is named because the admin app's Bite
+  lookup calls the same `searchBites` callable. Neither its ranking nor its matching may be
+  changed for an operator's benefit.
 
-## Current Flow
+## Flow
 
 - User opens search.
 - User enters search text.
@@ -29,6 +37,22 @@ Users can find people, Bites, and restaurants quickly.
 - `searchUsers` and `searchBites` have a second caller. The admin app's Bite lookup calls `searchBites` directly, and its account search deliberately does **not** call `searchUsers` — it filters the admin-only `listUsersWithRoles` instead, so an operator sees private profiles without the consumer-facing public-flag filter being relaxed for anyone. Neither the ranking nor the matching of these callables may be changed for an operator's benefit; see [[UC - Operate BiteTribe In The Admin App]] (issue \#1476).
 - Backend search becomes a Pro capability through [[epic-1122]]. A free user keeps client-side search and filtering inside the 15 km result set they already loaded. See [[Monetization]].
 
+## MVP Classification
+
+**[MVP]** - search across accounts, Bites and restaurants, the category separation, city and
+country search, and the list/map switch. Finding a Bite is half of the discovery loop.
+
+**[Secondary]** - the Pro gating of backend search, specified under [[epic-1122]] and not built.
+A free user would keep client-side search inside the result set already loaded. See
+[[Monetization]].
+
+## App Store Review Area
+
+Not relevant, because search exercises no permission and introduces no declared data type. The
+location permission that decides which Bites are loaded in the first place belongs to
+[[UC - Discover Bites]], and the map rendering to the Google Maps Platform boundary in
+[[Architecture - Firebase]].
+
 ## Supported Evidence
 
 - `search`
@@ -41,9 +65,10 @@ Users can find people, Bites, and restaurants quickly.
 
 ## Related GitHub Scope
 
-- Issue \#843 covers broader universal search, fuzzy matching, and topic-specific search.
+- Part of \#790, the open search epic.
+- Issue \#843 - the closed epic that delivered the search this page describes.
 - Issue \#903 adds a list/map switch for location-aware search results.
-- Issue 974 adds city search.
+- Issue \#973 adds city search, delivered by pull request \#974.
 - Issue \#722 adds country search.
 - Issue \#1476 reuses `searchBites` for the admin app's operator lookup without changing it.
 
@@ -52,3 +77,15 @@ Users can find people, Bites, and restaurants quickly.
 - [[Bite]]
 - [[User]]
 - [[Restaurant]]
+
+## Related Pages
+
+- [[Personas]] - the audiences the `Actors` mapping displaced: the food lover, the traveler and
+  the Bite creator
+- [[UC - Complete Universal Search]] - the unbuilt search this one would become or sit beside;
+  which of the two it is has not been decided
+- [[UC - Operate BiteTribe In The Admin App]] - the second caller of `searchBites`, and why the
+  account search deliberately does not reuse `searchUsers`
+- [[UC - Discover Bites]] - the loaded result set a free user searches inside
+- [[Monetization]]
+- [[epic-1122]]

@@ -20,7 +20,7 @@ All paths in this skill are relative to the repository root. Resolve it with `gi
    - topn: at least `100`
    - Priority must be `P0` in GitHub Projects, or mirrored as an issue label such as `Priority P0`
    - reading GitHub Project priority requires `gh` auth with `read:project`
-3. Render the `Epics` section in `ssot/pages/SSOT.md` and `ssot/pages/contents.md`:
+3. Render the `Epics` section in `ssot/pages/SSOT.md`:
    - `Epics` is a plain bullet, not `[[Epics]]`
    - one nested bullet per open Priority P0 epic
    - each nested bullet links to `[[epic-<issue-number>]]`
@@ -49,7 +49,7 @@ All paths in this skill are relative to the repository root. Resolve it with `gi
    - do not use Logseq properties such as `date::`, `github-issue::`, or `status::`
    - escape `#` in displayed text as `\#`
    - avoid namespaces like `epics/...` or `releases/...` unless the user explicitly asks
-8. Ensure `ssot/pages/contents.md` contains exactly one plain `- Epics` section and no `[[Epics]]` page link.
+8. Ensure `ssot/pages/SSOT.md` contains exactly one plain `- Epics` section and no `[[Epics]]` page link.
 9. Remove `ssot/logseq/bak` if Logseq recreated backup pages during the refresh.
 10. Run `git diff --check`.
 

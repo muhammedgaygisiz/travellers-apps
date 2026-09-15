@@ -159,6 +159,29 @@
 - Narrowing the radius is a weak lever: cutting it from 15 km to 10 km removed only a tenth of the result, because Bites cluster where the user already is. The fix is the staged search in [issue \#1294](https://github.com/muhammedgaygisiz/travellers-apps/issues/1294), not further radius tuning.
 - Attaching the likes server-side traded feed latency for feed correctness. Time to a full feed moved from about 4.0 s to about 6.7 s, and in exchange a liked Bite can no longer render as unliked. Bounding the result set is what recovers the latency.
 
+- ## A Sold-Out Dish Reads As Available On The Consumer Menu
+
+  **Why it matters:** the flag is written and enforced, and the one surface a
+  diner actually reads does not look at it.
+
+  `MenuItem.isAvailable` is absent-means-available and is read through
+  `isMenuItemAvailable` in `libs/bite-tribe-common/model/src/lib/menu.ts`. The
+  business menu editor writes it, in
+  `business-menu-item-editor/business-menu-variant.component.ts`, and the
+  backend enforces it: `submit-table-order.ts` refuses a dish or variant that is
+  unavailable, and `resolve-table-qr-token.ts` filters on it.
+
+  No consumer surface reads it. A dish the kitchen has taken off today renders
+  on the menu page exactly as one that is not, so a diner planning around it
+  finds out only when the table-ordering flow refuses the order - and only where
+  that flow exists at all.
+
+  Unreachable in production today, because the business app has not launched and
+  nothing sets the flag. It becomes visible the day a restaurant uses the menu
+  editor. Recorded rather than fixed; [[UC - View Restaurant Menus]] marks the
+  behaviour _Intended, not met_, and the split of ownership is that page for the
+  display and [[UC - Maintain Restaurants In The Business App]] for the writing.
+
 - ## A Deleted Table Leaves Its Live State Behind
 
   **Why it matters:** it is the untested half of an epic success criterion, and

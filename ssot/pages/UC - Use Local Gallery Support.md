@@ -2,17 +2,24 @@
 
 ## Status
 
-Supported today.
+**Level:** L0.
+Supported today. The gallery, the shared full-screen viewer, the uid-scoped directory behind it
+and the filename route back to a Bite all ship. The scoping is the page's substantial fact and
+the reason it exists: see `Account Scoping Contract`.
 
 ## Goal
 
-Users can access locally stored BiteTribe image content.
+Someone who photographed a dish can find that photo again on their own device, full screen, and
+get back to the Bite it belongs to. This page owns what the local gallery shows, whose it is,
+and how a photo is traced to a Bite; where the copy is written and by whom is the upload flow's,
+on [[UC - Create And Maintain Personal Bites]].
 
 ## Actors
 
-- Bite creator
+- **Bite Creator** - opens the gallery, views and zooms its own photos, and follows one back to
+  its Bite.
 
-## Current Flow
+## Flow
 
 - User opens the local gallery.
 - The app shows the BiteTribe images this device stored for that account.
@@ -57,6 +64,28 @@ upload, so all three are scoped by the same rule.
 - The filename is not proof that the Bite still exists. A deleted Bite is
   answered by the Bite details page, which has to handle that case for the home
   feed and shared links regardless.
+- Local copies live in app-private storage (`Directory.Data`), not the public `Documents`
+  folder they used to sit in. Capacitor maps `Documents` to Android's public external storage,
+  which needs `WRITE_EXTERNAL_STORAGE` on API 29 and below - a permission this app does not
+  hold. Because the Bite save read its `uri` from that copy, a denial took the whole save down:
+  the photo never left the device and nothing said so.
+
+## MVP Classification
+
+**[MVP]** - the account scoping. It is a privacy boundary rather than a feature: before it, a
+second account on the same browser profile saw the previous account's photos _and_ learned from
+the filenames which Bites they had created.
+
+**[Secondary]** - the gallery surface itself, the zoom and swipe, and the offer to open the Bite
+behind a photo. Each is a convenience over photos the device already holds.
+
+## App Store Review Area
+
+Not relevant, because nothing on this page asks for anything. The gallery reads copies the
+device already holds, from app-private storage that needs no permission at any API level - see
+`Constraints`. The camera and photo-library permissions that put a photo there are collected in
+onboarding ([[UC - Guide New Users After Registration]]) and exercised on
+[[UC - Create And Maintain Personal Bites]].
 
 ## Supported Evidence
 
@@ -71,3 +100,11 @@ upload, so all three are scoped by the same rule.
 
 - [[Bite]]
 - [[User]]
+
+## Related Pages
+
+- [[Personas]] - the audience the `Actors` mapping displaced: the Bite creator
+- [[UC - Create And Maintain Personal Bites]] - the upload flow that writes the local copy, and
+  where the camera and photo-library permissions are exercised
+- [[UC - Inspect Bite Details]] - the Bite a photo leads back to, and the shared image viewer
+- [[UC - Guide New Users After Registration]] - where the photo permissions are collected

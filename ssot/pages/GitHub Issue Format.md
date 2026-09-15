@@ -50,33 +50,33 @@ For work not yet implemented. The body opens with the intent, before the first h
 As a [role/user] I want [function/action], so that [benefit/goal].
 ```
 
-| Section | When | Content |
-| --- | --- | --- |
-| `Description` | optional after the story sentence | The problem in prose. The story sentence alone is not a description. |
-| `Technical Details` | optional | Paths, identifiers, constants, functions. Name the exact artefact, not "the service". |
-| `Business Details` | optional | Commercial or product rationale, entitlement or pricing consequences. |
-| `Acceptance Criteria` | when the contract is non-trivial | See Acceptance Criteria below. Not mandatory for every issue. |
-| `Out Of Scope` | when something was deliberately excluded, and always after an INVEST split | So the exclusion is not re-litigated. |
-| `App Store Review Area` | always | See App Store Review Area below. |
-| `Related Issues` | always | See Related Issues below. |
+| Section                 | When                                                                       | Content                                                                               |
+| ----------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `Description`           | optional after the story sentence                                          | The problem in prose. The story sentence alone is not a description.                  |
+| `Technical Details`     | optional                                                                   | Paths, identifiers, constants, functions. Name the exact artefact, not "the service". |
+| `Business Details`      | optional                                                                   | Commercial or product rationale, entitlement or pricing consequences.                 |
+| `Acceptance Criteria`   | when the contract is non-trivial                                           | See Acceptance Criteria below. Not mandatory for every issue.                         |
+| `Out Of Scope`          | when something was deliberately excluded, and always after an INVEST split | So the exclusion is not re-litigated.                                                 |
+| `App Store Review Area` | always                                                                     | See App Store Review Area below.                                                      |
+| `Related Issues`        | always                                                                     | See Related Issues below.                                                             |
 
 ## Shape 2 - Retrospective
 
 For a defect or a change already implemented. **The user-story form is not used.** The body opens with `Description`.
 
-| Section | When | Content |
-| --- | --- | --- |
-| `Description` | always | The problem in prose, and how it was observed. |
-| `Findings` | always | What the investigation established. A second finding gets its own heading. |
-| `Decisions` | always | What was decided and why, including options rejected. |
-| `Outcome` | always | What changed, by exact path. |
-| `Technical Details` | optional | Where `Outcome` needs supporting detail. |
-| `Business Details` | optional | Commercial or product consequences of the change. |
-| `Out Of Scope` | optional | What was deliberately not fixed here. |
-| `Validation` | always | Which commands ran, which files were read. |
-| `Open` | always | What is still unverified, and why. "Nothing open." is a valid entry. |
-| `App Store Review Area` | always | See App Store Review Area below. |
-| `Related Issues` | always | See Related Issues below. |
+| Section                 | When     | Content                                                                    |
+| ----------------------- | -------- | -------------------------------------------------------------------------- |
+| `Description`           | always   | The problem in prose, and how it was observed.                             |
+| `Findings`              | always   | What the investigation established. A second finding gets its own heading. |
+| `Decisions`             | always   | What was decided and why, including options rejected.                      |
+| `Outcome`               | always   | What changed, by exact path.                                               |
+| `Technical Details`     | optional | Where `Outcome` needs supporting detail.                                   |
+| `Business Details`      | optional | Commercial or product consequences of the change.                          |
+| `Out Of Scope`          | optional | What was deliberately not fixed here.                                      |
+| `Validation`            | always   | Which commands ran, which files were read.                                 |
+| `Open`                  | always   | What is still unverified, and why. "Nothing open." is a valid entry.       |
+| `App Store Review Area` | always   | See App Store Review Area below.                                           |
+| `Related Issues`        | always   | See Related Issues below.                                                  |
 
 ## Acceptance Criteria
 
@@ -88,7 +88,7 @@ A decision that has not yet been taken belongs in [[Current State - Open Questio
 
 ### The Use-Case Assertion
 
-Where an issue closes a gap that a use case carries as a rule, guarantee or exception marked *Intended, not met*, the **last** acceptance criterion asserts that the marker is gone:
+Where an issue closes a gap that a use case carries as a rule, guarantee or exception marked _Intended, not met_, the **last** acceptance criterion asserts that the marker is gone:
 
 ```text
 - [ ] `UC - Detect Restaurant Candidate` no longer marks `G7` as *Intended, not met*.
@@ -96,14 +96,22 @@ Where an issue closes a gap that a use case carries as a rule, guarantee or exce
 
 This is an assertion, not the process entry ruled out above. It names one artefact and one identifier, it is false until the work lands, and it is checked by reading a single line. `[ ] Use case updated` is the process form and stays excluded, as does anything that does not name the identifier it settles.
 
-It exists because an id can survive a rewrite while its meaning moves, and because a rule marked *Intended, not met* is the one place the SSOT admits the code and the specification disagree. Nothing else in the issue makes the closing of that admission checkable.
+It exists because an id can survive a rewrite while its meaning moves, and because a rule marked _Intended, not met_ is the one place the SSOT admits the code and the specification disagree. Nothing else in the issue makes the closing of that admission checkable.
 
 Two limits:
 
 - **It applies only where such a marker exists.** An issue that closes nothing marked in a use case carries no criterion of this kind, and no issue invents a marker in order to have one.
 - **Where two issues together close one marker**, because the rule states both halves, the criterion belongs on the issue that lands second. The first names the half it delivers in its traceability sentence instead.
 
-This is the one exception to the rule that traceability is not recorded in the issue body. It records a *contract*, not a cross-reference: the cross-reference still belongs on the use-case page.
+The same form applies to deletion. Where an issue removes the code behind a use case marked `[Obsolete]` ([[Use Case Format]] `UF-21`), the **last** acceptance criterion asserts the page is gone:
+
+```text
+- [ ] `UC - <name>` is deleted, with its entry removed from [[SSOT]] and the use-case code registry.
+```
+
+The deletion itself is defined by [[Use Case Format]] `UF-23`; the criterion only makes it checkable from the issue.
+
+This is the one exception to the rule that traceability is not recorded in the issue body. It records a _contract_, not a cross-reference: the cross-reference still belongs on the use-case page.
 
 ## App Store Review Area
 
@@ -139,10 +147,10 @@ MVP is the core functionality strictly required for the initial release. Anythin
 
 The classification is recorded on the board as `Priority`, not in the issue body:
 
-| Classification | Board `Priority` |
-| --- | --- |
-| `[MVP]` | `P0` |
-| `[Secondary]` | `P1` to `P4`, by the scale below |
+| Classification | Board `Priority`                 |
+| -------------- | -------------------------------- |
+| `[MVP]`        | `P0`                             |
+| `[Secondary]`  | `P1` to `P4`, by the scale below |
 
 `P0` is MVP: launch-critical, and a decision with a named consequence rather than an observation, as [[GitHub Project Board And Issue Handling]] defines it. `P1` is what should be done immediately after MVP. `P2` is relevant, but the software works without it. `P3` is relevant in the future. `P4` is close to irrelevant. `P5` is unused.
 

@@ -19,8 +19,6 @@ personas have no distinct permission set, and two roles have no persona.
 **Verified against the code on 7 September 2026**, branch `develop` at `d015d6fa`,
 read-only. Decisions recorded after that reading are dated and are not re-verified.
 
-This page carries facts and decisions.
-
 ## Roles
 
 A role is a **Firebase Auth custom claim**, written only by the backend and carried in
@@ -52,17 +50,14 @@ truthful.
 _Operator_ is the accepted short form in prose, matching
 [[UC - Operate BiteTribe In The Admin App]]; the other two are used in full.
 
-Ownership is **written, enforced and visible**: \#1077 gave
-`Restaurant.ownerUserId` and `claimStatus` an operator writer - `assignRestaurantOwner`
-and `revokeRestaurantOwner`, behind an admin-app surface - \#1078 made
-`firestore.rules` read the field, so an assignment grants and withholds writes rather
-than only recording accountability, and \#1079 scoped the business dashboard and its edit
-routes to it. Since \#1537 the field authorises a third thing: which restaurant's staff an
-account may change. One caveat: the rules deploy by hand and are live
-only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
-Nothing in production is assigned today. There is **no self-service claim** - \#1076 was closed as not planned and
-\#1077 removed the `RestaurantClaim` model with it. See
-[[UC - Own And Claim Restaurants]].
+Ownership is **written, enforced and visible**. `Restaurant.ownerUserId` and `claimStatus` got an
+operator writer in \#1077 (`assignRestaurantOwner`, `revokeRestaurantOwner`), `firestore.rules` began
+reading it in \#1078, and \#1079 scoped the business dashboard and its edit routes to it.
+Since \#1537 the same field decides which restaurant's staff an account may change. Two
+caveats: the rules deploy by hand, so they bind only once
+`npx nx firebase-deploy-rules bite-tribe-firebase` has run, and nothing in production is
+assigned today. There is **no self-service claim** - \#1076 was closed as not planned and
+\#1077 removed the `RestaurantClaim` model with it. See [[UC - Own And Claim Restaurants]].
 
 ## What each role may do
 
@@ -83,33 +78,24 @@ Granted today: yes. Target state, not implemented: **target**. Not granted: no.
 | Acquire a BiteTrail as a Bucketlist                                                         | yes                       | yes              | yes                      |
 | Write `bite.restaurantId`                                                                   | yes, via verification     | no               | yes, via the Bite form ⁴ |
 | Report content and block another user                                                       | **target** ⁵              | **target** ⁵     | **target** ⁵             |
-| Act on a report: block an account, delete a Bite                                            | **target** ⁵              | no               | no                       |
+| Act on a report: block an account, delete a Bite                                            | yes ⁵                     | no               | no                       |
 
 ¹ `RD-UR-6`: the Operator maintains **every** Restaurant, claimed or unclaimed, from the
-Admin App - where verification already creates them. It does not reach them through the
-Business App, which requires `business` and is owner-scoped since issue \#1079. **The
-surface does not exist yet**, so today a Restaurant is maintainable by nobody once
-created: the Operator's only control is correcting the data during verification, and a
-Firebase console edit afterwards. No issue owns the surface. Two consequences elsewhere -
-the ownership-scoped rules in issue \#1078 need an explicit `admin` allowance, and epic
-\#1069's success criterion _"a restaurant cannot be edited by a user who does not own
-it"_ needs that exception written into its deny tests. Supersedes the three-way hierarchy
-question in [[UC - Verify Restaurant Candidate]] `S-10` and issue \#1164.
+Admin App - where verification already creates them - and never through the Business App,
+which requires `business` and is owner-scoped since \#1079. \#1078 delivered the rules half:
+`admin` is an explicit clause rather than an implied `business`, carried in the suite as its
+own allow case alongside epic \#1069's deny case for a business account writing a restaurant it
+does not hold. **The maintenance surface itself does not exist and no issue owns it**, so a
+Restaurant is today maintainable by nobody once created - the Operator corrects data during
+verification, or edits in the Firebase console. The remaining gap is attributability: an
+operator write from the admin app lands as a plain client write and leaves nothing in the
+operator log, unlike the ownership callables. That half of \#1164 is \#1546, open. Supersedes
+the three-way hierarchy question in [[UC - Verify Restaurant Candidate]] `S-10` and \#1164.
 
-**Both are delivered as of \#1078.** The rules name `admin` as an explicit clause rather
-than implying `business`, and the rules suite carries the exception as its own allow case
-alongside the deny case for a business account writing a restaurant it does not hold. The
-gap that remains is attributability: an operator write from the admin app lands as a plain
-client write and leaves nothing in the operator log, unlike the ownership callables. That
-is the half of \#1164 no issue owns yet.
-
-² Assigned since \#1077, enforced since \#1078 and visible since \#1079:
-`firestore.rules` allows a restaurant, menu or Bite-trail write only from the account
-named on the document, the business dashboard lists only the restaurants assigned to the
-caller, and the two routes that edit one refuse anything else by direct URL. The write is
-authorised by ownership alone rather than by ownership _and_ the `business` role, so an
-account whose role was revoked while it still held a restaurant keeps write access through
-the API; \#1539 removes that state at the source.
+² Assigned, enforced and visible per the ownership note above. One consequence worth naming:
+the write is authorised by ownership alone rather than by ownership _and_ the `business` role,
+so an account whose role was revoked while it still held a restaurant keeps write access
+through the API. \#1539 removes that state at the source.
 
 ³ `RD-UR-4`: publishing moves to the consumer app behind `authGuard` only, so it becomes a
 Bite Creator capability and the Business App route is retired. Implementation is issue
@@ -120,12 +106,15 @@ without code.
 This makes the Bite Creator one of three writers of that field; see
 [[UC - Verify Restaurant Candidate]], rule `R-8`.
 
-⁵ Nothing here exists in the product today, and Bite Creator carrying no claim means
-there is no grant to revoke either. `RD-UR-7` fixes the required set and classes it `[MVP]`.
-Operator actions are issues \#1474 (block an account) and \#1475 (delete a Bite),
-children of epic \#1471; the report queue is epic \#1284. **The user-facing report
-action, user-to-user blocking and content filtering have no owning issue**, and the
-contact address waits on \#1429. Store requirement rather than product polish:
+⁵ `RD-UR-7` fixes the required set and classes it `[MVP]`. Bite Creator carrying no claim
+means there is no grant to revoke either. **The operator half shipped**: block an account
+(\#1474) and delete a Bite (\#1475) with epic \#1471, the contact address with \#1429;
+the report queue is epic \#1284, open. **The user-facing half - reporting, user-to-user
+blocking, content filtering - does not exist**, and each part has had an owning issue since
+14 September 2026: \#1608 reporting a Bite, \#1609 blocking another user, \#1610 filtering
+before publication. Epic \#1284 is narrower than it looks - it moderates review threads, so it
+covers reporting inside a thread and nothing else. Store requirement
+rather than product polish:
 [[Implementation - Store Declarations]] declares the **Social Media** data-use category
 at a **13+** age rating, and Apple's user-generated-content guideline asks for filtering,
 timely reporting, blocking and published contact details, with an equivalent Google Play
@@ -137,21 +126,18 @@ by `RD-UR-6` and reaches every one, which is the way back when a Restaurant remo
 last account with access. Neither can grant `admin` or `business` through these callables,
 and neither can act on an account that holds one.
 
-**Store position, checked 8 September 2026 against public store data only.** Google Play
-**has published the build**: the listing is live with an install button, last updated
-31 August 2026, rated 12+ on Play's own scale. So Play raised no objection to shipping
-with none of the four safeguards present. The iOS app is **not findable** by bundle id
-`com.bitetribe.app` on either the US or the Swiss storefront, which is consistent with
-[[Current State - Release State]] recording it as awaiting review on 31 August and is
-**not** evidence of a rejection. Apple's actual position is still unread - it is in App
-Store Connect, not in public data.
+**What the stores have done about footnote ⁵, checked 8 September 2026 against public data
+only.** Google Play published the build with none of the four safeguards present, so Play
+raised no objection. Apple's position is unread - it lives in App Store Connect, and the iOS
+app not being findable is consistent with awaiting review rather than evidence of rejection.
+[[Current State - Release State]] owns the release position itself.
 
-**Every gate above is a route guard or a callable check, not a data-layer one.**
-`firestore.rules` grants read and write on every document to every authenticated user, so
-a role gate stops an account reaching a page rather than stopping a determined caller
-writing a document. Accepted as a documented launch risk on 19 August 2026 under issue
-\#1177; owned by [[Current State - Known Issues]], with \#1078 for Firestore and \#1350
-for Storage, the more exploitable of the two.
+**The gates above are route guards and callable checks; since \#1078 the data layer backs
+them too.** `firestore.rules` scopes every **write** by the account named on the document;
+most **reads** it does not, and `bites` still allows read to any signed-in account. The
+ruleset is live - confirmed in the Firebase console on 11 September 2026, ending in a
+default-deny. `storage.rules` is untouched and still open (\#1350), and nothing in CI deploys
+either ruleset (\#1567). The detail is owned by [[Current State - Known Issues]].
 
 ## Not roles
 
@@ -179,85 +165,22 @@ rather than surfaces, is orthogonal to every role, and is not written by `setUse
 BiteTribe Pro is the entitlement - which is why it sits in the table above without being a
 persona either. See `RD-UR-1`.
 
-**Restaurant Staff now has a column, as of \#1097.** It had none for as long as its
-permission set was undecided, because a column of guesses would state a boundary nobody
-had taken. The set below is decided, enforced and under test; what is fixed above it, and
-was fixed from the start, is that staff acts on the one restaurant its granting Restaurant
-Owner holds and on no other.
+**Restaurant Staff has no column in the matrix above, deliberately.** The role is decided
+(`RD-UR-8`) and grantable (\#1537); its permission set is not, and a column of guesses would
+state a boundary nobody has decided. What is fixed: staff acts on the restaurants its granting
+Restaurant Owner holds and on no others.
 
-| Capability                                                    | Restaurant Staff      |
-| ------------------------------------------------------------- | --------------------- |
-| Consumer app: create and edit own Bites, browse, search, etc. | yes                   |
-| Sign into the Business App                                    | yes ⁷                 |
-| Read the **published** floor plan                             | yes, own restaurant ⁸ |
-| Read the owner's unpublished floor-plan draft                 | no ⁸                  |
-| Read live table state, the audit trail and visits             | yes, own restaurant   |
-| Change live table state, open and close visits                | yes, own restaurant ⁹ |
-| Edit the floor plan, or print its QR codes                    | no                    |
-| Maintain the restaurant profile, menu, hours, address, links  | no                    |
-| Grant or revoke `staff`, or see the staff list                | no                    |
-| Create and publish a BiteTrail                                | no                    |
-
-⁷ And lands in the room it works at rather than on the owner dashboard (\#1097):
-`staffEntryGuard` reads `/restaurantStaff/{uid}` on `/dashboard` and redirects to
-`restaurant/{restaurantId}/tables`. The dashboard lists restaurants by
-`Restaurant.ownerUserId`, so without the redirect a staff account arrives at an empty
-page and the one surface its role has is reachable only by typing a URL.
-
-⁸ The split is what made the read safe to open at all (\#1088). The published arrangement
-is the room document and the table documents; the owner's half-finished one lives at
-`rooms/{roomId}/drafts/current`, which has no staff clause. Scoped by `worksAt()` - the
-claim **and** the association naming that restaurant - never by the `staff` role alone,
-which would make the role a key to every restaurant's interior in BiteTribe.
-
-⁹ The role's only write, and it does not go through `firestore.rules`: every client write
-to `tableStates`, `tableStateTransitions` and `visits` is refused, and the change is made
-by calling `transitionTableState` (\#1092, \#1095). A callable rather than a rule because
-two hosts seating one table at the same second has to resolve to one outcome.
-
-**Revocation is immediate at the data layer, and lags by up to an hour in the app.**
-`removeRestaurantStaff` drops the claim and deletes the association together, and every
-rule above requires both, so the deleted association ends the access even while the
-account's unrefreshed ID token still carries `staff`. What the token's remaining life
-still costs is the sign-out: the account keeps the app open, reading nothing, until
-`roleGuard` sees a refreshed token without the claim. The rules suite covers both halves.
-
-**Checked 10 September 2026: a staff account can do nothing yet, and that is what \#1537
-shipped.** The issue's own scope was the grant, not the permission — "this makes the role
-and the association writable by the right caller, not meaningful". So today a Restaurant
-Owner can put an account on a restaurant, the `staff` claim and the
-`/restaurantStaff/{uid}` record are written together and audited, `firestore.rules`
-protects the record, and the account can sign into the Business App — where the dashboard
-lists restaurants by `Restaurant.ownerUserId` (\#1079) and therefore shows it nothing, and
-the rules give it no write (\#1078).
-
-**Updated 12 September 2026: the role has a permission, and no screen.** \#1088 gave
-`staff` its first read — the published floor plan of the one restaurant it works at, never
-a plan of any restaurant, because `worksAt()` pairs the claim with the association naming
-that restaurant. \#1092 gave it its first write, and deliberately not through the rules: a
-staff account changes a table's live state by calling `transitionTableState`, which admits
-`staff`, `business` or `admin` and then decides which restaurant each of them reaches.
-Live state is written by a callable rather than by a client because two hosts seating one
-table at once has to resolve to one outcome. \#1093 and \#1094 then gave the role its
-surface: `restaurant/:restaurantId/tables` draws the room a staff account works in, and
-holding a table opens the transitions it is allowed to make. So the write the role was
-granted is now one a staff member can actually reach - and it is still the only one, since
-the floor plan, the QR codes and the staff list remain closed to it. What a staff account
-signing in today still lands on is a dashboard that lists nothing, because the dashboard
-scopes by `Restaurant.ownerUserId`; that scoping has no owning issue.
-
-**Superseded the same day by \#1097, which owned it after all.** The dashboard still
-scopes by `Restaurant.ownerUserId` and still lists a staff account nothing — the fix was
-not to widen the list but to stop sending the account there. `staffEntryGuard` redirects
-to `restaurant/{restaurantId}/tables` on the way in, so the surface \#1093 and \#1094
-built is where a staff account starts rather than somewhere it has to be told the URL of.
-\#1097 also wrote the permission set into the matrix above and put its refusals under
-test; the gap that closed was the entry and the proof, not the permissions, which had
-already arrived one issue at a time.
+**A staff account can do nothing yet, checked 10 September 2026, and that is exactly what
+\#1537 shipped** - its scope was the grant, not the permission. A Restaurant Owner can put an
+account on a restaurant, the `staff` claim and the `/restaurantStaff/{uid}` record are written
+together and audited, and the account can sign into the Business App - where the dashboard
+lists by `Restaurant.ownerUserId` (\#1079) and shows it nothing, and the rules give it no
+write (\#1078). Making the role mean something is a change to those two, and has no owning
+issue.
 
 ## Recorded Decisions
 
-The decisions binding this page are `RD-UR-1` to `RD-UR-7`. They are held in
+The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [[Recorded Decisions]] with every other decision in the graph.
 
 ## Related Pages

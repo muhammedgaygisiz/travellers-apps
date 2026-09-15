@@ -480,6 +480,7 @@ X5 SYS <action>
 | `UC-ILQ` | Improve Localization Quality                           | [[UC - Improve Localization Quality]]                           |
 | `UC-SBP` | Subscribe To BiteTribe Pro                             | [[UC - Subscribe To BiteTribe Pro]]                             |
 | `UC-SAF` | See Ads As A Free User                                 | [[UC - See Ads As A Free User]]                                 |
+| `UC-BPB` | Buy A Paid BiteTrail                                   | [[UC - Buy A Paid BiteTrail]]                                   |
 | `UC-EPB` | Earn From A Paid BiteTrail                             | [[UC - Earn From A Paid BiteTrail]]                             |
 | `UC-PPB` | Price And Publish A BiteTrail                          | [[UC - Price And Publish A BiteTrail]]                          |
 | `UC-DIS` | Dismiss Restaurant Candidate                           | none                                                            |

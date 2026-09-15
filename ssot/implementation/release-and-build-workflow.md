@@ -21,7 +21,7 @@ Release and build workflow describes the implementation-facing scripts that supp
 | `npm run release:provenance`                            | Write `dist/build-provenance.json` naming the version, build number, and source commit        |
 | `npm run generate-changelog`                            | Generate incremental changelog output                                                         |
 | `npm run release:notes`                                 | Print the changelog range for store build notes (`-- --full` for the GitHub release body)     |
-| `npm run generate-full-changelog`                       | Generate full Logseq changelog output                                                         |
+| `npm run generate-full-changelog`                       | Regenerate `ssot/releases/` from the git tags                                                 |
 | `npm run increment-build-number-and-generate-changelog` | Generate changelog, increment build number, commit, tag, push, and publish the GitHub release |
 | `npm run cap:sync:ios`                                  | Capacitor sync into the iOS wrapper with a UTF-8 locale pinned                                |
 | `npm run cap:run:ios`                                   | Run Capacitor iOS                                                                             |

@@ -31,6 +31,7 @@
     "analytics:query": "node tools/analytics/query.mjs",
     "generate-changelog": "node tools/generate-changelog.mjs",
     "release:notes": "node tools/release-notes.mjs",
+    "check:ssot": "node tools/check-ssot.mjs",
     "generate-full-changelog": "node tools/generate-full-changelog.mjs",
     "increment-build-number-and-generate-changelog": "node tools/increment-build-number-and-generate-changelog.mjs",
     "build:storybook": "npm run nxgraph-html && nx run storybook-host:build-storybook",

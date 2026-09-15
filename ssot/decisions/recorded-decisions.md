@@ -134,7 +134,7 @@ Created 8 September 2026, when the register was centralised.
 **The seven `RD-VRC-*` entries were restored, not moved.** They were deleted from
 [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md) when that page was migrated to the actogram format
 earlier the same day, before this register existed, and no copy remained in the working
-tree or in `logseq/bak/`. The text above was recovered from a working transcript and is
+tree. The text above was recovered from a working transcript and is
 believed verbatim, but it has **not** been checked against a copy in the graph, because
 none exists. Confirm `RD-VRC-6` to `RD-VRC-16` against the code and the issues before
 treating them as verified.

@@ -51,6 +51,10 @@ jobs:
     needs:
       - setup
 
+    permissions:
+      contents: read
+      pull-requests: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -68,6 +72,77 @@ jobs:
 
       - name: Run Linter
         run: npm run nx -- affected -t lint
+
+      # Structural checks for the SSOT: dead relative links, leftover Logseq syntax,
+      # issue numbers that do not link, and the use-case format rules.
+      # See ssot/overview/use-case-format.md.
+      #
+      # Deliberately NON-BLOCKING: a dead link in a document should not stop a merge.
+      # The report goes to the job summary and, on a pull request, to a comment - which
+      # GitHub turns into an email through normal notification settings.
+      - name: Check SSOT
+        id: ssot
+        continue-on-error: true
+        run: npm run check:ssot --silent > ssot-report.txt 2>&1
+
+      - name: Report SSOT findings
+        if: always()
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { readFileSync } = require('node:fs');
+            const report = readFileSync('ssot-report.txt', 'utf8').trim();
+            const failed = '${{ steps.ssot.outcome }}' === 'failure';
+            const heading = failed ? '### SSOT check found problems' : '### SSOT check passed';
+
+            await core.summary.addRaw(`${heading}\n\n\`\`\`\n${report}\n\`\`\`\n`).write();
+
+            if (context.eventName !== 'pull_request') {
+              if (failed) core.warning(`SSOT check found problems:\n${report}`);
+              return;
+            }
+
+            const marker = '<!-- ssot-check -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+            });
+            const existing = comments.find((comment) => comment.body.includes(marker));
+
+            if (!failed) {
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: existing.id,
+                  body: `${marker}\n${heading}\n`,
+                });
+              }
+
+              return;
+            }
+
+            const body = [
+              marker,
+              heading,
+              '',
+              'Not a merge blocker. Fix it here, or in a follow-up.',
+              '',
+              '```',
+              report,
+              '```',
+              '',
+              'Run `npm run check:ssot` locally; the rules are in [tools/README.md](https://github.com/muhammedgaygisiz/travellers-apps/blob/develop/tools/README.md).',
+            ].join('\n');
+
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
 
   stylelint:
     runs-on: ubuntu-latest

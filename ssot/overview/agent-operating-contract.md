@@ -80,7 +80,7 @@ If the trace is missing or outdated, update the relevant SSOT page before or alo
 - Use Transloco keys for visible UI text and update every relevant locale file.
 - Update Storybook when shared UI gains visible states, inputs, modes, or layout behavior.
 - Use Capacitor sync commands for native wrapper dependency changes.
-- Keep Logseq backup pages out of the committed SSOT graph.
+- Do not hand-edit a generated page. `tools/README.md` names which scripts write into `ssot/`; change the generator instead.
 
 ## Validation Rules
 

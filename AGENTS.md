@@ -29,7 +29,7 @@ This contract is model-agnostic. Codex, Claude, GPT, local IDE agents, and futur
 - Adding a language means four lists, not one: Transloco locales, the Firebase Functions notification catalog, the published privacy-policy languages, and the iOS `InfoPlist.strings` variant group. Follow the checklist in `ssot/implementation/localization.md`; a missed list silently falls back to English instead of failing.
 - Update Storybook when shared UI gains visible states, inputs, modes, or layout behavior.
 - Use Capacitor sync commands for native wrapper dependency changes.
-- Keep Logseq backup pages out of the committed SSOT graph.
+- Do not hand-edit a generated page. `tools/README.md` names which scripts write into `ssot/`; change the generator instead.
 
 ## Traceability Rule
 

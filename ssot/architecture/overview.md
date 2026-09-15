@@ -86,8 +86,8 @@ libs/common
 
 ## Related Architecture Pages
 
-- [[Architecture - Nx Workspace]]
-- [[Architecture - Firebase]]
-- [[Architecture - Capacitor]]
-- [[Architecture - Data Access]]
-- [[Architecture - State Management]]
+- [Architecture - Nx Workspace](nx-workspace.md)
+- [Architecture - Firebase](firebase.md)
+- [Architecture - Capacitor](capacitor.md)
+- [Architecture - Data Access](data-access.md)
+- [Architecture - State Management](state-management.md)

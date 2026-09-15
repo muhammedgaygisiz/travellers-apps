@@ -12,7 +12,7 @@ the reason it exists: see `Account Scoping Contract`.
 Someone who photographed a dish can find that photo again on their own device, full screen, and
 get back to the Bite it belongs to. This page owns what the local gallery shows, whose it is,
 and how a photo is traced to a Bite; where the copy is written and by whom is the upload flow's,
-on [[UC - Create And Maintain Personal Bites]].
+on [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md).
 
 ## Actors
 
@@ -45,7 +45,7 @@ was shared by every account on a browser profile, and what leaked was not only
 the photographs: the filenames name the Bites their owner created, so the next
 user also learned that. Logging out did not clear it, and `Delete all` is manual.
 Scoping the read is therefore what holds, not a cleanup step at the end of a
-session that an abandoned browser tab never reaches. See GitHub issue #1328.
+session that an abandoned browser tab never reaches. See GitHub issue [#1328].
 
 The same directory backs the local image picker and the retry of a failed
 upload, so all three are scoped by the same rule.
@@ -84,8 +84,8 @@ behind a photo. Each is a convenience over photos the device already holds.
 Not relevant, because nothing on this page asks for anything. The gallery reads copies the
 device already holds, from app-private storage that needs no permission at any API level - see
 `Constraints`. The camera and photo-library permissions that put a photo there are collected in
-onboarding ([[UC - Guide New Users After Registration]]) and exercised on
-[[UC - Create And Maintain Personal Bites]].
+onboarding ([UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md)) and exercised on
+[UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md).
 
 ## Supported Evidence
 
@@ -98,13 +98,15 @@ onboarding ([[UC - Guide New Users After Registration]]) and exercised on
 
 ## Related Domains
 
-- [[Bite]]
-- [[User]]
+- [Bite](../domain/bite.md)
+- [User](../domain/user.md)
 
 ## Related Pages
 
-- [[Personas]] - the audience the `Actors` mapping displaced: the Bite creator
-- [[UC - Create And Maintain Personal Bites]] - the upload flow that writes the local copy, and
+- [Personas](../product/personas.md) - the audience the `Actors` mapping displaced: the Bite creator
+- [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md) - the upload flow that writes the local copy, and
   where the camera and photo-library permissions are exercised
-- [[UC - Inspect Bite Details]] - the Bite a photo leads back to, and the shared image viewer
-- [[UC - Guide New Users After Registration]] - where the photo permissions are collected
+- [UC - Inspect Bite Details](uc-inspect-bite-details.md) - the Bite a photo leads back to, and the shared image viewer
+- [UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md) - where the photo permissions are collected
+
+[#1328]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1328

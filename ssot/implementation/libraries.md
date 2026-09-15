@@ -36,9 +36,9 @@ else. A component two features both need therefore belongs in a `type:ui`
 library - or, where extracting one is out of proportion to the change, both
 screens live in the one feature library that already owns the component.
 
-Issue \#1103 is the worked example. The table ordering screen renders `bt-menu`,
+Issue [#1103] is the worked example. The table ordering screen renders `bt-menu`,
 which lives in `libs/bite-tribe/menu/page` beside the public menu of issue
-\#1102, so the screen was written there rather than in
+[#1102], so the screen was written there rather than in
 `libs/bite-tribe/table-session`. The alternative - a second copy of the menu
 renderer - is how two menus start disagreeing about what an unavailable dish
 looks like. Its cart and its submission are a `type:data-access` library of their
@@ -66,6 +66,9 @@ Use `libs/bite-tribe-common/model` only when multiple features need the same typ
 
 ## Related Pages
 
-- [[Architecture - Nx Workspace]]
-- [[Implementation - Code Map]]
-- [[Implementation - Naming Conventions]]
+- [Architecture - Nx Workspace](../architecture/nx-workspace.md)
+- [Implementation - Code Map](code-map.md)
+- [Implementation - Naming Conventions](naming-conventions.md)
+
+[#1102]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1102
+[#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103

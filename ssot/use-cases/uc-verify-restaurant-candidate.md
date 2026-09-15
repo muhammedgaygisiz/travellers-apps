@@ -5,12 +5,12 @@
 **Level:** L2.
 
 Implemented and in use. The backend callable `verifyRestaurantCandidate` is
-`admin`-gated since issue \#1472, and the Operator surface moved into
-`bite-tribe-admin` with issue \#1473. Four referenced Use Cases this flow depends on
+`admin`-gated since issue [#1472], and the Operator surface moved into
+`bite-tribe-admin` with issue [#1473]. Four referenced Use Cases this flow depends on
 have no implementation — dismissal, duplicate resolution, owner assignment, and a
 standalone writer for Bite assignment — and each is carried as a rule marked
 _Intended, not met_ rather than as an agreed step that quietly does not run. Work in
-flight: epic \#1495.
+flight: epic [#1495].
 
 | Aspect                                                 | State                                                                                                      |
 | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -18,10 +18,10 @@ flight: epic \#1495.
 | Operator surface (Candidate list, new-Restaurant form) | Implemented in `bite-tribe-admin`                                                                          |
 | `UC-GIM` — Initial Menu                                | Implemented, reachable only inside verification                                                            |
 | `UC-ARB` — assign Bites                                | Reachable only inside verification; no standalone writer, see `R-8`                                        |
-| `UC-DIS` — dismiss                                     | Not implemented, see `R-13`. Owned by #1501, #1508 and #1502                                               |
+| `UC-DIS` — dismiss                                     | Not implemented, see `R-13`. Owned by [#1501], [#1508] and [#1502]                                         |
 | `UC-MRC` — resolve a duplicate                         | Not implemented, see `R-14`                                                                                |
-| `UC-ARO` — assign owner                                | Implemented (\#1077) as a separate Operator action, **outside this flow**; see `R-15`                      |
-| Authorization at the data layer                        | Closed in the repository by #1078; see `Authorization`. Live once the rules are deployed by hand           |
+| `UC-ARO` — assign owner                                | Implemented ([#1077]) as a separate Operator action, **outside this flow**; see `R-15`                     |
+| Authorization at the data layer                        | Closed in the repository by [#1078]; see `Authorization`. Live once the rules are deployed by hand         |
 | `AF-31` / `AF-34` handshake                            | `AF-31` satisfied. `AF-34` closed with `UC-DRC`; unanswered against seven counterparties. See `Guarantees` |
 
 ## Goal
@@ -37,7 +37,7 @@ works, so that a defect is locatable in exactly one document.
 
 ## Actors
 
-The authorization vocabulary is three roles, defined in [[User Roles]]. Only one of
+The authorization vocabulary is three roles, defined in [User Roles](../product/user-roles.md). Only one of
 them acts here.
 
 - **BiteTribe Operator** (short: _Operator_), holding the `admin` claim. The only
@@ -50,7 +50,7 @@ them acts here.
   it is one of the four writers of `bite.restaurantId` (`R-8`).
 
 **BiteTrail Creator is not a role** and has no part here. `RD-UR-4` retired it; it is
-listed under _Not roles_ in [[User Roles]].
+listed under _Not roles_ in [User Roles](../product/user-roles.md).
 
 **The role hierarchy is decided and not implemented.** `RD-UR-6` places the Operator
 above the Restaurant Owner in capability: it may maintain every Restaurant, claimed or
@@ -58,22 +58,22 @@ unclaimed, without owning any — delivered through an Admin App restaurant-edit
 plus an `admin` allowance in the ownership-scoped Firestore rules, never by granting
 `business` and never by writing `Restaurant.ownerUserId`. In the code `admin` and
 `business` are still deliberately _not_ a hierarchy — settled rather than open, by
-`RD-UR-6` and issue \#1164.
-**The rules half is delivered:** \#1078 names `admin` as an explicit clause, so an
+`RD-UR-6` and issue [#1164].
+**The rules half is delivered:** [#1078] names `admin` as an explicit clause, so an
 Operator may write any Restaurant and its Menu from the Admin App. **The surface half is
-not:** there is no edit surface in the Admin App, explicitly out of scope in \#1510, so
+not:** there is no edit surface in the Admin App, explicitly out of scope in [#1510], so
 an Operator still cannot maintain the Restaurant it just verified — which, by `G7`, also
 has no owner. What changed is that the permission is now there when the surface is built.
 
 ## Lanes
 
-| Code  | Kind     | Binding                                               |
-| ----- | -------- | ----------------------------------------------------- |
-| `OP`  | actor    | BiteTribe Operator, `admin` claim, per [[User Roles]] |
-| `UI`  | system   | `bite-tribe-admin`, the Admin App (Angular)           |
-| `SYS` | system   | Cloud Functions; the callable is named at the step    |
-| `DB`  | system   | Firestore                                             |
-| `EXT` | external | Google Places API                                     |
+| Code  | Kind     | Binding                                                                       |
+| ----- | -------- | ----------------------------------------------------------------------------- |
+| `OP`  | actor    | BiteTribe Operator, `admin` claim, per [User Roles](../product/user-roles.md) |
+| `UI`  | system   | `bite-tribe-admin`, the Admin App (Angular)                                   |
+| `SYS` | system   | Cloud Functions; the callable is named at the step                            |
+| `DB`  | system   | Firestore                                                                     |
+| `EXT` | external | Google Places API                                                             |
 
 `NAT` is not used: the Admin App is a web app and touches no native capability.
 
@@ -109,21 +109,21 @@ creates every Candidate, through both of its producers. This Use Case writes the
 verification at `V24`. `UC-DIS` would write `dismissed` and today writes nothing
 (`R-13`). `UC-MRC` would write the duplicate resolution and today writes nothing
 (`R-14`). Excluded: any signed-in client, which
-`firestore.rules` refuses since \#1078 — a boundary now enforced where the data lives and
+`firestore.rules` refuses since [#1078] — a boundary now enforced where the data lives and
 stated once under `Authorization`.
 
 Out of scope. Each of these is its own Use Case, referenced from the step it belongs to:
 
-| UC-ID    | Use Case                                          | Referenced at  | Direction                                                                                                                                                          |
-| -------- | ------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `UC-DRC` | [[UC - Detect Restaurant Candidate]]              | `P1`, `P2`     | Upstream, and the sole owner of every way a Candidate comes into existence — the automatic trigger _and_ the Operator's on-demand clustering callable (`RD-VRC-8`) |
-| `UC-DIS` | Dismiss Restaurant Candidate                      | `V4a`          | Alternative outcome                                                                                                                                                |
-| `UC-MRC` | Resolve Candidate Against An Existing Restaurant  | `V4b`          | Alternative outcome                                                                                                                                                |
-| `UC-ARO` | [[UC - Own And Claim Restaurants]]                | `G7`, `R-15`   | Downstream — a separate Operator action after `END-V4`, not a step here                                                                                            |
-| `UC-GIM` | Generate Initial Menu From Bite Evidence          | `V19`          | Invoked step                                                                                                                                                       |
-| `UC-ARB` | Assign Bites To Restaurant                        | `V23`          | Invoked step                                                                                                                                                       |
-| `UC-MRB` | [[UC - Maintain Restaurants In The Business App]] | After `END-V4` | Downstream                                                                                                                                                         |
-| `UC-OPS` | [[UC - Operate BiteTribe In The Admin App]]       | `V1`           | Enclosing: sign-in and the role gate                                                                                                                               |
+| UC-ID    | Use Case                                                                                        | Referenced at  | Direction                                                                                                                                                          |
+| -------- | ----------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `UC-DRC` | [UC - Detect Restaurant Candidate](uc-detect-restaurant-candidate.md)                           | `P1`, `P2`     | Upstream, and the sole owner of every way a Candidate comes into existence — the automatic trigger _and_ the Operator's on-demand clustering callable (`RD-VRC-8`) |
+| `UC-DIS` | Dismiss Restaurant Candidate                                                                    | `V4a`          | Alternative outcome                                                                                                                                                |
+| `UC-MRC` | Resolve Candidate Against An Existing Restaurant                                                | `V4b`          | Alternative outcome                                                                                                                                                |
+| `UC-ARO` | [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md)                               | `G7`, `R-15`   | Downstream — a separate Operator action after `END-V4`, not a step here                                                                                            |
+| `UC-GIM` | Generate Initial Menu From Bite Evidence                                                        | `V19`          | Invoked step                                                                                                                                                       |
+| `UC-ARB` | Assign Bites To Restaurant                                                                      | `V23`          | Invoked step                                                                                                                                                       |
+| `UC-MRB` | [UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md) | After `END-V4` | Downstream                                                                                                                                                         |
+| `UC-OPS` | [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md)             | `V1`           | Enclosing: sign-in and the role gate                                                                                                                               |
 
 Of the referenced Use Cases, **`UC-DIS`, `UC-MRC`, `UC-GIM` and `UC-ARB` do not yet
 exist as pages.** They are named here so that each rule this flow depends on has an
@@ -179,7 +179,7 @@ Under `AF-34` these seven counterparties are **unanswered**, not conformance fai
 this page has stated its side, and the other side is theirs to state. Each is a claim on
 `UF-20`'s migration order, and each closes the day that page carries numbered guarantees.
 `UC-ARO` is the one to take first: it is the only one of the seven already implemented
-(\#1077), so its guarantees can be written from the code rather than proposed.
+([#1077]), so its guarantees can be written from the code rather than proposed.
 
 `G1` and `G3` hold at `END-V4` and are not durable afterwards. `G1` is falsified by a
 second verification of the same Candidate, which `R-18` closes. `G3` is falsified by a
@@ -188,7 +188,7 @@ and which nothing closes today. Both are recorded as `E9` and `E7`.
 
 ## Actogram
 
-The flow below is a text actogram; the notation is defined in [[Actogram Format]].
+The flow below is a text actogram; the notation is defined in [Actogram Format](../overview/actogram-format.md).
 
 One entry, step-id prefix `V`. `V26`, `V27` and `V28` are retired and are not reused,
 and so is the terminal `END-E8`: `V26` was the post-transaction image upload that `V11a`
@@ -430,20 +430,20 @@ V25  SYS  returns { restaurantId, menuId, menuItemCount, candidateId, skippedBit
 
 ### Terminal States
 
-| End      | Kind               | Aggregate state                                 | Perception                                                                                                                                                                                           | Meaning                                                                                                                                                                                                                                     |
-| -------- | ------------------ | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `END-V1` | Hand-over          | `dismissed`                                     | The Candidate no longer appears in the pending list                                                                                                                                                  | Left to `UC-DIS`. Unreachable today, `R-13`                                                                                                                                                                                                 |
-| `END-V2` | Hand-over          | `verified`                                      | The Candidate no longer appears in the pending list, and points at the Restaurant that already existed                                                                                               | Left to `UC-MRC`. Unreachable today, `R-14`                                                                                                                                                                                                 |
-| `END-V3` | Abort              | `pending`                                       | Back at the Candidate list with the Candidate still listed; the form draft — the image, address and opening hours entered at `V8` and `V9` — is discarded, because it exists only in the client form | Deferred or abandoned. No side effect                                                                                                                                                                                                       |
-| `END-V4` | Success            | `verified`                                      | The Candidate list no longer lists it, and the new Restaurant is reachable from the Restaurants surface                                                                                              | G1 to G7 hold                                                                                                                                                                                                                               |
-| `END-V5` | Idempotent success | `verified`                                      | The verification succeeds, naming the Restaurant that already existed, and marked as an existing result rather than a created one                                                                    | Nothing is created                                                                                                                                                                                                                          |
-| `END-E1` | Rejection          | `pending`                                       | The submission fails with a generic error and the form keeps its data                                                                                                                                | App Check token missing or invalid                                                                                                                                                                                                          |
-| `END-E2` | Rejection          | `pending`                                       | The submission fails and the Operator is asked to sign in                                                                                                                                            | `unauthenticated`                                                                                                                                                                                                                           |
-| `END-E3` | Rejection          | `pending`                                       | The submission fails, and signing in again does not help                                                                                                                                             | `permission-denied`, the account holds no `admin` claim                                                                                                                                                                                     |
-| `END-E4` | Rejection          | `pending`                                       | The submission fails with a generic error                                                                                                                                                            | `invalid-argument`, `candidateId`                                                                                                                                                                                                           |
-| `END-E5` | Rejection          | `absent`                                        | The submission fails, and the Candidate is gone from the list on reload                                                                                                                              | `not-found`                                                                                                                                                                                                                                 |
-| `END-E6` | Rejection          | `dismissed`, or `verified` naming no Restaurant | The submission fails with a generic error                                                                                                                                                            | `failed-precondition`: decided, but pointing at no Restaurant. Unreachable since #1078 made `/restaurantCandidates` client-writable by nobody: `R-13` leaves `dismissed` without a writer, and `V24` never writes `verified` without the id |
-| `END-E7` | Rejection          | `pending`                                       | The submission fails and the form keeps its data                                                                                                                                                     | `invalid-argument`, name or position                                                                                                                                                                                                        |
+| End      | Kind               | Aggregate state                                 | Perception                                                                                                                                                                                           | Meaning                                                                                                                                                                                                                                       |
+| -------- | ------------------ | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `END-V1` | Hand-over          | `dismissed`                                     | The Candidate no longer appears in the pending list                                                                                                                                                  | Left to `UC-DIS`. Unreachable today, `R-13`                                                                                                                                                                                                   |
+| `END-V2` | Hand-over          | `verified`                                      | The Candidate no longer appears in the pending list, and points at the Restaurant that already existed                                                                                               | Left to `UC-MRC`. Unreachable today, `R-14`                                                                                                                                                                                                   |
+| `END-V3` | Abort              | `pending`                                       | Back at the Candidate list with the Candidate still listed; the form draft — the image, address and opening hours entered at `V8` and `V9` — is discarded, because it exists only in the client form | Deferred or abandoned. No side effect                                                                                                                                                                                                         |
+| `END-V4` | Success            | `verified`                                      | The Candidate list no longer lists it, and the new Restaurant is reachable from the Restaurants surface                                                                                              | G1 to G7 hold                                                                                                                                                                                                                                 |
+| `END-V5` | Idempotent success | `verified`                                      | The verification succeeds, naming the Restaurant that already existed, and marked as an existing result rather than a created one                                                                    | Nothing is created                                                                                                                                                                                                                            |
+| `END-E1` | Rejection          | `pending`                                       | The submission fails with a generic error and the form keeps its data                                                                                                                                | App Check token missing or invalid                                                                                                                                                                                                            |
+| `END-E2` | Rejection          | `pending`                                       | The submission fails and the Operator is asked to sign in                                                                                                                                            | `unauthenticated`                                                                                                                                                                                                                             |
+| `END-E3` | Rejection          | `pending`                                       | The submission fails, and signing in again does not help                                                                                                                                             | `permission-denied`, the account holds no `admin` claim                                                                                                                                                                                       |
+| `END-E4` | Rejection          | `pending`                                       | The submission fails with a generic error                                                                                                                                                            | `invalid-argument`, `candidateId`                                                                                                                                                                                                             |
+| `END-E5` | Rejection          | `absent`                                        | The submission fails, and the Candidate is gone from the list on reload                                                                                                                              | `not-found`                                                                                                                                                                                                                                   |
+| `END-E6` | Rejection          | `dismissed`, or `verified` naming no Restaurant | The submission fails with a generic error                                                                                                                                                            | `failed-precondition`: decided, but pointing at no Restaurant. Unreachable since [#1078] made `/restaurantCandidates` client-writable by nobody: `R-13` leaves `dismissed` without a writer, and `V24` never writes `verified` without the id |
+| `END-E7` | Rejection          | `pending`                                       | The submission fails and the form keeps its data                                                                                                                                                     | `invalid-argument`, name or position                                                                                                                                                                                                          |
 
 ## Rules And Invariants
 
@@ -458,28 +458,28 @@ V25  SYS  returns { restaurantId, menuId, menuItemCount, candidateId, skippedBit
 | **R-7**  | Verification is idempotent. A second call for the same Candidate creates nothing and returns the existing Restaurant, marked as an existing result and not as a created one, so a caller can tell `END-V5` from `END-V4`.                                                                                                                                                                                                                                                                                                                                                                                                    |
 | **R-8**  | `bite.restaurantId` has **four** writers. `V23` is the only transactional one, and the only one inside this Use Case. Two more sit in the Bite form, which carries a `restaurantId` control set when a Bite Creator picks a verified nearby Restaurant: the whole form value is persisted on create **and on edit**. The fourth is the Admin App's Candidate-free save path, which links every listed Bite in a client-side write outside any transaction; it is unreachable today only because the Bite-places surface passes no `biteIds`. Detection is deliberately **not** a writer — see `UC-DRC` `R-6` and `RD-VRC-9`. |
 | **R-9**  | `V15` to `V24` are one transaction. The Candidate read at `V15` and the evidence read at `V18` happen inside it, before any write, so no observable state has a Restaurant without its Menu, or Bites pointing at a Restaurant whose Candidate is still `pending`.                                                                                                                                                                                                                                                                                                                                                           |
-| **R-10** | _Intended, not met._ Everything the Restaurant needs in order to be valid is written inside `R-9`'s transaction. An image is therefore uploaded at `V11a`, before the callable, so only its URL crosses the boundary. Today the image is instead written after the transaction has committed, by a direct client write to `/restaurants`. Since #1078 that write is authorised by the Operator's `admin` clause rather than by open rules, so it still works and is still outside the transaction. Owned by #1504.                                                                                                           |
+| **R-10** | _Intended, not met._ Everything the Restaurant needs in order to be valid is written inside `R-9`'s transaction. An image is therefore uploaded at `V11a`, before the callable, so only its URL crosses the boundary. Today the image is instead written after the transaction has committed, by a direct client write to `/restaurants`. Since [#1078] that write is authorised by the Operator's `admin` clause rather than by open rules, so it still works and is still outside the transaction. Owned by [#1504].                                                                                                       |
 | **R-11** | The Initial Menu is a **draft derived from evidence**, not a statement about the real menu. Its prices are averages of what Bite Creators reported.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | **R-12** | A Bite Creator is never notified and sees no state change from this Use Case, other than their Bite now appearing under a Restaurant.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| **R-13** | _Intended, not met._ A Candidate the Operator judges not to be a restaurant is left `dismissed` (`V4a`, `UC-DIS`). No surface and no writer exist, so `dismissed` is a declared status that nothing can reach. Owned in three parts, all in epic #1495 and all `[Secondary]`: #1501 the backend writer, #1508 the Operator surface, #1502 un-dismissal.                                                                                                                                                                                                                                                                      |
+| **R-13** | _Intended, not met._ A Candidate the Operator judges not to be a restaurant is left `dismissed` (`V4a`, `UC-DIS`). No surface and no writer exist, so `dismissed` is a declared status that nothing can reach. Owned in three parts, all in epic [#1495] and all `[Secondary]`: [#1501] the backend writer, [#1508] the Operator surface, [#1502] un-dismissal.                                                                                                                                                                                                                                                              |
 | **R-14** | _Intended, not met._ A Candidate for a place that already has a verified Restaurant is resolved against that Restaurant (`V4b`, `UC-MRC`), creating no second Restaurant. No writer exists.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| **R-15** | Verification does **not** assign an owner. Every Restaurant leaves this flow `unclaimed` (`G7`), and ownership is a separate Operator action afterwards — `assignRestaurantOwner` in the Admin App (`UC-ARO`, #1077). Corrected 9 September 2026 against that delivery, which contradicts the earlier intent twice: the target account must **already** hold `business`, because assignment does not grant the role and is refused otherwise (`setUserRoles` grants it); and the write is its own transaction, not part of `R-9`'s.                                                                                          |
+| **R-15** | Verification does **not** assign an owner. Every Restaurant leaves this flow `unclaimed` (`G7`), and ownership is a separate Operator action afterwards — `assignRestaurantOwner` in the Admin App (`UC-ARO`, [#1077]). Corrected 9 September 2026 against that delivery, which contradicts the earlier intent twice: the target account must **already** hold `business`, because assignment does not grant the role and is refused otherwise (`setUserRoles` grants it); and the write is its own transaction, not part of `R-9`'s.                                                                                        |
 | **R-16** | An evidence Bite deleted after detection is skipped at `V18`, rather than failing the transaction and stranding the Candidate in `pending`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | **R-17** | _Intended, not met._ The Candidate list has one server-side order and no selectable ordering — `evidence.biteCount` descending, then `createdAtTimestamp` descending — and it pages rather than truncating, so every `pending` Candidate is reachable. Ordering without paging satisfies neither half. The single fixed order, and the absence of a selectable one, is `RD-VRC-16`.                                                                                                                                                                                                                                          |
 | **R-18** | _Intended, not met._ Idempotency is keyed on `verifiedRestaurantId`, not on `status`. A Candidate that names a Restaurant has already been verified whatever its status says: `status` is a label any writer can rewrite, the field is the fact. Today `V16` branches on `status` alone, so a Candidate returned to `pending` while still naming a Restaurant is verified a second time.                                                                                                                                                                                                                                     |
 | **R-19** | _Intended, not met._ An Operator correction of `position` at `V8` is recorded as a correction, so a corrected position is distinguishable from the seeded one. Nothing marks the difference today, so a later write cannot know it must not revert the correction, and the Restaurant's geohash derived at `V20a` can diverge from the Candidate's own `geohash` with nothing to say which is right.                                                                                                                                                                                                                         |
-| **R-20** | _Intended, not met._ A surviving evidence Bite that already carries a non-empty `restaurantId` — of any shape, bare id or document path — is skipped: it is not written at `V23`, it is named in the Candidate's `skippedBiteIds` and in the callable's result, and it is excluded from the Menu derivation at `V19`, because a Menu must not be derived from a dish belonging to another Restaurant. The transaction still completes and the Candidate still reaches `verified` even where every listed Bite was skipped. Owned by #1498; the Operator-facing half — showing which Bites were skipped — is #1505.           |
+| **R-20** | _Intended, not met._ A surviving evidence Bite that already carries a non-empty `restaurantId` — of any shape, bare id or document path — is skipped: it is not written at `V23`, it is named in the Candidate's `skippedBiteIds` and in the callable's result, and it is excluded from the Menu derivation at `V19`, because a Menu must not be derived from a dish belonging to another Restaurant. The transaction still completes and the Candidate still reaches `verified` even where every listed Bite was skipped. Owned by [#1498]; the Operator-facing half — showing which Bites were skipped — is [#1505].       |
 
 ## Exceptions And Failure Modes
 
-| #   | Situation                                                                                                                                                                          | Behaviour                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Assessment              |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
-| E5  | The model deletes `merged`, and the code still carries the status and the `mergedIntoCandidateId` branch at `V17`                                                                  | The branch exists in code and is unreachable in practice, because nothing writes the status                                                                                                                                                                                                                                                                                                                                                                                    | Gap, #1499              |
-| E7  | An evidence Bite already belongs to another Restaurant                                                                                                                             | Silently overwritten at `V23` today, and reachable by a Bite Creator editing their own Bite, per `R-8`. Detection excludes assigned Bites, so a Candidate's `biteIds` were all unassigned at clustering time: the divergence appears between clustering and verification, in a window nobody watches. `R-20` decides the behaviour and is not built                                                                                                                            | Defect, #1498           |
-| E8  | More than five Candidates are `pending`                                                                                                                                            | `V2` takes the first five in document-id order and does not page, so every Candidate beyond the fifth is unreachable by any path. Ordering alone would change which five are stuck, not that five are stuck — which is why `R-17` requires paging as well                                                                                                                                                                                                                      | Defect, #1506 and #1507 |
-| E9  | A verified Candidate is returned to `pending` — by detection's unconditional write, by an Operator, or through the open data layer — while it still carries `verifiedRestaurantId` | `V16` branches on `status` alone, so the Candidate reaches `V18` and a second Restaurant is created for a business that already has one. `R-18` closes it and is not built. The reset itself is owned by `UC-DRC` `R-8`                                                                                                                                                                                                                                                        | Defect, #1521           |
-| E10 | The Operator corrects `name` or `position` at `V8`                                                                                                                                 | Detection's only protection against re-detecting an already verified place is a 0.82 name score within 200 m, so a correction past either threshold defeats it: the Candidate is reset to `pending` with a stale `verifiedRestaurantId`, which is the state `E9` then acts on. Nothing records that the value was corrected (`R-19`), and the Restaurant's geohash from `V20a` no longer matches the Candidate's. Strengthening that check is explicitly out of scope in #1497 | Defect, #1522           |
-| E11 | The image upload runs after the verification transaction has committed                                                                                                             | The Restaurant is created without it; the failure surfaces as an unhandled rejection on the form, and a resubmit returns the idempotent result so the upload is never retried. The write is a direct client write to `/restaurants`, authorised since #1078 by the Operator's `admin` clause rather than by open rules. `V11a` and `R-10` close it                                                                                                                             | Defect, #1504           |
+| #   | Situation                                                                                                                                                                          | Behaviour                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Assessment                  |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| E5  | The model deletes `merged`, and the code still carries the status and the `mergedIntoCandidateId` branch at `V17`                                                                  | The branch exists in code and is unreachable in practice, because nothing writes the status                                                                                                                                                                                                                                                                                                                                                                                      | Gap, [#1499]                |
+| E7  | An evidence Bite already belongs to another Restaurant                                                                                                                             | Silently overwritten at `V23` today, and reachable by a Bite Creator editing their own Bite, per `R-8`. Detection excludes assigned Bites, so a Candidate's `biteIds` were all unassigned at clustering time: the divergence appears between clustering and verification, in a window nobody watches. `R-20` decides the behaviour and is not built                                                                                                                              | Defect, [#1498]             |
+| E8  | More than five Candidates are `pending`                                                                                                                                            | `V2` takes the first five in document-id order and does not page, so every Candidate beyond the fifth is unreachable by any path. Ordering alone would change which five are stuck, not that five are stuck — which is why `R-17` requires paging as well                                                                                                                                                                                                                        | Defect, [#1506] and [#1507] |
+| E9  | A verified Candidate is returned to `pending` — by detection's unconditional write, by an Operator, or through the open data layer — while it still carries `verifiedRestaurantId` | `V16` branches on `status` alone, so the Candidate reaches `V18` and a second Restaurant is created for a business that already has one. `R-18` closes it and is not built. The reset itself is owned by `UC-DRC` `R-8`                                                                                                                                                                                                                                                          | Defect, [#1521]             |
+| E10 | The Operator corrects `name` or `position` at `V8`                                                                                                                                 | Detection's only protection against re-detecting an already verified place is a 0.82 name score within 200 m, so a correction past either threshold defeats it: the Candidate is reset to `pending` with a stale `verifiedRestaurantId`, which is the state `E9` then acts on. Nothing records that the value was corrected (`R-19`), and the Restaurant's geohash from `V20a` no longer matches the Candidate's. Strengthening that check is explicitly out of scope in [#1497] | Defect, [#1522]             |
+| E11 | The image upload runs after the verification transaction has committed                                                                                                             | The Restaurant is created without it; the failure surfaces as an unhandled rejection on the form, and a resubmit returns the idempotent result so the upload is never retried. The write is a direct client write to `/restaurants`, authorised since [#1078] by the Operator's `admin` clause rather than by open rules. `V11a` and `R-10` close it                                                                                                                             | Defect, [#1504]             |
 
 `E1`, `E2`, `E3`, `E4` and `E6` were removed under `UF-12`: each restated a branch the
 actogram already carries. Their ids are retired and are not reused.
@@ -494,9 +494,9 @@ the emulator. The Admin App refuses sign-in without the role, and `roleGuard('ad
 backs that up per route for a restored session or a revoked role. The acting Operator
 is recorded as `verifiedByUserId`, satisfying `G6`.
 
-**Enforced at the data layer since \#1078.** `V2`'s direct client read of
+**Enforced at the data layer since [#1078].** `V2`'s direct client read of
 `/restaurantCandidates` still works — reads were deliberately left where they were, and
-\#1079 narrowed what the business app _lists_ in its own query rather than in the rules —
+[#1079] narrowed what the business app _lists_ in its own query rather than in the rules —
 but the collection is client-writable by nobody, and
 `/restaurants` is writable only by the Operator or the assigned owner. A signed-in Bite
 Creator can no longer create a Restaurant, nor set a Candidate to `verified`, without
@@ -512,18 +512,18 @@ _data_. **They deploy by hand**, so this holds in production only once
 
 **[MVP] and not implemented — release blockers under `UF-15`:**
 
-- `V2`'s ordered, paged Candidate list (`R-17`, `E8`, \#1506 and \#1507). The surface reads the first five
+- `V2`'s ordered, paged Candidate list (`R-17`, `E8`, [#1506] and [#1507]). The surface reads the first five
   `pending` Candidates in document-id order and does not page, so everything beyond the
   fifth is unreachable. With dismissal deferred below, this is the only thing keeping
   the queue workable.
-- `V16`'s guard on `verifiedRestaurantId` (`R-18`, `E9`, \#1521). Without it a
+- `V16`'s guard on `verifiedRestaurantId` (`R-18`, `E9`, [#1521]). Without it a
   Candidate returned to `pending` is verified a second time, publishing a duplicate page
   about a real, named business. The reset path is live today because `UC-DRC` `R-8`'s
   guard is not built either.
 
 **[Secondary]**
 
-- `V4a` and `END-V1` — dismissal (`R-13`, `UC-DIS`, \#1501, \#1508, \#1502). Deliberately
+- `V4a` and `END-V1` — dismissal (`R-13`, `UC-DIS`, [#1501], [#1508], [#1502]). Deliberately
   out of the release:
   dismissal is inert without `UC-DRC` `R-8`'s guard, because detection's unconditional
   write returns a dismissed Candidate to `pending`. The release fix for the queue is the
@@ -539,7 +539,7 @@ _data_. **They deploy by hand**, so this holds in production only once
 
 `V11a` is `[MVP]` where an image was supplied: storing it is not optional once the
 Operator has provided it. `R-10` is `[MVP]` and not built — the upload runs after the
-transaction today (`E11`) — but it has an owner in \#1504, so it is not a blocker
+transaction today (`E11`) — but it has an owner in [#1504], so it is not a blocker
 without an issue.
 
 ## App Store Review Area
@@ -556,9 +556,9 @@ app, which _is_ reviewed:
    derived from Bite reports, per `R-11`, not from the business, and nothing marks it
    as such. A reviewer comparing a listed price to the real one sees an inaccuracy
    attributed to a named business. `RD-VRC-11` decides that marker and its retraction:
-   the marker is owned by \#1511, and retraction is sequenced behind owner assignment.
-   That assignment has a writer since \#1077 and the Business App is ownership-scoped
-   since \#1079, so the path exists; what is still missing is the assignments
+   the marker is owned by [#1511], and retraction is sequenced behind owner assignment.
+   That assignment has a writer since [#1077] and the Business App is ownership-scoped
+   since [#1079], so the path exists; what is still missing is the assignments
    themselves. No Restaurant is assigned in production, so no Restaurant Owner can
    reach the Menu to retract until an operator assigns one.
 2. **The Restaurant is created unclaimed,** per `G7`. `V21` publishes a page about a
@@ -575,30 +575,30 @@ discovered in review.
 
 ## Related GitHub Scope
 
-- Part of epic \#1495, the verification work in flight.
-- \#1472 — `admin`-gates the callable. The enforcement behind `V13` and `R-6`.
-- \#1473 — moves the Operator surface into `bite-tribe-admin`. `V2`, `V3`, `V5`.
-- \#1078 — ownership-scoped `firestore.rules`. Closed the "Not enforced" half of
+- Part of epic [#1495], the verification work in flight.
+- [#1472] — `admin`-gates the callable. The enforcement behind `V13` and `R-6`.
+- [#1473] — moves the Operator surface into `bite-tribe-admin`. `V2`, `V3`, `V5`.
+- [#1078] — ownership-scoped `firestore.rules`. Closed the "Not enforced" half of
   `Authorization`, and re-authorised the post-transaction image write through the
   Operator's `admin` clause (`R-10`, `E11`).
-- \#1069 / \#1077 — owner assignment, delivered outside this flow. `G7`, `R-15`, `UC-ARO`.
-- \#1506 and \#1507 — the ordered, paged Candidate list. `V2`, `R-17`, `E8`. MVP
+- [#1069] / [#1077] — owner assignment, delivered outside this flow. `G7`, `R-15`, `UC-ARO`.
+- [#1506] and [#1507] — the ordered, paged Candidate list. `V2`, `R-17`, `E8`. MVP
   release blocker.
-- \#1521 — `V16`'s guard on `verifiedRestaurantId`. `R-18`, `E9`. MVP release blocker.
-- \#1522 — detection recognising a verified place after its name or position was
+- [#1521] — `V16`'s guard on `verifiedRestaurantId`. `R-18`, `E9`. MVP release blocker.
+- [#1522] — detection recognising a verified place after its name or position was
   corrected. `R-19`, `E10`.
-- \#1498 — a Bite that already belongs to a Restaurant is skipped, not reassigned.
+- [#1498] — a Bite that already belongs to a Restaurant is skipped, not reassigned.
   `V18`, `V19`, `V23`, `R-20`, `E7`.
-- \#1499 — removing the `merged` status and its resolution branch. `V17`, `E5`.
-- \#1504 — the image upload moves in front of the transaction. `V11a`, `R-10`, `E11`.
-- \#1497 — detection's guard against writing `pending` onto a decided Candidate. It
+- [#1499] — removing the `merged` status and its resolution branch. `V17`, `E5`.
+- [#1504] — the image upload moves in front of the transaction. `V11a`, `R-10`, `E11`.
+- [#1497] — detection's guard against writing `pending` onto a decided Candidate. It
   owns the reset half of `E9`; this page owns the duplicate that follows.
-- \#1501, \#1508 and \#1502 — dismissal, in epic \#1495: the backend writer, the
+- [#1501], [#1508] and [#1502] — dismissal, in epic [#1495]: the backend writer, the
   Operator surface, and un-dismissal. `V4a`, `END-V1`, `R-13`, `UC-DIS`. All
   `[Secondary]`.
-- \#1505 — showing the Bites verification skipped. The Operator-facing half of `R-20`
+- [#1505] — showing the Bites verification skipped. The Operator-facing half of `R-20`
   and `skippedBiteIds`.
-- \#1511 — marking a Menu as derived from Bite evidence and showing it in the consumer
+- [#1511] — marking a Menu as derived from Bite evidence and showing it in the consumer
   app. `R-11`, `RD-VRC-11`, and the first App Store content question.
 - **No issue yet:** duplicate resolution (`V4b`, `R-14`, `UC-MRC`), `[Secondary]` and
   deferred deliberately. It is now the only referenced Use Case on this page that
@@ -606,19 +606,42 @@ discovered in review.
 
 ## Related Domains
 
-- [[Restaurant]]
-- [[Bite]]
-- [[User]]
+- [Restaurant](../domain/restaurant.md)
+- [Bite](../domain/bite.md)
+- [User](../domain/user.md)
 
 ## Related Pages
 
-- [[Recorded Decisions]] — `RD-VRC-6` to `RD-VRC-16` bind this page. They were restored
+- [Recorded Decisions](../decisions/recorded-decisions.md) — `RD-VRC-6` to `RD-VRC-16` bind this page. They were restored
   from a working transcript when the register was centralised and are **not** confirmed
   against the code or the issues; see that page's `Provenance`.
-- [[Actogram Format]]
-- [[Use Case Format]]
-- [[UC - Detect Restaurant Candidate]]
-- [[UC - Operate BiteTribe In The Admin App]]
-- [[UC - Own And Claim Restaurants]]
-- [[UC - Maintain Restaurants In The Business App]]
-- [[Implementation - Firebase Functions]]
+- [Actogram Format](../overview/actogram-format.md)
+- [Use Case Format](../overview/use-case-format.md)
+- [UC - Detect Restaurant Candidate](uc-detect-restaurant-candidate.md)
+- [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md)
+- [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md)
+- [UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md)
+- [Implementation - Firebase Functions](../implementation/firebase-functions.md)
+
+[#1069]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1069
+[#1077]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1077
+[#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
+[#1079]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1079
+[#1164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1164
+[#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472
+[#1473]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1473
+[#1495]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1495
+[#1497]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1497
+[#1498]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1498
+[#1499]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1499
+[#1501]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1501
+[#1502]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1502
+[#1504]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1504
+[#1505]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1505
+[#1506]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1506
+[#1507]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1507
+[#1508]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1508
+[#1510]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1510
+[#1511]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1511
+[#1521]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1521
+[#1522]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1522

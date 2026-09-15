@@ -45,7 +45,7 @@ data, and email verification.
 
 ## Account Identity Contract
 
-See [[issue-1234]] for the reasoning.
+See [issue-1234](../github/issue-1234.md) for the reasoning.
 
 - A deletion is only offered against an account the page has named. Without a signed-in account the page says so and the destructive action stays disabled.
 - The identity is non-secret: profile photo, display name, email, and the sign-in method. The uid is never shown, and no credential ever is.
@@ -56,7 +56,7 @@ See [[issue-1234]] for the reasoning.
 
 ## Re-Authentication Contract
 
-See [[issue-1385]] for the reasoning.
+See [issue-1385](../github/issue-1385.md) for the reasoning.
 
 - The sign-in method is read from the first `providerData` entry that is not Firebase's own reserved `firebase` record. The Android SDK includes that record and the web and iOS SDKs do not, so reading the list positionally identified every Android account as unknown and made deletion unreachable for them.
 - Only Google and Apple refresh a sign-in through their own sheet. Every other provider - including one the app does not recognise - is answered with the password prompt, because a sign-in sheet that does not exist can only fail, and failing there leaves the user with no route to a deletion the law requires.
@@ -64,19 +64,19 @@ See [[issue-1385]] for the reasoning.
 
 ## Deletion Contract
 
-Each user-owned data category is handled deliberately. See [[issue-1182]] for the reasoning and [[User]] for the paths.
+Each user-owned data category is handled deliberately. See [issue-1182](../github/issue-1182.md) for the reasoning and [User](../domain/user.md) for the paths.
 
-- Removed: public profile and its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes given, bucket lists, BiteTrail ratings, profile images, the staff association at `/restaurantStaff/{uid}` if the account works at a restaurant (\#1537), and the Firebase Auth account.
+- Removed: public profile and its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes given, bucket lists, BiteTrail ratings, profile images, the staff association at `/restaurantStaff/{uid}` if the account works at a restaurant ([#1537]), and the Firebase Auth account.
 - Kept with the identifier cleared: Bites (the Bite and its image stay, `userId` is removed) and BiteTrail purchase records (the document stays so the seller's `soldCount` holds).
 - Kept untouched: restaurants, menus and restaurant candidates, which are shared place data.
 - Cannot be removed in band: analytics and Crashlytics data already keyed to the uid. The in-app copy says so.
-- Not decided yet, each owned by its own issue: a restaurant's ownership fields, which stay on the restaurant carrying the deleted account's uid (\#1568); a BiteTrail the account owns, which falls into none of the categories above (\#1569); and the job record at `/accountDeletions/{uid}`, which survives the account it names and has no stated retention (\#1570).
+- Not decided yet, each owned by its own issue: a restaurant's ownership fields, which stay on the restaurant carrying the deleted account's uid ([#1568]); a BiteTrail the account owns, which falls into none of the categories above ([#1569]); and the job record at `/accountDeletions/{uid}`, which survives the account it names and has no stated retention ([#1570]).
 
 The cascade also prunes the deleted user from `/meta/leaderboardDaily` and rebuilds `/meta/leaderboard`, because those snapshots cache display names and emails and are otherwise only rebuilt by a Bite create or delete.
 
 ## Policy Language Contract
 
-See [[issue-1218]] for the reasoning.
+See [issue-1218](../github/issue-1218.md) for the reasoning.
 
 - `PUBLISHED_PRIVACY_POLICY_LANGUAGES` in `libs/bite-tribe/privacy-policy` is the published set. A language belongs there only once its policy copy exists in that locale file with legal coverage equivalent to the English original. It currently matches `availableLangs` and has to be extended with it.
 - Everything outside that set - including an unknown or missing app language - resolves to English and reports the fallback, so the page can disclose it. This is what keeps a newly added locale from rendering raw keys inside a legal document.
@@ -110,7 +110,7 @@ Relevant, and exercised more directly than on any other page.
   half is only as good as `Deletion Contract`, because a category that contract does not
   decide is a category the policy cannot describe.
 - The categories the cascade removes, keeps, or cannot reach have to agree with the data
-  types declared in [[Implementation - Store Declarations]].
+  types declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
 ## Supported Evidence
 
@@ -126,16 +126,21 @@ Relevant, and exercised more directly than on any other page.
 
 ## Related Domains
 
-- [[User]]
+- [User](../domain/user.md)
 
 ## Related Pages
 
-- [[Personas]] - the audiences this page serves: the privacy-conscious participant the
+- [Personas](../product/personas.md) - the audiences this page serves: the privacy-conscious participant the
   deletion guarantee exists for, and the new user who meets the verification prompt
-- [[UC - Own And Claim Restaurants]] - where a restaurant's ownership fields are written
-- [[Implementation - Store Declarations]] - the declared data types the deletion contract
+- [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md) - where a restaurant's ownership fields are written
+- [Implementation - Store Declarations](../implementation/store-declarations.md) - the declared data types the deletion contract
   has to agree with
-- [[issue-1182]]
-- [[issue-1218]]
-- [[issue-1234]]
-- [[issue-1385]]
+- [issue-1182](../github/issue-1182.md)
+- [issue-1218](../github/issue-1218.md)
+- [issue-1234](../github/issue-1234.md)
+- [issue-1385](../github/issue-1385.md)
+
+[#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
+[#1568]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1568
+[#1569]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1569
+[#1570]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1570

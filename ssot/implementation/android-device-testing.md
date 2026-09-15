@@ -5,12 +5,12 @@
 Android device testing records how to get a branch build of `bite-tribe` onto a
 physical Android device and how to inspect it while it runs.
 
-It exists because the Angular 22 device validation in [[issue-1037]] needed
+It exists because the Angular 22 device validation in [issue-1037](../github/issue-1037.md) needed
 every step below and none of them was written down. The App Check debug secret
 in particular blocks the first launch of any fresh install, and the failure it
 produces looks like a product bug rather than a setup step.
 
-This is not [[Implementation - Store Release Steps]]. That page owns signed
+This is not [Implementation - Store Release Steps](store-release-steps.md). That page owns signed
 release artifacts for TestFlight and Play. This page owns a debug build on a
 device you are holding, used to validate a branch before it merges.
 
@@ -40,7 +40,7 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 ```
 
 `tools/build-android-release.mjs` resolves a usable JDK by itself, which is why
-[[Implementation - Store Release Steps]] needs no export. The debug `:run` path
+[Implementation - Store Release Steps](store-release-steps.md) needs no export. The debug `:run` path
 used here has no such resolver, so the export is required.
 
 ### The env file
@@ -75,7 +75,7 @@ check that `apps/bite-tribe-android/android/app/src/main/assets/public/` holds
 the `main-*.js` hash you just built.
 
 A version-only move inside the Capacitor 8 family should produce **no** committed
-native diff, the rule issue #1038 established. Anything appearing under
+native diff, the rule issue [#1038] established. Anything appearing under
 `apps/bite-tribe-android/android/` after a sync is a finding, not noise.
 
 ## App Check Debug Secret
@@ -86,7 +86,7 @@ issue a token for a locally signed build — and that provider's secret has to b
 allow-listed in the Firebase console before the build can read production data.
 
 Until it is, App Check returns `403 App attestation failed`, and with enforcement
-on, the gate from issue #933 correctly blocks the whole app behind its retry
+on, the gate from issue [#933] correctly blocks the whole app behind its retry
 screen. That is the gate working, not a defect.
 
 Read the secret from logcat after the first launch:
@@ -115,7 +115,7 @@ session.
 
 A debug build is debuggable, so the WebView exposes a DevTools socket and can be
 driven over CDP — which is how the Transloco transport was proved in
-[[issue-1037]] rather than inferred from the rendered text:
+[issue-1037](../github/issue-1037.md) rather than inferred from the rendered text:
 
 ```bash
 adb forward tcp:9222 localabstract:webview_devtools_remote_$(adb shell pidof com.bitetribe.app | tr -d '\r')
@@ -189,9 +189,12 @@ https://localhost/ are blocked`. The Firebase web API key's HTTP-referrer
 
 ## Related Pages
 
-- [[Implementation - iOS Simulator Testing]]
-- [[Implementation - Store Release Steps]]
-- [[Implementation - Release And Build Workflow]]
-- [[Architecture - Capacitor]]
-- [[Current State - Release State]]
-- [[Current State - Release Candidate Test Charter]]
+- [Implementation - iOS Simulator Testing](ios-simulator-testing.md)
+- [Implementation - Store Release Steps](store-release-steps.md)
+- [Implementation - Release And Build Workflow](release-and-build-workflow.md)
+- [Architecture - Capacitor](../architecture/capacitor.md)
+- [Current State - Release State](../current-state/release-state.md)
+- [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)
+
+[#933]: https://github.com/muhammedgaygisiz/travellers-apps/issues/933
+[#1038]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1038

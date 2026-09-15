@@ -10,18 +10,18 @@ Connect, and the Google Play Console.
 
 `.github/workflows/native-release.yml` now implements the build-and-sign half of
 it in CI, under
-[issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181).
+[issue #1181][#1181].
 It has never run: the signing secrets are not provisioned. **This page is still
 the procedure in force**, and stays so until a real run has produced an
 installable artifact on each platform. See
-[[Implementation - Release And Build Workflow]] for what the jobs do and which
+[Implementation - Release And Build Workflow](release-and-build-workflow.md) for what the jobs do and which
 secrets they need.
 
 The console halves below — App Store Connect and the Play Console — remain
 manual either way. CI produces and signs the artifact; a person still decides
 what to submit.
 
-[[Release Workflow]] owns the surrounding order. This page owns the console
+[Release Workflow](../overview/release-workflow.md) owns the surrounding order. This page owns the console
 details that page deliberately does not repeat.
 
 ## Entry Condition
@@ -209,7 +209,7 @@ Both stores receive the same text, generated from the changelog produced by
   a second edit.
 
 The wider range — `### Features` through the end of `### Chores` — is used for
-the GitHub release body, not for store notes. See [[Release Workflow]].
+the GitHub release body, not for store notes. See [Release Workflow](../overview/release-workflow.md).
 
 ## App Store Connect - TestFlight
 
@@ -251,7 +251,7 @@ Two consequences to keep in mind:
 
 - Apple no longer asks the France question, but France's own encryption rules
   are not waived by the plist. Revisit before distributing there;
-  [[Current State - Release State]] carries that as a launch checklist item.
+  [Current State - Release State](../current-state/release-state.md) carries that as a launch checklist item.
 - The declaration is an export-compliance statement, not a build setting. If
   BiteTribe ever adds its own cryptography, this key has to be re-evaluated —
   the non-exempt path needs `true` plus an `ITSEncryptionExportComplianceCode`.
@@ -304,7 +304,7 @@ been selected for this track`. Follow **Add countries / regions**, select
 Two warnings appear on every promotion and do not block it: no deobfuscation
 file for R8/proguard, and no native debug symbols. Both degrade the readability
 of crash and ANR stack traces, which matters more now that stability is
-monitored daily - see [[Analytics Operations]].
+monitored daily - see [Analytics Operations](../operations/analytics-operations.md).
 
 ### Release Notes Are Eleven Locales, Not One
 
@@ -323,11 +323,11 @@ Rules:
 
 - Translate the notes rather than repeating the English. A language is not
   finished until it is actually in that language, which is the standard
-  [[Implementation - Store Listing Translations]] already holds the listing to.
+  [Implementation - Store Listing Translations](store-listing-translations.md) already holds the listing to.
 - Play allows 500 characters per locale, which is looser than the 230-character
   summary the notes are written to, so a translation that runs longer than the
   English is fine. French is reliably the longest.
-- Cross-check terminology against [[Implementation - Store Listing Translations]],
+- Cross-check terminology against [Implementation - Store Listing Translations](store-listing-translations.md),
   which carries the ten-locale listing copy, rather than translating each
   release from scratch.
 - App Store Connect's **What to Test** takes a single box, so the English note
@@ -344,15 +344,17 @@ Rules:
   distributing. The Organizer is the last point where a stale build number is
   cheap to catch.
 - Record the source commit for every uploaded artifact. Neither store exposes
-  it, and [[Current State - Release Candidate Test Charter]] needs it to bind a
+  it, and [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md) needs it to bind a
   test run to code.
 - Do not archive from a simulator or device destination, and do not upload a
   debug-variant Android bundle.
 
 ## Related Pages
 
-- [[Release Workflow]]
-- [[Implementation - Release And Build Workflow]]
-- [[Architecture - Capacitor]]
-- [[Current State - Release Candidate Test Charter]]
-- [[Current State - Release State]]
+- [Release Workflow](../overview/release-workflow.md)
+- [Implementation - Release And Build Workflow](release-and-build-workflow.md)
+- [Architecture - Capacitor](../architecture/capacitor.md)
+- [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)
+- [Current State - Release State](../current-state/release-state.md)
+
+[#1181]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1181

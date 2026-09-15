@@ -40,8 +40,8 @@ libs/common
 
 ## Related Pages
 
-- [[Implementation - Code Map]]
-- [[Implementation - Libraries]]
-- [[Implementation - Naming Conventions]]
-- [[Implementation - Feature Patterns]]
-- [[Implementation - Testing]]
+- [Implementation - Code Map](code-map.md)
+- [Implementation - Libraries](libraries.md)
+- [Implementation - Naming Conventions](naming-conventions.md)
+- [Implementation - Feature Patterns](feature-patterns.md)
+- [Implementation - Testing](testing.md)

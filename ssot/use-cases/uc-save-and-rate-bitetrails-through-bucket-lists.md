@@ -17,9 +17,9 @@ Users can turn curated BiteTrail discovery into a personal Bucket List and rate 
 This page owns what a Bucket List is once it exists and what can be done to it - filling it
 from a **free** BiteTrail, ticking its Bites off, and rating the BiteTrail it came from.
 Finding the BiteTrail beforehand belongs to
-[[UC - Discover BiteTrails In The Marketplace]], and the
+[UC - Discover BiteTrails In The Marketplace](uc-discover-bitetrails-in-the-marketplace.md), and the
 coach mark that teaches the swipe to
-[[UC - Guide New Users After Registration]].
+[UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md).
 
 ## Actors
 
@@ -44,10 +44,10 @@ Not on this page: **paid BiteTrails**. Only a free BiteTrail can be taken as a B
 List - `isFree` is `price === 0`, and the footer carrying the button is rendered only when
 it holds - so a priced BiteTrail has no route into a Bucket List at all. Whether buying one
 should open the same route is an open product question, and it belongs to
-[[UC - Buy A Paid BiteTrail]] rather than here.
+[UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md) rather than here.
 
 Also not on this page: the coach mark named in `Flow` is one of ten in the first-visit
-sequence that [[UC - Guide New Users After Registration]] owns and classifies
+sequence that [UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md) owns and classifies
 `[Secondary]`.
 
 ## App Store Review Area
@@ -56,9 +56,9 @@ Relevant, because this page can raise the OS location prompt. It renders the sha
 component, whose GPS-error banner offers `enableLocation`: on `prompt` that asks the system
 for the location permission, and on `denied` it opens the app's own page in the system
 settings instead (`home.service.ts:252`). The purpose strings behind that prompt are
-declared once and belong to [[UC - Guide New Users After Registration]], and **Precise
+declared once and belong to [UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md), and **Precise
 Location** under App Functionality is already declared in
-[[Implementation - Store Declarations]].
+[Implementation - Store Declarations](../implementation/store-declarations.md).
 
 ## Supported Evidence
 
@@ -69,30 +69,37 @@ Location** under App Functionality is already declared in
 
 ## Related GitHub Scope
 
-- Issue \#685 added the `Get for free` button on a free BiteTrail detail page, which is the
+- Issue [#685] added the `Get for free` button on a free BiteTrail detail page, which is the
   entry point `Flow` opens with. Closed as completed.
-- Issue \#812 asked for the swipe that checks a Bite off in a Bucket List. Closed as
-  completed, delivered by pull request \#1162.
-- Issue \#1016 added the first-visit coach marks, the bucket-list swipe among them. Closed
+- Issue [#812] asked for the swipe that checks a Bite off in a Bucket List. Closed as
+  completed, delivered by pull request [#1162].
+- Issue [#1016] added the first-visit coach marks, the bucket-list swipe among them. Closed
   as completed.
-- Pull request \#766 added the `tried out` flow with its bucketlist-scoped metadata, and
-  pull request \#757 the one-time BiteTrail rating flow reached from My Bucket Lists.
+- Pull request [#766] added the `tried out` flow with its bucketlist-scoped metadata, and
+  pull request [#757] the one-time BiteTrail rating flow reached from My Bucket Lists.
   Neither names an issue, so the rating flow has no issue behind it in the repository.
 
 ## Related Domains
 
-- [[Bucket List]]
-- [[Bite Trail]]
-- [[Bite]]
+- [Bucket List](../domain/bucket-list.md)
+- [Bite Trail](../domain/bite-trail.md)
+- [Bite](../domain/bite.md)
 
 ## Related Pages
 
-- [[Personas]] - the audiences the `Actors` mapping displaced: the food lover and the
+- [Personas](../product/personas.md) - the audiences the `Actors` mapping displaced: the food lover and the
   traveler
-- [[UC - Discover BiteTrails In The Marketplace]] - where a BiteTrail is found before it is
+- [UC - Discover BiteTrails In The Marketplace](uc-discover-bitetrails-in-the-marketplace.md) - where a BiteTrail is found before it is
   taken
-- [[UC - Guide New Users After Registration]] - the coach-mark sequence this page's swipe
+- [UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md) - the coach-mark sequence this page's swipe
   mark belongs to, and the location purpose strings behind the banner's prompt
-- [[UC - Discover Bites]] - the shared home component this page renders, and the GPS-error
+- [UC - Discover Bites](uc-discover-bites.md) - the shared home component this page renders, and the GPS-error
   banner it carries
-- [[UC - Inspect Bite Details]] - a Bite opened from a Bucket List
+- [UC - Inspect Bite Details](uc-inspect-bite-details.md) - a Bite opened from a Bucket List
+
+[#685]: https://github.com/muhammedgaygisiz/travellers-apps/issues/685
+[#757]: https://github.com/muhammedgaygisiz/travellers-apps/issues/757
+[#766]: https://github.com/muhammedgaygisiz/travellers-apps/issues/766
+[#812]: https://github.com/muhammedgaygisiz/travellers-apps/issues/812
+[#1016]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1016
+[#1162]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1162

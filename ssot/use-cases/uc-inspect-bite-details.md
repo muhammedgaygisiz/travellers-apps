@@ -5,7 +5,7 @@
 **Level:** L0.
 Supported today. The detail page, its share and deep-link entry, the bucket-list and
 directions actions, the header photo's upload state, and the six contracts below all ship.
-Editing, deleting and reporting a review are not on this page at all — [[epic-1284]] owns
+Editing, deleting and reporting a review are not on this page at all — [epic-1284](../github/epic-1284.md) owns
 them.
 
 ## Goal
@@ -31,7 +31,7 @@ nothing, and how a review and its thread are attributed.
   `handleSharedLinkToBite` preview endpoint, and the native `/s/bite/*` deep-link
   registration in the iOS Associated Domains file and the Android App Links
   intent filter exist for Bites alone. Profiles, bucket lists, restaurants, and
-  BiteTrails have no share action and no deep link. See [[issue-1190]].
+  BiteTrails have no share action and no deep link. See [issue-1190](../github/issue-1190.md).
 - User can open directions to the Bite's place through the platform navigation experience.
 - User can save the Bite to an existing bucket list or create a new list for it.
 - User can understand creator/profile context, restaurant/place context, image, likes, reviews, and related data.
@@ -39,20 +39,20 @@ nothing, and how a review and its thread are attributed.
   replaced by skeleton placeholders rather than shown as tappable icons, so the
   user cannot trigger an action against a Bite that is not there yet. The
   first-visit coach marks for those actions are gated on the loaded Bite, so
-  they are unaffected. This predates GitHub issue #1166, which cites the details
+  they are unaffected. This predates GitHub issue [#1166], which cites the details
   page as the model when introducing the same loading state on the profile page;
-  see [[UC - Manage Profile And Social Graph]]. No issue in this page's
+  see [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md). No issue in this page's
   references owns the behaviour itself.
 - The header photo reports its upload state exactly as the feed card does: an
   uploading Bite shows the wait message (addressed to the poster, neutral for
   everyone else) and a failed or long-abandoned upload says so, instead of
   leaving an unexplained empty header. Both surfaces render the same
-  `bt-bite-image-status` component so they cannot drift. See GitHub issue #1168
-  and [[UC - Create And Maintain Personal Bites]] for the status rules.
+  `bt-bite-image-status` component so they cannot drift. See GitHub issue [#1168]
+  and [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md) for the status rules.
 
 ## Relative Time Contract
 
-Issue [#1272](https://github.com/muhammedgaygisiz/travellers-apps/issues/1272)
+Issue [#1272]
 made the page's ages honest. The Bite's age and every review's age render
 through the same pipe, so the contract covers both:
 
@@ -96,13 +96,13 @@ apologetic.
   the condition is a Bite having tags, which is knowledge the page has and the
   component does not.
 - This is the same judgement as the profile's dropped "no location"
-  placeholder in [[UC - Manage Profile And Social Graph]] and the empty string
+  placeholder in [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md) and the empty string
   an absent timestamp renders above: BiteTribe does not fill a gap with a
   message about the gap.
 
 ## Shared Link Entry Contract
 
-Issue [#1246](https://github.com/muhammedgaygisiz/travellers-apps/issues/1246)
+Issue [#1246]
 made the recipient of a shared Bite link arrive at that Bite:
 
 - A shared link is opened cold — a new tab, a message, a browser that has never
@@ -125,13 +125,13 @@ made the recipient of a shared Bite link arrive at that Bite:
   before signing in abandons it; a target resurfacing in a later session would
   be the more surprising outcome.
 - This shares its shape with the tapped-notification contract in
-  [[UC - Receive App Notifications And Engagement Updates]]: a target requested
+  [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md): a target requested
   while the app is still starting, against startup navigation that resolves the
   address a returning user is sent to.
 
 ## Unresolvable Bite Contract
 
-Issue [#1232](https://github.com/muhammedgaygisiz/travellers-apps/issues/1232)
+Issue [#1232]
 gave the page an answer for every way its read can end. It is reachable with a
 Bite that cannot be resolved from the local gallery, the home feed, a shared
 link, and a tapped notification alike, so the page owns this rather than each
@@ -161,7 +161,7 @@ entry point.
 - The alert waits for the active language before it is written. It translates
   synchronously, so a failure reported before the language file has arrived -
   which a cold start makes likely - would put raw keys on screen, the defect
-  issue #1186 fixed elsewhere. Storybook proved it: the first captures of the
+  issue [#1186] fixed elsewhere. Storybook proved it: the first captures of the
   failure stories rendered `bite-not-found` and `go-back` verbatim.
 - Every settled read that produced no Bite files a Crashlytics non-fatal
   carrying the Bite id, the branch taken, and where the navigation came from.
@@ -174,7 +174,7 @@ entry point.
 
 ## Review Thread Contract
 
-Issue [#1283](https://github.com/muhammedgaygisiz/travellers-apps/issues/1283)
+Issue [#1283]
 turns the review compartment from a flat list into a thread list. Implemented by
 `ReviewThreadComponent` and the `reviewThreads` selector.
 
@@ -200,16 +200,16 @@ turns the review compartment from a flat list into a thread list. Implemented by
   survivable for a flat list and not for threads.
 - Arriving from a tapped reply notification opens the Bite with that thread
   already expanded and highlighted. See
-  [[UC - Receive App Notifications And Engagement Updates]] for the fan-out.
+  [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) for the fan-out.
 - Editing, deleting and reporting a review or reply are not part of this
-  contract. [[epic-1284]] owns them.
+  contract. [epic-1284](../github/epic-1284.md) owns them.
 
 ## Review Attribution Contract
 
-Issue [#1308](https://github.com/muhammedgaygisiz/travellers-apps/issues/1308)
+Issue [#1308]
 stopped reviews publishing the author's real name. It is the same two-names
 confusion as the Profile Identity Contract in
-[[UC - Manage Profile And Social Graph]], on a surface that publishes rather
+[UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md), on a surface that publishes rather
 than displays.
 
 - A review and every reply in its thread are attributed to the author's
@@ -241,19 +241,19 @@ than displays.
 ## MVP Classification
 
 **[MVP]** — the whole page: everything it renders, every way its read can end, and the
-review threads. Attribution is release-critical rather than polish — \#1308 was accepted
+review threads. Attribution is release-critical rather than polish — [#1308] was accepted
 as a release blocker because reviews published the name the identity provider holds.
 
 Not on this page: editing, deleting and reporting a review or reply, owned by
-[[epic-1284]].
+[epic-1284](../github/epic-1284.md).
 
 ## App Store Review Area
 
 Relevant on two counts. The `/s/bite/*` deep link is registered in the iOS Associated
 Domains entitlement and an Android App Links intent filter, so it is part of the shipped
-build's configuration — see [[issue-1190]]. And review attribution is a privacy matter
-rather than a cosmetic one: \#1308 published the name the identity provider holds. The
-data types this page renders are declared in [[Implementation - Store Declarations]].
+build's configuration — see [issue-1190](../github/issue-1190.md). And review attribution is a privacy matter
+rather than a cosmetic one: [#1308] published the name the identity provider holds. The
+data types this page renders are declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
 ## Supported Evidence
 
@@ -283,18 +283,27 @@ data types this page renders are declared in [[Implementation - Store Declaratio
 
 ## Related Domains
 
-- [[Bite]]
-- [[User]]
-- [[Restaurant]]
+- [Bite](../domain/bite.md)
+- [User](../domain/user.md)
+- [Restaurant](../domain/restaurant.md)
 
 ## Related Pages
 
-- [[Personas]] — the audiences this page serves: Food lover, Traveler, Bite creator
-- [[UC - Create And Maintain Personal Bites]] — the upload-status rules the header reuses
-- [[UC - Manage Profile And Social Graph]] — the same two-names confusion, on a surface
+- [Personas](../product/personas.md) — the audiences this page serves: Food lover, Traveler, Bite creator
+- [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md) — the upload-status rules the header reuses
+- [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md) — the same two-names confusion, on a surface
   that displays rather than publishes
-- [[UC - Receive App Notifications And Engagement Updates]] — the tapped-notification
+- [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) — the tapped-notification
   entry that lands on a highlighted thread
-- [[epic-1284]]
-- [[issue-1190]]
-- [[Implementation - Store Declarations]]
+- [epic-1284](../github/epic-1284.md)
+- [issue-1190](../github/issue-1190.md)
+- [Implementation - Store Declarations](../implementation/store-declarations.md)
+
+[#1166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1166
+[#1168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1168
+[#1186]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1186
+[#1232]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1232
+[#1246]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1246
+[#1272]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1272
+[#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
+[#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308

@@ -5,7 +5,7 @@
 Personas describe who BiteTribe is for, what each group is trying to do, and what
 the product gives them today.
 
-[[Mission]] names three audiences at a high level: food lovers, bite creators, and
+[Mission](mission.md) names three audiences at a high level: food lovers, bite creators, and
 restaurants and organisations. This page splits those into the seven concrete
 groups the product actually has to serve, and records what each one can and cannot
 do right now.
@@ -60,7 +60,7 @@ A food lover in an unfamiliar place who needs local food confidence quickly.
 
 - Map-first discovery.
 - Reliable place, currency, language, and menu context.
-- Curated paths through local food, especially [[Bite Trail]] and [[Bucket List]].
+- Curated paths through local food, especially [Bite Trail](../domain/bite-trail.md) and [Bucket List](../domain/bucket-list.md).
 
 **Supported today**
 
@@ -84,9 +84,9 @@ A user who contributes food experiences and builds credibility through shared bi
 
 **Needs**
 
-- Low-friction bite creation and editing. See [[Bite]].
+- Low-friction bite creation and editing. See [Bite](../domain/bite.md).
 - Good image handling, restaurant and place selection, price and currency entry, tags, and review fields.
-- Profile identity, followers, likes, reviews, and contribution recognition. See [[User]].
+- Profile identity, followers, likes, reviews, and contribution recognition. See [User](../domain/user.md).
 
 **Supported today**
 
@@ -111,9 +111,9 @@ A creator who packages local food knowledge into curated recommendations or jour
 
 **Needs**
 
-- BiteTrail creation and publishing. See [[Bite Trail]].
+- BiteTrail creation and publishing. See [Bite Trail](../domain/bite-trail.md).
 - Creator profile context.
-- Marketplace visibility and clear ownership. See [[Market Place]].
+- Marketplace visibility and clear ownership. See [Market Place](../domain/market-place.md).
 - Metrics such as sold counters, ratings, and completion signals.
 
 **Supported today**
@@ -125,7 +125,7 @@ A creator who packages local food knowledge into curated recommendations or jour
 **Next opportunities**
 
 - Complete marketplace packages, free BiteTrail access, assigned-user workflows, sold counters, ratings, badges, and creator-facing BiteTrail management.
-- Selling paid BiteTrails and earning 80 percent of net proceeds, with payout onboarding and an earnings dashboard. See [[Monetization]] and [[epic-1125]].
+- Selling paid BiteTrails and earning 80 percent of net proceeds, with payout onboarding and an earnings dashboard. See [Monetization](monetization.md) and [epic-1125](../github/epic-1125.md).
 
 ## Restaurant owner or business maintainer
 
@@ -140,7 +140,7 @@ for discovery.
 
 **Needs**
 
-- Restaurant creation and editing. See [[Restaurant]].
+- Restaurant creation and editing. See [Restaurant](../domain/restaurant.md).
 - Menu editing and menu item management.
 - Opening hours, social links, address and location pinning, about section, and verified restaurant state.
 - A way to connect menu items to real bites.
@@ -176,7 +176,7 @@ A person who has just registered and does not yet understand how to participate 
 
 **Next opportunities**
 
-- Onboarding assistant for username, motivation, public profile, default currency, favorite currencies, and first actions. See [[epic-850]].
+- Onboarding assistant for username, motivation, public profile, default currency, favorite currencies, and first actions. See [epic-850](../github/epic-850.md).
 
 ## Privacy-conscious participant
 
@@ -213,31 +213,31 @@ A user who wants the value of food discovery without unnecessary public exposure
 ## Current Limitations
 
 - "Supported today" and "Next opportunities" are point-in-time state. The
-  authoritative lists are the Use Cases section in [[SSOT]] and, for unbuilt work,
-  [[Current State - Product Direction]]. When those move, this page has to be
+  authoritative lists are the Use Cases section in [SSOT](../README.md) and, for unbuilt work,
+  [Current State - Product Direction](../current-state/product-direction.md). When those move, this page has to be
   updated by hand or it drifts.
-- The seven personas here are a finer split of the three audiences in [[Mission]].
+- The seven personas here are a finer split of the three audiences in [Mission](mission.md).
   Neither page states the mapping, so a new persona can be added here without
   Mission noticing.
 
 ## Related Pages
 
-- [[Mission]]
-- [[Principles]]
-- [[Glossary]]
-- [[Monetization]]
-- [[Current State - Product Direction]]
-- [[Bite]]
-- [[User]]
-- [[Restaurant]]
-- [[Bite Trail]]
-- [[Bucket List]]
-- [[Market Place]]
+- [Mission](mission.md)
+- [Principles](principles.md)
+- [Glossary](glossary.md)
+- [Monetization](monetization.md)
+- [Current State - Product Direction](../current-state/product-direction.md)
+- [Bite](../domain/bite.md)
+- [User](../domain/user.md)
+- [Restaurant](../domain/restaurant.md)
+- [Bite Trail](../domain/bite-trail.md)
+- [Bucket List](../domain/bucket-list.md)
+- [Market Place](../domain/market-place.md)
 
 ## Sources Used
 
-- [[Mission]]
-- [[Principles]]
-- [[Glossary]]
-- Use Cases section in [[SSOT]]
-- Epics section in [[SSOT]]
+- [Mission](mission.md)
+- [Principles](principles.md)
+- [Glossary](glossary.md)
+- Use Cases section in [SSOT](../README.md)
+- Epics section in [SSOT](../README.md)

@@ -1,7 +1,7 @@
 - Date: 2025-09-13
 - Git tag: `build-35`
 - Git commit: `a5fd777e`
-- [[Changelog]]
+- [Changelog](changelog.md)
 - Commits
   - chore: update nx to 20.8.2 (34ebad6d)
   - chore: migrate to nx 21.0.4 (90672be6)
@@ -39,7 +39,7 @@
   - chore: deps (b5c79131)
   - refactor: align firebase usage (664e204e)
   - chore: finalize deps (8a835501)
-  - 398 deleting existing tags by owner of bite (\#428) (539624b0)
+  - 398 deleting existing tags by owner of bite ([#428]) (539624b0)
   - refactor: uninstall angular/fire for less deps and point-of-failures (2b3da56b)
   - refactor: remove angular/fire (f4e902bd)
   - test: fix tests (aba1be5f)
@@ -63,3 +63,5 @@
   - refactor: introduce infinite scrolling with page size 50 (c6438666)
   - test: extend test suite (b43c25a2)
   - test: extend test coverage (a5fd777e)
+
+[#428]: https://github.com/muhammedgaygisiz/travellers-apps/issues/428

@@ -25,7 +25,7 @@ Bucket Lists also bridge BiteTrails into a personal user journey.
 - Removing a Bite from a Bucket List also removes its tried-out status for that Bucket List.
 - Deleting a Bucket List deletes the list, not the Bites.
 - Saving a BiteTrail as a Bucket List writes a sell record for that BiteTrail.
-- Creating a Bucket List from a Bite writes the list and that Bite's membership as one document, so the pair either both exist or neither does. The user is told it worked, or told it failed, only once that write has settled — never on the prompt closing. A list is not created before its Bite is loaded, since an unloaded Bite would leave an empty list behind. This is the contract GitHub issue #1231 restored, where a first list created from a Bite's empty add dialog reported success and persisted nothing.
+- Creating a Bucket List from a Bite writes the list and that Bite's membership as one document, so the pair either both exist or neither does. The user is told it worked, or told it failed, only once that write has settled — never on the prompt closing. A list is not created before its Bite is loaded, since an unloaded Bite would leave an empty list behind. This is the contract GitHub issue [#1231] restored, where a first list created from a Bite's empty add dialog reported success and persisted nothing.
 
 ## Required Data
 
@@ -79,7 +79,7 @@ Current implementation notes:
 - `biteIds` stores the saved Bites.
 - `triedOutBites` stores Bite completion with date and timestamp.
 - A Bucket List created from a BiteTrail stores `biteTrailId`.
-- `My Bucket Lists` orders lists alphabetically by name and offers no sort choice. Lists are looked up by name rather than browsed chronologically, so the page carries a client-side name filter instead. See GitHub issue #1329.
+- `My Bucket Lists` orders lists alphabetically by name and offers no sort choice. Lists are looked up by name rather than browsed chronologically, so the page carries a client-side name filter instead. See GitHub issue [#1329].
 - Creating a Bucket List from a BiteTrail writes to `/biteTrails/{biteTrailId}/sells`.
 
 ## Permissions
@@ -171,9 +171,12 @@ No dedicated Bucket List Cloud Function is currently modeled.
 
 ## Sources Used
 
-- [[Mission]]
-- [[Principles]]
-- [[Glossary]]
-- Use Cases section in [[SSOT]]
-- [[Personas]]
-- [[Bite]]
+- [Mission](../product/mission.md)
+- [Principles](../product/principles.md)
+- [Glossary](../product/glossary.md)
+- Use Cases section in [SSOT](../README.md)
+- [Personas](../product/personas.md)
+- [Bite](bite.md)
+
+[#1231]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1231
+[#1329]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1329

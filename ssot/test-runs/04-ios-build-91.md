@@ -3,7 +3,7 @@
 ## Purpose
 
 Execution record for the release candidate test pass. Originally section "iOS
-Execution - Build 91 (Run 4)" of [[Current State - Release Candidate Test Charter]],
+Execution - Build 91 (Run 4)" of [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md),
 which owns the checks, the device matrix, and the pass criteria this run was
 measured against.
 
@@ -14,14 +14,14 @@ measured against.
 - Build: TestFlight 1.0.1 (91)
 - Device: iPhone 12 mini, iOS 26.5.2
 
-Run 4 executed; release-candidate fail with six open P0 findings; #1230, #1231, #1233, #1234 verified fixed
+Run 4 executed; release-candidate fail with six open P0 findings; [#1230], [#1231], [#1233], [#1234] verified fixed
 
-Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issues/1229), [#1244](https://github.com/muhammedgaygisiz/travellers-apps/issues/1244), [#1245](https://github.com/muhammedgaygisiz/travellers-apps/issues/1245), [#1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181), [#1246](https://github.com/muhammedgaygisiz/travellers-apps/issues/1246), [#1232](https://github.com/muhammedgaygisiz/travellers-apps/issues/1232)
+Defects filed: [#1229], [#1244], [#1245], [#1181], [#1246], [#1232]
 
 ## Entry State
 
 - The tester reported TestFlight build 91 installed on the same physical device: `Mo's iPhone`, an iPhone 12 mini running iOS 26.5.2.
-- Run 4 is a complete iOS regression pass after reported fixes for Run-3 findings #1229 through #1234; closure state on GitHub does not replace physical verification.
+- Run 4 is a complete iOS regression pass after reported fixes for Run-3 findings [#1229] through [#1234]; closure state on GitHub does not replace physical verification.
 - The repository branch `test-run-4` was clean when execution began.
 - The two anonymous Run-3 Bites remain preserved under the cleanup inventory and must not be removed during this run.
 - Exact source commit, TestFlight upload timestamp, local toolchain, and signing route for build 91 remain to be recorded.
@@ -178,7 +178,7 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 - The selected photo was not displayed or otherwise represented as retained for recovery.
 - No visible pending state, localized failed-photo state, or Retry action appeared within 60 seconds or afterwards.
 - No technical text or raw translation key appeared.
-- Result: fail. Build 91 physically reproduces issue #1229 despite the reported thirty-second timeout fix; retained-copy retry and missing-copy fallback remain unreachable from the UI.
+- Result: fail. Build 91 physically reproduces issue [#1229] despite the reported thirty-second timeout fix; retained-copy retry and missing-copy fallback remain unreachable from the UI.
 
 ## Session 19 - Foreground Reconnect After Offline Save
 
@@ -187,7 +187,7 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 - Feed content rendered normally and navigation remained usable throughout and afterwards.
 - Profile contained both Run-4 Bites, with the offline-created Bite exactly once.
 - Returning to Home did not re-enter an endless loader, and no technical text or raw translation key appeared.
-- Result: pass for issue #1230 on build 91. The missing photo state remains independently failed under #1229.
+- Result: pass for issue [#1230] on build 91. The missing photo state remains independently failed under [#1229].
 
 ## Session 20 - First Inline Bucket List Creation
 
@@ -195,7 +195,7 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 - Creating the first list reported success only after it completed; the list appeared under My Bucket Lists and persisted after reopening.
 - The current Bite was added exactly once, displayed its membership, and produced neither a duplicate list nor duplicate membership.
 - No error, technical text, or raw translation key appeared.
-- Result: pass for issue #1231's repaired first-list create-and-add path on build 91. The direct My Bucket Lists control path remains to be checked.
+- Result: pass for issue [#1231]'s repaired first-list create-and-add path on build 91. The direct My Bucket Lists control path remains to be checked.
 
 ## Session 21 - Bucket List Control Paths
 
@@ -204,7 +204,7 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 - Swipe to tried, Undo, and persistence of the restored state all worked on the online Bite.
 - Opening the online Bite from the first list and returning both navigated correctly.
 - No error, technical text, or raw translation key appeared.
-- Result: pass; issue #1231 and the wider Bucket List regression contract are physically verified on build 91.
+- Result: pass; issue [#1231] and the wider Bucket List regression contract are physically verified on build 91.
 
 ## Session 22 - Local Gallery Viewer And Gestures
 
@@ -212,7 +212,7 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 - The multi-image position counter, pinch zoom, pan while zoomed, double-tap zoom, and horizontal paging all worked without unusable gesture conflict.
 - The top-right close action returned to the same gallery scroll position.
 - No error, technical text, or raw translation key appeared.
-- Result: pass for issue #1232's gallery viewer and physical gesture contract. Open-Bite navigation and details-page viewer remain to be checked.
+- Result: pass for issue [#1232]'s gallery viewer and physical gesture contract. Open-Bite navigation and details-page viewer remain to be checked.
 
 ## Session 23 - Gallery Bite Navigation And Details Viewer
 
@@ -220,7 +220,7 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 - Back returned to the gallery at the same scroll position with the viewer closed.
 - Tapping the dish image on the normal Bite details page opened the same full-screen viewer; zoom and close worked, and no redundant Open Bite action appeared there.
 - No error, technical text, or raw translation key appeared.
-- Result: pass for all reachable issue #1232 paths on build 91. The blocking not-found modal for an already-deleted Bite remains unverified because this run has no safe deleted-Bite local-gallery fixture.
+- Result: pass for all reachable issue [#1232] paths on build 91. The blocking not-found modal for an already-deleted Bite remains unverified because this run has no safe deleted-Bite local-gallery fixture.
 
 ## Session 24 - Cancelled Menu Draft Then Generic Create
 
@@ -228,7 +228,7 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 - Cancelling through back navigation without saving returned controllably to the prior journey and then to Home.
 - Starting the normal Create Bite flow from Home afterwards produced a clean form: neither the cancelled Restaurant nor the cancelled dish was present, and only intentional global defaults remained.
 - No error, technical text, or raw translation key appeared.
-- Result: pass for issue #1233's cancel-then-generic-create path on build 91. Cancel-then-another-menu-item, background/route reuse, and a successful menu-derived save remain to be checked.
+- Result: pass for issue [#1233]'s cancel-then-generic-create path on build 91. Cancel-then-another-menu-item, background/route reuse, and a successful menu-derived save remain to be checked.
 
 ## Session 25 - Alternate Menu Draft, Background, And Successful Save
 
@@ -237,7 +237,7 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 - Completing and saving the menu-derived Bite succeeded exactly once, and reopening it preserved the intended Restaurant and dish.
 - A later generic Create Bite action from Home was clean again and contained no Restaurant or dish from either menu flow.
 - No error, technical text, or raw translation key appeared.
-- Result: pass; all physical acceptance paths for issue #1233 are verified on TestFlight build 91.
+- Result: pass; all physical acceptance paths for issue [#1233] are verified on TestFlight build 91.
 
 ## Session 26 - Map Position, Marker, And Camera
 
@@ -278,24 +278,24 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 - Following it exactly once while BiteTribe was backgrounded and the iPhone locked produced exactly one push within 60 seconds.
 - The notification copy was understandable German, and tapping it opened BiteTribe without an error or technical text.
 - The tap landed on the Home feed instead of the new follower's profile, contrary to the notification navigation contract and the supplied `followerUid` payload.
-- Result: fail for target navigation under [issue #1244](https://github.com/muhammedgaygisiz/travellers-apps/issues/1244); real APNs/FCM delivery, localization, and app launch pass.
+- Result: fail for target navigation under [issue #1244][#1244]; real APNs/FCM delivery, localization, and app launch pass.
 
 ## Session 31 - App Check Enforced Working Session
 
 - Firebase Console showed `Enforced` for Storage, Cloud Firestore, and Authentication after the Build-91 physical run.
 - The seven-day overview reported Storage at 98% verified and 2% unverified, Cloud Firestore at 100% verified and 0% unverified, and Authentication at 96% verified and 4% unverified; the tester observed no conspicuous invalid or unknown-request increase during Run 4.
 - Build 91 completed extensive authenticated reads and writes while those Firebase APIs were enforced, including registration, settings, Bite creation, social activity, and push-token use. This is behavioral evidence, and therefore an inference, that the distributed TestFlight artifact supplied accepted App Check tokens.
-- Places API (New) remained in Monitoring at 0% verified and 100% unverified; [issue #1245](https://github.com/muhammedgaygisiz/travellers-apps/issues/1245) records this separate protection gap rather than silently treating Places as covered.
-- Resolved after the run by [[issue-1245]], and the reading was the finding: BiteTribe reaches Places only server-to-server from Cloud Functions, Google Maps Platform App Check only accepts tokens from the client Maps and Places SDKs, so 0% verified is what this architecture must report and enforcement would break every place search. The equivalent control is the callable in front of Places - App Check enforced plus an authenticated caller - now pinned by build-failing specs. The next run reads Places as expected-unverified and records that place search works while the Firebase APIs stay enforced.
-- Result: pass for the Firebase iOS enforced working-session path, but fail for verified Places traffic under #1245. The aggregates are not build-specific, and the deliberately refused-token startup/retry gate still requires a separate invalid-token artifact or controlled environment.
+- Places API (New) remained in Monitoring at 0% verified and 100% unverified; [issue #1245][#1245] records this separate protection gap rather than silently treating Places as covered.
+- Resolved after the run by [issue-1245](../github/issue-1245.md), and the reading was the finding: BiteTribe reaches Places only server-to-server from Cloud Functions, Google Maps Platform App Check only accepts tokens from the client Maps and Places SDKs, so 0% verified is what this architecture must report and enforcement would break every place search. The equivalent control is the callable in front of Places - App Check enforced plus an authenticated caller - now pinned by build-failing specs. The next run reads Places as expected-unverified and records that place search works while the Firebase APIs stay enforced.
+- Result: pass for the Firebase iOS enforced working-session path, but fail for verified Places traffic under [#1245]. The aggregates are not build-specific, and the deliberately refused-token startup/retry gate still requires a separate invalid-token artifact or controlled environment.
 
 ## Session 32 - Crashlytics Delivery And Symbols
 
 - Crashlytics recognized the latest iOS release as 1.0.1 (91); crash-free users and crash-free sessions were both 100%, with no crash issue for the build.
 - One non-fatal event from one user arrived for build 91 on 6 August 2026. It was the expected background connectivity error from the deliberate offline test: `Failed to get document because the client is offline` on the Run-4 iPhone 12 mini / iOS 26.5.2.
 - This artifact-specific event verifies production Crashlytics delivery from the TestFlight build.
-- Crashlytics nevertheless reported build-91 UUIDs `AD1CE4AB-6356-3948-B714-8DBA6B834959` and `D4B24778-B39E-32D1-B6DB-8ADA39E23516` as `Missing (optional)`, each associated with one event. The evidence is attached to [issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181), which must retain and upload symbols for the exact native artifact.
-- Result: pass for Crashlytics event delivery and crash-free health; native symbol retention/upload remains a P0 release-pipeline gap under #1181.
+- Crashlytics nevertheless reported build-91 UUIDs `AD1CE4AB-6356-3948-B714-8DBA6B834959` and `D4B24778-B39E-32D1-B6DB-8ADA39E23516` as `Missing (optional)`, each associated with one event. The evidence is attached to [issue #1181][#1181], which must retain and upload symbols for the exact native artifact.
+- Result: pass for Crashlytics event delivery and crash-free health; native symbol retention/upload remains a P0 release-pipeline gap under [#1181].
 
 ## Session 33 - Production Analytics Delivery
 
@@ -307,10 +307,10 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 
 ## Session 34 - Target-Account Identity Before Deletion
 
-- The deletion page showed the disposable account's photo, display name, e-mail address, and sign-in method, which is the identity surface [issue #1234](https://github.com/muhammedgaygisiz/travellers-apps/issues/1234) reported missing in Run 3.
+- The deletion page showed the disposable account's photo, display name, e-mail address, and sign-in method, which is the identity surface [issue #1234][#1234] reported missing in Run 3.
 - The final confirmation and the password dialog each repeated the identity in a reduced form, display name and e-mail only, without the photo and sign-in method. Both still name the exact account being destroyed, so the tester accepted this as sufficient rather than a defect.
 - Every step showed the Run-4 disposable account. The main account never appeared at any point in the flow.
-- Result: pass for the #1234 identity contract on Build 91; the reduced repetition on the confirmation and password steps is recorded as an observation, not a finding.
+- Result: pass for the [#1234] identity contract on Build 91; the reduced repetition on the confirmation and password steps is recorded as an observation, not a finding.
 
 ## Session 34 - Pre-Deletion Firebase Snapshot
 
@@ -341,42 +341,42 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 - All three Bites survived with the `userId` field removed rather than emptied, matching the anonymization contract that keeps shared content reachable for other users' Bucket Lists and BiteTrails.
 - Storage: the profile image `images/users/rd6f…/8d8fec8c-c799-4b59-a641-d7fa67162798.jpg` was deleted, and both Bite images were intentionally retained for the later authorized cleanup.
 - Leaderboard removal could not be evidenced in this run because the account never entered the persisted top 10; this branch of the cascade remains unverified rather than passed.
-- Result: pass for the account-deletion contract on Build 91. [Issue #1234](https://github.com/muhammedgaygisiz/travellers-apps/issues/1234) stays closed, now backed by physical verification instead of a reported fix.
+- Result: pass for the account-deletion contract on Build 91. [Issue #1234][#1234] stays closed, now backed by physical verification instead of a reported fix.
 
 ## Session 35 - Cold Bite Deep Link On Web
 
 - Found after the deletion while resolving which local gallery photo belonged to which Bite, not as a planned charter step.
 - A cold external `https://www.bitetribe.app/bite/<biteId>` never opens the Bite. Signed out it ends on `/start`, reproduced directly against production; signed in it ends on the Home feed, observed on the tester's desktop for two different Bites.
 - Mechanism: on a cold load `authState()` is still `null`, `authGuard` waits on `authStateChange$` behind a fixed `debounceTime(2000)` and returns `/start` when that elapses, and `startGuard` then forwards an authenticated user to `/home`. The requested URL is discarded in both directions and never restored after sign-in.
-- Independent of the anonymization and of #1229: a normal Bite carrying a `userId` behaves the same, and the equivalent cold external deep link passed on iOS in Session 28.
-- Filed as P0 [issue #1246](https://github.com/muhammedgaygisiz/travellers-apps/issues/1246) in the Bite Tribe project, cross-referenced from [#1244](https://github.com/muhammedgaygisiz/travellers-apps/issues/1244) as a probable shared root cause: both lose a deep target requested while auth state is unrestored on a cold start.
+- Independent of the anonymization and of [#1229]: a normal Bite carrying a `userId` behaves the same, and the equivalent cold external deep link passed on iOS in Session 28.
+- Filed as P0 [issue #1246][#1246] in the Bite Tribe project, cross-referenced from [#1244] as a probable shared root cause: both lose a deep target requested while auth state is unrestored on a cold start.
 - Result: fail. Bite sharing is the product's only share surface, so every shared link currently fails for its recipient.
 
 ## Session 36 - Deleted-Bite Gallery Fixture
 
-- Deleting two Run-4 Bites while their local photo copies stayed on the device created the deleted-Bite local-gallery fixture that Session 22 lacked, which closes the last unverified acceptance criterion of [issue #1232](https://github.com/muhammedgaygisiz/travellers-apps/issues/1232).
+- Deleting two Run-4 Bites while their local photo copies stayed on the device created the deleted-Bite local-gallery fixture that Session 22 lacked, which closes the last unverified acceptance criterion of [issue #1232][#1232].
 - Opening such an image with "Open Bite" produces an indefinite loading state on the details page. No blocking not-found modal appears, and there is no error text or raw technical output.
 - `biteIdFromImageName` deliberately performs no existence check and leaves the missing-Bite case to the details page, which is the correct split; the details page is the part that neither resolves nor reports.
-- Result: fail. #1232 was reopened with this evidence and already carried P0. A useful side effect for other reports: an indefinite loading details page is the observable signature of a Bite that cannot be found.
+- Result: fail. [#1232] was reopened with this evidence and already carried P0. A useful side effect for other reports: an indefinite loading details page is the observable signature of a Bite that cannot be found.
 
 ## Run 4 Outcome
 
 - The physical iOS execution covered build identity and cold start, fresh registration, the full onboarding chain, permissions and their recovery paths, settings and localization, email verification, Bite creation online and offline, reconnect behavior, Bucket Lists, the local gallery, menu drafts, map, search, deep links, lifecycle and authentication, real push delivery, App Check, Crashlytics, production Analytics, and the destructive account deletion.
-- Four Run-3 findings verified as fixed on Build 91: #1230 reconnect feed deadlock, #1231 first inline Bucket List creation, #1233 cancelled menu draft leakage, and #1234 missing target-account identity before deletion. #1232 passed its gallery interaction contract but was reopened after cleanup exposed the deleted-Bite case, see Session 36.
-- Release-candidate result: fail. Six P0 findings remain open: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issues/1229) offline photo recovery, still reproducible after a reported fix; [#1244](https://github.com/muhammedgaygisiz/travellers-apps/issues/1244) push tap opening Home instead of the follower profile; [#1245](https://github.com/muhammedgaygisiz/travellers-apps/issues/1245) Places API traffic fully unverified under App Check; [#1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181) missing build-91 dSYMs in the native pipeline; [#1246](https://github.com/muhammedgaygisiz/travellers-apps/issues/1246) cold Bite deep links never opening the Bite on web; and the reopened [#1232](https://github.com/muhammedgaygisiz/travellers-apps/issues/1232) for the missing deleted-Bite not-found modal.
+- Four Run-3 findings verified as fixed on Build 91: [#1230] reconnect feed deadlock, [#1231] first inline Bucket List creation, [#1233] cancelled menu draft leakage, and [#1234] missing target-account identity before deletion. [#1232] passed its gallery interaction contract but was reopened after cleanup exposed the deleted-Bite case, see Session 36.
+- Release-candidate result: fail. Six P0 findings remain open: [#1229] offline photo recovery, still reproducible after a reported fix; [#1244] push tap opening Home instead of the follower profile; [#1245] Places API traffic fully unverified under App Check; [#1181] missing build-91 dSYMs in the native pipeline; [#1246] cold Bite deep links never opening the Bite on web; and the reopened [#1232] for the missing deleted-Bite not-found modal.
 - Evidence gaps recorded rather than silently passed: the refused App Check token and retry gate still needs an invalid-token artifact or controlled environment; Analytics DebugView needs a dedicated Xcode debug-mode launch; the processed `Latest app release overview` card was still empty and must be rechecked after processing; the scheduled daily ranking notification was not forced; the leaderboard branch of the deletion cascade was not exercised; and build 91's exact source SHA, local toolchain, signing route, and TestFlight upload timestamp are still unrecorded.
 
 ## Run 4 Cleanup Inventory
 
 - Captured before the destructive Session-34 deletion so the Run-4 artifacts stay identifiable after anonymization. Run 3 lost that mapping; this inventory exists to prevent a repeat.
 - The three documents below are anonymous as of 6 August 2026. Their former owner, the disposable account `rd6fEZTWcxbzoIgM65QQxPUqSYH2`, no longer exists, so the names and image paths recorded here are the only way to identify them.
-- `/bites/46aaf056-d171-44ca-af28-e81ee97abf3b` has no image and is the Session-18 offline Bite. It is the live Build-91 evidence for [issue #1229](https://github.com/muhammedgaygisiz/travellers-apps/issues/1229) and survived the deletion as an anonymized document, as required.
-- That document was read before cleanup and narrows #1229 to a different layer than the reported fix touched. It was created at `2026-08-06T15:35:07.893Z` with `imageStatus` absent, `imagePath` an empty string, and `addressStatus` `resolved`. The absent `image` field proves nothing, because `submitNewBite` always destructures `image` out before writing; the absent `imageStatus` is the decisive part, since that field is only written when `image` is truthy at submit. The photo was therefore already gone when the Bite was saved, so no upload started, the 30-second stall watchdog was never armed, no terminal `failed` was written, and the Retry action could not appear. The #1168 recovery machinery was never reached and is not the broken part. `addressStatus` reaching `resolved` shows queued offline writes on this document did flush after reconnect, so a `failed` write would have landed had one been issued. Evidence attached as [issue #1229 comment](https://github.com/muhammedgaygisiz/travellers-apps/issues/1229#issuecomment-5207973315).
-- The device-local retained copy that `findLocalImage` would return is the other half of this evidence and still exists only on the Run-4 iPhone. Do not reinstall BiteTribe or clear its storage on that device until #1229 is diagnosed; the account deletion does not affect the app container.
+- `/bites/46aaf056-d171-44ca-af28-e81ee97abf3b` has no image and is the Session-18 offline Bite. It is the live Build-91 evidence for [issue #1229][#1229] and survived the deletion as an anonymized document, as required.
+- That document was read before cleanup and narrows [#1229] to a different layer than the reported fix touched. It was created at `2026-08-06T15:35:07.893Z` with `imageStatus` absent, `imagePath` an empty string, and `addressStatus` `resolved`. The absent `image` field proves nothing, because `submitNewBite` always destructures `image` out before writing; the absent `imageStatus` is the decisive part, since that field is only written when `image` is truthy at submit. The photo was therefore already gone when the Bite was saved, so no upload started, the 30-second stall watchdog was never armed, no terminal `failed` was written, and the Retry action could not appear. The [#1168] recovery machinery was never reached and is not the broken part. `addressStatus` reaching `resolved` shows queued offline writes on this document did flush after reconnect, so a `failed` write would have landed had one been issued. Evidence attached as [issue [#1229] comment](https://github.com/muhammedgaygisiz/travellers-apps/issues/1229#issuecomment-5207973315).
+- The device-local retained copy that `findLocalImage` would return is the other half of this evidence and still exists only on the Run-4 iPhone. Do not reinstall BiteTribe or clear its storage on that device until [#1229] is diagnosed; the account deletion does not affect the app container.
 - **Run 5 entry prerequisite.** This conflicts with starting the next run from a clean install. Download the app container in Xcode and archive `AppData/Documents` **before** Run 5 begins, or Run 5's fresh install destroys the only copy of this evidence.
 - The in-app local gallery lists `Directory.Documents` by the `bites_<docId>` naming and shows three images. One of them reached a details page that never finished loading, and the tester identified its photo as the offline Bite's, which briefly looked like a contradiction of the analysis above. It is not. Two later observations settled it: a deleted Bite opened from the gallery produces the same indefinite hang, so an indefinite hang is the signature of a Bite that cannot be found; and `46aaf056` itself renders normally when opened through in-app search, bypassing the gallery. The hanging image therefore does not belong to `46aaf056`, the offline Bite has no local copy, and the analysis above stands.
-- What replaces the contradiction is a stronger lead: a local photo copy exists on the device for a Bite id that has no Firestore document. `writeBlobToFileSystem` runs only inside the upload path, so an upload was started for that id, yet no document for it exists - while the document that does exist for the offline save carries no image. The decisive step is to read `AppData/Documents` from the app container in Xcode and look up the third file's id in Firestore. Recorded on [issue #1229](https://github.com/muhammedgaygisiz/travellers-apps/issues/1229#issuecomment-5208318794).
-- The desktop deep-link observation from the same investigation proved nothing about this Bite: cold Bite deep links fail on the web for every Bite, which is #1246.
+- What replaces the contradiction is a stronger lead: a local photo copy exists on the device for a Bite id that has no Firestore document. `writeBlobToFileSystem` runs only inside the upload path, so an upload was started for that id, yet no document for it exists - while the document that does exist for the offline save carries no image. The decisive step is to read `AppData/Documents` from the app container in Xcode and look up the third file's id in Firestore. Recorded on [issue #1229][#1229].
+- The desktop deep-link observation from the same investigation proved nothing about this Bite: cold Bite deep links fail on the web for every Bite, which is [#1246].
 - `/bites/15f0612d-7846-4310-b82a-c30dada12ba2` is the Session-25 menu Bite, identifiable by the pre-seeded menu-item name `Salami`, and carries image `images/bites/15f0612d-7846-4310-b82a-c30dada12ba2/916d7a2f-c6a6-4980-8dd8-8ba547e51b58.jpg`.
 - `/bites/c9bf32d1-02a9-453d-ba28-29c4961a3dc4` is the Session-17 online Bite, named `Test`, and carries image `images/bites/c9bf32d1-02a9-453d-ba28-29c4961a3dc4/0df1c577-4019-42c8-a8eb-98d7d2ee895b.jpg`.
 - Both Storage objects were confirmed present after the deletion. The contract keeps Bite images for a later controlled cleanup and removes only the profile picture, which is gone.
@@ -384,6 +384,18 @@ Defects filed: [#1229](https://github.com/muhammedgaygisiz/travellers-apps/issue
 
 ## Related Pages
 
-- [[Current State - Release Candidate Test Charter]]
-- [[Current State - Release State]]
-- [[Current State - Known Issues]]
+- [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)
+- [Current State - Release State](../current-state/release-state.md)
+- [Current State - Known Issues](../current-state/known-issues.md)
+
+[#1168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1168
+[#1181]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1181
+[#1229]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1229
+[#1230]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1230
+[#1231]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1231
+[#1232]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1232
+[#1233]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1233
+[#1234]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1234
+[#1244]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1244
+[#1245]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1245
+[#1246]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1246

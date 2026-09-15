@@ -5,7 +5,7 @@
 **Level:** L0.
 Supported today. The create and edit flows, the photo upload states and their retry, and
 the five-source position picker are all shipped. The one deferred capability is the
-storage of resolved candidate positions, \#1290.
+storage of resolved candidate positions, [#1290].
 
 ## Goal
 
@@ -27,26 +27,26 @@ rest of the product reads.
   itself — it locks behind a spinner and the `create-bite-in-progress` label,
   and the page runs the header progress bar — instead of leaving the tap
   unanswered for seconds. This is the same feedback contract sign-in follows;
-  see the Entry Feedback Contract in [[Implementation - Feature Patterns]] and
-  GitHub issue #1287.
-- A creation session can be seeded with a prefilled draft — a Restaurant menu item, or an existing Bite the user wants to post again — and that draft belongs to that one session. Leaving the form ends the session and drops the draft, so cancelling a menu-derived creation and later starting a generic Bite from Home begins from the normal defaults instead of the abandoned Restaurant and dish. This is the contract GitHub issue #1233 established, where the cancelled draft survived in the store and prefilled the next, unrelated creation. Only the intentional global defaults — the current location and the preferred currency — carry across sessions, and a Bite that is actually posted keeps the Restaurant and dish its draft supplied.
-- A prefilled draft brings no photo of its own, and the form keeps that absence as an empty path rather than an undefined one. Firestore rejects an undefined field, so a menu-derived Bite used to be refused by the backend while the form reported a successful post, and the Bite was lost with nothing to retry. See GitHub issue #1233.
+  see the Entry Feedback Contract in [Implementation - Feature Patterns](../implementation/feature-patterns.md) and
+  GitHub issue [#1287].
+- A creation session can be seeded with a prefilled draft — a Restaurant menu item, or an existing Bite the user wants to post again — and that draft belongs to that one session. Leaving the form ends the session and drops the draft, so cancelling a menu-derived creation and later starting a generic Bite from Home begins from the normal defaults instead of the abandoned Restaurant and dish. This is the contract GitHub issue [#1233] established, where the cancelled draft survived in the store and prefilled the next, unrelated creation. Only the intentional global defaults — the current location and the preferred currency — carry across sessions, and a Bite that is actually posted keeps the Restaurant and dish its draft supplied.
+- A prefilled draft brings no photo of its own, and the form keeps that absence as an empty path rather than an undefined one. Firestore rejects an undefined field, so a menu-derived Bite used to be refused by the backend while the form reported a successful post, and the Bite was lost with nothing to retry. See GitHub issue [#1233].
 - User enters dish details, price, currency, tags, rating, description, and image context.
-- The photo comes from the camera or from the gallery, and on Android the gallery is the system Photo Picker: a surface outside the app that returns the one photo the user selected. It is opened in single-select mode, so the choice is a tap rather than a checkbox and a confirmation, and it raises no permission prompt of any kind. See GitHub issue #1394.
-- `Aus Bild` still works, because the permission that makes it work is asked for elsewhere. Android strips a picked photo's location metadata for a caller without `ACCESS_MEDIA_LOCATION`, so the grant is collected by the onboarding photos step — which explains what the photo's position is for before asking — rather than by the picker. Asking at the picker is what put an OS prompt between the user and their photo, and under "Allow limited access" made them select it twice. See GitHub issue #1409 and the Media Permission Rule in [[Architecture - Capacitor]].
+- The photo comes from the camera or from the gallery, and on Android the gallery is the system Photo Picker: a surface outside the app that returns the one photo the user selected. It is opened in single-select mode, so the choice is a tap rather than a checkbox and a confirmation, and it raises no permission prompt of any kind. See GitHub issue [#1394].
+- `Aus Bild` still works, because the permission that makes it work is asked for elsewhere. Android strips a picked photo's location metadata for a caller without `ACCESS_MEDIA_LOCATION`, so the grant is collected by the onboarding photos step — which explains what the photo's position is for before asking — rather than by the picker. Asking at the picker is what put an OS prompt between the user and their photo, and under "Allow limited access" made them select it twice. See GitHub issue [#1409] and the Media Permission Rule in [Architecture - Capacitor](../architecture/capacitor.md).
 - A user who declined keeps every other source: GPS, restaurant, Google, and the map. The modal's photo row then says the photo location is off rather than claiming the photo has no GPS, and offers the way back in place — the OS prompt while one is left, the system settings page once it is not. It never navigates to the app's own Settings page, because leaving the form ends the creation session and drops the draft.
 - User selects a restaurant/place through the picker before saving; direct free-text place entry is no longer the form-level path.
 - When a selected restaurant or other location source changes the Bite position, the form map refits its camera to the new marker.
-- The location section states where the position came from as a text row — `Aus Bild`, `Aus GPS`, `Aus Restaurant`, `Aus Google`, or `Manuell gesetzt` — with an edit action at the end of the row, mirroring the restaurant field. With no position resolved yet, the row is replaced by a full-width `Standort wählen` call to action. This replaced four permanently visible source buttons of equal weight, where the active source was readable only from a check mark on one of them. See GitHub issue #1266.
+- The location section states where the position came from as a text row — `Aus Bild`, `Aus GPS`, `Aus Restaurant`, `Aus Google`, or `Manuell gesetzt` — with an edit action at the end of the row, mirroring the restaurant field. With no position resolved yet, the row is replaced by a full-width `Standort wählen` call to action. This replaced four permanently visible source buttons of equal weight, where the active source was readable only from a check mark on one of them. See GitHub issue [#1266].
 - The source is tracked explicitly at every point that writes the position, not inferred by comparing coordinates. Two sources can resolve to the same point, and a restaurant-derived position matched none of the four buttons, so the section used to report no source at all in that case.
 - The source is stored on the Bite as `positionSource`, so a Bite reopened for editing still names where its position came from. Bites written before this carry none and are reported as an unknown source rather than being given a guessed one. The field is `null` rather than absent when unknown: the whole form value is handed to Firestore, which rejects an undefined field.
-- The candidate positions themselves are not stored, only the source. Persisting them would let a user switch back to, say, the photo's location while editing — the photo position is otherwise unrecoverable, because `compressWithCanvas` strips EXIF before upload. It is deferred because stored candidates would publish the positions the user chose _not_ to use: `match /bites/{biteId}` allows read to any signed-in account, so anything written onto the Bite document is readable by every user. The original objection — that a stricter nested rule could not override the permissive `/{document=**}` wildcard — no longer applies, because \#1078 replaced that wildcard with a default deny and per-collection matches; a subcollection scoped to the owner, as `bites/{biteId}/likes` already is, is now possible. Checked against `firestore.rules` on 11 September 2026. See GitHub issue #1290.
+- The candidate positions themselves are not stored, only the source. Persisting them would let a user switch back to, say, the photo's location while editing — the photo position is otherwise unrecoverable, because `compressWithCanvas` strips EXIF before upload. It is deferred because stored candidates would publish the positions the user chose _not_ to use: `match /bites/{biteId}` allows read to any signed-in account, so anything written onto the Bite document is readable by every user. The original objection — that a stricter nested rule could not override the permissive `/{document=**}` wildcard — no longer applies, because [#1078] replaced that wildcard with a default deny and per-collection matches; a subcollection scoped to the owner, as `bites/{biteId}/likes` already is, is now possible. Checked against `firestore.rules` on 11 September 2026. See GitHub issue [#1290].
 - The edit action opens a modal that lists all five sources over a map showing the resolved candidates as colour-coded markers, one colour per source, with clustering off so nearby candidates stay distinguishable. A source with nothing to offer stays listed but disabled with the reason — no GPS in the photo, no restaurant selected, no Google place selected. Selecting a row or tapping its marker highlights it; the position is applied only on confirm.
-- The map shows the source being selected: it moves to the selected candidate and renders that marker larger, so the two routes to the same choice — the list row and the marker — leave the map in the same state. The map used to centre on the device instead and never move again, so with a photo taken 1500 km away the user confirmed a position the map had never shown, and colour alone had to carry the selection where candidates sit metres apart. The camera follows an explicit `focusedGeopointId` on the shared map component rather than a change to the GPS-first default the other maps recenter through. See GitHub issue #1306.
+- The map shows the source being selected: it moves to the selected candidate and renders that marker larger, so the two routes to the same choice — the list row and the marker — leave the map in the same state. The map used to centre on the device instead and never move again, so with a photo taken 1500 km away the user confirmed a position the map had never shown, and colour alone had to carry the selection where candidates sit metres apart. The camera follows an explicit `focusedGeopointId` on the shared map component rather than a change to the GPS-first default the other maps recenter through. See GitHub issue [#1306].
 - `Manuell gesetzt` is a listed source like the others. Selecting its row turns the modal map into a picker seeded from the highlighted candidate. Reopening the modal on a manual position starts in the comparison view, so the manual point can be weighed against the other sources before being edited again.
 - The device GPS fix prefills the position and keeps following the device only while the user has not chosen another source. Once a source is chosen, a later fix no longer overwrites it, because the source row would otherwise report a spontaneous switch to GPS.
 - If no nearby verified restaurant, unverified restaurant, or Google Place is correct, the selector keeps the explicit `Use: "abc"` custom-place fallback.
-- The selector measures its rows from whichever position actually answers the question in front of the user. While the Bite sits where the user is standing, every row carries the single unlabelled distance it always did. Once the Bite's position is more than half a kilometre from the device — the charter's `Posting later` edge case — each row names both origins instead, `0.2 km from the Bite` above `1538.8 km from you`, and the list is ordered by the distance from the Bite. A distance measured from the device cannot discriminate between candidates that are all ~1539 km away, and ordering by it puts a candidate that happens to lie towards the device ahead of the one next door. Rows are measured from the two positions rather than from a precomputed value, so the same numbers hold for local restaurants, Google search results, and nearby Google suggestions, which had three different origins between them. The half-kilometre threshold sits above GPS and EXIF noise and below the spread of a plausible candidate list, so posting on the spot never degrades into two near-identical numbers. See GitHub issue #1269.
+- The selector measures its rows from whichever position actually answers the question in front of the user. While the Bite sits where the user is standing, every row carries the single unlabelled distance it always did. Once the Bite's position is more than half a kilometre from the device — the charter's `Posting later` edge case — each row names both origins instead, `0.2 km from the Bite` above `1538.8 km from you`, and the list is ordered by the distance from the Bite. A distance measured from the device cannot discriminate between candidates that are all ~1539 km away, and ordering by it puts a candidate that happens to lie towards the device ahead of the one next door. Rows are measured from the two positions rather than from a precomputed value, so the same numbers hold for local restaurants, Google search results, and nearby Google suggestions, which had three different origins between them. The half-kilometre threshold sits above GPS and EXIF noise and below the spread of a plausible candidate list, so posting on the spot never degrades into two near-identical numbers. See GitHub issue [#1269].
 - When a Bite position is available, the app prefills the currency from that location; the user's preferred currency remains the fallback.
 - User can still manually correct the currency before saving.
 - The app warns when the entered price looks suspiciously high.
@@ -61,7 +61,7 @@ rest of the product reads.
   written without an image status, and none of the recovery below could ever
   run. Picking a photo is a local operation, and the upload states now cover a
   transfer that cannot start, so the restriction is gone. See GitHub issue
-  #1229.
+  [#1229].
 - The image upload has three states on the Bite document, and every viewer sees
   the card accordingly: `pending` while it uploads, `uploaded` once the storage
   trigger has the download URL, and `failed` when the upload errored.
@@ -74,7 +74,7 @@ rest of the product reads.
   that loses connectivity mid-flight is silently retried by the Storage SDK for
   its own ten-minute window, so without this bound the Bite stayed `pending`
   with no error for the user to act on — the offline case from GitHub issue
-  #1229. Each progress report restarts the clock, so a slow but moving upload is
+  [#1229]. Each progress report restarts the clock, so a slow but moving upload is
   never cut short. Offline the `failed` write is queued by Firestore and applies
   to the local cache at once, which is what makes the state visible while the
   device is still disconnected.
@@ -92,7 +92,7 @@ rest of the product reads.
   runs on a finalized object — without it the card kept telling every viewer
   "uploading, keep the app open" forever. A failed upload shows that state even
   to the poster, whose device still holds the local copy, so a lost photo is
-  never passed off as a successful post. See GitHub issue #1168.
+  never passed off as a successful post. See GitHub issue [#1168].
 - The poster, and only the poster, is offered a retry on a failed photo: the
   photo lives on their device, so nobody else has anything to send. The retry
   takes one of two flows. When this device still holds the Bite's own local copy
@@ -122,7 +122,7 @@ currency and suspicious-price handling. This is the core contribution loop and a
 ships today.
 
 **[Secondary]** — storing the resolved candidate positions on the Bite so a source can be
-re-chosen while editing, deferred under \#1290. Nothing else on this page is
+re-chosen while editing, deferred under [#1290]. Nothing else on this page is
 unimplemented.
 
 ## App Store Review Area
@@ -130,9 +130,9 @@ unimplemented.
 Relevant. This is where the camera, photo library and location permissions are exercised
 and where their purpose strings have to hold up. On Android the gallery is the system
 Photo Picker, which raises no permission prompt of its own, and `ACCESS_MEDIA_LOCATION` is
-collected by the onboarding photos step rather than here - see [[Architecture - Capacitor]]
-and GitHub issue #1409. Both data types this flow writes are already declared in
-[[Implementation - Store Declarations]]: **Photos or Videos** and **Precise Location**,
+collected by the onboarding photos step rather than here - see [Architecture - Capacitor](../architecture/capacitor.md)
+and GitHub issue [#1409]. Both data types this flow writes are already declared in
+[Implementation - Store Declarations](../implementation/store-declarations.md): **Photos or Videos** and **Precise Location**,
 each under App Functionality.
 
 ## Supported Evidence
@@ -162,18 +162,31 @@ each under App Functionality.
   EXIF; see `tools/generate-geotagged-fixture.mjs`. The modal's disabled rows and
   marker-tap selection stay on the unit tests in `bite.page.spec.ts`: neither
   writes to the Bite, so an E2E failure there would not be catching data loss.
-  See GitHub issues #1266 and #1289.
+  See GitHub issues [#1266] and [#1289].
 
 ## Related Domains
 
-- [[Bite]]
-- [[User]]
-- [[Restaurant]]
+- [Bite](../domain/bite.md)
+- [User](../domain/user.md)
+- [Restaurant](../domain/restaurant.md)
 
 ## Related Pages
 
-- [[Personas]] - the audiences this loop serves: Food lover, Traveler, Bite creator
-- [[Implementation - Feature Patterns]] - the Entry Feedback Contract
-- [[Architecture - Capacitor]] - the Media Permission Rule
-- [[Implementation - Store Declarations]]
-- [[Current State - Known Issues]]
+- [Personas](../product/personas.md) - the audiences this loop serves: Food lover, Traveler, Bite creator
+- [Implementation - Feature Patterns](../implementation/feature-patterns.md) - the Entry Feedback Contract
+- [Architecture - Capacitor](../architecture/capacitor.md) - the Media Permission Rule
+- [Implementation - Store Declarations](../implementation/store-declarations.md)
+- [Current State - Known Issues](../current-state/known-issues.md)
+
+[#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
+[#1168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1168
+[#1229]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1229
+[#1233]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1233
+[#1266]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1266
+[#1269]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1269
+[#1287]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1287
+[#1289]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1289
+[#1290]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1290
+[#1306]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1306
+[#1394]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1394
+[#1409]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1409

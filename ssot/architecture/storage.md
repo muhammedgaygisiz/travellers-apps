@@ -44,7 +44,7 @@ only way in; nothing reads or writes `Documents` directly.
 Copies written before this scoping carry no owner. They are adopted into the
 signed-in user's directory on a device, where one owner is a safe assumption,
 and deleted in a browser, where the previous account is exactly who they might
-belong to. See [[UC - Use Local Gallery Support]] and GitHub issue #1328.
+belong to. See [UC - Use Local Gallery Support](../use-cases/uc-use-local-gallery-support.md) and GitHub issue [#1328].
 
 ## Bite Image Trigger
 
@@ -74,3 +74,5 @@ libs/bite-tribe-common/bite/src/lib/pipes/get-image.pipe.ts
 - Image upload and document update can be separate steps.
 - Backgrounding the app can make upload flows fragile.
 - Different domains use slightly different image update flows.
+
+[#1328]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1328

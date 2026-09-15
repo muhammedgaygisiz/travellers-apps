@@ -59,6 +59,6 @@ Export new functions from `apps/bite-tribe-firebase/functions/src/index.ts`.
 
 ## Related Pages
 
-- [[Implementation - Libraries]]
-- [[Implementation - Firebase Functions]]
-- [[Implementation - Localization]]
+- [Implementation - Libraries](libraries.md)
+- [Implementation - Firebase Functions](firebase-functions.md)
+- [Implementation - Localization](localization.md)

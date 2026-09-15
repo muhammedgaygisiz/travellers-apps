@@ -33,9 +33,9 @@ The board owns issue state. These are the fields that are set deliberately.
 
 ### Priority
 
-`P0` means launch-critical or currently selected for execution. It is the level that makes a build fail its release-candidate check in [[Current State - Release Candidate Test Charter]], so it is a decision rather than an observation: a finding is `P0` because someone accepted the consequence, not because it looked severe.
+`P0` means launch-critical or currently selected for execution. It is the level that makes a build fail its release-candidate check in [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md), so it is a decision rather than an observation: a finding is `P0` because someone accepted the consequence, not because it looked severe.
 
-A defect that works exactly as written can still be `P0`. Issue #1308 is the reference case: nothing malfunctioned, and it was accepted as a release blocker because it published users' real names and defeated a privacy control the product offers.
+A defect that works exactly as written can still be `P0`. Issue [#1308] is the reference case: nothing malfunctioned, and it was accepted as a release blocker because it published users' real names and defeated a privacy control the product offers.
 
 Everything else defaults to `P1` unless there is a reason to sort it lower.
 
@@ -51,7 +51,7 @@ Do not create priority labels. If a `P0` or `P1` label appears in the repository
 
 ## How To File An Issue
 
-1. Create the issue with `gh issue create`. Write the body per [[GitHub Issue Format]], which owns the shape of the issue text and does not restate the fields below.
+1. Create the issue with `gh issue create`. Write the body per [GitHub Issue Format](github-issue-format.md), which owns the shape of the issue text and does not restate the fields below.
 2. Add it to the board and keep the returned item id:
 
    ```
@@ -73,7 +73,7 @@ Do not create priority labels. If a `P0` or `P1` label appears in the repository
 ### Verifying An Add
 
 **Do not verify with `gh project item-list`.** It serves a stale view: on
-2026-08-25 it reported the board ending at #1371 while #1374 through #1382 were
+2026-08-25 it reported the board ending at [#1371] while [#1374] through [#1382] were
 already on it with `Priority` set, and re-running it did not refresh. Trusting it
 leads to either re-adding items that are already there, creating duplicates, or
 reporting a successful add as failed.
@@ -102,7 +102,7 @@ This needs the `project` token scope on the authenticated `gh` CLI, in addition 
 
 **Reopening an issue is not enough on its own.** The board runs an auto-close workflow: an item whose `Status` is `Done` closes its issue. A closed issue still carries `Status` `Done`, so reopening it leaves the board and the issue disagreeing, and the next time anything touches that item the workflow resolves the disagreement by closing the issue again.
 
-This is silent. `gh issue reopen` reports success, the issue is genuinely open for a while, and it closes later without anyone acting on it. Issue #1265 was reopened during release-candidate Run 6, verified open, and re-closed seven minutes later when its `Priority` field was set.
+This is silent. `gh issue reopen` reports success, the issue is genuinely open for a while, and it closes later without anyone acting on it. Issue [#1265] was reopened during release-candidate Run 6, verified open, and re-closed seven minutes later when its `Priority` field was set.
 
 The order that works:
 
@@ -123,7 +123,13 @@ The same applies to any later field edit on a reopened item: if `Status` is stil
 
 ## Related Pages
 
-- [[Feature Delivery Workflow]]
-- [[Agent Operating Contract]]
-- [[Current State - Release Candidate Test Charter]]
-- [[Release Workflow]]
+- [Feature Delivery Workflow](feature-delivery-workflow.md)
+- [Agent Operating Contract](agent-operating-contract.md)
+- [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)
+- [Release Workflow](release-workflow.md)
+
+[#1265]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1265
+[#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308
+[#1371]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1371
+[#1374]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1374
+[#1382]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1382

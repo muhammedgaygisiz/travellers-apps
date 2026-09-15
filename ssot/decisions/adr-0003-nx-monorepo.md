@@ -35,7 +35,7 @@ Apps, libraries, backend functions, e2e projects, Storybook, and native wrapper 
 
 ## Links
 
-- [[Architecture - Nx Workspace]]
-- [[Implementation - Code Map]]
-- [[Implementation - Libraries]]
-- [[Implementation - Testing]]
+- [Architecture - Nx Workspace](../architecture/nx-workspace.md)
+- [Implementation - Code Map](../implementation/code-map.md)
+- [Implementation - Libraries](../implementation/libraries.md)
+- [Implementation - Testing](../implementation/testing.md)

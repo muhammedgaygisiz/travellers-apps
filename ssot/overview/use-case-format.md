@@ -1,6 +1,6 @@
 # Use Case Format
 
-Sibling of [[GitHub Issue Format]]. The flow notation lives in [[Actogram Format]];
+Sibling of [GitHub Issue Format](github-issue-format.md). The flow notation lives in [Actogram Format](actogram-format.md);
 this page defines the page that contains it.
 
 ## Purpose
@@ -10,14 +10,14 @@ what each one may and may not contain, how its identifiers work, and how an exis
 page is migrated to the format.
 
 It exists because the format was invented inside two pages —
-[[UC - Detect Restaurant Candidate]] and [[UC - Verify Restaurant Candidate]] — and is
+[UC - Detect Restaurant Candidate](../use-cases/uc-detect-restaurant-candidate.md) and [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md) — and is
 currently knowable only by imitation. Each of those pages carries its own copy of the
 notation legend, so with 36 use-case pages the legend would exist 36 times and could
 disagree with itself in 36 ways.
 
 Rules are numbered `UF-n` and are citable. `MUST` rules are conformance conditions.
 
-[[GitHub Issue Format]] currently states that use cases are excluded from it because a
+[GitHub Issue Format](github-issue-format.md) currently states that use cases are excluded from it because a
 `UC - *` page "keeps its own shape: `Status`, `Goal`, `Actors`, `Related Domains`, and a
 current or target flow". That sentence becomes a pointer to this page.
 
@@ -57,7 +57,7 @@ defect list and not a work plan. Where it needs one of those, it links to it.
 | --- | ------------------------------ | --- | --- | --- | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | `Status`                       | ✓   | ✓   | ✓   | ✓   | Level; at L3 the provenance line; one paragraph of snapshot; optionally an aspect/state table. A snapshot only — never the only place a fact lives                                                                    |
 | 2   | `Goal`                         | ✓   | ✓   | ✓   | ✓   | What becomes true for whom, and what this page therefore owns. Two paragraphs at most                                                                                                                                 |
-| 3   | `Actors`                       | ✓   | ✓   | ✓   | ✓   | Roles from [[User Roles]] only. For each: whether it acts, and if not, why it is named at all. At L0 this may be a provisional guess                                                                                  |
+| 3   | `Actors`                       | ✓   | ✓   | ✓   | ✓   | Roles from [User Roles](../product/user-roles.md) only. For each: whether it acts, and if not, why it is named at all. At L0 this may be a provisional guess                                                          |
 | 4   | `Lanes`                        | –   | –   | ✓   | ✓   | Code, kind and binding per lane. `AF-2`                                                                                                                                                                               |
 | 5   | `Aggregate`                    | –   | –   | ✓   | ✓   | The object the flow acts on, its collections, and the states it can be left in. `AF-1`                                                                                                                                |
 | 6   | `Scope`                        | –   | –   | ✓   | ✓   | In scope in prose; the completeness claim (`AF-32`); out of scope as the referenced-use-case table                                                                                                                    |
@@ -65,14 +65,14 @@ defect list and not a work plan. Where it needs one of those, it links to it.
 | 8   | `Preconditions`                | –   | –   | ✓   | ✓   | `P1..Pn`, each with an owner: another use case, or `Platform`                                                                                                                                                         |
 | 9   | `Guarantees`                   | opt | opt | ✓   | ✓   | `G1..Gn`, true at the success terminal state and nowhere else. At L0 and L1, where no terminal state exists yet, they state what is true once the behaviour has succeeded and are re-anchored onto the terminal at L2 |
 | 10  | `Flow`                         | opt | opt | –   | –   | The behaviour as prose bullets, per `UF-4a`. At L2 and L3 the `Actogram` holds it instead                                                                                                                             |
-| 11  | `Actogram`                     | opt | opt | ✓   | ✓   | Per [[Actogram Format]]. Phases, mechanism sections, terminal table. At L0/L1, when present, may be a partial sketch rather than a complete enumeration — `UF-2`                                                      |
+| 11  | `Actogram`                     | opt | opt | ✓   | ✓   | Per [Actogram Format](actogram-format.md). Phases, mechanism sections, terminal table. At L0/L1, when present, may be a partial sketch rather than a complete enumeration — `UF-2`                                    |
 | 12  | `Rules And Invariants`         | opt | opt | ✓   | ✓   | `R-1..R-n`. Normative statements. Code-anchor column at L3 only                                                                                                                                                       |
 | 13  | `Exceptions And Failure Modes` | –   | –   | opt | ✓   | Only what the actogram cannot express. See `UF-12`                                                                                                                                                                    |
 | 14  | `Authorization`                | opt | opt | ✓   | ✓   | What is enforced, where, and what is not. At L0 and L1 it states the boundary as the page understands it; the per-step enforcement is written at L2                                                                   |
 | 15  | `MVP Classification`           | ✓   | ✓   | ✓   | ✓   | Never omitted. `[MVP]`, `[Secondary]` or `[Obsolete]`. See below                                                                                                                                                      |
-| 16  | `App Store Review Area`        | opt | ✓   | ✓   | ✓   | Never omitted from L1 up. Same rule as [[GitHub Issue Format]]: if not relevant, "not relevant, because …"                                                                                                            |
+| 16  | `App Store Review Area`        | opt | ✓   | ✓   | ✓   | Never omitted from L1 up. Same rule as [GitHub Issue Format](github-issue-format.md): if not relevant, "not relevant, because …"                                                                                      |
 | 17  | `Supported Evidence`           | opt | ✓   | –   | –   | Optional at L0, required at L1. At L2 and L3 the `@` locus on each step replaces it                                                                                                                                   |
-| 18  | `Related GitHub Scope`         | opt | ✓   | ✓   | ✓   | Never omitted from L1 up. The issue and epic links that close the chain in [[Agent Operating Contract]]                                                                                                               |
+| 18  | `Related GitHub Scope`         | opt | ✓   | ✓   | ✓   | Never omitted from L1 up. The issue and epic links that close the chain in [Agent Operating Contract](agent-operating-contract.md)                                                                                    |
 | 19  | `Related Domains`              | ✓   | ✓   | ✓   | ✓   | Domain pages only                                                                                                                                                                                                     |
 | 20  | `Related Pages`                | opt | opt | ✓   | ✓   | Everything that is not a domain page                                                                                                                                                                                  |
 
@@ -86,7 +86,7 @@ defect list and not a work plan. Where it needs one of those, it links to it.
   and MUST NOT be deleted to reach a level. It is resolved on the way to L2 into whatever
   owns it: `Key Behaviours` and `Boundary Conditions` are normative and become
   `Rules And Invariants`; `Success Criteria` is an epic section that splits into
-  `Guarantees` and the owning issue's acceptance criteria ([[GitHub Issue Format]]);
+  `Guarantees` and the owning issue's acceptance criteria ([GitHub Issue Format](github-issue-format.md));
   rationale moves to the issue or the ADR; a fact another page owns becomes a link to it
   (`UF-7`).
 
@@ -95,7 +95,7 @@ defect list and not a work plan. Where it needs one of those, it links to it.
   A page with several entries MAY add one paragraph declaring its step-id prefixes.
 - **UF-6** A page MUST NOT carry a `Recorded Decisions` section. A register split
   across pages cannot be read as a register. Decisions live on one page,
-  [[Recorded Decisions]]; the use case links the ones that bind it. Ids carry their
+  [Recorded Decisions](../decisions/recorded-decisions.md); the use case links the ones that bind it. Ids carry their
   register as a prefix - `RD-VRC-7`, never a bare `RD-7`.
 - **UF-7** A page MUST NOT state the same fact in two sections. Every fact has one home
   and the others point at it.
@@ -136,13 +136,13 @@ defect list and not a work plan. Where it needs one of those, it links to it.
   removed.
 - **UF-13** The `Assessment` column MUST carry one word — `Correct`, `Defect`, `Gap` —
   plus the issue that owns it. The argument belongs in that issue and in
-  [[Current State - Known Issues]]: an assessment has an author and a date, a use case
+  [Current State - Known Issues](../current-state/known-issues.md): an assessment has an author and a date, a use case
   does not.
 
 ## MVP Classification
 
 MVP is the core functionality strictly required for the initial release; everything else
-is secondary. See [[GitHub Issue Format]] for the `P0`–`P4` board mapping.
+is secondary. See [GitHub Issue Format](github-issue-format.md) for the `P0`–`P4` board mapping.
 
 - **UF-14** The section MUST classify the page and, where the page is not uniform, name
   the exceptions by step id and terminal id:
@@ -189,7 +189,7 @@ Where the behaviour the page describes has left scope, the section carries the s
 ### L0 → L1
 
 1. **Settle the actors.** Replace any placeholder or provisional names in `Actors` with
-   the real roles from [[User Roles]], and state for each whether it acts.
+   the real roles from [User Roles](../product/user-roles.md), and state for each whether it acts.
 2. **Check the idea is actually agreed**, not just proposed. If nothing beyond the idea
    is settled, the page stays at L0 — do not add prose bullets just to move the number.
    `Flow` already exists at L0 (`UF-4a`); what changes here is that the team now shares
@@ -204,7 +204,7 @@ Where the behaviour the page describes has left scope, the section carries the s
 
 1. **Name the aggregate** and the states it can be left in (`AF-1`).
 2. **Map the informal actors** ("Food lover", "Traveler") onto the lane vocabulary in
-   [[Actogram Format]]. Most consumer pages are `BC`, `UI`, `SYS`, `DB`, plus `NAT`
+   [Actogram Format](actogram-format.md). Most consumer pages are `BC`, `UI`, `SYS`, `DB`, plus `NAT`
    wherever a permission, camera, gallery or store client appears.
 3. **Split the prose bullets into actor turns first.** The legacy `Flow` bullets
    mix actor actions, system behaviour and policy in one list. Extract only the actor
@@ -222,7 +222,7 @@ Where the behaviour the page describes has left scope, the section carries the s
    referenced use case (`AF-31`, and `AF-34` for those that answer back).
 9. **Do not add code anchors** unless the page reaches L3 in the same sitting. An anchor
    without a provenance line is an unverifiable claim.
-10. **Run the checklist** in [[Actogram Format]] and report failures by rule id.
+10. **Run the checklist** in [Actogram Format](actogram-format.md) and report failures by rule id.
 
 ### L2 → L3
 
@@ -255,13 +255,13 @@ workaround for the missing `admin` role. Removed by \#1473.
 - **UF-23** An `[Obsolete]` page is deleted once the code it describes is gone. Before it
   goes: no other page may reference its `UC-ID` — a reference in another page's `Scope`
   table is a contract, and it is removed or re-pointed first (`UF-9`); and the entry is
-  removed from [[SSOT]], from [[Traceability Map]] where it appears, and
+  removed from [SSOT](../README.md), from [Traceability Map](traceability-map.md) where it appears, and
   from the registry at the end of this page.
 
 ## Template
 
 A new use-case page starts from this skeleton. It is kept here rather than as a
-`UC - Template` page so that it does not appear in the use-case list in [[SSOT]].
+`UC - Template` page so that it does not appear in the use-case list in [SSOT](../README.md).
 
 Inside the skeleton the actogram blocks are fenced with `~~~` so that they nest inside
 the skeleton's own block. Replace them with ordinary backtick fences when you copy it out.
@@ -449,45 +449,45 @@ X5 SYS <action>
 
 ## Use Case Code Registry
 
-| UC-ID    | Use Case                                               | Page                                                            |
-| -------- | ------------------------------------------------------ | --------------------------------------------------------------- |
-| `UC-DRC` | Detect Restaurant Candidate                            | [[UC - Detect Restaurant Candidate]]                            |
-| `UC-VRC` | Verify Restaurant Candidate                            | [[UC - Verify Restaurant Candidate]]                            |
-| `UC-OPS` | Operate BiteTribe In The Admin App                     | [[UC - Operate BiteTribe In The Admin App]]                     |
-| `UC-ROM` | Run Operational Migrations                             | [[UC - Run Operational Migrations]]                             |
-| `UC-CMB` | Create And Maintain Personal Bites                     | [[UC - Create And Maintain Personal Bites]]                     |
-| `UC-MRB` | Maintain Restaurants In The Business App               | [[UC - Maintain Restaurants In The Business App]]               |
-| `UC-ARO` | Own And Claim Restaurants                              | [[UC - Own And Claim Restaurants]]                              |
-| `UC-DSB` | Discover Bites                                         | [[UC - Discover Bites]]                                         |
-| `UC-IBD` | Inspect Bite Details                                   | [[UC - Inspect Bite Details]]                                   |
-| `UC-MPS` | Manage Profile And Social Graph                        | [[UC - Manage Profile And Social Graph]]                        |
-| `UC-ALF` | Use Account And Legal Flows                            | [[UC - Use Account And Legal Flows]]                            |
-| `UC-CPS` | Configure Personal Settings                            | [[UC - Configure Personal Settings]]                            |
-| `UC-SIB` | Search In BiteTribe                                    | [[UC - Search In BiteTribe]]                                    |
-| `UC-CUS` | Complete Universal Search                              | [[UC - Complete Universal Search]]                              |
-| `UC-GNU` | Guide New Users After Registration                     | [[UC - Guide New Users After Registration]]                     |
-| `UC-HPT` | Harden Platform And Backend Trust                      | [[UC - Harden Platform And Backend Trust]]                      |
-| `UC-LGS` | Use Local Gallery Support                              | [[UC - Use Local Gallery Support]]                              |
-| `UC-UGS` | Use Gamification Signals                               | [[UC - Use Gamification Signals]]                               |
-| `UC-RAN` | Receive App Notifications And Engagement Updates       | [[UC - Receive App Notifications And Engagement Updates]]       |
-| `UC-LCQ` | Strengthen Location Currency And Data Quality Guidance | [[UC - Strengthen Location Currency And Data Quality Guidance]] |
-| `UC-BRP` | Browse Restaurants And Places                          | [[UC - Browse Restaurants And Places]]                          |
-| `UC-VRM` | View Restaurant Menus                                  | [[UC - View Restaurant Menus]]                                  |
-| `UC-SBL` | Save And Rate BiteTrails Through Bucket Lists          | [[UC - Save And Rate BiteTrails Through Bucket Lists]]          |
-| `UC-DBM` | Discover BiteTrails In The Marketplace                 | [[UC - Discover BiteTrails In The Marketplace]]                 |
-| `UC-MTS` | Manage Tables During Service                           | [[UC - Manage Tables During Service]]                           |
-| `UC-ILQ` | Improve Localization Quality                           | [[UC - Improve Localization Quality]]                           |
-| `UC-SBP` | Subscribe To BiteTribe Pro                             | [[UC - Subscribe To BiteTribe Pro]]                             |
-| `UC-SAF` | See Ads As A Free User                                 | [[UC - See Ads As A Free User]]                                 |
-| `UC-BPB` | Buy A Paid BiteTrail                                   | [[UC - Buy A Paid BiteTrail]]                                   |
-| `UC-CRV` | Contact A Restaurant And Plan A Visit                  | [[UC - Contact A Restaurant And Plan A Visit]]                  |
-| `UC-CBT` | Create And Operate BiteTrails In The Business App      | [[UC - Create And Operate BiteTrails In The Business App]]      |
-| `UC-EPB` | Earn From A Paid BiteTrail                             | [[UC - Earn From A Paid BiteTrail]]                             |
-| `UC-PBS` | Price A BiteTrail For Sale                             | [[UC - Price A BiteTrail For Sale]]                             |
-| `UC-DIS` | Dismiss Restaurant Candidate                           | none                                                            |
-| `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | none                                                            |
-| `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                            |
-| `UC-ARB` | Assign Bites To Restaurant                             | none                                                            |
+| UC-ID    | Use Case                                               | Page                                                                                                                                     |
+| -------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `UC-DRC` | Detect Restaurant Candidate                            | [UC - Detect Restaurant Candidate](../use-cases/uc-detect-restaurant-candidate.md)                                                       |
+| `UC-VRC` | Verify Restaurant Candidate                            | [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md)                                                       |
+| `UC-OPS` | Operate BiteTribe In The Admin App                     | [UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md)                                         |
+| `UC-ROM` | Run Operational Migrations                             | [UC - Run Operational Migrations](../use-cases/uc-run-operational-migrations.md)                                                         |
+| `UC-CMB` | Create And Maintain Personal Bites                     | [UC - Create And Maintain Personal Bites](../use-cases/uc-create-and-maintain-personal-bites.md)                                         |
+| `UC-MRB` | Maintain Restaurants In The Business App               | [UC - Maintain Restaurants In The Business App](../use-cases/uc-maintain-restaurants-in-the-business-app.md)                             |
+| `UC-ARO` | Own And Claim Restaurants                              | [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md)                                                           |
+| `UC-DSB` | Discover Bites                                         | [UC - Discover Bites](../use-cases/uc-discover-bites.md)                                                                                 |
+| `UC-IBD` | Inspect Bite Details                                   | [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md)                                                                     |
+| `UC-MPS` | Manage Profile And Social Graph                        | [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md)                                               |
+| `UC-ALF` | Use Account And Legal Flows                            | [UC - Use Account And Legal Flows](../use-cases/uc-use-account-and-legal-flows.md)                                                       |
+| `UC-CPS` | Configure Personal Settings                            | [UC - Configure Personal Settings](../use-cases/uc-configure-personal-settings.md)                                                       |
+| `UC-SIB` | Search In BiteTribe                                    | [UC - Search In BiteTribe](../use-cases/uc-search-in-bitetribe.md)                                                                       |
+| `UC-CUS` | Complete Universal Search                              | [UC - Complete Universal Search](../use-cases/uc-complete-universal-search.md)                                                           |
+| `UC-GNU` | Guide New Users After Registration                     | [UC - Guide New Users After Registration](../use-cases/uc-guide-new-users-after-registration.md)                                         |
+| `UC-HPT` | Harden Platform And Backend Trust                      | [UC - Harden Platform And Backend Trust](../use-cases/uc-harden-platform-and-backend-trust.md)                                           |
+| `UC-LGS` | Use Local Gallery Support                              | [UC - Use Local Gallery Support](../use-cases/uc-use-local-gallery-support.md)                                                           |
+| `UC-UGS` | Use Gamification Signals                               | [UC - Use Gamification Signals](../use-cases/uc-use-gamification-signals.md)                                                             |
+| `UC-RAN` | Receive App Notifications And Engagement Updates       | [UC - Receive App Notifications And Engagement Updates](../use-cases/uc-receive-app-notifications-and-engagement-updates.md)             |
+| `UC-LCQ` | Strengthen Location Currency And Data Quality Guidance | [UC - Strengthen Location Currency And Data Quality Guidance](../use-cases/uc-strengthen-location-currency-and-data-quality-guidance.md) |
+| `UC-BRP` | Browse Restaurants And Places                          | [UC - Browse Restaurants And Places](../use-cases/uc-browse-restaurants-and-places.md)                                                   |
+| `UC-VRM` | View Restaurant Menus                                  | [UC - View Restaurant Menus](../use-cases/uc-view-restaurant-menus.md)                                                                   |
+| `UC-SBL` | Save And Rate BiteTrails Through Bucket Lists          | [UC - Save And Rate BiteTrails Through Bucket Lists](../use-cases/uc-save-and-rate-bitetrails-through-bucket-lists.md)                   |
+| `UC-DBM` | Discover BiteTrails In The Marketplace                 | [UC - Discover BiteTrails In The Marketplace](../use-cases/uc-discover-bitetrails-in-the-marketplace.md)                                 |
+| `UC-MTS` | Manage Tables During Service                           | [UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md)                                                     |
+| `UC-ILQ` | Improve Localization Quality                           | [UC - Improve Localization Quality](../use-cases/uc-improve-localization-quality.md)                                                     |
+| `UC-SBP` | Subscribe To BiteTribe Pro                             | [UC - Subscribe To BiteTribe Pro](../use-cases/uc-subscribe-to-bitetribe-pro.md)                                                         |
+| `UC-SAF` | See Ads As A Free User                                 | [UC - See Ads As A Free User](../use-cases/uc-see-ads-as-a-free-user.md)                                                                 |
+| `UC-BPB` | Buy A Paid BiteTrail                                   | [UC - Buy A Paid BiteTrail](../use-cases/uc-buy-a-paid-bitetrail.md)                                                                     |
+| `UC-CRV` | Contact A Restaurant And Plan A Visit                  | [UC - Contact A Restaurant And Plan A Visit](../use-cases/uc-contact-a-restaurant-and-plan-a-visit.md)                                   |
+| `UC-CBT` | Create And Operate BiteTrails In The Business App      | [UC - Create And Operate BiteTrails In The Business App](../use-cases/uc-create-and-operate-bitetrails-in-the-business-app.md)           |
+| `UC-EPB` | Earn From A Paid BiteTrail                             | [UC - Earn From A Paid BiteTrail](../use-cases/uc-earn-from-a-paid-bitetrail.md)                                                         |
+| `UC-PBS` | Price A BiteTrail For Sale                             | [UC - Price A BiteTrail For Sale](../use-cases/uc-price-a-bitetrail-for-sale.md)                                                         |
+| `UC-DIS` | Dismiss Restaurant Candidate                           | none                                                                                                                                     |
+| `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | none                                                                                                                                     |
+| `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                                                                                                     |
+| `UC-ARB` | Assign Bites To Restaurant                             | none                                                                                                                                     |
 
 Codes whose `Page` cell reads `none` have no page yet. They are referenced by `UC-VRC`
 and `UC-DRC` for rules those flows depend on, which makes writing them visible work
@@ -499,10 +499,10 @@ stops it being reused while anything still refers to it.
 
 ## Related Pages
 
-- [[Actogram Format]]
-- [[GitHub Issue Format]]
-- [[Agent Operating Contract]]
-- [[Traceability Map]]
-- [[User Roles]]
-- [[Glossary]]
-- [[Current State - Known Issues]]
+- [Actogram Format](actogram-format.md)
+- [GitHub Issue Format](github-issue-format.md)
+- [Agent Operating Contract](agent-operating-contract.md)
+- [Traceability Map](traceability-map.md)
+- [User Roles](../product/user-roles.md)
+- [Glossary](../product/glossary.md)
+- [Current State - Known Issues](../current-state/known-issues.md)

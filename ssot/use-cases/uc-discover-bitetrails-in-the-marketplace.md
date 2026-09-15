@@ -10,7 +10,7 @@ card opens a detail page listing that BiteTrail's Bites, with a map view beside 
 BiteTrail carries the button that takes it as a Bucket List, or returns to the one already
 saved. **No paid BiteTrail is published at launch**, which is what keeps that safe: purchase
 is not built, and a priced BiteTrail would today show its Bites to anyone and offer no way to
-buy. [[UC - Buy A Paid BiteTrail]] owns both halves.
+buy. [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md) owns both halves.
 
 ## Goal
 
@@ -18,9 +18,9 @@ Users can discover curated BiteTrail packages in the Market Place.
 
 This page owns the three surfaces a BiteTrail is found through - the Market Place listing, the
 detail page and its map view - and nothing beyond opening one. Taking a free BiteTrail as a
-Bucket List belongs to [[UC - Save And Rate BiteTrails Through Bucket Lists]], buying a paid
-one to [[UC - Buy A Paid BiteTrail]], and packaging one to
-[[UC - Price A BiteTrail For Sale]].
+Bucket List belongs to [UC - Save And Rate BiteTrails Through Bucket Lists](uc-save-and-rate-bitetrails-through-bucket-lists.md), buying a paid
+one to [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md), and packaging one to
+[UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale.md).
 
 ## Actors
 
@@ -40,7 +40,7 @@ one to [[UC - Buy A Paid BiteTrail]], and packaging one to
 **[MVP]** - the whole page. A BiteTrail that cannot be found is a BiteTrail nobody has, and
 the Market Place is the only way into one.
 
-Not on this page: buying. [[UC - Buy A Paid BiteTrail]] is `Next to implement` at P1,
+Not on this page: buying. [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md) is `Next to implement` at P1,
 post-launch, and owns both the purchase and the locking that has to come with it.
 
 ## App Store Review Area
@@ -52,7 +52,7 @@ published: today the detail page would list its Bites in full and offer no purch
 because the footer carrying that control renders only when `isFree` holds - so a reviewer
 would meet priced digital content with no way to buy it. Both the purchase, which has to go
 through store in-app purchase, and the locking that must come with it belong to
-[[UC - Buy A Paid BiteTrail]] and [[Monetization]].
+[UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md) and [Monetization](../product/monetization.md).
 
 ## Supported Evidence
 
@@ -63,24 +63,29 @@ through store in-app purchase, and the locking that must come with it belong to
 
 ## Related GitHub Scope
 
-- Issue \#266, the `Organisation/Food Vlogger wants to offer packages of bites (BiteTrails)`
+- Issue [#266], the `Organisation/Food Vlogger wants to offer packages of bites (BiteTrails)`
   epic, describes the marketplace MVP for creator or food-vlogger BiteTrail packages and was
   the Eid campaign's vehicle. Closed as completed.
-- The three surfaces themselves have no issue behind them: pull request \#662 set the Market
-  Place up, \#666 added the BiteTrail loading, and \#684 the price display and the detail
+- The three surfaces themselves have no issue behind them: pull request [#662] set the Market
+  Place up, [#666] added the BiteTrail loading, and [#684] the price display and the detail
   page. None of the three names an issue.
 
 ## Related Domains
 
-- [[Market Place]]
-- [[Bite Trail]]
-- [[Bite]]
+- [Market Place](../domain/market-place.md)
+- [Bite Trail](../domain/bite-trail.md)
+- [Bite](../domain/bite.md)
 
 ## Related Pages
 
-- [[Personas]] - the audiences the `Actors` mapping displaced: the food lover, the traveler,
+- [Personas](../product/personas.md) - the audiences the `Actors` mapping displaced: the food lover, the traveler,
   and the food curator or vlogger
-- [[UC - Save And Rate BiteTrails Through Bucket Lists]] - what taking a free BiteTrail does
-- [[UC - Buy A Paid BiteTrail]] - the purchase and the locking a priced BiteTrail still lacks
-- [[UC - Price A BiteTrail For Sale]] - the creator side of the same epic
-- [[Monetization]] - what is sold and what stays free
+- [UC - Save And Rate BiteTrails Through Bucket Lists](uc-save-and-rate-bitetrails-through-bucket-lists.md) - what taking a free BiteTrail does
+- [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md) - the purchase and the locking a priced BiteTrail still lacks
+- [UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale.md) - the creator side of the same epic
+- [Monetization](../product/monetization.md) - what is sold and what stays free
+
+[#266]: https://github.com/muhammedgaygisiz/travellers-apps/issues/266
+[#662]: https://github.com/muhammedgaygisiz/travellers-apps/issues/662
+[#666]: https://github.com/muhammedgaygisiz/travellers-apps/issues/666
+[#684]: https://github.com/muhammedgaygisiz/travellers-apps/issues/684

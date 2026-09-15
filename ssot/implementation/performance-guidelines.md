@@ -4,7 +4,7 @@
 
 These are the rules that came out of profiling the Android app against production data, where a dense feed made ordinary-looking code cost seconds of blocked main thread. They are written as rules with the measurement that produced them, because none of them are visible from reading the code that breaks them.
 
-The two architectural rules that belong to state ownership live in [[Architecture - State Management]]: a reducer must return the same state reference when nothing changed, and a derived read model belongs to whoever produced the list. This page covers what sits on top of them.
+The two architectural rules that belong to state ownership live in [Architecture - State Management](../architecture/state-management.md): a reducer must return the same state reference when nothing changed, and a derived read model belongs to whoever produced the list. This page covers what sits on top of them.
 
 ## Measure On The Device, Against Real Data
 
@@ -75,8 +75,10 @@ When a change is being validated on a device, verify that the build actually pro
 
 ## Related Pages
 
-- [[Architecture - State Management]]
-- [[Implementation - Feature Patterns]]
-- [[Current State - Known Issues]]
+- [Architecture - State Management](../architecture/state-management.md)
+- [Implementation - Feature Patterns](feature-patterns.md)
+- [Current State - Known Issues](../current-state/known-issues.md)
 
-Open work bringing existing code in line with these rules is tracked under GitHub issue #1359.
+Open work bringing existing code in line with these rules is tracked under GitHub issue [#1359].
+
+[#1359]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1359

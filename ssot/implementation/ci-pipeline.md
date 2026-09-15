@@ -8,13 +8,13 @@ The pipeline is the gate between a pull request and `develop`, and between `deve
 
 ## Workflows
 
-| Workflow                                 | Trigger                                    | Purpose                                                                                              |
-| ---------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `.github/workflows/pipeline.yml`         | Push to `develop`, PR to `develop`, manual | The main gate: lint, stylelint, tests, Loki, E2E, and every deploy                                   |
-| `.github/workflows/deploy-cv.yml`        | Manual                                     | Build and publish the `cv` app to its own Firebase project                                           |
-| `.github/workflows/analytics-digest.yml` | Daily 06:00 UTC, manual                    | Post the launch-analytics digest to a tracking issue, see [[Analytics Operations]]                   |
-| `.github/workflows/native-release.yml`   | Push of a `build-*` tag, manual, called    | Build the signed Android bundle and iOS archive, see [[Implementation - Release And Build Workflow]] |
-| `.github/workflows/release.yml`          | Manual                                     | Cut a release: branch, changelog, tag, native build, pull request, see [[Release Workflow]]          |
+| Workflow                                 | Trigger                                    | Purpose                                                                                                                           |
+| ---------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/pipeline.yml`         | Push to `develop`, PR to `develop`, manual | The main gate: lint, stylelint, tests, Loki, E2E, and every deploy                                                                |
+| `.github/workflows/deploy-cv.yml`        | Manual                                     | Build and publish the `cv` app to its own Firebase project                                                                        |
+| `.github/workflows/analytics-digest.yml` | Daily 06:00 UTC, manual                    | Post the launch-analytics digest to a tracking issue, see [Analytics Operations](../operations/analytics-operations.md)           |
+| `.github/workflows/native-release.yml`   | Push of a `build-*` tag, manual, called    | Build the signed Android bundle and iOS archive, see [Implementation - Release And Build Workflow](release-and-build-workflow.md) |
+| `.github/workflows/release.yml`          | Manual                                     | Cut a release: branch, changelog, tag, native build, pull request, see [Release Workflow](../overview/release-workflow.md)        |
 
 `pipeline.yml` is the only workflow that runs on a branch or pull request.
 `native-release.yml` also runs without being dispatched, but on a `build-*`
@@ -62,7 +62,7 @@ release-candidate scope, so it is the only one that sets
 
 `functions-build` compiles the Firebase functions and `deploy-functions` ships
 them, so backend behaviour reaches production on the same push as the web bundle
-that calls it. Until [issue #1464](https://github.com/muhammedgaygisiz/travellers-apps/issues/1464)
+that calls it. Until [issue #1464][#1464]
 the pipeline built them and threw the result away, and the deploy was a command
 someone remembered to run on a workstation - which meant a merged function could
 sit undeployed indefinitely, and the artifact came from whatever state that
@@ -82,7 +82,7 @@ The script's role list is also where the reasoning for each role lives.
 runs the emulator suite over `apps/bite-tribe-firebase/firestore.rules` on every pull
 request, and stops there. A rules deploy takes effect the moment it lands and cannot be
 staged, so it stays a deliberate act with a verification pass behind it - see the rules
-section on [[Architecture - Firebase]]. The job installs the functions package as well as
+section on [Architecture - Firebase](../architecture/firebase.md). The job installs the functions package as well as
 the workspace root: the suite needs `@firebase/rules-unit-testing` from the first and
 jest, ts-jest and the Firebase client SDK from the second.
 
@@ -96,7 +96,7 @@ actually has and fails the deploy when something it declares is missing. It
 reads live state rather than the diff of the push, so re-running the job after
 the manual index deploy passes. The deploy account holds `datastore.viewer` and
 not `datastore.indexAdmin`: CI can check indexes and cannot deploy them.
-[Issue #1227](https://github.com/muhammedgaygisiz/travellers-apps/issues/1227)
+[Issue #1227][#1227]
 is the failure this prevents.
 
 **A failed deploy fails the run, and nothing more.** There is no
@@ -108,7 +108,7 @@ one would trade that window for a functions problem blocking every web deploy,
 which is the worse of the two on a repository where the web deploy runs about a
 hundred times a month.
 
-See [[Implementation - Firebase Functions]].
+See [Implementation - Firebase Functions](firebase-functions.md).
 
 The lint, stylelint and tests chain is deliberately sequential so a cheap failure stops the run before the expensive jobs start. Everything after `tests` fans out in parallel.
 
@@ -127,13 +127,13 @@ The lint, stylelint and tests chain is deliberately sequential so a cheap failur
 ## Action Versions
 
 **This page owns the versions of the GitHub Actions used in CI.** Not
-[[Current State - Nx And Dependency Migration Roadmap]], which pins Node and Nx:
+[Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md), which pins Node and Nx:
 that page describes a migration with an end state, while action versions are a
 permanent property of the workflows, and this page already owns the workflow
 inventory and the composite actions that call them.
 
 Current, as of the bump under
-[issue #1437](https://github.com/muhammedgaygisiz/travellers-apps/issues/1437).
+[issue #1437][#1437].
 Every one declares `using: node24`.
 
 | Action                      | Version | Uses |
@@ -166,7 +166,7 @@ its breaking changes read before it is merged.
 ### What A Bump Has To Preserve
 
 Two behaviours in `native-release.yml` are load-bearing and neither is obvious
-from a diff. During issue #1181 an artifact was staged as a dotfile and dropped
+from a diff. During issue [#1181] an artifact was staged as a dotfile and dropped
 in silence while the step reported success, and the guard added afterwards
 assumes both:
 
@@ -219,13 +219,13 @@ This is why the `deploy-bite-tribe`, `deploy-bite-tribe-business` and `deploy-bi
 
 Each app reads its own `authDomain` secret — `NX_APP_BITE_TRIBE_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_ADMIN_AUTH_DOMAIN`. All three hold the same value today, the project's shared `bite-tribe.firebaseapp.com` OAuth handler. They are separate secrets because `authDomain` is what Firebase builds the Google and Apple redirect from, so one app can later be moved to its own handler domain without moving the other two.
 
-The three deploy jobs do **not** pass the same set. `NX_APP_BITE_TRIBE_MEASSUREMENT_ID` reaches `deploy-bite-tribe` and the native release, and reached `deploy-bite-tribe-business` only from issue \#1588 - the table operations of \#1098 are the first events that app sends, and until then it had no analytics to need one. `deploy-bite-tribe-admin` still omits it deliberately: nothing in the admin app emits a product event, and `AnalyticsService` initializes analytics lazily on the first one, so it initializes none.
+The three deploy jobs do **not** pass the same set. `NX_APP_BITE_TRIBE_MEASSUREMENT_ID` reaches `deploy-bite-tribe` and the native release, and reached `deploy-bite-tribe-business` only from issue [#1588] - the table operations of [#1098] are the first events that app sends, and until then it had no analytics to need one. `deploy-bite-tribe-admin` still omits it deliberately: nothing in the admin app emits a product event, and `AnalyticsService` initializes analytics lazily on the first one, so it initializes none.
 
 The failure mode is worth knowing, because it is silent. Without `measurementId` in the Firebase options the web SDK recovers one from a runtime `webConfig` fetch keyed on the app id, and if that fetch does not answer, `getAnalytics()` throws inside `AnalyticsService.emit`, which swallows it by design - tracking must never break a user flow. So the app works, the events do not arrive, and nothing says so. An app that emits events states the value rather than trusting the recovery.
 
 `deploy-bite-tribe-storybook` is not subject to this. The Storybook build reads no `NX_APP_*` variables, so it needs no secrets and its artifact is the same whichever job produced it.
 
-See [[Implementation - Release And Build Workflow]] for how the values reach the bundle and which of them are public by design, and [[Current State - Known Issues]] for the deliberately misspelled `NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID` secret name.
+See [Implementation - Release And Build Workflow](release-and-build-workflow.md) for how the values reach the bundle and which of them are public by design, and [Current State - Known Issues](../current-state/known-issues.md) for the deliberately misspelled `NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID` secret name.
 
 ## Repository Visibility And Actions Cost
 
@@ -282,11 +282,11 @@ signing secrets are unreachable from a fork under any trigger.
 What a reader can see is configuration and identifiers, not credentials: the
 Android signing block, the Apple team id, the upload key's SHA-256 fingerprint -
 which Play publishes anyway under **App signing** - and the Firebase client
-configuration that [[Implementation - Release And Build Workflow]] records as
+configuration that [Implementation - Release And Build Workflow](release-and-build-workflow.md) records as
 public by design.
 
 The one thing a public repository genuinely exposes is `ssot` itself: the
-release-candidate charter, [[Current State - Known Issues]], and the open
+release-candidate charter, [Current State - Known Issues](../current-state/known-issues.md), and the open
 findings, in detail. If visibility is ever revisited, that is the argument.
 It is a disclosure decision, not a cost or a security-of-signing one, and it
 costs about `$40` a month to act on.
@@ -295,7 +295,7 @@ costs about `$40` a month to act on.
 
 A self-hosted macOS runner would avoid the multiplier, and it would put the
 store artifact back on one machine's toolchain and signing state - which is the
-thing [issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
+thing [issue #1181][#1181]
 exists to remove. If the bill ever needs cutting, cut it in the pipeline first;
 the Nx-cache gaps under Current Limitations are the larger lever.
 
@@ -311,14 +311,14 @@ the Nx-cache gaps under Current Limitations are the larger lever.
 - Add a new deploy to `pipeline.yml` behind `if: github.ref == 'refs/heads/develop'`. Do not give it a manually dispatched workflow of its own. A separate workflow needs a trigger that fires on its own, as `native-release.yml`'s tag does.
 - Never put `continue-on-error` on a deploy job. A deploy that is allowed to fail quietly is the manual deploy again, with extra steps.
 - Give a deploy the narrowest credential that can perform it, and grant a new permission to that deploy's own service account. Widening `FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE` is how a hosting secret ends up worth a project.
-- Deploy a new Firestore index before the function that queries through it, and wait for it to reach `READY`. `deploy-functions` refuses to run while a declared index is missing from the project, so this is enforced rather than remembered. See [[Implementation - Firebase Functions]].
+- Deploy a new Firestore index before the function that queries through it, and wait for it to reach `READY`. `deploy-functions` refuses to run while a declared index is missing from the project, so this is enforced rather than remembered. See [Implementation - Firebase Functions](firebase-functions.md).
 - Do not grant the functions deploy account `datastore.indexAdmin`. The index deploy is deliberately outside CI, and a read-only `datastore.viewer` is all the preflight needs.
 - Keep every `actions/*` use on the version this page's table names, and update the table in the same pull request that moves one. A version that appears in a workflow and not in the table is drift by definition.
 - Read a major bump's breaking changes before merging the Dependabot pull request. Grouped means one review, not no review.
 - Do not use `.github/actions/setup` or `.github/actions/restore-cache` from a macOS or Windows job. The `node_modules` cache key is `node-modules-<package-lock hash>` with no runner OS in it, so a non-Linux job would restore Linux native binaries, and saving would overwrite the entry every other job depends on. Use `actions/setup-node` and `npm ci` directly, as the `ios` job does.
-- Keep local and CI Node.js versions aligned through `.nvmrc` as defined by [[Current State - Nx And Dependency Migration Roadmap]].
+- Keep local and CI Node.js versions aligned through `.nvmrc` as defined by [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md).
 - Price a change of repository visibility before making one. CI is free because the repository is public, and going private starts a bill dominated by `pipeline.yml` rather than by the native jobs. See Repository Visibility And Actions Cost above.
-- Do not add a self-hosted runner to escape a minute multiplier. It reintroduces the single-workstation build that issue #1181 removed.
+- Do not add a self-hosted runner to escape a minute multiplier. It reintroduces the single-workstation build that issue [#1181] removed.
 
 ## Code Anchors
 
@@ -347,9 +347,9 @@ nx.json
 - `loki`, `e2e`, `business-e2e` and `deploy-bite-tribe-storybook` do not restore the Nx cache, so the Storybook build and the E2E app builds re-run on every pipeline run. On `develop` the Storybook is therefore built twice, once in `loki` and once in the deploy, at roughly 80 seconds each. Both Storybook builds are safe to put on the Nx cache; the E2E jobs build with `NX_APP_BITE_TRIBE_IS_DEV=true` and fall under the environment-variable rule above.
 - Only the two build jobs carry `install-if-missing`. Every other job restores `node_modules` with an exact key and no fallback, so a cache miss or an unreachable cache service fails them with `nx: not found` instead of installing.
 - There is no remote cache. Nx Cloud's free tier is exhausted too quickly for this workspace, and the self-hosted cache plugins (`@nx/gcs-cache` and siblings) are deprecated over CVE-2025-36852, an unpatchable cache-poisoning design flaw. The GitHub Actions cache is used instead, and its branch scoping provides the isolation those plugins lack.
-- The native jobs in `native-release.yml` have never run. The Android and iOS signing secrets are not provisioned, so the workflow is written and reviewed but unexecuted, and the manual workstation release in [[Implementation - Store Release Steps]] is still the one that produces store artifacts. See [[Current State - Release Candidate Test Charter]].
+- The native jobs in `native-release.yml` have never run. The Android and iOS signing secrets are not provisioned, so the workflow is written and reviewed but unexecuted, and the manual workstation release in [Implementation - Store Release Steps](store-release-steps.md) is still the one that produces store artifacts. See [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md).
 - `native-release.yml` builds on whatever Xcode `macos-latest` carries. An artifact is reproducible against a commit, not against a toolchain.
-- The two jobs that compile the Firebase functions use different compilers. `functions-build` does not install the functions package, so it compiles with the workspace TypeScript 6; `deploy-functions` installs it and therefore compiles with the `^5.7.3` that package pins, which is also what a workstation deploy uses. An error only one of them reports passes the pull request and fails the deploy. The version split is described in [[Current State - Nx And Dependency Migration Roadmap]].
+- The two jobs that compile the Firebase functions use different compilers. `functions-build` does not install the functions package, so it compiles with the workspace TypeScript 6; `deploy-functions` installs it and therefore compiles with the `^5.7.3` that package pins, which is also what a workstation deploy uses. An error only one of them reports passes the pull request and fails the deploy. The version split is described in [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md).
 - A second push to `develop` cancels a functions deploy in flight. The workflow-level `cancel-in-progress` supersedes the whole run, and a job-level `concurrency` group cannot override that; it only keeps a deploy started from another run from overlapping. A cancelled gen2 deploy leaves the already-updated functions updated, and the next push deploys the rest.
 - CI never deletes a function. `--non-interactive` turns the deletion prompt into a failure, so removing an export from `src/index.ts` makes the deploy fail rather than silently take a live endpoint away. Delete it locally and deliberately, then push.
 - Gen2 functions have no rollback. Recovery from a bad deploy is a forward deploy of the reverted commit, not a console action.
@@ -357,8 +357,15 @@ nx.json
 
 ## Related Pages
 
-- [[Architecture - Nx Workspace]]
-- [[Implementation - Release And Build Workflow]]
-- [[Implementation - Testing]]
-- [[Current State - Nx And Dependency Migration Roadmap]]
-- [[Current State - Release Candidate Test Charter]]
+- [Architecture - Nx Workspace](../architecture/nx-workspace.md)
+- [Implementation - Release And Build Workflow](release-and-build-workflow.md)
+- [Implementation - Testing](testing.md)
+- [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md)
+- [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)
+
+[#1098]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1098
+[#1181]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1181
+[#1227]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1227
+[#1437]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1437
+[#1464]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1464
+[#1588]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1588

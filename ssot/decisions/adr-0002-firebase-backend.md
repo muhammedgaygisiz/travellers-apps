@@ -34,8 +34,8 @@ Firestore stores product data. Firebase Storage stores user-generated and produc
 
 ## Links
 
-- [[Architecture - Firebase]]
-- [[Architecture - Auth]]
-- [[Architecture - Storage]]
-- [[Architecture - Analytics]]
-- [[Implementation - Firebase Functions]]
+- [Architecture - Firebase](../architecture/firebase.md)
+- [Architecture - Auth](../architecture/auth.md)
+- [Architecture - Storage](../architecture/storage.md)
+- [Architecture - Analytics](../architecture/analytics.md)
+- [Implementation - Firebase Functions](../implementation/firebase-functions.md)

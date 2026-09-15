@@ -26,14 +26,14 @@ If Nx starts without useful output for roughly 10 seconds, stop it and use the d
 
 ## Where The Test Target Comes From
 
-`project.json` no longer declares a Jest target. `@nx/jest/plugin` infers one `test` target per project from the `jest.config.{ts,cts}` sitting in the project root (issue #1379), and `nx.json` `targetDefaults.test` carries the shared cache inputs, `passWithNoTests`, and the `ci` configuration. Read [[Architecture - Nx Workspace]] for the inference rule and the two excluded roots.
+`project.json` no longer declares a Jest target. `@nx/jest/plugin` infers one `test` target per project from the `jest.config.{ts,cts}` sitting in the project root (issue [#1379]), and `nx.json` `targetDefaults.test` carries the shared cache inputs, `passWithNoTests`, and the `ci` configuration. Read [Architecture - Nx Workspace](../architecture/nx-workspace.md) for the inference rule and the two excluded roots.
 
 Two consequences for validation:
 
 - `nx show project <name>` is the only accurate view of a `test` target. Reading `project.json` will show you no Jest target at all.
 - The Nx target now shells out to `jest` with `cwd` set to the project root, so the direct fallback below runs the same Jest that Nx runs.
 
-`model` gained a `test` target with issue #1080 and is the workspace's one non-Angular Jest config: it takes the `ts-jest` transform straight from `jest.preset.js` instead of overriding it with `jest-preset-angular`, because a types-only library has no component to compile. Its `tsconfig.spec.json` sets `allowJs`, since `jest.preset.js` adds the workspace `__mocks__` directory to every project's roots and `ts-jest` otherwise warns twice per run about compiling `fetch.js` and `resize-observer.js`.
+`model` gained a `test` target with issue [#1080] and is the workspace's one non-Angular Jest config: it takes the `ts-jest` transform straight from `jest.preset.js` instead of overriding it with `jest-preset-angular`, because a types-only library has no component to compile. Its `tsconfig.spec.json` sets `allowJs`, since `jest.preset.js` adds the workspace `__mocks__` directory to every project's roots and `ts-jest` otherwise warns twice per run about compiling `fetch.js` and `resize-observer.js`.
 
 Its specs are compile-time assertions: `ts-jest` type-checks the spec, so a shape the model can no longer express fails the run before any expectation is evaluated. A coverage run collects nothing, which the 80% threshold in `jest.preset.js` tolerates because there is no instrumented file to measure.
 
@@ -216,7 +216,7 @@ Markers never paint in Loki's Docker Chrome, so a baseline locks in a blank grey
 rectangle instead of the markers the story exists to show. See
 `libs/bite-tribe-common/map/src/lib/map/__specs__/map.component.stories.ts`, which
 carries the skip and the reason. The device is where map rendering gets confirmed
-instead — see [[Implementation - Android Device Testing]].
+instead — see [Implementation - Android Device Testing](android-device-testing.md).
 
 **A story-level `viewport` parameter does not narrow a Loki capture, and
 `parameters.loki.skip` does not narrow it to one configuration.** Loki sizes the
@@ -226,8 +226,8 @@ configuration at once. To baseline a story on some configurations and not
 others, use that configuration's `skipStories` regex, which is matched against
 `kind + ' ' + name`. `chrome.iphone7` carries `'^(Admin|Business)/'` so the
 admin and business apps - desktop products, neither shipped as a native build -
-are baselined at `chrome.laptop` only. See [[Implementation - Storybook]] and
-issue \#1547.
+are baselined at `chrome.laptop` only. See [Implementation - Storybook](storybook.md) and
+issue [#1547].
 
 **A skeleton in a reference image is not automatically a regression.**
 `loki-getstories-shim.ts` carries a settle gate precisely because an `@defer`
@@ -238,9 +238,13 @@ committed reference already shows a skeleton.
 
 ## Related Pages
 
-- [[Architecture - Testing]]
-- [[Current State - E2E Coverage]]
-- [[Implementation - Android Device Testing]]
-- [[Implementation - Firebase Functions]]
-- [[Implementation - Storybook]]
-- [[Current State - Nx And Dependency Migration Roadmap]]
+- [Architecture - Testing](../architecture/testing.md)
+- [Current State - E2E Coverage](../current-state/e2e-coverage.md)
+- [Implementation - Android Device Testing](android-device-testing.md)
+- [Implementation - Firebase Functions](firebase-functions.md)
+- [Implementation - Storybook](storybook.md)
+- [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md)
+
+[#1080]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1080
+[#1379]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1379
+[#1547]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1547

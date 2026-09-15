@@ -6,12 +6,12 @@ This page owns what search engines and link unfurlers read when they reach the
 BiteTribe web app: the canonical host, the document metadata, the document
 title, `robots.txt`, `sitemap.xml`, and the Open Graph image.
 
-[[Implementation - Store Listing Assets]] owns the approved copy. This page owns
+[Implementation - Store Listing Assets](store-listing-assets.md) owns the approved copy. This page owns
 where that copy is served on the web, so the stores and the site cannot drift
 apart. Change a sentence there first, then here.
 
 Added 1 September 2026 for
-[issue #1454](https://github.com/muhammedgaygisiz/travellers-apps/issues/1454).
+[issue #1454][#1454].
 Before it, `apps/bite-tribe/src/index.html` carried thorough PWA plumbing and no
 metadata at all, so a Google search for `bitetribe` returned the site as a title
 and a `Translate this page` link with no snippet, and every shared link unfurled
@@ -43,7 +43,7 @@ was chosen because it is the host Google already indexed and it matches the
 verify against through `.well-known/assetlinks.json`, it is the support URL in
 App Store Connect, and `handleSharedLinkToBite` builds both its canonical and
 its redirect from it. Those keep working and are deliberately untouched by
-#1454; migrating them is separate work, because the redirect target and the
+[#1454]; migrating them is separate work, because the redirect target and the
 verified host have to move together with a Play Console update.
 
 The consequence to remember: a `/s/bite/<id>` share page still declares a
@@ -63,7 +63,7 @@ canonical on `bite-tribe.web.app`, which is now not the canonical host.
 | `og:image` and its `type`, `width`, `height`, `alt`                          | `/assets/social/og-image.jpg`, `1200x630`               |
 | `og:locale`                                                                  | `en_US`                                                 |
 | `twitter:card`                                                               | `summary_large_image`                                   |
-| `twitter:site`                                                               | `@bitetribeapp`, added under #1455                      |
+| `twitter:site`                                                               | `@bitetribeapp`, added under [#1455]                    |
 | `twitter:title`, `twitter:description`, `twitter:image`, `twitter:image:alt` | Mirror the Open Graph values                            |
 
 They are static on purpose. An unfurler never runs the app's JavaScript, and a
@@ -73,10 +73,10 @@ would set at runtime is invisible to the clients this metadata exists for.
 `og:image` is absolute. Unfurlers do not resolve relative image URLs.
 
 `twitter:site` arrived after the rest, under
-[issue #1455](https://github.com/muhammedgaygisiz/travellers-apps/issues/1455),
-because #1454 had no account to name. The handle and the constraint that it
+[issue #1455][#1455],
+because [#1454] had no account to name. The handle and the constraint that it
 must not ship before the X account is registered both live in
-[[Implementation - Social Media Channels]].
+[Implementation - Social Media Channels](social-media-channels.md).
 
 ## The Two Runtime Exceptions
 
@@ -113,13 +113,13 @@ for `/` and `/start`, which is the page a search result for the site root
 actually shows.
 
 Route titles are still hardcoded English in `routes.ts`. Translating them is
-open work and is not tracked by #1454.
+open work and is not tracked by [#1454].
 
 ## robots.txt And sitemap.xml
 
 Both live in `apps/bite-tribe/public`, which the `public` asset entry in
 `apps/bite-tribe/project.json` copies to the site root. The folder was created by
-#1454; the build already referenced it.
+[#1454]; the build already referenced it.
 
 `sitemap.xml` lists four URLs: the root, `/support`, `/privacy` and
 `/account-deletion`. That is every route that renders without a session. The app
@@ -164,7 +164,7 @@ same image is 1 MB against 138 KB.
 - **`manifest.webmanifest`.** It still calls the app `bite-tribe` and carries no
   description. That is the PWA install name, not search metadata, and it is a
   separate defect against the spelling rule in
-  [[Implementation - Store Listing Assets]].
+  [Implementation - Store Listing Assets](store-listing-assets.md).
 - **The business app.** `apps/bite-tribe-business/src/index.html` has the same
   gap. It is not a public front door and was out of scope.
 
@@ -181,8 +181,11 @@ Once deployed:
 
 ## Related Pages
 
-- [[Implementation - Store Listing Assets]]
-- [[Implementation - Social Media Channels]]
-- [[Implementation - Localization]]
-- [[Architecture - Overview]]
-- [[Current State - Release State]]
+- [Implementation - Store Listing Assets](store-listing-assets.md)
+- [Implementation - Social Media Channels](social-media-channels.md)
+- [Implementation - Localization](localization.md)
+- [Architecture - Overview](../architecture/overview.md)
+- [Current State - Release State](../current-state/release-state.md)
+
+[#1454]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1454
+[#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455

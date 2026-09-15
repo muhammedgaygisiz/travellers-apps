@@ -47,12 +47,12 @@ is denied. Adding a collection to the product means adding it to the rules.
 
 ## Firestore Security Rules
 
-Until issue \#1078 the whole database was one match on `/{document=**}` allowing
+Until issue [#1078] the whole database was one match on `/{document=**}` allowing
 read and write to any signed-in account. `apps/bite-tribe-firebase/firestore.rules`
 now scopes every write by ownership. Three rules of thumb carry the file:
 
 - **Reads are where they were.** Every collection a signed-in account could read
-  before, it can still read. Issue \#1079 narrowed what the business app _sees_
+  before, it can still read. Issue [#1079] narrowed what the business app _sees_
   in the client query rather than here, so an unowned restaurant is still
   readable and simply not listed. The two exceptions are `accountDeletions` and
   the top-level `pushTokens` index, which are cross-account identifiers no
@@ -69,14 +69,14 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   owns it, because they are written by `assignRestaurantOwner` and
   `revokeRestaurantOwner` — which bypass rules entirely, so denying every client
   write to them costs the backend nothing and closes the forgery path recorded
-  on [[Current State - Known Issues]]. The same holds for the entitlement and
+  on [Current State - Known Issues](../current-state/known-issues.md). The same holds for the entitlement and
   counter fields on `/users`: `subscriptionTier`, `biteCount`, the follow
   counts, `normalizedDisplayName`, `countryCodes`, the last-seen stamps and the
   email-verification state. The comparison is by value, so a client that reads a
   profile and writes the same numbers back is unaffected.
 
 The one role in the file is `admin`, and it appears as an explicit clause rather
-than as an implied `business`. That is `RD-UR-6` in [[User Roles]]: the Operator
+than as an implied `business`. That is `RD-UR-6` in [User Roles](../product/user-roles.md): the Operator
 is above the Restaurant Owner in capability and not in claims. It is what lets
 the admin app create a restaurant and run the Bite migrations while the business
 app stays owner-scoped.
@@ -92,9 +92,9 @@ by its owner and gains the field on its next save.
 
 **`staff` still grants no write here, and now has one anyway.** The rules scope
 a write by `Restaurant.ownerUserId`, and a staff account never holds it. Issue
-\#1537 wrote the record that was missing — `/restaurantStaff/{uid}`, one document
+[#1537] wrote the record that was missing — `/restaurantStaff/{uid}`, one document
 per staff account naming its restaurant — and deliberately did not make the
-rules read it. Issue \#1092 gave the role its first write, and deliberately did
+rules read it. Issue [#1092] gave the role its first write, and deliberately did
 not put it here either: a host changes a table's live state through
 `transitionTableState`, a callable, because the outcome of two hosts acting at
 once has to be decided by one transaction rather than by the later write
@@ -116,7 +116,7 @@ client that could write the document could only ever produce half of a grant.
 `addRestaurantStaff` and `removeRestaurantStaff` write it through the Admin SDK.
 
 **Live table state is read like the plan and written by nobody** (issue
-\#1092). `/restaurants/{id}/tableStates/{tableId}` is what each table is doing
+[#1092]). `/restaurants/{id}/tableStates/{tableId}` is what each table is doing
 right now and
 `/restaurants/{id}/tableStateTransitions/{transitionId}` is how it got there,
 and both admit exactly the readers of the published plan: the staff of that
@@ -136,7 +136,7 @@ table holds now. A client write would be the way round that, so there is not one
   append-only for the same reason it exists: a disputed table is answered by a
   history nobody could have edited afterwards.
 
-The audit entry is also the **dedupe record** (issue \#1096). A caller may name
+The audit entry is also the **dedupe record** (issue [#1096]). A caller may name
 its transition with a `requestId`, which becomes that entry's document id
 prefixed `req-`; the callable reads the document it would write inside the same
 transaction, so a request sent twice - the ordinary shape of an offline queue
@@ -146,7 +146,7 @@ happened was already there, and naming it after the intent is what makes it
 findable.
 
 **A table visit is stored beside the state and written by nobody either**
-(issue \#1095). `/restaurants/{id}/visits/{visitId}` is the party at a table
+(issue [#1095]). `/restaurants/{id}/visits/{visitId}` is the party at a table
 over time, and it admits the same readers as the plan and the live state.
 
 It is under the restaurant rather than under the table, and that placement is
@@ -157,14 +157,14 @@ string that keeps naming a table nobody can find any more.
 
 Client writes are refused for a sharper reason than for the state. A client able
 to write here could open a second visit at a table that already has one, and the
-orders of issue \#1072 and the bill of issue \#1073 hang from the visit - a
+orders of issue [#1072] and the bill of issue [#1073] hang from the visit - a
 party billed for the next party's dinner is what that hole looks like from the
 dining room. `transitionTableState` opens and ends visits alongside the state
 change that caused them, in one transaction, and `moveTableVisit` walks an open
 visit to another table without ending it.
 
 **A guest's table session is the one collection a signed-in stranger reads a
-single document of and nothing more** (issue \#1101). A session lives at
+single document of and nothing more** (issue [#1101]). A session lives at
 `/restaurants/{restaurantId}/tableSessions/{sessionId}`, its name derived from
 the table and the guest's uid, and the guest clause matches
 `resource.data.guestUserId` against `request.auth.uid`. So the phone that
@@ -196,7 +196,7 @@ is top-level and named by the token itself, so resolving one is a single
 know the fact the scan exists to establish.
 
 The rule is `get` without `list`, and that distinction is the whole enumeration
-defence (issue \#1086). Whoever physically holds a printed code can read what it
+defence (issue [#1086]). Whoever physically holds a printed code can read what it
 resolves to; nobody can walk the set, so a restaurant's table count and its live
 codes stay unavailable to an account that was never given one. Guessing is the
 other half and is answered by the token rather than by the rule: 130 bits drawn
@@ -216,23 +216,23 @@ phone a restaurant id, a room id and a table label. Whether the restaurant is
 still held by anyone, whether it takes orders at the table, whether the table is
 still in the published plan, whether the kitchen is open and whether there is a
 menu all live in documents a guest may not read, and three of them change without
-the token being touched. `resolveTableQrToken` (issue \#1100) is the callable
+the token being touched. `resolveTableQrToken` (issue [#1100]) is the callable
 that answers, and it is the one `public` endpoint that reads restaurant data: a
 guest at a table has no account, so requiring one would make the account a
 precondition of finding out whether the restaurant even takes orders. App Check
 is enforced on it like every other endpoint, it writes nothing, and it assembles
 its answer field by field rather than handing back the documents it read.
 
-`startTableSession` (issue \#1101) runs the same checks again before it
+`startTableSession` (issue [#1101]) runs the same checks again before it
 writes, through the same `resolveScan` rather than a copy of it. That is not
 belt and braces: the client holds the earlier resolution for as long as the
 guest takes to read the confirmation screen, and three of the checks move inside
 a service - the kitchen pauses, the clock passes closing time, the owner turns
 the feature off. It requires a session where the scan does not, and an anonymous
 one is enough; what the door opens onto is one document named after the caller's
-own uid. See [[Implementation - Firebase Functions]].
+own uid. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
 
-**Two collections exist because the codes are assumed to leak** (issue \#1107).
+**Two collections exist because the codes are assumed to leak** (issue [#1107]).
 
 `/restaurants/{id}/scanAnomalies/{n}_{tableId}_{kind}` is what the restaurant is
 told about scans that do not look ordinary - a token past its limit, a code
@@ -245,7 +245,7 @@ their scan - handing them a way to find out whether they tripped one would hand
 an attacker the feedback loop for tuning around it. Staff read it through
 `readsFloorPlan`, the same list as everything else about one dining room.
 
-The address is issue \#1106's, and the reason is worth stating on this page
+The address is issue [#1106]'s, and the reason is worth stating on this page
 because it is a rule about shape rather than about this feature. A log of scan
 attempts is the obvious way to report an attack and it is the wrong one: reading
 the screen then costs more the harder somebody tries. Naming the document after
@@ -272,7 +272,7 @@ the third manual step in this epic, beside the rules and the indexes. Until it
 exists the collection grows: a document per bucket per minute.
 
 **`/menus` stayed shut, and that is the decision rather than an omission**
-(issue \#1102, `RD-TS-7`). A public menu page needs the restaurant's name as
+(issue [#1102], `RD-TS-7`). A public menu page needs the restaurant's name as
 well as its dishes, and `/restaurants/{id}` carries `ownerUserId`,
 `claimStatus` and the whole `tableOrdering` configuration - so opening a read
 rule wide enough to render the page would publish operations data with it.
@@ -300,7 +300,7 @@ pull request. The two e2e suites exercise the rules along the paths they walk,
 but neither can assert that something is _refused_.
 
 **The rules deploy by hand, and nothing in CI deploys them.** That is
-deliberate, and it is the rollout step issue \#1078 asks for: merge, then run
+deliberate, and it is the rollout step issue [#1078] asks for: merge, then run
 the suite, then deploy, then watch production for newly denied legitimate paths.
 
 ```bash
@@ -308,7 +308,7 @@ npx nx firebase-deploy-rules bite-tribe-firebase
 ```
 
 Rolling back is deploying the previous version of the file, which takes about a
-minute. `storage.rules` is still open and is issue \#1350, filed separately.
+minute. `storage.rules` is still open and is issue [#1350], filed separately.
 
 ## Functions Pattern
 
@@ -317,9 +317,9 @@ minute. `storage.rules` is still open and is issue \#1350, filed separately.
 - Function exports live in `apps/bite-tribe-firebase/functions/src/index.ts`.
 - Backend functions live under `apps/bite-tribe-firebase/functions/src/functions`.
 - Callable functions should validate `request.auth` before user-scoped reads.
-- **A collection-group query needs a rule that reads the document, and the query then carries the permission.** A `match /{path=**}/orders/{orderId}` has no `{restaurantId}` to scope it with, so the rule reads `resource.data.restaurantId` - and Firestore admits such a query only when its constraints prove the condition. The client therefore has to send the matching `where`, and a query without it is refused whole rather than widened to every restaurant in the database. Issue \#1105's staff order queue is the first client query in this repository shaped that way, and `firestore-rules.emulator-spec.ts` asserts both halves: the constrained query succeeds for the restaurant's own people and the unconstrained one is refused. The same mechanism scopes a guest to their own orders (`RD-TS-12`).
-- **A derived document name can replace a query, an index and a rule clause.** Issue \#1106's calls for a waiter are named `{n}_{tableId}_{kind}` under the restaurant, which bounds the collection at two documents per table however busy the room is - so both staff screens subscribe to the whole subcollection with no `where` at all, admitted by `readsFloorPlan(restaurantId)` from the path, and the guest's phone reaches its own by `get` on a name it derives. Compare the order queue one collection above it: orders hang from the visit and are unbounded, which forced a collection-group query, a `where` doubling as the permission, a second `where` to bound the read and two index exemptions deployed by hand. The same trick makes the repeated tap harmless, because the second write addresses the first one's document - a uniqueness constraint Firestore has no other way to express, and the same reason `tableSessionId` is derived.
-- Firestore index configuration is code. `apps/bite-tribe-firebase/firestore.indexes.json` holds the composite indexes and the single-field exemptions that collection-group queries need, and deploys on its own through the `bite-tribe-firebase:firebase-deploy-indexes` Nx target (`npm run deploy:indexes`), separately from functions and rules. That one deploy stays manual while functions deploy from CI, because the Firestore API builds an index in the background and the CLI returns before it is usable. The pipeline's `deploy-functions` job asserts the declared indexes are already live instead of deploying them. `firestore-collection-group-indexes.spec.ts` pairs every collection-group query in the **functions** source with an entry there; a query made by a **client** is outside what that spec can see, so issue \#1105's queue carries its own check in `libs/bite-tribe-business/table-management/data-access/src/lib/__specs__/table-order-queue-indexes.spec.ts`. Neither can prove the deploy has run. See [[Implementation - Firebase Functions]].
+- **A collection-group query needs a rule that reads the document, and the query then carries the permission.** A `match /{path=**}/orders/{orderId}` has no `{restaurantId}` to scope it with, so the rule reads `resource.data.restaurantId` - and Firestore admits such a query only when its constraints prove the condition. The client therefore has to send the matching `where`, and a query without it is refused whole rather than widened to every restaurant in the database. Issue [#1105]'s staff order queue is the first client query in this repository shaped that way, and `firestore-rules.emulator-spec.ts` asserts both halves: the constrained query succeeds for the restaurant's own people and the unconstrained one is refused. The same mechanism scopes a guest to their own orders (`RD-TS-12`).
+- **A derived document name can replace a query, an index and a rule clause.** Issue [#1106]'s calls for a waiter are named `{n}_{tableId}_{kind}` under the restaurant, which bounds the collection at two documents per table however busy the room is - so both staff screens subscribe to the whole subcollection with no `where` at all, admitted by `readsFloorPlan(restaurantId)` from the path, and the guest's phone reaches its own by `get` on a name it derives. Compare the order queue one collection above it: orders hang from the visit and are unbounded, which forced a collection-group query, a `where` doubling as the permission, a second `where` to bound the read and two index exemptions deployed by hand. The same trick makes the repeated tap harmless, because the second write addresses the first one's document - a uniqueness constraint Firestore has no other way to express, and the same reason `tableSessionId` is derived.
+- Firestore index configuration is code. `apps/bite-tribe-firebase/firestore.indexes.json` holds the composite indexes and the single-field exemptions that collection-group queries need, and deploys on its own through the `bite-tribe-firebase:firebase-deploy-indexes` Nx target (`npm run deploy:indexes`), separately from functions and rules. That one deploy stays manual while functions deploy from CI, because the Firestore API builds an index in the background and the CLI returns before it is usable. The pipeline's `deploy-functions` job asserts the declared indexes are already live instead of deploying them. `firestore-collection-group-indexes.spec.ts` pairs every collection-group query in the **functions** source with an entry there; a query made by a **client** is outside what that spec can see, so issue [#1105]'s queue carries its own check in `libs/bite-tribe-business/table-management/data-access/src/lib/__specs__/table-order-queue-indexes.spec.ts`. Neither can prove the deploy has run. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
 
 ## Current Function Examples
 
@@ -353,11 +353,11 @@ Google Maps Platform is reached only from the backend. The apps call the `search
 
 Google Maps Platform App Check only accepts tokens minted by the client Maps and Places SDKs, so a server-to-server REST call has no App Check token to attach. Places API (New) therefore reports 0% verified in App Check monitoring by design, and enforcement must stay off for it - enabling it would reject every legitimate BiteTribe place search.
 
-The equivalent verified control is the callable in front of the API: App Check enforced through `onAppCheck`, plus an authenticated caller. `apps/bite-tribe-firebase/functions/src/__specs__/google-maps-request-path.spec.ts` fails the build when a client reaches a Google Maps host, when a native Maps or Places SDK is linked, or when a callable is registered without App Check enforcement. See [[issue-1245]].
+The equivalent verified control is the callable in front of the API: App Check enforced through `onAppCheck`, plus an authenticated caller. `apps/bite-tribe-firebase/functions/src/__specs__/google-maps-request-path.spec.ts` fails the build when a client reaches a Google Maps host, when a native Maps or Places SDK is linked, or when a callable is registered without App Check enforcement. See [issue-1245](../github/issue-1245.md).
 
 ## Adding A Web App To The Project
 
-Creating a Firebase Hosting site does **not** authorise the new domain anywhere else. Three separate allowlists have to be edited by hand, in three different consoles, and none of them is mentioned when the site is created. Verified on 5 September 2026 while bringing up `bite-tribe-admin` (issue \#1469).
+Creating a Firebase Hosting site does **not** authorise the new domain anywhere else. Three separate allowlists have to be edited by hand, in three different consoles, and none of them is mentioned when the site is created. Verified on 5 September 2026 while bringing up `bite-tribe-admin` (issue [#1469]).
 
 | Allowlist                        | Where                                                                                 | Format                                    | Symptom when missing                                                                                                                                  |
 | -------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -401,7 +401,7 @@ The app environment exposes emulator ports for Firestore, Functions, Auth, and S
 | `test@test.com`         | none       | The consumer app, and the E2E deny case for both role gates.     |
 | `test2@test.com`        | none       | A second consumer account.                                       |
 
-**Roles live in the export, in each account's `customAttributes`.** Since issue \#1469 the two privileged apps require a role _at sign-in_, so an account without one cannot log in at all — and the refusal is the same generic error a wrong password gives, by design. An account whose claim is missing from the export therefore presents as "the password is wrong", which is the confusing failure to expect after regenerating it.
+**Roles live in the export, in each account's `customAttributes`.** Since issue [#1469] the two privileged apps require a role _at sign-in_, so an account without one cannot log in at all — and the refusal is the same generic error a wrong password gives, by design. An account whose claim is missing from the export therefore presents as "the password is wrong", which is the confusing failure to expect after regenerating it.
 
 `admin` and `business` are held by different accounts on purpose. A single fixture carrying both would hide a bug where one role is treated as implying the other.
 
@@ -426,3 +426,21 @@ libs/bite-tribe/api
 - App Check health depends on runtime configuration and platform attestation.
 - App Check cannot cover Google Maps Platform from a backend request path, so Places API (New) stays in Monitoring behind the callable boundary described above.
 - Some aggregate and migration behaviors need operational care because Firestore query semantics can skip documents with missing fields.
+
+[#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
+[#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
+[#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
+[#1079]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1079
+[#1086]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1086
+[#1092]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1092
+[#1095]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1095
+[#1096]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1096
+[#1100]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1100
+[#1101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1101
+[#1102]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1102
+[#1105]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1105
+[#1106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1106
+[#1107]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1107
+[#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350
+[#1469]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1469
+[#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537

@@ -6,7 +6,7 @@
 
 Implemented and in use, with **two producers**: an automatic Firestore trigger on Bite
 creation, and an Operator-initiated callable `clusterRestaurantCandidateForBite`, which is
-`admin`-gated since issue \#1472 and surfaced in `bite-tribe-admin` since issue \#1473.
+`admin`-gated since issue [#1472] and surfaced in `bite-tribe-admin` since issue [#1473].
 Both converge on one shared clustering kernel; per `RD-VRC-8` this Use Case owns both, and
 per `RD-DRC-18` they are one page rather than two. `RD-DRC-19` records that the automatic
 producer is a mechanism rather than an entry, because it has no actor.
@@ -14,20 +14,20 @@ producer is a mechanism rather than an entry, because it has no actor.
 The kernel is complete and the collection's invariants are not. Nothing records which
 producer created a Candidate, nothing guards a write onto a Candidate that has already been
 decided, and nothing re-evaluates a cluster after the Bites underneath it change. Work in
-flight: epic \#1495 for verification's half, epic \#1523 for this page's own.
+flight: epic [#1495] for verification's half, epic [#1523] for this page's own.
 
-| Aspect                                                      | State                                                                                                                                                                                                                                    |
-| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Automatic detection `createRestaurantCandidateOnBiteCreate` | Implemented                                                                                                                                                                                                                              |
-| On-demand callable `clusterRestaurantCandidateForBite`      | Implemented, `admin`-gated                                                                                                                                                                                                               |
-| Shared clustering kernel `K1`–`K10`                         | Implemented, except `K9`                                                                                                                                                                                                                 |
-| `K9` — guard against writing onto a non-`pending` Candidate | Not implemented. `R-8`                                                                                                                                                                                                                   |
-| Producer marker on the Candidate                            | Not implemented: no field exists in either model copy, so `R-19` cannot be met                                                                                                                                                           |
-| Re-evaluation after a Bite is edited, deleted or detached   | Not implemented, and not designed. `R-11`                                                                                                                                                                                                |
-| The on-demand seed check                                    | Missing: `B8` accepts a Bite that already belongs to a Restaurant. `E7`                                                                                                                                                                  |
-| Candidate identity                                          | Derived from content, so one place can split into two Candidates and two places can share one. `R-7`, `E2`, `E3`                                                                                                                         |
-| The on-demand producer's eligible-Bite list                 | Implemented in the client, over the whole `/bites` collection. `R-13`                                                                                                                                                                    |
-| Authorization at the data layer                             | Closed in the repository by #1078: `restaurantCandidates` is readable and client-writable by nobody, so the collection is written only by the clustering trigger and the verification callable. Live once the rules are deployed by hand |
+| Aspect                                                      | State                                                                                                                                                                                                                                      |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Automatic detection `createRestaurantCandidateOnBiteCreate` | Implemented                                                                                                                                                                                                                                |
+| On-demand callable `clusterRestaurantCandidateForBite`      | Implemented, `admin`-gated                                                                                                                                                                                                                 |
+| Shared clustering kernel `K1`–`K10`                         | Implemented, except `K9`                                                                                                                                                                                                                   |
+| `K9` — guard against writing onto a non-`pending` Candidate | Not implemented. `R-8`                                                                                                                                                                                                                     |
+| Producer marker on the Candidate                            | Not implemented: no field exists in either model copy, so `R-19` cannot be met                                                                                                                                                             |
+| Re-evaluation after a Bite is edited, deleted or detached   | Not implemented, and not designed. `R-11`                                                                                                                                                                                                  |
+| The on-demand seed check                                    | Missing: `B8` accepts a Bite that already belongs to a Restaurant. `E7`                                                                                                                                                                    |
+| Candidate identity                                          | Derived from content, so one place can split into two Candidates and two places can share one. `R-7`, `E2`, `E3`                                                                                                                           |
+| The on-demand producer's eligible-Bite list                 | Implemented in the client, over the whole `/bites` collection. `R-13`                                                                                                                                                                      |
+| Authorization at the data layer                             | Closed in the repository by [#1078]: `restaurantCandidates` is readable and client-writable by nobody, so the collection is written only by the clustering trigger and the verification callable. Live once the rules are deployed by hand |
 
 ## Goal
 
@@ -42,7 +42,7 @@ two documents.
 
 ## Actors
 
-The authorization vocabulary is defined in [[User Roles]].
+The authorization vocabulary is defined in [User Roles](../product/user-roles.md).
 
 - **BiteTribe Operator** (short: _Operator_), holding the `admin` claim. The only actor,
   lane `OP`, and only in the on-demand producer.
@@ -59,12 +59,12 @@ argument that made `RD-DRC-18` a real decision rather than a formality.
 
 ## Lanes
 
-| Code  | Kind   | Binding                                               |
-| ----- | ------ | ----------------------------------------------------- |
-| `OP`  | actor  | BiteTribe Operator, `admin` claim, per [[User Roles]] |
-| `UI`  | system | `bite-tribe-admin`, the Admin App (Angular)           |
-| `SYS` | system | Cloud Functions; the function is named at the step    |
-| `DB`  | system | Firestore                                             |
+| Code  | Kind   | Binding                                                                       |
+| ----- | ------ | ----------------------------------------------------------------------------- |
+| `OP`  | actor  | BiteTribe Operator, `admin` claim, per [User Roles](../product/user-roles.md) |
+| `UI`  | system | `bite-tribe-admin`, the Admin App (Angular)                                   |
+| `SYS` | system | Cloud Functions; the function is named at the step                            |
+| `DB`  | system | Firestore                                                                     |
 
 `NAT` is not used: the Admin App is a web app and touches no native capability. `EXT` is
 not used: detection consults no third party, which is `R-15`.
@@ -78,7 +78,7 @@ Detection writes exactly one status, `pending`. It leaves a Candidate `verified`
 `dismissed` only at `END-K5`, by refusing to write onto one — so those two are states this
 flow can leave behind without ever producing them. That refusal is `R-8` and is not built,
 which is `E1`. `merged` was a fifth declared status and is removed from both model copies by
-`RD-VRC-7`, owned by \#1499.
+`RD-VRC-7`, owned by [#1499].
 
 `absent` is where every unsuccessful path leaves the aggregate: no Candidate is created and
 none is modified.
@@ -93,18 +93,18 @@ identity, and the merge semantics of a repeated detection.
 creates every Candidate, through both producers, at `K10`. `UC-VRC` writes the verification.
 `UC-DIS` would write `dismissed` and today has no writer. `UC-MRC` would write the duplicate
 resolution and today has no writer. Excluded: any signed-in client, which
-`firestore.rules` refuses since \#1078 — a boundary now enforced where the data lives,
+`firestore.rules` refuses since [#1078] — a boundary now enforced where the data lives,
 stated once under `Authorization`.
 
 Out of scope. Each of these is its own Use Case, referenced from the step it belongs to:
 
-| UC-ID    | Use Case                                    | Referenced at | Direction                                                                                                        |
-| -------- | ------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `UC-VRC` | [[UC - Verify Restaurant Candidate]]        | `K10`         | Downstream, and the sole consumer of what this Use Case produces                                                 |
-| `UC-CMB` | [[UC - Create And Maintain Personal Bites]] | `A2`          | Upstream cause of automatic detection                                                                            |
-| `UC-OPS` | [[UC - Operate BiteTribe In The Admin App]] | `B1`          | Enclosing: sign-in and the role gate                                                                             |
-| `UC-ROM` | [[UC - Run Operational Migrations]]         | `B2`          | Enclosing: the surface the on-demand producer is offered on                                                      |
-| `UC-DIS` | Dismiss Restaurant Candidate                | `K9`          | Alternative downstream outcome, and — once #1497 and #1501 land — detection's only negative evidence. See `R-18` |
+| UC-ID    | Use Case                                                                            | Referenced at | Direction                                                                                                            |
+| -------- | ----------------------------------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `UC-VRC` | [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md)               | `K10`         | Downstream, and the sole consumer of what this Use Case produces                                                     |
+| `UC-CMB` | [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md) | `A2`          | Upstream cause of automatic detection                                                                                |
+| `UC-OPS` | [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md) | `B1`          | Enclosing: sign-in and the role gate                                                                                 |
+| `UC-ROM` | [UC - Run Operational Migrations](uc-run-operational-migrations.md)                 | `B2`          | Enclosing: the surface the on-demand producer is offered on                                                          |
+| `UC-DIS` | Dismiss Restaurant Candidate                                                        | `K9`          | Alternative downstream outcome, and — once [#1497] and [#1501] land — detection's only negative evidence. See `R-18` |
 
 **Also out of scope, and not a Use Case: the Bite-places creation path.** The Admin App
 offers a list of distinct `place` strings taken from all Bites; picking one opens the same
@@ -116,7 +116,7 @@ Restaurant. It is not detection, it produces no Candidate, and this Use Case sta
 about it.
 
 Whether it is retired is an open question rather than a settled one, and it is carried in
-[[Current State - Open Questions]] because it is a release decision: with the on-demand
+[Current State - Open Questions](../current-state/open-questions.md) because it is a release decision: with the on-demand
 producer classified `[Secondary]`, that path is the only route to a Restaurant for a place
 that never reaches `R-2`'s threshold.
 
@@ -172,7 +172,7 @@ itself said it did not. Its content is now `R-19`.
 
 ## Actogram
 
-The flow below is a text actogram; the notation is defined in [[Actogram Format]].
+The flow below is a text actogram; the notation is defined in [Actogram Format](../overview/actogram-format.md).
 
 One entry, step-id prefix `B`, on the on-demand producer. `A*` is the automatic-detection
 mechanism, which has no actor and is therefore not an entry (`AF-4`, `RD-DRC-19`); `K*` is
@@ -421,25 +421,25 @@ leave the Operator with; whether it does is an L3 question.
 
 ## Exceptions And Failure Modes
 
-| #   | Situation                                                                               | Behaviour                                                                                                                                                                                                                                              | Assessment    |
-| --- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
-| E1  | The derived id at `K8` already points to a `verified` or `dismissed` Candidate          | `K10` merge-writes `status: 'pending'` onto it. The Candidate is reset, reappears in `UC-VRC`'s list and can be verified a second time, producing a duplicate Restaurant                                                                               | Defect, #1497 |
-| E2  | Two different restaurants share a normalized name inside one geohash cell               | One Candidate, holding both places' Bites as evidence for one another, at a position that is the mean of both and may be on neither                                                                                                                    | Defect, #1526 |
-| E3  | One restaurant's Bites straddle a geohash cell boundary                                 | Two Candidates for one place. `K8`'s pending-duplicate lookup mitigates this only when the second cluster's bounds happen to reach the first document                                                                                                  | Defect, #1525 |
-| E4  | A Bite's `place` is corrected after creation                                            | Nothing happens. The Bite never joins the cluster it now names, and never leaves the one it no longer names                                                                                                                                            | Gap, #1527    |
-| E5  | An evidence Bite is deleted                                                             | `biteIds` and `biteCount` keep counting it, so a Candidate can be verified on evidence that no longer exists                                                                                                                                           | Gap, #1527    |
-| E6  | A Bite is detached from its Restaurant                                                  | It returns to the unverified pool and becomes eligible again, but nothing re-runs detection for it                                                                                                                                                     | Gap, #1528    |
-| E7  | The callable is called for a Bite that already carries `restaurantId`                   | `B8` accepts it, `K4` then drops it as evidence, and with no threshold `K5` waves through a draft with **zero** Bites: a Candidate with `biteCount: 0` and the seed Bite's name and position. Unreachable through `B3`, reachable through the callable | Defect, #1524 |
-| E8  | Five Bites at a festival stand, a home kitchen, an office canteen or a supermarket deli | Cluster exactly like a restaurant. There is no place type and no negative evidence; dismissal records "not a restaurant" only after a human looked, and `R-18` is the only thing that feeds it back                                                    | Gap, #1501    |
-| E9  | "Da Mario" and "Ristorante Da Mario" at one address                                     | Score below 0.82, so two clusters that never merge — and by `R-9` whichever spelling clustered first owns the name and the id forever                                                                                                                  | Gap, #1525    |
-| E10 | A verified Restaurant was renamed, or two branches of one business sit within 200 m     | `K3` misses, and detection creates a Candidate for a place that is already a Restaurant                                                                                                                                                                | Defect, #1522 |
-| E11 | The `/restaurants` bounds query fails, or no Restaurant carries a `geohash`             | The entire `/restaurants` collection is read and then filtered by radius. Correct, and unbounded, on a path that runs on every Bite creation                                                                                                           | Defect, #1530 |
-| E12 | More than 50 Bites are eligible for the on-demand producer                              | Only the first 50 in read order are offered, with no defined ordering, so the same Bites are offered every time and the rest are unreachable                                                                                                           | Defect, #1531 |
+| #   | Situation                                                                               | Behaviour                                                                                                                                                                                                                                              | Assessment      |
+| --- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| E1  | The derived id at `K8` already points to a `verified` or `dismissed` Candidate          | `K10` merge-writes `status: 'pending'` onto it. The Candidate is reset, reappears in `UC-VRC`'s list and can be verified a second time, producing a duplicate Restaurant                                                                               | Defect, [#1497] |
+| E2  | Two different restaurants share a normalized name inside one geohash cell               | One Candidate, holding both places' Bites as evidence for one another, at a position that is the mean of both and may be on neither                                                                                                                    | Defect, [#1526] |
+| E3  | One restaurant's Bites straddle a geohash cell boundary                                 | Two Candidates for one place. `K8`'s pending-duplicate lookup mitigates this only when the second cluster's bounds happen to reach the first document                                                                                                  | Defect, [#1525] |
+| E4  | A Bite's `place` is corrected after creation                                            | Nothing happens. The Bite never joins the cluster it now names, and never leaves the one it no longer names                                                                                                                                            | Gap, [#1527]    |
+| E5  | An evidence Bite is deleted                                                             | `biteIds` and `biteCount` keep counting it, so a Candidate can be verified on evidence that no longer exists                                                                                                                                           | Gap, [#1527]    |
+| E6  | A Bite is detached from its Restaurant                                                  | It returns to the unverified pool and becomes eligible again, but nothing re-runs detection for it                                                                                                                                                     | Gap, [#1528]    |
+| E7  | The callable is called for a Bite that already carries `restaurantId`                   | `B8` accepts it, `K4` then drops it as evidence, and with no threshold `K5` waves through a draft with **zero** Bites: a Candidate with `biteCount: 0` and the seed Bite's name and position. Unreachable through `B3`, reachable through the callable | Defect, [#1524] |
+| E8  | Five Bites at a festival stand, a home kitchen, an office canteen or a supermarket deli | Cluster exactly like a restaurant. There is no place type and no negative evidence; dismissal records "not a restaurant" only after a human looked, and `R-18` is the only thing that feeds it back                                                    | Gap, [#1501]    |
+| E9  | "Da Mario" and "Ristorante Da Mario" at one address                                     | Score below 0.82, so two clusters that never merge — and by `R-9` whichever spelling clustered first owns the name and the id forever                                                                                                                  | Gap, [#1525]    |
+| E10 | A verified Restaurant was renamed, or two branches of one business sit within 200 m     | `K3` misses, and detection creates a Candidate for a place that is already a Restaurant                                                                                                                                                                | Defect, [#1522] |
+| E11 | The `/restaurants` bounds query fails, or no Restaurant carries a `geohash`             | The entire `/restaurants` collection is read and then filtered by radius. Correct, and unbounded, on a path that runs on every Bite creation                                                                                                           | Defect, [#1530] |
+| E12 | More than 50 Bites are eligible for the on-demand producer                              | Only the first 50 in read order are offered, with no defined ordering, so the same Bites are offered every time and the rest are unreachable                                                                                                           | Defect, [#1531] |
 
 `E13` is **retired** and its id is not reused. It recorded that a real restaurant in a thin
 market never reaches five Bites, which makes the threshold-free producer load-bearing. That
 is a release decision rather than a defect, and it is carried in
-[[Current State - Open Questions]], where it was settled on 9 September 2026: at over
+[Current State - Open Questions](../current-state/open-questions.md), where it was settled on 9 September 2026: at over
 3000 Bites the property already has places past the five-Bite threshold, so the
 thin-market premise does not hold. The Bite-places path it depended on stays open there
 as a cleanup decision.
@@ -455,12 +455,12 @@ App Check at `B5`. A `business` account and a plain Bite Creator both receive
 `permission-denied`; an unauthenticated caller receives `unauthenticated`. The route guard
 behind `B2` and the eligibility filter at `B3` are conveniences.
 
-**Enforced at the data layer since \#1078.** `firestore.rules` makes
+**Enforced at the data layer since [#1078].** `firestore.rules` makes
 `/restaurantCandidates` readable by a signed-in account and client-writable by nobody, so
 a Bite Creator can no longer write a Candidate with any `evidence`, any `biteIds` and any
 `status`. The invariants on this page are now properties of the collection as well as of
 this code. `B3`'s whole-collection read of `/bites` still works: reads were deliberately
-left where they were, and \#1079 narrowed what the business app _lists_ in its own query
+left where they were, and [#1079] narrowed what the business app _lists_ in its own query
 rather than in the rules. **The rules deploy by hand**, so this holds in production only
 once `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
 
@@ -472,7 +472,7 @@ the only producer the initial release depends on.
 
 **[MVP] and not implemented — release blocker under `UF-15`:**
 
-- `K9`'s guard on a non-`pending` target (`R-8`, `E1`, \#1497). Without it a decided
+- `K9`'s guard on a non-`pending` target (`R-8`, `E1`, [#1497]). Without it a decided
   Candidate is reset and can be verified a second time, publishing a duplicate page about a
   real, named business. It is reachable by automatic detection alone, so it does not depend
   on the producer classified `[Secondary]` below.
@@ -482,13 +482,13 @@ the only producer the initial release depends on.
 - `B1` to `B4a`, `B5` to `B8`, and the terminal states `END-B1` to `END-B7` — the on-demand
   producer. Operator tooling on a web app that is not store-reviewed; the release path is
   automatic detection.
-- `B8`'s missing seed check (`R-4`, `E7`, \#1524). `[Secondary]` and unimplemented, so no
+- `B8`'s missing seed check (`R-4`, `E7`, [#1524]). `[Secondary]` and unimplemented, so no
   release blocker under `UF-15`.
-- `B3`'s ordering and cap (`R-13`, `E12`, \#1531).
-- `R-11`'s re-evaluation (`E4`, `E5`, `E6`, \#1527 and \#1528).
-- `R-7`'s identity (`E2`, `E3`, `E9`, \#1525 and \#1526).
-- `R-14`'s bounded read (`E11`, \#1529 and \#1530).
-- `R-3`'s single declaration (\#1532), and `R-19`'s producer marker (\#1500, \#1509, \#1533).
+- `B3`'s ordering and cap (`R-13`, `E12`, [#1531]).
+- `R-11`'s re-evaluation (`E4`, `E5`, `E6`, [#1527] and [#1528]).
+- `R-7`'s identity (`E2`, `E3`, `E9`, [#1525] and [#1526]).
+- `R-14`'s bounded read (`E11`, [#1529] and [#1530]).
+- `R-3`'s single declaration ([#1532]), and `R-19`'s producer marker ([#1500], [#1509], [#1533]).
 
 ## App Store Review Area
 
@@ -516,47 +516,70 @@ discovered in review.
 
 ## Related GitHub Scope
 
-- Part of epic \#1523, which hardens this Use Case, and epic \#1495, which hardens
+- Part of epic [#1523], which hardens this Use Case, and epic [#1495], which hardens
   verification and reaches into detection where verification trips over it.
-- \#1497 — the guard at `K9`. `R-8`, `E1`. The release blocker on this page.
-- \#1524 — the on-demand seed check. `B8`, `R-4`, `E7`.
-- \#1525 — one place resolves to one Candidate across a spelling variant and a cell
+- [#1497] — the guard at `K9`. `R-8`, `E1`. The release blocker on this page.
+- [#1524] — the on-demand seed check. `B8`, `R-4`, `E7`.
+- [#1525] — one place resolves to one Candidate across a spelling variant and a cell
   boundary. `R-7`, `E3`, `E9`, and what makes `R-18` durable.
-- \#1526 — two places in one cell do not share a Candidate. `E2`.
-- \#1527 — evidence stops counting Bites that no longer support it. `R-10`, `R-11`, `E4`,
+- [#1526] — two places in one cell do not share a Candidate. `E2`.
+- [#1527] — evidence stops counting Bites that no longer support it. `R-10`, `R-11`, `E4`,
   `E5`.
-- \#1528 — a Bite whose eligibility changes re-enters detection. `R-11`, `E6`. Closes
+- [#1528] — a Bite whose eligibility changes re-enters detection. `R-11`, `E6`. Closes
   `R-11`.
-- \#1529 — every Restaurant carries a `geohash`. The cause behind `E11`.
-- \#1530 — the neighbourhood read is bounded and never silently partial. `R-14`, `E11`.
-- \#1531 — the clustering queue shows unclustered places, ordered by evidence. `R-13`,
+- [#1529] — every Restaurant carries a `geohash`. The cause behind `E11`.
+- [#1530] — the neighbourhood read is bounded and never silently partial. `R-14`, `E11`.
+- [#1531] — the clustering queue shows unclustered places, ordered by evidence. `R-13`,
   `E12`.
-- \#1532 — the clustering constants are each declared once. Closes `R-3`.
-- \#1533 — every Candidate carries a producer value. The `unknown` set in `R-19`.
-- \#1500 and \#1509 — the producer field and its rendering, in epic \#1495. `R-19`, `R-17`.
-- \#1501 — dismissal, in epic \#1495. `R-18`, `E8`.
-- \#1522 — detection recognises a verified place after a correction, in epic \#1495. `R-5`,
+- [#1532] — the clustering constants are each declared once. Closes `R-3`.
+- [#1533] — every Candidate carries a producer value. The `unknown` set in `R-19`.
+- [#1500] and [#1509] — the producer field and its rendering, in epic [#1495]. `R-19`, `R-17`.
+- [#1501] — dismissal, in epic [#1495]. `R-18`, `E8`.
+- [#1522] — detection recognises a verified place after a correction, in epic [#1495]. `R-5`,
   `E10`.
-- \#1499 — removes the `merged` status. `Aggregate`.
-- \#1472 and \#1473 — the `admin` gate on the callable and its move into `bite-tribe-admin`.
+- [#1499] — removes the `merged` status. `Aggregate`.
+- [#1472] and [#1473] — the `admin` gate on the callable and its move into `bite-tribe-admin`.
   `B5`, `R-12`.
-- \#1078 — ownership-scoped `firestore.rules`. Closed the "Not enforced" half of
+- [#1078] — ownership-scoped `firestore.rules`. Closed the "Not enforced" half of
   `Authorization`: `/restaurantCandidates` is now client-writable by nobody.
 
 ## Related Domains
 
-- [[Restaurant]]
-- [[Bite]]
+- [Restaurant](../domain/restaurant.md)
+- [Bite](../domain/bite.md)
 
 ## Related Pages
 
-- [[Actogram Format]]
-- [[Use Case Format]]
-- [[Recorded Decisions]]
-- [[UC - Verify Restaurant Candidate]]
-- [[UC - Operate BiteTribe In The Admin App]]
-- [[UC - Run Operational Migrations]]
-- [[UC - Create And Maintain Personal Bites]]
-- [[Implementation - Firebase Functions]]
-- [[Current State - Open Questions]]
-- [[User Roles]]
+- [Actogram Format](../overview/actogram-format.md)
+- [Use Case Format](../overview/use-case-format.md)
+- [Recorded Decisions](../decisions/recorded-decisions.md)
+- [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md)
+- [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md)
+- [UC - Run Operational Migrations](uc-run-operational-migrations.md)
+- [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md)
+- [Implementation - Firebase Functions](../implementation/firebase-functions.md)
+- [Current State - Open Questions](../current-state/open-questions.md)
+- [User Roles](../product/user-roles.md)
+
+[#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
+[#1079]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1079
+[#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472
+[#1473]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1473
+[#1495]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1495
+[#1497]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1497
+[#1499]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1499
+[#1500]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1500
+[#1501]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1501
+[#1509]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1509
+[#1522]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1522
+[#1523]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1523
+[#1524]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1524
+[#1525]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1525
+[#1526]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1526
+[#1527]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1527
+[#1528]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1528
+[#1529]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1529
+[#1530]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1530
+[#1531]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1531
+[#1532]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1532
+[#1533]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1533

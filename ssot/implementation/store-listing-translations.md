@@ -3,7 +3,7 @@
 ## Purpose
 
 The ten locale translations of the store listing, derived from the English
-source in [[Implementation - Store Listing Assets]].
+source in [Implementation - Store Listing Assets](store-listing-assets.md).
 
 They live here rather than only in the two consoles so that they are
 reviewable in one diff, versioned with the product, and identical across Google
@@ -16,7 +16,7 @@ Written 30 August 2026 for issue 1178.
 
 The app ships eleven languages. Both store listings were English-only, which put
 a fully localized product behind an English product page in ten of them. As
-[[Implementation - Store Listing Assets]] puts it, a language is not finished
+[Implementation - Store Listing Assets](store-listing-assets.md) puts it, a language is not finished
 until both product pages carry it.
 
 ## Terminology Rules
@@ -25,14 +25,14 @@ This is the part to get right, and the part a translator working from the
 English text alone would get wrong. The product nouns are **not** free to
 translate, and the ones that are must match what the app already says.
 
-| Term            | Rule                                                                          |
-| --------------- | ----------------------------------------------------------------------------- |
-| `BiteTribe`     | Never translated, never spaced. See [[Implementation - Store Listing Assets]] |
-| `Bite`, `Bites` | Never translated. Turkish inflects it with an apostrophe: `Bite'ler`          |
-| `BiteTrail`     | Never translated. Turkish: `BiteTrail'i`                                      |
-| `Tribe`         | Never translated where it names the social graph                              |
-| Bucket List     | **Translated**, and must match the app's own wording per locale               |
-| Leaderboard     | **Translated**, and must match the app's own wording per locale               |
+| Term            | Rule                                                                                                 |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| `BiteTribe`     | Never translated, never spaced. See [Implementation - Store Listing Assets](store-listing-assets.md) |
+| `Bite`, `Bites` | Never translated. Turkish inflects it with an apostrophe: `Bite'ler`                                 |
+| `BiteTrail`     | Never translated. Turkish: `BiteTrail'i`                                                             |
+| `Tribe`         | Never translated where it names the social graph                                                     |
+| Bucket List     | **Translated**, and must match the app's own wording per locale                                      |
+| Leaderboard     | **Translated**, and must match the app's own wording per locale                                      |
 
 The two translated terms, taken from `apps/bite-tribe/src/assets/i18n/*.json`
 rather than invented here:
@@ -630,6 +630,6 @@ the product.
 
 ## Related Pages
 
-- [[Implementation - Store Listing Assets]]
-- [[Implementation - Localization]]
-- [[Implementation - Store Release Steps]]
+- [Implementation - Store Listing Assets](store-listing-assets.md)
+- [Implementation - Localization](localization.md)
+- [Implementation - Store Release Steps](store-release-steps.md)

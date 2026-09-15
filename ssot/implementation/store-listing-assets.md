@@ -5,14 +5,14 @@
 Store listing assets owns the decided store identity, the listing copy, and the
 asset rules behind the App Store and Google Play entries.
 
-[[Implementation - Store Release Steps]] owns the upload procedure. This page
+[Implementation - Store Release Steps](store-release-steps.md) owns the upload procedure. This page
 owns what gets uploaded, so the listing is reviewable and versioned instead of
 living only in the two consoles.
 
 Listing content belongs in the SSOT graph rather than a store directory of its
 own, so it is reviewable and versioned alongside everything else.
 
-[Issue #1178](https://github.com/muhammedgaygisiz/travellers-apps/issues/1178)
+[Issue #1178][#1178]
 tracks filling both entries.
 
 ## Console Coordinates
@@ -42,7 +42,7 @@ Applied on 21 August 2026: Play's category moved from Entertainment to Food &
 Drink and is in Google's review queue; Apple carries Food & Drink with Social
 Networking as its secondary. Both listings were English-only until 30 August 2026;
 Play now carries ten translations and the App Store nine, written out in
-[[Implementation - Store Listing Translations]].
+[Implementation - Store Listing Translations](store-listing-translations.md).
 
 ## Distribution And Pricing
 
@@ -58,8 +58,8 @@ Set on the App Store on 21 August 2026.
 The base region is the territory Apple does **not** auto-adjust for tax and
 foreign-exchange movement. It has no effect while the app is free, and it was
 set to Switzerland to match the developer entity — the Android upload
-certificate reads `C=CH, ST=Berne`. Pro subscriptions ([[epic-1124]]) and paid
-BiteTrails ([[epic-1125]]) each choose their own base territory, so this field
+certificate reads `C=CH, ST=Berne`. Pro subscriptions ([epic-1124](../github/epic-1124.md)) and paid
+BiteTrails ([epic-1125](../github/epic-1125.md)) each choose their own base territory, so this field
 stays cosmetic even once there is revenue.
 
 Content Rights is answered **yes, with the necessary rights**, because the app
@@ -69,7 +69,7 @@ shows three kinds of content it does not own: OpenStreetMap tiles, attributed
 Google Places results behind `searchPlaces` and `searchNearbyPlaces`; and every
 user-generated Bite.
 
-France is deliberately in scope. [[Current State - Release State]] had reserved
+France is deliberately in scope. [Current State - Release State](../current-state/release-state.md) had reserved
 it pending a check of France's own encryption rules; that item is now decided
 and closed there.
 
@@ -77,8 +77,8 @@ and closed there.
 
 **BiteTribe is one word in prose. The header wordmark keeps the space.**
 
-The one-word form is the spelling used by [[Mission]],
-[[ADR-0001 Dish First Product]], the bundle identifier, and both store records.
+The one-word form is the spelling used by [Mission](../product/mission.md),
+[ADR-0001 Dish First Product](../decisions/adr-0001-dish-first-product.md), the bundle identifier, and both store records.
 It is the product name wherever the name is written as text.
 
 The in-app header is the exception, and a deliberate one. `APP_TITLE` feeds
@@ -115,7 +115,7 @@ name being written down as text:
 - The GitHub project board is literally named `Bite Tribe`. Documentation that
   names it is describing an external identifier, not the product. Renaming the
   board is a separate operational decision.
-- [[issue-1265]] and [[Current State - Release Candidate Test Charter]] record
+- [issue-1265](../github/issue-1265.md) and [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md) record
   dated console state and observed mail headers. Rewriting a past observation
   would make it assert something that was never true.
 - Historical changelog entries under `build-*` quote past commit subjects.
@@ -124,13 +124,13 @@ The rule reaches the social accounts too, and there it does a second job.
 `@bitetribe` on Instagram is an unrelated food business that writes itself
 **Bite Tribe**, with a space, so following our own spelling is also what tells
 the two apart. The handle is `bitetribeapp` and the display name is
-`BiteTribe`; see [[Implementation - Social Media Channels]].
+`BiteTribe`; see [Implementation - Social Media Channels](social-media-channels.md).
 
 ### Console Follow-Up The Rename Owes
 
 The rename moved two values that live outside this repository, and both must be
 changed before the next functions deploy or the registration and resend mails
-present two identities again — the exact defect [[issue-1265]] closed:
+present two identities again — the exact defect [issue-1265](../github/issue-1265.md) closed:
 
 1. The Firebase Auth `Email address verification` template subject, to
    `Verify your BiteTribe email address`.
@@ -138,11 +138,11 @@ present two identities again — the exact defect [[issue-1265]] closed:
    `BiteTribe`, so it agrees with `SENDER_NAME`. Gmail rewrites the visible
    sender when it does not, and no spec can catch that.
 
-See [[Implementation - Firebase Functions]].
+See [Implementation - Firebase Functions](firebase-functions.md).
 
 ### Category
 
-Food & Drink over Entertainment, because [[ADR-0001 Dish First Product]] makes
+Food & Drink over Entertainment, because [ADR-0001 Dish First Product](../decisions/adr-0001-dish-first-product.md) makes
 the bite — not the venue and not the content — the product unit, and because
 Play already carries the `Food & drink` and `Social` tags. Entertainment was the
 value the Play entry was created with, not a decision.
@@ -164,7 +164,7 @@ English-only product page in ten languages.
 
 This binds the listing locales to `availableLangs`. Store listings are console
 configuration rather than a repository list, so they do not become a fifth entry
-in the `Adding A Language` checklist in [[Implementation - Localization]] — but a
+in the `Adding A Language` checklist in [Implementation - Localization](localization.md) — but a
 language is not finished until both product pages carry it, or the store page
 falls back to English while the app does not.
 
@@ -183,7 +183,7 @@ Play, where it replaced a 224-character original that still said `Bite Tribe`.
 One body serves both: the App Store description and the Play full description are
 both capped at 4000 characters, so they do not diverge. The ten translations
 derive from this text and are written out in
-[[Implementation - Store Listing Translations]].
+[Implementation - Store Listing Translations](store-listing-translations.md).
 
 ### Description
 
@@ -224,7 +224,7 @@ Every pin on the map is one real dish, photographed by the person who ate it, wi
 It is also the web app's meta description and Open Graph description, so the site
 and the stores make the same claim. Change it here first, then in
 `apps/bite-tribe/src/index.html`. See
-[[Implementation - Web Search And Social Metadata]].
+[Implementation - Web Search And Social Metadata](web-search-and-social-metadata.md).
 
 ### Keywords
 
@@ -238,29 +238,29 @@ food,dish,eat,foodie,restaurant,dining,menu,nearby,local,travel,review,meal,cuis
 
 ### What The Copy Claims, And Why
 
-The opening line is [[ADR-0001 Dish First Product]] in one sentence: every
+The opening line is [ADR-0001 Dish First Product](../decisions/adr-0001-dish-first-product.md) in one sentence: every
 competitor indexes venues, BiteTribe indexes dishes. It sits in the first two
 lines because that is all the App Store shows before the fold.
 
-Every claim maps to a use case marked _Supported today_ in [[SSOT]]:
+Every claim maps to a use case marked _Supported today_ in [SSOT](../README.md):
 
-| Claim                         | Use case                                                        |
-| ----------------------------- | --------------------------------------------------------------- |
-| Feed, map, search             | [[UC - Discover Bites]], [[UC - Search In BiteTribe]]           |
-| Photo, place, price, rating   | [[UC - Create And Maintain Personal Bites]], [[Bite]]           |
-| Position and currency prefill | [[UC - Strengthen Location Currency And Data Quality Guidance]] |
-| BiteTrails, swipe to tick off | [[UC - Save And Rate BiteTrails Through Bucket Lists]]          |
-| Following, replies, likes     | [[UC - Manage Profile And Social Graph]], [[Bite]]              |
-| Notifications on new posts    | [[UC - Receive App Notifications And Engagement Updates]]       |
-| Leaderboard                   | [[UC - Use Gamification Signals]]                               |
-| Eleven languages              | [[Implementation - Localization]]                               |
+| Claim                         | Use case                                                                                                                                 |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Feed, map, search             | [UC - Discover Bites](../use-cases/uc-discover-bites.md), [UC - Search In BiteTribe](../use-cases/uc-search-in-bitetribe.md)             |
+| Photo, place, price, rating   | [UC - Create And Maintain Personal Bites](../use-cases/uc-create-and-maintain-personal-bites.md), [Bite](../domain/bite.md)              |
+| Position and currency prefill | [UC - Strengthen Location Currency And Data Quality Guidance](../use-cases/uc-strengthen-location-currency-and-data-quality-guidance.md) |
+| BiteTrails, swipe to tick off | [UC - Save And Rate BiteTrails Through Bucket Lists](../use-cases/uc-save-and-rate-bitetrails-through-bucket-lists.md)                   |
+| Following, replies, likes     | [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md), [Bite](../domain/bite.md)                    |
+| Notifications on new posts    | [UC - Receive App Notifications And Engagement Updates](../use-cases/uc-receive-app-notifications-and-engagement-updates.md)             |
+| Leaderboard                   | [UC - Use Gamification Signals](../use-cases/uc-use-gamification-signals.md)                                                             |
+| Eleven languages              | [Implementation - Localization](localization.md)                                                                                         |
 
 Four things are **deliberately absent** because they are not in the shipped
 build, and naming them would be a promise the app does not keep:
 
-- BiteTribe Pro and subscriptions ([[epic-1124]]).
-- Advertising ([[epic-1123]]).
-- Buying paid BiteTrails ([[epic-1125]]) — discovering and saving them ships,
+- BiteTribe Pro and subscriptions ([epic-1124](../github/epic-1124.md)).
+- Advertising ([epic-1123](../github/epic-1123.md)).
+- Buying paid BiteTrails ([epic-1125](../github/epic-1125.md)) — discovering and saving them ships,
   purchasing does not.
 - The business app. This listing is the consumer product.
 
@@ -396,7 +396,7 @@ Two things about this set that a re-shoot should know:
   feed shows a warning banner and `-` for every distance. `xcrun simctl
 location <udid> set 50.9375,6.9603` puts the device in Cologne and the
   distances become real. The commands are in
-  [[Implementation - iOS Simulator Testing]].
+  [Implementation - iOS Simulator Testing](ios-simulator-testing.md).
 - **The `Verify your email address` banner is in every signed-in frame**,
   because the capture account is unverified. **Kept by decision on 31 August
   2026**, on the same reasoning as the phone set's mid-scroll framing: it reads
@@ -407,7 +407,7 @@ The set exists because App Store Connect **enforces** the 13-inch requirement:
 displays`. That answers the question this page previously recorded as unknown.
 Whether BiteTribe should claim iPad support at all is a separate and still-open
 decision, tracked as
-[#1451](https://github.com/muhammedgaygisiz/travellers-apps/issues/1451).
+[#1451].
 
 ### Capturing Prod Content Needs A Simulator App Check Provider
 
@@ -426,13 +426,13 @@ and TestFlight builds are always compiled for a device, so the debug provider
 cannot reach a release binary even by misconfiguration.
 
 The build, boot and token-registration commands are in
-[[Implementation - iOS Simulator Testing]].
+[Implementation - iOS Simulator Testing](ios-simulator-testing.md).
 
 The provider emits a token that has to be registered in the Firebase console
 before it works. That registration is a **standing App Check bypass for whoever
 holds the token**, so it is issued per capture session and revoked afterwards —
 the token used for this set was deleted on 22 August 2026. It joins the rotation
-list in [issue #1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177).
+list in [issue #1177][#1177].
 
 Two things this makes explicit that were previously only implicit:
 
@@ -572,7 +572,7 @@ state through 31 August 2026, the day both stores were submitted.
 The default listing is live and has been since 8 February 2026. There is one
 listing and no custom listings. It was English-only until 30 August 2026, when
 submission **51** published the listing along with the ten translations in
-[[Implementation - Store Listing Translations]].
+[Implementation - Store Listing Translations](store-listing-translations.md).
 
 | Slot                  | State                                 |
 | --------------------- | ------------------------------------- |
@@ -598,7 +598,7 @@ the translations. There was never a draft waiting for anyone.
 
 Build 96 was promoted from Open Testing to **Production on 31 August 2026**, at
 100% rollout across all 177 countries and regions, and is in review. Nothing in
-the listing was outstanding at that point. See [[Current State - Release State]].
+the listing was outstanding at that point. See [Current State - Release State](../current-state/release-state.md).
 
 The feature graphic was recoloured to the current palette the same day, so no
 stale-palette asset remains on either store.
@@ -609,22 +609,22 @@ stale-palette asset remains on either store.
 The version was corrected from `1.0` to `1.0.1` so it matches the binary, and the
 App Review sign-in and contact fields were filled — they had been entirely empty,
 which for a login-gated app is the most common rejection there is. See
-[[Current State - Release State]] for the submission narrative.
+[Current State - Release State](../current-state/release-state.md) for the submission narrative.
 
-| Slot                                    | State                                                                                                     |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Name, subtitle                          | set                                                                                                       |
-| Age rating                              | set, 13+ - was 18+                                                                                        |
-| Screenshots, iPhone                     | 5 of 10, 6.9", current                                                                                    |
-| Screenshots, iPad                       | 5 of 10, 13", captured and uploaded 31 Aug 2026                                                           |
-| App previews                            | none                                                                                                      |
-| Description, promotional text, keywords | set                                                                                                       |
-| Support URL, marketing URL, copyright   | support URL and copyright **set**, marketing URL blank pending [[Implementation - Social Media Channels]] |
-| Primary category                        | Food & Drink                                                                                              |
-| App Privacy                             | published                                                                                                 |
-| Pricing, availability                   | free, all 175 regions                                                                                     |
-| Content Rights                          | declared                                                                                                  |
-| Build                                   | 96 (1.0.1), attached 31 Aug 2026                                                                          |
+| Slot                                    | State                                                                                                                             |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Name, subtitle                          | set                                                                                                                               |
+| Age rating                              | set, 13+ - was 18+                                                                                                                |
+| Screenshots, iPhone                     | 5 of 10, 6.9", current                                                                                                            |
+| Screenshots, iPad                       | 5 of 10, 13", captured and uploaded 31 Aug 2026                                                                                   |
+| App previews                            | none                                                                                                                              |
+| Description, promotional text, keywords | set                                                                                                                               |
+| Support URL, marketing URL, copyright   | support URL and copyright **set**, marketing URL blank pending [Implementation - Social Media Channels](social-media-channels.md) |
+| Primary category                        | Food & Drink                                                                                                                      |
+| App Privacy                             | published                                                                                                                         |
+| Pricing, availability                   | free, all 175 regions                                                                                                             |
+| Content Rights                          | declared                                                                                                                          |
+| Build                                   | 96 (1.0.1), attached 31 Aug 2026                                                                                                  |
 
 TestFlight is in good shape: internal and external groups exist, and the beta
 description, feedback email and reviewer sign-in are all filled. It carried build
@@ -636,7 +636,7 @@ Store description, which is now set in the table above.
 
 Play's ten app-content declarations, Apple's privacy nutrition labels, the age
 rating, and the account-creation and data-deletion answers are in
-[[Implementation - Store Declarations]], together with the Digital Services Act
+[Implementation - Store Declarations](store-declarations.md), together with the Digital Services Act
 trader status. All of Play's ten and all of Apple's equivalents are complete.
 
 ## What The Listings Still Need
@@ -720,7 +720,7 @@ A cold load of `/support` from an automated browser rendered the enforced-mode
 App Check gate instead of the page: "Extra security check needed. BiteTribe
 couldn't verify this device with its security check." The same URL in an
 ordinary Chrome profile rendered the page in full. That matches the Run 7
-methodology note in [[Current State - Release Candidate Test Charter]]: an
+methodology note in [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md): an
 instrumented browser scores badly with reCAPTCHA Enterprise, and a bad score
 produces an App Check refusal.
 
@@ -741,7 +741,7 @@ remove the risk outright.
 
 Declared **non-trader** on 30 August 2026, at account level, covering the 27 EU
 territories. The reasoning, the two corrections it rests on, and what makes it
-stop being accurate are in [[Implementation - Store Declarations]].
+stop being accurate are in [Implementation - Store Declarations](store-declarations.md).
 
 ## Tablets Are Deferred, And The iPad Claim Is Untested
 
@@ -753,7 +753,7 @@ advertising a layout nobody has seen.
 `apps/bite-tribe-ios/ios/App/App.xcodeproj/project.pbxproj` sets
 `TARGETED_DEVICE_FAMILY = "1,2"`, which is iPhone **and iPad**. So the App Store
 listing offers an iPad app today, and the eleven-run platform test pass in
-[[Current State - Release Candidate Test Charter]] never touched an iPad - every
+[Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md) never touched an iPad - every
 iOS run was an iPhone 12 mini.
 
 Two consequences, in order of how much they cost:
@@ -787,7 +787,7 @@ These are account-level and gate submission regardless of listing completeness:
   Account Holder to accept it.~~ **Done.** Verified in the console on 29 August
   2026: the Free Apps Agreement is `Active`, effective 23 August 2026 to 13 April 2027. The Paid Apps Agreement is still `New` and unsigned, and needs the legal
   entity updated before it can be signed - that gates in-app purchases, so it
-  belongs to the monetization epic [[epic-1121]], not to this release.
+  belongs to the monetization epic [epic-1121](../github/epic-1121.md), not to this release.
 - ~~Digital Services Act trader status is not provided.~~ **Declared non-trader
   on 30 August 2026.** The Business page now reads "You have completed all
   regulatory requirements at this time", and the Compliance table shows
@@ -800,7 +800,7 @@ These are account-level and gate submission regardless of listing completeness:
   `Untitled release` draft, and issue 1179 needs it live to receive the release
   candidate.~~ **Not a blocker, and the wrong track.** BiteTribe distributes on
   Android through **Open testing**, not internal testing, which is what every
-  Android run in [[Current State - Release Candidate Test Charter]] used. Open
+  Android run in [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md) used. Open
   testing is `Active` to unlimited testers across 12 countries; it carried release
   **95 (1.0.1)** when the console was read on 30 August 2026, and build 96 was
   promoted from it to **Production** on 31 August 2026.
@@ -814,12 +814,16 @@ These are account-level and gate submission regardless of listing completeness:
 
 ## Related Pages
 
-- [[Implementation - Store Release Steps]]
-- [[Implementation - Store Listing Translations]]
-- [[Implementation - Web Search And Social Metadata]]
-- [[Implementation - Social Media Channels]]
-- [[Implementation - Localization]]
-- [[Implementation - Release And Build Workflow]]
-- [[Current State - Release State]]
-- [[Current State - Release Candidate Test Charter]]
-- [[ADR-0001 Dish First Product]]
+- [Implementation - Store Release Steps](store-release-steps.md)
+- [Implementation - Store Listing Translations](store-listing-translations.md)
+- [Implementation - Web Search And Social Metadata](web-search-and-social-metadata.md)
+- [Implementation - Social Media Channels](social-media-channels.md)
+- [Implementation - Localization](localization.md)
+- [Implementation - Release And Build Workflow](release-and-build-workflow.md)
+- [Current State - Release State](../current-state/release-state.md)
+- [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)
+- [ADR-0001 Dish First Product](../decisions/adr-0001-dish-first-product.md)
+
+[#1177]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1177
+[#1178]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1178
+[#1451]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1451

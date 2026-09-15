@@ -39,7 +39,7 @@ clear, and which installations they are delivered to.
 
 ## Notification Navigation Contract
 
-Issue [#1244](https://github.com/muhammedgaygisiz/travellers-apps/issues/1244)
+Issue [#1244]
 made a tapped notification reliably open its own surface:
 
 - A tap opens the surface the notification is about, whether the app was
@@ -67,7 +67,7 @@ made a tapped notification reliably open its own surface:
 
 ## Notification Collapse Contract
 
-Issue [#1366](https://github.com/muhammedgaygisiz/travellers-apps/issues/1366)
+Issue [#1366]
 stopped notifications accumulating in the OS drawer:
 
 - Every notification carries a collapse key, shaped `<type>[:<surface>[:<variant>]]`.
@@ -105,7 +105,7 @@ stopped notifications accumulating in the OS drawer:
 
 ## Localization Contract
 
-Issue [#1200](https://github.com/muhammedgaygisiz/travellers-apps/issues/1200)
+Issue [#1200]
 made notification copy follow the recipient:
 
 - The language of a notification is the `language` the user saved in settings -
@@ -121,7 +121,7 @@ made notification copy follow the recipient:
 
 ## Release Announcement Contract
 
-Issue [#1194](https://github.com/muhammedgaygisiz/travellers-apps/issues/1194)
+Issue [#1194]
 added a manually triggered notification for a released app version:
 
 - The trigger is manual. Nothing observable tells the backend when a TestFlight
@@ -141,7 +141,7 @@ added a manually triggered notification for a released app version:
 
 ## Country Badge Contract
 
-Issue [#1212](https://github.com/muhammedgaygisiz/travellers-apps/issues/1212)
+Issue [#1212]
 turned the profile's country badges into an engagement signal:
 
 - The trigger is the badge, not the Bite. A country that enters a profile's
@@ -172,7 +172,7 @@ turned the profile's country badges into an engagement signal:
 
 ## Review Thread Contract
 
-Issue [#1283](https://github.com/muhammedgaygisiz/travellers-apps/issues/1283)
+Issue [#1283]
 extends review notifications from one recipient to a conversation. Implemented by
 `notifyThreadParticipantsOnReviewReply`.
 
@@ -203,7 +203,7 @@ extends review notifications from one recipient to a conversation. Implemented b
 
 ## Installation Contract
 
-Issue [#1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184)
+Issue [#1184]
 made notification delivery installation-specific:
 
 - An FCM token is a delivery address for one signed-in user and app
@@ -239,7 +239,7 @@ Localization, Release Announcement, Country Badge and Review Thread contracts ar
 with the notifications they shape.
 
 Not on this page: the settings surface that lists installations and switches them. That is
-[[UC - Configure Personal Settings]], which owns the UI this page's delivery state feeds.
+[UC - Configure Personal Settings](uc-configure-personal-settings.md), which owns the UI this page's delivery state feeds.
 
 ## App Store Review Area
 
@@ -249,9 +249,9 @@ Relevant.
   `UNUserNotificationCenter`; Android 13 and later require `POST_NOTIFICATIONS`, which reaches
   the app by manifest merge from `@capacitor-firebase/messaging` rather than being declared in
   the app's own manifest. The contextual prompt, and the way back from a device the user has
-  muted, belong to [[UC - Configure Personal Settings]].
+  muted, belong to [UC - Configure Personal Settings](uc-configure-personal-settings.md).
 - The FCM token and the installation UUID are device identifiers, covered by the `device IDs`
-  entry in [[Implementation - Store Declarations]]. An identifier introduced here would have to
+  entry in [Implementation - Store Declarations](../implementation/store-declarations.md). An identifier introduced here would have to
   be added there.
 
 ## Supported Evidence
@@ -279,16 +279,24 @@ Relevant.
 
 ## Related Domains
 
-- [[User]]
-- [[Bite]]
+- [User](../domain/user.md)
+- [Bite](../domain/bite.md)
 
 ## Related Pages
 
-- [[Personas]] - the audiences this page serves: the food lover and the Bite creator, whose
+- [Personas](../product/personas.md) - the audiences this page serves: the food lover and the Bite creator, whose
   engagement these signals exist to return
-- [[UC - Configure Personal Settings]] - the settings surface that lists installations and
+- [UC - Configure Personal Settings](uc-configure-personal-settings.md) - the settings surface that lists installations and
   switches delivery, and where `Settings.pushNotifications` was retired
-- [[UC - Inspect Bite Details]] - the surface a tapped Bite or review-reply notification opens
-- [[UC - Run Operational Migrations]] - where the release announcement is fired
-- [[UC - Use Gamification Signals]] - the leaderboard the daily notification reports on
-- [[Implementation - Store Declarations]]
+- [UC - Inspect Bite Details](uc-inspect-bite-details.md) - the surface a tapped Bite or review-reply notification opens
+- [UC - Run Operational Migrations](uc-run-operational-migrations.md) - where the release announcement is fired
+- [UC - Use Gamification Signals](uc-use-gamification-signals.md) - the leaderboard the daily notification reports on
+- [Implementation - Store Declarations](../implementation/store-declarations.md)
+
+[#1184]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1184
+[#1194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1194
+[#1200]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1200
+[#1212]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1212
+[#1244]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1244
+[#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
+[#1366]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1366

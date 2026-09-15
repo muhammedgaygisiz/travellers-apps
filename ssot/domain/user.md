@@ -19,7 +19,7 @@
 - A User can have a public or private profile.
 - A public profile is visible to other BiteTribe users inside the app. It is not
   a shareable link: profiles have no share action and no deep link, by design.
-  Sharing is a [[Bite]] capability. See [[issue-1190]].
+  Sharing is a [Bite](bite.md) capability. See [issue-1190](../github/issue-1190.md).
 - A User can follow and be followed by other users.
 - A User can save Bites to bucket lists.
 - A User can save a BiteTrail as a bucket list.
@@ -109,13 +109,13 @@
 - Email verification metadata is stored on the public user document so the app can show non-blocking prompts and other users can see whether the profile email is verified.
 - Email verification reminders are only required for email/password accounts without a trusted linked provider.
 - Onboarding completion is stored on the public user document (`onboardingCompletedAt`, `onboardingCompletedAtTimestamp`, `onboardingVersion`). The absence of the flag routes an authenticated user into the blocking onboarding assistant; the finish step writes it. `onboardingVersion` leaves room for future re-onboarding.
-- An auth-scoped entry gate (`onboardingGuard`) redirects users without the completion flag to the onboarding route and blocks every other authenticated route until completion; `onboardingCompletedGuard` keeps completed users out of the route. See [[epic-850]].
-- Display names are unique, enforced case-insensitively (normalized by trim + lowercase; original casing preserved for display). A claim document `/displayNames/{normalizedDisplayName}` is written transactionally by the `claimDisplayName` callable so two users cannot take the same normalized name concurrently; renaming releases the old claim and takes the new one in the same transaction and keeps `/users/{uid}.displayName` plus `normalizedDisplayName` in sync. `checkDisplayNameAvailability` is a read-only advisory check. The profile edit flow claims the name before saving and shows a localized error when it is taken. Users who registered before claims existed have none; both checks also scan `/users`, so their name is protected anyway, and onboarding claims it when they next return. There is deliberately no backfill - see [[UC - Run Operational Migrations]]. See [[epic-850]].
-- `subscriptionTier` is currently written as `1` by `createUserOnAuthCreate` for every new account and is only read for display in the profile and settings pages. Nothing enforces it, and `firestore.rules` still allows any authenticated user to write any document, so it is not a trustworthy access signal today. [[epic-1122]] makes the entitlement server-owned and turns this field into a backend-written display mirror. See [[Subscription]].
+- An auth-scoped entry gate (`onboardingGuard`) redirects users without the completion flag to the onboarding route and blocks every other authenticated route until completion; `onboardingCompletedGuard` keeps completed users out of the route. See [epic-850](../github/epic-850.md).
+- Display names are unique, enforced case-insensitively (normalized by trim + lowercase; original casing preserved for display). A claim document `/displayNames/{normalizedDisplayName}` is written transactionally by the `claimDisplayName` callable so two users cannot take the same normalized name concurrently; renaming releases the old claim and takes the new one in the same transaction and keeps `/users/{uid}.displayName` plus `normalizedDisplayName` in sync. `checkDisplayNameAvailability` is a read-only advisory check. The profile edit flow claims the name before saving and shows a localized error when it is taken. Users who registered before claims existed have none; both checks also scan `/users`, so their name is protected anyway, and onboarding claims it when they next return. There is deliberately no backfill - see [UC - Run Operational Migrations](../use-cases/uc-run-operational-migrations.md). See [epic-850](../github/epic-850.md).
+- `subscriptionTier` is currently written as `1` by `createUserOnAuthCreate` for every new account and is only read for display in the profile and settings pages. Nothing enforces it, and `firestore.rules` still allows any authenticated user to write any document, so it is not a trustworthy access signal today. [epic-1122](../github/epic-1122.md) makes the entitlement server-owned and turns this field into a backend-written display mirror. See [Subscription](subscription.md).
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
-- A User can delete their own account from the app. `deleteOwnAccount` removes the public user document, its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes, bucket lists, BiteTrail ratings and profile images, then deletes the Firebase Auth account last. Bites are kept with `userId` removed so the shared content graph survives, and a Bite without a `userId` renders like a private user's Bite. The full per-category contract is in [[UC - Use Account And Legal Flows]]; the reasoning is in [[issue-1182]].
+- A User can delete their own account from the app. `deleteOwnAccount` removes the public user document, its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes, bucket lists, BiteTrail ratings and profile images, then deletes the Firebase Auth account last. Bites are kept with `userId` removed so the shared content graph survives, and a Bite without a `userId` renders like a private user's Bite. The full per-category contract is in [UC - Use Account And Legal Flows](../use-cases/uc-use-account-and-legal-flows.md); the reasoning is in [issue-1182](../github/issue-1182.md).
 - Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
-- There is no organisation or restaurant profile type. `isOrganisation` and `isRestaurant` were declared on `PublicUser` but never written by any client, callable, or migration - only by hand onto a few seeded emulator documents - so no account could ever become one from inside the app. `isOrganisation` nevertheless changed the profile page (Bite Trails instead of Bites, no subscription badge, no follow or edit action, no visibility status) and drove the business dashboard's Organisations list, and `isRestaurant` was read by nothing at all. Both are removed, along with the `organisationId` field the business app queried without ever declaring it. Business capability is planned as an additional role on a normal user instead. See [[UC - Own And Claim Restaurants]] and [[issue-1371]].
+- There is no organisation or restaurant profile type. `isOrganisation` and `isRestaurant` were declared on `PublicUser` but never written by any client, callable, or migration - only by hand onto a few seeded emulator documents - so no account could ever become one from inside the app. `isOrganisation` nevertheless changed the profile page (Bite Trails instead of Bites, no subscription badge, no follow or edit action, no visibility status) and drove the business dashboard's Organisations list, and `isRestaurant` was read by nothing at all. Both are removed, along with the `organisationId` field the business app queried without ever declaring it. Business capability is planned as an additional role on a normal user instead. See [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md) and [issue-1371](../github/issue-1371.md).
 - ## Permissions
 - Guest
   - Guest behavior is not the main authenticated app flow today.
@@ -159,7 +159,7 @@
 - Marketplace
 - BiteTrail gamification
 - BiteTrail packages
-- [[epic-1122]] entitlement foundation and Pro gating
+- [epic-1122](../github/epic-1122.md) entitlement foundation and Pro gating
 - ## Technical Implementation
 
   Firestore:
@@ -210,7 +210,7 @@
   ```
 
 - ## Current Limitations
-- There is no profile type. Every User is an individual profile; business capability is planned as an additional role on a normal user rather than a separate kind of profile. See [[UC - Own And Claim Restaurants]].
+- There is no profile type. Every User is an individual profile; business capability is planned as an additional role on a normal user rather than a separate kind of profile. See [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md).
 - Public/private visibility needs clearer user-facing guidance.
 - Admin moderation is not clearly modeled.
 - Profile trust and creator credibility are mostly implicit.
@@ -222,9 +222,9 @@
 - Clearer public/private profile controls.
 - Better trust signals for search and Bite ranking.
 - ## Sources Used
-- [[Mission]]
-- [[Principles]]
-- [[Glossary]]
-- Use Cases section in [[SSOT]]
-- [[Personas]]
-- [[Bite]]
+- [Mission](../product/mission.md)
+- [Principles](../product/principles.md)
+- [Glossary](../product/glossary.md)
+- Use Cases section in [SSOT](../README.md)
+- [Personas](../product/personas.md)
+- [Bite](bite.md)

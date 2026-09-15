@@ -22,7 +22,7 @@ There are **three** web apps, split by who signs into them rather than by what
 they do: `bite-tribe` is the consumer app, `bite-tribe-business` is what a
 restaurant maintains its own data in, and `bite-tribe-admin` is the internal
 operations tool. Only `bite-tribe` has native wrappers. See
-[[UC - Operate BiteTribe In The Admin App]].
+[UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md).
 
 ## Library Families
 
@@ -60,7 +60,7 @@ The apps share the **platform** layers and nothing else:
 
 **A feature-local data-access library belongs to exactly one app.** When both apps touch the same entity, each owns its own read and write surface over the shared store and API rather than importing the other's.
 
-This was learned the expensive way. `scope:bite-tribe-business` had no `depConstraints` entry at all until [issue #1317](https://github.com/muhammedgaygisiz/travellers-apps/issues/1317), so business libraries could import anything. Three things had drifted in under it:
+This was learned the expensive way. `scope:bite-tribe-business` had no `depConstraints` entry at all until [issue #1317][#1317], so business libraries could import anything. Three things had drifted in under it:
 
 - `bite-tribe/restaurant-data-access` held six restaurant **write** methods that only the business app ever called, and the business edit page imported that library to reach them — while its sibling new-restaurant page used the business one. Two services in one library, two data-access libraries, same entity.
 - `libs/bite-tribe/restaurant/page` carried an unreachable duplicate of the business edit UI, container and component and service, exported from nothing and routed by nothing.
@@ -101,7 +101,7 @@ Before reaching for lazy routing to fix a bundle, prefer the on-demand dependenc
 
 Some targets live in `project.json`, some are inferred by an `nx.json` plugin, and nothing in a project's files tells you which. `@nx/playwright`, `@nx/eslint`, `@nx/storybook`, `@nxext/capacitor`, and `@nx/jest` all infer targets. **Read `nx show project <name>` rather than `project.json` when you need a target's real configuration.**
 
-`test` is inferred. `@nx/jest/plugin` creates one `test` target per project that has a `jest.config.{ts,cts,js,cjs,mjs,mts}` next to a `project.json` or a workspace `package.json` (issue #1379). No `project.json` declares a Jest target, and adding a library with a Jest config is enough to give it a working `test` target.
+`test` is inferred. `@nx/jest/plugin` creates one `test` target per project that has a `jest.config.{ts,cts,js,cjs,mjs,mts}` next to a `project.json` or a workspace `package.json` (issue [#1379]). No `project.json` declares a Jest target, and adding a library with a Jest config is enough to give it a working `test` target.
 
 Two roots are excluded from that inference in `nx.json`:
 
@@ -112,7 +112,7 @@ Two roots are excluded from that inference in `nx.json`:
 
 Shared Jest task configuration lives in one place: the `test` entry of `nx.json` `targetDefaults`, filtered to `plugin: "@nx/jest/plugin"` so it applies to the inferred targets and leaves the Functions `test` target alone. That entry, not the plugin's own defaults, owns the cache inputs — including the exclusions for `*.stories.*`, `.storybook/**`, and `tsconfig.storybook.json` that keep a story edit from invalidating a test result.
 
-`lint` is inferred too. `@nx/eslint/plugin` creates one `lint` target per project it finds a governing ESLint config for (issue #1379). One project opts out: `functions` declares an explicit `nx:run-commands` `lint` target, because its `package.json` `lint` script is `cd ../../.. && npx nx run functions:lint` — without an explicit target Nx infers `lint` from that script and the task invokes itself, which Nx detects and fails. Its command also runs from the workspace root rather than the project root, because `apps/bite-tribe-firebase/functions` carries its own nested `node_modules` with ESLint 8 and a project-root cwd resolves that instead of the workspace's ESLint 9.
+`lint` is inferred too. `@nx/eslint/plugin` creates one `lint` target per project it finds a governing ESLint config for (issue [#1379]). One project opts out: `functions` declares an explicit `nx:run-commands` `lint` target, because its `package.json` `lint` script is `cd ../../.. && npx nx run functions:lint` — without an explicit target Nx infers `lint` from that script and the task invokes itself, which Nx detects and fails. Its command also runs from the workspace root rather than the project root, because `apps/bite-tribe-firebase/functions` carries its own nested `node_modules` with ESLint 8 and a project-root cwd resolves that instead of the workspace's ESLint 9.
 
 The lint targets need no `targetDefaults` entry at all. The plugin's own inputs are a superset of the ones the old `@nx/eslint:lint` defaults carried: it adds each project's own `eslint.config.mjs` and its tsconfig `extends` chain, which the flat workspace-wide list never tracked, so editing a library's ESLint config now invalidates that library's lint cache.
 
@@ -136,7 +136,7 @@ Use focused Nx targets when they are reliable. If Nx daemon or graph behavior ha
 - Keep `nx` and all official `@nx/*` packages on one exact version.
 - Use Playwright as the only E2E framework; the legacy Cypress project has been removed and must not be reintroduced.
 - Invoke `oblador/loki` directly and do not load visual regression through an Nx plugin.
-- Follow [[Current State - Nx And Dependency Migration Roadmap]] for the staged Nx 22.7, Nx 23, Node.js, and Angular migration sequence.
+- Follow [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md) for the staged Nx 22.7, Nx 23, Node.js, and Angular migration sequence.
 
 ## Code Anchors
 
@@ -156,7 +156,10 @@ libs/bite-tribe-business/shell/src/lib/routes.ts
 
 ## Related Pages
 
-- [[Architecture - Testing]]
-- [[Implementation - Testing]]
-- [[Implementation - CI Pipeline]]
-- [[Current State - Nx And Dependency Migration Roadmap]]
+- [Architecture - Testing](testing.md)
+- [Implementation - Testing](../implementation/testing.md)
+- [Implementation - CI Pipeline](../implementation/ci-pipeline.md)
+- [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md)
+
+[#1317]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1317
+[#1379]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1379

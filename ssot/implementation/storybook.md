@@ -25,11 +25,11 @@ Update or add stories when a change introduces:
 
 ## Story Exports Are PascalCase
 
-`eslint-plugin-storybook` has been installed for a long time but linted nothing: the block that enabled it was eslintrc syntax with a `files: ['*.stories.*']` glob that never matched a nested story. It was reinstated as flat config in issue #1379, and its `flat/recommended` rules now run over every `**/*.stories.*`.
+`eslint-plugin-storybook` has been installed for a long time but linted nothing: the block that enabled it was eslintrc syntax with a `files: ['*.stories.*']` glob that never matched a nested story. It was reinstated as flat config in issue [#1379], and its `flat/recommended` rules now run over every `**/*.stories.*`.
 
 That surfaced 25 camelCase story exports, all renamed to PascalCase. **This rename is safe to repeat and safe to ignore in reviews of Loki output.** Storybook derives a story's display name from its export with `startCase`, and `startCase('imageLoaded')` and `startCase('ImageLoaded')` are both `Image Loaded` — so the story name, the story id, and the `.loki/reference` filename are byte-identical either way. Renaming a story export from camelCase to PascalCase never invalidates a visual reference; renaming it to a _different word_ does.
 
-`storybook/no-uninstalled-addons` is configured in `apps/storybook-host/eslint.config.mjs` rather than the root config. It resolves its `packageJsonLocation` against `process.cwd()`, and the inferred `lint` target sets that to the project root, which has no `package.json` of its own — see the basePath trap in [[Architecture - Nx Workspace]].
+`storybook/no-uninstalled-addons` is configured in `apps/storybook-host/eslint.config.mjs` rather than the root config. It resolves its `packageJsonLocation` against `process.cwd()`, and the inferred `lint` target sets that to the project root, which has no `package.json` of its own — see the basePath trap in [Architecture - Nx Workspace](../architecture/nx-workspace.md).
 
 ## Story Data Must Not Move On Its Own
 
@@ -50,7 +50,7 @@ createdAt: isoAgo(5 * MINUTE_MS); // always renders "5 min. ago"
 A fixed date renders a different string every time the calendar crosses the
 next unit boundary. The Bite details stories carried exactly that: the relative
 timestamp was measured against a hardcoded `2025-05-17` fallback, so their
-references aged from `1 y ago` to `1 y 2 m ago` on their own. See issue \#1272.
+references aged from `1 y ago` to `1 y 2 m ago` on their own. See issue [#1272].
 
 Keep the offset comfortably inside its unit band, so a slow render cannot tip
 it into the next one.
@@ -67,7 +67,7 @@ The App Check gate is the case. It is rendered inside `ion-app` in place of the
 router outlet, and `ion-app` hands its children no height, so on the device the
 panel collapsed and sat under the status bar. The story, mounted on Storybook's
 sized root, centred it perfectly - through four committed reference images and
-every review that looked at them. See issue \#1411.
+every review that looked at them. See issue [#1411].
 
 Wrap the story in the container the component actually lives in, and import the
 Ionic element through `moduleMetadata` so the wrapper template resolves:
@@ -124,7 +124,7 @@ references were two distinct images: `chrome_laptop_*_Stacked.png` and
 `chrome_laptop_*_Two_Column.png` were byte-identical, and so were the iphone7
 pair. A responsive split is browsed through the viewport toolbar; it is
 baselined by adding a Loki configuration, never by adding a story (issue
-\#1547).
+[#1547]).
 
 ## A Dark Story Cannot Switch The Document
 
@@ -144,7 +144,7 @@ const DARK = '--ion-background-color: #1a1c22; --ion-text-color: #ffffff';
 componentWrapperDecorator((story) => `<div style="${DARK}">${story}</div>`);
 ```
 
-The floor-plan canvas is baselined this way (issue \#1089). The same decorator
+The floor-plan canvas is baselined this way (issue [#1089]). The same decorator
 shape gives a `filter: grayscale(1)` story, which is how a plan that must not
 carry meaning in a colour alone is asserted rather than promised - and it is
 the state the plan is printed in.
@@ -167,7 +167,7 @@ committed consumer reference byte-identical.
 
 Before this, only the consumer catalogue was served and the single admin story
 baselined raw keys - the committed reference read `about-restaurant` and
-`prefill-from-google-places` where the app shows English (issue \#1547).
+`prefill-from-google-places` where the app shows English (issue [#1547]).
 
 The admin and business apps ship `en.json` only, so any other locale 404s two
 of the three requests; the loader swallows those so the consumer catalogue
@@ -218,7 +218,7 @@ pass/fail signal. Verified on 25 August 2026 against `components-bite--bite`:
 resolves `BiteComponent` with all six of its outputs subscribable.
 
 Note the contrast with a production bundle, where `window.ng` is **absent** — see
-[[Implementation - Android Device Testing]], where application state has to be
+[Implementation - Android Device Testing](android-device-testing.md), where application state has to be
 reached through the DOM or the Capacitor bridge instead. Checking out the
 pre-fix files with `git checkout HEAD -- <files>` reproduces the old behaviour on
 the same story, which gives a before/after on one page.
@@ -246,7 +246,13 @@ gitignored, then remove the entry afterwards.
 
 ## Related Pages
 
-- [[Implementation - Android Device Testing]]
-- [[Implementation - Feature Patterns]]
-- [[Implementation - Ionic Patterns]]
-- [[Implementation - Testing]]
+- [Implementation - Android Device Testing](android-device-testing.md)
+- [Implementation - Feature Patterns](feature-patterns.md)
+- [Implementation - Ionic Patterns](ionic-patterns.md)
+- [Implementation - Testing](testing.md)
+
+[#1089]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1089
+[#1272]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1272
+[#1379]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1379
+[#1411]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1411
+[#1547]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1547

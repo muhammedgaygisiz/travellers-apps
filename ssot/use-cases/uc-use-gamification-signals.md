@@ -5,7 +5,7 @@
 **Level:** L0.
 Supported today. The leaderboard and its persisted `/meta/leaderboard` document, the bite counts
 behind it, the daily ranking notification and the country badges all ship. What is still ahead
-is BiteTrail gamification, which is [[UC - Add BiteTrail Gamification]]'s rather than this
+is BiteTrail gamification, which is [UC - Add BiteTrail Gamification](uc-add-bitetrail-gamification.md)'s rather than this
 page's.
 
 ## Goal
@@ -13,7 +13,7 @@ page's.
 Someone who contributes sees that it counted - a rank, a count on their profile, a badge for a
 country they are the first to record. This page owns which signals exist and what each is
 computed from; what a notification about one of them says, and to whom, belongs to
-[[UC - Receive App Notifications And Engagement Updates]].
+[UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
 
 ## Actors
 
@@ -41,7 +41,7 @@ them.
 
 Not relevant, because nothing here is a permission, a store declaration or a review
 surface. The notifications these signals trigger are
-[[UC - Receive App Notifications And Engagement Updates]]'s, and the permission behind
+[UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md)'s, and the permission behind
 them is collected in onboarding.
 
 ## Supported Evidence
@@ -56,31 +56,40 @@ them is collected in onboarding.
 
 ## Related GitHub Scope
 
-- Issue \#966 resyncs the per-user bite count and the aggregate weekly.
-- Issue \#968 persisted the leaderboard as the `/meta/leaderboard` document. That document
-  caches an entry per ranked account; \#1611 removes the email address from it, which any
+- Issue [#966] resyncs the per-user bite count and the aggregate weekly.
+- Issue [#968] persisted the leaderboard as the `/meta/leaderboard` document. That document
+  caches an entry per ranked account; [#1611] removes the email address from it, which any
   signed-in account can read today.
-- Issue \#954 added the ranking notifications, delivered by pull request \#971.
-- Issue \#975 added the country badges; \#1212 turned a new badge into a notification for the
+- Issue [#954] added the ranking notifications, delivered by pull request [#971].
+- Issue [#975] added the country badges; [#1212] turned a new badge into a notification for the
   user and their followers, and that contract lives in
-  [[UC - Receive App Notifications And Engagement Updates]].
-- Issue \#770 is the **BiteTrail** gamification epic and is owned by
-  [[UC - Add BiteTrail Gamification]], not by this page.
+  [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
+- Issue [#770] is the **BiteTrail** gamification epic and is owned by
+  [UC - Add BiteTrail Gamification](uc-add-bitetrail-gamification.md), not by this page.
 
 ## Related Domains
 
-- [[User]]
-- [[Bite]]
-- [[Bite Trail]]
+- [User](../domain/user.md)
+- [Bite](../domain/bite.md)
+- [Bite Trail](../domain/bite-trail.md)
 
 ## Related Pages
 
-- [[Personas]] - the audiences the `Actors` mapping displaced: the Bite creator and the food
+- [Personas](../product/personas.md) - the audiences the `Actors` mapping displaced: the Bite creator and the food
   lover
-- [[UC - Receive App Notifications And Engagement Updates]] - the daily ranking notification and
+- [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) - the daily ranking notification and
   the country-badge notification
-- [[UC - Add BiteTrail Gamification]] - the unbuilt BiteTrail half, which owns \#770
-- [[UC - Manage Profile And Social Graph]] - the profile the badges and the contribution count
+- [UC - Add BiteTrail Gamification](uc-add-bitetrail-gamification.md) - the unbuilt BiteTrail half, which owns [#770]
+- [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md) - the profile the badges and the contribution count
   are rendered on
-- [[UC - Use Account And Legal Flows]] - the deletion cascade that prunes a deleted account from
+- [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md) - the deletion cascade that prunes a deleted account from
   both leaderboard documents
+
+[#770]: https://github.com/muhammedgaygisiz/travellers-apps/issues/770
+[#954]: https://github.com/muhammedgaygisiz/travellers-apps/issues/954
+[#966]: https://github.com/muhammedgaygisiz/travellers-apps/issues/966
+[#968]: https://github.com/muhammedgaygisiz/travellers-apps/issues/968
+[#971]: https://github.com/muhammedgaygisiz/travellers-apps/issues/971
+[#975]: https://github.com/muhammedgaygisiz/travellers-apps/issues/975
+[#1212]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1212
+[#1611]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1611

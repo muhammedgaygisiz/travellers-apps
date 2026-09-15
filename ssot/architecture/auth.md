@@ -24,7 +24,7 @@ Backend callables validate request.auth where required
 
 - `AuthService` wraps Capacitor Firebase Authentication, and reports when the
   persisted session has been restored so nothing decides on the current user
-  before that answer exists. Since issue \#1101 it answers **two** questions
+  before that answer exists. Since issue [#1101] it answers **two** questions
   rather than one: `getUser()` is "is somebody signed in", which every caller
   that writes a document for the current account needs, and `getMember()` is "is
   a BiteTribe member signed in", which the route guards need. See Anonymous
@@ -45,7 +45,7 @@ Backend callables validate request.auth where required
   _which document is theirs_, which the role cannot: every restaurant holds
   `business`, so the role alone opens every restaurant's edit form. The
   business app puts it on `restaurant/:restaurantId` and its menu route
-  (issue \#1079). It fails closed - a read that is rejected, empty, or missing
+  (issue [#1079]). It fails closed - a read that is rejected, empty, or missing
   the owner field is a refusal - and it refuses with a toast and a redirect
   rather than an error screen, naming nothing about who does hold the document.
 - `startGuard` controls the start route. Like `authGuard` it asks for a member:
@@ -76,12 +76,12 @@ Backend callables validate request.auth where required
 - A guard that redirects away from a requested URL remembers it, and a guard
   that resolves a visitor into the app hands it back. That keeps a shared Bite
   link alive across the whole entry chain. See the Shared Link Entry Contract in
-  [[UC - Inspect Bite Details]].
+  [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md).
 
 ## Anonymous Guests
 
 A guest who scans the QR code on a restaurant table signs in anonymously
-(issue \#1101, `RD-TS-4`). This is the one place in the product where a session
+(issue [#1101], `RD-TS-4`). This is the one place in the product where a session
 exists without anybody having decided to join BiteTribe, and three things follow
 from that.
 
@@ -118,24 +118,24 @@ That is the accepted cost of the decision, and it is recorded rather than solved
 ## Roles And Authorization
 
 Authentication answers _who is signed in_. Authorization answers _which app is
-theirs_, and until issue \#1469 nothing answered it: `authGuard` was the only
+theirs_, and until issue [#1469] nothing answered it: `authGuard` was the only
 check on either privileged app, so any BiteTribe account could open the business
 app and run the operational migrations in it.
 
 - A role is a Firebase Auth **custom claim** carried in the ID token. Claims are
   written only by the backend, so a client cannot forge one.
-- The authorization vocabulary is three roles, defined in [[User Roles]]. Two of
+- The authorization vocabulary is three roles, defined in [User Roles](../product/user-roles.md). Two of
   them are claims in the code today; Bite Creator is the absence of a claim.
 - Two claims exist: `admin` for BiteTribe Operators, `business` for a restaurant
   that has been granted maintenance rights. They are separate rather than a
   hierarchy — an operator account is not a restaurant, and granting it
   restaurant rights by implication would defeat the ownership gate for exactly
-  the accounts most able to break it. **Settled, not open**: issue \#1164 asked
+  the accounts most able to break it. **Settled, not open**: issue [#1164] asked
   which of three ways out to take, and `RD-UR-6` answers it. The answer now
   holds in all four places the issue named — the claim checks in the callables,
-  the sign-in gate, the route guards, and the Firestore rules of \#1078, where
+  the sign-in gate, the route guards, and the Firestore rules of [#1078], where
   the Operator appears as an explicit `admin` clause.
-  **This is about claims, not capability.** By `RD-UR-6` in [[User Roles]] the
+  **This is about claims, not capability.** By `RD-UR-6` in [User Roles](../product/user-roles.md) the
   Operator does maintain every Restaurant, claimed or not — through the Admin App
   and an `admin` allowance in the rules, never by holding `business`.
 - They live in one array under one claim key, `roles`, because Firebase caps the
@@ -143,7 +143,7 @@ app and run the operational migrations in it.
 - `setUserRoles` writes them for an operator, and it requires the caller to
   already hold `admin`. It is no longer the _only_ writer: `addRestaurantStaff`
   and `removeRestaurantStaff` write `staff` for a restaurant owner acting on a
-  restaurant it holds (issue \#1537, below). Those two write nothing else, and
+  restaurant it holds (issue [#1537], below). Those two write nothing else, and
   the split is deliberate — widening `setUserRoles` to a business caller would
   let one write `admin`, because it replaces the whole role set. `listUsersWithRoles` is its read counterpart,
   also admin-only, and reads Firebase Auth rather than the `/users` collection
@@ -171,29 +171,29 @@ app and run the operational migrations in it.
 - **The roles an app admits are alternatives, not a hierarchy.** The business
   app takes two because a staff account holds `staff` and **not** `business`.
   Any one of the listed roles admits the account; what it may then _do_ is
-  narrower and belongs to the rules of issue \#1078 and the scoped dashboard of
-  \#1079, not to the door. Both have landed. \#1078 gives `staff` **no write
-  authority at all**, and \#1079 scopes the list and the edit routes by
+  narrower and belongs to the rules of issue [#1078] and the scoped dashboard of
+  [#1079], not to the door. Both have landed. [#1078] gives `staff` **no write
+  authority at all**, and [#1079] scopes the list and the edit routes by
   `Restaurant.ownerUserId` \- which a staff account never holds.
   **A staff account still opens the business app to an empty list**, and
-  \#1537 did not change that. It wrote the record of which restaurant a staff
+  [#1537] did not change that. It wrote the record of which restaurant a staff
   account works at, which was the thing that did not exist; it deliberately did
   not make anything read it, because what a staff account may see and do is
-  \#1079's scope and \#1078's, and reopening either from inside a grant surface
+  [#1079]'s scope and [#1078]'s, and reopening either from inside a grant surface
   would have been two changes in one. The role and the association are now
   writable by the right caller; making them mean something is the work that is
   left.
-  **That work is done as of \#1097, and the empty list is still there.** The
+  **That work is done as of [#1097], and the empty list is still there.** The
   fix was not to widen the dashboard but to stop routing a staff account to it:
   `staffEntryGuard` on `/dashboard` reads `/restaurantStaff/{uid}` and
-  redirects to `restaurant/{restaurantId}/tables`, the surface \#1093 and
-  \#1094 built. A guard rather than a second `AFTER_LOGIN_PAGE`, because that
+  redirects to `restaurant/{restaurantId}/tables`, the surface [#1093] and
+  [#1094] built. A guard rather than a second `AFTER_LOGIN_PAGE`, because that
   token is one string for the whole app while the answer depends on the
   account - and because a guard also covers the restored session and the
   bookmark, which a redirect inside the sign-in effect would have missed. It
   refuses nothing: an owner has no association, an unreadable one falls through
   to the dashboard, and `roleGuard` on the same route remains the gate. The
-  permission set it fixed is in [[User Roles]].
+  permission set it fixed is in [User Roles](../product/user-roles.md).
 - `roleGuard(...roles)` is the backstop, not the primary gate. Sign-in already
   refuses these accounts, so it fires only for a session restored on startup
   (which reports itself as a successful login without running the sign-in
@@ -201,7 +201,7 @@ app and run the operational migrations in it.
   session, raise the generic failure, return to `/login`.
 - **There are two gates, and widening one is not widening the app.** They are
   independent: `REQUIRED_ROLES` refuses the sign-in, `roleGuard` covers the two
-  paths that never run the sign-in effect. Issue \#1075 widened the guard alone
+  paths that never run the sign-in effect. Issue [#1075] widened the guard alone
   and the unit tests were green, because each gate's tests only exercise its own
   gate; the staff account was still turned away at the door, and the only thing
   that showed it was signing one in against the emulator. **A change to which
@@ -223,8 +223,8 @@ app and run the operational migrations in it.
   `backfillReviewTimestampsCallable`, `clusterRestaurantCandidateForBite` and
   `sendNewVersionNotification`.
   `handleSharedLinkToBite` is the one public endpoint, because it is the
-  redirect a shared Bite link resolves through. See issue \#1472.
-  **`restaurantAuthority` is the class issue \#1537 added**, and it is narrow on
+  redirect a shared Bite link resolves through. See issue [#1472].
+  **`restaurantAuthority` is the class issue [#1537] added**, and it is narrow on
   purpose: a callable that acts on one restaurant, admits `business` or `admin`,
   and then decides for itself which restaurants that reaches. The spec can check
   the door — it fails an endpoint in this class that does not call
@@ -240,12 +240,12 @@ app and run the operational migrations in it.
   message the login page shows.
 - The role gate shipped **hard, with no backfill**. An account that could sign
   into the business app before the role existed cannot now unless an operator
-  granted it. See issue \#1469 for the reasoning.
+  granted it. See issue [#1469] for the reasoning.
 
 ## Staff On A Restaurant
 
 Granting `staff` is the one role change a BiteTribe operator does not make.
-Issue \#1537 gives it to the account holding the restaurant, because staff turns
+Issue [#1537] gives it to the account holding the restaurant, because staff turns
 over with ordinary hiring and a restaurant that has to open a support
 conversation for every new waiter will either wait or share a login.
 
@@ -255,7 +255,7 @@ conversation for every new waiter will either wait or share a login.
   business app with nothing to do there; the association alone grants nothing.
 - **The document's name is the "one restaurant per staff account" rule.** A
   second restaurant has nowhere to be written. More than one is out of scope
-  until \#1079 shows whether it is needed, and this shape means allowing it is a
+  until [#1079] shows whether it is needed, and this shape means allowing it is a
   schema change somebody makes on purpose rather than a state the data drifts
   into.
 - **It is a collection of its own, not a `staffUserIds` array on the
@@ -264,7 +264,7 @@ conversation for every new waiter will either wait or share a login.
   The rules on the new collection admit three readers — the account itself, the
   operator, and the account holding the restaurant — and no writer at all.
 - **The caller's authority is read from Firestore, not from the token.**
-  `Restaurant.ownerUserId`, written by \#1077 and read by \#1078's rules. A
+  `Restaurant.ownerUserId`, written by [#1077] and read by [#1078]'s rules. A
   revoked assignment therefore stops authorising immediately rather than at the
   end of the token's hour, and there is no claim copy to disagree with the
   document. The check is repeated inside the transaction, so a revocation
@@ -289,7 +289,7 @@ conversation for every new waiter will either wait or share a login.
   lifetime, and is then returned to the login page by `roleGuard` rather than to
   a broken screen. It is the same window blocking an account has, and both
   surfaces say it out loud rather than implying the removal is instant.
-  **The hour buys no access, and \#1097 proved it.** `worksAt()` in
+  **The hour buys no access, and [#1097] proved it.** `worksAt()` in
   `firestore.rules` requires the claim **and** the `/restaurantStaff/{uid}`
   document naming that restaurant, and the removal deletes the document
   immediately - so the stale token still says `staff` and reaches nothing. The
@@ -317,39 +317,39 @@ conversation for every new waiter will either wait or share a login.
   reaches. The boundary is enforced in both places; the callable is the
   ergonomic path.
 
-The **backend** half of authorization is issue \#1078, deliberately kept out of
+The **backend** half of authorization is issue [#1078], deliberately kept out of
 the change that introduced the roles and delivered on its own branch.
 `firestore.rules` no longer grants read and write on every document to every
 authenticated user: every write is scoped by the account named on the document,
 and the four restaurant ownership fields are writable by no client at all. See
-the rules section on [[Architecture - Firebase]] for the contract, the test
+the rules section on [Architecture - Firebase](firebase.md) for the contract, the test
 suite and the deploy.
 
 **The rules deploy by hand.** Nothing in CI deploys `firestore.rules`, so
-merging \#1078 does not change production — running
+merging [#1078] does not change production — running
 `npx nx firebase-deploy-rules bite-tribe-firebase` does. Until that deploy runs,
 the role gate is still a client-side gate over an open database.
-`storage.rules` remains open and is issue \#1350.
+`storage.rules` remains open and is issue [#1350].
 
 ## Operator Audit Trail
 
 What an operator did is recorded in Cloud Logging and nowhere else. There is no
 in-app audit surface and none is planned at this scale: with two operators, the
-cost of reading the trail is project access, and epic \#1471 took that over
+cost of reading the trail is project access, and epic [#1471] took that over
 building and maintaining a second record of the same events.
 
 The decision is only worth taking while the logs are usable. A trail that has to
 be read three different ways is not a trail, and by the time eight operator
 callables existed there were three names for the actor - `callerUid`,
 `requestedBy` and `uid` - and two callables, `verifyRestaurantCandidate` and
-`clusterRestaurantCandidateForBite`, that named no actor at all. Issue \#1477
+`clusterRestaurantCandidateForBite`, that named no actor at all. Issue [#1477]
 gave every operator action one shape.
 
 - **Two entries in the trail are not operator actions.**
   `addRestaurantStaff` and `removeRestaurantStaff` are performed by a
   restaurant owner as often as by an operator, and they change what an account
   may do exactly as `setUserRoles` does. They log through the same helper, so
-  "everything done to this account" keeps one answer — which is what \#1477
+  "everything done to this account" keeps one answer — which is what [#1477]
   bought. `callerRoles` is what says which kind of caller acted.
 - **The shape lives in `functions/src/functions/shared/operator-log.ts`**, and
   `logOperatorAction` is the only way an operator action reaches the logs. The
@@ -364,7 +364,7 @@ gave every operator action one shape.
   | Field            | Meaning                                                                                                                                        |
   | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
   | `operatorAction` | The callable's name. Both "this is an operator action" and "which one", so one field carries the marker and the filter.                        |
-  | `callerUid`      | The operator. Named for what `setUserRoles` and `setUserSubscriptionTier` already wrote, so entries from before \#1477 answer the same query.  |
+  | `callerUid`      | The operator. Named for what `setUserRoles` and `setUserSubscriptionTier` already wrote, so entries from before [#1477] answer the same query. |
   | `callerRoles`    | The roles their verified ID token carried at the time.                                                                                         |
   | `targetType`     | `user`, `bite`, `restaurantCandidate`, `review` or `appInstallation`. An id alone does not say what it identifies.                             |
   | `targetId`       | The one record acted on. Absent from an action that operates on a whole collection, rather than answered with something invented.              |
@@ -391,7 +391,7 @@ gave every operator action one shape.
   jsonPayload.operatorAction="setUserRoles"          one kind of action
   ```
 
-  **Entries written before \#1477 name the target `targetUid`, not `targetId`,**
+  **Entries written before [#1477] name the target `targetUid`, not `targetId`,**
   so a `targetId` query silently misses them. `callerUid` is unaffected, which
   is why it kept its name. Real examples exist: three
   `setUserSubscriptionTier` grants on 2026-09-06, the day before the deploy.
@@ -402,7 +402,7 @@ gave every operator action one shape.
   ```
 
   This is the one place the shape genuinely replaced rather than formalised what
-  was there, and it was unavoidable: \#1474 targets an account and \#1475 a
+  was there, and it was unavoidable: [#1474] targets an account and [#1475] a
   Bite, so a user-specific field name could not carry both.
 
 - **One action's entry is the record of something that no longer exists.**
@@ -429,7 +429,7 @@ gave every operator action one shape.
 Blocking is Firebase Auth's `disabled` flag and nothing else. Firebase enforces
 it, so a block needs no Firestore rule and no check in app code — which is what
 made it a whole feature rather than the first half of one. `setUserBlocked` is
-the admin-only callable behind it, and issue \#1474 is the reasoning.
+the admin-only callable behind it, and issue [#1474] is the reasoning.
 
 - **Firebase closes the doors it owns, and only those.** A sign-in by a blocked
   account is refused with `auth/user-disabled`, and a refresh cannot mint a new
@@ -446,7 +446,7 @@ the admin-only callable behind it, and issue \#1474 is the reasoning.
   not instant.
 - **Blocking removes nothing.** The account's Bites, reviews and restaurants
   are untouched. Removal is a separate operator action with its own log entry
-  (issue \#1475), by decision: one action with hidden consequences is harder to
+  (issue [#1475]), by decision: one action with hidden consequences is harder to
   reason about and harder to undo.
 - **An operator may not block themselves**, and the callable refuses it rather
   than the UI alone. Only an admin can unblock, so the last one to block their
@@ -468,8 +468,8 @@ the admin-only callable behind it, and issue \#1474 is the reasoning.
   right, and on the shared login component it would give a blocked account a
   different answer from a role-refused one — the distinction the role gate
   exists to hide. It is the rule already stated above for a missing role, and
-  it applies here for the same reason. Issue \#1534 proposed the opposite and
-  was closed as not planned. What #1474 did have to verify is that the app does
+  it applies here for the same reason. Issue [#1534] proposed the opposite and
+  was closed as not planned. What [#1474] did have to verify is that the app does
   not present the refusal as a crash or a silent failure: it catches the error,
   releases the form and shows the failure, confirmed against the Auth emulator.
 
@@ -486,7 +486,7 @@ Email verification is non-blocking. Password-only accounts require verification 
 
 ## Provider Data Rules
 
-See [[issue-1385]] for what reading these positionally cost.
+See [issue-1385](../github/issue-1385.md) for what reading these positionally cost.
 
 - `user.providerData` is **not** the same list on every platform. The Android
   SDK includes Firebase's own reserved record - `providerId` of `firebase`, the
@@ -566,5 +566,24 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 - Onboarding after registration is still a product gap.
 - Public/private profile intent needs clearer user guidance.
 - Backend callable auth checks need to remain consistent as more write/query logic moves server-side.
-- Ownership, not the role, is what the Firestore rules enforce (\#1078). An account that holds `business` but is assigned no restaurant can write no restaurant, which is the intended boundary rather than a gap. `storage.rules` is still open (\#1350), so an image can still be written by any signed-in account.
+- Ownership, not the role, is what the Firestore rules enforce ([#1078]). An account that holds `business` but is assigned no restaurant can write no restaurant, which is the intended boundary rather than a gap. `storage.rules` is still open ([#1350]), so an image can still be written by any signed-in account.
 - The rules are deployed by hand and by nobody else. A merged rules change is live only after `npx nx firebase-deploy-rules bite-tribe-firebase` runs against the project.
+
+[#1075]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1075
+[#1077]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1077
+[#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
+[#1079]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1079
+[#1093]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1093
+[#1094]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1094
+[#1097]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1097
+[#1101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1101
+[#1164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1164
+[#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350
+[#1469]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1469
+[#1471]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1471
+[#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472
+[#1474]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1474
+[#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475
+[#1477]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1477
+[#1534]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1534
+[#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537

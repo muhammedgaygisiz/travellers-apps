@@ -59,7 +59,7 @@ before the default is consulted. Read from a template, that throw aborts the
 whole binding update for the element: every input after it silently never runs,
 so the surface freezes in whatever state it was in, usually a loading skeleton,
 with nothing on screen to explain it. This is what left the Bite details page
-loading forever in [issue #1232](https://github.com/muhammedgaygisiz/travellers-apps/issues/1232).
+loading forever in [issue #1232][#1232].
 
 - A resource whose loader can reject is exposed through `resourceValue(...)`
   from `libs/common/utils`, never as `resource.value()`, and never straight off
@@ -103,7 +103,7 @@ if (this.form.dirty) {
 
 **Guard stale async results against the latest request, not against other state.** A "discard if the value changed" check that compares against a signal fed by a _different_ stream will discard fresh results whenever the streams land out of order, leaving the UI stuck in its pending state forever. Track the most recent request and only discard when a newer one has superseded it.
 
-**Reflect external state into the form through a validator, not `setErrors`.** A manual `setErrors` is wiped the next time the control's value updates, because Angular re-runs validation and finds no validators. A validator re-derives the error on every value change instead. Trigger it with `updateValueAndValidity({ emitEvent: false })` when the external state changes. This is how Ionic's native invalid styling is driven; see [[Implementation - Ionic Patterns]].
+**Reflect external state into the form through a validator, not `setErrors`.** A manual `setErrors` is wiped the next time the control's value updates, because Angular re-runs validation and finds no validators. A validator re-derives the error on every value change instead. Trigger it with `updateValueAndValidity({ emitEvent: false })` when the external state changes. This is how Ionic's native invalid styling is driven; see [Implementation - Ionic Patterns](ionic-patterns.md).
 
 ## Header Loading Indication
 
@@ -132,13 +132,13 @@ One detail is easy to get wrong and made the bar invisible during development: `
 
 This is deliberately additive: it does not change when a placeholder appears. Field-level indicators stay out of it — a deferred image placeholder, an upload spinner inside a form control, or a spinner inside a button report their own element, not the page.
 
-The end state is that a reload of content already on screen reports itself only through this bar instead of replacing that content with a placeholder. Adopting it is the first half of that move. See GitHub issue #1168.
+The end state is that a reload of content already on screen reports itself only through this bar instead of replacing that content with a placeholder. Adopting it is the first half of that move. See GitHub issue [#1168].
 
 ## Entry Feedback Contract
 
 **An action whose result is a page change reports the wait on the control that was used.** A route is not free: a guard can be a network round-trip and the page itself is a lazy chunk, so the seconds between the tap and the new page are seconds the old page still owns. Leaving them unanswered reads as a dead button and invites a second tap.
 
-The pattern is the sign-in one from [[Architecture - Auth]], applied to navigation:
+The pattern is the sign-in one from [Architecture - Auth](../architecture/auth.md), applied to navigation:
 
 - The pending flag lives in the integration service that owns the navigation, raised before the call and lowered in a `finally`, so a guard that redirects elsewhere or a failed navigation never leaves the control locked.
 - The control locks behind a spinner and a pending label, and the page runs the header progress bar with it.
@@ -150,7 +150,7 @@ The pattern is the sign-in one from [[Architecture - Auth]], applied to navigati
 <ta-page [addButtonPending]="createBitePending()" [loading]="createBitePending()"></ta-page>
 ```
 
-Create Bite is the first case: `new-bite` is behind `freshSessionGuard`, which force-refreshes the ID token, plus the Bite page chunk. See GitHub issue #1287.
+Create Bite is the first case: `new-bite` is behind `freshSessionGuard`, which force-refreshes the ID token, plus the Bite page chunk. See GitHub issue [#1287].
 
 ## List Windowing
 
@@ -193,8 +193,12 @@ imagePath || image || ''
 
 ## Related Pages
 
-- [[Implementation - Performance Guidelines]]
+- [Implementation - Performance Guidelines](performance-guidelines.md)
 
-- [[Architecture - Data Access]]
-- [[Architecture - State Management]]
-- [[Implementation - Code Map]]
+- [Architecture - Data Access](../architecture/data-access.md)
+- [Architecture - State Management](../architecture/state-management.md)
+- [Implementation - Code Map](code-map.md)
+
+[#1168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1168
+[#1232]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1232
+[#1287]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1287

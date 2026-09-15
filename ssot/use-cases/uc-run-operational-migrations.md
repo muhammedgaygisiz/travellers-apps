@@ -27,11 +27,11 @@ means, and what an operator is shown when a run succeeds or fails.
   lists one entry per migration.
 - The operator opens the migration they came for and runs it. There is no
   combined migrations page: each migration is its own surface, so reaching one
-  never means scrolling past the others (issue \#1473).
+  never means scrolling past the others (issue [#1473]).
 - **New version notification** announces a released app version to iPhone or
   Android users once the matching store serves the new build, and reports how
   far the announcement reached. See the Release Announcement Contract in
-  [[UC - Receive App Notifications And Engagement Updates]].
+  [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
 - **Review timestamps backfill** starts the collection-wide rewrite and reads
   back what it did.
 - **Menu item ids backfill** gives every stored category, menu item and variant
@@ -44,7 +44,7 @@ means, and what an operator is shown when a run succeeds or fails.
 
 It was one page in the business app, which put every migration in front of an
 operator who wanted one of them, and put all of them in front of every
-restaurant that signed in. Issue \#1473 moved them behind the `admin` role and
+restaurant that signed in. Issue [#1473] moved them behind the `admin` role and
 split them by what they do, so the dashboard names the operation rather than the
 mechanism.
 
@@ -73,8 +73,8 @@ collection itself.
 - Adding a migration means adding a name, its runner, its copy and its dashboard
   entry — not another copy of the state handling.
 
-Registered today: `review-timestamps` ([[issue-1283]]) and `menu-item-ids`
-(issue \#1099).
+Registered today: `review-timestamps` ([issue-1283](../github/issue-1283.md)) and `menu-item-ids`
+(issue [#1099]).
 
 `menu-item-ids` is the second registration, and it is the first evidence that
 the contract above holds: it added a name, a runner, its copy and its dashboard
@@ -83,7 +83,7 @@ knowing what a menu is.
 
 Its idempotence carries more weight than most. An id that already exists is
 never replaced, because replacing one would move the target of every order line
-already pointing at it - see [[UC - Order At The Table Through A QR Code]].
+already pointing at it - see [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md).
 
 ### Why There Is No Display Name Backfill
 
@@ -113,7 +113,7 @@ name in onboarding.
 
 ## Authorization
 
-Every migration callable calls `requireAdmin` (issue \#1472). Moving the UI into
+Every migration callable calls `requireAdmin` (issue [#1472]). Moving the UI into
 the admin app did not secure them: the callable runs with admin credentials, so
 the only thing that stops a consumer account from posting a crafted payload to
 it is the callable reading the role out of the verified token itself. The
@@ -133,7 +133,7 @@ a convenience over the stores' own update prompts rather than a release gate.
 Not relevant, because nothing here reaches a store surface. Every migration runs from the admin
 app, which is a web surface, and each callable is operator-only. The one thing on this page that
 reaches a device is the new version announcement, whose store considerations belong to
-[[UC - Receive App Notifications And Engagement Updates]].
+[UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
 
 ## Supported Evidence
 
@@ -147,15 +147,19 @@ reaches a device is the new version announcement, whose store considerations bel
 
 ## Related Domains
 
-- [[User]]
-- [[Restaurant]]
-- [[Bite]]
+- [User](../domain/user.md)
+- [Restaurant](../domain/restaurant.md)
+- [Bite](../domain/bite.md)
 
 ## Related Pages
 
-- [[User Roles]] - the `admin` role every route and callable here checks
-- [[UC - Receive App Notifications And Engagement Updates]] - the Release Announcement Contract,
+- [User Roles](../product/user-roles.md) - the `admin` role every route and callable here checks
+- [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) - the Release Announcement Contract,
   which owns what the announcement says and to which installations
-- [[UC - Order At The Table Through A QR Code]] - the order lines that point at the menu item
+- [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md) - the order lines that point at the menu item
   ids `menu-item-ids` fills
-- [[issue-1283]]
+- [issue-1283](../github/issue-1283.md)
+
+[#1099]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1099
+[#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472
+[#1473]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1473

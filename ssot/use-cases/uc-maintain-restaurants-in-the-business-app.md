@@ -8,7 +8,7 @@ Supported today. A business account signs in, sees the map and the two surfaces 
 offers, and edits the Restaurants assigned to it - metadata, opening hours, social links,
 address, and the menu seeded from its Bites. It sees only what it owns, and the edit routes
 refuse anything else by direct URL. Creating a Restaurant is not done here; that left for the
-admin app with issue \#1473.
+admin app with issue [#1473].
 
 ## Goal
 
@@ -16,10 +16,10 @@ Business users can maintain Restaurant and menu context that improves Bite disco
 
 This page owns what an account may do to a Restaurant it already holds, including taking a
 dish off today's menu - `MenuItem.isAvailable` is written here and nowhere else. How an
-unavailable dish then reads to a diner is [[UC - View Restaurant Menus]]. Being given one is
-[[UC - Own And Claim Restaurants]], creating one and verifying a candidate into one is
-[[UC - Operate BiteTribe In The Admin App]], and what a menu looks like to a diner is
-[[UC - View Restaurant Menus]].
+unavailable dish then reads to a diner is [UC - View Restaurant Menus](uc-view-restaurant-menus.md). Being given one is
+[UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md), creating one and verifying a candidate into one is
+[UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md), and what a menu looks like to a diner is
+[UC - View Restaurant Menus](uc-view-restaurant-menus.md).
 
 ## Actors
 
@@ -33,7 +33,7 @@ unavailable dish then reads to a diner is [[UC - View Restaurant Menus]]. Being 
 - The business user opens Restaurants and edits one of them.
 - The business user maintains menu and Restaurant metadata.
 - Both the map and the list hold **only the Restaurants assigned to the
-  signed-in account** since issue \#1079. An account that holds none sees an
+  signed-in account** since issue [#1079]. An account that holds none sees an
   empty state naming BiteTribe support, not an empty list: assignment is
   operator work in the admin app, and there is nothing the account can do here
   to change it.
@@ -42,7 +42,7 @@ unavailable dish then reads to a diner is [[UC - View Restaurant Menus]]. Being 
 ### How The Restaurant Page Is Laid Out
 
 Two columns inside a centred 78 rem measure, from the Ionic `lg` breakpoint
-(issue \#1572). The picture, the social links, the About text and the address
+(issue [#1572]). The picture, the social links, the About text and the address
 run down the left; the map and the opening hours run down the right; and the
 ways _out_ of the page - the menu, the staff, the floor plan - sit in a row
 under both.
@@ -59,7 +59,7 @@ page, so beside the map it balances the columns instead of lengthening them.
 The columns stack below the breakpoint, in the order they are written. That is
 the opposite of what the floor-plan editor does in the same app, and
 deliberately: this page is a form, and a labelled input is a labelled input at
-any width. See [[Floor Plan]] for why a drag surface is not.
+any width. See [Floor Plan](../domain/floor-plan.md) for why a drag surface is not.
 
 Each field group keeps its own Save, unlike the admin page's single one. The
 admin page creates a restaurant in one write; this one edits an existing
@@ -69,26 +69,26 @@ restaurant a field group at a time, through a service call per group.
 
 Creating a Restaurant is operator work. Restaurant-candidate verification, the
 unmatched Bite places, and the new-restaurant form both of them open moved to
-the admin app with issue \#1473 — see
-[[UC - Operate BiteTribe In The Admin App]]. The business app holds only what a
+the admin app with issue [#1473] — see
+[UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md). The business app holds only what a
 restaurant does to Restaurants it already has.
 
 That was not a tidy-up. The `business` role is held by every restaurant, so
 anything behind it is something every restaurant can do, and verifying a
 candidate creates a Restaurant out of other people's Bites.
 
-And, since issue \#1079, maintaining a Restaurant it was not assigned. The edit
+And, since issue [#1079], maintaining a Restaurant it was not assigned. The edit
 routes - `restaurant/:restaurantId` and its menu - carry `documentOwnerGuard` on
 top of the role gate, so a Restaurant assigned to another account is refused by
 direct URL rather than merely being unlinked from the list. The refusal is a
 toast and a return to the account's own list; it never says who does hold the
-Restaurant. See [[UC - Own And Claim Restaurants]].
+Restaurant. See [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md).
 
 ## MVP Classification
 
 **[Secondary]** - the whole page. The business app is out of scope for this release candidate
 by decision and gets its own soft launch, so nothing here is required for the initial release;
-[[Current State - Release Candidate Test Charter]] records that.
+[Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md) records that.
 
 ## App Store Review Area
 
@@ -107,30 +107,38 @@ all be reviewed for the first time.
 
 ## Related GitHub Scope
 
-- Issue \#1079 scoped this app to the Restaurants assigned to the caller and guarded the edit
-  routes. Closed as completed; the assignment itself is [[UC - Own And Claim Restaurants]].
-- Issue \#734, the restaurant and menu epic, covered opening hours, social links,
+- Issue [#1079] scoped this app to the Restaurants assigned to the caller and guarded the edit
+  routes. Closed as completed; the assignment itself is [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md).
+- Issue [#734], the restaurant and menu epic, covered opening hours, social links,
   verified/unverified restaurant handling, menu cleanup, and admin restaurant workflows.
   Closed as completed - delivered, not planned.
-- Issue \#778, the candidate epic, and issue \#942 covered verifying restaurant candidates
+- Issue [#778], the candidate epic, and issue [#942] covered verifying restaurant candidates
   discovered from repeated Bite evidence into real Restaurants. Both closed as completed. That
-  flow is Operator work in the Admin App; see [[UC - Verify Restaurant Candidate]].
-- Issue \#1003 seeded the initial Menu of a verified candidate from its Bites. Closed as
+  flow is Operator work in the Admin App; see [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
+- Issue [#1003] seeded the initial Menu of a verified candidate from its Bites. Closed as
   completed.
-- Issue \#1572 gave `restaurant/:restaurantId` the two-column layout the admin app's Create
+- Issue [#1572] gave `restaurant/:restaurantId` the two-column layout the admin app's Create
   Restaurant page already had. Closed as completed.
 
 ## Related Domains
 
-- [[Restaurant]]
-- [[Bite]]
+- [Restaurant](../domain/restaurant.md)
+- [Bite](../domain/bite.md)
 
 ## Related Pages
 
-- [[User Roles]] - the `business` and `staff` roles the door gate tests, and why they are
+- [User Roles](../product/user-roles.md) - the `business` and `staff` roles the door gate tests, and why they are
   alternatives rather than a hierarchy
-- [[UC - Own And Claim Restaurants]] - how an account comes to hold a Restaurant at all
-- [[UC - Operate BiteTribe In The Admin App]] - creating a Restaurant, and the migrations and
-  candidate verification that left this app with issue \#1473
-- [[UC - Verify Restaurant Candidate]] - the Operator flow issues \#778 and \#942 built
-- [[UC - View Restaurant Menus]] - what the maintained menu looks like to a diner
+- [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md) - how an account comes to hold a Restaurant at all
+- [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md) - creating a Restaurant, and the migrations and
+  candidate verification that left this app with issue [#1473]
+- [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md) - the Operator flow issues [#778] and [#942] built
+- [UC - View Restaurant Menus](uc-view-restaurant-menus.md) - what the maintained menu looks like to a diner
+
+[#734]: https://github.com/muhammedgaygisiz/travellers-apps/issues/734
+[#778]: https://github.com/muhammedgaygisiz/travellers-apps/issues/778
+[#942]: https://github.com/muhammedgaygisiz/travellers-apps/issues/942
+[#1003]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1003
+[#1079]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1079
+[#1473]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1473
+[#1572]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1572

@@ -23,7 +23,7 @@ It is the business-facing extension of BiteTribe's authentic discovery loop.
 - Sell counts are derived from BiteTrail sell records.
 - Marketplace value depends on creator, Bite, and BiteTrail trust.
 - The Market Place should not weaken the dish-first mission.
-- A paid BiteTrail sells through store in-app purchase, and its Bites stay locked until the purchase is verified. A non-buyer sees a preview only. See [[Monetization]] and [[epic-1125]].
+- A paid BiteTrail sells through store in-app purchase, and its Bites stay locked until the purchase is verified. A non-buyer sees a preview only. See [Monetization](../product/monetization.md) and [epic-1125](../github/epic-1125.md).
 - Paid BiteTrail revenue is shared with the creator at 80 percent of net proceeds, meaning the amount remaining after the store commission. Gross-based wording must never be used.
 - Advertising and marketplace inventory stay separate. The Market Place exposes curated experiences, and ads live only in the home feed.
 
@@ -127,7 +127,7 @@ Related future or expanding use cases:
 - Marketplace
 - BiteTrail gamification
 - Search
-- [[epic-1125]] paid BiteTrails and creator revenue share
+- [epic-1125](../github/epic-1125.md) paid BiteTrails and creator revenue share
 
 ## Technical Implementation
 
@@ -181,10 +181,10 @@ Uses BiteTrail images from images/biteTrails/{biteTrailId}/{filename}.
 
 ## Sources Used
 
-- [[Mission]]
-- [[Principles]]
-- [[Glossary]]
-- Use Cases section in [[SSOT]]
-- [[Personas]]
-- [[Bite Trail]]
-- [[Bucket List]]
+- [Mission](../product/mission.md)
+- [Principles](../product/principles.md)
+- [Glossary](../product/glossary.md)
+- Use Cases section in [SSOT](../README.md)
+- [Personas](../product/personas.md)
+- [Bite Trail](bite-trail.md)
+- [Bucket List](bucket-list.md)

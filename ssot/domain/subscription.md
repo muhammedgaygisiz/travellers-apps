@@ -28,7 +28,7 @@ Every paywall in the product reduces to that question. If the answer lives anywh
 
 ## Required Data
 
-The model does not exist yet. It is specified by issue \#1126 and will cover at least:
+The model does not exist yet. It is specified by issue [#1126] and will cover at least:
 
 | Field      | Description                                                      |
 | ---------- | ---------------------------------------------------------------- |
@@ -89,16 +89,16 @@ Entitlement updated and access adjusted
 
 Next to implement:
 
-- [[UC - Subscribe To BiteTribe Pro]]
-- [[UC - See Ads As A Free User]]
-- [[UC - Buy A Paid BiteTrail]]
+- [UC - Subscribe To BiteTribe Pro](../use-cases/uc-subscribe-to-bitetribe-pro.md)
+- [UC - See Ads As A Free User](../use-cases/uc-see-ads-as-a-free-user.md)
+- [UC - Buy A Paid BiteTrail](../use-cases/uc-buy-a-paid-bitetrail.md)
 
 ## Related Epics
 
-- [[epic-1122]] entitlement foundation and Pro gating
-- [[epic-1124]] Pro subscriptions
-- [[epic-1125]] paid BiteTrails, which reuses the same rails
-- [[epic-1471]] the operator surface over the tier, ahead of the entitlement it will write (issue \#1485)
+- [epic-1122](../github/epic-1122.md) entitlement foundation and Pro gating
+- [epic-1124](../github/epic-1124.md) Pro subscriptions
+- [epic-1125](../github/epic-1125.md) paid BiteTrails, which reuses the same rails
+- [epic-1471](../github/epic-1471.md) the operator surface over the tier, ahead of the entitlement it will write (issue [#1485])
 
 ## Technical Implementation
 
@@ -111,7 +111,7 @@ libs/bite-tribe/profile/page                               tier badge rendering 
 apps/bite-tribe-firebase/functions/src/functions/users/create-user-on-auth-create.ts
 ```
 
-The last of these writes `subscriptionTier: 1` for every new account, which issue \#1127 corrects.
+The last of these writes `subscriptionTier: 1` for every new account, which issue [#1127] corrects.
 
 ## Current Limitations
 
@@ -129,8 +129,12 @@ The last of these writes `subscriptionTier: 1` for every new account, which issu
 
 ## Sources Used
 
-- [[Monetization]]
-- [[User]]
-- [[Architecture - Auth]]
-- [[Architecture - Firebase]]
-- [[Glossary]]
+- [Monetization](../product/monetization.md)
+- [User](user.md)
+- [Architecture - Auth](../architecture/auth.md)
+- [Architecture - Firebase](../architecture/firebase.md)
+- [Glossary](../product/glossary.md)
+
+[#1126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1126
+[#1127]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1127
+[#1485]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1485

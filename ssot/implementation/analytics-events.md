@@ -6,12 +6,12 @@
   documents each event, how it is emitted in code, the launch dashboard to build
   in the GA4/Firebase console, and how to verify events in DebugView.
 
-  The launch-critical core was defined by issue 910 (part of [[epic-907]],
-  Phase 2 / Week 3), and the onboarding funnel by [[epic-850]]. Issue 1098
+  The launch-critical core was defined by issue 910 (part of [epic-907](../github/epic-907.md),
+  Phase 2 / Week 3), and the onboarding funnel by [epic-850](../github/epic-850.md). Issue 1098
   added the first events the **business** app owns - the table operations of
-  [[epic-1071]] - which is where the per-event surface rule below comes from.
+  [epic-1071](../github/epic-1071.md) - which is where the per-event surface rule below comes from.
 
-  See [[Architecture - Analytics]] for how this fits the wider analytics surface.
+  See [Architecture - Analytics](../architecture/analytics.md) for how this fits the wider analytics surface.
 
 - ## How Events Are Emitted
 - Events and their typed parameters live in
@@ -70,8 +70,8 @@
   | Table ops  | `table_visit_opened`                  | `TableOperation`, `visit_id: string`                                             | The transition opened a visit the table did not already carry                                      | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`   |
   | Table ops  | `table_visit_closed`                  | `TableOperation`, `visit_id: string`, `outcome: 'closed' \| 'abandoned'`         | The transition ended the visit at that table                                                       | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`   |
 
-  The onboarding funnel events belong to the onboarding assistant epic ([[epic-850]],
-  issue #1017), not to the launch taxonomy of issue 910. `onboarding_step_completed`
+  The onboarding funnel events belong to the onboarding assistant epic ([epic-850](../github/epic-850.md),
+  issue [#1017]), not to the launch taxonomy of issue 910. `onboarding_step_completed`
   fires once per step in order (`identity`, `visibility`, `currency`, `language`,
   `location`, `notifications`, `finish`); `onboarding_assistant_completed` fires
   once, after the `finish` step's completion write succeeds. `coach_mark_dismissed`
@@ -81,7 +81,7 @@
 - ## Table Operations
 
   The seven `table_*` events belong to the staff table management of
-  [[epic-1071]] (issue 1098) and are emitted by the **business** app alone. They
+  [epic-1071](../github/epic-1071.md) (issue 1098) and are emitted by the **business** app alone. They
   are not launch signals and are deliberately absent from the launch dashboard
   below; the measures they exist for are the BigQuery query named under Derived
   Measures.
@@ -133,7 +133,7 @@
 
   **`table_visit_moved` does not exist.** Issue 1098 names it, and
   `moveTableVisit` has existed since issue 1095, but no surface calls it —
-  [[UC - Manage Tables During Service]] records the same gap. An event constant
+  [UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md) records the same gap. An event constant
   nothing emits would be a row in this table that DebugView can never show, so
   the event lands with the move surface rather than ahead of it.
 
@@ -308,7 +308,7 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
     If logcat answers that app measurement is disabled by
     `setAnalyticsCollectionEnabled(false)`, the device is carrying a disable a
     dev build wrote into `com.google.android.gms.measurement.prefs`. Only a
-    build that includes the [[issue-1387]] fix re-enables it; clearing app data
+    build that includes the [issue-1387](../github/issue-1387.md) fix re-enables it; clearing app data
     may not, because auto-backup can restore the preference.
   - iOS: add launch argument `-FIRDebugEnabled`.
   - Web: analytics debug is visible via the `google-analytics`/`g/collect`
@@ -407,7 +407,9 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   that a consumer session carries `app_surface: consumer`.
 
 - ## Related Pages
-- [[Architecture - Analytics]]
-- [[epic-907]]
-- [[Current State - Roadmap]]
-- [[Implementation - Testing]]
+- [Architecture - Analytics](../architecture/analytics.md)
+- [epic-907](../github/epic-907.md)
+- [Current State - Roadmap](../current-state/roadmap.md)
+- [Implementation - Testing](testing.md)
+
+[#1017]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1017

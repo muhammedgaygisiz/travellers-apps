@@ -4,7 +4,7 @@
 
 How BiteTribe operates analytics after launch: how metrics are checked, how the
 daily monitoring loop runs, and the roadmap for deeper analysis. Part of
-[[epic-907]] (Launch Readiness), Phase 2–4.
+[epic-907](../github/epic-907.md) (Launch Readiness), Phase 2–4.
 
 ## Operating Principle
 
@@ -34,7 +34,7 @@ Tooling lives in `tools/analytics/` (setup: `tools/analytics/README.md`):
   checked in under `tools/analytics/queries/`. See BigQuery Export below.
 
 Dashboard-as-code and the event taxonomy are documented in
-[[Implementation - Analytics Events]].
+[Implementation - Analytics Events](../implementation/analytics-events.md).
 
 ## Stability Signal
 
@@ -127,7 +127,7 @@ needs more, in two places that are easy to confuse:
 | `analytics:bigquery -- --apply`     | **Administrator** on the property + dataset-create in Cloud |
 | `analytics:query`                   | `roles/bigquery.jobUser` + `roles/bigquery.dataViewer`      |
 
-Editor — the tier [[issue-912]] raised the account to for
+Editor — the tier [issue-912](../github/issue-912.md) raised the account to for
 `analytics:provision` — is **not** enough to create a link. With Editor every
 read succeeds and only the create is denied, which reads like a broken script
 rather than a missing grant. Linking from the GA4 console is the equivalent
@@ -153,7 +153,7 @@ permissions implicitly.
 | GDPR consent mode + PII/retention review | [issue 989](https://github.com/muhammedgaygisiz/travellers-apps/issues/989) | 3    |
 
 [issue 988](https://github.com/muhammedgaygisiz/travellers-apps/issues/988) is **done**, landed with the soft-launch monitoring loop under
-[[issue-912]]: the digest is one artifact answering both "are we growing?" and
+[issue-912](../github/issue-912.md): the digest is one artifact answering both "are we growing?" and
 "are we breaking?", and crash-free users carries a threshold. See Stability
 Signal above.
 
@@ -183,7 +183,7 @@ are met.
 
 ## Related Pages
 
-- [[Implementation - Analytics Events]]
-- [[Architecture - Analytics]]
-- [[epic-907]]
-- [[Current State - Roadmap]]
+- [Implementation - Analytics Events](../implementation/analytics-events.md)
+- [Architecture - Analytics](../architecture/analytics.md)
+- [epic-907](../github/epic-907.md)
+- [Current State - Roadmap](../current-state/roadmap.md)

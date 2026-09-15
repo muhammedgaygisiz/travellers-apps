@@ -12,7 +12,7 @@ Monetization should help answer:
 
 > What does BiteTribe give away, what does it sell, and why is that split fair to the user?
 
-[[Vision]] promises an ecosystem where food creators can earn money from their local knowledge and where businesses benefit from authentic recommendations instead of traditional advertising. Monetization is how that promise becomes revenue without turning the product into the thing it set out to replace.
+[Vision](vision.md) promises an ecosystem where food creators can earn money from their local knowledge and where businesses benefit from authentic recommendations instead of traditional advertising. Monetization is how that promise becomes revenue without turning the product into the thing it set out to replace.
 
 ## Business Rules
 
@@ -21,7 +21,7 @@ Monetization should help answer:
 - The free tier is exactly today's product. A free user loads the 15 km radius around their current position and can search and filter inside that result set.
 - Pro sells reach beyond the user's physical surroundings. It is the natural price line because the capabilities beyond that radius are also the ones that cost money to run.
 - Content creation is never gated. Creating, editing, liking, reviewing and saving Bites stay free, because supply is what makes discovery worth paying for.
-- Map zoom is free for every user regardless of tier. See [[UC - Discover Bites]].
+- Map zoom is free for every user regardless of tier. See [UC - Discover Bites](../use-cases/uc-discover-bites.md).
 - Entitlement is server-owned. A billing webhook writes the entitlement, and gates are enforced in Cloud Functions and Firestore rules, never only in the UI.
 - Ads are shown to free users only.
 - The Market Place should expose curated experiences, not generic ads. Advertising and marketplace inventory stay separate surfaces.
@@ -29,13 +29,13 @@ Monetization should help answer:
 
 ## The Three Channels
 
-| Channel         | Who pays                                          | Rails                                                        | Epic          |
-| --------------- | ------------------------------------------------- | ------------------------------------------------------------ | ------------- |
-| Ads             | Advertisers, shown to free users                  | Google AdMob                                                 | [[epic-1123]] |
-| Subscriptions   | Food lovers who want more than their surroundings | Apple and Google in-app purchase through RevenueCat          | [[epic-1124]] |
-| Paid BiteTrails | Food lovers buying a curated journey              | Store in-app purchase, creator payout through Stripe Connect | [[epic-1125]] |
+| Channel         | Who pays                                          | Rails                                                        | Epic                                |
+| --------------- | ------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------- |
+| Ads             | Advertisers, shown to free users                  | Google AdMob                                                 | [epic-1123](../github/epic-1123.md) |
+| Subscriptions   | Food lovers who want more than their surroundings | Apple and Google in-app purchase through RevenueCat          | [epic-1124](../github/epic-1124.md) |
+| Paid BiteTrails | Food lovers buying a curated journey              | Store in-app purchase, creator payout through Stripe Connect | [epic-1125](../github/epic-1125.md) |
 
-The shared entitlement foundation all three depend on is [[epic-1122]], and [[epic-1121]] is the umbrella.
+The shared entitlement foundation all three depend on is [epic-1122](../github/epic-1122.md), and [epic-1121](../github/epic-1121.md) is the umbrella.
 
 ## Free And Pro Capability Matrix
 
@@ -94,32 +94,34 @@ Monetization
 
 - Nothing in this page is implemented yet. All of it is Priority P1 and post-launch.
 - `subscriptionTier` exists on the public user document but is not enforced anywhere, and `createUserOnAuthCreate` currently writes tier 1 for every new account.
-- Issue \#1078 made `subscriptionTier` refuse every client write, so an account can no longer grant itself Pro with one document write. The remaining gap is [[epic-1122]]: the entitlement has a writer nobody buys through yet. The rules deploy by hand, so the field is protected in production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
+- Issue [#1078] made `subscriptionTier` refuse every client write, so an account can no longer grant itself Pro with one document write. The remaining gap is [epic-1122](../github/epic-1122.md): the entitlement has a writer nobody buys through yet. The rules deploy by hand, so the field is protected in production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
 - There is no ad, purchase or payout dependency in the workspace.
 - Free-tier position enforcement is best-effort. A client can report any coordinates, so the radius gate resists casual bypass rather than a determined one.
 
 ## Out Of Scope
 
-- A creator or business subscription tier. Business-side monetization stays with [[epic-735]].
-- Restaurant transaction fees or commission on table orders. That belongs to [[epic-1073]].
+- A creator or business subscription tier. Business-side monetization stays with [epic-735](../github/epic-735.md).
+- Restaurant transaction fees or commission on table orders. That belongs to [epic-1073](../github/epic-1073.md).
 - Web and PWA billing. AdMob has no web SDK and store in-app purchase does not apply on web, so the PWA stays free and ad-free until a separate decision is taken.
 
 ## Related Epics
 
-- [[epic-1121]] umbrella
-- [[epic-1122]] entitlement foundation and Pro gating
-- [[epic-1123]] AdMob advertising
-- [[epic-1124]] Pro subscriptions
-- [[epic-1125]] paid BiteTrails and creator revenue share
+- [epic-1121](../github/epic-1121.md) umbrella
+- [epic-1122](../github/epic-1122.md) entitlement foundation and Pro gating
+- [epic-1123](../github/epic-1123.md) AdMob advertising
+- [epic-1124](../github/epic-1124.md) Pro subscriptions
+- [epic-1125](../github/epic-1125.md) paid BiteTrails and creator revenue share
 
 ## Sources Used
 
-- [[Vision]]
-- [[Mission]]
-- [[Principles]]
-- [[Glossary]]
-- [[Personas]]
-- [[Subscription]]
-- [[Bite Trail]]
-- [[Market Place]]
-- [[User]]
+- [Vision](vision.md)
+- [Mission](mission.md)
+- [Principles](principles.md)
+- [Glossary](glossary.md)
+- [Personas](personas.md)
+- [Subscription](../domain/subscription.md)
+- [Bite Trail](../domain/bite-trail.md)
+- [Market Place](../domain/market-place.md)
+- [User](../domain/user.md)
+
+[#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078

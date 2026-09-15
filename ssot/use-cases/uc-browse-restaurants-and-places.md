@@ -15,9 +15,9 @@ if it is broken.
 Users can understand the place or restaurant context around a Bite.
 
 This page owns what the restaurant and place pages show and in what order they are allowed
-to show it. What a menu itself contains belongs to [[UC - View Restaurant Menus]], and the
+to show it. What a menu itself contains belongs to [UC - View Restaurant Menus](uc-view-restaurant-menus.md), and the
 selector that attaches a place to a Bite in the first place to
-[[UC - Create And Maintain Personal Bites]].
+[UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md).
 
 ## Actors
 
@@ -35,8 +35,8 @@ selector that attaches a place to a Bite in the first place to
 
 ## Restaurant Page State Contract
 
-Issue [#1381](https://github.com/muhammedgaygisiz/travellers-apps/issues/1381)
-gave the verified restaurant page the loading treatment issue \#1382 gave the
+Issue [#1381]
+gave the verified restaurant page the loading treatment issue [#1382] gave the
 menu page, without the failed state that issue also added there. Before it,
 the page rendered its final layout immediately and filled in as the reads
 landed, so a restaurant that had not loaded yet was indistinguishable
@@ -47,7 +47,7 @@ screen before the state backing them existed.
   undefined it renders skeletons tracing its own shape - the header photo, the
   name and distance, the rating line, the description and links, the tags, the
   opening-hours rows, the address and the map - and the header runs the loading
-  bar with them, per [[Implementation - Feature Patterns]].
+  bar with them, per [Implementation - Feature Patterns](../implementation/feature-patterns.md).
 - The empty states ("no description available", "no social media links", "no
   ratings yet") belong to a restaurant that loaded and really has those fields
   empty. They can no longer be reached while the read is in flight.
@@ -71,10 +71,10 @@ rather than an addition to it.
 
 Not relevant, because nothing here requests a permission or changes a store declaration.
 The distance these pages show is computed in the store, `haversineDistance` against the
-app-level GPS position that [[UC - Discover Bites]] and onboarding obtain; this page reads
+app-level GPS position that [UC - Discover Bites](uc-discover-bites.md) and onboarding obtain; this page reads
 that position and never asks for one. It would become relevant if a restaurant page began
 requesting a live position of its own, or if the place data it renders started coming from
-a source [[Implementation - Store Declarations]] does not cover.
+a source [Implementation - Store Declarations](../implementation/store-declarations.md) does not cover.
 
 ## Supported Evidence
 
@@ -89,22 +89,26 @@ a source [[Implementation - Store Declarations]] does not cover.
 
 ## Related GitHub Scope
 
-- Issue \#734, the `User wants to see a menu of a restaurant` epic, covered richer restaurant
+- Issue [#734], the `User wants to see a menu of a restaurant` epic, covered richer restaurant
   menu and restaurant page behaviour. Closed as completed - it is delivered, not planned.
-- Issue \#1381 owns the state contract above. Closed as completed.
+- Issue [#1381] owns the state contract above. Closed as completed.
 
 ## Related Domains
 
-- [[Restaurant]]
-- [[Bite]]
+- [Restaurant](../domain/restaurant.md)
+- [Bite](../domain/bite.md)
 
 ## Related Pages
 
-- [[Personas]] - the audiences the `Actors` mapping displaced: the food lover, the traveler,
+- [Personas](../product/personas.md) - the audiences the `Actors` mapping displaced: the food lover, the traveler,
   and the restaurant owner or business maintainer
-- [[UC - View Restaurant Menus]] - the menu this page's button resolves to, and its own
+- [UC - View Restaurant Menus](uc-view-restaurant-menus.md) - the menu this page's button resolves to, and its own
   loading and failed states
-- [[UC - Create And Maintain Personal Bites]] - the restaurant and place selector named in
+- [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md) - the restaurant and place selector named in
   `Flow`, and the Bites these pages aggregate
-- [[UC - Inspect Bite Details]] - the Bite a visit to these pages starts from
-- [[Implementation - Feature Patterns]] - the loading-bar pattern the header follows
+- [UC - Inspect Bite Details](uc-inspect-bite-details.md) - the Bite a visit to these pages starts from
+- [Implementation - Feature Patterns](../implementation/feature-patterns.md) - the loading-bar pattern the header follows
+
+[#734]: https://github.com/muhammedgaygisiz/travellers-apps/issues/734
+[#1381]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1381
+[#1382]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1382

@@ -9,11 +9,11 @@ It exists because the set was created as raster renders in a local design folder
 where nothing recorded which variants were current or that they were derived from
 the logo rather than drawn beside it.
 
-[[Implementation - Store Listing Assets]] owns the store identity and the listing
+[Implementation - Store Listing Assets](store-listing-assets.md) owns the store identity and the listing
 artwork. This page owns the character artwork itself.
 
 Filed as
-[issue #1482](https://github.com/muhammedgaygisiz/travellers-apps/issues/1482).
+[issue #1482][#1482].
 
 ## The Set
 
@@ -35,7 +35,7 @@ renders it in the line-up rather than above it.
 
 The names are the design export's and mix a historical term with national ones.
 A product vocabulary has not been decided, so nothing in the repository should
-treat these as user-facing labels. See [[Current State - Open Questions]].
+treat these as user-facing labels. See [Current State - Open Questions](../current-state/open-questions.md).
 
 ### The Logo Is In An Older Palette
 
@@ -146,4 +146,6 @@ acceptable.
 
 Loki captures the page like any other story, so a character that fails to load
 fails the visual job rather than rendering as a silent gap - `fetchFailIgnore` in
-`loki.config.js` ignores third-party hosts only. See [[Implementation - Storybook]].
+`loki.config.js` ignores third-party hosts only. See [Implementation - Storybook](storybook.md).
+
+[#1482]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1482

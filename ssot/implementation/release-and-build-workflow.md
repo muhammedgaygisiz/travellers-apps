@@ -80,7 +80,7 @@ because a hand-built store artifact is tied to a commit only by convention:
 build 92's source had to be reconstructed afterwards from one machine's reflog,
 and the answer was `ac217b99` plus an uncommitted change, which is to say no
 commit at all. See
-[issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181).
+[issue #1181][#1181].
 
 ### Triggers
 
@@ -154,8 +154,8 @@ value side, and the same three around the key.
 
 This is not defensive padding. The build of commit `297f8be4` emits
 `` NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED:`true` `` — a template literal — so the
-double-quoted grep that [[Release Workflow]] and
-[[Current State - Release Candidate Test Charter]] used to prescribe returns **no
+double-quoted grep that [Release Workflow](../overview/release-workflow.md) and
+[Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md) used to prescribe returns **no
 match** on a bundle that is entirely correct. Both pages now warn against it and
 defer to the script. A check whose "expected match"
 half silently never matches is worse than no check. Which quote form the
@@ -199,7 +199,7 @@ The consequences were not theoretical: on the build 96 release the tag run
 produced `bitetribe-1.0.1-97-269cb26` artifacts attached to a tag named 96,
 which is a foot-gun for anyone fetching "the artifacts for the tag", and it
 burned a macOS runner every release on a build nobody wanted. Fixed under issue
-#1441 by capturing the commit before the release writes anything and tagging
+[#1441] by capturing the commit before the release writes anything and tagging
 that.
 
 The helper asserts the invariant rather than trusting it. After creating the
@@ -247,7 +247,7 @@ every value, and the job reads the same four through the environment-variable
 fallback in `app/build.gradle`. The script strips the newline `sed` leaves on a
 properties value, because an alias of `First Key\n` fails signing with the same
 misleading `No key with alias` that quoting the value causes. See
-[[Implementation - Store Release Steps]].
+[Implementation - Store Release Steps](store-release-steps.md).
 
 `PLAY_SERVICE_ACCOUNT_JSON` is only read when publishing, which is off by
 default, so the `play` section can stay unset until a store upload is wanted.
@@ -259,12 +259,12 @@ Developer API, and creates the release as a **draft**.
 
 Both halves were wrong in the first version of this workflow, and both were
 taken from the wording of
-[issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
+[issue #1181][#1181]
 rather than from the SSOT:
 
 - **Not `internal`.** BiteTribe distributes on Android through Open testing.
   The internal track is paused and abandoned, still holding a February build 58
-  and an `Untitled release` draft. [[Implementation - Store Listing Assets]]
+  and an `Untitled release` draft. [Implementation - Store Listing Assets](store-listing-assets.md)
   records mistaking that paused track for a release blocker as an error already
   made once, and closes with the rule this repeats: check which track the
   product actually ships on.
@@ -272,7 +272,7 @@ rather than from the SSOT:
   `npm run release:notes` to at most 230 characters, by a person, and the
   submission for review is a deliberate click. A completed release would reach
   review carrying no notes. `draft` leaves the console steps in
-  [[Implementation - Store Release Steps]] exactly as they are.
+  [Implementation - Store Release Steps](store-release-steps.md) exactly as they are.
 
 An issue body is a starting hypothesis. The SSOT is the source of truth, and
 where the two disagree the SSOT wins.
@@ -410,7 +410,7 @@ for it" and the artifacts went to the stores by hand. The path is proven; the
 upload steps still are not.
 
 That is the designed behaviour and it costs a runner. Expect one such run after
-every release until the ordering question in [[Release Workflow]] is settled.
+every release until the ordering question in [Release Workflow](../overview/release-workflow.md) is settled.
 
 Run #1 found two defects, both recorded above: the artifact name emptied by
 secret redaction, and an App Store Connect key scoped too narrowly to export.
@@ -429,7 +429,7 @@ workflow is not on the pull-request path.
   Android upload skips with a warning and the bundle is uploaded by hand.
 - **No artifact has been installed on a device.** The jobs prove the artifacts
   are produced, signed and named; they do not prove either one runs.
-  [issue #1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
+  [issue #1181][#1181]
   asks for an install of each, and that is what remains of it.
 - The Xcode version is whatever `macos-latest` carries, so an artifact is
   reproducible against a commit but not against a toolchain.
@@ -465,7 +465,7 @@ Rules:
   outputs, in the same sense the build number already was.
 - Do not reintroduce reading the version out of the native projects into the
   bundle. That is what left `package.json` at `0.0.0` while the app displayed
-  and persisted it as a fact (issue #1303).
+  and persisted it as a fact (issue [#1303]).
 - On a native build the app prefers what `App.getInfo()` reports over the
   build-time value, through `appRelease` in `libs/common/utils`. That is a
   safety net for a skipped or failed sync, not a second source of truth: the web
@@ -475,7 +475,7 @@ Rules:
 
 - Use the existing build-number scripts instead of editing generated release state manually.
 - Generate changelog and release notes after the current native build is published, but before incrementing the shared build number for the next development week.
-- Run the build-number increment as part of the release helper, which also creates the tag the artifacts are built from. It therefore precedes the build rather than following publication, which reverses the older rule deliberately; see [[Release Workflow]].
+- Run the build-number increment as part of the release helper, which also creates the tag the artifacts are built from. It therefore precedes the build rather than following publication, which reverses the older rule deliberately; see [Release Workflow](../overview/release-workflow.md).
 - Capture the `package.json` version and the native build number before incrementing when creating release tags. The combined helper tags the release commit as `build-<version>-<build-number>`, for example `build-1.0.1-81`.
 - Use the changelog scripts for SSOT changelog pages.
 - Derive the short TestFlight and Google Play build notes from the generated changelog, using the `### Features` to `### Chores` range and summarizing it to at most 230 characters. The changelog is produced by tooling, so it is the reliable source; closed Priority P0 issue titles from the release week are a cross-check, not the input.
@@ -486,7 +486,7 @@ Rules:
   reports the web-asset copy as succeeded, so the wrapper ends up with new web
   assets and stale native pods. The raw target works from an interactive
   terminal and fails in agent shells and CI, which is why it keeps getting
-  called. See [[Architecture - Capacitor]].
+  called. See [Architecture - Capacitor](../architecture/capacitor.md).
 - Keep source maps and native build artifacts traceable to the release build number and future git tag.
 - Run `npm run release:verify-bundle` against `dist/apps/bite-tribe` before
   wrapping it, by hand or in CI. Do not hand-grep for the dev-only keys: the
@@ -495,7 +495,7 @@ Rules:
 - Add a key to `DEV_ONLY_ENV_KEYS` and the release check starts asserting it.
   The check imports that list rather than repeating it.
 - Treat generated native files as outputs unless the requested change specifically targets native wrapper source.
-- Keep local and CI Node.js versions explicitly aligned as defined by [[Current State - Nx And Dependency Migration Roadmap]].
+- Keep local and CI Node.js versions explicitly aligned as defined by [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md).
 - Keep visual regression scripts as direct `oblador/loki` CLI wrappers; do not route them through `nx-loki` or inferred Nx targets.
 
 ## Build-Time Environment Variables
@@ -518,8 +518,8 @@ build written correctly and run with `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true`
 can still return a cached bundle carrying the gate off.
 
 Run 11 of the release-candidate pass hit exactly that, and only the bundle check
-caught it. See [[Test Run 11 - Android Build 96]] and
-[#1428](https://github.com/muhammedgaygisiz/travellers-apps/issues/1428).
+caught it. See [Test Run 11 - Android Build 96](../test-runs/11-android-build-96.md) and
+[#1428].
 
 Every production build therefore passes `--skip-nx-cache`, in CI and by hand.
 The runner starts without an Nx cache today, and this keeps that from being the
@@ -527,10 +527,15 @@ reason it is safe.
 
 ## Related Pages
 
-- [[Release Workflow]]
-- [[Implementation - Store Release Steps]]
-- [[Architecture - Capacitor]]
-- [[Implementation - Testing]]
-- [[Implementation - CI Pipeline]]
-- [[Current State - Release Candidate Test Charter]]
-- [[Current State - Nx And Dependency Migration Roadmap]]
+- [Release Workflow](../overview/release-workflow.md)
+- [Implementation - Store Release Steps](store-release-steps.md)
+- [Architecture - Capacitor](../architecture/capacitor.md)
+- [Implementation - Testing](testing.md)
+- [Implementation - CI Pipeline](ci-pipeline.md)
+- [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)
+- [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md)
+
+[#1181]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1181
+[#1303]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1303
+[#1428]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1428
+[#1441]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1441

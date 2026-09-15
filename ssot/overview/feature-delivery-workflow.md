@@ -10,10 +10,10 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
 
 1. Start from a GitHub issue.
    - Create the issue if it does not exist yet.
-   - Write the issue body per [[GitHub Issue Format]].
-   - Add it to the `Bite Tribe` project board. `gh issue create` does not do this, and an issue that is not on the board has no priority and no status. See [[GitHub Project Board And Issue Handling]].
+   - Write the issue body per [GitHub Issue Format](github-issue-format.md).
+   - Add it to the `Bite Tribe` project board. `gh issue create` does not do this, and an issue that is not on the board has no priority and no status. See [GitHub Project Board And Issue Handling](github-project-board-and-issue-handling.md).
    - Link it to the relevant epic or roadmap item when applicable.
-   - Set the board's `Priority` field on the `P0` to `P4` scale defined in [[GitHub Issue Format]]. Priority is a board field, never a label.
+   - Set the board's `Priority` field on the `P0` to `P4` scale defined in [GitHub Issue Format](github-issue-format.md). Priority is a board field, never a label.
    - Set the board's `Size` field.
    - Set Status to `In progress` when work starts.
 
@@ -23,9 +23,9 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
    - Confirm local state with `git status --short --branch`.
 
 3. Implement with the assigned coding agent.
-   - Follow [[Agent Operating Contract]].
-   - Use [[Traceability Map]] to find the relevant SSOT context.
-   - Use [[Spec To Code Workflow]] for code ownership, implementation, and validation details.
+   - Follow [Agent Operating Contract](agent-operating-contract.md).
+   - Use [Traceability Map](traceability-map.md) to find the relevant SSOT context.
+   - Use [Spec To Code Workflow](spec-to-code-workflow.md) for code ownership, implementation, and validation details.
    - Keep the change scoped to the issue.
 
 4. Create a pull request.
@@ -71,8 +71,8 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
 
 ## Related Pages
 
-- [[GitHub Project Board And Issue Handling]]
-- [[Traceability Map]]
-- [[Spec To Code Workflow]]
-- [[Implementation - Testing]]
-- [[Release Workflow]]
+- [GitHub Project Board And Issue Handling](github-project-board-and-issue-handling.md)
+- [Traceability Map](traceability-map.md)
+- [Spec To Code Workflow](spec-to-code-workflow.md)
+- [Implementation - Testing](../implementation/testing.md)
+- [Release Workflow](release-workflow.md)

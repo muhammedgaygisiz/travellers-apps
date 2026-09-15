@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This charter defines the platform test pass that has to be executed before the release candidate is cut. It exists so that "Android, iOS and web tested" on the readiness checklist in [[Current State - Release State]] means a recorded run against a named build, on named devices, with a named result, instead of an informal click-through.
+This charter defines the platform test pass that has to be executed before the release candidate is cut. It exists so that "Android, iOS and web tested" on the readiness checklist in [Current State - Release State](release-state.md) means a recorded run against a named build, on named devices, with a named result, instead of an informal click-through.
 
-It covers issue 1176 and belongs to issue 911 under [[epic-907]].
+It covers issue 1176 and belongs to issue 911 under [epic-907](../github/epic-907.md).
 
 ## Build Under Test
 
@@ -25,9 +25,9 @@ This says nothing about backend protection: Firebase Console enforcement is a se
 
 ## How To Produce The Build
 
-The build procedure itself is not charter material. [[Implementation - Release And Build Workflow]]
+The build procedure itself is not charter material. [Implementation - Release And Build Workflow](../implementation/release-and-build-workflow.md)
 owns the npm scripts, the `native-release.yml` jobs, what those jobs assert, artifact
-naming and provenance, and the run history. [[Implementation - Store Release Steps]]
+naming and provenance, and the run history. [Implementation - Store Release Steps](../implementation/store-release-steps.md)
 owns the store console procedure. Follow those; this section states only what the
 pass additionally requires.
 
@@ -84,7 +84,7 @@ Cover the oldest supported OS if a device is available. The lowest supported lev
 
 ## Web
 
-1. Run the full Playwright suites serially, one after the other, with `npx nx e2e bite-tribe-e2e --workers=1` and `npx nx e2e bite-tribe-business-e2e --workers=1`. They share the emulator ports, so never run them at once, and a parallel local run is not evidence; see [[Implementation - Testing]].
+1. Run the full Playwright suites serially, one after the other, with `npx nx e2e bite-tribe-e2e --workers=1` and `npx nx e2e bite-tribe-business-e2e --workers=1`. They share the emulator ports, so never run them at once, and a parallel local run is not evidence; see [Implementation - Testing](../implementation/testing.md).
 2. Repeat the critical journeys manually against a production-configuration build: registration, onboarding, login, create a Bite with a photo, Bite details, search, map, bucket list, profile, settings.
 3. Check the privacy policy page and the account deletion flow.
 4. Confirm no console errors and no failed network requests on the main journeys.
@@ -98,16 +98,16 @@ Install the named Google Play Open Testing artifact on a physical device, then e
 1. Registration, the blocking onboarding assistant, and continuation to the home page.
 2. Login, logout, and session restore after a cold start.
 3. Create a Bite with a photo, including the upload failure state and both retry paths.
-4. Location permission grant and denial, Bite currency prefill from the Bite position, and manual currency override. The account default currency suggested during onboarding is a separate check with a separate source: it is derived from the device region through the device time zone, never from the interface language, so a device whose Region and language variant disagree must still suggest the currency of the Region. See [[issue-1262]].
+4. Location permission grant and denial, Bite currency prefill from the Bite position, and manual currency override. The account default currency suggested during onboarding is a separate check with a separate source: it is derived from the device region through the device time zone, never from the interface language, so a device whose Region and language variant disagree must still suggest the currency of the Region. See [issue-1262](../github/issue-1262.md).
 5. Map view, marker selection, the Bite drawer, and camera stability while live updates arrive.
 6. Search for Bites, restaurants and cities.
 7. Bucket list add, swipe to tick, and undo.
 8. Notification permission, and delivery of a ranking-change notification. Issue 971 landed these but device delivery is still unverified.
-9. Deep links into Bite details. Profiles are not shareable and have no deep link; that is the intended product scope, not a missing feature. See [[issue-1190]].
+9. Deep links into Bite details. Profiles are not shareable and have no deep link; that is the intended product scope, not a missing feature. See [issue-1190](../github/issue-1190.md).
 10. Privacy policy and account deletion end to end.
 11. Restaurant menus and local gallery support, which have no Playwright coverage at all.
-12. App Check in enforced mode: a working session, then the retry gate when the token is refused. Google Maps Platform is read separately: Places API (New) at 0% verified is the expected reading and must not be enforced, so the evidence to record is that restaurant, city, and Bite place search still work while the Firebase APIs are enforced. See [[issue-1245]].
-13. Trigger the verification-mail **resend** and read the delivered `From` header and subject in the received mail, not the code that built them. Expect `BiteTribe <noreply@bitetribe.app>` and the catalog subject in the account's language; the one-word spelling landed on 2026-08-21 and only reaches a recipient once the Workspace `Send mail as` display name is updated to match, so a delivered `Bite Tribe` here means that console step is still outstanding. This is a required check rather than an optional one because Gmail rewrites `From` server-side when the delegated mailbox's `Send mail as` list does not carry the address, which happens after the function has already produced a correct header: [[issue-1265]] shipped twice and changed nothing a recipient saw, and no unit test can catch it. Read the resend mail specifically - the registration mail comes from Firebase Auth's own mailer and exercises a different sender path. See [[Implementation - Firebase Functions]].
+12. App Check in enforced mode: a working session, then the retry gate when the token is refused. Google Maps Platform is read separately: Places API (New) at 0% verified is the expected reading and must not be enforced, so the evidence to record is that restaurant, city, and Bite place search still work while the Firebase APIs are enforced. See [issue-1245](../github/issue-1245.md).
+13. Trigger the verification-mail **resend** and read the delivered `From` header and subject in the received mail, not the code that built them. Expect `BiteTribe <noreply@bitetribe.app>` and the catalog subject in the account's language; the one-word spelling landed on 2026-08-21 and only reaches a recipient once the Workspace `Send mail as` display name is updated to match, so a delivered `Bite Tribe` here means that console step is still outstanding. This is a required check rather than an optional one because Gmail rewrites `From` server-side when the delegated mailbox's `Send mail as` list does not carry the address, which happens after the function has already produced a correct header: [issue-1265](../github/issue-1265.md) shipped twice and changed nothing a recipient saw, and no unit test can catch it. Read the resend mail specifically - the registration mail comes from Firebase Auth's own mailer and exercises a different sender path. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
 
 ## iOS
 
@@ -124,7 +124,7 @@ These are named on the readiness checklist and have never been tested explicitly
 - Posting later: create a Bite for a place visited earlier, with the position no longer matching.
 - Missing location: no permission, no signal, and a location that resolves to nothing usable.
 
-The first two are reachable on web without travelling: the position-source modal's **`Set manually`** option makes the Bite position differ from the device position, which is how Run 8 reached #1307 and saw the currency prefill switch. Run 8 used it for one Bite in Verona against a device in Bern; the class of cases is still open.
+The first two are reachable on web without travelling: the position-source modal's **`Set manually`** option makes the Bite position differ from the device position, which is how Run 8 reached [#1307] and saw the currency prefill switch. Run 8 used it for one Bite in Verona against a device in Bern; the class of cases is still open.
 
 ## Business App
 
@@ -135,8 +135,8 @@ The business app has no Playwright coverage and was never exercised in any of th
 ## Monitoring
 
 - Confirm Crashlytics receives a report from each native platform. Note what the app actually sends: `FirebaseErrorHandlerService` calls `recordException`, which files a **non-fatal**, and it only runs on a native platform. A JavaScript error never crashes the native process, so there is no path that produces a fatal crash report from app code. Trigger an unhandled Angular error, restart the app so the report uploads, and expect it under Non-fatals rather than Crashes.
-- Verify the analytics events in DebugView from a real device, not only from the web build. On Android this needs a build that carries the [#1387](https://github.com/muhammedgaygisiz/travellers-apps/issues/1387) fix: the native collection flag persists in SharedPreferences, so a device that once ran a dev build stays silent under any earlier artifact, build 95 included. Expect the `App measurement disabled by setAnalyticsCollectionEnabled(false)` line to be gone and `Logging event` lines to follow.
-- Confirm the key metrics dashboard exists and receives data. **Confirmed on 29 August 2026.** The dashboard is not a console dashboard: GA4 has no API to create one, so the nine launch tiles in [[Implementation - Analytics Events]] live as code in `tools/analytics/dashboard.config.mjs`, and `.github/workflows/analytics-digest.yml` runs `digest.mjs` daily against GA4 property `487035057` and posts the result to [#991](https://github.com/muhammedgaygisiz/travellers-apps/issues/991). The 29 August run reported 144 restaurant and Bite views, 38 active users and 5 Bites, each a total for the seven-day window rather than a daily rate - the tiles were titled "/ day" but never divided by the window, corrected on 31 August 2026, and correctly raised its own threshold alert on sign-ups at zero for the window. Two tiles stay console-only because the Data API cannot do cohorts - D1/D7 retention and crash-free users - and [#986](https://github.com/muhammedgaygisiz/travellers-apps/issues/986) is what would close them.
+- Verify the analytics events in DebugView from a real device, not only from the web build. On Android this needs a build that carries the [#1387] fix: the native collection flag persists in SharedPreferences, so a device that once ran a dev build stays silent under any earlier artifact, build 95 included. Expect the `App measurement disabled by setAnalyticsCollectionEnabled(false)` line to be gone and `Logging event` lines to follow.
+- Confirm the key metrics dashboard exists and receives data. **Confirmed on 29 August 2026.** The dashboard is not a console dashboard: GA4 has no API to create one, so the nine launch tiles in [Implementation - Analytics Events](../implementation/analytics-events.md) live as code in `tools/analytics/dashboard.config.mjs`, and `.github/workflows/analytics-digest.yml` runs `digest.mjs` daily against GA4 property `487035057` and posts the result to [#991]. The 29 August run reported 144 restaurant and Bite views, 38 active users and 5 Bites, each a total for the seven-day window rather than a daily rate - the tiles were titled "/ day" but never divided by the window, corrected on 31 August 2026, and correctly raised its own threshold alert on sign-ups at zero for the window. Two tiles stay console-only because the Data API cannot do cohorts - D1/D7 retention and crash-free users - and [#986] is what would close them.
 
 ## Pass Criteria
 
@@ -151,16 +151,16 @@ Anything else found is filed, triaged, and either fixed under issue 1177 or acce
 
 Decided on 29 August 2026, when the platform pass was closed out. These are checks the charter asks for that will **not** be executed before the release candidate. They are recorded here rather than left to be rediscovered, and each names the evidence that stands in its place, so a later reader can judge the substitution instead of assuming a pass.
 
-| Gap                                           | Accepted because                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **One build proven on all three platforms**   | Android passed at Run 11 on build 96, web at Run 8 on `a20f485a`, iOS at Run 7 on TestFlight build 94. The maintainer accepts three separate per-platform passes instead of one artifact proven everywhere. The residual risk is that no single artifact has been exercised end to end on all three.                                                                                                                                                                                                                                                                                                                                                                                                            |
-| **Check 12 on web and iOS**                   | Executed on Android only, both halves. Web and iOS never attempted it. The enforced build is delivered on both - CI sets the flag on `deploy-bite-tribe`, and TestFlight build 95 was the first artifact carrying it - and no attestation failure has surfaced in the field, which covers the working session. **The refused-token retry gate remains unproven outside Android.**                                                                                                                                                                                                                                                                                                                               |
-| **Ranking-change notification delivery**      | Never executed on either platform in eleven runs, because `sendDailyLeaderboardNotification` is scheduled and forcing it would push to every real user whose rank changed. Users have reported receiving these notifications and that they work, and push transport itself is proven on both platforms by the new-follower path.                                                                                                                                                                                                                                                                                                                                                                                |
-| **iOS Analytics DebugView**                   | iOS analytics is verified through GA4 Realtime on runs 4, 6 and 7. DebugView needs a dedicated Xcode debug-mode launch and would confirm a transport that is not in doubt. Android DebugView is verified at Run 10.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| **Edge cases, exhaustively**                  | Partially covered: Run 8 reached the vacation and posting-later shape on web through the position-source modal's `Set manually` option, which is how it found [#1307](https://github.com/muhammedgaygisiz/travellers-apps/issues/1307), and Run 11 covered missing location on Android by denying the permission. A real trip across a currency boundary is not tested.                                                                                                                                                                                                                                                                                                                                         |
-| **The business app**                          | Out of scope for this release candidate by decision; it gets its own soft launch. See the Business App section above.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| **Android deep-link OS auto-verification**    | **Resolved 30 August 2026, and the prediction held exactly.** The gap was `pm get-app-links` reporting state 1024 because the debug signature is not in the published `assetlinks.json`; the server half was verified independently and the app's own handling passed warm and cold. Against the Play-installed build 96 the same command reports `bite-tribe.web.app: verified`, and a `/s/bite/` link routes straight to `com.bitetribe.app/.MainActivity`. Recorded under [#1179](https://github.com/muhammedgaygisiz/travellers-apps/issues/1179). The lesson worth keeping: a signature-dependent check cannot be executed on a debug artifact at all, so deferring it was correct rather than convenient. |
-| **Android Crashlytics `ErrorHandler` wiring** | The app is zoneless, so a thrown error from an injected `setTimeout` never reaches Angular's `ErrorHandler`. Run 10 called `recordException` directly - the same call the service makes - and the report uploaded, which proves the transport. The service's own wiring is verified on iOS, not on Android.                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Gap                                           | Accepted because                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **One build proven on all three platforms**   | Android passed at Run 11 on build 96, web at Run 8 on `a20f485a`, iOS at Run 7 on TestFlight build 94. The maintainer accepts three separate per-platform passes instead of one artifact proven everywhere. The residual risk is that no single artifact has been exercised end to end on all three.                                                                                                                                                                                                                                                                                                                                           |
+| **Check 12 on web and iOS**                   | Executed on Android only, both halves. Web and iOS never attempted it. The enforced build is delivered on both - CI sets the flag on `deploy-bite-tribe`, and TestFlight build 95 was the first artifact carrying it - and no attestation failure has surfaced in the field, which covers the working session. **The refused-token retry gate remains unproven outside Android.**                                                                                                                                                                                                                                                              |
+| **Ranking-change notification delivery**      | Never executed on either platform in eleven runs, because `sendDailyLeaderboardNotification` is scheduled and forcing it would push to every real user whose rank changed. Users have reported receiving these notifications and that they work, and push transport itself is proven on both platforms by the new-follower path.                                                                                                                                                                                                                                                                                                               |
+| **iOS Analytics DebugView**                   | iOS analytics is verified through GA4 Realtime on runs 4, 6 and 7. DebugView needs a dedicated Xcode debug-mode launch and would confirm a transport that is not in doubt. Android DebugView is verified at Run 10.                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **Edge cases, exhaustively**                  | Partially covered: Run 8 reached the vacation and posting-later shape on web through the position-source modal's `Set manually` option, which is how it found [#1307], and Run 11 covered missing location on Android by denying the permission. A real trip across a currency boundary is not tested.                                                                                                                                                                                                                                                                                                                                         |
+| **The business app**                          | Out of scope for this release candidate by decision; it gets its own soft launch. See the Business App section above.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **Android deep-link OS auto-verification**    | **Resolved 30 August 2026, and the prediction held exactly.** The gap was `pm get-app-links` reporting state 1024 because the debug signature is not in the published `assetlinks.json`; the server half was verified independently and the app's own handling passed warm and cold. Against the Play-installed build 96 the same command reports `bite-tribe.web.app: verified`, and a `/s/bite/` link routes straight to `com.bitetribe.app/.MainActivity`. Recorded under [#1179]. The lesson worth keeping: a signature-dependent check cannot be executed on a debug artifact at all, so deferring it was correct rather than convenient. |
+| **Android Crashlytics `ErrorHandler` wiring** | The app is zoneless, so a thrown error from an injected `setTimeout` never reaches Angular's `ErrorHandler`. Run 10 called `recordException` directly - the same call the service makes - and the report uploaded, which proves the transport. The service's own wiring is verified on iOS, not on Android.                                                                                                                                                                                                                                                                                                                                    |
 
 Everything else in this charter was executed and recorded. The accepted gaps do not include any check that a run attempted and failed.
 
@@ -170,18 +170,18 @@ Add one entry per platform per execution, newest first. Keep previous entries
 when re-running after fixes. Each record holds the build identity, the device,
 the result summary, the findings filed, and what was left unexecuted.
 
-- 29 Aug 2026 — [[Test Run 11 - Android Build 96]]
-- 29 Aug 2026 — [[Test Run 10 - Android Build 96]]
-- 27 Aug 2026 — [[Test Run 09 - Android Build 95]]
-- 17 Aug 2026 — [[Test Run 08 - Web Build 95]]
-- 15 Aug 2026 — [[Test Run 07 - Web Build 95]]
-- 15 Aug 2026 — [[Test Run 07 - iOS Build 94]]
-- 10 Aug 2026 — [[Test Run 06 - iOS Build 93]]
-- 8 Aug 2026 — [[Test Run 05 - iOS Build 92]]
-- 6 Aug 2026 — [[Test Run 04 - iOS Build 91]]
-- 4 Aug 2026 — [[Test Run 03 - iOS Build 90]]
-- 3 Aug 2026 — [[Test Run 02 - iOS Build 89]]
-- 28 July 2026 — [[Test Run 01 - iOS Build 87]]
+- 29 Aug 2026 — [Test Run 11 - Android Build 96](../test-runs/11-android-build-96.md)
+- 29 Aug 2026 — [Test Run 10 - Android Build 96](../test-runs/10-android-build-96.md)
+- 27 Aug 2026 — [Test Run 09 - Android Build 95](../test-runs/09-android-build-95.md)
+- 17 Aug 2026 — [Test Run 08 - Web Build 95](../test-runs/08-web-build-95.md)
+- 15 Aug 2026 — [Test Run 07 - Web Build 95](../test-runs/07-web-build-95.md)
+- 15 Aug 2026 — [Test Run 07 - iOS Build 94](../test-runs/07-ios-build-94.md)
+- 10 Aug 2026 — [Test Run 06 - iOS Build 93](../test-runs/06-ios-build-93.md)
+- 8 Aug 2026 — [Test Run 05 - iOS Build 92](../test-runs/05-ios-build-92.md)
+- 6 Aug 2026 — [Test Run 04 - iOS Build 91](../test-runs/04-ios-build-91.md)
+- 4 Aug 2026 — [Test Run 03 - iOS Build 90](../test-runs/03-ios-build-90.md)
+- 3 Aug 2026 — [Test Run 02 - iOS Build 89](../test-runs/02-ios-build-89.md)
+- 28 July 2026 — [Test Run 01 - iOS Build 87](../test-runs/01-ios-build-87.md)
 
 Runs 01 and 02 carried no run number in the source; those two numbers are
 assigned for ordering only and each page says so.
@@ -191,14 +191,21 @@ assigned for ordering only and each page says so.
 - File every defect as its own issue and link it to issue 1176.
 - Mark it Priority P0 only if it blocks the release candidate against the pass criteria above.
 - Fix release-candidate blockers under issue 1177, not on this branch.
-- Move anything accepted into [[Current State - Known Issues]] before the release candidate is cut.
+- Move anything accepted into [Current State - Known Issues](known-issues.md) before the release candidate is cut.
 
 ## Related Pages
 
-- [[Current State - Release State]]
-- [[Current State - Known Issues]]
-- [[Current State - E2E Coverage]]
-- [[Implementation - Testing]]
-- [[Implementation - Release And Build Workflow]]
-- [[epic-907]]
-- [Issue #1181 - signed Android and iOS CI builds](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
+- [Current State - Release State](release-state.md)
+- [Current State - Known Issues](known-issues.md)
+- [Current State - E2E Coverage](e2e-coverage.md)
+- [Implementation - Testing](../implementation/testing.md)
+- [Implementation - Release And Build Workflow](../implementation/release-and-build-workflow.md)
+- [epic-907](../github/epic-907.md)
+- [Issue [#1181] - signed Android and iOS CI builds](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
+
+[#986]: https://github.com/muhammedgaygisiz/travellers-apps/issues/986
+[#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
+[#1179]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1179
+[#1181]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1181
+[#1307]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1307
+[#1387]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1387

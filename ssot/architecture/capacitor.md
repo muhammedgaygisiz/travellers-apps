@@ -69,7 +69,7 @@ bundle around stale native pods.
 
 Android sync is unaffected and needs no script; it never invokes CocoaPods.
 
-The full procedure is [[Implementation - Store Release Steps]].
+The full procedure is [Implementation - Store Release Steps](../implementation/store-release-steps.md).
 
 ## Launch Asset Rule
 
@@ -80,7 +80,7 @@ app theme in `apps/bite-tribe/src/theme/variables.scss`:
 - Light: `$BACKGROUND_COLOR` (`#fff`).
 - Dark: `$DARK_BACKGROUND_COLOR` (`#1a1c22`).
 
-Issue [#1203](https://github.com/muhammedgaygisiz/travellers-apps/issues/1203)
+Issue [#1203]
 closed the gap left when the current palette landed: splash and manifest still
 carried the previous warm palette (`#fffbef`, `#00365f`, the orange splash
 canvas) while the app itself had already moved to the neutral background.
@@ -117,7 +117,7 @@ therefore already matched the light background.
 
 ## Service Worker Rule
 
-The Angular service worker (`ngsw`) is web-only. `apps/bite-tribe` keeps building it (`serviceWorker: true`), so the PWA is unchanged, but the shell registers it only outside a native platform (issue \#1067).
+The Angular service worker (`ngsw`) is web-only. `apps/bite-tribe` keeps building it (`serviceWorker: true`), so the PWA is unchanged, but the shell registers it only outside a native platform (issue [#1067]).
 
 `libs/bite-tribe/shell/src/lib/service-worker.ts` splits this in two:
 
@@ -147,10 +147,10 @@ Three permissions follow this: location, notifications, and media location. Each
 has an onboarding step that explains before it asks, and each has a recovery
 surface in Settings for the users that step cannot reach - a denial, a revoke,
 or an account that onboarded before the step existed. For notifications, issue
-[#1184](https://github.com/muhammedgaygisiz/travellers-apps/issues/1184) adds
+[#1184] adds
 **Receive notifications on this device** in Settings as a second contextual
 surface, and issue
-[#1386](https://github.com/muhammedgaygisiz/travellers-apps/issues/1386) adds
+[#1386] adds
 two more in the same section: **Turn on notifications** next to the muted-device
 explanation, and the installation's own switch when the user flips a muted
 device back on. All three are contextual — the user asked for notifications on
@@ -168,7 +168,7 @@ The grant is necessary but **not sufficient**. Which intent the picker fires
 decides whether there is an unredacted photo to hand over at all, and the
 Android Photo Picker redacts unconditionally no matter what is granted. See the
 Gallery Picker Version Pin below; assuming the permission is the whole story is
-what sent issue #1414's first diagnosis in the wrong direction.
+what sent issue [#1414]'s first diagnosis in the wrong direction.
 
 The library splits this the same way `push-notifications` and `geolocation` do:
 
@@ -201,7 +201,7 @@ above requires:
 `libs/common/ui/image-upload` reads and picks; it requests nothing. Asking
 there put an OS prompt between the user and their photo, and under "Allow
 limited access" Android made them select the photo twice - once on the grant
-screen, once in the picker. See GitHub issues #1394 and #1409.
+screen, once in the picker. See GitHub issues [#1394] and [#1409].
 
 `FilePicker.pickImages({ limit: 1 })` is the picker, and the limit is
 load-bearing: at the default `0` the plugin sets `EXTRA_ALLOW_MULTIPLE` and the
@@ -211,7 +211,7 @@ file is ever read.
 ### Gallery Picker Version Pin
 
 **`@capawesome/capacitor-file-picker` is pinned to `8.0.2`. Do not bump it
-without reading this section and GitHub issue #1414.**
+without reading this section and GitHub issue [#1414].**
 
 `8.0.3` rewrote `pickImages` to fire the Android Photo Picker
 (`ActivityResultContracts.PickVisualMedia`) instead of `Intent.ACTION_PICK`.
@@ -227,7 +227,7 @@ position for the five weeks until run 10 of the test charter found it dead.
 | `8.0.3`, `8.0.4` | `PickVisualMedia`    | always absent   |
 
 The pin is a holding position, not a resting place. Upstream
-[PR #893](https://github.com/capawesome-team/capacitor-plugins/pull/893) made
+[PR #893][#893] made
 the change for a real reason: OEM gallery apps with an old `targetSdkVersion`
 answer `ACTION_PICK` with a raw `file://` URI, which an app holding no storage
 permission cannot read. Pinning brings that defect back for those devices.
@@ -253,7 +253,7 @@ Photo Picker fallback natively - upstream's fix plus the case they did not need
 
 ### Nothing Is Stored
 
-There is no account-level flag for this, for the reason issue #1184 established
+There is no account-level flag for this, for the reason issue [#1184] established
 for notifications: the grant is a fact about one OS installation. A reinstall or
 a revoke in system settings resets it while a stored flag would survive, so
 every surface reconciles against the live state and a denial is not written
@@ -276,13 +276,13 @@ Do not call `requestPushPermission` from app startup or a login path. A cold
 ask there spends the OS prompt before the user has any context for the
 decision.
 
-Issue #1184 retires `Settings.pushNotifications`. Onboarding registers the
+Issue [#1184] retires `Settings.pushNotifications`. Onboarding registers the
 current installation after a grant and accepts a denial without saving an
 account-level notification preference.
 
 ## Push Installation Rule
 
-The contract from issue #1184 separates installation identity, the FCM
+The contract from issue [#1184] separates installation identity, the FCM
 delivery address, BiteTribe delivery state, and OS permission:
 
 - A random installation UUID is generated once and persisted with Capacitor
@@ -296,7 +296,7 @@ delivery address, BiteTribe delivery state, and OS permission:
   metadata, OS version, app version, `lastSeenAt`, and their own `enabled`
   state.
 - The OS version comes from `@capacitor/device`, never from the user agent
-  (issue #1263). See the Device Metadata Source Rule below.
+  (issue [#1263]). See the Device Metadata Source Rule below.
 - The raw FCM token is not the primary user-facing device label.
 - There is at most one active token per installation. Token rotation inherits
   the existing `enabled` state and cleans the superseded token and reverse
@@ -311,13 +311,13 @@ delivery address, BiteTribe delivery state, and OS permission:
   the current installation's switch shows what actually arrives, so a missing OS
   permission renders it off whatever `enabled` says, and switching it back on
   asks the OS instead of writing the flag (issue
-  [#1386](https://github.com/muhammedgaygisiz/travellers-apps/issues/1386)).
+  [#1386]).
   See the OS Permission Reflection Rule below.
 - The installation list is account data, so it is listed and switchable from
   every signed-in surface, including a platform that cannot receive push
   itself. Only registering _this_ device is platform-gated: the web build says
   it cannot receive notifications and still manages the user's phones.
-- Permanent installation deletion or revocation is outside issue #1184.
+- Permanent installation deletion or revocation is outside issue [#1184].
 
 `libs/common/push-notifications` owns this contract:
 
@@ -339,7 +339,7 @@ Backend delivery filtering stays in `getTokens`, which skips a token whose
 
 Only `granted` means delivery. Every other state mutes the device, and the UI
 must say so rather than treat the difference as "not decided yet" (issue
-[#1386](https://github.com/muhammedgaygisiz/travellers-apps/issues/1386)).
+[#1386]).
 
 The two platforms report a revoked permission differently, which is what made
 this a rule rather than a detail:
@@ -386,16 +386,16 @@ moves out of `push-notifications` when it gets one.
 Recovery is recognised on re-entering the Settings page, which reloads the
 installation list and re-reads the permission. Returning from the system
 settings page to a Settings page that is still mounted does not re-read it — the
-same limitation iOS has, and not addressed by #1386.
+same limitation iOS has, and not addressed by [#1386].
 
-See [[issue-1386]] for what reading a revoked Android permission as "not decided
+See [issue-1386](../github/issue-1386.md) for what reading a revoked Android permission as "not decided
 yet" cost.
 
 ### Device Metadata Source Rule
 
 The two halves of a device row have different truth requirements, so they have
 different sources (issue
-[#1263](https://github.com/muhammedgaygisiz/travellers-apps/issues/1263)).
+[#1263]).
 
 - The **device label** stays derived from `navigator.userAgent`. It only has to
   make a row recognisable among a user's own devices, and no user agent lies
@@ -420,7 +420,7 @@ different sources (issue
 ## Location Permission Rule
 
 Location follows the same contextual rule as push. Onboarding explains what the
-position is used for before the primary request (epic #850, issue #1023), while
+position is used for before the primary request (epic [#850], issue [#1023]), while
 an explicit later recovery action may request an unspent permission or guide a
 denied user to device settings.
 
@@ -431,7 +431,7 @@ denied user to device settings.
   still has an unspent OS prompt; `denied` does not, and only the settings page
   can undo it; `unsupported` is the web build, which has nothing to pre-check.
   Callers must branch on the three. It is the only permission read the library
-  offers: a boolean `hasLocationPermission` sat beside it until issue #1412 and
+  offers: a boolean `hasLocationPermission` sat beside it until issue [#1412] and
   reported `true` on web, which reads as a grant to anyone reconciling against
   it.
 - `requestLocationPermission` - shows the prompt. Called from onboarding or an
@@ -452,7 +452,7 @@ The onboarding location step reads the live OS state on arrival and treats a
 notification steps do. `settings.location` records what a user once chose on
 some install; the grant is a fact about this one, so the flag decides nothing
 about whether the step still has a question (issue
-[#1412](https://github.com/muhammedgaygisiz/travellers-apps/issues/1412)).
+[#1412]).
 
 - The stored flag cannot stand in for the state in either direction. It survives
   a reinstall or a revoke that resets the grant, and it is absent — or a stored
@@ -466,15 +466,15 @@ about whether the step still has a question (issue
   read.
 - The read happens once, when the assistant initializes. A grant made in system
   settings while the assistant is open is not picked up until the next start —
-  the same limitation Settings has, and not addressed by #1412.
-- This is the assistant's half of what issue #1386 fixed for notifications in
+  the same limitation Settings has, and not addressed by [#1412].
+- This is the assistant's half of what issue [#1386] fixed for notifications in
   Settings. See the OS Permission Reflection Rule above.
 
 ### Denied-Permission Recovery Rule
 
 A denial is not just a failed read: the OS ignores every further permission
 request, so the system settings page is the only way back. Recovery surfaces
-must therefore branch on the state, not on the failure (issue #1183).
+must therefore branch on the state, not on the failure (issue [#1183]).
 
 - The refused read carries the reason. `LocationPermissionNotGrantedError`
   holds the `permissionState` that blocked it, so no caller has to ask the OS a
@@ -521,3 +521,17 @@ libs/common/image-compression
 - Android and iOS generated files should be treated as sync output, not hand-maintained source of truth.
 - `@capawesome/capacitor-file-picker` is held at `8.0.2` and cannot be upgraded without losing the Android gallery photo position. See the Gallery Picker Version Pin above.
 - A patch release of a native plugin can change which OS intent is fired, and therefore what the app is handed, without saying so. Read the Android or iOS diff of a native plugin bump, not just its version number.
+
+[#850]: https://github.com/muhammedgaygisiz/travellers-apps/issues/850
+[#893]: https://github.com/muhammedgaygisiz/travellers-apps/issues/893
+[#1023]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1023
+[#1067]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1067
+[#1183]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1183
+[#1184]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1184
+[#1203]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1203
+[#1263]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1263
+[#1386]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1386
+[#1394]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1394
+[#1409]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1409
+[#1412]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1412
+[#1414]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1414

@@ -4,19 +4,19 @@
 
 **Level:** L1
 
-Implemented. Specified through issue \#1070 as stage 1 of issue \#735, and
-every step of the planned flow below is now built, accessible (issue \#1089)
-and covered (issue \#1090).
+Implemented. Specified through issue [#1070] as stage 1 of issue [#735], and
+every step of the planned flow below is now built, accessible (issue [#1089])
+and covered (issue [#1090]).
 
 An owner can reach the editor, build the room and describe its tables:
 `restaurant/:restaurantId/floor-plan` in the business app creates, renames,
 resizes and deletes rooms, and draws one of them on a millimetre-accurate canvas
-with a grid, pan, zoom and a scale reference (issue \#1082). Issue \#1083 put
+with a grid, pan, zoom and a scale reference (issue [#1082]). Issue [#1083] put
 the furniture in it: a palette of nine objects, drag or keyboard placement, move,
 resize, rotate, multi-select, duplicate, delete, snapping to the grid and to
 adjacent edges, and an undo history over all of it.
 
-Issue \#1084 made a table a business entity rather than a rectangle. The owner
+Issue [#1084] made a table a business entity rather than a rectangle. The owner
 sets its public number, its seating capacity, its shape and whether it is in
 service, and the number is unique across the whole restaurant rather than the
 open room: the editor reads every table of the restaurant, refuses a label
@@ -24,18 +24,18 @@ another one already holds and names the room that holds it. A selection can be
 numbered consecutively in one action, and the plan draws each table's number
 with its capacity under it.
 
-Issue \#1085 made the plan a restaurant rather than a room. The switcher orders
+Issue [#1085] made the plan a restaurant rather than a room. The switcher orders
 the rooms, groups them by an optional floor name, and shows what each one holds;
 a table moves to another room from its own card and keeps its number and its QR
 token when it goes; and the plan is summarised for the restaurant as a whole.
 
-Issue \#1086 built the QR tokens, backend only. A table gets an opaque,
+Issue [#1086] built the QR tokens, backend only. A table gets an opaque,
 non-guessable code that resolves in one public read to its restaurant, room and
 number; rotating one supersedes the code it replaces instead of erasing it, and
 deleting a table revokes its code rather than leaving a sticker that resolves to
 nothing.
 
-Issue \#1087 put them on paper, and is the first caller of those callables.
+Issue [#1087] put them on paper, and is the first caller of those callables.
 `restaurant/:restaurantId/floor-plan/qr-codes` asks for the tokens as it loads,
 draws one code per table in service, and lays them out as the A4 pages they
 will print as - twelve stickers to a sheet, or one large tent card per page.
@@ -46,7 +46,7 @@ print stylesheet takes the app's header, its controls and Ionic's own scroll
 container out of the way, so what leaves the printer is black codes on white
 paper and the three lines of text beside each one.
 
-Issue \#1088 made the plan two states. Nothing an owner does in the editor is
+Issue [#1088] made the plan two states. Nothing an owner does in the editor is
 live any more: every edit goes into a draft that is stored as they work, and
 publishing is the one deliberate action that makes it the room staff and a
 scanned code read. It is refused while the plan carries a blocking error, each
@@ -54,7 +54,7 @@ finding names its table and jumps to it, and discarding returns the room to the
 published plan. Staff got their read of that published plan in the same issue,
 scoped to the one restaurant they work at.
 
-Issue \#1090 locked the behaviour down before stage 2 builds on it. The
+Issue [#1090] locked the behaviour down before stage 2 builds on it. The
 geometry, the table rules, the validation and the draft/publish state machine
 are unit-covered as the pure functions they were written as, every reusable
 editor component has its Storybook states including the QR code renderer's two
@@ -64,16 +64,16 @@ publishes and reloads, and `table-qr-codes.spec.ts` prints their codes. Both
 assert the stored room, table and `/tableTokens` documents rather than a
 picture of the editor, because a plan that renders correctly and stores nothing
 is the failure that matters here. What stays on the unit tests is listed in
-[[Current State - E2E Coverage]].
+[Current State - E2E Coverage](../current-state/e2e-coverage.md).
 
-The page a scan lands on is still specification: \#1087 fixed the address at
+The page a scan lands on is still specification: [#1087] fixed the address at
 `https://bitetribe.app/t/{token}` because a sticker cannot be corrected
-afterwards, and issue \#1072 is what answers it.
+afterwards, and issue [#1072] is what answers it.
 
-No longer blocked. [[UC - Own And Claim Restaurants]] was the prerequisite,
+No longer blocked. [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md) was the prerequisite,
 because floor-plan data is restaurant-scoped and could not be trusted while the
 Firestore rules allowed every authenticated user to write every document; issue
-\#1078 replaced those rules and issue \#1081 scoped the room and table
+[#1078] replaced those rules and issue [#1081] scoped the room and table
 collections to the account holding the restaurant. Those rules are deployed by
 hand, so production is only bound once
 `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
@@ -90,7 +90,7 @@ This is not a construction plan. It is a practical, easy-to-maintain top-down re
 
 ## Planned Flow
 
-Every step is implemented. Issue \#1088 built step seven, and publishing asks
+Every step is implemented. Issue [#1088] built step seven, and publishing asks
 for the tokens of step eight as it lands - so an owner now reaches the sheet of
 step nine from a plan that already carries codes, rather than from a page that
 had to ask for them itself. It still asks, because issuing is idempotent and
@@ -109,10 +109,10 @@ neither ask invalidates what the other printed.
 ## Key Behaviours
 
 - Coordinates are stored in room-relative integer millimetres, so the same stored plan renders consistently wherever it is drawn. The editor's SVG `viewBox` is in those same millimetres, and the owner types metres: the conversion happens at the form boundary and in the canvas's scale label, and nowhere else. Rendering the plan on a phone is what the staff live view does with that data, not what this editor does.
-- The editor is a desktop tool and does not collapse. It holds a minimum width and scrolls sideways below it, because a millimetre-accurate drag surface folded into one column is a reading order nobody designed. See [[UC - Manage Tables During Service]] for the small-screen surface: a host at the door wants the plan read-only with a service's operations on it, which is a different screen rather than a narrower one.
+- The editor is a desktop tool and does not collapse. It holds a minimum width and scrolls sideways below it, because a millimetre-accurate drag surface folded into one column is a reading order nobody designed. See [UC - Manage Tables During Service](uc-manage-tables-during-service.md) for the small-screen surface: a host at the door wants the plan read-only with a service's operations on it, which is a different screen rather than a narrower one.
 - The cards are arranged by what they describe. What the restaurant _is_ runs down the left: its rooms, the open room's fields, the selected table. What the owner _does_ to it runs down the right: the palette, the canvas, and one row under it holding whatever the selection calls for beside the grid settings, which stay put so the controls reached for most never move.
 - Pan, zoom and the grid are viewport state and are stored nowhere. Moving over a plan changes no stored field, and turning snapping on decides where the next measurement lands rather than moving anything already drawn.
-- A save that lost a race against another device shows the room as it is stored, not a failure message. See [[Floor Plan]].
+- A save that lost a race against another device shows the room as it is stored, not a failure message. See [Floor Plan](../domain/floor-plan.md).
 - The plan is structured data. Every object stays individually identifiable and editable. It is never stored as an image.
 - An object's centre stays inside its room, so nothing can be dragged off the plan and lost, while a bar counter can still overhang the wall it is built into.
 - A gesture is one undo step. What is on screen mid-drag is a preview the editor holds; the plan is written once, when the pointer is released.
@@ -124,11 +124,11 @@ neither ask invalidates what the other printed.
 - A table moves between rooms without becoming a different table. Its identity, its number and its QR token all survive, so a code already printed and stuck to the table keeps resolving to it. That is what makes `roomId` a field rather than the table being a document under its room, and the move is an ordinary plan edit that the owner can undo and that lands with the save they press once.
 - Room order is a decision the owner makes and the system stores, so the list reads the same after a reload. A floor name groups the rooms for display without reordering them, and a group appears where its first room already stood - naming a level never reshuffles a plan somebody arranged.
 - Each room says how many tables it holds and how many guests it seats, and the restaurant says the same across all of them. The numbers are derived from the tables the editor already holds rather than stored, so they follow a table that was placed or moved a minute ago, and seats count only the tables in service.
-- No arrangement is discarded without the owner saying so, and since issue \#1088 almost nothing can be. The plan is stored as a draft while the owner works, so closing the browser mid-edit and coming back opens on what they left. Opening another room and reordering the rooms both store the draft first and then reseed from it, which is why neither asks any longer: the question issue \#1085 put there protected an arrangement that can no longer be lost, and a confirmation that protects nothing trains an owner to click through the next one. Discarding the draft is the one action that destroys work, and it is the one that asks.
+- No arrangement is discarded without the owner saying so, and since issue [#1088] almost nothing can be. The plan is stored as a draft while the owner works, so closing the browser mid-edit and coming back opens on what they left. Opening another room and reordering the rooms both store the draft first and then reseed from it, which is why neither asks any longer: the question issue [#1085] put there protected an arrangement that can no longer be lost, and a confirmation that protects nothing trains an owner to click through the next one. Discarding the draft is the one action that destroys work, and it is the one that asks.
 - Draft and published states are separate, so rearranging during service does not affect the live view. The separation is structural rather than promised: the draft is a document of its own, and a table placed in a draft has no table document at all until the plan is published.
 - Publishing is blocked by a missing table number, duplicate table numbers, a capacity below one, or a table whose centre is outside its room. Overlapping tables and a table overhanging the room outline warn but do not block, because real rooms have odd arrangements. The editor already refuses three of the four as they are typed; the publish gate catches a plan that reached that state another way - a room that was made smaller, or a second device arranging a room this one cannot see.
 - A finding names its table and jumps to it, opening the table's room first when it is not the one on screen. A finding an owner has to hunt for is a finding they publish around.
-- Publishing is what asks for the QR codes. Until issue \#1088 the only thing that asked was the printable sheet, so a plan carried codes from the first time somebody opened it; the codes now exist from the moment the plan goes live. A failure to issue them does not unpublish a correct plan.
+- Publishing is what asks for the QR codes. Until issue [#1088] the only thing that asked was the printable sheet, so a plan carried codes from the first time somebody opened it; the codes now exist from the moment the plan goes live. A failure to issue them does not unpublish a correct plan.
 - An owner whose draft is refused keeps what is on screen. A second device arranging the same room stops this one's autosave rather than replacing the arrangement with theirs - the opposite of what a refused publish does, and for the opposite reason: a published plan that moved is something the owner has to see, while an unpublished arrangement is the only copy of itself.
 - A table's QR code says which table it is and nothing about which table it is. The code carries 130 random bits and no part of the number printed beside it, so holding the sheet from table 11 tells a guest nothing about the code on table 12. It is read one document at a time and the collection cannot be listed, so the set of a restaurant's live codes is not something an account can collect.
 - A code outlives the table's arrangement and not the table. It survives a move to another room, a rename and being taken out of service, because a sticker already on a table cannot be reprinted every time the plan changes; it is superseded when the owner deliberately replaces it, and revoked when the table is deleted. Both leave a code that still resolves, to "this was replaced" and "this is no longer valid" rather than to nothing - a scan that finds no document at all would be the answer to a code BiteTribe never issued, which is a different thing to tell a guest.
@@ -156,7 +156,7 @@ neither ask invalidates what the other printed.
 
 **[Secondary]** - the whole page. Its only surfaces are `restaurant/:restaurantId/floor-plan`
 and `.../qr-codes` in the business app, which is out of scope for this release candidate by
-decision and gets its own soft launch; [[Current State - Release Candidate Test Charter]]
+decision and gets its own soft launch; [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)
 records that.
 
 ## App Store Review Area
@@ -164,7 +164,7 @@ records that.
 Not relevant, because nothing this page describes is store-distributed: the editor and the
 printable sheet are routes in the business app, and only `apps/bite-tribe-ios` and
 `apps/bite-tribe-android` carry a native project. What a printed code opens once a guest scans
-it is [[UC - Order At The Table Through A QR Code]]'s.
+it is [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md)'s.
 
 ## Supported Evidence
 
@@ -188,24 +188,42 @@ Still planned:
 
 ## Related GitHub Scope
 
-- Issue \#735 - Restaurant Interaction Platform umbrella
-- Issue \#1070 - Restaurant floor plan and table configuration, with eleven child issues
-- Issue \#1069 - Restaurant ownership, claiming and authorization, prerequisite, delivered
-- Issue \#1080 - the shared model and the coordinate system, delivered
-- Issue \#1081 - persistence, rules and optimistic concurrency, delivered
-- Issue \#1082 - the editor canvas, rooms and the grid, delivered
-- Issue \#1083 - placing, moving, resizing and rotating floor-plan objects, delivered
-- Issue \#1084 - table properties, label uniqueness, numbering and capacity, delivered
-- Issue \#1085 - multiple rooms and floors, room order, cross-room table moves, capacity summaries and the desktop-locked layout, delivered
-- Issue \#1086 - opaque table QR tokens, their lifecycle and the rules that keep them backend-owned, delivered as backend only
-- Issue \#1087 - printable table QR sheets, the first caller of those callables, delivered
-- Issue \#1088 - the draft/published split, the autosaved draft, the publish validation and the staff read of the published plan, delivered
-- Issue \#1089 - accessibility of the editor, delivered; its responsive half was moved to issue \#1093 rather than deferred
-- Issue \#1090 - the unit, Storybook and Playwright coverage that closes the epic, delivered
-- Issue \#1093 - the staff live view, which owns the small-screen and touch rendering of a published plan
+- Issue [#735] - Restaurant Interaction Platform umbrella
+- Issue [#1070] - Restaurant floor plan and table configuration, with eleven child issues
+- Issue [#1069] - Restaurant ownership, claiming and authorization, prerequisite, delivered
+- Issue [#1080] - the shared model and the coordinate system, delivered
+- Issue [#1081] - persistence, rules and optimistic concurrency, delivered
+- Issue [#1082] - the editor canvas, rooms and the grid, delivered
+- Issue [#1083] - placing, moving, resizing and rotating floor-plan objects, delivered
+- Issue [#1084] - table properties, label uniqueness, numbering and capacity, delivered
+- Issue [#1085] - multiple rooms and floors, room order, cross-room table moves, capacity summaries and the desktop-locked layout, delivered
+- Issue [#1086] - opaque table QR tokens, their lifecycle and the rules that keep them backend-owned, delivered as backend only
+- Issue [#1087] - printable table QR sheets, the first caller of those callables, delivered
+- Issue [#1088] - the draft/published split, the autosaved draft, the publish validation and the staff read of the published plan, delivered
+- Issue [#1089] - accessibility of the editor, delivered; its responsive half was moved to issue [#1093] rather than deferred
+- Issue [#1090] - the unit, Storybook and Playwright coverage that closes the epic, delivered
+- Issue [#1093] - the staff live view, which owns the small-screen and touch rendering of a published plan
 
 ## Related Domains
 
-- [[Floor Plan]]
-- [[Table]]
-- [[Restaurant]]
+- [Floor Plan](../domain/floor-plan.md)
+- [Table](../domain/table.md)
+- [Restaurant](../domain/restaurant.md)
+
+[#735]: https://github.com/muhammedgaygisiz/travellers-apps/issues/735
+[#1069]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1069
+[#1070]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1070
+[#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
+[#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
+[#1080]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1080
+[#1081]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1081
+[#1082]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1082
+[#1083]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1083
+[#1084]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1084
+[#1085]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1085
+[#1086]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1086
+[#1087]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1087
+[#1088]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1088
+[#1089]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1089
+[#1090]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1090
+[#1093]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1093

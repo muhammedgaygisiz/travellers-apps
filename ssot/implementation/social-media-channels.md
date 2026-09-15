@@ -5,16 +5,16 @@
 This page owns the BiteTribe social handle, the account inventory across every
 platform, and the profile copy each one carries.
 
-[[Implementation - Store Listing Assets]] owns the approved product copy and the
-name spelling. [[Implementation - Web Search And Social Metadata]] owns what the
+[Implementation - Store Listing Assets](store-listing-assets.md) owns the approved product copy and the
+name spelling. [Implementation - Web Search And Social Metadata](web-search-and-social-metadata.md) owns what the
 web app tells crawlers and unfurlers. This page owns the accounts themselves, and
 it is the reason `twitter:site` in `apps/bite-tribe/src/index.html` has a value
 to point at.
 
 Added 1 September 2026 for
-[issue #1455](https://github.com/muhammedgaygisiz/travellers-apps/issues/1455),
+[issue #1455][#1455],
 which is a prerequisite for
-[#913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913), the
+[#913], the
 public launch campaign. That campaign lists Instagram, Reddit, LinkedIn and
 travel communities in its scope, and none of the channels existed.
 
@@ -57,7 +57,7 @@ promoted:
 - Any campaign that says "find us on Instagram" without the handle sends traffic
   to them.
 - They write themselves **Bite Tribe**, with a space. Our own rule in
-  [[Implementation - Store Listing Assets]] is that the product is **BiteTribe**,
+  [Implementation - Store Listing Assets](store-listing-assets.md) is that the product is **BiteTribe**,
   one word, in prose. Following our own rule is therefore also the thing that
   distinguishes the two accounts at a glance. Do not let the spaced form creep
   into a profile display name.
@@ -164,12 +164,12 @@ Instagram already demonstrates.
 **Reddit is deliberately absent.** You do not set up a Reddit channel, you
 participate in existing communities, and a brand account posting into `r/food` or
 a city subreddit reads as spam and gets removed. That is outreach and belongs to
-[#913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913).
+[#913].
 
 ## Profile Content
 
 The same on every platform, so the accounts read as one brand. All of it is
-existing approved copy from [[Implementation - Store Listing Assets]]; none of it
+existing approved copy from [Implementation - Store Listing Assets](store-listing-assets.md); none of it
 is new marketing writing.
 
 | Field        | Value                                 |
@@ -188,7 +188,7 @@ candidate is worse: `BiteTribe` is the third repetition of the word in a
 four-line profile, and a call to action hides the domain we want remembered.
 
 **Display name is `BiteTribe`, one word.** This is the name spelling rule in
-[[Implementation - Store Listing Assets]] applied to a new surface, and here it
+[Implementation - Store Listing Assets](store-listing-assets.md) applied to a new surface, and here it
 does double duty as the thing that tells us apart from `Bite Tribe` on Instagram.
 The spaced form is correct in exactly two places, and neither of them is a social
 profile.
@@ -206,7 +206,7 @@ Where the limit is tighter, keep the tagline and trim the sentence rather than
 rewriting it. The sentence is the approved App Store promotional text and the web
 app's meta description, so it is already the claim the product makes everywhere
 else. Changing it means changing it in
-[[Implementation - Store Listing Assets]] first.
+[Implementation - Store Listing Assets](store-listing-assets.md) first.
 
 ### Per-Platform Bio Trims
 
@@ -295,7 +295,7 @@ Real dishes, photographed by those who ate them.
 
 **TikTok carries no link to `bitetribe.app`,** and cannot until 1,000 followers.
 This is the one acceptance criterion of
-[#1455](https://github.com/muhammedgaygisiz/travellers-apps/issues/1455) that a
+[#1455] that a
 platform refuses rather than we skipped. Revisit at 1k.
 
 ### Pinterest Is A Business Account
@@ -304,7 +304,7 @@ Registered through `pinterest.com/business/create/` rather than the consumer
 signup. Free, and unlike Instagram's business account it costs nothing - there is
 no music-library equivalent to lose. It is also the only one of the eight that
 takes our category as a first-class field: **Food and drink**, matching
-[[Implementation - Store Listing Assets]] exactly.
+[Implementation - Store Listing Assets](store-listing-assets.md) exactly.
 
 Onboarding answers, none of them load-bearing but all recorded so they are not
 re-guessed:
@@ -314,7 +314,7 @@ re-guessed:
 | Business type     | `Other` - we are a consumer app, and every other option mis-describes us |
 | Brand focus       | `Food and drink`                                                         |
 | Goals             | Drive traffic to your site, Grow brand awareness                         |
-| Interested in ads | Yes, consistent with keeping ads open for #913                           |
+| Interested in ads | Yes, consistent with keeping ads open for [#913]                         |
 
 `Other` was chosen deliberately: `Online merchant or marketplace` would steer
 Pinterest into product-catalogue tooling we cannot fill, and `Publisher or media`
@@ -437,10 +437,10 @@ said the quiet part:
 > Your ability to **advertise and monetise with ads** will be limited.
 
 That is a direct cost to
-[#913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913), which is
+[#913], which is
 a paid launch campaign. Crippling the ad account before the campaign starts buys
 less data processing on an account that publishes dish photos and browses
-nothing. Wrong trade. Both settings are reversible in Ad preferences, so if #913
+nothing. Wrong trade. Both settings are reversible in Ad preferences, so if [#913]
 turns out to be organic-only, switch then.
 
 **Check the Accounts Centre scope before agreeing.** The consent applies to every
@@ -479,8 +479,8 @@ on the dark ground produces a white rectangle.
 
 `apps/bite-tribe/src/index.html` carries
 `<meta name="twitter:site" content="@bitetribeapp" />`, added here rather than
-under [#1454](https://github.com/muhammedgaygisiz/travellers-apps/issues/1454)
-because #1454 had no handle to name.
+under [#1454]
+because [#1454] had no handle to name.
 
 The ordering risk it carried is closed: **`@bitetribeapp` on X was registered on
 2 September 2026**, so the tag resolves. Until it did, the tag named a handle
@@ -491,23 +491,23 @@ the attribution on our own link cards.
 
 - **Store listing social fields.** Both consoles have marketing and social URL
   fields that are blank; see the console-state tables in
-  [[Implementation - Store Listing Assets]]. They can be filled without shipping
+  [Implementation - Store Listing Assets](store-listing-assets.md). They can be filled without shipping
   a build.
 - **Claim `bitetribe.app` on Pinterest.** `pinterest.com/settings/claim/` takes a
   meta tag, an HTML file or a DNS TXT record. Claiming gives us attribution on
   every pin that originates from the site, and unlocks the analytics that make
   Pinterest worth doing at all. It needs a change to the web app, so it is real
   work rather than a console click - the meta tag would sit alongside the ones in
-  [[Implementation - Web Search And Social Metadata]].
+  [Implementation - Web Search And Social Metadata](web-search-and-social-metadata.md).
 - **Links from the web app.** Worth considering alongside the store QR codes in
-  [#1453](https://github.com/muhammedgaygisiz/travellers-apps/issues/1453),
+  [#1453],
   rather than as a separate pass over the same footer.
 
 ### Open: Instagram Account Type
 
 `bitetribeapp` is a **Personal** account. Deferred 2 September 2026, because it
 is a question about
-[#913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913)'s strategy
+[#913]'s strategy
 rather than about setup, and it is reversible either way.
 
 | Type     | Gains                                                                             | Costs                                        |
@@ -517,11 +517,11 @@ rather than about setup, and it is reversible either way.
 
 The music restriction is the part that is easy to miss and hard to undo mid
 campaign: a dish-first product lives on short video with trending audio, and a
-Business account cannot use it. Pick Creator if #913 is organic Reels and
-BiteTrails as short video, Business if #913 is mainly paid ads.
+Business account cannot use it. Pick Creator if [#913] is organic Reels and
+BiteTrails as short video, Business if [#913] is mainly paid ads.
 
 Until this is decided the profile carries no category, which is the one place
-where [[Implementation - Store Listing Assets]]'s `Food & Drink` identity is not
+where [Implementation - Store Listing Assets](store-listing-assets.md)'s `Food & Drink` identity is not
 yet reflected.
 
 ### Deliberately Not Done
@@ -529,14 +529,19 @@ yet reflected.
 - **Header and banner images.** X, YouTube and Facebook each want one, at three
   different aspect ratios with three different safe areas. The feature graphic is
   `1024x500` and none of them is, so producing them is a design pass rather than
-  asset reuse, and #1455 scoped itself to existing assets. The two primary
+  asset reuse, and [#1455] scoped itself to existing assets. The two primary
   platforms, Instagram and TikTok, have no header at all, so nothing is blocked.
 - **Localised bios.** The app speaks eleven languages; the accounts speak
   English, like both store listings do today.
 
 ## Related Pages
 
-- [[Implementation - Store Listing Assets]]
-- [[Implementation - Web Search And Social Metadata]]
-- [[Current State - Release State]]
-- [[Mission]]
+- [Implementation - Store Listing Assets](store-listing-assets.md)
+- [Implementation - Web Search And Social Metadata](web-search-and-social-metadata.md)
+- [Current State - Release State](../current-state/release-state.md)
+- [Mission](../product/mission.md)
+
+[#913]: https://github.com/muhammedgaygisiz/travellers-apps/issues/913
+[#1453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1453
+[#1454]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1454
+[#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455

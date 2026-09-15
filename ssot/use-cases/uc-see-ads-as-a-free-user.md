@@ -7,11 +7,11 @@
 Next to implement. Priority P1, post-launch. Nothing of it exists, and that absence is
 currently a declared fact rather than an omission: no AdMob, User Messaging Platform or App
 Tracking Transparency dependency appears in any `package.json`, and
-[[Implementation - Store Declarations]] answers the advertising question on both stores with
+[Implementation - Store Declarations](../implementation/store-declarations.md) answers the advertising question on both stores with
 "No AdMob dependency in `package.json`, no ad code in `libs/` or `apps/`". The tier this page
 divides on is a display mirror today - `subscriptionTier` gates nothing, as
-[[UC - Subscribe To BiteTribe Pro]] records - so "a Pro subscriber sees no ad" needs the
-entitlement of issue \#1126 before it can be enforced rather than merely drawn.
+[UC - Subscribe To BiteTribe Pro](uc-subscribe-to-bitetribe-pro.md) records - so "a Pro subscriber sees no ad" needs the
+entitlement of issue [#1126] before it can be enforced rather than merely drawn.
 
 ## Goal
 
@@ -21,9 +21,9 @@ This page owns the ad itself: the consent that must resolve before any request, 
 the feed, its placement rules, and the entitlement check that suppresses it. The advertiser
 whose inventory fills the card is external and holds no BiteTribe account, so nothing about
 buying or targeting that inventory is on this page. Which capabilities are sold and which are
-given away is [[Monetization]]; the subscription that switches ads off is
-[[UC - Subscribe To BiteTribe Pro]]; the feed the card is inserted into is
-[[UC - Discover Bites]].
+given away is [Monetization](../product/monetization.md); the subscription that switches ads off is
+[UC - Subscribe To BiteTribe Pro](uc-subscribe-to-bitetribe-pro.md); the feed the card is inserted into is
+[UC - Discover Bites](uc-discover-bites.md).
 
 ## Actors
 
@@ -51,22 +51,22 @@ given away is [[Monetization]]; the subscription that switches ads off is
 ## MVP Classification
 
 **[Secondary]** - the whole page. Priority P1 and post-launch by its own Status, and
-[[Current State - Roadmap]] puts the whole of [[Monetization]] there; nothing here is
+[Current State - Roadmap](../current-state/roadmap.md) puts the whole of [Monetization](../product/monetization.md) there; nothing here is
 strictly required for the initial release.
 
 Not on this page: buying or targeting the inventory, which is the advertiser's side and
 external to BiteTribe, and the subscription that removes the ad, which is
-[[UC - Subscribe To BiteTribe Pro]]'s.
+[UC - Subscribe To BiteTribe Pro](uc-subscribe-to-bitetribe-pro.md)'s.
 
 ## App Store Review Area
 
 Relevant, and more of it than anything else in this pass touches.
-[[Implementation - Store Declarations]] records four answers that this page makes false, each
+[Implementation - Store Declarations](../implementation/store-declarations.md) records four answers that this page makes false, each
 by name. The content-rating questionnaire answers Advertising "No" on the strength of there
 being no AdMob dependency, and that answer was part of what brought the calculated rating
 down. The privacy declarations say "Tracking - no, for everything. No AdMob, no ATT usage,
 and no `NSUserTrackingUsageDescription` in `Info.plist`", with the note that this is to be
-revisited with [[epic-1123]] because requesting the IDFA forces Device ID to be declared as
+revisited with [epic-1123](../github/epic-1123.md) because requesting the IDFA forces Device ID to be declared as
 used for tracking. Apple's App Tracking Transparency prompt and Google's Data safety form
 both then need the answers rewritten together, and the Boundary Conditions' hard gate - no ad
 request before consent resolves - is the behaviour those declarations would be describing.
@@ -77,33 +77,39 @@ Not implemented. There is no ad dependency in the workspace. The surfaces this w
 
 - `libs/bite-tribe/home/page` for the feed and the ad card
 - The Capacitor wrappers in `apps/bite-tribe-ios` and `apps/bite-tribe-android`
-- The consent surface, which overlaps issue \#989
+- The consent surface, which overlaps issue [#989]
 
 ## Related GitHub Scope
 
-- Issue \#1123 is the epic, AdMob advertising for free users, and stage 1 of the
-  monetization umbrella \#1121. Open
-- Issue \#542 is the native in-feed placement and carries the ordinal `04` within that epic.
+- Issue [#1123] is the epic, AdMob advertising for free users, and stage 1 of the
+  monetization umbrella [#1121]. Open
+- Issue [#542] is the native in-feed placement and carries the ordinal `04` within that epic.
   Open
-- Issue \#989, the GDPR consent mode and PII/retention review, is open and should produce one
+- Issue [#989], the GDPR consent mode and PII/retention review, is open and should produce one
   consent experience with this page rather than two
 
 ## Related Domains
 
-- [[Subscription]]
-- [[Bite]]
-- [[User]]
+- [Subscription](../domain/subscription.md)
+- [Bite](../domain/bite.md)
+- [User](../domain/user.md)
 
 ## Related Pages
 
-- [[Personas]] - the food lover on the free tier this page used to name as an actor
-- [[Monetization]] - the free and paid boundary, and the rule that ads are shown to free users
+- [Personas](../product/personas.md) - the food lover on the free tier this page used to name as an actor
+- [Monetization](../product/monetization.md) - the free and paid boundary, and the rule that ads are shown to free users
   only. A product page, not a domain
-- [[epic-1121]] - the monetization umbrella, which sequences the three revenue channels and
+- [epic-1121](../github/epic-1121.md) - the monetization umbrella, which sequences the three revenue channels and
   holds the product decisions the stage epics share
-- [[epic-1123]] - this page's stage epic
-- [[UC - Subscribe To BiteTribe Pro]] - the purchase that switches this off
-- [[UC - Discover Bites]] - the feed the ad card is inserted into
-- [[Implementation - Store Declarations]] - the advertising and tracking answers this page
+- [epic-1123](../github/epic-1123.md) - this page's stage epic
+- [UC - Subscribe To BiteTribe Pro](uc-subscribe-to-bitetribe-pro.md) - the purchase that switches this off
+- [UC - Discover Bites](uc-discover-bites.md) - the feed the ad card is inserted into
+- [Implementation - Store Declarations](../implementation/store-declarations.md) - the advertising and tracking answers this page
   makes false
-- [[Current State - Roadmap]] - where Monetization sits relative to launch
+- [Current State - Roadmap](../current-state/roadmap.md) - where Monetization sits relative to launch
+
+[#542]: https://github.com/muhammedgaygisiz/travellers-apps/issues/542
+[#989]: https://github.com/muhammedgaygisiz/travellers-apps/issues/989
+[#1121]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1121
+[#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
+[#1126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1126

@@ -25,10 +25,12 @@ Completing BiteTrails should create visible progress and reward moments.
 
 ## Related GitHub Scope
 
-- Issue \#770
+- Issue [#770]
 
 ## Related Domains
 
-- [[Bite Trail]]
-- [[Bucket List]]
-- [[User]]
+- [Bite Trail](../domain/bite-trail.md)
+- [Bucket List](../domain/bucket-list.md)
+- [User](../domain/user.md)
+
+[#770]: https://github.com/muhammedgaygisiz/travellers-apps/issues/770

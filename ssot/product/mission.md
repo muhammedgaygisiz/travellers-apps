@@ -4,7 +4,7 @@
 
 Mission states what BiteTribe does for people every day, who it does it for, and where it stops.
 
-It is the operational reading of [[Vision]]: Vision says what BiteTribe is trying to become, Mission says what the product must therefore do, and [[Principles]] turns that into decision rules for individual changes.
+It is the operational reading of [Vision](vision.md): Vision says what BiteTribe is trying to become, Mission says what the product must therefore do, and [Principles](principles.md) turns that into decision rules for individual changes.
 
 ## Why It Exists
 
@@ -24,16 +24,16 @@ Help people decide what to eat by showing them real dishes through the experienc
 
 ## Who We Serve
 
-Three audiences. [[Personas]] describes each one in full, including travelers and new users on the demand side and food curators on the creator side.
+Three audiences. [Personas](personas.md) describes each one in full, including travelers and new users on the demand side and food curators on the creator side.
 
 - **Food lovers** — people deciding what to eat, nearby or in a destination, through photos, reviews, prices, places, creators, and social proof.
-- **Bite creators** — people who share authentic food experiences, build trust through a public profile, and turn local food knowledge into curated journeys. See [[User]] and [[Bite Trail]].
-- **Restaurants and organisations** — businesses that benefit from authentic recommendations and maintain the restaurant, menu, and organisation context around them. See [[Restaurant]] and [[Market Place]].
+- **Bite creators** — people who share authentic food experiences, build trust through a public profile, and turn local food knowledge into curated journeys. See [User](../domain/user.md) and [Bite Trail](../domain/bite-trail.md).
+- **Restaurants and organisations** — businesses that benefit from authentic recommendations and maintain the restaurant, menu, and organisation context around them. See [Restaurant](../domain/restaurant.md) and [Market Place](../domain/market-place.md).
 
 ## Product Direction
 
 The fronts the product grows along, and the use cases grouped under them, live in
-[[Current State - Product Direction]]. [[Current State - Roadmap]] owns sequencing
+[Current State - Product Direction](../current-state/product-direction.md). [Current State - Roadmap](../current-state/roadmap.md) owns sequencing
 and dates.
 
 ## Strategic Boundary
@@ -44,22 +44,22 @@ and dates.
 
 ## Related Pages
 
-- [[Vision]]
-- [[Principles]]
-- [[Personas]]
-- [[Glossary]]
-- [[Monetization]]
-- [[ADR-0001 Dish First Product]]
-- [[Bite]]
-- [[User]]
-- [[Restaurant]]
-- [[Bucket List]]
-- [[Bite Trail]]
-- [[Market Place]]
+- [Vision](vision.md)
+- [Principles](principles.md)
+- [Personas](personas.md)
+- [Glossary](glossary.md)
+- [Monetization](monetization.md)
+- [ADR-0001 Dish First Product](../decisions/adr-0001-dish-first-product.md)
+- [Bite](../domain/bite.md)
+- [User](../domain/user.md)
+- [Restaurant](../domain/restaurant.md)
+- [Bucket List](../domain/bucket-list.md)
+- [Bite Trail](../domain/bite-trail.md)
+- [Market Place](../domain/market-place.md)
 
 ## Sources Used
 
-- [[Vision]]
-- [[Glossary]]
-- Use Cases section in [[SSOT]]
-- Epics section in [[SSOT]]
+- [Vision](vision.md)
+- [Glossary](glossary.md)
+- Use Cases section in [SSOT](../README.md)
+- Epics section in [SSOT](../README.md)

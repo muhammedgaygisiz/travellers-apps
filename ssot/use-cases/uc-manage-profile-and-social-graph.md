@@ -5,7 +5,7 @@
 **Level:** L0.
 Supported today. Profile view and edit, public profiles, follow and unfollow with their
 lists, the visibility choice, and the two identity contracts below all ship. Onboarding
-has collected an optional home city since \#1271, so a profile without one stays the
+has collected an optional home city since [#1271], so a profile without one stays the
 normal case.
 
 ## Goal
@@ -28,23 +28,23 @@ signed-in account, and the follow relation.
 - Profile identity is used in search and Bite trust context.
 - Profile Bites are always listed newest first. The profile is a timeline of what
   a user cooked or ate, so it ignores the distance sorting and the my-bites
-  filters. See [[issue-1118]].
+  filters. See [issue-1118](../github/issue-1118.md).
 - While a profile loads, the page shows a skeleton in the shape of the loaded
   profile instead of the field fallbacks. Placeholder values such as the FREE
   badge must never be shown for a profile that has not arrived yet, because the
   user reads them as facts about that person. The "profile not available"
   message stays reserved for a profile that finished loading without data. See
-  GitHub issue #1166. The "no location" placeholder this rule also named is
+  GitHub issue [#1166]. The "no location" placeholder this rule also named is
   gone; see the identity contract below.
 - The signed-in user's own personal profile states whether it is public or
   private and leads from there to the visibility switch in profile edit. Saved
   visibility is a privacy fact the user must be able to read off the profile
   itself rather than confirm by opening the edit form. A profile with no saved
-  choice reads as private. See GitHub issue #1188.
+  choice reads as private. See GitHub issue [#1188].
 
 ## Profile Identity Contract
 
-Issue [#1270](https://github.com/muhammedgaygisiz/travellers-apps/issues/1270)
+Issue [#1270]
 stopped the profile repeating itself. The header carries the display name and
 the line under it carries what the display name does not say — a real name, a
 city — so that line only earns its space when it has something of its own.
@@ -67,7 +67,7 @@ city — so that line only earns its space when it has something of its own.
   announced missing data for something the app did not ask for at the time, which
   reads as a fact about that person rather than as an unfilled optional field.
   With neither a distinct real name nor a city the line is not rendered at all.
-- Onboarding was the product half of this and shipped as issue #1271, which added
+- Onboarding was the product half of this and shipped as issue [#1271], which added
   an optional home city step. Optional is the operative word: a profile with no
   city is still the ordinary case, so this contract still governs what is
   rendered when there is none.
@@ -75,10 +75,10 @@ city — so that line only earns its space when it has something of its own.
 ## Account Identity In The Menu
 
 Issue
-[#1260](https://github.com/muhammedgaygisiz/travellers-apps/issues/1260) moved
+[#1260] moved
 the answer to "who am I signed in as" out of the profile page and into the app
 menu. Release-candidate Run 5 could not name the account it was testing with
-without leaving the menu, and pull request #1240 had already established that the
+without leaving the menu, and pull request [#1240] had already established that the
 app should name the account before consequential actions, by identifying it in the
 deletion flow; knowing who you are is the same question asked earlier.
 
@@ -108,14 +108,14 @@ deletion flow; knowing who you are is the same question asked earlier.
   someone outside the app.
 - Sharing is a Bite capability. Making profiles shareable would be a new product
   decision with its own privacy handling, not a completion of existing work. See
-  [[issue-1190]] and [[UC - Inspect Bite Details]].
+  [issue-1190](../github/issue-1190.md) and [UC - Inspect Bite Details](uc-inspect-bite-details.md).
 
 ## MVP Classification
 
 **[MVP]** — profile view and edit, public profiles, the public/private visibility choice
 readable off the profile itself, the loading skeleton that withholds placeholder facts, and
 both identity contracts. Visibility is a privacy control the product offers, so getting
-identity wrong here is the \#1308 class of defect rather than polish.
+identity wrong here is the [#1308] class of defect rather than polish.
 
 **[Secondary]** — the social graph: follow and unfollow, and the follower and following
 lists. Shipped, but the contribution loop does not depend on it for the initial release.
@@ -124,8 +124,8 @@ lists. Shipped, but the contribution loop does not depend on it for the initial 
 
 Relevant. The public/private profile is a privacy control, and the profile photo uses the
 photo library — the permission itself is collected in onboarding rather than here, see
-[[UC - Guide New Users After Registration]]. The identity data this page renders is covered
-by the name, photo and user-ID entries declared in [[Implementation - Store Declarations]].
+[UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md). The identity data this page renders is covered
+by the name, photo and user-ID entries declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
 ## Supported Evidence
 
@@ -140,16 +140,24 @@ by the name, photo and user-ID entries declared in [[Implementation - Store Decl
 
 ## Related Domains
 
-- [[User]]
-- [[Bite]]
+- [User](../domain/user.md)
+- [Bite](../domain/bite.md)
 
 ## Related Pages
 
-- [[Personas]] — the audiences this page serves: Food lover, Bite creator, and the
+- [Personas](../product/personas.md) — the audiences this page serves: Food lover, Bite creator, and the
   privacy-conscious participant the visibility choice exists for
-- [[UC - Inspect Bite Details]] — the same two-names confusion on a surface that publishes
-- [[UC - Guide New Users After Registration]] — where the photo and location permissions
+- [UC - Inspect Bite Details](uc-inspect-bite-details.md) — the same two-names confusion on a surface that publishes
+- [UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md) — where the photo and location permissions
   are collected
-- [[issue-1118]]
-- [[issue-1190]]
-- [[Implementation - Store Declarations]]
+- [issue-1118](../github/issue-1118.md)
+- [issue-1190](../github/issue-1190.md)
+- [Implementation - Store Declarations](../implementation/store-declarations.md)
+
+[#1166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1166
+[#1188]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1188
+[#1240]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1240
+[#1260]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1260
+[#1270]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1270
+[#1271]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1271
+[#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308

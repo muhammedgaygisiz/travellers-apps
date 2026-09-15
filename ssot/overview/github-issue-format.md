@@ -11,7 +11,7 @@ It exists because the format was previously only implicit. Forty `issue-*` pages
 This page governs **GitHub issues**, and only issues.
 
 - **Epics are excluded.** An `epic-*` page keeps its own shape.
-- **Use cases are excluded.** A `UC - *` page has its own format, defined in [[Use Case Format]], with its flow notation in [[Actogram Format]].
+- **Use cases are excluded.** A `UC - *` page has its own format, defined in [Use Case Format](use-case-format.md), with its flow notation in [Actogram Format](actogram-format.md).
 - **It applies to issues created from 4 September 2026 onward.** Existing issues are not retrofitted. Updating an existing issue does not change its structure either: an issue keeps the shape it was filed with for its whole life, and only its content is edited.
 - **The SSOT mirror page is a different artefact.** `issue-*` pages in this graph are Logseq outline blocks, not `##` headings, and they carry context the GitHub issue does not. See Status And The Mirror Page.
 
@@ -84,7 +84,7 @@ For a defect or a change already implemented. **The user-story form is not used.
 
 `[ ] Glossary updated`, `[ ] Decision made` and `[ ] Rationale documented` are not acceptance criteria. They are process.
 
-A decision that has not yet been taken belongs in [[Current State - Open Questions]], not in an acceptance criterion.
+A decision that has not yet been taken belongs in [Current State - Open Questions](../current-state/open-questions.md), not in an acceptance criterion.
 
 ### The Use-Case Assertion
 
@@ -103,13 +103,13 @@ Two limits:
 - **It applies only where such a marker exists.** An issue that closes nothing marked in a use case carries no criterion of this kind, and no issue invents a marker in order to have one.
 - **Where two issues together close one marker**, because the rule states both halves, the criterion belongs on the issue that lands second. The first names the half it delivers in its traceability sentence instead.
 
-The same form applies to deletion. Where an issue removes the code behind a use case marked `[Obsolete]` ([[Use Case Format]] `UF-21`), the **last** acceptance criterion asserts the page is gone:
+The same form applies to deletion. Where an issue removes the code behind a use case marked `[Obsolete]` ([Use Case Format](use-case-format.md) `UF-21`), the **last** acceptance criterion asserts the page is gone:
 
 ```text
 - [ ] `UC - <name>` is deleted, with its entry removed from [[SSOT]] and the use-case code registry.
 ```
 
-The deletion itself is defined by [[Use Case Format]] `UF-23`; the criterion only makes it checkable from the issue.
+The deletion itself is defined by [Use Case Format](use-case-format.md) `UF-23`; the criterion only makes it checkable from the issue.
 
 This is the one exception to the rule that traceability is not recorded in the issue body. It records a _contract_, not a cross-reference: the cross-reference still belongs on the use-case page.
 
@@ -121,7 +121,7 @@ If Apple or Google requirements are relevant, name which: permission, privacy nu
 
 If they are not, write "not relevant, because ...". A missing section reads as "not yet considered" rather than as "considered and cleared".
 
-See [[Implementation - Store Declarations]] and [[Implementation - Store Listing Assets]] for the declarations an answer here has to match.
+See [Implementation - Store Declarations](../implementation/store-declarations.md) and [Implementation - Store Listing Assets](../implementation/store-listing-assets.md) for the declarations an answer here has to match.
 
 ## Related Issues
 
@@ -133,11 +133,11 @@ A link states its kind, using one of three forms, in this order:
 
 On GitHub, use `#1234`. On the SSOT mirror page, use `[[issue-1234]]`.
 
-Domain, use-case, epic and architecture traceability is not recorded here. It belongs on the use-case page, in its `Related GitHub Scope` section, which [[Use Case Format]] `UF-4` requires and never omits from L1 up (optional while a page is still at `L0`).
+Domain, use-case, epic and architecture traceability is not recorded here. It belongs on the use-case page, in its `Related GitHub Scope` section, which [Use Case Format](use-case-format.md) `UF-4` requires and never omits from L1 up (optional while a page is still at `L0`).
 
 ## Status And The Mirror Page
 
-**Status, priority and type live on the board, not in the issue body.** Do not write `Status:` or `Priority:` lines into a GitHub issue. GitHub's own issue state and the board fields serve that purpose. See [[GitHub Project Board And Issue Handling]] for the board, the fields, the label vocabulary and the commands.
+**Status, priority and type live on the board, not in the issue body.** Do not write `Status:` or `Priority:` lines into a GitHub issue. GitHub's own issue state and the board fields serve that purpose. See [GitHub Project Board And Issue Handling](github-project-board-and-issue-handling.md) for the board, the fields, the label vocabulary and the commands.
 
 **An SSOT `issue-*` page may carry a `Status` section, and a GitHub issue may not.** The mirror page is written after the fact and its `Status` states what the page is - for example "Implemented. This page records the agreed specification the implementation was built against." That is a statement about the document, not a board field, and it has no equivalent in the issue body.
 
@@ -152,7 +152,7 @@ The classification is recorded on the board as `Priority`, not in the issue body
 | `[MVP]`        | `P0`                             |
 | `[Secondary]`  | `P1` to `P4`, by the scale below |
 
-`P0` is MVP: launch-critical, and a decision with a named consequence rather than an observation, as [[GitHub Project Board And Issue Handling]] defines it. `P1` is what should be done immediately after MVP. `P2` is relevant, but the software works without it. `P3` is relevant in the future. `P4` is close to irrelevant. `P5` is unused.
+`P0` is MVP: launch-critical, and a decision with a named consequence rather than an observation, as [GitHub Project Board And Issue Handling](github-project-board-and-issue-handling.md) defines it. `P1` is what should be done immediately after MVP. `P2` is relevant, but the software works without it. `P3` is relevant in the future. `P4` is close to irrelevant. `P5` is unused.
 
 ## Before Filing
 
@@ -160,8 +160,8 @@ Search for an existing issue on the same subject and link it rather than duplica
 
 ## Related Pages
 
-- [[GitHub Project Board And Issue Handling]]
-- [[Feature Delivery Workflow]]
-- [[Spec To Code Workflow]]
-- [[Agent Operating Contract]]
-- [[Current State - Open Questions]]
+- [GitHub Project Board And Issue Handling](github-project-board-and-issue-handling.md)
+- [Feature Delivery Workflow](feature-delivery-workflow.md)
+- [Spec To Code Workflow](spec-to-code-workflow.md)
+- [Agent Operating Contract](agent-operating-contract.md)
+- [Current State - Open Questions](../current-state/open-questions.md)

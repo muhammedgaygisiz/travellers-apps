@@ -30,7 +30,7 @@ Two consequences. A disabled **native** collection flag silences the app's own
 events on a device, not only the auto-collected ones. And an event sent through
 the JS SDK from a native platform lands on a different measurement path than
 every other event the same device produces, which is what `exception` did until
-[[issue-1387]].
+[issue-1387](../github/issue-1387.md).
 
 ## Collection Flag Rule
 
@@ -49,7 +49,7 @@ window flag that nothing persists and would eagerly initialize web analytics for
 apps that never asked for it.
 
 The general rule: a dev-only branch may not leave persistent native state that
-no production path asserts back. See [[issue-1387]] for what one unbalanced
+no production path asserts back. See [issue-1387](../github/issue-1387.md) for what one unbalanced
 call cost.
 
 ## Common Events
@@ -93,7 +93,7 @@ it already was.
 
 Before issue 1098 the guard was per app: the whole service returned early in
 the business app, because every event it knew belonged to the consumer one. The
-table operations of [[epic-1071]] are the first events the business app owns.
+table operations of [epic-1071](../github/epic-1071.md) are the first events the business app owns.
 
 ## One Property, Two Apps
 
@@ -108,10 +108,10 @@ Those carry no event name that distinguishes them, so both apps set the
 user-scoped property `app_surface` (`consumer` / `business`) before their first
 event. It is set from both now even though nothing filters on it yet: GA4 does
 not backfill, and a filter added later over traffic that never carried the
-property would exclude nothing. See [[Implementation - Analytics Events]] for
+property would exclude nothing. See [Implementation - Analytics Events](../implementation/analytics-events.md) for
 what still has to be filtered.
 
-See [[Implementation - Analytics Events]] for the full parameter table, the
+See [Implementation - Analytics Events](../implementation/analytics-events.md) for the full parameter table, the
 launch dashboard spec, and DebugView verification steps.
 
 ## Code Anchors

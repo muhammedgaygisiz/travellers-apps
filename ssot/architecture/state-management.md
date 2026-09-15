@@ -50,7 +50,7 @@ The same substring style is still used elsewhere in the store, listed under Curr
 
 The consequence is that every server-maintained aggregate on that document is stale in the client the moment a trigger writes it: `biteCount` from `incrementBiteCountOnBiteCreate` and `decrementBiteCountOnBiteDelete`, and the follower counters. The server value itself is not late — the trigger commits within seconds — which is why only an app restart used to repair the count.
 
-Aggregates the user moves themselves are therefore corrected optimistically in the reducer, because the delta is exact and the next login reconciles it: followers on `followedUser`/`unfollowedUser`, and `biteCount` on `createdBite`/`deletedBite`. A profile with no aggregate at all is left alone so the view keeps counting what it loaded. See [issue \#1310](https://github.com/muhammedgaygisiz/travellers-apps/issues/1310).
+Aggregates the user moves themselves are therefore corrected optimistically in the reducer, because the delta is exact and the next login reconciles it: followers on `followedUser`/`unfollowedUser`, and `biteCount` on `createdBite`/`deletedBite`. A profile with no aggregate at all is left alone so the view keeps counting what it loaded. See [issue [#1310]][#1310].
 
 Anything reading such an aggregate should treat it as a lower bound rather than as truth when it has a fully loaded list to compare against. Drift from a source that is not the user's own action — the weekly `resyncBiteCounts` job, a write from another device — is only reconciled at the next login, which is the accepted trade for not holding the listener.
 
@@ -60,7 +60,7 @@ An NgRx entity adapter does not compare values. `updateManyMutably` treats every
 
 That is invisible until a selector chain hangs off the slice. `bitesWithMetadata` joins the likes onto every Bite and returns rebuilt Bites, so a new `likes` array gives every Bite in the feed a new identity, and every card bound to one re-renders. Loading the same likes twice therefore re-rendered the entire feed.
 
-The cost was not theoretical. Opening a Bite runs `seedUserLikes`, which re-loads likes the store usually already had, and on-device profiling of the feed that followed put **87% of all busy JS main-thread time** inside that single dispatch, with **470 minor garbage collections inside one 1971 ms animation frame** — roughly three seconds during which the app did not respond to touch. See [issue \#1357](https://github.com/muhammedgaygisiz/travellers-apps/issues/1357).
+The cost was not theoretical. Opening a Bite runs `seedUserLikes`, which re-loads likes the store usually already had, and on-device profiling of the feed that followed put **87% of all busy JS main-thread time** inside that single dispatch, with **470 minor garbage collections inside one 1971 ms animation frame** — roughly three seconds during which the app did not respond to touch. See [issue [#1357]][#1357].
 
 **A reducer handling a load-style action must return `state` itself when the payload changes nothing.** The likes reducer compares each incoming like against the entity already stored and only calls `upsertMany` when at least one differs.
 
@@ -76,7 +76,7 @@ The backend had the list already. `loadBitesByLocation` knows who is asking and 
 
 **When the client fans out reads to answer a question about a list it has just been given, the question belongs to whoever produced the list.** The client should be seeding state from a payload, not assembling a read model.
 
-The trade is that the producer pays a read per item it returns, so this only holds where the result set is bounded. `loadBitesByLocation` returns every Bite within its radius, which is 440 for a single position, and that is the open problem in [issue \#1294](https://github.com/muhammedgaygisiz/travellers-apps/issues/1294).
+The trade is that the producer pays a read per item it returns, so this only holds where the result set is bounded. `loadBitesByLocation` returns every Bite within its radius, which is 440 for a single position, and that is the open problem in [issue [#1294]][#1294].
 
 **The likes slice is legacy.** It survives for the feeds that do not carry likes — latest Bites, restaurant Bites, weekly Bites — and to hold optimistic writes while a like is being saved. Work that would extend it should move the logic to the backend instead, following the pattern above, rather than adding another client-side read model.
 
@@ -96,13 +96,18 @@ apps/bite-tribe-firebase/functions/src/functions/bites/load-bites-by-location.ts
 ## Current Limitations
 
 - Some newer feature data uses Angular resources directly, while older/shared flows use NgRx.
-- Store and resource boundaries should remain explicit so features do not duplicate remote state ownership. NgRx 22 (issue #1037) adds resource extensions to `@ngrx/signals`, which is the first release that offers a shared home for both sides of that split; the package is installed but not yet used anywhere.
+- Store and resource boundaries should remain explicit so features do not duplicate remote state ownership. NgRx 22 (issue [#1037]) adds resource extensions to `@ngrx/signals`, which is the first release that offers a shared home for both sides of that split; the package is installed but not yet used anywhere.
 - `@ngrx/component-store` is a declared dependency with no import in the workspace.
 - `bites/effects.ts`, `bites/reducer.ts`, `reviews/effects.ts`, `app/effects.ts`, `app/utils/is-profile-page.ts`, and `bucketlists/utils/should-load-bucketlists.ts` still decide on `url.includes(...)`. Each one can be fooled by an id or a name that contains the word it looks for, in the way described under Route-Driven Effects; the restaurant and menu effects have been moved to route parameters, the rest have not.
 - The likes slice is legacy, as described under Derived Read Models Belong On The Server. It is still the source for feeds that do not carry likes and for optimistic like writes, but new work should move the read model to the backend rather than extend it.
 - `bitesWithMetadata` rebuilds every Bite it returns, so any slice it depends on — bites, latest bites, likes, GPS position — re-renders the whole feed when its identity changes. Reducers feeding it are bound by the contract under A Reducer That Changes Nothing Must Return The Same State.
-- Shared selectors must not assume both apps fill the same slices. The bites slice is only populated in the consumer app, so `restaurantToCreate` resolves Bite evidence from the store first and falls back to the Bites carried on the selection itself, which is how the business app passes restaurant-candidate evidence. See [[issue-1117]].
+- Shared selectors must not assume both apps fill the same slices. The bites slice is only populated in the consumer app, so `restaurantToCreate` resolves Bite evidence from the store first and falls back to the Bites carried on the selection itself, which is how the business app passes restaurant-candidate evidence. See [issue-1117](../github/issue-1117.md).
 
 ## Related Pages
 
-- [[Implementation - Performance Guidelines]]
+- [Implementation - Performance Guidelines](../implementation/performance-guidelines.md)
+
+[#1037]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1037
+[#1294]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1294
+[#1310]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1310
+[#1357]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1357

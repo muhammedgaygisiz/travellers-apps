@@ -1,6 +1,6 @@
 # Actogram Format
 
-Companion page: [[Use Case Format]] — this page defines the actogram itself;
+Companion page: [Use Case Format](use-case-format.md) — this page defines the actogram itself;
 that page defines the use-case page that contains one.
 
 ## Purpose
@@ -32,17 +32,17 @@ that is not built is recorded as a rule, not as a step.
 An actogram consists of exactly these elements. An agent producing an actogram is
 producing instances of this model.
 
-| Element            | Fields                                                                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **Aggregate**      | name; the set of states it can be left in; the collections it lives in                                                                |
-| **Lane**           | code; kind (`actor` \| `system` \| `external`); binding (a role from [[User Roles]], a named function or app, or a named third party) |
-| **Step**           | id; lane; action; locus; effects[]; perceptions[]; basis (decision steps); annotations[]; exactly one exit                            |
-| **Effect**         | target lane; what this step causes there                                                                                              |
-| **Perception**     | actor lane; what that actor sees, reads or is told                                                                                    |
-| **Branch**         | condition; target (step id or terminal id); direction (forward or loop)                                                               |
-| **Terminal state** | id; kind; aggregate state; perception; meaning                                                                                        |
-| **Reference**      | referenced use-case id; the guarantee that use case owes at this step                                                                 |
-| **Invariant link** | rule id; whether the step upholds or violates it                                                                                      |
+| Element            | Fields                                                                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Aggregate**      | name; the set of states it can be left in; the collections it lives in                                                                                        |
+| **Lane**           | code; kind (`actor` \| `system` \| `external`); binding (a role from [User Roles](../product/user-roles.md), a named function or app, or a named third party) |
+| **Step**           | id; lane; action; locus; effects[]; perceptions[]; basis (decision steps); annotations[]; exactly one exit                                                    |
+| **Effect**         | target lane; what this step causes there                                                                                                                      |
+| **Perception**     | actor lane; what that actor sees, reads or is told                                                                                                            |
+| **Branch**         | condition; target (step id or terminal id); direction (forward or loop)                                                                                       |
+| **Terminal state** | id; kind; aggregate state; perception; meaning                                                                                                                |
+| **Reference**      | referenced use-case id; the guarantee that use case owes at this step                                                                                         |
+| **Invariant link** | rule id; whether the step upholds or violates it                                                                                                              |
 
 A step's **class is derived, not declared**: a step on an `actor` lane is an
 _interaction step_; a step on a `system` or `external` lane is a _mechanism step_.
@@ -100,7 +100,7 @@ several entries. A page with one entry uses one prefix.
 - **AF-2** Lanes MUST be declared before the first step, each with a code, a kind and a
   binding.
 - **AF-3** Lane codes MUST come from the vocabulary below. An `actor` lane MUST bind to a
-  role defined in [[User Roles]]. A page MUST NOT invent an actor lane.
+  role defined in [User Roles](../product/user-roles.md). A page MUST NOT invent an actor lane.
 - **AF-4** An actogram MUST contain at least one interaction step. A flow with no actor
   is a mechanism; it is written under `### Mechanism` inside the use case whose actor
   causes it, and it is not called an actogram.
@@ -138,7 +138,7 @@ lands, and folding it into `UI` makes those questions invisible.
 - **AF-11** Step ids MUST be unique within the page and MUST NOT be renumbered or reused.
   A removed step's id is retired. A step inserted between `V7` and `V8` is `V7a`.
 - **AF-12** Every step SHOULD name its locus with `@` — route, component, callable or
-  trigger. At L3 (see [[Use Case Format]]) it MUST.
+  trigger. At L3 (see [Use Case Format](use-case-format.md)) it MUST.
 - **AF-13** A step whose code does not exist MUST carry `[not implemented]` and an
   `INV: … is VIOLATED here` line naming a rule marked _Intended, not met_.
 - **AF-14** Semantics of a written field or document belong in a rule, not in an effect
@@ -289,7 +289,7 @@ automated check.
 | 14  | ⚙ Every `[decision]` step has a `BASIS:` line and no locus                                                                  | AF-19, AF-20 |
 | 15  | ⚙ Every `[not implemented]` step has an `INV: … is VIOLATED here` line                                                      | AF-13        |
 | 16  | ⚙ Every `INV:` names a rule in `Rules And Invariants`                                                                       | AF-33        |
-| 17  | ⚙ Every `REF:` names a use-case code in the registry in [[Use Case Format]]                                                 | AF-30        |
+| 17  | ⚙ Every `REF:` names a use-case code in the registry in [Use Case Format](use-case-format.md)                               | AF-30        |
 | 18  | ⚙ Every `Scope` out-of-scope row names an attachment point                                                                  | AF-30        |
 | 19  | ⚙ Every run of ≥2 mechanism steps sits under a `### Mechanism` heading                                                      | AF-21        |
 | 20  | ⚙ At L3, every step has an `@` locus                                                                                        | AF-12        |
@@ -368,7 +368,7 @@ because it deletes without an actor.
 
 ## Related Pages
 
-- [[Use Case Format]]
-- [[User Roles]]
-- [[Glossary]]
-- [[Agent Operating Contract]]
+- [Use Case Format](use-case-format.md)
+- [User Roles](../product/user-roles.md)
+- [Glossary](../product/glossary.md)
+- [Agent Operating Contract](agent-operating-contract.md)

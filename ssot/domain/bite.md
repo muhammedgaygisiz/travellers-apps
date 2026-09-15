@@ -31,20 +31,20 @@ A good Bite makes one concrete dish understandable enough that another person ca
 - A tag typed on the Bite form is committed by a delimiter, by Enter, by
   leaving the field, and by submitting the form. The field is live state that
   nothing else drains, so a tag left in it used to be posted as nothing at all.
-  See issue \#1391 and [[issue-1391]].
+  See issue [#1391] and [issue-1391](../github/issue-1391.md).
 - A Bite can be liked, but not by its own creator. On their own Bite the
   creator still sees the reaction chip, as a read-only label rather than a
   control, and it is left out entirely while the Bite has no reactions yet. See
-  [[issue-1401]].
+  [issue-1401](../github/issue-1401.md).
 - A Bite can be reviewed.
 - A review can be answered. A root review opens a thread, any authenticated user
   may reply inside it, and replies are one level deep. A new root review is a new
-  conversation, not a continuation of an existing one. See [[issue-1283]].
+  conversation, not a continuation of an existing one. See [issue-1283](../github/issue-1283.md).
 - A Bite can be added to bucket lists.
 - A Bite can be part of BiteTrail-based journeys.
 - A Bite is the only entity with a public share link and a native deep link
   (`/s/bite/*`). Users, bucket lists, restaurants, and BiteTrails are not
-  shareable. See [[issue-1190]].
+  shareable. See [issue-1190](../github/issue-1190.md).
 - A Bite should have an image because the image is a core trust signal.
 - Deleting a Bite currently deletes the Firestore document and attempts to delete its stored image.
 - Deleting a Bite must decrement the creator's `biteCount` aggregate because Bite creation increments it.
@@ -52,7 +52,7 @@ A good Bite makes one concrete dish understandable enough that another person ca
   operator path is `deleteBiteAsOperator`, it requires the `admin` role and a
   short reason, and it exists so content that has to come down — abusive,
   illegal, or simply not food — has a removal path short of the Firebase
-  console. See [[UC - Operate BiteTribe In The Admin App]] and issue \#1475.
+  console. See [UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md) and issue [#1475].
 - **An operator removal is a delete, not a hide.** There is no `hidden` field
   and no tombstone: hiding would need a flag respected by every read path, and
   every read path is the expensive part. The cost accepted in exchange is that a
@@ -169,7 +169,7 @@ Current implementation notes:
 - The Bite page warns users when the entered price looks suspiciously high.
 - Uploaded Bite images are stored below `images/bites/{biteId}/{filename}`.
 - `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized.
-- A photo upload that fails is offered back to the poster as a retry, but only when the device reports a connection. Offline the failed tile says so instead, because a retry started with no network cannot upload and only earns the poster another thirty-second stall before the same failure. `BiteImageStatusComponent` owns that rule for every surface that shows a Bite photo. See [[issue-1390]].
+- A photo upload that fails is offered back to the poster as a retry, but only when the device reports a connection. Offline the failed tile says so instead, because a retry started with no network cannot upload and only earns the poster another thirty-second stall before the same failure. `BiteImageStatusComponent` owns that rule for every surface that shows a Bite photo. See [issue-1390](../github/issue-1390.md).
 - The current delete flow removes the Bite document and attempts to remove the image file.
 - The operator delete removes children and references first and the Bite document **last**. Every read path resolves through the document, so while it exists the Bite is still findable and a failed run is a retry; the other way round, a failure halfway would leave an image, a set of likes and a pile of reviews with no document left to reach them from. `deleteOwnAccount` orders its cascade the same way and for the same reason.
 - The operator delete unions two sources for the image: everything under `images/bites/{biteId}/` — which catches the object an edited Bite replaced, since each upload is a fresh UUID under one prefix — and the object `imagePath` names, added unconditionally so the one image whose survival would be visible does not depend on the listing succeeding.
@@ -191,8 +191,8 @@ Current product expectation:
 - Admin
   - Delete any Bite, through `deleteBiteAsOperator` with a reason. This is the one modeled operator capability over a Bite.
   - Editing somebody else's Bite is deliberately not one: an operator can remove a Bite or leave it, and nothing in between.
-  - Hiding, tombstoning and notifying the author are out of scope by decision, not by omission. See [[epic-1471]].
-  - The report queue that would surface the Bites needing removal belongs to [[epic-1284]].
+  - Hiding, tombstoning and notifying the author are out of scope by decision, not by omission. See [epic-1471](../github/epic-1471.md).
+  - The report queue that would surface the Bites needing removal belongs to [epic-1284](../github/epic-1284.md).
 
 ## Use Cases
 
@@ -298,13 +298,13 @@ images/bites/{biteId}/{filename}
 - Historical behavior for deleted Bites needs a clearer product rule.
 - Counter aggregates must stay symmetric across create/delete lifecycles. If a future aggregate increments when a Bite, like, review, or related counted document is created, add the matching decrement behavior when that counted document can be deleted.
 - Older Bite documents may not have like aggregate fields. Like-count triggers migrate missing `thumbup`, `drooling`, and `mindblown` fields by recomputing counts from the Bite's `likes` subcollection before applying ongoing delta maintenance.
-- The like aggregates are eventually consistent, so the client cannot treat them as the only source for the displayed reaction counter. A reaction the client already knows about - an own reaction written optimistically, or an old Bite whose aggregates were never migrated - is not yet reflected in `thumbup`, `drooling`, or `mindblown`, and issue \#1165 showed the counter dropping to the empty chip on the Bite details and restaurant pages while the reaction chip was already rendered as liked. `getLikeCount` in `libs/bite-tribe-common/bite/src/lib/utils/like-counts.ts` therefore takes the higher of the aggregate and the loaded `likes` per like type. Reading only the aggregate field is a regression.
+- The like aggregates are eventually consistent, so the client cannot treat them as the only source for the displayed reaction counter. A reaction the client already knows about - an own reaction written optimistically, or an old Bite whose aggregates were never migrated - is not yet reflected in `thumbup`, `drooling`, or `mindblown`, and issue [#1165] showed the counter dropping to the empty chip on the Bite details and restaurant pages while the reaction chip was already rendered as liked. `getLikeCount` in `libs/bite-tribe-common/bite/src/lib/utils/like-counts.ts` therefore takes the higher of the aggregate and the loaded `likes` per like type. Reading only the aggregate field is a regression.
 - Reviews and their replies share the `/reviews` collection. A reply carries
   `parentReviewId` and `threadId`, so `loadReviewsByBiteId` stays one equality
   query per Bite and the grouping into threads happens on the client, in
   `toReviewThreads`. The read still has no `orderBy`; ordering is applied to the
   loaded set instead, which keeps the query unindexed and puts the rule in one
-  tested place. See [[issue-1283]].
+  tested place. See [issue-1283](../github/issue-1283.md).
 - Reviews written before `authorId` was declared on the `Review` interface —
   `saveNewReview` has always written it — cannot be attributed to a user.
   Notification fan-out skips them rather than failing, and the gap self-heals as
@@ -321,7 +321,7 @@ images/bites/{biteId}/{filename}
   `loadReviewsByBiteId` build it the same way, so it is self-consistent; only
   the two notification triggers unpick it, with `split('/').pop()`. Not a
   legacy shape — it is what every review write produces today.
-- Guest permissions and admin moderation are not clearly expressed as current Bite-domain capabilities. [[epic-1284]] owns closing that gap for review threads.
+- Guest permissions and admin moderation are not clearly expressed as current Bite-domain capabilities. [epic-1284](../github/epic-1284.md) owns closing that gap for review threads.
 
 ## Future Ideas
 
@@ -337,8 +337,12 @@ images/bites/{biteId}/{filename}
 
 ## Sources Used
 
-- [[Mission]]
-- [[Principles]]
-- [[Glossary]]
-- Use Cases section in [[SSOT]]
-- [[Personas]]
+- [Mission](../product/mission.md)
+- [Principles](../product/principles.md)
+- [Glossary](../product/glossary.md)
+- Use Cases section in [SSOT](../README.md)
+- [Personas](../product/personas.md)
+
+[#1165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1165
+[#1391]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1391
+[#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475

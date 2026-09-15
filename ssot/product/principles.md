@@ -2,8 +2,8 @@
 
 ## Purpose
 
-Principles are the decision rules for individual changes. They turn [[Vision]] and
-[[Mission]] into a test that can be applied to one pull request, one feature, or
+Principles are the decision rules for individual changes. They turn [Vision](vision.md) and
+[Mission](mission.md) into a test that can be applied to one pull request, one feature, or
 one design choice.
 
 Mission says what BiteTribe does and where it stops. Principles say how to choose
@@ -17,12 +17,12 @@ Principles should help answer:
 
 They are evaluative and timeless: they apply to work someone has already proposed,
 and they should read the same after the current roadmap is finished. What to build
-next is [[Current State - Product Direction]]; when is [[Current State - Roadmap]].
+next is [Current State - Product Direction](../current-state/product-direction.md); when is [Current State - Roadmap](../current-state/roadmap.md).
 
 ## The Principles
 
 - **The bite is the center.**
-  - Every major product decision should strengthen the usefulness, quality, discovery, or creation of bites. See [[Bite]] and [[ADR-0001 Dish First Product]].
+  - Every major product decision should strengthen the usefulness, quality, discovery, or creation of bites. See [Bite](../domain/bite.md) and [ADR-0001 Dish First Product](../decisions/adr-0001-dish-first-product.md).
   - Restaurants, menus, profiles, maps, BiteTrails, and marketplace features are supporting context around real food experiences.
 - **Show what people actually ate.**
   - BiteTribe should favor concrete dish-level experiences over generic restaurant claims.
@@ -37,14 +37,14 @@ next is [[Current State - Product Direction]]; when is [[Current State - Roadmap
   - Location, currency, restaurant and place data, menu details, language, and creator identity should make a bite understandable in its real-world context.
   - Data quality work is product work because bad context weakens trust.
 - **Community creates trust.**
-  - Profiles, followers, likes, reviews, leaderboards, and creator history should help users judge whether a recommendation is relevant. See [[User]].
+  - Profiles, followers, likes, reviews, leaderboards, and creator history should help users judge whether a recommendation is relevant. See [User](../domain/user.md).
   - Social features should support food discovery, not distract from it.
 - **Curation turns discovery into journeys.**
-  - [[Bucket List]] and [[Bite Trail]] should help users move from interesting bites to planned food experiences.
+  - [Bucket List](../domain/bucket-list.md) and [Bite Trail](../domain/bite-trail.md) should help users move from interesting bites to planned food experiences.
   - Curated journeys should feel useful for locals, travelers, food creators, and organisations.
 - **Businesses support the experience, not the other way around.**
-  - Business tools should help restaurants, organisations, and creators contribute better food context. See [[Restaurant]].
-  - [[Market Place]] and organisation features should preserve the authentic bite-first discovery loop. See [[Monetization]] for the free and paid boundary.
+  - Business tools should help restaurants, organisations, and creators contribute better food context. See [Restaurant](../domain/restaurant.md).
+  - [Market Place](../domain/market-place.md) and organisation features should preserve the authentic bite-first discovery loop. See [Monetization](monetization.md) for the free and paid boundary.
 - **Search must scale with content.**
   - As the graph of bites, users, restaurants, menus, and BiteTrails grows, search must become fast, forgiving, and understandable.
   - Search categories, fuzzy matching, and richer searchable fields should help users find intent quickly.
@@ -56,7 +56,7 @@ next is [[Current State - Product Direction]]; when is [[Current State - Roadmap
   - Localization, currency handling, and location quality should be treated as core product concerns rather than afterthoughts.
 - **Keep the system explainable.**
   - Users should understand why they see a bite, restaurant, creator, or BiteTrail.
-  - Internal SSOT pages, epics, and use cases should stay aligned so product decisions can be traced back to the mission. See [[Traceability Map]].
+  - Internal SSOT pages, epics, and use cases should stay aligned so product decisions can be traced back to the mission. See [Traceability Map](../overview/traceability-map.md).
 
 ## Decision Checks
 
@@ -69,18 +69,18 @@ next is [[Current State - Product Direction]]; when is [[Current State - Roadmap
 
 ## Related Pages
 
-- [[Vision]]
-- [[Mission]]
-- [[Personas]]
-- [[Glossary]]
-- [[Monetization]]
-- [[Current State - Product Direction]]
-- [[ADR-0001 Dish First Product]]
+- [Vision](vision.md)
+- [Mission](mission.md)
+- [Personas](personas.md)
+- [Glossary](glossary.md)
+- [Monetization](monetization.md)
+- [Current State - Product Direction](../current-state/product-direction.md)
+- [ADR-0001 Dish First Product](../decisions/adr-0001-dish-first-product.md)
 
 ## Sources Used
 
-- [[Vision]]
-- [[Mission]]
-- [[Glossary]]
-- Use Cases section in [[SSOT]]
-- Epics section in [[SSOT]]
+- [Vision](vision.md)
+- [Mission](mission.md)
+- [Glossary](glossary.md)
+- Use Cases section in [SSOT](../README.md)
+- Epics section in [SSOT](../README.md)

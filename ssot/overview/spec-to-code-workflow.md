@@ -15,11 +15,11 @@ Use this workflow with Codex, Claude, GPT, local IDE agents, or any other coding
 - If a GitHub issue or PR is referenced, fetch and read the current source before editing.
 - Check local status with `git status --short --branch`.
 - Do not revert unrelated local changes.
-- Follow [[Agent Operating Contract]].
+- Follow [Agent Operating Contract](agent-operating-contract.md).
 
 ## Step 2 - Trace The Spec
 
-Use [[Traceability Map]] to find the relevant SSOT chain.
+Use [Traceability Map](traceability-map.md) to find the relevant SSOT chain.
 
 Minimum trace:
 
@@ -88,8 +88,8 @@ Validation rules:
 
 Update the relevant SSOT page when implementation changes the product truth, domain model, architecture rule, workflow, release state, or known issue list.
 
-A touched `UC - *` page follows [[Use Case Format]] and is validated against the
-checklist in [[Actogram Format]] before this step is done.
+A touched `UC - *` page follows [Use Case Format](use-case-format.md) and is validated against the
+checklist in [Actogram Format](actogram-format.md) before this step is done.
 
 User-facing release changes should also update changelog output through the existing changelog workflow when requested.
 
@@ -115,10 +115,10 @@ A change is done when:
 
 ## Related Pages
 
-- [[Traceability Map]]
-- [[Agent Operating Contract]]
-- [[Feature Delivery Workflow]]
-- [[Release Workflow]]
-- [[Implementation - Code Map]]
-- [[Implementation - Testing]]
-- [[Architecture - Testing]]
+- [Traceability Map](traceability-map.md)
+- [Agent Operating Contract](agent-operating-contract.md)
+- [Feature Delivery Workflow](feature-delivery-workflow.md)
+- [Release Workflow](release-workflow.md)
+- [Implementation - Code Map](../implementation/code-map.md)
+- [Implementation - Testing](../implementation/testing.md)
+- [Architecture - Testing](../architecture/testing.md)

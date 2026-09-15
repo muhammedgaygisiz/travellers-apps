@@ -58,9 +58,9 @@ Examples:
 - `libs/bite-tribe-business/table-management/data-access`
 
 `floor-plan` is the one feature with a third library. It was also the one that
-existed as half a pair for a while: issue \#1081 added the data-access half so
+existed as half a pair for a while: issue [#1081] added the data-access half so
 persistence, rules and conflict handling could be settled and tested before an
-editor existed, and issue \#1082 added the `page` half with the editor.
+editor existed, and issue [#1082] added the `page` half with the editor.
 
 The third library, `floor-plan/ui`, holds the canvas. It is a `type:ui` library
 in the `scope:bite-tribe-business` scope - the shape `libs/bite-tribe/coach-mark`
@@ -68,19 +68,19 @@ already uses in the consumer scope - rather than another component inside the
 page library, because `@nx/enforce-module-boundaries` forbids `type:ui` from
 importing `type:data-access`. That makes the canvas structurally unable to read
 or write a room: it takes a `Room` and the items standing in it, draws them, and
-reports back the geometry a gesture produced. Issue \#1083 added the palette and
+reports back the geometry a gesture produced. Issue [#1083] added the palette and
 the edit geometry beside it - pure functions over millimetres for snapping,
 clamping, resizing and rotation - while the layout being edited, its undo history
-and every write stayed in `page`. See [[Floor Plan]].
+and every write stayed in `page`. See [Floor Plan](../domain/floor-plan.md).
 
-Issue \#1087 put the printed QR code in the same library, for the same reason:
+Issue [#1087] put the printed QR code in the same library, for the same reason:
 `table-qr-code.ts` turns a token into an SVG path and knows nothing about where
 the token came from, and `TableQrCodeComponent` draws it. The sheet that decides
 which tables to print, asks the backend for their tokens and carries the print
 stylesheet is in `page`, and its route is
 `restaurant/:restaurantId/floor-plan/qr-codes`.
 
-`table-management` is the live room staff open during service (issue \#1093).
+`table-management` is the live room staff open during service (issue [#1093]).
 It has no `ui` library of its own and deliberately reuses `floor-plan/ui`: the
 plan an owner arranges and the plan a host reads are the same drawing, and they
 are the same drawing because they are the same renderer. The canvas gained a
@@ -88,11 +88,11 @@ are the same drawing because they are the same renderer. The canvas gained a
 table is doing - which room is open, how the states are listened to, how long a
 table has held its status - is in `table-management`.
 
-Its `data-access` half listens and calls one callable. Issue \#1092 made
+Its `data-access` half listens and calls one callable. Issue [#1092] made
 `transitionTableState` the only writer of a table state and `firestore.rules`
 refuses every client write to the collection, so there is no Firestore write
 path here to add by accident. It also holds `TableTransitionQueueService`
-(issue \#1096), which is where a transition goes when there is no signal to send
+(issue [#1096]), which is where a transition goes when there is no signal to send
 it on: a durable queue in device storage, keyed per account, minting the
 idempotency key and replaying in order when the connection returns. Sending,
 persisting and classifying a failure are data-access work; _when_ to replay and
@@ -104,7 +104,7 @@ owner-only `ownedRestaurantGuard` every editing route carries.
 
 The business app holds only what a restaurant does to its own data. Migrations,
 restaurant-candidate verification, the unmatched Bite places and the
-new-restaurant form they open left for the admin app with issue \#1473.
+new-restaurant form they open left for the admin app with issue [#1473].
 
 ## Admin Feature Libraries
 
@@ -133,7 +133,7 @@ Examples:
 - `libs/bite-tribe-admin/bites/data-access`
 
 `migrations/page` holds one page per migration rather than one page listing all
-of them, because each is its own entry on the admin dashboard (issue \#1473).
+of them, because each is its own entry on the admin dashboard (issue [#1473]).
 
 ## Shared Libraries
 
@@ -165,6 +165,15 @@ Function files are named after the behavior they expose, such as `search-bites.t
 
 ## Related Pages
 
-- [[Implementation - Libraries]]
-- [[Implementation - Feature Patterns]]
-- [[Implementation - Firebase Functions]]
+- [Implementation - Libraries](libraries.md)
+- [Implementation - Feature Patterns](feature-patterns.md)
+- [Implementation - Firebase Functions](firebase-functions.md)
+
+[#1081]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1081
+[#1082]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1082
+[#1083]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1083
+[#1087]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1087
+[#1092]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1092
+[#1093]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1093
+[#1096]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1096
+[#1473]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1473

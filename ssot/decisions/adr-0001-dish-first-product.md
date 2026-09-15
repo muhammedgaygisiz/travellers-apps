@@ -42,7 +42,7 @@ Restaurants, menus, profiles, maps, bucket lists, BiteTrails, marketplace featur
 
 ## Links
 
-- [[Mission]]
-- [[Bite]]
-- Use Cases section in [[SSOT]]
-- Epics section in [[SSOT]]
+- [Mission](../product/mission.md)
+- [Bite](../domain/bite.md)
+- Use Cases section in [SSOT](../README.md)
+- Epics section in [SSOT](../README.md)

@@ -31,13 +31,13 @@ Before editing code or SSOT content, an agent must:
 1. Read the user request or linked issue.
 2. Fetch current GitHub issue or PR text when one is referenced.
 3. Check local state with `git status --short --branch`.
-4. Read [[SSOT]].
-5. Use [[Traceability Map]] to identify the relevant product, domain, use-case, epic, architecture, implementation, testing, and release context.
+4. Read [SSOT](../README.md).
+5. Use [Traceability Map](traceability-map.md) to identify the relevant product, domain, use-case, epic, architecture, implementation, testing, and release context.
 6. Read the owning code surface before editing.
-7. When the change writes or revises a `UC - *` page, read [[Use Case Format]] and [[Actogram Format]] first.
+7. When the change writes or revises a `UC - *` page, read [Use Case Format](use-case-format.md) and [Actogram Format](actogram-format.md) first.
 
 A `UC - *` page must not be written from memory or by imitating another page. Before
-finishing, run the validation checklist in [[Actogram Format]] and report every failure
+finishing, run the validation checklist in [Actogram Format](actogram-format.md) and report every failure
 by rule id (`AF-n`, `UF-n`).
 
 For analysis-only requests, stop after evidence gathering and report concrete findings without changing files.
@@ -48,7 +48,7 @@ Use the authenticated `gh` CLI for GitHub issue, pull request, project, label, a
 
 Connector-backed GitHub tools may be used only as supplementary read helpers when they are already available and clearly sufficient, but durable issue or PR updates should go through `gh` so repository permissions match the user's local setup.
 
-Issues belong on the `Bite Tribe` project board, and their priority is a board field rather than a label. Filing an issue without adding it to the board leaves it invisible to planning. See [[GitHub Project Board And Issue Handling]] for the board, the fields, and the commands.
+Issues belong on the `Bite Tribe` project board, and their priority is a board field rather than a label. Filing an issue without adding it to the board leaves it invisible to planning. See [GitHub Project Board And Issue Handling](github-project-board-and-issue-handling.md) for the board, the fields, and the commands.
 
 ## Traceability Requirement
 
@@ -105,11 +105,11 @@ When finishing, report:
 
 ## Related Pages
 
-- [[SSOT]]
-- [[GitHub Project Board And Issue Handling]]
-- [[GitHub Issue Format]]
-- [[Traceability Map]]
-- [[Spec To Code Workflow]]
-- [[Feature Delivery Workflow]]
-- [[Release Workflow]]
-- [[Implementation - Testing]]
+- [SSOT](../README.md)
+- [GitHub Project Board And Issue Handling](github-project-board-and-issue-handling.md)
+- [GitHub Issue Format](github-issue-format.md)
+- [Traceability Map](traceability-map.md)
+- [Spec To Code Workflow](spec-to-code-workflow.md)
+- [Feature Delivery Workflow](feature-delivery-workflow.md)
+- [Release Workflow](release-workflow.md)
+- [Implementation - Testing](../implementation/testing.md)

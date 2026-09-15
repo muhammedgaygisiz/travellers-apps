@@ -4,12 +4,12 @@
 
 How to run BiteTribe on an iOS simulator against the **production** Firebase
 project, which is what capture sessions, layout checks and reproduction work
-need. The Android counterpart is [[Implementation - Android Device Testing]].
+need. The Android counterpart is [Implementation - Android Device Testing](android-device-testing.md).
 
 A simulator is not a substitute for a device. The release-candidate charter is
 explicit that simulators do not count for permissions, notifications, camera or
 App Check attestation; see
-[[Current State - Release Candidate Test Charter]]. Use this for layout, for
+[Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md). Use this for layout, for
 content capture, and for reproducing something a device already showed.
 
 ## Prerequisites
@@ -112,7 +112,7 @@ it.** Issue one per session and delete it afterwards; the rotation list is on
 The 31 August 2026 capture session followed exactly that: a token was
 registered for the iPad Pro 13-inch simulator, used for the shoot, and deleted
 the same evening. The project again holds none.
-See [[Current State - Known Issues]] for why every pre-19-August token is
+See [Current State - Known Issues](../current-state/known-issues.md) for why every pre-19-August token is
 considered burned.
 
 ## Capturing Screenshots
@@ -123,7 +123,7 @@ xcrun simctl io <UDID> screenshot out.png
 
 The output is at the device's native pixel size, which is what both stores
 want. Capture rules, framing decisions and the shipped set are in
-[[Implementation - Store Listing Assets]].
+[Implementation - Store Listing Assets](store-listing-assets.md).
 
 ## Gotchas
 
@@ -140,8 +140,8 @@ want. Capture rules, framing decisions and the shipped set are in
 
 ## Related Pages
 
-- [[Implementation - Android Device Testing]]
-- [[Implementation - Store Listing Assets]]
-- [[Implementation - Store Release Steps]]
-- [[Architecture - Capacitor]]
-- [[Current State - Release Candidate Test Charter]]
+- [Implementation - Android Device Testing](android-device-testing.md)
+- [Implementation - Store Listing Assets](store-listing-assets.md)
+- [Implementation - Store Release Steps](store-release-steps.md)
+- [Architecture - Capacitor](../architecture/capacitor.md)
+- [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)

@@ -25,7 +25,7 @@ propagates it into the Android and iOS projects and then refuses to continue if
 the three disagree, so `versionName` and `MARKETING_VERSION` are outputs rather
 than places to edit. On the usual release the propagation is a no-op, because
 the version it writes is the one already there. See
-[[Implementation - Release And Build Workflow]].
+[Implementation - Release And Build Workflow](../implementation/release-and-build-workflow.md).
 
 Development happens against the next build number.
 
@@ -40,7 +40,7 @@ identify what is in the stores - and the tag now protects it better: it is
 immutable, it points at a tree declaring build `x`, and the helper refuses to
 push it otherwise. What actually changes is that `develop` reaches `x+1` a few
 hours earlier than it used to, and it was going to spend the rest of the week
-there anyway. Decided under issue #1441.
+there anyway. Decided under issue [#1441].
 
 During the following development week:
 
@@ -109,7 +109,7 @@ would build nothing and do it silently.
 - The tag is created after the commit, so a failure earlier leaves no tag
   behind, but it names the pre-release commit. If the two ever disagree the
   helper deletes the tag and refuses, rather than pushing a tag that lies about
-  what it contains. See issue #1441.
+  what it contains. See issue [#1441].
 - If the GitHub release or the pull request fails - `gh` not authenticated, for
   example - the helper says so explicitly and prints the exact retry command for
   that step alone. The commit, tag, and push have already succeeded at that
@@ -169,7 +169,7 @@ npm run release:notes
 - Summarize it into user-facing notes of at most 230 characters, and keep them
   free of platform-specific phrasing: the same English text serves both stores.
 - Play needs one block **per listing locale**, not just `en-US`. An unedited
-  block is published verbatim. See [[Implementation - Store Release Steps]].
+  block is published verbatim. See [Implementation - Store Release Steps](../implementation/store-release-steps.md).
 - `npm run release:notes -- --full` prints the wider range that the helper
   already used for the GitHub release body.
 
@@ -181,7 +181,7 @@ npm run release:notes
   `Info.plist`.
 - Add the build notes to the Play Console release, save, and submit the change
   for review.
-- Both are detailed in [[Implementation - Store Release Steps]].
+- Both are detailed in [Implementation - Store Release Steps](../implementation/store-release-steps.md).
 
 5. Merge the release branch.
    - The helper already opened the pull request in step 1, titled from the
@@ -207,7 +207,7 @@ npm run release:android
 - `--skip-nx-cache` is not belt-and-braces. `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED`
   is not part of the build target's cache key, so the command can return a
   cached bundle carrying the gate disabled. See
-  [#1428](https://github.com/muhammedgaygisiz/travellers-apps/issues/1428).
+  [#1428].
 - `npm run release:verify-bundle` fails when either dev-only key is inlined and
   when the App Check gate is not. Prefer it over grepping by hand: the quoting
   the minifier chooses varies, and the double-quoted grep this page used to
@@ -217,7 +217,7 @@ npm run release:android
   `en_US.UTF-8`, without which CocoaPods aborts `pod install` with
   `Unicode Normalization not appropriate for ASCII-8BIT`. An interactive
   terminal already exports a UTF-8 locale, so calling the target directly works
-  by hand and fails in agent shells and CI. See [[Architecture - Capacitor]].
+  by hand and fails in agent shells and CI. See [Architecture - Capacitor](../architecture/capacitor.md).
 - The wrappers bundle `dist/apps/bite-tribe`, so an unsynced wrapper ships the
   previous build's web assets silently.
 - Archive and upload iOS from Xcode. `npm run release:android` verifies the
@@ -303,13 +303,16 @@ Intended, but not part of the current release:
   the stores by hand. A tag push publishes on its own; a run started from
   `release.yml` publishes only when the dispatch asks for it, and the one release
   that has used that path did not. See the run history in
-  [[Implementation - Release And Build Workflow]].
+  [Implementation - Release And Build Workflow](../implementation/release-and-build-workflow.md).
 
 ## Related Pages
 
-- [[Implementation - Store Release Steps]]
-- [[Implementation - Release And Build Workflow]]
-- [[Architecture - Capacitor]]
-- [[Current State - Release State]]
-- [[Current State - Release Candidate Test Charter]]
-- [[Feature Delivery Workflow]]
+- [Implementation - Store Release Steps](../implementation/store-release-steps.md)
+- [Implementation - Release And Build Workflow](../implementation/release-and-build-workflow.md)
+- [Architecture - Capacitor](../architecture/capacitor.md)
+- [Current State - Release State](../current-state/release-state.md)
+- [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)
+- [Feature Delivery Workflow](feature-delivery-workflow.md)
+
+[#1428]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1428
+[#1441]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1441

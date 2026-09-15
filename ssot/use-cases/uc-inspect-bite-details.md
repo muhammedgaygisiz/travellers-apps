@@ -5,7 +5,7 @@
 **Level:** L0.
 Supported today. The detail page, its share and deep-link entry, the bucket-list and
 directions actions, the header photo's upload state, and the six contracts below all ship.
-Editing, deleting and reporting a review are not on this page at all — [epic-1284](../github/epic-1284.md) owns
+Editing, deleting and reporting a review are not on this page at all — [epic-1284](../records/epic-1284.md) owns
 them.
 
 ## Goal
@@ -31,7 +31,7 @@ nothing, and how a review and its thread are attributed.
   `handleSharedLinkToBite` preview endpoint, and the native `/s/bite/*` deep-link
   registration in the iOS Associated Domains file and the Android App Links
   intent filter exist for Bites alone. Profiles, bucket lists, restaurants, and
-  BiteTrails have no share action and no deep link. See [issue-1190](../github/issue-1190.md).
+  BiteTrails have no share action and no deep link. See [issue-1190](../records/issue-1190.md).
 - User can open directions to the Bite's place through the platform navigation experience.
 - User can save the Bite to an existing bucket list or create a new list for it.
 - User can understand creator/profile context, restaurant/place context, image, likes, reviews, and related data.
@@ -202,7 +202,7 @@ turns the review compartment from a flat list into a thread list. Implemented by
   already expanded and highlighted. See
   [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) for the fan-out.
 - Editing, deleting and reporting a review or reply are not part of this
-  contract. [epic-1284](../github/epic-1284.md) owns them.
+  contract. [epic-1284](../records/epic-1284.md) owns them.
 
 ## Review Attribution Contract
 
@@ -245,13 +245,13 @@ review threads. Attribution is release-critical rather than polish — [#1308] w
 as a release blocker because reviews published the name the identity provider holds.
 
 Not on this page: editing, deleting and reporting a review or reply, owned by
-[epic-1284](../github/epic-1284.md).
+[epic-1284](../records/epic-1284.md).
 
 ## App Store Review Area
 
 Relevant on two counts. The `/s/bite/*` deep link is registered in the iOS Associated
 Domains entitlement and an Android App Links intent filter, so it is part of the shipped
-build's configuration — see [issue-1190](../github/issue-1190.md). And review attribution is a privacy matter
+build's configuration — see [issue-1190](../records/issue-1190.md). And review attribution is a privacy matter
 rather than a cosmetic one: [#1308] published the name the identity provider holds. The
 data types this page renders are declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
@@ -295,8 +295,8 @@ data types this page renders are declared in [Implementation - Store Declaration
   that displays rather than publishes
 - [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) — the tapped-notification
   entry that lands on a highlighted thread
-- [epic-1284](../github/epic-1284.md)
-- [issue-1190](../github/issue-1190.md)
+- [epic-1284](../records/epic-1284.md)
+- [issue-1190](../records/issue-1190.md)
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
 
 [#1166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1166

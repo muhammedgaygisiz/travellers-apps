@@ -13,7 +13,7 @@ This page governs **GitHub issues**, and only issues.
 - **Epics are excluded.** An `epic-*` page keeps its own shape.
 - **Use cases are excluded.** A `UC - *` page has its own format, defined in [Use Case Format](use-case-format.md), with its flow notation in [Actogram Format](actogram-format.md).
 - **It applies to issues created from 4 September 2026 onward.** Existing issues are not retrofitted. Updating an existing issue does not change its structure either: an issue keeps the shape it was filed with for its whole life, and only its content is edited.
-- **The SSOT mirror page is a different artefact.** `issue-*` pages in this graph are Logseq outline blocks, not `##` headings, and they carry context the GitHub issue does not. See Status And The Mirror Page.
+- **The SSOT does not mirror issues.** There is no `issue-*` page to keep in step with an issue body; for the current state of an issue, ask GitHub. What the SSOT keeps is the closing report, as a comment on the issue (see `Closing Report`) and, where the work produced a durable rule, on the page that owns it. Reports written before that rule was stated are in [records/](../records/README.md).
 
 ## Language And Form
 
@@ -131,15 +131,38 @@ A link states its kind, using one of three forms, in this order:
 - `Part of #1234` - the owning epic.
 - `Related to #1234` - everything else: a superseded issue, a follow-up, or the existing issue found by the search rule below.
 
-On GitHub, use `#1234`. On the SSOT mirror page, use `[[issue-1234]]`.
+On GitHub, use `#1234`. In the SSOT, write it as a reference link - `[#1234]` in the text, with its definition at the end of the page.
 
 Domain, use-case, epic and architecture traceability is not recorded here. It belongs on the use-case page, in its `Related GitHub Scope` section, which [Use Case Format](use-case-format.md) `UF-4` requires and never omits from L1 up (optional while a page is still at `L0`).
 
-## Status And The Mirror Page
+## Status
 
 **Status, priority and type live on the board, not in the issue body.** Do not write `Status:` or `Priority:` lines into a GitHub issue. GitHub's own issue state and the board fields serve that purpose. See [GitHub Project Board And Issue Handling](github-project-board-and-issue-handling.md) for the board, the fields, the label vocabulary and the commands.
 
-**An SSOT `issue-*` page may carry a `Status` section, and a GitHub issue may not.** The mirror page is written after the fact and its `Status` states what the page is - for example "Implemented. This page records the agreed specification the implementation was built against." That is a statement about the document, not a board field, and it has no equivalent in the issue body.
+## Closing Report
+
+**When work on an issue finishes, the report is a comment on that issue.** It is not a
+file in the SSOT. A comment is authored and dated, and the work it describes happened
+once; a page states what is true now.
+
+The comment carries only what is true of this piece of work:
+
+```text
+**Findings** - what was actually wrong, established from evidence rather than repeated
+from the report.
+**Decisions** - what was chosen, and what was refused, with the reason.
+**Outcome** - the files that changed and what each one now does.
+**Validation** - the commands that ran, and their result.
+**Open** - what is still unsettled, and anything deliberately not run.
+```
+
+A section with nothing to say is omitted. `Outcome` and `Validation` never are.
+
+**A durable rule that came out of the work does not go in the comment.** It goes onto the
+SSOT page that owns it - an `Architecture - *` page, a domain page, or
+[Current State - Known Issues](../current-state/known-issues.md) - and the comment links
+there. The test is whether the statement is still true next quarter: if it is, it belongs
+on the page; if it is only true of this fix on this day, it belongs in the comment.
 
 ## MVP Classification
 

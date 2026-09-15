@@ -46,7 +46,7 @@ the reason a reader trusting the summary would have re-done finished work.
 
 The Apple nutrition labels are answered from this same list, so the two stores
 describe one set of data flows. Revisit both when the AdMob epic
-[epic-1123](../github/epic-1123.md) lands, since `Ads` becomes true at that point.
+[epic-1123][#1123] lands, since `Ads` becomes true at that point.
 
 ### The Age Rating Was Over-Declared
 
@@ -124,7 +124,7 @@ Three answers that needed evidence rather than assumption:
   unlinked, which is the common default and would have been wrong here.
 - **Tracking — no, for everything.** No AdMob, no ATT usage, and no
   `NSUserTrackingUsageDescription` in `Info.plist`. Revisit with
-  [epic-1123](../github/epic-1123.md): requesting the IDFA forces Device ID to be declared as used
+  [epic-1123][#1123]: requesting the IDFA forces Device ID to be declared as used
   for tracking.
 - **Search History — not declared.** `search_performed` in
   [Implementation - Analytics Events](analytics-events.md) carries no parameters, so the query text
@@ -136,7 +136,7 @@ carry review text, ratings, prices and place names, which Apple expects under
 that heading. The divergence is a taxonomy difference, not an inconsistency.
 
 `Purchases` is left undeclared on both stores: paid BiteTrails are
-[epic-1125](../github/epic-1125.md) and are not in the shipped build.
+[epic-1125][#1125] and are not in the shipped build.
 
 The Privacy Policy URL on the App Privacy page is set to the same
 `https://bite-tribe.web.app/privacy` that Play carries.
@@ -239,9 +239,9 @@ trader."
 ### What makes it stop being accurate
 
 The monetization epics. Apple names an **ad-sponsored** app explicitly among the
-trader factors, so [epic-1123](../github/epic-1123.md) - Stage 1 in [epic-1121](../github/epic-1121.md)'s sequencing, and the
+trader factors, so [epic-1123][#1123] - Stage 1 in [epic-1121][#1121]'s sequencing, and the
 first release that earns anything - is the crossing point, even though no user
-pays. [epic-1122](../github/epic-1122.md) is Stage 0 and sells nothing, so the entitlement foundation
+pays. [epic-1122][#1122] is Stage 0 and sells nothing, so the entitlement foundation
 can ship with the status unchanged.
 
 The declaration is reversible at two levels, both confirmed present in the
@@ -252,7 +252,7 @@ App Store Regulations & Permits -> Digital Services Act.
 two-factor validation of both a phone and an email, uploaded documentation
 verifying name and address, payment account details, and then verification by
 Apple on their timetable. That is why it is filed as [#1433] under
-[epic-1123](../github/epic-1123.md) rather than left as a note: it has to start while that epic is in
+[epic-1123][#1123] rather than left as a note: it has to start while that epic is in
 progress, not when its build is ready.
 
 This is a compliance self-assessment rather than a configuration value, and
@@ -266,4 +266,8 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 - [Current State - Release State](../current-state/release-state.md)
 - [Architecture - Auth](../architecture/auth.md)
 
+[#1121]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1121
+[#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
+[#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
+[#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
 [#1433]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1433

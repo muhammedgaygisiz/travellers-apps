@@ -486,7 +486,7 @@ Email verification is non-blocking. Password-only accounts require verification 
 
 ## Provider Data Rules
 
-See [issue-1385](../github/issue-1385.md) for what reading these positionally cost.
+See [issue-1385](../records/issue-1385.md) for what reading these positionally cost.
 
 - `user.providerData` is **not** the same list on every platform. The Android
   SDK includes Firebase's own reserved record - `providerId` of `firebase`, the

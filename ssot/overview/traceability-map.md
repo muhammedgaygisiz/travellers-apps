@@ -66,33 +66,33 @@
 
 - ## Use Cases To Open P0 Epics
 
-  | Use Case Area                       | Epic Links                                                                                                                                                              |
-  | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | Bite creation and quality           | [epic-907](../github/epic-907.md)                                                                                                                                       |
-  | Discovery, search, and navigation   | [epic-738](../github/epic-738.md)                                                                                                                                       |
-  | Restaurant and menu context         | [epic 734](https://github.com/muhammedgaygisiz/travellers-apps/issues/734)                                                                                              |
-  | Marketplace and BiteTrails          | [epic-738](../github/epic-738.md)                                                                                                                                       |
-  | Platform readiness and data quality | [epic-907](../github/epic-907.md), [Current State - Known Issues](../current-state/known-issues.md), [Current State - Release State](../current-state/release-state.md) |
+  | Use Case Area                       | Epic Links                                                                                                                                             |
+  | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+  | Bite creation and quality           | [epic-907][#907]                                                                                                                                       |
+  | Discovery, search, and navigation   | [epic-738][#738]                                                                                                                                       |
+  | Restaurant and menu context         | [epic 734](https://github.com/muhammedgaygisiz/travellers-apps/issues/734)                                                                             |
+  | Marketplace and BiteTrails          | [epic-738][#738]                                                                                                                                       |
+  | Platform readiness and data quality | [epic-907][#907], [Current State - Known Issues](../current-state/known-issues.md), [Current State - Release State](../current-state/release-state.md) |
 
 - ## Restaurant Interaction Platform (post-launch)
 
-  [epic-735](../github/epic-735.md) is the umbrella. It and its five stage epics are Priority P1, sequenced behind the P0 launch and migration work.
+  [epic-735][#735] is the umbrella. It and its five stage epics are Priority P1, sequenced behind the P0 launch and migration work.
 
-  | Stage                           | Epic                                | Use Case                                                                                                                                                                         | Domain                                                                         |
-  | ------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-  | 0 Ownership and authorization   | [epic-1069](../github/epic-1069.md) | [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md), [UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md) | [Restaurant](../domain/restaurant.md), [User](../domain/user.md)               |
-  | 1 Floor plan and tables         | [epic-1070](../github/epic-1070.md) | [UC - Configure Restaurant Floor Plans And Tables](../use-cases/uc-configure-restaurant-floor-plans-and-tables.md)                                                               | [Floor Plan](../domain/floor-plan.md), [Table](../domain/table.md)             |
-  | 2 Staff table management        | [epic-1071](../github/epic-1071.md) | [UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md)                                                                                             | [Table](../domain/table.md), [Table Visit](../domain/table-visit.md)           |
-  | 3 QR menu and ordering          | [epic-1072](../github/epic-1072.md) | [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md)                                                                             | [Table Visit](../domain/table-visit.md), [Restaurant](../domain/restaurant.md) |
-  | 4 Payment and Bites from orders | [epic-1073](../github/epic-1073.md) | [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md)                                                                             | [Table Visit](../domain/table-visit.md), [Bite](../domain/bite.md)             |
+  | Stage                           | Epic                                 | Use Case                                                                                                                                                                         | Domain                                                                         |
+  | ------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+  | 0 Ownership and authorization   | [epic-1069](../records/epic-1069.md) | [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md), [UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md) | [Restaurant](../domain/restaurant.md), [User](../domain/user.md)               |
+  | 1 Floor plan and tables         | [epic-1070][#1070]                   | [UC - Configure Restaurant Floor Plans And Tables](../use-cases/uc-configure-restaurant-floor-plans-and-tables.md)                                                               | [Floor Plan](../domain/floor-plan.md), [Table](../domain/table.md)             |
+  | 2 Staff table management        | [epic-1071][#1071]                   | [UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md)                                                                                             | [Table](../domain/table.md), [Table Visit](../domain/table-visit.md)           |
+  | 3 QR menu and ordering          | [epic-1072][#1072]                   | [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md)                                                                             | [Table Visit](../domain/table-visit.md), [Restaurant](../domain/restaurant.md) |
+  | 4 Payment and Bites from orders | [epic-1073][#1073]                   | [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md)                                                                             | [Table Visit](../domain/table-visit.md), [Bite](../domain/bite.md)             |
 
   The 41 child issues ([#1074] to [#1114]) have no `issue-*` pages. They are unstarted, and their specifications live on the GitHub issues; the durable product context is in the use-case and domain pages above.
 
-  Stage 0 was rescoped on 8 September 2026 and its child list no longer matches that range. Ownership is assigned by an operator rather than claimed by a restaurant, so [#1076] is closed as not planned, [#1077] is the assignment workflow and is done, and [#1537] was added for a business account managing its own staff and is done. [#1075] was largely delivered from outside the epic: [#1469] needed the role model for the admin app and built it first. See [epic-1069](../github/epic-1069.md) for what moved and why.
+  Stage 0 was rescoped on 8 September 2026 and its child list no longer matches that range. Ownership is assigned by an operator rather than claimed by a restaurant, so [#1076] is closed as not planned, [#1077] is the assignment workflow and is done, and [#1537] was added for a business account managing its own staff and is done. [#1075] was largely delivered from outside the epic: [#1469] needed the role model for the admin app and built it first. See [epic-1069](../records/epic-1069.md) for what moved and why.
 
   Stage 0 blocks every later stage. Stages 1 and 2 are independently shippable.
 
-  Stage 1 has started at its model. Issue [#1080] added `Room`, `FloorPlanObject` and `RestaurantTable` to `libs/bite-tribe-common/model` and made the coordinate system of [Floor Plan](../domain/floor-plan.md) the file header of `floor-plan.ts`, so the editor of [#1082], the staff view of [epic-1071](../github/epic-1071.md) and the guest ordering flow of [epic-1072](../github/epic-1072.md) all read one set of shapes.
+  Stage 1 has started at its model. Issue [#1080] added `Room`, `FloorPlanObject` and `RestaurantTable` to `libs/bite-tribe-common/model` and made the coordinate system of [Floor Plan](../domain/floor-plan.md) the file header of `floor-plan.ts`, so the editor of [#1082], the staff view of [epic-1071][#1071] and the guest ordering flow of [epic-1072][#1072] all read one set of shapes.
 
   Writing it settled two things the pages had left open. A `position` is the centre of a shape for geometry objects as well as for tables, so `rotation` has a single meaning; and a room's display order is a required field rather than an optional nicety, because a plan with more than one room has to list them in some order the owner chose.
 
@@ -104,7 +104,7 @@
 
   Issue [#1084] turned that rectangle into a business entity. The owner sets a table's number, its capacity, its shape and whether it is in service, and the number is unique across the restaurant rather than the room - which moved the editor's table read from one room to the whole restaurant, because a rule cannot be checked against data that was never loaded. A duplicate label is refused rather than warned about, and the refusal names the room that holds the number. A selection is numbered consecutively in one action, skipping numbers taken elsewhere. `loadTableByLabel` closes the epic's own success criterion: "table 12" is one query on `label` and one table back. What a table still has not got is a room it can be moved to - that is [#1085] - or a token to print, which is [#1086].
 
-  Issue [#1089] closed the last feature child of stage 1. The floor-plan editor is now operable and usable without a pointing device - tab walks the objects of the plan and brings the one it lands on into view, every object carries an accessible name saying what it is, and selection reads as a heavier line rather than as a colour, so a printed or greyscale plan says the same thing the screen does. It also recorded a product decision rather than deferring one: the "responsive" half of its own title is dead for the editor and alive for the staff live view of [epic-1071](../github/epic-1071.md), because an owner laying out twenty tables to the millimetre and a host seating a party on a tablet are two surfaces with two gesture vocabularies. See [Floor Plan](../domain/floor-plan.md), which carries that reasoning together with the decisions of issues [#1085] to [#1088]. Issue [#1090] then closed the last of them, so every child of [epic-1070](../github/epic-1070.md) has landed and stage 1 is complete.
+  Issue [#1089] closed the last feature child of stage 1. The floor-plan editor is now operable and usable without a pointing device - tab walks the objects of the plan and brings the one it lands on into view, every object carries an accessible name saying what it is, and selection reads as a heavier line rather than as a colour, so a printed or greyscale plan says the same thing the screen does. It also recorded a product decision rather than deferring one: the "responsive" half of its own title is dead for the editor and alive for the staff live view of [epic-1071][#1071], because an owner laying out twenty tables to the millimetre and a host seating a party on a tablet are two surfaces with two gesture vocabularies. See [Floor Plan](../domain/floor-plan.md), which carries that reasoning together with the decisions of issues [#1085] to [#1088]. Issue [#1090] then closed the last of them, so every child of [epic-1070][#1070] has landed and stage 1 is complete.
 
   Stage 2 has started at its model, in the same place and for the same reason stage 1 did. Issue [#1091] added `TableState` and the transition matrix to `libs/bite-tribe-common/model`, so the transition callable of [#1092], the live view of [#1093] and the staff actions of [#1094] all validate against one definition instead of three.
 
@@ -114,7 +114,7 @@
 
   Two decisions in it are worth finding again. The guard is a **separate** function from `requireRestaurantAuthority` rather than that one with `staff` added, because the two answer different questions - may you configure this restaurant, and may you operate it during service - and one function taking a role list would put that difference in an argument at each call site. And the matrix now exists twice, because Firebase Functions cannot import the model library: `table-state-parity.spec.ts` compares both copies row by row, following the precedent `role-list-parity.spec.ts` set for the role list. Stage 2's backend was done and none of it was reachable from a screen; the live view is [#1093] and the staff actions are [#1094].
 
-  Issue [#1093] gave stage 2 its first surface, and gave the `staff` role the first route in the business app it was ever meant to reach. `restaurant/:restaurantId/tables` draws the published plan read-only with each table's live status on it, listens to `tableStates` rather than polling, and writes nothing at all - `bite-tribe-business/table-management` has no write path, which is the client half of the guarantee [#1092]'s rules make on the server. It reuses the editor's canvas rather than drawing a second one, so the room an owner arranged and the room a host reads are one drawing; the canvas gained a `readOnly` mode, a status mark per table, and the touch vocabulary [epic-1070](../github/epic-1070.md) deliberately left to this surface - tap, pinch, two-finger pan and long press.
+  Issue [#1093] gave stage 2 its first surface, and gave the `staff` role the first route in the business app it was ever meant to reach. `restaurant/:restaurantId/tables` draws the published plan read-only with each table's live status on it, listens to `tableStates` rather than polling, and writes nothing at all - `bite-tribe-business/table-management` has no write path, which is the client half of the guarantee [#1092]'s rules make on the server. It reuses the editor's canvas rather than drawing a second one, so the room an owner arranged and the room a host reads are one drawing; the canvas gained a `readOnly` mode, a status mark per table, and the touch vocabulary [epic-1070][#1070] deliberately left to this surface - tap, pinch, two-finger pan and long press.
 
   Two decisions in it are worth finding again. The status **word** is not drawn on the plan: everything on that canvas is a share of its `viewBox`, which is what holds a mark at one size on screen across the zoom range and therefore also holds a status word at about eight pixels however far the plan is zoomed. So the plan carries a colour and a silhouette per status and the summary bar above it carries the words, which is the legend, on screen at the same time and large enough to read - see [UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md). And the route needed a guard that did not exist: every other route about one restaurant uses `ownedRestaurantGuard`, which checks `Restaurant.ownerUserId` and would refuse every account this page is for, so `restaurantAccessGuard` admits the owner **or** the staff of that one restaurant - the two halves of `worksAt()` in `firestore.rules`.
 
@@ -210,8 +210,8 @@
   two halves of the epic meet. Until it landed a guest could send an order that
   no screen in the restaurant drew; it gave the restaurant the queue, every order
   status after `submitted`, the cancellation reason issue [#1104] had declared and
-  left empty, an order-count badge on the live floor plan of [epic-1071](../github/epic-1071.md), and a
-  push through the notification infrastructure of [epic-850](../github/epic-850.md) to the owner and
+  left empty, an order-count badge on the live floor plan of [epic-1071][#1071], and a
+  push through the notification infrastructure of [epic-850](../records/epic-850.md) to the owner and
   every account associated with the restaurant.
 
   Two decisions in it cross stage boundaries. The queue is a **collection-group**
@@ -232,7 +232,7 @@
   query, no index and no collection-group rule, where the orders of [#1105] needed
   all three. The same name is the rate limit: a repeated tap addresses the first
   tap's document, across phones as well as across taps. It also crosses into
-  [epic-1071](../github/epic-1071.md) twice - a pulsing mark on the live floor plan and a second count
+  [epic-1071][#1071] twice - a pulsing mark on the live floor plan and a second count
   on its header link - and into the floor's state machine once: asking for the
   bill writes `awaitingPayment` from the guest's own callable (`RD-TS-21`),
   because `transitionTableState` admits three roles a guest holds none of.
@@ -288,81 +288,81 @@ signing in today lands on an empty app. See [User Roles](../product/user-roles.m
 
 Issue [#1469] delivered the first part of stage 0 outside the child-issue list: the `bite-tribe-admin` app, and the role gate on both privileged apps. It deliberately left [#1078], the Firestore rules replacement, alone — that is the highest-regression-risk change in the epic and needed its own branch. It got one, together with [#1164]: `firestore.rules` is now ownership-scoped, the role hierarchy question is settled by `RD-UR-6`, and the rules have their own emulator suite and CI job. The rules deploy by hand, so stage 0 is not finished until that deploy has run. See [Architecture - Firebase](../architecture/firebase.md).
 
-[epic-1471](../github/epic-1471.md) owns what the admin app still needs. It is not a stage of [#735]: it runs alongside, because moving the operator surfaces out of the business app and hardening the privileged callables are overdue regardless of whether the floor-plan work ever starts.
+[epic-1471](../records/epic-1471.md) owns what the admin app still needs. It is not a stage of [#735]: it runs alongside, because moving the operator surfaces out of the business app and hardening the privileged callables are overdue regardless of whether the floor-plan work ever starts.
 
 - ## Monetization (post-launch)
 
-  [epic-1121](../github/epic-1121.md) is the umbrella for the three revenue channels. It and its four stage epics are Priority P1, sequenced behind the public launch. [Monetization](../product/monetization.md) holds the product decisions and the Free/Pro capability matrix.
+  [epic-1121][#1121] is the umbrella for the three revenue channels. It and its four stage epics are Priority P1, sequenced behind the public launch. [Monetization](../product/monetization.md) holds the product decisions and the Free/Pro capability matrix.
 
-  | Stage                    | Epic                                | Use Case                                                                         | Domain                                                                           |
-  | ------------------------ | ----------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-  | 0 Entitlement foundation | [epic-1122](../github/epic-1122.md) | [UC - Subscribe To BiteTribe Pro](../use-cases/uc-subscribe-to-bitetribe-pro.md) | [Subscription](../domain/subscription.md), [User](../domain/user.md)             |
-  | 1 AdMob advertising      | [epic-1123](../github/epic-1123.md) | [UC - See Ads As A Free User](../use-cases/uc-see-ads-as-a-free-user.md)         | [Monetization](../product/monetization.md), [Bite](../domain/bite.md)            |
-  | 2 Pro subscriptions      | [epic-1124](../github/epic-1124.md) | [UC - Subscribe To BiteTribe Pro](../use-cases/uc-subscribe-to-bitetribe-pro.md) | [Subscription](../domain/subscription.md), [User](../domain/user.md)             |
-  | 3 Paid BiteTrails        | [epic-1125](../github/epic-1125.md) | [UC - Buy A Paid BiteTrail](../use-cases/uc-buy-a-paid-bitetrail.md)             | [Bite Trail](../domain/bite-trail.md), [Market Place](../domain/market-place.md) |
+  | Stage                    | Epic               | Use Case                                                                         | Domain                                                                           |
+  | ------------------------ | ------------------ | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+  | 0 Entitlement foundation | [epic-1122][#1122] | [UC - Subscribe To BiteTribe Pro](../use-cases/uc-subscribe-to-bitetribe-pro.md) | [Subscription](../domain/subscription.md), [User](../domain/user.md)             |
+  | 1 AdMob advertising      | [epic-1123][#1123] | [UC - See Ads As A Free User](../use-cases/uc-see-ads-as-a-free-user.md)         | [Monetization](../product/monetization.md), [Bite](../domain/bite.md)            |
+  | 2 Pro subscriptions      | [epic-1124][#1124] | [UC - Subscribe To BiteTribe Pro](../use-cases/uc-subscribe-to-bitetribe-pro.md) | [Subscription](../domain/subscription.md), [User](../domain/user.md)             |
+  | 3 Paid BiteTrails        | [epic-1125][#1125] | [UC - Buy A Paid BiteTrail](../use-cases/uc-buy-a-paid-bitetrail.md)             | [Bite Trail](../domain/bite-trail.md), [Market Place](../domain/market-place.md) |
 
   The 34 child issues ([#542] and [#1126] to [#1158]) have no `issue-*` pages. Their specifications live on the GitHub issues; the durable product context is in the pages above.
 
-  Stage 0 blocks stages 2 and 3. Stage 1 can run in parallel with stage 0, and only its "hide ads for Pro" child depends on it. Stage 3 additionally depends on [epic-1069](../github/epic-1069.md) for the verified identity that creator payouts require.
+  Stage 0 blocks stages 2 and 3. Stage 1 can run in parallel with stage 0, and only its "hide ads for Pro" child depends on it. Stage 3 additionally depends on [epic-1069](../records/epic-1069.md) for the verified identity that creator payouts require.
 
 - ## Review Conversations
 
-  [issue-1283](../github/issue-1283.md) turns the review compartment of a Bite into a thread list and extends review notifications to every participant of a conversation. [epic-1284](../github/epic-1284.md) follows it with edit, delete and reporting, which threading makes necessary but does not itself answer.
+  [issue-1283](../records/issue-1283.md) turns the review compartment of a Bite into a thread list and extends review notifications to every participant of a conversation. [epic-1284](../records/epic-1284.md) follows it with edit, delete and reporting, which threading makes necessary but does not itself answer.
 
-  | Work                                  | Use Case                                                                                                                                                                                           | Domain                                               |
-  | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-  | [issue-1283](../github/issue-1283.md) | [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md), [UC - Receive App Notifications And Engagement Updates](../use-cases/uc-receive-app-notifications-and-engagement-updates.md) | [Bite](../domain/bite.md), [User](../domain/user.md) |
-  | [epic-1284](../github/epic-1284.md)   | [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md)                                                                                                                               | [Bite](../domain/bite.md), [User](../domain/user.md) |
+  | Work                                   | Use Case                                                                                                                                                                                           | Domain                                               |
+  | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+  | [issue-1283](../records/issue-1283.md) | [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md), [UC - Receive App Notifications And Engagement Updates](../use-cases/uc-receive-app-notifications-and-engagement-updates.md) | [Bite](../domain/bite.md), [User](../domain/user.md) |
+  | [epic-1284](../records/epic-1284.md)   | [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md)                                                                                                                               | [Bite](../domain/bite.md), [User](../domain/user.md) |
 
-  [issue-1283](../github/issue-1283.md) is implemented. [epic-1284](../github/epic-1284.md) depends on it: a moderation rule for deleting a root review only has meaning once a root review can carry replies.
+  [issue-1283](../records/issue-1283.md) is implemented. [epic-1284](../records/epic-1284.md) depends on it: a moderation rule for deleting a root review only has meaning once a root review can carry replies.
 
 - ## Photo Position And The Media Permission
 
-[issue-1394](../github/issue-1394.md) moved the Android gallery path onto the single-select Photo
-Picker. [issue-1409](../github/issue-1409.md) follows it by moving the media location permission the
+[issue-1394](../records/issue-1394.md) moved the Android gallery path onto the single-select Photo
+Picker. [issue-1409](../records/issue-1409.md) follows it by moving the media location permission the
 photo position depends on out of the picker and into onboarding, with recovery
 surfaces in Settings and on the Bite form.
 
-| Work                                  | Use Case                                                                                                                                                                                           | Domain                                               |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| [issue-1394](../github/issue-1394.md) | [UC - Create And Maintain Personal Bites](../use-cases/uc-create-and-maintain-personal-bites.md)                                                                                                   | [Bite](../domain/bite.md)                            |
-| [issue-1409](../github/issue-1409.md) | [UC - Create And Maintain Personal Bites](../use-cases/uc-create-and-maintain-personal-bites.md), [UC - Guide New Users After Registration](../use-cases/uc-guide-new-users-after-registration.md) | [Bite](../domain/bite.md), [User](../domain/user.md) |
+| Work                                   | Use Case                                                                                                                                                                                           | Domain                                               |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| [issue-1394](../records/issue-1394.md) | [UC - Create And Maintain Personal Bites](../use-cases/uc-create-and-maintain-personal-bites.md)                                                                                                   | [Bite](../domain/bite.md)                            |
+| [issue-1409](../records/issue-1409.md) | [UC - Create And Maintain Personal Bites](../use-cases/uc-create-and-maintain-personal-bites.md), [UC - Guide New Users After Registration](../use-cases/uc-guide-new-users-after-registration.md) | [Bite](../domain/bite.md), [User](../domain/user.md) |
 
-[issue-1409](../github/issue-1409.md) supersedes [issue-1394](../github/issue-1394.md)'s decision to keep asking at the
+[issue-1409](../records/issue-1409.md) supersedes [issue-1394](../records/issue-1394.md)'s decision to keep asking at the
 picker. The permission itself is unchanged; only who asks for it moved.
 
 ## Onboarding And The Live OS Permission
 
-[issue-1412](../github/issue-1412.md) makes the onboarding location step read the OS grant it was
+[issue-1412](../records/issue-1412.md) makes the onboarding location step read the OS grant it was
 ignoring, so a user who has already granted location is not asked for it again.
 
-| Work                                  | Use Case                                                                                         | Domain                    |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------- |
-| [issue-1412](../github/issue-1412.md) | [UC - Guide New Users After Registration](../use-cases/uc-guide-new-users-after-registration.md) | [User](../domain/user.md) |
+| Work                                   | Use Case                                                                                         | Domain                    |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------- |
+| [issue-1412](../records/issue-1412.md) | [UC - Guide New Users After Registration](../use-cases/uc-guide-new-users-after-registration.md) | [User](../domain/user.md) |
 
 It completes a pattern rather than starting one: issue [#1184] established that
-a permission is a fact about an installation and not an account, [issue-1394](../github/issue-1394.md)
-applied that to the photos step, [issue-1386](../github/issue-1386.md) gave notifications a Settings
+a permission is a fact about an installation and not an account, [issue-1394](../records/issue-1394.md)
+applied that to the photos step, [issue-1386](../records/issue-1386.md) gave notifications a Settings
 surface that reflects the live state, and the location step was the one left
 reconciling against a stored flag. The rule is on [Architecture - Capacitor](../architecture/capacitor.md).
 
 ## Own Bite Reactions
 
-[issue-1401](../github/issue-1401.md) gives a Bite creator the reaction counts on their own Bite as a read-only label, on the Bite card and on the Bite details page, and removes the client affordance to react to a Bite they created.
+[issue-1401](../records/issue-1401.md) gives a Bite creator the reaction counts on their own Bite as a read-only label, on the Bite card and on the Bite details page, and removes the client affordance to react to a Bite they created.
 
-| Work                                  | Use Case                                                                                                                                                               | Domain                    |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| [issue-1401](../github/issue-1401.md) | [UC - Create And Maintain Personal Bites](../use-cases/uc-create-and-maintain-personal-bites.md), [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) | [Bite](../domain/bite.md) |
+| Work                                   | Use Case                                                                                                                                                               | Domain                    |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| [issue-1401](../records/issue-1401.md) | [UC - Create And Maintain Personal Bites](../use-cases/uc-create-and-maintain-personal-bites.md), [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) | [Bite](../domain/bite.md) |
 
 The rule it adds is recorded on [Bite](../domain/bite.md). The guard is a client affordance only; nothing in the Firestore rules or the like triggers enforces it.
 
 ## The Brand Characters
 
-[issue-1482](../github/issue-1482.md) versions the seven character SVGs under `ssot/assets/characters/` and renders them, with the logo, as the `Brand/Characters` Storybook page.
+[issue-1482](../records/issue-1482.md) versions the seven character SVGs under `ssot/assets/characters/` and renders them, with the logo, as the `Brand/Characters` Storybook page.
 
-| Work                                  | Implementation                                                                                                                           | Owns                                                 |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| [issue-1482](../github/issue-1482.md) | [Implementation - Brand Characters](../implementation/brand-characters.md), [Implementation - Storybook](../implementation/storybook.md) | The set, where it lives, and how a character is made |
+| Work                                   | Implementation                                                                                                                           | Owns                                                 |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| [issue-1482](../records/issue-1482.md) | [Implementation - Brand Characters](../implementation/brand-characters.md), [Implementation - Storybook](../implementation/storybook.md) | The set, where it lives, and how a character is made |
 
 This trace has no use case and no domain page, which is the point: a character is brand material, and nothing in the product references one. The naming and the eventual product use are open on [Current State - Open Questions](../current-state/open-questions.md). The day a surface uses a character, the artwork moves into app assets and this row gains the use case that took it.
 
@@ -380,11 +380,11 @@ Three constraints came out of it and are recorded rather than rediscovered: a st
 
 ## Public City Landing Pages
 
-[epic-1487](../github/epic-1487.md) gives an operator a way to publish curated, indexable city pages over the data the product already holds. It is Priority `P3`: nothing in the launch path depends on it.
+[epic-1487](../records/epic-1487.md) gives an operator a way to publish curated, indexable city pages over the data the product already holds. It is Priority `P3`: nothing in the launch path depends on it.
 
-| Work                                | Use Case                                                                                                                                                                                                                | Domain                                                           | Implementation                                                                                                                                                                         |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [epic-1487](../github/epic-1487.md) | [UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md) for curation; [UC - Browse Restaurants And Places](../use-cases/uc-browse-restaurants-and-places.md) for what it shows | [Restaurant](../domain/restaurant.md), [Bite](../domain/bite.md) | [Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md), [Implementation - Firebase Functions](../implementation/firebase-functions.md) |
+| Work                                 | Use Case                                                                                                                                                                                                                | Domain                                                           | Implementation                                                                                                                                                                         |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [epic-1487](../records/epic-1487.md) | [UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md) for curation; [UC - Browse Restaurants And Places](../use-cases/uc-browse-restaurants-and-places.md) for what it shows | [Restaurant](../domain/restaurant.md), [Bite](../domain/bite.md) | [Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md), [Implementation - Firebase Functions](../implementation/firebase-functions.md) |
 
 The chain runs backwards through two closed issues rather than an epic. Issue [#894] wrote `city` and `country` onto every Bite and named city pages as the reason; issue [#1454] established the metadata contract the pages have to extend. The epic adds no new metadata page: [Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md) already owns the canonical host, `robots.txt` and `sitemap.xml`, and gains the landing-page section.
 
@@ -452,7 +452,11 @@ No use case covers public acquisition today. One is written when the epic starts
 
 [#542]: https://github.com/muhammedgaygisiz/travellers-apps/issues/542
 [#735]: https://github.com/muhammedgaygisiz/travellers-apps/issues/735
+[#738]: https://github.com/muhammedgaygisiz/travellers-apps/issues/738
 [#894]: https://github.com/muhammedgaygisiz/travellers-apps/issues/894
+[#907]: https://github.com/muhammedgaygisiz/travellers-apps/issues/907
+[#1070]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1070
+[#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071
 [#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
 [#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
 [#1074]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1074
@@ -484,6 +488,11 @@ No use case covers public acquisition today. One is written when the epic starts
 [#1107]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1107
 [#1108]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1108
 [#1114]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1114
+[#1121]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1121
+[#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
+[#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
+[#1124]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1124
+[#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
 [#1126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1126
 [#1158]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1158
 [#1164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1164

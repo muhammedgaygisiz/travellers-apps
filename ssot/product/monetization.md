@@ -29,13 +29,13 @@ Monetization should help answer:
 
 ## The Three Channels
 
-| Channel         | Who pays                                          | Rails                                                        | Epic                                |
-| --------------- | ------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------- |
-| Ads             | Advertisers, shown to free users                  | Google AdMob                                                 | [epic-1123](../github/epic-1123.md) |
-| Subscriptions   | Food lovers who want more than their surroundings | Apple and Google in-app purchase through RevenueCat          | [epic-1124](../github/epic-1124.md) |
-| Paid BiteTrails | Food lovers buying a curated journey              | Store in-app purchase, creator payout through Stripe Connect | [epic-1125](../github/epic-1125.md) |
+| Channel         | Who pays                                          | Rails                                                        | Epic               |
+| --------------- | ------------------------------------------------- | ------------------------------------------------------------ | ------------------ |
+| Ads             | Advertisers, shown to free users                  | Google AdMob                                                 | [epic-1123][#1123] |
+| Subscriptions   | Food lovers who want more than their surroundings | Apple and Google in-app purchase through RevenueCat          | [epic-1124][#1124] |
+| Paid BiteTrails | Food lovers buying a curated journey              | Store in-app purchase, creator payout through Stripe Connect | [epic-1125][#1125] |
 
-The shared entitlement foundation all three depend on is [epic-1122](../github/epic-1122.md), and [epic-1121](../github/epic-1121.md) is the umbrella.
+The shared entitlement foundation all three depend on is [epic-1122][#1122], and [epic-1121][#1121] is the umbrella.
 
 ## Free And Pro Capability Matrix
 
@@ -94,23 +94,23 @@ Monetization
 
 - Nothing in this page is implemented yet. All of it is Priority P1 and post-launch.
 - `subscriptionTier` exists on the public user document but is not enforced anywhere, and `createUserOnAuthCreate` currently writes tier 1 for every new account.
-- Issue [#1078] made `subscriptionTier` refuse every client write, so an account can no longer grant itself Pro with one document write. The remaining gap is [epic-1122](../github/epic-1122.md): the entitlement has a writer nobody buys through yet. The rules deploy by hand, so the field is protected in production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
+- Issue [#1078] made `subscriptionTier` refuse every client write, so an account can no longer grant itself Pro with one document write. The remaining gap is [epic-1122][#1122]: the entitlement has a writer nobody buys through yet. The rules deploy by hand, so the field is protected in production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
 - There is no ad, purchase or payout dependency in the workspace.
 - Free-tier position enforcement is best-effort. A client can report any coordinates, so the radius gate resists casual bypass rather than a determined one.
 
 ## Out Of Scope
 
-- A creator or business subscription tier. Business-side monetization stays with [epic-735](../github/epic-735.md).
-- Restaurant transaction fees or commission on table orders. That belongs to [epic-1073](../github/epic-1073.md).
+- A creator or business subscription tier. Business-side monetization stays with [epic-735][#735].
+- Restaurant transaction fees or commission on table orders. That belongs to [epic-1073][#1073].
 - Web and PWA billing. AdMob has no web SDK and store in-app purchase does not apply on web, so the PWA stays free and ad-free until a separate decision is taken.
 
 ## Related Epics
 
-- [epic-1121](../github/epic-1121.md) umbrella
-- [epic-1122](../github/epic-1122.md) entitlement foundation and Pro gating
-- [epic-1123](../github/epic-1123.md) AdMob advertising
-- [epic-1124](../github/epic-1124.md) Pro subscriptions
-- [epic-1125](../github/epic-1125.md) paid BiteTrails and creator revenue share
+- [epic-1121][#1121] umbrella
+- [epic-1122][#1122] entitlement foundation and Pro gating
+- [epic-1123][#1123] AdMob advertising
+- [epic-1124][#1124] Pro subscriptions
+- [epic-1125][#1125] paid BiteTrails and creator revenue share
 
 ## Sources Used
 
@@ -124,4 +124,11 @@ Monetization
 - [Market Place](../domain/market-place.md)
 - [User](../domain/user.md)
 
+[#735]: https://github.com/muhammedgaygisiz/travellers-apps/issues/735
+[#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
 [#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
+[#1121]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1121
+[#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
+[#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
+[#1124]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1124
+[#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125

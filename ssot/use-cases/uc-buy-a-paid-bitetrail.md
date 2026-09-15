@@ -95,8 +95,8 @@ Not implemented. Today a BiteTrail has `price` and `currency`, and saving one as
 
 - [Personas](../product/personas.md) - the food lover and the traveler this page used to name as actors
 - [Monetization](../product/monetization.md) - the free and paid boundary. A product page, not a domain
-- [epic-1121](../github/epic-1121.md) - the monetization umbrella
-- [epic-1125](../github/epic-1125.md) - this page's stage epic, shared with [UC - Earn From A Paid BiteTrail](uc-earn-from-a-paid-bitetrail.md)
+- [epic-1121][#1121] - the monetization umbrella
+- [epic-1125][#1125] - this page's stage epic, shared with [UC - Earn From A Paid BiteTrail](uc-earn-from-a-paid-bitetrail.md)
 - [UC - Earn From A Paid BiteTrail](uc-earn-from-a-paid-bitetrail.md) - what the creator gets from this purchase
 - [UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale.md) - pricing and publishing the trail being bought
 - [UC - Discover BiteTrails In The Marketplace](uc-discover-bitetrails-in-the-marketplace.md) - finding it beforehand

@@ -1,3 +1,0 @@
-- [chore: check Arabic](https://github.com/muhammedgaygisiz/travellers-apps/issues/740) (Issue \#740)
-- Description
-  - No description provided.

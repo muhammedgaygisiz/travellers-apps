@@ -16,7 +16,7 @@ Target public launch period: 3 August 2026 to 16 August 2026.
 
 BiteTribe is completing Phase 2 (Product Intelligence) as of 19 August 2026. The original Phase 3 window of 3 to 16 August 2026 passed without a release candidate and is recorded below as missed rather than quietly rewritten.
 
-The product is not yet in public launch mode. All launch-blocking **code** work is complete: Phase 1's backend work, the onboarding assistant ([epic-850](../github/epic-850.md)), and the enforced-mode App Check startup gate from issue 933, which landed and is now switched on for the release candidate. What remains is not implementation but proof and paperwork.
+The product is not yet in public launch mode. All launch-blocking **code** work is complete: Phase 1's backend work, the onboarding assistant ([epic-850](../records/epic-850.md)), and the enforced-mode App Check startup gate from issue 933, which landed and is now switched on for the release candidate. What remains is not implementation but proof and paperwork.
 
 Where the three release-candidate gates stand. All three closed by 30 August 2026, and **the release candidate is cut**: build 1.0.1 (96) is distributed on both tracks and installed on hardware from each. The gate history is kept below rather than collapsed, because two of these were open for a month and the reasons are worth keeping:
 

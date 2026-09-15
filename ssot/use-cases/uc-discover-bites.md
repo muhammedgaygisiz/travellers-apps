@@ -5,7 +5,7 @@
 **Level:** L0.
 Supported today. The feed, its map view, search and filter, and the location-bounded
 loading with its timeouts and error separation all ship. The Pro widening of the radius is
-specified but not built, [epic-1122](../github/epic-1122.md).
+specified but not built, [epic-1122][#1122].
 
 ## Goal
 
@@ -27,7 +27,7 @@ them.
 - User can filter or search within the feed.
 - An empty feed and an empty search result are two different states and never share their copy. `No bites found. Be the first one.` invites a first Bite and is only correct when there is nothing to show; a search that excluded everything names the term instead and offers to clear it, because the Bites are still there and the next action is to change the search, not to create. See issue [#1331].
 - Nearby Bites can be loaded through backend-assisted location loading.
-- `loadBitesByLocation` loads a fixed 15 km radius around the reported position. This radius is the free tier. Loading a position other than the current one, or a radius beyond 15 km, becomes a Pro capability through [epic-1122](../github/epic-1122.md). See [Monetization](../product/monetization.md).
+- `loadBitesByLocation` loads a fixed 15 km radius around the reported position. This radius is the free tier. Loading a position other than the current one, or a radius beyond 15 km, becomes a Pro capability through [epic-1122][#1122]. See [Monetization](../product/monetization.md).
 - When live Bite updates add markers, the map should preserve the user's current pan and zoom after the initial marker fit.
 - Every step of a feed load is bounded in time, and the loading state always resolves into either bites or a named failure. The position read gives up after fifteen seconds and the `loadBitesByLocation` call after twenty, because both sit in front of the Home skeleton: iOS hands the position request to CoreLocation without a timeout of its own, so a device that produced no fix — the state a phone can sit in right after regaining connectivity — kept the feed hidden until the app was force-quit, the case in GitHub issue [#1230].
 - A position read that lands under the movement threshold ends the initial load itself, because it deliberately skips the refetch and no later event would clear the loading state.
@@ -43,7 +43,7 @@ separated location and synchronization errors, and the resynchronization on rega
 connectivity. All of it ships today.
 
 **[Secondary]** — loading a position other than the current one, and any radius beyond
-15 km. Specified as a Pro capability under [epic-1122](../github/epic-1122.md) and not built. See
+15 km. Specified as a Pro capability under [epic-1122][#1122] and not built. See
 [Monetization](../product/monetization.md).
 
 ## App Store Review Area
@@ -72,9 +72,10 @@ onboarding rather than from this flow — see [UC - Guide New Users After Regist
 
 - [Personas](../product/personas.md) — the audiences this feed serves: Food lover, Traveler, Bite creator
 - [Monetization](../product/monetization.md)
-- [epic-1122](../github/epic-1122.md)
+- [epic-1122][#1122]
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
 - [UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md)
 
+[#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
 [#1230]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1230
 [#1331]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1331

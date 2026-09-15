@@ -3,7 +3,7 @@
 ## Status
 
 **Level:** L0.
-Supported today. Delivered through [epic-850](../github/epic-850.md) (issue [#850] closed 17 July 2026; all nine
+Supported today. Delivered through [epic-850](../records/epic-850.md) (issue [#850] closed 17 July 2026; all nine
 sub-issues complete). The blocking assistant, its seven steps, the funnel analytics and the
 coach-mark sequence all ship. Onboarding is the app's first-run permission surface, which is
 what makes `App Store Review Area` below the substantial section on this page.
@@ -137,7 +137,7 @@ permission surface, so the purpose strings are read here before any other screen
 - [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md) - where the camera and photo permissions are then
   used
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
-- [epic-850](../github/epic-850.md)
+- [epic-850](../records/epic-850.md)
 
 [#812]: https://github.com/muhammedgaygisiz/travellers-apps/issues/812
 [#841]: https://github.com/muhammedgaygisiz/travellers-apps/issues/841

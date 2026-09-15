@@ -31,20 +31,20 @@ A good Bite makes one concrete dish understandable enough that another person ca
 - A tag typed on the Bite form is committed by a delimiter, by Enter, by
   leaving the field, and by submitting the form. The field is live state that
   nothing else drains, so a tag left in it used to be posted as nothing at all.
-  See issue [#1391] and [issue-1391](../github/issue-1391.md).
+  See issue [#1391] and [issue-1391](../records/issue-1391.md).
 - A Bite can be liked, but not by its own creator. On their own Bite the
   creator still sees the reaction chip, as a read-only label rather than a
   control, and it is left out entirely while the Bite has no reactions yet. See
-  [issue-1401](../github/issue-1401.md).
+  [issue-1401](../records/issue-1401.md).
 - A Bite can be reviewed.
 - A review can be answered. A root review opens a thread, any authenticated user
   may reply inside it, and replies are one level deep. A new root review is a new
-  conversation, not a continuation of an existing one. See [issue-1283](../github/issue-1283.md).
+  conversation, not a continuation of an existing one. See [issue-1283](../records/issue-1283.md).
 - A Bite can be added to bucket lists.
 - A Bite can be part of BiteTrail-based journeys.
 - A Bite is the only entity with a public share link and a native deep link
   (`/s/bite/*`). Users, bucket lists, restaurants, and BiteTrails are not
-  shareable. See [issue-1190](../github/issue-1190.md).
+  shareable. See [issue-1190](../records/issue-1190.md).
 - A Bite should have an image because the image is a core trust signal.
 - Deleting a Bite currently deletes the Firestore document and attempts to delete its stored image.
 - Deleting a Bite must decrement the creator's `biteCount` aggregate because Bite creation increments it.
@@ -169,7 +169,7 @@ Current implementation notes:
 - The Bite page warns users when the entered price looks suspiciously high.
 - Uploaded Bite images are stored below `images/bites/{biteId}/{filename}`.
 - `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized.
-- A photo upload that fails is offered back to the poster as a retry, but only when the device reports a connection. Offline the failed tile says so instead, because a retry started with no network cannot upload and only earns the poster another thirty-second stall before the same failure. `BiteImageStatusComponent` owns that rule for every surface that shows a Bite photo. See [issue-1390](../github/issue-1390.md).
+- A photo upload that fails is offered back to the poster as a retry, but only when the device reports a connection. Offline the failed tile says so instead, because a retry started with no network cannot upload and only earns the poster another thirty-second stall before the same failure. `BiteImageStatusComponent` owns that rule for every surface that shows a Bite photo. See [issue-1390](../records/issue-1390.md).
 - The current delete flow removes the Bite document and attempts to remove the image file.
 - The operator delete removes children and references first and the Bite document **last**. Every read path resolves through the document, so while it exists the Bite is still findable and a failed run is a retry; the other way round, a failure halfway would leave an image, a set of likes and a pile of reviews with no document left to reach them from. `deleteOwnAccount` orders its cascade the same way and for the same reason.
 - The operator delete unions two sources for the image: everything under `images/bites/{biteId}/` — which catches the object an edited Bite replaced, since each upload is a fresh UUID under one prefix — and the object `imagePath` names, added unconditionally so the one image whose survival would be visible does not depend on the listing succeeding.
@@ -191,8 +191,8 @@ Current product expectation:
 - Admin
   - Delete any Bite, through `deleteBiteAsOperator` with a reason. This is the one modeled operator capability over a Bite.
   - Editing somebody else's Bite is deliberately not one: an operator can remove a Bite or leave it, and nothing in between.
-  - Hiding, tombstoning and notifying the author are out of scope by decision, not by omission. See [epic-1471](../github/epic-1471.md).
-  - The report queue that would surface the Bites needing removal belongs to [epic-1284](../github/epic-1284.md).
+  - Hiding, tombstoning and notifying the author are out of scope by decision, not by omission. See [epic-1471](../records/epic-1471.md).
+  - The report queue that would surface the Bites needing removal belongs to [epic-1284](../records/epic-1284.md).
 
 ## Use Cases
 
@@ -304,7 +304,7 @@ images/bites/{biteId}/{filename}
   query per Bite and the grouping into threads happens on the client, in
   `toReviewThreads`. The read still has no `orderBy`; ordering is applied to the
   loaded set instead, which keeps the query unindexed and puts the rule in one
-  tested place. See [issue-1283](../github/issue-1283.md).
+  tested place. See [issue-1283](../records/issue-1283.md).
 - Reviews written before `authorId` was declared on the `Review` interface —
   `saveNewReview` has always written it — cannot be attributed to a user.
   Notification fan-out skips them rather than failing, and the gap self-heals as
@@ -321,7 +321,7 @@ images/bites/{biteId}/{filename}
   `loadReviewsByBiteId` build it the same way, so it is self-consistent; only
   the two notification triggers unpick it, with `split('/').pop()`. Not a
   legacy shape — it is what every review write produces today.
-- Guest permissions and admin moderation are not clearly expressed as current Bite-domain capabilities. [epic-1284](../github/epic-1284.md) owns closing that gap for review threads.
+- Guest permissions and admin moderation are not clearly expressed as current Bite-domain capabilities. [epic-1284](../records/epic-1284.md) owns closing that gap for review threads.
 
 ## Future Ideas
 

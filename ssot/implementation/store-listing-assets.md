@@ -58,8 +58,8 @@ Set on the App Store on 21 August 2026.
 The base region is the territory Apple does **not** auto-adjust for tax and
 foreign-exchange movement. It has no effect while the app is free, and it was
 set to Switzerland to match the developer entity — the Android upload
-certificate reads `C=CH, ST=Berne`. Pro subscriptions ([epic-1124](../github/epic-1124.md)) and paid
-BiteTrails ([epic-1125](../github/epic-1125.md)) each choose their own base territory, so this field
+certificate reads `C=CH, ST=Berne`. Pro subscriptions ([epic-1124][#1124]) and paid
+BiteTrails ([epic-1125][#1125]) each choose their own base territory, so this field
 stays cosmetic even once there is revenue.
 
 Content Rights is answered **yes, with the necessary rights**, because the app
@@ -115,7 +115,7 @@ name being written down as text:
 - The GitHub project board is literally named `Bite Tribe`. Documentation that
   names it is describing an external identifier, not the product. Renaming the
   board is a separate operational decision.
-- [issue-1265](../github/issue-1265.md) and [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md) record
+- [issue-1265](../records/issue-1265.md) and [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md) record
   dated console state and observed mail headers. Rewriting a past observation
   would make it assert something that was never true.
 - Historical changelog entries under `build-*` quote past commit subjects.
@@ -130,7 +130,7 @@ the two apart. The handle is `bitetribeapp` and the display name is
 
 The rename moved two values that live outside this repository, and both must be
 changed before the next functions deploy or the registration and resend mails
-present two identities again — the exact defect [issue-1265](../github/issue-1265.md) closed:
+present two identities again — the exact defect [issue-1265](../records/issue-1265.md) closed:
 
 1. The Firebase Auth `Email address verification` template subject, to
    `Verify your BiteTribe email address`.
@@ -258,9 +258,9 @@ Every claim maps to a use case marked _Supported today_ in [SSOT](../README.md):
 Four things are **deliberately absent** because they are not in the shipped
 build, and naming them would be a promise the app does not keep:
 
-- BiteTribe Pro and subscriptions ([epic-1124](../github/epic-1124.md)).
-- Advertising ([epic-1123](../github/epic-1123.md)).
-- Buying paid BiteTrails ([epic-1125](../github/epic-1125.md)) — discovering and saving them ships,
+- BiteTribe Pro and subscriptions ([epic-1124][#1124]).
+- Advertising ([epic-1123][#1123]).
+- Buying paid BiteTrails ([epic-1125][#1125]) — discovering and saving them ships,
   purchasing does not.
 - The business app. This listing is the consumer product.
 
@@ -787,7 +787,7 @@ These are account-level and gate submission regardless of listing completeness:
   Account Holder to accept it.~~ **Done.** Verified in the console on 29 August
   2026: the Free Apps Agreement is `Active`, effective 23 August 2026 to 13 April 2027. The Paid Apps Agreement is still `New` and unsigned, and needs the legal
   entity updated before it can be signed - that gates in-app purchases, so it
-  belongs to the monetization epic [epic-1121](../github/epic-1121.md), not to this release.
+  belongs to the monetization epic [epic-1121][#1121], not to this release.
 - ~~Digital Services Act trader status is not provided.~~ **Declared non-trader
   on 30 August 2026.** The Business page now reads "You have completed all
   regulatory requirements at this time", and the Compliance table shows
@@ -824,6 +824,10 @@ These are account-level and gate submission regardless of listing completeness:
 - [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)
 - [ADR-0001 Dish First Product](../decisions/adr-0001-dish-first-product.md)
 
+[#1121]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1121
+[#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
+[#1124]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1124
+[#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
 [#1177]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1177
 [#1178]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1178
 [#1451]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1451

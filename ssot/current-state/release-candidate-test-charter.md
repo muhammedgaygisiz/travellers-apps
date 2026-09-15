@@ -4,7 +4,7 @@
 
 This charter defines the platform test pass that has to be executed before the release candidate is cut. It exists so that "Android, iOS and web tested" on the readiness checklist in [Current State - Release State](release-state.md) means a recorded run against a named build, on named devices, with a named result, instead of an informal click-through.
 
-It covers issue 1176 and belongs to issue 911 under [epic-907](../github/epic-907.md).
+It covers issue 1176 and belongs to issue 911 under [epic-907][#907].
 
 ## Build Under Test
 
@@ -98,16 +98,16 @@ Install the named Google Play Open Testing artifact on a physical device, then e
 1. Registration, the blocking onboarding assistant, and continuation to the home page.
 2. Login, logout, and session restore after a cold start.
 3. Create a Bite with a photo, including the upload failure state and both retry paths.
-4. Location permission grant and denial, Bite currency prefill from the Bite position, and manual currency override. The account default currency suggested during onboarding is a separate check with a separate source: it is derived from the device region through the device time zone, never from the interface language, so a device whose Region and language variant disagree must still suggest the currency of the Region. See [issue-1262](../github/issue-1262.md).
+4. Location permission grant and denial, Bite currency prefill from the Bite position, and manual currency override. The account default currency suggested during onboarding is a separate check with a separate source: it is derived from the device region through the device time zone, never from the interface language, so a device whose Region and language variant disagree must still suggest the currency of the Region. See [issue-1262](../records/issue-1262.md).
 5. Map view, marker selection, the Bite drawer, and camera stability while live updates arrive.
 6. Search for Bites, restaurants and cities.
 7. Bucket list add, swipe to tick, and undo.
 8. Notification permission, and delivery of a ranking-change notification. Issue 971 landed these but device delivery is still unverified.
-9. Deep links into Bite details. Profiles are not shareable and have no deep link; that is the intended product scope, not a missing feature. See [issue-1190](../github/issue-1190.md).
+9. Deep links into Bite details. Profiles are not shareable and have no deep link; that is the intended product scope, not a missing feature. See [issue-1190](../records/issue-1190.md).
 10. Privacy policy and account deletion end to end.
 11. Restaurant menus and local gallery support, which have no Playwright coverage at all.
-12. App Check in enforced mode: a working session, then the retry gate when the token is refused. Google Maps Platform is read separately: Places API (New) at 0% verified is the expected reading and must not be enforced, so the evidence to record is that restaurant, city, and Bite place search still work while the Firebase APIs are enforced. See [issue-1245](../github/issue-1245.md).
-13. Trigger the verification-mail **resend** and read the delivered `From` header and subject in the received mail, not the code that built them. Expect `BiteTribe <noreply@bitetribe.app>` and the catalog subject in the account's language; the one-word spelling landed on 2026-08-21 and only reaches a recipient once the Workspace `Send mail as` display name is updated to match, so a delivered `Bite Tribe` here means that console step is still outstanding. This is a required check rather than an optional one because Gmail rewrites `From` server-side when the delegated mailbox's `Send mail as` list does not carry the address, which happens after the function has already produced a correct header: [issue-1265](../github/issue-1265.md) shipped twice and changed nothing a recipient saw, and no unit test can catch it. Read the resend mail specifically - the registration mail comes from Firebase Auth's own mailer and exercises a different sender path. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
+12. App Check in enforced mode: a working session, then the retry gate when the token is refused. Google Maps Platform is read separately: Places API (New) at 0% verified is the expected reading and must not be enforced, so the evidence to record is that restaurant, city, and Bite place search still work while the Firebase APIs are enforced. See [issue-1245](../records/issue-1245.md).
+13. Trigger the verification-mail **resend** and read the delivered `From` header and subject in the received mail, not the code that built them. Expect `BiteTribe <noreply@bitetribe.app>` and the catalog subject in the account's language; the one-word spelling landed on 2026-08-21 and only reaches a recipient once the Workspace `Send mail as` display name is updated to match, so a delivered `Bite Tribe` here means that console step is still outstanding. This is a required check rather than an optional one because Gmail rewrites `From` server-side when the delegated mailbox's `Send mail as` list does not carry the address, which happens after the function has already produced a correct header: [issue-1265](../records/issue-1265.md) shipped twice and changed nothing a recipient saw, and no unit test can catch it. Read the resend mail specifically - the registration mail comes from Firebase Auth's own mailer and exercises a different sender path. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
 
 ## iOS
 
@@ -200,9 +200,10 @@ assigned for ordering only and each page says so.
 - [Current State - E2E Coverage](e2e-coverage.md)
 - [Implementation - Testing](../implementation/testing.md)
 - [Implementation - Release And Build Workflow](../implementation/release-and-build-workflow.md)
-- [epic-907](../github/epic-907.md)
+- [epic-907][#907]
 - [Issue [#1181] - signed Android and iOS CI builds](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
 
+[#907]: https://github.com/muhammedgaygisiz/travellers-apps/issues/907
 [#986]: https://github.com/muhammedgaygisiz/travellers-apps/issues/986
 [#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
 [#1179]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1179

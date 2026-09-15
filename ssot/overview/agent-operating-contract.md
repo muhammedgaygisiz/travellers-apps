@@ -103,6 +103,22 @@ When finishing, report:
 - Whether Nx was used or bypassed.
 - Any warnings, skipped checks, or remaining risks.
 
+### Where The Report Goes
+
+The report has two halves and two destinations, and neither of them is a page named after
+an issue.
+
+- **The event** - what was found, what changed, what was validated, and what was
+  deliberately not run - is posted as a **comment on the GitHub issue the work closes**,
+  in the shape [GitHub Issue Format](github-issue-format.md) defines under
+  `Closing Report`. It has an author and a date, which is what a comment is for.
+- **The durable rule** the work established - a constraint, an invariant, a corrected
+  fact - is written onto the SSOT page that owns it, and nowhere else.
+
+The SSOT does not mirror GitHub. When the current state of an issue is needed, ask GitHub
+for it (`gh issue view <number>`) rather than reading a copy. Reports written before this
+rule was stated are kept in [records/](../records/README.md) and are not extended.
+
 ## Related Pages
 
 - [SSOT](../README.md)

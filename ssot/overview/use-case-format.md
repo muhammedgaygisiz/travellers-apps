@@ -123,9 +123,11 @@ defect list and not a work plan. Where it needs one of those, it links to it.
   `none`. A code whose behaviour is documented on a page links that page, whatever the
   page is named. A code MUST NOT be claimed for behaviour that an existing page
   already owns — that page's own code is the reference target (`UF-9`).
-- **UF-11** In Logseq, an issue number that opens a line or follows a space is escaped
-  as `\#1472`; inside a table cell or after a word, plain `#1472`. Prefer
-  `[[issue-1472]]` where a mirror page exists.
+- **UF-11** An issue number is written as a reference link: `[#1472]` in the text, with
+  `[#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472` at the end of
+  the page. A bare `#1472` does not link on GitHub, and at the start of a line it renders
+  as a heading. Where the sentence needs words around it, the text is kept and the
+  reference reused - `[Issue #1472][#1472]`.
 
 ## Exceptions And Failure Modes
 

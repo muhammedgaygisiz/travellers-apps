@@ -90,8 +90,8 @@ touch are:
 - [Personas](../product/personas.md) - the food curator or vlogger this behaviour used to be described for
 - [Monetization](../product/monetization.md) - the revenue-share rule and the free and paid boundary. A product page, not
   a domain
-- [epic-1121](../github/epic-1121.md) - the monetization umbrella, which sequences the three revenue channels
-- [epic-1125](../github/epic-1125.md) - this page's stage epic, shared with [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md)
+- [epic-1121][#1121] - the monetization umbrella, which sequences the three revenue channels
+- [epic-1125][#1125] - this page's stage epic, shared with [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md)
 - [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md) - the purchase that produces a sale
 - [UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale.md) - pricing and publishing, and the gate that
   reads this page's onboarding

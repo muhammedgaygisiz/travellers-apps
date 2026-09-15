@@ -73,7 +73,7 @@ collection itself.
 - Adding a migration means adding a name, its runner, its copy and its dashboard
   entry — not another copy of the state handling.
 
-Registered today: `review-timestamps` ([issue-1283](../github/issue-1283.md)) and `menu-item-ids`
+Registered today: `review-timestamps` ([issue-1283](../records/issue-1283.md)) and `menu-item-ids`
 (issue [#1099]).
 
 `menu-item-ids` is the second registration, and it is the first evidence that
@@ -158,7 +158,7 @@ reaches a device is the new version announcement, whose store considerations bel
   which owns what the announcement says and to which installations
 - [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md) - the order lines that point at the menu item
   ids `menu-item-ids` fills
-- [issue-1283](../github/issue-1283.md)
+- [issue-1283](../records/issue-1283.md)
 
 [#1099]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1099
 [#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472

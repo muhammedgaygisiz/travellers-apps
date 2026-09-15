@@ -29,7 +29,7 @@ itself belong to [UC - Create And Maintain Personal Bites](uc-create-and-maintai
 
 What ships today:
 
-- App suggests the user's default currency during onboarding from the device region, read through the device time zone rather than through the interface language. See [issue-1262](../github/issue-1262.md).
+- App suggests the user's default currency during onboarding from the device region, read through the device time zone rather than through the interface language. See [issue-1262](../records/issue-1262.md).
 - App prefills Bite currency from the selected Bite position when the backend can resolve a country currency.
 - User preferred currency remains the fallback when the position is missing or currency resolution fails.
 - User can manually correct the selected currency before saving.
@@ -75,7 +75,7 @@ changed what [Implementation - Store Declarations](../implementation/store-decla
 - Issue [#978] covers currency prefill edge-case verification. Closed as completed on its
   own final acceptance criterion, that no extra mismatch-warning UI is added unless
   prefill-plus-override proves insufficient.
-- [issue-1262](../github/issue-1262.md) moved the onboarding default currency suggestion from the interface
+- [issue-1262](../records/issue-1262.md) moved the onboarding default currency suggestion from the interface
   language to the device region.
 
 ## Related Domains

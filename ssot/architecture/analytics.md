@@ -30,7 +30,7 @@ Two consequences. A disabled **native** collection flag silences the app's own
 events on a device, not only the auto-collected ones. And an event sent through
 the JS SDK from a native platform lands on a different measurement path than
 every other event the same device produces, which is what `exception` did until
-[issue-1387](../github/issue-1387.md).
+[issue-1387](../records/issue-1387.md).
 
 ## Collection Flag Rule
 
@@ -49,7 +49,7 @@ window flag that nothing persists and would eagerly initialize web analytics for
 apps that never asked for it.
 
 The general rule: a dev-only branch may not leave persistent native state that
-no production path asserts back. See [issue-1387](../github/issue-1387.md) for what one unbalanced
+no production path asserts back. See [issue-1387](../records/issue-1387.md) for what one unbalanced
 call cost.
 
 ## Common Events
@@ -93,7 +93,7 @@ it already was.
 
 Before issue 1098 the guard was per app: the whole service returned early in
 the business app, because every event it knew belonged to the consumer one. The
-table operations of [epic-1071](../github/epic-1071.md) are the first events the business app owns.
+table operations of [epic-1071][#1071] are the first events the business app owns.
 
 ## One Property, Two Apps
 
@@ -131,3 +131,5 @@ libs/bite-tribe-business/table-management/page/src/lib/integration/table-plan.se
 
 - Screen tracking is spread across route containers.
 - Analytics support depends on platform/runtime support.
+
+[#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071

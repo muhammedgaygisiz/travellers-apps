@@ -125,7 +125,7 @@ A creator who packages local food knowledge into curated recommendations or jour
 **Next opportunities**
 
 - Complete marketplace packages, free BiteTrail access, assigned-user workflows, sold counters, ratings, badges, and creator-facing BiteTrail management.
-- Selling paid BiteTrails and earning 80 percent of net proceeds, with payout onboarding and an earnings dashboard. See [Monetization](monetization.md) and [epic-1125](../github/epic-1125.md).
+- Selling paid BiteTrails and earning 80 percent of net proceeds, with payout onboarding and an earnings dashboard. See [Monetization](monetization.md) and [epic-1125][#1125].
 
 ## Restaurant owner or business maintainer
 
@@ -176,7 +176,7 @@ A person who has just registered and does not yet understand how to participate 
 
 **Next opportunities**
 
-- Onboarding assistant for username, motivation, public profile, default currency, favorite currencies, and first actions. See [epic-850](../github/epic-850.md).
+- Onboarding assistant for username, motivation, public profile, default currency, favorite currencies, and first actions. See [epic-850](../records/epic-850.md).
 
 ## Privacy-conscious participant
 
@@ -241,3 +241,5 @@ A user who wants the value of food discovery without unnecessary public exposure
 - [Glossary](glossary.md)
 - Use Cases section in [SSOT](../README.md)
 - Epics section in [SSOT](../README.md)
+
+[#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125

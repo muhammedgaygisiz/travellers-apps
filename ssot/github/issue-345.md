@@ -1,3 +1,0 @@
-- [Kavi wants to offer QR Code at the table to order digitally bites](https://github.com/muhammedgaygisiz/travellers-apps/issues/345) (Issue \#345)
-- Description
-  - No description provided.

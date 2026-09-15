@@ -103,10 +103,10 @@ Not implemented. The surfaces this will touch are:
 - [Personas](../product/personas.md) - the food lover and the traveler this page used to name as actors
 - [Monetization](../product/monetization.md) - the free and paid boundary, and why reach is the thing sold. A product
   page, not a domain
-- [epic-1121](../github/epic-1121.md) - the monetization umbrella, which sequences the three revenue channels and
+- [epic-1121][#1121] - the monetization umbrella, which sequences the three revenue channels and
   holds the product decisions the stage epics share
-- [epic-1124](../github/epic-1124.md) - this page's stage epic
-- [epic-1122](../github/epic-1122.md) - the entitlement foundation it waits on
+- [epic-1124][#1124] - this page's stage epic
+- [epic-1122][#1122] - the entitlement foundation it waits on
 - [UC - See Ads As A Free User](uc-see-ads-as-a-free-user.md) - what a subscription switches off
 - [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md) - the one-off purchase that reuses these rails
 - [Implementation - Store Declarations](../implementation/store-declarations.md) - the revenue line this page makes false

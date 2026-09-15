@@ -28,7 +28,7 @@ signed-in account, and the follow relation.
 - Profile identity is used in search and Bite trust context.
 - Profile Bites are always listed newest first. The profile is a timeline of what
   a user cooked or ate, so it ignores the distance sorting and the my-bites
-  filters. See [issue-1118](../github/issue-1118.md).
+  filters. See [issue-1118](../records/issue-1118.md).
 - While a profile loads, the page shows a skeleton in the shape of the loaded
   profile instead of the field fallbacks. Placeholder values such as the FREE
   badge must never be shown for a profile that has not arrived yet, because the
@@ -108,7 +108,7 @@ deletion flow; knowing who you are is the same question asked earlier.
   someone outside the app.
 - Sharing is a Bite capability. Making profiles shareable would be a new product
   decision with its own privacy handling, not a completion of existing work. See
-  [issue-1190](../github/issue-1190.md) and [UC - Inspect Bite Details](uc-inspect-bite-details.md).
+  [issue-1190](../records/issue-1190.md) and [UC - Inspect Bite Details](uc-inspect-bite-details.md).
 
 ## MVP Classification
 
@@ -150,8 +150,8 @@ by the name, photo and user-ID entries declared in [Implementation - Store Decla
 - [UC - Inspect Bite Details](uc-inspect-bite-details.md) — the same two-names confusion on a surface that publishes
 - [UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md) — where the photo and location permissions
   are collected
-- [issue-1118](../github/issue-1118.md)
-- [issue-1190](../github/issue-1190.md)
+- [issue-1118](../records/issue-1118.md)
+- [issue-1190](../records/issue-1190.md)
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
 
 [#1166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1166

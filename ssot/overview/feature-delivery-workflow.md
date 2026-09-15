@@ -50,6 +50,7 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
 7. Merge.
    - Merge the PR when required checks are successful.
    - Ignore the Codecov coverage step when it is the only remaining blocker.
+   - Post the closing report as a comment on the issue, in the shape [GitHub Issue Format](github-issue-format.md) defines under `Closing Report`, and write any durable rule it produced onto the SSOT page that owns it.
    - Move the issue to Done after the PR is merged and the behavior is verified.
 
 ## Local Verification Checklist
@@ -65,6 +66,7 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
 
 - Keep issue priority, status, branch, PR, and SSOT context aligned.
 - Report exactly which local checks were run.
+- Post the closing report on the issue rather than into a file named after it.
 - Mention any check that was skipped and why.
 - Preserve unrelated local changes.
 - Do not merge unless the user explicitly asks for merge or the workflow step is clearly delegated.

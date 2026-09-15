@@ -17,7 +17,7 @@ repository, and [Traceability Map](overview/traceability-map.md) to find the pag
 | [implementation/](implementation/) | How the constraints are realised in code and CI                                      |
 | [current-state/](current-state/)   | What is true right now: roadmap, known issues, release state                         |
 | [decisions/](decisions/)           | ADRs and the `RD-*` decision register                                                |
-| [github/](github/)                 | Mirrors of the open `P0` epics and their sub-issues                                  |
+| [records/](records/)               | Closing records for work already done. History, not specification                    |
 | [test-runs/](test-runs/)           | Release-candidate execution records                                                  |
 | [releases/](releases/)             | Changelog and per-build pages                                                        |
 | [operations/](operations/)         | Running the product day to day                                                       |
@@ -108,24 +108,16 @@ repository, and [Traceability Map](overview/traceability-map.md) to find the pag
 
 ## Epics
 
-- [epic-735](github/epic-735.md)
-- [epic-738](github/epic-738.md)
-- [epic-850](github/epic-850.md)
-- [epic-907](github/epic-907.md)
-- [epic-1029](github/epic-1029.md)
-- [epic-1069](github/epic-1069.md)
-- [epic-1070](github/epic-1070.md)
-- [epic-1071](github/epic-1071.md)
-- [epic-1072](github/epic-1072.md)
-- [epic-1073](github/epic-1073.md)
-- [epic-1121](github/epic-1121.md)
-- [epic-1122](github/epic-1122.md)
-- [epic-1123](github/epic-1123.md)
-- [epic-1124](github/epic-1124.md)
-- [epic-1125](github/epic-1125.md)
-- [epic-1284](github/epic-1284.md)
-- [epic-1471](github/epic-1471.md)
-- [epic-1487](github/epic-1487.md)
+Epics are GitHub issues titled `epic: …` and are **not mirrored here** - a copy drifts the
+day it is written. For the current set, ask GitHub:
+
+```bash
+gh issue list -R muhammedgaygisiz/travellers-apps --search 'is:open epic: in:title'
+```
+
+Their priority is the `Priority` field on the `Bite Tribe` project board, not a label; see
+[GitHub Project Board And Issue Handling](overview/github-project-board-and-issue-handling.md).
+Closing records for epics that produced one are in [records/](records/README.md).
 
 ## Architecture
 
@@ -191,3 +183,16 @@ repository, and [Traceability Map](overview/traceability-map.md) to find the pag
 ## Releases
 
 - [Changelog](releases/changelog.md)
+
+[#735]: https://github.com/muhammedgaygisiz/travellers-apps/issues/735
+[#738]: https://github.com/muhammedgaygisiz/travellers-apps/issues/738
+[#907]: https://github.com/muhammedgaygisiz/travellers-apps/issues/907
+[#1070]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1070
+[#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071
+[#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
+[#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
+[#1121]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1121
+[#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
+[#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
+[#1124]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1124
+[#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125

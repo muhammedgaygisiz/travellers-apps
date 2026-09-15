@@ -159,7 +159,7 @@ Defects filed: [#1229], [#1230], [#1231], [#1232], [#1233], [#1234]
 
 ## Session 16 - Disposable-Account Deletion
 
-- The deletion page did not identify the signed-in disposable account before the irreversible action. [Issue #1234][#1234] now names the account on the page and repeats it in the final confirmation and the password prompt, and refuses a deletion whose signed-in account is no longer the confirmed one (see [issue-1234](../github/issue-1234.md)). Reverification on a physical iOS device through TestFlight is still open.
+- The deletion page did not identify the signed-in disposable account before the irreversible action. [Issue #1234][#1234] now names the account on the page and repeats it in the final confirmation and the password prompt, and refuses a deletion whose signed-in account is no longer the confirmed one (see [issue-1234](../records/issue-1234.md)). Reverification on a physical iOS device through TestFlight is still open.
 - The deletion contract and final destructive action were otherwise understandable.
 - Password reauthentication was requested before deletion, and a visible progress state appeared.
 - Deletion completed within two minutes and returned the app automatically to the unauthenticated Start screen.

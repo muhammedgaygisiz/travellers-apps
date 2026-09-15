@@ -76,7 +76,7 @@ Defects filed: [#1217], [#1218], [#1219]
 ## Session 7 - Privacy And Account-Deletion Entry Points
 
 - The Privacy Policy entry was discoverable in the app and the document loaded successfully.
-- With the app language set to German, the policy was displayed in English; this new localization defect is tracked by [issue #1218][#1218]. Fixed: the policy is published in all eleven app languages, and any language without policy copy gets the English document with a notice in its own language saying so (see [issue-1218](../github/issue-1218.md)). Recheck the German policy on a physical device in the next pass.
+- With the app language set to German, the policy was displayed in English; this new localization defect is tracked by [issue #1218][#1218]. Fixed: the policy is published in all eleven app languages, and any language without policy copy gets the English document with a notice in its own language saying so (see [issue-1218](../records/issue-1218.md)). Recheck the German policy on a physical device in the next pass.
 - The Delete Account entry was discoverable.
 - Its warning and consequences were understandable, and the flow could be cancelled safely before destructive confirmation.
 - Result: pass for the non-destructive entry-point portion of issue [#1182]. End-to-end deletion with a disposable account remains unverified.

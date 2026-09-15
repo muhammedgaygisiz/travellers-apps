@@ -14,7 +14,7 @@ publish step, no draft and no published flag: a BiteTrail is live the moment it 
 
 The organisation dashboard that used to sit in front of this flow is gone with its
 `:organisationId` routes and its "employees" list, which read a field nothing ever wrote and
-was therefore always empty; see [issue-1371](../github/issue-1371.md). That is also why issue [#266]'s "assigned users"
+was therefore always empty; see [issue-1371](../records/issue-1371.md). That is also why issue [#266]'s "assigned users"
 describes a mechanism which no longer exists.
 
 Who may reach any of this is unsettled. The door is `roleGuard('business', 'staff')` on both
@@ -77,7 +77,7 @@ owner is the signed-in user.
 
 - Issue [#266], the packaging epic, covered BiteTrail creation from selected Bites, free
   BiteTrail access and marketplace listing. Closed as completed. Its "assigned users" half
-  describes the organisation mechanism [issue-1371](../github/issue-1371.md) removed and no longer exists
+  describes the organisation mechanism [issue-1371](../records/issue-1371.md) removed and no longer exists
 - Issue [#1615] decides whether a BiteTrail curator is a role or a persona, which is this page's
   actor. Open
 

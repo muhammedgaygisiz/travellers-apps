@@ -18,7 +18,7 @@
 
 - Completed or landed toward launch:
   - Firebase App Check hardening (monitoring and remaining fixes) has landed through issue 908; the App Check bootstrap and telemetry are in place. Issue 933's enforced-mode startup gate has since landed and is switched on for the release candidate, so no App Check code work remains.
-  - The onboarding assistant has landed through [epic-850](../github/epic-850.md) (issue 850 closed 17 July 2026, all nine sub-issues complete).
+  - The onboarding assistant has landed through [epic-850](../records/epic-850.md) (issue 850 closed 17 July 2026, all nine sub-issues complete).
   - Intermittent Bite photo upload failures have been addressed through issue 927 (closed 13 July 2026).
   - Bite address enrichment and city search have landed through issue 974.
   - Location-based Bite currency prefill has landed through issue 909 / PR [#965].
@@ -83,7 +83,7 @@
 - Angular 22 is not a release-candidate prerequisite; it follows only after the Nx 23 workspace is stable and the Angular 22 dependency prerequisites are available.
 - ### Onboarding assistant
 
-  The onboarding assistant ([epic-850](../github/epic-850.md)) has landed. Issue [#850] was closed as completed on 17 July 2026 with all nine sub-issues done, so the first real users onboard through it.
+  The onboarding assistant ([epic-850](../records/epic-850.md)) has landed. Issue [#850] was closed as completed on 17 July 2026 with all nine sub-issues done, so the first real users onboard through it.
 
 - Blocking assistant after registration: unique display name, public/private decision, currency, language, notification priming (issues 1011 to 1015, 1023). Landed.
 - Completion flag plus must-dismiss feature coach marks (issue 1016). Landed.
@@ -133,12 +133,12 @@
 - Talk to users.
 - ### Monetization preparation
 
-  [Monetization](../product/monetization.md) is Priority P1 and post-launch. [epic-1121](../github/epic-1121.md) is the umbrella over four stage epics covering the entitlement foundation, AdMob advertising, Pro subscriptions, and paid BiteTrails.
+  [Monetization](../product/monetization.md) is Priority P1 and post-launch. [epic-1121][#1121] is the umbrella over four stage epics covering the entitlement foundation, AdMob advertising, Pro subscriptions, and paid BiteTrails.
 
 - None of it blocks the public launch.
 - It is prepared during this phase rather than after it, because store products and review, RevenueCat setup, the consent flow, and creator payout onboarding all have lead time that cannot be compressed once the decision to monetize is made.
 - The ads channel can start first. It needs no purchase rails, no store products and no payout infrastructure, and only its "hide ads for Pro" child depends on the entitlement work.
-- The entitlement foundation ([epic-1122](../github/epic-1122.md)) also corrects a live defect: `createUserOnAuthCreate` currently writes `subscriptionTier: 1` for every new account, which would grant Pro to the entire user base on the first release that enforces a gate.
+- The entitlement foundation ([epic-1122][#1122]) also corrects a live defect: `createUserOnAuthCreate` currently writes `subscriptionTier: 1` for every new account, which would grant Pro to the entire user base on the first release that enforces a gate.
 - ## Strategic Rule
 
   After launch, resist adding major new features until the product has enough real usage signals to show what people actually value.
@@ -154,3 +154,5 @@
 [#850]: https://github.com/muhammedgaygisiz/travellers-apps/issues/850
 [#965]: https://github.com/muhammedgaygisiz/travellers-apps/issues/965
 [#981]: https://github.com/muhammedgaygisiz/travellers-apps/issues/981
+[#1121]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1121
+[#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122

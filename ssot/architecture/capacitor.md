@@ -388,7 +388,7 @@ installation list and re-reads the permission. Returning from the system
 settings page to a Settings page that is still mounted does not re-read it — the
 same limitation iOS has, and not addressed by [#1386].
 
-See [issue-1386](../github/issue-1386.md) for what reading a revoked Android permission as "not decided
+See [issue-1386](../records/issue-1386.md) for what reading a revoked Android permission as "not decided
 yet" cost.
 
 ### Device Metadata Source Rule

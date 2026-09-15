@@ -81,7 +81,7 @@ Neither is a question to answer before the behaviour is scoped.
 
 - [Personas](../product/personas.md) - the food lover, the traveler and the restaurant owner this page used to name
   as actors
-- [epic-735](../github/epic-735.md) - the platform epic that draws the boundary
+- [epic-735][#735] - the platform epic that draws the boundary
 - [UC - Browse Restaurants And Places](uc-browse-restaurants-and-places.md) - the restaurant page these actions would sit on
 - [UC - View Restaurant Menus](uc-view-restaurant-menus.md) - the menu route in, and the two actions that left this page
 - [UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md) - where a dish's availability is set

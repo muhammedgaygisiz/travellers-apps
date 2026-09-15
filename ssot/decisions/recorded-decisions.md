@@ -51,7 +51,7 @@ Taken 9 September 2026.
 | #         | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `RD-GL-1` | **Place is the Bite-side term; Restaurant is the verified entity.** Every Bite carries a `place`; that place is unmatched, or a Candidate, or verified into a Restaurant. The alternative considered was naming the Bite-side concept _Restaurant_ with three states and calling the record a _verified Restaurant_ - refused, because it renames both a field and an entity to gain nothing the two words do not already carry                                                                                                                    |
-| `RD-GL-2` | **"Restaurant profile" is retired as a domain term.** It resolved to three different things: the public restaurant page, the completeness scope of the use case that carried that name, and the removed `PublicUser.isRestaurant` account type ([issue-1371](../github/issue-1371.md)). The first is a surface, the second is [Restaurant](../domain/restaurant.md), the third no longer exists. "Restaurant profile page" survives as UI wording only                                                                                             |
+| `RD-GL-2` | **"Restaurant profile" is retired as a domain term.** It resolved to three different things: the public restaurant page, the completeness scope of the use case that carried that name, and the removed `PublicUser.isRestaurant` account type ([issue-1371](../records/issue-1371.md)). The first is a surface, the second is [Restaurant](../domain/restaurant.md), the third no longer exists. "Restaurant profile page" survives as UI wording only                                                                                            |
 | `RD-GL-3` | **Restaurant claim and Restaurant ownership are two terms, not one.** A claim is the step _before_ ownership - settling who should own a restaurant that has none; ownership is the state that one account is accountable for it. The claim is not a record: [#1076] declined the self-service flow and [#1077] removed the `RestaurantClaim` model, so a claim is settled off-system and reaches BiteTribe as the operator's assignment and its reason. Renaming claim to ownership was considered and refused - it collapses two states into one |
 | `RD-GL-4` | **A glossary term is human-readable; a code identifier is an attribute of it.** `RestaurantCandidate` does not contradict _Restaurant candidate_, and `Bucketlist`, `BucketList` and `bucketlistId` do not contradict _Bucket list_. Differences of case or spacing between [Glossary](../product/glossary.md) and the code are therefore not drift and are not tracked as findings. Whether the code identifiers should be unified among themselves is a code question, not a glossary one                                                        |
 
@@ -59,7 +59,7 @@ Taken 9 September 2026.
 
 Taken 13 September 2026, on implementing issues [#1101], [#1103], [#1104], [#1105] and
 [#1106], and 14 September 2026 on issue [#1107].
-They began as the four stage 2 and stage 3 questions [epic-1072](../github/epic-1072.md) carried as proposals
+They began as the four stage 2 and stage 3 questions [epic-1072][#1072] carried as proposals
 and that [#1101] was blocked on, and grew as each later child settled one more. They are
 recorded here rather than left in [Current State - Open Questions](../current-state/open-questions.md) because each of them
 is now a shape in the database.
@@ -148,6 +148,7 @@ treating them as verified.
 - [Table Visit](../domain/table-visit.md)
 - [SSOT](../README.md)
 
+[#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
 [#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
 [#1076]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1076
 [#1077]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1077

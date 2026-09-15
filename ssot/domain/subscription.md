@@ -95,10 +95,10 @@ Next to implement:
 
 ## Related Epics
 
-- [epic-1122](../github/epic-1122.md) entitlement foundation and Pro gating
-- [epic-1124](../github/epic-1124.md) Pro subscriptions
-- [epic-1125](../github/epic-1125.md) paid BiteTrails, which reuses the same rails
-- [epic-1471](../github/epic-1471.md) the operator surface over the tier, ahead of the entitlement it will write (issue [#1485])
+- [epic-1122][#1122] entitlement foundation and Pro gating
+- [epic-1124][#1124] Pro subscriptions
+- [epic-1125][#1125] paid BiteTrails, which reuses the same rails
+- [epic-1471](../records/epic-1471.md) the operator surface over the tier, ahead of the entitlement it will write (issue [#1485])
 
 ## Technical Implementation
 
@@ -135,6 +135,9 @@ The last of these writes `subscriptionTier: 1` for every new account, which issu
 - [Architecture - Firebase](../architecture/firebase.md)
 - [Glossary](../product/glossary.md)
 
+[#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
+[#1124]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1124
+[#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
 [#1126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1126
 [#1127]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1127
 [#1485]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1485

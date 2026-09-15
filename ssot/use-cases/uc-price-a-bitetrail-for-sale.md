@@ -13,7 +13,7 @@ elsewhere: the dashboard by [UC - Create And Operate BiteTrails In The Business 
 listing, the counter and the profile link by [UC - Discover BiteTrails In The Marketplace](uc-discover-bitetrails-in-the-marketplace.md).
 One clause of the old flow described a mechanism that no longer exists - assigning users to a
 BiteTrail read the `organisationId` field on user documents, which nothing ever wrote and which
-[issue-1371](../github/issue-1371.md) removed together with the organisation dashboard built around it.
+[issue-1371](../records/issue-1371.md) removed together with the organisation dashboard built around it.
 
 What remains for this page is narrower than its old name suggested. Setting a price is built
 and belongs to the create form - see [UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md),
@@ -75,7 +75,7 @@ when issue [#1125] starts.
   umbrella [#1121]. Open
 - Issue [#1615] decides whether a BiteTrail curator is a role or a persona, which is this page's
   actor. Open
-- [issue-1371](../github/issue-1371.md) removed the `organisationId` field and the assigned-users flow this page used
+- [issue-1371](../records/issue-1371.md) removed the `organisationId` field and the assigned-users flow this page used
   to describe
 
 ## Related Domains
@@ -90,8 +90,8 @@ when issue [#1125] starts.
   actors
 - [Monetization](../product/monetization.md) - the free and paid boundary, and the revenue-share rule the disclosure
   renders. A product page, not a domain
-- [epic-1121](../github/epic-1121.md) - the monetization umbrella
-- [epic-1125](../github/epic-1125.md) - this page's stage epic
+- [epic-1121][#1121] - the monetization umbrella
+- [epic-1125][#1125] - this page's stage epic
 - [UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md) - making the BiteTrail and setting
   the price these rules would constrain
 - [UC - Earn From A Paid BiteTrail](uc-earn-from-a-paid-bitetrail.md) - the split behind the number this flow shows, and the

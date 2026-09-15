@@ -35,14 +35,14 @@ categorised and paged, and the two views they can be read in.
 - The map view runs the page full width, so on desktop the map is not held to the 720px reading column the result list uses. The controls above it keep that column.
 - Bite markers carry their rating, the same marker the Bite gets on every other map. An unrated Bite keeps the plain pin, and restaurants have no rating of their own.
 - `searchUsers` and `searchBites` have a second caller. The admin app's Bite lookup calls `searchBites` directly, and its account search deliberately does **not** call `searchUsers` — it filters the admin-only `listUsersWithRoles` instead, so an operator sees private profiles without the consumer-facing public-flag filter being relaxed for anyone. Neither the ranking nor the matching of these callables may be changed for an operator's benefit; see [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md) (issue [#1476]).
-- Backend search becomes a Pro capability through [epic-1122](../github/epic-1122.md). A free user keeps client-side search and filtering inside the 15 km result set they already loaded. See [Monetization](../product/monetization.md).
+- Backend search becomes a Pro capability through [epic-1122][#1122]. A free user keeps client-side search and filtering inside the 15 km result set they already loaded. See [Monetization](../product/monetization.md).
 
 ## MVP Classification
 
 **[MVP]** - search across accounts, Bites and restaurants, the category separation, city and
 country search, and the list/map switch. Finding a Bite is half of the discovery loop.
 
-**[Secondary]** - the Pro gating of backend search, specified under [epic-1122](../github/epic-1122.md) and not built.
+**[Secondary]** - the Pro gating of backend search, specified under [epic-1122][#1122] and not built.
 A free user would keep client-side search inside the result set already loaded. See
 [Monetization](../product/monetization.md).
 
@@ -88,7 +88,7 @@ location permission that decides which Bites are loaded in the first place belon
   account search deliberately does not reuse `searchUsers`
 - [UC - Discover Bites](uc-discover-bites.md) - the loaded result set a free user searches inside
 - [Monetization](../product/monetization.md)
-- [epic-1122](../github/epic-1122.md)
+- [epic-1122][#1122]
 
 [#722]: https://github.com/muhammedgaygisiz/travellers-apps/issues/722
 [#790]: https://github.com/muhammedgaygisiz/travellers-apps/issues/790
@@ -96,4 +96,5 @@ location permission that decides which Bites are loaded in the first place belon
 [#903]: https://github.com/muhammedgaygisiz/travellers-apps/issues/903
 [#973]: https://github.com/muhammedgaygisiz/travellers-apps/issues/973
 [#974]: https://github.com/muhammedgaygisiz/travellers-apps/issues/974
+[#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
 [#1476]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1476

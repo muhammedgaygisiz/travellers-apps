@@ -5,7 +5,7 @@
 Android device testing records how to get a branch build of `bite-tribe` onto a
 physical Android device and how to inspect it while it runs.
 
-It exists because the Angular 22 device validation in [issue-1037](../github/issue-1037.md) needed
+It exists because the Angular 22 device validation in [issue-1037](../records/issue-1037.md) needed
 every step below and none of them was written down. The App Check debug secret
 in particular blocks the first launch of any fresh install, and the failure it
 produces looks like a product bug rather than a setup step.
@@ -115,7 +115,7 @@ session.
 
 A debug build is debuggable, so the WebView exposes a DevTools socket and can be
 driven over CDP — which is how the Transloco transport was proved in
-[issue-1037](../github/issue-1037.md) rather than inferred from the rendered text:
+[issue-1037](../records/issue-1037.md) rather than inferred from the rendered text:
 
 ```bash
 adb forward tcp:9222 localabstract:webview_devtools_remote_$(adb shell pidof com.bitetribe.app | tr -d '\r')

@@ -45,7 +45,7 @@ data, and email verification.
 
 ## Account Identity Contract
 
-See [issue-1234](../github/issue-1234.md) for the reasoning.
+See [issue-1234](../records/issue-1234.md) for the reasoning.
 
 - A deletion is only offered against an account the page has named. Without a signed-in account the page says so and the destructive action stays disabled.
 - The identity is non-secret: profile photo, display name, email, and the sign-in method. The uid is never shown, and no credential ever is.
@@ -56,7 +56,7 @@ See [issue-1234](../github/issue-1234.md) for the reasoning.
 
 ## Re-Authentication Contract
 
-See [issue-1385](../github/issue-1385.md) for the reasoning.
+See [issue-1385](../records/issue-1385.md) for the reasoning.
 
 - The sign-in method is read from the first `providerData` entry that is not Firebase's own reserved `firebase` record. The Android SDK includes that record and the web and iOS SDKs do not, so reading the list positionally identified every Android account as unknown and made deletion unreachable for them.
 - Only Google and Apple refresh a sign-in through their own sheet. Every other provider - including one the app does not recognise - is answered with the password prompt, because a sign-in sheet that does not exist can only fail, and failing there leaves the user with no route to a deletion the law requires.
@@ -64,7 +64,7 @@ See [issue-1385](../github/issue-1385.md) for the reasoning.
 
 ## Deletion Contract
 
-Each user-owned data category is handled deliberately. See [issue-1182](../github/issue-1182.md) for the reasoning and [User](../domain/user.md) for the paths.
+Each user-owned data category is handled deliberately. See [issue-1182](../records/issue-1182.md) for the reasoning and [User](../domain/user.md) for the paths.
 
 - Removed: public profile and its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes given, bucket lists, BiteTrail ratings, profile images, the staff association at `/restaurantStaff/{uid}` if the account works at a restaurant ([#1537]), and the Firebase Auth account.
 - Kept with the identifier cleared: Bites (the Bite and its image stay, `userId` is removed) and BiteTrail purchase records (the document stays so the seller's `soldCount` holds).
@@ -76,7 +76,7 @@ The cascade also prunes the deleted user from `/meta/leaderboardDaily` and rebui
 
 ## Policy Language Contract
 
-See [issue-1218](../github/issue-1218.md) for the reasoning.
+See [issue-1218](../records/issue-1218.md) for the reasoning.
 
 - `PUBLISHED_PRIVACY_POLICY_LANGUAGES` in `libs/bite-tribe/privacy-policy` is the published set. A language belongs there only once its policy copy exists in that locale file with legal coverage equivalent to the English original. It currently matches `availableLangs` and has to be extended with it.
 - Everything outside that set - including an unknown or missing app language - resolves to English and reports the fallback, so the page can disclose it. This is what keeps a newly added locale from rendering raw keys inside a legal document.
@@ -135,10 +135,10 @@ Relevant, and exercised more directly than on any other page.
 - [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md) - where a restaurant's ownership fields are written
 - [Implementation - Store Declarations](../implementation/store-declarations.md) - the declared data types the deletion contract
   has to agree with
-- [issue-1182](../github/issue-1182.md)
-- [issue-1218](../github/issue-1218.md)
-- [issue-1234](../github/issue-1234.md)
-- [issue-1385](../github/issue-1385.md)
+- [issue-1182](../records/issue-1182.md)
+- [issue-1218](../records/issue-1218.md)
+- [issue-1234](../records/issue-1234.md)
+- [issue-1385](../records/issue-1385.md)
 
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
 [#1568]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1568

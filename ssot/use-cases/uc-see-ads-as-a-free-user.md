@@ -66,7 +66,7 @@ by name. The content-rating questionnaire answers Advertising "No" on the streng
 being no AdMob dependency, and that answer was part of what brought the calculated rating
 down. The privacy declarations say "Tracking - no, for everything. No AdMob, no ATT usage,
 and no `NSUserTrackingUsageDescription` in `Info.plist`", with the note that this is to be
-revisited with [epic-1123](../github/epic-1123.md) because requesting the IDFA forces Device ID to be declared as
+revisited with [epic-1123][#1123] because requesting the IDFA forces Device ID to be declared as
 used for tracking. Apple's App Tracking Transparency prompt and Google's Data safety form
 both then need the answers rewritten together, and the Boundary Conditions' hard gate - no ad
 request before consent resolves - is the behaviour those declarations would be describing.
@@ -99,9 +99,9 @@ Not implemented. There is no ad dependency in the workspace. The surfaces this w
 - [Personas](../product/personas.md) - the food lover on the free tier this page used to name as an actor
 - [Monetization](../product/monetization.md) - the free and paid boundary, and the rule that ads are shown to free users
   only. A product page, not a domain
-- [epic-1121](../github/epic-1121.md) - the monetization umbrella, which sequences the three revenue channels and
+- [epic-1121][#1121] - the monetization umbrella, which sequences the three revenue channels and
   holds the product decisions the stage epics share
-- [epic-1123](../github/epic-1123.md) - this page's stage epic
+- [epic-1123][#1123] - this page's stage epic
 - [UC - Subscribe To BiteTribe Pro](uc-subscribe-to-bitetribe-pro.md) - the purchase that switches this off
 - [UC - Discover Bites](uc-discover-bites.md) - the feed the ad card is inserted into
 - [Implementation - Store Declarations](../implementation/store-declarations.md) - the advertising and tracking answers this page

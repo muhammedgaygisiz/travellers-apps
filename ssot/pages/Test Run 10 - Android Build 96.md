@@ -3,9 +3,9 @@
 ## Purpose
 
 Execution record for the release candidate test pass. Originally section "Android
-Execution - Build 96 (Run 10)" of [[Current State - Release Candidate Test
-Charter]], which owns the checks, the device matrix, and the pass criteria this run
-was measured against.
+Execution - Build 96 (Run 10)" of [[Current State - Release Candidate Test Charter]],
+which owns the checks, the device matrix, and the pass criteria this run was measured
+against.
 
 The Android re-run for issue 1353, executed on 29 August 2026 against a **locally built debug artifact** rather than a store artifact, and stopped by decision once the regression sweep was complete and a new `P0` was on the board.
 

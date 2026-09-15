@@ -3,9 +3,9 @@
 ## Purpose
 
 Execution record for the release candidate test pass. Originally section "Android
-Execution - Build 96 (Run 11)" of [[Current State - Release Candidate Test
-Charter]], which owns the checks, the device matrix, and the pass criteria this run
-was measured against.
+Execution - Build 96 (Run 11)" of [[Current State - Release Candidate Test Charter]],
+which owns the checks, the device matrix, and the pass criteria this run was measured
+against.
 
 The contingency Android re-run for issue 1354, executed on 29 August 2026 against a **locally built debug artifact installed over run 10's install**, so the App Check debug secret and the app's MediaStore file ownership both survived.
 

@@ -39,9 +39,10 @@ them.
 
 ## App Store Review Area
 
-Not relevant, because nothing here is a permission, a store declaration or a review surface. The
-notifications these signals trigger are [[UC - Receive App Notifications And Engagement
-Updates]]'s, and the permission behind them is collected in onboarding.
+Not relevant, because nothing here is a permission, a store declaration or a review
+surface. The notifications these signals trigger are
+[[UC - Receive App Notifications And Engagement Updates]]'s, and the permission behind
+them is collected in onboarding.
 
 ## Supported Evidence
 

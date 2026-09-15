@@ -3,9 +3,9 @@
 ## Purpose
 
 Execution record for the release candidate test pass. Originally section "Web
-Execution - Build 95 at `a20f485a` (Run 8)" of [[Current State - Release Candidate
-Test Charter]], which owns the checks, the device matrix, and the pass criteria this
-run was measured against.
+Execution - Build 95 at `a20f485a` (Run 8)" of
+[[Current State - Release Candidate Test Charter]], which owns the checks, the device
+matrix, and the pass criteria this run was measured against.
 
 ## Summary
 

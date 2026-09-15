@@ -30,7 +30,6 @@
   - [[Table Visit]]
 - Use Cases
   - Supported today
-    collapsed:: true
     - [[UC - Discover Bites]]
     - [[UC - Create And Maintain Personal Bites]]
     - [[UC - Inspect Bite Details]]
@@ -59,7 +58,6 @@
     - [[UC - Manage Tables During Service]]
     - [[UC - Order At The Table Through A QR Code]]
   - Next to implement
-    collapsed:: true
     - [[UC - Complete Universal Search]]
     - [[UC - Contact A Restaurant And Plan A Visit]]
     - [[UC - Price A BiteTrail For Sale]]

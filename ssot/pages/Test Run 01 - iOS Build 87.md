@@ -2,10 +2,9 @@
 
 ## Purpose
 
-Execution record for the release candidate test pass. Originally section
-"Preliminary iOS Execution - Build 87" of [[Current State - Release Candidate Test
-Charter]], which owns the checks, the device matrix, and the pass criteria this run
-was measured against.
+Execution record for the release candidate test pass. Originally section "Preliminary
+iOS Execution - Build 87" of [[Current State - Release Candidate Test Charter]], which
+owns the checks, the device matrix, and the pass criteria this run was measured against.
 
 The original charter section called this a preliminary execution and carried no run number. "Run 01" is assigned by this page for ordering only; no source names it that.
 

@@ -51,6 +51,7 @@
     - [[UC - Subscribe To BiteTribe Pro]]
     - [[UC - See Ads As A Free User]]
     - [[UC - Buy A Paid BiteTrail]]
+    - [[UC - Earn From A Paid BiteTrail]]
   - Obsolete - pending deletion
     - none
 - Epics

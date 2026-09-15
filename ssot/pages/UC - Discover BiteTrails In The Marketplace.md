@@ -20,7 +20,7 @@ This page owns the three surfaces a BiteTrail is found through - the Market Plac
 detail page and its map view - and nothing beyond opening one. Taking a free BiteTrail as a
 Bucket List belongs to [[UC - Save And Rate BiteTrails Through Bucket Lists]], buying a paid
 one to [[UC - Buy A Paid BiteTrail]], and packaging one to
-[[UC - Price And Publish A BiteTrail]].
+[[UC - Price A BiteTrail For Sale]].
 
 ## Actors
 
@@ -82,5 +82,5 @@ through store in-app purchase, and the locking that must come with it belong to
   and the food curator or vlogger
 - [[UC - Save And Rate BiteTrails Through Bucket Lists]] - what taking a free BiteTrail does
 - [[UC - Buy A Paid BiteTrail]] - the purchase and the locking a priced BiteTrail still lacks
-- [[UC - Price And Publish A BiteTrail]] - the creator side of the same epic
+- [[UC - Price A BiteTrail For Sale]] - the creator side of the same epic
 - [[Monetization]] - what is sold and what stays free

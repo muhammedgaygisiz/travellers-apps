@@ -20,7 +20,7 @@ published.
 This page owns the money on the creator's side: making them payable at all, the split that
 decides the amount, the record each sale writes, and the balances and payouts that follow.
 Buying the trail is [[UC - Buy A Paid BiteTrail]]. Pricing and publishing it are
-[[UC - Price And Publish A BiteTrail]], which shows the creator what a sale will yield
+[[UC - Price A BiteTrail For Sale]], which shows the creator what a sale will yield
 but takes that quantity from here. Making the trail in the first place is
 [[UC - Create And Operate BiteTrails In The Business App]].
 
@@ -38,7 +38,7 @@ but takes that quantity from here. Making the trail in the first place is
 - The creator sees pending and paid balances and receives payouts on schedule.
 - A refund reverses the ledger entry. Revoking the buyer's access is the same event seen from [[UC - Buy A Paid BiteTrail]].
 - The 80/20 split is always on net proceeds. Gross-based wording cannot be honoured alongside a store commission and must never appear.
-- A creator is payable only once identity verification, payout onboarding and creator terms are complete. The gate that stops an unpayable creator publishing is [[UC - Price And Publish A BiteTrail]]'s.
+- A creator is payable only once identity verification, payout onboarding and creator terms are complete. The gate that stops an unpayable creator publishing is [[UC - Price A BiteTrail For Sale]]'s.
 
 ## MVP Classification
 
@@ -47,7 +47,7 @@ but takes that quantity from here. Making the trail in the first place is
 ships at launch; nothing here is strictly required for the initial release.
 
 Not on this page: setting the price and publishing the trail, which is
-[[UC - Price And Publish A BiteTrail]], and the purchase that triggers a sale, which is
+[[UC - Price A BiteTrail For Sale]], and the purchase that triggers a sale, which is
 [[UC - Buy A Paid BiteTrail]].
 
 ## App Store Review Area
@@ -93,7 +93,7 @@ touch are:
 - [[epic-1121]] - the monetization umbrella, which sequences the three revenue channels
 - [[epic-1125]] - this page's stage epic, shared with [[UC - Buy A Paid BiteTrail]]
 - [[UC - Buy A Paid BiteTrail]] - the purchase that produces a sale
-- [[UC - Price And Publish A BiteTrail]] - pricing and publishing, and the gate that
+- [[UC - Price A BiteTrail For Sale]] - pricing and publishing, and the gate that
   reads this page's onboarding
 - [[UC - Create And Operate BiteTrails In The Business App]] - making the BiteTrail at all
 - [[Current State - Roadmap]] - where Monetization sits relative to launch

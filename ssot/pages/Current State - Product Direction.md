@@ -50,7 +50,7 @@ action: trying a dish, planning a visit, or creating a bite from a menu item.
 
 ## The BiteTrail Ecosystem
 
-- [[UC - Price And Publish A BiteTrail]]
+- [[UC - Price A BiteTrail For Sale]]
 - [[UC - Add BiteTrail Gamification]]
 
 Curated journeys turn discovery into intent and progress, and are how creators

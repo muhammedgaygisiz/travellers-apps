@@ -482,8 +482,9 @@ X5 SYS <action>
 | `UC-SAF` | See Ads As A Free User                                 | [[UC - See Ads As A Free User]]                                 |
 | `UC-BPB` | Buy A Paid BiteTrail                                   | [[UC - Buy A Paid BiteTrail]]                                   |
 | `UC-CRV` | Contact A Restaurant And Plan A Visit                  | [[UC - Contact A Restaurant And Plan A Visit]]                  |
+| `UC-CBT` | Create And Operate BiteTrails In The Business App      | [[UC - Create And Operate BiteTrails In The Business App]]      |
 | `UC-EPB` | Earn From A Paid BiteTrail                             | [[UC - Earn From A Paid BiteTrail]]                             |
-| `UC-PPB` | Price And Publish A BiteTrail                          | [[UC - Price And Publish A BiteTrail]]                          |
+| `UC-PBS` | Price A BiteTrail For Sale                             | [[UC - Price A BiteTrail For Sale]]                             |
 | `UC-DIS` | Dismiss Restaurant Candidate                           | none                                                            |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | none                                                            |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                            |

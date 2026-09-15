@@ -19,7 +19,7 @@ A food lover can buy a curated food journey.
 This page owns the purchase and what it unlocks: the locked preview a non-buyer sees, the store
 transaction, the purchase record the backend writes, and the reading of the Bites that follows.
 What the creator earns from that sale is [[UC - Earn From A Paid BiteTrail]]; pricing and
-publishing the trail are [[UC - Price And Publish A BiteTrail]]; finding it is
+publishing the trail are [[UC - Price A BiteTrail For Sale]]; finding it is
 [[UC - Discover BiteTrails In The Marketplace]]; and taking a free one as a Bucket List is
 [[UC - Save And Rate BiteTrails Through Bucket Lists]].
 
@@ -53,7 +53,7 @@ published at launch, so nothing here is reachable in the shipping app.
 
 Not on this page: what the creator earns from the sale, which is
 [[UC - Earn From A Paid BiteTrail]], and setting the price, which is
-[[UC - Price And Publish A BiteTrail]].
+[[UC - Price A BiteTrail For Sale]].
 
 ## App Store Review Area
 
@@ -81,7 +81,7 @@ Not implemented. Today a BiteTrail has `price` and `currency`, and saving one as
 - Issue \#1122 is the entitlement foundation, stage 0, and issue \#1124 the Pro subscription
   rails this purchase reuses, stage 2. Both open
 - Issue \#266, the packaging epic, is closed as completed; what is left of packaging is
-  [[UC - Price And Publish A BiteTrail]]
+  [[UC - Price A BiteTrail For Sale]]
 
 ## Related Domains
 
@@ -98,7 +98,7 @@ Not implemented. Today a BiteTrail has `price` and `currency`, and saving one as
 - [[epic-1121]] - the monetization umbrella
 - [[epic-1125]] - this page's stage epic, shared with [[UC - Earn From A Paid BiteTrail]]
 - [[UC - Earn From A Paid BiteTrail]] - what the creator gets from this purchase
-- [[UC - Price And Publish A BiteTrail]] - pricing and publishing the trail being bought
+- [[UC - Price A BiteTrail For Sale]] - pricing and publishing the trail being bought
 - [[UC - Discover BiteTrails In The Marketplace]] - finding it beforehand
 - [[UC - Save And Rate BiteTrails Through Bucket Lists]] - what a bought trail becomes
 - [[Implementation - Store Declarations]] - the revenue line this page makes false

@@ -91,7 +91,8 @@ defect list and not a work plan. Where it needs one of those, it links to it.
   (`UF-7`).
 
 - **UF-5** A page MUST NOT carry a `Notation` section. It writes one line instead:
-  `The flow below is a text actogram; the notation is defined in [[Actogram Format]].`
+  `The flow below is a text actogram; the notation is defined in`
+  `[Actogram Format](../overview/actogram-format.md).`
   A page with several entries MAY add one paragraph declaring its step-id prefixes.
 - **UF-6** A page MUST NOT carry a `Recorded Decisions` section. A register split
   across pages cannot be read as a register. Decisions live on one page,
@@ -119,7 +120,7 @@ defect list and not a work plan. Where it needs one of those, it links to it.
   code, then the local id. A bare `R-6` always means this page's `R-6`.
 - **UF-10** A `UC-ID` MUST be claimed in the registry at the end of this page before it
   is used in a `Scope` table.
-- **UF-10a** The registry's `Page` cell MUST hold either a `[[page]]` link or exactly
+- **UF-10a** The registry's `Page` cell MUST hold either a `[Page](path.md)` link or exactly
   `none`. A code whose behaviour is documented on a page links that page, whatever the
   page is named. A code MUST NOT be claimed for behaviour that an existing page
   already owns — that page's own code is the reference target (`UF-9`).
@@ -295,7 +296,7 @@ the full skeleton below is legitimately absent until the page earns it.
 
 ## Related Domains
 
-- [[<Domain>]]
+- [<Domain>](../domain/<domain>.md)
 ```
 
 `Flow` (`UF-4a`), `Guarantees`, `App Store Review Area`, `Supported Evidence`,
@@ -325,10 +326,10 @@ Used from L1 upward; trim the sections a lower level does not require.
 
 ## Lanes
 
-| Code     | Kind   | Binding                    |
-| -------- | ------ | -------------------------- |
-| `<CODE>` | actor  | <role from [[User Roles]]> |
-| `<CODE>` | system | <app, function or store>   |
+| Code     | Kind   | Binding                                            |
+| -------- | ------ | -------------------------------------------------- |
+| `<CODE>` | actor  | <role from [User Roles](../product/user-roles.md)> |
+| `<CODE>` | system | <app, function or store>                           |
 
 ## Aggregate
 
@@ -343,9 +344,9 @@ excluded, and why.>
 
 Out of scope. Each of these is its own Use Case, referenced from the step it belongs to:
 
-| UC-ID    | Use Case           | Referenced at | Direction                                                                                     |
-| -------- | ------------------ | ------------- | --------------------------------------------------------------------------------------------- |
-| `UC-XXX` | <name or [[page]]> | `<StepId>`    | <Upstream \| Downstream \| Enclosing \| Invoked step \| Optional step \| Alternative outcome> |
+| UC-ID    | Use Case       | Referenced at | Direction                                                                                     |
+| -------- | -------------- | ------------- | --------------------------------------------------------------------------------------------- |
+| `UC-XXX` | <name or link> | `<StepId>`    | <Upstream \| Downstream \| Enclosing \| Invoked step \| Optional step \| Alternative outcome> |
 
 ## Trigger
 
@@ -375,7 +376,8 @@ On the successful path, `END-X<n>`:
 
 ## Actogram
 
-The flow below is a text actogram; the notation is defined in [[Actogram Format]].
+The flow below is a text actogram; the notation is defined in
+[Actogram Format](../overview/actogram-format.md).
 
 ### Phase 1 - <the actor's sub-goal>
 ```
@@ -437,16 +439,18 @@ X5 SYS <action>
 
 ## Related GitHub Scope
 
-- Part of [[epic-<n>]]
+- Part of [#<n>]
 - <what each issue contributes>
 
 ## Related Domains
 
-- [[<Domain>]]
+- [<Domain>](../domain/<domain>.md)
 
 ## Related Pages
 
-- [[<page>]]
+- [<Page>](<relative-path>.md)
+
+[#<n>]: https://github.com/muhammedgaygisiz/travellers-apps/issues/<n>
 ```
 
 ## Use Case Code Registry

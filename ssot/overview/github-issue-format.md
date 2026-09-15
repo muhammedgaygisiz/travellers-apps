@@ -106,7 +106,7 @@ Two limits:
 The same form applies to deletion. Where an issue removes the code behind a use case marked `[Obsolete]` ([Use Case Format](use-case-format.md) `UF-21`), the **last** acceptance criterion asserts the page is gone:
 
 ```text
-- [ ] `UC - <name>` is deleted, with its entry removed from [[SSOT]] and the use-case code registry.
+- [ ] `UC - <name>` is deleted, with its entry removed from the SSOT index and the use-case code registry.
 ```
 
 The deletion itself is defined by [Use Case Format](use-case-format.md) `UF-23`; the criterion only makes it checkable from the issue.

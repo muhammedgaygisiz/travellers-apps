@@ -7,20 +7,20 @@ elsewhere disagrees with a page here on a fact, the page here wins.
 Start with [Agent Operating Contract](overview/agent-operating-contract.md) for how to work in this
 repository, and [Traceability Map](overview/traceability-map.md) to find the pages a change touches.
 
-| Folder                             | Holds                                                                                |
-| ---------------------------------- | ------------------------------------------------------------------------------------ |
-| [overview/](overview/)             | How work is done here: contracts, workflows, page formats                            |
-| [product/](product/)               | Vision, mission, principles, glossary, personas, roles, monetization                 |
-| [domain/](domain/)                 | The domain model, one page per aggregate                                             |
-| [use-cases/](use-cases/)           | Behaviour, one page per use case, per [Use Case Format](overview/use-case-format.md) |
-| [architecture/](architecture/)     | Structural constraints                                                               |
-| [implementation/](implementation/) | How the constraints are realised in code and CI                                      |
-| [current-state/](current-state/)   | What is true right now: roadmap, known issues, release state                         |
-| [decisions/](decisions/)           | ADRs and the `RD-*` decision register                                                |
-| [records/](records/)               | Closing records for work already done. History, not specification                    |
-| [test-runs/](test-runs/)           | Release-candidate execution records                                                  |
-| [releases/](releases/)             | Changelog and per-build pages                                                        |
-| [operations/](operations/)         | Running the product day to day                                                       |
+| Folder                                      | Holds                                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [overview/](overview/README.md)             | How work is done here: contracts, workflows, page formats                            |
+| [product/](product/README.md)               | Vision, mission, principles, glossary, personas, roles, monetization                 |
+| [domain/](domain/README.md)                 | The domain model, one page per aggregate                                             |
+| [use-cases/](use-cases/README.md)           | Behaviour, one page per use case, per [Use Case Format](overview/use-case-format.md) |
+| [architecture/](architecture/README.md)     | Structural constraints                                                               |
+| [implementation/](implementation/README.md) | How the constraints are realised in code and CI                                      |
+| [current-state/](current-state/README.md)   | What is true right now: roadmap, known issues, release state                         |
+| [decisions/](decisions/README.md)           | ADRs and the `RD-*` decision register                                                |
+| [records/](records/README.md)               | Closing records for work already done. History, not specification                    |
+| [test-runs/](test-runs/README.md)           | Release-candidate execution records                                                  |
+| [releases/](releases/README.md)             | Changelog and per-build pages                                                        |
+| [operations/](operations/README.md)         | Running the product day to day                                                       |
 
 ## Overview
 

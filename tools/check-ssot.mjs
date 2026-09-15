@@ -13,7 +13,8 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, relative, resolve, sep } from 'node:path';
 
 const SSOT = resolve('ssot');
-const SKIP = new Set(['assets']);
+// `Claude outputs` is where the Claude desktop app drops files; it is git-ignored.
+const SKIP = new Set(['assets', 'Claude outputs']);
 const failures = [];
 const fail = (file, rule, message) =>
   failures.push({ file: relative('.', file), rule, message });

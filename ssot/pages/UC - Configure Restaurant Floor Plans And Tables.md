@@ -152,6 +152,20 @@ neither ask invalidates what the other printed.
 - A guest with no BiteTribe account resolves a scanned code in one read, and a replaced or revoked code tells them so rather than failing.
 - A printed QR sheet is legible and identifies restaurant, room, and table in human-readable text next to the code.
 
+## MVP Classification
+
+**[Secondary]** - the whole page. Its only surfaces are `restaurant/:restaurantId/floor-plan`
+and `.../qr-codes` in the business app, which is out of scope for this release candidate by
+decision and gets its own soft launch; [[Current State - Release Candidate Test Charter]]
+records that.
+
+## App Store Review Area
+
+Not relevant, because nothing this page describes is store-distributed: the editor and the
+printable sheet are routes in the business app, and only `apps/bite-tribe-ios` and
+`apps/bite-tribe-android` carry a native project. What a printed code opens once a guest scans
+it is [[UC - Order At The Table Through A QR Code]]'s.
+
 ## Supported Evidence
 
 Implemented:

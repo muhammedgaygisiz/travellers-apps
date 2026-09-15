@@ -29,6 +29,7 @@ import {
   TableCartService,
   TableOrderHistoryService,
   TableOrderService,
+  TableOrderSubmissionService,
   type TableCartLine,
   type TableOrderView,
 } from 'bite-tribe/table-order-data-access';
@@ -118,10 +119,16 @@ const symbolOf = (code: string): string => {
   // lifetime: two more Firestore listeners that belong to the screen, and
   // rooting them would leave a guest's table on a listener after they walked
   // out of the restaurant (GitHub issue #1106).
+  //
+  // The submission joins them, and its lifetime is the reason it is listed
+  // rather than rooted: what it keeps between attempts is on the device, not in
+  // the instance, so a new screen reads the same record back and a stale
+  // instance holds nothing worth keeping (GitHub issue #1108).
   providers: [
     TableCartService,
     TableOrderHistoryService,
     TableAssistanceService,
+    TableOrderSubmissionService,
     TableOrderService,
   ],
   templateUrl: 'table-order.component.html',
@@ -140,6 +147,15 @@ export class TableOrder implements OnInit {
   protected readonly isBusy = this.service.isBusy;
   protected readonly canSubmit = this.service.canSubmit;
   protected readonly refusal = this.service.lastRefusal;
+
+  /** The submission the phone could not confirm, while there is one. */
+  protected readonly unconfirmed = this.service.unconfirmed;
+
+  /** False while one is unresolved, which freezes every cart control. */
+  protected readonly canEditCart = this.service.canEditCart;
+
+  /** Which attempt is running, so a slow send can say it has not given up. */
+  protected readonly attempt = this.service.attempt;
 
   private readonly state = this.service.state;
 
@@ -384,6 +400,32 @@ export class TableOrder implements OnInit {
 
   protected onNotes(key: string, value: string | number | null): void {
     this.service.setNotes(key, String(value ?? ''));
+  }
+
+  /**
+   * What the send button says, which is its state as much as its label.
+   *
+   * Three labels. A cart nobody has sent yet is "send to the kitchen"; one the
+   * phone could not confirm is "check this order", because the tap is a
+   * question rather than a second order; and a send in flight names the attempt
+   * it is on, so a spinner turning for four seconds is visibly a phone still
+   * trying rather than one that has stopped (GitHub issue #1108).
+   */
+  protected sendKey(): string {
+    if (this.isBusy()) {
+      return this.attempt() > 1
+        ? 'table-order-retrying'
+        : 'table-order-sending';
+    }
+
+    return this.unconfirmed() ? 'table-order-check' : 'table-order-send';
+  }
+
+  /** The sentence an unresolved submission is told with. */
+  protected unconfirmedKey(): string {
+    return this.unconfirmed()?.delivery === 'notSent'
+      ? 'table-order-unconfirmed-notSent'
+      : 'table-order-unconfirmed-unknown';
   }
 
   protected submit(): void {

@@ -1,27 +1,49 @@
 import { Injectable, computed, signal } from '@angular/core';
 import {
   createOrderLineSnapshot,
+  findMenuItemById,
   isMenuVariantAvailable,
   MAX_ORDER_LINES,
   MAX_ORDER_LINE_QUANTITY,
   tableOrderTotal,
 } from 'model';
-import type { MenuItem, OrderLineSnapshot, SubmitTableOrderLine } from 'model';
+import type {
+  Menu,
+  MenuItem,
+  OrderLineSnapshot,
+  SubmitTableOrderLine,
+} from 'model';
+import { clearStored, readStored, writeStored } from './table-order-storage';
+
+/** Where one table's unsent cart lives between visits to the screen. */
+export const TABLE_CART_KEY_PREFIX = 'table-cart:';
 
 /**
  * The cart a guest builds at a table (GitHub issue #1103).
  *
- * ## It is never stored
+ * ## It never reaches Firestore, and it does survive a reload
  *
- * Nothing here reaches Firestore. A cart is a few minutes of somebody changing
- * their mind, and writing each of those minutes to a restaurant's database
+ * Nothing here reaches the restaurant's database. A cart is a few minutes of
+ * somebody changing their mind, and writing each of those minutes to Firestore
  * would cost the restaurant a write per tap for a document nobody reads. What
  * the restaurant learns is the order, at the moment it is sent.
  *
- * The cost is that a reload loses the cart. That is the honest trade for now -
- * a cart that survived a reload would have to live somewhere, and the somewhere
- * that is free is the phone's own storage, which is issue #1108's territory
- * along with the offline queue it would be half of.
+ * It is kept on the **phone**, though, which issue #1103 left to issue #1108
+ * and this is it. A guest at a table puts the phone in their pocket, the wifi
+ * drops the tab, and a cart that had to be rebuilt from memory is where people
+ * give up and wave at a waiter instead. The objection the earlier issue raised
+ * was about who pays for a guest changing their mind, and the answer is still
+ * nobody: device storage costs the restaurant nothing and leaves the device
+ * never.
+ *
+ * ## What is stored is ids, not dishes
+ *
+ * A row is put back together from the menu that is on screen now, so a cart
+ * restored an hour later cannot carry a dish that has been taken off, renamed
+ * or repriced in the meantime. Storing the {@link MenuItem} itself would be
+ * storing a copy of the menu on the phone and then ordering from the copy -
+ * which is the price-integrity problem this whole flow refuses, with the stale
+ * data one layer further away.
  *
  * ## One line per dish and variant
  *
@@ -84,6 +106,51 @@ const snapshotOf = (line: TableCartLine, currency: string): OrderLineSnapshot =>
     notes: line.notes,
   });
 
+/**
+ * One row as the phone keeps it: ids and what the guest chose, never a dish.
+ *
+ * The dish is rebuilt from the live menu on the way back in, so the stored
+ * copy cannot become a second, stale menu that an order is priced from.
+ */
+interface StoredCartLine {
+  itemId: string;
+  variantId?: string;
+  quantity: number;
+  notes?: string;
+}
+
+const toStoredLine = (line: TableCartLine): StoredCartLine => ({
+  itemId: line.item.id,
+  ...(line.variant ? { variantId: line.variant.id } : {}),
+  quantity: line.quantity,
+  ...(line.notes ? { notes: line.notes } : {}),
+});
+
+const isStoredCartLine = (value: unknown): value is StoredCartLine => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const row = value as Partial<Record<keyof StoredCartLine, unknown>>;
+
+  return (
+    typeof row.itemId === 'string' &&
+    row.itemId.length > 0 &&
+    typeof row.quantity === 'number' &&
+    Number.isFinite(row.quantity)
+  );
+};
+
+/**
+ * The cart as it was stored, with anything unreadable left out.
+ *
+ * A half-written or stale row is dropped rather than rebuilt: the entry
+ * outlives the app version that wrote it, and a cart that cannot be parsed must
+ * not take the ordering screen down with it.
+ */
+const parseStoredCart = (value: unknown): StoredCartLine[] | undefined =>
+  Array.isArray(value) ? value.filter(isStoredCartLine) : undefined;
+
 @Injectable()
 export class TableCartService {
   private readonly rows = signal<readonly TableCartLine[]>([]);
@@ -99,6 +166,9 @@ export class TableCartService {
 
   /** Whether the cart has as many rows as an order may carry. */
   readonly isFull = computed(() => this.rows().length >= MAX_ORDER_LINES);
+
+  /** Where this cart is kept, once the screen has said which table it is. */
+  private storageKey = '';
 
   /**
    * The running total, in the menu's currency.
@@ -153,8 +223,8 @@ export class TableCartService {
       return;
     }
 
-    this.rows.update((lines) => [
-      ...lines,
+    this.setRows([
+      ...this.rows(),
       {
         key,
         item,
@@ -182,8 +252,8 @@ export class TableCartService {
 
     const clamped = Math.min(Math.floor(quantity), MAX_ORDER_LINE_QUANTITY);
 
-    this.rows.update((lines) =>
-      lines.map((line) =>
+    this.setRows(
+      this.rows().map((line) =>
         line.key === key ? { ...line, quantity: clamped } : line,
       ),
     );
@@ -208,13 +278,13 @@ export class TableCartService {
   }
 
   remove(key: string): void {
-    this.rows.update((lines) => lines.filter((line) => line.key !== key));
+    this.setRows(this.rows().filter((line) => line.key !== key));
   }
 
   /** What the guest asked for on this row. Trimmed when it is sent, not here. */
   setNotes(key: string, notes: string): void {
-    this.rows.update((lines) =>
-      lines.map((line) => (line.key === key ? { ...line, notes } : line)),
+    this.setRows(
+      this.rows().map((line) => (line.key === key ? { ...line, notes } : line)),
     );
   }
 
@@ -227,7 +297,7 @@ export class TableCartService {
    * rest was fine.
    */
   clear(): void {
-    this.rows.set([]);
+    this.setRows([]);
   }
 
   /**
@@ -244,10 +314,120 @@ export class TableCartService {
     const dropped = this.rows().length - kept.length;
 
     if (dropped) {
-      this.rows.set(kept);
+      this.setRows(kept);
     }
 
     return dropped;
+  }
+
+  /**
+   * Names the table this cart belongs to, so it can be kept and found again
+   * (GitHub issue #1108).
+   *
+   * Keyed by the restaurant and the table rather than by the guest's account.
+   * A phone is one guest, and the anonymous uid it holds is not something the
+   * guest chose or can be asked about - a cart filed under a uid the app
+   * re-minted is a cart the guest rebuilt for no reason they could see.
+   *
+   * A phone that scanned table 5 at lunch and table 12 at dinner has two
+   * carts, which is right: they are two meals.
+   */
+  useTable(restaurantId: string, tableId: string): void {
+    this.storageKey = `${TABLE_CART_KEY_PREFIX}${restaurantId}:${tableId}`;
+  }
+
+  /**
+   * Puts back what this phone was building, against the menu on screen now.
+   *
+   * Every row is rebuilt from the live menu rather than from the stored copy,
+   * which is what makes a restored cart safe: a dish taken off the menu, a
+   * variant withdrawn or a dish with no price left is dropped instead of being
+   * carried into an order the backend would refuse line by line. A dish that is
+   * merely *repriced* comes back at the new price, because the price a guest
+   * agrees to is the one they can see on the screen they are looking at.
+   *
+   * Anything already in the cart wins. The restore is asynchronous and a guest
+   * can tap "add" while it is still reading, and a read that overwrote what
+   * they just did would lose the one row they were watching.
+   */
+  async restore(menu: Menu): Promise<void> {
+    if (!this.storageKey) {
+      return;
+    }
+
+    const stored = await readStored(this.storageKey, parseStoredCart);
+
+    if (!stored?.length) {
+      return;
+    }
+
+    const restored = stored
+      .map((row) => this.rebuild(menu, row))
+      .filter((row): row is TableCartLine => row !== undefined)
+      .filter((row) => !this.rows().some((line) => line.key === row.key));
+
+    if (restored.length) {
+      this.setRows([...this.rows(), ...restored].slice(0, MAX_ORDER_LINES));
+    }
+  }
+
+  /** One stored row as a cart line, or nothing where the menu lost it. */
+  private rebuild(menu: Menu, row: StoredCartLine): TableCartLine | undefined {
+    const item = findMenuItemById(menu, row.itemId);
+
+    if (!item) {
+      return undefined;
+    }
+
+    const variant = row.variantId
+      ? (item.variants ?? []).find((entry) => entry.id === row.variantId)
+      : undefined;
+
+    if (row.variantId && !variant) {
+      return undefined;
+    }
+
+    // The same two guards `add` applies, and for the same reasons. A row that
+    // came back unavailable or unpriced is a row the guest would be allowed to
+    // send and the backend would refuse, which reads as the app having let them
+    // build something impossible.
+    if (
+      !isMenuVariantAvailable(item, variant ?? item) ||
+      !Number.isFinite((variant ?? item).price)
+    ) {
+      return undefined;
+    }
+
+    return {
+      key: cartLineKey(item, variant),
+      item,
+      ...(variant ? { variant } : {}),
+      quantity: Math.min(
+        Math.max(1, Math.floor(row.quantity)),
+        MAX_ORDER_LINE_QUANTITY,
+      ),
+      notes: row.notes ?? '',
+    };
+  }
+
+  /**
+   * The rows, in memory and on the device.
+   *
+   * The signal is written first and unconditionally, following the staff
+   * transition queue: a phone whose storage is full or blocked still has a
+   * guest in front of it who has just added a dish, and the cart is worth
+   * keeping for this screen even when it cannot be kept for the next one.
+   */
+  private setRows(next: readonly TableCartLine[]): void {
+    this.rows.set(next);
+
+    if (!this.storageKey) {
+      return;
+    }
+
+    void (next.length
+      ? writeStored(this.storageKey, next.map(toStoredLine))
+      : clearStored(this.storageKey));
   }
 
   /**

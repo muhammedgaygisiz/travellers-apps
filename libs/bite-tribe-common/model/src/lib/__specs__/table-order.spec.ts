@@ -6,12 +6,15 @@ import {
   TABLE_ORDER_END_STATUSES,
   TABLE_ORDER_REFUSAL_REASONS,
   TABLE_ORDER_STATUSES,
+  TABLE_ORDER_REQUEST_ID_PREFIX,
   TABLE_ORDER_STATUS_TRANSITIONS,
   canTransitionTableOrderStatus,
   createOrderLineSnapshot,
   isTableOrderEnded,
   isTableOrderStatus,
+  isTableOrderRequestId,
   isTableOrderSubmitted,
+  tableOrderDocumentId,
   tableOrderTotal,
   tableOrdersTotal,
 } from '../../index';
@@ -323,5 +326,51 @@ describe('table orders', () => {
   it('caps a line and an order at figures a real table stays under', () => {
     expect(MAX_ORDER_LINE_QUANTITY).toBe(99);
     expect(MAX_ORDER_LINES).toBe(60);
+  });
+
+  /**
+   * The idempotency key (GitHub issue #1108).
+   *
+   * The pattern is not a formality. The key becomes a Firestore document name,
+   * so it has to be a legal one - and it has to be one no auto-generated id
+   * could ever be, or a client could hand in a twenty-character alphanumeric
+   * string that happens to name somebody else's order and be answered with
+   * their dinner.
+   */
+  describe('the key that makes a retry safe', () => {
+    it('names the order document after the key', () => {
+      expect(tableOrderDocumentId('abcdefgh')).toBe('req-abcdefgh');
+      expect(
+        tableOrderDocumentId('abcdefgh').startsWith(
+          TABLE_ORDER_REQUEST_ID_PREFIX,
+        ),
+      ).toBe(true);
+    });
+
+    it('accepts the shape a client mints', () => {
+      expect(isTableOrderRequestId('abcdefgh')).toBe(true);
+      expect(
+        isTableOrderRequestId('3f1c9d2e-7a4b-4c8d-9e1f-2a3b4c5d6e7f'),
+      ).toBe(true);
+      expect(isTableOrderRequestId('a'.repeat(128))).toBe(true);
+    });
+
+    /** A slash would address a subcollection rather than name a document. */
+    it('refuses anything that could not be a document name', () => {
+      expect(isTableOrderRequestId('has/a/slash')).toBe(false);
+      expect(isTableOrderRequestId('.leading-dot')).toBe(false);
+      expect(isTableOrderRequestId('has a space')).toBe(false);
+    });
+
+    /**
+     * Too short is guessable and too long is a way to store data in a document
+     * id. Both are refused rather than trimmed.
+     */
+    it('refuses one too short or too long to be a key', () => {
+      expect(isTableOrderRequestId('short')).toBe(false);
+      expect(isTableOrderRequestId('a'.repeat(129))).toBe(false);
+      expect(isTableOrderRequestId('')).toBe(false);
+      expect(isTableOrderRequestId(undefined)).toBe(false);
+    });
   });
 });

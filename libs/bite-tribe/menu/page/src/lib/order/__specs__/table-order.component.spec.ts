@@ -22,6 +22,7 @@ import {
   TableCartService,
   TableOrderService,
   type TableOrderRefusal,
+  type TableOrderUnconfirmed,
   type TableOrderView,
 } from 'bite-tribe/table-order-data-access';
 import { TableOrder } from '../table-order.component';
@@ -81,6 +82,15 @@ const en = {
   'table-order-notes-hint': 'No onions...',
   'table-order-total': 'Total {{total}}',
   'table-order-send': 'Send to the kitchen',
+  'table-order-sending': 'Sending...',
+  'table-order-retrying': 'Still sending...',
+  'table-order-check': 'Check this order',
+  'table-order-unconfirmed-notSent':
+    "Your order hasn't reached {{restaurant}} yet.",
+  'table-order-unconfirmed-unknown':
+    "We couldn't tell whether {{restaurant}} got your order for table {{table}}.",
+  'table-order-unconfirmed-safe': "It's saved on your phone.",
+  'table-order-placed-already': 'This one was already with the kitchen.',
   'table-order-placed-heading': 'Your order is with the kitchen',
   'table-order-placed-intro': '{{restaurant}} has it for table {{table}}.',
   'table-order-placed-total': 'Total {{total}}',
@@ -130,6 +140,9 @@ describe(TableOrder.name, () => {
   let fixture: ComponentFixture<TableOrder>;
   let state: WritableSignal<TableOrderView>;
   let lastRefusal: WritableSignal<TableOrderRefusal | undefined>;
+  let unconfirmed: WritableSignal<TableOrderUnconfirmed | undefined>;
+  let isBusy: WritableSignal<boolean>;
+  let attempt: WritableSignal<number>;
   let cart: TableCartService;
   let load: jest.Mock;
   let submit: jest.Mock;
@@ -166,6 +179,9 @@ describe(TableOrder.name, () => {
   beforeEach(() => {
     state = signal<TableOrderView>({ kind: 'loading' });
     lastRefusal = signal<TableOrderRefusal | undefined>(undefined);
+    unconfirmed = signal<TableOrderUnconfirmed | undefined>(undefined);
+    isBusy = signal(false);
+    attempt = signal(0);
     load = jest.fn().mockResolvedValue(undefined);
     submit = jest.fn().mockResolvedValue(undefined);
 
@@ -220,7 +236,12 @@ describe(TableOrder.name, () => {
       assistance,
       state,
       lastRefusal,
-      isBusy: signal(false),
+      unconfirmed,
+      // The same rule the service applies: the cart is frozen exactly while a
+      // submission is unresolved (GitHub issue #1108).
+      canEditCart: computed(() => unconfirmed() === undefined),
+      attempt,
+      isBusy,
       canSubmit: signal(true),
       load,
       submit,
@@ -733,6 +754,123 @@ describe(TableOrder.name, () => {
       });
 
       expect(has('table-assistance')).toBe(true);
+    });
+  });
+
+  /**
+   * An order the phone could not confirm (GitHub issue #1108).
+   *
+   * What a guest sees is the whole of this issue's "a guest is never left
+   * unsure whether their order was placed": the sentence has to say which of
+   * the two things happened, the way out has to be on screen, and the cart has
+   * to stop pretending it can still be changed.
+   */
+  describe('an order the phone could not confirm', () => {
+    const unsure = (delivery: 'notSent' | 'unknown'): void => {
+      unconfirmed.set({ delivery, failure: 'offline' });
+      show(ORDERING);
+    };
+
+    it('says the order never left the phone, when that is what happened', () => {
+      render();
+      unsure('notSent');
+
+      expect(text()).toContain("Your order hasn't reached Sakura Kitchen yet.");
+    });
+
+    it('says it cannot tell, when it cannot', () => {
+      render();
+      unsure('unknown');
+
+      expect(text()).toContain(
+        "We couldn't tell whether Sakura Kitchen got your order for table 12.",
+      );
+    });
+
+    /** The menu and the cart stay, as they do for a refusal. */
+    it('leaves the menu and the cart on screen', () => {
+      render();
+      cart.add(MARGHERITA);
+      unsure('unknown');
+
+      expect(has('table-order-menu')).toBe(true);
+      expect(text()).toContain('Total 12 €');
+    });
+
+    /** The tap is a question rather than a second order, and says so. */
+    it('turns the send button into a check', () => {
+      render();
+      unsure('unknown');
+
+      expect(text()).toContain('Check this order');
+      expect(text()).not.toContain('Send to the kitchen');
+    });
+
+    /**
+     * A cart that cannot be changed must not go on offering controls that do
+     * nothing, and the menu above it must stop offering "add".
+     */
+    it('freezes every cart control', () => {
+      render();
+      cart.add(MARGHERITA);
+      unsure('unknown');
+
+      const disabled = (testId: string): boolean =>
+        fixture.nativeElement.querySelector(`[data-testid="${testId}"]`)
+          ?.disabled === true;
+
+      expect(disabled('cart-line-increase')).toBe(true);
+      expect(disabled('cart-line-decrease')).toBe(true);
+      expect(disabled('cart-line-remove')).toBe(true);
+      expect(text()).not.toContain('Add');
+    });
+
+    /** A spinner with nothing behind it is what gets tapped a second time. */
+    it('names the attempt while it is still trying', () => {
+      render();
+      show(ORDERING);
+      isBusy.set(true);
+      attempt.set(2);
+      fixture.detectChanges();
+
+      expect(text()).toContain('Still sending...');
+    });
+
+    it('says it is sending on the first attempt', () => {
+      render();
+      show(ORDERING);
+      isBusy.set(true);
+      attempt.set(1);
+      fixture.detectChanges();
+
+      expect(text()).toContain('Sending...');
+    });
+
+    /** "Sent" said twice reads as two dinners to somebody who tapped twice. */
+    it('tells a replayed order apart from a fresh one', () => {
+      render();
+
+      show({
+        kind: 'placed',
+        context: CONTEXT,
+        order: { total: 12, currency: 'EUR' } as never,
+        replayed: true,
+      });
+
+      expect(has('table-order-placed-replayed')).toBe(true);
+      expect(text()).toContain('This one was already with the kitchen.');
+    });
+
+    it('says nothing of the sort about an ordinary send', () => {
+      render();
+
+      show({
+        kind: 'placed',
+        context: CONTEXT,
+        order: { total: 12, currency: 'EUR' } as never,
+      });
+
+      expect(has('table-order-placed-replayed')).toBe(false);
     });
   });
 

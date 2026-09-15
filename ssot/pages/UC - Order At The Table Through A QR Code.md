@@ -6,7 +6,7 @@
 
 Partly implemented. Specified through issue \#1072 as stage 3 of issue \#735, and issue \#1073 as stage 4.
 
-Nine of the ten children have landed. Issue \#1099 gave menu items the identity
+Every one of the ten children has landed. Issue \#1099 gave menu items the identity
 an order line hangs from; issue \#1100 made a scanned token resolve, validating
 the six rules below and answering with a restaurant, a room, a table and a menu
 or one of twelve distinct refusal reasons; issue \#1101 gave the guest a
@@ -14,8 +14,8 @@ screen, a session and an identity to hold it with; issue \#1103 gave them a
 cart and a way to send it; issue \#1104 gave them a way to watch what happens
 to it and to order again; issue \#1105 gave the restaurant the screen that
 answers them; issue \#1106 gave the guest a way to ask for a person without
-waving; and issue \#1107 assumed the code is already public and made that
-boring.
+waving; issue \#1107 assumed the code is already public and made that boring;
+and issue \#1108 assumed the wifi drops things and made that survivable.
 
 **A scanned code now reaches something.** `/t/:token` is a public route in the
 consumer app, the twelve refusal reasons have copy in all eleven locale files,
@@ -75,6 +75,18 @@ room in one action, which is the answer to a code that has been photographed and
 posted. Resolution is throttled across function instances rather than within
 one, and what is throttled is reported to the restaurant as a row it can act on.
 Five decisions shaped it, `RD-TS-24` to `RD-TS-28`.
+
+**Issue \#1108 closed the epic, on the one criterion that had stayed open since
+\#1103.** A submission carries a key the phone mints once per tap and reuses on
+every attempt; the backend names the order document after it, so a retry is
+answered with the order the first attempt wrote rather than writing a second
+one. Around that sit the three things that make a retry worth having: a cart
+kept on the phone and rebuilt from the live menu, so a dropped tab does not cost
+the guest the round they chose; three attempts with a growing gap, behind a send
+button that cannot be double-triggered; and, when none of them resolves, a
+sentence that says which of the two things happened - the order never left the
+phone, or it left and nothing came back - with a retry that is a question rather
+than a second dinner. Six decisions shaped it, `RD-TS-29` to `RD-TS-34`.
 
 Table ordering is off for every restaurant until an owner turns it on, and what
 still has to happen before one should is the deploy: the rules and the indexes
@@ -160,7 +172,11 @@ and the floor-plan geometry on the table stay where they are.
 - The confirmation screen is acknowledged before anything else is possible, because the sticker is a thing anybody can point a camera at - so a code swapped between two tables is caught by the person sitting at one of them rather than by the kitchen.
 - An order belongs to a visit, not directly to a table, so a party that moves keeps its orders.
 - Order lines snapshot the menu item name, price, and currency at submission, so the price the guest saw is the price they are charged. Delivered by issue \#1103 and recorded as `RD-TS-10`: the phone sends the prices it displayed, the backend compares each to the live menu, and a difference refuses the whole order naming the item and both prices - so what is stored is always the menu's number, and it is only ever stored when the two agree.
-- Submission carries an idempotency key, so a double tap on a flaky restaurant network produces one order.
+- Submission carries an idempotency key, so a double tap on a flaky restaurant network produces one order. Delivered by issue \#1108 and recorded as `RD-TS-29`: the key **names the order document**, at `visits/{visitId}/orders/req-{requestId}`, which turns deduplication into a read of one document rather than a search for an order that looks similar - and, because that read is inside the transaction, two copies of one request racing each other contend on it.
+- **A replay is answered before the meal it happened in is looked at** (`RD-TS-30`). The stored order is returned before the session status, the visit, the table and the lines are checked, because a replay arrives after the world has moved on and none of that makes the order that already landed untrue. The answer says `replayed`, so a guest who tapped once is not told twice that they have ordered.
+- **The phone never invents a certainty or a doubt** (`RD-TS-31`). A submission it could not resolve says the order never left the device when no attempt was made, and says it cannot tell when one went out and came back with nothing. Both offer the same retry, because the key makes it safe either way.
+- **You cannot change an order you might already have placed** (`RD-TS-32`). While a submission is unresolved the menu and the cart stay on screen and the cart stops accepting edits, because the key already names an order that does not contain whatever would be added to it.
+- **The cart survives a reload and is rebuilt from the live menu** (`RD-TS-33`). It still never reaches Firestore - the restaurant pays nothing for a guest changing their mind - and it is kept on the phone as **ids**, so a restored row cannot carry a dish that has been taken off, marked unavailable or left unpriced, and a repriced dish comes back at the price on the screen the guest is looking at.
 - A guest sees the orders **their own phone** sent, and not the party's (`RD-TS-12`). The bill is shared and is settled at the table; what the screen runs a total over is what this guest ordered, with cancelled orders excluded from it.
 - An order's status is the **restaurant's** to move, and only along the matrix. `transitionTableOrderStatus` is the only writer of it, `firestore.rules` refuses every client write to the collection, and the transition matrix lives once in `libs/bite-tribe-common/model` with a checked copy in the Functions project - so the buttons the queue offers and the moves the backend accepts cannot disagree.
 - An order is **immutable except for its status**. A correction is a cancellation with a reason, never a rewrite of the lines: a bill that can be edited after the fact is a bill nobody can dispute. The staff callable updates four fields and touches nothing the guest agreed to.
@@ -351,10 +367,10 @@ matrix the staff callable uses. The audit entry names the guest and carries no
 roles, which is the signature of a guest-driven change. A table already
 `ordering` is left alone.
 
-**The cart is never stored.** It is a few minutes of somebody changing their
-mind, and a write per tap would cost the restaurant for a document nobody reads.
-The cost is that a reload loses it, which is the honest trade until issue \#1108
-owns offline tolerance and has somewhere to put it.
+**The cart never reaches Firestore.** It is a few minutes of somebody changing
+their mind, and a write per tap would cost the restaurant for a document nobody
+reads. It costs a reload for the length of this issue; issue \#1108 gave it the
+phone's own storage, which costs the restaurant nothing (`RD-TS-33`).
 
 **A refusal does not take the menu away.** The ordering screen keeps the cart and
 the menu on screen and puts the refusal above them, because a guest told their
@@ -363,9 +379,10 @@ from. The menu is re-read in the same breath, and only the rows the reloaded men
 no longer _offers_ are dropped - a dish still there at a new price stays at the
 price the guest agreed to, since agreeing to the new one is theirs to do.
 
-**Sending twice makes two orders.** Idempotency is issue \#1108, and it is
-deliberately not half-solved here: a key the client would have to unlearn is
-worse than an absence the next issue fills.
+**Sending twice makes two orders.** Idempotency was left whole to issue \#1108
+rather than half-solved here, on the grounds that a key the client would have to
+unlearn is worse than an absence the next issue fills. That issue filled it - see
+`An Order That May Or May Not Have Arrived` below.
 
 ## Watching An Order, And Ordering Again
 
@@ -631,6 +648,87 @@ thing is applied by hand with no Nx target at all: a TTL policy on
 removed - a document per bucket per minute, which is a handful an hour for an
 ordinary restaurant and three a minute under attack.
 
+## An Order That May Or May Not Have Arrived
+
+Issue \#1108 is the last child of the epic, and it is about the one sentence
+nobody wants to read at a table: we are not sure whether that went through.
+
+**A restaurant's wifi drops answers as readily as it drops requests.** That is
+the whole problem, stated once. A submission that timed out is, from the phone,
+indistinguishable from one that never arrived - and the honest response to both
+is to send it again. Unlabelled, that second send is a second dinner.
+
+**So the phone labels it** (`RD-TS-29`). A key is minted once per _intent_ - one
+cart, one tap - and every attempt carries it, including attempts made after the
+phone was locked, reloaded or carried out of range and back. The key **names the
+order document**: `submitTableOrder` writes to
+`visits/{visitId}/orders/req-{requestId}`, so a replay reads the id it would
+write rather than searching for an order that looks similar, and two copies of
+one request racing each other contend on that one document because the read is
+inside the transaction. The prefix and the eight-to-128-character pattern are
+issue \#1096's, unchanged, for the two reasons that issue gives: the key has to
+be a legal Firestore document name, and it has to be one no auto-generated id
+could ever be. What is new is that the derivation lives in the **model** as well
+as in the backend, because the guest's phone uses it too - an order it sent is
+findable by address in the list it is already listening to.
+
+**The replay is answered before the meal it happened in is looked at**
+(`RD-TS-30`). The order document is read straight after the session and an
+existing one is returned before the session status, the visit, the table and
+every line are checked. A replay arrives after the world has moved on: the
+kitchen may have paused, the party may have been moved, staff may have closed
+the table. None of that makes the order that already landed untrue, and the one
+thing it must not do is land twice. The answer carries `replayed`, so the screen
+says "this was already with the kitchen" rather than confirming an order twice
+to somebody who placed it once.
+
+**Three attempts, then a sentence.** The phone retries on a transport failure
+with a growing gap, and stops - a fourth attempt would arrive after the point
+where somebody decides the app is broken and waves at a waiter instead. What
+follows is not an apology but a distinction (`RD-TS-31`): the order _never left
+the phone_, when no attempt was made because the device had no connection, or we
+_cannot tell_, when a call went out and nothing came back. Inventing a doubt
+where there is none teaches a guest to order twice to be sure; inventing a
+certainty where there is a doubt means the dish turns up anyway. Both are
+offered the same way out, because the key makes the retry safe either way.
+
+**While it is unresolved the cart freezes** (`RD-TS-32`). The menu and the cart
+stay on screen, for the reason a refusal leaves them there and one stronger: the
+guest has to see what they sent. What goes is the editing. The order that key
+names may already be with the kitchen, and a cart that accepted an edit would
+build a round that can never be sent - the key would answer with the order that
+does not contain it. You cannot change an order you might already have placed,
+and the way out is one tap that either confirms it or releases the cart.
+
+**The cart is kept on the phone** (`RD-TS-33`). Issue \#1103's rule survives
+intact: nothing reaches Firestore, and the restaurant pays nothing for a guest
+changing their mind. What it gains is device storage, keyed by restaurant and
+table rather than by the guest's account - a phone is one guest, and an
+anonymous uid the app re-minted is not something a guest chose or could be asked
+about. What is stored is **ids**, never dishes. A row is rebuilt from the menu on
+screen now, so a restored cart cannot carry a dish that has been taken off,
+marked unavailable or left unpriced, and a repriced dish comes back at the price
+the guest can see. Storing the item itself would be keeping a second, stale menu
+on the phone and then ordering from the copy, which is the price-integrity
+problem of `RD-TS-10` with the stale data one layer further away.
+
+**A record found after a reload is resolved without being asked** (`RD-TS-34`).
+Sending it again _is_ the question: one request either reconciles the phone with
+the truth or places the order nobody ever answered. What bounds it is the
+record's age - one older than a meal is dropped rather than sent, because the
+restaurant's own session idle timeout has closed the table by then and an order
+arriving in a dining room the guest left hours ago is worse than a record nobody
+is watching for.
+
+**What this issue did not build is a queue.** The staff transition queue of
+issue \#1096 is the nearest thing in the workspace and was deliberately not
+copied: that one replays entry after entry because a host acts on table after
+table while the signal is gone, and each entry expects the one before it to have
+landed. A guest has one cart and one order in flight, so a queue here would be a
+list that never holds two things, with an ordering rule and a drop policy no
+path could reach. What is shared is the shape of the answer and the argument for
+writing an intent down at all.
+
 ## Success Criteria
 
 - Scanning a table QR resolves to exactly one restaurant, room, and table, confirmed on screen before any order can be placed. **Met** by issues \#1100 and \#1101.
@@ -640,7 +738,9 @@ ordinary restaurant and three a minute under attack.
 - A staff status change is visible to the guest within seconds. **Met**, both halves: issue \#1104 gave the guest the listener and issue \#1105 gave a status something that changes it. Observed end to end against the emulators - see `Supported Evidence`.
 - A guest can ask for a waiter or for the bill, and the request is unmistakable on the room view within seconds. **Met** by issue \#1106: a pulsing mark on the table's corner on the live plan, a row above the tickets in the queue, and a second count on the header link. Acknowledging clears it on every device, because every device is reading one document.
 - Repeated taps do not create repeated signals. **Met** by issue \#1106, and by the address rather than by a check: the document is named after the table and the kind, so the second tap lands on the first tap's document - across phones as well as across taps.
-- An order submitted twice because of a flaky network creates one order. **Not met.** Issue \#1103 left it to issue \#1108 rather than half-solving it.
+- An order submitted twice because of a flaky network creates one order. **Met** by issue \#1108, and by the address rather than by a check: the order document is named after the key the phone minted, so the second submission reads the first one's document instead of writing a second. Observed end to end against the emulators with the answer to every attempt dropped on the wire - see `Supported Evidence`.
+- A guest is never left unsure whether their order was placed. **Met** by issue \#1108: three attempts, then a sentence that says whether the order left the phone at all, and a retry that is a question rather than a second order.
+- A lost connection mid-submission is recoverable without rebuilding the cart. **Met** by issue \#1108: the cart is kept on the phone and rebuilt from the live menu, and the submission it was sent as is kept beside it.
 - A revoked or rotated token stops working immediately. **Met** by issues \#1086 and \#1107: the backend has superseded a rotated token since \#1086 and `resolveTableQrToken` answers `tokenSuperseded` with "look at the table again"; \#1107 gave a restaurant the surface that does it, for one table or for a whole room.
 - Automated resolution attempts are throttled across instances and leave a record the restaurant can read. **Met** by issue \#1107.
 - A guest who declines to share their location scans, sits down and orders exactly as one who allows it. **Met** by issue \#1107.
@@ -648,7 +748,7 @@ ordinary restaurant and three a minute under attack.
 
 ## Open Product Questions
 
-Tracked in [[Current State - Open Questions]]. Twenty-four are settled and recorded as `RD-TS-1` to `RD-TS-28` in [[Recorded Decisions]]: occupancy confirmation, shared sessions, ordering without an account, session expiry, what a scan at a menu-only restaurant does, where a menu's currency lives, and - on 13 September 2026 with issues \#1103, \#1104 and \#1105 - order attribution, price integrity, who moves the table when an order lands, whose orders a guest's screen shows, where the cancellation reason is declared, how the staff queue reads a restaurant's orders, whether a queue row moves ahead of the backend, what a cancellation has to carry, what a busy-service alert may do without being asked, and - with issue \#1106 - how a call for a waiter is addressed, what it hangs from, how it is rate limited, what asking for the bill does to the table, why an acknowledgement needs no expectation, and why the two staff lists sort in opposite directions; and - with issue \#1107 - how a scan endpoint is limited across instances, what a restaurant is told about scans that do not look ordinary, where a pending session is drawn, what a shared position may and may not do, and which authority replaces a printed code.
+Tracked in [[Current State - Open Questions]]. Thirty are settled and recorded as `RD-TS-1` to `RD-TS-34` in [[Recorded Decisions]]: occupancy confirmation, shared sessions, ordering without an account, session expiry, what a scan at a menu-only restaurant does, where a menu's currency lives, and - on 13 September 2026 with issues \#1103, \#1104 and \#1105 - order attribution, price integrity, who moves the table when an order lands, whose orders a guest's screen shows, where the cancellation reason is declared, how the staff queue reads a restaurant's orders, whether a queue row moves ahead of the backend, what a cancellation has to carry, what a busy-service alert may do without being asked, and - with issue \#1106 - how a call for a waiter is addressed, what it hangs from, how it is rate limited, what asking for the bill does to the table, why an acknowledgement needs no expectation, and why the two staff lists sort in opposite directions; and - with issue \#1107 - how a scan endpoint is limited across instances, what a restaurant is told about scans that do not look ordinary, where a pending session is drawn, what a shared position may and may not do, and which authority replaces a printed code; and - with issue \#1108 - how a submission is identified across attempts, when a replay is answered, what the phone may claim about an order it could not confirm, what an unresolved submission does to the cart, where the cart lives between reloads, and how long an unsent order stays worth sending.
 
 The last two of the epic's proposals are now answered rather than open: a cancelled order is corrected by a staff-side cancellation carrying a reason the guest is shown, and staff are notified by an in-app queue plus a push through the existing infrastructure. What remains open is the payment model, which is issue \#1073's.
 
@@ -805,6 +905,25 @@ the mark appear on a plan and clears it. The rules and the callable are
 asserted against the real database and the screens against faked listeners, so
 what is untested is the wiring between them.
 
+Run on 14 September 2026 while implementing issue \#1108, on branch
+`1108-offline-tolerant-and-idempotent-order-submission`:
+
+**The guest's half was driven through the running app, over a broken wire.**
+`apps/bite-tribe-e2e/src/tests/table-order-flaky-network.spec.ts` seeds a
+restaurant, a menu, a table, a token and the seating a host would have done,
+then scans the code, sits down, builds a cart and sends it in a real browser
+against the real emulators - with every submission forwarded to the callable and
+its answer dropped on the way back, which is the shape of a restaurant's wifi
+losing a response rather than a request. The phone retried, gave up saying so,
+and the guest's own retry was answered with the order the first attempt had
+written: one order under the visit, read back out of Firestore, and the
+confirmation naming it as one the kitchen already had. A second test reloads the
+page mid-cart and finds the dish still in it.
+
+What that leaves unobserved is the same gap the rest of this page has: the
+_staff_ side of one of these journeys, with a queue on a second screen while the
+guest's phone is retrying.
+
 ## Related GitHub Scope
 
 - Issue \#1072 - QR table menu and table ordering, with ten child issues
@@ -816,7 +935,7 @@ what is untested is the wiring between them.
 - Issue \#1104 - guest order status and follow-up ordering, which gave the guest the live list of what they sent, the sentence a cancellation is explained with, and a second order into the same visit
 - Issue \#1105 - incoming order queue for staff, which gave the restaurant the screen that answers a guest: the queue, every order status after `submitted`, the badge on the floor plan and the push that reaches the people on shift
 - Issue \#1106 - request staff assistance and request the bill, which gave the guest a way to ask for a person without waving and the floor a way to see it and clear it
-- Issue \#1108 - offline-tolerant and idempotent order submission, which owns the duplicate an order submitted twice still creates
+- Issue \#1108 - offline-tolerant and idempotent order submission, which closed the epic: the key that makes a retry one order, the cart that survives a reload, and the sentence a guest gets when the phone cannot tell what happened
 - Issue \#1598 - orderable menu extras, split out of \#1103 because `Category.extrasBlock` has no ids, no renderer and no editor
 - Issue \#1107 - QR token abuse protection, which made the resolution limit durable, gave the restaurant the rows and the rotation that answer a public code, and drew the pending session the epic had been writing since \#1101
 - Issue \#1087 - printable table QR sheets, which fixed the scan URL this use case has to serve
@@ -835,7 +954,7 @@ what is untested is the wiring between them.
 
 ## Related Pages
 
-- [[Recorded Decisions]] - `RD-TS-1` to `RD-TS-28` bind this page
+- [[Recorded Decisions]] - `RD-TS-1` to `RD-TS-34` bind this page
 - [[Architecture - Auth]] - the anonymous guest
 - [[Architecture - Firebase]] - the rules on `tableSessions`, and the collection-group rule and index the staff queue reads through
 - [[Implementation - Firebase Functions]] - the callables

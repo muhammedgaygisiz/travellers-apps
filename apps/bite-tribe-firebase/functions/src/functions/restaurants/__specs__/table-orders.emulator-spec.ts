@@ -907,6 +907,185 @@ describe('table cart and order submission', () => {
     });
   });
 
+  describe('sending the same order twice (GitHub issue #1108)', () => {
+    const KEY = 'abcdefgh-1108-key';
+
+    const submitWithKey = (
+      requestId: string,
+      lines: Record<string, unknown>[] = [margherita()],
+      guest: Guest = alice,
+      now = LUNCHTIME,
+    ): Promise<SubmitTableOrderResult> =>
+      submit(lines, guest, now, { requestId });
+
+    /**
+     * The acceptance criterion, stated as plainly as it can be: a guest tapping
+     * submit twice on a spinner must not order two schnitzels.
+     */
+    it('creates one order for two submissions carrying one key', async () => {
+      const visitId = await ordering();
+
+      const first = (await submitWithKey(KEY)) as TableOrderSubmitted;
+      const second = (await submitWithKey(KEY)) as TableOrderSubmitted;
+
+      expect(await readOrders(visitId)).toHaveLength(1);
+      expect(second.order.id).toBe(first.order.id);
+      expect(second.order.total).toBe(first.order.total);
+    });
+
+    /**
+     * The second answer is the same outcome and not the same event. A phone
+     * that gave up and retried is shown "this was already with the kitchen"
+     * rather than a second confirmation of an order placed once.
+     */
+    it('marks the second answer as a replay and the first as not', async () => {
+      await ordering();
+
+      expect(
+        ((await submitWithKey(KEY)) as TableOrderSubmitted).replayed,
+      ).toBeUndefined();
+      expect(((await submitWithKey(KEY)) as TableOrderSubmitted).replayed).toBe(
+        true,
+      );
+    });
+
+    /** The key names the document, so the order is findable by address. */
+    it('names the order document after the key', async () => {
+      const visitId = await ordering();
+
+      const placed = (await submitWithKey(KEY)) as TableOrderSubmitted;
+
+      expect(placed.order.id).toBe(`req-${KEY}`);
+      expect(placed.order.requestId).toBe(KEY);
+      expect((await readOrders(visitId))[0]['requestId']).toBe(KEY);
+    });
+
+    /**
+     * Two copies of one request racing each other. The loser's read set is
+     * touched by the winner's `create`, Firestore retries it, and the retry
+     * finds the order - which is the whole reason the read is inside the
+     * transaction rather than before it.
+     */
+    it('creates one order when both copies arrive together', async () => {
+      const visitId = await ordering();
+
+      const [first, second] = (await Promise.all([
+        submitWithKey(KEY),
+        submitWithKey(KEY),
+      ])) as TableOrderSubmitted[];
+
+      expect(await readOrders(visitId)).toHaveLength(1);
+      expect(second.order.id).toBe(first.order.id);
+    });
+
+    /**
+     * A replay arrives after the world has moved on. The kitchen pausing does
+     * not make the order that already landed untrue, and a phone told
+     * `orderingUnavailable` would go on retrying an order the restaurant is
+     * already cooking.
+     */
+    it('answers a replay after the kitchen stopped taking orders', async () => {
+      await ordering();
+      const placed = (await submitWithKey(KEY)) as TableOrderSubmitted;
+
+      await restaurantRef().update({
+        tableOrdering: { enabled: false, timeZone: 'Europe/Berlin' },
+      });
+
+      const replayed = (await submitWithKey(KEY)) as TableOrderSubmitted;
+
+      expect(replayed.ok).toBe(true);
+      expect(replayed.order.id).toBe(placed.order.id);
+      expect(replayed.replayed).toBe(true);
+    });
+
+    /**
+     * And after the guest's own session went idle. The order is theirs either
+     * way, and expiring the session under a replay would tell a guest at a
+     * table with the food in front of them to scan the code again.
+     */
+    it('answers a replay after the session has been closed', async () => {
+      await ordering();
+      const placed = (await submitWithKey(KEY)) as TableOrderSubmitted;
+
+      await restaurantRef()
+        .collection('tableSessions')
+        .doc(tableSessionId(TABLE_12, ALICE))
+        .update({ status: 'closed', endedAt: LUNCHTIME.getTime() });
+
+      const replayed = (await submitWithKey(KEY)) as TableOrderSubmitted;
+
+      expect(replayed.order.id).toBe(placed.order.id);
+      expect(replayed.replayed).toBe(true);
+    });
+
+    /**
+     * A replay writes nothing, so the table moved once. A second
+     * `occupied -> ordering` entry would put a change in the audit trail that
+     * nobody made.
+     */
+    it('appends no second table transition for a replay', async () => {
+      await ordering();
+
+      await submitWithKey(KEY);
+      const afterFirst = (await readTransitions()).length;
+      await submitWithKey(KEY);
+
+      expect(await readTransitions()).toHaveLength(afterFirst);
+    });
+
+    /** Two intents are two orders. The key identifies a tap, not a cart. */
+    it('creates two orders for two keys', async () => {
+      const visitId = await ordering();
+
+      await submitWithKey(KEY);
+      await submitWithKey('abcdefgh-1108-second');
+
+      expect(await readOrders(visitId)).toHaveLength(2);
+    });
+
+    /**
+     * A second order under the same key is refused even when its lines differ.
+     * The key is the guest's statement that this is the submission they already
+     * made, and honouring the new lines would let a retry rewrite an order the
+     * kitchen is already cooking.
+     */
+    it('answers with the stored order rather than the lines sent again', async () => {
+      const visitId = await ordering();
+
+      await submitWithKey(KEY, [margherita()]);
+      const replayed = (await submitWithKey(KEY, [
+        { menuItemId: TIRAMISU, quantity: 3, price: 6 },
+      ])) as TableOrderSubmitted;
+
+      expect(replayed.order.lines).toHaveLength(1);
+      expect(replayed.order.lines[0].menuItemId).toBe(MARGHERITA);
+      expect(await readOrders(visitId)).toHaveLength(1);
+    });
+
+    /** An order placed without a key still works, and still gets an id. */
+    it('places an order from a client that sends no key', async () => {
+      const visitId = await ordering();
+
+      const placed = await submitted();
+
+      expect(placed.order.requestId).toBeUndefined();
+      expect(await readOrders(visitId)).toHaveLength(1);
+    });
+
+    it('rejects a key that could not be a document name', async () => {
+      await ordering();
+
+      expect(await codeOf(submitWithKey('has/a/slash'))).toBe(
+        'invalid-argument',
+      );
+      expect(await codeOf(submitWithKey('short'))).toBe('invalid-argument');
+      expect(await codeOf(submitWithKey('x'.repeat(129)))).toBe(
+        'invalid-argument',
+      );
+    });
+  });
+
   describe('two phones at one table', () => {
     /**
      * The epic's per-line attribution, at the grain that actually exists: a

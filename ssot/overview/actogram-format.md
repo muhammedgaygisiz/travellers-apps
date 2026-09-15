@@ -32,20 +32,20 @@ that is not built is recorded as a rule, not as a step.
 An actogram consists of exactly these elements. An agent producing an actogram is
 producing instances of this model.
 
-| Element | Fields |
-|---|---|
-| **Aggregate** | name; the set of states it can be left in; the collections it lives in |
-| **Lane** | code; kind (`actor` \| `system` \| `external`); binding (a role from [[User Roles]], a named function or app, or a named third party) |
-| **Step** | id; lane; action; locus; effects[]; perceptions[]; basis (decision steps); annotations[]; exactly one exit |
-| **Effect** | target lane; what this step causes there |
-| **Perception** | actor lane; what that actor sees, reads or is told |
-| **Branch** | condition; target (step id or terminal id); direction (forward or loop) |
-| **Terminal state** | id; kind; aggregate state; perception; meaning |
-| **Reference** | referenced use-case id; the guarantee that use case owes at this step |
-| **Invariant link** | rule id; whether the step upholds or violates it |
+| Element            | Fields                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Aggregate**      | name; the set of states it can be left in; the collections it lives in                                                                |
+| **Lane**           | code; kind (`actor` \| `system` \| `external`); binding (a role from [[User Roles]], a named function or app, or a named third party) |
+| **Step**           | id; lane; action; locus; effects[]; perceptions[]; basis (decision steps); annotations[]; exactly one exit                            |
+| **Effect**         | target lane; what this step causes there                                                                                              |
+| **Perception**     | actor lane; what that actor sees, reads or is told                                                                                    |
+| **Branch**         | condition; target (step id or terminal id); direction (forward or loop)                                                               |
+| **Terminal state** | id; kind; aggregate state; perception; meaning                                                                                        |
+| **Reference**      | referenced use-case id; the guarantee that use case owes at this step                                                                 |
+| **Invariant link** | rule id; whether the step upholds or violates it                                                                                      |
 
 A step's **class is derived, not declared**: a step on an `actor` lane is an
-*interaction step*; a step on a `system` or `external` lane is a *mechanism step*.
+_interaction step_; a step on a `system` or `external` lane is a _mechanism step_.
 
 ## Notation
 
@@ -71,12 +71,12 @@ other legend, and a page does not carry a copy of this one.
 
 ### Markers
 
-| Marker | Meaning |
-|---|---|
-| `[decision]` | The action is an actor's judgement, not an observable interaction. Requires a `BASIS:` line. Carries no test claim |
-| `[optional]` | Skippable. The guarantees still hold without it |
-| `[not implemented]` | Specified and absent from the code. Requires an `INV: … is VIOLATED here` line |
-| `[conditional: <what>]` | Runs only in the named case, where that case is not a branch of its own |
+| Marker                  | Meaning                                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `[decision]`            | The action is an actor's judgement, not an observable interaction. Requires a `BASIS:` line. Carries no test claim |
+| `[optional]`            | Skippable. The guarantees still hold without it                                                                    |
+| `[not implemented]`     | Specified and absent from the code. Requires an `INV: … is VIOLATED here` line                                     |
+| `[conditional: <what>]` | Runs only in the named case, where that case is not a branch of its own                                            |
 
 ### Headings
 
@@ -107,17 +107,17 @@ several entries. A page with one entry uses one prefix.
 - **AF-5** There is no null lane. An event caused outside this use case is a
   precondition, or a `REF:` on the first step — never a step with no lane.
 
-| Code | Kind | Lane |
-|---|---|---|
-| `BC` | actor | Bite Creator, a signed-in consumer user |
-| `GU` | actor | Guest, unauthenticated visitor |
-| `OP` | actor | BiteTribe Operator (`admin`) |
-| `RO` | actor | Restaurant Owner (`business`) |
-| `UI` | system | A client app, named in the lane declaration |
-| `NAT` | system | The native layer: Capacitor plugin, OS permission dialog, store client |
-| `SYS` | system | Backend, the function named at the step |
-| `DB` | system | Firestore, or Storage where the page says so |
-| `EXT` | external | A named third party |
+| Code  | Kind     | Lane                                                                   |
+| ----- | -------- | ---------------------------------------------------------------------- |
+| `BC`  | actor    | Bite Creator, a signed-in consumer user                                |
+| `GU`  | actor    | Guest, unauthenticated visitor                                         |
+| `OP`  | actor    | BiteTribe Operator (`admin`)                                           |
+| `RO`  | actor    | Restaurant Owner (`business`)                                          |
+| `UI`  | system   | A client app, named in the lane declaration                            |
+| `NAT` | system   | The native layer: Capacitor plugin, OS permission dialog, store client |
+| `SYS` | system   | Backend, the function named at the step                                |
+| `DB`  | system   | Firestore, or Storage where the page says so                           |
+| `EXT` | external | A named third party                                                    |
 
 `NAT` is separate from `UI` deliberately. It is where every App Store review question
 lands, and folding it into `UI` makes those questions invisible.
@@ -140,9 +140,9 @@ lands, and folding it into `UI` makes those questions invisible.
 - **AF-12** Every step SHOULD name its locus with `@` — route, component, callable or
   trigger. At L3 (see [[Use Case Format]]) it MUST.
 - **AF-13** A step whose code does not exist MUST carry `[not implemented]` and an
-  `INV: … is VIOLATED here` line naming a rule marked *Intended, not met*.
+  `INV: … is VIOLATED here` line naming a rule marked _Intended, not met_.
 - **AF-14** Semantics of a written field or document belong in a rule, not in an effect
-  line. An effect states *that* the step writes; the rule states *what the value means*.
+  line. An effect states _that_ the step writes; the rule states _what the value means_.
 
 ### Perception
 
@@ -211,17 +211,17 @@ lands, and folding it into `UI` makes those questions invisible.
 - **AF-31** For every referenced use case and every precondition, the page MUST name the
   counterparty and state, in its own words, the guarantee that counterparty owes at that
   point. A `REF:` carries it inline (`AF-30`); a precondition carries it in the `Owner`
-  column together with the precondition's own text. This is a statement about *this* page
+  column together with the precondition's own text. This is a statement about _this_ page
   and is decidable from it alone. Whether the counterparty has written its side back is
   governed by `AF-34` and is never a conformance condition of this page.
 - **AF-32** The actogram MUST carry a completeness claim: every writer of the aggregate
   is either represented as a step, or named as excluded with a reason.
 - **AF-33** The actogram MUST be as-built at L3 and as-agreed at L2. Intent that is not
-  built is a rule marked *Intended, not met*, never a step — except under `AF-13`.
+  built is a rule marked _Intended, not met_, never a step — except under `AF-13`.
 - **AF-34** Where a referenced use case has a page that carries numbered guarantees, that
   guarantee MUST name this page's precondition, and the two statements MUST agree. A
   disagreement is a conformance failure on **both** pages. Where the counterparty has no
-  page, or has one carrying no numbered guarantees, the obligation is *unanswered*: it is
+  page, or has one carrying no numbered guarantees, the obligation is _unanswered_: it is
   recorded where the page states its handshake, and it is a claim on `UF-20`'s migration
   order rather than a defect in this page. **A page does not reach a level by waiting for
   another page to reach one** — `UF-3` makes L0 and L1 legitimate resting levels, so a rule that
@@ -229,15 +229,15 @@ lands, and folding it into `UI` makes those questions invisible.
 
 ## Terminal State Kinds
 
-| Kind | Meaning |
-|---|---|
-| `Success` | The guarantees hold |
-| `Partial success` | Some guarantees hold; the aggregate is left in a state the page names. Always also an entry in `Exceptions And Failure Modes` |
-| `Idempotent success` | Nothing was written; an existing result was returned |
-| `Hand-over` | Control passed to a named use case |
-| `Abort` | The actor stopped. No side effect |
-| `Rejection` | The system refused a caller. Names the returned error and the perception |
-| `Refusal` | The system accepted the caller and refused a write on its own invariant |
+| Kind                 | Meaning                                                                                                                       |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `Success`            | The guarantees hold                                                                                                           |
+| `Partial success`    | Some guarantees hold; the aggregate is left in a state the page names. Always also an entry in `Exceptions And Failure Modes` |
+| `Idempotent success` | Nothing was written; an existing result was returned                                                                          |
+| `Hand-over`          | Control passed to a named use case                                                                                            |
+| `Abort`              | The actor stopped. No side effect                                                                                             |
+| `Rejection`          | The system refused a caller. Names the returned error and the perception                                                      |
+| `Refusal`            | The system accepted the caller and refused a write on its own invariant                                                       |
 
 ## Procedure For An Agent
 
@@ -271,35 +271,35 @@ Follow in order. Each step's output is the input to the next.
 Checks marked ⚙ are decidable from the text alone and are the intended scope of an
 automated check.
 
-| # | Check | Rule |
-|---|---|---|
-| 1 | ⚙ Every lane used in a step or effect is declared | AF-2 |
-| 2 | ⚙ Every lane code is in the vocabulary | AF-3 |
-| 3 | ⚙ At least one step is on an actor lane | AF-4 |
-| 4 | ⚙ No step lacks a lane | AF-5 |
-| 5 | ⚙ Step ids unique; no gaps introduced by renumbering | AF-11 |
-| 6 | ⚙ Every step has exactly one exit | AF-9 |
-| 7 | ⚙ Line order inside every step | AF-7 |
-| 8 | ⚙ Every branch target resolves | AF-24 |
-| 9 | ⚙ No branch set has two arms with the same target | AF-25 |
-| 10 | ⚙ Every backward branch uses `↺` | AF-26 |
-| 11 | ⚙ Every declared terminal is reached; every reached terminal is declared | AF-27 |
-| 12 | ⚙ Every terminal kind is in the vocabulary | AF-28 |
-| 13 | ⚙ Terminal table has the five required columns, none empty | AF-29 |
-| 14 | ⚙ Every `[decision]` step has a `BASIS:` line and no locus | AF-19, AF-20 |
-| 15 | ⚙ Every `[not implemented]` step has an `INV: … is VIOLATED here` line | AF-13 |
-| 16 | ⚙ Every `INV:` names a rule in `Rules And Invariants` | AF-33 |
-| 17 | ⚙ Every `REF:` names a use-case code in the registry in [[Use Case Format]] | AF-30 |
-| 18 | ⚙ Every `Scope` out-of-scope row names an attachment point | AF-30 |
-| 19 | ⚙ Every run of ≥2 mechanism steps sits under a `### Mechanism` heading | AF-21 |
-| 20 | ⚙ At L3, every step has an `@` locus | AF-12 |
-| 21 | ⚙ A completeness claim is present in `Scope` | AF-32 |
-| 22 | ⚙ Every `REF:` and every precondition names a counterparty and the guarantee it owes | AF-31 |
-| 23 | No effect line contains an actor action | AF-8 |
-| 24 | Every mechanism run returning to an actor **mid-flow** ends in a perception; a run ending at a terminal is covered by AF-16 | AF-15 |
-| 25 | No perception is stated as an error code | AF-17 |
-| 26 | Every branch set is exhaustive | AF-23 |
-| 27 | Where a referenced page carries numbered guarantees, the two statements agree | AF-34 |
+| #   | Check                                                                                                                       | Rule         |
+| --- | --------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| 1   | ⚙ Every lane used in a step or effect is declared                                                                           | AF-2         |
+| 2   | ⚙ Every lane code is in the vocabulary                                                                                      | AF-3         |
+| 3   | ⚙ At least one step is on an actor lane                                                                                     | AF-4         |
+| 4   | ⚙ No step lacks a lane                                                                                                      | AF-5         |
+| 5   | ⚙ Step ids unique; no gaps introduced by renumbering                                                                        | AF-11        |
+| 6   | ⚙ Every step has exactly one exit                                                                                           | AF-9         |
+| 7   | ⚙ Line order inside every step                                                                                              | AF-7         |
+| 8   | ⚙ Every branch target resolves                                                                                              | AF-24        |
+| 9   | ⚙ No branch set has two arms with the same target                                                                           | AF-25        |
+| 10  | ⚙ Every backward branch uses `↺`                                                                                            | AF-26        |
+| 11  | ⚙ Every declared terminal is reached; every reached terminal is declared                                                    | AF-27        |
+| 12  | ⚙ Every terminal kind is in the vocabulary                                                                                  | AF-28        |
+| 13  | ⚙ Terminal table has the five required columns, none empty                                                                  | AF-29        |
+| 14  | ⚙ Every `[decision]` step has a `BASIS:` line and no locus                                                                  | AF-19, AF-20 |
+| 15  | ⚙ Every `[not implemented]` step has an `INV: … is VIOLATED here` line                                                      | AF-13        |
+| 16  | ⚙ Every `INV:` names a rule in `Rules And Invariants`                                                                       | AF-33        |
+| 17  | ⚙ Every `REF:` names a use-case code in the registry in [[Use Case Format]]                                                 | AF-30        |
+| 18  | ⚙ Every `Scope` out-of-scope row names an attachment point                                                                  | AF-30        |
+| 19  | ⚙ Every run of ≥2 mechanism steps sits under a `### Mechanism` heading                                                      | AF-21        |
+| 20  | ⚙ At L3, every step has an `@` locus                                                                                        | AF-12        |
+| 21  | ⚙ A completeness claim is present in `Scope`                                                                                | AF-32        |
+| 22  | ⚙ Every `REF:` and every precondition names a counterparty and the guarantee it owes                                        | AF-31        |
+| 23  | No effect line contains an actor action                                                                                     | AF-8         |
+| 24  | Every mechanism run returning to an actor **mid-flow** ends in a perception; a run ending at a terminal is covered by AF-16 | AF-15        |
+| 25  | No perception is stated as an error code                                                                                    | AF-17        |
+| 26  | Every branch set is exhaustive                                                                                              | AF-23        |
+| 27  | Where a referenced page carries numbered guarantees, the two statements agree                                               | AF-34        |
 
 ## Worked Example
 
@@ -354,12 +354,12 @@ D6   SYS  deletes the Bite
 
 ### Terminal States
 
-| End | Kind | Aggregate state | Perception | Meaning |
-|---|---|---|---|---|
-| `END-D1` | Abort | `present` | The Bite is still on screen | No side effect |
-| `END-D2` | Success | `deleted` | The feed no longer lists it | `G1` holds |
-| `END-E1` | Rejection | `present` | The sign-in prompt appears | `unauthenticated` |
-| `END-E2` | Rejection | `present` | "You can only delete your own Bites" | `permission-denied` |
+| End      | Kind      | Aggregate state | Perception                           | Meaning             |
+| -------- | --------- | --------------- | ------------------------------------ | ------------------- |
+| `END-D1` | Abort     | `present`       | The Bite is still on screen          | No side effect      |
+| `END-D2` | Success   | `deleted`       | The feed no longer lists it          | `G1` holds          |
+| `END-E1` | Rejection | `present`       | The sign-in prompt appears           | `unauthenticated`   |
+| `END-E2` | Rejection | `present`       | "You can only delete your own Bites" | `permission-denied` |
 
 **Completeness.** `/bites` is written by this use case, by
 `UC - Create And Maintain Personal Bites`, and by the retention job in

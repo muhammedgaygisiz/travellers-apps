@@ -42,7 +42,7 @@ No epic owns this front yet.
 
 ## Restaurant And Menu Completeness
 
-- [[UC - Expand Restaurant Menus Into Actionable Menu Journeys]]
+- [[UC - Contact A Restaurant And Plan A Visit]]
 - [[UC - Own And Claim Restaurants]] — [[epic-1069]]
 
 Restaurant and menu data should carry someone from discovery to a clear next

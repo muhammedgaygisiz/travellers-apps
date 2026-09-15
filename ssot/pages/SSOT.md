@@ -57,7 +57,7 @@
   - Next to implement
     collapsed:: true
     - [[UC - Complete Universal Search]]
-    - [[UC - Expand Restaurant Menus Into Actionable Menu Journeys]]
+    - [[UC - Contact A Restaurant And Plan A Visit]]
     - [[UC - Price And Publish A BiteTrail]]
     - [[UC - Add BiteTrail Gamification]]
     - [[UC - Improve Localization Quality]]

@@ -53,7 +53,7 @@ for (const file of files) {
   const text = readFileSync(file, 'utf8');
   const spans = codeSpans(text);
 
-  for (const m of text.matchAll(/\]\((?!https?:|mailto:|#)([^)\s]+)\)/g)) {
+  for (const m of text.matchAll(/]\((?!https?:|mailto:|#)([^)\s]+)\)/g)) {
     if (inCode(spans, m.index)) continue;
     const target = m[1].split('#')[0];
     if (target && !exists(resolve(dirname(file), target))) {
@@ -65,14 +65,14 @@ for (const file of files) {
     if (!inCode(spans, m.index)) fail(file, 'WIKILINK', 'Logseq wikilink outside code');
   }
 
-  for (const m of text.matchAll(/\\#\d|(?<![\w\\[/#])#\d{3,5}(?!\]\[)\b/g)) {
+  for (const m of text.matchAll(/\\#\d|(?<![\w\\[/#])#\d{3,5}(?!]\[)\b/g)) {
     if (inCode(spans, m.index)) continue;
-    if (/^\]\[#\d+\]/.test(text.slice(m.index + m[0].length))) continue;
+    if (/^]\[#\d+]/.test(text.slice(m.index + m[0].length))) continue;
     fail(file, 'ISSUEREF', `issue reference does not link: ${m[0]}`);
   }
 
-  const defined = new Set([...text.matchAll(/^\[#(\d+)\]: /gm)].map((m) => m[1]));
-  for (const m of text.matchAll(/\]\[#(\d+)\]|(?<!:)\[#(\d+)\](?!:)/g)) {
+  const defined = new Set([...text.matchAll(/^\[#(\d+)]: /gm)].map((m) => m[1]));
+  for (const m of text.matchAll(/]\[#(\d+)]|(?<!:)\[#(\d+)](?!:)/g)) {
     if (inCode(spans, m.index)) continue;
     const n = m[1] ?? m[2];
     if (!defined.has(n)) fail(file, 'REFDEF', `[#${n}] used with no definition in this file`);
@@ -94,10 +94,10 @@ const SECTIONS = [
 const ORDER = new Map(SECTIONS.map(([n], i) => [n, i]));
 const index = readFileSync(join(SSOT, 'README.md'), 'utf8');
 const domainSection = index.split('## Domain\n')[1]?.split('\n## ')[0] ?? '';
-const domains = new Set([...domainSection.matchAll(/\[([^\]]+)\]\(domain\//g)].map((m) => m[1]));
+const domains = new Set([...domainSection.matchAll(/\[([^\]]+)]\(domain\//g)].map((m) => m[1]));
 const nextUp = new Set(
   [...(index.split('### Next to implement\n')[1]?.split('\n##')[0] ?? '')
-    .matchAll(/\[([^\]]+)\]\(use-cases\//g)].map((m) => m[1]),
+    .matchAll(/\[([^\]]+)]\(use-cases\//g)].map((m) => m[1]),
 );
 const section = (text, name) => {
   const part = text.split(/^## /m).slice(1).find((p) => p.split('\n')[0].trim() === name);
@@ -137,13 +137,13 @@ for (const file of readdirSync(join(SSOT, 'use-cases'))
 
   const mvp = section(bare, 'MVP Classification');
   if (mvp !== null) {
-    const tags = new Set([...mvp.matchAll(/\*\*\[(MVP|Secondary|Obsolete)\]\*\*/g)].map((m) => m[1]));
+    const tags = new Set([...mvp.matchAll(/\*\*\[(MVP|Secondary|Obsolete)]\*\*/g)].map((m) => m[1]));
     if (!tags.size) fail(file, 'UF-14', 'no classification tag');
     if (tags.has('Obsolete') && tags.size > 1) fail(file, 'UF-21', '`[Obsolete]` mixed with another tag');
   }
 
   const linksIn = (name) =>
-    [...(section(bare, name) ?? '').matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)]
+    [...(section(bare, name) ?? '').matchAll(/\[([^\]]+)]\(([^)]+)\)/g)]
       .map((m) => ({ text: m[1], target: m[2] }));
   const rd = linksIn('Related Domains');
   const rp = linksIn('Related Pages');

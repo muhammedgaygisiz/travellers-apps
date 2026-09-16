@@ -14,7 +14,6 @@ const repoRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], {
 const pagesPath = join(repoRoot, 'ssot/pages');
 const epicsIndexPath = join(pagesPath, 'Epics.md');
 const ssotPath = join(pagesPath, 'SSOT.md');
-const contentsPath = join(pagesPath, 'contents.md');
 const backupPath = join(repoRoot, 'ssot/logseq/bak');
 const projectNumber = '4';
 const projectOwner = 'muhammedgaygisiz';
@@ -54,7 +53,6 @@ const subIssues = getUniqueSubIssues(epics);
 clearGeneratedEpicPages();
 rmSync(epicsIndexPath, { force: true });
 writeFileSync(ssotPath, replaceRootSection(readFileSync(ssotPath, 'utf8'), 'Epics', renderEpicsSection(epics, '  ')));
-writeFileSync(contentsPath, replaceRootSection(readFileSync(contentsPath, 'utf8'), 'Epics', renderEpicsSection(epics, '  ')));
 
 for (const epic of epics) {
   writeFileSync(

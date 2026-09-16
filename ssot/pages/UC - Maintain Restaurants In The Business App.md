@@ -2,17 +2,31 @@
 
 ## Status
 
-Supported today and still expanding.
+**Level:** L0.
+
+Supported today. A business account signs in, sees the map and the two surfaces the dashboard
+offers, and edits the Restaurants assigned to it - metadata, opening hours, social links,
+address, and the menu seeded from its Bites. It sees only what it owns, and the edit routes
+refuse anything else by direct URL. Creating a Restaurant is not done here; that left for the
+admin app with issue \#1473.
 
 ## Goal
 
-Business users or admins can maintain Restaurant and menu context that improves Bite discovery.
+Business users can maintain Restaurant and menu context that improves Bite discovery.
+
+This page owns what an account may do to a Restaurant it already holds, including taking a
+dish off today's menu - `MenuItem.isAvailable` is written here and nowhere else. How an
+unavailable dish then reads to a diner is [[UC - View Restaurant Menus]]. Being given one is
+[[UC - Own And Claim Restaurants]], creating one and verifying a candidate into one is
+[[UC - Operate BiteTribe In The Admin App]], and what a menu looks like to a diner is
+[[UC - View Restaurant Menus]].
 
 ## Actors
 
-- Restaurant owner, holding the `business` role
+- **Restaurant Owner** - acts: opens the dashboard, edits the Restaurants assigned to its
+  account, and maintains their metadata and menus. It holds the `business` role.
 
-## Current Flow
+## Flow
 
 - The business user opens the dashboard, which shows the map and one entry per
   surface: **BiteTrails** and **Restaurants**.
@@ -70,6 +84,20 @@ direct URL rather than merely being unlinked from the list. The refusal is a
 toast and a return to the account's own list; it never says who does hold the
 Restaurant. See [[UC - Own And Claim Restaurants]].
 
+## MVP Classification
+
+**[Secondary]** - the whole page. The business app is out of scope for this release candidate
+by decision and gets its own soft launch, so nothing here is required for the initial release;
+[[Current State - Release Candidate Test Charter]] records that.
+
+## App Store Review Area
+
+Not relevant, because the business app is not store-distributed. Only
+`apps/bite-tribe-ios` and `apps/bite-tribe-android` carry a `capacitor.config.ts` and a native
+project; this app ships on the web. It would become relevant if the business app were ever
+packaged for a store, at which point its sign-in, its role gate and its data handling would
+all be reviewed for the first time.
+
 ## Supported Evidence
 
 - Business `dashboard`, `bite-trails` and `restaurants`
@@ -79,14 +107,30 @@ Restaurant. See [[UC - Own And Claim Restaurants]].
 
 ## Related GitHub Scope
 
-- Issue \#1079 scopes this app to the Restaurants assigned to the caller and guards the edit routes; the assignment itself is [[UC - Own And Claim Restaurants]].
-- Issue \#734 includes opening hours, social links, verified/unverified restaurant handling, menu cleanup, and admin restaurant workflows.
-- Issue \#778 / \#942 covers verifying restaurant candidates discovered from repeated Bite evidence into real Restaurants. That flow is Operator work in the Admin App; see [[UC - Verify Restaurant Candidate]].
-- Issue \#1003 seeds the initial Menu of a verified candidate from its Bites.
-- Issue \#1572 gives `restaurant/:restaurantId` the two-column layout the admin app's Create Restaurant page already had.
+- Issue \#1079 scoped this app to the Restaurants assigned to the caller and guarded the edit
+  routes. Closed as completed; the assignment itself is [[UC - Own And Claim Restaurants]].
+- Issue \#734, the restaurant and menu epic, covered opening hours, social links,
+  verified/unverified restaurant handling, menu cleanup, and admin restaurant workflows.
+  Closed as completed - delivered, not planned.
+- Issue \#778, the candidate epic, and issue \#942 covered verifying restaurant candidates
+  discovered from repeated Bite evidence into real Restaurants. Both closed as completed. That
+  flow is Operator work in the Admin App; see [[UC - Verify Restaurant Candidate]].
+- Issue \#1003 seeded the initial Menu of a verified candidate from its Bites. Closed as
+  completed.
+- Issue \#1572 gave `restaurant/:restaurantId` the two-column layout the admin app's Create
+  Restaurant page already had. Closed as completed.
 
 ## Related Domains
 
 - [[Restaurant]]
 - [[Bite]]
-- [[User Roles]]
+
+## Related Pages
+
+- [[User Roles]] - the `business` and `staff` roles the door gate tests, and why they are
+  alternatives rather than a hierarchy
+- [[UC - Own And Claim Restaurants]] - how an account comes to hold a Restaurant at all
+- [[UC - Operate BiteTribe In The Admin App]] - creating a Restaurant, and the migrations and
+  candidate verification that left this app with issue \#1473
+- [[UC - Verify Restaurant Candidate]] - the Operator flow issues \#778 and \#942 built
+- [[UC - View Restaurant Menus]] - what the maintained menu looks like to a diner

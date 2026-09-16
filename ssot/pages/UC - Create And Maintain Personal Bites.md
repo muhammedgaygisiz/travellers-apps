@@ -2,18 +2,23 @@
 
 ## Status
 
-Supported today.
+**Level:** L0.
+Supported today. The create and edit flows, the photo upload states and their retry, and
+the five-source position picker are all shipped. The one deferred capability is the
+storage of resolved candidate positions, \#1290.
 
 ## Goal
 
-Users can create and maintain real dish-level food experiences.
+Users can create and maintain real dish-level food experiences. This is the core
+contribution loop: every account can perform it, and the Bites it produces are what the
+rest of the product reads.
 
 ## Actors
 
-- Bite creator
-- Food lover
+- **Bite Creator** — creates a Bite, edits it later, and is the only account offered the
+  retry on a failed photo upload, because the photo is on their device.
 
-## Current Flow
+## Flow
 
 - User creates a new Bite.
 - Entering the flow is not instant: `new-bite` sits behind `freshSessionGuard`,
@@ -35,7 +40,7 @@ Users can create and maintain real dish-level food experiences.
 - The location section states where the position came from as a text row — `Aus Bild`, `Aus GPS`, `Aus Restaurant`, `Aus Google`, or `Manuell gesetzt` — with an edit action at the end of the row, mirroring the restaurant field. With no position resolved yet, the row is replaced by a full-width `Standort wählen` call to action. This replaced four permanently visible source buttons of equal weight, where the active source was readable only from a check mark on one of them. See GitHub issue #1266.
 - The source is tracked explicitly at every point that writes the position, not inferred by comparing coordinates. Two sources can resolve to the same point, and a restaurant-derived position matched none of the four buttons, so the section used to report no source at all in that case.
 - The source is stored on the Bite as `positionSource`, so a Bite reopened for editing still names where its position came from. Bites written before this carry none and are reported as an unknown source rather than being given a guessed one. The field is `null` rather than absent when unknown: the whole form value is handed to Firestore, which rejects an undefined field.
-- The candidate positions themselves are not stored, only the source. Persisting them would let a user switch back to, say, the photo's location while editing — the photo position is otherwise unrecoverable, because `compressWithCanvas` strips EXIF before upload. It is deferred because `firestore.rules` grants read on every document to every authenticated user, so stored candidates would publish the positions the user chose _not_ to use, and a stricter nested rule cannot override the permissive wildcard. See [[Current State - Known Issues]] and GitHub issue #1290.
+- The candidate positions themselves are not stored, only the source. Persisting them would let a user switch back to, say, the photo's location while editing — the photo position is otherwise unrecoverable, because `compressWithCanvas` strips EXIF before upload. It is deferred because stored candidates would publish the positions the user chose _not_ to use: `match /bites/{biteId}` allows read to any signed-in account, so anything written onto the Bite document is readable by every user. The original objection — that a stricter nested rule could not override the permissive `/{document=**}` wildcard — no longer applies, because \#1078 replaced that wildcard with a default deny and per-collection matches; a subcollection scoped to the owner, as `bites/{biteId}/likes` already is, is now possible. Checked against `firestore.rules` on 11 September 2026. See GitHub issue #1290.
 - The edit action opens a modal that lists all five sources over a map showing the resolved candidates as colour-coded markers, one colour per source, with clustering off so nearby candidates stay distinguishable. A source with nothing to offer stays listed but disabled with the reason — no GPS in the photo, no restaurant selected, no Google place selected. Selecting a row or tapping its marker highlights it; the position is applied only on confirm.
 - The map shows the source being selected: it moves to the selected candidate and renders that marker larger, so the two routes to the same choice — the list row and the marker — leave the map in the same state. The map used to centre on the device instead and never move again, so with a photo taken 1500 km away the user confirmed a position the map had never shown, and colour alone had to carry the selection where candidates sit metres apart. The camera follows an explicit `focusedGeopointId` on the shared map component rather than a change to the GPS-first default the other maps recenter through. See GitHub issue #1306.
 - `Manuell gesetzt` is a listed source like the others. Selecting its row turns the modal map into a picker seeded from the highlighted candidate. Reopening the modal on a manual position starts in the comparison view, so the manual point can be weighed against the other sources before being edited again.
@@ -109,6 +114,27 @@ Users can create and maintain real dish-level food experiences.
 - User can post the Bite and stay on the form to add another Bite at the same place. Restaurant, currency, and position stay; image, dish name, price, rating, description, and tags reset, and the tags of the Bites already posted in that session become suggestions.
 - User can edit the Bite later.
 
+## MVP Classification
+
+**[MVP]** — creating a Bite and editing it later, the photo requirement with its three
+upload states and the poster-only retry, restaurant and position selection, and the
+currency and suspicious-price handling. This is the core contribution loop and all of it
+ships today.
+
+**[Secondary]** — storing the resolved candidate positions on the Bite so a source can be
+re-chosen while editing, deferred under \#1290. Nothing else on this page is
+unimplemented.
+
+## App Store Review Area
+
+Relevant. This is where the camera, photo library and location permissions are exercised
+and where their purpose strings have to hold up. On Android the gallery is the system
+Photo Picker, which raises no permission prompt of its own, and `ACCESS_MEDIA_LOCATION` is
+collected by the onboarding photos step rather than here - see [[Architecture - Capacitor]]
+and GitHub issue #1409. Both data types this flow writes are already declared in
+[[Implementation - Store Declarations]]: **Photos or Videos** and **Precise Location**,
+each under App Functionality.
+
 ## Supported Evidence
 
 - `new-bite`
@@ -143,3 +169,11 @@ Users can create and maintain real dish-level food experiences.
 - [[Bite]]
 - [[User]]
 - [[Restaurant]]
+
+## Related Pages
+
+- [[Personas]] - the audiences this loop serves: Food lover, Traveler, Bite creator
+- [[Implementation - Feature Patterns]] - the Entry Feedback Contract
+- [[Architecture - Capacitor]] - the Media Permission Rule
+- [[Implementation - Store Declarations]]
+- [[Current State - Known Issues]]

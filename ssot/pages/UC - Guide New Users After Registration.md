@@ -1,18 +1,28 @@
 # UC - Guide New Users After Registration
 
-- ## Status
+## Status
 
-  Supported today. Delivered through [[epic-850]] (issue \#850 closed 17 July 2026; all nine sub-issues complete).
+**Level:** L0.
+Supported today. Delivered through [[epic-850]] (issue \#850 closed 17 July 2026; all nine
+sub-issues complete). The blocking assistant, its seven steps, the funnel analytics and the
+coach-mark sequence all ship. Onboarding is the app's first-run permission surface, which is
+what makes `App Store Review Area` below the substantial section on this page.
 
-- ## Goal
+## Goal
 
-  New users should understand BiteTribe and configure the basics needed for useful discovery and contribution.
+Someone who has just registered reaches a usable app: named, with a visibility choice made, a
+currency and language set, and the two permissions the product depends on either granted or
+knowingly declined. This page owns what the assistant asks, in what order, and what it does
+with an answer - including a declined one.
 
-- ## Actors
-- New user
-- Existing user without a completed onboarding
-- Privacy-conscious participant
-- ## Target Flow
+## Actors
+
+- **Bite Creator** - completes the assistant once, on first entry. Every account passes through
+  it: an existing account without the completion flag is routed back into it rather than
+  exempted.
+
+## Flow
+
 - User registers or logs in without the onboarding completion flag.
 - Registration acknowledges the submit immediately and stays blocked until the assistant is on screen or a localized error is shown, because sign-up, the verification mail, and the onboarding gate are three round-trips that would otherwise look like a dropped tap (issue \#1185).
 - A blocking assistant guides the user through:
@@ -58,13 +68,73 @@
 - The Bite details navigation mark then highlights opening directions to the Bite's place in the platform navigation experience.
 - The Bite details bucket-list mark finishes the sequence by highlighting how to save a Bite to an existing or new bucket list.
 - The bucket list swipe mark (issue \#812) teaches the swipe-to-tick gesture inside a bucket list. It is anchored to the first Bite of the list and stays back while the list is empty, because there is nothing to swipe yet.
-- ## Related GitHub Scope
+- The assistant reports its own funnel. `onboarding_assistant_started` is logged when it
+  opens, `onboarding_step_completed` as each step is finished, and
+  `onboarding_assistant_completed` at the end (issue \#1017). These are app-interaction
+  events, declared with the rest in [[Implementation - Store Declarations]].
+
+## MVP Classification
+
+**[MVP]** - the blocking assistant and its steps: the unique display name, the public/private
+choice, currency, language, and the priming in front of each OS permission prompt. No account
+reaches the app without completing it, so it is on the path of every first session.
+
+**[Secondary]** - the coach-mark sequence and the funnel analytics. Both ship; neither is
+required for a first release, and the coach marks are ten must-dismiss interruptions that the
+product could tune afterwards.
+
+## App Store Review Area
+
+Relevant, and more of it is exercised here than anywhere else: this is the app's first-run
+permission surface, so the purpose strings are read here before any other screen shows them.
+
+- The steps are backed by `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`,
+  `NSPhotoLibraryAddUsageDescription` and `NSLocationWhenInUseUsageDescription`.
+  `NSLocationAlwaysAndWhenInUseUsageDescription` is declared as well and nothing requests
+  always-on location; removing it is \#1607.
+- Android reaches the gallery through the system Photo Picker (\#1394), which needs no storage
+  permission, and `POST_NOTIFICATIONS` arrives by manifest merge from
+  `@capacitor-firebase/messaging` rather than being declared in the app's own manifest.
+- The priming rule is the review-facing one: a prompt follows an explicit step or a later
+  recovery action and never appears cold from login, startup or passive loading. A reviewer
+  sees each prompt in the context that explains it.
+- The data these steps collect is declared in [[Implementation - Store Declarations]].
+
+## Supported Evidence
+
+- `libs/bite-tribe/onboarding/{page,guards,data-access}`.
+- The step components: `identity-step`, `photos-step`, `visibility-step`, `currency-step`,
+  `language-step`, `location-step`, `notification-step`, `finish-step`.
+- `onboardingCompletedAt` and `onboardingCompletedAtTimestamp` on the user profile, written by
+  `completeOnboarding`.
+- `AnalyticsEvent.OnboardingAssistantStarted`, `OnboardingStepCompleted` and
+  `OnboardingAssistantCompleted`, logged from `OnboardingService`.
+
+## Related GitHub Scope
+
 - Issue \#850 (epic, supersedes closed \#841)
 - Issues \#1011, \#1012, \#1013, \#1014, \#1015, \#1023, \#1016, \#1017
 - Issue \#1271 (home city collected in the location step), with \#1270 for the
   profile display of the same field
 - Issue \#1412 (the location step reads the live OS grant), following \#1394 for
   the photos step and \#1184 for notifications
-- ## Related Domains
+
+## Related Domains
+
 - [[User]]
 - [[Bite]]
+
+## Related Pages
+
+- [[Personas]] - the audiences the `Actors` mapping displaced: the new user, the existing user
+  without a completed onboarding, and the privacy-conscious participant
+- [[UC - Manage Profile And Social Graph]] - the display name, photo and visibility this step
+  collects, and where the home city is rendered
+- [[UC - Configure Personal Settings]] - where currency, language and notification delivery are
+  changed afterwards
+- [[UC - Receive App Notifications And Engagement Updates]] - the installation the notification
+  grant registers
+- [[UC - Create And Maintain Personal Bites]] - where the camera and photo permissions are then
+  used
+- [[Implementation - Store Declarations]]
+- [[epic-850]]

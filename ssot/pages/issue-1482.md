@@ -26,7 +26,7 @@
   - `.loki/reference/chrome_laptop_Brand_Characters_Tribe.png` and its iPhone 7 pair: the two new visual references.
   - [[Implementation - Brand Characters]]: the set, where it lives, how a character is produced, and the two clustering traps.
   - [[Current State - Open Questions]]: the naming question and the palette question.
-  - [[Traceability Map]] and [[contents]] carry the new page.
+  - [[Traceability Map]] and [[SSOT]] carry the new page.
 - Validation
   - `nx lint storybook-host` - clean.
   - `npm run build:storybook` - succeeds, and `dist/storybook/storybook-host/assets/characters/` contains all seven files. This is the check that matters for the `staticDirs` entry: `fetchFailIgnore` in `loki.config.js` ignores third-party hosts only, so a character that failed to load would fail the story rather than render as a gap.

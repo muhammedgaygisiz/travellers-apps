@@ -555,7 +555,26 @@ blank title.
 The App Store URL drops the `/de/` storefront segment so it opens the viewer's own
 store.
 
-Status: not yet set in the app, and the post not yet published.
+### Published 16 September 2026
+
+The bio links were set from the Android app, in the order above. Instagram adds a
+new link at the bottom, so they had to be reordered afterwards under Links - `⋯` -
+Reorder links. The profile shows the first link's URL rather than its title:
+`apps.apple.com/app/id6746098595 and 2 more`.
+
+The post was published from `instagram.com` on desktop. Three things on the way:
+
+- **The web uploader defaults to a square crop.** It opened at 4:5 for this image,
+  but check it every time - a square crop cuts the lettering off the bottom.
+- **The AI label stays off.** The image is composed by a script from our own
+  artwork, and the label is meant for realistic AI-generated photos and video.
+- **Shared to Threads** from the same dialog, as the first post on that account.
+
+The grid thumbnail is Instagram's 3:4 crop of the 4:5 image, and it keeps every
+character and the full tagline, so the side margins in the script are enough.
+
+Not pinned: with one post on the profile there is nothing to pin it above. Pin it
+once the second post goes up.
 
 ## Wiring Back Into The Product
 

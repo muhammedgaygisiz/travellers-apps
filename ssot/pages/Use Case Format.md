@@ -484,6 +484,9 @@ X5 SYS <action>
 | `UC-CBT` | Create And Operate BiteTrails In The Business App      | [[UC - Create And Operate BiteTrails In The Business App]]      |
 | `UC-EPB` | Earn From A Paid BiteTrail                             | [[UC - Earn From A Paid BiteTrail]]                             |
 | `UC-PBS` | Price A BiteTrail For Sale                             | [[UC - Price A BiteTrail For Sale]]                             |
+| `UC-CFP` | Configure Restaurant Floor Plans And Tables            | [[UC - Configure Restaurant Floor Plans And Tables]]            |
+| `UC-OTT` | Order At The Table Through A QR Code                   | [[UC - Order At The Table Through A QR Code]]                   |
+| `UC-ABG` | Add BiteTrail Gamification                             | [[UC - Add BiteTrail Gamification]]                             |
 | `UC-DIS` | Dismiss Restaurant Candidate                           | none                                                            |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | none                                                            |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                            |

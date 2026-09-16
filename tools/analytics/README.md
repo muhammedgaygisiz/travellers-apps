@@ -1,7 +1,7 @@
 # Analytics tooling
 
 Agent-operable access to the launch analytics defined in
-[`ssot/pages/Implementation - Analytics Events.md`](../../ssot/pages/Implementation%20-%20Analytics%20Events.md).
+[`ssot/implementation/analytics-events.md`](../../ssot/implementation/analytics-events.md).
 
 - **`dashboard.config.mjs`** — dashboard-as-code: the launch monitoring tiles
   (one source of truth for the report and the docs).

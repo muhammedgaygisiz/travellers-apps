@@ -52,7 +52,7 @@
  * staff member clears it in one tap. Neither implies the other, and nothing in
  * this file reads `enabled` - the two live in separate documents on purpose.
  *
- * The product rules are in `ssot/pages/Table.md`.
+ * The product rules are in `ssot/domain/table.md`.
  */
 
 /**

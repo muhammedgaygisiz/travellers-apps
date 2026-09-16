@@ -58,7 +58,7 @@ import type {
  * second scan addresses the document the first one wrote instead of opening a
  * second session for one phone.
  *
- * The product rules are in `ssot/pages/Table Visit.md`.
+ * The product rules are in `ssot/domain/table-visit.md`.
  */
 
 /**

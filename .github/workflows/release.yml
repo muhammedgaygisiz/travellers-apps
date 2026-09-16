@@ -7,7 +7,7 @@ name: BiteTribe Release
 # started from, because the release is defined by the branch rather than by
 # whoever pressed the button.
 #
-# See ssot/pages/Release Workflow.md.
+# See ssot/overview/release-workflow.md.
 
 on:
   workflow_dispatch:

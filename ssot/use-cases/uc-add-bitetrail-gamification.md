@@ -1,0 +1,36 @@
+# UC - Add BiteTrail Gamification
+
+## Status
+
+**Level:** L0.
+
+Next to implement.
+
+## Goal
+
+Completing BiteTrails should create visible progress and reward moments.
+
+## Actors
+
+- **Bite Creator** — acts: follows or completes a BiteTrail and sees the resulting progress and reward signals.
+
+## Flow
+
+- User follows or completes a BiteTrail.
+- App shows progress, badges, contests, or reward-like signals.
+
+## MVP Classification
+
+**[Secondary]**
+
+## Related GitHub Scope
+
+- Issue [#770]
+
+## Related Domains
+
+- [Bite Trail](../domain/bite-trail.md)
+- [Bucket List](../domain/bucket-list.md)
+- [User](../domain/user.md)
+
+[#770]: https://github.com/muhammedgaygisiz/travellers-apps/issues/770

@@ -60,12 +60,9 @@ apps/storybook-host/src/assets/temp/**/*
 # Husky backup hooks
 .husky/*.bak
 
-# Logseq backup pages
-ssot/logseq/bak/
-ssot/Claude outputs/
-
 # Files delivered into the repo folder by the Claude desktop app
 /Claude outputs/
+ssot/Claude outputs/
 # Claude Code local state, except the shared skills symlink
 /.claude/*
 !/.claude/skills

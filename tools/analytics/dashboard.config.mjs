@@ -3,7 +3,7 @@
  * CLI (`report.mjs`) and the docs share a single source of truth.
  *
  * These tiles mirror the "Launch Dashboard Spec" table in
- * `ssot/pages/Implementation - Analytics Events.md`, which is derived from the
+ * `ssot/implementation/analytics-events.md`, which is derived from the
  * product event taxonomy in
  * `libs/common/ta-firestore/src/lib/analytics/analytics-events.ts`.
  *

@@ -1,0 +1,165 @@
+# Architecture - Nx Workspace
+
+## Purpose
+
+Nx organizes BiteTribe into apps and focused libraries so product features, shared UI, native wrappers, backend functions, and tests can evolve independently.
+
+## Apps
+
+```text
+apps/bite-tribe
+apps/bite-tribe-business
+apps/bite-tribe-admin
+apps/bite-tribe-firebase
+apps/bite-tribe-ios
+apps/bite-tribe-android
+apps/bite-tribe-e2e
+apps/bite-tribe-business-e2e
+apps/storybook-host
+```
+
+There are **three** web apps, split by who signs into them rather than by what
+they do: `bite-tribe` is the consumer app, `bite-tribe-business` is what a
+restaurant maintains its own data in, and `bite-tribe-admin` is the internal
+operations tool. Only `bite-tribe` has native wrappers. See
+[UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md).
+
+## Library Families
+
+```text
+libs/bite-tribe
+libs/bite-tribe-business
+libs/bite-tribe-admin
+libs/bite-tribe-common
+libs/common
+```
+
+## Feature Library Pattern
+
+- `page` libraries own presentation, containers, and workflow services.
+- `data-access` libraries own feature reads, resources, and feature-local request/result shapes.
+- `api` owns shared Firebase and Firestore operations.
+- `store` owns app-wide NgRx state and derived state.
+- `common/ui` owns reusable UI components.
+- `common/utils` owns cross-cutting helpers and shared paths.
+
+## Boundary Rule
+
+Prefer existing library boundaries over new abstractions. Add a new abstraction only when it removes real complexity or matches an existing local pattern.
+
+## Scope Boundaries Between The Apps
+
+`depConstraints` in `eslint.config.mjs` is what actually holds the app boundary. `scope:bite-tribe`, `scope:bite-tribe-business` and `scope:bite-tribe-admin` each have an entry; a scope with no entry is unconstrained, not restricted.
+
+The apps share the **platform** layers and nothing else:
+
+| Shared                                                          | Not shared                                 |
+| --------------------------------------------------------------- | ------------------------------------------ |
+| `type:api` (one Firebase client), `type:store` (one NgRx store) | `type:feature` libraries                   |
+| `type:model`, `scope:common`, `type:ui`                         | feature-local `type:data-access` libraries |
+
+**A feature-local data-access library belongs to exactly one app.** When both apps touch the same entity, each owns its own read and write surface over the shared store and API rather than importing the other's.
+
+This was learned the expensive way. `scope:bite-tribe-business` had no `depConstraints` entry at all until [issue #1317][#1317], so business libraries could import anything. Three things had drifted in under it:
+
+- `bite-tribe/restaurant-data-access` held six restaurant **write** methods that only the business app ever called, and the business edit page imported that library to reach them — while its sibling new-restaurant page used the business one. Two services in one library, two data-access libraries, same entity.
+- `libs/bite-tribe/restaurant/page` carried an unreachable duplicate of the business edit UI, container and component and service, exported from nothing and routed by nothing.
+- `libs/bite-tribe-business/start` was tagged `scope:bite-tribe` despite living in the business app and being routed only by the business shell.
+
+Adding the constraint found all three in one lint run. Two known crossings remain deliberately excused in the rule's `allow` array rather than silently permitted; each names its issue.
+
+`scope:bite-tribe-admin` was given its entry in the same change that created
+the scope, rather than afterwards, precisely because of the three drifts above:
+an operator surface able to reach into either app's feature libraries would make
+the split it exists for cosmetic.
+
+**A tag that disagrees with the directory is a defect.** Nothing derives the scope tag from the path, so `libs/bite-tribe-business/**` carrying `scope:bite-tribe` lints clean and quietly opts that library out of the boundary.
+
+## Bundle Budget Rule
+
+`apps/bite-tribe` enforces an initial bundle budget of 3 MB (error) and 500 kB (warning). The error budget fails the production build in CI.
+
+Every consumer route is lazy through `loadComponent`. A route that references its component statically pulls that component's whole dependency chain into the initial bundle, so route components should stay lazy.
+
+Keep large optional dependencies out of the initial bundle at their source rather than through routing. Import them on demand inside the function that needs them:
+
+```ts
+const { default: heic2any } = await import('heic2any');
+```
+
+This is preferred over lazy routing because it benefits every consumer of the shared library at once. Loading `heic2any` on demand removed roughly 1.4 MB from the initial bundle and helps every feature that uploads an image.
+
+## Lazy Library Rule
+
+Nx forbids statically importing a library that is also lazily loaded (`@nx/enforce-module-boundaries`: _"Static imports of lazy-loaded libraries are forbidden"_). The rule applies per **project**, not per file, so a second entry point inside the same project does not satisfy it.
+
+Route guards must be imported statically to build the route config. A lazily loaded feature library therefore cannot also export that route's guards: the guards belong in their own project. `bite-tribe/onboarding-guards` is the split that exists for this pattern.
+
+Before reaching for lazy routing to fix a bundle, prefer the on-demand dependency import above: it is cheaper, has no module-boundary consequences, and helps every consumer.
+
+## Target Inference Rule
+
+Some targets live in `project.json`, some are inferred by an `nx.json` plugin, and nothing in a project's files tells you which. `@nx/playwright`, `@nx/eslint`, `@nx/storybook`, `@nxext/capacitor`, and `@nx/jest` all infer targets. **Read `nx show project <name>` rather than `project.json` when you need a target's real configuration.**
+
+`test` is inferred. `@nx/jest/plugin` creates one `test` target per project that has a `jest.config.{ts,cts,js,cjs,mjs,mts}` next to a `project.json` or a workspace `package.json` (issue [#1379]). No `project.json` declares a Jest target, and adding a library with a Jest config is enough to give it a working `test` target.
+
+Two roots are excluded from that inference in `nx.json`:
+
+| Root                                 | Why                                                                                                                   |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `apps/bite-tribe-firebase/functions` | Owns an explicit `nx:run-commands` `test` target that runs Jest with `--runInBand` against the emulator-shaped suite. |
+| `apps/storybook-host`                | Has a Jest config and one unrun spec but has never had a `test` target. Inferring one would newly enter it into CI.   |
+
+Shared Jest task configuration lives in one place: the `test` entry of `nx.json` `targetDefaults`, filtered to `plugin: "@nx/jest/plugin"` so it applies to the inferred targets and leaves the Functions `test` target alone. That entry, not the plugin's own defaults, owns the cache inputs — including the exclusions for `*.stories.*`, `.storybook/**`, and `tsconfig.storybook.json` that keep a story edit from invalidating a test result.
+
+`lint` is inferred too. `@nx/eslint/plugin` creates one `lint` target per project it finds a governing ESLint config for (issue [#1379]). One project opts out: `functions` declares an explicit `nx:run-commands` `lint` target, because its `package.json` `lint` script is `cd ../../.. && npx nx run functions:lint` — without an explicit target Nx infers `lint` from that script and the task invokes itself, which Nx detects and fails. Its command also runs from the workspace root rather than the project root, because `apps/bite-tribe-firebase/functions` carries its own nested `node_modules` with ESLint 8 and a project-root cwd resolves that instead of the workspace's ESLint 9.
+
+The lint targets need no `targetDefaults` entry at all. The plugin's own inputs are a superset of the ones the old `@nx/eslint:lint` defaults carried: it adds each project's own `eslint.config.mjs` and its tsconfig `extends` chain, which the flat workspace-wide list never tracked, so editing a library's ESLint config now invalidates that library's lint cache.
+
+### The ESLint basePath Trap
+
+An inferred `lint` target runs `eslint .` with the cwd set to the **project root**, where the old executor ran from the workspace root. ESLint resolves both `files` and `ignores` patterns relative to the directory of the config file it loaded, so moving the cwd silently changes which patterns match. Two live bugs in this repo were only ever dormant because the cwd was the workspace root:
+
+- A `files` entry without a `**/` prefix — `['*.js', '*.jsx']` — matches nothing at the workspace root, so two leftover eslintrc-style blocks carrying the `extends` key sat in the root `eslint.config.mjs` as dead code. From a project root they match `apps/bite-tribe/env-var-plugin.js`, ESLint applies the block, and the whole lint run dies on `"extends" ... is not supported in flat config system`. Both blocks were removed; neither had ever contributed a rule.
+- An `ignores` entry written workspace-root-relative stops matching when the basePath becomes the project root. `apps/storybook-host/eslint.config.mjs` ignored `apps/storybook-host/src/assets/temp/**`, the gitignored Nx-graph bundle; from the project root that pattern misses and the minified output produced **12,513 errors**. It now carries both spellings.
+
+**When adding a `files` or `ignores` pattern, write it so it matches from either basePath** — prefix with `**/`, or list both the workspace-root-relative and project-relative form. A pattern that is merely dead is indistinguishable from one that works until the cwd moves.
+
+`useInferencePlugins` stays `false`. It gates only whether generators and `nx add` register plugins for you; it has never gated the plugins listed explicitly in `nx.json`, and this workspace registers all of them by hand on purpose.
+
+## Validation Rule
+
+Use focused Nx targets when they are reliable. If Nx daemon or graph behavior hangs, use direct Jest/build/lint commands for the touched project and still run `git diff --check`.
+
+## Toolchain Direction
+
+- Keep `nx` and all official `@nx/*` packages on one exact version.
+- Use Playwright as the only E2E framework; the legacy Cypress project has been removed and must not be reintroduced.
+- Invoke `oblador/loki` directly and do not load visual regression through an Nx plugin.
+- Follow [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md) for the staged Nx 22.7, Nx 23, Node.js, and Angular migration sequence.
+
+## Code Anchors
+
+```text
+nx.json
+project.json
+apps/*/project.json
+libs/**/project.json
+libs/bite-tribe/shell/src/lib/routes.ts
+libs/bite-tribe-business/shell/src/lib/routes.ts
+```
+
+## Current Limitations
+
+- The workspace is broad, so targeted validation is preferred over broad test runs.
+- Some shared models and data-access boundaries are still evolving as product domains become clearer.
+
+## Related Pages
+
+- [Architecture - Testing](testing.md)
+- [Implementation - Testing](../implementation/testing.md)
+- [Implementation - CI Pipeline](../implementation/ci-pipeline.md)
+- [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md)
+
+[#1317]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1317
+[#1379]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1379

@@ -1,0 +1,264 @@
+# Current State - Known Issues
+
+- ## Purpose
+
+  Known issues are the current launch risks or unfinished areas that should be visible while moving toward public release.
+
+  **This page is a risk register, not a fix history.** It answers "does the change I am about to make touch an open risk, or an accepted one?" A defect that is fixed and verified keeps one line under Resolved And Recorded, naming the outcome and the issue that holds the investigation; the narrative lives on the issue and on the [Current State - Release Candidate Test Charter](release-candidate-test-charter.md) run it came from. A check that will deliberately not be executed is an accepted gap, and the charter's Accepted Gaps section is its home rather than this page.
+
+- ## Open Launch Risks
+
+- ### Backend authorization
+
+  **Why it matters:** blanket authenticated access stops being acceptable the moment accounts nobody vouches for can register.
+
+  `apps/bite-tribe-firebase/storage.rules` still allows read and write on `/{allPaths=**}`, so any signed-in user can overwrite another user's Bite photo or profile image. That half is [issue 1350](https://github.com/muhammedgaygisiz/travellers-apps/issues/1350) and is still open.
+
+  **Accepted as a documented launch risk on 19 August 2026 under [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177)**, because ownership-scoped rules carry high regression risk and do not fit the launch window. Replacing them had to be its own change with its own verification pass against both apps.
+
+  **Firestore is closed in the repository and open in production until the rules are deployed.** [Issue 1078](https://github.com/muhammedgaygisiz/travellers-apps/issues/1078) replaced the blanket `/{document=**}` match: every write is now scoped by the account named on the document, the four restaurant ownership fields are writable by no client at all, and the entitlement and counter fields on `/users` are refused any change. [Issue 1164](https://github.com/muhammedgaygisiz/travellers-apps/issues/1164) went with it — the role hierarchy question is settled by `RD-UR-6` and now holds in the callables, the sign-in gate, the route guards and the rules alike. **Nothing in CI deploys `firestore.rules`**, so this risk stays open on this page until `npx nx firebase-deploy-rules bite-tribe-firebase` has run against the live project and production traffic has been watched for newly denied legitimate paths. The contract, the test suite and the deploy are on [Architecture - Firebase](../architecture/firebase.md). Issue [#1107] added a **third** manual step beside the rules and the indexes, and this one has no Nx target at all: a TTL policy on `scanRateLimits.expiresAt`. The durable scan counters are written whether or not it exists, so without it that collection grows by a document per bucket per minute and is never swept - which is a storage cost rather than a correctness problem, and is the kind of thing found six months later.
+
+  **Storage is the more exploitable of the two now that Firestore is scoped.** Any account can overwrite another user's Bite photo or profile image, leaving no trace in Firestore because the write never touches a document, and can read the profile images of accounts whose visibility is private. Revisit immediately after launch: the risk is bounded today only by every account belonging to a trusted tester, and the soft launch is precisely the event that removes that bound.
+
+  **The restaurant ownership fields were forgeable, which is why [#1078] got more urgent rather than less.** Issue [#1077] writes `ownerUserId` and `claimStatus` onto the restaurant document through admin-only callables that require a reason and log who decided what. Under the blanket rules any signed-in account could write the same fields itself. Demonstrated against the emulator on 8 September 2026: signed in as a `business` account, one `PATCH` to `restaurants/{id}` with an update mask over `ownerUserId` and `claimStatus` made that account the owner of a restaurant an operator had just revoked, and left nothing in the operator log because no operator was involved. The rules now refuse that write to every client, including the account that owns the restaurant and including an operator, because the fields are written by the Admin SDK inside the callables and rules do not constrain those. The same `PATCH` is a rules test.
+
+  Two authorization surfaces were already closed and are not part of this gap. Every operator callable requires the `admin` role, enforced by a build-failing classification test ([#1472]), and the role model itself is live ([#1469]). See [Architecture - Auth](../architecture/auth.md).
+
+- ### A restaurant can be owned by an account that no longer holds `business`
+
+  **Why it matters:** the assignment callable refuses to _create_ this state, and nothing stops it _becoming_ this state, so the invariant holds only at the moment it is written.
+
+  `assignRestaurantOwner` refuses a target that does not hold `business` ([#1077]). `setUserRoles` then revokes that role without looking at what the account owns, so the restaurant keeps an `ownerUserId` pointing at an account that can no longer sign into the business app. Found by testing [#1077] against the emulator on 8 September 2026: assign to an account, revoke its role, and the assignment survives.
+
+  **This is now live rather than latent, and [#1078] chose a side on it.** The rules grant a restaurant write on `ownerUserId` alone and do not additionally require the `business` role, so an account whose role was revoked while it still held a restaurant can write that restaurant through the API even though the business app turns it away at the door. The alternative — testing ownership _and_ the role — would silently strip write access from an account the document still says is the owner, which is the worse of two wrong answers and harder to diagnose. [Issue 1079](https://github.com/muhammedgaygisiz/travellers-apps/issues/1079) has since scoped the dashboard by the same field, which does **not** surface this state: the account is turned away at the door by `roleGuard` before the scoped list is ever read, so an orphaned assignment is visible only on the admin app's ownership surface. [Issue 1539](https://github.com/muhammedgaygisiz/travellers-apps/issues/1539) owns it, and proposes refusal rather than cascade: `setUserRoles` fails while the account still holds restaurants and names them, so the operator revokes the assignments first. A cascade would revoke several assignments under one reason written about a role, which is the kind of action with hidden consequences this epic keeps splitting apart.
+
+- ### A blocked account keeps a live session for up to an hour
+
+  **Why it matters:** an operator blocking an abusive account should know the block is not instant.
+
+  Firebase enforces `disabled` when a session is created or a token is refreshed, and cannot recall an ID token already issued. `setUserBlocked` calls `revokeRefreshTokens` alongside the disable, which records the revocation time but changes nothing for a caller that verifies without `checkRevoked`, and none does. **The consequence to know: a blocked admin can unblock themselves inside that window**, so blocking an operator is not a substitute for revoking their `admin` role. Accepted rather than solved ([#1474]); the reasoning is on [Architecture - Auth](../architecture/auth.md).
+
+- ### Firebase App Check
+
+  **Why it matters:** backend protection should be enabled without blocking legitimate app traffic.
+
+  The enforced-mode startup gate ships on all three platforms — CI sets the flag on `deploy-bite-tribe`, and TestFlight build 95 was the first artifact carrying it — and no attestation failure has surfaced in the field. **The refused-token retry gate has only ever been exercised on Android**, at Runs 10 and 11, so issue 933's blocking behaviour is proven on one platform of three. Accepted as a gap on web and iOS on 29 August 2026.
+
+  **Places API (New) stays in Monitoring by decision** ([issue 1245](https://github.com/muhammedgaygisiz/travellers-apps/issues/1245)), not as an open gap. BiteTribe reaches Places only server-to-server from Cloud Functions, and Google Maps Platform App Check only accepts tokens from the client Maps and Places SDKs, so there is no token a backend call could send and enforcement would break every place search. The equivalent control is the callable in front of Places — App Check enforced plus an authenticated caller — pinned by build-failing specs.
+
+  Still open: the Cloud Console API restriction on the Maps key, deliberately refused-token evidence on web and Android, and [issue 952](https://github.com/muhammedgaygisiz/travellers-apps/issues/952), replay protection on the sensitive callables.
+
+- ### Store assets
+
+  **Why it matters:** publishing cannot complete without store-ready material, and this is the only remaining gate on the release candidate.
+
+  As of 31 August 2026, the day both stores were submitted: Play's default listing is live in eleven locales with all ten app-content declarations complete, but carries no tablet screenshots of either size. App Store Connect is `Waiting for Review` with build 96 attached, five iPhone and five iPad screenshots, and no app previews. Privacy nutrition labels published 21 August; age rating corrected to **13+** on 30 August.
+
+  **No account-level blocker remains.** Digital Services Act trader status was declared non-trader on 30 August 2026 and is `Active` across the 27 EU territories. It is accurate only while the app earns nothing — [#1433] gates re-declaring it at [#1123]. Tracked by issue 1178; the current state of every asset is in [Implementation - Store Listing Assets](../implementation/store-listing-assets.md), which corrects two earlier claims made here.
+
+- ### Native release CI
+
+  **Why it matters:** native release artifacts should be reproducible, retained, and traceable to source.
+
+  `.github/workflows/native-release.yml` implements tag- and manually-triggered signed jobs with artifact, provenance and dSYM retention, and **has never run**: the Android and iOS signing secrets are not provisioned. Store artifacts are still produced by hand on a workstation, so they depend on local toolchain and signing state and are tied to a source commit only by convention. P0 [issue 1181](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181). The dSYM half was closed as not-a-defect at Run 6 — the `Missing (optional)` UUIDs are vendor frameworks and the app's own dSYM is uploaded.
+
+- ### Account deletion on Android
+
+  **Why it matters:** store policy and GDPR both require a working deletion, and this one does not work.
+
+  [Issue 1385](https://github.com/muhammedgaygisiz/travellers-apps/issues/1385), found at Run 9: an email/password account can only be deleted within five minutes of signing in, because the client resolves the sign-in provider to `unknown` on Android and never asks for the password the re-authentication needs. The cause is confirmed from the Firebase Android SDK — `getProviderData()` returns Firebase's own reserved `firebase` record ahead of the real providers, which the web and iOS SDKs do not — and the client fix is written and unit-covered. **It is not verified on a device, and the separate inside-the-window failure the tester saw is untouched by it and still unexplained.**
+
+  The iOS contract passed in full at Run 4, including the account-identification safety gap from [#1234]. A human legal review of the nine policy translations beyond English and German is still open.
+
+- ### Local photo copies survive account deletion
+
+  **Why it matters:** the deletion page enumerates what goes and what stays with care, and local copies appear in neither list.
+
+  [#1418] reproduces on build 96 and is confirmed open. A local image copy survives Bite deletion — decided at Run 11 to be **intended** — and also survives account deletion, which is the open half, together with the disclosure gap above. The test device holds two stranded per-uid directories under uids no session will ever carry again.
+
+- ### Notifications
+
+  **Why it matters:** launch learning and retention signals depend on reliable notifications.
+
+  Push transport is proven on both native platforms by the new-follower path, and users report receiving the daily ranking notifications. **What stays unproven is `sendDailyLeaderboardNotification`'s own delivery path under controlled observation.** It is an `onSchedule` function that diffs against yesterday's baseline, so forcing it would push to every real user whose rank changed; Runs 10 and 11 declined to trigger it. Proving it needs a controlled account or a separate manually invoked path, not another device run. **Accepted as a gap on 29 August 2026.**
+
+  Android delivery verification is still pending on a build carrying the [#1386] permission-reflection fix.
+
+- ### Analytics
+
+  **Why it matters:** launch learning depends on reliable usage data.
+
+  Delivery is proven on iOS (Realtime, Run 4) and Android (DebugView, Run 10, 48 events in thirty minutes). The key metrics dashboard exists as dashboard-as-code — GA4 has no API to create one — in `tools/analytics/dashboard.config.mjs`, posted daily to [#991] by `.github/workflows/analytics-digest.yml`. See [Analytics Operations](../operations/analytics-operations.md).
+
+  Open: **D1/D7 retention tiles are not built**, though [#986] landed the BigQuery export on 1 September 2026 that makes them queryable. **iOS DebugView is an accepted gap** — Realtime already proves delivery from the device, and DebugView needs a dedicated Xcode debug-mode launch.
+
+- ### Platform verification never passed on one build
+
+  **Why it matters:** public launch requires confidence across supported platforms.
+
+  All three platforms have passed, but never the same artifact. Android passed at Run 11 on local debug 1.0.1 (96); web passed at Run 8 and iOS at Run 7, both predating the Angular 22 / NgRx 22 / TypeScript 6 upgrade, so neither carries over. **Issue 1176 was closed out on 29 August 2026 with three per-platform passes accepted in place of one artifact proven everywhere**, and [#1355] has nothing left to execute. The business app is out of scope for this release candidate by decision and gets its own soft launch; Android deep-link OS auto-verification moves to [#1179], where a store-signed artifact resolves it. Every accepted substitution is listed in [Current State - Release Candidate Test Charter](release-candidate-test-charter.md).
+
+- ### Edge cases
+
+  **Why it matters:** real users will create Bites outside the ideal happy path.
+
+  Partially covered. Run 8 reached the vacation and posting-later shape on web through the position-source modal's `Set manually` option — the route that found [#1307] — and Run 11 covered the missing-location branch on Android by denying the permission. The wider class of cases, and a real trip across a currency boundary, are still untested. Currency fallback, manual override and border cases are [issue 978](https://github.com/muhammedgaygisiz/travellers-apps/issues/978).
+
+- ## Resolved And Recorded
+
+  One line each. The investigation is on the issue and on the charter run that found it; it is not repeated here.
+
+- **Photo upload recovery** — two independent causes of a silently lost Bite photo, both fixed and physically reverified: a form control disabled offline dropped the image from the emitted value, and local copies written to public `Documents` were denied on SDK ≤29. [#1229], [#1367]. **One bound is accepted rather than fixed** ([#1413], the follow-up to [#1395]): the migration out of the legacy public folder cannot reach a device that reinstalled the app, because scoped storage hides files the app no longer owns. An in-place Play update does migrate. The residue is inert clutter in the user's Files app — no build writes there any more, and the cross-account leak of [#1328] is closed by uid scoping.
+- **Bucket List creation** — [#1231] moved first-list prompting out of the dismissing Bite popover and made create-and-add settle atomically. Physically passed at Run 4 on a fresh account.
+- **Bite draft state** — [#1233] scoped the prefilled draft to one creation session, so a cancelled Restaurant draft no longer contaminates a later generic Bite. Physically passed at Run 4.
+- **Offline reconnect** — [#1230] bounded position and feed resynchronization and added foreground recovery; Home no longer loads indefinitely after reconnect. Physically passed at Run 4.
+- **Gallery viewer** — [#1232] delivered the shared full-screen viewer and the deleted-Bite case. A useful corollary for reading other reports: **an indefinitely loading details page is the signature of a Bite that cannot be found.**
+- **Onboarding registration** — [#1219] unblocked registration, which had parked forever on a lazy Ionic overlay controller; the trap it belongs to is under Developer Experience Issues. The onboarding sub-issues [#1186], [#1187] and [#1189] have no post-fix reverification recorded.
+- **Native permission recovery** — iOS deny-then-enable verified at Build 90 ([#1183]); the missing Android half was fixed by [#1386] and awaits physical verification.
+- **Profile visibility** — [#1188] put a localized public/private status on the signed-in user's own profile; device verification of both states is open. A profile share or deep link is **not** a gap: sharing is deliberately a Bite capability, and the charter wording that implied otherwise was corrected by [#1190].
+- **Location quality** — city search, address enrichment, mandatory place selection, position patching and map camera stability all landed. What remains is real-world testing rather than implementation.
+
+- ## Pinned Native Dependency
+
+- **`@capawesome/capacitor-file-picker` is pinned to `8.0.2` and must not be upgraded without a replacement for the gallery pick.** `8.0.3` swapped `pickImages` from `Intent.ACTION_PICK` to the Android Photo Picker, which redacts photo location unconditionally and ignores `ACCESS_MEDIA_LOCATION`. That killed the Bite photo position on Android silently on 20 Jul 2026 in `834221e5`, and it went unnoticed until run 10 of the test charter on 29 Aug. See [issue 1414](https://github.com/muhammedgaygisiz/travellers-apps/issues/1414) and the Gallery Picker Version Pin in [Architecture - Capacitor](../architecture/capacitor.md).
+- The pin reintroduces the defect upstream fixed: OEM gallery apps with an old `targetSdkVersion` return raw `file://` URIs an app with no storage permission cannot read. `pickGalleryFile` hedges by retrying through `FilePicker.pickFiles`, which Android 13+ routes to the Photo Picker - the image loads, the position does not.
+- **This is bounded by the current install base, not by design.** GA4 at the time of the pin showed 21 identifiable Android app devices - 9 Pixel, 9 Samsung, 3 Xiaomi, no Motorola, no budget MediaTek - with one Xiaomi old enough to plausibly be affected. The trade rests on that distribution rather than on design, so it is worth re-reading the numbers when the brand mix changes. Replacing the pin with an app-owned picker plugin is tracked separately.
+- **Read the native diff on any native plugin bump.** This regression was a patch release changing which OS intent a method fires, with no signal in the version number or the release notes.
+
+- ## Release Build Traps
+
+- **The Nx cache can silently disarm the App Check gate.** `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` is not part of the `bite-tribe` build target's cache key, so the charter's own build step returned a cached bundle carrying `` `ENFORCED:"false"` `` while the command line said `true`. Run 11 caught it only through the charter's grep, and the charter now requires `--skip-nx-cache`. The durable fix is to make the variable part of the cache key so the correct command cannot produce the wrong artifact. See [#1428].
+- **~~The privacy policy and the deletion page name a `support@bitetribe.app` mailbox that does not exist.~~ Resolved on 30 August 2026.** The mailbox is provisioned on the `bitetribe.app` Workspace domain and **verified the way [#1265] taught**: a message sent from outside the domain was delivered to it, rather than the address being inferred from console configuration. The privacy policy, the account-deletion page and the new support page now all name an address that receives mail. See [#1429].
+
+- ## Developer Experience Issues
+- Local Playwright runs are flaky. `nxE2EPreset` only pins `workers: 1` when `CI` is set, so a local `npm run e2e` runs every spec in parallel against one Firebase emulator and the same seeded users. CI is unaffected. Run `npx nx e2e bite-tribe-e2e --workers=1` for a trustworthy local result; see [Implementation - Testing](../implementation/testing.md).
+- ~~`npx nx lint bite-tribe-firebase` reports several hundred phantom problems.~~ Resolved. The phantom problems came from the inferred target linting the gitignored `functions/lib` build output; the root `eslint.config.mjs` now ignores it, and `nx lint bite-tribe-firebase` reports 17 warnings and 0 errors. Every project's `lint` target is inferred as of issue [#1379], and `nx run-many -t lint --all` is green — see [Architecture - Nx Workspace](../architecture/nx-workspace.md) for the basePath trap that class of bug belongs to.
+- Nx commands can start silently or stall while constructing the project graph, even with the daemon disabled. The installed tree still mixes the workspace's Nx 22 toolchain with an older Nx/Devkit copy loaded by `@nxext/capacitor@21` (the `nx-loki` adapter has been removed); this is a credible risk but not a proven single cause. Follow [Current State - Nx And Dependency Migration Roadmap](nx-and-dependency-migration-roadmap.md).
+- **Never import an Ionic overlay controller from `@ionic/angular`.** Both apps bootstrap through `provideIonicAngular` from `@ionic/angular/standalone`, and in that build a custom element only exists once something calls its `defineCustomElement`. The standalone controllers (`LoadingController`, `ToastController`, `AlertController`, `ActionSheetController`, `PickerController`, `PopoverController`, `ModalController`) do that in their constructor; the identically-named classes exported by the lazy `@ionic/angular` entry point do not, because they expect the `@ionic/core/loader` bundle that a standalone app never installs. `@ionic/core`'s `createOverlay` then awaits `customElements.whenDefined(tagName)`, which **never settles** — so `await controller.create(...)` hangs forever with no error, no rejection and no timeout. It is not a visible crash: the caller simply stops, which is how issue 1219 blocked a release. Only the element-backed controllers are affected. `NavController`, `Platform`, `Config`, `DomController`, `AngularDelegate` and `IonicRouteStrategy` are re-exported from `@ionic/angular/common` by **both** entry points, so they are the same class and the same DI token either way; type-only imports (`ItemReorderEventDetail`, `RefresherCustomEvent`, `ToastOptions`) are equally harmless. The trap is that a lazy controller sometimes works by accident, because an unrelated standalone import may already have defined the element it needs — on the production `/registration` route `ion-alert` happened to be defined while `ion-loading` and `ion-toast` were not. This is now enforced: the root `eslint.config.mjs` restricts the eight element-backed controller names on the `@ionic/angular` path through `@typescript-eslint/no-restricted-imports`, so a reintroduction fails `nx affected -t lint` in CI. Unit tests do not catch this — every spec provides a mocked controller — and dev builds do not reproduce it either, because they do not tree-shake the `@ionic/angular/standalone` barrel; reproduce against `npx nx build bite-tribe` output and check `customElements.get('ion-loading')` in the console.
+- Ionic `8.7.18` moved `@ionic/core` from importing `@stencil/core/internal/client` to bundling its own copy of the Stencil runtime. That runtime patches `childNodes` and `textContent`, and under jsdom the patches read empty for elements that have not upgraded, even though the markup is rendered correctly. Browser behavior is unaffected (verified against Storybook on `8.8.14`: `ion-label.textContent` returns its text and `ion-list` light-DOM children hydrate). Consequence for tests: element-tree snapshots (`toMatchSnapshot` on a debug element or DOM element) and `textContent` assertions on Ionic elements silently report empty. Use `innerHTML` instead; see the notes in `libs/common/ui/page/src/lib/menu/__specs__/app-menu.component.spec.ts`. No upstream issue was found; re-check on future Ionic 8.x releases.
+- Loki captured stories before Angular `@defer` content appeared, which produced intermittent visual-regression failures. Loki screenshots once the network is idle, but a `@placeholder (minimum <n>ms)` block holds its skeleton for at least `n` ms after render - long after the last request settles - so the same story captured a skeleton for one viewport and the real content for another. Seven references (the restaurant `@defer` image, across both configurations) had been approved in the skeleton state, including a story named "Image Loaded"; they were re-recorded from verified settled captures. Fixed by `registerLokiSettle` in `apps/storybook-host/.storybook/loki-getstories-shim.ts`, registered per story from the preview decorator: it holds Loki's `awaitReady()` until the DOM is quiescent and images are complete. Note that DOM quiescence alone is insufficient - a placeholder waiting out its `minimum` timer does not mutate - so a bounded extra grace period applies while an `ion-skeleton-text` is on screen. If a future `@placeholder` uses a `minimum` above `SKELETON_GRACE_MS`, raise that constant.
+- Loki visual references are sensitive to flags carrying fine emblem line-art. `Pages/Profile With Many Flags` failed in CI while passing locally; the CI diff was only 49 pixels (iphone7) and 73 (laptop), and mapping them to tile geometry attributed all of them to Portugal's armillary sphere and Cambodia's Angkor Wat - `flag-icons` renders those as white line-art scaled into a roughly 25x19px box, where a sub-pixel renderer difference swings a pixel across a colour boundary. Measured against the reference, the CIEDE2000 delta needed to absorb them is 14.4 at minimum and about 62 to clear all of them, versus the configured `chromeTolerance` of 2.5; raising it was rejected because tolerance is global (per-story `parameters.loki` only feeds tab options such as viewport, media and `chromeSelector`, not the comparison) and a value in that range would hide genuine colour regressions everywhere. Resolved by swapping those two codes for flat-colour flags in the story fixture, which preserves what the story covers - how a long flag list wraps. Keep that fixture to flat-colour, straight-edged flags. Note that the root cause of the renderer difference was never established, and Hong Kong, Malta, South Korea and Tunisia carry similar detail while staying under tolerance today.
+- `loki --storiesFilter` matches `kind` and `name` joined by a **space**, not the slash-separated path shown in Loki's failure output. `Pages/Profile` + `With Many Flags` is `^Pages/Profile With Many Flags$`; a filter written with a slash matches nothing and the run **passes vacuously**, which is easily mistaken for a green result. Always confirm a filtered run prints per-story `PASS`/`FAIL` lines, not just the target-level `PASS  chrome.docker`.
+- Visual regression now runs through the upstream `oblador/loki` CLI directly (`npm run loki:test` / `loki:update`, configured by the root `loki.config.js`); the `nx-loki` adapter and its Nx plugin registration have been removed and the reference-image review workflow is preserved.
+
+- ## Security Posture
+- Issue 806 reported that every `NX_*` environment variable is readable in the browser. Verified against the live `www.bitetribe.app` bundle by pulling the served JS chunks and extracting the object esbuild inlines into `process.env`. **Nothing exposed in production was a credential.** Seven values are Firebase web configuration (`API_KEY`, `AUTH_DOMAIN`, `PROJECT_ID`, `STORAGE_BUCKET`, `APP_ID`, `MEASSUREMENT_ID`, `MESSAGING_SENDER_ID`) plus the App Check `SITE_KEY`; all are public by design, since the Firebase client SDK and the reCAPTCHA widget cannot function without them and Google documents the web API key as an identifier rather than a secret. Access control comes from Firestore rules and App Check. The remaining thirteen were Nx build internals (`NX_WORKSPACE_ROOT`, `NX_TASK_HASH`, `NX_BASE`, and similar) — noise, not a disclosure, since CI builds resolve the workspace path to `/home/runner/work/...`. **Do not treat the presence of Firebase config in the bundle as a defect**; hiding it behind a runtime-config endpoint adds startup latency and no security, because the values remain readable in the network tab.
+- The real risk in issue 806 was latent rather than live. The plugin matched `/^NX_/i` against the whole environment, so it inlined whatever happened to be set at build time. A production build made outside CI therefore embedded `NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN` — a registered debug token bypasses App Check entirely, which would have defeated the enforced-mode gate landed by issue 933 — along with the developer's local filesystem path. CI never set that token, so it never shipped, but a `nx build` plus `firebase deploy` from a workstation would have published it. Fixed by replacing the prefix match with an explicit per-app allowlist and a production strip list; see [Implementation - Release And Build Workflow](../implementation/release-and-build-workflow.md). Treat any debug token that existed before this change as burned. **Rotated on 19 August 2026 under [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177):** every registered debug token was deleted from all three App Check apps - Android (Play Integrity), iOS (App Attest) and Web (reCAPTCHA Enterprise) - and **no replacement was issued**, so the project currently holds none. Debug tokens are managed per app, from the overflow menu on the app's row in App Check > Apps, not from a page-level control. The consequence is deliberate: a native build running on a simulator or emulator against production can no longer attest, so it fails loudly instead of quietly writing to production, which is the behaviour [issue 1221](https://github.com/muhammedgaygisiz/travellers-apps/issues/1221) describes. Emulator work is unaffected, because `getAppCheckCallableOptions` disables `enforceAppCheck` when `FUNCTIONS_EMULATOR` is set. Issue a fresh token only when simulator work against production actually needs one, and keep it in a gitignored `.env` only.
+- Two defects surfaced while investigating issue 806 and were fixed with it. `messagingSenderId` resolved to `undefined` in every CI-built bundle because CI supplied `NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID` while the code read a misspelled `NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID`; local builds masked it because the local `.env` carried the same typo. The GitHub Actions **secret** is still registered under the misspelled name and is mapped to the correct variable in `pipeline.yml`. That mismatch is **accepted and intentional** — the mapping is explicit and correct, so do not "fix" the secret name without also updating `pipeline.yml` in the same change. Separately, `NX_APP_BITE_TRIBE_IS_BUSINESS` was never set anywhere, so the analytics and Crashlytics guards in `AnalyticsService` and `AuthService` never no-opped in the business app as their documentation claimed; the flag is now compiled into the business bundle through the plugin's `staticValues`. Note that `Environment.isBusiness` in `environment.ts` is a separate and correctly configured mechanism — the two are easily confused.
+- Geoapify was removed with issue 806. `libs/common/geoapify` exposed a `LocationService` that reverse-geocoded coordinates to a city name through `api.geoapify.com` using a browser-readable `NX_APP_GEOAPIFY_API_KEY`, but nothing imported it: no Nx project depended on `geoapify-service`, `LocationService` was referenced only by its own barrel file, and the key was never set in any CI workflow, so any call would have gone out with `apiKey=undefined`. Positioning is owned by `libs/common/geolocation` on top of `@capacitor/geolocation`, and place lookup is owned by the `search-places` and `get-place-details` Firebase Functions on top of Google Places. If a Geoapify account still exists, revoke the key — it is no longer used by anything.
+- **A stored XSS was live on the Bite share page. Fixed and deployed.** [Issue 1488](https://github.com/muhammedgaygisiz/travellers-apps/issues/1488), found 7 September 2026 while scoping [epic-1487](../records/epic-1487.md). `escapeHtml` in `apps/bite-tribe-firebase/functions/src/functions/shared/utils/render-html.ts` passed **string** patterns to `String.prototype.replace`, which replaces only the first match, so it escaped the first `&`, `<`, `>`, `"` and `'` in a value and emitted every later one raw. `handleSharedLinkToBite` writes the user-authored Bite `name` and `place` into the document title and the `og:title` and `twitter:title` `content` attributes. A Bite name carrying two of each character therefore closed the attribute, closed the meta tag, and opened a genuine `script` element. Confirmed by rendering the payload through the then-current helper and template in a browser - one script element, executed - rather than inferred from the code. `/s/bite/<id>` answers on both `bitetribe.app` and `bite-tribe.web.app`, so the injected script ran on the origin that also serves the web app and persists its Firebase Auth session. Exploitation needed an account and a victim who opened the shared link; nothing was observed in the wild. **The fix** replaces every pattern with a global regex, `&` first so the entities the later replacements emit are not escaped again, and `render-html.spec.ts` pins the multi-occurrence payload. **Deployed to `bite-tribe` on 7 September 2026**, before the PR was merged, because the share page is rendered by a Cloud Function rather than by the web bundle - shipping the web app would not have closed it. `/s/bite/<id>` answers from the updated revision on both hosts. Two follow-ups stay open and are deliberately not part of the fix: auditing stored Bite names for a payload already written, and a Content Security Policy header on the Hosting responses, which would blunt this class of defect generally.
+- **The `P0` on issue 1488 is deliberately not a release-candidate blocker.** It was taken as the board's "currently selected for execution" sense rather than "launch-critical", and the [Current State - Release Candidate Test Charter](release-candidate-test-charter.md) consequence was explicitly declined when the priority was set. Leave it at `P0`, and do not read it as failing a candidate. The reasoning is recorded as a comment on the issue.
+
+- ## Data Trust
+- **`appVersion` on the user document is not trustworthy before build 94.** Until issue 1303, `package.json` held the placeholder `0.0.0` and `tools/env-var-plugin.js` inlined it into `process.env['version']`, which `ProfileApiService.updateUserMetadata` sent to the `updateUserMetadata` callable. Every user document written before the fix therefore carries `appVersion: "0.0.0"` regardless of which build wrote it. `appBuildNumber` was always read from the native projects and is correct.
+- **Decision: the historical values are not backfilled.** A backfill would have to invent the version each document was written under, and the only evidence available is `appBuildNumber`, which already answers the question the backfill would be trying to answer. Rewriting `appVersion` from it would produce a field that looks derived from the client and is not. **Do not use `appVersion` for release-adoption reporting across the `0.0.0` boundary; use `appBuildNumber`.** A document is on the fixed path once its `appVersion` is anything other than `0.0.0`.
+
+- ## Nearby Feed Cost And Latency
+
+- `loadBitesByLocation` returns every Bite inside its radius. A single position returns 440 Bites against a feed that renders 50 at a time, and the callable answers in roughly 2.4 s warm. Since the caller's likes now travel with the feed, each returned Bite costs a second read as well.
+- Narrowing the radius is a weak lever: cutting it from 15 km to 10 km removed only a tenth of the result, because Bites cluster where the user already is. The fix is the staged search in [issue [#1294]][#1294], not further radius tuning.
+- Attaching the likes server-side traded feed latency for feed correctness. Time to a full feed moved from about 4.0 s to about 6.7 s, and in exchange a liked Bite can no longer render as unliked. Bounding the result set is what recovers the latency.
+
+- ## A Deleted Table Leaves Its Live State Behind
+
+  **Why it matters:** it is the untested half of an epic success criterion, and
+  the leak is silent.
+
+  Deleting a table in the floor-plan editor does not delete
+  `/restaurants/{restaurantId}/tableStates/{tableId}`. No trigger cleans it up -
+  `sync-table-qr-token-on-table-write.ts` is the only document trigger on the
+  table, and it handles the QR token alone.
+
+  Nothing is lost and nothing is corrupted, which is what the criterion of
+  [epic-1071][#1071] actually asks: the live view draws states only for tables that
+  exist, so an orphan is invisible, and a table _moved_ between rooms keeps its
+  id and therefore its state. The record side is tested - "survives the deletion
+  of the table it describes" for the audit trail, "answers a replay for a table
+  that is no longer on the plan" for the queue, and `TableVisit.tableId` is a
+  plain string so a visit outlives its table.
+
+  What is left is an orphaned document per deleted table, accumulating quietly.
+  Small, and worth a cleanup trigger or a migration the day a restaurant
+  rearranges a dining room often enough to notice. Recorded rather than fixed
+  because no behaviour depends on it today.
+
+- ## Business App Traffic On The Launch Property
+
+  **Why it matters:** the separation works, and the two user counts are not
+  comparable across the day it started.
+
+  All three apps read one `measurementId`, so one GA4 property carries all of
+  them. Until issue [#1098] that was harmless - the business app initialized no
+  analytics at all - and since it, the auto-collected session of every staff
+  shift lands on the property [Analytics Operations](../operations/analytics-operations.md) reads daily. `Active
+users` and `Crash-free users` are the two tiles that count people rather than
+  events, and issue [#1584] scoped them to the consumer surface.
+
+  **Closed, in two steps.** [#1584] added the filter, and [#1586] corrected its
+  form after the live run: `= consumer` matched nothing, because GA4 does not
+  backfill and no session collected before the dimension existed carries a
+  value. `NOT IN (business)` keeps that traffic, which is what it is. The
+  dimension was registered on the property on 12 September 2026.
+
+  **What remains is a reading caveat, not a risk.** `activeUsers` is an
+  approximate distinct count and a dimension filter changes its aggregation
+  path, so the filtered figure is not the unfiltered one - 70 against 66 over
+  the same window on the day it landed. The digest's delta column shows that as
+  a one-off step. It is the filter, not traffic, and it does not recur.
+
+- ## Operational Issues To Watch
+- Crashlytics should be monitored daily during soft launch.
+- Analytics should be monitored daily during soft launch.
+- Remaining launch blockers should be fixed before public launch communication expands.
+- Onboarding and retention should be improved based on real usage signals after launch.
+
+- ## Related Pages
+- [Current State - Roadmap](roadmap.md)
+- [Current State - Open Questions](open-questions.md)
+- [Current State - Release State](release-state.md)
+- [Current State - Release Candidate Test Charter](release-candidate-test-charter.md)
+- [Architecture - Firebase](../architecture/firebase.md)
+- [Architecture - Analytics](../architecture/analytics.md)
+- [Current State - Nx And Dependency Migration Roadmap](nx-and-dependency-migration-roadmap.md)
+
+[#986]: https://github.com/muhammedgaygisiz/travellers-apps/issues/986
+[#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
+[#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071
+[#1077]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1077
+[#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
+[#1098]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1098
+[#1107]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1107
+[#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
+[#1179]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1179
+[#1183]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1183
+[#1186]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1186
+[#1187]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1187
+[#1188]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1188
+[#1189]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1189
+[#1190]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1190
+[#1219]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1219
+[#1229]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1229
+[#1230]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1230
+[#1231]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1231
+[#1232]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1232
+[#1233]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1233
+[#1234]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1234
+[#1265]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1265
+[#1294]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1294
+[#1307]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1307
+[#1328]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1328
+[#1355]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1355
+[#1367]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1367
+[#1379]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1379
+[#1386]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1386
+[#1395]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1395
+[#1413]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1413
+[#1418]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1418
+[#1428]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1428
+[#1429]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1429
+[#1433]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1433
+[#1469]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1469
+[#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472
+[#1474]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1474
+[#1584]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1584
+[#1586]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1586

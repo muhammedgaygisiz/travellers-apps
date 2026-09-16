@@ -1,0 +1,302 @@
+# UC - Receive App Notifications And Engagement Updates
+
+## Status
+
+**Level:** L0.
+Supported today. Every notification named in `Supported Evidence` ships, together with the
+seven contracts below: how a tap resolves to a surface, how notifications collapse and clear,
+the language they arrive in, how a release is announced, the country badge, the review-thread
+fan-out, and per-installation delivery. The release announcement is the only one a person
+fires; everything else runs from a backend trigger or a schedule.
+
+## Goal
+
+An account learns that something happened around its Bites, its followers and its standing
+without opening the app, and reaches the thing that happened in one tap. This page owns which
+events produce a notification, what each says and in which language, how they collapse and
+clear, and which installations they are delivered to.
+
+## Actors
+
+- **Bite Creator** - receives notifications about its Bites, its followers and its standing,
+  taps them to reach the surface they name, and decides which of its installations are
+  delivered to.
+- **BiteTribe Operator** - fires the release announcement by hand once a store serves a new
+  build. No other notification on this page is triggered by a person.
+
+## Flow
+
+- Backend functions react to new Bites, likes, reviews, followers, and weekly activity.
+- Backend functions can notify users about meaningful leaderboard ranking changes.
+- Notifications or shared-link behavior keep users connected to activity.
+- Tapping a notification opens the surface it talks about: the Bite, the follower profile, the leaderboard, or the weekly bites page.
+- Notifications about the same thing replace one another instead of stacking, and
+  the ones about a surface are cleared once the user opens it.
+- The weekly summary counts one calendar week (Monday to Sunday, Europe/Zurich) and carries those bounds, so its landing page lists the Bites of exactly that week even when the user opens it days later.
+- Notification text arrives in the language the user chose in settings, not in English.
+- Users learn that a new app version is live from a notification, instead of waiting for TestFlight or Google Play to auto-update them.
+- A Bite in a country the user has never covered congratulates them on the new country badge, and tells their followers when the profile is public.
+
+## Notification Navigation Contract
+
+Issue [#1244]
+made a tapped notification reliably open its own surface:
+
+- A tap opens the surface the notification is about, whether the app was
+  already open, backgrounded, or had to start from cold. Landing on Home is a
+  failure, not a fallback.
+- A tap that launched the app arrives mid-startup, before the app has decided
+  where a returning user belongs. The target is therefore held, not navigated:
+  first until startup navigation is released, then until the redirect chain it
+  starts has come to rest. Only then is one navigation issued.
+- Startup navigation resolves the address the app was launched at, which for a
+  signed-in user is Home. It is the last navigation issued during startup, so
+  anything routed before it is discarded — which is why a target may not be
+  navigated on arrival.
+- Both waits are bounded. A startup that never settles opens the target anyway
+  rather than swallowing the tap without trace.
+- One tap produces one navigation. Two notifications tapped during the same
+  startup open only the later surface, because the user asked for that one and
+  the first would only be passed through.
+- A payload naming a type the app does not route, or missing the id its route
+  needs, leaves the user where they are. Guessing a surface the notification
+  never mentioned is worse than not moving.
+- Route guards still decide. The target goes through the router, so incomplete
+  onboarding or a lost session redirects a tapped notification exactly as it
+  would redirect the same route reached by hand.
+
+## Notification Collapse Contract
+
+Issue [#1366]
+stopped notifications accumulating in the OS drawer:
+
+- Every notification carries a collapse key, shaped `<type>[:<surface>[:<variant>]]`.
+  Without one, FCM gives each message its own notification id and the OS keeps all
+  of them, which is how a device reached a backlog roughly 35 deep.
+- Two notifications sharing a key are the same notification restated, so the later
+  one replaces the earlier. The daily leaderboard notification is the clearest
+  case: it has no id to name, its key is its type, and it can therefore never be
+  present more than once.
+- Type is always part of the identity. A like and a review on one Bite are
+  different events with different copy, and collapsing them together would lose
+  one of them.
+- The surface is the second segment: the thing the notification opens. Every
+  notification about one Bite shares it, whatever their type, which is what iOS
+  groups on to render them under a summary.
+- Android has no group or summary field in FCM's notification payload, so an
+  app-authored summary is not expressible there. Android collapses per key and
+  otherwise relies on the system's own bundling of an app's notifications.
+- A payload missing the id its key needs is sent uncollapsed rather than
+  collapsed on its type alone, which would merge likes on unrelated Bites into
+  one notification.
+- Opening a surface clears the delivered notifications about it. The OS only
+  dismisses the notification that was tapped, so a Bite reached from the feed
+  otherwise leaves the notification announcing it in the drawer for good.
+- Clearing runs on navigation rather than in each page, so a page cannot forget
+  to clear and a new notification type only has to name the surface its route
+  already has. Pages nested under a Bite count as that Bite.
+- The app matches on the collapse key alone, because that is all a delivered
+  notification still carries: the `tag` on Android, the `id` on iOS. A
+  notification carrying neither predates this contract and is left in the
+  drawer rather than guessed at.
+- Notification channels are deliberately not part of this. Collapsing and
+  clearing need none, and a channel visible in system settings would need a
+  localized name in every catalog.
+
+## Localization Contract
+
+Issue [#1200]
+made notification copy follow the recipient:
+
+- The language of a notification is the `language` the user saved in settings -
+  the same choice the settings page shows them.
+- The OS renders a push notification before the app runs, so the copy is
+  translated in the backend when it is sent, not in the app when it arrives.
+- Every installation of an account receives the same language, because language
+  is an account preference while delivery is per installation.
+- One trigger can go out in several languages at once: followers of the same
+  Bite each read it in their own.
+- An account that never chose a language, or chose one the app no longer offers,
+  receives English rather than nothing.
+
+## Release Announcement Contract
+
+Issue [#1194]
+added a manually triggered notification for a released app version:
+
+- The trigger is manual. Nothing observable tells the backend when a TestFlight
+  build or a Play Console review has actually gone live, so an operator fires it
+  from its own surface in the admin app once the store serves the new build.
+- iOS and Android are announced separately, because the two stores clear their
+  review at different times.
+- The announcement is addressed by installation platform, not by account: the
+  same user can have an iPhone and an Android phone registered, and only the
+  installation whose store already serves the release is told to update.
+- An installation whose `platform` was never recorded receives nothing, because
+  guessing would announce an App Store release to an Android device.
+- The copy still follows the Localization Contract: every recipient reads it in
+  the language they chose.
+- The admin surface reports how far the announcement reached, since a broadcast
+  leaves nothing else behind to verify it by.
+
+## Country Badge Contract
+
+Issue [#1212]
+turned the profile's country badges into an engagement signal:
+
+- The trigger is the badge, not the Bite. A country that enters a profile's
+  `countryCodes` list for the first time is congratulated; every later Bite in
+  the same country is silent, because only the first one is an achievement.
+- Followers of a public profile are told about the achievement, so a badge is
+  recognition in front of an audience rather than a private counter. That is
+  what the feature is for on the follower side: the same motivation, borrowed.
+- A private profile is congratulated but never announced. Followers of a
+  private account see none of its activity anywhere else in the app, and a
+  badge notification must not become the one place that leaks where someone has
+  been.
+- A tap opens the profile that carries the badge - their own for the achiever,
+  the achiever's for a follower.
+- The country is named in the recipient's language, following the Localization
+  Contract. ICU supplies the country name from the same language the sentence is
+  written in, so the catalog carries the sentence and not 200 country names per
+  locale. The flag emoji travels with the name as one value, so a locale decides
+  where the whole badge goes in its sentence.
+- The one-time backfill that gave existing profiles their badge list stays
+  silent. It reconstructs a history the user already lived through, so it is a
+  migration, not an achievement.
+- A new account starts with an empty badge list rather than no list at all, so
+  its first Bite reads as a first country earned instead of as the
+  never-ran-before signal that triggers the backfill.
+- A failing send never marks the Bite's address as unresolved. Awarding the
+  badge happens after the address is written and is contained on its own.
+
+## Review Thread Contract
+
+Issue [#1283]
+extends review notifications from one recipient to a conversation. Implemented by
+`notifyThreadParticipantsOnReviewReply`.
+
+- A reply notifies everyone already in that thread except the person who just
+  wrote it: the root review author, every reply author, and the Bite creator.
+  Being in the conversation is what makes someone a recipient, not owning the
+  Bite.
+- A participant is notified once per reply however many messages they have in the
+  thread, so joining a conversation early is not punished with duplicates.
+- A new root review is a new conversation. It notifies the Bite creator alone,
+  exactly as `notifyBiteCreatorOnReview` does today, and reaches no participant of
+  any other thread on the same Bite. This is the one rule the issue stated
+  outright, and it is the reason a reply cannot simply reuse the existing trigger.
+- A reply carries its own type, `NEW_REVIEW_REPLY`, with its own copy. The
+  existing `NEW_BITE_REVIEW` text says "X reviewed your Bite", which is false for
+  every recipient who is a reviewer rather than the creator.
+- A participant whose review predates the `authorId` field is unreachable and is
+  skipped. The rest of the fan-out still goes out; one unattributable document
+  does not silence a conversation.
+- A creator replying on their own Bite triggers no self-notification, consistent
+  with the existing review and like triggers.
+- A tap opens the Bite with the thread expanded and highlighted, so the payload
+  carries `threadId` alongside `biteId`. Under the Notification Navigation
+  Contract a payload missing the id its route needs leaves the user where they
+  are.
+- The copy follows the Localization Contract, so `newReviewReply` keys are added
+  to every catalog rather than to English alone.
+
+## Installation Contract
+
+Issue [#1184]
+made notification delivery installation-specific:
+
+- An FCM token is a delivery address for one signed-in user and app
+  installation.
+- A persistent installation UUID identifies the app installation across FCM
+  token rotations; it is not a hardware identifier and naturally changes after
+  reinstall.
+- Each installation's token has its own `enabled` delivery state.
+- Disabling one installation does not affect another installation on the same
+  account.
+- Login, app restart, metadata refresh, and token rotation preserve a disabled
+  state instead of writing `enabled: true`.
+- Token rotation transfers the installation's state and removes the superseded
+  token and reverse index.
+- OS permission controls whether the current device may receive notifications;
+  BiteTribe's token state controls whether the backend sends to that
+  installation. Both states must remain visible and distinct.
+- An installation's token state is manageable from any signed-in surface, not
+  only from the installation itself. OS permission gates registering the
+  current device, never the management of the others.
+- `Settings.pushNotifications` is not part of delivery eligibility.
+
+## MVP Classification
+
+**[MVP]** - the Installation Contract and the Notification Navigation Contract. If any
+notification ships at all, an account has to be able to stop delivery to one installation, and
+a tap has to open the surface it names rather than landing on Home.
+
+**[Secondary]** - which notifications exist: followers on a new Bite, likes, reviews and
+replies, the weekly summary, the daily leaderboard, the country badge, and the release
+announcement. Each drives engagement and none is required for the app to work. The Collapse,
+Localization, Release Announcement, Country Badge and Review Thread contracts are secondary
+with the notifications they shape.
+
+Not on this page: the settings surface that lists installations and switches them. That is
+[UC - Configure Personal Settings](uc-configure-personal-settings.md), which owns the UI this page's delivery state feeds.
+
+## App Store Review Area
+
+Relevant.
+
+- The notification permission is a user-facing OS prompt on both platforms. iOS asks through
+  `UNUserNotificationCenter`; Android 13 and later require `POST_NOTIFICATIONS`, which reaches
+  the app by manifest merge from `@capacitor-firebase/messaging` rather than being declared in
+  the app's own manifest. The contextual prompt, and the way back from a device the user has
+  muted, belong to [UC - Configure Personal Settings](uc-configure-personal-settings.md).
+- The FCM token and the installation UUID are device identifiers, covered by the `device IDs`
+  entry in [Implementation - Store Declarations](../implementation/store-declarations.md). An identifier introduced here would have to
+  be added there.
+
+## Supported Evidence
+
+- `notifyFollowersOnNewBite`
+- `notifyBiteCreatorOnLike`
+- `notifyBiteCreatorOnReview`, which returns early for a reply
+- `notifyThreadParticipantsOnReviewReply`
+- `notifyUserOnNewFollower`
+- `sendWeeklyBiteNotification`
+- `sendDailyLeaderboardNotification`
+- `sendNewVersionNotification`, guarded by `requireAdmin` and triggered from its own
+  surface in the admin app
+- `notifyOnNewCountryBadge`, awarded from `enrichBiteAddressOnCreate`
+- `handleSharedLinkToBite`
+- `loadWeeklyBites`
+- `sendLocalizedNotification` and the notification catalog in
+  `apps/bite-tribe-firebase/functions/src/functions/shared/i18n`
+- `buildCollapseKey` and `toSurfaceKey` in
+  `apps/bite-tribe-firebase/functions/src/functions/shared/utils/notification-collapse.ts`
+- `toNotificationSurface`, `isNotificationForSurface` and
+  `clearNotificationsForSurface` in `libs/common/push-notifications`
+- `clearNotificationsOnPageChangeToSurface$` in `AppEffect`
+- `weekly-bites` route, served by `WeeklyBitesContainer` in `libs/bite-tribe/home/page`
+
+## Related Domains
+
+- [User](../domain/user.md)
+- [Bite](../domain/bite.md)
+
+## Related Pages
+
+- [Personas](../product/personas.md) - the audiences this page serves: the food lover and the Bite creator, whose
+  engagement these signals exist to return
+- [UC - Configure Personal Settings](uc-configure-personal-settings.md) - the settings surface that lists installations and
+  switches delivery, and where `Settings.pushNotifications` was retired
+- [UC - Inspect Bite Details](uc-inspect-bite-details.md) - the surface a tapped Bite or review-reply notification opens
+- [UC - Run Operational Migrations](uc-run-operational-migrations.md) - where the release announcement is fired
+- [UC - Use Gamification Signals](uc-use-gamification-signals.md) - the leaderboard the daily notification reports on
+- [Implementation - Store Declarations](../implementation/store-declarations.md)
+
+[#1184]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1184
+[#1194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1194
+[#1200]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1200
+[#1212]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1212
+[#1244]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1244
+[#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
+[#1366]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1366

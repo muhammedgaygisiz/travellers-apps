@@ -5,18 +5,18 @@
 This file is a GitHub Copilot entrypoint for the shared repository agent contract.
 
 The source of truth is not Copilot-specific. Follow `AGENTS.md` and the SSOT pages under
-`ssot/pages`.
+`ssot`.
 
 ## Required Start
 
 1. Read `AGENTS.md`.
-2. Read `ssot/pages/SSOT.md`.
-3. Read `ssot/pages/Agent Operating Contract.md`.
-4. Use `ssot/pages/Traceability Map.md` to connect the request to product, domain, use case,
+2. Read `ssot/README.md`.
+3. Read `ssot/overview/agent-operating-contract.md`.
+4. Use `ssot/overview/traceability-map.md` to connect the request to product, domain, use case,
    epic, architecture, implementation, testing, and release context.
-5. Follow `ssot/pages/Spec To Code Workflow.md` for implementation work.
-6. Follow `ssot/pages/Feature Delivery Workflow.md` for normal issue-to-merge work.
-7. Follow `ssot/pages/Release Workflow.md` for Sunday release work.
+5. Follow `ssot/overview/spec-to-code-workflow.md` for implementation work.
+6. Follow `ssot/overview/feature-delivery-workflow.md` for normal issue-to-merge work.
+7. Follow `ssot/overview/release-workflow.md` for Sunday release work.
 
 ## Task-Scoped Guidance
 

@@ -9,17 +9,16 @@ This page defines how a `UC - *` page is written in this graph: which sections i
 what each one may and may not contain, how its identifiers work, and how an existing
 page is migrated to the format.
 
-It exists because the format was invented inside two pages —
-[[UC - Detect Restaurant Candidate]] and [[UC - Verify Restaurant Candidate]] — and is
-currently knowable only by imitation. Each of those pages carries its own copy of the
-notation legend, so with 36 use-case pages the legend would exist 36 times and could
-disagree with itself in 36 ways.
+It exists because a legend copied onto every page is 36 legends free to disagree with one
+another. A use-case page therefore carries none: `UF-5` gives it one line pointing at
+[[Actogram Format]], and the format itself is defined here rather than inferred from
+[[UC - Detect Restaurant Candidate]] and [[UC - Verify Restaurant Candidate]], where it
+was invented.
 
 Rules are numbered `UF-n` and are citable. `MUST` rules are conformance conditions.
 
-[[GitHub Issue Format]] currently states that use cases are excluded from it because a
-`UC - *` page "keeps its own shape: `Status`, `Goal`, `Actors`, `Related Domains`, and a
-current or target flow". That sentence becomes a pointer to this page.
+[[GitHub Issue Format]] excludes use cases from its own shape and points here for theirs,
+so the two pages divide the graph between them rather than overlapping.
 
 ## Scope
 

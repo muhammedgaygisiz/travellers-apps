@@ -473,6 +473,90 @@ Use `logo.svg`, not `apps/bite-tribe-ios/assets/icon-only.png`. Despite its alph
 channel the iOS icon is fully opaque white behind the mascot, so compositing it
 on the dark ground produces a white rectangle.
 
+## The Launch Post
+
+The first Instagram post of [#913], planned 16 September 2026. One image, one
+caption, and the store links in the bio.
+
+![Launch post](../assets/social/launch-post.png)
+
+### Nothing In A Post Links
+
+**A link in an Instagram caption is plain text, and nothing inside an image is
+tappable.** The first plan was two photos, one per store, each with its badge and
+the store URL in the caption, so a repost would carry the links. None of it would
+have been clickable, and the app does not let a viewer select caption text to copy
+a URL either. QR codes were considered and dropped as clutter.
+
+So the post carries no links at all. It sends people to the bio, which is one of
+the two places on Instagram that does link; story link stickers are the other.
+
+### The Image
+
+`ssot/assets/social/launch-post.png`, `1080x1350` (4:5, Instagram's tallest feed
+ratio), on the same `#1A1C22` ground as [The Avatar](#the-avatar).
+
+The logo stands in front, and the seven characters from
+[Implementation - Brand Characters](brand-characters.md) stand behind it as a group photo in a pyramid:
+the feathers are the highest point, four characters step down to the left and
+three to the right. The right side has one fewer because the logo's bite notch is
+there, and **nothing may sit in the notch** - the bite is the mark. Characters
+further back are smaller, down to about half the logo's width, and the base row is
+the largest.
+
+The wordmark and tagline below are cut from the Play feature graphic, which
+carries them as outlined paths, so they match the store listing without a font.
+
+Regenerate it rather than editing the PNG:
+
+```bash
+npm run generate-launch-post
+```
+
+Positions, sizes and tilts are the `tribe` table in
+`tools/generate-launch-post.mjs`.
+
+**Why a script and not an image model.** Three rounds with GPT image generation
+were tried first. It kept the characters faithful but could not place them: each
+round fixed one layout problem and introduced another, and the third stamped a
+dark rectangle over the bite notch and stacked four heads into a column. The work
+is placement, not drawing, and placement is exact in code. Midjourney was ruled
+out for the same reason, since it cannot read the SVGs at all.
+
+### The Caption
+
+```text
+BiteTribe is live 🎉
+Find it. Try it. Share it.
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #realfood
+```
+
+The approved promotional sentence from [Profile Content](#profile-content) was
+left out on purpose: the bio directly above the post already says it.
+
+### The Bio Links
+
+Instagram takes up to five profile links, set in the mobile app only - see
+[Instagram's Website Field Is Mobile-Only](#instagrams-website-field-is-mobile-only).
+The profile shows the first and folds the rest behind _and N more_.
+
+| Order | URL                                                               | Title         |
+| ----- | ----------------------------------------------------------------- | ------------- |
+| 1     | `https://apps.apple.com/app/id6746098595`                         | `App Store`   |
+| 2     | `https://play.google.com/store/apps/details?id=com.bitetribe.app` | `Google Play` |
+| 3     | `https://bitetribe.app`                                           | blank         |
+
+**Store links get a title.** The blank-title rule in
+[Profile Content](#profile-content) is about a single link whose domain is the
+brand; two store URLs are indistinguishable without one. `bitetribe.app` keeps its
+blank title.
+
+The App Store URL drops the `/de/` storefront segment so it opens the viewer's own
+store.
+
+Status: not yet set in the app, and the post not yet published.
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done

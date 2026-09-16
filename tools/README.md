@@ -14,6 +14,7 @@ content is generated, change the generator.
 | ----------------------------- | ------------------------- | --------------------------------------------- | ------------------------------------------------------------------ |
 | `generate-full-changelog.mjs` | `generate-full-changelog` | `ssot/releases/`                              | Rebuilds `changelog.md` and one `build-*.md` per tag from git tags |
 | `write-build-provenance.mjs`  | `release:provenance`      | `ssot/current-state/`, `ssot/implementation/` | Records what a native build was made from                          |
+| `generate-launch-post.mjs`    | `generate-launch-post`    | `ssot/assets/social/`                         | Composes the Instagram launch post from the brand artwork          |
 
 ## Release and build
 

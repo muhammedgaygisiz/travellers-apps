@@ -597,15 +597,18 @@ August, both `Store Listing`, both `Published`, then **51** on 30 August carryin
 the translations. There was never a draft waiting for anyone.
 
 Build 96 was promoted from Open Testing to **Production on 31 August 2026**, at
-100% rollout across all 177 countries and regions, and is in review. Nothing in
-the listing was outstanding at that point. See [Current State - Release State](../current-state/release-state.md).
+100% rollout across all 177 countries and regions, and **went live within a few
+days**. Nothing in the listing was outstanding at that point. See [Current State - Release State](../current-state/release-state.md).
 
 The feature graphic was recoloured to the current palette the same day, so no
 stale-palette asset remains on either store.
 
 ### App Store Connect
 
-**Submitted 31 August 2026 and `Waiting for Review`**, with up to 48 hours quoted.
+**Submitted 31 August 2026 and live on the App Store since 15 September 2026**,
+against the up-to-48-hours quoted at submission — fifteen days, which is the
+number to budget for the next submission. BiteTribe 1.0.1 (build 96) is on sale
+at [apps.apple.com/de/app/bitetribe/id6746098595](https://apps.apple.com/de/app/bitetribe/id6746098595).
 The version was corrected from `1.0` to `1.0.1` so it matches the binary, and the
 App Review sign-in and contact fields were filled — they had been entirely empty,
 which for a login-gated app is the most common rejection there is. See

@@ -14,9 +14,9 @@ Target public launch period: 3 August 2026 to 16 August 2026.
 
 ## Current Release Stage
 
-BiteTribe is completing Phase 2 (Product Intelligence) as of 19 August 2026. The original Phase 3 window of 3 to 16 August 2026 passed without a release candidate and is recorded below as missed rather than quietly rewritten.
+BiteTribe is in Phase 3 (Public Launch) as of 16 September 2026, and **the app is live on both stores**: Google Play since the production promotion of 31 August 2026, and the App Store since 15 September 2026. The original Phase 3 window of 3 to 16 August 2026 passed without a release candidate and is recorded below as missed rather than quietly rewritten.
 
-The product is not yet in public launch mode. All launch-blocking **code** work is complete: Phase 1's backend work, the onboarding assistant ([epic-850](../records/epic-850.md)), and the enforced-mode App Check startup gate from issue 933, which landed and is now switched on for the release candidate. What remains is not implementation but proof and paperwork.
+The soft launch is executed ([issue 912](https://github.com/muhammedgaygisiz/travellers-apps/issues/912)); the public launch campaign ([issue 913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913)) has not started, and nothing has been published on any channel. All launch-blocking **code** work was complete before the release candidate: Phase 1's backend work, the onboarding assistant ([epic-850](../records/epic-850.md)), and the enforced-mode App Check startup gate from issue 933, which landed and was switched on for the release candidate. What remained after that was proof and paperwork, and both stores have now cleared it.
 
 Where the three release-candidate gates stand. All three closed by 30 August 2026, and **the release candidate is cut**: build 1.0.1 (96) is distributed on both tracks and installed on hardware from each. The gate history is kept below rather than collapsed, because two of these were open for a month and the reasons are worth keeping:
 
@@ -38,13 +38,13 @@ Where the three release-candidate gates stand. All three closed by 30 August 202
 
 Revised on 19 August 2026. The original targets are kept alongside the new ones, because a schedule that quietly forgets it slipped teaches nothing the next time.
 
-| Milestone                              | Original Target          | Revised Target            | State                                                      |
-| -------------------------------------- | ------------------------ | ------------------------- | ---------------------------------------------------------- |
-| Launch-blocking backend work completed | 17 July 2026             | Met, late                 | Done. All launch-blocking code has landed                  |
-| Release Candidate ready                | 31 July 2026             | Met, 30 August 2026       | Done. Build 1.0.1 (96), cut and distributed on both tracks |
-| Soft launch                            | Week of 3 August 2026    | Week of 7 September 2026  | Missed original window                                     |
-| Public launch                          | Week of 10 August 2026   | Week of 14 September 2026 | Missed original window                                     |
-| Learning phase                         | August to September 2026 | September to October 2026 | Follows public launch                                      |
+| Milestone                              | Original Target          | Revised Target            | State                                                                        |
+| -------------------------------------- | ------------------------ | ------------------------- | ---------------------------------------------------------------------------- |
+| Launch-blocking backend work completed | 17 July 2026             | Met, late                 | Done. All launch-blocking code has landed                                    |
+| Release Candidate ready                | 31 July 2026             | Met, 30 August 2026       | Done. Build 1.0.1 (96), cut and distributed on both tracks                   |
+| Soft launch                            | Week of 3 August 2026    | Week of 7 September 2026  | Done, late. Play 31 August 2026, App Store 15 September 2026                 |
+| Public launch                          | Week of 10 August 2026   | Week of 14 September 2026 | Not started. Waited on the App Store review, which cleared 15 September 2026 |
+| Learning phase                         | August to September 2026 | September to October 2026 | Follows public launch                                                        |
 
 The revised dates are derived rather than chosen, and the derivation is what to argue with if they look wrong:
 
@@ -157,8 +157,8 @@ promotion warnings - no R8 deobfuscation file and no native debug symbols - do
 not block release but do degrade crash and ANR stack traces, which is worth
 closing now that stability is monitored daily.
 
-**iOS was submitted the same evening** and is `Waiting for Review`, with up to
-48 hours quoted. Build 96 was attached, the App Store version corrected from
+**iOS was submitted the same evening** and went to `Waiting for Review`, with up
+to 48 hours quoted; it cleared on 15 September 2026, recorded below. Build 96 was attached, the App Store version corrected from
 `1.0` to `1.0.1` so it matches the binary, and the App Review sign-in and
 contact fields filled - they were **entirely empty**, which for a login-gated
 app is the most common rejection there is.
@@ -181,7 +181,78 @@ at all remains open as
 [#1451]; what
 is settled is that the claim is not currently embarrassing.
 
-Both stores are therefore in review for the soft launch.
+Both stores were therefore in review for the soft launch.
+
+### Both stores are live
+
+**Google Play went live within a few days of the 31 August 2026 promotion.** The
+public listing shows 1.0.1, updated 31 August 2026.
+
+**App Store review cleared on 15 September 2026 at 19:03 UTC**, and BiteTribe
+1.0.1 (build 96) is on sale at
+[apps.apple.com/de/app/bitetribe/id6746098595](https://apps.apple.com/de/app/bitetribe/id6746098595).
+That is verified from the public store lookup for `com.bitetribe.app` rather
+than from the console, so the timestamp is the store's own.
+
+The number worth carrying forward is the wait. App Store Connect quoted up to 48
+hours at submission on 31 August. It took **fifteen days**. Budget the observed
+number rather than the quoted one for the next submission, in the same way the
+launch dates themselves are derived from observed cadence.
+
+Two things the live listing settles:
+
+- The App Store listing **claims iPad support** - its supported-device list
+  carries iPad models - so [#1435] and [#1451] are now decisions about a
+  shipped claim, not a pending one.
+- Apple's published content rating is `12+`, which is Apple's own scale for the
+  13+ answer given on 30 August 2026. The two are not in conflict.
+
+### What the soft launch actually was
+
+Recorded on 16 September 2026, because two of the three acceptance criteria on
+[issue 912](https://github.com/muhammedgaygisiz/travellers-apps/issues/912) were
+met by something other than what they describe, and an unwritten substitution
+reads later as an unmet criterion.
+
+- **No tester cohort was told.** The 31 August decision was that the maintainer
+  would tell the current users directly. That did not happen. The audience the
+  soft launch reached is the **existing Android users**, who received it as a
+  production update; the iOS side reached nobody until 15 September. The
+  criterion is met by the release rather than by an invitation.
+- **Nothing was published on social media.** The channels exist ([#1455]), but
+  no post has been made, and the web app still offers no route to either listing
+  ([#1453]). A teaser is planned. Both belong to the public launch campaign
+  under [#913] rather than being soft-launch gaps.
+- **Daily monitoring held.** The digest on [#991] has posted every day since 31
+  August, unbroken through 16 September 2026, and has raised no threshold alert.
+  Crash-free users stayed at 100% throughout.
+
+### What the soft launch showed
+
+Three weeks of digests say the release reached almost nobody new, which is the
+expected consequence of the two substitutions above rather than a surprise:
+
+- **New activated users: 1 per week**, for three consecutive weeks.
+- **Active users are falling**: 58 in the seven days to 16 September, against 75
+  in the previous seven, and 83 in the seven days to 14 September's comparison
+  window. The starting scale on 31 August was 40, so the pool is the same people
+  and their engagement rather than any growth.
+- **Bites created are falling with it**: 69 against 93.
+
+Two signals from the monitoring itself are still unresolved, both carried
+forward from the 31 August caveats:
+
+- **The 100% crash-free rate has never been cross-checked against the
+  console.** An `app_exception` pipeline that never fires looks identical to an
+  app that never crashes, and after sixteen days of an unvarying 100% the check
+  is overdue. Filed as [#1623].
+- **9 to 11 `Missing or insufficient permissions` errors arrive every week**,
+  every week since the promotion, alongside a smaller `PERMISSION_DENIED` and
+  `Unauthenticated` count. Nothing has examined whether those are rules denials
+  in normal operation, a signed-out client retrying, or the App Check lockout
+  filed as [#1621] and [#1622] on 16 September. The digest counts them and the
+  threshold does not fire, so they have been visible and unexamined since the
+  launch. Filed as [#1624].
 
 ## Launch Rule
 
@@ -196,6 +267,7 @@ Before public launch, the release should be stable enough to learn from real use
 - [Implementation - Release And Build Workflow](../implementation/release-and-build-workflow.md)
 - [Current State - Nx And Dependency Migration Roadmap](nx-and-dependency-migration-roadmap.md)
 
+[#913]: https://github.com/muhammedgaygisiz/travellers-apps/issues/913
 [#965]: https://github.com/muhammedgaygisiz/travellers-apps/issues/965
 [#981]: https://github.com/muhammedgaygisiz/travellers-apps/issues/981
 [#986]: https://github.com/muhammedgaygisiz/travellers-apps/issues/986
@@ -216,4 +288,11 @@ Before public launch, the release should be stable enough to learn from real use
 [#1428]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1428
 [#1429]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1429
 [#1433]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1433
+[#1435]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1435
 [#1451]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1451
+[#1453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1453
+[#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455
+[#1621]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1621
+[#1622]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1622
+[#1623]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1623
+[#1624]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1624

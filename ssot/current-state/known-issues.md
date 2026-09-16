@@ -50,9 +50,9 @@
 
 - ### Store assets
 
-  **Why it matters:** publishing cannot complete without store-ready material, and this is the only remaining gate on the release candidate.
+  **Why it matters:** publishing cannot complete without store-ready material. It no longer gates a release - both stores are live - so what is left here is listing quality, not a blocker.
 
-  As of 31 August 2026, the day both stores were submitted: Play's default listing is live in eleven locales with all ten app-content declarations complete, but carries no tablet screenshots of either size. App Store Connect is `Waiting for Review` with build 96 attached, five iPhone and five iPad screenshots, and no app previews. Privacy nutrition labels published 21 August; age rating corrected to **13+** on 30 August.
+  **Both listings are published.** Google Play went live within a few days of the 31 August 2026 production promotion, and the App Store cleared review on **15 September 2026**, fifteen days after submission against a quoted 48 hours. Play's default listing is live in eleven locales with all ten app-content declarations complete, and still carries no tablet screenshots of either size. The App Store listing carries build 96 (1.0.1) with five iPhone and five iPad screenshots and no app previews, and has no marketing URL. Privacy nutrition labels published 21 August; age rating answered **13+** on 30 August, which Apple publishes on its own scale as `12+`.
 
   **No account-level blocker remains.** Digital Services Act trader status was declared non-trader on 30 August 2026 and is `Active` across the 27 EU territories. It is accurate only while the app earns nothing — [#1433] gates re-declaring it at [#1123]. Tracked by issue 1178; the current state of every asset is in [Implementation - Store Listing Assets](../implementation/store-listing-assets.md), which corrects two earlier claims made here.
 

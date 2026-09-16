@@ -14,7 +14,7 @@ Completing BiteTrails should create visible progress and reward moments.
 
 - **Bite Creator** — acts: follows or completes a BiteTrail and sees the resulting progress and reward signals.
 
-## Target Flow
+## Flow
 
 - User follows or completes a BiteTrail.
 - App shows progress, badges, contests, or reward-like signals.

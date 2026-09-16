@@ -88,7 +88,7 @@ This is not a construction plan. It is a practical, easy-to-maintain top-down re
 
 - Restaurant owner
 
-## Planned Flow
+## Flow
 
 Every step is implemented. Issue \#1088 built step seven, and publishing asks
 for the tokens of step eight as it lands - so an owner now reaches the sheet of

@@ -107,10 +107,10 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 - Restaurant staff handling incoming orders
 - BiteTribe user creating a Bite afterwards
 
-## Planned Flow
+## Flow
 
-- The guest scans the QR code on the table.
-- The backend resolves the opaque token to a restaurant, room, table, and menu.
+- The guest scans the QR code on the table. Implemented, issue \#1101.
+- The backend resolves the opaque token to a restaurant, room, table, and menu. Implemented, issue \#1100.
 - The guest confirms an unambiguous context screen: "You are ordering at Sakura Kitchen, table 12". Implemented, issue \#1101.
 - The guest joins the table's open visit, or raises a pending signal that staff confirm. Implemented, issue \#1101.
 - The guest browses the menu, with unavailable items marked and not addable, a variant of an unavailable dish included. Implemented, issues \#1102 and \#1103.
@@ -119,9 +119,9 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 - The guest watches each order move along its status, and is told when one is cancelled and why. Implemented, issues \#1104 and \#1105.
 - The guest orders again into the same visit without rescanning. Implemented, issue \#1104.
 - The guest requests assistance or the bill. Implemented, issue \#1106.
-- The guest pays in the app or asks staff to settle, and the visit closes.
-- The guest sees a receipt listing the dishes they ordered.
-- The guest selects a dish and creates a Bite prefilled with restaurant, dish, price, and currency, adding only a photo, rating, and comment.
+- The guest pays in the app or asks staff to settle, and the visit closes. Not built; issue \#1073, stage 4.
+- The guest sees a receipt listing the dishes they ordered. Not built; issue \#1073, stage 4.
+- The guest selects a dish and creates a Bite prefilled with restaurant, dish, price, and currency, adding only a photo, rating, and comment. Not built; issue \#1073, stage 4. `OrderLineSnapshot` already records the checked price this would read.
 
 ## Validation On Every Scan
 

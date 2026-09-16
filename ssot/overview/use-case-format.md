@@ -9,17 +9,18 @@ This page defines how a `UC - *` page is written in this graph: which sections i
 what each one may and may not contain, how its identifiers work, and how an existing
 page is migrated to the format.
 
-It exists because the format was invented inside two pages —
-[UC - Detect Restaurant Candidate](../use-cases/uc-detect-restaurant-candidate.md) and [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md) — and is
-currently knowable only by imitation. Each of those pages carries its own copy of the
-notation legend, so with 36 use-case pages the legend would exist 36 times and could
-disagree with itself in 36 ways.
+It exists because a legend copied onto every page is 36 legends free to disagree with one
+another. A use-case page therefore carries none: `UF-5` gives it one line pointing at
+[Actogram Format](actogram-format.md), and the format itself is defined here rather than
+inferred from [UC - Detect Restaurant Candidate](../use-cases/uc-detect-restaurant-candidate.md)
+and [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md), where
+it was invented.
 
 Rules are numbered `UF-n` and are citable. `MUST` rules are conformance conditions.
 
-[GitHub Issue Format](github-issue-format.md) currently states that use cases are excluded from it because a
-`UC - *` page "keeps its own shape: `Status`, `Goal`, `Actors`, `Related Domains`, and a
-current or target flow". That sentence becomes a pointer to this page.
+[GitHub Issue Format](github-issue-format.md) excludes use cases from its own shape and
+points here for theirs, so the two pages divide the graph between them rather than
+overlapping.
 
 ## Scope
 
@@ -493,6 +494,9 @@ X5 SYS <action>
 | `UC-CBT` | Create And Operate BiteTrails In The Business App      | [UC - Create And Operate BiteTrails In The Business App](../use-cases/uc-create-and-operate-bitetrails-in-the-business-app.md)           |
 | `UC-EPB` | Earn From A Paid BiteTrail                             | [UC - Earn From A Paid BiteTrail](../use-cases/uc-earn-from-a-paid-bitetrail.md)                                                         |
 | `UC-PBS` | Price A BiteTrail For Sale                             | [UC - Price A BiteTrail For Sale](../use-cases/uc-price-a-bitetrail-for-sale.md)                                                         |
+| `UC-CFP` | Configure Restaurant Floor Plans And Tables            | [UC - Configure Restaurant Floor Plans And Tables](../use-cases/uc-configure-restaurant-floor-plans-and-tables.md)                       |
+| `UC-OTT` | Order At The Table Through A QR Code                   | [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md)                                     |
+| `UC-ABG` | Add BiteTrail Gamification                             | [UC - Add BiteTrail Gamification](../use-cases/uc-add-bitetrail-gamification.md)                                                         |
 | `UC-DIS` | Dismiss Restaurant Candidate                           | none                                                                                                                                     |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | none                                                                                                                                     |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                                                                                                     |

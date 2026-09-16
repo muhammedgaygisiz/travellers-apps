@@ -103,14 +103,28 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 
 ## Actors
 
-- Restaurant guest, with or without a BiteTribe account
-- Restaurant staff handling incoming orders
-- BiteTribe user creating a Bite afterwards
+- **Table Guest** — acts: scans the code, confirms the table, reads the menu, builds and
+  sends an order, watches it move, and asks for a waiter or the bill. Not a role but a kind
+  of session, per [User Roles](../product/user-roles.md): an anonymous account carrying no
+  claim, minted by the scan screen and reaching nothing outside these routes.
+- **Bite Creator** — acts, and is the same person with an account: `signInAsGuest` returns an
+  existing session rather than replacing it, so a member who scans orders as themselves. The
+  Bite prefilled from an order line is theirs too, and is the step that is not built - issue
+  [#1073], stage 4.
+- **Restaurant Staff** — acts: works the order queue, moves an order along its lifecycle, and
+  clears the assistance signals a guest raises.
+- **Restaurant Owner** (`business`) — acts, by the same callables: `staffAuthority` admits
+  `business` beside `staff`, so an owner working its own floor needs no second account. It is
+  also the only role that turns table ordering on, on the restaurant's page in the business
+  app behind `ownedRestaurantGuard` ([#1102]).
+- **BiteTribe Operator** — not an actor, and named because the callables suggest otherwise:
+  `staffAuthority` admits `admin` as well. It has no way to reach them, because the business
+  app admits only `business` and `staff` and the admin app carries no service surface.
 
-## Planned Flow
+## Flow
 
-- The guest scans the QR code on the table.
-- The backend resolves the opaque token to a restaurant, room, table, and menu.
+- The guest scans the QR code on the table. Implemented, issue [#1101].
+- The backend resolves the opaque token to a restaurant, room, table, and menu. Implemented, issue [#1100].
 - The guest confirms an unambiguous context screen: "You are ordering at Sakura Kitchen, table 12". Implemented, issue [#1101].
 - The guest joins the table's open visit, or raises a pending signal that staff confirm. Implemented, issue [#1101].
 - The guest browses the menu, with unavailable items marked and not addable, a variant of an unavailable dish included. Implemented, issues [#1102] and [#1103].
@@ -119,9 +133,9 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 - The guest watches each order move along its status, and is told when one is cancelled and why. Implemented, issues [#1104] and [#1105].
 - The guest orders again into the same visit without rescanning. Implemented, issue [#1104].
 - The guest requests assistance or the bill. Implemented, issue [#1106].
-- The guest pays in the app or asks staff to settle, and the visit closes.
-- The guest sees a receipt listing the dishes they ordered.
-- The guest selects a dish and creates a Bite prefilled with restaurant, dish, price, and currency, adding only a photo, rating, and comment.
+- The guest pays in the app or asks staff to settle, and the visit closes. Not built; issue [#1073], stage 4.
+- The guest sees a receipt listing the dishes they ordered. Not built; issue [#1073], stage 4.
+- The guest selects a dish and creates a Bite prefilled with restaurant, dish, price, and currency, adding only a photo, rating, and comment. Not built; issue [#1073], stage 4. `OrderLineSnapshot` already records the checked price this would read.
 
 ## Validation On Every Scan
 
@@ -168,7 +182,7 @@ and the floor-plan geometry on the table stay where they are.
 
 - A QR token is opaque and non-guessable, and never encodes the table number.
 - A QR code identifies a table context. It does not prove the guest is physically present. The operational flow is designed so a remote scan cannot cause harm beyond a rejected or staff-visible pending session. Delivered by issue [#1101] and recorded as `RD-TS-1`: starting a session writes one document naming the guest and leaves the table's live state untouched, so what a scan from the car park costs the restaurant is one row on a screen.
-- A guest is signed in **anonymously**, and an anonymous account is not a member (`RD-TS-4`). The uid is what the rules match the guest's own session document against and what `linkWith*` upgrades in place; it writes no `/users` document and does not pass the app's route guards.
+- A guest is signed in **anonymously**, and an anonymous account is not a member (`RD-TS-4`). The uid is what the rules match the guest's own session document against; it writes no `/users` document and does not pass the app's route guards. The upgrade the design rests on is **not built**: both `auth.service.ts` and `start-table-session.ts` explain the uid as the thing `linkWith*` later upgrades in place, so a guest who registers keeps the session that knows what they ordered, and `linkWith` appears nowhere in the workspace but in those two comments. A guest who signs up today gets a second account with a second uid, and the session, the orders and the visit stay with the first. No issue owns it. See [User Roles](../product/user-roles.md).
 - The confirmation screen is acknowledged before anything else is possible, because the sticker is a thing anybody can point a camera at - so a code swapped between two tables is caught by the person sitting at one of them rather than by the kitchen.
 - An order belongs to a visit, not directly to a table, so a party that moves keeps its orders.
 - Order lines snapshot the menu item name, price, and currency at submission, so the price the guest saw is the price they are charged. Delivered by issue [#1103] and recorded as `RD-TS-10`: the phone sends the prices it displayed, the backend compares each to the live menu, and a difference refuses the whole order naming the item and both prices - so what is stored is always the menu's number, and it is only ever stored when the two agree.

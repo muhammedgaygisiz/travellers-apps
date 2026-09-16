@@ -86,9 +86,20 @@ This is not a construction plan. It is a practical, easy-to-maintain top-down re
 
 ## Actors
 
-- Restaurant owner
+- **Restaurant Owner** (`business`) — acts: creates the rooms, places the geometry and the
+  tables, publishes the plan and prints its QR sheets, for a restaurant it holds. Every
+  route here sits behind `ownedRestaurantGuard`, so the authority is `Restaurant.ownerUserId`
+  rather than the role.
+- **Restaurant Staff** — not an actor, although this is the room it works in: the editor and
+  the QR sheet are behind that same `ownedRestaurantGuard`, and a staff account never holds
+  `ownerUserId`. What staff does with the published plan is
+  [UC - Manage Tables During Service](uc-manage-tables-during-service.md).
+- **BiteTribe Operator** — not an actor, and named because `RD-UR-6` would suggest otherwise.
+  It reads a plan at the data layer, deliberately - `readsFloorPlan()` admits it so support
+  can see what an owner is describing on the phone - but it has no surface to edit one:
+  the business app refuses `admin`, and the admin app has no floor plan.
 
-## Planned Flow
+## Flow
 
 Every step is implemented. Issue [#1088] built step seven, and publishing asks
 for the tokens of step eight as it lands - so an owner now reaches the sheet of

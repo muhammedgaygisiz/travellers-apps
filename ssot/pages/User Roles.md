@@ -25,15 +25,16 @@ A role is a **Firebase Auth custom claim**, written only by the backend and carr
 the ID token. A client that lies about it changes nothing: every privileged callable
 re-reads the claim from the verified token.
 
-| Role (EN)              | Role (DE)              | Claim      | Definition                                                                                                                                                                                                                                                                                           | Persona                                 |
-| ---------------------- | ---------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| **BiteTribe Operator** | BiteTribe-Betreiber    | `admin`    | BiteTribe-internal superuser administering the entire application: verifies RestaurantCandidates, grants and revokes roles, assigns and revokes Restaurant ownership (\#1077), runs the operational migrations. Required to sign into the Admin App.                                                 | _none_                                  |
-| **Restaurant Owner**   | Restaurant-Inhaber     | `business` | The verified owner of one Restaurant, responsible for that Restaurant's own data: Menu, opening hours, address, description, image, social links. Required to sign into the Business App.                                                                                                            | Restaurant owner or business maintainer |
-| **Bite Creator**       | Bite-Ersteller         | _none_     | A registered user allowed to create a Bite. Carries **no** claim: in the code this role is the _absence_ of a role, so it is neither grantable nor revocable.                                                                                                                                        | Bite creator                            |
-| **Restaurant Staff**   | Restaurant-Mitarbeiter | `staff`    | A member of a restaurant's team, acting on the restaurants its Restaurant Owner holds. **Grantable since \#1537**: the Restaurant Owner grants and revokes it for the restaurants it holds, not an Operator. What it may then _do_ is the service floor of those restaurants — see the matrix below. | _none_                                  |
+| Role (EN)              | Role (DE)              | Claim      | Definition                                                                                                                                                                                                                                                                                                          | Persona                                 |
+| ---------------------- | ---------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| **BiteTribe Operator** | BiteTribe-Betreiber    | `admin`    | BiteTribe-internal superuser administering the entire application: verifies RestaurantCandidates, grants and revokes roles, assigns and revokes Restaurant ownership (\#1077), runs the operational migrations. Required to sign into the Admin App.                                                                | _none_                                  |
+| **Restaurant Owner**   | Restaurant-Inhaber     | `business` | The verified owner of one Restaurant, responsible for that Restaurant's own data: Menu, opening hours, address, description, image, social links. Required to sign into the Business App.                                                                                                                           | Restaurant owner or business maintainer |
+| **Bite Creator**       | Bite-Ersteller         | _none_     | A registered user allowed to create a Bite. Carries **no** claim: in the code this role is the absence of a role _on a member session_, so it is neither grantable nor revocable. The second half is not decoration - an anonymous session also carries no claim, and is not a Bite Creator. See Table Guest below. | Bite creator                            |
+| **Restaurant Staff**   | Restaurant-Mitarbeiter | `staff`    | A member of a restaurant's team, acting on the restaurants its Restaurant Owner holds. **Grantable since \#1537**: the Restaurant Owner grants and revokes it for the restaurants it holds, not an Operator. What it may then _do_ is the service floor of those restaurants — see the matrix below.                | _none_                                  |
 
-How they compose: **Bite Creator is the base every account holds**, because the consumer
-app has no role gate - only `authGuard`. Roles are additive rather than exclusive (one
+How they compose: **Bite Creator is the base every member account holds**, because the
+consumer app has no role gate - only `authGuard`, which admits a member and refuses an
+anonymous session (`getMember()`, not `getUser()`). Roles are additive rather than exclusive (one
 account may hold `admin` and `business` at once), but holding one role does **not** imply
 holding another: `admin` and `business` are deliberately not a hierarchy in the code.
 `staff` is the exception to additivity - it _is_ the narrowed set, so holding it together
@@ -141,18 +142,19 @@ either ruleset (\#1567). The detail is owned by [[Current State - Known Issues]]
 
 ## Not roles
 
-| Concept                       | What it actually is                                                                                                                                                                                                |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Food lover                    | A subset of Bite Creator's permissions. There is no read-only role - any authenticated account may create                                                                                                          |
-| Traveler                      | A subset of Food lover                                                                                                                                                                                             |
-| New user                      | A lifecycle state (`onboardingCompletedAt`, `onboardingVersion`), not a permission                                                                                                                                 |
-| Privacy-conscious participant | A settings choice (`PublicUser.public`), not a permission                                                                                                                                                          |
-| **Public / Private Profile**  | The same visibility choice, not a capability                                                                                                                                                                       |
-| **BiteTribe Pro**             | An entitlement on `PublicUser.subscriptionTier`: `0` = Free, `>= 1` = Pro. Orthogonal to every role. No purchase path exists. See [[Subscription]]                                                                 |
-| **BiteTrail Creator**         | An activity of the _Food curator or vlogger_ persona, not a permission. Publishing a BiteTrail becomes a Bite Creator capability under `RD-UR-4`, tracked by issue \#1519; the proposed `curator` claim is retired |
-| **Moderator**                 | Does not exist. There is no moderation role: content reports are acted on by the Operator under `RD-UR-7`. Stated here rather than in [[Glossary]], which carries the terms the product _has_                      |
-| **Unauthenticated visitor**   | Reaches only `start` and the auth routes                                                                                                                                                                           |
-| **The backend itself**        | Cloud Functions act with admin credentials and no role. It is the actual writer in most flows, which is why the open Firestore rules matter - see the note above the table                                         |
+| Concept                       | What it actually is                                                                                                                                                                                                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Food lover                    | A subset of Bite Creator's permissions. There is no read-only role - any authenticated account may create                                                                                                                                                                                   |
+| Traveler                      | A subset of Food lover                                                                                                                                                                                                                                                                      |
+| New user                      | A lifecycle state (`onboardingCompletedAt`, `onboardingVersion`), not a permission                                                                                                                                                                                                          |
+| Privacy-conscious participant | A settings choice (`PublicUser.public`), not a permission                                                                                                                                                                                                                                   |
+| **Public / Private Profile**  | The same visibility choice, not a capability                                                                                                                                                                                                                                                |
+| **BiteTribe Pro**             | An entitlement on `PublicUser.subscriptionTier`: `0` = Free, `>= 1` = Pro. Orthogonal to every role. No purchase path exists. See [[Subscription]]                                                                                                                                          |
+| **BiteTrail Creator**         | An activity of the _Food curator or vlogger_ persona, not a permission. Publishing a BiteTrail becomes a Bite Creator capability under `RD-UR-4`, tracked by issue \#1519; the proposed `curator` claim is retired                                                                          |
+| **Moderator**                 | Does not exist. There is no moderation role: content reports are acted on by the Operator under `RD-UR-7`. Stated here rather than in [[Glossary]], which carries the terms the product _has_                                                                                               |
+| **Table Guest**               | An **anonymous Firebase Auth session**, not a role: it carries no claim, nothing grants or revokes it, and `createUserOnAuthCreate` skips it so it leaves no `/users` document. It is an authentication state, and the table screens are the only place that mints one. See the table below |
+| **Unauthenticated visitor**   | Reaches the open routes and nothing else: the privacy policy, the account-deletion notice, support, a scanned table code and the order screen behind it, and a published menu                                                                                                               |
+| **The backend itself**        | Cloud Functions act with admin credentials and no role. It is the actual writer in most flows, which is why the open Firestore rules matter - see the note above the table                                                                                                                  |
 
 The first four are personas: audiences, not authorization concepts, and they must not
 become roles.
@@ -164,6 +166,64 @@ claim: it gates surfaces and callables, and it is grantable and revocable. An
 rather than surfaces, is orthogonal to every role, and is not written by `setUserRoles`.
 BiteTribe Pro is the entitlement - which is why it sits in the table above without being a
 persona either. See `RD-UR-1`.
+
+**A fourth thing the three categories do not cover, checked 16 September 2026: the kind of
+session.** The table guest of issues \#1101 to \#1108 is not a persona, because removing it
+changes what the table callables admit; not a role, because it carries no claim and nothing
+grants or revokes it; and not an entitlement, because nothing is recorded about it anywhere.
+It is the session's own kind - anonymous or member - and the two layers read it differently.
+`authGuard` asks `getMember()` rather than `getUser()`, so an anonymous session opens no
+authenticated route: without that distinction a guest who scanned a table would be handed the
+feed, the gallery and a profile page with nobody behind it. `firestore.rules` asks only
+`signedIn()` and then matches the document against the caller's own uid, which is what the
+anonymity actually buys - a stable identity to name a session after, upgraded in place by
+`linkWith*` if the guest later registers.
+
+| Capability                                                       | Table Guest                     |
+| ---------------------------------------------------------------- | ------------------------------- |
+| Resolve a scanned table code, read the menu behind it            | yes, **without any session** ¹¹ |
+| Start or leave a table session                                   | yes, own session ¹²             |
+| Send an order, ask for a waiter or the bill                      | yes, own session ¹²             |
+| Read back its own session, orders and assistance requests        | yes, own uid only ¹³            |
+| Read another party's session, orders or the room's state         | no ¹³                           |
+| Every authenticated route: feed, gallery, profile, Bite creation | no ¹⁴                           |
+
+¹¹ `resolveTableQrToken` and `loadPublicMenu` are the two `public` callables of the flow
+(\#1100, \#1102), reachable with no session at all. Both assemble their answer field by
+field rather than handing back the documents they read, because the restaurant document
+carries ownership and ordering configuration a reader is not entitled to.
+
+¹² `startTableSession`, `leaveTableSession`, `submitTableOrder` and `requestTableAssistance`
+are the four callables written for an anonymous session. None of them takes a `guestUserId`:
+each writes against the one session named after the caller's own uid, and the restaurant,
+table and visit all come off a scanned token. **Four by design and not by enforcement**, and
+the distinction matters: `classifyCallable`'s `authenticated` means "carries a uid", nothing
+more, and `start-table-session.ts` reading `sign_in_provider === 'anonymous'` is the only
+place in the backend that looks at the kind of session at all - and it records the answer on
+the session rather than refusing anything with it. So an anonymous token reaches every other
+`authenticated` callable too, `searchUsers` and `loadBitesByLocation` among them.
+`callable-authorization.spec.ts` asserts the role guards and does not assert this, so nothing
+would catch a fifth callable quietly joining the list.
+
+¹³ The documents are `allow write: if false` throughout; the guest's read clauses match
+`guestUserId == uid()` on `tableSessions` and `orders`, and `requestedByUserIds` on
+`assistanceRequests`. `list` on a session or an assistance request is `readsFloorPlan` only,
+so a guest reads its own documents and cannot enumerate the room.
+
+¹⁴ The **routes** refuse it - `authGuard` turns an anonymous session away, and the table
+routes sit outside `gateAuthenticatedRoutes` as well, so a guest who never signed up is not
+asked to finish an onboarding they never started. The callables behind those routes do not
+refuse it, per footnote ¹².
+
+**The upgrade the design rests on does not exist yet.** Both `auth.service.ts` and
+`start-table-session.ts` explain the anonymous uid as the thing `linkWith*` later upgrades in
+place, so that a guest who registers keeps the session that knows what they ordered.
+`linkWith` appears nowhere in the workspace but in those two comments. A guest who signs up
+today therefore gets a second account with a second uid, and the session, the orders and the
+visit stay with the first - which is also why the anonymous record leaves no `/users`
+document behind it: `createUserOnAuthCreate` is a `beforeUserCreated` blocking trigger, so it
+fires for a sign-up and would not fire for a link even once linking exists. No issue owns
+this.
 
 **Restaurant Staff has a column, as of \#1097.** It had none for as long as its permission
 set was undecided (`RD-UR-8`), because a column of guesses would state a boundary nobody had

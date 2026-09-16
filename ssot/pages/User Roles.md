@@ -25,12 +25,12 @@ A role is a **Firebase Auth custom claim**, written only by the backend and carr
 the ID token. A client that lies about it changes nothing: every privileged callable
 re-reads the claim from the verified token.
 
-| Role (EN)              | Role (DE)              | Claim      | Definition                                                                                                                                                                                                                                                                           | Persona                                 |
-| ---------------------- | ---------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- |
-| **BiteTribe Operator** | BiteTribe-Betreiber    | `admin`    | BiteTribe-internal superuser administering the entire application: verifies RestaurantCandidates, grants and revokes roles, assigns and revokes Restaurant ownership (\#1077), runs the operational migrations. Required to sign into the Admin App.                                 | _none_                                  |
-| **Restaurant Owner**   | Restaurant-Inhaber     | `business` | The verified owner of one Restaurant, responsible for that Restaurant's own data: Menu, opening hours, address, description, image, social links. Required to sign into the Business App.                                                                                            | Restaurant owner or business maintainer |
-| **Bite Creator**       | Bite-Ersteller         | _none_     | A registered user allowed to create a Bite. Carries **no** claim: in the code this role is the _absence_ of a role, so it is neither grantable nor revocable.                                                                                                                        | Bite creator                            |
-| **Restaurant Staff**   | Restaurant-Mitarbeiter | `staff`    | A member of a restaurant's team, acting on the restaurants its Restaurant Owner holds. **Grantable since \#1537**: the Restaurant Owner grants and revokes it for the restaurants it holds, not an Operator. What it may then _do_ is still nothing — see the note below the matrix. | _none_                                  |
+| Role (EN)              | Role (DE)              | Claim      | Definition                                                                                                                                                                                                                                                                                           | Persona                                 |
+| ---------------------- | ---------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| **BiteTribe Operator** | BiteTribe-Betreiber    | `admin`    | BiteTribe-internal superuser administering the entire application: verifies RestaurantCandidates, grants and revokes roles, assigns and revokes Restaurant ownership (\#1077), runs the operational migrations. Required to sign into the Admin App.                                                 | _none_                                  |
+| **Restaurant Owner**   | Restaurant-Inhaber     | `business` | The verified owner of one Restaurant, responsible for that Restaurant's own data: Menu, opening hours, address, description, image, social links. Required to sign into the Business App.                                                                                                            | Restaurant owner or business maintainer |
+| **Bite Creator**       | Bite-Ersteller         | _none_     | A registered user allowed to create a Bite. Carries **no** claim: in the code this role is the _absence_ of a role, so it is neither grantable nor revocable.                                                                                                                                        | Bite creator                            |
+| **Restaurant Staff**   | Restaurant-Mitarbeiter | `staff`    | A member of a restaurant's team, acting on the restaurants its Restaurant Owner holds. **Grantable since \#1537**: the Restaurant Owner grants and revokes it for the restaurants it holds, not an Operator. What it may then _do_ is the service floor of those restaurants — see the matrix below. | _none_                                  |
 
 How they compose: **Bite Creator is the base every account holds**, because the consumer
 app has no role gate - only `authGuard`. Roles are additive rather than exclusive (one
@@ -165,18 +165,68 @@ rather than surfaces, is orthogonal to every role, and is not written by `setUse
 BiteTribe Pro is the entitlement - which is why it sits in the table above without being a
 persona either. See `RD-UR-1`.
 
-**Restaurant Staff has no column in the matrix above, deliberately.** The role is decided
-(`RD-UR-8`) and grantable (\#1537); its permission set is not, and a column of guesses would
-state a boundary nobody has decided. What is fixed: staff acts on the restaurants its granting
-Restaurant Owner holds and on no others.
+**Restaurant Staff has a column, as of \#1097.** It had none for as long as its permission
+set was undecided (`RD-UR-8`), because a column of guesses would state a boundary nobody had
+taken. The set below is decided, enforced and under test; what was fixed from the start, and
+still is, is that staff acts on the restaurants its granting Restaurant Owner holds and on no
+others.
 
-**A staff account can do nothing yet, checked 10 September 2026, and that is exactly what
-\#1537 shipped** - its scope was the grant, not the permission. A Restaurant Owner can put an
-account on a restaurant, the `staff` claim and the `/restaurantStaff/{uid}` record are written
-together and audited, and the account can sign into the Business App - where the dashboard
-lists by `Restaurant.ownerUserId` (\#1079) and shows it nothing, and the rules give it no
-write (\#1078). Making the role mean something is a change to those two, and has no owning
-issue.
+| Capability                                                    | Restaurant Staff       |
+| ------------------------------------------------------------- | ---------------------- |
+| Consumer app: create and edit own Bites, browse, search, etc. | yes                    |
+| Sign into the Business App                                    | yes ⁷                  |
+| Read the **published** floor plan                             | yes, own restaurant ⁸  |
+| Read the owner's unpublished floor-plan draft                 | no ⁸                   |
+| Read live table state, the audit trail and visits             | yes, own restaurant    |
+| Change live table state, open and close visits                | yes, own restaurant ⁹  |
+| Read the table sessions, orders and assistance signals        | yes, own restaurant ¹⁰ |
+| Move an order along its lifecycle, clear an assistance signal | yes, own restaurant ¹⁰ |
+| Edit the floor plan, or print its QR codes                    | no                     |
+| Maintain the restaurant profile, menu, hours, address, links  | no                     |
+| Grant or revoke `staff`, or see the staff list                | no                     |
+| Create and publish a BiteTrail                                | no                     |
+
+⁷ And lands in the room it works at rather than on the owner dashboard (\#1097):
+`staffEntryGuard` reads `/restaurantStaff/{uid}` on `/dashboard` and redirects to
+`restaurant/{restaurantId}/tables`. The dashboard lists restaurants by
+`Restaurant.ownerUserId`, so without the redirect a staff account arrives at an empty page and
+the surfaces its role has are reachable only by typing a URL.
+
+⁸ The split is what made the read safe to open at all (\#1088). The published arrangement is
+the room document and the table documents; the owner's half-finished one lives at
+`rooms/{roomId}/drafts/current`, which has no staff clause. Scoped by `worksAt()` - the claim
+**and** the association naming that restaurant - never by the `staff` role alone, which would
+make the role a key to every restaurant's interior in BiteTribe.
+
+⁹ Not through `firestore.rules`: every client write to `tableStates`,
+`tableStateTransitions` and `visits` is refused, and the change is made by calling
+`transitionTableState` or `moveTableVisit` (\#1092, \#1095). A callable rather than a rule
+because two hosts seating one table at the same second has to resolve to one outcome.
+
+¹⁰ The pass beside the room (\#1105, \#1106). The reads follow the same `readsFloorPlan` as
+the tables, their live state and the visits, because two lists of readers for one dining room
+would drift apart; the restaurant-wide queue is a collection-group `list` on `orders` that the
+query must prove with `where('restaurantId', '==', ...)`, and
+`restaurant/:restaurantId/orders` is the second route in the business app a staff account is
+meant to reach. The writes are callables again - `transitionTableOrderStatus` and
+`acknowledgeTableAssistance`, classified `staffAuthority` beside the two in footnote ⁹ - and
+the documents stay `allow write: if false`, because a client able to write an order could
+rewrite its lines after the guest agreed to them.
+
+**Revocation is immediate at the data layer, and lags by up to an hour in the app.**
+`removeRestaurantStaff` drops the claim and deletes the association together, and every rule
+above requires both, so the deleted association ends the access even while the account's
+unrefreshed ID token still carries `staff`. What the token's remaining life still costs is the
+sign-out: the account keeps the app open, reading nothing, until `roleGuard` sees a refreshed
+token without the claim. The rules suite covers both halves.
+
+**The set arrived one issue at a time, and the dashboard was never part of it.** \#1537
+shipped the grant rather than the permission on 10 September 2026, so for a day a staff
+account could sign in and do nothing. \#1088 gave the role its first read, \#1092 its first
+write, \#1093 and \#1094 the room and the actions, \#1097 the entry that leads to them, and
+\#1105 and \#1106 the order queue and the assistance signals. Throughout, the dashboard has
+scoped by `Restaurant.ownerUserId` and listed a staff account nothing: the fix was never to
+widen that list but to stop sending the account to it.
 
 ## Recorded Decisions
 

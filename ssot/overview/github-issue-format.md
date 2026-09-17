@@ -133,6 +133,8 @@ A link states its kind, using one of three forms, in this order:
 
 On GitHub, use `#1234`. In the SSOT, write it as a reference link - `[#1234]` in the text, with its definition at the end of the page.
 
+**`Part of #1234` is prose, not a relationship GitHub tracks.** An issue that is `Part of` an epic must also be attached as a native GitHub sub-issue of that epic - see [Sub-Issues](github-project-board-and-issue-handling.md#sub-issues). Writing the line without doing that step leaves the epic's own checklist and progress bar blank.
+
 Domain, use-case, epic and architecture traceability is not recorded here. It belongs on the use-case page, in its `Related GitHub Scope` section, which [Use Case Format](use-case-format.md) `UF-4` requires and never omits from L1 up (optional while a page is still at `L0`).
 
 ## Status

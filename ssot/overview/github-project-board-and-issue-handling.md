@@ -69,6 +69,7 @@ Do not create priority labels. If a `P0` or `P1` label appears in the repository
    ```
 
 4. Set `Status` when work starts, and move it to `Done` after the pull request is merged and the behavior is verified.
+5. When the issue is `Part of` an epic, attach it as a native GitHub sub-issue of that epic (see Sub-Issues below) in addition to the `Part of #1234` reference [GitHub Issue Format](github-issue-format.md) requires in the body text.
 
 ### Verifying An Add
 
@@ -97,6 +98,31 @@ query($id: ID!) {
 Field and option ids are read with `gh project field-list 4 --owner muhammedgaygisiz` and a GraphQL `node` query against the field id. They are stable, so they can be looked up once per session rather than per issue.
 
 This needs the `project` token scope on the authenticated `gh` CLI, in addition to `repo`.
+
+## Sub-Issues
+
+**An epic's children are linked twice, and the two links do different jobs.** The `Part of #1234` line [GitHub Issue Format](github-issue-format.md) requires in the child's body is prose - it renders in the issue text and in the SSOT's reference-link form, but it creates no relationship GitHub itself knows about. The board's `Parent issue` and `Sub-issues progress` fields, and the checklist-with-a-progress-bar GitHub renders at the top of the epic, only populate through the native sub-issue relationship, which is a separate step.
+
+Attach a child issue as a sub-issue of its epic with the REST API:
+
+```bash
+gh api repos/muhammedgaygisiz/travellers-apps/issues/<epic-number>/sub_issues \
+  -X POST -F sub_issue_id=<child-database-id>
+```
+
+Two things about this call are easy to get wrong:
+
+- **`sub_issue_id` is the issue's internal database id, not its issue number.** Read it first: `gh api repos/muhammedgaygisiz/travellers-apps/issues/<child-number> --jq '.id'`.
+- **Use `-F`, not `-f`.** `gh api`'s `-f` sends every value as a string, and the endpoint rejects a quoted number with `Invalid property /sub_issue_id: is not of type integer`. `-F` sends it typed.
+
+Verify the same way `item-add` is verified above, against the source of truth rather than a cached view:
+
+```bash
+gh api repos/muhammedgaygisiz/travellers-apps/issues/<epic-number>/sub_issues \
+  --jq '.[] | "\(.number): \(.title)"'
+```
+
+Filing the child issue and setting board fields does not imply this step happened. Do it as its own explicit call, for every issue that carries a `Part of #1234` line.
 
 ## Reopening An Issue
 

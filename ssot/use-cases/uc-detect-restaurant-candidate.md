@@ -101,7 +101,7 @@ Out of scope. Each of these is its own Use Case, referenced from the step it bel
 | `UC-CMB` | [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md) | `A2`          | Upstream cause of automatic detection                                                                                |
 | `UC-OPS` | [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md) | `B1`          | Enclosing: sign-in and the role gate                                                                                 |
 | `UC-ROM` | [UC - Run Operational Migrations](uc-run-operational-migrations.md)                 | `B2`          | Enclosing: the surface the on-demand producer is offered on                                                          |
-| `UC-DIS` | Dismiss Restaurant Candidate                                                        | `K9`          | Alternative downstream outcome, and — once [#1497] and [#1501] land — detection's only negative evidence. See `R-18` |
+| `UC-DIS` | [Dismiss Restaurant Candidate](uc-dismiss-restaurant-candidate.md)                  | `K9`          | Alternative downstream outcome, and — once [#1497] and [#1501] land — detection's only negative evidence. See `R-18` |
 
 **Also out of scope, and not a Use Case: the Bite-places creation path.** The Admin App
 offers a list of distinct `place` strings taken from all Bites; picking one opens the same
@@ -140,8 +140,8 @@ checked inside the kernel, at `K3` and `K8`, and both checks are fuzzy — see `
 **Handshake.** `AF-31` is satisfied: every `REF:` and every precondition names its
 counterparty and the guarantee that counterparty owes. `AF-34` is closed in both
 directions with `UC-VRC` only: `G2` names `UC-VRC` `P1` and `P2`, and those name this Use
-Case as owner. `UC-CMB`, `UC-OPS` and `UC-ROM` are L1 pages carrying no numbered
-guarantees, and `UC-DIS` has no page at all, so `P1`, `P2`, `P3`, the `B2` reference and
+Case as owner. `UC-CMB`, `UC-OPS`, `UC-ROM` and `UC-DIS` are L0 or L1 pages carrying no numbered
+guarantees, so `P1`, `P2`, `P3`, the `B2` reference and
 the `K9` reference are **unanswered** under `AF-34` rather than failures. Those four are a
 claim on `UF-20`'s migration order; they are not a precondition of this page reaching L3.
 

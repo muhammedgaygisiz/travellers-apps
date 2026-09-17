@@ -117,7 +117,7 @@ Out of scope. Each of these is its own Use Case, referenced from the step it bel
 | UC-ID    | Use Case                                                                                        | Referenced at  | Direction                                                                                                                                                          |
 | -------- | ----------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `UC-DRC` | [UC - Detect Restaurant Candidate](uc-detect-restaurant-candidate.md)                           | `P1`, `P2`     | Upstream, and the sole owner of every way a Candidate comes into existence — the automatic trigger _and_ the Operator's on-demand clustering callable (`RD-VRC-8`) |
-| `UC-DIS` | Dismiss Restaurant Candidate                                                                    | `V4a`          | Alternative outcome                                                                                                                                                |
+| `UC-DIS` | [Dismiss Restaurant Candidate](uc-dismiss-restaurant-candidate.md)                              | `V4a`          | Alternative outcome                                                                                                                                                |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant                                                | `V4b`          | Alternative outcome                                                                                                                                                |
 | `UC-ARO` | [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md)                               | `G7`, `R-15`   | Downstream — a separate Operator action after `END-V4`, not a step here                                                                                            |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence                                                        | `V19`          | Invoked step                                                                                                                                                       |
@@ -125,9 +125,10 @@ Out of scope. Each of these is its own Use Case, referenced from the step it bel
 | `UC-MRB` | [UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md) | After `END-V4` | Downstream                                                                                                                                                         |
 | `UC-OPS` | [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md)             | `V1`           | Enclosing: sign-in and the role gate                                                                                                                               |
 
-Of the referenced Use Cases, **`UC-DIS`, `UC-MRC`, `UC-GIM` and `UC-ARB` do not yet
-exist as pages.** They are named here so that each rule this flow depends on has an
-owner, and so that writing them is a visible gap rather than an omission.
+Of the referenced Use Cases, **`UC-MRC`, `UC-GIM` and `UC-ARB` do not yet
+exist as pages, and `UC-DIS` exists only at L0.** They are named here so that each rule
+this flow depends on has an owner, and so that writing them is a visible gap rather than
+an omission.
 
 ## Trigger
 
@@ -170,10 +171,11 @@ directions with `UC-DRC` and with nothing else: `P1` and `P2` name `UC-DRC` as o
 
 `G1` is what `UC-MRB` and `UC-ARO` consume; `G1` and `G2` together are what the consumer
 surfaces that render a Restaurant and its Menu consume. None of that can be answered
-from the other side today: `UC-OPS`, `UC-MRB` and `UC-ARO` are L1 pages carrying neither
-numbered preconditions nor numbered guarantees, so `P3` has an owner that owes nothing in
-writing; and `UC-DIS`, `UC-MRC`, `UC-GIM` and `UC-ARB` have no pages at all, so the four
-`REF:` lines that name them state a guarantee no page owns.
+from the other side today: `UC-OPS`, `UC-MRB`, `UC-ARO` and `UC-DIS` are L0 or L1 pages
+carrying neither numbered preconditions nor numbered guarantees, so `P3` and the `V4a`
+reference have an owner that owes nothing in writing; and `UC-MRC`, `UC-GIM` and `UC-ARB`
+have no pages at all, so the three remaining `REF:` lines that name them state a
+guarantee no page owns.
 
 Under `AF-34` these seven counterparties are **unanswered**, not conformance failures:
 this page has stated its side, and the other side is theirs to state. Each is a claim on

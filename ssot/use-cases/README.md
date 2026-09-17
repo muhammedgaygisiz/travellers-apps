@@ -36,6 +36,7 @@ Part of the [SSOT index](../README.md).
 
 ## Next to implement
 
+- [UC - Create A BiteTrail](uc-create-a-bitetrail.md)
 - [UC - Complete Universal Search](uc-complete-universal-search.md)
 - [UC - Contact A Restaurant And Plan A Visit](uc-contact-a-restaurant-and-plan-a-visit.md)
 - [UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale.md)
@@ -45,3 +46,4 @@ Part of the [SSOT index](../README.md).
 - [UC - See Ads As A Free User](uc-see-ads-as-a-free-user.md)
 - [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md)
 - [UC - Earn From A Paid BiteTrail](uc-earn-from-a-paid-bitetrail.md)
+- [UC - Dismiss Restaurant Candidate](uc-dismiss-restaurant-candidate.md)

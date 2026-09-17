@@ -4,20 +4,22 @@
 
 **Level:** L0.
 
-Supported today, and smaller than its title. A signed-in Restaurant Owner opens the business
-dashboard, sees the BiteTrails it owns, and creates one from its own Bites through
-`create-bite-trail`, the form that also sets the trail's price and currency, defaulted to `0`
-and `EUR`. Creating a trail is the whole of operating one: nothing edits or deletes a
-BiteTrail from the business app, and there is no publish step, no draft and no published
-flag. Who creates BiteTrails is meant to change, and who may reach this surface today is
-wider than intended; see `Actors` and `Authorization`. The organisation dashboard that used
-to sit in front of this flow is gone; see `Related GitHub Scope`.
+Obsolete: BiteTrails are not created through the business app (`RD-UR-4`), so this surface is
+removed; see `MVP Classification`. Until then it is supported, and smaller than its title. A
+signed-in Restaurant Owner opens the business dashboard, sees the BiteTrails it owns, and
+creates one from its own Bites through `create-bite-trail`, the form that also sets the
+trail's price and currency, defaulted to `0` and `EUR`. Creating a trail is the whole of
+operating one: nothing edits or deletes a BiteTrail from the business app, and there is no
+publish step, no draft and no published flag. The route gate admits more than intended; see
+`Authorization`. The organisation dashboard that used to sit in front of this flow is gone;
+see `Related GitHub Scope`. Creating a BiteTrail in the consumer app, where it moves, is
+[UC - Create A BiteTrail](uc-create-a-bitetrail.md).
 
 ## Goal
 
 Creators and Restaurant Owners can create curated BiteTrail offerings.
 
-This page owns making a BiteTrail exist: the dashboard list, the create form, and everything
+This page owns making a BiteTrail exist in the business app: the dashboard list, the create form, and everything
 that form writes, price and currency included. What has to be true for a priced trail to
 actually sell is [UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale.md); the money a sale produces is
 [UC - Earn From A Paid BiteTrail](uc-earn-from-a-paid-bitetrail.md); what a buyer sees and does is
@@ -25,16 +27,14 @@ actually sell is [UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale
 
 ## Actors
 
-- **Restaurant Owner** - acts today: opens the business dashboard, creates a BiteTrail from
-  its own Bites, and sets its price and currency.
-- **Bite Creator** - does not act here yet. Creating a BiteTrail is meant to move into the
-  consumer app as a Bite Creator capability, retiring this business-app surface (`RD-UR-4`,
-  issue [#1519]). `RD-UR-4` is not final: issue [#1615] decides whether a BiteTrail creator
-  is a role of its own or a persona, and this line is rewritten from
-  [User Roles](../product/user-roles.md) when it does.
+- **Restaurant Owner** - acts until the surface is removed: opens the business dashboard,
+  creates a BiteTrail from its own Bites, and sets its price and currency.
+- **Bite Creator** - not an actor, and named because creating a BiteTrail moves to it, in the
+  consumer app rather than here (`RD-UR-4`, issue [#1519]). Whether a BiteTrail creator is a
+  role of its own or a persona is not final; issue [#1615] settles it.
 - **Restaurant Staff** - not an actor: it must not create BiteTrails
-  ([User Roles](../product/user-roles.md)), although the route gate admits it today; see
-  `Authorization`.
+  ([User Roles](../product/user-roles.md)), although the route gate admits it until the
+  surface is removed; see `Authorization`.
 
 ## Flow
 
@@ -49,18 +49,14 @@ The door is `roleGuard('business', 'staff')` on both routes, while `firestore.ru
 `/biteTrails/{biteTrailId}` create on `owns(request.resource.data, 'ownerId')` alone - so the
 rules admit any signed-in account and only the surface is restricted.
 
-_Intended, not met._ `staff` must not create BiteTrails ([User Roles](../product/user-roles.md)), yet
-the route gate admits it. No issue owns the correction yet.
+`staff` must not create BiteTrails ([User Roles](../product/user-roles.md)), yet the route gate
+admits it. The gap closes with the surface itself, which [#1519] removes, and gets no fix of
+its own.
 
 ## MVP Classification
 
-**[Secondary]** - the whole page. Its only surface is the business app, which
-[Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md) puts out of scope for this release candidate
-with a soft launch of its own, so nothing here is strictly required for the initial release.
-
-Not on this page: the conditions that make a priced trail sellable, which are
-[UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale.md), and everything that happens after a sale, which is
-[UC - Earn From A Paid BiteTrail](uc-earn-from-a-paid-bitetrail.md).
+**[Obsolete]** - BiteTrails are not created through the business app (`RD-UR-4`); creating
+one moves into the consumer app, [UC - Create A BiteTrail](uc-create-a-bitetrail.md). Removed by [#1519].
 
 ## App Store Review Area
 
@@ -83,9 +79,8 @@ owner is the signed-in user.
 - Issue [#266], the packaging epic, covered BiteTrail creation from selected Bites, free
   BiteTrail access and marketplace listing. Closed as completed. Its "assigned users" half
   describes the organisation mechanism [issue-1371](../records/issue-1371.md) removed and no longer exists
-- Issue [#1519] moves creating a BiteTrail into the consumer app, under `RD-UR-4`
-- Issue [#1615] decides whether a BiteTrail curator is a role or a persona, which is this page's
-  actor. Open
+- Issue [#1519] moves creating a BiteTrail into the consumer app and removes this surface, under `RD-UR-4`
+- Issue [#1615] decides whether a BiteTrail curator is a role or a persona. Open
 
 ## Related Domains
 

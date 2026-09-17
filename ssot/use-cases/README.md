@@ -33,6 +33,7 @@ Part of the [SSOT index](../README.md).
 - [UC - Configure Restaurant Floor Plans And Tables](uc-configure-restaurant-floor-plans-and-tables.md)
 - [UC - Manage Tables During Service](uc-manage-tables-during-service.md)
 - [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md)
+- [UC - Generate Initial Menu From Bite Evidence](uc-generate-initial-menu-from-bite-evidence.md)
 
 ## Next to implement
 

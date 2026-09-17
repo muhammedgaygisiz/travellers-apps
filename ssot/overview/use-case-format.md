@@ -500,7 +500,7 @@ X5 SYS <action>
 | `UC-ABG` | Add BiteTrail Gamification                             | [UC - Add BiteTrail Gamification](../use-cases/uc-add-bitetrail-gamification.md)                                                         |
 | `UC-DIS` | Dismiss Restaurant Candidate                           | [UC - Dismiss Restaurant Candidate](../use-cases/uc-dismiss-restaurant-candidate.md)                                                     |
 | `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | [UC - Resolve Candidate Against An Existing Restaurant](../use-cases/uc-resolve-candidate-against-an-existing-restaurant.md)             |
-| `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                                                                                                     |
+| `UC-GIM` | Generate Initial Menu From Bite Evidence               | [UC - Generate Initial Menu From Bite Evidence](../use-cases/uc-generate-initial-menu-from-bite-evidence.md)                             |
 | `UC-ARB` | Assign Bites To Restaurant                             | none                                                                                                                                     |
 
 Codes whose `Page` cell reads `none` have no page yet. They are referenced by `UC-VRC`

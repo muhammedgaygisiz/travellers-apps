@@ -36,7 +36,7 @@ content is generated, change the generator.
 | Script                                    | `npm run`                                  | Does                                                                     |
 | ----------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------ |
 | `check-ssot.mjs`                          | `check:ssot`                               | Structural checks for the SSOT — see below. Runs in CI in the `lint` job |
-| `assert-firestore-indexes-deployed.mjs`   | `firestore:assert-indexes-deployed`        | Fails when a Firestore index or exemption is not deployed                |
+| `assert-firestore-indexes-ready.mjs`      | `firestore:assert-indexes-ready`           | Waits for every declared Firestore index and exemption to reach `READY`  |
 | `loki.mjs`                                | `loki:test`, `loki:update`, `loki:approve` | Visual regression, wrapping `oblador/loki` directly                      |
 | `generate-geotagged-fixture.mjs`          | —                                          | Regenerates the geotagged e2e image fixture                              |
 | `set-functions-deploy-service-account.sh` | —                                          | Provisions the service account the `deploy-functions` job uses           |

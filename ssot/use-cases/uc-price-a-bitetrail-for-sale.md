@@ -5,28 +5,18 @@
 **Level:** L0.
 
 Mostly delivered, and what is left is not packaging. Issue [#266] shipped the marketplace
-surfaces this page was written for - the business dashboard listing a creator's own BiteTrails,
-free BiteTrails reaching the Market Place, the sold counter derived from each trail's `sells`
-subcollection, and the tap from a listing to the creator's profile through
-`onGoToProfileClick(ownerId)` - and it is closed as completed. Those surfaces are owned
-elsewhere: the dashboard by [UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md), and the
-listing, the counter and the profile link by [UC - Discover BiteTrails In The Marketplace](uc-discover-bitetrails-in-the-marketplace.md).
-One clause of the old flow described a mechanism that no longer exists - assigning users to a
-BiteTrail read the `organisationId` field on user documents, which nothing ever wrote and which
-[issue-1371](../records/issue-1371.md) removed together with the organisation dashboard built around it.
-
-What remains for this page is narrower than its old name suggested. Setting a price is built
-and belongs to the create form - see [UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md),
-where `price` and `currency` are required fields defaulted to `0` and `EUR` - and there is no
-publish step anywhere: a BiteTrail is live the moment it is created, and the only draft-and-
-publish cycle in the product is the floor plan's. What is left is what has to be true before a
-priced trail can actually sell: the bands a price must fall within, what the creator is shown
-about their share, and the payout gate. None of that is built. Issue [#1125] owns it, as stage 3
-of the monetization umbrella [#1121].
+surfaces this page was written for - the business dashboard listing a creator's own
+BiteTrails, free BiteTrails reaching the Market Place, the sold counter derived from each
+trail's `sells` subcollection, and the tap from a listing to the creator's profile - and
+those surfaces are now owned by
+[UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md) and
+[UC - Discover BiteTrails In The Marketplace](uc-discover-bitetrails-in-the-marketplace.md). Setting a price is built too, in the
+create form, and there is no publish step anywhere. Nothing this page owns is built; issue
+[#1125] owns it, as stage 3 of the monetization umbrella [#1121].
 
 ## Goal
 
-Creators and business users should be able to package Bites into credible marketplace offerings.
+Creators and Restaurant Owners should be able to package Bites into credible marketplace offerings.
 
 This page owns the step between having a priced BiteTrail and having one that can be sold: the
 bands a price has to fall within, what the creator is shown about their share before they

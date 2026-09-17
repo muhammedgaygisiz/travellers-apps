@@ -98,13 +98,14 @@ the write is authorised by ownership alone rather than by ownership _and_ the `b
 so an account whose role was revoked while it still held a restaurant keeps write access
 through the API. [#1539] removes that state at the source.
 
-³ `RD-UR-4`: publishing moves to the consumer app behind `authGuard` only, so it becomes a
+³ `RD-UR-4`, not yet final ([#1615]): publishing moves to the consumer app behind `authGuard` only, so it becomes a
 Bite Creator capability and the Business App route is retired. Implementation is issue
 [#1519], sequenced behind content reporting - see footnote ⁵. `RD-UR-5` covers launch content
 without code.
 
 ⁴ Set when the creator picks a verified nearby Restaurant, on create **and** on edit.
-This makes the Bite Creator one of three writers of that field; see
+This puts the Bite Creator behind two of the four writers of that field, the create and
+the edit path; see
 [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md), rule `R-8`.
 
 ⁵ `RD-UR-7` fixes the required set and classes it `[MVP]`. Bite Creator carrying no claim
@@ -150,7 +151,7 @@ either ruleset ([#1567]). The detail is owned by [Current State - Known Issues](
 | Privacy-conscious participant | A settings choice (`PublicUser.public`), not a permission                                                                                                                                                                                                                                   |
 | **Public / Private Profile**  | The same visibility choice, not a capability                                                                                                                                                                                                                                                |
 | **BiteTribe Pro**             | An entitlement on `PublicUser.subscriptionTier`: `0` = Free, `>= 1` = Pro. Orthogonal to every role. No purchase path exists. See [Subscription](../domain/subscription.md)                                                                                                                 |
-| **BiteTrail Creator**         | An activity of the _Food curator or vlogger_ persona, not a permission. Publishing a BiteTrail becomes a Bite Creator capability under `RD-UR-4`, tracked by issue [#1519]; the proposed `curator` claim is retired                                                                         |
+| **BiteTrail Creator**         | An activity of the _Food curator or vlogger_ persona, not a permission. Publishing a BiteTrail becomes a Bite Creator capability under `RD-UR-4`, tracked by issue [#1519]; the proposed `curator` claim is retired. `RD-UR-4` is not final; issue [#1615] settles it                       |
 | **Moderator**                 | Does not exist. There is no moderation role: content reports are acted on by the Operator under `RD-UR-7`. Stated here rather than in [Glossary](glossary.md), which carries the terms the product _has_                                                                                    |
 | **Table Guest**               | An **anonymous Firebase Auth session**, not a role: it carries no claim, nothing grants or revokes it, and `createUserOnAuthCreate` skips it so it leaves no `/users` document. It is an authentication state, and the table screens are the only place that mints one. See the table below |
 | **Unauthenticated visitor**   | Reaches the open routes and nothing else: the privacy policy, the account-deletion notice, support, a scanned table code and the order screen behind it, and a published menu                                                                                                               |
@@ -339,3 +340,4 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
 [#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
+[#1615]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1615

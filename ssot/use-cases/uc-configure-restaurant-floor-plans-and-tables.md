@@ -4,78 +4,11 @@
 
 **Level:** L1
 
-Implemented. Specified through issue [#1070] as stage 1 of issue [#735], and
-every step of the planned flow below is now built, accessible (issue [#1089])
-and covered (issue [#1090]).
-
-An owner can reach the editor, build the room and describe its tables:
-`restaurant/:restaurantId/floor-plan` in the business app creates, renames,
-resizes and deletes rooms, and draws one of them on a millimetre-accurate canvas
-with a grid, pan, zoom and a scale reference (issue [#1082]). Issue [#1083] put
-the furniture in it: a palette of nine objects, drag or keyboard placement, move,
-resize, rotate, multi-select, duplicate, delete, snapping to the grid and to
-adjacent edges, and an undo history over all of it.
-
-Issue [#1084] made a table a business entity rather than a rectangle. The owner
-sets its public number, its seating capacity, its shape and whether it is in
-service, and the number is unique across the whole restaurant rather than the
-open room: the editor reads every table of the restaurant, refuses a label
-another one already holds and names the room that holds it. A selection can be
-numbered consecutively in one action, and the plan draws each table's number
-with its capacity under it.
-
-Issue [#1085] made the plan a restaurant rather than a room. The switcher orders
-the rooms, groups them by an optional floor name, and shows what each one holds;
-a table moves to another room from its own card and keeps its number and its QR
-token when it goes; and the plan is summarised for the restaurant as a whole.
-
-Issue [#1086] built the QR tokens, backend only. A table gets an opaque,
-non-guessable code that resolves in one public read to its restaurant, room and
-number; rotating one supersedes the code it replaces instead of erasing it, and
-deleting a table revokes its code rather than leaving a sticker that resolves to
-nothing.
-
-Issue [#1087] put them on paper, and is the first caller of those callables.
-`restaurant/:restaurantId/floor-plan/qr-codes` asks for the tokens as it loads,
-draws one code per table in service, and lays them out as the A4 pages they
-will print as - twelve stickers to a sheet, or one large tent card per page.
-The owner filters by room and ticks
-individual tables, which is how a single replacement is reprinted; nothing on
-the page rotates, so every other table keeps the code already stuck to it. A
-print stylesheet takes the app's header, its controls and Ionic's own scroll
-container out of the way, so what leaves the printer is black codes on white
-paper and the three lines of text beside each one.
-
-Issue [#1088] made the plan two states. Nothing an owner does in the editor is
-live any more: every edit goes into a draft that is stored as they work, and
-publishing is the one deliberate action that makes it the room staff and a
-scanned code read. It is refused while the plan carries a blocking error, each
-finding names its table and jumps to it, and discarding returns the room to the
-published plan. Staff got their read of that published plan in the same issue,
-scoped to the one restaurant they work at.
-
-Issue [#1090] locked the behaviour down before stage 2 builds on it. The
-geometry, the table rules, the validation and the draft/publish state machine
-are unit-covered as the pure functions they were written as, every reusable
-editor component has its Storybook states including the QR code renderer's two
-print sizes, and two Playwright journeys run the editor as an owner does:
-`floor-plan-editor.spec.ts` builds a room, places and numbers two tables,
-publishes and reloads, and `table-qr-codes.spec.ts` prints their codes. Both
-assert the stored room, table and `/tableTokens` documents rather than a
-picture of the editor, because a plan that renders correctly and stores nothing
-is the failure that matters here. What stays on the unit tests is listed in
-[Current State - E2E Coverage](../current-state/e2e-coverage.md).
-
-The page a scan lands on is still specification: [#1087] fixed the address at
-`https://bitetribe.app/t/{token}` because a sticker cannot be corrected
-afterwards, and issue [#1072] is what answers it.
-
-No longer blocked. [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md) was the prerequisite,
-because floor-plan data is restaurant-scoped and could not be trusted while the
-Firestore rules allowed every authenticated user to write every document; issue
-[#1078] replaced those rules and issue [#1081] scoped the room and table
-collections to the account holding the restaurant. Those rules are deployed by
-hand, so production is only bound once
+Implemented. Specified through issue [#1070] as stage 1 of issue [#735]; every step of
+`Flow` is built, accessible (issue [#1089]) and covered (issue [#1090]), and
+`Related GitHub Scope` lists what each child issue delivered. The room and table
+collections are scoped to the account holding the restaurant ([#1078], [#1081]) by rules
+that are deployed by hand, so production is bound only once
 `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
 
 ## Goal
@@ -145,6 +78,7 @@ neither ask invalidates what the other printed.
 - A code outlives the table's arrangement and not the table. It survives a move to another room, a rename and being taken out of service, because a sticker already on a table cannot be reprinted every time the plan changes; it is superseded when the owner deliberately replaces it, and revoked when the table is deleted. Both leave a code that still resolves, to "this was replaced" and "this is no longer valid" rather than to nothing - a scan that finds no document at all would be the answer to a code BiteTribe never issued, which is a different thing to tell a guest.
 - Asking for codes twice gives the same codes. Publishing a plan and opening the sheet both ask, and a second ask that minted new tokens would invalidate every sheet already printed. That is what lets the sheet page ask as it loads rather than behind a button an owner has to be told is safe to press.
 - A printed code is a physical object and is designed as one. A phone resolves a QR code from roughly ten times its own width, so the sticker on the table is 38 mm and read at arm's length, while the tent card standing on it is 80 mm and read from a seated 600 to 700 mm. One size for both would be too small to read across the table or too large to put twelve on a sheet.
+- A printed code's address is `https://bitetribe.app/t/{token}`, fixed by issue [#1087] because a sticker cannot be corrected afterwards.
 - A person holding a printed code can tell which table it is without scanning it, and the layout says which fact matters most: the table number is the largest thing on the sheet, the room and the restaurant are under it, and the token itself is in small monospace for the support call where the camera is what is broken.
 - What goes on paper is what is on screen, down to the page. The preview draws real A4 pages at 210 mm by 297 mm with the print margin as padding, splits the selection across them, and hands the same boxes to the printer as the page breaks - so an owner feeding label paper knows it is two sheets before they load it, and the preview and the paper cannot disagree about where a page ends. `Ctrl`/`Cmd`+`P` gives exactly what the Print button gives, because there is one set of elements rather than two documents. The codes are drawn in literal black on white rather than in theme colours: this is the one surface in the app that must ignore dark mode, because a scanner needs the contrast and an inverted code scans as nothing.
 - A sheet is printed and thrown away; the plan outlives it. Which layout, which room and which tables are selected are viewport state stored nowhere, in the same way pan, zoom and the grid are.
@@ -193,9 +127,10 @@ Implemented:
 - `/restaurants/{restaurantId}/rooms/{roomId}`, `/restaurants/{restaurantId}/rooms/{roomId}/drafts/current`, `/restaurants/{restaurantId}/tables/{tableId}` and `/tableTokens/{token}`
 - `apps/bite-tribe-business-e2e/src/tests/floor-plan-editor.spec.ts` the build, publish and reload journey, and `.../table-qr-codes.spec.ts` the printable-sheet journey, both against the stored documents
 
-Still planned:
+Built since, and owned elsewhere:
 
-- The page a scanned code lands on, and the staff live view that reads the published plan
+- The page a scanned code lands on, in [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md) (issue [#1101])
+- The staff live view that reads the published plan, in [UC - Manage Tables During Service](uc-manage-tables-during-service.md) (issue [#1093])
 
 ## Related GitHub Scope
 
@@ -204,15 +139,15 @@ Still planned:
 - Issue [#1069] - Restaurant ownership, claiming and authorization, prerequisite, delivered
 - Issue [#1080] - the shared model and the coordinate system, delivered
 - Issue [#1081] - persistence, rules and optimistic concurrency, delivered
-- Issue [#1082] - the editor canvas, rooms and the grid, delivered
-- Issue [#1083] - placing, moving, resizing and rotating floor-plan objects, delivered
+- Issue [#1082] - the editor canvas, rooms and the grid: creating, renaming, resizing and deleting rooms, with pan, zoom and a scale reference, delivered
+- Issue [#1083] - placing, moving, resizing and rotating floor-plan objects: a palette of nine objects, drag or keyboard placement, multi-select, duplicate, snapping to the grid and to adjacent edges, and undo, delivered
 - Issue [#1084] - table properties, label uniqueness, numbering and capacity, delivered
 - Issue [#1085] - multiple rooms and floors, room order, cross-room table moves, capacity summaries and the desktop-locked layout, delivered
 - Issue [#1086] - opaque table QR tokens, their lifecycle and the rules that keep them backend-owned, delivered as backend only
-- Issue [#1087] - printable table QR sheets, the first caller of those callables, delivered
+- Issue [#1087] - printable table QR sheets, the first caller of those callables: twelve stickers to an A4 sheet or one tent card per page, filtered by room and by table, delivered
 - Issue [#1088] - the draft/published split, the autosaved draft, the publish validation and the staff read of the published plan, delivered
 - Issue [#1089] - accessibility of the editor, delivered; its responsive half was moved to issue [#1093] rather than deferred
-- Issue [#1090] - the unit, Storybook and Playwright coverage that closes the epic, delivered
+- Issue [#1090] - the unit, Storybook and Playwright coverage that closes the epic, delivered; what stays on the unit tests is listed in [Current State - E2E Coverage](../current-state/e2e-coverage.md)
 - Issue [#1093] - the staff live view, which owns the small-screen and touch rendering of a published plan
 
 ## Related Domains
@@ -224,7 +159,6 @@ Still planned:
 [#735]: https://github.com/muhammedgaygisiz/travellers-apps/issues/735
 [#1069]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1069
 [#1070]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1070
-[#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
 [#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
 [#1080]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1080
 [#1081]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1081
@@ -238,3 +172,4 @@ Still planned:
 [#1089]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1089
 [#1090]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1090
 [#1093]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1093
+[#1101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1101

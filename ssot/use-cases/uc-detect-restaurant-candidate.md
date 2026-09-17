@@ -9,12 +9,9 @@ creation, and an Operator-initiated callable `clusterRestaurantCandidateForBite`
 `admin`-gated since issue [#1472] and surfaced in `bite-tribe-admin` since issue [#1473].
 Both converge on one shared clustering kernel; per `RD-VRC-8` this Use Case owns both, and
 per `RD-DRC-18` they are one page rather than two. `RD-DRC-19` records that the automatic
-producer is a mechanism rather than an entry, because it has no actor.
-
-The kernel is complete and the collection's invariants are not. Nothing records which
-producer created a Candidate, nothing guards a write onto a Candidate that has already been
-decided, and nothing re-evaluates a cluster after the Bites underneath it change. Work in
-flight: epic [#1495] for verification's half, epic [#1523] for this page's own.
+producer is a mechanism rather than an entry, because it has no actor. The kernel is
+complete and the collection's invariants are not; the table below names what is missing.
+Work in flight: epic [#1495] for verification's half, epic [#1523] for this page's own.
 
 | Aspect                                                      | State                                                                                                                                                                                                                                      |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

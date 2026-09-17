@@ -3,9 +3,17 @@
 ## Status
 
 **Level:** L0.
-Implemented for a single owner. The roles exist: [#1469] delivered `admin` and `business` as Firebase Auth custom claims and [#1472] guarded every operator callable, both driven by the admin app rather than by this use case. The shared model carries the ownership fields as of [#1074], and **an operator writes them** as of [#1077]: `assignRestaurantOwner` and `revokeRestaurantOwner`, behind a surface in the admin app. **The rules enforce it** as of [#1078]: a Restaurant and its Menu are writable by the assigned account and by an Operator and by nobody else, and `ownerUserId`, `claimStatus`, `claimedAt` and `claimedAtTimestamp` are writable by no client at all - the forgery demonstrated against the emulator on 8 September 2026 is now a deny test. **The business app reads it** as of [#1079]: the dashboard lists only the restaurants assigned to the caller, and the two routes that edit one refuse a restaurant assigned elsewhere by direct URL. **The business account manages its own staff** as of [#1537]: `addRestaurantStaff` and `removeRestaurantStaff` write the `staff` claim and a `/restaurantStaff/{uid}` record together, authorised by `ownerUserId` for a restaurant owner and by `RD-UR-6` for an operator. What that role may then _do_ is still nothing, deliberately - [#1537] scoped itself to the grant. The rules deploy by hand: they bind production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run. Specified through issue [#1069] as stage 0 of issue [#735].
 
-This is the blocking prerequisite for every other stage of the Restaurant Interaction Platform.
+Implemented for a single owner. Specified through issue [#1069] as stage 0 of issue [#735].
+The roles are Firebase Auth custom claims ([#1469], [#1472]), the ownership fields are on the
+shared model ([#1074]), and an operator writes them from the admin app ([#1077]). **The rules
+enforce it** ([#1078]): a Restaurant and its Menu are writable by the assigned account and by
+an Operator only, and the ownership fields by no client at all - the forgery demonstrated
+against the emulator on 8 September 2026 is now a deny test. The business app lists and opens
+only the restaurants assigned to the caller ([#1079]), and the business account manages its
+own staff ([#1537]); what that role may then _do_ is still nothing, deliberately - [#1537]
+scoped itself to the grant. The rules deploy by hand: they bind production only once
+`npx nx firebase-deploy-rules bite-tribe-firebase` has run.
 
 ## Goal
 

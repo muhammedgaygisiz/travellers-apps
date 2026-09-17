@@ -6,9 +6,9 @@
 
 Implemented and in use. The backend callable `verifyRestaurantCandidate` is
 `admin`-gated since issue [#1472], and the Operator surface moved into
-`bite-tribe-admin` with issue [#1473]. Four referenced Use Cases this flow depends on
-have no implementation — dismissal, duplicate resolution, owner assignment, and a
-standalone writer for Bite assignment — and each is carried as a rule marked
+`bite-tribe-admin` with issue [#1473]. Three referenced Use Cases this flow depends on
+have no implementation — dismissal, duplicate resolution, and a standalone writer for Bite
+assignment — and each is carried as a rule marked
 _Intended, not met_ rather than as an agreed step that quietly does not run. Work in
 flight: epic [#1495].
 
@@ -37,7 +37,7 @@ works, so that a defect is locatable in exactly one document.
 
 ## Actors
 
-The authorization vocabulary is three roles, defined in [User Roles](../product/user-roles.md). Only one of
+The authorization vocabulary is four roles, defined in [User Roles](../product/user-roles.md). Only one of
 them acts here.
 
 - **BiteTribe Operator** (short: _Operator_), holding the `admin` claim. The only
@@ -47,9 +47,9 @@ them acts here.
   them.
 - **Bite Creator** — not an actor here: not notified, holding no rights, and seeing no
   state change beyond their Bite appearing under a Restaurant (`R-12`). Named because
-  it is one of the four writers of `bite.restaurantId` (`R-8`).
+  it is behind two of the four writers of `bite.restaurantId`, the create and the edit path (`R-8`).
 
-**BiteTrail Creator is not a role** and has no part here. `RD-UR-4` retired it; it is
+**BiteTrail Creator is not a role** and has no part here. `RD-UR-4` retires it, not yet finally ([#1615]); it is
 listed under _Not roles_ in [User Roles](../product/user-roles.md).
 
 **The role hierarchy is decided and not implemented.** `RD-UR-6` places the Operator
@@ -645,3 +645,4 @@ discovered in review.
 [#1511]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1511
 [#1521]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1521
 [#1522]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1522
+[#1615]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1615

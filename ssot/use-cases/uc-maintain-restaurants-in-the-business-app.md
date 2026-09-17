@@ -7,19 +7,17 @@
 Supported today. A business account signs in, sees the map and the two surfaces the dashboard
 offers, and edits the Restaurants assigned to it - metadata, opening hours, social links,
 address, and the menu seeded from its Bites. It sees only what it owns, and the edit routes
-refuse anything else by direct URL. Creating a Restaurant is not done here; that left for the
-admin app with issue [#1473].
+refuse anything else by direct URL. Creating a Restaurant is not done here; that moved to the admin app with issue [#1473].
 
 ## Goal
 
-Business users can maintain Restaurant and menu context that improves Bite discovery.
+Restaurant Owners can maintain Restaurant and menu context that improves Bite discovery.
 
 This page owns what an account may do to a Restaurant it already holds, including taking a
-dish off today's menu - `MenuItem.isAvailable` is written here and nowhere else. How an
-unavailable dish then reads to a diner is [UC - View Restaurant Menus](uc-view-restaurant-menus.md). Being given one is
-[UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md), creating one and verifying a candidate into one is
-[UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md), and what a menu looks like to a diner is
-[UC - View Restaurant Menus](uc-view-restaurant-menus.md).
+dish off today's menu - `MenuItem.isAvailable` is written here and nowhere else. How a menu, an unavailable dish included, then reads to a diner is
+[UC - View Restaurant Menus](uc-view-restaurant-menus.md). Being given a Restaurant is
+[UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md), and creating one, by verifying a candidate into it,
+is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
 
 ## Actors
 
@@ -28,16 +26,16 @@ unavailable dish then reads to a diner is [UC - View Restaurant Menus](uc-view-r
 
 ## Flow
 
-- The business user opens the dashboard, which shows the map and one entry per
+- The Restaurant Owner opens the dashboard, which shows the map and one entry per
   surface: **BiteTrails** and **Restaurants**.
-- The business user opens Restaurants and edits one of them.
-- The business user maintains menu and Restaurant metadata.
+- The Restaurant Owner opens Restaurants and edits one of them.
+- The Restaurant Owner maintains menu and Restaurant metadata.
 - Both the map and the list hold **only the Restaurants assigned to the
   signed-in account** since issue [#1079]. An account that holds none sees an
   empty state naming BiteTribe support, not an empty list: assignment is
   operator work in the admin app, and there is nothing the account can do here
   to change it.
-- The initial Menu saves the business user the first round of typing: each distinct Bite dish name becomes one item, priced with the average of the prices users reported, in a single `Bites` category. The business user then corrects, renames, and structures it in the edit-menu page.
+- The initial Menu saves the Restaurant Owner the first round of typing: each distinct Bite dish name becomes one item, priced with the average of the prices users reported, in a single `Bites` category. The Restaurant Owner then corrects, renames, and structures it in the edit-menu page.
 
 ### How The Restaurant Page Is Laid Out
 

@@ -24,14 +24,14 @@ to [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-q
 ## Actors
 
 - **Bite Creator** - acts: opens a menu from a restaurant, reads its categories and prices,
-  and creates a Bite from an item. The business user named in `Flow` acts in the business
-  app, not on this page.
+  and creates a Bite from an item.
+- **Restaurant Owner** - not an actor here, and named because it maintains the menu this page
+  reads; see `Status`.
 
 ## Flow
 
 - User opens a restaurant menu from a Bite.
 - User can create a Bite from a menu item, which opens the Bite form prefilled with that Restaurant and dish. The prefilled draft is scoped to that one creation session; see [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md).
-- Business users can maintain menus from the business app.
 - An item the kitchen is not serving reads as unavailable. `MenuItem.isAvailable` is absent-means-available, read through `isMenuItemAvailable`, and written by the business menu editor and nowhere else ([UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md)). Since issue [#923] a dish carrying `false` renders dimmed, with its price struck through and a translated `Not available` beside it, and the button that would create a Bite from it is disabled. The backend reads the same flag, so [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md) refuses to order such a dish and its add-to-cart button is disabled here too. Nothing in production sets the flag yet, because the business app has not launched.
 
 ## Menu Page State Contract

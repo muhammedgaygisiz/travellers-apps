@@ -17,7 +17,7 @@ flight: epic [#1495].
 | Backend callable `verifyRestaurantCandidate`           | Implemented, `admin`-gated                                                                                 |
 | Operator surface (Candidate list, new-Restaurant form) | Implemented in `bite-tribe-admin`                                                                          |
 | `UC-GIM` — Initial Menu                                | Implemented, reachable only inside verification                                                            |
-| `UC-ARB` — assign Bites                                | Reachable only inside verification; no standalone writer, see `R-8`                                        |
+| `UC-MBR` — manage a Bite's Restaurant assignment       | Reachable only inside verification; no standalone writer, see `R-8`                                        |
 | `UC-DIS` — dismiss                                     | Not implemented, see `R-13`. Owned by [#1501], [#1508] and [#1502]                                         |
 | `UC-MRC` — resolve a duplicate                         | Not implemented, see `R-14`                                                                                |
 | `UC-ARO` — assign owner                                | Implemented ([#1077]) as a separate Operator action, **outside this flow**; see `R-15`                     |
@@ -91,7 +91,7 @@ The Candidate also carries `skippedBiteIds` once verified, naming the evidence B
 
 `/restaurants/{restaurantId}`, `/menus/{menuId}` and `bite.restaurantId` are written by
 this flow but are not its aggregate: they are the effects of leaving the Candidate
-`verified`, and their own lifecycles belong to `UC-MRB`, `UC-GIM` and `UC-ARB`.
+`verified`, and their own lifecycles belong to `UC-MRB`, `UC-GIM` and `UC-MBR`.
 
 ## Scope
 
@@ -99,7 +99,7 @@ In scope: one Operator, one `pending` Candidate, one decision — verify. Correc
 proposed Restaurant data, and the transactional creation of the Restaurant.
 
 `RD-VRC-6` sets that boundary: `V19` and `V23` stay inside the verification
-transaction but are _referenced_ steps, owned by `UC-GIM` and `UC-ARB`; dismissal and
+transaction but are _referenced_ steps, owned by `UC-GIM` and `UC-MBR`; dismissal and
 duplicate resolution are referenced Use Cases with their own terminal states; owner
 assignment is **not** part of this Use Case at all — it is a separate Operator action
 afterwards (`UC-ARO`, `R-15`).
@@ -121,11 +121,11 @@ Out of scope. Each of these is its own Use Case, referenced from the step it bel
 | `UC-MRC` | [Resolve Candidate Against An Existing Restaurant](uc-resolve-candidate-against-an-existing-restaurant.md) | `V4b`          | Alternative outcome                                                                                                                                                |
 | `UC-ARO` | [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md)                                          | `G7`, `R-15`   | Downstream — a separate Operator action after `END-V4`, not a step here                                                                                            |
 | `UC-GIM` | [Generate Initial Menu From Bite Evidence](uc-generate-initial-menu-from-bite-evidence.md)                 | `V19`          | Invoked step                                                                                                                                                       |
-| `UC-ARB` | Assign Bites To Restaurant                                                                                 | `V23`          | Invoked step                                                                                                                                                       |
+| `UC-MBR` | Manage A Bite's Restaurant Assignment                                                                      | `V23`          | Invoked step                                                                                                                                                       |
 | `UC-MRB` | [UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md)            | After `END-V4` | Downstream                                                                                                                                                         |
 | `UC-OPS` | [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md)                        | `V1`           | Enclosing: sign-in and the role gate                                                                                                                               |
 
-Of the referenced Use Cases, **`UC-ARB` does not yet exist as a page, and `UC-DIS`,
+Of the referenced Use Cases, **`UC-MBR` does not yet exist as a page, and `UC-DIS`,
 `UC-MRC` and `UC-GIM` exist only at L0.** They are named here so that each rule this flow
 depends on has an owner, and so that writing them is a visible gap rather than an
 omission.
@@ -174,7 +174,7 @@ surfaces that render a Restaurant and its Menu consume. None of that can be answ
 from the other side today: `UC-OPS`, `UC-MRB`, `UC-ARO`, `UC-DIS`, `UC-MRC` and `UC-GIM`
 are L0 or L1 pages carrying neither numbered preconditions nor numbered guarantees, so
 `P3`, the `V4a` reference, the `V4b` reference and the `V19` reference have an owner that
-owes nothing in writing; and `UC-ARB` has no page at all, so the one remaining `REF:`
+owes nothing in writing; and `UC-MBR` has no page at all, so the one remaining `REF:`
 line that names it states a guarantee no page owns.
 
 Under `AF-34` these seven counterparties are **unanswered**, not conformance failures:
@@ -185,7 +185,7 @@ this page has stated its side, and the other side is theirs to state. Each is a 
 
 `G1` and `G3` hold at `END-V4` and are not durable afterwards. `G1` is falsified by a
 second verification of the same Candidate, which `R-18` closes. `G3` is falsified by a
-later verification repointing a shared evidence Bite, which `V23` delegates to `UC-ARB`
+later verification repointing a shared evidence Bite, which `V23` delegates to `UC-MBR`
 and which nothing closes today. Both are recorded as `E9` and `E7`.
 
 ## Actogram
@@ -410,7 +410,7 @@ V23  SYS  links the unassigned evidence Bites to the Restaurant
           └─→ DB   bite.restaurantId = restaurantId, for every surviving Bite that
                    carries none
           └─→ DB   skippedBiteIds on the Candidate, naming every Bite left untouched
-          REF:UC-ARB   must define assigning a Bite to a Restaurant outside this flow;
+          REF:UC-MBR   must define managing a Bite's Restaurant assignment outside this flow;
                        the conflict behaviour inside it is decided by R-20
           INV:R-8
           INV:R-20 is VIOLATED here: the write is unconditional, so a surviving Bite that

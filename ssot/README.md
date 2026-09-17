@@ -90,6 +90,7 @@ repository, and [Traceability Map](overview/traceability-map.md) to find the pag
 - [UC - Manage Tables During Service](use-cases/uc-manage-tables-during-service.md)
 - [UC - Order At The Table Through A QR Code](use-cases/uc-order-at-the-table-through-a-qr-code.md)
 - [UC - Generate Initial Menu From Bite Evidence](use-cases/uc-generate-initial-menu-from-bite-evidence.md)
+- [UC - Manage A Bite's Restaurant Assignment](use-cases/uc-manage-a-bites-restaurant-assignment.md)
 
 ### Next to implement
 

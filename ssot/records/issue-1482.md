@@ -35,7 +35,7 @@ Written before the [Closing Report](../overview/github-issue-format.md#closing-r
 
 ## Outcome
 
-- `ssot/assets/characters/01-viking.svg` through `07-swiss.svg`: the seven traced characters, layered flat-colour paths on a transparent 1254x1254 canvas, 21-79 KB each.
+- [`ssot/assets/characters/01-viking.svg`](../assets/characters/01-viking.svg) through [`07-swiss.svg`](../assets/characters/07-swiss.svg): the seven traced characters, layered flat-colour paths on a transparent 1254x1254 canvas, 21-79 KB each.
 - `apps/storybook-host/.storybook/main.ts`: a third `staticDirs` entry maps `ssot/assets/characters/` to `/assets/characters/`, with the reason the artwork is not in app assets.
 - `apps/storybook-host/src/app/characters/characters.stories.ts`: `Brand/Characters`, rendering all eight with their headwear and the palette note.
 - `.loki/reference/chrome_laptop_Brand_Characters_Tribe.png` and its iPhone 7 pair: the two new visual references.

@@ -139,7 +139,7 @@ the shared-link function, and it serves its own title, description and image.
 `apps/bite-tribe/src/assets/social/og-image.jpg`, `1200x630`, about 138 KB.
 
 It is the Play feature graphic from
-`ssot/assets/store-listing/feature-graphic/feature-graphic.png` letterboxed to
+[`ssot/assets/store-listing/feature-graphic/feature-graphic.png`](../assets/store-listing/feature-graphic/feature-graphic.png) letterboxed to
 the Open Graph ratio. The feature graphic is `1024x500` and Open Graph wants
 `1200x630`, so it is scaled to the full width and padded by 22 pixels top and
 bottom on `#1a1c22`, the dark background token from `theme/variables.scss`. The

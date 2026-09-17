@@ -172,12 +172,12 @@ The same on every platform, so the accounts read as one brand. All of it is
 existing approved copy from [Implementation - Store Listing Assets](store-listing-assets.md); none of it
 is new marketing writing.
 
-| Field        | Value                                 |
-| ------------ | ------------------------------------- |
-| Display name | `BiteTribe`                           |
-| Website      | `https://bitetribe.app`               |
-| Category     | Food & Drink, where the platform asks |
-| Avatar       | `ssot/assets/social/avatar.png`       |
+| Field        | Value                                                          |
+| ------------ | -------------------------------------------------------------- |
+| Display name | `BiteTribe`                                                    |
+| Website      | `https://bitetribe.app`                                        |
+| Category     | Food & Drink, where the platform asks                          |
+| Avatar       | [`ssot/assets/social/avatar.png`](../assets/social/avatar.png) |
 
 **Leave the link title blank** where a platform offers one, as Instagram and
 Threads both do. YouTube requires one, so it gets `bitetribe.app` as the title -
@@ -452,7 +452,7 @@ consent reaches it.
 
 ### The Avatar
 
-`ssot/assets/social/avatar.png`, `1024x1024`, about 52 KB.
+[`ssot/assets/social/avatar.png`](../assets/social/avatar.png), `1024x1024`, about 52 KB.
 
 The mascot from `apps/bite-tribe/src/assets/icons/logo.svg` at 80% of the canvas
 height, centred on `#1A1C22` - the same dark ground as the feature graphic and
@@ -493,7 +493,7 @@ the two places on Instagram that does link; story link stickers are the other.
 
 ### The Image
 
-`ssot/assets/social/launch-post.png`, `1080x1350` (4:5, Instagram's tallest feed
+[`ssot/assets/social/launch-post.png`](../assets/social/launch-post.png), `1080x1350` (4:5, Instagram's tallest feed
 ratio), on the same `#1A1C22` ground as [The Avatar](#the-avatar).
 
 The logo stands in front, and the seven characters from

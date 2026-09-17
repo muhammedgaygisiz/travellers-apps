@@ -499,7 +499,7 @@ X5 SYS <action>
 | `UC-OTT` | Order At The Table Through A QR Code                   | [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md)                                     |
 | `UC-ABG` | Add BiteTrail Gamification                             | [UC - Add BiteTrail Gamification](../use-cases/uc-add-bitetrail-gamification.md)                                                         |
 | `UC-DIS` | Dismiss Restaurant Candidate                           | [UC - Dismiss Restaurant Candidate](../use-cases/uc-dismiss-restaurant-candidate.md)                                                     |
-| `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | none                                                                                                                                     |
+| `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | [UC - Resolve Candidate Against An Existing Restaurant](../use-cases/uc-resolve-candidate-against-an-existing-restaurant.md)             |
 | `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                                                                                                     |
 | `UC-ARB` | Assign Bites To Restaurant                             | none                                                                                                                                     |
 

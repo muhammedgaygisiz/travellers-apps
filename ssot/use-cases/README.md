@@ -47,3 +47,4 @@ Part of the [SSOT index](../README.md).
 - [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md)
 - [UC - Earn From A Paid BiteTrail](uc-earn-from-a-paid-bitetrail.md)
 - [UC - Dismiss Restaurant Candidate](uc-dismiss-restaurant-candidate.md)
+- [UC - Resolve Candidate Against An Existing Restaurant](uc-resolve-candidate-against-an-existing-restaurant.md)

@@ -46,13 +46,19 @@ tests
 +-- e2e -------------+-- report (pull requests only)
 +-- business-e2e ----+
 |
-+-- firestore-rules
++-- firestore-rules ----------- deploy-firestore-rules       (develop only)
 |
-+-- bite-tribe-build ----------- deploy-bite-tribe           (develop only)
-+-- bite-tribe-business-build -- deploy-bite-tribe-business  (develop only)
-+-- bite-tribe-admin-build ----- deploy-bite-tribe-admin     (develop only)
-+-- functions-build ------------ deploy-functions            (develop only)
++-- deploy-firestore-indexes --+                             (develop only)
+|                              |
++-- bite-tribe-build ----------|- deploy-bite-tribe          (develop only)
++-- bite-tribe-business-build -|- deploy-bite-tribe-business (develop only)
++-- bite-tribe-admin-build ----|- deploy-bite-tribe-admin    (develop only)
++-- functions-build -----------+- deploy-functions           (develop only)
 ```
+
+`deploy-functions` is the only job with two `needs`: `functions-build` for the
+artifact and `deploy-firestore-indexes` for the ordering. The three web deploys
+take their build only.
 
 The three web apps deploy through three independent build/deploy pairs to three
 hosting sites. They are not one job with three targets: a failure deploying one
@@ -68,36 +74,79 @@ someone remembered to run on a workstation - which meant a merged function could
 sit undeployed indefinitely, and the artifact came from whatever state that
 machine was in rather than from the commit CI verified.
 
-Three decisions shape that job, and none of them is the obvious one.
+Four decisions shape the backend deploys, and none of them is the obvious one.
+Two of them are no longer about `deploy-functions` at all: [issue #1567][#1567]
+gave the rules and the indexes jobs of their own, and what was a note about why
+a deploy was missing is now a note about how it is gated.
 
-**It has its own service account.** `FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS`,
-provisioned by `tools/set-functions-deploy-service-account.sh`, not the
-`FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE` the three hosting deploys share. A gen2
-deploy needs Cloud Run, Artifact Registry, Cloud Build, Eventarc, Cloud
-Scheduler and Secret Manager admin, and putting all of that on the credential
-that otherwise publishes static files makes one leaked secret worth far more.
-The script's role list is also where the reasoning for each role lives.
+**They share one service account.** `FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS`,
+provisioned by `tools/set-functions-deploy-service-account.sh`, is used by all
+three backend deploys and is not the `FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE` the
+three hosting deploys share. A gen2 deploy needs Cloud Run, Artifact Registry,
+Cloud Build, Eventarc, Cloud Scheduler and Secret Manager admin, and putting all
+of that on the credential that otherwise publishes static files makes one leaked
+secret worth far more. The rules and index deploys add `firebaserules.admin` and
+`datastore.indexAdmin` to it; the script's role list is where the reasoning for
+each role lives. The secret keeps its `_FUNCTIONS` name from when functions were
+the only backend deploy, because renaming it means the repository settings and
+every job at once.
 
-**Firestore rules are deployed by hand and no job deploys them.** `firestore-rules`
-runs the emulator suite over `apps/bite-tribe-firebase/firestore.rules` on every pull
-request, and stops there. A rules deploy takes effect the moment it lands and cannot be
-staged, so it stays a deliberate act with a verification pass behind it - see the rules
-section on [Architecture - Firebase](../architecture/firebase.md). The job installs the functions package as well as
-the workspace root: the suite needs `@firebase/rules-unit-testing` from the first and
-jest, ts-jest and the Firebase client SDK from the second.
+**Firestore and Storage rules deploy from `develop`, gated on their own test
+suite.** `firestore-rules` runs the emulator suite over
+`apps/bite-tribe-firebase/firestore.rules` on every pull request, and
+`deploy-firestore-rules` needs it, so a ruleset that fails the suite is never
+published. Both files go in one command, `--only firestore:rules,storage`. The
+test job installs the functions package as well as the workspace root: the suite
+needs `@firebase/rules-unit-testing` from the first and jest, ts-jest and the
+Firebase client SDK from the second.
 
-**Firestore indexes are still deployed by hand, and the job asserts it.**
-`firebase deploy --only functions` never touches them, and the Firestore API
-builds an index in the background while the CLI returns immediately, so folding
-the index deploy into this job would only look like it had solved the ordering.
-`npm run firestore:assert-indexes-deployed` instead compares
-`apps/bite-tribe-firebase/firestore.indexes.json` against what the project
-actually has and fails the deploy when something it declares is missing. It
-reads live state rather than the diff of the push, so re-running the job after
-the manual index deploy passes. The deploy account holds `datastore.viewer` and
-not `datastore.indexAdmin`: CI can check indexes and cannot deploy them.
-[Issue #1227][#1227]
-is the failure this prevents.
+The deploy was manual until [issue #1567][#1567], on the argument that a rules
+deploy takes effect the moment it lands and cannot be staged. It still cannot.
+What that argument does not survive is [issue #1078][#1078] - the rules change
+merged on 9 September 2026 went live only when someone ran the workstation
+command, and nothing in the repository, the pipeline or a pull request said so
+in between. An unstageable deploy is a reason to gate the deploy on a test, not
+a reason to leave production behind the tested file. The gate is the `needs`
+edge above; the rules section on
+[Architecture - Firebase](../architecture/firebase.md) carries the rollout and
+rollback story.
+
+**Firestore indexes deploy from `develop` too, in a job that then waits for the
+build.** `firebase deploy --only functions` never touches them, and the
+Firestore API builds an index in the background while the CLI returns
+immediately - so deploying an index is not the same as having one, and a
+function whose query needs one still in `CREATING` fails in production with
+`FAILED_PRECONDITION`. That is [issue #1227][#1227].
+
+`deploy-firestore-indexes` therefore does two things, and the second is the one
+that matters: it deploys the specification, then runs
+`npm run firestore:assert-indexes-ready`, which polls until every index and
+field override `apps/bite-tribe-firebase/firestore.indexes.json` declares is
+present and `READY`. `deploy-functions` needs that job, which is what enforces
+the ordering the manual process relied on someone remembering.
+
+The wait is a rewrite of the old preflight, not a rename of it. That version
+read deployed state through `firebase-tools`' `firestore:indexes` command, whose
+`makeIndexSpec` builds the shape of the specification file and drops `state` on
+the way, so it could not tell a finished index from one still building. Adding
+a deploy in front of a presence check would have made it pass instantly on
+exactly the index it exists to catch. `tools/assert-firestore-indexes-ready.mjs`
+reads the Firestore Admin API directly instead.
+
+Two details of that read are worth keeping, because the obvious guess is wrong
+on both. The Admin API reports `state` on composite indexes **and** on every
+index inside a field override, so exemptions are covered directly - it is
+`firebase firestore:indexes --pretty` that prints no build state for them, not
+the resource that lacks one. And a live composite index always carries a
+trailing `__name__` field that `firestore.indexes.json` never declares, because
+`firebase deploy` appends it to the committed specification on the way out; both
+sides have to be normalised before they are compared. The wait also polls the
+database's long-running operations as a second signal, which covers the window
+where a build has been requested but the index is not listable yet.
+
+An index build is proportional to the data already in the collection, so the
+wait is bounded: it fails the job rather than holding a deploy open, and
+re-running it once the build finishes passes with no code change.
 
 **A failed deploy fails the run, and nothing more.** There is no
 `continue-on-error`, and the hosting deploys do not wait for this job. A
@@ -311,8 +360,9 @@ the Nx-cache gaps under Current Limitations are the larger lever.
 - Add a new deploy to `pipeline.yml` behind `if: github.ref == 'refs/heads/develop'`. Do not give it a manually dispatched workflow of its own. A separate workflow needs a trigger that fires on its own, as `native-release.yml`'s tag does.
 - Never put `continue-on-error` on a deploy job. A deploy that is allowed to fail quietly is the manual deploy again, with extra steps.
 - Give a deploy the narrowest credential that can perform it, and grant a new permission to that deploy's own service account. Widening `FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE` is how a hosting secret ends up worth a project.
-- Deploy a new Firestore index before the function that queries through it, and wait for it to reach `READY`. `deploy-functions` refuses to run while a declared index is missing from the project, so this is enforced rather than remembered. See [Implementation - Firebase Functions](firebase-functions.md).
-- Do not grant the functions deploy account `datastore.indexAdmin`. The index deploy is deliberately outside CI, and a read-only `datastore.viewer` is all the preflight needs.
+- Deploy a new Firestore index before the function that queries through it, and wait for it to reach `READY`. `deploy-functions` needs `deploy-firestore-indexes`, which does both, so this is enforced rather than remembered. See [Implementation - Firebase Functions](firebase-functions.md).
+- Do not pass `--force` to the index deploy. `--non-interactive` alone logs and skips an index that the project has and the file does not; `--force` deletes it. An undeclared index in production costs storage, and rebuilding a deleted one costs a query outage, so removal stays a deliberate local command.
+- Pair any new backend deploy with the test that can refuse it, as a `needs` edge. `deploy-firestore-rules` needs `firestore-rules` and `deploy-functions` needs `deploy-firestore-indexes`. A deploy job whose only gate is the `develop` guard is a scheduled accident.
 - Keep every `actions/*` use on the version this page's table names, and update the table in the same pull request that moves one. A version that appears in a workflow and not in the table is drift by definition.
 - Read a major bump's breaking changes before merging the Dependabot pull request. Grouped means one review, not no review.
 - Do not use `.github/actions/setup` or `.github/actions/restore-cache` from a macOS or Windows job. The `node_modules` cache key is `node-modules-<package-lock hash>` with no runner OS in it, so a non-Linux job would restore Linux native binaries, and saving would overwrite the entry every other job depends on. Use `actions/setup-node` and `npm ci` directly, as the `ios` job does.
@@ -328,7 +378,7 @@ the Nx-cache gaps under Current Limitations are the larger lever.
 .github/workflows/analytics-digest.yml
 .github/workflows/native-release.yml
 tools/assert-release-bundle.mjs
-tools/assert-firestore-indexes-deployed.mjs
+tools/assert-firestore-indexes-ready.mjs
 tools/set-functions-deploy-service-account.sh
 .github/dependabot.yml
 tools/write-build-provenance.mjs
@@ -363,9 +413,11 @@ nx.json
 - [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md)
 - [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md)
 
+[#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
 [#1098]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1098
 [#1181]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1181
 [#1227]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1227
 [#1437]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1437
 [#1464]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1464
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1588]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1588

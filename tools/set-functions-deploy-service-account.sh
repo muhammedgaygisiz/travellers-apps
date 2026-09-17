@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 #
-# Provisions the service account that the `deploy-functions` job in
-# .github/workflows/pipeline.yml uses, and stores its key as the GitHub Actions
-# secret FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS.
+# Provisions the service account that the backend deploy jobs in
+# .github/workflows/pipeline.yml use - `deploy-functions`,
+# `deploy-firestore-rules` and `deploy-firestore-indexes` - and stores its key
+# as the GitHub Actions secret FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS.
+#
+# The secret keeps its name from when functions were the only backend deploy.
+# Renaming it would have to be done in the repository settings and in every job
+# at once, and a half-applied rename is a deploy that fails at the credential
+# check for a reason nobody would look for.
 #
 # It is a separate account from the hosting one behind
 # FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE on purpose. A gen2 functions deploy needs
@@ -23,7 +29,7 @@
 #   bash tools/set-functions-deploy-service-account.sh          # create, grant, set the secret
 #   bash tools/set-functions-deploy-service-account.sh roles    # re-grant the roles only
 #
-# See GitHub issue #1464.
+# See GitHub issues #1464 and #1567.
 
 set -euo pipefail
 
@@ -60,10 +66,24 @@ trap 'rm -f "$KEY_FILE"' EXIT
 # `serviceusage.services.enable` even when the API is already on. A dry run on
 # 9 September 2026 showed it happening on a project where nothing was new.
 #
-# datastore.viewer is the odd one out and is deliberately read-only: the
-# preflight in tools/assert-firestore-indexes-deployed.mjs needs
-# `datastore.indexes.list`, and CI must not be able to deploy an index. That
-# stays a manual step, sequenced ahead of the functions deploy.
+# Two more are for the backend deploys that share this account, which are not
+# functions:
+#
+#   datastore.indexAdmin  deploy-firestore-indexes, and the READY wait's reads
+#   firebaserules.admin   deploy-firestore-rules, for Firestore and Storage
+#
+# datastore.indexAdmin replaces the read-only datastore.viewer this account
+# carried while the index deploy was a workstation command. It is a real
+# widening and it was made deliberately in issue #1567: an index that CI cannot
+# deploy is an index that reaches production only when someone remembers, which
+# is the failure #1464 removed for the functions. indexAdmin subsumes the
+# `datastore.indexes.list` and `datastore.operations.list` the wait in
+# tools/assert-firestore-indexes-ready.mjs reads.
+#
+# Neither role can delete data. indexAdmin administers index definitions and
+# not documents, and firebaserules.admin publishes rulesets - which is why the
+# rules deploy is gated behind the emulator suite in `firestore-rules` rather
+# than behind a permission boundary.
 ROLES=(
   roles/cloudfunctions.admin
   roles/run.admin
@@ -75,7 +95,8 @@ ROLES=(
   roles/cloudscheduler.admin
   roles/pubsub.admin
   roles/serviceusage.serviceUsageAdmin
-  roles/datastore.viewer
+  roles/datastore.indexAdmin
+  roles/firebaserules.admin
   roles/firebase.viewer
 )
 

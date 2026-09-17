@@ -299,16 +299,29 @@ The `firestore-rules` job in `.github/workflows/pipeline.yml` runs it on every
 pull request. The two e2e suites exercise the rules along the paths they walk,
 but neither can assert that something is _refused_.
 
-**The rules deploy by hand, and nothing in CI deploys them.** That is
-deliberate, and it is the rollout step issue [#1078] asks for: merge, then run
-the suite, then deploy, then watch production for newly denied legitimate paths.
+**The rules deploy from CI, on every push to `develop`.** The
+`deploy-firestore-rules` job publishes `firestore.rules` and `storage.rules`
+together, and it needs `firestore-rules`, so a ruleset that fails the emulator
+suite is never published. Issue [#1567] moved the deploy there.
+
+It was a workstation command until then, which is the state issue [#1078]
+exposed: a merged rules change sat undeployed while the repository looked
+correct, and nothing in the pipeline or a pull request would have said so. The
+argument for keeping it manual was that a rules deploy takes effect the instant
+it lands and cannot be staged. That is still true; what changed is the reading
+of it. An unstageable deploy is a reason to gate the deploy on a test, not a
+reason to leave production behind the tested file.
+
+Deploying by hand is still how a rollout is watched or a rollback is made:
 
 ```bash
 npx nx firebase-deploy-rules bite-tribe-firebase
 ```
 
 Rolling back is deploying the previous version of the file, which takes about a
-minute. `storage.rules` is still open and is issue [#1350], filed separately.
+minute - by hand for speed, or by pushing the revert. `storage.rules` deploys
+through the same job as committed, including its current unscoped state, which
+is issue [#1350].
 
 ## Functions Pattern
 
@@ -318,8 +331,8 @@ minute. `storage.rules` is still open and is issue [#1350], filed separately.
 - Backend functions live under `apps/bite-tribe-firebase/functions/src/functions`.
 - Callable functions should validate `request.auth` before user-scoped reads.
 - **A collection-group query needs a rule that reads the document, and the query then carries the permission.** A `match /{path=**}/orders/{orderId}` has no `{restaurantId}` to scope it with, so the rule reads `resource.data.restaurantId` - and Firestore admits such a query only when its constraints prove the condition. The client therefore has to send the matching `where`, and a query without it is refused whole rather than widened to every restaurant in the database. Issue [#1105]'s staff order queue is the first client query in this repository shaped that way, and `firestore-rules.emulator-spec.ts` asserts both halves: the constrained query succeeds for the restaurant's own people and the unconstrained one is refused. The same mechanism scopes a guest to their own orders (`RD-TS-12`).
-- **A derived document name can replace a query, an index and a rule clause.** Issue [#1106]'s calls for a waiter are named `{n}_{tableId}_{kind}` under the restaurant, which bounds the collection at two documents per table however busy the room is - so both staff screens subscribe to the whole subcollection with no `where` at all, admitted by `readsFloorPlan(restaurantId)` from the path, and the guest's phone reaches its own by `get` on a name it derives. Compare the order queue one collection above it: orders hang from the visit and are unbounded, which forced a collection-group query, a `where` doubling as the permission, a second `where` to bound the read and two index exemptions deployed by hand. The same trick makes the repeated tap harmless, because the second write addresses the first one's document - a uniqueness constraint Firestore has no other way to express, and the same reason `tableSessionId` is derived.
-- Firestore index configuration is code. `apps/bite-tribe-firebase/firestore.indexes.json` holds the composite indexes and the single-field exemptions that collection-group queries need, and deploys on its own through the `bite-tribe-firebase:firebase-deploy-indexes` Nx target (`npm run deploy:indexes`), separately from functions and rules. That one deploy stays manual while functions deploy from CI, because the Firestore API builds an index in the background and the CLI returns before it is usable. The pipeline's `deploy-functions` job asserts the declared indexes are already live instead of deploying them. `firestore-collection-group-indexes.spec.ts` pairs every collection-group query in the **functions** source with an entry there; a query made by a **client** is outside what that spec can see, so issue [#1105]'s queue carries its own check in `libs/bite-tribe-business/table-management/data-access/src/lib/__specs__/table-order-queue-indexes.spec.ts`. Neither can prove the deploy has run. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
+- **A derived document name can replace a query, an index and a rule clause.** Issue [#1106]'s calls for a waiter are named `{n}_{tableId}_{kind}` under the restaurant, which bounds the collection at two documents per table however busy the room is - so both staff screens subscribe to the whole subcollection with no `where` at all, admitted by `readsFloorPlan(restaurantId)` from the path, and the guest's phone reaches its own by `get` on a name it derives. Compare the order queue one collection above it: orders hang from the visit and are unbounded, which forced a collection-group query, a `where` doubling as the permission, a second `where` to bound the read and two index exemptions. The same trick makes the repeated tap harmless, because the second write addresses the first one's document - a uniqueness constraint Firestore has no other way to express, and the same reason `tableSessionId` is derived.
+- Firestore index configuration is code. `apps/bite-tribe-firebase/firestore.indexes.json` holds the composite indexes and the single-field exemptions that collection-group queries need, and deploys on its own through the `bite-tribe-firebase:firebase-deploy-indexes` Nx target (`npm run deploy:indexes`), separately from functions and rules. The `deploy-firestore-indexes` job runs both halves on every push to `develop`: it deploys the specification and then waits for the builds it started, because the Firestore API builds an index in the background and the CLI returns before it is usable. `deploy-functions` needs that job, so a function cannot go live ahead of an index its query needs. `firestore-collection-group-indexes.spec.ts` pairs every collection-group query in the **functions** source with an entry there; a query made by a **client** is outside what that spec can see, so issue [#1105]'s queue carries its own check in `libs/bite-tribe-business/table-management/data-access/src/lib/__specs__/table-order-queue-indexes.spec.ts`. Neither can prove the deploy has run. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
 
 ## Current Function Examples
 
@@ -444,3 +457,4 @@ libs/bite-tribe/api
 [#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350
 [#1469]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1469
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567

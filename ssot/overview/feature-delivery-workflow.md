@@ -12,7 +12,7 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
    - Create the issue if it does not exist yet.
    - Write the issue body per [GitHub Issue Format](github-issue-format.md).
    - Add it to the `Bite Tribe` project board. `gh issue create` does not do this, and an issue that is not on the board has no priority and no status. See [GitHub Project Board And Issue Handling](github-project-board-and-issue-handling.md).
-   - Link it to the relevant epic or roadmap item when applicable.
+   - Link it to the relevant epic or roadmap item when applicable: the `Part of #1234` line in the body, and the native GitHub sub-issue relationship - see [Sub-Issues](github-project-board-and-issue-handling.md#sub-issues). The two are separate steps and neither substitutes for the other.
    - Set the board's `Priority` field on the `P0` to `P4` scale defined in [GitHub Issue Format](github-issue-format.md). Priority is a board field, never a label.
    - Set the board's `Size` field.
    - Set Status to `In progress` when work starts.

@@ -4,6 +4,7 @@ import { inject, Injectable } from '@angular/core';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ToastController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
+import { HapticsService } from 'haptics';
 import { firstValueFrom } from 'rxjs';
 
 /**
@@ -114,6 +115,7 @@ const withTimeout = async <T>(
 export class ToastService {
   private readonly toastController = inject(ToastController);
   private readonly transloco = inject(TranslocoService);
+  private readonly haptics = inject(HapticsService);
 
   /** The toast currently on screen, so a newer one can replace it. */
   private currentToast: HTMLIonToastElement | null = null;
@@ -129,6 +131,9 @@ export class ToastService {
    * A toast still on screen is dismissed first. Ionic stacks toasts at the same
    * position, so without this a second one covers the first and the user reads
    * whichever happens to be on top.
+   *
+   * The outcome is also played as a haptic, so it is confirmed even when the
+   * user looked away before reading the toast (issue #1635).
    */
   async present({
     messageKey,
@@ -137,6 +142,8 @@ export class ToastService {
     params,
     action,
   }: ToastRequest): Promise<void> {
+    this.playOutcome(outcome);
+
     await this.dismissCurrent();
 
     const text = messageKey ? await this.resolve(messageKey, params) : message;
@@ -207,6 +214,26 @@ export class ToastService {
       );
     } catch {
       return this.transloco.translate(messageKey, params);
+    }
+  }
+
+  /**
+   * Fires the haptic for the outcome without waiting on it.
+   *
+   * It sits alongside the toast rather than in front of it: whether the toast
+   * presents, and when `present()` settles, must not depend on the haptic.
+   * `HapticsService` already never rejects, but a synchronous throw or a
+   * rejection is still swallowed here so that stays true of this service on its
+   * own.
+   */
+  private playOutcome(outcome: ToastOutcome): void {
+    try {
+      const played =
+        outcome === 'success' ? this.haptics.success() : this.haptics.error();
+
+      played.catch(() => undefined);
+    } catch {
+      // The toast stands without its haptic.
     }
   }
 

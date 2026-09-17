@@ -524,6 +524,9 @@ to exactly one `@capacitor/haptics` call:
 - **Never rejects.** A failure from the native call is swallowed, the same
   posture `ToastService.present()` holds, so a call site fires and forgets it
   without a try/catch.
+- **Toast outcomes play automatically.** `ToastService.present()` plays
+  `success` or `error` from its `outcome`, so every toast in both apps carries
+  its haptic and a call site that raises a toast adds none (issue [#1635]).
 - **Once per discrete event.** No call site plays an intent on every
   pointer-move frame, keystroke or scroll tick.
 - **No permission, no store declaration.** The plugin needs no runtime
@@ -544,6 +547,7 @@ apps/bite-tribe-android/package.json
 libs/bite-tribe/shell/src/lib/service-worker.ts
 libs/common/geolocation
 libs/common/haptics
+libs/common/toast/src/lib/toast.service.ts
 libs/common/push-notifications
 libs/common/networkstatus/feature
 libs/common/image-compression
@@ -571,3 +575,4 @@ libs/common/image-compression
 [#1414]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1414
 [#1633]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1633
 [#1634]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1634
+[#1635]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1635

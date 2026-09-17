@@ -89,9 +89,12 @@ repository, and [Traceability Map](overview/traceability-map.md) to find the pag
 - [UC - Configure Restaurant Floor Plans And Tables](use-cases/uc-configure-restaurant-floor-plans-and-tables.md)
 - [UC - Manage Tables During Service](use-cases/uc-manage-tables-during-service.md)
 - [UC - Order At The Table Through A QR Code](use-cases/uc-order-at-the-table-through-a-qr-code.md)
+- [UC - Generate Initial Menu From Bite Evidence](use-cases/uc-generate-initial-menu-from-bite-evidence.md)
+- [UC - Manage A Bite's Restaurant Assignment](use-cases/uc-manage-a-bites-restaurant-assignment.md)
 
 ### Next to implement
 
+- [UC - Create A BiteTrail](use-cases/uc-create-a-bitetrail.md)
 - [UC - Complete Universal Search](use-cases/uc-complete-universal-search.md)
 - [UC - Contact A Restaurant And Plan A Visit](use-cases/uc-contact-a-restaurant-and-plan-a-visit.md)
 - [UC - Price A BiteTrail For Sale](use-cases/uc-price-a-bitetrail-for-sale.md)
@@ -101,6 +104,8 @@ repository, and [Traceability Map](overview/traceability-map.md) to find the pag
 - [UC - See Ads As A Free User](use-cases/uc-see-ads-as-a-free-user.md)
 - [UC - Buy A Paid BiteTrail](use-cases/uc-buy-a-paid-bitetrail.md)
 - [UC - Earn From A Paid BiteTrail](use-cases/uc-earn-from-a-paid-bitetrail.md)
+- [UC - Dismiss Restaurant Candidate](use-cases/uc-dismiss-restaurant-candidate.md)
+- [UC - Resolve Candidate Against An Existing Restaurant](use-cases/uc-resolve-candidate-against-an-existing-restaurant.md)
 
 ### Obsolete - pending deletion
 

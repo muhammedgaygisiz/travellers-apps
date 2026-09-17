@@ -492,15 +492,16 @@ X5 SYS <action>
 | `UC-BPB` | Buy A Paid BiteTrail                                   | [UC - Buy A Paid BiteTrail](../use-cases/uc-buy-a-paid-bitetrail.md)                                                                     |
 | `UC-CRV` | Contact A Restaurant And Plan A Visit                  | [UC - Contact A Restaurant And Plan A Visit](../use-cases/uc-contact-a-restaurant-and-plan-a-visit.md)                                   |
 | `UC-CBT` | Create And Operate BiteTrails In The Business App      | [UC - Create And Operate BiteTrails In The Business App](../use-cases/uc-create-and-operate-bitetrails-in-the-business-app.md)           |
+| `UC-CAB` | Create A BiteTrail                                     | [UC - Create A BiteTrail](../use-cases/uc-create-a-bitetrail.md)                                                                         |
 | `UC-EPB` | Earn From A Paid BiteTrail                             | [UC - Earn From A Paid BiteTrail](../use-cases/uc-earn-from-a-paid-bitetrail.md)                                                         |
 | `UC-PBS` | Price A BiteTrail For Sale                             | [UC - Price A BiteTrail For Sale](../use-cases/uc-price-a-bitetrail-for-sale.md)                                                         |
 | `UC-CFP` | Configure Restaurant Floor Plans And Tables            | [UC - Configure Restaurant Floor Plans And Tables](../use-cases/uc-configure-restaurant-floor-plans-and-tables.md)                       |
 | `UC-OTT` | Order At The Table Through A QR Code                   | [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md)                                     |
 | `UC-ABG` | Add BiteTrail Gamification                             | [UC - Add BiteTrail Gamification](../use-cases/uc-add-bitetrail-gamification.md)                                                         |
-| `UC-DIS` | Dismiss Restaurant Candidate                           | none                                                                                                                                     |
-| `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | none                                                                                                                                     |
-| `UC-GIM` | Generate Initial Menu From Bite Evidence               | none                                                                                                                                     |
-| `UC-ARB` | Assign Bites To Restaurant                             | none                                                                                                                                     |
+| `UC-DIS` | Dismiss Restaurant Candidate                           | [UC - Dismiss Restaurant Candidate](../use-cases/uc-dismiss-restaurant-candidate.md)                                                     |
+| `UC-MRC` | Resolve Candidate Against An Existing Restaurant       | [UC - Resolve Candidate Against An Existing Restaurant](../use-cases/uc-resolve-candidate-against-an-existing-restaurant.md)             |
+| `UC-GIM` | Generate Initial Menu From Bite Evidence               | [UC - Generate Initial Menu From Bite Evidence](../use-cases/uc-generate-initial-menu-from-bite-evidence.md)                             |
+| `UC-MBR` | Manage A Bite's Restaurant Assignment                  | [UC - Manage A Bite's Restaurant Assignment](../use-cases/uc-manage-a-bites-restaurant-assignment.md)                                    |
 
 Codes whose `Page` cell reads `none` have no page yet. They are referenced by `UC-VRC`
 and `UC-DRC` for rules those flows depend on, which makes writing them visible work

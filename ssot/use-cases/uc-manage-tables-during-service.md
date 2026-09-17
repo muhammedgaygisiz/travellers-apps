@@ -4,65 +4,14 @@
 
 **Level:** L0.
 
-Readable and writable, and now usable in a room with no signal. Specified through issue [#1071] as stage 2 of issue [#735].
-
-Issue [#1091] added the live state and the transition matrix to `libs/bite-tribe-common/model`. Issue [#1092] made the backend their only writer: `transitionTableState` validates a requested transition against the matrix and the caller's authority over this restaurant - the staff association, the account named on the Restaurant, or the operator - applies it transactionally against the state the caller says it saw, and appends an audit entry per transition. Two staff members seating one table produce one seating and one explicit conflict. `firestore.rules` refuses every client write to the state and the trail, and admits the staff of that restaurant, the account holding it and the operator to read both.
-
-Issue [#1093] put the first surface on it. `restaurant/:restaurantId/tables` in the business app draws the published plan read-only with each table's live status on it, updated by a Firestore listener rather than a poll, and it is the first route in that app a staff account is meant to reach. It reads and never writes: there is no write path through `bite-tribe-business/table-management` at all.
-
-Issue [#1094] closed the loop. Holding a table, or pressing enter on it, opens a sheet of exactly the transitions the matrix allows from the status that table holds right now, and picking one calls `transitionTableState`. The table changes colour on the press rather than on the answer, and a refusal takes the change back and says why - a conflict names the colleague who got there first rather than reading as a generic failure. An end-of-service reset frees a batch of tables in one press. The staff member who could see that table 6 had been awaiting payment for twenty minutes can now do something about it from the same screen.
-
-Issue [#1095] put the party behind the status. A `TableVisit` at `/restaurants/{restaurantId}/visits/{visitId}` is the party at a table over time, and seating a table now _is_ opening one: a transition into `occupied` from a status that held no party writes the visit, the state and the audit entry in one commit, and a transition out of the party statuses ends it. A table cannot have two open visits, ending one lands the table on `cleaning` rather than `available`, and `moveTableVisit` walks a party to another table keeping the visit's id - which is what will keep its orders when issue [#1072] gives it some. The visit outlives its table: it lives under the restaurant, and `tableId` is a plain string that keeps naming a table deleted from the plan.
-
-Issue [#1096] made the view survive the room it is used in. Firestore offline
-persistence was already on in every production build, so the plan keeps drawing without
-a signal; what was missing was everything about the _writes_. A transition made offline
-is now written to device storage rather than sent, carries an idempotency key minted
-once per intent, and is replayed in order when the signal comes back - so two tables
-seated in a basement dining room are two transitions on reconnect and not four, and a
-tablet locked or reloaded inside the gap comes back showing the tables the host seated.
-`transitionTableState` answers a replay off its own audit trail, before it checks the
-table and before it compares `expectedStatus`, because a replay arrives after the world
-has moved on. A queued transition the table has genuinely moved past is refused and
-named to the host rather than forced or dropped. And the header now says which of four
-things is true - connecting, live, offline, or not current and how long since - which is
-what makes "staff can always tell whether what they are looking at is live" checkable
-rather than assumed.
-
-Issue [#1097] settled what the role may do, and where it starts. Most of the
-permission set had arrived ahead of it, one piece per issue that needed it -
-[#1537] the grant and the staff list, [#1088] the published-plan read, [#1092] the
-one write - so what [#1097] added is the two things nobody had reached: the
-entry, and the proof. Signing in now lands a staff account in the room it works
-in rather than on the owner's dashboard, which lists restaurants by
-`Restaurant.ownerUserId` and therefore showed it nothing; `staffEntryGuard`
-reads the association on `/dashboard` and redirects, so a restored session and a
-bookmark land there too. And the refusals are now under test rather than
-asserted: a staff account writing a room, a table, a room draft, a menu or
-another account's association is refused by `firestore.rules` in the emulator
-suite, and every read the role has ends the moment the association is deleted -
-with the `staff` claim still on its token, which is what makes revocation take
-effect before the token refreshes rather than an hour after it.
-
-Issue [#1098] made the room measurable. Seven `table_*` events now record what
-staff actually do during a service - a table seated, freed, reserved, sent for
-cleaning or taken out of service, and a visit opened or ended - and they record
-it only when the backend has confirmed the transition, so a refusal is not a
-seating and a transition made offline is counted when it lands rather than twice
-or never. Three measures fall out of them per restaurant per service day: table
-turnover, the share of tables that were used at all, and how long a party
-occupied a table. They are computed over the BigQuery export
-(`tools/analytics/queries/table-operations.sql`) rather than as launch-dashboard
-tiles, because the dashboard is scoped to launch signals and how a restaurant
-works its room is not one. No guest is named in any of it: the parameters are the
-restaurant's own ids, a party size and an opaque visit id, and who moved a
-disputed table stays the audit trail's answer rather than analytics'. The one
-event the issue named and did not get is `table_visit_moved`, for the reason
-below - there is nothing to move a visit from.
-
-What no issue has added yet is a **surface** for the visit. Seating a table through issue [#1094]'s sheet opens a visit, and nothing shows it. The guest count is still optional in the sheet and still travels as the audit entry's `reason`; `TableVisit.guestCount` now exists to hold it and `transitionTableState` now takes it, so moving it across is a change to the business app rather than to the backend.
-
-[UC - Configure Restaurant Floor Plans And Tables](uc-configure-restaurant-floor-plans-and-tables.md) is complete and no longer blocks this. [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md) no longer blocks it either: the `staff` role now has its first write, through the callable rather than through the rules, and [#1093] gives a staff member somewhere to sign in to.
+Readable and writable, and usable in a room with no signal. Specified through issue [#1071]
+as stage 2 of issue [#735] and built by its child issues [#1091] to [#1098], which `Flow`
+and `Key Behaviours` cite step by step: staff read the published plan with each table's live
+state at `restaurant/:restaurantId/tables`, change a table only through
+`transitionTableState`, open and end a party's visit by seating and freeing it, keep working
+offline, and the room's operations are measured. What no issue has added yet is a
+**surface** for the visit: seating a table opens one and nothing shows it, which is also why
+the guest count does not reach the visit (see `Flow`).
 
 ## Goal
 
@@ -93,10 +42,10 @@ account comes to hold the Restaurant at all is [UC - Own And Claim Restaurants](
 - The published floor plan renders read-only, with each table showing its live state.
 - This is the floor-plan surface that carries a small screen. The editor of [UC - Configure Restaurant Floor Plans And Tables](uc-configure-restaurant-floor-plans-and-tables.md) was locked to a desktop width, because an owner laying out twenty tables to the millimetre is at a desk while a host greeting guests is holding a tablet at the door. Touch drag, pinch zoom, two-finger pan and long-press belong here, designed for seating a party rather than for moving a wall (issue [#1093]).
 - Staff hold a table, or press enter on it, and see only the transitions currently allowed (issue [#1094]).
-- Seating a party opens a visit and records the guest count. The visit opens (issue [#1095]); the count is still written to the audit entry rather than to the visit, because no surface sends it there yet.
+- Seating a party opens a visit and records the guest count. The visit opens (issue [#1095]); the count is still written to the audit entry rather than to the visit, because no surface sends it there yet, although `TableVisit.guestCount` exists to hold it and `transitionTableState` already takes it.
 - Staff mark tables reserved, cleaning, or disabled as service demands (issue [#1094]).
 - Freeing a table closes its visit (issue [#1095]), and lands the table on `cleaning` rather than `available`, so no table is silently reused.
-- A party that moves takes its visit and its orders with it. `moveTableVisit` exists and keeps the visit's identity (issue [#1095]); the orders are issue [#1072], and no surface calls the move yet.
+- A party that moves takes its visit and its orders with it. `moveTableVisit` exists and keeps the visit's identity (issue [#1095]); the orders hang from the visit since issue [#1103] ([UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md)), and no surface calls the move yet.
 - End-of-service reset is available as a bulk action (issue [#1094]).
 
 ## Key Behaviours
@@ -192,8 +141,6 @@ that surface is [UC - Order At The Table Through A QR Code](uc-order-at-the-tabl
 
 [#735]: https://github.com/muhammedgaygisiz/travellers-apps/issues/735
 [#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071
-[#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
-[#1088]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1088
 [#1091]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1091
 [#1092]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1092
 [#1093]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1093
@@ -202,4 +149,4 @@ that surface is [UC - Order At The Table Through A QR Code](uc-order-at-the-tabl
 [#1096]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1096
 [#1097]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1097
 [#1098]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1098
-[#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
+[#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103

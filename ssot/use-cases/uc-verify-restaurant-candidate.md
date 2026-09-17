@@ -6,9 +6,9 @@
 
 Implemented and in use. The backend callable `verifyRestaurantCandidate` is
 `admin`-gated since issue [#1472], and the Operator surface moved into
-`bite-tribe-admin` with issue [#1473]. Four referenced Use Cases this flow depends on
-have no implementation — dismissal, duplicate resolution, owner assignment, and a
-standalone writer for Bite assignment — and each is carried as a rule marked
+`bite-tribe-admin` with issue [#1473]. Three referenced Use Cases this flow depends on
+have no implementation — dismissal, duplicate resolution, and a standalone writer for Bite
+assignment — and each is carried as a rule marked
 _Intended, not met_ rather than as an agreed step that quietly does not run. Work in
 flight: epic [#1495].
 
@@ -17,7 +17,7 @@ flight: epic [#1495].
 | Backend callable `verifyRestaurantCandidate`           | Implemented, `admin`-gated                                                                                 |
 | Operator surface (Candidate list, new-Restaurant form) | Implemented in `bite-tribe-admin`                                                                          |
 | `UC-GIM` — Initial Menu                                | Implemented, reachable only inside verification                                                            |
-| `UC-ARB` — assign Bites                                | Reachable only inside verification; no standalone writer, see `R-8`                                        |
+| `UC-MBR` — manage a Bite's Restaurant assignment       | Reachable only inside verification; no standalone writer, see `R-8`                                        |
 | `UC-DIS` — dismiss                                     | Not implemented, see `R-13`. Owned by [#1501], [#1508] and [#1502]                                         |
 | `UC-MRC` — resolve a duplicate                         | Not implemented, see `R-14`                                                                                |
 | `UC-ARO` — assign owner                                | Implemented ([#1077]) as a separate Operator action, **outside this flow**; see `R-15`                     |
@@ -37,7 +37,7 @@ works, so that a defect is locatable in exactly one document.
 
 ## Actors
 
-The authorization vocabulary is three roles, defined in [User Roles](../product/user-roles.md). Only one of
+The authorization vocabulary is four roles, defined in [User Roles](../product/user-roles.md). Only one of
 them acts here.
 
 - **BiteTribe Operator** (short: _Operator_), holding the `admin` claim. The only
@@ -47,9 +47,9 @@ them acts here.
   them.
 - **Bite Creator** — not an actor here: not notified, holding no rights, and seeing no
   state change beyond their Bite appearing under a Restaurant (`R-12`). Named because
-  it is one of the four writers of `bite.restaurantId` (`R-8`).
+  it is behind two of the four writers of `bite.restaurantId`, the create and the edit path (`R-8`).
 
-**BiteTrail Creator is not a role** and has no part here. `RD-UR-4` retired it; it is
+**BiteTrail Creator is not a role** and has no part here. `RD-UR-4` retires it, not yet finally ([#1615]); it is
 listed under _Not roles_ in [User Roles](../product/user-roles.md).
 
 **The role hierarchy is decided and not implemented.** `RD-UR-6` places the Operator
@@ -91,7 +91,7 @@ The Candidate also carries `skippedBiteIds` once verified, naming the evidence B
 
 `/restaurants/{restaurantId}`, `/menus/{menuId}` and `bite.restaurantId` are written by
 this flow but are not its aggregate: they are the effects of leaving the Candidate
-`verified`, and their own lifecycles belong to `UC-MRB`, `UC-GIM` and `UC-ARB`.
+`verified`, and their own lifecycles belong to `UC-MRB`, `UC-GIM` and `UC-MBR`.
 
 ## Scope
 
@@ -99,7 +99,7 @@ In scope: one Operator, one `pending` Candidate, one decision — verify. Correc
 proposed Restaurant data, and the transactional creation of the Restaurant.
 
 `RD-VRC-6` sets that boundary: `V19` and `V23` stay inside the verification
-transaction but are _referenced_ steps, owned by `UC-GIM` and `UC-ARB`; dismissal and
+transaction but are _referenced_ steps, owned by `UC-GIM` and `UC-MBR`; dismissal and
 duplicate resolution are referenced Use Cases with their own terminal states; owner
 assignment is **not** part of this Use Case at all — it is a separate Operator action
 afterwards (`UC-ARO`, `R-15`).
@@ -114,20 +114,21 @@ stated once under `Authorization`.
 
 Out of scope. Each of these is its own Use Case, referenced from the step it belongs to:
 
-| UC-ID    | Use Case                                                                                        | Referenced at  | Direction                                                                                                                                                          |
-| -------- | ----------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `UC-DRC` | [UC - Detect Restaurant Candidate](uc-detect-restaurant-candidate.md)                           | `P1`, `P2`     | Upstream, and the sole owner of every way a Candidate comes into existence — the automatic trigger _and_ the Operator's on-demand clustering callable (`RD-VRC-8`) |
-| `UC-DIS` | Dismiss Restaurant Candidate                                                                    | `V4a`          | Alternative outcome                                                                                                                                                |
-| `UC-MRC` | Resolve Candidate Against An Existing Restaurant                                                | `V4b`          | Alternative outcome                                                                                                                                                |
-| `UC-ARO` | [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md)                               | `G7`, `R-15`   | Downstream — a separate Operator action after `END-V4`, not a step here                                                                                            |
-| `UC-GIM` | Generate Initial Menu From Bite Evidence                                                        | `V19`          | Invoked step                                                                                                                                                       |
-| `UC-ARB` | Assign Bites To Restaurant                                                                      | `V23`          | Invoked step                                                                                                                                                       |
-| `UC-MRB` | [UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md) | After `END-V4` | Downstream                                                                                                                                                         |
-| `UC-OPS` | [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md)             | `V1`           | Enclosing: sign-in and the role gate                                                                                                                               |
+| UC-ID    | Use Case                                                                                                   | Referenced at  | Direction                                                                                                                                                          |
+| -------- | ---------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `UC-DRC` | [UC - Detect Restaurant Candidate](uc-detect-restaurant-candidate.md)                                      | `P1`, `P2`     | Upstream, and the sole owner of every way a Candidate comes into existence — the automatic trigger _and_ the Operator's on-demand clustering callable (`RD-VRC-8`) |
+| `UC-DIS` | [Dismiss Restaurant Candidate](uc-dismiss-restaurant-candidate.md)                                         | `V4a`          | Alternative outcome                                                                                                                                                |
+| `UC-MRC` | [Resolve Candidate Against An Existing Restaurant](uc-resolve-candidate-against-an-existing-restaurant.md) | `V4b`          | Alternative outcome                                                                                                                                                |
+| `UC-ARO` | [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md)                                          | `G7`, `R-15`   | Downstream — a separate Operator action after `END-V4`, not a step here                                                                                            |
+| `UC-GIM` | [Generate Initial Menu From Bite Evidence](uc-generate-initial-menu-from-bite-evidence.md)                 | `V19`          | Invoked step                                                                                                                                                       |
+| `UC-MBR` | Manage A Bite's Restaurant Assignment                                                                      | `V23`          | Invoked step                                                                                                                                                       |
+| `UC-MRB` | [UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md)            | After `END-V4` | Downstream                                                                                                                                                         |
+| `UC-OPS` | [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md)                        | `V1`           | Enclosing: sign-in and the role gate                                                                                                                               |
 
-Of the referenced Use Cases, **`UC-DIS`, `UC-MRC`, `UC-GIM` and `UC-ARB` do not yet
-exist as pages.** They are named here so that each rule this flow depends on has an
-owner, and so that writing them is a visible gap rather than an omission.
+Of the referenced Use Cases, **`UC-MBR` does not yet exist as a page, and `UC-DIS`,
+`UC-MRC` and `UC-GIM` exist only at L0.** They are named here so that each rule this flow
+depends on has an owner, and so that writing them is a visible gap rather than an
+omission.
 
 ## Trigger
 
@@ -170,10 +171,11 @@ directions with `UC-DRC` and with nothing else: `P1` and `P2` name `UC-DRC` as o
 
 `G1` is what `UC-MRB` and `UC-ARO` consume; `G1` and `G2` together are what the consumer
 surfaces that render a Restaurant and its Menu consume. None of that can be answered
-from the other side today: `UC-OPS`, `UC-MRB` and `UC-ARO` are L1 pages carrying neither
-numbered preconditions nor numbered guarantees, so `P3` has an owner that owes nothing in
-writing; and `UC-DIS`, `UC-MRC`, `UC-GIM` and `UC-ARB` have no pages at all, so the four
-`REF:` lines that name them state a guarantee no page owns.
+from the other side today: `UC-OPS`, `UC-MRB`, `UC-ARO`, `UC-DIS`, `UC-MRC` and `UC-GIM`
+are L0 or L1 pages carrying neither numbered preconditions nor numbered guarantees, so
+`P3`, the `V4a` reference, the `V4b` reference and the `V19` reference have an owner that
+owes nothing in writing; and `UC-MBR` has no page at all, so the one remaining `REF:`
+line that names it states a guarantee no page owns.
 
 Under `AF-34` these seven counterparties are **unanswered**, not conformance failures:
 this page has stated its side, and the other side is theirs to state. Each is a claim on
@@ -183,7 +185,7 @@ this page has stated its side, and the other side is theirs to state. Each is a 
 
 `G1` and `G3` hold at `END-V4` and are not durable afterwards. `G1` is falsified by a
 second verification of the same Candidate, which `R-18` closes. `G3` is falsified by a
-later verification repointing a shared evidence Bite, which `V23` delegates to `UC-ARB`
+later verification repointing a shared evidence Bite, which `V23` delegates to `UC-MBR`
 and which nothing closes today. Both are recorded as `E9` and `E7`.
 
 ## Actogram
@@ -408,7 +410,7 @@ V23  SYS  links the unassigned evidence Bites to the Restaurant
           └─→ DB   bite.restaurantId = restaurantId, for every surviving Bite that
                    carries none
           └─→ DB   skippedBiteIds on the Candidate, naming every Bite left untouched
-          REF:UC-ARB   must define assigning a Bite to a Restaurant outside this flow;
+          REF:UC-MBR   must define managing a Bite's Restaurant assignment outside this flow;
                        the conflict behaviour inside it is decided by R-20
           INV:R-8
           INV:R-20 is VIOLATED here: the write is unconditional, so a surviving Bite that
@@ -600,9 +602,8 @@ discovered in review.
   and `skippedBiteIds`.
 - [#1511] — marking a Menu as derived from Bite evidence and showing it in the consumer
   app. `R-11`, `RD-VRC-11`, and the first App Store content question.
-- **No issue yet:** duplicate resolution (`V4b`, `R-14`, `UC-MRC`), `[Secondary]` and
-  deferred deliberately. It is now the only referenced Use Case on this page that
-  nothing on the board covers.
+- [#1630] — epic for duplicate resolution (`V4b`, `R-14`, `UC-MRC`), `[Secondary]` and
+  deferred deliberately.
 
 ## Related Domains
 
@@ -645,3 +646,5 @@ discovered in review.
 [#1511]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1511
 [#1521]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1521
 [#1522]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1522
+[#1615]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1615
+[#1630]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1630

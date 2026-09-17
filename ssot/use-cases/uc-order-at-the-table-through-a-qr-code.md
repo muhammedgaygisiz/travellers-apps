@@ -4,98 +4,12 @@
 
 **Level:** L1
 
-Partly implemented. Specified through issue [#1072] as stage 3 of issue [#735], and issue [#1073] as stage 4.
-
-Every one of the ten children has landed. Issue [#1099] gave menu items the identity
-an order line hangs from; issue [#1100] made a scanned token resolve, validating
-the six rules below and answering with a restaurant, a room, a table and a menu
-or one of twelve distinct refusal reasons; issue [#1101] gave the guest a
-screen, a session and an identity to hold it with; issue [#1103] gave them a
-cart and a way to send it; issue [#1104] gave them a way to watch what happens
-to it and to order again; issue [#1105] gave the restaurant the screen that
-answers them; issue [#1106] gave the guest a way to ask for a person without
-waving; issue [#1107] assumed the code is already public and made that boring;
-and issue [#1108] assumed the wifi drops things and made that survivable.
-
-**A scanned code now reaches something.** `/t/:token` is a public route in the
-consumer app, the twelve refusal reasons have copy in all eleven locale files,
-and a guest who confirms the table is signed in anonymously and attached to the
-table's visit - or, when staff have not seated it, to a pending session that
-says so. The four product decisions this use case was waiting on are settled and
-recorded as `RD-TS-1` to `RD-TS-5` in [Recorded Decisions](../decisions/recorded-decisions.md).
-
-**Issue [#1102] closed the larger of the two gaps.** A restaurant can now turn
-table ordering on, from its profile page in the business app, so the flag issue
-[#1100] gated every scan on finally has a writer. The same issue made a menu
-readable without an account at `/m/{restaurantId}`, which is what [#370] and
-[#371] asked for, and it settled what a scan at a restaurant that takes no orders
-should do: show the way to the menu rather than tell the guest to ask a waiter.
-
-**Issue [#1103] closed the middle of the flow.** A guest with an active session
-builds a cart at `/t/{token}/order` and sends it to `submitTableOrder`, which
-revalidates the session, the visit, the table, the restaurant's ordering
-availability and every line against the live menu before it writes anything. The
-order lands under the visit rather than the table, and the same commit moves the
-table to `ordering`. The three decisions that shaped it are `RD-TS-9` to
-`RD-TS-11`.
-
-**Issue [#1104] closed the guest's end of the loop.** The ordering screen lists
-the orders this phone has sent into the visit, live, with their status, their
-lines and a running total across them; a cancellation is named and carries the
-reason where staff gave one; and a table that stops taking orders withdraws the
-send button within seconds rather than refusing a cart the guest has already
-built. Two decisions shaped it, `RD-TS-12` and `RD-TS-13`.
-
-**Issue [#1105] closed the restaurant's end of the loop.** Orders reach a queue at
-`restaurant/{id}/orders`, grouped by table and newest first, each row carrying
-its whole ticket and the time since the guest sent it; staff accept, start
-preparing, serve, or cancel with a reason the guest is shown; the room view
-badges each table with what the kitchen still owes it; and a new order reaches
-the people on shift as a push through the existing notification infrastructure,
-with a per-device audible alert that is off until somebody turns it on. Four
-decisions shaped it, `RD-TS-14` to `RD-TS-17`.
-
-**Issue [#1106] closed the part that is not about food at all.** A guest with an
-active session taps once for a waiter or once for the bill; a marker appears on
-the room view within seconds and a row appears above the tickets in the queue;
-a member of staff presses **On my way** and it goes from every device. A bill
-request moves the table to `awaitingPayment` in the same commit, which is also
-what stops it taking further orders. The signal lives at
-`/restaurants/{id}/assistanceRequests/{n}_{tableId}_{kind}` - a **derived**
-name, which is what makes a repeated tap join the signal that is up rather than
-raise a second one, bounds the collection at two documents per table so the
-staff screens read it whole with no index, and lets the guest's phone subscribe
-to the answer. Six decisions shaped it, `RD-TS-18` to `RD-TS-23`.
-
-**Issue [#1107] closed the last gap this page carried, and it was two gaps at
-once.** Staff can now see a **pending session** - the guest who scanned while
-waiting to be seated, which issue [#1101] had been writing since it landed and
-nothing drew - and a restaurant can replace the code of one table or of a whole
-room in one action, which is the answer to a code that has been photographed and
-posted. Resolution is throttled across function instances rather than within
-one, and what is throttled is reported to the restaurant as a row it can act on.
-Five decisions shaped it, `RD-TS-24` to `RD-TS-28`.
-
-**Issue [#1108] closed the epic, on the one criterion that had stayed open since
-[#1103].** A submission carries a key the phone mints once per tap and reuses on
-every attempt; the backend names the order document after it, so a retry is
-answered with the order the first attempt wrote rather than writing a second
-one. Around that sit the three things that make a retry worth having: a cart
-kept on the phone and rebuilt from the live menu, so a dropped tab does not cost
-the guest the round they chose; three attempts with a growing gap, behind a send
-button that cannot be double-triggered; and, when none of them resolves, a
-sentence that says which of the two things happened - the order never left the
-phone, or it left and nothing came back - with a retry that is a question rather
-than a second dinner. Six decisions shaped it, `RD-TS-29` to `RD-TS-34`.
-
-Table ordering is off for every restaurant until an owner turns it on, and what
-still has to happen before one should is the deploy: the rules and the indexes
-are applied by hand, so a queue opened against production today would be refused
-until `npx nx firebase-deploy-rules bite-tribe-firebase` and
-`npx nx firebase-deploy-indexes bite-tribe-firebase` have run. Issue [#1107] adds
-a third manual step with no Nx target at all - a TTL policy on
-`scanRateLimits.expiresAt` - without which the durable counters are written and
-never removed.
+Partly implemented. Specified through issue [#1072] as stage 3 of issue [#735], which is
+built end to end - all ten of its child issues have landed, and `Flow` names the issue
+behind each step - and through issue [#1073] as stage 4, which is not: paying at the table,
+the receipt, and the Bite created from an order line. Table ordering is off for every
+restaurant until an owner turns it on; what has to be applied by hand before it binds
+production is stated in `What A Code On The Internet Costs`.
 
 ## Goal
 
@@ -103,14 +17,14 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 
 ## Actors
 
-- **Table Guest** — acts: scans the code, confirms the table, reads the menu, builds and
-  sends an order, watches it move, and asks for a waiter or the bill. Not a role but a kind
-  of session, per [User Roles](../product/user-roles.md): an anonymous account carrying no
-  claim, minted by the scan screen and reaching nothing outside these routes.
-- **Bite Creator** — acts, and is the same person with an account: `signInAsGuest` returns an
-  existing session rather than replacing it, so a member who scans orders as themselves. The
-  Bite prefilled from an order line is theirs too, and is the step that is not built - issue
-  [#1073], stage 4.
+- **Bite Creator** — acts: scans the code, confirms the table, reads the menu, builds and
+  sends an order, watches it move, and asks for a waiter or the bill. `signInAsGuest` returns
+  an existing session rather than replacing it, so a member who scans orders as themselves.
+  The Bite prefilled from an order line is theirs too, and is the step that is not built -
+  issue [#1073], stage 4. The same routes also admit a guest without an account through an
+  anonymous session; [User Roles](../product/user-roles.md) lists that _Table Guest_ under
+  _Not roles_, so it is not an actor here. Whether that path stays allowed, and how its actor
+  is named, is open; see `Open Product Questions`.
 - **Restaurant Staff** — acts: works the order queue, moves an order along its lifecycle, and
   clears the assistance signals a guest raises.
 - **Restaurant Owner** (`business`) — acts, by the same callables: `staffAuthority` admits
@@ -766,6 +680,12 @@ Tracked in [Current State - Open Questions](../current-state/open-questions.md).
 
 The last two of the epic's proposals are now answered rather than open: a cancelled order is corrected by a staff-side cancellation carrying a reason the guest is shown, and staff are notified by an in-app queue plus a push through the existing infrastructure. What remains open is the payment model, which is issue [#1073]'s.
 
+**Reopened on 17 September 2026:** whether a guest without an account may order through an
+anonymous session at all, which `RD-TS-4` settled as allowed, and if it stays allowed, how
+this page names that actor when `UF-4` admits only roles and
+[User Roles](../product/user-roles.md) lists the session under _Not roles_. Issue [#1629] owns
+the decision.
+
 What is newly open is smaller and belongs to a guest whose party is **moved**: their session goes on naming the table they scanned, and nothing tells them the table number on their screen has changed. Beside it sits a second small one from this issue: an order placed before a party moved stays grouped under the table it was ordered from, which is right for the kitchen and is not what a waiter carrying the plates reads.
 
 ## MVP Classification
@@ -775,8 +695,8 @@ What is newly open is smaller and belongs to a guest whose party is **moved**: t
 taking a single order through BiteTribe, and [Current State - Open Questions](../current-state/open-questions.md)
 files every question on this page under a post-launch heading.
 
-Nothing here is therefore a release blocker under `UF-15`, including the two
-gaps named in `Status`.
+Nothing here is therefore a release blocker under `UF-15`, including the stage 4
+steps `Status` names as not built.
 
 ## App Store Review Area
 
@@ -999,3 +919,4 @@ guest's phone is retrying.
 [#1184]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1184
 [#1200]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1200
 [#1598]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1598
+[#1629]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1629

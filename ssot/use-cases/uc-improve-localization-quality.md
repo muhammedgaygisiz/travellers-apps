@@ -5,24 +5,17 @@
 **Level:** L0.
 
 Partly built, and the unbuilt half is a review rather than a feature. The consumer app ships
-eleven locales - `en`, `de`, `fr`, `tr`, `es`, `it`, `ar`, `am`, `id`, `pt`, `th` - and the
-catalogs are healthy: every locale file carries the same key set, and `locale-copy.spec.ts`
-and `language-names.spec.ts` fail the build when one drifts. The mechanics around them are
-settled too, each with its own rule in [Implementation - Localization](../implementation/localization.md): push and verification
-mail read a backend catalog bound to the account language, the privacy policy has its own
-published-language list, iOS permission copy lives in `InfoPlist.strings`, and casing and
-formatted values are localized through the document language and `Intl`.
-
-What is not done is the manual review of AI-generated copy, which epic [#738] tracks with one
-story per language and which is outstanding for some of them, and the rule at
-`Implementation - Localization.md:122` - "avoid hardcoded visible English in templates" -
-which a sweep of the consumer templates found broken in two shapes: visible text nodes, in
-nine components, and copy in `alt`, `title`, `placeholder` and `aria-label` attributes, which
-a screen reader announces in English whatever the account language is. The issues below carry
-the enumerated list. Brand terms are not among them - `BiteTribe`, `Bitemap`, `PRO` and, in
-ten of the eleven locales, `Bites` are kept in English by the catalogs themselves. Nothing
-enforces the rule; the guards that exist compare locale files with each other and never read
-a template.
+eleven locales - `en`, `de`, `fr`, `tr`, `es`, `it`, `ar`, `am`, `id`, `pt`, `th` - with the
+same key set in every locale file, and `locale-copy.spec.ts` and `language-names.spec.ts`
+fail the build when one drifts. Not done: the manual review of AI-generated copy, which epic
+[#738] tracks with one story per language and which is outstanding for some of them, and the
+rule "avoid hardcoded visible English in templates" (line 122 of
+[Implementation - Localization](../implementation/localization.md)), which the consumer templates break with visible
+text nodes in nine components and with English `alt`, `title`, `placeholder` and
+`aria-label` copy; the issues in `Related GitHub Scope` carry the list. Brand terms -
+`BiteTribe`, `Bitemap`, `PRO` and, in ten of the eleven locales, `Bites` - are kept in
+English by the catalogs themselves. Nothing enforces the rule: the existing guards compare
+locale files with each other and never read a template.
 
 ## Goal
 

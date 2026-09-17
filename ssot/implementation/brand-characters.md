@@ -22,16 +22,16 @@ headwear. **The shipped logo is one of them, not the mark the others were derive
 from** - it wears a feathered headdress - which is why the Storybook showcase
 renders it in the line-up rather than above it.
 
-| Character | File                                        | Headwear                  |
-| --------- | ------------------------------------------- | ------------------------- |
-| BiteTribe | `apps/bite-tribe/src/assets/icons/logo.svg` | feathered headdress       |
-| Viking    | `ssot/assets/characters/01-viking.svg`      | horned helmet             |
-| Arab      | `ssot/assets/characters/02-arab.svg`        | keffiyeh and agal         |
-| Ethiopian | `ssot/assets/characters/03-ethiopian.svg`   | striped headband          |
-| Turk      | `ssot/assets/characters/04-turk.svg`        | fez                       |
-| Chinese   | `ssot/assets/characters/05-chinese.svg`     | hair buns                 |
-| Japanese  | `ssot/assets/characters/06-japanese.svg`    | kabuto                    |
-| Swiss     | `ssot/assets/characters/07-swiss.svg`       | alpine hat with edelweiss |
+| Character | File                                                                               | Headwear                  |
+| --------- | ---------------------------------------------------------------------------------- | ------------------------- |
+| BiteTribe | `apps/bite-tribe/src/assets/icons/logo.svg`                                        | feathered headdress       |
+| Viking    | [`ssot/assets/characters/01-viking.svg`](../assets/characters/01-viking.svg)       | horned helmet             |
+| Arab      | [`ssot/assets/characters/02-arab.svg`](../assets/characters/02-arab.svg)           | keffiyeh and agal         |
+| Ethiopian | [`ssot/assets/characters/03-ethiopian.svg`](../assets/characters/03-ethiopian.svg) | striped headband          |
+| Turk      | [`ssot/assets/characters/04-turk.svg`](../assets/characters/04-turk.svg)           | fez                       |
+| Chinese   | [`ssot/assets/characters/05-chinese.svg`](../assets/characters/05-chinese.svg)     | hair buns                 |
+| Japanese  | [`ssot/assets/characters/06-japanese.svg`](../assets/characters/06-japanese.svg)   | kabuto                    |
+| Swiss     | [`ssot/assets/characters/07-swiss.svg`](../assets/characters/07-swiss.svg)         | alpine hat with edelweiss |
 
 The names are the design export's and mix a historical term with national ones.
 A product vocabulary has not been decided, so nothing in the repository should

@@ -330,13 +330,13 @@ Five frames, shot 22 August 2026 on an iPhone 16 Pro simulator at
 1320 x 2868 against the **production** Firebase project, so every dish, review
 and profile is real content rather than a fixture.
 
-| #   | File                 | Shows                                                        |
-| --- | -------------------- | ------------------------------------------------------------ |
-| 1   | `01-home-feed.png`   | The Bites feed with search, sitemap and distance filters     |
-| 2   | `02-bitemap.png`     | The map view, clustered pins over Istanbul                   |
-| 3   | `03-bite-detail.png` | One Bite: photo, author, stars, price, place and distance    |
-| 4   | `04-bucket-list.png` | A BiteTrail saved as a bucket list, with its Bites           |
-| 5   | `05-profile.png`     | A profile: follower counts, visited-country flags, own Bites |
+| #   | File                                                                         | Shows                                                        |
+| --- | ---------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| 1   | [`01-home-feed.png`](../assets/store-listing/phone-6.9/01-home-feed.png)     | The Bites feed with search, sitemap and distance filters     |
+| 2   | [`02-bitemap.png`](../assets/store-listing/phone-6.9/02-bitemap.png)         | The map view, clustered pins over Istanbul                   |
+| 3   | [`03-bite-detail.png`](../assets/store-listing/phone-6.9/03-bite-detail.png) | One Bite: photo, author, stars, price, place and distance    |
+| 4   | [`04-bucket-list.png`](../assets/store-listing/phone-6.9/04-bucket-list.png) | A BiteTrail saved as a bucket list, with its Bites           |
+| 5   | [`05-profile.png`](../assets/store-listing/phone-6.9/05-profile.png)         | A profile: follower counts, visited-country flags, own Bites |
 
 The file numbering is capture order, not store order. What matters is that the
 App Store uses only the **first three** on install sheets, so those three have to
@@ -378,13 +378,13 @@ Five frames, shot 31 August 2026 on an **iPad Pro 13-inch (M5) simulator, iOS
 `ssot/assets/store-listing/ipad-13/`. Uploaded the same day; Apple confirmed it
 serves the 13-inch set to every iPad display size.
 
-| #   | File                            | Shows                                                     |
-| --- | ------------------------------- | --------------------------------------------------------- |
-| 1   | `01-home-feed.png`              | Two-column Bites feed with real distances from Cologne    |
-| 2   | `02-search-map-switzerland.png` | Country search, map view, clustered pins over Switzerland |
-| 3   | `03-restaurant-china-wok.png`   | China Wok: storefront, 4.8 from 26 ratings, tags, map     |
-| 4   | `04-restaurant-menu.png`        | The China Wok menu, categories with prices                |
-| 5   | `05-start-page.png`             | The logged-out start page                                 |
+| #   | File                                                                                             | Shows                                                     |
+| --- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| 1   | [`01-home-feed.png`](../assets/store-listing/ipad-13/01-home-feed.png)                           | Two-column Bites feed with real distances from Cologne    |
+| 2   | [`02-search-map-switzerland.png`](../assets/store-listing/ipad-13/02-search-map-switzerland.png) | Country search, map view, clustered pins over Switzerland |
+| 3   | [`03-restaurant-china-wok.png`](../assets/store-listing/ipad-13/03-restaurant-china-wok.png)     | China Wok: storefront, 4.8 from 26 ratings, tags, map     |
+| 4   | [`04-restaurant-menu.png`](../assets/store-listing/ipad-13/04-restaurant-menu.png)               | The China Wok menu, categories with prices                |
+| 5   | [`05-start-page.png`](../assets/store-listing/ipad-13/05-start-page.png)                         | The logged-out start page                                 |
 
 Uploaded in the order menu, restaurant, feed, start page, map. Apple uses only
 the first three on install sheets, which puts prices and then a rated
@@ -464,9 +464,9 @@ bar and makes the two stores show different framing of the same screen.
 
 Play's 1024 x 500 feature graphic is the one asset with a real design source: a
 Figma frame, exported to SVG. `ssot/assets/store-listing/feature-graphic/` holds
-the untouched export as `feature-graphic-original.svg`, the recoloured
-`feature-graphic.svg`, the 1024 x 500 `feature-graphic.png` that is live, and
-`photo-ojja.png`.
+the untouched export as [`feature-graphic-original.svg`](../assets/store-listing/feature-graphic/feature-graphic-original.svg), the recoloured
+[`feature-graphic.svg`](../assets/store-listing/feature-graphic/feature-graphic.svg), the 1024 x 500 [`feature-graphic.png`](../assets/store-listing/feature-graphic/feature-graphic.png) that is live, and
+[`photo-ojja.png`](../assets/store-listing/feature-graphic/photo-ojja.png).
 
 The export made the recolour surgical, because the whole orange surface is one
 two-stop linear gradient rather than painted artwork. Three edits:

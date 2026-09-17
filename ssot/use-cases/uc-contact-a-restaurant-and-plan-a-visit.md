@@ -4,22 +4,11 @@
 
 **Level:** L0.
 
-An idea with an epic and no code. The page began as
-`Expand Restaurant Menus Into Actionable Menu Journeys`, whose goal was that "menu items should
-become actionable starting points for food discovery and restaurant interaction". Two of the
-five actions it listed turned out to be delivered and owned - creating a Bite from a menu item
-is [UC - View Restaurant Menus](uc-view-restaurant-menus.md)'s and already ships, and a dish's availability is that page's
-to show and [UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md)'s to set. What was left is
-reaching the restaurant itself rather than the dish, which is this page.
-
-In the code there is nothing to point at: `Restaurant` carries no phone number and no email,
-no surface offers a contact action, and nothing resembling a visit plan or a reservation
-exists. Issue [#735], the Restaurant Interaction Platform epic, does not cover any of it either
-
-- its five stages are ownership, floor plan, table management, QR ordering, and payment with
-  Bite creation - and it names "Reservation management and booking windows" in its own
-  out-of-scope list. Issue [#1617] was opened for exactly this gap and owns all three actions; it
-  has no child issues yet, because each of them is a product decision before it is work.
+An idea with an epic and no code; `Flow` says what each action lacks. The page began as
+`Expand Restaurant Menus Into Actionable Menu Journeys`; two of the five actions it listed
+turned out to be delivered and owned elsewhere (see `MVP Classification`), and what was left
+is reaching the restaurant itself rather than the dish. Issue [#1617] owns that;
+`Related GitHub Scope` says why issue [#735] does not.
 
 ## Goal
 
@@ -49,8 +38,9 @@ with the restaurant.
 
 ## MVP Classification
 
-**[Secondary]** - the whole page. Nothing here is built, nothing is scheduled, and no epic owns
-any of it; none of it can be strictly required for the initial release.
+**[Secondary]** - the whole page. Nothing here is built and nothing is scheduled: epic [#1617]
+owns all of it and has no child issues yet, so none of it can be strictly required for the
+initial release.
 
 Not on this page: creating a Bite from a menu item and reading whether a dish is available,
 which are [UC - View Restaurant Menus](uc-view-restaurant-menus.md)'s, and setting that availability, which is

@@ -3,13 +3,19 @@
 ## Status
 
 **Level:** L0.
-Implemented for a single owner. The roles exist: [#1469] delivered `admin` and `business` as Firebase Auth custom claims and [#1472] guarded every operator callable, both driven by the admin app rather than by this use case. The shared model carries the ownership fields as of [#1074], and **an operator writes them** as of [#1077]: `assignRestaurantOwner` and `revokeRestaurantOwner`, behind a surface in the admin app. **The rules enforce it** as of [#1078]: a Restaurant and its Menu are writable by the assigned account and by an Operator and by nobody else, and `ownerUserId`, `claimStatus`, `claimedAt` and `claimedAtTimestamp` are writable by no client at all - the forgery demonstrated against the emulator on 8 September 2026 is now a deny test. **The business app reads it** as of [#1079]: the dashboard lists only the restaurants assigned to the caller, and the two routes that edit one refuse a restaurant assigned elsewhere by direct URL. **The business account manages its own staff** as of [#1537]: `addRestaurantStaff` and `removeRestaurantStaff` write the `staff` claim and a `/restaurantStaff/{uid}` record together, authorised by `ownerUserId` for a restaurant owner and by `RD-UR-6` for an operator. What that role may then _do_ is still nothing, deliberately - [#1537] scoped itself to the grant. The rules deploy by hand: they bind production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run. Specified through issue [#1069] as stage 0 of issue [#735].
 
-This is the blocking prerequisite for every other stage of the Restaurant Interaction Platform.
+Implemented for a single owner. Specified through issue [#1069] as stage 0 of issue [#735].
+The roles are Firebase Auth custom claims ([#1469], [#1472]), the ownership fields are on the
+shared model ([#1074]), and an operator writes them from the admin app ([#1077]). **The rules
+enforce it** ([#1078]): a Restaurant and its Menu are writable by the assigned account and by
+an Operator only, and the ownership fields by no client at all - the forgery demonstrated
+against the emulator on 8 September 2026 is now a deny test. The business app lists and opens
+only the restaurants assigned to the caller ([#1079]), and the business account manages its own staff ([#1537]). The rules deploy by hand: they bind production only once
+`npx nx firebase-deploy-rules bite-tribe-firebase` has run.
 
 ## Goal
 
-A restaurant has exactly one accountable owner: a normal BiteTribe user carrying the `business` role. Users can only read and write the restaurants assigned to them. Staff can act on those restaurants within a narrower permission set. Operators assign and revoke ownership.
+A restaurant has exactly one accountable owner: a normal BiteTribe user carrying the `business` role. Accounts can write only the restaurants assigned to them, and the business app shows them only those; the restaurants themselves stay readable, because the consumer app shows them. Staff can act on those restaurants within a narrower permission set. Operators assign and revoke ownership.
 
 This page owns who holds a restaurant, how that hold is granted and revoked, and what
 reads and writes it gates - in the callables, in `firestore.rules`, and in the business
@@ -23,8 +29,9 @@ pages for those behaviours.
   with access has a way back.
 - **Restaurant Owner** - holds the `business` role and the restaurants assigned to it, edits
   those restaurants and their menus, and adds and removes their staff.
-- **Restaurant Staff** - holds the `staff` role, granted by the Restaurant Owner. Named here
-  because this page is where the grant is made, not because the role can yet act on anything.
+- **Restaurant Staff** - holds the `staff` role, granted by the Restaurant Owner. Named here because this page is where the grant is made; what the role then does is
+  [UC - Manage Tables During Service](uc-manage-tables-during-service.md) and
+  [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md).
 
 ## Flow
 
@@ -39,7 +46,7 @@ Rewritten on 8 September 2026, implemented by [#1077], [#1078], [#1079] and [#15
 - An account holding nothing sees an empty state naming BiteTribe support rather than an empty list, because there is nothing it can do here to fix it: self-service claiming is closed as not planned ([#1076]).
 - **The account holding a restaurant adds and removes its staff, and cannot touch a restaurant it does not hold** ([#1537]). It adds an existing BiteTribe account by the email address it signed up with, from `restaurant/:restaurantId/staff` behind the same `documentOwnerGuard` the edit routes carry - so a staff account, which holds no restaurant, cannot reach the page that would let it hire. The `staff` claim and the `/restaurantStaff/{uid}` record are written together and neither is left behind by a failure; an account holding `admin` or `business` is refused as a target in both directions; and every grant and removal reaches Cloud Logging with the caller, the target and the restaurant. An operator can do all of it from the staff card on `restaurant-ownership`, which is the way back when a restaurant removes its last account with access.
 - **A removed staff account keeps its session for up to an hour** - the ID token's lifetime - and is then returned to the login page by `roleGuard`, not to a broken screen. Both surfaces say so in the removal confirmation rather than implying it is instant.
-- **[#1537] made the role grantable, not useful.** A staff account signs into the business app and sees an empty list: the dashboard scopes by `ownerUserId` ([#1079]) and the rules give `staff` no write ([#1078]). The issue put both out of scope by name. Narrowing what staff may see and do is a change to those two and has no owning issue.
+- **[#1537] made the role grantable; later issues made it usable.** [#1537] put what staff may see and do out of scope by name. [#1088], [#1092] and [#1097] then gave the role its reads, its first write through a callable, and an entry that lands a staff account in the room it works in instead of on the dashboard, which still lists restaurants by `ownerUserId` ([#1079]). The resulting permission set is [User Roles](../product/user-roles.md)'s.
 
 **[#1079] closed the gap between the assignment and what the account can _see_.** Verified against the emulator on 8 September 2026, before it: `restaurantsLoader` read the whole `restaurants` collection with no owner filter, so a business account was shown a restaurant assigned to a _different_ account and could open its edit form. The list had never been ownership-driven, so that was not something [#1077] regressed - it was the half of the epic's "the effect is visible in the business app" criterion [#1079] owned. [#1078] had already refused the _save_, which left the account reaching a form it could not submit and being told only that something went wrong; [#1079] removed the form from the list rather than improving that message.
 
@@ -87,7 +94,7 @@ There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it 
 
 - Ownership is held by a normal user carrying the `business` role. There is no organisation entity: the `isOrganisation` and `organisationId` fields this was once going to build on never had a writer and were removed in [issue-1371](../records/issue-1371.md).
 - Roles are Firebase Auth custom claims set only by the backend, so they cannot be forged from the client. See [Architecture - Auth](../architecture/auth.md).
-- **`admin`, `business` and `staff` are independent roles, not a hierarchy.** A staff account holds `staff` and **not** `business`, which is why `roleGuard` has to accept a set of roles: every business-app route is gated on `roleGuard('business')` today, so a staff account would otherwise be signed out at the door. Holding `business` and `staff` together is contradictory \- one operates a restaurant, the other is the narrowed set \- and `setUserRoles` refuses it.
+- **`admin`, `business` and `staff` are independent roles, not a hierarchy.** A staff account holds `staff` and **not** `business`, which is why `roleGuard` accepts a set of roles: the business-app routes are gated on `roleGuard('business', 'staff')`, and a single-role gate would sign a staff account out at the door. Holding `business` and `staff` together is contradictory \- one operates a restaurant, the other is the narrowed set \- and `setUserRoles` refuses it.
 - **Which restaurants an account is assigned to is a Firestore document, never a custom claim.** An assignment change then takes effect immediately rather than after up to an hour, there is no 1000-byte claim payload to grow into, and [#1078]'s rules read the same field \- a claim copy would be a second version of one fact that can silently disagree with it.
 - **Who may grant which role is not uniform.** `admin` and `business` are operator decisions through the admin-only `setUserRoles`. `staff` turns over with ordinary hiring, so a business account grants it itself, for the restaurants it holds only \- a callable that let any `business` caller grant `staff` to any uid would be a privilege-escalation path into the business app dressed as a convenience. See [#1537].
 - Assignment is idempotent, matching the existing `verifyRestaurantCandidate` rule.
@@ -126,9 +133,7 @@ and the business app - are web surfaces: only `bite-tribe-ios` and `bite-tribe-a
 are packaged with Capacitor, and [Implementation - Store Declarations](../implementation/store-declarations.md) covers that
 consumer client alone.
 
-This stops being true the moment a business or admin client is submitted to a store, at
-which point the empty list a staff account is shown becomes a minimum-functionality
-question rather than a known limitation.
+This stops being true the moment a business or admin client is submitted to a store, at which point the role-gated surfaces of that client are reviewed for the first time.
 
 ## Related GitHub Scope
 
@@ -172,6 +177,9 @@ question rather than a known limitation.
 [#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
 [#1079]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1079
 [#1086]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1086
+[#1088]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1088
+[#1092]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1092
+[#1097]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1097
 [#1371]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1371
 [#1469]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1469
 [#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472

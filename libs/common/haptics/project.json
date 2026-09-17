@@ -1,0 +1,8 @@
+{
+  "name": "haptics",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/common/haptics/src",
+  "prefix": "travellers-apps",
+  "tags": ["scope:common", "framework:ionic"]
+}

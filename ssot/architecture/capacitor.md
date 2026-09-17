@@ -22,6 +22,7 @@ apps/bite-tribe-android
 - Filesystem and local gallery support.
 - Geolocation and maps.
 - Native image handling and compression support.
+- Haptic feedback.
 
 ## Dependency Rule
 
@@ -498,6 +499,38 @@ must therefore branch on the state, not on the failure (issue [#1183]).
 - `openLocationSettings` is iOS-only. It reports `false` on every other
   platform, so a caller must not present the handoff as guaranteed.
 
+## Haptic Feedback Rule
+
+Haptics play through one service, `HapticsService` in `libs/common/haptics`, and
+only as one of five named intents (epic [#1633], issue [#1634]). Each intent maps
+to exactly one `@capacitor/haptics` call:
+
+| Intent      | Capacitor call                                             | Reserved for                                       |
+| ----------- | ---------------------------------------------------------- | -------------------------------------------------- |
+| `selection` | `Haptics.impact({ style: ImpactStyle.Light })`             | A frequent, low-stakes tap                         |
+| `confirm`   | `Haptics.impact({ style: ImpactStyle.Medium })`            | A deliberate, less frequent action completing      |
+| `warning`   | `Haptics.impact({ style: ImpactStyle.Heavy })`             | The confirming tap on an irreversible action, only |
+| `success`   | `Haptics.notification({ type: NotificationType.Success })` | The successful outcome of an action, never a tap   |
+| `error`     | `Haptics.notification({ type: NotificationType.Error })`   | The failed outcome of an action, never a tap       |
+
+- **No raw vibration.** The service exposes no `vibrate({ duration })`
+  passthrough, and no call site imports `@capacitor/haptics` directly. Apple's
+  and Android's haptics guidelines both steer away from an arbitrary buzz in
+  favour of named, reusable patterns, and one intent keeps one meaning
+  everywhere.
+- **Native only.** Every intent returns without reaching the plugin when
+  `Capacitor.isNativePlatform()` is false. The plugin's web implementation
+  falls back to `navigator.vibrate`, which is not part of the vocabulary.
+- **Never rejects.** A failure from the native call is swallowed, the same
+  posture `ToastService.present()` holds, so a call site fires and forgets it
+  without a try/catch.
+- **Once per discrete event.** No call site plays an intent on every
+  pointer-move frame, keystroke or scroll tick.
+- **No permission, no store declaration.** The plugin needs no runtime
+  permission, privacy nutrition label entry or store review declaration on
+  either platform, and the OS haptics setting already lets a user turn it off,
+  so there is no in-app toggle.
+
 ## Code Anchors
 
 ```text
@@ -510,6 +543,7 @@ apps/bite-tribe-ios/package.json
 apps/bite-tribe-android/package.json
 libs/bite-tribe/shell/src/lib/service-worker.ts
 libs/common/geolocation
+libs/common/haptics
 libs/common/push-notifications
 libs/common/networkstatus/feature
 libs/common/image-compression
@@ -535,3 +569,5 @@ libs/common/image-compression
 [#1409]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1409
 [#1412]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1412
 [#1414]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1414
+[#1633]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1633
+[#1634]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1634

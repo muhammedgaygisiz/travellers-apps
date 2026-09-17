@@ -52,9 +52,14 @@ or its own trail (`RD-VRC-7`). No second Restaurant and no second Menu are ever 
 data-quality defect, not a blocked flow; the Operator can defer at `END-V3`. Best guess;
 revisit once this page reaches L1.
 
+## Related GitHub Scope
+
+- Part of epic [#1630]
+
 ## Related Domains
 
 - [Restaurant](../domain/restaurant.md)
 - [Bite](../domain/bite.md)
 
 [#1499]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1499
+[#1630]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1630

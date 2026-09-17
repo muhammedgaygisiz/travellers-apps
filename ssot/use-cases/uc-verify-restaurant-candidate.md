@@ -602,9 +602,8 @@ discovered in review.
   and `skippedBiteIds`.
 - [#1511] — marking a Menu as derived from Bite evidence and showing it in the consumer
   app. `R-11`, `RD-VRC-11`, and the first App Store content question.
-- **No issue yet:** duplicate resolution (`V4b`, `R-14`, `UC-MRC`), `[Secondary]` and
-  deferred deliberately. It is now the only referenced Use Case on this page that
-  nothing on the board covers.
+- [#1630] — epic for duplicate resolution (`V4b`, `R-14`, `UC-MRC`), `[Secondary]` and
+  deferred deliberately.
 
 ## Related Domains
 
@@ -648,3 +647,4 @@ discovered in review.
 [#1521]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1521
 [#1522]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1522
 [#1615]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1615
+[#1630]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1630

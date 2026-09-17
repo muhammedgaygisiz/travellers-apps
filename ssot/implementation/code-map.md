@@ -152,6 +152,7 @@ of them, because each is its own entry on the admin dashboard (issue [#1473]).
 | `libs/common/toast`                    | `ToastService`, the only way either app raises a toast                                                     |
 | `libs/common/ta-firestore`             | Firebase bootstrap and Firestore integration support                                                       |
 | `libs/common/geolocation`              | Shared geolocation support                                                                                 |
+| `libs/common/haptics`                  | `HapticsService`, the only way either app plays haptic feedback                                            |
 | `libs/common/push-notifications`       | Push notification support                                                                                  |
 
 ## Backend Functions

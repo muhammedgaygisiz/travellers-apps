@@ -28,9 +28,7 @@ itself is [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md); and the money
 
 ## Actors
 
-- **Bite Creator** - acts: puts a priced BiteTrail on sale. Provisional: whether a
-  BiteTrail creator is a role of its own or a persona holding `business` is undecided, and
-  issue [#1615] settles it. This line is rewritten from [User Roles](../product/user-roles.md) when it does.
+- **Bite Creator** - acts: puts a priced BiteTrail on sale. Provisional: whether a BiteTrail creator is a role of its own or a persona is not final under `RD-UR-4`; issue [#1615] settles it, and this line is rewritten from [User Roles](../product/user-roles.md) when it does.
 
 ## Flow
 

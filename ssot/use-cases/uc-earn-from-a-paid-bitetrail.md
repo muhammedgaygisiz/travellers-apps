@@ -27,9 +27,7 @@ but takes that quantity from here. Making the trail in the first place is
 ## Actors
 
 - **Bite Creator** - acts: completes payout onboarding, earns from each sale, and reads the
-  balances those sales produce. Provisional: whether a BiteTrail creator is a role of its own
-  or a persona holding `business` is undecided, and issue [#1615] settles it. This line is
-  rewritten from [User Roles](../product/user-roles.md) when it does.
+  balances those sales produce. Provisional: whether a BiteTrail creator is a role of its own or a persona is not final under `RD-UR-4`; issue [#1615] settles it, and this line is rewritten from [User Roles](../product/user-roles.md) when it does.
 
 ## Flow
 

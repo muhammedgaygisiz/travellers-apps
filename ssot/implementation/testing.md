@@ -229,6 +229,17 @@ admin and business apps - desktop products, neither shipped as a native build -
 are baselined at `chrome.laptop` only. See [Implementation - Storybook](storybook.md) and
 issue [#1547].
 
+**Loki's Docker Chrome runs a 12-hour locale, so a reference image is a 12-hour
+rendering.** Anything a browser formats from its own UI locale rather than from
+the document - `input[type="time"]`, `input[type="date"]`, a native picker - is
+baselined in that locale and not in the one the developer's browser uses. This
+cuts both ways: a reference can look wrong to a reviewer whose browser is on
+24-hour time and still be correct, and a defect that only a 12-hour locale shows
+is caught here and nowhere else. The opening-hours times were the case: the
+committed `Business/Edit Restaurant` reference captured the meridiem being clipped
+off a fixed-width time box months before anyone read it that way (issue [#1549],
+see [Implementation - Ionic Patterns](ionic-patterns.md)).
+
 **A skeleton in a reference image is not automatically a regression.**
 `loki-getstories-shim.ts` carries a settle gate precisely because an `@defer`
 block's `@placeholder (minimum <n>ms)` outlives a naive settle check, and Loki
@@ -248,3 +259,4 @@ committed reference already shows a skeleton.
 [#1080]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1080
 [#1379]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1379
 [#1547]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1547
+[#1549]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1549

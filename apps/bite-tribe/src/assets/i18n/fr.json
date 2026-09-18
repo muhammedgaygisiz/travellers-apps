@@ -674,5 +674,9 @@
   "table-assistance-stale": "Nous avons perdu le contact avec le restaurant, ceci peut donc être périmé.",
   "bitemap": "Bitemap",
   "filters": "Filtres",
-  "suggested-tags": "Tags suggérés :"
+  "suggested-tags": "Tags suggérés :",
+  "get-the-app": "Obtenir l'application",
+  "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "Scannez un code avec l'appareil photo de votre téléphone pour installer BiteTribe.",
+  "download-on-the-app-store": "Télécharger dans l'App Store",
+  "get-it-on-google-play": "Disponible sur Google Play"
 }

@@ -674,5 +674,9 @@
   "table-assistance-stale": "فقدنا الاتصال بالمطعم، لذا قد تكون هذه المعلومات قديمة.",
   "bitemap": "Bitemap",
   "filters": "عوامل التصفية",
-  "suggested-tags": "الوسوم المقترحة:"
+  "suggested-tags": "الوسوم المقترحة:",
+  "get-the-app": "احصل على التطبيق",
+  "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "امسح رمزًا بكاميرا هاتفك لتثبيت BiteTribe.",
+  "download-on-the-app-store": "التنزيل من App Store",
+  "get-it-on-google-play": "احصل عليه من Google Play"
 }

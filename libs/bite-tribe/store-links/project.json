@@ -1,0 +1,21 @@
+{
+  "name": "bite-tribe/store-links",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bite-tribe/store-links/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["type:ui", "scope:bite-tribe", "framework:ionic"],
+  "targets": {
+    "stylelint": {
+      "executor": "nx-stylelint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/bite-tribe/store-links/**/*.css",
+          "libs/bite-tribe/store-links/**/*.scss"
+        ],
+        "formatter": "compact"
+      }
+    }
+  }
+}

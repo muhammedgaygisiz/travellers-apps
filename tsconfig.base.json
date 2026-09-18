@@ -157,6 +157,7 @@
       ],
       "bite-tribe/shell": ["libs/bite-tribe/shell/src/index.ts"],
       "bite-tribe/start": ["libs/bite-tribe/start/src/index.ts"],
+      "bite-tribe/store-links": ["libs/bite-tribe/store-links/src/index.ts"],
       "bite-tribe/store": ["libs/bite-tribe/store/src/index.ts"],
       "chart": ["libs/common/ui/chart/src/index.ts"],
       "common/networkstatus": [

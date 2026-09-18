@@ -31,7 +31,7 @@
 
 @if (!readonlyData && suggestedTags().length > 0) {
   <div class="suggestions-container ion-margin-top">
-    <div class="suggestions-label">Suggested Tags:</div>
+    <div class="suggestions-label">{{ 'suggested-tags' | transloco }}</div>
     <div class="suggestions">
       @for (suggestedTag of suggestedTags(); track suggestedTag) {
         @if (!tags().includes(suggestedTag)) {

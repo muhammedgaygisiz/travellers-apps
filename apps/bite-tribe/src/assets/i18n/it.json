@@ -671,5 +671,8 @@
   "table-assistance-requestBill-acknowledged": "Il tuo conto sta arrivando.",
   "table-assistance-refused-tableNotAttended": "Il ristorante non ti ha seduto a questo tavolo. Chiedi a un membro del personale.",
   "table-assistance-refused-cooldown": "Hai appena chiesto. Aspetta un momento prima di chiedere di nuovo.",
-  "table-assistance-stale": "Abbiamo perso il contatto con il ristorante, quindi questo potrebbe non essere aggiornato."
+  "table-assistance-stale": "Abbiamo perso il contatto con il ristorante, quindi questo potrebbe non essere aggiornato.",
+  "bitemap": "Bitemap",
+  "filters": "Filtri",
+  "suggested-tags": "Tag suggeriti:"
 }

@@ -671,5 +671,8 @@
   "table-assistance-requestBill-acknowledged": "Tu cuenta va de camino.",
   "table-assistance-refused-tableNotAttended": "El restaurante no te tiene sentado en esta mesa. Pregunta a un miembro del personal.",
   "table-assistance-refused-cooldown": "Acabas de pedirlo. Espera un momento antes de volver a pedirlo.",
-  "table-assistance-stale": "Hemos perdido el contacto con el restaurante, así que esto puede estar desactualizado."
+  "table-assistance-stale": "Hemos perdido el contacto con el restaurante, así que esto puede estar desactualizado.",
+  "bitemap": "Bitemap",
+  "filters": "Filtros",
+  "suggested-tags": "Etiquetas sugeridas:"
 }

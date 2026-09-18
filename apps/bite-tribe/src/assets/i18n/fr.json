@@ -671,5 +671,8 @@
   "table-assistance-requestBill-acknowledged": "Votre addition arrive.",
   "table-assistance-refused-tableNotAttended": "Le restaurant ne vous a pas installé à cette table. Adressez-vous à un membre du personnel.",
   "table-assistance-refused-cooldown": "Vous venez de demander. Patientez un instant avant de redemander.",
-  "table-assistance-stale": "Nous avons perdu le contact avec le restaurant, ceci peut donc être périmé."
+  "table-assistance-stale": "Nous avons perdu le contact avec le restaurant, ceci peut donc être périmé.",
+  "bitemap": "Bitemap",
+  "filters": "Filtres",
+  "suggested-tags": "Tags suggérés :"
 }

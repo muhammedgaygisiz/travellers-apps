@@ -671,5 +671,8 @@
   "table-assistance-requestBill-acknowledged": "เช็คบิลของคุณกำลังมา",
   "table-assistance-refused-tableNotAttended": "ร้านไม่ได้บันทึกว่าคุณนั่งอยู่โต๊ะนี้ กรุณาสอบถามพนักงาน",
   "table-assistance-refused-cooldown": "คุณเพิ่งขอไป รอสักครู่ก่อนขออีกครั้ง",
-  "table-assistance-stale": "เราขาดการติดต่อกับร้าน ข้อมูลนี้อาจไม่เป็นปัจจุบัน"
+  "table-assistance-stale": "เราขาดการติดต่อกับร้าน ข้อมูลนี้อาจไม่เป็นปัจจุบัน",
+  "bitemap": "Bitemap",
+  "filters": "ตัวกรอง",
+  "suggested-tags": "แท็กที่แนะนำ:"
 }

@@ -20,6 +20,7 @@ import {
 import { Bite, LikeClick, ProfileMetaData, PublicUser } from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
+import { HapticsService } from 'haptics';
 import { OverlayEventDetail } from '@ionic/core';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { ProfileHeader } from './components/profile-header';
@@ -56,6 +57,7 @@ const PAGE_SIZE = 50;
 })
 export class ProfileComponent {
   transloco = inject(TranslocoService);
+  private readonly haptics = inject(HapticsService);
 
   isAuthenticated = input(false);
   isLoading = input(false, { transform: booleanAttribute });
@@ -225,6 +227,11 @@ export class ProfileComponent {
     const role = event.detail.role;
 
     if (role === UNFOLLOW) {
+      // The confirming tap on a destructive alert gets the `warning` intent
+      // reserved for exactly that. Cancelling, and opening the alert, stay
+      // silent. See GitHub issue #1636.
+      void this.haptics.warning();
+
       this.unfollow();
     }
 

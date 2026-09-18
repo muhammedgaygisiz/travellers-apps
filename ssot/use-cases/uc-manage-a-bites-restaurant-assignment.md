@@ -4,7 +4,7 @@
 
 **Level:** L1
 
-No page exists yet; `UC-VRC` names this page (renamed from `UC-ARB`) as the owner of
+This page is what `UC-VRC` names as the owner of
 `bite.restaurantId`'s writers outside its own verification transaction (`R-8`), tracked,
 alongside dismissal and duplicate resolution, under epic [#1495]. `R-8` names four
 writers in total: `V23` inside candidate verification, owned by `UC-VRC`; the Bite form,

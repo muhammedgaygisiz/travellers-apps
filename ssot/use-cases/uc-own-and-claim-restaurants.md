@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Implemented for a single owner. Specified through issue [#1069] as stage 0 of issue [#735].
 The roles are Firebase Auth custom claims ([#1469], [#1472]), the ownership fields are on the
@@ -134,6 +134,24 @@ are packaged with Capacitor, and [Implementation - Store Declarations](../implem
 consumer client alone.
 
 This stops being true the moment a business or admin client is submitted to a store, at which point the role-gated surfaces of that client are reviewed for the first time.
+
+## Supported Evidence
+
+- `libs/bite-tribe-common/model/src/lib/restaurant.ts`, the `ownerUserId`, `claimStatus`,
+  `claimedAt` and `claimedAtTimestamp` fields
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/restaurant-ownership.ts`
+  (`assignRestaurantOwner`, `revokeRestaurantOwner`) and `restaurant-staff.ts`
+  (`addRestaurantStaff`, `removeRestaurantStaff`), both logged through
+  `apps/bite-tribe-firebase/functions/src/functions/shared/operator-log.ts`
+- `libs/bite-tribe-admin/restaurants/{page,data-access}`, the `restaurant-ownership` admin
+  surface that assigns and revokes, and the staff card on it
+- `libs/common/ta-firestore/src/lib/document-owner.guard.ts` (`documentOwnerGuard`), on
+  `restaurant/:restaurantId` and its menu route, and `restaurantsLoader` in
+  `libs/bite-tribe-business/dashboard/data-access/src/lib/dashboard-data-access.service.ts`,
+  which queries `restaurants` where `ownerUserId` equals the caller
+- `apps/bite-tribe-firebase/firestore.rules`, the ownership-scoped rules, verified by
+  `apps/bite-tribe-firebase/functions/src/firestore-rules/__specs__/firestore-rules.emulator-spec.ts`
+  (allow and deny cases, including the ownership-forgery deny test)
 
 ## Related GitHub Scope
 

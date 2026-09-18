@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Readable and writable, and usable in a room with no signal. Specified through issue [#1071]
 as stage 2 of issue [#735] and built by its child issues [#1091] to [#1098], which `Flow`
@@ -109,6 +109,21 @@ route in the business app, and only `apps/bite-tribe-ios` and `apps/bite-tribe-a
 native project. It would become relevant the moment a guest reached a table from a store
 build - the session a seating activates is already written by `transitionTableState` - and
 that surface is [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md)'s.
+
+## Supported Evidence
+
+- `libs/bite-tribe-business/table-management/{page,data-access}`, the live room view at
+  `restaurant/:restaurantId/tables`, gated by `staffEntryGuard` and `restaurantAccessGuard`
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/transition-table-state.ts`
+  (`transitionTableState`) and `move-table-visit.ts` (`moveTableVisit`)
+- `libs/bite-tribe-common/model/src/lib/table-state.ts`, `TABLE_STATE_TRANSITIONS`, and
+  `apps/bite-tribe-firebase/functions/src/__specs__/table-state-parity.spec.ts`, which compares
+  the Functions copy against it row by row
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/__specs__/transition-table-state.emulator-spec.ts`,
+  the two-staff-acting-at-once conflict suite
+- `apps/bite-tribe-business-e2e/src/tests/live-table-view.spec.ts`, covering real-time sync
+  across devices, the offline write queue and replay, and the four-state liveness indicator
+- [Implementation - Analytics Events](../implementation/analytics-events.md), the production run of the seven `table_*` events
 
 ## Related GitHub Scope
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Next to implement. Priority P1, post-launch. Nothing of the paid half exists: there is no
 paywall, no store client, no billing webhook and no gated capability. What exists is the

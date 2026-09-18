@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. Every migration runs from its own surface in the admin app behind
 `roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Two collection-wide
 migrations are registered - `review-timestamps` and `menu-item-ids` - alongside the four
@@ -145,6 +145,33 @@ reaches a device is the new version announcement, whose store considerations bel
 - `backfillMenuItemIdsCallable`, started from the menu item ids backfill
   surface.
 
+## Related GitHub Scope
+
+- Issue [#1471] is the epic that grew the admin app into the BiteTribe operations tool,
+  migrations included. Closed, with every issue under it complete.
+- Issue [#1473], part of [#1471], split the migrations page by what each migration does and
+  gave the dashboard one entry per migration instead of one shared page - new version
+  notification, review timestamps backfill, Bite address backfill, restaurant clustering,
+  image migration, geohash migration. Closed.
+- Issue [#1472] requires the `admin` role on every operator callable, migrations included, so
+  moving the UI did not secure them on its own; the classification of every endpoint is now a
+  test. Done.
+- Issue [#1194] added the new version notification (`sendNewVersionNotification`). Closed; see
+  the Release Announcement Contract in
+  [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
+- Issue [#1283] delivered `backfillReviewTimestampsCallable` alongside review threading, to be
+  run once after deploying from the review-timestamps backfill surface. Closed - see
+  [issue-1283](../records/issue-1283.md).
+- Issue [#1099] added the stable menu-item ids `backfillMenuItemIds` fills in for menus written
+  before it, delivered by pull request [#1593]. Closed.
+- Issue [#945] added `backfillBiteAddress`, delivered by pull request [#1005]. Closed.
+- Issue [#939] added `clusterRestaurantCandidateForBite`, the restaurant-clustering migration,
+  delivered by pull request [#948]. Closed.
+- Issue [#447] added the geohash migration (`addGeohashToBite`), delivered by pull request
+  [#453]. Closed.
+- Pull request [#432] built the image-migration tooling (`migrateBiteImage`); it carries no
+  linked issue of its own. Closed.
+
 ## Related Domains
 
 - [User](../domain/user.md)
@@ -160,6 +187,17 @@ reaches a device is the new version announcement, whose store considerations bel
   ids `menu-item-ids` fills
 - [issue-1283](../records/issue-1283.md)
 
+[#432]: https://github.com/muhammedgaygisiz/travellers-apps/issues/432
+[#447]: https://github.com/muhammedgaygisiz/travellers-apps/issues/447
+[#453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/453
+[#939]: https://github.com/muhammedgaygisiz/travellers-apps/issues/939
+[#945]: https://github.com/muhammedgaygisiz/travellers-apps/issues/945
+[#948]: https://github.com/muhammedgaygisiz/travellers-apps/issues/948
+[#1005]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1005
 [#1099]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1099
+[#1194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1194
+[#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
+[#1471]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1471
 [#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472
 [#1473]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1473
+[#1593]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1593

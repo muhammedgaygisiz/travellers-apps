@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Next to implement. Priority P1, post-launch. Nothing of it exists, and that absence is
 currently a declared fact rather than an omission: no AdMob, User Messaging Platform or App

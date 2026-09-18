@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Supported today. A business account signs in, sees the map and the two surfaces the dashboard
 offers, and edits the Restaurants assigned to it - metadata, opening hours, social links,

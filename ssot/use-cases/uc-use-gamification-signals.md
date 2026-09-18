@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. The leaderboard and its persisted `/meta/leaderboard` document, the bite counts
 behind it, the daily ranking notification and the country badges all ship. What is still ahead
 is BiteTrail gamification, which is [UC - Add BiteTrail Gamification](uc-add-bitetrail-gamification.md)'s rather than this

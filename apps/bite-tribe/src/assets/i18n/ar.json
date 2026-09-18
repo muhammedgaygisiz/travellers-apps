@@ -671,5 +671,8 @@
   "table-assistance-requestBill-acknowledged": "حسابك في الطريق.",
   "table-assistance-refused-tableNotAttended": "المطعم لا يسجل جلوسك على هذه الطاولة. اسأل أحد العاملين.",
   "table-assistance-refused-cooldown": "لقد طلبت للتو. انتظر قليلًا قبل أن تطلب مرة أخرى.",
-  "table-assistance-stale": "فقدنا الاتصال بالمطعم، لذا قد تكون هذه المعلومات قديمة."
+  "table-assistance-stale": "فقدنا الاتصال بالمطعم، لذا قد تكون هذه المعلومات قديمة.",
+  "bitemap": "Bitemap",
+  "filters": "عوامل التصفية",
+  "suggested-tags": "الوسوم المقترحة:"
 }

@@ -671,5 +671,8 @@
   "table-assistance-requestBill-acknowledged": "Bon Anda sedang disiapkan.",
   "table-assistance-refused-tableNotAttended": "Restoran tidak mencatat Anda duduk di meja ini. Tanyakan kepada staf.",
   "table-assistance-refused-cooldown": "Anda baru saja meminta. Tunggu sebentar sebelum meminta lagi.",
-  "table-assistance-stale": "Kami kehilangan kontak dengan restoran, jadi ini mungkin sudah tidak berlaku."
+  "table-assistance-stale": "Kami kehilangan kontak dengan restoran, jadi ini mungkin sudah tidak berlaku.",
+  "bitemap": "Bitemap",
+  "filters": "Filter",
+  "suggested-tags": "Tag yang disarankan:"
 }

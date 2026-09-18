@@ -28,7 +28,7 @@
     <div class="chip-container ion-display-flex ion-flex-wrap">
       <ion-chip (click)="openMapView.emit()">
         <ion-icon src="assets/custom-icons/map.svg" />
-        <ion-text color="secondary">Bitemap</ion-text>
+        <ion-text color="secondary">{{ 'bitemap' | transloco }}</ion-text>
       </ion-chip>
     </div>
   }
@@ -69,7 +69,7 @@
   <ng-template>
     <app-type-ahead
       class="ion-page"
-      title="Filters"
+      [title]="'filters' | transloco"
       [items]="allTags()"
       [selectedItems]="selectedFilters()"
       [distance]="distance()"

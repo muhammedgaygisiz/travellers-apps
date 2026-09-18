@@ -671,5 +671,8 @@
   "table-assistance-requestBill-acknowledged": "ሂሳብዎ እየመጣ ነው።",
   "table-assistance-refused-tableNotAttended": "ምግብ ቤቱ በዚህ ጠረጨዛ ላይ እንደተቀመጡ አልመዝገበም። ሰራተኛ ይጠይቁ።",
   "table-assistance-refused-cooldown": "አሁን ጠይቀውአል። እንደገና ከመጠየቅዎ በፊት ትንሽ ይጠብቁ።",
-  "table-assistance-stale": "ከምግብ ቤቱ ጋር ግንኛነት ተቁርጧል፣ ስለዚህ ይህ ወቅታዋይ ላይሆን ይችላል።"
+  "table-assistance-stale": "ከምግብ ቤቱ ጋር ግንኛነት ተቁርጧል፣ ስለዚህ ይህ ወቅታዋይ ላይሆን ይችላል።",
+  "bitemap": "Bitemap",
+  "filters": "ማጣሪያዎች",
+  "suggested-tags": "የተጠቆሙ መለያዎች:"
 }

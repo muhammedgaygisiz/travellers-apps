@@ -674,5 +674,9 @@
   "table-assistance-stale": "Restoranla bağlantımız koptu, bu yüzden bu bilgi güncel olmayabilir.",
   "bitemap": "Bitemap",
   "filters": "Filtreler",
-  "suggested-tags": "Önerilen Etiketler:"
+  "suggested-tags": "Önerilen Etiketler:",
+  "get-the-app": "Uygulamayı indir",
+  "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "BiteTribe'ı yüklemek için telefonunuzun kamerasıyla bir kodu tarayın.",
+  "download-on-the-app-store": "App Store'dan indirin",
+  "get-it-on-google-play": "Google Play'den alın"
 }

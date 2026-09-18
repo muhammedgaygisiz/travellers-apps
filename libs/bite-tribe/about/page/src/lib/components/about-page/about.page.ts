@@ -14,6 +14,7 @@ import {
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { appRelease } from 'utils';
+import { StoreLinksComponent } from 'bite-tribe/store-links';
 
 @Component({
   selector: 'about-page',
@@ -28,6 +29,7 @@ import { appRelease } from 'utils';
     IonLabel,
     IonIcon,
     TranslocoPipe,
+    StoreLinksComponent,
   ],
 })
 export class AboutPage {

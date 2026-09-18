@@ -1,0 +1,38 @@
+@if (isWeb) {
+  <div class="store-links" data-testid="store-links">
+    <p class="store-links-heading">{{ 'get-the-app' | transloco }}</p>
+    <p class="store-links-hint">
+      {{
+        'scan-a-code-with-your-phone-camera-to-install-bite-tribe' | transloco
+      }}
+    </p>
+
+    <div class="store-links-list">
+      <!-- One anchor per listing, holding both drawings of it. The badge names
+    which code it sits under, so nothing here needs a caption of its own. -->
+      <a
+        class="store-link"
+        data-testid="store-links-app-store"
+        [href]="appStoreUrl"
+        target="_blank"
+        rel="noopener"
+        [attr.aria-label]="'download-on-the-app-store' | transloco"
+      >
+        <span class="store-code store-code-app-store"></span>
+        <span class="store-badge store-badge-app-store"></span>
+      </a>
+
+      <a
+        class="store-link"
+        data-testid="store-links-google-play"
+        [href]="googlePlayUrl"
+        target="_blank"
+        rel="noopener"
+        [attr.aria-label]="'get-it-on-google-play' | transloco"
+      >
+        <span class="store-code store-code-google-play"></span>
+        <span class="store-badge store-badge-google-play"></span>
+      </a>
+    </div>
+  </div>
+}

@@ -674,5 +674,9 @@
   "table-assistance-stale": "We've lost touch with the restaurant, so this may be out of date.",
   "bitemap": "Bitemap",
   "filters": "Filters",
-  "suggested-tags": "Suggested Tags:"
+  "suggested-tags": "Suggested Tags:",
+  "get-the-app": "Get the app",
+  "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "Scan a code with your phone camera to install BiteTribe.",
+  "download-on-the-app-store": "Download on the App Store",
+  "get-it-on-google-play": "Get it on Google Play"
 }

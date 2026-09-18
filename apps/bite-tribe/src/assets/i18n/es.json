@@ -674,5 +674,9 @@
   "table-assistance-stale": "Hemos perdido el contacto con el restaurante, así que esto puede estar desactualizado.",
   "bitemap": "Bitemap",
   "filters": "Filtros",
-  "suggested-tags": "Etiquetas sugeridas:"
+  "suggested-tags": "Etiquetas sugeridas:",
+  "get-the-app": "Consigue la app",
+  "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "Escanea un código con la cámara de tu teléfono para instalar BiteTribe.",
+  "download-on-the-app-store": "Consíguelo en el App Store",
+  "get-it-on-google-play": "Disponible en Google Play"
 }

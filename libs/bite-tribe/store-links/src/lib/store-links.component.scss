@@ -1,0 +1,150 @@
+/* What each listing is drawn as is decided here rather than in TypeScript, and
+ * that is the design of this component. A QR code and a store badge are the same
+ * link at two different distances - one for a camera held by a second device,
+ * one for the thumb already on the screen - and which applies is a property of
+ * the viewport, which CSS observes directly and continuously. A component
+ * reading the width into a signal would answer the same question a step later
+ * and re-answer it on every resize.
+ *
+ * On a wide viewport both are shown, the badge under the code it belongs to:
+ * two QR codes side by side are otherwise indistinguishable, and the badge says
+ * which store each one leads to in the artwork the reader already recognises.
+ * Below the breakpoint the code cannot be scanned by the screen displaying it,
+ * so only the badge remains.
+ *
+ * Both drawings sit inside one anchor per listing. There is one link and one
+ * `aria-label` per store however many pictures of it are on screen, and the
+ * artwork stays decorative.
+ *
+ * The badge files are Apple's and Google's own, unmodified, and must stay that
+ * way: both store guidelines permit the supplied artwork and no derivative of
+ * it. See Implementation - Store Listing Assets. */
+
+:host {
+  display: block;
+}
+
+.store-links {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+  text-align: center;
+}
+
+.store-links-heading {
+  margin: 0 0 4px;
+  color: var(--ion-color-secondary);
+  font-size: 0.875rem;
+}
+
+.store-links-hint {
+  margin: 0 0 16px;
+  color: var(--ion-color-medium, #92949c);
+  font-size: 0.75rem;
+}
+
+.store-links-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.store-link {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  text-decoration: none;
+}
+
+.store-code,
+.store-badge {
+  display: block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* 124px rather than anything rounder: the start page caps its column at 300px,
+ * and this sits beside the widest of the two badge boxes below with the row gap
+ * still inside that. Wider and the two listings wrap into a stack on the one
+ * page the codes exist for. */
+.store-code {
+  width: 124px;
+  height: 124px;
+}
+
+.store-code-app-store {
+  background-image: url('/assets/store/app-store-qr.svg');
+}
+
+.store-code-google-play {
+  background-image: url('/assets/store/google-play-qr.svg');
+}
+
+/* Both badges show the same 40px of visible artwork, which is the smallest
+ * Apple's guidelines allow. The clear space each needs is a tenth of its height
+ * and reaches them differently: Apple's SVG is the badge alone, so the margin is
+ * added here, while Google's PNG is a 646x250 canvas around a 564x168 badge and
+ * already carries it - which is why its box is the taller of the two for the
+ * same drawn height. */
+.store-badge-app-store {
+  width: 120px;
+  height: 40px;
+  margin: 4px 0;
+  background-image: url('/assets/store/app-store-badge-black.svg');
+}
+
+.store-badge-google-play {
+  width: 154px;
+  height: 60px;
+  background-image: url('/assets/store/google-play-badge.png');
+}
+
+/* Apple ships a black badge for light backgrounds and a white one for dark, and
+ * the two conditions below are the same pair the theme itself is switched on in
+ * `apps/bite-tribe/src/theme/variables.scss`: an explicit choice on the `html`
+ * element, and the system preference where no choice was made. A `<picture>`
+ * element could express the second but never the first.
+ *
+ * `:host-context()` rather than a plain descendant selector, and that is not a
+ * style preference. Angular's emulated encapsulation appends the component
+ * attribute to every compound selector in this file, `html` included, so a
+ * written `html.dark .store-badge-app-store` is emitted as
+ * `html.dark[_ngcontent-x] ...` and matches nothing ever - silently, leaving the
+ * black badge on a dark page.
+ *
+ * Google ships one badge, which their guidelines place on either. */
+:host-context(html.dark) .store-badge-app-store {
+  background-image: url('/assets/store/app-store-badge-white.svg');
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(html:not(.light)) .store-badge-app-store {
+    background-image: url('/assets/store/app-store-badge-white.svg');
+  }
+}
+
+/* STORE_BADGE_MAX_WIDTH_PX in store-links.ts, which is where the reasoning for
+ * the number lives. Repeated as a literal because Sass cannot read a TypeScript
+ * constant; the two are held together by Loki, which renders these stories
+ * either side of this width on every run. */
+@media (width <= 600px) {
+  /* The hint tells the reader to scan, which is exactly what they cannot do
+   * here, so it goes rather than being reworded for a second case. */
+  .store-links-hint {
+    display: none;
+  }
+
+  .store-links-list {
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .store-code {
+    display: none;
+  }
+}

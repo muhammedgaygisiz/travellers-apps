@@ -674,5 +674,9 @@
   "table-assistance-stale": "ከምግብ ቤቱ ጋር ግንኛነት ተቁርጧል፣ ስለዚህ ይህ ወቅታዋይ ላይሆን ይችላል።",
   "bitemap": "Bitemap",
   "filters": "ማጣሪያዎች",
-  "suggested-tags": "የተጠቆሙ መለያዎች:"
+  "suggested-tags": "የተጠቆሙ መለያዎች:",
+  "get-the-app": "መተግበሪያውን ያግኙ",
+  "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "BiteTribe ን ለመጫን በስልክዎ ካሜራ አንድ ኮድ ይቃኙ።",
+  "download-on-the-app-store": "ከApp Store ያውርዱ",
+  "get-it-on-google-play": "በGoogle Play ያግኙት"
 }

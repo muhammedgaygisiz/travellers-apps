@@ -674,5 +674,9 @@
   "table-assistance-stale": "เราขาดการติดต่อกับร้าน ข้อมูลนี้อาจไม่เป็นปัจจุบัน",
   "bitemap": "Bitemap",
   "filters": "ตัวกรอง",
-  "suggested-tags": "แท็กที่แนะนำ:"
+  "suggested-tags": "แท็กที่แนะนำ:",
+  "get-the-app": "ดาวน์โหลดแอป",
+  "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "สแกนโค้ดด้วยกล้องโทรศัพท์ของคุณเพื่อติดตั้ง BiteTribe",
+  "download-on-the-app-store": "ดาวน์โหลดบน App Store",
+  "get-it-on-google-play": "ดาวน์โหลดได้ที่ Google Play"
 }

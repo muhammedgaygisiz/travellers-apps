@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. The gallery, the shared full-screen viewer, the uid-scoped directory behind it
 and the filename route back to a Bite all ship. The scoping is the page's substantial fact and
 the reason it exists: see `Account Scoping Contract`.
@@ -95,6 +95,10 @@ onboarding ([UC - Guide New Users After Registration](uc-guide-new-users-after-r
 - `localImageFileName` in `libs/bite-tribe/api/src/lib/utils/local-image-file.ts`.
 - `localImageDirectory` in `libs/common/utils/src/lib/local-image-directory.ts`,
   the single owner of where local copies live.
+
+## Related GitHub Scope
+
+- Issue [#1328] is the account-scoping fix - the gallery moved from a flat, unscoped directory to the uid-scoped one this page now reads. Closed.
 
 ## Related Domains
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. The settings page carries theme, currency with a favourites shortlist,
 language, the location-permission state, and the per-installation notification list [#1184] put
 in place of the old account-wide switch. Two fields on the `Settings` model are not controls
@@ -101,6 +101,13 @@ and at the point of use, not here, and the data types behind them are declared i
 - Settings API.
 - Exchange-rates API.
 - Currency selector assets.
+
+## Related GitHub Scope
+
+- Issue [#1184] replaced the account-wide Push Notifications switch with the per-installation notification management this page exposes. Closed as completed.
+- Issue [#1023] is where the location permission this page reports is collected, during onboarding (part of the closed epic-850).
+- Issue [#1386] is the OS-permission-vs-delivery-flag distinction the current installation's row reflects. Closed as completed.
+- Issue [#1606] tracks two undecided items this page still carries: whether the disabled email-updates switch is built or dropped, and whether `Settings.nearby` becomes a control here. Open.
 
 ## Related Domains
 

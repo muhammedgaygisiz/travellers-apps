@@ -4,8 +4,9 @@
 
 **Level:** L1
 Partly in place, and the rest is tracked elsewhere. App Check is enforced on every callable -
-all 42 go through the `onAppCheck` wrapper and not one uses a raw `onCall` - and the control in
-front of Google Places is written down rather than implied ([issue-1245](../records/issue-1245.md)). Still open:
+41 go through the `onAppCheck` wrapper, and the other two (`getCurrencyByPosition`,
+`backfillBiteAddress`) call `onCall` directly but set `enforceAppCheck` themselves - and the
+control in front of Google Places is written down rather than implied ([issue-1245](../records/issue-1245.md)). Still open:
 `storage.rules` ([#1350]) and App Check replay protection on sensitive callables ([#952]). CI
 now deploys `firestore.rules`, `storage.rules` and `firestore.indexes.json` from `develop` and
 waits for indexes to be READY before functions deploy, closing [#1567].
@@ -51,7 +52,8 @@ App Check attests the app binary to Firebase and is invisible to a reviewer.
 
 - `onAppCheck` in `apps/bite-tribe-firebase/functions/src/functions/shared/callable-options.ts`,
   which sets `enforceAppCheck` everywhere except the Functions emulator.
-- 42 callable modules import it; none declares a raw `onCall`.
+- 41 callable modules import it; the other two, `getCurrencyByPosition` and
+  `backfillBiteAddress`, call `onCall` directly but set `enforceAppCheck` themselves.
 - [issue-1245](../records/issue-1245.md) for the Google Places control and the App Check monitoring reading behind it.
 
 ## Related GitHub Scope

@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Supported today. Bite creation resolves the currency from the Bite position and prefills
 it, keeps the user's preferred currency as the fallback, and leaves the choice editable
@@ -60,6 +60,13 @@ resolves against is obtained by [UC - Create And Maintain Personal Bites](uc-cre
 those prompts. It would become relevant if a mismatch check ever needed a live position of
 its own, or if what the backend sends to Google while resolving a currency or a place
 changed what [Implementation - Store Declarations](../implementation/store-declarations.md) declares.
+
+## Supported Evidence
+
+- `getCurrencyByPosition` in `apps/bite-tribe-firebase/functions/src/functions/location/get-currency-by-position.ts`, the backend currency resolution callable.
+- `getCurrencyForDevice` in `libs/common/utils/src/lib/get-currency-for-device.ts`, called from `OnboardingService` with the device time zone.
+- `FloatNumberDotNotationValidator` in `libs/bite-tribe/bite/page/src/lib/validators/float-number-dot-notation.validator.ts`, the price field's reject-and-explain validator.
+- `onRestaurantSelected` and `onGooglePlaceSelected` in `libs/bite-tribe/bite/page/src/lib/components/page/bite.page.ts`, which patch the Bite `position` when the selected place carries one.
 
 ## Related GitHub Scope
 

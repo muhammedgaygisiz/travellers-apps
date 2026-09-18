@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Supported today. A restaurant that carries a menu resolves to this page, which renders the
 categories and their priced dish rows and turns any item into a prefilled Bite. Its whole

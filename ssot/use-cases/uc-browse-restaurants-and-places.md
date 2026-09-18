@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Supported today. A Bite leads to a verified restaurant page or an unverified place page;
 both render the ratings, tags and context derived from Bites, and the verified page

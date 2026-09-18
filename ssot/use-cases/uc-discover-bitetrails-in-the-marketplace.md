@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Supported today. The Market Place page reads the whole `biteTrails` collection and shows a
 card per BiteTrail, each enriched with a sold count taken from its `sells` subcollection; a

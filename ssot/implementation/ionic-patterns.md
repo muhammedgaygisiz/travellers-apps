@@ -49,22 +49,24 @@ Use these adaptive tokens:
 
 **Every toast goes through `ToastService` in `libs/common/toast`.** No call site builds its own `toastController.create` options; a `no-restricted-imports` rule in `eslint.config.mjs` blocks `ToastController` everywhere except the service itself and its spec.
 
-The service owns the four things the fourteen former call sites disagreed on:
+The service owns the four things the fourteen former call sites disagreed on, and the haptic that the same `outcome` now also drives:
 
-| Decision | Value                                            |
-| -------- | ------------------------------------------------ |
-| Position | `top`, for every toast in both apps              |
-| Colour   | `success` or `danger`, from a required `outcome` |
-| Duration | 5s for a success, 10s for a failure              |
-| Message  | A Transloco key, looked up by the service        |
+| Decision | Value                                                |
+| -------- | ---------------------------------------------------- |
+| Position | `top`, for every toast in both apps                  |
+| Colour   | `success` or `danger`, from a required `outcome`     |
+| Duration | 5s for a success, 10s for a failure                  |
+| Message  | A Transloco key, looked up by the service            |
+| Haptic   | `success` or `error` intent, from the same `outcome` |
 
 `outcome` is a required input, so a call site cannot raise an uncoloured toast. That was the actual defect in [issue #1305][#1305]: only the two Bite paths passed a colour and nothing anywhere passed `danger`, so a failed registration, settings save or bucket-list write rendered in exactly the same grey as a success. The outcome of an action was not encoded visually at all and had to be read out of the message text.
 
-Three details worth knowing before changing it:
+Four details worth knowing before changing it:
 
 - **`top` is a footer decision, not a majority one.** Twelve of the fourteen sites presented at the bottom, but the shared page chrome in `libs/common/ui/page` renders a persistent `ion-footer` carrying the menu entries and the add button, and a bottom toast lands on it. The Bite creation toast also sits better above the full-width photo card.
 - **Failures stay up twice as long, deliberately.** A success confirms something the user just did and only has to be noticed; a failure carries a recovery instruction that has to be read, and it arrives when the user has already moved on. Both durations derive from one constant.
 - **`present()` never rejects and always settles.** Every overlay call is bounded by a 2s timeout and every failure swallowed, so a flow can `await` a toast without the toast becoming what that flow depends on. This is the [Current State - Known Issues](../current-state/known-issues.md) [#1219] guarantee, held once in the service instead of separately at each caller. A toast still on screen is dismissed before the next one, because Ionic stacks toasts at the same position.
+- **The haptic sits alongside the toast, never in front of it.** `present()` fires the `HapticsService` intent for the outcome (`success` → `success`, `failure` → `error`) without awaiting it, before the overlay work, and swallows a throw or rejection from it. The haptic therefore plays even when the overlay fails, and it can never change whether the toast presents or when `present()` settles. No call site plays a `success` or `error` intent next to a toast itself; it would play twice. See issue [#1635].
 
 A toast that leads somewhere passes an `action` instead, which replaces the dismiss button — the bucket-list save is the one example.
 
@@ -107,3 +109,4 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1392]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1392
 [#1393]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1393
 [#1411]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1411
+[#1635]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1635

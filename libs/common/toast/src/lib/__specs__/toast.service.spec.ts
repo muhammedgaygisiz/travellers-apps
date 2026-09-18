@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ToastController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
+import { HapticsService } from 'haptics';
 import {
   TOAST_DURATION_MS,
   TOAST_FAILURE_DURATION_MS,
@@ -26,10 +27,15 @@ describe('ToastService', () => {
   let service: ToastService;
   let toast: ToastStub;
   let create: jest.Mock;
+  let haptics: { success: jest.Mock; error: jest.Mock };
 
   beforeEach(() => {
     toast = createToastStub();
     create = jest.fn().mockResolvedValue(toast);
+    haptics = {
+      success: jest.fn().mockResolvedValue(undefined),
+      error: jest.fn().mockResolvedValue(undefined),
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -38,6 +44,7 @@ describe('ToastService', () => {
           provide: TranslocoService,
           useValue: { translate: (key: string): string => `translated:${key}` },
         },
+        { provide: HapticsService, useValue: haptics },
       ],
     });
 
@@ -210,5 +217,74 @@ describe('ToastService', () => {
     await expect(
       service.present({ messageKey: 'preferences-saved', outcome: 'success' }),
     ).resolves.toBeUndefined();
+  });
+
+  describe('haptics', () => {
+    it('plays the success intent for a successful outcome', async () => {
+      await service.present({
+        messageKey: 'preferences-saved',
+        outcome: 'success',
+      });
+
+      expect(haptics.success).toHaveBeenCalledTimes(1);
+      expect(haptics.error).not.toHaveBeenCalled();
+    });
+
+    it('plays the error intent for a failed outcome', async () => {
+      await service.present({
+        messageKey: 'notifications-change-failed',
+        outcome: 'failure',
+      });
+
+      expect(haptics.error).toHaveBeenCalledTimes(1);
+      expect(haptics.success).not.toHaveBeenCalled();
+    });
+
+    // The haptic sits alongside the toast, never in front of it.
+    it.each([
+      [
+        'throws',
+        (): never => {
+          throw new Error('no plugin');
+        },
+      ],
+      ['rejects', (): Promise<never> => Promise.reject(new Error('no plugin'))],
+      ['never settles', (): Promise<never> => new Promise(() => undefined)],
+    ])(
+      'presents the toast and resolves when the haptic %s',
+      async (_, play) => {
+        haptics.success.mockImplementation(play);
+        haptics.error.mockImplementation(play);
+
+        await expect(
+          service.present({
+            messageKey: 'preferences-saved',
+            outcome: 'success',
+          }),
+        ).resolves.toBeUndefined();
+        await expect(
+          service.present({
+            messageKey: 'notifications-change-failed',
+            outcome: 'failure',
+          }),
+        ).resolves.toBeUndefined();
+
+        expect(create).toHaveBeenCalledTimes(2);
+        expect(create.mock.calls[0][0].color).toBe('success');
+        expect(create.mock.calls[1][0].color).toBe('danger');
+        expect(toast.present).toHaveBeenCalled();
+      },
+    );
+
+    it('still plays when the toast cannot be presented', async () => {
+      create.mockRejectedValue(new Error('no overlay'));
+
+      await service.present({
+        messageKey: 'notifications-change-failed',
+        outcome: 'failure',
+      });
+
+      expect(haptics.error).toHaveBeenCalledTimes(1);
+    });
   });
 });

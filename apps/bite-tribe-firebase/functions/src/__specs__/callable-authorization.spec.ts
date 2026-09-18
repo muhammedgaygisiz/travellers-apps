@@ -166,6 +166,13 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // sent the link, which is the point of sharing one.
   handleSharedLinkToBite: 'public',
 
+  // The one download link that belongs in a post, a story or a QR code
+  // (issue #1628). Public for the same reason and more so: it is read by people
+  // who do not have the app yet, it reads nothing and writes nothing, and its
+  // whole answer is a redirect to one of two store listings that are themselves
+  // public.
+  handleDownloadLink: 'public',
+
   // The scan of a table QR code (issue #1100). Public because a guest at a
   // table has no BiteTribe account and may never want one, and the scan is
   // what establishes which restaurant they would be signing in to - so an

@@ -356,6 +356,7 @@ notifyBiteCreatorOnReview
 notifyUserOnNewFollower
 sendWeeklyBiteNotification
 handleSharedLinkToBite
+handleDownloadLink
 createUserOnAuthCreate
 deleteOwnAccount
 ```

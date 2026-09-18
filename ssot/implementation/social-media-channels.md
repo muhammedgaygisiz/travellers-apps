@@ -590,6 +590,29 @@ The ordering risk it carried is closed: **`@bitetribeapp` on X was registered on
 nobody owned, which was an invitation for someone else to claim it and collect
 the attribution on our own link cards.
 
+### The One Download Link, Done
+
+**`https://bitetribe.app/download` opens the App Store on an iPhone and Google
+Play on an Android phone.** Added 19 September 2026 for
+[issue #1628][#1628];
+[Implementation - Web Search And Social Metadata](web-search-and-social-metadata.md) owns how it works.
+
+It is the answer to the constraint this page keeps running into. Instagram allows
+**one link sticker per story**, so the launch story of 16 September 2026 had to be
+posted twice, once per store. A bio shows only the first of its links. A caption
+does not link at all. A QR code encodes one URL. Every one of those wants a single
+link, and until now there were two.
+
+It is also short enough to type from a caption and to say out loud, which
+`https://play.google.com/store/apps/details?id=com.bitetribe.app` is not.
+
+What it does **not** change: the launch post, its caption and the published
+stories stay as they are, and the bio links in
+[The Bio Links](#the-bio-links) are still the two store URLs as set on
+16 September 2026. Switching the bio to the single link is a console edit to make
+once the link answers in production, and the table above is the record of what is
+set today rather than a plan.
+
 ### Still Open
 
 - **Store listing social fields.** Both consoles have marketing and social URL
@@ -648,3 +671,4 @@ yet reflected.
 [#1453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1453
 [#1454]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1454
 [#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455
+[#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628

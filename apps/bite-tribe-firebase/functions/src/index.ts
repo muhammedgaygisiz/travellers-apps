@@ -11,6 +11,7 @@ export { backfillMenuItemIdsCallable } from './functions/menus/backfill-menu-ite
 export { notifyUserOnNewFollower } from './functions/notifications/notify-user-on-new-follower';
 export { notifyStaffOnNewTableOrder } from './functions/notifications/notify-staff-on-new-table-order';
 export { handleSharedLinkToBite } from './functions/bites/handle-shared-link-to-bite';
+export { handleDownloadLink } from './functions/web/handle-download-link';
 export { sendWeeklyBiteNotification } from './functions/notifications/send-weekly-bite-notification';
 export { sendNewVersionNotification } from './functions/notifications/send-new-version-notification';
 export { setBiteImagePathOnUpload } from './functions/bites/set-bite-image-path-on-upload';

@@ -134,6 +134,72 @@ the shared-link function, and it serves its own title, description and image.
 **A new public route needs three edits: the sitemap, `robots.txt`, and
 `SELF_CANONICAL_PATHS` in `canonical-url.ts`.**
 
+## The Download Link
+
+**`https://bitetribe.app/download` is the one link that belongs in a post, a
+story, a bio, a caption or a QR code.** Added 19 September 2026 for
+[issue #1628][#1628].
+
+It answers with a `302` chosen from the visitor's own `User-Agent`:
+
+| Visitor                    | Redirect                                                          |
+| -------------------------- | ----------------------------------------------------------------- |
+| iPhone, iPad or iPod       | `https://apps.apple.com/app/id6746098595`                         |
+| Android                    | `https://play.google.com/store/apps/details?id=com.bitetribe.app` |
+| Desktop, unknown, no agent | `https://bitetribe.app/`                                          |
+
+The App Store URL carries no storefront segment, so the visitor lands in their
+own country's store. The desktop fallback is the start page because neither
+store has anything to install there; it is the page that carries the store QR
+codes from [#1453].
+
+### Why A Function
+
+**Firebase Hosting cannot branch a redirect on a request header.** A `redirects`
+entry in `firebase.json` is static, so the choice has to be made by code. The
+endpoint is `handleDownloadLink` in
+`apps/bite-tribe-firebase/functions/src/functions/web/handle-download-link.ts`,
+reached through two rewrites above the catch-all `**` in the `bite-tribe`
+hosting target - the same shape as `/s/**` to `handleSharedLinkToBite`.
+
+A static page with a script was the alternative and was rejected: this link is
+opened mostly from inside the Instagram and Facebook in-app browsers, which is
+exactly where a script-based redirect is least reliable. A server redirect needs
+no client code and works the same in every one of them.
+
+### The Two Things That Make It Fail Silently
+
+- **The CDN.** Hosting caches in front of the function, and the answer depends on
+  a request header. The function sets `Cache-Control: no-store` and
+  `Vary: User-Agent`; without them, one visitor's platform is served to the next
+  one, with no error anywhere.
+- **`302`, not `301`.** A permanent redirect is cached by the browser itself, so
+  a phone that first opened the link in a desktop-mode browser would keep the web
+  fallback for good.
+
+### What It Deliberately Does Not Touch
+
+- **The apps must not capture `/download`.** Android verifies App Links only for
+  `android:pathPrefix="/s/bite"` and `apple-app-site-association` lists only
+  `/s/bite/*`, so the path stays in the browser on a device with the app
+  installed. Both files are unchanged by [#1628] and adding `/download` to either
+  would break the link on exactly the phones it exists for.
+- **`robots.txt` and `sitemap.xml`.** The three-edit rule above is for a new
+  Angular route. `/download` is not one - it never reaches the bundle, and a
+  `302` is not a page to index - so neither file, nor `SELF_CANONICAL_PATHS`,
+  has anything to say about it.
+- **An iPad in Safari's default desktop mode** sends a Macintosh user agent that
+  nothing on the server can tell from a Mac, and gets the web fallback. That is
+  accepted rather than worked around; the start page carries both QR codes.
+
+### Deploying It
+
+The two halves ship from different CI jobs and neither waits for the other.
+`deploy-functions` publishes the function on a push to `develop`, and
+`deploy-bite-tribe` publishes the `firebase.json` rewrite. The link answers only
+once **both** have run: the rewrite without the function is a `404`, and the
+function without the rewrite is reachable only at its Cloud Functions URL.
+
 ## The Open Graph Image
 
 `apps/bite-tribe/src/assets/social/og-image.jpg`, `1200x630`, about 138 KB.
@@ -187,5 +253,7 @@ Once deployed:
 - [Architecture - Overview](../architecture/overview.md)
 - [Current State - Release State](../current-state/release-state.md)
 
+[#1453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1453
 [#1454]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1454
 [#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455
+[#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628

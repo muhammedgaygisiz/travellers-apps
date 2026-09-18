@@ -35,6 +35,8 @@
       },
       "rewrites": [
         { "source": "/s/**", "function": "handleSharedLinkToBite" },
+        { "source": "/download", "function": "handleDownloadLink" },
+        { "source": "/download/**", "function": "handleDownloadLink" },
         { "source": "**", "destination": "/index.html" }
       ]
     },

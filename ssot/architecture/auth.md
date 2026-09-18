@@ -222,8 +222,12 @@ app and run the operational migrations in it.
   `listUsersWithRoles`, `verifyRestaurantCandidate`, `backfillBiteAddress`,
   `backfillReviewTimestampsCallable`, `clusterRestaurantCandidateForBite` and
   `sendNewVersionNotification`.
-  `handleSharedLinkToBite` is the one public endpoint, because it is the
-  redirect a shared Bite link resolves through. See issue [#1472].
+  Four are public, each because the person opening it has no account yet and the
+  endpoint reads nothing an account would gate: `handleSharedLinkToBite`, the
+  redirect a shared Bite link resolves through; `resolveTableQrToken` and
+  `loadPublicMenu`, the scan and the menu behind it; and `handleDownloadLink`,
+  the `bitetribe.app/download` store redirect from issue [#1628]. See issue
+  [#1472].
   **`restaurantAuthority` is the class issue [#1537] added**, and it is narrow on
   purpose: a callable that acts on one restaurant, admits `business` or `admin`,
   and then decides for itself which restaurants that reaches. The spec can check
@@ -587,3 +591,4 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 [#1477]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1477
 [#1534]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1534
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
+[#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628

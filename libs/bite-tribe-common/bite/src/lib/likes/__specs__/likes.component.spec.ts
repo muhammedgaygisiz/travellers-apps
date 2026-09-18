@@ -4,6 +4,11 @@ import { ComponentRef } from '@angular/core';
 import { LikeOptionsPopoverMenuComponent } from '../../like-options-popover-menu/like-options-popover-menu.component';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { LikeCounts } from '../../utils/like-counts';
+import { HapticsService } from 'haptics';
+
+const MockHapticsService = {
+  selection: jest.fn().mockResolvedValue(undefined),
+};
 
 const likeCounts: LikeCounts = {
   thumbup: 1,
@@ -18,7 +23,10 @@ describe(LikesComponent.name, () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideIonicAngular()],
+      providers: [
+        provideIonicAngular(),
+        { provide: HapticsService, useValue: MockHapticsService },
+      ],
     });
 
     fixture = TestBed.createComponent(LikesComponent);
@@ -28,6 +36,8 @@ describe(LikesComponent.name, () => {
     componentRef.setInput('biteId', 'bite1');
     componentRef.setInput('likeCounts', likeCounts);
     componentRef.setInput('userLikeType', 'thumbup');
+
+    MockHapticsService.selection.mockClear();
   });
 
   it('should calculate class correctly for liked bite', () => {
@@ -188,5 +198,35 @@ describe(LikesComponent.name, () => {
         previousLikeType: undefined,
       });
     });
+
+    // The reaction raises no toast and rides no Ionic component that would
+    // carry haptics of its own, so the tap is what confirms it. See GitHub
+    // issue #1637.
+    it('should play the selection haptic when un-liking', () => {
+      component.onLikeSelected('thumbup');
+
+      expect(MockHapticsService.selection).toHaveBeenCalledTimes(1);
+    });
+
+    it('should play the selection haptic when liking', () => {
+      componentRef.setInput('userLikeType', undefined);
+      fixture.detectChanges();
+
+      component.onLikeSelected('mindblown');
+
+      expect(MockHapticsService.selection).toHaveBeenCalledTimes(1);
+    });
+
+    it('should play the selection haptic once per tap when switching type', () => {
+      component.onLikeSelected('drooling');
+
+      expect(MockHapticsService.selection).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('should not play the selection haptic on opening the like options', async () => {
+    await component.openLikeOptions(new MouseEvent('click'));
+
+    expect(MockHapticsService.selection).not.toHaveBeenCalled();
   });
 });

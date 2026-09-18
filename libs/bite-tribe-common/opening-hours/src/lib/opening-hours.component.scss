@@ -33,7 +33,28 @@
 
   .time-input {
     --color: --ion-color;
-    width: 110px;
+
+    /*
+     * Chrome renders `input[type="time"]` in the browser's UI locale rather
+     * than the document's, and ignores `lang` on the input or its ancestors.
+     * In a 12-hour locale the control lays out `hh:mm AM/PM`, which is wider
+     * than the `HH:mm` a 24-hour locale shows. The old fixed 110px was the
+     * 24-hour natural width exactly - 78px of control plus the 16px inline
+     * padding Ionic's outline fill adds on each side - so the meridiem had
+     * nowhere to go and was clipped away, and 18:00 read back as 06:00
+     * (issue #1549).
+     *
+     * A floor rather than a fixed width: the box holds the 12-hour form, and
+     * a locale whose day period is longer still ("a. m.", "午前") grows the
+     * box instead of losing characters off the end.
+     *
+     * `width: auto` is what lets it grow. `ion-input` is `width: 100%` by
+     * default, and as a flex item that resolves against the whole row, so the
+     * two boxes would split the row between them rather than take the width
+     * the control actually asks for.
+     */
+    width: auto;
+    min-width: 140px;
   }
 
   .time-separator {

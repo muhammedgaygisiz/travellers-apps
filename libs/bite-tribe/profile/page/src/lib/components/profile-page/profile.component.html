@@ -80,10 +80,12 @@
         {{ userData?.about || ('no-description-available' | transloco) }}
       </p>
 
-      <country-flags [countryCodes]="$safeNavigationMigration(userData?.countryCodes)" />
+      <country-flags
+        [countryCodes]="$safeNavigationMigration(userData?.countryCodes)"
+      />
 
       <div class="bites-section">
-        <h2>Bites</h2>
+        <h2>{{ 'bites' | transloco }}</h2>
 
         @if (displayedBites().length) {
           @for (bite of displayedBites(); track bite.id) {

@@ -527,6 +527,20 @@ to exactly one `@capacitor/haptics` call:
 - **Toast outcomes play automatically.** `ToastService.present()` plays
   `success` or `error` from its `outcome`, so every toast in both apps carries
   its haptic and a call site that raises a toast adds none (issue [#1635]).
+- **The Bite reaction plays `selection`, on the tap.** `LikesComponent` in
+  `libs/bite-tribe-common/bite` fires it at the top of `onLikeSelected`, before
+  the branch that decides direction, so liking, un-liking and switching reaction
+  type each play it exactly once. It is not fired from the store's outcome: the
+  reaction is optimistic, raises no toast and touches no Ionic component that
+  would carry haptics on its own, which is the frequent, low-stakes case
+  `selection` exists for. Opening the reaction popover stays silent (issue
+  [#1637]).
+- **Destructive confirmations play `warning`, on the confirming button only.**
+  The three alerts that ask before a destructive action - delete Bite, and
+  unfollow on both the followers list and a profile - fire it from their
+  `didDismiss` handler when the role is the confirming one. Opening the alert
+  and cancelling it stay silent, and no other call site uses `warning` (issue
+  [#1636]).
 - **Once per discrete event.** No call site plays an intent on every
   pointer-move frame, keystroke or scroll tick.
 - **No permission, no store declaration.** The plugin needs no runtime
@@ -548,6 +562,10 @@ libs/bite-tribe/shell/src/lib/service-worker.ts
 libs/common/geolocation
 libs/common/haptics
 libs/common/toast/src/lib/toast.service.ts
+libs/bite-tribe-common/bite/src/lib/bite.component.ts
+libs/bite-tribe-common/bite/src/lib/likes/likes.component.ts
+libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts
+libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts
 libs/common/push-notifications
 libs/common/networkstatus/feature
 libs/common/image-compression
@@ -576,3 +594,5 @@ libs/common/image-compression
 [#1633]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1633
 [#1634]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1634
 [#1635]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1635
+[#1636]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1636
+[#1637]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1637

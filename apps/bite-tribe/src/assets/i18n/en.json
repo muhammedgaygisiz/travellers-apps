@@ -671,5 +671,8 @@
   "table-assistance-requestBill-acknowledged": "Your bill is on its way.",
   "table-assistance-refused-tableNotAttended": "The restaurant doesn't have you seated at this table. Ask a member of staff.",
   "table-assistance-refused-cooldown": "You've only just asked. Give them a moment before asking again.",
-  "table-assistance-stale": "We've lost touch with the restaurant, so this may be out of date."
+  "table-assistance-stale": "We've lost touch with the restaurant, so this may be out of date.",
+  "bitemap": "Bitemap",
+  "filters": "Filters",
+  "suggested-tags": "Suggested Tags:"
 }

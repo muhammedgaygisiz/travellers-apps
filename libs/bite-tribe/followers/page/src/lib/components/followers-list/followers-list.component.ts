@@ -22,6 +22,7 @@ import {
 import type { PublicUser } from 'model';
 import { PATH } from 'utils';
 import { PageComponent } from 'common/ui/page';
+import { HapticsService } from 'haptics';
 import { OverlayEventDetail } from '@ionic/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ImageErroredPipe } from './pipes/image-errored.pipe';
@@ -52,6 +53,7 @@ const CANCEL = 'cancel';
 })
 export class FollowersListComponent {
   private readonly transloco = inject(TranslocoService);
+  private readonly haptics = inject(HapticsService);
 
   users = input.required<PublicUser[] | undefined>();
   type = input.required<'followers' | 'following'>();
@@ -121,6 +123,11 @@ export class FollowersListComponent {
     const role = event.detail.role;
 
     if (role === UNFOLLOW) {
+      // The confirming tap on a destructive alert gets the `warning` intent
+      // reserved for exactly that. Cancelling, and opening the alert, stay
+      // silent. See GitHub issue #1636.
+      void this.haptics.warning();
+
       this.unfollow(user);
     }
 

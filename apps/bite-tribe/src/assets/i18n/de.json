@@ -671,5 +671,8 @@
   "table-assistance-requestBill-acknowledged": "Deine Rechnung ist unterwegs.",
   "table-assistance-refused-tableNotAttended": "Das Restaurant hat dich nicht an diesem Tisch sitzen. Frag eine Mitarbeiterin oder einen Mitarbeiter.",
   "table-assistance-refused-cooldown": "Du hast gerade erst gefragt. Warte einen Moment, bevor du erneut fragst.",
-  "table-assistance-stale": "Wir haben die Verbindung zum Restaurant verloren, das hier kann also veraltet sein."
+  "table-assistance-stale": "Wir haben die Verbindung zum Restaurant verloren, das hier kann also veraltet sein.",
+  "bitemap": "Bitemap",
+  "filters": "Filter",
+  "suggested-tags": "Vorgeschlagene Tags:"
 }

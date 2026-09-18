@@ -15,6 +15,7 @@ import { addNecessaryIcons } from 'utils';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 import { STALE_PENDING_UPLOAD_MS } from '../utils/image-status';
+import { HapticsService } from 'haptics';
 
 jest.mock('heic2any', () => jest.fn());
 
@@ -41,6 +42,10 @@ class MockTranslocoPipe implements PipeTransform {
     return value;
   }
 }
+
+const MockHapticsService = {
+  warning: jest.fn().mockResolvedValue(undefined),
+};
 
 describe('BiteComponent', () => {
   let component: BiteComponent;
@@ -72,6 +77,7 @@ describe('BiteComponent', () => {
         ToMetricPipe,
         { provide: TranslocoService, useValue: MockTranslocoService },
         { provide: TranslocoPipe, useValue: MockTranslocoPipe },
+        { provide: HapticsService, useValue: MockHapticsService },
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }).overrideComponent(BiteComponent, {
@@ -87,6 +93,8 @@ describe('BiteComponent', () => {
     componentRef.setInput('userId', 'user1');
     componentRef.setInput('showEditButton', false);
     fixture.detectChanges();
+
+    MockHapticsService.warning.mockClear();
   });
 
   it('should create', () => {
@@ -236,6 +244,34 @@ describe('BiteComponent', () => {
 
       expect(component.deleteBite.emit).toHaveBeenCalledWith(mockBite);
       expect(component.isOpen()).toBe(false);
+    });
+
+    // Deleting a Bite is irreversible, which is the one thing the `warning`
+    // intent is reserved for. See GitHub issue #1636.
+    it('should play the warning haptic when role is DELETE', () => {
+      const mockEvent = {
+        detail: { role: 'delete' },
+      } as CustomEvent<OverlayEventDetail>;
+
+      component.handleConfirmationDismiss(mockEvent);
+
+      expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not play the warning haptic when role is CANCEL', () => {
+      const mockEvent = {
+        detail: { role: 'cancel' },
+      } as CustomEvent<OverlayEventDetail>;
+
+      component.handleConfirmationDismiss(mockEvent);
+
+      expect(MockHapticsService.warning).not.toHaveBeenCalled();
+    });
+
+    it('should not play the warning haptic on opening the alert', () => {
+      component.openConfirmationDialog();
+
+      expect(MockHapticsService.warning).not.toHaveBeenCalled();
     });
 
     it('should not emit deleteBite when role is CANCEL', () => {

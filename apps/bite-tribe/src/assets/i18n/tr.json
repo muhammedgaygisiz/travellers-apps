@@ -671,5 +671,8 @@
   "table-assistance-requestBill-acknowledged": "Hesabın yolda.",
   "table-assistance-refused-tableNotAttended": "Restoran seni bu masada oturuyor olarak görmüyor. Bir görevliye sor.",
   "table-assistance-refused-cooldown": "Az önce istedin. Tekrar istemeden önce biraz bekle.",
-  "table-assistance-stale": "Restoranla bağlantımız koptu, bu yüzden bu bilgi güncel olmayabilir."
+  "table-assistance-stale": "Restoranla bağlantımız koptu, bu yüzden bu bilgi güncel olmayabilir.",
+  "bitemap": "Bitemap",
+  "filters": "Filtreler",
+  "suggested-tags": "Önerilen Etiketler:"
 }

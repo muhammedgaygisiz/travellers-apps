@@ -7,6 +7,7 @@ import {
   input,
   output,
 } from '@angular/core';
+import { HapticsService } from 'haptics';
 import { IonChip, IonLabel } from '@ionic/angular/standalone';
 import { LikeClick, LikeType } from 'model';
 import { LikeOptionsPopoverMenuComponent } from '../like-options-popover-menu/like-options-popover-menu.component';
@@ -29,6 +30,7 @@ const emojiMap: Record<string, string> = {
 })
 export class LikesComponent {
   popoverController = inject(PopoverController);
+  private readonly haptics = inject(HapticsService);
 
   biteId = input.required<string>();
   likeCounts = input.required<LikeCounts>();
@@ -105,6 +107,14 @@ export class LikesComponent {
   }
 
   onLikeSelected(likeType: LikeType): void {
+    // Reacting to a Bite raises no toast and sits on no Ionic component that
+    // would carry haptics of its own, so the tap itself is what gets confirmed.
+    // It is played here, once per selection and in both directions, rather than
+    // on the store's eventual outcome: the reaction is optimistic, frequent and
+    // low-stakes, which is exactly what `selection` is for. See GitHub issue
+    // #1637.
+    void this.haptics.selection();
+
     const userLikeType = this.userLikeType();
 
     if (likeType === userLikeType) {

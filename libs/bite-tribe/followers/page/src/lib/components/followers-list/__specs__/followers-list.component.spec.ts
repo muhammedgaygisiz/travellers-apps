@@ -6,6 +6,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
+import { HapticsService } from 'haptics';
 
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
@@ -13,6 +14,10 @@ const MockTranslocoService = {
     reRenderOnLangChange: jest.fn(),
   },
   langChanges$: of(),
+};
+
+const MockHapticsService = {
+  warning: jest.fn().mockResolvedValue(undefined),
 };
 
 describe(FollowersListComponent.name, () => {
@@ -26,12 +31,15 @@ describe(FollowersListComponent.name, () => {
       providers: [
         provideIonicAngular(getIonicConfig()),
         { provide: TranslocoService, useValue: MockTranslocoService },
+        { provide: HapticsService, useValue: MockHapticsService },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FollowersListComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
+
+    MockHapticsService.warning.mockClear();
   });
 
   it('should create', () => {
@@ -163,6 +171,35 @@ describe(FollowersListComponent.name, () => {
 
       expect(unfollowSpy).not.toHaveBeenCalled();
       expect(component.userPendingUnfollow()).toBeUndefined();
+    });
+
+    // The confirming tap on a destructive alert is the one thing the `warning`
+    // intent is reserved for. See GitHub issue #1636.
+    it('should play the warning haptic when role is unfollow', () => {
+      component.handleConfirmationDismiss(
+        { detail: { role: 'unfollow' } } as CustomEvent<{ role: string }>,
+        mockUser,
+      );
+
+      expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not play the warning haptic when role is cancel', () => {
+      component.handleConfirmationDismiss(
+        { detail: { role: 'cancel' } } as CustomEvent<{ role: string }>,
+        mockUser,
+      );
+
+      expect(MockHapticsService.warning).not.toHaveBeenCalled();
+    });
+
+    it('should not play the warning haptic on opening the alert', () => {
+      component.openConfirmationDialog(
+        { stopPropagation: jest.fn() },
+        mockUser,
+      );
+
+      expect(MockHapticsService.warning).not.toHaveBeenCalled();
     });
   });
 

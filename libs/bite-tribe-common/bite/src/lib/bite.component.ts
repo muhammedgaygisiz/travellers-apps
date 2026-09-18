@@ -35,6 +35,7 @@ import { StarRatingComponent } from 'common/ui/star-rating';
 import type { OverlayEventDetail } from '@ionic/core';
 import { DistanceComponent } from 'common/distance';
 import { GetImagePipe } from './pipes/get-image.pipe';
+import { HapticsService } from 'haptics';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { getLocalizedRegionName } from './utils/getLocalizedCityAndCountry';
@@ -73,6 +74,7 @@ const CANCEL = 'cancel';
 })
 export class BiteComponent {
   private readonly transloco = inject(TranslocoService);
+  private readonly haptics = inject(HapticsService);
   activeLang = toSignal(this.transloco.langChanges$, {
     initialValue: this.transloco.getActiveLang?.() || 'en',
   });
@@ -165,6 +167,11 @@ export class BiteComponent {
     const role = event.detail.role;
 
     if (role === DELETE) {
+      // Deleting a Bite is irreversible, so the confirming tap gets the
+      // `warning` intent that is reserved for exactly that. Cancelling, and
+      // opening the alert, stay silent. See GitHub issue #1636.
+      void this.haptics.warning();
+
       const bite = this.bite();
       this.deleteBite.emit(bite);
     }

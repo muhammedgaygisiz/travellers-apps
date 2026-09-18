@@ -9,6 +9,7 @@ import {
 import { of } from 'rxjs';
 import { PublicUser } from 'model';
 import { getIonicConfig } from 'utils';
+import { HapticsService } from 'haptics';
 import { ProfileComponent } from '../profile.component';
 
 /**
@@ -39,6 +40,10 @@ const FOLLOWED_USER: PublicUser = {
 
 type AlertElement = HTMLElement & { header?: string; message?: string };
 
+const MockHapticsService = {
+  warning: jest.fn().mockResolvedValue(undefined),
+};
+
 describe(`${ProfileComponent.name} unfollow dialog`, () => {
   let fixture: ComponentFixture<ProfileComponent>;
   let component: ProfileComponent;
@@ -56,6 +61,7 @@ describe(`${ProfileComponent.name} unfollow dialog`, () => {
           },
           loader: DialogTranslocoLoader,
         }),
+        { provide: HapticsService, useValue: MockHapticsService },
       ],
     });
 
@@ -67,6 +73,8 @@ describe(`${ProfileComponent.name} unfollow dialog`, () => {
     componentRef.setInput('userId', 'me');
     componentRef.setInput('profileMetadata', { isFollowedByMe: true });
     fixture.detectChanges();
+
+    MockHapticsService.warning.mockClear();
   });
 
   const queryAlerts = (): AlertElement[] => [
@@ -124,5 +132,29 @@ describe(`${ProfileComponent.name} unfollow dialog`, () => {
 
     expect(unfollowed).toEqual([FOLLOWED_USER]);
     expect(queryAlerts()).toHaveLength(0);
+  });
+
+  // The confirming tap on a destructive alert is the one thing the `warning`
+  // intent is reserved for. See GitHub issue #1636.
+  it('should play the warning haptic when the confirmation is accepted', () => {
+    component.openConfirmationDialog();
+
+    expect(MockHapticsService.warning).not.toHaveBeenCalled();
+
+    component.handleConfirmationDismiss(
+      new CustomEvent('didDismiss', { detail: { role: 'unfollow' } }),
+    );
+
+    expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not play the warning haptic when the confirmation is cancelled', () => {
+    component.openConfirmationDialog();
+
+    component.handleConfirmationDismiss(
+      new CustomEvent('didDismiss', { detail: { role: 'cancel' } }),
+    );
+
+    expect(MockHapticsService.warning).not.toHaveBeenCalled();
   });
 });

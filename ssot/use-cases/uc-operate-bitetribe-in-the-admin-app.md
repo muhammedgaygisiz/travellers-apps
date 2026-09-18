@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. The app exists, deploys, and is gated on the `admin` role as of issue [#1469].
 Account management - roles, subscription tier and blocking - Bite search and removal,
 restaurant-candidate verification, restaurant ownership, the unmatched Bite places and the
@@ -130,6 +130,15 @@ user-to-user blocking and content filtering have no surface in the consumer app;
 by an issue as of 14 September 2026 - [#1608] reporting a Bite, [#1609] blocking another user,
 [#1610] filtering before publication. Epic [#1284] covers reporting inside a review thread only.
 Not this page's behaviour, but this page is where the half that exists lives.
+
+## Supported Evidence
+
+- `libs/bite-tribe-admin/shell/src/lib/routes.ts` - every route behind `authGuard` and `roleGuard('admin')`: `dashboard`, `user-management`, `bite-search`, `restaurant-candidates`, `restaurant-ownership`, `bite-places`, `new-restaurant`, and the six migration routes.
+- `roleGuard` in `libs/common/ta-firestore/src/lib/role.guard.ts`, the client-side backstop for a restored session or a revoked role.
+- `requireAdmin` in `apps/bite-tribe-firebase/functions/src/functions/shared/roles.ts`, the server-side gate `listUsersWithRoles`, `setUserRoles`, `setUserBlocked`, `setUserSubscriptionTier`, `assignRestaurantOwner`, `revokeRestaurantOwner` and `deleteBiteAsOperator` all import.
+- `apps/bite-tribe-firebase/scripts/grant-role.mjs`, the bootstrap script that grants the first `admin` role.
+- `searchBites`, the same callable the consumer app's search drives.
+- The six operational-migration routes and their callables are [UC - Run Operational Migrations](uc-run-operational-migrations.md)'s own evidence.
 
 ## Related GitHub Scope
 

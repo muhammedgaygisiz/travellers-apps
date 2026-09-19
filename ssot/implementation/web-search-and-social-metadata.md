@@ -39,15 +39,55 @@ was chosen because it is the host Google already indexed and it matches the
 
 ### The web.app References That Stay
 
-`bite-tribe.web.app` is not a stray alias. It is the host the Android app links
-verify against through `.well-known/assetlinks.json`, it is the support URL in
-App Store Connect, and `handleSharedLinkToBite` builds both its canonical and
-its redirect from it. Those keep working and are deliberately untouched by
-[#1454]; migrating them is separate work, because the redirect target and the
-verified host have to move together with a Play Console update.
+**Updated 19 September 2026 by [#345].** The migration [#1454] deferred is done:
+`handleSharedLinkToBite` and the in-app share sheet now build every URL from the
+canonical host, so a share page declares its canonical on `bitetribe.app` and
+hands the reader on to it.
 
-The consequence to remember: a `/s/bite/<id>` share page still declares a
-canonical on `bite-tribe.web.app`, which is now not the canonical host.
+`bite-tribe.web.app` is still not a stray alias, and still cannot be removed. It
+is the support URL in App Store Connect, and - the reason that matters most - it
+is the host in every share link sent before this change, sitting in message
+threads that will outlive several releases. Those links have to keep opening the
+app, so the host stays registered as a verified App Link on both platforms
+alongside the canonical one.
+
+The rule to carry forward: **hosts are added here, never swapped.** An address
+this product has ever published is an address it keeps answering.
+
+### Which Hosts Open The App
+
+All three hosts are registered for both deep-link paths, on both platforms
+([#345], 19 September 2026):
+
+| Path           | What it is                                            |
+| -------------- | ----------------------------------------------------- |
+| `/s/bite/<id>` | A shared Bite                                         |
+| `/t/<token>`   | A scanned table QR code, printed on physical stickers |
+
+Before this, only `bite-tribe.web.app` + `/s/bite` was registered, so a scanned
+table code always opened the browser even with the app installed - the sticker
+carries `bitetribe.app/t/<token>`, which matched neither the host nor the path.
+The in-app handler in `app.component.ts` had been ready since [#1101]; it was
+simply never reached, because the OS never delivered the URL.
+
+Both paths are registered on all three hosts rather than each path on the host
+that emits it, because all three serve the same build: a `/t/` link that reaches
+a guest on any of them should open the app rather than fall to the browser for a
+reason no guest can see.
+
+On Android this is **one `<intent-filter>` per host**, not one filter listing all
+three. `autoVerify` is evaluated per filter, so the split keeps a host that fails
+verification from taking the other two down with it.
+
+The two files that have to agree with each other and with the manifest are
+`apps/bite-tribe/src/.well-known/assetlinks.json` and
+`apps/bite-tribe/src/apple-app-site-association`; both are served from every
+host, because all three serve the same build.
+
+The iOS `appID` must carry the Team ID: `DJ2XQYP3NB.com.bitetribe.app`. It was
+written as the bare bundle id from [#628] until [#345], which is invalid - so
+Universal Links had almost certainly never worked on iOS, for share links
+either.
 
 ## What index.html Carries
 
@@ -226,7 +266,8 @@ same image is 1 MB against 138 KB.
   to any in-app route unfurls with the site card. The one route that unfurls with
   its own content is `/s/bite/<id>`, which is server-rendered by
   `handleSharedLinkToBite` and already carries its own tags.
-- **Moving the `bite-tribe.web.app` references.** See the canonical host section.
+- **Moving the `bite-tribe.web.app` references.** Done on 19 September 2026 by
+  [#345]; see the canonical host section. The host itself stays registered.
 - **`manifest.webmanifest`.** It still calls the app `bite-tribe` and carries no
   description. That is the PWA install name, not search metadata, and it is a
   separate defect against the spelling rule in
@@ -253,6 +294,9 @@ Once deployed:
 - [Architecture - Overview](../architecture/overview.md)
 - [Current State - Release State](../current-state/release-state.md)
 
+[#345]: https://github.com/muhammedgaygisiz/travellers-apps/issues/345
+[#628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/628
+[#1101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1101
 [#1453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1453
 [#1454]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1454
 [#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455

@@ -1,5 +1,6 @@
 import { logger } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/https';
+import { BITE_TRIBE_ORIGIN } from '../shared/utils/bite-tribe-origin';
 
 /**
  * The one link that belongs in a post, a story, a bio or a QR code.
@@ -26,7 +27,7 @@ export const PLAY_STORE_URL =
  * Neither store has anything to offer a desktop visitor, so they get the web
  * app's start page, which carries the store QR codes from issue #1453.
  */
-export const WEB_FALLBACK_URL = 'https://bitetribe.app/';
+export const WEB_FALLBACK_URL = `${BITE_TRIBE_ORIGIN}/`;
 
 /**
  * `iPad` and `iPod` are listed next to `iPhone` because the App Store listing

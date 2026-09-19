@@ -3,8 +3,8 @@
     "apps": [],
     "details": [
       {
-        "appID": "com.bitetribe.app",
-        "paths": [ "/s/bite/*" ]
+        "appID": "DJ2XQYP3NB.com.bitetribe.app",
+        "paths": [ "/s/bite/*", "/t/*" ]
       }
     ]
   }

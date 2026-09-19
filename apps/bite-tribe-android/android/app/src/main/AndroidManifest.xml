@@ -23,6 +23,62 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
 
+      <!--
+        Verified App Links, one filter per host (GitHub issue #345).
+
+        Three hosts serve the same build and each serves its own
+        `.well-known/assetlinks.json`: `bitetribe.app` is the canonical one
+        decided in issue #1454 and the one printed into every table QR code,
+        `www.bitetribe.app` is the address a guest reaches by typing, and
+        `bite-tribe.web.app` is where every share link sent before this change
+        still points. None of the three can be dropped - a link already sitting
+        in a WhatsApp thread has to keep opening the app.
+
+        One filter per host rather than one filter listing all three, because
+        `autoVerify` is evaluated per filter: split like this, a host that fails
+        verification cannot take the other two down with it.
+
+        Both paths on every host, because all three serve the same app and a
+        `/t/` link that arrived on the wrong host should still open here rather
+        than fall to the browser for a reason no guest can see.
+
+        `/s/bite` keeps its prefix exactly as it verified on 30 August 2026
+        (see ssot/current-state/release-state.md); `/t/` carries its trailing
+        slash so it matches the scanned address and nothing else that may later
+        start with a `t`.
+      -->
+      <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+
+        <data
+          android:host="bitetribe.app"
+          android:pathPrefix="/s/bite"
+          android:scheme="https" />
+        <data
+          android:host="bitetribe.app"
+          android:pathPrefix="/t/"
+          android:scheme="https" />
+      </intent-filter>
+
+      <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+
+        <data
+          android:host="www.bitetribe.app"
+          android:pathPrefix="/s/bite"
+          android:scheme="https" />
+        <data
+          android:host="www.bitetribe.app"
+          android:pathPrefix="/t/"
+          android:scheme="https" />
+      </intent-filter>
+
       <intent-filter android:autoVerify="true">
         <action android:name="android.intent.action.VIEW" />
 
@@ -32,6 +88,10 @@
         <data
           android:host="bite-tribe.web.app"
           android:pathPrefix="/s/bite"
+          android:scheme="https" />
+        <data
+          android:host="bite-tribe.web.app"
+          android:pathPrefix="/t/"
           android:scheme="https" />
       </intent-filter>
     </activity>

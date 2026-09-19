@@ -9,7 +9,7 @@ import {
 import { Router } from '@angular/router';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { CrashReportingService } from 'ta-firestore';
-import { resourceValue } from 'utils';
+import { BITE_TRIBE_ORIGIN, resourceValue } from 'utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
@@ -32,7 +32,17 @@ import {
   describeBiteLoadError,
 } from './bite-load-failure';
 
-const SHARE_BITE_URL = 'https://bite-tribe.web.app/s/bite';
+/**
+ * The address a shared Bite is sent as (GitHub issue #345).
+ *
+ * Built from {@link BITE_TRIBE_ORIGIN} rather than spelled out, so a share
+ * names the canonical host decided in issue #1454 - the same one the table QR
+ * codes are printed with. Shares sent before this change point at
+ * `bite-tribe.web.app` and keep working: that host serves the same build, is
+ * still handled by `handleSharedLinkToBite`, and is still a verified App Link
+ * on both platforms.
+ */
+const SHARE_BITE_URL = `${BITE_TRIBE_ORIGIN}/s/bite`;
 
 // The bite document read can transiently fail or hang right after a cold start
 // from a push notification (Firestore/auth not ready yet). Retry it silently so

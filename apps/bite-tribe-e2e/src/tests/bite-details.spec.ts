@@ -35,7 +35,7 @@ test.describe('Inspect Bite details', () => {
     const bucketListId = `details-list-${runId}`;
     const bucketListName = `Details Favorites ${runId}`;
     const review = `A detailed review from Playwright ${runId}`;
-    const sharedUrl = `https://bite-tribe.web.app/s/bite/${biteId}`;
+    const sharedUrl = `https://bitetribe.app/s/bite/${biteId}`;
 
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'share', {

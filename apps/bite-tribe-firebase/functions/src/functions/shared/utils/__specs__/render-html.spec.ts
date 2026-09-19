@@ -36,8 +36,8 @@ describe('renderHtml', () => {
       title,
       description,
       imageUrl: 'https://example.com/bite.jpg',
-      canonicalUrl: 'https://bite-tribe.web.app/s/bite/abc',
-      redirectUrl: 'https://bite-tribe.web.app/bite/abc',
+      canonicalUrl: 'https://bitetribe.app/s/bite/abc',
+      redirectUrl: 'https://bitetribe.app/bite/abc',
     });
 
   it('renders no script element for the crafted Bite name', () => {

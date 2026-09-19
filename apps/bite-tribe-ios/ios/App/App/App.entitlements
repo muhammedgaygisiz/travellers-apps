@@ -8,8 +8,16 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<!-- Universal Links, one entry per host (GitHub issue #345). `bitetribe.app`
+	     is canonical and is what every table QR code is printed with,
+	     `www.bitetribe.app` is what a guest reaches by typing, and
+	     `bite-tribe.web.app` is where every share link sent before this change
+	     still points. All three serve the same build and the same
+	     `apple-app-site-association`, and none of them can be dropped. -->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
+		<string>applinks:bitetribe.app</string>
+		<string>applinks:www.bitetribe.app</string>
 		<string>applinks:bite-tribe.web.app</string>
 	</array>
 	<key>com.apple.developer.devicecheck.appattest-environment</key>

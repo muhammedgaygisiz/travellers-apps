@@ -576,6 +576,58 @@ character and the full tagline, so the side margins in the script are enough.
 Not pinned: with one post on the profile there is nothing to pin it above. Pin it
 once the second post goes up.
 
+## The Bites Around You Post
+
+The second Instagram post of [#913], prepared 19 September 2026. The launch post
+said the product exists; this one shows what it does, so it is a screenshot of
+the live map rather than composed artwork.
+
+![Bites around you](../assets/social/bites-around-you-post.png)
+
+Same rule as the launch post: nothing in it links, and the bio carries the store
+URLs - see [Nothing In A Post Links](#nothing-in-a-post-links).
+
+### The Image
+
+[`ssot/assets/social/bites-around-you-post.png`](../assets/social/bites-around-you-post.png), `1080x1350` (4:5), the
+consumer app's map over Bern with its cluster counts.
+
+It is a screenshot, so there is no generator to rerun and no script table to
+edit. What was done to it is the crop: the phone screenshot is `1080x1440` (3:4),
+and Instagram's tallest feed ratio is 4:5, so **cut the 90 pixels off the bottom
+rather than letting the uploader centre the crop**. Anchoring at the top keeps
+the header bar whole - a centred crop takes 45 pixels off it and leaves the
+wordmark sitting on the edge - and it drops a half-drawn cluster that the
+screenshot had caught on the bottom edge.
+
+The counts are the subject of the frame. The crop keeps the dense band in the old
+town, where the numbers are largest, rather than centring the river.
+
+### The Caption
+
+```text
+Did you check what Bites people ate around you? 🍽️
+Maybe your next favourite dish is a five-minute walk away.
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #realfood #bern
+```
+
+The caption says nothing about how the map works. The screenshot already shows
+clusters and counts, and a caption that explains them reads as a manual - the
+second line is about the reader's own street instead, which is answerable by
+anyone scrolling past whether or not they have the app.
+
+The four hashtags are the launch post's, unchanged, so the account reads as one
+voice rather than a fresh guess per post. `#bern` is added because the frame names
+the city: it is the one tag a person standing in that map might follow, and it
+costs nothing to a viewer who is not there.
+
+### Pin It
+
+The launch post note left this open - _pin it once the second post goes up_.
+With two posts there is something to pin above, and the launch post is the one
+that should stay at the top of the grid.
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done

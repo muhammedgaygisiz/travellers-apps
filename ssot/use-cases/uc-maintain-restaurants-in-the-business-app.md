@@ -35,7 +35,14 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
   empty state naming BiteTribe support, not an empty list: assignment is
   operator work in the admin app, and there is nothing the account can do here
   to change it.
+- The Restaurant Owner publishes the menu, by taking the code on the restaurant's page (issue [#370]). It is a QR code and the same address as plain text, because publishing a menu should not require owning a printer - the text goes on a Google listing, an Instagram bio or the restaurant's own site, and the code goes in a window, on a menu card or on a table tent. A restaurant with no menu is shown what is missing instead of a code: one for a restaurant with no menu tells whoever scans it that there is nothing to read. What the reader then sees is [UC - View Restaurant Menus](uc-view-restaurant-menus.md); which restaurants may publish at all is `RD-PM-5`.
 - The initial Menu saves the Restaurant Owner the first round of typing: each distinct Bite dish name becomes one item, priced with the average of the prices users reported, in a single `Bites` category. The Restaurant Owner then corrects, renames, and structures it in the edit-menu page.
+
+This page owns producing the code and not what it leads to, which is the split
+`RD-PM-1` draws: the code is made here because a restaurant that wants nothing
+from BiteTribe but a menu in its window should need no floor plan and no tables,
+and the floor-plan editor's printable table sheets are a different printed thing
+(`RD-PM-4`).
 
 ### How The Restaurant Page Is Laid Out
 
@@ -117,6 +124,10 @@ all be reviewed for the first time.
   completed.
 - Issue [#1572] gave `restaurant/:restaurantId` the two-column layout the admin app's Create
   Restaurant page already had. Closed as completed.
+- Issue [#370] put the published menu code on `restaurant/:restaurantId`, and with it the
+  copyable address and the print sheet. Closed as completed, delivering issue [#371].
+- Issue [#1653] blanks every field on this page, the menu code included, whenever the device
+  reports no GPS position. Open.
 
 ## Related Domains
 
@@ -131,6 +142,7 @@ all be reviewed for the first time.
 - [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md) - creating a Restaurant, and the migrations and
   candidate verification that left this app with issue [#1473]
 - [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md) - the Operator flow issues [#778] and [#942] built
+- [Recorded Decisions](../decisions/recorded-decisions.md) - `RD-PM-1` and `RD-PM-5` bind the menu code this page produces
 - [UC - View Restaurant Menus](uc-view-restaurant-menus.md) - what the maintained menu looks like to a diner
 
 [#734]: https://github.com/muhammedgaygisiz/travellers-apps/issues/734
@@ -140,3 +152,6 @@ all be reviewed for the first time.
 [#1079]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1079
 [#1473]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1473
 [#1572]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1572
+[#370]: https://github.com/muhammedgaygisiz/travellers-apps/issues/370
+[#371]: https://github.com/muhammedgaygisiz/travellers-apps/issues/371
+[#1653]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1653

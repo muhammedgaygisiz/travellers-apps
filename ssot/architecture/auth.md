@@ -228,6 +228,12 @@ app and run the operational migrations in it.
   `loadPublicMenu`, the scan and the menu behind it; and `handleDownloadLink`,
   the `bitetribe.app/download` store redirect from issue [#1628]. See issue
   [#1472].
+  `loadPublicMenu` stayed public when issue [#370] gave its address a printed code
+  and an associated-domain entry. A code in a restaurant's window is read by
+  people with no account and no intention of having one, so the endpoint is
+  attested by App Check and by nothing else; what keeps it narrow is not a session
+  but what it will answer for - only a restaurant a business account holds
+  (`RD-PM-5`), and only three of its fields.
   **`restaurantAuthority` is the class issue [#1537] added**, and it is narrow on
   purpose: a callable that acts on one restaurant, admits `business` or `admin`,
   and then decides for itself which restaurants that reaches. The spec can check
@@ -592,3 +598,4 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 [#1534]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1534
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
 [#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628
+[#370]: https://github.com/muhammedgaygisiz/travellers-apps/issues/370

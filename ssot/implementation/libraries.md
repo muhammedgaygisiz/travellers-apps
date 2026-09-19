@@ -45,6 +45,16 @@ looks like. Its cart and its submission are a `type:data-access` library of thei
 own, `bite-tribe/table-order-data-access`, which both the ordering screen and
 anything later can reach.
 
+Issue [#370] is the counter-example, and it moved a library rather than placing a
+screen. The QR encoder and its SVG renderer had grown inside
+`libs/bite-tribe-business/floor-plan/ui`, because table codes were the only codes
+BiteTribe printed. A restaurant publishing its menu prints one too, and must not
+reach into the floor-plan library to do it - so the encoder and `bt-qr-code` are
+`libs/common/ui/qr-code`, and the floor-plan library kept only what is about
+tables: the scan URL and the alphanumeric split of its token, behind a thin
+wrapper its call sites still use. A `type:ui` library under `scope:common` is what
+both apps can reach; the alternative was a second encoder, which is `RD-PM-2`.
+
 ## Business App Libraries
 
 Business functionality lives under `libs/bite-tribe-business`.
@@ -72,3 +82,4 @@ Use `libs/bite-tribe-common/model` only when multiple features need the same typ
 
 [#1102]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1102
 [#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103
+[#370]: https://github.com/muhammedgaygisiz/travellers-apps/issues/370

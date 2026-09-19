@@ -59,11 +59,27 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 | --- | ---------------------------------------------- | ------------------------------------------ | ------------------ |
 | 0   | The token exists                               | `unknownToken`                             | ask staff          |
 | 1   | The restaurant exists and is active            | `restaurantNotFound`, `restaurantInactive` | ask staff          |
-| 2   | Table ordering is enabled for that restaurant  | `tableOrderingDisabled`                    | ask staff          |
-| 3   | The table exists, is published, and is enabled | `tableNotFound`, `tableDisabled`           | ask staff          |
-| 4   | The QR token is active and not revoked         | `tokenSuperseded`, `tokenRevoked`          | rescan / ask staff |
-| 5   | The restaurant is currently accepting orders   | `orderingPaused`, `restaurantClosed`       | try later          |
-| 6   | The requested menu exists and is available     | `menuMissing`, `menuUnavailable`           | ask staff          |
+| 2   | The table exists, is published, and is enabled | `tableNotFound`, `tableDisabled`           | ask staff          |
+| 3   | The QR token is active and not revoked         | `tokenSuperseded`, `tokenRevoked`          | rescan / ask staff |
+| 4   | The restaurant is within its opening hours     | `restaurantClosed`                         | try later          |
+| 5   | The restaurant has a menu to show              | `menuMissing`                              | ask staff          |
+| 6   | Something on that menu can be ordered today    | `menuUnavailable`                          | ask staff          |
+
+**Whether the guest may order is not one of the rules.** Table ordering being
+switched off, and staff having paused it, left the refusal list in issue [#1102]
+(`RD-TS-6`). They are read after step 5 into an ordering verdict carried on a
+scan that _resolved_, because neither is a reason to withhold a menu.
+
+**Step 6 refuses only a scan that could otherwise have ordered** (issue [#1597]).
+Where the verdict is already `tableOrderingDisabled` or `orderingPaused` the scan
+resolves with every dish on the menu marked off: nothing was going to be ordered
+there, so `menuUnavailable` would answer a question the guest is not asking, and
+answer it by withholding the menu they scanned the code for - the same menu the
+restaurant's published link hands out at the same moment. It still refuses, and
+still pairs with ask staff, at a restaurant that _does_ take orders from the
+table, because ordering is what the guest came to the screen for and they are
+owed the sentence that says nothing can be ordered. Step 5 is untouched on either
+path: a restaurant with no menu document has nothing to show.
 
 Each failure returns a distinct, actionable reason, not a generic error, and the
 reason carries the next step with it - ask staff, try later, or look at the
@@ -77,14 +93,15 @@ assignment lapse fails three of them - and the guest gets one sentence, so which
 one has to be decided here rather than by however an implementation nested its
 conditions. It runs outside-in, so the answer is the largest true thing.
 
-Three of the rules had no data behind them and now do. "Active" is not a field:
-a restaurant is active while a business account holds it, which
+Three of these questions had no data behind them and now do. "Active" is not a
+field: a restaurant is active while a business account holds it, which
 `assignRestaurantOwner` and `revokeRestaurantOwner` already write. "Table
 ordering is enabled" is `Restaurant.tableOrdering.enabled`, absent everywhere and
-absent meaning off. "Currently accepting orders" is a staff-side
-`pausedUntilTimestamp` **and** the opening hours evaluated in
-`tableOrdering.timeZone` - `DaySchedule` carries no zone, and the server runs in
-UTC, so without one a Jakarta restaurant would close at four in the afternoon.
+absent meaning off. "Currently accepting orders" is two facts answering two
+questions: the staff-side `pausedUntilTimestamp` feeds the verdict, and the
+opening hours feed step 4, evaluated in `tableOrdering.timeZone` - `DaySchedule`
+carries no zone, and the server runs in UTC, so without one a Jakarta restaurant
+would close at four in the afternoon.
 
 A refusal never says more than it has to, and a resolution says only what the
 guest needs: the restaurant's name and picture, the room's name, the table's
@@ -96,7 +113,7 @@ and the floor-plan geometry on the table stay where they are.
 
 - A QR token is opaque and non-guessable, and never encodes the table number.
 - A QR code identifies a table context. It does not prove the guest is physically present. The operational flow is designed so a remote scan cannot cause harm beyond a rejected or staff-visible pending session. Delivered by issue [#1101] and recorded as `RD-TS-1`: starting a session writes one document naming the guest and leaves the table's live state untouched, so what a scan from the car park costs the restaurant is one row on a screen.
-- A guest is signed in **anonymously**, and an anonymous account is not a member (`RD-TS-4`). The uid is what the rules match the guest's own session document against; it writes no `/users` document and does not pass the app's route guards. The upgrade the design rests on is **not built**: both `auth.service.ts` and `start-table-session.ts` explain the uid as the thing `linkWith*` later upgrades in place, so a guest who registers keeps the session that knows what they ordered, and `linkWith` appears nowhere in the workspace but in those two comments. A guest who signs up today gets a second account with a second uid, and the session, the orders and the visit stay with the first. No issue owns it. See [User Roles](../product/user-roles.md).
+- A guest scans **as whoever they already are**, and only a signed-out one is signed in anonymously. `signInAsGuest` returns the existing user when there is one and mints an anonymous account otherwise, and `guestOf` in `start-table-session.ts` admits any authenticated caller, reading `isAnonymous` off the token's `sign_in_provider` - so a member who scans a code at a table orders as themselves, and signing in again would mint a second uid and orphan both sessions. An anonymous account is not a member (`RD-TS-4`): the uid is what the rules match the guest's own session document against, it writes no `/users` document, and it does not pass the app's route guards. **For that anonymous guest the upgrade the design rests on is not built**: both `auth.service.ts` and `start-table-session.ts` explain the uid as the thing `linkWith*` later upgrades in place, so a guest who registers keeps the session that knows what they ordered, and `linkWith` appears nowhere in the workspace but in those two comments. A guest who signs up today gets a second account with a second uid, and the session, the orders and the visit stay with the first. Issues [#1657] and [#1658] own it - the link, and the move for a guest who signs into an account they already had. See [User Roles](../product/user-roles.md).
 - The confirmation screen is acknowledged before anything else is possible, because the sticker is a thing anybody can point a camera at - so a code swapped between two tables is caught by the person sitting at one of them rather than by the kitchen.
 - An order belongs to a visit, not directly to a table, so a party that moves keeps its orders.
 - Order lines snapshot the menu item name, price, and currency at submission, so the price the guest saw is the price they are charged. Delivered by issue [#1103] and recorded as `RD-TS-10`: the phone sends the prices it displayed, the backend compares each to the live menu, and a difference refuses the whole order naming the item and both prices - so what is stored is always the menu's number, and it is only ever stored when the two agree.
@@ -929,5 +946,8 @@ guest's phone is retrying.
 [#1109]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1109
 [#1184]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1184
 [#1200]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1200
+[#1597]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1597
 [#1598]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1598
+[#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657
+[#1658]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1658
 [#1629]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1629

@@ -40,6 +40,7 @@ import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.c
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { OpeningHoursComponent } from 'opening-hours';
+import { MenuQrComponent } from '../menu-qr/menu-qr.component';
 
 /**
  * The zone this browser is in, as a starting point rather than an answer.
@@ -74,6 +75,7 @@ const detectedTimeZone = (): string =>
     TranslocoPipe,
     OpeningHoursComponent,
     PositionComponent,
+    MenuQrComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

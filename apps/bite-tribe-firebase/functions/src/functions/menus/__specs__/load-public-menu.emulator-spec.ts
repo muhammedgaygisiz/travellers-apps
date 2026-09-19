@@ -182,6 +182,24 @@ describe('load public menu', () => {
     });
 
     /**
+     * `Restaurant.menuId` has held both a bare document id and a `menus/{id}`
+     * path over the collection's life, which is why the consumer app has
+     * normalised it for as long as it has had a menu button. Handing the path
+     * shape to `.doc()` names a collection rather than a document, so the read
+     * throws and a restaurant with a perfectly good menu reports as having
+     * none. Issue #370 prints this address on a sticker, so the answer has to
+     * be right for both shapes.
+     */
+    it('reads a restaurant whose menu is named as a path', async () => {
+      await restaurantRef().update({ menuId: `menus/${MENU}` });
+
+      const result = await loaded();
+
+      expect(result.ok).toBe(true);
+      expect(result.menu['id']).toBe(MENU);
+    });
+
+    /**
      * Weaker than the scan's `menuUnavailable`, and deliberately: a menu whose
      * every dish is off cannot be ordered from and is still worth reading.
      */

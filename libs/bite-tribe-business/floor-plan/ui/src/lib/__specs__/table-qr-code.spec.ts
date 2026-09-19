@@ -1,9 +1,5 @@
-import {
-  TABLE_QR_QUIET_ZONE_MODULES,
-  TABLE_SCAN_PREFIX,
-  tableQrCode,
-  tableScanUrl,
-} from '../table-qr-code';
+import { QR_QUIET_ZONE_MODULES } from 'common/ui/qr-code';
+import { TABLE_SCAN_PREFIX, tableQrCode, tableScanUrl } from '../table-qr-code';
 
 /**
  * The length a real token has, and deliberately nothing else about one.
@@ -58,7 +54,7 @@ describe('tableQrCode', () => {
 
   it('surrounds the code with the quiet zone the standard requires', () => {
     const { moduleCount, viewBox } = tableQrCode(TOKEN);
-    const side = moduleCount + TABLE_QR_QUIET_ZONE_MODULES * 2;
+    const side = moduleCount + QR_QUIET_ZONE_MODULES * 2;
 
     expect(viewBox).toBe(`0 0 ${side} ${side}`);
   });
@@ -70,8 +66,8 @@ describe('tableQrCode', () => {
     // The top-left finder pattern starts at module 0,0, so the first command
     // lands at the quiet zone itself - anything smaller would print part of
     // the code outside its own viewBox.
-    expect(firstMove?.[1]).toBe(String(TABLE_QR_QUIET_ZONE_MODULES));
-    expect(firstMove?.[2]).toBe(String(TABLE_QR_QUIET_ZONE_MODULES));
+    expect(firstMove?.[1]).toBe(String(QR_QUIET_ZONE_MODULES));
+    expect(firstMove?.[2]).toBe(String(QR_QUIET_ZONE_MODULES));
   });
 
   it('draws a run of dark modules as one bar', () => {
@@ -79,7 +75,7 @@ describe('tableQrCode', () => {
     // path that emitted one command per module would be seven times longer for
     // twenty-four codes on a page.
     expect(tableQrCode(TOKEN).path).toContain(
-      `M${TABLE_QR_QUIET_ZONE_MODULES} ${TABLE_QR_QUIET_ZONE_MODULES}h7v1h-7z`,
+      `M${QR_QUIET_ZONE_MODULES} ${QR_QUIET_ZONE_MODULES}h7v1h-7z`,
     );
   });
 

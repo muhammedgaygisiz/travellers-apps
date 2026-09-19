@@ -163,6 +163,20 @@
         </div>
 
         <!--
+          The published menu code (issue #370). Above table ordering rather
+          than inside it, because it is the one thing on this page a restaurant
+          can use with no floor plan, no tables and no ordering configured at
+          all - and reading as part of the table settings would say otherwise.
+        -->
+        <div class="ion-margin-top">
+          <bt-business-menu-qr
+            [restaurantId]="restaurant()?.id ?? ''"
+            [restaurantName]="placeName() ?? ''"
+            [hasMenu]="hasMenu()"
+          />
+        </div>
+
+        <!--
           How this restaurant uses its QR codes (issue #1102). Two modes, not
           three: the flag is one boolean, and a scan with it off shows the menu
           either way.

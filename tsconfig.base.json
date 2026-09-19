@@ -175,6 +175,7 @@
         "libs/common/ui/restaurant-selector/src/index.ts"
       ],
       "common/ui/page": ["libs/common/ui/page/src/index.ts"],
+      "common/ui/qr-code": ["libs/common/ui/qr-code/src/index.ts"],
       "common/ui/star-rating": ["libs/common/ui/star-rating/src/index.ts"],
       "common/ui/tags": ["libs/common/ui/tags/src/index.ts"],
       "opening-hours": ["libs/bite-tribe-common/opening-hours/src/index.ts"],

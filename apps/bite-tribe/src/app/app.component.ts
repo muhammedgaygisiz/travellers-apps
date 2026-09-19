@@ -119,6 +119,32 @@ export class AppComponent implements OnInit, OnDestroy {
         if (token) {
           void this.navController.navigateRoot([PATH.TABLE_SCAN, token]);
         }
+
+        return;
+      }
+
+      // A scanned menu QR code (GitHub issue #370). The code a restaurant
+      // prints for its window or its menu card carries
+      // `https://bitetribe.app/m/{restaurantId}`, and it is one address for
+      // everybody who points a camera at it: the route's own guard is what
+      // decides whether this member reads the app's menu page or the public
+      // one, so nothing about that belongs here.
+      //
+      // `navigateRoot` for the same reason the table code uses it - somebody
+      // who arrived by pointing a camera at a sticker has no history behind
+      // them, and a back button offering some would be offering a page they
+      // never visited.
+      const menuPrefix = `/${PATH.PUBLIC_MENU}/`;
+
+      if (path.startsWith(menuPrefix)) {
+        const restaurantId = path.slice(menuPrefix.length);
+
+        if (restaurantId) {
+          void this.navController.navigateRoot([
+            PATH.PUBLIC_MENU,
+            restaurantId,
+          ]);
+        }
       }
     });
   }

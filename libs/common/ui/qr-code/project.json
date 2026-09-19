@@ -1,0 +1,8 @@
+{
+  "name": "common-ui-qr-code",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/common/ui/qr-code/src",
+  "prefix": "bt",
+  "projectType": "library",
+  "tags": ["type:ui", "scope:common"]
+}

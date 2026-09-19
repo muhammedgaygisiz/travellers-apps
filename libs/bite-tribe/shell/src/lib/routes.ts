@@ -1,7 +1,11 @@
 import { Route, Routes } from '@angular/router';
 import { withAuthRoutes } from 'auth';
 import { authGuard, freshSessionGuard, startGuard } from 'ta-firestore';
-import { biteTitleResolver } from 'bite-tribe/store';
+import {
+  biteTitleResolver,
+  publicMenuMemberGuard,
+  restaurantMenuGuard,
+} from 'bite-tribe/store';
 import {
   gateAuthenticatedRoutes,
   onboardingCompletedGuard,
@@ -97,6 +101,36 @@ const APP_ROUTES: Routes = [
     path: `${PATH.BITE}/:biteId/${PATH.RESTAURANT}/:restaurantId/${PATH.MENU}/:menuId`,
     loadComponent: () => import('bite-tribe/menu').then((m) => m.MenuContainer),
     canActivate: [authGuard],
+  },
+  /**
+   * A restaurant's menu, in the app, without a Bite in front of it
+   * (GitHub issue #370).
+   *
+   * Every other way into a menu here comes from a Bite, so the route that
+   * renders one has always carried a `:biteId` it does not read. A scanned
+   * menu code carries a restaurant and nothing else, which is what these two
+   * routes exist for: the first resolves the restaurant's menu and redirects
+   * to the second, which is the address the NgRx menu pipeline is keyed on.
+   *
+   * Both carry `authGuard`, because this is the app's own menu page - the
+   * chrome, and the button that turns a dish into a Bite. The reader with no
+   * account has {@link PATH.PUBLIC_MENU} instead, and `publicMenuMemberGuard`
+   * is what sends a member here from there.
+   */
+  {
+    path: `${PATH.RESTAURANT}/:restaurantId/${PATH.MENU}`,
+    canActivate: [authGuard, restaurantMenuGuard],
+    // Never rendered: the guard always answers with a redirect. Angular needs
+    // a component all the same, and the menu page is the honest stand-in for
+    // the one this route resolves to.
+    loadComponent: () => import('bite-tribe/menu').then((m) => m.MenuContainer),
+    title: 'Menu',
+  },
+  {
+    path: `${PATH.RESTAURANT}/:restaurantId/${PATH.MENU}/:menuId`,
+    loadComponent: () => import('bite-tribe/menu').then((m) => m.MenuContainer),
+    canActivate: [authGuard],
+    title: 'Menu',
   },
   {
     path: `${PATH.BITE}/:biteId/${PATH.RESTAURANT}/:restaurantId/${PATH.BITES}`,
@@ -291,10 +325,17 @@ const APP_ROUTES: Routes = [
    * `restaurantId`, which the NgRx router selector keys on: that name makes
    * `loadRestaurantById$` read `/restaurants/{id}` on arrival, and the rules
    * refuse that read to the very reader this route exists for.
+   *
+   * `publicMenuMemberGuard` is not an auth guard and refuses nobody. Since
+   * issue #370 a restaurant prints this address on a code of its own, so a
+   * member with the app installed now scans their way here - and they are
+   * handed the app's own menu page instead of the stranger's. Everybody else,
+   * an anonymous table guest included, is let through to the page below.
    */
   {
     path: `${PATH.PUBLIC_MENU}/:${PUBLIC_MENU_RESTAURANT_PARAM}`,
     loadComponent: () => import('bite-tribe/menu').then((m) => m.PublicMenu),
+    canActivate: [publicMenuMemberGuard],
     title: 'Menu',
   },
   {

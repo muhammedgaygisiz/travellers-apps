@@ -1,0 +1,78 @@
+:host {
+  display: block;
+}
+
+.menu-qr-print {
+  max-width: 220px;
+}
+
+.menu-qr-code {
+  width: 100%;
+}
+
+.menu-qr-name {
+  margin: 0.6rem 0 0;
+  font-weight: 600;
+  text-align: center;
+}
+
+.menu-qr-caption {
+  margin: 0.2rem 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ion-text-color-step-400);
+}
+
+.menu-qr-url {
+  margin: 1rem 0 0.5rem;
+
+  /* An address meant to be read off the screen and typed, or selected with a
+   * cursor. `anywhere` rather than `break-all` so it wraps at the slashes
+   * where it can. */
+  overflow-wrap: anywhere;
+  font-family: monospace;
+  font-size: 0.85rem;
+  user-select: all;
+}
+
+.menu-qr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/**
+ * Printing one code and nothing else.
+ *
+ * The document-level releases that make an Ionic page printable at all are in
+ * `apps/bite-tribe-business/src/global.scss`; without them the job is one
+ * blank page. What is left here is the choosing: everything on the restaurant
+ * page is hidden, this block is shown, and the code is sized in millimetres
+ * because a scanner cares about the printed size and nothing else.
+ */
+@media print {
+  :host {
+    /* Hidden by the page around it, shown again here: `visibility` rather than
+     * `display`, so the ancestors this block is nested in can stay hidden
+     * without taking it down with them. */
+    visibility: visible;
+  }
+
+  .menu-qr-print {
+    visibility: visible;
+    max-width: none;
+    width: 60mm;
+    margin: 0 auto;
+  }
+
+  .menu-qr-code {
+    width: 60mm;
+    height: 60mm;
+  }
+
+  .menu-qr-url,
+  .menu-qr-actions,
+  .note {
+    display: none;
+  }
+}

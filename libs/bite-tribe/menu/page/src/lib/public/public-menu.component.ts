@@ -9,6 +9,7 @@ import { IonButton, IonContent, IonSpinner } from '@ionic/angular/standalone';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
+import { StoreLinksComponent } from 'bite-tribe/store-links';
 import {
   PublicMenuService,
   type PublicMenuView,
@@ -40,6 +41,7 @@ import { MenuComponent } from '../components/menu/menu.component';
     IonSpinner,
     TranslocoPipe,
     MenuComponent,
+    StoreLinksComponent,
   ],
   providers: [PublicMenuService],
   templateUrl: 'public-menu.component.html',

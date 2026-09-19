@@ -134,6 +134,17 @@ who never signed up must not be asked to finish an onboarding they never
 started. The deep-link handler in `app.component.ts` sends the same address to
 the same screen for a guest who has the app installed.
 
+That handler was not sufficient on its own, and for eighteen days it did
+nothing at all: a scanned code opened the browser even with the app installed,
+because the OS had no reason to hand the URL to the app. Android declared a
+verified App Link for one other host and one other path, and iOS listed one
+other associated domain, so `bitetribe.app/t/<token>` matched nothing.
+[#345] registered both paths on all three hosts. The lesson worth keeping is
+that an in-app URL handler is the second half of a deep link; the first half is
+an OS-level registration that has to name the exact host and path the sticker
+is printed with. See
+[Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md).
+
 The two constants are now one. `TABLE_SCAN_PATH` in the business app's QR sheet
 is built from `PATH.TABLE_SCAN` rather than spelled beside it, because two
 constants naming one printed URL can disagree and the disagreement would be

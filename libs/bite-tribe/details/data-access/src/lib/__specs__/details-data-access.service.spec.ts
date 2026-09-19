@@ -686,9 +686,9 @@ describe(DetailsDataAccessService.name, () => {
 
       expect(shareSpy).toHaveBeenCalledWith({
         dialogTitle: 'Share Bite',
-        text: '$ 10 · ⭐️ 4\nhttps://bite-tribe.web.app/s/bite/test-bite-id',
+        text: '$ 10 · ⭐️ 4\nhttps://bitetribe.app/s/bite/test-bite-id',
         title: 'Test Bite @ Test Place',
-        url: 'https://bite-tribe.web.app/s/bite/test-bite-id',
+        url: 'https://bitetribe.app/s/bite/test-bite-id',
       });
     });
 
@@ -716,7 +716,7 @@ describe(DetailsDataAccessService.name, () => {
 
       expect(shareSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          text: 'Check out this Bite on BiteTribe 👇\nhttps://bite-tribe.web.app/s/bite/test-bite-id',
+          text: 'Check out this Bite on BiteTribe 👇\nhttps://bitetribe.app/s/bite/test-bite-id',
         }),
       );
     });

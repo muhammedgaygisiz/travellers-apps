@@ -2,6 +2,7 @@ import { onRequest } from 'firebase-functions/https';
 import { Bite } from '../shared/model/bite';
 import { getFirestore } from 'firebase-admin/firestore';
 import { renderHtml } from '../shared/utils/render-html';
+import { BITE_TRIBE_ORIGIN } from '../shared/utils/bite-tribe-origin';
 
 const db = getFirestore();
 
@@ -47,8 +48,13 @@ export const handleSharedLinkToBite = onRequest(async (req, res) => {
 
     const imageUrl = bite.imagePath;
 
-    const canonicalUrl = `https://bite-tribe.web.app/s/bite/${encodeURIComponent(biteId)}`;
-    const redirectUrl = `https://bite-tribe.web.app/bite/${encodeURIComponent(biteId)}`;
+    // Both built from the canonical host (GitHub issue #345). A share page
+    // reached on `bite-tribe.web.app` therefore declares its canonical on
+    // `bitetribe.app` and hands the reader on to it, which is what issue #1454
+    // wanted and could not do while the verified App Link host was the other
+    // one. The function still answers on every host it always did.
+    const canonicalUrl = `${BITE_TRIBE_ORIGIN}/s/bite/${encodeURIComponent(biteId)}`;
+    const redirectUrl = `${BITE_TRIBE_ORIGIN}/bite/${encodeURIComponent(biteId)}`;
 
     res.status(200).send(
       renderHtml({

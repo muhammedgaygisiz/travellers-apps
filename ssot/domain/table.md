@@ -229,10 +229,12 @@ canonicalises search-engine URLs against, because a second copy that drifted
 would retire a room full of stickers nobody can correct. The path is two
 characters because every character costs modules and every module costs printed
 millimetres. Issue [#1100] gave that address a backend: `resolveTableQrToken`
-turns a token into an ordering context or into a reason it is not one. No route
-serves `/t/:token` in the consumer app yet - that screen is issue [#1101] - so a
-sticker printed today reaches an unknown route and the resolution behind it is
-called by nothing.
+turns a token into an ordering context or into a reason it is not one, and issue
+[#1101] gave it a screen: `PATH.TABLE_SCAN/:token` in the consumer shell's
+routes, deliberately behind no auth guard, because a guest at a table has no
+BiteTribe account and may never want one. Issue [#345] wired the printed address
+to it on both platforms, so a sticker scanned with the app installed opens the
+app rather than a browser.
 
 The code is drawn as two QR segments rather than one, which is where the
 Crockford base32 alphabet pays for itself: a byte segment for the origin and an
@@ -429,6 +431,7 @@ uses.
 - [Table Visit](table-visit.md)
 - [Restaurant](restaurant.md)
 
+[#345]: https://github.com/muhammedgaygisiz/travellers-apps/issues/345
 [#1070]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1070
 [#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071
 [#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072

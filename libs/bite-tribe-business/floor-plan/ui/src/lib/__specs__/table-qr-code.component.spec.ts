@@ -22,7 +22,9 @@ describe(TableQrCodeComponent.name, () => {
   let ref: ComponentRef<TableQrCodeComponent>;
 
   const svg = (): SVGSVGElement =>
-    fixture.nativeElement.querySelector('[data-testid="table-qr-code"]');
+    fixture.nativeElement.querySelector(
+      '[data-testid="table-qr-code"] [data-testid="qr-code"]',
+    );
 
   const setInputs = (inputs: Record<string, unknown>): void => {
     Object.entries(inputs).forEach(([key, value]) => ref.setInput(key, value));

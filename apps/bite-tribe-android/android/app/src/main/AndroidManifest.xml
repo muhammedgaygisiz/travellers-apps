@@ -38,14 +38,20 @@
         `autoVerify` is evaluated per filter: split like this, a host that fails
         verification cannot take the other two down with it.
 
-        Both paths on every host, because all three serve the same app and a
-        `/t/` link that arrived on the wrong host should still open here rather
-        than fall to the browser for a reason no guest can see.
+        Every path on every host, because all three serve the same app and a
+        link that arrived on the wrong host should still open here rather than
+        fall to the browser for a reason no guest can see.
 
         `/s/bite` keeps its prefix exactly as it verified on 30 August 2026
-        (see ssot/current-state/release-state.md); `/t/` carries its trailing
-        slash so it matches the scanned address and nothing else that may later
-        start with a `t`.
+        (see ssot/current-state/release-state.md); `/t/` and `/m/` carry their
+        trailing slash so each matches the scanned address and nothing else
+        that may later start with the same letter.
+
+        `/m/` is the published menu of issue #370 - a code a restaurant prints
+        for its window rather than for a table. A guest with the app installed
+        lands on the in-app menu, and a stranger on the public page in the
+        browser; both read the same menu, which is the whole point of giving
+        the path to the app rather than leaving it to the browser.
       -->
       <intent-filter android:autoVerify="true">
         <action android:name="android.intent.action.VIEW" />
@@ -61,6 +67,10 @@
           android:host="bitetribe.app"
           android:pathPrefix="/t/"
           android:scheme="https" />
+        <data
+          android:host="bitetribe.app"
+          android:pathPrefix="/m/"
+          android:scheme="https" />
       </intent-filter>
 
       <intent-filter android:autoVerify="true">
@@ -77,6 +87,10 @@
           android:host="www.bitetribe.app"
           android:pathPrefix="/t/"
           android:scheme="https" />
+        <data
+          android:host="www.bitetribe.app"
+          android:pathPrefix="/m/"
+          android:scheme="https" />
       </intent-filter>
 
       <intent-filter android:autoVerify="true">
@@ -92,6 +106,10 @@
         <data
           android:host="bite-tribe.web.app"
           android:pathPrefix="/t/"
+          android:scheme="https" />
+        <data
+          android:host="bite-tribe.web.app"
+          android:pathPrefix="/m/"
           android:scheme="https" />
       </intent-filter>
     </activity>

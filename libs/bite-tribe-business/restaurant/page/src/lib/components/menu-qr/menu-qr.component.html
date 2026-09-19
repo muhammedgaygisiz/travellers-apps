@@ -1,0 +1,62 @@
+<section class="menu-qr" data-testid="menu-qr">
+  <ion-text>
+    <h2>{{ 'menu-qr-title' | transloco }}</h2>
+  </ion-text>
+
+  @if (hasMenu()) {
+    <ion-text>
+      <p class="note">{{ 'menu-qr-hint' | transloco }}</p>
+    </ion-text>
+
+    <!--
+      The printed half. Everything inside `.menu-qr-print` is what a print job
+      keeps - see the stylesheet - so the name sits here rather than above,
+      where it would be cropped off the paper.
+    -->
+    <div class="menu-qr-print">
+      <bt-qr-code
+        class="menu-qr-code"
+        [payload]="url()"
+        [label]="'menu-qr-code-label' | transloco: { name: restaurantName() }"
+      />
+
+      @if (restaurantName()) {
+        <p class="menu-qr-name">{{ restaurantName() }}</p>
+      }
+
+      <p class="menu-qr-caption">{{ 'menu-qr-caption' | transloco }}</p>
+    </div>
+
+    <!--
+      The address on its own, for everywhere a camera is not pointed: a Google
+      listing, an Instagram bio, a restaurant's own site.
+    -->
+    <p class="menu-qr-url" data-testid="menu-qr-url">{{ url() }}</p>
+
+    <div class="menu-qr-actions">
+      <ion-button
+        fill="outline"
+        size="small"
+        data-testid="menu-qr-copy"
+        (click)="copy()"
+      >
+        {{ (copied() ? 'menu-qr-copied' : 'menu-qr-copy') | transloco }}
+      </ion-button>
+
+      <ion-button
+        fill="outline"
+        size="small"
+        data-testid="menu-qr-print"
+        (click)="print()"
+      >
+        {{ 'menu-qr-print' | transloco }}
+      </ion-button>
+    </div>
+  } @else {
+    <ion-text>
+      <p class="note" data-testid="menu-qr-no-menu">
+        {{ 'menu-qr-no-menu' | transloco }}
+      </p>
+    </ion-text>
+  }
+</section>

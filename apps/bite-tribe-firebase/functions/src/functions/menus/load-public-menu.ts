@@ -88,6 +88,20 @@ const getString = (data: DocumentData | undefined, field: string): string =>
   typeof data?.[field] === 'string' ? (data[field] as string) : '';
 
 /**
+ * The menu document this restaurant points at, as an id rather than a path.
+ *
+ * `Restaurant.menuId` has held both shapes over the collection's life - a bare
+ * document id, and a `menus/{id}` path - which is why the consumer app has
+ * normalised it since it gained its menu button, and why
+ * `menuIdOfRestaurant` in `bite-tribe/store` does the same for the routes of
+ * issue #370. Handing a path to `.doc()` names a collection rather than a
+ * document, so the read throws and a restaurant with a perfectly good menu is
+ * reported as having none - on a code already printed and glued to a window.
+ */
+const menuIdOf = (restaurant: DocumentData): string =>
+  getString(restaurant, 'menuId').split('/').filter(Boolean).pop() ?? '';
+
+/**
  * Whether the restaurant is one whose menu may be published under its name.
  *
  * The same rule the scan applies, and it survives the absence of ordering for a
@@ -148,7 +162,7 @@ export const loadPublicMenuHandler = async (
     return refuse('restaurantInactive');
   }
 
-  const menuId = getString(restaurant, 'menuId');
+  const menuId = menuIdOf(restaurant);
 
   if (!menuId) {
     return refuse('menuMissing');

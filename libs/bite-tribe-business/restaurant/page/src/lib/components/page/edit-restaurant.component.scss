@@ -67,3 +67,30 @@
     }
   }
 }
+
+/**
+ * Printing the menu code, and nothing else on this page
+ * (GitHub issue #370).
+ *
+ * `visibility` rather than `display`, because the block being kept is nested
+ * several levels inside the ones being dropped, and `display: none` on an
+ * ancestor takes its descendants with it whatever they ask for. Hidden
+ * elements still occupy their boxes, so the code is lifted out of the flow and
+ * put at the top of the sheet - otherwise it prints wherever the invisible
+ * form left it, which is most of the way down page two.
+ *
+ * The document-level releases that make any Ionic page printable are in
+ * `apps/bite-tribe-business/src/global.scss`.
+ */
+@media print {
+  :host {
+    visibility: hidden;
+  }
+
+  bt-business-menu-qr {
+    visibility: visible;
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+  }
+}

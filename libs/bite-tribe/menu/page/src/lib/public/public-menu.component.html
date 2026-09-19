@@ -29,6 +29,20 @@
           [canCreateBite]="false"
           data-testid="public-menu-body"
         />
+
+        <!--
+          The one surface where somebody who has never heard of BiteTribe is
+          holding a BiteTribe page, so it is where the app is worth offering
+          (GitHub issue #370). Under the menu rather than over it: they came to
+          read it, and an interstitial in front of a restaurant's menu is the
+          wall this whole route exists to remove.
+
+          `bt-store-links` renders nothing inside the native wrapper, so a user
+          who already has the app is not offered it - and it draws badges on a
+          phone and codes on a desktop, because a code cannot be scanned by the
+          screen showing it.
+        -->
+        <bt-store-links />
       }
 
       @if (refusal(); as refused) {

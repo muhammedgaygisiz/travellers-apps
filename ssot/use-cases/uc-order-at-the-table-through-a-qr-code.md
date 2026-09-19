@@ -234,35 +234,36 @@ visit by tapping "leave" could clear a table they were never sitting at.
 
 ## Reading The Menu Without An Account
 
-Issue [#1102] delivered the half of this use case that needs no table at all.
-
-**A menu is public information, and it is served by a callable.** `loadPublicMenu`
-answers with the restaurant and the menu, both assembled field by field, because
-a page that renders a restaurant's name needs a document that also carries its
-owner, its claim status and its whole ordering configuration. Opening a read
-rule wide enough to draw the page would publish all of it; the callable publishes
-three fields. It takes a restaurant rather than a token, since the entry point it
-exists for is a link a restaurant shares, and such a restaurant may have no floor
-plan and no printed codes at all.
+Issue [#1102] delivered the half of this use case that needs no table at all, and
+issue [#370] then took it out of this page's hands entirely. The published menu is
+a restaurant's menu read by a stranger: it is reached by a code the restaurant
+prints for its window, it names a restaurant rather than a table, and a restaurant
+with no floor plan and no tables can publish one. What it is, what it refuses and
+what it deliberately does not render is
+[UC - View Restaurant Menus](uc-view-restaurant-menus.md) `Reading A Menu Without An Account`. What stays
+here is only what a **scan** does with it.
 
 **A refusal now means there is nothing to show.** Two members left the refusal
 list: a restaurant that has not turned table ordering on, and a kitchen that has
 paused it, both resolve and say ordering is shut. A guest who scans either is
-offered the menu. `restaurantClosed` stayed a refusal, because it says something
-about the restaurant rather than about ordering, and a menu under a "closed"
-heading reads as an invitation with nobody there to correct it.
+offered the menu - the published one, which the scan screen links to rather than
+renders, so a guest who arrived by camera and a guest who followed a link read the
+same screen. `restaurantClosed` stayed a refusal, because it says something about
+the restaurant rather than about ordering, and a menu under a "closed" heading
+reads as an invitation with nobody there to correct it.
 
 **The menu states its own currency.** `Menu.currency` is set by the owner, and a
 menu that states none renders bare numbers - which a reader can ask about, unlike
 the hardcoded euro sign the renderer used to print at every restaurant on earth.
 The same field is the one `OrderLineSnapshot.currency` has been waiting for.
 
-**Two things are deliberately absent from the public page**: any way to create a
-Bite, because the reader may have no account and that button opens a sign-up for
-a product they came to read a menu of; and the app's own chrome, because they did
-not arrive from anywhere inside it. The renderer itself is the one the
-authenticated menu uses, so the two cannot disagree about what an unavailable
-dish looks like.
+**A table code and a menu code are different printed things.** Both are scanned in
+the same restaurant and neither substitutes for the other: a table code carries a
+token, scopes a table and is rotatable under issue [#1107]; a menu code carries a
+restaurant id, is not a secret, and leads to a page that cannot order anything.
+Since issue [#370] both are drawn by the same shared encoder, which is in
+`common/ui/qr-code` rather than in this platform's floor-plan library precisely so
+that a restaurant printing the second needs nothing from the first.
 
 ## Building And Sending An Order
 
@@ -886,8 +887,7 @@ guest's phone is retrying.
 - Issue [#1087] - printable table QR sheets, which fixed the scan URL this use case has to serve
 - Issue [#1073] - Table payment and Bite creation from orders, with six child issues
 - Issue [#345] - Kavi wants to offer a QR code at the table to order digitally
-- Issue [#371] - business wants the menu accessible via QR code
-- Issue [#370] - user wants to access the menu without authentication
+- Issue [#370] - reading a menu without an account, and the code a restaurant prints for it. Closed as completed, delivering issue [#371]. Owned by [UC - View Restaurant Menus](uc-view-restaurant-menus.md), not by this page
 - Issue [#344] - orderable bites, JustEat-like, a different fulfilment model and out of scope
 
 ## Related Domains

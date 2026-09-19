@@ -104,6 +104,14 @@
 
   Partially covered. Run 8 reached the vacation and posting-later shape on web through the position-source modal's `Set manually` option — the route that found [#1307] — and Run 11 covered the missing-location branch on Android by denying the permission. The wider class of cases, and a real trip across a currency boundary, are still untested. Currency fallback, manual override and border cases are [issue 978](https://github.com/muhammedgaygisiz/travellers-apps/issues/978).
 
+- ### The business restaurant page is blank without a GPS position
+
+  **Why it matters:** an owner who declines the browser's location prompt sees a restaurant that looks like it does not exist.
+
+  The shared `restaurant` selector in `libs/bite-tribe/store` finds the restaurant the route names and then discards it, because it cannot compute the `distance` it decorates it with. Every field on the business restaurant page therefore renders empty - the name, the picture, the address, the opening hours - and `Create Menu` is offered for a restaurant that has had a menu for months. `distance` is the one field a business owner editing their own restaurant has no use for.
+
+  Found on 19 September 2026 while verifying [issue 370](https://github.com/muhammedgaygisiz/travellers-apps/issues/370) against the emulators; dispatching a position by hand filled the whole page in one change-detection cycle. [Issue 1653](https://github.com/muhammedgaygisiz/travellers-apps/issues/1653) owns it and proposes returning the restaurant with no `distance` rather than withholding it, which has to be checked against the consumer surfaces that sort by it. It hides the menu code of [issue 370](https://github.com/muhammedgaygisiz/travellers-apps/issues/370) along with the rest of the form, so the business app cannot publish a menu on a device with location denied.
+
 - ## Resolved And Recorded
 
   One line each. The investigation is on the issue and on the charter run that found it; it is not repeated here.

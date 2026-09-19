@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Next to implement. Priority P1, post-launch. Nothing of the purchase exists: no store client,
 no purchase record, no lock. `isFree` is `(price ?? -1) === 0` in

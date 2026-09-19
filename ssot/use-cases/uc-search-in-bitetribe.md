@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. Search across accounts, Bites and restaurants ships, with category separation,
 city and country search, the list/map switch, and infinite-scroll paging. What is specified and
 not built is the Pro gating of backend search; the broader fuzzy, typo-tolerant search is a

@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. The create and edit flows, the photo upload states and their retry, and
 the five-source position picker are all shipped. The one deferred capability is the
 storage of resolved candidate positions, [#1290].
@@ -163,6 +163,18 @@ each under App Functionality.
   marker-tap selection stay on the unit tests in `bite.page.spec.ts`: neither
   writes to the Bite, so an E2E failure there would not be catching data loss.
   See GitHub issues [#1266] and [#1289].
+
+## Related GitHub Scope
+
+- Issues [#1229] and [#1168] made the photo survive being offline and losing connectivity mid-upload: a photo picked offline now enters the `pending`/`uploaded`/`failed` states instead of being silently dropped, and the client writes `failed` itself once an upload stalls. Closed.
+- Issue [#1233] scoped a prefilled creation draft (from a menu item or a repost) to its own session, and fixed the undefined-vs-empty photo path that lost a menu-derived Bite when it had none. Closed.
+- Issue [#1287] is the Entry Feedback Contract on the Create Bite button - the spinner and header progress bar covering `freshSessionGuard` and the lazy page chunk. Closed.
+- Issues [#1266], [#1306] and [#1289] redesigned the position-source picker: the single text row with an edit action replacing four always-visible buttons, the modal map following the selected candidate (`focusedGeopointId`), and the modal's disabled rows and marker-tap selection. Closed.
+- Issue [#1269] added the dual-origin distance labels and Bite-position ordering for the `Posting later` edge case. Closed.
+- Issue [#1394] moved the Android gallery onto the system Photo Picker, dropping its own permission prompt. Closed.
+- Issue [#1409] moved the `ACCESS_MEDIA_LOCATION` grant to the onboarding photos step (the Media Permission Rule). Closed.
+- Issue [#1078] replaced the permissive `/{document=**}` Firestore wildcard with default-deny and per-collection matches, which is what makes the deferred work under [#1290] possible. Closed.
+- Issue [#1290] - storing the resolved candidate positions on the Bite so a source can be re-chosen while editing. Open, classified `[Secondary]`.
 
 ## Related Domains
 

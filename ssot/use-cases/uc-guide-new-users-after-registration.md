@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. Delivered through [epic-850](../records/epic-850.md) (issue [#850] closed 17 July 2026; all nine
 sub-issues complete). The blocking assistant, its seven steps, the funnel analytics and the
 coach-mark sequence all ship. Onboarding is the app's first-run permission surface, which is

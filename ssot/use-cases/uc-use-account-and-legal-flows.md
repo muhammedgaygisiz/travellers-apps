@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. The privacy policy and its language fallback, in-app account deletion
 with re-authentication and the full data cascade, the public `/account-deletion` route,
 the email verification prompt with its throttled manual resend, and the monthly reminder
@@ -123,6 +123,11 @@ Relevant, and exercised more directly than on any other page.
 - `sendEmailVerificationReminders`
 - `apps/bite-tribe-e2e/src/tests/account-and-legal.spec.ts` covers in-app privacy navigation, deletion cancellation, and the completed emulator-backed cascade with a retained anonymized Bite.
 - `libs/bite-tribe/privacy-policy/src/lib/privacy-policy/__specs__` covers the policy language contract: German and Turkish apps render their own policy, a language without published policy copy renders the English one with the disclosed notice in its own language, and a late language preference rebuilds the document.
+
+## Related GitHub Scope
+
+- Issue [#1537] added removing the restaurant-staff association (`/restaurantStaff/{uid}`) from the account deletion cascade. Closed.
+- Issues [#1568], [#1569] and [#1570] track three decisions the Deletion Contract has not yet made: what happens to a deleted account's restaurant-ownership fields, to a BiteTrail it owns, and to its `/accountDeletions/{uid}` job record. All open.
 
 ## Related Domains
 

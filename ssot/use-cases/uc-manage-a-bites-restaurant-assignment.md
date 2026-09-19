@@ -2,9 +2,9 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
-No page exists yet; `UC-VRC` names this page (renamed from `UC-ARB`) as the owner of
+This page is what `UC-VRC` names as the owner of
 `bite.restaurantId`'s writers outside its own verification transaction (`R-8`), tracked,
 alongside dismissal and duplicate resolution, under epic [#1495]. `R-8` names four
 writers in total: `V23` inside candidate verification, owned by `UC-VRC`; the Bite form,
@@ -38,7 +38,17 @@ to, without needing an Operator, for every Bite outside an active `UC-VRC` verif
 
 **[MVP]** - this writer is what makes `bite.restaurantId` mean anything for any Bite
 that has never gone through candidate verification, and it already ships in
-production. Best guess; revisit once this page reaches L1.
+production.
+
+## App Store Review Area
+
+Not relevant, because nothing here requests a permission or changes a store declaration.
+Picking a restaurant reads the nearby-restaurant list the Bite form already loaded; the
+location permission behind that list belongs to [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md).
+
+## Supported Evidence
+
+- `onRestaurantSelected` and `onGooglePlaceSelected` in `libs/bite-tribe/bite/page/src/lib/components/page/bite.page.ts` - the Bite form's only implemented writer of `bite.restaurantId`, setting it for a verified nearby Restaurant and clearing it for anything else.
 
 ## Related GitHub Scope
 

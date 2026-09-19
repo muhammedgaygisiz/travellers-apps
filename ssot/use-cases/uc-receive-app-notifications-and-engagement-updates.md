@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. Every notification named in `Supported Evidence` ships, together with the
 seven contracts below: how a tap resolves to a surface, how notifications collapse and clear,
 the language they arrive in, how a release is announced, the country badge, the review-thread
@@ -276,6 +276,16 @@ Relevant.
   `clearNotificationsForSurface` in `libs/common/push-notifications`
 - `clearNotificationsOnPageChangeToSurface$` in `AppEffect`
 - `weekly-bites` route, served by `WeeklyBitesContainer` in `libs/bite-tribe/home/page`
+
+## Related GitHub Scope
+
+- Issue [#1244] is the Notification Navigation Contract above - a tap reliably opens its own surface, cold start or not. Closed.
+- Issue [#1366] is the Notification Collapse Contract above - a collapse key stops notifications piling up in the OS drawer. Closed.
+- Issue [#1200] is the Localization Contract above - notification copy follows the recipient's saved language. Closed.
+- Issue [#1194] is the Release Announcement Contract above - an operator-fired, per-platform new-version notification. Closed.
+- Issue [#1212] is the Country Badge Contract above - a profile's first Bite in a new country becomes an engagement signal. Closed.
+- Issue [#1283] is the Review Thread Contract above - a reply fans out to every thread participant, not just the Bite creator. Closed. Shared with [UC - Inspect Bite Details](uc-inspect-bite-details.md), which owns the thread UI this fan-out targets.
+- Issue [#1184] is the Installation Contract above - notification delivery becomes per-installation rather than per-account. Closed. Shared with [UC - Configure Personal Settings](uc-configure-personal-settings.md), which owns the settings surface this delivery state feeds.
 
 ## Related Domains
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Supported today. A free BiteTrail can be taken as a Bucket List, which is created holding
 that BiteTrail's Bites; the list is then the shared home component in bucket-list mode,

@@ -2,12 +2,12 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Next to implement, and not built: no consumer-app route creates a BiteTrail today. Creation
 still happens in the business app, on
 [UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md), which issue [#1519]
-removes when it moves creation here. The page reaches L1 with that issue.
+removes when it moves creation here.
 
 ## Goal
 
@@ -44,6 +44,22 @@ behind content reporting.
 
 Relevant: this widens who publishes user-generated content into the Market Place. Issue
 [#1519] names the guidelines involved.
+
+## Supported Evidence
+
+Not implemented. No consumer-app route creates or publishes a BiteTrail: `libs/bite-tribe/bite-trail/page`
+only reads and displays one, through `bite-trail-bites.page`, and `libs/bite-tribe/market-place` only
+browses what is already published. Creation lives entirely in the business app that issue [#1519]
+retires. The surfaces this will touch are:
+
+- `libs/bite-tribe-common/model/src/lib/bite-trail.ts`, the `BiteTrail` model creation writes
+- `libs/bite-tribe-business/create-bite-trail/page` (`create-bite-trail.component.ts`,
+  `create-bite-trail-container.ts`) and its `data-access` (`create-bite-trail-data-access.service.ts`),
+  the business-app flow this page replaces and whose write path a consumer route reuses or repoints
+- `libs/bite-tribe/bite-trail` and `libs/bite-tribe/market-place`, the consumer surfaces a published
+  trail is already read into
+- `libs/bite-tribe-common/bite-trail`, the shared `BiteTrail` card/detail component both apps render
+  from
 
 ## Related GitHub Scope
 

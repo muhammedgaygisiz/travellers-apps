@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. The detail page, its share and deep-link entry, the bucket-list and
 directions actions, the header photo's upload state, and the six contracts below all ship.
 Editing, deleting and reporting a review are not on this page at all — [epic-1284](../records/epic-1284.md) owns
@@ -280,6 +280,16 @@ data types this page renders are declared in [Implementation - Store Declaration
 - Playwright E2E coverage of the cold shared-link entry:
   `apps/bite-tribe-e2e/src/tests/shared-bite-deep-link.spec.ts` opens
   `/bite/:biteId` as a fresh page load, signed in and signed out.
+
+## Related GitHub Scope
+
+- Issue [#1272] is the Relative Time Contract above - localized, single-unit, honest ages for the Bite and its reviews. Closed.
+- Issue [#1246] is the Shared Link Entry Contract above - a cold shared-link visitor always lands on the Bite, signed in or not. Closed.
+- Issue [#1232] is the Unresolvable Bite Contract above - one settled answer (shown, gone, or failed) for every way this page's read can end. Closed.
+- Issue [#1186] fixed the raw-translation-keys defect the Unresolvable Bite Contract's alert now avoids by waiting for the active language. Closed.
+- Issue [#1283] is the Review Thread Contract above - the flat review list became `ReviewThreadComponent`'s one-level-deep threads. Closed.
+- Issue [#1308] is the Review Attribution Contract above - reviews now publish the BiteTribe display name rather than the identity provider's real name; accepted as a release blocker. Closed.
+- Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card. Closed.
 
 ## Related Domains
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Mostly delivered, and what is left is not packaging. Issue [#266] shipped the marketplace
 surfaces this page was written for - the business dashboard listing a creator's own
@@ -54,6 +54,23 @@ proceeds displayed depend on the commission the store takes. The surface itself 
 reviewed: it is in the business app, which is web-only, and only `apps/bite-tribe-ios` and
 `apps/bite-tribe-android` carry a native project. The price-point mechanism on each store was not verified at source; check it
 when issue [#1125] starts.
+
+## Supported Evidence
+
+Nothing this page owns is built. What issue [#266] delivered belongs to the sibling pages
+Status and Related GitHub Scope already name, not to this one:
+
+- `libs/bite-tribe-business/create-bite-trail/page/src/lib/components/page/create-bite-trail.component.ts`
+  takes a price with `Validators.min(0)` only - no bands, no per-currency floor or ceiling -
+  and any of `currencyCodes` may be picked; that free-text amount is what the bands this page
+  adds would replace.
+- The same create-form surface has no publish step and no net-proceeds disclosure: nothing
+  under `libs/bite-tribe-business/create-bite-trail` renders a split or a commission, and
+  neither `stripe`, `payout` nor `onboarding` appears anywhere in it - there is no gate to
+  wire the payable-creator check into yet.
+- `libs/bite-tribe-common/model/src/lib/bite-trail.ts` carries `price` and `currency` with no
+  further shape, so nothing on the model itself distinguishes a priced-but-unpublished trail
+  from a sellable one.
 
 ## Related GitHub Scope
 

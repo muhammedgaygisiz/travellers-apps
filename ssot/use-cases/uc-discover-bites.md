@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. The feed, its map view, search and filter, and the location-bounded
 loading with its timeouts and error separation all ship. The Pro widening of the radius is
 specified but not built, [epic-1122][#1122].
@@ -61,6 +61,12 @@ onboarding rather than from this flow — see [UC - Guide New Users After Regist
 - `loadBitesByLocation`
 - Bite API loading by location.
 - Shared `bt-map` marker update behavior.
+
+## Related GitHub Scope
+
+- Part of [epic-1122][#1122], which specifies loading a position other than the current one and any radius beyond 15 km as a Pro capability. Not built.
+- Issue [#1230] is the CoreLocation timeout defect the bounded position read (15s) and feed load (20s) now guard against. Closed.
+- Issue [#1331] separated the empty-feed and empty-search-result copy. Closed.
 
 ## Related Domains
 

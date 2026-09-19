@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Next to implement. Priority P1, post-launch, and the least built behaviour in the graph: the
 workspace carries no Stripe dependency and no payout, ledger, balance or creator-onboarding

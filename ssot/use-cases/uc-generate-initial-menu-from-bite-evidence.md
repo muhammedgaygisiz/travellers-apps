@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 
 Implemented. Reachable only from `UC-VRC` `V19`, inside the Operator's verification
 transaction - no standalone trigger, no other caller anywhere in the codebase
@@ -39,9 +39,29 @@ action triggers it belongs to `UC-VRC`, not to this page.
 **[MVP]** - `V19` sits inside `UC-VRC`'s own `[MVP]`-classified success path (`V11` to
 `V25`), and this page is what that step is.
 
+## App Store Review Area
+
+Not relevant, because this page is a backend mechanism with no user-facing surface of its
+own. It runs inside the Operator's `UC-VRC` verification transaction, requests no
+permission, and changes no store declaration.
+
+## Supported Evidence
+
+- `buildInitialMenuCategories` and `buildInitialMenuItems` in
+  `apps/bite-tribe-firebase/functions/src/functions/shared/utils/initial-menu.ts`, invoked
+  from `UC-VRC` `V19` and nowhere else in the codebase.
+
+## Related GitHub Scope
+
+- Pull request [#1210] introduced this mechanism (`seed initial menu from bites when verifying a candidate`); it names no issue.
+- Issue [#1099] added the stable per-item id (`InitialMenuItem.id`) an order line references, delivered by pull request [#1593]. Closed.
+
 ## Related Domains
 
 - [Restaurant](../domain/restaurant.md)
 - [Bite](../domain/bite.md)
 
+[#1099]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1099
+[#1210]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1210
 [#1511]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1511
+[#1593]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1593

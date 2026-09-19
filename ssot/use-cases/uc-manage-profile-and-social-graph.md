@@ -2,7 +2,7 @@
 
 ## Status
 
-**Level:** L0.
+**Level:** L1
 Supported today. Profile view and edit, public profiles, follow and unfollow with their
 lists, the visibility choice, and the two identity contracts below all ship. Onboarding
 has collected an optional home city since [#1271], so a profile without one stays the
@@ -137,6 +137,13 @@ by the name, photo and user-ID entries declared in [Implementation - Store Decla
 - Public-user conversion.
 - Playwright coverage for profile editing, public-profile navigation,
   follower/following lists, and follow/unfollow persistence.
+
+## Related GitHub Scope
+
+- Issue [#1166] is the profile-loading skeleton fix - no placeholder facts (e.g. the FREE badge) render before a profile arrives. Closed.
+- Issue [#1188] made the public/private visibility choice readable directly off the profile. Closed.
+- Issue [#1260] moved account identity ("who am I signed in as") from the profile page into the app menu. Closed.
+- Issue [#1270], together with onboarding's [#1271], is the Profile Identity Contract above. Closed.
 
 ## Related Domains
 

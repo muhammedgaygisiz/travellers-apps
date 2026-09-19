@@ -19,6 +19,8 @@ import { AuthService } from 'ta-firestore';
 import { NetworkStatusService } from 'common/networkstatus';
 import type {
   PublicMenuRefusalReason,
+  SubmitTableOrderResult,
+  TableOrder as TableOrderModel,
   PublicMenuResult,
   TableOrderingUnavailableReason,
   TableScanContext,
@@ -132,6 +134,7 @@ const pending = <T>(): Promise<T> => new Promise<T>(() => undefined);
 interface Answers {
   scan?: () => Promise<TableScanResult | TableSessionCallError>;
   menu?: () => Promise<PublicMenuResult | undefined>;
+  submit?: () => Promise<SubmitTableOrderResult | TableSessionCallError>;
 }
 
 const order = (answers: Answers = {}): Decorator =>
@@ -169,7 +172,10 @@ const order = (answers: Answers = {}): Decorator =>
         provide: TableOrderApiService,
         useValue: {
           orders$: (): Observable<never> => EMPTY,
-          submit: (): Promise<never> => pending(),
+          submit:
+            answers.submit ??
+            ((): Promise<SubmitTableOrderResult | TableSessionCallError> =>
+              pending()),
         },
       },
       {
@@ -334,3 +340,97 @@ export const FailedOffline = failed('offline');
 
 /** The same code has been hammered, and the rate limiter said so. */
 export const FailedRateLimited = failed('rateLimited');
+
+/** One Margherita, as the kitchen would have recorded it. */
+const placedOrder = (): TableOrderModel =>
+  ({
+    id: 'req-9f2a',
+    visitId: 'visit-1',
+    tableId: context.table.id,
+    status: 'received',
+    currency: 'EUR',
+    total: 12,
+    lines: [
+      {
+        menuItemId: 'item-margherita',
+        name: 'Margherita',
+        price: 12,
+        quantity: 1,
+      },
+    ],
+    statusChangedAt: Date.parse('2026-09-19T19:40:00Z'),
+  }) as unknown as TableOrderModel;
+
+/** Adds one dish and taps send. */
+const sendOne = async (): Promise<void> => {
+  await pressAll('menu-item-add-to-cart', 1);
+  await pressAll('table-order-submit', 1);
+};
+
+/** Sent, and the kitchen has it. */
+export const Placed: Story = {
+  decorators: [
+    order({
+      submit: async () => ({
+        ok: true,
+        order: placedOrder(),
+        tableStatus: 'ordering',
+      }),
+    }),
+  ],
+  play: sendOne,
+};
+
+/**
+ * The same order, found rather than placed (issue #1108). A guest whose phone
+ * gave up and retried is told it was already with the kitchen rather than shown
+ * a second confirmation of an order they placed once.
+ */
+export const PlacedReplayed: Story = {
+  decorators: [
+    order({
+      submit: async () => ({
+        ok: true,
+        order: placedOrder(),
+        tableStatus: 'ordering',
+        replayed: true,
+      }),
+    }),
+  ],
+  play: sendOne,
+};
+
+/**
+ * A dish was repriced while the guest read its description, so the whole order
+ * is refused by name. The refusal sits **beside** the cart rather than
+ * replacing it: a guest told their Margherita changed price needs the cart they
+ * built and the menu they built it from, both still on screen.
+ */
+export const RefusedBesideCart: Story = {
+  decorators: [
+    order({
+      submit: async () => ({
+        ok: false,
+        reason: 'priceChanged',
+        item: {
+          menuItemId: 'item-margherita',
+          name: 'Margherita',
+          shownPrice: 12,
+          currentPrice: 13.5,
+        },
+      }),
+    }),
+  ],
+  play: sendOne,
+};
+
+/**
+ * A send that never came back. The cart and the menu stay put and the cart
+ * stops accepting edits (`RD-TS-32`): the key already names an order that does
+ * not contain whatever would be added to it, so a dessert added now is one that
+ * can never be sent.
+ */
+export const SubmissionUnresolved: Story = {
+  decorators: [order({ submit: () => pending() })],
+  play: sendOne,
+};

@@ -123,6 +123,12 @@ export interface TableOrderingSettings {
  * `restaurantClosed` stayed. It is a statement about the restaurant rather than
  * about ordering, and a menu under a "closed" heading reads as an invitation -
  * with nobody there to correct it, which is the difference from a pause.
+ *
+ * `menuUnavailable` stayed too, and issue #1597 narrowed which scans can reach
+ * it: only those where ordering was otherwise possible. Where the verdict is
+ * already {@link TableOrderingAvailability} with `available: false`, nothing on
+ * the menu being orderable says nothing the guest needs, and refusing on it
+ * would withhold the menu the code was printed for.
  */
 export const TABLE_SCAN_REFUSAL_REASONS = [
   /** No token document. A code that was never ours, or a mistyped URL. */
@@ -160,7 +166,15 @@ export const TABLE_SCAN_REFUSAL_REASONS = [
   'restaurantClosed',
   /** The restaurant has no menu document. */
   'menuMissing',
-  /** The menu exists and has nothing on it that can be ordered today. */
+  /**
+   * The menu exists and has nothing on it that can be ordered today.
+   *
+   * Reachable only where the scan could otherwise have ordered (issue #1597).
+   * A menu-only restaurant, and one whose staff have paused, resolve instead
+   * and carry the verdict below: nothing was going to be ordered at either, so
+   * refusing here would withhold the menu over an answer to a question the
+   * guest never asked - the dead end `RD-TS-6` exists to remove.
+   */
   'menuUnavailable',
 ] as const;
 

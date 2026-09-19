@@ -160,6 +160,37 @@ const seed = async (): Promise<void> => {
     });
 };
 
+/** Every dish on the seeded menu marked off, leaving nothing orderable. */
+const markEveryDishUnavailable = async (): Promise<void> => {
+  await getFirestore()
+    .collection('menus')
+    .doc(MENU)
+    .update({
+      categories: [
+        {
+          id: 'category-pizza',
+          title: 'Pizza',
+          items: [
+            {
+              id: 'item-margherita',
+              name: 'Margherita',
+              description: '',
+              price: 12,
+              isAvailable: false,
+            },
+          ],
+        },
+      ],
+    });
+};
+
+/** The restaurant as one that publishes a menu and takes no orders at all. */
+const makeMenuOnly = async (): Promise<void> => {
+  await restaurantRef().update({
+    tableOrdering: { enabled: false, timeZone: 'Europe/Berlin' },
+  });
+};
+
 const clear = async (): Promise<void> => {
   const db = getFirestore();
 
@@ -268,9 +299,7 @@ describe('resolve table QR token', () => {
    */
   describe('a scan that resolves without ordering', () => {
     it('resolves a menu-only restaurant, naming the menu', async () => {
-      await restaurantRef().update({
-        tableOrdering: { enabled: false, timeZone: 'Europe/Berlin' },
-      });
+      await makeMenuOnly();
 
       const context = await resolved();
 
@@ -338,6 +367,61 @@ describe('resolve table QR token', () => {
     });
 
     /**
+     * The refusal this branch used to end in, one check before it (issue
+     * #1597). Nothing on the menu can be ordered, and at a menu-only
+     * restaurant nothing was going to be - so the scan resolves and the guest
+     * reads the menu, which is the answer the restaurant's own published link
+     * gives for the same menu at the same moment.
+     */
+    it('resolves a menu-only restaurant whose every dish is marked off', async () => {
+      await makeMenuOnly();
+      await markEveryDishUnavailable();
+
+      const context = await resolved();
+
+      expect(context.ok).toBe(true);
+      expect(context.menu).toEqual({ id: MENU });
+      expect(context.ordering).toEqual({
+        available: false,
+        reason: 'tableOrderingDisabled',
+      });
+    });
+
+    /** The same, for the other verdict that is not a refusal. */
+    it('resolves a paused restaurant whose every dish is marked off', async () => {
+      const pausedUntilTimestamp = LUNCHTIME.getTime() + 20 * 60_000;
+
+      await restaurantRef().update({
+        tableOrdering: {
+          enabled: true,
+          timeZone: 'Europe/Berlin',
+          pausedUntilTimestamp,
+        },
+      });
+      await markEveryDishUnavailable();
+
+      expect((await resolved()).ordering).toEqual({
+        available: false,
+        reason: 'orderingPaused',
+        pausedUntilTimestamp,
+      });
+    });
+
+    /**
+     * A menu-only restaurant with no menu document has nothing to show on
+     * either path, so the narrowing of issue #1597 does not reach it.
+     */
+    it('still refuses a menu-only restaurant that has no menu', async () => {
+      await makeMenuOnly();
+      await restaurantRef().update({ menuId: '' });
+
+      expect(await refused()).toMatchObject({
+        reason: 'menuMissing',
+        nextStep: 'askStaff',
+      });
+    });
+
+    /**
      * Closed is not menu-only. It is a statement about the restaurant rather
      * than about ordering, so it stays a refusal - the line issue #1102 drew.
      */
@@ -345,9 +429,7 @@ describe('resolve table QR token', () => {
       /** 09:00 Berlin, before the 11:30 service. */
       const beforeService = new Date('2026-09-16T07:00:00Z');
 
-      await restaurantRef().update({
-        tableOrdering: { enabled: false, timeZone: 'Europe/Berlin' },
-      });
+      await makeMenuOnly();
 
       expect(await refused(TOKEN, beforeService)).toMatchObject({
         reason: 'restaurantClosed',
@@ -520,27 +602,13 @@ describe('resolve table QR token', () => {
       expect(await refused()).toMatchObject({ reason: 'menuMissing' });
     });
 
+    /**
+     * At a restaurant that does take orders from the table, and only there
+     * (issue #1597). Ordering is what the guest came to the screen for, so
+     * they are owed the sentence that says nothing can be ordered.
+     */
     it('refuses a menu with nothing that can be ordered today', async () => {
-      await getFirestore()
-        .collection('menus')
-        .doc(MENU)
-        .update({
-          categories: [
-            {
-              id: 'category-pizza',
-              title: 'Pizza',
-              items: [
-                {
-                  id: 'item-margherita',
-                  name: 'Margherita',
-                  description: '',
-                  price: 12,
-                  isAvailable: false,
-                },
-              ],
-            },
-          ],
-        });
+      await markEveryDishUnavailable();
 
       expect(await refused()).toMatchObject({
         reason: 'menuUnavailable',

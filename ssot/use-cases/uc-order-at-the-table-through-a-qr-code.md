@@ -59,11 +59,27 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 | --- | ---------------------------------------------- | ------------------------------------------ | ------------------ |
 | 0   | The token exists                               | `unknownToken`                             | ask staff          |
 | 1   | The restaurant exists and is active            | `restaurantNotFound`, `restaurantInactive` | ask staff          |
-| 2   | Table ordering is enabled for that restaurant  | `tableOrderingDisabled`                    | ask staff          |
-| 3   | The table exists, is published, and is enabled | `tableNotFound`, `tableDisabled`           | ask staff          |
-| 4   | The QR token is active and not revoked         | `tokenSuperseded`, `tokenRevoked`          | rescan / ask staff |
-| 5   | The restaurant is currently accepting orders   | `orderingPaused`, `restaurantClosed`       | try later          |
-| 6   | The requested menu exists and is available     | `menuMissing`, `menuUnavailable`           | ask staff          |
+| 2   | The table exists, is published, and is enabled | `tableNotFound`, `tableDisabled`           | ask staff          |
+| 3   | The QR token is active and not revoked         | `tokenSuperseded`, `tokenRevoked`          | rescan / ask staff |
+| 4   | The restaurant is within its opening hours     | `restaurantClosed`                         | try later          |
+| 5   | The restaurant has a menu to show              | `menuMissing`                              | ask staff          |
+| 6   | Something on that menu can be ordered today    | `menuUnavailable`                          | ask staff          |
+
+**Whether the guest may order is not one of the rules.** Table ordering being
+switched off, and staff having paused it, left the refusal list in issue [#1102]
+(`RD-TS-6`). They are read after step 5 into an ordering verdict carried on a
+scan that _resolved_, because neither is a reason to withhold a menu.
+
+**Step 6 refuses only a scan that could otherwise have ordered** (issue [#1597]).
+Where the verdict is already `tableOrderingDisabled` or `orderingPaused` the scan
+resolves with every dish on the menu marked off: nothing was going to be ordered
+there, so `menuUnavailable` would answer a question the guest is not asking, and
+answer it by withholding the menu they scanned the code for - the same menu the
+restaurant's published link hands out at the same moment. It still refuses, and
+still pairs with ask staff, at a restaurant that _does_ take orders from the
+table, because ordering is what the guest came to the screen for and they are
+owed the sentence that says nothing can be ordered. Step 5 is untouched on either
+path: a restaurant with no menu document has nothing to show.
 
 Each failure returns a distinct, actionable reason, not a generic error, and the
 reason carries the next step with it - ask staff, try later, or look at the
@@ -77,14 +93,15 @@ assignment lapse fails three of them - and the guest gets one sentence, so which
 one has to be decided here rather than by however an implementation nested its
 conditions. It runs outside-in, so the answer is the largest true thing.
 
-Three of the rules had no data behind them and now do. "Active" is not a field:
-a restaurant is active while a business account holds it, which
+Three of these questions had no data behind them and now do. "Active" is not a
+field: a restaurant is active while a business account holds it, which
 `assignRestaurantOwner` and `revokeRestaurantOwner` already write. "Table
 ordering is enabled" is `Restaurant.tableOrdering.enabled`, absent everywhere and
-absent meaning off. "Currently accepting orders" is a staff-side
-`pausedUntilTimestamp` **and** the opening hours evaluated in
-`tableOrdering.timeZone` - `DaySchedule` carries no zone, and the server runs in
-UTC, so without one a Jakarta restaurant would close at four in the afternoon.
+absent meaning off. "Currently accepting orders" is two facts answering two
+questions: the staff-side `pausedUntilTimestamp` feeds the verdict, and the
+opening hours feed step 4, evaluated in `tableOrdering.timeZone` - `DaySchedule`
+carries no zone, and the server runs in UTC, so without one a Jakarta restaurant
+would close at four in the afternoon.
 
 A refusal never says more than it has to, and a resolution says only what the
 guest needs: the restaurant's name and picture, the room's name, the table's
@@ -929,5 +946,6 @@ guest's phone is retrying.
 [#1109]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1109
 [#1184]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1184
 [#1200]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1200
+[#1597]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1597
 [#1598]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1598
 [#1629]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1629

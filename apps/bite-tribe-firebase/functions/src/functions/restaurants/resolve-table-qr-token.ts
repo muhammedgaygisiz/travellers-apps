@@ -56,8 +56,16 @@ import {
  *
  * Two checks left that sequence in issue #1102. Whether the restaurant offers
  * table ordering, and whether staff have paused it, no longer refuse anything:
- * they are read at the end into {@link orderingAvailability} and carried on a
- * scan that resolved, because neither is a reason to withhold a menu.
+ * they are read into {@link orderingAvailability} and carried on a scan that
+ * resolved, because neither is a reason to withhold a menu.
+ *
+ * One refusal was left standing in front of that branch and ended the same
+ * journey in the same place (issue #1597). `menuUnavailable` - nothing on this
+ * menu can be ordered today - is now decided *after* the ordering verdict and
+ * only where that verdict says an order was possible. At a menu-only
+ * restaurant nothing was going to be ordered, so the check answered a question
+ * the guest was not asking, and answered it by withholding the menu they had
+ * just scanned a code for.
  *
  * The token document is read before any of it, because it is what names the
  * restaurant, but its *status* is not judged until its own turn. That is not an
@@ -166,6 +174,13 @@ const isRestaurantActive = (restaurant: DocumentData): boolean =>
  *
  * An empty menu and a menu whose every dish is off both read as unavailable.
  * They are the same thing to a guest: a menu screen with nothing on it.
+ *
+ * Asked only of a scan that could otherwise have ordered (issue #1597). Where
+ * the ordering verdict is already `tableOrderingDisabled` or `orderingPaused`
+ * this is not reached, and the menu-only guest is handed the same menu the
+ * restaurant's own published link gives them - `hasReadableContent` in
+ * `menus/load-public-menu.ts`, which asks the weaker question of whether there
+ * is anything written there at all.
  */
 const hasOrderableItem = (menu: DocumentData): boolean => {
   const categories = menu['categories'];
@@ -481,13 +496,19 @@ export const resolveScan = async (
     return { result: refuseScan('menuMissing') };
   }
 
-  if (!hasOrderableItem(menu.data() ?? {})) {
+  const ordering = orderingAvailability(tableOrdering, now);
+
+  // Read before the menu is judged, because it decides whether judging it is
+  // worth doing (issue #1597). A menu nothing can be ordered from is a refusal
+  // only where an order was the point; where ordering is off or paused it is
+  // the menu the guest scanned the code for, and refusing it would put the
+  // dead end of issue #1102 back one check further along.
+  if (ordering.available && !hasOrderableItem(menu.data() ?? {})) {
     return { result: refuseScan('menuUnavailable') };
   }
 
   const roomName = getString(room?.data(), 'name');
   const image = getString(restaurant, 'image');
-  const ordering = orderingAvailability(tableOrdering, now);
 
   // Assembled field by field. The restaurant document carries `ownerUserId`
   // and the table document carries the geometry of a floor plan, and a guest

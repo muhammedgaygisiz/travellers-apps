@@ -81,8 +81,31 @@ verification from taking the other two down with it.
 
 The two files that have to agree with each other and with the manifest are
 `apps/bite-tribe/src/.well-known/assetlinks.json` and
-`apps/bite-tribe/src/apple-app-site-association`; both are served from every
-host, because all three serve the same build.
+`apps/bite-tribe/src/.well-known/apple-app-site-association`; both are served
+from every host, because all three serve the same build.
+
+### Both Files Live Under `.well-known`, And Hosting Must Not Generate Them
+
+Apple fetches `https://<host>/.well-known/apple-app-site-association` and only
+that path. The build also emits a copy at the site root, which older clients
+used, but the root copy proves nothing: a device reads the `.well-known` one.
+
+**`appAssociation` in `firebase.json` has to be `NONE`.** Left unset it defaults
+to `AUTO`, and Hosting then generates its own association file for any
+`.well-known` path the deploy does not fill. Until [#1651] that is exactly what
+happened - the repository's file was emitted at the site root only, and every
+host served a generated `apple-app-site-association` at `.well-known` declaring
+`"paths": ["NOT /__/auth/action/", "NOT /__/auth/handler/", "NOT /_/*", "/*"]`.
+The generated file carried the correct `appID`, so Universal Links could still
+open the app - by claiming **every** path, rather than the three the repository
+declares. `assetlinks.json` was unaffected because it was always deployed at
+`.well-known`, which is also why a deployed file is the evidence that `AUTO`
+fills gaps rather than overriding what it finds.
+
+Both files need an explicit `Content-Type: application/json` header, which is
+what the `headers` block in `firebase.json` is for - Hosting serves an
+extensionless file as `application/octet-stream` otherwise, and Apple rejects
+it.
 
 The iOS `appID` must carry the Team ID: `DJ2XQYP3NB.com.bitetribe.app`. It was
 written as the bare bundle id from [#628] until [#345], which is invalid - so
@@ -220,9 +243,9 @@ no client code and works the same in every one of them.
 ### What It Deliberately Does Not Touch
 
 - **The apps must not capture `/download`.** Android verifies App Links only for
-  `android:pathPrefix="/s/bite"` and `apple-app-site-association` lists only
-  `/s/bite/*`, so the path stays in the browser on a device with the app
-  installed. Both files are unchanged by [#1628] and adding `/download` to either
+  the `/s/bite`, `/t/` and `/m/` path prefixes, and `apple-app-site-association`
+  lists `/s/bite/*`, `/t/*` and `/m/*`, so the path stays in the browser on a
+  device with the app installed. Both files are unchanged by [#1628] and adding `/download` to either
   would break the link on exactly the phones it exists for.
 - **`robots.txt` and `sitemap.xml`.** The three-edit rule above is for a new
   Angular route. `/download` is not one - it never reaches the bundle, and a
@@ -301,3 +324,4 @@ Once deployed:
 [#1454]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1454
 [#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455
 [#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628
+[#1651]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1651

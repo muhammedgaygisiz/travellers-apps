@@ -335,11 +335,13 @@ and the four restaurant ownership fields are writable by no client at all. See
 the rules section on [Architecture - Firebase](firebase.md) for the contract, the test
 suite and the deploy.
 
-**The rules deploy by hand.** Nothing in CI deploys `firestore.rules`, so
-merging [#1078] does not change production — running
-`npx nx firebase-deploy-rules bite-tribe-firebase` does. Until that deploy runs,
-the role gate is still a client-side gate over an open database.
-`storage.rules` remains open and is issue [#1350].
+**The rules deploy from CI, on every push to `develop`.** The
+`deploy-firestore-rules` job publishes `firestore.rules` and `storage.rules`
+together and needs the rules emulator suite, so merging [#1078] is what changes
+production. Issue [#1567] moved the deploy there; it was a workstation command
+until then, and the role gate sat over an open database for as long as nobody
+ran it. `storage.rules` is published as committed, including its still-open
+state, which is issue [#1350].
 
 ## Operator Audit Trail
 
@@ -577,7 +579,7 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 - Public/private profile intent needs clearer user guidance.
 - Backend callable auth checks need to remain consistent as more write/query logic moves server-side.
 - Ownership, not the role, is what the Firestore rules enforce ([#1078]). An account that holds `business` but is assigned no restaurant can write no restaurant, which is the intended boundary rather than a gap. `storage.rules` is still open ([#1350]), so an image can still be written by any signed-in account.
-- The rules are deployed by hand and by nobody else. A merged rules change is live only after `npx nx firebase-deploy-rules bite-tribe-firebase` runs against the project.
+- The rules deploy from CI on every push to `develop` ([#1567]), so a merged rules change is live without a further step. Deploying by hand is still how a rollout is watched or a rollback is made.
 
 [#1075]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1075
 [#1077]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1077
@@ -599,3 +601,4 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
 [#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628
 [#370]: https://github.com/muhammedgaygisiz/travellers-apps/issues/370
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567

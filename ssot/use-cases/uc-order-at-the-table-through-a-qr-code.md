@@ -399,7 +399,8 @@ and closing it again on every clearing. The rule that admits it reads
 `{restaurantId}` in its path - which makes the `where` the permission rather
 than a filter, the same mechanism `RD-TS-12` rests on turned towards a
 restaurant. It needs a collection-group index exemption that Firestore does not
-create on its own, and indexes here deploy by hand.
+create on its own, declared in `firestore.indexes.json` and deployed from CI
+with the rest ([#1567]).
 
 **Grouped by the table the order was placed from.** A party that moves keeps its
 visit and changes its `tableId`, and the kitchen's question is "what goes to
@@ -518,9 +519,8 @@ in a pocket would be a second channel for the same fact with none of the
 urgency. And the selected-table panel beside the plan does not name the call; the
 mark on the table and the row in the queue do.
 
-It changes nothing in production until
-`npx nx firebase-deploy-rules bite-tribe-firebase` has run, because the rule
-that admits the two reads is deployed by hand. No index deploy is needed, which
+It binds production on merge: the rule that admits the two reads deploys from
+CI on every push to `develop` ([#1567]). No index deploy is needed either, which
 is the point of the derived name.
 
 ## What A Code On The Internet Costs
@@ -597,11 +597,9 @@ seated writes one row and cannot order - and everything above raises the cost of
 working through a code that is already public. A restaurant that wants presence
 proved has to prove it with a person.
 
-It changes nothing in production until
-`npx nx firebase-deploy-rules bite-tribe-firebase` and
-`npx nx firebase-deploy-indexes bite-tribe-firebase` have run, and one more
-thing is applied by hand with no Nx target at all: a TTL policy on
-`scanRateLimits.expiresAt`. Until that policy exists the counters are never
+The rules and the indexes it needs deploy from CI on every push to `develop`
+([#1567]), so those bind production on merge. **One thing is still applied by
+hand, with no Nx target at all: a TTL policy on `scanRateLimits.expiresAt`.** Until that policy exists the counters are never
 removed - a document per bucket per minute, which is a handful an hour for an
 ordinary restaurant and three a minute under attack.
 
@@ -946,6 +944,7 @@ guest's phone is retrying.
 [#1109]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1109
 [#1184]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1184
 [#1200]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1200
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1597]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1597
 [#1598]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1598
 [#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657

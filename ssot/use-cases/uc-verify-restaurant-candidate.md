@@ -12,17 +12,17 @@ assignment — and each is carried as a rule marked
 _Intended, not met_ rather than as an agreed step that quietly does not run. Work in
 flight: epic [#1495].
 
-| Aspect                                                 | State                                                                                                      |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| Backend callable `verifyRestaurantCandidate`           | Implemented, `admin`-gated                                                                                 |
-| Operator surface (Candidate list, new-Restaurant form) | Implemented in `bite-tribe-admin`                                                                          |
-| `UC-GIM` — Initial Menu                                | Implemented, reachable only inside verification                                                            |
-| `UC-MBR` — manage a Bite's Restaurant assignment       | Reachable only inside verification; no standalone writer, see `R-8`                                        |
-| `UC-DIS` — dismiss                                     | Not implemented, see `R-13`. Owned by [#1501], [#1508] and [#1502]                                         |
-| `UC-MRC` — resolve a duplicate                         | Not implemented, see `R-14`                                                                                |
-| `UC-ARO` — assign owner                                | Implemented ([#1077]) as a separate Operator action, **outside this flow**; see `R-15`                     |
-| Authorization at the data layer                        | Closed in the repository by [#1078]; see `Authorization`. Live once the rules are deployed by hand         |
-| `AF-31` / `AF-34` handshake                            | `AF-31` satisfied. `AF-34` closed with `UC-DRC`; unanswered against seven counterparties. See `Guarantees` |
+| Aspect                                                 | State                                                                                                       |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| Backend callable `verifyRestaurantCandidate`           | Implemented, `admin`-gated                                                                                  |
+| Operator surface (Candidate list, new-Restaurant form) | Implemented in `bite-tribe-admin`                                                                           |
+| `UC-GIM` — Initial Menu                                | Implemented, reachable only inside verification                                                             |
+| `UC-MBR` — manage a Bite's Restaurant assignment       | Reachable only inside verification; no standalone writer, see `R-8`                                         |
+| `UC-DIS` — dismiss                                     | Not implemented, see `R-13`. Owned by [#1501], [#1508] and [#1502]                                          |
+| `UC-MRC` — resolve a duplicate                         | Not implemented, see `R-14`                                                                                 |
+| `UC-ARO` — assign owner                                | Implemented ([#1077]) as a separate Operator action, **outside this flow**; see `R-15`                      |
+| Authorization at the data layer                        | Closed in the repository by [#1078]; see `Authorization`. Live on merge: the rules deploy from CI ([#1567]) |
+| `AF-31` / `AF-34` handshake                            | `AF-31` satisfied. `AF-34` closed with `UC-DRC`; unanswered against seven counterparties. See `Guarantees`  |
 
 ## Goal
 
@@ -503,8 +503,8 @@ but the collection is client-writable by nobody, and
 `/restaurants` is writable only by the Operator or the assigned owner. A signed-in Bite
 Creator can no longer create a Restaurant, nor set a Candidate to `verified`, without
 calling the callable. The guard still protects the _flow_; the rules now protect the
-_data_. **They deploy by hand**, so this holds in production only once
-`npx nx firebase-deploy-rules bite-tribe-firebase` has run.
+_data_. **They deploy from CI**, on every push to `develop` since [#1567], so this
+holds in production from the merge.
 
 ## MVP Classification
 
@@ -646,5 +646,6 @@ discovered in review.
 [#1511]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1511
 [#1521]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1521
 [#1522]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1522
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1615]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1615
 [#1630]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1630

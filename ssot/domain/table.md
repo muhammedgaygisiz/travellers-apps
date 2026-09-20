@@ -403,7 +403,7 @@ uses.
 
 ## Current Limitations
 
-- The rules deploy by hand. `npx nx firebase-deploy-rules bite-tribe-firebase` has to run before the `tableStates`, `tableStateTransitions` and `visits` clauses mean anything in production; merging them changes nothing on its own. Until that deploy, the catch-all at the bottom of the file denies both collections outright, so the reads issue [#1093] needs are refused - the callable's own writes are unaffected, because the Admin SDK bypasses rules.
+- The rules deploy from CI on every push to `develop` ([#1567]), so the `tableStates`, `tableStateTransitions` and `visits` clauses mean something in production from the merge. Before [#1567] they did not: the catch-all at the bottom of the file denied both collections outright until somebody ran the deploy, so the reads issue [#1093] needs were refused - the callable's own writes were unaffected either way, because the Admin SDK bypasses rules.
 - The party size has a field now and no caller. `TableVisit.guestCount` exists and `transitionTableState` takes a `guestCount` argument (issue [#1095]), but issue [#1094]'s sheet still sends the count as the audit entry's `reason`. Moving it across is a change to the business app, not to the backend, and belongs with the surface that renders visits.
 - The matrix exists twice. Firebase Functions cannot import the Nx model library - `rootDir: src`, no path mappings, and a deploy that uploads `lib/` alone - so issue [#1092] copied it and made the copy checked instead of trusted. `src/__specs__/table-state-parity.spec.ts` compares the statuses, their order and every row of both files, following the precedent `role-list-parity.spec.ts` set for `BITE_TRIBE_ROLES`. A row changed in one file and not the other fails the build rather than reaching a dining room.
 - The idempotency key is optional, and a caller that omits one gets the old behaviour. Issue [#1096] added `requestId` to `transitionTableState`: the key names the audit entry the transition writes, prefixed `req-`, so a replay reads the entry it would have written and is answered with what that entry recorded - before the table is checked and before `expectedStatus` is compared, because a replay arrives after the world has moved on. A request without a key is still applied twice if it is sent twice, which is what every caller written before issue [#1096] does; the staff view is not one of them.
@@ -458,3 +458,4 @@ uses.
 [#1106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1106
 [#1107]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1107
 [#1164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1164
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567

@@ -13,18 +13,18 @@ producer is a mechanism rather than an entry, because it has no actor. The kerne
 complete and the collection's invariants are not; the table below names what is missing.
 Work in flight: epic [#1495] for verification's half, epic [#1523] for this page's own.
 
-| Aspect                                                      | State                                                                                                                                                                                                                                      |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Automatic detection `createRestaurantCandidateOnBiteCreate` | Implemented                                                                                                                                                                                                                                |
-| On-demand callable `clusterRestaurantCandidateForBite`      | Implemented, `admin`-gated                                                                                                                                                                                                                 |
-| Shared clustering kernel `K1`–`K10`                         | Implemented, except `K9`                                                                                                                                                                                                                   |
-| `K9` — guard against writing onto a non-`pending` Candidate | Not implemented. `R-8`                                                                                                                                                                                                                     |
-| Producer marker on the Candidate                            | Not implemented: no field exists in either model copy, so `R-19` cannot be met                                                                                                                                                             |
-| Re-evaluation after a Bite is edited, deleted or detached   | Not implemented, and not designed. `R-11`                                                                                                                                                                                                  |
-| The on-demand seed check                                    | Missing: `B8` accepts a Bite that already belongs to a Restaurant. `E7`                                                                                                                                                                    |
-| Candidate identity                                          | Derived from content, so one place can split into two Candidates and two places can share one. `R-7`, `E2`, `E3`                                                                                                                           |
-| The on-demand producer's eligible-Bite list                 | Implemented in the client, over the whole `/bites` collection. `R-13`                                                                                                                                                                      |
-| Authorization at the data layer                             | Closed in the repository by [#1078]: `restaurantCandidates` is readable and client-writable by nobody, so the collection is written only by the clustering trigger and the verification callable. Live once the rules are deployed by hand |
+| Aspect                                                      | State                                                                                                                                                                                                                                               |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Automatic detection `createRestaurantCandidateOnBiteCreate` | Implemented                                                                                                                                                                                                                                         |
+| On-demand callable `clusterRestaurantCandidateForBite`      | Implemented, `admin`-gated                                                                                                                                                                                                                          |
+| Shared clustering kernel `K1`–`K10`                         | Implemented, except `K9`                                                                                                                                                                                                                            |
+| `K9` — guard against writing onto a non-`pending` Candidate | Not implemented. `R-8`                                                                                                                                                                                                                              |
+| Producer marker on the Candidate                            | Not implemented: no field exists in either model copy, so `R-19` cannot be met                                                                                                                                                                      |
+| Re-evaluation after a Bite is edited, deleted or detached   | Not implemented, and not designed. `R-11`                                                                                                                                                                                                           |
+| The on-demand seed check                                    | Missing: `B8` accepts a Bite that already belongs to a Restaurant. `E7`                                                                                                                                                                             |
+| Candidate identity                                          | Derived from content, so one place can split into two Candidates and two places can share one. `R-7`, `E2`, `E3`                                                                                                                                    |
+| The on-demand producer's eligible-Bite list                 | Implemented in the client, over the whole `/bites` collection. `R-13`                                                                                                                                                                               |
+| Authorization at the data layer                             | Closed in the repository by [#1078]: `restaurantCandidates` is readable and client-writable by nobody, so the collection is written only by the clustering trigger and the verification callable. Live on merge: the rules deploy from CI ([#1567]) |
 
 ## Goal
 
@@ -458,8 +458,8 @@ a Bite Creator can no longer write a Candidate with any `evidence`, any `biteIds
 `status`. The invariants on this page are now properties of the collection as well as of
 this code. `B3`'s whole-collection read of `/bites` still works: reads were deliberately
 left where they were, and [#1079] narrowed what the business app _lists_ in its own query
-rather than in the rules. **The rules deploy by hand**, so this holds in production only
-once `npx nx firebase-deploy-rules bite-tribe-firebase` has run.
+rather than in the rules. **The rules deploy from CI**, on every push to `develop` since [#1567], so
+this holds in production from the merge.
 
 ## MVP Classification
 
@@ -580,3 +580,4 @@ discovered in review.
 [#1531]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1531
 [#1532]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1532
 [#1533]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1533
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567

@@ -10,8 +10,8 @@ shared model ([#1074]), and an operator writes them from the admin app ([#1077])
 enforce it** ([#1078]): a Restaurant and its Menu are writable by the assigned account and by
 an Operator only, and the ownership fields by no client at all - the forgery demonstrated
 against the emulator on 8 September 2026 is now a deny test. The business app lists and opens
-only the restaurants assigned to the caller ([#1079]), and the business account manages its own staff ([#1537]). The rules deploy by hand: they bind production only once
-`npx nx firebase-deploy-rules bite-tribe-firebase` has run.
+only the restaurants assigned to the caller ([#1079]), and the business account manages its own staff ([#1537]). The rules deploy from CI on every push to `develop` ([#1567]), so they bind
+production from the merge.
 
 ## Goal
 
@@ -203,3 +203,4 @@ This stops being true the moment a business or admin client is submitted to a st
 [#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472
 [#1476]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1476
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567

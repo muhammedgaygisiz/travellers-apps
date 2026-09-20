@@ -37,6 +37,7 @@ const version = readPackageVersion();
 const tagName = `build-${version}-${buildNumber}`;
 
 ensureTagDoesNotExist(tagName);
+ensureTaggedTreeCarriesVersion(version);
 
 run('npm', ['run', 'generate-changelog']);
 run('npm', ['run', 'sync-native-version']);
@@ -214,6 +215,44 @@ function ensureTagDoesNotExist(tagName) {
   if (remoteTag.status !== 2) {
     throw new Error(`Could not confirm whether ${tagName} exists on origin.`);
   }
+}
+
+/**
+ * Refuses a release whose tagged tree does not already carry the version.
+ *
+ * `sync-native-version` runs below, and its output lands in the release commit
+ * - which the tag does not point at. The tag names `releaseCommit`, the tree
+ * captured before anything was written, and that is the tree the artifacts are
+ * built from. So the version the artifacts carry is the one the native
+ * projects declare **now**, not the one the sync is about to write.
+ *
+ * While the marketing version stands still the two are the same string and the
+ * difference cannot be seen. On a bump it is the whole difference: build
+ * 1.0.2-98 was tagged on 20 September 2026 at a tree still declaring 1.0.1,
+ * and its artifacts would have been 1.0.1 (98) - the version App Store review
+ * had already approved and refuses, which `altool` reports 25 minutes later as
+ * error 90062 while Android publishes the wrong version without complaint.
+ *
+ * A marketing-version bump therefore has to reach the release branch already
+ * synced. See `Marketing Version` in Implementation - Release And Build
+ * Workflow.
+ */
+function ensureTaggedTreeCarriesVersion(version) {
+  const nativeVersion = readNativeVersion();
+
+  if (nativeVersion === version) {
+    return;
+  }
+
+  throw new Error(
+    [
+      `package.json declares version ${version}, but the native projects in`,
+      `the tree this release would tag declare ${nativeVersion}, so the`,
+      `artifacts would be built as ${nativeVersion}. Run`,
+      '`npm run sync-native-version` and land that commit on the release',
+      'branch before cutting.',
+    ].join(' '),
+  );
 }
 
 /**

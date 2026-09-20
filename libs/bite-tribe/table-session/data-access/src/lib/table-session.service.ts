@@ -18,6 +18,7 @@ import {
   type TableOrderingAvailability,
 } from 'model';
 import { lastValueFrom } from 'rxjs';
+import { AuthService } from 'ta-firestore';
 
 /**
  * What a guest sees between scanning a table code and being able to order
@@ -108,6 +109,7 @@ const contextOf = (resolved: TableScanContext): TableScanContext => ({
 @Injectable()
 export class TableSessionService {
   private readonly api = inject(TableSessionApiService);
+  private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
 
   private readonly view = signal<TableSessionView>({ kind: 'loading' });
@@ -308,6 +310,15 @@ export class TableSessionService {
 
       return;
     }
+
+    // Remembered for one navigation, so that a guest who taps "create an
+    // account" and turns out to have one already can sign in and bring the meal
+    // with them (issue #1658). Only an anonymous session has anything to move.
+    this.authService.rememberTableForClaim({
+      restaurantId: result.context.restaurant.id,
+      tableId: result.context.table.id,
+      token: result.context.token,
+    });
 
     this.view.set({
       kind: 'joined',

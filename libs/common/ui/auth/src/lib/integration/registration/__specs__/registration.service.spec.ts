@@ -2,7 +2,11 @@ import { RegistrationService } from '../registration.service';
 import { TestBed } from '@angular/core/testing';
 import { TranslocoService } from '@jsverse/transloco';
 import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
-import { LoadingController, NavController } from '@ionic/angular/standalone';
+import {
+  AlertController,
+  LoadingController,
+  NavController,
+} from '@ionic/angular/standalone';
 import { ToastService } from 'toast';
 
 const translations: Record<string, string> = {
@@ -21,10 +25,13 @@ const translations: Record<string, string> = {
 const MockedAuthService = {
   registerWithUsernameAndPassword: jest.fn(),
   sendEmailVerification: jest.fn(),
+  rememberedTable: jest.fn(),
+  signInAndClaimTableVisit: jest.fn(),
 };
 
 const MockedNavController = {
   navigateBack: jest.fn(),
+  navigateRoot: jest.fn(),
 };
 
 const MockedAnalyticsService = {
@@ -42,6 +49,40 @@ const loadingOverlay = {
 
 const MockedLoadingController = {
   create: jest.fn().mockResolvedValue(loadingOverlay),
+};
+
+/**
+ * The alert that offers to bring the table order along (issue #1658). The
+ * handler is what the spec drives: presenting it is Ionic's job, and tapping
+ * the button is what this service has to get right.
+ */
+interface AlertButton {
+  text: string;
+  role?: string;
+  handler?: () => boolean;
+}
+
+let alertButtons: AlertButton[] = [];
+
+const alertOverlay = {
+  present: jest.fn().mockResolvedValue(undefined),
+};
+
+const MockedAlertController = {
+  create: jest.fn(async (options: { buttons: AlertButton[] }) => {
+    alertButtons = options.buttons;
+
+    return alertOverlay;
+  }),
+};
+
+const confirmTheOffer = async (): Promise<void> => {
+  alertButtons.find((button) => button.role !== 'cancel')?.handler?.();
+
+  // The handler starts the sign-in and returns so Ionic can close the alert.
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
 };
 
 const MockedTranslocoService = {
@@ -64,6 +105,9 @@ describe(RegistrationService.name, () => {
     MockedNavController.navigateBack.mockResolvedValue(true);
     MockedLoadingController.create.mockResolvedValue(loadingOverlay);
     MockedToastService.present.mockResolvedValue(undefined);
+    MockedAuthService.rememberedTable.mockReturnValue(null);
+    MockedNavController.navigateRoot.mockResolvedValue(true);
+    alertButtons = [];
 
     TestBed.configureTestingModule({
       providers: [
@@ -72,6 +116,7 @@ describe(RegistrationService.name, () => {
         { provide: NavController, useValue: MockedNavController },
         { provide: ToastService, useValue: MockedToastService },
         { provide: LoadingController, useValue: MockedLoadingController },
+        { provide: AlertController, useValue: MockedAlertController },
         { provide: TranslocoService, useValue: MockedTranslocoService },
       ],
     });
@@ -192,6 +237,111 @@ describe(RegistrationService.name, () => {
           messageKey: 'registration-account-exists-sign-in',
           outcome: 'failure',
         });
+      });
+    });
+
+    /**
+     * The same refusal, for a guest with a meal to move (issue #1658). The
+     * offer is an alert rather than a toast because it asks a question, and
+     * the answer decides whether anything happens at all.
+     */
+    describe('given the guest is sitting at a remembered table', () => {
+      const TABLE = {
+        restaurantId: 'restaurant-1',
+        tableId: 'table-12',
+        token: 'TESTTESTTESTTESTTESTTEST22',
+      };
+
+      beforeEach(() => {
+        MockedAuthService.rememberedTable.mockReturnValue(TABLE);
+        registerWithUsernameAndPasswordSpy.mockImplementation(() => {
+          throw Object.assign(new Error('Credential already in use'), {
+            code: 'auth/credential-already-in-use',
+          }) as Error & { code: string };
+        });
+      });
+
+      it('offers to sign in and bring the order rather than refusing', async () => {
+        await service.register({ email: 'q@q.de', password: '12345678' });
+
+        expect(MockedAlertController.create).toHaveBeenCalled();
+        expect(MockedToastService.present).not.toHaveBeenCalled();
+      });
+
+      it('signs in with the typed credentials and reopens the table', async () => {
+        MockedAuthService.signInAndClaimTableVisit.mockResolvedValue({
+          claimed: true,
+          table: TABLE,
+          movedOrders: 1,
+        });
+
+        await service.register({ email: 'q@q.de', password: '12345678' });
+        await confirmTheOffer();
+
+        expect(MockedAuthService.signInAndClaimTableVisit).toHaveBeenCalledWith(
+          {
+            email: 'q@q.de',
+            password: '12345678',
+          },
+        );
+        expect(MockedToastService.present).toHaveBeenCalledWith({
+          messageKey: 'table-claim-moved',
+          outcome: 'success',
+        });
+        expect(MockedNavController.navigateRoot).toHaveBeenCalledWith([
+          '/',
+          't',
+          TABLE.token,
+          'order',
+        ]);
+      });
+
+      /**
+       * Signed in, and the meal did not follow. Saying so is the point: the
+       * orders are still under the anonymous session on this phone, and a
+       * guest who believes otherwise stops watching their own order.
+       */
+      it('says so when the sign-in worked and the meal did not move', async () => {
+        MockedAuthService.signInAndClaimTableVisit.mockResolvedValue({
+          claimed: false,
+        });
+
+        await service.register({ email: 'q@q.de', password: '12345678' });
+        await confirmTheOffer();
+
+        expect(MockedToastService.present).toHaveBeenCalledWith({
+          messageKey: 'table-claim-failed',
+          outcome: 'failure',
+        });
+        expect(MockedNavController.navigateRoot).not.toHaveBeenCalled();
+      });
+
+      /** The password belonged to the form rather than to the account. */
+      it('reports a failed sign-in and moves nothing', async () => {
+        MockedAuthService.signInAndClaimTableVisit.mockRejectedValue(
+          Object.assign(new Error('wrong password'), {
+            code: 'auth/invalid-credential',
+          }),
+        );
+        const warn = jest.spyOn(console, 'warn').mockImplementation();
+
+        await service.register({ email: 'q@q.de', password: '12345678' });
+        await confirmTheOffer();
+
+        expect(MockedToastService.present).toHaveBeenCalledWith({
+          messageKey: 'table-claim-sign-in-failed',
+          outcome: 'failure',
+        });
+
+        warn.mockRestore();
+      });
+
+      it('leaves the guest ordering when the offer is declined', async () => {
+        await service.register({ email: 'q@q.de', password: '12345678' });
+
+        expect(
+          MockedAuthService.signInAndClaimTableVisit,
+        ).not.toHaveBeenCalled();
       });
     });
 

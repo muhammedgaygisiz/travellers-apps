@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  inject,
   provideAppInitializer,
   provideZonelessChangeDetection,
 } from '@angular/core';
@@ -16,6 +17,7 @@ import {
 import { provideDocumentLanguage } from './document-language';
 import { provideCanonicalUrl } from './canonical-url';
 import { provideDocumentTitle } from './document-title';
+import { AuthService } from 'ta-firestore';
 
 export const appConfig = (environment: Environment): ApplicationConfig => ({
   providers: [
@@ -37,6 +39,13 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
     // on a Capacitor bridge call.
     provideAppInitializer(() => {
       void loadAppRelease();
+    }),
+    // Reads back the table a guest was sitting at before a reload, so that
+    // signing into an account they already had still brings the meal with them
+    // (issue #1658). Not awaited: an offer the app cannot make is a smaller
+    // loss than a start-up that waits on storage.
+    provideAppInitializer(() => {
+      void inject(AuthService).restoreRememberedTable();
     }),
     provideIonicAngular(getIonicConfig()),
     provideTransloco({

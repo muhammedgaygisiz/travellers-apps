@@ -2,9 +2,14 @@ import { inject, Injectable, signal } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { Credentials } from '../../api/credentials.model';
 import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
-import { LoadingController, NavController } from '@ionic/angular/standalone';
+import {
+  AlertController,
+  LoadingController,
+  NavController,
+} from '@ionic/angular/standalone';
 import { AuthErrorCodes } from 'firebase/auth';
 import { ToastService } from 'toast';
+import { PATH } from 'utils';
 
 interface RegistrationError {
   code?: string;
@@ -63,6 +68,7 @@ export class RegistrationService {
   private readonly analytics = inject(AnalyticsService);
   private readonly transloco = inject(TranslocoService);
   private readonly toast = inject(ToastService);
+  readonly alertController = inject(AlertController);
   readonly loadingController = inject(LoadingController);
   readonly navController = inject(NavController);
 
@@ -71,10 +77,29 @@ export class RegistrationService {
   /** Whether a registration round-trip is still running (issue #1185). */
   readonly registering = this.registrationInProgress.asReadonly();
 
+  /**
+   * Registers, and - where that turns out to be a guest who already has an
+   * account - offers to sign them in and bring the table order with them
+   * (issue #1658).
+   *
+   * The offer is presented **after** the run rather than inside it, because
+   * the loading overlay is still up in there: an alert raised under it is
+   * hidden behind it, and a guest is left looking at a dismissed spinner and
+   * nothing else.
+   */
   public async register(registration: Credentials): Promise<void> {
+    const offerTheOrder = await this.runRegistration(registration);
+
+    if (offerTheOrder) {
+      await this.offerToBringTheOrder(registration);
+    }
+  }
+
+  /** Returns whether the table-order offer should be made afterwards. */
+  private async runRegistration(registration: Credentials): Promise<boolean> {
     // Guards against a second submit while the first one is still in flight.
     if (this.registrationInProgress()) {
-      return;
+      return false;
     }
     this.registrationInProgress.set(true);
 
@@ -126,27 +151,42 @@ export class RegistrationService {
           outcome: 'failure',
         });
 
-        return;
+        return false;
       }
 
       // A guest at a table whose email already has a BiteTribe account
       // (issue #1657). Firebase refuses to link a credential that belongs to
       // somebody else, so the account they were offered cannot be created and
       // the anonymous session they are ordering on is untouched - which is the
-      // important half: they stay at their table with their order.
+      // important half: they are still at their table with their order.
       //
-      // Named rather than folded into the generic message below, and there is
-      // nothing to withhold here: the caller already proved they are sitting
-      // in the restaurant, and "try again" would send them at something that
-      // cannot work while their account exists. Moving the meal onto the
-      // account they sign into is issue #1658.
+      // Since issue #1658 that is an offer rather than a dead end: signing in
+      // moves the meal onto the account they already had. The offer is only
+      // made where there is a meal to move - a table remembered by the session
+      // they are holding - and declining it leaves them ordering exactly as
+      // they were.
+      // **Two codes, because a link reports the clash two ways.** An email
+      // credential whose address is taken raises `email-already-in-use`, the
+      // same code an ordinary sign-up raises; an OAuth credential already
+      // attached to another account raises `credential-already-in-use`. Only
+      // the second is unambiguous, so the offer is gated on there being a
+      // table to bring rather than on the code alone - which is also what
+      // keeps the ordinary registration form's generic answer generic.
+      if (
+        this.authService.rememberedTable() &&
+        (code === AuthErrorCodes.CREDENTIAL_ALREADY_IN_USE ||
+          code === AuthErrorCodes.EMAIL_EXISTS)
+      ) {
+        return true;
+      }
+
       if (code === AuthErrorCodes.CREDENTIAL_ALREADY_IN_USE) {
         await this.toast.present({
           messageKey: 'registration-account-exists-sign-in',
           outcome: 'failure',
         });
 
-        return;
+        return false;
       }
 
       if (code === AuthErrorCodes.EMAIL_EXISTS) {
@@ -156,7 +196,7 @@ export class RegistrationService {
           outcome: 'failure',
         });
 
-        return;
+        return false;
       }
 
       // Firebase's own message, when it carries one, is not a translation key,
@@ -174,6 +214,89 @@ export class RegistrationService {
     } finally {
       await this.dismissLoading(loading);
       this.registrationInProgress.set(false);
+    }
+
+    return false;
+  }
+
+  /**
+   * The offer a guest at a table gets when the account they tried to create is
+   * one they already have (GitHub issue #1658).
+   *
+   * An alert rather than a toast, because it asks a question: the meal moves
+   * only if they say so. The password is the one they just typed into the
+   * registration form - if it is their account's, the sign-in goes through and
+   * the claim follows; if it is not, they are told that and stay anonymous
+   * with their order intact, which is the state they were already in.
+   */
+  private async offerToBringTheOrder(registration: Credentials): Promise<void> {
+    const alert = await this.alertController.create({
+      header: this.transloco.translate('table-claim-offer-title'),
+      message: this.transloco.translate('table-claim-offer-message'),
+      buttons: [
+        {
+          text: this.transloco.translate('table-claim-offer-cancel'),
+          role: 'cancel',
+        },
+        {
+          text: this.transloco.translate('table-claim-offer-confirm'),
+          handler: (): boolean => {
+            void this.bringTheOrder(registration);
+
+            return true;
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  private async bringTheOrder(registration: Credentials): Promise<void> {
+    const table = this.authService.rememberedTable();
+
+    try {
+      const outcome = await withTimeout(
+        this.authService.signInAndClaimTableVisit({
+          email: registration.email,
+          password: registration.password,
+        }),
+        REGISTRATION_TIMEOUT_MS,
+      );
+
+      if (!outcome.claimed) {
+        // Signed in, and the meal did not follow. Saying so is the whole point:
+        // the orders are still under the anonymous session on this phone, and a
+        // guest who believes otherwise stops watching their own order.
+        await this.toast.present({
+          messageKey: 'table-claim-failed',
+          outcome: 'failure',
+        });
+
+        return;
+      }
+
+      await this.toast.present({
+        messageKey: 'table-claim-moved',
+        outcome: 'success',
+      });
+
+      await this.navController.navigateRoot([
+        '/',
+        PATH.TABLE_SCAN,
+        outcome.table.token,
+        PATH.TABLE_ORDER,
+      ]);
+    } catch (error) {
+      // The sign-in itself failed - almost always a password that belongs to
+      // the form rather than to the account. Nothing moved, and the guest is
+      // still holding the session they ordered on.
+      await this.toast.present({
+        messageKey: 'table-claim-sign-in-failed',
+        outcome: 'failure',
+      });
+
+      console.warn('Could not sign in to bring the table order:', error);
     }
   }
 

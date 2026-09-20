@@ -72,7 +72,12 @@ export const TABLE_GUEST_FIXTURE: TableOrderFixture = {
   tableId: 'e2e-table-guest-table',
   menuId: 'e2e-table-guest-menu',
   visitId: 'e2e-table-guest-visit',
-  token: 'BCDEFGHJKMNPQRSTVWXYZ01234',
+  // Twenty-six characters of the token alphabet, and deliberately the least
+  // credential-shaped ones available: a real token carries 130 bits of entropy,
+  // so a fixture that looks like one is reported as a leaked secret by the
+  // repository's scanner - correct behaviour from the scanner, and an alert
+  // somebody has to dismiss on every pull request afterwards.
+  token: 'TESTTESTTESTTESTTESTTEST22',
 };
 
 const DAYS = [

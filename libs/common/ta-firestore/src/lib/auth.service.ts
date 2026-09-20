@@ -10,12 +10,14 @@ import { AuthCredentials } from './api/auth-credentials.model';
 import {
   AuthStateChange,
   FirebaseAuthentication,
+  LinkResult,
   SignInResult,
   User,
 } from '@capacitor-firebase/authentication';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { Capacitor } from '@capacitor/core';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from './provide-firestore-utils';
 import { BiteTribeRole, rolesFromClaims } from 'utils';
@@ -137,7 +139,8 @@ export class AuthService {
    *
    * What the anonymity buys is not privacy but a *stable* identity without an
    * account: the uid is what `firestore.rules` matches a session document
-   * against, and what `linkWith*` later upgrades in place, so the guest who
+   * against, and what {@link upgradeGuestSession} later upgrades in place
+   * through `linkWith*` (issue #1657), so the guest who
    * decides at the end of the meal to keep the Bite they just ate does not lose
    * the session that knows what they ordered.
    *
@@ -339,9 +342,81 @@ export class AuthService {
     window.location.reload();
   }
 
+  /**
+   * Whether the session in hand is the anonymous one a table scan mints
+   * (GitHub issue #1101).
+   *
+   * `isAnonymous` comes off the Firebase user rather than off the token, so it
+   * is right the moment the link returns rather than an hour later.
+   */
+  private isGuestSession(): boolean {
+    return this.getUser()?.isAnonymous === true;
+  }
+
+  /**
+   * Turns the anonymous account a table guest holds into the account they
+   * registered, without changing the uid (GitHub issue #1657).
+   *
+   * The uid is the whole point. The guest's `tableSessions` document is
+   * *named* after it, their orders carry it, and `firestore.rules` matches
+   * both against `request.auth.uid` - so a sign-up that minted a new account
+   * would hand the guest an empty one and leave the meal they just ate on a
+   * uid nothing will ever sign into again. `RD-TS-4` rests on this.
+   *
+   * Two things have to happen after the link, and neither is Firebase's doing:
+   *
+   * The **token** still says `anonymous`. `isMember()` in `firestore.rules`
+   * and `requireMember` in the callables both read that, so a new member who
+   * skipped the refresh would meet empty lists rather than errors, for as long
+   * as an hour (`RD-TS-40`).
+   *
+   * The **profile** does not exist. `createUserOnAuthCreate` is a
+   * `beforeUserCreated` blocking trigger and the account already existed, so
+   * linking fires nothing; `upgradeGuestAccount` writes the same document the
+   * trigger would have. It is best effort on purpose: the account *is*
+   * registered by then, so failing the registration over it would report a
+   * failure for something that succeeded, and the callable is idempotent so a
+   * later call repairs it.
+   */
+  private async upgradeGuestSession(
+    link: () => Promise<LinkResult>,
+  ): Promise<SignInResult> {
+    const result = await link();
+
+    await this.refreshSession();
+
+    try {
+      await FirebaseFunctions.callByName<void, { created: boolean }>({
+        name: 'upgradeGuestAccount',
+      });
+    } catch (error) {
+      console.warn('Failed to write the profile for a linked account:', error);
+    }
+
+    // The uid did not change, so the plugin reports no auth state change and
+    // `getMember()` would go on reading the user object it already had - the
+    // one that says `isAnonymous`. Every route guard asks that question.
+    const { user } = await FirebaseAuthentication.getCurrentUser();
+
+    if (user) {
+      this._authStateChange$.next({ user });
+    }
+
+    return result;
+  }
+
   public async registerWithUsernameAndPassword(
     registration: AuthCredentials,
   ): Promise<SignInResult> {
+    if (this.isGuestSession()) {
+      return await this.upgradeGuestSession(() =>
+        FirebaseAuthentication.linkWithEmailAndPassword({
+          email: registration.email,
+          password: registration.password,
+        }),
+      );
+    }
+
     return await FirebaseAuthentication.createUserWithEmailAndPassword({
       email: registration.email,
       password: registration.password,
@@ -378,10 +453,22 @@ export class AuthService {
   }
 
   public async signInWithGoogleAccount(): Promise<SignInResult> {
+    if (this.isGuestSession()) {
+      return await this.upgradeGuestSession(() =>
+        FirebaseAuthentication.linkWithGoogle({ mode: 'popup' }),
+      );
+    }
+
     return await FirebaseAuthentication.signInWithGoogle({ mode: 'popup' });
   }
 
   public async signInWithAppleAccount(): Promise<SignInResult> {
+    if (this.isGuestSession()) {
+      return await this.upgradeGuestSession(() =>
+        FirebaseAuthentication.linkWithApple({ mode: 'popup' }),
+      );
+    }
+
     return await FirebaseAuthentication.signInWithApple({ mode: 'popup' });
   }
 

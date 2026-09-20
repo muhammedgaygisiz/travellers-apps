@@ -129,6 +129,26 @@ export class RegistrationService {
         return;
       }
 
+      // A guest at a table whose email already has a BiteTribe account
+      // (issue #1657). Firebase refuses to link a credential that belongs to
+      // somebody else, so the account they were offered cannot be created and
+      // the anonymous session they are ordering on is untouched - which is the
+      // important half: they stay at their table with their order.
+      //
+      // Named rather than folded into the generic message below, and there is
+      // nothing to withhold here: the caller already proved they are sitting
+      // in the restaurant, and "try again" would send them at something that
+      // cannot work while their account exists. Moving the meal onto the
+      // account they sign into is issue #1658.
+      if (code === AuthErrorCodes.CREDENTIAL_ALREADY_IN_USE) {
+        await this.toast.present({
+          messageKey: 'registration-account-exists-sign-in',
+          outcome: 'failure',
+        });
+
+        return;
+      }
+
       if (code === AuthErrorCodes.EMAIL_EXISTS) {
         // Prevent user enumeration by showing a generic error message
         await this.toast.present({

@@ -53,6 +53,15 @@ const swallowTheAnswer = (page: Page, delivered: () => void): Promise<void> =>
     await route.abort('failed');
   });
 
+/**
+ * Both tests seat a party at the same table, and the fixture is torn down after
+ * each - so they cannot run at the same time: one test's cleanup deletes the
+ * restaurant the other is ordering from, and the screen it lands on says the
+ * restaurant is no longer on BiteTribe. Playwright runs a file's tests in
+ * parallel by default, which made that a matter of how many workers were free.
+ */
+test.describe.configure({ mode: 'serial' });
+
 test.describe('ordering at a table over a network that drops answers', () => {
   let order: TableOrderPage;
 

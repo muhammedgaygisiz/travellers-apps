@@ -178,7 +178,7 @@ feed, the gallery and a profile page with nobody behind it. `firestore.rules` as
 every general read clause since issue [#1565], and asks only `signedIn()` on the clauses
 written for the guest itself, which then match the document against the caller's own uid -
 which is what the anonymity actually buys: a stable identity to name a session after,
-upgraded in place by `linkWith*` if the guest later registers.
+upgraded in place by `linkWith*` when the guest registers during the meal ([#1657]).
 
 | Capability                                                       | Table Guest                     |
 | ---------------------------------------------------------------- | ------------------------------- |
@@ -220,21 +220,24 @@ routes sit outside `gateAuthenticatedRoutes` as well, so a guest who never signe
 asked to finish an onboarding they never started. The callables behind those routes do not
 refuse it, per footnote ¹².
 
-**The upgrade the design rests on does not exist yet.** Both `auth.service.ts` and
-`start-table-session.ts` explain the anonymous uid as the thing `linkWith*` later upgrades in
-place, so that a guest who registers keeps the session that knows what they ordered.
-`linkWith` appears nowhere in the workspace but in those two comments. A guest who signs up
-today therefore gets a second account with a second uid, and the session, the orders and the
-visit stay with the first - which is also why the anonymous record leaves no `/users`
-document behind it: `createUserOnAuthCreate` is a `beforeUserCreated` blocking trigger, so it
-fires for a sign-up and would not fire for a link even once linking exists.
+**The upgrade the design rests on is built, as of [#1657].** A guest who registers during the
+meal is _linked_ rather than created: `registerWithUsernameAndPassword`,
+`signInWithGoogleAccount` and `signInWithAppleAccount` all reach `linkWith*` when the session
+in hand is anonymous, so the uid does not change and the session, the orders and the visit
+stay where they are. Two things follow the link that Firebase does not do by itself. The
+token still says `anonymous` until it is refreshed, and `isMember()` and `requireMember` both
+read that (`RD-TS-40`), so the link forces a refresh. And `createUserOnAuthCreate` is a
+`beforeUserCreated` blocking trigger, so linking fires nothing and the account would have no
+`/users` document: `upgradeGuestAccount` writes the one the trigger would have written, from
+the same builder, so a created and a linked member start life identically. `RD-TS-41`.
 
-**It bites only the guest who arrived with no account.** `signInAsGuest` returns the existing
-user rather than signing in again, so a member who scans a table code holds their own uid
-throughout and never meets the link at all. The window is between an anonymous scan and the
-end of that meal, which is exactly the window issue [#1112] wants to use for a Bite. Issues
-[#1657] and [#1658] own it: the link itself, and the move for a guest who signs into an
-account they already had, whom Firebase refuses to link.
+**It only ever applied to the guest who arrived with no account.** `signInAsGuest` returns the
+existing user rather than signing in again, so a member who scans a table code holds their own
+uid throughout and never meets the link at all. What is still open is the guest who _has_ an
+account and signs into it: Firebase refuses to link a credential that belongs to somebody
+else, so registration is refused with `credential-already-in-use` and the guest is told they
+already have an account and can keep ordering on the session they are holding. Moving the meal
+onto the account they sign into is issue [#1658].
 
 **Restaurant Staff has a column, as of [#1097].** It had none for as long as its permission
 set was undecided (`RD-UR-8`), because a column of guesses would state a boundary nobody had

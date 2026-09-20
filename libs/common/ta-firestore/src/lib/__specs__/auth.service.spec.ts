@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../provide-firestore-utils';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import * as firestoreUtils from 'firebase/firestore';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
@@ -30,6 +31,10 @@ jest.mock('@capacitor-firebase/crashlytics', () => ({
 }));
 
 jest.mock('@capacitor-firebase/firestore');
+
+jest.mock('@capacitor-firebase/functions', () => ({
+  FirebaseFunctions: { callByName: jest.fn() },
+}));
 
 jest.mock('firebase/firestore');
 
@@ -657,6 +662,162 @@ describe(AuthService.name, () => {
         password: registration.password,
       });
       expect(result).toEqual({ user: { uid: '123' } });
+    });
+  });
+
+  /**
+   * The guest who registers during the meal (GitHub issue #1657).
+   *
+   * Everything at the table is filed under the anonymous uid - the session
+   * document is *named* after it - so registering has to link the provider
+   * onto that account rather than create a second one. These assertions are
+   * about the three steps that follow the link and are nobody else's job: the
+   * token refresh `RD-TS-40` requires, the profile `createUserOnAuthCreate`
+   * will not write because linking fires no blocking trigger, and the auth
+   * state push, without which every guard goes on reading `isAnonymous`.
+   */
+  describe('upgrading an anonymous table guest', () => {
+    const MEMBER = { uid: 'guest-uid', isAnonymous: false } as never;
+
+    /**
+     * The `linkWith*` methods are assigned rather than spied on. The plugin is
+     * automocked, and `jest.spyOn` needs the property to be there already -
+     * which it is for the sign-in methods and is not for these, so a spy fails
+     * with "does not exist in the provided object" rather than with anything
+     * about the code under test.
+     */
+    const plugin = FirebaseAuthentication as unknown as Record<
+      string,
+      jest.Mock
+    >;
+
+    let linkWithEmailAndPassword: jest.Mock;
+    let linkWithGoogle: jest.Mock;
+    let linkWithApple: jest.Mock;
+    let getIdToken: jest.Mock;
+    let createUserSpy: jest.SpyInstance;
+    let signInWithGoogleSpy: jest.SpyInstance;
+
+    const asGuest = (): void =>
+      service._authStateChange$.next({
+        user: { uid: 'guest-uid', isAnonymous: true },
+      } as never);
+
+    beforeEach(() => {
+      linkWithEmailAndPassword = jest.fn().mockResolvedValue({ user: MEMBER });
+      linkWithGoogle = jest.fn().mockResolvedValue({ user: MEMBER });
+      linkWithApple = jest.fn().mockResolvedValue({ user: MEMBER });
+      getIdToken = jest.fn().mockResolvedValue({ token: 'fresh' });
+
+      plugin['linkWithEmailAndPassword'] = linkWithEmailAndPassword;
+      plugin['linkWithGoogle'] = linkWithGoogle;
+      plugin['linkWithApple'] = linkWithApple;
+      plugin['getIdToken'] = getIdToken;
+      plugin['getCurrentUser'] = jest.fn().mockResolvedValue({ user: MEMBER });
+
+      createUserSpy = jest
+        .spyOn(FirebaseAuthentication, 'createUserWithEmailAndPassword')
+        .mockResolvedValue({ user: MEMBER } as never);
+      signInWithGoogleSpy = jest
+        .spyOn(FirebaseAuthentication, 'signInWithGoogle')
+        .mockResolvedValue({ user: MEMBER } as never);
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        created: true,
+      });
+    });
+
+    it('links the password credential onto the guest account', async () => {
+      asGuest();
+
+      await service.registerWithUsernameAndPassword({
+        email: 'guest@test.com',
+        password: 'password',
+      });
+
+      expect(linkWithEmailAndPassword).toHaveBeenCalledWith({
+        email: 'guest@test.com',
+        password: 'password',
+      });
+      expect(createUserSpy).not.toHaveBeenCalled();
+    });
+
+    it('links Google and Apple onto the guest account', async () => {
+      asGuest();
+      await service.signInWithGoogleAccount();
+
+      asGuest();
+      await service.signInWithAppleAccount();
+
+      expect(linkWithGoogle).toHaveBeenCalledWith({ mode: 'popup' });
+      expect(linkWithApple).toHaveBeenCalledWith({ mode: 'popup' });
+    });
+
+    it('refreshes the token and writes the profile after linking', async () => {
+      asGuest();
+
+      await service.registerWithUsernameAndPassword({
+        email: 'guest@test.com',
+        password: 'password',
+      });
+
+      expect(getIdToken).toHaveBeenCalledWith({ forceRefresh: true });
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'upgradeGuestAccount',
+      });
+    });
+
+    it('reports the upgraded account so the guards stop reading a guest', async () => {
+      asGuest();
+      expect(service.getMember()).toBeNull();
+
+      await service.registerWithUsernameAndPassword({
+        email: 'guest@test.com',
+        password: 'password',
+      });
+
+      expect(service.getMember()).toEqual(MEMBER);
+    });
+
+    /**
+     * The account is registered by the time the profile call runs, so failing
+     * the registration over it would report a failure for something that
+     * succeeded. The callable is idempotent, so a later call repairs it.
+     */
+    it('still registers when the profile call fails', async () => {
+      asGuest();
+      (FirebaseFunctions.callByName as jest.Mock).mockRejectedValue(
+        new Error('unavailable'),
+      );
+      const warn = jest.spyOn(console, 'warn').mockImplementation();
+
+      await expect(
+        service.registerWithUsernameAndPassword({
+          email: 'guest@test.com',
+          password: 'password',
+        }),
+      ).resolves.toEqual({ user: MEMBER });
+
+      warn.mockRestore();
+    });
+
+    it('creates a new account when nobody is signed in', async () => {
+      await service.registerWithUsernameAndPassword({
+        email: 'new@test.com',
+        password: 'password',
+      });
+
+      expect(createUserSpy).toHaveBeenCalled();
+      expect(linkWithEmailAndPassword).not.toHaveBeenCalled();
+    });
+
+    /** A member who scans a table code orders as themselves and never links. */
+    it('signs a member in normally', async () => {
+      service._authStateChange$.next({ user: MEMBER } as never);
+
+      await service.signInWithGoogleAccount();
+
+      expect(signInWithGoogleSpy).toHaveBeenCalledWith({ mode: 'popup' });
+      expect(linkWithGoogle).not.toHaveBeenCalled();
     });
   });
 

@@ -166,6 +166,35 @@ describe(RegistrationService.name, () => {
       });
     });
 
+    /**
+     * The guest at a table whose email already has an account (issue #1657).
+     * Firebase refuses to link a credential that belongs to somebody else, so
+     * this arrives instead of a registration - and the guest is still signed
+     * in anonymously with their order open, which is what the message has to
+     * account for. Moving the meal onto the account they sign into is #1658.
+     */
+    describe('given the credential already belongs to an account', () => {
+      beforeEach(() => {
+        registerWithUsernameAndPasswordSpy.mockImplementation(() => {
+          throw Object.assign(new Error('Credential already in use'), {
+            code: 'auth/credential-already-in-use',
+          }) as Error & { code: string };
+        });
+      });
+
+      it('tells the guest they already have an account and can keep ordering', async () => {
+        await service.register({
+          email: 'q@q.de',
+          password: '12345678',
+        });
+
+        expect(MockedToastService.present).toHaveBeenCalledWith({
+          messageKey: 'registration-account-exists-sign-in',
+          outcome: 'failure',
+        });
+      });
+    });
+
     describe('given any other error from AuthErrorCodes is thrown', () => {
       beforeEach(() => {
         registerWithUsernameAndPasswordSpy.mockImplementation(() => {

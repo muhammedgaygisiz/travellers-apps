@@ -1,9 +1,14 @@
-import { AUTH_RESTORE_TIMEOUT_MS, AuthService } from '../auth.service';
+import {
+  AUTH_RESTORE_TIMEOUT_MS,
+  AuthService,
+  TABLE_CLAIM_TTL_MS,
+} from '../auth.service';
 import { TestBed } from '@angular/core/testing';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../provide-firestore-utils';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
+import { Preferences } from '@capacitor/preferences';
 import * as firestoreUtils from 'firebase/firestore';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
@@ -34,6 +39,18 @@ jest.mock('@capacitor-firebase/firestore');
 
 jest.mock('@capacitor-firebase/functions', () => ({
   FirebaseFunctions: { callByName: jest.fn() },
+}));
+
+// `@capacitor/core` is mocked above, so `registerPlugin` hands every plugin
+// back as an empty object. The table a guest is claiming from is kept here
+// between reloads (issue #1658), so the three methods that touch it are what
+// this stands in for.
+jest.mock('@capacitor/preferences', () => ({
+  Preferences: {
+    get: jest.fn().mockResolvedValue({ value: null }),
+    set: jest.fn().mockResolvedValue(undefined),
+    remove: jest.fn().mockResolvedValue(undefined),
+  },
 }));
 
 jest.mock('firebase/firestore');
@@ -818,6 +835,173 @@ describe(AuthService.name, () => {
 
       expect(signInWithGoogleSpy).toHaveBeenCalledWith({ mode: 'popup' });
       expect(linkWithGoogle).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * The guest who already had an account (GitHub issue #1658).
+   *
+   * Firebase refuses to link a credential that belongs to somebody else, so
+   * this guest cannot keep the uid they ordered on: the documents move instead.
+   * What the client owes the move is the proof - an ID token of the anonymous
+   * session, taken *before* signing in, because signing in is what ends it.
+   */
+  describe('signing in and claiming the table visit', () => {
+    const TABLE = {
+      restaurantId: 'restaurant-1',
+      tableId: 'table-12',
+      token: 'TESTTESTTESTTESTTESTTEST22',
+    };
+
+    const CREDENTIALS = { email: 'guest@test.com', password: 'Test4711' };
+    const MEMBER = { uid: 'member-uid', isAnonymous: false } as never;
+
+    const plugin = FirebaseAuthentication as unknown as Record<
+      string,
+      jest.Mock
+    >;
+
+    let signInWithEmailAndPasswordSpy: jest.SpyInstance;
+    let order: string[];
+
+    beforeEach(() => {
+      order = [];
+      plugin['getIdToken'] = jest.fn(async () => {
+        order.push('getIdToken');
+
+        return { token: 'guest-id-token' };
+      });
+      plugin['getCurrentUser'] = jest.fn().mockResolvedValue({ user: MEMBER });
+      signInWithEmailAndPasswordSpy = jest
+        .spyOn(FirebaseAuthentication, 'signInWithEmailAndPassword')
+        .mockImplementation(async () => {
+          order.push('signIn');
+
+          return { user: MEMBER } as never;
+        });
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: {
+          ok: true,
+          sessionId: '8_table-12_member-uid',
+          movedOrders: 2,
+        },
+      });
+      service._authStateChange$.next({
+        user: { uid: 'guest-uid', isAnonymous: true },
+      } as never);
+      service.rememberTableForClaim(TABLE);
+    });
+
+    it('takes the guest token before signing in, and claims with it', async () => {
+      const outcome = await service.signInAndClaimTableVisit(CREDENTIALS);
+
+      expect(order).toEqual(['getIdToken', 'signIn']);
+      expect(signInWithEmailAndPasswordSpy).toHaveBeenCalledWith(CREDENTIALS);
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'claimTableVisit',
+        data: {
+          restaurantId: TABLE.restaurantId,
+          tableId: TABLE.tableId,
+          guestIdToken: 'guest-id-token',
+        },
+      });
+      expect(outcome).toEqual({
+        claimed: true,
+        table: TABLE,
+        movedOrders: 2,
+      });
+    });
+
+    it('forgets the table once the meal has moved', async () => {
+      await service.signInAndClaimTableVisit(CREDENTIALS);
+
+      expect(service.rememberedTable()).toBeNull();
+    });
+
+    it('reports a refusal as nothing claimed', async () => {
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: { ok: false, reason: 'sessionNotFound' },
+      });
+
+      await expect(
+        service.signInAndClaimTableVisit(CREDENTIALS),
+      ).resolves.toEqual({ claimed: false });
+    });
+
+    /**
+     * The sign-in has already succeeded by then, and the meal is recoverable
+     * while the session it came from is not - so the failure is reported
+     * rather than thrown at a guest who is now signed in.
+     */
+    it('reports a failed claim rather than throwing', async () => {
+      (FirebaseFunctions.callByName as jest.Mock).mockRejectedValue(
+        new Error('unavailable'),
+      );
+      const warn = jest.spyOn(console, 'warn').mockImplementation();
+
+      await expect(
+        service.signInAndClaimTableVisit(CREDENTIALS),
+      ).resolves.toEqual({ claimed: false });
+
+      warn.mockRestore();
+    });
+
+    /** A password that belongs to the form rather than to the account. */
+    it('lets a failed sign-in through, having claimed nothing', async () => {
+      signInWithEmailAndPasswordSpy.mockRejectedValue(
+        new Error('wrong password'),
+      );
+
+      await expect(
+        service.signInAndClaimTableVisit(CREDENTIALS),
+      ).rejects.toThrow('wrong password');
+      expect(FirebaseFunctions.callByName).not.toHaveBeenCalled();
+      expect(service.rememberedTable()).toEqual(TABLE);
+    });
+
+    /**
+     * The journey includes a reload - the ordering screen is built for one
+     * (`RD-TS-33`) - so the table outlives the page that remembered it.
+     */
+    it('keeps the table on the device and reads it back', async () => {
+      const stored = (Preferences.set as jest.Mock).mock.calls[0][0];
+
+      expect(stored.key).toBe('bite-tribe.table-claim');
+      expect(JSON.parse(stored.value)).toMatchObject(TABLE);
+
+      service.forgetTableForClaim();
+      (Preferences.get as jest.Mock).mockResolvedValue({
+        value: JSON.stringify({ ...TABLE, rememberedAt: Date.now() }),
+      });
+
+      await service.restoreRememberedTable();
+
+      expect(service.rememberedTable()).toEqual(TABLE);
+    });
+
+    /** A meal that ended hours ago must not produce an offer. */
+    it('drops a table remembered too long ago', async () => {
+      service.forgetTableForClaim();
+      (Preferences.get as jest.Mock).mockResolvedValue({
+        value: JSON.stringify({
+          ...TABLE,
+          rememberedAt: Date.now() - TABLE_CLAIM_TTL_MS - 1,
+        }),
+      });
+
+      await service.restoreRememberedTable();
+
+      expect(service.rememberedTable()).toBeNull();
+      expect(Preferences.remove).toHaveBeenCalled();
+    });
+
+    it('just signs in when there is no table to claim', async () => {
+      service.forgetTableForClaim();
+
+      await expect(
+        service.signInAndClaimTableVisit(CREDENTIALS),
+      ).resolves.toEqual({ claimed: false });
+      expect(FirebaseFunctions.callByName).not.toHaveBeenCalled();
     });
   });
 

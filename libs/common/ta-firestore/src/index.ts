@@ -30,7 +30,11 @@ export {
 export { RequestedUrlService } from './lib/requested-url.service';
 export { freshSessionGuard } from './lib/fresh-session.guard';
 
-export { AuthService } from './lib/auth.service';
+export {
+  AuthService,
+  type TableClaimContext,
+  type TableVisitClaimOutcome,
+} from './lib/auth.service';
 
 export { AppCheckReadinessService } from './lib/app-check-readiness.service';
 export { StartupNavigationService } from './lib/startup-navigation.service';

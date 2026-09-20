@@ -189,6 +189,13 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // than what the token claims, and acts on the caller's own uid.
   upgradeGuestAccount: 'anySession',
 
+  // Moving a meal from the anonymous account that ordered it onto the account
+  // the guest signed into (issue #1658). `member`, unlike the upgrade beside
+  // it: the caller here is by definition the account being signed *into*, and
+  // the anonymous half of the pair is proved by a verified ID token rather
+  // than by the session the call arrives on.
+  claimTableVisit: 'member',
+
   // The redirect target of a shared Bite link. It is opened by whoever was
   // sent the link, which is the point of sharing one.
   handleSharedLinkToBite: 'public',

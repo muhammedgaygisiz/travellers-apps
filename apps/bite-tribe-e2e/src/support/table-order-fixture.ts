@@ -80,6 +80,22 @@ export const TABLE_GUEST_FIXTURE: TableOrderFixture = {
   token: 'TESTTESTTESTTESTTESTTEST22',
 };
 
+/**
+ * A third table, for the spec where the guest turns out to have an account
+ * already (issue #1658). Its own everything, for the reason the one above
+ * gives.
+ */
+export const TABLE_CLAIM_FIXTURE: TableOrderFixture = {
+  ...TABLE_ORDER_FIXTURE,
+  restaurantId: 'e2e-table-claim-restaurant',
+  restaurantName: 'Returning Guest Osteria',
+  roomId: 'e2e-table-claim-room',
+  tableId: 'e2e-table-claim-table',
+  menuId: 'e2e-table-claim-menu',
+  visitId: 'e2e-table-claim-visit',
+  token: 'TESTTESTTESTTESTTESTTEST33',
+};
+
 const DAYS = [
   'monday',
   'tuesday',

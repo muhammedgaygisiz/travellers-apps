@@ -7,6 +7,7 @@ import {
   Meta,
   StoryObj,
 } from '@storybook/angular';
+import { AuthService } from 'ta-firestore';
 import {
   TableSessionApiService,
   type TableSessionCallError,
@@ -119,6 +120,14 @@ const scan = (answers: Answers): Decorator =>
         useValue: {
           snapshot: { paramMap: { get: (): string => context.token } },
         },
+      },
+      // The service remembers the table it joined, so that a guest who turns
+      // out to have an account already can sign in and bring the meal with
+      // them (issue #1658). The real `AuthService` reaches Firebase; here it
+      // is the one method that is called and nothing else.
+      {
+        provide: AuthService,
+        useValue: { rememberTableForClaim: (): void => undefined },
       },
       {
         provide: TableSessionApiService,

@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import {
   BehaviorSubject,
   distinctUntilChanged,
@@ -19,6 +19,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { Capacitor } from '@capacitor/core';
+import { Preferences } from '@capacitor/preferences';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from './provide-firestore-utils';
 import { BiteTribeRole, rolesFromClaims } from 'utils';
 import { terminate } from 'firebase/firestore';
@@ -30,6 +31,44 @@ import { NavController } from '@ionic/angular';
  * exists before it has to decide without that answer.
  */
 export const AUTH_RESTORE_TIMEOUT_MS = 5_000;
+
+/** Where the remembered table is kept between reloads (issue #1658). */
+const TABLE_CLAIM_STORAGE_KEY = 'bite-tribe.table-claim';
+
+/**
+ * How long a remembered table stays claimable: three hours, which is a long
+ * meal and well past the two-hour idle timeout a session expires on.
+ */
+export const TABLE_CLAIM_TTL_MS = 3 * 60 * 60 * 1000;
+
+interface StoredTableClaim extends TableClaimContext {
+  rememberedAt: number;
+}
+
+/** Where a guest is sitting, as much of it as a claim needs (issue #1658). */
+export interface TableClaimContext {
+  restaurantId: string;
+  tableId: string;
+  /** The scanned code, so the screen can be reopened after the claim. */
+  token: string;
+}
+
+/** What `claimTableVisit` answers, as much of it as the app reads. */
+interface TableVisitClaimAnswer {
+  ok: boolean;
+  movedOrders?: number;
+}
+
+interface TableVisitClaimCall {
+  restaurantId: string;
+  tableId: string;
+  guestIdToken: string;
+}
+
+/** Whether the meal moved, and where it moved from. */
+export type TableVisitClaimOutcome =
+  | { claimed: true; table: TableClaimContext; movedOrders: number }
+  | { claimed: false };
 
 @Injectable({
   providedIn: 'root',
@@ -296,6 +335,152 @@ export class AuthService {
     distinctUntilChanged(),
     shareReplay(1),
   );
+
+  /**
+   * The table this device is sitting at, remembered so that signing in can
+   * bring the meal with it (GitHub issue #1658).
+   *
+   * Kept on the device rather than in memory, because the journey it has to
+   * survive includes a reload: the guest is ordering over a restaurant's wifi,
+   * the screen is built to be reloaded (`RD-TS-33`), and the sign-in that
+   * needs this may be two navigations away from the table.
+   *
+   * It goes stale on its own. A table remembered from a meal that ended hours
+   * ago would offer to move a session the backend has long since expired, and
+   * the offer is worse than nothing: it asks a guest to sign in for something
+   * that cannot happen. {@link TABLE_CLAIM_TTL_MS} is the window, and it is
+   * the idle timeout of a session with room to spare.
+   */
+  private readonly tableToClaim = signal<TableClaimContext | null>(null);
+
+  readonly rememberedTable = this.tableToClaim.asReadonly();
+
+  rememberTableForClaim(context: TableClaimContext): void {
+    this.tableToClaim.set(context);
+
+    void this.storeRememberedTable({ ...context, rememberedAt: Date.now() });
+  }
+
+  forgetTableForClaim(): void {
+    this.tableToClaim.set(null);
+
+    void this.clearRememberedTable();
+  }
+
+  private async clearRememberedTable(): Promise<void> {
+    try {
+      await Preferences.remove({ key: TABLE_CLAIM_STORAGE_KEY });
+    } catch (error) {
+      console.warn('Could not clear the remembered table:', error);
+    }
+  }
+
+  /**
+   * Reads back a table remembered before a reload. Best effort throughout:
+   * storage that cannot be read costs the guest the offer and nothing else.
+   */
+  async restoreRememberedTable(): Promise<void> {
+    try {
+      const { value } = await Preferences.get({
+        key: TABLE_CLAIM_STORAGE_KEY,
+      });
+
+      if (!value) {
+        return;
+      }
+
+      const stored = JSON.parse(value) as StoredTableClaim;
+      const fresh =
+        typeof stored?.rememberedAt === 'number' &&
+        Date.now() - stored.rememberedAt < TABLE_CLAIM_TTL_MS;
+
+      if (!fresh || !stored.restaurantId || !stored.tableId || !stored.token) {
+        await Preferences.remove({ key: TABLE_CLAIM_STORAGE_KEY });
+
+        return;
+      }
+
+      this.tableToClaim.set({
+        restaurantId: stored.restaurantId,
+        tableId: stored.tableId,
+        token: stored.token,
+      });
+    } catch (error) {
+      console.warn('Could not read the remembered table:', error);
+    }
+  }
+
+  private async storeRememberedTable(stored: StoredTableClaim): Promise<void> {
+    try {
+      await Preferences.set({
+        key: TABLE_CLAIM_STORAGE_KEY,
+        value: JSON.stringify(stored),
+      });
+    } catch (error) {
+      console.warn('Could not remember the table for a sign-in:', error);
+    }
+  }
+
+  /**
+   * Signs into an account the guest already had, and moves the meal they
+   * ordered anonymously onto it (GitHub issue #1658).
+   *
+   * This is the exception to the in-place upgrade of issue #1657. Firebase
+   * refuses to link a credential that belongs to another account, so a guest
+   * with an account cannot keep the uid they ordered on: the documents move
+   * instead, and `claimTableVisit` is what moves them.
+   *
+   * **The proof is taken before signing in**, because signing in is what ends
+   * the anonymous session. The ID token in hand is a credential only this
+   * phone ever had, and it is the whole of what ties the account now signing in
+   * to the meal it is claiming - the backend verifies it and refuses anything
+   * that is not a live anonymous session's.
+   *
+   * The sign-in itself is allowed to throw: a password that does not match the
+   * account is the caller's to report, and the guest is still holding their
+   * anonymous session when it does. Only the *claim* is swallowed, because by
+   * then the sign-in has succeeded and the meal is recoverable while the
+   * session it came from is not.
+   */
+  async signInAndClaimTableVisit(
+    credentials: AuthCredentials,
+  ): Promise<TableVisitClaimOutcome> {
+    const table = this.tableToClaim();
+    const guestIdToken =
+      table && this.isGuestSession()
+        ? (await FirebaseAuthentication.getIdToken()).token
+        : '';
+
+    await this.loginWithUsernameAndPassword(credentials);
+
+    if (!table || !guestIdToken) {
+      return { claimed: false };
+    }
+
+    try {
+      const { data: result } = await FirebaseFunctions.callByName<
+        TableVisitClaimCall,
+        TableVisitClaimAnswer
+      >({
+        name: 'claimTableVisit',
+        data: {
+          restaurantId: table.restaurantId,
+          tableId: table.tableId,
+          guestIdToken,
+        },
+      });
+
+      this.forgetTableForClaim();
+
+      return result?.ok
+        ? { claimed: true, table, movedOrders: result.movedOrders ?? 0 }
+        : { claimed: false };
+    } catch (error) {
+      console.warn('Failed to move the table order to the account:', error);
+
+      return { claimed: false };
+    }
+  }
 
   public async loginWithUsernameAndPassword(
     authCreds: AuthCredentials,

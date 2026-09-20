@@ -233,11 +233,13 @@ the same builder, so a created and a linked member start life identically. `RD-T
 
 **It only ever applied to the guest who arrived with no account.** `signInAsGuest` returns the
 existing user rather than signing in again, so a member who scans a table code holds their own
-uid throughout and never meets the link at all. What is still open is the guest who _has_ an
-account and signs into it: Firebase refuses to link a credential that belongs to somebody
-else, so registration is refused with `credential-already-in-use` and the guest is told they
-already have an account and can keep ordering on the session they are holding. Moving the meal
-onto the account they sign into is issue [#1658].
+uid throughout and never meets the link at all. The guest who _has_ an account takes the other
+path, as of [#1658]: Firebase refuses to link a credential that belongs to somebody else, so
+registering is refused and the refusal becomes an offer - sign in, and `claimTableVisit` moves
+the session, the orders and the signals onto that account, authorised by an ID token of the
+anonymous session taken before the sign-in that ends it. The anonymous account is deleted
+after the move, and declining the offer leaves the guest ordering exactly as they were.
+`RD-TS-42`.
 
 **Restaurant Staff has a column, as of [#1097].** It had none for as long as its permission
 set was undecided (`RD-UR-8`), because a column of guesses would state a boundary nobody had

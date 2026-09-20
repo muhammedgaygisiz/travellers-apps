@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TableSessionApiService } from 'bite-tribe/api';
 import type { TableScanContext } from 'model';
 import { TableSessionService } from '../table-session.service';
+import { AuthService } from 'ta-firestore';
 
 /**
  * The five states a scanned code can land in (GitHub issue #1101).
@@ -29,6 +30,8 @@ const MENU_ONLY: TableScanContext = {
   ordering: { available: false, reason: 'tableOrderingDisabled' },
 };
 
+const rememberTableForClaim = jest.fn();
+
 describe(TableSessionService.name, () => {
   let service: TableSessionService;
   let resolveToken: jest.Mock;
@@ -49,6 +52,13 @@ describe(TableSessionService.name, () => {
           useValue: {
             snapshot: { paramMap: { get: (): string | null => token } },
           },
+        },
+        // Only the one method this service calls: the real one reaches
+        // Firebase, and what is asserted here is that joining remembers the
+        // table so a sign-in can bring the meal with it (issue #1658).
+        {
+          provide: AuthService,
+          useValue: { rememberTableForClaim },
         },
       ],
     });
@@ -324,6 +334,30 @@ describe(TableSessionService.name, () => {
       await service.retry();
 
       expect(service.context()).toBeUndefined();
+    });
+  });
+
+  /**
+   * A guest who taps "create an account" from here and turns out to have one
+   * already is offered the sign-in that brings the meal with them (issue
+   * #1658). The offer needs a table to claim, and this is where it is known.
+   */
+  describe('remembering the table for a later sign-in', () => {
+    it('remembers restaurant, table and code when the guest joins', async () => {
+      start.mockResolvedValue({
+        ok: true,
+        status: 'active',
+        context: CONTEXT,
+      });
+
+      await service.resolve();
+      await service.confirm();
+
+      expect(rememberTableForClaim).toHaveBeenCalledWith({
+        restaurantId: CONTEXT.restaurant.id,
+        tableId: CONTEXT.table.id,
+        token: CONTEXT.token,
+      });
     });
   });
 });

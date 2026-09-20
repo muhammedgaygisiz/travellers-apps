@@ -57,6 +57,14 @@ export const ROUTES: Routes = withAuthRoutes(
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
+      path: 'table-sessions',
+      loadComponent: () =>
+        import('bite-tribe-admin/restaurants').then(
+          (m) => m.TableSessionsContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
       path: 'restaurant-ownership',
       loadComponent: () =>
         import('bite-tribe-admin/restaurants').then(

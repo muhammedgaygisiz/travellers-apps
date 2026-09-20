@@ -85,6 +85,10 @@ export interface TableSession {
   id: string;
   restaurantId: string;
   tableId: string;
+  /** Where the party sits now, once staff have moved them (`RD-TS-43`). */
+  currentTableId?: string;
+  /** The label of {@link currentTableId}, so a screen needs no second read. */
+  currentTableLabel?: string;
   guestUserId: string;
   status: TableSessionStatus;
   /** The visit this guest is ordering into. Absent while `pending`. */

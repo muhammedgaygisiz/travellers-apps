@@ -6,6 +6,7 @@ import {
   BITE_TRIBE_ROLES,
   BiteTribeRole,
   ROLES_CLAIM,
+  TABLE_GUEST_ROLE,
   isBiteTribeRole,
   requireAdmin,
 } from '../shared/roles';
@@ -58,6 +59,17 @@ const parseRoles = (value: unknown): BiteTribeRole[] => {
     throw new HttpsError(
       'invalid-argument',
       `Unknown role(s): ${unknownRoles.join(', ')}. Known roles: ${BITE_TRIBE_ROLES.join(', ')}.`,
+    );
+  }
+
+  // `tableGuest` is a role, and the one no operator hands out (issue #1629):
+  // it is written by `startTableSession` on the anonymous account a scan mints,
+  // and an account given it here would read as a guest at no table - admitted
+  // to nothing, and confusing wherever a session is listed.
+  if (value.includes(TABLE_GUEST_ROLE)) {
+    throw new HttpsError(
+      'invalid-argument',
+      `${TABLE_GUEST_ROLE} is granted by a table scan, not by an operator.`,
     );
   }
 

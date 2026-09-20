@@ -180,6 +180,18 @@ export interface TableSession {
   restaurantId: string;
   /** The table that was scanned. A plain id, as on the visit. */
   tableId: string;
+  /**
+   * Where the party is sitting *now*, when staff have walked them to another
+   * table (`RD-TS-43`).
+   *
+   * Absent until a move happens, and never replaces {@link tableId}: that one
+   * names the code that was scanned, which is also what this document is named
+   * after. This one is what the guest's screen prints, because the number on
+   * the sticker in front of them is the one they can check.
+   */
+  currentTableId?: string;
+  /** The label of {@link currentTableId}, so a screen needs no second read. */
+  currentTableLabel?: string;
   /** The account that scanned, anonymous or not. */
   guestUserId: string;
   status: TableSessionStatus;

@@ -21,6 +21,9 @@ export class RestaurantsService {
   readonly candidates = this.dataAccess.restaurantCandidatesValue;
   readonly places = this.dataAccess.bitePlacesValue;
 
+  /** Every table session in BiteTribe, for the operator's list (issue #1629). */
+  readonly tableSessions = this.dataAccess.tableSessionsValue;
+
   candidateClicked(candidate: AdminRestaurantCandidate): void {
     this.dataAccess.selectRestaurantToCreate({
       id: '',

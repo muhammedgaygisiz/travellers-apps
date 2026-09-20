@@ -22,6 +22,8 @@ import {
   tableStatusOf,
   visitIdOf,
 } from './table-state';
+import { TABLE_ORDERS_COLLECTION } from './table-order';
+import { TABLE_SESSIONS_COLLECTION } from './table-session';
 import {
   TABLE_STATUS_AFTER_VISIT,
   TABLE_VISITS_COLLECTION,
@@ -372,6 +374,29 @@ export const moveTableVisitHandler = async (
     const turnsOverSource = stillSeats(fromState, visitId);
     const fromStatus = tableStatusOf(fromState);
 
+    // Read before anything is written, because a transaction may not read
+    // after its first write. What follows the party to the new table is the
+    // *number* it is sitting at: the guest's phone reads it off its own
+    // session, and the kitchen reads it off the order it is cooking, so both
+    // learn about a move that neither was told about (`RD-TS-43`).
+    const toTableLabel =
+      typeof toTableData['label'] === 'string'
+        ? toTableData['label']
+        : toTableId;
+
+    const [movedSessions, movedOrders] = await Promise.all([
+      transaction.get(
+        restaurantRef
+          .collection(TABLE_SESSIONS_COLLECTION)
+          .where('visitId', '==', visitId),
+      ),
+      transaction.get(
+        visitRef
+          .collection(TABLE_ORDERS_COLLECTION)
+          .where('visitId', '==', visitId),
+      ),
+    ]);
+
     const at = Date.now();
     const transitionIds: string[] = [];
 
@@ -436,6 +461,18 @@ export const moveTableVisitHandler = async (
     // opener, `openedAt` and the party size are what make this the same visit
     // rather than a new one at a different table.
     transaction.update(visitRef, { tableId: toTableId });
+
+    // The party keeps its session and its orders - they hang from the visit,
+    // not from the table - and both now say where that party is sitting. The
+    // table each was *created* at stays on the document: a bon that changed
+    // its own history would leave the pass unable to recognise the ticket it
+    // took twenty minutes ago (`RD-TS-43`).
+    [...movedSessions.docs, ...movedOrders.docs].forEach((moved) =>
+      transaction.update(moved.ref, {
+        currentTableId: toTableId,
+        currentTableLabel: toTableLabel,
+      }),
+    );
 
     return {
       restaurantId,

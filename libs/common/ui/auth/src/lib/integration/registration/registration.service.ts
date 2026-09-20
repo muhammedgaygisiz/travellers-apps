@@ -253,8 +253,6 @@ export class RegistrationService {
   }
 
   private async bringTheOrder(registration: Credentials): Promise<void> {
-    const table = this.authService.rememberedTable();
-
     try {
       const outcome = await withTimeout(
         this.authService.signInAndClaimTableVisit({

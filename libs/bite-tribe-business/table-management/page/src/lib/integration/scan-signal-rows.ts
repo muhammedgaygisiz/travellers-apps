@@ -4,6 +4,7 @@ import type {
   ScanAnomaly,
   ScanAnomalyKind,
   TableSession,
+  TableSessionStatus,
 } from 'model';
 import { elapsedParts, type ElapsedParts } from './table-status-duration';
 
@@ -263,4 +264,64 @@ export const pendingSessionRows = (
         };
       })
   );
+};
+
+/** The statuses in which a guest is still attached to a table (`RD-TS-5`). */
+const LIVE_SESSION_STATUSES: readonly TableSessionStatus[] = [
+  'pending',
+  'active',
+];
+
+/** One guest attached to a table, as the restaurant's session list shows them. */
+export interface TableSessionRow {
+  /** The session's own document name. */
+  id: string;
+  tableId: string;
+  /** The table's number, empty where the table has left the plan. */
+  label: string;
+  /** Where the party sits now, when staff moved them (`RD-TS-43`). */
+  movedToLabel?: string;
+  status: TableSessionStatus;
+  /** Whether the guest holds an anonymous session rather than an account. */
+  anonymous: boolean;
+  /** How long ago this guest last did anything. */
+  lastActive: ElapsedParts;
+}
+
+/**
+ * Everybody attached to a table right now, newest activity first
+ * (GitHub issue #1629).
+ *
+ * One row per **guest** rather than per table, which is the opposite of
+ * {@link pendingSessionRows} and deliberately so: the waiting list is a job -
+ * seat that table - and this is a register of who is in the room. A party of
+ * four holding four phones is one job at the door and four sessions at the
+ * table, and the second number is the one a support question is ever about.
+ *
+ * Ended sessions are dropped rather than greyed out. A closed meal belongs to
+ * the operator's cross-restaurant view, where the question is what happened;
+ * here the question is what is happening.
+ */
+export const tableSessionRows = (
+  sessions: readonly TableSession[],
+  tables: readonly RestaurantTable[],
+  now: number,
+): TableSessionRow[] => {
+  const labels = new Map(tables.map((table) => [table.id, table.label]));
+
+  return sessions
+    .filter((session) => LIVE_SESSION_STATUSES.includes(session.status))
+    .slice()
+    .sort((first, second) => second.lastActiveAt - first.lastActiveAt)
+    .map((session) => ({
+      id: session.id,
+      tableId: session.tableId,
+      label: labels.get(session.tableId) ?? '',
+      ...(session.currentTableId && session.currentTableId !== session.tableId
+        ? { movedToLabel: session.currentTableLabel ?? '' }
+        : {}),
+      status: session.status,
+      anonymous: session.isAnonymousGuest,
+      lastActive: elapsedParts(session.lastActiveAt, now),
+    }));
 };

@@ -172,6 +172,13 @@ export class AdminDashboard {
       testId: 'admin-tool-restaurant-ownership',
     },
     {
+      titleKey: 'admin-tool-table-sessions',
+      descriptionKey: 'admin-tool-table-sessions-description',
+      icon: 'people-outline',
+      path: '/table-sessions',
+      testId: 'admin-tool-table-sessions',
+    },
+    {
       titleKey: 'admin-tool-bite-places',
       descriptionKey: 'admin-tool-bite-places-description',
       icon: 'storefront-outline',

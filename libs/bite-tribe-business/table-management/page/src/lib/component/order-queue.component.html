@@ -189,6 +189,71 @@
       }
 
       <!--
+        Who is attached to a table at all (issue #1629). The waiting list above
+        is a job - seat that table - and this is the register: one row per
+        guest, newest activity first, ended sessions left out. A restaurant
+        asked to be able to see it; the operator sees the same thing across
+        every restaurant in the admin app.
+      -->
+      @if (hasSessions()) {
+        <section
+          class="order-queue__calling"
+          data-testid="order-queue-sessions"
+        >
+          <h2 class="order-queue__calling-title">
+            {{ 'table-session-list-title' | transloco }}
+            ({{ sessions().length }})
+          </h2>
+
+          <ion-note class="order-queue__calling-hint">
+            {{ 'table-session-list-hint' | transloco }}
+          </ion-note>
+
+          <ul class="order-queue__calling-list">
+            @for (row of sessions(); track row.id) {
+              <li
+                class="order-queue__calling-row"
+                [attr.data-testid]="'table-session-' + row.id"
+              >
+                <div class="order-queue__calling-what">
+                  <span class="order-queue__table">
+                    {{
+                      row.label
+                        ? ('order-queue-table'
+                          | transloco: { label: row.label })
+                        : ('order-queue-table-unknown' | transloco)
+                    }}
+                  </span>
+
+                  @if (row.movedToLabel) {
+                    <span class="order-queue__moved-from">
+                      {{
+                        'table-session-moved-to'
+                          | transloco: { label: row.movedToLabel }
+                      }}
+                    </span>
+                  }
+
+                  <span>
+                    {{ 'table-session-status-' + row.status | transloco }}
+                    @if (row.anonymous) {
+                      · {{ 'table-session-anonymous' | transloco }}
+                    }
+                  </span>
+                </div>
+
+                <div class="order-queue__calling-when">
+                  <span class="order-queue__age">
+                    {{ row.lastActive.key | transloco: row.lastActive.params }}
+                  </span>
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      <!--
         The tables that are calling, above the tickets and sorted the other way
         round (GitHub issue #1106). A pass works its tickets newest first,
         because the one that just landed is the one nobody has read; a floor
@@ -306,6 +371,23 @@
                       : ('order-queue-table-unknown' | transloco)
                   }}
                 </span>
+
+                <!--
+                  Where these tickets were taken, when the party has been moved
+                  since. The pass knows them by that number; the plates have to
+                  go to the one above (issue #1072, `RD-TS-43`).
+                -->
+                @if (group.movedFromLabel) {
+                  <span
+                    class="order-queue__moved-from"
+                    [attr.data-testid]="'order-group-moved-' + group.tableId"
+                  >
+                    {{
+                      'order-queue-moved-from'
+                        | transloco: { label: group.movedFromLabel }
+                    }}
+                  </span>
+                }
 
                 <!--
                   The oldest order in the group, which is the number that says

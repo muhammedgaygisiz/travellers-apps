@@ -184,6 +184,18 @@ export interface TableOrder {
    * what the kitchen wrote on the ticket.
    */
   tableId: string;
+  /**
+   * Where the party is sitting *now*, when staff have moved them since
+   * (`RD-TS-43`).
+   *
+   * The pass took this ticket for table 12 and reads it under table 12; the
+   * waiter carrying the plates needs table 5. So the record above is left
+   * exactly as it was and the destination is written beside it, which is the
+   * only way both readings stay true.
+   */
+  currentTableId?: string;
+  /** The label of {@link currentTableId}, so a queue needs no second read. */
+  currentTableLabel?: string;
   /** The session that placed it, by `TableSession.id`. */
   sessionId: string;
   /**

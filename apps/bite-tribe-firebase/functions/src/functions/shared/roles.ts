@@ -21,9 +21,42 @@ import { CallableRequest, HttpsError } from 'firebase-functions/https';
  * existing shape of every shared constant in this project; the two lists have
  * to be changed together.
  */
-export const BITE_TRIBE_ROLES = ['admin', 'business', 'staff'] as const;
+
+/**
+ * The role a table guest holds (GitHub issue #1629).
+ *
+ * Decided on 20 September 2026: the anonymous session a scanned table code
+ * mints **is** a role, and `RD-UR-1`'s test - a role is grantable and
+ * revocable - is narrowed rather than kept. What grants this one is the scan:
+ * `startTableSession` writes the claim on the anonymous account it just
+ * admitted, and nothing else ever writes it. `setUserRoles` refuses it
+ * outright, which is why {@link GRANTABLE_ROLES} exists beside the list below:
+ * an operator picking roles in the admin app is picking from the three that an
+ * operator can actually give.
+ *
+ * It grants nothing. Every gate in the product reads what a caller *is not*:
+ * `requireMember` refuses an anonymous sign-in provider and `isMember()` in
+ * `firestore.rules` does the same, both independently of this claim
+ * (`RD-TS-40`). What the claim buys is that a table guest is nameable - in the
+ * admin and business session views, in a token somebody is reading, and in the
+ * use case's `Actors`, which admits roles and now has one to admit.
+ */
+export const BITE_TRIBE_ROLES = [
+  'admin',
+  'business',
+  'staff',
+  'tableGuest',
+] as const;
 
 export type BiteTribeRole = (typeof BITE_TRIBE_ROLES)[number];
+
+/** The roles an operator may grant. The table guest's is written by a scan. */
+export const GRANTABLE_ROLES = BITE_TRIBE_ROLES.filter(
+  (role) => role !== 'tableGuest',
+);
+
+/** The role a table guest holds, written by `startTableSession` and nothing else. */
+export const TABLE_GUEST_ROLE = 'tableGuest';
 
 /**
  * The custom-claim key the roles are stored under.

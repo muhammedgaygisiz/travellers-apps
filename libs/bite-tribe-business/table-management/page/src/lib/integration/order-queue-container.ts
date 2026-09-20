@@ -16,6 +16,7 @@ import { OrderQueueService } from './order-queue.service';
       [assistance]="service.assistance()"
       [busyAssistanceId]="service.busyAssistanceId()"
       [waiting]="service.waitingParties()"
+      [sessions]="service.liveSessions()"
       [anomalies]="service.anomalies()"
       [busyAnomalyId]="service.busyAnomalyId()"
       [loading]="service.loading()"

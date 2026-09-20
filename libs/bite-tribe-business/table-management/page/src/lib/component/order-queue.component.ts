@@ -20,6 +20,7 @@ import type { AssistanceRow } from '../integration/assistance-rows';
 import type {
   PendingSessionRow,
   ScanAnomalyRow,
+  TableSessionRow,
 } from '../integration/scan-signal-rows';
 import type {
   OrderAction,
@@ -143,6 +144,12 @@ export class OrderQueueComponent {
   readonly waiting = input<PendingSessionRow[]>([]);
 
   /** What the restaurant is told about its own codes (GitHub issue #1107). */
+  /**
+   * Everybody attached to a table right now (issue #1629). One row per guest
+   * rather than per table: the waiting list above is a job, this is a register.
+   */
+  readonly sessions = input<TableSessionRow[]>([]);
+
   readonly anomalies = input<ScanAnomalyRow[]>([]);
 
   /** The anomaly whose press has not been answered yet, if any. */
@@ -185,6 +192,9 @@ export class OrderQueueComponent {
 
   /** Whether anybody is waiting to be seated. */
   readonly hasWaiting = computed(() => this.waiting().length > 0);
+
+  /** Whether anybody is attached to a table at all. */
+  readonly hasSessions = computed(() => this.sessions().length > 0);
 
   /** Whether the restaurant has anything to read about its codes. */
   readonly hasAnomalies = computed(() => this.anomalies().length > 0);

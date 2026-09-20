@@ -237,6 +237,10 @@ describe(OrderQueueService.name, () => {
         {
           provide: PendingSessionQueueService,
           useValue: {
+            // One listener for both lists since issue #1629: the waiting
+            // parties are filtered out of it, and the session register is the
+            // whole of it.
+            sessions$: jest.fn(() => pendingFeed.asObservable()),
             pendingSessions$: jest.fn(() => pendingFeed.asObservable()),
           },
         },
@@ -838,6 +842,7 @@ describe('when the table numbers cannot be read', () => {
         {
           provide: PendingSessionQueueService,
           useValue: {
+            sessions$: jest.fn(() => new Subject().asObservable()),
             pendingSessions$: jest.fn(() => new Subject().asObservable()),
           },
         },

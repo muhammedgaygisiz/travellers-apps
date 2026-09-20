@@ -103,6 +103,7 @@ describe(AdminDashboard.name, () => {
       '/bite-search',
       '/restaurant-candidates',
       '/restaurant-ownership',
+      '/table-sessions',
       '/bite-places',
       '/new-version-notification',
       '/review-timestamps-backfill',

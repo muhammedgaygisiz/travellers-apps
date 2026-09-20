@@ -135,6 +135,10 @@ export interface TableOrder {
   visitId: string;
   /** Where the party was sitting when they sent it. A record, not an address. */
   tableId: string;
+  /** Where the party sits now, once staff have moved them (`RD-TS-43`). */
+  currentTableId?: string;
+  /** The label of {@link currentTableId}, so a queue needs no second read. */
+  currentTableLabel?: string;
   sessionId: string;
   guestUserId: string;
   status: TableOrderStatus;

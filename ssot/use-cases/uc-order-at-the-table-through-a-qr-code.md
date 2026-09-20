@@ -21,19 +21,25 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
   sends an order, watches it move, and asks for a waiter or the bill. `signInAsGuest` returns
   an existing session rather than replacing it, so a member who scans orders as themselves.
   The Bite prefilled from an order line is theirs too, and is the step that is not built -
-  issue [#1073], stage 4. The same routes also admit a guest without an account through an
-  anonymous session; [User Roles](../product/user-roles.md) lists that _Table Guest_ under
-  _Not roles_, so it is not an actor here. Whether that path stays allowed, and how its actor
-  is named, is open; see `Open Product Questions`.
-- **Restaurant Staff** — acts: works the order queue, moves an order along its lifecycle, and
-  clears the assistance signals a guest raises.
+  issue [#1073], stage 4. The same routes also admit a guest without an account, who is the
+  _Table Guest_ below.
+- **Table Guest** (`tableGuest`) — acts: everything the Bite Creator above does at a table,
+  without a BiteTribe account. A role since issue [#1629], which confirmed `RD-TS-4` and gave
+  this page the actor it had been describing in prose: the claim is written by the scan that
+  mints the session, nobody grants it, and it opens nothing outside the table routes
+  (`RD-UR-9`). Registering during the meal upgrades the session in place ([#1657]); signing
+  into an account they already had moves the meal onto it ([#1658]).
+- **Restaurant Staff** — acts: works the order queue, moves an order along its lifecycle,
+  clears the assistance signals a guest raises, and sees who is attached to a table in the
+  restaurant's own session list (`RD-TS-44`).
 - **Restaurant Owner** (`business`) — acts, by the same callables: `staffAuthority` admits
   `business` beside `staff`, so an owner working its own floor needs no second account. It is
   also the only role that turns table ordering on, on the restaurant's page in the business
   app behind `ownedRestaurantGuard` ([#1102]).
-- **BiteTribe Operator** — not an actor, and named because the callables suggest otherwise:
-  `staffAuthority` admits `admin` as well. It has no way to reach them, because the business
-  app admits only `business` and `staff` and the admin app carries no service surface.
+- **BiteTribe Operator** — acts on one thing only, as of issue [#1629]: it reads every table
+  session in BiteTribe from the admin app, which is a support question rather than a service
+  one (`RD-TS-44`). It reaches no service surface - `staffAuthority` admits `admin`, and the
+  business app admits only `business` and `staff`.
 
 ## Flow
 
@@ -717,13 +723,19 @@ Tracked in [Current State - Open Questions](../current-state/open-questions.md).
 
 The last two of the epic's proposals are now answered rather than open: a cancelled order is corrected by a staff-side cancellation carrying a reason the guest is shown, and staff are notified by an in-app queue plus a push through the existing infrastructure. What remains open is the payment model, which is issue [#1073]'s.
 
-**Reopened on 17 September 2026:** whether a guest without an account may order through an
-anonymous session at all, which `RD-TS-4` settled as allowed, and if it stays allowed, how
-this page names that actor when `UF-4` admits only roles and
-[User Roles](../product/user-roles.md) lists the session under _Not roles_. Issue [#1629] owns
-the decision.
+**Closed on 20 September 2026 by issue [#1629].** Whether a guest without an account may
+order at all was reopened on 17 September; it is settled as it stood - `RD-TS-4` holds, and
+anonymous table sessions stay. What changed is the naming: the session's holder is a _role_
+now, `tableGuest`, written by the scan and granted by nobody (`RD-UR-9`), so `Actors` above
+names it without `UF-4` having to admit anything but roles. The same decision gave the
+sessions a reader on both internal surfaces: the restaurant sees its own room live, and the
+operator sees every restaurant's, for support rather than for service (`RD-TS-44`).
 
-What is newly open is smaller and belongs to a guest whose party is **moved**: their session goes on naming the table they scanned, and nothing tells them the table number on their screen has changed. Beside it sits a second small one from this issue: an order placed before a party moved stays grouped under the table it was ordered from, which is right for the kitchen and is not what a waiter carrying the plates reads.
+**The last open question of stage 3 is closed too**, by `RD-TS-43`: a party walked to
+another table takes its number with it. `moveTableVisit` stamps the destination onto the
+sessions and the orders of that visit, so the guest's screen prints where they are sitting
+and the kitchen queue groups the tickets there - while each document keeps the table it was
+created at, which is how the pass still recognises a ticket it took twenty minutes ago.
 
 ## MVP Classification
 

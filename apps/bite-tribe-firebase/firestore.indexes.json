@@ -15,6 +15,11 @@
         { "fieldPath": "tableId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "tableSessions",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [{ "fieldPath": "lastActiveAt", "order": "DESCENDING" }]
     }
   ],
   "fieldOverrides": [

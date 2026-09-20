@@ -37,9 +37,45 @@
  * of hole #1078 closed. The role opens the business app and reads; reading it
  * as a working write permission is the mistake to avoid until #1537 lands.
  */
-export const BITE_TRIBE_ROLES = ['admin', 'business', 'staff'] as const;
+
+/**
+ * The role a table guest holds (GitHub issue #1629).
+ *
+ * Decided on 20 September 2026: the anonymous session a scanned table code
+ * mints **is** a role, and `RD-UR-1`'s test - a role is grantable and
+ * revocable - is narrowed rather than kept. What grants this one is the scan:
+ * `startTableSession` writes the claim on the anonymous account it just
+ * admitted, and nothing else ever writes it. `setUserRoles` refuses it
+ * outright, which is why {@link GRANTABLE_ROLES} exists beside the list below:
+ * an operator picking roles in the admin app is picking from the three that an
+ * operator can actually give.
+ *
+ * It grants nothing. Every gate in the product reads what a caller *is not*:
+ * `requireMember` refuses an anonymous sign-in provider and `isMember()` in
+ * `firestore.rules` does the same, both independently of this claim
+ * (`RD-TS-40`). What the claim buys is that a table guest is nameable - in the
+ * admin and business session views, in a token somebody is reading, and in the
+ * use case's `Actors`, which admits roles and now has one to admit.
+ */
+export const BITE_TRIBE_ROLES = [
+  'admin',
+  'business',
+  'staff',
+  'tableGuest',
+] as const;
 
 export type BiteTribeRole = (typeof BITE_TRIBE_ROLES)[number];
+
+/**
+ * The roles an operator may grant, which is every role but the table guest's.
+ *
+ * `setUserRoles` refuses `tableGuest` and the admin app's picker never offers
+ * it: a claim written by a scan is not one a person hands out, and a checkbox
+ * for it would be a way to make an account that reads as a guest at no table.
+ */
+export const GRANTABLE_ROLES = BITE_TRIBE_ROLES.filter(
+  (role) => role !== 'tableGuest',
+);
 
 /**
  * The custom-claim key the roles are stored under.

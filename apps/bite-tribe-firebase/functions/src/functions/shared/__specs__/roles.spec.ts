@@ -11,6 +11,7 @@ jest.mock('firebase-functions/https', () => ({
 
 import {
   BITE_TRIBE_ROLES,
+  GRANTABLE_ROLES,
   BiteTribeRole,
   ROLES_CLAIM,
   hasRole,
@@ -47,8 +48,21 @@ const codeOf = (act: () => unknown): string => {
 };
 
 describe('the role set', () => {
-  it('holds the three roles BiteTribe grants', () => {
-    expect(BITE_TRIBE_ROLES).toEqual(['admin', 'business', 'staff']);
+  it('holds the four roles BiteTribe knows', () => {
+    expect(BITE_TRIBE_ROLES).toEqual([
+      'admin',
+      'business',
+      'staff',
+      'tableGuest',
+    ]);
+  });
+
+  /**
+   * The fourth is not like the others (issue #1629): a table scan writes it,
+   * `setUserRoles` refuses it, and the admin app's picker never offers it.
+   */
+  it('leaves the table guest out of what an operator may grant', () => {
+    expect(GRANTABLE_ROLES).toEqual(['admin', 'business', 'staff']);
   });
 
   it.each([...BITE_TRIBE_ROLES])('recognises %p as a role', (role) => {

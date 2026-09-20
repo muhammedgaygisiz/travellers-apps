@@ -480,6 +480,18 @@ Rules:
   Android has no equivalent rule, which is why that half published and the
   draft then had to be discarded to keep the two platforms on one build.
 
+- **A bump has to reach the release branch already synced, and the helper now
+  refuses otherwise.** `increment-build-number-and-generate-changelog` captures
+  the commit it will tag before it runs `sync-native-version`, because the tag
+  has to name the tree the artifacts are built from ([#1441]). The synced
+  version therefore lands only in the `chore: prepare ...` commit, which the tag
+  does not point at, so a bump that has not already been synced produces
+  artifacts carrying the old version. `ensureTaggedTreeCarriesVersion` reads the
+  native projects before anything is written and refuses with the remedy, so the
+  release fails in seconds at `prepare` rather than 25 minutes later at
+  `altool`. Run `npm run sync-native-version` in the same pull request that
+  edits `package.json`.
+
 - Do not edit `versionName` or `MARKETING_VERSION` by hand. They are release
   outputs, in the same sense the build number already was.
 - Do not reintroduce reading the version out of the native projects into the

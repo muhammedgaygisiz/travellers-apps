@@ -27,6 +27,8 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
    - Use [Traceability Map](traceability-map.md) to find the relevant SSOT context.
    - Use [Spec To Code Workflow](spec-to-code-workflow.md) for code ownership, implementation, and validation details.
    - Keep the change scoped to the issue.
+   - **A frontend change owes its Loki references, in the same commit range as the code.** Any change a story renders - a shared or app component, a template, a stylesheet, or a story fixture - moves the committed images under `.loki/reference`, and the visual job fails until they match. Build with `npm run build:storybook -- --skip-nx-cache`, run `npm run loki:test`, look at each diff in `.loki/difference` before accepting it, and adopt one by copying `current` over `reference` by hand. A new story needs no separate step: `loki test` writes the reference it cannot find. Never run `loki approve`. The traps behind each of those are in [Implementation - Testing](../implementation/testing.md#operating-loki).
+   - State in the pull request which references are new, which were adopted and why, and that the rest of the suite passed unchanged. That last part is the evidence a refactor was inert; without it a reviewer cannot tell a deliberate rebaseline from a regression nobody looked at.
 
 4. Create a pull request.
    - Push the branch.
@@ -58,6 +60,7 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
 - Angular app starts successfully.
 - Firebase simulator starts successfully.
 - New functionality can be executed in the UI.
+- Loki references match, or the changed ones are adopted deliberately (frontend changes only).
 - UI result matches the expected product behavior.
 - Firebase state or emulator output matches the expected backend behavior.
 - Regression-sensitive paths still behave as expected.

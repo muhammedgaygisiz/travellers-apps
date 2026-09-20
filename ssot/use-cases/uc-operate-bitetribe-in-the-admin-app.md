@@ -96,7 +96,7 @@ Two problems in one, both verified before issue [#1469]:
 
 The role gate is a lockout change, and the tool that grants roles is behind it. The bootstrap script is the recovery path and has to keep working after the gate is live; `setUserRoles` refusing to let an admin drop their own `admin` role is the cheaper half of the same protection.
 
-Issue [#1078] replaced the Firestore rules, so this gate is no longer alone: a caller that goes around the admin app is now scoped by the account named on the document, and the `admin` role is a clause the rules read for themselves. Two things still hold. The gate stops an account from reaching a page and the rules stop it from writing a document, and they are independent — a change to one is not a change to the other. And the rules deploy by hand, so until `npx nx firebase-deploy-rules bite-tribe-firebase` has run against the live project this is still a client-side gate over an open database. `storage.rules` is open regardless ([#1350]).
+Issue [#1078] replaced the Firestore rules, so this gate is no longer alone: a caller that goes around the admin app is now scoped by the account named on the document, and the `admin` role is a clause the rules read for themselves. Two things still hold. The gate stops an account from reaching a page and the rules stop it from writing a document, and they are independent — a change to one is not a change to the other. The rules themselves are live on merge: they deploy from CI on every push to `develop` since [#1567], so the gate is no longer a client-side gate over an open database. `storage.rules` is open regardless ([#1350]).
 
 ## Operational Notes
 
@@ -188,6 +188,7 @@ Not this page's behaviour, but this page is where the half that exists lives.
 [#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475
 [#1476]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1476
 [#1485]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1485
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
 [#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610

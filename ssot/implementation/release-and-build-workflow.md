@@ -461,6 +461,25 @@ Rules:
   marketing version changes when someone edits `package.json` on purpose, which
   is rare. `sync-native-version` is therefore a no-op on most releases, writing
   back the version that is already there.
+- **App Store approval locks the version it approved.** Once a version is
+  approved, `altool` refuses every further binary carrying it:
+
+  ```
+  ERROR: [altool] This bundle is invalid. The value for key
+  CFBundleShortVersionString [1.0.1] in the Info.plist file must contain a
+  higher version than that of the previously approved version [1.0.1]. (90062)
+  ```
+
+  It is a server-side rule, so uploading by hand fails the same way, and a
+  higher build number does not satisfy it - Apple is comparing the marketing
+  version. This is the one case where the marketing version has to move before
+  the next release rather than when someone decides the release deserves it.
+  Build 97 hit it on 20 September 2026, five days after 1.0.1 cleared review:
+  the archive, the export and the Play upload all succeeded and only the
+  TestFlight step failed, so the whole cut had to be repeated as 1.0.2 (98).
+  Android has no equivalent rule, which is why that half published and the
+  draft then had to be discarded to keep the two platforms on one build.
+
 - Do not edit `versionName` or `MARKETING_VERSION` by hand. They are release
   outputs, in the same sense the build number already was.
 - Do not reintroduce reading the version out of the native projects into the

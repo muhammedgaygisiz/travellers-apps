@@ -18,6 +18,10 @@ import {
 import type { Category, MenuItem } from 'model';
 import { createEntityId } from 'utils';
 import { NgTemplateOutlet } from '@angular/common';
+import {
+  BusinessCategoryExtrasComponent,
+  type ExtrasBlock,
+} from '../business-category-extras/business-category-extras.component';
 import { BusinessMenuVariantComponent } from '../business-menu-item-editor/business-menu-variant.component';
 import { BusinessMenuItemComponent } from '../business-menu-item/business-menu-item.component';
 import { ItemReorderEventDetail } from '@ionic/angular';
@@ -31,6 +35,7 @@ import { debounce, FormField, form, required } from '@angular/forms/signals';
   imports: [
     IonButton,
     NgTemplateOutlet,
+    BusinessCategoryExtrasComponent,
     BusinessMenuVariantComponent,
     BusinessMenuItemComponent,
     IonReorderGroup,
@@ -133,6 +138,31 @@ export class BusinessCategoryComponent {
 
   onCancelAddItem(): void {
     this.presentShowAddItem.set(false);
+  }
+
+  /**
+   * The category's extras, as the extras editor now has them
+   * (GitHub issue #1598).
+   *
+   * Merged and emitted on the one `categoryChanged` output every other edit
+   * here goes through, so extras ride the existing save rather than needing a
+   * partial write of their own - there is no such thing in this editor, and
+   * inventing one would give a menu two ways to be persisted.
+   *
+   * An `undefined` block is written as `undefined` rather than dropped,
+   * because that is how the last extra is removed: the merge below would
+   * otherwise keep whatever the category already held.
+   */
+  onExtrasBlockChanged(extrasBlock: ExtrasBlock): void {
+    const category = this.linkedCategory();
+
+    this.categoryChanged.emit({
+      ...category,
+      id: category?.id ?? createEntityId(),
+      title: category?.title || '',
+      items: category?.items || [],
+      extrasBlock,
+    });
   }
 
   onAddVariant(newVariant: MenuItem, item: MenuItem): void {

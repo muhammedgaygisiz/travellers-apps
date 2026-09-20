@@ -1,0 +1,65 @@
+@use 'globals';
+
+:host {
+  .extras {
+    @include globals.light-border;
+
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+    padding: 0.75rem;
+
+    h3 {
+      font-size: 1.1rem;
+      margin: 0 0 0.5rem;
+    }
+
+    .extras-empty {
+      color: var(--ion-color-medium);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .extras-rows {
+      list-style: none;
+      margin: 0.75rem 0 0;
+      padding: 0;
+    }
+
+    /*
+     * The name takes the room and the price takes what it needs, which is the
+     * shape of the row on a laptop. Below 480px they stack, because a price
+     * field squeezed beside a name field on a phone is two fields neither of
+     * which can show its own label.
+     */
+    .extra-row {
+      align-items: center;
+      display: grid;
+      gap: 0.5rem;
+      grid-template-columns: minmax(0, 1fr) 8rem auto;
+      margin-bottom: 0.5rem;
+
+      @media (max-width: 480px) {
+        grid-template-columns: minmax(0, 1fr);
+
+        ion-button {
+          justify-self: end;
+        }
+      }
+    }
+
+    .extra-row-new {
+      grid-template-columns: minmax(0, 1fr) 8rem;
+
+      @media (max-width: 480px) {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .extra-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+  }
+}

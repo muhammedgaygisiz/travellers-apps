@@ -661,6 +661,8 @@
   "table-order-refused-itemMissing": "{{item}} ya no está en la carta. Quítalo y envía el resto.",
   "table-order-refused-itemUnavailable": "{{item}} no está disponible ahora mismo. Quítalo y envía el resto.",
   "table-order-refused-priceChanged": "El precio de {{item}} ha cambiado. Míralo y vuelve a enviar.",
+  "table-order-refused-extraMissing": "{{extra}} ya no se ofrece con {{item}}. Quítalo y envía el resto.",
+  "table-order-refused-extraPriceChanged": "El precio de {{extra}} en {{item}} ha cambiado. Míralo y vuelve a enviar.",
   "table-order-refused-currencyChanged": "Los precios de la carta han cambiado de moneda. Revisa tu pedido y vuelve a enviar.",
   "table-assistance-heading": "¿Necesitas algo?",
   "table-assistance-callStaff-idle": "Llamar a un camarero",

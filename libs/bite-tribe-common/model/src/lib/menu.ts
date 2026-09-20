@@ -71,7 +71,27 @@ export interface MenuItem {
   variants?: MenuItem[];
 }
 
-interface ExtraItem {
+/**
+ * One thing a guest can add to a dish they are ordering
+ * (GitHub issue #1598).
+ *
+ * An extra is additive and nothing else: ticking it adds its price to the line
+ * it was ticked on. Anything with a cardinality rule - "choose one base",
+ * "pick two of three" - is a different model and is deliberately not this one.
+ */
+export interface ExtraItem {
+  /**
+   * Stable identity, on the same terms as {@link MenuItem.id}.
+   *
+   * Required from issue #1598, which is the issue that made an extra something
+   * outside the menu points at: an order line records the extras it was
+   * ordered with, and the backend revalidates each one against the live menu.
+   * Before that an extra was prose, and prose needs no id.
+   *
+   * Every extra written before this carries none and is read through
+   * {@link withMenuIds}, exactly as a category, an item and a variant are.
+   */
+  id: string;
   name: string;
   price: number;
 }
@@ -92,13 +112,32 @@ export interface Category {
   items: MenuItem[];
 
   /**
-   * Free-text extras, which carry no id.
+   * The extras every dish in this category may be ordered with
+   * (GitHub issue #1598).
    *
-   * Deliberate: an extra is prose attached to a category rather than something
-   * a guest adds to an order line, so nothing outside the menu points at one.
-   * It gains an id when ordering reaches it, not before.
+   * ## Why the category and not the dish
+   *
+   * Ordering reached extras in issue #1598, and the first thing that issue had
+   * to settle was whether this block belongs here at all - "extra cheese"
+   * reads as a property of a pizza rather than of the Pizze section. It stays
+   * on the category, and {@link description} is why: it is the owner's own
+   * sentence saying who the extras are offered with, "Add to any pizza", which
+   * is the sentence a paper menu prints once under a section rather than
+   * beside each dish on it. Moving the block to the item would make an owner
+   * retype "extra mozzarella, 2.00" on every pizza and re-price it on every
+   * pizza, and a menu maintained that way disagrees with itself within a week.
+   *
+   * So the rule is: **a dish's extras are its category's**, read through
+   * {@link menuExtrasForItem} rather than off this field, so the cart, the two
+   * renderers and the backend's revalidation all apply it the same way.
+   *
+   * What the shape cannot say is that an extra is offered on *some* items of a
+   * category and not others. That is the same class of thing as the
+   * cardinality rules issue #1598 puts out of scope, and it is reachable later
+   * as an allowlist on the item without moving the data that is already here.
    */
   extrasBlock?: {
+    /** The owner's sentence introducing the extras. Rendered above them. */
     description: string;
     extras: ExtraItem[];
   };
@@ -215,6 +254,40 @@ const withItemIds = (
   return { items: filled ? withIds : items, filled };
 };
 
+/**
+ * A category's extras, with an id on each that had none.
+ *
+ * Returns the block it was given, by identity, when nothing was missing, for
+ * the reason {@link withItemIds} does: the business editor runs the backfill on
+ * every read, and a fresh object per read restarts the `linkedSignal` chain the
+ * editor is built on and throws away what the owner was typing.
+ */
+const withExtraIds = (
+  extrasBlock: Category['extrasBlock'],
+  createId: MenuIdFactory,
+): { extrasBlock: Category['extrasBlock']; filled: number } => {
+  if (!extrasBlock) {
+    return { extrasBlock, filled: 0 };
+  }
+
+  let filled = 0;
+
+  const extras = (extrasBlock.extras ?? []).map((extra) => {
+    if (extra.id) {
+      return extra;
+    }
+
+    filled++;
+
+    return { ...extra, id: createId() };
+  });
+
+  return {
+    extrasBlock: filled ? { ...extrasBlock, extras } : extrasBlock,
+    filled,
+  };
+};
+
 /** What {@link withMenuIds} had to add, for a migration to count and report. */
 export interface MenuIdBackfill {
   menu: Menu;
@@ -222,10 +295,19 @@ export interface MenuIdBackfill {
   categories: number;
   /** Items and variants that had no id, counted together. */
   items: number;
+  /**
+   * Extras that had no id (GitHub issue #1598).
+   *
+   * Counted apart from the items rather than folded in with them, because the
+   * admin backfill reports what it did and "filled 40 ids" over a collection
+   * whose menus were already migrated for issue #1099 would read as a second
+   * pass having found work the first one missed. It found extras, which is new.
+   */
+  extras: number;
 }
 
 /**
- * Gives every category, item and variant that has no id one.
+ * Gives every category, item, variant and extra that has no id one.
  *
  * Returns the menu it was given, by identity, when nothing was missing. That
  * is not a micro-optimisation: the business editor runs this on every read, and
@@ -242,12 +324,16 @@ export const backfillMenuIds = (
 ): MenuIdBackfill => {
   let categoriesFilled = 0;
   let itemsFilled = 0;
+  let extrasFilled = 0;
 
   const categories = (menu.categories ?? []).map((category) => {
     const items = withItemIds(category.items, createId);
     itemsFilled += items.filled;
 
-    if (category.id && !items.filled) {
+    const extras = withExtraIds(category.extrasBlock, createId);
+    extrasFilled += extras.filled;
+
+    if (category.id && !items.filled && !extras.filled) {
       return category;
     }
 
@@ -259,15 +345,17 @@ export const backfillMenuIds = (
       ...category,
       id: category.id || createId(),
       items: items.items ?? [],
+      ...(category.extrasBlock ? { extrasBlock: extras.extrasBlock } : {}),
     };
   });
 
-  const changed = categoriesFilled > 0 || itemsFilled > 0;
+  const changed = categoriesFilled > 0 || itemsFilled > 0 || extrasFilled > 0;
 
   return {
     menu: changed ? { ...menu, categories } : menu,
     categories: categoriesFilled,
     items: itemsFilled,
+    extras: extrasFilled,
   };
 };
 
@@ -313,3 +401,55 @@ export const findMenuItemById = (
 
   return undefined;
 };
+
+/** Whether `items`, or any variant of one, is the item `itemId` names. */
+const holdsItem = (items: MenuItem[] | undefined, itemId: string): boolean =>
+  (items ?? []).some(
+    (item) => item.id === itemId || holdsItem(item.variants, itemId),
+  );
+
+/**
+ * The extras a dish may be ordered with (GitHub issue #1598).
+ *
+ * The one place the category rule from {@link Category.extrasBlock} is
+ * applied. The cart offers these, the ordering screen draws them and the
+ * backend revalidates against them, and a fourth reader that walked to the
+ * extras itself would be a fourth chance to offer a guest something the
+ * kitchen is not selling - or to refuse them something it is.
+ *
+ * Takes a **variant's** id as readily as a dish's. A large Margherita is a
+ * Margherita, and the extras of the section it is printed in are offered with
+ * it; anything else would mean ticking extra cheese on the small pizza and
+ * losing the option by choosing the large one.
+ *
+ * Answers an empty array rather than `undefined` for a dish whose category
+ * offers none, because every caller goes on to iterate it.
+ */
+export const menuExtrasForItem = (
+  menu: Menu | undefined,
+  itemId: string,
+): ExtraItem[] => {
+  for (const category of menu?.categories ?? []) {
+    if (holdsItem(category.items, itemId)) {
+      return category.extrasBlock?.extras ?? [];
+    }
+  }
+
+  return [];
+};
+
+/**
+ * The extra one id names, among those offered with a dish.
+ *
+ * Scoped to the dish rather than searched across the whole menu, which is what
+ * makes "this extra is offered with that dish" a fact the order establishes
+ * rather than one it assumes - the same rule the backend applies to a variant,
+ * where naming the large Margherita as a variant of the tiramisu finds
+ * nothing.
+ */
+export const findMenuExtraForItem = (
+  menu: Menu | undefined,
+  itemId: string,
+  extraId: string,
+): ExtraItem | undefined =>
+  menuExtrasForItem(menu, itemId).find((extra) => extra.id === extraId);

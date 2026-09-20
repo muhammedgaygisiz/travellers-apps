@@ -1,9 +1,24 @@
 import { BusinessCategoryComponent } from '../business-category.component';
+import { BusinessCategoryExtrasComponent } from '../../business-category-extras/business-category-extras.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ComponentRef } from '@angular/core';
-import { Category, MenuItem } from 'model';
+import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { Category, ExtraItem, MenuItem } from 'model';
 import { ItemReorderEventDetail } from '@ionic/angular';
 import SpyInstance = jest.SpyInstance;
+
+/**
+ * The extras editor below the items renders Transloco keys, and this spec
+ * stands up the real child rather than a stub - the merge onto
+ * `categoryChanged` is the thing worth testing and a stub would not exercise
+ * it. Same mock pipe the item editor's own spec uses.
+ */
+@Pipe({ name: 'transloco' })
+class MockTranslocoPipe implements PipeTransform {
+  transform(value: string): string {
+    return value;
+  }
+}
 
 const createMenuItem = (
   overrides: Partial<MenuItem> & Record<string, unknown> = {},
@@ -40,7 +55,12 @@ describe('BusinessCategoryComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BusinessCategoryComponent],
-    }).compileComponents();
+    })
+      .overrideComponent(BusinessCategoryExtrasComponent, {
+        remove: { imports: [TranslocoPipe] },
+        add: { imports: [MockTranslocoPipe] },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(BusinessCategoryComponent);
     component = fixture.componentInstance;
@@ -148,6 +168,63 @@ describe('BusinessCategoryComponent', () => {
       component.presentShowAddItem.set(true);
       component.onCancelAddItem();
       expect(component.presentShowAddItem()).toBe(false);
+    });
+  });
+
+  /**
+   * Extras ride the one `categoryChanged` output every other edit here goes
+   * through (GitHub issue #1598). What is asserted is the merge: the block
+   * changes and nothing else on the category does.
+   */
+  describe('onExtrasBlockChanged', () => {
+    const MOZZARELLA: ExtraItem = {
+      id: 'extra-mozzarella',
+      name: 'Extra mozzarella',
+      price: 2,
+    };
+
+    it('emits the category with the new extras block on it', () => {
+      const category = createCategory({
+        items: [createMenuItem()],
+        subtitle: 'From the wood oven',
+      });
+      componentRef.setInput('category', category);
+      const emitSpy: SpyInstance = jest.spyOn(
+        component.categoryChanged,
+        'emit',
+      );
+
+      component.onExtrasBlockChanged({
+        description: 'Add to any pizza',
+        extras: [MOZZARELLA],
+      });
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        ...category,
+        extrasBlock: { description: 'Add to any pizza', extras: [MOZZARELLA] },
+      });
+    });
+
+    /**
+     * `undefined` is how the last extra is removed, so it has to reach the
+     * emitted category as `undefined` rather than being merged away.
+     */
+    it('carries an emptied block through as undefined', () => {
+      const category = createCategory({
+        extrasBlock: { description: 'Add to any pizza', extras: [MOZZARELLA] },
+      });
+      componentRef.setInput('category', category);
+      const emitSpy: SpyInstance = jest.spyOn(
+        component.categoryChanged,
+        'emit',
+      );
+
+      component.onExtrasBlockChanged(undefined);
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        ...category,
+        extrasBlock: undefined,
+      });
     });
   });
 

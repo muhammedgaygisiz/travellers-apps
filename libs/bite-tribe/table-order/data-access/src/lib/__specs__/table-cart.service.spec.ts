@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import type { Menu, MenuItem } from 'model';
+import type { ExtraItem, Menu, MenuItem } from 'model';
 import {
   TABLE_CART_KEY_PREFIX,
   TableCartService,
@@ -66,6 +66,14 @@ const TIRAMISU: MenuItem = {
 
 const SOLD_OUT: MenuItem = { ...TIRAMISU, isAvailable: false };
 
+const MOZZARELLA: ExtraItem = {
+  id: 'extra-mozzarella',
+  name: 'Extra mozzarella',
+  price: 2,
+};
+
+const NDUJA: ExtraItem = { id: 'extra-nduja', name: "'Nduja", price: 2.5 };
+
 describe(TableCartService.name, () => {
   let cart: TableCartService;
 
@@ -95,6 +103,7 @@ describe(TableCartService.name, () => {
           item: MARGHERITA,
           quantity: 1,
           notes: '',
+          extras: [],
         },
       ]);
       expect(cart.total()).toBe(12);
@@ -175,6 +184,81 @@ describe(TableCartService.name, () => {
       cart.add({ ...MARGHERITA, isAvailable: false }, LARGE);
 
       expect(cart.isEmpty()).toBe(true);
+    });
+  });
+
+  /**
+   * The extras a guest ticks on a row (GitHub issue #1598).
+   *
+   * They are part of the row's identity and part of its price, and both halves
+   * are asserted here: the wrong identity merges two different plates onto one
+   * row, and the wrong price is the guest agreeing to a figure the restaurant
+   * does not record.
+   */
+  describe('extras', () => {
+    it('prices a row at the dish plus everything ticked on it', () => {
+      cart.add(MARGHERITA, undefined, [MOZZARELLA, NDUJA]);
+
+      expect(cart.total()).toBe(16.5);
+    });
+
+    it('multiplies the extras by the quantity, not just the dish', () => {
+      cart.add(MARGHERITA, undefined, [MOZZARELLA]);
+      cart.increase(cartLineKey(MARGHERITA, undefined, [MOZZARELLA]));
+
+      expect(cart.total()).toBe(28);
+    });
+
+    /**
+     * Two different plates. Merging them would charge for the cheese twice or
+     * not at all, and neither is what the guest tapped.
+     */
+    it('keeps a dish with extras apart from the same dish without', () => {
+      cart.add(MARGHERITA);
+      cart.add(MARGHERITA, undefined, [MOZZARELLA]);
+
+      expect(cart.lines().length).toBe(2);
+      expect(cart.total()).toBe(26);
+    });
+
+    it('raises the quantity when the same extras are ticked again', () => {
+      cart.add(MARGHERITA, undefined, [MOZZARELLA]);
+      cart.add(MARGHERITA, undefined, [MOZZARELLA]);
+
+      expect(cart.lines().length).toBe(1);
+      expect(cart.lines()[0].quantity).toBe(2);
+    });
+
+    /**
+     * The key is an address, and the order two boxes were tapped in is not
+     * part of what was ordered.
+     */
+    it('lands on one row whichever order the extras were ticked in', () => {
+      cart.add(MARGHERITA, undefined, [MOZZARELLA, NDUJA]);
+      cart.add(MARGHERITA, undefined, [NDUJA, MOZZARELLA]);
+
+      expect(cart.lines().length).toBe(1);
+      expect(cart.lines()[0].quantity).toBe(2);
+    });
+
+    it('sends each extra by id and by the price it showed', () => {
+      cart.add({ ...MARGHERITA, variants: [LARGE] }, LARGE, [MOZZARELLA]);
+
+      expect(cart.toRequestLines('EUR')).toEqual([
+        {
+          menuItemId: MARGHERITA.id,
+          variantId: LARGE.id,
+          quantity: 1,
+          price: 16,
+          extras: [{ extraId: MOZZARELLA.id, price: 2 }],
+        },
+      ]);
+    });
+
+    it('sends no extras field at all for a row with none', () => {
+      cart.add(MARGHERITA);
+
+      expect('extras' in cart.toRequestLines('EUR')[0]).toBe(false);
     });
   });
 
@@ -296,7 +380,17 @@ describe(TableCartService.name, () => {
     const menuOf = (...items: MenuItem[]): Menu => ({
       id: 'menu-1',
       currency: 'EUR',
-      categories: [{ id: 'category-1', title: 'Everything', items }],
+      categories: [
+        {
+          id: 'category-1',
+          title: 'Everything',
+          items,
+          extrasBlock: {
+            description: 'Add to anything',
+            extras: [MOZZARELLA, NDUJA],
+          },
+        },
+      ],
     });
 
     const MENU = menuOf({ ...MARGHERITA, variants: [LARGE] }, TIRAMISU);
@@ -398,6 +492,36 @@ describe(TableCartService.name, () => {
 
       const next = reloaded();
       await next.restore(menuOf(TIRAMISU));
+
+      expect(next.lines().map((line) => line.item.id)).toEqual([TIRAMISU.id]);
+    });
+
+    it('puts back the extras a row was ticked with, at the menu price', async () => {
+      cart.add(MARGHERITA, undefined, [MOZZARELLA]);
+      await Promise.resolve();
+
+      const next = reloaded();
+      await next.restore(MENU);
+
+      expect(next.lines()[0].extras).toEqual([MOZZARELLA]);
+      expect(next.total()).toBe(14);
+    });
+
+    /**
+     * Whole, rather than without the extra. A plain pizza put in front of
+     * somebody who ordered one with cheese on it, with nothing said, is the
+     * silent substitution the withdrawn-variant rule already refuses.
+     */
+    it('drops a row whose extra is no longer offered', async () => {
+      cart.add(MARGHERITA, undefined, [MOZZARELLA]);
+      cart.add(TIRAMISU);
+      await Promise.resolve();
+
+      const next = reloaded();
+      await next.restore({
+        ...MENU,
+        categories: [{ ...MENU.categories[0], extrasBlock: undefined }],
+      });
 
       expect(next.lines().map((line) => line.item.id)).toEqual([TIRAMISU.id]);
     });

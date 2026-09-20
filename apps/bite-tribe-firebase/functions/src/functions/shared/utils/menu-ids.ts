@@ -30,9 +30,21 @@ export interface StoredMenuItem {
   [field: string]: unknown;
 }
 
+/** One extra as it is stored (GitHub issue #1598). */
+export interface StoredMenuExtra {
+  id?: string;
+  [field: string]: unknown;
+}
+
+export interface StoredMenuExtrasBlock {
+  extras?: StoredMenuExtra[];
+  [field: string]: unknown;
+}
+
 export interface StoredMenuCategory {
   id?: string;
   items?: StoredMenuItem[];
+  extrasBlock?: StoredMenuExtrasBlock;
   [field: string]: unknown;
 }
 
@@ -43,6 +55,14 @@ export interface MenuIdBackfill {
   categoriesFilled: number;
   /** Items and variants that had no id, counted together. */
   itemsFilled: number;
+  /**
+   * Extras that had no id (GitHub issue #1598).
+   *
+   * Counted apart from the items, matching the library: a second pass over a
+   * collection already migrated for issue #1099 reports its extras work as
+   * extras work rather than as items the first pass appeared to miss.
+   */
+  extrasFilled: number;
 }
 
 /**
@@ -80,9 +100,35 @@ const backfillItemIds = (
   return { items: withIds, filled };
 };
 
+/** A category's extras, with an id on each that had none. */
+const backfillExtraIds = (
+  extrasBlock: StoredMenuExtrasBlock | undefined,
+): { extrasBlock: StoredMenuExtrasBlock | undefined; filled: number } => {
+  if (!extrasBlock) {
+    return { extrasBlock, filled: 0 };
+  }
+
+  let filled = 0;
+
+  const extras = (extrasBlock.extras ?? []).map((extra) => {
+    if (extra.id) {
+      return extra;
+    }
+
+    filled++;
+
+    return { ...extra, id: createMenuEntityId() };
+  });
+
+  return {
+    extrasBlock: filled ? { ...extrasBlock, extras } : extrasBlock,
+    filled,
+  };
+};
+
 /**
- * Gives every category, item and variant of one stored menu an id, where it
- * has none.
+ * Gives every category, item, variant and extra of one stored menu an id,
+ * where it has none.
  *
  * Idempotent: an id that already exists is never replaced. That is what makes
  * the operator surface a plain button - a second press over an already-migrated
@@ -95,14 +141,22 @@ export const backfillMenuIds = (
 ): MenuIdBackfill => {
   let categoriesFilled = 0;
   let itemsFilled = 0;
+  let extrasFilled = 0;
 
   const withIds = (categories ?? []).map((category) => {
     const items = backfillItemIds(category.items);
     itemsFilled += items.filled;
 
-    const next: StoredMenuCategory = items.filled
+    const extras = backfillExtraIds(category.extrasBlock);
+    extrasFilled += extras.filled;
+
+    let next: StoredMenuCategory = items.filled
       ? { ...category, items: items.items }
       : category;
+
+    if (extras.filled) {
+      next = { ...next, extrasBlock: extras.extrasBlock };
+    }
 
     if (next.id) {
       return next;
@@ -113,5 +167,5 @@ export const backfillMenuIds = (
     return { ...next, id: createMenuEntityId() };
   });
 
-  return { categories: withIds, categoriesFilled, itemsFilled };
+  return { categories: withIds, categoriesFilled, itemsFilled, extrasFilled };
 };

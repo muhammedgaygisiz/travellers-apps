@@ -661,6 +661,8 @@
   "table-order-refused-itemMissing": "{{item}} n'est plus à la carte. Retirez-le et envoyez le reste.",
   "table-order-refused-itemUnavailable": "{{item}} n'est pas disponible en ce moment. Retirez-le et envoyez le reste.",
   "table-order-refused-priceChanged": "Le prix de {{item}} a changé. Vérifiez-le et renvoyez.",
+  "table-order-refused-extraMissing": "{{extra}} n'est plus proposé avec {{item}}. Retirez-le et envoyez le reste.",
+  "table-order-refused-extraPriceChanged": "Le prix de {{extra}} sur {{item}} a changé. Vérifiez-le et renvoyez.",
   "table-order-refused-currencyChanged": "Les prix de la carte ont changé de devise. Vérifiez votre commande et renvoyez.",
   "table-assistance-heading": "Besoin de quelque chose ?",
   "table-assistance-callStaff-idle": "Appeler un serveur",

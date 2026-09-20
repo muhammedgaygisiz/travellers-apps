@@ -75,8 +75,8 @@ const menu: Menu = {
       extrasBlock: {
         description: 'Add to any pizza',
         extras: [
-          { name: 'Extra mozzarella', price: 2 },
-          { name: "'Nduja", price: 2.5 },
+          { id: 'extra-mozzarella', name: 'Extra mozzarella', price: 2 },
+          { id: 'extra-nduja', name: "'Nduja", price: 2.5 },
         ],
       },
     },
@@ -101,9 +101,28 @@ type Story = StoryObj<EditMenuPage>;
 
 /**
  * A populated menu: two categories, an item carrying a variant, an unavailable
- * item, and a category with an extras block.
+ * item, and a category whose extras the owner can now author (issue #1598).
  */
 export const Default: Story = {};
+
+/**
+ * A category with no extras yet (GitHub issue #1598).
+ *
+ * The state every existing menu is in, and the one the editor has to make
+ * obvious: an owner who has never seen an extras section needs the empty
+ * section to say what one is for before they will add anything to it.
+ */
+export const CategoryWithoutExtras: Story = {
+  args: {
+    menu: {
+      ...menu,
+      categories: menu.categories.map((category) => ({
+        ...category,
+        extrasBlock: undefined,
+      })),
+    },
+  },
+};
 
 /** A menu that has just been created and holds no category yet. */
 export const EmptyMenu: Story = {

@@ -41,6 +41,17 @@
 
     <ng-container [ngTemplateOutlet]="addItem" />
   }
+
+  <!--
+    The category's extras (issue #1598). Below the items, because that is
+    where the menu prints them and because they are a property of the section
+    rather than of any one dish in it.
+  -->
+  <business-category-extras
+    [extrasBlock]="categoryData?.extrasBlock"
+    [currencySymbol]="currencySymbol()"
+    (extrasBlockChanged)="onExtrasBlockChanged($event)"
+  />
 </div>
 
 <ng-template #addItem>

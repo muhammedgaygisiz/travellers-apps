@@ -1,4 +1,4 @@
-import type { MenuItem } from './menu';
+import type { ExtraItem, MenuItem } from './menu';
 
 /**
  * What one line of a table order recorded about the dish it is for
@@ -35,6 +35,25 @@ import type { MenuItem } from './menu';
  * Written and read by the order submission of issue #1103; nothing writes one
  * yet.
  */
+/**
+ * One extra a line was ordered with, as it stood at that moment
+ * (GitHub issue #1598).
+ *
+ * A snapshot for the reason the line itself is one: an owner who reprices
+ * extra mozzarella on Tuesday must not change what Monday's receipt says it
+ * cost. The id is carried as well, on the same terms as
+ * {@link OrderLineSnapshot.menuItemId} - the copy is the record, the id is the
+ * link back to the extra that is still on the menu.
+ */
+export interface OrderLineExtraSnapshot {
+  /** The extra, by {@link ExtraItem.id}. */
+  readonly extraId: string;
+  /** The extra's name at the moment of the order. */
+  readonly name: string;
+  /** What it added to the unit price, at the moment of the order. */
+  readonly price: number;
+}
+
 export interface OrderLineSnapshot {
   /**
    * The dish, by {@link MenuItem.id}.
@@ -60,12 +79,18 @@ export interface OrderLineSnapshot {
   /** The variant's name at the moment of the order. Absent with {@link variantId}. */
   readonly variantName?: string;
   /**
-   * The unit price charged, at the moment of the order.
+   * The dish's unit price, at the moment of the order.
    *
    * The variant's price where a variant was ordered, because that is the number
-   * the guest was shown. A line total is this times {@link quantity} and is not
-   * stored: a stored total is a second copy of an arithmetic fact, free to
-   * disagree with the two fields it was derived from.
+   * the guest was shown. A line total is not stored: a stored total is a second
+   * copy of an arithmetic fact, free to disagree with the fields it was derived
+   * from.
+   *
+   * **The extras are not in here.** They are their own field, and folding them
+   * into this number would have made the backend's price check - which compares
+   * this against the live menu - compare a sum against a dish price and refuse
+   * every order that carried an extra. So what one unit costs is
+   * {@link orderLineUnitPrice} rather than this field.
    */
   readonly price: number;
   /**
@@ -85,7 +110,35 @@ export interface OrderLineSnapshot {
   readonly quantity: number;
   /** What the guest asked for, if anything. Absent rather than empty. */
   readonly notes?: string;
+  /**
+   * The extras this line was ordered with (GitHub issue #1598).
+   *
+   * Absent rather than empty when the guest ticked none, following
+   * {@link notes}: absent means they added nothing, and an empty array would
+   * be a third state every reader would then have to treat as the second.
+   *
+   * On the line rather than on the order, because an extra is chosen per line
+   * - a party ordering two pizzas puts extra cheese on one of them - and it is
+   * per line that the extras are priced into {@link orderLineUnitPrice}.
+   */
+  readonly extras?: readonly OrderLineExtraSnapshot[];
 }
+
+/**
+ * What one unit of a line costs: the dish plus everything ticked on it
+ * (GitHub issue #1598).
+ *
+ * One function rather than a sum at each call site, and there are four of
+ * them: the running total on the guest's phone, the per-line figure beside it,
+ * the total the backend stores on the order, and the bill of issue #1073. A
+ * second spelling of this is the guest agreeing to one figure and the
+ * restaurant recording another, which is the thing `tableOrderTotal` was
+ * written as one function to prevent.
+ */
+export const orderLineUnitPrice = (
+  line: Pick<OrderLineSnapshot, 'price' | 'extras'>,
+): number =>
+  (line.extras ?? []).reduce((sum, extra) => sum + extra.price, line.price);
 
 /** What a caller has to decide; everything else is read off the menu. */
 export interface OrderLineRequest {
@@ -96,6 +149,15 @@ export interface OrderLineRequest {
   quantity: number;
   currency: string;
   notes?: string;
+  /**
+   * The extras ticked, out of `menuExtrasForItem(menu, item.id)`.
+   *
+   * Taken from the menu rather than named by id, for the reason the item and
+   * the variant are: the snapshot copies a name and a price, and a caller that
+   * could hand in those two fields would be handing in what it would like to
+   * be charged.
+   */
+  extras?: readonly ExtraItem[];
 }
 
 /**
@@ -116,6 +178,7 @@ export const createOrderLineSnapshot = ({
   quantity,
   currency,
   notes,
+  extras,
 }: OrderLineRequest): OrderLineSnapshot => ({
   menuItemId: item.id,
   name: item.name,
@@ -124,4 +187,13 @@ export const createOrderLineSnapshot = ({
   currency,
   quantity,
   ...(notes?.trim() ? { notes: notes.trim() } : {}),
+  ...(extras?.length
+    ? {
+        extras: extras.map((extra) => ({
+          extraId: extra.id,
+          name: extra.name,
+          price: extra.price,
+        })),
+      }
+    : {}),
 });

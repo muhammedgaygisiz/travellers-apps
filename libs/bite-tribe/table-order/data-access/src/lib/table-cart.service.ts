@@ -1,6 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import {
   createOrderLineSnapshot,
+  findMenuExtraForItem,
   findMenuItemById,
   isMenuVariantAvailable,
   MAX_ORDER_LINES,
@@ -8,6 +9,7 @@ import {
   tableOrderTotal,
 } from 'model';
 import type {
+  ExtraItem,
   Menu,
   MenuItem,
   OrderLineSnapshot,
@@ -45,11 +47,16 @@ export const TABLE_CART_KEY_PREFIX = 'table-cart:';
  * which is the price-integrity problem this whole flow refuses, with the stale
  * data one layer further away.
  *
- * ## One line per dish and variant
+ * ## One line per dish, variant and set of extras
  *
  * Adding the Margherita twice raises the quantity of one line rather than
  * appending a second. It is what a guest tapping "add" twice means, and it is
  * what keeps the cart short enough to read on a phone.
+ *
+ * The extras are part of that identity (GitHub issue #1598), because they are
+ * part of what was ordered: a Margherita with extra cheese and a Margherita
+ * without are two different plates and cost two different amounts, so merging
+ * them onto one row would charge for the cheese twice or not at all.
  *
  * The consequence is that a note belongs to a *line* and therefore to every
  * unit on it: a guest ordering two Margheritas cannot ask for basil on one of
@@ -83,11 +90,36 @@ export interface TableCartLine {
   readonly quantity: number;
   /** What the guest asked for. `''` rather than absent while being typed. */
   readonly notes: string;
+  /**
+   * The extras ticked on this row, in the order the menu prints them.
+   *
+   * Always an array, empty where none were ticked. Absent-versus-empty is a
+   * distinction the *stored* order draws, because a document is read back by
+   * things that have to branch on it; a row being built on a phone is read by
+   * one screen, and giving it two spellings of "no extras" would put the
+   * branch in every one of them.
+   */
+  readonly extras: readonly ExtraItem[];
 }
 
-/** The row one dish and variant occupy. */
-export const cartLineKey = (item: MenuItem, variant?: MenuItem): string =>
-  variant ? `${item.id}:${variant.id}` : item.id;
+/**
+ * The row one dish, variant and set of extras occupy.
+ *
+ * The extra ids are sorted before they are joined, so a guest who ticks cheese
+ * then chilli lands on the row they made by ticking chilli then cheese. The
+ * key is an address and the order things were tapped in is not part of what
+ * was ordered.
+ */
+export const cartLineKey = (
+  item: MenuItem,
+  variant?: MenuItem,
+  extras: readonly ExtraItem[] = [],
+): string => {
+  const dish = variant ? `${item.id}:${variant.id}` : item.id;
+  const ticked = [...extras].map((extra) => extra.id).sort();
+
+  return ticked.length ? `${dish}+${ticked.join('+')}` : dish;
+};
 
 /**
  * The unit price of one row: the variant's where there is one.
@@ -104,6 +136,7 @@ const snapshotOf = (line: TableCartLine, currency: string): OrderLineSnapshot =>
     quantity: line.quantity,
     currency,
     notes: line.notes,
+    extras: line.extras,
   });
 
 /**
@@ -117,6 +150,8 @@ interface StoredCartLine {
   variantId?: string;
   quantity: number;
   notes?: string;
+  /** The extras ticked, by id alone. Re-priced off the live menu on the way back. */
+  extraIds?: string[];
 }
 
 const toStoredLine = (line: TableCartLine): StoredCartLine => ({
@@ -124,6 +159,9 @@ const toStoredLine = (line: TableCartLine): StoredCartLine => ({
   ...(line.variant ? { variantId: line.variant.id } : {}),
   quantity: line.quantity,
   ...(line.notes ? { notes: line.notes } : {}),
+  ...(line.extras.length
+    ? { extraIds: line.extras.map((extra) => extra.id) }
+    : {}),
 });
 
 const isStoredCartLine = (value: unknown): value is StoredCartLine => {
@@ -137,7 +175,14 @@ const isStoredCartLine = (value: unknown): value is StoredCartLine => {
     typeof row.itemId === 'string' &&
     row.itemId.length > 0 &&
     typeof row.quantity === 'number' &&
-    Number.isFinite(row.quantity)
+    Number.isFinite(row.quantity) &&
+    // Checked rather than trusted, unlike `notes`, because the restore
+    // *iterates* this one: a stored value that is a number rather than a list
+    // would throw inside the rebuild and take the whole cart down with it,
+    // which is the failure this parser exists to keep off the screen.
+    (row.extraIds === undefined ||
+      (Array.isArray(row.extraIds) &&
+        row.extraIds.every((id) => typeof id === 'string')))
   );
 };
 
@@ -190,7 +235,11 @@ export class TableCartService {
    * cart that accepts one produces an order the backend refuses, which the
    * guest experiences as the app having let them build something impossible.
    */
-  add(item: MenuItem, variant?: MenuItem): void {
+  add(
+    item: MenuItem,
+    variant?: MenuItem,
+    extras: readonly ExtraItem[] = [],
+  ): void {
     // `variant ?? item` collapses the two cases into the one rule: a plain
     // dish is checked against itself, and a variant is checked against itself
     // *and* the dish it belongs to - because unavailability travels down.
@@ -210,7 +259,7 @@ export class TableCartService {
       return;
     }
 
-    const key = cartLineKey(item, variant);
+    const key = cartLineKey(item, variant, extras);
     const existing = this.rows().find((line) => line.key === key);
 
     if (existing) {
@@ -231,6 +280,7 @@ export class TableCartService {
         ...(variant ? { variant } : {}),
         quantity: 1,
         notes: '',
+        extras: [...extras],
       },
     ]);
   }
@@ -341,10 +391,11 @@ export class TableCartService {
    *
    * Every row is rebuilt from the live menu rather than from the stored copy,
    * which is what makes a restored cart safe: a dish taken off the menu, a
-   * variant withdrawn or a dish with no price left is dropped instead of being
-   * carried into an order the backend would refuse line by line. A dish that is
-   * merely *repriced* comes back at the new price, because the price a guest
-   * agrees to is the one they can see on the screen they are looking at.
+   * variant withdrawn, an extra no longer offered or a dish with no price left
+   * is dropped instead of being carried into an order the backend would refuse
+   * line by line. A dish that is merely *repriced* comes back at the new price,
+   * because the price a guest agrees to is the one they can see on the screen
+   * they are looking at.
    *
    * Anything already in the cart wins. The restore is asynchronous and a guest
    * can tap "add" while it is still reading, and a read that overwrote what
@@ -398,8 +449,25 @@ export class TableCartService {
       return undefined;
     }
 
+    // The extras are resolved against the live menu too, and a row whose extra
+    // has since been withdrawn is dropped whole rather than brought back
+    // without it. Dropping the extra alone would put a plain pizza in front of
+    // somebody who ordered one with cheese on it and say nothing - the same
+    // silent substitution the variant rule above refuses.
+    const extras: ExtraItem[] = [];
+
+    for (const extraId of row.extraIds ?? []) {
+      const extra = findMenuExtraForItem(menu, item.id, extraId);
+
+      if (!extra || !Number.isFinite(extra.price)) {
+        return undefined;
+      }
+
+      extras.push(extra);
+    }
+
     return {
-      key: cartLineKey(item, variant),
+      key: cartLineKey(item, variant, extras),
       item,
       ...(variant ? { variant } : {}),
       quantity: Math.min(
@@ -407,6 +475,7 @@ export class TableCartService {
         MAX_ORDER_LINE_QUANTITY,
       ),
       notes: row.notes ?? '',
+      extras,
     };
   }
 
@@ -447,6 +516,14 @@ export class TableCartService {
         quantity: snapshot.quantity,
         ...(snapshot.notes ? { notes: snapshot.notes } : {}),
         price: snapshot.price,
+        ...(snapshot.extras?.length
+          ? {
+              extras: snapshot.extras.map((extra) => ({
+                extraId: extra.extraId,
+                price: extra.price,
+              })),
+            }
+          : {}),
       };
     });
   }

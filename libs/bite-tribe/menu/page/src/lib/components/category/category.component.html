@@ -14,6 +14,7 @@
             [currency]="currency()"
             [canCreateBite]="canCreateBite()"
             [canAddToCart]="canAddToCart()"
+            [extras]="extras()"
             (createBiteClick)="createBiteClick.emit($event)"
             (addToCartClick)="addToCartClick.emit($event)"
           />
@@ -23,6 +24,29 @@
   } @else {
     <div class="menu-placeholder">
       <p>No items in this category yet.</p>
+    </div>
+  }
+  <!--
+    The category's extras as menu text (issue #1598). Under the dishes, which
+    is where a menu prints "add to any pizza", and only where the guest is
+    reading rather than ordering - the ordering screen puts a tick box for
+    each of these on every dish above instead.
+  -->
+  @if (showExtrasBlock()) {
+    <div class="extras-block" data-testid="category-extras">
+      @if (categoryData?.extrasBlock?.description) {
+        <p class="extras-description">
+          {{ categoryData?.extrasBlock?.description }}
+        </p>
+      }
+      <ul class="extras-list">
+        @for (extra of extras(); track extra.id) {
+          <li>
+            <span class="extra-name">{{ extra.name }}</span>
+            <span class="extra-price">{{ extraPriceLabel(extra) }}</span>
+          </li>
+        }
+      </ul>
     </div>
   }
 </div>

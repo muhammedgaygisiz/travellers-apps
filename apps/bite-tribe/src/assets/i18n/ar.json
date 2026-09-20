@@ -661,6 +661,8 @@
   "table-order-refused-itemMissing": "لم يعد {{item}} في القائمة. أزِله وأرسِل البقية.",
   "table-order-refused-itemUnavailable": "{{item}} غير متاح الآن. أزِله وأرسِل البقية.",
   "table-order-refused-priceChanged": "تغيّر سعر {{item}}. راجِعه ثم أرسِل مرة أخرى.",
+  "table-order-refused-extraMissing": "لم يعد {{extra}} متاحًا مع {{item}}. أزِله وأرسِل البقية.",
+  "table-order-refused-extraPriceChanged": "تغيّر سعر {{extra}} مع {{item}}. راجِعه ثم أرسِل مرة أخرى.",
   "table-order-refused-currencyChanged": "تغيّرت عملة أسعار القائمة. راجِع طلبك ثم أرسِل مرة أخرى.",
   "table-assistance-heading": "هل تحتاج شيئًا؟",
   "table-assistance-callStaff-idle": "اطلب نادلًا",

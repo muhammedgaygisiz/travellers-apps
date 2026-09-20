@@ -25,5 +25,35 @@
       font-size: 0.9rem;
       margin-bottom: 1rem;
     }
+
+    .extras-block {
+      border-top: 1px solid var(--ion-color-light-shade);
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+
+      .extras-description {
+        color: var(--ion-color-medium);
+        font-size: 0.9rem;
+        margin: 0 0 0.5rem;
+      }
+
+      .extras-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+
+        li {
+          display: flex;
+          gap: 1rem;
+          justify-content: space-between;
+          padding: 0.15rem 0;
+        }
+
+        .extra-price {
+          font-weight: bold;
+          white-space: nowrap;
+        }
+      }
+    }
   }
 }

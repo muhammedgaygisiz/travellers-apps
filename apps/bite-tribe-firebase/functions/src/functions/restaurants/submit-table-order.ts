@@ -4,6 +4,7 @@ import { onAppCheck } from '../shared/callable-options';
 import { rolesOf } from '../shared/roles';
 import {
   StoredMenuCategory,
+  StoredMenuExtra,
   StoredMenuItem,
   backfillMenuIds,
 } from '../shared/utils/menu-ids';
@@ -20,6 +21,7 @@ import {
   MAX_ORDER_LINE_QUANTITY,
   INITIAL_TABLE_ORDER_STATUS,
   ORDERABLE_TABLE_STATUSES,
+  OrderLineExtraSnapshot,
   OrderLineSnapshot,
   TABLE_ORDERS_COLLECTION,
   TABLE_ORDER_REQUEST_ID_PATTERN,
@@ -128,6 +130,13 @@ import { TABLE_VISITS_COLLECTION, isOpenVisit } from './table-visit';
  * landed untrue. What it must not do is land twice.
  */
 
+/** One extra ticked on a line (GitHub issue #1598). Parsed, never trusted. */
+export interface SubmitTableOrderExtra {
+  extraId?: unknown;
+  /** The price the phone displayed for it. A claim, like the line's. */
+  price?: unknown;
+}
+
 /** One line, as the guest's phone sends it. Parsed, never trusted. */
 export interface SubmitTableOrderLine {
   menuItemId?: unknown;
@@ -136,6 +145,8 @@ export interface SubmitTableOrderLine {
   notes?: unknown;
   /** The unit price the phone displayed. A claim, checked against the menu. */
   price?: unknown;
+  /** The extras ticked on this line (GitHub issue #1598). */
+  extras?: unknown;
 }
 
 export interface SubmitTableOrderRequest {
@@ -174,6 +185,12 @@ export interface TableOrderSubmitted {
 
 export type SubmitTableOrderResult = TableOrderSubmitted | TableOrderRefused;
 
+/** An extra after parsing, before it has been checked against the menu. */
+interface RequestedExtra {
+  extraId: string;
+  shownPrice: number;
+}
+
 /** A line after parsing, before anything has been checked against the menu. */
 interface RequestedLine {
   menuItemId: string;
@@ -181,7 +198,17 @@ interface RequestedLine {
   quantity: number;
   notes: string;
   shownPrice: number;
+  extras: RequestedExtra[];
 }
+
+/**
+ * The most extras one line may carry (GitHub issue #1598).
+ *
+ * A bound on a list a client sends rather than a product rule: a category
+ * offering more than this is a menu nobody could read on a phone, and without
+ * a cap a single line could ask the transaction to check an unbounded list.
+ */
+const MAX_LINE_EXTRAS = 20;
 
 /** The free-text note on a line, capped so it cannot be used as storage. */
 const MAX_NOTES_LENGTH = 280;
@@ -307,6 +334,55 @@ const parseShownPrice = (value: unknown): number => {
   return value;
 };
 
+/**
+ * The extras ticked on one line (GitHub issue #1598).
+ *
+ * A duplicate is an `invalid-argument` rather than a refusal, and the
+ * distinction is the one the rest of this file draws: a refusal is something
+ * the guest can act on - the dish sold out, the price moved - and is rendered
+ * as a sentence they read. An extra is a tick box, so one named twice is not a
+ * decision any screen can produce; it is a client bug, and dressing it up as a
+ * refusal would put a sentence in front of a guest that tells them to fix
+ * something they never did.
+ *
+ * Which extras exist, and at what price, is the menu's question and is asked
+ * inside the transaction.
+ */
+const parseExtras = (value: unknown): RequestedExtra[] => {
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new HttpsError('invalid-argument', 'extras must be a list.');
+  }
+
+  if (value.length > MAX_LINE_EXTRAS) {
+    throw new HttpsError(
+      'invalid-argument',
+      `A line carries at most ${MAX_LINE_EXTRAS} extras.`,
+    );
+  }
+
+  const extras = value.map((entry) => {
+    const extra = (entry ?? {}) as SubmitTableOrderExtra;
+
+    return {
+      extraId: parseRequiredString(extra.extraId, 'extraId'),
+      shownPrice: parseShownPrice(extra.price),
+    };
+  });
+
+  if (new Set(extras.map((extra) => extra.extraId)).size !== extras.length) {
+    throw new HttpsError(
+      'invalid-argument',
+      'extras must not name the same extra twice.',
+    );
+  }
+
+  return extras;
+};
+
 const parseLines = (value: unknown): RequestedLine[] => {
   if (!Array.isArray(value)) {
     throw new HttpsError('invalid-argument', 'lines must be a list.');
@@ -328,6 +404,7 @@ const parseLines = (value: unknown): RequestedLine[] => {
       quantity: parseQuantity(line.quantity),
       notes: parseNotes(line.notes),
       shownPrice: parseShownPrice(line.price),
+      extras: parseExtras(line.extras),
     };
   });
 };
@@ -344,27 +421,40 @@ const isAvailable = (item: StoredMenuItem): boolean =>
   item['isAvailable'] !== false;
 
 /**
- * The dish one id names, searched across every category.
+ * The dish one id names, and the category it is printed in.
  *
  * Top-level items only. A variant is reached through the dish it belongs to,
  * which is what makes "this variant is a variant of that dish" a fact the order
  * establishes rather than one it assumes: a client naming the large Margherita
  * as a variant of the tiramisu finds nothing here.
+ *
+ * The category comes back with it because a dish's extras are its category's
+ * (GitHub issue #1598, and `menuExtrasForItem` in the library). Answering both
+ * from one walk is what makes "this extra is offered with that dish" the same
+ * kind of established fact: an extra named from another section finds nothing.
  */
 const findDish = (
   categories: StoredMenuCategory[],
   menuItemId: string,
-): StoredMenuItem | undefined => {
+): { dish: StoredMenuItem; category: StoredMenuCategory } | undefined => {
   for (const category of categories) {
-    const found = (category.items ?? []).find((item) => item.id === menuItemId);
+    const dish = (category.items ?? []).find((item) => item.id === menuItemId);
 
-    if (found) {
-      return found;
+    if (dish) {
+      return { dish, category };
     }
   }
 
   return undefined;
 };
+
+/** A stored extra's price, or `undefined` where it has none to read. */
+const extraPriceOf = (extra: StoredMenuExtra): number | undefined =>
+  typeof extra['price'] === 'number' ? (extra['price'] as number) : undefined;
+
+/** The extras a category offers, which are the extras each of its dishes has. */
+const extrasOf = (category: StoredMenuCategory): StoredMenuExtra[] =>
+  category.extrasBlock?.extras ?? [];
 
 /**
  * One line checked against the live menu, or the refusal it earned.
@@ -379,11 +469,13 @@ const checkLine = (
   categories: StoredMenuCategory[],
   currency: string,
 ): OrderLineSnapshot | TableOrderRefused => {
-  const dish = findDish(categories, line.menuItemId);
+  const found = findDish(categories, line.menuItemId);
 
-  if (!dish) {
+  if (!found) {
     return refuseOrder('itemMissing', { menuItemId: line.menuItemId });
   }
+
+  const { dish, category } = found;
 
   const variant = line.variantId
     ? (dish.variants ?? []).find((entry) => entry.id === line.variantId)
@@ -420,6 +512,43 @@ const checkLine = (
     });
   }
 
+  // The extras, on exactly the terms of the dish above them (issue #1598):
+  // is it still offered with this dish, and is it the price I was shown. The
+  // order of the two is the same, and for the same reason - an extra that is
+  // both gone and repriced is reported as gone, because that is the sentence
+  // that tells the guest what to do about it.
+  const offered = extrasOf(category);
+  const extras: OrderLineExtraSnapshot[] = [];
+
+  for (const ticked of line.extras) {
+    const extra = offered.find((entry) => entry.id === ticked.extraId);
+
+    if (!extra) {
+      return refuseOrder('extraMissing', {
+        ...named,
+        extraId: ticked.extraId,
+      });
+    }
+
+    const extraPrice = extraPriceOf(extra);
+
+    if (extraPrice === undefined || extraPrice !== ticked.shownPrice) {
+      return refuseOrder('extraPriceChanged', {
+        ...named,
+        extraId: ticked.extraId,
+        extraName: nameOf(extra),
+        shownPrice: ticked.shownPrice,
+        ...(extraPrice === undefined ? {} : { currentPrice: extraPrice }),
+      });
+    }
+
+    extras.push({
+      extraId: ticked.extraId,
+      name: nameOf(extra),
+      price: extraPrice,
+    });
+  }
+
   return {
     menuItemId: line.menuItemId,
     name: nameOf(dish),
@@ -430,6 +559,7 @@ const checkLine = (
     currency,
     quantity: line.quantity,
     ...(line.notes ? { notes: line.notes } : {}),
+    ...(extras.length ? { extras } : {}),
   };
 };
 

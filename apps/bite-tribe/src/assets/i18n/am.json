@@ -661,6 +661,8 @@
   "table-order-refused-itemMissing": "{{item}} ከምናሌው ላይ የለም። አውጥተው የቀረውን ይላኩ።",
   "table-order-refused-itemUnavailable": "{{item}} አሁን አይገኝም። አውጥተው የቀረውን ይላኩ።",
   "table-order-refused-priceChanged": "የ{{item}} ዋጋ ተለውጧል። ተመልክተው እንደገና ይላኩ።",
+  "table-order-refused-extraMissing": "{{extra}} ከ{{item}} ጋር አይቀርብም። አውጥተው የቀረውን ይላኩ።",
+  "table-order-refused-extraPriceChanged": "የ{{extra}} ዋጋ በ{{item}} ላይ ተለውጧል። ተመልክተው እንደገና ይላኩ።",
   "table-order-refused-currencyChanged": "የምናሌው ዋጋዎች ገንዘብ ተለውጧል። ትዕዛዝዎን አይተው እንደገና ይላኩ።",
   "table-assistance-heading": "የሚያስፈልግዎት ነገር አለ?",
   "table-assistance-callStaff-idle": "አስተናጋጅ ይጥሩ",

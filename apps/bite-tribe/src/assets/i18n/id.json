@@ -661,6 +661,8 @@
   "table-order-refused-itemMissing": "{{item}} sudah tidak ada di menu. Keluarkan dan kirim sisanya.",
   "table-order-refused-itemUnavailable": "{{item}} sedang tidak tersedia. Keluarkan dan kirim sisanya.",
   "table-order-refused-priceChanged": "Harga {{item}} berubah. Periksa lalu kirim lagi.",
+  "table-order-refused-extraMissing": "{{extra}} sudah tidak tersedia untuk {{item}}. Hapus lalu kirim sisanya.",
+  "table-order-refused-extraPriceChanged": "Harga {{extra}} pada {{item}} berubah. Periksa lalu kirim lagi.",
   "table-order-refused-currencyChanged": "Mata uang harga di menu berubah. Periksa pesananmu lalu kirim lagi.",
   "table-assistance-heading": "Butuh sesuatu?",
   "table-assistance-callStaff-idle": "Panggil pelayan",

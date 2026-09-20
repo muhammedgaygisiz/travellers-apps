@@ -128,3 +128,54 @@ const ORDERING_MENU: Menu = {
 export const OrderingAtATable: Story = {
   args: { menu: ORDERING_MENU, canCreateBite: false, canAddToCart: true },
 };
+
+/**
+ * A category that offers extras (GitHub issue #1598).
+ *
+ * Its own fixture again, for the reason `ORDERING_MENU` is one: the two
+ * stories above keep their visual references, and the two below are about the
+ * one thing that differs between reading a menu and ordering from it.
+ */
+const EXTRAS_MENU: Menu = {
+  ...ORDERING_MENU,
+  categories: [
+    {
+      ...ORDERING_MENU.categories[0],
+      extrasBlock: {
+        description: 'Add to any bowl',
+        extras: [
+          { id: 'extra-egg', name: 'Ajitama egg', price: 150 },
+          { id: 'extra-chashu', name: 'Extra chashu', price: 300 },
+          { id: 'extra-nori', name: 'Nori', price: 100 },
+        ],
+      },
+    },
+  ],
+};
+
+/**
+ * Reading a menu that offers extras.
+ *
+ * The extras are printed once, under the dishes, the way a paper menu prints
+ * "add to any bowl" under a section rather than beside each dish in it. There
+ * is nothing to tick: this reader has no cart.
+ */
+export const ExtrasOnTheMenu: Story = {
+  args: { menu: EXTRAS_MENU, canCreateBite: false },
+};
+
+/**
+ * Ordering from the same menu.
+ *
+ * The block above is gone and each orderable row carries the same extras as
+ * tick boxes instead. Two views of one fact rather than both at once: on the
+ * one surface that is a phone held at a table, printing the list and then
+ * repeating it per dish is the same two lines twice.
+ *
+ * The sold-out dish and the sold-out size carry no picker at all, which is the
+ * case worth having a reference for - offering extras on something the kitchen
+ * will not serve is a control that leads nowhere.
+ */
+export const OrderingWithExtras: Story = {
+  args: { menu: EXTRAS_MENU, canCreateBite: false, canAddToCart: true },
+};

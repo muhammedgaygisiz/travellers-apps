@@ -56,6 +56,25 @@ const LIBRARY_TABLE_ORDER = join(
 const BOTH = [FUNCTIONS_TABLE_ORDER, LIBRARY_TABLE_ORDER];
 
 /**
+ * Where the library keeps `orderLineUnitPrice` (GitHub issue #1598).
+ *
+ * A third file rather than a fourth copy: the unit price belongs beside
+ * `OrderLineSnapshot`, which is `order-line.ts` in the library and is inlined
+ * into `table-order.ts` on this side because the backend cannot import across
+ * the wall. So the pair this spec compares is asymmetric, and says so here
+ * rather than by quietly reading the wrong file.
+ */
+const LIBRARY_ORDER_LINE = join(
+  WORKSPACE_ROOT,
+  'libs',
+  'bite-tribe-common',
+  'model',
+  'src',
+  'lib',
+  'order-line.ts',
+);
+
+/**
  * The members of a `const` tuple or a `readonly` array, in declaration order.
  *
  * Line-anchored, so a status named in the prose documenting the member above it
@@ -109,6 +128,20 @@ const totalBodyOf = (file: string): string => {
 
   if (!body) {
     throw new Error(`No tableOrderTotal declaration found in ${file}`);
+  }
+
+  return body[1].replace(/\s+/g, ' ').trim();
+};
+
+/** The body of the one-expression `orderLineUnitPrice` arrow, as written. */
+const unitPriceBodyOf = (file: string): string => {
+  const source = readFileSync(file, 'utf8');
+  const body = /orderLineUnitPrice = \([\s\S]*?\): number =>\s*([^;]+);/.exec(
+    source,
+  );
+
+  if (!body) {
+    throw new Error(`No orderLineUnitPrice declaration found in ${file}`);
   }
 
   return body[1].replace(/\s+/g, ' ').trim();
@@ -203,8 +236,29 @@ describe('table order parity', () => {
     expect(totalBodyOf(FUNCTIONS_TABLE_ORDER)).toBe(
       totalBodyOf(LIBRARY_TABLE_ORDER),
     );
+    // Pinned as Prettier formats it. `totalBodyOf` collapses runs of
+    // whitespace but keeps the wrapping punctuation, so the literal carries
+    // the argument-list comma and parens the formatter adds once the
+    // expression no longer fits on one line.
     expect(totalBodyOf(LIBRARY_TABLE_ORDER)).toBe(
-      'lines.reduce((sum, line) => sum + line.price * line.quantity, 0)',
+      'lines.reduce( (sum, line) => sum + orderLineUnitPrice(line) * line.quantity, 0, )',
+    );
+  });
+
+  /**
+   * The other half of the same arithmetic (GitHub issue #1598).
+   *
+   * The total now sums a *unit price* rather than a field, so pinning the
+   * total alone would leave the sum that puts the extras into it uncompared -
+   * and a copy that forgot them would charge for the pizza and serve the
+   * cheese.
+   */
+  it('prices a unit identically in both files', () => {
+    expect(unitPriceBodyOf(FUNCTIONS_TABLE_ORDER)).toBe(
+      unitPriceBodyOf(LIBRARY_ORDER_LINE),
+    );
+    expect(unitPriceBodyOf(LIBRARY_ORDER_LINE)).toBe(
+      '(line.extras ?? []).reduce((sum, extra) => sum + extra.price, line.price)',
     );
   });
 

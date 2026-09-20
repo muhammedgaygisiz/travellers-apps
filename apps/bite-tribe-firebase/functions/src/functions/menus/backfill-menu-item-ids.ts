@@ -20,11 +20,13 @@ export interface BackfillMenuItemIdsResult {
   categories: number;
   /** Items and variants that gained an id, counted together. */
   items: number;
+  /** Extras that gained an id, across every menu (GitHub issue #1598). */
+  extras: number;
 }
 
 /**
- * One-off migration that gives every stored category, menu item and variant the
- * stable id an order line references (issue #1099).
+ * One-off migration that gives every stored category, menu item, variant and
+ * extra the stable id an order line references (issues #1099 and #1598).
  *
  * Menus written before this carry no ids at all, which is not a cosmetic gap:
  * until it is closed, the only way to name a menu item is its name and its
@@ -55,6 +57,7 @@ export const backfillMenuItemIds =
     let skipped = 0;
     let categories = 0;
     let items = 0;
+    let extras = 0;
 
     for (const menuDoc of menusSnapshot.docs) {
       const stored = menuDoc.data()['categories'];
@@ -62,7 +65,11 @@ export const backfillMenuItemIds =
         Array.isArray(stored) ? (stored as StoredMenuCategory[]) : undefined,
       );
 
-      if (!backfill.categoriesFilled && !backfill.itemsFilled) {
+      if (
+        !backfill.categoriesFilled &&
+        !backfill.itemsFilled &&
+        !backfill.extrasFilled
+      ) {
         skipped++;
         continue;
       }
@@ -72,6 +79,7 @@ export const backfillMenuItemIds =
       updated++;
       categories += backfill.categoriesFilled;
       items += backfill.itemsFilled;
+      extras += backfill.extrasFilled;
 
       if (batchSize === WRITE_BATCH_LIMIT) {
         await batch.commit();
@@ -90,6 +98,7 @@ export const backfillMenuItemIds =
       skipped,
       categories,
       items,
+      extras,
     };
 
     logger.info('backfillMenuItemIds: complete', result);

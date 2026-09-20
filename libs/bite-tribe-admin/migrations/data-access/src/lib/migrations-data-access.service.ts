@@ -93,6 +93,8 @@ export interface BackfillMenuItemIdsResult extends CollectionMigrationResult {
   categories: number;
   /** Items and variants that gained an id, counted together. */
   items: number;
+  /** Extras that gained an id, across every menu (GitHub issue #1598). */
+  extras: number;
 }
 
 export interface BackfillReviewTimestampsResult extends CollectionMigrationResult {

@@ -273,20 +273,21 @@
   **document name** turns deduplication into a read of one document and makes
   two racing copies contend on it, with no query, no index and no lock.
 
-  What stage 3 still owes is nothing of its own. As everywhere else in this
-  epic, the rules and the indexes deploy by hand, so none of it binds production
-  until both deploys have run - plus, since [#1107], a TTL policy on
-  `scanRateLimits.expiresAt` that has no Nx target at all.
+  What stage 3 still owes is nothing of its own. The rules and the indexes
+  deploy from CI on every push to `develop` ([#1567]), so all of it binds
+  production on merge - except, since [#1107], a TTL policy on
+  `scanRateLimits.expiresAt`, which has no Nx target at all and is now the one
+  step left to anybody's hands.
 
-Every child of stage 0 has now landed, and the stage is still not finished. Two things
-remain and neither has an owning issue: the rules deploy by hand, so [#1078] binds
-production only once `npx nx firebase-deploy-rules bite-tribe-firebase` has run, and the
-`staff` role [#1537] made grantable still opens nothing a staff member can use. [#1092]
+Every child of stage 0 has now landed, and the stage is still not finished. One thing
+remains and it has no owning issue: the `staff` role [#1537] made grantable still opens
+nothing a staff member can use. ([#1078] binds production on merge - the rules have
+deployed from CI since [#1567].) [#1092]
 gave the role its first write — a table transition through a callable — but no screen
 calls it and the dashboard still scopes by `Restaurant.ownerUserId`, so a staff account
 signing in today lands on an empty app. See [User Roles](../product/user-roles.md).
 
-Issue [#1469] delivered the first part of stage 0 outside the child-issue list: the `bite-tribe-admin` app, and the role gate on both privileged apps. It deliberately left [#1078], the Firestore rules replacement, alone — that is the highest-regression-risk change in the epic and needed its own branch. It got one, together with [#1164]: `firestore.rules` is now ownership-scoped, the role hierarchy question is settled by `RD-UR-6`, and the rules have their own emulator suite and CI job. The rules deploy by hand, so stage 0 is not finished until that deploy has run. See [Architecture - Firebase](../architecture/firebase.md).
+Issue [#1469] delivered the first part of stage 0 outside the child-issue list: the `bite-tribe-admin` app, and the role gate on both privileged apps. It deliberately left [#1078], the Firestore rules replacement, alone — that is the highest-regression-risk change in the epic and needed its own branch. It got one, together with [#1164]: `firestore.rules` is now ownership-scoped, the role hierarchy question is settled by `RD-UR-6`, and the rules have their own emulator suite and CI job. The rules deploy from CI on every push to `develop` ([#1567]), so that half of stage 0 is finished on merge. See [Architecture - Firebase](../architecture/firebase.md).
 
 [epic-1471](../records/epic-1471.md) owns what the admin app still needs. It is not a stage of [#735]: it runs alongside, because moving the operator surfaces out of the business app and hardening the privileged callables are overdue regardless of whether the floor-plan work ever starts.
 
@@ -501,3 +502,4 @@ No use case covers public acquisition today. One is written when the epic starts
 [#1469]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1469
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
 [#1547]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1547
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567

@@ -54,10 +54,9 @@ _Operator_ is the accepted short form in prose, matching
 Ownership is **written, enforced and visible**. `Restaurant.ownerUserId` and `claimStatus` got an
 operator writer in [#1077] (`assignRestaurantOwner`, `revokeRestaurantOwner`), `firestore.rules` began
 reading it in [#1078], and [#1079] scoped the business dashboard and its edit routes to it.
-Since [#1537] the same field decides which restaurant's staff an account may change. Two
-caveats: the rules deploy by hand, so they bind only once
-`npx nx firebase-deploy-rules bite-tribe-firebase` has run, and nothing in production is
-assigned today. There is **no self-service claim** - [#1076] was closed as not planned and
+Since [#1537] the same field decides which restaurant's staff an account may change. One
+caveat: nothing in production is assigned today. The rules themselves bind on
+merge - they deploy from CI on every push to `develop` since [#1567]. There is **no self-service claim** - [#1076] was closed as not planned and
 [#1077] removed the `RestaurantClaim` model with it. See [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md).
 
 ## What each role may do

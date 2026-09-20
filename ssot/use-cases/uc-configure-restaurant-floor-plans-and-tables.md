@@ -8,8 +8,8 @@ Implemented. Specified through issue [#1070] as stage 1 of issue [#735]; every s
 `Flow` is built, accessible (issue [#1089]) and covered (issue [#1090]), and
 `Related GitHub Scope` lists what each child issue delivered. The room and table
 collections are scoped to the account holding the restaurant ([#1078], [#1081]) by rules
-that are deployed by hand, so production is bound only once
-`npx nx firebase-deploy-rules bite-tribe-firebase` has run.
+that deploy from CI on every push to `develop` ([#1567]), so production is bound
+from the merge.
 
 ## Goal
 
@@ -173,3 +173,4 @@ Built since, and owned elsewhere:
 [#1090]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1090
 [#1093]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1093
 [#1101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1101
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567

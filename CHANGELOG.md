@@ -1,5 +1,20 @@
 # Changelog
 
+## build-98 (2026-09-20)
+
+<!-- changelog-start-rev: e0d546a9 -->
+<!-- changelog-end-rev: e8b915de -->
+
+### Bug Fixes
+
+- **bite-tribe-firebase**: declare the table-session sweep index as a field override (#1673) (4baac6cb)
+
+### Chores
+
+- sync the 1.0.2 marketing version into the native projects (#1677) (e8b915de)
+- move the marketing version to 1.0.2 (#1675) (54cf85e9)
+- prepare build 1.0.1-97 release (#1674) (5212b9cb)
+
 ## build-97 (2026-09-20)
 
 <!-- changelog-start-rev: dcd8d395 -->

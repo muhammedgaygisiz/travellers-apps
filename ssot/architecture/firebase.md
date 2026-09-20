@@ -404,6 +404,54 @@ Firebase emulator targets are defined under `apps/bite-tribe-firebase/project.js
 
 The app environment exposes emulator ports for Firestore, Functions, Auth, and Storage.
 
+### Both SDKs Have To Be Redirected
+
+**A `connect*Emulator` call from `firebase/*` redirects the JS SDK and nothing
+else.** Every one of them takes a JS SDK object - `Auth`, `Firestore`,
+`FirebaseStorage` - and rewrites where _that object_ sends traffic. On a native
+platform the data path is not that object: it is the Capacitor plugin talking
+to the native Firebase SDK, which those calls never reach. Each plugin has its
+own `useEmulator`, and it has to be called separately.
+
+Until issue [#1221] only Functions called its plugin. `nx run bite-tribe-ios:dev`,
+and any `NX_APP_BITE_TRIBE_IS_DEV=true` build on a device or simulator,
+therefore logged `DEV ENVIRONMENT - CONNECTING TO FIREBASE SIMULATORS` and sent
+Auth, Firestore and Storage straight to the production project. Test accounts
+and test documents landed in `bite-tribe`. `provide-firestore-simulator.ts` now
+calls all four plugins.
+
+The plugin calls are made on native platforms only. Each plugin's **web**
+implementation reaches for the default JS SDK instance - `getAuth()`,
+`getFirestore()`, `getStorage()` - which is the same object the
+`connect*Emulator` calls already redirect, so on the web the plugin call
+connects one instance twice and adds nothing. Functions is the exception and
+stays unconditional, because nothing else connects it; that is why it was the
+one surface that already worked.
+
+### The Emulator Host Is Not `localhost` Everywhere
+
+The environment files configure `host: 'localhost'`, which is correct in a
+browser tab and wrong inside a native wrapper, where it resolves to the phone
+or the emulated device rather than to the machine running
+`firebase emulators:start`. `resolveEmulatorHost` in `libs/common/ta-firestore`
+is the single place that decides, for the JS SDK and the plugins alike:
+
+1. A non-loopback configured host is explicit and is used as is.
+2. Otherwise the **live-reload serving host**, when the WebView was loaded over
+   the network. `cap run ios|android -l --host 0.0.0.0` points the WebView at
+   the dev server on the developer machine's LAN address, so
+   `location.hostname` is the machine running the emulators - on a physical
+   device and on a simulator alike.
+3. Otherwise `10.0.2.2` on Android, the emulator's alias for its host machine.
+4. Otherwise the configured host, which is right on the web and on the iOS
+   Simulator: both share the host machine's network stack.
+
+**A packaged dev build on a physical device reaches step 4 and keeps a host it
+cannot reach.** That is deliberate. It fails at the first Firebase call instead
+of silently redirecting to production, which is the failure mode issue [#1221]
+was filed for. Use the live-reload dev target to work against emulators from a
+physical device.
+
 ### Seeded Accounts
 
 `nx firebase-serve bite-tribe-firebase` imports `apps/bite-tribe-firebase/.firebase-export`. Its auth export seeds four accounts, all with the password `Test4711`:
@@ -441,6 +489,7 @@ libs/bite-tribe/api
 - App Check cannot cover Google Maps Platform from a backend request path, so Places API (New) stays in Monitoring behind the callable boundary described above.
 - Some aggregate and migration behaviors need operational care because Firestore query semantics can skip documents with missing fields.
 
+[#1221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1221
 [#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
 [#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
 [#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078

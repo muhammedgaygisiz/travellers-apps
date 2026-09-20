@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { Device } from '@capacitor/device';
 import { FirebaseAppCheck } from '@capacitor-firebase/app-check';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { FirebaseApp } from 'firebase/app';
@@ -29,6 +30,26 @@ export type FirebaseAppCheckTelemetryOptions = {
 type AppCheckProvider = 'none' | 'native_bridge' | 'recaptcha_enterprise';
 type AppCheckStartupStatus = 'completed' | 'failed' | 'skipped';
 type AppCheckPlatform = 'android' | 'ios' | 'web' | 'other';
+
+/**
+ * Whether the running client is emulated hardware.
+ *
+ * Firebase's own App Check metrics are per-service and carry no client
+ * attribution, so production numbers are the only readiness signal there is
+ * for switching enforcement on - and a simulator cannot attest, so its traffic
+ * is unverified by construction. Without this parameter a production build on
+ * a simulator is indistinguishable from a physical device in our telemetry
+ * (same `runtime_mode`, same `platform`), which makes the test traffic
+ * polluting those metrics impossible to subtract. Issue #1221.
+ */
+type AppCheckDeviceClass = 'physical' | 'unknown' | 'virtual';
+
+type AppCheckPreflightTrigger = 'retry' | 'startup';
+
+type AppCheckPreflightResult = {
+  ok: boolean;
+  reason?: string;
+};
 
 type AppCheckStartupResult = {
   platform: AppCheckPlatform;
@@ -99,10 +120,10 @@ export const refreshFirebaseAppCheckReadiness = async (
     };
   }
 
-  const telemetry = createTelemetry(telemetryOptions);
-  const tokenReady = await preflightAppCheckToken(telemetry);
+  const telemetry = await createTelemetry(telemetryOptions);
+  const preflight = await preflightAppCheckToken(telemetry, 'retry');
 
-  if (!tokenReady) {
+  if (!preflight.ok) {
     telemetry.emit('app_check_enforced_blocked', {
       platform,
       reason: 'token_unavailable',
@@ -110,12 +131,12 @@ export const refreshFirebaseAppCheckReadiness = async (
   }
 
   return {
-    ready: tokenReady,
+    ready: preflight.ok,
     enforced,
-    status: tokenReady ? 'completed' : 'failed',
+    status: preflight.ok ? 'completed' : 'failed',
     provider: 'none',
     platform,
-    reason: tokenReady ? undefined : 'token_unavailable',
+    reason: preflight.ok ? undefined : 'token_unavailable',
   };
 };
 
@@ -127,20 +148,14 @@ const initializeFirebaseAppCheckOnce = async (
   app: FirebaseApp,
   telemetryOptions?: FirebaseAppCheckTelemetryOptions,
 ): Promise<AppCheckReadiness> => {
-  const telemetry = createTelemetry(telemetryOptions);
+  const telemetry = await createTelemetry(telemetryOptions);
   const startedAt = Date.now();
   telemetry.emit('app_check_startup_started');
 
   const result = await initializeFirebaseAppCheckProvider(app, telemetry);
   const durationMs = Date.now() - startedAt;
   const enforced = isFirebaseAppCheckEnforced();
-
-  // Only spend a token round-trip when enforcement actually needs the proof;
-  // non-enforced startup keeps its previous behavior and Firebase traffic.
-  const tokenReady =
-    enforced && result.status === 'completed'
-      ? await preflightAppCheckToken(telemetry)
-      : false;
+  const tokenReady = await runStartupPreflight(result, enforced, telemetry);
 
   const ready = isAppCheckReady(result, enforced, tokenReady);
 
@@ -204,15 +219,66 @@ const isAppCheckReady = (
   }
 };
 
-const preflightAppCheckToken = async (
+/**
+ * Runs the startup token preflight and reports its outcome.
+ *
+ * The preflight runs whenever a provider was actually registered, enforced or
+ * not. Registering a `CustomProvider` never fetches a token, so before issue
+ * #1221 a client that could not attest at all - a simulator, a device with a
+ * burned debug token - still reported `app_check_startup_completed` and
+ * nothing in our telemetry disagreed. Enforcement could therefore only be
+ * validated by switching it on in production.
+ *
+ * **Enforced mode awaits it; non-enforced mode does not.** Readiness depends
+ * on the token only when enforcement is on, so awaiting it there is what the
+ * gate needs. When enforcement is off the result changes nothing about
+ * startup, and awaiting a token round-trip inside the app initializer would
+ * delay initial navigation for every user to buy a metric. It is issued and
+ * reported when it settles instead, leaving startup timing unchanged.
+ */
+const runStartupPreflight = async (
+  result: AppCheckStartupResult,
+  enforced: boolean,
   telemetry: AppCheckTelemetry,
 ): Promise<boolean> => {
+  if (result.status !== 'completed') {
+    return false;
+  }
+
+  if (!enforced) {
+    void preflightAppCheckToken(telemetry, 'startup');
+    return false;
+  }
+
+  const preflight = await preflightAppCheckToken(telemetry, 'startup');
+  return preflight.ok;
+};
+
+const preflightAppCheckToken = async (
+  telemetry: AppCheckTelemetry,
+  trigger: AppCheckPreflightTrigger,
+): Promise<AppCheckPreflightResult> => {
+  const preflight = await getAppCheckTokenPreflight(telemetry);
+
+  telemetry.emit('app_check_token_preflight', {
+    reason: preflight.reason,
+    succeeded: preflight.ok,
+    trigger,
+  });
+
+  return preflight;
+};
+
+const getAppCheckTokenPreflight = async (
+  telemetry: AppCheckTelemetry,
+): Promise<AppCheckPreflightResult> => {
   try {
     const { token } = await FirebaseAppCheck.getToken({ forceRefresh: false });
-    return Boolean(token);
+
+    return token ? { ok: true } : { ok: false, reason: 'empty_token' };
   } catch (error) {
     telemetry.warn('[AppCheck] App Check token preflight failed', error);
-    return false;
+    return { ok: false, reason: 'token_request_failed' };
   }
 };
 
@@ -378,9 +444,11 @@ type AppCheckTelemetryEvent =
   | 'app_check_initialization_failed'
   | 'app_check_skipped'
   | 'app_check_startup_completed'
-  | 'app_check_startup_started';
+  | 'app_check_startup_started'
+  | 'app_check_token_preflight';
 
 type AppCheckTelemetryParams = {
+  device_class: AppCheckDeviceClass;
   duration_ms?: number;
   has_debug_token?: boolean;
   has_site_key?: boolean;
@@ -388,7 +456,9 @@ type AppCheckTelemetryParams = {
   provider?: AppCheckProvider;
   reason?: string;
   runtime_mode: FirebaseAppCheckRuntimeMode;
+  succeeded?: boolean;
   transitional_policy?: typeof TRANSITIONAL_POLICY;
+  trigger?: AppCheckPreflightTrigger;
   enforced_policy?: typeof ENFORCED_POLICY;
 };
 
@@ -401,15 +471,16 @@ type AppCheckTelemetry = {
   warn: (message: string, error?: unknown) => void;
 };
 
-const createTelemetry = (
+const createTelemetry = async (
   options?: FirebaseAppCheckTelemetryOptions,
-): AppCheckTelemetry => {
+): Promise<AppCheckTelemetry> => {
   const runtimeMode = options?.runtimeMode ?? getRuntimeMode();
   const platform = getAppCheckPlatform();
   const shouldEmitTelemetry = runtimeMode !== 'dev_simulator';
   const shouldLogToConsole = runtimeMode === 'local_prod_firebase';
   const shouldUseNativeAnalytics = platform === 'ios' || platform === 'android';
   const baseParams: AppCheckTelemetryParams = {
+    device_class: await getAppCheckDeviceClass(platform),
     has_debug_token: Boolean(process.env[APP_CHECK_DEBUG_TOKEN_ENV]),
     has_site_key: Boolean(process.env[APP_CHECK_SITE_KEY_ENV]),
     runtime_mode: runtimeMode,
@@ -460,6 +531,30 @@ const createTelemetry = (
       }
     },
   };
+};
+
+/**
+ * Whether this client is emulated hardware, for App Check attribution.
+ *
+ * Only native platforms are asked. A browser has no simulator/device
+ * distinction to make, and `@capacitor/device` answers `isVirtual: false`
+ * there, which would report every web client as physical hardware and read as
+ * a claim rather than as the absence of one. The lookup is best-effort:
+ * attribution is never worth failing startup for.
+ */
+const getAppCheckDeviceClass = async (
+  platform: AppCheckPlatform,
+): Promise<AppCheckDeviceClass> => {
+  if (platform !== 'android' && platform !== 'ios') {
+    return 'unknown';
+  }
+
+  try {
+    const { isVirtual } = await Device.getInfo();
+    return isVirtual ? 'virtual' : 'physical';
+  } catch {
+    return 'unknown';
+  }
 };
 
 const getRuntimeMode = (): FirebaseAppCheckRuntimeMode => {

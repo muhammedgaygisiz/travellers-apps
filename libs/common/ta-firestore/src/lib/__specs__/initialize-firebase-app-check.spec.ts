@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { Device } from '@capacitor/device';
 import { FirebaseAppCheck } from '@capacitor-firebase/app-check';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import {
@@ -17,6 +18,11 @@ import {
 import { Analytics, logEvent } from 'firebase/analytics';
 
 jest.mock('@capacitor/core');
+jest.mock('@capacitor/device', () => ({
+  Device: {
+    getInfo: jest.fn().mockResolvedValue({ isVirtual: false }),
+  },
+}));
 jest.mock('@capacitor-firebase/app-check', () => ({
   FirebaseAppCheck: {
     initialize: jest.fn().mockResolvedValue(undefined),
@@ -63,6 +69,9 @@ describe(initializeFirebaseAppCheck.name, () => {
       expireTimeMillis: 123,
     });
     jest.spyOn(FirebaseAnalytics, 'logEvent').mockResolvedValue(undefined);
+    jest.mocked(Device.getInfo).mockResolvedValue({
+      isVirtual: false,
+    } as Awaited<ReturnType<typeof Device.getInfo>>);
     jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('web');
     delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'];
     delete process.env['NX_APP_BITE_TRIBE_APP_CHECK_DEBUG_TOKEN'];
@@ -114,6 +123,7 @@ describe(initializeFirebaseAppCheck.name, () => {
       analytics,
       'app_check_startup_started',
       {
+        device_class: 'unknown',
         has_debug_token: false,
         has_site_key: true,
         runtime_mode: 'production',
@@ -272,6 +282,7 @@ describe(initializeFirebaseAppCheck.name, () => {
     expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
       name: 'app_check_startup_started',
       params: {
+        device_class: 'physical',
         has_debug_token: false,
         has_site_key: false,
         runtime_mode: 'local_prod_firebase',
@@ -335,7 +346,9 @@ describe(initializeFirebaseAppCheck.name, () => {
   it('should add a short expiry fallback when native token expiry is unavailable', async () => {
     jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
     const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000);
-    jest.spyOn(FirebaseAppCheck, 'getToken').mockResolvedValueOnce({
+    // The startup preflight now spends a `getToken` of its own before the
+    // CustomProvider is ever asked, so this fixture answers every call.
+    jest.spyOn(FirebaseAppCheck, 'getToken').mockResolvedValue({
       token: 'native-token-without-expiry',
     });
 
@@ -407,7 +420,11 @@ describe(initializeFirebaseAppCheck.name, () => {
         analytics,
         runtimeMode: 'local_prod_firebase',
       }),
-    ).resolves.toMatchObject({ ready: true, enforced: false, status: 'failed' });
+    ).resolves.toMatchObject({
+      ready: true,
+      enforced: false,
+      status: 'failed',
+    });
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       '[AppCheck] Firebase App Check initialization failed; continuing under transitional policy',
@@ -441,7 +458,11 @@ describe(initializeFirebaseAppCheck.name, () => {
         analytics,
         runtimeMode: 'local_prod_firebase',
       }),
-    ).resolves.toMatchObject({ ready: true, enforced: false, status: 'failed' });
+    ).resolves.toMatchObject({
+      ready: true,
+      enforced: false,
+      status: 'failed',
+    });
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       '[AppCheck] Android Firebase App Check bridge initialization failed; continuing under transitional policy',
@@ -570,6 +591,176 @@ describe(initializeFirebaseAppCheck.name, () => {
     });
   });
 
+  describe('token preflight', () => {
+    const flushPendingPreflight = (): Promise<void> =>
+      new Promise((resolve) => setTimeout(resolve, 0));
+
+    it('should preflight a token and report the outcome when enforcement is off', async () => {
+      jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
+
+      await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'production',
+      });
+      await flushPendingPreflight();
+
+      expect(FirebaseAppCheck.getToken).toHaveBeenCalledWith({
+        forceRefresh: false,
+      });
+      expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+        name: 'app_check_token_preflight',
+        params: expect.objectContaining({
+          device_class: 'physical',
+          runtime_mode: 'production',
+          succeeded: true,
+          trigger: 'startup',
+        }),
+      });
+    });
+
+    it('should report a failed preflight without blocking a non-enforced startup', async () => {
+      jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
+      jest
+        .spyOn(FirebaseAppCheck, 'getToken')
+        .mockRejectedValue(new Error('App Attest is not supported'));
+
+      const readiness = await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'production',
+      });
+      await flushPendingPreflight();
+
+      // The whole point of issue #1221: attestation failed, startup is still
+      // allowed to continue, and telemetry says so.
+      expect(readiness.ready).toBe(true);
+      expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+        name: 'app_check_token_preflight',
+        params: expect.objectContaining({
+          reason: 'token_request_failed',
+          succeeded: false,
+          trigger: 'startup',
+        }),
+      });
+    });
+
+    it('should report an empty token as a failed preflight', async () => {
+      jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
+      jest
+        .spyOn(FirebaseAppCheck, 'getToken')
+        .mockResolvedValue({ token: '', expireTimeMillis: 123 });
+
+      await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'production',
+      });
+      await flushPendingPreflight();
+
+      expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+        name: 'app_check_token_preflight',
+        params: expect.objectContaining({
+          reason: 'empty_token',
+          succeeded: false,
+        }),
+      });
+    });
+
+    it('should not preflight when no provider was registered', async () => {
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'true';
+
+      await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'production',
+      });
+      await flushPendingPreflight();
+
+      expect(FirebaseAppCheck.getToken).not.toHaveBeenCalled();
+    });
+
+    it('should block an enforced startup when the preflight fails', async () => {
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+      jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
+      jest
+        .spyOn(FirebaseAppCheck, 'getToken')
+        .mockRejectedValue(new Error('App Attest is not supported'));
+
+      const readiness = await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'production',
+      });
+
+      expect(readiness.ready).toBe(false);
+      expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+        name: 'app_check_token_preflight',
+        params: expect.objectContaining({
+          succeeded: false,
+          trigger: 'startup',
+        }),
+      });
+    });
+  });
+
+  describe('device class attribution', () => {
+    it.each([
+      ['ios' as const, true, 'virtual'],
+      ['ios' as const, false, 'physical'],
+      ['android' as const, true, 'virtual'],
+    ])(
+      'should report a %s client with isVirtual %s as %s',
+      async (platform, isVirtual, deviceClass) => {
+        jest.spyOn(Capacitor, 'getPlatform').mockReturnValue(platform);
+        jest
+          .mocked(Device.getInfo)
+          .mockResolvedValue({ isVirtual } as Awaited<
+            ReturnType<typeof Device.getInfo>
+          >);
+
+        await initializeFirebaseAppCheck(firebaseApp, {
+          analytics,
+          runtimeMode: 'production',
+        });
+
+        expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+          name: 'app_check_startup_completed',
+          params: expect.objectContaining({ device_class: deviceClass }),
+        });
+      },
+    );
+
+    it('should report a web client as unknown rather than as physical hardware', async () => {
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY'] = 'site-key';
+
+      await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'production',
+      });
+
+      expect(Device.getInfo).not.toHaveBeenCalled();
+      expect(logEvent).toHaveBeenCalledWith(
+        analytics,
+        'app_check_startup_completed',
+        expect.objectContaining({ device_class: 'unknown' }),
+      );
+    });
+
+    it('should fall back to unknown when the device lookup fails', async () => {
+      jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
+      jest
+        .mocked(Device.getInfo)
+        .mockRejectedValue(new Error('plugin unavailable'));
+
+      const readiness = await initializeFirebaseAppCheck(firebaseApp, {
+        analytics,
+        runtimeMode: 'production',
+      });
+
+      expect(readiness.ready).toBe(true);
+      expect(FirebaseAnalytics.logEvent).toHaveBeenCalledWith({
+        name: 'app_check_startup_completed',
+        params: expect.objectContaining({ device_class: 'unknown' }),
+      });
+    });
+  });
+
   describe('refreshFirebaseAppCheckReadiness', () => {
     it('should always be ready when enforcement is off', async () => {
       const readiness = await refreshFirebaseAppCheckReadiness();
@@ -604,6 +795,21 @@ describe(initializeFirebaseAppCheck.name, () => {
       });
 
       expect(readiness.ready).toBe(false);
+    });
+
+    it('should report the retry preflight outcome', async () => {
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+
+      await refreshFirebaseAppCheckReadiness({
+        analytics,
+        runtimeMode: 'production',
+      });
+
+      expect(logEvent).toHaveBeenCalledWith(
+        analytics,
+        'app_check_token_preflight',
+        expect.objectContaining({ succeeded: true, trigger: 'retry' }),
+      );
     });
   });
 });

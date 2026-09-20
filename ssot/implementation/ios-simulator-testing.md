@@ -137,6 +137,11 @@ want. Capture rules, framing decisions and the shipped set are in
   provider supplies attestation, not the web one.
 - **A development build is not an alternative.** It routes at the local
   emulators, so it cannot show production content however App Check is answered.
+  That sentence was only true of the web until issue
+  [1221](https://github.com/muhammedgaygisiz/travellers-apps/issues/1221): a
+  native dev build redirected Functions and nothing else, so it read and wrote
+  production Auth, Firestore and Storage while saying it was on the emulators.
+  It is true on native now.
 
 ## Related Pages
 

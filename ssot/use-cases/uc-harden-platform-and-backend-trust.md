@@ -61,6 +61,7 @@ App Check attests the app binary to Firebase and is invisible to a reviewer.
 - Issue [#1350] - `storage.rules` is still open to any signed-in account. Open.
 - Issue [#1567] - CI now deploys the committed rules and indexes from `develop`. Closed as completed.
 - Issue [#952] - App Check replay protection on sensitive callables, classified `[Secondary]`. Open.
+- Issue [#1221] - the Operator's App Check monitoring is now readable: the token preflight runs whether or not enforcement is on, and `device_class` separates simulator traffic from device traffic. Partly closed; the `capacitor://localhost` API-key restriction and the QA-project decision are still open.
 
 ## Related Domains
 
@@ -77,5 +78,6 @@ App Check attests the app binary to Firebase and is invisible to a reviewer.
 - [issue-1245](../records/issue-1245.md)
 
 [#952]: https://github.com/muhammedgaygisiz/travellers-apps/issues/952
+[#1221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1221
 [#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567

@@ -11,6 +11,7 @@ import {
 import { OnboardingPage } from '../pages/onboarding.page';
 import { RegistrationPage } from '../pages/registration.page';
 import { TableOrderPage } from '../pages/table-order.page';
+import { TEST_USERS } from '../support/test-users';
 
 /**
  * A guest who orders at a table and then registers (GitHub issue #1657).
@@ -58,7 +59,11 @@ test.describe('registering during a table visit', () => {
     // address would meet an existing account on the second run - which is the
     // *other* issue's case (#1658) rather than this one's.
     const email = `e2e-table-guest-${Date.now()}@test.com`;
-    const password = 'Test4711';
+    // The seeded accounts' password, which already satisfies the policy this
+    // form enforces - lower, upper, digit, eight characters. Taken from the
+    // shared constant rather than written out again: a password literal in a
+    // spec file is a secret-scanner finding somebody has to dismiss.
+    const password = TEST_USERS.default.password;
 
     await order.scan(FIXTURE.token);
     await order.sitDown();

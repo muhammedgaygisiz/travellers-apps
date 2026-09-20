@@ -1,0 +1,115 @@
+<section class="extras" data-testid="category-extras-editor">
+  <h3>{{ 'menu-extras' | transloco }}</h3>
+
+  @if (extras().length) {
+    <ion-input
+      fill="outline"
+      mode="md"
+      data-testid="category-extras-description"
+      [label]="'menu-extras-description' | transloco"
+      labelPlacement="floating"
+      [placeholder]="'menu-extras-description-hint' | transloco"
+      [value]="description()"
+      (ionChange)="onDescriptionChange($event.detail.value ?? '')"
+    />
+
+    <ul class="extras-rows">
+      @for (extra of extras(); let index = $index; track extra.id) {
+        <li class="extra-row" data-testid="category-extra-row">
+          <ion-input
+            class="extra-name"
+            fill="outline"
+            mode="md"
+            [attr.data-testid]="'category-extra-name-' + extra.id"
+            [label]="'name' | transloco"
+            labelPlacement="floating"
+            [value]="extra.name"
+            (ionChange)="renameExtra(index, $event.detail.value ?? '')"
+          />
+
+          <ion-input
+            class="extra-price"
+            fill="outline"
+            mode="md"
+            type="number"
+            min="0"
+            [attr.data-testid]="'category-extra-price-' + extra.id"
+            [label]="'price' | transloco"
+            labelPlacement="floating"
+            [value]="extra.price"
+            (ionChange)="repriceExtra(index, +($event.detail.value ?? 0))"
+          >
+            <span slot="end">{{ currencySymbol() }}</span>
+          </ion-input>
+
+          <ion-button
+            fill="clear"
+            color="danger"
+            [attr.data-testid]="'category-extra-remove-' + extra.id"
+            [attr.aria-label]="'menu-extras-remove' | transloco"
+            (click)="removeExtra(index)"
+          >
+            <ion-icon name="trash-outline" slot="icon-only" />
+          </ion-button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="extras-empty" data-testid="category-extras-empty">
+      {{ 'menu-extras-none' | transloco }}
+    </p>
+  }
+
+  @if (isAdding()) {
+    <div class="extra-row extra-row-new">
+      <ion-input
+        class="extra-name"
+        fill="outline"
+        mode="md"
+        data-testid="category-extra-new-name"
+        [label]="'name' | transloco"
+        labelPlacement="floating"
+        [value]="newName()"
+        (ionInput)="newName.set($event.detail.value ?? '')"
+      />
+
+      <ion-input
+        class="extra-price"
+        fill="outline"
+        mode="md"
+        type="number"
+        min="0"
+        data-testid="category-extra-new-price"
+        [label]="'price' | transloco"
+        labelPlacement="floating"
+        [value]="newPrice()"
+        (ionInput)="newPrice.set(+($event.detail.value ?? 0))"
+      >
+        <span slot="end">{{ currencySymbol() }}</span>
+      </ion-input>
+    </div>
+
+    <div class="extra-actions">
+      <ion-button fill="clear" (click)="cancelAdd()">
+        {{ 'cancel' | transloco }}
+      </ion-button>
+
+      <ion-button
+        data-testid="category-extra-add-confirm"
+        [disabled]="!canAdd()"
+        (click)="addExtra()"
+      >
+        {{ 'menu-extras-add' | transloco }}
+      </ion-button>
+    </div>
+  } @else {
+    <ion-button
+      fill="outline"
+      class="ion-margin-top"
+      data-testid="category-extra-add"
+      (click)="showAdd()"
+    >
+      {{ 'menu-extras-add' | transloco }}
+    </ion-button>
+  }
+</section>

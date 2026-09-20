@@ -38,11 +38,18 @@ interface StoredItem {
   variants?: StoredItem[];
 }
 
+interface StoredExtra {
+  id?: string;
+  name?: string;
+  price?: number;
+}
+
 interface StoredCategory {
   id?: string;
   title?: string;
   subtitle?: string;
   items?: StoredItem[];
+  extrasBlock?: { description?: string; extras?: StoredExtra[] };
 }
 
 const seedMenu = (id: string, categories: StoredCategory[]): void => {
@@ -64,6 +71,7 @@ const idsIn = (categories: StoredCategory[]): string[] =>
       item.id ?? '',
       ...(item.variants ?? []).map((variant) => variant.id ?? ''),
     ]),
+    ...(category.extrasBlock?.extras ?? []).map((extra) => extra.id ?? ''),
   ]);
 
 describe('backfillMenuItemIds', () => {
@@ -96,6 +104,7 @@ describe('backfillMenuItemIds', () => {
       skipped: 0,
       categories: 1,
       items: 3,
+      extras: 0,
     });
   });
 
@@ -179,6 +188,61 @@ describe('backfillMenuItemIds', () => {
     expect(result).toMatchObject({ updated: 1, categories: 0, items: 1 });
   });
 
+  /**
+   * The extras half (GitHub issue #1598). A menu migrated for issue #1099
+   * carries ids on everything except its extras, so the second pass over an
+   * already-migrated collection has work to do and reports it as extras work.
+   */
+  it('gives every extra an id and counts it apart from the items', async () => {
+    seedMenu('menu-1', [
+      {
+        id: 'category-pizze',
+        title: 'Pizze',
+        items: [{ id: 'item-margherita', name: 'Margherita', price: 12 }],
+        extrasBlock: {
+          description: 'Add to any pizza',
+          extras: [
+            { name: 'Extra mozzarella', price: 2 },
+            { id: 'extra-nduja', name: "'Nduja", price: 2.5 },
+          ],
+        },
+      },
+    ]);
+
+    const result = await backfillMenuItemIds();
+    const [category] = categoriesOf('menu-1');
+
+    expect(category.extrasBlock?.extras?.[0].id).toBeTruthy();
+    expect(category.extrasBlock?.extras?.[1].id).toBe('extra-nduja');
+    expect(category.extrasBlock?.description).toBe('Add to any pizza');
+    expect(result).toMatchObject({
+      updated: 1,
+      categories: 0,
+      items: 0,
+      extras: 1,
+    });
+  });
+
+  it('skips a menu whose extras already have ids', async () => {
+    seedMenu('menu-1', [
+      {
+        id: 'category-pizze',
+        title: 'Pizze',
+        items: [{ id: 'item-margherita', name: 'Margherita', price: 12 }],
+        extrasBlock: {
+          description: 'Add to any pizza',
+          extras: [
+            { id: 'extra-mozzarella', name: 'Extra mozzarella', price: 2 },
+          ],
+        },
+      },
+    ]);
+
+    const result = await backfillMenuItemIds();
+
+    expect(result).toMatchObject({ updated: 0, skipped: 1, extras: 0 });
+  });
+
   it('runs again without moving anything', async () => {
     seedMenu('menu-1', [
       { title: 'Pizze', items: [{ name: 'Margherita', price: 12 }] },
@@ -242,6 +306,7 @@ describe('backfillMenuItemIds', () => {
       skipped: 0,
       categories: 0,
       items: 0,
+      extras: 0,
     });
   });
 

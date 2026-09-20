@@ -1,3 +1,4 @@
+import { orderLineUnitPrice } from './order-line';
 import type { OrderLineSnapshot } from './order-line';
 import type { TableStatus } from './table-state';
 
@@ -330,10 +331,18 @@ export const tableOrderDocumentId = (requestId: string): string =>
  * on the guest's phone and the total stored on the order have to be the same
  * number, computed the same way, or the guest agreed to one figure and the
  * restaurant recorded another.
+ *
+ * The unit is {@link orderLineUnitPrice} rather than `line.price`, so the
+ * extras a guest ticked are in the figure they are shown and in the figure
+ * they are charged (GitHub issue #1598).
  */
 export const tableOrderTotal = (
-  lines: readonly Pick<OrderLineSnapshot, 'price' | 'quantity'>[],
-): number => lines.reduce((sum, line) => sum + line.price * line.quantity, 0);
+  lines: readonly Pick<OrderLineSnapshot, 'price' | 'quantity' | 'extras'>[],
+): number =>
+  lines.reduce(
+    (sum, line) => sum + orderLineUnitPrice(line) * line.quantity,
+    0,
+  );
 
 /**
  * What a guest has run up over several orders, in one currency
@@ -378,6 +387,20 @@ export const MAX_ORDER_LINES = 60;
  * asked for - plus {@link SubmitTableOrderLine.price}, which is not a decision
  * but a *claim*, checked against the live menu and never trusted.
  */
+export interface SubmitTableOrderExtra {
+  /** The extra, by `ExtraItem.id`. */
+  extraId: string;
+  /**
+   * The price the guest's phone displayed for this extra.
+   *
+   * A claim, on exactly the terms {@link SubmitTableOrderLine.price} is one:
+   * the backend compares it to the extra as the menu states it now and refuses
+   * the order if it has moved. Nothing here is ever written - the price
+   * recorded on the line is read off the live menu.
+   */
+  price: number;
+}
+
 export interface SubmitTableOrderLine {
   /** The dish, by `MenuItem.id`. */
   menuItemId: string;
@@ -386,6 +409,16 @@ export interface SubmitTableOrderLine {
   quantity: number;
   /** What the guest asked for. Absent rather than empty. */
   notes?: string;
+  /**
+   * The extras ticked on this line (GitHub issue #1598).
+   *
+   * Absent rather than empty where none were, following `notes`. Each id must
+   * be one the dish's category offers, and each must appear at most once: an
+   * extra is a tick box rather than a quantity, so a line naming the same
+   * extra twice is a malformed argument rather than a guest decision, and is
+   * refused as one.
+   */
+  extras?: SubmitTableOrderExtra[];
   /**
    * The unit price the guest's phone displayed for this line.
    *
@@ -486,6 +519,18 @@ export const TABLE_ORDER_REFUSAL_REASONS = [
   'itemUnavailable',
   /** An item's price has moved since the guest put it in the cart. */
   'priceChanged',
+  /**
+   * An extra ticked on a line is no longer offered with that dish
+   * (GitHub issue #1598).
+   *
+   * Its own reason rather than `itemMissing`, because the two call for
+   * different things from the guest: a dish that is gone means picking
+   * something else, and an extra that is gone means the dish is still there
+   * without it.
+   */
+  'extraMissing',
+  /** An extra's price has moved since the guest ticked it. */
+  'extraPriceChanged',
   /** The menu is priced in a different currency from the one the guest saw. */
   'currencyChanged',
 ] as const;
@@ -507,10 +552,26 @@ export interface TableOrderRefusedItem {
   variantId?: string;
   /** The item's name on the menu now. Absent when it has been deleted. */
   name?: string;
-  /** The price the guest's phone sent. Present on `priceChanged`. */
+  /**
+   * The price the guest's phone sent. Present on `priceChanged`, and on
+   * `extraPriceChanged`, where it is the **extra's** price rather than the
+   * dish's.
+   */
   shownPrice?: number;
-  /** The price on the menu now. Present on `priceChanged`. */
+  /** The price on the menu now, on the same two reasons. */
   currentPrice?: number;
+  /**
+   * The extra a refusal is about, on the two reasons that are about one
+   * (GitHub issue #1598).
+   *
+   * Beside the dish rather than instead of it, because the sentence the guest
+   * needs names both: "extra mozzarella on the Margherita". {@link name} stays
+   * the dish's throughout, so a screen reads one field for "which row of my
+   * cart" whatever the reason was.
+   */
+  extraId?: string;
+  /** The extra's name on the menu now. Absent when it has been deleted. */
+  extraName?: string;
 }
 
 export interface TableOrderRefused {

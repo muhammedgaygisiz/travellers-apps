@@ -33,7 +33,7 @@ import {
   type TableCartLine,
   type TableOrderView,
 } from 'bite-tribe/table-order-data-access';
-import { TABLE_ASSISTANCE_KINDS } from 'model';
+import { orderLineUnitPrice, TABLE_ASSISTANCE_KINDS } from 'model';
 // Aliased because the screen's own class is called `TableOrder` too, and a
 // merged declaration of the two is a compile error rather than a shadowing.
 import type {
@@ -345,14 +345,37 @@ export class TableOrder implements OnInit {
     return line.variantName ? `${line.name} (${line.variantName})` : line.name;
   }
 
-  /** What one line of a sent order came to. */
+  /**
+   * What one line of a sent order came to.
+   *
+   * Through `orderLineUnitPrice` rather than `line.price`, so a line ordered
+   * with extras reads as what it cost rather than as what the dish alone did
+   * (GitHub issue #1598).
+   */
   protected orderLineTotal(line: OrderLineSnapshot): number {
-    return line.price * line.quantity;
+    return orderLineUnitPrice(line) * line.quantity;
   }
 
-  /** What one row of the cart comes to. */
+  /**
+   * What one row of the cart comes to.
+   *
+   * Priced through the same snapshot the order is built from rather than off
+   * the dish, so the row, the running total below it and the total the
+   * restaurant records are one arithmetic (GitHub issue #1598). It was a
+   * ternary over `variant?.price` until extras existed, and a second place to
+   * forget them.
+   */
   protected lineTotal(line: TableCartLine): number {
-    return (line.variant?.price ?? line.item.price) * line.quantity;
+    return (
+      orderLineUnitPrice({
+        price: line.variant?.price ?? line.item.price,
+        extras: line.extras.map((extra) => ({
+          extraId: extra.id,
+          name: extra.name,
+          price: extra.price,
+        })),
+      }) * line.quantity
+    );
   }
 
   /** The row's name, with the size where the guest chose one. */
@@ -360,6 +383,45 @@ export class TableOrder implements OnInit {
     return line.variant
       ? `${line.item.name} (${line.variant.name})`
       : line.item.name;
+  }
+
+  /**
+   * The extras on a row, as one line of small print under its name.
+   *
+   * A sentence rather than a list, because a cart row on a phone is already
+   * three controls deep and a second bulleted list inside it reads as another
+   * dish. Empty where nothing was ticked, and the template draws nothing.
+   */
+  protected lineExtras(line: TableCartLine): string {
+    return line.extras.map((extra) => extra.name).join(', ');
+  }
+
+  /** The same, for a line of an order that has already been sent. */
+  protected orderLineExtras(line: OrderLineSnapshot): string {
+    return (line.extras ?? []).map((extra) => extra.name).join(', ');
+  }
+
+  /**
+   * The extra a refusal is about, named for the sentence (issue #1598).
+   *
+   * The menu's name where the backend could still read one, and the cart's
+   * otherwise, on exactly the terms {@link refusedName} works: an extra that
+   * has been deleted has no name left on the menu, and the guest still needs
+   * to know which tick to take off.
+   */
+  protected refusedExtraName(): string {
+    const item = this.refusal()?.item;
+
+    if (!item?.extraId) {
+      return '';
+    }
+
+    const ticked = this.cart
+      .lines()
+      .flatMap((line) => line.extras)
+      .find((extra) => extra.id === item.extraId);
+
+    return item.extraName || ticked?.name || '';
   }
 
   /**

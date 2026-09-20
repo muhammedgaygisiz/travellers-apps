@@ -108,15 +108,24 @@ export const TABLE_ORDERS_COLLECTION = 'orders';
  * at it. Every field is `readonly` there and here: nothing edits a line after
  * it is submitted, and a correction is a cancellation with a reason.
  */
+export interface OrderLineExtraSnapshot {
+  readonly extraId: string;
+  readonly name: string;
+  readonly price: number;
+}
+
 export interface OrderLineSnapshot {
   readonly menuItemId: string;
   readonly name: string;
   readonly variantId?: string;
   readonly variantName?: string;
+  /** The dish alone. What one unit costs is `orderLineUnitPrice`. */
   readonly price: number;
   readonly currency: string;
   readonly quantity: number;
   readonly notes?: string;
+  /** The extras ticked on this line. Absent rather than empty. */
+  readonly extras?: readonly OrderLineExtraSnapshot[];
 }
 
 /** One order, as one party sent it. */
@@ -178,6 +187,20 @@ export const tableOrderDocumentId = (requestId: string): string =>
   `${TABLE_ORDER_REQUEST_ID_PREFIX}${requestId}`;
 
 /**
+ * What one unit of a line costs: the dish plus everything ticked on it
+ * (GitHub issue #1598).
+ *
+ * The same arithmetic as the library's `orderLineUnitPrice`, in
+ * `libs/bite-tribe-common/model/src/lib/order-line.ts`. The parity spec
+ * compares the two implementations as text, for the reason it compares the
+ * total: the guest is shown one side's answer and charged the other's.
+ */
+export const orderLineUnitPrice = (
+  line: Pick<OrderLineSnapshot, 'price' | 'extras'>,
+): number =>
+  (line.extras ?? []).reduce((sum, extra) => sum + extra.price, line.price);
+
+/**
  * What one order comes to.
  *
  * The same arithmetic as the library's `tableOrderTotal`, so the running total
@@ -185,8 +208,12 @@ export const tableOrderDocumentId = (requestId: string): string =>
  * parity spec compares the two implementations as text.
  */
 export const tableOrderTotal = (
-  lines: readonly Pick<OrderLineSnapshot, 'price' | 'quantity'>[],
-): number => lines.reduce((sum, line) => sum + line.price * line.quantity, 0);
+  lines: readonly Pick<OrderLineSnapshot, 'price' | 'quantity' | 'extras'>[],
+): number =>
+  lines.reduce(
+    (sum, line) => sum + orderLineUnitPrice(line) * line.quantity,
+    0,
+  );
 
 /** The largest quantity one line may carry. */
 export const MAX_ORDER_LINE_QUANTITY = 99;
@@ -208,6 +235,8 @@ export const TABLE_ORDER_REFUSAL_REASONS = [
   'itemMissing',
   'itemUnavailable',
   'priceChanged',
+  'extraMissing',
+  'extraPriceChanged',
   'currencyChanged',
 ] as const;
 
@@ -222,6 +251,10 @@ export interface TableOrderRefusedItem {
   name?: string;
   shownPrice?: number;
   currentPrice?: number;
+  /** The extra a refusal is about, on the two reasons that are about one. */
+  extraId?: string;
+  /** The extra's name on the menu now. Absent when it has been deleted. */
+  extraName?: string;
 }
 
 export interface TableOrderRefused {
@@ -233,7 +266,7 @@ export interface TableOrderRefused {
 /**
  * A refusal, assembled in one place.
  *
- * A function rather than an object literal at each of the twelve return sites,
+ * A function rather than an object literal at each of the return sites,
  * following `refuseScan`: the optional item is dropped rather than written as
  * `undefined`, which is what a callable's JSON would otherwise carry to a
  * client that checks `'item' in result`.

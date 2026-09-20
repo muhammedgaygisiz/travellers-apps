@@ -42,6 +42,7 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 - The guest confirms an unambiguous context screen: "You are ordering at Sakura Kitchen, table 12". Implemented, issue [#1101].
 - The guest joins the table's open visit, or raises a pending signal that staff confirm. Implemented, issue [#1101].
 - The guest browses the menu, with unavailable items marked and not addable, a variant of an unavailable dish included. Implemented, issues [#1102] and [#1103].
+- The guest picks a dish's extras, which are the extras its category offers, and the running total includes them. Implemented, issue [#1598].
 - The guest builds a cart and submits an order. Implemented, issue [#1103].
 - Staff see the order in a queue attached to the correct table, accept it, and update its status. Implemented, issue [#1105].
 - The guest watches each order move along its status, and is told when one is cancelled and why. Implemented, issues [#1104] and [#1105].
@@ -186,8 +187,12 @@ now, and so do the renderers - which is what the acceptance criteria of that
 issue actually assert.
 
 **The id says which item; the snapshot says what it was.** `OrderLineSnapshot`
-in `order-line.ts` carries the dish's name, the price charged, the currency and
-the variant as they stood at the moment of the order, alongside the id. A line
+in `order-line.ts` carries the dish's name, the price charged, the currency,
+the variant and - since issue [#1598] - every extra the line was ordered with,
+each by its own id, name and price, as they stood at the moment of the order,
+alongside the id. What one unit cost is `orderLineUnitPrice`, the dish plus its
+extras, rather than the `price` field alone: that field stays the dish's, so
+the backend's price check compares a menu price against a menu price. A line
 that read its price through the id would tell a guest they were charged
 Tuesday's price for Monday's dinner, because a menu is edited in place. It is
 also what makes an order readable after the dish is deleted: the link goes and
@@ -308,7 +313,12 @@ the item and both prices. Snapshotting whatever the menu says would silently
 recharge a guest whose dish was repriced while they read its description, and
 trusting the client's number would let a client name its own price - so neither.
 The same shape covers an item that has gone, an item marked off, a variant of a
-dish that is off, and a menu whose currency has moved.
+dish that is off, and a menu whose currency has moved - and, since issue
+[#1598], an extra withdrawn from the category or repriced while the guest read
+the description. Those two carry their own reasons rather than reusing the
+dish's, because they call for something different: a dish that is gone means
+picking something else, an extra that is gone means the dish is still there
+without it (`RD-TS-36`).
 
 **A menu that states no currency cannot be ordered from.** `Menu.currency` is
 optional and absent means "not stated" rather than a default, which is right for
@@ -705,7 +715,7 @@ writing an intent down at all.
 
 ## Open Product Questions
 
-Tracked in [Current State - Open Questions](../current-state/open-questions.md). Thirty are settled and recorded as `RD-TS-1` to `RD-TS-34` in [Recorded Decisions](../decisions/recorded-decisions.md): occupancy confirmation, shared sessions, ordering without an account, session expiry, what a scan at a menu-only restaurant does, where a menu's currency lives, and - on 13 September 2026 with issues [#1103], [#1104] and [#1105] - order attribution, price integrity, who moves the table when an order lands, whose orders a guest's screen shows, where the cancellation reason is declared, how the staff queue reads a restaurant's orders, whether a queue row moves ahead of the backend, what a cancellation has to carry, what a busy-service alert may do without being asked, and - with issue [#1106] - how a call for a waiter is addressed, what it hangs from, how it is rate limited, what asking for the bill does to the table, why an acknowledgement needs no expectation, and why the two staff lists sort in opposite directions; and - with issue [#1107] - how a scan endpoint is limited across instances, what a restaurant is told about scans that do not look ordinary, where a pending session is drawn, what a shared position may and may not do, and which authority replaces a printed code; and - with issue [#1108] - how a submission is identified across attempts, when a replay is answered, what the phone may claim about an order it could not confirm, what an unresolved submission does to the cart, where the cart lives between reloads, and how long an unsent order stays worth sending.
+Tracked in [Current State - Open Questions](../current-state/open-questions.md). Thirty-two are settled and recorded as `RD-TS-1` to `RD-TS-36` in [Recorded Decisions](../decisions/recorded-decisions.md): occupancy confirmation, shared sessions, ordering without an account, session expiry, what a scan at a menu-only restaurant does, where a menu's currency lives, and - on 13 September 2026 with issues [#1103], [#1104] and [#1105] - order attribution, price integrity, who moves the table when an order lands, whose orders a guest's screen shows, where the cancellation reason is declared, how the staff queue reads a restaurant's orders, whether a queue row moves ahead of the backend, what a cancellation has to carry, what a busy-service alert may do without being asked, and - with issue [#1106] - how a call for a waiter is addressed, what it hangs from, how it is rate limited, what asking for the bill does to the table, why an acknowledgement needs no expectation, and why the two staff lists sort in opposite directions; and - with issue [#1107] - how a scan endpoint is limited across instances, what a restaurant is told about scans that do not look ordinary, where a pending session is drawn, what a shared position may and may not do, and which authority replaces a printed code; and - with issue [#1108] - how a submission is identified across attempts, when a replay is answered, what the phone may claim about an order it could not confirm, what an unresolved submission does to the cart, where the cart lives between reloads, and how long an unsent order stays worth sending; and - with issue [#1598] - whether an extra belongs to a dish or to the category it is printed under, and on what terms one is revalidated and recorded.
 
 The last two of the epic's proposals are now answered rather than open: a cancelled order is corrected by a staff-side cancellation carrying a reason the guest is shown, and staff are notified by an in-app queue plus a push through the existing infrastructure. What remains open is the payment model, which is issue [#1073]'s.
 
@@ -899,7 +909,7 @@ guest's phone is retrying.
 - Issue [#1105] - incoming order queue for staff, which gave the restaurant the screen that answers a guest: the queue, every order status after `submitted`, the badge on the floor plan and the push that reaches the people on shift
 - Issue [#1106] - request staff assistance and request the bill, which gave the guest a way to ask for a person without waving and the floor a way to see it and clear it
 - Issue [#1108] - offline-tolerant and idempotent order submission, which closed the epic: the key that makes a retry one order, the cart that survives a reload, and the sentence a guest gets when the phone cannot tell what happened
-- Issue [#1598] - orderable menu extras, split out of [#1103] because `Category.extrasBlock` has no ids, no renderer and no editor
+- Issue [#1598] - orderable menu extras, split out of [#1103] because `Category.extrasBlock` had no ids, no renderer and no editor. It settled where an extra lives first (`RD-TS-35`: on the category, applying to every dish in it) and then gave extras ids, an editor in the business app, a printed block on both reading surfaces, a tick box per orderable dish, a per-line snapshot, and the two refusals that answer an extra withdrawn or repriced mid-meal (`RD-TS-36`)
 - Issue [#1107] - QR token abuse protection, which made the resolution limit durable, gave the restaurant the rows and the rotation that answer a public code, and drew the pending session the epic had been writing since [#1101]
 - Issue [#1087] - printable table QR sheets, which fixed the scan URL this use case has to serve
 - Issue [#1073] - Table payment and Bite creation from orders, with six child issues
@@ -916,7 +926,7 @@ guest's phone is retrying.
 
 ## Related Pages
 
-- [Recorded Decisions](../decisions/recorded-decisions.md) - `RD-TS-1` to `RD-TS-34` bind this page
+- [Recorded Decisions](../decisions/recorded-decisions.md) - `RD-TS-1` to `RD-TS-36` bind this page
 - [Architecture - Auth](../architecture/auth.md) - the anonymous guest
 - [Architecture - Firebase](../architecture/firebase.md) - the rules on `tableSessions`, and the collection-group rule and index the staff queue reads through
 - [Implementation - Firebase Functions](../implementation/firebase-functions.md) - the callables

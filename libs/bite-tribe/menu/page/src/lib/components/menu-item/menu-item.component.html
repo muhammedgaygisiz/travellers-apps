@@ -42,18 +42,43 @@
     <!--
       Ordering at a table (issue #1103). Off everywhere else, so the
       authenticated menu and the public one render exactly as before.
+
+      A row with an extras picker draws the button *below* the picker instead
+      (issue #1598), because a button above the boxes is a button the guest
+      taps before reading them - and the line it adds is then the plain dish
+      they did not mean to order.
     -->
-    @if (canAddToCart()) {
-      <ion-button
-        size="small"
-        data-testid="menu-item-add-to-cart"
-        [disabled]="isItemUnavailable"
-        (click)="onAddToCartClick(itemData)"
-      >
-        {{ 'table-order-add' | transloco }}
-      </ion-button>
+    @if (canAddToCart() && !showExtrasPicker()) {
+      <ng-container [ngTemplateOutlet]="addButton" />
     }
   </div>
+  <!--
+    The extras picker (issue #1598). Ordering only: the reading surfaces draw
+    the category's extras block once, under its dishes, which is where a menu
+    prints it. Above the variants so it belongs to this row rather than
+    reading as a footer to the sizes below it.
+  -->
+  @if (showExtrasPicker()) {
+    <div class="extras" data-testid="menu-item-extras">
+      @for (extra of extras(); track extra.id) {
+        <ion-checkbox
+          class="extra"
+          justify="space-between"
+          labelPlacement="end"
+          [attr.data-testid]="'menu-item-extra-' + extra.id"
+          [checked]="isTicked(extra.id)"
+          (ionChange)="toggleExtra(extra.id, $event.detail.checked)"
+        >
+          <span class="extra-name">{{ extra.name }}</span>
+          <span class="extra-price">{{ extraPriceLabel(extra) }}</span>
+        </ion-checkbox>
+      }
+
+      <div class="extras-add">
+        <ng-container [ngTemplateOutlet]="addButton" />
+      </div>
+    </div>
+  }
   @if (itemData?.variants?.length) {
     <div class="variants">
       @for (variant of itemData?.variants; track variant.id) {
@@ -63,6 +88,7 @@
           [currency]="currency()"
           [canCreateBite]="canCreateBite()"
           [canAddToCart]="canAddToCart()"
+          [extras]="extras()"
           (addToCartClick)="addToCartClick.emit($event)"
           isVariant
         />
@@ -70,3 +96,14 @@
     </div>
   }
 </div>
+
+<ng-template #addButton>
+  <ion-button
+    size="small"
+    data-testid="menu-item-add-to-cart"
+    [disabled]="isUnavailable(item())"
+    (click)="onAddToCartClick(item())"
+  >
+    {{ 'table-order-add' | transloco }}
+  </ion-button>
+</ng-template>

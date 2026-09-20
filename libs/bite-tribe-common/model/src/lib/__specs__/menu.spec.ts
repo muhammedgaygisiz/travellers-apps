@@ -1,12 +1,21 @@
 import {
   backfillMenuIds,
   createOrderLineSnapshot,
+  findMenuExtraForItem,
   findMenuItemById,
   isMenuItemAvailable,
   isMenuVariantAvailable,
+  menuExtrasForItem,
+  orderLineUnitPrice,
   withMenuIds,
 } from '../../index';
-import type { Category, Menu, MenuIdFactory, MenuItem } from '../../index';
+import type {
+  Category,
+  ExtraItem,
+  Menu,
+  MenuIdFactory,
+  MenuItem,
+} from '../../index';
 
 /**
  * Menu-item identity, availability and the copy an order line keeps
@@ -50,10 +59,22 @@ describe('menus', () => {
     price: 7,
   };
 
+  const mozzarella: ExtraItem = {
+    id: 'extra-mozzarella',
+    name: 'Extra mozzarella',
+    price: 2,
+  };
+
+  const nduja: ExtraItem = { id: 'extra-nduja', name: "'Nduja", price: 2.5 };
+
   const pizze: Category = {
     id: 'category-pizze',
     title: 'Pizze',
     items: [margherita],
+    extrasBlock: {
+      description: 'Add to any pizza',
+      extras: [mozzarella, nduja],
+    },
   };
 
   const dolci: Category = {
@@ -104,6 +125,50 @@ describe('menus', () => {
     it('answers undefined for an item that is no longer on the menu', () => {
       expect(findMenuItemById(menu, 'item-calzone')).toBeUndefined();
       expect(findMenuItemById(undefined, 'item-margherita')).toBeUndefined();
+    });
+  });
+
+  /**
+   * The rule issue #1598 settled: a dish's extras are its category's, applied
+   * in one place so the cart, the two renderers and the backend cannot offer
+   * or refuse different things.
+   */
+  describe('the extras a dish is offered with', () => {
+    it('offers a dish the extras of its own category', () => {
+      expect(menuExtrasForItem(menu, 'item-margherita')).toEqual([
+        mozzarella,
+        nduja,
+      ]);
+    });
+
+    it('offers a variant the same extras as the dish it is a size of', () => {
+      expect(menuExtrasForItem(menu, 'variant-margherita-large')).toEqual([
+        mozzarella,
+        nduja,
+      ]);
+    });
+
+    it('offers nothing for a category with no extras block', () => {
+      expect(menuExtrasForItem(menu, 'item-tiramisu')).toEqual([]);
+    });
+
+    it('offers nothing for a dish that is not on the menu', () => {
+      expect(menuExtrasForItem(menu, 'item-calzone')).toEqual([]);
+      expect(menuExtrasForItem(undefined, 'item-margherita')).toEqual([]);
+    });
+
+    /**
+     * Scoped to the dish rather than searched across the menu, on the same
+     * terms as a variant: naming an extra of another section is naming an
+     * extra the kitchen is not selling with this dish.
+     */
+    it('does not find an extra offered with a different category', () => {
+      expect(
+        findMenuExtraForItem(menu, 'item-margherita', 'extra-nduja'),
+      ).toEqual(nduja);
+      expect(
+        findMenuExtraForItem(menu, 'item-tiramisu', 'extra-nduja'),
+      ).toBeUndefined();
     });
   });
 
@@ -182,6 +247,53 @@ describe('menus', () => {
      * A second run of the admin backfill must change nothing. Replacing an id
      * that already exists is the one thing this whole issue is about not doing.
      */
+    /**
+     * The extras half of issue #1598. A menu written before it carries extras
+     * with no ids, and the owner's next save persists the ones the backfill
+     * adds - the same two-place answer issue #1099 gave for items.
+     */
+    it('fills an extra that has no id and counts it apart', () => {
+      const legacy = {
+        ...menu,
+        categories: [
+          {
+            ...pizze,
+            extrasBlock: {
+              description: 'Add to any pizza',
+              extras: [{ name: 'Extra mozzarella', price: 2 }, { ...nduja }],
+            },
+          },
+          dolci,
+        ],
+      } as unknown as Menu;
+
+      const {
+        menu: filled,
+        categories,
+        items,
+        extras,
+      } = backfillMenuIds(legacy, idFactory());
+
+      expect(categories).toBe(0);
+      expect(items).toBe(0);
+      expect(extras).toBe(1);
+      expect(filled.categories[0].extrasBlock?.extras[0]).toEqual({
+        id: 'generated-0',
+        name: 'Extra mozzarella',
+        price: 2,
+      });
+      expect(filled.categories[0].extrasBlock?.extras[1].id).toBe(
+        'extra-nduja',
+      );
+      expect(filled.categories[0].extrasBlock?.description).toBe(
+        'Add to any pizza',
+      );
+    });
+
+    it('leaves a category whose extras all have ids by identity', () => {
+      expect(withMenuIds(menu, idFactory()).categories[0]).toBe(pizze);
+    });
+
     it('changes nothing on a second run', () => {
       const legacy = {
         ...menu,
@@ -344,6 +456,87 @@ describe('menus', () => {
 
       expect(findMenuItemById(repriced, line.menuItemId)?.price).toBe(14);
       expect(line.price).toBe(12);
+    });
+
+    /** The extras half of the same record (GitHub issue #1598). */
+    describe('the extras it was ordered with', () => {
+      it('records each extra by id, name and price', () => {
+        const line = createOrderLineSnapshot({
+          item: margherita,
+          quantity: 1,
+          currency: 'EUR',
+          extras: [mozzarella, nduja],
+        });
+
+        expect(line.extras).toEqual([
+          { extraId: 'extra-mozzarella', name: 'Extra mozzarella', price: 2 },
+          { extraId: 'extra-nduja', name: "'Nduja", price: 2.5 },
+        ]);
+      });
+
+      it('leaves the field absent when nothing was ticked', () => {
+        const none = createOrderLineSnapshot({
+          item: margherita,
+          quantity: 1,
+          currency: 'EUR',
+          extras: [],
+        });
+
+        expect('extras' in none).toBe(false);
+      });
+
+      /**
+       * The dish's price stays the dish's. Folding the extras into it would
+       * make the backend compare a sum against a menu price and refuse every
+       * order that carried one.
+       */
+      it('leaves the dish price alone and prices the unit separately', () => {
+        const line = createOrderLineSnapshot({
+          item: margherita,
+          variant: margherita.variants?.[0],
+          quantity: 3,
+          currency: 'EUR',
+          extras: [mozzarella],
+        });
+
+        expect(line.price).toBe(16);
+        expect(orderLineUnitPrice(line)).toBe(18);
+      });
+
+      it('prices a unit at the dish alone when nothing was ticked', () => {
+        expect(orderLineUnitPrice({ price: 12 })).toBe(12);
+        expect(orderLineUnitPrice({ price: 12, extras: [] })).toBe(12);
+      });
+
+      it('does not follow a later price change to an extra', () => {
+        const line = createOrderLineSnapshot({
+          item: margherita,
+          quantity: 1,
+          currency: 'EUR',
+          extras: [mozzarella],
+        });
+
+        const repriced: Menu = {
+          ...menu,
+          categories: [
+            {
+              ...pizze,
+              extrasBlock: {
+                description: 'Add to any pizza',
+                extras: [{ ...mozzarella, price: 3 }, nduja],
+              },
+            },
+            dolci,
+          ],
+        };
+
+        expect(
+          findMenuExtraForItem(repriced, 'item-margherita', 'extra-mozzarella')
+            ?.price,
+        ).toBe(3);
+        expect(line.extras?.[0].price).toBe(2);
+        expect(orderLineUnitPrice(line)).toBe(14);
+      });
     });
   });
 });

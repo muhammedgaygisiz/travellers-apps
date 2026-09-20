@@ -661,6 +661,8 @@
   "table-order-refused-itemMissing": "{{item}} is no longer on the menu. Take it out and send the rest.",
   "table-order-refused-itemUnavailable": "{{item}} isn't available right now. Take it out and send the rest.",
   "table-order-refused-priceChanged": "The price of {{item}} has changed. Check it and send again.",
+  "table-order-refused-extraMissing": "{{extra}} is no longer offered with {{item}}. Take it off and send the rest.",
+  "table-order-refused-extraPriceChanged": "The price of {{extra}} on {{item}} has changed. Check it and send again.",
   "table-order-refused-currencyChanged": "The menu's prices have changed currency. Check your order and send again.",
   "table-assistance-heading": "Need something?",
   "table-assistance-callStaff-idle": "Call a waiter",

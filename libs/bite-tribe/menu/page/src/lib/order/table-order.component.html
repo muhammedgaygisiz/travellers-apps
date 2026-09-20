@@ -59,12 +59,21 @@
             <p data-testid="table-order-refusal-reason">
               {{
                 'table-order-refused-' + refused.reason
-                  | transloco: { item: refusedName() }
+                  | transloco
+                    : { item: refusedName(), extra: refusedExtraName() }
               }}
             </p>
 
+            <!--
+              Both prices, on either reason that is about one (issue #1598).
+              An extra's price moving is the same event as a dish's, one row
+              further in, and it earns the same sentence rather than a second
+              one that says less.
+            -->
             @if (
-              refused.reason === 'priceChanged' && refused.item;
+              (refused.reason === 'priceChanged' ||
+                refused.reason === 'extraPriceChanged') &&
+                refused.item;
               as changed
             ) {
               <p class="note" data-testid="table-order-price-change">
@@ -116,6 +125,17 @@
                       {{ priceLabel(lineTotal(line)) }}
                     </span>
                   </div>
+
+                  <!--
+                    What was ticked on this row (issue #1598). The total above
+                    already includes it; this is the guest reading back what
+                    they chose, which is what makes the number check out.
+                  -->
+                  @if (line.extras.length) {
+                    <p class="cart-line-extras" data-testid="cart-line-extras">
+                      {{ lineExtras(line) }}
+                    </p>
+                  }
 
                   <div class="cart-line-quantity">
                     <ion-button
@@ -404,6 +424,14 @@
                       <li class="order-line">
                         <span>
                           {{ line.quantity }} &times; {{ orderLineName(line) }}
+                          @if (line.extras?.length) {
+                            <span
+                              class="order-line-extras"
+                              data-testid="order-line-extras"
+                            >
+                              {{ orderLineExtras(line) }}
+                            </span>
+                          }
                         </span>
                         <span>
                           {{

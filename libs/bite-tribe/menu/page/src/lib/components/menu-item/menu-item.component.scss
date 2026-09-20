@@ -60,6 +60,40 @@
       }
     }
 
+    .extras {
+      grid-column: 1 / -1;
+
+      .extra {
+        display: block;
+        font-size: 0.9rem;
+        width: 100%;
+
+        &::part(label) {
+          display: flex;
+          gap: 0.5rem;
+          justify-content: space-between;
+          width: 100%;
+        }
+      }
+
+      .extra-price {
+        color: var(--ion-color-medium);
+        white-space: nowrap;
+      }
+
+      /* The add button, moved under the boxes it depends on. */
+      .extras-add {
+        display: flex;
+        justify-content: flex-end;
+
+        ion-button {
+          --padding-start: 0;
+          --padding-end: 0;
+          margin: 0;
+        }
+      }
+    }
+
     .variants {
       border-left: 1px solid var(--ion-color-tertiary-tint);
       grid-column: 1 / -1;

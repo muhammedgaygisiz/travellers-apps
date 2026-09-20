@@ -661,6 +661,8 @@
   "table-order-refused-itemMissing": "{{item}} ไม่มีในเมนูแล้ว นำออกแล้วส่งรายการที่เหลือ",
   "table-order-refused-itemUnavailable": "{{item}} ตอนนี้ไม่มีให้บริการ นำออกแล้วส่งรายการที่เหลือ",
   "table-order-refused-priceChanged": "ราคาของ {{item}} เปลี่ยนไป ตรวจสอบแล้วส่งใหม่อีกครั้ง",
+  "table-order-refused-extraMissing": "{{extra}} ไม่มีให้เลือกกับ {{item}} แล้ว นำออกแล้วส่งรายการที่เหลือ",
+  "table-order-refused-extraPriceChanged": "ราคาของ {{extra}} สำหรับ {{item}} เปลี่ยนไป ตรวจสอบแล้วส่งใหม่อีกครั้ง",
   "table-order-refused-currencyChanged": "สกุลเงินของราคาในเมนูเปลี่ยนไป ตรวจสอบรายการแล้วส่งใหม่อีกครั้ง",
   "table-assistance-heading": "ต้องการอะไรไหม",
   "table-assistance-callStaff-idle": "เรียกพนักงาน",

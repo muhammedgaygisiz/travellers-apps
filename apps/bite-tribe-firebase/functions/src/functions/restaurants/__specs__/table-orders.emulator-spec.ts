@@ -56,6 +56,9 @@ const MARGHERITA = 'item-margherita';
 const MARGHERITA_LARGE = 'variant-margherita-large';
 const TIRAMISU = 'item-tiramisu';
 
+const MOZZARELLA = 'extra-mozzarella';
+const NDUJA = 'extra-nduja';
+
 const EUR = 'EUR';
 
 /** Wednesday 2026-09-16, 12:00 in Berlin. The restaurant is open. */
@@ -199,6 +202,17 @@ const menuCategories = (): Record<string, unknown>[] => [
         variants: [{ id: MARGHERITA_LARGE, name: 'Large', price: 16 }],
       },
     ],
+    // The pizza section offers extras and the dessert section does not
+    // (GitHub issue #1598), which is what makes "an extra belongs to a
+    // category" testable: the same extra id named on the tiramisu has to
+    // find nothing.
+    extrasBlock: {
+      description: 'Add to any pizza',
+      extras: [
+        { id: MOZZARELLA, name: 'Extra mozzarella', price: 2 },
+        { id: NDUJA, name: "'Nduja", price: 2.5 },
+      ],
+    },
   },
   {
     id: 'category-dessert',
@@ -750,6 +764,196 @@ describe('table cart and order submission', () => {
 
       expect(result.reason).toBe('itemMissing');
       expect(result.item?.variantId).toBe(MARGHERITA_LARGE);
+    });
+  });
+
+  /**
+   * The extras a line was ordered with (GitHub issue #1598).
+   *
+   * Revalidated on exactly the terms the dish above them is, which is what
+   * these assert: still offered with *this* dish, still at the price the guest
+   * was shown, and recorded on the line by id, name and price so a receipt
+   * cannot be rewritten by a later menu edit.
+   */
+  describe('extras', () => {
+    const withMozzarella = (
+      overrides: Record<string, unknown> = {},
+    ): Record<string, unknown> =>
+      margherita({
+        extras: [{ extraId: MOZZARELLA, price: 2 }],
+        ...overrides,
+      });
+
+    it('records each extra by id, name and price', async () => {
+      await ordering();
+
+      const { order } = await submitted([withMozzarella()]);
+
+      expect(order.lines[0].extras).toEqual([
+        { extraId: MOZZARELLA, name: 'Extra mozzarella', price: 2 },
+      ]);
+      expect(order.lines[0].price).toBe(12);
+    });
+
+    /**
+     * The one number the guest agreed to. The dish price stays the dish's and
+     * the extras are added on top of it, per unit.
+     */
+    it('totals the dish plus its extras, times the quantity', async () => {
+      await ordering();
+
+      const { order } = await submitted([
+        margherita({
+          quantity: 2,
+          extras: [
+            { extraId: MOZZARELLA, price: 2 },
+            { extraId: NDUJA, price: 2.5 },
+          ],
+        }),
+      ]);
+
+      expect(order.total).toBe(33);
+    });
+
+    it('prices extras onto a variant rather than onto the dish', async () => {
+      await ordering();
+
+      const { order } = await submitted([
+        withMozzarella({ variantId: MARGHERITA_LARGE, price: 16 }),
+      ]);
+
+      expect(order.lines[0].price).toBe(16);
+      expect(order.total).toBe(18);
+    });
+
+    it('writes no extras field for a line that ticked none', async () => {
+      await ordering();
+
+      const { order } = await submitted();
+
+      expect('extras' in order.lines[0]).toBe(false);
+    });
+
+    it('refuses an extra whose price moved, naming it and both prices', async () => {
+      await ordering();
+      await setMenu([
+        {
+          id: 'category-pizza',
+          title: 'Pizza',
+          items: [{ id: MARGHERITA, name: 'Margherita', price: 12 }],
+          extrasBlock: {
+            description: 'Add to any pizza',
+            extras: [{ id: MOZZARELLA, name: 'Extra mozzarella', price: 3 }],
+          },
+        },
+      ]);
+
+      expect(await refused([withMozzarella()])).toEqual({
+        ok: false,
+        reason: 'extraPriceChanged',
+        item: {
+          menuItemId: MARGHERITA,
+          name: 'Margherita',
+          extraId: MOZZARELLA,
+          extraName: 'Extra mozzarella',
+          shownPrice: 2,
+          currentPrice: 3,
+        },
+      });
+    });
+
+    it('refuses an extra the owner has withdrawn', async () => {
+      await ordering();
+      await setMenu([
+        {
+          id: 'category-pizza',
+          title: 'Pizza',
+          items: [{ id: MARGHERITA, name: 'Margherita', price: 12 }],
+        },
+      ]);
+
+      expect(await refused([withMozzarella()])).toEqual({
+        ok: false,
+        reason: 'extraMissing',
+        item: {
+          menuItemId: MARGHERITA,
+          name: 'Margherita',
+          extraId: MOZZARELLA,
+        },
+      });
+    });
+
+    /**
+     * An extra belongs to a category, so one named on a dish from another
+     * section finds nothing - the same rule a variant is held to, and the
+     * reason the dessert section has no extras block.
+     */
+    it('refuses an extra offered with a different category', async () => {
+      await ordering();
+
+      const result = await refused([
+        {
+          menuItemId: TIRAMISU,
+          quantity: 1,
+          price: 6,
+          extras: [{ extraId: MOZZARELLA, price: 2 }],
+        },
+      ]);
+
+      expect(result.reason).toBe('extraMissing');
+      expect(result.item?.extraId).toBe(MOZZARELLA);
+    });
+
+    it('writes nothing at all when an extra is refused', async () => {
+      await ordering();
+
+      const { order } = await submitted();
+      await setMenu([
+        {
+          id: 'category-pizza',
+          title: 'Pizza',
+          items: [{ id: MARGHERITA, name: 'Margherita', price: 12 }],
+        },
+      ]);
+
+      await refused([withMozzarella()]);
+
+      expect(await readOrders(order.visitId)).toHaveLength(1);
+    });
+
+    /**
+     * A tick box, not a quantity. A line naming the same extra twice is a
+     * client bug rather than a decision any screen can produce, so it is an
+     * `invalid-argument` rather than a refusal a guest is asked to act on.
+     */
+    it('rejects a line that names the same extra twice', async () => {
+      await ordering();
+
+      expect(
+        await codeOf(
+          submit([
+            margherita({
+              extras: [
+                { extraId: MOZZARELLA, price: 2 },
+                { extraId: MOZZARELLA, price: 2 },
+              ],
+            }),
+          ]),
+        ),
+      ).toBe('invalid-argument');
+    });
+
+    it('rejects an extra with no id or no price', async () => {
+      await ordering();
+
+      expect(
+        await codeOf(submit([margherita({ extras: [{ price: 2 }] })])),
+      ).toBe('invalid-argument');
+      expect(
+        await codeOf(
+          submit([margherita({ extras: [{ extraId: MOZZARELLA }] })]),
+        ),
+      ).toBe('invalid-argument');
     });
   });
 

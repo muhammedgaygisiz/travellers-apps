@@ -5,10 +5,12 @@ import {
   computed,
   input,
   output,
+  signal,
 } from '@angular/core';
-import { IonButton } from '@ionic/angular/standalone';
+import { NgTemplateOutlet } from '@angular/common';
+import { IonButton, IonCheckbox } from '@ionic/angular/standalone';
 import { isMenuVariantAvailable } from 'model';
-import type { MenuItem } from 'model';
+import type { ExtraItem, MenuItem } from 'model';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { currencyCodes } from 'utils';
 
@@ -24,6 +26,13 @@ import { currencyCodes } from 'utils';
 export interface MenuItemSelection {
   item: MenuItem;
   variant?: MenuItem;
+  /**
+   * The extras the guest ticked on this row (GitHub issue #1598).
+   *
+   * Absent on every surface that is not ordering, and on an orderable row
+   * whose category offers none.
+   */
+  extras?: ExtraItem[];
 }
 
 @Component({
@@ -31,7 +40,7 @@ export interface MenuItemSelection {
   selector: 'menu-item',
   templateUrl: './menu-item.component.html',
   styleUrl: './menu-item.component.scss',
-  imports: [IonButton, TranslocoPipe],
+  imports: [IonButton, IonCheckbox, NgTemplateOutlet, TranslocoPipe],
 })
 export class MenuItemComponent {
   item = input<MenuItem>();
@@ -119,6 +128,72 @@ export class MenuItemComponent {
    */
   canAddToCart = input(false, { transform: booleanAttribute });
 
+  /**
+   * The extras this dish may be ordered with (GitHub issue #1598).
+   *
+   * Passed in rather than read off a category, because this component is given
+   * one dish and has never been given the menu around it. The category above
+   * decides - a dish's extras are its category's, `menuExtrasForItem` - and
+   * threads the answer down, including into the variant rows below: a large
+   * Margherita is a Margherita, and takes the extras of the section it is
+   * printed in.
+   *
+   * Drawn only in ordering mode. The two reading surfaces render the
+   * category's extras block once, under the dishes, which is where a menu
+   * prints it; ticking one of them is only meaningful where there is a cart.
+   */
+  extras = input<readonly ExtraItem[]>([]);
+
+  /**
+   * Which extras are ticked right now, by id.
+   *
+   * Local to the row and reset the moment it is added, because a tick is part
+   * of building *one* line rather than a preference about the dish. A guest
+   * who adds a pizza with extra cheese and then taps add again means a second
+   * plain pizza unless they say otherwise - and a picker that stayed ticked
+   * would quietly charge them for cheese they never asked for a second time.
+   */
+  private readonly ticked = signal<readonly string[]>([]);
+
+  /** Whether the picker has anything to draw on this row. */
+  readonly hasExtras = computed(() => this.extras().length > 0);
+
+  /**
+   * Whether this row draws the extras picker.
+   *
+   * Also decides where the add button goes: a row with a picker puts it under
+   * the boxes, because a button above them is one the guest taps before
+   * reading them. Nothing is offered on an unavailable dish - extras on
+   * something the kitchen will not serve is a control that leads nowhere.
+   */
+  readonly showExtrasPicker = computed(
+    () =>
+      this.canAddToCart() &&
+      this.hasExtras() &&
+      !this.isUnavailable(this.item()),
+  );
+
+  isTicked(extraId: string): boolean {
+    return this.ticked().includes(extraId);
+  }
+
+  /** What one extra adds, rendered beside its name. */
+  extraPriceLabel(extra: ExtraItem): string {
+    const symbol = this.currencySymbol();
+
+    return symbol ? `+${extra.price} ${symbol}` : `+${extra.price}`;
+  }
+
+  toggleExtra(extraId: string, checked: boolean): void {
+    this.ticked.update((ids) =>
+      checked
+        ? ids.includes(extraId)
+          ? ids
+          : [...ids, extraId]
+        : ids.filter((id) => id !== extraId),
+    );
+  }
+
   createBiteClick = output<MenuItem>();
 
   /**
@@ -138,9 +213,18 @@ export class MenuItemComponent {
       return;
     }
 
-    this.addToCartClick.emit(
-      parent ? { item: parent, variant: itemData } : { item: itemData },
-    );
+    // Taken in the menu's order rather than in the order they were tapped, so
+    // a line reads the way the section it came from is printed. The cart's key
+    // sorts the ids anyway, so this is about what the guest sees rather than
+    // about which row they land on.
+    const ticked = this.extras().filter((extra) => this.isTicked(extra.id));
+
+    this.addToCartClick.emit({
+      ...(parent ? { item: parent, variant: itemData } : { item: itemData }),
+      ...(ticked.length ? { extras: [...ticked] } : {}),
+    });
+
+    this.ticked.set([]);
   }
 
   onCreateBiteClick(itemData: MenuItem | undefined): void {

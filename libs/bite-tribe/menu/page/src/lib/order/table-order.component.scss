@@ -150,6 +150,20 @@
   font-size: 0.9rem;
 }
 
+/*
+ * The extras a line carries, on both the cart row and the sent order
+ * (GitHub issue #1598). Small print under the dish rather than rows of their
+ * own: the price beside the dish already includes them, and a second priced
+ * row would read as a second thing the guest is being charged for.
+ */
+.cart-line-extras,
+.order-line-extras {
+  color: var(--ion-color-medium);
+  display: block;
+  font-size: 0.85rem;
+  margin: 0.1rem 0 0;
+}
+
 .orders-total {
   font-weight: 600;
   text-align: end;

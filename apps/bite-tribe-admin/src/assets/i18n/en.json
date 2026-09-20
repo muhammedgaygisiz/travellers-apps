@@ -102,6 +102,7 @@
   "migration-count-updated": "Updated",
   "migration-count-categories": "Categories given an id",
   "migration-count-items": "Items and variants given an id",
+  "migration-count-extras": "Extras given an id",
   "restaurant-candidates": "Restaurant candidates",
   "candidate-evidence-count": "{{count}} Bite evidence",
   "candidate-nearby-bite-evidence": "Nearby Bite evidence",

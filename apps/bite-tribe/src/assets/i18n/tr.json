@@ -661,6 +661,8 @@
   "table-order-refused-itemMissing": "{{item}} artık menüde değil. Çıkar ve kalanını gönder.",
   "table-order-refused-itemUnavailable": "{{item}} şu anda mevcut değil. Çıkar ve kalanını gönder.",
   "table-order-refused-priceChanged": "{{item}} ürününün fiyatı değişti. Kontrol edip tekrar gönder.",
+  "table-order-refused-extraMissing": "{{extra}} artık {{item}} ile sunulmuyor. Çıkar ve kalanını gönder.",
+  "table-order-refused-extraPriceChanged": "{{item}} üzerindeki {{extra}} fiyatı değişti. Kontrol edip tekrar gönder.",
   "table-order-refused-currencyChanged": "Menünün fiyatları başka bir para birimine geçti. Siparişini kontrol edip tekrar gönder.",
   "table-assistance-heading": "Bir şeye mi ihtiyacın var?",
   "table-assistance-callStaff-idle": "Garson çağır",

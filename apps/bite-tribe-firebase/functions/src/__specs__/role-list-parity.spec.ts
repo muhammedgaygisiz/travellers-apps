@@ -66,6 +66,16 @@ const rolesIn = (file: string): string[] => {
 const claimKeyIn = (file: string): string | undefined =>
   /ROLES_CLAIM = '([^']+)'/.exec(readFileSync(file, 'utf8'))?.[1];
 
+/**
+ * Which roles the file excludes from what an operator may grant, read as text
+ * for the same reason the list itself is (issue #1629).
+ */
+const grantableIn = (file: string): string[] =>
+  rolesIn(file).filter(
+    (role) =>
+      !new RegExp(`role !== '${role}'`).test(readFileSync(file, 'utf8')),
+  );
+
 describe('role list parity', () => {
   it('finds a role list in both files', () => {
     expect(rolesIn(FUNCTIONS_ROLES).length).toBeGreaterThan(1);
@@ -80,8 +90,24 @@ describe('role list parity', () => {
     expect(rolesIn(FUNCTIONS_ROLES)).toEqual(rolesIn(LIBRARY_ROLES));
   });
 
-  it('carries the three roles that exist', () => {
-    expect(rolesIn(FUNCTIONS_ROLES)).toEqual(['admin', 'business', 'staff']);
+  /**
+   * Four since issue #1629, and the fourth is not like the others: `tableGuest`
+   * is written by `startTableSession` on the anonymous account a scan mints,
+   * never by `setUserRoles`, and the admin app's picker offers the three an
+   * operator can actually grant.
+   */
+  it('carries the four roles that exist', () => {
+    expect(rolesIn(FUNCTIONS_ROLES)).toEqual([
+      'admin',
+      'business',
+      'staff',
+      'tableGuest',
+    ]);
+  });
+
+  it('offers only the grantable roles to an operator', () => {
+    expect(grantableIn(FUNCTIONS_ROLES)).toEqual(grantableIn(LIBRARY_ROLES));
+    expect(grantableIn(LIBRARY_ROLES)).not.toContain('tableGuest');
   });
 
   // A claim key that disagreed would be worse than a missing role: the backend

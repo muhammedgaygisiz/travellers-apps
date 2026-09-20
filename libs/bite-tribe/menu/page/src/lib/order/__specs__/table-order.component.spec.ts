@@ -154,6 +154,9 @@ describe(TableOrder.name, () => {
   >;
   let assistanceRefusal: WritableSignal<{ reason: 'cooldown' } | undefined>;
   let assistanceStale: WritableSignal<boolean>;
+  let sessionDocument: WritableSignal<
+    { currentTableLabel?: string } | undefined
+  >;
   let ask: jest.Mock;
 
   const show = (next: TableOrderView): void => {
@@ -199,6 +202,9 @@ describe(TableOrder.name, () => {
     });
     assistanceRefusal = signal<{ reason: 'cooldown' } | undefined>(undefined);
     assistanceStale = signal(false);
+    sessionDocument = signal<{ currentTableLabel?: string } | undefined>(
+      undefined,
+    );
     ask = jest.fn().mockResolvedValue(undefined);
 
     // The history is signals all the way down, so the fake is the four the
@@ -206,6 +212,9 @@ describe(TableOrder.name, () => {
     // chain of listeners behind those signals has its own spec.
     const history = {
       orders,
+      // The guest's own session, for the table number the screen prints: a
+      // party moved to another table reads the new one off it (`RD-TS-43`).
+      session: sessionDocument,
       hasOrders: computed(() => orders().length > 0),
       total: computed(() => tableOrdersTotal(orders())),
       status: sessionStatus,
@@ -294,6 +303,20 @@ describe(TableOrder.name, () => {
     show(ORDERING);
 
     expect(text()).toContain('Ordering at Sakura Kitchen, table 12');
+  });
+
+  /**
+   * Staff walked the party to a bigger table halfway through the meal
+   * (`RD-TS-43`). The session knows where they are sitting now; the scan knows
+   * only the sticker they read twenty minutes ago, at a table somebody else is
+   * eating at by now.
+   */
+  it('names the table the party was moved to, not the one they scanned', () => {
+    sessionDocument.set({ currentTableLabel: '5' });
+    render();
+    show(ORDERING);
+
+    expect(text()).toContain('Ordering at Sakura Kitchen, table 5');
   });
 
   /**

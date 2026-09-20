@@ -1,0 +1,54 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="table-sessions">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ 'table-sessions' | transloco }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-note>{{ 'table-sessions-hint' | transloco }}</ion-note>
+
+          <ion-list lines="full" data-testid="table-sessions">
+            @for (session of sessions(); track session.id) {
+            <ion-item [attr.data-testid]="'table-session-' + session.id">
+              <ion-label>
+                <h2>
+                  {{ 'table-sessions-table' | transloco: { label:
+                  session.tableId } }} @if (movedTo(session)) {
+                  <ion-text color="medium"
+                    >· {{ 'table-sessions-moved-to' | transloco: { label:
+                    movedTo(session) } }}</ion-text
+                  >
+                  }
+                </h2>
+                <p>
+                  {{ 'table-session-status-' + session.status | transloco }}
+                </p>
+                <p>
+                  {{ 'table-sessions-restaurant' | transloco }}: {{
+                  session.restaurantId }}
+                </p>
+                <ion-text color="medium">
+                  <p>
+                    {{ 'table-sessions-last-active' | transloco }}: {{
+                    lastActive(session) }} @if (session.isAnonymousGuest) { · {{
+                    'table-sessions-anonymous' | transloco }} }
+                  </p>
+                </ion-text>
+              </ion-label>
+            </ion-item>
+            } @empty {
+            <ion-item data-testid="table-sessions-empty">
+              <ion-label>{{ 'table-sessions-empty' | transloco }}</ion-label>
+            </ion-item>
+            }
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </ion-content>
+</ta-page>

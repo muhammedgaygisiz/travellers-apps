@@ -3,6 +3,7 @@ import {
   PENDING_SESSION_URGENT_AFTER_MS,
   SCAN_ANOMALY_ACTIVE_WITHIN_MS,
   pendingSessionRows,
+  tableSessionRows,
   scanAnomalyRows,
 } from '../scan-signal-rows';
 
@@ -243,5 +244,76 @@ describe('pendingSessionRows', () => {
     );
 
     expect(row.label).toBe('');
+  });
+});
+
+/**
+ * The register of who is attached to a table (GitHub issue #1629), which is
+ * the opposite grain from the waiting list above: one row per guest rather
+ * than per table, because a party of four holding four phones is one job at
+ * the door and four sessions in the room.
+ */
+describe('tableSessionRows', () => {
+  it('lists every live session, most recently active first', () => {
+    const rows = tableSessionRows(
+      [
+        session({ id: 'older', lastActiveAt: NOW - 10 * MINUTE }),
+        session({ id: 'newer', lastActiveAt: NOW - MINUTE }),
+      ],
+      TABLES,
+      NOW,
+    );
+
+    expect(rows.map((row) => row.id)).toEqual(['newer', 'older']);
+  });
+
+  /** A closed meal is a support question, and this list is a service one. */
+  it('leaves an ended session out', () => {
+    const rows = tableSessionRows(
+      [
+        session({ id: 'live', status: 'active' }),
+        session({ id: 'left', status: 'left' }),
+        session({ id: 'expired', status: 'expired' }),
+        session({ id: 'closed', status: 'closed' }),
+      ],
+      TABLES,
+      NOW,
+    );
+
+    expect(rows.map((row) => row.id)).toEqual(['live']);
+  });
+
+  it('names the table, the status and whether the guest has an account', () => {
+    expect(
+      tableSessionRows([session({ isAnonymousGuest: false })], TABLES, NOW)[0],
+    ).toMatchObject({
+      tableId: 'table-12',
+      label: '12',
+      status: 'pending',
+      anonymous: false,
+    });
+  });
+
+  /** A party staff walked to another table keeps this session (`RD-TS-43`). */
+  it('says where a moved party is sitting now', () => {
+    const rows = tableSessionRows(
+      [
+        session({ currentTableId: 'table-5', currentTableLabel: '5' }),
+        session({ id: 'stayed' }),
+      ],
+      TABLES,
+      NOW,
+    );
+
+    expect(rows[0].movedToLabel).toBe('5');
+    expect(
+      rows.find((row) => row.id === 'stayed')?.movedToLabel,
+    ).toBeUndefined();
+  });
+
+  it('still lists a guest whose table has left the plan', () => {
+    expect(
+      tableSessionRows([session({ tableId: 'gone' })], TABLES, NOW)[0],
+    ).toMatchObject({ tableId: 'gone', label: '' });
   });
 });

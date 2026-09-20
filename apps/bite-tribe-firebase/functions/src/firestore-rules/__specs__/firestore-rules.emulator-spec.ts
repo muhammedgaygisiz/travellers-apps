@@ -14,6 +14,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  orderBy,
   query,
   setDoc,
   updateDoc,
@@ -2775,6 +2776,36 @@ describe('backend-owned collections', () => {
  * uid, the same documents, a different sign-in provider - so a rule that
  * started refusing members too would fail there rather than passing here.
  */
+/**
+ * Every table session across every restaurant, which is the operator's view
+ * (GitHub issue #1629).
+ *
+ * The restaurant's own view is the path-scoped block above, and it is already
+ * tested there. What this pins down is that the group query is the operator's
+ * alone: an owner who could run it would be reading the dining rooms of every
+ * other restaurant on BiteTribe, which is the whole reason the per-restaurant
+ * clause is per-restaurant.
+ */
+describe('the sessions of every restaurant', () => {
+  const everySession = (db: Firestore): Query<DocumentData> =>
+    query(
+      collectionGroup(db, 'tableSessions'),
+      orderBy('lastActiveAt', 'desc'),
+    );
+
+  it('lets an operator list them', async () => {
+    await assertSucceeds(getDocs(everySession(asOperator())));
+  });
+
+  it('refuses the owner, the staff, a member and a table guest', async () => {
+    await assertFails(getDocs(everySession(asOwner())));
+    await assertFails(getDocs(everySession(asStaff())));
+    await assertFails(getDocs(everySession(asConsumer())));
+    await assertFails(getDocs(everySession(asTableGuest())));
+    await assertFails(getDocs(everySession(signedOut())));
+  });
+});
+
 describe('an anonymous table guest reaches nothing else of BiteTribe', () => {
   it('refuses it any /users document, its own uid included', async () => {
     await assertFails(getDoc(doc(asTableGuest(), 'users', STRANGER)));

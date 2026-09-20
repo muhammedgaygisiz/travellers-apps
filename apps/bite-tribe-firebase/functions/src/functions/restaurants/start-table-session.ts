@@ -2,6 +2,7 @@ import { logger } from 'firebase-functions';
 import { DocumentData, getFirestore } from 'firebase-admin/firestore';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { markTableGuest } from './table-guest-claim';
 import { recordScanAnomaly } from './record-scan-anomaly';
 import { RESTAURANT_COLLECTION } from './restaurant-authority';
 import {
@@ -35,7 +36,7 @@ import {
 } from './table-session';
 import { TABLE_STATES_COLLECTION, visitIdOf } from './table-state';
 import { TABLE_VISITS_COLLECTION, isOpenVisit } from './table-visit';
-import { isAnonymousSession } from '../shared/roles';
+import { TABLE_GUEST_ROLE, isAnonymousSession, rolesOf } from '../shared/roles';
 
 /**
  * Attaches the guest who scanned a code to the party at that table
@@ -473,6 +474,16 @@ export const startTableSessionHandler = async (
       position,
       now.getTime(),
     );
+  }
+
+  // The role a table guest holds (issue #1629), written on the account rather
+  // than inferred from it. Only for an anonymous caller, and only where the
+  // token does not already say so: a guest scanning a second code is already
+  // labelled, and a member who scans is not a table guest at all. Best effort
+  // by design - `markTableGuest` swallows its own failure - because the claim
+  // grants nothing and a scan must not fail over a label.
+  if (guest.isAnonymous && !rolesOf(request).includes(TABLE_GUEST_ROLE)) {
+    await markTableGuest(guest.uid);
   }
 
   return {

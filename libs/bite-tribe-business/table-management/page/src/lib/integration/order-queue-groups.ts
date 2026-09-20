@@ -107,6 +107,15 @@ export interface OrderTableGroup {
   tableId: string;
   /** The table's number as staff call it. Empty where the table has gone. */
   label: string;
+  /**
+   * The number the orders in this group were *taken* at, where the party has
+   * been moved since (`RD-TS-43`).
+   *
+   * Absent in the ordinary case. It is the pass's own reference - the ticket it
+   * accepted twenty minutes ago said table 12 - while the group above it is
+   * where the plates now have to go.
+   */
+  movedFromLabel?: string;
   orders: QueuedOrder[];
   /** How long the oldest order in the group has been waiting. */
   oldest: ElapsedParts;
@@ -190,8 +199,15 @@ export const groupOrdersByTable = (
   const labels = new Map(tables.map((table) => [table.id, table.label]));
   const groups = new Map<string, TableOrder[]>();
 
+  // Grouped by where the party is sitting **now**. An order carries the table
+  // it was taken at, and `moveTableVisit` writes the destination beside it
+  // (`RD-TS-43`): grouping by the first would send the waiter to a table that
+  // somebody else is eating at, and dropping the first would take from the
+  // pass the number it wrote on the ticket - so the group is the destination
+  // and the origin is printed on it.
   orders.forEach((order) => {
-    const group = groups.get(order.tableId);
+    const tableId = order.currentTableId || order.tableId;
+    const group = groups.get(tableId);
 
     if (group) {
       group.push(order);
@@ -199,7 +215,7 @@ export const groupOrdersByTable = (
       return;
     }
 
-    groups.set(order.tableId, [order]);
+    groups.set(tableId, [order]);
   });
 
   return [...groups.entries()]
@@ -208,6 +224,21 @@ export const groupOrdersByTable = (
         (first, second) => second.submittedAt - first.submittedAt,
       );
       const queued = sorted.map((order) => toQueuedOrder(order, now));
+
+      // The number the orders were taken at, where every order in the group
+      // agrees on one and it is not this table. A group can hold orders from
+      // more than one origin - a party moved twice, or two parties joined -
+      // and naming one of them would be worse than naming none.
+      const origins = new Set(
+        sorted
+          .filter(
+            (order) =>
+              (order.currentTableId || order.tableId) !== order.tableId,
+          )
+          .map((order) => order.tableId),
+      );
+      const movedFrom =
+        origins.size === 1 ? labels.get([...origins][0]) : undefined;
 
       return {
         // The instant the group is sorted by, kept beside the group rather
@@ -218,6 +249,7 @@ export const groupOrdersByTable = (
         group: {
           tableId,
           label: labels.get(tableId) ?? '',
+          ...(movedFrom ? { movedFromLabel: movedFrom } : {}),
           orders: queued,
           oldest: elapsedParts(sorted[sorted.length - 1].submittedAt, now),
           urgent: queued.some((order) => order.urgent),

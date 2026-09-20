@@ -30,7 +30,7 @@ import {
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
 import {
-  BITE_TRIBE_ROLES,
+  GRANTABLE_ROLES,
   BiteTribeRole,
   SUBSCRIPTION_TIERS,
   SubscriptionTier,
@@ -126,7 +126,12 @@ export class UserManagementComponent {
   readonly saveBlocked = output<{ uid: string; blocked: boolean }>();
   readonly logoutClick = output<void>();
 
-  readonly allRoles = BITE_TRIBE_ROLES;
+  /**
+   * The roles an operator may grant. Not every role: `tableGuest` is written by
+   * a table scan and refused by `setUserRoles` (issue #1629), so a checkbox for
+   * it would offer an action the backend declines.
+   */
+  readonly allRoles = GRANTABLE_ROLES;
   readonly allTiers = SUBSCRIPTION_TIERS;
 
   /**

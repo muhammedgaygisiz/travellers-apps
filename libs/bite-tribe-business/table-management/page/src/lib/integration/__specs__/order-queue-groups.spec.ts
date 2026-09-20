@@ -71,6 +71,60 @@ describe('the order queue grouping', () => {
   });
 
   /**
+   * The party was walked to another table after ordering (`RD-TS-43`). The
+   * plates go where they are sitting, so the group is the destination - and
+   * the number the ticket was taken under is printed on it, because that is
+   * how the pass knows the ticket.
+   */
+  describe('a party that has been moved', () => {
+    it('groups the orders under the table they are sitting at now', () => {
+      const groups = groupOrdersByTable(
+        [
+          order('a', { currentTableId: 'table-5', currentTableLabel: '5' }),
+          order('b', { currentTableId: 'table-5', currentTableLabel: '5' }),
+        ],
+        tables,
+        NOW,
+      );
+
+      expect(groups).toHaveLength(1);
+      expect(groups[0]).toMatchObject({
+        tableId: 'table-5',
+        label: '5',
+        movedFromLabel: '12',
+      });
+    });
+
+    it('says nothing about an origin for a party that never moved', () => {
+      const groups = groupOrdersByTable([order('a')], tables, NOW);
+
+      expect(groups[0].movedFromLabel).toBeUndefined();
+    });
+
+    /**
+     * Two origins in one group - a party moved twice, or two parties joined -
+     * and naming one of them would be worse than naming none.
+     */
+    it('names no origin when the group holds more than one', () => {
+      const groups = groupOrdersByTable(
+        [
+          order('a', { currentTableId: 'table-5', currentTableLabel: '5' }),
+          order('b', {
+            tableId: 'table-9',
+            currentTableId: 'table-5',
+            currentTableLabel: '5',
+          }),
+        ],
+        tables,
+        NOW,
+      );
+
+      expect(groups).toHaveLength(1);
+      expect(groups[0].movedFromLabel).toBeUndefined();
+    });
+  });
+
+  /**
    * Newest first, twice: the orders of a table, and the tables themselves. The
    * thing that just arrived is the thing nobody has looked at yet.
    */

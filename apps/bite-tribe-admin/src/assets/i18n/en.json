@@ -275,5 +275,20 @@
   "admin-restaurant-staff-remove-confirm-title": "Remove from staff?",
   "admin-restaurant-staff-remove-confirm-message": "The account loses the staff role and its place on this restaurant. A session it already has open can survive for up to an hour.",
   "admin-restaurant-staff-removed": "Removed from the staff of this restaurant.",
-  "admin-restaurant-staff-remove-failed": "Could not remove that account."
+  "admin-restaurant-staff-remove-failed": "Could not remove that account.",
+  "table-sessions": "Table sessions",
+  "table-sessions-hint": "Every guest attached to a table across BiteTribe, most recently active first.",
+  "table-sessions-table": "Table {{label}}",
+  "table-sessions-restaurant": "Restaurant",
+  "table-sessions-last-active": "Last active",
+  "table-sessions-anonymous": "no account",
+  "table-sessions-moved-to": "moved to {{label}}",
+  "table-sessions-empty": "No table sessions.",
+  "table-session-status-pending": "Waiting to be seated",
+  "table-session-status-active": "Seated",
+  "table-session-status-left": "Left",
+  "table-session-status-expired": "Expired",
+  "table-session-status-closed": "Closed with the visit",
+  "admin-tool-table-sessions": "Table sessions",
+  "admin-tool-table-sessions-description": "Who is attached to a table right now, across every restaurant."
 }

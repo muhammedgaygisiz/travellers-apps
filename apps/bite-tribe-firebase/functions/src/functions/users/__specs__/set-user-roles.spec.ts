@@ -159,6 +159,17 @@ describe('setUserRoles input', () => {
     ).toBe('invalid-argument');
   });
 
+  /**
+   * `tableGuest` is a role and the one nobody hands out (issue #1629): a table
+   * scan writes it on the anonymous account it admits. Granted here it would
+   * make an account that reads as a guest at no table.
+   */
+  it('rejects the table guest role, which a scan writes', async () => {
+    expect(
+      await codeOf(handle(request({ uid: TARGET_UID, roles: ['tableGuest'] }))),
+    ).toBe('invalid-argument');
+  });
+
   it('rejects a request naming neither a uid nor an email', async () => {
     expect(await codeOf(handle(request({ roles: ['business'] })))).toBe(
       'invalid-argument',

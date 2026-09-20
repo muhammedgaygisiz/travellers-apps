@@ -778,6 +778,94 @@ describe('table visits', () => {
     });
   });
 
+  /**
+   * The party is walked to a bigger table halfway through the meal (issue
+   * #1072, `RD-TS-43`). Their session and their orders hang from the visit
+   * rather than from the table, so they survive the move - and since neither
+   * document is told about it, both are stamped with where the party is
+   * sitting now. The table each was created at stays on it: a ticket that
+   * rewrote its own history is one the pass cannot recognise.
+   */
+  describe('what follows a party to another table', () => {
+    it('stamps the new table on the session and the orders of the visit', async () => {
+      const seated = await seat();
+      const visitId = seated.visitId ?? '';
+      const sessions = restaurantRef().collection('tableSessions');
+      const orders = restaurantRef()
+        .collection('visits')
+        .doc(visitId)
+        .collection('orders');
+
+      await sessions.doc(`${TABLE_12.length}_${TABLE_12}_guest-uid`).set({
+        id: `${TABLE_12.length}_${TABLE_12}_guest-uid`,
+        restaurantId: RESTAURANT,
+        tableId: TABLE_12,
+        guestUserId: 'guest-uid',
+        status: 'active',
+        visitId,
+        startedAt: 1_000,
+        lastActiveAt: 1_000,
+        isAnonymousGuest: true,
+      });
+      await orders.doc('req-1').set({
+        id: 'req-1',
+        restaurantId: RESTAURANT,
+        tableId: TABLE_12,
+        visitId,
+        guestUserId: 'guest-uid',
+        status: 'submitted',
+        total: 12,
+      });
+
+      await moveVisit(visitId, TABLE_5);
+
+      const [session, order] = await Promise.all([
+        sessions.doc(`${TABLE_12.length}_${TABLE_12}_guest-uid`).get(),
+        orders.doc('req-1').get(),
+      ]);
+
+      expect(session.data()).toMatchObject({
+        // Where the party is sitting now, for the phone in their hand.
+        currentTableId: TABLE_5,
+        currentTableLabel: '5',
+        // And where they scanned, which is what names this document.
+        tableId: TABLE_12,
+      });
+      expect(order.data()).toMatchObject({
+        currentTableId: TABLE_5,
+        currentTableLabel: '5',
+        tableId: TABLE_12,
+        // Nothing the guest agreed to moved with them.
+        total: 12,
+        status: 'submitted',
+      });
+    });
+
+    it("leaves another party's documents alone", async () => {
+      const seated = await seat();
+      const visitId = seated.visitId ?? '';
+      const sessions = restaurantRef().collection('tableSessions');
+
+      await sessions.doc('other-session').set({
+        id: 'other-session',
+        restaurantId: RESTAURANT,
+        tableId: TABLE_5,
+        guestUserId: 'other-guest',
+        status: 'active',
+        visitId: 'another-visit',
+        startedAt: 1_000,
+        lastActiveAt: 1_000,
+        isAnonymousGuest: true,
+      });
+
+      await moveVisit(visitId, TABLE_5);
+
+      expect(
+        (await sessions.doc('other-session').get()).data(),
+      ).not.toHaveProperty('currentTableId');
+    });
+  });
+
   describe('a visit whose table is gone', () => {
     /**
      * The acceptance criterion: a visit survives the deletion of its table in

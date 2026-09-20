@@ -7,6 +7,7 @@ import { BiteTribeApiService } from 'bite-tribe/api';
 import {
   RESTAURANT_COLLECTION,
   RestaurantsDataAccessService,
+  TABLE_SESSIONS_LIMIT,
 } from '../restaurants-data-access.service';
 
 jest.mock('@capacitor-firebase/firestore');
@@ -61,6 +62,77 @@ describe(`${RestaurantsDataAccessService.name} ownership`, () => {
     });
 
     service = TestBed.inject(RestaurantsDataAccessService);
+  });
+
+  /**
+   * Every table session in BiteTribe, which is the operator's view of a thing
+   * each restaurant also sees for itself (GitHub issue #1629, `RD-TS-44`).
+   */
+  describe('tableSessionsLoader', () => {
+    // Assigned rather than spied on: the plugin is automocked, and the
+    // automock carries the methods that existed when it was taken - which
+    // does not include the collection-group read this loader uses.
+    const getCollectionGroup = jest.fn();
+
+    beforeEach(() => {
+      (FirebaseFirestore as unknown as Record<string, jest.Mock>)[
+        'getCollectionGroup'
+      ] = getCollectionGroup;
+    });
+
+    it('reads the collection group, newest activity first and capped', async () => {
+      getCollectionGroup.mockResolvedValue({
+        snapshots: [
+          {
+            id: '8_table-12_guest-1',
+            data: { restaurantId: 'restaurant-1', status: 'active' },
+          },
+        ],
+      });
+
+      const sessions = await service.tableSessionsLoader({} as never);
+
+      expect(getCollectionGroup).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reference: 'tableSessions',
+          queryConstraints: [
+            {
+              type: 'orderBy',
+              fieldPath: 'lastActiveAt',
+              directionStr: 'desc',
+            },
+            { type: 'limit', limit: TABLE_SESSIONS_LIMIT },
+          ],
+        }),
+      );
+      expect(sessions).toEqual([
+        {
+          id: '8_table-12_guest-1',
+          restaurantId: 'restaurant-1',
+          status: 'active',
+        },
+      ]);
+    });
+
+    /** A read that answers nothing is an empty list rather than a failure. */
+    it('reads no sessions as an empty list', async () => {
+      getCollectionGroup.mockResolvedValue(undefined);
+
+      await expect(service.tableSessionsLoader({} as never)).resolves.toEqual(
+        [],
+      );
+    });
+
+    /** A document the platform delivered without data is skipped, not mapped. */
+    it('skips a snapshot carrying no data', async () => {
+      getCollectionGroup.mockResolvedValue({
+        snapshots: [{ id: 'empty', data: null }],
+      });
+
+      await expect(service.tableSessionsLoader({} as never)).resolves.toEqual(
+        [],
+      );
+    });
   });
 
   describe('restaurantsLoader', () => {

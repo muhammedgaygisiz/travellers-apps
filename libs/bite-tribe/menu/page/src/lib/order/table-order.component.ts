@@ -311,13 +311,23 @@ export class TableOrder implements OnInit {
     FirebaseAnalytics.setCurrentScreen({ screenName: 'Table Order' });
   }
 
-  /** The restaurant and the table, for the sentences that name them. */
+  /**
+   * The restaurant and the table, for the sentences that name them.
+   *
+   * The table comes from the **session** where it says one, and from the scan
+   * otherwise (`RD-TS-43`). A party walked to another table mid-meal keeps its
+   * session and its orders - they hang from the visit - and `moveTableVisit`
+   * writes the new number onto the session, so the guest reads where they are
+   * sitting rather than the number on the sticker they scanned twenty minutes
+   * ago at a table somebody else is now eating at.
+   */
   protected placeOf(view: {
     context: { restaurant: { name: string }; table: { label: string } };
   }): Record<string, string> {
     return {
       restaurant: view.context.restaurant.name,
-      table: view.context.table.label,
+      table:
+        this.history.session()?.currentTableLabel ?? view.context.table.label,
     };
   }
 

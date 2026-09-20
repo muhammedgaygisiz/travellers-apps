@@ -8,6 +8,7 @@ export { createEntityId } from './lib/create-entity-id';
 
 export {
   BITE_TRIBE_ROLES,
+  GRANTABLE_ROLES,
   ROLES_CLAIM,
   isBiteTribeRole,
   rolesFromClaims,

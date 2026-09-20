@@ -1,5 +1,6 @@
 import {
   BITE_TRIBE_ROLES,
+  GRANTABLE_ROLES,
   isBiteTribeRole,
   rolesFromClaims,
 } from '../user-role';
@@ -10,7 +11,20 @@ describe('BITE_TRIBE_ROLES', () => {
   // kept in step by `apps/bite-tribe-firebase/functions/src/__specs__/role-list-parity.spec.ts`,
   // and this assertion is the half of that pair which lives with the type.
   it('holds the three roles BiteTribe grants', () => {
-    expect(BITE_TRIBE_ROLES).toEqual(['admin', 'business', 'staff']);
+    expect(BITE_TRIBE_ROLES).toEqual([
+      'admin',
+      'business',
+      'staff',
+      'tableGuest',
+    ]);
+  });
+
+  /**
+   * The table guest's role is written by a scan and refused by `setUserRoles`
+   * (issue #1629), so the operator's picker offers the other three.
+   */
+  it('offers only the grantable roles to an operator', () => {
+    expect(GRANTABLE_ROLES).toEqual(['admin', 'business', 'staff']);
   });
 });
 

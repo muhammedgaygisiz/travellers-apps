@@ -29,8 +29,10 @@ import { assistanceRows, type AssistanceRow } from './assistance-rows';
 import {
   pendingSessionRows,
   scanAnomalyRows,
+  tableSessionRows,
   type PendingSessionRow,
   type ScanAnomalyRow,
+  type TableSessionRow,
 } from './scan-signal-rows';
 import {
   groupOrdersByTable,
@@ -227,9 +229,7 @@ export class OrderQueueService {
   private readonly pendingFeed = toSignal(
     this.storeService.restaurantIdFromUrl$.pipe(
       switchMap((restaurantId) =>
-        restaurantId
-          ? this.pendingSessions.pendingSessions$(restaurantId)
-          : EMPTY,
+        restaurantId ? this.pendingSessions.sessions$(restaurantId) : EMPTY,
       ),
     ),
   );
@@ -309,11 +309,41 @@ export class OrderQueueService {
    */
   readonly waitingParties = computed<PendingSessionRow[]>(() =>
     pendingSessionRows(
+      // Filtered here rather than in the query since issue #1629: one listener
+      // now carries every session of the restaurant, because the same feed
+      // answers two questions - who is waiting to be seated, and who is
+      // attached to a table at all.
+      (this.pendingFeed()?.sessions ?? []).filter(
+        (session) => session.status === 'pending',
+      ),
+      this.tablesValue(),
+      this.now(),
+    ),
+  );
+
+  /**
+   * Everybody attached to a table right now, newest activity first
+   * (GitHub issue #1629).
+   *
+   * The list above is the door: parties nobody has seated yet. This is the
+   * room - every session that has not ended, seated or not - which is what a
+   * restaurant asked to be able to see, and what the operator sees across
+   * every restaurant in the admin app.
+   *
+   * Ended sessions are left out on purpose. A closed meal is a support
+   * question rather than a service one, and a list that kept growing through a
+   * Friday night is a list nobody reads by nine.
+   */
+  readonly liveSessions = computed<TableSessionRow[]>(() =>
+    tableSessionRows(
       this.pendingFeed()?.sessions ?? [],
       this.tablesValue(),
       this.now(),
     ),
   );
+
+  /** How many guests are attached to a table, for the section heading. */
+  readonly liveSessionCount = computed(() => this.liveSessions().length);
 
   /** How many parties are waiting. The badge beside the other two counts. */
   readonly waitingCount = computed(() => this.waitingParties().length);

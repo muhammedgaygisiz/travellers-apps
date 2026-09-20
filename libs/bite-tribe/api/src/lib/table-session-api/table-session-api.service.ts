@@ -168,6 +168,13 @@ export class TableSessionApiService {
         data: position ? { token, position } : { token },
       });
 
+      // The backend writes the `tableGuest` role onto an anonymous account as
+      // it admits it (issue #1629), and a claim written after a token was
+      // minted is invisible until that token is replaced. Best effort: the
+      // claim grants nothing, so a refresh that fails costs a label rather
+      // than a session.
+      await this.authService.refreshSession();
+
       return result.data;
     } catch (error) {
       return failed(error);

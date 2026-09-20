@@ -17,6 +17,8 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
+import { TABLE_SESSIONS_COLLECTION } from 'model';
+import type { TableSession } from 'model';
 import { isBase64String, resourceValue } from 'utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -24,6 +26,19 @@ export const BITE_COLLECTION = 'bites';
 export const RESTAURANT_COLLECTION = 'restaurants';
 export const RESTAURANT_CANDIDATES_COLLECTION = 'restaurantCandidates';
 export const RESTAURANT_CANDIDATES_LIMIT = 5;
+
+/**
+ * How many table sessions the operator's list reads at once.
+ *
+ * A support screen rather than a report: fifty rows, newest activity first, is
+ * what answers "what is happening at tables right now" - and a query with no
+ * ceiling on a collection group that grows with every scan in BiteTribe is a
+ * screen that gets slower every service until somebody notices.
+ */
+export const TABLE_SESSIONS_LIMIT = 50;
+
+/** A table session as the operator's list shows it, with its own name on it. */
+export type AdminTableSession = TableSession;
 export const BITE_PLACES_LIMIT = 10;
 
 /** A pending candidate together with the Bites that are the evidence for it. */
@@ -142,6 +157,41 @@ export class RestaurantsDataAccessService {
   /** The restaurant a candidate or a place was turned into a draft of. */
   restaurantToCreate = toSignal(this.storeService.restaurantToCreate$);
 
+  /**
+   * Every table session in BiteTribe, most recently active first (GitHub issue
+   * #1629).
+   *
+   * A collection-group read, which is the operator's alone: `firestore.rules`
+   * admits a restaurant to its own sessions by path and this query to nobody
+   * but `admin`. It answers the one question a per-restaurant view cannot -
+   * what is happening at tables across the platform - which is a support and
+   * abuse question rather than a dining-room one.
+   *
+   * A read rather than a listener, unlike the restaurant's own list. Nobody is
+   * working a floor from this screen; an operator opens it to answer a
+   * question, and a live feed of every table in BiteTribe would be a cost with
+   * no reader.
+   */
+  tableSessionsLoader: ResourceLoader<
+    AdminTableSession[] | undefined,
+    unknown
+  > = async () => {
+    const docs = await FirebaseFirestore.getCollectionGroup({
+      reference: TABLE_SESSIONS_COLLECTION,
+      queryConstraints: [
+        { type: 'orderBy', fieldPath: 'lastActiveAt', directionStr: 'desc' },
+        { type: 'limit', limit: TABLE_SESSIONS_LIMIT },
+      ],
+    });
+
+    return (docs?.snapshots ?? [])
+      .filter((snapshot) => snapshot.data)
+      .map((snapshot) => ({
+        ...(snapshot.data as TableSession),
+        id: snapshot.id,
+      }));
+  };
+
   restaurantCandidatesLoader: ResourceLoader<
     AdminRestaurantCandidate[] | undefined,
     unknown
@@ -186,6 +236,10 @@ export class RestaurantsDataAccessService {
 
   restaurantCandidates = resource({
     loader: this.restaurantCandidatesLoader.bind(this),
+  });
+
+  tableSessions = resource({
+    loader: this.tableSessionsLoader.bind(this),
   });
 
   bitePlacesLoader: ResourceLoader<string[] | undefined, unknown> =
@@ -264,6 +318,10 @@ export class RestaurantsDataAccessService {
     [] as AdminRestaurantCandidate[],
   );
   bitePlacesValue = resourceValue(this.bitePlaces, [] as string[]);
+  tableSessionsValue = resourceValue(
+    this.tableSessions,
+    [] as AdminTableSession[],
+  );
   restaurantsValue = resourceValue(this.restaurants, [] as Restaurant[]);
 
   /**

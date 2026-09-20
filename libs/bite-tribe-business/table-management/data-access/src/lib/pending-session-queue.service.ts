@@ -5,7 +5,7 @@ import type {
   GetCollectionResult,
 } from '@capacitor-firebase/firestore';
 import { TABLE_SESSIONS_COLLECTION } from 'model';
-import type { TableSession } from 'model';
+import type { TableSession, TableSessionStatus } from 'model';
 import { Observable } from 'rxjs';
 import { RESTAURANT_COLLECTION } from './table-state-data-access.service';
 
@@ -73,6 +73,22 @@ export class PendingSessionQueueService {
 
   /** Every pending session of one restaurant, again on every change. */
   pendingSessions$(restaurantId: string): Observable<PendingSessionSnapshot> {
+    return this.sessions$(restaurantId, PENDING);
+  }
+
+  /**
+   * Every session of one restaurant, whatever its status (GitHub issue #1629).
+   *
+   * The pending list above is the *floor's* view - people standing at a table
+   * nobody has seated - and it deliberately leaves out everybody who is sitting
+   * down. This is the restaurant's own view of who is attached to its tables at
+   * all, which is the question a restaurant asked for and the one the operator
+   * asks across every restaurant.
+   */
+  sessions$(
+    restaurantId: string,
+    status?: TableSessionStatus,
+  ): Observable<PendingSessionSnapshot> {
     const reference = `${RESTAURANT_COLLECTION}/${restaurantId}/${TABLE_SESSIONS_COLLECTION}`;
 
     return new Observable<PendingSessionSnapshot>((subscriber) => {
@@ -83,17 +99,21 @@ export class PendingSessionQueueService {
       void FirebaseFirestore.addCollectionSnapshotListener(
         {
           reference,
-          compositeFilter: {
-            type: 'and',
-            queryConstraints: [
-              {
-                type: 'where',
-                fieldPath: 'status',
-                opStr: '==',
-                value: PENDING,
-              },
-            ],
-          },
+          ...(status
+            ? {
+                compositeFilter: {
+                  type: 'and' as const,
+                  queryConstraints: [
+                    {
+                      type: 'where' as const,
+                      fieldPath: 'status',
+                      opStr: '==' as const,
+                      value: status,
+                    },
+                  ],
+                },
+              }
+            : {}),
         },
         (event, error) => {
           if (error) {

@@ -724,6 +724,34 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    /**
+     * Every table session in BiteTribe, across every restaurant (GitHub issue
+     * #1629).
+     *
+     * ```text
+     * /{path=**}/tableSessions/{sessionId}
+     * ```
+     *
+     * **The operator's view, and only the operator's.** A restaurant reads its
+     * own sessions through the path-scoped block above, where `readsFloorPlan`
+     * already admits its owner and its staff; this one exists for the single
+     * question that block cannot answer - what is happening at tables right
+     * now, across the platform - which is a support and abuse question rather
+     * than a dining-room one.
+     *
+     * `list` and nothing else, exactly as the order queue's group match does:
+     * a `get` here would be a second way to reach one session document, and
+     * two paths to one document are two rules to keep in step.
+     *
+     * It needs an index the automatic ones do not cover, because a
+     * collection-group query needs the scope declared:
+     * `firestore.indexes.json` carries `tableSessions.lastActiveAt` at
+     * `COLLECTION_GROUP` scope.
+     */
+    match /{path=**}/tableSessions/{sessionId} {
+      allow list: if isOperator();
+    }
+
     // --------------------------------------------------- table assistance
 
     /**

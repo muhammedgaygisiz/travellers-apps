@@ -628,6 +628,135 @@ The launch post note left this open - _pin it once the second post goes up_.
 With two posts there is something to pin above, and the launch post is the one
 that should stay at the top of the grid.
 
+## The Profile Post
+
+The third Instagram post of [#913], prepared 20 September 2026. The launch post
+said the product exists and
+[The Bites Around You Post](#the-bites-around-you-post) showed what it does. This
+one shows what it leaves behind, which is the half of the audience that travels
+and the half that eats meeting on one screen.
+
+![Profile post](../assets/social/profile-post.png)
+
+It is a real, populated profile - the maintainer's own, published with his
+consent - because the claim only lands on a profile somebody actually filled. An
+empty profile with a placeholder name would be a mockup of the argument rather
+than the argument.
+
+Same rule as the two before it: nothing in it links, and the bio carries the
+store URLs - see [Nothing In A Post Links](#nothing-in-a-post-links).
+
+### The Image
+
+[`ssot/assets/social/profile-post.png`](../assets/social/profile-post.png),
+`1080x1350` (4:5), the consumer app's profile page.
+
+A screenshot again, so there is no generator to rerun. The source is an iPhone
+screenshot at `1125x2436`, and the crop is a `1125x1406` window taken at
+**`y=321`**, scaled to `1080x1350`.
+
+Those numbers are the whole design of the frame, so they are worth stating
+rather than re-deriving by eye. Measured on the source screenshot:
+
+| Band                       | Rows        |
+| -------------------------- | ----------- |
+| Header separator line ends | `317`       |
+| The four flag rows         | `1392-1697` |
+| First dish photo starts    | `1928`      |
+
+A 4:5 window is 1406 rows at that width, which is 58% of the screen, and
+`1928 - 321` is more than that. **The flags and a dish photo cannot both be in
+frame.** The flags win: they are the travel half of the claim, and the dishes are
+already the subject of every other post. So the crop starts one row under the
+separator and ends 30 rows past the last flag.
+
+The cost is the header bar, and with it the wordmark. Accepted, because the post
+renders under the `@bitetribeapp` avatar, which names the brand directly above
+it. The alternative crop at `y=149` keeps the wordmark and cuts the flags to 18
+of 30 at a clean row boundary - it reads as truncated, and it throws away the
+reason the frame was chosen.
+
+### Two Things Left In On Purpose
+
+Both are things the instinct is to crop out, and both were decided rather than
+overlooked.
+
+**The counts, including 34 followers.** A small follower number on a marketing
+frame argues against the product, and it is still the right call: the account is
+days old, the number is true, and 635 Bites next to it is the number that
+actually carries the image. Retouching it would make every other number in the
+frame a question.
+
+**The `Public profile` card.** It is the self-service privacy control, own-profile
+only - `showVisibilityStatus` in
+`libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts`
+returns `isOwnProfile()`. In a feed it reads as settings chrome, and it costs
+about a flag row of vertical space. It cannot be removed without also losing the
+counts, because it sits between the name and the bio, and it is honest about what
+a profile discloses.
+
+### The Caption
+
+```text
+30 countries. 635 dishes. One profile 🎒🍜
+Your trips are also a list of things you ate. This one didn't get lost in the camera roll.
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #realfood
+```
+
+Both numbers are read off the frame - nine, nine, nine and three flags, and the
+`635` badge - so the image is the evidence for the first line rather than a
+decoration next to it.
+
+The caption says nothing about what the flags row is or how a country gets onto
+it, for the reason
+[The Bites Around You Post](#the-bites-around-you-post) already gives: a caption
+that explains the UI reads as a manual. The second line is about the reader's own
+photos instead.
+
+The four hashtags are unchanged again. No city tag this time - `#bern` earned its
+place on the map post because the frame named Bern, and nothing in this frame
+names a place.
+
+### Published 20 September 2026
+
+Posted from `instagram.com` on desktop, with the alt text and the Threads share
+set in the same dialog. Four things worth keeping:
+
+- **The web uploader opened at 1:1, not 4:5.** The launch post note says it opened
+  at 4:5 _but check it every time_ - this is the case that justifies the warning.
+  The square default cut the three count labels off the top and sliced flag row 3,
+  which is exactly the frame the crop was designed to avoid. Fixed with the crop
+  control at the bottom left: **`Original` is the correct pick**, because the file
+  is already 4:5.
+- **Alt text, for the first time on this account.** `Accessibility - Write alt
+text`, describing the counts, the bio and the flags rather than naming the
+  screen. Instagram writes one automatically otherwise, and an auto-generated
+  description of a screenshot is a list of UI words.
+- **No filter.** A screenshot of the running app carries the product's own
+  colours, and a filter shifts them.
+- **Shared to Threads**, as the launch post was.
+
+The grid thumbnail is Instagram's 3:4 crop, which takes about 34 pixels off each
+side of a 4:5 image. The flag rows carry roughly 45 pixels of margin, so the
+outer columns survive: Spain stays whole on the left and Japan on the right.
+
+### Pin It Is Still Open
+
+With three posts up, the grid reads newest first - profile, map, launch - so the
+launch post has **not** been pinned, and the note under
+[Pin It](#pin-it) is a plan rather than a record of what is set.
+
+**Instagram web cannot pin.** The post's `...` menu on desktop offers Delete,
+Edit, Hide like count, Turn off commenting, Go to post, Share to, Copy link,
+Embed and About this account, and no pin control - checked on the launch post on
+20 September 2026. It is app-only, the same shape of gap as
+[Instagram's Website Field Is Mobile-Only](#instagrams-website-field-is-mobile-only).
+
+Pin it from the phone: profile tab, the post, `...`, then the pin item - labelled
+`Pin to your profile` or `Pin to your main grid` depending on the app version.
+Three posts can be pinned, so pinning the launch post costs nothing later.
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done

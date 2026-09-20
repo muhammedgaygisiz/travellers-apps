@@ -602,3 +602,4 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 [#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628
 [#370]: https://github.com/muhammedgaygisiz/travellers-apps/issues/370
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
+[#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657

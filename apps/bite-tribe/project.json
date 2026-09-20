@@ -44,7 +44,7 @@
           },
           {
             "glob": "apple-app-site-association",
-            "input": "apps/bite-tribe/src",
+            "input": "apps/bite-tribe/src/.well-known",
             "output": "."
           }
         ],

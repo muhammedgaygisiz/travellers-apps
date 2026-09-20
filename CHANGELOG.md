@@ -1,5 +1,127 @@
 # Changelog
 
+## build-97 (2026-09-20)
+
+<!-- changelog-start-rev: dcd8d395 -->
+<!-- changelog-end-rev: e0d546a9 -->
+
+### Features
+
+- **bite-tribe**: settle the last questions of QR ordering and name the table guest (#1629) (#1669) (80b4a4b4)
+- **bite-tribe-firebase**: move a table visit to the account a guest signs into (#1658) (#1668) (ee7595b1)
+- **bite-tribe**: upgrade a table guest's anonymous account in place (#1657) (#1667) (0a2a8e37)
+- **bite-tribe**: orderable menu extras (#1598) (#1662) (33f2e041)
+- **bite-tribe**: publish a restaurant's menu behind a QR code (#370) (#1652) (38148f36)
+- **functions**: add a bitetribe.app/download link that opens the right store (#1628) (#1648) (4480cd29)
+- **bite-tribe**: offer the store listings as QR codes and badges on web (#1453) (#1647) (39cf3b7b)
+- **bite-tribe**: trigger haptic feedback on reacting to a Bite (#1637) (#1643) (8807015c)
+- **bite-tribe**: trigger haptic feedback on destructive confirmation alerts (#1636) (#1642) (c0696b56)
+- **toast**: trigger haptic feedback from ToastService outcomes (#1635) (#1640) (03cd75e7)
+- **haptics**: add a shared haptics service wrapping @capacitor/haptics (#1634) (#1638) (eb335047)
+- offline-tolerant and idempotent order submission (#1108) (#1616) (72c91441)
+- request staff assistance and request the bill (#1106) (#1602) (b731ab57)
+- incoming order queue for staff (#1105) (#1601) (3abb3c23)
+- guest order status and follow-up ordering (#1104) (#1600) (35294b31)
+- table cart and order submission (#1103) (#1599) (bc0c9dc0)
+- guest table session start and join (#1101) (#1595) (789d002b)
+- **functions**: resolve and validate a table QR token (#1100) (#1594) (1576098f)
+- **bite-tribe-business**: table operation analytics events (#1098) (#1583) (ceba0ceb)
+- **bite-tribe-business**: staff accounts and shift-scoped permissions (#1097) (#1582) (665473a4)
+- **bite-tribe-business**: realtime sync and offline resilience for the staff view (#1096) (#1581) (86836ca8)
+- **model**: table visits (#1095) (#1580) (815b6259)
+- **bite-tribe-business**: staff table actions (#1094) (#1579) (3d3c0529)
+- **bite-tribe-business**: live floor plan view with table status (#1093) (#1578) (17440a3f)
+- **functions**: table state transitions and audit trail (#1092) (#1577) (e0b89757)
+- **model**: live table state separated from the floor plan (#1091) (#1576) (756c78c7)
+- **bite-tribe-business**: accessible floor plan rendering (#1089) (#1574) (f2c4cd22)
+- **bite-tribe-business**: two-column restaurant page (#1572) (#1573) (09252deb)
+- **bite-tribe-business**: floor plan validation, draft and publish (#1088) (#1571) (71676e65)
+- **bite-tribe-business**: printable table QR sheets (#1087) (#1566) (c7ac39c5)
+- **functions**: opaque table QR tokens (#1086) (#1562) (4aecdbde)
+- **bite-tribe-business**: multiple rooms, floors and cross-room table moves (#1085) (#1561) (af399c2f)
+- **bite-tribe-business**: table properties, numbering and capacity (#1084) (#1560) (19c61e5a)
+- **bite-tribe-business**: place, move, resize and rotate floor plan objects (#1083) (#1556) (64b56167)
+- **bite-tribe-business**: floor plan editor canvas with rooms and grid (#1082) (#1554) (1aa12582)
+- floor plan persistence, rules and concurrency (#1081) (#1553) (ef7bfc3f)
+- **model**: add the floor plan data model and coordinate system (#1080) (#1552) (461e61fe)
+- **bite-tribe-business**: a business account manages the staff on its restaurant (#1537) (#1551) (f859eb32)
+- **bite-tribe-business**: scope the app to owned restaurants (#1079) (#1550) (1000d820)
+- replace open Firestore rules with ownership-scoped rules (#1078) (#1164) (#1545) (b0b99b9d)
+- assign and revoke restaurant ownership (#1077) (#1540) (d3d47fa2)
+- add the staff role and admit it to the business app (#1538) (ac2332fd)
+- **bite-tribe-admin**: delete an improper Bite (#1536) (99172b8d)
+- **bite-tribe-admin**: block and unblock an account (#1535) (33a18e49)
+- **bite-tribe-admin**: find accounts and Bites by reusing the existing search (#1518) (1c1b6439)
+- **bite-tribe-admin**: see and change an account's subscription tier (#1486) (8c6f1b92)
+- version the BiteTribe character set and showcase it in Storybook (#1484) (14b126c5)
+- **bite-tribe-admin**: split the operator surfaces out of the business app (#1479) (c4993020)
+- introduce the bite-tribe-admin app and gate both privileged apps on roles (#1470) (01e587b2)
+- stop grandfathered pro grant for users (beta-phase is over) (#1463) (ee15cbe3)
+- add the GA4 BigQuery export and agent-runnable SQL over it (#1456) (a889f0a2)
+- add search and social metadata to the web app (#1457) (d53a8f07)
+- fold crash and error signal into the daily analytics digest (#1448) (d47cbed1)
+- loading skeleton for restaurant page (#1446) (33000e8c)
+
+### Bug Fixes
+
+- **bite-tribe**: serve the association file where Apple looks for it (#1671) (e0d546a9)
+- **bite-tribe-ios**: record the pinned file picker version in the iOS locks (#1670) (b8645b2d)
+- **functions**: a menu-only scan must not dead-end when nothing is orderable (#1597) (#1656) (bf54ed7c)
+- **bite-tribe**: open a scanned table QR code in the app (#345) (#1650) (fd8de931)
+- **opening-hours**: widen the time boxes for a 12-hour locale (#1549) (#1646) (8e051164)
+- **bite-tribe**: render stray template literals through Transloco (#1612) (#1644) (5e665241)
+- **functions**: a failed anomaly count must not fail a guest's session (#1604) (#1605) (20db24bf)
+- **bite-tribe-business**: pass the measurement id to the hosting deploy (#1588) (#1589) (78e82ac3)
+- exclude the business surface instead of requiring the consumer one (#1586) (#1587) (bafd9779)
+- scope the launch user-count tiles to the consumer app (#1584) (#1585) (54444e49)
+- **functions**: escape every HTML metacharacter on the Bite share page (#1515) (56d26b97)
+- **functions**: require the admin role on every operator callable (#1483) (67448c73)
+- **bite-tribe-admin**: render the map instead of scattered tiles (#1481) (740375b8)
+- fix ungrouped notifications and content not clearing it's notification (#1447) (728ee57c)
+- make the build tag point at the released source, and cut releases from it (#1443) (f301593f)
+
+### Refactoring
+
+- add props for claiming a restaurant (#1445) (c13b5565)
+
+### Documentation
+
+- a change that makes an SSOT fact untrue owes the caveat sweep (#1664) (84ecad55)
+- Loki references in the delivery workflow, and the rules-deploy sweep (#1663) (b13ae58c)
+- record the published menu and its printed code (#370) (#1655) (7918a0bb)
+- require native sub-issue links for epic children (#1639) (26781833)
+- plan and publish the Instagram launch post (#913) (#1626) (6d37ccc1)
+- record the soft launch on both stores (#912) (#1625) (b03b00be)
+- record the table analytics verification and the epic success criteria (#1591) (#1592) (8c467760)
+- specify restaurant candidate detection and verification (#1513) (d35af6e2)
+- scope the city landing pages epic and record the share-page XSS (#1494) (d015d6fa)
+- rescope epic 1471 to basic operations and record its decisions (#1478) (6daa62d9)
+- Adapting ssot to include issue format for ai (#1468) (761d9fca)
+- condense the SSOT and correct stale status (#1461) (f8713e96)
+- setup social media channels (#1460) (ee543b9f)
+- add iOS simulator testing, and record the App Store submission (#1452) (ae2186ae)
+- record the Play production promotion for the soft launch (#1450) (3c8101c8)
+- record the release candidate and the resolved deep-link gap (#1442) (85a4dcb3)
+- update docs (#1440) (1dc6fd52)
+
+### Continuous Integration
+
+- deploy the security rules and Firestore indexes from develop (#1567) (#1641) (1fd831a5)
+- bump the github-actions group across 1 directory with 2 updates (#1544) (303c1a20)
+- bump GitHub Actions to their Node 24 major versions (#1437) (#1543) (816bc1e1)
+- deploy Firebase Functions from the pipeline (#1464) (#1542) (bf27fd1d)
+
+### Tests
+
+- **bite-tribe**: visual coverage for the guest half of the table journey (#1660) (#1661) (58a69391)
+- **bite-tribe-business**: floor plan editor unit, Storybook and E2E coverage (#1090) (#1575) (a4ade19f)
+- give the admin and business apps a desktop visual baseline (#1547) (#1548) (7b3a6890)
+
+### Chores
+
+- **functions**: give every operator action one log shape (#1517) (99387a0a)
+- prepare build 1.0.1-96 release (#1439) (79811067)
+
 ## build-96 (2026-08-30)
 
 <!-- changelog-start-rev: 39ca8201 -->

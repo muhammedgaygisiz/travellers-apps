@@ -14,9 +14,11 @@ import {
   BiteTribeRole,
   ROLES_CLAIM,
   hasRole,
+  isAnonymousSession,
   isBiteTribeRole,
   requireAdmin,
   requireBusiness,
+  requireMember,
   requireRole,
   rolesOf,
 } from '../roles';
@@ -171,5 +173,89 @@ describe('hasRole', () => {
 
     expect(hasRole(caller, 'staff')).toBe(true);
     expect(hasRole(caller, 'business')).toBe(false);
+  });
+});
+
+describe('isAnonymousSession', () => {
+  const withProvider = (provider?: string): TestRequest => ({
+    auth: {
+      uid: CALLER_UID,
+      token: provider ? { firebase: { sign_in_provider: provider } } : {},
+    },
+  });
+
+  it('is true only for a session signed in anonymously', () => {
+    expect(isAnonymousSession(as(withProvider('anonymous')))).toBe(true);
+    expect(isAnonymousSession(as(withProvider('password')))).toBe(false);
+    expect(isAnonymousSession(as(withProvider('google.com')))).toBe(false);
+  });
+
+  /**
+   * A token that says nothing is a token that says nothing, and the answer has
+   * to be "not a guest" rather than an error: the guard that asks this refuses
+   * the caller when it is true, so an absent field reading as anonymous would
+   * lock out every account whose token shape ever changed.
+   */
+  it('is false for a token that names no provider, and for no session', () => {
+    expect(isAnonymousSession(as(withProvider()))).toBe(false);
+    expect(isAnonymousSession(as({}))).toBe(false);
+  });
+});
+
+describe('requireMember', () => {
+  const guest: TestRequest = {
+    auth: {
+      uid: CALLER_UID,
+      token: { firebase: { sign_in_provider: 'anonymous' } },
+    },
+  };
+
+  const member: TestRequest = {
+    auth: {
+      uid: CALLER_UID,
+      token: { firebase: { sign_in_provider: 'password' } },
+    },
+  };
+
+  const SIGNED_OUT = 'You must be signed in to search for bites.';
+
+  it('rejects a caller with no session as unauthenticated', () => {
+    expect(codeOf(() => requireMember(as({}), SIGNED_OUT))).toBe(
+      'unauthenticated',
+    );
+  });
+
+  /**
+   * The two failures are separated for the reason `requireRole` separates
+   * them: `unauthenticated` means "sign in", and a table guest who signs in
+   * again as a guest would meet exactly the same wall.
+   */
+  it('rejects an anonymous table guest as permission-denied', () => {
+    expect(codeOf(() => requireMember(as(guest), SIGNED_OUT))).toBe(
+      'permission-denied',
+    );
+  });
+
+  it('carries the callable own words for a signed-out caller', () => {
+    try {
+      requireMember(as({}), SIGNED_OUT);
+    } catch (error) {
+      expect((error as Error).message).toBe(SIGNED_OUT);
+    }
+  });
+
+  it('admits an account', () => {
+    expect(() => requireMember(as(member), SIGNED_OUT)).not.toThrow();
+  });
+
+  /**
+   * A token with no provider is the shape every unit spec in this project
+   * writes, and most of the apps' own callers. It has to pass, or this guard
+   * would refuse everyone the moment it shipped.
+   */
+  it('admits an account whose token names no provider', () => {
+    expect(() =>
+      requireMember(as(callerWith(['business'])), SIGNED_OUT),
+    ).not.toThrow();
   });
 });

@@ -1,6 +1,11 @@
-import { DocumentData, QueryDocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
+import {
+  DocumentData,
+  QueryDocumentSnapshot,
+  getFirestore,
+} from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { requireMember } from '../shared/roles';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -23,24 +28,17 @@ interface SearchRestaurant {
   };
 }
 
-const getString = (
-  data: DocumentData,
-  field: string,
-): string => (typeof data[field] === 'string' ? data[field] : '');
+const getString = (data: DocumentData, field: string): string =>
+  typeof data[field] === 'string' ? data[field] : '';
 
-const getStringArray = (
-  data: DocumentData,
-  field: string,
-): string[] => {
+const getStringArray = (data: DocumentData, field: string): string[] => {
   const value = data[field];
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === 'string')
     : [];
 };
 
-const getPosition = (
-  data: DocumentData,
-): SearchRestaurant['position'] => {
+const getPosition = (data: DocumentData): SearchRestaurant['position'] => {
   const position = data.position;
 
   if (
@@ -67,9 +65,7 @@ const idFromPath = (value: string): string => {
 const getBiteId = (bite: QueryDocumentSnapshot): string =>
   getString(bite.data(), 'id') || bite.id;
 
-const getNormalizedRestaurantId = (
-  data: DocumentData,
-): string => {
+const getNormalizedRestaurantId = (data: DocumentData): string => {
   const restaurantId = getString(data, 'restaurantId');
   return restaurantId ? idFromPath(restaurantId) : '';
 };
@@ -118,12 +114,7 @@ const toUnverifiedRestaurant = (
 
 export const searchRestaurants = onAppCheck<SearchRestaurantsRequest>(
   async (request) => {
-    if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to search for restaurants.',
-      );
-    }
+    requireMember(request, 'You must be signed in to search for restaurants.');
 
     if (typeof request.data.searchText !== 'string') {
       throw new HttpsError('invalid-argument', 'searchText must be a string.');

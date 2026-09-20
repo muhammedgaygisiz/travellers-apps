@@ -158,3 +158,56 @@ export const requireAnyRole = (
 
   return request.auth.uid;
 };
+
+/**
+ * Whether the caller signed in anonymously (GitHub issue #1565).
+ *
+ * The only thing in BiteTribe that mints an anonymous session is a phone that
+ * scanned a table QR code (issue #1101), so this is "the caller is a table
+ * guest" spelled as what the verified token actually says. It is read off
+ * `firebase.sign_in_provider` rather than from the absence of a `/users`
+ * document, because the token is already in hand and the document is a read -
+ * the same trade `isMember()` in `firestore.rules` makes, and for the same
+ * reason. `RD-TS-40`.
+ */
+export const isAnonymousSession = (
+  request: CallableRequest<unknown>,
+): boolean => request.auth?.token?.firebase?.sign_in_provider === 'anonymous';
+
+type MemberCallableRequest<T> = CallableRequest<T> & {
+  auth: NonNullable<CallableRequest<T>['auth']>;
+};
+
+/**
+ * Rejects a caller that is signed out, and a caller that is only a table guest.
+ *
+ * `authenticated` used to mean "carries a uid", which stopped being the same
+ * thing as "has a BiteTribe account" the moment issue #1101 handed a uid to
+ * anybody who could photograph a sticker. Nineteen callables were written on
+ * the old reading, four of them spending billed Google Maps quota and three
+ * acting on an account a guest does not have. `RD-TS-38`.
+ *
+ * The signed-out message is the caller's own, because it is shown to a person
+ * who can act on it - "sign in and try again" - while the guest refusal is one
+ * message everywhere: a table guest reaching a member surface is a bug in the
+ * app rather than something the guest can fix.
+ *
+ * It is an assertion rather than a function returning the uid, unlike
+ * {@link requireRole}, so that a callable keeps the narrowing its inline
+ * `if (!request.auth)` gave it and can go on reading `request.auth.token`.
+ */
+export function requireMember<T>(
+  request: CallableRequest<T>,
+  signedOutMessage: string,
+): asserts request is MemberCallableRequest<T> {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', signedOutMessage);
+  }
+
+  if (isAnonymousSession(request)) {
+    throw new HttpsError(
+      'permission-denied',
+      'This operation requires a BiteTribe account.',
+    );
+  }
+}

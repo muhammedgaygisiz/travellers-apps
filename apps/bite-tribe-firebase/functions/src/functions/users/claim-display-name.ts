@@ -8,6 +8,7 @@ import {
   isValidNormalizedDisplayName,
   normalizeDisplayName,
 } from './display-name-utils';
+import { requireMember } from '../shared/roles';
 
 interface ClaimDisplayNameRequest {
   displayName?: unknown;
@@ -162,12 +163,7 @@ export const claimDisplayNameForUser = async (
 export const claimDisplayNameHandler = async (
   request: CallableRequest<ClaimDisplayNameRequest>,
 ): Promise<ClaimDisplayNameResult> => {
-  if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to claim a display name.',
-    );
-  }
+  requireMember(request, 'You must be signed in to claim a display name.');
 
   if (typeof request.data?.displayName !== 'string') {
     throw new HttpsError('invalid-argument', 'invalid_display_name');

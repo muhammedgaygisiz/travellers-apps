@@ -6,6 +6,7 @@ import {
 import { HttpsError } from 'firebase-functions/https';
 import { distanceBetween, geohashQueryBounds, Geopoint } from 'geofire-common';
 import { onAppCheck } from '../shared/callable-options';
+import { requireMember } from '../shared/roles';
 
 const BITE_COLLECTION = 'bites';
 const LIKE_SUBCOLLECTION = 'likes';
@@ -148,12 +149,7 @@ export const attachCallerLikes = async (
 
 export const loadBitesByLocation = onAppCheck<LoadBitesByLocationRequest>(
   async (request) => {
-    if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to load nearby bites.',
-      );
-    }
+    requireMember(request, 'You must be signed in to load nearby bites.');
 
     const { latitude, longitude } = request.data;
 

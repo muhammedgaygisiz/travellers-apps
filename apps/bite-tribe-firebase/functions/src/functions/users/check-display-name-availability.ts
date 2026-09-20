@@ -7,6 +7,7 @@ import {
   isValidNormalizedDisplayName,
   normalizeDisplayName,
 } from './display-name-utils';
+import { requireMember } from '../shared/roles';
 
 interface CheckDisplayNameAvailabilityRequest {
   displayName?: unknown;
@@ -66,12 +67,10 @@ export const checkDisplayNameAvailabilityForUser = async (
 export const checkDisplayNameAvailabilityHandler = async (
   request: CallableRequest<CheckDisplayNameAvailabilityRequest>,
 ): Promise<CheckDisplayNameAvailabilityResult> => {
-  if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to check display name availability.',
-    );
-  }
+  requireMember(
+    request,
+    'You must be signed in to check display name availability.',
+  );
 
   if (typeof request.data?.displayName !== 'string') {
     throw new HttpsError('invalid-argument', 'invalid_display_name');

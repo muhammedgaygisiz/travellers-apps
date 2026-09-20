@@ -1,4 +1,8 @@
-import { DocumentData, QueryDocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
+import {
+  DocumentData,
+  QueryDocumentSnapshot,
+  getFirestore,
+} from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
@@ -6,6 +10,7 @@ import { distanceBetween, geohashQueryBounds, Geopoint } from 'geofire-common';
 import { onAppCheck } from '../shared/callable-options';
 import { geocodeAddress, Position } from '../shared/utils/geocode';
 import { SearchBite, toSearchBite } from '../shared/utils/search-bite';
+import { requireMember } from '../shared/roles';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -39,9 +44,7 @@ const querySingleBound = async (
   }
 };
 
-const getBitePosition = (
-  data: DocumentData,
-): Position | undefined => {
+const getBitePosition = (data: DocumentData): Position | undefined => {
   const position = data.position;
 
   if (
@@ -89,12 +92,10 @@ export const searchBitesByCity = onAppCheck<SearchBitesByCityRequest>(
     secrets: [googleMapsApiKey],
   },
   async (request): Promise<SearchBite[]> => {
-    if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to search for bites by city.',
-      );
-    }
+    requireMember(
+      request,
+      'You must be signed in to search for bites by city.',
+    );
 
     if (typeof request.data.searchText !== 'string') {
       throw new HttpsError('invalid-argument', 'searchText must be a string.');

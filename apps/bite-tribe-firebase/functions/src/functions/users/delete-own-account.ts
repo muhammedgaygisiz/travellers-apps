@@ -23,6 +23,7 @@ import {
   USERS_COLLECTION,
   normalizeDisplayName,
 } from './display-name-utils';
+import { requireMember } from '../shared/roles';
 
 const BITES_COLLECTION = 'bites';
 const BITE_TRAILS_COLLECTION = 'biteTrails';
@@ -515,12 +516,7 @@ export const assertRecentSignIn = (
 export const deleteOwnAccountHandler = async (
   request: CallableRequest<unknown>,
 ): Promise<DeleteOwnAccountResult> => {
-  if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to delete your account.',
-    );
-  }
+  requireMember(request, 'You must be signed in to delete your account.');
 
   assertRecentSignIn(request.auth.token.auth_time);
 

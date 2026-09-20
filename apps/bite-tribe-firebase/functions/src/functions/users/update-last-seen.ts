@@ -1,14 +1,9 @@
 import { getFirestore } from 'firebase-admin/firestore';
-import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { requireMember } from '../shared/roles';
 
 export const updateLastSeen = onAppCheck(async (request) => {
-  if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to update last seen.',
-    );
-  }
+  requireMember(request, 'You must be signed in to update last seen.');
 
   const userReference = getFirestore()
     .collection('users')

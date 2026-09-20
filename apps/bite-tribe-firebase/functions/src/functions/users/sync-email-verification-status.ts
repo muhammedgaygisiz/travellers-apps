@@ -1,11 +1,11 @@
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
-import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import {
   buildEmailVerificationMetadata,
   EmailVerificationMetadata,
 } from './email-verification-utils';
+import { requireMember } from '../shared/roles';
 
 export const syncEmailVerificationStatusForUser = async (
   uid: string,
@@ -31,12 +31,10 @@ export const syncEmailVerificationStatus = onAppCheck<
   void,
   Promise<EmailVerificationMetadata>
 >(async (request) => {
-  if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to sync email verification status.',
-    );
-  }
+  requireMember(
+    request,
+    'You must be signed in to sync email verification status.',
+  );
 
   return syncEmailVerificationStatusForUser(request.auth.uid);
 });

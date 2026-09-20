@@ -30,6 +30,7 @@ This contract is model-agnostic. Codex, Claude, GPT, local IDE agents, and futur
 - Update Storybook when shared UI gains visible states, inputs, modes, or layout behavior.
 - Use Capacitor sync commands for native wrapper dependency changes.
 - Do not hand-edit a generated page. `tools/README.md` names which scripts write into `ssot/`; change the generator instead.
+- A change that makes an SSOT fact untrue also removes the caveats that grew around the old one. Correcting the owning page is not the whole change; see `Superseded Facts` in `ssot/overview/agent-operating-contract.md`.
 
 ## Traceability Rule
 

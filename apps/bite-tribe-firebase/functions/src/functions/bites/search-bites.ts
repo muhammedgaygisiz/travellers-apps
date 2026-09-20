@@ -6,6 +6,7 @@ import {
   getStringArray,
   toSearchBite,
 } from '../shared/utils/search-bite';
+import { requireMember } from '../shared/roles';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -18,12 +19,7 @@ const matchesSearchText = (value: string, searchText: string): boolean =>
   value.toLocaleLowerCase().includes(searchText);
 
 export const searchBites = onAppCheck<SearchBitesRequest>(async (request) => {
-  if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to search for bites.',
-    );
-  }
+  requireMember(request, 'You must be signed in to search for bites.');
 
   if (typeof request.data.searchText !== 'string') {
     throw new HttpsError('invalid-argument', 'searchText must be a string.');

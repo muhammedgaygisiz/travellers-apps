@@ -211,8 +211,34 @@ const asStranger = (): Firestore =>
 const asStaff = (): Firestore =>
   testEnv.authenticatedContext(STRANGER, { roles: ['staff'] }).firestore();
 
-const anonymously = (): Firestore =>
-  testEnv.unauthenticatedContext().firestore();
+/**
+ * A caller with no session at all.
+ *
+ * It was called `anonymously` until issue #1565, which is the word Firebase
+ * uses for the opposite thing - a session that carries a uid. Every deny it
+ * proved was a deny against a signed-*out* caller, so for as long as the name
+ * stood, the rules had no test for a table guest at all and looked as though
+ * they had one everywhere. See {@link asTableGuest}.
+ */
+const signedOut = (): Firestore => testEnv.unauthenticatedContext().firestore();
+
+/**
+ * An anonymous table guest: the session `signInAsGuest` mints for a phone that
+ * scanned a QR code (issue #1101), and the principal issue #1565 bounds.
+ *
+ * It carries `CONSUMER`'s uid on purpose, so the fixtures written for the guest
+ * at `OWNED_TABLE` - their session, their order, the assistance request they
+ * raised - are reached by a caller of the right *kind* as well as the right
+ * name. The only difference from {@link asConsumer} is the sign-in provider,
+ * which is what `isMember()` reads, so a pair of assertions across the two
+ * contexts says exactly what the guest's anonymity costs them.
+ */
+const asTableGuest = (): Firestore =>
+  testEnv
+    .authenticatedContext(CONSUMER, {
+      firebase: { sign_in_provider: 'anonymous' },
+    })
+    .firestore();
 
 beforeAll(async () => {
   testEnv = await initializeTestEnvironment({
@@ -1689,7 +1715,7 @@ describe('table sessions', () => {
      */
     it('lets a guest read the session named after them', async () => {
       const snapshot = await assertSucceeds(
-        getDoc(sessionDoc(asConsumer(), CONSUMER_SESSION)),
+        getDoc(sessionDoc(asTableGuest(), CONSUMER_SESSION)),
       );
 
       expect(snapshot.data()).toMatchObject({
@@ -1719,7 +1745,7 @@ describe('table sessions', () => {
     });
 
     it('refuses an unauthenticated reader entirely', async () => {
-      await assertFails(getDoc(sessionDoc(anonymously(), CONSUMER_SESSION)));
+      await assertFails(getDoc(sessionDoc(signedOut(), CONSUMER_SESSION)));
     });
   });
 
@@ -1826,7 +1852,7 @@ describe('table orders', () => {
      */
     it('lets a guest read the order they placed', async () => {
       const snapshot = await assertSucceeds(
-        getDoc(orderDoc(asConsumer(), CONSUMER_ORDER)),
+        getDoc(orderDoc(asTableGuest(), CONSUMER_ORDER)),
       );
 
       expect(snapshot.data()).toMatchObject({
@@ -1857,7 +1883,7 @@ describe('table orders', () => {
     it('lets a guest list the orders that name them', async () => {
       const snapshot = await assertSucceeds(
         getDocs(
-          query(orders(asConsumer()), where('guestUserId', '==', CONSUMER)),
+          query(orders(asTableGuest()), where('guestUserId', '==', CONSUMER)),
         ),
       );
 
@@ -1885,13 +1911,13 @@ describe('table orders', () => {
     it('refuses an unauthenticated reader the same query', async () => {
       await assertFails(
         getDocs(
-          query(orders(anonymously()), where('guestUserId', '==', CONSUMER)),
+          query(orders(signedOut()), where('guestUserId', '==', CONSUMER)),
         ),
       );
     });
 
     it('refuses an unauthenticated reader entirely', async () => {
-      await assertFails(getDoc(orderDoc(anonymously(), CONSUMER_ORDER)));
+      await assertFails(getDoc(orderDoc(signedOut(), CONSUMER_ORDER)));
     });
   });
 
@@ -1943,7 +1969,7 @@ describe('table orders', () => {
 
     it('refuses a guest and a signed-out reader', async () => {
       await assertFails(getDocs(openOrders(asConsumer())));
-      await assertFails(getDocs(openOrders(anonymously())));
+      await assertFails(getDocs(openOrders(signedOut())));
     });
   });
 
@@ -2045,7 +2071,7 @@ describe('table assistance requests', () => {
      */
     it('lets a guest read the signal they are named on', async () => {
       const snapshot = await assertSucceeds(
-        getDoc(requestDoc(asConsumer(), CONSUMER_CALL)),
+        getDoc(requestDoc(asTableGuest(), CONSUMER_CALL)),
       );
 
       expect(snapshot.data()).toMatchObject({
@@ -2075,7 +2101,7 @@ describe('table assistance requests', () => {
       const snapshot = await assertSucceeds(
         getDoc(
           requestDoc(
-            asConsumer(),
+            asTableGuest(),
             `${OWNED_TABLE.length}_${OWNED_TABLE}_requestBill`,
           ),
         ),
@@ -2094,7 +2120,7 @@ describe('table assistance requests', () => {
     });
 
     it('refuses an unauthenticated reader entirely', async () => {
-      await assertFails(getDoc(requestDoc(anonymously(), CONSUMER_CALL)));
+      await assertFails(getDoc(requestDoc(signedOut(), CONSUMER_CALL)));
     });
   });
 
@@ -2222,9 +2248,7 @@ describe('scan anomalies', () => {
     });
 
     it('refuses an unauthenticated reader entirely', async () => {
-      await assertFails(
-        getDoc(anomalyDoc(anonymously(), RATE_LIMITED_ANOMALY)),
-      );
+      await assertFails(getDoc(anomalyDoc(signedOut(), RATE_LIMITED_ANOMALY)));
     });
   });
 
@@ -2294,7 +2318,7 @@ describe('scan rate limits', () => {
    * as a hash.
    */
   it('refuses every reader there is', async () => {
-    await assertFails(getDoc(counter(anonymously())));
+    await assertFails(getDoc(counter(signedOut())));
     await assertFails(getDoc(counter(asConsumer())));
     await assertFails(getDoc(counter(asStaff())));
     await assertFails(getDoc(counter(asOwner())));
@@ -2319,7 +2343,7 @@ describe('table qr tokens', () => {
    */
   it('lets a guest with no session resolve a token in one read', async () => {
     const snapshot = await assertSucceeds(
-      getDoc(doc(tokens(anonymously()), ACTIVE_TOKEN)),
+      getDoc(doc(tokens(signedOut()), ACTIVE_TOKEN)),
     );
 
     expect(snapshot.data()).toMatchObject({
@@ -2338,7 +2362,7 @@ describe('table qr tokens', () => {
    */
   it('resolves a revoked token to a document that says so', async () => {
     const snapshot = await assertSucceeds(
-      getDoc(doc(tokens(anonymously()), REVOKED_TOKEN)),
+      getDoc(doc(tokens(signedOut()), REVOKED_TOKEN)),
     );
 
     expect(snapshot.data()).toMatchObject({ status: 'revoked' });
@@ -2346,7 +2370,7 @@ describe('table qr tokens', () => {
 
   it('resolves a token that was never issued to a missing document', async () => {
     const snapshot = await assertSucceeds(
-      getDoc(doc(tokens(anonymously()), 'NEVERISSUEDNEVERISSUED00')),
+      getDoc(doc(tokens(signedOut()), 'NEVERISSUEDNEVERISSUED00')),
     );
 
     expect(snapshot.exists()).toBe(false);
@@ -2359,7 +2383,7 @@ describe('table qr tokens', () => {
    * by the restaurant, not by an operator.
    */
   it('refuses listing the collection to everyone', async () => {
-    await assertFails(getDocs(tokens(anonymously())));
+    await assertFails(getDocs(tokens(signedOut())));
     await assertFails(getDocs(tokens(asConsumer())));
     await assertFails(getDocs(tokens(asOwner())));
     await assertFails(getDocs(tokens(asOperator())));
@@ -2389,7 +2413,7 @@ describe('table qr tokens', () => {
       issuedAtTimestamp: 1789117200000,
     };
 
-    await assertFails(setDoc(doc(tokens(anonymously()), 'FORGED'), forged));
+    await assertFails(setDoc(doc(tokens(signedOut()), 'FORGED'), forged));
     await assertFails(setDoc(doc(tokens(asConsumer()), 'FORGED'), forged));
     await assertFails(setDoc(doc(tokens(asOwner()), 'FORGED'), forged));
     await assertFails(setDoc(doc(tokens(asOperator()), 'FORGED'), forged));
@@ -2739,6 +2763,85 @@ describe('backend-owned collections', () => {
   });
 });
 
+/**
+ * The boundary of issue #1565, from the outside.
+ *
+ * Everything above proves the guest reaches what is named after it. This
+ * proves the other half, which had no test at all while `signedOut` was called
+ * `anonymously`: a uid minted by photographing a sticker is not a BiteTribe
+ * account, and the clauses written for accounts refuse it. `RD-TS-37`.
+ *
+ * Each of these reads succeeds for `asConsumer` in the blocks above - the same
+ * uid, the same documents, a different sign-in provider - so a rule that
+ * started refusing members too would fail there rather than passing here.
+ */
+describe('an anonymous table guest reaches nothing else of BiteTribe', () => {
+  it('refuses it any /users document, its own uid included', async () => {
+    await assertFails(getDoc(doc(asTableGuest(), 'users', STRANGER)));
+    await assertFails(getDoc(doc(asTableGuest(), 'users', CONSUMER)));
+  });
+
+  it('refuses it the follow graph', async () => {
+    await assertFails(
+      getDocs(collection(asTableGuest(), 'users', CONSUMER, 'followers')),
+    );
+    await assertFails(
+      getDocs(collection(asTableGuest(), 'users', CONSUMER, 'following')),
+    );
+  });
+
+  it('refuses it Bites and their reactions', async () => {
+    await assertFails(getDoc(doc(asTableGuest(), 'bites', 'consumer-bite')));
+    await assertFails(
+      getDoc(doc(asTableGuest(), 'bites', 'consumer-bite', 'likes', STRANGER)),
+    );
+  });
+
+  it('refuses it reviews, bucket lists and BiteTrails', async () => {
+    await assertFails(
+      getDoc(doc(asTableGuest(), 'reviews', 'consumer-review')),
+    );
+    await assertFails(
+      getDoc(doc(asTableGuest(), 'bucketlists', 'consumer-list')),
+    );
+    await assertFails(
+      getDoc(doc(asTableGuest(), 'biteTrails', 'consumer-trail')),
+    );
+  });
+
+  /**
+   * The restaurant it is sitting in, and the menu it is ordering from. Neither
+   * is a loss: the scan answers both through `resolveTableQrToken` and
+   * `loadPublicMenu`, which assemble their answers field by field and are
+   * reachable with no session at all - which is why the guest never reads
+   * either document directly.
+   */
+  it('refuses it the restaurant and menu documents', async () => {
+    await assertFails(
+      getDoc(doc(asTableGuest(), 'restaurants', OWNED_RESTAURANT)),
+    );
+    await assertFails(getDoc(doc(asTableGuest(), 'menus', OWNED_MENU)));
+  });
+
+  it('refuses it the leaderboard, display names and candidates', async () => {
+    await assertFails(getDoc(doc(asTableGuest(), 'meta', 'leaderboard')));
+    await assertFails(getDoc(doc(asTableGuest(), 'displayNames', 'consumer')));
+    await assertFails(
+      getDoc(doc(asTableGuest(), 'restaurantCandidates', 'candidate-1')),
+    );
+  });
+
+  /**
+   * The scan itself still works, because the token is the one document a guest
+   * reads before it has any session at all (issue #1100).
+   */
+  it('still lets it read the token it scanned', async () => {
+    await assertSucceeds(
+      getDoc(doc(asTableGuest(), 'tableTokens', ACTIVE_TOKEN)),
+    );
+  });
+});
+
 describe('everything else', () => {
   it('refuses a collection these rules do not name', async () => {
     await assertFails(
@@ -2748,12 +2851,12 @@ describe('everything else', () => {
   });
 
   it('refuses an unauthenticated caller everywhere', async () => {
-    await assertFails(getDoc(doc(anonymously(), 'bites', 'consumer-bite')));
+    await assertFails(getDoc(doc(signedOut(), 'bites', 'consumer-bite')));
     await assertFails(
-      setDoc(doc(anonymously(), 'bites', 'anon-bite'), { userId: CONSUMER }),
+      setDoc(doc(signedOut(), 'bites', 'anon-bite'), { userId: CONSUMER }),
     );
     await assertFails(
-      getDoc(doc(anonymously(), 'restaurants', OWNED_RESTAURANT)),
+      getDoc(doc(signedOut(), 'restaurants', OWNED_RESTAURANT)),
     );
   });
 });

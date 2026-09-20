@@ -1,6 +1,5 @@
 import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
-import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import {
   LeaderboardUser,
@@ -8,6 +7,7 @@ import {
   META_COLLECTION,
   rebuildLeaderboard,
 } from '../shared/utils/leaderboard';
+import { requireMember } from '../shared/roles';
 
 const db = getFirestore();
 
@@ -29,12 +29,15 @@ const readPersistedLeaderboard = async (): Promise<
 };
 
 export const loadLeaderboard = onAppCheck<void>(async (request) => {
-  if (!request.auth) {
-    logger.warn('loadLeaderboard: unauthenticated request rejected');
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to load the leaderboard.',
-    );
+  try {
+    requireMember(request, 'You must be signed in to load the leaderboard.');
+  } catch (error) {
+    // The guard refuses a signed-out caller and an anonymous table guest,
+    // and this log is older than the second case. It covers both now: what
+    // it is for is noticing a client calling this without an account.
+    logger.warn('loadLeaderboard: request without an account rejected');
+
+    throw error;
   }
 
   logger.info('loadLeaderboard: request received', {

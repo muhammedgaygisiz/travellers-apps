@@ -1,8 +1,12 @@
 import { getAuth } from 'firebase-admin/auth';
-import { DocumentData, UpdateData, getFirestore } from 'firebase-admin/firestore';
-import { HttpsError } from 'firebase-functions/https';
+import {
+  DocumentData,
+  UpdateData,
+  getFirestore,
+} from 'firebase-admin/firestore';
 import { onAppCheck } from '../shared/callable-options';
 import { buildEmailVerificationMetadata } from './email-verification-utils';
+import { requireMember } from '../shared/roles';
 
 interface UpdateUserMetadataRequest {
   version?: string;
@@ -21,12 +25,7 @@ const toOptionalString = (value: unknown): string | undefined => {
 
 export const updateUserMetadata = onAppCheck<UpdateUserMetadataRequest>(
   async (request) => {
-    if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to update user metadata.',
-      );
-    }
+    requireMember(request, 'You must be signed in to update user metadata.');
 
     const userReference = getFirestore()
       .collection('users')
@@ -40,13 +39,12 @@ export const updateUserMetadata = onAppCheck<UpdateUserMetadataRequest>(
     const appVersion = toOptionalString(request.data?.version);
     const appBuildNumber = toOptionalString(request.data?.buildNumber);
     const authUser = await getAuth().getUser(request.auth.uid);
-    const userUpdate: UpdateData<DocumentData> =
-      {
-        lastSeen: new Date().toISOString(),
-        lastSeenTimestamp: Date.now(),
-        email: authUser.email || userSnapshot.data()?.['email'] || '',
-        ...buildEmailVerificationMetadata(authUser, userSnapshot.data() || {}),
-      };
+    const userUpdate: UpdateData<DocumentData> = {
+      lastSeen: new Date().toISOString(),
+      lastSeenTimestamp: Date.now(),
+      email: authUser.email || userSnapshot.data()?.['email'] || '',
+      ...buildEmailVerificationMetadata(authUser, userSnapshot.data() || {}),
+    };
 
     if (appVersion) {
       userUpdate.appVersion = appVersion;

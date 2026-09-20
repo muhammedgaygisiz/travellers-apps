@@ -12,12 +12,18 @@ rules_version = '2';
  * Three rules of thumb hold everywhere below, and reading them once is cheaper
  * than reading them per collection:
  *
- * 1. **Reads stay where they were.** Every collection a signed-in account
- *    could read before, it can still read. Narrowing reads is issue #1079's
- *    visible scope, not this one's, and mixing the two would make a regression
- *    here indistinguishable from a regression there. The two exceptions are
- *    named at their own match blocks: `accountDeletions` and the `pushTokens`
- *    index are cross-account identifiers no client ever read.
+ * 1. **Reads stay where they were, for a member.** Every collection a
+ *    registered account could read before, it can still read. Narrowing what
+ *    one member reads about another is issue #1079's visible scope, not this
+ *    one's, and mixing the two would make a regression here indistinguishable
+ *    from a regression there. The two exceptions are named at their own match
+ *    blocks: `accountDeletions` and the `pushTokens` index are cross-account
+ *    identifiers no client ever read.
+ *
+ *    The general read clauses ask `isMember()` rather than `signedIn()` since
+ *    issue #1565, because since issue #1101 a signed-in account is no longer
+ *    the same thing as a registered one. An anonymous table guest reads what
+ *    is named after its own uid and nothing else; see `isMember()` below.
  *
  * 2. **A write is allowed by ownership, not by a role.** The account named on
  *    the document writes it. The one role that appears here is `admin`, and it
@@ -40,6 +46,35 @@ service cloud.firestore {
 
     function uid() {
       return request.auth.uid;
+    }
+
+    /**
+     * A signed-in account that is not an anonymous table guest (GitHub issue
+     * #1565).
+     *
+     * `signedIn()` is `request.auth != null`, and from issue #1101 onwards that
+     * became true for a principal anybody can mint by photographing a sticker
+     * on a table: `signInAsGuest` hands out an anonymous session so the guest's
+     * phone can read back the session, the orders and the assistance request
+     * named after its own uid. Those clauses match the *uid*, so they are safe
+     * whoever holds it. The clauses that matched `signedIn()` alone were not:
+     * they were written when the only way to hold a uid was to register, and a
+     * scan from the pavement inherited every one of them.
+     *
+     * So the general read clauses ask this instead, and what an anonymous
+     * session may read is exactly what is named after it. `RD-TS-37`.
+     *
+     * The kind of session is read off the verified ID token rather than from
+     * `exists(/databases/$(database)/documents/users/$(uid()))`, which would be
+     * a document read on every evaluation of every clause below - billed, and
+     * paid partly by the guest's own cheap reads. The cost of the token is that
+     * it can lag: a guest who registers mid-meal keeps an `anonymous` token
+     * until it refreshes, which is why issue #1657's link forces a refresh.
+     * `RD-TS-40`.
+     */
+    function isMember() {
+      return signedIn()
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
     }
 
     /**
@@ -133,7 +168,7 @@ service cloud.firestore {
     }
 
     match /restaurants/{restaurantId} {
-      allow read: if signedIn();
+      allow read: if isMember();
 
       /**
        * Creating a restaurant is an operator action.
@@ -173,7 +208,7 @@ service cloud.firestore {
     }
 
     match /menus/{menuId} {
-      allow read: if signedIn();
+      allow read: if isMember();
 
       /**
        * At create time the restaurant does not point at the menu yet — the
@@ -869,7 +904,7 @@ service cloud.firestore {
     // ------------------------------------------------------------------ bites
 
     match /bites/{biteId} {
-      allow read: if signedIn();
+      allow read: if isMember();
 
       allow create: if owns(request.resource.data, 'userId');
 
@@ -891,7 +926,7 @@ service cloud.firestore {
 
       /** One reaction document per account, named by the account's own uid. */
       match /likes/{likeUserId} {
-        allow read: if signedIn();
+        allow read: if isMember();
         allow create, update: if isSelf(likeUserId)
           && owns(request.resource.data, 'userId');
         allow delete: if isSelf(likeUserId);
@@ -901,7 +936,7 @@ service cloud.firestore {
     // ---------------------------------------------------------------- reviews
 
     match /reviews/{reviewId} {
-      allow read: if signedIn();
+      allow read: if isMember();
       allow create: if owns(request.resource.data, 'authorId');
       allow update, delete: if isOperator() || owns(resource.data, 'authorId');
     }
@@ -909,7 +944,7 @@ service cloud.firestore {
     // ----------------------------------------------------------- bucket lists
 
     match /bucketlists/{bucketlistId} {
-      allow read: if signedIn();
+      allow read: if isMember();
       allow create: if owns(request.resource.data, 'userId');
       allow update, delete: if isOperator() || owns(resource.data, 'userId');
     }
@@ -917,7 +952,7 @@ service cloud.firestore {
     // ------------------------------------------------------------ bite trails
 
     match /biteTrails/{biteTrailId} {
-      allow read: if signedIn();
+      allow read: if isMember();
       allow create: if owns(request.resource.data, 'ownerId');
       allow update, delete: if isOperator() || owns(resource.data, 'ownerId');
 
@@ -927,7 +962,7 @@ service cloud.firestore {
        * update path would have nothing to update.
        */
       match /sells/{sellId} {
-        allow read: if signedIn();
+        allow read: if isMember();
         allow create: if owns(request.resource.data, 'userId');
         allow update: if false;
         allow delete: if isOperator();
@@ -935,7 +970,7 @@ service cloud.firestore {
 
       /** One rating per account, named by the account's own uid. */
       match /ratings/{ratingUserId} {
-        allow read: if signedIn();
+        allow read: if isMember();
         allow write: if isSelf(ratingUserId);
       }
     }
@@ -980,7 +1015,7 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if signedIn();
+      allow read: if isMember();
 
       /**
        * The document is created by `createUserOnAuthCreate` before the account
@@ -1003,12 +1038,12 @@ service cloud.firestore {
        * authorisation.
        */
       match /followers/{followerId} {
-        allow read: if signedIn();
+        allow read: if isMember();
         allow write: if isSelf(followerId);
       }
 
       match /following/{followedId} {
-        allow read: if signedIn();
+        allow read: if isMember();
         allow write: if isSelf(userId);
       }
 
@@ -1052,17 +1087,17 @@ service cloud.firestore {
      * `verifyRestaurantCandidate` rather than by writing the candidate.
      */
     match /meta/{documentId} {
-      allow read: if signedIn();
+      allow read: if isMember();
       allow write: if false;
     }
 
     match /displayNames/{normalizedDisplayName} {
-      allow read: if signedIn();
+      allow read: if isMember();
       allow write: if false;
     }
 
     match /restaurantCandidates/{candidateId} {
-      allow read: if signedIn();
+      allow read: if isMember();
       allow write: if false;
     }
 

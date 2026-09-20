@@ -4,6 +4,7 @@ import { defineSecret } from 'firebase-functions/params';
 import { getAppCheckCallableOptions } from '../shared/callable-options';
 import { getCurrencyByCountryCode } from '../shared/utils/country-code-to-currency';
 import { reverseGeocode } from '../shared/utils/reverse-geocode';
+import { requireMember } from '../shared/roles';
 
 const GOOGLE_GEOCODING_API_KEY_ENV = 'GOOGLE_GEOCODING_API_KEY';
 const googleGeocodingApiKey = defineSecret(GOOGLE_GEOCODING_API_KEY_ENV);
@@ -26,12 +27,7 @@ export const getCurrencyByPosition = onCall<GetCurrencyByPositionRequest>(
     secrets: [googleGeocodingApiKey],
   },
   async (request): Promise<GetCurrencyByPositionResult> => {
-    if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to determine the currency.',
-      );
-    }
+    requireMember(request, 'You must be signed in to determine the currency.');
 
     const { latitude, longitude } = request.data;
 

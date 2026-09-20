@@ -35,6 +35,7 @@ import {
 } from './table-session';
 import { TABLE_STATES_COLLECTION, visitIdOf } from './table-state';
 import { TABLE_VISITS_COLLECTION, isOpenVisit } from './table-visit';
+import { isAnonymousSession } from '../shared/roles';
 
 /**
  * Attaches the guest who scanned a code to the party at that table
@@ -177,8 +178,7 @@ const guestOf = (
 
   return {
     uid: request.auth.uid,
-    isAnonymous:
-      request.auth?.token?.firebase?.sign_in_provider === 'anonymous',
+    isAnonymous: isAnonymousSession(request),
   };
 };
 

@@ -174,10 +174,11 @@ grants or revokes it; and not an entitlement, because nothing is recorded about 
 It is the session's own kind - anonymous or member - and the two layers read it differently.
 `authGuard` asks `getMember()` rather than `getUser()`, so an anonymous session opens no
 authenticated route: without that distinction a guest who scanned a table would be handed the
-feed, the gallery and a profile page with nobody behind it. `firestore.rules` asks only
-`signedIn()` and then matches the document against the caller's own uid, which is what the
-anonymity actually buys - a stable identity to name a session after, upgraded in place by
-`linkWith*` if the guest later registers.
+feed, the gallery and a profile page with nobody behind it. `firestore.rules` asks `isMember()` on
+every general read clause since issue [#1565], and asks only `signedIn()` on the clauses
+written for the guest itself, which then match the document against the caller's own uid -
+which is what the anonymity actually buys: a stable identity to name a session after,
+upgraded in place by `linkWith*` if the guest later registers.
 
 | Capability                                                       | Table Guest                     |
 | ---------------------------------------------------------------- | ------------------------------- |
@@ -186,6 +187,7 @@ anonymity actually buys - a stable identity to name a session after, upgraded in
 | Send an order, ask for a waiter or the bill                      | yes, own session ¹²             |
 | Read back its own session, orders and assistance requests        | yes, own uid only ¹³            |
 | Read another party's session, orders or the room's state         | no ¹³                           |
+| Read a `/users` document, a Bite, a review, a BiteTrail, a menu  | no ¹³                           |
 | Every authenticated route: feed, gallery, profile, Bite creation | no ¹⁴                           |
 
 ¹¹ `resolveTableQrToken` and `loadPublicMenu` are the two `public` callables of the flow
@@ -196,19 +198,22 @@ carries ownership and ordering configuration a reader is not entitled to.
 ¹² `startTableSession`, `leaveTableSession`, `submitTableOrder` and `requestTableAssistance`
 are the four callables written for an anonymous session. None of them takes a `guestUserId`:
 each writes against the one session named after the caller's own uid, and the restaurant,
-table and visit all come off a scanned token. **Four by design and not by enforcement**, and
-the distinction matters: `classifyCallable`'s `authenticated` means "carries a uid", nothing
-more, and `start-table-session.ts` reading `sign_in_provider === 'anonymous'` is the only
-place in the backend that looks at the kind of session at all - and it records the answer on
-the session rather than refusing anything with it. So an anonymous token reaches every other
-`authenticated` callable too, `searchUsers` and `loadBitesByLocation` among them.
-`callable-authorization.spec.ts` asserts the role guards and does not assert this, so nothing
-would catch a fifth callable quietly joining the list.
+table and visit all come off a scanned token. **Four by enforcement since issue [#1565]**,
+which is the part that used to be missing: `callable-authorization.spec.ts` classified 23
+callables as `authenticated`, meaning "carries a uid" and nothing more, so an anonymous token
+reached `searchUsers`, `loadBitesByLocation` and the billed Google Maps calls as well. The
+class is now split - `member`, guarded by `requireMember` and asserted per endpoint, and
+`anySession`, which is exactly these four - so a twentieth callable has to say which of the
+two it is. `RD-TS-38`.
 
 ¹³ The documents are `allow write: if false` throughout; the guest's read clauses match
 `guestUserId == uid()` on `tableSessions` and `orders`, and `requestedByUserIds` on
 `assistanceRequests`. `list` on a session or an assistance request is `readsFloorPlan` only,
-so a guest reads its own documents and cannot enumerate the room.
+so a guest reads its own documents and cannot enumerate the room. Everything else a signed-in
+account may read now asks `isMember()` instead of `signedIn()` (`RD-TS-37`), so the guest
+reads what is named after it and nothing else - not a `/users` document, not a Bite, not the
+restaurant or menu document behind the code it scanned, which it reads through the two public
+callables of footnote 11 instead.
 
 ¹⁴ The **routes** refuse it - `authGuard` turns an anonymous session away, and the table
 routes sit outside `gateAuthenticatedRoutes` as well, so a guest who never signed up is not
@@ -349,3 +354,4 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#1112]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1112
 [#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657
 [#1658]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1658
+[#1565]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1565

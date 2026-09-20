@@ -4,9 +4,9 @@ import {
   getFirestore,
 } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
-import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { getPreviousWeekBounds } from '../shared/utils/week-bounds';
+import { requireMember } from '../shared/roles';
 
 const BITE_COLLECTION = 'bites';
 const MAX_RESULTS = 200;
@@ -72,13 +72,15 @@ export const resolveWeekBounds = (
  */
 export const loadWeeklyBites = onAppCheck<LoadWeeklyBitesRequest>(
   async (request) => {
-    if (!request.auth) {
-      logger.warn('loadWeeklyBites: unauthenticated request rejected');
+    try {
+      requireMember(request, 'You must be signed in to load the weekly bites.');
+    } catch (error) {
+      // The guard refuses a signed-out caller and an anonymous table guest,
+      // and this log is older than the second case. It covers both now: what
+      // it is for is noticing a client calling this without an account.
+      logger.warn('loadWeeklyBites: request without an account rejected');
 
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to load the weekly bites.',
-      );
+      throw error;
     }
 
     const { start, end } = resolveWeekBounds(request.data ?? {});

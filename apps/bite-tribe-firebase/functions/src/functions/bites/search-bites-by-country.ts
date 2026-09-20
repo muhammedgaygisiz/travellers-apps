@@ -3,6 +3,7 @@ import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { SearchBite, toSearchBite } from '../shared/utils/search-bite';
+import { requireMember } from '../shared/roles';
 
 const BITE_COLLECTION = 'bites';
 const COUNTRY_CODE_FIELD = 'countryCode';
@@ -22,12 +23,10 @@ interface SearchBitesByCountryRequest {
  */
 export const searchBitesByCountry = onAppCheck<SearchBitesByCountryRequest>(
   async (request): Promise<SearchBite[]> => {
-    if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to search for bites by country.',
-      );
-    }
+    requireMember(
+      request,
+      'You must be signed in to search for bites by country.',
+    );
 
     if (typeof request.data.countryCode !== 'string') {
       throw new HttpsError('invalid-argument', 'countryCode must be a string.');

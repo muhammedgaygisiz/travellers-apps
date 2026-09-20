@@ -2,6 +2,7 @@ import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
 import { onAppCheck } from '../shared/callable-options';
+import { requireMember } from '../shared/roles';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -174,12 +175,7 @@ export const searchPlaces = onAppCheck<SearchPlacesRequest>(
     secrets: [googleMapsApiKey],
   },
   async (request): Promise<GooglePlace[]> => {
-    if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to search for places.',
-      );
-    }
+    requireMember(request, 'You must be signed in to search for places.');
 
     if (typeof request.data.searchText !== 'string') {
       throw new HttpsError('invalid-argument', 'searchText must be a string.');
@@ -220,12 +216,7 @@ export const searchNearbyPlaces = onAppCheck<SearchNearbyPlacesRequest>(
     secrets: [googleMapsApiKey],
   },
   async (request): Promise<GooglePlace[]> => {
-    if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to search for places.',
-      );
-    }
+    requireMember(request, 'You must be signed in to search for places.');
 
     const position = parsePosition(request.data.position);
 

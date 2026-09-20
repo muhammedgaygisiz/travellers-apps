@@ -14,6 +14,7 @@ import {
   sendGoogleWorkspaceVerificationEmail,
   SendVerificationEmailParams,
 } from './google-workspace-email';
+import { requireMember } from '../shared/roles';
 
 interface ResendEmailVerificationResult {
   status: 'sent';
@@ -96,12 +97,7 @@ export const resendEmailVerification = onAppCheck<
   void,
   Promise<ResendEmailVerificationResult>
 >({ secrets: googleWorkspaceEmailSecrets }, async (request) => {
-  if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to resend email verification.',
-    );
-  }
+  requireMember(request, 'You must be signed in to resend email verification.');
 
   return resendEmailVerificationForUser(request.auth.uid);
 });

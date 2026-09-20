@@ -41,8 +41,27 @@ type Access =
    * the same pair `worksAt()` in `firestore.rules` checks.
    */
   | 'staffAuthority'
-  /** Requires a session, and does the same thing for every account. */
-  | 'authenticated'
+  /**
+   * Requires a BiteTribe account, and does the same thing for every one of
+   * them.
+   *
+   * It was called `authenticated` until issue #1565, and the rename is the
+   * decision: `request.auth != null` stopped meaning "has an account" when
+   * issue #1101 gave a uid to every phone that scanned a table QR code, and
+   * nineteen callables written on the old reading were reachable by one -
+   * four of them spending billed Google Maps quota. `requireMember` is what
+   * this class asserts, and `RD-TS-38` is why.
+   */
+  | 'member'
+  /**
+   * Requires a session of any kind, an anonymous table guest included.
+   *
+   * The four callables of the QR ordering flow, and the only ones for which a
+   * guest session is enough. What the door opens onto is one document named
+   * after the caller's own uid: none of them takes a `guestUserId`, and the
+   * restaurant, table and visit all come off a token the caller had to hold.
+   */
+  | 'anySession'
   /** Deliberately reachable without a session. */
   | 'public';
 
@@ -115,25 +134,25 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // Consumer and business app paths. Each acts for the caller, or reads data
   // every signed-in account may read, so requiring `admin` here would break
   // the consumer app.
-  checkDisplayNameAvailability: 'authenticated',
-  claimDisplayName: 'authenticated',
-  deleteOwnAccount: 'authenticated',
-  getCurrencyByPosition: 'authenticated',
-  getPlaceDetails: 'authenticated',
-  loadBitesByLocation: 'authenticated',
-  loadLeaderboard: 'authenticated',
-  loadWeeklyBites: 'authenticated',
-  resendEmailVerification: 'authenticated',
-  searchBites: 'authenticated',
-  searchBitesByCity: 'authenticated',
-  searchBitesByCountry: 'authenticated',
-  searchNearbyPlaces: 'authenticated',
-  searchPlaces: 'authenticated',
-  searchRestaurants: 'authenticated',
-  searchUsers: 'authenticated',
-  syncEmailVerificationStatus: 'authenticated',
-  updateLastSeen: 'authenticated',
-  updateUserMetadata: 'authenticated',
+  checkDisplayNameAvailability: 'member',
+  claimDisplayName: 'member',
+  deleteOwnAccount: 'member',
+  getCurrencyByPosition: 'member',
+  getPlaceDetails: 'member',
+  loadBitesByLocation: 'member',
+  loadLeaderboard: 'member',
+  loadWeeklyBites: 'member',
+  resendEmailVerification: 'member',
+  searchBites: 'member',
+  searchBitesByCity: 'member',
+  searchBitesByCountry: 'member',
+  searchNearbyPlaces: 'member',
+  searchPlaces: 'member',
+  searchRestaurants: 'member',
+  searchUsers: 'member',
+  syncEmailVerificationStatus: 'member',
+  updateLastSeen: 'member',
+  updateUserMetadata: 'member',
 
   // A guest attaching to, or leaving, the party at a table they scanned
   // (issue #1101). `authenticated` rather than `public`, and the only two
@@ -144,8 +163,8 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // after the caller's own uid - neither callable takes a `guestUserId`, and
   // the restaurant, table and visit all come from a token the caller had to
   // hold, checked against the twelve rules of issue #1100.
-  startTableSession: 'authenticated',
-  leaveTableSession: 'authenticated',
+  startTableSession: 'anySession',
+  leaveTableSession: 'anySession',
 
   // A guest sending the order they built to the kitchen (issue #1103). The
   // same door and the same reason: the session it writes against is named
@@ -153,14 +172,14 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // comes off that visit, and every price comes off the restaurant's own menu.
   // There is nothing in the request a caller could choose that would reach
   // another party's dinner.
-  submitTableOrder: 'authenticated',
+  submitTableOrder: 'anySession',
 
   // A guest asking for a waiter or for the bill (issue #1106). The fourth
   // callable an anonymous session is enough for, and the narrowest of them:
   // the request carries a restaurant, the table the caller scanned and one of
   // two kinds, and everything else - the visit, the table the marker is drawn
   // on, who asked - comes off the session named after the caller's own uid.
-  requestTableAssistance: 'authenticated',
+  requestTableAssistance: 'anySession',
 
   // The redirect target of a shared Bite link. It is opened by whoever was
   // sent the link, which is the point of sharing one.
@@ -307,7 +326,11 @@ describe('callable authorization', () => {
   // The consumer app is the thing this test protects. A callable it depends on
   // that quietly starts requiring `admin` breaks the app for every user.
   it('requires no role of an endpoint the apps call as any signed-in user', () => {
-    const overGuarded = [...named('authenticated'), ...named('public')]
+    const overGuarded = [
+      ...named('member'),
+      ...named('anySession'),
+      ...named('public'),
+    ]
       .filter((endpoint) => sourceOf(endpoint.file).includes('requireAdmin('))
       .map((endpoint) => endpoint.name);
 
@@ -374,6 +397,43 @@ describe('callable authorization', () => {
     expect(operatorOnly).toEqual([]);
   });
 
+  /**
+   * The boundary of issue #1565, asserted where a new callable will meet it.
+   *
+   * A `member` endpoint that forgets this guard is not visibly broken: it
+   * works for every account that tests it, and is reachable by a uid anybody
+   * can mint by photographing a sticker on a table. The four `anySession`
+   * endpoints are asserted from the other side for the same reason - a guard
+   * added there would refuse the guest the QR flow exists for, and the flow
+   * would fail on a phone rather than in a test.
+   */
+  it('guards every member endpoint with requireMember', () => {
+    const unguarded = named('member')
+      .filter((endpoint) => !sourceOf(endpoint.file).includes('requireMember('))
+      .map((endpoint) => endpoint.name);
+
+    expect(unguarded).toEqual([]);
+  });
+
+  it('admits an anonymous table guest on the four table callables', () => {
+    expect(
+      named('anySession')
+        .map((endpoint) => endpoint.name)
+        .sort(),
+    ).toEqual([
+      'leaveTableSession',
+      'requestTableAssistance',
+      'startTableSession',
+      'submitTableOrder',
+    ]);
+
+    const guarded = named('anySession')
+      .filter((endpoint) => sourceOf(endpoint.file).includes('requireMember('))
+      .map((endpoint) => endpoint.name);
+
+    expect(guarded).toEqual([]);
+  });
+
   // `firebase-admin/auth` pulls in `jose`, which is ESM only, so a spec that
   // reaches a module importing it fails to parse under ts-jest unless it mocks
   // the SDK. Every operator callable imports the guard, so the guard importing
@@ -393,7 +453,8 @@ describe('callable authorization', () => {
       ...named('operator'),
       ...named('restaurantAuthority'),
       ...named('staffAuthority'),
-      ...named('authenticated'),
+      ...named('member'),
+      ...named('anySession'),
     ]
       .filter((endpoint) => {
         const source = sourceOf(endpoint.file);
@@ -403,7 +464,8 @@ describe('callable authorization', () => {
           ![...RESTAURANT_AUTHORITY_GUARDS, ...STAFF_AUTHORITY_GUARDS].some(
             (guard) => source.includes(guard),
           ) &&
-          !source.includes('!request.auth')
+          !source.includes('!request.auth') &&
+          !source.includes('requireMember(')
         );
       })
       .map((endpoint) => endpoint.name);

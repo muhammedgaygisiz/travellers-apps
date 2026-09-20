@@ -1,6 +1,7 @@
 import { QueryDocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
+import { requireMember } from '../shared/roles';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -39,12 +40,7 @@ const toSearchUser = (doc: QueryDocumentSnapshot): SearchUser => {
 };
 
 export const searchUsers = onAppCheck<SearchUsersRequest>(async (request) => {
-  if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to search for users.',
-    );
-  }
+  requireMember(request, 'You must be signed in to search for users.');
 
   if (typeof request.data.searchText !== 'string') {
     throw new HttpsError('invalid-argument', 'searchText must be a string.');

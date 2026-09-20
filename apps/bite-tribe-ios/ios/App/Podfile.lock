@@ -1276,7 +1276,7 @@ PODS:
     - Capacitor
   - CapacitorStatusBar (8.0.3):
     - Capacitor
-  - CapawesomeCapacitorFilePicker (8.0.3):
+  - CapawesomeCapacitorFilePicker (8.0.2):
     - Capacitor
   - FirebaseAnalytics/Core (12.7.0):
     - FirebaseCore (~> 12.7.0)
@@ -1702,7 +1702,7 @@ SPEC CHECKSUMS:
   CapacitorShare: 0c58305114538568059bfc07111f22dcb9cb2a82
   CapacitorSplashScreen: 7bf61c2001557ff9e195e601c6b87344480d3c65
   CapacitorStatusBar: eca7bc2b58d9f886f1ef9edb66e57a9b29c121af
-  CapawesomeCapacitorFilePicker: 1b4fa0c4983250a55f745acaa9f945a96f60abd5
+  CapawesomeCapacitorFilePicker: eb29fb54c59614fede51e0e0fe25070dda9d024c
   FirebaseAnalytics: e423129866107aeacf6010a280b9c9829f9ea50d
   FirebaseAppCheck: ca32814649d879d81589ac925ef1c3f833f8453f
   FirebaseAppCheckInterop: d58366471f1dadf2ed998b15f85c658458a10142

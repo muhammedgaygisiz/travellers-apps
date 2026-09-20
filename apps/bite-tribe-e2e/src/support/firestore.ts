@@ -178,6 +178,37 @@ export const listFirestoreCollection = async (
   );
 };
 
+/**
+ * Empties a collection, document by document.
+ *
+ * Deleting a document does **not** delete its subcollections - Firestore keeps
+ * them, and the emulator keeps everything for the whole run - so a fixture that
+ * only deletes the parent leaves the children behind for the next spec. The
+ * orders under a table visit are exactly that: the next run seeds the same
+ * visit id and finds the previous run's dinner already under it.
+ */
+export const deleteFirestoreCollection = async (
+  page: Page,
+  collectionPath: string,
+): Promise<void> => {
+  const response = await page.request.get(
+    `${FIRESTORE_EMULATOR_URL}/${collectionPath}`,
+    { headers: { Authorization: 'Bearer owner' } },
+  );
+
+  if (!response.ok()) return;
+
+  const { documents } = (await response.json()) as {
+    documents?: FirestoreDocument[];
+  };
+
+  for (const document of documents ?? []) {
+    const path = document.name.slice(document.name.indexOf('/documents/') + 11);
+
+    await deleteFirestoreDocument(page, path);
+  }
+};
+
 export const getFirestoreDocument = async (
   page: Page,
   documentPath: string,

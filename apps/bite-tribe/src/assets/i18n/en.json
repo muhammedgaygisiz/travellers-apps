@@ -250,6 +250,7 @@
   "registration-in-progress": "Creating your account...",
   "registration-success-check-your-email-to-verify-account": "Registration successful! Please check your email to verify your account.",
   "registration-error-try-again": "An error occurred during registration. Please try again.",
+  "registration-account-exists-sign-in": "You already have a BiteTribe account with this email address. Keep ordering here and sign in when you are done.",
   "registration-unknown-error-try-again": "An unknown error occurred during registration. Please try again.",
   "registration-timeout-try-again": "Registration is taking longer than expected. Please check your connection and try again. If your account was created, sign in instead.",
   "rate-now": "Rate now",

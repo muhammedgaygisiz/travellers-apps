@@ -1,5 +1,9 @@
 import { Page } from '@playwright/test';
-import { deleteFirestoreDocument, seedFirestoreDocument } from './firestore';
+import {
+  deleteFirestoreCollection,
+  deleteFirestoreDocument,
+  seedFirestoreDocument,
+} from './firestore';
 import { TEST_USERS } from './test-users';
 
 /**
@@ -50,6 +54,25 @@ export const TABLE_ORDER_FIXTURE: TableOrderFixture = {
   token: 'ABCDEFGHJKMNPQRSTVWXYZ0123',
   dishName: 'Margherita',
   dishPrice: 12,
+};
+
+/**
+ * A second table, for the spec that registers during the meal (issue #1657).
+ *
+ * Its own restaurant, table, visit and printed code, because Playwright runs
+ * spec files in parallel and the fixture now empties the orders under its visit
+ * afterwards - two specs sharing one visit would delete each other's dinner
+ * mid-test.
+ */
+export const TABLE_GUEST_FIXTURE: TableOrderFixture = {
+  ...TABLE_ORDER_FIXTURE,
+  restaurantId: 'e2e-table-guest-restaurant',
+  restaurantName: 'Sign Up Trattoria',
+  roomId: 'e2e-table-guest-room',
+  tableId: 'e2e-table-guest-table',
+  menuId: 'e2e-table-guest-menu',
+  visitId: 'e2e-table-guest-visit',
+  token: 'BCDEFGHJKMNPQRSTVWXYZ01234',
 };
 
 const DAYS = [
@@ -236,6 +259,22 @@ export const deleteOrderableTable = async (
   fixture: TableOrderFixture = TABLE_ORDER_FIXTURE,
 ): Promise<void> => {
   await deleteFirestoreDocument(page, `tableTokens/${fixture.token}`);
+  // Subcollections outlive the document they hang from, and both of these are
+  // written by the flows under test rather than seeded here - so without this
+  // the next run finds the previous run's orders under the visit it just
+  // seeded, and a spec that counts them fails on a change that is not there.
+  await deleteFirestoreCollection(
+    page,
+    `restaurants/${fixture.restaurantId}/visits/${fixture.visitId}/orders`,
+  );
+  await deleteFirestoreCollection(
+    page,
+    `restaurants/${fixture.restaurantId}/tableSessions`,
+  );
+  await deleteFirestoreCollection(
+    page,
+    `restaurants/${fixture.restaurantId}/assistanceRequests`,
+  );
   await deleteFirestoreDocument(
     page,
     `restaurants/${fixture.restaurantId}/tableStates/${fixture.tableId}`,

@@ -68,6 +68,7 @@ export { requestTableAssistance } from './functions/restaurants/request-table-as
 export { acknowledgeTableAssistance } from './functions/restaurants/acknowledge-table-assistance';
 export { dismissScanAnomaly } from './functions/restaurants/dismiss-scan-anomaly';
 export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-create';
+export { upgradeGuestAccount } from './functions/users/upgrade-guest-account';
 export { claimDisplayName } from './functions/users/claim-display-name';
 export { setUserRoles } from './functions/users/set-user-roles';
 export { setUserBlocked } from './functions/users/set-user-blocked';

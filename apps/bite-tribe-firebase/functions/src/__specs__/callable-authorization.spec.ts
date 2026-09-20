@@ -181,6 +181,14 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // on, who asked - comes off the session named after the caller's own uid.
   requestTableAssistance: 'anySession',
 
+  // A guest who registered during the meal, asking for the `/users` document a
+  // member has (issue #1657). `anySession` and not `member`, which looks the
+  // wrong way round until the order of events is read: the account is a member
+  // by the time it calls, and the token in its hand still says `anonymous`
+  // until it refreshes. The callable reads what Firebase Auth holds rather
+  // than what the token claims, and acts on the caller's own uid.
+  upgradeGuestAccount: 'anySession',
+
   // The redirect target of a shared Bite link. It is opened by whoever was
   // sent the link, which is the point of sharing one.
   handleSharedLinkToBite: 'public',
@@ -415,7 +423,7 @@ describe('callable authorization', () => {
     expect(unguarded).toEqual([]);
   });
 
-  it('admits an anonymous table guest on the four table callables', () => {
+  it('admits an anonymous table guest on the table callables and the upgrade', () => {
     expect(
       named('anySession')
         .map((endpoint) => endpoint.name)
@@ -425,6 +433,7 @@ describe('callable authorization', () => {
       'requestTableAssistance',
       'startTableSession',
       'submitTableOrder',
+      'upgradeGuestAccount',
     ]);
 
     const guarded = named('anySession')

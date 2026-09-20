@@ -249,6 +249,7 @@
   "registration-in-progress": "መለያህ እየተፈጠረ ነው...",
   "registration-success-check-your-email-to-verify-account": "ምዝገባው ተሳክቷል! መለያህን ለማረጋገጥ ኢሜይልህን ተመልከት።",
   "registration-error-try-again": "በምዝገባ ጊዜ ስህተት ተፈጥሯል። እንደገና ሞክር።",
+  "registration-account-exists-sign-in": "በዚህ ኢሜይል አድራሻ አስቀድሞ የBiteTribe መለያ አለህ። እዚህ ማዘዝህን ቀጥል፣ ከጨረስክ በኋላ ግባ።",
   "registration-unknown-error-try-again": "በምዝገባ ጊዜ ያልታወቀ ስህተት ተፈጥሯል። እንደገና ሞክር።",
   "registration-timeout-try-again": "ምዝገባው ከተጠበቀው በላይ ጊዜ ወስዷል። ግንኙነትህን አረጋግጠህ እንደገና ሞክር። መለያህ ከተፈጠረ ግባ።",
   "rate-now": "አሁን ደረጃ ስጥ",

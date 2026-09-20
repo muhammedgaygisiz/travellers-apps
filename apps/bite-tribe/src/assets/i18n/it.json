@@ -249,6 +249,7 @@
   "registration-in-progress": "Creazione del tuo account...",
   "registration-success-check-your-email-to-verify-account": "Registrazione completata con successo! Controlla la tua e-mail per verificare il tuo account.",
   "registration-error-try-again": "Si è verificato un errore durante la registrazione. Riprova.",
+  "registration-account-exists-sign-in": "Hai già un account BiteTribe con questa e-mail. Continua a ordinare qui e accedi quando hai finito.",
   "registration-unknown-error-try-again": "Si è verificato un errore sconosciuto durante la registrazione. Riprova.",
   "registration-timeout-try-again": "La registrazione sta impiegando più tempo del previsto. Controlla la connessione e riprova. Se il tuo account è stato creato, accedi.",
   "rate-now": "Valuta ora",

@@ -88,7 +88,7 @@ from that.
 **The uid is the point, not the anonymity.** A table session has to belong to
 somebody: it is what `firestore.rules` matches the session document against, so
 the guest's phone can subscribe to its own session directly instead of polling a
-callable, and it is what `linkWith*` upgrades in place, so the guest who decides
+callable, and it is what `linkWith*` upgrades in place ([#1657]), so the guest who decides
 at the end of the meal to keep the Bite they just ate does not lose the session
 that knows what they ordered. The alternative - a server-issued secret the
 client replays - was refused for exactly that: with no uid, every guest read

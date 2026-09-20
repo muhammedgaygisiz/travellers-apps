@@ -81,6 +81,54 @@ If the trace is missing or outdated, update the relevant SSOT page before or alo
 - Update Storybook when shared UI gains visible states, inputs, modes, or layout behavior.
 - Use Capacitor sync commands for native wrapper dependency changes.
 - Do not hand-edit a generated page. `tools/README.md` names which scripts write into `ssot/`; change the generator instead.
+- When a change makes an SSOT fact untrue, sweep the caveats that grew around the old one. See `Superseded Facts` below.
+
+## Superseded Facts
+
+**Correcting the page that owns a fact does not finish the change.** A fact that
+constrained the product gets _quoted_ on the pages it constrained, usually as a
+caveat with a remedy attached - "X holds in production only once you run Y" -
+and those sentences outlive the fact. Each of them reads as the current state on
+its own, and [SSOT](../README.md)'s rule that the owning page wins does not help a reader
+who does not know which page owns the fact. They are reading the page about the
+thing they are working on.
+
+Issue [#1567] is the worked example. It moved the Firestore rules deploy into
+CI on 17 September 2026, updated [Architecture - Firebase](../architecture/firebase.md) - the owner, which
+explains the reversal properly - and left sixteen other pages saying the rules
+deploy by hand, across product, domain, architecture, the traceability map, the
+known issues and seven use cases. It took three days for that to cost something:
+on 20 September an agent read one of those pages and told the user a merged
+rules change leaves production untouched. The sweep was issue [#1598]'s
+follow-up rather than [#1567]'s own work, which is the gap this rule closes.
+
+So a change that makes a fact untrue carries the sweep with it:
+
+- **Search for the consequence, not the fact.** A caveat is derived text rather
+  than a copy, so it rarely repeats the fact's own words. Grep for the _remedy_
+  (the command, the script, the manual step), for the shape the consequence
+  takes ("by hand", "only once", "nothing in CI", "changes nothing in
+  production"), and for the issue number that introduced it.
+- **Say what is now true, in the page's own terms.** A caveat is not deleted and
+  left as a gap in an argument; the sentence that depended on it is rewritten so
+  the argument still holds.
+- **Keep the history where the gap was the point.** A [current-state/](../current-state/README.md) entry or a
+  risk note whose whole subject was the gap records that it closed and what
+  closed it, rather than losing the fact that it was ever open.
+- **Do not rewrite a recorded decision.** `RD-*` entries in [Recorded Decisions](../decisions/recorded-decisions.md) say
+  what was decided and when. A by-hand clause inside one is marked as true when
+  the decision was taken; the decision itself stands.
+- **Leave [records/](../records/README.md), [releases/](../releases/README.md) and [test-runs/](../test-runs/README.md) alone.** They are accounts of what was
+  true at the time. Correcting them would destroy the record rather than the
+  staleness.
+- **Do not over-correct.** Check which neighbouring steps are still manual
+  before rewriting a sentence that bundles several together. The same sweep
+  found the `scanRateLimits.expiresAt` TTL policy genuinely still applied by
+  hand, so pages that had counted it as one of three manual steps had to name it
+  as the only one rather than drop it.
+
+Report the sweep with the change: the pages corrected, and the claims
+deliberately left standing.
 
 ## Validation Rules
 
@@ -129,3 +177,6 @@ rule was stated are kept in [records/](../records/README.md) and are not extende
 - [Feature Delivery Workflow](feature-delivery-workflow.md)
 - [Release Workflow](release-workflow.md)
 - [Implementation - Testing](../implementation/testing.md)
+
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
+[#1598]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1598

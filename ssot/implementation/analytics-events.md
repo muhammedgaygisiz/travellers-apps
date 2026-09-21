@@ -78,6 +78,69 @@
   carries the dismissed `CoachMarkSurface` id and fires only on the first dismissal
   per user, so re-entering a surface whose mark was already seen emits nothing.
 
+- ## App Check Telemetry
+
+  The five `app_check_*` events are **not** part of the product taxonomy above.
+  They are emitted directly by
+  `libs/common/ta-firestore/src/lib/initialize-firebase-app-check.ts`, not
+  through `AnalyticsService`, because they have to fire during the app
+  initializer - before the injector the service lives in is usable - and
+  because they belong to platform readiness rather than to product behavior.
+  They are listed here so nobody reads them in GA4 without knowing what they
+  can and cannot answer.
+
+  | Event                             | Params                                      | Trigger                                        |
+  | --------------------------------- | ------------------------------------------- | ---------------------------------------------- |
+  | `app_check_startup_started`       | base                                        | The initializer begins                         |
+  | `app_check_startup_completed`     | base, `duration_ms`, `platform`, `provider` | A provider was registered                      |
+  | `app_check_initialization_failed` | base, `platform`, `provider`, `reason`      | Provider registration threw                    |
+  | `app_check_skipped`               | base, `platform`, `reason`                  | Dev mode, unsupported platform, or no site key |
+  | `app_check_token_preflight`       | base, `succeeded`, `trigger`, `reason?`     | A token was actually requested                 |
+  | `app_check_enforced_blocked`      | base, `platform`, `provider`, `reason`      | Enforced mode could not prove readiness        |
+
+  The base parameters on every one of them are `runtime_mode`, `device_class`,
+  `has_site_key` and `has_debug_token`.
+
+- ### Why the preflight event exists
+
+  **Registering a provider is not evidence that attestation works.** The native
+  bridge registers a `CustomProvider`, which never fetches a token, so before
+  issue [#1221] a client that could not attest at all still reported
+  `app_check_startup_completed` and nothing disagreed. The token round-trip only
+  ran when enforcement was already on, which meant the only way to find out
+  whether enforcement would work was to switch it on in production.
+
+  `app_check_token_preflight` now fires whenever a provider was registered,
+  enforced or not, and carries `succeeded`. It is the readiness signal to read
+  before enabling enforcement.
+
+  **Enforced mode awaits it; non-enforced mode does not.** With enforcement off
+  the token changes nothing about startup, so awaiting a round-trip inside the
+  app initializer would delay initial navigation for every user to buy a metric.
+  The request is issued and reported when it settles. `trigger` separates the
+  startup attempt from a `retry` through the enforced-mode gate.
+
+- ### Why `device_class` exists
+
+  Firebase's own App Check metrics are per-service and carry **no client
+  attribution**, so production numbers are the only readiness signal there is.
+  A simulator or emulator cannot attest, so its traffic is unverified by
+  construction - and a production build on a simulator was previously
+  indistinguishable from a physical device here, since both carry
+  `runtime_mode: production` and `platform: ios`. Test traffic polluting the
+  metric could therefore not be identified, let alone subtracted.
+
+  `device_class` is `virtual`, `physical`, or `unknown`, read from
+  `@capacitor/device`'s `isVirtual`. **A web client is `unknown`, not
+  `physical`.** The plugin answers `isVirtual: false` in a browser, which would
+  read as a claim about hardware rather than as the absence of one, so only
+  native platforms are asked. The lookup is best-effort and falls back to
+  `unknown`; attribution is never worth failing startup for.
+
+  Note the remaining blind spot: `runtime_mode: dev_simulator` suppresses
+  telemetry entirely, so a dev build reports nothing at all. That is intended -
+  a dev build talks to the emulators, which do not enforce App Check.
+
 - ## Table Operations
 
   The seven `table_*` events belong to the staff table management of
@@ -415,3 +478,4 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 [#907]: https://github.com/muhammedgaygisiz/travellers-apps/issues/907
 [#1017]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1017
 [#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071
+[#1221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1221

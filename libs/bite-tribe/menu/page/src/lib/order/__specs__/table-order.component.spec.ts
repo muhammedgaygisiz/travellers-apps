@@ -17,6 +17,8 @@ import type {
   TableOrder as TableOrderModel,
   TableScanContext,
   TableSessionStatus,
+  TableVisitBill,
+  TableVisitBillRefusalReason,
 } from 'model';
 import {
   TableCartService,
@@ -131,6 +133,20 @@ const en = {
   'table-assistance-refused-cooldown':
     "You've only just asked. Give them a moment before asking again.",
   'table-assistance-stale': "We've lost touch with the restaurant.",
+  'table-bill-heading': "The table's bill",
+  'table-bill-show': "Show the table's bill",
+  'table-bill-refresh': 'Refresh the bill',
+  'table-bill-total': 'Table total {{total}}',
+  'table-bill-empty': 'Nothing has been ordered at this table yet.',
+  'table-bill-unsettled':
+    "Settle the bill with the restaurant when you're ready.",
+  'table-bill-settled': 'The restaurant has marked this bill as paid.',
+  'table-bill-settled-cash':
+    'The restaurant has marked this bill as paid in cash.',
+  'table-bill-settled-card':
+    'The restaurant has marked this bill as paid by card.',
+  'table-bill-settled-other': 'The restaurant has marked this bill as paid.',
+  'table-order-refused-sessionExpired': 'Your table session timed out.',
   'menu-item-not-available': 'Not available',
   'create-bite': 'Create Bite',
   'no-menu-yet': 'No menu yet',
@@ -158,6 +174,10 @@ describe(TableOrder.name, () => {
     { currentTableLabel?: string } | undefined
   >;
   let ask: jest.Mock;
+  let billRead: WritableSignal<TableVisitBill | undefined>;
+  let billLoading: WritableSignal<boolean>;
+  let billRefusal: WritableSignal<TableVisitBillRefusalReason | undefined>;
+  let loadBill: jest.Mock;
 
   const show = (next: TableOrderView): void => {
     state.set(next);
@@ -206,6 +226,10 @@ describe(TableOrder.name, () => {
       undefined,
     );
     ask = jest.fn().mockResolvedValue(undefined);
+    billRead = signal<TableVisitBill | undefined>(undefined);
+    billLoading = signal(false);
+    billRefusal = signal<TableVisitBillRefusalReason | undefined>(undefined);
+    loadBill = jest.fn().mockResolvedValue(undefined);
 
     // The history is signals all the way down, so the fake is the four the
     // template reads. What is being checked here is what a guest sees, and the
@@ -239,10 +263,26 @@ describe(TableOrder.name, () => {
       ask,
     };
 
+    // The party's bill (GitHub issue #1110). Signals like the two above, and
+    // the one of the three with no listener behind it: `RD-TS-12` leaves the
+    // party's orders unreadable from a guest's phone, so the real service
+    // fetches on a tap and this fake answers whatever a test has put in it.
+    const bill = {
+      bill: billRead,
+      isLoading: billLoading,
+      lastRefusal: billRefusal,
+      lastFailure: signal<string | undefined>(undefined),
+      isEmpty: computed(() => (billRead()?.orderCount ?? 0) === 0),
+      isSettled: computed(() => billRead()?.paymentStatus === 'settled'),
+      load: loadBill,
+      clear: jest.fn(),
+    };
+
     const service = {
       cart,
       history,
       assistance,
+      bill,
       state,
       lastRefusal,
       unconfirmed,
@@ -894,6 +934,189 @@ describe(TableOrder.name, () => {
       });
 
       expect(has('table-order-placed-replayed')).toBe(false);
+    });
+  });
+
+  /**
+   * The party's bill (GitHub issue #1110, `RD-TS-47`).
+   *
+   * What these pin down is the half a guest can see: that the bill is behind a
+   * tap rather than loaded with the screen, that the two empty bills read
+   * differently, and that a settled one says the *restaurant* marked it paid
+   * rather than claiming BiteTribe took the money (`ADR-0004`).
+   */
+  describe("the table's bill", () => {
+    const BILL: TableVisitBill = {
+      restaurantId: 'r1',
+      visitId: 'v1',
+      tableId: 't12',
+      currency: 'EUR',
+      lines: [
+        {
+          menuItemId: 'item-1',
+          name: 'Margherita',
+          quantity: 3,
+          unitPrice: 12,
+          lineTotal: 36,
+        },
+      ],
+      total: 36,
+      paymentStatus: 'unsettled',
+      orderCount: 2,
+    };
+
+    it('offers the bill without having fetched one', () => {
+      render();
+      show(ORDERING);
+
+      expect(has('table-bill-load')).toBe(true);
+      expect(loadBill).not.toHaveBeenCalled();
+      expect(has('table-bill-total')).toBe(false);
+    });
+
+    it('fetches it when the guest asks', () => {
+      render();
+      show(ORDERING);
+
+      click('table-bill-load');
+
+      expect(loadBill).toHaveBeenCalled();
+    });
+
+    it('shows every dish the table ordered, and the total', () => {
+      billRead.set(BILL);
+      render();
+      show(ORDERING);
+
+      expect(text()).toContain('3 × Margherita');
+      expect(text()).toContain('Table total 36 €');
+    });
+
+    /**
+     * The button changes what it offers once there is a bill on screen,
+     * because tapping it again is a refresh rather than a first look - and a
+     * bill has no listener to keep it current (`RD-TS-12`).
+     */
+    it('offers a refresh once a bill is on screen', () => {
+      billRead.set(BILL);
+      render();
+      show(ORDERING);
+
+      expect(text()).toContain('Refresh the bill');
+      expect(text()).not.toContain("Show the table's bill");
+    });
+
+    /** Two zero totals, two sentences. That is what `orderCount` is for. */
+    it('tells a party that has ordered nothing, rather than showing zero', () => {
+      billRead.set({ ...BILL, lines: [], total: 0, orderCount: 0 });
+      render();
+      show(ORDERING);
+
+      expect(has('table-bill-empty')).toBe(true);
+      expect(has('table-bill-total')).toBe(false);
+    });
+
+    it('shows a total of zero where every order was cancelled', () => {
+      billRead.set({ ...BILL, lines: [], total: 0, orderCount: 1 });
+      render();
+      show(ORDERING);
+
+      expect(has('table-bill-empty')).toBe(false);
+      expect(text()).toContain('Table total 0 €');
+    });
+
+    /**
+     * The wording is the contract here, not decoration. BiteTribe was never in
+     * the money flow, so the screen may say the restaurant recorded a payment
+     * and may not say a payment succeeded.
+     */
+    it('says the restaurant marked it paid, and how', () => {
+      billRead.set({
+        ...BILL,
+        paymentStatus: 'settled',
+        settlementMethod: 'card',
+      });
+      render();
+      show(ORDERING);
+
+      expect(text()).toContain(
+        'The restaurant has marked this bill as paid by card.',
+      );
+      expect(has('table-bill-unsettled')).toBe(false);
+    });
+
+    it('falls back to the plain sentence where no method was recorded', () => {
+      billRead.set({ ...BILL, paymentStatus: 'settled' });
+      render();
+      show(ORDERING);
+
+      expect(text()).toContain('The restaurant has marked this bill as paid.');
+    });
+
+    /**
+     * A dish with a size names both, because "Margherita" twice at two prices
+     * is a bill a guest cannot check against what arrived at the table.
+     */
+    it('names the variant beside the dish', () => {
+      billRead.set({
+        ...BILL,
+        lines: [
+          {
+            ...BILL.lines[0],
+            variantId: 'large',
+            variantName: 'Large',
+          },
+        ],
+      });
+      render();
+      show(ORDERING);
+
+      expect(text()).toContain('Margherita - Large');
+    });
+
+    /**
+     * The extras are already priced into `unitPrice` (issue #1598), so they
+     * are small print under the dish rather than rows of their own - the same
+     * treatment the cart and the sent order give them.
+     */
+    it('lists the extras under the dish', () => {
+      billRead.set({
+        ...BILL,
+        lines: [
+          {
+            ...BILL.lines[0],
+            extras: [
+              { extraId: 'e1', name: 'Extra cheese', price: 1 },
+              { extraId: 'e2', name: 'Bacon', price: 2 },
+            ],
+          },
+        ],
+      });
+      render();
+      show(ORDERING);
+
+      expect(text()).toContain('Extra cheese, Bacon');
+    });
+
+    it('explains a refusal in the words the rest of the screen uses', () => {
+      billRefusal.set('sessionExpired');
+      render();
+      show(ORDERING);
+
+      expect(text()).toContain('Your table session timed out.');
+    });
+
+    /**
+     * The same predicate the waiter buttons use: the backend refuses a bill in
+     * exactly the states it refuses a signal, and a button that is always
+     * there and always refused teaches a guest to stop reading the screen.
+     */
+    it('is not offered to a session that can no longer order', () => {
+      sessionStatus.set('closed');
+      render();
+      show(ORDERING);
+
+      expect(has('table-bill')).toBe(false);
     });
   });
 

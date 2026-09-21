@@ -23,6 +23,8 @@ import { PATH, currencyCodes } from 'utils';
 import {
   TABLE_ASSISTANCE_REFUSAL_KEYS,
   TABLE_ORDER_BLOCKED_KEYS,
+  TABLE_VISIT_BILL_REFUSAL_KEYS,
+  TABLE_VISIT_SETTLEMENT_KEYS,
   TABLE_ORDER_CLOSED_KEYS,
   TABLE_ORDER_STATUS_KEYS,
   TableAssistanceService,
@@ -30,6 +32,7 @@ import {
   TableOrderHistoryService,
   TableOrderService,
   TableOrderSubmissionService,
+  TableVisitBillService,
   type TableCartLine,
   type TableOrderView,
 } from 'bite-tribe/table-order-data-access';
@@ -40,6 +43,9 @@ import type {
   OrderLineSnapshot,
   TableAssistanceKind,
   TableOrder as TableOrderModel,
+  TableVisitBillLine,
+  TableVisitBillRefusalReason,
+  TableVisitSettlementMethod,
 } from 'model';
 import { MenuComponent } from '../components/menu/menu.component';
 import type { MenuItemSelection } from '../components/menu-item/menu-item.component';
@@ -129,6 +135,7 @@ const symbolOf = (code: string): string => {
     TableOrderHistoryService,
     TableAssistanceService,
     TableOrderSubmissionService,
+    TableVisitBillService,
     TableOrderService,
   ],
   templateUrl: 'table-order.component.html',
@@ -141,6 +148,7 @@ export class TableOrder implements OnInit {
   protected readonly cart = this.service.cart;
   protected readonly history = this.service.history;
   protected readonly assistance = this.service.assistance;
+  protected readonly bill = this.service.bill;
 
   /** The two things the guest can ask for, in the order they are offered. */
   protected readonly assistanceKinds = TABLE_ASSISTANCE_KINDS;
@@ -301,6 +309,48 @@ export class TableOrder implements OnInit {
 
   protected askFor(kind: TableAssistanceKind): void {
     void this.assistance.ask(kind);
+  }
+
+  /**
+   * Whether the party's bill is worth offering at all.
+   *
+   * The same predicate the waiter buttons use, and for the same reason: the
+   * backend refuses a bill in exactly the states it refuses a signal, and a
+   * button that is always there and always refused teaches a guest to stop
+   * reading the screen.
+   */
+  protected readonly canSeeBill = computed(() => this.history.acceptsOrders());
+
+  /** Fetches the table's bill, or fetches it again. */
+  protected showBill(): void {
+    void this.bill.load();
+  }
+
+  /** The sentence a refused bill is explained with. */
+  protected billRefusalKey(reason: TableVisitBillRefusalReason): string {
+    return TABLE_VISIT_BILL_REFUSAL_KEYS[reason];
+  }
+
+  /** How the party paid, in the guest's own language. */
+  protected settlementKey(method: TableVisitSettlementMethod): string {
+    return TABLE_VISIT_SETTLEMENT_KEYS[method];
+  }
+
+  /**
+   * One bill row's dish, with its variant where it has one.
+   *
+   * The same shape `orderLineName` gives an order line, and deliberately not
+   * that function: a bill row is not an order line, and one function taking
+   * both would be a signature wide enough to hide a field that means something
+   * different on each.
+   */
+  protected billLineName(line: TableVisitBillLine): string {
+    return line.variantName ? `${line.name} - ${line.variantName}` : line.name;
+  }
+
+  /** The extras on a bill row, as one readable string. */
+  protected billLineExtras(line: TableVisitBillLine): string {
+    return (line.extras ?? []).map((extra) => extra.name).join(', ');
   }
 
   ngOnInit(): void {

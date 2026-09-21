@@ -15,6 +15,8 @@ import {
   tableStatusGlyphPath,
   tableStatusMark,
 } from 'bite-tribe-business/floor-plan-ui';
+import { TABLE_VISIT_SETTLEMENT_METHODS } from 'model';
+import type { TableVisitSettlementMethod } from 'model';
 import { TableAction, TableActionRequest } from '../integration/table-actions';
 import { TableDetail } from '../integration/table-plan.service';
 
@@ -85,7 +87,50 @@ export class TableActionsComponent {
   readonly actions = input<TableAction[]>([]);
 
   readonly actionPicked = output<TableActionRequest>();
+
+  /**
+   * Which method the party paid with (GitHub issue #1110).
+   *
+   * A separate output from {@link actionPicked} because it is a different kind
+   * of thing: every other button on this sheet moves the table through the
+   * transition matrix, and this one records a fact about the *visit*. Folding
+   * it into the same event would have the parent switch on a union whose two
+   * halves go to two different callables.
+   */
+  readonly settlementPicked = output<TableVisitSettlementMethod>();
+
   readonly dismissed = output<void>();
+
+  /**
+   * Whether recording a payment is worth offering on this table.
+   *
+   * An open visit and nothing else. A table with no party has no bill, and a
+   * table whose party has left has a visit that ended - which the backend will
+   * still settle, deliberately, but which is not something to offer from a
+   * sheet about the room as it is now.
+   */
+  readonly canSettle = computed(() => this.table().visitId !== undefined);
+
+  /**
+   * The three ways a party pays, in the order a restaurant meets them.
+   *
+   * Three buttons rather than one button and a picker, because nobody during a
+   * service navigates - the same argument the actions above are one screenful
+   * of whole actions rather than a menu. A member of staff walking back from a
+   * table with a card machine presses once.
+   */
+  readonly settlementMethods: readonly TableVisitSettlementMethod[] =
+    TABLE_VISIT_SETTLEMENT_METHODS;
+
+  /** The label for one method. */
+  protected settlementKey(method: TableVisitSettlementMethod): string {
+    return `table-settle-${method}`;
+  }
+
+  /** Records a payment and closes, exactly as picking an action does. */
+  protected settle(method: TableVisitSettlementMethod): void {
+    this.settlementPicked.emit(method);
+  }
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
 

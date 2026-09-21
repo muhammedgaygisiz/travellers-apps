@@ -6,12 +6,14 @@ import {
   TableAssistanceApiService,
   TableOrderApiService,
   TableSessionApiService,
+  TableVisitBillApiService,
 } from 'bite-tribe/api';
 import { AuthService } from 'ta-firestore';
 import type { Menu, MenuItem, TableScanContext, TableSession } from 'model';
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import { NetworkStatusService } from 'common/networkstatus';
 import { TableCartService } from '../table-cart.service';
+import { TableVisitBillService } from '../table-visit-bill.service';
 import { TableAssistanceService } from '../table-assistance.service';
 import { TableOrderHistoryService } from '../table-order-history.service';
 import { TableOrderSubmissionService } from '../table-order-submission.service';
@@ -121,6 +123,15 @@ describe(TableOrderService.name, () => {
             request: jest.fn(),
             request$: (): typeof EMPTY => EMPTY,
           },
+        },
+        // Provided for the same reason, and never exercised here:
+        // `TableOrderService` injects it so the restaurant and the table are
+        // learned once (issue #1110). It attaches no listener, so the fake
+        // needs only the one call the service can make.
+        TableVisitBillService,
+        {
+          provide: TableVisitBillApiService,
+          useValue: { read: jest.fn() },
         },
         {
           provide: TableSessionApiService,

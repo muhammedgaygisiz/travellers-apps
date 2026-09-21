@@ -36,6 +36,7 @@ import { TablePlanService } from './table-plan.service';
       (activateTable)="service.activateTable($event)"
       (clearSelection)="service.clearSelection()"
       (actionPicked)="service.applyAction($event)"
+      (settlementPicked)="service.settleVisit($event)"
       (actionsDismissed)="service.closeActions()"
       (bulkModeToggled)="service.toggleBulkMode()"
       (selectAllRequested)="service.selectAllInRoom()"

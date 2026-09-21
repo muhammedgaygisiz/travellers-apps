@@ -4,3 +4,4 @@ export * from './lib/table-order-history.service';
 export * from './lib/table-assistance.service';
 export * from './lib/table-order-submission.service';
 export * from './lib/pending-table-order';
+export * from './lib/table-visit-bill.service';

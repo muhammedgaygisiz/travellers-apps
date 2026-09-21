@@ -84,7 +84,64 @@ export interface TableVisit {
   openedByUserId: string;
   /** Who ended the visit. Absent while it is open. */
   closedByUserId?: string;
+  /** Whether the restaurant has been paid. Absent means `unsettled`. */
+  paymentStatus?: TableVisitPaymentStatus;
+  /** How the party paid. Absent until the bill is settled. */
+  settlementMethod?: TableVisitSettlementMethod;
+  /** When staff recorded the settlement, in epoch milliseconds. */
+  settledAt?: number;
+  /** Which staff account recorded it. */
+  settledByUserId?: string;
 }
+
+/**
+ * Whether the restaurant has been paid for this visit (GitHub issue #1110).
+ *
+ * Two values and not five. `ADR-0004` decided BiteTribe is never in the money
+ * flow at a table (`RD-TS-45`), so `pending`, `failed` and `refunded`
+ * described a payment provider's state machine and there is no provider. The
+ * party pays the restaurant, and this records that somebody said so.
+ */
+export const TABLE_VISIT_PAYMENT_STATUSES = ['unsettled', 'settled'] as const;
+
+export type TableVisitPaymentStatus =
+  (typeof TABLE_VISIT_PAYMENT_STATUSES)[number];
+
+/**
+ * How a party paid the restaurant.
+ *
+ * Three values and not free text, for the reason the cancellation reason is
+ * capped (`RD-TS-16`): this is written during service by somebody holding a
+ * card machine, and a sentence typed mid-rush is a field that is skipped or
+ * filled with noise. `other` is what makes the short list honest.
+ */
+export const TABLE_VISIT_SETTLEMENT_METHODS = [
+  'cash',
+  'card',
+  'other',
+] as const;
+
+export type TableVisitSettlementMethod =
+  (typeof TABLE_VISIT_SETTLEMENT_METHODS)[number];
+
+/** Whether an unknown value is a settlement method this backend knows. */
+export const isTableVisitSettlementMethod = (
+  value: unknown,
+): value is TableVisitSettlementMethod =>
+  typeof value === 'string' &&
+  (TABLE_VISIT_SETTLEMENT_METHODS as readonly string[]).includes(value);
+
+/**
+ * Whether a stored visit has been settled.
+ *
+ * Takes the raw document, like {@link isOpenVisit} and for the same reason:
+ * every caller has just read one out of a transaction. An absent
+ * `paymentStatus` is `unsettled`, which is true of every visit opened before
+ * the field existed - nothing had recorded a settlement, because nothing
+ * could.
+ */
+export const isSettledVisit = (visit: DocumentData | undefined): boolean =>
+  visit?.['paymentStatus'] === 'settled';
 
 /**
  * Whether an unknown value is a visit status this backend knows.

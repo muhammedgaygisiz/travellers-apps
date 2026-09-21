@@ -131,3 +131,32 @@ export const OnPhone: Story = {
   ...from('available'),
   decorators: [over('390px', '540px')],
 };
+
+/**
+ * A table with an open visit, which is the one that can be settled
+ * (GitHub issue #1110).
+ *
+ * The three payment buttons appear only when the detail carries a `visitId`,
+ * because settling names the visit rather than the table - a party walked to
+ * another table takes its bill with it. The stories above deliberately carry
+ * none: they exist to show that the buttons are built from the transition
+ * matrix, and putting a visit on every one of them would fold a second
+ * subject into a set that answers one question.
+ *
+ * The section is fenced off from the transitions above it on purpose. A staff
+ * member reaching for "free the table" must not land on "paid, cash" by muscle
+ * memory, and the two are different kinds of action: everything above moves
+ * the table through the matrix, and this records a fact about the visit.
+ *
+ * The sheet is taller than the frame the set uses and the picture crops its
+ * bottom padding. That is left alone deliberately: a story-level `over` nests
+ * *inside* the one on the meta rather than replacing it, so the outer
+ * `overflow: hidden` wins whatever the inner height says - and all three
+ * payment buttons are above the cut, which is what this reference is for.
+ */
+export const WithOpenVisit: Story = {
+  args: {
+    table: { ...detail('awaitingPayment', '20 min'), visitId: 'visit-1' },
+    actions: tableActions('awaitingPayment'),
+  },
+};

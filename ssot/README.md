@@ -169,6 +169,7 @@ Closing records for epics that produced one are in [records/](records/README.md)
 - [ADR-0001 Dish First Product](decisions/adr-0001-dish-first-product.md)
 - [ADR-0002 Firebase Backend](decisions/adr-0002-firebase-backend.md)
 - [ADR-0003 Nx Monorepo](decisions/adr-0003-nx-monorepo.md)
+- [ADR-0004 Table Payment Model](decisions/adr-0004-table-payment-model.md)
 
 ## Operations
 

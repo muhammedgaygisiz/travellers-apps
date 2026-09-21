@@ -6,8 +6,8 @@
 
 Partly implemented. Specified through issue [#1072] as stage 3 of issue [#735], which is
 built end to end - all ten of its child issues have landed, and `Flow` names the issue
-behind each step - and through issue [#1073] as stage 4, which is not: paying at the table,
-the receipt, and the Bite created from an order line. Table ordering is off for every
+behind each step - and through issue [#1073] as stage 4, which is not: the bill, the visit
+summary that follows it, and the Bite created from an order line. Table ordering is off for every
 restaurant until an owner turns it on; what has to be applied by hand before it binds
 production is stated in `What A Code On The Internet Costs`.
 
@@ -54,8 +54,8 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 - The guest watches each order move along its status, and is told when one is cancelled and why. Implemented, issues [#1104] and [#1105].
 - The guest orders again into the same visit without rescanning. Implemented, issue [#1104].
 - The guest requests assistance or the bill. Implemented, issue [#1106].
-- The guest pays in the app or asks staff to settle, and the visit closes. Not built; issue [#1073], stage 4.
-- The guest sees a receipt listing the dishes they ordered. Not built; issue [#1073], stage 4.
+- The guest asks for the bill, settles it with the restaurant, and staff close the visit. Partly built: the request is issue [#1106]'s and works; settling and the close confirmation are not built, issue [#1073], stage 4. BiteTribe takes no payment of its own ([ADR-0004 Table Payment Model](../decisions/adr-0004-table-payment-model.md), `RD-TS-45`).
+- The guest sees a visit summary listing what the table ordered, and can have it emailed. Not built; issue [#1073], stage 4. It is a summary and never a receipt (`RD-TS-46`).
 - The guest selects a dish and creates a Bite prefilled with restaurant, dish, price, and currency, adding only a photo, rating, and comment. Not built; issue [#1073], stage 4. `OrderLineSnapshot` already records the checked price this would read.
 
 ## Validation On Every Scan
@@ -141,7 +141,7 @@ and the floor-plan geometry on the table stay where they are.
 - **The rate limit is the document name plus one clock** (`RD-TS-20`). A minute, measured from when a signal was raised rather than from when it was answered, so a restaurant is not punished for being quick; joining a signal that is still open is not rate limited at all.
 - **An acknowledgement is one destination, so a second press is not a conflict** (`RD-TS-22`). No `expectedStatus`, no dialog, and no reason to type: a cancellation takes something away from a guest and owes them a sentence, and this gives them one.
 - **The two staff lists sort in opposite directions** (`RD-TS-23`). The tickets newest first, because the one that just landed is the one nobody has read; the tables that are calling oldest first, because the guest who has been waving longest is the one nobody has walked to. A repeated tap moves `lastRequestedAt` and not `requestedAt`, so tapping cannot push a table up the list - the row says "asked again" instead.
-- Prices from a real order are stronger evidence than a typed price and bypass the suspicious-price warning from issue [#967] during Bite creation. The evidence now exists - `OrderLineSnapshot` records a price the backend checked against the menu - and nothing reads it yet; that is issue [#1073]'s.
+- Prices from a real order are stronger evidence than a typed price during Bite creation. The evidence now exists - `OrderLineSnapshot` records a price the backend checked against the menu - and nothing reads it yet; that is issue [#1073]'s. This previously said an ordered price should bypass a suspicious-price warning from issue [#967]; **there is no such warning.** That issue shipped a required-field and float-format validator on the Bite form, so there is nothing to bypass. If a plausibility check is ever added, an ordered price is the case it should exempt.
 
 ## The Address A Code Already Carries
 
@@ -755,11 +755,17 @@ declares no camera use for it and the Capacitor plugin set is unchanged. The
 route is a public web page in the consumer app and is reachable in the PWA
 without a store build.
 
-Two things will need an answer before ordering ships, and neither is this page's
-to settle today: an anonymous account is account creation as far as the privacy
-nutrition label is concerned, and taking payment at the table is in-app-purchase
-territory that the ADR of issue [#1109] has to settle first. See
+One thing will need an answer before ordering ships, and it is not this page's
+to settle: an anonymous account is account creation as far as the privacy
+nutrition label is concerned. See
 [Implementation - Store Declarations](../implementation/store-declarations.md).
+
+The second used to be whether taking payment at the table is in-app-purchase
+territory. **It is settled, and the answer removes the question**: issue [#1109]
+recorded [ADR-0004 Table Payment Model](../decisions/adr-0004-table-payment-model.md),
+BiteTribe takes no payment at a table, and a summary of what was ordered buys the
+guest nothing. The store rules that would have applied are the monetization
+epic's, not this page's.
 
 ## Supported Evidence
 
@@ -922,7 +928,7 @@ guest's phone is retrying.
 - Issue [#1598] - orderable menu extras, split out of [#1103] because `Category.extrasBlock` had no ids, no renderer and no editor. It settled where an extra lives first (`RD-TS-35`: on the category, applying to every dish in it) and then gave extras ids, an editor in the business app, a printed block on both reading surfaces, a tick box per orderable dish, a per-line snapshot, and the two refusals that answer an extra withdrawn or repriced mid-meal (`RD-TS-36`)
 - Issue [#1107] - QR token abuse protection, which made the resolution limit durable, gave the restaurant the rows and the rotation that answer a public code, and drew the pending session the epic had been writing since [#1101]
 - Issue [#1087] - printable table QR sheets, which fixed the scan URL this use case has to serve
-- Issue [#1073] - Table payment and Bite creation from orders, with six child issues
+- Issue [#1073] - Visit summary, bill delivery and Bite creation from orders, with six child issues
 - Issue [#345] - Kavi wants to offer a QR code at the table to order digitally
 - Issue [#370] - reading a menu without an account, and the code a restaurant prints for it. Closed as completed, delivering issue [#371]. Owned by [UC - View Restaurant Menus](uc-view-restaurant-menus.md), not by this page
 - Issue [#344] - orderable bites, JustEat-like, a different fulfilment model and out of scope

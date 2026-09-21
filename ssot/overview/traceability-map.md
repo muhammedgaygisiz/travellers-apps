@@ -78,13 +78,13 @@
 
   [epic-735][#735] is the umbrella. It and its five stage epics are Priority P1, sequenced behind the P0 launch and migration work.
 
-  | Stage                           | Epic                                 | Use Case                                                                                                                                                                         | Domain                                                                         |
-  | ------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-  | 0 Ownership and authorization   | [epic-1069](../records/epic-1069.md) | [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md), [UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md) | [Restaurant](../domain/restaurant.md), [User](../domain/user.md)               |
-  | 1 Floor plan and tables         | [epic-1070][#1070]                   | [UC - Configure Restaurant Floor Plans And Tables](../use-cases/uc-configure-restaurant-floor-plans-and-tables.md)                                                               | [Floor Plan](../domain/floor-plan.md), [Table](../domain/table.md)             |
-  | 2 Staff table management        | [epic-1071][#1071]                   | [UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md)                                                                                             | [Table](../domain/table.md), [Table Visit](../domain/table-visit.md)           |
-  | 3 QR menu and ordering          | [epic-1072][#1072]                   | [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md)                                                                             | [Table Visit](../domain/table-visit.md), [Restaurant](../domain/restaurant.md) |
-  | 4 Payment and Bites from orders | [epic-1073][#1073]                   | [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md)                                                                             | [Table Visit](../domain/table-visit.md), [Bite](../domain/bite.md)             |
+  | Stage                                 | Epic                                 | Use Case                                                                                                                                                                         | Domain                                                                         |
+  | ------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+  | 0 Ownership and authorization         | [epic-1069](../records/epic-1069.md) | [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md), [UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md) | [Restaurant](../domain/restaurant.md), [User](../domain/user.md)               |
+  | 1 Floor plan and tables               | [epic-1070][#1070]                   | [UC - Configure Restaurant Floor Plans And Tables](../use-cases/uc-configure-restaurant-floor-plans-and-tables.md)                                                               | [Floor Plan](../domain/floor-plan.md), [Table](../domain/table.md)             |
+  | 2 Staff table management              | [epic-1071][#1071]                   | [UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md)                                                                                             | [Table](../domain/table.md), [Table Visit](../domain/table-visit.md)           |
+  | 3 QR menu and ordering                | [epic-1072][#1072]                   | [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md)                                                                             | [Table Visit](../domain/table-visit.md), [Restaurant](../domain/restaurant.md) |
+  | 4 Visit summary and Bites from orders | [epic-1073][#1073]                   | [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md)                                                                             | [Table Visit](../domain/table-visit.md), [Bite](../domain/bite.md)             |
 
   The 41 child issues ([#1074] to [#1114]) have no `issue-*` pages. They are unstarted, and their specifications live on the GitHub issues; the durable product context is in the use-case and domain pages above.
 
@@ -124,7 +124,7 @@
 
   Issue [#1095] put the party behind the status. `TableVisit` at
   `/restaurants/{restaurantId}/visits/{visitId}` is the entity orders ([#1072])
-  and payment ([#1073]) will hang from, and the decision that shapes everything
+  and the visit summary ([#1073]) hang from, and the decision that shapes everything
   else is that it is **not a second action**: seating a table _is_ opening a
   visit and freeing it _is_ ending one, written by `transitionTableState` in the
   same commit as the state and the audit entry. Two callables and a pairing rule
@@ -395,11 +395,12 @@ No use case covers public acquisition today. One is written when the epic starts
 
 - ## Decisions To Constraints
 
-  | Decision                                                                   | Constraint                                                                                                          |
-  | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-  | [ADR-0001 Dish First Product](../decisions/adr-0001-dish-first-product.md) | Keep Bites as the first-class product unit. Restaurant, menu, and marketplace work should support dish discovery.   |
-  | [ADR-0002 Firebase Backend](../decisions/adr-0002-firebase-backend.md)     | Put backend-owned query semantics, security-sensitive behavior, triggers, and scheduled work in Firebase Functions. |
-  | [ADR-0003 Nx Monorepo](../decisions/adr-0003-nx-monorepo.md)               | Put changes in the smallest owning app or library and respect Nx boundaries.                                        |
+  | Decision                                                                     | Constraint                                                                                                                                                             |
+  | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | [ADR-0001 Dish First Product](../decisions/adr-0001-dish-first-product.md)   | Keep Bites as the first-class product unit. Restaurant, menu, and marketplace work should support dish discovery.                                                      |
+  | [ADR-0002 Firebase Backend](../decisions/adr-0002-firebase-backend.md)       | Put backend-owned query semantics, security-sensitive behavior, triggers, and scheduled work in Firebase Functions.                                                    |
+  | [ADR-0003 Nx Monorepo](../decisions/adr-0003-nx-monorepo.md)                 | Put changes in the smallest owning app or library and respect Nx boundaries.                                                                                           |
+  | [ADR-0004 Table Payment Model](../decisions/adr-0004-table-payment-model.md) | BiteTribe does not settle restaurant table bills. It delivers a visit summary, never a receipt. Scoped to the table; the stores remain merchant of record for [#1121]. |
 
 - ## Architecture To Implementation
 

@@ -4,13 +4,13 @@
 
 A Table Visit represents a party at a table over a period of time.
 
-It is the entity that orders, payments, and eventually Bites hang from. Attaching orders to a visit rather than directly to a table is what allows a party to move tables without losing what they ordered.
+It is the entity that orders, the visit summary, and eventually Bites hang from. Attaching orders to a visit rather than directly to a table is what allows a party to move tables without losing what they ordered.
 
 ## Why It Exists
 
 A table is a place. A visit is what happens there. Without a visit, a restaurant cannot answer:
 
-> Who is at this table right now, what have they ordered, and have they paid?
+> Who is at this table right now, what have they ordered, and has the table been settled?
 
 The Table Visit is also the bridge back to the core product: the dishes ordered during a visit become the best-sourced Bites BiteTribe can produce.
 
@@ -24,8 +24,9 @@ The Table Visit is also the bridge back to the core product: the dishes ordered 
 - A guest scan does not open a visit by itself. It raises a pending signal that staff confirm. Decided, `RD-TS-1`.
 - A guest may participate without a BiteTribe account, through anonymous authentication. Decided, `RD-TS-4`.
 - A session expires when the visit closes, or after a configurable idle timeout. Decided, `RD-TS-5`.
-- Closing a visit with an unpaid bill requires explicit staff confirmation.
-- A visit is retained after it closes, because it becomes the receipt context and the Bite-creation entry point.
+- BiteTribe does not settle the bill. The restaurant takes the money, and what BiteTribe produces is a visit summary rather than a receipt. Decided, `RD-TS-45` and `RD-TS-46`.
+- Closing a visit whose bill is not settled requires explicit staff confirmation.
+- A visit is retained after it closes, because it becomes the visit summary and the Bite-creation entry point.
 - A visit survives the deletion of its Table, keeping the historical record readable.
 - Ending a visit leaves its Table in `cleaning` and never in `available`, so the next party cannot be seated at it without somebody looking at it first.
 - Ending a visit is one-way. A closed visit is never reopened; the party that comes back for a coffee is a new party at that table.
@@ -43,16 +44,20 @@ The Table Visit is also the bridge back to the core product: the dishes ordered 
 | `guestCount`     | Party size. Optional, absent rather than `0`         | Implemented, issue [#1095] |
 | `openedByUserId` | Staff member who seated the party                    | Implemented, issue [#1095] |
 | `closedByUserId` | Staff member who closed the visit. Absent while open | Implemented, issue [#1095] |
-| `paymentStatus`  | `unpaid`, `pending`, `paid`, `failed`, `refunded`    | Proposed, issue [#1073]    |
+| `paymentStatus`  | `unsettled`, `settled`                               | Proposed, issue [#1110]    |
 
 `guestCount` is optional because a host tapping a table mid-rush has not been
 asked for a number, and refusing the seating over it would cost more than the
 field is worth. Absent means nobody recorded one, which is true; `0` would be a
 party of nobody.
 
-`paymentStatus` is not a field yet. Whether BiteTribe is ever in the money flow
-is undecided until the ADR of issue [#1109] exists, and a status enum written
-before that decision would be a shape the decision then has to migrate.
+`paymentStatus` is not a field yet, and it has two values rather than the five
+it was proposed with. [ADR-0004 Table Payment Model](../decisions/adr-0004-table-payment-model.md)
+settled on 21 September 2026 that BiteTribe is never in the money flow at a
+table (`RD-TS-45`), so `pending`, `failed` and `refunded` described a payment
+provider's state machine and describe nothing that can now happen. What is left
+is whether the restaurant has been paid, recorded by staff with the method they
+used, which issue [#1110] writes.
 
 ## Lifecycle Operations
 
@@ -79,7 +84,9 @@ already answers, free to disagree with it.
 A visit ends as `closed` by default and as `abandoned` when the caller says so -
 the table found still open at the end of service, or the party that walked out.
 The two are kept apart because a bill reconciled and a bill nobody ever looked
-at are different facts, and the payment of issue [#1073] charges for one of them.
+at are different facts, and `abandoned` is what a party that left without
+settling looks like - the only failure mode left now that BiteTribe takes no
+payment of its own (`RD-TS-45`).
 
 ## Where A Visit's History Lives
 
@@ -200,7 +207,7 @@ An order line snapshots the menu item at the moment of submission: item id, name
 
 That shape exists. Issue [#1099] added `OrderLineSnapshot` to `libs/bite-tribe-common/model/src/lib/order-line.ts`, with every field `readonly`, and gave `MenuItem`, `Category` and every variant the `id` it references. `menuItemId` names the dish rather than the variant - "large Margherita" and "small Margherita" are one thing on the menu - and `variantId` says which size, so a line renders as two fields rather than one string a reader has to take apart.
 
-The snapshot is what makes a line survive its dish. `findMenuItemById` answers `undefined` for an item that has since been deleted, which is an ordinary outcome rather than an error: the link goes and the record stays, so a receipt from before the deletion reads exactly as it did.
+The snapshot is what makes a line survive its dish. `findMenuItemById` answers `undefined` for an item that has since been deleted, which is an ordinary outcome rather than an error: the link goes and the record stays, so a summary from before the deletion reads exactly as it did.
 
 Issue [#1103] gave it a writer. `submitTableOrder` is the only one, and it revalidates before it writes anything: the session must be `active` and not idle, the visit must still be open and must be the one the table's state points at, the restaurant must still be taking orders, and every line must name a dish that is still on the menu, still being served, and still at the price the guest's phone displayed. A difference on any of those refuses the whole order and names the item (`RD-TS-10`). The order and the table's move to `ordering` land in one commit (`RD-TS-11`), and `firestore.rules` refuses every client write to the collection - so the status lifecycle above is a restaurant's to move and never a guest's.
 
@@ -286,7 +293,7 @@ Restaurant
     |-- Table Visit
         |-- Orders
             |-- Order lines (menu item snapshots)
-        |-- Payment
+        |-- Visit summary (what was ordered, and what it cost)
         |-- Bites created from ordered dishes
 ```
 
@@ -301,9 +308,9 @@ Guests browse the menu and submit orders
 |
 Staff accept, prepare, and serve, the guest watching it happen and ordering again
 |
-Guest requests the bill or pays in the app
+Guest requests the bill, and settles it with the restaurant
 |
-Visit closes and the receipt is retained
+Visit closes and the summary is retained
 |
 Guest creates a Bite from a dish they ordered
 ```
@@ -311,7 +318,7 @@ Guest creates a Bite from a dish they ordered
 ## Permissions
 
 - Guest: join a visit at a table they scanned, see the visit's orders and total, submit orders, request assistance and the bill, and later create a Bite from a dish. No access to other visits, and no access to the sessions of the other guests at their own table.
-- Restaurant staff: open, move, and close visits, change order status, cancel with a reason, and confirm payment.
+- Restaurant staff: open, move, and close visits, change order status, cancel with a reason, and record that the bill was settled.
 - Restaurant owner: everything staff can do, plus configuration.
 - Admin: full access for support.
 
@@ -324,7 +331,7 @@ Guest creates a Bite from a dish they ordered
 
 - Issue [#1071] - Staff table management and live table state
 - Issue [#1072] - QR table menu and table ordering
-- Issue [#1073] - Table payment and Bite creation from orders
+- Issue [#1073] - Visit summary, bill delivery and Bite creation from orders
 
 ## Technical Implementation
 
@@ -370,7 +377,7 @@ staff keep an unconditional `list` over the whole table.
 - **A guest's phone cannot read the visit, and no longer needs to.** Issue [#1104] decided it (`RD-TS-12`): the running total on the guest's screen is a sum over their own orders, cancelled ones excluded, and the shared bill is settled at the table. What a guest is shown when their party is **moved** is still unowned - the session goes on naming the table they scanned, and nothing tells them the table number on their screen has changed.
 - Rules deploy from CI on every push to `develop` ([#1567]), gated on the rules emulator suite - see [Architecture - Firebase](../architecture/firebase.md).
 - Several of the business rules above are proposals awaiting a product decision. They are listed in [Current State - Open Questions](../current-state/open-questions.md).
-- Payment behaviour is undecided until the ADR from issue [#1109] exists. Whether BiteTribe is ever in the money flow changes the architecture.
+- **The guest sees nothing after the visit closes.** The close itself works - `transitionTableState` ends the visit, closes the sessions and leaves the table in `cleaning` - but the visit summary `RD-TS-46` describes has no surface, no email delivery and no retention rule yet. Issues [#1110] and [#1111] own it.
 
 ## Future Ideas
 
@@ -403,3 +410,5 @@ staff keep an unconditional `list` over the whole table.
 [#1108]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1108
 [#1109]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1109
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
+[#1110]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1110
+[#1111]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1111

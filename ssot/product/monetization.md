@@ -101,7 +101,7 @@ Monetization
 ## Out Of Scope
 
 - A creator or business subscription tier. Business-side monetization stays with [epic-735][#735].
-- Restaurant transaction fees or commission on table orders. That belongs to [epic-1073][#1073].
+- Restaurant transaction fees or commission on table orders. **There is no such transaction to take a fee from**: [ADR-0004 Table Payment Model](../decisions/adr-0004-table-payment-model.md) settled on 21 September 2026 that the restaurant settles the bill and BiteTribe only produces a visit summary ([epic-1073][#1073], `RD-TS-45`). Charging a restaurant for table ordering is still possible as a subscription; it is not possible as a cut of a payment BiteTribe never handles.
 - Web and PWA billing. AdMob has no web SDK and store in-app purchase does not apply on web, so the PWA stays free and ad-free until a separate decision is taken.
 
 ## Related Epics

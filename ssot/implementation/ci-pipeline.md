@@ -47,6 +47,7 @@ tests
 +-- business-e2e ----+
 |
 +-- firestore-rules ----------- deploy-firestore-rules       (develop only)
++-- functions-emulator
 |
 +-- deploy-firestore-indexes --+                             (develop only)
 |                              |
@@ -55,6 +56,46 @@ tests
 +-- bite-tribe-admin-build ----|- deploy-bite-tribe-admin    (develop only)
 +-- functions-build -----------+- deploy-functions           (develop only)
 ```
+
+## Which Suites Gate A Merge
+
+Not every test in this repository runs on a pull request, and the difference is
+worth stating rather than inferring from a workflow file.
+
+| Suite                       | Command                 | Gates a merge             |
+| --------------------------- | ----------------------- | ------------------------- |
+| Unit tests                  | `nx affected -t test`   | Yes, `tests`              |
+| Lint, Stylelint             | `nx affected -t lint`   | Yes                       |
+| SSOT structure              | `npm run check:ssot`    | Yes, inside `lint`        |
+| Visual regression           | `npm run loki:test`     | Yes, `loki`               |
+| Consumer and business e2e   | `nx e2e …`              | Yes                       |
+| Firestore rules             | `npm run test:rules`    | Yes, `firestore-rules`    |
+| Firebase Functions emulator | `npm run test:emulator` | Yes, `functions-emulator` |
+
+**The unit-test job cannot see the emulator specs, and that is deliberate.**
+`jest.config.cjs` matches `src/**/*.spec.ts`; an emulator spec is
+`*.emulator-spec.ts` and runs under `jest.emulator.config.cjs`, because it
+needs a Firestore emulator and a JVM to run it. The two suites therefore need
+two jobs.
+
+Until [issue #1681][#1681] the second job did not exist. `firestore-rules` runs
+`--testPathPatterns firestore-rules`, which is the rules specs alone, so the
+other ~530 assertions - table sessions, orders, visits, assistance signals, QR
+abuse protection - were verified only when somebody remembered to run them by
+hand. Three of them had been failing on `develop` since 16 September 2026 and
+nothing said so.
+
+What those specs hold is the part a unit test cannot reach: what happens inside
+a Firestore transaction when two callers contend on one document. The product's
+correctness at a table rests on transactions rather than on single writes, so a
+mocked store would assert that the code called `set` - which was never the part
+in doubt.
+
+**`functions-emulator` is a job of its own rather than a widening of
+`firestore-rules`.** `deploy-firestore-rules` depends on that job, and rules
+reach production the instant they land and cannot be staged or rolled back.
+Gating that deploy on a table-ordering spec would couple two things that answer
+different questions and should be able to fail independently.
 
 `deploy-functions` is the only job with two `needs`: `functions-build` for the
 artifact and `deploy-firestore-indexes` for the ordering. The three web deploys
@@ -403,6 +444,7 @@ nx.json
 - A second push to `develop` cancels a functions deploy in flight. The workflow-level `cancel-in-progress` supersedes the whole run, and a job-level `concurrency` group cannot override that; it only keeps a deploy started from another run from overlapping. A cancelled gen2 deploy leaves the already-updated functions updated, and the next push deploys the rest.
 - CI never deletes a function. `--non-interactive` turns the deletion prompt into a failure, so removing an export from `src/index.ts` makes the deploy fail rather than silently take a live endpoint away. Delete it locally and deliberately, then push.
 - Gen2 functions have no rollback. Recovery from a bad deploy is a forward deploy of the reverted commit, not a console action.
+- **The emulator suite has one rare flake, and it is in the test that races two writes.** `table-orders.emulator-spec.ts`'s "creates one order when both copies arrive together" failed twice in roughly twenty local full-suite runs while [issue #1681][#1681] was being worked, and could not be reproduced under deliberate CPU load or by running that spec alone thirty times. Both failures followed back-to-back `emulators:exec` invocations, which a CI run does not do - it starts one emulator, runs the suite once, and exits. Recorded because a job that goes red at random teaches people to ignore it, so if `functions-emulator` starts flaking on pull requests, this is the first place to look and the flake is older than the job.
 - One Node 20 deprecation warning cannot be removed from this repository. `codecov/codecov-action@v5` pins `actions/github-script` at v7.0.1 by commit SHA, so the `tests` job reports the warning no matter what versions this page's table holds. It is Codecov's to fix, v5 is their latest, and the run is not affected - the runner executes the action on Node 24 regardless.
 
 ## Related Pages
@@ -421,3 +463,4 @@ nx.json
 [#1464]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1464
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1588]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1588
+[#1681]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1681

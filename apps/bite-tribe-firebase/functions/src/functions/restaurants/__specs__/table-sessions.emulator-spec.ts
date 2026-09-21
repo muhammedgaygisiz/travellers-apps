@@ -129,11 +129,21 @@ const leave = (
 const staffRequest = (data: Record<string, unknown>): never =>
   ({ auth: { uid: HOST, token: { roles: ['staff'] } }, data }) as never;
 
+/**
+ * A table transition, at the same clock the sessions were started on.
+ *
+ * The `now` is the whole of issue #1681. Without it `transitionTableState`
+ * stamps the real clock, and a seating measured against a session started at
+ * {@link LUNCHTIME} reads as idle by however long ago that date was - so these
+ * specs passed on the day they were written and failed silently from two hours
+ * later.
+ */
 const transition = (
   tableId: string,
   to: string,
   from: string,
   extra: Record<string, unknown> = {},
+  now: Date = LUNCHTIME,
 ): Promise<TransitionTableStateResult> =>
   transitionTableStateHandler(
     staffRequest({
@@ -143,6 +153,7 @@ const transition = (
       expectedStatus: from,
       ...extra,
     }),
+    now,
   );
 
 /** The ordinary seating: a free table takes a party, opening a visit. */
@@ -190,9 +201,11 @@ const readSessions = async (): Promise<DocumentData[]> => {
  * idle is a thing that happens to a session over time, and this is that, with
  * the time removed.
  *
- * `transitionTableState` stamps its own `Date.now()`, so a backdate meant to be
- * read by a seating is measured from the real clock rather than from the
- * injected one.
+ * Backdate from the **pinned** clock, not from `Date.now()`. Until issue #1681
+ * `transitionTableState` stamped its own `Date.now()` and a backdate meant to
+ * be read by a seating had to be measured against the real clock; the seating
+ * now takes the same injected date every other table callable takes, so the
+ * two agree and this helper reads whatever the caller pinned.
  */
 const goIdle = (
   from: number,
@@ -459,7 +472,11 @@ describe('guest table sessions', () => {
     it('expires a pending session that went idle instead of activating it', async () => {
       await setIdleTimeout(30);
       await started(alice);
-      await goIdle(Date.now(), 90);
+      // Backdated from `LUNCHTIME` rather than from the real clock, because
+      // the seating below now reads the same pinned clock (issue #1681). The
+      // old spelling worked only while the two disagreed, which is the bug
+      // that issue fixes rather than a property worth keeping.
+      await goIdle(LUNCHTIME.getTime(), 90);
 
       await seat();
 

@@ -134,10 +134,20 @@ const refused = async (
 ): Promise<TableOrderRefused> =>
   (await submit(lines, guest, now, extra)) as TableOrderRefused;
 
+/**
+ * A table transition, at the same clock the sessions were started on.
+ *
+ * The `now` is the whole of issue #1681. Without it `transitionTableState`
+ * stamps the real clock, and a seating measured against a session started at
+ * {@link LUNCHTIME} reads as idle by however long ago that date was - so these
+ * specs passed on the day they were written and failed silently from two hours
+ * later.
+ */
 const transition = (
   tableId: string,
   to: string,
   from: string,
+  now: Date = LUNCHTIME,
 ): Promise<TransitionTableStateResult> =>
   transitionTableStateHandler(
     staffRequest({
@@ -146,6 +156,7 @@ const transition = (
       status: to,
       expectedStatus: from,
     }),
+    now,
   );
 
 /** The ordinary seating: a free table takes a party, opening a visit. */
@@ -452,7 +463,12 @@ describe('table cart and order submission', () => {
 
     it('appends an audit entry naming the guest who moved it', async () => {
       const visitId = await ordering();
-      await submitted();
+      // Ordered ten minutes after being seated, which is both what happens at
+      // a table and what makes `readTransitions` deterministic: it sorts on
+      // `at`, and since issue #1681 gave the seating the same injected clock
+      // the order carries, two events pinned to one instant would be a tie the
+      // sort cannot break.
+      await submitted(undefined, alice, later(10));
 
       const entries = await readTransitions();
 

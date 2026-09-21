@@ -209,8 +209,24 @@ const entryFor = (
  * contended one, so two hosts sending two parties to table 5 at the same moment
  * produce one move and one `aborted` naming what table 5 holds now.
  */
+/**
+ * The clock, injectable for the reason every other table callable makes it so.
+ *
+ * `submitTableOrder`, `startTableSession` and `requestTableAssistance` all end
+ * their signature with this parameter, and this one did not - which made the
+ * emulator specs of issue #1681 fail with the passage of real time rather
+ * than with a change to the code. A spec pins a date to start a session and
+ * then seats the table; the seating stamped `Date.now()`, so once real time had
+ * moved further past the pinned date than `sessionIdleTimeoutMinutes`, every
+ * pending session expired at the moment of seating instead of activating. The
+ * suite went red on 16 September 2026 and nothing noticed, because nothing in
+ * CI ran it.
+ *
+ * Production passes nothing and gets the real clock, which is what it had.
+ */
 export const moveTableVisitHandler = async (
   request: CallableRequest<MoveTableVisitRequest>,
+  now: Date = new Date(),
 ): Promise<MoveTableVisitResult> => {
   const restaurantId = parseRequiredString(
     request.data?.restaurantId,
@@ -397,7 +413,7 @@ export const moveTableVisitHandler = async (
       ),
     ]);
 
-    const at = Date.now();
+    const at = now.getTime();
     const transitionIds: string[] = [];
 
     if (turnsOverSource) {
@@ -492,6 +508,6 @@ export const moveTableVisitHandler = async (
  * seating them at the first one, done by the same host, and requiring the
  * owner's own login for it would mean that login being passed round the floor.
  */
-export const moveTableVisit = onAppCheck<MoveTableVisitRequest>(
-  moveTableVisitHandler,
+export const moveTableVisit = onAppCheck<MoveTableVisitRequest>((request) =>
+  moveTableVisitHandler(request),
 );

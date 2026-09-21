@@ -833,18 +833,34 @@ product is relative to the viewer.
 
 ```text
 Newest first, wherever it was eaten 🌍
-Today's top of the feed is an omelette in Salzburg - 431 km from where we opened the app.
+Sort by date and the feed hands you the 20 most recent dishes on BiteTribe.
 📲 Available on iOS and Android, link in bio.
 #foodie #foodapp #travelfood #realfood #salzburg
 ```
 
-The second line is the whole point of the post: it names the city, and it names
-whose 431 kilometres those are. The sorting itself is not explained, for the
-reason [The Bites Around You Post](#the-bites-around-you-post) gives.
+The number stays out of the caption entirely, which is the safe half of the
+choice described above: the image carries `431 KM` where it is visibly one
+person's screen, and no sentence claims it of the dish.
+
+Both candidate lines originally ended on _wherever it was eaten_ / _wherever in
+the world they were eaten_, and the repeat was trimmed from the second. The
+sorting itself is not explained, for the reason
+[The Bites Around You Post](#the-bites-around-you-post) gives.
 
 `#salzburg` follows the rule the map post set with `#bern`: the frame names a
 city, so the tag is the one a person there might follow. The four standing
 hashtags are unchanged.
+
+### Published 21 September 2026
+
+Posted from `instagram.com` on desktop, with alt text naming the dish, the city,
+the distance and the rating, no filter, and the Threads share on.
+
+**The web uploader opened at 1:1 again**, which settles it: **square is the
+default and the launch post's 4:5 open was the exception.** Two consecutive
+posts have had to be set back to `Original` by hand. Treat the crop control as a
+required step rather than a check, and read
+[The Launch Post](#the-launch-post)'s note as the one-off it was.
 
 ## Wiring Back Into The Product
 

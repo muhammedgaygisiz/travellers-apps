@@ -757,6 +757,95 @@ Pin it from the phone: profile tab, the post, `...`, then the pin item - labelle
 `Pin to your profile` or `Pin to your main grid` depending on the app version.
 Three posts can be pinned, so pinning the launch post costs nothing later.
 
+## The Newest First Post
+
+The fourth Instagram post of [#913], prepared 21 September 2026. The three
+before it were about the product; this one is about one thing the product does
+that a viewer cannot guess from the outside - **sorting the home feed by date
+puts the newest Bites in the world at the top, not the newest ones near you.**
+
+![Newest first](../assets/social/newest-first-post.png)
+
+Same rule as the three before it: nothing in it links, and the bio carries the
+store URLs - see [Nothing In A Post Links](#nothing-in-a-post-links).
+
+### The Claim Is Checked Against The Code
+
+A post that describes behaviour can be wrong in a way that a post showing
+artwork cannot, so the claim was read out of the source before the frame was
+designed:
+
+| Fact                      | Where                                                                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| The sort option           | `home-feed-controls.component.html`, the `createdAt` option labelled `date`                                                                 |
+| The latest twenty         | `libs/bite-tribe/store/src/lib/bites/effects.ts`, `listenToLatest20Bites$`                                                                  |
+| Worldwide, not nearby     | `bite-api.service.ts`, the listener orders the whole bite collection by `createdAtTimestamp` desc with `limit 20` and **no geo constraint** |
+| Nothing filters them back | `filtering-and-sorting/reducer.ts`, the home distance filter defaults to `undefined`                                                        |
+
+So "the twenty newest, from anywhere" is what the app actually does, and the
+post is not making a marketing claim the code would have to grow into.
+
+### The Image
+
+[`ssot/assets/social/newest-first-post.png`](../assets/social/newest-first-post.png),
+`1080x1350` (4:5), the home feed sorted by date on an iPhone, cropped
+`445-1851` from a `1125x2436` screenshot.
+
+The frame is the chips row with `Date` on it, then one whole card: the dish, the
+restaurant, `431 KM`, `SALZBURG, AUSTRIA`, the rating and the reaction. The chip
+is the mechanism and the card is the payoff, and they have to be in the same
+frame or the post is two separate assertions.
+
+**The scroll-to-top button sets the bottom edge.** It is `slot="fixed"` and
+renders whenever the feed holds more than five Bites -
+`@if (moreThen5Bites())` in
+`libs/bite-tribe/home/page/src/lib/components/page/home.component.html` - so it
+sits at the same `y` in every feed screenshot that can be taken, `1873` on this
+device. The card runs to `1905`. The two overlap, and the crop ends at `1851` to
+keep the button out, which clips the bottom of the reaction badge and the card's
+rounded corner.
+
+There is one way to have both, worth knowing before the next feed screenshot:
+the chrome is fixed and only the cards scroll, and the gap between the chips row
+and the button is `1295` against a `1250` card. Scrolling roughly 40 pixels
+further drops the card clear of the button while its top stays under the chips.
+
+### The Distance Is The Viewer's, Not The Dish's
+
+`431 KM` is a `haversineDistance` from the phone's own GPS position, so a reader
+standing in Salzburg sees `0 KM` on the same Bite. **A caption may not state it
+as a property of the dish.**
+
+The first draft did exactly that - _"The newest Bite is 431 km away"_ - which is
+true of one phone and false of everyone reading the post.
+
+Two fixes were on the table: drop the number from the caption and let the image
+carry it, or keep it and say whose it is. **The second was chosen**, because the
+number is the most concrete thing in the frame and a reader who is told it is
+measured from a phone has learnt what every distance in the product means.
+Spending a caption line on that is cheaper than a viewer concluding the app
+thinks Salzburg is 431 km from everywhere.
+
+This recurs for every feed or map screenshot, because every distance in the
+product is relative to the viewer.
+
+### The Caption
+
+```text
+Newest first, wherever it was eaten 🌍
+Today's top of the feed is an omelette in Salzburg - 431 km from where we opened the app.
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #realfood #salzburg
+```
+
+The second line is the whole point of the post: it names the city, and it names
+whose 431 kilometres those are. The sorting itself is not explained, for the
+reason [The Bites Around You Post](#the-bites-around-you-post) gives.
+
+`#salzburg` follows the rule the map post set with `#bern`: the frame names a
+city, so the tag is the one a person there might follow. The four standing
+hashtags are unchanged.
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done

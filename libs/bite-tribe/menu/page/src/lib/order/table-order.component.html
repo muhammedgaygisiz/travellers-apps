@@ -370,7 +370,37 @@
                 shows the same thing weeks later, and two features may not
                 depend on each other.
               -->
-              <bt-visit-summary [summary]="meal" />
+              <bt-visit-summary
+                [summary]="meal"
+                [offersBite]="isMember()"
+                (createBite)="startBite($event)"
+              />
+
+              <!--
+                The account-upgrade moment (issue #1112). An anonymous guest is
+                asked here rather than offered a button that bounces them at
+                `new-bite`, which sits behind `authGuard`. Issue #1657 keeps
+                their uid through registering, so the meal above stays theirs
+                and the draft survives.
+              -->
+              @if (!isMember()) {
+                <div
+                  class="summary-register"
+                  data-testid="visit-summary-register"
+                >
+                  <p class="note">
+                    {{ 'visit-summary-register-copy' | transloco }}
+                  </p>
+
+                  <ion-button
+                    expand="block"
+                    data-testid="visit-summary-register-action"
+                    (click)="registerToWrite()"
+                  >
+                    {{ 'visit-summary-register-action' | transloco }}
+                  </ion-button>
+                </div>
+              }
 
               <!--
                   Asked once, at the end, and optional. Declining costs the

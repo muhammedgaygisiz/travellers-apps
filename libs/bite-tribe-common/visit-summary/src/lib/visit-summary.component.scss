@@ -55,3 +55,25 @@
   font-size: 0.85rem;
   margin: 0.5rem 0 0;
 }
+
+/*
+ * The offer to turn a dish into a Bite (GitHub issue #1112).
+ *
+ * On its own line under the row rather than beside the price, because the row
+ * is already two columns that wrap on a phone and a third would push the price
+ * off the end. `clear` rather than a solid button: there is one per dish, and
+ * four solid buttons down a bill would read as the point of the screen rather
+ * than as an offer.
+ */
+.visit-summary__bite {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin: 0;
+  --padding-start: 0;
+  --padding-end: 0.5rem;
+}
+
+.visit-summary__line:has(.visit-summary__bite) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}

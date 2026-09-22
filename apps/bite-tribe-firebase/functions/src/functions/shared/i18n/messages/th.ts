@@ -17,6 +17,8 @@ export const th: NotificationMessages = {
     'ร้านอาหารไม่ได้บันทึกการชำระเงินสำหรับการมาเยือนครั้งนี้',
   'visitSummary.footnote':
     'นี่เป็นสรุปรายการที่สั่ง ไม่ใช่ใบเสร็จ ใบเสร็จของคุณออกโดยร้านอาหาร',
+  'visitReminder.title': 'อร่อยไหม',
+  'visitReminder.body': 'เปลี่ยนอาหารเมื่อคืนให้เป็น Bite รูป คะแนน เสร็จ',
   'newBite.title': 'Bite ใหม่',
   'newBite.body': '{{author}} เพิ่งสร้าง Bite ใหม่',
   'newBite.bodyWithName': '{{author}} เพิ่งสร้าง Bite ใหม่: {{bite}}',

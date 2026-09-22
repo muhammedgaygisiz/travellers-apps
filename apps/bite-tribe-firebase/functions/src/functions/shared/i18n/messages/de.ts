@@ -17,6 +17,9 @@ export const de: NotificationMessages = {
     'Das Restaurant hat für diesen Besuch keine Zahlung erfasst.',
   'visitSummary.footnote':
     'Dies ist eine Zusammenfassung des Bestellten, keine Rechnung. Deinen Beleg bekommst du vom Restaurant.',
+  'visitReminder.title': 'War es gut?',
+  'visitReminder.body':
+    'Mach aus dem Gericht von gestern Abend einen Bite. Foto, Bewertung, fertig.',
   'newBite.title': 'Neuer Bite',
   'newBite.body': '{{author}} hat gerade einen neuen Bite erstellt',
   'newBite.bodyWithName':

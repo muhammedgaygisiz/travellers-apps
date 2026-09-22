@@ -23,6 +23,21 @@ import {
 import { writeVisitSummaries } from '../write-visit-summaries-on-close';
 
 /**
+ * The push transport is mocked, and not because it is inconvenient.
+ *
+ * `send-localized-notification` reaches a module that calls `getFirestore()`
+ * at import time, which throws in a spec whose `initializeApp` has not run
+ * yet - and there is no emulator for FCM regardless, so a real call could
+ * prove nothing. What these specs are about is **which** summaries a run
+ * picks up and what it writes on them, and that is all Firestore.
+ */
+jest.mock('../../shared/utils/send-localized-notification', () => ({
+  sendLocalizedNotification: jest.fn().mockResolvedValue(1),
+}));
+
+import { remindAboutVisitSummaries } from '../remind-about-visit-summaries';
+
+/**
  * What a guest keeps after the meal (GitHub issue #1111).
  *
  * ## Why this spec runs on the real clock
@@ -628,6 +643,117 @@ describe('the visit summary', () => {
         emailedAt: expect.any(Number),
       });
       expect(await emailed(visitId)).toMatchObject({ ok: true });
+    });
+  });
+
+  /**
+   * Turning a meal into a Bite, and the one reminder (GitHub issue #1112).
+   *
+   * The trigger that marks a summary converted is not exercised here - it
+   * watches `bites` and the flag is what matters - so these set `biteCreated`
+   * the way the trigger would and check what the reminder does about it.
+   */
+  describe('the one reminder', () => {
+    /** A meal that closed yesterday, which is the window the sweep reads. */
+    const YESTERDAY = new Date();
+
+    YESTERDAY.setDate(YESTERDAY.getDate() - 1);
+    YESTERDAY.setHours(20, 0, 0, 0);
+
+    const closedYesterday = async (
+      uid = ALICE,
+      extra: Record<string, unknown> = {},
+    ): Promise<void> => {
+      await getFirestore()
+        .collection('users')
+        .doc(uid)
+        .collection('visitSummaries')
+        .doc(`visit-${uid}`)
+        .set({
+          id: `visit-${uid}`,
+          restaurantId: RESTAURANT,
+          restaurantName: 'Owned Bistro',
+          tableLabel: '12',
+          closedAt: YESTERDAY.getTime(),
+          currency: EUR,
+          lines: [],
+          total: 12,
+          paymentStatus: 'settled',
+          biteCreated: false,
+          reminded: false,
+          ...extra,
+        });
+    };
+
+    const readFlags = async (uid = ALICE): Promise<DocumentData | undefined> =>
+      (
+        await getFirestore()
+          .collection('users')
+          .doc(uid)
+          .collection('visitSummaries')
+          .doc(`visit-${uid}`)
+          .get()
+      ).data();
+
+    it('marks a meal as reminded about', async () => {
+      await closedYesterday();
+
+      await remindAboutVisitSummaries();
+
+      expect(await readFlags()).toMatchObject({ reminded: true });
+    });
+
+    /** `RD-TS-51`. One ask at the table, one the next morning, then never. */
+    it('does not ask a second time', async () => {
+      await closedYesterday(ALICE, { reminded: true });
+
+      await remindAboutVisitSummaries();
+
+      // Still reminded, and the run found nothing to change - which is what
+      // the `where` clause is for rather than a check inside the loop.
+      expect(await readFlags()).toMatchObject({ reminded: true });
+    });
+
+    it('leaves a meal that already became a Bite alone', async () => {
+      await closedYesterday(ALICE, { biteCreated: true });
+
+      await remindAboutVisitSummaries();
+
+      expect(await readFlags()).toMatchObject({ reminded: false });
+    });
+
+    /**
+     * The window is yesterday. A meal that ended an hour ago has just had the
+     * offer on the summary screen, and one from last week is a meal nobody is
+     * going to write about now.
+     */
+    it('leaves a meal from today alone', async () => {
+      await closedYesterday(ALICE, { closedAt: Date.now() });
+
+      await remindAboutVisitSummaries();
+
+      expect(await readFlags()).toMatchObject({ reminded: false });
+    });
+
+    it('leaves a meal from last week alone', async () => {
+      const lastWeek = new Date();
+
+      lastWeek.setDate(lastWeek.getDate() - 8);
+      await closedYesterday(ALICE, { closedAt: lastWeek.getTime() });
+
+      await remindAboutVisitSummaries();
+
+      expect(await readFlags()).toMatchObject({ reminded: false });
+    });
+
+    it('reminds every guest who was at the table', async () => {
+      await closedYesterday(ALICE);
+      await closedYesterday(BOB);
+
+      await remindAboutVisitSummaries();
+
+      expect(await readFlags(ALICE)).toMatchObject({ reminded: true });
+      expect(await readFlags(BOB)).toMatchObject({ reminded: true });
     });
   });
 

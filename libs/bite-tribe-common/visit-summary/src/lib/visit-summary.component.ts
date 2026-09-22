@@ -3,7 +3,9 @@ import {
   Component,
   computed,
   input,
+  output,
 } from '@angular/core';
+import { IonButton } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { currencyCodes } from 'utils';
 import type { TableVisitBillLine, VisitSummary } from 'model';
@@ -53,7 +55,7 @@ const symbolOf = (code: string): string => {
  */
 @Component({
   selector: 'bt-visit-summary',
-  imports: [TranslocoPipe],
+  imports: [IonButton, TranslocoPipe],
   templateUrl: './visit-summary.component.html',
   styleUrl: './visit-summary.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,6 +71,26 @@ export class VisitSummaryComponent {
    * than as the plain fact it is.
    */
   readonly showsFootnote = input(true);
+
+  /**
+   * Whether each dish offers to become a Bite (GitHub issue #1112).
+   *
+   * Off by default, because the component renders a document and a Bite is an
+   * action on it. The screens that turn it on are the ones a member reaches:
+   * an anonymous guest is asked to register first, and a row offering
+   * something that bounces them at the next screen would be a worse answer
+   * than not offering it.
+   */
+  readonly offersBite = input(false);
+
+  /**
+   * The dish somebody wants to write about.
+   *
+   * The line rather than its index, because what the next screen needs is the
+   * name, the price and the currency - and an index into a list the parent
+   * also holds is a second way to get them wrong.
+   */
+  readonly createBite = output<TableVisitBillLine>();
 
   /** Whether the table ordered nothing at all. */
   protected readonly isEmpty = computed(

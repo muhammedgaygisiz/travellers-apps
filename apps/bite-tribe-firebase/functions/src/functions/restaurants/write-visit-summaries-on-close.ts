@@ -62,6 +62,15 @@ import {
  * exists to prevent.
  */
 
+/** Whether a stored value is a position this backend will copy. */
+const isGeopoint = (
+  value: unknown,
+): value is { latitude: number; longitude: number } =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as { latitude?: unknown }).latitude === 'number' &&
+  typeof (value as { longitude?: unknown }).longitude === 'number';
+
 /** The sessions of one visit that were ever really at the table. */
 const seatedGuestIdsOf = (
   documents: readonly { data: () => Record<string, unknown> }[],
@@ -171,6 +180,12 @@ export const writeVisitSummaries = async (
       typeof table?.data()?.['label'] === 'string'
         ? (table?.data()?.['label'] as string)
         : '',
+    // Copied so a Bite made from this meal is filed where the food was eaten
+    // rather than wherever the guest opens the app (issue #1112). The
+    // restaurant document is already open for its name, so this is free.
+    ...(isGeopoint(restaurant.data()?.['position'])
+      ? { restaurantPosition: restaurant.data()?.['position'] }
+      : {}),
     closedAt:
       typeof after['closedAt'] === 'number'
         ? (after['closedAt'] as number)
@@ -180,6 +195,11 @@ export const writeVisitSummaries = async (
     total: tableVisitBillTotal(lines),
     paymentStatus:
       after['paymentStatus'] === 'settled' ? 'settled' : 'unsettled',
+    // Written rather than left absent, because the nightly reminder reads
+    // every guest's summaries as a collection group and Firestore cannot ask
+    // for a field that is not there (issue #1112).
+    biteCreated: false,
+    reminded: false,
     ...(typeof after['settlementMethod'] === 'string'
       ? {
           settlementMethod: after[

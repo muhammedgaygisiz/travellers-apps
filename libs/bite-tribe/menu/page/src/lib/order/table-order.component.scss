@@ -279,3 +279,17 @@
   margin-top: 1rem;
   padding-top: 0.75rem;
 }
+
+/*
+ * The account-upgrade moment (GitHub issue #1112).
+ *
+ * Under the meal rather than over it: the guest came to this section to see
+ * what they ate, and an ask placed above the thing they asked for reads as a
+ * wall. Fenced like the email block beside it, because both are requests
+ * rather than parts of the record.
+ */
+.summary-register {
+  border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+}

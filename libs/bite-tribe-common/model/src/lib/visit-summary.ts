@@ -1,3 +1,4 @@
+import type { Geopoint } from './geopoint';
 import type { TableVisitBillLine } from './table-visit-bill';
 import type {
   TableVisitPaymentStatus,
@@ -61,6 +62,20 @@ export interface VisitSummary {
   restaurantName: string;
   /** The table the party was sitting at when the visit ended. */
   tableLabel: string;
+  /**
+   * Where the restaurant is, copied at close (GitHub issue #1112).
+   *
+   * Here so that a Bite made from this meal is complete. `Bite.position` is
+   * `Validators.required` on the creation form, and a guest reading a summary
+   * at home is nowhere near the restaurant - so their own GPS would file the
+   * dish at their kitchen table. The trigger that writes this already has the
+   * restaurant document open for the name, so it costs nothing.
+   *
+   * Absent on a summary written before issue #1112, and on a restaurant with
+   * no position recorded. A Bite made from one of those asks for a position
+   * the way any other Bite does.
+   */
+  restaurantPosition?: Geopoint;
   /** When staff ended the visit, in epoch milliseconds. */
   closedAt: number;
   /** ISO 4217, read off the orders and equal on every line. */
@@ -82,6 +97,24 @@ export interface VisitSummary {
    * is used for the one send and stored nowhere.
    */
   emailedAt?: number;
+  /**
+   * Whether a Bite has been made from this meal (GitHub issue #1112).
+   *
+   * Written `false` at close and flipped by the trigger that watches Bites, so
+   * the nightly reminder can ask for it in a `where`. A **field** rather than
+   * the absence of one, because Firestore cannot query for a missing field in
+   * a collection group, and the reminder reads every guest's summaries at once.
+   */
+  biteCreated?: boolean;
+  /**
+   * Whether the one reminder has gone out (GitHub issue #1112).
+   *
+   * The guest is offered a Bite at the table and once the next morning, and
+   * then never again (`RD-TS-51`). This is what makes "never again" true of
+   * the record rather than of a habit, and it is queried for the same reason
+   * {@link biteCreated} is.
+   */
+  reminded?: boolean;
 }
 
 /**

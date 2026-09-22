@@ -141,6 +141,15 @@ theirs until the session that produced them goes idle -
 expiry field, which is why the read is a callable: `firestore.rules` cannot
 compute an idle timeout against a per-restaurant setting.
 
+**A dish is offered as a Bite twice, and then never again** (`RD-TS-51`). On
+the summary while the guest is still at the table, and once the next morning
+by push. There is no dismiss and no counter: ignoring the offer is declining
+it, and the ceiling is the meal - `biteCreated` and `reminded` on the guest's
+own summary are what the nightly sweep reads, written `false` at close so a
+collection-group `where` can ask for them. A Bite made this way carries
+`visitId`, which is what tells the sweep to stop asking; the menu-item link is
+a different field and is issue [#1113]'s.
+
 **The email is asked once, at the end, and the address is stored nowhere.** Not
 on the account, not on the summary, not in a log. That is what makes the flow
 need no retention rule and no deletion path for a uid nobody can sign into
@@ -477,3 +486,4 @@ staff keep an unconditional `list` over the whole table.
 [#1110]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1110
 [#1111]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1111
 [#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657
+[#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113

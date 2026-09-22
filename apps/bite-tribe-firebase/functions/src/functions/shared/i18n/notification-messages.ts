@@ -25,6 +25,11 @@ export type NotificationMessageKey =
   | 'visitSummary.settled'
   | 'visitSummary.unsettled'
   | 'visitSummary.footnote'
+  // The one reminder, the morning after (GitHub issue #1112). It asks about a
+  // dish rather than announcing a feature, because the guest ate it last night
+  // and that is the only reason the push is welcome.
+  | 'visitReminder.title'
+  | 'visitReminder.body'
   | 'newBite.title'
   | 'newBite.body'
   | 'newBite.bodyWithName'

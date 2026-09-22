@@ -15,6 +15,8 @@ export const ar: NotificationMessages = {
   'visitSummary.unsettled': 'لم يسجّل المطعم أي دفعة لهذه الزيارة.',
   'visitSummary.footnote':
     'هذا ملخص لما تم طلبه وليس إيصالاً. إيصالك يصدر من المطعم.',
+  'visitReminder.title': 'هل كان لذيذًا؟',
+  'visitReminder.body': 'حوّل طبق الليلة الماضية إلى Bite. صورة، تقييم، انتهى.',
   'newBite.title': 'Bite جديد',
   'newBite.body': '{{author}} أنشأ للتو Bite جديدًا',
   'newBite.bodyWithName': '{{author}} أنشأ للتو Bite جديدًا: {{bite}}',

@@ -17,6 +17,9 @@ export const fr: NotificationMessages = {
     "Le restaurant n'a enregistré aucun règlement pour cette visite.",
   'visitSummary.footnote':
     'Ceci est un récapitulatif de ce qui a été commandé, pas une note. Votre reçu vous est remis par le restaurant.',
+  'visitReminder.title': "C'était bon ?",
+  'visitReminder.body':
+    "Transformez le plat d'hier soir en Bite. Photo, note, c'est fait.",
   'newBite.title': 'Nouveau Bite',
   'newBite.body': '{{author}} vient de créer un nouveau Bite',
   'newBite.bodyWithName':

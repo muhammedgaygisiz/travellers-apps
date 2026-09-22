@@ -1,6 +1,6 @@
 /* eslint-disable @nx/enforce-module-boundaries -- see the note below */
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import { NavController, provideIonicAngular } from '@ionic/angular/standalone';
 import {
   applicationConfig,
   Decorator,
@@ -17,6 +17,7 @@ import {
 } from 'bite-tribe/api';
 import { AuthService } from 'ta-firestore';
 import { VisitSummaryApiService } from 'bite-tribe/api';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 import { NetworkStatusService } from 'common/networkstatus';
 import type {
   PublicMenuRefusalReason,
@@ -179,6 +180,8 @@ interface Answers {
   session?: () => Observable<unknown>;
   /** The meal, for the same story. */
   summary?: () => Promise<unknown>;
+  /** Whether the guest holds an account, which decides what the meal offers. */
+  member?: boolean;
 }
 
 /**
@@ -253,6 +256,12 @@ const order =
           useValue: {
             getUser: (): { uid: string } | undefined =>
               answers.session ? { uid: 'guest-alice' } : undefined,
+            // `getMember` and `getUser` answer different questions, and the
+            // summary asks the first: an anonymous table guest has a uid and
+            // is not a member, so they are asked to register rather than
+            // offered a Bite (issue #1112). A story opts in.
+            getMember: (): { uid: string } | null =>
+              answers.member ? { uid: 'member-uid' } : null,
           },
         },
         {
@@ -263,6 +272,17 @@ const order =
             list: (): Promise<unknown> => pending<unknown>(),
             email: (): Promise<unknown> => pending<unknown>(),
           },
+        },
+        {
+          // The screen leaves a prefilled draft here and navigates away
+          // (issue #1112). Neither is exercised by a picture, and both have
+          // to exist for the screen to construct.
+          provide: BiteTribeStoreService,
+          useValue: { cacheBite: (): void => undefined },
+        },
+        {
+          provide: NavController,
+          useValue: { navigateForward: (): void => undefined },
         },
         {
           provide: NetworkStatusService,
@@ -528,6 +548,75 @@ export const SubmissionUnresolved: Story = {
  * of.
  */
 export const VisitSummaryAfterClose: Story = {
+  decorators: [
+    order({
+      member: true,
+      session: () =>
+        of({
+          session: {
+            id: 'session-1',
+            restaurantId: context.restaurant.id,
+            tableId: context.table.id,
+            guestUserId: 'guest-alice',
+            status: 'closed',
+            visitId: 'visit-1',
+            startedAt: 1_700_000_000_000,
+            lastActiveAt: 1_700_000_000_000,
+            isAnonymousGuest: true,
+          },
+          live: true,
+        }),
+      summary: async () => ({
+        ok: true,
+        summary: {
+          id: 'visit-1',
+          restaurantId: context.restaurant.id,
+          restaurantName: context.restaurant.name,
+          tableLabel: context.table.label,
+          closedAt: 1_700_000_000_000,
+          currency: 'EUR',
+          lines: [
+            {
+              menuItemId: 'item-margherita',
+              name: 'Margherita',
+              quantity: 2,
+              unitPrice: 12,
+              lineTotal: 24,
+            },
+            {
+              menuItemId: 'item-tiramisu',
+              name: 'Tiramisù',
+              quantity: 1,
+              unitPrice: 7,
+              lineTotal: 7,
+            },
+          ],
+          total: 31,
+          paymentStatus: 'settled',
+          settlementMethod: 'card',
+        },
+      }),
+    }),
+  ],
+  play: async () => {
+    await settle();
+    document
+      .querySelector<HTMLElement>('[data-testid="visit-summary-load"]')
+      ?.click();
+    await settle();
+    await settle();
+  },
+};
+
+/**
+ * The same meal, seen by a guest who never registered (GitHub issue #1112).
+ *
+ * No Bite button and an ask instead. `new-bite` sits behind `authGuard`, so a
+ * button here would bounce them at the next screen - and this is the strongest
+ * moment BiteTribe will ever have to ask somebody to sign up, because they are
+ * looking at a dish they just ate.
+ */
+export const VisitSummaryForGuest: Story = {
   decorators: [
     order({
       session: () =>

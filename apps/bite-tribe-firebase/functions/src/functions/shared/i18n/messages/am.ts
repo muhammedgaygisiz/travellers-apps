@@ -15,6 +15,8 @@ export const am: NotificationMessages = {
   'visitSummary.unsettled': 'ምግብ ቤቱ ለዚህ ጉብኝት ምንም ክፍያ አልመዘገበም።',
   'visitSummary.footnote':
     'ይህ የታዘዘውን ማጠቃለያ ነው እንጂ ደረሰኝ አይደለም። ደረሰኝዎን ከምግብ ቤቱ ያገኛሉ።',
+  'visitReminder.title': 'ጣፋጭ ነበር?',
+  'visitReminder.body': 'የትናንት ምሽቱን ምግብ ወደ Bite ይለውጡት። ፎቶ፣ ደረጃ፣ ተጠናቀቀ።',
   'newBite.title': 'አዲስ Bite',
   'newBite.body': '{{author}} አዲስ Bite ፈጥሯል',
   'newBite.bodyWithName': '{{author}} አዲስ Bite ፈጥሯል፦ {{bite}}',

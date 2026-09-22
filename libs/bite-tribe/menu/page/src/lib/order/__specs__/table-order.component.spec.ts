@@ -6,6 +6,9 @@ import {
   signal,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { NavController } from '@ionic/angular/standalone';
+import { AuthService } from 'ta-firestore';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
@@ -163,6 +166,10 @@ const en = {
   'visit-summary-email-privacy':
     "We'll use your address for this one email and won't keep it.",
   'visit-summary-email-sent': 'Sent. Check your inbox.',
+  'visit-summary-create-bite': 'Create a Bite',
+  'visit-summary-register-copy':
+    'Create an account to turn what you ate into a Bite.',
+  'visit-summary-register-action': 'Create an account',
   'menu-item-not-available': 'Not available',
   'create-bite': 'Create Bite',
   'no-menu-yet': 'No menu yet',
@@ -200,6 +207,9 @@ describe(TableOrder.name, () => {
   let summarySent: WritableSignal<boolean>;
   let loadSummary: jest.Mock;
   let emailSummary: jest.Mock;
+  let member: { uid: string } | null;
+  let cacheBite: jest.Mock;
+  let navigateForward: jest.Mock;
 
   const show = (next: TableOrderView): void => {
     state.set(next);
@@ -258,6 +268,9 @@ describe(TableOrder.name, () => {
     summarySent = signal(false);
     loadSummary = jest.fn().mockResolvedValue(undefined);
     emailSummary = jest.fn().mockResolvedValue(undefined);
+    member = { uid: 'member-uid' };
+    cacheBite = jest.fn();
+    navigateForward = jest.fn();
 
     // The history is signals all the way down, so the fake is the four the
     // template reads. What is being checked here is what a guest sees, and the
@@ -371,6 +384,15 @@ describe(TableOrder.name, () => {
         provideIonicAngular(getIonicConfig()),
         provideRouter([]),
         { provide: TableOrderService, useValue: service },
+        // The screen asks three things of the world now: who is signed in,
+        // where to leave a prefilled draft, and where to send somebody next
+        // (GitHub issue #1112).
+        {
+          provide: AuthService,
+          useValue: { getMember: (): { uid: string } | null => member },
+        },
+        { provide: BiteTribeStoreService, useValue: { cacheBite } },
+        { provide: NavController, useValue: { navigateForward } },
       ],
     })
       // The component provides the real service, which would win over the fake
@@ -1297,6 +1319,71 @@ describe(TableOrder.name, () => {
       click('visit-summary-send');
 
       expect(emailSummary).not.toHaveBeenCalled();
+    });
+
+    /**
+     * The account-upgrade moment (GitHub issue #1112). A member gets the
+     * offer; an anonymous guest gets the ask, because `new-bite` sits behind
+     * `authGuard` and a button that bounced them would be worse than none.
+     */
+    it('offers a Bite per dish to a member', () => {
+      summaryVisit.set(true);
+      summaryRead.set(MEAL);
+      render();
+      show(ORDERING);
+
+      expect(has('visit-summary-create-bite')).toBe(true);
+      expect(has('visit-summary-register')).toBe(false);
+    });
+
+    it('asks an unregistered guest to sign up instead', () => {
+      member = null;
+      summaryVisit.set(true);
+      summaryRead.set(MEAL);
+      render();
+      show(ORDERING);
+
+      expect(has('visit-summary-create-bite')).toBe(false);
+      expect(text()).toContain('Create an account');
+    });
+
+    /**
+     * The draft goes through the store's cached bite, which is how the
+     * menu-item flow has prefilled the form since before this issue - and is
+     * what makes it survive the navigation and the account upgrade.
+     */
+    it('hands the form a prefilled draft and goes there', () => {
+      summaryVisit.set(true);
+      summaryRead.set(MEAL);
+      render();
+      show(ORDERING);
+
+      click('visit-summary-create-bite');
+
+      expect(cacheBite).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Margherita',
+          place: 'Sakura Kitchen',
+          price: 12,
+          currency: 'EUR',
+          restaurantId: 'r1',
+          visitId: 'visit-1',
+        }),
+      );
+      expect(navigateForward).toHaveBeenCalledWith(['new-bite']);
+    });
+
+    it('sends an unregistered guest to sign up', () => {
+      member = null;
+      summaryVisit.set(true);
+      summaryRead.set(MEAL);
+      render();
+      show(ORDERING);
+
+      click('visit-summary-register-action');
+
+      expect(navigateForward).toHaveBeenCalledWith(['start']);
+      expect(cacheBite).not.toHaveBeenCalled();
     });
 
     it('stops offering the send once it has gone', () => {

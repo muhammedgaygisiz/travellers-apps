@@ -55,6 +55,7 @@ export * from './lib/table-state';
  */
 export * from './lib/table-visit';
 export * from './lib/table-visit-bill';
+export * from './lib/visit-summary';
 /**
  * A value export rather than `export type *`: the refusal reasons and the next
  * step each one calls for are data the backend applies and a scan screen

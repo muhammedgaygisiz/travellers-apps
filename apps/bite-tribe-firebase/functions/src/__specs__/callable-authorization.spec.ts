@@ -198,6 +198,28 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // the membership the rules cannot.
   readTableVisitBill: 'anySession',
 
+  // A guest reading what they ate after the meal (issue #1111). `anySession`
+  // for the reason the bill is: it answers with a document filed under the
+  // caller's own uid, and an anonymous account is what most guests hold. The
+  // retention rule an unregistered guest is held to - the session that
+  // produced the summary must not have gone idle - is applied inside, because
+  // `firestore.rules` cannot compute it against a per-restaurant timeout.
+  readVisitSummary: 'anySession',
+
+  // The same account's list of past meals (issue #1111). Also `anySession`,
+  // and it answers an anonymous caller with an empty list rather than a
+  // refusal: a guest who never registered has the one meal they are sitting
+  // at, and reaches it from the screen they are on.
+  listVisitSummaries: 'anySession',
+
+  // A guest asking for their summary by mail (issue #1111). `anySession`, and
+  // bounded by something a caller cannot mint: one send per visit, stamped on
+  // the guest's own summary (`RD-TS-48`). An anonymous account is free and
+  // unlimited (`RD-TS-4`), so a per-guest rate limit would bucket an attacker
+  // holding one throwaway uid per request by nothing; a visit exists only
+  // because staff seated a party and closed it.
+  emailVisitSummary: 'anySession',
+
   // A guest who registered during the meal, asking for the `/users` document a
   // member has (issue #1657). `anySession` and not `member`, which looks the
   // wrong way round until the order of events is read: the account is a member
@@ -453,8 +475,11 @@ describe('callable authorization', () => {
         .map((endpoint) => endpoint.name)
         .sort(),
     ).toEqual([
+      'emailVisitSummary',
       'leaveTableSession',
+      'listVisitSummaries',
       'readTableVisitBill',
+      'readVisitSummary',
       'requestTableAssistance',
       'startTableSession',
       'submitTableOrder',

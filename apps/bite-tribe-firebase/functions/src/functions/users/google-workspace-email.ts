@@ -146,6 +146,85 @@ const encodeBody = (html: string): string =>
       .match(/.{1,76}/g) ?? []
   ).join('\r\n');
 
+/**
+ * One rendered message, ready to hand to Gmail (GitHub issue #1111).
+ *
+ * The transport and the template are split here. Everything above - the JWT,
+ * the delegation, the access token, the header and body encodings, the sender
+ * address that must never be the delegated mailbox (issue #1265) - is true of
+ * every mail BiteTribe sends; the subject and the body are true of one. Until
+ * this issue there was one mail, so the two were one function, and a second
+ * template would have meant a second copy of the transport - and the first
+ * thing to drift would have been the `From`.
+ */
+export interface RenderedEmail {
+  to: string;
+  subject: string;
+  /** The HTML body. Encoded here, so a template never thinks about MIME. */
+  html: string;
+}
+
+/**
+ * The envelope and the encodings, around whatever a template rendered.
+ *
+ * Exported for tests: the rendered message is the contract, not the send.
+ */
+export const createRawMessage = ({
+  to,
+  subject,
+  html,
+}: RenderedEmail): string => {
+  // Never the delegated user: which Workspace mailbox performs the Gmail API
+  // delegation is infrastructure, and building `From` from it published a
+  // personal address to every user who requested a resend (issue \#1265).
+  const from = process.env[GOOGLE_WORKSPACE_SENDER_ADDRESS_ENV];
+
+  if (!from) {
+    throw new Error('Google Workspace sender address is missing.');
+  }
+
+  const message = [
+    `From: ${SENDER_NAME} <${from}>`,
+    `To: ${to}`,
+    `Subject: ${encodeHeaderValue(subject)}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset=UTF-8',
+    'Content-Transfer-Encoding: base64',
+    '',
+    encodeBody(html),
+  ].join('\r\n');
+
+  return base64Url(message);
+};
+
+/**
+ * Hands one rendered message to Gmail.
+ *
+ * The one place a mail leaves this codebase. A template that needed its own
+ * copy of this would need its own copy of the token exchange above it.
+ */
+export const sendGoogleWorkspaceEmail = async (
+  email: RenderedEmail,
+): Promise<void> => {
+  const accessToken = await fetchAccessToken();
+  const response = await fetch(GMAIL_SEND_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ raw: createRawMessage(email) }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => '');
+
+    throw new Error(
+      `Failed to send Google Workspace email (${response.status}): ${body}`,
+    );
+  }
+};
+
 /** Exported for tests: the rendered message is the contract, not the send. */
 export const createRawEmail = (
   to: string,
@@ -182,22 +261,11 @@ export const sendGoogleWorkspaceVerificationEmail = async ({
   verificationLink,
   language,
 }: SendVerificationEmailParams): Promise<void> => {
-  const accessToken = await fetchAccessToken();
-  const response = await fetch(GMAIL_SEND_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      raw: createRawEmail(to, verificationLink, language),
-    }),
-  });
+  const translate = createTranslate(language ?? DEFAULT_LANGUAGE);
 
-  if (!response.ok) {
-    const body = await response.text().catch(() => '');
-    throw new Error(
-      `Failed to send Google Workspace verification email (${response.status}): ${body}`,
-    );
-  }
+  await sendGoogleWorkspaceEmail({
+    to,
+    subject: translate('emailVerification.subject'),
+    html: `${translate('emailVerification.body')}<br><br><a href="${verificationLink}">${translate('emailVerification.linkLabel')}</a>`,
+  });
 };

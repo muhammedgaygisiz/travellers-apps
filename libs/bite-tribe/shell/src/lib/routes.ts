@@ -42,6 +42,21 @@ const APP_ROUTES: Routes = [
     title: 'Search',
   },
   {
+    path: PATH.MY_VISITS,
+    loadComponent: () => import('visits-page').then((m) => m.MyVisitsContainer),
+    canActivate: [authGuard],
+    title: 'My visits',
+  },
+  {
+    // Addressable on its own: a kept link, and the notification of issue #1112,
+    // both arrive here without the list above having been loaded.
+    path: `${PATH.MY_VISITS}/:visitId`,
+    loadComponent: () =>
+      import('visits-page').then((m) => m.VisitDetailContainer),
+    canActivate: [authGuard],
+    title: 'My visits',
+  },
+  {
     path: PATH.GALLERY,
     loadComponent: () =>
       import('bite-tribe/gallery').then((m) => m.GalleryContainer),

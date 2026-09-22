@@ -260,3 +260,22 @@
   font-weight: 600;
   margin: 0.5rem 0 0;
 }
+
+/*
+ * What the guest ate, once the table has been cleared (GitHub issue #1111).
+ *
+ * The rows themselves are the shared `bt-visit-summary` component's, because
+ * the visits page shows the same meal weeks later. What is left here is the
+ * one part that belongs to this screen alone: the field that asks for an
+ * email address.
+ */
+/*
+ * The one place on this screen that asks for personal data, so it is fenced
+ * off and carries its own sentence about what happens to the address. A field
+ * that appeared inline among the dishes would read as part of the bill.
+ */
+.summary-email {
+  border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+}

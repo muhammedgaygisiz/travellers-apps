@@ -41,6 +41,17 @@ export type TableTransitionFailure =
    */
   | 'offline'
   /**
+   * The party ordered and nobody recorded a payment (GitHub issue #1111).
+   *
+   * The one failure that is a **question** rather than a sentence. Every other
+   * entry here names something the staff member cannot do; this one names
+   * something they can do once they say so, and the same transition sent again
+   * with the acknowledgement goes through. A screen that reported it as
+   * "this table can't do that right now" would be telling a host to give up on
+   * a bill they are standing next to.
+   */
+  | 'unsettled-bill'
+  /**
    * The table cannot do that right now: the move is not in the matrix, or the
    * owner has taken the table out of service.
    */
@@ -96,6 +107,14 @@ export const tableTransitionFailure = (
 
   if (described.includes('aborted') || described.includes('changed it first')) {
     return 'conflict';
+  }
+
+  // Before the general `failed-precondition`, which it is a kind of: the
+  // backend's own wording is stable and distinctive, and the details object
+  // that also carries it is not something to rely on across the Capacitor
+  // bridge - the reasoning this file opens with.
+  if (described.includes('has not been recorded as paid')) {
+    return 'unsettled-bill';
   }
 
   if (described.includes('failed-precondition')) {

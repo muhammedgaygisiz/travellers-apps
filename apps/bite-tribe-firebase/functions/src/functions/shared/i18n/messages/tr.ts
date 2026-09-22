@@ -7,6 +7,15 @@ export const tr: NotificationMessages = {
   'emailVerification.body':
     'BiteTribe hesabının güvende kalması ve hesabınla ilgili önemli mesajları alabilmen için lütfen e-posta adresini doğrula.',
   'emailVerification.linkLabel': 'E-posta adresini doğrula',
+  'visitSummary.subject': '{{restaurant}} ziyaretin',
+  'visitSummary.heading': 'Sipariş ettiklerin',
+  'visitSummary.intro':
+    '{{date}} tarihindeki {{restaurant}} ziyaretinin özeti.',
+  'visitSummary.total': 'Toplam',
+  'visitSummary.settled': 'Restoran bunu ödendi olarak işaretledi.',
+  'visitSummary.unsettled': 'Restoran bu ziyaret için bir ödeme kaydetmedi.',
+  'visitSummary.footnote':
+    'Bu, sipariş edilenlerin bir özetidir, fiş değildir. Fişini restorandan alırsın.',
   'newBite.title': 'Yeni Bite',
   'newBite.body': '{{author}} yeni bir Bite oluşturdu',
   'newBite.bodyWithName': '{{author}} yeni bir Bite oluşturdu: {{bite}}',

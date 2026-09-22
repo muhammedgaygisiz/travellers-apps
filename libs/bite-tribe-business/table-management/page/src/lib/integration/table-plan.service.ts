@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { AlertController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FloorPlanDataAccessService } from 'bite-tribe-business/floor-plan-data-access';
@@ -103,6 +104,9 @@ export const FAILURE_KEYS: Readonly<Record<TableTransitionFailure, string>> = {
   // the map is total over the failures, and a partial one would let a new
   // failure ship with no sentence at all.
   offline: 'table-action-queued',
+  // Never presented as a toast: this one is answered with a dialog, and the
+  // key is here because the map is total over the failures (issue #1111).
+  'unsettled-bill': 'table-close-unsettled-message',
   unknown: 'table-action-failed',
 };
 
@@ -265,6 +269,7 @@ export class TablePlanService {
   private readonly transloco = inject(TranslocoService);
   private readonly toast = inject(ToastService);
   private readonly settlement = inject(TableSettlementService);
+  private readonly alertController = inject(AlertController);
   private readonly analytics = inject(AnalyticsService);
 
   readonly restaurantId = this.storeService.restaurantIdFromUrl;
@@ -1131,6 +1136,7 @@ export class TablePlanService {
     from: TableStatus,
     to: TableStatus,
     guests?: number,
+    acknowledgeUnsettled = false,
   ): Promise<TransitionOutcomeKind> {
     const restaurantId = this.restaurantId();
 
@@ -1152,6 +1158,7 @@ export class TablePlanService {
       status: to,
       expectedStatus: from,
       ...(guests === undefined ? {} : { reason: guestCountReason(guests) }),
+      ...(acknowledgeUnsettled ? { acknowledgeUnsettled: true } : {}),
     });
 
     if (outcome.outcome === 'applied') {
@@ -1179,9 +1186,56 @@ export class TablePlanService {
     }
 
     this.rollback(tableId);
+
+    // The one refusal that is a question. The staff member is standing next to
+    // the table and can answer it, so the same transition is offered again
+    // with the acknowledgement rather than reported as something the table
+    // cannot do (issue #1111).
+    if (outcome.failure === 'unsettled-bill' && !acknowledgeUnsettled) {
+      return (await this.askAboutUnsettledBill(tableId))
+        ? this.transition(tableId, from, to, guests, true)
+        : 'failed';
+    }
+
     await this.reportFailure(outcome.failure, outcome.error);
 
     return 'failed';
+  }
+
+  /**
+   * Asks whether a table whose bill nobody recorded should be cleared anyway
+   * (GitHub issue #1111).
+   *
+   * A dialog rather than a toast, because the answer decides what happens: a
+   * party that walked out without paying is a real evening and the visit has
+   * to be closable, and a bill somebody forgot to record is a different
+   * evening that this question is the only chance to catch.
+   *
+   * It is asked **from the refusal** rather than before the transition, so the
+   * question is only put where the backend actually has one - a visit already
+   * settled, or one that ordered nothing, never reaches here. That also means
+   * a settlement recorded on another device a second earlier silently makes
+   * the question go away, because the retry reads the visit again.
+   */
+  private async askAboutUnsettledBill(tableId: string): Promise<boolean> {
+    const alert = await this.alertController.create({
+      header: this.transloco.translate('table-close-unsettled-title'),
+      subHeader: this.labelOf(tableId),
+      message: this.transloco.translate('table-close-unsettled-message'),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('table-close-unsettled-confirm'),
+          role: 'destructive',
+        },
+      ],
+    });
+
+    await alert.present();
+
+    const { role } = await alert.onDidDismiss();
+
+    return role === 'destructive';
   }
 
   /**

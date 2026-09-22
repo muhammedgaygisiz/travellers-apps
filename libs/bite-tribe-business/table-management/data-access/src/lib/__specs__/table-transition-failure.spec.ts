@@ -72,6 +72,31 @@ describe('tableTransitionFailure', () => {
   });
 
   /**
+   * The unsettled bill is a **question**, not a refusal (GitHub issue #1111).
+   * Reading it as `not-allowed` would tell a host standing next to the table
+   * to give up on a bill they can still record.
+   */
+  it('reads an unsettled bill as its own answer, not as not-allowed', () => {
+    expect(
+      tableTransitionFailure({
+        code: 'functions/failed-precondition',
+        message:
+          'The bill for table 12 has not been recorded as paid. Confirm that the visit should be closed unsettled.',
+      }),
+    ).toBe('unsettled-bill');
+  });
+
+  /** Every other `failed-precondition` still is one. */
+  it('keeps an ordinary precondition failure as not-allowed', () => {
+    expect(
+      tableTransitionFailure({
+        code: 'functions/failed-precondition',
+        message: 'Table 12 is not in service, so no party can be seated at it.',
+      }),
+    ).toBe('not-allowed');
+  });
+
+  /**
    * A definite answer is never mistaken for a dropped connection, however its
    * message is worded. The offline check runs last for exactly this case.
    */

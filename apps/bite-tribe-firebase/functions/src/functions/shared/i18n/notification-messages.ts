@@ -15,6 +15,16 @@ export type NotificationMessageKey =
   | 'emailVerification.subject'
   | 'emailVerification.body'
   | 'emailVerification.linkLabel'
+  // The visit summary mail (GitHub issue #1111). Named for what it is: a
+  // summary of what was ordered, never a receipt, because BiteTribe never took
+  // the money (`ADR-0004`).
+  | 'visitSummary.subject'
+  | 'visitSummary.heading'
+  | 'visitSummary.intro'
+  | 'visitSummary.total'
+  | 'visitSummary.settled'
+  | 'visitSummary.unsettled'
+  | 'visitSummary.footnote'
   | 'newBite.title'
   | 'newBite.body'
   | 'newBite.bodyWithName'

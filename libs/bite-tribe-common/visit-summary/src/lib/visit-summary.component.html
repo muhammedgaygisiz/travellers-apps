@@ -1,0 +1,43 @@
+<p class="visit-summary__where" data-testid="visit-summary-where">
+  {{
+    'visit-summary-where'
+      | transloco
+        : { restaurant: summary().restaurantName, table: summary().tableLabel }
+  }}
+</p>
+
+@if (isEmpty()) {
+  <p class="visit-summary__note" data-testid="visit-summary-empty">
+    {{ 'visit-summary-empty' | transloco }}
+  </p>
+} @else {
+  <ul class="visit-summary__lines">
+    @for (line of summary().lines; track $index) {
+      <li class="visit-summary__line" data-testid="visit-summary-line">
+        <span>
+          {{ line.quantity }} &times; {{ lineName(line) }}
+          @if (line.extras?.length) {
+            <span class="visit-summary__extras">{{ lineExtras(line) }}</span>
+          }
+        </span>
+        <span>{{ price(line.lineTotal) }}</span>
+      </li>
+    }
+  </ul>
+
+  <p class="visit-summary__total" data-testid="visit-summary-total">
+    {{ 'visit-summary-total' | transloco: { total: price(summary().total) } }}
+  </p>
+}
+
+<!--
+  Never a receipt (`ADR-0004`, `RD-TS-46`). The restaurant took the money and
+  issues whatever document the law requires; this says what was ordered. The
+  sentence belongs to the document rather than to either screen showing it,
+  which is why it is here and not duplicated in both.
+-->
+@if (showsFootnote()) {
+  <p class="visit-summary__note" data-testid="visit-summary-not-a-receipt">
+    {{ 'visit-summary-not-a-receipt' | transloco }}
+  </p>
+}

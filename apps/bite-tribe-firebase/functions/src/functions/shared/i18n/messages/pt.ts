@@ -7,6 +7,16 @@ export const pt: NotificationMessages = {
   'emailVerification.body':
     'Confirma o teu endereço de e-mail para que a tua conta BiteTribe se mantenha segura e possas receber mensagens importantes sobre ela.',
   'emailVerification.linkLabel': 'Confirmar endereço de e-mail',
+  'visitSummary.subject': 'A tua visita ao {{restaurant}}',
+  'visitSummary.heading': 'O que pediste',
+  'visitSummary.intro':
+    'Aqui está um resumo da tua visita ao {{restaurant}} em {{date}}.',
+  'visitSummary.total': 'Total',
+  'visitSummary.settled': 'O restaurante marcou isto como pago.',
+  'visitSummary.unsettled':
+    'O restaurante não registou nenhum pagamento para esta visita.',
+  'visitSummary.footnote':
+    'Este é um resumo do que foi pedido, não um recibo. O recibo é dado pelo restaurante.',
   'newBite.title': 'Novo Bite',
   'newBite.body': '{{author}} acabou de criar um novo Bite',
   'newBite.bodyWithName': '{{author}} acabou de criar um novo Bite: {{bite}}',

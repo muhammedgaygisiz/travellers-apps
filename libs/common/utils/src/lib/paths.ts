@@ -12,6 +12,14 @@ export const PATH = {
   ABOUT: 'about',
   FOLLOWERS: 'followers',
   MY_BUCKETLISTS: 'my-bucketlists',
+  /**
+   * The meals this account has finished (GitHub issue #1111).
+   *
+   * A detail route hangs under it, `my-visits/{visitId}`, and it is addressable
+   * on purpose: a guest who kept the link arrives without a list having been
+   * loaded, and the notification of issue #1112 needs somewhere to send them.
+   */
+  MY_VISITS: 'my-visits',
   RESTAURANT: 'restaurant',
   PLACE: 'place',
   MENU: 'menu',

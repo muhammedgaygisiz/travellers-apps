@@ -24,6 +24,7 @@ import {
   tableStatusOf,
   visitIdOf,
 } from './table-state';
+import { TABLE_ORDERS_COLLECTION } from './table-order';
 import {
   TABLE_SESSIONS_COLLECTION,
   isExpiredSession,
@@ -167,6 +168,22 @@ export interface TransitionTableStateRequest {
    * restarted mid-queue.
    */
   requestId?: unknown;
+  /**
+   * That the caller knows this visit's bill was never settled
+   * (GitHub issue #1111).
+   *
+   * Required to end a visit the restaurant has not been paid for, and refused
+   * as meaningless on any transition that ends nothing. A party that walks out
+   * without paying is a real evening and this callable must be able to record
+   * it - what it must not do is let the bill be forgotten by the same tap that
+   * clears a table at the end of service.
+   *
+   * A flag on the close rather than a separate "mark unpaid" callable, so the
+   * table's state machine stays one callable and the acknowledgement travels
+   * with the act it qualifies. The refusal names itself, so the sheet can ask
+   * and send the same transition again.
+   */
+  acknowledgeUnsettled?: unknown;
   /** Why, recorded on the audit entry. Optional free text. */
   reason?: unknown;
   /** A short note for the next person on shift, written onto the state. */
@@ -557,6 +574,53 @@ const assertInService = (
 };
 
 /**
+ * Refuses to end a visit nobody has been paid for, unless the caller says so
+ * (GitHub issue #1111).
+ *
+ * The business rule the Table Visit page has carried since issue #1095 and
+ * nothing implemented: closing a visit with an unsettled bill requires
+ * explicit staff confirmation. Until issue #1110 there was no settlement to
+ * check, so the rule had nothing to stand on; now there is.
+ *
+ * ## It asks only where there is a bill to forget
+ *
+ * **A visit that ordered nothing has no unsettled bill.** That is not a
+ * loophole, it is most of the product: a restaurant that has never turned on
+ * table ordering seats and clears tables all evening, and a confirmation on
+ * every one of those would be a dialog between a host and an empty table. The
+ * existing transition specs found this the moment the rule was first written
+ * without the clause - every one of them closes a visit nobody ordered on, and
+ * every one of them was refused.
+ *
+ * So the question is asked when the party ordered something and nobody
+ * recorded a payment for it, which is exactly when a bill can be forgotten.
+ *
+ * ## Why a refusal rather than a silent close
+ *
+ * `failed-precondition` carrying a reason of its own, because the caller is
+ * expected to answer it and send the same transition again with the
+ * acknowledgement on. A dialog is what turns a forgotten bill into a recorded
+ * one, and the backend's refusal is the backstop rather than the path - the
+ * same division `RD-TS-16` draws for a cancellation reason.
+ */
+const assertSettledOrAcknowledged = (
+  visit: DocumentData | undefined,
+  hasBill: boolean,
+  acknowledged: boolean,
+  tableId: string,
+): void => {
+  if (!hasBill || visit?.['paymentStatus'] === 'settled' || acknowledged) {
+    return;
+  }
+
+  throw new HttpsError(
+    'failed-precondition',
+    `The bill for table ${tableId} has not been recorded as paid. Confirm that the visit should be closed unsettled.`,
+    { reason: 'unsettledBill' },
+  );
+};
+
+/**
  * Brings the guests' sessions into line with the visit this transition opens or
  * ends (GitHub issue #1101).
  *
@@ -696,6 +760,10 @@ export const transitionTableStateHandler = async (
   const guestCount = parseGuestCount(request.data?.guestCount);
   const visitOutcome = parseVisitOutcome(request.data?.visitOutcome);
   const requestId = parseRequestId(request.data?.requestId);
+  // A flag rather than a parsed value: anything other than a literal `true` is
+  // the absence of an acknowledgement, and a caller that sends `"yes"` has not
+  // confirmed anything a member of staff was asked.
+  const acknowledgeUnsettled = request.data?.acknowledgeUnsettled === true;
   const reason = parseOptionalText(request.data?.reason, 'reason');
   const note = parseOptionalText(request.data?.note, 'note');
 
@@ -813,6 +881,32 @@ export const transitionTableStateHandler = async (
 
     if (ending) {
       assertEndsByTurningOver(to);
+
+      // Both read inside the transaction, so a settlement or an order landing
+      // between the sheet asking and the host answering is seen: the
+      // acknowledgement the dialog collected is then unnecessary rather than
+      // wrong, and the close goes through either way.
+      //
+      // The orders are read whole rather than counted by query. An open
+      // visit's orders are bounded by what one party can eat, and a
+      // `where` on the status would need an index for a read that is already
+      // small - the same trade `readTableVisitBill` makes.
+      const [closing, ordered] = await Promise.all([
+        transaction.get(visits.doc(carried)),
+        transaction.get(
+          visits.doc(carried).collection(TABLE_ORDERS_COLLECTION),
+        ),
+      ]);
+      const hasBill = ordered.docs.some(
+        (order) => order.data()['status'] !== 'cancelled',
+      );
+
+      assertSettledOrAcknowledged(
+        closing.data(),
+        hasBill,
+        acknowledgeUnsettled,
+        tableId,
+      );
     }
 
     const at = now.getTime();

@@ -1,0 +1,56 @@
+/*
+ * Every meal this account keeps (GitHub issue #1111).
+ *
+ * A row is a button rather than an item with a link, because the whole row is
+ * the target: somebody scrolling a list of evenings on a phone is aiming with
+ * a thumb, and a tap zone the width of the restaurant's name would be a list
+ * that misses.
+ */
+.my-visits__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.my-visits__row {
+  align-items: baseline;
+  background: var(--ion-color-step-50, #f7f7f7);
+  border: none;
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.25rem 1rem;
+  grid-template-columns: 1fr auto;
+  padding: 0.75rem 1rem;
+  text-align: start;
+  width: 100%;
+}
+
+.my-visits__where {
+  font-weight: 600;
+}
+
+.my-visits__when {
+  color: var(--ion-color-medium);
+  font-size: 0.85rem;
+  grid-column: 1;
+}
+
+.my-visits__total {
+  font-weight: 700;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.my-visits__note {
+  color: var(--ion-color-medium);
+}
+
+.my-visits__state {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}

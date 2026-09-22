@@ -1,0 +1,57 @@
+/*
+ * What a guest ate (GitHub issue #1111).
+ *
+ * The rows are the bill's rows from issue #1110, restated here rather than
+ * imported: this library is what both screens now read them from, so the
+ * definition moved rather than being copied - the table order screen deleted
+ * its own when it started using this component.
+ *
+ * A bill on a phone held at a restaurant table is read at arm's length in poor
+ * light, so the rows are two spans that wrap rather than columns that collapse.
+ */
+.visit-summary__where {
+  color: var(--ion-color-medium);
+  margin: 0 0 0.5rem;
+}
+
+.visit-summary__lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.visit-summary__line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.visit-summary__extras {
+  color: var(--ion-color-medium);
+  display: block;
+  font-size: 0.85rem;
+  margin: 0.1rem 0 0;
+}
+
+/*
+ * Heavier than anything above it, because this is the number somebody is about
+ * to hand over money for.
+ */
+.visit-summary__total {
+  border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0.75rem 0 0;
+  padding-top: 0.5rem;
+  text-align: end;
+}
+
+.visit-summary__note {
+  color: var(--ion-color-medium);
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0;
+}

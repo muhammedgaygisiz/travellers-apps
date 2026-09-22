@@ -7,6 +7,16 @@ export const th: NotificationMessages = {
   'emailVerification.body':
     'โปรดยืนยันที่อยู่อีเมลของคุณ เพื่อให้บัญชี BiteTribe ของคุณปลอดภัยและคุณได้รับข้อความสำคัญเกี่ยวกับบัญชี',
   'emailVerification.linkLabel': 'ยืนยันที่อยู่อีเมล',
+  'visitSummary.subject': 'การมาเยือน {{restaurant}} ของคุณ',
+  'visitSummary.heading': 'สิ่งที่คุณสั่ง',
+  'visitSummary.intro':
+    'นี่คือสรุปการมาเยือน {{restaurant}} ของคุณเมื่อ {{date}}',
+  'visitSummary.total': 'ยอดรวม',
+  'visitSummary.settled': 'ร้านอาหารทำเครื่องหมายว่าชำระแล้ว',
+  'visitSummary.unsettled':
+    'ร้านอาหารไม่ได้บันทึกการชำระเงินสำหรับการมาเยือนครั้งนี้',
+  'visitSummary.footnote':
+    'นี่เป็นสรุปรายการที่สั่ง ไม่ใช่ใบเสร็จ ใบเสร็จของคุณออกโดยร้านอาหาร',
   'newBite.title': 'Bite ใหม่',
   'newBite.body': '{{author}} เพิ่งสร้าง Bite ใหม่',
   'newBite.bodyWithName': '{{author}} เพิ่งสร้าง Bite ใหม่: {{bite}}',

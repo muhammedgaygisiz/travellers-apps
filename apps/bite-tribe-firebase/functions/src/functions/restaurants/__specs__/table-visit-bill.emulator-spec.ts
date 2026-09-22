@@ -496,6 +496,10 @@ describe('the visit bill', () => {
           tableId: TABLE_12,
           status: 'cleaning',
           expectedStatus: 'ordering',
+          // The party ordered and nobody recorded a payment, so the close asks
+          // (issue #1111). What is being tested here is the bill after a
+          // close, not the confirmation, so this one is given.
+          acknowledgeUnsettled: true,
         }),
       );
 

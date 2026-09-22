@@ -56,7 +56,8 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 - The guest requests assistance or the bill. Implemented, issue [#1106].
 - The guest asks for the bill, sees what the whole table owes, settles it with the restaurant, and staff record that it was paid. Implemented, issues [#1106] and [#1110]. BiteTribe takes no payment of its own ([ADR-0004 Table Payment Model](../decisions/adr-0004-table-payment-model.md), `RD-TS-45`); what staff write down is a record of what happened at the table.
 - The guest sees the party's bill and their own, and the party's names nobody. Implemented, issue [#1110] (`RD-TS-47`). The close confirmation on an unsettled bill is not built; issue [#1111].
-- The guest sees a visit summary listing what the table ordered, and can have it emailed. Not built; issue [#1073], stage 4. It is a summary and never a receipt (`RD-TS-46`).
+- The guest sees a visit summary listing what the table ordered, and can have it emailed. Implemented, issue [#1111]. It is a summary and never a receipt (`RD-TS-46`); the address is used for one send and stored nowhere, and a member keeps the summary permanently while an unregistered guest keeps it until their session goes idle.
+- Closing a visit whose bill nobody recorded asks staff to confirm, and only where the party ordered something. Implemented, issue [#1111] (`RD-TS-50`).
 - The guest selects a dish and creates a Bite prefilled with restaurant, dish, price, and currency, adding only a photo, rating, and comment. Not built; issue [#1073], stage 4. `OrderLineSnapshot` already records the checked price this would read.
 
 ## Validation On Every Scan
@@ -931,6 +932,7 @@ guest's phone is retrying.
 - Issue [#1087] - printable table QR sheets, which fixed the scan URL this use case has to serve
 - Issue [#1073] - Visit summary, bill delivery and Bite creation from orders, with six child issues
 - Issue [#1110] - the party's bill and the settlement record, which gave the guest the one read `RD-TS-12` had deferred and the restaurant a place to write down that it was paid. The bill is a callable rather than a widened rule, so a guest's phone still cannot list the visit
+- Issue [#1111] - the visit summary, which gave the meal somewhere to live after the table was cleared: one document per guest under their own account, written by a trigger rather than by the close, optionally mailed once, and a confirmation on a close nobody was paid for
 - Issue [#345] - Kavi wants to offer a QR code at the table to order digitally
 - Issue [#370] - reading a menu without an account, and the code a restaurant prints for it. Closed as completed, delivering issue [#371]. Owned by [UC - View Restaurant Menus](uc-view-restaurant-menus.md), not by this page
 - Issue [#344] - orderable bites, JustEat-like, a different fulfilment model and out of scope

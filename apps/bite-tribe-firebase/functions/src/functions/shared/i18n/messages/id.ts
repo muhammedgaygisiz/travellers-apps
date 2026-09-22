@@ -7,6 +7,16 @@ export const id: NotificationMessages = {
   'emailVerification.body':
     'Verifikasi alamat emailmu agar akun BiteTribe kamu tetap aman dan kamu bisa menerima pesan penting tentang akunmu.',
   'emailVerification.linkLabel': 'Verifikasi alamat email',
+  'visitSummary.subject': 'Kunjungan Anda ke {{restaurant}}',
+  'visitSummary.heading': 'Yang Anda pesan',
+  'visitSummary.intro':
+    'Berikut ringkasan kunjungan Anda ke {{restaurant}} pada {{date}}.',
+  'visitSummary.total': 'Total',
+  'visitSummary.settled': 'Restoran menandai ini sebagai lunas.',
+  'visitSummary.unsettled':
+    'Restoran tidak mencatat pembayaran untuk kunjungan ini.',
+  'visitSummary.footnote':
+    'Ini ringkasan pesanan, bukan bukti pembayaran. Struk Anda diberikan oleh restoran.',
   'newBite.title': 'Bite baru',
   'newBite.body': '{{author}} baru saja membuat Bite baru',
   'newBite.bodyWithName': '{{author}} baru saja membuat Bite baru: {{bite}}',

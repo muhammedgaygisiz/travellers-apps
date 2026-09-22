@@ -20,6 +20,7 @@ import {
 import {
   TableAssistanceQueueService,
   TableOrderQueueService,
+  TableSettlementService,
   TableStateDataAccessService,
   TableTransitionFailure,
   TableTransitionQueueService,
@@ -31,6 +32,7 @@ import {
   Room,
   TableState,
   TableStatus,
+  TableVisitSettlementMethod,
 } from 'model';
 import { EMPTY, switchMap } from 'rxjs';
 import {
@@ -201,6 +203,16 @@ export interface TableDetail {
    * circle competing with the status glyph.
    */
   pending?: boolean;
+  /**
+   * The open visit at this table, where there is one (GitHub issue #1110).
+   *
+   * Read off `TableState.visitId`, which is already the only pointer at an
+   * open visit and is already on the document this detail is built from. It is
+   * here so the sheet can record that the party paid without a second read:
+   * settling names the visit, not the table, because a party walked to another
+   * table takes its bill with it.
+   */
+  visitId?: string;
 }
 
 /**
@@ -252,6 +264,7 @@ export class TablePlanService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly transloco = inject(TranslocoService);
   private readonly toast = inject(ToastService);
+  private readonly settlement = inject(TableSettlementService);
   private readonly analytics = inject(AnalyticsService);
 
   readonly restaurantId = this.storeService.restaurantIdFromUrl;
@@ -810,6 +823,7 @@ export class TablePlanService {
       ...(duration === undefined ? {} : { duration }),
       ...(state?.note === undefined ? {} : { note: state.note }),
       ...(this.queued().has(table.id) ? { pending: true } : {}),
+      ...(state?.visitId === undefined ? {} : { visitId: state.visitId }),
     };
   }
 
@@ -1045,6 +1059,63 @@ export class TablePlanService {
     }
 
     await this.transition(target.table.id, target.status, to, guests);
+  }
+
+  /**
+   * Records that the party at the open sheet's table paid
+   * (GitHub issue #1110).
+   *
+   * Named after the **visit** and not the table, because a party walked to
+   * another table takes its bill with it - the same reason an order hangs from
+   * the visit and a call for a waiter hangs from the table (`RD-TS-19`).
+   *
+   * The sheet closes first, exactly as `applyAction` closes it: the press is
+   * the decision, and a sheet that stayed open over a round trip invites a
+   * second press at a different method. What it does **not** do is move the
+   * table or end the visit - a bill settled while the party is still on their
+   * coffee is ordinary, and freeing the table here would seat the next party
+   * on top of them. Closing stays the host's, through the buttons above.
+   *
+   * Nothing is drawn optimistically (`RD-TS-15`): this is pressed while
+   * somebody stands at the table with a card machine, the answer is one round
+   * trip, and a settlement that appeared to land and then rolled back would
+   * have staff walk away from a bill nobody recorded.
+   */
+  async settleVisit(method: TableVisitSettlementMethod): Promise<void> {
+    const target = this.actionTarget();
+    const restaurantId = this.restaurantId();
+
+    this.closeActions();
+
+    if (!target?.visitId || !restaurantId) {
+      return;
+    }
+
+    const result = await this.settlement.settle(
+      restaurantId,
+      target.visitId,
+      method,
+    );
+
+    if (!result) {
+      await this.toast.present({
+        messageKey: 'table-settle-failed',
+        outcome: 'failure',
+      });
+
+      return;
+    }
+
+    // A second press is not a conflict (`RD-TS-22`), and is not silence
+    // either: the staff member who pressed it is told the bill was already
+    // recorded rather than being left to wonder whether their tap registered.
+    await this.toast.present({
+      messageKey: result.changed
+        ? 'table-settle-recorded'
+        : 'table-settle-already',
+      params: { label: this.labelOf(target.table.id) },
+      outcome: 'success',
+    });
   }
 
   /**

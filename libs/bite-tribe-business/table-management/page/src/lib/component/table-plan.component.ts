@@ -29,6 +29,7 @@ import {
 } from 'bite-tribe-business/floor-plan-ui';
 import { PageComponent } from 'common/ui/page';
 import { Room, TableStatus } from 'model';
+import type { TableVisitSettlementMethod } from 'model';
 import { TableAction, TableActionRequest } from '../integration/table-actions';
 import {
   TableDetail,
@@ -174,6 +175,9 @@ export class TablePlanComponent {
   readonly activateTable = output<string>();
   readonly clearSelection = output<void>();
   readonly actionPicked = output<TableActionRequest>();
+
+  /** How the party at the open sheet's table paid (GitHub issue #1110). */
+  readonly settlementPicked = output<TableVisitSettlementMethod>();
   readonly actionsDismissed = output<void>();
   readonly bulkModeToggled = output<void>();
   readonly selectAllRequested = output<void>();

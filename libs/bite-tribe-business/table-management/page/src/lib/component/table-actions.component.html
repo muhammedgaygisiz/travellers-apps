@@ -158,4 +158,38 @@
       </li>
     }
   </ul>
+
+  <!--
+    Recording that the party paid (GitHub issue #1110).
+
+    Below the transitions and separated from them, because it is a different
+    kind of action: everything above moves the table through the matrix, and
+    this writes a fact about the visit. It is a *record* and not a payment -
+    BiteTribe never took the money (`ADR-0004`), the card machine did.
+
+    Three buttons rather than a picker, for the reason the actions above are
+    whole actions rather than a menu: nobody during a service navigates.
+  -->
+  @if (canSettle()) {
+    <div class="table-actions__settlement">
+      <h3 class="table-actions__settlement-heading">
+        {{ 'table-settle-heading' | transloco }}
+      </h3>
+
+      <ul class="table-actions__list">
+        @for (method of settlementMethods; track method) {
+          <li>
+            <button
+              type="button"
+              class="table-actions__action table-actions__action--settle"
+              [attr.data-testid]="'table-settle-' + method"
+              (click)="settle(method)"
+            >
+              {{ settlementKey(method) | transloco }}
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
 </section>

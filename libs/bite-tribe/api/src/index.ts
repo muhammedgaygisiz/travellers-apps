@@ -5,3 +5,4 @@ export * from './lib/utils/local-image-file';
 export * from './lib/table-session-api/table-session-api.service';
 export * from './lib/table-order-api/table-order-api.service';
 export * from './lib/table-assistance-api/table-assistance-api.service';
+export * from './lib/table-visit-bill-api/table-visit-bill-api.service';

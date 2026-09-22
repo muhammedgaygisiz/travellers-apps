@@ -211,3 +211,31 @@
   outline: 2px solid var(--ion-color-primary, #3880ff);
   outline-offset: 2px;
 }
+
+/*
+ * Recording that the party paid (GitHub issue #1110).
+ *
+ * Fenced off from the transitions above by a rule and a heading, because the
+ * two are different kinds of action and a staff member reaching for "free the
+ * table" must not land on "paid, cash" by muscle memory. No status colour on
+ * these: the mark vocabulary above belongs to the table's state machine, and
+ * a settlement is not a state the table is in.
+ */
+.table-actions__settlement {
+  border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.table-actions__settlement-heading {
+  color: var(--ion-color-medium);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+}
+
+.table-actions__action--settle {
+  --mark-colour: var(--ion-color-success);
+}

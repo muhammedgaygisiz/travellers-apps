@@ -25,6 +25,7 @@ import type {
 import { TableAssistanceService } from './table-assistance.service';
 import { TableCartService, type TableCartLine } from './table-cart.service';
 import { TableOrderHistoryService } from './table-order-history.service';
+import { TableVisitBillService } from './table-visit-bill.service';
 import {
   TableOrderSubmissionService,
   type TableOrderOutcome,
@@ -206,6 +207,16 @@ export class TableOrderService {
    */
   readonly assistance = inject(TableAssistanceService);
 
+  /**
+   * What the whole table owes (GitHub issue #1110).
+   *
+   * Pointed at the table from here for the reason the two above are, even
+   * though it attaches no listener: this is where the restaurant and the table
+   * are first known, and a screen handing them over would be a second place
+   * the trio could be started from with different arguments.
+   */
+  readonly bill = inject(TableVisitBillService);
+
   private readonly view = signal<TableOrderView>({ kind: 'loading' });
   private readonly busy = signal(false);
   private readonly refusal = signal<TableOrderRefusal | undefined>(undefined);
@@ -345,6 +356,7 @@ export class TableOrderService {
     // their uid are enough to find all three.
     this.history.watch(restaurantId, scan.table.id);
     this.assistance.watch(restaurantId, scan.table.id);
+    this.bill.watch(restaurantId, scan.table.id);
 
     const state: Extract<TableOrderView, { kind: 'ordering' }> = {
       kind: 'ordering',
@@ -541,6 +553,12 @@ export class TableOrderService {
     // - and an order proves they have one now. A repeat call on the same table
     // and uid does nothing.
     this.history.watch(state.context.restaurant.id, state.context.table.id);
+
+    // The bill the guest may already be looking at is now wrong by exactly the
+    // order that was just sent, and it cannot learn that on its own - there is
+    // no listener behind it (`RD-TS-12`). Dropping it makes the next open a
+    // fetch rather than a stale total shown to somebody about to pay.
+    this.bill.clear();
 
     this.view.set({
       kind: 'placed',

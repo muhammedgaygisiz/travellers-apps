@@ -203,3 +203,60 @@
 .assistance-button {
   margin-inline: 0;
 }
+
+/*
+ * What the whole table owes (GitHub issue #1110).
+ *
+ * The same row shape as an order's lines rather than a table with columns: a
+ * bill on a phone held at a restaurant table is read at arm's length in poor
+ * light, and a two-column row that wraps is worse than one that never had
+ * columns to lose.
+ */
+.bill-lines {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bill-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.bill-line-extras {
+  color: var(--ion-color-medium);
+  display: block;
+  font-size: 0.85rem;
+  margin: 0.1rem 0 0;
+}
+
+/*
+ * Heavier than the per-guest running total above it, because this is the
+ * number somebody is about to hand over money for and the one beside it is
+ * not.
+ */
+.bill-total {
+  border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0.75rem 0 0;
+  padding-top: 0.5rem;
+  text-align: end;
+}
+
+/*
+ * The restaurant saying it was paid - not a payment confirmation, because
+ * BiteTribe never took the money (`ADR-0004`). Success-coloured because it is
+ * good news at the table, and deliberately no tick-in-a-circle: that is the
+ * visual vocabulary of a transaction this product did not perform.
+ */
+.bill-settled {
+  color: var(--ion-color-success);
+  font-weight: 600;
+  margin: 0.5rem 0 0;
+}

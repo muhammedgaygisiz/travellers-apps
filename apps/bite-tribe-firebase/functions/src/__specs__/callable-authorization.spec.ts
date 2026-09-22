@@ -125,6 +125,14 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // and the callable decides for itself which restaurant each caller reaches.
   acknowledgeTableAssistance: 'staffAuthority',
 
+  // Recording that the party paid the restaurant (issue #1110). The same door
+  // as seating a table and moving an order, deliberately: operating a
+  // restaurant during service is one permission, and a second list of who may
+  // take payment would be free to disagree with who may close the visit it
+  // belongs to. It writes a record rather than moving money - BiteTribe is
+  // never in the money flow at a table (`ADR-0004`).
+  settleTableVisit: 'staffAuthority',
+
   // Clearing a row saying a table's code is being worked on (issue #1107).
   // The same door again: the rows sit on the screens the floor is already
   // being read from, and a second list of who may clear one would be free to
@@ -180,6 +188,15 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // two kinds, and everything else - the visit, the table the marker is drawn
   // on, who asked - comes off the session named after the caller's own uid.
   requestTableAssistance: 'anySession',
+
+  // A guest reading what their table owes (issue #1110). `anySession` for the
+  // reason the request above is: everything it answers with - the visit, the
+  // orders, the table the party is at now - comes off the session named after
+  // the caller's own uid, and an anonymous account is what most guests hold.
+  // It is the widest *read* a guest gets, and deliberately still not a
+  // Firestore query: `RD-TS-12` keeps the visit unlistable, and this proves
+  // the membership the rules cannot.
+  readTableVisitBill: 'anySession',
 
   // A guest who registered during the meal, asking for the `/users` document a
   // member has (issue #1657). `anySession` and not `member`, which looks the
@@ -437,6 +454,7 @@ describe('callable authorization', () => {
         .sort(),
     ).toEqual([
       'leaveTableSession',
+      'readTableVisitBill',
       'requestTableAssistance',
       'startTableSession',
       'submitTableOrder',

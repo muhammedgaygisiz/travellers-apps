@@ -59,7 +59,15 @@ const listIn = (file: string, name: string): string[] => {
     throw new Error(`No ${name} declaration found in ${file}`);
   }
 
-  return [...declaration[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
+  // Comments are stripped before the members are read, because a doc comment
+  // on a member is ordinary here and an apostrophe in one - "the restaurant's
+  // timeout" - would otherwise be read as the start of a quoted member and
+  // fail the parity of two files that agree. Found writing issue #1110.
+  const members = declaration[1]
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '');
+
+  return [...members.matchAll(/'([^']+)'/g)].map((match) => match[1]);
 };
 
 /** The value of a `const NAME: Type = 'value'` declaration. */
@@ -74,7 +82,27 @@ const valueIn = (file: string, name: string): string => {
   return declaration[1];
 };
 
+const FUNCTIONS_TABLE_VISIT_BILL = join(
+  __dirname,
+  '..',
+  'functions',
+  'restaurants',
+  'table-visit-bill.ts',
+);
+
+const LIBRARY_TABLE_VISIT_BILL = join(
+  WORKSPACE_ROOT,
+  'libs',
+  'bite-tribe-common',
+  'model',
+  'src',
+  'lib',
+  'table-visit-bill.ts',
+);
+
 const BOTH = [FUNCTIONS_TABLE_VISIT, LIBRARY_TABLE_VISIT];
+
+const BOTH_BILLS = [FUNCTIONS_TABLE_VISIT_BILL, LIBRARY_TABLE_VISIT_BILL];
 
 describe('table visit parity', () => {
   it('finds a status list in both files', () => {
@@ -140,6 +168,83 @@ describe('table visit parity', () => {
   it('stores visits where the rules and the model agree', () => {
     expect(valueIn(FUNCTIONS_TABLE_VISIT, 'TABLE_VISITS_COLLECTION')).toBe(
       'visits',
+    );
+  });
+
+  /**
+   * The payment status (GitHub issue #1110). A backend that wrote a word the
+   * guest's screen does not know would show a settled table an empty status
+   * line, and one that wrote a word the *staff* screen does not know would
+   * leave a bill looking unpaid after somebody took the money.
+   */
+  it('agrees on the payment statuses, in the same order', () => {
+    expect(
+      listIn(FUNCTIONS_TABLE_VISIT, 'TABLE_VISIT_PAYMENT_STATUSES'),
+    ).toEqual(listIn(LIBRARY_TABLE_VISIT, 'TABLE_VISIT_PAYMENT_STATUSES'));
+  });
+
+  /**
+   * Two and not five. `ADR-0004` decided BiteTribe is never in the money flow
+   * at a table, so a copy that reintroduced `pending`, `failed` or `refunded`
+   * would be describing a payment provider this product does not have.
+   */
+  it('carries only the two statuses a restaurant-settled bill can hold', () => {
+    BOTH.forEach((file) =>
+      expect(listIn(file, 'TABLE_VISIT_PAYMENT_STATUSES')).toEqual([
+        'unsettled',
+        'settled',
+      ]),
+    );
+  });
+
+  /**
+   * The settlement method is rendered by the staff sheet that writes it and by
+   * the guest's bill that reads it back, and the backend refuses anything not
+   * on this list - so a method one side offers and the other rejects is a
+   * button that always fails.
+   */
+  it('agrees on the settlement methods, in the same order', () => {
+    expect(
+      listIn(FUNCTIONS_TABLE_VISIT, 'TABLE_VISIT_SETTLEMENT_METHODS'),
+    ).toEqual(listIn(LIBRARY_TABLE_VISIT, 'TABLE_VISIT_SETTLEMENT_METHODS'));
+  });
+
+  it('offers cash, card and the honest third option', () => {
+    BOTH.forEach((file) =>
+      expect(listIn(file, 'TABLE_VISIT_SETTLEMENT_METHODS')).toEqual([
+        'cash',
+        'card',
+        'other',
+      ]),
+    );
+  });
+
+  /**
+   * The bill's refusal reasons. Each one is a Transloco key on the guest's
+   * screen, so a reason this backend answers with and the library does not
+   * declare is a blank line where a guest expected to be told why.
+   */
+  it('agrees on why a bill cannot be read', () => {
+    expect(
+      listIn(FUNCTIONS_TABLE_VISIT_BILL, 'TABLE_VISIT_BILL_REFUSAL_REASONS'),
+    ).toEqual(
+      listIn(LIBRARY_TABLE_VISIT_BILL, 'TABLE_VISIT_BILL_REFUSAL_REASONS'),
+    );
+  });
+
+  /**
+   * And they are the assistance callable's four, deliberately: a guest whose
+   * session expired is told one sentence by the bill and by the screen beside
+   * it, because it is one fact about one session.
+   */
+  it('refuses a bill for the four reasons a party can fail', () => {
+    BOTH_BILLS.forEach((file) =>
+      expect(listIn(file, 'TABLE_VISIT_BILL_REFUSAL_REASONS')).toEqual([
+        'sessionNotFound',
+        'sessionNotActive',
+        'sessionExpired',
+        'visitClosed',
+      ]),
     );
   });
 });

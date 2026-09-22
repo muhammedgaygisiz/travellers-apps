@@ -66,6 +66,13 @@ describe(TableActionsComponent.name, () => {
     fixture.detectChanges();
   };
 
+  /** The same sheet, over a table that has a party and therefore a bill. */
+  const openWithVisit = (status: TableStatus): void => {
+    ref.setInput('table', { ...detail(status), visitId: 'visit-1' });
+    ref.setInput('actions', tableActions(status));
+    fixture.detectChanges();
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TableActionsComponent],
@@ -201,6 +208,62 @@ describe(TableActionsComponent.name, () => {
       click('table-action-cleaning');
 
       expect(picked).toEqual([{ to: 'cleaning' }]);
+    });
+  });
+
+  /**
+   * Recording that the party paid (GitHub issue #1110).
+   *
+   * What the sheet owns here is *whether* to offer it and *what was picked*.
+   * It records nothing itself: BiteTribe was never in the money flow
+   * (`ADR-0004`), and the write is a callable the container calls.
+   */
+  describe('recording a payment', () => {
+    it('is not offered on a table with no party', () => {
+      open('available');
+
+      expect(query('table-settle-cash')).toBeNull();
+    });
+
+    /**
+     * The visit and not the status decides it. A table can be `occupied`
+     * without this sheet knowing the visit - the detail is built from the
+     * state document, and a state with no `visitId` has no bill to settle.
+     */
+    it('is not offered where the detail names no visit', () => {
+      open('occupied');
+
+      expect(query('table-settle-card')).toBeNull();
+    });
+
+    it('offers all three methods where there is an open visit', () => {
+      openWithVisit('awaitingPayment');
+
+      expect(query('table-settle-cash')).not.toBeNull();
+      expect(query('table-settle-card')).not.toBeNull();
+      expect(query('table-settle-other')).not.toBeNull();
+    });
+
+    it('says which method was picked', () => {
+      const methods: string[] = [];
+      component.settlementPicked.subscribe((method) => methods.push(method));
+
+      openWithVisit('awaitingPayment');
+      click('table-settle-card');
+
+      expect(methods).toEqual(['card']);
+    });
+
+    /**
+     * A separate output from `actionPicked`, and the assertion is worth its
+     * own test: the two go to two different callables, and a settlement that
+     * arrived as a table transition would be a request the backend refuses.
+     */
+    it('does not report a settlement as a table action', () => {
+      openWithVisit('awaitingPayment');
+      click('table-settle-cash');
+
+      expect(picked).toEqual([]);
     });
   });
 

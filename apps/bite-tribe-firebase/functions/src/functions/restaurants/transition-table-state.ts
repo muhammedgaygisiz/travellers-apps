@@ -664,8 +664,24 @@ const syncTableSessions = async (
  * the conflict comes from - not from a timestamp comparison, and not from a
  * lock the caller has to hold.
  */
+/**
+ * The clock, injectable for the reason every other table callable makes it so.
+ *
+ * `submitTableOrder`, `startTableSession` and `requestTableAssistance` all end
+ * their signature with this parameter, and this one did not - which made the
+ * emulator specs of issue #1681 fail with the passage of real time rather
+ * than with a change to the code. A spec pins a date to start a session and
+ * then seats the table; the seating stamped `Date.now()`, so once real time had
+ * moved further past the pinned date than `sessionIdleTimeoutMinutes`, every
+ * pending session expired at the moment of seating instead of activating. The
+ * suite went red on 16 September 2026 and nothing noticed, because nothing in
+ * CI ran it.
+ *
+ * Production passes nothing and gets the real clock, which is what it had.
+ */
 export const transitionTableStateHandler = async (
   request: CallableRequest<TransitionTableStateRequest>,
+  now: Date = new Date(),
 ): Promise<TransitionTableStateResult> => {
   const restaurantId = parseRequiredString(
     request.data?.restaurantId,
@@ -799,7 +815,7 @@ export const transitionTableStateHandler = async (
       assertEndsByTurningOver(to);
     }
 
-    const at = Date.now();
+    const at = now.getTime();
     const openedVisitRef = opening ? visits.doc() : undefined;
     const visitId = openedVisitRef?.id ?? carried;
     const visitStatus = visitStatusAfter(visitId, ending, visitOutcome);
@@ -887,5 +903,5 @@ export const transitionTableStateHandler = async (
  * a table and cannot touch the floor plan, the QR codes or the staff list.
  */
 export const transitionTableState = onAppCheck<TransitionTableStateRequest>(
-  transitionTableStateHandler,
+  (request) => transitionTableStateHandler(request),
 );

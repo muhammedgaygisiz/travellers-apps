@@ -125,80 +125,122 @@ const publicMenu = (currency: string | undefined): PublicMenuResult =>
     menu: { ...menu, currency },
   }) as unknown as PublicMenuResult;
 
+/**
+ * The scan, at a table of this story's own.
+ *
+ * The table id carries the story id, which is what keeps one story's cart out
+ * of the next one's screenshot. `TableCartService` addresses the phone's
+ * storage as `table-cart:{restaurantId}:{tableId}` and restores from it on
+ * init, so every story sharing one table shares one cart - and the `loaders`
+ * clear below cannot fix that on its own, because `Preferences.set` resolves
+ * *after* the story that wrote it has been captured and the next story's
+ * loader has already run. The late write lands on a slate that was wiped a
+ * moment too early, and the story after it reads a cart it never built.
+ *
+ * That is what failed in CI on 21 September 2026 and passed on every local
+ * run: `Pages/Table Order/Ordering` photographed a Margherita left behind by
+ * another story. Giving each story its own address makes the race unreachable
+ * rather than unlikely - a late write lands under a key nothing else reads.
+ */
 const resolved = (
   ordering: TableScanContext['ordering'] = { available: true },
-): TableScanResult => ({ ok: true, ...context, ordering });
+  tableId: string = context.table.id,
+): TableScanResult => ({
+  ok: true,
+  ...context,
+  table: { ...context.table, id: tableId },
+  ordering,
+});
 
 const pending = <T>(): Promise<T> => new Promise<T>(() => undefined);
 
 interface Answers {
-  scan?: () => Promise<TableScanResult | TableSessionCallError>;
+  /**
+   * The scan answer, handed the table this story sits at.
+   *
+   * A story that resolves its own scan still has to name that table, or it
+   * falls back to the shared one and takes the leaked cart with it - see
+   * {@link resolved}.
+   */
+  scan?: (tableId: string) => Promise<TableScanResult | TableSessionCallError>;
   menu?: () => Promise<PublicMenuResult | undefined>;
   submit?: () => Promise<SubmitTableOrderResult | TableSessionCallError>;
 }
 
-const order = (answers: Answers = {}): Decorator =>
-  applicationConfig({
-    providers: [
-      provideIonicAngular(getIonicConfig()),
-      provideRouter([]),
-      { provide: APP_TITLE, useValue: 'Bite Tribe' },
-      {
-        provide: ActivatedRoute,
-        useValue: {
-          snapshot: { paramMap: { get: (): string => context.token } },
+/**
+ * Everything the screen needs, wired to a table only this story sits at.
+ *
+ * A decorator of its own rather than `applicationConfig` directly, because the
+ * providers have to see the Storybook context: `ctx.id` is what makes the
+ * table unique, and that is the whole of the fix described on {@link resolved}.
+ */
+const order =
+  (answers: Answers = {}): Decorator =>
+  (storyFn, ctx) =>
+    applicationConfig({
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        provideRouter([]),
+        { provide: APP_TITLE, useValue: 'Bite Tribe' },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { paramMap: { get: (): string => context.token } },
+          },
         },
-      },
-      {
-        provide: TableSessionApiService,
-        useValue: {
-          resolveToken:
-            answers.scan ??
-            ((): Promise<TableScanResult | TableSessionCallError> =>
-              Promise.resolve(resolved())),
-          session$: (): Observable<never> => EMPTY,
+        {
+          provide: TableSessionApiService,
+          useValue: {
+            resolveToken: (): Promise<
+              TableScanResult | TableSessionCallError
+            > =>
+              // The story's own table, so a cart written late by the story
+              // before it lands under a key nothing here reads.
+              answers.scan?.(ctx.id) ??
+              Promise.resolve(resolved(undefined, ctx.id)),
+            session$: (): Observable<never> => EMPTY,
+          },
         },
-      },
-      {
-        provide: BiteTribeApiService,
-        useValue: {
-          loadPublicMenu:
-            answers.menu ??
-            ((): Promise<PublicMenuResult | undefined> =>
-              Promise.resolve(publicMenu('EUR'))),
+        {
+          provide: BiteTribeApiService,
+          useValue: {
+            loadPublicMenu:
+              answers.menu ??
+              ((): Promise<PublicMenuResult | undefined> =>
+                Promise.resolve(publicMenu('EUR'))),
+          },
         },
-      },
-      {
-        provide: TableOrderApiService,
-        useValue: {
-          orders$: (): Observable<never> => EMPTY,
-          submit:
-            answers.submit ??
-            ((): Promise<SubmitTableOrderResult | TableSessionCallError> =>
-              pending()),
+        {
+          provide: TableOrderApiService,
+          useValue: {
+            orders$: (): Observable<never> => EMPTY,
+            submit:
+              answers.submit ??
+              ((): Promise<SubmitTableOrderResult | TableSessionCallError> =>
+                pending()),
+          },
         },
-      },
-      {
-        provide: TableAssistanceApiService,
-        useValue: {
-          request$: (): Observable<unknown> => of({}),
-          request: (): Promise<never> => pending(),
+        {
+          provide: TableAssistanceApiService,
+          useValue: {
+            request$: (): Observable<unknown> => of({}),
+            request: (): Promise<never> => pending(),
+          },
         },
-      },
-      // No uid, so the history listener returns before it subscribes: a guest
-      // who has not confirmed a table has ordered nothing to show.
-      {
-        provide: AuthService,
-        useValue: { getUser: (): undefined => undefined },
-      },
-      {
-        provide: NetworkStatusService,
-        useValue: {
-          status: (): { connected: boolean } => ({ connected: true }),
+        // No uid, so the history listener returns before it subscribes: a guest
+        // who has not confirmed a table has ordered nothing to show.
+        {
+          provide: AuthService,
+          useValue: { getUser: (): undefined => undefined },
         },
-      },
-    ],
-  });
+        {
+          provide: NetworkStatusService,
+          useValue: {
+            status: (): { connected: boolean } => ({ connected: true }),
+          },
+        },
+      ],
+    })(storyFn, ctx);
 
 /** Two frames, or a play function photographs the state before the click. */
 const settle = async (): Promise<void> => {
@@ -227,9 +269,13 @@ export default {
    * sequence that means the cart one story builds is still there for the next,
    * which put two lines under a blocked screen that should have had none.
    *
-   * Cleared before each story rather than given each story its own table:
-   * `Preferences` is `localStorage` on the web, so this is the same slate the
-   * first guest of the day gets.
+   * This clear is no longer what prevents that, and it was never enough on its
+   * own: `Preferences.set` resolves after the story that wrote it has been
+   * captured, so a late write lands on a slate wiped a moment too early. Each
+   * story now sits at a table of its own ({@link resolved}), which makes the
+   * race unreachable rather than unlikely. The clear stays because it is the
+   * same slate the first guest of the day gets, and a story that starts from
+   * one is a story that renders what it says it renders.
    */
   loaders: [
     async (): Promise<void> => {
@@ -275,7 +321,7 @@ const blockedByScan = (reason: TableScanRefusalReason): Story => ({
 const blockedByOrdering = (reason: TableOrderingUnavailableReason): Story => ({
   decorators: [
     order({
-      scan: async () =>
+      scan: async (tableId) =>
         resolved(
           reason === 'orderingPaused'
             ? {
@@ -284,6 +330,7 @@ const blockedByOrdering = (reason: TableOrderingUnavailableReason): Story => ({
                 pausedUntilTimestamp: Date.parse('2026-09-19T20:20:00Z'),
               }
             : { available: false, reason },
+          tableId,
         ),
     }),
   ],

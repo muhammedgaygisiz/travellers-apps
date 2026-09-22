@@ -25,6 +25,13 @@
         "command": "npm run test:rules"
       }
     },
+    "firebase-test-emulator": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/bite-tribe-firebase/functions",
+        "command": "npm run test:emulator"
+      }
+    },
     "firebase-build": {
       "executor": "nx:run-commands",
       "options": {

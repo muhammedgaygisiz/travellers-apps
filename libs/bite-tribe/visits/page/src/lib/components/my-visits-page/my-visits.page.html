@@ -1,0 +1,51 @@
+<ta-page
+  [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
+>
+  <ion-content class="ion-padding content-safe-padding-bottom">
+    <h1>{{ 'my-visits' | transloco }}</h1>
+
+    @if (loading()) {
+    <div class="my-visits__state" data-testid="my-visits-loading">
+      <ion-spinner name="crescent" />
+    </div>
+    } @else if (failed()) {
+    <p class="my-visits__note" data-testid="my-visits-failed">
+      {{ 'my-visits-failed' | transloco }}
+    </p>
+
+    <ion-button
+      expand="block"
+      fill="outline"
+      data-testid="my-visits-retry"
+      (click)="retry.emit()"
+    >
+      {{ 'my-visits-retry' | transloco }}
+    </ion-button>
+    } @else if (empty()) {
+    <!--
+        Almost every account, for now. It says what would put something here
+        rather than apologising for having nothing (issue #1111).
+      -->
+    <p class="my-visits__note" data-testid="my-visits-empty">
+      {{ 'my-visits-empty' | transloco }}
+    </p>
+    } @else {
+    <ul class="my-visits__list">
+      @for (summary of summaries(); track summary.id) {
+      <li>
+        <button
+          type="button"
+          class="my-visits__row"
+          data-testid="my-visits-row"
+          (click)="openVisit.emit(summary.id)"
+        >
+          <span class="my-visits__where">{{ summary.restaurantName }}</span>
+          <span class="my-visits__when">{{ day(summary) }}</span>
+          <span class="my-visits__total">{{ total(summary) }}</span>
+        </button>
+      </li>
+      }
+    </ul>
+    }
+  </ion-content>
+</ta-page>

@@ -53,6 +53,7 @@ import type {
   VisitSummaryEmailRefusalReason,
   VisitSummaryRefusalReason,
 } from 'model';
+import { VisitSummaryComponent } from 'visit-summary';
 import { MenuComponent } from '../components/menu/menu.component';
 import type { MenuItemSelection } from '../components/menu-item/menu-item.component';
 
@@ -114,6 +115,7 @@ const symbolOf = (code: string): string => {
     RouterLink,
     NgTemplateOutlet,
     MenuComponent,
+    VisitSummaryComponent,
   ],
   // Both, and at the component rather than at the root. A cart belongs to the
   // screen a guest is building it on: rooted, it would survive the guest
@@ -403,11 +405,6 @@ export class TableOrder implements OnInit {
     reason: VisitSummaryEmailRefusalReason,
   ): string {
     return VISIT_SUMMARY_EMAIL_REFUSAL_KEYS[reason];
-  }
-
-  /** One summary row's dish, with its variant where it has one. */
-  protected summaryLineName(line: TableVisitBillLine): string {
-    return this.billLineName(line);
   }
 
   ngOnInit(): void {

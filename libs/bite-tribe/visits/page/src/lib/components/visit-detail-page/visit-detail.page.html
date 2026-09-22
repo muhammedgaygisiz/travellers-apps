@@ -1,0 +1,31 @@
+<ta-page
+  [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
+>
+  <ion-content class="ion-padding content-safe-padding-bottom">
+    <h1>{{ 'visit-summary-heading' | transloco }}</h1>
+
+    @if (loading()) {
+    <div class="ion-text-center" data-testid="visit-detail-loading">
+      <ion-spinner name="crescent" />
+    </div>
+    } @else if (summary(); as meal) {
+    <bt-visit-summary [summary]="meal" />
+    } @else if (refusalKey(); as reason) {
+    <p data-testid="visit-detail-refusal">{{ reason | transloco }}</p>
+
+    <!--
+        Offered on every refusal, because the commonest one is `notFound` and
+        the commonest cause of that is a summary the trigger has not written
+        yet (issue #1111).
+      -->
+    <ion-button
+      expand="block"
+      fill="outline"
+      data-testid="visit-detail-retry"
+      (click)="retry.emit()"
+    >
+      {{ 'visit-summary-look-again' | transloco }}
+    </ion-button>
+    }
+  </ion-content>
+</ta-page>

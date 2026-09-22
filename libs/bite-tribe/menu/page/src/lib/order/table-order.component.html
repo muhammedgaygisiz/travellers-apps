@@ -364,59 +364,13 @@
             }
 
             @if (visitSummary.summary(); as meal) {
-              <p class="summary-where" data-testid="visit-summary-where">
-                {{
-                  'visit-summary-where'
-                    | transloco
-                      : {
-                          restaurant: meal.restaurantName,
-                          table: meal.tableLabel,
-                        }
-                }}
-              </p>
-
-              @if (visitSummary.isEmpty()) {
-                <p class="note" data-testid="visit-summary-empty">
-                  {{ 'visit-summary-empty' | transloco }}
-                </p>
-              } @else {
-                <ul class="bill-lines">
-                  @for (line of meal.lines; track $index) {
-                    <li class="bill-line" data-testid="visit-summary-line">
-                      <span>
-                        {{ line.quantity }} &times; {{ summaryLineName(line) }}
-                        @if (line.extras?.length) {
-                          <span class="bill-line-extras">
-                            {{ billLineExtras(line) }}
-                          </span>
-                        }
-                      </span>
-                      <span>
-                        {{ priceLabelIn(line.lineTotal, meal.currency) }}
-                      </span>
-                    </li>
-                  }
-                </ul>
-
-                <p class="bill-total" data-testid="visit-summary-total">
-                  {{
-                    'visit-summary-total'
-                      | transloco
-                        : {
-                            total: priceLabelIn(meal.total, meal.currency),
-                          }
-                  }}
-                </p>
-              }
-
               <!--
-                  Never a receipt (`ADR-0004`, `RD-TS-46`). The restaurant took
-                  the money and issues whatever document the law requires; this
-                  says what was ordered.
-                -->
-              <p class="note" data-testid="visit-summary-not-a-receipt">
-                {{ 'visit-summary-not-a-receipt' | transloco }}
-              </p>
+                The meal itself, from the shared component (issue #1111). The
+                markup lives in a `type:ui` library because the visits page
+                shows the same thing weeks later, and two features may not
+                depend on each other.
+              -->
+              <bt-visit-summary [summary]="meal" />
 
               <!--
                   Asked once, at the end, and optional. Declining costs the

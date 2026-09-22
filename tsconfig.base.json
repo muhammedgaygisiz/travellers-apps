@@ -228,7 +228,9 @@
       ],
       "bite-tribe-business/create-bite-trail-data-access": [
         "libs/bite-tribe-business/create-bite-trail/data-access/src/index.ts"
-      ]
+      ],
+      "visit-summary": ["./libs/bite-tribe-common/visit-summary/src/index.ts"],
+      "visits-page": ["./libs/bite-tribe/visits/page/src/index.ts"]
     },
     "strict": false,
     "noUncheckedSideEffectImports": false,

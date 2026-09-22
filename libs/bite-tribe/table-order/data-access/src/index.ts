@@ -6,3 +6,4 @@ export * from './lib/table-order-submission.service';
 export * from './lib/pending-table-order';
 export * from './lib/table-visit-bill.service';
 export * from './lib/visit-summary.service';
+export * from './lib/my-visits.service';

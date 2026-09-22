@@ -264,16 +264,11 @@
 /*
  * What the guest ate, once the table has been cleared (GitHub issue #1111).
  *
- * It reuses the bill's row styles above rather than restating them: the
- * summary *is* the bill, frozen at the moment the visit closed, and two sets
- * of row rules would be two chances for the thing a guest checked at the table
- * to look different from the thing they keep.
+ * The rows themselves are the shared `bt-visit-summary` component's, because
+ * the visits page shows the same meal weeks later. What is left here is the
+ * one part that belongs to this screen alone: the field that asks for an
+ * email address.
  */
-.summary-where {
-  color: var(--ion-color-medium);
-  margin: 0 0 0.5rem;
-}
-
 /*
  * The one place on this screen that asks for personal data, so it is fenced
  * off and carries its own sentence about what happens to the address. A field

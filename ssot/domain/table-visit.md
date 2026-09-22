@@ -25,7 +25,7 @@ The Table Visit is also the bridge back to the core product: the dishes ordered 
 - A guest may participate without a BiteTribe account, through anonymous authentication. Decided, `RD-TS-4`.
 - A session expires when the visit closes, or after a configurable idle timeout. Decided, `RD-TS-5`.
 - BiteTribe does not settle the bill. The restaurant takes the money, and what BiteTribe produces is a visit summary rather than a receipt. Decided, `RD-TS-45` and `RD-TS-46`.
-- Closing a visit whose bill is not settled requires explicit staff confirmation.
+- Closing a visit whose bill is not settled requires explicit staff confirmation, and only where the party ordered something. A visit that ordered nothing has no bill to forget. Decided, `RD-TS-50`.
 - A visit is retained after it closes, because it becomes the visit summary and the Bite-creation entry point.
 - A visit survives the deletion of its Table, keeping the historical record readable.
 - Ending a visit leaves its Table in `cleaning` and never in `available`, so the next party cannot be seated at it without somebody looking at it first.
@@ -105,6 +105,49 @@ The two are kept apart because a bill reconciled and a bill nobody ever looked
 at are different facts, and `abandoned` is what a party that left without
 settling looks like - the only failure mode left now that BiteTribe takes no
 payment of its own (`RD-TS-45`).
+
+## What The Guest Keeps
+
+Issue [#1111] files the meal under each guest who ate it.
+
+```text
+/users/{uid}/visitSummaries/{visitId}
+```
+
+One document per session that was ever **active** on the visit, written when
+the visit ends. Under the guest rather than under the restaurant (`RD-TS-49`),
+because "reachable later from their account, permanently" is a question about a
+person: the guest lists their own, and nothing has to prove which party they
+were in six months ago. Issue [#1657] links an anonymous account in place
+rather than minting a new one, so the uid a summary is filed under is the uid
+the guest signs in with afterwards, and the meal follows them into the account
+for free. What it costs is a copy per guest, which is the point - the party
+splits up and each of them keeps what they ate.
+
+A `pending` session gets none. Staff never confirmed anybody was at that table,
+and filing a stranger's dinner under the account of somebody who photographed a
+sticker from the pavement is what `RD-TS-1` exists to prevent.
+
+**It is a summary and never a receipt** (`ADR-0004`, `RD-TS-46`): no tax line,
+no document number, no sequence. The restaurant's own till issues whatever the
+law requires. The rows are the bill's own rows from issue [#1110], so a second
+shape cannot disagree with what the guest was shown while they were still
+sitting there.
+
+**How long it is kept is the session's own clock.** A member keeps their
+summaries for as long as the account exists; a guest who never registered keeps
+theirs until the session that produced them goes idle -
+`sessionIdleTimeoutMinutes`, two hours by default. No second clock and no
+expiry field, which is why the read is a callable: `firestore.rules` cannot
+compute an idle timeout against a per-restaurant setting.
+
+**The email is asked once, at the end, and the address is stored nowhere.** Not
+on the account, not on the summary, not in a log. That is what makes the flow
+need no retention rule and no deletion path for a uid nobody can sign into
+again. One send per visit, stamped on the guest's own summary (`RD-TS-48`): a
+rate limit per guest would bound nothing, because an anonymous account is free
+and unlimited (`RD-TS-4`), and a visit exists only because staff seated a party
+and closed it.
 
 ## Where A Visit's History Lives
 
@@ -397,7 +440,7 @@ staff keep an unconditional `list` over the whole table.
 - **A guest's phone cannot read the visit, and no longer needs to.** Issue [#1104] decided it (`RD-TS-12`): the running total on the guest's screen is a sum over their own orders, cancelled ones excluded, and the shared bill is settled at the table. What a guest is shown when their party is **moved** is still unowned - the session goes on naming the table they scanned, and nothing tells them the table number on their screen has changed.
 - Rules deploy from CI on every push to `develop` ([#1567]), gated on the rules emulator suite - see [Architecture - Firebase](../architecture/firebase.md).
 - Several of the business rules above are proposals awaiting a product decision. They are listed in [Current State - Open Questions](../current-state/open-questions.md).
-- **The guest sees nothing after the visit closes.** The close itself works - `transitionTableState` ends the visit, closes the sessions and leaves the table in `cleaning` - and the live bill of issue [#1110] stops at the same moment, deliberately. What has no surface, no email delivery and no retention rule is the **retained summary** `RD-TS-46` describes, which is issue [#1111]'s.
+- **A summary arrives a moment after the close, not with it.** `writeVisitSummariesOnVisitClose` is a trigger (`RD-TS-49`), so a guest who looks in the second after the table is cleared is told the summary is being prepared rather than that there is none. The alternative was reading every order inside the close transaction, which would make the seating flow pay for a document nobody is waiting for and would roll back a successful close when it failed.
 - **The staff screen does not show that a bill was settled.** Issue [#1110] writes the record and the guest's bill reads it back, but the business app reads `tableStates` rather than the visit document, so a sheet re-opened on a settled table offers the three buttons again. Pressing one is harmless - the backend answers with the first settlement and changes nothing - but a second device cannot see that the first already recorded it. Showing it needs a read of the visit the business app does not make today.
 
 ## Future Ideas
@@ -433,3 +476,4 @@ staff keep an unconditional `list` over the whole table.
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1110]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1110
 [#1111]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1111
+[#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657

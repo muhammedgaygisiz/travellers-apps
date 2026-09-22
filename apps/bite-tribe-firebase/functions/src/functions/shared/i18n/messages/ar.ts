@@ -7,6 +7,14 @@ export const ar: NotificationMessages = {
   'emailVerification.body':
     'يرجى تأكيد عنوان بريدك الإلكتروني ليبقى حسابك في BiteTribe آمنًا ولتتمكن من تلقي الرسائل المهمة المتعلقة بحسابك.',
   'emailVerification.linkLabel': 'تأكيد عنوان البريد الإلكتروني',
+  'visitSummary.subject': 'زيارتك إلى {{restaurant}}',
+  'visitSummary.heading': 'ما طلبته',
+  'visitSummary.intro': 'إليك ملخص زيارتك إلى {{restaurant}} في {{date}}.',
+  'visitSummary.total': 'الإجمالي',
+  'visitSummary.settled': 'سجّل المطعم هذا كمدفوع.',
+  'visitSummary.unsettled': 'لم يسجّل المطعم أي دفعة لهذه الزيارة.',
+  'visitSummary.footnote':
+    'هذا ملخص لما تم طلبه وليس إيصالاً. إيصالك يصدر من المطعم.',
   'newBite.title': 'Bite جديد',
   'newBite.body': '{{author}} أنشأ للتو Bite جديدًا',
   'newBite.bodyWithName': '{{author}} أنشأ للتو Bite جديدًا: {{bite}}',

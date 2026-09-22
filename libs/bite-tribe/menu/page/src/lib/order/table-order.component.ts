@@ -4,6 +4,7 @@ import {
   OnInit,
   computed,
   inject,
+  signal,
 } from '@angular/core';
 import {
   IonButton,
@@ -25,6 +26,8 @@ import {
   TABLE_ORDER_BLOCKED_KEYS,
   TABLE_VISIT_BILL_REFUSAL_KEYS,
   TABLE_VISIT_SETTLEMENT_KEYS,
+  VISIT_SUMMARY_EMAIL_REFUSAL_KEYS,
+  VISIT_SUMMARY_REFUSAL_KEYS,
   TABLE_ORDER_CLOSED_KEYS,
   TABLE_ORDER_STATUS_KEYS,
   TableAssistanceService,
@@ -33,6 +36,7 @@ import {
   TableOrderService,
   TableOrderSubmissionService,
   TableVisitBillService,
+  VisitSummaryService,
   type TableCartLine,
   type TableOrderView,
 } from 'bite-tribe/table-order-data-access';
@@ -46,6 +50,8 @@ import type {
   TableVisitBillLine,
   TableVisitBillRefusalReason,
   TableVisitSettlementMethod,
+  VisitSummaryEmailRefusalReason,
+  VisitSummaryRefusalReason,
 } from 'model';
 import { MenuComponent } from '../components/menu/menu.component';
 import type { MenuItemSelection } from '../components/menu-item/menu-item.component';
@@ -136,6 +142,7 @@ const symbolOf = (code: string): string => {
     TableAssistanceService,
     TableOrderSubmissionService,
     TableVisitBillService,
+    VisitSummaryService,
     TableOrderService,
   ],
   templateUrl: 'table-order.component.html',
@@ -149,6 +156,7 @@ export class TableOrder implements OnInit {
   protected readonly history = this.service.history;
   protected readonly assistance = this.service.assistance;
   protected readonly bill = this.service.bill;
+  protected readonly visitSummary = this.service.visitSummary;
 
   /** The two things the guest can ask for, in the order they are offered. */
   protected readonly assistanceKinds = TABLE_ASSISTANCE_KINDS;
@@ -351,6 +359,55 @@ export class TableOrder implements OnInit {
   /** The extras on a bill row, as one readable string. */
   protected billLineExtras(line: TableVisitBillLine): string {
     return (line.extras ?? []).map((extra) => extra.name).join(', ');
+  }
+
+  /**
+   * The address the guest typed, held only until the call is made.
+   *
+   * `RD-TS-46`. It is read off this field, handed to the backend and the field
+   * is cleared in the same breath - nothing on the account, nothing on the
+   * summary, and nothing here either.
+   */
+  protected readonly summaryEmail = signal('');
+
+  /** Whether the summary section is worth drawing at all. */
+  protected readonly showsSummary = computed(
+    () =>
+      this.visitSummary.summary() !== undefined ||
+      this.visitSummary.isPreparing() ||
+      this.visitSummary.isLoading(),
+  );
+
+  /** Fetches the meal, or looks again while the trigger catches up. */
+  protected showSummary(): void {
+    void this.visitSummary.load();
+  }
+
+  /** Sends it, and forgets the address as it goes. */
+  protected sendSummary(): void {
+    const address = this.summaryEmail().trim();
+
+    if (!address) {
+      return;
+    }
+
+    this.summaryEmail.set('');
+    void this.visitSummary.email(address);
+  }
+
+  protected summaryRefusalKey(reason: VisitSummaryRefusalReason): string {
+    return VISIT_SUMMARY_REFUSAL_KEYS[reason];
+  }
+
+  protected summaryEmailRefusalKey(
+    reason: VisitSummaryEmailRefusalReason,
+  ): string {
+    return VISIT_SUMMARY_EMAIL_REFUSAL_KEYS[reason];
+  }
+
+  /** One summary row's dish, with its variant where it has one. */
+  protected summaryLineName(line: TableVisitBillLine): string {
+    return this.billLineName(line);
   }
 
   ngOnInit(): void {

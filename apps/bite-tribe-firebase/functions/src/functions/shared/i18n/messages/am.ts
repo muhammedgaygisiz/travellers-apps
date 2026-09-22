@@ -7,6 +7,14 @@ export const am: NotificationMessages = {
   'emailVerification.body':
     'የBiteTribe መለያዎ ደኅንነቱ የተጠበቀ ሆኖ እንዲቆይና ስለ መለያዎ አስፈላጊ መልእክቶችን መቀበል እንዲችሉ እባክዎ የኢሜይል አድራሻዎን ያረጋግጡ።',
   'emailVerification.linkLabel': 'የኢሜይል አድራሻ ያረጋግጡ',
+  'visitSummary.subject': 'የእርስዎ {{restaurant}} ጉብኝት',
+  'visitSummary.heading': 'ያዘዙት',
+  'visitSummary.intro': 'በ{{date}} ወደ {{restaurant}} ያደረጉት ጉብኝት ማጠቃለያ ይኸውና።',
+  'visitSummary.total': 'ጠቅላላ',
+  'visitSummary.settled': 'ምግብ ቤቱ ይህን እንደተከፈለ ምልክት አድርጎታል።',
+  'visitSummary.unsettled': 'ምግብ ቤቱ ለዚህ ጉብኝት ምንም ክፍያ አልመዘገበም።',
+  'visitSummary.footnote':
+    'ይህ የታዘዘውን ማጠቃለያ ነው እንጂ ደረሰኝ አይደለም። ደረሰኝዎን ከምግብ ቤቱ ያገኛሉ።',
   'newBite.title': 'አዲስ Bite',
   'newBite.body': '{{author}} አዲስ Bite ፈጥሯል',
   'newBite.bodyWithName': '{{author}} አዲስ Bite ፈጥሯል፦ {{bite}}',

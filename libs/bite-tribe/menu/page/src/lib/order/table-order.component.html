@@ -312,6 +312,179 @@
         }
 
         <!--
+          What the guest ate, once the table has been cleared
+          (GitHub issue #1111).
+
+          Here rather than on a screen of its own: the phone is already open on
+          this page when the host clears the table, and walking somebody to a
+          new route at the moment they stand up is a navigation they did not
+          ask for. It is also where creating a Bite from a dish will hang
+          (issue #1112).
+
+          Behind a tap, and re-tappable. The summary is written by a trigger
+          after the close rather than inside it, so the first look can
+          legitimately find nothing - which the screen says as "being
+          prepared", never as "there is none".
+        -->
+        @if (visitSummary.hasVisit()) {
+          <section class="summary" data-testid="visit-summary">
+            <h2>{{ 'visit-summary-heading' | transloco }}</h2>
+
+            @if (!visitSummary.summary()) {
+              <ion-button
+                expand="block"
+                fill="outline"
+                [disabled]="visitSummary.isLoading()"
+                data-testid="visit-summary-load"
+                (click)="showSummary()"
+              >
+                @if (visitSummary.isLoading()) {
+                  <ion-spinner name="crescent" slot="start" />
+                }
+
+                {{
+                  (visitSummary.isPreparing()
+                    ? 'visit-summary-look-again'
+                    : 'visit-summary-show'
+                  ) | transloco
+                }}
+              </ion-button>
+            }
+
+            @if (visitSummary.lastRefusal(); as declined) {
+              <p class="note" data-testid="visit-summary-refusal">
+                {{ summaryRefusalKey(declined) | transloco }}
+              </p>
+            }
+
+            @if (visitSummary.lastFailure(); as failed) {
+              <p class="note" data-testid="visit-summary-failed">
+                {{ 'table-session-failed-' + failed | transloco }}
+              </p>
+            }
+
+            @if (visitSummary.summary(); as meal) {
+              <p class="summary-where" data-testid="visit-summary-where">
+                {{
+                  'visit-summary-where'
+                    | transloco
+                      : {
+                          restaurant: meal.restaurantName,
+                          table: meal.tableLabel,
+                        }
+                }}
+              </p>
+
+              @if (visitSummary.isEmpty()) {
+                <p class="note" data-testid="visit-summary-empty">
+                  {{ 'visit-summary-empty' | transloco }}
+                </p>
+              } @else {
+                <ul class="bill-lines">
+                  @for (line of meal.lines; track $index) {
+                    <li class="bill-line" data-testid="visit-summary-line">
+                      <span>
+                        {{ line.quantity }} &times; {{ summaryLineName(line) }}
+                        @if (line.extras?.length) {
+                          <span class="bill-line-extras">
+                            {{ billLineExtras(line) }}
+                          </span>
+                        }
+                      </span>
+                      <span>
+                        {{ priceLabelIn(line.lineTotal, meal.currency) }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+
+                <p class="bill-total" data-testid="visit-summary-total">
+                  {{
+                    'visit-summary-total'
+                      | transloco
+                        : {
+                            total: priceLabelIn(meal.total, meal.currency),
+                          }
+                  }}
+                </p>
+              }
+
+              <!--
+                  Never a receipt (`ADR-0004`, `RD-TS-46`). The restaurant took
+                  the money and issues whatever document the law requires; this
+                  says what was ordered.
+                -->
+              <p class="note" data-testid="visit-summary-not-a-receipt">
+                {{ 'visit-summary-not-a-receipt' | transloco }}
+              </p>
+
+              <!--
+                  Asked once, at the end, and optional. Declining costs the
+                  guest nothing but the copy in their inbox, and the address is
+                  used for the one send and stored nowhere.
+                -->
+              <div class="summary-email">
+                @if (visitSummary.isSent()) {
+                  <p class="bill-settled" data-testid="visit-summary-sent">
+                    {{ 'visit-summary-email-sent' | transloco }}
+                  </p>
+                } @else {
+                  <!--
+                    `label` and `mode="md"` together, which is what every
+                    other `ion-input` in this app carries. `fill="outline"`
+                    draws no border without a label, and none in iOS mode
+                    either - the first two reference pictures had a heading, a
+                    gap nobody would think to type into, and a button.
+                  -->
+                  <ion-input
+                    label="{{ 'visit-summary-email-label' | transloco }}"
+                    mode="md"
+                    type="email"
+                    inputmode="email"
+                    autocomplete="email"
+                    fill="outline"
+                    data-testid="visit-summary-email"
+                    [value]="summaryEmail()"
+                    (ionInput)="summaryEmail.set($any($event.target).value)"
+                  />
+
+                  <ion-button
+                    expand="block"
+                    [disabled]="
+                      visitSummary.isSending() || summaryEmail().trim() === ''
+                    "
+                    data-testid="visit-summary-send"
+                    (click)="sendSummary()"
+                  >
+                    @if (visitSummary.isSending()) {
+                      <ion-spinner name="crescent" slot="start" />
+                    }
+
+                    {{ 'visit-summary-email-send' | transloco }}
+                  </ion-button>
+
+                  <p class="note" data-testid="visit-summary-email-privacy">
+                    {{ 'visit-summary-email-privacy' | transloco }}
+                  </p>
+                }
+
+                @if (visitSummary.lastEmailRefusal(); as declined) {
+                  <p class="note" data-testid="visit-summary-email-refusal">
+                    {{ summaryEmailRefusalKey(declined) | transloco }}
+                  </p>
+                }
+
+                @if (visitSummary.lastEmailFailure(); as failed) {
+                  <p class="note" data-testid="visit-summary-email-failed">
+                    {{ 'table-session-failed-' + failed | transloco }}
+                  </p>
+                }
+              </div>
+            }
+          </section>
+        }
+
+        <!--
           The two things a guest most often needs a waiter for, without waving
           (GitHub issue #1106). Above the orders rather than in the footer
           beside the send button: asking for the bill is the opposite of

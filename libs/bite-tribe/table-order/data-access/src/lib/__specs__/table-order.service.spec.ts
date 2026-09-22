@@ -7,6 +7,7 @@ import {
   TableOrderApiService,
   TableSessionApiService,
   TableVisitBillApiService,
+  VisitSummaryApiService,
 } from 'bite-tribe/api';
 import { AuthService } from 'ta-firestore';
 import type { Menu, MenuItem, TableScanContext, TableSession } from 'model';
@@ -14,6 +15,7 @@ import { BehaviorSubject, EMPTY } from 'rxjs';
 import { NetworkStatusService } from 'common/networkstatus';
 import { TableCartService } from '../table-cart.service';
 import { TableVisitBillService } from '../table-visit-bill.service';
+import { VisitSummaryService } from '../visit-summary.service';
 import { TableAssistanceService } from '../table-assistance.service';
 import { TableOrderHistoryService } from '../table-order-history.service';
 import { TableOrderSubmissionService } from '../table-order-submission.service';
@@ -132,6 +134,14 @@ describe(TableOrderService.name, () => {
         {
           provide: TableVisitBillApiService,
           useValue: { read: jest.fn() },
+        },
+        // Provided for the same reason again, and never exercised here: the
+        // service injects it so the summary is pointed at the visit from the
+        // one place that knows the restaurant and the table (issue #1111).
+        VisitSummaryService,
+        {
+          provide: VisitSummaryApiService,
+          useValue: { read: jest.fn(), list: jest.fn(), email: jest.fn() },
         },
         {
           provide: TableSessionApiService,

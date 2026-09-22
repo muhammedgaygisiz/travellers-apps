@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   BiteTribeApiService,
@@ -26,6 +26,7 @@ import { TableAssistanceService } from './table-assistance.service';
 import { TableCartService, type TableCartLine } from './table-cart.service';
 import { TableOrderHistoryService } from './table-order-history.service';
 import { TableVisitBillService } from './table-visit-bill.service';
+import { VisitSummaryService } from './visit-summary.service';
 import {
   TableOrderSubmissionService,
   type TableOrderOutcome,
@@ -171,6 +172,10 @@ export interface TableOrderUnconfirmed {
 @Injectable()
 export class TableOrderService {
   private readonly sessionApi = inject(TableSessionApiService);
+
+  /** Where the guest scanned, kept so the summary can be addressed later. */
+  private watchedTable?: { restaurantId: string; tableId: string };
+
   private readonly api = inject(BiteTribeApiService);
   private readonly route = inject(ActivatedRoute);
 
@@ -216,6 +221,41 @@ export class TableOrderService {
    * the trio could be started from with different arguments.
    */
   readonly bill = inject(TableVisitBillService);
+
+  /**
+   * What the guest ate, once staff have cleared the table
+   * (GitHub issue #1111).
+   *
+   * Pointed at the visit from an effect rather than from {@link load}, because
+   * unlike its three neighbours it needs a **visit id**, and at the moment of
+   * the scan there may not be one: a guest who scans an unseated table has a
+   * `pending` session naming no visit, and the id arrives on the session
+   * listener when staff seat the party. So the trigger is the session going
+   * `closed` with a visit on it, which is exactly the moment the meal ends.
+   */
+  readonly visitSummary = inject(VisitSummaryService);
+
+  constructor() {
+    // The session listener reports the close within seconds of a host pressing
+    // the button, and it carries the visit id the summary is filed under. The
+    // effect fires once per visit: `watch` is a no-op for a visit it is
+    // already pointed at, so a session document that changes again - a status
+    // rewrite, a party moved - does not restart anything.
+    effect(() => {
+      const session = this.history.session();
+      const table = this.watchedTable;
+
+      if (!table || session?.status !== 'closed' || !session.visitId) {
+        return;
+      }
+
+      this.visitSummary.watch(
+        session.visitId,
+        table.restaurantId,
+        table.tableId,
+      );
+    });
+  }
 
   private readonly view = signal<TableOrderView>({ kind: 'loading' });
   private readonly busy = signal(false);
@@ -357,6 +397,7 @@ export class TableOrderService {
     this.history.watch(restaurantId, scan.table.id);
     this.assistance.watch(restaurantId, scan.table.id);
     this.bill.watch(restaurantId, scan.table.id);
+    this.watchedTable = { restaurantId, tableId: scan.table.id };
 
     const state: Extract<TableOrderView, { kind: 'ordering' }> = {
       kind: 'ordering',

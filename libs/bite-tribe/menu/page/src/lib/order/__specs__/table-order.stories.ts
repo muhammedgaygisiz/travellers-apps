@@ -16,6 +16,7 @@ import {
   type TableSessionCallFailure,
 } from 'bite-tribe/api';
 import { AuthService } from 'ta-firestore';
+import { VisitSummaryApiService } from 'bite-tribe/api';
 import { NetworkStatusService } from 'common/networkstatus';
 import type {
   PublicMenuRefusalReason,
@@ -154,6 +155,15 @@ const resolved = (
 
 const pending = <T>(): Promise<T> => new Promise<T>(() => undefined);
 
+/**
+ * A guest whose table has been cleared, for the summary story
+ * (GitHub issue #1111).
+ *
+ * The chain the screen actually follows: the session listener reports the
+ * visit closed, `TableOrderService` points the summary service at that visit,
+ * and the screen offers the meal. Faking it any further down would draw the
+ * section without proving anything reaches it.
+ */
 interface Answers {
   /**
    * The scan answer, handed the table this story sits at.
@@ -165,6 +175,10 @@ interface Answers {
   scan?: (tableId: string) => Promise<TableScanResult | TableSessionCallError>;
   menu?: () => Promise<PublicMenuResult | undefined>;
   submit?: () => Promise<SubmitTableOrderResult | TableSessionCallError>;
+  /** The guest's own session, for a story about a table that has closed. */
+  session?: () => Observable<unknown>;
+  /** The meal, for the same story. */
+  summary?: () => Promise<unknown>;
 }
 
 /**
@@ -198,7 +212,7 @@ const order =
               // before it lands under a key nothing here reads.
               answers.scan?.(ctx.id) ??
               Promise.resolve(resolved(undefined, ctx.id)),
-            session$: (): Observable<never> => EMPTY,
+            session$: (): Observable<unknown> => answers.session?.() ?? EMPTY,
           },
         },
         {
@@ -230,8 +244,25 @@ const order =
         // No uid, so the history listener returns before it subscribes: a guest
         // who has not confirmed a table has ordered nothing to show.
         {
+          // A uid only where a story needs one. `TableOrderHistoryService`
+          // returns before it subscribes without one, which is right for every
+          // story about ordering - a guest who has not confirmed a table has
+          // nothing to show - and is exactly what the closed-table story has
+          // to undo.
           provide: AuthService,
-          useValue: { getUser: (): undefined => undefined },
+          useValue: {
+            getUser: (): { uid: string } | undefined =>
+              answers.session ? { uid: 'guest-alice' } : undefined,
+          },
+        },
+        {
+          provide: VisitSummaryApiService,
+          useValue: {
+            read: (): Promise<unknown> =>
+              answers.summary?.() ?? pending<unknown>(),
+            list: (): Promise<unknown> => pending<unknown>(),
+            email: (): Promise<unknown> => pending<unknown>(),
+          },
         },
         {
           provide: NetworkStatusService,
@@ -480,4 +511,78 @@ export const RefusedBesideCart: Story = {
 export const SubmissionUnresolved: Story = {
   decorators: [order({ submit: () => pending() })],
   play: sendOne,
+};
+
+/**
+ * The table has been cleared, and the guest keeps what they ate
+ * (GitHub issue #1111).
+ *
+ * The one story that reaches the summary, and it reaches it the way the screen
+ * does: the session listener reports the visit closed, `TableOrderService`
+ * points the summary service at that visit, and the section appears. Faking it
+ * further down would draw the box without proving anything gets there.
+ *
+ * It renders the meal already fetched rather than the button that fetches it,
+ * because the rows and the email block are what this picture is for - the
+ * button is the same outline button the bill above it already has a reference
+ * of.
+ */
+export const VisitSummaryAfterClose: Story = {
+  decorators: [
+    order({
+      session: () =>
+        of({
+          session: {
+            id: 'session-1',
+            restaurantId: context.restaurant.id,
+            tableId: context.table.id,
+            guestUserId: 'guest-alice',
+            status: 'closed',
+            visitId: 'visit-1',
+            startedAt: 1_700_000_000_000,
+            lastActiveAt: 1_700_000_000_000,
+            isAnonymousGuest: true,
+          },
+          live: true,
+        }),
+      summary: async () => ({
+        ok: true,
+        summary: {
+          id: 'visit-1',
+          restaurantId: context.restaurant.id,
+          restaurantName: context.restaurant.name,
+          tableLabel: context.table.label,
+          closedAt: 1_700_000_000_000,
+          currency: 'EUR',
+          lines: [
+            {
+              menuItemId: 'item-margherita',
+              name: 'Margherita',
+              quantity: 2,
+              unitPrice: 12,
+              lineTotal: 24,
+            },
+            {
+              menuItemId: 'item-tiramisu',
+              name: 'Tiramisù',
+              quantity: 1,
+              unitPrice: 7,
+              lineTotal: 7,
+            },
+          ],
+          total: 31,
+          paymentStatus: 'settled',
+          settlementMethod: 'card',
+        },
+      }),
+    }),
+  ],
+  play: async () => {
+    await settle();
+    document
+      .querySelector<HTMLElement>('[data-testid="visit-summary-load"]')
+      ?.click();
+    await settle();
+    await settle();
+  },
 };

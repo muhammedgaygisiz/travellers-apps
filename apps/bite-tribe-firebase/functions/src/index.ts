@@ -66,6 +66,12 @@ export { transitionTableOrderStatus } from './functions/restaurants/transition-t
 export { moveTableVisit } from './functions/restaurants/move-table-visit';
 export { readTableVisitBill } from './functions/restaurants/read-table-visit-bill';
 export { settleTableVisit } from './functions/restaurants/settle-table-visit';
+export {
+  listVisitSummaries,
+  readVisitSummary,
+} from './functions/restaurants/read-visit-summary';
+export { emailVisitSummary } from './functions/restaurants/email-visit-summary';
+export { writeVisitSummariesOnVisitClose } from './functions/restaurants/write-visit-summaries-on-close';
 export { requestTableAssistance } from './functions/restaurants/request-table-assistance';
 export { acknowledgeTableAssistance } from './functions/restaurants/acknowledge-table-assistance';
 export { dismissScanAnomaly } from './functions/restaurants/dismiss-scan-anomaly';

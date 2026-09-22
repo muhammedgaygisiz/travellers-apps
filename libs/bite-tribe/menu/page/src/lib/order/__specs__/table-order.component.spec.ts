@@ -19,6 +19,8 @@ import type {
   TableSessionStatus,
   TableVisitBill,
   TableVisitBillRefusalReason,
+  VisitSummary,
+  VisitSummaryRefusalReason,
 } from 'model';
 import {
   TableCartService,
@@ -147,6 +149,20 @@ const en = {
     'The restaurant has marked this bill as paid by card.',
   'table-bill-settled-other': 'The restaurant has marked this bill as paid.',
   'table-order-refused-sessionExpired': 'Your table session timed out.',
+  'visit-summary-heading': 'Your visit',
+  'visit-summary-show': 'Show what you ordered',
+  'visit-summary-look-again': 'Look again',
+  'visit-summary-preparing':
+    "We're still putting your summary together. Try again in a moment.",
+  'visit-summary-where': '{{restaurant}}, table {{table}}',
+  'visit-summary-total': 'Total {{total}}',
+  'visit-summary-not-a-receipt':
+    'This is a summary of what was ordered, not a receipt.',
+  'visit-summary-email-label': 'Send it to your email',
+  'visit-summary-email-send': 'Send summary',
+  'visit-summary-email-privacy':
+    "We'll use your address for this one email and won't keep it.",
+  'visit-summary-email-sent': 'Sent. Check your inbox.',
   'menu-item-not-available': 'Not available',
   'create-bite': 'Create Bite',
   'no-menu-yet': 'No menu yet',
@@ -178,6 +194,12 @@ describe(TableOrder.name, () => {
   let billLoading: WritableSignal<boolean>;
   let billRefusal: WritableSignal<TableVisitBillRefusalReason | undefined>;
   let loadBill: jest.Mock;
+  let summaryRead: WritableSignal<VisitSummary | undefined>;
+  let summaryVisit: WritableSignal<boolean>;
+  let summaryRefusal: WritableSignal<VisitSummaryRefusalReason | undefined>;
+  let summarySent: WritableSignal<boolean>;
+  let loadSummary: jest.Mock;
+  let emailSummary: jest.Mock;
 
   const show = (next: TableOrderView): void => {
     state.set(next);
@@ -230,6 +252,12 @@ describe(TableOrder.name, () => {
     billLoading = signal(false);
     billRefusal = signal<TableVisitBillRefusalReason | undefined>(undefined);
     loadBill = jest.fn().mockResolvedValue(undefined);
+    summaryRead = signal<VisitSummary | undefined>(undefined);
+    summaryVisit = signal(false);
+    summaryRefusal = signal<VisitSummaryRefusalReason | undefined>(undefined);
+    summarySent = signal(false);
+    loadSummary = jest.fn().mockResolvedValue(undefined);
+    emailSummary = jest.fn().mockResolvedValue(undefined);
 
     // The history is signals all the way down, so the fake is the four the
     // template reads. What is being checked here is what a guest sees, and the
@@ -278,11 +306,32 @@ describe(TableOrder.name, () => {
       clear: jest.fn(),
     };
 
+    // What the guest keeps after the meal (GitHub issue #1111). Signals like
+    // the rest, and the one with no listener at all: the visit has ended and
+    // the summary is written once, so the screen fetches and can fetch again.
+    const visitSummary = {
+      hasVisit: summaryVisit,
+      summary: summaryRead,
+      isLoading: signal(false),
+      lastRefusal: summaryRefusal,
+      lastFailure: signal<string | undefined>(undefined),
+      isPreparing: computed(() => summaryRefusal() === 'notFound'),
+      isSending: signal(false),
+      isSent: summarySent,
+      lastEmailRefusal: signal<string | undefined>(undefined),
+      lastEmailFailure: signal<string | undefined>(undefined),
+      isEmpty: computed(() => (summaryRead()?.lines.length ?? 0) === 0),
+      load: loadSummary,
+      email: emailSummary,
+      clear: jest.fn(),
+    };
+
     const service = {
       cart,
       history,
       assistance,
       bill,
+      visitSummary,
       state,
       lastRefusal,
       unconfirmed,
@@ -1117,6 +1166,148 @@ describe(TableOrder.name, () => {
       show(ORDERING);
 
       expect(has('table-bill')).toBe(false);
+    });
+  });
+
+  /**
+   * What the guest keeps after the meal (GitHub issue #1111).
+   *
+   * The screen's own share of the contract: that the section appears when the
+   * table is cleared and not before, that an unwritten summary reads as being
+   * prepared rather than as missing, that the document never calls itself a
+   * receipt (`ADR-0004`), and that the address is handed over and let go.
+   */
+  describe('the visit summary', () => {
+    const MEAL: VisitSummary = {
+      id: 'visit-1',
+      restaurantId: 'r1',
+      restaurantName: 'Sakura Kitchen',
+      tableLabel: '12',
+      closedAt: 1_700_000_000_000,
+      currency: 'EUR',
+      lines: [
+        {
+          menuItemId: 'item-1',
+          name: 'Margherita',
+          quantity: 2,
+          unitPrice: 12,
+          lineTotal: 24,
+        },
+      ],
+      total: 24,
+      paymentStatus: 'settled',
+    };
+
+    /** Nothing has ended, so there is nothing to keep. */
+    it('is absent while the party is still eating', () => {
+      render();
+      show(ORDERING);
+
+      expect(has('visit-summary')).toBe(false);
+    });
+
+    it('offers the meal once the table has been cleared', () => {
+      summaryVisit.set(true);
+      render();
+      show(ORDERING);
+
+      expect(has('visit-summary')).toBe(true);
+      expect(loadSummary).not.toHaveBeenCalled();
+    });
+
+    it('fetches it when the guest asks', () => {
+      summaryVisit.set(true);
+      render();
+      show(ORDERING);
+
+      click('visit-summary-load');
+
+      expect(loadSummary).toHaveBeenCalled();
+    });
+
+    /**
+     * The trigger writes the summary after the close rather than inside it, so
+     * the first look can legitimately find nothing. A guest standing up from a
+     * table who is told "nothing here" would conclude the restaurant lost it.
+     */
+    it('says a missing summary is being prepared, and offers another look', () => {
+      summaryVisit.set(true);
+      summaryRefusal.set('notFound');
+      render();
+      show(ORDERING);
+
+      expect(text()).toContain("We're still putting your summary together");
+      expect(text()).toContain('Look again');
+    });
+
+    it('shows where the guest ate, what they had, and the total', () => {
+      summaryVisit.set(true);
+      summaryRead.set(MEAL);
+      render();
+      show(ORDERING);
+
+      expect(text()).toContain('Sakura Kitchen, table 12');
+      expect(text()).toContain('2 × Margherita');
+      expect(text()).toContain('Total 24 €');
+    });
+
+    /** `ADR-0004`. The wording is the contract, not decoration. */
+    it('says it is not a receipt', () => {
+      summaryVisit.set(true);
+      summaryRead.set(MEAL);
+      render();
+      show(ORDERING);
+
+      expect(text()).toContain('not a receipt');
+    });
+
+    it('offers the email with the promise about the address beside it', () => {
+      summaryVisit.set(true);
+      summaryRead.set(MEAL);
+      render();
+      show(ORDERING);
+
+      expect(has('visit-summary-email')).toBe(true);
+      expect(text()).toContain("won't keep it");
+    });
+
+    /**
+     * `RD-TS-46`. The field is cleared as the call is made rather than when it
+     * returns, so a failed send leaves nothing behind either.
+     */
+    it('hands the address over and forgets it', () => {
+      summaryVisit.set(true);
+      summaryRead.set(MEAL);
+      render();
+      show(ORDERING);
+
+      fixture.componentInstance['summaryEmail'].set('guest@example.com');
+      click('visit-summary-send');
+
+      expect(emailSummary).toHaveBeenCalledWith('guest@example.com');
+      expect(fixture.componentInstance['summaryEmail']()).toBe('');
+    });
+
+    it('does not send an empty address', () => {
+      summaryVisit.set(true);
+      summaryRead.set(MEAL);
+      render();
+      show(ORDERING);
+
+      click('visit-summary-send');
+
+      expect(emailSummary).not.toHaveBeenCalled();
+    });
+
+    it('stops offering the send once it has gone', () => {
+      summaryVisit.set(true);
+      summaryRead.set(MEAL);
+      summarySent.set(true);
+      render();
+      show(ORDERING);
+
+      expect(has('visit-summary-email')).toBe(false);
+      expect(text()).toContain('Sent. Check your inbox.');
     });
   });
 

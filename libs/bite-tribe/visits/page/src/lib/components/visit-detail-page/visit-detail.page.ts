@@ -8,7 +8,7 @@ import { IonButton, IonContent, IonSpinner } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
 import { VisitSummaryComponent } from 'visit-summary';
-import type { VisitSummary } from 'model';
+import type { TableVisitBillLine, VisitSummary } from 'model';
 
 /**
  * One meal, weeks later (GitHub issue #1111).
@@ -43,4 +43,7 @@ export class VisitDetailPage {
   readonly refusalKey = input('');
 
   readonly retry = output<void>();
+
+  /** The dish somebody wants to write about (GitHub issue #1112). */
+  readonly createBite = output<TableVisitBillLine>();
 }

@@ -1,5 +1,5 @@
-import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
 /**
  * Firestore indexes every single field at collection scope automatically, but a
@@ -60,9 +60,55 @@ const readStringConstants = (source: string): Map<string, string> => {
   return constants;
 };
 
+/**
+ * The same constants, plus the ones this file imports from its neighbours.
+ *
+ * A collection name is declared once and imported by whoever queries it, which
+ * is the point of the constant - so a query that named its collection properly
+ * used to read here as the *identifier* and be reported as undeclared. Issue
+ * #1112 hit that, and the choice was to duplicate the string next to the query
+ * or to follow the import; duplicating it would have defeated the constant and
+ * the parity spec that pins it.
+ *
+ * Relative imports only, and one level deep. That covers every collection
+ * constant in this codebase and stops the spec from walking `node_modules`.
+ */
+const resolveConstants = (
+  file: string,
+  source: string,
+): Map<string, string> => {
+  const constants = readStringConstants(source);
+
+  for (const match of source.matchAll(
+    /import\s*\{([^}]*)\}\s*from\s*['"](\.[^'"]+)['"]/g,
+  )) {
+    const imported = match[1]
+      .split(',')
+      .map((name) => name.trim())
+      .filter(Boolean);
+    const sibling = join(dirname(file), `${match[2]}.ts`);
+
+    if (!imported.length || !existsSync(sibling)) {
+      continue;
+    }
+
+    const theirs = readStringConstants(readFileSync(sibling, 'utf8'));
+
+    imported.forEach((name) => {
+      const value = theirs.get(name);
+
+      if (value !== undefined && !constants.has(name)) {
+        constants.set(name, value);
+      }
+    });
+  }
+
+  return constants;
+};
+
 const findCollectionGroupQueries = (file: string): CollectionGroupQuery[] => {
   const source = readFileSync(file, 'utf8');
-  const constants = readStringConstants(source);
+  const constants = resolveConstants(file, source);
   const flattened = source.replace(/\s+/g, ' ');
   const pattern =
     /collectionGroup\( *(['"]?)([A-Za-z0-9_$]+)\1 *\) *\.where\( *['"]([^'"]+)['"]/g;

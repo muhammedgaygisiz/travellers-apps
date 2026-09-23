@@ -17,6 +17,9 @@ export const it: NotificationMessages = {
     'Il ristorante non ha registrato alcun pagamento per questa visita.',
   'visitSummary.footnote':
     'Questo è un riepilogo di ciò che è stato ordinato, non una ricevuta. La ricevuta te la dà il ristorante.',
+  'visitReminder.title': 'Era buono?',
+  'visitReminder.body':
+    'Trasforma il piatto di ieri sera in un Bite. Foto, voto, fatto.',
   'newBite.title': 'Nuovo Bite',
   'newBite.body': '{{author}} ha appena creato un nuovo Bite',
   'newBite.bodyWithName': '{{author}} ha appena creato un nuovo Bite: {{bite}}',

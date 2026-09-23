@@ -17,6 +17,9 @@ export const id: NotificationMessages = {
     'Restoran tidak mencatat pembayaran untuk kunjungan ini.',
   'visitSummary.footnote':
     'Ini ringkasan pesanan, bukan bukti pembayaran. Struk Anda diberikan oleh restoran.',
+  'visitReminder.title': 'Enak?',
+  'visitReminder.body':
+    'Ubah hidangan semalam jadi Bite. Foto, penilaian, selesai.',
   'newBite.title': 'Bite baru',
   'newBite.body': '{{author}} baru saja membuat Bite baru',
   'newBite.bodyWithName': '{{author}} baru saja membuat Bite baru: {{bite}}',

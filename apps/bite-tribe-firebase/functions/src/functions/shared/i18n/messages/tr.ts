@@ -16,6 +16,9 @@ export const tr: NotificationMessages = {
   'visitSummary.unsettled': 'Restoran bu ziyaret için bir ödeme kaydetmedi.',
   'visitSummary.footnote':
     'Bu, sipariş edilenlerin bir özetidir, fiş değildir. Fişini restorandan alırsın.',
+  'visitReminder.title': 'Güzel miydi?',
+  'visitReminder.body':
+    'Dün akşamki yemeği bir Bite’a dönüştür. Fotoğraf, puan, tamam.',
   'newBite.title': 'Yeni Bite',
   'newBite.body': '{{author}} yeni bir Bite oluşturdu',
   'newBite.bodyWithName': '{{author}} yeni bir Bite oluşturdu: {{bite}}',

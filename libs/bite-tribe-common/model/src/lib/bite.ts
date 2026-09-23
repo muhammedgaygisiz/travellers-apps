@@ -27,6 +27,19 @@ export interface Bite {
   formatted?: string;
   addressStatus?: 'pending' | 'resolved' | 'failed';
   restaurantId?: string;
+  /**
+   * The meal this Bite was made from (GitHub issue #1112).
+   *
+   * Present only on a Bite created from a visit summary, and absent on every
+   * other one - which is most of them. It is what lets the nightly reminder
+   * know a meal has already become a Bite and stop asking, and it is
+   * deliberately **not** the menu-item link: that is `menuItemId`, it points
+   * at the dish rather than at the evening, and it is issue #1113's.
+   *
+   * It says nothing to other readers. A Bite made this way is an ordinary
+   * Bite, better sourced.
+   */
+  visitId?: string;
   tags?: string[];
   rating?: number;
   description?: string;

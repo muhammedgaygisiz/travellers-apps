@@ -21,6 +21,24 @@
           }
         </span>
         <span>{{ price(line.lineTotal) }}</span>
+
+        <!--
+          The dish someone actually ordered and ate, one tap from being a Bite
+          (GitHub issue #1112). Per row rather than one button for the meal,
+          because a Bite is about a dish - and the row is the only place that
+          knows which.
+        -->
+        @if (offersBite()) {
+          <ion-button
+            class="visit-summary__bite"
+            size="small"
+            fill="clear"
+            [attr.data-testid]="'visit-summary-create-bite'"
+            (click)="createBite.emit(line)"
+          >
+            {{ 'visit-summary-create-bite' | transloco }}
+          </ion-button>
+        }
       </li>
     }
   </ul>

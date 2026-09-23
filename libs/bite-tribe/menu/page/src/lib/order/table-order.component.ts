@@ -20,6 +20,9 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { RouterLink } from '@angular/router';
 import { NgTemplateOutlet } from '@angular/common';
 import { PageComponent } from 'common/ui/page';
+import { NavController } from '@ionic/angular/standalone';
+import { AuthService } from 'ta-firestore';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 import { PATH, currencyCodes } from 'utils';
 import {
   TABLE_ASSISTANCE_REFUSAL_KEYS,
@@ -37,6 +40,7 @@ import {
   TableOrderSubmissionService,
   TableVisitBillService,
   VisitSummaryService,
+  biteFromOrderLine,
   type TableCartLine,
   type TableOrderView,
 } from 'bite-tribe/table-order-data-access';
@@ -153,12 +157,28 @@ const symbolOf = (code: string): string => {
 })
 export class TableOrder implements OnInit {
   protected readonly service = inject(TableOrderService);
+  private readonly auth = inject(AuthService);
+  private readonly store = inject(BiteTribeStoreService);
+  private readonly navController = inject(NavController);
 
   protected readonly cart = this.service.cart;
   protected readonly history = this.service.history;
   protected readonly assistance = this.service.assistance;
   protected readonly bill = this.service.bill;
   protected readonly visitSummary = this.service.visitSummary;
+
+  /**
+   * Whether the guest holds an account, and so whether a dish can become a
+   * Bite from here (GitHub issue #1112).
+   *
+   * `getMember()` and not `getUser()`: an anonymous table guest has a uid and
+   * is not a member, `new-bite` is behind `authGuard`, and offering a button
+   * that bounces them at the next screen would be a worse answer than asking
+   * them to register - which is what the row beside it does.
+   */
+  protected readonly isMember = computed(
+    () => this.service.attempt() >= 0 && !!this.auth.getMember(),
+  );
 
   /** The two things the guest can ask for, in the order they are offered. */
   protected readonly assistanceKinds = TABLE_ASSISTANCE_KINDS;
@@ -383,6 +403,32 @@ export class TableOrder implements OnInit {
   /** Fetches the meal, or looks again while the trigger catches up. */
   protected showSummary(): void {
     void this.visitSummary.load();
+  }
+
+  /**
+   * Hands the Bite form a dish that has already been eaten
+   * (GitHub issue #1112).
+   *
+   * The draft goes through the store's cached bite, which is how the
+   * menu-item flow has prefilled the form since before this issue - and it is
+   * what makes the draft survive the account upgrade: issue #1657 keeps the
+   * uid, the store is not cleared by signing in, and the form reads the cache
+   * on load whichever screen the guest arrived from.
+   */
+  protected startBite(line: TableVisitBillLine): void {
+    const meal = this.visitSummary.summary();
+
+    if (!meal) {
+      return;
+    }
+
+    this.store.cacheBite(biteFromOrderLine(meal, line));
+    void this.navController.navigateForward([PATH.NEW_BITE]);
+  }
+
+  /** Sends an unregistered guest to sign up, keeping the meal they just ate. */
+  protected registerToWrite(): void {
+    void this.navController.navigateForward([PATH.START]);
   }
 
   /** Sends it, and forgets the address as it goes. */

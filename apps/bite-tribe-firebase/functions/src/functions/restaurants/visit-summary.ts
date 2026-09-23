@@ -51,6 +51,8 @@ export interface VisitSummary {
   restaurantId: string;
   restaurantName: string;
   tableLabel: string;
+  /** Where the restaurant is, so a Bite made from this meal is complete. */
+  restaurantPosition?: { latitude: number; longitude: number };
   closedAt: number;
   currency: string;
   lines: readonly TableVisitBillLine[];
@@ -59,6 +61,10 @@ export interface VisitSummary {
   settlementMethod?: TableVisitSettlementMethod;
   /** When this guest had it emailed. Its presence refuses a second send. */
   emailedAt?: number;
+  /** Whether a Bite has been made from this meal (GitHub issue #1112). */
+  biteCreated?: boolean;
+  /** Whether the one nightly reminder has gone out. */
+  reminded?: boolean;
 }
 
 /**

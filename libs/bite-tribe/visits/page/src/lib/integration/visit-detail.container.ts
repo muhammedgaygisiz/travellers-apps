@@ -8,8 +8,18 @@ import {
 } from '@angular/core';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { ActivatedRoute } from '@angular/router';
-import { MyVisitsService } from 'bite-tribe/table-order-data-access';
-import type { VisitSummary, VisitSummaryRefusalReason } from 'model';
+import { NavController } from '@ionic/angular/standalone';
+import {
+  MyVisitsService,
+  biteFromOrderLine,
+} from 'bite-tribe/table-order-data-access';
+import { BiteTribeStoreService } from 'bite-tribe/store';
+import { PATH } from 'utils';
+import type {
+  TableVisitBillLine,
+  VisitSummary,
+  VisitSummaryRefusalReason,
+} from 'model';
 import { VisitDetailPage } from '../components/visit-detail-page/visit-detail.page';
 
 /**
@@ -34,6 +44,7 @@ const REFUSAL_KEYS: Readonly<Record<VisitSummaryRefusalReason, string>> = {
       [loading]="loading()"
       [refusalKey]="refusalKey()"
       (retry)="load()"
+      (createBite)="startBite($event)"
     />
   `,
   imports: [VisitDetailPage],
@@ -41,6 +52,8 @@ const REFUSAL_KEYS: Readonly<Record<VisitSummaryRefusalReason, string>> = {
 export class VisitDetailContainer implements OnInit {
   private readonly service = inject(MyVisitsService);
   private readonly route = inject(ActivatedRoute);
+  private readonly store = inject(BiteTribeStoreService);
+  private readonly navController = inject(NavController);
 
   private readonly read = signal<VisitSummary | undefined>(undefined);
   private readonly refusal = signal<VisitSummaryRefusalReason | undefined>(
@@ -57,6 +70,27 @@ export class VisitDetailContainer implements OnInit {
 
   ngOnInit(): void {
     void this.load();
+  }
+
+  /**
+   * Hands the Bite form a dish that has already been eaten
+   * (GitHub issue #1112).
+   *
+   * Through the store's cached bite, which is how the menu-item flow has
+   * prefilled the form since before this issue: the form reads `cachedBite`
+   * on load, so the draft is handed over rather than pushed through the
+   * router - and it survives the navigation, a reload, and the account upgrade
+   * an anonymous guest goes through on the other screen.
+   */
+  startBite(line: TableVisitBillLine): void {
+    const meal = this.read();
+
+    if (!meal) {
+      return;
+    }
+
+    this.store.cacheBite(biteFromOrderLine(meal, line));
+    void this.navController.navigateForward([PATH.NEW_BITE]);
   }
 
   ionViewDidEnter(): void {

@@ -94,7 +94,9 @@
 
   Delivery is proven on iOS (Realtime, Run 4) and Android (DebugView, Run 10, 48 events in thirty minutes). The key metrics dashboard exists as dashboard-as-code — GA4 has no API to create one — in `tools/analytics/dashboard.config.mjs`, posted daily to [#991] by `.github/workflows/analytics-digest.yml`. See [Analytics Operations](../operations/analytics-operations.md).
 
-  Open: **D1/D7 retention tiles are not built**, though [#986] landed the BigQuery export on 1 September 2026 that makes them queryable. **iOS DebugView is an accepted gap** — Realtime already proves delivery from the device, and DebugView needs a dedicated Xcode debug-mode launch.
+  Closed: **D1/D7 retention** was unbuilt from launch until [#987] computed it from the BigQuery export on 23 September 2026, as `queries/retention-cohorts.sql` plus a Retention section in the daily digest. The activation funnel landed with it. D30 exists in the query but matures on 30 September 2026, thirty days after the export's first delivered day.
+
+  Open: **iOS DebugView is an accepted gap** — Realtime already proves delivery from the device, and DebugView needs a dedicated Xcode debug-mode launch.
 
 - ### Platform verification never passed on one build
 
@@ -236,6 +238,7 @@ users` and `Crash-free users` are the two tiles that count people rather than
 - [Current State - Nx And Dependency Migration Roadmap](nx-and-dependency-migration-roadmap.md)
 
 [#986]: https://github.com/muhammedgaygisiz/travellers-apps/issues/986
+[#987]: https://github.com/muhammedgaygisiz/travellers-apps/issues/987
 [#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
 [#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071
 [#1077]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1077

@@ -23,8 +23,11 @@
  *                     the note on the `crash-free-users` tile below.
  * - `breakdown`       Top `limit` values of `dimension` for `events`, by event
  *                     count. Rendered as a list rather than a single number.
- * - `console`         Cannot be expressed through the Data API at all (cohort
- *                     retention, stack traces); surfaced as a manual pointer.
+ * - `console`         Cannot be expressed through the Data API *or* the
+ *                     BigQuery export - Crashlytics stack traces, which have
+ *                     no read API at all; surfaced as a manual pointer.
+ *                     Cohort retention was one of these until issue #987 gave
+ *                     it a query.
  */
 
 /**
@@ -119,13 +122,13 @@ export const DASHBOARD_TILES = [
     metric: 'activeUsers',
     surface: 'consumer',
   },
-  {
-    id: 'retention',
-    title: 'D1 / D7 retention',
-    category: 'Retention',
-    type: 'console',
-    source: 'GA4 → Retention / cohort exploration',
-  },
+  // D1/D7 retention was a `console` tile here until issue #987. It is now
+  // computed from the BigQuery export by `queries/retention-cohorts.sql` and
+  // printed by the digest's own Retention section, so leaving the pointer
+  // would tell a reader to go and look up a number the same artifact already
+  // shows them. What stays console-only is what the export cannot answer:
+  // behavioural cohorts and segment overlap in GA4's exploration builder,
+  // which are an analyst's tool rather than a daily tile.
   // Stability. Two distinct signals, deliberately not merged into one number:
   //
   // - `app_exception` is logged by Crashlytics itself when a native process

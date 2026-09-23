@@ -88,6 +88,73 @@ export function datasetIdFor(propertyId) {
   return `analytics_${propertyId}`;
 }
 
+/**
+ * Raised instead of exiting when a caller asked for `soft` handling.
+ *
+ * `query.mjs` is run by a person who wants to know their credentials are
+ * wrong, so it exits. The digest runs unattended at 06:00 and posts one
+ * comment a day: a missing dataset or a revoked role there has to degrade to a
+ * line in the output rather than take the whole daily artifact down, the way a
+ * missing custom dimension already does on the GA4 side.
+ */
+export class BigQueryUnavailableError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'BigQueryUnavailableError';
+  }
+}
+
+/** Query ids (file basenames), sorted, with their leading comment as summary. */
+export function availableQueries() {
+  if (!fs.existsSync(QUERIES_DIR)) return [];
+  return fs
+    .readdirSync(QUERIES_DIR)
+    .filter((file) => file.endsWith('.sql'))
+    .sort()
+    .map((file) => {
+      const id = file.slice(0, -'.sql'.length);
+      const first = fs
+        .readFileSync(path.join(QUERIES_DIR, file), 'utf8')
+        .split('\n')[0];
+      return { id, summary: first.replace(/^--\s?/, '').trim() };
+    });
+}
+
+/** The SQL of a checked-in query, by id. */
+export function readCheckedInQuery(id) {
+  const file = path.join(QUERIES_DIR, `${id}.sql`);
+  if (!fs.existsSync(file)) {
+    const known = availableQueries()
+      .map((q) => q.id)
+      .join(', ');
+    fail(`Unknown query "${id}". Available: ${known || '(none)'}.`);
+  }
+  return fs.readFileSync(file, 'utf8');
+}
+
+/** `YYYYMMDD` for `daysAgo` days before today, in UTC to match `event_date`. */
+export function suffixDate(daysAgo) {
+  const date = new Date(Date.now() - daysAgo * 86_400_000);
+  return date.toISOString().slice(0, 10).replaceAll('-', '');
+}
+
+/**
+ * The wildcard events table, fully qualified.
+ *
+ * `events_*` also matches `events_intraday_*`, but the `_TABLE_SUFFIX` window
+ * every query applies excludes them: `intraday_20260923` sorts above any
+ * `YYYYMMDD` string, so a daily query never silently mixes in a partial day.
+ */
+export function eventsTableRef({ projectId, datasetId, intraday }) {
+  const prefix = intraday ? 'events_intraday_' : 'events_';
+  return `\`${projectId}.${datasetId}.${prefix}*\``;
+}
+
+/** Fill the `${EVENTS_TABLE}` placeholder a checked-in query declares. */
+export function resolveQuerySql(sql, table) {
+  return sql.replaceAll('${EVENTS_TABLE}', table);
+}
+
 /** Lazily create an authenticated REST client scoped for BigQuery. */
 export async function createBigQueryClient() {
   let GoogleAuth;
@@ -112,7 +179,7 @@ async function request(client, { url, method = 'GET', data }) {
  * first delivery, so it is a value rather than an error; everything else
  * (denied, disabled API) still exits loudly.
  */
-export async function getDataset(client, projectId, datasetId) {
+export async function getDataset(client, projectId, datasetId, { soft } = {}) {
   try {
     const res = await request(client, {
       url: `/projects/${projectId}/datasets/${datasetId}`,
@@ -120,6 +187,7 @@ export async function getDataset(client, projectId, datasetId) {
     return res.data;
   } catch (error) {
     if (error?.response?.status === 404) return null;
+    if (soft) throw asUnavailable(error);
     handleBigQueryError(error);
     return null; // unreachable — handleBigQueryError exits
   }
@@ -199,7 +267,7 @@ function decodeCell(field, value) {
  */
 export async function runQuery(
   client,
-  { projectId, sql, params = {}, location, maxRows = 200 },
+  { projectId, sql, params = {}, location, maxRows = 200, soft = false },
 ) {
   let res;
   try {
@@ -218,6 +286,7 @@ export async function runQuery(
       },
     });
   } catch (error) {
+    if (soft) throw asUnavailable(error);
     handleBigQueryError(error);
     return { rows: [], totalBytesProcessed: 0 }; // unreachable
   }
@@ -238,21 +307,30 @@ export async function runQuery(
       });
       payload = poll.data;
     } catch (error) {
+      if (soft) throw asUnavailable(error);
       handleBigQueryError(error);
     }
   }
 
   if (!payload.jobComplete) {
-    fail(
+    const message =
       `BigQuery job did not finish within ${(MAX_POLLS * QUERY_TIMEOUT_MS) / 1000}s. ` +
-        'Re-run, or narrow the window with --days.',
-    );
+      'Re-run, or narrow the window with --days.';
+    if (soft) throw new BigQueryUnavailableError(message);
+    fail(message);
   }
 
   return {
     rows: decodeRows(payload.schema, payload.rows),
     totalBytesProcessed: Number(payload.totalBytesProcessed ?? 0),
   };
+}
+
+/** The message `handleBigQueryError` would have printed, as a throwable. */
+function asUnavailable(error) {
+  return new BigQueryUnavailableError(
+    String(error?.response?.data?.error?.message ?? error?.message ?? error),
+  );
 }
 
 export function handleBigQueryError(error) {

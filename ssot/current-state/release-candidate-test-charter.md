@@ -136,7 +136,7 @@ The business app has no Playwright coverage and was never exercised in any of th
 
 - Confirm Crashlytics receives a report from each native platform. Note what the app actually sends: `FirebaseErrorHandlerService` calls `recordException`, which files a **non-fatal**, and it only runs on a native platform. A JavaScript error never crashes the native process, so there is no path that produces a fatal crash report from app code. Trigger an unhandled Angular error, restart the app so the report uploads, and expect it under Non-fatals rather than Crashes.
 - Verify the analytics events in DebugView from a real device, not only from the web build. On Android this needs a build that carries the [#1387] fix: the native collection flag persists in SharedPreferences, so a device that once ran a dev build stays silent under any earlier artifact, build 95 included. Expect the `App measurement disabled by setAnalyticsCollectionEnabled(false)` line to be gone and `Logging event` lines to follow.
-- Confirm the key metrics dashboard exists and receives data. **Confirmed on 29 August 2026.** The dashboard is not a console dashboard: GA4 has no API to create one, so the nine launch tiles in [Implementation - Analytics Events](../implementation/analytics-events.md) live as code in `tools/analytics/dashboard.config.mjs`, and `.github/workflows/analytics-digest.yml` runs `digest.mjs` daily against GA4 property `487035057` and posts the result to [#991]. The 29 August run reported 144 restaurant and Bite views, 38 active users and 5 Bites, each a total for the seven-day window rather than a daily rate - the tiles were titled "/ day" but never divided by the window, corrected on 31 August 2026, and correctly raised its own threshold alert on sign-ups at zero for the window. Two tiles stay console-only because the Data API cannot do cohorts - D1/D7 retention and crash-free users - and [#986] is what would close them.
+- Confirm the key metrics dashboard exists and receives data. **Confirmed on 29 August 2026.** The dashboard is not a console dashboard: GA4 has no API to create one, so the nine launch tiles in [Implementation - Analytics Events](../implementation/analytics-events.md) live as code in `tools/analytics/dashboard.config.mjs`, and `.github/workflows/analytics-digest.yml` runs `digest.mjs` daily against GA4 property `487035057` and posts the result to [#991]. The 29 August run reported 144 restaurant and Bite views, 38 active users and 5 Bites, each a total for the seven-day window rather than a daily rate - the tiles were titled "/ day" but never divided by the window, corrected on 31 August 2026, and correctly raised its own threshold alert on sign-ups at zero for the window. Two tiles were console-only at that run because the Data API cannot do cohorts - D1/D7 retention and crash-free users - and both have since closed: crash-free users became a derived tile on 31 August 2026 under [#912], and D1/D7 retention a BigQuery query on 23 September 2026 under [#987].
 
 ## Pass Criteria
 
@@ -204,7 +204,9 @@ assigned for ordering only and each page says so.
 - [Issue [#1181] - signed Android and iOS CI builds](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
 
 [#907]: https://github.com/muhammedgaygisiz/travellers-apps/issues/907
+[#912]: https://github.com/muhammedgaygisiz/travellers-apps/issues/912
 [#986]: https://github.com/muhammedgaygisiz/travellers-apps/issues/986
+[#987]: https://github.com/muhammedgaygisiz/travellers-apps/issues/987
 [#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
 [#1179]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1179
 [#1181]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1181

@@ -33,6 +33,13 @@ Tooling lives in `tools/analytics/` (setup: `tools/analytics/README.md`):
   export link as config-as-code, and `npm run analytics:query` runs the SQL
   checked in under `tools/analytics/queries/`. See BigQuery Export below.
 
+- **Funnel and cohorts** — the activation funnel and D1/D7/D30 retention, as
+  `queries/activation-funnel.sql` and `queries/retention-cohorts.sql` with
+  their steps and horizons declared in `cohorts.config.mjs`. The digest prints
+  the headline of each; `npm run analytics:query -- activation-funnel` and
+  `... -- retention-cohorts --days=30` give the per-day breakdown. See
+  Activation And Retention below.
+
 Dashboard-as-code and the event taxonomy are documented in
 [Implementation - Analytics Events](../implementation/analytics-events.md).
 
@@ -134,32 +141,80 @@ rather than a missing grant. Linking from the GA4 console is the equivalent
 path and additionally grants the Analytics service agent its BigQuery
 permissions implicitly.
 
+## Activation And Retention (Tier 2)
+
+[issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987)
+is the second half of what the export was for. A dashboard tile counts events
+in a window; these two count **people**, followed from the day they arrived.
+
+- **Activation funnel** — arrival → onboarding started → onboarding completed
+  → sign-up → first Bite, per arrival day and per platform. The two conversion
+  steps are `sign_up` and `bite_created`, which are GA4 key events registered
+  by `provision-ga4.mjs`, so the funnel and the GA4 console agree on what a
+  conversion is.
+- **Retention cohorts** — D1/D7/D30 by arrival day. **Classic** retention:
+  active on exactly that day, which is what GA4's own cohort exploration shows
+  and therefore what these numbers can be checked against.
+
+Three properties of the pair are worth knowing before reading a number from
+them.
+
+**Arrival is `first_open` _or_ `first_visit`.** GA4 logs the first on iOS and
+Android and the second on the web for the same moment. Naming only one drops
+every arrival on the other platform, and on this property the web is where the
+arrivals are: 42 of 92 in the seven days to 22 September 2026.
+
+**An unmatured horizon is `NULL`, never `0`.** A cohort that arrived three days
+ago has no D7. Counting it would report 0, which is indistinguishable from a
+cohort that arrived and never came back - alarming and wrong in the same
+direction. Maturity is judged against the last day the export actually
+delivered rather than the last day requested, because GA4 writes a day's table
+up to 24h late and the digest runs at 06:00.
+
+**The cohorts are small enough that one person is several points.** In the
+seven days to 22 September 2026 a D7 horizon covered 18 users. A single
+returning account moves that rate by 5.6 points, so these read as direction
+rather than as rates, and the digest prints the cohort size beside every
+percentage for exactly that reason.
+
 ## Limits
 
 - GA4 has no API to create visual dashboards/explorations — the config + report
   is the reproducible substitute.
 - The Data API is aggregated and quota-limited; retention cohorts and raw event
   joins need BigQuery.
-- Retention (D1/D7) remains a console tile until the BigQuery export has
-  delivered enough days to compute a cohort from.
+- Retention (D1/D7) was a console tile until
+  [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987)
+  computed it from the export on 23 September 2026. What the export still
+  cannot answer is anything before **31 August 2026**, its first delivered day,
+  and D30 for a cohort that has not lived thirty days yet - the first one
+  matures on 30 September 2026. GA4's exploration builder stays the place for
+  behavioural cohorts and segment overlap, which are an analyst's question
+  rather than a daily tile.
 
 ## Roadmap (Tier 2–3)
 
-| Item                                     | Issue                                                                       | Tier |
-| ---------------------------------------- | --------------------------------------------------------------------------- | ---- |
-| BigQuery export as analytics foundation  | [issue 986](https://github.com/muhammedgaygisiz/travellers-apps/issues/986) | 2    |
-| Activation funnel + retention cohorts    | [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) | 2    |
-| Unified growth + stability daily digest  | [issue 988](https://github.com/muhammedgaygisiz/travellers-apps/issues/988) | 2    |
-| GDPR consent mode + PII/retention review | [issue 989](https://github.com/muhammedgaygisiz/travellers-apps/issues/989) | 3    |
+| Item                                     | Issue                                                                                  | Tier |
+| ---------------------------------------- | -------------------------------------------------------------------------------------- | ---- |
+| BigQuery export as analytics foundation  | [issue 986](https://github.com/muhammedgaygisiz/travellers-apps/issues/986)            | 2    |
+| Activation funnel + retention cohorts    | [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) — **done** | 2    |
+| Unified growth + stability daily digest  | [issue 988](https://github.com/muhammedgaygisiz/travellers-apps/issues/988)            | 2    |
+| GDPR consent mode + PII/retention review | [issue 989](https://github.com/muhammedgaygisiz/travellers-apps/issues/989)            | 3    |
 
 [issue 988](https://github.com/muhammedgaygisiz/travellers-apps/issues/988) is **done**, landed with the soft-launch monitoring loop under
 [issue-912][#912]: the digest is one artifact answering both "are we growing?" and
 "are we breaking?", and crash-free users carries a threshold. See Stability
 Signal above.
 
-Sequencing: BigQuery export ([issue 986](https://github.com/muhammedgaygisiz/travellers-apps/issues/986)) unblocks funnels/cohorts
-([issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987)); consent/PII ([issue 989](https://github.com/muhammedgaygisiz/travellers-apps/issues/989)) is launch-sensitive for EU and
-should not slip.
+Sequencing: BigQuery export ([issue 986](https://github.com/muhammedgaygisiz/travellers-apps/issues/986)) unblocked funnels/cohorts
+([issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987), landed 23 September 2026); consent/PII
+([issue 989](https://github.com/muhammedgaygisiz/travellers-apps/issues/989)) is launch-sensitive for EU and
+should not slip. It waited deliberately on
+[issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987):
+enabling the consent gate resets the Firebase app instance id for anyone
+passing through the undecided window, which breaks a cohort spanning that
+release, so the cohort queries had to exist and be read first. That
+precondition is now met.
 
 [issue 986](https://github.com/muhammedgaygisiz/travellers-apps/issues/986) shipped the tooling, the checked-in SQL and this documentation,
 and the export was **enabled on 1 September 2026** — link

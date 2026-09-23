@@ -415,8 +415,16 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   Retention and launch monitoring rely on events GA4 collects automatically plus
   the existing exception handler:
 
-- `first_open`, `session_start`, `screen_view` — GA4 automatic collection.
+- `first_open`, `first_visit`, `session_start`, `screen_view` — GA4 automatic
+  collection.
 - `exception` — emitted by `FirebaseErrorHandlerService`.
+
+  `first_open` and `first_visit` are the same moment on different platforms:
+  GA4 logs the first for an app install and the second for a web session, and
+  a funnel or cohort that names only one silently drops every arrival on the
+  other. The activation funnel of [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) counts both as one step, which is
+  what made the web's conversion visible at all.
+
 - ## Launch Dashboard Spec
 
   Build a daily-monitoring dashboard in the Firebase console (Analytics
@@ -431,7 +439,7 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   | Ratings submitted           | Creation          | `bucketlist_rated` count            |
   | Searches                    | Discovery         | `search_performed` count            |
   | Restaurant + Bite views     | Discovery         | `restaurant_viewed` + `bite_viewed` |
-  | D1 / D7 retention           | Retention         | GA4 retention / cohort report       |
+  | D1 / D7 retention           | Retention         | `queries/retention-cohorts.sql`     |
   | Active users                | Retention         | GA4 `activeUsers`                   |
   | Crash-free users            | Launch monitoring | `app_exception` users vs all users  |
   | Unhandled errors            | Launch monitoring | `exception` count                   |
@@ -439,6 +447,13 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   | Crash traces and non-fatals | Launch monitoring | Crashlytics console                 |
 
   Keep the dashboard scoped to launch signals; resist adding vanity metrics.
+
+  Two of these are not tiles and cannot become ones. D1/D7 retention and the
+  activation funnel are populations followed over time rather than totals for a
+  window, so [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) gave them checked-in SQL over the BigQuery export
+  and their own sections in the daily digest. They are listed here because the
+  launch dashboard is where a reader looks for them, not because
+  `dashboard.config.mjs` holds them.
 
   Every metric is a **total for the window**, not a per-day rate. Until 31
   August 2026 six of them were titled "/ day" and one "Daily active users",

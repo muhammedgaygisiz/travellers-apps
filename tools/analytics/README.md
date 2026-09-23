@@ -143,11 +143,17 @@ tiles that resolve to a single number, because those had exited and would have
 taken the live 06:00 digest down. Until it is registered, the two user counts are
 the unfiltered figures they always were and the digest says so above the table.
 
-Two tiles stay console-only because the Data API cannot express them at all:
+The digest also carries two sections the Data API cannot produce at all, read
+from the BigQuery export (see below): the **activation funnel** and
+**retention**. Both degrade to a line naming the reason if BigQuery is
+unreachable, so a revoked role cannot take the daily artifact down with it.
 
-- **D1 / D7 retention** — GA4 → Retention / cohort exploration.
+One tile stays console-only, because nothing has a read API for it:
+
 - **Crash stack traces and non-fatals** — Firebase Crashlytics → Issues. Counts
   come from GA4; traces and `recordException` reports exist only in Crashlytics.
+
+D1/D7 retention was on this list until issue #987 computed it from the export.
 
 ## BigQuery export (raw event data)
 
@@ -184,6 +190,32 @@ delivered `events_20260831` inside 20 hours: the first delivery covered the day
 _before_ the link existed. Do not plan around more history than that, though.
 One prior day is what was observed, not a documented backfill window, and
 nothing reaches back to the start of the soft launch.
+
+### Activation funnel and retention cohorts
+
+Both are checked in, and both are run by the digest as well as by hand:
+
+```bash
+npm run analytics:query -- activation-funnel --days=14
+npm run analytics:query -- retention-cohorts --days=30
+```
+
+The steps and horizons are declared in `cohorts.config.mjs`;
+`analytics-events.spec.ts` fails if they drift from the taxonomy or from the
+SQL that measures them.
+
+Three things to know before reading a number:
+
+- **Arrival is `first_open` or `first_visit`.** GA4 logs one for an app install
+  and the other for a web session. A funnel naming only the first reports no
+  web arrivals at all.
+- **An unmatured horizon is blank, not zero.** A cohort three days old has no
+  D7 yet, and a 0 there would read as total churn. Maturity is measured against
+  the last day the export actually delivered, which is routinely yesterday
+  rather than today.
+- **`--days` has to cover the horizon.** D7 needs the window to reach seven
+  days past a cohort, so `--days=7` matures only its oldest day. Use 30 or
+  more. Nothing exists before 31 August 2026 either way.
 
 ### One-time access, and who can do what
 

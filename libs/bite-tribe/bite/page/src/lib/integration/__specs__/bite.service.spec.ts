@@ -17,6 +17,7 @@ const Mock = {
   back: jest.fn(),
   setEditingBite: jest.fn(),
   clearCachedBite: jest.fn(),
+  cachedBite: jest.fn(),
   getCurrencyByPosition: jest.fn(),
   currency: (): string => 'EUR',
 };
@@ -81,6 +82,7 @@ describe('BiteService', () => {
 
       expect(AnalyticsMock.logEvent).toHaveBeenCalledWith(
         AnalyticsEvent.BiteCreated,
+        { source: 'manual' },
       );
     });
 
@@ -137,6 +139,7 @@ describe('BiteService', () => {
 
       expect(AnalyticsMock.logEvent).toHaveBeenCalledWith(
         AnalyticsEvent.BiteCreated,
+        { source: 'manual' },
       );
     });
   });
@@ -210,6 +213,84 @@ describe('BiteService', () => {
       await service.determineCurrencyForPosition(undefined);
 
       expect(Mock.getCurrencyByPosition).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * The links a prefilled draft carries, which the form cannot (issue #1114).
+   *
+   * `visitId`, `menuItemId` and `variantId` are not form controls - a guest can
+   * neither see nor change them - so before this they were dropped between the
+   * draft and Firestore, and the Bites written from a meal or a menu row
+   * reached the collection with no link to either.
+   */
+  describe('the draft a Bite was started from', () => {
+    const draft = {
+      restaurantId: 'restaurant-1',
+      visitId: 'visit-1',
+      menuItemId: 'item-margherita',
+      variantId: 'variant-large',
+    };
+
+    it('carries the meal and the dish onto the document', async () => {
+      Mock.cachedBite.mockReturnValue(draft);
+
+      await service.submitNewBite({
+        id: '123',
+        name: 'Margherita',
+        restaurantId: 'restaurant-1',
+      });
+
+      expect(Mock.submitNewBite).toHaveBeenCalledWith({
+        name: 'Margherita',
+        restaurantId: 'restaurant-1',
+        visitId: 'visit-1',
+        menuItemId: 'item-margherita',
+        variantId: 'variant-large',
+      });
+    });
+
+    it('reports a Bite made from a meal as coming from one', async () => {
+      Mock.cachedBite.mockReturnValue(draft);
+
+      await service.submitNewBite({
+        id: '123',
+        name: 'Margherita',
+        restaurantId: 'restaurant-1',
+      });
+
+      expect(AnalyticsMock.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.BiteCreated,
+        { source: 'visit' },
+      );
+    });
+
+    /**
+     * The guard that matters. Picking a different restaurant clears
+     * `restaurantId` on the form, and a menu item id carried past that point
+     * would file a Bite under a restaurant whose menu never had that dish.
+     */
+    it('drops the link once the Bite is about another restaurant', async () => {
+      Mock.cachedBite.mockReturnValue(draft);
+
+      await service.submitNewBite({
+        id: '123',
+        name: 'Margherita',
+        restaurantId: 'restaurant-2',
+      });
+
+      expect(Mock.submitNewBite).toHaveBeenCalledWith({
+        name: 'Margherita',
+        restaurantId: 'restaurant-2',
+      });
+    });
+
+    it('leaves a hand-written Bite alone', async () => {
+      Mock.cachedBite.mockReturnValue(undefined);
+
+      await service.submitNewBite({ id: '123', name: 'Test Bite' });
+
+      expect(Mock.submitNewBite).toHaveBeenCalledWith({ name: 'Test Bite' });
     });
   });
 });

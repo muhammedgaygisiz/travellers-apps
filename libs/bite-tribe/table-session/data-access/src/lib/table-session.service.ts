@@ -18,7 +18,7 @@ import {
   type TableOrderingAvailability,
 } from 'model';
 import { lastValueFrom } from 'rxjs';
-import { AuthService } from 'ta-firestore';
+import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 
 /**
  * What a guest sees between scanning a table code and being able to order
@@ -110,6 +110,7 @@ const contextOf = (resolved: TableScanContext): TableScanContext => ({
 export class TableSessionService {
   private readonly api = inject(TableSessionApiService);
   private readonly authService = inject(AuthService);
+  private readonly analytics = inject(AnalyticsService);
   private readonly route = inject(ActivatedRoute);
 
   private readonly view = signal<TableSessionView>({ kind: 'loading' });
@@ -167,6 +168,18 @@ export class TableSessionService {
       : undefined;
   });
 
+  /**
+   * Whether a registered member is signed in right now (GitHub issue #1114).
+   *
+   * `getMember()` rather than `getUser()`, because every table guest holds an
+   * account from the scan onwards - the anonymous one this screen mints - and
+   * "signed in" would therefore be true of everybody. The funnel asks whether
+   * this was somebody BiteTribe already had.
+   */
+  private hasAccount(): boolean {
+    return !!this.authService.getMember();
+  }
+
   async resolve(): Promise<void> {
     if (!this.token) {
       this.view.set({
@@ -174,6 +187,8 @@ export class TableSessionService {
         reason: 'unknownToken',
         nextStep: 'askStaff',
       });
+
+      this.reportScan('refused');
 
       return;
     }
@@ -184,6 +199,8 @@ export class TableSessionService {
 
     if (isTableSessionCallError(result)) {
       this.view.set({ kind: 'failed', failure: result.failure });
+
+      this.reportScan('failed');
 
       return;
     }
@@ -196,6 +213,8 @@ export class TableSessionService {
         ...(result.reopensAt ? { reopensAt: result.reopensAt } : {}),
       });
 
+      this.reportScan('refused');
+
       return;
     }
 
@@ -206,6 +225,31 @@ export class TableSessionService {
         ? { kind: 'confirm', context }
         : { kind: 'menuOnly', context, ordering: result.ordering },
     );
+
+    this.reportScan(result.ordering.available ? 'confirm' : 'menu_only', {
+      restaurant_id: context.restaurant.id,
+      table_id: context.table.id,
+    });
+  }
+
+  /**
+   * The top of the order-to-Bite funnel (GitHub issue #1114).
+   *
+   * Emitted from all four ways a scan can end, because the denominator of
+   * every rate below it is scans rather than successful ones - a sticker on a
+   * table that has been taken out of service is a guest the platform lost, and
+   * it looks identical to no scan at all if only the resolved ones are
+   * counted. A refusal names no restaurant, so the ids are simply left off.
+   */
+  private reportScan(
+    outcome: 'confirm' | 'menu_only' | 'refused' | 'failed',
+    where?: { restaurant_id: string; table_id: string },
+  ): void {
+    this.analytics.logEvent(AnalyticsEvent.TableCodeScanned, {
+      outcome,
+      has_account: this.hasAccount(),
+      ...(where ?? {}),
+    });
   }
 
   /** Turns sharing on or off. Reachable only from the confirmation screen. */
@@ -324,6 +368,17 @@ export class TableSessionService {
       kind: 'joined',
       status: result.status,
       context: result.context,
+    });
+
+    // Only here: a session that was refused, or that landed on `menuOnly`
+    // because the kitchen paused while the guest read the screen, did not
+    // start. `status` keeps the two that did apart - a table staff had already
+    // seated, and one they have only been told about (`RD-TS-1`).
+    this.analytics.logEvent(AnalyticsEvent.TableSessionStarted, {
+      restaurant_id: result.context.restaurant.id,
+      table_id: result.context.table.id,
+      has_account: this.hasAccount(),
+      status: result.status,
     });
   }
 

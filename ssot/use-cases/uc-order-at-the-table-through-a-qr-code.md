@@ -703,6 +703,22 @@ list that never holds two things, with an ordering rule and a drop policy no
 path could reach. What is shared is the shape of the answer and the argument for
 writing an intent down at all.
 
+## What This Journey Reports
+
+Nothing, until issue [#1114]. The whole scan-browse-order journey shipped with
+no analytics at all - the seven `table_*` events that existed were the business
+app's and describe how staff work the room - so the platform could not say
+whether any of it fed the core product.
+
+It now reports four steps of the order-to-Bite funnel from the guest's side:
+the scan (`table_code_scanned`, counted however it ended), the session
+(`table_session_started`), the order (`table_order_submitted`, with a replay
+counted once) and the Bite offer on the summary afterwards
+(`table_bite_prompt_shown`). Each carries the restaurant, the table and one bit
+about the person - whether BiteTribe already had them - and none of them
+carries a dish name, a uid or an address. The taxonomy and the reasoning are in
+[Implementation - Analytics Events](../implementation/analytics-events.md).
+
 ## Success Criteria
 
 - Scanning a table QR resolves to exactly one restaurant, room, and table, confirmed on screen before any order can be placed. **Met** by issues [#1100] and [#1101].
@@ -949,6 +965,7 @@ guest's phone is retrying.
 ## Related Pages
 
 - [Recorded Decisions](../decisions/recorded-decisions.md) - `RD-TS-1` to `RD-TS-36` bind this page
+- [Implementation - Analytics Events](../implementation/analytics-events.md) - the order-to-Bite funnel this journey's four guest steps report into
 - [Architecture - Auth](../architecture/auth.md) - the anonymous guest
 - [Architecture - Firebase](../architecture/firebase.md) - the rules on `tableSessions`, and the collection-group rule and index the staff queue reads through
 - [Implementation - Firebase Functions](../implementation/firebase-functions.md) - the callables
@@ -971,6 +988,7 @@ guest's phone is retrying.
 [#1102]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1102
 [#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103
 [#1104]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1104
+[#1114]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1114
 [#1105]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1105
 [#1106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1106
 [#1107]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1107

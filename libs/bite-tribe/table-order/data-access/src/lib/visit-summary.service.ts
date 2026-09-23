@@ -4,6 +4,7 @@ import {
   isTableSessionCallError,
   type TableSessionCallFailure,
 } from 'bite-tribe/api';
+import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 import type {
   VisitSummary,
   VisitSummaryEmailRefusalReason,
@@ -60,6 +61,8 @@ export const VISIT_SUMMARY_EMAIL_REFUSAL_KEYS: Readonly<
 @Injectable()
 export class VisitSummaryService {
   private readonly api = inject(VisitSummaryApiService);
+  private readonly analytics = inject(AnalyticsService);
+  private readonly authService = inject(AuthService);
 
   private readonly read = signal<VisitSummary | undefined>(undefined);
   private readonly refusal = signal<VisitSummaryRefusalReason | undefined>(
@@ -162,9 +165,39 @@ export class VisitSummaryService {
       }
 
       this.read.set(result.summary);
+      this.reportPrompt(result.summary);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  /**
+   * The offer to turn this meal into a Bite, counted once (issue #1114).
+   *
+   * Once per visit rather than once per read: the screen offers another look
+   * while the trigger is still writing the summary (`RD-TS-49`), so a guest
+   * who taps twice saw one offer. The guard is a field rather than a flag on
+   * the summary, because what is being counted is this screen showing it.
+   *
+   * It is emitted where the summary lands rather than from the template,
+   * because a component cannot say "shown" once - it re-renders - and because
+   * the taxonomy keeps emission in the integration layer.
+   */
+  private promptedFor?: string;
+
+  private reportPrompt(summary: VisitSummary): void {
+    if (this.promptedFor === summary.id) {
+      return;
+    }
+
+    this.promptedFor = summary.id;
+
+    this.analytics.logEvent(AnalyticsEvent.TableBitePromptShown, {
+      restaurant_id: summary.restaurantId,
+      visit_id: summary.id,
+      has_account: !!this.authService.getMember(),
+      surface: 'table',
+    });
   }
 
   /**

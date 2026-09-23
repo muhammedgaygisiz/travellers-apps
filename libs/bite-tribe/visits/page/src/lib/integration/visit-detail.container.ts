@@ -14,6 +14,7 @@ import {
   biteFromOrderLine,
 } from 'bite-tribe/table-order-data-access';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 import { PATH } from 'utils';
 import type {
   TableVisitBillLine,
@@ -54,6 +55,8 @@ export class VisitDetailContainer implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly store = inject(BiteTribeStoreService);
   private readonly navController = inject(NavController);
+  private readonly analytics = inject(AnalyticsService);
+  private readonly authService = inject(AuthService);
 
   private readonly read = signal<VisitSummary | undefined>(undefined);
   private readonly refusal = signal<VisitSummaryRefusalReason | undefined>(
@@ -88,6 +91,13 @@ export class VisitDetailContainer implements OnInit {
     if (!meal) {
       return;
     }
+
+    this.analytics.logEvent(AnalyticsEvent.TableBiteStarted, {
+      restaurant_id: meal.restaurantId,
+      visit_id: meal.id,
+      has_account: !!this.authService.getMember(),
+      surface: 'visit_detail',
+    });
 
     this.store.cacheBite(biteFromOrderLine(meal, line));
     void this.navController.navigateForward([PATH.NEW_BITE]);
@@ -125,6 +135,16 @@ export class VisitDetailContainer implements OnInit {
       }
 
       this.read.set(result.summary);
+
+      // The same offer as the table screen's, a day or a week later - which is
+      // what `surface` is for. Once per read is once per visit here: this
+      // container reads one meal, named by the route (issue #1114).
+      this.analytics.logEvent(AnalyticsEvent.TableBitePromptShown, {
+        restaurant_id: result.summary.restaurantId,
+        visit_id: result.summary.id,
+        has_account: !!this.authService.getMember(),
+        surface: 'visit_detail',
+      });
     } finally {
       this.loading.set(false);
     }

@@ -9,7 +9,7 @@ import {
   TableVisitBillApiService,
   VisitSummaryApiService,
 } from 'bite-tribe/api';
-import { AuthService } from 'ta-firestore';
+import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 import type { Menu, MenuItem, TableScanContext, TableSession } from 'model';
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import { NetworkStatusService } from 'common/networkstatus';
@@ -100,6 +100,7 @@ describe(TableOrderService.name, () => {
   let loadPublicMenu: jest.Mock;
   let submit: jest.Mock;
   let session$: BehaviorSubject<{ session?: TableSession; live: boolean }>;
+  let logEvent: jest.Mock;
 
   const build = (token: string | null = CONTEXT.token): TableOrderService => {
     TestBed.configureTestingModule({
@@ -159,8 +160,13 @@ describe(TableOrderService.name, () => {
           provide: AuthService,
           useValue: {
             getUser: (): { uid: string } => ({ uid: SESSION.guestUserId }),
+            // A table guest, which is what this screen is nearly always for:
+            // `getMember` answers null for the anonymous account the scan
+            // mints, and the funnel of issue #1114 reads it to segment.
+            getMember: (): null => null,
           },
         },
+        { provide: AnalyticsService, useValue: { logEvent } },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -192,6 +198,7 @@ describe(TableOrderService.name, () => {
       restaurant: { id: CONTEXT.restaurant.id, name: CONTEXT.restaurant.name },
       menu: MENU,
     });
+    logEvent = jest.fn();
     submit = jest.fn().mockResolvedValue({
       ok: true,
       order: { id: 'order-1', total: 12, lines: [] },
@@ -332,6 +339,73 @@ describe(TableOrderService.name, () => {
 
       expect(service.state()).toMatchObject({ kind: 'placed' });
       expect(service.cart.isEmpty()).toBe(true);
+    });
+
+    /**
+     * The funnel's middle step (issue #1114). How many lines, never what was
+     * on them: a dish name is the restaurant's business rather than a measure.
+     */
+    it('counts an order that reached the kitchen', async () => {
+      submit.mockResolvedValue({
+        ok: true,
+        order: { id: 'order-1', total: 12, lines: [{}, {}] },
+        tableStatus: 'ordering',
+      });
+      await ordering();
+      service.add({ item: MARGHERITA });
+
+      await service.submit();
+
+      expect(logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.TableOrderSubmitted,
+        {
+          restaurant_id: CONTEXT.restaurant.id,
+          table_id: CONTEXT.table.id,
+          has_account: false,
+          line_count: 2,
+        },
+      );
+    });
+
+    /**
+     * A replay is the backend saying it had already applied this exact intent
+     * (`RD-TS-9`), so the order reached the kitchen once. A guest whose phone
+     * lost the answer and asked again is one dinner, not two.
+     */
+    it('does not count a replayed order twice', async () => {
+      submit.mockResolvedValue({
+        ok: true,
+        replayed: true,
+        order: { id: 'order-1', total: 12, lines: [{}] },
+        tableStatus: 'ordering',
+      });
+      await ordering();
+      service.add({ item: MARGHERITA });
+
+      await service.submit();
+
+      expect(service.state()).toMatchObject({ kind: 'placed', replayed: true });
+      expect(logEvent).not.toHaveBeenCalledWith(
+        AnalyticsEvent.TableOrderSubmitted,
+        expect.anything(),
+      );
+    });
+
+    it('counts nothing for an order the restaurant refused', async () => {
+      submit.mockResolvedValue({
+        ok: false,
+        reason: 'itemUnavailable',
+        item: { id: MARGHERITA.id, name: MARGHERITA.name },
+      });
+      await ordering();
+      service.add({ item: MARGHERITA });
+
+      await service.submit();
+
+      expect(logEvent).not.toHaveBeenCalledWith(
+        AnalyticsEvent.TableOrderSubmitted,
+        expect.anything(),
+      );
     });
   });
 

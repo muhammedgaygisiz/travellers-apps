@@ -53,6 +53,12 @@ export const AnalyticsEvent = {
   TableDisabled: 'table_disabled',
   TableVisitOpened: 'table_visit_opened',
   TableVisitClosed: 'table_visit_closed',
+  // Order-to-Bite funnel, consumer app (epic #1073, issue #1114)
+  TableCodeScanned: 'table_code_scanned',
+  TableSessionStarted: 'table_session_started',
+  TableOrderSubmitted: 'table_order_submitted',
+  TableBitePromptShown: 'table_bite_prompt_shown',
+  TableBiteStarted: 'table_bite_started',
 } as const;
 
 export type AnalyticsEventName =
@@ -98,7 +104,21 @@ export interface AnalyticsEventParamMap {
     // was no longer the one the user confirmed, so nothing was deleted.
     reason: 'reauth_required' | 'reauth_failed' | 'account_changed' | 'unknown';
   };
-  [AnalyticsEvent.BiteCreated]: never;
+  /**
+   * Where the Bite came from (GitHub issue #1114).
+   *
+   * The last step of the order-to-Bite funnel, and the reason it is a
+   * parameter on the event that already exists rather than a second event for
+   * the same moment: a published Bite is a published Bite, and the launch
+   * dashboard's count of them must not change because the funnel wanted to
+   * read one.
+   *
+   * `BiteSource` in `bite-tribe/bite` is the same union, inlined here for the
+   * reason every other union on this page is - `scope:common` may not import
+   * `scope:bite-tribe` - and compared against it as text by
+   * `analytics-events.spec.ts`.
+   */
+  [AnalyticsEvent.BiteCreated]: { source: 'visit' | 'menu' | 'manual' };
   [AnalyticsEvent.BiteImageUploaded]: never;
   [AnalyticsEvent.BiteImageUploadFailed]: { code: string };
   [AnalyticsEvent.BiteImageUploadRetried]: never;
@@ -173,6 +193,91 @@ export interface AnalyticsEventParamMap {
     /** How the visit ended: staff closed it, or it was abandoned. */
     outcome: 'closed' | 'abandoned';
   };
+  /**
+   * The top of the funnel, and the one step whose restaurant can be unknown.
+   *
+   * A token that resolves to nothing names no restaurant and no table - the
+   * refusal says why it was refused and not where - so both ids are **absent**
+   * on a `refused` or `failed` scan rather than sent empty, the same answer
+   * `guests` gives when a host recorded no party size. Every rate over this
+   * event therefore reads `outcome` before it reads a restaurant.
+   */
+  [AnalyticsEvent.TableCodeScanned]: Partial<
+    Pick<TableGuestParams, 'restaurant_id' | 'table_id'>
+  > &
+    Pick<TableGuestParams, 'has_account'> & {
+      /** What the scan resolved into, from the guest's side of it. */
+      outcome: 'confirm' | 'menu_only' | 'refused' | 'failed';
+    };
+  [AnalyticsEvent.TableSessionStarted]: TableGuestParams & {
+    /** Whether staff had the table seated already, or were only told. */
+    status: 'pending' | 'active';
+  };
+  [AnalyticsEvent.TableOrderSubmitted]: TableGuestParams & {
+    /** How many lines the order carried. Never what was on them. */
+    line_count: number;
+  };
+  /**
+   * The offer to turn a meal into a Bite, and the draft that accepts it.
+   *
+   * No `table_id` on either: the object here is the **visit**, which outlives
+   * the table it started at and is what `table_visit_closed` above names too -
+   * so the two halves of the funnel join on `visit_id` and a table would be a
+   * fourth id nothing reads. `My visits` has no table to give in any case: a
+   * summary carries the label that was printed on it, not the id behind it.
+   */
+  [AnalyticsEvent.TableBitePromptShown]: Pick<
+    TableGuestParams,
+    'restaurant_id' | 'has_account'
+  > & {
+    visit_id: string;
+    /** Which screen offered it: the table, or a visit read later. */
+    surface: BitePromptSurface;
+  };
+  [AnalyticsEvent.TableBiteStarted]: Pick<
+    TableGuestParams,
+    'restaurant_id' | 'has_account'
+  > & {
+    visit_id: string;
+    surface: BitePromptSurface;
+  };
+}
+
+/**
+ * The two screens a meal can be turned into a Bite from (GitHub issue #1112).
+ *
+ * `table` is the summary while the guest is still sitting there; `visit_detail`
+ * is the same meal opened from *My visits* afterwards. They are one parameter
+ * rather than two event names because the offer is the same offer - what
+ * differs is how long after the meal it was taken, which is what the funnel is
+ * trying to find out.
+ */
+export type BitePromptSurface = 'table' | 'visit_detail';
+
+/**
+ * What every guest-side funnel event says about where it happened
+ * (GitHub issue #1114).
+ *
+ * The same shape and the same reasoning as {@link TableOperationParams}: all
+ * of them on every event, so no step of the funnel needs a join to be read
+ * against the step before it. `table_count` is absent, because a guest's phone
+ * has no business knowing how many tables the restaurant has and no measure
+ * here is a rate over it.
+ *
+ * `has_account` is the segmentation the issue asks for, and it says exactly
+ * one thing: whether a **member** was signed in at that moment. A table guest
+ * holds an anonymous account from the scan onwards, so "signed in" would be
+ * true of everybody and mean nothing; what the funnel wants to know is whether
+ * this was somebody BiteTribe already had. It carries no uid and nothing that
+ * could become one.
+ */
+export interface TableGuestParams {
+  /** The restaurant whose code was scanned. */
+  restaurant_id: string;
+  /** The table the guest is at. */
+  table_id: string;
+  /** Whether a registered member was signed in when this happened. */
+  has_account: boolean;
 }
 
 /**
@@ -271,6 +376,14 @@ export const ANALYTICS_EVENT_SURFACE: Record<
   [AnalyticsEvent.TableDisabled]: 'business',
   [AnalyticsEvent.TableVisitOpened]: 'business',
   [AnalyticsEvent.TableVisitClosed]: 'business',
+  // The funnel's guest side is the consumer app, and its one business step is
+  // `table_visit_closed` above - reused rather than duplicated, because the
+  // moment a visit ends is one moment whichever app is watching it.
+  [AnalyticsEvent.TableCodeScanned]: 'consumer',
+  [AnalyticsEvent.TableSessionStarted]: 'consumer',
+  [AnalyticsEvent.TableOrderSubmitted]: 'consumer',
+  [AnalyticsEvent.TableBitePromptShown]: 'consumer',
+  [AnalyticsEvent.TableBiteStarted]: 'consumer',
 };
 
 /**

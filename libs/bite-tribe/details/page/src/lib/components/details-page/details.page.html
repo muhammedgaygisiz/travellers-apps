@@ -178,6 +178,28 @@
         @if (biteLocation()) { {{ biteLocation() }} }
       </div>
 
+      <!-- Where this Bite came from, when it came from a menu (issue #1113).
+      The dish's own name is already the heading above, which is the fallback
+      the issue asks for: a menu item that has since been deleted or renamed
+      leaves this Bite readable, because nothing here is resolved off the menu.
+      The link goes to the restaurant's menu rather than to the item, because
+      the menu route resolves itself from the restaurant and a dish that is
+      gone would otherwise be a dead address. -->
+      @if (biteData?.menuItemId && biteData?.restaurantId) {
+      <div class="from-menu ion-margin-bottom">
+        <span
+          class="link"
+          role="button"
+          tabindex="0"
+          data-testid="bite-from-menu"
+          (click)="onMenuItemClick(biteData)"
+          (keydown.enter)="onMenuItemClick(biteData)"
+        >
+          {{ 'bite-from-menu' | transloco }}
+        </span>
+      </div>
+      }
+
       <div class="age-bar ion-margin-bottom">
         @if (!biteData) {
         <ion-skeleton-text

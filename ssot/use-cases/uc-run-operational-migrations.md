@@ -73,8 +73,8 @@ collection itself.
 - Adding a migration means adding a name, its runner, its copy and its dashboard
   entry — not another copy of the state handling.
 
-Registered today: `review-timestamps` ([issue-1283](../records/issue-1283.md)) and `menu-item-ids`
-(issue [#1099]).
+Registered today: `review-timestamps` ([issue-1283](../records/issue-1283.md)), `menu-item-ids`
+(issue [#1099]) and `menu-item-stats` (issue [#1113]).
 
 `menu-item-ids` is the second registration, and it is the first evidence that
 the contract above holds: it added a name, a runner, its copy and its dashboard
@@ -84,6 +84,26 @@ knowing what a menu is.
 Its idempotence carries more weight than most. An id that already exists is
 never replaced, because replacing one would move the target of every order line
 already pointing at it - see [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md).
+
+`menu-item-stats` is a **repair rather than a backfill**, and it is the reason a
+migration surface exists at all for an aggregate. A dish's Bite count and rating
+are kept by Firestore triggers with `increment`: one write, atomic across two
+people at one table rating the same Margherita in the same second, and unable to
+fix anything it has already got wrong. A missed event, an exception halfway
+through, or a Bite written by another migration leaves a number that is wrong and
+stays wrong, because nothing ever reads that dish's Bites again. This walks them
+and writes the answer.
+
+It is the one registered migration that **replaces rather than merges**: a
+recompute is the authority, and merging would leave a drifted count in place
+wherever the recount happened to agree about the other two fields. It writes one
+document per dish that has a Bite, and **does not zero a dish whose Bites have
+all gone** - it walks the Bites, so a dish with none left keeps what it last had.
+Deleting those is a separate sweep and not what "consistent with the underlying
+Bites" asks for. It is a button and not a schedule for the reason this whole page
+exists: a nightly recount would pay the full cost every night to fix something
+that should not drift, and a number that is wrong is wrong until somebody notices
+either way (`RD-TS-52`).
 
 ### Why There Is No Display Name Backfill
 
@@ -144,6 +164,11 @@ reaches a device is the new version announcement, whose store considerations bel
   backfill surface.
 - `backfillMenuItemIdsCallable`, started from the menu item ids backfill
   surface.
+- `recomputeMenuItemStatsAsOperator`, started from the menu item Bite stats
+  surface. It is the one callable here that leaves an operator-log entry on both
+  sides of the work - `started` and `succeeded` - because it reads every linked
+  Bite and can time out halfway, and a `started` with no `succeeded` is exactly
+  what an audit trail should show.
 
 ## Related GitHub Scope
 
@@ -195,6 +220,7 @@ reaches a device is the new version announcement, whose store considerations bel
 [#948]: https://github.com/muhammedgaygisiz/travellers-apps/issues/948
 [#1005]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1005
 [#1099]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1099
+[#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
 [#1194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1194
 [#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
 [#1471]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1471

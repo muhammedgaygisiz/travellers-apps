@@ -2,7 +2,14 @@ import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { EMPTY } from 'rxjs';
 import { FieldValue, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
-import type { LoadPublicMenuRequest, Menu, PublicMenuResult } from 'model';
+import {
+  MENU_ITEM_STATS_COLLECTION,
+  type Bite,
+  type LoadPublicMenuRequest,
+  type Menu,
+  type MenuItemStats,
+  type PublicMenuResult,
+} from 'model';
 import { getMenuById } from './utils/get-menu-by-id';
 
 export const MENU_COLLECTION = 'menus';
@@ -13,6 +20,92 @@ export class MenuApiService {
 
   loadMenu(menuId: string): Promise<Menu | undefined> {
     return getMenuById(menuId);
+  }
+
+  /**
+   * What people thought of each dish on one restaurant's menu
+   * (GitHub issue #1113).
+   *
+   * The whole subcollection in one read, keyed by menu item id for the
+   * template. It is bounded by the dishes a restaurant has written Bites
+   * about rather than by the size of the menu, so it is small and usually
+   * empty - a `where` per row would be one read per dish for an answer almost
+   * every row does not have.
+   *
+   * A failure is an empty map rather than a rejection. The signal under a dish
+   * is worth having and is not worth a menu that does not load: a guest
+   * standing in a restaurant wants the prices.
+   */
+  async loadMenuItemStats(
+    restaurantId: string,
+  ): Promise<Record<string, MenuItemStats>> {
+    if (!restaurantId) {
+      return {};
+    }
+
+    try {
+      const { snapshots } = await FirebaseFirestore.getCollection({
+        reference: `restaurants/${restaurantId}/${MENU_ITEM_STATS_COLLECTION}`,
+      });
+
+      return Object.fromEntries(
+        snapshots
+          .map((snapshot) => snapshot.data as MenuItemStats | undefined)
+          .filter((stats): stats is MenuItemStats => !!stats?.id)
+          .map((stats) => [stats.id, stats]),
+      );
+    } catch (error) {
+      console.error('Error fetching menu item stats:', error);
+
+      return {};
+    }
+  }
+
+  /**
+   * The Bites written about one dish, newest first.
+   *
+   * Read straight from `bites` rather than through a callable: the rules
+   * already admit any member to that collection, and the `where` is an
+   * ordinary filter rather than a permission - unlike the collection-group
+   * reads of the table epic, where the constraint *is* the authorisation.
+   */
+  async loadBitesForMenuItem(menuItemId: string, limit = 20): Promise<Bite[]> {
+    if (!menuItemId) {
+      return [];
+    }
+
+    try {
+      const { snapshots } = await FirebaseFirestore.getCollection({
+        reference: 'bites',
+        compositeFilter: {
+          type: 'and',
+          queryConstraints: [
+            {
+              type: 'where',
+              fieldPath: 'menuItemId',
+              opStr: '==',
+              value: menuItemId,
+            },
+          ],
+        },
+        queryConstraints: [
+          {
+            type: 'orderBy',
+            fieldPath: 'createdAtTimestamp',
+            directionStr: 'desc',
+          },
+          { type: 'limit', limit },
+        ],
+      });
+
+      return snapshots
+        .map((snapshot) => snapshot.data as Bite | undefined)
+        .filter((bite): bite is Bite => !!bite);
+    } catch (error) {
+      console.error('Error fetching bites for menu item:', error);
+
+      return [];
+    }
   }
 
   handleError(err: unknown): typeof EMPTY {

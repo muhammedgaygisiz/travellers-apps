@@ -117,3 +117,22 @@
     }
   }
 }
+
+/*
+ * What people thought of this dish (GitHub issue #1113).
+ *
+ * A quiet line under the description rather than a badge beside the price: the
+ * price is what a guest is comparing between dishes, and a second number
+ * competing with it at the same weight makes the menu harder to read rather
+ * than more informative. It is a button because it leads somewhere, and it
+ * looks like text because most rows will never have one.
+ */
+.bite-signal {
+  background: none;
+  border: none;
+  color: var(--ion-color-primary);
+  font-size: 0.85rem;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  text-align: start;
+}

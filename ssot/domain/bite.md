@@ -115,10 +115,17 @@ Required by product intent, but optional or not strictly enforced in the shared 
 - `mindblown`
 - `priceInPreferredCurrency`
 - `priceInPreferredCurrencySymbol`
+- `visitId` - the meal it came from, on a Bite made from a closed table visit
+  (issue [#1112])
+- `menuItemId` and `variantId` - the dish it was ordered as, on a Bite made from
+  an order (issue [#1113]). Both, because a large and a small Margherita are one
+  dish on the menu and two different things to eat, and a rating belongs to what
+  was eaten. Nothing is resolved off the menu to render a Bite, so a dish that is
+  renamed or deleted leaves every Bite of it intact and readable under the name
+  copied onto it at creation (`RD-TS-53`)
 
 Future or not currently part of the Bite model:
 
-- menu item id
 - duplicate-detection metadata
 - generated dish description
 - food-recognition metadata
@@ -129,6 +136,8 @@ Future or not currently part of the Bite model:
 Bite
 |-- User (creator)
 |-- Restaurant (optional verified restaurant link)
+|-- Menu Item (optional, with the variant, on a Bite ordered from a menu)
+|-- Table Visit (optional, on a Bite made from a closed visit)
 |-- Place (human-readable place context)
 |-- Location (GPS position and geohash)
 |-- Bucket Lists
@@ -346,3 +355,5 @@ images/bites/{biteId}/{filename}
 [#1165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1165
 [#1391]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1391
 [#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475
+[#1112]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1112
+[#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113

@@ -4,6 +4,7 @@ import { RestaurantApiService } from './restaurant-api/restaurant-api.service';
 import {
   Address,
   Bite,
+  MenuItemStats,
   BiteTrail,
   Bucketlist,
   CreateAndSaveToBucketListParams,
@@ -190,6 +191,18 @@ export class BiteTribeApiService {
    * navigates away from the editor as though the save had worked, losing the
    * change without saying so.
    */
+  /** What people thought of each dish on one menu (GitHub issue #1113). */
+  loadMenuItemStats(
+    restaurantId: string,
+  ): Promise<Record<string, MenuItemStats>> {
+    return this.menuApiService.loadMenuItemStats(restaurantId);
+  }
+
+  /** The Bites written about one dish, newest first. */
+  loadBitesForMenuItem(menuItemId: string): Promise<Bite[]> {
+    return this.menuApiService.loadBitesForMenuItem(menuItemId);
+  }
+
   saveMenu(menu: Menu, restaurantId: string | undefined): Promise<void> {
     return this.menuApiService.saveMenu(menu, restaurantId);
   }

@@ -10,6 +10,8 @@
             [currency]="currency()"
             [canCreateBite]="canCreateBite()"
             [canAddToCart]="canAddToCart()"
+            [stats]="stats()"
+            (biteSignalClick)="biteSignalClick.emit($event)"
             (createBiteClick)="createBiteClick.emit($event)"
             (addToCartClick)="addToCartClick.emit($event)"
           />

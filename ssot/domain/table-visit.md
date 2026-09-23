@@ -147,8 +147,21 @@ by push. There is no dismiss and no counter: ignoring the offer is declining
 it, and the ceiling is the meal - `biteCreated` and `reminded` on the guest's
 own summary are what the nightly sweep reads, written `false` at close so a
 collection-group `where` can ask for them. A Bite made this way carries
-`visitId`, which is what tells the sweep to stop asking; the menu-item link is
-a different field and is issue [#1113]'s.
+`visitId`, which is what tells the sweep to stop asking.
+
+**A Bite made from a dish also names the dish** (issue [#1113]): `menuItemId`
+and `variantId`, which is a different link from `visitId` and answers a
+different question - that one points at the evening, this one at what was eaten.
+It is what closes the loop back onto the menu. A dish that people have written
+about carries one line under its name on the menu, the count and the average,
+read from `/restaurants/{restaurantId}/menuItemStats/{menuItemId}` - a document
+the client cannot write, kept by triggers on the Bites with `increment`, and
+repaired by an admin button rather than a nightly recount (`RD-TS-52`).
+Aggregated at the **menu item** with the variant kept on the Bite, so a
+per-variant view stays possible later. Nothing on the menu is resolved to render
+a Bite, which is what makes a renamed or deleted dish harmless: the name, the
+price and the currency were copied onto the Bite when it was created
+(`RD-TS-53`).
 
 **The email is asked once, at the end, and the address is stored nowhere.** Not
 on the account, not on the summary, not in a log. That is what makes the flow

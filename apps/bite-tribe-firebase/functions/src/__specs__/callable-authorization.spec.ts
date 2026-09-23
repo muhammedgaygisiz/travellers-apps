@@ -73,6 +73,12 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   backfillMenuItemIdsCallable: 'operator',
   backfillReviewTimestampsCallable: 'operator',
   clusterRestaurantCandidateForBite: 'operator',
+
+  // Rebuilding every dish's Bite count and rating from the Bites themselves
+  // (issue #1113). `operator`, because it rewrites an aggregate over every
+  // account's Bites - the repair the incrementing triggers beside it cannot
+  // do, and the kind of thing that should leave a name in the operator log.
+  recomputeMenuItemStatsAsOperator: 'operator',
   deleteBiteAsOperator: 'operator',
   listUsersWithRoles: 'operator',
   revokeRestaurantOwner: 'operator',

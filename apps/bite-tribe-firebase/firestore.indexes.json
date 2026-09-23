@@ -45,6 +45,20 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "bites",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "menuItemId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtTimestamp",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": [

@@ -19,8 +19,22 @@
       <div class="ion-padding">
         <h1>{{ placeName() }}</h1>
 
+        <!--
+          What people said about one dish, over the menu rather than instead of
+          it (issue #1113): the guest is choosing what to order, and a route
+          would put them back at the top of the list afterwards.
+        -->
+        <bt-dish-bites
+          [dish]="selectedDish()"
+          [bites]="dishBites()"
+          [loading]="isLoadingBites()"
+          (closed)="closeBites.emit()"
+        />
+
         <bt-menu
           [menu]="menuData"
+          [stats]="stats()"
+          (biteSignalClick)="biteSignalClick.emit($event)"
           (createBiteClick)="createBiteClick.emit($event)"
         />
       </div>

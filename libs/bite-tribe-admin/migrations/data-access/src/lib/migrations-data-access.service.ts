@@ -97,6 +97,11 @@ export interface BackfillMenuItemIdsResult extends CollectionMigrationResult {
   extras: number;
 }
 
+export interface RecomputeMenuItemStatsResult extends CollectionMigrationResult {
+  /** Dishes that now carry an aggregate. */
+  dishes: number;
+}
+
 export interface BackfillReviewTimestampsResult extends CollectionMigrationResult {
   /** Every review document the migration looked at. */
   processed: number;
@@ -301,6 +306,29 @@ export class MigrationsDataAccessService {
       void,
       BackfillMenuItemIdsResult
     >({ name: 'backfillMenuItemIdsCallable' });
+
+    return result.data;
+  }
+
+  /**
+   * Recounts every dish's Bite count and rating from the Bites themselves
+   * (issue #1113).
+   *
+   * The aggregates are kept by Firestore triggers with `increment`, which is
+   * atomic and cheap but cannot repair: a missed event or a Bite written
+   * around the trigger leaves a number that is wrong and stays wrong. This is
+   * the resync, and the reason it is a button rather than a schedule — a
+   * nightly recount would pay the full cost every night to fix something that
+   * should not drift.
+   *
+   * No resource is reloaded: this app shows Bites and users, and the migration
+   * writes under `restaurants`, which nothing here reads.
+   */
+  async recomputeMenuItemStats(): Promise<RecomputeMenuItemStatsResult> {
+    const result = await FirebaseFunctions.callByName<
+      void,
+      RecomputeMenuItemStatsResult
+    >({ name: 'recomputeMenuItemStatsAsOperator' });
 
     return result.data;
   }

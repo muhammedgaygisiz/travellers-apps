@@ -33,6 +33,7 @@ nothing, and how a review and its thread are attributed.
   intent filter exist for Bites alone. Profiles, bucket lists, restaurants, and
   BiteTrails have no share action and no deep link. See [issue-1190](../records/issue-1190.md).
 - User can open directions to the Bite's place through the platform navigation experience.
+- A Bite made from a dish somebody ordered says so, and the line opens that restaurant's menu (issue [#1113]). It leads to the **menu** rather than to the dish: `restaurant/:restaurantId/menu` resolves which menu that is, and a dish that has since been deleted would otherwise be a dead address. Nothing on this page is resolved off the menu, which is what makes a rename or a deletion harmless - the dish's name was copied onto the Bite when it was created and is the heading at the top of this page (`RD-TS-53`). A Bite carrying no menu link renders no line, under the `Absent Field Contract` below.
 - User can save the Bite to an existing bucket list or create a new list for it.
 - User can understand creator/profile context, restaurant/place context, image, likes, reviews, and related data.
 - While the Bite loads, the share, navigation, and bucket-list actions are
@@ -317,3 +318,4 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1272]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1272
 [#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
 [#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308
+[#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113

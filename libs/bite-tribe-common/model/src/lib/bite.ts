@@ -40,6 +40,36 @@ export interface Bite {
    * Bite, better sourced.
    */
   visitId?: string;
+  /**
+   * The dish on the restaurant's menu that this Bite is about
+   * (GitHub issue #1113).
+   *
+   * Set by both paths that know it: a Bite made from an order line, and the
+   * "Create Bite" button on a menu item, which has had the `MenuItem` in hand
+   * since before this issue. Absent on every Bite somebody typed, which is
+   * most of them.
+   *
+   * It is the **dish** and not the size. "Large Margherita" and "small
+   * Margherita" are one thing on a menu and two things to eat, so the rating a
+   * guest gave belongs to {@link variantId} while the count under the dish
+   * belongs here - which is why the aggregate is kept per menu item and the
+   * variant is kept on the Bite.
+   *
+   * A renamed dish keeps its id, so the link survives. A **deleted** one does
+   * not come back, and nothing repairs the Bite: `name` and `place` were
+   * copied when it was created, so it reads exactly as it did - the link goes
+   * and the record stays.
+   */
+  menuItemId?: string;
+  /**
+   * Which size or variant was eaten (GitHub issue #1113).
+   *
+   * Absent where the dish has no variants, or where the guest chose the dish
+   * itself rather than one of them. Nothing aggregates on it yet, and it is
+   * here so that a per-variant view stays possible without going back through
+   * every Bite - the field is cheap now and unrecoverable later.
+   */
+  variantId?: string;
   tags?: string[];
   rating?: number;
   description?: string;

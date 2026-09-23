@@ -13,6 +13,33 @@
 
     <p>{{ itemData?.description }}</p>
 
+    <!--
+      What people thought of this dish (GitHub issue #1113). One line under the
+      name rather than the Bites themselves: a menu can run to sixty items, and
+      a guest deciding what to order should not have to scroll past other
+      people's dinners to read the next dish. The Bites are one tap away.
+    -->
+    @if (hasSignal()) {
+      <button
+        type="button"
+        class="bite-signal"
+        data-testid="menu-item-bite-signal"
+        (click)="openBiteSignal()"
+      >
+        @if (averageRating()) {
+          {{
+            'menu-item-bite-signal-rated'
+              | transloco
+                : { rating: averageRating(), count: stats()?.biteCount }
+          }}
+        } @else {
+          {{
+            'menu-item-bite-signal' | transloco: { count: stats()?.biteCount }
+          }}
+        }
+      </button>
+    }
+
     @if (itemData?.ingredients) {
       <p>{{ itemData?.ingredients }}</p>
     }

@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TableSessionApiService } from 'bite-tribe/api';
 import type { TableScanContext } from 'model';
 import { TableSessionService } from '../table-session.service';
-import { AuthService } from 'ta-firestore';
+import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 
 /**
  * The five states a scanned code can land in (GitHub issue #1101).
@@ -37,6 +37,8 @@ describe(TableSessionService.name, () => {
   let resolveToken: jest.Mock;
   let start: jest.Mock;
   let leave: jest.Mock;
+  let getMember: jest.Mock;
+  let logEvent: jest.Mock;
 
   const build = (token: string | null = CONTEXT.token): TableSessionService => {
     TestBed.configureTestingModule({
@@ -53,13 +55,15 @@ describe(TableSessionService.name, () => {
             snapshot: { paramMap: { get: (): string | null => token } },
           },
         },
-        // Only the one method this service calls: the real one reaches
-        // Firebase, and what is asserted here is that joining remembers the
-        // table so a sign-in can bring the meal with it (issue #1658).
+        // Only the methods this service calls: the real one reaches Firebase.
+        // What is asserted through it is that joining remembers the table so a
+        // sign-in can bring the meal with it (issue #1658), and that the funnel
+        // can tell a member from a table guest (issue #1114).
         {
           provide: AuthService,
-          useValue: { rememberTableForClaim },
+          useValue: { rememberTableForClaim, getMember },
         },
+        { provide: AnalyticsService, useValue: { logEvent } },
       ],
     });
 
@@ -75,6 +79,8 @@ describe(TableSessionService.name, () => {
       context: CONTEXT,
     });
     leave = jest.fn().mockResolvedValue('left');
+    getMember = jest.fn().mockReturnValue(null);
+    logEvent = jest.fn();
   });
 
   describe('resolving the code', () => {
@@ -358,6 +364,113 @@ describe(TableSessionService.name, () => {
         tableId: CONTEXT.table.id,
         token: CONTEXT.token,
       });
+    });
+  });
+  /**
+   * The top two steps of the order-to-Bite funnel (issue #1114).
+   *
+   * The scan is counted however it ended, because the denominator of every
+   * rate under it is scans rather than successful ones: a sticker on a table
+   * that has been taken out of service is a guest the platform lost, and it
+   * looks exactly like no scan at all if only the resolved ones are counted.
+   */
+  describe('the funnel it reports', () => {
+    it('counts a scan that resolved, with where it resolved to', async () => {
+      service = build();
+
+      await service.resolve();
+
+      expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.TableCodeScanned, {
+        outcome: 'confirm',
+        has_account: false,
+        restaurant_id: CONTEXT.restaurant.id,
+        table_id: CONTEXT.table.id,
+      });
+    });
+
+    it('counts a menu-only restaurant as its own outcome', async () => {
+      resolveToken.mockResolvedValue({
+        ok: true,
+        ...CONTEXT,
+        ordering: { available: false, reason: 'tableOrderingDisabled' },
+      });
+      service = build();
+
+      await service.resolve();
+
+      expect(logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.TableCodeScanned,
+        expect.objectContaining({ outcome: 'menu_only' }),
+      );
+    });
+
+    /** A refusal names no restaurant, so it sends none rather than an empty one. */
+    it('counts a refused scan without inventing a restaurant', async () => {
+      resolveToken.mockResolvedValue({
+        ok: false,
+        reason: 'tableClosed',
+        nextStep: 'askStaff',
+      });
+      service = build();
+
+      await service.resolve();
+
+      expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.TableCodeScanned, {
+        outcome: 'refused',
+        has_account: false,
+      });
+    });
+
+    it('counts a route with no token as a refusal, without calling out', async () => {
+      service = build(null);
+
+      await service.resolve();
+
+      expect(resolveToken).not.toHaveBeenCalled();
+      expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.TableCodeScanned, {
+        outcome: 'refused',
+        has_account: false,
+      });
+    });
+
+    it('counts a session only once the backend started one', async () => {
+      service = build();
+
+      await service.resolve();
+
+      expect(logEvent).not.toHaveBeenCalledWith(
+        AnalyticsEvent.TableSessionStarted,
+        expect.anything(),
+      );
+
+      await service.confirm();
+
+      expect(logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.TableSessionStarted,
+        {
+          restaurant_id: CONTEXT.restaurant.id,
+          table_id: CONTEXT.table.id,
+          has_account: false,
+          status: 'active',
+        },
+      );
+    });
+
+    /**
+     * Every table guest holds an anonymous account from the scan onwards, so
+     * "signed in" is true of everybody. What the funnel segments on is whether
+     * BiteTribe already had this person.
+     */
+    it('tells a member apart from a table guest', async () => {
+      getMember.mockReturnValue({ uid: 'member-1' });
+      service = build();
+
+      await service.resolve();
+
+      expect(logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.TableCodeScanned,
+        expect.objectContaining({ has_account: true }),
+      );
     });
   });
 });

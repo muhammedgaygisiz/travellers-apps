@@ -32,6 +32,7 @@ import {
   type TableOrderOutcome,
 } from './table-order-submission.service';
 import type { TableOrderDelivery } from './pending-table-order';
+import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 
 /**
  * What a guest sees between joining a table and their order reaching the
@@ -178,6 +179,8 @@ export class TableOrderService {
 
   private readonly api = inject(BiteTribeApiService);
   private readonly route = inject(ActivatedRoute);
+  private readonly analytics = inject(AnalyticsService);
+  private readonly authService = inject(AuthService);
 
   /**
    * The key, the retries and the written-down submission (GitHub issue #1108).
@@ -607,6 +610,23 @@ export class TableOrderService {
       context: state.context,
       ...(outcome.result.replayed ? { replayed: true } : {}),
     });
+
+    // Not on a replay. `replayed` is the backend saying it had already applied
+    // this exact intent (`RD-TS-9`), so the order reached the kitchen once and
+    // a second event would count one dinner twice - the same rule the staff
+    // transitions of issue #1096 settled on. A guest whose phone lost the
+    // answer and retried is one order either way.
+    if (!outcome.result.replayed) {
+      this.analytics.logEvent(AnalyticsEvent.TableOrderSubmitted, {
+        restaurant_id: state.context.restaurant.id,
+        table_id: state.context.table.id,
+        has_account: !!this.authService.getMember(),
+        // How many lines, never what was on them. A dish name is the
+        // restaurant's business rather than a measure, and the funnel counts
+        // orders.
+        line_count: outcome.result.order.lines.length,
+      });
+    }
   }
 
   /** Ordering again, after one order has landed. */

@@ -3,6 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import type { Bite, Geopoint } from 'model';
 import type { BiteFormValue } from '../components/page/bite.page';
+import { biteSourceOf, withDraftProvenance } from './bite-provenance';
 import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
@@ -124,10 +125,20 @@ export class BiteService {
 
     const { id, ...biteData } = newBite;
     void id;
-    try {
-      await this.dataAccess.submitNewBite(biteData as unknown as Bite);
 
-      this.analytics.logEvent(AnalyticsEvent.BiteCreated);
+    // Read before the write: `submitNewBite` clears the draft as its first act,
+    // so the provenance has to be taken off it while it is still there.
+    const document = withDraftProvenance(
+      biteData as unknown as Bite,
+      this.cachedBite(),
+    );
+
+    try {
+      await this.dataAccess.submitNewBite(document);
+
+      this.analytics.logEvent(AnalyticsEvent.BiteCreated, {
+        source: biteSourceOf(document),
+      });
 
       onCreated();
     } finally {

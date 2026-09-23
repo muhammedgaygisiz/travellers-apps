@@ -37,10 +37,10 @@ const KEY_EVENTS = [
  *
  * Only low-cardinality values are registered. GA4 allows 50 event-scoped
  * dimensions and collapses a high-cardinality one into `(other)` rows, so the
- * ids the table operations of issue #1098 carry - `restaurant_id`, `table_id`,
- * `visit_id` - are deliberately absent: they are read from the BigQuery export
- * by `queries/table-operations.sql`, which carries every parameter whether GA4
- * knows it or not.
+ * ids the table events carry - `restaurant_id`, `table_id`, `visit_id` - are
+ * deliberately absent: they are read from the BigQuery export by
+ * `queries/table-operations.sql` and `queries/order-to-bite-funnel.sql`, which
+ * carry every parameter whether GA4 knows it or not.
  */
 const CUSTOM_DIMENSIONS = [
   { parameterName: 'method', displayName: 'Sign up method' },
@@ -57,6 +57,22 @@ const CUSTOM_DIMENSIONS = [
   // a visit staff closed from one nobody ever looked at.
   { parameterName: 'from_status', displayName: 'Table status left' },
   { parameterName: 'outcome', displayName: 'Visit outcome' },
+  // The order-to-Bite funnel (issue #1114). `has_account` is the segmentation
+  // that issue asks for and says exactly one thing: whether a registered member
+  // was signed in. `status` separates a table staff had already seated from one
+  // they have only been told about, `surface` which screen offered a Bite, and
+  // `source` what a published Bite was made from.
+  //
+  // Two of these are shared parameter names, which GA4 registers once across
+  // every event that sends them: `outcome` above now also carries how a scan
+  // resolved, and `surface` is already sent by the email-verification prompts
+  // and the coach marks. Nothing breaks - a dimension is a parameter name, and
+  // every reading of one picks an event first - but a breakdown by `surface`
+  // with no event filter mixes three unrelated vocabularies.
+  { parameterName: 'has_account', displayName: 'Guest had an account' },
+  { parameterName: 'status', displayName: 'Table session status' },
+  { parameterName: 'surface', displayName: 'Prompt surface' },
+  { parameterName: 'source', displayName: 'Bite source' },
   // Which app the session came from (issue #1098). Both apps report to one
   // property through one measurement id, so this is the only thing separating
   // a staff shift from a diner's session - and `activeUsers` counts people,

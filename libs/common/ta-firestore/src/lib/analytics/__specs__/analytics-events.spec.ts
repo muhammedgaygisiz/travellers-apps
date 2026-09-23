@@ -41,6 +41,67 @@ const LIBRARY_TABLE_STATE = join(
 
 const ANALYTICS_EVENTS = join(__dirname, '..', 'analytics-events.ts');
 
+const WORKSPACE = join(__dirname, '..', '..', '..', '..', '..', '..', '..');
+
+const FUNNEL_CONFIG = join(
+  WORKSPACE,
+  'tools',
+  'analytics',
+  'funnel.config.mjs',
+);
+
+const FUNNEL_QUERY = join(
+  WORKSPACE,
+  'tools',
+  'analytics',
+  'queries',
+  'order-to-bite-funnel.sql',
+);
+
+const BITE_SOURCE = join(
+  WORKSPACE,
+  'libs',
+  'bite-tribe',
+  'bite',
+  'page',
+  'src',
+  'lib',
+  'integration',
+  'bite-provenance.ts',
+);
+
+/** The events the funnel config declares, in order. */
+const funnelEvents = (): string[] =>
+  [
+    ...readFileSync(FUNNEL_CONFIG, 'utf8').matchAll(/^\s+event: '([^']+)',$/gm),
+  ].map((match) => match[1]);
+
+/** The `BiteSource` members, in declaration order. */
+const biteSources = (): string[] => {
+  const source = readFileSync(BITE_SOURCE, 'utf8');
+  const union = /export type BiteSource =([^;]*);/.exec(source);
+
+  if (!union) {
+    throw new Error('No BiteSource declaration found');
+  }
+
+  return [...union[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
+};
+
+/** The `source` values the taxonomy will accept on `bite_created`. */
+const taxonomySources = (): string[] => {
+  const source = readFileSync(ANALYTICS_EVENTS, 'utf8');
+  const entry = /\[AnalyticsEvent\.BiteCreated\]: \{ source:([^}]*)\};/.exec(
+    source,
+  );
+
+  if (!entry) {
+    throw new Error('No BiteCreated parameter declaration found');
+  }
+
+  return [...entry[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
+};
+
 /**
  * The `TABLE_STATUSES` members, in declaration order.
  *
@@ -125,5 +186,56 @@ describe('analytics taxonomy', () => {
       'table_visit_opened',
       'table_visit_closed',
     ]);
+  });
+  /**
+   * The funnel of issue #1114, which spans this taxonomy, a config under
+   * `tools/analytics` and a SQL file - none of which the compiler can see at
+   * once.
+   *
+   * A step naming an event nobody emits is a row of zeroes that reads as a
+   * conversion problem, and a query that quietly stops counting a step is the
+   * same number arrived at differently. Both are the kind of wrong that is
+   * only discovered by somebody making a decision on it.
+   */
+  describe('the order-to-Bite funnel', () => {
+    it('names only events the taxonomy has', () => {
+      for (const event of funnelEvents()) {
+        expect(names).toContain(event);
+      }
+    });
+
+    it('declares the seven steps in the order they happen', () => {
+      expect(funnelEvents()).toEqual([
+        'table_code_scanned',
+        'table_session_started',
+        'table_order_submitted',
+        'table_visit_closed',
+        'table_bite_prompt_shown',
+        'table_bite_started',
+        'bite_created',
+      ]);
+    });
+
+    it('counts every declared step in the query that measures it', () => {
+      const sql = readFileSync(FUNNEL_QUERY, 'utf8');
+
+      for (const event of funnelEvents()) {
+        expect(sql).toContain(`'${event}'`);
+      }
+    });
+
+    /**
+     * `bite_created` is the one step the funnel reads through a parameter, so
+     * the union the app writes and the union the taxonomy accepts have to be
+     * the same one. They are two copies for the usual reason: `scope:common`
+     * may not import `scope:bite-tribe`.
+     */
+    it('agrees with the app about where a Bite came from', () => {
+      expect(taxonomySources()).toEqual(biteSources());
+    });
+
+    it('carries a value the funnel can filter a meal by', () => {
+      expect(biteSources()).toContain('visit');
+    });
   });
 });

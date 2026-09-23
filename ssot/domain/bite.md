@@ -124,6 +124,13 @@ Required by product intent, but optional or not strictly enforced in the shared 
   renamed or deleted leaves every Bite of it intact and readable under the name
   copied onto it at creation (`RD-TS-53`)
 
+None of those three is a field on the create form, and none of them can be: a
+guest can neither see nor change them. They are merged onto the document at
+submit, off the draft the creation session was seeded with, and only while the
+Bite is still about the restaurant that draft named (`RD-TS-54`). Before issue
+[#1114] they were simply dropped between the draft and Firestore, so a Bite
+written through the app carried no link at all.
+
 Future or not currently part of the Bite model:
 
 - duplicate-detection metadata
@@ -357,3 +364,4 @@ images/bites/{biteId}/{filename}
 [#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475
 [#1112]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1112
 [#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
+[#1114]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1114

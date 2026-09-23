@@ -9,8 +9,16 @@ Agent-operable access to the launch analytics defined in
   metrics. Run it via `npm run analytics:report`.
 - **`provision-bigquery.mjs`** — owns the GA4 → BigQuery export link as
   config-as-code. Run it via `npm run analytics:bigquery`.
+- **`funnel.config.mjs`** — the order-to-Bite conversion funnel as data
+  (issue #1114). Its own configuration rather than a section of
+  `dashboard.config.mjs`, because the launch dashboard is scoped to launch
+  signals and whether the table platform feeds the core product is a different
+  question. Nothing runs it directly: it is the list a reader reads, and
+  `analytics-events.spec.ts` fails if it drifts from the taxonomy or from the
+  query below.
 - **`queries/*.sql`** — checked-in SQL against the export, run by `query.mjs`
-  via `npm run analytics:query`.
+  via `npm run analytics:query`. `order-to-bite-funnel.sql` is that funnel as
+  numbers, per restaurant per day.
 
 ## Quick start
 

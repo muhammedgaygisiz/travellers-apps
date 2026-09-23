@@ -39,36 +39,41 @@
   primitives only.
 - ## Event Reference
 
-  | Category   | Event                                 | Params                                                                           | Trigger                                                                                            | Owner                                                                        |
-  | ---------- | ------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-  | Activation | `sign_up`                             | `method: string` (`'password'`)                                                  | Registration succeeds                                                                              | `libs/common/ui/auth/.../registration/registration.service.ts`               |
-  | Activation | `password_reset_requested`            | –                                                                                | Forgot-password form submitted                                                                     | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`         |
-  | Activation | `password_reset_request_failed`       | `code: string`                                                                   | Firebase rejects a forgot-password request                                                         | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`         |
-  | Activation | `email_verification_prompt_shown`     | `surface: 'home' \| 'settings' \| 'profile_edit'`                                | Eligible unverified user enters a prompt surface                                                   | Home, settings, and profile integration services                             |
-  | Activation | `email_verification_resend_tapped`    | `surface: 'home' \| 'settings' \| 'profile_edit'`                                | User taps resend verification email                                                                | Home, settings, and profile integration services                             |
-  | Activation | `email_verification_resend_succeeded` | `surface: 'home' \| 'settings' \| 'profile_edit'`                                | Backend resend callable succeeds                                                                   | Home, settings, and profile integration services                             |
-  | Activation | `email_verification_resend_failed`    | `surface: 'home' \| 'settings' \| 'profile_edit'`, `reason: string`              | Backend resend callable fails or rate-limits                                                       | Home, settings, and profile integration services                             |
-  | Activation | `email_verification_synced`           | `verified: boolean`, `source: 'app_start' \| 'app_resume' \| 'profile_edit'`     | App syncs Firebase Auth email verification metadata                                                | `libs/bite-tribe/store/src/lib/app/effects.ts`                               |
-  | Account    | `account_deletion_started`            | –                                                                                | User confirms the destructive delete-account alert                                                 | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`       |
-  | Account    | `account_deletion_completed`          | –                                                                                | Backend cascade succeeds and the user is signed out                                                | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`       |
-  | Account    | `account_deletion_failed`             | `reason: 'reauth_required' \| 'reauth_failed' \| 'account_changed' \| 'unknown'` | Deletion needs a fresh sign-in, targets an account other than the confirmed one, or fails outright | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`       |
-  | Creation   | `bite_created`                        | –                                                                                | New Bite persisted                                                                                 | `libs/bite-tribe/bite/page/.../integration/bite.service.ts`                  |
-  | Creation   | `bucketlist_created`                  | –                                                                                | Bucket list created                                                                                | `libs/bite-tribe/bucketlist/page/.../integration/bucketlists.service.ts`     |
-  | Creation   | `bucketlist_rated`                    | `rating: number`                                                                 | BiteTrail rating submitted                                                                         | `libs/bite-tribe/bucketlist/page/.../integration/rate-bucketlist.service.ts` |
-  | Discovery  | `search_performed`                    | –                                                                                | Query first reaches the min length (once per search session)                                       | `libs/bite-tribe/search/page/.../integration/search.service.ts`              |
-  | Discovery  | `restaurant_viewed`                   | `verified: boolean`                                                              | Restaurant / place page entered                                                                    | `libs/bite-tribe/restaurant/page/.../integration/*restaurant-container*.ts`  |
-  | Discovery  | `bite_viewed`                         | –                                                                                | Bite details page entered                                                                          | `libs/bite-tribe/details/page/.../integration/details.container.ts`          |
-  | Onboarding | `onboarding_assistant_started`        | –                                                                                | Assistant loads for the first time in a session                                                    | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`      |
-  | Onboarding | `onboarding_step_completed`           | `step: OnboardingStepId`                                                         | A step is persisted and marked complete on advance                                                 | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`      |
-  | Onboarding | `onboarding_assistant_completed`      | –                                                                                | Completion flag is written on the finish step                                                      | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`      |
-  | Onboarding | `coach_mark_dismissed`                | `surface: CoachMarkSurface`                                                      | A coach mark is dismissed for the first time                                                       | `libs/bite-tribe/coach-mark/src/lib/coach-mark-state.service.ts`             |
-  | Table ops  | `table_seated`                        | `TableOperation`, `from_status: TableStatus`, `guests?: number`                  | A transition into `occupied` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`   |
-  | Table ops  | `table_freed`                         | `TableOperation`, `from_status: TableStatus`                                     | A transition into `available` is confirmed                                                         | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`   |
-  | Table ops  | `table_reserved`                      | `TableOperation`, `from_status: TableStatus`                                     | A transition into `reserved` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`   |
-  | Table ops  | `table_cleaning_started`              | `TableOperation`, `from_status: TableStatus`                                     | A transition into `cleaning` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`   |
-  | Table ops  | `table_disabled`                      | `TableOperation`, `from_status: TableStatus`                                     | A transition into `disabled` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`   |
-  | Table ops  | `table_visit_opened`                  | `TableOperation`, `visit_id: string`                                             | The transition opened a visit the table did not already carry                                      | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`   |
-  | Table ops  | `table_visit_closed`                  | `TableOperation`, `visit_id: string`, `outcome: 'closed' \| 'abandoned'`         | The transition ended the visit at that table                                                       | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`   |
+  | Category     | Event                                 | Params                                                                                                     | Trigger                                                                                            | Owner                                                                                                       |
+  | ------------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+  | Activation   | `sign_up`                             | `method: string` (`'password'`)                                                                            | Registration succeeds                                                                              | `libs/common/ui/auth/.../registration/registration.service.ts`                                              |
+  | Activation   | `password_reset_requested`            | –                                                                                                          | Forgot-password form submitted                                                                     | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`                                        |
+  | Activation   | `password_reset_request_failed`       | `code: string`                                                                                             | Firebase rejects a forgot-password request                                                         | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`                                        |
+  | Activation   | `email_verification_prompt_shown`     | `surface: 'home' \| 'settings' \| 'profile_edit'`                                                          | Eligible unverified user enters a prompt surface                                                   | Home, settings, and profile integration services                                                            |
+  | Activation   | `email_verification_resend_tapped`    | `surface: 'home' \| 'settings' \| 'profile_edit'`                                                          | User taps resend verification email                                                                | Home, settings, and profile integration services                                                            |
+  | Activation   | `email_verification_resend_succeeded` | `surface: 'home' \| 'settings' \| 'profile_edit'`                                                          | Backend resend callable succeeds                                                                   | Home, settings, and profile integration services                                                            |
+  | Activation   | `email_verification_resend_failed`    | `surface: 'home' \| 'settings' \| 'profile_edit'`, `reason: string`                                        | Backend resend callable fails or rate-limits                                                       | Home, settings, and profile integration services                                                            |
+  | Activation   | `email_verification_synced`           | `verified: boolean`, `source: 'app_start' \| 'app_resume' \| 'profile_edit'`                               | App syncs Firebase Auth email verification metadata                                                | `libs/bite-tribe/store/src/lib/app/effects.ts`                                                              |
+  | Account      | `account_deletion_started`            | –                                                                                                          | User confirms the destructive delete-account alert                                                 | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
+  | Account      | `account_deletion_completed`          | –                                                                                                          | Backend cascade succeeds and the user is signed out                                                | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
+  | Account      | `account_deletion_failed`             | `reason: 'reauth_required' \| 'reauth_failed' \| 'account_changed' \| 'unknown'`                           | Deletion needs a fresh sign-in, targets an account other than the confirmed one, or fails outright | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
+  | Creation     | `bite_created`                        | `source: 'visit' \| 'menu' \| 'manual'`                                                                    | New Bite persisted                                                                                 | `libs/bite-tribe/bite/page/.../integration/bite.service.ts`                                                 |
+  | Creation     | `bucketlist_created`                  | –                                                                                                          | Bucket list created                                                                                | `libs/bite-tribe/bucketlist/page/.../integration/bucketlists.service.ts`                                    |
+  | Creation     | `bucketlist_rated`                    | `rating: number`                                                                                           | BiteTrail rating submitted                                                                         | `libs/bite-tribe/bucketlist/page/.../integration/rate-bucketlist.service.ts`                                |
+  | Discovery    | `search_performed`                    | –                                                                                                          | Query first reaches the min length (once per search session)                                       | `libs/bite-tribe/search/page/.../integration/search.service.ts`                                             |
+  | Discovery    | `restaurant_viewed`                   | `verified: boolean`                                                                                        | Restaurant / place page entered                                                                    | `libs/bite-tribe/restaurant/page/.../integration/*restaurant-container*.ts`                                 |
+  | Discovery    | `bite_viewed`                         | –                                                                                                          | Bite details page entered                                                                          | `libs/bite-tribe/details/page/.../integration/details.container.ts`                                         |
+  | Onboarding   | `onboarding_assistant_started`        | –                                                                                                          | Assistant loads for the first time in a session                                                    | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
+  | Onboarding   | `onboarding_step_completed`           | `step: OnboardingStepId`                                                                                   | A step is persisted and marked complete on advance                                                 | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
+  | Onboarding   | `onboarding_assistant_completed`      | –                                                                                                          | Completion flag is written on the finish step                                                      | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
+  | Onboarding   | `coach_mark_dismissed`                | `surface: CoachMarkSurface`                                                                                | A coach mark is dismissed for the first time                                                       | `libs/bite-tribe/coach-mark/src/lib/coach-mark-state.service.ts`                                            |
+  | Table ops    | `table_seated`                        | `TableOperation`, `from_status: TableStatus`, `guests?: number`                                            | A transition into `occupied` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+  | Table ops    | `table_freed`                         | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `available` is confirmed                                                         | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+  | Table ops    | `table_reserved`                      | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `reserved` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+  | Table ops    | `table_cleaning_started`              | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `cleaning` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+  | Table ops    | `table_disabled`                      | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `disabled` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+  | Table ops    | `table_visit_opened`                  | `TableOperation`, `visit_id: string`                                                                       | The transition opened a visit the table did not already carry                                      | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+  | Table ops    | `table_visit_closed`                  | `TableOperation`, `visit_id: string`, `outcome: 'closed' \| 'abandoned'`                                   | The transition ended the visit at that table                                                       | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+  | Table funnel | `table_code_scanned`                  | `TableGuestParams` (ids absent on a refusal), `outcome: 'confirm' \| 'menu_only' \| 'refused' \| 'failed'` | A scanned code resolves, is refused, or cannot be reached                                          | `libs/bite-tribe/table-session/data-access/.../table-session.service.ts`                                    |
+  | Table funnel | `table_session_started`               | `TableGuestParams`, `status: 'pending' \| 'active'`                                                        | The backend opened a session for the confirmed table                                               | `libs/bite-tribe/table-session/data-access/.../table-session.service.ts`                                    |
+  | Table funnel | `table_order_submitted`               | `TableGuestParams`, `line_count: number`                                                                   | An order reached the kitchen, replays excluded                                                     | `libs/bite-tribe/table-order/data-access/.../table-order.service.ts`                                        |
+  | Table funnel | `table_bite_prompt_shown`             | `restaurant_id`, `has_account`, `visit_id: string`, `surface: 'table' \| 'visit_detail'`                   | A visit summary reached a guest with the Bite offer on it                                          | `.../table-order/data-access/.../visit-summary.service.ts`, `.../visits/page/.../visit-detail.container.ts` |
+  | Table funnel | `table_bite_started`                  | `restaurant_id`, `has_account`, `visit_id: string`, `surface: 'table' \| 'visit_detail'`                   | The guest opened the Bite form from that offer                                                     | `.../menu/page/.../order/table-order.component.ts`, `.../visits/page/.../visit-detail.container.ts`         |
 
   The onboarding funnel events belong to the onboarding assistant epic ([epic-850](../records/epic-850.md),
   issue [#1017]), not to the launch taxonomy of issue 910. `onboarding_step_completed`
@@ -200,6 +205,118 @@
   nothing emits would be a row in this table that DebugView can never show, so
   the event lands with the move surface rather than ahead of it.
 
+- ## The Order-To-Bite Funnel
+
+  Stage 4 of [epic-1073][#1073] exists to answer one question - does the table
+  platform actually feed the core product - and issue [#1114] is that question
+  as a number. Seven steps, from a code being scanned to a Bite being published
+  about what was eaten.
+
+  **The guest app emitted nothing before this.** Stage 3 shipped the entire
+  scan, browse and order journey with no analytics at all; the seven `table_*`
+  events above are the business app's and describe how staff work the room. So
+  this issue is mostly instrumentation, and only then a funnel.
+
+- ### The Steps
+
+  | #   | Step               | Event                                 | App          | One row is            |
+  | --- | ------------------ | ------------------------------------- | ------------ | --------------------- |
+  | 1   | Table code scanned | `table_code_scanned`                  | consumer     | an event              |
+  | 2   | Session started    | `table_session_started`               | consumer     | an event              |
+  | 3   | Order submitted    | `table_order_submitted`               | consumer     | an event              |
+  | 4   | Visit closed       | `table_visit_closed`                  | **business** | a distinct `visit_id` |
+  | 5   | Bite offered       | `table_bite_prompt_shown`             | consumer     | a distinct `visit_id` |
+  | 6   | Bite draft started | `table_bite_started`                  | consumer     | an event              |
+  | 7   | Bite published     | `bite_created` where `source = visit` | consumer     | an event              |
+
+  The list lives as data in `tools/analytics/funnel.config.mjs`, and
+  `analytics-events.spec.ts` fails if a step names an event this taxonomy does
+  not have or if the query stops counting one.
+
+- ### What Was Reused Rather Than Added
+
+  **`table_visit_closed`**, which the business app already emits. The moment a
+  visit ends is one moment whichever app is watching it, and a second event for
+  it would have to be kept in step with the first forever. It is also what makes
+  `visit_id` the join for the bottom half of the funnel: staff close the visit,
+  the guest's phone offers the Bite, and only the id ties the two sides
+  together.
+
+  **`bite_created`**, which gained a `source` parameter rather than a
+  `table_bite_published` beside it. A published Bite is a published Bite, and
+  the launch dashboard's count of them must not change because the funnel
+  wanted to read one. `source` is derived from the document rather than passed
+  down from the screen that opened the form - a draft whose link was dropped,
+  because the guest picked a different restaurant, is honestly `manual` no
+  matter which button started it.
+
+- ### What Each Step Counts, And What It Does Not
+
+  **A scan is counted however it ended.** A sticker on a table that has been
+  taken out of service is a guest the platform lost, and it looks identical to
+  no scan at all if only the resolved ones are counted. `outcome` separates
+  them. A refusal names **no restaurant**, because a token that resolves to
+  nothing resolves to nothing - so both ids are absent on a `refused` or
+  `failed` scan rather than sent empty, the same answer `guests` gives when a
+  host recorded no party size, and `scans_resolved` is the figure a
+  per-restaurant reading should use.
+
+  **A replayed order is not counted twice.** The backend answering `replayed`
+  means it had already applied that exact intent (`RD-TS-9`), so a guest whose
+  phone lost the answer and retried is one dinner. Same rule as the staff
+  transitions of issue 1096.
+
+  **A prompt is counted once per visit per screen.** The table screen offers
+  another look while the trigger is still writing the summary (`RD-TS-49`), so
+  a guest who taps twice saw one offer. `surface` separates the summary at the
+  table from the same meal opened in _My visits_ days later, which is how long
+  the gap between eating and writing actually is.
+
+  **Nothing is counted from a template.** A component cannot say "shown" once,
+  because it re-renders; every one of these is emitted from the integration
+  layer that owns the behaviour, which is the rule the rest of this page states.
+
+- ### The Account Segmentation
+
+  `has_account` is on every guest-side step and says exactly one thing:
+  **whether a registered member was signed in at that moment**. Not whether
+  somebody is signed in at all - a table guest holds an anonymous account from
+  the scan onwards (`RD-TS-4`), so that would be true of everybody and mean
+  nothing. It is read through `AuthService.getMember()`, which answers `null`
+  for the anonymous account, and it carries no uid and nothing that could
+  become one.
+
+  That is what makes "account creation triggered by the Bite prompt is
+  attributable" answerable: a `table_bite_prompt_shown` with `has_account:
+false` followed by a `sign_up` in the same session is the offer working. The
+  funnel query reports the population - `prompts_without_account` - and the
+  join to `sign_up` is a GA4 exploration rather than a column, because the two
+  events share a session and not a parameter.
+
+- ### Where It Is Measured
+
+  `tools/analytics/queries/order-to-bite-funnel.sql`, run with
+  `npm run analytics:query -- order-to-bite-funnel [--days=n]`. Over the
+  BigQuery export rather than the Data API, for the reason
+  `table-operations.sql` is: two steps are a distinct count of `visit_id`, the
+  Data API has no distinct-count metric, and the ids are deliberately
+  unregistered as custom dimensions.
+
+  **The launch dashboard is untouched.** `dashboard.config.mjs` still carries no
+  `table_*` tile, and the funnel is its own configuration beside it - the
+  sentence that file already carried stays true, because whether the table
+  platform feeds the core product is a different question from whether the
+  launch is healthy.
+
+  Four parameters were added to `provision-ga4.mjs`: `has_account`, `status`,
+  `surface` and `source`. Two of those are **shared parameter names** - GA4
+  registers a dimension per parameter name across every event that sends one -
+  so `outcome` now also carries how a scan resolved, and `surface` is already
+  sent by the email-verification prompts and the coach marks. Nothing breaks,
+  because every reading picks an event first; but a breakdown by `surface` with
+  no event filter mixes three unrelated vocabularies. And GA4 does not backfill,
+  so every event collected before the `--apply` reports `(not set)` forever.
+
 - ### No personal guest data
 
   The rule of issue 1098, and what it does and does not exclude.
@@ -217,6 +334,19 @@
   actor. Who moved a disputed table is the audit trail's job
   (`tableStateTransitions`, issue 1092), which is the record a dispute is
   actually read from; analytics answers how a room is worked, not by whom.
+
+  **The same rule on the guest side** (issue [#1114]), where the events are
+  emitted from a phone the guest is holding and the temptation is larger. The
+  funnel carries `restaurant_id`, `table_id`, `visit_id`, a `line_count` and a
+  boolean. It carries **no dish names**: what somebody ordered is the
+  restaurant's business and would be a food preference attached to a session,
+  and the funnel counts orders rather than reading them. It carries no uid -
+  not the anonymous one the scan mints, and not the member's - and no address,
+  even on the step that follows the summary mail (`RD-TS-46`: the address is
+  handed to the backend, used, and stored nowhere, this layer included).
+
+  `has_account` is the one thing said about the person, and it is one bit:
+  whether BiteTribe already had them. It cannot be joined back to anybody.
 
 - ### Derived Measures
 
@@ -350,6 +480,15 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   `npm run analytics:query -- table-operations`; `--dry-run` needs no
   credentials.
 
+- `tools/analytics/funnel.config.mjs` — the order-to-Bite funnel of issue
+  [#1114] as data, its own configuration rather than a section of the launch
+  dashboard. It is read by `analytics-events.spec.ts`, which fails if a step
+  names an event the taxonomy does not have or if the query stops counting one.
+- `tools/analytics/queries/order-to-bite-funnel.sql` — that funnel as numbers,
+  per restaurant per day. Run with
+  `npm run analytics:query -- order-to-bite-funnel`; `--dry-run` needs no
+  credentials.
+
   GA4 has no API to create the visual dashboard/exploration, so the config +
   report is the reproducible substitute. Provisioning event **parameters** as GA4
   custom dimensions and registering key events via the Analytics **Admin API** is
@@ -441,6 +580,36 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   realtime report for arrival, and `analytics:query -- table-operations` from the
   next day for the measures.
 
+- ### DebugView, the order-to-Bite funnel
+
+  The guest surfaces are the consumer app, so the ordinary DebugView steps
+  above apply - but the flow needs a restaurant with table ordering switched on
+  and a printed table token, which is the same setup the manual test of issue
+  [#1103] uses. Read the `g/collect` payloads rather than DebugView for the
+  parameters: `restaurant_id`, `table_id` and `visit_id` are deliberately
+  unregistered, so no GA4 report will ever show them.
+
+  In one pass, on one table:
+
+- Scan a valid code → `table_code_scanned` with `outcome: confirm` and both ids.
+- Scan a code for a table that is out of service → `table_code_scanned` with
+  `outcome: refused` and **no** `restaurant_id` and no `table_id`.
+- Confirm the table → `table_session_started` with `status`, and
+  `has_account: false` while the guest is anonymous.
+- Send an order → one `table_order_submitted` with the line count. Kill the
+  connection mid-submit and retry → still one, because the replay is not
+  counted.
+- Have staff clear the table → `table_visit_closed` from the **business**
+  session, carrying the same `visit_id` the next two events will.
+- Open the summary → `table_bite_prompt_shown` with `surface: table`. Tap
+  "look again" → no second event.
+- Tap "create a Bite" → `table_bite_started`, then post it → `bite_created`
+  with `source: visit`.
+- Open the same meal from _My visits_ afterwards → `table_bite_prompt_shown`
+  with `surface: visit_detail` and `has_account: true`.
+- Write a Bite by hand from the home screen → `bite_created` with
+  `source: manual`.
+
 - ### DebugView, business app (table operations)
 
   The business app is web-only and its table events need a **non-dev** build to
@@ -479,3 +648,6 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 [#1017]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1017
 [#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071
 [#1221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1221
+[#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
+[#1114]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1114
+[#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103

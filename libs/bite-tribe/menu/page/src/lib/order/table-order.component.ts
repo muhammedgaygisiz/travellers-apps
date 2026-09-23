@@ -21,7 +21,7 @@ import { RouterLink } from '@angular/router';
 import { NgTemplateOutlet } from '@angular/common';
 import { PageComponent } from 'common/ui/page';
 import { NavController } from '@ionic/angular/standalone';
-import { AuthService } from 'ta-firestore';
+import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { PATH, currencyCodes } from 'utils';
 import {
@@ -158,6 +158,7 @@ const symbolOf = (code: string): string => {
 export class TableOrder implements OnInit {
   protected readonly service = inject(TableOrderService);
   private readonly auth = inject(AuthService);
+  private readonly analytics = inject(AnalyticsService);
   private readonly store = inject(BiteTribeStoreService);
   private readonly navController = inject(NavController);
 
@@ -421,6 +422,17 @@ export class TableOrder implements OnInit {
     if (!meal) {
       return;
     }
+
+    // Counted where the draft is made rather than where it is posted: the
+    // funnel's gap between an offer taken up and a Bite published is the
+    // interesting one, and a guest who opens the form and abandons it has
+    // still accepted the offer (issue #1114).
+    this.analytics.logEvent(AnalyticsEvent.TableBiteStarted, {
+      restaurant_id: meal.restaurantId,
+      visit_id: meal.id,
+      has_account: !!this.auth.getMember(),
+      surface: 'table',
+    });
 
     this.store.cacheBite(biteFromOrderLine(meal, line));
     void this.navController.navigateForward([PATH.NEW_BITE]);

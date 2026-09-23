@@ -2,7 +2,7 @@ import { computed, inject, Injectable, Signal } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { withMenuIds } from 'model';
-import type { Bite, Menu } from 'model';
+import type { Bite, Menu, MenuItemStats } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { createEntityId } from 'utils';
 
@@ -81,5 +81,17 @@ export class MenuDataAccessService {
 
   prepareBiteFromMenuItem(biteToBeCreated: Partial<Bite>): void {
     this.storeService.cacheBite(biteToBeCreated);
+  }
+
+  /** What people thought of each dish on one menu (GitHub issue #1113). */
+  loadMenuItemStats(
+    restaurantId: string,
+  ): Promise<Record<string, MenuItemStats>> {
+    return this.api.loadMenuItemStats(restaurantId);
+  }
+
+  /** The Bites written about one dish, newest first. */
+  loadBitesForMenuItem(menuItemId: string): Promise<Bite[]> {
+    return this.api.loadBitesForMenuItem(menuItemId);
   }
 }

@@ -13,6 +13,7 @@ export { type CollectionMigrationResult };
 export const COLLECTION_MIGRATIONS = [
   'review-timestamps',
   'menu-item-ids',
+  'menu-item-stats',
 ] as const;
 
 export type CollectionMigrationName = (typeof COLLECTION_MIGRATIONS)[number];

@@ -45,6 +45,11 @@ export const biteFromOrderLine = (
   // about and stops asking (`RD-TS-51`). It is not the menu-item link, which
   // is issue #1113's.
   visitId: summary.id,
+  // The dish and the size it was eaten in (issue #1113). `menuItemId` is what
+  // the count under a menu row aggregates on; `variantId` rides along so a
+  // per-variant view stays possible without going back through every Bite.
+  ...(line.menuItemId ? { menuItemId: line.menuItemId } : {}),
+  ...(line.variantId ? { variantId: line.variantId } : {}),
   price: line.unitPrice,
   currency: summary.currency,
   ...(summary.restaurantPosition

@@ -10,7 +10,11 @@ jest.mock('@capacitor-firebase/analytics');
 
 describe(MenuDataAccessService.name, () => {
   let service: MenuDataAccessService;
-  let apiMock: { saveMenu: jest.Mock };
+  let apiMock: {
+    saveMenu: jest.Mock;
+    loadMenuItemStats: jest.Mock;
+    loadBitesForMenuItem: jest.Mock;
+  };
   let storeMock: {
     bite$: Observable<unknown>;
     restaurant$: Observable<unknown>;
@@ -23,7 +27,11 @@ describe(MenuDataAccessService.name, () => {
   };
 
   beforeEach(() => {
-    apiMock = { saveMenu: jest.fn() };
+    apiMock = {
+      saveMenu: jest.fn(),
+      loadMenuItemStats: jest.fn().mockResolvedValue({}),
+      loadBitesForMenuItem: jest.fn().mockResolvedValue([]),
+    };
     storeMock = {
       bite$: of(),
       restaurant$: of(),
@@ -147,6 +155,47 @@ describe(MenuDataAccessService.name, () => {
       const menu = { id: 'menu-1', categories: [] } as unknown as Menu;
       service.prepareBiteFromMenuItem(menu);
       expect(storeMock.cacheBite).toHaveBeenCalledWith(menu);
+    });
+  });
+  /**
+   * The aggregates and the Bites behind them (GitHub issue #1113).
+   *
+   * Both are plain delegations, and the assertion worth making is that they
+   * stay plain: the restaurant comes from the caller rather than off the route,
+   * because the menu screen holds a restaurant it was routed to and the store's
+   * url reader answers the route the reader is on - which on the table-ordering
+   * screen is not the same thing.
+   */
+  describe('menu item Bite stats', () => {
+    it('asks the api for one restaurant\'s aggregates', async () => {
+      const stats = {
+        'item-margherita': {
+          id: 'item-margherita',
+          restaurantId: 'restaurant-1',
+          biteCount: 2,
+          ratingCount: 1,
+          ratingSum: 4,
+          updatedAt: 0,
+        },
+      };
+      apiMock.loadMenuItemStats.mockResolvedValue(stats);
+
+      await expect(service.loadMenuItemStats('restaurant-1')).resolves.toBe(
+        stats,
+      );
+      expect(apiMock.loadMenuItemStats).toHaveBeenCalledWith('restaurant-1');
+    });
+
+    it('asks the api for the Bites of one dish', async () => {
+      const bites = [{ id: 'bite-1' }];
+      apiMock.loadBitesForMenuItem.mockResolvedValue(bites);
+
+      await expect(
+        service.loadBitesForMenuItem('item-margherita'),
+      ).resolves.toBe(bites);
+      expect(apiMock.loadBitesForMenuItem).toHaveBeenCalledWith(
+        'item-margherita',
+      );
     });
   });
 });

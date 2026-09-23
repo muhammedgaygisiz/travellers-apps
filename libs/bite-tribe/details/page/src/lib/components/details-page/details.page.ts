@@ -156,6 +156,7 @@ export class DetailsPage {
   likeButtonClick = output<LikeClick>();
   readonly logoutClick = output();
   readonly restaurantClick = output<Bite>();
+  readonly menuItemClick = output<Bite>();
   readonly goToProfile = output<PublicUser>();
   readonly gotoEdit = output<Bite>();
   readonly gotoNew = output<Bite>();
@@ -578,6 +579,12 @@ export class DetailsPage {
   onRestaurantClick(biteData: Bite | undefined): void {
     if (biteData) {
       this.restaurantClick.emit(biteData);
+    }
+  }
+
+  onMenuItemClick(biteData: Bite | undefined): void {
+    if (biteData) {
+      this.menuItemClick.emit(biteData);
     }
   }
 

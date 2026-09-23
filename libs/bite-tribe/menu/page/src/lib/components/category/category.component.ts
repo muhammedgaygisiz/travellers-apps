@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { IonReorderGroup } from '@ionic/angular/standalone';
 import { currencyCodes } from 'utils';
-import type { Category, ExtraItem, MenuItem } from 'model';
+import type { Category, ExtraItem, MenuItem, MenuItemStats } from 'model';
 import {
   MenuItemComponent,
   type MenuItemSelection,
@@ -36,6 +36,20 @@ export class CategoryComponent {
   canAddToCart = input(false, { transform: booleanAttribute });
 
   createBiteClick = output<MenuItem>();
+
+  /**
+   * What people thought of each dish, keyed by menu item id
+   * (GitHub issue #1113).
+   *
+   * A map rather than a value per row, because the whole menu's aggregates
+   * arrive in one read and threading them item by item would put a lookup in
+   * every template. Empty for a menu nobody has written a Bite about, which
+   * today is nearly all of them.
+   */
+  stats = input<Record<string, MenuItemStats>>({});
+
+  /** Somebody wants to read what people said about one dish. */
+  biteSignalClick = output<MenuItem>();
 
   addToCartClick = output<MenuItemSelection>();
 

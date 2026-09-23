@@ -130,6 +130,27 @@ export class DetailsService {
     ]);
   }
 
+  /**
+   * Opens the menu the Bite was ordered from (issue #1113).
+   *
+   * The restaurant's menu, not the dish: `restaurant/:restaurantId/menu`
+   * resolves which menu that is and redirects, so this works for a Bite whose
+   * dish has since been deleted - which is the case the issue asks to survive.
+   * Nothing is read off the menu to render the Bite, so a rename changes what
+   * the guest finds on arrival and nothing about the page they left.
+   */
+  onMenuItemClick(bite: Bite): void {
+    if (!bite.restaurantId) {
+      return;
+    }
+
+    void this.navController.navigateForward([
+      PATH.RESTAURANT,
+      bite.restaurantId,
+      PATH.MENU,
+    ]);
+  }
+
   onGoToProfileClick(publicUser: PublicUser): void {
     this.navController.navigateForward(['profile', publicUser.userId]);
   }

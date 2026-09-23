@@ -9,8 +9,12 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { IonButton, IonCheckbox } from '@ionic/angular/standalone';
-import { isMenuVariantAvailable } from 'model';
-import type { ExtraItem, MenuItem } from 'model';
+import {
+  hasMenuItemSignal,
+  isMenuVariantAvailable,
+  menuItemAverageRating,
+} from 'model';
+import type { ExtraItem, MenuItem, MenuItemStats } from 'model';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { currencyCodes } from 'utils';
 
@@ -68,6 +72,40 @@ export class MenuItemComponent {
    * ask about; a wrong symbol is something they believe.
    */
   currency = input<string>();
+
+  /**
+   * What people thought of this dish (GitHub issue #1113).
+   *
+   * Absent until somebody has written a Bite about it, which for most dishes
+   * is always - so the row renders exactly as it did and the signal appears
+   * where there is one. An average of `undefined` is not zero: a dish nobody
+   * rated and a dish everybody hated are not the same dish, and a row printing
+   * `0` for the first would libel a kitchen.
+   */
+  stats = input<MenuItemStats | undefined>(undefined);
+
+  /** Somebody wants to read what people said about this dish. */
+  readonly biteSignalClick = output<MenuItem>();
+
+  /** The average, to one decimal, or nothing where nobody has rated it. */
+  protected readonly averageRating = computed(() => {
+    const average = menuItemAverageRating(this.stats());
+
+    return average === undefined ? '' : average.toFixed(1);
+  });
+
+  /** Whether this dish has anything worth a line under its name. */
+  protected readonly hasSignal = computed(() =>
+    hasMenuItemSignal(this.stats()),
+  );
+
+  protected openBiteSignal(): void {
+    const dish = this.item();
+
+    if (dish) {
+      this.biteSignalClick.emit(dish);
+    }
+  }
 
   /**
    * Whether to offer turning this dish into a Bite.

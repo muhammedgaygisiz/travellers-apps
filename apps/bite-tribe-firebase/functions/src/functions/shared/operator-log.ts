@@ -51,6 +51,7 @@ export const OPERATOR_ACTIONS = [
   'clusterRestaurantCandidateForBite',
   'deleteBiteAsOperator',
   'issueTableQrTokens',
+  'recomputeMenuItemStats',
   'removeRestaurantStaff',
   'revokeRestaurantOwner',
   'rotateTableQrToken',

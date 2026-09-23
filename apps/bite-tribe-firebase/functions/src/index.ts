@@ -73,6 +73,12 @@ export {
 export { emailVisitSummary } from './functions/restaurants/email-visit-summary';
 export { writeVisitSummariesOnVisitClose } from './functions/restaurants/write-visit-summaries-on-close';
 export { markVisitSummaryOnBiteCreate } from './functions/restaurants/mark-visit-summary-on-bite-create';
+export {
+  countBiteOnMenuItem,
+  discountBiteOnMenuItem,
+  recomputeMenuItemStatsAsOperator,
+  recountBiteOnMenuItem,
+} from './functions/restaurants/maintain-menu-item-stats';
 export { remindAboutVisitSummariesDaily } from './functions/restaurants/remind-about-visit-summaries';
 export { requestTableAssistance } from './functions/restaurants/request-table-assistance';
 export { acknowledgeTableAssistance } from './functions/restaurants/acknowledge-table-assistance';

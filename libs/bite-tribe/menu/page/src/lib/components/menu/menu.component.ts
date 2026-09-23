@@ -7,7 +7,7 @@ import {
   linkedSignal,
   output,
 } from '@angular/core';
-import type { Menu, MenuItem } from 'model';
+import type { Menu, MenuItem, MenuItemStats } from 'model';
 import { IonReorderGroup } from '@ionic/angular/standalone';
 import { CategoryComponent } from '../category/category.component';
 import type { MenuItemSelection } from '../menu-item/menu-item.component';
@@ -44,6 +44,20 @@ export class MenuComponent {
   canAddToCart = input(false, { transform: booleanAttribute });
 
   createBiteClick = output<MenuItem>();
+
+  /**
+   * What people thought of each dish, keyed by menu item id
+   * (GitHub issue #1113).
+   *
+   * A map rather than a value per row, because the whole menu's aggregates
+   * arrive in one read and threading them item by item would put a lookup in
+   * every template. Empty for a menu nobody has written a Bite about, which
+   * today is nearly all of them.
+   */
+  stats = input<Record<string, MenuItemStats>>({});
+
+  /** Somebody wants to read what people said about one dish. */
+  biteSignalClick = output<MenuItem>();
 
   /** The dish, and the size where the guest chose one. */
   addToCartClick = output<MenuItemSelection>();

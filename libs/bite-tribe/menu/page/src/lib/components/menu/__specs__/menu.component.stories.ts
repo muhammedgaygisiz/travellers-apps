@@ -179,3 +179,44 @@ export const ExtrasOnTheMenu: Story = {
 export const OrderingWithExtras: Story = {
   args: { menu: EXTRAS_MENU, canCreateBite: false, canAddToCart: true },
 };
+
+/**
+ * What people thought of two of the dishes (GitHub issue #1113).
+ *
+ * `MENU` again rather than a fixture of its own: the aggregates arrive as a
+ * separate input, so the story above keeps its reference and this one differs
+ * by exactly the line the issue adds.
+ *
+ * The two rows are the two cases worth a reference. Shoyu has been eaten seven
+ * times and rated by four of them; Tonkotsu has three Bites and no rating at
+ * all, and prints a count with no number beside it - because a dish nobody
+ * rated and a dish everybody hated are not the same dish, and `0.0` on that
+ * row would libel a kitchen.
+ *
+ * The modal behind the line has no story: it is an `ion-modal`, which presents
+ * on an animation the screenshot would race. `dish-bites.component.spec.ts`
+ * covers what it decides.
+ */
+export const WithBiteSignals: Story = {
+  args: {
+    menu: MENU,
+    stats: {
+      'item-shoyu': {
+        id: 'item-shoyu',
+        restaurantId: 'restaurant-1',
+        biteCount: 7,
+        ratingCount: 4,
+        ratingSum: 17,
+        updatedAt: 0,
+      },
+      'item-tonkotsu': {
+        id: 'item-tonkotsu',
+        restaurantId: 'restaurant-1',
+        biteCount: 3,
+        ratingCount: 0,
+        ratingSum: 0,
+        updatedAt: 0,
+      },
+    },
+  },
+};

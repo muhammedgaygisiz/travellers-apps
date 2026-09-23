@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Pipe, PipeTransform } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MenuItemComponent } from '../menu-item.component';
-import { ExtraItem, MenuItem } from 'model';
+import { ExtraItem, MenuItem, MenuItemStats } from 'model';
 import SpyInstance = jest.SpyInstance;
 
 @Pipe({
@@ -252,6 +252,76 @@ describe('MenuItemComponent', () => {
         variant: large,
         extras: [MOZZARELLA],
       });
+    });
+  });
+  describe('the Bite signal', () => {
+    const DISH: MenuItem = {
+      id: 'margherita',
+      name: 'Margherita',
+      description: '',
+      price: 12,
+    };
+
+    const signal = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="menu-item-bite-signal"]',
+      );
+
+    const render = (stats: MenuItemStats | undefined): void => {
+      fixture.componentRef.setInput('item', DISH);
+      fixture.componentRef.setInput('stats', stats);
+      fixture.detectChanges();
+    };
+
+    it('should say nothing about a dish nobody has written about', () => {
+      render(undefined);
+
+      expect(signal()).toBeNull();
+    });
+
+    it('should count the Bites of a dish nobody rated, without an average', () => {
+      render({
+        id: DISH.id,
+        restaurantId: 'trattoria',
+        biteCount: 3,
+        ratingCount: 0,
+        ratingSum: 0,
+        updatedAt: 0,
+      });
+
+      // Zero would read as a dish everybody hated rather than one nobody rated.
+      expect(signal()?.textContent).toContain('menu-item-bite-signal');
+      expect(signal()?.textContent).not.toContain('rated');
+    });
+
+    it('should show the average to one decimal where there is one', () => {
+      render({
+        id: DISH.id,
+        restaurantId: 'trattoria',
+        biteCount: 4,
+        ratingCount: 3,
+        ratingSum: 13,
+        updatedAt: 0,
+      });
+
+      expect(signal()?.textContent).toContain('menu-item-bite-signal-rated');
+      expect(component['averageRating']()).toBe('4.3');
+    });
+
+    it('should ask for the Bites of the dish that was tapped', () => {
+      const emitSpy = jest.spyOn(component.biteSignalClick, 'emit');
+      render({
+        id: DISH.id,
+        restaurantId: 'trattoria',
+        biteCount: 1,
+        ratingCount: 1,
+        ratingSum: 5,
+        updatedAt: 0,
+      });
+
+      signal()?.click();
+
+      expect(emitSpy).toHaveBeenCalledWith(DISH);
     });
   });
 });

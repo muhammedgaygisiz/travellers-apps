@@ -53,6 +53,7 @@ from its own scan and owns nothing about it.
 - A reader with no account gets the published page instead; see
   `Reading A Menu Without An Account`.
 - User can create a Bite from a menu item, which opens the Bite form prefilled with that Restaurant and dish. The prefilled draft is scoped to that one creation session; see [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md).
+- A dish other people have written about carries one line under its name: how many Bites name it, and their average rating where any of them rated it (issue [#1113]). Tapping it opens those Bites in a sheet - photo, rating and comment, and nothing else: no author, no likes and nothing to tap through to, because somebody reading this is choosing between two pizzas and every affordance is a way out of that decision. A dish nobody has written about says nothing at all, and a dish whose Bites carry no rating prints the count alone (`RD-TS-52`). The aggregates arrive as one read for the whole menu, and a read that fails leaves the menu exactly as it was before this issue rather than failing to load.
 - An item the kitchen is not serving reads as unavailable. `MenuItem.isAvailable` is absent-means-available, read through `isMenuItemAvailable`, and written by the business menu editor and nowhere else ([UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md)). Since issue [#923] a dish carrying `false` renders dimmed, with its price struck through and a translated `Not available` beside it, and the button that would create a Bite from it is disabled. The backend reads the same flag, so [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md) refuses to order such a dish and its add-to-cart button is disabled here too. Nothing in production sets the flag yet, because the business app has not launched.
 
 ## Menu Page State Contract
@@ -191,7 +192,7 @@ no privacy label entry changes. Table ordering shares this page's library and be
 
 ## Related Pages
 
-- [Recorded Decisions](../decisions/recorded-decisions.md) - `RD-PM-1` to `RD-PM-7` bind this page, and `RD-TS-7` binds the callable it reads through
+- [Recorded Decisions](../decisions/recorded-decisions.md) - `RD-PM-1` to `RD-PM-7` bind this page, `RD-TS-7` binds the callable it reads through, and `RD-TS-52` binds the Bite signal on a dish row
 - [Personas](../product/personas.md) - the audiences the `Actors` mapping displaced: the food lover, the traveler,
   and the restaurant owner or business maintainer
 - [UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md) - the business menu route named in
@@ -213,3 +214,4 @@ no privacy label entry changes. Table ordering shares this page's library and be
 [#1102]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1102
 [#1653]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1653
 [#1654]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1654
+[#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113

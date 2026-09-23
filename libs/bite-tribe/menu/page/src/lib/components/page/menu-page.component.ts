@@ -16,7 +16,8 @@ import {
   IonImg,
   IonSkeletonText,
 } from '@ionic/angular/standalone';
-import type { Bite, Menu, MenuItem, Restaurant } from 'model';
+import { DishBitesComponent } from '../dish-bites/dish-bites.component';
+import type { Bite, Menu, MenuItem, MenuItemStats, Restaurant } from 'model';
 import { TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import { MenuComponent } from '../menu/menu.component';
@@ -25,7 +26,14 @@ import { MenuComponent } from '../menu/menu.component';
   selector: 'menu-page',
   templateUrl: 'menu-page.component.html',
   styleUrl: 'menu-page.component.scss',
-  imports: [PageComponent, IonContent, IonImg, IonSkeletonText, MenuComponent],
+  imports: [
+    PageComponent,
+    IonContent,
+    IonImg,
+    IonSkeletonText,
+    MenuComponent,
+    DishBitesComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MenuPage {
@@ -48,6 +56,20 @@ export class MenuPage {
   isMenuUnavailable = input(false, { transform: booleanAttribute });
 
   createBiteClick = output<MenuItem>();
+
+  /** What people thought of each dish, keyed by id (GitHub issue #1113). */
+  stats = input<Record<string, MenuItemStats>>({});
+
+  /** The dish whose Bites are open, or nothing. */
+  selectedDish = input<MenuItem | undefined>(undefined);
+
+  /** The Bites of that dish, newest first. */
+  dishBites = input<Bite[]>([]);
+
+  isLoadingBites = input(false);
+
+  biteSignalClick = output<MenuItem>();
+  closeBites = output<void>();
   readonly goBack = output();
   readonly retryLoad = output();
 

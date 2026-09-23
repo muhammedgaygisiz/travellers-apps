@@ -515,6 +515,36 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ------------------------------------------------------ menu item signals
+
+    /**
+     * What people thought of one dish (GitHub issue #1113).
+     *
+     * ```text
+     * /restaurants/{restaurantId}/menuItemStats/{menuItemId}
+     * ```
+     *
+     * **Written by nobody.** Three triggers on `bites` maintain it through
+     * `FieldValue.increment`, and an operator migration rebuilds it. A client
+     * able to write here could give its own restaurant's dishes any rating it
+     * liked, which is the one number on a menu a diner is entitled to trust.
+     *
+     * It is a collection of its own rather than a field inside the menu item
+     * precisely so that it can be refused: a menu is written by its owner,
+     * whole, on every price edit, and an aggregate kept inside one would be
+     * overwritten by somebody who had no idea they were holding it.
+     *
+     * **Reads go to every member**, like the menu the numbers sit beside. A
+     * count of Bites and an average rating are what a guest reads a menu for,
+     * and there is nothing in the document that is not already derivable from
+     * Bites the same reader may list.
+     */
+    match /restaurants/{restaurantId}/menuItemStats/{menuItemId} {
+      allow read: if isMember();
+
+      allow write: if false;
+    }
+
     // ----------------------------------------------------------- table visits
 
     /**

@@ -14,6 +14,12 @@
  *   GA4_PROPERTY_ID, GOOGLE_APPLICATION_CREDENTIALS  (see README.md)
  */
 
+import { collectCohortHeadlines } from './cohorts.mjs';
+import {
+  ACTIVATION_FUNNEL_QUERY,
+  DIGEST_HORIZONS,
+  RETENTION_COHORTS_QUERY,
+} from './cohorts.config.mjs';
 import {
   breakdownTiles,
   consoleTiles,
@@ -126,6 +132,92 @@ function formatDelta(tile, now, prev) {
   return `${sign}${diff}`;
 }
 
+/** `12` → `12`, `null` → `n/a`; percentages carry their sign. */
+function cell(value, { unit } = {}) {
+  if (value === null || value === undefined) return 'n/a';
+  return unit === '%' ? `${value}%` : String(value);
+}
+
+/**
+ * The activation funnel and retention, rendered as their own sections.
+ *
+ * Both are counts of *people*, where every tile above is a count of events in
+ * a window, so they are kept visually apart and each says what one row is.
+ */
+function cohortMarkdown(cohorts, days) {
+  const lines = [];
+  lines.push('### Activation funnel');
+  lines.push('');
+
+  if (!cohorts.available) {
+    lines.push(`_Unavailable: ${cohorts.reason}_`);
+    lines.push('');
+    lines.push('### Retention');
+    lines.push('');
+    lines.push(`_Unavailable: ${cohorts.reason}_`);
+    lines.push('');
+    return lines;
+  }
+
+  const { funnel, retention } = cohorts;
+  lines.push(
+    `People who arrived in the last ${days} days, followed to each step. ` +
+      `Export through \`${funnel.dataThrough ?? 'n/a'}\`.`,
+  );
+  lines.push('');
+  lines.push(
+    '| Arrived on | Arrived | Onboarding started | Completed | Signed up | First Bite | Arrive → sign-up |',
+  );
+  lines.push('| --- | --- | --- | --- | --- | --- | --- |');
+  for (const row of [...funnel.platforms, funnel.total]) {
+    lines.push(
+      `| ${row.platform} | ${row.arrived} | ${row.onboardingStarted} | ` +
+        `${row.onboardingCompleted} | ${row.signedUp} | ${row.firstBite} | ` +
+        `${cell(row.signupPct, { unit: '%' })} |`,
+    );
+  }
+  lines.push('');
+  lines.push(
+    '<sub>The youngest cohorts have had hours rather than days to convert, ' +
+      'so the window total understates a rate the same cohorts will reach. ' +
+      `Per day: \`npm run analytics:query -- ${ACTIVATION_FUNNEL_QUERY}\`.</sub>`,
+  );
+  lines.push('');
+
+  lines.push('### Retention');
+  lines.push('');
+  if (retention.horizons.every((h) => h.users === 0)) {
+    lines.push(
+      '_No cohort has matured inside this window yet. The export begins on ' +
+        '31 August 2026 and a horizon needs that many days past an arrival._',
+    );
+    lines.push('');
+    return lines;
+  }
+  lines.push(
+    'Cohorts that reached each horizon during the window. Classic retention: ' +
+      'active on exactly that day.',
+  );
+  lines.push('');
+  lines.push('| Horizon | Arrival days | Users | Returned | Rate |');
+  lines.push('| --- | --- | --- | --- | --- |');
+  for (const h of retention.horizons) {
+    const span = h.from ? `${h.from} … ${h.to}` : 'none matured';
+    lines.push(
+      `| D${h.horizon} | ${span} | ${h.users} | ${h.returned} | ` +
+        `${cell(h.pct, { unit: '%' })} |`,
+    );
+  }
+  lines.push('');
+  lines.push(
+    '<sub>A cohort too young for a horizon is excluded rather than counted ' +
+      'as zero. At these cohort sizes one returning person moves the rate by ' +
+      `several points. Per cohort: \`npm run analytics:query -- ${RETENTION_COHORTS_QUERY} --days=30\`.</sub>`,
+  );
+  lines.push('');
+  return lines;
+}
+
 function toMarkdown({
   date,
   days,
@@ -134,6 +226,7 @@ function toMarkdown({
   breakdowns,
   alerts,
   surfaceNote,
+  cohorts,
 }) {
   const lines = [];
   lines.push(`## Launch analytics digest — ${date}`);
@@ -159,6 +252,7 @@ function toMarkdown({
     lines.push(`> ⚠️ ${surfaceNote}`);
     lines.push('');
   }
+  if (cohorts) lines.push(...cohortMarkdown(cohorts, days));
   for (const b of breakdowns) {
     lines.push(`### ${b.title}`);
     lines.push('');
@@ -210,6 +304,12 @@ function runDryRun({ days }) {
       );
     }
   }
+  console.log('\nBigQuery sections (issue #987):');
+  console.log(`- ${ACTIVATION_FUNNEL_QUERY} → last ${days} days`);
+  console.log(
+    `- ${RETENTION_COHORTS_QUERY} → last ${days + Math.max(...DIGEST_HORIZONS)} days, ` +
+      `horizons ${DIGEST_HORIZONS.map((h) => `D${h}`).join(' / ')}`,
+  );
 }
 
 async function runLive({ days, json }) {
@@ -257,6 +357,10 @@ async function runLive({ days, json }) {
     breakdowns.push({ id: tile.id, title: tile.title, ...result });
   }
 
+  // Last, and never fatal: the tiles above are the digest's job, and a
+  // BigQuery problem degrades to a line inside the section it belongs to.
+  const cohorts = await collectCohortHeadlines({ days });
+
   const date = new Date().toISOString().slice(0, 10);
   const payload = {
     date,
@@ -264,6 +368,7 @@ async function runLive({ days, json }) {
     propertyId,
     rows,
     breakdowns,
+    cohorts,
     alerts,
     ...(surfaceFilterUnavailable()
       ? { surfaceNote: SURFACE_UNAVAILABLE_NOTE }

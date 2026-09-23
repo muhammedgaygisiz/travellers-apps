@@ -109,7 +109,7 @@ Moderation questions raised by threading are recorded on [epic-1284](../records/
 ## Analytics Questions
 
 - Which events define activation?
-- Which events define retention?
+- Which events define retention? **Decided on 23 September 2026 with [#987]: any event at all.** `queries/retention-cohorts.sql` counts a cohort member as retained on day N if they fired anything on that day. Holding retention to a deliberate action - a Bite, a search - would measure engagement under retention's name, and the two questions deserve separate numbers. Cohort membership is the arrival event, `first_open` or `first_visit`, and the horizon is classic rather than rolling so the figure can be checked against GA4's own cohort exploration.
 - Which events show whether users understand Bite creation?
 - Which dashboard metrics are needed for the first two launch weeks?
 - What threshold should trigger a launch rollback, hotfix, or onboarding change? **Decided on 31 August 2026: no threshold is set in advance.** The call is made on the day, from the experience the soft launch produces, rather than from a number chosen before anyone has seen the product meet real users. What makes that workable is that the daily digest on [#991] now carries stability as well as growth, so the judgement is made against numbers that arrive on their own: crash-free users alerting below 99%, unhandled errors alerting on a doubling. Those are alert thresholds, not rollback thresholds, and the distinction is deliberate - they say look, not act. Revisit once there is enough history to know what a bad day actually looks like.

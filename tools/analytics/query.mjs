@@ -15,17 +15,19 @@
  * See tools/analytics/README.md for the one-time BigQuery access setup.
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
 import { fail, loadEnv, resolvePropertyId } from './ga4.mjs';
 import {
-  QUERIES_DIR,
+  availableQueries,
   createBigQueryClient,
   datasetIdFor,
+  eventsTableRef,
   getDataset,
+  readCheckedInQuery,
   resolveDatasetLocation,
   resolveProjectId,
+  resolveQuerySql,
   runQuery,
+  suffixDate,
   tryResolveProjectId,
 } from './bigquery.mjs';
 
@@ -90,48 +92,6 @@ function positiveInt(raw, prefix) {
   return n;
 }
 
-/** Query ids (file basenames), sorted, with their leading comment as summary. */
-function availableQueries() {
-  if (!fs.existsSync(QUERIES_DIR)) return [];
-  return fs
-    .readdirSync(QUERIES_DIR)
-    .filter((file) => file.endsWith('.sql'))
-    .sort()
-    .map((file) => {
-      const id = file.slice(0, -'.sql'.length);
-      const first = fs
-        .readFileSync(path.join(QUERIES_DIR, file), 'utf8')
-        .split('\n')[0];
-      return { id, summary: first.replace(/^--\s?/, '').trim() };
-    });
-}
-
-function readQuery(id) {
-  const file = path.join(QUERIES_DIR, `${id}.sql`);
-  if (!fs.existsSync(file)) {
-    const known = availableQueries()
-      .map((q) => q.id)
-      .join(', ');
-    fail(`Unknown query "${id}". Available: ${known || '(none)'}.`);
-  }
-  return fs.readFileSync(file, 'utf8');
-}
-
-/** `YYYYMMDD` for `daysAgo` days before today, in UTC to match `event_date`. */
-function suffixDate(daysAgo) {
-  const date = new Date(Date.now() - daysAgo * 86_400_000);
-  return date.toISOString().slice(0, 10).replaceAll('-', '');
-}
-
-function eventsTable({ projectId, datasetId, intraday }) {
-  const prefix = intraday ? 'events_intraday_' : 'events_';
-  return `\`${projectId}.${datasetId}.${prefix}*\``;
-}
-
-function resolveSql(sql, table) {
-  return sql.replaceAll('${EVENTS_TABLE}', table);
-}
-
 function printTable(rows) {
   if (rows.length === 0) {
     console.log('(no rows)');
@@ -152,9 +112,9 @@ function runDryRun(args) {
     start_date: suffixDate(args.days),
     end_date: suffixDate(0),
   };
-  const sql = resolveSql(
-    readQuery(args.query),
-    eventsTable({
+  const sql = resolveQuerySql(
+    readCheckedInQuery(args.query),
+    eventsTableRef({
       projectId,
       datasetId: datasetIdFor(propertyId),
       intraday: args.intraday,
@@ -194,9 +154,9 @@ async function runLive(args) {
     start_date: suffixDate(args.days),
     end_date: suffixDate(0),
   };
-  const sql = resolveSql(
-    readQuery(args.query),
-    eventsTable({ projectId, datasetId, intraday: args.intraday }),
+  const sql = resolveQuerySql(
+    readCheckedInQuery(args.query),
+    eventsTableRef({ projectId, datasetId, intraday: args.intraday }),
   );
 
   const { rows, totalBytesProcessed } = await runQuery(client, {

@@ -361,6 +361,46 @@ createUserOnAuthCreate
 deleteOwnAccount
 ```
 
+## App Check Readiness Is Not A Startup Question
+
+The client gate holds auth and the first navigation until an App Check token
+has been obtained, and shows the readiness gate in place of the router outlet
+when it has not (issue [#933]). **That verdict is re-evaluated for as long as
+the app runs**, because a page that passed it can lose the token afterwards and
+a page that has lost it is refused by every App Check-protected service while
+looking perfectly healthy.
+
+Three rules hold that together (issue [#1621]):
+
+- **A sign-in refused for a missing or invalid App Check token is not a failed
+  sign-in.** Identity Toolkit answers `401 UNAUTHENTICATED` with _Firebase App
+  Check token is invalid_ before it looks at the credentials, so the account and
+  the password are both fine and every later attempt on that page fails the same
+  way. It is routed into the readiness path instead of being reported on the
+  login form, where it would send the operator to reset a password that works.
+- **A re-check asks for a new token rather than re-issuing the call that
+  failed.** Every path but the cold-start preflight passes `forceRefresh`.
+- **The wait is bounded and ends in a defined state.** Recovery re-checks on a
+  backoff of roughly a minute and then leaves the app in `ready` or
+  `unavailable`; `unavailable` keeps the gate up with its retry tappable. The
+  Firebase SDK's own `isTokenAutoRefreshEnabled` refresh is working the same
+  problem in parallel, and the recovery stops as soon as it wins.
+
+**One failure is outside that bound.** After a 403 from the exchange the SDK
+applies a one-day backoff it holds in memory for the life of the page instance,
+and answers every later request out of it without a network call. No wait inside
+the session outlives it and `forceRefresh` does not reach past it: only a
+document reload clears it. It is reported as `app_check_throttled` rather than
+counted with ordinary failures - see [Implementation - Analytics Events](../implementation/analytics-events.md) - because
+it is the state that decides whether the bounded recovery can help at all, and
+because a throttled client sends nothing and is therefore invisible in App Check
+monitoring, which goes on reporting 100% verified.
+
+`NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` is not consulted on the recovery path.
+The flag says what the build does about App Check, not what the Console
+enforces, and the two drift (issue [#1369]); a recovery runs only after a live
+request was refused, so by then the flag has already been contradicted.
+
 ## Google Maps Platform Trust Boundary
 
 Google Maps Platform is reached only from the backend. The apps call the `searchPlaces`, `searchNearbyPlaces`, `getPlaceDetails`, `searchBitesByCity`, `getCurrencyByPosition`, and `backfillBiteAddress` callables, and the functions call `places.googleapis.com` and `maps.googleapis.com` server-to-server with the backend-only `GOOGLE_GEOCODING_API_KEY`. No app, library, or native project links a Maps or Places SDK.
@@ -486,10 +526,14 @@ libs/bite-tribe/api
 
 - Some backend responsibilities are still split between frontend Firebase access and backend callables.
 - App Check health depends on runtime configuration and platform attestation.
+- A client that entered the App Check SDK's one-day throttle cannot recover inside its page instance; the readiness gate ends in a defined state there, but only a reload restores it.
 - App Check cannot cover Google Maps Platform from a backend request path, so Places API (New) stays in Monitoring behind the callable boundary described above.
 - Some aggregate and migration behaviors need operational care because Firestore query semantics can skip documents with missing fields.
 
 [#1221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1221
+[#1621]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1621
+[#1369]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1369
+[#933]: https://github.com/muhammedgaygisiz/travellers-apps/issues/933
 [#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
 [#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
 [#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078

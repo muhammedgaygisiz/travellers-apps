@@ -242,13 +242,90 @@ describe(provideFirestoreUtils.name, () => {
     await initializer();
 
     const retryHandler = gate.readiness.registerRetryHandler.mock
-      .calls[0][0] as () => Promise<void>;
+      .calls[0][0] as (context?: { requireToken: boolean }) => Promise<void>;
     await retryHandler();
 
     expect(appCheckUtils.refreshFirebaseAppCheckReadiness).toHaveBeenCalled();
     expect(gate.readiness.markReady).toHaveBeenCalled();
     expect(authService.initialize).toHaveBeenCalled();
     expect(gate.startNavigation).toHaveBeenCalled();
+  });
+
+  // Issue #1621: the handler used to be registered only on the failure branch,
+  // so a page that started successfully and lost its token afterwards called
+  // `retry()` into nothing and a reload was the only way back.
+  it('should register a retry handler on a startup that succeeded', async () => {
+    const authService = { initialize: jest.fn() };
+    const gate = createGate();
+
+    const initializer = createFirebaseStartupInitializer(
+      firebaseApp,
+      { production: true },
+      null,
+      authService,
+      gate,
+    );
+    await initializer();
+
+    expect(gate.readiness.registerRetryHandler).toHaveBeenCalledWith(
+      expect.any(Function),
+    );
+  });
+
+  it('should lift the gate on a mid-session recovery without restarting the app', async () => {
+    const authService = { initialize: jest.fn() };
+    const gate = createGate();
+
+    const initializer = createFirebaseStartupInitializer(
+      firebaseApp,
+      { production: true },
+      null,
+      authService,
+      gate,
+    );
+    await initializer();
+
+    expect(authService.initialize).toHaveBeenCalledTimes(1);
+    expect(gate.startNavigation).toHaveBeenCalledTimes(1);
+
+    const retryHandler = gate.readiness.registerRetryHandler.mock
+      .calls[0][0] as (context: { requireToken: boolean }) => Promise<void>;
+    await retryHandler({ requireToken: true });
+
+    expect(appCheckUtils.refreshFirebaseAppCheckReadiness).toHaveBeenCalledWith(
+      expect.objectContaining({ trigger: 'recovery' }),
+    );
+    expect(gate.readiness.markReady).toHaveBeenCalledTimes(2);
+    // A second auth initialize would register a second `authStateChange`
+    // listener, and a second initial navigation would move the operator off the
+    // page they were on.
+    expect(authService.initialize).toHaveBeenCalledTimes(1);
+    expect(gate.startNavigation).toHaveBeenCalledTimes(1);
+  });
+
+  it('should re-check under the retry trigger when nothing proved a token missing', async () => {
+    jest
+      .mocked(appCheckUtils.initializeFirebaseAppCheck)
+      .mockResolvedValueOnce(BLOCKED);
+    const authService = { initialize: jest.fn() };
+    const gate = createGate();
+
+    const initializer = createFirebaseStartupInitializer(
+      firebaseApp,
+      { production: true },
+      null,
+      authService,
+      gate,
+    );
+    await initializer();
+
+    const retryHandler = gate.readiness.registerRetryHandler.mock
+      .calls[0][0] as (context?: { requireToken: boolean }) => Promise<void>;
+    await retryHandler({ requireToken: false });
+
+    expect(appCheckUtils.refreshFirebaseAppCheckReadiness).toHaveBeenCalledWith(
+      expect.objectContaining({ trigger: 'retry' }),
+    );
   });
 
   it('should stay blocked when a retry still fails', async () => {
@@ -271,7 +348,7 @@ describe(provideFirestoreUtils.name, () => {
     await initializer();
 
     const retryHandler = gate.readiness.registerRetryHandler.mock
-      .calls[0][0] as () => Promise<void>;
+      .calls[0][0] as (context?: { requireToken: boolean }) => Promise<void>;
     await retryHandler();
 
     expect(gate.readiness.markReady).not.toHaveBeenCalled();

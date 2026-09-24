@@ -20,6 +20,8 @@ import {
 import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
+import { AppCheckReadinessService } from '../app-check-readiness.service';
+import { isAppCheckRefusal } from '../initialize-firebase-app-check';
 import { RequestedUrlService } from '../requested-url.service';
 import {
   AFTER_LOGIN_PAGE,
@@ -64,6 +66,7 @@ export class AuthEffects {
   private readonly navController = inject(NavController);
   private readonly store = inject(Store);
   private readonly requestedUrlService = inject(RequestedUrlService);
+  private readonly appCheckReadiness = inject(AppCheckReadinessService);
 
   private hasRoutedAfterSignIn = false;
 
@@ -131,7 +134,7 @@ export class AuthEffects {
           map(() => AuthActions.loginSucceeded()),
           catchError((err) => {
             console.debug('#mo error login: ', err);
-            return of(AuthActions.loginFailed());
+            return of(this.toLoginFailure(err));
           }),
         ),
       ),
@@ -285,9 +288,46 @@ export class AuthEffects {
       return AuthActions.loginFailed();
     }
 
+    const blocked = this.toAppCheckBlock(err);
+
+    if (blocked) {
+      return blocked;
+    }
+
     return AuthActions.registrationFailed({
       code: (err as { code?: string })?.code ?? 'unknown',
     });
+  }
+
+  private toLoginFailure(err: unknown): Action {
+    return this.toAppCheckBlock(err) ?? AuthActions.loginFailed();
+  }
+
+  /**
+   * Routes a sign-in that was refused for an App Check token into the readiness
+   * path, rather than reporting it as a rejected sign-in (issue #1621).
+   *
+   * It is not one. Identity Toolkit answers `401 UNAUTHENTICATED` before it
+   * looks at the credentials when Console enforcement is on and the request
+   * carries no usable token, so the account is fine and the password is fine
+   * and trying again on this page will fail the same way for as long as the
+   * token is missing - up to a day, when the SDK's throttle is what is holding
+   * it. Reporting that as a wrong password sends the operator to reset a
+   * password that works.
+   *
+   * The readiness service takes it from here: it blocks the shell, re-checks
+   * the token on a bounded backoff, and lifts the gate by itself when one comes
+   * back. Nothing is awaited - the recovery outlives this effect by design, and
+   * the action returned only has to release the form the sign-in locked.
+   */
+  private toAppCheckBlock(err: unknown): Action | null {
+    if (!isAppCheckRefusal(err)) {
+      return null;
+    }
+
+    void this.appCheckReadiness.reportTokenLost();
+
+    return AuthActions.loginBlockedByAppCheck();
   }
 
   private login(authCreds: AuthCredentials): Promise<SignInResult> {

@@ -18,6 +18,13 @@ export const AuthActions = createActionGroup({
      * dispatched. It releases the form and says nothing else.
      */
     'Login blocked by App Check': emptyProps(),
+    /**
+     * A provider sign-in the user dismissed - the popup closed, the native sheet
+     * swiped away (issue #1622). Nothing refused them, so it releases the form
+     * and reports nothing. Every other way a provider sign-in can end short of
+     * success is `Login failed`.
+     */
+    'Login cancelled': emptyProps(),
     'Logout succeeded': emptyProps(),
     'Logout failed': emptyProps(),
     Logout: emptyProps(),

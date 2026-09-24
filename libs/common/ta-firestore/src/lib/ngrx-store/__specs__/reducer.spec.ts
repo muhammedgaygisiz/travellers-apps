@@ -52,15 +52,22 @@ describe('auth reducer', () => {
     expect(state.authenticationFailed).toBe(true);
   });
 
-  // The Google and Apple effects report their failure as a registration
-  // failure, including a dismissed native sheet.
-  it('should release the pending state when a provider sign-in reports a failure', () => {
+  it('should release the pending state when a registration fails', () => {
     const state = reducer(
       pendingState(),
-      AuthActions.registrationFailed({ code: 'auth/cancelled' }),
+      AuthActions.registrationFailed({ code: 'auth/email-already-in-use' }),
     );
 
     expect(state.authenticationPending).toBe(false);
+  });
+
+  // Issue #1622: a dismissed Google or Apple sheet. The user knows what they
+  // did, so nothing is reported.
+  it('should release the pending state without a failure when a provider sign-in is cancelled', () => {
+    const state = reducer(pendingState(), AuthActions.loginCancelled());
+
+    expect(state.authenticationPending).toBe(false);
+    expect(state.authenticationFailed).toBe(false);
   });
 
   // Issue #1621: the App Check gate has the screen by then, and the attempt was

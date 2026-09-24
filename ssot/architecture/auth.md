@@ -522,14 +522,38 @@ the same way registration does rather than inventing a second pattern.
 - The pending state is store state, not component state. `authenticationPending`
   in the auth reducer is raised by all three sign-in entry points (email and
   password, Google, Apple) and lowered by every outcome: success, failure, a
-  provider failure reported as `registrationFailed`, and logout. The login page
-  reads it through `selectLoginPending` and `StoreService.loginPending`.
+  cancelled provider sign-in, a sign-in the App Check gate took over, and
+  logout. The login page reads it through `selectLoginPending` and
+  `StoreService.loginPending`.
 - While it is raised the page runs the header progress bar, the submit action
   locks behind a pending label with a spinner, and the provider buttons lock
   with it. All three actions guard themselves in code as well, because a tap
   can be queued between the click and the flag turning on.
 - A new sign-in clears the previous failure, so a retry is not shown spinning
   underneath a stale error. The failure itself still surfaces exactly as before.
+- **A provider sign-in that fails says so, and only a dismissal is silent**
+  (issue [#1622]). Every Google or Apple rejection reports `loginFailed` - the
+  same state and the same message a wrong password produces - and is logged
+  with its Firebase code. A popup the user closed or a sheet they swiped away
+  reports `loginCancelled`, which releases the form and nothing else, because
+  the user knows what they did. Before this both ended in `registrationFailed`,
+  which sets nothing the login page renders, so a refused sign-in left the page
+  looking exactly as it did before the tap.
+- **A dismissal is recognised by its code where there is one, and by its
+  message only where there is not.** The web SDK reports `auth/popup-closed-by-user`,
+  `auth/cancelled-popup-request` or `auth/user-cancelled`, and the iOS plugin maps
+  its web-context errors onto the first two. The native provider SDKs refuse
+  before Firebase is asked anything, so their cancellations carry **no code**:
+  Google on iOS says _canceled_, Sign in with Apple on iOS says only
+  `AuthorizationError error 1001`, and Android says _canceled_ or _cancelled_,
+  or `12501` from the legacy Google client. A Firebase code outside the
+  cancellation set is a rejection whatever its message says.
+- **The failure is deliberately the generic one.** An account without the role
+  the app requires is refused exactly like a wrong password, so nothing tells
+  the two apart (issue [#1469]), and a message naming the control that refused a
+  sign-in would give an operator nothing to act on. The one exception is an App
+  Check refusal, which is not a login failure at all: the readiness gate takes
+  the screen - see [Architecture - Firebase](firebase.md).
 - The email/password round-trip is bounded at 30 seconds and a timeout reports
   itself as a normal login failure. The form is locked while the request runs,
   so a request that never settles would otherwise lock the form with it. The
@@ -603,3 +627,4 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 [#370]: https://github.com/muhammedgaygisiz/travellers-apps/issues/370
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657
+[#1622]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1622

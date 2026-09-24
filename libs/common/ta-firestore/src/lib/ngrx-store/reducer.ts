@@ -49,9 +49,13 @@ export const reducer = createReducer<AuthResult, Action>(
     ...state,
     authenticationPending: false,
   })),
-  // The Google and Apple effects report their failure as a registration
-  // failure. What that surfaces is left as it is; it only has to release the
-  // form it locked, including when the user simply dismissed the native sheet.
+  // A provider sign-in the user walked away from. The form it locked is
+  // released and nothing is reported: the user knows what they did. A
+  // rejection is `loginFailed` above, which the login form renders (#1622).
+  on(AuthActions.loginCancelled, (state) => ({
+    ...state,
+    authenticationPending: false,
+  })),
   on(AuthActions.registrationFailed, (state) => ({
     ...state,
     authenticationPending: false,

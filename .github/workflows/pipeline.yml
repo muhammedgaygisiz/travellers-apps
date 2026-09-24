@@ -77,12 +77,12 @@ jobs:
       # issue numbers that do not link, and the use-case format rules.
       # See ssot/overview/use-case-format.md.
       #
-      # Deliberately NON-BLOCKING: a dead link in a document should not stop a merge.
-      # The report goes to the job summary and, on a pull request, to a comment - which
-      # GitHub turns into an email through normal notification settings.
+      # BLOCKING: a violation fails the job and therefore the pipeline. The report still
+      # goes to the job summary and, on a pull request, to a comment - which GitHub turns
+      # into an email through normal notification settings - because the reporting step
+      # runs with `if: always()`.
       - name: Check SSOT
         id: ssot
-        continue-on-error: true
         run: npm run check:ssot --silent > ssot-report.txt 2>&1
 
       - name: Report SSOT findings
@@ -90,15 +90,19 @@ jobs:
         uses: actions/github-script@v9
         with:
           script: |
-            const { readFileSync } = require('node:fs');
-            const report = readFileSync('ssot-report.txt', 'utf8').trim();
-            const failed = '${{ steps.ssot.outcome }}' === 'failure';
+            const { existsSync, readFileSync } = require('node:fs');
+            const outcome = '${{ steps.ssot.outcome }}';
+            if (outcome !== 'success' && outcome !== 'failure') return; // step never ran
+            const report = existsSync('ssot-report.txt')
+              ? readFileSync('ssot-report.txt', 'utf8').trim()
+              : '(no report produced)';
+            const failed = outcome === 'failure';
             const heading = failed ? '### SSOT check found problems' : '### SSOT check passed';
 
             await core.summary.addRaw(`${heading}\n\n\`\`\`\n${report}\n\`\`\`\n`).write();
 
             if (context.eventName !== 'pull_request') {
-              if (failed) core.warning(`SSOT check found problems:\n${report}`);
+              if (failed) core.error(`SSOT check found problems:\n${report}`);
               return;
             }
 
@@ -129,7 +133,7 @@ jobs:
               marker,
               heading,
               '',
-              'Not a merge blocker. Fix it here, or in a follow-up.',
+              'This blocks the merge. Fix it in this pull request.',
               '',
               '```',
               report,

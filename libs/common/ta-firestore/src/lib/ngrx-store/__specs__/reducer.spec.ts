@@ -63,6 +63,17 @@ describe('auth reducer', () => {
     expect(state.authenticationPending).toBe(false);
   });
 
+  // Issue #1621: the App Check gate has the screen by then, and the attempt was
+  // never judged, so there is no rejection to leave behind for the operator to
+  // find once readiness comes back.
+  it('should release the pending state without a rejection when App Check blocked the sign-in', () => {
+    const state = reducer(pendingState(), AuthActions.loginBlockedByAppCheck());
+
+    expect(state.authenticationPending).toBe(false);
+    expect(state.authenticationFailed).toBe(false);
+    expect(state.authenticated).toBe(false);
+  });
+
   it('should release the pending state on logout', () => {
     const state = reducer(pendingState(), AuthActions.logoutSucceeded());
 

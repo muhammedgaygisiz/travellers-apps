@@ -6,12 +6,17 @@ import { AppCheckReadinessService } from '../app-check-readiness.service';
 /**
  * Full-screen App Check retry gate.
  *
- * Rendered by the root component in place of the router outlet while App Check
- * enforcement is on and token readiness has not been achieved (issue #933).
- * Because the outlet is never mounted in this state and initial navigation is
- * held, no protected Firebase screen is shown. The retry button re-runs the
- * token preflight through {@link AppCheckReadinessService}; on success the
- * service resumes auth and initial navigation and the gate is removed.
+ * Rendered by the root component in place of the router outlet whenever App
+ * Check token readiness has not been achieved (issue #933). Because the outlet
+ * is not mounted in this state, no protected Firebase screen is shown. The
+ * retry button re-runs the token preflight through
+ * {@link AppCheckReadinessService}; on success the service lifts the gate,
+ * resuming auth and initial navigation if the app has not started yet.
+ *
+ * **It is not only a startup screen.** A page that started with a token and
+ * lost it afterwards lands here too, with a bounded recovery already running
+ * behind it (issue #1621). The button is what is left when that recovery ends
+ * without a token, which is the state this panel was built for.
  */
 @Component({
   selector: 'bite-app-check-gate',

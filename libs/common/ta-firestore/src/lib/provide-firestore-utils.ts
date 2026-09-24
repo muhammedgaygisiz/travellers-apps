@@ -39,7 +39,10 @@ import {
   initializeFirebaseAppCheck,
   refreshFirebaseAppCheckReadiness,
 } from './initialize-firebase-app-check';
-import { AppCheckReadinessService } from './app-check-readiness.service';
+import {
+  AppCheckReadinessService,
+  AppCheckRetryContext,
+} from './app-check-readiness.service';
 import { provideFirestoreSimulator } from './provide-firestore-simulator';
 import { Emulators } from 'utils';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
@@ -132,10 +135,11 @@ export const provideFirestoreUtils = (
 };
 
 /**
- * Coordinates the App Check startup gate: the readiness service the root
- * component observes, and the callback that starts initial navigation once the
- * app is allowed to proceed. Router initial navigation is disabled in both
- * shells so this is the single place that releases it.
+ * Coordinates the App Check gate: the readiness service the root component
+ * observes, and the callback that starts initial navigation once the app is
+ * allowed to proceed. Router initial navigation is disabled in both shells so
+ * this is the single place that releases it, and the single place that lifts
+ * the gate again after a mid-session loss (issue #1621).
  */
 export type AppCheckStartupGate = {
   readiness: Pick<
@@ -207,6 +211,25 @@ export const createFirebaseStartupInitializer =
     gate: AppCheckStartupGate,
   ): (() => Promise<void>) =>
   async () => {
+    // Whether auth and the first navigation have already run, so a later
+    // re-check only has to lift the gate.
+    const startup = { resumed: false };
+
+    // Registered before the verdict rather than on the failure branch, because
+    // the path that needs it most is the one that succeeded. A page that
+    // started with a token and lost it afterwards used to call `retry()` into
+    // nothing, and a reload was the only way back (issue #1621).
+    gate.readiness.registerRetryHandler((context) =>
+      retryStartup(
+        runtimeContext,
+        analytics,
+        authService,
+        gate,
+        startup,
+        context,
+      ),
+    );
+
     const readiness: AppCheckReadiness =
       await createFirebaseAppCheckInitializer(app, runtimeContext, analytics)();
 
@@ -214,13 +237,10 @@ export const createFirebaseStartupInitializer =
       // Enforced mode with no usable App Check token: hold auth and navigation,
       // show the retry gate, and only resume when a retry proves readiness.
       gate.readiness.markBlocked();
-      gate.readiness.registerRetryHandler(() =>
-        retryStartup(runtimeContext, analytics, authService, gate),
-      );
       return;
     }
 
-    await resumeStartup(authService, gate);
+    await resumeStartup(authService, gate, startup);
   };
 
 const retryStartup = async (
@@ -228,22 +248,41 @@ const retryStartup = async (
   analytics: Analytics | null | undefined,
   authService: Pick<AuthService, 'initialize'>,
   gate: AppCheckStartupGate,
+  startup: { resumed: boolean },
+  context?: AppCheckRetryContext,
 ): Promise<void> => {
   const refreshed = await refreshFirebaseAppCheckReadiness({
     analytics,
     runtimeMode: getAppCheckRuntimeMode(runtimeContext),
+    trigger: context?.requireToken ? 'recovery' : 'retry',
   });
 
   if (refreshed.ready) {
-    await resumeStartup(authService, gate);
+    await resumeStartup(authService, gate, startup);
   }
 };
 
+/**
+ * Lifts the gate, and starts the app the first time only.
+ *
+ * A mid-session recovery reaches this too, and by then auth has its listener
+ * and the router has been through its initial navigation. Running either again
+ * would register a second `authStateChange` listener and navigate the operator
+ * away from the page they were on, so the recovery does the one thing it is
+ * for: it marks the app ready and leaves it where it was (issue #1621).
+ */
 const resumeStartup = async (
   authService: Pick<AuthService, 'initialize'>,
   gate: AppCheckStartupGate,
+  startup: { resumed: boolean },
 ): Promise<void> => {
   gate.readiness.markReady();
+
+  if (startup.resumed) {
+    return;
+  }
+
+  startup.resumed = true;
   await authService.initialize();
   await gate.startNavigation();
 };

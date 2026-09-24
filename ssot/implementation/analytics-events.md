@@ -85,7 +85,7 @@
 
 - ## App Check Telemetry
 
-  The five `app_check_*` events are **not** part of the product taxonomy above.
+  The seven `app_check_*` events are **not** part of the product taxonomy above.
   They are emitted directly by
   `libs/common/ta-firestore/src/lib/initialize-firebase-app-check.ts`, not
   through `AnalyticsService`, because they have to fire during the app
@@ -102,6 +102,7 @@
   | `app_check_skipped`               | base, `platform`, `reason`                  | Dev mode, unsupported platform, or no site key |
   | `app_check_token_preflight`       | base, `succeeded`, `trigger`, `reason?`     | A token was actually requested                 |
   | `app_check_enforced_blocked`      | base, `platform`, `provider`, `reason`      | Enforced mode could not prove readiness        |
+  | `app_check_throttled`             | base, `platform`, `trigger`                 | The SDK is refusing to ask for a token at all  |
 
   The base parameters on every one of them are `runtime_mode`, `device_class`,
   `has_site_key` and `has_debug_token`.
@@ -123,7 +124,35 @@
   the token changes nothing about startup, so awaiting a round-trip inside the
   app initializer would delay initial navigation for every user to buy a metric.
   The request is issued and reported when it settles. `trigger` separates the
-  startup attempt from a `retry` through the enforced-mode gate.
+  startup attempt from a `retry` through the enforced-mode gate, and both from a
+  `recovery` - the mid-session path issue [#1621] added, where a page that
+  started with a token lost it afterwards. The three say different things about
+  a client: a `retry` means the app never started, a `recovery` means it ran and
+  then stopped being able to reach Firebase.
+
+  **`startup` is the only trigger that accepts a cached token.** The other two
+  run after a token request has just failed, so they ask with `forceRefresh` -
+  without it the SDK answers a re-check out of the cache the failed call came
+  from, which is the defect Charter Run 11 worked around by deleting the App
+  Check token cache by hand.
+
+- ### Why the throttle event exists
+
+  A 403 from the App Check exchange puts the SDK into its own one-day backoff -
+  `appCheck/initial-throttle` - held in memory for the life of the page
+  instance. From that moment the client answers every token request out of that
+  state without a network call, so **nothing it does afterwards reaches
+  Firebase**, and nothing on the server side can see it: a client that never
+  sends a request is invisible in App Check monitoring, which goes on reporting
+  100% verified.
+
+  It was therefore observable only as a console line on a page nobody was
+  watching - the state issue [#1621] was reported from had produced hundreds of
+  them over five hours. `app_check_throttled` fires when a token request is
+  refused by that backoff rather than by the network, which is the one failure
+  in this file that no wait inside the session can end: only a document reload
+  clears it. It carries the `trigger` that met it, so a page that started in the
+  state and a page that fell into it mid-session are told apart.
 
 - ### Why `device_class` exists
 
@@ -444,6 +473,7 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   | Crash-free users            | Launch monitoring | `app_exception` users vs all users  |
   | Unhandled errors            | Launch monitoring | `exception` count                   |
   | Top unhandled errors        | Launch monitoring | `exception` by `description`        |
+  | App Check throttle          | Launch monitoring | `app_check_throttled` count         |
   | Crash traces and non-fatals | Launch monitoring | Crashlytics console                 |
 
   Keep the dashboard scoped to launch signals; resist adding vanity metrics.
@@ -666,3 +696,4 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 [#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
 [#1114]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1114
 [#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103
+[#1621]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1621

@@ -11,6 +11,7 @@ import { FirebaseApp } from 'firebase/app';
 
 import {
   initializeFirebaseAppCheck,
+  isAppCheckRefusal,
   isFirebaseAppCheckEnforced,
   refreshFirebaseAppCheckReadiness,
   resetFirebaseAppCheckInitializationForTesting,
@@ -769,7 +770,9 @@ describe(initializeFirebaseAppCheck.name, () => {
       expect(FirebaseAppCheck.getToken).not.toHaveBeenCalled();
     });
 
-    it('should be ready when enforced and a token is obtained', async () => {
+    // Issue #1621: a re-check runs after a token request has just failed, so
+    // the cached answer it would otherwise get back is the one that failed.
+    it('should force a token refresh rather than re-issue the failed call', async () => {
       process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
 
       const readiness = await refreshFirebaseAppCheckReadiness({
@@ -778,7 +781,7 @@ describe(initializeFirebaseAppCheck.name, () => {
       });
 
       expect(FirebaseAppCheck.getToken).toHaveBeenCalledWith({
-        forceRefresh: false,
+        forceRefresh: true,
       });
       expect(readiness.ready).toBe(true);
     });
@@ -810,6 +813,122 @@ describe(initializeFirebaseAppCheck.name, () => {
         'app_check_token_preflight',
         expect.objectContaining({ succeeded: true, trigger: 'retry' }),
       );
+    });
+
+    it('should report the recovery preflight under its own trigger', async () => {
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+
+      await refreshFirebaseAppCheckReadiness({
+        analytics,
+        runtimeMode: 'production',
+        trigger: 'recovery',
+      });
+
+      expect(logEvent).toHaveBeenCalledWith(
+        analytics,
+        'app_check_token_preflight',
+        expect.objectContaining({ succeeded: true, trigger: 'recovery' }),
+      );
+    });
+
+    // Issue #1621: the flag says what this build does about App Check, not what
+    // the Console enforces, and a recovery runs only after the Console has
+    // already refused a request. Trusting the flag there reports a page healthy
+    // that cannot reach Firebase.
+    it('should check the token on a recovery even when the flag is off', async () => {
+      const readiness = await refreshFirebaseAppCheckReadiness({
+        analytics,
+        runtimeMode: 'production',
+        trigger: 'recovery',
+      });
+
+      expect(FirebaseAppCheck.getToken).toHaveBeenCalledWith({
+        forceRefresh: true,
+      });
+      expect(readiness.ready).toBe(true);
+    });
+
+    it('should report a recovery as blocked when the token is still refused', async () => {
+      jest
+        .spyOn(FirebaseAppCheck, 'getToken')
+        .mockRejectedValueOnce(new Error('still no token'));
+
+      const readiness = await refreshFirebaseAppCheckReadiness({
+        analytics,
+        runtimeMode: 'production',
+        trigger: 'recovery',
+      });
+
+      expect(readiness.ready).toBe(false);
+      expect(readiness.reason).toBe('token_request_failed');
+    });
+
+    it('should not ask for a token in dev mode', async () => {
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'true';
+
+      const readiness = await refreshFirebaseAppCheckReadiness({
+        analytics,
+        runtimeMode: 'dev_simulator',
+        trigger: 'recovery',
+      });
+
+      expect(readiness.ready).toBe(true);
+      expect(readiness.reason).toBe('dev_mode');
+      expect(FirebaseAppCheck.getToken).not.toHaveBeenCalled();
+    });
+
+    // The SDK's own one-day backoff after a 403. No wait inside the page
+    // outlives it, so it is told apart from an ordinary failed request and
+    // reported, rather than counted with it (issue #1621).
+    it('should report the SDK throttle as its own state', async () => {
+      process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+      jest.spyOn(FirebaseAppCheck, 'getToken').mockRejectedValueOnce(
+        Object.assign(
+          new Error('AppCheck: Requests throttled due to previous 403 error.'),
+          {
+            code: 'appCheck/throttled',
+          },
+        ),
+      );
+
+      const readiness = await refreshFirebaseAppCheckReadiness({
+        analytics,
+        runtimeMode: 'production',
+        trigger: 'recovery',
+      });
+
+      expect(readiness.ready).toBe(false);
+      expect(readiness.reason).toBe('token_throttled');
+      expect(logEvent).toHaveBeenCalledWith(
+        analytics,
+        'app_check_throttled',
+        expect.objectContaining({ platform: 'web', trigger: 'recovery' }),
+      );
+    });
+  });
+
+  describe(isAppCheckRefusal.name, () => {
+    it.each([
+      ['Firebase App Check token is invalid.'],
+      ['AppCheck: Requests throttled due to previous 403 error.'],
+      ['Error while retrieving App Check token'],
+    ])('should recognize %s as an App Check refusal', (message) => {
+      expect(isAppCheckRefusal(new Error(message))).toBe(true);
+    });
+
+    it('should recognize a refusal carried on the error code', () => {
+      expect(isAppCheckRefusal({ code: 'appCheck/fetch-status-error' })).toBe(
+        true,
+      );
+    });
+
+    it.each([
+      [new Error('The password is invalid.')],
+      [{ code: 'auth/wrong-password' }],
+      [undefined],
+      [null],
+    ])('should not mistake %s for an App Check refusal', (error) => {
+      expect(isAppCheckRefusal(error)).toBe(false);
     });
   });
 });

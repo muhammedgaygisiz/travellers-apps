@@ -41,6 +41,14 @@ export const reducer = createReducer<AuthResult, Action>(
     authenticationPending: false,
     authenticated: false,
   })),
+  // A sign-in the App Check gate took over: the form is released, and the
+  // failure flag is deliberately left alone. Raising it would leave a rejection
+  // message behind the gate for the operator to find once readiness comes back,
+  // about an attempt that was never judged (issue #1621).
+  on(AuthActions.loginBlockedByAppCheck, (state) => ({
+    ...state,
+    authenticationPending: false,
+  })),
   // The Google and Apple effects report their failure as a registration
   // failure. What that surfaces is left as it is; it only has to release the
   // form it locked, including when the user simply dismissed the native sheet.

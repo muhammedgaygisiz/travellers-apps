@@ -44,7 +44,17 @@ type AppCheckPlatform = 'android' | 'ios' | 'web' | 'other';
  */
 type AppCheckDeviceClass = 'physical' | 'unknown' | 'virtual';
 
-type AppCheckPreflightTrigger = 'retry' | 'startup';
+/**
+ * What asked for a token.
+ *
+ * `recovery` is the mid-session path (issue #1621): a page that started with a
+ * token and lost it afterwards. It is kept apart from `retry` - the cold-start
+ * gate's button - because the two say different things about a client. A
+ * `retry` means the app never started; a `recovery` means it ran and then
+ * stopped being able to reach Firebase, which is the state that was previously
+ * invisible outside a browser console.
+ */
+type AppCheckPreflightTrigger = 'recovery' | 'retry' | 'startup';
 
 type AppCheckPreflightResult = {
   ok: boolean;
@@ -96,37 +106,64 @@ export const initializeFirebaseAppCheck = (
   return appCheckInitialization;
 };
 
+export type FirebaseAppCheckRecheckOptions =
+  FirebaseAppCheckTelemetryOptions & {
+    /**
+     * Whether this re-check is the cold-start gate's button (`retry`, the
+     * default) or the mid-session path (`recovery`).
+     */
+    trigger?: 'recovery' | 'retry';
+  };
+
 /**
  * Re-checks App Check token readiness without re-registering the provider
  * (registering twice throws). Used by the startup gate's retry path: the
  * provider is already registered from the first attempt, so a retry only needs
- * to confirm a token can now be obtained. In non-enforced mode this is a no-op
- * that always reports ready.
+ * to confirm a token can now be obtained.
+ *
+ * **The token is always requested with `forceRefresh`.** Both re-check paths
+ * run after a token request has just failed, and without the flag the SDK
+ * answers a second time out of the cache it answered the first time from, so
+ * the re-check re-issues the call that failed instead of asking again. Charter
+ * Run 11 cleared this state by deleting the App Check token cache, which is
+ * what the flag does (issues #1465, #1621).
+ *
+ * **A `recovery` checks the token whether or not the client flag is on.**
+ * `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` says what this build does about App
+ * Check, not what the Firebase Console enforces - the two drift, which is
+ * issue #1369. A cold-start `retry` may take the flag at its word, because
+ * nothing has contradicted it. A `recovery` runs only after a live request was
+ * refused for a missing or invalid token, so on that path the flag has already
+ * been proven wrong and short-circuiting to `ready: true` would report a page
+ * healthy that cannot reach Firebase (issue #1621).
  */
 export const refreshFirebaseAppCheckReadiness = async (
-  telemetryOptions?: FirebaseAppCheckTelemetryOptions,
+  telemetryOptions?: FirebaseAppCheckRecheckOptions,
 ): Promise<AppCheckReadiness> => {
   const enforced = isFirebaseAppCheckEnforced();
   const platform = getAppCheckPlatform();
+  const trigger = telemetryOptions?.trigger ?? 'retry';
+  const skipReason = getRecheckSkipReason(enforced, trigger);
 
-  if (!enforced) {
+  if (skipReason) {
     return {
       ready: true,
       enforced,
       status: 'skipped',
       provider: 'none',
       platform,
-      reason: 'not_enforced',
+      reason: skipReason,
     };
   }
 
   const telemetry = await createTelemetry(telemetryOptions);
-  const preflight = await preflightAppCheckToken(telemetry, 'retry');
+  const preflight = await preflightAppCheckToken(telemetry, trigger);
 
   if (!preflight.ok) {
     telemetry.emit('app_check_enforced_blocked', {
       platform,
-      reason: 'token_unavailable',
+      reason: preflight.reason ?? 'token_unavailable',
+      trigger,
     });
   }
 
@@ -136,8 +173,29 @@ export const refreshFirebaseAppCheckReadiness = async (
     status: preflight.ok ? 'completed' : 'failed',
     provider: 'none',
     platform,
-    reason: preflight.ok ? undefined : 'token_unavailable',
+    reason: preflight.ok
+      ? undefined
+      : (preflight.reason ?? 'token_unavailable'),
   };
+};
+
+/**
+ * Why a re-check answers ready without asking for a token, or nothing when it
+ * has to ask.
+ *
+ * Dev mode never registers a provider, so there is no token to ask for and the
+ * emulators enforce nothing; a recovery there would fail forever against a
+ * plugin that was never initialized.
+ */
+const getRecheckSkipReason = (
+  enforced: boolean,
+  trigger: 'recovery' | 'retry',
+): string | undefined => {
+  if (process.env[IS_DEV_ENV] === 'true') {
+    return 'dev_mode';
+  }
+
+  return !enforced && trigger !== 'recovery' ? 'not_enforced' : undefined;
 };
 
 export const resetFirebaseAppCheckInitializationForTesting = (): void => {
@@ -258,7 +316,7 @@ const preflightAppCheckToken = async (
   telemetry: AppCheckTelemetry,
   trigger: AppCheckPreflightTrigger,
 ): Promise<AppCheckPreflightResult> => {
-  const preflight = await getAppCheckTokenPreflight(telemetry);
+  const preflight = await getAppCheckTokenPreflight(telemetry, trigger);
 
   telemetry.emit('app_check_token_preflight', {
     reason: preflight.reason,
@@ -269,17 +327,103 @@ const preflightAppCheckToken = async (
   return preflight;
 };
 
+/**
+ * `forceRefresh` on every trigger but `startup`, where a cached token is the
+ * right answer and the fast one. A re-check has just been told the cached
+ * token is no good, so asking for it again answers with the same one.
+ */
 const getAppCheckTokenPreflight = async (
   telemetry: AppCheckTelemetry,
+  trigger: AppCheckPreflightTrigger,
 ): Promise<AppCheckPreflightResult> => {
   try {
-    const { token } = await FirebaseAppCheck.getToken({ forceRefresh: false });
+    const { token } = await FirebaseAppCheck.getToken({
+      forceRefresh: trigger !== 'startup',
+    });
 
     return token ? { ok: true } : { ok: false, reason: 'empty_token' };
   } catch (error) {
     telemetry.warn('[AppCheck] App Check token preflight failed', error);
-    return { ok: false, reason: 'token_request_failed' };
+
+    if (!isAppCheckThrottleError(error)) {
+      return { ok: false, reason: 'token_request_failed' };
+    }
+
+    telemetry.emit('app_check_throttled', {
+      platform: getAppCheckPlatform(),
+      trigger,
+    });
+
+    return { ok: false, reason: 'token_throttled' };
   }
+};
+
+/**
+ * Whether the App Check SDK is refusing to ask for a token at all.
+ *
+ * After a 403 from the exchange the SDK applies its own backoff -
+ * `appCheck/initial-throttle`, one day - and answers every later request out
+ * of that state without a network call: *Requests throttled due to previous
+ * 403 error. Attempts allowed again after 01d:00m:00s*. The backoff is held in
+ * memory for the life of the page instance, so `forceRefresh` does not reach
+ * past it and no wait inside a session outlives it; only a document reload
+ * does.
+ *
+ * That makes it the one failure here that a bounded recovery cannot end, which
+ * is why it is told apart from an ordinary failed request rather than counted
+ * with it. Before issue #1621 it was visible only as a line in a browser
+ * console, hundreds of times over, on a page nobody was watching.
+ */
+const isAppCheckThrottleError = (error: unknown): boolean => {
+  const { code, message } = (error ?? {}) as {
+    code?: unknown;
+    message?: unknown;
+  };
+  const text = [
+    typeof code === 'string' ? code : '',
+    typeof message === 'string' ? message : '',
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  return text.includes('throttl');
+};
+
+/**
+ * Whether a request was refused for a missing or invalid App Check token.
+ *
+ * The refusal this answers for is the server's, not the SDK's: Identity
+ * Toolkit answers `401 UNAUTHENTICATED` with *Firebase App Check token is
+ * invalid* when Console enforcement is on and the request carried no usable
+ * token. That reaches the caller as an opaque sign-in failure - a wrong
+ * password and a page that has lost its attestation look the same from the
+ * login form - so the text of the refusal is the only thing that tells them
+ * apart (issue #1621).
+ *
+ * Matched on the text on purpose. The Firebase JS SDK folds the server's
+ * response into `auth/internal-error` and carries the original message with
+ * it, the Capacitor plugin passes the native error's message through, and
+ * neither exposes a stable code for this. A false positive costs a recovery
+ * attempt that finds a healthy token and clears itself; a false negative
+ * leaves the operator where this issue found them.
+ */
+export const isAppCheckRefusal = (error: unknown): boolean => {
+  const { code, message } = (error ?? {}) as {
+    code?: unknown;
+    message?: unknown;
+  };
+  const text = [
+    typeof code === 'string' ? code : '',
+    typeof message === 'string' ? message : '',
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  return (
+    text.includes('app check') ||
+    text.includes('app-check') ||
+    text.includes('appcheck')
+  );
 };
 
 const initializeFirebaseAppCheckProvider = async (
@@ -445,6 +589,7 @@ type AppCheckTelemetryEvent =
   | 'app_check_skipped'
   | 'app_check_startup_completed'
   | 'app_check_startup_started'
+  | 'app_check_throttled'
   | 'app_check_token_preflight';
 
 type AppCheckTelemetryParams = {

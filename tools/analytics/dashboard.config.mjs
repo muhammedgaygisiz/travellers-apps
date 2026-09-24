@@ -173,6 +173,20 @@ export const DASHBOARD_TILES = [
     dimension: 'customEvent:description',
     limit: 5,
   },
+  // A client that entered the App Check SDK's one-day throttle can reach
+  // nothing App Check protects for the life of that page instance, and before
+  // issue #1621 the only trace of it was a line in a browser console on a page
+  // nobody was watching. Any count here is worth looking at: the state is meant
+  // to be rare, and the tile exists to say how rare rather than to let it be
+  // inferred.
+  {
+    id: 'app-check-throttled',
+    title: 'Clients in the App Check throttle',
+    category: 'Launch monitoring',
+    type: 'eventCount',
+    events: ['app_check_throttled'],
+    expect: { maxRisePct: 0 },
+  },
   {
     id: 'crash-detail',
     title: 'Crash stack traces and non-fatals',

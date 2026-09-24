@@ -11,6 +11,7 @@ import { Action } from '@ngrx/store';
 import { NavController } from '@ionic/angular';
 import { BiteTribeRole, isAuthEntryPage, REQUIRED_ROLES } from 'utils';
 import { RequestedUrlService } from '../../requested-url.service';
+import { AppCheckReadinessService } from '../../app-check-readiness.service';
 
 jest.mock('utils', () => ({
   ...jest.requireActual('utils'),
@@ -520,6 +521,99 @@ describe(AuthEffects.name, () => {
         });
       });
     });
+  });
+});
+
+/**
+ * A sign-in refused for a missing or invalid App Check token is not a rejected
+ * sign-in, and is not reported as one (issue #1621).
+ *
+ * Identity Toolkit answers `401 UNAUTHENTICATED` before it looks at the
+ * credentials when Console enforcement is on and the request carries no usable
+ * token. The account is fine, the password is fine, and every later attempt on
+ * this page fails the same way until a token comes back - so the readiness
+ * service takes it, and the form is released without a rejection message.
+ */
+describe(`${AuthEffects.name} with App Check refusing the request`, () => {
+  let effects: AuthEffects;
+  let actions$: Observable<Action>;
+  let readiness: AppCheckReadinessService;
+
+  const authCreds = { email: 'q@q.de', password: 'password' };
+
+  /** What Identity Toolkit answers a request carrying no usable token. */
+  const appCheckRefusal = (): Error =>
+    Object.assign(new Error('Firebase App Check token is invalid.'), {
+      code: 'auth/internal-error',
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (isAuthEntryPage as jest.Mock).mockReturnValue(true);
+    AuthServiceMock.hasAnyRole.mockResolvedValue(true);
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        AuthEffects,
+        provideMockActions(() => actions$),
+        { provide: AuthService, useValue: AuthServiceMock },
+        provideMockStore(),
+        { provide: NavController, useValue: MockNavController },
+      ],
+    });
+
+    effects = TestBed.inject(AuthEffects);
+    readiness = TestBed.inject(AppCheckReadinessService);
+    jest.spyOn(readiness, 'reportTokenLost').mockResolvedValue();
+  });
+
+  it('should route an email sign-in into the readiness path', async () => {
+    AuthServiceMock.loginWithUsernameAndPassword.mockRejectedValue(
+      appCheckRefusal(),
+    );
+    actions$ = of(AuthActions.login({ authCreds }));
+
+    const result = await firstValueFrom(effects.loginEffect$);
+
+    expect(result).toEqual(AuthActions.loginBlockedByAppCheck());
+    expect(readiness.reportTokenLost).toHaveBeenCalled();
+  });
+
+  it('should route a Google sign-in into the readiness path', async () => {
+    AuthServiceMock.signInWithGoogleAccount.mockRejectedValue(
+      appCheckRefusal(),
+    );
+    actions$ = of(AuthActions.loginWithGoogleAccount());
+
+    const result = await firstValueFrom(effects.loginWithGoogleAccountEffect$);
+
+    expect(result).toEqual(AuthActions.loginBlockedByAppCheck());
+    expect(readiness.reportTokenLost).toHaveBeenCalled();
+  });
+
+  it('should route an Apple sign-in into the readiness path', async () => {
+    AuthServiceMock.signInWithAppleAccount.mockRejectedValue(appCheckRefusal());
+    actions$ = of(AuthActions.loginWithAppleAccount());
+
+    const result = await firstValueFrom(effects.loginWithAppleAccountEffect$);
+
+    expect(result).toEqual(AuthActions.loginBlockedByAppCheck());
+    expect(readiness.reportTokenLost).toHaveBeenCalled();
+  });
+
+  it('should leave a genuinely rejected sign-in alone', async () => {
+    AuthServiceMock.loginWithUsernameAndPassword.mockRejectedValue(
+      Object.assign(new Error('The password is invalid.'), {
+        code: 'auth/wrong-password',
+      }),
+    );
+    actions$ = of(AuthActions.login({ authCreds }));
+
+    const result = await firstValueFrom(effects.loginEffect$);
+
+    expect(result).toEqual(AuthActions.loginFailed());
+    expect(readiness.reportTokenLost).not.toHaveBeenCalled();
   });
 });
 

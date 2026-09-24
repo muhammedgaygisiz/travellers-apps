@@ -862,6 +862,119 @@ posts have had to be set back to `Original` by hand. Treat the crop control as a
 required step rather than a check, and read
 [The Launch Post](#the-launch-post)'s note as the one-off it was.
 
+## The Bucket List Post
+
+The fifth Instagram post of [#913], prepared 24 September 2026. The four before
+it are about finding a dish that somebody has already eaten. This one is about
+the ones nobody has eaten yet - **the bookmark on a Bite opens your own bucket
+lists, and a tap puts the dish on one.**
+
+![Bucket list post](../assets/social/bucket-list-post.png)
+
+Same rule as the four before it: nothing in it links, and the bio carries the
+store URLs - see [Nothing In A Post Links](#nothing-in-a-post-links).
+
+### The Claim Is Checked Against The Code
+
+The post describes behaviour, so the claim was read out of the source first, as
+[The Newest First Post](#the-newest-first-post) did:
+
+| Fact                              | Where                                                                                                                               |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| The popover lists your own lists  | `bucket-list-selection.component.ts`, one `ion-item` per `bucketLists()` plus the `New Bucket list` row                             |
+| A tap adds, a second tap removes  | `onBucketlistSelected` emits `removeBiteFromBucketlist` when the list's `biteIds` already hold the Bite, and `selectList` otherwise |
+| A filled bookmark means it is on  | `get-bucketlist-icon.pipe.ts` returns `bookmark` for a list holding the Bite and `bookmark-outline` for the rest                    |
+| `New Bucket list` asks for a name | `details.page.ts` passes `promptForNewList` in the popover's `componentProps`, because the popover dismisses itself on select       |
+| A list knows what you have eaten  | `progress.pipe.ts` is `triedOutBites / biteIds`, and `bucketlists.page.html` swaps in a tick once that is `1`                       |
+| Ticking one off is a swipe        | `bucket-list.container.ts` sets `enableTriedOutSwipe` and anchors the `bucket-list-swipe` coach mark on it                          |
+
+So _save it now, tick it off when you get there_ is what the app does, and the
+caption is not describing a feature the code would have to grow into.
+
+### The Image
+
+[`ssot/assets/social/bucket-list-post.png`](../assets/social/bucket-list-post.png),
+`1080x1350` (4:5). **This is the first frame on the account that is composed
+rather than cut**, and the reason is measurable. On the `1125x2436` iPhone
+source:
+
+| Band            | Rows       |
+| --------------- | ---------- |
+| Status bar text | `64-99`    |
+| Header bar ends | `308`      |
+| The popover     | `282-1872` |
+
+The popover is **1591 rows tall, and a 4:5 frame at the screen's full width is
+1406**. It does not fit. Every crop that ends inside it loses either
+`New Bucket list` at the bottom, which is the row that says a list can be made
+from here, or the first list names at the top, and a popover cut at the top
+reads as a mistake rather than a frame.
+
+So the screenshot is pasted instead of cropped: rows `130-1872` onto a
+`1394x1743` ground of `#1A1C22`, the launch post's and the avatar's ground, with
+`135` pixel gutters left and right, scaled to `1080x1350`. Two passes, because
+**sharp resizes before it composites** - pasting a 1125-wide screenshot onto a
+canvas that a `resize` in the same chain has already taken to 1080 fails with
+_Image to composite must have same dimensions or smaller_.
+
+The gutters do not read as gutters: the page background is `#181A20` and the
+ground is `#1A1C22`, two steps apart on each channel. What the extra width buys
+is the whole popover plus the header bar, so the wordmark is in frame, which
+[The Profile Post](#the-profile-post) gave up for a crop - and dropping rows
+`0-129` takes the clock and the battery out with it.
+
+### The Truncated Left Column Stays
+
+`Fried Chicke`, `Bonchon Robinson Th` and a lone `km` on its own line are the
+popover sitting on top of the page, which is what the screen does when the
+bookmark is tapped. It is tempting to read them as a bad crop; they are not, and
+nothing was retouched. The dish photo, the four stars and `12inch` carry the
+half of the frame that is a Bite, and the list names carry the other half.
+
+### The Caption
+
+```text
+Turkey. Thailand. Bern's top 10 🔖
+Every trip starts with a dish somebody told you about. Keep them in one place until you're standing there.
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #realfood
+```
+
+The first line is read off the frame - three of the eleven list names, and the
+one that is not a country says what a list is for. The second line is about the
+reader's own trips rather than the popover, for the reason
+[The Bites Around You Post](#the-bites-around-you-post) gives: naming the
+bookmark, the tap and the tick would turn the caption into a manual, and the
+image already shows the tap.
+
+**No fifth hashtag.** The frame carries `Turkey`, `Thailand` and `Bern's Top 10
+Must Eats`, but those are list names somebody typed, not where the post is set -
+`#bern` and `#salzburg` earned their place because the frame _was_ that city.
+The four standing hashtags are unchanged for the fifth post running.
+
+### When It Goes Up
+
+Not published yet. The four posts before it settled the steps:
+
+- **Set the crop to `Original`.** Square is the web uploader's default, see
+  [Published 21 September 2026](#published-21-september-2026).
+- **The alt text**, written here rather than improvised in the upload dialog,
+  for the reason
+  [Published 20 September 2026](#published-20-september-2026) gives - Instagram
+  writes a list of UI words otherwise:
+
+  ```text
+  A bookmark menu open over a dish in the BiteTribe app, listing eleven saved bucket lists - Turkey, Cologne, Croatia, Kosovo, Thailand, Malta, London, Greece, Ethiopia, Bern's Top 10 Must Eats and Berlin - with New Bucket list at the bottom. Behind it, a four-star Bite for fried chicken thighs from a restaurant in Thailand.
+  ```
+
+  It names what the menu is for and what is behind it, not the screen it was
+  taken on.
+
+- **No filter**, so the app's own colours survive.
+- **Share to Threads** from the same dialog.
+- Pinning is still app-only and still open, see
+  [Pin It Is Still Open](#pin-it-is-still-open).
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done

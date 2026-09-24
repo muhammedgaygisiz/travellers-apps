@@ -618,6 +618,106 @@ describe(`${AuthEffects.name} with App Check refusing the request`, () => {
 });
 
 /**
+ * A provider sign-in that fails says so; one the user dismissed does not
+ * (issue #1622).
+ *
+ * Both used to dispatch `registrationFailed`, which releases the form and sets
+ * nothing the login page renders - so a Google sign-in Firebase refused left
+ * the page looking exactly as it did before the tap.
+ */
+describe.each([
+  {
+    provider: 'Google',
+    signIn: AuthServiceMock.signInWithGoogleAccount,
+    action: AuthActions.loginWithGoogleAccount(),
+    effect: (effects: AuthEffects): Observable<Action> =>
+      effects.loginWithGoogleAccountEffect$,
+  },
+  {
+    provider: 'Apple',
+    signIn: AuthServiceMock.signInWithAppleAccount,
+    action: AuthActions.loginWithAppleAccount(),
+    effect: (effects: AuthEffects): Observable<Action> =>
+      effects.loginWithAppleAccountEffect$,
+  },
+])(
+  `${AuthEffects.name} when a $provider sign-in does not succeed`,
+  ({ signIn, action, effect }) => {
+    let effects: AuthEffects;
+    let actions$: Observable<Action>;
+    let warn: jest.SpyInstance;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (isAuthEntryPage as jest.Mock).mockReturnValue(true);
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          AuthEffects,
+          provideMockActions(() => actions$),
+          { provide: AuthService, useValue: AuthServiceMock },
+          provideMockStore(),
+          { provide: NavController, useValue: MockNavController },
+        ],
+      });
+
+      effects = TestBed.inject(AuthEffects);
+      warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      jest.spyOn(console, 'debug').mockImplementation(() => undefined);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const run = (error: unknown): Promise<Action> => {
+      signIn.mockRejectedValue(error);
+      actions$ = of(action);
+
+      return firstValueFrom(effect(effects));
+    };
+
+    it.each([
+      ['a backend rejection', { code: 'auth/internal-error', message: 'boom' }],
+      ['a disabled account', { code: 'auth/user-disabled' }],
+      ['an error with no code at all', new Error('network request failed')],
+    ])('should report %s as a login failure', async (_, error) => {
+      expect(await run(error)).toEqual(AuthActions.loginFailed());
+      expect(MockNavController.navigateBack).not.toHaveBeenCalled();
+    });
+
+    it('should log the rejection with its Firebase code', async () => {
+      const error = { code: 'auth/user-disabled' };
+
+      await run(error);
+
+      expect(warn).toHaveBeenCalledWith(
+        'Provider sign-in failed:',
+        'auth/user-disabled',
+        error,
+      );
+    });
+
+    it.each([
+      ['the web popup closed', { code: 'auth/popup-closed-by-user' }],
+      [
+        'a second popup replacing the first',
+        { code: 'auth/cancelled-popup-request' },
+      ],
+      ['the user cancelling', { code: 'auth/user-cancelled' }],
+      [
+        'the native sheet dismissed',
+        { message: 'The user canceled the sign-in flow.' },
+      ],
+    ])('should unlock the form without a failure when %s', async (_, error) => {
+      expect(await run(error)).toEqual(AuthActions.loginCancelled());
+      expect(warn).not.toHaveBeenCalled();
+    });
+  },
+);
+
+/**
  * Sign-in refuses an account that lacks the role the app requires, and reports
  * the refusal as the same generic failure a wrong password produces.
  *
@@ -823,7 +923,7 @@ describe(`${AuthEffects.name} with a required role`, () => {
       expect(result).toEqual(AuthActions.loginFailed());
     });
 
-    it('still reports a genuine provider error as a registration failure', async () => {
+    it('still lets a dismissed popup pass silently', async () => {
       AuthServiceMock.signInWithGoogleAccount.mockRejectedValue({
         code: 'auth/popup-closed-by-user',
       });
@@ -833,9 +933,7 @@ describe(`${AuthEffects.name} with a required role`, () => {
         AuthActions.loginWithGoogleAccount(),
       );
 
-      expect(result).toEqual(
-        AuthActions.registrationFailed({ code: 'auth/popup-closed-by-user' }),
-      );
+      expect(result).toEqual(AuthActions.loginCancelled());
     });
   });
 

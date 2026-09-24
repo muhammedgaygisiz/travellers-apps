@@ -22,6 +22,10 @@ import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
 import { AppCheckReadinessService } from '../app-check-readiness.service';
 import { isAppCheckRefusal } from '../initialize-firebase-app-check';
+import {
+  getSignInErrorCode,
+  isSignInCancellation,
+} from './sign-in-cancellation';
 import { RequestedUrlService } from '../requested-url.service';
 import {
   AFTER_LOGIN_PAGE,
@@ -278,25 +282,41 @@ export class AuthEffects {
   }
 
   /**
-   * A missing role is reported as a login failure, not a registration failure:
-   * `registrationFailed` only releases the pending flag, so the login page
-   * would unlock with no message at all and the rejection would look like
-   * nothing happened.
+   * How a Google or Apple sign-in that did not succeed is reported.
+   *
+   * **A dismissal is the only silent outcome.** The user closed the popup or
+   * swiped the sheet away, knows it, and is told nothing. Everything else is a
+   * rejection and reports the same failure a wrong password does - until
+   * issue #1622 it was `registrationFailed`, which releases the form and sets
+   * nothing the login page renders, so a refused sign-in left the page looking
+   * exactly as it did before the tap.
+   *
+   * The same failure is the point, not a shortcut. An account without the role
+   * this app requires is refused like a wrong password so that nothing tells
+   * the two apart (issue #1469), and a rejection naming the control that
+   * refused it would tell an operator nothing they can act on. An App Check
+   * refusal is the one exception, and it is not reported here at all: the
+   * readiness gate takes the screen instead (issue #1621).
+   *
+   * Every non-dismissal is logged with its code. A rejected provider promise
+   * skips the effect's `switchMap`, and before this the only trace it left was
+   * the absence of the success log.
    */
   private toProviderFailure(err: unknown): Action {
-    if (err instanceof MissingRequiredRoleError) {
-      return AuthActions.loginFailed();
+    const code = getSignInErrorCode(err);
+
+    if (
+      !(err instanceof MissingRequiredRoleError) &&
+      isSignInCancellation(err)
+    ) {
+      console.debug('Provider sign-in cancelled:', code ?? 'no code');
+
+      return AuthActions.loginCancelled();
     }
 
-    const blocked = this.toAppCheckBlock(err);
+    console.warn('Provider sign-in failed:', code ?? 'no code', err);
 
-    if (blocked) {
-      return blocked;
-    }
-
-    return AuthActions.registrationFailed({
-      code: (err as { code?: string })?.code ?? 'unknown',
-    });
+    return this.toLoginFailure(err);
   }
 
   private toLoginFailure(err: unknown): Action {

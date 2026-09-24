@@ -114,6 +114,46 @@ describe('BitePlaceComponent', () => {
     expect(uniqueBitesByNameMock).toHaveBeenCalledWith(bites);
   });
 
+  describe('bites link', () => {
+    const bitesLink = (): HTMLElement | null =>
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
+        '[data-testid="place-bites-link"]',
+      );
+    const bite = {
+      id: 'bite-1',
+      name: 'Bite',
+      place: 'Bite Place',
+      rating: 4,
+    } as Bite;
+
+    beforeEach(() => {
+      // No position, so the map renders no marker for the mocked leaflet.
+      getPositionMock.mockReturnValue(undefined);
+      getDistanceMock.mockReturnValue(undefined);
+    });
+
+    it('should link the rating count to the Bites and emit the current Bite', () => {
+      uniqueBitesByNameMock.mockReturnValue([bite]);
+      componentRef.setInput('bite', bite);
+      componentRef.setInput('bites', [bite]);
+      fixture.detectChanges();
+
+      const emitted: unknown[] = [];
+      component.showBitesClick.subscribe((value) => emitted.push(value));
+
+      bitesLink()?.click();
+      expect(emitted).toEqual([bite]);
+    });
+
+    it('should show the rating line as plain text when there are no Bites', () => {
+      uniqueBitesByNameMock.mockReturnValue([]);
+      componentRef.setInput('bites', []);
+      fixture.detectChanges();
+
+      expect(bitesLink()).toBeNull();
+    });
+  });
+
   describe('uniqueTags', () => {
     it('should return unique tags from all bites', () => {
       componentRef.setInput('bites', [

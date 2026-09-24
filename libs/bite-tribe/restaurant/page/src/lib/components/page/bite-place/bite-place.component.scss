@@ -25,19 +25,6 @@
     }
   }
 
-  .buttons-container {
-    ion-button {
-      margin: 0;
-      --border-width: 0;
-      --color: white;
-      border-bottom: 1px solid var(--ion-input-border-color);
-
-      &:first-of-type {
-        border-top: 1px solid var(--ion-input-border-color);
-      }
-    }
-  }
-
   .rating-container {
     white-space: nowrap;
 
@@ -49,6 +36,20 @@
 
     .rating {
       margin-right: 0.5rem;
+    }
+
+    .bites-link {
+      appearance: none;
+      background: none;
+      border: 0;
+      margin: 0;
+      padding: 0;
+      min-height: 44px;
+      color: var(--ion-text-color);
+      font-family: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
     }
   }
 }

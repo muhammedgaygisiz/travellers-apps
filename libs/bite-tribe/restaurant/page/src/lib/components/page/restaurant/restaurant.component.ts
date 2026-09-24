@@ -75,7 +75,7 @@ export class RestaurantComponent {
    * Whether the loaded restaurant carries a menu to navigate to. Without one
    * `navigateToMenu` falls back to a route keyed by place name, which lands on
    * the empty-menu page even for a restaurant that has a menu, so the button is
-   * gated on this the way the Bites button is gated on its Bite count.
+   * gated on this the way the Bites link is gated on its Bite count.
    */
   hasMenu = computed(() => !!this.restaurant()?.menuId);
 

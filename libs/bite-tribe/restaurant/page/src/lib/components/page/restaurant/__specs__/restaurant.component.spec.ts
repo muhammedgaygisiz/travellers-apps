@@ -323,7 +323,7 @@ describe('RestaurantComponent', () => {
       ).toBeNull();
     });
 
-    it('should not offer the menu or the bites button while the restaurant is missing', () => {
+    it('should not offer the menu button or the bites link while the restaurant is missing', () => {
       componentRef.setInput('restaurant', undefined);
       uniqueBitesByNameMock.mockReturnValue([createBite()]);
       componentRef.setInput('bites', [createBite()]);
@@ -334,7 +334,7 @@ describe('RestaurantComponent', () => {
         nativeEl.querySelector('[data-testid="restaurant-menu-button"]'),
       ).toBeNull();
       expect(
-        nativeEl.querySelector('[data-testid="restaurant-bites-button"]'),
+        nativeEl.querySelector('[data-testid="restaurant-bites-link"]'),
       ).toBeNull();
     });
 
@@ -390,6 +390,46 @@ describe('RestaurantComponent', () => {
         ?.click();
 
       expect(emitted).toEqual([restaurant]);
+    });
+  });
+
+  describe('bites link', () => {
+    const bitesLink = (): HTMLElement | null =>
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
+        '[data-testid="restaurant-bites-link"]',
+      );
+
+    it('should link the rating count to the Bites and emit the restaurant', () => {
+      const restaurant = createRestaurant();
+      uniqueBitesByNameMock.mockReturnValue([createBite({ rating: 4 })]);
+      componentRef.setInput('bites', [createBite({ rating: 4 })]);
+      componentRef.setInput('restaurant', restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      const emitted: (Restaurant | undefined)[] = [];
+      component.showBitesClick.subscribe((value) => emitted.push(value));
+
+      expect(bitesLink()).toBeTruthy();
+      bitesLink()?.click();
+      expect(emitted).toEqual([restaurant]);
+    });
+
+    it('should still link to the Bites when none of them carries a rating', () => {
+      uniqueBitesByNameMock.mockReturnValue([createBite()]);
+      componentRef.setInput('bites', [createBite()]);
+      componentRef.setInput('restaurant', createRestaurant());
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.ratedBiteCount()).toBe(0);
+      expect(bitesLink()).toBeTruthy();
+    });
+
+    it('should show the rating line as plain text when there are no Bites', () => {
+      componentRef.setInput('bites', []);
+      componentRef.setInput('restaurant', createRestaurant());
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(bitesLink()).toBeNull();
     });
   });
 

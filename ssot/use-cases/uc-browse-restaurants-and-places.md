@@ -30,7 +30,7 @@ selector that attaches a place to a Bite in the first place to
 
 - User navigates from a Bite to a verified Restaurant or unverified place page.
 - During Bite creation, user selects a nearby verified restaurant, unverified restaurant, Google Place, or explicit custom place through the selector before saving.
-- User can inspect restaurant-related Bites.
+- User can inspect restaurant-related Bites by following the rating count on either page.
 - Restaurant pages can show ratings derived from Bites, tags, menu entry points, and verification distinctions.
 
 ## Restaurant Page State Contract
@@ -57,9 +57,15 @@ screen before the state backing them existed.
   place name and lands on the empty-menu page for a restaurant that does have a
   menu.
 - The menu button is rendered only for a loaded restaurant that carries a menu
-  id, the same way the Bites button is gated on its Bite count, so the menu
-  entry point always resolves to the id-based menu route. A restaurant with no
-  menu offers no button rather than one that reports the menu as absent.
+  id, so the menu entry point always resolves to the id-based menu route. A
+  restaurant with no menu offers no button rather than one that reports the
+  menu as absent.
+- The rating count is the entry point to the Bites recorded at the place, on
+  the restaurant page and the place page alike. It links whenever the place has
+  Bites, rated or not, so "no ratings yet" still leads to Bites that carry no
+  rating. It is plain text only when there are no Bites.
+- The menu button sits under the description and links, above the tags, so it
+  is reachable without scrolling past the opening hours and the map.
 
 ## MVP Classification
 
@@ -92,6 +98,7 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 - Issue [#734], the `User wants to see a menu of a restaurant` epic, covered richer restaurant
   menu and restaurant page behaviour. Closed as completed - it is delivered, not planned.
 - Issue [#1381] owns the state contract above. Closed as completed.
+- Issue [#1696] made the Menu label readable in light mode, where it had been drawn in fixed white on a transparent button, moved the menu button above the tags, and replaced the Bites button on both pages with the rating count as a link.
 
 ## Related Domains
 
@@ -112,3 +119,4 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 [#734]: https://github.com/muhammedgaygisiz/travellers-apps/issues/734
 [#1381]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1381
 [#1382]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1382
+[#1696]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1696

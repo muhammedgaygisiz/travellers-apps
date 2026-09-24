@@ -6,7 +6,7 @@ import {
   output,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import { IonButton, IonContent, IonIcon } from '@ionic/angular/standalone';
+import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { Bite, LikeClick } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { getPosition } from '../../../utils/get-position';
@@ -24,7 +24,6 @@ import { TagsInputComponent } from 'common/ui/tags';
   imports: [
     PageComponent,
     IonContent,
-    IonButton,
     IonIcon,
     MapComponent,
     DistanceComponent,

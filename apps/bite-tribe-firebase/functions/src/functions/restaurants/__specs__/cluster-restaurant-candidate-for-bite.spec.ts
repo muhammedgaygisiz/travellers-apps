@@ -73,8 +73,31 @@ const makeCollection = (name: string): unknown => {
   return query;
 };
 
+interface DocRefMock {
+  get: () => Promise<unknown>;
+  set: (data: Record<string, unknown>, options: unknown) => Promise<void>;
+}
+
 const firestoreMock = {
   collection: jest.fn((name: string) => makeCollection(name)),
+  runTransaction: jest.fn(
+    async (
+      handler: (transaction: {
+        get: (ref: DocRefMock) => Promise<unknown>;
+        set: (
+          ref: DocRefMock,
+          data: Record<string, unknown>,
+          options: unknown,
+        ) => void;
+      }) => Promise<unknown>,
+    ) =>
+      handler({
+        get: (ref) => ref.get(),
+        set: (ref, data, options) => {
+          void ref.set(data, options);
+        },
+      }),
+  ),
 };
 
 jest.mock('firebase-admin/firestore', () => ({
@@ -211,6 +234,62 @@ describe('clusterRestaurantCandidateForBite', () => {
       status: 'verified-restaurant-match',
     });
   });
+
+  it.each(['verified', 'dismissed'])(
+    'refuses to write onto a %s Candidate at the derived id and says so',
+    async (status) => {
+      seed['bites'] = [
+        biteDoc('bite-selected', 'Pizza Palace', CENTER),
+        biteDoc('bite-1', 'Pizza Palace', nearby(1)),
+      ];
+      await clusterRestaurantCandidateForBite(request('bite-selected'));
+      const candidateId = writes[0].path.split('/')[1];
+      writes.length = 0;
+      jest.clearAllMocks();
+
+      const decided: SeedDoc = {
+        id: candidateId,
+        data: {
+          name: 'Pizza Palace',
+          normalizedName: 'pizza palace',
+          status,
+          position: nearby(1),
+          geohash: 'geohash-1',
+          biteIds: ['bite-existing'],
+          evidence: { biteCount: 1, placeNames: { 'Pizza Palace': 1 } },
+        },
+      };
+      const decidedData = structuredClone(decided.data);
+      seed['restaurantCandidates'] = [decided];
+
+      const result = await clusterRestaurantCandidateForBite(
+        request('bite-selected'),
+      );
+
+      expect(writes).toHaveLength(0);
+      expect(decided.data).toEqual(decidedData);
+      expect(result).toEqual(
+        expect.objectContaining({
+          candidateId,
+          candidateStatus: status,
+          evidenceCount: 0,
+          matchedBiteIds: [],
+          status: 'candidate-already-decided',
+        }),
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('clusterRestaurantCandidateForBite succeeded'),
+        expect.objectContaining({
+          details: expect.objectContaining({
+            candidateId,
+            candidateStatus: status,
+            refusedBiteIds: expect.arrayContaining(['bite-selected', 'bite-1']),
+            status: 'candidate-already-decided',
+          }),
+        }),
+      );
+    },
+  );
 
   /**
    * The manual clustering callable writes candidate documents for Bites the

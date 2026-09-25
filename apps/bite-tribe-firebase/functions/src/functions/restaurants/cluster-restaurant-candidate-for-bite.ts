@@ -11,15 +11,13 @@ import {
 } from '../shared/utils/restaurant-candidates';
 import {
   BITE_COLLECTION,
-  RESTAURANT_CANDIDATES_COLLECTION,
   RestaurantCandidateMatchSkippedCounts,
-  buildCandidateUpdate,
-  buildRestaurantCandidateDocumentId,
   getMatchingBites,
   getNearbyBites,
   getNearbyPendingCandidates,
   getNearbyVerifiedRestaurants,
   toCandidateBite,
+  writeRestaurantCandidate,
 } from '../shared/utils/restaurant-candidate-store';
 
 interface ClusterRestaurantCandidateForBiteRequest {
@@ -28,11 +26,17 @@ interface ClusterRestaurantCandidateForBiteRequest {
 
 interface ClusterRestaurantCandidateForBiteResult {
   candidateId?: string;
+  /** The decided Candidate's status, when the write was refused. */
+  candidateStatus?: string;
   verifiedRestaurantId?: string;
   evidenceCount: number;
   matchedBiteIds: string[];
   skippedCounts: RestaurantCandidateMatchSkippedCounts;
-  status: 'created' | 'updated' | 'verified-restaurant-match';
+  status:
+    | 'created'
+    | 'updated'
+    | 'verified-restaurant-match'
+    | 'candidate-already-decided';
 }
 
 /**
@@ -128,16 +132,38 @@ export const clusterRestaurantCandidateForBite =
       selectedBite.place,
       selectedBite.position,
     );
-    const candidateRef = pendingDuplicate
-      ? getFirestore()
-          .collection(RESTAURANT_CANDIDATES_COLLECTION)
-          .doc(pendingDuplicate.item.id)
-      : getFirestore()
-          .collection(RESTAURANT_CANDIDATES_COLLECTION)
-          .doc(buildRestaurantCandidateDocumentId(draft));
-    const candidateUpdate = buildCandidateUpdate(draft, pendingDuplicate?.item);
+    const writeResult = await writeRestaurantCandidate(
+      draft,
+      pendingDuplicate?.item.id,
+    );
 
-    await candidateRef.set(candidateUpdate, { merge: true });
+    if (writeResult.outcome === 'refused') {
+      // The place has already been decided. Its Bites stay unlinked, which
+      // keeps them on the Bite-places surface (RD-VRC-9).
+      logOperatorAction(request, {
+        action: 'clusterRestaurantCandidateForBite',
+        targetType: 'bite',
+        targetId: selectedBite.id,
+        outcome: 'succeeded',
+        details: {
+          candidateId: writeResult.candidateId,
+          candidateStatus: writeResult.candidateStatus,
+          refusedBiteIds: draft.biteIds,
+          status: 'candidate-already-decided',
+        },
+      });
+
+      return {
+        candidateId: writeResult.candidateId,
+        candidateStatus: writeResult.candidateStatus,
+        evidenceCount: 0,
+        matchedBiteIds: [],
+        skippedCounts,
+        status: 'candidate-already-decided',
+      } satisfies ClusterRestaurantCandidateForBiteResult;
+    }
+
+    const status = writeResult.created ? 'created' : 'updated';
 
     logOperatorAction(request, {
       action: 'clusterRestaurantCandidateForBite',
@@ -145,18 +171,17 @@ export const clusterRestaurantCandidateForBite =
       targetId: selectedBite.id,
       outcome: 'succeeded',
       details: {
-        candidateId: candidateRef.id,
-        evidenceCount: candidateUpdate.evidence?.biteCount,
-        status: pendingDuplicate ? 'updated' : 'created',
+        candidateId: writeResult.candidateId,
+        evidenceCount: writeResult.evidenceCount,
+        status,
       },
     });
 
     return {
-      candidateId: candidateRef.id,
-      evidenceCount:
-        candidateUpdate.evidence?.biteCount ?? draft.biteIds.length,
+      candidateId: writeResult.candidateId,
+      evidenceCount: writeResult.evidenceCount,
       matchedBiteIds: draft.biteIds,
       skippedCounts,
-      status: pendingDuplicate ? 'updated' : 'created',
+      status,
     } satisfies ClusterRestaurantCandidateForBiteResult;
   });

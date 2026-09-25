@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import {
   RESTAURANT_CANDIDATE_EVIDENCE_THRESHOLD,
   createRestaurantCandidateOnBiteCreate,
@@ -26,9 +27,10 @@ const writes: Array<{
   options: unknown;
 }> = [];
 
-const toSnapshot = (doc: SeedDoc): unknown => ({
-  id: doc.id,
-  data: (): Record<string, unknown> => doc.data,
+const toSnapshot = (doc: SeedDoc | undefined): unknown => ({
+  id: doc?.id ?? '',
+  exists: !!doc,
+  data: (): Record<string, unknown> | undefined => doc?.data,
 });
 
 const makeCollection = (name: string): unknown => {
@@ -41,6 +43,9 @@ const makeCollection = (name: string): unknown => {
       return {
         id: docId,
         path: `${name}/${docId}`,
+        get: jest.fn(async () =>
+          toSnapshot((seed[name] ?? []).find((doc) => doc.id === docId)),
+        ),
         set: jest.fn(
           async (data: Record<string, unknown>, options: unknown) => {
             writes.push({ path: `${name}/${docId}`, data, options });
@@ -53,8 +58,31 @@ const makeCollection = (name: string): unknown => {
   return query;
 };
 
+interface DocRefMock {
+  get: () => Promise<unknown>;
+  set: (data: Record<string, unknown>, options: unknown) => Promise<void>;
+}
+
 const firestoreMock = {
   collection: jest.fn((name: string) => makeCollection(name)),
+  runTransaction: jest.fn(
+    async (
+      handler: (transaction: {
+        get: (ref: DocRefMock) => Promise<unknown>;
+        set: (
+          ref: DocRefMock,
+          data: Record<string, unknown>,
+          options: unknown,
+        ) => void;
+      }) => Promise<unknown>,
+    ) =>
+      handler({
+        get: (ref) => ref.get(),
+        set: (ref, data, options) => {
+          void ref.set(data, options);
+        },
+      }),
+  ),
 };
 
 jest.mock('firebase-admin/firestore', () => ({
@@ -246,6 +274,106 @@ describe('createRestaurantCandidateOnBiteCreate', () => {
     expect(writes).toHaveLength(1);
     expect(writes[0].path).toMatch(/^restaurantCandidates\/pizza-palace-/);
     expect(writes[0].path).not.toContain('candidate-');
+  });
+
+  describe('onto a Candidate that already occupies the derived id', () => {
+    const seedMatchingBites = (): void => {
+      seed['bites'] = [
+        biteDoc('bite-1', 'Pizza Palace', nearby(1)),
+        biteDoc('bite-2', 'Pizza Palace', nearby(2)),
+        biteDoc('bite-3', 'Pizza Palace', nearby(3)),
+        biteDoc('bite-4', 'Pizza Palace', nearby(4)),
+      ];
+    };
+
+    /**
+     * The id the trigger derives for the seeded Bites. The tests before #1497
+     * seeded decided Candidates at other ids, so the collision never occurred.
+     */
+    const derivedCandidateId = async (): Promise<string> => {
+      seedMatchingBites();
+      await runTrigger('bite-new', {
+        place: 'Pizza Palace',
+        position: CENTER,
+      });
+      const id = writes[0].path.split('/')[1];
+
+      writes.length = 0;
+      jest.clearAllMocks();
+
+      return id;
+    };
+
+    const candidateAt = (id: string, status: string): SeedDoc => ({
+      id,
+      data: {
+        name: 'Pizza Palace',
+        normalizedName: 'pizza palace',
+        status,
+        position: nearby(1),
+        geohash: 'geohash-1',
+        biteIds: ['bite-existing'],
+        evidence: { biteCount: 1, placeNames: { 'Pizza Palace': 1 } },
+        ...(status === 'verified'
+          ? { verifiedRestaurantId: 'restaurant-1' }
+          : {}),
+      },
+    });
+
+    it.each(['verified', 'dismissed'])(
+      'refuses to write onto a %s Candidate and logs the refusal once',
+      async (status) => {
+        const candidateId = await derivedCandidateId();
+        const decided = candidateAt(candidateId, status);
+        const decidedData = structuredClone(decided.data);
+        seed['restaurantCandidates'] = [decided];
+
+        await runTrigger('bite-new', {
+          place: 'Pizza Palace',
+          position: CENTER,
+        });
+
+        // Nothing at all is written: not the Candidate, and not a Bite.
+        expect(writes).toHaveLength(0);
+        expect(decided.data).toEqual(decidedData);
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('write refused'),
+          expect.objectContaining({
+            candidateId,
+            candidateStatus: status,
+            refusedBiteIds: expect.arrayContaining([
+              'bite-1',
+              'bite-2',
+              'bite-3',
+              'bite-4',
+              'bite-new',
+            ]),
+          }),
+        );
+      },
+    );
+
+    it('still updates a pending Candidate and unions its biteIds', async () => {
+      const candidateId = await derivedCandidateId();
+      seed['restaurantCandidates'] = [candidateAt(candidateId, 'pending')];
+
+      await runTrigger('bite-new', {
+        place: 'Pizza Palace',
+        position: CENTER,
+      });
+
+      expect(writes).toHaveLength(1);
+      expect(writes[0].path).toBe(`restaurantCandidates/${candidateId}`);
+      expect(writes[0].data.status).toBe('pending');
+      expect(writes[0].data.biteIds).toEqual(
+        expect.arrayContaining(['bite-existing', 'bite-new']),
+      );
+      expect((writes[0].data.evidence as { biteCount: number }).biteCount).toBe(
+        RESTAURANT_CANDIDATE_EVIDENCE_THRESHOLD + 1,
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
   });
 
   it('ignores bites without a place name or position', async () => {

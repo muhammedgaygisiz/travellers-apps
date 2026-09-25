@@ -29,6 +29,8 @@ export interface ClusterRestaurantCandidateForBiteRequest {
 
 export interface ClusterRestaurantCandidateForBiteResult {
   candidateId?: string;
+  /** The decided Candidate's status, when the backend refused the write. */
+  candidateStatus?: string;
   verifiedRestaurantId?: string;
   evidenceCount: number;
   matchedBiteIds: string[];
@@ -38,7 +40,11 @@ export interface ClusterRestaurantCandidateForBiteResult {
     outsideRadius: number;
     nameMismatch: number;
   };
-  status: 'created' | 'updated' | 'verified-restaurant-match';
+  status:
+    | 'created'
+    | 'updated'
+    | 'verified-restaurant-match'
+    | 'candidate-already-decided';
 }
 
 export interface BackfillBiteAddressRequest {

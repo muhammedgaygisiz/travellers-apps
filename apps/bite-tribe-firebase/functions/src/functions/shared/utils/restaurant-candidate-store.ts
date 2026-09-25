@@ -1,4 +1,9 @@
-import { DocumentData, DocumentSnapshot, QueryDocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
+import {
+  DocumentData,
+  DocumentSnapshot,
+  QueryDocumentSnapshot,
+  getFirestore,
+} from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import type { RestaurantCandidate } from '../model/restaurant-candidate';
 import {
@@ -35,15 +40,10 @@ export interface RestaurantCandidateMatchSkippedCounts {
 const isValidCoordinate = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value);
 
-const getString = (
-  data: DocumentData,
-  field: string,
-): string => (typeof data[field] === 'string' ? data[field] : '');
+const getString = (data: DocumentData, field: string): string =>
+  typeof data[field] === 'string' ? data[field] : '';
 
-const getNumber = (
-  data: DocumentData,
-  field: string,
-): number | undefined =>
+const getNumber = (data: DocumentData, field: string): number | undefined =>
   typeof data[field] === 'number' && Number.isFinite(data[field])
     ? data[field]
     : undefined;
@@ -72,9 +72,7 @@ const idFromPath = (value: string): string => {
   return segments[segments.length - 1] ?? value;
 };
 
-const getNormalizedRestaurantId = (
-  data: DocumentData,
-): string => {
+const getNormalizedRestaurantId = (data: DocumentData): string => {
   const restaurantId = getString(data, 'restaurantId');
   return restaurantId ? idFromPath(restaurantId) : '';
 };
@@ -137,9 +135,9 @@ const toCandidateRestaurant = (
 };
 
 const toPendingRestaurantCandidate = (
-  doc: QueryDocumentSnapshot,
+  doc: QueryDocumentSnapshot | DocumentSnapshot,
 ): PendingRestaurantCandidate => {
-  const data = doc.data();
+  const data = doc.data() ?? {};
 
   return {
     id: doc.id,
@@ -299,4 +297,66 @@ export const buildRestaurantCandidateDocumentId = (
   const geohashBucket = draft.geohash.slice(0, 7);
 
   return `${normalizedName || 'restaurant-candidate'}-${geohashBucket}`;
+};
+
+export type RestaurantCandidateWriteResult =
+  | {
+      outcome: 'written';
+      candidateId: string;
+      created: boolean;
+      evidenceCount: number;
+    }
+  | {
+      outcome: 'refused';
+      candidateId: string;
+      candidateStatus: string;
+    };
+
+/**
+ * Merge-writes a draft onto its Candidate, unless that Candidate has already
+ * been decided.
+ *
+ * The target is the nearby pending duplicate when one was found, otherwise the
+ * id derived from the draft. A derived id is deterministic, so it can already
+ * hold a `verified` or `dismissed` Candidate that the pending-only duplicate
+ * lookup never saw; writing `status: 'pending'` onto it would reset a decision
+ * and let one place be verified twice (issue #1497). The target is therefore
+ * read in the same transaction as the write, and anything not `pending` is left
+ * untouched. The caller logs the refusal; no Bite is written either way.
+ */
+export const writeRestaurantCandidate = async (
+  draft: RestaurantCandidateDraft,
+  pendingDuplicateId?: string,
+): Promise<RestaurantCandidateWriteResult> => {
+  const db = getFirestore();
+  const candidateRef = db
+    .collection(RESTAURANT_CANDIDATES_COLLECTION)
+    .doc(pendingDuplicateId ?? buildRestaurantCandidateDocumentId(draft));
+
+  return db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(candidateRef);
+    const existing = snapshot.exists
+      ? toPendingRestaurantCandidate(snapshot)
+      : undefined;
+
+    if (existing && existing.status !== 'pending') {
+      return {
+        outcome: 'refused',
+        candidateId: candidateRef.id,
+        candidateStatus: existing.status || 'unknown',
+      };
+    }
+
+    const candidateUpdate = buildCandidateUpdate(draft, existing);
+
+    transaction.set(candidateRef, candidateUpdate, { merge: true });
+
+    return {
+      outcome: 'written',
+      candidateId: candidateRef.id,
+      created: !existing,
+      evidenceCount:
+        candidateUpdate.evidence?.biteCount ?? draft.biteIds.length,
+    };
+  });
 };

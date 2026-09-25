@@ -3,7 +3,5 @@
    See ssot/implementation/localization.md. */
 
 "NSCameraUsageDescription" = "BiteTribe, yemek fotoğrafı çekip başkalarıyla paylaşabilmen için kamerana erişim gerektiriyor.";
-"NSLocationAlwaysAndWhenInUseUsageDescription" = "BiteTribe, nerede yemek yediğini işaretlemene ve yakındaki Bite'ları keşfetmene yardımcı olmak için konumunu kullanır.";
 "NSLocationWhenInUseUsageDescription" = "BiteTribe, nerede yemek yediğini işaretlemene ve yakındaki Bite'ları keşfetmene yardımcı olmak için konumunu kullanır.";
-"NSPhotoLibraryAddUsageDescription" = "BiteTribe, yemek fotoğraflarını başkalarıyla paylaşabilmek için fotoğraf kitaplığına erişim gerektiriyor.";
 "NSPhotoLibraryUsageDescription" = "BiteTribe, yemek fotoğraflarını seçip paylaşabilmen için fotoğraf kitaplığına erişim gerektiriyor.";

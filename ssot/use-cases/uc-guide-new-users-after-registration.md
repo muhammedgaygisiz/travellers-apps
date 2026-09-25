@@ -88,10 +88,15 @@ product could tune afterwards.
 Relevant, and more of it is exercised here than anywhere else: this is the app's first-run
 permission surface, so the purpose strings are read here before any other screen shows them.
 
-- The steps are backed by `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`,
-  `NSPhotoLibraryAddUsageDescription` and `NSLocationWhenInUseUsageDescription`.
-  `NSLocationAlwaysAndWhenInUseUsageDescription` is declared as well and nothing requests
-  always-on location; removing it is [#1607].
+- The steps are backed by `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` and
+  `NSLocationWhenInUseUsageDescription`, which are the only purpose strings `Info.plist`
+  declares. Each one has a native request behind it: `Camera.requestPermissions()` asks for
+  the camera and read-write photo access, and `@capacitor/geolocation` asks for when-in-use
+  location only. [#1607] removed `NSLocationAlwaysAndWhenInUseUsageDescription` and
+  `NSPhotoLibraryAddUsageDescription`, because nothing requests always-on location and
+  nothing adds to the photo library (`saveToGallery` is never set, and sharing sends text and
+  a URL, not an image). A new purpose string belongs in `Info.plist` and every
+  `InfoPlist.strings` only together with the code path that requests it.
 - Android reaches the gallery through the system Photo Picker ([#1394]), which needs no storage
   permission, and `POST_NOTIFICATIONS` arrives by manifest merge from
   `@capacitor-firebase/messaging` rather than being declared in the app's own manifest.

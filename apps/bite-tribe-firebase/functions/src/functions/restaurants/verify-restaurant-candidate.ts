@@ -28,6 +28,7 @@ interface VerifyRestaurantCandidateResult {
   menuId?: string;
   menuItemCount?: number;
   candidateId: string;
+  skippedBiteIds?: string[];
   status: 'created' | 'already-verified';
 }
 
@@ -131,6 +132,19 @@ const getStringArray = (data: DocumentData, field: string): string[] =>
         (value: unknown): value is string => typeof value === 'string',
       )
     : [];
+
+/**
+ * A Bite already belongs to a Restaurant when its `restaurantId` carries
+ * anything at all. Some Bites store the field as a document path rather than a
+ * bare id, so the value is never compared, only tested for presence.
+ */
+const hasRestaurant = (data: DocumentData): boolean => {
+  const restaurantId = data['restaurantId'];
+
+  return typeof restaurantId === 'string'
+    ? restaurantId.trim().length > 0
+    : restaurantId !== undefined && restaurantId !== null;
+};
 
 const toInitialMenuBite = (data: DocumentData): InitialMenuBite => ({
   name: typeof data['name'] === 'string' ? data['name'] : undefined,
@@ -250,8 +264,17 @@ export const verifyRestaurantCandidateHandler = async (
       const existingBiteSnapshots = biteSnapshots.filter(
         (snapshot) => snapshot.exists,
       );
+      // A Bite that already names a Restaurant was assigned after clustering,
+      // by its creator or an operator. Verification must not repoint it, and
+      // its dish must not seed this Restaurant's menu (issue #1498).
+      const unassignedBiteSnapshots = existingBiteSnapshots.filter(
+        (snapshot) => !hasRestaurant(snapshot.data() ?? {}),
+      );
+      const skippedBiteIds = existingBiteSnapshots
+        .filter((snapshot) => hasRestaurant(snapshot.data() ?? {}))
+        .map((snapshot) => snapshot.ref.id);
       const categories = buildInitialMenuCategories(
-        existingBiteSnapshots.map((snapshot) =>
+        unassignedBiteSnapshots.map((snapshot) =>
           toInitialMenuBite(snapshot.data() ?? {}),
         ),
       );
@@ -278,7 +301,7 @@ export const verifyRestaurantCandidateHandler = async (
         createdAtTimestamp: now.getTime(),
       });
 
-      existingBiteSnapshots.forEach((snapshot) => {
+      unassignedBiteSnapshots.forEach((snapshot) => {
         transaction.update(snapshot.ref, {
           restaurantId: restaurantRef.id,
           updatedAt: now.toISOString(),
@@ -292,6 +315,7 @@ export const verifyRestaurantCandidateHandler = async (
         verifiedAt: now.toISOString(),
         verifiedAtTimestamp: now.getTime(),
         verifiedByUserId: userId,
+        skippedBiteIds,
         updatedAt: now.toISOString(),
         updatedAtTimestamp: now.getTime(),
       });
@@ -304,6 +328,7 @@ export const verifyRestaurantCandidateHandler = async (
           0,
         ),
         candidateId,
+        skippedBiteIds,
         status: 'created',
       };
     },
@@ -317,6 +342,7 @@ export const verifyRestaurantCandidateHandler = async (
     details: {
       restaurantId: result.restaurantId,
       menuItemCount: result.menuItemCount,
+      skippedBiteIds: result.skippedBiteIds,
       status: result.status,
     },
   });

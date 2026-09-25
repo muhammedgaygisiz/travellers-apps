@@ -26,6 +26,11 @@ export interface RestaurantCandidate {
   verifiedAt?: string;
   verifiedAtTimestamp?: number;
   verifiedByUserId?: string;
+  /**
+   * Evidence Bites verification left untouched because they already named a
+   * Restaurant. Written once, when the candidate is verified.
+   */
+  skippedBiteIds?: string[];
   mergedIntoCandidateId?: string;
   createdAt?: string;
   createdAtTimestamp?: number;

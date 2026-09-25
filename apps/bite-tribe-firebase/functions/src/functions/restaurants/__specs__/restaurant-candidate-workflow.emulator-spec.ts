@@ -190,6 +190,7 @@ describe('restaurant candidate workflow emulator integration', () => {
         status: 'verified',
         verifiedRestaurantId: restaurantId,
         verifiedByUserId: 'operator-1',
+        skippedBiteIds: [],
       });
 
       const menuSnapshot = await getFirestore().collection('menus').get();
@@ -246,6 +247,87 @@ describe('restaurant candidate workflow emulator integration', () => {
     },
     RACE_TIMEOUT_MS,
   );
+
+  /**
+   * Issue #1498. Detection lists only unassigned Bites, but a Bite Creator can
+   * pick a verified restaurant for one of them before the operator verifies.
+   * Verification used to repoint that Bite at the restaurant it created.
+   */
+  it('leaves an evidence Bite assigned after clustering on its own restaurant', async () => {
+    await Promise.all([
+      seedBite('bite-new', 'Pizza Palace', CENTER, {
+        name: 'Margherita',
+        price: 12,
+      }),
+      seedBite('bite-1', 'Pizza Palace', nearby(1), {
+        name: 'Margherita',
+        price: 13,
+      }),
+      seedBite('bite-2', 'Pizza Palace', nearby(2), {
+        name: 'Tiramisu',
+        price: 7,
+      }),
+      seedBite('bite-3', 'Pizza Palace', nearby(3), {
+        name: 'Calzone',
+        price: 14,
+      }),
+      seedBite('bite-4', 'Pizza Palace', nearby(4), {
+        name: 'Calzone',
+        price: 14,
+      }),
+    ]);
+    await handleCreateRestaurantCandidateOnBiteCreate(
+      await getFirestore().collection('bites').doc('bite-new').get(),
+    );
+
+    const [candidateDoc] = (
+      await getFirestore().collection('restaurantCandidates').get()
+    ).docs;
+    const bites = getFirestore().collection('bites');
+
+    await Promise.all([
+      bites.doc('bite-2').update({ restaurantId: 'restaurant-chosen' }),
+      bites
+        .doc('bite-3')
+        .update({ restaurantId: 'restaurants/restaurant-chosen' }),
+    ]);
+
+    const result = await verifyCandidate(candidateDoc.id);
+
+    expect(result.skippedBiteIds).toEqual(
+      expect.arrayContaining(['bite-2', 'bite-3']),
+    );
+    expect(result.skippedBiteIds).toHaveLength(2);
+    expect((await candidateDoc.ref.get()).data()).toMatchObject({
+      status: 'verified',
+      verifiedRestaurantId: result.restaurantId,
+      skippedBiteIds: result.skippedBiteIds,
+    });
+
+    const restaurantIds = await Promise.all(
+      ['bite-new', 'bite-1', 'bite-2', 'bite-3', 'bite-4'].map(
+        async (biteId) =>
+          (await bites.doc(biteId).get()).data()?.['restaurantId'],
+      ),
+    );
+
+    expect(restaurantIds).toEqual([
+      result.restaurantId,
+      result.restaurantId,
+      'restaurant-chosen',
+      'restaurants/restaurant-chosen',
+      result.restaurantId,
+    ]);
+
+    const [menuDoc] = (await getFirestore().collection('menus').get()).docs;
+    const dishNames = menuDoc
+      .data()
+      ['categories'].flatMap((category: { items: { name: string }[] }) =>
+        category.items.map((item) => item.name),
+      );
+
+    expect([...dishNames].sort()).toEqual(['Calzone', 'Margherita']);
+  });
 
   it('does not create a candidate when a matching verified restaurant already exists', async () => {
     await getFirestore()

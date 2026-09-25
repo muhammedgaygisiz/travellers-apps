@@ -23,7 +23,7 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - A Restaurant can have an address and GPS position.
 - A Restaurant can have social media links, opening hours, description, and image.
 - Creating a Restaurant can update selected Bites with the new `restaurantId`.
-- Verifying a Restaurant candidate creates the Restaurant through the backend, creates its initial Menu from the candidate Bites, updates all candidate Bites with the new `restaurantId`, and records the verification on the candidate. The full flow, its rules and its failure modes are in [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md).
+- Verifying a Restaurant candidate creates the Restaurant through the backend, creates its initial Menu from the candidate Bites, updates every candidate Bite that does not already name a Restaurant with the new `restaurantId`, and records the verification on the candidate. A candidate Bite that already names one - picked by its Bite Creator after clustering - is left untouched, kept out of the initial Menu and listed in the candidate's `skippedBiteIds` (issue [#1498]). The full flow, its rules and its failure modes are in [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md).
 - The initial Menu is a draft built from evidence, not a claim about the real menu: one item per distinct Bite dish name, priced with the average of the prices users reported, in a single `Bites` category the business user edits afterwards.
 - Candidate-backed Restaurant creation should be idempotent: repeated verification of an already verified or merged candidate must return the existing verified Restaurant instead of creating another one.
 - Verified versus unverified restaurant behavior is an active product area.
@@ -282,3 +282,4 @@ images/restaurants/{restaurantId}/{filename}
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1597]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1597
 [#1598]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1598
+[#1498]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1498

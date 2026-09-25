@@ -118,10 +118,15 @@ describe('verifyRestaurantCandidate', () => {
     ref: DocRef,
     name: string,
     price: number,
+    restaurantId?: string,
   ): { exists: boolean; ref: DocRef; data: () => unknown } => ({
     exists: true,
     ref,
-    data: (): { name: string; price: number } => ({ name, price }),
+    data: (): { name: string; price: number; restaurantId?: string } => ({
+      name,
+      price,
+      ...(restaurantId === undefined ? {} : { restaurantId }),
+    }),
   });
 
   const getAllMock = jest.fn(async (...refs: DocRef[]) =>
@@ -210,6 +215,7 @@ describe('verifyRestaurantCandidate', () => {
         status: 'verified',
         verifiedRestaurantId: 'restaurants-new-id',
         verifiedByUserId: 'user-1',
+        skippedBiteIds: [],
       }),
     );
     expect(result).toEqual({
@@ -217,7 +223,115 @@ describe('verifyRestaurantCandidate', () => {
       menuId: 'menus-new-id',
       menuItemCount: 1,
       candidateId: 'candidate-1',
+      skippedBiteIds: [],
       status: 'created',
+    });
+  });
+
+  /**
+   * Issue #1498. A Bite Creator can pick a verified restaurant for a Bite that
+   * is still listed on a pending candidate. Verifying the candidate used to
+   * repoint that Bite at the new restaurant, silently.
+   */
+  describe('evidence Bites that already name a restaurant', () => {
+    const verify = (): ReturnType<typeof verifyRestaurantCandidate> =>
+      verifyRestaurantCandidate(
+        request({
+          candidateId: 'candidate-1',
+          restaurant: {
+            name: 'Pizza Palace',
+            position: { latitude: 46.948, longitude: 7.4474 },
+          },
+        }),
+      );
+
+    const withBite2AssignedTo = (restaurantId: string): void => {
+      getAllMock.mockImplementationOnce(async (...refs: DocRef[]) =>
+        refs.map((ref) =>
+          ref.id === 'bite-1'
+            ? biteSnapshot(ref, 'Margherita', 12, '')
+            : biteSnapshot(ref, 'Tiramisu', 7, restaurantId),
+        ),
+      );
+    };
+
+    it.each([
+      ['a bare id', 'restaurant-chosen'],
+      ['a document path', 'restaurants/restaurant-chosen'],
+    ])(
+      'leaves a Bite whose restaurantId is %s untouched and names it as skipped',
+      async (_shape, restaurantId) => {
+        withBite2AssignedTo(restaurantId);
+
+        const result = await verify();
+
+        expect(updateMock).toHaveBeenCalledWith(
+          expect.objectContaining({ path: 'bites/bite-1' }),
+          expect.objectContaining({ restaurantId: 'restaurants-new-id' }),
+        );
+        expect(updateMock).not.toHaveBeenCalledWith(
+          expect.objectContaining({ path: 'bites/bite-2' }),
+          expect.anything(),
+        );
+        expect(updateMock).toHaveBeenCalledWith(
+          expect.objectContaining({ path: 'restaurantCandidates/candidate-1' }),
+          expect.objectContaining({
+            status: 'verified',
+            skippedBiteIds: ['bite-2'],
+          }),
+        );
+        expect(result).toMatchObject({
+          status: 'created',
+          skippedBiteIds: ['bite-2'],
+        });
+      },
+    );
+
+    it('derives the initial menu only from the Bites it assigns', async () => {
+      withBite2AssignedTo('restaurant-chosen');
+
+      const result = await verify();
+
+      expect(createMock).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'menus/menus-new-id' }),
+        expect.objectContaining({
+          categories: [
+            expect.objectContaining({
+              items: [expect.objectContaining({ name: 'Margherita' })],
+            }),
+          ],
+        }),
+      );
+      expect(result.menuItemCount).toBe(1);
+    });
+
+    it('still verifies the candidate when every listed Bite is skipped', async () => {
+      getAllMock.mockImplementationOnce(async (...refs: DocRef[]) =>
+        refs.map((ref) =>
+          biteSnapshot(ref, 'Margherita', 12, 'restaurant-chosen'),
+        ),
+      );
+
+      const result = await verify();
+
+      expect(createMock).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'menus/menus-new-id' }),
+        expect.objectContaining({ categories: [] }),
+      );
+      expect(updateMock).toHaveBeenCalledTimes(1);
+      expect(updateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'restaurantCandidates/candidate-1' }),
+        expect.objectContaining({
+          status: 'verified',
+          verifiedRestaurantId: 'restaurants-new-id',
+          skippedBiteIds: ['bite-1', 'bite-2'],
+        }),
+      );
+      expect(result).toMatchObject({
+        status: 'created',
+        menuItemCount: 0,
+        skippedBiteIds: ['bite-1', 'bite-2'],
+      });
     });
   });
 

@@ -975,6 +975,81 @@ Not published yet. The four posts before it settled the steps:
 - Pinning is still app-only and still open, see
   [Pin It Is Still Open](#pin-it-is-still-open).
 
+## The Street Food Comic Post
+
+The sixth Instagram post of [#913], prepared 25 September 2026. The five before
+it are screenshots or artwork cut from the brand files. **This one is a story:
+a traveller at a night market who cannot choose, opens BiteTribe, orders the
+Pad Thai somebody rated five stars, and shares their own Bite of it** - the
+tagline's three verbs as six panels.
+
+![Street food comic post](../assets/social/street-food-comic-post.png)
+
+Same rule as the five before it: nothing in it links, and the bio carries the
+store URLs - see [Nothing In A Post Links](#nothing-in-a-post-links).
+
+### The Image
+
+[`ssot/assets/social/street-food-comic-post.png`](../assets/social/street-food-comic-post.png),
+`1080x1350` (4:5). The comic arrived as a `941x1672` image, about 9:16, which
+no feed crop can hold: a 4:5 cut at full width keeps 1176 of its 1672 rows and
+loses either the arrival panel or the wordmark panel, and the story needs both
+ends. So it is pasted rather than cropped, the way
+[The Bucket List Post](#the-bucket-list-post) was - scaled to `760x1350` and
+centred on a `1080x1350` ground of `#1A1C22`, with `160` pixel gutters. The
+last panel's ground is close to `#1A1C22`, so the gutters read as the account's
+own frame rather than as bars.
+
+The comic's source file is not kept in the repo; only the framed PNG is. There
+is no generator to rerun.
+
+### The Phone Is Illustrated, Not The App
+
+**The map in panel three is a drawing, not a screenshot**, and it is not what
+the app draws. The real map shows cluster counts, see
+[The Bites Around You Post](#the-bites-around-you-post); it has no per-pin star
+ratings. It stays because the panel is a comic and reads as one - nobody takes
+an illustrated phone for a UI promise - and the claim the story makes is true:
+a Bite carries a dish, a photo and a star rating, and the viewer can find one
+before ordering. The header's `BITE TRIBE` with a space matches the app's
+header title, see [Implementation - Store Listing Assets](store-listing-assets.md).
+
+### The Caption
+
+```text
+Twenty stalls, one dinner 🏮
+Next time you can't choose, see what the people before you ate - and how they rated it.
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #realfood #streetfood
+```
+
+The first line is the second panel. The second line is the reader's own
+problem rather than the phone in panel three, for the reason
+[The Bites Around You Post](#the-bites-around-you-post) gives. The frame
+already ends on `Find it. Try it. Share it.`, so the caption does not repeat it.
+
+**`#streetfood` is the fifth hashtag.** The market is not a named city, so no
+place tag, but the frame _is_ a street food market in every panel - the same
+test `#bern` passed.
+
+### Published 25 September 2026
+
+Published from the web uploader on the Mac, with the steps
+[The Bucket List Post](#the-bucket-list-post) settled:
+
+- **Set the crop to `Original`.**
+- **The alt text**:
+
+  ```text
+  A six-panel comic at a night street food market. A traveller with a blue backpack arrives, can't choose between skewers, noodles, mango sticky rice, dumplings, pad thai and iced tea, and checks the BiteTribe map on their phone, which shows a five-star Pad Thai nearby. A stall cook hands over the Pad Thai, the traveller photographs it and rates it five stars, and the last panel shows the BiteTribe logo with its characters and the line Find it. Try it. Share it.
+  ```
+
+- **No filter.**
+- **Share to Threads** from the same dialog.
+- **A story is optional.** The comic is natively about 9:16, so a story can
+  carry it at full size without the gutters; it is not saved here, since a
+  story expires.
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done

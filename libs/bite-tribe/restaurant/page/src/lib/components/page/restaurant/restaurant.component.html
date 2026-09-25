@@ -66,7 +66,14 @@
             />
           </div>
 
-          <div class="seperator"></div>
+          <!-- No action while loading: the menu button dead-ends without the
+          restaurant it acts on. -->
+          <div class="ion-margin-vertical">
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 44px; width: 100%; margin: 0"
+            />
+          </div>
 
           <div class="ion-display-flex ion-flex-row ion-margin-vertical">
             <ion-skeleton-text
@@ -131,17 +138,6 @@
             />
           </div>
         </div>
-
-        <!-- No action bar while loading: every button here needs the restaurant
-        it acts on, and the menu button in particular dead-ends without it. -->
-        <div class="ion-padding safe-padding-bottom buttons-container">
-          <div class="ion-padding-bottom">
-            <ion-skeleton-text
-              [animated]="true"
-              style="height: 44px; width: 100%; margin: 0"
-            />
-          </div>
-        </div>
       </div>
     } @else {
       <bt-restaurant-image [restaurant]="restaurantData" />
@@ -161,16 +157,27 @@
           <ion-icon [src]="starIconPath" class="rating-icon" />
           @if (ratedBiteCountData) {
             <span class="rating">{{ averageBiteRating() }}</span>
-            <span class="text-small text-secondary">
-              {{
-                'restaurant-rating'
-                  | transloco: { biteCount: ratedBiteCountData }
-              }}
-            </span>
+          }
+          @let ratingLabel =
+            ratedBiteCountData
+              ? ('restaurant-rating'
+                | transloco: { biteCount: ratedBiteCountData })
+              : ('no-ratings-yet' | transloco);
+          <!-- The rating count is the way to the Bites recorded here; it
+          replaced a Bites row at the bottom of the page. It links whenever
+          there are Bites, rated or not, so a restaurant whose Bites carry no
+          rating yet still offers them. See GitHub issue #1696. -->
+          @if (biteCountData) {
+            <button
+              type="button"
+              class="bites-link text-small"
+              data-testid="restaurant-bites-link"
+              (click)="showBitesClick.emit(restaurantData)"
+            >
+              {{ ratingLabel }}
+            </button>
           } @else {
-            <span class="text-small text-secondary">{{
-              'no-ratings-yet' | transloco
-            }}</span>
+            <span class="text-small text-secondary">{{ ratingLabel }}</span>
           }
         </div>
 
@@ -224,7 +231,37 @@
           }
         </div>
 
-        <div class="seperator"></div>
+        <!-- The menu sits under the links rather than below the map, so it is
+        reachable without scrolling past the opening hours. It is gated on a
+        menu id rather than rendered unconditionally: without one the tap falls
+        through to a route keyed by place name and dead-ends on the empty-menu
+        page. See GitHub issues #1381 and #1696. -->
+        @if (hasMenu()) {
+          <div class="buttons-container ion-margin-vertical">
+            <ion-button
+              expand="full"
+              fill="outline"
+              data-testid="restaurant-menu-button"
+              (click)="showMenuClick.emit(restaurantData)"
+            >
+              <div
+                class="ion-display-flex ion-justify-content-between ion-align-items-center ion-flex-1"
+              >
+                <span class="ion-display-flex ion-align-items-center">
+                  <ion-icon
+                    name="restaurant-outline"
+                    class="ion-margin-end"
+                    aria-hidden="true"
+                  />
+                  {{ 'menu' | transloco }}
+                </span>
+                <ion-icon name="chevron-forward-outline" />
+              </div>
+            </ion-button>
+          </div>
+        } @else {
+          <div class="seperator"></div>
+        }
 
         @if (uniqueTags().length) {
           <div class="ion-margin-vertical">
@@ -284,46 +321,8 @@
           </div>
         }
 
-        <div class="ion-margin-top">
+        <div class="ion-margin-top ion-padding-bottom safe-padding-bottom">
           <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
-        </div>
-      </div>
-
-      <div class="ion-padding safe-padding-bottom buttons-container">
-        <div class="ion-padding-bottom">
-          <!-- Gated on a menu id rather than rendered unconditionally: without
-          one the tap falls through to a route keyed by place name and dead-ends
-          on the empty-menu page. See GitHub issue #1381. -->
-          @if (hasMenu()) {
-            <ion-button
-              expand="full"
-              fill="outline"
-              data-testid="restaurant-menu-button"
-              (click)="showMenuClick.emit(restaurantData)"
-            >
-              <div
-                class="ion-display-flex ion-justify-content-between ion-flex-1"
-              >
-                <span>{{ 'menu' | transloco }}</span>
-                <ion-icon slot="end" name="chevron-forward-outline" />
-              </div>
-            </ion-button>
-          }
-          @if (biteCountData) {
-            <ion-button
-              expand="full"
-              fill="outline"
-              data-testid="restaurant-bites-button"
-              (click)="showBitesClick.emit(restaurantData)"
-            >
-              <div
-                class="ion-display-flex ion-justify-content-between ion-flex-1"
-              >
-                <span>{{ 'bites' | transloco }}</span>
-                <ion-icon slot="end" name="chevron-forward-outline" />
-              </div>
-            </ion-button>
-          }
         </div>
       </div>
     }

@@ -17,7 +17,7 @@
       <span>{{ 'not-verified-restaurant' | transloco }}</span>
     </div>
 
-    <div class="ion-padding">
+    <div class="ion-padding safe-padding-bottom">
       <div
         class="header-container ion-display-flex ion-justify-content-between ion-align-items-center ion-margin-bottom"
       >
@@ -30,15 +30,25 @@
         <ion-icon [src]="starIconPath" class="rating-icon" />
         @if (ratedBiteCountData) {
           <span class="rating">{{ averageBiteRating() }}</span>
-          <span class="text-small text-secondary">
-            {{
-              'restaurant-rating' | transloco: { biteCount: ratedBiteCountData }
-            }}
-          </span>
+        }
+        @let ratingLabel =
+          ratedBiteCountData
+            ? ('restaurant-rating'
+              | transloco: { biteCount: ratedBiteCountData })
+            : ('no-ratings-yet' | transloco);
+        <!-- The rating count is the way to the Bites recorded here, the same
+        as on the restaurant page. See GitHub issue #1696. -->
+        @if (biteCountData) {
+          <button
+            type="button"
+            class="bites-link text-small"
+            data-testid="place-bites-link"
+            (click)="showBitesClick.emit(biteData)"
+          >
+            {{ ratingLabel }}
+          </button>
         } @else {
-          <span class="text-small text-secondary">{{
-            'no-ratings-yet' | transloco
-          }}</span>
+          <span class="text-small text-secondary">{{ ratingLabel }}</span>
         }
       </div>
 
@@ -52,25 +62,6 @@
 
       <div class="ion-margin-top">
         <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
-      </div>
-    </div>
-
-    <div class="ion-padding safe-padding-bottom buttons-container">
-      <div class="ion-padding-bottom">
-        @if (biteCountData) {
-          <ion-button
-            expand="full"
-            fill="outline"
-            (click)="showBitesClick.emit(biteData)"
-          >
-            <div
-              class="ion-display-flex ion-justify-content-between ion-flex-1"
-            >
-              <span>{{ 'bites' | transloco }}</span>
-              <ion-icon slot="end" name="chevron-forward-outline" />
-            </div>
-          </ion-button>
-        }
       </div>
     </div>
   </ion-content>

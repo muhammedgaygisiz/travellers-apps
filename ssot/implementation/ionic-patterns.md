@@ -27,6 +27,7 @@ Use these adaptive tokens:
 - **`--ion-color-light` is not a surface.** It is a fixed light value (`#f4f5f8`) that does **not** flip in dark mode. Using it as a background leaves theme-adaptive white text unreadable on it.
 - **`--ion-color-step-*` and `--ion-item-background` are undefined.** The app imports Ionic's `core`, `normalize`, `structure`, and `typography` CSS but not the palette files that define stepped colors, and it never defines them itself. They resolve to empty, so `background: var(--ion-color-step-50)` silently becomes transparent and `border-color` falls back to `currentColor`.
 - The theme does define `--ion-background-color-step-*` and `--ion-text-color-step-*`. Note the different names.
+- **A fixed `white` label is invisible on an `outline` or `clear` button.** Those fills are transparent, so the label is drawn over the page background, which is white in light mode. The restaurant and place pages set `--color: white` on their Bites and Menu buttons, copied from a dark-mode mockup, so in light mode those rows showed only their borders. The Loki references were captured that way and kept the defect green. Take the label from `--ion-text-color`, which flips with the theme. A fixed text colour is safe only on a surface that is itself fixed. See GitHub issue [#1696].
 
 ## Component Rules
 
@@ -116,3 +117,4 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1635]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1635
 [#1636]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1636
 [#1637]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1637
+[#1696]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1696

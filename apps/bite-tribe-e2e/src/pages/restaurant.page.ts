@@ -95,9 +95,8 @@ export class RestaurantPage {
 
   async openBites(): Promise<void> {
     const activePage = this.verified.or(this.unverified);
-    await activePage
-      .getByRole('button', { name: 'Bites', exact: true })
-      .click();
+    // The rating count is the Bites entry point on both pages (#1696).
+    await activePage.getByTestId(/^(restaurant|place)-bites-link$/).click();
     await this.page.waitForURL(/\/bite\/[^/]+\/restaurant\/[^/]+\/bites$/);
   }
 }

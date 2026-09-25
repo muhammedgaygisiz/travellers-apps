@@ -17,8 +17,8 @@ Work in flight: epic [#1495] for verification's half, epic [#1523] for this page
 | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Automatic detection `createRestaurantCandidateOnBiteCreate` | Implemented                                                                                                                                                                                                                                         |
 | On-demand callable `clusterRestaurantCandidateForBite`      | Implemented, `admin`-gated                                                                                                                                                                                                                          |
-| Shared clustering kernel `K1`–`K10`                         | Implemented, except `K9`                                                                                                                                                                                                                            |
-| `K9` — guard against writing onto a non-`pending` Candidate | Not implemented. `R-8`                                                                                                                                                                                                                              |
+| Shared clustering kernel `K1`–`K10`                         | Implemented                                                                                                                                                                                                                                         |
+| `K9` — guard against writing onto a non-`pending` Candidate | Implemented by [#1497]. `R-8`                                                                                                                                                                                                                       |
 | Producer marker on the Candidate                            | Not implemented: no field exists in either model copy, so `R-19` cannot be met                                                                                                                                                                      |
 | Re-evaluation after a Bite is edited, deleted or detached   | Not implemented, and not designed. `R-11`                                                                                                                                                                                                           |
 | The on-demand seed check                                    | Missing: `B8` accepts a Bite that already belongs to a Restaurant. `E7`                                                                                                                                                                             |
@@ -73,9 +73,9 @@ not used: detection consults no third party, which is `R-15`.
 
 Detection writes exactly one status, `pending`. It leaves a Candidate `verified` or
 `dismissed` only at `END-K5`, by refusing to write onto one — so those two are states this
-flow can leave behind without ever producing them. That refusal is `R-8` and is not built,
-which is `E1`. `merged` was a fifth declared status and is removed from both model copies by
-`RD-VRC-7`, owned by [#1499].
+flow can leave behind without ever producing them. That refusal is `R-8`. `merged` was a
+fifth declared status and is removed from both model copies by `RD-VRC-7`, owned by
+[#1499].
 
 `absent` is where every unsuccessful path leaves the aggregate: no Candidate is created and
 none is modified.
@@ -95,13 +95,13 @@ stated once under `Authorization`.
 
 Out of scope. Each of these is its own Use Case, referenced from the step it belongs to:
 
-| UC-ID    | Use Case                                                                            | Referenced at | Direction                                                                                                            |
-| -------- | ----------------------------------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `UC-VRC` | [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md)               | `K10`         | Downstream, and the sole consumer of what this Use Case produces                                                     |
-| `UC-CMB` | [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md) | `A2`          | Upstream cause of automatic detection                                                                                |
-| `UC-OPS` | [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md) | `B1`          | Enclosing: sign-in and the role gate                                                                                 |
-| `UC-ROM` | [UC - Run Operational Migrations](uc-run-operational-migrations.md)                 | `B2`          | Enclosing: the surface the on-demand producer is offered on                                                          |
-| `UC-DIS` | [Dismiss Restaurant Candidate](uc-dismiss-restaurant-candidate.md)                  | `K9`          | Alternative downstream outcome, and — once [#1497] and [#1501] land — detection's only negative evidence. See `R-18` |
+| UC-ID    | Use Case                                                                            | Referenced at | Direction                                                                                                 |
+| -------- | ----------------------------------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------- |
+| `UC-VRC` | [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md)               | `K10`         | Downstream, and the sole consumer of what this Use Case produces                                          |
+| `UC-CMB` | [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md) | `A2`          | Upstream cause of automatic detection                                                                     |
+| `UC-OPS` | [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md) | `B1`          | Enclosing: sign-in and the role gate                                                                      |
+| `UC-ROM` | [UC - Run Operational Migrations](uc-run-operational-migrations.md)                 | `B2`          | Enclosing: the surface the on-demand producer is offered on                                               |
+| `UC-DIS` | [Dismiss Restaurant Candidate](uc-dismiss-restaurant-candidate.md)                  | `K9`          | Alternative downstream outcome, and — once [#1501] lands — detection's only negative evidence. See `R-18` |
 
 **Also out of scope, and not a Use Case: the Bite-places creation path.** The Admin App
 offers a list of distinct `place` strings taken from all Bites; picking one opens the same
@@ -149,14 +149,14 @@ claim on `UF-20`'s migration order; they are not a precondition of this page rea
 
 On the successful path, `END-K4`:
 
-| #   | Guarantee                                                                                                                                                                              |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| G1  | Exactly one document under `/restaurantCandidates` is written, and it carries `status == 'pending'`                                                                                    |
-| G2  | It carries `name`, `normalizedName`, `position`, `geohash`, `biteIds` and `evidence`, satisfying `UC-VRC` `P1` and `P2`                                                                |
-| G3  | The document id is a pure function of the normalized name and the geohash bucket, so repeated detection of the same place converges on one document instead of accumulating duplicates |
-| G4  | No Bite is written. Detection is never a writer of `bite.restaurantId` (`RD-VRC-9`)                                                                                                    |
-| G5  | No Restaurant and no Menu is created, and no existing Restaurant is modified                                                                                                           |
-| G8  | Atomicity is per document and nothing more. One merge write is the entire effect; there is no transaction, because there is nothing else to keep consistent with it                    |
+| #   | Guarantee                                                                                                                                                                                                       |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| G1  | Exactly one document under `/restaurantCandidates` is written, and it carries `status == 'pending'`                                                                                                             |
+| G2  | It carries `name`, `normalizedName`, `position`, `geohash`, `biteIds` and `evidence`, satisfying `UC-VRC` `P1` and `P2`                                                                                         |
+| G3  | The document id is a pure function of the normalized name and the geohash bucket, so repeated detection of the same place converges on one document instead of accumulating duplicates                          |
+| G4  | No Bite is written. Detection is never a writer of `bite.restaurantId` (`RD-VRC-9`)                                                                                                                             |
+| G5  | No Restaurant and no Menu is created, and no existing Restaurant is modified                                                                                                                                    |
+| G8  | Atomicity is per document and nothing more. One merge write of one document is the entire effect; the transaction around it reads only that document, so that `K9`'s check and `K10`'s write see the same state |
 
 `G6` is **retired** and its number is not reused. It guaranteed that `biteIds` is a union
 with what the document already held and therefore never shrinks — which is the defect
@@ -343,18 +343,19 @@ K8   SYS  determines the target document id
           INV:R-17
           → K9
 
-K9   SYS  refuses a write onto a target that is not `pending`  [not implemented]
+K9   SYS  refuses a write onto a target that is not `pending`
+          └─→ DB   reads the target in the transaction that K10 writes in
           REF:UC-DIS   must leave a Candidate `dismissed`, which is the only negative
                        evidence detection has: a dismissed document occupying the
                        derived id is what this step refuses every later write onto
-          INV:R-8 is VIOLATED here: this step does not exist in the code.
-               The write at K10 is unconditional, so a target that is
-               `verified` or `dismissed` is reset to `pending`. See E1
+          INV:R-8
+          ENTRY:A  the refusal is logged and nothing is returned
+          ENTRY:B  the Candidate's id and status are returned to the Operator
           ├─ target exists and status != 'pending' → END-K5
           └─ target is absent or `pending`          → K10
 
 K10  SYS  merge-writes the Candidate
-          └─→ DB   status = 'pending' (unconditionally),
+          └─→ DB   status = 'pending',
                    biteIds = the union with what the document held,
                    evidence.biteCount = the size of that union,
                    evidence.placeNames / averageRating / imagePaths = this
@@ -387,7 +388,7 @@ K10  SYS  merge-writes the Candidate
 | `END-K2` | Hand-over   | `absent`                             | The Operator is told the place already has a verified Restaurant, and which one — distinguishable from nothing having happened                          | `verifiedRestaurantId` and `status: 'verified-restaurant-match'` are returned. Still no Candidate and still no link           |
 | `END-K3` | Abort       | `absent`                             | None — no actor is in the flow                                                                                                                          | Below the evidence threshold. No Candidate. Nothing remembers the near-miss, so the next Bite recomputes it from scratch      |
 | `END-K4` | **Success** | `pending`                            | On demand, the Operator is told a pending Candidate now exists and can find it in the verification queue. Automatically, none — no actor is in the flow | `G1` to `G5` and `G8` hold. Hands over to `UC-VRC` `P1`                                                                       |
-| `END-K5` | Refusal     | `verified` or `dismissed`, unchanged | The Operator is told the place has already been decided, and which way                                                                                  | `R-8`'s guard refuses the write. Not implemented: today this path leads to `END-K4` on top of an already decided Candidate    |
+| `END-K5` | Refusal     | `verified` or `dismissed`, unchanged | On demand, the Operator is told the place has already been decided, and which way. Automatically, none — no actor is in the flow                        | `R-8`'s guard refuses the write. No Candidate and no Bite is written, and the Bites stay unlinked (`RD-VRC-9`)                |
 
 Every perception above is **as-agreed, not observed**. They state what the surface must
 leave the Operator with; whether it does is an L3 question.
@@ -403,7 +404,7 @@ leave the Operator with; whether it does is an L3 question.
 | **R-5**  | Whether a place is already a Restaurant, and whether it is already a Candidate, are both decided by **fuzzy name plus distance and nothing else**. Neither a Restaurant nor a Candidate carries an external place identity, so neither check can be made exact.                                                                                                                                                                                                                                                |
 | **R-6**  | Detection's entire effect is **one merge write of one `/restaurantCandidates` document**. It writes no Bite, no Restaurant and no Menu, and per `RD-VRC-9` it must never become a writer of `bite.restaurantId`.                                                                                                                                                                                                                                                                                               |
 | **R-7**  | A Candidate's identity is **derived from its content**: the normalized name plus the first **7** geohash characters — a cell of roughly 150 m against a 200 m radius. A Candidate therefore has no identity independent of the evidence that produced it, which is why one place can split into two Candidates and two places can share one.                                                                                                                                                                   |
-| **R-8**  | _Intended, not met._ A write onto a Candidate that is not `pending` is refused and logged. Today `status: 'pending'` is written unconditionally and the target's current status is never read, so a `verified` or `dismissed` Candidate is silently reset. This is `K9`.                                                                                                                                                                                                                                       |
+| **R-8**  | A write onto a Candidate that is not `pending` is refused and logged. The target's status is read in the same transaction as the write, so a Candidate decided while detection runs is refused too, and a document with any other status — or none — is never reset. The log names the Candidate, its status and the Bite ids that were not recorded. This is `K9`.                                                                                                                                            |
 | **R-9**  | `name`, `normalizedName`, `position` and `geohash` are **first-writer-wins**. The name is a majority vote of Bite place strings taken at first clustering and then frozen, and it feeds `R-7`'s document id — so the earliest few Bites' spelling fixes both the name and the identity permanently.                                                                                                                                                                                                            |
 | **R-10** | `evidence.biteCount` is the size of the **union** of `biteIds`, while `evidence.placeNames`, `averageRating` and `imagePaths` describe **only the current run's** matched Bites. The count and the histogram beside it therefore describe different sets.                                                                                                                                                                                                                                                      |
 | **R-11** | _Intended, not met._ A Candidate reflects the Bites that currently support it. Today only Bite **creation** triggers detection and `biteIds` only ever grows: editing a place name never lets a Bite join or leave a cluster, deleting a Bite never shrinks one, and detaching a Bite from a Restaurant returns it to the unverified pool with nothing to re-run. There is no re-evaluation path at all, so `evidence.biteCount` drifts upward from reality and `R-2` stops holding for existing documents.    |
@@ -413,14 +414,13 @@ leave the Operator with; whether it does is an L3 question.
 | **R-15** | Detection never consults an external place directory. Google Places is used for prefill only **after** an Operator has opened the new-restaurant form, in `UC-VRC`. Nothing ever asks whether a business exists at a coordinate.                                                                                                                                                                                                                                                                               |
 | **R-16** | The only clustering signal is `bite.place`, a free-text string that may be typed, taken from a Google place, or taken from a picked Restaurant. Normalization folds case, accents, `&` and punctuation, and nothing else — not abbreviations, not word order, not a place type.                                                                                                                                                                                                                                |
 | **R-17** | A Candidate makes no statement about _why_ it is credible. An automatically detected Candidate asserts that five people independently named the place; an Operator-created one asserts that one Operator believes it. Both are the same shape in the same collection with the same `status`, and `evidence.biteCount` is read as a proxy for a claim it does not make. `R-19` is the invariant that would fix this.                                                                                            |
-| **R-18** | _Intended, not met._ A place an Operator has dismissed is not proposed again. Once `R-8`'s guard exists, a `dismissed` document occupying the derived id refuses every later write, which makes dismissal detection's only negative evidence and its only permanent suppression — the one thing that answers `E8` at all. The suppression is only as durable as `R-7`'s identity, so a spelling variant or a cell boundary defeats it.                                                                         |
+| **R-18** | _Intended, not met._ A place an Operator has dismissed is not proposed again. `R-8`'s guard makes a `dismissed` document occupying the derived id refuse every later write; what is missing is a writer of `dismissed`. That makes dismissal detection's only negative evidence and its only permanent suppression — the one thing that answers `E8` at all. The suppression is only as durable as `R-7`'s identity, so a spelling variant or a cell boundary defeats it.                                      |
 | **R-19** | _Intended, not met._ Every Candidate written since the producer field exists is either backed by at least five matching Bites within 200 m, or marked as created by an Operator (`RD-VRC-10`). No field records the producer yet, so the second half is unrepresentable, and the Candidates that predate the field carry `unknown` permanently: their producer was never recorded and cannot be recovered, which is a permanent exception rather than a temporary state. This was `G7` until `G7` was retired. |
 
 ## Exceptions And Failure Modes
 
 | #   | Situation                                                                               | Behaviour                                                                                                                                                                                                                                              | Assessment      |
 | --- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
-| E1  | The derived id at `K8` already points to a `verified` or `dismissed` Candidate          | `K10` merge-writes `status: 'pending'` onto it. The Candidate is reset, reappears in `UC-VRC`'s list and can be verified a second time, producing a duplicate Restaurant                                                                               | Defect, [#1497] |
 | E2  | Two different restaurants share a normalized name inside one geohash cell               | One Candidate, holding both places' Bites as evidence for one another, at a position that is the mean of both and may be on neither                                                                                                                    | Defect, [#1526] |
 | E3  | One restaurant's Bites straddle a geohash cell boundary                                 | Two Candidates for one place. `K8`'s pending-duplicate lookup mitigates this only when the second cluster's bounds happen to reach the first document                                                                                                  | Defect, [#1525] |
 | E4  | A Bite's `place` is corrected after creation                                            | Nothing happens. The Bite never joins the cluster it now names, and never leaves the one it no longer names                                                                                                                                            | Gap, [#1527]    |
@@ -432,6 +432,11 @@ leave the Operator with; whether it does is an L3 question.
 | E10 | A verified Restaurant was renamed, or two branches of one business sit within 200 m     | `K3` misses, and detection creates a Candidate for a place that is already a Restaurant                                                                                                                                                                | Defect, [#1522] |
 | E11 | The `/restaurants` bounds query fails, or no Restaurant carries a `geohash`             | The entire `/restaurants` collection is read and then filtered by radius. Correct, and unbounded, on a path that runs on every Bite creation                                                                                                           | Defect, [#1530] |
 | E12 | More than 50 Bites are eligible for the on-demand producer                              | Only the first 50 in read order are offered, with no defined ordering, so the same Bites are offered every time and the rest are unreachable                                                                                                           | Defect, [#1531] |
+
+`E1` is **retired** and its id is not reused. It recorded that a derived id already holding
+a `verified` or `dismissed` Candidate was reset to `pending` and could be verified a second
+time. [#1497] built `K9`, and the case is now that step's branch to `END-K5`, which `UF-12`
+keeps out of this table.
 
 `E13` is **retired** and its id is not reused. It recorded that a real restaurant in a thin
 market never reaches five Bites, which makes the threshold-free producer load-bearing. That
@@ -467,12 +472,8 @@ this holds in production from the merge.
 terminal states `END-A1`, `END-K1`, `END-K3`, `END-K4` and `END-K5`. Automatic detection is
 the only producer the initial release depends on.
 
-**[MVP] and not implemented — release blocker under `UF-15`:**
-
-- `K9`'s guard on a non-`pending` target (`R-8`, `E1`, [#1497]). Without it a decided
-  Candidate is reset and can be verified a second time, publishing a duplicate page about a
-  real, named business. It is reachable by automatic detection alone, so it does not depend
-  on the producer classified `[Secondary]` below.
+**[MVP] and not implemented:** none. `K9`'s guard on a non-`pending` target (`R-8`) was
+this page's release blocker under `UF-15` until [#1497] built it.
 
 **[Secondary]**
 
@@ -515,7 +516,7 @@ discovered in review.
 
 - Part of epic [#1523], which hardens this Use Case, and epic [#1495], which hardens
   verification and reaches into detection where verification trips over it.
-- [#1497] — the guard at `K9`. `R-8`, `E1`. The release blocker on this page.
+- [#1497] — built the guard at `K9`. `R-8`; retired `E1`.
 - [#1524] — the on-demand seed check. `B8`, `R-4`, `E7`.
 - [#1525] — one place resolves to one Candidate across a spelling variant and a cell
   boundary. `R-7`, `E3`, `E9`, and what makes `R-18` durable.

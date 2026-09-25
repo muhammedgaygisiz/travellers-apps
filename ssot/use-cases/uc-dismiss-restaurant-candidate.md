@@ -5,10 +5,10 @@
 **Level:** L0.
 
 No page exists yet; the behaviour is named only where two other pages depend on it.
-`UC-DRC` `K9` (guard against writing onto a decided Candidate) and `R-18` (permanent
-suppression of a re-proposed place) both require a `dismissed` Candidate to exist.
-`UC-VRC` `V4a` is the Operator's decision branch that would produce one, and both pages
-mark their side `[not implemented]` (`UC-VRC` `R-13`). No surface and no backend writer
+`UC-DRC` `K9` (guard against writing onto a decided Candidate, built by [#1497]) and
+`R-18` (permanent suppression of a re-proposed place) both need a `dismissed` Candidate to
+exist before they suppress anything. `UC-VRC` `V4a` is the Operator's decision branch that
+would produce one, and marks its side `[not implemented]` (`UC-VRC` `R-13`). No surface and no backend writer
 exist anywhere in the codebase today - a repository-wide search for candidate-dismissal
 code returns nothing but unrelated UI modal/alert dismissals. The model already declares
 `'dismissed'` as one of the `RestaurantCandidateStatus` values, so the target shape is
@@ -65,6 +65,7 @@ L1.
 - [Bite](../domain/bite.md)
 
 [#1495]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1495
+[#1497]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1497
 [#1501]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1501
 [#1502]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1502
 [#1508]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1508

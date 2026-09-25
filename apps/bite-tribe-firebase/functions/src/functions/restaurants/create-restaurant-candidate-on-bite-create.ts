@@ -1,4 +1,4 @@
-import { DocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
+import { DocumentSnapshot } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onDocumentCreated } from 'firebase-functions/firestore';
 import {
@@ -8,14 +8,12 @@ import {
   planRestaurantCandidateGeohashBounds,
 } from '../shared/utils/restaurant-candidates';
 import {
-  RESTAURANT_CANDIDATES_COLLECTION,
-  buildCandidateUpdate,
-  buildRestaurantCandidateDocumentId,
   getMatchingBites,
   getNearbyBites,
   getNearbyPendingCandidates,
   getNearbyVerifiedRestaurants,
   toCandidateBite,
+  writeRestaurantCandidate,
 } from '../shared/utils/restaurant-candidate-store';
 
 // Automatic candidate detection only fires once enough repeated nearby
@@ -86,22 +84,31 @@ export const handleCreateRestaurantCandidateOnBiteCreate = async (
     selectedBite.place,
     selectedBite.position,
   );
-  const candidateRef = pendingDuplicate
-    ? getFirestore()
-        .collection(RESTAURANT_CANDIDATES_COLLECTION)
-        .doc(pendingDuplicate.item.id)
-    : getFirestore()
-        .collection(RESTAURANT_CANDIDATES_COLLECTION)
-        .doc(buildRestaurantCandidateDocumentId(draft));
-  const candidateUpdate = buildCandidateUpdate(draft, pendingDuplicate?.item);
+  const writeResult = await writeRestaurantCandidate(
+    draft,
+    pendingDuplicate?.item.id,
+  );
 
-  await candidateRef.set(candidateUpdate, { merge: true });
+  if (writeResult.outcome === 'refused') {
+    // The place has already been decided. Its Bites stay unlinked, which keeps
+    // them on the admin app's Bite-places surface (RD-VRC-9).
+    logger.warn(
+      'createRestaurantCandidateOnBiteCreate: candidate already decided, write refused',
+      {
+        biteId,
+        candidateId: writeResult.candidateId,
+        candidateStatus: writeResult.candidateStatus,
+        refusedBiteIds: draft.biteIds,
+      },
+    );
+    return;
+  }
 
   logger.info('createRestaurantCandidateOnBiteCreate: candidate stored', {
     biteId,
-    candidateId: candidateRef.id,
-    evidenceCount: candidateUpdate.evidence?.biteCount,
-    status: pendingDuplicate ? 'updated' : 'created',
+    candidateId: writeResult.candidateId,
+    evidenceCount: writeResult.evidenceCount,
+    status: writeResult.created ? 'created' : 'updated',
   });
 };
 

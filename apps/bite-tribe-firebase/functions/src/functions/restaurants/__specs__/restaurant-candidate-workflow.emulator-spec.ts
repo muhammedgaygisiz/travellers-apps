@@ -65,6 +65,7 @@ const queryCount = async (collectionName: string): Promise<number> =>
 
 const verifyCandidate = (
   candidateId: string,
+  restaurantName = 'Pizza Palace',
 ): ReturnType<typeof verifyRestaurantCandidateHandler> =>
   verifyRestaurantCandidateHandler({
     auth: {
@@ -74,7 +75,7 @@ const verifyCandidate = (
     data: {
       candidateId,
       restaurant: {
-        name: 'Pizza Palace',
+        name: restaurantName,
         position: CENTER,
       },
     },
@@ -102,134 +103,149 @@ describe('restaurant candidate workflow emulator integration', () => {
     await Promise.all(getApps().map((app) => deleteApp(app)));
   });
 
-  it('keeps candidate creation and verification idempotent across repeated workflow runs', async () => {
-    await Promise.all([
-      seedBite('bite-new', 'Pizza Palace', CENTER, {
-        name: 'Margherita',
-        price: 12,
-      }),
-      seedBite('bite-1', 'Pizza Palace', nearby(1), {
-        name: 'Margherita',
-        price: 13,
-      }),
-      seedBite('bite-2', 'Pizza Palace', nearby(2), {
-        name: 'Tiramisu',
-        price: 7,
-      }),
-      seedBite('bite-3', 'Pizza Palace', nearby(3), {
-        name: 'Calzone',
-        price: 14,
-      }),
-      seedBite('bite-4', 'Pizza Palace', nearby(4), {
-        name: 'Calzone',
-        price: 14,
-      }),
-    ]);
+  /**
+   * Both halves of this run race two transactions on one document, and the
+   * loser of each race is retried after the Admin SDK's backoff, which lands
+   * about three and a half seconds in. Verification always raced; since #1497
+   * the candidate write is a transaction too, so two races together are past
+   * Jest's five-second default. The time is the SDK's backoff, not a deadlock.
+   */
+  const RACE_TIMEOUT_MS = 30_000;
 
-    const selectedBiteSnapshot = await getFirestore()
-      .collection('bites')
-      .doc('bite-new')
-      .get();
+  it(
+    'keeps candidate creation and verification idempotent across repeated workflow runs',
+    async () => {
+      await Promise.all([
+        seedBite('bite-new', 'Pizza Palace', CENTER, {
+          name: 'Margherita',
+          price: 12,
+        }),
+        seedBite('bite-1', 'Pizza Palace', nearby(1), {
+          name: 'Margherita',
+          price: 13,
+        }),
+        seedBite('bite-2', 'Pizza Palace', nearby(2), {
+          name: 'Tiramisu',
+          price: 7,
+        }),
+        seedBite('bite-3', 'Pizza Palace', nearby(3), {
+          name: 'Calzone',
+          price: 14,
+        }),
+        seedBite('bite-4', 'Pizza Palace', nearby(4), {
+          name: 'Calzone',
+          price: 14,
+        }),
+      ]);
 
-    await Promise.all([
-      handleCreateRestaurantCandidateOnBiteCreate(selectedBiteSnapshot),
-      handleCreateRestaurantCandidateOnBiteCreate(selectedBiteSnapshot),
-    ]);
+      const selectedBiteSnapshot = await getFirestore()
+        .collection('bites')
+        .doc('bite-new')
+        .get();
 
-    const candidateSnapshot = await getFirestore()
-      .collection('restaurantCandidates')
-      .get();
-    const candidateDocs = candidateSnapshot.docs;
+      await Promise.all([
+        handleCreateRestaurantCandidateOnBiteCreate(selectedBiteSnapshot),
+        handleCreateRestaurantCandidateOnBiteCreate(selectedBiteSnapshot),
+      ]);
 
-    expect(candidateDocs).toHaveLength(1);
-    expect(candidateDocs[0].data()).toMatchObject({
-      status: 'pending',
-      normalizedName: 'pizza palace',
-      evidence: {
-        biteCount: 5,
-      },
-    });
-    expect(candidateDocs[0].data()['biteIds']).toEqual(
-      expect.arrayContaining([
-        'bite-new',
-        'bite-1',
-        'bite-2',
-        'bite-3',
-        'bite-4',
-      ]),
-    );
+      const candidateSnapshot = await getFirestore()
+        .collection('restaurantCandidates')
+        .get();
+      const candidateDocs = candidateSnapshot.docs;
 
-    const verificationResults = await Promise.all([
-      verifyCandidate(candidateDocs[0].id),
-      verifyCandidate(candidateDocs[0].id),
-    ]);
+      expect(candidateDocs).toHaveLength(1);
+      expect(candidateDocs[0].data()).toMatchObject({
+        status: 'pending',
+        normalizedName: 'pizza palace',
+        evidence: {
+          biteCount: 5,
+        },
+      });
+      expect(candidateDocs[0].data()['biteIds']).toEqual(
+        expect.arrayContaining([
+          'bite-new',
+          'bite-1',
+          'bite-2',
+          'bite-3',
+          'bite-4',
+        ]),
+      );
 
-    expect(
-      new Set(verificationResults.map((result) => result.restaurantId)).size,
-    ).toBe(1);
-    expect(await queryCount('restaurants')).toBe(1);
-    expect(await queryCount('menus')).toBe(1);
+      const verificationResults = await Promise.all([
+        verifyCandidate(candidateDocs[0].id),
+        verifyCandidate(candidateDocs[0].id),
+      ]);
 
-    const verifiedCandidateSnapshot = await candidateDocs[0].ref.get();
-    const verifiedCandidate = verifiedCandidateSnapshot.data();
-    const restaurantId = verificationResults[0].restaurantId;
+      expect(
+        new Set(verificationResults.map((result) => result.restaurantId)).size,
+      ).toBe(1);
+      expect(await queryCount('restaurants')).toBe(1);
+      expect(await queryCount('menus')).toBe(1);
 
-    expect(verifiedCandidate).toMatchObject({
-      status: 'verified',
-      verifiedRestaurantId: restaurantId,
-      verifiedByUserId: 'operator-1',
-    });
+      const verifiedCandidateSnapshot = await candidateDocs[0].ref.get();
+      const verifiedCandidate = verifiedCandidateSnapshot.data();
+      const restaurantId = verificationResults[0].restaurantId;
 
-    const menuSnapshot = await getFirestore().collection('menus').get();
+      expect(verifiedCandidate).toMatchObject({
+        status: 'verified',
+        verifiedRestaurantId: restaurantId,
+        verifiedByUserId: 'operator-1',
+      });
 
-    // The category and every dish are born with an id (issue #1099), so a menu
-    // created here never needs the admin backfill.
-    expect(menuSnapshot.docs[0].data()['categories']).toEqual([
-      {
-        id: expect.any(String),
-        title: 'Bites',
-        items: [
-          {
-            id: expect.any(String),
-            name: 'Calzone',
-            description: '',
-            price: 14,
-            isAvailable: true,
-          },
-          {
-            id: expect.any(String),
-            name: 'Margherita',
-            description: '',
-            price: 12.5,
-            isAvailable: true,
-          },
-          {
-            id: expect.any(String),
-            name: 'Tiramisu',
-            description: '',
-            price: 7,
-            isAvailable: true,
-          },
-        ],
-      },
-    ]);
+      const menuSnapshot = await getFirestore().collection('menus').get();
 
-    const linkedBiteSnapshots = await Promise.all(
-      ['bite-new', 'bite-1', 'bite-2', 'bite-3', 'bite-4'].map((biteId) =>
-        getFirestore().collection('bites').doc(biteId).get(),
-      ),
-    );
+      // The category and every dish are born with an id (issue #1099), so a menu
+      // created here never needs the admin backfill.
+      expect(menuSnapshot.docs[0].data()['categories']).toEqual([
+        {
+          id: expect.any(String),
+          title: 'Bites',
+          items: [
+            {
+              id: expect.any(String),
+              name: 'Calzone',
+              description: '',
+              price: 14,
+              isAvailable: true,
+            },
+            {
+              id: expect.any(String),
+              name: 'Margherita',
+              description: '',
+              price: 12.5,
+              isAvailable: true,
+            },
+            {
+              id: expect.any(String),
+              name: 'Tiramisu',
+              description: '',
+              price: 7,
+              isAvailable: true,
+            },
+          ],
+        },
+      ]);
 
-    expect(
-      linkedBiteSnapshots.map((snapshot) => snapshot.data()?.['restaurantId']),
-    ).toEqual([
-      restaurantId,
-      restaurantId,
-      restaurantId,
-      restaurantId,
-      restaurantId,
-    ]);
-  });
+      const linkedBiteSnapshots = await Promise.all(
+        ['bite-new', 'bite-1', 'bite-2', 'bite-3', 'bite-4'].map((biteId) =>
+          getFirestore().collection('bites').doc(biteId).get(),
+        ),
+      );
+
+      expect(
+        linkedBiteSnapshots.map(
+          (snapshot) => snapshot.data()?.['restaurantId'],
+        ),
+      ).toEqual([
+        restaurantId,
+        restaurantId,
+        restaurantId,
+        restaurantId,
+        restaurantId,
+      ]);
+    },
+    RACE_TIMEOUT_MS,
+  );
 
   it('does not create a candidate when a matching verified restaurant already exists', async () => {
     await getFirestore()
@@ -255,5 +271,51 @@ describe('restaurant candidate workflow emulator integration', () => {
     await handleCreateRestaurantCandidateOnBiteCreate(selectedBiteSnapshot);
 
     expect(await queryCount('restaurantCandidates')).toBe(0);
+  });
+
+  /**
+   * Issue #1497. Once the Operator corrects the name on verification, the
+   * verified-restaurant check no longer recognises the place, and the next
+   * five Bites resolve to the same derived candidate id. Before the guard they
+   * reset it to pending, and verifying it again created a second restaurant.
+   */
+  it('never resets a verified candidate when new Bites resolve to its id', async () => {
+    await Promise.all(
+      ['bite-new', 'bite-1', 'bite-2', 'bite-3', 'bite-4'].map((id, index) =>
+        seedBite(id, 'Pizza Palace', index ? nearby(index) : CENTER),
+      ),
+    );
+    await handleCreateRestaurantCandidateOnBiteCreate(
+      await getFirestore().collection('bites').doc('bite-new').get(),
+    );
+
+    const [candidateDoc] = (
+      await getFirestore().collection('restaurantCandidates').get()
+    ).docs;
+
+    await verifyCandidate(candidateDoc.id, 'Ristorante Luigi');
+
+    const verifiedCandidate = (await candidateDoc.ref.get()).data();
+
+    await Promise.all(
+      ['later-new', 'later-1', 'later-2', 'later-3', 'later-4'].map(
+        (id, index) =>
+          seedBite(id, 'Pizza Palace', index ? nearby(index) : CENTER),
+      ),
+    );
+    await handleCreateRestaurantCandidateOnBiteCreate(
+      await getFirestore().collection('bites').doc('later-new').get(),
+    );
+
+    expect((await candidateDoc.ref.get()).data()).toEqual(verifiedCandidate);
+    expect(await queryCount('restaurantCandidates')).toBe(1);
+    expect(await queryCount('restaurants')).toBe(1);
+
+    const laterBiteSnapshot = await getFirestore()
+      .collection('bites')
+      .doc('later-new')
+      .get();
+
+    expect(laterBiteSnapshot.data()?.['restaurantId']).toBeUndefined();
   });
 });

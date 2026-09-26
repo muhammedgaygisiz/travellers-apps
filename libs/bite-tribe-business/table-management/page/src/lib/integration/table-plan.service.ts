@@ -245,8 +245,7 @@ export interface TableDetail {
  *
  * The route parameter, for the reason the floor-plan editor, the menu and the
  * staff list all read it that way: `restaurant$` is a derived selector that is
- * `undefined` whenever there is no GPS position, which is an ordinary state for
- * anyone who declined the location permission, and this page is reachable by
+ * `undefined` until the restaurants have loaded, and this page is reachable by
  * direct URL. The route always carries `:restaurantId`, and it is the id the
  * route guard and the Firestore rules both authorise against.
  *

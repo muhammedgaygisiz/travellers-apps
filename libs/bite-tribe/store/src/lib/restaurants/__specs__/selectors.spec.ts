@@ -177,7 +177,7 @@ describe('restaurant Selectors', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should return undefined if gpsPosition is undefined', () => {
+    it('should return the restaurant without a distance if gpsPosition is undefined', () => {
       const state = {
         restaurants: [
           {
@@ -195,7 +195,27 @@ describe('restaurant Selectors', () => {
         state.gpsPosition,
       );
 
-      expect(result).toBeUndefined();
+      expect(result).toBeDefined();
+      expect(result?.id).toBe('1');
+      expect(result?.name).toBe('Saved Restaurant 1');
+      expect(result?.distance).toBeUndefined();
+    });
+
+    it('should not carry over a stored distance if gpsPosition is undefined', () => {
+      const result = restaurant.projector(
+        '1',
+        [
+          {
+            id: '1',
+            name: 'Saved Restaurant 1',
+            position: { latitude: 40.7128, longitude: -74.006 },
+            distance: '12.3',
+          },
+        ],
+        undefined,
+      );
+
+      expect(result?.distance).toBeUndefined();
     });
   });
 

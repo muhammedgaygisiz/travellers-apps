@@ -154,10 +154,11 @@ host, on all three hosts that serve the build.
 
 Nothing here requests a permission. The page reads a menu by the route's `menuId` and asks
 the device for nothing - not the camera, since a printed code is scanned by the phone's own
-camera app and BiteTribe never opens a scanner. The restaurant selector it uses returns
-`undefined` without a GPS position, which is why the save path reads the restaurant id from
-the route instead; the same selector blanks the business restaurant page, which is issue
-[#1653]. The published read sends no user identifier and is attested by App Check alone, so
+camera app and BiteTribe never opens a scanner. The restaurant selector it uses returns the
+restaurant with or without a GPS position, leaving `distance` unset without one (issue
+[#1653]), so a declined location permission degrades nothing on the menu or business
+restaurant pages. The save path reads the restaurant id from the route regardless, because
+that is the id the rules authorise against. The published read sends no user identifier and is attested by App Check alone, so
 no privacy label entry changes. Table ordering shares this page's library and belongs to
 [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md).
 
@@ -185,8 +186,8 @@ no privacy label entry changes. Table ordering shares this page's library and be
   and it delivered issue [#371], the same feature from the restaurant's side.
 - Issue [#1654] leaves a member with unfinished onboarding on the published page rather
   than sending them through the assistant.
-- Issue [#1653] blanks the business restaurant page, and with it the code that leads here,
-  whenever the device reports no GPS position. Open.
+- Issue [#1653] keeps the business restaurant page, and with it the code that leads here,
+  rendered when the device reports no GPS position.
 
 ## Related Domains
 

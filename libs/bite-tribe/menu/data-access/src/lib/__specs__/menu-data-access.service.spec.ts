@@ -129,9 +129,9 @@ describe(MenuDataAccessService.name, () => {
      * nothing about who may write it (issue #1078).
      *
      * `restaurant$` is deliberately empty here. The id comes from the route
-     * parameter, and the loaded restaurant is a derived selector that resolves
-     * to `undefined` without a GPS position — reading the id off it would fail
-     * the save for anyone who declined the location permission.
+     * parameter, and the loaded restaurant is a derived selector that is empty
+     * until the restaurants have loaded — reading the id off it would fail the
+     * save whenever it had not.
      */
     it('should call saveMenu on BiteTribeApiService with the restaurant from the route', () => {
       const menu = { id: 'menu-1', categories: [] } as unknown as Menu;

@@ -114,8 +114,9 @@ export class TableQrSheetsService {
 
   /**
    * The route parameter, for the reason `FloorPlanService` reads it that way:
-   * `restaurant$` is undefined without a GPS position, and this page is
-   * reachable by a bookmarked URL that never passed through the editor.
+   * `restaurant$` is undefined until the restaurants have loaded, and this
+   * page is reachable by a bookmarked URL that never passed through the
+   * editor.
    */
   readonly restaurantId = this.storeService.restaurantIdFromUrl;
 

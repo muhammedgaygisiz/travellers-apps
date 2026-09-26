@@ -74,8 +74,7 @@ export class RestaurantStaffDataAccessService {
    * restaurant.
    *
    * The same reason `saveMenu` reads it that way: `restaurant$` is a derived
-   * selector that is `undefined` whenever there is no GPS position, which is
-   * an ordinary state for anyone who declined the location permission — and
+   * selector that is `undefined` until the restaurants have loaded — and
    * this page is reachable by direct URL without going through the edit form
    * that populates it. The route always carries `:restaurantId`, and it is the
    * id `ownedRestaurantGuard` and the callable both authorise against.

@@ -126,8 +126,9 @@ all be reviewed for the first time.
   Restaurant page already had. Closed as completed.
 - Issue [#370] put the published menu code on `restaurant/:restaurantId`, and with it the
   copyable address and the print sheet. Closed as completed, delivering issue [#371].
-- Issue [#1653] blanks every field on this page, the menu code included, whenever the device
-  reports no GPS position. Open.
+- Issue [#1653] keeps every field on this page, the menu code included, rendered when the
+  device reports no GPS position; the restaurant is read without a `distance` instead of
+  being withheld.
 
 ## Related Domains
 

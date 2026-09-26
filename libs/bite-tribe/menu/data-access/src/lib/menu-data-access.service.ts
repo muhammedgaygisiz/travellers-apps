@@ -50,11 +50,11 @@ export class MenuDataAccessService {
   /**
    * The restaurant comes from the **route parameter**, not from the loaded
    * restaurant. Both menu routes carry `:restaurantId`, so the parameter is
-   * always there; `restaurant` is a derived selector that returns `undefined`
-   * whenever there is no GPS position, which is an ordinary state for anyone
-   * who declined the location permission. Reading the id off it would fail the
-   * save for those users and nowhere else. The rules that authorise the write
-   * read this id (issue #1078).
+   * always there; `restaurant` is only there once the restaurants have loaded.
+   * Until issue #1653 it was also `undefined` whenever there was no GPS
+   * position, and reading the id off it failed the save for anyone who had
+   * declined the location permission. The rules that authorise the write read
+   * this id (issue #1078), so the route stays the source either way.
    */
   saveMenu(menu: Menu): Promise<void> {
     return this.api.saveMenu(menu, this.storeService.restaurantIdFromUrl());

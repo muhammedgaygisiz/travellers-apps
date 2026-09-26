@@ -131,10 +131,13 @@ scan of its own.
   included - reads the published one. The menu is resolved before that redirect, so a
   restaurant that printed a code and has no menu settles on the refusal above rather than on
   a route that would send it back.
-- **A member who has not finished onboarding is sent through the assistant first**, because
-  the route they are handed to carries the auth guard and the onboarding gate with it. The
-  displaced address is remembered, so the menu is what they land on afterwards. Whether that
-  is the right answer is issue [#1654].
+- **A member who has not finished onboarding reads this page** (issue [#1654]). The app's own
+  menu page carries the auth guard and the onboarding gate with it, so handing them there
+  would put the assistant in front of the menu - leaving somebody who has the app worse off
+  than a stranger. The member is handed on only when the gate would let them through: the
+  completion flag is set, or the assistant was dismissed for the session. That question has
+  one reader, `isReleasedFromOnboarding` in `bite-tribe/onboarding-guards`, shared with the
+  gate itself, and an answer it cannot obtain leaves the reader on this page.
 
 ## MVP Classification
 
@@ -180,8 +183,8 @@ no privacy label entry changes. Table ordering shares this page's library and be
 - Issue [#370] gave the published address a code to be printed on, the associated-domain
   entry that opens it in the app, and the in-app route a scan lands on. Closed as completed,
   and it delivered issue [#371], the same feature from the restaurant's side.
-- Issue [#1654] asks whether a member with unfinished onboarding should read the published
-  page rather than be sent through the assistant. Open.
+- Issue [#1654] leaves a member with unfinished onboarding on the published page rather
+  than sending them through the assistant.
 - Issue [#1653] blanks the business restaurant page, and with it the code that leads here,
   whenever the device reports no GPS position. Open.
 

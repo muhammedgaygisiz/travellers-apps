@@ -1,14 +1,11 @@
 import { Route, Routes } from '@angular/router';
 import { withAuthRoutes } from 'auth';
 import { authGuard, freshSessionGuard, startGuard } from 'ta-firestore';
-import {
-  biteTitleResolver,
-  publicMenuMemberGuard,
-  restaurantMenuGuard,
-} from 'bite-tribe/store';
+import { biteTitleResolver, restaurantMenuGuard } from 'bite-tribe/store';
 import {
   gateAuthenticatedRoutes,
   onboardingCompletedGuard,
+  publicMenuGuard,
 } from 'bite-tribe/onboarding-guards';
 import { OnboardingContainerComponent } from 'bite-tribe/onboarding';
 import { PATH, PUBLIC_MENU_RESTAURANT_PARAM } from 'utils';
@@ -129,8 +126,8 @@ const APP_ROUTES: Routes = [
    *
    * Both carry `authGuard`, because this is the app's own menu page - the
    * chrome, and the button that turns a dish into a Bite. The reader with no
-   * account has {@link PATH.PUBLIC_MENU} instead, and `publicMenuMemberGuard`
-   * is what sends a member here from there.
+   * account has {@link PATH.PUBLIC_MENU} instead, and `publicMenuGuard` is
+   * what sends a member here from there - once onboarding would let them in.
    */
   {
     path: `${PATH.RESTAURANT}/:restaurantId/${PATH.MENU}`,
@@ -341,16 +338,18 @@ const APP_ROUTES: Routes = [
    * `loadRestaurantById$` read `/restaurants/{id}` on arrival, and the rules
    * refuse that read to the very reader this route exists for.
    *
-   * `publicMenuMemberGuard` is not an auth guard and refuses nobody. Since
+   * `publicMenuGuard` is not an auth guard and refuses nobody. Since
    * issue #370 a restaurant prints this address on a code of its own, so a
    * member with the app installed now scans their way here - and they are
    * handed the app's own menu page instead of the stranger's. Everybody else,
-   * an anonymous table guest included, is let through to the page below.
+   * an anonymous table guest included, is let through to the page below - and
+   * so is a member who has not finished onboarding, because the in-app page
+   * would put the assistant in front of the menu (issue #1654).
    */
   {
     path: `${PATH.PUBLIC_MENU}/:${PUBLIC_MENU_RESTAURANT_PARAM}`,
     loadComponent: () => import('bite-tribe/menu').then((m) => m.PublicMenu),
-    canActivate: [publicMenuMemberGuard],
+    canActivate: [publicMenuGuard],
     title: 'Menu',
   },
   {

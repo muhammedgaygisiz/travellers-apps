@@ -87,7 +87,7 @@ describe(RestaurantsDataAccessService.name, () => {
   });
 
   describe('bitePlacesLoader', () => {
-    it('should load unique Bite places without verified restaurants', async () => {
+    it('should load unique Bite places with the unassigned Bites behind each', async () => {
       jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
         snapshots: [
           { id: 'bite-1', data: { place: 'Pizza Palace' } },
@@ -120,7 +120,10 @@ describe(RestaurantsDataAccessService.name, () => {
           },
         ],
       });
-      expect(result).toEqual(['Pizza Palace', 'Cafe Central']);
+      expect(result).toEqual([
+        { place: 'Pizza Palace', biteIds: ['bite-1', 'bite-2'] },
+        { place: 'Cafe Central', biteIds: ['bite-3'] },
+      ]);
     });
 
     it('should return an empty list when Bite place snapshots are missing', async () => {

@@ -14,6 +14,18 @@ import { getRestaurantById } from './utils/get-restaurant-by-id';
 import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
 import { getDownloadUrlFromFirebaseStorage } from 'utils';
 
+/**
+ * Whether a Bite already names a restaurant, in any shape - the same test
+ * `verifyRestaurantCandidate` applies before it links a Bite (`R-20`).
+ */
+const hasRestaurant = (data: Record<string, unknown>): boolean => {
+  const restaurantId = data['restaurantId'];
+
+  return typeof restaurantId === 'string'
+    ? restaurantId.trim().length > 0
+    : restaurantId !== undefined && restaurantId !== null;
+};
+
 @Injectable({ providedIn: 'root' })
 export class RestaurantApiService {
   loadRestaurantById(restaurantId: string): Promise<Restaurant | undefined> {
@@ -61,19 +73,10 @@ export class RestaurantApiService {
       },
     });
 
-    // Update the bites with the new restaurant ID
+    // Link the bites to the new restaurant
     if (biteIds && biteIds.length > 0) {
       await Promise.all(
-        biteIds.map((biteId) =>
-          FirebaseFirestore.updateDocument({
-            reference: `${BITE_COLLECTION}/${biteId}`,
-            data: {
-              restaurantId: `${newRestaurantId}`,
-              updatedAt: new Date().toISOString(),
-              updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
-            },
-          }),
-        ),
+        biteIds.map((biteId) => this.linkBite(biteId, newRestaurantId)),
       );
     }
 
@@ -81,6 +84,36 @@ export class RestaurantApiService {
     if (image) {
       await this.uploadAndSaveRestaurantImage(newRestaurantId, image);
     }
+  }
+
+  /**
+   * Points one Bite at a new restaurant, unless it already names one.
+   *
+   * The ids were read when the operator opened the list, so a Bite can have
+   * been assigned since - by its creator, or by a candidate verification. It
+   * keeps that assignment, the same rule `UC-VRC` `R-20` holds for `V23`
+   * (issues #1498, #1631). A Bite deleted in the meantime is skipped too,
+   * rather than failing the whole save. The read and the write are not one
+   * transaction, which the plugin does not offer; the window this leaves is
+   * the few milliseconds between them rather than the time the list was open.
+   */
+  private async linkBite(biteId: string, restaurantId: string): Promise<void> {
+    const { snapshot } = await FirebaseFirestore.getDocument({
+      reference: `${BITE_COLLECTION}/${biteId}`,
+    });
+
+    if (!snapshot?.data || hasRestaurant(snapshot.data)) {
+      return;
+    }
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${BITE_COLLECTION}/${biteId}`,
+      data: {
+        restaurantId: `${restaurantId}`,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
+      },
+    });
   }
 
   private async uploadAndSaveRestaurantImage(

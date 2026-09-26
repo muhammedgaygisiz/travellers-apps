@@ -3,6 +3,7 @@ import { NavController } from '@ionic/angular/standalone';
 import { Restaurant } from 'model';
 import {
   AdminRestaurantCandidate,
+  BitePlace,
   RestaurantsDataAccessService,
 } from 'bite-tribe-admin/restaurants-data-access';
 
@@ -38,11 +39,17 @@ export class RestaurantsService {
     void this.navController.navigateForward(['new-restaurant']);
   }
 
-  placeClicked(placeName: string): void {
+  /**
+   * Carries the Bites behind the place into the draft, so the Restaurant
+   * created from it links them (issue #1631). `saveNewRestaurant` skips any
+   * that were assigned in the meantime.
+   */
+  placeClicked(place: BitePlace): void {
     const restaurant: Restaurant = {
       id: '',
-      name: placeName,
+      name: place.place,
       position: { latitude: 0, longitude: 0 },
+      biteIds: place.biteIds,
       unsaved: true,
     };
 

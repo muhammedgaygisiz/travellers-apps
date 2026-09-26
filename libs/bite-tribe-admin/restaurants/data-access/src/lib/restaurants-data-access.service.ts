@@ -41,6 +41,18 @@ export const TABLE_SESSIONS_LIMIT = 50;
 export type AdminTableSession = TableSession;
 export const BITE_PLACES_LIMIT = 10;
 
+/**
+ * A place name unassigned Bites carry, with the Bites that carry it.
+ *
+ * The ids travel with the name so a Restaurant created from the place links
+ * those Bites (issue #1631); a bare name left `saveNewRestaurant` nothing to
+ * write.
+ */
+export interface BitePlace {
+  place: string;
+  biteIds: string[];
+}
+
 /** A pending candidate together with the Bites that are the evidence for it. */
 export interface AdminRestaurantCandidate extends RestaurantCandidate {
   bites: Bite[];
@@ -242,7 +254,7 @@ export class RestaurantsDataAccessService {
     loader: this.tableSessionsLoader.bind(this),
   });
 
-  bitePlacesLoader: ResourceLoader<string[] | undefined, unknown> =
+  bitePlacesLoader: ResourceLoader<BitePlace[] | undefined, unknown> =
     async () => {
       const docs = await FirebaseFirestore.getCollection({
         reference: BITE_COLLECTION,
@@ -269,11 +281,20 @@ export class RestaurantsDataAccessService {
         return [];
       }
 
-      const places = docs.snapshots
-        .map((doc) => (doc.data as Bite).place)
-        .filter((place): place is string => !!place);
+      const biteIdsByPlace = docs.snapshots.reduce((result, doc) => {
+        const place = (doc.data as Bite | undefined)?.place;
 
-      return [...new Set(places)];
+        if (place) {
+          result.set(place, [...(result.get(place) ?? []), doc.id]);
+        }
+
+        return result;
+      }, new Map<string, string[]>());
+
+      return [...biteIdsByPlace].map(([place, biteIds]) => ({
+        place,
+        biteIds,
+      }));
     };
 
   bitePlaces = resource({
@@ -317,7 +338,7 @@ export class RestaurantsDataAccessService {
     this.restaurantCandidates,
     [] as AdminRestaurantCandidate[],
   );
-  bitePlacesValue = resourceValue(this.bitePlaces, [] as string[]);
+  bitePlacesValue = resourceValue(this.bitePlaces, [] as BitePlace[]);
   tableSessionsValue = resourceValue(
     this.tableSessions,
     [] as AdminTableSession[],

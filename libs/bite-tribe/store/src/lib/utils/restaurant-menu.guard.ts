@@ -1,5 +1,10 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, GuardResult, Router } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  CanActivateFn,
+  GuardResult,
+  Router,
+} from '@angular/router';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { AuthService } from 'ta-firestore';
 import { PATH, PUBLIC_MENU_RESTAURANT_PARAM } from 'utils';
@@ -86,19 +91,19 @@ export const restaurantMenuGuard: CanActivateFn = async (
  *
  * ## A member who has not finished onboarding
  *
- * They are sent through the assistant first, because the route this redirects
- * to carries `authGuard` and therefore the onboarding gate with it. That is a
- * deferral rather than a dead end - `onboardingGuard` remembers the displaced
- * URL (issue #1246), so the menu is what they land on when the assistant is
- * done.
+ * This guard does not ask, and is not what the route carries. The in-app menu
+ * page carries `authGuard` and therefore the onboarding gate, so handing such a
+ * member there would put the assistant in front of the menu. Whether the gate
+ * would let them through is a question for `OnboardingDataAccessService`,
+ * which this `type:store` library cannot import; `publicMenuGuard` in
+ * `bite-tribe/onboarding-guards` asks it, and takes this guard's hand-off only
+ * when the answer is yes (issue #1654).
  *
- * Asking the question here instead, and leaving such a member on the public
- * page, would mean a second reader of the onboarding rule - including its
- * session-scoped dismissal - in a library that cannot import the first. Two
- * readers of one rule is how they start disagreeing.
+ * Typed as a promise rather than a bare `CanActivateFn` so that guard can
+ * await the answer.
  */
-export const publicMenuMemberGuard: CanActivateFn = async (
-  route,
+export const publicMenuMemberGuard = async (
+  route: ActivatedRouteSnapshot,
 ): Promise<GuardResult> => {
   const auth = inject(AuthService);
   const api = inject(BiteTribeApiService);

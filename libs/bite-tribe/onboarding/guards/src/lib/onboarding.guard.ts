@@ -3,6 +3,7 @@ import { CanActivateFn, Router, UrlTree } from '@angular/router';
 import { PATH } from 'utils';
 import { RequestedUrlService } from 'ta-firestore';
 import { OnboardingDataAccessService } from 'bite-tribe/onboarding-data-access';
+import { isReleasedFromOnboarding } from './onboarding-release';
 
 /**
  * Blocks every authenticated route for users who have not completed onboarding,
@@ -25,13 +26,7 @@ export const onboardingGuard: CanActivateFn = async (
   const router = inject(Router);
   const requestedUrlService = inject(RequestedUrlService);
 
-  if (dataAccess.dismissedForSession()) {
-    return true;
-  }
-
-  const isComplete = await dataAccess.isOnboardingComplete();
-
-  if (isComplete) {
+  if (await isReleasedFromOnboarding(dataAccess)) {
     return true;
   }
 

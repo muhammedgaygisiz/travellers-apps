@@ -1003,6 +1003,11 @@ own frame rather than as bars.
 The comic's source file is not kept in the repo; only the framed PNG is. There
 is no generator to rerun.
 
+The traveller has since been named **Leela** and made BiteTribe's main
+character; her reference crops are cut from this image. See
+[Implementation - Brand Characters](brand-characters.md#leela). The published
+caption and alt text do not name her and are left as posted.
+
 ### The Phone Is Illustrated, Not The App
 
 **The map in panel three is a drawing, not a screenshot**, and it is not what

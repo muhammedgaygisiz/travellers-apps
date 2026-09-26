@@ -33,14 +33,14 @@ content is generated, change the generator.
 
 ## Checks
 
-| Script                                    | `npm run`                                  | Does                                                                     |
-| ----------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------ |
-| `check-ssot.mjs`                          | `check:ssot`                               | Structural checks for the SSOT — see below. Runs in CI in the `lint` job |
-| `assert-firestore-indexes-ready.mjs`      | `firestore:assert-indexes-ready`           | Waits for every declared Firestore index and exemption to reach `READY`  |
-| `loki.mjs`                                | `loki:test`, `loki:update`, `loki:approve` | Visual regression, wrapping `oblador/loki` directly                      |
-| `generate-geotagged-fixture.mjs`          | —                                          | Regenerates the geotagged e2e image fixture                              |
-| `generate-store-qr-codes.mjs`             | `generate-store-qr-codes`                  | Redraws the two committed store QR codes under the consumer app's assets |
-| `set-functions-deploy-service-account.sh` | —                                          | Provisions the service account the `deploy-functions` job uses           |
+| Script                                    | `npm run`                                  | Does                                                                                               |
+| ----------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `check-ssot.mjs`                          | `check:ssot`                               | Structural checks for the SSOT — see below. Runs in CI in the `lint` job, and a violation fails it |
+| `assert-firestore-indexes-ready.mjs`      | `firestore:assert-indexes-ready`           | Waits for every declared Firestore index and exemption to reach `READY`                            |
+| `loki.mjs`                                | `loki:test`, `loki:update`, `loki:approve` | Visual regression, wrapping `oblador/loki` directly                                                |
+| `generate-geotagged-fixture.mjs`          | —                                          | Regenerates the geotagged e2e image fixture                                                        |
+| `generate-store-qr-codes.mjs`             | `generate-store-qr-codes`                  | Redraws the two committed store QR codes under the consumer app's assets                           |
+| `set-functions-deploy-service-account.sh` | —                                          | Provisions the service account the `deploy-functions` job uses                                     |
 
 ## Analytics
 

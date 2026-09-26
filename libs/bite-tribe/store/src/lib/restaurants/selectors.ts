@@ -72,6 +72,15 @@ export const restaurants = createSelector(
   },
 );
 
+/**
+ * The route's restaurant, with a `distance` when the device reports a position.
+ *
+ * Without a position the restaurant is still returned, just with no `distance`
+ * (issue #1653). Declining the location permission is an ordinary state, and
+ * withholding the restaurant for it blanked every surface reading this
+ * selector - the whole business restaurant page among them - for the sake of
+ * the one field an owner editing their own restaurant has no use for.
+ */
 export const restaurant = createSelector(
   restaurantId,
   allRestaurants,
@@ -79,20 +88,20 @@ export const restaurant = createSelector(
   (id, restaurants, gpsPosition) => {
     const foundRestaurantById = getRestaurant(restaurants, id);
 
-    if (foundRestaurantById && gpsPosition) {
-      return {
-        ...foundRestaurantById,
-        distance: haversineDistance(
-          foundRestaurantById.position?.latitude,
-          foundRestaurantById.position?.longitude,
-          gpsPosition?.latitude,
-          gpsPosition?.longitude,
-          'km',
-        ),
-      };
+    if (!foundRestaurantById) {
+      return undefined;
     }
 
-    return undefined;
+    return {
+      ...foundRestaurantById,
+      distance: haversineDistance(
+        foundRestaurantById.position?.latitude,
+        foundRestaurantById.position?.longitude,
+        gpsPosition?.latitude,
+        gpsPosition?.longitude,
+        'km',
+      ),
+    };
   },
 );
 

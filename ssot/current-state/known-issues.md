@@ -110,14 +110,6 @@
 
   Partially covered. Run 8 reached the vacation and posting-later shape on web through the position-source modal's `Set manually` option — the route that found [#1307] — and Run 11 covered the missing-location branch on Android by denying the permission. The wider class of cases, and a real trip across a currency boundary, are still untested. Currency fallback, manual override and border cases are [issue 978](https://github.com/muhammedgaygisiz/travellers-apps/issues/978).
 
-- ### The business restaurant page is blank without a GPS position
-
-  **Why it matters:** an owner who declines the browser's location prompt sees a restaurant that looks like it does not exist.
-
-  The shared `restaurant` selector in `libs/bite-tribe/store` finds the restaurant the route names and then discards it, because it cannot compute the `distance` it decorates it with. Every field on the business restaurant page therefore renders empty - the name, the picture, the address, the opening hours - and `Create Menu` is offered for a restaurant that has had a menu for months. `distance` is the one field a business owner editing their own restaurant has no use for.
-
-  Found on 19 September 2026 while verifying [issue 370](https://github.com/muhammedgaygisiz/travellers-apps/issues/370) against the emulators; dispatching a position by hand filled the whole page in one change-detection cycle. [Issue 1653](https://github.com/muhammedgaygisiz/travellers-apps/issues/1653) owns it and proposes returning the restaurant with no `distance` rather than withholding it, which has to be checked against the consumer surfaces that sort by it. It hides the menu code of [issue 370](https://github.com/muhammedgaygisiz/travellers-apps/issues/370) along with the rest of the form, so the business app cannot publish a menu on a device with location denied.
-
 - ## Resolved And Recorded
 
   One line each. The investigation is on the issue and on the charter run that found it; it is not repeated here.
@@ -130,6 +122,7 @@
 - **Onboarding registration** — [#1219] unblocked registration, which had parked forever on a lazy Ionic overlay controller; the trap it belongs to is under Developer Experience Issues. The onboarding sub-issues [#1186], [#1187] and [#1189] have no post-fix reverification recorded.
 - **Native permission recovery** — iOS deny-then-enable verified at Build 90 ([#1183]); the missing Android half was fixed by [#1386] and awaits physical verification.
 - **Profile visibility** — [#1188] put a localized public/private status on the signed-in user's own profile; device verification of both states is open. A profile share or deep link is **not** a gap: sharing is deliberately a Bite capability, and the charter wording that implied otherwise was corrected by [#1190].
+- **Business restaurant page without a position** — [#1653] made the shared `restaurant` selector return the route's restaurant with no `distance` instead of withholding it, so the business restaurant page and its menu code render with location denied. Found while verifying [#370].
 - **Location quality** — city search, address enrichment, mandatory place selection, position patching and map camera stability all landed. What remains is real-world testing rather than implementation.
 
 - ## Pinned Native Dependency
@@ -237,6 +230,7 @@ users` and `Crash-free users` are the two tiles that count people rather than
 - [Architecture - Analytics](../architecture/analytics.md)
 - [Current State - Nx And Dependency Migration Roadmap](nx-and-dependency-migration-roadmap.md)
 
+[#370]: https://github.com/muhammedgaygisiz/travellers-apps/issues/370
 [#986]: https://github.com/muhammedgaygisiz/travellers-apps/issues/986
 [#987]: https://github.com/muhammedgaygisiz/travellers-apps/issues/987
 [#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
@@ -280,3 +274,4 @@ users` and `Crash-free users` are the two tiles that count people rather than
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1584]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1584
 [#1586]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1586
+[#1653]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1653

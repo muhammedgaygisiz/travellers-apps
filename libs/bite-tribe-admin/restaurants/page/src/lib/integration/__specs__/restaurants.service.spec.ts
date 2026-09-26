@@ -75,19 +75,23 @@ describe('RestaurantsService', () => {
   });
 
   describe('placeClicked', () => {
-    it('should select an unsaved restaurant carrying the place name', () => {
-      service.placeClicked('Pizza Palace');
+    it('should select an unsaved restaurant carrying the place name and its Bites', () => {
+      service.placeClicked({
+        place: 'Pizza Palace',
+        biteIds: ['bite-1', 'bite-2'],
+      });
 
       expect(dataAccessMock.selectRestaurantToCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'Pizza Palace',
+          biteIds: ['bite-1', 'bite-2'],
           unsaved: true,
         }),
       );
     });
 
     it('should navigate forward to new-restaurant', () => {
-      service.placeClicked('Pizza Palace');
+      service.placeClicked({ place: 'Pizza Palace', biteIds: [] });
 
       expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
         'new-restaurant',

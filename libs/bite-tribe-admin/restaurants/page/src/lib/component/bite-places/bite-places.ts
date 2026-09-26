@@ -16,12 +16,14 @@ import {
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
+import type { BitePlace } from 'bite-tribe-admin/restaurants-data-access';
 
 /**
  * Place names that Bites carry but no verified restaurant answers to yet.
  *
- * Picking one opens the new-restaurant form seeded with that name, which is how
- * an operator turns a place people are already eating at into a restaurant.
+ * Picking one opens the new-restaurant form seeded with that name and the Bites
+ * behind it, which is how an operator turns a place people are already eating
+ * at into a restaurant those Bites belong to.
  */
 @Component({
   selector: 'lib-bite-places',
@@ -52,9 +54,9 @@ import { PageComponent } from 'common/ui/page';
             </ion-card-header>
             <ion-card-content>
               <ion-list lines="full" data-testid="bite-places">
-                @for (place of places(); track place) {
+                @for (place of places(); track place.place) {
                   <ion-item [button]="true" (click)="placeClick.emit(place)">
-                    <ion-label>{{ place }}</ion-label>
+                    <ion-label>{{ place.place }}</ion-label>
                   </ion-item>
                 } @empty {
                   <p>{{ 'no-bite-places-found' | transloco }}</p>
@@ -76,8 +78,8 @@ import { PageComponent } from 'common/ui/page';
   `,
 })
 export class BitePlaces {
-  readonly places = input<string[]>([]);
+  readonly places = input<BitePlace[]>([]);
 
-  readonly placeClick = output<string>();
+  readonly placeClick = output<BitePlace>();
   readonly logoutClick = output<void>();
 }

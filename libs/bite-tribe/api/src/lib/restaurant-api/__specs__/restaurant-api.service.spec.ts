@@ -72,15 +72,29 @@ describe(RestaurantApiService.name, () => {
   describe('saveNewRestaurant', () => {
     let addDocumentSpy: jest.SpyInstance;
     let updateDocumentSpy: jest.SpyInstance;
+    let getDocumentSpy: jest.SpyInstance;
 
     beforeEach(() => {
       addDocumentSpy = jest.spyOn(FirebaseFirestore, 'addDocument');
       updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
+      getDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockImplementation(
+          async ({ reference }) =>
+            ({
+              snapshot: {
+                id: reference.split('/')[1],
+                path: reference,
+                data: { restaurantId: '' },
+              },
+            }) as any,
+        );
     });
 
     afterEach(() => {
-      addDocumentSpy.mockClear();
-      updateDocumentSpy.mockClear();
+      addDocumentSpy.mockReset();
+      updateDocumentSpy.mockReset();
+      getDocumentSpy.mockReset();
     });
 
     describe('given biteIds', () => {
@@ -151,6 +165,71 @@ describe(RestaurantApiService.name, () => {
             updatedAtTimestamp: 1710504000000,
           },
         });
+      });
+    });
+
+    describe('given a Bite assigned since the list was read', () => {
+      it.each([
+        ['a bare restaurant id', 'resto-other'],
+        ['a document path', 'restaurants/resto-other'],
+      ])(
+        'should leave a Bite already carrying %s untouched',
+        async (_, restaurantId) => {
+          getDocumentSpy.mockImplementation(
+            async ({ reference }) =>
+              ({
+                snapshot: {
+                  id: reference.split('/')[1],
+                  path: reference,
+                  data: reference === 'bites/bite1' ? { restaurantId } : {},
+                },
+              }) as any,
+          );
+
+          addDocumentSpy
+            .mockResolvedValueOnce({ reference: { id: 'resto-new' } } as any)
+            .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+          updateDocumentSpy.mockResolvedValue({} as any);
+
+          await service.saveNewRestaurant({
+            name: 'New Resto',
+            biteIds: ['bite1', 'bite2'],
+          } as any);
+
+          expect(getDocumentSpy).toHaveBeenCalledWith({
+            reference: 'bites/bite1',
+          });
+          expect(updateDocumentSpy).not.toHaveBeenCalledWith(
+            expect.objectContaining({ reference: 'bites/bite1' }),
+          );
+          expect(updateDocumentSpy).toHaveBeenCalledWith({
+            reference: 'bites/bite2',
+            data: {
+              restaurantId: 'resto-new',
+              updatedAt: '2024-03-15T12:00:00.000Z',
+              updatedAtTimestamp: 1710504000000,
+            },
+          });
+        },
+      );
+
+      it('should skip a Bite deleted since the list was read', async () => {
+        getDocumentSpy.mockResolvedValue({ snapshot: null } as any);
+
+        addDocumentSpy
+          .mockResolvedValueOnce({ reference: { id: 'resto-new' } } as any)
+          .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+        updateDocumentSpy.mockResolvedValue({} as any);
+
+        await service.saveNewRestaurant({
+          name: 'New Resto',
+          biteIds: ['bite1'],
+        } as any);
+
+        expect(updateDocumentSpy).toHaveBeenCalledTimes(1);
+        expect(updateDocumentSpy).not.toHaveBeenCalledWith(
+          expect.objectContaining({ reference: 'bites/bite1' }),
+        );
       });
     });
 

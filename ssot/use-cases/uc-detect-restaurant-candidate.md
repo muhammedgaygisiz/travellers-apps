@@ -104,11 +104,13 @@ Out of scope. Each of these is its own Use Case, referenced from the step it bel
 | `UC-DIS` | [Dismiss Restaurant Candidate](uc-dismiss-restaurant-candidate.md)                  | `K9`          | Alternative downstream outcome, and — once [#1501] lands — detection's only negative evidence. See `R-18` |
 
 **Also out of scope, and not a Use Case: the Bite-places creation path.** The Admin App
-offers a list of distinct `place` strings taken from all Bites; picking one opens the same
-new-restaurant form used by verification, seeded with `position: {latitude: 0, longitude:
-0}` and **no** `restaurantCandidateId`. Submitting without one bypasses the verification
-callable entirely and creates a Restaurant through five separate client-side writes with no
-transaction and no backend validation. It is a second, Candidate-free route to a
+offers a list of distinct `place` strings taken from unassigned Bites; picking one opens the
+same new-restaurant form used by verification, seeded with `position: {latitude: 0,
+longitude: 0}`, the ids of the Bites carrying that place, and **no**
+`restaurantCandidateId`. Submitting without one bypasses the verification
+callable entirely and creates a Restaurant through separate client-side writes with no
+transaction and no backend validation, linking those Bites as it goes; that link is owned by
+[UC - Manage A Bite's Restaurant Assignment](uc-manage-a-bites-restaurant-assignment.md). It is a second, Candidate-free route to a
 Restaurant. It is not detection, it produces no Candidate, and this Use Case states no rule
 about it.
 

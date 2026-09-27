@@ -92,6 +92,7 @@ function summariseFunnel(rows) {
     onboardingCompleted: sumBy(subset, 'onboarding_completed'),
     signedUp: sumBy(subset, 'signed_up'),
     firstBite: sumBy(subset, 'first_bite'),
+    crawlerArrivals: sumBy(subset, 'crawler_arrivals'),
     signupPct: pct(sumBy(subset, 'signed_up'), sumBy(subset, 'arrived')),
   });
 
@@ -105,6 +106,9 @@ function summariseFunnel(rows) {
           platform,
         ),
       )
+      // A platform whose every arrival was a crawler would print as a row of
+      // zeros. Its crawlers still count towards the total's note.
+      .filter((row) => row.arrived > 0)
       .sort((a, b) => b.arrived - a.arrived),
     total: forRows(rows, 'All'),
   };

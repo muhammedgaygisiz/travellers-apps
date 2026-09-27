@@ -156,13 +156,22 @@ in a window; these two count **people**, followed from the day they arrived.
   active on exactly that day, which is what GA4's own cohort exploration shows
   and therefore what these numbers can be checked against.
 
-Three properties of the pair are worth knowing before reading a number from
+Four properties of the pair are worth knowing before reading a number from
 them.
 
 **Arrival is `first_open` _or_ `first_visit`.** GA4 logs the first on iOS and
 Android and the second on the web for the same moment. Naming only one drops
-every arrival on the other platform, and on this property the web is where the
-arrivals are: 42 of 92 in the seven days to 22 September 2026.
+every arrival on the other platform, and on this property about half of all
+arrivals are on the web.
+
+**A crawler is not an arrival.** Meta's link-preview crawlers run the page's
+JavaScript, so GA4 logs a `first_visit` for each one. In the fortnight to 26
+September 2026 they were 32 of 76 new web users. Since
+[issue 1709](https://github.com/muhammedgaygisiz/travellers-apps/issues/1709) both queries leave out web arrivals from the data-centre
+towns in `tools/analytics/crawlers.config.mjs`, and the digest says how many
+it left out. A crawler from a town not on that list still counts as a person:
+a burst of zero-engagement web arrivals right after a post is the sign to add
+its town.
 
 **An unmatured horizon is `NULL`, never `0`.** A cohort that arrived three days
 ago has no D7. Counting it would report 0, which is indistinguishable from a

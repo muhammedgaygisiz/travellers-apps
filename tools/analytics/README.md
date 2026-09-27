@@ -16,6 +16,10 @@ Agent-operable access to the launch analytics defined in
   question. Nothing runs it directly: it is the list a reader reads, and
   `analytics-events.spec.ts` fails if it drifts from the taxonomy or from the
   query below.
+- **`crawlers.config.mjs`** — the data-centre towns whose web traffic is
+  link-preview crawlers rather than people (issue #1709). The cohort queries
+  and the App Check throttle tiles filter on it, and `analytics-events.spec.ts`
+  fails if a query's copy of the list drifts from it.
 - **`queries/*.sql`** — checked-in SQL against the export, run by `query.mjs`
   via `npm run analytics:query`. `order-to-bite-funnel.sql` is that funnel as
   numbers, per restaurant per day.
@@ -204,11 +208,16 @@ The steps and horizons are declared in `cohorts.config.mjs`;
 `analytics-events.spec.ts` fails if they drift from the taxonomy or from the
 SQL that measures them.
 
-Three things to know before reading a number:
+Four things to know before reading a number:
 
 - **Arrival is `first_open` or `first_visit`.** GA4 logs one for an app install
   and the other for a web session. A funnel naming only the first reports no
   web arrivals at all.
+- **Crawlers are left out.** Web arrivals from the data-centre towns in
+  `crawlers.config.mjs` are link-preview crawlers (issue #1709). The funnel
+  counts them in `crawler_arrivals` instead of `arrived`, and retention drops
+  them from the cohort. The same list splits the App Check throttle tile into
+  people and crawlers.
 - **An unmatured horizon is blank, not zero.** A cohort three days old has no
   D7 yet, and a 0 there would read as total churn. Maturity is measured against
   the last day the export actually delivered, which is routinely yesterday

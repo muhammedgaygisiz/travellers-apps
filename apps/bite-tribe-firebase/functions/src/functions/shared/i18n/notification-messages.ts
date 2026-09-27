@@ -58,7 +58,23 @@ export type NotificationMessageKey =
   | 'newTableOrder.bodyWithoutTable'
   | 'newVersion.title'
   | 'newVersion.bodyIos'
-  | 'newVersion.bodyAndroid';
+  | 'newVersion.bodyAndroid'
+  // The one follow-up mail the day after sign-up (GitHub issue #1707): three
+  // Bites and three people picked by hand, the same for every new account.
+  | 'newUserFollowUp.emailSubject'
+  | 'newUserFollowUp.emailIntro'
+  | 'newUserFollowUp.bitesHeading'
+  | 'newUserFollowUp.peopleHeading'
+  | 'newUserFollowUp.openBite'
+  | 'newUserFollowUp.openProfile'
+  | 'newUserFollowUp.footer'
+  | 'newUserFollowUp.unsubscribeLabel'
+  // The page the mail's unsubscribe link opens.
+  | 'emailUnsubscribe.title'
+  | 'emailUnsubscribe.confirm'
+  | 'emailUnsubscribe.button'
+  | 'emailUnsubscribe.done'
+  | 'emailUnsubscribe.invalid';
 
 /**
  * One locale's full catalog. `Record` is deliberate: a locale that forgets a

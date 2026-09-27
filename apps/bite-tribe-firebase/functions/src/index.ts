@@ -35,6 +35,8 @@ export { updateUserMetadata } from './functions/users/update-user-metadata';
 export { resendEmailVerification } from './functions/users/resend-email-verification';
 export { syncEmailVerificationStatus } from './functions/users/sync-email-verification-status';
 export { sendEmailVerificationReminders } from './functions/users/send-email-verification-reminders';
+export { sendNewUserFollowUps } from './functions/users/send-new-user-follow-ups';
+export { handleEmailUnsubscribe } from './functions/users/handle-email-unsubscribe';
 export { loadBitesByLocation } from './functions/bites/load-bites-by-location';
 export { loadWeeklyBites } from './functions/bites/load-weekly-bites';
 export { getCurrencyByPosition } from './functions/location/get-currency-by-position';

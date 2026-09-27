@@ -2,9 +2,9 @@
  * Minimal in-memory stand-in for the Firestore admin API.
  *
  * It covers exactly the surface the callables under test use — document
- * get/set/update/delete, `getAll`, `==`/`in`/`array-contains` collection and
- * collection-group queries, subcollections, dotted field paths and batched
- * writes — so they can be tested against real document state instead of a wall
+ * get/set/update/create/delete, `getAll`, `==`/`in`/`array-contains`/range
+ * collection and collection-group queries, subcollections, dotted field paths
+ * and batched writes — so they can be tested against real document state instead of a wall
  * of call assertions.
  */
 
@@ -99,6 +99,14 @@ const matchesFilter = (data: DocData, filter: Filter): boolean => {
       );
     case 'array-contains':
       return Array.isArray(stored) && stored.includes(filter.value);
+    case '>=':
+      return (stored as number) >= (filter.value as number);
+    case '>':
+      return (stored as number) > (filter.value as number);
+    case '<=':
+      return (stored as number) <= (filter.value as number);
+    case '<':
+      return (stored as number) < (filter.value as number);
     default:
       return stored === filter.value;
   }
@@ -150,6 +158,15 @@ class FakeDocumentReference {
     this.store.set(this.path, applyData(this.store.get(this.path) ?? {}, data));
   }
 
+  /** Fails like Firestore's `create` does when the document already exists. */
+  async create(data: DocData): Promise<void> {
+    if (this.store.has(this.path)) {
+      throw Object.assign(new Error('ALREADY_EXISTS'), { code: 6 });
+    }
+
+    this.store.set(this.path, applyData({}, data));
+  }
+
   async delete(): Promise<void> {
     this.store.delete(this.path);
   }
@@ -174,6 +191,11 @@ class FakeQuery {
 
   limit(count: number): FakeQuery {
     return new FakeQuery(this.store, this.matchesPath, this.filters, count);
+  }
+
+  /** Accepted for the query shape; results keep insertion order. */
+  orderBy(): FakeQuery {
+    return this;
   }
 
   async get(): Promise<{

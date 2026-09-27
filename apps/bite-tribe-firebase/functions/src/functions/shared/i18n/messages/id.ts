@@ -54,4 +54,22 @@ export const id: NotificationMessages = {
     'Versi baru BiteTribe sudah ada di App Store. Perbarui sekarang agar tidak ketinggalan.',
   'newVersion.bodyAndroid':
     'Versi baru BiteTribe sudah ada di Google Play. Perbarui sekarang agar tidak ketinggalan.',
+  'newUserFollowUp.emailSubject': 'Hidangan dan foodie yang dipilih untukmu',
+  'newUserFollowUp.emailIntro':
+    'Selamat datang di BiteTribe! Berikut beberapa hidangan yang layak dicoba dan beberapa orang yang layak diikuti.',
+  'newUserFollowUp.bitesHeading': 'Hidangan yang layak dicoba',
+  'newUserFollowUp.peopleHeading': 'Foodie yang layak diikuti',
+  'newUserFollowUp.openBite': 'Buka Bite',
+  'newUserFollowUp.openProfile': 'Lihat profil',
+  'newUserFollowUp.footer':
+    'Kamu menerima email ini sekali saja karena kamu baru bergabung dengan BiteTribe.',
+  'newUserFollowUp.unsubscribeLabel': 'Berhenti berlangganan email BiteTribe',
+  'emailUnsubscribe.title': 'Berhenti berlangganan email BiteTribe',
+  'emailUnsubscribe.confirm':
+    'BiteTribe akan berhenti mengirimimu email seperti ini. Email akun, seperti email verifikasi, tetap akan dikirim.',
+  'emailUnsubscribe.button': 'Berhenti berlangganan',
+  'emailUnsubscribe.done':
+    'Kamu sudah berhenti berlangganan. BiteTribe tidak akan mengirimimu email seperti ini lagi.',
+  'emailUnsubscribe.invalid':
+    'Tautan berhenti berlangganan ini sudah tidak berlaku.',
 };

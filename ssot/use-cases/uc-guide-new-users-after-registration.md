@@ -73,6 +73,63 @@ with an answer - including a declined one.
   `onboarding_assistant_completed` at the end (issue [#1017]). These are app-interaction
   events, declared with the rest in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
+## Follow-Up Mail Contract
+
+Registration is where a new user arrives; the follow-up mail is the one reason
+BiteTribe gives them to come back the next day (issue [#1707]). D1 retention was
+5% when it was specified: new users liked what they saw and had nothing that
+brought them back.
+
+- **Trigger.** `sendNewUserFollowUps` runs daily at 18:00 Europe/Zurich and reads
+  the profiles whose `createdAtTimestamp` lies 24 to 49 hours before the run. The
+  window is an hour wider than a day, so a late scheduler leaves no gap between
+  two runs; the claim below absorbs the overlap.
+- **Channel.** Email only. A push would open whichever app build the device has,
+  and routing its tap would need an app release; a mail link opens the web app,
+  which already serves every page the mail points at. It also keeps one journey
+  for every new user, whether they signed up on a phone or the web.
+- **Who gets it.** A verified email address on an enabled account with a sign-in
+  provider, which Firebase Auth decides, and no opt-out of product mail.
+  Anonymous table guests have no profile and are never read. Everyone else gets
+  nothing.
+- **Exactly once.** `newUserFollowUps/{uid}` is created with `create`, which fails
+  when it exists, before the mail is sent, and ends as `sent` or `failed`. A
+  failed send is not retried: the claim-before-send order chooses silence over
+  a second mail, the same choice the visit reminder makes.
+- **Content.** Fixed, not ranked: three Bites and three people, chosen by hand in
+  `config/newUserFollowUp` (`biteIds`, `userIds`) from the Firebase console, the
+  same for every recipient and in the recipient's `settings/{uid}.language`. A
+  pick is dropped at send time when its Bite is gone or its profile is not
+  public, and a recipient is never suggested to themselves. While no pick
+  resolves, a run sends nothing and claims nobody, so accounts are not burnt on
+  an empty mail - there is no separate on switch.
+- **Monitor copy.** Every uid in `config/newUserFollowUp.monitorUids` (at most
+  five) gets the mail after every run, rendered from the full picks, with the
+  run's counts in an English subject such as
+  `[Follow-up monitor] 2 sent, 1 skipped, 0 failed of 3 - ...`. A run whose
+  picks resolve to nothing sends the monitor an alert instead. The copy ignores
+  the claim and the product-mail opt-out, and a failed copy never fails the
+  run. A day without it means the job did not run. The uids live in the config
+  document rather than in code, so the operator can change them without a
+  deploy.
+- **Opt-out.** The footer and an RFC 8058 `List-Unsubscribe` header both point at
+  `https://bitetribe.app/unsubscribe/{token}`, rewritten to
+  `handleEmailUnsubscribe`. The token is random and maps to the account in
+  `emailOptOuts`; a uid in the link would let anybody opt anybody out. A GET only
+  shows a confirmation, because mail scanners open every link; the POST sets
+  `settings/{uid}.productEmails` to `false`. That setting covers every
+  non-transactional mail - verification mail and a guest's visit summary ignore
+  it. The consent decision itself stays with issue [#989].
+- **Measurement.** Every link carries
+  `utm_source=bitetribe&utm_medium=email&utm_campaign=new_user_follow_up`, which
+  the web app's GA4 tag attributes to the session with no app code. Sends are
+  counted from the `status` of `newUserFollowUps` and the run's log summary,
+  not from a GA4 event: the functions have no GA4 transport. The effect is read
+  as D1 and D7 from `retention-cohorts` for the cohorts before and after the
+  release.
+- **Deletion.** Account deletion removes the claim and every opt-out token the
+  account was issued; see [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md).
+
 ## MVP Classification
 
 **[MVP]** - the blocking assistant and its steps: the unique display name, the public/private
@@ -114,6 +171,11 @@ permission surface, so the purpose strings are read here before any other screen
   `completeOnboarding`.
 - `AnalyticsEvent.OnboardingAssistantStarted`, `OnboardingStepCompleted` and
   `OnboardingAssistantCompleted`, logged from `OnboardingService`.
+- The follow-up mail: `users/send-new-user-follow-ups.ts`,
+  `users/new-user-follow-up-picks.ts`, `users/new-user-follow-up-email.ts`,
+  `users/email-opt-out.ts` and `users/handle-email-unsubscribe.ts` in
+  `apps/bite-tribe-firebase/functions`, with the `newUserFollowUp.*` and
+  `emailUnsubscribe.*` keys of the backend catalog.
 
 ## Related GitHub Scope
 
@@ -123,6 +185,8 @@ permission surface, so the purpose strings are read here before any other screen
   profile display of the same field
 - Issue [#1412] (the location step reads the live OS grant), following [#1394] for
   the photos step and [#1184] for notifications
+- Issue [#1707] (the follow-up mail the day after sign-up), with the consent
+  decision in [#989]
 
 ## Related Domains
 
@@ -152,6 +216,7 @@ permission surface, so the purpose strings are read here before any other screen
 [#1013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1013
 [#1014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1014
 [#1015]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1015
+[#989]: https://github.com/muhammedgaygisiz/travellers-apps/issues/989
 [#1016]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1016
 [#1017]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1017
 [#1023]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1023
@@ -164,3 +229,4 @@ permission surface, so the purpose strings are read here before any other screen
 [#1394]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1394
 [#1412]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1412
 [#1607]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1607
+[#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707

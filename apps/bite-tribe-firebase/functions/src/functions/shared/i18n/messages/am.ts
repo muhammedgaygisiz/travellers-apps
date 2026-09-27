@@ -48,4 +48,21 @@ export const am: NotificationMessages = {
   'newVersion.bodyIos': 'አዲሱ የBiteTribe ስሪት በApp Store ላይ ደርሷል። አሁን ያዘምኑት።',
   'newVersion.bodyAndroid':
     'አዲሱ የBiteTribe ስሪት በGoogle Play ላይ ደርሷል። አሁን ያዘምኑት።',
+  'newUserFollowUp.emailSubject': 'ለእርስዎ የተመረጡ ምግቦችና የምግብ ወዳጆች',
+  'newUserFollowUp.emailIntro':
+    'ወደ BiteTribe እንኳን በደህና መጡ! ሊሞክሯቸው የሚገቡ ጥቂት ምግቦችና ሊከተሏቸው የሚገቡ ጥቂት ሰዎች እነሆ።',
+  'newUserFollowUp.bitesHeading': 'ሊሞክሯቸው የሚገቡ ምግቦች',
+  'newUserFollowUp.peopleHeading': 'ሊከተሏቸው የሚገቡ የምግብ ወዳጆች',
+  'newUserFollowUp.openBite': 'Biteን ክፈት',
+  'newUserFollowUp.openProfile': 'መገለጫ ይመልከቱ',
+  'newUserFollowUp.footer':
+    'ይህን ኢሜይል አንድ ጊዜ ብቻ የሚቀበሉት አሁን BiteTribeን ስለተቀላቀሉ ነው።',
+  'newUserFollowUp.unsubscribeLabel': 'ከBiteTribe ኢሜይሎች ምዝገባ ይሰርዙ',
+  'emailUnsubscribe.title': 'ከBiteTribe ኢሜይሎች ምዝገባ ይሰርዙ',
+  'emailUnsubscribe.confirm':
+    'BiteTribe እንደዚህ ያሉ ኢሜይሎችን ከእንግዲህ አይልክልዎትም። እንደ ማረጋገጫ ያሉ የመለያ ኢሜይሎች መድረሳቸውን ይቀጥላሉ።',
+  'emailUnsubscribe.button': 'ምዝገባ ሰርዝ',
+  'emailUnsubscribe.done':
+    'ምዝገባዎ ተሰርዟል። BiteTribe እንደዚህ ያሉ ኢሜይሎችን ዳግም አይልክልዎትም።',
+  'emailUnsubscribe.invalid': 'ይህ የምዝገባ መሰረዣ አገናኝ ከእንግዲህ የሚሰራ አይደለም።',
 };

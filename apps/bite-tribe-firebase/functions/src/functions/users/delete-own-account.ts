@@ -24,6 +24,8 @@ import {
   normalizeDisplayName,
 } from './display-name-utils';
 import { requireMember } from '../shared/roles';
+import { EMAIL_OPT_OUTS_COLLECTION } from './email-opt-out';
+import { NEW_USER_FOLLOW_UPS_COLLECTION } from './new-user-follow-up-picks';
 
 const BITES_COLLECTION = 'bites';
 const BITE_TRAILS_COLLECTION = 'biteTrails';
@@ -352,6 +354,24 @@ export const deleteSettingsForUser = (
 ): Promise<FirebaseFirestore.WriteResult> =>
   db.collection(SETTINGS_COLLECTION).doc(uid).delete();
 
+/**
+ * Deletes what the new-user follow-up mail kept about the account
+ * (GitHub issue #1707): its once-only claim and every unsubscribe token issued
+ * to it. A token outliving its account would answer a click with a page about
+ * an account that no longer exists.
+ */
+export const deleteFollowUpRecordsForUser = async (
+  db: Firestore,
+  uid: string,
+): Promise<void> => {
+  await applyToQuery(
+    db,
+    db.collection(EMAIL_OPT_OUTS_COLLECTION).where('uid', '==', uid),
+    (batch, ref) => batch.delete(ref),
+  );
+  await db.collection(NEW_USER_FOLLOW_UPS_COLLECTION).doc(uid).delete();
+};
+
 export const deleteProfileImagesForUser = async (
   uid: string,
 ): Promise<void> => {
@@ -438,6 +458,7 @@ export const deleteAccountForUser = async (
     const deletedRestaurantStaff = await deleteRestaurantStaffForUser(db, uid);
 
     await deleteSettingsForUser(db, uid);
+    await deleteFollowUpRecordsForUser(db, uid);
     await deleteProfileImagesForUser(uid);
     await deleteUserProfileAndClaim(db, uid);
     await refreshLeaderboardsAfterDeletion(db, uid);

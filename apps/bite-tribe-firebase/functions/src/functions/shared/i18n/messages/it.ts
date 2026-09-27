@@ -56,4 +56,22 @@ export const it: NotificationMessages = {
     'La nuova versione di BiteTribe è nell’App Store. Aggiorna ora per non perderti nulla.',
   'newVersion.bodyAndroid':
     'La nuova versione di BiteTribe è su Google Play. Aggiorna ora per non perderti nulla.',
+  'newUserFollowUp.emailSubject': 'Piatti e foodie scelti per te',
+  'newUserFollowUp.emailIntro':
+    'Benvenuto su BiteTribe! Ecco alcuni piatti da provare e alcune persone da seguire.',
+  'newUserFollowUp.bitesHeading': 'Piatti da provare',
+  'newUserFollowUp.peopleHeading': 'Foodie da seguire',
+  'newUserFollowUp.openBite': 'Apri il Bite',
+  'newUserFollowUp.openProfile': 'Vedi profilo',
+  'newUserFollowUp.footer':
+    'Ricevi questa email una sola volta, perché ti sei appena iscritto a BiteTribe.',
+  'newUserFollowUp.unsubscribeLabel':
+    'Annulla l’iscrizione alle email di BiteTribe',
+  'emailUnsubscribe.title': 'Annulla l’iscrizione alle email di BiteTribe',
+  'emailUnsubscribe.confirm':
+    'BiteTribe non ti invierà più email come questa. Le email del tuo account, come quella di verifica, continueranno ad arrivare.',
+  'emailUnsubscribe.button': 'Annulla iscrizione',
+  'emailUnsubscribe.done':
+    'Iscrizione annullata. BiteTribe non ti invierà più email come questa.',
+  'emailUnsubscribe.invalid': 'Questo link di annullamento non è più valido.',
 };

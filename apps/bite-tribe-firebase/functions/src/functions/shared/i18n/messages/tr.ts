@@ -52,4 +52,22 @@ export const tr: NotificationMessages = {
     'BiteTribe’ın yeni sürümü App Store’da. Hemen güncelle, hiçbir yeniliği kaçırma.',
   'newVersion.bodyAndroid':
     'BiteTribe’ın yeni sürümü Google Play’de. Hemen güncelle, hiçbir yeniliği kaçırma.',
+  'newUserFollowUp.emailSubject': 'Senin için seçilen yemekler ve gurmeler',
+  'newUserFollowUp.emailIntro':
+    'BiteTribe’a hoş geldin! İşte denemeye değer birkaç yemek ve takip etmeye değer birkaç kişi.',
+  'newUserFollowUp.bitesHeading': 'Denemeye değer yemekler',
+  'newUserFollowUp.peopleHeading': 'Takip etmeye değer gurmeler',
+  'newUserFollowUp.openBite': 'Bite’ı aç',
+  'newUserFollowUp.openProfile': 'Profili gör',
+  'newUserFollowUp.footer':
+    'Bu e-postayı BiteTribe’a yeni katıldığın için bir kez alıyorsun.',
+  'newUserFollowUp.unsubscribeLabel': 'BiteTribe e-postalarından çık',
+  'emailUnsubscribe.title': 'BiteTribe e-postalarından çık',
+  'emailUnsubscribe.confirm':
+    'BiteTribe sana artık bunun gibi e-postalar göndermeyecek. Doğrulama gibi hesap e-postaları gelmeye devam eder.',
+  'emailUnsubscribe.button': 'Abonelikten çık',
+  'emailUnsubscribe.done':
+    'Abonelikten çıktın. BiteTribe sana artık bunun gibi e-postalar göndermeyecek.',
+  'emailUnsubscribe.invalid':
+    'Bu abonelikten çıkma bağlantısı artık geçerli değil.',
 };

@@ -959,6 +959,25 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    /**
+     * The new-user follow-up mail (GitHub issue #1707), all three written and
+     * read by the Admin SDK only. `config` holds the hand-picked Bites and
+     * people, edited in the console; `newUserFollowUps` is the once-per-account
+     * claim; `emailOptOuts` maps an unsubscribe token to its account, and a
+     * readable token would let anybody who saw one opt somebody else out.
+     */
+    match /config/{documentId} {
+      allow read, write: if false;
+    }
+
+    match /newUserFollowUps/{userId} {
+      allow read, write: if false;
+    }
+
+    match /emailOptOuts/{token} {
+      allow read, write: if false;
+    }
+
     // ------------------------------------------------------------------ bites
 
     match /bites/{biteId} {

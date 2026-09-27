@@ -58,4 +58,22 @@ export const es: NotificationMessages = {
     'Ya está la nueva versión de BiteTribe en la App Store. Actualiza ahora para no perderte nada.',
   'newVersion.bodyAndroid':
     'Ya está la nueva versión de BiteTribe en Google Play. Actualiza ahora para no perderte nada.',
+  'newUserFollowUp.emailSubject': 'Platos y foodies seleccionados para ti',
+  'newUserFollowUp.emailIntro':
+    '¡Te damos la bienvenida a BiteTribe! Aquí tienes algunos platos que vale la pena probar y algunas personas a las que vale la pena seguir.',
+  'newUserFollowUp.bitesHeading': 'Platos que vale la pena probar',
+  'newUserFollowUp.peopleHeading': 'Foodies a los que vale la pena seguir',
+  'newUserFollowUp.openBite': 'Abrir Bite',
+  'newUserFollowUp.openProfile': 'Ver perfil',
+  'newUserFollowUp.footer':
+    'Recibes este correo una sola vez porque acabas de unirte a BiteTribe.',
+  'newUserFollowUp.unsubscribeLabel':
+    'Darse de baja de los correos de BiteTribe',
+  'emailUnsubscribe.title': 'Darse de baja de los correos de BiteTribe',
+  'emailUnsubscribe.confirm':
+    'BiteTribe dejará de enviarte correos como este. Los correos de tu cuenta, como el de verificación, seguirán llegando.',
+  'emailUnsubscribe.button': 'Darse de baja',
+  'emailUnsubscribe.done':
+    'Te has dado de baja. BiteTribe no volverá a enviarte correos como este.',
+  'emailUnsubscribe.invalid': 'Este enlace para darse de baja ya no es válido.',
 };

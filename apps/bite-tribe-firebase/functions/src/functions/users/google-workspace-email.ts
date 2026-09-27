@@ -162,6 +162,11 @@ export interface RenderedEmail {
   subject: string;
   /** The HTML body. Encoded here, so a template never thinks about MIME. */
   html: string;
+  /**
+   * Extra ASCII headers, such as `List-Unsubscribe` on a mail a user can opt
+   * out of (issue \#1707). A transactional mail sets none.
+   */
+  headers?: Record<string, string>;
 }
 
 /**
@@ -173,6 +178,7 @@ export const createRawMessage = ({
   to,
   subject,
   html,
+  headers = {},
 }: RenderedEmail): string => {
   // Never the delegated user: which Workspace mailbox performs the Gmail API
   // delegation is infrastructure, and building `From` from it published a
@@ -187,6 +193,7 @@ export const createRawMessage = ({
     `From: ${SENDER_NAME} <${from}>`,
     `To: ${to}`,
     `Subject: ${encodeHeaderValue(subject)}`,
+    ...Object.entries(headers).map(([name, value]) => `${name}: ${value}`),
     'MIME-Version: 1.0',
     'Content-Type: text/html; charset=UTF-8',
     'Content-Transfer-Encoding: base64',

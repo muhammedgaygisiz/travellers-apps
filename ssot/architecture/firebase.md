@@ -40,6 +40,9 @@ displayNames
 meta
 accountDeletions
 pushTokens
+config
+newUserFollowUps
+emailOptOuts
 ```
 
 Every one of these is named in `firestore.rules`, and anything not named there
@@ -56,7 +59,9 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   in the client query rather than here, so an unowned restaurant is still
   readable and simply not listed. The two exceptions are `accountDeletions` and
   the top-level `pushTokens` index, which are cross-account identifiers no
-  client ever read.
+  client ever read. The three collections of the new-user follow-up mail -
+  `config`, `newUserFollowUps` and `emailOptOuts` - were never readable at all:
+  the Admin SDK is their only reader and writer ([#1707]).
 - **A write is allowed by ownership, not by a role.** The document names the
   account that may write it: `Restaurant.ownerUserId`, `Bite.userId`,
   `Review.authorId`, `Bucketlist.userId`, `BiteTrail.ownerId`, or the document
@@ -552,3 +557,4 @@ libs/bite-tribe/api
 [#1469]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1469
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
+[#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707

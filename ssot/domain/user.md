@@ -195,6 +195,8 @@
   syncEmailVerificationStatus
   resendEmailVerification
   sendEmailVerificationReminders
+  sendNewUserFollowUps
+  handleEmailUnsubscribe
   searchUsers
   loadLeaderboard
   incrementBiteCountOnBiteCreate

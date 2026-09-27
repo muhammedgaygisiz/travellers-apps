@@ -252,6 +252,13 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // public.
   handleDownloadLink: 'public',
 
+  // The unsubscribe link in the new-user follow-up mail (issue #1707). Public
+  // because the reader of a mail is not necessarily signed in anywhere. The
+  // bearer is a random token issued with that one mail, never a uid, it can do
+  // exactly one thing - set `productEmails: false` on the account it names -
+  // and only a POST does it, so a scanner that opens the link changes nothing.
+  handleEmailUnsubscribe: 'public',
+
   // The scan of a table QR code (issue #1100). Public because a guest at a
   // table has no BiteTribe account and may never want one, and the scan is
   // what establishes which restaurant they would be signing in to - so an

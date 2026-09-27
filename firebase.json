@@ -42,6 +42,7 @@
         { "source": "/s/**", "function": "handleSharedLinkToBite" },
         { "source": "/download", "function": "handleDownloadLink" },
         { "source": "/download/**", "function": "handleDownloadLink" },
+        { "source": "/unsubscribe/**", "function": "handleEmailUnsubscribe" },
         { "source": "**", "destination": "/index.html" }
       ]
     },

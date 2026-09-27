@@ -49,4 +49,21 @@ export const ar: NotificationMessages = {
     'إصدار جديد من BiteTribe متاح الآن في App Store. حدّث التطبيق لتحصل على أحدث المزايا.',
   'newVersion.bodyAndroid':
     'إصدار جديد من BiteTribe متاح الآن على Google Play. حدّث التطبيق لتحصل على أحدث المزايا.',
+  'newUserFollowUp.emailSubject': 'أطباق وعشاق طعام اخترناهم لك',
+  'newUserFollowUp.emailIntro':
+    'مرحبًا بك في BiteTribe! إليك بعض الأطباق التي تستحق التجربة وبعض الأشخاص الذين تستحق متابعتهم.',
+  'newUserFollowUp.bitesHeading': 'أطباق تستحق التجربة',
+  'newUserFollowUp.peopleHeading': 'عشاق طعام تستحق متابعتهم',
+  'newUserFollowUp.openBite': 'فتح الـ Bite',
+  'newUserFollowUp.openProfile': 'عرض الملف الشخصي',
+  'newUserFollowUp.footer':
+    'تصلك هذه الرسالة مرة واحدة فقط لأنك انضممت للتو إلى BiteTribe.',
+  'newUserFollowUp.unsubscribeLabel': 'إلغاء الاشتراك في رسائل BiteTribe',
+  'emailUnsubscribe.title': 'إلغاء الاشتراك في رسائل BiteTribe',
+  'emailUnsubscribe.confirm':
+    'لن يرسل لك BiteTribe رسائل مثل هذه بعد الآن. ستستمر رسائل الحساب، مثل رسالة التحقق، في الوصول.',
+  'emailUnsubscribe.button': 'إلغاء الاشتراك',
+  'emailUnsubscribe.done':
+    'تم إلغاء اشتراكك. لن يرسل لك BiteTribe رسائل مثل هذه مرة أخرى.',
+  'emailUnsubscribe.invalid': 'رابط إلغاء الاشتراك هذا لم يعد صالحًا.',
 };

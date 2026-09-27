@@ -66,7 +66,7 @@ See [issue-1385](../records/issue-1385.md) for the reasoning.
 
 Each user-owned data category is handled deliberately. See [issue-1182](../records/issue-1182.md) for the reasoning and [User](../domain/user.md) for the paths.
 
-- Removed: public profile and its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes given, bucket lists, BiteTrail ratings, profile images, the staff association at `/restaurantStaff/{uid}` if the account works at a restaurant ([#1537]), and the Firebase Auth account.
+- Removed: public profile and its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes given, bucket lists, BiteTrail ratings, profile images, the staff association at `/restaurantStaff/{uid}` if the account works at a restaurant ([#1537]), the new-user follow-up claim at `/newUserFollowUps/{uid}` and every unsubscribe token in `/emailOptOuts` issued to the account ([#1707]), and the Firebase Auth account.
 - Kept with the identifier cleared: Bites (the Bite and its image stay, `userId` is removed) and BiteTrail purchase records (the document stays so the seller's `soldCount` holds).
 - Kept untouched: restaurants, menus and restaurant candidates, which are shared place data.
 - Cannot be removed in band: analytics and Crashlytics data already keyed to the uid. The in-app copy says so.
@@ -149,3 +149,4 @@ Relevant, and exercised more directly than on any other page.
 [#1568]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1568
 [#1569]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1569
 [#1570]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1570
+[#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707

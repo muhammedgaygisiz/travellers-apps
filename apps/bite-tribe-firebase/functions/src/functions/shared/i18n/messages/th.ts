@@ -52,4 +52,21 @@ export const th: NotificationMessages = {
     'BiteTribe เวอร์ชันใหม่พร้อมใช้งานบน App Store แล้ว อัปเดตเลยเพื่อไม่พลาดของใหม่',
   'newVersion.bodyAndroid':
     'BiteTribe เวอร์ชันใหม่พร้อมใช้งานบน Google Play แล้ว อัปเดตเลยเพื่อไม่พลาดของใหม่',
+  'newUserFollowUp.emailSubject': 'เมนูและนักชิมที่คัดมาเพื่อคุณ',
+  'newUserFollowUp.emailIntro':
+    'ยินดีต้อนรับสู่ BiteTribe! นี่คือเมนูที่น่าลองและคนที่น่าติดตาม',
+  'newUserFollowUp.bitesHeading': 'เมนูที่น่าลอง',
+  'newUserFollowUp.peopleHeading': 'นักชิมที่น่าติดตาม',
+  'newUserFollowUp.openBite': 'เปิด Bite',
+  'newUserFollowUp.openProfile': 'ดูโปรไฟล์',
+  'newUserFollowUp.footer':
+    'คุณได้รับอีเมลนี้เพียงครั้งเดียว เพราะคุณเพิ่งเข้าร่วม BiteTribe',
+  'newUserFollowUp.unsubscribeLabel': 'ยกเลิกการรับอีเมลจาก BiteTribe',
+  'emailUnsubscribe.title': 'ยกเลิกการรับอีเมลจาก BiteTribe',
+  'emailUnsubscribe.confirm':
+    'BiteTribe จะหยุดส่งอีเมลแบบนี้ให้คุณ อีเมลเกี่ยวกับบัญชี เช่น อีเมลยืนยัน จะยังคงส่งถึงคุณ',
+  'emailUnsubscribe.button': 'ยกเลิกการรับ',
+  'emailUnsubscribe.done':
+    'คุณยกเลิกการรับแล้ว BiteTribe จะไม่ส่งอีเมลแบบนี้ให้คุณอีก',
+  'emailUnsubscribe.invalid': 'ลิงก์ยกเลิกการรับนี้ใช้ไม่ได้แล้ว',
 };

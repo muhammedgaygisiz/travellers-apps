@@ -571,8 +571,11 @@ the repository held no store link anywhere.
 `libs/bite-tribe/store-links` renders it, and the native builds do not: the whole
 block sits behind `Capacitor.isNativePlatform()` being false, because a code
 pointing at the store the user installed from is noise. It appears in two places,
-both web-only - under the buttons on the start page, and above the version footer
-on the about page.
+both web-only - on the start page, and above the version footer on the about
+page. Since [Issue #1706][#1706] the web start page leads with what BiteTribe is
+and a sign-up button; the store links sit beside that pitch under a screenshot
+of the map from 768px up, and below it on a phone. The native start page is
+unchanged and never showed them.
 
 ### The Five Assets
 
@@ -895,3 +898,4 @@ These are account-level and gate submission regardless of listing completeness:
 [#1178]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1178
 [#1451]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1451
 [#1453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1453
+[#1706]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1706

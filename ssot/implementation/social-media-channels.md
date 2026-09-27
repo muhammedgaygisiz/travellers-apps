@@ -1055,6 +1055,57 @@ Published from the web uploader on the Mac, with the steps
   carry it at full size without the gutters; it is not saved here, since a
   story expires.
 
+## The Istanbul Comic Post
+
+The second comic, prepared 27 September 2026 and **not yet published**. Posting
+it is handed to the person now responsible for social media. **Leela recommends
+BiteTribe to her friend Deniz in a Tokyo hostel; Deniz arrives in Istanbul,
+finds the balık ekmek she rated on the map, eats it and shares his own Bite** -
+the tagline again, this time passed from one traveller to the next.
+
+![Istanbul comic post](../assets/social/istanbul-comic-post.png)
+
+### The Image
+
+[`ssot/assets/social/istanbul-comic-post.png`](../assets/social/istanbul-comic-post.png),
+`1080x1350` (4:5). It was generated at 4:5 from the start, so unlike
+[The Street Food Comic Post](#the-street-food-comic-post) it needs no gutters.
+Leela is drawn from
+[Implementation - Brand Characters](brand-characters.md#leela). Deniz is new
+and has no reference sheet yet: short black curly hair, round glasses, a
+mustard-yellow hoodie and a green crossbody bag.
+
+**Two parts were replaced by hand after generation**, because the generator
+kept drifting on them:
+
+- The logo in panel three's phone header is the real `logo.svg`, recoloured
+  white with dark lines the way the app header shows it.
+- The tribe in the last panel is cut from the street food comic's last panel.
+  The generator repeated some headwear, left others out and drew human faces
+  instead of cookies.
+
+As with the first comic, the phones are illustrated. The red rating pins match
+the app's single-Bite markers; the map style does not match the app.
+
+### Draft Caption And Alt Text
+
+A draft for whoever publishes it, not a posted text:
+
+```text
+Your friend already ate here 🐟
+Leela's Istanbul Bites, straight from a Tokyo hostel to the Galata Bridge.
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #streetfood #istanbul
+```
+
+```text
+A six-panel comic. In a Tokyo hostel, a traveller with a blue backpack shows her friend the BiteTribe app with her rated Bites in Istanbul. Later the friend stands on the Galata Bridge, opens the map, finds a five-star balık ekmek, buys it from a fish stall at Eminönü, and photographs and rates it five stars. The last panel shows both Bites beside the BiteTribe logo and its characters, with the line Find it. Try it. Share it.
+```
+
+Publish with the steps in
+[Published 25 September 2026](#published-25-september-2026): crop `Original`,
+no filter, and share to Threads.
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done

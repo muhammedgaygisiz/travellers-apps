@@ -1,27 +1,91 @@
 <div class="ion-page">
   <ion-content class="ion-padding">
-    <div class="container">
-      <div class="ion-text-center logo-text-container">
-        <img src="assets/icons/logo.svg" alt="BiteTribe Logo" class="logo" />
-        <span class="company-name">BiteTribe</span>
-        <span class="tagline">{{ 'find-it-try-it-share-it' | transloco }}</span>
+    @if (native()) {
+      <div class="container">
+        <div class="ion-text-center logo-text-container">
+          <img src="assets/icons/logo.svg" alt="BiteTribe Logo" class="logo" />
+          <span class="company-name">BiteTribe</span>
+          <span class="tagline">{{
+            'find-it-try-it-share-it' | transloco
+          }}</span>
+        </div>
+
+        <div class="ion-padding-top buttons-container">
+          <ion-button expand="block" routerLink="/login">{{
+            'log-in' | transloco
+          }}</ion-button>
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            routerLink="/registration"
+            class="ion-margin-top"
+            >{{ 'sign-up' | transloco }}</ion-button
+          >
+        </div>
       </div>
+    } @else {
+      <div class="landing" data-testid="start-landing">
+        <div class="landing-copy">
+          <div class="brand">
+            <img src="assets/icons/logo.svg" alt="" class="brand-logo" />
+            <span class="brand-name">BiteTribe</span>
+          </div>
 
-      <div class="ion-padding-top buttons-container">
-        <ion-button expand="block" routerLink="/login">{{
-          'log-in' | transloco
-        }}</ion-button>
+          <h1 class="headline">
+            {{ 'the-dishes-people-near-you-actually-loved' | transloco }}
+          </h1>
+          <p class="value">
+            {{
+              'photos-and-ratings-of-single-dishes-not-whole-restaurants-free'
+                | transloco
+            }}
+          </p>
 
-        <ion-button
-          expand="block"
-          fill="outline"
-          routerLink="/registration"
-          class="ion-margin-top"
-          >{{ 'sign-up' | transloco }}</ion-button
-        >
+          <ul class="benefits">
+            <li>
+              <ion-icon name="location-outline" aria-hidden="true" />
+              {{ 'find-bites-around-you' | transloco }}
+            </li>
+            <li>
+              <ion-icon name="restaurant-outline" aria-hidden="true" />
+              {{ 'know-what-to-order' | transloco }}
+            </li>
+            <li>
+              <ion-icon name="camera-outline" aria-hidden="true" />
+              {{ 'share-your-own-bite' | transloco }}
+            </li>
+          </ul>
+
+          <div class="actions">
+            <ion-button
+              routerLink="/registration"
+              class="sign-up"
+              data-testid="start-sign-up"
+              >{{ 'sign-up-free' | transloco }}</ion-button
+            >
+            <p class="log-in">
+              {{ 'already-a-member' | transloco }}
+              <a routerLink="/login" data-testid="start-log-in">{{
+                'log-in' | transloco
+              }}</a>
+            </p>
+          </div>
+        </div>
+
+        <div class="landing-aside">
+          <img
+            src="assets/start/bites-around-you.jpg"
+            [alt]="
+              'a-map-of-bites-around-you-in-the-bite-tribe-app' | transloco
+            "
+            class="preview"
+            width="576"
+            height="720"
+          />
+          <bt-store-links />
+        </div>
       </div>
-
-      <bt-store-links />
-    </div>
+    }
   </ion-content>
 </div>

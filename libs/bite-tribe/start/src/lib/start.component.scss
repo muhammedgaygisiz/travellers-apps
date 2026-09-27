@@ -1,3 +1,8 @@
+// Wide enough for two columns without squeezing the headline. Between 600px
+// and this width the page is still one column, with the store links already
+// drawn as QR codes (STORE_BADGE_MAX_WIDTH_PX in bite-tribe/store-links).
+$two-columns-min-width: 768px;
+
 :host {
   ion-content {
     .container {
@@ -36,6 +41,123 @@
           color: var(--ion-color-secondary);
           font-size: 1rem;
           text-align: left;
+        }
+      }
+    }
+
+    .landing {
+      max-width: 420px;
+      margin: 24px auto 20px;
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+
+        .brand-logo {
+          width: 40px;
+          height: 40px;
+        }
+
+        .brand-name {
+          font-size: 1.5rem;
+          font-weight: bold;
+        }
+      }
+
+      .headline {
+        margin: 0 0 0.5rem;
+        font-size: 1.75rem;
+        font-weight: bold;
+        line-height: 1.25;
+      }
+
+      .value {
+        margin: 0 0 1.25rem;
+        color: var(--ion-color-medium);
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .benefits {
+        margin: 0 0 1.5rem;
+        padding: 0;
+        list-style: none;
+
+        li {
+          display: flex;
+          align-items: center;
+          gap: 0.625rem;
+          padding: 0.25rem 0;
+          font-size: 1rem;
+
+          ion-icon {
+            flex-shrink: 0;
+            color: var(--ion-color-primary);
+            font-size: 1.25rem;
+          }
+        }
+      }
+
+      .actions {
+        .sign-up {
+          width: 100%;
+          margin: 0;
+        }
+
+        .log-in {
+          margin: 0.75rem 0 0;
+          color: var(--ion-color-medium);
+          text-align: center;
+
+          a {
+            color: var(--ion-color-primary);
+          }
+        }
+      }
+
+      // A picture of the app beside the pitch. On a phone it would push the
+      // store links a screen further down, and the visitor is already holding
+      // the device the app runs on, so the badges say enough.
+      .preview {
+        display: none;
+      }
+
+      @media (min-width: $two-columns-min-width) {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        gap: 3rem;
+        align-items: center;
+        max-width: 960px;
+        margin-top: 48px;
+
+        .headline {
+          font-size: 2.5rem;
+        }
+
+        .actions {
+          display: flex;
+          align-items: center;
+          gap: 1.25rem;
+
+          .sign-up {
+            width: auto;
+          }
+
+          .log-in {
+            margin: 0;
+          }
+        }
+
+        .preview {
+          display: block;
+          width: 100%;
+          max-width: 300px;
+          height: auto;
+          margin: 0 auto;
+          border: 1px solid var(--ion-color-light-shade);
+          border-radius: 24px;
         }
       }
     }

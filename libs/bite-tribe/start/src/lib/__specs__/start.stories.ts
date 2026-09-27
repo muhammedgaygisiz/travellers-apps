@@ -21,4 +21,14 @@ export default {
 };
 
 type Story = StoryObj<StartComponent>;
+
+/** The web start page, which is what a browser renders (issue #1706). */
 export const Primary: Story = {};
+
+/**
+ * The iOS and Android start page, unchanged by issue #1706. A browser never
+ * reaches it on its own, so the story sets the platform input.
+ */
+export const Native: Story = {
+  args: { native: true },
+};

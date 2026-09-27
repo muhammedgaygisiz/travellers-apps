@@ -11,6 +11,12 @@
         </div>
 
         <div class="ion-padding-top buttons-container">
+          <ng-container [ngTemplateOutlet]="providerButtons" />
+
+          <p class="divider">
+            <span>{{ 'or-with-your-email' | transloco }}</span>
+          </p>
+
           <ion-button expand="block" routerLink="/login">{{
             'log-in' | transloco
           }}</ion-button>
@@ -64,6 +70,13 @@
               data-testid="start-sign-up"
               >{{ 'sign-up-free' | transloco }}</ion-button
             >
+
+            <p class="divider">
+              <span>{{ 'or' | transloco }}</span>
+            </p>
+
+            <ng-container [ngTemplateOutlet]="providerButtons" />
+
             <p class="log-in">
               {{ 'already-a-member' | transloco }}
               <a routerLink="/login" data-testid="start-log-in">{{
@@ -89,3 +102,32 @@
     }
   </ion-content>
 </div>
+
+<!-- One tap signs in or creates the account, as on the login page (#1714). -->
+<ng-template #providerButtons>
+  <div class="providers">
+    @for (provider of providers(); track provider) {
+      <ion-button
+        expand="block"
+        fill="outline"
+        [disabled]="pending()"
+        (click)="signInWith(provider)"
+        [attr.data-testid]="'start-' + provider"
+      >
+        <ion-icon slot="start" [name]="'logo-' + provider" aria-hidden="true" />
+        {{
+          (provider === 'google'
+            ? 'continue-with-google'
+            : 'continue-with-apple'
+          ) | transloco
+        }}
+      </ion-button>
+    }
+  </div>
+
+  @if (signInFailed()) {
+    <ion-text color="danger" class="provider-error" data-testid="start-error">{{
+      'something-went-wrong-please-try-again' | transloco
+    }}</ion-text>
+  }
+</ng-template>

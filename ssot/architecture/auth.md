@@ -531,6 +531,14 @@ the same way registration does rather than inventing a second pattern.
   can be queued between the click and the flag turning on.
 - A new sign-in clears the previous failure, so a retry is not shown spinning
   underneath a stale error. The failure itself still surfaces exactly as before.
+- **The start page is a second place provider sign-in starts** (issue
+  [#1714]). It offers "Continue with Google" and "Continue with Apple" on every
+  platform and calls the same `StoreService` methods as the login page, so it
+  gets the same pending lock and the same routing afterwards: `/start` is an
+  auth entry page. Its error line shows `loginFailed` only for a sign-in the
+  page itself started, because the flag is global and a rejection left over
+  from `/login` was not caused by anything on the start page. On iOS Apple
+  comes first, on Android and the web Google does.
 - **A provider sign-in that fails says so, and only a dismissal is silent**
   (issue [#1622]). Every Google or Apple rejection reports `loginFailed` - the
   same state and the same message a wrong password produces - and is logged
@@ -628,3 +636,4 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657
 [#1622]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1622
+[#1714]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1714

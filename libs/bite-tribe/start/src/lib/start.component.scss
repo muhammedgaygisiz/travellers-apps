@@ -7,7 +7,9 @@ $two-columns-min-width: 768px;
   ion-content {
     .container {
       max-width: 300px;
-      margin: 160px auto 20px;
+      // Tighter than before issue #1714: the provider buttons and the divider
+      // have to fit above Log In and Sign Up on a 667pt-tall iPhone SE.
+      margin: 96px auto 20px;
 
       .logo-text-container {
         display: grid;
@@ -17,7 +19,7 @@ $two-columns-min-width: 768px;
         column-gap: 1rem;
         row-gap: 0.25rem;
 
-        margin-bottom: 120px;
+        margin-bottom: 64px;
 
         .logo {
           grid-row: 1 / span 2;
@@ -42,6 +44,45 @@ $two-columns-min-width: 768px;
           font-size: 1rem;
           text-align: left;
         }
+      }
+    }
+
+    .providers {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      ion-button {
+        margin: 0;
+      }
+    }
+
+    // Log In and Sign Up keep Ionic's default side margin in the native
+    // layout, so the provider buttons take it too and the four line up.
+    .container .providers ion-button {
+      margin-inline: 2px;
+    }
+
+    .provider-error {
+      display: block;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    // A rule either side of a short label: "or", "or with your email".
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      color: var(--ion-color-medium);
+      font-size: 0.875rem;
+
+      &::before,
+      &::after {
+        content: '';
+        flex: 1;
+        border-top: 1px solid var(--ion-color-light-shade);
       }
     }
 
@@ -136,17 +177,13 @@ $two-columns-min-width: 768px;
           font-size: 2.5rem;
         }
 
+        // One column of equal buttons rather than the full column width, so
+        // "Sign up free" and the providers read as one group of choices.
         .actions {
-          display: flex;
-          align-items: center;
-          gap: 1.25rem;
-
-          .sign-up {
-            width: auto;
-          }
+          max-width: 320px;
 
           .log-in {
-            margin: 0;
+            text-align: left;
           }
         }
 

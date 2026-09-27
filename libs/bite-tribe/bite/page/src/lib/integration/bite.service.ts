@@ -4,6 +4,7 @@ import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import type { Bite, Geopoint } from 'model';
 import type { BiteFormValue } from '../components/page/bite.page';
 import { biteSourceOf, withDraftProvenance } from './bite-provenance';
+import { withAddressInvalidatedIfMoved } from './bite-address';
 import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
@@ -147,7 +148,12 @@ export class BiteService {
   }
 
   submitEditedBite(editedBite: BiteFormValue): void {
-    void this.dataAccess.submitEditedBite(editedBite as unknown as Bite);
+    const bite = withAddressInvalidatedIfMoved(
+      editedBite as unknown as Bite,
+      this.biteValue(),
+    );
+
+    void this.dataAccess.submitEditedBite(bite);
     this.location.back();
   }
 

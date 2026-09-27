@@ -86,13 +86,13 @@ Current model fields:
 
 Required by product intent, but optional or not strictly enforced in the shared TypeScript model today:
 
-| Field             | Current name in code              | Description                                                                        |
-| ----------------- | --------------------------------- | ---------------------------------------------------------------------------------- |
-| Creator           | `userId`                          | User who created the Bite. It is set when the Bite is created.                     |
-| Created timestamp | `createdAt`, `createdAtTimestamp` | Created during Bite creation for display, sorting, and queries.                    |
-| Currency          | `currency`                        | Original currency of the entered price.                                            |
-| Rating            | `rating`                          | Optional user evaluation signal today, but important for content quality.          |
-| Address status    | `addressStatus`                   | New Bites start as `pending`; backend geocoding marks them `resolved` or `failed`. |
+| Field             | Current name in code              | Description                                                                                                                               |
+| ----------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Creator           | `userId`                          | User who created the Bite. It is set when the Bite is created.                                                                            |
+| Created timestamp | `createdAt`, `createdAtTimestamp` | Created during Bite creation for display, sorting, and queries.                                                                           |
+| Currency          | `currency`                        | Original currency of the entered price.                                                                                                   |
+| Rating            | `rating`                          | Optional user evaluation signal today, but important for content quality.                                                                 |
+| Address status    | `addressStatus`                   | New Bites start as `pending`; backend geocoding marks them `resolved` or `failed`. An edit that moves the Bite sets it back to `pending`. |
 
 ## Optional Data
 
@@ -176,8 +176,10 @@ Edited, deleted, or referenced by surrounding journeys
 Current implementation notes:
 
 - The app creates the Bite document id locally before image upload so the image can reference the Bite id.
-- `geohash` is derived from the Bite position at creation.
-- New Bite documents are written with `addressStatus = pending`; `enrichBiteAddressOnCreate` reverse-geocodes the Bite position asynchronously and writes `city`, `region`, `country`, `countryCode`, `formatted`, and a final address status.
+- `geohash` is derived from the Bite position at creation by the app, so an offline Bite is queryable at once, and again by `enrichBiteAddressOnWrite` whenever the position changes.
+- New Bite documents are written with `addressStatus = pending`; `enrichBiteAddressOnWrite` reverse-geocodes the Bite position asynchronously and writes `city`, `region`, `country`, `countryCode`, `formatted`, `geohash`, and a final address status.
+- The address is derived from the position alone, so it follows the position rather than the restaurant: an edit that moves the Bite - picking a restaurant elsewhere moves it - derives the address again, and an edit that keeps the position leaves it alone. The edit form clears the old address and sets `addressStatus = pending` when it saves a moved Bite, so the Bite shows no place rather than the one it left until the new address lands. Fields the new result lacks are deleted, and a failed geocode clears the old address instead of keeping it. The author's `countryCodes` follow the move: the new country is added (and celebrated when it is a first) and the old one dropped once no other Bite of theirs is there.
+- Until the trigger watched updates, an edit that moved a Bite kept the city, country and geohash of the place it was first posted at, so it stayed in the old place's location and country searches. No backfill was run for those Bites: the trigger compares the stored `geohash` with the position, so each one is re-derived on its next write.
 - Older Bite documents without address enrichment are migrated through the business migrations backfill path, which calls `backfillBiteAddress` for the selected Bite.
 - Enriched city data powers `searchBitesByCity`.
 - During Bite creation, `getCurrencyByPosition` can resolve the selected position to a country currency and prefill the form currency; the user's preferred currency remains the fallback.
@@ -281,7 +283,7 @@ searchBitesByCity
 searchNearbyPlaces
 getCurrencyByPosition
 setBiteImagePathOnUpload
-enrichBiteAddressOnCreate
+enrichBiteAddressOnWrite
 backfillBiteAddress
 notifyFollowersOnNewBite
 notifyOnNewCountryBadge

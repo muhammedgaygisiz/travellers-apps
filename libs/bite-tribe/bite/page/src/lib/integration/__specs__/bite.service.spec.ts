@@ -18,6 +18,7 @@ const Mock = {
   setEditingBite: jest.fn(),
   clearCachedBite: jest.fn(),
   cachedBite: jest.fn(),
+  biteValue: jest.fn(),
   getCurrencyByPosition: jest.fn(),
   currency: (): string => 'EUR',
 };
@@ -157,6 +158,46 @@ describe('BiteService', () => {
       service.submitEditedBite(editedBite);
 
       expect(Mock.back).toHaveBeenCalled();
+    });
+
+    it('clears the old city and country when the edit moves the Bite', () => {
+      Mock.biteValue.mockReturnValue({
+        id: '123',
+        position: { latitude: 49.0665, longitude: 18.9219 },
+        city: 'Martin',
+        countryCode: 'SK',
+      });
+      const editedBite = {
+        id: '123',
+        place: 'Karak Budapest Restaurant',
+        position: { latitude: 47.4979, longitude: 19.0402 },
+      };
+
+      service.submitEditedBite(editedBite);
+
+      expect(Mock.submitEditedBite).toHaveBeenCalledWith({
+        ...editedBite,
+        city: null,
+        region: null,
+        country: null,
+        countryCode: null,
+        formatted: null,
+        addressStatus: 'pending',
+      });
+    });
+
+    it('leaves the address alone when the edit keeps the position', () => {
+      const position = { latitude: 49.0665, longitude: 18.9219 };
+      Mock.biteValue.mockReturnValue({ id: '123', position, city: 'Martin' });
+      const editedBite = {
+        id: '123',
+        name: 'Goulash',
+        position: { ...position },
+      };
+
+      service.submitEditedBite(editedBite);
+
+      expect(Mock.submitEditedBite).toHaveBeenCalledWith(editedBite);
     });
   });
 

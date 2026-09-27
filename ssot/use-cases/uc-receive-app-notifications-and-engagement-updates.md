@@ -265,7 +265,7 @@ Relevant.
 - `sendDailyLeaderboardNotification`
 - `sendNewVersionNotification`, guarded by `requireAdmin` and triggered from its own
   surface in the admin app
-- `notifyOnNewCountryBadge`, awarded from `enrichBiteAddressOnCreate`
+- `notifyOnNewCountryBadge`, awarded from `enrichBiteAddressOnWrite`
 - `handleSharedLinkToBite`
 - `loadWeeklyBites`
 - `sendLocalizedNotification` and the notification catalog in

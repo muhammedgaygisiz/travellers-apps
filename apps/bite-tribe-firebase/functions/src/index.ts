@@ -17,8 +17,8 @@ export { sendNewVersionNotification } from './functions/notifications/send-new-v
 export { setBiteImagePathOnUpload } from './functions/bites/set-bite-image-path-on-upload';
 export {
   backfillBiteAddress,
-  enrichBiteAddressOnCreate,
-} from './functions/bites/enrich-bite-address-on-create';
+  enrichBiteAddressOnWrite,
+} from './functions/bites/enrich-bite-address-on-write';
 export { searchUsers } from './functions/users/search-users';
 export { searchBites } from './functions/bites/search-bites';
 export { deleteBiteAsOperator } from './functions/bites/delete-bite-as-operator';

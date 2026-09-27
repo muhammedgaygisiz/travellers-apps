@@ -8,6 +8,7 @@ export type Bite = {
     latitude?: unknown;
     longitude?: unknown;
   };
+  geohash?: string;
   city?: string;
   region?: string;
   country?: string;

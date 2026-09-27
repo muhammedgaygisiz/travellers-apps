@@ -29,13 +29,22 @@
 -- days past the cohort, so `--days=7` can only ever mature its oldest cohort.
 -- Run it over `--days=30` or more to read D7 properly, and note that the
 -- export itself starts on 31 August 2026 - nothing earlier exists to cohort.
+--
+-- ## Crawlers are not cohort members
+--
+-- A web arrival from a data-centre town is a link-preview crawler (issue
+-- #1709; the list lives in `crawlers.config.mjs`). A crawler never comes
+-- back, so leaving it in would report a retention rate over people and bots,
+-- read lower than the people alone. It is dropped from the cohort here; the
+-- activation funnel reports how many were dropped.
 WITH activity AS (
   SELECT
     user_pseudo_id,
     platform,
     event_name,
     event_timestamp,
-    PARSE_DATE('%Y%m%d', event_date) AS event_day
+    PARSE_DATE('%Y%m%d', event_date) AS event_day,
+    geo.city AS city
   FROM ${EVENTS_TABLE}
   WHERE _TABLE_SUFFIX BETWEEN @start_date AND @end_date
 ),
@@ -58,13 +67,25 @@ cohort AS (
       user_pseudo_id,
       event_day AS cohort_day,
       platform,
+      platform = 'WEB' AND IFNULL(city IN (
+        'Prineville',
+        'Lulea',
+        'Forest City',
+        'Altoona',
+        'Fort Worth',
+        'Gretna',
+        'Dublin',
+        'Boardman',
+        'Council Bluffs',
+        'Flint Hill'
+      ), FALSE) AS is_crawler,
       ROW_NUMBER() OVER (
         PARTITION BY user_pseudo_id ORDER BY event_timestamp
       ) AS seq
     FROM activity
     WHERE event_name IN ('first_open', 'first_visit')
   )
-  WHERE seq = 1
+  WHERE seq = 1 AND NOT is_crawler
 ),
 -- Any event at all counts as a return. A person who opened the app and read
 -- one Bite came back, and holding retention to a deliberate action would

@@ -473,10 +473,19 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   | Crash-free users            | Launch monitoring | `app_exception` users vs all users  |
   | Unhandled errors            | Launch monitoring | `exception` count                   |
   | Top unhandled errors        | Launch monitoring | `exception` by `description`        |
-  | App Check throttle          | Launch monitoring | `app_check_throttled` count         |
+  | App Check throttle          | Launch monitoring | `app_check_throttled`, people only  |
+  | App Check throttle crawlers | Launch monitoring | `app_check_throttled`, crawlers     |
   | Crash traces and non-fatals | Launch monitoring | Crashlytics console                 |
 
   Keep the dashboard scoped to launch signals; resist adding vanity metrics.
+
+  The App Check throttle is two rows since [issue 1709](https://github.com/muhammedgaygisiz/travellers-apps/issues/1709). Meta's
+  link-preview crawlers open every link posted to Instagram or Facebook, fail
+  reCAPTCHA, and land in the throttle. Counted together with people, they made
+  App Check look like it was locking people out. The alert stays on the people
+  row. A crawler is web traffic from a data-centre town; the towns, and why
+  the rule is the town rather than the App Check block, are in
+  `tools/analytics/crawlers.config.mjs`.
 
   Two of these are not tiles and cannot become ones. D1/D7 retention and the
   activation funnel are populations followed over time rather than totals for a

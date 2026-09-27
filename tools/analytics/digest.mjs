@@ -177,6 +177,14 @@ function cohortMarkdown(cohorts, days) {
     );
   }
   lines.push('');
+  if (funnel.total.crawlerArrivals > 0) {
+    lines.push(
+      `<sub>Left out: ${funnel.total.crawlerArrivals} web arrivals from ` +
+        'data-centre towns, which are link-preview crawlers rather than ' +
+        'people. The towns are listed in `tools/analytics/crawlers.config.mjs`.</sub>',
+    );
+    lines.push('');
+  }
   lines.push(
     '<sub>The youngest cohorts have had hours rather than days to convert, ' +
       'so the window total understates a rate the same cohorts will reach. ' +

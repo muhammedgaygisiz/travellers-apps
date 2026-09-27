@@ -8,6 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DATA_CENTRE_CITIES } from './crawlers.config.mjs';
 import { DASHBOARD_TILES } from './dashboard.config.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -128,6 +129,35 @@ function surfaceFilter(surface) {
 }
 
 /**
+ * GA4 dimension filter matching link-preview crawler traffic: the web platform
+ * from a data-centre town (issue #1709). `crawlersFilter('only')` keeps just
+ * that traffic and `crawlersFilter('exclude')` keeps everything else. The
+ * fingerprint and why it is the city are in `crawlers.config.mjs`.
+ */
+function crawlersFilter(mode) {
+  const crawler = {
+    andGroup: {
+      expressions: [
+        {
+          filter: {
+            fieldName: 'platform',
+            stringFilter: { matchType: 'EXACT', value: 'web' },
+          },
+        },
+        {
+          filter: {
+            fieldName: 'city',
+            inListFilter: { values: DATA_CENTRE_CITIES },
+          },
+        },
+      ],
+    },
+  };
+
+  return mode === 'only' ? crawler : { notExpression: crawler };
+}
+
+/**
  * The filters a request needs, as one expression.
  *
  * Returns the single filter unwrapped and `undefined` for none, so a tile that
@@ -203,7 +233,11 @@ export function buildRequest(tile, propertyId, dateRange) {
 
   // eventCount
   request.metrics = [{ name: 'eventCount' }];
-  request.dimensionFilter = allOf([eventNameFilter(tile.events), surface]);
+  request.dimensionFilter = allOf([
+    eventNameFilter(tile.events),
+    surface,
+    tile.crawlers ? crawlersFilter(tile.crawlers) : undefined,
+  ]);
   return request;
 }
 

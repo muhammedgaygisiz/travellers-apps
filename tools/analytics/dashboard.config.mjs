@@ -51,6 +51,10 @@
  *           every event-name tile already names one app's events. Absent means
  *           the whole property, which is what every tile meant before the
  *           business app started reporting to it.
+ * @property {'exclude'|'only'} [crawlers]
+ *           Leave out, or keep only, link-preview crawler traffic: the web
+ *           platform from a data-centre town listed in `crawlers.config.mjs`
+ *           (issue #1709). Only `eventCount` tiles take it. Absent means both.
  * @property {'%'} [unit]         display unit; percentages format and compare
  *                                in percentage points
  * @property {string} [source]    human description for `console` tiles
@@ -179,13 +183,28 @@ export const DASHBOARD_TILES = [
   // nobody was watching. Any count here is worth looking at: the state is meant
   // to be rare, and the tile exists to say how rare rather than to let it be
   // inferred.
+  //
+  // Split in two by issue #1709. Link-preview crawlers fail reCAPTCHA, so every
+  // Instagram post put a handful of them in the throttle, and one count made
+  // App Check look like it was locking people out. People carry the alert;
+  // the crawler count is there so the split can be checked, and alerts on
+  // nothing.
   {
     id: 'app-check-throttled',
     title: 'Clients in the App Check throttle',
     category: 'Launch monitoring',
     type: 'eventCount',
     events: ['app_check_throttled'],
+    crawlers: 'exclude',
     expect: { maxRisePct: 0 },
+  },
+  {
+    id: 'app-check-throttled-crawlers',
+    title: 'Crawlers in the App Check throttle',
+    category: 'Launch monitoring',
+    type: 'eventCount',
+    events: ['app_check_throttled'],
+    crawlers: 'only',
   },
   {
     id: 'crash-detail',

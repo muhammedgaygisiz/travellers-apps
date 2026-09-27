@@ -31,13 +31,23 @@
 -- A later step is only counted from the arrival onward (`event_timestamp >=
 -- arrived_at`). Without it, a returning user whose app reinstalled would bring
 -- their entire history into a cohort they joined yesterday.
+--
+-- ## Crawlers are not arrivals
+--
+-- A web arrival from a data-centre town is a link-preview crawler, not a
+-- person (issue #1709; the fingerprint and its limits are in
+-- `crawlers.config.mjs`, which `analytics-events.spec.ts` keeps this list in
+-- step with). They are left out of `arrived` and every step, and counted in
+-- `crawler_arrivals` instead, so the web conversion rate is a rate over people
+-- and the number removed stays visible.
 WITH funnel_events AS (
   SELECT
     user_pseudo_id,
     platform,
     event_name,
     event_timestamp,
-    PARSE_DATE('%Y%m%d', event_date) AS event_day
+    PARSE_DATE('%Y%m%d', event_date) AS event_day,
+    geo.city AS city
   FROM ${EVENTS_TABLE}
   WHERE _TABLE_SUFFIX BETWEEN @start_date AND @end_date
     AND event_name IN (
@@ -58,13 +68,25 @@ window_bounds AS (
 -- The arrival itself, and the platform it happened on. A person who opens the
 -- app and later the website belongs to the surface that brought them in.
 arrivals AS (
-  SELECT user_pseudo_id, cohort_day, platform, arrived_at
+  SELECT user_pseudo_id, cohort_day, platform, arrived_at, is_crawler
   FROM (
     SELECT
       user_pseudo_id,
       event_day AS cohort_day,
       platform,
       event_timestamp AS arrived_at,
+      platform = 'WEB' AND IFNULL(city IN (
+        'Prineville',
+        'Lulea',
+        'Forest City',
+        'Altoona',
+        'Fort Worth',
+        'Gretna',
+        'Dublin',
+        'Boardman',
+        'Council Bluffs',
+        'Flint Hill'
+      ), FALSE) AS is_crawler,
       ROW_NUMBER() OVER (
         PARTITION BY user_pseudo_id ORDER BY event_timestamp
       ) AS seq
@@ -78,6 +100,7 @@ per_user AS (
     a.cohort_day,
     a.platform,
     a.user_pseudo_id,
+    ANY_VALUE(a.is_crawler) AS is_crawler,
     LOGICAL_OR(
       e.event_name = 'onboarding_assistant_started'
       AND e.event_timestamp >= a.arrived_at
@@ -105,23 +128,40 @@ SELECT
   (SELECT last_day FROM window_bounds) AS data_through,
   DATE_DIFF((SELECT last_day FROM window_bounds), cohort_day, DAY)
     AS days_observed,
-  COUNT(*) AS arrived,
-  COUNTIF(started_onboarding) AS onboarding_started,
-  COUNTIF(completed_onboarding) AS onboarding_completed,
-  COUNTIF(signed_up) AS signed_up,
-  COUNTIF(published_bite) AS first_bite,
+  COUNTIF(NOT is_crawler) AS arrived,
+  COUNTIF(NOT is_crawler AND started_onboarding) AS onboarding_started,
+  COUNTIF(NOT is_crawler AND completed_onboarding) AS onboarding_completed,
+  COUNTIF(NOT is_crawler AND signed_up) AS signed_up,
+  COUNTIF(NOT is_crawler AND published_bite) AS first_bite,
+  COUNTIF(is_crawler) AS crawler_arrivals,
   -- The end-to-end rate, and then the three places it can be lost. A single
   -- percentage says a funnel is bad; these say where.
-  ROUND(100 * SAFE_DIVIDE(COUNTIF(signed_up), COUNT(*)), 1)
-    AS arrive_to_signup_pct,
-  ROUND(100 * SAFE_DIVIDE(COUNTIF(started_onboarding), COUNT(*)), 1)
-    AS arrive_to_onboarding_pct,
   ROUND(
-    100 * SAFE_DIVIDE(COUNTIF(completed_onboarding), COUNTIF(started_onboarding)),
+    100 * SAFE_DIVIDE(
+      COUNTIF(NOT is_crawler AND signed_up), COUNTIF(NOT is_crawler)
+    ),
+    1
+  ) AS arrive_to_signup_pct,
+  ROUND(
+    100 * SAFE_DIVIDE(
+      COUNTIF(NOT is_crawler AND started_onboarding), COUNTIF(NOT is_crawler)
+    ),
+    1
+  ) AS arrive_to_onboarding_pct,
+  ROUND(
+    100 * SAFE_DIVIDE(
+      COUNTIF(NOT is_crawler AND completed_onboarding),
+      COUNTIF(NOT is_crawler AND started_onboarding)
+    ),
     1
   ) AS onboarding_completion_pct,
-  ROUND(100 * SAFE_DIVIDE(COUNTIF(published_bite), COUNTIF(signed_up)), 1)
-    AS signup_to_bite_pct
+  ROUND(
+    100 * SAFE_DIVIDE(
+      COUNTIF(NOT is_crawler AND published_bite),
+      COUNTIF(NOT is_crawler AND signed_up)
+    ),
+    1
+  ) AS signup_to_bite_pct
 FROM per_user
 GROUP BY cohort_day, platform
 ORDER BY cohort_day DESC, arrived DESC

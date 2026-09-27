@@ -81,6 +81,20 @@ const RETENTION_QUERY = join(
   'retention-cohorts.sql',
 );
 
+const CRAWLERS_CONFIG = join(
+  WORKSPACE,
+  'tools',
+  'analytics',
+  'crawlers.config.mjs',
+);
+
+const DASHBOARD_CONFIG = join(
+  WORKSPACE,
+  'tools',
+  'analytics',
+  'dashboard.config.mjs',
+);
+
 const PROVISION_GA4 = join(
   WORKSPACE,
   'tools',
@@ -148,6 +162,31 @@ const keyEvents = (): string[] => {
   }
 
   return [...block[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
+};
+
+/** The data-centre towns the crawler config declares (issue #1709). */
+const dataCentreCities = (): string[] => {
+  const source = readFileSync(CRAWLERS_CONFIG, 'utf8');
+  const block = /export const DATA_CENTRE_CITIES = \[([\s\S]*?)\];/.exec(
+    source,
+  );
+
+  if (!block) {
+    throw new Error('No DATA_CENTRE_CITIES declaration found');
+  }
+
+  return [...block[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
+};
+
+/** The towns a query treats as crawler traffic, from its `city IN (...)`. */
+const queryCrawlerCities = (sql: string): string[] => {
+  const list = /city IN \(([^)]*)\)/.exec(sql);
+
+  if (!list) {
+    throw new Error('No crawler city list found in the query');
+  }
+
+  return [...list[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
 };
 
 /** The retention horizons the cohort config declares. */
@@ -430,6 +469,58 @@ describe('analytics taxonomy', () => {
       expect(sql).toContain(
         "WHERE event_name IN ('first_open', 'first_visit')",
       );
+    });
+  });
+
+  /**
+   * Issue #1709. SQL cannot import the crawler config, so each query carries
+   * its own copy of the town list. A town added to the config and not to a
+   * query would leave that query counting crawlers as people again.
+   */
+  describe('the crawler filter', () => {
+    it('leaves the same towns out of both cohort queries', () => {
+      const cities = dataCentreCities();
+
+      expect(cities.length).toBeGreaterThan(0);
+      for (const query of [ACTIVATION_QUERY, RETENTION_QUERY]) {
+        const sql = readFileSync(query, 'utf8');
+
+        expect(queryCrawlerCities(sql)).toEqual(cities);
+        // Web only: an app arrival is a store install, which a crawler does
+        // not make.
+        expect(sql).toContain("platform = 'WEB' AND IFNULL(city IN (");
+      }
+    });
+
+    it('counts the crawlers it leaves out of the funnel', () => {
+      const sql = readFileSync(ACTIVATION_QUERY, 'utf8');
+
+      expect(sql).toContain('COUNTIF(NOT is_crawler) AS arrived');
+      expect(sql).toContain('COUNTIF(is_crawler) AS crawler_arrivals');
+    });
+
+    it('drops crawlers from the retention cohort', () => {
+      expect(readFileSync(RETENTION_QUERY, 'utf8')).toContain(
+        'WHERE seq = 1 AND NOT is_crawler',
+      );
+    });
+
+    /**
+     * The alert stays on people. Built on the block itself, the split would
+     * define real throttled clients as zero; built on the town, it keeps
+     * the tile able to say that App Check is locking out a person.
+     */
+    it('alerts on people in the App Check throttle and counts crawlers apart', () => {
+      const source = readFileSync(DASHBOARD_CONFIG, 'utf8');
+      const tile = (id: string): string =>
+        new RegExp(`id: '${id}',[\\s\\S]*?\\n {2}\\}`).exec(source)?.[0] ?? '';
+
+      expect(tile('app-check-throttled')).toContain("crawlers: 'exclude'");
+      expect(tile('app-check-throttled')).toContain('expect:');
+      expect(tile('app-check-throttled-crawlers')).toContain(
+        "crawlers: 'only'",
+      );
+      expect(tile('app-check-throttled-crawlers')).not.toContain('expect:');
     });
   });
 });

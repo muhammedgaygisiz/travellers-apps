@@ -44,13 +44,22 @@ export interface FollowUpPicks {
 export interface FollowUpConfig {
   biteIds: string[];
   userIds: string[];
+  /**
+   * Accounts that get a copy of the mail after every run, whether or not
+   * anybody new was due, with the run's counts in the subject. A day without
+   * that copy means the job did not run.
+   */
+  monitorUids: string[];
 }
 
-const toIds = (value: unknown): string[] =>
+/** How many monitor copies one run sends, at most. */
+export const MAX_MONITORS = 5;
+
+const toIds = (value: unknown, max = MAX_PICKS): string[] =>
   Array.isArray(value)
     ? value
         .filter((id): id is string => typeof id === 'string' && id !== '')
-        .slice(0, MAX_PICKS)
+        .slice(0, max)
     : [];
 
 const toText = (value: unknown): string | undefined =>
@@ -70,6 +79,7 @@ export const readFollowUpConfig = async (
   return {
     biteIds: toIds(data?.['biteIds']),
     userIds: toIds(data?.['userIds']),
+    monitorUids: toIds(data?.['monitorUids'], MAX_MONITORS),
   };
 };
 

@@ -13,6 +13,7 @@ import {
 } from './google-workspace-email';
 import { renderFollowUpEmail } from './new-user-follow-up-email';
 import {
+  FollowUpPicks,
   hasPicks,
   NEW_USER_FOLLOW_UPS_COLLECTION,
   picksFor,
@@ -59,6 +60,15 @@ import {
  * The content lives in `config/newUserFollowUp`. A run whose picks resolve to
  * nothing sends nothing and claims nobody, so an account that signed up before
  * the picks were set is not burnt on an empty mail.
+ *
+ * ## The monitor copy
+ *
+ * Every uid in `config/newUserFollowUp.monitorUids` gets the mail after every
+ * run, exactly as a new user sees it and with the run's counts in the subject -
+ * or, on a run whose picks resolved to nothing, a one-line alert instead. It
+ * ignores the claim and the product-mail opt-out, because it is an operator's
+ * check and not a follow-up. A day without it means the job did not run; a
+ * copy that fails to send is logged and never fails the run.
  */
 
 export { NEW_USER_FOLLOW_UPS_COLLECTION };
@@ -81,6 +91,7 @@ export interface FollowUpSummary {
   sent: number;
   skipped: number;
   failed: number;
+  monitored: number;
 }
 
 export type FollowUpEmailSender = (email: RenderedEmail) => Promise<void>;
@@ -113,6 +124,83 @@ const claim = async (
   }
 };
 
+const summaryLine = ({
+  candidates,
+  sent,
+  skipped,
+  failed,
+}: FollowUpSummary): string =>
+  `${sent} sent, ${skipped} skipped, ${failed} failed of ${candidates}`;
+
+/**
+ * Sends the operator copy of this run to every monitor account.
+ *
+ * The subject is English and outside the catalog on purpose: it is read by
+ * whoever runs BiteTribe, not by a user. The body is the real mail in the
+ * monitor's own language, rendered from the full picks, so a broken pick or a
+ * broken template shows up the day it breaks.
+ */
+const sendMonitorCopies = async (
+  db: Firestore,
+  monitorUids: string[],
+  picks: FollowUpPicks,
+  summary: FollowUpSummary,
+  now: Date,
+  sendEmail: FollowUpEmailSender,
+): Promise<void> => {
+  if (monitorUids.length === 0) {
+    return;
+  }
+
+  const { users } = await getAuth().getUsers(
+    monitorUids.map((uid) => ({ uid })),
+  );
+
+  for (const monitor of users) {
+    if (!isReachable(monitor)) {
+      logger.warn('new user follow-up monitor is not reachable', {
+        uid: monitor.uid,
+      });
+      continue;
+    }
+
+    try {
+      const status = summaryLine(summary);
+
+      if (!hasPicks(picks)) {
+        await sendEmail({
+          to: monitor.email,
+          subject: `[Follow-up monitor] No picks resolved - nothing sent`,
+          html: `<p>No pick in <code>config/newUserFollowUp</code> resolved on ${now.toISOString()}, so the run sent nothing and claimed nobody. Check that the Bites still exist and the profiles are public.</p>`,
+        });
+      } else {
+        const [language, unsubscribeToken] = await Promise.all([
+          getUserLanguage(monitor.uid),
+          createOptOutToken(db, monitor.uid, now),
+        ]);
+        const email = renderFollowUpEmail({
+          to: monitor.email,
+          language,
+          picks,
+          unsubscribeToken,
+        });
+
+        await sendEmail({
+          ...email,
+          subject: `[Follow-up monitor] ${status} - ${email.subject}`,
+        });
+      }
+
+      summary.monitored += 1;
+    } catch (error) {
+      logger.warn('new user follow-up monitor copy failed', {
+        uid: monitor.uid,
+        error,
+      });
+    }
+  }
+};
+
 const isReachable = (
   authUser: UserRecord | undefined,
 ): authUser is UserRecord & { email: string } =>
@@ -132,12 +220,22 @@ export const sendNewUserFollowUpsForWindow = async (
     sent: 0,
     skipped: 0,
     failed: 0,
+    monitored: 0,
   };
 
-  const picks = await resolveFollowUpPicks(db, await readFollowUpConfig(db));
+  const config = await readFollowUpConfig(db);
+  const picks = await resolveFollowUpPicks(db, config);
 
   if (!hasPicks(picks)) {
     logger.warn('new user follow-up has no picks to show');
+    await sendMonitorCopies(
+      db,
+      config.monitorUids,
+      picks,
+      summary,
+      now,
+      sendEmail,
+    );
 
     return summary;
   }
@@ -201,6 +299,15 @@ export const sendNewUserFollowUpsForWindow = async (
       }
     }
   }
+
+  await sendMonitorCopies(
+    db,
+    config.monitorUids,
+    picks,
+    summary,
+    now,
+    sendEmail,
+  );
 
   logger.info('new user follow-up run finished', summary);
 

@@ -118,7 +118,13 @@ describe('sendNewUserFollowUpsForWindow', () => {
 
     const summary = await sendNewUserFollowUpsForWindow(NOW, sendEmail);
 
-    expect(summary).toEqual({ candidates: 1, sent: 1, skipped: 0, failed: 0 });
+    expect(summary).toEqual({
+      candidates: 1,
+      sent: 1,
+      skipped: 0,
+      failed: 0,
+      monitored: 0,
+    });
     expect(sendEmail).toHaveBeenCalledTimes(1);
 
     const [email] = sendEmail.mock.calls[0];
@@ -247,5 +253,79 @@ describe('sendNewUserFollowUpsForWindow', () => {
     expect(db.read(`${NEW_USER_FOLLOW_UPS_COLLECTION}/new-1`)).toEqual(
       expect.objectContaining({ status: 'failed' }),
     );
+  });
+
+  describe('monitor copy', () => {
+    const withMonitor = (): void => {
+      db.seed('config/newUserFollowUp', {
+        biteIds: ['bite-1'],
+        userIds: ['creator-1'],
+        monitorUids: ['creator-1'],
+      });
+      anAuthUser({ uid: 'creator-1', email: 'ops@example.com' });
+    };
+
+    it('mails the full picks with the run counts in the subject, every run', async () => {
+      withMonitor();
+      aNewUser({ uid: 'new-1' });
+
+      const summary = await sendNewUserFollowUpsForWindow(NOW, sendEmail);
+
+      expect(summary.monitored).toBe(1);
+      expect(sendEmail).toHaveBeenCalledTimes(2);
+
+      const copy = sendEmail.mock.calls[1][0];
+
+      expect(copy.to).toBe('ops@example.com');
+      expect(copy.subject).toBe(
+        '[Follow-up monitor] 1 sent, 0 skipped, 0 failed of 1 - Dishes and foodies picked for you',
+      );
+      // The monitor is a pick here; the copy still shows what new users see.
+      expect(copy.html).toContain('Leela');
+    });
+
+    it('still arrives when nobody new was due, and claims nothing', async () => {
+      withMonitor();
+
+      await sendNewUserFollowUpsForWindow(NOW, sendEmail);
+      await sendNewUserFollowUpsForWindow(NOW, sendEmail);
+
+      expect(sendEmail).toHaveBeenCalledTimes(2);
+      expect(sendEmail.mock.calls[0][0].subject).toMatch(
+        /^\[Follow-up monitor\] 0 sent, 0 skipped, 0 failed of 0 - /,
+      );
+      expect(db.exists(`${NEW_USER_FOLLOW_UPS_COLLECTION}/creator-1`)).toBe(
+        false,
+      );
+    });
+
+    it('alerts instead when no pick resolves', async () => {
+      db.seed('config/newUserFollowUp', {
+        biteIds: ['bite-gone'],
+        monitorUids: ['creator-1'],
+      });
+      anAuthUser({ uid: 'creator-1', email: 'ops@example.com' });
+
+      await sendNewUserFollowUpsForWindow(NOW, sendEmail);
+
+      expect(sendEmail).toHaveBeenCalledTimes(1);
+      expect(sendEmail.mock.calls[0][0].subject).toBe(
+        '[Follow-up monitor] No picks resolved - nothing sent',
+      );
+    });
+
+    it('never fails the run when the copy cannot be sent', async () => {
+      withMonitor();
+      aNewUser({ uid: 'new-1' });
+      sendEmail
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('gmail down'));
+
+      const summary = await sendNewUserFollowUpsForWindow(NOW, sendEmail);
+
+      expect(summary).toEqual(
+        expect.objectContaining({ sent: 1, failed: 0, monitored: 0 }),
+      );
+    });
   });
 });

@@ -103,6 +103,15 @@ brought them back.
   public, and a recipient is never suggested to themselves. While no pick
   resolves, a run sends nothing and claims nobody, so accounts are not burnt on
   an empty mail - there is no separate on switch.
+- **Monitor copy.** Every uid in `config/newUserFollowUp.monitorUids` (at most
+  five) gets the mail after every run, rendered from the full picks, with the
+  run's counts in an English subject such as
+  `[Follow-up monitor] 2 sent, 1 skipped, 0 failed of 3 - ...`. A run whose
+  picks resolve to nothing sends the monitor an alert instead. The copy ignores
+  the claim and the product-mail opt-out, and a failed copy never fails the
+  run. A day without it means the job did not run. The uids live in the config
+  document rather than in code, so the operator can change them without a
+  deploy.
 - **Opt-out.** The footer and an RFC 8058 `List-Unsubscribe` header both point at
   `https://bitetribe.app/unsubscribe/{token}`, rewritten to
   `handleEmailUnsubscribe`. The token is random and maps to the account in

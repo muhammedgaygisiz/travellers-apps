@@ -490,8 +490,8 @@ describe('deleteBiteAsOperator restaurant candidates', () => {
 });
 
 describe('deleteBiteAsOperator bucket lists and BiteTrails', () => {
-  // `loadBitesByBucketlist` resolves each id and its filter cannot drop a
-  // missing one, so a stale id renders as a nameless, imageless Bite.
+  // `loadBitesByBucketlist` hides an id with no document behind it (#1717),
+  // but the id itself stays in `biteIds` until something removes it.
   it('drops the Bite from every bucket list holding it', async () => {
     seedBite();
     db.seed('bucketlists/list-1', {

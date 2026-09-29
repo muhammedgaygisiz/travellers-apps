@@ -269,11 +269,11 @@ export const removeBiteFromRestaurantCandidates = async (
  * having tried it out.
  *
  * Not named by issue #1475, and removed anyway, because a stale id in a bucket
- * list does not disappear on its own: `loadBitesByBucketlist` resolves each id
- * and its filter cannot drop a missing one — the loader returns an object
- * carrying the id and nothing else — so the entry renders as a nameless,
- * imageless Bite rather than being absent. The epic's criterion is that nothing
- * downstream is left referring to a deleted Bite.
+ * list does not disappear on its own. `loadBitesByBucketlist` has dropped an id
+ * with no document behind it since issue #1717, so the entry no longer renders
+ * as a blank card - but the id stays in `biteIds` and is read again on every
+ * open. The epic's criterion is that nothing downstream is left referring to a
+ * deleted Bite, and hiding a reference is not removing it.
  */
 export const removeBiteFromBucketlists = async (
   db: Firestore,

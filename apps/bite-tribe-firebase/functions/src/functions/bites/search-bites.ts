@@ -7,6 +7,7 @@ import {
   toSearchBite,
 } from '../shared/utils/search-bite';
 import { requireMember } from '../shared/roles';
+import { isBiteVisibleTo } from '../shared/utils/bite-listability';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -33,9 +34,16 @@ export const searchBites = onAppCheck<SearchBitesRequest>(async (request) => {
 
   const bitesSnapshot = await getFirestore().collection('bites').get();
 
+  // Visibility is part of the match rather than a pass after it, so the cap
+  // counts only Bites the caller can see (GitHub issue #1717).
   return bitesSnapshot.docs
     .filter((doc) => {
       const bite = doc.data();
+
+      if (!isBiteVisibleTo(bite, request.auth.uid)) {
+        return false;
+      }
+
       const name = getString(bite, 'name');
       const tags = getStringArray(bite, 'tags');
 

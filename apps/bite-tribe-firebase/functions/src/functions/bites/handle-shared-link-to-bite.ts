@@ -3,6 +3,7 @@ import { Bite } from '../shared/model/bite';
 import { getFirestore } from 'firebase-admin/firestore';
 import { renderHtml } from '../shared/utils/render-html';
 import { BITE_TRIBE_ORIGIN } from '../shared/utils/bite-tribe-origin';
+import { isListableBite } from '../shared/utils/bite-listability';
 
 const db = getFirestore();
 
@@ -17,12 +18,16 @@ export const handleSharedLinkToBite = onRequest(async (req, res) => {
 
     const biteId = parts[2];
     const snap = await db.doc(`/bites/${biteId}`).get();
-    if (!snap.exists) {
+    const bite = snap.exists ? ((snap.data() ?? {}) as Bite) : undefined;
+
+    // A Bite whose photo never arrived is answered exactly like one that does
+    // not exist: no title, no image, nothing that says an id is real. The link
+    // has no signed-in reader, so there is no creator to exempt
+    // (GitHub issue #1717).
+    if (!bite || !isListableBite(bite)) {
       res.status(404).send('Not Found');
       return;
     }
-
-    const bite = (snap.data() ?? {}) as Bite;
 
     // ---- SANITIZE: expose only fields that are ok to be public ----
     const name = bite.name ?? 'A Bite';

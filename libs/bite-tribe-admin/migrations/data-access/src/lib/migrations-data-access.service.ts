@@ -103,6 +103,17 @@ export interface BackfillMenuItemIdsResult extends CollectionMigrationResult {
   extras: number;
 }
 
+export interface BackfillBiteImageStatusResult extends CollectionMigrationResult {
+  /** Every Bite the migration looked at. */
+  inspected: number;
+  /** Bites without a status that were found to have a photo in Storage. */
+  uploaded: number;
+  /** Bites without a status that have no photo anywhere in Storage. */
+  failed: number;
+  /** Bites that already carried a status and were left alone. */
+  skipped: number;
+}
+
 export interface RecomputeMenuItemStatsResult extends CollectionMigrationResult {
   /** Dishes that now carry an aggregate. */
   dishes: number;
@@ -312,6 +323,24 @@ export class MigrationsDataAccessService {
       void,
       BackfillMenuItemIdsResult
     >({ name: 'backfillMenuItemIdsCallable' });
+
+    return result.data;
+  }
+
+  /**
+   * Gives every Bite written before the upload states existed the
+   * `imageStatus` the listing rule reads (issue #1717): `uploaded` where
+   * Storage holds its photo, `failed` where it holds none.
+   *
+   * Has to run before that rule is live, or every such Bite disappears from
+   * everybody but its poster. No resource is reloaded: nothing on this page
+   * reads `imageStatus`.
+   */
+  async backfillBiteImageStatus(): Promise<BackfillBiteImageStatusResult> {
+    const result = await FirebaseFunctions.callByName<
+      void,
+      BackfillBiteImageStatusResult
+    >({ name: 'backfillBiteImageStatusCallable' });
 
     return result.data;
   }

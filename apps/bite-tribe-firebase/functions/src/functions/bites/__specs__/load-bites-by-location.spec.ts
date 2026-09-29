@@ -1,4 +1,7 @@
-import { attachCallerLikes } from '../load-bites-by-location';
+import {
+  attachCallerLikes,
+  selectNearbyBites,
+} from '../load-bites-by-location';
 import { getFirestore } from 'firebase-admin/firestore';
 
 jest.mock('firebase-admin/firestore', () => ({
@@ -98,5 +101,53 @@ describe('attachCallerLikes', () => {
     const bites = [{ id: 'bite1', likes: [] }];
 
     expect(await attachCallerLikes(bites, userId)).toEqual(bites);
+  });
+});
+
+describe('selectNearbyBites', () => {
+  const center: [number, number] = [47.3769, 8.5417];
+  const here = { latitude: 47.3769, longitude: 8.5417 };
+  const farAway = { latitude: 46.948, longitude: 7.4474 };
+
+  const bite = (
+    id: string,
+    overrides: Record<string, unknown> = {},
+  ): { id: string; likes: unknown[]; [field: string]: unknown } => ({
+    id,
+    likes: [],
+    userId: 'poster',
+    imageStatus: 'uploaded',
+    position: here,
+    ...overrides,
+  });
+
+  const feed = [
+    bite('listed'),
+    bite('failed', { imageStatus: 'failed' }),
+    bite('pending', { imageStatus: 'pending' }),
+    bite('legacy', { imageStatus: undefined }),
+    bite('far', { position: farAway }),
+  ];
+
+  it('offers somebody else only the listable Bites in the radius', () => {
+    expect(
+      selectNearbyBites(feed, center, 'viewer').map((item) => item.id),
+    ).toEqual(['listed']);
+  });
+
+  /**
+   * The poster's own Bites stay in their feed whatever their upload state, so
+   * the retry on the card is still reachable (GitHub issues #1168 and #1717).
+   */
+  it("keeps the caller's own Bites whatever their upload state", () => {
+    expect(
+      selectNearbyBites(feed, center, 'poster').map((item) => item.id),
+    ).toEqual(['listed', 'failed', 'pending', 'legacy']);
+  });
+
+  it('still drops a Bite outside the radius for its creator', () => {
+    expect(
+      selectNearbyBites([bite('far', { position: farAway })], center, 'poster'),
+    ).toEqual([]);
   });
 });

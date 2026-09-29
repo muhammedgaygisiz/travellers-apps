@@ -251,7 +251,10 @@ export class BiteApiService {
 
   async loadBitesByBucketlist(bucketlist: Bucketlist): Promise<Bite[]> {
     try {
-      return await loadBitesByBucketlist(bucketlist);
+      return await loadBitesByBucketlist(
+        bucketlist,
+        this.authService.getUser()?.uid,
+      );
     } catch (e) {
       console.error(`Failed loading bites for bucketlist ${bucketlist.id}:`, e);
       this.errorHandler.handleError(e);

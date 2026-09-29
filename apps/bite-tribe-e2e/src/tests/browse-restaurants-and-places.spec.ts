@@ -33,6 +33,7 @@ async function seedRestaurantBite(
   await seedFirestoreDocument(page, `bites/${fixture.id}`, {
     id: { stringValue: fixture.id },
     name: { stringValue: fixture.name },
+    imageStatus: { stringValue: 'uploaded' },
     place: { stringValue: fixture.place },
     description: { stringValue: `A Bite served by ${fixture.place}.` },
     price: { stringValue: '12.00' },

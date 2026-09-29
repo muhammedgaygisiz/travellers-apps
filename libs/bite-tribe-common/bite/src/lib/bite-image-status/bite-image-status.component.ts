@@ -147,7 +147,14 @@ export class BiteImageStatusComponent {
     return this.isRetryable() && this.isOffline();
   });
 
-  private readonly isOwnBite = computed((): boolean => {
+  /**
+   * Also decides who is told a failed Bite is visible to them alone: only the
+   * poster can see it at all, and only the poster can fix it by uploading the
+   * photo. Everyone else keeps the plain failure line. This tile is the one
+   * place the app says a Bite is unlisted, on every surface that shows one
+   * (GitHub issue #1717).
+   */
+  protected readonly isOwnBite = computed((): boolean => {
     const userId = this.userId();
 
     return !!userId && this.bite().userId === userId;

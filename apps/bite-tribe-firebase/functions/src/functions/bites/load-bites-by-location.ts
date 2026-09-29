@@ -7,6 +7,7 @@ import { HttpsError } from 'firebase-functions/https';
 import { distanceBetween, geohashQueryBounds, Geopoint } from 'geofire-common';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
+import { isBiteVisibleTo } from '../shared/utils/bite-listability';
 
 const BITE_COLLECTION = 'bites';
 const LIKE_SUBCOLLECTION = 'likes';
@@ -29,7 +30,7 @@ interface LoadBitesByLocationRequest {
   longitude?: unknown;
 }
 
-interface LocationBite extends DocumentData {
+export interface LocationBite extends DocumentData {
   id: string;
   likes: unknown[];
 }
@@ -78,6 +79,41 @@ const getPosition = (
 
   return undefined;
 };
+
+/**
+ * The Bites of one geohash read that belong in the caller's feed: inside the
+ * radius, and visible to them.
+ *
+ * Visibility is settled here, in the pass that already drops what the geohash
+ * bounds over-read, rather than in the query - see `bite-listability.ts`. It
+ * also runs before {@link attachCallerLikes}, so a hidden Bite costs no like
+ * read. A Bite whose photo never arrived reaches its own poster and nobody
+ * else (GitHub issue #1717).
+ */
+export const selectNearbyBites = (
+  bites: LocationBite[],
+  center: Geopoint,
+  viewerUid: string,
+): LocationBite[] =>
+  bites.filter((bite) => {
+    if (!isBiteVisibleTo(bite as DocumentData, viewerUid)) {
+      return false;
+    }
+
+    const position = getPosition(bite);
+
+    if (!position) {
+      return false;
+    }
+
+    const distanceInKm = distanceBetween(
+      [position.latitude, position.longitude],
+      center,
+    );
+    const distanceInM = distanceInKm * 1000;
+
+    return distanceInM <= DEFAULT_SEARCH_RADIUS_IN_M;
+  });
 
 /**
  * Attaches the caller's own like to each Bite.
@@ -164,25 +200,13 @@ export const loadBitesByLocation = onAppCheck<LoadBitesByLocationRequest>(
     const bounds = geohashQueryBounds(center, DEFAULT_SEARCH_RADIUS_IN_M);
     const snapshots = await Promise.all(bounds.map(querySingleBound));
 
-    const bitesInRadius = snapshots
-      .flat()
-      .map(toLocationBite)
-      .filter((bite) => {
-        const position = getPosition(bite);
-
-        if (!position) {
-          return false;
-        }
-
-        const distanceInKm = distanceBetween(
-          [position.latitude, position.longitude],
-          center,
-        );
-        const distanceInM = distanceInKm * 1000;
-
-        return distanceInM <= DEFAULT_SEARCH_RADIUS_IN_M;
-      });
-
-    return attachCallerLikes(bitesInRadius, request.auth.uid);
+    return attachCallerLikes(
+      selectNearbyBites(
+        snapshots.flat().map(toLocationBite),
+        center,
+        request.auth.uid,
+      ),
+      request.auth.uid,
+    );
   },
 );

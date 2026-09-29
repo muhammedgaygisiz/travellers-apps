@@ -41,6 +41,7 @@ async function seedTrailBite(
   await seedFirestoreDocument(page, `bites/${fixture.id}`, {
     id: { stringValue: fixture.id },
     name: { stringValue: fixture.name },
+    imageStatus: { stringValue: 'uploaded' },
     place: { stringValue: fixture.place },
     price: { stringValue: '12.00' },
     currency: { stringValue: 'EUR' },

@@ -46,6 +46,23 @@ A good Bite makes one concrete dish understandable enough that another person ca
   (`/s/bite/*`). Users, bucket lists, restaurants, and BiteTrails are not
   shareable. See [issue-1190](../records/issue-1190.md).
 - A Bite should have an image because the image is a core trust signal.
+- **A Bite is listable once its photo is uploaded**, and only then: exactly
+  when `imageStatus` is `uploaded`, which `setBiteImagePathOnUpload` writes
+  from a finalized Storage object. `pending`, `failed` and an absent status are
+  not listable. A non-listable Bite is shown to its creator and to nobody else:
+  not in the nearby feed, the three searches, the weekly page or a bucket list,
+  and its share link answers exactly like a Bite id that does not exist.
+  Its creator still finds it on every surface, with the failed-upload tile
+  telling them it is visible only to them and offering the retry. It cannot be
+  added to a bucket list. See issue [#1717].
+- **Listability is a visibility rule, not a domain invariant.** A Bite without
+  its photo is still a valid Bite: creation, storage, `biteCount`, the
+  leaderboard and deletion ignore it, and a Bite already in a bucket list keeps
+  its place in `biteIds` and is hidden rather than removed. It is not a
+  moderation control either - it hides a poster's own incomplete Bite and
+  offers the fix. The rule is `isBiteVisibleTo` in
+  `libs/bite-tribe-common/model/src/lib/bite-listability.ts`; the callables
+  carry a copy that `bite-listability-parity.spec.ts` keeps in step.
 - Deleting a Bite currently deletes the Firestore document and attempts to delete its stored image.
 - Deleting a Bite must decrement the creator's `biteCount` aggregate because Bite creation increments it.
 - A Bite can be deleted by its creator, and by a BiteTribe operator. The
@@ -66,9 +83,11 @@ A good Bite makes one concrete dish understandable enough that another person ca
   candidate's `evidence.biteCount` is rewritten to match what is left, because it
   is the length of that array and an operator deciding whether to verify reads
   it. Removing the reference from a bucket list or a BiteTrail is part of the
-  contract rather than a nicety: `loadBitesByBucketlist` resolves each id and its
-  filter cannot drop a missing one, so a stale id renders as a nameless,
-  imageless Bite instead of being absent.
+  contract rather than a nicety. Since issue [#1717] `loadBitesByBucketlist`
+  drops an id with no document behind it, so a stale id no longer renders as a
+  nameless, imageless Bite - but it stays in `biteIds` and is resolved again on
+  every open, and hiding a reference is not removing it. The creator's own
+  delete still drops the id from no bucket list; that is a separate defect.
 - Historical references after deletion are a product question, not a fully established current rule.
 
 ## Required Data
@@ -168,6 +187,8 @@ Place or restaurant selected
 |
 Saved
 |
+Photo uploaded, so listable
+|
 Visible in feed, map, search, profiles, restaurants, bucket lists, or BiteTrails
 |
 Edited, deleted, or referenced by surrounding journeys
@@ -186,7 +207,8 @@ Current implementation notes:
 - During Bite creation, the user selects the Bite place through the restaurant selector before saving. The selector can use nearby verified restaurants, unverified restaurants, nearby Google Places, or the explicit custom-place fallback.
 - The Bite page warns users when the entered price looks suspiciously high.
 - Uploaded Bite images are stored below `images/bites/{biteId}/{filename}`.
-- `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized.
+- `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized, and writes `imageStatus = uploaded` - the only write that makes a Bite listable. A `pending` Bite becomes listable with no client action once it lands.
+- Bites written before the upload states of issue [#1168] have no `imageStatus`. The admin `bite-image-status` collection migration gives each one `uploaded` where Storage holds an object under `images/bites/{biteId}/` or at the path `imagePath` names, and `failed` otherwise. It has to run before the listing rule is deployed, or every such Bite disappears for everybody but its poster. See [UC - Run Operational Migrations](../use-cases/uc-run-operational-migrations.md).
 - A photo upload that fails is offered back to the poster as a retry, but only when the device reports a connection. Offline the failed tile says so instead, because a retry started with no network cannot upload and only earns the poster another thirty-second stall before the same failure. `BiteImageStatusComponent` owns that rule for every surface that shows a Bite photo. See [issue-1390](../records/issue-1390.md).
 - The current delete flow removes the Bite document and attempts to remove the image file.
 - The operator delete removes children and references first and the Bite document **last**. Every read path resolves through the document, so while it exists the Bite is still findable and a failed run is a retry; the other way round, a failure halfway would leave an image, a set of likes and a pile of reviews with no document left to reach them from. `deleteOwnAccount` orders its cascade the same way and for the same reason.
@@ -204,7 +226,7 @@ Current product expectation:
   - Delete own Bite.
   - Like Bite.
   - Review Bite.
-  - Save Bite to bucket list.
+  - Save a listable Bite to a bucket list. A Bite whose photo has not arrived is refused, with the reason.
   - Discover Bites through feed, map, search, restaurant, profile, bucket list, and BiteTrail flows.
 - Admin
   - Delete any Bite, through `deleteBiteAsOperator` with a reason. This is the one modeled operator capability over a Bite.
@@ -363,7 +385,9 @@ images/bites/{biteId}/{filename}
 
 [#1165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1165
 [#1391]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1391
+[#1168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1168
 [#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475
+[#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717
 [#1112]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1112
 [#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
 [#1114]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1114

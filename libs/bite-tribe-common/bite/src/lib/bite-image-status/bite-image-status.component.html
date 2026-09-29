@@ -17,6 +17,15 @@
         {{ 'image-upload-failed' | transloco }}
       </ion-text>
 
+      @if (isOwnBite()) {
+        <ion-text
+          class="image-state-text smalltext"
+          data-testid="bite-not-visible-until-upload"
+        >
+          {{ 'bite-not-visible-until-upload' | transloco }}
+        </ion-text>
+      }
+
       @if (canRetry()) {
         <ion-button
           fill="outline"

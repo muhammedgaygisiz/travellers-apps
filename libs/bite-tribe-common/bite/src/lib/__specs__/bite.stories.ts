@@ -335,6 +335,10 @@ export const FailedUpload: Story = {
 /**
  * The same failure seen by the poster, who is offered a retry. The photo lives
  * on their device, so nobody else is shown the button.
+ *
+ * The poster alone is also told the Bite is visible only to them until the
+ * photo arrives - the line between the failure and the retry, which
+ * {@link FailedUpload} shows nobody else (GitHub issue #1717).
  */
 export const FailedUploadForOwner: Story = {
   args: {

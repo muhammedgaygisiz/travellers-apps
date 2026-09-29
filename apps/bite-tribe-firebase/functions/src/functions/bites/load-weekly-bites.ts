@@ -1,5 +1,6 @@
 import {
   DocumentData,
+  Query,
   QueryDocumentSnapshot,
   getFirestore,
 } from 'firebase-admin/firestore';
@@ -7,6 +8,7 @@ import { logger } from 'firebase-functions';
 import { onAppCheck } from '../shared/callable-options';
 import { getPreviousWeekBounds } from '../shared/utils/week-bounds';
 import { requireMember } from '../shared/roles';
+import { isBiteVisibleTo } from '../shared/utils/bite-listability';
 
 const BITE_COLLECTION = 'bites';
 const MAX_RESULTS = 200;
@@ -67,6 +69,49 @@ export const resolveWeekBounds = (
 };
 
 /**
+ * The week's Bites the caller may see, newest first, up to {@link MAX_RESULTS}.
+ *
+ * Read a page at a time rather than with one `limit(MAX_RESULTS)`, because the
+ * visibility filter has to run before the cap: a single capped read would
+ * return fewer than the page holds whenever a hidden Bite fell inside it, and
+ * an index on `imageStatus` could never admit the caller's own hidden Bites
+ * (GitHub issue #1717). Stops at the first short page, so a week with nothing
+ * hidden costs the one read it always did.
+ */
+export const loadVisibleWeeklyBites = async (
+  query: Query,
+  viewerUid: string,
+): Promise<{ bites: WeeklyBite[]; read: number }> => {
+  const bites: WeeklyBite[] = [];
+  let read = 0;
+  let cursor: QueryDocumentSnapshot | undefined;
+
+  while (bites.length < MAX_RESULTS) {
+    const page = cursor ? query.startAfter(cursor) : query;
+    const snapshot = await page.limit(MAX_RESULTS).get();
+
+    read += snapshot.size;
+
+    for (const doc of snapshot.docs) {
+      if (
+        bites.length < MAX_RESULTS &&
+        isBiteVisibleTo(doc.data(), viewerUid)
+      ) {
+        bites.push(toWeeklyBite(doc));
+      }
+    }
+
+    if (snapshot.size < MAX_RESULTS) {
+      break;
+    }
+
+    cursor = snapshot.docs[snapshot.docs.length - 1];
+  }
+
+  return { bites, read };
+};
+
+/**
  * Callable that returns the bites created within one calendar week, newest
  * first. It backs the weekly bites page the summary notification opens.
  */
@@ -85,25 +130,29 @@ export const loadWeeklyBites = onAppCheck<LoadWeeklyBitesRequest>(
 
     const { start, end } = resolveWeekBounds(request.data ?? {});
 
-    const snapshot = await getFirestore()
+    const query = getFirestore()
       .collection(BITE_COLLECTION)
       .where('createdAtTimestamp', '>=', start)
       .where('createdAtTimestamp', '<=', end)
-      .orderBy('createdAtTimestamp', 'desc')
-      .limit(MAX_RESULTS)
-      .get();
+      .orderBy('createdAtTimestamp', 'desc');
+
+    const { bites, read } = await loadVisibleWeeklyBites(
+      query,
+      request.auth.uid,
+    );
 
     logger.info('loadWeeklyBites: query finished', {
       uid: request.auth.uid,
       weekStart: start,
       weekEnd: end,
-      returnedBites: snapshot.size,
+      readBites: read,
+      returnedBites: bites.length,
     });
 
     return {
       weekStart: start,
       weekEnd: end,
-      bites: snapshot.docs.map(toWeeklyBite),
+      bites,
     } satisfies WeeklyBitesResponse;
   },
 );

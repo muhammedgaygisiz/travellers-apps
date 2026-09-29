@@ -89,6 +89,7 @@ test.describe('Account and legal flows', () => {
     await seedFirestoreDocument(page, `bites/${biteId}`, {
       userId: { stringValue: uid },
       name: { stringValue: biteName },
+      imageStatus: { stringValue: 'uploaded' },
       place: { stringValue: 'Ramen Bar' },
       price: { doubleValue: 12.5 },
     });

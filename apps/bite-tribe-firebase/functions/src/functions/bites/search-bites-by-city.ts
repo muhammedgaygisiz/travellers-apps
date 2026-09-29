@@ -11,6 +11,7 @@ import { onAppCheck } from '../shared/callable-options';
 import { geocodeAddress, Position } from '../shared/utils/geocode';
 import { SearchBite, toSearchBite } from '../shared/utils/search-bite';
 import { requireMember } from '../shared/roles';
+import { isBiteVisibleTo } from '../shared/utils/bite-listability';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -61,8 +62,16 @@ const getBitePosition = (data: DocumentData): Position | undefined => {
   return undefined;
 };
 
+/**
+ * The Bites near one position that the caller may see, up to the cap.
+ *
+ * Visibility is checked in the same filter as the radius, before the cap, so a
+ * city with hidden Bites still fills the page with visible ones (GitHub issue
+ * #1717).
+ */
 export const loadBitesNearPosition = async (
   center: Position,
+  viewerUid: string,
 ): Promise<SearchBite[]> => {
   const centerPoint: Geopoint = [center.latitude, center.longitude];
   const bounds = geohashQueryBounds(centerPoint, DEFAULT_SEARCH_RADIUS_IN_M);
@@ -71,7 +80,13 @@ export const loadBitesNearPosition = async (
   return snapshots
     .flat()
     .filter((doc) => {
-      const position = getBitePosition(doc.data());
+      const data = doc.data();
+
+      if (!isBiteVisibleTo(data, viewerUid)) {
+        return false;
+      }
+
+      const position = getBitePosition(data);
 
       if (!position) {
         return false;
@@ -120,7 +135,7 @@ export const searchBitesByCity = onAppCheck<SearchBitesByCityRequest>(
         return [];
       }
 
-      return await loadBitesNearPosition(position);
+      return await loadBitesNearPosition(position, request.auth.uid);
     } catch (error) {
       logger.warn('searchBitesByCity: failed to load bites for city', {
         error: error instanceof Error ? error.message : String(error),

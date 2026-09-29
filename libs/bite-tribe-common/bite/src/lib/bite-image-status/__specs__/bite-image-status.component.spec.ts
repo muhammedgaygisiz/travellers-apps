@@ -165,6 +165,69 @@ describe(BiteImageStatusComponent.name, () => {
     });
   });
 
+  /**
+   * The only place the app tells a poster their Bite is unlisted (GitHub issue
+   * #1717): the failure line, then this, then the retry.
+   */
+  describe('visibility notice', () => {
+    const queryNotice = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="bite-not-visible-until-upload"]',
+      );
+
+    const show = (overrides: Partial<Bite>, viewer: string): void => {
+      componentRef.setInput('bite', bite({ userId: 'user1', ...overrides }));
+      componentRef.setInput('userId', viewer);
+      componentRef.setInput('enableRetry', true);
+      fixture.detectChanges();
+    };
+
+    it('should tell the poster a failed Bite is visible only to them', () => {
+      show({ imageStatus: 'failed' }, 'user1');
+
+      expect(queryNotice()).toBeTruthy();
+    });
+
+    it('should render the notice between the failure line and the retry', () => {
+      show({ imageStatus: 'failed' }, 'user1');
+
+      const children = Array.from(queryFailed()?.children ?? []);
+      const notice = children.indexOf(queryNotice() as Element);
+
+      expect(notice).toBeGreaterThan(
+        children.findIndex((child) => child.tagName === 'ION-TEXT'),
+      );
+      expect(children.indexOf(queryRetryButton() as Element)).toBeGreaterThan(
+        notice,
+      );
+    });
+
+    it('should tell the poster about an abandoned upload that reads as failed', () => {
+      show(
+        {
+          imageStatus: 'pending',
+          createdAtTimestamp: Date.now() - STALE_PENDING_UPLOAD_MS,
+        },
+        'user1',
+      );
+
+      expect(queryNotice()).toBeTruthy();
+    });
+
+    it('should keep the plain failure line for everyone else', () => {
+      show({ imageStatus: 'failed' }, 'someone-else');
+
+      expect(queryFailed()).toBeTruthy();
+      expect(queryNotice()).toBeNull();
+    });
+
+    it('should say nothing about visibility while the upload is pending', () => {
+      show({ imageStatus: 'pending' }, 'user1');
+
+      expect(queryNotice()).toBeNull();
+    });
+  });
+
   describe('retry', () => {
     const setUpFailedOwnBite = (): void => {
       componentRef.setInput(

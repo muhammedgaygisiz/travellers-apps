@@ -320,11 +320,14 @@ describe(BiteApiService.name, () => {
   });
 
   describe('loadBitesByBucketlist', () => {
-    it('should call loadBitesByBucketlist with the bucketlist', async () => {
+    it('should call loadBitesByBucketlist with the bucketlist and the viewer', async () => {
       const mockedBucketlist = { id: 'bucketlist-123' } as Bucketlist;
       await service.loadBitesByBucketlist(mockedBucketlist);
 
-      expect(loadBitesByBucketlist).toHaveBeenCalledWith(mockedBucketlist);
+      expect(loadBitesByBucketlist).toHaveBeenCalledWith(
+        mockedBucketlist,
+        mockedUser.uid,
+      );
     });
 
     describe('given an error', () => {

@@ -22,8 +22,9 @@ const POSITION = { latitude: 48.147154, longitude: 11.576124 };
 
 /** Copy from apps/bite-tribe/src/assets/i18n/en.json — asserted verbatim. */
 const PENDING_POSTER_TEXT = 'Uploading photo — keep the app open';
-const PENDING_VIEWER_TEXT = 'Loading photo…';
 const FAILED_TEXT = 'Photo couldn’t be uploaded';
+const NOT_VISIBLE_TEXT =
+  'Until the photo is uploaded, this Bite is only visible to you.';
 
 /**
  * Keep in sync with STALE_PENDING_UPLOAD_MS in
@@ -152,7 +153,11 @@ test.describe('Bite photo upload status', () => {
     );
   });
 
-  test('tells only the poster to keep the app open while a photo uploads', async ({
+  /**
+   * Only the poster is shown a Bite whose photo has not arrived, so the neutral
+   * viewer message is no longer reachable from the feed (GitHub issue #1717).
+   */
+  test('shows a pending upload to its poster only, and tells them to keep the app open', async ({
     page,
   }) => {
     const runId = Date.now();
@@ -183,17 +188,19 @@ test.describe('Bite photo upload status', () => {
     await expect(
       home.imageStatus(ownBite).getByTestId('bite-image-pending-text'),
     ).toHaveText(PENDING_POSTER_TEXT);
-    await expect(
-      home.imageStatus(otherBite).getByTestId('bite-image-pending-text'),
-    ).toHaveText(PENDING_VIEWER_TEXT);
+    await expect(home.biteCard(otherBite)).toHaveCount(0);
 
-    // An upload in flight is not a failure, so nobody is offered a retry yet.
+    // An upload in flight is not a failure, so nobody is offered a retry yet,
+    // and nothing claims the Bite is hidden before it is known to have failed.
     await expect(
       home.imageStatus(ownBite).getByTestId('bite-image-retry'),
     ).toHaveCount(0);
+    await expect(
+      home.imageStatus(ownBite).getByTestId('bite-not-visible-until-upload'),
+    ).toHaveCount(0);
   });
 
-  test('reports a failed upload to every viewer and offers the retry only to the poster', async ({
+  test('shows a failed upload to its poster only, with the visibility notice and the retry', async ({
     page,
   }) => {
     const runId = Date.now();
@@ -229,15 +236,13 @@ test.describe('Bite photo upload status', () => {
     ).toContainText(FAILED_TEXT);
     await expect(home.biteImage(ownBite)).toHaveCount(0);
     await expect(
+      home.imageStatus(ownBite).getByTestId('bite-not-visible-until-upload'),
+    ).toHaveText(NOT_VISIBLE_TEXT);
+    await expect(
       home.imageStatus(ownBite).getByTestId('bite-image-retry'),
     ).toBeVisible();
 
-    await expect(
-      home.imageStatus(otherBite).getByTestId('bite-image-failed'),
-    ).toContainText(FAILED_TEXT);
-    await expect(
-      home.imageStatus(otherBite).getByTestId('bite-image-retry'),
-    ).toHaveCount(0);
+    await expect(home.biteCard(otherBite)).toHaveCount(0);
   });
 
   test('treats a long-abandoned pending upload as failed without rewriting the document', async ({

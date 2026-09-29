@@ -229,6 +229,24 @@ describe(MigrationsService.name, () => {
       });
     });
 
+    it('should call the Bite image status backfill for its own name', async () => {
+      const result = { inspected: 3, uploaded: 1, failed: 1, skipped: 1 };
+      const backfillBiteImageStatus = jest.fn().mockResolvedValue(result);
+      const service = configure(
+        aDataAccess({
+          backfillBiteImageStatus,
+        } as Partial<MigrationsDataAccessService>),
+      );
+
+      await service.runCollectionMigration('bite-image-status');
+
+      expect(backfillBiteImageStatus).toHaveBeenCalledTimes(1);
+      expect(service.collectionMigrationState('bite-image-status')).toEqual({
+        status: 'done',
+        result,
+      });
+    });
+
     /**
      * Each migration holds its own state, so one long run does not block or
      * overwrite another - the contract in `UC - Run Operational Migrations`,

@@ -24,6 +24,7 @@ async function seedDiscoverBite(
 ): Promise<void> {
   await seedFirestoreDocument(page, `bites/${fixture.id}`, {
     name: { stringValue: fixture.name },
+    imageStatus: { stringValue: 'uploaded' },
     place: { stringValue: fixture.place },
     description: { stringValue: 'Seeded for the Discover Bites E2E test.' },
     price: { stringValue: '9.50' },

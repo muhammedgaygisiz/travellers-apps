@@ -8,6 +8,7 @@ export { notifyBiteCreatorOnReview } from './functions/notifications/notify-bite
 export { notifyThreadParticipantsOnReviewReply } from './functions/notifications/notify-thread-participants-on-review-reply';
 export { backfillReviewTimestampsCallable } from './functions/reviews/backfill-review-timestamps';
 export { backfillMenuItemIdsCallable } from './functions/menus/backfill-menu-item-ids';
+export { backfillBiteImageStatusCallable } from './functions/bites/backfill-bite-image-status';
 export { notifyUserOnNewFollower } from './functions/notifications/notify-user-on-new-follower';
 export { notifyStaffOnNewTableOrder } from './functions/notifications/notify-staff-on-new-table-order';
 export { handleSharedLinkToBite } from './functions/bites/handle-shared-link-to-bite';

@@ -52,6 +52,7 @@ export const Default: Story = {
       id: 'botanic-breeze',
       image: '',
       imagePath: 'assets/demo/bite-demo.png',
+      imageStatus: 'uploaded',
       name: 'Botanic Breeze',
       rating: 3,
       place: 'Einstein au Jardin',

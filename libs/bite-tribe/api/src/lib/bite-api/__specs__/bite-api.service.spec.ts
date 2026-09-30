@@ -393,29 +393,60 @@ describe(BiteApiService.name, () => {
   });
 
   describe('handleLatestBites', () => {
+    /** The shape the Capacitor listener delivers: `data` is a property. */
+    const snapshot = (
+      id: string,
+      data: Record<string, unknown>,
+    ): { id: string; data: Record<string, unknown> } => ({ id, data });
+
+    const emitted = (): Bite[] => {
+      let bites: Bite[] = [];
+      service.latestBites$.subscribe((value) => (bites = value)).unsubscribe();
+      return bites;
+    };
+
     it('should update _latestBitesChannel$ with bites from snapshots', () => {
-      const mockSnapshot1 = {
-        id: 'bite1',
-        data: () => ({ name: 'Bite 1' }),
-      } as any;
-      const mockSnapshot2 = {
-        id: 'bite2',
-        data: () => ({ name: 'Bite 2' }),
-      } as any;
+      service.handleLatestBites({
+        snapshots: [
+          snapshot('bite1', { name: 'Bite 1', imageStatus: 'uploaded' }),
+          snapshot('bite2', { name: 'Bite 2', imageStatus: 'uploaded' }),
+        ],
+      } as never);
 
-      const mockEvent = {
-        snapshots: [mockSnapshot1, mockSnapshot2],
-      };
+      expect(emitted().map((bite) => [bite.id, bite.name])).toEqual([
+        ['bite1', 'Bite 1'],
+        ['bite2', 'Bite 2'],
+      ]);
+    });
 
-      service.handleLatestBites(mockEvent);
+    /**
+     * The listener reads Firestore directly and the home feed merges it in, so
+     * it must hide what the location callable hides (GitHub issue #1717).
+     */
+    it("should drop another user's Bite whose photo has not arrived", () => {
+      service.handleLatestBites({
+        snapshots: [
+          snapshot('listed', { userId: 'other', imageStatus: 'uploaded' }),
+          snapshot('pending', { userId: 'other', imageStatus: 'pending' }),
+          snapshot('failed', { userId: 'other', imageStatus: 'failed' }),
+          snapshot('legacy', { userId: 'other' }),
+        ],
+      } as never);
 
-      service.latestBites$.subscribe((bites) => {
-        expect(bites.length).toBe(2);
-        expect(bites[0].id).toBe('bite1');
-        expect(bites[0].name).toBe('Bite 1');
-        expect(bites[1].id).toBe('bite2');
-        expect(bites[1].name).toBe('Bite 2');
-      });
+      expect(emitted().map((bite) => bite.id)).toEqual(['listed']);
+    });
+
+    it("should keep the signed-in user's own Bite whatever its upload state", () => {
+      service.handleLatestBites({
+        snapshots: [
+          snapshot('own-failed', {
+            userId: mockedUser.uid,
+            imageStatus: 'failed',
+          }),
+        ],
+      } as never);
+
+      expect(emitted().map((bite) => bite.id)).toEqual(['own-failed']);
     });
 
     it('should update _latestBitesChannel$ with empty array when event is null', () => {

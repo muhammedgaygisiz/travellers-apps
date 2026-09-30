@@ -234,7 +234,7 @@
         </div>
         }
         <div class="ion-text-end ion-display-flex">
-          @if (biteData) {
+          @if (biteData) { @if (canSaveToBucketlist()) {
           <ion-icon
             data-testid="bite-details-bucket-list"
             slot="icon-only"
@@ -244,7 +244,7 @@
             [name]="biteData | getBucketlistsIcon: bucketlists()"
             (click)="showBucketListsSelection($event)"
           />
-          } @else {
+          } } @else {
           <ion-skeleton-text
             class="icon-skeleton ion-margin-start"
             [animated]="true"

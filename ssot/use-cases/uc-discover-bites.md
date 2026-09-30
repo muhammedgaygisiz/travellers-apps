@@ -27,6 +27,7 @@ them.
 - User can filter or search within the feed.
 - An empty feed and an empty search result are two different states and never share their copy. `No bites found. Be the first one.` invites a first Bite and is only correct when there is nothing to show; a search that excluded everything names the term instead and offers to clear it, because the Bites are still there and the next action is to change the search, not to create. See issue [#1331].
 - Nearby Bites can be loaded through backend-assisted location loading.
+- The feed, the three searches and the weekly page offer another user's Bite only once its photo is uploaded. A Bite whose photo is still pending or never arrived reaches its own poster and nobody else, so the feed never carries a card no viewer can judge; the poster keeps it, with the retry and a line saying nobody else can see it. The filter runs before any cap, so a page still fills with Bites the viewer can see. See issue [#1717] and [Bite](../domain/bite.md).
 - `loadBitesByLocation` loads a fixed 15 km radius around the reported position. This radius is the free tier. Loading a position other than the current one, or a radius beyond 15 km, becomes a Pro capability through [epic-1122][#1122]. See [Monetization](../product/monetization.md).
 - When live Bite updates add markers, the map should preserve the user's current pan and zoom after the initial marker fit.
 - Every step of a feed load is bounded in time, and the loading state always resolves into either bites or a named failure. The position read gives up after fifteen seconds and the `loadBitesByLocation` call after twenty, because both sit in front of the Home skeleton: iOS hands the position request to CoreLocation without a timeout of its own, so a device that produced no fix — the state a phone can sit in right after regaining connectivity — kept the feed hidden until the app was force-quit, the case in GitHub issue [#1230].
@@ -67,6 +68,7 @@ onboarding rather than from this flow — see [UC - Guide New Users After Regist
 - Part of [epic-1122][#1122], which specifies loading a position other than the current one and any radius beyond 15 km as a Pro capability. Not built.
 - Issue [#1230] is the CoreLocation timeout defect the bounded position read (15s) and feed load (20s) now guard against. Closed.
 - Issue [#1331] separated the empty-feed and empty-search-result copy. Closed.
+- Issue [#1717] lists only Bites with an uploaded photo to anybody but their poster. Open.
 
 ## Related Domains
 
@@ -85,3 +87,4 @@ onboarding rather than from this flow — see [UC - Guide New Users After Regist
 [#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
 [#1230]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1230
 [#1331]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1331
+[#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717

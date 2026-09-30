@@ -24,6 +24,16 @@ const BiteTribeApiServiceMock = {
   createBucketList: jest.fn(),
   updateBucketlistTriedOutStatus: jest.fn(),
   createBucketListFromBiteTrail: jest.fn(),
+  biteById: jest.fn(),
+};
+
+/** What the save guard reads back for a Bite id. */
+const resolvingBite = (
+  bite: Record<string, unknown> = { imageStatus: 'uploaded' },
+): void => {
+  BiteTribeApiServiceMock.biteById.mockImplementation((id: string) =>
+    of({ id, likes: [], ...bite }),
+  );
 };
 
 const MockedAuthService = {
@@ -146,6 +156,7 @@ describe('BucketListEffect', () => {
     let saveBiteIdToBucketListSpy: SpyInstance;
 
     beforeEach(() => {
+      resolvingBite();
       saveBiteIdToBucketListSpy = jest
         .spyOn(apiService, 'saveBiteIdToBucketList')
         .mockReturnValue(
@@ -175,12 +186,44 @@ describe('BucketListEffect', () => {
 
       expect(saveBiteIdToBucketListSpy).toHaveBeenCalledTimes(1);
     });
+
+    /**
+     * A Bite whose photo never arrived is not appended, and the user is told
+     * why rather than left thinking it saved (GitHub issue #1717).
+     */
+    it.each([
+      ['failed', { imageStatus: 'failed' }],
+      ['pending', { imageStatus: 'pending' }],
+      ['missing', {}],
+    ])('should reject a %s Bite without writing', (_case, bite) => {
+      resolvingBite(bite);
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: BucketlistActions.saveBiteToBucketlist({
+            bucketListId: 'bucketListId',
+            biteId: 'biteId',
+          }),
+        });
+
+        expectObservable(effects.saveBiteIdToBucketListEffect$).toBe('a', {
+          a: BucketlistActions.saveBiteToBucketlistFailed(),
+        });
+      });
+
+      expect(saveBiteIdToBucketListSpy).not.toHaveBeenCalled();
+      expect(mockToastPresent).toHaveBeenCalledWith({
+        messageKey: 'bucket-list-bite-not-listable',
+        outcome: 'failure',
+      });
+    });
   });
 
   describe('createBucketlistAndSaveBiteIdToBucketListEffect$', () => {
     let createBucketListAndSaveBiteIdToBucketListSpy: SpyInstance;
 
     beforeEach(() => {
+      resolvingBite();
       createBucketListAndSaveBiteIdToBucketListSpy = jest
         .spyOn(apiService, 'createBucketListAndSaveBiteIdToBucketList')
         .mockImplementation(
@@ -239,6 +282,33 @@ describe('BucketListEffect', () => {
 
       expect(mockToastPresent).toHaveBeenCalledWith({
         messageKey: 'bucket-list-create-with-bite-failed',
+        outcome: 'failure',
+      });
+    });
+
+    it('should create no list for a Bite that is not listable', () => {
+      resolvingBite({ imageStatus: 'failed' });
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: BucketlistActions.createAndSaveBiteIdToBucketlist({
+            bucketListName: 'bucketListName',
+            biteId: 'biteId',
+          }),
+        });
+
+        expectObservable(
+          effects.createBucketlistAndSaveBiteIdToBucketListEffect$,
+        ).toBe('a', {
+          a: BucketlistActions.createBucketlistAndSaveBiteToItFailed(),
+        });
+      });
+
+      expect(
+        createBucketListAndSaveBiteIdToBucketListSpy,
+      ).not.toHaveBeenCalled();
+      expect(mockToastPresent).toHaveBeenCalledWith({
+        messageKey: 'bucket-list-bite-not-listable',
         outcome: 'failure',
       });
     });

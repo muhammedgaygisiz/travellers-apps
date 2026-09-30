@@ -23,6 +23,7 @@ async function seedOwnBite(
   await seedFirestoreDocument(page, `bites/${id}`, {
     id: { stringValue: id },
     name: { stringValue: name },
+    imageStatus: { stringValue: 'uploaded' },
     place: { stringValue: `Own Tavern ${id}` },
     price: { stringValue: '11.00' },
     currency: { stringValue: 'EUR' },
@@ -59,6 +60,7 @@ test.describe('Like a bite', () => {
     await seedFirestoreDocument(page, `bites/${biteId}`, {
       id: { stringValue: biteId },
       name: { stringValue: biteName },
+      imageStatus: { stringValue: 'uploaded' },
       place: { stringValue: `Like Tavern ${runId}` },
       price: { stringValue: '11.00' },
       currency: { stringValue: 'EUR' },

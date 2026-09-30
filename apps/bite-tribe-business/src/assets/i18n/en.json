@@ -201,6 +201,7 @@
   "uploading-keep-app-open": "Uploading photo — keep the app open",
   "loading-photo": "Loading photo…",
   "image-upload-failed": "Photo couldn’t be uploaded",
+  "bite-not-visible-until-upload": "Until the photo is uploaded, this Bite is only visible to you.",
   "retry-upload": "Retry upload",
   "retry-upload-offline": "You’re offline — reconnect to upload this photo",
   "choose-photo": "Choose a photo",

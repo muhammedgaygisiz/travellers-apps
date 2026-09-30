@@ -31,6 +31,8 @@ coach mark that teaches the swipe to
 - User opens a BiteTrail.
 - User saves the BiteTrail as a Bucket List.
 - The app creates a Bucket List with the BiteTrail's Bites.
+- A Bucket List shows only the Bites its viewer can see. A Bite whose photo never arrived stays in `biteIds` but is shown to its own poster alone - not to the list's owner - and an id whose Bite no longer exists is not rendered at all. A list whose Bites are all hidden shows the empty state. See issue [#1717].
+- A single Bite can be added to a Bucket List only once its photo is uploaded. The save is refused with the reason rather than dropped silently, and the details page does not offer it.
 - User opens the Bucket List and swipes a Bite to tick it off as tried out, or swipes an already ticked Bite to undo it. A first-visit coach mark teaches the gesture.
 - User can rate the BiteTrail through Bucket List-related flows.
 
@@ -78,6 +80,9 @@ Location** under App Functionality is already declared in
 - Pull request [#766] added the `tried out` flow with its bucketlist-scoped metadata, and
   pull request [#757] the one-time BiteTrail rating flow reached from My Bucket Lists.
   Neither names an issue, so the rating flow has no issue behind it in the repository.
+- Issue [#1717] hides a Bite whose photo never arrived from everybody but its poster, bucket
+  lists included, and refuses to add one. The list overview's badge still counts the stored
+  `biteIds`. Open.
 
 ## Related Domains
 
@@ -103,3 +108,4 @@ Location** under App Functionality is already declared in
 [#812]: https://github.com/muhammedgaygisiz/travellers-apps/issues/812
 [#1016]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1016
 [#1162]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1162
+[#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717

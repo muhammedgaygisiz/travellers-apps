@@ -62,13 +62,23 @@ rest of the product reads.
   run. Picking a photo is a local operation, and the upload states now cover a
   transfer that cannot start, so the restriction is gone. See GitHub issue
   [#1229].
-- The image upload has three states on the Bite document, and every viewer sees
-  the card accordingly: `pending` while it uploads, `uploaded` once the storage
-  trigger has the download URL, and `failed` when the upload errored.
+- The image upload has three states on the Bite document: `pending` while it
+  uploads, `uploaded` once the storage trigger has the download URL, and
+  `failed` when the upload errored.
+- Only an `uploaded` Bite is listed to anybody but its poster. Until then the
+  feed, the searches, the weekly page, bucket lists and the share link leave it
+  out for everyone else, and the poster sees it on every surface as usual. See
+  issue [#1717] and [Bite](../domain/bite.md).
 - The `pending` message is addressed to the poster only. Their device is the one
-  holding the transfer, so they are asked to keep the app open; everyone else
-  gets a neutral "loading photo" wait message, because they cannot influence
-  someone else's upload.
+  holding the transfer, so they are asked to keep the app open. A viewer who
+  reaches the Bite some other way - its details page by id - gets a neutral
+  "loading photo" wait message instead, because they cannot influence someone
+  else's upload.
+- On a `failed` Bite the poster is told, between the failure line and the
+  retry, that the Bite is visible only to them until the photo is uploaded. It
+  is the one place the app says a Bite is unlisted, and it rides on
+  `BiteImageStatusComponent`, so the feed card, the details page and the
+  profile all carry it. It never shows while the upload is still `pending`.
 - The posting device gives up on an upload that reports neither progress, nor
   completion, nor an error for thirty seconds, and records `failed`. A transfer
   that loses connectivity mid-flight is silently retried by the Storage SDK for
@@ -167,6 +177,7 @@ each under App Functionality.
 ## Related GitHub Scope
 
 - Issues [#1229] and [#1168] made the photo survive being offline and losing connectivity mid-upload: a photo picked offline now enters the `pending`/`uploaded`/`failed` states instead of being silently dropped, and the client writes `failed` itself once an upload stalls. Closed.
+- Issue [#1717] made the upload state decide who is shown the Bite: only `uploaded` is listed to other people, and the poster of a failed one is told so. Open.
 - Issue [#1233] scoped a prefilled creation draft (from a menu item or a repost) to its own session, and fixed the undefined-vs-empty photo path that lost a menu-derived Bite when it had none. Closed.
 - Issue [#1287] is the Entry Feedback Contract on the Create Bite button - the spinner and header progress bar covering `freshSessionGuard` and the lazy page chunk. Closed.
 - Issues [#1266], [#1306] and [#1289] redesigned the position-source picker: the single text row with an edit action replacing four always-visible buttons, the modal map following the selected candidate (`focusedGeopointId`), and the modal's disabled rows and marker-tap selection. Closed.
@@ -202,3 +213,4 @@ each under App Functionality.
 [#1306]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1306
 [#1394]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1394
 [#1409]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1409
+[#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717

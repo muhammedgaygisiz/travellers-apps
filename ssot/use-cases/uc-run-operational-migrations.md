@@ -4,9 +4,9 @@
 
 **Level:** L1
 Supported today. Every migration runs from its own surface in the admin app behind
-`roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Two collection-wide
-migrations are registered - `review-timestamps` and `menu-item-ids` - alongside the four
-per-Bite migrations and the new version announcement. The display-name claim backfill was
+`roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Four collection-wide
+migrations are registered - `review-timestamps`, `menu-item-ids`, `menu-item-stats` and
+`bite-image-status` - alongside the four per-Bite migrations and the new version announcement. The display-name claim backfill was
 removed rather than carried over, for the reasons below.
 
 ## Goal
@@ -37,6 +37,9 @@ means, and what an operator is shown when a run succeeds or fails.
 - **Menu item ids backfill** gives every stored category, menu item and variant
   the stable id an order line references, and reports how many of each it had
   to fill.
+- **Bite image status backfill** marks every Bite that predates the upload
+  states `uploaded` or `failed` from what Storage holds, and reports how many it
+  inspected, set each way and skipped.
 - **Bite address backfill**, **Restaurant clustering**, **Image migration** and
   **Geohash migration** each act on one Bite the operator picks from a table.
 
@@ -74,7 +77,7 @@ collection itself.
   entry — not another copy of the state handling.
 
 Registered today: `review-timestamps` ([issue-1283](../records/issue-1283.md)), `menu-item-ids`
-(issue [#1099]) and `menu-item-stats` (issue [#1113]).
+(issue [#1099]), `menu-item-stats` (issue [#1113]) and `bite-image-status` (issue [#1717]).
 
 `menu-item-ids` is the second registration, and it is the first evidence that
 the contract above holds: it added a name, a runner, its copy and its dashboard
@@ -84,6 +87,21 @@ knowing what a menu is.
 Its idempotence carries more weight than most. An id that already exists is
 never replaced, because replacing one would move the target of every order line
 already pointing at it - see [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md).
+
+`bite-image-status` is the one registration with an **ordering constraint on
+the deploy**. A Bite is listed to anybody but its poster only once its
+`imageStatus` is `uploaded` (see [Bite](../domain/bite.md)), and Bites written
+before issue [#1168] have no status at all, so the listing rule hides every one
+of them until this has run. It runs before that rule ships. It lists the
+`images/bites/{biteId}/` prefix rather than trusting `imagePath`, because an
+edited Bite leaves an earlier object there under a fresh UUID and a download URL
+can outlive its object, and checks the path `imagePath` names as well, for a
+photo migrated into place from elsewhere. A Bite that already carries any status
+is never touched, which is what makes a second press write nothing, and it
+writes `imageStatus` alone - not `updatedAt`. A Bite whose photo is still inline
+in `image` has no Storage object and is marked `failed`; the per-Bite image
+migration moves such a photo into Storage, and the finalize trigger then marks it
+`uploaded`.
 
 `menu-item-stats` is a **repair rather than a backfill**, and it is the reason a
 migration surface exists at all for an aggregate. A dish's Bite count and rating
@@ -164,9 +182,10 @@ reaches a device is the new version announcement, whose store considerations bel
   backfill surface.
 - `backfillMenuItemIdsCallable`, started from the menu item ids backfill
   surface.
+- `backfillBiteImageStatusCallable`, started from the Bite image status
+  backfill surface.
 - `recomputeMenuItemStatsAsOperator`, started from the menu item Bite stats
-  surface. It is the one callable here that leaves an operator-log entry on both
-  sides of the work - `started` and `succeeded` - because it reads every linked
+  surface. It leaves an operator-log entry on both sides of the work - `started` and `succeeded` - because it reads every linked
   Bite and can time out halfway, and a `started` with no `succeeded` is exactly
   what an audit trail should show.
 
@@ -189,6 +208,8 @@ reaches a device is the new version announcement, whose store considerations bel
   [issue-1283](../records/issue-1283.md).
 - Issue [#1099] added the stable menu-item ids `backfillMenuItemIds` fills in for menus written
   before it, delivered by pull request [#1593]. Closed.
+- Issue [#1717] added `backfillBiteImageStatusCallable`, which has to run before the rule that
+  lists only Bites with an uploaded photo goes live. Open.
 - Issue [#945] added `backfillBiteAddress`, delivered by pull request [#1005]. Closed.
 - Issue [#939] added `clusterRestaurantCandidateForBite`, the restaurant-clustering migration,
   delivered by pull request [#948]. Closed.
@@ -221,9 +242,11 @@ reaches a device is the new version announcement, whose store considerations bel
 [#1005]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1005
 [#1099]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1099
 [#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
+[#1168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1168
 [#1194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1194
 [#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
 [#1471]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1471
 [#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472
 [#1473]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1473
 [#1593]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1593
+[#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717

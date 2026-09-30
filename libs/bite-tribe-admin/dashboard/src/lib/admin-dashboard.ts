@@ -207,6 +207,13 @@ export class AdminDashboard {
       testId: 'admin-tool-menu-item-ids-backfill',
     },
     {
+      titleKey: 'admin-tool-bite-image-status-backfill',
+      descriptionKey: 'admin-tool-bite-image-status-backfill-description',
+      icon: 'images-outline',
+      path: '/bite-image-status-backfill',
+      testId: 'admin-tool-bite-image-status-backfill',
+    },
+    {
       titleKey: 'admin-tool-menu-item-stats-recompute',
       descriptionKey: 'admin-tool-menu-item-stats-recompute-description',
       icon: 'stats-chart-outline',

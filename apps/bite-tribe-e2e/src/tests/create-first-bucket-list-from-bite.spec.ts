@@ -60,6 +60,7 @@ test.describe('Create the first bucket list from a Bite', () => {
 
     await seedFirestoreDocument(page, `bites/${biteId}`, {
       name: { stringValue: biteName },
+      imageStatus: { stringValue: 'uploaded' },
       place: { stringValue: `First List Kitchen ${runId}` },
       price: { stringValue: '12.00' },
       currency: { stringValue: 'EUR' },

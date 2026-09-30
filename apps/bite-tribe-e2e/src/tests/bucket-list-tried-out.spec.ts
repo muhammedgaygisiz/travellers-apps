@@ -21,6 +21,7 @@ test.describe('Tick a Bite off a bucket list', () => {
 
     await seedFirestoreDocument(page, `bites/${biteId}`, {
       name: { stringValue: biteName },
+      imageStatus: { stringValue: 'uploaded' },
       place: { stringValue: `Tick Kitchen ${runId}` },
       price: { stringValue: '10.00' },
       currency: { stringValue: 'EUR' },

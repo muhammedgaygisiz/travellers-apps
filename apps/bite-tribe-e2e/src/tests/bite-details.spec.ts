@@ -72,6 +72,7 @@ test.describe('Inspect Bite details', () => {
 
     await seedFirestoreDocument(page, `bites/${biteId}`, {
       name: { stringValue: biteName },
+      imageStatus: { stringValue: 'uploaded' },
       place: { stringValue: restaurant },
       description: {
         stringValue: 'Hand-folded dumplings with a deeply savory filling.',

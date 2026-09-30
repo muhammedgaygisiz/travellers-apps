@@ -4,6 +4,7 @@ import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { SearchBite, toSearchBite } from '../shared/utils/search-bite';
 import { requireMember } from '../shared/roles';
+import { isBiteVisibleTo } from '../shared/utils/bite-listability';
 
 const BITE_COLLECTION = 'bites';
 const COUNTRY_CODE_FIELD = 'countryCode';
@@ -20,6 +21,11 @@ interface SearchBitesByCountryRequest {
  * ISO 3166-1 alpha-2 vocabulary. The result set is deliberately uncapped for
  * now; paging and result limits are being designed as one concept across all
  * search categories.
+ *
+ * A Bite whose photo never arrived is returned to its poster only (GitHub issue
+ * #1717). The filter runs on the results rather than in the query: an equality
+ * on `imageStatus` would need its own index and could never match the
+ * creator's own Bites.
  */
 export const searchBitesByCountry = onAppCheck<SearchBitesByCountryRequest>(
   async (request): Promise<SearchBite[]> => {
@@ -44,7 +50,9 @@ export const searchBitesByCountry = onAppCheck<SearchBitesByCountryRequest>(
         .where(COUNTRY_CODE_FIELD, '==', countryCode)
         .get();
 
-      return snapshot.docs.map(toSearchBite);
+      return snapshot.docs
+        .filter((doc) => isBiteVisibleTo(doc.data(), request.auth.uid))
+        .map(toSearchBite);
     } catch (error) {
       logger.warn('searchBitesByCountry: failed to load bites for country', {
         countryCode,

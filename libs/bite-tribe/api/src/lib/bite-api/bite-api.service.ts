@@ -7,6 +7,7 @@ import {
   CreateAndUploadImageCallbackParams,
   Geopoint,
   GooglePlace,
+  isBiteVisibleTo,
   PlaceDetails,
   WeekRange,
   WeeklyBites,
@@ -251,7 +252,10 @@ export class BiteApiService {
 
   async loadBitesByBucketlist(bucketlist: Bucketlist): Promise<Bite[]> {
     try {
-      return await loadBitesByBucketlist(bucketlist);
+      return await loadBitesByBucketlist(
+        bucketlist,
+        this.authService.getUser()?.uid,
+      );
     } catch (e) {
       console.error(`Failed loading bites for bucketlist ${bucketlist.id}:`, e);
       this.errorHandler.handleError(e);
@@ -278,10 +282,27 @@ export class BiteApiService {
     );
   }
 
+  /**
+   * The newest Bites the signed-in user may see.
+   *
+   * This listener reads Firestore directly and the home feed merges it with
+   * `loadBitesByLocation`, so it needs the same rule the callable applies: a
+   * Bite whose photo has not arrived reaches its poster and nobody else
+   * (GitHub issue #1717). Being a live snapshot, it re-fires when the finalize
+   * trigger writes `uploaded`, and the Bite then appears with no client action.
+   *
+   * Filtered after the query's `limit`, so the feed can receive fewer than the
+   * number asked for. An equality on `imageStatus` in the query could never
+   * admit the viewer's own hidden Bites, and this list only tops up a feed the
+   * callable already fills.
+   */
   handleLatestBites(
     biteDocs: AddCollectionSnapshotListenerCallbackEvent<DocumentData> | null,
   ): void {
-    const bites = biteDocs?.snapshots?.map((snapshot) => toBite(snapshot));
+    const viewerUid = this.authService.getUser()?.uid;
+    const bites = biteDocs?.snapshots
+      ?.map((snapshot) => toBite(snapshot))
+      .filter((bite) => isBiteVisibleTo(bite, viewerUid));
 
     this._latestBitesChannel$.next(bites || []);
   }

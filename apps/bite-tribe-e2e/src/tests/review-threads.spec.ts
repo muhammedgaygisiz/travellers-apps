@@ -23,6 +23,7 @@ const seedBite = (
 ): Promise<void> =>
   seedFirestoreDocument(page, `bites/${biteId}`, {
     name: { stringValue: biteName },
+    imageStatus: { stringValue: 'uploaded' },
     place: { stringValue: '' },
     price: { stringValue: '10.00' },
     currency: { stringValue: 'EUR' },

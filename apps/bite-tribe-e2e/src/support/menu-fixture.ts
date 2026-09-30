@@ -85,6 +85,7 @@ export const seedRestaurantWithMenu = async (
     seedFirestoreDocument(page, `bites/${fixture.biteId}`, {
       id: { stringValue: fixture.biteId },
       name: { stringValue: fixture.biteName },
+      imageStatus: { stringValue: 'uploaded' },
       place: { stringValue: fixture.restaurantName },
       restaurantId: { stringValue: fixture.restaurantId },
       price: { stringValue: '12.00' },

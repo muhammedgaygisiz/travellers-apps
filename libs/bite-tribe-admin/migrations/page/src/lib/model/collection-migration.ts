@@ -14,6 +14,7 @@ export const COLLECTION_MIGRATIONS = [
   'review-timestamps',
   'menu-item-ids',
   'menu-item-stats',
+  'bite-image-status',
 ] as const;
 
 export type CollectionMigrationName = (typeof COLLECTION_MIGRATIONS)[number];

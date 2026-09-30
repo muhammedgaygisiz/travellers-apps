@@ -96,3 +96,8 @@ export * from './lib/table-assistance';
  * (issue #1107).
  */
 export * from './lib/scan-anomaly';
+/**
+ * A value export: who may be shown a Bite is decided by the callables, the
+ * bucket-list read and the bucket-list save alike (issue #1717).
+ */
+export * from './lib/bite-listability';

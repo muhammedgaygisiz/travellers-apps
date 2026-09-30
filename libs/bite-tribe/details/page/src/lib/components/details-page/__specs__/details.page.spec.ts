@@ -465,10 +465,41 @@ describe('DetailsPage', () => {
       'bite-details-bucket-list',
     ];
 
-    const setLoadedBite = (): void => {
-      componentRef.setInput('bite', { id: '1', name: 'Pizza' } as Bite);
+    const setLoadedBite = (overrides: Partial<Bite> = {}): void => {
+      componentRef.setInput('bite', {
+        id: '1',
+        name: 'Pizza',
+        imageStatus: 'uploaded',
+        ...overrides,
+      } as Bite);
       componentRef.changeDetectorRef.detectChanges();
     };
+
+    /**
+     * A Bite nobody else can see is not offered for a bucket list, while the
+     * other actions stay (GitHub issue #1717).
+     */
+    it.each([
+      ['failed', { imageStatus: 'failed' }],
+      ['pending', { imageStatus: 'pending' }],
+      ['without a status', { imageStatus: undefined }],
+    ] as [string, Partial<Bite>][])(
+      'offers no bucket list for a Bite that is %s',
+      (_case, overrides) => {
+        setLoadedBite(overrides);
+
+        expect(
+          fixture.nativeElement.querySelector(
+            '[data-testid="bite-details-bucket-list"]',
+          ),
+        ).toBeFalsy();
+        expect(
+          fixture.nativeElement.querySelector(
+            '[data-testid="bite-details-share"]',
+          ),
+        ).toBeTruthy();
+      },
+    );
 
     it.each(actionTestIds)(
       'exposes %s as a coach-mark anchor once the bite is loaded',

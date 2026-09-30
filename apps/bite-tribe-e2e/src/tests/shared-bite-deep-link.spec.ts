@@ -16,6 +16,7 @@ const seedSharedBite = async (
 ): Promise<void> => {
   await seedFirestoreDocument(page, `bites/${biteId}`, {
     name: { stringValue: biteName },
+    imageStatus: { stringValue: 'uploaded' },
     place: { stringValue: restaurant },
     description: { stringValue: 'Shared through a Bite link.' },
     price: { stringValue: '10.00' },

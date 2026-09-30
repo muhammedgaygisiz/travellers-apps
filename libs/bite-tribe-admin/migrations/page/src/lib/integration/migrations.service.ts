@@ -50,6 +50,7 @@ export class MigrationsService {
     'review-timestamps': () => this.dataAccess.backfillReviewTimestamps(),
     'menu-item-ids': () => this.dataAccess.backfillMenuItemIds(),
     'menu-item-stats': () => this.dataAccess.recomputeMenuItemStats(),
+    'bite-image-status': () => this.dataAccess.backfillBiteImageStatus(),
   };
 
   /** What the last run of one migration did, or nothing if it never ran here. */

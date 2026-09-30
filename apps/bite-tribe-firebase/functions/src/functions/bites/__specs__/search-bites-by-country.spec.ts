@@ -46,6 +46,8 @@ interface BiteDocData {
   id: string;
   name: string;
   place: string;
+  userId: string;
+  imageStatus?: 'pending' | 'uploaded' | 'failed';
 }
 
 interface BiteDocStub {
@@ -59,9 +61,20 @@ interface FirestoreStub {
   get: jest.Mock;
 }
 
-const biteDoc = (id: string, name: string): BiteDocStub => ({
+const biteDoc = (
+  id: string,
+  name: string,
+  overrides: Partial<BiteDocData> = {},
+): BiteDocStub => ({
   id,
-  data: (): BiteDocData => ({ id, name, place: `${name} place` }),
+  data: (): BiteDocData => ({
+    id,
+    name,
+    place: `${name} place`,
+    userId: 'poster',
+    imageStatus: 'uploaded',
+    ...overrides,
+  }),
 });
 
 const mockFirestore = (docs: BiteDocStub[]): FirestoreStub => {
@@ -125,6 +138,42 @@ describe('searchBitesByCountry', () => {
       id: 'bite-0',
       name: 'Bite 0',
       place: 'Bite 0 place',
+    });
+  });
+
+  describe('given a Bite whose photo is not uploaded', () => {
+    const docs = (): BiteDocStub[] => [
+      biteDoc('listed', 'Fondue'),
+      biteDoc('failed', 'Raclette', { imageStatus: 'failed' }),
+      biteDoc('pending', 'Rösti', { imageStatus: 'pending' }),
+      biteDoc('legacy', 'Älplermagronen', { imageStatus: undefined }),
+    ];
+
+    it('hides it from somebody else', async () => {
+      mockFirestore(docs());
+
+      const result = await handler({
+        auth: { uid: 'viewer' },
+        data: { countryCode: 'CH' },
+      });
+
+      expect(result.map((bite) => bite.id)).toEqual(['listed']);
+    });
+
+    it('returns it to its creator', async () => {
+      mockFirestore(docs());
+
+      const result = await handler({
+        auth: { uid: 'poster' },
+        data: { countryCode: 'CH' },
+      });
+
+      expect(result.map((bite) => bite.id)).toEqual([
+        'listed',
+        'failed',
+        'pending',
+        'legacy',
+      ]);
     });
   });
 

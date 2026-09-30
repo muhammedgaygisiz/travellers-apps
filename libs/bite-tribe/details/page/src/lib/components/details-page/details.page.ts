@@ -14,6 +14,7 @@ import { PageComponent } from 'common/ui/page';
 import {
   Bite,
   Bucketlist,
+  isListableBite,
   LikeClick,
   PublicUser,
   RemoveBiteFromBucketlistParams,
@@ -445,6 +446,17 @@ export class DetailsPage {
     ),
     { initialValue: !this.reviewFormGroup.valid },
   );
+
+  /**
+   * A Bite nobody else can see is not offered for a bucket list (GitHub issue
+   * #1717). The bucket-list effects refuse the save regardless; this is the
+   * half that keeps the user from trying.
+   */
+  canSaveToBucketlist = computed(() => {
+    const bite = this.bite();
+
+    return !!bite && isListableBite(bite);
+  });
 
   isBucketlistBite = computed(() => {
     const biteId = this.bite()?.id;

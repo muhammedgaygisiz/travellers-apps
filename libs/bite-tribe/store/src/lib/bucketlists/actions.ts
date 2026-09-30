@@ -13,6 +13,7 @@ export const BucketlistActions = createActionGroup({
     'Loaded from API': props<{ bucketlists: Bucketlist[] }>(),
     'Save bite to bucketlist': props<SaveToBucketListParams>(),
     'Saved bite to bucketlist': props<{ bucketlist: Bucketlist }>(),
+    'Save bite to bucketlist failed': emptyProps(),
     'Create and save BiteId to Bucketlist':
       props<CreateAndSaveToBucketListParams>(),
     'Create Bucketlist': props<{ bucketlistName: string }>(),

@@ -54,7 +54,9 @@ A good Bite makes one concrete dish understandable enough that another person ca
   and its share link answers exactly like a Bite id that does not exist.
   Its creator still finds it on every surface, with the failed-upload tile
   telling them it is visible only to them and offering the retry. It cannot be
-  added to a bucket list. See issue [#1717].
+  added to a bucket list. The Bite form's nearby-restaurant and tag suggestions
+  are derived from the Bites in the viewer's feed, so a hidden Bite contributes
+  to neither. See issue [#1717].
 - **Listability is a visibility rule, not a domain invariant.** A Bite without
   its photo is still a valid Bite: creation, storage, `biteCount`, the
   leaderboard and deletion ignore it, and a Bite already in a bucket list keeps

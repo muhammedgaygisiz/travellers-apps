@@ -118,6 +118,10 @@ async function seedVerifiedRestaurantBite(
       data: {
         fields: {
           name: { stringValue: 'Verified restaurant seed' },
+          // The restaurant selector offers the restaurants of the Bites in the
+          // feed, and another user's Bite reaches the feed only once its photo
+          // is uploaded (GitHub issue #1717).
+          imageStatus: { stringValue: 'uploaded' },
           place: { stringValue: options.restaurantName },
           restaurantId: { stringValue: options.restaurantId },
           userId: { stringValue: TEST_USERS.organisation.uid },

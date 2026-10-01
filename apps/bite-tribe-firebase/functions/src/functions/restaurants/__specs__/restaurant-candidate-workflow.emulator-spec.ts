@@ -329,6 +329,67 @@ describe('restaurant candidate workflow emulator integration', () => {
     expect([...dishNames].sort()).toEqual(['Calzone', 'Margherita']);
   });
 
+  /**
+   * Issue #1521. A verified candidate returned to `pending` - by an operator,
+   * the open data layer, or detection before #1497 - still names its
+   * restaurant. Verification used to key on `status` alone and created a
+   * second restaurant and menu, repointing the Bites at it.
+   */
+  it(
+    'returns the named restaurant for a candidate reset to pending',
+    async () => {
+      await Promise.all(
+        ['bite-new', 'bite-1', 'bite-2', 'bite-3', 'bite-4'].map((id, index) =>
+          seedBite(id, 'Pizza Palace', index ? nearby(index) : CENTER),
+        ),
+      );
+      await handleCreateRestaurantCandidateOnBiteCreate(
+        await getFirestore().collection('bites').doc('bite-new').get(),
+      );
+
+      const [candidateDoc] = (
+        await getFirestore().collection('restaurantCandidates').get()
+      ).docs;
+      const { restaurantId } = await verifyCandidate(candidateDoc.id);
+
+      await candidateDoc.ref.update({ status: 'pending' });
+      const resetCandidate = (await candidateDoc.ref.get()).data();
+
+      const results = await Promise.all([
+        verifyCandidate(candidateDoc.id, 'Ristorante Luigi'),
+        verifyCandidate(candidateDoc.id, 'Ristorante Luigi'),
+      ]);
+
+      expect(results).toEqual([
+        {
+          restaurantId,
+          candidateId: candidateDoc.id,
+          status: 'already-verified',
+        },
+        {
+          restaurantId,
+          candidateId: candidateDoc.id,
+          status: 'already-verified',
+        },
+      ]);
+      expect(await queryCount('restaurants')).toBe(1);
+      expect(await queryCount('menus')).toBe(1);
+      expect((await candidateDoc.ref.get()).data()).toEqual(resetCandidate);
+
+      const restaurantIds = await Promise.all(
+        ['bite-new', 'bite-1', 'bite-2', 'bite-3', 'bite-4'].map(
+          async (biteId) =>
+            (
+              await getFirestore().collection('bites').doc(biteId).get()
+            ).data()?.['restaurantId'],
+        ),
+      );
+
+      expect(new Set(restaurantIds)).toEqual(new Set([restaurantId]));
+    },
+    RACE_TIMEOUT_MS,
+  );
+
   it('does not create a candidate when a matching verified restaurant already exists', async () => {
     await getFirestore()
       .collection('restaurants')

@@ -23,7 +23,6 @@ const SCAN_PAGE_SIZE = 50;
 export interface LeaderboardUser {
   userId: string;
   displayName: string;
-  email: string;
   photoUrl: string;
   city?: string;
   public?: boolean;
@@ -33,6 +32,45 @@ export interface LeaderboardUser {
 export interface Leaderboard {
   users: LeaderboardUser[];
 }
+
+/**
+ * Every field a persisted leaderboard entry may hold. `/meta` is readable by
+ * any member through the client SDK, so whatever an entry carries is published
+ * to every signed-in account whether or not a screen renders it. The email
+ * address used to be one of these fields and is deliberately not (issue #1611).
+ */
+const LEADERBOARD_FIELDS: readonly (keyof LeaderboardUser)[] = [
+  'userId',
+  'displayName',
+  'photoUrl',
+  'city',
+  'public',
+  'biteCount',
+];
+
+/**
+ * Projects a stored entry onto {@link LEADERBOARD_FIELDS}, dropping anything an
+ * older build cached alongside them.
+ */
+export const toLeaderboardEntry = (entry: LeaderboardUser): LeaderboardUser =>
+  Object.fromEntries(
+    LEADERBOARD_FIELDS.filter((field) => field in entry).map((field) => [
+      field,
+      entry[field],
+    ]),
+  ) as unknown as LeaderboardUser;
+
+/**
+ * True when a stored entry carries a field outside {@link LEADERBOARD_FIELDS},
+ * i.e. the snapshot was written by an older build and still caches data the
+ * leaderboard no longer publishes.
+ */
+export const holdsRetiredFields = (entries: LeaderboardUser[]): boolean =>
+  entries.some((entry) =>
+    Object.keys(entry).some(
+      (key) => !LEADERBOARD_FIELDS.includes(key as keyof LeaderboardUser),
+    ),
+  );
 
 /**
  * Describes how a single user's ranking changed between two persisted
@@ -156,7 +194,6 @@ export const toLeaderboardUser = (
       publicUser && typeof user['displayName'] === 'string'
         ? user['displayName']
         : '',
-    email: publicUser && typeof user['email'] === 'string' ? user['email'] : '',
     photoUrl:
       publicUser && typeof user['photoUrl'] === 'string'
         ? user['photoUrl']
@@ -243,4 +280,42 @@ export const rebuildLeaderboard = async (
   });
 
   return users;
+};
+
+/**
+ * Reads the persisted ranking from `meta/leaderboard`. Returns `null` when the
+ * document does not exist yet.
+ *
+ * A snapshot written before issue #1611 still caches each public user's email
+ * address, and nothing else rewrites it until a Bite is created or deleted. A
+ * snapshot holding a retired field is therefore rebuilt on read, so the first
+ * leaderboard load or daily run after the deploy clears it.
+ */
+export const readPersistedLeaderboard = async (
+  db: Firestore,
+): Promise<LeaderboardUser[] | null> => {
+  const leaderboardDoc = await db
+    .collection(META_COLLECTION)
+    .doc(LEADERBOARD_DOC)
+    .get();
+
+  if (!leaderboardDoc.exists) {
+    return null;
+  }
+
+  const users = leaderboardDoc.data()?.['users'];
+
+  if (!Array.isArray(users)) {
+    return null;
+  }
+
+  if (holdsRetiredFields(users as LeaderboardUser[])) {
+    logger.info(
+      'readPersistedLeaderboard: snapshot holds retired fields; rebuilding',
+    );
+
+    return rebuildLeaderboard(db);
+  }
+
+  return users as LeaderboardUser[];
 };

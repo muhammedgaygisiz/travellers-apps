@@ -17,6 +17,7 @@ import {
   LeaderboardUser,
   META_COLLECTION,
   rebuildLeaderboard,
+  toLeaderboardEntry,
 } from '../shared/utils/leaderboard';
 import {
   DISPLAY_NAMES_COLLECTION,
@@ -384,7 +385,7 @@ export const deleteProfileImagesForUser = async (
  * Removes the user from both persisted leaderboard snapshots.
  *
  * The leaderboard is a cached document, not a live query, and it stores each
- * entry's display name, email and photo. Nothing rebuilds it except a Bite
+ * entry's display name and photo. Nothing rebuilds it except a Bite
  * create or delete — and this flow keeps the Bites — so without this step a
  * deleted user's personal data would sit in `/meta/leaderboard` until some
  * unrelated user happens to post. The daily baseline is pruned in place so the
@@ -399,9 +400,9 @@ export const refreshLeaderboardsAfterDeletion = async (
   const dailyUsers = dailySnapshot.data()?.['users'];
 
   if (Array.isArray(dailyUsers)) {
-    const remaining = (dailyUsers as LeaderboardUser[]).filter(
-      (user) => user?.userId !== uid,
-    );
+    const remaining = (dailyUsers as LeaderboardUser[])
+      .filter((user) => user?.userId !== uid)
+      .map(toLeaderboardEntry);
 
     if (remaining.length !== dailyUsers.length) {
       await dailyRef.set({ users: remaining }, { merge: true });

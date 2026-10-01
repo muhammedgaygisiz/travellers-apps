@@ -48,6 +48,8 @@ jest.mock('firebase-functions/https', () => ({
 jest.mock('../../shared/utils/leaderboard', () => ({
   META_COLLECTION: 'meta',
   LEADERBOARD_DAILY_DOC: 'leaderboardDaily',
+  toLeaderboardEntry: jest.requireActual('../../shared/utils/leaderboard')
+    .toLeaderboardEntry,
   rebuildLeaderboard: (...args: unknown[]): unknown =>
     rebuildLeaderboardMock(...args),
 }));
@@ -157,8 +159,10 @@ describe('refreshLeaderboardsAfterDeletion', () => {
 
     await refreshLeaderboardsAfterDeletion(asFirestore(db), UID);
 
+    // The pruned baseline is written back without the email a legacy
+    // snapshot cached (issue #1611).
     expect(db.read('meta/leaderboardDaily')?.['users']).toEqual([
-      { userId: 'other', displayName: 'Other', email: 'other@example.com' },
+      { userId: 'other', displayName: 'Other' },
     ]);
     expect(rebuildLeaderboardMock).toHaveBeenCalledWith(db);
   });

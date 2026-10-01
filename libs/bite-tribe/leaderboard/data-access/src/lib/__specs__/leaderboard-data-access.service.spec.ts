@@ -28,7 +28,6 @@ describe(LeaderboardDataAccessService.name, () => {
       {
         userId: 'user-1',
         displayName: 'Daniel Langone',
-        email: 'daniel@example.com',
         photoUrl: '',
         public: true,
         biteCount: 12,

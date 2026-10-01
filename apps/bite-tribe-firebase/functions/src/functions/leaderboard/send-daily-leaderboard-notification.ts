@@ -8,8 +8,8 @@ import {
   LeaderboardRankChange,
   LeaderboardUser,
   LEADERBOARD_DAILY_DOC,
-  LEADERBOARD_DOC,
   META_COLLECTION,
+  readPersistedLeaderboard,
 } from '../shared/utils/leaderboard';
 
 const db = getFirestore();
@@ -17,15 +17,16 @@ const db = getFirestore();
 const ZURICH_TZ = 'Europe/Zurich';
 
 /**
- * Reads the persisted `users` ranking from a meta document. Returns `null` when
+ * Reads the daily baseline ranking. Returns `null` when
  * the document does not exist yet (used to detect the first daily run, where
  * there is no baseline to compare against), and an empty array when the
  * document exists but holds no ranking.
  */
-const readRanking = async (
-  docId: string,
-): Promise<LeaderboardUser[] | null> => {
-  const snap = await db.collection(META_COLLECTION).doc(docId).get();
+const readBaseline = async (): Promise<LeaderboardUser[] | null> => {
+  const snap = await db
+    .collection(META_COLLECTION)
+    .doc(LEADERBOARD_DAILY_DOC)
+    .get();
 
   if (!snap.exists) {
     return null;
@@ -77,8 +78,10 @@ export const sendDailyLeaderboardNotification = onSchedule(
   async (): Promise<void> => {
     logger.info('--- Starting daily leaderboard notification');
 
-    const currentUsers = (await readRanking(LEADERBOARD_DOC)) ?? [];
-    const baselineUsers = await readRanking(LEADERBOARD_DAILY_DOC);
+    // Read through the shared helper so a snapshot still caching retired
+    // fields is rebuilt first, and today's baseline is written without them.
+    const currentUsers = (await readPersistedLeaderboard(db)) ?? [];
+    const baselineUsers = await readBaseline();
 
     if (baselineUsers === null) {
       logger.info(

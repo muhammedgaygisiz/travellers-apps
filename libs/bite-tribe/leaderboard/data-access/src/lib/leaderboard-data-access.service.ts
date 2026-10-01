@@ -4,13 +4,7 @@ import type { PublicUser } from 'model';
 
 export type LeaderboardUser = Pick<
   PublicUser,
-  | 'userId'
-  | 'displayName'
-  | 'email'
-  | 'photoUrl'
-  | 'city'
-  | 'public'
-  | 'biteCount'
+  'userId' | 'displayName' | 'photoUrl' | 'city' | 'public' | 'biteCount'
 > &
   Required<Pick<PublicUser, 'biteCount'>>;
 

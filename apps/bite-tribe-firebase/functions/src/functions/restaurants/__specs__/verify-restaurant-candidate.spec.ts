@@ -419,6 +419,92 @@ describe('verifyRestaurantCandidate', () => {
     });
   });
 
+  /**
+   * Issue #1521. `status` is a label any writer can rewrite; the restaurant id
+   * is the fact. A candidate returned to `pending` while it still names a
+   * restaurant used to be verified a second time, creating a duplicate.
+   */
+  it('returns the named restaurant for a pending candidate that already carries one', async () => {
+    const getAll = jest.fn();
+
+    firestoreMock.runTransaction.mockImplementation((handler) =>
+      handler({
+        get: jest.fn(async () => ({
+          exists: true,
+          data: (): {
+            status: string;
+            verifiedRestaurantId: string;
+            biteIds: string[];
+          } => ({
+            status: 'pending',
+            verifiedRestaurantId: 'restaurant-1',
+            biteIds: ['bite-1', 'bite-2'],
+          }),
+        })),
+        getAll,
+        create: createMock,
+        update: updateMock,
+      }),
+    );
+
+    const result = await verifyRestaurantCandidate(
+      request({
+        candidateId: 'candidate-1',
+        restaurant: {
+          name: 'Pizza Palace',
+          position: { latitude: 46.948, longitude: 7.4474 },
+        },
+      }),
+    );
+
+    expect(getAll).not.toHaveBeenCalled();
+    expect(createMock).not.toHaveBeenCalled();
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      restaurantId: 'restaurant-1',
+      candidateId: 'candidate-1',
+      status: 'already-verified',
+    });
+  });
+
+  it('verifies a pending candidate whose verifiedRestaurantId is empty', async () => {
+    firestoreMock.runTransaction.mockImplementation((handler) =>
+      handler({
+        get: jest.fn(async () => ({
+          exists: true,
+          data: (): {
+            status: string;
+            verifiedRestaurantId: string;
+            biteIds: string[];
+          } => ({
+            status: 'pending',
+            verifiedRestaurantId: '',
+            biteIds: ['bite-1', 'bite-2'],
+          }),
+        })),
+        getAll: getAllMock,
+        create: createMock,
+        update: updateMock,
+      }),
+    );
+
+    const result = await verifyRestaurantCandidate(
+      request({
+        candidateId: 'candidate-1',
+        restaurant: {
+          name: 'Pizza Palace',
+          position: { latitude: 46.948, longitude: 7.4474 },
+        },
+      }),
+    );
+
+    expect(result).toMatchObject({
+      restaurantId: 'restaurants-new-id',
+      status: 'created',
+    });
+    expect(createMock).toHaveBeenCalledTimes(2);
+  });
+
   it('returns the merged candidate restaurant without creating duplicates', async () => {
     firestoreMock.runTransaction.mockImplementation((handler) =>
       handler({

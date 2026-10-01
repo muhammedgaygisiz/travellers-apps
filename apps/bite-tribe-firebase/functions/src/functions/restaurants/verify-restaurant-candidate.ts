@@ -238,7 +238,15 @@ export const verifyRestaurantCandidateHandler = async (
       const candidateData = candidateSnapshot.data() ?? {};
       const status = getString(candidateData, 'status');
 
-      if (status !== 'pending') {
+      // `verifiedRestaurantId` is the fact that a Restaurant exists; `status`
+      // is a label any writer can rewrite. A Candidate returned to `pending`
+      // while it still names a Restaurant has already been verified, and
+      // creating another would publish a second page about the same business
+      // (issue #1521).
+      if (
+        status !== 'pending' ||
+        getString(candidateData, 'verifiedRestaurantId')
+      ) {
         const existingRestaurantId = await getExistingVerifiedRestaurantId(
           transaction,
           candidateData,

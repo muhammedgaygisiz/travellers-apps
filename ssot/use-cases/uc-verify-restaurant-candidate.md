@@ -183,12 +183,15 @@ this page has stated its side, and the other side is theirs to state. Each is a 
 `UC-ARO` is the one to take first: it is the only one of the seven already implemented
 ([#1077]), so its guarantees can be written from the code rather than proposed.
 
-`G1` and `G3` hold at `END-V4` and are not durable afterwards. `G1` is falsified by a
-second verification of the same Candidate, which `R-18` closes; that is recorded as `E9`.
-`G3` is no longer falsified by a later verification: since [#1498], `V23` skips a
-shared evidence Bite that already names a Restaurant rather than repointing it (`R-20`,
-`E7`). It is still changed by the other writers `R-8` counts, which is intended — the
-Bite Creator's own choice belongs to `UC-MBR`, not to this flow.
+`G1` and `G3` hold at `END-V4`. `G1` is no longer falsified by a second verification of
+the same Candidate: since [#1521], `V16` keys on `verifiedRestaurantId` rather than on
+`status` (`R-18`), so a Candidate returned to `pending` while it still names a Restaurant
+returns that Restaurant instead of creating another. It holds only as long as the field
+does — a writer that clears `verifiedRestaurantId` as well as resetting `status` is not
+something this flow can detect. `G3` is no longer falsified by a later verification:
+since [#1498], `V23` skips a shared evidence Bite that already names a Restaurant rather
+than repointing it (`R-20`, `E7`). It is still changed by the other writers `R-8` counts,
+which is intended — the Bite Creator's own choice belongs to `UC-MBR`, not to this flow.
 
 ## Actogram
 
@@ -356,9 +359,7 @@ V15  SYS  reads the Candidate inside the transaction
 
 V16  SYS  checks whether the Candidate is already decided
           INV:R-7
-          INV:R-18 is VIOLATED here: the branch keys on status alone, so a Candidate
-               returned to pending while it still names a Restaurant reaches V18 and is
-               verified a second time (E9)
+          INV:R-18
           ├─ it carries verifiedRestaurantId, or status != 'pending' → V17
           └─ status == 'pending' and it names no Restaurant          → V18
 
@@ -465,23 +466,30 @@ V25  SYS  returns { restaurantId, menuId, menuItemCount, candidateId, skippedBit
 | **R-15** | Verification does **not** assign an owner. Every Restaurant leaves this flow `unclaimed` (`G7`), and ownership is a separate Operator action afterwards — `assignRestaurantOwner` in the Admin App (`UC-ARO`, [#1077]). Corrected 9 September 2026 against that delivery, which contradicts the earlier intent twice: the target account must **already** hold `business`, because assignment does not grant the role and is refused otherwise (`setUserRoles` grants it); and the write is its own transaction, not part of `R-9`'s.                                                                                                                                                                                          |
 | **R-16** | An evidence Bite deleted after detection is skipped at `V18`, rather than failing the transaction and stranding the Candidate in `pending`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | **R-17** | _Intended, not met._ The Candidate list has one server-side order and no selectable ordering — `evidence.biteCount` descending, then `createdAtTimestamp` descending — and it pages rather than truncating, so every `pending` Candidate is reachable. Ordering without paging satisfies neither half. The single fixed order, and the absence of a selectable one, is `RD-VRC-16`.                                                                                                                                                                                                                                                                                                                                            |
-| **R-18** | _Intended, not met._ Idempotency is keyed on `verifiedRestaurantId`, not on `status`. A Candidate that names a Restaurant has already been verified whatever its status says: `status` is a label any writer can rewrite, the field is the fact. Today `V16` branches on `status` alone, so a Candidate returned to `pending` while still naming a Restaurant is verified a second time.                                                                                                                                                                                                                                                                                                                                       |
+| **R-18** | Idempotency is keyed on `verifiedRestaurantId`, not on `status`. A Candidate that names a Restaurant has already been verified whatever its status says: `status` is a label any writer can rewrite, the field is the fact. Since [#1521], `V16` sends a Candidate carrying a non-empty `verifiedRestaurantId` to `V17` whatever its `status`, inside the transaction, so a Candidate returned to `pending` returns its Restaurant as an existing result and writes nothing.                                                                                                                                                                                                                                                   |
 | **R-19** | _Intended, not met._ An Operator correction of `position` at `V8` is recorded as a correction, so a corrected position is distinguishable from the seeded one. Nothing marks the difference today, so a later write cannot know it must not revert the correction, and the Restaurant's geohash derived at `V20a` can diverge from the Candidate's own `geohash` with nothing to say which is right.                                                                                                                                                                                                                                                                                                                           |
 | **R-20** | A surviving evidence Bite that already carries a non-empty `restaurantId` — of any shape, bare id or document path — is skipped: it is not written at `V23`, it is named in the Candidate's `skippedBiteIds` and in the callable's result, and it is excluded from the Menu derivation at `V19`, because a Menu must not be derived from a dish belonging to another Restaurant. The transaction still completes and the Candidate still reaches `verified` even where every listed Bite was skipped. Built by [#1498]; the Operator-facing half — showing which Bites were skipped — is [#1505].                                                                                                                              |
 
 ## Exceptions And Failure Modes
 
-| #   | Situation                                                                                                                                      | Behaviour                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Assessment                  |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| E5  | The model deletes `merged`, and the code still carries the status and the `mergedIntoCandidateId` branch at `V17`                              | The branch exists in code and is unreachable in practice, because nothing writes the status                                                                                                                                                                                                                                                                                                                                                                                                                                | Gap, [#1499]                |
-| E7  | An evidence Bite already belongs to another Restaurant                                                                                         | Skipped at `V18` since [#1498]: `V23` leaves it untouched, `V19` does not derive a dish from it, and its id is written to `skippedBiteIds` and returned by the callable (`R-20`). Reachable by a Bite Creator editing their own Bite, per `R-8`. Detection excludes assigned Bites, so the divergence appears between clustering and verification. Until [#1505] the Operator is not shown which Bites were skipped                                                                                                        | Closed, [#1498]             |
-| E8  | More than five Candidates are `pending`                                                                                                        | `V2` takes the first five in document-id order and does not page, so every Candidate beyond the fifth is unreachable by any path. Ordering alone would change which five are stuck, not that five are stuck — which is why `R-17` requires paging as well                                                                                                                                                                                                                                                                  | Defect, [#1506] and [#1507] |
-| E9  | A verified Candidate is returned to `pending` — by an Operator, or through the open data layer — while it still carries `verifiedRestaurantId` | `V16` branches on `status` alone, so the Candidate reaches `V18` and a second Restaurant is created for a business that already has one. `R-18` closes it and is not built. Detection can no longer cause the reset: `UC-DRC` `R-8` refuses it since [#1497], but Candidates it reset before then may still carry this state                                                                                                                                                                                               | Defect, [#1521]             |
-| E10 | The Operator corrects `name` or `position` at `V8`                                                                                             | Detection's only protection against re-detecting an already verified place is a 0.82 name score within 200 m, so a correction past either threshold defeats it: later Bites at the place resolve to this Candidate's id, and `UC-DRC` `R-8` refuses the write, so they stay unlinked instead of reaching the Restaurant. Nothing records that the value was corrected (`R-19`), and the Restaurant's geohash from `V20a` no longer matches the Candidate's. Strengthening that check is explicitly out of scope in [#1497] | Defect, [#1522]             |
-| E11 | The image upload runs after the verification transaction has committed                                                                         | The Restaurant is created without it; the failure surfaces as an unhandled rejection on the form, and a resubmit returns the idempotent result so the upload is never retried. The write is a direct client write to `/restaurants`, authorised since [#1078] by the Operator's `admin` clause rather than by open rules. `V11a` and `R-10` close it                                                                                                                                                                       | Defect, [#1504]             |
+| #   | Situation                                                                                                         | Behaviour                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Assessment                  |
+| --- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| E5  | The model deletes `merged`, and the code still carries the status and the `mergedIntoCandidateId` branch at `V17` | The branch exists in code and is unreachable in practice, because nothing writes the status                                                                                                                                                                                                                                                                                                                                                                                                                                | Gap, [#1499]                |
+| E7  | An evidence Bite already belongs to another Restaurant                                                            | Skipped at `V18` since [#1498]: `V23` leaves it untouched, `V19` does not derive a dish from it, and its id is written to `skippedBiteIds` and returned by the callable (`R-20`). Reachable by a Bite Creator editing their own Bite, per `R-8`. Detection excludes assigned Bites, so the divergence appears between clustering and verification. Until [#1505] the Operator is not shown which Bites were skipped                                                                                                        | Closed, [#1498]             |
+| E8  | More than five Candidates are `pending`                                                                           | `V2` takes the first five in document-id order and does not page, so every Candidate beyond the fifth is unreachable by any path. Ordering alone would change which five are stuck, not that five are stuck — which is why `R-17` requires paging as well                                                                                                                                                                                                                                                                  | Defect, [#1506] and [#1507] |
+| E10 | The Operator corrects `name` or `position` at `V8`                                                                | Detection's only protection against re-detecting an already verified place is a 0.82 name score within 200 m, so a correction past either threshold defeats it: later Bites at the place resolve to this Candidate's id, and `UC-DRC` `R-8` refuses the write, so they stay unlinked instead of reaching the Restaurant. Nothing records that the value was corrected (`R-19`), and the Restaurant's geohash from `V20a` no longer matches the Candidate's. Strengthening that check is explicitly out of scope in [#1497] | Defect, [#1522]             |
+| E11 | The image upload runs after the verification transaction has committed                                            | The Restaurant is created without it; the failure surfaces as an unhandled rejection on the form, and a resubmit returns the idempotent result so the upload is never retried. The write is a direct client write to `/restaurants`, authorised since [#1078] by the Operator's `admin` clause rather than by open rules. `V11a` and `R-10` close it                                                                                                                                                                       | Defect, [#1504]             |
 
 `E1`, `E2`, `E3`, `E4` and `E6` were removed under `UF-12`: each restated a branch the
 actogram already carries. Their ids are retired and are not reused.
+
+`E9` is **retired** and its id is not reused. It recorded that a verified Candidate
+returned to `pending` while still carrying `verifiedRestaurantId` reached `V18` and
+created a second Restaurant, because `V16` branched on `status` alone. [#1521] built
+`R-18`, and the case is now `V16`'s branch to `V17`, which `UF-12` keeps out of this
+table. Candidates detection reset before [#1497] may still carry that state; they now
+resolve to the Restaurant they name, and repairing them or any duplicate they already
+produced is outside this page.
 
 ## Authorization
 
@@ -515,11 +523,6 @@ holds in production from the merge.
   `pending` Candidates in document-id order and does not page, so everything beyond the
   fifth is unreachable. With dismissal deferred below, this is the only thing keeping
   the queue workable.
-- `V16`'s guard on `verifiedRestaurantId` (`R-18`, `E9`, [#1521]). Without it a
-  Candidate returned to `pending` is verified a second time, publishing a duplicate page
-  about a real, named business. Detection no longer takes that path, since `UC-DRC`
-  `R-8`'s guard ([#1497]); an Operator edit, the open data layer, or a Candidate reset
-  before the guard existed still reaches it.
 
 **[Secondary]**
 
@@ -534,7 +537,8 @@ holds in production from the merge.
   is a data-quality defect, not a blocked flow: the Operator can defer at `END-V3`.
 - `R-19`'s recording of a corrected `position` (`E10`). The correction itself works at
   `V8`; only the marker that distinguishes it from the seeded value is missing, and a
-  silent revert needs the same reset path `R-18` closes.
+  silent revert needs a reset path that `R-18` closes on this side ([#1521]) and
+  `UC-DRC` `R-8` closes on detection's ([#1497]).
 
 `V11a` is `[MVP]` where an image was supplied: storing it is not optional once the
 Operator has provided it. `R-10` is `[MVP]` and not built — the upload runs after the
@@ -583,7 +587,7 @@ discovered in review.
 - [#1069] / [#1077] — owner assignment, delivered outside this flow. `G7`, `R-15`, `UC-ARO`.
 - [#1506] and [#1507] — the ordered, paged Candidate list. `V2`, `R-17`, `E8`. MVP
   release blocker.
-- [#1521] — `V16`'s guard on `verifiedRestaurantId`. `R-18`, `E9`. MVP release blocker.
+- [#1521] — built `V16`'s guard on `verifiedRestaurantId`. `R-18`; retired `E9`.
 - [#1522] — detection recognising a verified place after its name or position was
   corrected. `R-19`, `E10`.
 - [#1498] — a Bite that already belongs to a Restaurant is skipped, not reassigned.
@@ -591,8 +595,8 @@ discovered in review.
 - [#1499] — removing the `merged` status and its resolution branch. `V17`, `E5`.
 - [#1504] — the image upload moves in front of the transaction. `V11a`, `R-10`, `E11`.
 - [#1497] — built detection's guard against writing `pending` onto a decided Candidate,
-  closing the reset half of `E9` that detection caused; this page owns the duplicate that
-  follows.
+  closing the reset half of the now-retired `E9` that detection caused; [#1521] closed the
+  duplicate that followed.
 - [#1501], [#1508] and [#1502] — dismissal, in epic [#1495]: the backend writer, the
   Operator surface, and un-dismissal. `V4a`, `END-V1`, `R-13`, `UC-DIS`. All
   `[Secondary]`.

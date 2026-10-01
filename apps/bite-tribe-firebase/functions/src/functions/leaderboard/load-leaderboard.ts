@@ -2,31 +2,12 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onAppCheck } from '../shared/callable-options';
 import {
-  LeaderboardUser,
-  LEADERBOARD_DOC,
-  META_COLLECTION,
+  readPersistedLeaderboard,
   rebuildLeaderboard,
 } from '../shared/utils/leaderboard';
 import { requireMember } from '../shared/roles';
 
 const db = getFirestore();
-
-const readPersistedLeaderboard = async (): Promise<
-  LeaderboardUser[] | null
-> => {
-  const leaderboardDoc = await db
-    .collection(META_COLLECTION)
-    .doc(LEADERBOARD_DOC)
-    .get();
-
-  if (!leaderboardDoc.exists) {
-    return null;
-  }
-
-  const users = leaderboardDoc.data()?.['users'];
-
-  return Array.isArray(users) ? (users as LeaderboardUser[]) : null;
-};
 
 export const loadLeaderboard = onAppCheck<void>(async (request) => {
   try {
@@ -48,7 +29,7 @@ export const loadLeaderboard = onAppCheck<void>(async (request) => {
   // whole users collection on every request. The document is kept up to date by
   // the bite create/delete triggers; rebuild it on demand when it is missing
   // (e.g. before the first bite write after this feature ships).
-  let leaderboardUsers = await readPersistedLeaderboard();
+  let leaderboardUsers = await readPersistedLeaderboard(db);
 
   if (!leaderboardUsers) {
     logger.info('loadLeaderboard: no persisted leaderboard found; rebuilding');

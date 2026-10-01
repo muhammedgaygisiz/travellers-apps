@@ -3,8 +3,10 @@ import { createTranslate } from '../../i18n/translate';
 import {
   buildLeaderboardNotificationBody,
   computeRankChanges,
+  holdsRetiredFields,
   isPublicUser,
   LeaderboardUser,
+  toLeaderboardEntry,
   toLeaderboardUser,
 } from '../leaderboard';
 
@@ -37,7 +39,6 @@ const asDoc = (
 const asLeaderboardUser = (userId: string): LeaderboardUser => ({
   userId,
   displayName: userId,
-  email: '',
   photoUrl: '',
   public: true,
   biteCount: 0,
@@ -59,7 +60,7 @@ describe('isPublicUser', () => {
 });
 
 describe('toLeaderboardUser', () => {
-  it('exposes the full profile for public users', () => {
+  it('exposes the public profile of public users, without their email', () => {
     const doc = asDoc('doc-id', {
       userId: 'user-1',
       displayName: 'Jane',
@@ -73,7 +74,6 @@ describe('toLeaderboardUser', () => {
     expect(toLeaderboardUser(doc)).toEqual({
       userId: 'user-1',
       displayName: 'Jane',
-      email: 'jane@example.com',
       photoUrl: 'https://example.com/jane.png',
       city: 'Zurich',
       public: true,
@@ -95,7 +95,6 @@ describe('toLeaderboardUser', () => {
     expect(toLeaderboardUser(doc)).toEqual({
       userId: 'user-2',
       displayName: '',
-      email: '',
       photoUrl: '',
       public: false,
       biteCount: 7,
@@ -108,11 +107,60 @@ describe('toLeaderboardUser', () => {
     expect(toLeaderboardUser(doc)).toEqual({
       userId: 'doc-id',
       displayName: '',
-      email: '',
       photoUrl: '',
       public: true,
       biteCount: 0,
     });
+  });
+});
+
+/**
+ * A snapshot persisted before issue #1611 cached each public user's email
+ * address, and `/meta` is readable by every member.
+ */
+const legacyEntry = (): LeaderboardUser =>
+  ({
+    userId: 'user-1',
+    displayName: 'Jane',
+    email: 'jane@example.com',
+    photoUrl: 'https://example.com/jane.png',
+    city: 'Zurich',
+    public: true,
+    biteCount: 12,
+  }) as LeaderboardUser;
+
+describe('toLeaderboardEntry', () => {
+  it('drops the email a legacy entry still caches', () => {
+    expect(toLeaderboardEntry(legacyEntry())).toEqual({
+      userId: 'user-1',
+      displayName: 'Jane',
+      photoUrl: 'https://example.com/jane.png',
+      city: 'Zurich',
+      public: true,
+      biteCount: 12,
+    });
+  });
+
+  it('does not invent an absent optional field', () => {
+    expect(toLeaderboardEntry(asLeaderboardUser('user-2'))).not.toHaveProperty(
+      'city',
+    );
+  });
+});
+
+describe('holdsRetiredFields', () => {
+  it('flags a snapshot in which any entry caches an email', () => {
+    expect(
+      holdsRetiredFields([asLeaderboardUser('user-2'), legacyEntry()]),
+    ).toBe(true);
+  });
+
+  it('accepts a snapshot written by the current mapper', () => {
+    expect(
+      holdsRetiredFields([
+        toLeaderboardUser(asDoc('doc-id', { ...legacyEntry(), public: true })),
+      ]),
+    ).toBe(false);
   });
 });
 

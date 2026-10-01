@@ -58,8 +58,10 @@ them is collected in onboarding.
 
 - Issue [#966] resyncs the per-user bite count and the aggregate weekly.
 - Issue [#968] persisted the leaderboard as the `/meta/leaderboard` document. That document
-  caches an entry per ranked account; [#1611] removes the email address from it, which any
-  signed-in account can read today.
+  caches an entry per ranked account, and any member can read it through the client SDK. Issue
+  [#1611] removed the email address from those entries: an entry holds the user id, display
+  name, photo, city, public flag and Bite count, and a snapshot written by an older build is
+  rebuilt the first time it is read.
 - Issue [#954] added the ranking notifications, delivered by pull request [#971].
 - Issue [#975] added the country badges; [#1212] turned a new badge into a notification for the
   user and their followers, and that contract lives in

@@ -43,7 +43,6 @@ describe(LeaderboardListComponent.name, () => {
       {
         userId: 'user-1',
         displayName: 'A',
-        email: '',
         photoUrl: '',
         public: true,
         biteCount: 3,
@@ -51,7 +50,6 @@ describe(LeaderboardListComponent.name, () => {
       {
         userId: 'user-2',
         displayName: 'B',
-        email: '',
         photoUrl: '',
         public: true,
         biteCount: 10,
@@ -71,7 +69,6 @@ describe(LeaderboardListComponent.name, () => {
       {
         userId: 'user-1',
         displayName: 'A',
-        email: '',
         photoUrl: '',
         public: true,
         biteCount: 3,
@@ -79,7 +76,6 @@ describe(LeaderboardListComponent.name, () => {
       {
         userId: 'user-2',
         displayName: 'B',
-        email: '',
         photoUrl: '',
         public: true,
         biteCount: 10,
@@ -122,7 +118,6 @@ describe(LeaderboardListComponent.name, () => {
     const user = {
       userId: 'user-1',
       displayName: 'A',
-      email: '',
       photoUrl: 'photo.jpg',
       public: true,
       biteCount: 3,

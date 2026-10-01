@@ -44,7 +44,6 @@ describe(LeaderboardService.name, () => {
     service.userClicked({
       userId: 'user-1',
       displayName: 'Daniel',
-      email: '',
       photoUrl: '',
       public: true,
       biteCount: 7,
@@ -60,7 +59,6 @@ describe(LeaderboardService.name, () => {
     service.userClicked({
       userId: 'user-1',
       displayName: '',
-      email: '',
       photoUrl: '',
       public: false,
       biteCount: 7,

@@ -72,7 +72,7 @@ Each user-owned data category is handled deliberately. See [issue-1182](../recor
 - Cannot be removed in band: analytics and Crashlytics data already keyed to the uid. The in-app copy says so.
 - Not decided yet, each owned by its own issue: a restaurant's ownership fields, which stay on the restaurant carrying the deleted account's uid ([#1568]); a BiteTrail the account owns, which falls into none of the categories above ([#1569]); and the job record at `/accountDeletions/{uid}`, which survives the account it names and has no stated retention ([#1570]).
 
-The cascade also prunes the deleted user from `/meta/leaderboardDaily` and rebuilds `/meta/leaderboard`, because those snapshots cache display names and emails and are otherwise only rebuilt by a Bite create or delete.
+The cascade also prunes the deleted user from `/meta/leaderboardDaily` and rebuilds `/meta/leaderboard`, because those snapshots cache display names and photos and are otherwise only rebuilt by a Bite create or delete. They no longer cache email addresses ([#1611]).
 
 ## Policy Language Contract
 
@@ -149,4 +149,5 @@ Relevant, and exercised more directly than on any other page.
 [#1568]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1568
 [#1569]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1569
 [#1570]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1570
+[#1611]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1611
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707

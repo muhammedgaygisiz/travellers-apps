@@ -29,8 +29,9 @@ async function seedRankedUser(page: Page, user: RankedUser): Promise<void> {
 
 /**
  * The callable serves `meta/leaderboard` as it stands and only rebuilds it when
- * the document is missing, so seeding it is what makes the ranking deterministic
- * here. The rebuild itself hangs off the Bite create/delete triggers and is
+ * the document is missing or an entry holds a field the leaderboard no longer
+ * publishes, so seeding it in the current shape - no `email`, issue #1611 - is
+ * what makes the ranking deterministic here. The rebuild itself hangs off the Bite create/delete triggers and is
  * covered by the functions unit tests; this journey is about the screen.
  */
 async function seedLeaderboard(page: Page, users: RankedUser[]): Promise<void> {
@@ -42,7 +43,6 @@ async function seedLeaderboard(page: Page, users: RankedUser[]): Promise<void> {
             fields: {
               userId: { stringValue: user.id },
               displayName: { stringValue: user.displayName },
-              email: { stringValue: `${user.id}@example.test` },
               photoUrl: { stringValue: '' },
               city: { stringValue: user.city },
               public: { booleanValue: true },

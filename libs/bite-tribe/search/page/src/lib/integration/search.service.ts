@@ -14,6 +14,7 @@ export class SearchService {
   private readonly analytics = inject(AnalyticsService);
 
   readonly results = this.dataAccessService.results;
+  readonly visibleResults = this.dataAccessService.visibleResults;
   readonly selectedCategory = this.dataAccessService.searchCategory;
   readonly selectedCountryCode = this.dataAccessService.searchCountryCode;
   /**

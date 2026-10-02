@@ -8,6 +8,7 @@ import { distanceBetween, geohashQueryBounds, Geopoint } from 'geofire-common';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
 import { isBiteVisibleTo } from '../shared/utils/bite-listability';
+import { isBlockedUid, loadBlockedUids } from '../shared/utils/user-blocks';
 
 const BITE_COLLECTION = 'bites';
 const LIKE_SUBCOLLECTION = 'likes';
@@ -88,15 +89,21 @@ const getPosition = (
  * bounds over-read, rather than in the query - see `bite-listability.ts`. It
  * also runs before {@link attachCallerLikes}, so a hidden Bite costs no like
  * read. A Bite whose photo never arrived reaches its own poster and nobody
- * else (GitHub issue #1717).
+ * else (GitHub issue #1717). A Bite by an account the caller blocked is dropped
+ * in the same pass (GitHub issue #1609).
  */
 export const selectNearbyBites = (
   bites: LocationBite[],
   center: Geopoint,
   viewerUid: string,
+  blockedUids: ReadonlySet<string> = new Set(),
 ): LocationBite[] =>
   bites.filter((bite) => {
     if (!isBiteVisibleTo(bite as DocumentData, viewerUid)) {
+      return false;
+    }
+
+    if (isBlockedUid(bite.userId, blockedUids)) {
       return false;
     }
 
@@ -198,13 +205,17 @@ export const loadBitesByLocation = onAppCheck<LoadBitesByLocationRequest>(
 
     const center: Geopoint = [latitude, longitude];
     const bounds = geohashQueryBounds(center, DEFAULT_SEARCH_RADIUS_IN_M);
-    const snapshots = await Promise.all(bounds.map(querySingleBound));
+    const [snapshots, blockedUids] = await Promise.all([
+      Promise.all(bounds.map(querySingleBound)),
+      loadBlockedUids(getFirestore(), request.auth.uid),
+    ]);
 
     return attachCallerLikes(
       selectNearbyBites(
         snapshots.flat().map(toLocationBite),
         center,
         request.auth.uid,
+        blockedUids,
       ),
       request.auth.uid,
     );

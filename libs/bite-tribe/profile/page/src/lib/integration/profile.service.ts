@@ -38,6 +38,7 @@ export class ProfileService {
   myBites = this.dataAccess.myBites;
   isPublicProfile = this.dataAccess.isPublicProfile;
   profileMetadata = this.dataAccess.profileMetadata;
+  isBlockedByMe = this.dataAccess.isBlockedByMe;
   emailVerificationPromptVisible = this.emailVerification.promptVisible;
   emailVerificationResendRunning = this.emailVerification.resendRunning;
 
@@ -138,6 +139,14 @@ export class ProfileService {
 
   unfollowButtonClicked(user: PublicUser): void {
     this.dataAccess.submitUnfollowClick(user);
+  }
+
+  blockButtonClicked(user: PublicUser): void {
+    this.dataAccess.submitBlockClick(user);
+  }
+
+  unblockButtonClicked(user: PublicUser): void {
+    this.dataAccess.submitUnblockClick(user);
   }
 
   gotoFollowers(userId: string): void {

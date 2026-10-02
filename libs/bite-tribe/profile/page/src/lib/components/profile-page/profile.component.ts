@@ -30,6 +30,7 @@ import { ProfileVisibility } from './components/profile-visibility';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const UNFOLLOW = 'unfollow';
+const BLOCK = 'block';
 const CANCEL = 'cancel';
 
 const PAGE_SIZE = 50;
@@ -64,6 +65,11 @@ export class ProfileComponent {
   user = input<PublicUser | undefined>();
   bites = input<Bite[]>();
   profileMetadata = input<ProfileMetaData>();
+  /**
+   * The signed-in user blocked this account (GitHub issue #1609). The page then
+   * shows only who it is and the way back, never the account's content.
+   */
+  isBlocked = input(false, { transform: booleanAttribute });
   userId = input<string>();
   subscriptionTier = computed((): number => {
     return this.user()?.subscriptionTier || 0;
@@ -119,11 +125,14 @@ export class ProfileComponent {
   readonly likeButtonClick = output<LikeClick>();
   readonly followButtonClick = output<PublicUser>();
   readonly unfollowButtonClick = output<PublicUser>();
+  readonly blockButtonClick = output<PublicUser>();
+  readonly unblockButtonClick = output<PublicUser>();
   readonly followersClick = output<string>();
   readonly followingClick = output<string>();
   readonly retryImageUpload = output<Bite>();
 
   isOpen = signal(false);
+  isBlockConfirmationOpen = signal(false);
   currentPage = signal<number>(1);
 
   // Only skeletonize while there is nothing to show. A reload of an already
@@ -140,6 +149,17 @@ export class ProfileComponent {
     {
       text: this.transloco.translate('yes-unfollow'),
       role: UNFOLLOW,
+    },
+  ];
+
+  blockConfirmationButtons = [
+    {
+      text: this.transloco.translate('cancel'),
+      role: CANCEL,
+    },
+    {
+      text: this.transloco.translate('yes-block'),
+      role: BLOCK,
     },
   ];
 
@@ -236,6 +256,31 @@ export class ProfileComponent {
     }
 
     this.isOpen.set(false);
+  }
+
+  openBlockConfirmationDialog(): void {
+    this.isBlockConfirmationOpen.set(true);
+  }
+
+  handleBlockConfirmationDismiss(event: CustomEvent<OverlayEventDetail>): void {
+    const user = this.user();
+
+    if (event.detail.role === BLOCK && user) {
+      // Destructive and confirmed, like the unfollow above (issue #1636).
+      void this.haptics.warning();
+
+      this.blockButtonClick.emit(user);
+    }
+
+    this.isBlockConfirmationOpen.set(false);
+  }
+
+  unblock(): void {
+    const user = this.user();
+
+    if (user) {
+      this.unblockButtonClick.emit(user);
+    }
   }
 
   onIonInfinite(event: InfiniteScrollCustomEvent): void {

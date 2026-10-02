@@ -56,57 +56,79 @@
             </ion-button>
           }
           @if (isUnfollowedUser()) {
-            @if (this.profileMetadata()?.isFollowedByMe) {
-              <ion-button fill="outline" (click)="openConfirmationDialog()"
-                >{{ 'stop-following' | transloco }}
+            @if (isBlocked()) {
+              <ion-button
+                fill="outline"
+                data-testid="profile-unblock"
+                (click)="unblock()"
+                >{{ 'unblock' | transloco }}
               </ion-button>
             } @else {
-              <ion-button fill="outline" (click)="onFollow()"
-                >{{ 'follow' | transloco }}
+              @if (this.profileMetadata()?.isFollowedByMe) {
+                <ion-button fill="outline" (click)="openConfirmationDialog()"
+                  >{{ 'stop-following' | transloco }}
+                </ion-button>
+              } @else {
+                <ion-button fill="outline" (click)="onFollow()"
+                  >{{ 'follow' | transloco }}
+                </ion-button>
+              }
+              <ion-button
+                fill="clear"
+                color="danger"
+                data-testid="profile-block"
+                (click)="openBlockConfirmationDialog()"
+                >{{ 'block' | transloco }}
               </ion-button>
             }
           }
         </div>
       </div>
 
-      @if (showVisibilityStatus()) {
-        <profile-visibility
-          [isPublic]="$safeNavigationMigration(userData?.public)"
-          (editClick)="gotoEditProfile.emit()"
-        />
-      }
-
-      <p class="profile-about">
-        {{ userData?.about || ('no-description-available' | transloco) }}
-      </p>
-
-      <country-flags
-        [countryCodes]="$safeNavigationMigration(userData?.countryCodes)"
-      />
-
-      <div class="bites-section">
-        <h2>{{ 'bites' | transloco }}</h2>
-
-        @if (displayedBites().length) {
-          @for (bite of displayedBites(); track bite.id) {
-            <bt-bite
-              [bite]="bite"
-              [userId]="currentUserId"
-              [showEditButton]="false"
-              [enableImageRetry]="enableImageRetry()"
-              (retryImageUpload)="retryImageUpload.emit($event)"
-              (biteClick)="biteClick.emit($event)"
-              (likeButtonClick)="likeButtonClick.emit($event)"
-            />
-          }
-        } @else {
-          <p class="empty-bites-message">{{ emptyBitesMessage() }}</p>
+      @if (isBlocked()) {
+        <p class="profile-blocked-message" data-testid="profile-blocked">
+          {{ 'you-blocked-this-account' | transloco }}
+        </p>
+      } @else {
+        @if (showVisibilityStatus()) {
+          <profile-visibility
+            [isPublic]="$safeNavigationMigration(userData?.public)"
+            (editClick)="gotoEditProfile.emit()"
+          />
         }
 
-        <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
-          <ion-infinite-scroll-content />
-        </ion-infinite-scroll>
-      </div>
+        <p class="profile-about">
+          {{ userData?.about || ('no-description-available' | transloco) }}
+        </p>
+
+        <country-flags
+          [countryCodes]="$safeNavigationMigration(userData?.countryCodes)"
+        />
+
+        <div class="bites-section">
+          <h2>{{ 'bites' | transloco }}</h2>
+
+          @if (displayedBites().length) {
+            @for (bite of displayedBites(); track bite.id) {
+              <bt-bite
+                [bite]="bite"
+                [userId]="currentUserId"
+                [showEditButton]="false"
+                [enableImageRetry]="enableImageRetry()"
+                (retryImageUpload)="retryImageUpload.emit($event)"
+                (biteClick)="biteClick.emit($event)"
+                (likeButtonClick)="likeButtonClick.emit($event)"
+              />
+            }
+          } @else {
+            <p class="empty-bites-message">{{ emptyBitesMessage() }}</p>
+          }
+
+          <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
+            <ion-infinite-scroll-content />
+          </ion-infinite-scroll>
+        </div>
+      }
 
       <!-- Show a message when no user data is available -->
       @if (!userData) {
@@ -135,5 +157,16 @@ surfaces read the same sentence in the same language. See GitHub issue #1343. --
     }}"
     [buttons]="confirmationButtons"
     (didDismiss)="handleConfirmationDismiss($event)"
+  />
+}
+
+<!-- Created only while a block awaits confirmation, for the reason above. -->
+@if (isBlockConfirmationOpen()) {
+  <ion-alert
+    [isOpen]="true"
+    header="{{ 'block-username' | transloco: { username: displayName() } }}"
+    message="{{ 'block-confirmation-message' | transloco }}"
+    [buttons]="blockConfirmationButtons"
+    (didDismiss)="handleBlockConfirmationDismiss($event)"
   />
 }

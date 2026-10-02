@@ -9,6 +9,9 @@ export class ProfilePage {
   readonly editProfile: Locator;
   readonly follow: Locator;
   readonly stopFollowing: Locator;
+  readonly block: Locator;
+  readonly unblock: Locator;
+  readonly blockedMessage: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -28,6 +31,15 @@ export class ProfilePage {
       name: 'Stop following',
       exact: true,
     });
+    this.block = page.locator(
+      'profile-page:visible [data-testid="profile-block"]',
+    );
+    this.unblock = page.locator(
+      'profile-page:visible [data-testid="profile-unblock"]',
+    );
+    this.blockedMessage = page.locator(
+      'profile-page:visible [data-testid="profile-blocked"]',
+    );
   }
 
   async openMyProfileFromMenu(): Promise<void> {
@@ -81,6 +93,14 @@ export class ProfilePage {
   async goBackToProfile(userId: string): Promise<void> {
     await this.page.locator('followers-list:visible ion-back-button').click();
     await this.page.waitForURL(`**/profile/${userId}`);
+  }
+
+  async confirmBlock(displayName: string): Promise<void> {
+    await this.block.click();
+    await this.page
+      .getByRole('alertdialog', { name: `Block @${displayName}?` })
+      .getByRole('button', { name: 'Yes, block', exact: true })
+      .click();
   }
 
   async confirmUnfollow(): Promise<void> {

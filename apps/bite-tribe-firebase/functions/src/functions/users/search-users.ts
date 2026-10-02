@@ -2,6 +2,7 @@ import { QueryDocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
+import { isBlockedUid, loadBlockedUids } from '../shared/utils/user-blocks';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -52,11 +53,22 @@ export const searchUsers = onAppCheck<SearchUsersRequest>(async (request) => {
     return [];
   }
 
-  const usersSnapshot = await getFirestore().collection('users').get();
+  const db = getFirestore();
+  const [usersSnapshot, blockedUids] = await Promise.all([
+    db.collection('users').get(),
+    loadBlockedUids(db, request.auth.uid),
+  ]);
 
   return usersSnapshot.docs
     .filter((doc) => {
       const user = doc.data();
+
+      // An account the caller blocked is not offered back to them (GitHub
+      // issue #1609). Checked on the document id, which is the uid even on a
+      // document that lost its `userId` field.
+      if (isBlockedUid(doc.id, blockedUids)) {
+        return false;
+      }
       const displayName =
         typeof user['displayName'] === 'string'
           ? user['displayName'].toLocaleLowerCase()

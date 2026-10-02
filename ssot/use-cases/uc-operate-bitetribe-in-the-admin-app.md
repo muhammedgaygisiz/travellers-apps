@@ -125,11 +125,12 @@ category at a **13+** age rating.
 **This page owns the operator half, and it ships**: an operator removes a Bite ([#1475]) and
 blocks an account ([#1474]), with the contact address delivered by [#1429].
 
-**The user-facing half does not exist**, and `RD-UR-7` classes the set `[MVP]`. Reporting,
-user-to-user blocking and content filtering have no surface in the consumer app; each is owned
-by an issue as of 14 September 2026 - [#1608] reporting a Bite, [#1609] blocking another user,
-[#1610] filtering before publication. Epic [#1284] covers reporting inside a review thread only.
-Not this page's behaviour, but this page is where the half that exists lives.
+**The user-facing half exists only in part**, and `RD-UR-7` classes the set `[MVP]`.
+User-to-user blocking ships with [#1609], in [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md). Reporting and
+content filtering have no surface in the consumer app; each is owned by an issue as of
+14 September 2026 - [#1608] reporting a Bite, [#1610] filtering before publication. Epic
+[#1284] covers reporting inside a review thread only. Not this page's behaviour, but this page
+is where the operator half lives.
 
 ## Supported Evidence
 

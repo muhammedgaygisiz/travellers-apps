@@ -70,6 +70,28 @@ describe('Bites Selectors', () => {
     });
   });
 
+  // GitHub issue #1609.
+  describe('bitesWithMetadata', () => {
+    it('leaves out the Bites of an account the user blocked', () => {
+      const result = fromHomeSelectors.bitesWithMetadata.projector(
+        [
+          { id: 'kept', userId: 'someone' } as Bite,
+          { id: 'blocked', userId: 'blocked-user' } as Bite,
+          { id: 'anonymous' } as Bite,
+        ],
+        [{ id: 'latest-blocked', userId: 'blocked-user' } as Bite],
+        [],
+        undefined,
+        ['blocked-user'],
+      );
+
+      expect(result.map((bite) => bite.id).sort()).toEqual([
+        'anonymous',
+        'kept',
+      ]);
+    });
+  });
+
   describe('bites', () => {
     it('should return all bites with metadata when no filters are applied', () => {
       const bitesWithMetadata = [

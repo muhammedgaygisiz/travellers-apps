@@ -78,7 +78,8 @@ Granted today: yes. Target state, not implemented: **target**. Not granted: no.
 | **Create and publish a BiteTrail**                                                          | no                        | yes, today ³     | **target** ³             |
 | Acquire a BiteTrail as a Bucketlist                                                         | yes                       | yes              | yes                      |
 | Write `bite.restaurantId`                                                                   | yes, via verification     | no               | yes, via the Bite form ⁴ |
-| Report content and block another user                                                       | **target** ⁵              | **target** ⁵     | **target** ⁵             |
+| Report content                                                                              | **target** ⁵              | **target** ⁵     | **target** ⁵             |
+| Block another user                                                                          | yes ⁵                     | yes ⁵            | yes ⁵                    |
 | Act on a report: block an account, delete a Bite                                            | yes ⁵                     | no               | no                       |
 
 ¹ `RD-UR-6`: the Operator maintains **every** Restaurant, claimed or unclaimed, from the
@@ -111,9 +112,10 @@ the edit path; see
 ⁵ `RD-UR-7` fixes the required set and classes it `[MVP]`. Bite Creator carrying no claim
 means there is no grant to revoke either. **The operator half shipped**: block an account
 ([#1474]) and delete a Bite ([#1475]) with epic [#1471], the contact address with [#1429];
-the report queue is epic [#1284], open. **The user-facing half - reporting, user-to-user
-blocking, content filtering - does not exist**, and each part has had an owning issue since
-14 September 2026: [#1608] reporting a Bite, [#1609] blocking another user, [#1610] filtering
+the report queue is epic [#1284], open. **Of the user-facing half, only user-to-user
+blocking has shipped** ([#1609]): any account blocks another from its profile, per
+[UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md). **Reporting and content filtering do not exist**, and each
+has had an owning issue since 14 September 2026: [#1608] reporting a Bite, [#1610] filtering
 before publication. Epic [#1284] is narrower than it looks - it moderates review threads, so it
 covers reporting inside a thread and nothing else. Store requirement
 rather than product polish:

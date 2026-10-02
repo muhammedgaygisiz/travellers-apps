@@ -42,6 +42,7 @@ import type {
   Settings,
 } from 'model';
 import {
+  blockedUserIds,
   currency,
   exchangeRates,
   favCurrencies,
@@ -162,6 +163,7 @@ export class BiteTribeStoreService implements StoreService {
   homeFilters$ = this.store.select(homeFilters);
   homeDistance$ = this.store.select(homeDistance);
   profileMetadata$ = this.store.select(profileMetadata);
+  blockedUserIds$ = this.store.select(blockedUserIds);
 
   type$ = this.store.select(followType);
   userIdFromUrl$ = this.store.select(userIdFromUrl);
@@ -409,6 +411,14 @@ export class BiteTribeStoreService implements StoreService {
 
   unfollowUser(user: PublicUser): void {
     this.store.dispatch(AppActions.unfollowUser({ user }));
+  }
+
+  blockUser(user: PublicUser): void {
+    this.store.dispatch(AppActions.blockUser({ user }));
+  }
+
+  unblockUser(user: PublicUser): void {
+    this.store.dispatch(AppActions.unblockUser({ user }));
   }
 
   updateLastSeen(): void {

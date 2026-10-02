@@ -57,6 +57,7 @@ jest.mock('../../shared/utils/leaderboard', () => ({
 import {
   assertRecentSignIn,
   deleteAccountForUser,
+  deleteBlockEdgesForUser,
   deleteFollowEdgesForUser,
   deleteOwnAccountHandler,
   refreshLeaderboardsAfterDeletion,
@@ -140,6 +141,29 @@ describe('deleteFollowEdgesForUser', () => {
     expect(db.exists(`users/follower-1/following/${UID}`)).toBe(false);
     expect(db.exists(`users/${UID}/following/followed-1`)).toBe(false);
     expect(db.exists(`users/followed-1/followers/${UID}`)).toBe(false);
+  });
+});
+
+describe('deleteBlockEdgesForUser', () => {
+  beforeEach(() => {
+    db = createFakeFirestore();
+  });
+
+  it('removes both sides of every block the user placed or received', async () => {
+    db.seed(`users/${UID}/blocked/blocked-1`, {});
+    db.seed(`users/blocked-1/blockedBy/${UID}`, {});
+    db.seed(`users/${UID}/blockedBy/blocker-1`, {});
+    db.seed(`users/blocker-1/blocked/${UID}`, {});
+    db.seed('users/blocker-1/blocked/someone-else', {});
+
+    const deleted = await deleteBlockEdgesForUser(asFirestore(db), UID);
+
+    expect(deleted).toBe(4);
+    expect(db.exists(`users/${UID}/blocked/blocked-1`)).toBe(false);
+    expect(db.exists(`users/blocked-1/blockedBy/${UID}`)).toBe(false);
+    expect(db.exists(`users/${UID}/blockedBy/blocker-1`)).toBe(false);
+    expect(db.exists(`users/blocker-1/blocked/${UID}`)).toBe(false);
+    expect(db.exists('users/blocker-1/blocked/someone-else')).toBe(true);
   });
 });
 
@@ -334,6 +358,7 @@ describe('deleteAccountForUser', () => {
       deletedRatings: 1,
       anonymizedSales: 1,
       deletedFollowEdges: 0,
+      deletedBlockEdges: 0,
       deletedPushTokens: 1,
       deletedRestaurantStaff: 1,
     });

@@ -44,6 +44,11 @@ export const AppActions = createActionGroup({
     // the optimistic update is exact and reconciles on the next navigation.
     'Followed user': emptyProps(),
     'Unfollowed user': emptyProps(),
+    'Loaded blocked users': props<{ userIds: string[] }>(),
+    'Block user': props<{ user: PublicUser }>(),
+    'Blocked user': props<{ userId: string }>(),
+    'Unblock user': props<{ user: PublicUser }>(),
+    'Unblocked user': props<{ userId: string }>(),
     'Loaded exchange rates from API': props<{
       exchangeRates: Record<string, number>;
     }>(),

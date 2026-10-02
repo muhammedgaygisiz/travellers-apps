@@ -100,4 +100,37 @@ describe('searchBites', () => {
 
     expect(result.map((bite) => bite.id)).toEqual(['listed']);
   });
+
+  /** GitHub issue #1609. */
+  it('leaves out the Bites of an account the caller blocked', async () => {
+    const blockedList = {
+      get: jest.fn().mockResolvedValue({ docs: [{ id: 'poster' }] }),
+    };
+
+    (getFirestore as jest.Mock).mockReturnValue({
+      collection: jest.fn((name: string) =>
+        name === 'users'
+          ? {
+              doc: (): { collection: () => typeof blockedList } => ({
+                collection: (): typeof blockedList => blockedList,
+              }),
+            }
+          : {
+              get: jest.fn().mockResolvedValue({
+                docs: [
+                  biteDoc('blocked'),
+                  biteDoc('other', { userId: 'someone-else' }),
+                ],
+              }),
+            },
+      ),
+    });
+
+    const result = await handler({
+      auth: { uid: 'viewer' },
+      data: { searchText: 'pizza' },
+    });
+
+    expect(result.map((bite) => bite.id)).toEqual(['other']);
+  });
 });

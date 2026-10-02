@@ -138,6 +138,7 @@ describe('searchBitesByCountry', () => {
       id: 'bite-0',
       name: 'Bite 0',
       place: 'Bite 0 place',
+      userId: 'poster',
     });
   });
 

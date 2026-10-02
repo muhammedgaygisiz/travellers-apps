@@ -1,4 +1,10 @@
-import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
+import {
+  computed,
+  inject,
+  Injectable,
+  resource,
+  ResourceLoader,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -68,6 +74,18 @@ export class ProfileDataAccessService {
 
   profileMetadata = toSignal(this.storeService.profileMetadata$);
 
+  private readonly blockedUserIds = toSignal(
+    this.storeService.blockedUserIds$,
+    { initialValue: [] as string[] },
+  );
+
+  /** Whether the signed-in user blocked the profile on screen (#1609). */
+  isBlockedByMe = computed((): boolean => {
+    const profileOwner = this.userValue()?.userId;
+
+    return !!profileOwner && this.blockedUserIds().includes(profileOwner);
+  });
+
   logout(): void {
     this.storeService.logout();
   }
@@ -92,5 +110,13 @@ export class ProfileDataAccessService {
 
   submitUnfollowClick(user: PublicUser): void {
     this.storeService.unfollowUser(user);
+  }
+
+  submitBlockClick(user: PublicUser): void {
+    this.storeService.blockUser(user);
+  }
+
+  submitUnblockClick(user: PublicUser): void {
+    this.storeService.unblockUser(user);
   }
 }

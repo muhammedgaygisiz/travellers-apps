@@ -55,6 +55,11 @@ export const locationPermissionState = createSelector(
   (state) => state?.locationPermissionState,
 );
 
+export const blockedUserIds = createSelector(
+  slice,
+  (state) => state?.blockedUserIds ?? [],
+);
+
 export const profileMetadata = createSelector(
   slice,
   (state) => state?.profileMetadata,

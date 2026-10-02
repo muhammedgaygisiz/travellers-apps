@@ -1,4 +1,11 @@
-import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
+import {
+  computed,
+  inject,
+  Injectable,
+  resource,
+  ResourceLoader,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ProfileApiService } from 'bite-tribe/api';
 import type { PublicUser } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
@@ -10,6 +17,11 @@ export class FollowersDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
 
   type = this.storeService.type;
+
+  private readonly blockedUserIds = toSignal(
+    this.storeService.blockedUserIds$,
+    { initialValue: [] as string[] },
+  );
 
   usersLoader: ResourceLoader<
     PublicUser[],
@@ -44,7 +56,17 @@ export class FollowersDataAccessService {
    * from the template that took the whole list page down with it rather than
    * reporting anything. See GitHub issue #1232.
    */
-  usersValue = resourceValue(this.users, [] as PublicUser[]);
+  private readonly loadedUsers = resourceValue(this.users, [] as PublicUser[]);
+
+  /**
+   * Without the accounts the signed-in user blocked (GitHub issue #1609), on
+   * anybody's list, not only their own.
+   */
+  usersValue = computed((): PublicUser[] => {
+    const blocked = new Set(this.blockedUserIds());
+
+    return this.loadedUsers().filter((user) => !blocked.has(user.userId));
+  });
 
   /** True once the read failed, so the list can say so instead of looking empty. */
   usersFailed = resourceFailed(this.users);

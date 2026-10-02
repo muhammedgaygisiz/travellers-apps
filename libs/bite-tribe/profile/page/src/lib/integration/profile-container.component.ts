@@ -14,6 +14,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [bites]="service.bitesByUser()"
       [userId]="service.userId()"
       [profileMetadata]="service.profileMetadata()"
+      [isBlocked]="service.isBlockedByMe()"
       (biteClick)="service.biteClicked($event)"
       enableImageRetry
       (retryImageUpload)="service.retryBiteImageUpload($event)"
@@ -23,6 +24,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (gotoEditProfile)="service.gotoEditProfile()"
       (followButtonClick)="service.followButtonClicked($event)"
       (unfollowButtonClick)="service.unfollowButtonClicked($event)"
+      (blockButtonClick)="service.blockButtonClicked($event)"
+      (unblockButtonClick)="service.unblockButtonClicked($event)"
       (followersClick)="service.gotoFollowers($event)"
       (followingClick)="service.gotoFollowing($event)"
     />

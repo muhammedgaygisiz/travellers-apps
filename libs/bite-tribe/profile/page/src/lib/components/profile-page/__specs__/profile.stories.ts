@@ -201,3 +201,14 @@ export const NoFollowersOrFollowing: Story = {
     bites: [bite],
   },
 };
+
+/** The profile of an account the signed-in user blocked (GitHub issue #1609). */
+export const BlockedAccount: Story = {
+  args: {
+    user: baseUser,
+    userId: currentUserId,
+    profileMetadata: noProfileMetadata,
+    bites: [bite],
+    isBlocked: true,
+  },
+};

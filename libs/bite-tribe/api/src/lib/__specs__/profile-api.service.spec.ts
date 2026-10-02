@@ -697,6 +697,97 @@ describe(ProfileApiService.name, () => {
     ));
   });
 
+  // GitHub issue #1609.
+  describe('blockUser', () => {
+    it('should call the blockUser firebase function for the account', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+          data: { blocked: true },
+        });
+
+        await service.blockUser('other');
+
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'blockUser',
+          data: { uid: 'other' },
+        });
+      },
+    ));
+
+    it('should leave a failure to the caller', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFunctions.callByName)
+          .mockRejectedValue(new Error('internal'));
+
+        await expect(service.blockUser('other')).rejects.toThrow('internal');
+      },
+    ));
+  });
+
+  describe('unblockUser', () => {
+    it('should call the unblockUser firebase function for the account', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+          data: { blocked: false },
+        });
+
+        await service.unblockUser('other');
+
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'unblockUser',
+          data: { uid: 'other' },
+        });
+      },
+    ));
+  });
+
+  describe('fetchBlockedUserIds', () => {
+    it("should read the signed-in user's own block list", inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.mocked(FirebaseFirestore.getCollection).mockResolvedValue({
+          snapshots: [{ id: 'a' }, { id: 'b' }],
+        } as never);
+
+        const result = await service.fetchBlockedUserIds();
+
+        expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
+          reference: 'users/123/blocked',
+        });
+        expect(result).toEqual(['a', 'b']);
+      },
+    ));
+
+    it('should answer with no blocks when the read fails', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFirestore.getCollection)
+          .mockRejectedValue(new Error('permission-denied'));
+
+        await expect(service.fetchBlockedUserIds()).resolves.toEqual([]);
+        expect(MockedErrorHandler.handleError).toHaveBeenCalled();
+      },
+    ));
+
+    it('should answer with no blocks without a signed-in user', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const getUser = jest
+          .spyOn(MockedAuthService, 'getUser')
+          .mockReturnValue(undefined);
+
+        await expect(service.fetchBlockedUserIds()).resolves.toEqual([]);
+
+        getUser.mockRestore();
+      },
+    ));
+  });
+
   describe('checkDisplayNameAvailability', () => {
     it('should call checkDisplayNameAvailability firebase function', inject(
       [ProfileApiService],

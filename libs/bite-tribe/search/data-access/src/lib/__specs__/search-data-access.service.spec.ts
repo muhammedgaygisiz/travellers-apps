@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { SearchDataAccessService } from '../search-data-access.service';
+import { BiteTribeStoreService } from 'bite-tribe/store';
+import { BehaviorSubject } from 'rxjs';
 
 jest.mock('@capacitor-firebase/functions', () => ({
   FirebaseFunctions: {
@@ -8,15 +10,21 @@ jest.mock('@capacitor-firebase/functions', () => ({
   },
 }));
 
+const blockedUserIds$ = new BehaviorSubject<string[]>([]);
+
 describe(SearchDataAccessService.name, () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    blockedUserIds$.next([]);
     jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({ data: [] });
   });
 
   const createService = (): SearchDataAccessService => {
     TestBed.configureTestingModule({
-      providers: [SearchDataAccessService],
+      providers: [
+        SearchDataAccessService,
+        { provide: BiteTribeStoreService, useValue: { blockedUserIds$ } },
+      ],
     });
 
     return TestBed.inject(SearchDataAccessService);
@@ -206,5 +214,31 @@ describe(SearchDataAccessService.name, () => {
       },
     });
     expect(result).toEqual([]);
+  });
+
+  // GitHub issue #1609.
+  it('drops results by an account blocked while they were on screen', async () => {
+    jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+      data: [
+        { id: 'kept', name: 'Pizza', place: 'Here', userId: 'someone' },
+        { id: 'blocked', name: 'Pizza', place: 'There', userId: 'blocked' },
+        { id: 'anonymous', name: 'Pizza', place: 'Nowhere' },
+      ],
+    });
+    const service = createService();
+
+    service.searchCategory.set('bite');
+    service.searchText.set('pizza');
+    TestBed.tick();
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(service.visibleResults()).toHaveLength(3);
+
+    blockedUserIds$.next(['blocked']);
+
+    expect(service.visibleResults().map((result) => result.value.id)).toEqual([
+      'kept',
+      'anonymous',
+    ]);
   });
 });

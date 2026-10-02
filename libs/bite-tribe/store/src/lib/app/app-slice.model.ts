@@ -17,6 +17,13 @@ export type AppSlice = {
     isFollowedByMe: boolean;
   };
   exchangeRates: Record<string, number>;
+  /**
+   * The accounts the signed-in user has blocked (GitHub issue #1609). Content
+   * by them is filtered out of every surface that reads from the store, so a
+   * block takes effect on what is already loaded rather than on the next
+   * fetch. Loaded once after login and kept current by the block actions.
+   */
+  blockedUserIds: string[];
   errorLoadingGpsPosition: boolean;
   /**
    * The last feed synchronization did not deliver bites. It is kept apart from

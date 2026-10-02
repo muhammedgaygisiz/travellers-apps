@@ -9,6 +9,7 @@ import { onAppCheck } from '../shared/callable-options';
 import { getPreviousWeekBounds } from '../shared/utils/week-bounds';
 import { requireMember } from '../shared/roles';
 import { isBiteVisibleTo } from '../shared/utils/bite-listability';
+import { isBlockedUid, loadBlockedUids } from '../shared/utils/user-blocks';
 
 const BITE_COLLECTION = 'bites';
 const MAX_RESULTS = 200;
@@ -76,11 +77,13 @@ export const resolveWeekBounds = (
  * return fewer than the page holds whenever a hidden Bite fell inside it, and
  * an index on `imageStatus` could never admit the caller's own hidden Bites
  * (GitHub issue #1717). Stops at the first short page, so a week with nothing
- * hidden costs the one read it always did.
+ * hidden costs the one read it always did. A Bite by an account the caller
+ * blocked counts as hidden (GitHub issue #1609).
  */
 export const loadVisibleWeeklyBites = async (
   query: Query,
   viewerUid: string,
+  blockedUids: ReadonlySet<string> = new Set(),
 ): Promise<{ bites: WeeklyBite[]; read: number }> => {
   const bites: WeeklyBite[] = [];
   let read = 0;
@@ -95,7 +98,8 @@ export const loadVisibleWeeklyBites = async (
     for (const doc of snapshot.docs) {
       if (
         bites.length < MAX_RESULTS &&
-        isBiteVisibleTo(doc.data(), viewerUid)
+        isBiteVisibleTo(doc.data(), viewerUid) &&
+        !isBlockedUid(doc.data()['userId'], blockedUids)
       ) {
         bites.push(toWeeklyBite(doc));
       }
@@ -130,7 +134,8 @@ export const loadWeeklyBites = onAppCheck<LoadWeeklyBitesRequest>(
 
     const { start, end } = resolveWeekBounds(request.data ?? {});
 
-    const query = getFirestore()
+    const db = getFirestore();
+    const query = db
       .collection(BITE_COLLECTION)
       .where('createdAtTimestamp', '>=', start)
       .where('createdAtTimestamp', '<=', end)
@@ -139,6 +144,7 @@ export const loadWeeklyBites = onAppCheck<LoadWeeklyBitesRequest>(
     const { bites, read } = await loadVisibleWeeklyBites(
       query,
       request.auth.uid,
+      await loadBlockedUids(db, request.auth.uid),
     );
 
     logger.info('loadWeeklyBites: query finished', {

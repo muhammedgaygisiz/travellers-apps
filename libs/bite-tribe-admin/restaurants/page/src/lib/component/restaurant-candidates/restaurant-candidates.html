@@ -38,6 +38,14 @@
             <p>{{ 'no-restaurant-candidates-found' | transloco }}</p>
             }
           </ion-list>
+          @if (hasMore()) {
+          <ion-text color="medium" data-testid="restaurant-candidates-more">
+            <p>
+              {{ 'restaurant-candidates-more-pending' | transloco: { count:
+              candidates().length } }}
+            </p>
+          </ion-text>
+          }
         </ion-card-content>
       </ion-card>
     </div>

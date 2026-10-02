@@ -21,6 +21,7 @@ describe('RestaurantsService', () => {
   beforeEach(() => {
     dataAccessMock = {
       restaurantCandidatesValue: jest.fn().mockReturnValue([]),
+      restaurantCandidatesHasMore: jest.fn().mockReturnValue(false),
       bitePlacesValue: jest.fn().mockReturnValue([]),
       selectRestaurantToCreate: jest.fn(),
       logout: jest.fn(),

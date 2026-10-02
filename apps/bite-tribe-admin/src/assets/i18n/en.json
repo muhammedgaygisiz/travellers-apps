@@ -115,6 +115,7 @@
   "candidate-evidence-count": "{{count}} Bite evidence",
   "candidate-nearby-bite-evidence": "Nearby Bite evidence",
   "no-restaurant-candidates-found": "No pending restaurant candidates found.",
+  "restaurant-candidates-more-pending": "Showing the {{count}} strongest candidates. More are pending.",
   "place-name-label": "Place Name?",
   "name": "Name",
   "cancel": "Cancel",

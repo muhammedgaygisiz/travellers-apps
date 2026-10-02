@@ -96,4 +96,33 @@ describe(RestaurantCandidates.name, () => {
 
     expect(emitSpy).toHaveBeenCalledWith(candidate);
   });
+  describe('when more candidates are pending than are shown', () => {
+    const candidates = [
+      { id: 'candidate-1', name: 'Pizza Palace', biteIds: [], bites: [] },
+      { id: 'candidate-2', name: 'Taco Town', biteIds: [], bites: [] },
+    ] as unknown as AdminRestaurantCandidate[];
+
+    const moreStatement = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="restaurant-candidates-more"]',
+      );
+
+    it('should say more are pending', () => {
+      compRef.setInput('candidates', candidates);
+      compRef.setInput('hasMore', true);
+      fixture.detectChanges();
+
+      expect(moreStatement()?.textContent).toContain(
+        'restaurant-candidates-more-pending:{"count":2}',
+      );
+    });
+
+    it('should say nothing when every pending candidate is shown', () => {
+      compRef.setInput('candidates', candidates);
+      compRef.setInput('hasMore', false);
+      fixture.detectChanges();
+
+      expect(moreStatement()).toBeNull();
+    });
+  });
 });

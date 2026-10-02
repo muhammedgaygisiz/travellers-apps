@@ -1,4 +1,5 @@
 import {
+  computed,
   inject,
   Injectable,
   resource,
@@ -56,6 +57,17 @@ export interface BitePlace {
 /** A pending candidate together with the Bites that are the evidence for it. */
 export interface AdminRestaurantCandidate extends RestaurantCandidate {
   bites: Bite[];
+}
+
+/**
+ * The candidates the list shows, and whether more are pending beyond them.
+ *
+ * `hasMore` comes from reading one past the limit rather than from a count:
+ * a count aggregation is unverified in the Capacitor Firestore plugin.
+ */
+export interface AdminRestaurantCandidatePage {
+  candidates: AdminRestaurantCandidate[];
+  hasMore: boolean;
 }
 
 export interface VerifyRestaurantCandidateRequest {
@@ -204,46 +216,101 @@ export class RestaurantsDataAccessService {
       }));
   };
 
+  /**
+   * The pending candidates, strongest evidence first, newest first among
+   * equals (`RD-VRC-16`, issue #1506).
+   *
+   * The order is in the query rather than a sort over what came back: the
+   * defect it fixes is _which_ candidates a limited read returns, and without
+   * an `orderBy` that was always the alphabetically-first five by document id.
+   *
+   * One more than the limit is read so the surface can say more are pending;
+   * only the limit is kept, and only those candidates' Bites are read.
+   *
+   * Firestore leaves out a document that lacks a field it orders by, so a
+   * candidate without `evidence.biteCount` or `createdAtTimestamp` would vanish
+   * rather than sort last. `buildCandidateUpdate` writes both, so that should
+   * never happen; an unordered read of the same filter catches any that does
+   * and puts it after the ordered ones.
+   */
   restaurantCandidatesLoader: ResourceLoader<
-    AdminRestaurantCandidate[] | undefined,
+    AdminRestaurantCandidatePage | undefined,
     unknown
   > = async () => {
-    const docs = await FirebaseFirestore.getCollection({
-      reference: RESTAURANT_CANDIDATES_COLLECTION,
-      compositeFilter: {
-        type: 'and',
-        queryConstraints: [
-          {
-            type: 'where',
-            fieldPath: 'status',
-            opStr: '==',
-            value: 'pending',
-          },
-        ],
-      },
+    const pendingOnly = {
+      type: 'and' as const,
       queryConstraints: [
         {
-          type: 'limit',
-          limit: RESTAURANT_CANDIDATES_LIMIT,
+          type: 'where' as const,
+          fieldPath: 'status',
+          opStr: '==' as const,
+          value: 'pending',
         },
       ],
-    });
+    };
+    const fetchLimit = {
+      type: 'limit' as const,
+      limit: RESTAURANT_CANDIDATES_LIMIT + 1,
+    };
 
-    if (!docs?.snapshots?.length) {
-      return [];
+    const [ordered, unordered] = await Promise.all([
+      FirebaseFirestore.getCollection({
+        reference: RESTAURANT_CANDIDATES_COLLECTION,
+        compositeFilter: pendingOnly,
+        queryConstraints: [
+          {
+            type: 'orderBy',
+            fieldPath: 'evidence.biteCount',
+            directionStr: 'desc',
+          },
+          {
+            type: 'orderBy',
+            fieldPath: 'createdAtTimestamp',
+            directionStr: 'desc',
+          },
+          fetchLimit,
+        ],
+      }),
+      FirebaseFirestore.getCollection({
+        reference: RESTAURANT_CANDIDATES_COLLECTION,
+        compositeFilter: pendingOnly,
+        queryConstraints: [fetchLimit],
+      }),
+    ]);
+
+    const orderedCandidates = (ordered?.snapshots ?? []).map(
+      toRestaurantCandidate,
+    );
+    const orderedIds = new Set(orderedCandidates.map(({ id }) => id));
+    const unorderable = (unordered?.snapshots ?? [])
+      .map(toRestaurantCandidate)
+      .filter(
+        (candidate) =>
+          !orderedIds.has(candidate.id) &&
+          (candidate.evidence?.biteCount === undefined ||
+            candidate.createdAtTimestamp === undefined),
+      );
+    const fetched = [...orderedCandidates, ...unorderable];
+    const candidates = fetched.slice(0, RESTAURANT_CANDIDATES_LIMIT);
+    const hasMore = fetched.length > RESTAURANT_CANDIDATES_LIMIT;
+
+    if (!candidates.length) {
+      return { candidates: [], hasMore };
     }
 
-    const candidates = docs.snapshots.map(toRestaurantCandidate);
     const bitesById = await this.loadBitesById(
       candidates.flatMap((candidate) => candidate.biteIds ?? []),
     );
 
-    return candidates.map((candidate) => ({
-      ...candidate,
-      bites: (candidate.biteIds ?? [])
-        .map((biteId) => bitesById.get(biteId))
-        .filter((bite): bite is Bite => !!bite),
-    }));
+    return {
+      candidates: candidates.map((candidate) => ({
+        ...candidate,
+        bites: (candidate.biteIds ?? [])
+          .map((biteId) => bitesById.get(biteId))
+          .filter((bite): bite is Bite => !!bite),
+      })),
+      hasMore,
+    };
   };
 
   restaurantCandidates = resource({
@@ -334,9 +401,16 @@ export class RestaurantsDataAccessService {
   });
 
   // Guarded reads: `value()` throws once a read has failed (issue #1232).
-  restaurantCandidatesValue = resourceValue(
+  private readonly restaurantCandidatePage = resourceValue(
     this.restaurantCandidates,
-    [] as AdminRestaurantCandidate[],
+    { candidates: [], hasMore: false } as AdminRestaurantCandidatePage,
+  );
+  restaurantCandidatesValue = computed(
+    () => this.restaurantCandidatePage().candidates,
+  );
+  /** True when more candidates are pending than the list shows. */
+  restaurantCandidatesHasMore = computed(
+    () => this.restaurantCandidatePage().hasMore,
   );
   bitePlacesValue = resourceValue(this.bitePlaces, [] as BitePlace[]);
   tableSessionsValue = resourceValue(

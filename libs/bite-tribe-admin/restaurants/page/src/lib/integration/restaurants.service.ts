@@ -20,6 +20,7 @@ export class RestaurantsService {
   private readonly navController = inject(NavController);
 
   readonly candidates = this.dataAccess.restaurantCandidatesValue;
+  readonly hasMoreCandidates = this.dataAccess.restaurantCandidatesHasMore;
   readonly places = this.dataAccess.bitePlacesValue;
 
   /** Every table session in BiteTribe, for the operator's list (issue #1629). */

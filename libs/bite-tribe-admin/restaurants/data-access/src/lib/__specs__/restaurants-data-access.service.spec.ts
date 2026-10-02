@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
@@ -139,19 +141,90 @@ describe(RestaurantsDataAccessService.name, () => {
   });
 
   describe('restaurantCandidatesLoader', () => {
-    it('should load the top pending restaurant candidates with Bite evidence', async () => {
-      jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
-        snapshots: [
+    const pendingOnly = {
+      type: 'and',
+      queryConstraints: [
+        {
+          type: 'where',
+          fieldPath: 'status',
+          opStr: '==',
+          value: 'pending',
+        },
+      ],
+    };
+
+    const candidateDoc = (
+      id: string,
+      data: Record<string, unknown> = {},
+    ): { id: string; data: Record<string, unknown> } => ({
+      id,
+      data: {
+        name: id,
+        status: 'pending',
+        biteIds: [],
+        evidence: { biteCount: 1 },
+        createdAtTimestamp: 1,
+        ...data,
+      },
+    });
+
+    const isOrderedQuery = (options: unknown): boolean =>
+      (
+        options as { queryConstraints: { type: string }[] }
+      ).queryConstraints.some(({ type }) => type === 'orderBy');
+
+    /** Answers the ordered read and the unordered fallback separately. */
+    const mockCandidateReads = (
+      ordered: ReturnType<typeof candidateDoc>[],
+      unordered: ReturnType<typeof candidateDoc>[] = ordered,
+    ): void => {
+      jest.spyOn(FirebaseFirestore, 'getCollection').mockImplementation(
+        async (options) =>
+          ({
+            snapshots: isOrderedQuery(options) ? ordered : unordered,
+          }) as unknown as FirestoreCollection,
+      );
+    };
+
+    it('should order pending candidates by evidence, then newest first, reading one past the limit', async () => {
+      mockCandidateReads([]);
+
+      const service = TestBed.inject(RestaurantsDataAccessService);
+      await service.restaurantCandidatesLoader({} as never);
+
+      expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
+        reference: RESTAURANT_CANDIDATES_COLLECTION,
+        compositeFilter: pendingOnly,
+        queryConstraints: [
           {
-            id: 'candidate-1',
-            data: {
-              name: 'Pizza Palace',
-              status: 'pending',
-              biteIds: ['bite-1', 'bite-2'],
-            },
+            type: 'orderBy',
+            fieldPath: 'evidence.biteCount',
+            directionStr: 'desc',
           },
+          {
+            type: 'orderBy',
+            fieldPath: 'createdAtTimestamp',
+            directionStr: 'desc',
+          },
+          { type: 'limit', limit: RESTAURANT_CANDIDATES_LIMIT + 1 },
         ],
-      } as unknown as FirestoreCollection);
+      });
+      expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
+        reference: RESTAURANT_CANDIDATES_COLLECTION,
+        compositeFilter: pendingOnly,
+        queryConstraints: [
+          { type: 'limit', limit: RESTAURANT_CANDIDATES_LIMIT + 1 },
+        ],
+      });
+    });
+
+    it('should load the pending restaurant candidates with Bite evidence', async () => {
+      mockCandidateReads([
+        candidateDoc('candidate-1', {
+          name: 'Pizza Palace',
+          biteIds: ['bite-1', 'bite-2'],
+        }),
+      ]);
       jest
         .spyOn(FirebaseFirestore, 'getDocument')
         .mockResolvedValueOnce({
@@ -170,79 +243,136 @@ describe(RestaurantsDataAccessService.name, () => {
       const service = TestBed.inject(RestaurantsDataAccessService);
       const result = await service.restaurantCandidatesLoader({} as never);
 
-      expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
-        reference: RESTAURANT_CANDIDATES_COLLECTION,
-        compositeFilter: {
-          type: 'and',
-          queryConstraints: [
-            {
-              type: 'where',
-              fieldPath: 'status',
-              opStr: '==',
-              value: 'pending',
-            },
-          ],
-        },
-        queryConstraints: [
-          {
-            type: 'limit',
-            limit: RESTAURANT_CANDIDATES_LIMIT,
-          },
-        ],
-      });
       expect(FirebaseFirestore.getDocument).toHaveBeenCalledWith({
         reference: `${BITE_COLLECTION}/bite-1`,
       });
       expect(FirebaseFirestore.getDocument).toHaveBeenCalledWith({
         reference: `${BITE_COLLECTION}/bite-2`,
       });
-      expect(result).toEqual([
-        {
-          id: 'candidate-1',
-          name: 'Pizza Palace',
-          status: 'pending',
-          biteIds: ['bite-1', 'bite-2'],
-          bites: [
-            {
-              id: 'bite-1',
-              name: 'Margherita',
-              place: 'Pizza Palace',
-            },
-            {
-              id: 'bite-2',
-              name: 'Calzone',
-              place: 'Pizza Palace',
-            },
-          ],
-        },
-      ]);
+      expect(result).toEqual({
+        candidates: [
+          {
+            id: 'candidate-1',
+            name: 'Pizza Palace',
+            status: 'pending',
+            biteIds: ['bite-1', 'bite-2'],
+            evidence: { biteCount: 1 },
+            createdAtTimestamp: 1,
+            bites: [
+              {
+                id: 'bite-1',
+                name: 'Margherita',
+                place: 'Pizza Palace',
+              },
+              {
+                id: 'bite-2',
+                name: 'Calzone',
+                place: 'Pizza Palace',
+              },
+            ],
+          },
+        ],
+        hasMore: false,
+      });
     });
 
-    it('should return an empty list when no pending candidate snapshots are found', async () => {
-      jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
-        snapshots: [],
-      } as unknown as FirestoreCollection);
+    it('should keep the order the query returned', async () => {
+      mockCandidateReads([
+        candidateDoc('zebra-grill', {
+          evidence: { biteCount: 7 },
+          createdAtTimestamp: 1,
+        }),
+        candidateDoc('newer-cafe', {
+          evidence: { biteCount: 5 },
+          createdAtTimestamp: 20,
+        }),
+        candidateDoc('older-cafe', {
+          evidence: { biteCount: 5 },
+          createdAtTimestamp: 10,
+        }),
+      ]);
 
       const service = TestBed.inject(RestaurantsDataAccessService);
       const result = await service.restaurantCandidatesLoader({} as never);
 
-      expect(result).toEqual([]);
+      expect(result?.candidates.map(({ id }) => id)).toEqual([
+        'zebra-grill',
+        'newer-cafe',
+        'older-cafe',
+      ]);
+    });
+
+    it('should keep at most the limit and say more are pending when one more came back', async () => {
+      const docs = Array.from(
+        { length: RESTAURANT_CANDIDATES_LIMIT + 1 },
+        (_, index) =>
+          candidateDoc(`candidate-${index}`, { biteIds: [`bite-${index}`] }),
+      );
+      mockCandidateReads(docs);
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockResolvedValue({ snapshot: null } as unknown as FirestoreDocument);
+
+      const service = TestBed.inject(RestaurantsDataAccessService);
+      const result = await service.restaurantCandidatesLoader({} as never);
+
+      expect(result?.candidates).toHaveLength(RESTAURANT_CANDIDATES_LIMIT);
+      expect(result?.hasMore).toBe(true);
+      // The extra candidate is a signal, not a row: its Bites are not read.
+      expect(FirebaseFirestore.getDocument).not.toHaveBeenCalledWith({
+        reference: `${BITE_COLLECTION}/bite-${RESTAURANT_CANDIDATES_LIMIT}`,
+      });
+    });
+
+    it('should not say more are pending when every candidate is shown', async () => {
+      mockCandidateReads(
+        Array.from({ length: RESTAURANT_CANDIDATES_LIMIT }, (_, index) =>
+          candidateDoc(`candidate-${index}`),
+        ),
+      );
+
+      const service = TestBed.inject(RestaurantsDataAccessService);
+      const result = await service.restaurantCandidatesLoader({} as never);
+
+      expect(result?.candidates).toHaveLength(RESTAURANT_CANDIDATES_LIMIT);
+      expect(result?.hasMore).toBe(false);
+    });
+
+    it('should list a candidate the ordered read leaves out for lacking an ordered field, after the ordered ones', async () => {
+      const ordered = candidateDoc('ordered-cafe');
+      const noBiteCount = candidateDoc('no-count-cafe', { evidence: {} });
+      const noCreatedAt = candidateDoc('no-created-cafe', {
+        createdAtTimestamp: undefined,
+      });
+      mockCandidateReads([ordered], [noBiteCount, ordered, noCreatedAt]);
+
+      const service = TestBed.inject(RestaurantsDataAccessService);
+      const result = await service.restaurantCandidatesLoader({} as never);
+
+      expect(result?.candidates.map(({ id }) => id)).toEqual([
+        'ordered-cafe',
+        'no-count-cafe',
+        'no-created-cafe',
+      ]);
+    });
+
+    it('should return an empty list when no pending candidate snapshots are found', async () => {
+      mockCandidateReads([]);
+
+      const service = TestBed.inject(RestaurantsDataAccessService);
+      const result = await service.restaurantCandidatesLoader({} as never);
+
+      expect(result).toEqual({ candidates: [], hasMore: false });
       expect(FirebaseFirestore.getDocument).not.toHaveBeenCalled();
     });
 
     it('should omit missing Bite evidence documents from candidates', async () => {
-      jest.spyOn(FirebaseFirestore, 'getCollection').mockResolvedValue({
-        snapshots: [
-          {
-            id: 'candidate-1',
-            data: {
-              name: 'Pizza Palace',
-              status: 'pending',
-              biteIds: ['bite-1', 'missing-bite'],
-            },
-          },
-        ],
-      } as unknown as FirestoreCollection);
+      mockCandidateReads([
+        candidateDoc('candidate-1', {
+          name: 'Pizza Palace',
+          biteIds: ['bite-1', 'missing-bite'],
+        }),
+      ]);
       jest
         .spyOn(FirebaseFirestore, 'getDocument')
         .mockResolvedValueOnce({
@@ -260,13 +390,41 @@ describe(RestaurantsDataAccessService.name, () => {
       const service = TestBed.inject(RestaurantsDataAccessService);
       const result = await service.restaurantCandidatesLoader({} as never);
 
-      expect(result?.[0].bites).toEqual([
+      expect(result?.candidates[0].bites).toEqual([
         {
           id: 'bite-1',
           name: 'Margherita',
           place: 'Pizza Palace',
         },
       ]);
+    });
+
+    /**
+     * A filter on `status` with an order on other fields needs a composite
+     * index, and without one the read fails at runtime naming the index it
+     * wants. This proves the declaration exists, not that it is deployed.
+     */
+    it('should have the composite index its ordered read needs declared', () => {
+      const indexes = JSON.parse(
+        readFileSync(
+          join(
+            __dirname,
+            '../../../../../../..',
+            'apps/bite-tribe-firebase/firestore.indexes.json',
+          ),
+          'utf8',
+        ),
+      );
+
+      expect(indexes.indexes).toContainEqual({
+        collectionGroup: RESTAURANT_CANDIDATES_COLLECTION,
+        queryScope: 'COLLECTION',
+        fields: [
+          { fieldPath: 'status', order: 'ASCENDING' },
+          { fieldPath: 'evidence.biteCount', order: 'DESCENDING' },
+          { fieldPath: 'createdAtTimestamp', order: 'DESCENDING' },
+        ],
+      });
     });
   });
 

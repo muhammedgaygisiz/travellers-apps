@@ -9,6 +9,7 @@ import { RestaurantsService } from './restaurants.service';
     <lib-restaurant-candidates
       class="ion-page"
       [candidates]="service.candidates()"
+      [hasMore]="service.hasMoreCandidates()"
       (candidateClick)="service.candidateClicked($event)"
       (logoutClick)="service.logout()"
     />

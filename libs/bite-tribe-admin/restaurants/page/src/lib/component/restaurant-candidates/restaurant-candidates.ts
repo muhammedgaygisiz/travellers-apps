@@ -54,6 +54,11 @@ import { AdminRestaurantCandidate } from 'bite-tribe-admin/restaurants-data-acce
 })
 export class RestaurantCandidates {
   readonly candidates = input<AdminRestaurantCandidate[]>([]);
+  /**
+   * More candidates are pending than the list shows. Said out loud so five rows
+   * do not read as "that is all of them" (issue #1506).
+   */
+  readonly hasMore = input(false);
 
   readonly candidateClick = output<AdminRestaurantCandidate>();
   readonly logoutClick = output<void>();

@@ -1106,6 +1106,61 @@ Publish with the steps in
 [Published 25 September 2026](#published-25-september-2026): crop `Original`,
 no filter, and share to Threads.
 
+## The Bratislava Matcha Latte Post
+
+Prepared 6 October 2026 and **not yet published**. The posts before it are
+screenshots, brand artwork or comics. **This one is a real Bite: a matcha latte
+at Kave Kaviaren in Bratislava, rated five stars at EUR 4.80** - the first post
+that is the product's content rather than a picture of the product.
+
+![Bratislava matcha latte post](../assets/social/matcha-latte-bratislava-post.png)
+
+Same rule as the posts before it: nothing in it links, and the bio carries the
+store URLs - see [Nothing In A Post Links](#nothing-in-a-post-links). The Bite's
+share link is kept here as the source, not put in the caption:
+`https://bitetribe.app/s/bite/9247952c-262f-4662-9518-047c06e14590`.
+
+### The Image
+
+[`ssot/assets/social/matcha-latte-bratislava-post.png`](../assets/social/matcha-latte-bratislava-post.png),
+`1080x1350` (4:5). The photo arrived as a `3000x4000` (3:4) phone shot. A 4:5
+cut at full width keeps `3750` of its `4000` rows, so it is cropped rather than
+pasted onto a ground: `200` rows off the top, which is blurred wall, and `50`
+off the bottom, which is table. The cup, the latte art, the spoon and the
+succulent all stay. Resized to `1080x1350`; the EXIF block, including any
+location, is not carried over. No filter and no retouching.
+
+### The Caption
+
+```text
+Matcha latte in Bratislava 🍵 €4.80 · ⭐️⭐️⭐️⭐️⭐️
+Rated five stars at @kave_kaviaren - one Bite on the map for the next person passing through.
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #realfood #bratislava
+```
+
+The first line carries what a Bite carries: the dish, the price and the rating.
+
+**`@kave_kaviaren` is the one thing in a caption that links.** A mention is
+tappable, unlike a URL, and it lets the café see and share the post. Tag the
+account on the photo as well.
+
+**`#bratislava` is the fifth hashtag**, on the test `#bern` set: the post is set
+in that city and the caption names it.
+
+### When It Goes Up
+
+- **Set the crop to `Original`.**
+- **Tag `@kave_kaviaren`** on the photo and set the location to the café.
+- **The alt text**:
+
+  ```text
+  A matcha latte in a speckled ceramic cup with a blue-grey glazed rim, topped with a white tulip latte art on bright green foam. The cup stands on an oval wooden tray beside a small spoon, on a round wooden café table with a little succulent in a woven pot behind it.
+  ```
+
+- **No filter.**
+- **Share to Threads** from the same dialog.
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done

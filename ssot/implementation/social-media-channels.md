@@ -1106,14 +1106,14 @@ Publish with the steps in
 [Published 25 September 2026](#published-25-september-2026): crop `Original`,
 no filter, and share to Threads.
 
-## The Bratislava Matcha Latte Post
+## The Bratislava Jasmine Matcha Latte Post
 
 Prepared 6 October 2026 and **not yet published**. The posts before it are
-screenshots, brand artwork or comics. **This one is a real Bite: a matcha latte
+screenshots, brand artwork or comics. **This one is a real Bite: a jasmine matcha latte
 at Kave Kaviaren in Bratislava, rated five stars at EUR 4.80** - the first post
 that is the product's content rather than a picture of the product.
 
-![Bratislava matcha latte post](../assets/social/matcha-latte-bratislava-post.png)
+![Bratislava jasmine matcha latte post](../assets/social/matcha-latte-bratislava-post.png)
 
 Same rule as the posts before it: nothing in it links, and the bio carries the
 store URLs - see [Nothing In A Post Links](#nothing-in-a-post-links). The Bite's
@@ -1133,7 +1133,7 @@ location, is not carried over. No filter and no retouching.
 ### The Caption
 
 ```text
-Matcha latte in Bratislava 🍵 €4.80 · ⭐️⭐️⭐️⭐️⭐️
+Jasmine matcha latte in Bratislava 🍵 €4.80 · ⭐️⭐️⭐️⭐️⭐️
 Rated five stars at @kave_kaviaren - one Bite on the map for the next person passing through.
 📲 Available on iOS and Android, link in bio.
 #foodie #foodapp #travelfood #realfood #bratislava
@@ -1155,7 +1155,7 @@ in that city and the caption names it.
 - **The alt text**:
 
   ```text
-  A matcha latte in a speckled ceramic cup with a blue-grey glazed rim, topped with a white tulip latte art on bright green foam. The cup stands on an oval wooden tray beside a small spoon, on a round wooden café table with a little succulent in a woven pot behind it.
+  A jasmine matcha latte in a speckled ceramic cup with a blue-grey glazed rim, topped with a white tulip latte art on bright green foam. The cup stands on an oval wooden tray beside a small spoon, on a round wooden café table with a little succulent in a woven pot behind it.
   ```
 
 - **No filter.**

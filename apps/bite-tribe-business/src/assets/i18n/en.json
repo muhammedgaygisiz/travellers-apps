@@ -522,5 +522,10 @@
   "table-plan-orders": "Orders",
   "table-plan-orders-count": "{{count}} open order(s)",
   "table-plan-item-table-orders": "{{type}} {{label}}, {{seats}} seat(s), {{status}}, {{orders}} open order(s)",
-  "table-plan-item-table-timed-orders": "{{type}} {{label}}, {{seats}} seat(s), {{status}} for {{duration}}, {{orders}} open order(s)"
+  "table-plan-item-table-timed-orders": "{{type}} {{label}}, {{seats}} seat(s), {{status}} for {{duration}}, {{orders}} open order(s)",
+  "image-upload-processing": "Processing image",
+  "image-upload-preview-alt": "Image",
+  "image-upload-edit": "Edit image",
+  "image-upload-delete": "Delete image",
+  "image-upload-rotate": "Rotate 90°"
 }

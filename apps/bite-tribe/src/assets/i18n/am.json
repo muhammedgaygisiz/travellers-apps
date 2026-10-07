@@ -738,5 +738,22 @@
   "get-the-app": "መተግበሪያውን ያግኙ",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "BiteTribe ን ለመጫን በስልክዎ ካሜራ አንድ ኮድ ይቃኙ።",
   "download-on-the-app-store": "ከApp Store ያውርዱ",
-  "get-it-on-google-play": "በGoogle Play ያግኙት"
+  "get-it-on-google-play": "በGoogle Play ያግኙት",
+  "done": "ተጠናቋል",
+  "tag-filter-distance-placeholder": "ሜትር",
+  "tag-filter-price-label": "ዋጋ ({{currency}})",
+  "tag-filter-selected-tags": "የተመረጡ መለያዎች",
+  "tag-filter-no-tags-selected": "ምንም መለያ አልተመረጠም።",
+  "tag-filter-search-placeholder": "በሚገኙ መለያዎች ውስጥ ፈልግ",
+  "tag-filter-available-tags": "የሚገኙ መለያዎች",
+  "tag-filter-clear-all": "ሁሉንም ማጣሪያዎች አጽዳ",
+  "image-upload-processing": "ምስሉ እየተሰራ ነው",
+  "image-upload-preview-alt": "ምስል",
+  "image-upload-edit": "ምስሉን አስተካክል",
+  "image-upload-delete": "ምስሉን ሰርዝ",
+  "image-upload-rotate": "90° አሽከርክር",
+  "edit-bucket-list": "ዝርዝር አስተካክል",
+  "remove-bite-from-bucket-list-title": "Bite አስወግድ",
+  "remove-bite-from-bucket-list-message": "ይህን Bite ከዝርዝሩ ለማስወገድ እርግጠኛ ነህ?",
+  "menu-category-empty": "በዚህ ምድብ ውስጥ እስካሁን ምንም ምግብ የለም።"
 }

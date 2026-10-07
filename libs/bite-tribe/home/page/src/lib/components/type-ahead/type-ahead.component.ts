@@ -25,6 +25,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { getSimilarityScore, normalize } from 'utils';
 import { IsCheckedPipe } from './pipes/is-checked.pipe';
 
@@ -48,6 +49,7 @@ import { IsCheckedPipe } from './pipes/is-checked.pipe';
     IsCheckedPipe,
     IonLabel,
     IonFooter,
+    TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

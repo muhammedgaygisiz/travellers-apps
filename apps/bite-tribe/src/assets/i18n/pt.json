@@ -738,5 +738,22 @@
   "get-the-app": "Baixe o app",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "Escaneie um código com a câmera do seu celular para instalar o BiteTribe.",
   "download-on-the-app-store": "Baixar na App Store",
-  "get-it-on-google-play": "Disponível no Google Play"
+  "get-it-on-google-play": "Disponível no Google Play",
+  "done": "Concluído",
+  "tag-filter-distance-placeholder": "metros",
+  "tag-filter-price-label": "Preço ({{currency}})",
+  "tag-filter-selected-tags": "Etiquetas selecionadas",
+  "tag-filter-no-tags-selected": "Nenhuma etiqueta selecionada.",
+  "tag-filter-search-placeholder": "Pesquisar nas etiquetas disponíveis",
+  "tag-filter-available-tags": "Etiquetas disponíveis",
+  "tag-filter-clear-all": "Limpar todos os filtros",
+  "image-upload-processing": "A processar imagem",
+  "image-upload-preview-alt": "Imagem",
+  "image-upload-edit": "Editar imagem",
+  "image-upload-delete": "Eliminar imagem",
+  "image-upload-rotate": "Rodar 90°",
+  "edit-bucket-list": "Editar Lista",
+  "remove-bite-from-bucket-list-title": "Remover Bite",
+  "remove-bite-from-bucket-list-message": "Tens a certeza de que queres remover este Bite da lista?",
+  "menu-category-empty": "Ainda não há pratos nesta categoria."
 }

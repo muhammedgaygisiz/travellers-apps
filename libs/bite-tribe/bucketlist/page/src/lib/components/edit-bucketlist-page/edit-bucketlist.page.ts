@@ -21,6 +21,7 @@ import {
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import type { OverlayEventDetail } from '@ionic/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const DELETE = 'delete';
 const CANCEL = 'cancel';
@@ -41,10 +42,12 @@ const CANCEL = 'cancel';
     IonLabel,
     IonAlert,
     ReactiveFormsModule,
+    TranslocoPipe,
   ],
 })
 export class EditBucketlistPage {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly transloco = inject(TranslocoService);
 
   bucketlist = input<Bucketlist | undefined>(undefined);
   bites = input<Bite[]>([]);
@@ -61,11 +64,11 @@ export class EditBucketlistPage {
 
   removeBiteConfirmationButtons = [
     {
-      text: 'Cancel',
+      text: this.transloco.translate('cancel'),
       role: CANCEL,
     },
     {
-      text: 'Delete',
+      text: this.transloco.translate('delete'),
       role: DELETE,
     },
   ];

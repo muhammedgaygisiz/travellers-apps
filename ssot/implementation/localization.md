@@ -41,6 +41,11 @@ component that only these two render therefore belongs in these two files, not
 in the consumer app's eleven — an English string dropped into `de.json` is
 permanently English there, which is worse than a key that is absent.
 
+The converse holds for a `scope:common` component that all three apps render,
+such as `image-upload`: its keys go into the consumer app's eleven files **and**
+both internal `en.json` files. Each app loads only its own catalog, so a key
+missing from one of them renders as the raw key in that app; see issue [#1613].
+
 Push notifications:
 
 ```text
@@ -195,3 +200,4 @@ ls -d /tmp/bt-ios/Build/Products/Debug-iphonesimulator/App.app/*.lproj
 [#1416]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1416
 [#1417]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1417
 [#1612]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1612
+[#1613]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1613

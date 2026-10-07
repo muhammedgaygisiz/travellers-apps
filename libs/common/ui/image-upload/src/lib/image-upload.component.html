@@ -10,24 +10,31 @@
 
 @if (isLoading()) {
   <div class="image-processing" role="status" data-testid="image-processing">
-    <ion-spinner name="crescent" aria-label="Processing image" />
+    <ion-spinner
+      name="crescent"
+      [attr.aria-label]="'image-upload-processing' | transloco"
+    />
   </div>
 } @else if (showImage()) {
   <div class="image-preview" [class.is-pending]="isImagePending()">
     <img
       [src]="imageSource()"
-      alt="Image"
+      [alt]="'image-upload-preview-alt' | transloco"
       (load)="onImageLoad()"
       (error)="onImageError()"
     />
     <div class="image-actions-overlay">
-      <ion-button id="edit-button" fill="solid" aria-label="Edit image">
+      <ion-button
+        id="edit-button"
+        fill="solid"
+        [attr.aria-label]="'image-upload-edit' | transloco"
+      >
         <ion-icon name="crop-outline" />
       </ion-button>
       <ion-button
         id="delete-button"
         fill="solid"
-        aria-label="Delete image"
+        [attr.aria-label]="'image-upload-delete' | transloco"
         (click)="clearImage()"
       >
         <ion-icon name="trash-outline" />
@@ -43,7 +50,10 @@
         role="status"
         data-testid="image-pending"
       >
-        <ion-spinner name="crescent" aria-label="Processing image" />
+        <ion-spinner
+          name="crescent"
+          [attr.aria-label]="'image-upload-processing' | transloco"
+        />
       </div>
     }
   </div>
@@ -58,11 +68,15 @@
       <ion-header>
         <ion-toolbar>
           <ion-buttons slot="start">
-            <ion-button (click)="cancelCropping()">Cancel</ion-button>
+            <ion-button (click)="cancelCropping()">{{
+              'cancel' | transloco
+            }}</ion-button>
           </ion-buttons>
-          <ion-title>Edit</ion-title>
+          <ion-title>{{ 'edit' | transloco }}</ion-title>
           <ion-buttons slot="end">
-            <ion-button (click)="confirmCropping()">Save</ion-button>
+            <ion-button (click)="confirmCropping()">{{
+              'save' | transloco
+            }}</ion-button>
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
@@ -72,7 +86,7 @@
         @let imageUrlData = imageUrl();
         <div class="edit-image-container">
           <ion-button fill="outline" (click)="rotateImage()">
-            Rotate 90&deg;
+            {{ 'image-upload-rotate' | transloco }}
           </ion-button>
           <image-cropper
             [imageBase64]="valueData ? valueData : undefined"

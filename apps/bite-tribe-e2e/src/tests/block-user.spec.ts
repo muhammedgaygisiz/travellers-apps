@@ -95,12 +95,17 @@ test.describe('Block another user', () => {
 
     const profile = new ProfilePage(page);
     await expect(profile.displayName).toHaveText(other.displayName);
+    // Follow is the one prominent action; Block is behind the header menu.
+    // The test user follows this account, so that action is Stop following.
+    await expect(profile.stopFollowing).toBeVisible();
+    await expect(profile.block).toHaveCount(0);
 
     await profile.confirmBlock(other.displayName);
 
     await expect(profile.blockedMessage).toBeVisible();
     await expect(profile.unblock).toBeVisible();
     await expect(profile.about).toHaveCount(0);
+    await expect(profile.actionsMenu).toHaveCount(0);
     await expectFirestoreDocument(page, `users/${ME}/blocked/${other.id}`, {
       blockerUid: ME,
       blockedUid: other.id,

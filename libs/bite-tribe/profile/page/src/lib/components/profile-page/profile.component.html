@@ -13,6 +13,22 @@
   (logoutClick)="logoutClick.emit()"
   (menuNavigate)="menuNavigate.emit($event)"
 >
+  <!-- The secondary actions on somebody else's profile. Follow stays the one
+  prominent action on the page, so Block lives behind this menu rather than
+  beside it. Not offered once blocked: Unblock then takes Follow's place. See
+  GitHub issue #1609. -->
+  @if (showProfileActionsMenu()) {
+    <ion-buttons header-end slot="end">
+      <ion-button
+        data-testid="profile-actions-menu"
+        [attr.aria-label]="'profile-more-actions' | transloco"
+        (click)="openProfileActionsMenu($event)"
+      >
+        <ion-icon slot="icon-only" name="ellipsis-vertical" />
+      </ion-button>
+    </ion-buttons>
+  }
+
   <ion-content class="ion-padding">
     @if (showSkeleton()) {
       <profile-skeleton />
@@ -73,13 +89,6 @@
                   >{{ 'follow' | transloco }}
                 </ion-button>
               }
-              <ion-button
-                fill="clear"
-                color="danger"
-                data-testid="profile-block"
-                (click)="openBlockConfirmationDialog()"
-                >{{ 'block' | transloco }}
-              </ion-button>
             }
           }
         </div>
@@ -158,6 +167,31 @@ surfaces read the same sentence in the same language. See GitHub issue #1343. --
     [buttons]="confirmationButtons"
     (didDismiss)="handleConfirmationDismiss($event)"
   />
+}
+
+<!-- Bound rather than created on demand, so closing it animates and still
+reports its dismissal: the block confirmation opens from that, once the
+popover has gone, so two overlays never animate over each other. -->
+@if (showProfileActionsMenu()) {
+  <ion-popover
+    [isOpen]="isProfileActionsMenuOpen()"
+    [event]="profileActionsMenuEvent()"
+    (didDismiss)="handleProfileActionsMenuDismiss()"
+  >
+    <ng-template>
+      <ion-list lines="none">
+        <ion-item
+          button
+          detail="false"
+          data-testid="profile-block"
+          (click)="chooseBlockFromMenu()"
+        >
+          <ion-icon slot="start" color="danger" name="ban-outline" />
+          <ion-label color="danger">{{ 'block' | transloco }}</ion-label>
+        </ion-item>
+      </ion-list>
+    </ng-template>
+  </ion-popover>
 }
 
 <!-- Created only while a block awaits confirmation, for the reason above. -->

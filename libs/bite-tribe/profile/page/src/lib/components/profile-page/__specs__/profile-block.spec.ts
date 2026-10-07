@@ -88,16 +88,49 @@ describe(`${ProfileComponent.name} block`, () => {
   ];
 
   describe('given the account is not blocked', () => {
-    it('offers to block it', () => {
-      expect(byTestId('profile-block')).not.toBeNull();
+    // Follow stays the one prominent action; Block is secondary.
+    it('keeps Block out of the action row, beside Follow', () => {
+      const actions = [
+        ...element().querySelectorAll('.profile-actions ion-button'),
+      ].map((button) => button.textContent?.trim());
+
+      expect(actions).toEqual(['follow']);
       expect(byTestId('profile-unblock')).toBeNull();
     });
 
-    it('does not offer to block the signed-in user themselves', () => {
+    it('offers Block from the header menu', () => {
+      // Its accessible name is checked in `block-user.spec.ts` in a real
+      // browser: `ion-button` moves `aria-label` into its shadow button.
+      byTestId('profile-actions-menu')?.click();
+      fixture.detectChanges();
+
+      expect(component.isProfileActionsMenuOpen()).toBe(true);
+    });
+
+    it('asks for confirmation once the menu has closed after Block', () => {
+      component.openProfileActionsMenu(new Event('click'));
+      component.chooseBlockFromMenu();
+
+      expect(component.isProfileActionsMenuOpen()).toBe(false);
+      expect(component.isBlockConfirmationOpen()).toBe(false);
+
+      component.handleProfileActionsMenuDismiss();
+
+      expect(component.isBlockConfirmationOpen()).toBe(true);
+    });
+
+    it('asks nothing when the menu is dismissed without a choice', () => {
+      component.openProfileActionsMenu(new Event('click'));
+      component.handleProfileActionsMenuDismiss();
+
+      expect(component.isBlockConfirmationOpen()).toBe(false);
+    });
+
+    it('does not offer the menu on the signed-in user’s own profile', () => {
       componentRef.setInput('userId', OTHER_USER.userId);
       fixture.detectChanges();
 
-      expect(byTestId('profile-block')).toBeNull();
+      expect(byTestId('profile-actions-menu')).toBeNull();
     });
 
     it('asks before blocking, naming the account', () => {
@@ -155,7 +188,7 @@ describe(`${ProfileComponent.name} block`, () => {
 
     it('offers unblocking instead of following or blocking', () => {
       expect(byTestId('profile-unblock')).not.toBeNull();
-      expect(byTestId('profile-block')).toBeNull();
+      expect(byTestId('profile-actions-menu')).toBeNull();
       const actions = [
         ...element().querySelectorAll('.profile-actions ion-button'),
       ].map((button) => button.textContent?.trim());

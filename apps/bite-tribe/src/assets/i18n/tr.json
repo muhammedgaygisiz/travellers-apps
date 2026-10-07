@@ -138,6 +138,7 @@
   "stop-following": "Takibi bırak",
   "are-you-sure-you-want-to-stop-following-username": "@{{username}} takip etmeyi bırakmak istediğinden emin misin?",
   "block": "Engelle",
+  "profile-more-actions": "Diğer işlemler",
   "unblock": "Engeli kaldır",
   "yes-block": "Evet, engelle",
   "block-username": "@{{username}} engellensin mi?",

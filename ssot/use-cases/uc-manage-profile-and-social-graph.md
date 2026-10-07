@@ -107,8 +107,10 @@ no judgement about whether the other account did anything wrong, and it is not t
 Operator's block in [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md), which disables an
 account for everybody.
 
-- Blocking is offered on another account's profile, behind a confirmation that says what
-  it does. Unblocking is offered on the same profile and needs no confirmation.
+- Blocking is offered on another account's profile, from the header menu and behind a
+  confirmation that says what it does. It is deliberately secondary: follow and unfollow
+  stay the one prominent action on a profile. Once the account is blocked, Unblock takes
+  the place Follow had, since following is no longer offered, and needs no confirmation.
 - The blocked account's Bites, reviews and profile do not appear to the blocker: not in
   the feed, the map, the weekly Bites, search, a Bite's review threads, or anybody's
   follower and following lists. A reply somebody else wrote to a blocked account's review

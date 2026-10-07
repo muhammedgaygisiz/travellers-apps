@@ -138,6 +138,7 @@
   "stop-following": "መከታተልን አቁም",
   "are-you-sure-you-want-to-stop-following-username": "@{{username}}ን መከታተልን ማቆም እንደሚፈልግ እርግጠኛ ነህ?",
   "block": "አግድ",
+  "profile-more-actions": "ተጨማሪ ድርጊቶች",
   "unblock": "እገዳ አንሳ",
   "yes-block": "አዎ፣ አግድ",
   "block-username": "@{{username}}ን ልታግድ?",

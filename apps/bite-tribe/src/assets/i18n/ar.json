@@ -138,6 +138,7 @@
   "stop-following": "إيقاف المتابعة",
   "are-you-sure-you-want-to-stop-following-username": "؟ @{{username}} هل أنت متأكد أنك تريد إيقاف متابعة",
   "block": "حظر",
+  "profile-more-actions": "إجراءات أخرى",
   "unblock": "إلغاء الحظر",
   "yes-block": "نعم، احظر",
   "block-username": "حظر @{{username}}؟",

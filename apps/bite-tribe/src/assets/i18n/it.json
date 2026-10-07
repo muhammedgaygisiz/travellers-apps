@@ -137,6 +137,7 @@
   "stop-following": "Smetti di seguire",
   "are-you-sure-you-want-to-stop-following-username": "Sei sicuro di voler smettere di seguire @{{username}}?",
   "block": "Blocca",
+  "profile-more-actions": "Altre azioni",
   "unblock": "Sblocca",
   "yes-block": "Sì, blocca",
   "block-username": "Bloccare @{{username}}?",

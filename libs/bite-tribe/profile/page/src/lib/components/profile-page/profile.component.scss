@@ -78,11 +78,9 @@ $GOLD: #ffd700;
     font-style: italic;
   }
 
-  // Wraps once a viewed profile carries Block beside Follow, which two long
-  // translations no longer fit next to the name on a phone (issue #1609).
   .profile-actions {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-end;
     gap: 0.5rem;
 

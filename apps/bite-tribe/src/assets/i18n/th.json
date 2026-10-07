@@ -137,6 +137,7 @@
   "stop-following": "เลิกติดตาม",
   "are-you-sure-you-want-to-stop-following-username": "แน่ใจไหมว่าอยากเลิกติดตาม  @{{username}}",
   "block": "บล็อก",
+  "profile-more-actions": "การทำงานเพิ่มเติม",
   "unblock": "เลิกบล็อก",
   "yes-block": "ใช่ บล็อก",
   "block-username": "บล็อก @{{username}} ใช่ไหม",

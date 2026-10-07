@@ -13,7 +13,13 @@ import {
   IonAlert,
   IonBadge,
   IonButton,
+  IonButtons,
   IonContent,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonPopover,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
 } from '@ionic/angular/standalone';
@@ -44,6 +50,12 @@ const PAGE_SIZE = 50;
     PageComponent,
     IonContent,
     IonButton,
+    IonButtons,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonPopover,
     BiteComponent,
     IonBadge,
     IonAlert,
@@ -133,6 +145,10 @@ export class ProfileComponent {
 
   isOpen = signal(false);
   isBlockConfirmationOpen = signal(false);
+  isProfileActionsMenuOpen = signal(false);
+  profileActionsMenuEvent = signal<Event | undefined>(undefined);
+  /** Block was picked in the menu; confirm once the popover has gone. */
+  private blockChosenFromMenu = false;
   currentPage = signal<number>(1);
 
   // Only skeletonize while there is nothing to show. A reload of an already
@@ -256,6 +272,33 @@ export class ProfileComponent {
     }
 
     this.isOpen.set(false);
+  }
+
+  /**
+   * The header menu belongs to somebody else's profile that is not blocked.
+   * Once it is, Unblock replaces Follow and the menu has nothing to offer.
+   */
+  showProfileActionsMenu = computed((): boolean => {
+    return this.isUnfollowedUser() && !this.isBlocked();
+  });
+
+  openProfileActionsMenu(event: Event): void {
+    this.profileActionsMenuEvent.set(event);
+    this.isProfileActionsMenuOpen.set(true);
+  }
+
+  chooseBlockFromMenu(): void {
+    this.blockChosenFromMenu = true;
+    this.isProfileActionsMenuOpen.set(false);
+  }
+
+  handleProfileActionsMenuDismiss(): void {
+    this.isProfileActionsMenuOpen.set(false);
+
+    if (this.blockChosenFromMenu) {
+      this.blockChosenFromMenu = false;
+      this.openBlockConfirmationDialog();
+    }
   }
 
   openBlockConfirmationDialog(): void {

@@ -212,3 +212,21 @@ export const BlockedAccount: Story = {
     isBlocked: true,
   },
 };
+
+/**
+ * Somebody else's profile with its header menu open, where Block lives so
+ * that Follow stays the one prominent action (GitHub issue #1609).
+ */
+export const ActionsMenuOpen: Story = {
+  args: {
+    user: baseUser,
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+  play: async ({ canvasElement }) => {
+    canvasElement
+      .querySelector<HTMLElement>('[data-testid="profile-actions-menu"]')
+      ?.click();
+  },
+};

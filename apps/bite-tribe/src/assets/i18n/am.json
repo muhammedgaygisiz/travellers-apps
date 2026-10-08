@@ -755,5 +755,17 @@
   "edit-bucket-list": "ዝርዝር አስተካክል",
   "remove-bite-from-bucket-list-title": "Bite አስወግድ",
   "remove-bite-from-bucket-list-message": "ይህን Bite ከዝርዝሩ ለማስወገድ እርግጠኛ ነህ?",
-  "menu-category-empty": "በዚህ ምድብ ውስጥ እስካሁን ምንም ምግብ የለም።"
+  "menu-category-empty": "በዚህ ምድብ ውስጥ እስካሁን ምንም ምግብ የለም።",
+  "report-bite": "ይህን Bite ሪፖርት አድርግ",
+  "report-bite-title": "ይህን Bite ሪፖርት አድርግ",
+  "report-bite-message": "ይህን Bite ለምን እንመርምር? ያጋራው ሰው ማን ሪፖርት እንዳደረገ አይነገረውም።",
+  "report-bite-reason-spam": "አይፈለጌ መልዕክት ወይም ማስታወቂያ",
+  "report-bite-reason-notFood": "ምግብ አይደለም",
+  "report-bite-reason-inappropriate": "አስጸያፊ ወይም ተገቢ ያልሆነ",
+  "report-bite-reason-harassment": "ትንኮሳ ወይም ጥላቻ",
+  "report-bite-reason-other": "ሌላ ነገር",
+  "report-bite-submit": "ሪፖርት አድርግ",
+  "report-bite-sent": "እናመሰግናለን። ይህን Bite እንመረምራለን።",
+  "report-bite-already-sent": "ይህን Bite አስቀድመው ሪፖርት አድርገዋል።",
+  "report-bite-failed": "ሪፖርቱ ሊላክ አልቻለም። እባክዎ እንደገና ይሞክሩ።"
 }

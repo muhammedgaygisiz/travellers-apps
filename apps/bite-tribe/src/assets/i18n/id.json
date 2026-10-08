@@ -755,5 +755,17 @@
   "edit-bucket-list": "Edit Daftar Keinginan",
   "remove-bite-from-bucket-list-title": "Hapus Bite",
   "remove-bite-from-bucket-list-message": "Kamu yakin ingin menghapus Bite ini dari daftar keinginan?",
-  "menu-category-empty": "Belum ada menu di kategori ini."
+  "menu-category-empty": "Belum ada menu di kategori ini.",
+  "report-bite": "Laporkan Bite ini",
+  "report-bite-title": "Laporkan Bite ini",
+  "report-bite-message": "Mengapa kami perlu memeriksa Bite ini? Pembuatnya tidak akan diberi tahu siapa yang melaporkannya.",
+  "report-bite-reason-spam": "Spam atau iklan",
+  "report-bite-reason-notFood": "Bukan makanan",
+  "report-bite-reason-inappropriate": "Menyinggung atau tidak pantas",
+  "report-bite-reason-harassment": "Pelecehan atau kebencian",
+  "report-bite-reason-other": "Hal lain",
+  "report-bite-submit": "Laporkan",
+  "report-bite-sent": "Terima kasih. Kami akan memeriksa Bite ini.",
+  "report-bite-already-sent": "Kamu sudah melaporkan Bite ini.",
+  "report-bite-failed": "Laporan tidak dapat dikirim. Silakan coba lagi."
 }

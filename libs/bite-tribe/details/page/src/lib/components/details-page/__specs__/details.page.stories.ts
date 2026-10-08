@@ -316,3 +316,58 @@ export const FailedImage: Story = {
     } as unknown as Bite,
   },
 };
+
+/**
+ * A Bite with no header photo, for the stories about the bottom of the page.
+ *
+ * The photo is left out on purpose. It is sized in `vh`, and Loki captures a
+ * whole page by growing the viewport to the page's height, which grows the
+ * photo with it and pushes the last ~60px of the page out of the frame - the
+ * Edit button in `MyBite` is cut off for that reason. Without the photo the
+ * bottom of the page is what the reference shows.
+ */
+const withoutPhoto: Bite = {
+  ...(Default.args?.bite as Bite),
+  image: '',
+  imagePath: undefined,
+  imageStatus: undefined,
+  userId: 'someone-else',
+};
+
+/**
+ * The profile of that Bite's author. It has to agree with `bite.userId`: the
+ * Edit button reads the profile and reporting reads the Bite, and `Default`'s
+ * profile is the reader's own, which would show both.
+ */
+const someoneElse: PublicUser = {
+  userId: 'someone-else',
+  displayName: 'Mira',
+  public: true,
+} as PublicUser;
+
+/**
+ * A signed-in reader on somebody else's Bite: "Report this Bite" is the last
+ * thing on the page, below the review composer (issue #1608).
+ */
+export const ReportOffered: Story = {
+  args: {
+    ...Default.args,
+    userId: '1',
+    bite: withoutPhoto,
+    biteCreator: someoneElse,
+  },
+};
+
+/**
+ * The same Bite for a reader who is not signed in. Reporting is not offered,
+ * and the page ends exactly where it ended before reporting existed.
+ */
+export const ReportNotOfferedSignedOut: Story = {
+  args: {
+    ...Default.args,
+    isAuthenticated: false,
+    userId: undefined,
+    bite: withoutPhoto,
+    biteCreator: someoneElse,
+  },
+};

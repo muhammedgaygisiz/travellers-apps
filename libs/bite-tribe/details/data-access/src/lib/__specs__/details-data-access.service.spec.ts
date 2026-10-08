@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { BiteTribeApiService } from 'bite-tribe/api';
 import { CrashReportingService } from 'ta-firestore';
 import { of, throwError } from 'rxjs';
 import {
@@ -17,6 +18,7 @@ import { Bite, LikeClick } from 'model';
 import { Share } from '@capacitor/share';
 
 jest.mock('bite-tribe/store');
+jest.mock('bite-tribe/api', () => ({ BiteTribeApiService: class {} }));
 jest.mock('@capacitor/geolocation', () => ({
   Geolocation: {
     getCollection: jest.fn(),
@@ -91,6 +93,10 @@ describe(DetailsDataAccessService.name, () => {
           useValue: { lastSuccessfulNavigation },
         },
         {
+          provide: BiteTribeApiService,
+          useValue: { reportBite: jest.fn() },
+        },
+        {
           provide: BiteTribeStoreService,
           useValue: {
             reviews$: of(),
@@ -122,6 +128,19 @@ describe(DetailsDataAccessService.name, () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  /** Reporting goes straight to the callable, not through the store (#1608). */
+  it('reports a Bite through the API and hands back its answer', async () => {
+    const api = TestBed.inject(BiteTribeApiService) as unknown as {
+      reportBite: jest.Mock;
+    };
+    api.reportBite.mockResolvedValue({ reported: true });
+
+    await expect(service.reportBite('bite-1', 'spam')).resolves.toEqual({
+      reported: true,
+    });
+    expect(api.reportBite).toHaveBeenCalledWith('bite-1', 'spam');
   });
 
   describe('biteParams', () => {

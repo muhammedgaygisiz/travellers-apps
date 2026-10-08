@@ -755,5 +755,17 @@
   "edit-bucket-list": "Yapılacaklar Listesini Düzenle",
   "remove-bite-from-bucket-list-title": "Bite'ı Çıkar",
   "remove-bite-from-bucket-list-message": "Bu Bite'ı yapılacaklar listesinden çıkarmak istediğinden emin misin?",
-  "menu-category-empty": "Bu kategoride henüz yemek yok."
+  "menu-category-empty": "Bu kategoride henüz yemek yok.",
+  "report-bite": "Bu Bite'ı bildir",
+  "report-bite-title": "Bu Bite'ı bildir",
+  "report-bite-message": "Bu Bite'ı neden incelemeliyiz? Paylaşan kişiye onu kimin bildirdiği söylenmez.",
+  "report-bite-reason-spam": "Spam veya reklam",
+  "report-bite-reason-notFood": "Yemek değil",
+  "report-bite-reason-inappropriate": "Saldırgan veya uygunsuz",
+  "report-bite-reason-harassment": "Taciz veya nefret",
+  "report-bite-reason-other": "Başka bir şey",
+  "report-bite-submit": "Bildir",
+  "report-bite-sent": "Teşekkürler. Bu Bite'ı inceleyeceğiz.",
+  "report-bite-already-sent": "Bu Bite'ı zaten bildirdin.",
+  "report-bite-failed": "Bildirim gönderilemedi. Lütfen tekrar dene."
 }

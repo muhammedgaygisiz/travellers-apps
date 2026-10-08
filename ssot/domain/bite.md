@@ -230,11 +230,12 @@ Current product expectation:
   - Review Bite.
   - Save a listable Bite to a bucket list. A Bite whose photo has not arrived is refused, with the reason.
   - Discover Bites through feed, map, search, restaurant, profile, bucket list, and BiteTrail flows.
+  - Report somebody else's Bite to the operators, once per Bite, through `reportBite` ([#1608]). The report is a `/biteReports/{biteId}_{reporterUid}` document only an operator can read; it changes nothing on the Bite, and it is deleted with the Bite.
 - Admin
   - Delete any Bite, through `deleteBiteAsOperator` with a reason. This is the one modeled operator capability over a Bite.
   - Editing somebody else's Bite is deliberately not one: an operator can remove a Bite or leave it, and nothing in between.
   - Hiding, tombstoning and notifying the author are out of scope by decision, not by omission. See [epic-1471](../records/epic-1471.md).
-  - The report queue that would surface the Bites needing removal belongs to [epic-1284](../records/epic-1284.md).
+  - The report queue surfaces the reported Bites, through `listBiteReports`, and closes a report on a Bite that stays through `dismissBiteReports` ([#1608]). Reporting inside a review thread still belongs to [epic-1284](../records/epic-1284.md).
 
 ## Use Cases
 
@@ -393,3 +394,4 @@ images/bites/{biteId}/{filename}
 [#1112]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1112
 [#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
 [#1114]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1114
+[#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608

@@ -23,6 +23,12 @@ export {
 export { searchUsers } from './functions/users/search-users';
 export { searchBites } from './functions/bites/search-bites';
 export { deleteBiteAsOperator } from './functions/bites/delete-bite-as-operator';
+export { reportBite } from './functions/bites/report-bite';
+export {
+  dismissBiteReports,
+  listBiteReports,
+} from './functions/bites/bite-reports-as-operator';
+export { deleteBiteReportsOnBiteDelete } from './functions/bites/delete-bite-reports-on-bite-delete';
 export { searchBitesByCity } from './functions/bites/search-bites-by-city';
 export { searchBitesByCountry } from './functions/bites/search-bites-by-country';
 export { searchRestaurants } from './functions/restaurants/search-restaurants';

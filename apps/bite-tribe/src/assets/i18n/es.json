@@ -755,5 +755,17 @@
   "edit-bucket-list": "Editar lista de deseos",
   "remove-bite-from-bucket-list-title": "Quitar Bite",
   "remove-bite-from-bucket-list-message": "¿Estás seguro de que quieres quitar este Bite de la lista de deseos?",
-  "menu-category-empty": "Todavía no hay platos en esta categoría."
+  "menu-category-empty": "Todavía no hay platos en esta categoría.",
+  "report-bite": "Denunciar este Bite",
+  "report-bite-title": "Denunciar este Bite",
+  "report-bite-message": "¿Por qué deberíamos revisar este Bite? Su autor no sabrá quién lo denunció.",
+  "report-bite-reason-spam": "Spam o publicidad",
+  "report-bite-reason-notFood": "No es comida",
+  "report-bite-reason-inappropriate": "Ofensivo o inapropiado",
+  "report-bite-reason-harassment": "Acoso u odio",
+  "report-bite-reason-other": "Otra cosa",
+  "report-bite-submit": "Denunciar",
+  "report-bite-sent": "Gracias. Revisaremos este Bite.",
+  "report-bite-already-sent": "Ya has denunciado este Bite.",
+  "report-bite-failed": "No se pudo enviar la denuncia. Inténtalo de nuevo."
 }

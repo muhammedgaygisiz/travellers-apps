@@ -755,5 +755,17 @@
   "edit-bucket-list": "Edit Bucket List",
   "remove-bite-from-bucket-list-title": "Remove Bite",
   "remove-bite-from-bucket-list-message": "Are you sure you want to remove this bite from the bucket list?",
-  "menu-category-empty": "No items in this category yet."
+  "menu-category-empty": "No items in this category yet.",
+  "report-bite": "Report this Bite",
+  "report-bite-title": "Report this Bite",
+  "report-bite-message": "Why should we look at this Bite? Its author is not told who reported it.",
+  "report-bite-reason-spam": "Spam or advertising",
+  "report-bite-reason-notFood": "Not food",
+  "report-bite-reason-inappropriate": "Offensive or inappropriate",
+  "report-bite-reason-harassment": "Harassment or hate",
+  "report-bite-reason-other": "Something else",
+  "report-bite-submit": "Report",
+  "report-bite-sent": "Thanks. We will look at this Bite.",
+  "report-bite-already-sent": "You have already reported this Bite.",
+  "report-bite-failed": "The report could not be sent. Please try again."
 }

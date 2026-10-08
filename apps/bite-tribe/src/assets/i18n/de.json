@@ -755,5 +755,17 @@
   "edit-bucket-list": "Bucket-Liste bearbeiten",
   "remove-bite-from-bucket-list-title": "Bite entfernen",
   "remove-bite-from-bucket-list-message": "Bist du sicher, dass du diesen Bite aus der Bucket-Liste entfernen möchtest?",
-  "menu-category-empty": "In dieser Kategorie gibt es noch keine Gerichte."
+  "menu-category-empty": "In dieser Kategorie gibt es noch keine Gerichte.",
+  "report-bite": "Diesen Bite melden",
+  "report-bite-title": "Diesen Bite melden",
+  "report-bite-message": "Warum sollten wir uns diesen Bite ansehen? Die Person, die ihn erstellt hat, erfährt nicht, wer ihn gemeldet hat.",
+  "report-bite-reason-spam": "Spam oder Werbung",
+  "report-bite-reason-notFood": "Kein Essen",
+  "report-bite-reason-inappropriate": "Anstößig oder unangemessen",
+  "report-bite-reason-harassment": "Belästigung oder Hass",
+  "report-bite-reason-other": "Etwas anderes",
+  "report-bite-submit": "Melden",
+  "report-bite-sent": "Danke. Wir sehen uns diesen Bite an.",
+  "report-bite-already-sent": "Du hast diesen Bite bereits gemeldet.",
+  "report-bite-failed": "Die Meldung konnte nicht gesendet werden. Bitte versuche es erneut."
 }

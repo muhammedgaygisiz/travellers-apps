@@ -4,6 +4,7 @@ import { RestaurantApiService } from './restaurant-api/restaurant-api.service';
 import {
   Address,
   Bite,
+  BiteReportReason,
   MenuItemStats,
   BiteTrail,
   Bucketlist,
@@ -19,6 +20,7 @@ import {
   PlaceDetails,
   PublicUser,
   RemoveBiteFromBucketlistParams,
+  ReportBiteResult,
   Restaurant,
   Review,
   SaveToBucketListParams,
@@ -413,6 +415,13 @@ export class BiteTribeApiService {
 
   async getPlaceDetails(placeId: string): Promise<PlaceDetails | undefined> {
     return this.biteApiService.getPlaceDetails(placeId);
+  }
+
+  async reportBite(
+    biteId: string,
+    reason: BiteReportReason,
+  ): Promise<ReportBiteResult> {
+    return this.biteApiService.reportBite(biteId, reason);
   }
 
   async biteById(biteId: string): Promise<Bite> {

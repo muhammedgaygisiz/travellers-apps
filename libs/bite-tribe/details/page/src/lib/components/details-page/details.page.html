@@ -384,7 +384,7 @@
       <ion-button
         expand="block"
         color="primary"
-        [class.safe-padding-bottom]="!isOwnBite"
+        [class.safe-padding-bottom]="!isOwnBite && !canReport()"
         [disabled]="isReviewFieldInvalid()"
         (click)="saveReview()"
       >
@@ -400,6 +400,24 @@
         (click)="editBite(biteData)"
       >
         {{ 'edit-bite' | transloco }}
+      </ion-button>
+      }
+
+      <!-- Reporting sits last and quiet: it is a way out for a reader who
+      should not have to look at a Bite, not an action the page invites. Never
+      offered on the reader's own Bite (issue #1608). -->
+      @if (canReport()) {
+      <ion-button
+        fill="clear"
+        expand="block"
+        color="medium"
+        size="small"
+        class="ion-margin-top safe-padding-bottom"
+        data-testid="bite-details-report"
+        (click)="onReportBite()"
+      >
+        <ion-icon name="flag-outline" slot="start" aria-hidden="true" />
+        {{ 'report-bite' | transloco }}
       </ion-button>
       } }
     </div>

@@ -79,6 +79,7 @@ class BiteApiMock {
   uploadImage = jest.fn();
   updateImagePathInBite = jest.fn();
   setImageStatus = jest.fn();
+  reportBite = jest.fn();
   findLocalImage = jest.fn();
   uploadImageFromLocalFile = jest.fn();
 }
@@ -161,6 +162,22 @@ describe(BiteTribeApiService.name, () => {
           .mockReturnValue(Promise.resolve({ USD: 1, EUR: 0.85 }));
         service.getExchangeRates();
         expect(getExchangeRatesSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('reportBite', () => {
+    it('should call reportBite on BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      async (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        const spy = jest
+          .spyOn(biteApiService, 'reportBite')
+          .mockResolvedValue({ reported: true });
+
+        await expect(service.reportBite('bite-id', 'spam')).resolves.toEqual({
+          reported: true,
+        });
+        expect(spy).toHaveBeenCalledWith('bite-id', 'spam');
       },
     ));
   });

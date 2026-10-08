@@ -984,6 +984,138 @@ describe('DetailsPage', () => {
     });
   });
 
+  /** Reporting a Bite to the operators (issue #1608). */
+  describe('report', () => {
+    const OTHER_BITE = {
+      id: 'bite-1',
+      name: 'Ramen',
+      userId: 'author-uid',
+    } as Bite;
+
+    const reportButton = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="bite-details-report"]',
+      );
+
+    const show = (bite: Bite, userId: string, authenticated = true): void => {
+      componentRef.setInput('bite', bite);
+      componentRef.setInput('userId', userId);
+      componentRef.setInput('isAuthenticated', authenticated);
+      componentRef.changeDetectorRef.detectChanges();
+    };
+
+    const presentAlert = async (): Promise<{
+      inputs: { value?: unknown }[];
+      submit: AlertButton['handler'];
+    }> => {
+      let captured: Parameters<AlertController['create']>[0];
+      const alert = document.createElement('ion-alert');
+      jest.spyOn(alert, 'present').mockResolvedValue();
+      jest.spyOn(alertController, 'create').mockImplementation((options) => {
+        captured = options;
+        return Promise.resolve(alert);
+      });
+
+      await component.onReportBite();
+
+      const buttons = (captured?.buttons ?? []).filter(
+        (button): button is AlertButton => typeof button !== 'string',
+      );
+
+      return {
+        inputs: captured?.inputs ?? [],
+        submit: buttons.find((button) => button.text === 'report-bite-submit')
+          ?.handler,
+      };
+    };
+
+    it("is offered on somebody else's Bite", () => {
+      show(OTHER_BITE, 'reader-uid');
+
+      expect(reportButton()).not.toBeNull();
+    });
+
+    it("is never offered on the reader's own Bite", () => {
+      show(OTHER_BITE, 'author-uid');
+
+      expect(reportButton()).toBeNull();
+    });
+
+    it('is not offered to a reader who is not signed in', () => {
+      show(OTHER_BITE, '', false);
+
+      expect(reportButton()).toBeNull();
+    });
+
+    /**
+     * The page has to end exactly where it ended before reporting existed when
+     * the button is not offered: the review button keeps the bottom safe-area
+     * padding, and nothing else is rendered after it.
+     */
+    describe('bottom of the page', () => {
+      const addReviewButton = (): HTMLElement | undefined =>
+        Array.from(fixture.nativeElement.querySelectorAll('ion-button')).find(
+          (button) =>
+            (button as HTMLElement).textContent?.includes('add-your-review'),
+        ) as HTMLElement | undefined;
+
+      it('keeps the padding on the review button for a signed-out reader', () => {
+        show(OTHER_BITE, '', false);
+
+        expect(addReviewButton()?.classList).toContain('safe-padding-bottom');
+        expect(reportButton()).toBeNull();
+      });
+
+      it('moves the padding to the report button when it is offered', () => {
+        show(OTHER_BITE, 'reader-uid');
+
+        expect(addReviewButton()?.classList).not.toContain(
+          'safe-padding-bottom',
+        );
+        expect(reportButton()?.classList).toContain('safe-padding-bottom');
+      });
+    });
+
+    it('offers every report reason', async () => {
+      show(OTHER_BITE, 'reader-uid');
+
+      const { inputs } = await presentAlert();
+
+      expect(inputs.map((input) => input.value)).toEqual([
+        'spam',
+        'notFood',
+        'inappropriate',
+        'harassment',
+        'other',
+      ]);
+    });
+
+    it('reports the Bite on screen with the chosen reason', async () => {
+      show(OTHER_BITE, 'reader-uid');
+      const emitSpy = jest.spyOn(component.reportBite, 'emit');
+
+      const { submit } = await presentAlert();
+      const dismissed = submit?.('notFood');
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        biteId: 'bite-1',
+        reason: 'notFood',
+      });
+      expect(dismissed).toBe(true);
+    });
+
+    it('keeps the alert open and reports nothing until a reason is chosen', async () => {
+      show(OTHER_BITE, 'reader-uid');
+      const emitSpy = jest.spyOn(component.reportBite, 'emit');
+
+      const { submit } = await presentAlert();
+      const dismissed = submit?.(undefined);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+      expect(dismissed).toBe(false);
+    });
+  });
+
   describe('openNavigation', () => {
     let windowOpenSpy: jest.SpyInstance;
 

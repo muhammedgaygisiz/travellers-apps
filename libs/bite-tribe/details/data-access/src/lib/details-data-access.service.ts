@@ -8,15 +8,18 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { BiteTribeApiService } from 'bite-tribe/api';
 import { CrashReportingService } from 'ta-firestore';
 import { BITE_TRIBE_ORIGIN, resourceValue } from 'utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
+  BiteReportReason,
   Like,
   LikeClick,
   PublicUser,
   RemoveBiteFromBucketlistParams,
+  ReportBiteResult,
   SaveToBucketListParams,
 } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
@@ -60,6 +63,7 @@ type BiteRequest = { biteId: string; userId?: string };
 })
 export class DetailsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly api = inject(BiteTribeApiService);
   private readonly crashReporting = inject(CrashReportingService);
   private readonly router = inject(Router);
 
@@ -330,6 +334,20 @@ export class DetailsDataAccessService {
 
   cacheBite(bite: Partial<Bite>): void {
     this.storeService.cacheBite(bite);
+  }
+
+  /**
+   * Reports the Bite to the BiteTribe operators (GitHub issue #1608).
+   *
+   * Straight to the callable rather than through the store: nothing the app
+   * holds changes when a report is filed, and the reporter sees no difference
+   * in the Bite afterwards - the report only reaches an operator.
+   */
+  reportBite(
+    biteId: string,
+    reason: BiteReportReason,
+  ): Promise<ReportBiteResult> {
+    return this.api.reportBite(biteId, reason);
   }
 
   async shareBite(bite: Bite): Promise<void> {

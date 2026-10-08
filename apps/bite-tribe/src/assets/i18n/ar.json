@@ -755,5 +755,17 @@
   "edit-bucket-list": "تعديل قائمة الآمال",
   "remove-bite-from-bucket-list-title": "إزالة Bite",
   "remove-bite-from-bucket-list-message": "هل أنت متأكد أنك تريد إزالة هذا الـ Bite من قائمة الآمال؟",
-  "menu-category-empty": "لا توجد أطباق في هذه الفئة بعد."
+  "menu-category-empty": "لا توجد أطباق في هذه الفئة بعد.",
+  "report-bite": "الإبلاغ عن هذه الـBite",
+  "report-bite-title": "الإبلاغ عن هذه الـBite",
+  "report-bite-message": "لماذا يجب أن نراجع هذه الـBite؟ لن يُخبَر صاحبها بمن أبلغ عنها.",
+  "report-bite-reason-spam": "رسائل مزعجة أو إعلان",
+  "report-bite-reason-notFood": "ليست طعامًا",
+  "report-bite-reason-inappropriate": "مسيئة أو غير لائقة",
+  "report-bite-reason-harassment": "تحرش أو كراهية",
+  "report-bite-reason-other": "شيء آخر",
+  "report-bite-submit": "إبلاغ",
+  "report-bite-sent": "شكرًا. سنراجع هذه الـBite.",
+  "report-bite-already-sent": "لقد أبلغت عن هذه الـBite بالفعل.",
+  "report-bite-failed": "تعذّر إرسال البلاغ. يُرجى المحاولة مرة أخرى."
 }

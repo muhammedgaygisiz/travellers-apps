@@ -43,6 +43,7 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       (gotoEdit)="service.onGotoEditClick($event)"
       (gotoNew)="service.onGotoNewClick($event)"
       (shareBite)="service.onShareBiteClick($event)"
+      (reportBite)="service.reportBite($event)"
     />
 
     <bt-coach-mark

@@ -1047,6 +1047,35 @@ describe('DetailsPage', () => {
       expect(reportButton()).toBeNull();
     });
 
+    /**
+     * The page has to end exactly where it ended before reporting existed when
+     * the button is not offered: the review button keeps the bottom safe-area
+     * padding, and nothing else is rendered after it.
+     */
+    describe('bottom of the page', () => {
+      const addReviewButton = (): HTMLElement | undefined =>
+        Array.from(fixture.nativeElement.querySelectorAll('ion-button')).find(
+          (button) =>
+            (button as HTMLElement).textContent?.includes('add-your-review'),
+        ) as HTMLElement | undefined;
+
+      it('keeps the padding on the review button for a signed-out reader', () => {
+        show(OTHER_BITE, '', false);
+
+        expect(addReviewButton()?.classList).toContain('safe-padding-bottom');
+        expect(reportButton()).toBeNull();
+      });
+
+      it('moves the padding to the report button when it is offered', () => {
+        show(OTHER_BITE, 'reader-uid');
+
+        expect(addReviewButton()?.classList).not.toContain(
+          'safe-padding-bottom',
+        );
+        expect(reportButton()?.classList).toContain('safe-padding-bottom');
+      });
+    });
+
     it('offers every report reason', async () => {
       show(OTHER_BITE, 'reader-uid');
 

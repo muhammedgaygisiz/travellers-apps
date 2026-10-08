@@ -43,6 +43,7 @@ pushTokens
 config
 newUserFollowUps
 emailOptOuts
+biteReports
 ```
 
 Every one of these is named in `firestore.rules`, and anything not named there
@@ -61,7 +62,10 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   the top-level `pushTokens` index, which are cross-account identifiers no
   client ever read. The three collections of the new-user follow-up mail -
   `config`, `newUserFollowUps` and `emailOptOuts` - were never readable at all:
-  the Admin SDK is their only reader and writer ([#1707]).
+  the Admin SDK is their only reader and writer ([#1707]). `biteReports` is
+  readable by an operator alone and written by no client: `reportBite` files a
+  report through the Admin SDK so that the reported author can never read who
+  reported them ([#1608]).
 - **A write is allowed by ownership, not by a role.** The document names the
   account that may write it: `Restaurant.ownerUserId`, `Bite.userId`,
   `Review.authorId`, `Bucketlist.userId`, `BiteTrail.ownerId`, or the document
@@ -570,3 +574,4 @@ libs/bite-tribe/api
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
+[#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608

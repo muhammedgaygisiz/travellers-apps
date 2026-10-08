@@ -4,7 +4,7 @@
 
 **Level:** L1
 Supported today. The detail page, its share and deep-link entry, the bucket-list and
-directions actions, the header photo's upload state, and the six contracts below all ship.
+directions actions, the header photo's upload state, reporting the Bite, and the six contracts below all ship.
 Editing, deleting and reporting a review are not on this page at all — [epic-1284](../records/epic-1284.md) owns
 them.
 
@@ -35,6 +35,7 @@ nothing, and how a review and its thread are attributed.
 - User can open directions to the Bite's place through the platform navigation experience.
 - A Bite made from a dish somebody ordered says so, and the line opens that restaurant's menu (issue [#1113]). It leads to the **menu** rather than to the dish: `restaurant/:restaurantId/menu` resolves which menu that is, and a dish that has since been deleted would otherwise be a dead address. Nothing on this page is resolved off the menu, which is what makes a rename or a deletion harmless - the dish's name was copied onto the Bite when it was created and is the heading at the top of this page (`RD-TS-53`). A Bite carrying no menu link renders no line, under the `Absent Field Contract` below.
 - User can save the Bite to an existing bucket list or create a new list for it.
+- A signed-in user can report somebody else's Bite to the BiteTribe operators, choosing one of five reasons: spam or advertising, not food, offensive or inappropriate, harassment or hate, or something else ([#1608]). The action sits last on the page and is never offered on the user's own Bite. The report is filed through `reportBite`, which keeps one report per account per Bite - a second tap is answered as already reported rather than filing again - and the Bite looks exactly the same to everyone afterwards, its author included, who is never told who reported it. What an operator then does with the report is `UC - Operate BiteTribe In The Admin App`'s.
 - User can understand creator/profile context, restaurant/place context, image, likes, reviews, and related data.
 - While the Bite loads, the share, navigation, and bucket-list actions are
   replaced by skeleton placeholders rather than shown as tappable icons, so the
@@ -291,6 +292,7 @@ data types this page renders are declared in [Implementation - Store Declaration
 - Issue [#1283] is the Review Thread Contract above - the flat review list became `ReviewThreadComponent`'s one-level-deep threads. Closed.
 - Issue [#1308] is the Review Attribution Contract above - reviews now publish the BiteTribe display name rather than the identity provider's real name; accepted as a release blocker. Closed.
 - Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card. Closed.
+- Issue [#1608] is reporting a Bite to the operators, one of the user-generated-content safeguards `RD-UR-7` requires.
 
 ## Related Domains
 
@@ -319,3 +321,4 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
 [#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308
 [#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
+[#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608

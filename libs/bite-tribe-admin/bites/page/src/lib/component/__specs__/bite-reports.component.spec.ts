@@ -210,4 +210,86 @@ describe(BiteReportsComponent.name, () => {
 
     expect(component.reason()).toBe('');
   });
+
+  describe('guards', () => {
+    let create: jest.SpyInstance;
+
+    beforeEach(() => {
+      create = jest.spyOn(alertController, 'create');
+    });
+
+    it('has no reasons to show without a selection', () => {
+      expect(component.reasonCounts()).toEqual([]);
+    });
+
+    it('treats a reason missing from the counts as none', () => {
+      const partial = reported({
+        reasons: { spam: 2 } as ReportedBite['reasons'],
+      });
+      setInputs({ selected: partial });
+
+      expect(component.reasonCounts()).toEqual([{ reason: 'spam', count: 2 }]);
+    });
+
+    it('asks nothing without a selection', async () => {
+      await component.onDismiss();
+      await component.onDelete();
+      await component.onBlockAuthor();
+
+      expect(create).not.toHaveBeenCalled();
+    });
+
+    it('asks nothing for a dismissal or deletion without a reason', async () => {
+      setInputs({ selected: reported() });
+
+      await component.onDismiss();
+      await component.onDelete();
+
+      expect(create).not.toHaveBeenCalled();
+    });
+
+    it('asks nothing for a deletion of a Bite that is gone', async () => {
+      setInputs({ selected: reported({ exists: false }) });
+      component.onReasonChange('Gone');
+
+      await component.onDelete();
+
+      expect(create).not.toHaveBeenCalled();
+    });
+
+    it('asks nothing for a block already made', async () => {
+      setInputs({ selected: reported(), authorBlocked: true });
+
+      await component.onBlockAuthor();
+
+      expect(create).not.toHaveBeenCalled();
+    });
+
+    it('names the account by its uid when it has no display name', async () => {
+      setInputs({ selected: reported({ authorDisplayName: '' }) });
+      const alert = document.createElement('ion-alert');
+      jest.spyOn(alert, 'present').mockResolvedValue();
+      create.mockResolvedValue(alert);
+
+      await component.onBlockAuthor();
+
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ subHeader: 'author-1' }),
+      );
+    });
+
+    it('names the Bite by its id when it has no name', async () => {
+      setInputs({ selected: reported({ name: '' }) });
+      component.onReasonChange('Fine');
+      const alert = document.createElement('ion-alert');
+      jest.spyOn(alert, 'present').mockResolvedValue();
+      create.mockResolvedValue(alert);
+
+      await component.onDismiss();
+
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ subHeader: 'b1' }),
+      );
+    });
+  });
 });

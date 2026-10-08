@@ -131,4 +131,21 @@ describe(BiteReportsService.name, () => {
     });
     expect(service.action()).toBeUndefined();
   });
+
+  it('selects nothing until a Bite is chosen', async () => {
+    await service.load();
+
+    expect(service.selected()).toBeUndefined();
+    expect(service.selectedAuthorBlocked()).toBe(false);
+  });
+
+  it('logs out through the store', () => {
+    const store = TestBed.inject(BiteTribeStoreService) as unknown as {
+      logout: jest.Mock;
+    };
+
+    service.logout();
+
+    expect(store.logout).toHaveBeenCalled();
+  });
 });

@@ -304,5 +304,10 @@
   "table-session-status-expired": "Expired",
   "table-session-status-closed": "Closed with the visit",
   "admin-tool-table-sessions": "Table sessions",
-  "admin-tool-table-sessions-description": "Who is attached to a table right now, across every restaurant."
+  "admin-tool-table-sessions-description": "Who is attached to a table right now, across every restaurant.",
+  "image-upload-processing": "Processing image",
+  "image-upload-preview-alt": "Image",
+  "image-upload-edit": "Edit image",
+  "image-upload-delete": "Delete image",
+  "image-upload-rotate": "Rotate 90°"
 }

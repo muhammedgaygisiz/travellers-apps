@@ -738,5 +738,22 @@
   "get-the-app": "Get the app",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "Scan a code with your phone camera to install BiteTribe.",
   "download-on-the-app-store": "Download on the App Store",
-  "get-it-on-google-play": "Get it on Google Play"
+  "get-it-on-google-play": "Get it on Google Play",
+  "done": "Done",
+  "tag-filter-distance-placeholder": "meters",
+  "tag-filter-price-label": "Price ({{currency}})",
+  "tag-filter-selected-tags": "Selected Tags",
+  "tag-filter-no-tags-selected": "No tags selected.",
+  "tag-filter-search-placeholder": "Search in available tags",
+  "tag-filter-available-tags": "Available Tags",
+  "tag-filter-clear-all": "Clear all filters",
+  "image-upload-processing": "Processing image",
+  "image-upload-preview-alt": "Image",
+  "image-upload-edit": "Edit image",
+  "image-upload-delete": "Delete image",
+  "image-upload-rotate": "Rotate 90°",
+  "edit-bucket-list": "Edit Bucket List",
+  "remove-bite-from-bucket-list-title": "Remove Bite",
+  "remove-bite-from-bucket-list-message": "Are you sure you want to remove this bite from the bucket list?",
+  "menu-category-empty": "No items in this category yet."
 }

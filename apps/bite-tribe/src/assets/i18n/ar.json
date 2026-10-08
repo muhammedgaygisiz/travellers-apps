@@ -738,5 +738,22 @@
   "get-the-app": "احصل على التطبيق",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "امسح رمزًا بكاميرا هاتفك لتثبيت BiteTribe.",
   "download-on-the-app-store": "التنزيل من App Store",
-  "get-it-on-google-play": "احصل عليه من Google Play"
+  "get-it-on-google-play": "احصل عليه من Google Play",
+  "done": "تم",
+  "tag-filter-distance-placeholder": "متر",
+  "tag-filter-price-label": "السعر ({{currency}})",
+  "tag-filter-selected-tags": "الوسوم المحددة",
+  "tag-filter-no-tags-selected": "لم يتم تحديد أي وسوم.",
+  "tag-filter-search-placeholder": "ابحث في الوسوم المتاحة",
+  "tag-filter-available-tags": "الوسوم المتاحة",
+  "tag-filter-clear-all": "مسح جميع عوامل التصفية",
+  "image-upload-processing": "جارٍ معالجة الصورة",
+  "image-upload-preview-alt": "صورة",
+  "image-upload-edit": "تعديل الصورة",
+  "image-upload-delete": "حذف الصورة",
+  "image-upload-rotate": "تدوير 90°",
+  "edit-bucket-list": "تعديل قائمة الآمال",
+  "remove-bite-from-bucket-list-title": "إزالة Bite",
+  "remove-bite-from-bucket-list-message": "هل أنت متأكد أنك تريد إزالة هذا الـ Bite من قائمة الآمال؟",
+  "menu-category-empty": "لا توجد أطباق في هذه الفئة بعد."
 }

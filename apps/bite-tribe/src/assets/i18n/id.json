@@ -738,5 +738,22 @@
   "get-the-app": "Dapatkan aplikasinya",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "Pindai kode dengan kamera ponsel Anda untuk memasang BiteTribe.",
   "download-on-the-app-store": "Unduh di App Store",
-  "get-it-on-google-play": "Dapatkan di Google Play"
+  "get-it-on-google-play": "Dapatkan di Google Play",
+  "done": "Selesai",
+  "tag-filter-distance-placeholder": "meter",
+  "tag-filter-price-label": "Harga ({{currency}})",
+  "tag-filter-selected-tags": "Tag Terpilih",
+  "tag-filter-no-tags-selected": "Belum ada tag yang dipilih.",
+  "tag-filter-search-placeholder": "Cari di tag yang tersedia",
+  "tag-filter-available-tags": "Tag Tersedia",
+  "tag-filter-clear-all": "Hapus semua filter",
+  "image-upload-processing": "Memproses gambar",
+  "image-upload-preview-alt": "Gambar",
+  "image-upload-edit": "Edit gambar",
+  "image-upload-delete": "Hapus gambar",
+  "image-upload-rotate": "Putar 90°",
+  "edit-bucket-list": "Edit Daftar Keinginan",
+  "remove-bite-from-bucket-list-title": "Hapus Bite",
+  "remove-bite-from-bucket-list-message": "Kamu yakin ingin menghapus Bite ini dari daftar keinginan?",
+  "menu-category-empty": "Belum ada menu di kategori ini."
 }

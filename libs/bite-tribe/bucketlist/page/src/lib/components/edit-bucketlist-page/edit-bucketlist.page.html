@@ -2,11 +2,11 @@
   [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
 >
   <ion-content class="ion-padding">
-    <h1 class="ion-margin-bottom">Edit Bucket List</h1>
+    <h1 class="ion-margin-bottom">{{ 'edit-bucket-list' | transloco }}</h1>
 
     <form [formGroup]="titleFormGroup">
       <ion-input
-        label="Name"
+        [label]="'name' | transloco"
         formControlName="name"
         fill="outline"
         class="ion-margin-top"
@@ -19,14 +19,14 @@
         (click)="onSaveTitle()"
         [disabled]="!titleFormGroup.valid"
       >
-        Save
+        {{ 'save' | transloco }}
       </ion-button>
     </form>
 
     @if (bites().length > 0) {
     <ion-list class="ion-margin-top">
       <ion-list-header>
-        <ion-label>Bites</ion-label>
+        <ion-label>{{ 'bites' | transloco }}</ion-label>
       </ion-list-header>
       @for (bite of bites(); track bite.id) {
       <ion-item>
@@ -38,7 +38,7 @@
           size="small"
           (click)="openRemoveBiteConfirmation(bite.id, $event)"
         >
-          Delete
+          {{ 'delete' | transloco }}
         </ion-button>
       </ion-item>
       }
@@ -47,8 +47,8 @@
 
     <ion-alert
       [isOpen]="isRemoveBiteAlertOpen()"
-      header="Remove Bite"
-      message="Are you sure you want to remove this bite from the bucket list?"
+      [header]="'remove-bite-from-bucket-list-title' | transloco"
+      [message]="'remove-bite-from-bucket-list-message' | transloco"
       [buttons]="removeBiteConfirmationButtons"
       (didDismiss)="handleRemoveBiteDismiss($event)"
     />

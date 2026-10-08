@@ -738,5 +738,22 @@
   "get-the-app": "Uygulamayı indir",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "BiteTribe'ı yüklemek için telefonunuzun kamerasıyla bir kodu tarayın.",
   "download-on-the-app-store": "App Store'dan indirin",
-  "get-it-on-google-play": "Google Play'den alın"
+  "get-it-on-google-play": "Google Play'den alın",
+  "done": "Bitti",
+  "tag-filter-distance-placeholder": "metre",
+  "tag-filter-price-label": "Fiyat ({{currency}})",
+  "tag-filter-selected-tags": "Seçili Etiketler",
+  "tag-filter-no-tags-selected": "Seçili etiket yok.",
+  "tag-filter-search-placeholder": "Mevcut etiketlerde ara",
+  "tag-filter-available-tags": "Mevcut Etiketler",
+  "tag-filter-clear-all": "Tüm filtreleri temizle",
+  "image-upload-processing": "Görsel işleniyor",
+  "image-upload-preview-alt": "Görsel",
+  "image-upload-edit": "Görseli düzenle",
+  "image-upload-delete": "Görseli sil",
+  "image-upload-rotate": "90° döndür",
+  "edit-bucket-list": "Yapılacaklar Listesini Düzenle",
+  "remove-bite-from-bucket-list-title": "Bite'ı Çıkar",
+  "remove-bite-from-bucket-list-message": "Bu Bite'ı yapılacaklar listesinden çıkarmak istediğinden emin misin?",
+  "menu-category-empty": "Bu kategoride henüz yemek yok."
 }

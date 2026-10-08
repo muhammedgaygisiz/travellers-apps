@@ -2,7 +2,14 @@ import { EditBucketlistPage } from '../edit-bucketlist.page';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { Bucketlist } from 'model';
+import { TranslocoTestingModule } from '@jsverse/transloco';
+import { Bite, Bucketlist } from 'model';
+
+const tr = {
+  'edit-bucket-list': 'Yapılacaklar Listesini Düzenle',
+  bites: "Bite'ler",
+  delete: 'Sil',
+};
 
 describe(EditBucketlistPage.name, () => {
   let comp: EditBucketlistPage;
@@ -11,6 +18,13 @@ describe(EditBucketlistPage.name, () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { tr },
+          translocoConfig: { availableLangs: ['tr'], defaultLang: 'tr' },
+          preloadLangs: true,
+        }),
+      ],
       providers: [provideIonicAngular()],
     });
     fixture = TestBed.createComponent(EditBucketlistPage);
@@ -20,6 +34,18 @@ describe(EditBucketlistPage.name, () => {
 
   it('should create', () => {
     expect(comp).toBeTruthy();
+  });
+
+  /** Turkish is the one catalog that translates `bites` (issue #1613). */
+  it('should render its copy in the active language', () => {
+    compRef.setInput('bites', [{ id: 'b1', name: 'Mantı' } as Bite]);
+    fixture.detectChanges();
+
+    const text: string = fixture.nativeElement.textContent;
+    expect(text).toContain('Yapılacaklar Listesini Düzenle');
+    expect(text).toContain("Bite'ler");
+    expect(text).toContain('Sil');
+    expect(text).not.toContain('Edit Bucket List');
   });
 
   describe('setNameControlFromBucketlistInput', () => {

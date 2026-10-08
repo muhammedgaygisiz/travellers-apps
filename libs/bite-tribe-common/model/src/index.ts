@@ -101,3 +101,8 @@ export * from './lib/scan-anomaly';
  * bucket-list read and the bucket-list save alike (issue #1717).
  */
 export * from './lib/bite-listability';
+/**
+ * A value export: the report reasons are a list the consumer app offers and the
+ * admin app counts, not only a shape (issue #1608).
+ */
+export * from './lib/bite-report';

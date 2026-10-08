@@ -51,6 +51,7 @@ export const OPERATOR_ACTIONS = [
   'backfillReviewTimestamps',
   'clusterRestaurantCandidateForBite',
   'deleteBiteAsOperator',
+  'dismissBiteReports',
   'issueTableQrTokens',
   'recomputeMenuItemStats',
   'removeRestaurantStaff',

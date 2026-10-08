@@ -72,6 +72,7 @@ describe('admin ROUTES', () => {
 
       expect(paths).toEqual(
         expect.arrayContaining([
+          'bite-reports',
           'bite-search',
           'restaurant-candidates',
           'restaurant-ownership',

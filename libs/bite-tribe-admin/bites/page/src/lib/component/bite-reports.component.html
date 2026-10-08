@@ -1,0 +1,269 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="ion-display-flex ion-flex-row bite-reports">
+      <div class="column column--list ion-padding">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>{{
+              'admin-reports-title' | transloco
+            }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-button
+              expand="block"
+              fill="outline"
+              data-testid="admin-reports-reload"
+              [disabled]="loading()"
+              (click)="reload.emit()"
+            >
+              {{ 'admin-reports-reload' | transloco }}
+            </ion-button>
+
+            @if (loading()) {
+              <div class="bite-reports__loading">
+                <ion-spinner name="crescent" />
+              </div>
+            } @else if (failed()) {
+              <p data-testid="admin-reports-failed">
+                {{ 'admin-reports-load-failed' | transloco }}
+              </p>
+            } @else {
+              <ion-list lines="full" data-testid="admin-reports-list">
+                @for (bite of reports(); track bite.biteId) {
+                  <ion-item
+                    [button]="true"
+                    [color]="
+                      bite.biteId === selected()?.biteId ? 'light' : undefined
+                    "
+                    (click)="onSelect(bite)"
+                  >
+                    <ion-label>
+                      <h3>{{ bite.name || bite.biteId }}</h3>
+                      @if (bite.place) {
+                        <p>{{ bite.place }}</p>
+                      }
+                    </ion-label>
+                    <ion-badge slot="end" color="danger">{{
+                      bite.reportCount
+                    }}</ion-badge>
+                  </ion-item>
+                } @empty {
+                  @if (loaded()) {
+                    <p data-testid="admin-reports-empty">
+                      {{ 'admin-reports-empty' | transloco }}
+                    </p>
+                  }
+                }
+              </ion-list>
+
+              @if (truncated()) {
+                <ion-note
+                  class="bite-reports__hint"
+                  data-testid="admin-reports-truncated"
+                >
+                  {{ 'admin-reports-truncated' | transloco }}
+                </ion-note>
+              }
+            }
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <div class="column column--detail ion-padding">
+        @if (selected(); as bite) {
+          <ion-card data-testid="admin-reports-detail">
+            <ion-card-header>
+              <ion-card-title>{{ bite.name || bite.biteId }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              @if (!bite.exists) {
+                <ion-note
+                  class="bite-reports__hint"
+                  data-testid="admin-reports-gone"
+                >
+                  {{ 'admin-reports-bite-gone' | transloco }}
+                </ion-note>
+              } @else if (bite.imageSrc) {
+                <img
+                  class="bite-reports__image"
+                  data-testid="admin-reports-image"
+                  alt="{{ bite.name || bite.biteId }}"
+                  [src]="bite.imageSrc"
+                />
+              } @else {
+                <ion-note class="bite-reports__hint">
+                  {{ 'admin-bites-no-image' | transloco }}
+                </ion-note>
+              }
+
+              <h4 class="bite-reports__section">
+                {{ 'admin-reports-why' | transloco }}
+              </h4>
+              <ion-list lines="none" data-testid="admin-reports-reasons">
+                @for (entry of reasonCounts(); track entry.reason) {
+                  <ion-item>
+                    <ion-label>{{
+                      'admin-reports-reason-' + entry.reason | transloco
+                    }}</ion-label>
+                    <ion-badge slot="end">{{ entry.count }}</ion-badge>
+                  </ion-item>
+                }
+              </ion-list>
+              <ion-note class="bite-reports__hint">
+                {{ 'admin-reports-first-reported' | transloco }}
+                {{ bite.firstReportedAt | date: 'medium' }}
+              </ion-note>
+
+              <ion-list lines="none">
+                <ion-item>
+                  <ion-label>
+                    <p>{{ 'admin-reports-author' | transloco }}</p>
+                    <h3>
+                      {{
+                        bite.authorDisplayName ||
+                          bite.authorUid ||
+                          ('admin-reports-no-author' | transloco)
+                      }}
+                    </h3>
+                    @if (bite.authorUid) {
+                      <p>{{ bite.authorUid }}</p>
+                    }
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label>
+                    <p>{{ 'admin-bites-id' | transloco }}</p>
+                    <h3>{{ bite.biteId }}</h3>
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label>
+                    <p>{{ 'admin-bites-place' | transloco }}</p>
+                    <h3>{{ bite.place || '—' }}</h3>
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label class="ion-text-wrap">
+                    <p>{{ 'admin-bites-description' | transloco }}</p>
+                    <h3>{{ bite.description || '—' }}</h3>
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label class="ion-text-wrap">
+                    <p>{{ 'admin-bites-tags' | transloco }}</p>
+                    @if (bite.tags.length) {
+                      @for (tag of bite.tags; track tag) {
+                        <ion-badge class="ion-margin-end">{{ tag }}</ion-badge>
+                      }
+                    } @else {
+                      <h3>—</h3>
+                    }
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+
+              <ion-list lines="full">
+                <ion-item>
+                  <ion-input
+                    labelPlacement="stacked"
+                    [label]="'admin-reports-reason' | transloco"
+                    [placeholder]="
+                      'admin-reports-reason-placeholder' | transloco
+                    "
+                    [value]="reason()"
+                    data-testid="admin-reports-decision-reason"
+                    (ionInput)="onReasonChange($event.detail.value ?? '')"
+                  />
+                </ion-item>
+              </ion-list>
+
+              <h4 class="bite-reports__section">
+                {{ 'admin-reports-keep' | transloco }}
+              </h4>
+              <ion-note class="bite-reports__hint">
+                {{ 'admin-reports-dismiss-hint' | transloco }}
+              </ion-note>
+              <ion-button
+                expand="block"
+                fill="outline"
+                class="ion-margin-top"
+                data-testid="admin-reports-dismiss"
+                [disabled]="!hasReason() || busy()"
+                (click)="onDismiss()"
+              >
+                @if (action() === 'dismiss') {
+                  <ion-spinner name="crescent" slot="start" />
+                }
+                {{ 'admin-reports-dismiss' | transloco }}
+              </ion-button>
+
+              @if (bite.authorUid) {
+                <h4 class="bite-reports__section">
+                  {{ 'admin-reports-block-title' | transloco }}
+                </h4>
+                <ion-note class="bite-reports__hint">
+                  {{
+                    (authorBlocked()
+                      ? 'admin-reports-author-is-blocked'
+                      : 'admin-reports-block-hint'
+                    ) | transloco
+                  }}
+                </ion-note>
+                <ion-button
+                  expand="block"
+                  fill="outline"
+                  color="warning"
+                  class="ion-margin-top"
+                  data-testid="admin-reports-block"
+                  [disabled]="!canBlock()"
+                  (click)="onBlockAuthor()"
+                >
+                  @if (action() === 'block') {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+                  {{ 'admin-reports-block' | transloco }}
+                </ion-button>
+              }
+
+              @if (bite.exists) {
+                <div class="bite-reports__danger">
+                  <h4
+                    class="bite-reports__section bite-reports__section--danger"
+                  >
+                    {{ 'admin-bites-remove' | transloco }}
+                  </h4>
+                  <ion-note class="bite-reports__hint">
+                    {{ 'admin-bites-delete-hint' | transloco }}
+                  </ion-note>
+                  <ion-button
+                    expand="block"
+                    class="ion-margin-top"
+                    color="danger"
+                    data-testid="admin-reports-delete"
+                    [disabled]="!hasReason() || busy()"
+                    (click)="onDelete()"
+                  >
+                    @if (action() === 'delete') {
+                      <ion-spinner name="crescent" slot="start" />
+                    }
+                    {{ 'admin-bites-delete' | transloco }}
+                  </ion-button>
+                </div>
+              }
+            </ion-card-content>
+          </ion-card>
+        } @else {
+          <ion-card>
+            <ion-card-content>
+              <p>{{ 'admin-reports-select-hint' | transloco }}</p>
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
+    </div>
+  </ion-content>
+</ta-page>

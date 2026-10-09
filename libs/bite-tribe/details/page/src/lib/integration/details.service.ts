@@ -4,6 +4,7 @@ import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
 import {
   Bite,
+  BiteReportReason,
   Bucketlist,
   LikeClick,
   PublicUser,
@@ -11,6 +12,7 @@ import {
 } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import { PATH } from 'utils';
+import { ToastService } from 'toast';
 
 @Injectable({ providedIn: 'root' })
 export class DetailsService {
@@ -18,6 +20,7 @@ export class DetailsService {
   private readonly biteDataAccess = inject(BiteDataAccessService);
   private readonly localImagePicker = inject(LocalImagePickerService);
   private readonly navController = inject(NavController);
+  private readonly toast = inject(ToastService);
 
   bite = this.dataAccess.bite;
 
@@ -170,6 +173,39 @@ export class DetailsService {
     } as Partial<Bite>;
     this.dataAccess.cacheBite(userAgnosticBiteInfo);
     this.navController.navigateForward(['new-bite']);
+  }
+
+  /**
+   * Files the report and tells the reporter it was received (GitHub issue
+   * #1608).
+   *
+   * A second report from the same account is answered as received too, in its
+   * own words: the Bite is already in front of an operator, which is all a
+   * second tap could ask for. A failure says so, because a reporter told their
+   * report went through when it did not will not file it again.
+   */
+  async reportBite(report: {
+    biteId: string;
+    reason: BiteReportReason;
+  }): Promise<void> {
+    try {
+      const { reported } = await this.dataAccess.reportBite(
+        report.biteId,
+        report.reason,
+      );
+
+      await this.toast.present({
+        messageKey: reported ? 'report-bite-sent' : 'report-bite-already-sent',
+        outcome: 'success',
+      });
+    } catch (error) {
+      console.error('Failed to report the Bite:', error);
+
+      await this.toast.present({
+        messageKey: 'report-bite-failed',
+        outcome: 'failure',
+      });
+    }
   }
 
   onShareBiteClick(bite: Bite): void {

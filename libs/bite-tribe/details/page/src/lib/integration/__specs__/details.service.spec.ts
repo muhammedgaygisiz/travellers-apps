@@ -12,6 +12,7 @@ import {
   RemoveBiteFromBucketlistParams,
 } from 'model';
 import { NavController } from '@ionic/angular/standalone';
+import { ToastService } from 'toast';
 import SpyInstance = jest.SpyInstance;
 
 type MockDetailsDataAccessService = Omit<
@@ -55,6 +56,7 @@ const createMockDataAccess = (
     cacheBite: jest.fn(),
     shareBite: jest.fn(),
     reloadBite: jest.fn(),
+    reportBite: jest.fn().mockResolvedValue({ reported: true }),
   };
   return { ...base, ...overrides } as MockDetailsDataAccessService;
 };
@@ -70,6 +72,10 @@ const mockBiteDataAccessService = {
 
 const mockLocalImagePicker = {
   pick: jest.fn().mockResolvedValue(undefined),
+};
+
+const mockToast = {
+  present: jest.fn().mockResolvedValue(undefined),
 };
 
 describe('DetailsService', () => {
@@ -93,6 +99,7 @@ describe('DetailsService', () => {
           useValue: mockLocalImagePicker,
         },
         DetailsService,
+        { provide: ToastService, useValue: mockToast },
         {
           provide: DetailsDataAccessService,
           useValue: mockDataAccessService,
@@ -185,6 +192,7 @@ describe('DetailsService', () => {
             useValue: mockLocalImagePicker,
           },
           DetailsService,
+          { provide: ToastService, useValue: mockToast },
           {
             provide: DetailsDataAccessService,
             useValue: mockDataAccessService,
@@ -222,6 +230,7 @@ describe('DetailsService', () => {
             useValue: mockLocalImagePicker,
           },
           DetailsService,
+          { provide: ToastService, useValue: mockToast },
           {
             provide: DetailsDataAccessService,
             useValue: mockDataAccessService,
@@ -266,6 +275,7 @@ describe('DetailsService', () => {
             useValue: mockLocalImagePicker,
           },
           DetailsService,
+          { provide: ToastService, useValue: mockToast },
           {
             provide: DetailsDataAccessService,
             useValue: mockDataAccessService,
@@ -307,6 +317,7 @@ describe('DetailsService', () => {
             useValue: mockLocalImagePicker,
           },
           DetailsService,
+          { provide: ToastService, useValue: mockToast },
           {
             provide: DetailsDataAccessService,
             useValue: mockDataAccessService,
@@ -348,6 +359,7 @@ describe('DetailsService', () => {
             useValue: mockLocalImagePicker,
           },
           DetailsService,
+          { provide: ToastService, useValue: mockToast },
           {
             provide: DetailsDataAccessService,
             useValue: mockDataAccessService,
@@ -510,6 +522,51 @@ describe('DetailsService', () => {
       service.onShareBiteClick(bite);
       expect(service.dataAccess.shareBite).toHaveBeenCalledWith(bite);
       expect(service.dataAccess.shareBite).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  /** Reporting a Bite to the operators (issue #1608). */
+  describe('reportBite', () => {
+    beforeEach(() => mockToast.present.mockClear());
+
+    it('files the report and says it was received', async () => {
+      await service.reportBite({ biteId: 'bite123', reason: 'spam' });
+
+      expect(service.dataAccess.reportBite).toHaveBeenCalledWith(
+        'bite123',
+        'spam',
+      );
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'report-bite-sent',
+        outcome: 'success',
+      });
+    });
+
+    it('says so when the account had already reported the Bite', async () => {
+      jest
+        .mocked(service.dataAccess.reportBite)
+        .mockResolvedValueOnce({ reported: false });
+
+      await service.reportBite({ biteId: 'bite123', reason: 'spam' });
+
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'report-bite-already-sent',
+        outcome: 'success',
+      });
+    });
+
+    it('says the report failed rather than pretending it went through', async () => {
+      jest.spyOn(console, 'error').mockImplementation();
+      jest
+        .mocked(service.dataAccess.reportBite)
+        .mockRejectedValueOnce(new Error('unavailable'));
+
+      await service.reportBite({ biteId: 'bite123', reason: 'spam' });
+
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'report-bite-failed',
+        outcome: 'failure',
+      });
     });
   });
 });

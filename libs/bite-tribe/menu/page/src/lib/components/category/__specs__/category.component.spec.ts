@@ -1,7 +1,7 @@
 import { CategoryComponent } from '../category.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Pipe, PipeTransform } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoTestingModule } from '@jsverse/transloco';
 import type { Category, ExtraItem } from 'model';
 import { MenuItemComponent } from '../../menu-item/menu-item.component';
 
@@ -57,7 +57,19 @@ describe('CategoryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CategoryComponent],
+      imports: [
+        CategoryComponent,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            de: {
+              'menu-category-empty':
+                'In dieser Kategorie gibt es noch keine Gerichte.',
+            },
+          },
+          translocoConfig: { availableLangs: ['de'], defaultLang: 'de' },
+          preloadLangs: true,
+        }),
+      ],
     })
       .overrideComponent(MenuItemComponent, {
         remove: { imports: [TranslocoPipe] },
@@ -71,6 +83,15 @@ describe('CategoryComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  /** An empty category follows the account language (issue #1613). */
+  it('should render the empty state in the active language', () => {
+    withCategory({ ...pizze(null), items: [] });
+
+    expect(fixture.nativeElement.textContent).toContain(
+      'In dieser Kategorie gibt es noch keine Gerichte.',
+    );
   });
 
   /**

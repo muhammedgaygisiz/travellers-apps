@@ -309,6 +309,33 @@ describe('deleteAccountForUser', () => {
     expect(db.exists('restaurantStaff/someone-else')).toBe(true);
   });
 
+  /**
+   * A report's document is named by the reporter's uid, so clearing a field
+   * would leave the identifier in the path. The reports go, and reports on the
+   * account's own Bites - filed by somebody else - stay (issue #1608).
+   */
+  it('removes the reports the account filed and leaves reports on its Bites', async () => {
+    seedFullAccount();
+    db.seed(`biteReports/bite-2_${UID}`, {
+      biteId: 'bite-2',
+      reporterUid: UID,
+      status: 'open',
+    });
+    db.seed('biteReports/bite-1_someone-else', {
+      biteId: 'bite-1',
+      reporterUid: 'someone-else',
+      status: 'open',
+    });
+
+    await deleteAccountForUser(UID, NOW);
+
+    expect(db.exists(`biteReports/bite-2_${UID}`)).toBe(false);
+    expect(db.exists('biteReports/bite-1_someone-else')).toBe(true);
+    expect(db.read(`accountDeletions/${UID}`)).toMatchObject({
+      deletedBiteReports: 1,
+    });
+  });
+
   /** Most accounts work at no restaurant, and the count has to say so. */
   it('records no removal for an account that is not staff', async () => {
     db.seed(`users/${UID}`, { displayName: 'Gone User' });

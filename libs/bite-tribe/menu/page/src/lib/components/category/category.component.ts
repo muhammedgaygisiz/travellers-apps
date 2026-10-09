@@ -8,6 +8,7 @@ import {
   output,
 } from '@angular/core';
 import { IonReorderGroup } from '@ionic/angular/standalone';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { currencyCodes } from 'utils';
 import type { Category, ExtraItem, MenuItem, MenuItemStats } from 'model';
 import {
@@ -19,7 +20,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './category.component.html',
   styleUrl: './category.component.scss',
-  imports: [MenuItemComponent, IonReorderGroup],
+  imports: [MenuItemComponent, IonReorderGroup, TranslocoPipe],
   selector: 'category',
 })
 export class CategoryComponent {

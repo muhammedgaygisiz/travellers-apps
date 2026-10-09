@@ -3,12 +3,14 @@ import { AuthService } from 'ta-firestore';
 import { DocumentData, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import {
   Bite,
+  BiteReportReason,
   Bucketlist,
   CreateAndUploadImageCallbackParams,
   Geopoint,
   GooglePlace,
   isBiteVisibleTo,
   PlaceDetails,
+  ReportBiteResult,
   WeekRange,
   WeeklyBites,
 } from 'model';
@@ -18,6 +20,7 @@ import { searchPlaces } from './utils/search-places';
 import { searchNearbyPlaces } from './utils/search-nearby-places';
 import { getPlaceDetails } from './utils/get-place-details';
 import { getCurrencyByPosition } from './utils/get-currency-by-position';
+import { reportBite } from './utils/report-bite';
 import { BITE_COLLECTION } from '../utils/constants';
 import { loadBitesByUser } from './utils/load-bites-by-user';
 import { loadWeeklyBites } from './utils/load-weekly-bites';
@@ -216,6 +219,13 @@ export class BiteApiService {
 
       throw error;
     }
+  }
+
+  public async reportBite(
+    biteId: string,
+    reason: BiteReportReason,
+  ): Promise<ReportBiteResult> {
+    return reportBite(biteId, reason);
   }
 
   public async deleteBite(bite: Bite): Promise<Bite> {

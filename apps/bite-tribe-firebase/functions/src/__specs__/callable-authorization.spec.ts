@@ -81,6 +81,12 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // do, and the kind of thing that should leave a name in the operator log.
   recomputeMenuItemStatsAsOperator: 'operator',
   deleteBiteAsOperator: 'operator',
+
+  // The report queue (issue #1608): reading the open reports, and closing
+  // them when the Bite stays up. Reports are readable by an operator only,
+  // and who filed one is not something any other account may learn.
+  dismissBiteReports: 'operator',
+  listBiteReports: 'operator',
   listUsersWithRoles: 'operator',
   revokeRestaurantOwner: 'operator',
   sendNewVersionNotification: 'operator',
@@ -158,6 +164,10 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   loadBitesByLocation: 'member',
   loadLeaderboard: 'member',
   loadWeeklyBites: 'member',
+  // A signed-in account reporting a Bite (issue #1608). `member` rather than
+  // `anySession`: a table guest has no Bite surface to report from, and a
+  // report is weighed by who filed it, which an anonymous uid cannot answer.
+  reportBite: 'member',
   resendEmailVerification: 'member',
   searchBites: 'member',
   searchBitesByCity: 'member',

@@ -135,7 +135,9 @@ export class AdminDashboard {
    * account: the filter lives on the page that holds the form, because finding
    * an account and acting on it are one errand. Bite search is its counterpart
    * and needs an entry of its own, because there is no Bite list to filter
-   * (issue #1476). Restaurant verification comes next because it is the daily
+   * (issue #1476). Reported Bites sit between the two, because a report is
+   * where most Bite work starts and the lookup is where it goes when a report
+   * names a Bite the queue does not hold (issue #1608). Restaurant verification comes next because it is the daily
    * work; the migrations below it are each their own entry rather than one
    * "migrations" page, so an operator reaches the one they came for instead of
    * scrolling past five Bite tables (issue #1473). Restaurant ownership sits
@@ -149,6 +151,13 @@ export class AdminDashboard {
       icon: 'people-outline',
       path: '/user-management',
       testId: 'admin-tool-user-management',
+    },
+    {
+      titleKey: 'admin-tool-bite-reports',
+      descriptionKey: 'admin-tool-bite-reports-description',
+      icon: 'flag-outline',
+      path: '/bite-reports',
+      testId: 'admin-tool-bite-reports',
     },
     {
       titleKey: 'admin-tool-bite-search',

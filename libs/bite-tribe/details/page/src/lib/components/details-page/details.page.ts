@@ -13,6 +13,8 @@ import {
 import { PageComponent } from 'common/ui/page';
 import {
   Bite,
+  BITE_REPORT_REASONS,
+  BiteReportReason,
   Bucketlist,
   isListableBite,
   LikeClick,
@@ -164,6 +166,7 @@ export class DetailsPage {
   readonly retryImageUpload = output<Bite>();
   readonly goBack = output();
   readonly retryLoad = output();
+  readonly reportBite = output<{ biteId: string; reason: BiteReportReason }>();
 
   private readonly formBuilder = inject(FormBuilder);
   private popoverController = inject(PopoverController);
@@ -467,6 +470,68 @@ export class DetailsPage {
 
     return bucketlists.some((list) => list.biteIds?.includes(biteId));
   });
+
+  /**
+   * Whether the reader may report this Bite (GitHub issue #1608).
+   *
+   * A signed-in reader, on somebody else's Bite. Read off the Bite rather than
+   * the loaded creator profile for the reason `isOwnBiteLike` gives: the
+   * profile is fetched from this same field and is absent on the first render.
+   * `reportBite` refuses an author reporting their own Bite regardless.
+   */
+  protected readonly canReport = computed(() => {
+    const bite = this.bite();
+    const userId = this.userId();
+
+    return (
+      this.isAuthenticated() && !!bite?.id && !!userId && bite.userId !== userId
+    );
+  });
+
+  /**
+   * Asks why, then reports.
+   *
+   * A list of reasons rather than a text field: reporting should be one tap
+   * past the button, and nothing a reporter submits can itself be text an
+   * operator has to read. The message says up front that the author is not
+   * told who reported them, which is the thing a hesitating reporter wants to
+   * know.
+   */
+  async onReportBite(): Promise<void> {
+    const biteId = this.bite()?.id;
+
+    if (!biteId || !this.canReport()) {
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: this.transloco.translate('report-bite-title'),
+      message: this.transloco.translate('report-bite-message'),
+      inputs: BITE_REPORT_REASONS.map((reason) => ({
+        type: 'radio' as const,
+        label: this.transloco.translate(`report-bite-reason-${reason}`),
+        value: reason,
+      })),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('report-bite-submit'),
+          role: 'destructive',
+          handler: (reason: BiteReportReason | undefined): boolean => {
+            if (!reason) {
+              return false;
+            }
+
+            this.reportBite.emit({ biteId, reason });
+
+            return true;
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
 
   saveReview(): void {
     if (!this.reviewFormGroup.valid) {

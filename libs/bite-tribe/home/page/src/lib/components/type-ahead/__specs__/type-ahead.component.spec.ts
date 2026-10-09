@@ -1,6 +1,17 @@
 import { TypeaheadComponent } from '../type-ahead.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
+import { TranslocoTestingModule } from '@jsverse/transloco';
+
+const de = {
+  cancel: 'Abbrechen',
+  done: 'Fertig',
+  'tag-filter-selected-tags': 'Ausgewählte Tags',
+  'tag-filter-no-tags-selected': 'Keine Tags ausgewählt.',
+  'tag-filter-search-placeholder': 'Verfügbare Tags durchsuchen',
+  'tag-filter-available-tags': 'Verfügbare Tags',
+  'tag-filter-clear-all': 'Alle Filter zurücksetzen',
+};
 
 const createInputEvent = (value: string): CustomEvent => {
   const input = document.createElement('input');
@@ -16,6 +27,15 @@ describe(TypeaheadComponent.name, () => {
   let compRef: ComponentRef<TypeaheadComponent>;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { de },
+          translocoConfig: { availableLangs: ['de'], defaultLang: 'de' },
+          preloadLangs: true,
+        }),
+      ],
+    });
     fixture = TestBed.createComponent(TypeaheadComponent);
     component = fixture.componentInstance;
     compRef = fixture.componentRef;
@@ -25,6 +45,22 @@ describe(TypeaheadComponent.name, () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  /** The tag filter follows the account language (issue #1613). */
+  it('should render its copy in the active language', () => {
+    const text: string = fixture.nativeElement.textContent;
+    const searchbar: HTMLIonSearchbarElement =
+      fixture.nativeElement.querySelector('ion-searchbar');
+
+    expect(text).toContain('Abbrechen');
+    expect(text).toContain('Fertig');
+    expect(text).toContain('Ausgewählte Tags');
+    expect(text).toContain('Keine Tags ausgewählt.');
+    expect(text).toContain('Verfügbare Tags');
+    expect(text).toContain('Alle Filter zurücksetzen');
+    expect(searchbar.placeholder).toBe('Verfügbare Tags durchsuchen');
+    expect(text).not.toMatch(/Selected Tags|Clear all filters/);
   });
 
   it('should filter items based on search term', () => {

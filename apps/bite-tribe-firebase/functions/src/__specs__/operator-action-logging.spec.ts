@@ -31,6 +31,7 @@ import { join } from 'node:path';
  * action. Anything that writes, spends or sends belongs in the trail instead.
  */
 const READ_ONLY_OPERATOR_ENDPOINTS = [
+  'listBiteReports',
   'listUsersWithRoles',
   'listRestaurantStaff',
 ];

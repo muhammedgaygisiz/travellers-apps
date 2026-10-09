@@ -1,0 +1,76 @@
+:host {
+  /* The Bite lookup's 1:2 split, for the same reason: a list to scan and a Bite to read. */
+  .bite-reports {
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .column {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .column--list {
+    flex: 1;
+  }
+
+  .column--detail {
+    flex: 2;
+  }
+
+  @media (min-width: 768px) {
+    .bite-reports {
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .column {
+      overflow-y: auto;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .bite-reports {
+      flex-direction: column;
+    }
+  }
+
+  .bite-reports__loading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  .bite-reports__hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  /* Capped by height, never cropped: the image is what is being judged. */
+  .bite-reports__image {
+    display: block;
+    width: 100%;
+    max-height: 22rem;
+    object-fit: contain;
+    border-radius: 0.5rem;
+    background: var(--ion-color-step-100, #f2f2f2);
+  }
+
+  .bite-reports__section {
+    margin: 1.5rem 0 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .bite-reports__section--danger {
+    color: var(--ion-color-danger);
+  }
+
+  /* Deleting cannot be undone, so it sits across a rule from the other two answers. */
+  .bite-reports__danger {
+    margin-top: 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+  }
+}

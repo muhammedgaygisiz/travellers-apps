@@ -39,7 +39,7 @@ import { getExifDataFromPhoto } from './utils/get-exif-data-from-photo';
 import { getExifDataFromFile } from './utils/get-exif-data-from-file';
 import { FilePicker, PickedFile } from '@capawesome/capacitor-file-picker';
 import { getExifDataFromFilePath } from './utils/get-exif-data-from-file-path';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const photoOptions = {
   quality: 90,
@@ -86,6 +86,7 @@ const isReadableGalleryFile = (file: PickedFile): boolean =>
     IonTitle,
     IonContent,
     Placeholder,
+    TranslocoPipe,
   ],
   providers: [
     {

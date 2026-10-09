@@ -653,6 +653,12 @@ beforeEach(async () => {
     await setDoc(doc(db, 'restaurantCandidates', 'candidate-1'), {
       status: 'pending',
     });
+    await setDoc(doc(db, 'biteReports', `consumer-bite_${STRANGER}`), {
+      biteId: 'consumer-bite',
+      reporterUid: STRANGER,
+      reason: 'spam',
+      status: 'open',
+    });
     await setDoc(doc(db, 'accountDeletions', 'deletion-1'), {
       userId: 'gone-uid',
     });
@@ -2836,6 +2842,33 @@ describe('backend-owned collections', () => {
     await assertFails(
       setDoc(doc(asConsumer(), 'accountDeletions', 'deletion-2'), {
         userId: CONSUMER,
+      }),
+    );
+  });
+
+  /**
+   * The reported author must never learn who reported them, and the reporter
+   * files through `reportBite` rather than by writing here (issue #1608).
+   */
+  it('lets only an operator read a Bite report, and nobody write one', async () => {
+    const report = `consumer-bite_${STRANGER}`;
+
+    await assertSucceeds(getDoc(doc(asOperator(), 'biteReports', report)));
+    await assertSucceeds(getDocs(collection(asOperator(), 'biteReports')));
+    await assertFails(getDoc(doc(asConsumer(), 'biteReports', report)));
+    await assertFails(getDoc(doc(asStranger(), 'biteReports', report)));
+    await assertFails(getDocs(collection(asConsumer(), 'biteReports')));
+    await assertFails(
+      setDoc(doc(asConsumer(), 'biteReports', `consumer-bite_${CONSUMER}`), {
+        biteId: 'consumer-bite',
+        reporterUid: CONSUMER,
+        reason: 'spam',
+        status: 'open',
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(asOperator(), 'biteReports', report), {
+        status: 'dismissed',
       }),
     );
   });

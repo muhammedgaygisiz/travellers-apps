@@ -16,17 +16,15 @@ import { imageOutline } from 'ionicons/icons';
 import { ComponentRef, signal } from '@angular/core';
 import { addNecessaryIcons } from 'utils';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
-import { of } from 'rxjs';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 addNecessaryIcons();
 
-const MockTranslocoService = {
-  translate: jest.fn((key: string): string => key),
-  config: {
-    reRenderOnLangChange: jest.fn(),
-  },
-  langChanges$: of(),
+const en = {
+  'image-upload-processing': 'Processing image',
+  'image-upload-preview-alt': 'Image',
+  'image-upload-edit': 'Edit image',
+  'image-upload-delete': 'Delete image',
 };
 
 jest.mock('@capacitor/camera', () => ({
@@ -131,12 +129,18 @@ describe('ImageUploadComponent', () => {
     addIcons({ imageOutline });
 
     await TestBed.configureTestingModule({
-      imports: [ImageUploadComponent],
+      imports: [
+        ImageUploadComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true,
+        }),
+      ],
       providers: [
         { provide: Platform, useValue: platformMock },
         { provide: NavController, useValue: navControllerMock },
         { provide: AlertController, useValue: alertControllerMock },
-        { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     }).compileComponents();
 
@@ -497,6 +501,26 @@ describe('ImageUploadComponent', () => {
 
       expect(component.isLoading()).toBe(false);
     });
+  });
+
+  /** The preview's labels go through Transloco (issue #1613). */
+  it('should label the preview and its actions through Transloco', () => {
+    compRef.setInput('imageUrl', 'https://example.com/profile.jpg');
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('img')?.getAttribute('alt')).toBe('Image');
+    expect(el.querySelector('#edit-button')?.getAttribute('aria-label')).toBe(
+      'Edit image',
+    );
+    expect(el.querySelector('#delete-button')?.getAttribute('aria-label')).toBe(
+      'Delete image',
+    );
+    expect(
+      el
+        .querySelector('[data-testid="image-pending"] ion-spinner')
+        ?.getAttribute('aria-label'),
+    ).toBe('Processing image');
   });
 
   describe('pending image state', () => {

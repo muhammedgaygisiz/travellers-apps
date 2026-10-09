@@ -1206,6 +1206,32 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ------------------------------------------------------------ bite reports
+
+    /**
+     * A report on a Bite (GitHub issue #1608).
+     *
+     * ```text
+     * /biteReports/{biteId}_{reporterUid}
+     * ```
+     *
+     * **Readable by an operator and by nobody else**, the reporter and the
+     * reported author included. The author must never learn who reported
+     * them, and a reporter has no use for the queue: what they filed is
+     * answered by what happens to the Bite.
+     *
+     * **Written only by `reportBite`, through the Admin SDK.** A reporter does
+     * create a report, but not from the client: the duplicate check is a
+     * `create` that fails on an existing document, and a client that may not
+     * read the collection could not tell that refusal from any other. Closing
+     * a report goes through `dismissBiteReports` for the same reason an
+     * operator's other actions are callables - the operator log.
+     */
+    match /biteReports/{reportId} {
+      allow read: if isOperator();
+      allow write: if false;
+    }
+
     // ------------------------------------------------------------------- rest
 
     /**

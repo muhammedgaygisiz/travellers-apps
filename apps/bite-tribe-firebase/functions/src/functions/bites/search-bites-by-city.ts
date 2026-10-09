@@ -12,6 +12,7 @@ import { geocodeAddress, Position } from '../shared/utils/geocode';
 import { SearchBite, toSearchBite } from '../shared/utils/search-bite';
 import { requireMember } from '../shared/roles';
 import { isBiteVisibleTo } from '../shared/utils/bite-listability';
+import { isBlockedUid, loadBlockedUids } from '../shared/utils/user-blocks';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -67,11 +68,13 @@ const getBitePosition = (data: DocumentData): Position | undefined => {
  *
  * Visibility is checked in the same filter as the radius, before the cap, so a
  * city with hidden Bites still fills the page with visible ones (GitHub issue
- * #1717).
+ * #1717). A Bite by an account the caller blocked is dropped with them
+ * (GitHub issue #1609).
  */
 export const loadBitesNearPosition = async (
   center: Position,
   viewerUid: string,
+  blockedUids: ReadonlySet<string> = new Set(),
 ): Promise<SearchBite[]> => {
   const centerPoint: Geopoint = [center.latitude, center.longitude];
   const bounds = geohashQueryBounds(centerPoint, DEFAULT_SEARCH_RADIUS_IN_M);
@@ -82,7 +85,10 @@ export const loadBitesNearPosition = async (
     .filter((doc) => {
       const data = doc.data();
 
-      if (!isBiteVisibleTo(data, viewerUid)) {
+      if (
+        !isBiteVisibleTo(data, viewerUid) ||
+        isBlockedUid(data['userId'], blockedUids)
+      ) {
         return false;
       }
 
@@ -135,7 +141,11 @@ export const searchBitesByCity = onAppCheck<SearchBitesByCityRequest>(
         return [];
       }
 
-      return await loadBitesNearPosition(position, request.auth.uid);
+      return await loadBitesNearPosition(
+        position,
+        request.auth.uid,
+        await loadBlockedUids(getFirestore(), request.auth.uid),
+      );
     } catch (error) {
       logger.warn('searchBitesByCity: failed to load bites for city', {
         error: error instanceof Error ? error.message : String(error),

@@ -84,6 +84,10 @@ export class HomeDataAccessService {
     initialValue: [] as string[],
   });
   userId = toSignal(this.storeService.userId$, { initialValue: '' });
+  private readonly blockedUserIds = toSignal(
+    this.storeService.blockedUserIds$,
+    { initialValue: [] as string[] },
+  );
   selectedBucketlist = toSignal(this.storeService.selectedBucketlist$, {
     requireSync: true,
   });
@@ -340,17 +344,22 @@ export class HomeDataAccessService {
   weeklyBites = computed((): Bite[] => {
     const likes = this.likes();
     const gpsPosition = this.gpsPosition();
-    const bites = this.weeklyBitesValue().bites.map((bite) => ({
-      ...bite,
-      likes: likes.filter((like) => like.biteId === bite.id),
-      distance: haversineDistance(
-        bite.position?.latitude,
-        bite.position?.longitude,
-        gpsPosition?.latitude,
-        gpsPosition?.longitude,
-        'km',
-      ),
-    }));
+    // The callable already leaves out blocked accounts; this applies a block
+    // placed after the week was loaded (GitHub issue #1609).
+    const blocked = new Set(this.blockedUserIds());
+    const bites = this.weeklyBitesValue()
+      .bites.filter((bite) => !bite.userId || !blocked.has(bite.userId))
+      .map((bite) => ({
+        ...bite,
+        likes: likes.filter((like) => like.biteId === bite.id),
+        distance: haversineDistance(
+          bite.position?.latitude,
+          bite.position?.longitude,
+          gpsPosition?.latitude,
+          gpsPosition?.longitude,
+          'km',
+        ),
+      }));
 
     return sortByCriteria(
       bites,

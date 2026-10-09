@@ -31,6 +31,7 @@ const MockSearchService = {
     value: results,
     isLoading,
   },
+  visibleResults: results,
   selectedCategory,
   selectedCountryCode,
   hasSearched,

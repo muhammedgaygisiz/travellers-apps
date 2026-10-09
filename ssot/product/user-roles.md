@@ -79,7 +79,8 @@ Granted today: yes. Target state, not implemented: **target**. Not granted: no.
 | Acquire a BiteTrail as a Bucketlist                                                         | yes                       | yes              | yes                      |
 | Write `bite.restaurantId`                                                                   | yes, via verification     | no               | yes, via the Bite form ⁴ |
 | Report a Bite                                                                               | yes ⁵                     | yes ⁵            | yes ⁵                    |
-| Report a Review or a profile, and block another user                                        | **target** ⁵              | **target** ⁵     | **target** ⁵             |
+| Report a Review or a profile                                                                | **target** ⁵              | **target** ⁵     | **target** ⁵             |
+| Block another user                                                                          | yes ⁵                     | yes ⁵            | yes ⁵                    |
 | Act on a report: dismiss it, block the author, delete the Bite                              | yes ⁵                     | no               | no                       |
 
 ¹ `RD-UR-6`: the Operator maintains **every** Restaurant, claimed or unclaimed, from the
@@ -114,9 +115,10 @@ means there is no grant to revoke either. **The operator half shipped**: block a
 ([#1474]) and delete a Bite ([#1475]) with epic [#1471], the contact address with [#1429].
 **Reporting a Bite ships** ([#1608]): any account reports somebody else's Bite from the Bite
 detail page, and the operator works the reports from the admin app's report queue, where they
-dismiss them, block the author or delete the Bite. **The rest of the user-facing half -
-user-to-user blocking, content filtering, and reporting a Review or a profile - does not exist
-yet**: [#1609] blocking another user, [#1610] filtering
+dismiss them, block the author or delete the Bite. **User-to-user blocking ships** ([#1609]):
+any account blocks another from its profile, per
+[UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md). **The rest of the user-facing half - content
+filtering, and reporting a Review or a profile - does not exist yet**: [#1610] filtering
 before publication, and epic [#1284] for reporting inside a review thread - narrower than it
 looks, because it moderates review threads and nothing else. Reporting a profile has no
 owning issue, checked 8 October 2026. Store requirement

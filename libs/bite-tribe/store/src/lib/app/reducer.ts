@@ -26,6 +26,7 @@ const initialState: AppSlice = {
     home: true,
   },
   exchangeRates: { EUR: 1 },
+  blockedUserIds: [],
   errorLoadingGpsPosition: false,
   errorLoadingBites: false,
   profileMetadata: CLEAN_PROFILE_METADATA,
@@ -243,6 +244,29 @@ export const reducer = createReducer<AppSlice>(
       followers: Math.max(state.profileMetadata.followers - 1, 0),
       isFollowedByMe: false,
     },
+  })),
+  on(AppActions.loadedBlockedUsers, (state, { userIds }) => ({
+    ...state,
+    blockedUserIds: userIds,
+  })),
+  // Blocking removes the follow in both directions on the backend, so the
+  // viewed profile no longer counts the blocker among its followers.
+  on(AppActions.blockedUser, (state, { userId }) => ({
+    ...state,
+    blockedUserIds: state.blockedUserIds.includes(userId)
+      ? state.blockedUserIds
+      : [...state.blockedUserIds, userId],
+    profileMetadata: {
+      ...state.profileMetadata,
+      followers: state.profileMetadata.isFollowedByMe
+        ? Math.max(state.profileMetadata.followers - 1, 0)
+        : state.profileMetadata.followers,
+      isFollowedByMe: false,
+    },
+  })),
+  on(AppActions.unblockedUser, (state, { userId }) => ({
+    ...state,
+    blockedUserIds: state.blockedUserIds.filter((id) => id !== userId),
   })),
   on(routerRequestAction, (state) => ({
     ...state,

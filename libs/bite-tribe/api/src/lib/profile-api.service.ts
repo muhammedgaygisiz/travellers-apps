@@ -494,6 +494,52 @@ export class ProfileApiService {
     }
   }
 
+  /**
+   * Blocks another account for the signed-in user (GitHub issue #1609).
+   *
+   * A callable rather than a client write: blocking also removes the other
+   * account's follow of this one, which the rules let no client delete.
+   * Errors are left to the caller, which has to tell the user it did not work.
+   */
+  async blockUser(userId: string): Promise<void> {
+    await FirebaseFunctions.callByName<{ uid: string }, { blocked: boolean }>({
+      name: 'blockUser',
+      data: { uid: userId },
+    });
+  }
+
+  async unblockUser(userId: string): Promise<void> {
+    await FirebaseFunctions.callByName<{ uid: string }, { blocked: boolean }>({
+      name: 'unblockUser',
+      data: { uid: userId },
+    });
+  }
+
+  /**
+   * The uids the signed-in user has blocked. The list is readable by its owner
+   * alone, and only its document ids are needed.
+   */
+  async fetchBlockedUserIds(): Promise<string[]> {
+    const uid = this.authService.getUser()?.uid;
+
+    if (!uid) {
+      return [];
+    }
+
+    try {
+      const result = await FirebaseFirestore.getCollection({
+        reference: `${USERS_COLLECTION}/${uid}/blocked`,
+      });
+
+      return result.snapshots.map((snapshot) => snapshot.id);
+    } catch (error) {
+      console.error('Error fetching blocked users:', error);
+      this.errorHandler.handleError(error);
+
+      return [];
+    }
+  }
+
   async fetchFollowers(
     userId: string,
   ): Promise<DocumentSnapshot<DocumentData>[]> {

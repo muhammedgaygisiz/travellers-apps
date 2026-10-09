@@ -150,4 +150,15 @@ describe('selectNearbyBites', () => {
       selectNearbyBites([bite('far', { position: farAway })], center, 'poster'),
     ).toEqual([]);
   });
+  /** GitHub issue #1609. */
+  it('drops the Bites of an account the caller blocked', () => {
+    expect(
+      selectNearbyBites(
+        [bite('blocked'), bite('other', { userId: 'someone-else' })],
+        center,
+        'viewer',
+        new Set(['poster']),
+      ).map((item) => item.id),
+    ).toEqual(['other']);
+  });
 });

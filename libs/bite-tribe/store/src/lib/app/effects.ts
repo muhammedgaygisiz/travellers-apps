@@ -3,6 +3,8 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AppActions } from './actions';
 import {
   catchError,
+  EMPTY,
+  exhaustMap,
   filter,
   from,
   map,
@@ -33,6 +35,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { userId } from '../router/selectors';
 import { publicUser } from './selectors';
 import { CreateAndUploadImageCallbackParams } from 'model';
+import { ToastService } from 'toast';
 
 @Injectable()
 export class AppEffect {
@@ -43,6 +46,7 @@ export class AppEffect {
   private readonly store = inject(Store);
   private readonly analytics = inject(AnalyticsService);
   private readonly pushNavigation = inject(PushNavigationService);
+  private readonly toast = inject(ToastService);
 
   private readonly userId = toSignal(this.store.select(userId));
 
@@ -378,6 +382,80 @@ export class AppEffect {
     },
     { dispatch: false },
   );
+
+  /**
+   * The signed-in user's block list, read once per login (GitHub issue #1609).
+   * The block and unblock effects keep it current afterwards, so it needs no
+   * listener of its own.
+   */
+  loadBlockedUsers$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(fromAuth.AuthActions.loadedUser),
+      stopIfUserIsUndefined(),
+      switchMap(() => from(this.api.fetchBlockedUserIds())),
+      map((userIds) => AppActions.loadedBlockedUsers({ userIds })),
+    );
+  });
+
+  /**
+   * The store only learns of a block once the backend has written it, unlike
+   * the optimistic follow: a block that silently failed would leave the user
+   * believing an account is gone from their app while it is not. A second tap
+   * while the first is in flight is dropped.
+   */
+  blockUser$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(AppActions.blockUser),
+      exhaustMap(({ user }) =>
+        from(this.api.blockUser(user.userId)).pipe(
+          map(() => {
+            void this.toast.present({
+              messageKey: 'user-blocked',
+              params: { username: user.displayName },
+              outcome: 'success',
+            });
+
+            return AppActions.blockedUser({ userId: user.userId });
+          }),
+          catchError(() => {
+            void this.toast.present({
+              messageKey: 'user-block-failed',
+              outcome: 'failure',
+            });
+
+            return EMPTY;
+          }),
+        ),
+      ),
+    );
+  });
+
+  unblockUser$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(AppActions.unblockUser),
+      exhaustMap(({ user }) =>
+        from(this.api.unblockUser(user.userId)).pipe(
+          map(() => {
+            void this.toast.present({
+              messageKey: 'user-unblocked',
+              params: { username: user.displayName },
+              outcome: 'success',
+            });
+
+            return AppActions.unblockedUser({ userId: user.userId });
+          }),
+          catchError(() => {
+            void this.toast.present({
+              messageKey: 'user-unblock-failed',
+              outcome: 'failure',
+            });
+
+            return EMPTY;
+          }),
+        ),
+      ),
+    );
+  });
 
   fetchFollowMetadata$ = createEffect(
     () => {

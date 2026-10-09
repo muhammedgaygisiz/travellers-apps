@@ -13,6 +13,22 @@
   (logoutClick)="logoutClick.emit()"
   (menuNavigate)="menuNavigate.emit($event)"
 >
+  <!-- The secondary actions on somebody else's profile. Follow stays the one
+  prominent action on the page, so Block lives behind this menu rather than
+  beside it. Not offered once blocked: Unblock then takes Follow's place. See
+  GitHub issue #1609. -->
+  @if (showProfileActionsMenu()) {
+    <ion-buttons header-end slot="end">
+      <ion-button
+        data-testid="profile-actions-menu"
+        [attr.aria-label]="'profile-more-actions' | transloco"
+        (click)="openProfileActionsMenu($event)"
+      >
+        <ion-icon slot="icon-only" name="ellipsis-vertical" />
+      </ion-button>
+    </ion-buttons>
+  }
+
   <ion-content class="ion-padding">
     @if (showSkeleton()) {
       <profile-skeleton />
@@ -56,57 +72,72 @@
             </ion-button>
           }
           @if (isUnfollowedUser()) {
-            @if (this.profileMetadata()?.isFollowedByMe) {
-              <ion-button fill="outline" (click)="openConfirmationDialog()"
-                >{{ 'stop-following' | transloco }}
+            @if (isBlocked()) {
+              <ion-button
+                fill="outline"
+                data-testid="profile-unblock"
+                (click)="unblock()"
+                >{{ 'unblock' | transloco }}
               </ion-button>
             } @else {
-              <ion-button fill="outline" (click)="onFollow()"
-                >{{ 'follow' | transloco }}
-              </ion-button>
+              @if (this.profileMetadata()?.isFollowedByMe) {
+                <ion-button fill="outline" (click)="openConfirmationDialog()"
+                  >{{ 'stop-following' | transloco }}
+                </ion-button>
+              } @else {
+                <ion-button fill="outline" (click)="onFollow()"
+                  >{{ 'follow' | transloco }}
+                </ion-button>
+              }
             }
           }
         </div>
       </div>
 
-      @if (showVisibilityStatus()) {
-        <profile-visibility
-          [isPublic]="$safeNavigationMigration(userData?.public)"
-          (editClick)="gotoEditProfile.emit()"
-        />
-      }
-
-      <p class="profile-about">
-        {{ userData?.about || ('no-description-available' | transloco) }}
-      </p>
-
-      <country-flags
-        [countryCodes]="$safeNavigationMigration(userData?.countryCodes)"
-      />
-
-      <div class="bites-section">
-        <h2>{{ 'bites' | transloco }}</h2>
-
-        @if (displayedBites().length) {
-          @for (bite of displayedBites(); track bite.id) {
-            <bt-bite
-              [bite]="bite"
-              [userId]="currentUserId"
-              [showEditButton]="false"
-              [enableImageRetry]="enableImageRetry()"
-              (retryImageUpload)="retryImageUpload.emit($event)"
-              (biteClick)="biteClick.emit($event)"
-              (likeButtonClick)="likeButtonClick.emit($event)"
-            />
-          }
-        } @else {
-          <p class="empty-bites-message">{{ emptyBitesMessage() }}</p>
+      @if (isBlocked()) {
+        <p class="profile-blocked-message" data-testid="profile-blocked">
+          {{ 'you-blocked-this-account' | transloco }}
+        </p>
+      } @else {
+        @if (showVisibilityStatus()) {
+          <profile-visibility
+            [isPublic]="$safeNavigationMigration(userData?.public)"
+            (editClick)="gotoEditProfile.emit()"
+          />
         }
 
-        <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
-          <ion-infinite-scroll-content />
-        </ion-infinite-scroll>
-      </div>
+        <p class="profile-about">
+          {{ userData?.about || ('no-description-available' | transloco) }}
+        </p>
+
+        <country-flags
+          [countryCodes]="$safeNavigationMigration(userData?.countryCodes)"
+        />
+
+        <div class="bites-section">
+          <h2>{{ 'bites' | transloco }}</h2>
+
+          @if (displayedBites().length) {
+            @for (bite of displayedBites(); track bite.id) {
+              <bt-bite
+                [bite]="bite"
+                [userId]="currentUserId"
+                [showEditButton]="false"
+                [enableImageRetry]="enableImageRetry()"
+                (retryImageUpload)="retryImageUpload.emit($event)"
+                (biteClick)="biteClick.emit($event)"
+                (likeButtonClick)="likeButtonClick.emit($event)"
+              />
+            }
+          } @else {
+            <p class="empty-bites-message">{{ emptyBitesMessage() }}</p>
+          }
+
+          <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
+            <ion-infinite-scroll-content />
+          </ion-infinite-scroll>
+        </div>
+      }
 
       <!-- Show a message when no user data is available -->
       @if (!userData) {
@@ -135,5 +166,41 @@ surfaces read the same sentence in the same language. See GitHub issue #1343. --
     }}"
     [buttons]="confirmationButtons"
     (didDismiss)="handleConfirmationDismiss($event)"
+  />
+}
+
+<!-- Bound rather than created on demand, so closing it animates and still
+reports its dismissal: the block confirmation opens from that, once the
+popover has gone, so two overlays never animate over each other. -->
+@if (showProfileActionsMenu()) {
+  <ion-popover
+    [isOpen]="isProfileActionsMenuOpen()"
+    [event]="profileActionsMenuEvent()"
+    (didDismiss)="handleProfileActionsMenuDismiss()"
+  >
+    <ng-template>
+      <ion-list lines="none">
+        <ion-item
+          button
+          detail="false"
+          data-testid="profile-block"
+          (click)="chooseBlockFromMenu()"
+        >
+          <ion-icon slot="start" color="danger" name="ban-outline" />
+          <ion-label color="danger">{{ 'block' | transloco }}</ion-label>
+        </ion-item>
+      </ion-list>
+    </ng-template>
+  </ion-popover>
+}
+
+<!-- Created only while a block awaits confirmation, for the reason above. -->
+@if (isBlockConfirmationOpen()) {
+  <ion-alert
+    [isOpen]="true"
+    header="{{ 'block-username' | transloco: { username: displayName() } }}"
+    message="{{ 'block-confirmation-message' | transloco }}"
+    [buttons]="blockConfirmationButtons"
+    (didDismiss)="handleBlockConfirmationDismiss($event)"
   />
 }

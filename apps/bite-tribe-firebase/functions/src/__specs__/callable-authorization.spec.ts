@@ -155,6 +155,7 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // Consumer and business app paths. Each acts for the caller, or reads data
   // every signed-in account may read, so requiring `admin` here would break
   // the consumer app.
+  blockUser: 'member',
   checkDisplayNameAvailability: 'member',
   claimDisplayName: 'member',
   deleteOwnAccount: 'member',
@@ -176,6 +177,7 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   searchRestaurants: 'member',
   searchUsers: 'member',
   syncEmailVerificationStatus: 'member',
+  unblockUser: 'member',
   updateLastSeen: 'member',
   updateUserMetadata: 'member',
 

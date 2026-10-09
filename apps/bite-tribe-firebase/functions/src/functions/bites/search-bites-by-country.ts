@@ -5,6 +5,7 @@ import { onAppCheck } from '../shared/callable-options';
 import { SearchBite, toSearchBite } from '../shared/utils/search-bite';
 import { requireMember } from '../shared/roles';
 import { isBiteVisibleTo } from '../shared/utils/bite-listability';
+import { isBlockedUid, loadBlockedUids } from '../shared/utils/user-blocks';
 
 const BITE_COLLECTION = 'bites';
 const COUNTRY_CODE_FIELD = 'countryCode';
@@ -45,13 +46,21 @@ export const searchBitesByCountry = onAppCheck<SearchBitesByCountryRequest>(
     }
 
     try {
-      const snapshot = await getFirestore()
-        .collection(BITE_COLLECTION)
-        .where(COUNTRY_CODE_FIELD, '==', countryCode)
-        .get();
+      const db = getFirestore();
+      const [snapshot, blockedUids] = await Promise.all([
+        db
+          .collection(BITE_COLLECTION)
+          .where(COUNTRY_CODE_FIELD, '==', countryCode)
+          .get(),
+        loadBlockedUids(db, request.auth.uid),
+      ]);
 
       return snapshot.docs
-        .filter((doc) => isBiteVisibleTo(doc.data(), request.auth.uid))
+        .filter(
+          (doc) =>
+            isBiteVisibleTo(doc.data(), request.auth.uid) &&
+            !isBlockedUid(doc.data()['userId'], blockedUids),
+        )
         .map(toSearchBite);
     } catch (error) {
       logger.warn('searchBitesByCountry: failed to load bites for country', {

@@ -28,6 +28,10 @@ import {
 import { requireMember } from '../shared/roles';
 import { EMAIL_OPT_OUTS_COLLECTION } from './email-opt-out';
 import { NEW_USER_FOLLOW_UPS_COLLECTION } from './new-user-follow-up-picks';
+import {
+  BLOCKED_BY_SUBCOLLECTION,
+  BLOCKED_SUBCOLLECTION,
+} from '../shared/utils/user-blocks';
 
 const BITES_COLLECTION = 'bites';
 const BITE_TRAILS_COLLECTION = 'biteTrails';
@@ -266,6 +270,51 @@ export const deleteFollowEdgesForUser = async (
   return refs.length;
 };
 
+/**
+ * Removes the user from both sides of every block, the ones they placed and the
+ * ones placed on them (GitHub issue #1609). Each block is a mirrored edge, so
+ * this walks it the way {@link deleteFollowEdgesForUser} walks a follow.
+ */
+export const deleteBlockEdgesForUser = async (
+  db: Firestore,
+  uid: string,
+): Promise<number> => {
+  const userRef = db.collection(USERS_COLLECTION).doc(uid);
+
+  const [blocked, blockedBy] = await Promise.all([
+    userRef.collection(BLOCKED_SUBCOLLECTION).get(),
+    userRef.collection(BLOCKED_BY_SUBCOLLECTION).get(),
+  ]);
+
+  const refs: DocumentReference[] = [];
+
+  blocked.docs.forEach((edge) => {
+    refs.push(edge.ref);
+    refs.push(
+      db
+        .collection(USERS_COLLECTION)
+        .doc(edge.id)
+        .collection(BLOCKED_BY_SUBCOLLECTION)
+        .doc(uid),
+    );
+  });
+
+  blockedBy.docs.forEach((edge) => {
+    refs.push(edge.ref);
+    refs.push(
+      db
+        .collection(USERS_COLLECTION)
+        .doc(edge.id)
+        .collection(BLOCKED_SUBCOLLECTION)
+        .doc(uid),
+    );
+  });
+
+  await deleteRefs(db, refs);
+
+  return refs.length;
+};
+
 export const deletePushTokensForUser = async (
   db: Firestore,
   uid: string,
@@ -456,6 +505,7 @@ export const deleteAccountForUser = async (
     const deletedRatings = await deleteBiteTrailRatingsByUser(db, uid);
     const anonymizedSales = await anonymizeBiteTrailSalesByUser(db, uid);
     const deletedFollowEdges = await deleteFollowEdgesForUser(db, uid);
+    const deletedBlockEdges = await deleteBlockEdgesForUser(db, uid);
     const deletedPushTokens = await deletePushTokensForUser(db, uid);
     const deletedRestaurantStaff = await deleteRestaurantStaffForUser(db, uid);
     const deletedBiteReports = await deleteBiteReportsByReporter(db, uid);
@@ -482,6 +532,7 @@ export const deleteAccountForUser = async (
         deletedRatings,
         anonymizedSales,
         deletedFollowEdges,
+        deletedBlockEdges,
         deletedPushTokens,
         deletedRestaurantStaff,
         deletedBiteReports,
@@ -498,6 +549,7 @@ export const deleteAccountForUser = async (
       deletedRatings,
       anonymizedSales,
       deletedFollowEdges,
+      deletedBlockEdges,
       deletedPushTokens,
       deletedRestaurantStaff,
       deletedBiteReports,

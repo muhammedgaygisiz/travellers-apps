@@ -128,11 +128,12 @@ category at a **13+** age rating.
 ([#1608]), removes a Bite ([#1475]) and blocks an account ([#1474]), with the contact address
 delivered by [#1429].
 
-**The user-facing half ships for Bites only**, and `RD-UR-7` classes the set `[MVP]`. Reporting
-a Bite is on the Bite detail page ([#1608]). User-to-user blocking and content filtering have no
-surface in the consumer app yet - [#1609] blocking another user, [#1610] filtering before
-publication - and epic [#1284] covers reporting inside a review thread only. Not this page's
-behaviour, but this page is where the queue the reports arrive in lives.
+**The user-facing half ships for Bites and for blocking**, and `RD-UR-7` classes the set
+`[MVP]`. Reporting a Bite is on the Bite detail page ([#1608]), and user-to-user blocking is on
+another account's profile ([#1609], in [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md)). Content
+filtering has no surface in the consumer app yet - [#1610] filtering before publication - and
+epic [#1284] covers reporting inside a review thread only. Not this page's behaviour, but this
+page is where the queue the reports arrive in lives.
 
 ## Supported Evidence
 

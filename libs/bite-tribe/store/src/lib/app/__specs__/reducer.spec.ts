@@ -14,6 +14,7 @@ describe('App Reducer', () => {
         settings: { emailUpdates: true } as Settings,
         loading: { home: true },
         exchangeRates: { EUR: 1 },
+        blockedUserIds: ['blocked'],
         errorLoadingGpsPosition: false,
         errorLoadingBites: false,
         profileMetadata: {
@@ -36,6 +37,7 @@ describe('App Reducer', () => {
         },
         loading: { home: true },
         exchangeRates: { EUR: 1 },
+        blockedUserIds: [],
         errorLoadingGpsPosition: false,
         errorLoadingBites: false,
         profileMetadata: {
@@ -462,6 +464,61 @@ describe('App Reducer', () => {
       expect(reducer(INITIAL_STATE, AppActions.unfollowedUser())).toEqual({
         profileMetadata: { followers: 0, following: 5, isFollowedByMe: false },
       } as AppSlice);
+    });
+  });
+
+  // GitHub issue #1609.
+  describe('blockedUser', () => {
+    it('adds the account and drops the follow the block removed', () => {
+      const INITIAL_STATE = {
+        blockedUserIds: ['other'],
+        profileMetadata: { followers: 3, following: 5, isFollowedByMe: true },
+      } as AppSlice;
+
+      expect(
+        reducer(INITIAL_STATE, AppActions.blockedUser({ userId: 'blocked' })),
+      ).toEqual({
+        blockedUserIds: ['other', 'blocked'],
+        profileMetadata: { followers: 2, following: 5, isFollowedByMe: false },
+      } as AppSlice);
+    });
+
+    it('leaves the follower count alone when there was no follow', () => {
+      const INITIAL_STATE = {
+        blockedUserIds: [],
+        profileMetadata: { followers: 3, following: 5, isFollowedByMe: false },
+      } as unknown as AppSlice;
+
+      expect(
+        reducer(INITIAL_STATE, AppActions.blockedUser({ userId: 'blocked' }))
+          .profileMetadata.followers,
+      ).toBe(3);
+    });
+  });
+
+  describe('unblockedUser', () => {
+    it('removes the account from the block list', () => {
+      const INITIAL_STATE = {
+        blockedUserIds: ['blocked', 'other'],
+      } as AppSlice;
+
+      expect(
+        reducer(INITIAL_STATE, AppActions.unblockedUser({ userId: 'blocked' }))
+          .blockedUserIds,
+      ).toEqual(['other']);
+    });
+  });
+
+  describe('loadedBlockedUsers', () => {
+    it('replaces the block list', () => {
+      const INITIAL_STATE = { blockedUserIds: ['stale'] } as AppSlice;
+
+      expect(
+        reducer(
+          INITIAL_STATE,
+          AppActions.loadedBlockedUsers({ userIds: ['a', 'b'] }),
+        ).blockedUserIds,
+      ).toEqual(['a', 'b']);
     });
   });
 

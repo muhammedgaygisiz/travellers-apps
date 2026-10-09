@@ -180,6 +180,8 @@
   libs/bite-tribe/api/src/lib/profile-api.service.ts
   libs/bite-tribe/profile/page
   libs/bite-tribe/followers/page
+  libs/bite-tribe/follow-suggestions/data-access
+  libs/bite-tribe/follow-suggestions/ui
   libs/bite-tribe/store/src/lib/app
   ```
 
@@ -198,6 +200,7 @@
   sendNewUserFollowUps
   handleEmailUnsubscribe
   searchUsers
+  suggestPeopleToFollow
   loadLeaderboard
   incrementBiteCountOnBiteCreate
   resyncBiteCounts

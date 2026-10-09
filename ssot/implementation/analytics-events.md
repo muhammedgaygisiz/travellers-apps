@@ -62,6 +62,9 @@
   | Onboarding   | `onboarding_step_completed`           | `step: OnboardingStepId`                                                                                   | A step is persisted and marked complete on advance                                                 | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
   | Onboarding   | `onboarding_assistant_completed`      | –                                                                                                          | Completion flag is written on the finish step                                                      | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
   | Onboarding   | `coach_mark_dismissed`                | `surface: CoachMarkSurface`                                                                                | A coach mark is dismissed for the first time                                                       | `libs/bite-tribe/coach-mark/src/lib/coach-mark-state.service.ts`                                            |
+  | Social       | `follow_suggestions_shown`            | `surface: 'onboarding' \| 'following_empty' \| 'home'`, `count: number`                                    | A suggestions list first renders with somebody in it, once per visit to the surface                | `libs/bite-tribe/follow-suggestions/data-access/.../follow-suggestions.service.ts`                          |
+  | Social       | `follow_suggestion_followed`          | `surface`, `position: number` (one-based), `reason: 'nearby' \| 'curated' \| 'active'`                     | A follow from a suggestion is written                                                              | `libs/bite-tribe/follow-suggestions/data-access/.../follow-suggestions.service.ts`                          |
+  | Social       | `user_followed`                       | `source: 'suggestion' \| 'profile'`                                                                        | Any follow: written from a suggestion, or tapped on a profile                                      | Follow-suggestions service; `libs/bite-tribe/profile/page/.../profile.service.ts`                           |
   | Table ops    | `table_seated`                        | `TableOperation`, `from_status: TableStatus`, `guests?: number`                                            | A transition into `occupied` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
   | Table ops    | `table_freed`                         | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `available` is confirmed                                                         | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
   | Table ops    | `table_reserved`                      | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `reserved` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
@@ -82,6 +85,14 @@
   once, after the `finish` step's completion write succeeds. `coach_mark_dismissed`
   carries the dismissed `CoachMarkSurface` id and fires only on the first dismissal
   per user, so re-entering a surface whose mark was already seen emits nothing.
+
+  The social events belong to issue [#1708]. None of them names the person
+  followed: `position` and `reason` are what the ranking needs, and a uid would be
+  personal data in a product event. `user_followed` is the first follow event the
+  app has had, so followers can be told apart from everybody else when reading
+  retention. From a profile it is counted on the tap, because that follow is
+  optimistic and its write reports no outcome; from a suggestion it is counted once
+  the write succeeds.
 
 - ## App Check Telemetry
 
@@ -706,3 +717,4 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 [#1114]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1114
 [#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103
 [#1621]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1621
+[#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708

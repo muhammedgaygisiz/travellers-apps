@@ -404,4 +404,65 @@ describe(FollowersListComponent.name, () => {
       expect(component.imageErroredUserIds().has('user2')).toBe(true);
     });
   });
+
+  describe('follow suggestions on an empty Following list', () => {
+    const ana = {
+      userId: 'ana',
+      displayName: 'Ana',
+      biteCount: 3,
+      reason: 'active' as const,
+    };
+
+    const renderEmptyList = (
+      type: 'followers' | 'following',
+      profileOwnerid: string,
+    ): void => {
+      componentRef.setInput('type', type);
+      componentRef.setInput('users', []);
+      componentRef.setInput('loggedInUserId', 'me');
+      componentRef.setInput('profileOwnerid', profileOwnerid);
+      componentRef.setInput('followSuggestions', [ana]);
+      fixture.detectChanges();
+    };
+
+    const suggestions = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="follow-suggestions"]');
+
+    it("offers people to follow on the user's own list", () => {
+      renderEmptyList('following', 'me');
+
+      expect(suggestions()).toBeTruthy();
+      expect(
+        fixture.nativeElement.querySelector(
+          '.empty-container--with-suggestions',
+        ),
+      ).toBeTruthy();
+    });
+
+    it("offers nobody on someone else's list", () => {
+      renderEmptyList('following', 'someone-else');
+
+      expect(suggestions()).toBeNull();
+    });
+
+    it('offers nobody on a Followers list', () => {
+      renderEmptyList('followers', 'me');
+
+      expect(suggestions()).toBeNull();
+    });
+
+    it('passes a follow on', () => {
+      const followed: unknown[] = [];
+      component.followSuggestion.subscribe((s) => followed.push(s));
+      renderEmptyList('following', 'me');
+
+      (
+        fixture.nativeElement.querySelector(
+          '[data-testid="follow-suggestion-follow"]',
+        ) as HTMLElement
+      ).click();
+
+      expect(followed).toEqual([ana]);
+    });
+  });
 });

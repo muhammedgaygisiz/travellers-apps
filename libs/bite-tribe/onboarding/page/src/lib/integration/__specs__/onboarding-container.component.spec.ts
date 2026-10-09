@@ -10,7 +10,8 @@ import { ONBOARDING_STEPS } from '../../steps/onboarding-steps';
 import { OnboardingContainerComponent } from '../onboarding-container.component';
 import { OnboardingService } from '../onboarding.service';
 import { OnboardingPage } from '../../components/onboarding-page/onboarding.page';
-import type { PublicUser } from 'model';
+import type { FollowSuggestion, PublicUser } from 'model';
+import { FollowSuggestionsService } from 'bite-tribe/follow-suggestions-data-access';
 import type { DisplayNameAvailabilityState } from '../../components/identity-step/identity-step.component';
 import type { LocationPermissionState } from '../../components/location-step/location-step.component';
 import type { PhotoLocationPermissionState } from '../../components/photos-step/photos-step.component';
@@ -70,7 +71,30 @@ describe(OnboardingContainerComponent.name, () => {
     skipNotifications: jest.Mock;
   };
 
+  const ana: FollowSuggestion = {
+    userId: 'ana',
+    displayName: 'Ana',
+    biteCount: 3,
+    reason: 'nearby',
+  };
+  let followSuggestionsMock: {
+    suggestions: ReturnType<typeof signal<FollowSuggestion[]>>;
+    pendingIds: ReturnType<typeof signal<ReadonlySet<string>>>;
+    isLoading: ReturnType<typeof signal<boolean>>;
+    request: jest.Mock;
+    follow: jest.Mock;
+    trackShown: jest.Mock;
+  };
+
   beforeEach(() => {
+    followSuggestionsMock = {
+      suggestions: signal<FollowSuggestion[]>([]),
+      pendingIds: signal<ReadonlySet<string>>(new Set()),
+      isLoading: signal(false),
+      request: jest.fn(),
+      follow: jest.fn().mockResolvedValue(true),
+      trackShown: jest.fn(),
+    };
     serviceMock = {
       steps: signal(ONBOARDING_STEPS),
       currentIndex: signal(0),
@@ -111,6 +135,7 @@ describe(OnboardingContainerComponent.name, () => {
         provideIonicAngular(getIonicConfig()),
         { provide: TranslocoService, useValue: MockTranslocoService },
         { provide: OnboardingService, useValue: serviceMock },
+        { provide: FollowSuggestionsService, useValue: followSuggestionsMock },
       ],
     }).compileComponents();
 
@@ -198,6 +223,54 @@ describe(OnboardingContainerComponent.name, () => {
         '[data-testid="onboarding-acknowledge"]',
       ),
     ).toBeNull();
+  });
+
+  describe('follow suggestions', () => {
+    const finishStep = (): HTMLElement =>
+      fixture.debugElement.nativeElement.querySelector(
+        'onboarding-finish-step',
+      );
+
+    beforeEach(() => {
+      serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[7]);
+      serviceMock.currentIndex.set(7);
+    });
+
+    it('asks for suggestions on reaching the finish step', () => {
+      fixture.detectChanges();
+
+      expect(followSuggestionsMock.request).toHaveBeenCalled();
+    });
+
+    it('does not ask before then', () => {
+      serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[0]);
+      serviceMock.currentIndex.set(0);
+
+      fixture.detectChanges();
+
+      expect(followSuggestionsMock.request).not.toHaveBeenCalled();
+    });
+
+    it('follows from the finish step as the onboarding surface', () => {
+      followSuggestionsMock.suggestions.set([ana]);
+      fixture.detectChanges();
+
+      (
+        fixture.debugElement.nativeElement.querySelector(
+          '[data-testid="follow-suggestion-follow"]',
+        ) as HTMLElement
+      ).click();
+
+      expect(followSuggestionsMock.follow).toHaveBeenCalledWith(
+        ana,
+        'onboarding',
+      );
+      expect(followSuggestionsMock.trackShown).toHaveBeenCalledWith(
+        'onboarding',
+        1,
+      );
+      expect(finishStep()).toBeTruthy();
+    });
   });
 
   it('routes currency, language, location, and notification events into the service', () => {

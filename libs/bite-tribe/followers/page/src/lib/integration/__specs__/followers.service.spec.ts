@@ -6,20 +6,41 @@ import { NavController } from '@ionic/angular/standalone';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
 import { PATH } from 'utils';
-import { PublicUser } from 'model';
+import { FollowSuggestion, PublicUser } from 'model';
+import { signal } from '@angular/core';
+import { FollowSuggestionsService } from 'bite-tribe/follow-suggestions-data-access';
+
+const usersLoading = signal(false);
+const usersFailed = signal(false);
+const usersValue = signal<PublicUser[]>([]);
+const followType = signal<'followers' | 'following'>('following');
+const userIdFromUrl = signal<string | undefined>('test-user-id');
 
 class MockFollowersDataAccessService {
   users = {
     reload: jest.fn(),
+    isLoading: usersLoading,
   };
-  type = jest.fn();
+  usersValue = usersValue;
+  usersFailed = usersFailed;
+  type = followType;
   isLoading = jest.fn();
   unfollowUser = jest.fn();
 }
 
 class MockBiteTribeStoreService {
   userId$ = of('test-user-id');
+  userIdFromUrl = userIdFromUrl;
 }
+
+const followSuggestionsMock = {
+  suggestions: signal<FollowSuggestion[]>([]),
+  pendingIds: signal<ReadonlySet<string>>(new Set()),
+  isLoading: signal(false),
+  request: jest.fn(),
+  follow: jest.fn(),
+  trackShown: jest.fn(),
+};
 
 describe(FollowersService.name, () => {
   let service: FollowersService;
@@ -27,6 +48,12 @@ describe(FollowersService.name, () => {
   let navController: NavController;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    usersLoading.set(false);
+    usersFailed.set(false);
+    usersValue.set([]);
+    followType.set('following');
+    userIdFromUrl.set('test-user-id');
     TestBed.configureTestingModule({
       providers: [
         FollowersService,
@@ -36,6 +63,7 @@ describe(FollowersService.name, () => {
           useClass: MockFollowersDataAccessService,
         },
         { provide: BiteTribeStoreService, useClass: MockBiteTribeStoreService },
+        { provide: FollowSuggestionsService, useValue: followSuggestionsMock },
         provideMockStore(),
       ],
     }).compileComponents();
@@ -96,6 +124,76 @@ describe(FollowersService.name, () => {
         expect.any(Error),
       );
       consoleErrorSpy.mockRestore();
+    });
+  });
+
+  describe('follow suggestions', () => {
+    const ana: FollowSuggestion = {
+      userId: 'ana',
+      displayName: 'Ana',
+      biteCount: 3,
+      reason: 'active',
+    };
+
+    it("asks for suggestions on the user's own empty Following list", () => {
+      TestBed.tick();
+
+      expect(followSuggestionsMock.request).toHaveBeenCalled();
+    });
+
+    it.each([
+      ["someone else's list", (): void => userIdFromUrl.set('other-user')],
+      ['a Followers list', (): void => followType.set('followers')],
+      ['a list still loading', (): void => usersLoading.set(true)],
+      ['a list that failed to load', (): void => usersFailed.set(true)],
+      [
+        'a list with people in it',
+        (): void => usersValue.set([{ userId: 'x' } as PublicUser]),
+      ],
+    ])('does not ask on %s', (_label, arrange) => {
+      arrange();
+      TestBed.tick();
+
+      expect(followSuggestionsMock.request).not.toHaveBeenCalled();
+    });
+
+    it('reloads the list after a follow so the person appears in it', async () => {
+      followSuggestionsMock.follow.mockResolvedValue(true);
+
+      await service.followSuggestion(ana);
+
+      expect(followSuggestionsMock.follow).toHaveBeenCalledWith(
+        ana,
+        'following_empty',
+      );
+      expect(dataAccessService.users.reload).toHaveBeenCalled();
+    });
+
+    it('leaves the list alone after a failed follow', async () => {
+      followSuggestionsMock.follow.mockResolvedValue(false);
+
+      await service.followSuggestion(ana);
+
+      expect(dataAccessService.users.reload).not.toHaveBeenCalled();
+    });
+
+    it('counts the shown list as the empty Following surface', () => {
+      service.trackSuggestionsShown(2);
+
+      expect(followSuggestionsMock.trackShown).toHaveBeenCalledWith(
+        'following_empty',
+        2,
+      );
+    });
+
+    it('opens a suggested profile', () => {
+      const navigateSpy = jest
+        .spyOn(navController, 'navigateForward')
+        .mockImplementation();
+
+      service.suggestionClicked('ana');
+
+      expect(navigateSpy).toHaveBeenCalledWith([PATH.PROFILE, 'ana']);
     });
   });
 });

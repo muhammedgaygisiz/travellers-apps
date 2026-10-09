@@ -19,7 +19,8 @@ import {
   IonList,
   IonSpinner,
 } from '@ionic/angular/standalone';
-import type { PublicUser } from 'model';
+import type { FollowSuggestion, PublicUser } from 'model';
+import { FollowSuggestionsComponent } from 'bite-tribe/follow-suggestions-ui';
 import { PATH } from 'utils';
 import { PageComponent } from 'common/ui/page';
 import { HapticsService } from 'haptics';
@@ -46,6 +47,7 @@ const CANCEL = 'cancel';
     IonIcon,
     TranslocoPipe,
     ImageErroredPipe,
+    FollowSuggestionsComponent,
   ],
   templateUrl: 'followers-list.component.html',
   styleUrls: ['followers-list.component.scss'],
@@ -62,10 +64,34 @@ export class FollowersListComponent {
   /** The read failed, which is not the same as having no followers (#1232). */
   hasError = input(false, { transform: booleanAttribute });
   profileOwnerid = input<string>();
+  followSuggestions = input<FollowSuggestion[]>([]);
+  followSuggestionsPending = input<ReadonlySet<string>>(new Set());
+  followSuggestionsLoading = input(false);
 
   userClick = output<PublicUser>();
   unfollowClick = output<PublicUser>();
   retryClick = output<void>();
+  followSuggestion = output<FollowSuggestion>();
+  followSuggestionsShown = output<number>();
+  suggestionClick = output<string>();
+
+  /**
+   * Only the user's own empty Following list offers people to follow
+   * (issue #1708). Someone else's empty list says nothing about what the
+   * viewer should do next.
+   */
+  protected readonly offersFollowSuggestions = computed(
+    () =>
+      this.type() === 'following' &&
+      !!this.loggedInUserId() &&
+      this.loggedInUserId() === this.profileOwnerid(),
+  );
+
+  protected readonly showsFollowSuggestions = computed(
+    () =>
+      this.offersFollowSuggestions() &&
+      (this.followSuggestionsLoading() || this.followSuggestions().length > 0),
+  );
 
   /**
    * The row whose unfollow is awaiting confirmation, rather than a boolean.

@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+} from '@angular/core';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
+import { FollowSuggestionsService } from 'bite-tribe/follow-suggestions-data-access';
 import { OnboardingPage } from '../components/onboarding-page/onboarding.page';
 import { OnboardingService } from './onboarding.service';
 
@@ -26,6 +32,9 @@ import { OnboardingService } from './onboarding.service';
     [homeCity]="service.homeCity()"
     [photoLocationPermission]="service.photoLocationPermission()"
     [notificationPermission]="service.notificationPermission()"
+    [followSuggestions]="followSuggestions.suggestions()"
+    [followSuggestionsPending]="followSuggestions.pendingIds()"
+    [followSuggestionsLoading]="followSuggestions.isLoading()"
     (next)="service.next()"
     (back)="service.back()"
     (identityChange)="service.updateIdentity($event)"
@@ -42,11 +51,26 @@ import { OnboardingService } from './onboarding.service';
     (enableNotifications)="service.requestNotifications()"
     (skipNotifications)="service.skipNotifications()"
     (placeholderValidityChange)="service.setCurrentStepValid($event)"
+    (followSuggestion)="followSuggestions.follow($event, 'onboarding')"
+    (followSuggestionsShown)="
+      followSuggestions.trackShown('onboarding', $event)
+    "
   />`,
   imports: [OnboardingPage],
 })
 export class OnboardingContainerComponent {
   service = inject(OnboardingService);
+  followSuggestions = inject(FollowSuggestionsService);
+
+  constructor() {
+    // Asked for on reaching the finish step rather than on entry, so a user
+    // who never gets that far costs no call (issue #1708).
+    effect(() => {
+      if (this.service.currentStep()?.id === 'finish') {
+        this.followSuggestions.request();
+      }
+    });
+  }
 
   async ionViewWillEnter(): Promise<void> {
     await this.service.initialize();

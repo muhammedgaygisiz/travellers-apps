@@ -69,7 +69,14 @@
         (skipNotifications)="skipNotifications.emit()"
       />
       } @case ('finish') {
-      <onboarding-finish-step [displayName]="profile()?.displayName ?? ''" />
+      <onboarding-finish-step
+        [displayName]="profile()?.displayName ?? ''"
+        [followSuggestions]="followSuggestions()"
+        [followSuggestionsPending]="followSuggestionsPending()"
+        [followSuggestionsLoading]="followSuggestionsLoading()"
+        (followSuggestion)="followSuggestion.emit($event)"
+        (followSuggestionsShown)="followSuggestionsShown.emit($event)"
+      />
       } @default {
       <ion-text>
         <p>{{ 'onboarding-step-placeholder' | transloco }}</p>

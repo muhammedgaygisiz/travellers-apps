@@ -29,7 +29,7 @@ import type { PhotoLocationPermissionState } from '../photos-step/photos-step.co
 import { NotificationStepComponent } from '../notification-step/notification-step.component';
 import type { NotificationPermissionState } from '../notification-step/notification-step.component';
 import { FinishStepComponent } from '../finish-step/finish-step.component';
-import type { PublicUser } from 'model';
+import type { FollowSuggestion, PublicUser } from 'model';
 
 /**
  * Presentational onboarding assistant page. It owns the visible step layout and
@@ -72,6 +72,9 @@ export class OnboardingPage {
   homeCity = input<string>('');
   photoLocationPermission = input<PhotoLocationPermissionState>('idle');
   notificationPermission = input<NotificationPermissionState>('idle');
+  followSuggestions = input<FollowSuggestion[]>([]);
+  followSuggestionsPending = input<ReadonlySet<string>>(new Set());
+  followSuggestionsLoading = input(false);
 
   next = output<void>();
   back = output<void>();
@@ -89,6 +92,8 @@ export class OnboardingPage {
   enableNotifications = output<void>();
   skipNotifications = output<void>();
   placeholderValidityChange = output<boolean>();
+  followSuggestion = output<FollowSuggestion>();
+  followSuggestionsShown = output<number>();
 
   readonly stepCount = computed(() => this.steps().length);
   readonly stepNumber = computed(() => this.currentIndex() + 1);

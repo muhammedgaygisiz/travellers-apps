@@ -1,0 +1,139 @@
+// `--follow-suggestions-inset` is the page gutter the row lines up with. A host
+// that already pads its content, like the onboarding step, sets it to 0.
+:host {
+  display: block;
+  min-width: 0;
+  text-align: start;
+}
+
+.follow-suggestions {
+  padding: 12px 0;
+}
+
+.follow-suggestions__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 var(--follow-suggestions-inset, 16px);
+}
+
+.follow-suggestions__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.follow-suggestions__subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+// A horizontal row the user swipes through, so five people never push the
+// rest of the screen down. The side padding keeps the first card on the page
+// gutter while the row itself scrolls edge to edge.
+.follow-suggestions__list {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 0 var(--follow-suggestions-inset, 16px) 4px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.follow-suggestions__card {
+  display: flex;
+  flex: 0 0 136px;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--ion-color-step-150, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  background: var(--ion-item-background, var(--ion-background-color));
+  scroll-snap-align: start;
+}
+
+.follow-suggestions__person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.follow-suggestions__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  ion-icon {
+    width: 100%;
+    height: 100%;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Long display names stay on one line rather than pushing the button out of
+// line with the cards beside it.
+.follow-suggestions__name {
+  width: 100%;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.follow-suggestions__meta {
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+}
+
+.follow-suggestions__line {
+  width: 80%;
+  height: 12px;
+  margin: 0 auto;
+
+  &--short {
+    width: 50%;
+  }
+}
+
+.follow-suggestions__card ion-button {
+  width: 100%;
+  margin: 0;
+}
+
+.follow-suggestions__header ion-button {
+  flex: none;
+  margin: 0;
+}

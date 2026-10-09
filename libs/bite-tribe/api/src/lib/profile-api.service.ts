@@ -10,6 +10,7 @@ import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type {
   Bite,
   CreateAndUploadImageCallbackParams,
+  FollowSuggestion,
   PublicUser,
 } from 'model';
 import { toPublicUser } from './utils/to-public-user';
@@ -446,30 +447,64 @@ export class ProfileApiService {
 
   async followUser(user: PublicUser): Promise<void> {
     try {
-      const currentUser = this.authService.getUser();
-      if (!currentUser) {
-        throw new Error('User not authenticated');
-      }
-
-      const followRelationship = {
-        createdAt: new Date().toISOString(),
-        followerUid: currentUser.uid,
-        followedUid: user.userId,
-      };
-
-      await FirebaseFirestore.setDocument({
-        reference: `${USERS_COLLECTION}/${user.userId}/followers/${currentUser.uid}`,
-        data: followRelationship,
-      });
-
-      await FirebaseFirestore.setDocument({
-        reference: `${USERS_COLLECTION}/${currentUser.uid}/following/${user.userId}`,
-        data: followRelationship,
-      });
+      await this.follow(user.userId);
     } catch (error) {
       console.error('Error following user:', error);
       this.errorHandler.handleError(error);
     }
+  }
+
+  /**
+   * Writes both halves of a follow and lets a failure through.
+   *
+   * {@link followUser} swallows its error, which the profile button can live
+   * with because it updates optimistically. A follow suggestion has to put its
+   * button back when the write fails, so it needs to hear about it
+   * (GitHub issue #1708).
+   */
+  async follow(userId: string): Promise<void> {
+    const currentUser = this.authService.getUser();
+    if (!currentUser) {
+      throw new Error('User not authenticated');
+    }
+
+    const followRelationship = {
+      createdAt: new Date().toISOString(),
+      followerUid: currentUser.uid,
+      followedUid: userId,
+    };
+
+    await FirebaseFirestore.setDocument({
+      reference: `${USERS_COLLECTION}/${userId}/followers/${currentUser.uid}`,
+      data: followRelationship,
+    });
+
+    await FirebaseFirestore.setDocument({
+      reference: `${USERS_COLLECTION}/${currentUser.uid}/following/${userId}`,
+      data: followRelationship,
+    });
+  }
+
+  /**
+   * People the signed-in user could follow, from the `suggestPeopleToFollow`
+   * callable (GitHub issue #1708). The position is optional and only ever one
+   * the caller already holds: asking for it is not this call's business.
+   */
+  async fetchFollowSuggestions(position?: {
+    latitude: number;
+    longitude: number;
+  }): Promise<FollowSuggestion[]> {
+    const result = await FirebaseFunctions.callByName<
+      { latitude?: number; longitude?: number },
+      FollowSuggestion[]
+    >({
+      name: 'suggestPeopleToFollow',
+      data: position
+        ? { latitude: position.latitude, longitude: position.longitude }
+        : {},
+    });
+
+    return result.data ?? [];
   }
 
   async unfollowUser(user: PublicUser): Promise<void> {

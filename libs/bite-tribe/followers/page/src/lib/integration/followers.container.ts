@@ -17,6 +17,12 @@ import { FollowersService } from './followers.service';
       (userClick)="service.userClicked($event)"
       (unfollowClick)="service.unfollowClicked($event)"
       (retryClick)="service.retryLoad()"
+      [followSuggestions]="service.suggestions()"
+      [followSuggestionsPending]="service.suggestionsPending()"
+      [followSuggestionsLoading]="service.suggestionsLoading()"
+      (followSuggestion)="service.followSuggestion($event)"
+      (followSuggestionsShown)="service.trackSuggestionsShown($event)"
+      (suggestionClick)="service.suggestionClicked($event)"
     />
   `,
   imports: [FollowersListComponent],

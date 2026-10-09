@@ -32,7 +32,10 @@
         </ion-button>
       </div>
     } @else if (users()?.length === 0) {
-      <div class="empty-container">
+      <div
+        class="empty-container"
+        [class.empty-container--with-suggestions]="showsFollowSuggestions()"
+      >
         <ion-label>
           @if (type() === 'followers') {
             <ng-container>{{ 'no-followers-yet' | transloco }}</ng-container>
@@ -43,6 +46,18 @@
           }
         </ion-label>
       </div>
+      @if (offersFollowSuggestions()) {
+        <bt-follow-suggestions
+          class="follow-suggestions"
+          [suggestions]="followSuggestions()"
+          [pendingIds]="followSuggestionsPending()"
+          [loading]="followSuggestionsLoading()"
+          [linkable]="true"
+          (follow)="followSuggestion.emit($event)"
+          (shown)="followSuggestionsShown.emit($event)"
+          (openProfile)="suggestionClick.emit($event)"
+        />
+      }
     } @else {
       <ion-list>
         @for (user of sortedUsers(); track user.userId) {

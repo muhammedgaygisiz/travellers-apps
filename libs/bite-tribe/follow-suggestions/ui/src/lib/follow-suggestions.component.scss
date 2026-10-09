@@ -48,9 +48,15 @@
   }
 }
 
+// Every card is the same width whatever it holds. A flex item's minimum width
+// defaults to its content's, so without `min-width: 0` a long display name
+// widened its card before the ellipsis below could apply.
 .follow-suggestions__card {
   display: flex;
   flex: 0 0 136px;
+  box-sizing: border-box;
+  width: 136px;
+  min-width: 0;
   flex-direction: column;
   align-items: center;
   gap: 8px;
@@ -67,6 +73,7 @@
   align-items: center;
   gap: 4px;
   width: 100%;
+  min-width: 0;
   padding: 0;
   border: 0;
   background: none;
@@ -107,6 +114,8 @@
 // line with the cards beside it.
 .follow-suggestions__name {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   font-weight: 600;
   text-overflow: ellipsis;
@@ -131,6 +140,13 @@
 .follow-suggestions__card ion-button {
   width: 100%;
   margin: 0;
+
+  // The pending spinner takes the label's line and no more. At its default
+  // 28px it made the button taller than the Follow it replaced.
+  ion-spinner {
+    width: 1.5em;
+    height: 1em;
+  }
 }
 
 .follow-suggestions__header ion-button {

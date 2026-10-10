@@ -57,7 +57,7 @@
               type="button"
               class="follow-suggestions__person"
               [disabled]="!linkable()"
-              (click)="onOpen(suggestion.userId)"
+              (click)="openProfile.emit(suggestion.userId)"
             >
               <span class="follow-suggestions__avatar">
                 @if (

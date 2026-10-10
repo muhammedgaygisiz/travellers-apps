@@ -242,6 +242,14 @@ describe(OnboardingContainerComponent.name, () => {
       expect(followSuggestionsMock.request).toHaveBeenCalled();
     });
 
+    it('does not ask before the steps are known', () => {
+      serviceMock.currentStep.mockReturnValue(undefined);
+
+      fixture.detectChanges();
+
+      expect(followSuggestionsMock.request).not.toHaveBeenCalled();
+    });
+
     it('does not ask before then', () => {
       serviceMock.currentStep.mockReturnValue(ONBOARDING_STEPS[0]);
       serviceMock.currentIndex.set(0);

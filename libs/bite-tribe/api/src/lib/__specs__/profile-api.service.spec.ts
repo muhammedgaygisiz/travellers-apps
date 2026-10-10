@@ -1002,6 +1002,15 @@ describe(ProfileApiService.name, () => {
       },
     ));
 
+    it('answers with nobody when the callable returns no data', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({});
+
+        await expect(service.fetchFollowSuggestions()).resolves.toEqual([]);
+      },
+    ));
+
     it('sends no position when it has none', inject(
       [ProfileApiService],
       async (service: ProfileApiService) => {

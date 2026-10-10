@@ -220,5 +220,28 @@ describe(SettingsApiService.name, () => {
         });
       },
     ));
+
+    describe('without a signed-in user', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(AuthService, {
+          useValue: { ...MockedAuthService, getUser: (): unknown => undefined },
+        });
+      });
+
+      it('writes nothing', inject(
+        [SettingsApiService],
+        async (service: SettingsApiService) => {
+          const setDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'setDocument')
+            .mockClear();
+
+          await service.mergeSettings({
+            followSuggestionsDismissedAt: '2024-03-15T12:00:00.000Z',
+          });
+
+          expect(setDocumentSpy).not.toHaveBeenCalled();
+        },
+      ));
+    });
   });
 });

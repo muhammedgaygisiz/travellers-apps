@@ -1,3 +1,4 @@
+import { PATH } from 'utils';
 import { inject, TestBed } from '@angular/core/testing';
 import { HomeService } from '../home.service';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
@@ -895,6 +896,16 @@ describe('HomeService', () => {
       followSuggestionsMock.homeCardWanted.set(true);
       service.requestFollowSuggestionsIfWanted();
       expect(followSuggestionsMock.request).toHaveBeenCalled();
+    });
+
+    it('opens the profile of a suggested person', () => {
+      const navigateForwardSpy = jest
+        .spyOn(TestBed.inject(NavController), 'navigateForward')
+        .mockImplementation();
+
+      service.openSuggestedProfile('ana');
+
+      expect(navigateForwardSpy).toHaveBeenCalledWith([PATH.PROFILE, 'ana']);
     });
 
     it('follows, counts and dismisses as the home surface', async () => {

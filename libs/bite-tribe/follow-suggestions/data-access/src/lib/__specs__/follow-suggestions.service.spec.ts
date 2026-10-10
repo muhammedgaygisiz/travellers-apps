@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ProfileApiService, SettingsApiService } from 'bite-tribe/api';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import type { FollowSuggestion, PublicUser, Settings } from 'model';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { AnalyticsService } from 'ta-firestore';
 import { ToastService } from 'toast';
 import {
@@ -131,6 +131,30 @@ describe(FollowSuggestionsService.name, () => {
     expect(getCurrentPosition).not.toHaveBeenCalled();
   });
 
+  it('reads a fresh position where location is already granted', async () => {
+    getLocationPermissionState.mockResolvedValue('granted');
+    getCurrentPosition.mockReturnValue(
+      of({ coords: { latitude: 47.37, longitude: 8.54 } }),
+    );
+    service.request();
+    await settle();
+
+    expect(profileApi.fetchFollowSuggestions).toHaveBeenCalledWith({
+      latitude: 47.37,
+      longitude: 8.54,
+    });
+  });
+
+  it('asks without a position when a granted read fails', async () => {
+    getLocationPermissionState.mockResolvedValue('granted');
+    getCurrentPosition.mockReturnValue(throwError(() => new Error('timeout')));
+    service.request();
+    await settle();
+
+    expect(profileApi.fetchFollowSuggestions).toHaveBeenCalledWith(undefined);
+    expect(service.suggestions()).toEqual([ana, ben]);
+  });
+
   it('never reads a position without an existing grant', async () => {
     getLocationPermissionState.mockResolvedValue('prompt');
     service.request();
@@ -220,9 +244,23 @@ describe(FollowSuggestionsService.name, () => {
       expect(service.homeCardVisible()).toBe(true);
     });
 
+    it('is wanted by a profile written before follow counts existed', () => {
+      profile$.next({});
+
+      expect(service.followsAnyone()).toBe(false);
+      expect(service.homeCardWanted()).toBe(true);
+    });
+
+    it('is wanted while settings have not loaded', () => {
+      settings$.next(undefined);
+
+      expect(service.homeCardWanted()).toBe(true);
+    });
+
     it('is not wanted before the profile has arrived', () => {
       profile$.next(undefined);
 
+      expect(service.followsAnyone()).toBe(false);
       expect(service.homeCardWanted()).toBe(false);
     });
 
@@ -256,6 +294,17 @@ describe(FollowSuggestionsService.name, () => {
           followSuggestionsDismissedAt: expect.any(String),
         }),
       );
+    });
+
+    it('saves the dismissal before settings have loaded without touching the store', async () => {
+      settings$.next(undefined);
+      settingsApi.mergeSettings.mockResolvedValue(undefined);
+
+      await service.dismissHomeCard();
+
+      expect(settingsApi.mergeSettings).toHaveBeenCalled();
+      expect(notifySavedSettings).not.toHaveBeenCalled();
+      expect(service.homeCardWanted()).toBe(false);
     });
 
     it('stays dismissed for the session when the save fails', async () => {

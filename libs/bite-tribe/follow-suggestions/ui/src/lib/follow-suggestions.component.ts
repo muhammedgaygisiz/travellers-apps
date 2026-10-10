@@ -81,10 +81,4 @@ export class FollowSuggestionsComponent {
   protected onImageError(userId: string): void {
     this.erroredImages.update((ids) => new Set(ids).add(userId));
   }
-
-  protected onOpen(userId: string): void {
-    if (this.linkable()) {
-      this.openProfile.emit(userId);
-    }
-  }
 }

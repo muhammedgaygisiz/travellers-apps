@@ -54,6 +54,14 @@ export const Dismissible: Story = {
   args: { dismissible: true },
 };
 
+/**
+ * On a centred surface - the onboarding finish step and the empty Following
+ * list - the heading and the row centre with it.
+ */
+export const Centered: Story = {
+  args: { centered: true },
+};
+
 /** A display name too long for the card stays on one line. */
 export const LongDisplayName: Story = {
   args: {

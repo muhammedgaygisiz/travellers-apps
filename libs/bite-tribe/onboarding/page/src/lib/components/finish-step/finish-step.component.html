@@ -32,6 +32,7 @@
   @if (followSuggestionsLoading() || followSuggestions().length > 0) {
     <bt-follow-suggestions
       class="finish-step__follow-suggestions"
+      [centered]="true"
       [suggestions]="followSuggestions()"
       [pendingIds]="followSuggestionsPending()"
       [loading]="followSuggestionsLoading()"

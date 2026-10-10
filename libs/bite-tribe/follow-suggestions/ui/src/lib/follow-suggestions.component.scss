@@ -41,6 +41,10 @@
   list-style: none;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  // Snapping aligns a card to the scrollport's edge, not to the padding, so
+  // without this an overflowing row scrolled its first card past the inset
+  // and out of line with the heading above it.
+  scroll-padding-inline: var(--follow-suggestions-inset, 16px);
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
@@ -152,4 +156,24 @@
 .follow-suggestions__header ion-button {
   flex: none;
   margin: 0;
+}
+
+// A centred surface centres the heading and the row. The row is centred with
+// auto margins on its first and last card rather than `justify-content`: once
+// the cards overflow, centring by alignment pushes the first card past the
+// start edge where it cannot be scrolled back to, while auto margins simply
+// collapse to nothing and the row scrolls from its first card as before.
+.follow-suggestions--centered {
+  .follow-suggestions__header {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .follow-suggestions__card:first-child {
+    margin-inline-start: auto;
+  }
+
+  .follow-suggestions__card:last-child {
+    margin-inline-end: auto;
+  }
 }

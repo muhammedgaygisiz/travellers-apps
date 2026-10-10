@@ -110,6 +110,18 @@ describe(FollowSuggestionsComponent.name, () => {
     expect(shown).toEqual([2]);
   });
 
+  it('centres only on a surface that asks for it', async () => {
+    await render({ suggestions: [ana, ben] });
+
+    const [section] = all('follow-suggestions');
+
+    expect(section.classList).not.toContain('follow-suggestions--centered');
+
+    await render({ centered: true });
+
+    expect(section.classList).toContain('follow-suggestions--centered');
+  });
+
   it('offers a close button only when dismissible', async () => {
     let dismissed = 0;
     fixture.componentInstance.dismiss.subscribe(() => (dismissed += 1));

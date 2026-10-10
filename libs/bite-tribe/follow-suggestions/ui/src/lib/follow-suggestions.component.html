@@ -1,6 +1,7 @@
 @if (loading() || suggestions().length > 0) {
   <section
     class="follow-suggestions"
+    [class.follow-suggestions--centered]="centered()"
     data-testid="follow-suggestions"
     [attr.aria-busy]="loading()"
   >

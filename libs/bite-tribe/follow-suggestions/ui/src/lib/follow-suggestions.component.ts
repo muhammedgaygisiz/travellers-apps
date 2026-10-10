@@ -44,6 +44,13 @@ export class FollowSuggestionsComponent {
   dismissible = input(false);
   /** Makes each card open the person's profile through {@link openProfile}. */
   linkable = input(false);
+  /**
+   * Centres the heading and the row, for a surface whose own content is
+   * centred - the onboarding finish step and the empty Following list. Home
+   * leaves it off: its feed is a start-aligned grid, and a centred row there
+   * would be the one thing out of line.
+   */
+  centered = input(false);
 
   follow = output<FollowSuggestion>();
   openProfile = output<string>();

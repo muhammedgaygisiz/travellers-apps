@@ -49,6 +49,7 @@
       @if (offersFollowSuggestions()) {
         <bt-follow-suggestions
           class="follow-suggestions"
+          [centered]="true"
           [suggestions]="followSuggestions()"
           [pendingIds]="followSuggestionsPending()"
           [loading]="followSuggestionsLoading()"

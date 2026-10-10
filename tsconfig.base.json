@@ -120,6 +120,12 @@
       "bite-tribe/followers-data-access": [
         "libs/bite-tribe/followers/data-access/src/index.ts"
       ],
+      "bite-tribe/follow-suggestions-data-access": [
+        "libs/bite-tribe/follow-suggestions/data-access/src/index.ts"
+      ],
+      "bite-tribe/follow-suggestions-ui": [
+        "libs/bite-tribe/follow-suggestions/ui/src/index.ts"
+      ],
       "bite-tribe/leaderboard": [
         "libs/bite-tribe/leaderboard/page/src/index.ts"
       ],

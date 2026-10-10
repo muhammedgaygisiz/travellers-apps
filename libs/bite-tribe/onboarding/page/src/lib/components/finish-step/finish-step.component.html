@@ -26,4 +26,18 @@
     <li>{{ 'onboarding-finish-highlight-create' | transloco }}</li>
     <li>{{ 'onboarding-finish-highlight-explore' | transloco }}</li>
   </ul>
+
+  <!-- Only in the grid when it has something to show: an empty host would
+  still take a row and a gap, and the step would grow for nothing. -->
+  @if (followSuggestionsLoading() || followSuggestions().length > 0) {
+    <bt-follow-suggestions
+      class="finish-step__follow-suggestions"
+      [centered]="true"
+      [suggestions]="followSuggestions()"
+      [pendingIds]="followSuggestionsPending()"
+      [loading]="followSuggestionsLoading()"
+      (follow)="followSuggestion.emit($event)"
+      (shown)="followSuggestionsShown.emit($event)"
+    />
+  }
 </div>

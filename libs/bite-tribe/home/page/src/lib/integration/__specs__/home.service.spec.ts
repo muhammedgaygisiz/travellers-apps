@@ -1,3 +1,4 @@
+import { PATH } from 'utils';
 import { inject, TestBed } from '@angular/core/testing';
 import { HomeService } from '../home.service';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
@@ -7,6 +8,21 @@ import SpyInstance = jest.SpyInstance;
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LocalImagePickerService } from 'bite-tribe-common/bite';
+import { signal } from '@angular/core';
+import { FollowSuggestionsService } from 'bite-tribe/follow-suggestions-data-access';
+import type { FollowSuggestion } from 'model';
+
+const followSuggestionsMock = {
+  homeCardVisible: signal(false),
+  homeCardWanted: signal(false),
+  suggestions: signal<FollowSuggestion[]>([]),
+  isLoading: signal(false),
+  pendingIds: signal<ReadonlySet<string>>(new Set()),
+  request: jest.fn(),
+  follow: jest.fn().mockResolvedValue(true),
+  trackShown: jest.fn(),
+  dismissHomeCard: jest.fn().mockResolvedValue(undefined),
+};
 
 const biteDataAccessMock = {
   findLocalImageForBite: jest.fn(),
@@ -78,6 +94,7 @@ describe('HomeService', () => {
         { provide: EmailVerificationService, useValue: emailVerificationMock },
         { provide: BiteDataAccessService, useValue: biteDataAccessMock },
         { provide: LocalImagePickerService, useValue: localImagePickerMock },
+        { provide: FollowSuggestionsService, useValue: followSuggestionsMock },
       ],
     }).compileComponents();
     homeDataAccessService = TestBed.inject(HomeDataAccessService);
@@ -832,5 +849,73 @@ describe('HomeService', () => {
         expect(biteDataAccessMock.retryImageUpload).not.toHaveBeenCalled();
       },
     ));
+  });
+
+  describe('follow suggestions card', () => {
+    const ana: FollowSuggestion = {
+      userId: 'ana',
+      displayName: 'Ana',
+      biteCount: 3,
+      reason: 'nearby',
+    };
+    let service: HomeService;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      followSuggestionsMock.homeCardVisible.set(false);
+      followSuggestionsMock.homeCardWanted.set(false);
+      followSuggestionsMock.suggestions.set([ana]);
+      followSuggestionsMock.isLoading.set(false);
+      service = TestBed.inject(HomeService);
+    });
+
+    it('shows nobody while the card is not visible', () => {
+      expect(service.followSuggestionsCard()).toEqual([]);
+    });
+
+    it('shows the suggestions while the card is visible', () => {
+      followSuggestionsMock.homeCardVisible.set(true);
+
+      expect(service.followSuggestionsCard()).toEqual([ana]);
+    });
+
+    it('only loads while the card is wanted', () => {
+      followSuggestionsMock.isLoading.set(true);
+
+      expect(service.followSuggestionsCardLoading()).toBe(false);
+
+      followSuggestionsMock.homeCardWanted.set(true);
+
+      expect(service.followSuggestionsCardLoading()).toBe(true);
+    });
+
+    it('asks for suggestions only when the card is wanted', () => {
+      service.requestFollowSuggestionsIfWanted();
+      expect(followSuggestionsMock.request).not.toHaveBeenCalled();
+
+      followSuggestionsMock.homeCardWanted.set(true);
+      service.requestFollowSuggestionsIfWanted();
+      expect(followSuggestionsMock.request).toHaveBeenCalled();
+    });
+
+    it('opens the profile of a suggested person', () => {
+      const navigateForwardSpy = jest
+        .spyOn(TestBed.inject(NavController), 'navigateForward')
+        .mockImplementation();
+
+      service.openSuggestedProfile('ana');
+
+      expect(navigateForwardSpy).toHaveBeenCalledWith([PATH.PROFILE, 'ana']);
+    });
+
+    it('follows, counts and dismisses as the home surface', async () => {
+      await service.followSuggestion(ana);
+      service.trackFollowSuggestionsShown(4);
+      await service.dismissFollowSuggestions();
+
+      expect(followSuggestionsMock.follow).toHaveBeenCalledWith(ana, 'home');
+      expect(followSuggestionsMock.trackShown).toHaveBeenCalledWith('home', 4);
+      expect(followSuggestionsMock.dismissHomeCard).toHaveBeenCalled();
+    });
   });
 });

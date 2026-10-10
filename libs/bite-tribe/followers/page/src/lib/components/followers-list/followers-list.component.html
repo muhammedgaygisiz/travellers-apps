@@ -8,7 +8,7 @@
 >
   <ion-content class="ion-padding content-safe-padding-bottom">
     <h1 class="ion-margin-bottom">
-      {{ toggleTitleText() }}
+      {{ titleKey() | transloco }}
     </h1>
 
     @if (isLoading()) {
@@ -32,7 +32,10 @@
         </ion-button>
       </div>
     } @else if (users()?.length === 0) {
-      <div class="empty-container">
+      <div
+        class="empty-container"
+        [class.empty-container--with-suggestions]="showsFollowSuggestions()"
+      >
         <ion-label>
           @if (type() === 'followers') {
             <ng-container>{{ 'no-followers-yet' | transloco }}</ng-container>
@@ -101,6 +104,26 @@
           }
         }
       </ion-list>
+    }
+
+    <!-- The user's own Following list offers people to follow whether or not
+    it is empty (issue #1708). One instance below whichever state the list is
+    in, so following somebody from an empty list - which reloads the list and
+    makes it a filled one - neither remounts the row nor reports it shown
+    twice. Centred under the centred empty message; start-aligned under the
+    rows of a filled list. -->
+    @if (showsFollowSuggestionsSection()) {
+      <bt-follow-suggestions
+        class="follow-suggestions"
+        [centered]="isEmptyList()"
+        [suggestions]="followSuggestions()"
+        [pendingIds]="followSuggestionsPending()"
+        [loading]="followSuggestionsLoading()"
+        [linkable]="true"
+        (follow)="followSuggestion.emit($event)"
+        (shown)="followSuggestionsShown.emit($event)"
+        (openProfile)="suggestionClick.emit($event)"
+      />
     }
 
     <!-- One alert for the whole list, created only once a row is awaiting

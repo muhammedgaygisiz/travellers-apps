@@ -133,6 +133,19 @@
         </ion-card>
       }
 
+      <bt-follow-suggestions
+        data-testid="home-follow-suggestions"
+        [suggestions]="followSuggestions()"
+        [pendingIds]="followSuggestionsPending()"
+        [loading]="followSuggestionsLoading()"
+        [dismissible]="true"
+        [linkable]="true"
+        (follow)="followSuggestion.emit($event)"
+        (shown)="followSuggestionsShown.emit($event)"
+        (dismiss)="followSuggestionsDismiss.emit()"
+        (openProfile)="suggestionClick.emit($event)"
+      />
+
       @if (isSearchVisible()) {
         <ion-searchbar
           data-testid="search-input"

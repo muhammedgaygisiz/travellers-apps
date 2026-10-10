@@ -78,4 +78,13 @@ $desktop-content-max-width: 1440px;
   .home-scrolling-content-container {
     padding-top: 80px;
   }
+
+  /* The container already sits on the feed's gutter, so the suggestions take
+   * no inset of their own: with the default one, their heading and cards
+   * started a gutter further in than the Bites below them. Start-aligned
+   * rather than centred, because the feed is a start-aligned grid.
+   * See GitHub issue #1708. */
+  bt-follow-suggestions {
+    --follow-suggestions-inset: 0;
+  }
 }

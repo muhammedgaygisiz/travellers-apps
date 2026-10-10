@@ -176,6 +176,7 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   searchPlaces: 'member',
   searchRestaurants: 'member',
   searchUsers: 'member',
+  suggestPeopleToFollow: 'member',
   syncEmailVerificationStatus: 'member',
   unblockUser: 'member',
   updateLastSeen: 'member',

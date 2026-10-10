@@ -7,7 +7,7 @@ Supported today. Profile view and edit, public profiles, follow and unfollow wit
 lists, the visibility choice, user-to-user blocking, and the two identity contracts below
 all ship. Onboarding
 has collected an optional home city since [#1271], so a profile without one stays the
-normal case.
+normal case. Follow suggestions ship with [#1708].
 
 ## Goal
 
@@ -26,6 +26,8 @@ signed-in account, the follow relation, and the block one account places on anot
 - User opens public profiles.
 - User follows or unfollows other users.
 - User inspects followers and following.
+- A user is offered people to follow, and follows them in one tap. See
+  `Follow Suggestions` below.
 - User blocks or unblocks another account from that account's profile, per the block
   contract below.
 - Profile identity is used in search and Bite trust context.
@@ -100,6 +102,51 @@ deletion flow; knowing who you are is the same question asked earlier.
   display name renders no subtitle. Neither degradation costs the entry its
   label or its navigation.
 
+## Follow Suggestions
+
+Issue [#1708] gives a new account somebody to follow. D1 retention was 5% when it
+was specified, and nothing in the app pointed a newcomer at anyone. What a follow
+gives the follower is a push when that person posts (`notifyFollowersOnNewBite`) and
+a populated Following list. The home feed sorts by distance or date across everyone
+and has no following filter, so a suggestion is only worth making for somebody who
+actually posts.
+
+- **Who can be suggested.** A profile with `public == true`, a display name, a
+  `biteCount` of at least 1 and a `lastSeenTimestamp` within the last 30 days, whose
+  Firebase Auth account exists and is not blocked. A private profile is never
+  suggested: suggesting it would show the account to strangers, which is what private
+  rules out. The public-and-named half is the same rule the follow-up mail applies
+  (`UC - Guide New Users After Registration`), held in one place for both.
+- **Who never is.** The viewer, everybody the viewer already follows, and everybody the
+  viewer blocked, per the User Block Contract below.
+- **Order.** Up to five people, ranked in three tiers and never listed twice:
+  1. `nearby` - creators of listable Bites within 10km of a position the app already
+     holds, the one with most Bites there first. The radius is the nearby feed's.
+     The position is the one the feed already read or, on a device where location is
+     already granted, a fresh read; this feature never asks for location, and the web
+     build, which has no grant to check, only uses what the feed read.
+  2. `curated` - the hand-picked `config/newUserFollowUp.userIds`, so a newcomer meets
+     the same people in the app and in the follow-up mail.
+  3. `active` - the accounts with the most Bites.
+- **Where.** Three places, all one component:
+  - the onboarding finish step, where following stays optional and never blocks
+    Finish;
+  - the user's own Following list, empty or not - never somebody else's. Following a
+    few people is no reason to stop being offered more, and nobody already followed is
+    ever suggested. Under an empty list the row is centred with the empty message;
+    under a filled one it starts in line with the rows;
+  - a card above the home feed while the user follows nobody. It can be closed, which
+    hides it for seven days on every device (`settings.followSuggestionsDismissedAt`),
+    and it goes once the user follows anybody.
+- **One tap.** Follow writes both follow edges at once. A failed write leaves the
+  person in the list, puts the button back and says so; a followed person leaves every
+  surface's list at once. Tapping a card on home or the Following list opens the
+  profile; in onboarding it does not, because the assistant is not left mid-way.
+- **Failure.** Suggestions are an extra. When the call fails the surfaces show nothing
+  rather than an error, because there is nothing the user could do about it.
+- **Measured.** `follow_suggestions_shown`, `follow_suggestion_followed` and
+  `user_followed`, defined in [Implementation - Analytics Events](../implementation/analytics-events.md).
+
 ## User Block Contract
 
 Issue [#1609]. A block is a personal boundary one account sets against another. It needs
@@ -149,8 +196,9 @@ identity wrong here is the [#1308] class of defect rather than polish.
 **[MVP]** — the user block contract. `RD-UR-7` classes user-to-user blocking as part of the
 user-generated-content safeguard set.
 
-**[Secondary]** — the social graph: follow and unfollow, and the follower and following
-lists. Shipped, but the contribution loop does not depend on it for the initial release.
+**[Secondary]** — the social graph: follow and unfollow, the follower and following
+lists, and follow suggestions. Shipped, but the contribution loop does not depend on it
+for the initial release.
 
 ## App Store Review Area
 
@@ -158,6 +206,9 @@ Relevant. The public/private profile is a privacy control, and the profile photo
 photo library — the permission itself is collected in onboarding rather than here, see
 [UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md). The identity data this page renders is covered
 by the name, photo and user-ID entries declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
+Follow suggestions add no permission and no purpose string: they use a position only
+where location is already granted, so the priming rule onboarding owns is untouched, and
+their three events are product interaction like the rest.
 
 The user block contract is the blocking half of Apple's user-generated-content guideline
 and the equivalent Google Play policy; see [User Roles](../product/user-roles.md) footnote 5 for the rest of the set.
@@ -173,6 +224,11 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 - Public-user conversion.
 - Playwright coverage for profile editing, public-profile navigation,
   follower/following lists, and follow/unfollow persistence.
+- Follow suggestions: the `suggestPeopleToFollow` callable and the shared
+  `suggestable-person.ts` rule in `apps/bite-tribe-firebase/functions/src/functions/users`;
+  `FollowSuggestionsService` in `libs/bite-tribe/follow-suggestions/data-access`; the
+  `bt-follow-suggestions` component and its stories in
+  `libs/bite-tribe/follow-suggestions/ui`.
 
 ## Related GitHub Scope
 
@@ -180,6 +236,7 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 - Issue [#1188] made the public/private visibility choice readable directly off the profile. Closed.
 - Issue [#1260] moved account identity ("who am I signed in as") from the profile page into the app menu. Closed.
 - Issue [#1270], together with onboarding's [#1271], is the Profile Identity Contract above. Closed.
+- Issue [#1708] is `Follow Suggestions` above, motivated by the analytics check on [#914] and sharing its pick list with the follow-up mail of [#1707].
 - Issue [#1609] is the User Block Contract above.
 
 ## Related Domains
@@ -208,4 +265,7 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 [#1270]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1270
 [#1271]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1271
 [#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308
+[#914]: https://github.com/muhammedgaygisiz/travellers-apps/issues/914
 [#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609
+[#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
+[#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708

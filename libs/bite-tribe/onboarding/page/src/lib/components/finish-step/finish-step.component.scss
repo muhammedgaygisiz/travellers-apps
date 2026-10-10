@@ -36,3 +36,9 @@
   line-height: 1.4;
   text-align: left;
 }
+
+.finish-step__follow-suggestions {
+  --follow-suggestions-inset: 0;
+
+  justify-self: stretch;
+}

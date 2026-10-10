@@ -63,6 +63,7 @@ const createLoaderParams = (
 });
 
 class StoreMock {
+  blockedUserIds$ = of([]);
   sortedHomeBites$ = of([]);
   homeSorting$ = of('distance');
   mybites$ = of([]);

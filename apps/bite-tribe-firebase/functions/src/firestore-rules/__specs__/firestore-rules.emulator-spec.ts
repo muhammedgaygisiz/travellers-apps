@@ -2744,6 +2744,59 @@ describe('users', () => {
   it('refuses deleting a profile from a client', async () => {
     await assertFails(deleteDoc(doc(asConsumer(), 'users', CONSUMER)));
   });
+
+  /**
+   * A block is written by the `blockUser` callable and read by the blocker
+   * alone (issue #1609). The blocked account reading either side would tell
+   * them about it, and a client write could skip the follow removal.
+   */
+  describe('blocks', () => {
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        const edge = { blockerUid: CONSUMER, blockedUid: STRANGER };
+
+        await setDoc(doc(db, 'users', CONSUMER, 'blocked', STRANGER), edge);
+        await setDoc(doc(db, 'users', STRANGER, 'blockedBy', CONSUMER), edge);
+      });
+    });
+
+    it('lets the blocker read their own block list', async () => {
+      await assertSucceeds(
+        getDocs(collection(asConsumer(), 'users', CONSUMER, 'blocked')),
+      );
+    });
+
+    it('refuses the blocked account either side of the block', async () => {
+      await assertFails(
+        getDoc(doc(asStranger(), 'users', CONSUMER, 'blocked', STRANGER)),
+      );
+      await assertFails(
+        getDocs(collection(asStranger(), 'users', STRANGER, 'blockedBy')),
+      );
+    });
+
+    it('refuses the blocker the mirror under the blocked account', async () => {
+      await assertFails(
+        getDoc(doc(asConsumer(), 'users', STRANGER, 'blockedBy', CONSUMER)),
+      );
+    });
+
+    it('refuses writing a block from a client', async () => {
+      await assertFails(
+        setDoc(doc(asConsumer(), 'users', CONSUMER, 'blocked', OWNER), {
+          blockerUid: CONSUMER,
+          blockedUid: OWNER,
+        }),
+      );
+      await assertFails(
+        deleteDoc(doc(asConsumer(), 'users', CONSUMER, 'blocked', STRANGER)),
+      );
+      await assertFails(
+        deleteDoc(doc(asStranger(), 'users', STRANGER, 'blockedBy', CONSUMER)),
+      );
+    });
+  });
 });
 
 describe('settings', () => {

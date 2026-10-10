@@ -13,7 +13,13 @@ import {
   IonAlert,
   IonBadge,
   IonButton,
+  IonButtons,
   IonContent,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonPopover,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
 } from '@ionic/angular/standalone';
@@ -30,6 +36,7 @@ import { ProfileVisibility } from './components/profile-visibility';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const UNFOLLOW = 'unfollow';
+const BLOCK = 'block';
 const CANCEL = 'cancel';
 
 const PAGE_SIZE = 50;
@@ -43,6 +50,12 @@ const PAGE_SIZE = 50;
     PageComponent,
     IonContent,
     IonButton,
+    IonButtons,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonPopover,
     BiteComponent,
     IonBadge,
     IonAlert,
@@ -64,6 +77,11 @@ export class ProfileComponent {
   user = input<PublicUser | undefined>();
   bites = input<Bite[]>();
   profileMetadata = input<ProfileMetaData>();
+  /**
+   * The signed-in user blocked this account (GitHub issue #1609). The page then
+   * shows only who it is and the way back, never the account's content.
+   */
+  isBlocked = input(false, { transform: booleanAttribute });
   userId = input<string>();
   subscriptionTier = computed((): number => {
     return this.user()?.subscriptionTier || 0;
@@ -119,11 +137,18 @@ export class ProfileComponent {
   readonly likeButtonClick = output<LikeClick>();
   readonly followButtonClick = output<PublicUser>();
   readonly unfollowButtonClick = output<PublicUser>();
+  readonly blockButtonClick = output<PublicUser>();
+  readonly unblockButtonClick = output<PublicUser>();
   readonly followersClick = output<string>();
   readonly followingClick = output<string>();
   readonly retryImageUpload = output<Bite>();
 
   isOpen = signal(false);
+  isBlockConfirmationOpen = signal(false);
+  isProfileActionsMenuOpen = signal(false);
+  profileActionsMenuEvent = signal<Event | undefined>(undefined);
+  /** Block was picked in the menu; confirm once the popover has gone. */
+  private blockChosenFromMenu = false;
   currentPage = signal<number>(1);
 
   // Only skeletonize while there is nothing to show. A reload of an already
@@ -140,6 +165,17 @@ export class ProfileComponent {
     {
       text: this.transloco.translate('yes-unfollow'),
       role: UNFOLLOW,
+    },
+  ];
+
+  blockConfirmationButtons = [
+    {
+      text: this.transloco.translate('cancel'),
+      role: CANCEL,
+    },
+    {
+      text: this.transloco.translate('yes-block'),
+      role: BLOCK,
     },
   ];
 
@@ -236,6 +272,58 @@ export class ProfileComponent {
     }
 
     this.isOpen.set(false);
+  }
+
+  /**
+   * The header menu belongs to somebody else's profile that is not blocked.
+   * Once it is, Unblock replaces Follow and the menu has nothing to offer.
+   */
+  showProfileActionsMenu = computed((): boolean => {
+    return this.isUnfollowedUser() && !this.isBlocked();
+  });
+
+  openProfileActionsMenu(event: Event): void {
+    this.profileActionsMenuEvent.set(event);
+    this.isProfileActionsMenuOpen.set(true);
+  }
+
+  chooseBlockFromMenu(): void {
+    this.blockChosenFromMenu = true;
+    this.isProfileActionsMenuOpen.set(false);
+  }
+
+  handleProfileActionsMenuDismiss(): void {
+    this.isProfileActionsMenuOpen.set(false);
+
+    if (this.blockChosenFromMenu) {
+      this.blockChosenFromMenu = false;
+      this.openBlockConfirmationDialog();
+    }
+  }
+
+  openBlockConfirmationDialog(): void {
+    this.isBlockConfirmationOpen.set(true);
+  }
+
+  handleBlockConfirmationDismiss(event: CustomEvent<OverlayEventDetail>): void {
+    const user = this.user();
+
+    if (event.detail.role === BLOCK && user) {
+      // Destructive and confirmed, like the unfollow above (issue #1636).
+      void this.haptics.warning();
+
+      this.blockButtonClick.emit(user);
+    }
+
+    this.isBlockConfirmationOpen.set(false);
+  }
+
+  unblock(): void {
+    const user = this.user();
+
+    if (user) {
+      this.unblockButtonClick.emit(user);
+    }
   }
 
   onIonInfinite(event: InfiniteScrollCustomEvent): void {

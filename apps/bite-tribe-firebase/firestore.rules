@@ -1128,6 +1128,23 @@ service cloud.firestore {
       match /pushTokens/{token} {
         allow read, write: if isSelf(userId);
       }
+
+      /**
+       * A user-to-user block (GitHub issue #1609), a mirrored edge like the
+       * follow relation, written only by the `blockUser` and `unblockUser`
+       * callables: blocking also removes the blocked account's follow of the
+       * blocker, which no client may delete. Only the blocker reads their own
+       * list. The mirror under the blocked account is read by nobody, because
+       * a block the blocked account could see would tell them about it.
+       */
+      match /blocked/{blockedId} {
+        allow read: if isSelf(userId);
+        allow write: if false;
+      }
+
+      match /blockedBy/{blockerId} {
+        allow read, write: if false;
+      }
     }
 
     // --------------------------------------------------------------- settings

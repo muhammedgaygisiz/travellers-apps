@@ -16,6 +16,7 @@ class Mock {
   userId$ = of('user-id');
   isPublicProfile$ = of(true);
   profileMetadata$ = of(true);
+  blockedUserIds$ = of([]);
   myProfileBites$ = of(null);
   user = jest.fn();
   userIdFromUrl = jest.fn();
@@ -24,6 +25,8 @@ class Mock {
   savePublicProfile = jest.fn();
   followUser = jest.fn();
   unfollowUser = jest.fn();
+  blockUser = jest.fn();
+  unblockUser = jest.fn();
 }
 
 const ApiMock = {
@@ -163,6 +166,37 @@ describe('ProfileDataAccessService', () => {
         const mockUser = MOCK_PUBLIC_USER;
         service.submitUnfollowClick(mockUser);
         expect(unfollowUserSpy).toHaveBeenCalledWith(mockUser);
+      },
+    ));
+  });
+
+  describe('submitBlockClick', () => {
+    it('should call blockUser on storeService', inject(
+      [ProfileDataAccessService],
+      (service: ProfileDataAccessService) => {
+        const blockUserSpy = jest.spyOn(storeService, 'blockUser');
+        service.submitBlockClick(MOCK_PUBLIC_USER);
+        expect(blockUserSpy).toHaveBeenCalledWith(MOCK_PUBLIC_USER);
+      },
+    ));
+  });
+
+  describe('submitUnblockClick', () => {
+    it('should call unblockUser on storeService', inject(
+      [ProfileDataAccessService],
+      (service: ProfileDataAccessService) => {
+        const unblockUserSpy = jest.spyOn(storeService, 'unblockUser');
+        service.submitUnblockClick(MOCK_PUBLIC_USER);
+        expect(unblockUserSpy).toHaveBeenCalledWith(MOCK_PUBLIC_USER);
+      },
+    ));
+  });
+
+  describe('isBlockedByMe', () => {
+    it('is false while no profile is loaded', inject(
+      [ProfileDataAccessService],
+      (service: ProfileDataAccessService) => {
+        expect(service.isBlockedByMe()).toBe(false);
       },
     ));
   });

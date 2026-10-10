@@ -9,6 +9,7 @@ import { distanceBetween, geohashQueryBounds, Geopoint } from 'geofire-common';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
 import { isListableBite } from '../shared/utils/bite-listability';
+import { loadBlockedUids } from '../shared/utils/user-blocks';
 import { readFollowUpConfig } from './new-user-follow-up-picks';
 import { isSuggestableProfile, toHttpsUrl, toText } from './suggestable-person';
 
@@ -189,9 +190,10 @@ export const suggestPeopleToFollowFor = async (
   center: Geopoint | undefined,
   now: number,
 ): Promise<FollowSuggestion[]> => {
-  const [followingSnapshot, nearbyIds, config, activeSnapshot] =
+  const [followingSnapshot, blockedUids, nearbyIds, config, activeSnapshot] =
     await Promise.all([
       db.collection(`users/${viewerUid}/following`).get(),
+      loadBlockedUids(db, viewerUid),
       center ? nearbyCreatorIds(db, center) : Promise.resolve([]),
       readFollowUpConfig(db),
       db
@@ -201,9 +203,13 @@ export const suggestPeopleToFollowFor = async (
         .get(),
     ]);
 
+  // Nobody the viewer blocked either (GitHub issue #1609): a blocked
+  // account appears to the blocker nowhere, and a suggestion to follow it
+  // would be the opposite of the boundary they set.
   const excluded = new Set([
     viewerUid,
     ...followingSnapshot.docs.map((doc) => doc.id),
+    ...blockedUids,
   ]);
 
   const activeProfiles = new Map<string, DocumentData>(

@@ -16,6 +16,7 @@ import { getEffectsMetadata } from '@ngrx/effects';
 import SpyInstance = jest.SpyInstance;
 import { gpsPosition, publicUser } from '../selectors';
 import { LocationPermissionNotGrantedError } from 'geolocation';
+import { ToastService } from 'toast';
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
@@ -55,6 +56,13 @@ const BiteTribeApiServiceMock = {
   updateLastSeen: jest.fn(),
   updateUserMetadata: jest.fn(),
   syncEmailVerificationStatus: jest.fn(),
+  blockUser: jest.fn(),
+  unblockUser: jest.fn(),
+  fetchBlockedUserIds: jest.fn(),
+};
+
+const ToastServiceMock = {
+  present: jest.fn().mockResolvedValue(undefined),
 };
 
 const NavControllerMock = {};
@@ -81,6 +89,7 @@ describe(AppEffect.name, () => {
         { provide: Platform, useValue: PlatformMock },
         { provide: NavController, useValue: NavControllerMock },
         { provide: AnalyticsService, useValue: AnalyticsServiceMock },
+        { provide: ToastService, useValue: ToastServiceMock },
         provideMockStore(),
       ],
     });
@@ -739,6 +748,100 @@ describe(AppEffect.name, () => {
       });
 
       expect(unfollowUserSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // GitHub issue #1609.
+  describe('blockUser$', () => {
+    const user = { userId: 'blocked-id', displayName: 'Blocked' } as PublicUser;
+
+    beforeEach(() => ToastServiceMock.present.mockClear());
+
+    it('records the block once the backend has written it', async () => {
+      BiteTribeApiServiceMock.blockUser.mockResolvedValue(undefined);
+      actions$ = of(AppActions.blockUser({ user }));
+
+      const emitted: Action[] = [];
+      await new Promise<void>((resolve) =>
+        effects.blockUser$.subscribe({
+          next: (action) => emitted.push(action),
+          complete: resolve,
+        }),
+      );
+
+      expect(BiteTribeApiServiceMock.blockUser).toHaveBeenCalledWith(
+        'blocked-id',
+      );
+      expect(emitted).toEqual([
+        AppActions.blockedUser({ userId: 'blocked-id' }),
+      ]);
+      expect(ToastServiceMock.present).toHaveBeenCalledWith(
+        expect.objectContaining({ messageKey: 'user-blocked' }),
+      );
+    });
+
+    it('records nothing and says so when the block fails', async () => {
+      BiteTribeApiServiceMock.blockUser.mockRejectedValue(new Error('nope'));
+      actions$ = of(AppActions.blockUser({ user }));
+
+      const emitted: Action[] = [];
+      await new Promise<void>((resolve) =>
+        effects.blockUser$.subscribe({
+          next: (action) => emitted.push(action),
+          complete: resolve,
+        }),
+      );
+
+      expect(emitted).toEqual([]);
+      expect(ToastServiceMock.present).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messageKey: 'user-block-failed',
+          outcome: 'failure',
+        }),
+      );
+    });
+  });
+
+  describe('unblockUser$', () => {
+    it('records the unblock once the backend has written it', async () => {
+      const user = { userId: 'blocked-id' } as PublicUser;
+      BiteTribeApiServiceMock.unblockUser.mockResolvedValue(undefined);
+      actions$ = of(AppActions.unblockUser({ user }));
+
+      const emitted: Action[] = [];
+      await new Promise<void>((resolve) =>
+        effects.unblockUser$.subscribe({
+          next: (action) => emitted.push(action),
+          complete: resolve,
+        }),
+      );
+
+      expect(emitted).toEqual([
+        AppActions.unblockedUser({ userId: 'blocked-id' }),
+      ]);
+    });
+  });
+
+  describe('loadBlockedUsers$', () => {
+    it('loads the block list after login', async () => {
+      BiteTribeApiServiceMock.fetchBlockedUserIds.mockResolvedValue(['a']);
+      actions$ = of(
+        fromAuth.AuthActions.loadedUser({
+          user: { uid: '1' } as never,
+        }),
+      );
+
+      const emitted: Action[] = [];
+      await new Promise<void>((resolve) =>
+        effects.loadBlockedUsers$.subscribe({
+          next: (action) => emitted.push(action),
+          complete: resolve,
+        }),
+      );
+
+      expect(emitted).toEqual([
+        AppActions.loadedBlockedUsers({ userIds: ['a'] }),
+      ]);
     });
   });
 

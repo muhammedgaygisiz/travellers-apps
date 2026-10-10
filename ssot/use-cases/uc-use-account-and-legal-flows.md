@@ -66,7 +66,7 @@ See [issue-1385](../records/issue-1385.md) for the reasoning.
 
 Each user-owned data category is handled deliberately. See [issue-1182](../records/issue-1182.md) for the reasoning and [User](../domain/user.md) for the paths.
 
-- Removed: public profile and its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes given, bucket lists, BiteTrail ratings, profile images, the staff association at `/restaurantStaff/{uid}` if the account works at a restaurant ([#1537]), the new-user follow-up claim at `/newUserFollowUps/{uid}` and every unsubscribe token in `/emailOptOuts` issued to the account ([#1707]), every report the account filed in `/biteReports` - open or dismissed, because the document's name carries the reporter's uid ([#1608]) - and the Firebase Auth account. Reports other accounts filed on this account's Bites stay, because the Bites stay.
+- Removed: public profile and its follow and push-token subcollections, the mirrored follow edge on other users, both sides of every user block the account placed or received - its `blocked` and `blockedBy` subcollections and the mirrored edge on each other account ([#1609]) - the display-name claim, settings, reviews, likes given, bucket lists, BiteTrail ratings, profile images, the staff association at `/restaurantStaff/{uid}` if the account works at a restaurant ([#1537]), the new-user follow-up claim at `/newUserFollowUps/{uid}` and every unsubscribe token in `/emailOptOuts` issued to the account ([#1707]), every report the account filed in `/biteReports` - open or dismissed, because the document's name carries the reporter's uid ([#1608]) - and the Firebase Auth account. Reports other accounts filed on this account's Bites stay, because the Bites stay.
 - Kept with the identifier cleared: Bites (the Bite and its image stay, `userId` is removed) and BiteTrail purchase records (the document stays so the seller's `soldCount` holds).
 - Kept untouched: restaurants, menus and restaurant candidates, which are shared place data.
 - Cannot be removed in band: analytics and Crashlytics data already keyed to the uid. The in-app copy says so.
@@ -127,6 +127,7 @@ Relevant, and exercised more directly than on any other page.
 ## Related GitHub Scope
 
 - Issue [#1537] added removing the restaurant-staff association (`/restaurantStaff/{uid}`) from the account deletion cascade. Closed.
+- Issue [#1609] added removing both sides of every user block to the cascade.
 - Issues [#1568], [#1569] and [#1570] track three decisions the Deletion Contract has not yet made: what happens to a deleted account's restaurant-ownership fields, to a BiteTrail it owns, and to its `/accountDeletions/{uid}` job record. All open.
 
 ## Related Domains
@@ -149,6 +150,7 @@ Relevant, and exercised more directly than on any other page.
 [#1568]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1568
 [#1569]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1569
 [#1570]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1570
+[#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609
 [#1611]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1611
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608

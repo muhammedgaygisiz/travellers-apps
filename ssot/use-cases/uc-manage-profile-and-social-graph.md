@@ -4,7 +4,8 @@
 
 **Level:** L1
 Supported today. Profile view and edit, public profiles, follow and unfollow with their
-lists, the visibility choice, and the two identity contracts below all ship. Onboarding
+lists, the visibility choice, user-to-user blocking, and the two identity contracts below
+all ship. Onboarding
 has collected an optional home city since [#1271], so a profile without one stays the
 normal case. Follow suggestions ship with [#1708].
 
@@ -12,12 +13,12 @@ normal case. Follow suggestions ship with [#1708].
 
 Any account can maintain its identity and read profile and social context to judge whether
 to trust a food experience. This page owns what a profile renders, what identifies the
-signed-in account, and the follow relation.
+signed-in account, the follow relation, and the block one account places on another.
 
 ## Actors
 
 - **Bite Creator** — views and edits its own profile, sets its visibility, opens other
-  public profiles, and follows or unfollows them.
+  public profiles, follows or unfollows them, and blocks or unblocks them.
 
 ## Flow
 
@@ -27,6 +28,8 @@ signed-in account, and the follow relation.
 - User inspects followers and following.
 - A user is offered people to follow, and follows them in one tap. See
   `Follow Suggestions` below.
+- User blocks or unblocks another account from that account's profile, per the block
+  contract below.
 - Profile identity is used in search and Bite trust context.
 - Profile Bites are always listed newest first. The profile is a timeline of what
   a user cooked or ate, so it ignores the distance sorting and the my-bites
@@ -114,7 +117,8 @@ actually posts.
   suggested: suggesting it would show the account to strangers, which is what private
   rules out. The public-and-named half is the same rule the follow-up mail applies
   (`UC - Guide New Users After Registration`), held in one place for both.
-- **Who never is.** The viewer, and everybody the viewer already follows.
+- **Who never is.** The viewer, everybody the viewer already follows, and everybody the
+  viewer blocked, per the User Block Contract below.
 - **Order.** Up to five people, ranked in three tiers and never listed twice:
   1. `nearby` - creators of listable Bites within 10km of a position the app already
      holds, the one with most Bites there first. The radius is the nearby feed's.
@@ -143,6 +147,32 @@ actually posts.
 - **Measured.** `follow_suggestions_shown`, `follow_suggestion_followed` and
   `user_followed`, defined in [Implementation - Analytics Events](../implementation/analytics-events.md).
 
+## User Block Contract
+
+Issue [#1609]. A block is a personal boundary one account sets against another. It needs
+no judgement about whether the other account did anything wrong, and it is not the
+Operator's block in [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md), which disables an
+account for everybody.
+
+- Blocking is offered on another account's profile, from the header menu and behind a
+  confirmation that says what it does. It is deliberately secondary: follow and unfollow
+  stay the one prominent action on a profile. Once the account is blocked, Unblock takes
+  the place Follow had, since following is no longer offered, and needs no confirmation.
+- The blocked account's Bites, reviews and profile do not appear to the blocker: not in
+  the feed, the map, the weekly Bites, search, a Bite's review threads, or anybody's
+  follower and following lists. A reply somebody else wrote to a blocked account's review
+  stays, and reads as a review of its own.
+- The blocked account's profile, opened directly, shows who it is and the way to unblock,
+  and none of its content.
+- Blocking removes the follow relation in both directions. Unblocking does not restore it.
+- The blocked account is not told and sees no change. Nothing it can read records the
+  block, so a refusal it could observe would itself be the notification.
+- A block takes effect on what the blocker already has loaded, not only on the next read.
+- A block is the blocker's to lift and nobody else's. Deleting either account removes it,
+  per [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md).
+
+The storage, the callables and the rules are in [User](../domain/user.md).
+
 ## Out Of Scope
 
 - A profile is not a shareable destination. There is no profile share action, no
@@ -163,6 +193,9 @@ readable off the profile itself, the loading skeleton that withholds placeholder
 both identity contracts. Visibility is a privacy control the product offers, so getting
 identity wrong here is the [#1308] class of defect rather than polish.
 
+**[MVP]** — the user block contract. `RD-UR-7` classes user-to-user blocking as part of the
+user-generated-content safeguard set.
+
 **[Secondary]** — the social graph: follow and unfollow, the follower and following
 lists, and follow suggestions. Shipped, but the contribution loop does not depend on it
 for the initial release.
@@ -177,12 +210,16 @@ Follow suggestions add no permission and no purpose string: they use a position 
 where location is already granted, so the priming rule onboarding owns is untouched, and
 their three events are product interaction like the rest.
 
+The user block contract is the blocking half of Apple's user-generated-content guideline
+and the equivalent Google Play policy; see [User Roles](../product/user-roles.md) footnote 5 for the rest of the set.
+
 ## Supported Evidence
 
 - `my-profile`
 - `edit-profile`
 - `profile/:userId`
 - `followers/:userId/:type`
+- `blockUser` and `unblockUser` callables.
 - Profile API.
 - Public-user conversion.
 - Playwright coverage for profile editing, public-profile navigation,
@@ -200,6 +237,7 @@ their three events are product interaction like the rest.
 - Issue [#1260] moved account identity ("who am I signed in as") from the profile page into the app menu. Closed.
 - Issue [#1270], together with onboarding's [#1271], is the Profile Identity Contract above. Closed.
 - Issue [#1708] is `Follow Suggestions` above, motivated by the analytics check on [#914] and sharing its pick list with the follow-up mail of [#1707].
+- Issue [#1609] is the User Block Contract above.
 
 ## Related Domains
 
@@ -216,6 +254,9 @@ their three events are product interaction like the rest.
 - [issue-1118](../records/issue-1118.md)
 - [issue-1190](../records/issue-1190.md)
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
+- [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md) — the Operator's block, which this is not
+- [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md) — where a block goes when either account is deleted
+- [User Roles](../product/user-roles.md)
 
 [#1166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1166
 [#1188]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1188
@@ -225,5 +266,6 @@ their three events are product interaction like the rest.
 [#1271]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1271
 [#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308
 [#914]: https://github.com/muhammedgaygisiz/travellers-apps/issues/914
+[#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708

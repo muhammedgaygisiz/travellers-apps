@@ -384,6 +384,18 @@ export class BiteTribeApiService {
     await this.profileApiService.unfollowUser(user);
   }
 
+  blockUser(userId: string): Promise<void> {
+    return this.profileApiService.blockUser(userId);
+  }
+
+  unblockUser(userId: string): Promise<void> {
+    return this.profileApiService.unblockUser(userId);
+  }
+
+  fetchBlockedUserIds(): Promise<string[]> {
+    return this.profileApiService.fetchBlockedUserIds();
+  }
+
   async bitesByPosition(position: GeolocationPosition): Promise<Bite[]> {
     return this.biteApiService.loadBitesByLocation(position);
   }

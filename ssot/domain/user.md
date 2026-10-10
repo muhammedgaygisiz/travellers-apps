@@ -21,6 +21,10 @@
   a shareable link: profiles have no share action and no deep link, by design.
   Sharing is a [Bite](bite.md) capability. See [issue-1190](../records/issue-1190.md).
 - A User can follow and be followed by other users.
+- A User can block another User, and lift that block. A block is the blocker's personal
+  boundary, invisible to the blocked account, and distinct from the Operator's block that
+  disables an account for everybody. Its behaviour is in
+  [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md).
 - A User can save Bites to bucket lists.
 - A User can save a BiteTrail as a bucket list.
 - A User can like and review Bites.
@@ -75,6 +79,7 @@
   |-- Reviews
   |-- Followers
   |-- Following
+  |-- Blocked accounts
   |-- BiteTrails (owner or curator)
   |-- BiteTrail ratings
   ```
@@ -113,7 +118,8 @@
 - Display names are unique, enforced case-insensitively (normalized by trim + lowercase; original casing preserved for display). A claim document `/displayNames/{normalizedDisplayName}` is written transactionally by the `claimDisplayName` callable so two users cannot take the same normalized name concurrently; renaming releases the old claim and takes the new one in the same transaction and keeps `/users/{uid}.displayName` plus `normalizedDisplayName` in sync. `checkDisplayNameAvailability` is a read-only advisory check. The profile edit flow claims the name before saving and shows a localized error when it is taken. Users who registered before claims existed have none; both checks also scan `/users`, so their name is protected anyway, and onboarding claims it when they next return. There is deliberately no backfill - see [UC - Run Operational Migrations](../use-cases/uc-run-operational-migrations.md). See [epic-850](../records/epic-850.md).
 - `subscriptionTier` is currently written as `1` by `createUserOnAuthCreate` for every new account and is only read for display in the profile and settings pages. Nothing enforces it, and `firestore.rules` still allows any authenticated user to write any document, so it is not a trustworthy access signal today. [epic-1122][#1122] makes the entitlement server-owned and turns this field into a backend-written display mirror. See [Subscription](subscription.md).
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
-- A User can delete their own account from the app. `deleteOwnAccount` removes the public user document, its follow and push-token subcollections, the mirrored follow edge on other users, the display-name claim, settings, reviews, likes, bucket lists, BiteTrail ratings and profile images, then deletes the Firebase Auth account last. Bites are kept with `userId` removed so the shared content graph survives, and a Bite without a `userId` renders like a private user's Bite. The full per-category contract is in [UC - Use Account And Legal Flows](../use-cases/uc-use-account-and-legal-flows.md); the reasoning is in [issue-1182](../records/issue-1182.md).
+- User blocks are a mirrored edge like the follow relation, stored under `/users/{blockerId}/blocked/{blockedId}` and `/users/{blockedId}/blockedBy/{blockerId}` ([#1609]). Only the `blockUser` and `unblockUser` callables write them: blocking also deletes the follow edges in both directions, and the blocked account's `following` entry for the blocker is not one any client may delete. The rules let the blocker read their own `blocked` list and nobody read `blockedBy`, which exists so the deletion cascade can find the edges an account appears on. The feed, weekly, search and user-search callables drop blocked authors server-side, and the consumer app filters the same set out of everything it already holds - the store, the weekly Bites, the follower lists and search results on screen - so a block applies at once. Search Bites carry their author's `userId` for that reason.
+- A User can delete their own account from the app. `deleteOwnAccount` removes the public user document, its follow and push-token subcollections, the mirrored follow edge on other users, both sides of every block it placed or received, the display-name claim, settings, reviews, likes, bucket lists, BiteTrail ratings and profile images, then deletes the Firebase Auth account last. Bites are kept with `userId` removed so the shared content graph survives, and a Bite without a `userId` renders like a private user's Bite. The full per-category contract is in [UC - Use Account And Legal Flows](../use-cases/uc-use-account-and-legal-flows.md); the reasoning is in [issue-1182](../records/issue-1182.md).
 - Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
 - There is no organisation or restaurant profile type. `isOrganisation` and `isRestaurant` were declared on `PublicUser` but never written by any client, callable, or migration - only by hand onto a few seeded emulator documents - so no account could ever become one from inside the app. `isOrganisation` nevertheless changed the profile page (Bite Trails instead of Bites, no subscription badge, no follow or edit action, no visibility status) and drove the business dashboard's Organisations list, and `isRestaurant` was read by nothing at all. Both are removed, along with the `organisationId` field the business app queried without ever declaring it. Business capability is planned as an additional role on a normal user instead. See [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md) and [issue-1371](../records/issue-1371.md).
 - ## Permissions
@@ -139,6 +145,7 @@
 - View public profile.
 - Follow and unfollow users.
 - View followers and following.
+- Block and unblock another user.
 - Search users by display name, full name, or email.
 - Update last seen.
 - Track latest reported app version and build number.
@@ -168,6 +175,8 @@
   /users/{userId}
   /users/{userId}/followers/{followerUserId}
   /users/{userId}/following/{followedUserId}
+  /users/{userId}/blocked/{blockedUserId}
+  /users/{userId}/blockedBy/{blockerUserId}
   /displayNames/{normalizedDisplayName}
   /biteTrails/{biteTrailId}/ratings/{userId}
   ```
@@ -190,6 +199,8 @@
   ```text
   createUserOnAuthCreate
   deleteOwnAccount
+  blockUser
+  unblockUser
   claimDisplayName
   checkDisplayNameAvailability
   updateLastSeen
@@ -235,3 +246,4 @@
 - [Bite](bite.md)
 
 [#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
+[#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609

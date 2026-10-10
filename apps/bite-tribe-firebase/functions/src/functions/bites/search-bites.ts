@@ -8,6 +8,7 @@ import {
 } from '../shared/utils/search-bite';
 import { requireMember } from '../shared/roles';
 import { isBiteVisibleTo } from '../shared/utils/bite-listability';
+import { isBlockedUid, loadBlockedUids } from '../shared/utils/user-blocks';
 
 const MIN_SEARCH_TEXT_LENGTH = 3;
 const MAX_RESULTS = 20;
@@ -32,15 +33,23 @@ export const searchBites = onAppCheck<SearchBitesRequest>(async (request) => {
     return [];
   }
 
-  const bitesSnapshot = await getFirestore().collection('bites').get();
+  const db = getFirestore();
+  const [bitesSnapshot, blockedUids] = await Promise.all([
+    db.collection('bites').get(),
+    loadBlockedUids(db, request.auth.uid),
+  ]);
 
   // Visibility is part of the match rather than a pass after it, so the cap
-  // counts only Bites the caller can see (GitHub issue #1717).
+  // counts only Bites the caller can see (GitHub issue #1717), and not the
+  // Bites of accounts the caller blocked (GitHub issue #1609).
   return bitesSnapshot.docs
     .filter((doc) => {
       const bite = doc.data();
 
-      if (!isBiteVisibleTo(bite, request.auth.uid)) {
+      if (
+        !isBiteVisibleTo(bite, request.auth.uid) ||
+        isBlockedUid(bite['userId'], blockedUids)
+      ) {
         return false;
       }
 

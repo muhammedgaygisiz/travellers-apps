@@ -1,6 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { sortByCriteria } from './utils/sort-by-criteria';
 import {
+  blockedUserIds,
   exchangeRates,
   gpsPosition,
   preferredCurrency,
@@ -33,13 +34,23 @@ const allBites = createSelector(slice, selectAll);
 
 const latestBites = createSelector(slice, (state) => state.latestBites);
 
+/**
+ * Every Bite the store holds for discovery, without those by accounts the user
+ * blocked (GitHub issue #1609). The feed, the map and the details page all
+ * read from here, so a block applies to what is already loaded the moment it
+ * lands, and to the latest-Bites listener, which no callable filters.
+ */
 export const bitesWithMetadata = createSelector(
   allBites,
   latestBites,
   likes,
   gpsPosition,
-  (bites, latestBites, likes, gpsPosition) => {
-    const dedupedBites = dedupMerge(bites, latestBites);
+  blockedUserIds,
+  (bites, latestBites, likes, gpsPosition, blockedUserIds) => {
+    const blocked = new Set(blockedUserIds);
+    const dedupedBites = dedupMerge(bites, latestBites).filter(
+      (bite) => !bite.userId || !blocked.has(bite.userId),
+    );
 
     return joinHomeBiteMetadata(
       dedupedBites,

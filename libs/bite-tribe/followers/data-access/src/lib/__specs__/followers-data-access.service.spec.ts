@@ -3,13 +3,16 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { FollowersDataAccessService } from '../followers-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { ProfileApiService } from 'bite-tribe/api';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { PublicUser } from 'model';
 import { signal } from '@angular/core';
 
 type UsersLoaderArg = Parameters<FollowersDataAccessService['usersLoader']>[0];
 
+const blockedUserIds$ = new BehaviorSubject<string[]>([]);
+
 class MockBiteTribeStoreService {
+  blockedUserIds$ = blockedUserIds$;
   type$ = of('followers');
   userIdFromUrl = signal<string | null>(null);
   type = signal<string | null>(null);
@@ -221,6 +224,38 @@ describe('FollowersDataAccessService', () => {
         expect(() => service.users.value()).toThrow();
         expect(service.usersValue()).toEqual([]);
         expect(service.usersFailed()).toBe(true);
+      },
+    ));
+  });
+
+  // GitHub issue #1609.
+  describe('given the signed-in user blocked an account on the list', () => {
+    afterEach(() => blockedUserIds$.next([]));
+
+    it('leaves the blocked account out', inject(
+      [FollowersDataAccessService, BiteTribeStoreService],
+      async (
+        service: FollowersDataAccessService,
+        store: MockBiteTribeStoreService,
+      ) => {
+        jest
+          .spyOn(profileApiService, 'fetchFollowersWithDetails')
+          .mockResolvedValue([
+            { userId: 'kept', displayName: 'Kept' } as PublicUser,
+            { userId: 'blocked', displayName: 'Blocked' } as PublicUser,
+          ]);
+        store.userIdFromUrl.set('user1');
+        store.type.set('followers');
+        blockedUserIds$.next(['blocked']);
+
+        TestBed.flushEffects();
+        for (let tick = 0; tick < 20; tick++) {
+          await Promise.resolve();
+        }
+
+        expect(service.usersValue().map((user) => user.userId)).toEqual([
+          'kept',
+        ]);
       },
     ));
   });

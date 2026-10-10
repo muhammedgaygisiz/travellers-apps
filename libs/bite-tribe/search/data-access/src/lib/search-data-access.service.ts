@@ -1,4 +1,13 @@
-import { Injectable, resource, ResourceLoader, signal } from '@angular/core';
+import {
+  computed,
+  inject,
+  Injectable,
+  resource,
+  ResourceLoader,
+  signal,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type {
   PublicUser,
@@ -26,8 +35,19 @@ interface SearchCountryRequest {
   countryCode: string;
 }
 
+/** The account behind a result. A restaurant has none. */
+const authorOf = (result: SearchResult): string | undefined =>
+  result.category === 'restaurant' ? undefined : result.value.userId;
+
 @Injectable({ providedIn: 'root' })
 export class SearchDataAccessService {
+  private readonly storeService = inject(BiteTribeStoreService);
+
+  private readonly blockedUserIds = toSignal(
+    this.storeService.blockedUserIds$,
+    { initialValue: [] as string[] },
+  );
+
   readonly searchText = signal('');
   readonly searchCategory = signal<SearchCategory>('user');
   /**
@@ -120,5 +140,26 @@ export class SearchDataAccessService {
     }),
     loader: this.resultsLoader.bind(this),
     defaultValue: [],
+  });
+
+  /**
+   * The results without accounts the user blocked, or their Bites (GitHub
+   * issue #1609). The callables already leave them out of a new search; this
+   * covers a block placed while the results were on screen, which the search
+   * box's debounce would otherwise keep showing until the term changes.
+   */
+  readonly visibleResults = computed((): SearchResult[] => {
+    const blocked = new Set(this.blockedUserIds());
+    const results = this.results.value();
+
+    if (!blocked.size) {
+      return results;
+    }
+
+    return results.filter((result) => {
+      const author = authorOf(result);
+
+      return !author || !blocked.has(author);
+    });
   });
 }

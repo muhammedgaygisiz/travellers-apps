@@ -14,6 +14,11 @@ export interface SearchBite {
   };
   /** Feeds the rating shown inside the map marker on the client. */
   rating?: number;
+  /**
+   * The author, so the client can drop a result it already holds once the
+   * viewer blocks them (GitHub issue #1609). Absent on an anonymised Bite.
+   */
+  userId?: string;
 }
 
 export const getString = (data: DocumentData, field: string): string =>
@@ -60,6 +65,7 @@ export const toSearchBite = (doc: QueryDocumentSnapshot): SearchBite => {
   const tags = getStringArray(bite, 'tags');
   const position = getPosition(bite);
   const rating = getRating(bite);
+  const userId = getString(bite, 'userId');
 
   return {
     id: getString(bite, 'id') || doc.id,
@@ -71,5 +77,6 @@ export const toSearchBite = (doc: QueryDocumentSnapshot): SearchBite => {
     ...(tags.length > 0 ? { tags } : {}),
     ...(position ? { position } : {}),
     ...(rating !== undefined ? { rating } : {}),
+    ...(userId ? { userId } : {}),
   };
 };

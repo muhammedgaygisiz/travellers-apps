@@ -57,6 +57,9 @@ class ProfileApiMock {
   getUserById = jest.fn();
   followUser = jest.fn();
   unfollowUser = jest.fn();
+  blockUser = jest.fn();
+  unblockUser = jest.fn();
+  fetchBlockedUserIds = jest.fn();
   getTotalNumberOfUsers = jest.fn();
   fetchFollowers = jest.fn();
   fetchFollowing = jest.fn();
@@ -645,6 +648,34 @@ describe(BiteTribeApiService.name, () => {
         const user = { id: 'user-id', name: 'Test User' } as any;
         service.unfollowUser(user);
         expect(unfollowUserSpy).toHaveBeenCalledWith(user);
+      },
+    ));
+  });
+
+  describe('block passthroughs', () => {
+    it('should forward block, unblock and the block list to ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        const block = jest
+          .spyOn(profileApiService, 'blockUser')
+          .mockResolvedValue();
+        const unblock = jest
+          .spyOn(profileApiService, 'unblockUser')
+          .mockResolvedValue();
+        const list = jest
+          .spyOn(profileApiService, 'fetchBlockedUserIds')
+          .mockResolvedValue(['a']);
+
+        await service.blockUser('a');
+        await service.unblockUser('a');
+
+        expect(block).toHaveBeenCalledWith('a');
+        expect(unblock).toHaveBeenCalledWith('a');
+        await expect(service.fetchBlockedUserIds()).resolves.toEqual(['a']);
+        expect(list).toHaveBeenCalled();
       },
     ));
   });

@@ -40,6 +40,10 @@ export class FollowSuggestionsService {
   private readonly profile = toSignal(this.storeService.publicUser$);
   private readonly settings = toSignal(this.storeService.settings$);
   private readonly storedPosition = toSignal(this.storeService.position$);
+  private readonly blockedUserIds = toSignal(
+    this.storeService.blockedUserIds$,
+    { initialValue: [] as string[] },
+  );
 
   private readonly requested = signal(false);
   private readonly followedIds = signal<ReadonlySet<string>>(new Set());
@@ -60,10 +64,19 @@ export class FollowSuggestionsService {
     [] as FollowSuggestion[],
   );
 
-  /** The people still worth showing: everybody not followed from here yet. */
-  readonly suggestions = computed(() =>
-    this.loaded().filter(({ userId }) => !this.followedIds().has(userId)),
-  );
+  /**
+   * The people still worth showing: everybody not followed from here yet, and
+   * nobody blocked since the list was read. The callable leaves out blocks that
+   * existed when it ran; this drops one placed while the suggestions were on
+   * screen (GitHub issue #1609).
+   */
+  readonly suggestions = computed(() => {
+    const blocked = new Set(this.blockedUserIds());
+
+    return this.loaded().filter(
+      ({ userId }) => !this.followedIds().has(userId) && !blocked.has(userId),
+    );
+  });
 
   readonly isLoading = this.suggestionsResource.isLoading;
 

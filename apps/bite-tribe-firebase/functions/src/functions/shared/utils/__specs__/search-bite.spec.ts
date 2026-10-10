@@ -63,4 +63,20 @@ describe('toSearchBite', () => {
     // it is given, so a coerced 0 would read as a real rating.
     expect(result).not.toHaveProperty('rating');
   });
+
+  // GitHub issue #1609: the client drops results by an account the viewer
+  // blocks while they are on screen.
+  it('carries the author, and nothing for an anonymised Bite', () => {
+    const authored = toSearchBite({
+      id: 'bite-1',
+      data: () => ({ name: 'Ramen', place: 'Ichiran', userId: 'poster' }),
+    } as never);
+    const anonymised = toSearchBite({
+      id: 'bite-2',
+      data: () => ({ name: 'Ramen', place: 'Ichiran' }),
+    } as never);
+
+    expect(authored.userId).toBe('poster');
+    expect(anonymised).not.toHaveProperty('userId');
+  });
 });

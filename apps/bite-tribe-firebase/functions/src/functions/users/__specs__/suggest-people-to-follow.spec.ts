@@ -139,6 +139,17 @@ describe('suggestPeopleToFollowFor', () => {
     expect(ids(await suggest(BERN))).toEqual(['ana']);
   });
 
+  // GitHub issue #1609: a blocked account appears to the blocker nowhere.
+  it('never suggests an account the viewer blocked', async () => {
+    aCreator('ana');
+    aCreator('blocked');
+    aBite('blocked', NEAR_BERN);
+    db.seed(`users/${VIEWER}/blocked/blocked`, { blockedUid: 'blocked' });
+    db.seed('config/newUserFollowUp', { userIds: ['blocked'] });
+
+    expect(ids(await suggest(BERN))).toEqual(['ana']);
+  });
+
   it('never suggests a private profile or one without Bites', async () => {
     aCreator('private', { public: false });
     aCreator('empty', { biteCount: 0 });

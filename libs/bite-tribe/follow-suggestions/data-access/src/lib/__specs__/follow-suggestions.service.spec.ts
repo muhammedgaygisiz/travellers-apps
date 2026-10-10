@@ -38,6 +38,7 @@ describe(FollowSuggestionsService.name, () => {
   let position$: BehaviorSubject<
     { latitude: number; longitude: number } | undefined
   >;
+  let blockedUserIds$: BehaviorSubject<string[]>;
   const profileApi = {
     fetchFollowSuggestions: jest.fn(),
     follow: jest.fn(),
@@ -65,6 +66,7 @@ describe(FollowSuggestionsService.name, () => {
             publicUser$: profile$,
             settings$,
             position$,
+            blockedUserIds$,
             notifySavedSettings,
           },
         },
@@ -86,6 +88,7 @@ describe(FollowSuggestionsService.name, () => {
     position$ = new BehaviorSubject<
       { latitude: number; longitude: number } | undefined
     >(undefined);
+    blockedUserIds$ = new BehaviorSubject<string[]>([]);
     profileApi.fetchFollowSuggestions.mockResolvedValue([ana, ben]);
     profileApi.follow.mockResolvedValue(undefined);
     getLocationPermissionState.mockResolvedValue('unsupported');
@@ -104,6 +107,16 @@ describe(FollowSuggestionsService.name, () => {
     await settle();
 
     expect(service.suggestions()).toEqual([ana, ben]);
+  });
+
+  // GitHub issue #1609.
+  it('drops somebody blocked while the suggestions are on screen', async () => {
+    service.request();
+    await settle();
+
+    blockedUserIds$.next(['ana']);
+
+    expect(service.suggestions()).toEqual([ben]);
   });
 
   it('sends the position the feed already read', async () => {

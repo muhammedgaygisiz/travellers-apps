@@ -201,3 +201,32 @@ export const NoFollowersOrFollowing: Story = {
     bites: [bite],
   },
 };
+
+/** The profile of an account the signed-in user blocked (GitHub issue #1609). */
+export const BlockedAccount: Story = {
+  args: {
+    user: baseUser,
+    userId: currentUserId,
+    profileMetadata: noProfileMetadata,
+    bites: [bite],
+    isBlocked: true,
+  },
+};
+
+/**
+ * Somebody else's profile with its header menu open, where Block lives so
+ * that Follow stays the one prominent action (GitHub issue #1609).
+ */
+export const ActionsMenuOpen: Story = {
+  args: {
+    user: baseUser,
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+  play: async ({ canvasElement }) => {
+    canvasElement
+      .querySelector<HTMLElement>('[data-testid="profile-actions-menu"]')
+      ?.click();
+  },
+};

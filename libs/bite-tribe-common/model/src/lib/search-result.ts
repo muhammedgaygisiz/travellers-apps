@@ -15,6 +15,8 @@ export interface SearchBite {
   position?: Geopoint;
   /** Feeds the rating shown inside the map marker, as on every other map. */
   rating?: number;
+  /** The author, absent on an anonymised Bite (GitHub issue #1609). */
+  userId?: string;
 }
 
 export interface SearchRestaurant {

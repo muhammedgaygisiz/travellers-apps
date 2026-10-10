@@ -174,11 +174,11 @@ export interface AnalyticsEventParamMap {
    * the ranking needs, and a uid would be personal data in a product event.
    */
   [AnalyticsEvent.FollowSuggestionsShown]: {
-    surface: 'onboarding' | 'following_empty' | 'home';
+    surface: 'onboarding' | 'following' | 'home';
     count: number;
   };
   [AnalyticsEvent.FollowSuggestionFollowed]: {
-    surface: 'onboarding' | 'following_empty' | 'home';
+    surface: 'onboarding' | 'following' | 'home';
     /** One-based place in the list at the moment it was tapped. */
     position: number;
     reason: 'nearby' | 'curated' | 'active';

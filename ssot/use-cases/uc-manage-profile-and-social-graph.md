@@ -6,7 +6,7 @@
 Supported today. Profile view and edit, public profiles, follow and unfollow with their
 lists, the visibility choice, and the two identity contracts below all ship. Onboarding
 has collected an optional home city since [#1271], so a profile without one stays the
-normal case. Follow suggestions for an account that follows nobody ship with [#1708].
+normal case. Follow suggestions ship with [#1708].
 
 ## Goal
 
@@ -25,8 +25,8 @@ signed-in account, and the follow relation.
 - User opens public profiles.
 - User follows or unfollows other users.
 - User inspects followers and following.
-- A user who follows nobody is offered people to follow, and follows them in one
-  tap. See `Follow Suggestions` below.
+- A user is offered people to follow, and follows them in one tap. See
+  `Follow Suggestions` below.
 - Profile identity is used in search and Bite trust context.
 - Profile Bites are always listed newest first. The profile is a timeline of what
   a user cooked or ate, so it ignores the distance sorting and the my-bites
@@ -127,7 +127,10 @@ actually posts.
 - **Where.** Three places, all one component:
   - the onboarding finish step, where following stays optional and never blocks
     Finish;
-  - the user's own empty Following list - never somebody else's;
+  - the user's own Following list, empty or not - never somebody else's. Following a
+    few people is no reason to stop being offered more, and nobody already followed is
+    ever suggested. Under an empty list the row is centred with the empty message;
+    under a filled one it starts in line with the rows;
   - a card above the home feed while the user follows nobody. It can be closed, which
     hides it for seven days on every device (`settings.followSuggestionsDismissedAt`),
     and it goes once the user follows anybody.

@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -76,9 +77,9 @@ export class FollowersListComponent {
   suggestionClick = output<string>();
 
   /**
-   * Only the user's own empty Following list offers people to follow
-   * (issue #1708). Someone else's empty list says nothing about what the
-   * viewer should do next.
+   * Only the user's own Following list offers people to follow, empty or not
+   * (issue #1708). Someone else's list says nothing about what the viewer
+   * should do next.
    */
   protected readonly offersFollowSuggestions = computed(
     () =>
@@ -91,6 +92,29 @@ export class FollowersListComponent {
     () =>
       this.offersFollowSuggestions() &&
       (this.followSuggestionsLoading() || this.followSuggestions().length > 0),
+  );
+
+  protected readonly isEmptyList = computed(
+    () => (this.users()?.length ?? 0) === 0,
+  );
+
+  /**
+   * Whether the list has finished its first read. Suggestions wait for it, so
+   * they never sit under the loading spinner of a page that has not said yet
+   * what the list holds - and once shown they stay through the reload a
+   * follow from them triggers, rather than unmounting with the list.
+   */
+  private readonly listSettled = signal(false);
+
+  private readonly settleList = effect(() => {
+    if (!this.isLoading()) {
+      this.listSettled.set(true);
+    }
+  });
+
+  protected readonly showsFollowSuggestionsSection = computed(
+    () =>
+      this.showsFollowSuggestions() && !this.hasError() && this.listSettled(),
   );
 
   /**
@@ -113,13 +137,15 @@ export class FollowersListComponent {
     this.imageErroredUserIds.update((set) => new Set([...set, userId]));
   }
 
-  toggleTitleText = computed(() => {
-    const type = this.type();
-
-    return type === 'followers'
-      ? this.transloco.translate('followers')
-      : this.transloco.translate('following');
-  });
+  /**
+   * The title's translation key, translated by the pipe in the template. A
+   * `translate()` call here ran once, before the translations had loaded, so
+   * the page could show the raw lower-case key, and never followed a language
+   * change after that.
+   */
+  titleKey = computed((): 'followers' | 'following' =>
+    this.type() === 'followers' ? 'followers' : 'following',
+  );
 
   confirmationButtons = [
     {

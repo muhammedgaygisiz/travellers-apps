@@ -28,20 +28,24 @@ export class FollowersService {
   suggestionsPending = this.followSuggestions.pendingIds;
   suggestionsLoading = this.followSuggestions.isLoading;
 
-  /** The user's own Following list, read and empty (issue #1708). */
-  private readonly ownFollowingIsEmpty = computed(
+  /**
+   * The user's own Following list, read (issue #1708). It offers people to
+   * follow whether or not it is empty: following a few people is no reason to
+   * stop being shown more, and the backend leaves out everyone already
+   * followed.
+   */
+  private readonly ownFollowingIsRead = computed(
     () =>
       this.type() === 'following' &&
       !!this.loggedInUserId() &&
       this.userIdFromUrl() === this.loggedInUserId() &&
       !this.users.isLoading() &&
-      !this.usersFailed() &&
-      this.usersValue().length === 0,
+      !this.usersFailed(),
   );
 
   constructor() {
     effect(() => {
-      if (this.ownFollowingIsEmpty()) {
+      if (this.ownFollowingIsRead()) {
         this.followSuggestions.request();
       }
     });
@@ -60,15 +64,15 @@ export class FollowersService {
     this.navController.navigateForward([PATH.PROFILE, userId]);
   }
 
-  /** A follow from the empty list puts that person into it. */
+  /** A follow from the suggestions puts that person into the list. */
   async followSuggestion(suggestion: FollowSuggestion): Promise<void> {
-    if (await this.followSuggestions.follow(suggestion, 'following_empty')) {
+    if (await this.followSuggestions.follow(suggestion, 'following')) {
       this.dataAccessService.users.reload();
     }
   }
 
   trackSuggestionsShown(count: number): void {
-    this.followSuggestions.trackShown('following_empty', count);
+    this.followSuggestions.trackShown('following', count);
   }
 
   async unfollowClicked(user: PublicUser): Promise<void> {

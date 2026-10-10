@@ -17,4 +17,4 @@ export interface FollowSuggestion {
 }
 
 /** Where suggestions are shown, which is also the analytics `surface`. */
-export type FollowSuggestionSurface = 'onboarding' | 'following_empty' | 'home';
+export type FollowSuggestionSurface = 'onboarding' | 'following' | 'home';

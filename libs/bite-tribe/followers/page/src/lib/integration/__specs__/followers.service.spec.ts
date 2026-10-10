@@ -141,15 +141,18 @@ describe(FollowersService.name, () => {
       expect(followSuggestionsMock.request).toHaveBeenCalled();
     });
 
+    it("asks for suggestions on the user's own list with people in it", () => {
+      usersValue.set([{ userId: 'x' } as PublicUser]);
+      TestBed.tick();
+
+      expect(followSuggestionsMock.request).toHaveBeenCalled();
+    });
+
     it.each([
       ["someone else's list", (): void => userIdFromUrl.set('other-user')],
       ['a Followers list', (): void => followType.set('followers')],
       ['a list still loading', (): void => usersLoading.set(true)],
       ['a list that failed to load', (): void => usersFailed.set(true)],
-      [
-        'a list with people in it',
-        (): void => usersValue.set([{ userId: 'x' } as PublicUser]),
-      ],
     ])('does not ask on %s', (_label, arrange) => {
       arrange();
       TestBed.tick();
@@ -164,7 +167,7 @@ describe(FollowersService.name, () => {
 
       expect(followSuggestionsMock.follow).toHaveBeenCalledWith(
         ana,
-        'following_empty',
+        'following',
       );
       expect(dataAccessService.users.reload).toHaveBeenCalled();
     });
@@ -177,11 +180,11 @@ describe(FollowersService.name, () => {
       expect(dataAccessService.users.reload).not.toHaveBeenCalled();
     });
 
-    it('counts the shown list as the empty Following surface', () => {
+    it('counts the shown list as the Following surface', () => {
       service.trackSuggestionsShown(2);
 
       expect(followSuggestionsMock.trackShown).toHaveBeenCalledWith(
-        'following_empty',
+        'following',
         2,
       );
     });

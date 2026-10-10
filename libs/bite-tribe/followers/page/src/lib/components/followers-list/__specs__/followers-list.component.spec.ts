@@ -111,15 +111,17 @@ describe(FollowersListComponent.name, () => {
     });
   });
 
-  describe('toggleTitleText', () => {
-    it('should return "Followers" when type is followers', () => {
+  // The key, not a translation: the template translates it, so the title is
+  // never the raw key read before the translations arrived.
+  describe('titleKey', () => {
+    it('should name the Followers title when type is followers', () => {
       componentRef.setInput('type', 'followers');
-      expect(component.toggleTitleText()).toBe('followers');
+      expect(component.titleKey()).toBe('followers');
     });
 
-    it('should return "Following" when type is following', () => {
+    it('should name the Following title when type is following', () => {
       componentRef.setInput('type', 'following');
-      expect(component.toggleTitleText()).toBe('following');
+      expect(component.titleKey()).toBe('following');
     });
   });
 
@@ -405,7 +407,7 @@ describe(FollowersListComponent.name, () => {
     });
   });
 
-  describe('follow suggestions on an empty Following list', () => {
+  describe("follow suggestions on the user's Following list", () => {
     const ana = {
       userId: 'ana',
       displayName: 'Ana',
@@ -413,12 +415,13 @@ describe(FollowersListComponent.name, () => {
       reason: 'active' as const,
     };
 
-    const renderEmptyList = (
+    const renderList = (
       type: 'followers' | 'following',
       profileOwnerid: string,
+      users: PublicUser[] = [],
     ): void => {
       componentRef.setInput('type', type);
-      componentRef.setInput('users', []);
+      componentRef.setInput('users', users);
       componentRef.setInput('loggedInUserId', 'me');
       componentRef.setInput('profileOwnerid', profileOwnerid);
       componentRef.setInput('followSuggestions', [ana]);
@@ -428,10 +431,14 @@ describe(FollowersListComponent.name, () => {
     const suggestions = (): HTMLElement | null =>
       fixture.nativeElement.querySelector('[data-testid="follow-suggestions"]');
 
-    it("offers people to follow on the user's own list", () => {
-      renderEmptyList('following', 'me');
+    const centered = (): boolean =>
+      !!fixture.nativeElement.querySelector('.follow-suggestions--centered');
+
+    it("offers people to follow on the user's own empty list, centred", () => {
+      renderList('following', 'me');
 
       expect(suggestions()).toBeTruthy();
+      expect(centered()).toBe(true);
       expect(
         fixture.nativeElement.querySelector(
           '.empty-container--with-suggestions',
@@ -439,14 +446,37 @@ describe(FollowersListComponent.name, () => {
       ).toBeTruthy();
     });
 
+    it("keeps offering them once the user's list has people in it", () => {
+      renderList('following', 'me', [
+        { userId: 'ben', displayName: 'Ben', public: true } as PublicUser,
+      ]);
+
+      expect(suggestions()).toBeTruthy();
+      expect(centered()).toBe(false);
+    });
+
+    it('offers nobody while the list has not been read yet', () => {
+      componentRef.setInput('isLoading', true);
+      renderList('following', 'me');
+
+      expect(suggestions()).toBeNull();
+    });
+
+    it('offers nobody when the list failed to load', () => {
+      componentRef.setInput('hasError', true);
+      renderList('following', 'me');
+
+      expect(suggestions()).toBeNull();
+    });
+
     it("offers nobody on someone else's list", () => {
-      renderEmptyList('following', 'someone-else');
+      renderList('following', 'someone-else');
 
       expect(suggestions()).toBeNull();
     });
 
     it('offers nobody on a Followers list', () => {
-      renderEmptyList('followers', 'me');
+      renderList('followers', 'me');
 
       expect(suggestions()).toBeNull();
     });
@@ -454,7 +484,7 @@ describe(FollowersListComponent.name, () => {
     it('passes a follow on', () => {
       const followed: unknown[] = [];
       component.followSuggestion.subscribe((s) => followed.push(s));
-      renderEmptyList('following', 'me');
+      renderList('following', 'me');
 
       (
         fixture.nativeElement.querySelector(

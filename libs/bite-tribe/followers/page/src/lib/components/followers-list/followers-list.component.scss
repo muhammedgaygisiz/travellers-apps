@@ -65,7 +65,12 @@
     }
   }
 
+  // Set apart from what sits above it - the empty message, or the last row
+  // of the list - so the suggestions read as a section of their own rather
+  // than as part of either.
   .follow-suggestions {
     --follow-suggestions-inset: 0;
+
+    margin-top: 2rem;
   }
 }

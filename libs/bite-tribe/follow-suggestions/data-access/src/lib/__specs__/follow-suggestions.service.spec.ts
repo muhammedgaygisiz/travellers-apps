@@ -191,10 +191,10 @@ describe(FollowSuggestionsService.name, () => {
   });
 
   it('counts a shown list with its surface and size', () => {
-    service.trackShown('following_empty', 3);
+    service.trackShown('following', 3);
 
     expect(logEvent).toHaveBeenCalledWith('follow_suggestions_shown', {
-      surface: 'following_empty',
+      surface: 'following',
       count: 3,
     });
   });

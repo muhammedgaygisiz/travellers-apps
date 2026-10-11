@@ -1,4 +1,5 @@
 import { Firestore } from 'firebase-admin/firestore';
+import { isSuggestableProfile, toHttpsUrl, toText } from './suggestable-person';
 
 /**
  * The document that names what the follow-up mail shows (GitHub issue #1707).
@@ -62,15 +63,6 @@ const toIds = (value: unknown, max = MAX_PICKS): string[] =>
         .slice(0, max)
     : [];
 
-const toText = (value: unknown): string | undefined =>
-  typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined;
-
-const toHttpsUrl = (value: unknown): string | undefined => {
-  const text = toText(value);
-
-  return text?.startsWith('https://') ? text : undefined;
-};
-
 export const readFollowUpConfig = async (
   db: Firestore,
 ): Promise<FollowUpConfig> => {
@@ -120,16 +112,14 @@ export const resolveFollowUpPicks = async (
 
   const people = userSnapshots.flatMap((snapshot): FollowUpPerson[] => {
     const data = snapshot.data();
-    const displayName = toText(data?.['displayName']);
-
-    if (!snapshot.exists || data?.['public'] !== true || !displayName) {
+    if (!snapshot.exists || !isSuggestableProfile(data)) {
       return [];
     }
 
     return [
       {
         uid: snapshot.id,
-        displayName,
+        displayName: toText(data?.['displayName']) as string,
         photoUrl: toHttpsUrl(data?.['photoUrl']),
       },
     ];

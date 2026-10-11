@@ -579,4 +579,44 @@ describe('BiteTribeHomeComponent', () => {
       expect(resendSpy).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('follow suggestions card', () => {
+    const ana = {
+      userId: 'ana',
+      displayName: 'Ana',
+      biteCount: 3,
+      reason: 'nearby' as const,
+    };
+    const card = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="follow-suggestions"]');
+
+    it('is absent when no suggestions are passed in', () => {
+      fixture.detectChanges();
+
+      expect(card()).toBeNull();
+    });
+
+    it('offers the people passed in and lets the user close it', () => {
+      const dismissSpy = jest.spyOn(component.followSuggestionsDismiss, 'emit');
+      const followSpy = jest.spyOn(component.followSuggestion, 'emit');
+      componentRef.setInput('followSuggestions', [ana]);
+      fixture.detectChanges();
+
+      expect(card()).toBeTruthy();
+
+      (
+        fixture.nativeElement.querySelector(
+          '[data-testid="follow-suggestion-follow"]',
+        ) as HTMLElement
+      ).click();
+      (
+        fixture.nativeElement.querySelector(
+          '[data-testid="follow-suggestions-dismiss"]',
+        ) as HTMLElement
+      ).click();
+
+      expect(followSpy).toHaveBeenCalledWith(ana);
+      expect(dismissSpy).toHaveBeenCalled();
+    });
+  });
 });

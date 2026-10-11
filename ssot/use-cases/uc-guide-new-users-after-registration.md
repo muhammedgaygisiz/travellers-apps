@@ -59,6 +59,9 @@ with an answer - including a declined one.
   based on the public or private choice made two steps earlier, because it is
   displayed publicly and carries a privacy weight that currency and language do
   not.
+- The finish step offers a few people to follow (issue [#1708]). It stays optional and
+  never holds Finish back; who is offered, and why, is `Follow Suggestions` in
+  [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md).
 - Completion is marked on the user profile; the assistant never shows again.
 - After the assistant, must-dismiss coach marks teach the essential features on first visit: home feed, home menu, home feed controls, create-Bite button, Bite details, map, bucket lists, bucket list swipe, leaderboard.
 - The home menu mark introduces the header menu as the route to the profile, bucket lists, leaderboard, gallery, marketplace, and settings.
@@ -187,6 +190,7 @@ permission surface, so the purpose strings are read here before any other screen
   the photos step and [#1184] for notifications
 - Issue [#1707] (the follow-up mail the day after sign-up), with the consent
   decision in [#989]
+- Issue [#1708] (people to follow on the finish step)
 
 ## Related Domains
 
@@ -230,3 +234,4 @@ permission surface, so the purpose strings are read here before any other screen
 [#1412]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1412
 [#1607]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1607
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
+[#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708

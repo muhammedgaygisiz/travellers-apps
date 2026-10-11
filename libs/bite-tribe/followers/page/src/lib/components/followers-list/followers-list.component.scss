@@ -28,6 +28,13 @@
       text-align: center;
       color: var(--ion-color-medium);
     }
+
+    // The empty message shares the page with the suggestions below it, so it
+    // stops claiming the full height (issue #1708).
+    &--with-suggestions {
+      height: auto;
+      padding-bottom: 0;
+    }
   }
 
   ion-item {
@@ -56,5 +63,14 @@
     img {
       background-color: white;
     }
+  }
+
+  // Set apart from what sits above it - the empty message, or the last row
+  // of the list - so the suggestions read as a section of their own rather
+  // than as part of either.
+  .follow-suggestions {
+    --follow-suggestions-inset: 0;
+
+    margin-top: 2rem;
   }
 }

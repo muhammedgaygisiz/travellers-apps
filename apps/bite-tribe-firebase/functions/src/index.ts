@@ -21,6 +21,7 @@ export {
   enrichBiteAddressOnWrite,
 } from './functions/bites/enrich-bite-address-on-write';
 export { searchUsers } from './functions/users/search-users';
+export { suggestPeopleToFollow } from './functions/users/suggest-people-to-follow';
 export { searchBites } from './functions/bites/search-bites';
 export { deleteBiteAsOperator } from './functions/bites/delete-bite-as-operator';
 export { reportBite } from './functions/bites/report-bite';

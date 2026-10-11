@@ -45,6 +45,10 @@ export const AnalyticsEvent = {
   OnboardingStepCompleted: 'onboarding_step_completed',
   OnboardingAssistantCompleted: 'onboarding_assistant_completed',
   CoachMarkDismissed: 'coach_mark_dismissed',
+  // Follow suggestions (issue #1708)
+  FollowSuggestionsShown: 'follow_suggestions_shown',
+  FollowSuggestionFollowed: 'follow_suggestion_followed',
+  UserFollowed: 'user_followed',
   // Table operations, business app (epic #1071, issue #1098)
   TableSeated: 'table_seated',
   TableFreed: 'table_freed',
@@ -160,6 +164,31 @@ export interface AnalyticsEventParamMap {
       | 'bucket-list-swipe'
       | 'leaderboard';
   };
+  /**
+   * Follow suggestions (GitHub issue #1708).
+   *
+   * `surface` and `reason` repeat `FollowSuggestionSurface` and
+   * `FollowSuggestionReason` from `model`, inlined for the reason the
+   * onboarding unions above are. Neither event names the person suggested:
+   * `position` says how far down the list the follow happened, which is what
+   * the ranking needs, and a uid would be personal data in a product event.
+   */
+  [AnalyticsEvent.FollowSuggestionsShown]: {
+    surface: 'onboarding' | 'following' | 'home';
+    count: number;
+  };
+  [AnalyticsEvent.FollowSuggestionFollowed]: {
+    surface: 'onboarding' | 'following' | 'home';
+    /** One-based place in the list at the moment it was tapped. */
+    position: number;
+    reason: 'nearby' | 'curated' | 'active';
+  };
+  /**
+   * Any follow, wherever it came from. Until #1708 no follow was counted at
+   * all, so followers could not be told apart from everybody else when
+   * reading retention.
+   */
+  [AnalyticsEvent.UserFollowed]: { source: 'suggestion' | 'profile' };
   [AnalyticsEvent.TableSeated]: TableOperationParams & {
     from_status: TableOperationStatus;
     /**
@@ -369,6 +398,9 @@ export const ANALYTICS_EVENT_SURFACE: Record<
   [AnalyticsEvent.OnboardingStepCompleted]: 'consumer',
   [AnalyticsEvent.OnboardingAssistantCompleted]: 'consumer',
   [AnalyticsEvent.CoachMarkDismissed]: 'consumer',
+  [AnalyticsEvent.FollowSuggestionsShown]: 'consumer',
+  [AnalyticsEvent.FollowSuggestionFollowed]: 'consumer',
+  [AnalyticsEvent.UserFollowed]: 'consumer',
   [AnalyticsEvent.TableSeated]: 'business',
   [AnalyticsEvent.TableFreed]: 'business',
   [AnalyticsEvent.TableReserved]: 'business',

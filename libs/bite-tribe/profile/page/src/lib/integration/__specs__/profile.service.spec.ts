@@ -8,6 +8,9 @@ import { NavController } from '@ionic/angular/standalone';
 import { ToastService } from 'toast';
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
 import { Bite, PublicUser } from 'model';
+import { AnalyticsService } from 'ta-firestore';
+
+const logEvent = jest.fn();
 
 const emailVerificationMock = {
   promptVisible: jest.fn(() => false),
@@ -68,6 +71,7 @@ describe(ProfileService.name, () => {
         { provide: ProfileDataAccessService, useClass: Mock },
         { provide: EmailVerificationService, useValue: emailVerificationMock },
         { provide: ToastService, useValue: toastServiceMock },
+        { provide: AnalyticsService, useValue: { logEvent } },
         provideMockStore(),
       ],
     }).compileComponents();
@@ -249,6 +253,14 @@ describe(ProfileService.name, () => {
       );
       service.followButtonClicked(user);
       expect(submitFollowClickSpy).toHaveBeenCalledWith(user);
+    });
+
+    it('counts the follow as coming from a profile', () => {
+      service.followButtonClicked({ userId: 'user123' } as PublicUser);
+
+      expect(logEvent).toHaveBeenCalledWith('user_followed', {
+        source: 'profile',
+      });
     });
   });
 

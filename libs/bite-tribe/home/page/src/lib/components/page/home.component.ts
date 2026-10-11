@@ -23,7 +23,8 @@ import {
   IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
-import type { Bite, LikeClick } from 'model';
+import type { Bite, FollowSuggestion, LikeClick } from 'model';
+import { FollowSuggestionsComponent } from 'bite-tribe/follow-suggestions-ui';
 import { RefresherCustomEvent } from '@ionic/angular';
 import { getSimilarityScore, normalize } from 'utils';
 import { ConnectionStatus } from '@capacitor/network';
@@ -61,6 +62,7 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     NetworkErrorBoxComponent,
     BiteListComponent,
     TranslocoPipe,
+    FollowSuggestionsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -93,6 +95,10 @@ export class BiteTribeHomeComponent {
   enableTriedOutSwipe = input(false, { transform: booleanAttribute });
   triedOutBiteIds = input<string[]>([]);
   showEmailVerificationPrompt = input(false, { transform: booleanAttribute });
+  /** People to follow; only the main feed passes any (issue #1708). */
+  followSuggestions = input<FollowSuggestion[]>([]);
+  followSuggestionsPending = input<ReadonlySet<string>>(new Set());
+  followSuggestionsLoading = input(false);
   emailVerificationResendRunning = input(false, {
     transform: booleanAttribute,
   });
@@ -131,6 +137,10 @@ export class BiteTribeHomeComponent {
   readonly enableLocation = output<void>();
   readonly triedOutChange = output<{ biteId: string; checked: boolean }>();
   readonly resendEmailVerification = output<void>();
+  readonly followSuggestion = output<FollowSuggestion>();
+  readonly followSuggestionsShown = output<number>();
+  readonly followSuggestionsDismiss = output<void>();
+  readonly suggestionClick = output<string>();
   readonly retryImageUpload = output<Bite>();
 
   ionContent = viewChild(IonContent);

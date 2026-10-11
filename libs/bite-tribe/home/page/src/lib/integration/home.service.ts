@@ -1,8 +1,9 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
-import type { Bite, LikeClick } from 'model';
+import type { Bite, FollowSuggestion, LikeClick } from 'model';
+import { FollowSuggestionsService } from 'bite-tribe/follow-suggestions-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import type { PageMenuTarget } from 'common/ui/page';
 import { PATH } from 'utils';
@@ -20,6 +21,7 @@ export class HomeService {
   private readonly localImagePicker = inject(LocalImagePickerService);
   private readonly navController = inject(NavController);
   private readonly emailVerification = inject(EmailVerificationService);
+  private readonly followSuggestions = inject(FollowSuggestionsService);
 
   sortedHomeBites = this.dataAccess.sortedHomeBites;
   sorting = this.dataAccess.sorting;
@@ -304,5 +306,46 @@ export class HomeService {
     if (fileUri) {
       await this.biteDataAccess.retryImageUpload(bite, fileUri);
     }
+  }
+
+  /**
+   * The home card of people to follow (issue #1708): only for somebody who
+   * follows nobody and has not closed it this week.
+   */
+  readonly followSuggestionsCard = computed<FollowSuggestion[]>(() =>
+    this.followSuggestions.homeCardVisible()
+      ? this.followSuggestions.suggestions()
+      : [],
+  );
+
+  readonly followSuggestionsCardLoading = computed(
+    () =>
+      this.followSuggestions.homeCardWanted() &&
+      this.followSuggestions.isLoading(),
+  );
+
+  readonly followSuggestionsPending = this.followSuggestions.pendingIds;
+
+  /** Asks for the card's people when, and only when, the card is wanted. */
+  requestFollowSuggestionsIfWanted(): void {
+    if (this.followSuggestions.homeCardWanted()) {
+      this.followSuggestions.request();
+    }
+  }
+
+  followSuggestion(suggestion: FollowSuggestion): Promise<boolean> {
+    return this.followSuggestions.follow(suggestion, 'home');
+  }
+
+  trackFollowSuggestionsShown(count: number): void {
+    this.followSuggestions.trackShown('home', count);
+  }
+
+  dismissFollowSuggestions(): Promise<void> {
+    return this.followSuggestions.dismissHomeCard();
+  }
+
+  openSuggestedProfile(userId: string): void {
+    this.navController.navigateForward([PATH.PROFILE, userId]);
   }
 }

@@ -1,0 +1,179 @@
+// `--follow-suggestions-inset` is the page gutter the row lines up with. A host
+// that already pads its content, like the onboarding step, sets it to 0.
+:host {
+  display: block;
+  min-width: 0;
+  text-align: start;
+}
+
+.follow-suggestions {
+  padding: 12px 0;
+}
+
+.follow-suggestions__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 var(--follow-suggestions-inset, 16px);
+}
+
+.follow-suggestions__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.follow-suggestions__subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+// A horizontal row the user swipes through, so five people never push the
+// rest of the screen down. The side padding keeps the first card on the page
+// gutter while the row itself scrolls edge to edge.
+.follow-suggestions__list {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 0 var(--follow-suggestions-inset, 16px) 4px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  // Snapping aligns a card to the scrollport's edge, not to the padding, so
+  // without this an overflowing row scrolled its first card past the inset
+  // and out of line with the heading above it.
+  scroll-padding-inline: var(--follow-suggestions-inset, 16px);
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// Every card is the same width whatever it holds. A flex item's minimum width
+// defaults to its content's, so without `min-width: 0` a long display name
+// widened its card before the ellipsis below could apply.
+.follow-suggestions__card {
+  display: flex;
+  flex: 0 0 136px;
+  box-sizing: border-box;
+  width: 136px;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--ion-color-step-150, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  background: var(--ion-item-background, var(--ion-background-color));
+  scroll-snap-align: start;
+}
+
+.follow-suggestions__person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.follow-suggestions__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  ion-icon {
+    width: 100%;
+    height: 100%;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Long display names stay on one line rather than pushing the button out of
+// line with the cards beside it.
+.follow-suggestions__name {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.follow-suggestions__meta {
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+}
+
+.follow-suggestions__line {
+  width: 80%;
+  height: 12px;
+  margin: 0 auto;
+
+  &--short {
+    width: 50%;
+  }
+}
+
+.follow-suggestions__card ion-button {
+  width: 100%;
+  margin: 0;
+
+  // The pending spinner takes the label's line and no more. At its default
+  // 28px it made the button taller than the Follow it replaced.
+  ion-spinner {
+    width: 1.5em;
+    height: 1em;
+  }
+}
+
+.follow-suggestions__header ion-button {
+  flex: none;
+  margin: 0;
+}
+
+// A centred surface centres the heading and the row. The row is centred with
+// auto margins on its first and last card rather than `justify-content`: once
+// the cards overflow, centring by alignment pushes the first card past the
+// start edge where it cannot be scrolled back to, while auto margins simply
+// collapse to nothing and the row scrolls from its first card as before.
+.follow-suggestions--centered {
+  .follow-suggestions__header {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .follow-suggestions__card:first-child {
+    margin-inline-start: auto;
+  }
+
+  .follow-suggestions__card:last-child {
+    margin-inline-end: auto;
+  }
+}

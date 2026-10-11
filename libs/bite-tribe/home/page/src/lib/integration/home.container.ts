@@ -54,6 +54,13 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (enableLocation)="service.enableLocation()"
       (rateNowClick)="service.rateNowClicked($event)"
       (resendEmailVerification)="service.resendEmailVerification('home')"
+      [followSuggestions]="service.followSuggestionsCard()"
+      [followSuggestionsPending]="service.followSuggestionsPending()"
+      [followSuggestionsLoading]="service.followSuggestionsCardLoading()"
+      (followSuggestion)="service.followSuggestion($event)"
+      (followSuggestionsShown)="service.trackFollowSuggestionsShown($event)"
+      (followSuggestionsDismiss)="service.dismissFollowSuggestions()"
+      (suggestionClick)="service.openSuggestedProfile($event)"
     />
 
     <bt-coach-mark
@@ -104,6 +111,15 @@ export class HomeContainer {
   protected readonly feedControlsCoachSettled = signal(false);
 
   private hasTrackedPrompt = false;
+
+  /**
+   * Home is the only `bt-home` that offers people to follow, so it is the one
+   * that asks for them - the other feeds share the component and the service
+   * and must not trigger the call (issue #1708).
+   */
+  private readonly followSuggestionsEffect = effect(() => {
+    this.service.requestFollowSuggestionsIfWanted();
+  });
 
   private readonly trackPromptEffect = effect(() => {
     if (this.service.emailVerificationPromptVisible()) {

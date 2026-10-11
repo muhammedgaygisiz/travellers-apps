@@ -102,3 +102,20 @@ export const EmailVerificationResendRunning: Story = {
     emailVerificationResendRunning: true,
   },
 };
+
+/** A new account that follows nobody yet gets people to follow above the feed (issue #1708). */
+export const WithFollowSuggestions: Story = {
+  args: {
+    ...WithBites.args,
+    followSuggestions: [
+      { userId: 'ana', displayName: 'Ana', biteCount: 12, reason: 'nearby' },
+      { userId: 'ben', displayName: 'Ben', biteCount: 4, reason: 'curated' },
+      {
+        userId: 'chloe',
+        displayName: 'Chloé',
+        biteCount: 31,
+        reason: 'active',
+      },
+    ],
+  },
+};

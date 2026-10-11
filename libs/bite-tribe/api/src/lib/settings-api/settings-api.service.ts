@@ -40,4 +40,28 @@ export class SettingsApiService {
       throw error;
     }
   }
+
+  /**
+   * Writes only the given fields and keeps the rest of the document.
+   *
+   * {@link saveSettings} replaces the whole document, which is right for the
+   * settings page that holds all of it and wrong for a single flag set from
+   * somewhere else - the follow-suggestions dismissal would erase the user's
+   * currency and language (GitHub issue #1708).
+   */
+  async mergeSettings(settings: Partial<Settings>): Promise<void> {
+    const user = this.authService.getUser();
+    if (!user?.uid) {
+      return;
+    }
+
+    await FirebaseFirestore.setDocument({
+      reference: `${SETTINGS_COLLECTION}/${user.uid}`,
+      data: {
+        ...settings,
+        updatedAt: new Date().toISOString(),
+      },
+      merge: true,
+    });
+  }
 }

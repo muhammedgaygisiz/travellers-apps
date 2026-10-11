@@ -197,4 +197,51 @@ describe(SettingsApiService.name, () => {
       ));
     });
   });
+
+  describe('mergeSettings', () => {
+    it('merges the given fields into the document instead of replacing it', inject(
+      [SettingsApiService],
+      async (service: SettingsApiService) => {
+        const setDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'setDocument')
+          .mockResolvedValue();
+
+        await service.mergeSettings({
+          followSuggestionsDismissedAt: '2024-03-15T12:00:00.000Z',
+        });
+
+        expect(setDocumentSpy).toHaveBeenCalledWith({
+          reference: 'settings/123',
+          data: {
+            followSuggestionsDismissedAt: '2024-03-15T12:00:00.000Z',
+            updatedAt: '2024-03-15T12:00:00.000Z',
+          },
+          merge: true,
+        });
+      },
+    ));
+
+    describe('without a signed-in user', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(AuthService, {
+          useValue: { ...MockedAuthService, getUser: (): unknown => undefined },
+        });
+      });
+
+      it('writes nothing', inject(
+        [SettingsApiService],
+        async (service: SettingsApiService) => {
+          const setDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'setDocument')
+            .mockClear();
+
+          await service.mergeSettings({
+            followSuggestionsDismissedAt: '2024-03-15T12:00:00.000Z',
+          });
+
+          expect(setDocumentSpy).not.toHaveBeenCalled();
+        },
+      ));
+    });
+  });
 });

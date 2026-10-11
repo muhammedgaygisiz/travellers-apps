@@ -16,6 +16,7 @@ import {
   EmailVerificationService,
   type EmailVerificationSurface,
 } from 'bite-tribe/email-verification-data-access';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
@@ -26,6 +27,7 @@ export class ProfileService {
   private readonly location = inject(Location);
   private readonly emailVerification = inject(EmailVerificationService);
   private readonly toast = inject(ToastService);
+  private readonly analytics = inject(AnalyticsService);
 
   isAuthenticated = this.dataAccess.isAuthenticated;
   myUser = this.dataAccess.myUser;
@@ -133,8 +135,16 @@ export class ProfileService {
     }
   }
 
+  /**
+   * Counted on the tap, the same moment the button turns into Unfollow: the
+   * profile follow is optimistic and its write reports no outcome to wait for
+   * (GitHub issue #1708).
+   */
   followButtonClicked(user: PublicUser): void {
     this.dataAccess.submitFollowClick(user);
+    this.analytics.logEvent(AnalyticsEvent.UserFollowed, {
+      source: 'profile',
+    });
   }
 
   unfollowButtonClicked(user: PublicUser): void {

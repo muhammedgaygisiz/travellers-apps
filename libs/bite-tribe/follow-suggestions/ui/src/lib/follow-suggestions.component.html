@@ -1,0 +1,108 @@
+@if (loading() || suggestions().length > 0) {
+  <section
+    class="follow-suggestions"
+    [class.follow-suggestions--centered]="centered()"
+    data-testid="follow-suggestions"
+    [attr.aria-busy]="loading()"
+  >
+    <header class="follow-suggestions__header">
+      <div>
+        <h2 class="follow-suggestions__title">
+          {{ 'follow-suggestions-title' | transloco }}
+        </h2>
+        <p class="follow-suggestions__subtitle">
+          {{ 'follow-suggestions-subtitle' | transloco }}
+        </p>
+      </div>
+      @if (dismissible()) {
+        <ion-button
+          fill="clear"
+          size="small"
+          data-testid="follow-suggestions-dismiss"
+          [attr.aria-label]="'follow-suggestions-dismiss' | transloco"
+          (click)="dismiss.emit()"
+        >
+          <ion-icon slot="icon-only" name="close-outline" />
+        </ion-button>
+      }
+    </header>
+
+    <ul class="follow-suggestions__list">
+      @if (loading() && suggestions().length === 0) {
+        @for (card of skeletonCards; track card) {
+          <li class="follow-suggestions__card" aria-hidden="true">
+            <ion-skeleton-text
+              [animated]="true"
+              class="follow-suggestions__avatar"
+            />
+            <ion-skeleton-text
+              [animated]="true"
+              class="follow-suggestions__line"
+            />
+            <ion-skeleton-text
+              [animated]="true"
+              class="follow-suggestions__line follow-suggestions__line--short"
+            />
+          </li>
+        }
+      } @else {
+        @for (suggestion of suggestions(); track suggestion.userId) {
+          @let pending = pendingIds().has(suggestion.userId);
+          <li
+            class="follow-suggestions__card"
+            data-testid="follow-suggestion"
+            [attr.data-user-id]="suggestion.userId"
+          >
+            <button
+              type="button"
+              class="follow-suggestions__person"
+              [disabled]="!linkable()"
+              (click)="openProfile.emit(suggestion.userId)"
+            >
+              <span class="follow-suggestions__avatar">
+                @if (
+                  suggestion.photoUrl && !erroredImages().has(suggestion.userId)
+                ) {
+                  <img
+                    [src]="suggestion.photoUrl"
+                    alt=""
+                    (error)="onImageError(suggestion.userId)"
+                  />
+                } @else {
+                  <ion-icon name="person-circle-outline" />
+                }
+              </span>
+              <span class="follow-suggestions__name">
+                {{ suggestion.displayName }}
+              </span>
+              <span class="follow-suggestions__meta">
+                {{
+                  'follow-suggestions-reason-' + suggestion.reason | transloco
+                }}
+              </span>
+              <span class="follow-suggestions__meta">
+                {{
+                  'follow-suggestions-bite-count'
+                    | transloco: { count: suggestion.biteCount }
+                }}
+              </span>
+            </button>
+            <ion-button
+              size="small"
+              expand="block"
+              data-testid="follow-suggestion-follow"
+              [disabled]="pending"
+              (click)="follow.emit(suggestion)"
+            >
+              @if (pending) {
+                <ion-spinner name="dots" />
+              } @else {
+                {{ 'follow' | transloco }}
+              }
+            </ion-button>
+          </li>
+        }
+      }
+    </ul>
+  </section>
+}

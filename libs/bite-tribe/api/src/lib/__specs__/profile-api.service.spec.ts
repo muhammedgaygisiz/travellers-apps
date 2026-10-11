@@ -966,6 +966,68 @@ describe(ProfileApiService.name, () => {
     });
   });
 
+  describe('follow', () => {
+    it('lets a failed write through instead of swallowing it', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        MockedErrorHandler.handleError.mockClear();
+        jest
+          .spyOn(FirebaseFirestore, 'setDocument')
+          .mockRejectedValue(new Error('permission-denied'));
+
+        await expect(service.follow('followed-user-id')).rejects.toThrow(
+          'permission-denied',
+        );
+        expect(MockedErrorHandler.handleError).not.toHaveBeenCalled();
+      },
+    ));
+  });
+
+  describe('fetchFollowSuggestions', () => {
+    it('sends the position it was given', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const suggestions = [{ userId: 'ana' }];
+        (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+          data: suggestions,
+        });
+
+        await expect(
+          service.fetchFollowSuggestions({ latitude: 46.9, longitude: 7.4 }),
+        ).resolves.toEqual(suggestions);
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'suggestPeopleToFollow',
+          data: { latitude: 46.9, longitude: 7.4 },
+        });
+      },
+    ));
+
+    it('answers with nobody when the callable returns no data', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({});
+
+        await expect(service.fetchFollowSuggestions()).resolves.toEqual([]);
+      },
+    ));
+
+    it('sends no position when it has none', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+          data: [],
+        });
+
+        await service.fetchFollowSuggestions();
+
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'suggestPeopleToFollow',
+          data: {},
+        });
+      },
+    ));
+  });
+
   describe('followUser', () => {
     it('should build followRelationship and call FirebaseFirestore.setDocument for both users', inject(
       [ProfileApiService],

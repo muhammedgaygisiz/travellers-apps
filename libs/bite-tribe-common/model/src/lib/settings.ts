@@ -16,5 +16,10 @@ export interface Settings {
   favoriteCurrencies?: string[];
   nearby?: number;
   language: string;
+  /**
+   * When the home follow-suggestions card was last dismissed. It stays away
+   * for a week after that (GitHub issue #1708).
+   */
+  followSuggestionsDismissedAt?: string;
   updatedAt?: string;
 }

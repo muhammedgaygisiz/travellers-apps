@@ -68,6 +68,27 @@ export interface AdminRestaurantCandidate extends RestaurantCandidate {
 export interface AdminRestaurantCandidatePage {
   candidates: AdminRestaurantCandidate[];
   hasMore: boolean;
+  /** Where the page after this one starts. Only meaningful when `hasMore`. */
+  next?: RestaurantCandidateCursor;
+}
+
+/**
+ * Where a page of pending candidates starts (issue #1507).
+ *
+ * A position in the order rather than an offset: `afterId` is the last ordered
+ * candidate an earlier page rendered, and the read resumes with `startAfter`
+ * on that document. A document cursor carries the ordering fields the query
+ * sorts by - `evidence.biteCount` and `createdAtTimestamp` - and the document
+ * id after them, so two candidates with equal evidence and the same timestamp
+ * can neither be skipped nor shown twice at a page boundary.
+ *
+ * `unorderableShown` counts the candidates earlier pages showed from the
+ * unordered fallback, which only exists for a document missing an ordered
+ * field and therefore has no position in the order to resume from.
+ */
+export interface RestaurantCandidateCursor {
+  afterId?: string;
+  unorderableShown?: number;
 }
 
 export interface VerifyRestaurantCandidateRequest {
@@ -143,6 +164,9 @@ export interface RevokeRestaurantOwnerResult {
   claimStatus: 'revoked';
 }
 
+/** The cursor of the first page: nothing to start after. */
+const FIRST_CANDIDATE_PAGE: RestaurantCandidateCursor = {};
+
 const toRestaurantCandidate = (doc: {
   id: string;
   data: unknown;
@@ -217,26 +241,31 @@ export class RestaurantsDataAccessService {
   };
 
   /**
-   * The pending candidates, strongest evidence first, newest first among
-   * equals (`RD-VRC-16`, issue #1506).
+   * One page of the pending candidates, strongest evidence first, newest first
+   * among equals (`RD-VRC-16`, issue #1506), starting where `params` says
+   * (issue #1507).
    *
    * The order is in the query rather than a sort over what came back: the
    * defect it fixes is _which_ candidates a limited read returns, and without
    * an `orderBy` that was always the alphabetically-first five by document id.
    *
    * One more than the limit is read so the surface can say more are pending;
-   * only the limit is kept, and only those candidates' Bites are read.
+   * only the limit is kept, and only those candidates' Bites are read. A page
+   * is the unit of cost: a larger limit would multiply the Bite reads behind
+   * every load, paging keeps them fixed.
    *
    * Firestore leaves out a document that lacks a field it orders by, so a
    * candidate without `evidence.biteCount` or `createdAtTimestamp` would vanish
    * rather than sort last. `buildCandidateUpdate` writes both, so that should
    * never happen; an unordered read of the same filter catches any that does
-   * and puts it after the ordered ones.
+   * and puts it after the ordered ones. That read is only made on the page
+   * where the ordered candidates run out, since only there can it add a row.
    */
   restaurantCandidatesLoader: ResourceLoader<
     AdminRestaurantCandidatePage | undefined,
-    unknown
-  > = async () => {
+    RestaurantCandidateCursor | undefined
+  > = async ({ params }) => {
+    const { afterId, unorderableShown = 0 } = params ?? {};
     const pendingOnly = {
       type: 'and' as const,
       queryConstraints: [
@@ -253,46 +282,62 @@ export class RestaurantsDataAccessService {
       limit: RESTAURANT_CANDIDATES_LIMIT + 1,
     };
 
-    const [ordered, unordered] = await Promise.all([
-      FirebaseFirestore.getCollection({
-        reference: RESTAURANT_CANDIDATES_COLLECTION,
-        compositeFilter: pendingOnly,
-        queryConstraints: [
-          {
-            type: 'orderBy',
-            fieldPath: 'evidence.biteCount',
-            directionStr: 'desc',
-          },
-          {
-            type: 'orderBy',
-            fieldPath: 'createdAtTimestamp',
-            directionStr: 'desc',
-          },
-          fetchLimit,
-        ],
-      }),
-      FirebaseFirestore.getCollection({
-        reference: RESTAURANT_CANDIDATES_COLLECTION,
-        compositeFilter: pendingOnly,
-        queryConstraints: [fetchLimit],
-      }),
-    ]);
+    const ordered = await FirebaseFirestore.getCollection({
+      reference: RESTAURANT_CANDIDATES_COLLECTION,
+      compositeFilter: pendingOnly,
+      queryConstraints: [
+        {
+          type: 'orderBy',
+          fieldPath: 'evidence.biteCount',
+          directionStr: 'desc',
+        },
+        {
+          type: 'orderBy',
+          fieldPath: 'createdAtTimestamp',
+          directionStr: 'desc',
+        },
+        ...(afterId
+          ? [
+              {
+                type: 'startAfter' as const,
+                reference: `${RESTAURANT_CANDIDATES_COLLECTION}/${afterId}`,
+              },
+            ]
+          : []),
+        fetchLimit,
+      ],
+    });
 
     const orderedCandidates = (ordered?.snapshots ?? []).map(
       toRestaurantCandidate,
     );
-    const orderedIds = new Set(orderedCandidates.map(({ id }) => id));
+    const unordered =
+      orderedCandidates.length > RESTAURANT_CANDIDATES_LIMIT
+        ? undefined
+        : await FirebaseFirestore.getCollection({
+            reference: RESTAURANT_CANDIDATES_COLLECTION,
+            compositeFilter: pendingOnly,
+            queryConstraints: [fetchLimit],
+          });
     const unorderable = (unordered?.snapshots ?? [])
       .map(toRestaurantCandidate)
       .filter(
         (candidate) =>
-          !orderedIds.has(candidate.id) &&
-          (candidate.evidence?.biteCount === undefined ||
-            candidate.createdAtTimestamp === undefined),
-      );
+          candidate.evidence?.biteCount === undefined ||
+          candidate.createdAtTimestamp === undefined,
+      )
+      .slice(unorderableShown);
     const fetched = [...orderedCandidates, ...unorderable];
     const candidates = fetched.slice(0, RESTAURANT_CANDIDATES_LIMIT);
     const hasMore = fetched.length > RESTAURANT_CANDIDATES_LIMIT;
+    const shownOrdered = candidates.filter((candidate) =>
+      orderedCandidates.includes(candidate),
+    );
+    const next: RestaurantCandidateCursor = {
+      afterId: shownOrdered.at(-1)?.id ?? afterId,
+      unorderableShown:
+        unorderableShown + candidates.length - shownOrdered.length,
+    };
 
     if (!candidates.length) {
       return { candidates: [], hasMore };
@@ -310,10 +355,29 @@ export class RestaurantsDataAccessService {
           .filter((bite): bite is Bite => !!bite),
       })),
       hasMore,
+      ...(hasMore ? { next } : {}),
     };
   };
 
+  /**
+   * The cursors of the pages before the one shown, oldest first. Empty on the
+   * first page; the last entry is where the shown page starts.
+   *
+   * A stack rather than a page number, because the way back to page two is
+   * the cursor page two was read with - an offset is exactly what the order
+   * does not provide.
+   */
+  private readonly candidateCursors = signal<RestaurantCandidateCursor[]>([]);
+
+  /** Which page of pending candidates is shown, counted from 1. */
+  readonly restaurantCandidatesPageNumber = computed(
+    () => this.candidateCursors().length + 1,
+  );
+
   restaurantCandidates = resource({
+    // Never `undefined`: a resource whose params are `undefined` stays idle
+    // and reads nothing, which on the first page would be the whole list.
+    params: () => this.candidateCursors().at(-1) ?? FIRST_CANDIDATE_PAGE,
     loader: this.restaurantCandidatesLoader.bind(this),
   });
 
@@ -412,12 +476,47 @@ export class RestaurantsDataAccessService {
   restaurantCandidatesHasMore = computed(
     () => this.restaurantCandidatePage().hasMore,
   );
+  /** True while a page of candidates is being read. */
+  restaurantCandidatesLoading = computed(() =>
+    this.restaurantCandidates.isLoading(),
+  );
   bitePlacesValue = resourceValue(this.bitePlaces, [] as BitePlace[]);
   tableSessionsValue = resourceValue(
     this.tableSessions,
     [] as AdminTableSession[],
   );
   restaurantsValue = resourceValue(this.restaurants, [] as Restaurant[]);
+
+  /** Moves to the page after the shown one, when there is one. */
+  showNextCandidatePage(): void {
+    const next = this.restaurantCandidatePage().next;
+
+    if (next && !this.restaurantCandidates.isLoading()) {
+      this.candidateCursors.update((cursors) => [...cursors, next]);
+    }
+  }
+
+  /** Moves back to the page before the shown one. */
+  showPreviousCandidatePage(): void {
+    if (!this.restaurantCandidates.isLoading()) {
+      this.candidateCursors.update((cursors) => cursors.slice(0, -1));
+    }
+  }
+
+  /**
+   * Shows the first page, read again.
+   *
+   * What a verification ends with: the candidate left the `pending` set, so
+   * every later page has shifted by one, and staying put would show a page
+   * whose contents silently changed (issue #1507).
+   */
+  showFirstCandidatePage(): void {
+    if (this.candidateCursors().length) {
+      this.candidateCursors.set([]);
+    } else {
+      this.restaurantCandidates.reload();
+    }
+  }
 
   /**
    * The restaurant whose staff the operator is looking at.
@@ -561,7 +660,7 @@ export class RestaurantsDataAccessService {
       );
     }
 
-    this.restaurantCandidates.reload();
+    this.showFirstCandidatePage();
 
     return verification;
   }

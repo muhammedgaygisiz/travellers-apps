@@ -5,6 +5,7 @@ import {
   output,
 } from '@angular/core';
 import {
+  IonButton,
   IonCard,
   IonCardContent,
   IonCardHeader,
@@ -40,6 +41,7 @@ import { AdminRestaurantCandidate } from 'bite-tribe-admin/restaurants-data-acce
     IonItem,
     IonLabel,
     IonText,
+    IonButton,
     TranslocoPipe,
   ],
   templateUrl: './restaurant-candidates.html',
@@ -50,6 +52,13 @@ import { AdminRestaurantCandidate } from 'bite-tribe-admin/restaurants-data-acce
       margin: 0 auto;
       max-width: 40rem;
     }
+
+    .restaurant-candidates__paging {
+      align-items: center;
+      display: flex;
+      gap: 0.5rem;
+      justify-content: space-between;
+    }
   `,
 })
 export class RestaurantCandidates {
@@ -59,8 +68,14 @@ export class RestaurantCandidates {
    * do not read as "that is all of them" (issue #1506).
    */
   readonly hasMore = input(false);
+  /** The page shown, counted from 1 (issue #1507). */
+  readonly pageNumber = input(1);
+  /** A page is being read; paging waits for it rather than queueing. */
+  readonly loading = input(false);
 
   readonly candidateClick = output<AdminRestaurantCandidate>();
+  readonly nextPageClick = output<void>();
+  readonly previousPageClick = output<void>();
   readonly logoutClick = output<void>();
 
   evidenceCount(candidate: AdminRestaurantCandidate): number {

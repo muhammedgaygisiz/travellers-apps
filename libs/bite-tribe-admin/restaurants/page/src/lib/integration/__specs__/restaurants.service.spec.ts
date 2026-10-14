@@ -22,6 +22,10 @@ describe('RestaurantsService', () => {
     dataAccessMock = {
       restaurantCandidatesValue: jest.fn().mockReturnValue([]),
       restaurantCandidatesHasMore: jest.fn().mockReturnValue(false),
+      restaurantCandidatesPageNumber: jest.fn().mockReturnValue(1),
+      restaurantCandidatesLoading: jest.fn().mockReturnValue(false),
+      showNextCandidatePage: jest.fn(),
+      showPreviousCandidatePage: jest.fn(),
       bitePlacesValue: jest.fn().mockReturnValue([]),
       selectRestaurantToCreate: jest.fn(),
       logout: jest.fn(),
@@ -72,6 +76,16 @@ describe('RestaurantsService', () => {
       expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
         'new-restaurant',
       ]);
+    });
+  });
+
+  describe('candidate pages', () => {
+    it('should page forward and back through the data access', () => {
+      service.nextCandidatesPage();
+      service.previousCandidatesPage();
+
+      expect(dataAccessMock.showNextCandidatePage).toHaveBeenCalledTimes(1);
+      expect(dataAccessMock.showPreviousCandidatePage).toHaveBeenCalledTimes(1);
     });
   });
 

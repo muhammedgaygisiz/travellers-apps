@@ -125,4 +125,80 @@ describe(RestaurantCandidates.name, () => {
       expect(moreStatement()).toBeNull();
     });
   });
+
+  describe('paging (issue #1507)', () => {
+    const query = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('should offer no paging when one page holds every candidate', () => {
+      compRef.setInput('hasMore', false);
+      compRef.setInput('pageNumber', 1);
+      fixture.detectChanges();
+
+      expect(query('restaurant-candidates-paging')).toBeNull();
+    });
+
+    it('should offer the next page, but not a previous one, on the first page', () => {
+      compRef.setInput('hasMore', true);
+      compRef.setInput('pageNumber', 1);
+      fixture.detectChanges();
+
+      expect(query('restaurant-candidates-paging')?.textContent).toContain(
+        'restaurant-candidates-page:{"page":1}',
+      );
+      expect(
+        (query('restaurant-candidates-previous') as HTMLIonButtonElement)
+          .disabled,
+      ).toBe(true);
+      expect(
+        (query('restaurant-candidates-next') as HTMLIonButtonElement).disabled,
+      ).toBe(false);
+    });
+
+    it('should offer the previous page, but not a next one, on the last page', () => {
+      compRef.setInput('hasMore', false);
+      compRef.setInput('pageNumber', 3);
+      fixture.detectChanges();
+
+      expect(
+        (query('restaurant-candidates-previous') as HTMLIonButtonElement)
+          .disabled,
+      ).toBe(false);
+      expect(
+        (query('restaurant-candidates-next') as HTMLIonButtonElement).disabled,
+      ).toBe(true);
+      expect(query('restaurant-candidates-more')).toBeNull();
+    });
+
+    it('should hold both buttons while a page is being read', () => {
+      compRef.setInput('hasMore', true);
+      compRef.setInput('pageNumber', 2);
+      compRef.setInput('loading', true);
+      fixture.detectChanges();
+
+      expect(
+        (query('restaurant-candidates-previous') as HTMLIonButtonElement)
+          .disabled,
+      ).toBe(true);
+      expect(
+        (query('restaurant-candidates-next') as HTMLIonButtonElement).disabled,
+      ).toBe(true);
+    });
+
+    it('should ask for the next and the previous page', () => {
+      const nextSpy = jest.spyOn(component.nextPageClick, 'emit');
+      const previousSpy = jest.spyOn(component.previousPageClick, 'emit');
+      compRef.setInput('hasMore', true);
+      compRef.setInput('pageNumber', 2);
+      fixture.detectChanges();
+
+      query('restaurant-candidates-next')?.dispatchEvent(new Event('click'));
+      query('restaurant-candidates-previous')?.dispatchEvent(
+        new Event('click'),
+      );
+
+      expect(nextSpy).toHaveBeenCalledTimes(1);
+      expect(previousSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 });

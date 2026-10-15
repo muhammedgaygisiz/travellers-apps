@@ -502,25 +502,57 @@ must therefore branch on the state, not on the failure (issue [#1183]).
 ## Haptic Feedback Rule
 
 Haptics play through one service, `HapticsService` in `libs/common/haptics`, and
-only as one of five named intents (epic [#1633], issue [#1634]). Each intent maps
-to exactly one `@capacitor/haptics` call:
+only as one of eight named intents (epics [#1633] and [#1740], issues [#1634] and
+[#1743]). Each intent calls the method of the same name on `BiteHaptics`, a local
+Capacitor plugin that is part of the bite-tribe native wrappers rather than an npm
+dependency, and that plays the platform's own haptic primitive:
 
-| Intent      | Capacitor call                                             | Reserved for                                       |
-| ----------- | ---------------------------------------------------------- | -------------------------------------------------- |
-| `selection` | `Haptics.impact({ style: ImpactStyle.Light })`             | A frequent, low-stakes tap                         |
-| `confirm`   | `Haptics.impact({ style: ImpactStyle.Medium })`            | A deliberate, less frequent action completing      |
-| `warning`   | `Haptics.impact({ style: ImpactStyle.Heavy })`             | The confirming tap on an irreversible action, only |
-| `success`   | `Haptics.notification({ type: NotificationType.Success })` | The successful outcome of an action, never a tap   |
-| `error`     | `Haptics.notification({ type: NotificationType.Error })`   | The failed outcome of an action, never a tap       |
+| Intent      | iOS                                                 | Android                                     | Reserved for                                       |
+| ----------- | --------------------------------------------------- | ------------------------------------------- | -------------------------------------------------- |
+| `press`     | `UIImpactFeedbackGenerator(.rigid)`                 | `VIRTUAL_KEY`                               | A finger landing on a pressable control            |
+| `release`   | `UIImpactFeedbackGenerator(.soft)` at intensity 0.6 | `VIRTUAL_KEY_RELEASE` (API 27+)             | The finger lifting off, completing the press       |
+| `tick`      | `UISelectionFeedbackGenerator.selectionChanged()`   | `SEGMENT_TICK` (API 34+), else `CLOCK_TICK` | One discrete step of a continuous gesture          |
+| `selection` | `UIImpactFeedbackGenerator(.light)`                 | `KEYBOARD_TAP`                              | A frequent, low-stakes tap                         |
+| `confirm`   | `UIImpactFeedbackGenerator(.medium)`                | `CONFIRM` (API 30+)                         | A deliberate, less frequent action completing      |
+| `warning`   | `UIImpactFeedbackGenerator(.heavy)`                 | `LONG_PRESS`                                | The confirming tap on an irreversible action, only |
+| `success`   | `UINotificationFeedbackGenerator` `.success`        | `CONFIRM` (API 30+)                         | The successful outcome of an action, never a tap   |
+| `error`     | `UINotificationFeedbackGenerator` `.error`          | `REJECT` (API 30+)                          | The failed outcome of an action, never a tap       |
 
+- **Platform primitives, not a waveform.** `@capacitor/haptics` plays a raw
+  `VibrationEffect.createWaveform` on Android - its Light impact is 50 ms at
+  amplitude 110, a soft buzz on most hardware - and creates a fresh, unprepared
+  generator per call on iOS, so the pulse can arrive after the frame it belongs
+  to. Android's `BiteHapticsPlugin.java` (next to `AppSettingsPlugin.java`,
+  registered in `MainActivity` before `super.onCreate`) plays a
+  `HapticFeedbackConstants` value through the WebView's
+  `performHapticFeedback`. Below the API level a constant needs, the intent
+  plays the waveform `@capacitor/haptics` played for it before, so an older
+  device feels no change; on API 30+ no intent plays a waveform.
+- **A pre-warmed engine on iOS.** `BiteHapticsPlugin.swift` holds one generator
+  per style for the app's lifetime, prepares them all on load, and calls
+  `prepare()` again after each play. It is the first plugin that lives in the
+  iOS wrapper, which Capacitor's npm discovery cannot see, so
+  `BridgeViewController.swift` - the `CAPBridgeViewController` subclass
+  `Main.storyboard` names - registers it in `capacitorDidLoad()`.
+- **`@capacitor/haptics` is the fallback, and stays installed.** When
+  `Capacitor.isPluginAvailable('BiteHaptics')` is false - a build without the
+  local plugin - each intent plays its former `@capacitor/haptics` call
+  (`press`, `release` and `tick` play Light impact), so nothing goes silent.
+  The package also stays because Ionic's own components (`ion-toggle`,
+  `ion-segment`, `ion-picker`, pull-to-refresh) play through it.
+- **A native change ships with a store build.** The local plugin is native
+  code, so a change to it reaches users only with a new store build on both
+  platforms, never as a web-bundle-only update.
 - **No raw vibration.** The service exposes no `vibrate({ duration })`
-  passthrough, and no call site imports `@capacitor/haptics` directly. Apple's
+  passthrough, and no call site imports `@capacitor/haptics` or `BiteHaptics`
+  directly. Apple's
   and Android's haptics guidelines both steer away from an arbitrary buzz in
   favour of named, reusable patterns, and one intent keeps one meaning
   everywhere.
-- **Native only.** Every intent returns without reaching the plugin when
-  `Capacitor.isNativePlatform()` is false. The plugin's web implementation
-  falls back to `navigator.vibrate`, which is not part of the vocabulary.
+- **Native only.** Every intent returns without reaching either plugin when
+  `Capacitor.isNativePlatform()` is false. The `@capacitor/haptics` web
+  implementation falls back to `navigator.vibrate`, which is not part of the
+  vocabulary.
 - **Never rejects.** A failure from the native call is swallowed, the same
   posture `ToastService.present()` holds, so a call site fires and forgets it
   without a try/catch.
@@ -543,7 +575,7 @@ to exactly one `@capacitor/haptics` call:
   [#1636]).
 - **Once per discrete event.** No call site plays an intent on every
   pointer-move frame, keystroke or scroll tick.
-- **No permission, no store declaration.** The plugin needs no runtime
+- **No permission, no store declaration.** Neither plugin needs no runtime
   permission, privacy nutrition label entry or store review declaration on
   either platform, and the OS haptics setting already lets a user turn it off,
   so there is no in-app toggle.
@@ -561,6 +593,9 @@ apps/bite-tribe-android/package.json
 libs/bite-tribe/shell/src/lib/service-worker.ts
 libs/common/geolocation
 libs/common/haptics
+apps/bite-tribe-android/android/app/src/main/java/com/bitetribe/app/BiteHapticsPlugin.java
+apps/bite-tribe-ios/ios/App/App/BiteHapticsPlugin.swift
+apps/bite-tribe-ios/ios/App/App/BridgeViewController.swift
 libs/common/toast/src/lib/toast.service.ts
 libs/bite-tribe-common/bite/src/lib/bite.component.ts
 libs/bite-tribe-common/bite/src/lib/likes/likes.component.ts
@@ -596,3 +631,5 @@ libs/common/image-compression
 [#1635]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1635
 [#1636]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1636
 [#1637]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1637
+[#1740]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1740
+[#1743]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1743

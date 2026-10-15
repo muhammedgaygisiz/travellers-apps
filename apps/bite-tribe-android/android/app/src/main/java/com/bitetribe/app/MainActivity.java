@@ -11,6 +11,7 @@ public class MainActivity extends BridgeActivity {
         // Registration has to happen before the bridge is built, which is what
         // super.onCreate does.
         registerPlugin(AppSettingsPlugin.class);
+        registerPlugin(BiteHapticsPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

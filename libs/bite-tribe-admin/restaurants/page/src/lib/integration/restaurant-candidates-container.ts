@@ -10,7 +10,11 @@ import { RestaurantsService } from './restaurants.service';
       class="ion-page"
       [candidates]="service.candidates()"
       [hasMore]="service.hasMoreCandidates()"
+      [pageNumber]="service.candidatesPageNumber()"
+      [loading]="service.candidatesLoading()"
       (candidateClick)="service.candidateClicked($event)"
+      (nextPageClick)="service.nextCandidatesPage()"
+      (previousPageClick)="service.previousCandidatesPage()"
       (logoutClick)="service.logout()"
     />
   `,

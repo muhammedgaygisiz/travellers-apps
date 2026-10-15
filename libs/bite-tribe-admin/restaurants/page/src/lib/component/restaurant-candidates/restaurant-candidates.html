@@ -45,6 +45,34 @@
               candidates().length } }}
             </p>
           </ion-text>
+          } @if (hasMore() || pageNumber() > 1) {
+          <div
+            class="restaurant-candidates__paging"
+            data-testid="restaurant-candidates-paging"
+          >
+            <ion-button
+              fill="outline"
+              size="small"
+              data-testid="restaurant-candidates-previous"
+              [disabled]="pageNumber() <= 1 || loading()"
+              (click)="previousPageClick.emit()"
+            >
+              {{ 'restaurant-candidates-previous-page' | transloco }}
+            </ion-button>
+            <ion-text color="medium">
+              {{ 'restaurant-candidates-page' | transloco: { page: pageNumber()
+              } }}
+            </ion-text>
+            <ion-button
+              fill="outline"
+              size="small"
+              data-testid="restaurant-candidates-next"
+              [disabled]="!hasMore() || loading()"
+              (click)="nextPageClick.emit()"
+            >
+              {{ 'restaurant-candidates-next-page' | transloco }}
+            </ion-button>
+          </div>
           }
         </ion-card-content>
       </ion-card>

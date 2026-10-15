@@ -21,6 +21,9 @@ export class RestaurantsService {
 
   readonly candidates = this.dataAccess.restaurantCandidatesValue;
   readonly hasMoreCandidates = this.dataAccess.restaurantCandidatesHasMore;
+  readonly candidatesPageNumber =
+    this.dataAccess.restaurantCandidatesPageNumber;
+  readonly candidatesLoading = this.dataAccess.restaurantCandidatesLoading;
   readonly places = this.dataAccess.bitePlacesValue;
 
   /** Every table session in BiteTribe, for the operator's list (issue #1629). */
@@ -38,6 +41,15 @@ export class RestaurantsService {
     });
 
     void this.navController.navigateForward(['new-restaurant']);
+  }
+
+  /** Pages through the pending candidates (issue #1507). */
+  nextCandidatesPage(): void {
+    this.dataAccess.showNextCandidatePage();
+  }
+
+  previousCandidatesPage(): void {
+    this.dataAccess.showPreviousCandidatePage();
   }
 
   /**

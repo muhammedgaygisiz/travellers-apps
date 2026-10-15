@@ -49,7 +49,7 @@ the same evidence, nothing re-derived and nothing lost.
 
 **[Secondary]** - per `UC-VRC`'s own classification: dismissal is "deliberately out of
 the release: dismissal is inert without `UC-DRC` `R-8`'s guard... The release fix for
-the queue is the cap at `V2`, not dismissal." Best guess; revisit once this page reaches
+the queue is the paging at `V2` and `V3a`, not dismissal." Best guess; revisit once this page reaches
 L1.
 
 ## Related GitHub Scope

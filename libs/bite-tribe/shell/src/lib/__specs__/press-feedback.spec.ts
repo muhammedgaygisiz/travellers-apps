@@ -327,6 +327,60 @@ describe(providePressFeedback.name, () => {
       expect(query('#surface').classList).toContain(PRESSED_CLASS);
       expect(haptics.release).not.toHaveBeenCalled();
     });
+
+    it.each(['pointercancel', 'pointerleave'] as const)(
+      'should not cancel on a %s from another pointer',
+      (type) => {
+        dispatch(query('#surface'), 'pointerdown', { pointerId: 1 });
+        dispatch(query('#surface'), type, { pointerId: 2 });
+
+        expect(query('#surface').classList).toContain(PRESSED_CLASS);
+      },
+    );
+
+    it('should press with the primary mouse button', () => {
+      tap(query('#surface'), { pointerType: 'mouse', button: 0 });
+
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('given a press whose end never arrived', () => {
+    it('should drop it silently when the next press starts', () => {
+      render(
+        '<ion-button id="first">One</ion-button><ion-button id="second">Two</ion-button>',
+      );
+
+      dispatch(query('#first'), 'pointerdown');
+      dispatch(query('#second'), 'pointerdown');
+
+      expect(query('#first').classList).not.toContain(PRESSED_CLASS);
+      expect(query('#second').classList).toContain(PRESSED_CLASS);
+      expect(haptics.press).toHaveBeenCalledTimes(2);
+      expect(haptics.release).not.toHaveBeenCalled();
+    });
+  });
+
+  it.each(['pointerup', 'pointercancel', 'pointerleave'] as const)(
+    'should do nothing on a %s with no press in progress',
+    (type) => {
+      render('<ion-button id="surface">Go</ion-button>');
+
+      dispatch(query('#surface'), type);
+
+      expect(query('#surface').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.release).not.toHaveBeenCalled();
+    },
+  );
+
+  it('should ignore a pointerdown that lands on no element', () => {
+    const event = new Event('pointerdown');
+    Object.assign(event, { pointerId: 1, isPrimary: true, button: 0 });
+
+    document.dispatchEvent(event);
+
+    expect(haptics.press).not.toHaveBeenCalled();
   });
 
   it('should never cancel the default action of a pointer event', () => {

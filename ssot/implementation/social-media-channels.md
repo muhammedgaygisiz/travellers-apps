@@ -1106,6 +1106,73 @@ Publish with the steps in
 [Published 25 September 2026](#published-25-september-2026): crop `Original`,
 no filter, and share to Threads.
 
+## The Vienna Comic Post
+
+The third comic, prepared 16 October 2026 and **scheduled for 22:00 that day**. **Leela
+and her friend Chiyoko share Schnitzel and Apfelstrudel in a Vienna café;
+Chiyoko is going to Istanbul soon, so Leela shows her the five-star Bite she
+still remembers from there** - a recommendation passed across a table. It
+introduces [Chiyoko](brand-characters.md#chiyoko) and
+[Leela's current look](brand-characters.md#her-current-look).
+
+![Vienna comic post](../assets/social/vienna-comic-post.png)
+
+### The Image
+
+[`ssot/assets/social/vienna-comic-post.png`](../assets/social/vienna-comic-post.png),
+`1080x1350` (4:5). Generated with ChatGPT at `1122x1402`, which is already
+4:5 to within a pixel, so it is scaled rather than framed.
+
+**Two things were replaced by hand after generation**, the way
+[The Istanbul Comic Post](#the-istanbul-comic-post) replaced its logo:
+
+- **The fez cookie, in the banner and in the panel four phone header.** The
+  generator drew its own cookie in a fez. Both are now the real
+  [`04-turk.svg`](../assets/characters/04-turk.svg) from the tribe, on a ground
+  filled from the surrounding pixels. The Turk rather than the logo is kept on
+  purpose: the comic is about Istanbul.
+- **The banner tagline.** The generator wrote _Discover your next bite._, which
+  is not approved copy. It is now `Find it. Try it. Share it.`, set in
+  Chalkboard SE to sit beside the hand-lettered speech bubbles.
+
+**Left as generated:** the `BITE TRIBE` wordmark, which matches the app header,
+and _Good food. Shared memories. New adventures._ at the bottom of the banner -
+a sign-off rather than a claim.
+
+As with the earlier comics, the phones are illustrated. The Bite in panel four,
+_Mixed Barbecue Platter with lamb kidney, heart and liver_ in Istanbul with
+five stars, is drawn, not a screenshot.
+
+### Draft Caption And Alt Text
+
+```text
+From a schnitzel in Vienna to a kebab in Istanbul 🍽️
+Leela already ate it. Chiyoko is on her way.
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #realfood #vienna #istanbul
+```
+
+`#vienna` because every panel is set there; `#istanbul` because the Bite is.
+
+```text
+A six-panel comic in a Vienna café. Two friends share schnitzel and apple strudel; one says she will be in Istanbul soon, and the other remembers her favourite dish there. She shows her friend a five-star Bite on her phone - a mixed barbecue platter in Istanbul - and her friend cheers. A banner shows the BiteTribe wordmark with a cookie in a fez, Vienna and Istanbul skylines, and the line Find it. Try it. Share it. In the last panel the friend asks: Did you install BiteTribe and follow us?
+```
+
+### Scheduled 16 October 2026
+
+Scheduled for 22:00 from the Instagram app on an Android phone, with the
+caption and alt text above, crop expanded to the full 4:5, no filter, and
+shared to Threads.
+
+**The first post with music:** _Hicaz Hümayun Peşrevi_ by Suzan Kardeş, an
+instrumental Ottoman peşrev chosen for the Istanbul half of the story.
+
+**Music on a photo post is app-only.** The web uploader used for the earlier
+posts has no music option, so a post with sound goes up from the phone. The
+account is still Personal, so the full music library is available - see
+[Open: Instagram Account Type](#open-instagram-account-type), which a switch to
+Business would change.
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done

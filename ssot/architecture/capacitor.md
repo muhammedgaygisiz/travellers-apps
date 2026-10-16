@@ -575,7 +575,7 @@ dependency, and that plays the platform's own haptic primitive:
   [#1636]).
 - **Once per discrete event.** No call site plays an intent on every
   pointer-move frame, keystroke or scroll tick.
-- **No permission, no store declaration.** Neither plugin needs no runtime
+- **No permission, no store declaration.** Neither plugin needs a runtime
   permission, privacy nutrition label entry or store review declaration on
   either platform, and the OS haptics setting already lets a user turn it off,
   so there is no in-app toggle.

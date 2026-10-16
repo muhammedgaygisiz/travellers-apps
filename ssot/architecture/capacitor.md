@@ -573,6 +573,36 @@ dependency, and that plays the platform's own haptic primitive:
   `didDismiss` handler when the role is the confirming one. Opening the alert
   and cancelling it stay silent, and no other call site uses `warning` (issue
   [#1636]).
+- **Press and release play from one delegated listener (bite-tribe only).**
+  `providePressFeedback` in `libs/bite-tribe/shell/src/lib/press-feedback.ts`,
+  registered once in the bite-tribe `appConfig`, listens on the document for
+  `pointerdown`, `pointerup`, `pointercancel` and `pointerleave` (capture,
+  passive, never `preventDefault`). It resolves the surface with `closest()`:
+  `ion-button`, `ion-fab-button`, `ion-chip`, `ion-tab-button`,
+  `ion-back-button`, `ion-menu-button` and `[btPressable]` play `press` on
+  touch-down and `release` on a touch-up inside; a tappable `ion-item` row plays
+  `press` only. On `pointerdown` the `bt-pressed` class is added and `press` is
+  played in the same handler, so what is seen and what is felt start on the same
+  frame. A cancel - `pointercancel`, which is also how the browser reports a
+  scroll taking the gesture over, the pointer leaving the surface, or a touch-up
+  outside it - removes the class and plays nothing. Disabled surfaces
+  (`disabled`, `aria-disabled="true"`, `.button-disabled`, `.item-disabled`) and
+  anything under `[btPressable="off"]` get neither. Two details are easy to get
+  wrong:
+  - **A row is tappable by property, not attribute.** Ionic does not reflect
+    `ion-item`'s `button` to an attribute, and a bound `[routerLink]` leaves no
+    attribute either, so `ion-item[button]` alone misses most rows. The listener
+    also reads the `button` property and `href`, which Ionic's router-link
+    directive sets on the item - the same test Ionic uses to render the row as a
+    button or link.
+  - **"Inside" is decided by coordinates.** Touch pointers are implicitly
+    captured by the element they went down on, so the `pointerup` target is the
+    surface even when the finger was lifted elsewhere. The listener compares the
+    lift point with the surface's bounding box.
+
+  `bite-tribe-business` and `bite-tribe-admin` do not register it (epic
+  [#1740], issue [#1744]).
+
 - **Once per discrete event.** No call site plays an intent on every
   pointer-move frame, keystroke or scroll tick.
 - **No permission, no store declaration.** Neither plugin needs a runtime
@@ -591,6 +621,7 @@ apps/bite-tribe/src/index.html
 apps/bite-tribe-ios/package.json
 apps/bite-tribe-android/package.json
 libs/bite-tribe/shell/src/lib/service-worker.ts
+libs/bite-tribe/shell/src/lib/press-feedback.ts
 libs/common/geolocation
 libs/common/haptics
 apps/bite-tribe-android/android/app/src/main/java/com/bitetribe/app/BiteHapticsPlugin.java
@@ -633,3 +664,4 @@ libs/common/image-compression
 [#1637]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1637
 [#1740]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1740
 [#1743]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1743
+[#1744]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1744

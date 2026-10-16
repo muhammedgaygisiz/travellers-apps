@@ -17,6 +17,7 @@ import {
 import { provideDocumentLanguage } from './document-language';
 import { provideCanonicalUrl } from './canonical-url';
 import { provideDocumentTitle } from './document-title';
+import { providePressFeedback } from './press-feedback';
 import { AuthService } from 'ta-firestore';
 
 export const appConfig = (environment: Environment): ApplicationConfig => ({
@@ -84,5 +85,8 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
     // Keeps the product name in the document title once routing replaces the
     // one `index.html` ships (issue #1454).
     provideDocumentTitle(),
+    // Drives the pressed state and the press/release haptics of every
+    // pressable surface from one delegated listener (issue #1744).
+    providePressFeedback(),
   ],
 });

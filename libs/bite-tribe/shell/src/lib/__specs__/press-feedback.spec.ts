@@ -1,0 +1,350 @@
+import { ApplicationInitStatus } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { HapticsService } from 'haptics';
+import { PRESSED_CLASS, providePressFeedback } from '../press-feedback';
+
+type PointerType =
+  'pointerdown' | 'pointerup' | 'pointercancel' | 'pointerleave';
+
+interface PointerInit {
+  pointerId?: number;
+  isPrimary?: boolean;
+  pointerType?: string;
+  button?: number;
+  clientX?: number;
+  clientY?: number;
+}
+
+/** Every element sits at 0,0-100,100, so (50, 50) is inside and (500, 500) is not. */
+const INSIDE = { clientX: 50, clientY: 50 };
+const OUTSIDE = { clientX: 500, clientY: 500 };
+
+// jsdom has no `PointerEvent`, so the fields the listener reads are set on a
+// plain event. `pointerleave` does not bubble, as in a browser.
+const dispatch = (
+  target: Element,
+  type: PointerType,
+  init: PointerInit = {},
+): void => {
+  const event = new Event(type, {
+    bubbles: type !== 'pointerleave',
+    composed: true,
+  });
+
+  Object.assign(event, {
+    pointerId: 1,
+    isPrimary: true,
+    pointerType: 'touch',
+    button: 0,
+    ...INSIDE,
+    ...init,
+  });
+  target.dispatchEvent(event);
+};
+
+const tap = (target: Element, init: PointerInit = {}): void => {
+  dispatch(target, 'pointerdown', init);
+  dispatch(target, 'pointerup', init);
+};
+
+const render = (html: string): void => {
+  document.body.innerHTML = html;
+  document.body.querySelectorAll('*').forEach((element) => {
+    element.getBoundingClientRect = (): DOMRect =>
+      ({ left: 0, top: 0, right: 100, bottom: 100 }) as DOMRect;
+  });
+};
+
+const query = <T extends HTMLElement = HTMLElement>(selector: string): T =>
+  document.querySelector<T>(selector) as T;
+
+describe(providePressFeedback.name, () => {
+  let haptics: Record<'press' | 'release', jest.Mock>;
+
+  beforeEach(async () => {
+    haptics = {
+      press: jest.fn().mockResolvedValue(undefined),
+      release: jest.fn().mockResolvedValue(undefined),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: HapticsService, useValue: haptics },
+        providePressFeedback(),
+      ],
+    });
+
+    await TestBed.inject(ApplicationInitStatus).donePromise;
+  });
+
+  afterEach(() => {
+    TestBed.resetTestingModule();
+    document.body.innerHTML = '';
+  });
+
+  describe.each([
+    'ion-button',
+    'ion-fab-button',
+    'ion-chip',
+    'ion-tab-button',
+    'ion-back-button',
+    'ion-menu-button',
+  ])('given a %s', (tag) => {
+    beforeEach(() => render(`<${tag} id="surface"><span>Go</span></${tag}>`));
+
+    it('should add the pressed class and play press in the same pointerdown', () => {
+      const surface = query('#surface');
+      let pressedWhenHapticPlayed: boolean | undefined;
+      haptics.press.mockImplementation(() => {
+        pressedWhenHapticPlayed = surface.classList.contains(PRESSED_CLASS);
+
+        return Promise.resolve();
+      });
+
+      dispatch(query('#surface span'), 'pointerdown');
+
+      expect(surface.classList).toContain(PRESSED_CLASS);
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(pressedWhenHapticPlayed).toBe(true);
+      expect(haptics.release).not.toHaveBeenCalled();
+    });
+
+    it('should remove the class and play release once on pointerup inside', () => {
+      tap(query('#surface span'));
+
+      expect(query('#surface').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('given a card that opts in with btPressable', () => {
+    beforeEach(() =>
+      render('<ion-card btPressable id="card"><p>Bite</p></ion-card>'),
+    );
+
+    it('should play press and release', () => {
+      dispatch(query('#card p'), 'pointerdown');
+
+      expect(query('#card').classList).toContain(PRESSED_CLASS);
+
+      dispatch(query('#card p'), 'pointerup');
+
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).toHaveBeenCalledTimes(1);
+    });
+
+    it('should leave the nearer button inside it to own the press', () => {
+      render(
+        '<ion-card btPressable id="card"><ion-button id="button">Go</ion-button></ion-card>',
+      );
+
+      dispatch(query('#button'), 'pointerdown');
+
+      expect(query('#button').classList).toContain(PRESSED_CLASS);
+      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
+    });
+  });
+
+  describe('given a list row', () => {
+    it.each([
+      [
+        'the button attribute',
+        '<ion-item button id="row"><ion-label>Row</ion-label></ion-item>',
+      ],
+      [
+        'the routerLink attribute',
+        '<ion-item routerLink="/x" id="row"><ion-label>Row</ion-label></ion-item>',
+      ],
+    ])('should play press but not release when tappable by %s', (_, html) => {
+      render(html);
+
+      dispatch(query('#row ion-label'), 'pointerdown');
+
+      expect(query('#row').classList).toContain(PRESSED_CLASS);
+
+      dispatch(query('#row ion-label'), 'pointerup');
+
+      expect(query('#row').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a bound [button]', { button: true }],
+      ['a bound [routerLink], which sets href', { href: '/bite/1' }],
+    ])('should treat a row tappable through %s as a row', (_, properties) => {
+      render('<ion-item id="row"><ion-label>Row</ion-label></ion-item>');
+      Object.assign(query('#row'), properties);
+
+      tap(query('#row ion-label'));
+
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a row that is not tappable', () => {
+      render('<ion-item id="row"><ion-label>Row</ion-label></ion-item>');
+
+      dispatch(query('#row ion-label'), 'pointerdown');
+
+      expect(query('#row').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.press).not.toHaveBeenCalled();
+    });
+
+    it('should fall through a non-tappable row to the pressable card around it', () => {
+      render(
+        '<ion-card btPressable id="card"><ion-item id="row"><ion-label>Row</ion-label></ion-item></ion-card>',
+      );
+
+      tap(query('#row ion-label'));
+
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('given a press that is cancelled', () => {
+    beforeEach(() => render('<ion-button id="surface">Go</ion-button>'));
+
+    it('should remove the class and play nothing on pointercancel', () => {
+      dispatch(query('#surface'), 'pointerdown');
+      dispatch(query('#surface'), 'pointercancel');
+
+      expect(query('#surface').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.release).not.toHaveBeenCalled();
+
+      dispatch(query('#surface'), 'pointerup');
+
+      expect(haptics.release).not.toHaveBeenCalled();
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+    });
+
+    it('should remove the class and play nothing on pointerleave', () => {
+      dispatch(query('#surface'), 'pointerdown');
+      dispatch(query('#surface'), 'pointerleave');
+
+      expect(query('#surface').classList).not.toContain(PRESSED_CLASS);
+
+      dispatch(query('#surface'), 'pointerup');
+
+      expect(haptics.release).not.toHaveBeenCalled();
+    });
+
+    it('should not cancel when the pointer only leaves a child of the surface', () => {
+      render('<ion-button id="surface"><ion-icon></ion-icon></ion-button>');
+
+      dispatch(query('#surface ion-icon'), 'pointerdown');
+      dispatch(query('#surface ion-icon'), 'pointerleave');
+
+      expect(query('#surface').classList).toContain(PRESSED_CLASS);
+    });
+
+    it('should play nothing when the finger is lifted outside the surface', () => {
+      dispatch(query('#surface'), 'pointerdown');
+      dispatch(query('#surface'), 'pointerup', OUTSIDE);
+
+      expect(query('#surface').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.release).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('given a disabled surface', () => {
+    it.each([
+      [
+        'the disabled attribute',
+        '<ion-button disabled id="surface">Go</ion-button>',
+      ],
+      [
+        'aria-disabled',
+        '<ion-button aria-disabled="true" id="surface">Go</ion-button>',
+      ],
+      [
+        "Ionic's button-disabled class",
+        '<ion-button class="button-disabled" id="surface">Go</ion-button>',
+      ],
+      [
+        "Ionic's item-disabled class",
+        '<ion-item button class="item-disabled" id="surface">Go</ion-item>',
+      ],
+    ])('should give no class and no haptic when disabled by %s', (_, html) => {
+      render(html);
+
+      tap(query('#surface'));
+
+      expect(query('#surface').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.press).not.toHaveBeenCalled();
+      expect(haptics.release).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('given btPressable="off"', () => {
+    it.each([
+      [
+        'on the surface',
+        '<ion-button btPressable="off" id="surface">Go</ion-button>',
+      ],
+      [
+        'on an ancestor',
+        '<div btPressable="off"><ion-button id="surface">Go</ion-button></div>',
+      ],
+    ])('should suppress the class and the haptics %s', (_, html) => {
+      render(html);
+
+      dispatch(query('#surface'), 'pointerdown');
+
+      expect(query('#surface').classList).not.toContain(PRESSED_CLASS);
+
+      dispatch(query('#surface'), 'pointerup');
+
+      expect(haptics.press).not.toHaveBeenCalled();
+      expect(haptics.release).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('given pointers that are not a primary tap', () => {
+    beforeEach(() => render('<ion-button id="surface">Go</ion-button>'));
+
+    it('should ignore a second finger', () => {
+      dispatch(query('#surface'), 'pointerdown', { isPrimary: false });
+
+      expect(haptics.press).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a secondary mouse button', () => {
+      dispatch(query('#surface'), 'pointerdown', {
+        pointerType: 'mouse',
+        button: 2,
+      });
+
+      expect(haptics.press).not.toHaveBeenCalled();
+    });
+
+    it('should not release for a pointer other than the one that pressed', () => {
+      dispatch(query('#surface'), 'pointerdown', { pointerId: 1 });
+      dispatch(query('#surface'), 'pointerup', { pointerId: 2 });
+
+      expect(query('#surface').classList).toContain(PRESSED_CLASS);
+      expect(haptics.release).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should never cancel the default action of a pointer event', () => {
+    render('<ion-button id="surface">Go</ion-button>');
+    const event = new Event('pointerdown', { bubbles: true, cancelable: true });
+    Object.assign(event, { pointerId: 1, isPrimary: true, button: 0 });
+
+    query('#surface').dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('should stop listening when the app is destroyed', () => {
+    render('<ion-button id="surface">Go</ion-button>');
+
+    TestBed.resetTestingModule();
+    tap(query('#surface'));
+
+    expect(haptics.press).not.toHaveBeenCalled();
+  });
+});

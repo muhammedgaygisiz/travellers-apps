@@ -93,7 +93,8 @@ design pass that uses these crops as the brief.
 
 ### What Makes Her Leela
 
-The traits a redraw has to keep, read from the three panels:
+The traits of her first appearance, read from the three panels. She has since
+evolved - see [Her Current Look](#her-current-look).
 
 - **Hair**: dark brown, shoulder length and wavy, pulled up into a messy top bun
   with loose strands, tied with a red band.
@@ -120,6 +121,65 @@ she reads as part of the family.
 
 Where she appears in the product, if anywhere, is open. See
 [Current State - Open Questions](../current-state/open-questions.md).
+
+### Her Current Look
+
+**Leela has evolved since the street food comic.** From
+[The Vienna Comic Post](social-media-channels.md#the-vienna-comic-post),
+16 October 2026, she is drawn this way, and a new comic should follow this
+look rather than [What Makes Her Leela](#what-makes-her-leela), which stays as
+the record of her first appearance.
+
+- **Hair**: long, voluminous auburn curls, loosely gathered at the crown with
+  strands falling past her shoulders. The red band is gone.
+- **Face**: round, rosy cheeks, large brown eyes with highlights, closing into
+  arcs when she laughs. The wide open-mouthed grin is unchanged.
+- **Clothes**: a cream knitted scarf over a brown jacket, and a dark backpack.
+  She is still a traveller, but the bright blue backpack is no longer what says
+  so.
+- **Style**: softer and more detailed than the street food comic - shaded,
+  warm-lit, anime-influenced - rather than flat fills with a thick outline.
+
+![Leela in Vienna](../assets/characters/leela/leela-vienna-reference-sheet.png)
+
+| File                                                                                              | Panel | Expression                  |
+| ------------------------------------------------------------------------------------------------- | ----- | --------------------------- |
+| [`leela-vienna-first-bite.png`](../assets/characters/leela/leela-vienna-first-bite.png)           | 1     | eating, eyes shut, laughing |
+| [`leela-vienna-shows-her-phone.png`](../assets/characters/leela/leela-vienna-shows-her-phone.png) | 3     | wistful, holding her phone  |
+
+Each crop is a `240x280` region of `ssot/assets/social/vienna-comic-post.png`,
+scaled 2x with Lanczos to `480x560`; the sheet sets them on `#1A1C22`. No colour
+table this time: the comic is lit and shaded, so a median sample reads the
+lighting rather than a fill.
+
+## Chiyoko
+
+**Chiyoko is Leela's Japanese friend.** She lives in Düsseldorf and travels
+too, and she is about to go to Istanbul. Introduced 16 October 2026 in
+[The Vienna Comic Post](social-media-channels.md#the-vienna-comic-post), where
+Leela shows her a five-star Bite from Istanbul to try when she gets there.
+
+Her role is the other end of a recommendation: Leela has eaten it, Chiyoko is
+going to.
+
+![Chiyoko reference sheet](../assets/characters/chiyoko/chiyoko-reference-sheet.png)
+
+### What Makes Her Chiyoko
+
+- **Hair**: black, chin-to-shoulder-length bob with full bangs.
+- **Face**: round, rosy cheeks, large dark brown eyes; she rests her chin on
+  her hands when she listens.
+- **Clothes**: a teal cardigan over a plain white top.
+- **Style**: the same as [Her Current Look](#her-current-look).
+
+| File                                                                          | Panel | Expression                 |
+| ----------------------------------------------------------------------------- | ----- | -------------------------- |
+| [`chiyoko-listens.png`](../assets/characters/chiyoko/chiyoko-listens.png)     | 1     | chin on hands, eyes shut   |
+| [`chiyoko-is-coming.png`](../assets/characters/chiyoko/chiyoko-is-coming.png) | 4     | excited, fists up          |
+| [`chiyoko-asks.png`](../assets/characters/chiyoko/chiyoko-asks.png)           | 6     | smiling, asking the reader |
+
+Cut the same way as Leela's Vienna crops. They are references, not production
+artwork, for the reason [Reference Artwork](#reference-artwork) gives.
 
 ## Where The Artwork Lives
 

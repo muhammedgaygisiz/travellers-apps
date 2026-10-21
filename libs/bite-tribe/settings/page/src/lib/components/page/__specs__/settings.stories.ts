@@ -172,3 +172,23 @@ export const EmailVerificationResendRunning: Story = {
     emailVerificationResendRunning: true,
   },
 };
+
+/**
+ * A native build, where the device's haptic feedback can be switched off right
+ * after the theme row. The web plays no haptics, which is why every other story
+ * shows no such row (issue #1746).
+ */
+export const HapticFeedbackOn: Story = {
+  args: {
+    hapticsSupported: true,
+    hapticsEnabled: true,
+  },
+};
+
+/** Switched off on this device. The setting lives on the device, not the account. */
+export const HapticFeedbackOff: Story = {
+  args: {
+    hapticsSupported: true,
+    hapticsEnabled: false,
+  },
+};

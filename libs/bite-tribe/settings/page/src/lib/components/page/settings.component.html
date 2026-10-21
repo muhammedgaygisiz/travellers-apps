@@ -311,6 +311,23 @@
               </ion-select-option>
             </ion-select>
           </ion-item>
+          @if (hapticsSupported()) {
+            <ion-item data-testid="settings-haptics">
+              <ion-label>
+                {{ 'haptic-feedback' | transloco }}
+                <p data-testid="settings-haptics-helper">
+                  {{ 'haptic-feedback-helper' | transloco }}
+                </p>
+              </ion-label>
+              <ion-toggle
+                slot="end"
+                data-testid="settings-haptics-toggle"
+                [attr.aria-label]="'haptic-feedback' | transloco"
+                [checked]="hapticsEnabled()"
+                (ionChange)="hapticsEnabledChange.emit($event.detail.checked)"
+              />
+            </ion-item>
+          }
           <ion-item
             button
             detail="false"

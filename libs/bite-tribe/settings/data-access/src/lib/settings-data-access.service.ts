@@ -7,6 +7,8 @@ import { Preferences } from '@capacitor/preferences';
 import { TranslocoService } from '@jsverse/transloco';
 import { Platform } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
+import { Capacitor } from '@capacitor/core';
+import { HapticsService } from 'haptics';
 import {
   enablePushOnThisDevice,
   getPushPermissionState,
@@ -34,10 +36,26 @@ export class SettingsDataAccessService {
   private readonly api = inject(BiteTribeApiService);
   private readonly transloco = inject(TranslocoService);
   private readonly platform = inject(Platform);
+  private readonly haptics = inject(HapticsService);
 
   user = toSignal(this.storeService.user$);
   settings = toSignal(this.storeService.settings$);
   publicUser = toSignal(this.storeService.publicUser$);
+
+  /**
+   * Whether this device plays the app's haptic feedback. A device setting, not
+   * an account one: it is kept in device `Preferences` by `HapticsService` and
+   * never reaches the settings document (issue #1746).
+   */
+  hapticsEnabled = this.haptics.enabled;
+
+  /** Haptics are a no-op off a native build, so the web has nothing to switch. */
+  readonly hapticsSupported = Capacitor.isNativePlatform();
+
+  /** Applies at once, and survives a restart. */
+  setHapticsEnabled(enabled: boolean): Promise<void> {
+    return this.haptics.setEnabled(enabled);
+  }
 
   /**
    * The signed-in user's registered push installations.

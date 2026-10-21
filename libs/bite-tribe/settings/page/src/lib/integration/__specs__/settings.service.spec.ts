@@ -23,6 +23,8 @@ describe(SettingsService.name, () => {
   let saveSettings: jest.Mock;
   let navigateBack: jest.Mock;
   let presentToast: jest.Mock;
+  let setHapticsEnabled: jest.Mock;
+  const hapticsEnabled = signal(true);
 
   const installation = (
     overrides: Partial<PushInstallation> = {},
@@ -52,6 +54,7 @@ describe(SettingsService.name, () => {
     saveSettings = jest.fn().mockResolvedValue(undefined);
     navigateBack = jest.fn();
     presentToast = jest.fn().mockResolvedValue(undefined);
+    setHapticsEnabled = jest.fn().mockResolvedValue(undefined);
 
     TestBed.configureTestingModule({
       providers: [
@@ -72,6 +75,9 @@ describe(SettingsService.name, () => {
             requestMediaLocationPermission,
             openMediaLocationSettings,
             saveSettings,
+            hapticsEnabled,
+            hapticsSupported: true,
+            setHapticsEnabled,
           },
         },
         {
@@ -91,6 +97,21 @@ describe(SettingsService.name, () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  describe('haptic feedback', () => {
+    it('reads the device setting and whether it can play at all', () => {
+      expect(service.hapticsEnabled()).toBe(true);
+      expect(service.hapticsSupported).toBe(true);
+    });
+
+    it('switches it on the device, with no save and no toast', async () => {
+      await service.setHapticsEnabled(false);
+
+      expect(setHapticsEnabled).toHaveBeenCalledWith(false);
+      expect(saveSettings).not.toHaveBeenCalled();
+      expect(presentToast).not.toHaveBeenCalled();
+    });
   });
 
   describe('refreshPushInstallations', () => {

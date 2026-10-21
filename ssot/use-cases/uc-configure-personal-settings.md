@@ -3,9 +3,9 @@
 ## Status
 
 **Level:** L1
-Supported today. The settings page carries theme, currency with a favourites shortlist,
-language, the location-permission state, and the per-installation notification list [#1184] put
-in place of the old account-wide switch. Two fields on the `Settings` model are not controls
+Supported today. The settings page carries theme, the device's haptic feedback switch on native
+builds, currency with a favourites shortlist, language, the location-permission state, and the
+per-installation notification list [#1184] put in place of the old account-wide switch. Two fields on the `Settings` model are not controls
 here: `nearby`, which nothing in settings sets, and `pushNotifications`, retired by [#1184]. The
 email-updates switch is present and disabled.
 
@@ -25,6 +25,14 @@ belongs to [UC - Receive App Notifications And Engagement Updates](uc-receive-ap
 
 - User opens settings.
 - **Theme** - light or dark.
+- **Haptic feedback** - whether this device plays the app's haptics, on by default. It is shown
+  on native builds only, because the web build plays none. It is a device setting, not an
+  account one: it applies as soon as it is flipped, needs no save, survives a restart and is
+  never written to the account, so another device keeps its own choice. Turning it off silences
+  every haptic the app plays itself and leaves the visual pressed state in place. The switches,
+  segmented controls and pull-to-refresh Ionic draws play their own haptics and follow the
+  phone's setting instead, which the row's helper text says. How the switch reaches the haptics
+  is owned by `Haptic Feedback Rule` in [Architecture - Capacitor](../architecture/capacitor.md) ([#1746]).
 - **Currency** - the currency amounts are shown in, with a shortlist of favourite currencies
   so a user switching between a few does not scroll the whole list. Rates come from the
   exchange-rates API.
@@ -84,7 +92,8 @@ Language is what the app and every notification are rendered in, and the app shi
 them. Currency is what reported prices mean: a price read in the wrong one misinforms rather
 than inconveniences, and prices are the point of the product.
 
-**[Secondary]** - theme, the favourite-currency shortlist, and the location-permission row,
+**[Secondary]** - theme, the haptic feedback switch, the favourite-currency shortlist, and the
+location-permission row,
 which reports a state collected elsewhere rather than setting one.
 
 ## App Store Review Area
@@ -107,6 +116,7 @@ and at the point of use, not here, and the data types behind them are declared i
 - Issue [#1184] replaced the account-wide Push Notifications switch with the per-installation notification management this page exposes. Closed as completed.
 - Issue [#1023] is where the location permission this page reports is collected, during onboarding (part of the closed epic-850).
 - Issue [#1386] is the OS-permission-vs-delivery-flag distinction the current installation's row reflects. Closed as completed.
+- Issue [#1746] added the per-device haptic feedback switch, part of epic [#1740], which reversed epic [#1633]'s reliance on the OS setting alone.
 - Issue [#1606] tracks two undecided items this page still carries: whether the disabled email-updates switch is built or dropped, and whether `Settings.nearby` becomes a control here. Open.
 
 ## Related Domains
@@ -121,8 +131,13 @@ and at the point of use, not here, and the data types behind them are declared i
 - [UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md) - where the location permission is collected
 - [UC - Discover Bites](uc-discover-bites.md) - the Home feed whose optional nearby filter reads `Settings.nearby`
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
+- [Architecture - Capacitor](../architecture/capacitor.md) - `Haptic Feedback Rule`, which owns how the haptic feedback switch
+  reaches the haptics
 
 [#1023]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1023
 [#1184]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1184
 [#1386]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1386
 [#1606]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1606
+[#1633]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1633
+[#1740]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1740
+[#1746]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1746

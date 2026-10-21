@@ -611,10 +611,22 @@ dependency, and that plays the platform's own haptic primitive:
 
 - **Once per discrete event.** No call site plays an intent on every
   pointer-move frame, keystroke or scroll tick.
+- **Switchable per device, in bite-tribe.** `HapticsService` reads one
+  `Preferences` key, `haptics-enabled`, once at start-up and caches it; while it
+  is off, every intent returns before reaching either plugin. An absent key
+  means on, and only `'false'` turns it off, so every device that predates the
+  switch keeps its haptics. A choice made before the start-up read settles wins
+  over the stored value. The flag lives in this common library, but only the
+  bite-tribe settings page offers a control for it - what that row does is owned
+  by [UC - Configure Personal Settings](../use-cases/uc-configure-personal-settings.md) - so the other apps keep haptics on. It cannot
+  reach Ionic's own component haptics (`ion-toggle`, `ion-segment`,
+  `ion-picker`, pull-to-refresh), because those call `@capacitor/haptics`
+  directly. Epic [#1633] relied on the OS setting alone; epic [#1740] added the
+  switch once press and release played on almost every tap (issue [#1746]).
 - **No permission, no store declaration.** Neither plugin needs a runtime
   permission, privacy nutrition label entry or store review declaration on
-  either platform, and the OS haptics setting already lets a user turn it off,
-  so there is no in-app toggle.
+  either platform, and the setting above stays on the device and is never
+  collected.
 
 ## Code Anchors
 
@@ -672,3 +684,4 @@ libs/common/image-compression
 [#1743]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1743
 [#1744]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1744
 [#1745]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1745
+[#1746]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1746

@@ -108,6 +108,14 @@ export class PageSettings {
   photoLocationPermission = input<MediaLocationPermissionState>('unsupported');
   photoLocationSetupRunning = input(false);
 
+  /**
+   * Whether this device can play haptics at all. Off the web build only, so
+   * the row is not offered where it would switch nothing.
+   */
+  hapticsSupported = input(false);
+  /** This device's haptics setting, kept on the device rather than the account. */
+  hapticsEnabled = input(true);
+
   submitSettings = output<Settings>();
   logout = output<void>();
   resendEmailVerification = output<void>();
@@ -124,6 +132,11 @@ export class PageSettings {
   openPushSettings = output<void>();
   enablePhotoLocation = output<void>();
   openPhotoLocationSettings = output<void>();
+  /**
+   * The haptics switch was flipped. It applies at once and is not part of the
+   * preferences form, which is saved to the account (issue #1746).
+   */
+  hapticsEnabledChange = output<boolean>();
 
   private readonly formBuilder = inject(FormBuilder);
 

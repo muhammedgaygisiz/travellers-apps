@@ -26,6 +26,8 @@ export class SettingsService {
   settings = this.dataAccess.settings;
   emailVerificationPromptVisible = this.emailVerification.promptVisible;
   emailVerificationResendRunning = this.emailVerification.resendRunning;
+  hapticsEnabled = this.dataAccess.hapticsEnabled;
+  hapticsSupported = this.dataAccess.hapticsSupported;
 
   readonly pushInstallations = signal<readonly PushInstallationView[]>([]);
   readonly pushPermission = signal<PushPermissionState>('prompt');
@@ -52,6 +54,10 @@ export class SettingsService {
    * saved (#1217). The toast outlives the navigation because Ionic presents it
    * at the app root.
    */
+  setHapticsEnabled(enabled: boolean): Promise<void> {
+    return this.dataAccess.setHapticsEnabled(enabled);
+  }
+
   async saveSettings(settings: Settings): Promise<void> {
     await this.dataAccess.saveSettings(settings);
 

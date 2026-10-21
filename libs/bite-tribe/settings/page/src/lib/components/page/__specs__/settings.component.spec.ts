@@ -732,6 +732,66 @@ describe(PageSettings.name, () => {
     });
   });
 
+  describe('Haptic feedback', () => {
+    const byTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    const toggle = (): HTMLElement & { checked?: boolean } =>
+      byTestId('settings-haptics-toggle') as HTMLElement & {
+        checked?: boolean;
+      };
+
+    it('should not offer the row where haptics play nothing', () => {
+      // The web build plays no haptics, so a switch there would switch nothing.
+      expect(byTestId('settings-haptics')).toBeNull();
+    });
+
+    describe('given a native build', () => {
+      beforeEach(() => {
+        compRef.setInput('hapticsSupported', true);
+        fixture.detectChanges();
+      });
+
+      it('should place the row right after the theme row', () => {
+        const theme = byTestId('settings-theme')?.closest('ion-item');
+
+        expect(theme?.nextElementSibling).toBe(byTestId('settings-haptics'));
+      });
+
+      it('should explain which controls follow the phone instead', () => {
+        const helper = byTestId('settings-haptics-helper');
+
+        expect(
+          helper?.closest('[data-testid="settings-haptics"]'),
+        ).not.toBeNull();
+      });
+
+      it.each([true, false])(
+        'should show the device setting as %s',
+        (enabled) => {
+          compRef.setInput('hapticsEnabled', enabled);
+          fixture.detectChanges();
+
+          expect(toggle().checked).toBe(enabled);
+        },
+      );
+
+      it('should emit the new value at once, outside the saved form', () => {
+        const changeSpy = jest.spyOn(component.hapticsEnabledChange, 'emit');
+
+        toggle().dispatchEvent(
+          new CustomEvent('ionChange', { detail: { checked: false } }),
+        );
+
+        expect(changeSpy).toHaveBeenCalledWith(false);
+        expect(component.settingsForm.pristine).toBe(true);
+        expect(Object.keys(component.settingsForm.controls)).not.toContain(
+          'haptics',
+        );
+      });
+    });
+  });
+
   describe('Section grouping', () => {
     const byTestId = (testId: string): HTMLElement | null =>
       fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);

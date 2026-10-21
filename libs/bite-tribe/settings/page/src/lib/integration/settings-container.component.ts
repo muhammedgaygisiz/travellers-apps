@@ -25,6 +25,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [pushSetupRunning]="service.pushSetupRunning()"
       [photoLocationPermission]="service.photoLocationPermission()"
       [photoLocationSetupRunning]="service.photoLocationSetupRunning()"
+      [hapticsSupported]="service.hapticsSupported"
+      [hapticsEnabled]="service.hapticsEnabled()"
       (submitSettings)="service.saveSettings($event)"
       (logout)="service.logout()"
       (resendEmailVerification)="service.resendEmailVerification('settings')"
@@ -36,6 +38,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (openPushSettings)="service.openPushSettings()"
       (enablePhotoLocation)="service.enablePhotoLocation()"
       (openPhotoLocationSettings)="service.openPhotoLocationSettings()"
+      (hapticsEnabledChange)="service.setHapticsEnabled($event)"
     />
   `,
   imports: [PageSettings],

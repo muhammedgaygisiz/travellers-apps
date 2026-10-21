@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StarRatingComponent } from '../star-rating.component';
-import { ComponentRef } from '@angular/core';
+import { Component, ComponentRef } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HapticsService } from 'haptics';
 
 const STAR_WIDTH = 30;
@@ -261,6 +262,40 @@ describe('StarRatingComponent', () => {
       expect(component.hoveredIndex()).toBe(-1);
     });
 
+    it('rates and ticks on a plain click, with no drag before it', () => {
+      const rated = jest.spyOn(component.rated, 'emit');
+
+      icons()[2].click();
+      fixture.detectChanges();
+
+      expect(rated).toHaveBeenCalledWith(3);
+      expect(tick).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores a pointercancel from a pointer that is not dragging', () => {
+      compRef.setInput('rating', 2);
+      fixture.detectChanges();
+
+      drag(2, 4);
+      pointer('pointercancel', xOf(4), { pointerId: 2 });
+      pointer('pointerup', xOf(4));
+
+      expect(component.value()).toBe(4);
+    });
+
+    it('ignores a secondary mouse button', () => {
+      const event = new Event('pointerdown', { bubbles: true });
+      Object.assign(event, {
+        pointerId: 1,
+        isPrimary: true,
+        button: 2,
+        clientX: xOf(3),
+      });
+      row().dispatchEvent(event);
+
+      expect(tick).not.toHaveBeenCalled();
+    });
+
     it('ignores a second finger', () => {
       pointer('pointerdown', xOf(3), { isPrimary: false });
 
@@ -294,6 +329,30 @@ describe('StarRatingComponent', () => {
       component.onRate(4);
 
       expect(tick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('as a form control', () => {
+    @Component({
+      template: `<star-rating [formControl]="control" />`,
+      imports: [StarRatingComponent, ReactiveFormsModule],
+    })
+    class HostComponent {
+      control = new FormControl<number | null>(2);
+    }
+
+    it('takes the control value and reports a rating back to it', () => {
+      const host = TestBed.createComponent(HostComponent);
+      host.detectChanges();
+      const rating = host.debugElement.children[0]
+        .componentInstance as StarRatingComponent;
+
+      expect(rating.getRating()).toBe(2);
+
+      rating.onRate(5);
+
+      expect(host.componentInstance.control.value).toBe(5);
+      expect(host.componentInstance.control.touched).toBe(true);
     });
   });
 });

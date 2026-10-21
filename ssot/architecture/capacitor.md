@@ -620,6 +620,19 @@ dependency, and that plays the platform's own haptic primitive:
   those classes are owned by [Implementation - Ionic Patterns](../implementation/ionic-patterns.md#pressed-state)
   (issue [#1745]).
 
+- **Star ratings play `tick`, once per star.** `star-rating`
+  (`libs/common/ui/star-rating`) is the one continuous control in bite-tribe
+  that Ionic does not already give haptics to. A finger going down on the row
+  starts a drag: the stars follow it, and every change of the value they show -
+  a tap that changes the rating, or the drag crossing into another star - plays
+  `tick` once and pops that star on the same frame. Moving within one star plays
+  nothing, a cancelled drag commits nothing, the rating commits once when the
+  finger lifts, and a read-only rating plays nothing. A drag that jumps several
+  stars between two pointer events plays one tick, not one per star skipped,
+  because stacking ticks in one frame reads as a single buzz. The pop is a
+  180 ms scale and is switched off under `prefers-reduced-motion: reduce`, as is
+  the mouse-only hover enlargement (issue [#1748]). `ion-toggle`, `ion-segment`
+  and `ion-picker` play Ionic's own selection haptics and are left alone.
 - **Once per discrete event.** No call site plays an intent on every
   pointer-move frame, keystroke or scroll tick.
 - **Switchable per device, in bite-tribe.** `HapticsService` reads one
@@ -653,6 +666,7 @@ libs/bite-tribe/shell/src/lib/service-worker.ts
 libs/bite-tribe/shell/src/lib/press-feedback.ts
 libs/common/geolocation
 libs/common/haptics
+libs/common/ui/star-rating
 apps/bite-tribe-android/android/app/src/main/java/com/bitetribe/app/BiteHapticsPlugin.java
 apps/bite-tribe-ios/ios/App/App/BiteHapticsPlugin.swift
 apps/bite-tribe-ios/ios/App/App/BridgeViewController.swift
@@ -697,3 +711,4 @@ libs/common/image-compression
 [#1745]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1745
 [#1746]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1746
 [#1747]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1747
+[#1748]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1748

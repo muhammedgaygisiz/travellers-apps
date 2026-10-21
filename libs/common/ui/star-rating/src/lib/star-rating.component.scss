@@ -4,6 +4,12 @@
   .star-rating {
     display: flex;
     gap: 4px;
+    // A horizontal drag rates; a vertical one still scrolls the page.
+    touch-action: pan-y;
+
+    &.read-only {
+      touch-action: auto;
+    }
 
     ion-icon {
       font-size: 24px;
@@ -17,8 +23,26 @@
         fill: var(--bite-tribe-color);
       }
 
-      &:hover {
-        transform: scale(1.2);
+      // Only where a pointer can hover: a touch screen keeps :hover on the
+      // last star tapped, which would leave it enlarged.
+      @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+        &:hover {
+          transform: scale(1.2);
+        }
+      }
+
+      // The star that just became the selected one pops on the frame its
+      // `tick` plays (issue #1748). With reduced motion it only fills.
+      &.popped {
+        animation: star-pop 180ms ease-out;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+
+        &.popped {
+          animation: none;
+        }
       }
 
       &.read-only {
@@ -26,5 +50,15 @@
         pointer-events: none;
       }
     }
+  }
+}
+
+@keyframes star-pop {
+  40% {
+    transform: scale(1.3);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }

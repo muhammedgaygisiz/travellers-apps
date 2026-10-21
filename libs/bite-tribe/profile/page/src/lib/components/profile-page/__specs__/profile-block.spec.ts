@@ -154,8 +154,21 @@ describe(`${ProfileComponent.name} block`, () => {
       fixture.detectChanges();
 
       expect(blocked).toEqual([OTHER_USER]);
-      expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
+      // The haptic is the confirming button's, not the dismissal's (#1747).
+      expect(MockHapticsService.warning).not.toHaveBeenCalled();
       expect(queryAlerts()).toHaveLength(0);
+    });
+
+    it('plays the warning haptic from the confirming button, on release', () => {
+      component.blockConfirmationButtons
+        .find(({ role }) => role === 'block')
+        ?.handler?.();
+
+      expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
+      expect(
+        component.blockConfirmationButtons.find(({ role }) => role === 'cancel')
+          ?.handler,
+      ).toBeUndefined();
     });
 
     it('blocks nobody when the confirmation is cancelled', () => {

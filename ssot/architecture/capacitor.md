@@ -559,29 +559,40 @@ dependency, and that plays the platform's own haptic primitive:
 - **Toast outcomes play automatically.** `ToastService.present()` plays
   `success` or `error` from its `outcome`, so every toast in both apps carries
   its haptic and a call site that raises a toast adds none (issue [#1635]).
-- **The Bite reaction plays `selection`, on the tap.** `LikesComponent` in
-  `libs/bite-tribe-common/bite` fires it at the top of `onLikeSelected`, before
-  the branch that decides direction, so liking, un-liking and switching reaction
-  type each play it exactly once. It is not fired from the store's outcome: the
-  reaction is optimistic, raises no toast and touches no Ionic component that
-  would carry haptics on its own, which is the frequent, low-stakes case
-  `selection` exists for. Opening the reaction popover stays silent (issue
-  [#1637]).
-- **Destructive confirmations play `warning`, on the confirming button only.**
-  The three alerts that ask before a destructive action - delete Bite, and
-  unfollow on both the followers list and a profile - fire it from their
-  `didDismiss` handler when the role is the confirming one. Opening the alert
-  and cancelling it stay silent, and no other call site uses `warning` (issue
-  [#1636]).
+- **The Bite reaction plays `selection` on release, in place of `release`.**
+  `LikesComponent` in `libs/bite-tribe-common/bite` fires it at the top of
+  `onLikeSelected`, before the branch that decides direction, so liking,
+  un-liking and switching reaction type each play it exactly once. It is not
+  fired from the store's outcome: the reaction is optimistic, raises no toast
+  and has no outcome haptic of its own, which is the frequent, low-stakes case
+  `selection` exists for (issue [#1637]). The reaction options sit under
+  `btPressable="release-off"`, so the shared listener plays `press` on
+  touch-down and leaves the release to `selection` - one intent per tap (issue
+  [#1747]). The chip that opens the options is an ordinary control and plays
+  `press` and `release`.
+- **Destructive confirmations play `warning` on release, in place of
+  `release`.** The four alerts that ask before a destructive action - delete
+  Bite, unfollow on both the followers list and a profile, and block on a
+  profile - give their confirming button a `handler` that fires it ([#1636]).
+  The handler runs on the tap, where the earlier `didDismiss` hook ran only
+  after the alert had animated away. Each alert carries
+  `btPressable="release-off"`, so both its buttons play `press` on touch-down;
+  the confirming one then plays `warning` and the cancelling one plays nothing,
+  because a tap that commits nothing must not feel like one that does (issue
+  [#1747]). No other call site uses `warning`.
 - **Press and release play from one delegated listener (bite-tribe only).**
   `providePressFeedback` in `libs/bite-tribe/shell/src/lib/press-feedback.ts`,
   registered once in the bite-tribe `appConfig`, listens on the document for
   `pointerdown`, `pointerup`, `pointercancel` and `pointerleave` (capture,
   passive, never `preventDefault`). It resolves the surface with `closest()`:
   `ion-button`, `ion-fab-button`, `ion-chip`, `ion-tab-button`,
-  `ion-back-button`, `ion-menu-button` and `[btPressable]` play `press` on
-  touch-down and `release` on a touch-up inside; a tappable `ion-item` row plays
-  `press` only. On `pointerdown` the `bt-pressed` class is added and `press` is
+  `ion-back-button`, `ion-menu-button`, an `ion-alert`'s `.alert-button` and
+  `[btPressable]` play `press` on touch-down and `release` on a touch-up
+  inside; a tappable `ion-item` row plays `press` only. Under
+  `btPressable="release-off"` - on the surface or an ancestor - a surface plays
+  `press` only, because the call site plays a semantic intent on release in
+  place of `release` (below); the value modifies the surfaces under it and does
+  not make its own element pressable. On `pointerdown` the `bt-pressed` class is added and `press` is
   played in the same handler, so what is seen and what is felt start on the same
   frame. A cancel - `pointercancel`, which is also how the browser reports a
   scroll taking the gesture over, the pointer leaving the surface, or a touch-up
@@ -685,3 +696,4 @@ libs/common/image-compression
 [#1744]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1744
 [#1745]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1745
 [#1746]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1746
+[#1747]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1747

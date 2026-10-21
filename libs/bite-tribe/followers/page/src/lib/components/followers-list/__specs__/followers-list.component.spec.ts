@@ -177,13 +177,33 @@ describe(FollowersListComponent.name, () => {
 
     // The confirming tap on a destructive alert is the one thing the `warning`
     // intent is reserved for. See GitHub issue #1636.
-    it('should play the warning haptic when role is unfollow', () => {
+    it('should play the warning haptic from the confirming button, on release', () => {
+      // From the button's handler, which runs on the tap, rather than from the
+      // dismissal, which lands only after the alert has animated away (#1747).
+      const confirm = component.confirmationButtons.find(
+        ({ role }) => role === 'unfollow',
+      );
+
+      confirm?.handler?.();
+
+      expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
+    });
+
+    it('should leave the cancelling button without a haptic of its own', () => {
+      const cancel = component.confirmationButtons.find(
+        ({ role }) => role === 'cancel',
+      );
+
+      expect(cancel?.handler).toBeUndefined();
+    });
+
+    it('should not play the warning haptic a second time on the dismissal', () => {
       component.handleConfirmationDismiss(
         { detail: { role: 'unfollow' } } as CustomEvent<{ role: string }>,
         mockUser,
       );
 
-      expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
+      expect(MockHapticsService.warning).not.toHaveBeenCalled();
     });
 
     it('should not play the warning haptic when role is cancel', () => {
@@ -382,7 +402,11 @@ describe(FollowersListComponent.name, () => {
     it('should have Cancel and Yes, unfollow buttons', () => {
       expect(component.confirmationButtons).toEqual([
         { text: 'cancel', role: 'cancel' },
-        { text: 'yes-unfollow', role: 'unfollow' },
+        {
+          text: 'yes-unfollow',
+          role: 'unfollow',
+          handler: expect.any(Function),
+        },
       ]);
     });
   });

@@ -132,6 +132,7 @@
     issue #1334. -->
     @if (userPendingUnfollow(); as pendingUser) {
       <ion-alert
+        btPressable="release-off"
         [isOpen]="true"
         header="{{ 'stop-following' | transloco }}"
         message="{{

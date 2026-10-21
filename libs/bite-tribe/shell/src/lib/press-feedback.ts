@@ -31,9 +31,16 @@ export const RELEASED_MS = 300;
  */
 export const PRESS_FEEDBACK_ROOT_CLASS = 'bt-press-feedback';
 
-/** Surfaces that play `press` on touch-down and `release` on touch-up. */
+/**
+ * Surfaces that play `press` on touch-down and `release` on touch-up.
+ *
+ * `.alert-button` is the native button `ion-alert` renders for each entry of
+ * its `buttons`, in the light DOM, so it is matched like any other control
+ * (issue #1747). `release-off` is a modifier rather than an opt-in, so an
+ * element carrying it is not a surface on its own account.
+ */
 const PRESS_AND_RELEASE =
-  'ion-button, ion-fab-button, ion-chip, ion-tab-button, ion-back-button, ion-menu-button, [btPressable]';
+  'ion-button, ion-fab-button, ion-chip, ion-tab-button, ion-back-button, ion-menu-button, .alert-button, [btPressable]:not([btPressable="release-off"])';
 
 /**
  * Tappable list rows, which play `press` only: they are tapped in quick
@@ -45,6 +52,15 @@ const ROW = 'ion-item';
 const SURFACE = `${PRESS_AND_RELEASE}, ${ROW}`;
 
 const OPT_OUT = '[btPressable="off"]';
+
+/**
+ * Where a semantic intent replaces `release`: the surface, or an ancestor,
+ * carries `btPressable="release-off"`. The surface still gives way and still
+ * plays `press`; the call site plays its own intent - `warning` on a
+ * destructive alert's confirming button, `selection` on a reaction - and one
+ * tap plays one intent on release, never two (issue #1747).
+ */
+const RELEASE_OFF = '[btPressable="release-off"]';
 
 interface Press {
   readonly surface: HTMLElement;
@@ -66,7 +82,9 @@ interface Press {
  *   plays `press`.
  * - **Release:** a `pointerup` that lands inside the same surface swaps the
  *   class for {@link RELEASED_CLASS}, which lets the surface spring back with
- *   an overshoot, and plays `release`, except on list rows.
+ *   an overshoot, and plays `release`, except on list rows and under
+ *   `[btPressable="release-off"]`, where the call site's own intent takes its
+ *   place.
  * - **Cancel:** `pointercancel` - which is also how the browser reports a
  *   scroll taking the gesture over - or the pointer leaving the surface
  *   removes the class and plays nothing. A cancelled press commits nothing,
@@ -139,7 +157,8 @@ export const providePressFeedback = (): EnvironmentProviders =>
       active = {
         surface,
         pointerId: event.pointerId,
-        release: surface.matches(PRESS_AND_RELEASE),
+        release:
+          surface.matches(PRESS_AND_RELEASE) && !surface.closest(RELEASE_OFF),
       };
       clearReleased(surface);
       surface.classList.add(PRESSED_CLASS);

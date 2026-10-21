@@ -1,4 +1,6 @@
-<div class="like-options-container">
+<!-- `selection`, played by the reaction itself, replaces the shared `release`
+so a reaction tap plays one intent on release (issue #1747). -->
+<div class="like-options-container" btPressable="release-off">
   @for (likeType of likeTypes; track likeType) {
     <ion-chip
       [attr.data-testid]="'like-option-' + likeType"

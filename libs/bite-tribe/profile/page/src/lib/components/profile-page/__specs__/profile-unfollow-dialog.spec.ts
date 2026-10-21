@@ -135,17 +135,26 @@ describe(`${ProfileComponent.name} unfollow dialog`, () => {
   });
 
   // The confirming tap on a destructive alert is the one thing the `warning`
-  // intent is reserved for. See GitHub issue #1636.
-  it('should play the warning haptic when the confirmation is accepted', () => {
+  // intent is reserved for (#1636). It plays from the button, on release,
+  // rather than from the dismissal after the alert has animated away (#1747).
+  it('should play the warning haptic from the confirming button', () => {
     component.openConfirmationDialog();
 
     expect(MockHapticsService.warning).not.toHaveBeenCalled();
 
+    component.confirmationButtons
+      .find(({ role }) => role === 'unfollow')
+      ?.handler?.();
+
+    expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not play the warning haptic again on the dismissal', () => {
     component.handleConfirmationDismiss(
       new CustomEvent('didDismiss', { detail: { role: 'unfollow' } }),
     );
 
-    expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
+    expect(MockHapticsService.warning).not.toHaveBeenCalled();
   });
 
   it('should not play the warning haptic when the confirmation is cancelled', () => {

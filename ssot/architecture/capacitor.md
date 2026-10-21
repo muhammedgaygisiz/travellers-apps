@@ -603,6 +603,12 @@ dependency, and that plays the platform's own haptic primitive:
   `bite-tribe-business` and `bite-tribe-admin` do not register it (epic
   [#1740], issue [#1744]).
 
+- **What the user sees is the pressed state, and it lives in CSS.** The
+  listener also puts `bt-press-feedback` on the document element and, after a
+  release inside a surface, `bt-released` on it for 300 ms. The styles behind
+  those classes are owned by [Implementation - Ionic Patterns](../implementation/ionic-patterns.md#pressed-state)
+  (issue [#1745]).
+
 - **Once per discrete event.** No call site plays an intent on every
   pointer-move frame, keystroke or scroll tick.
 - **No permission, no store declaration.** Neither plugin needs a runtime
@@ -665,3 +671,4 @@ libs/common/image-compression
 [#1740]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1740
 [#1743]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1743
 [#1744]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1744
+[#1745]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1745

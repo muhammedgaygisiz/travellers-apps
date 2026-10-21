@@ -1,7 +1,13 @@
 import { ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HapticsService } from 'haptics';
-import { PRESSED_CLASS, providePressFeedback } from '../press-feedback';
+import {
+  PRESS_FEEDBACK_ROOT_CLASS,
+  PRESSED_CLASS,
+  providePressFeedback,
+  RELEASED_CLASS,
+  RELEASED_MS,
+} from '../press-feedback';
 
 type PointerType =
   'pointerdown' | 'pointerup' | 'pointercancel' | 'pointerleave';
@@ -391,6 +397,79 @@ describe(providePressFeedback.name, () => {
     query('#surface').dispatchEvent(event);
 
     expect(event.defaultPrevented).toBe(false);
+  });
+
+  describe('given the spring back after a press', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      render(
+        '<ion-button id="surface">Go</ion-button><ion-item button id="row">Row</ion-item>',
+      );
+    });
+
+    afterEach(() => jest.useRealTimers());
+
+    it.each(['#surface', '#row'])(
+      'should mark %s released after a release inside, for a moment',
+      (selector) => {
+        tap(query(selector));
+
+        expect(query(selector).classList).toContain(RELEASED_CLASS);
+
+        jest.advanceTimersByTime(RELEASED_MS);
+
+        expect(query(selector).classList).not.toContain(RELEASED_CLASS);
+      },
+    );
+
+    it.each([
+      [
+        'pointercancel',
+        (): void => dispatch(query('#surface'), 'pointercancel'),
+      ],
+      [
+        'a lift outside',
+        (): void => dispatch(query('#surface'), 'pointerup', OUTSIDE),
+      ],
+    ])('should not mark a press ended by %s released', (_, endPress) => {
+      dispatch(query('#surface'), 'pointerdown');
+      endPress();
+
+      expect(query('#surface').classList).not.toContain(RELEASED_CLASS);
+    });
+
+    it('should clear the released mark when the surface is pressed again', () => {
+      tap(query('#surface'));
+      dispatch(query('#surface'), 'pointerdown');
+
+      expect(query('#surface').classList).not.toContain(RELEASED_CLASS);
+      expect(query('#surface').classList).toContain(PRESSED_CLASS);
+
+      // The first release's timer must not strip anything from the second.
+      jest.advanceTimersByTime(RELEASED_MS);
+
+      expect(query('#surface').classList).toContain(PRESSED_CLASS);
+    });
+  });
+
+  it('should opt the document into the pressed-state styles', () => {
+    expect(document.documentElement.classList).toContain(
+      PRESS_FEEDBACK_ROOT_CLASS,
+    );
+  });
+
+  it('should withdraw the opt-in and any released mark when the app is destroyed', () => {
+    jest.useFakeTimers();
+    render('<ion-button id="surface">Go</ion-button>');
+    tap(query('#surface'));
+
+    TestBed.resetTestingModule();
+
+    expect(document.documentElement.classList).not.toContain(
+      PRESS_FEEDBACK_ROOT_CLASS,
+    );
+    expect(query('#surface').classList).not.toContain(RELEASED_CLASS);
+    jest.useRealTimers();
   });
 
   it('should stop listening when the app is destroyed', () => {

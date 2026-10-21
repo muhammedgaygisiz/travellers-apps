@@ -10,6 +10,27 @@ import { HapticsService } from 'haptics';
 /** The class a pressable surface carries while a finger is down on it. */
 export const PRESSED_CLASS = 'bt-pressed';
 
+/**
+ * The class a surface carries for a moment after a press ends inside it, so
+ * the spring back can overshoot. A cancelled press never gets it and returns
+ * to rest without one (issue #1745).
+ */
+export const RELEASED_CLASS = 'bt-released';
+
+/**
+ * How long {@link RELEASED_CLASS} stays on: the spring-back transition in
+ * `_globals.scss`, with a margin.
+ */
+export const RELEASED_MS = 300;
+
+/**
+ * The class on the document element that opts it into the pressed-state
+ * styles. The styles live in a stylesheet the business and admin apps share,
+ * and Ionic's own `.ion-activated` tint is only neutralised under it, so those
+ * apps keep Ionic's pressed state unchanged.
+ */
+export const PRESS_FEEDBACK_ROOT_CLASS = 'bt-press-feedback';
+
 /** Surfaces that play `press` on touch-down and `release` on touch-up. */
 const PRESS_AND_RELEASE =
   'ion-button, ion-fab-button, ion-chip, ion-tab-button, ion-back-button, ion-menu-button, [btPressable]';
@@ -43,8 +64,9 @@ interface Press {
  *
  * - **Press:** a `pointerdown` on a surface adds {@link PRESSED_CLASS} and
  *   plays `press`.
- * - **Release:** a `pointerup` that lands inside the same surface removes the
- *   class and plays `release`, except on list rows.
+ * - **Release:** a `pointerup` that lands inside the same surface swaps the
+ *   class for {@link RELEASED_CLASS}, which lets the surface spring back with
+ *   an overshoot, and plays `release`, except on list rows.
  * - **Cancel:** `pointercancel` - which is also how the browser reports a
  *   scroll taking the gesture over - or the pointer leaving the surface
  *   removes the class and plays nothing. A cancelled press commits nothing,
@@ -61,9 +83,18 @@ export const providePressFeedback = (): EnvironmentProviders =>
   provideAppInitializer(() => {
     const document = inject(DOCUMENT);
     const haptics = inject(HapticsService);
+    const releaseTimers = new Map<HTMLElement, ReturnType<typeof setTimeout>>();
     let active: Press | undefined;
 
-    const end = (playRelease: boolean): void => {
+    document.documentElement.classList.add(PRESS_FEEDBACK_ROOT_CLASS);
+
+    const clearReleased = (surface: HTMLElement): void => {
+      clearTimeout(releaseTimers.get(surface));
+      releaseTimers.delete(surface);
+      surface.classList.remove(RELEASED_CLASS);
+    };
+
+    const end = (inside: boolean): void => {
       if (!active) {
         return;
       }
@@ -72,7 +103,18 @@ export const providePressFeedback = (): EnvironmentProviders =>
       active = undefined;
       surface.classList.remove(PRESSED_CLASS);
 
-      if (playRelease && release) {
+      if (!inside) {
+        return;
+      }
+
+      // Rows spring back in full; only their second tick is left out.
+      surface.classList.add(RELEASED_CLASS);
+      releaseTimers.set(
+        surface,
+        setTimeout(() => clearReleased(surface), RELEASED_MS),
+      );
+
+      if (release) {
         void haptics.release();
       }
     };
@@ -99,6 +141,7 @@ export const providePressFeedback = (): EnvironmentProviders =>
         pointerId: event.pointerId,
         release: surface.matches(PRESS_AND_RELEASE),
       };
+      clearReleased(surface);
       surface.classList.add(PRESSED_CLASS);
       void haptics.press();
     };
@@ -143,11 +186,13 @@ export const providePressFeedback = (): EnvironmentProviders =>
       document.addEventListener(type, listener as EventListener, options),
     );
 
-    inject(DestroyRef).onDestroy(() =>
+    inject(DestroyRef).onDestroy(() => {
       listeners.forEach(([type, listener]) =>
         document.removeEventListener(type, listener as EventListener, options),
-      ),
-    );
+      );
+      [...releaseTimers.keys()].forEach(clearReleased);
+      document.documentElement.classList.remove(PRESS_FEEDBACK_ROOT_CLASS);
+    });
   });
 
 /**

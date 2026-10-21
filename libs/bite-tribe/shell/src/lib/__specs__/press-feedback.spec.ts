@@ -284,6 +284,78 @@ describe(providePressFeedback.name, () => {
     });
   });
 
+  describe('given an alert button', () => {
+    it('should play press and release on an ordinary alert', () => {
+      render(
+        '<ion-alert><div class="alert-button-group"><button class="alert-button" id="ok"><span>OK</span></button></div></ion-alert>',
+      );
+
+      tap(query('#ok span'));
+
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('given btPressable="release-off"', () => {
+    it.each([
+      ['confirming', '#confirm'],
+      ['cancelling', '#cancel'],
+    ])(
+      'should play press but not release on the %s button of a destructive alert',
+      (_, selector) => {
+        render(`
+          <ion-alert btPressable="release-off">
+            <button class="alert-button" id="cancel">Cancel</button>
+            <button class="alert-button" id="confirm">Delete</button>
+          </ion-alert>
+        `);
+
+        dispatch(query(selector), 'pointerdown');
+
+        expect(query(selector).classList).toContain(PRESSED_CLASS);
+
+        dispatch(query(selector), 'pointerup');
+
+        expect(haptics.press).toHaveBeenCalledTimes(1);
+        expect(haptics.release).not.toHaveBeenCalled();
+        // It still springs back: only the second tick is left out.
+        expect(query(selector).classList).toContain(RELEASED_CLASS);
+      },
+    );
+
+    it('should play press but not release on a reaction under it', () => {
+      render(
+        '<div btPressable="release-off" id="options"><ion-chip id="reaction">👍</ion-chip></div>',
+      );
+
+      tap(query('#reaction'));
+
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).not.toHaveBeenCalled();
+    });
+
+    it('should apply to a surface that carries it itself', () => {
+      render('<ion-chip btPressable="release-off" id="reaction">👍</ion-chip>');
+
+      tap(query('#reaction'));
+
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).not.toHaveBeenCalled();
+    });
+
+    it('should not make the element carrying it a surface of its own', () => {
+      render(
+        '<div btPressable="release-off" id="options"><ion-chip>👍</ion-chip></div>',
+      );
+
+      tap(query('#options'));
+
+      expect(query('#options').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.press).not.toHaveBeenCalled();
+    });
+  });
+
   describe('given btPressable="off"', () => {
     it.each([
       [

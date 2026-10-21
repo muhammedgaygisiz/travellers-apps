@@ -155,6 +155,13 @@ export class FollowersListComponent {
     {
       text: this.transloco.translate('yes-unfollow'),
       role: UNFOLLOW,
+      // Played from the button rather than from the dismissal, so it lands on
+      // the release instead of after the alert has animated away. The alert
+      // carries `btPressable="release-off"`, so this replaces the shared
+      // `release` instead of stacking on it (issues #1636, #1747).
+      handler: (): void => {
+        void this.haptics.warning();
+      },
     },
   ];
 
@@ -175,11 +182,6 @@ export class FollowersListComponent {
     const role = event.detail.role;
 
     if (role === UNFOLLOW) {
-      // The confirming tap on a destructive alert gets the `warning` intent
-      // reserved for exactly that. Cancelling, and opening the alert, stay
-      // silent. See GitHub issue #1636.
-      void this.haptics.warning();
-
       this.unfollow(user);
     }
 

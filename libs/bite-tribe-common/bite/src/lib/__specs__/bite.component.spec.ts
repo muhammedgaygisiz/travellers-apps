@@ -247,15 +247,29 @@ describe('BiteComponent', () => {
     });
 
     // Deleting a Bite is irreversible, which is the one thing the `warning`
-    // intent is reserved for. See GitHub issue #1636.
-    it('should play the warning haptic when role is DELETE', () => {
+    // intent is reserved for (#1636). It plays from the confirming button, on
+    // release, rather than from the dismissal after the alert has animated
+    // away (#1747).
+    it('should play the warning haptic from the delete button', () => {
+      component.confirmationButtons
+        .find(({ role }) => role === 'delete')
+        ?.handler?.();
+
+      expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
+      expect(
+        component.confirmationButtons.find(({ role }) => role === 'cancel')
+          ?.handler,
+      ).toBeUndefined();
+    });
+
+    it('should not play the warning haptic again on the dismissal', () => {
       const mockEvent = {
         detail: { role: 'delete' },
       } as CustomEvent<OverlayEventDetail>;
 
       component.handleConfirmationDismiss(mockEvent);
 
-      expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
+      expect(MockHapticsService.warning).not.toHaveBeenCalled();
     });
 
     it('should not play the warning haptic when role is CANCEL', () => {

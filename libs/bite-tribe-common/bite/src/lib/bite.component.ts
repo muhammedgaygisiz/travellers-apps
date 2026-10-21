@@ -153,6 +153,13 @@ export class BiteComponent {
     {
       text: this.transloco.translate('delete'),
       role: DELETE,
+      // Played from the button rather than from the dismissal, so it lands on
+      // the release instead of after the alert has animated away. The alert
+      // carries `btPressable="release-off"`, so this replaces the shared
+      // `release` instead of stacking on it (issues #1636, #1747).
+      handler: (): void => {
+        void this.haptics.warning();
+      },
     },
   ];
 
@@ -167,11 +174,6 @@ export class BiteComponent {
     const role = event.detail.role;
 
     if (role === DELETE) {
-      // Deleting a Bite is irreversible, so the confirming tap gets the
-      // `warning` intent that is reserved for exactly that. Cancelling, and
-      // opening the alert, stay silent. See GitHub issue #1636.
-      void this.haptics.warning();
-
       const bite = this.bite();
       this.deleteBite.emit(bite);
     }

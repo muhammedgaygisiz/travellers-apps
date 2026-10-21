@@ -22,6 +22,11 @@ addIcons({
   starOutline,
 });
 
+/**
+ * Tap a star, or drag across the row: the stars follow the pointer, each star
+ * that becomes the selected one pops, and on a native build each change plays
+ * one `tick` (issue #1748). The rating commits when the pointer lifts.
+ */
 export const Primary: Story = {
   args: {
     readonly: false,

@@ -121,3 +121,130 @@ input[type='number'] {
 .text-secondary {
   color: var(--ion-background-color-step-600);
 }
+
+// The pressed state behind the press/release contract (epic #1740, issue
+// #1745). `libs/bite-tribe/shell/src/lib/press-feedback.ts` puts `bt-pressed`
+// on a surface while a finger is down on it - in the same handler that plays
+// the `press` haptic - and `bt-released` for a moment after a press that ends
+// inside it. Nothing here changes how a control looks at rest.
+//
+// Everything is scoped under `.bt-press-feedback`, which only the bite-tribe
+// listener sets on the document. This file is shared with the business and
+// admin apps, and they keep Ionic's own pressed state.
+
+$bt-filled-surfaces: 'ion-chip, ion-item, [btPressable]';
+$bt-pressable-surfaces: 'ion-button, ion-fab-button, ion-tab-button, ion-back-button, ion-menu-button, #{$bt-filled-surfaces}';
+
+.bt-press-feedback {
+  // Read by the transforms below, so reduced motion is one switch - and a
+  // story can show it from its own wrapper, which a media query cannot.
+  --bt-press-scale: 0.97;
+  --bt-release-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  @media (prefers-reduced-motion: reduce) {
+    --bt-press-scale: 1;
+    --bt-release-easing: ease-out;
+  }
+
+  // A cancelled press - the class removed without a release - returns to rest
+  // with no overshoot.
+  :is(#{$bt-pressable-surfaces}) {
+    transition: transform 120ms ease-out;
+  }
+
+  // Press: short enough to finish before the release tick.
+  .bt-pressed {
+    transform: scale(var(--bt-press-scale));
+    transition: transform 70ms ease-out;
+  }
+
+  // Release: springs back past rest and settles.
+  .bt-released {
+    transition: transform 240ms var(--bt-release-easing);
+  }
+
+  // The colour is the theme's existing shade of the control's own colour, so
+  // no token is added. A themed control darkens its own base colour...
+  :is(
+      ion-button,
+      ion-fab-button,
+      ion-back-button,
+      ion-menu-button
+    ).ion-color.bt-pressed {
+    --ion-color-base: var(--ion-color-shade);
+  }
+
+  // ...a solid fill without one takes the shade Ionic itself defines for it...
+  :is(ion-button.button-solid, ion-fab-button):not(.ion-color).bt-pressed {
+    --background: var(--background-activated);
+  }
+
+  // ...a control that is only an outline, a label or an icon has no fill to
+  // shade, so its own colour steps 12% toward black: the same step Ionic's
+  // `-shade` colours are generated with...
+  :is(
+      ion-button.button-outline,
+      ion-button.button-clear,
+      ion-tab-button,
+      ion-back-button,
+      ion-menu-button
+    ):not(.ion-color).bt-pressed {
+    filter: brightness(0.88);
+  }
+
+  // ...and a row, chip or card - whose colour is a surface - takes the tint
+  // Ionic's iOS mode lays over a pressed row: the text colour at 12%. It is
+  // drawn above the surface's own shadow-DOM content, which sits at z-index 1.
+  :is(#{$bt-filled-surfaces}).bt-pressed {
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      border-radius: inherit;
+      background: var(--ion-text-color, #000);
+      opacity: 0.12;
+      pointer-events: none;
+    }
+  }
+}
+
+// Ionic's own pressed state arrives about 100ms after the finger, and lingers
+// after it, so on top of `bt-pressed` it would be a second, late change. It is
+// switched off at zero specificity: a declaration from the page always beats a
+// `:host(.ion-activated)` rule inside the component, and anything a component
+// sets for itself still beats this. Surfaces that opt out with
+// `[btPressable="off"]` own their feedback and keep it.
+:where(.bt-press-feedback)
+  :where(.ion-activated):where(#{$bt-pressable-surfaces}):not(
+    :where([btPressable='off'], [btPressable='off'] *)
+  ) {
+  --background-activated-opacity: 0;
+  --color-activated: var(--color);
+  --transform: none;
+  opacity: 1;
+  transform: none;
+}
+
+:where(.bt-press-feedback)
+  :where(ion-button.button-outline.ion-color.ion-activated):not(
+    :where([btPressable='off'], [btPressable='off'] *)
+  ) {
+  --ion-color-contrast: var(--ion-color-base);
+}
+
+:where(.bt-press-feedback)
+  :where(ion-chip.ion-activated:not(.ion-color)):not(
+    :where([btPressable='off'], [btPressable='off'] *)
+  ) {
+  --background: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.12);
+}
+
+:where(.bt-press-feedback)
+  :where(ion-chip.ion-color.ion-activated):not(
+    :where([btPressable='off'], [btPressable='off'] *)
+  ) {
+  background: rgba(var(--ion-color-base-rgb), 0.08);
+}

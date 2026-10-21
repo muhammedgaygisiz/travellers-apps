@@ -74,6 +74,69 @@ Four details worth knowing before changing it:
 
 A toast that leads somewhere passes an `action` instead, which replaces the dismiss button — the bucket-list save is the one example.
 
+## Pressed State
+
+Every pressable surface in bite-tribe gives way under the finger, on the same
+frame as the `press` haptic (epic [#1740], issue [#1745]). The class comes from
+the delegated listener in `libs/bite-tribe/shell/src/lib/press-feedback.ts` - see
+`Haptic Feedback Rule` in [Architecture - Capacitor](../architecture/capacitor.md) - and the
+look comes from `libs/bite-tribe-common/styles/_globals.scss`.
+
+| Phase   | Class         | What it does                                                    |
+| ------- | ------------- | --------------------------------------------------------------- |
+| Press   | `bt-pressed`  | `scale(0.97)` over 70 ms, and the surface's shade (below)       |
+| Release | `bt-released` | Springs back over 240 ms on `cubic-bezier(0.34, 1.56, 0.64, 1)` |
+| Cancel  | neither       | Returns over 120 ms `ease-out`, with no overshoot               |
+
+The shade is the theme's existing shade of the surface's own colour, and no
+token is added for it:
+
+- A themed control (`color="..."`, so `.ion-color`) sets `--ion-color-base` to
+  `--ion-color-shade`, which darkens a solid fill, an outline and a label alike.
+- A solid `ion-button` or `ion-fab-button` without a colour takes
+  `--background-activated`, the shade Ionic itself defines for that fill.
+- An outline or clear `ion-button`, `ion-tab-button`, `ion-back-button` and
+  `ion-menu-button` without a colour have no fill to shade, so they take
+  `filter: brightness(0.88)`: the same 12%-toward-black step Ionic generates its
+  `-shade` colours with, applied to whatever colour the theme gave them.
+- `ion-chip`, `ion-item` and a `[btPressable]` surface are coloured by a surface,
+  so they take the tint Ionic's iOS mode lays over a pressed row: an `::after`
+  in `--ion-text-color` at 12% opacity, at `z-index: 2` because Ionic's own
+  shadow content sits at 1. It darkens in light mode and lightens in dark. The
+  pressed rule sets `position: relative` for it, which Ionic's chip, item and
+  card already have; a `[btPressable]` on any other element should be positioned
+  already, or its absolutely positioned children move while it is pressed.
+
+Rules that hold the contract together:
+
+- **Nothing changes at rest.** At rest the only addition is a `transition` on
+  `transform`, which shows nothing until something transforms. No border,
+  shadow, radius, size, variant or colour token changes.
+- **Ionic's own pressed state is switched off, not stacked.** `.ion-activated`
+  arrives about 100 ms after the finger and is held after it, so on top of
+  `bt-pressed` it is a second, late change. On the same surfaces it is
+  neutralised - the activated overlay, the clear and header buttons' 0.4
+  opacity, the card's own scale, the FAB's scale - at zero specificity through
+  `:where()`. A declaration from the page always beats a `:host(.ion-activated)`
+  rule inside the component, and anything a component sets for itself still
+  beats the neutraliser. Surfaces under `[btPressable="off"]` keep Ionic's
+  state.
+- **Only bite-tribe gets it.** `_globals.scss` is shared with the business and
+  admin apps, so every rule is scoped under `.bt-press-feedback`, which only the
+  bite-tribe listener sets. Those two apps keep Ionic's pressed state unchanged.
+- **Reduced motion is one switch.** `--bt-press-scale` and
+  `--bt-release-easing` are set on `.bt-press-feedback` and reset to `1` and
+  `ease-out` under `prefers-reduced-motion: reduce`, so the press changes colour
+  only and the release does not overshoot. A story shows the state by setting
+  the same two variables on its wrapper, because it cannot set the media query.
+- **Disabled surfaces show nothing.** The listener never gives them the class,
+  so a press on one leaves it exactly as it was - the "dead" response that tells
+  disabled apart from a miss.
+
+`Components/Pressed State` in Storybook (`libs/bite-tribe/shell/src/lib/__specs__/pressed-state.stories.ts`)
+shows rest, pressed, disabled and reduced-motion, in light and dark, for every
+button fill, a chip, a list row and a card.
+
 ## Desktop Layout
 
 `PageChromeConfig.desktopLayout` opts a page into the desktop layout in `libs/common/ui/page`. It is off by default, so pages that do not set it are unaffected at every width.
@@ -118,3 +181,5 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1636]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1636
 [#1637]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1637
 [#1696]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1696
+[#1740]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1740
+[#1745]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1745

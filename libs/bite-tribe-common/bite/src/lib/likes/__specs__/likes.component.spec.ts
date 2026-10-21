@@ -229,4 +229,59 @@ describe(LikesComponent.name, () => {
 
     expect(MockHapticsService.selection).not.toHaveBeenCalled();
   });
+
+  describe('the reaction pop', () => {
+    const emojiLabels = (): HTMLElement[] =>
+      Array.from(fixture.nativeElement.querySelectorAll('ion-label.emoji'));
+
+    it('applies the pop in the same handler call that plays the haptic', () => {
+      componentRef.setInput('userLikeType', undefined);
+      fixture.detectChanges();
+      let poppedWhenHapticPlayed: unknown;
+      MockHapticsService.selection.mockImplementationOnce(() => {
+        poppedWhenHapticPlayed = component.poppedLikeType();
+        return Promise.resolve();
+      });
+
+      component.onLikeSelected('drooling');
+
+      expect(poppedWhenHapticPlayed).toBe('drooling');
+    });
+
+    it('pops the emoji of the reaction just chosen, and only that one', () => {
+      component.onLikeSelected('drooling');
+      fixture.detectChanges();
+
+      // The fixture has thumbup and drooling, in that order; mindblown has none.
+      expect(
+        emojiLabels().map((label) => label.classList.contains('popped')),
+      ).toEqual([false, true]);
+    });
+
+    it('pops nothing when a reaction is taken back', () => {
+      component.onLikeSelected('thumbup');
+      fixture.detectChanges();
+
+      expect(component.poppedLikeType()).toBeNull();
+      expect(
+        emojiLabels().some((label) => label.classList.contains('popped')),
+      ).toBe(false);
+    });
+
+    it('settles once the pop has played', () => {
+      component.onLikeSelected('drooling');
+      component.onPopEnd();
+      fixture.detectChanges();
+
+      expect(
+        emojiLabels().some((label) => label.classList.contains('popped')),
+      ).toBe(false);
+    });
+
+    it('does not pop at rest', () => {
+      fixture.detectChanges();
+
+      expect(component.poppedLikeType()).toBeNull();
+    });
+  });
 });

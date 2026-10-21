@@ -46,6 +46,18 @@
         &.last-emoji {
           margin-right: 8px;
         }
+
+        // The reaction just chosen pops once, on the frame its haptic plays,
+        // and settles (issue #1749). Deliberately small: no burst, no colour.
+        &.popped {
+          animation: reaction-pop 200ms ease-out;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          &.popped {
+            animation: none;
+          }
+        }
       }
     }
 
@@ -75,5 +87,15 @@
         }
       }
     }
+  }
+}
+
+@keyframes reaction-pop {
+  45% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }

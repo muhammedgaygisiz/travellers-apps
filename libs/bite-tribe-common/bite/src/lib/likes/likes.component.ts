@@ -6,6 +6,7 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { HapticsService } from 'haptics';
 import { IonChip, IonLabel } from '@ionic/angular/standalone';
@@ -46,6 +47,12 @@ export class LikesComponent {
 
   likeButtonClick = output<LikeClick>();
 
+  /**
+   * The reaction that was just chosen, whose emoji pops on the frame the
+   * `selection` haptic plays. Removing a reaction pops nothing (issue #1749).
+   */
+  poppedLikeType = signal<LikeType | null>(null);
+
   totalLikeCount = computed(() => {
     const likeCounts = this.likeCounts();
     return likeTypes.reduce(
@@ -76,12 +83,21 @@ export class LikesComponent {
     return '';
   });
 
-  getLikeEmojis = computed(() => {
+  /** Each reaction the Bite has, with its emoji, in display order. */
+  likeEmojiEntries = computed(() => {
     const likeCounts = this.likeCounts();
     return likeTypes
       .filter((likeType) => likeCounts[likeType] > 0)
-      .map((likeType) => emojiMap[likeType]);
+      .map((likeType) => ({ likeType, emoji: emojiMap[likeType] }));
   });
+
+  getLikeEmojis = computed(() =>
+    this.likeEmojiEntries().map(({ emoji }) => emoji),
+  );
+
+  onPopEnd(): void {
+    this.poppedLikeType.set(null);
+  }
 
   async openLikeOptions($event: MouseEvent): Promise<void> {
     if (this.readonly()) {
@@ -113,11 +129,15 @@ export class LikesComponent {
     // on the store's eventual outcome: the reaction is optimistic, frequent and
     // low-stakes, which is exactly what `selection` is for. See GitHub issue
     // #1637.
+    const userLikeType = this.userLikeType();
+    const removing = likeType === userLikeType;
+
+    // What is seen goes with what is felt, in the same handler: choosing a
+    // reaction pops its emoji, while taking one back simply settles.
+    this.poppedLikeType.set(removing ? null : likeType);
     void this.haptics.selection();
 
-    const userLikeType = this.userLikeType();
-
-    if (likeType === userLikeType) {
+    if (removing) {
       this.likeButtonClick.emit({
         biteId: this.biteId(),
         likeType,

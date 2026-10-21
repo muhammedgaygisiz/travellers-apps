@@ -570,6 +570,8 @@ dependency, and that plays the platform's own haptic primitive:
   touch-down and leaves the release to `selection` - one intent per tap (issue
   [#1747]). The chip that opens the options is an ordinary control and plays
   `press` and `release`.
+  The chosen emoji pops on the same frame; [Implementation - Ionic Patterns](../implementation/ionic-patterns.md) owns how
+  (issue [#1749]).
 - **Destructive confirmations play `warning` on release, in place of
   `release`.** The four alerts that ask before a destructive action - delete
   Bite, unfollow on both the followers list and a profile, and block on a
@@ -712,3 +714,4 @@ libs/common/image-compression
 [#1746]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1746
 [#1747]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1747
 [#1748]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1748
+[#1749]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1749

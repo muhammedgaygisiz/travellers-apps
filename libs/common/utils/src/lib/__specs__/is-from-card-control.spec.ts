@@ -51,4 +51,20 @@ describe(isFromCardControl.name, () => {
 
     expect(isFromCardControl(clickOn('#name'), card)).toBe(false);
   });
+
+  it('is false for an event with no element target', () => {
+    const card = render('<ion-card btPressable></ion-card>');
+    const event = new Event('click');
+    document.dispatchEvent(event);
+
+    expect(isFromCardControl(event, card)).toBe(false);
+  });
+
+  it('does not count a card that is itself a control-shaped element', () => {
+    document.body.innerHTML =
+      '<div btPressable id="card"><p id="name">Restaurant</p></div>';
+    const card = document.querySelector('#card') as HTMLElement;
+
+    expect(isFromCardControl(clickOn('#name'), card)).toBe(false);
+  });
 });

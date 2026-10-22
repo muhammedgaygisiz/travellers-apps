@@ -324,6 +324,13 @@ describe(providePressFeedback.name, () => {
       expect(query('#card').classList).not.toContain(RELEASED_CLASS);
     });
 
+    it('ignores a move when no press is in progress', () => {
+      dispatch(query('#card p'), 'pointermove', { clientX: 90, clientY: 90 });
+
+      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.press).not.toHaveBeenCalled();
+    });
+
     it('ignores moves from another pointer', () => {
       dispatch(query('#card p'), 'pointerdown', { clientX: 50, clientY: 50 });
       dispatch(query('#card p'), 'pointermove', {

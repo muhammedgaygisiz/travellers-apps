@@ -38,6 +38,56 @@ export const LikedByMe: Story = {
 };
 
 /**
+ * Opens the reaction options from the chip and taps one, as a user does. The
+ * popover lives at the document root, outside the story's canvas.
+ */
+const react = async (
+  canvasElement: HTMLElement,
+  likeType: string,
+): Promise<void> => {
+  canvasElement
+    .querySelector<HTMLElement>('[data-testid="like-chip"]')
+    ?.click();
+
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const option = document.querySelector<HTMLElement>(
+      `[data-testid="like-option-${likeType}"]`,
+    );
+
+    if (option) {
+      option.click();
+      return;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+};
+
+/**
+ * These two exist to show motion, which a still image cannot hold, and they
+ * drive a popover whose timing would make a capture flaky - so they are kept
+ * out of the visual-regression run. Replay them from the toolbar to watch.
+ */
+const MOTION_ONLY = { loki: { skip: true } };
+
+/**
+ * Choosing a reaction: its emoji pops once and settles, on the frame the
+ * `selection` haptic plays (issue #1749).
+ */
+export const SelectReaction: Story = {
+  args: WithLikes.args,
+  parameters: MOTION_ONLY,
+  play: async ({ canvasElement }) => react(canvasElement, 'drooling'),
+};
+
+/** Taking a reaction back: it settles without a pop. */
+export const RemoveReaction: Story = {
+  args: LikedByMe.args,
+  parameters: MOTION_ONLY,
+  play: async ({ canvasElement }) => react(canvasElement, 'thumbup'),
+};
+
+/**
  * The viewer's own Bite. The chip reports how it was received but is not a
  * control, so it drops its fill and its top/left edge.
  */

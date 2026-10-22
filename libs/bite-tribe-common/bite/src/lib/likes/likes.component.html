@@ -7,13 +7,17 @@
     >
       @if (totalLikeCount()) {
         @for (
-          emoji of getLikeEmojis();
-          let index = $index, last = $last;
-          track index
+          entry of likeEmojiEntries();
+          let last = $last;
+          track entry.likeType
         ) {
-          <ion-label class="emoji" [class.last-emoji]="last">{{
-            emoji
-          }}</ion-label>
+          <ion-label
+            class="emoji"
+            [class.last-emoji]="last"
+            [class.popped]="entry.likeType === poppedLikeType()"
+            (animationend)="onPopEnd()"
+            >{{ entry.emoji }}</ion-label
+          >
         }
         <ion-label class="like-nr" data-testid="like-count">{{
           totalLikeCount()

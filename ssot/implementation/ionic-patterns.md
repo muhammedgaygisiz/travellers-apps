@@ -132,6 +132,22 @@ Rules that hold the contract together:
 - **Disabled surfaces show nothing.** The listener never gives them the class,
   so a press on one leaves it exactly as it was - the "dead" response that tells
   disabled apart from a miss.
+- **A card is one pressable surface, and its controls are not part of it.**
+  The Bite card (`bt-bite`) and the BiteTrail card (`bite-trail`) carry
+  `btPressable` on their `ion-card`, with `role="button"` and `tabindex="0"`,
+  and open what they show from a click anywhere on it or `Enter` while the card
+  itself has focus. A control inside the card - the interactive reaction chip,
+  _Rate now_, _Edit_, _Delete_, the image retry, _View BiteTrail_, and the
+  BiteTrail owner name, which carries its own `btPressable` - keeps its own
+  action and press: the listener resolves the nearest surface, so the control
+  presses and the card does not, and the card's handler ignores a click whose
+  target sits inside one (`isFromCardControl` in `libs/common/utils`). Nothing
+  else on the card is a link of its own; the photo and title no longer carry a
+  separate click or `role="button"`. A read-only reaction chip refuses pointer
+  input, so a tap on it is a tap on the card. Every host of `bt-bite` gets the
+  whole-card click, including the admin app's new-restaurant page; only
+  bite-tribe gets the press, because only its shell runs the listener (issue
+  [#1765]).
 
 `Components/Pressed State` in Storybook (`libs/bite-tribe/shell/src/lib/__specs__/pressed-state.stories.ts`)
 shows rest, pressed, disabled and reduced-motion, in light and dark, for every
@@ -185,3 +201,4 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1745]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1745
 [#1747]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1747
 [#1749]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1749
+[#1765]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1765

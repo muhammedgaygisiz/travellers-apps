@@ -24,6 +24,13 @@ export const RELEASED_CLASS = 'bt-released';
 export const RELEASED_MS = 300;
 
 /**
+ * How far a pointer may travel before a press stops being a tap. Past it the
+ * gesture is a drag - swiping a feed card open, pulling a drawer - and ends
+ * silently, the way a scroll does (issue #1765).
+ */
+export const DRAG_CANCEL_PX = 10;
+
+/**
  * The class on the document element that opts it into the pressed-state
  * styles. The styles live in a stylesheet the business and admin apps share,
  * and Ionic's own `.ion-activated` tint is only neutralised under it, so those
@@ -66,6 +73,8 @@ interface Press {
   readonly surface: HTMLElement;
   readonly pointerId: number;
   readonly release: boolean;
+  readonly startX: number;
+  readonly startY: number;
 }
 
 /**
@@ -86,8 +95,9 @@ interface Press {
  *   `[btPressable="release-off"]`, where the call site's own intent takes its
  *   place.
  * - **Cancel:** `pointercancel` - which is also how the browser reports a
- *   scroll taking the gesture over - or the pointer leaving the surface
- *   removes the class and plays nothing. A cancelled press commits nothing,
+ *   scroll taking the gesture over - the pointer leaving the surface, or the
+ *   pointer travelling more than {@link DRAG_CANCEL_PX} removes the class and
+ *   plays nothing. A cancelled press commits nothing,
  *   so it must not feel like one that does (the rule #1636 set for alerts).
  *
  * Disabled surfaces, and anything under `[btPressable="off"]`, get neither the
@@ -159,6 +169,8 @@ export const providePressFeedback = (): EnvironmentProviders =>
         pointerId: event.pointerId,
         release:
           surface.matches(PRESS_AND_RELEASE) && !surface.closest(RELEASE_OFF),
+        startX: event.clientX,
+        startY: event.clientY,
       };
       clearReleased(surface);
       surface.classList.add(PRESSED_CLASS);
@@ -174,6 +186,24 @@ export const providePressFeedback = (): EnvironmentProviders =>
       // on, so the event target cannot tell whether the finger was lifted
       // inside the surface. Where it was lifted can.
       end(isInside(active.surface, event));
+    };
+
+    // A gesture the browser keeps to itself - an `ion-item-sliding` swipe, a
+    // drawer drag - never fires `pointercancel`, so travel is what tells it
+    // apart from a tap.
+    const onPointerMove = (event: PointerEvent): void => {
+      if (active?.pointerId !== event.pointerId) {
+        return;
+      }
+
+      const travelled = Math.hypot(
+        event.clientX - active.startX,
+        event.clientY - active.startY,
+      );
+
+      if (travelled > DRAG_CANCEL_PX) {
+        end(false);
+      }
     };
 
     const onPointerCancel = (event: PointerEvent): void => {
@@ -195,6 +225,7 @@ export const providePressFeedback = (): EnvironmentProviders =>
 
     const listeners: [string, (event: PointerEvent) => void][] = [
       ['pointerdown', onPointerDown],
+      ['pointermove', onPointerMove],
       ['pointerup', onPointerUp],
       ['pointercancel', onPointerCancel],
       ['pointerleave', onPointerLeave],

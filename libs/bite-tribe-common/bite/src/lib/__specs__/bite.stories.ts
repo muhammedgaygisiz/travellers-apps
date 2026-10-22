@@ -1,4 +1,11 @@
-import { Component, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  Directive,
+  ElementRef,
+  inject,
+  signal,
+} from '@angular/core';
 import { BiteComponent } from '../bite.component';
 import {
   applicationConfig,
@@ -108,6 +115,42 @@ export const Bite: Story = {
   render: (args) => ({
     props: { ...args },
     template,
+  }),
+};
+
+/**
+ * Holds the card in its pressed state, the way the bite-tribe press listener
+ * leaves it while a finger is down. A story cannot hold a finger down, and the
+ * listener only runs in the app, so this sets the classes it would.
+ */
+@Directive({ selector: '[storyPressedCard]' })
+class StoryPressedCardDirective implements AfterViewInit {
+  private readonly host = inject(ElementRef<HTMLElement>);
+
+  ngAfterViewInit(): void {
+    this.host.nativeElement
+      .querySelector('ion-card')
+      ?.classList.add('bt-pressed');
+  }
+}
+
+/**
+ * The whole card is one pressable surface and opens the Bite from anywhere on
+ * it; this is a finger down on it (issue #1765). The reaction chip and the
+ * card's buttons press on their own instead.
+ */
+export const Pressed: Story = {
+  args: {
+    bite: demoBiteBase,
+  },
+  decorators: [moduleMetadata({ imports: [StoryPressedCardDirective] })],
+  render: (args) => ({
+    props: { ...args },
+    template: `
+      <div class="ion-margin bt-press-feedback" storyPressedCard>
+        <bt-bite [bite]="bite" [userId]="userId" />
+      </div>
+    `,
   }),
 };
 

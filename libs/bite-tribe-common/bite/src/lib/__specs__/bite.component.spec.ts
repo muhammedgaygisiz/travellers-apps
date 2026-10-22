@@ -455,4 +455,110 @@ describe('BiteComponent', () => {
       expect(component.isRatingModalOpen()).toBe(false);
     });
   });
+
+  describe('opening the Bite from the card (issue #1765)', () => {
+    let opened: Bite[];
+
+    const card = (): HTMLElement =>
+      fixture.nativeElement.querySelector('ion-card');
+
+    const click = (selector: string): void => {
+      const target =
+        selector === 'ion-card'
+          ? card()
+          : (fixture.nativeElement.querySelector(selector) as HTMLElement);
+      target.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    };
+
+    beforeEach(() => {
+      opened = [];
+      component.biteClick.subscribe((bite) => opened.push(bite));
+    });
+
+    it('makes the whole card one pressable, focusable button', () => {
+      expect(card().hasAttribute('btpressable')).toBe(true);
+      expect(card().getAttribute('role')).toBe('button');
+      expect(card().getAttribute('tabindex')).toBe('0');
+    });
+
+    it.each([
+      ['the photo', '.card-image img'],
+      ['the title', 'ion-card-title'],
+      ['the restaurant name', '.place'],
+      ['the location', '.location'],
+      ['the card surface', 'ion-card'],
+    ])('opens the Bite from %s', (_, selector) => {
+      click(selector);
+
+      expect(opened).toEqual([mockBite]);
+    });
+
+    it('leaves the photo and title without a click target of their own', () => {
+      const image = fixture.nativeElement.querySelector('.card-image img');
+
+      expect(image.getAttribute('role')).toBeNull();
+      expect(image.getAttribute('tabindex')).toBeNull();
+    });
+
+    it('does not open the Bite from the reaction chip', () => {
+      const likes = fixture.nativeElement.querySelector('bt-likes');
+      expect(likes).not.toBeNull();
+
+      click('[data-testid="like-chip"]');
+
+      expect(opened).toEqual([]);
+    });
+
+    it('does not open the Bite from Rate now', () => {
+      componentRef.setInput('bite', {
+        ...mockBite,
+        rating: undefined,
+        userId: 'user1',
+      });
+      fixture.detectChanges();
+      const rateNow = fixture.nativeElement.querySelector(
+        '.rating-container ion-button',
+      );
+      expect(rateNow).not.toBeNull();
+
+      rateNow.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+      expect(opened).toEqual([]);
+    });
+
+    it.each([0, 1])(
+      'does not open the Bite from the edit actions (button %i)',
+      (index) => {
+        componentRef.setInput('showEditButton', true);
+        fixture.detectChanges();
+        const button = fixture.nativeElement.querySelectorAll(
+          '.bite-actions ion-button',
+        )[index] as HTMLElement;
+
+        button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+        expect(opened).toEqual([]);
+      },
+    );
+
+    it('opens the Bite on Enter while the card itself has focus', () => {
+      card().dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+      );
+
+      expect(opened).toEqual([mockBite]);
+    });
+
+    it('leaves Enter on an inner control to that control', () => {
+      componentRef.setInput('showEditButton', true);
+      fixture.detectChanges();
+      fixture.nativeElement
+        .querySelector('.bite-actions ion-button')
+        .dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+        );
+
+      expect(opened).toEqual([]);
+    });
+  });
 });

@@ -24,6 +24,7 @@ export {
 } from './lib/subscription-tier';
 
 export { normalize } from './lib/normalize';
+export { isFromCardControl } from './lib/is-from-card-control';
 export { currencyCodes } from './lib/currencies';
 export { countries, type Country } from './lib/countries';
 export { getLocalizedCurrencyName } from './lib/get-localized-currency-name';

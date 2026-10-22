@@ -597,8 +597,11 @@ dependency, and that plays the platform's own haptic primitive:
   not make its own element pressable. On `pointerdown` the `bt-pressed` class is added and `press` is
   played in the same handler, so what is seen and what is felt start on the same
   frame. A cancel - `pointercancel`, which is also how the browser reports a
-  scroll taking the gesture over, the pointer leaving the surface, or a touch-up
-  outside it - removes the class and plays nothing. Disabled surfaces
+  scroll taking the gesture over, the pointer leaving the surface, a touch-up
+  outside it, or the pointer travelling more than 10 px (`DRAG_CANCEL_PX`) -
+  removes the class and plays nothing. The travel limit exists because a
+  gesture Ionic handles itself, such as swiping a feed card's `ion-item-sliding`
+  open or dragging the map drawer, fires no `pointercancel` (issue [#1765]). Disabled surfaces
   (`disabled`, `aria-disabled="true"`, `.button-disabled`, `.item-disabled`) and
   anything under `[btPressable="off"]` get neither. Two details are easy to get
   wrong:
@@ -715,3 +718,4 @@ libs/common/image-compression
 [#1747]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1747
 [#1748]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1748
 [#1749]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1749
+[#1765]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1765

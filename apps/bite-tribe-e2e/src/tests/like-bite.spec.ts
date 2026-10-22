@@ -132,15 +132,19 @@ test.describe('Like a bite', () => {
     await expect(home.likeChip(likedName)).toBeVisible();
     await home.expectLikeCount(likedName, '2');
 
-    // But the chip is a label, not a control: it refuses pointer input, and a
-    // tap landing on it opens no reaction popover.
+    // With nothing to report the chip is left out entirely, rather than
+    // offering a thumbs-up that cannot be tapped. Checked before the tap
+    // below, which leaves the feed.
+    await expect(home.biteCard(quietName)).toBeVisible();
+    await expect(home.likeChip(quietName)).toHaveCount(0);
+
+    // But the chip is a label, not a control: it refuses pointer input, so a
+    // tap landing on it opens no reaction popover. It falls through to the
+    // card, which opens the Bite from anywhere on it (issue #1765).
     await expect(home.likeChip(likedName)).toHaveCSS('pointer-events', 'none');
     await home.tapLikeChipDirectly(likedName);
     await expect(page.getByTestId('like-option-thumbup')).toHaveCount(0);
-
-    // With nothing to report the chip is left out entirely, rather than
-    // offering a thumbs-up that cannot be tapped.
-    await expect(home.likeChip(quietName)).toHaveCount(0);
+    await page.waitForURL(new RegExp(`/bite/${likedId}$`));
 
     await Promise.all([
       deleteFirestoreDocument(page, `bites/${likedId}`),

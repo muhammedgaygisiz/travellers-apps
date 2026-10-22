@@ -106,6 +106,7 @@ repository, and [Traceability Map](overview/traceability-map.md) to find the pag
 - [UC - Earn From A Paid BiteTrail](use-cases/uc-earn-from-a-paid-bitetrail.md)
 - [UC - Dismiss Restaurant Candidate](use-cases/uc-dismiss-restaurant-candidate.md)
 - [UC - Resolve Candidate Against An Existing Restaurant](use-cases/uc-resolve-candidate-against-an-existing-restaurant.md)
+- [UC - Share A Bite To Social Media](use-cases/uc-share-a-bite-to-social-media.md)
 
 ### Obsolete - pending deletion
 

@@ -27,6 +27,11 @@ nothing, and how a review and its thread are attributed.
 - A public creator profile identifies who shared the Bite.
 - The page shows the Bite's distance from the user's current position and converts its price into the user's preferred currency.
 - User can share the Bite through the device share sheet, including WhatsApp when available.
+  The share button is to open a share menu instead - Instagram Story, Instagram Post,
+  Facebook Story and More… - whose More… entry is this link share, unchanged. The menu, the
+  image composer behind its other entries and the hand-off to each app are
+  [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md)'s (`UC-SBS` `R-1`, `R-2`). Until issue [#1726]
+  lands, the button opens the device share sheet directly.
 - The Bite is the only shareable entity in BiteTribe. The share link, the
   `handleSharedLinkToBite` preview endpoint, and the native `/s/bite/*` deep-link
   registration in the iOS Associated Domains file and the Android App Links
@@ -308,6 +313,8 @@ data types this page renders are declared in [Implementation - Store Declaration
   that displays rather than publishes
 - [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) — the tapped-notification
   entry that lands on a highlighted thread
+- [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md) — the share menu and the image
+  share the share button leads to
 - [epic-1284](../records/epic-1284.md)
 - [issue-1190](../records/issue-1190.md)
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
@@ -322,3 +329,4 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308
 [#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
+[#1726]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1726

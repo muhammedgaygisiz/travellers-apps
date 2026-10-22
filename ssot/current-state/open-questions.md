@@ -134,6 +134,15 @@ These belong to [epic-1487](../records/epic-1487.md), the city landing pages. Ea
 - What is the content bar for publishing a page? One production restaurant has a menu. A curated list whose entries have no dishes behind them is the thin-page pattern that costs a domain more than it earns, so the epic proposes a stated minimum of real Bites with photos per entry, and one city in the first release.
 - Does the URL space keep `/eat/<city>/<slug>`? Cheap to change before the first page is indexed and expensive after.
 
+## Share As Image Questions
+
+These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and Facebook. The rules that are settled are on [UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md); these are not, and each gates the child named next to it.
+
+- How many templates ship at launch, who designs them, and do they use the brand characters in [Implementation - Brand Characters](../implementation/brand-characters.md)? Gates [#1731]; [#1726] ships one template either way.
+- Does the QR code carry the full `/s/bite/<biteId>` link or a short one? The full link may make the code too dense to scan at small sizes. Whichever it is, `UC-SBS` `R-23` holds: the code carries the Bite's address and nothing user-controlled. Gates [#1726].
+- Is the creator's display name on or off by default when the sharer shares their own Bite? `UC-SBS` `R-8` fixes the default for somebody else's Bite only. Gates [#1728].
+- Does an image add any exposure that the Bite on screen does not? `UC-SBS` `R-3` assumes that "any Bite the viewer can see" already respects a private profile and a Bite its creator has restricted, and the epic asks for that to be confirmed rather than assumed.
+
 ## Related Pages
 
 - [Current State - Roadmap](roadmap.md)
@@ -174,3 +183,7 @@ These belong to [epic-1487](../records/epic-1487.md), the city landing pages. Ea
 [#1611]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1611
 [#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657
 [#1658]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1658
+[#1723]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1723
+[#1726]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1726
+[#1728]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1728
+[#1731]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1731

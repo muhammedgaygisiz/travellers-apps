@@ -1,6 +1,17 @@
 @let biteData = bite();
 
-<ion-card>
+<!-- The whole card opens the Bite and gives way under the finger. Controls
+inside it - the reaction chip, Rate now, Edit, Delete, the image retry - keep
+their own action and press, and never also open the card. See GitHub issue
+#1765. -->
+<ion-card
+  btPressable
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="biteData?.name"
+  (click)="onCardClick($event)"
+  (keydown.enter)="onCardKeydown($event)"
+>
   <div class="card-content">
     <div class="card-image">
       <!-- Checked before the image branch: on a failed upload the poster still
@@ -16,16 +27,11 @@
       } @else if (biteData.image || biteData.imagePath) {
         <img
           alt="Dish"
-          class="cursor-pointer"
           [class.fade-in]="imageJustUploaded()"
           [src]="biteData | getImage"
           decoding="async"
           height="220"
           loading="lazy"
-          role="button"
-          tabindex="0"
-          (click)="biteClick.emit(biteData)"
-          (keydown.enter)="biteClick.emit(biteData)"
         />
       }
     </div>
@@ -34,8 +40,8 @@
       <ion-card-header
         class="ion-display-flex ion-flex-column ion-justify-content-start"
       >
-        <ion-card-title (click)="biteClick.emit(biteData)">
-          <span class="bite-title cursor-pointer">
+        <ion-card-title>
+          <span class="bite-title">
             <ion-text color="secondary" class="copytext">
               {{
                 $safeNavigationMigration(biteData?.name)

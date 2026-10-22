@@ -39,6 +39,7 @@ import { HapticsService } from 'haptics';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { getLocalizedRegionName } from './utils/getLocalizedCityAndCountry';
+import { isFromCardControl } from 'utils';
 
 const DELETE = 'delete';
 const CANCEL = 'cancel';
@@ -92,6 +93,27 @@ export class BiteComponent {
   deleteBite = output<Bite>();
   rateNowClick = output<{ bite: Bite; rating: number }>();
   retryImageUpload = output<Bite>();
+
+  /**
+   * A tap anywhere on the card opens the Bite, unless it landed on one of the
+   * card's own controls, which act on their own (issue #1765).
+   */
+  onCardClick(event: Event): void {
+    if (isFromCardControl(event, event.currentTarget as Element)) {
+      return;
+    }
+
+    this.biteClick.emit(this.bite());
+  }
+
+  /** `Enter` opens the Bite only while the card itself has focus. */
+  onCardKeydown(event: Event): void {
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
+    this.biteClick.emit(this.bite());
+  }
 
   likeCounts = computed(() => getLikeCounts(this.bite()));
   userLikeType = computed(() => getUserLikeType(this.bite(), this.userId()));

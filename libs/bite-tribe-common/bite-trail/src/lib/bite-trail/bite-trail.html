@@ -1,11 +1,20 @@
 @let biteTrailData = biteTrail();
 
-<ion-card>
+<!-- The whole card opens the BiteTrail and gives way under the finger. The
+owner name and View BiteTrail keep their own action and press, and never also
+open the card. See GitHub issue #1765. -->
+<ion-card
+  btPressable
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="biteTrailData.name"
+  (click)="onCardClick($event)"
+  (keydown.enter)="onCardKeydown($event)"
+>
   <div class="card-content">
     <div class="card-image">
       <img
         alt="{{biteTrailData.name}}"
-        class="cursor-pointer"
         src="{{biteTrailData.imagePath}}"
         height="220"
         loading="lazy"
@@ -17,7 +26,7 @@
         class="ion-display-flex ion-flex-column ion-justify-content-start"
       >
         <ion-card-title>
-          <span class="title cursor-pointer">
+          <span class="title">
             <ion-text color="secondary" class="copytext">
               {{ biteTrailData?.name }}
             </ion-text>
@@ -42,8 +51,10 @@
                 <p>
                   {{ 'by-before' | transloco}}
                   <ion-text
+                    btPressable
                     color="primary"
                     class="cursor-pointer ion-display-flex"
+                    data-testid="bite-trail-owner"
                     (click)="goToProfile.emit(biteTrailData.ownerId)"
                   >
                     &#64;{{ biteTrailData.ownerName }}

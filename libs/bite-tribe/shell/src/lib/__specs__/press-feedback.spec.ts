@@ -2,6 +2,7 @@ import { ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HapticsService } from 'haptics';
 import {
+  DRAG_CANCEL_PX,
   PRESS_FEEDBACK_ROOT_CLASS,
   PRESSED_CLASS,
   providePressFeedback,
@@ -10,7 +11,11 @@ import {
 } from '../press-feedback';
 
 type PointerType =
-  'pointerdown' | 'pointerup' | 'pointercancel' | 'pointerleave';
+  | 'pointerdown'
+  | 'pointermove'
+  | 'pointerup'
+  | 'pointercancel'
+  | 'pointerleave';
 
 interface PointerInit {
   pointerId?: number;
@@ -282,6 +287,65 @@ describe(providePressFeedback.name, () => {
       expect(haptics.press).not.toHaveBeenCalled();
       expect(haptics.release).not.toHaveBeenCalled();
     });
+  });
+
+  describe('given a press that turns into a drag (issue #1765)', () => {
+    beforeEach(() =>
+      render('<ion-card btPressable id="card"><p>A Bite</p></ion-card>'),
+    );
+
+    it('keeps the press while the finger stays within the tap distance', () => {
+      dispatch(query('#card p'), 'pointerdown', { clientX: 50, clientY: 50 });
+      dispatch(query('#card p'), 'pointermove', {
+        clientX: 50 + DRAG_CANCEL_PX - 2,
+        clientY: 50,
+      });
+
+      expect(query('#card').classList).toContain(PRESSED_CLASS);
+
+      dispatch(query('#card p'), 'pointerup', { clientX: 58, clientY: 50 });
+
+      expect(haptics.release).toHaveBeenCalledTimes(1);
+    });
+
+    it('ends silently once the finger travels further, as a swipe does', () => {
+      dispatch(query('#card p'), 'pointerdown', { clientX: 50, clientY: 50 });
+      dispatch(query('#card p'), 'pointermove', {
+        clientX: 50 - DRAG_CANCEL_PX - 5,
+        clientY: 52,
+      });
+
+      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
+
+      dispatch(query('#card p'), 'pointerup', { clientX: 30, clientY: 52 });
+
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).not.toHaveBeenCalled();
+      expect(query('#card').classList).not.toContain(RELEASED_CLASS);
+    });
+
+    it('ignores moves from another pointer', () => {
+      dispatch(query('#card p'), 'pointerdown', { clientX: 50, clientY: 50 });
+      dispatch(query('#card p'), 'pointermove', {
+        pointerId: 2,
+        clientX: 90,
+        clientY: 90,
+      });
+
+      expect(query('#card').classList).toContain(PRESSED_CLASS);
+    });
+  });
+
+  it('presses the reaction chip, not the pressable card around it', () => {
+    render(
+      '<ion-card btPressable id="card"><bt-likes><ion-chip id="chip"><ion-label>👍</ion-label></ion-chip></bt-likes></ion-card>',
+    );
+
+    tap(query('#chip ion-label'));
+
+    expect(query('#card').classList).not.toContain(PRESSED_CLASS);
+    expect(query('#chip').classList).toContain(RELEASED_CLASS);
+    expect(haptics.press).toHaveBeenCalledTimes(1);
   });
 
   describe('given an alert button', () => {

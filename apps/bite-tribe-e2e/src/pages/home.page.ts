@@ -53,9 +53,14 @@ export class HomePage {
    * Clicks the named Bite's reaction chip at its own coordinates instead of
    * through `Locator.click`, which first waits for the element to be
    * actionable. On a read-only chip that wait can only time out, so this is the
-   * way to prove a real tap there does nothing. See GitHub issue #1401.
+   * way to prove where a real tap there lands. See GitHub issue #1401.
+   *
+   * The card is scrolled into view first: a mouse click at coordinates below
+   * the fold hits nothing at all, which once let a "nothing happens" assertion
+   * pass without any tap having landed (issue #1765).
    */
   async tapLikeChipDirectly(name: string): Promise<void> {
+    await this.biteCard(name).scrollIntoViewIfNeeded();
     const box = await this.likeChip(name).boundingBox();
 
     if (!box) {

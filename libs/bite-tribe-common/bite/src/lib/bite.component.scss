@@ -6,6 +6,8 @@
   ion-card {
     margin-top: 0;
     margin-bottom: 0;
+    // The whole card opens the Bite (issue #1765).
+    cursor: pointer;
     border-radius: var(--border-radius);
 
     min-width: 345px;

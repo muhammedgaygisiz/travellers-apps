@@ -248,3 +248,27 @@ $bt-pressable-surfaces: 'ion-button, ion-fab-button, ion-tab-button, ion-back-bu
   ) {
   background: rgba(var(--ion-color-base-rgb), 0.08);
 }
+
+// Alert buttons (issue #1766). `ion-alert` renders its buttons in the light
+// DOM, where Ionic's own pressed tint - `.alert-button.ion-activated` - is an
+// ordinary rule of specificity (0,3,0) rather than a `:host()` rule, so the
+// zero-specificity neutraliser above cannot reach it. Both rules here outrank
+// it by naming `ion-alert`, and the pressed rule comes second so it wins when
+// the late `.ion-activated` and `bt-pressed` are on the button together.
+//
+// An iOS alert's buttons are square segments laid edge to edge inside the
+// alert's rounded, clipped frame, so a scale would open gaps between them. The
+// press is the tint alone: the same 12% of the text colour a pressed row
+// takes. A destructive button keeps Ionic's danger colour for its label.
+.bt-press-feedback ion-alert:not([btPressable='off']) .alert-button {
+  &.ion-activated {
+    background-color: transparent;
+  }
+
+  &.bt-pressed {
+    background-color: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.12);
+    // The general `.bt-pressed` rule above scales every pressed surface; a
+    // segment of the alert's frame must not move.
+    transform: none;
+  }
+}

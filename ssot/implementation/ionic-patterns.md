@@ -132,6 +132,20 @@ Rules that hold the contract together:
 - **Disabled surfaces show nothing.** The listener never gives them the class,
   so a press on one leaves it exactly as it was - the "dead" response that tells
   disabled apart from a miss.
+- **An alert's buttons press by tint alone.** `ion-alert` is a scoped
+  component, not a shadow one: its `.alert-button`s live in the light DOM, and
+  Ionic's iOS pressed tint is the ordinary rule `.alert-button.ion-activated`
+  with specificity (0,3,0), which the zero-specificity neutraliser cannot
+  reach. Two rules under `.bt-press-feedback ion-alert` outrank it: one resets
+  `.ion-activated` to the resting `transparent`, and the next, written after it
+  so it wins when the late `.ion-activated` and `bt-pressed` are on a button
+  together, gives `bt-pressed` the 12% text tint a pressed row takes. It also
+  sets `transform: none`, overriding the general `.bt-pressed` scale: an iOS
+  alert's buttons are square segments edge to edge inside the alert's rounded,
+  clipped frame, and a shrinking segment would open gaps. A destructive button
+  keeps Ionic's danger colour for its label. Ionic moves a presented inline
+  alert to the document's overlay root, which is why the scope has to be the
+  class on `<html>` and not a wrapper (issue [#1766]).
 - **A card is one pressable surface, and its controls are not part of it.**
   The Bite card (`bt-bite`) and the BiteTrail card (`bite-trail`) carry
   `btPressable` on their `ion-card`, with `role="button"` and `tabindex="0"`,
@@ -151,7 +165,8 @@ Rules that hold the contract together:
 
 `Components/Pressed State` in Storybook (`libs/bite-tribe/shell/src/lib/__specs__/pressed-state.stories.ts`)
 shows rest, pressed, disabled and reduced-motion, in light and dark, for every
-button fill, a chip, a list row and a card.
+button fill, a chip, a list row and a card, and a destructive alert at rest
+and pressed, in light and dark.
 
 ## Desktop Layout
 
@@ -202,3 +217,4 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1747]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1747
 [#1749]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1749
 [#1765]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1765
+[#1766]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1766

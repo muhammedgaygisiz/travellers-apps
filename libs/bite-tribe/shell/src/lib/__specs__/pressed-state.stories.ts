@@ -1,10 +1,20 @@
 import {
+  AfterViewInit,
+  Directive,
+  ElementRef,
+  inject,
+  input,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
+import {
   applicationConfig,
   Meta,
   moduleMetadata,
   StoryObj,
 } from '@storybook/angular';
 import {
+  IonAlert,
   IonButton,
   IonCard,
   IonCardContent,
@@ -119,6 +129,112 @@ const render =
     };
   };
 
+/**
+ * Marks the confirming button of a presented alert pressed. Its buttons exist
+ * only once the alert has rendered them, so the class is set as soon as they
+ * appear rather than on an overlay event whose timing a story cannot rely on.
+ */
+@Directive({ selector: '[libStoryPressedAlertButton]' })
+class StoryPressedAlertButtonDirective implements AfterViewInit, OnDestroy {
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly observer = new MutationObserver(() => this.markPressed());
+
+  ngAfterViewInit(): void {
+    if (!this.markPressed()) {
+      this.observer.observe(this.host.nativeElement, {
+        childList: true,
+        subtree: true,
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.observer.disconnect();
+  }
+
+  private markPressed(): boolean {
+    const buttons = this.host.nativeElement.querySelectorAll('.alert-button');
+    const confirm = buttons[buttons.length - 1];
+
+    if (!confirm) {
+      return false;
+    }
+
+    confirm.classList.add(PRESSED_CLASS);
+    this.observer.disconnect();
+    return true;
+  }
+}
+
+/**
+ * Ionic moves a presented alert to `<body>`, out of any wrapper, so an alert
+ * story cannot scope the styles the way the other stories do. It does what the
+ * app does - the opt-in class on the document element - and the dark palette
+ * goes on the alert itself for the same reason.
+ *
+ * Moved out of Angular's tree, the alert also outlives the story: Loki
+ * switches stories without reloading, and a leftover alert would sit over every
+ * story captured after it, with the page's scroll still locked. So the class,
+ * the alert and the scroll lock are all taken away when the story is torn down.
+ */
+@Directive({ selector: '[libStoryAlertRoot]' })
+class StoryAlertRootDirective implements OnInit, OnDestroy {
+  readonly storyAlertDark = input(false);
+
+  private readonly host = inject(ElementRef<HTMLElement>);
+
+  ngOnInit(): void {
+    document.documentElement.classList.add(PRESS_FEEDBACK_ROOT_CLASS);
+
+    if (this.storyAlertDark()) {
+      DARK.split('; ').forEach((declaration) => {
+        const [name, value] = declaration.split(': ');
+        this.host.nativeElement.style.setProperty(name, value);
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    document.documentElement.classList.remove(PRESS_FEEDBACK_ROOT_CLASS);
+    this.host.nativeElement.remove();
+    // Ionic locks the page's scroll while an overlay is open and only lifts it
+    // on a dismissal, which a removed alert never makes.
+    document.body.classList.remove('backdrop-no-scroll');
+  }
+}
+
+/**
+ * A destructive confirmation, presented. In the app the press listener marks
+ * the button under the finger; here the confirming one is held pressed.
+ */
+const renderAlert =
+  (variant: Pick<Variant, 'pressed' | 'dark'>): StoryObj['render'] =>
+  () => ({
+    props: {
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        { text: 'Delete', role: 'destructive' },
+      ],
+    },
+    template: `
+      <div
+        style="${variant.dark ? DARK + '; ' : ''}background: var(--ion-background-color, #fff); min-height: 100vh"
+      >
+        <ion-alert
+          libStoryAlertRoot
+          [storyAlertDark]="${variant.dark ? 'true' : 'false'}"
+          [isOpen]="true"
+          [animated]="false"
+          [backdropDismiss]="false"
+          header="Delete Bite"
+          message="Are you sure you want to delete this Bite?"
+          [buttons]="buttons"
+          ${variant.pressed ? 'libStoryPressedAlertButton' : ''}
+        />
+      </div>
+    `,
+  });
+
 export default {
   title: 'Components/Pressed State',
   decorators: [
@@ -127,6 +243,9 @@ export default {
     }),
     moduleMetadata({
       imports: [
+        IonAlert,
+        StoryPressedAlertButtonDirective,
+        StoryAlertRootDirective,
         IonButton,
         IonCard,
         IonCardContent,
@@ -169,4 +288,19 @@ export const DisabledDark: Story = {
 
 export const PressedReducedMotionDark: Story = {
   render: render({ pressed: true, reducedMotion: true, dark: true }),
+};
+
+/**
+ * An alert at rest. Its buttons are segments of the alert's frame, so they
+ * press by tint alone, with no scale (issue #1766).
+ */
+export const AlertRest: Story = { render: renderAlert({}) };
+
+/** The confirming button of an alert with a finger down on it. */
+export const AlertPressed: Story = { render: renderAlert({ pressed: true }) };
+
+export const AlertRestDark: Story = { render: renderAlert({ dark: true }) };
+
+export const AlertPressedDark: Story = {
+  render: renderAlert({ pressed: true, dark: true }),
 };

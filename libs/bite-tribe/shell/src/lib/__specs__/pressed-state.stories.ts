@@ -134,7 +134,7 @@ const render =
  * only once the alert has rendered them, so the class is set as soon as they
  * appear rather than on an overlay event whose timing a story cannot rely on.
  */
-@Directive({ selector: '[storyPressedAlertButton]' })
+@Directive({ selector: '[libStoryPressedAlertButton]' })
 class StoryPressedAlertButtonDirective implements AfterViewInit, OnDestroy {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly observer = new MutationObserver(() => this.markPressed());
@@ -177,7 +177,7 @@ class StoryPressedAlertButtonDirective implements AfterViewInit, OnDestroy {
  * story captured after it, with the page's scroll still locked. So the class,
  * the alert and the scroll lock are all taken away when the story is torn down.
  */
-@Directive({ selector: '[storyAlertRoot]' })
+@Directive({ selector: '[libStoryAlertRoot]' })
 class StoryAlertRootDirective implements OnInit, OnDestroy {
   readonly storyAlertDark = input(false);
 
@@ -221,7 +221,7 @@ const renderAlert =
         style="${variant.dark ? DARK + '; ' : ''}background: var(--ion-background-color, #fff); min-height: 100vh"
       >
         <ion-alert
-          storyAlertRoot
+          libStoryAlertRoot
           [storyAlertDark]="${variant.dark ? 'true' : 'false'}"
           [isOpen]="true"
           [animated]="false"
@@ -229,7 +229,7 @@ const renderAlert =
           header="Delete Bite"
           message="Are you sure you want to delete this Bite?"
           [buttons]="buttons"
-          ${variant.pressed ? 'storyPressedAlertButton' : ''}
+          ${variant.pressed ? 'libStoryPressedAlertButton' : ''}
         />
       </div>
     `,

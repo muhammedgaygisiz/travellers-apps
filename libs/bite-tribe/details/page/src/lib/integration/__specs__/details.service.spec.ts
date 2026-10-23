@@ -720,6 +720,7 @@ describe('DetailsService', () => {
     it.each([
       [{ public: true, displayName: 'Super Mario' }, 'Super Mario'],
       [{ public: false, displayName: 'Super Mario' }, undefined],
+      [{ public: true, displayName: '' }, undefined],
       [undefined, undefined],
     ])(
       'passes the composer the sharer’s name only while their profile is public (%o)',

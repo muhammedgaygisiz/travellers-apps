@@ -34,6 +34,23 @@
           <p>{{ 'share-image-photo-failed' | transloco }}</p>
         </ion-text>
       }
+
+      <ion-list class="fields" data-testid="share-image-fields">
+        <ion-list-header>
+          <ion-label>{{ 'share-image-fields-title' | transloco }}</ion-label>
+        </ion-list-header>
+        @for (item of fields(); track item.field) {
+          <ion-item>
+            <ion-toggle
+              [attr.data-testid]="'share-image-field-' + item.field"
+              [checked]="switches()[item.field]"
+              (ionChange)="setSwitch(item.field, $event.detail.checked)"
+            >
+              {{ item.labelKey | transloco }}
+            </ion-toggle>
+          </ion-item>
+        }
+      </ion-list>
     </div>
   } @else {
     <div class="loading">

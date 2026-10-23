@@ -16,9 +16,14 @@ import {
   IonContent,
   IonFooter,
   IonHeader,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonListHeader,
   IonSpinner,
   IonText,
   IonTitle,
+  IonToggle,
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
@@ -26,9 +31,25 @@ import { loadBiteImageForCanvas } from 'bite-tribe-common/bite';
 import type { Bite } from 'model';
 import { SHARE_IMAGE_FONT_FAMILY } from '../draw-share-image';
 import {
+  applyFieldSwitches,
+  availableFields,
+  DEFAULT_FIELD_SWITCHES,
   toShareImageContent,
+  type ShareImageField,
+  type ShareImageFieldSwitches,
   type ShareImageFormat,
 } from '../share-image-content';
+
+/** The label of each field's switch. */
+const FIELD_LABEL_KEY: Record<ShareImageField, string> = {
+  photo: 'share-image-field-photo',
+  dishName: 'share-image-field-dish-name',
+  place: 'share-image-field-place',
+  price: 'share-image-field-price',
+  rating: 'share-image-field-rating',
+  qr: 'share-image-field-qr',
+  creatorName: 'share-image-field-creator-name',
+};
 import { ShareImagePreviewComponent } from '../share-image-preview/share-image-preview.component';
 
 /** The logo drawn beside the wordmark, served with the app's own assets. */
@@ -80,9 +101,14 @@ const loadFonts = async (): Promise<void> => {
     IonContent,
     IonFooter,
     IonHeader,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonListHeader,
     IonSpinner,
     IonText,
     IonTitle,
+    IonToggle,
     IonToolbar,
     ShareImagePreviewComponent,
     TranslocoPipe,
@@ -94,6 +120,11 @@ const loadFonts = async (): Promise<void> => {
 export class ShareImageComposerComponent implements OnInit {
   readonly bite = input.required<Bite>();
   readonly format = input<ShareImageFormat>('story');
+  /**
+   * The sharer's display name, passed only while their profile is public.
+   * Without it there is no name switch (`UC-SBS` `R-8`).
+   */
+  readonly creatorName = input<string>();
   /** Shares the finished image. Resolves once the share sheet has closed. */
   readonly shareImage = input.required<(image: Blob) => Promise<void>>();
   readonly closed = output<void>();
@@ -103,8 +134,24 @@ export class ShareImageComposerComponent implements OnInit {
     initialValue: this.transloco.getActiveLang(),
   });
 
+  /** Starts from the defaults on every open; nothing is remembered. */
+  protected readonly switches = signal<ShareImageFieldSwitches>({
+    ...DEFAULT_FIELD_SWITCHES,
+  });
+
+  private readonly fullContent = computed(() =>
+    toShareImageContent(this.bite(), this.activeLang(), this.creatorName()),
+  );
+
+  protected readonly fields = computed(() =>
+    availableFields(this.fullContent()).map((field) => ({
+      field,
+      labelKey: FIELD_LABEL_KEY[field],
+    })),
+  );
+
   protected readonly content = computed(() =>
-    toShareImageContent(this.bite(), this.activeLang()),
+    applyFieldSwitches(this.fullContent(), this.switches()),
   );
   protected readonly photo = signal<HTMLImageElement | undefined>(undefined);
   protected readonly logo = signal<HTMLImageElement | undefined>(undefined);
@@ -133,6 +180,10 @@ export class ShareImageComposerComponent implements OnInit {
     }
 
     this.ready.set(true);
+  }
+
+  protected setSwitch(field: ShareImageField, on: boolean): void {
+    this.switches.update((switches) => ({ ...switches, [field]: on }));
   }
 
   protected async onShare(): Promise<void> {

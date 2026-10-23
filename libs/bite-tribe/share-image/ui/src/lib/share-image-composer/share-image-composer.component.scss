@@ -2,12 +2,16 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  height: 100%;
 }
 
+// Tall enough to judge the image, short enough that the first switches show
+// below it without scrolling. The content scrolls for the rest.
 .preview {
-  flex: 1;
-  min-height: 0;
+  height: min(56vh, 560px);
+}
+
+.fields {
+  background: transparent;
 }
 
 .photo-failed {

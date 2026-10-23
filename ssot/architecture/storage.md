@@ -54,11 +54,46 @@ belong to. See [UC - Use Local Gallery Support](../use-cases/uc-use-local-galler
 
 Use `imagePath || image || ''` for image display.
 
+## Bucket CORS Policy
+
+The bucket `bite-tribe.firebasestorage.app` carries a CORS policy so that a Bite photo can be
+drawn into a `<canvas>` and exported. Without it the canvas is tainted, and `toBlob()` and
+`toDataURL()` throw a `SecurityError` - which is what stops the share image of
+[UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md) from ever producing a file. The image is
+requested with `crossOrigin = 'anonymous'` through `loadBiteImageForCanvas`, which resolves the
+address by the Display Rule above.
+
+The policy is `apps/bite-tribe-firebase/storage.cors.json`, and the rules it must satisfy are
+`UC-SBS` `R-15` to `R-19`: `GET` and `HEAD` only, an explicit origin list and never `*`, and
+`Content-Type` as the only response header. It grants no access. Who may read a photo stays
+decided by its tokenised download URL and by `storage.rules`.
+
+**It is applied by hand.** `firebase deploy` does not touch a bucket's CORS configuration, and
+nothing in CI does either. Whoever changes the file applies it, with an account that holds
+Storage Admin on the `bite-tribe` project:
+
+```bash
+gcloud storage buckets update gs://bite-tribe.firebasestorage.app --cors-file=apps/bite-tribe-firebase/storage.cors.json
+```
+
+and checks that the live policy now equals the file:
+
+```bash
+gcloud storage buckets describe gs://bite-tribe.firebasestorage.app --format="json(cors_config)"
+```
+
+Uploads and deletes do not depend on this policy. They go through `@capacitor-firebase/storage`:
+the native SDK on iOS and Android, and on web the Firebase Storage API, which answers CORS
+itself. That is why the policy can allow reads only.
+
+The Storage emulator ignores the policy, so development needs no `http://localhost` origin.
+
 ## Code Anchors
 
 ```text
 apps/bite-tribe-firebase/storage.rules
-apps/bite-tribe-firebase/functions/src/functions/set-bite-image-path-on-upload.ts
+apps/bite-tribe-firebase/storage.cors.json
+apps/bite-tribe-firebase/functions/src/functions/bites/set-bite-image-path-on-upload.ts
 libs/bite-tribe/api/src/lib/utils/upload-base64-to-firebase-storage.ts
 libs/bite-tribe/api/src/lib/utils/write-blob-to-file-system.ts
 libs/bite-tribe/api/src/lib/utils/local-image-file.ts
@@ -67,6 +102,8 @@ libs/common/utils/src/lib/local-image-src.ts
 libs/common/utils/src/lib/get-download-url-from-firebase-storage.ts
 libs/common/utils/src/lib/storage-path-from-download-url.ts
 libs/bite-tribe-common/bite/src/lib/pipes/get-image.pipe.ts
+libs/bite-tribe-common/bite/src/lib/utils/bite-image-src.ts
+libs/bite-tribe-common/bite/src/lib/utils/load-bite-image-for-canvas.ts
 ```
 
 ## Current Limitations

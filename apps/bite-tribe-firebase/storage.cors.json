@@ -1,0 +1,14 @@
+[
+  {
+    "origin": [
+      "https://bitetribe.app",
+      "https://www.bitetribe.app",
+      "https://bite-tribe.web.app",
+      "capacitor://localhost",
+      "https://localhost"
+    ],
+    "method": ["GET", "HEAD"],
+    "responseHeader": ["Content-Type"],
+    "maxAgeSeconds": 3600
+  }
+]

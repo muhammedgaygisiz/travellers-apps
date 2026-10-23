@@ -217,6 +217,11 @@ Relevant, on both stores, and it lands with the code children rather than with t
   own Bite and none on somebody else's; More… sharing the same link and text as before; and an
   export of 1080×1920 from a geotagged photo, carrying no EXIF, whose QR code decodes to the
   Bite's `/s/bite/` address.
+- Checked the same day on the iOS simulator (iPhone 15 Pro), with a development build against the
+  emulators: the menu as an iOS action sheet, the composer drawing the photo from inside the
+  `capacitor://localhost` WebView, and the native share sheet receiving a 1080×1920 JPEG from the
+  cache directory. WebKit's encoder writes three EXIF tags of its own - colour space and pixel
+  size - and no GPS block. Android is not yet checked.
 
 ## Related GitHub Scope
 

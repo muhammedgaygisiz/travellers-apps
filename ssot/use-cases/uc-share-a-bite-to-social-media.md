@@ -59,7 +59,7 @@ Once a share has succeeded:
 
 All of it intended; none of it is built.
 
-- The user taps the share button on a Bite's details page. It opens BiteTribe's own share
+- The user taps the share button on the details page of one of their own Bites (`R-3`). It opens BiteTribe's own share
   menu with the entries `R-1` names, rather than the device share sheet.
 - **More…** runs the link share exactly as it runs today (`R-2`).
 - Any other entry opens the composer in that entry's format (`R-5`), with a live preview of the

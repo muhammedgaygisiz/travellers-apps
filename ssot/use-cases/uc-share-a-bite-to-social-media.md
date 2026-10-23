@@ -6,11 +6,11 @@
 
 In progress. Priority P1, post-launch. The share menu and the first template ship with
 [#1726]: on the user's own Bite the share button opens BiteTribe's menu, its three app entries
-open the composer at 9:16, and the finished image goes to the system share sheet; **More…** is
+open the composer - Instagram Post at 4:5 since [#1727], the two Stories at 9:16 - and the
+finished image goes to the system share sheet; **More…** is
 the link share of [UC - Inspect Bite Details](uc-inspect-bite-details.md), unchanged. Opening
-Instagram or Facebook directly, the 4:5 format, the field switches, more templates, saving and
-analytics are still to come. The rules without a marker below hold today; `R-1`, `R-3`, `R-5`
-and `R-6` hold in part and keep theirs until the child that finishes them. The epic is [#1723];
+Instagram or Facebook directly, the field switches, more templates, saving and analytics are
+still to come. The rules without a marker below hold today; `R-1`, `R-3` and `R-6` hold in part and keep theirs until the child that finishes them. The epic is [#1723];
 each child listed under `Related GitHub Scope` closes the markers on the rules it delivers. The
 page stays at L1 until the behaviour is complete enough to enumerate (`UF-2`).
 
@@ -58,9 +58,10 @@ Once a share has succeeded:
 
 ## Flow
 
-Built by [#1726]: the menu on the user's own Bite, **More…**, and the composer at 9:16 with every
-field except the creator's name, handing the image to the system share sheet. The rest - the
-4:5 format, the field switches, the hand-off to each app and analytics - is intended.
+Built by [#1726] and [#1727]: the menu on the user's own Bite, **More…**, and the composer in
+the entry's format with every field except the creator's name, handing the image to the system
+share sheet. The rest - the field switches, the hand-off to each app and analytics - is
+intended.
 
 - The user taps the share button on the details page of one of their own Bites (`R-3`). It opens BiteTribe's own share
   menu with the entries `R-1` names, rather than the device share sheet.
@@ -101,7 +102,7 @@ field except the creator's name, handing the image to the system share sheet. Th
 
 | ID       | Normative statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **R-5**  | _Intended, not met._ The image has one of two formats: 9:16 at 1080×1920 for Instagram Story and Facebook Story, and 4:5 at 1080×1350 for Instagram Post. The menu entry decides which the composer opens in. 9:16 is delivered by [#1726], 4:5 by [#1727].                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **R-5**  | The image has one of two formats: 9:16 at 1080×1920 for Instagram Story and Facebook Story, and 4:5 at 1080×1350 for Instagram Post. The menu entry decides which the composer opens in. 9:16 is delivered by [#1726], 4:5 by [#1727].                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | **R-6**  | _Intended, not met._ The image's fields are the dish photo, the dish name, the restaurant name and city, the price in the Bite's own currency, the rating, a QR code / link to the Bite, and the creator's display name. Each has its own switch in the composer, except the creator's display name, whose presence `R-8` decides; the preview updates as soon as one is flipped. All but the creator's display name are shown in [#1726]; the switches and the name are [#1728].                                                                                                                                                                                                                                                                                |
 | **R-7**  | The BiteTribe wordmark is on every image. It has no switch, in any template.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | **R-8**  | _Intended, not met._ Attribution is the photographer's choice, never the sharer's. On **the sharer's own Bite** the sharer is the photographer: the display name is offered with a switch, which starts off because the sharer's own account already identifies them, and is offered only while their profile is public - the same `public` gate the details page applies to the creator line. On **somebody else's Bite** there is no switch: the creator's display name is drawn, unless that creator has chosen under `R-31` to be shared without it. A private creator or a deleted account is never named, which `R-3` already guarantees by never reaching the composer for their Bites. The own-Bite switch is delivered by [#1728], the rest by [#1772]. |
@@ -233,9 +234,9 @@ Relevant, on both stores, and it lands with the code children rather than with t
 - [#1725] lets a Bite photo be drawn into a canvas and exported - `R-15` to `R-19`. Must land
   before [#1726].
 - [#1726] is the share menu and the composer with the first template at 9:16, on the sharer's
-  own Bites - `R-1`, `R-2`, the own-Bite half of `R-3`, `R-5`, and the fields of `R-6` all
+  own Bites - `R-1`, `R-2`, the own-Bite half of `R-3`, the 9:16 half of `R-5`, and the fields of `R-6` all
   shown. It and every child after it cover the sharer's own Bites only.
-- [#1727] is the Instagram Post format at 4:5 - `R-5`.
+- [#1727] is the Instagram Post format at 4:5, with a layout of its own - the 4:5 half of `R-5`.
 - [#1728] is the field switches, including the sharer's own name - `R-6`, and the own-Bite half
   of `R-8`.
 - [#1772] is the terms of use, the creator's acceptance and the licence it grants - `R-30`, and

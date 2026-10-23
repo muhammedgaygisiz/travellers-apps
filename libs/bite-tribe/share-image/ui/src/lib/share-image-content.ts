@@ -2,13 +2,18 @@ import type { Bite } from 'model';
 import { sharedBiteUrl } from 'utils';
 
 /** The image sizes a share image is composed at (`UC-SBS` `R-5`). */
-export type ShareImageFormat = 'story';
+/**
+ * `story` is 9:16, for Instagram and Facebook Stories; `post` is 4:5,
+ * Instagram's tallest feed ratio.
+ */
+export type ShareImageFormat = 'story' | 'post';
 
 export const SHARE_IMAGE_SIZE: Record<
   ShareImageFormat,
   { width: number; height: number }
 > = {
   story: { width: 1080, height: 1920 },
+  post: { width: 1080, height: 1350 },
 };
 
 /**

@@ -254,6 +254,11 @@ describe(ShareImageComposerComponent.name, () => {
       // A tap, or a short drag, changes nothing.
       swipe(200, 180);
       expect(drawnStyle()['layout']).toBe('classic');
+
+      // Nor does a release whose press began outside the preview.
+      preview.dispatchEvent(new MouseEvent('pointerup', { clientX: 0 }));
+      fixture.detectChanges();
+      expect(drawnStyle()['layout']).toBe('classic');
     });
 
     it('offers every background, and only the legible text colours', async () => {

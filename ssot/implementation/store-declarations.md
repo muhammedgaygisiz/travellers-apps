@@ -199,6 +199,23 @@ Check gate and show the security-check screen first. A store reviewer opening
 that link from a fresh browser can see it, which makes it a review risk rather
 than a cosmetic one.
 
+### Saving A Share Image Changes No Declaration
+
+Save image in the share image composer of [UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md) (issue [#1732])
+puts an image the user composed on their device into their own photos. Nothing
+leaves the device, so neither the nutrition labels nor Play's Data safety form
+change. It does add two platform entries, both write-only:
+
+- **iOS:** `NSPhotoLibraryAddUsageDescription`, localized in every
+  `InfoPlist.strings`. The plugin asks for add-only access
+  (`PHAccessLevel.addOnly`), so the app can never read the library through it.
+  This is separate from the existing `NSPhotoLibraryUsageDescription`, which
+  belongs to choosing a Bite photo.
+- **Android:** `WRITE_EXTERNAL_STORAGE`, limited by `android:maxSdkVersion="28"`
+  to Android 7 to 9. From Android 10 the image goes into `MediaStore`, which
+  needs no permission. Play's photo and video permissions policy concerns reading
+  media (`READ_MEDIA_IMAGES` and its predecessors) and is not touched.
+
 ## The DSA Trader Decision
 
 Declared **non-trader** on 30 August 2026, at account level, covering the 27 EU
@@ -271,3 +288,4 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 [#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
 [#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
 [#1433]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1433
+[#1732]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1732

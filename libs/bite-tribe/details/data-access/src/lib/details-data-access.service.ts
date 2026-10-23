@@ -26,12 +26,43 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Position } from '@capacitor/geolocation';
 import { Share } from '@capacitor/share';
 import { Directory, Filesystem } from '@capacitor/filesystem';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { lastValueFrom } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { retry, withTimeout } from './async-retry';
 import { BiteNotFoundError } from './bite-not-found-error';
-import { ShareImageUnavailableError } from './share-image-errors';
+import {
+  SaveImageDeniedError,
+  ShareImageUnavailableError,
+} from './share-image-errors';
+
+/**
+ * The local plugin of the native wrappers that saves a share image to the
+ * photo library: add-only on iOS, `MediaStore` on Android (issue #1732). It is
+ * registered by the wrappers themselves, not installed from npm.
+ */
+interface SaveImagePlugin {
+  saveToPhotos(options: { path: string }): Promise<void>;
+}
+
+const SaveImage = registerPlugin<SaveImagePlugin>('SaveImage');
+
+const shareImageFileName = (bite: Bite): string => `bitetribe-${bite.id}.jpg`;
+
+/** Hands a blob to the browser as a file download. */
+const downloadImage = (image: Blob, fileName: string): void => {
+  const url = URL.createObjectURL(image);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = fileName;
+  link.rel = 'noopener';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  // Revoked after the click has been handled, so the download has started.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+};
 import {
   BiteLoadFailure,
   classifyBiteLoadFailure,
@@ -386,27 +417,77 @@ export class DetailsDataAccessService {
    * take files.
    */
   async shareBiteImage(bite: Bite, image: Blob): Promise<void> {
-    const fileName = `bitetribe-${bite.id}.jpg`;
-
     if (Capacitor.isNativePlatform()) {
-      const { uri } = await Filesystem.writeFile({
-        path: `share-image/${fileName}`,
-        data: await toBase64(image),
-        directory: Directory.Cache,
-        recursive: true,
-      });
-
-      await Share.share({ files: [uri] });
+      await Share.share({ files: [await this.writeShareImage(bite, image)] });
 
       return;
     }
 
-    const file = new File([image], fileName, { type: image.type });
+    const file = new File([image], shareImageFileName(bite), {
+      type: image.type,
+    });
 
     if (!navigator.canShare?.({ files: [file] })) {
       throw new ShareImageUnavailableError();
     }
 
     await navigator.share({ files: [file] });
+  }
+
+  /**
+   * Whether this platform can hand an image file to a share sheet, which
+   * decides whether Share image… is offered at all (`UC-SBS` `R-12`). A device
+   * always can; a browser only where the Web Share API takes files.
+   */
+  canShareImageFiles(): boolean {
+    if (Capacitor.isNativePlatform()) {
+      return true;
+    }
+
+    const probe = new File([], 'probe.jpg', { type: 'image/jpeg' });
+
+    return !!navigator.canShare?.({ files: [probe] });
+  }
+
+  /**
+   * Saves a composed share image (`UC-SBS` `R-12`, `R-27`): to the photo
+   * library on a device, add-only on iOS, and as a download in a browser. Only
+   * the re-encoded canvas output is saved (`R-21`).
+   *
+   * Throws {@link SaveImageDeniedError} when the user has refused to let the app
+   * add the image.
+   */
+  async saveBiteImage(bite: Bite, image: Blob): Promise<void> {
+    if (!Capacitor.isNativePlatform()) {
+      downloadImage(image, shareImageFileName(bite));
+      return;
+    }
+
+    try {
+      await SaveImage.saveToPhotos({
+        path: await this.writeShareImage(bite, image),
+      });
+    } catch (error) {
+      if ((error as { code?: string })?.code === 'permission-denied') {
+        throw new SaveImageDeniedError();
+      }
+
+      throw error;
+    }
+  }
+
+  /**
+   * Writes the image to the cache directory, where both the Share plugin and
+   * the save plugin read it from by URI.
+   */
+  private async writeShareImage(bite: Bite, image: Blob): Promise<string> {
+    const { uri } = await Filesystem.writeFile({
+      path: `share-image/${shareImageFileName(bite)}`,
+      data: await toBase64(image),
+      directory: Directory.Cache,
+      recursive: true,
+    });
+
+    return uri;
   }
 }

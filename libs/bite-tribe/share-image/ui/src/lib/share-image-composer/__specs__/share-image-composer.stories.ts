@@ -69,6 +69,7 @@ const preload = (src: string): Promise<unknown> =>
         [format]="format()"
         [creatorName]="creatorName()"
         [shareImage]="shareImage"
+        [saveImage]="saveImage"
       />
     }
   `,
@@ -87,6 +88,7 @@ class ShareImageComposerDemoComponent implements OnInit {
 
   protected readonly ready = signal(false);
   protected readonly shareImage = (): Promise<void> => Promise.resolve();
+  protected readonly saveImage = (): Promise<void> => Promise.resolve();
 
   ngOnInit(): void {
     const loading = Promise.all([

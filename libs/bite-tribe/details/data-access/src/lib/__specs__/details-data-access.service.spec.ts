@@ -18,7 +18,10 @@ import { Bite, LikeClick } from 'model';
 import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem } from '@capacitor/filesystem';
-import { ShareImageUnavailableError } from '../share-image-errors';
+import {
+  SaveImageDeniedError,
+  ShareImageUnavailableError,
+} from '../share-image-errors';
 
 jest.mock('bite-tribe/store');
 jest.mock('bite-tribe/api', () => ({
@@ -42,6 +45,29 @@ jest.mock('geolocation', () => ({
   getCurrentPosition: jest.fn(),
 }));
 jest.mock('@capacitor/share');
+
+// The wrappers' local save plugin (issue #1732). The service registers it as
+// it is imported, which is before this file's own declarations run, so the
+// mock lives inside the factory and is read back through `jest.requireMock`.
+jest.mock('@capacitor/core', () => {
+  const actual = jest.requireActual('@capacitor/core');
+  const saveImage = { saveToPhotos: jest.fn() };
+
+  return {
+    ...actual,
+    __saveImage: saveImage,
+    registerPlugin: (name: string, implementations?: unknown): unknown =>
+      name === 'SaveImage'
+        ? saveImage
+        : actual.registerPlugin(name, implementations),
+  };
+});
+
+const mockSaveImage = (
+  jest.requireMock('@capacitor/core') as {
+    __saveImage: { saveToPhotos: jest.Mock };
+  }
+).__saveImage;
 jest.mock('@capacitor/filesystem', () => ({
   Directory: { Cache: 'CACHE' },
   Filesystem: {
@@ -831,6 +857,107 @@ describe(DetailsDataAccessService.name, () => {
       await expect(service.shareBiteImage(bite, image)).rejects.toBeInstanceOf(
         ShareImageUnavailableError,
       );
+    });
+
+    it('refuses in a browser without the Web Share API', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+      Object.assign(navigator, { canShare: undefined });
+
+      await expect(service.shareBiteImage(bite, image)).rejects.toBeInstanceOf(
+        ShareImageUnavailableError,
+      );
+    });
+  });
+
+  /** Saving the composed share image (UC-SBS R-12, R-27, issue #1732). */
+  describe('saveBiteImage', () => {
+    const bite = { id: 'bite-1', name: 'Pad thai' } as Bite;
+    const image = new Blob(['jpeg'], { type: 'image/jpeg' });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      mockSaveImage.saveToPhotos.mockReset();
+    });
+
+    it('writes the image to the cache and saves that file to Photos on a device', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+      mockSaveImage.saveToPhotos.mockResolvedValue(undefined);
+
+      await service.saveBiteImage(bite, image);
+
+      expect(Filesystem.writeFile).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'share-image/bitetribe-bite-1.jpg' }),
+      );
+      expect(mockSaveImage.saveToPhotos).toHaveBeenCalledWith({
+        path: 'file:///cache/image.jpg',
+      });
+    });
+
+    it('says so when the user refused to let the app add photos', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+      mockSaveImage.saveToPhotos.mockRejectedValue(
+        Object.assign(new Error('denied'), { code: 'permission-denied' }),
+      );
+
+      await expect(service.saveBiteImage(bite, image)).rejects.toBeInstanceOf(
+        SaveImageDeniedError,
+      );
+    });
+
+    it('passes any other failure on', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+      mockSaveImage.saveToPhotos.mockRejectedValue(new Error('disk full'));
+
+      await expect(service.saveBiteImage(bite, image)).rejects.toThrow(
+        'disk full',
+      );
+    });
+
+    it('downloads the image in a browser', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+      const createObjectURL = jest.fn().mockReturnValue('blob:share-image');
+      Object.assign(URL, { createObjectURL, revokeObjectURL: jest.fn() });
+      const clicked: HTMLAnchorElement[] = [];
+      jest
+        .spyOn(HTMLAnchorElement.prototype, 'click')
+        .mockImplementation(function (this: HTMLAnchorElement) {
+          clicked.push(this);
+        });
+
+      await service.saveBiteImage(bite, image);
+
+      expect(createObjectURL).toHaveBeenCalledWith(image);
+      expect(clicked).toHaveLength(1);
+      expect(clicked[0].download).toBe('bitetribe-bite-1.jpg');
+      expect(clicked[0].getAttribute('href')).toBe('blob:share-image');
+      expect(mockSaveImage.saveToPhotos).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('canShareImageFiles', () => {
+    afterEach(() => jest.restoreAllMocks());
+
+    it('is always true on a device', () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+
+      expect(service.canShareImageFiles()).toBe(true);
+    });
+
+    it('follows the Web Share API in a browser', () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+
+      Object.assign(navigator, { canShare: () => true });
+      expect(service.canShareImageFiles()).toBe(true);
+
+      Object.assign(navigator, { canShare: () => false });
+      expect(service.canShareImageFiles()).toBe(false);
+    });
+
+    it('is false in a browser without the Web Share API', () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+      Object.assign(navigator, { canShare: undefined });
+
+      expect(service.canShareImageFiles()).toBe(false);
     });
   });
 

@@ -19,7 +19,7 @@
   (ionScroll)="updateMoreBelow()"
 >
   @if (ready()) {
-    <div class="stage">
+    <div #stage class="stage">
       <bt-share-image-preview
         class="preview"
         data-testid="share-image-swipe"
@@ -31,7 +31,7 @@
         [label]="'share-image-preview-label' | transloco"
         (pointerdown)="onSwipeStart($event)"
         (pointerup)="onSwipeEnd($event)"
-        (pointercancel)="onSwipeEnd($event)"
+        (pointercancel)="onSwipeCancel()"
       />
 
       <ion-segment
@@ -150,18 +150,32 @@
 
 <ion-footer>
   <ion-toolbar>
-    <ion-button
-      expand="block"
-      class="ion-margin-horizontal"
-      data-testid="share-image-share"
-      [disabled]="!ready() || sharing()"
-      (click)="onShare()"
-    >
-      @if (sharing()) {
-        <ion-spinner name="dots" />
-      } @else {
-        {{ 'share-image-share' | transloco }}
+    <div class="actions">
+      <ion-button
+        fill="outline"
+        data-testid="share-image-save"
+        [disabled]="!ready() || !!busy()"
+        (click)="onSave()"
+      >
+        @if (busy() === 'save') {
+          <ion-spinner name="dots" />
+        } @else {
+          {{ 'share-image-save' | transloco }}
+        }
+      </ion-button>
+      @if (shareImage()) {
+        <ion-button
+          data-testid="share-image-share"
+          [disabled]="!ready() || !!busy()"
+          (click)="onShare()"
+        >
+          @if (busy() === 'share') {
+            <ion-spinner name="dots" />
+          } @else {
+            {{ 'share-image-share' | transloco }}
+          }
+        </ion-button>
       }
-    </ion-button>
+    </div>
   </ion-toolbar>
 </ion-footer>

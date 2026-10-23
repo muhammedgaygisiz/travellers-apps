@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { IonContent } from '@ionic/angular/standalone';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { loadBiteImageForCanvas } from 'bite-tribe-common/bite';
 import type { Bite } from 'model';
@@ -60,11 +61,13 @@ let fixture: ComponentFixture<ShareImageComposerComponent>;
 
 describe(ShareImageComposerComponent.name, () => {
   let shareImage: jest.Mock;
+  let saveImage: jest.Mock;
 
   const render = async (creatorName?: string): Promise<HTMLElement> => {
     fixture = TestBed.createComponent(ShareImageComposerComponent);
     fixture.componentRef.setInput('bite', bite);
     fixture.componentRef.setInput('shareImage', shareImage);
+    fixture.componentRef.setInput('saveImage', saveImage);
     fixture.componentRef.setInput('creatorName', creatorName);
     fixture.detectChanges();
     await flush();
@@ -75,6 +78,7 @@ describe(ShareImageComposerComponent.name, () => {
   beforeEach(async () => {
     settleLogo();
     shareImage = jest.fn().mockResolvedValue(undefined);
+    saveImage = jest.fn().mockResolvedValue(undefined);
     loadPhoto.mockResolvedValue({ width: 10, height: 10 } as HTMLImageElement);
 
     jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
@@ -128,6 +132,132 @@ describe(ShareImageComposerComponent.name, () => {
     await flush();
 
     expect(shareImage).toHaveBeenCalledWith(exported);
+  });
+
+  it('hands the exported preview to saveImage', async () => {
+    const element = await render();
+
+    (
+      element.querySelector('[data-testid="share-image-save"]') as HTMLElement
+    ).click();
+    await flush();
+
+    expect(saveImage).toHaveBeenCalledWith(exported);
+    expect(shareImage).not.toHaveBeenCalled();
+  });
+
+  it('hands over one image at a time, however often the action is tapped', async () => {
+    saveImage.mockReturnValue(new Promise(() => undefined));
+    const element = await render();
+    const save = element.querySelector(
+      '[data-testid="share-image-save"]',
+    ) as HTMLElement;
+
+    save.click();
+    await flush();
+    save.click();
+    (
+      element.querySelector('[data-testid="share-image-share"]') as HTMLElement
+    ).click();
+    await flush();
+
+    expect(saveImage).toHaveBeenCalledTimes(1);
+    expect(shareImage).not.toHaveBeenCalled();
+  });
+
+  it('offers no Share action without a share handler', async () => {
+    shareImage = undefined as unknown as jest.Mock;
+    const element = await render();
+
+    expect(
+      element.querySelector('[data-testid="share-image-share"]'),
+    ).toBeNull();
+    expect(
+      element.querySelector('[data-testid="share-image-save"]'),
+    ).not.toBeNull();
+  });
+
+  it('watches the stage and the modal for size changes, until destroyed', async () => {
+    const observed: Element[] = [];
+    const disconnect = jest.fn();
+    const globals = globalThis as unknown as { ResizeObserver?: unknown };
+    const original = globals.ResizeObserver;
+
+    // jsdom has no ResizeObserver; this one only records what it was given.
+    globals.ResizeObserver = class {
+      observe = (element: Element): number => observed.push(element);
+      disconnect = disconnect;
+    };
+
+    try {
+      const element = await render();
+
+      expect(observed).toEqual([element.querySelector('.stage'), element]);
+
+      fixture.destroy();
+
+      expect(disconnect).toHaveBeenCalled();
+    } finally {
+      globals.ResizeObserver = original;
+    }
+  });
+
+  /** The "More options" cue (issue #1731). */
+  describe('more options cue', () => {
+    const cue = (element: HTMLElement): HTMLElement | null =>
+      element.querySelector('[data-testid="share-image-more-options"]');
+
+    /** A scroll element with controls hidden below, scrolled `scrollTop` down. */
+    const scrollWithMoreBelow = (scrollTop = 0): HTMLElement =>
+      Object.assign(document.createElement('div'), {
+        scrollTop,
+        getBoundingClientRect: () => ({ top: 100 }) as DOMRect,
+      });
+
+    beforeEach(() => {
+      jest
+        .spyOn(HTMLElement.prototype, 'scrollHeight', 'get')
+        .mockReturnValue(1400);
+      jest
+        .spyOn(HTMLElement.prototype, 'clientHeight', 'get')
+        .mockReturnValue(700);
+    });
+
+    it('scrolls the first control into view when tapped', async () => {
+      const scroll = scrollWithMoreBelow();
+      jest
+        .spyOn(IonContent.prototype, 'getScrollElement')
+        .mockResolvedValue(scroll);
+      const scrollToPoint = jest
+        .spyOn(IonContent.prototype, 'scrollToPoint')
+        .mockResolvedValue(undefined);
+      const element = await render();
+      // The cue is measured once the stage has rendered, a turn after start-up.
+      await flush();
+      jest
+        .spyOn(
+          element.querySelector('.layouts') as HTMLElement,
+          'getBoundingClientRect',
+        )
+        .mockReturnValue({ top: 600 } as DOMRect);
+
+      cue(element)?.click();
+      await flush();
+
+      // 500px below the top of the scroll element, less the 8px of air.
+      expect(scrollToPoint).toHaveBeenCalledWith(0, 492, 300);
+    });
+
+    it('does not show where the content cannot be measured', async () => {
+      jest
+        .spyOn(IonContent.prototype, 'getScrollElement')
+        .mockRejectedValue(new Error('not upgraded'));
+
+      const element = await render();
+      await flush();
+
+      expect(cue(element)).toBeNull();
+    });
   });
 
   it('closes on cancel', async () => {
@@ -263,6 +393,29 @@ describe(ShareImageComposerComponent.name, () => {
       // Nor does a release whose press began outside the preview.
       preview.dispatchEvent(new MouseEvent('pointerup', { clientX: 0 }));
       fixture.detectChanges();
+      expect(drawnStyle()['layout']).toBe('classic');
+    });
+
+    it('leaves the layout alone when a vertical drag scrolls the content', async () => {
+      const element = await render();
+      const preview = element.querySelector(
+        '[data-testid="share-image-swipe"]',
+      ) as HTMLElement;
+      const press = (type: string, clientX: number, clientY: number): void => {
+        preview.dispatchEvent(new MouseEvent(type, { clientX, clientY }));
+        fixture.detectChanges();
+      };
+
+      // The browser takes the drag over as a scroll, and cancels the press
+      // with coordinates far from where it began.
+      press('pointerdown', 200, 500);
+      press('pointercancel', 0, 0);
+      press('pointerup', 0, 0);
+      expect(drawnStyle()['layout']).toBe('classic');
+
+      // A drag that is more vertical than horizontal is no swipe either.
+      press('pointerdown', 200, 500);
+      press('pointerup', 140, 200);
       expect(drawnStyle()['layout']).toBe('classic');
     });
 

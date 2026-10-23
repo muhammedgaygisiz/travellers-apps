@@ -276,7 +276,10 @@ $bt-pressable-surfaces: 'ion-button, ion-fab-button, ion-tab-button, ion-back-bu
 // The share image composer (issues #1726, #1731). Ionic draws a modal 600px
 // tall on tablets and desktops, which leaves little but the preview in view
 // and hides the layout and colour choices below it. The composer takes most of
-// the window instead. Phones already show it full screen.
-ion-modal.share-image-composer-modal {
-  --height: min(92vh, 960px);
+// the window instead. Phones already show it full screen, so the rule keeps to
+// the breakpoint where Ionic switches to the 600px modal.
+@media only screen and (min-width: 768px) and (min-height: 600px) {
+  ion-modal.share-image-composer-modal {
+    --height: min(92vh, 960px);
+  }
 }

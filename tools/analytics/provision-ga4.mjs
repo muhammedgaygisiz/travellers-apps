@@ -73,6 +73,21 @@ const CUSTOM_DIMENSIONS = [
   { parameterName: 'status', displayName: 'Table session status' },
   { parameterName: 'surface', displayName: 'Prompt surface' },
   { parameterName: 'source', displayName: 'Bite source' },
+  // The share-as-image funnel (issue #1733). `target` is the share menu entry,
+  // `format` and `template` what the image was made as, `action` whether it was
+  // saved or shared, and `reason` why a hand-off did not happen. `bite_id` is
+  // not registered, for the reason the table ids are not: it is read from the
+  // export by `queries/share-image-funnel.sql`.
+  //
+  // `reason` is a shared parameter name like `surface`: the email-verification
+  // resend, the account deletion, the follow suggestions and the App Check
+  // telemetry already send one, each with its own vocabulary, so a breakdown
+  // by it needs an event filter.
+  { parameterName: 'target', displayName: 'Share target' },
+  { parameterName: 'format', displayName: 'Share image format' },
+  { parameterName: 'template', displayName: 'Share image template' },
+  { parameterName: 'action', displayName: 'Share image action' },
+  { parameterName: 'reason', displayName: 'Failure reason' },
   // Which app the session came from (issue #1098). Both apps report to one
   // property through one measurement id, so this is the only thing separating
   // a staff shift from a diner's session - and `activeUsers` counts people,

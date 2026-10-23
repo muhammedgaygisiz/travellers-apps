@@ -216,6 +216,24 @@ change. It does add two platform entries, both write-only:
   needs no permission. Play's photo and video permissions policy concerns reading
   media (`READ_MEDIA_IMAGES` and its predecessors) and is not touched.
 
+### Measuring The Share Funnel Changes No Declaration
+
+The six `share_*` events of issue [#1733] go through the same Firebase Analytics
+setup as every other product event, so they fall under the **Product
+Interaction** (Play: App interactions) row above, already declared for Analytics
+and already linked to identity through `setUserId`. Checked against the table
+rather than assumed:
+
+- **No User Content.** The image shows a dish name, a place and possibly the
+  sharer's display name, and **none of them is an event parameter**
+  ([Implementation - Analytics Events](analytics-events.md), `UC-SBS` `R-24`).
+  The parameters are the Bite's id and enums: menu entry, format, layout,
+  action and failure reason. A Bite id names a document the share link already
+  carries in the open; it is not the content.
+- **No Photos.** The composed image never reaches analytics or any server.
+- **No new identifier.** The events carry no uid of their own; the user link
+  is the existing `setUserId`.
+
 ## The DSA Trader Decision
 
 Declared **non-trader** on 30 August 2026, at account level, covering the 27 EU
@@ -289,3 +307,4 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 [#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
 [#1433]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1433
 [#1732]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1732
+[#1733]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1733

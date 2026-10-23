@@ -12,9 +12,15 @@ therefore _Intended, not met_ except `R-4`, which holds today. The epic is [#172
 listed under `Related GitHub Scope` closes the markers on the rules it delivers. The page stays
 at L1 until the composer is built (`UF-2`).
 
+**Sharing somebody else's Bite as an image is blocked on terms of use, which do not exist.**
+BiteTribe publishes a privacy policy and nothing else, so no creator has licensed anyone to copy
+their photo onto another platform (`R-30`). Until terms exist, and until a given creator has
+accepted them, the image share is available on the sharer's own Bites only (`R-3`). No issue
+owns the terms yet.
+
 ## Goal
 
-A signed-in user viewing any Bite can turn it into a ready-made image and land in Instagram
+A signed-in user can turn a Bite - their own, or a public creator's who has licensed it - into a ready-made image and land in Instagram
 or Facebook with that image already loaded - as a Story or as an Instagram Post - without
 screenshotting, cropping or editing it first. A link becomes neither a Story nor a Post, which
 is why the link share alone does not serve these channels.
@@ -26,11 +32,13 @@ the image may and may not show, and the hand-off to each target. The link share 
 
 ## Actors
 
-- **Bite Creator** - acts: opens the share menu on a Bite they can see, picks a target, shapes
-  the image in the composer and hands it off. It need not be their own Bite.
-- **Bite Creator** whose Bite is shared - does not act. Named because attribution on the image
-  is about them: whether their display name may appear is decided by their profile's
-  visibility, not by the sharer (`R-8`).
+- **Bite Creator** - acts: opens the share menu on a Bite, picks a target, shapes the image in
+  the composer and hands it off. On their own Bite they are also the photographer, and every
+  choice is theirs; on somebody else's they act under that creator's licence (`R-3`).
+- **Bite Creator** whose Bite is shared - does not act here. Named because the photo is theirs:
+  whether others may share it as an image, and whether their name appears on it, is decided by
+  their profile's visibility, their acceptance of the terms and their own attribution choice -
+  never by the sharer (`R-3`, `R-8`, `R-30`, `R-31`).
 
 ## Guarantees
 
@@ -76,24 +84,24 @@ All of it intended; none of it is built.
 
 ### Entry And Reach
 
-| ID      | Normative statement                                                                                                                                                                                                                                                                 |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **R-1** | _Intended, not met._ The details page's share button opens a share menu offering **Instagram Story**, **Instagram Post**, **Facebook Story** and **More…**, subject to `R-12`. Delivered by [#1726], with the two app targets beyond the system share sheet by [#1730].             |
-| **R-2** | _Intended, not met._ **More…** is the link share that [UC - Inspect Bite Details](uc-inspect-bite-details.md) owns, unchanged: the same link, the same text, the same device share sheet. The menu adds entries in front of it and changes nothing behind it. Delivered by [#1726]. |
-| **R-3** | _Intended, not met._ Any Bite the viewer can see can be shared as an image, not only the viewer's own. The composer reads nothing the details page does not already show that viewer, so the image exposes nothing the page did not.                                                |
-| **R-4** | An image is a second shareable form of a Bite, not a new shareable entity. The rule that the Bite is the only shareable entity stays [UC - Inspect Bite Details](uc-inspect-bite-details.md)'s, and no BiteTrail, profile, bucket list or restaurant gets an image share.           |
+| ID      | Normative statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **R-1** | _Intended, not met._ On a Bite that `R-3` lets the viewer share as an image, the details page's share button opens a share menu offering **Instagram Story**, **Instagram Post**, **Facebook Story** and **More…**, subject to `R-12`. On any other Bite it runs the link share directly, as it does today. Delivered by [#1726], with the two app targets beyond the system share sheet by [#1730].                                                                                                                                                                                                                     |
+| **R-2** | _Intended, not met._ **More…** is the link share that [UC - Inspect Bite Details](uc-inspect-bite-details.md) owns, unchanged: the same link, the same text, the same device share sheet. The menu adds entries in front of it and changes nothing behind it. Delivered by [#1726].                                                                                                                                                                                                                                                                                                                                      |
+| **R-3** | _Intended, not met._ Who may share a Bite as an image depends on whose Bite it is. **The sharer's own Bite** can always be shared, because the sharer took the photo. **Somebody else's Bite** can be shared only when its creator's profile is public, their account still exists, and they have accepted terms that license it (`R-30`). The Bite of a private creator, of a deleted account, or of a creator who has not accepted the terms is never shared as an image by anyone else; the link share stays open for it. In every case the composer reads nothing the details page does not already show the viewer. |
+| **R-4** | An image is a second shareable form of a Bite, not a new shareable entity. The rule that the Bite is the only shareable entity stays [UC - Inspect Bite Details](uc-inspect-bite-details.md)'s, and no BiteTrail, profile, bucket list or restaurant gets an image share.                                                                                                                                                                                                                                                                                                                                                |
 
 ### The Image
 
-| ID       | Normative statement                                                                                                                                                                                                                                                                                                                                                             |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **R-5**  | _Intended, not met._ The image has one of two formats: 9:16 at 1080×1920 for Instagram Story and Facebook Story, and 4:5 at 1080×1350 for Instagram Post. The menu entry decides which the composer opens in. 9:16 is delivered by [#1726], 4:5 by [#1727].                                                                                                                     |
-| **R-6**  | _Intended, not met._ The image's fields are the dish photo, the dish name, the restaurant name and city, the price in the Bite's own currency, the rating, a QR code / link to the Bite, and the creator's display name. Each has its own switch in the composer, and the preview updates as soon as one is flipped. All are shown in [#1726]; the switches are [#1728].        |
-| **R-7**  | _Intended, not met._ The BiteTribe wordmark is on every image. It has no switch, in any template.                                                                                                                                                                                                                                                                               |
-| **R-8**  | _Intended, not met._ The creator's display name is offered only when the creator's profile is public - the same `public` gate the details page applies to the creator line. It is on by default when the Bite is not the sharer's own. It is never offered, and never drawn, for a private creator or for a Bite whose creator has deleted their account. Delivered by [#1728]. |
-| **R-9**  | _Intended, not met._ The only personal detail the image may carry is the creator's BiteTribe display name, read as the Review Attribution Contract of [UC - Inspect Bite Details](uc-inspect-bite-details.md) reads it. The name the identity provider holds ([#1308]) and the creator's profile photo are never drawn.                                                         |
-| **R-10** | _Intended, not met._ The preview is pixel-identical to the image handed off. There is one rendering, and the preview is it.                                                                                                                                                                                                                                                     |
-| **R-11** | _Intended, not met._ The image is rendered on the device. No backend renders it, and no Cloud Function is involved.                                                                                                                                                                                                                                                             |
+| ID       | Normative statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R-5**  | _Intended, not met._ The image has one of two formats: 9:16 at 1080×1920 for Instagram Story and Facebook Story, and 4:5 at 1080×1350 for Instagram Post. The menu entry decides which the composer opens in. 9:16 is delivered by [#1726], 4:5 by [#1727].                                                                                                                                                                                                                                                                                                                                                                               |
+| **R-6**  | _Intended, not met._ The image's fields are the dish photo, the dish name, the restaurant name and city, the price in the Bite's own currency, the rating, a QR code / link to the Bite, and the creator's display name. Each has its own switch in the composer, except the creator's display name, whose presence `R-8` decides; the preview updates as soon as one is flipped. All are shown in [#1726]; the switches are [#1728].                                                                                                                                                                                                     |
+| **R-7**  | _Intended, not met._ The BiteTribe wordmark is on every image. It has no switch, in any template.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **R-8**  | _Intended, not met._ Attribution is the photographer's choice, never the sharer's. On **the sharer's own Bite** the sharer is the photographer: the display name is offered with a switch, and is offered only while their profile is public - the same `public` gate the details page applies to the creator line. On **somebody else's Bite** there is no switch: the creator's display name is drawn, unless that creator has chosen under `R-31` to be shared without it. A private creator or a deleted account is never named, which `R-3` already guarantees by never reaching the composer for their Bites. Delivered by [#1728]. |
+| **R-9**  | _Intended, not met._ The only personal detail the image may carry is the creator's BiteTribe display name, read as the Review Attribution Contract of [UC - Inspect Bite Details](uc-inspect-bite-details.md) reads it. The name the identity provider holds ([#1308]) and the creator's profile photo are never drawn.                                                                                                                                                                                                                                                                                                                   |
+| **R-10** | _Intended, not met._ The preview is pixel-identical to the image handed off. There is one rendering, and the preview is it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **R-11** | _Intended, not met._ The image is rendered on the device. No backend renders it, and no Cloud Function is involved.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ### Targets
 
@@ -102,6 +110,20 @@ All of it intended; none of it is built.
 | **R-12** | _Intended, not met._ A target whose app is not installed is not offered. **Save image** and **Share image…** are always offered, on web as well as on iOS and Android, so there is never a composed image with nowhere to go. Detection and the native targets are [#1730]; Save image and web are [#1732]. |
 | **R-13** | _Intended, not met._ BiteTribe only hands the image to another app. It never posts, publishes or schedules anything on the user's behalf, and uses no Instagram Graph API.                                                                                                                                  |
 | **R-14** | _Intended, not met._ Every string the menu and the composer show is a Transloco key, present in every locale.                                                                                                                                                                                               |
+
+### Rights And Attribution
+
+A Bite photo is the creator's work, protected as a photograph under Swiss and EU copyright
+law. Turning it into an image for another platform copies it, adapts it - by cropping it and
+overlaying text - and makes it available outside BiteTribe, all of which need the
+photographer's permission. Showing a Bite inside BiteTribe does not grant that. These rules
+come from a product review of the epic, not from legal advice, and need a lawyer's
+confirmation before the terms are published.
+
+| ID       | Normative statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R-30** | _Intended, not met._ Somebody else's Bite is shared as an image only under terms of use the creator has accepted. The terms grant BiteTribe a non-exclusive, worldwide, royalty-free licence, which BiteTribe may pass on to other users, to copy the Bite photo, adapt it into a share image, and make that image available on third-party platforms under those platforms' own terms. The terms also say how attribution works (`R-8`, `R-31`), and the creator confirms they hold any consent needed from people shown in the photo. A creator who has not accepted them - every existing account, until it actively accepts - is treated as `R-3` treats a private one. No issue yet; this blocks the image share of somebody else's Bite, not of one's own. |
+| **R-31** | _Intended, not met._ A creator chooses, for their own Bites, whether others who share them as an image name them or not. Being named is the default, because it is the photographer's right unless they choose otherwise. The choice belongs to the creator's settings and is never offered to a sharer. No issue yet.                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ### Security
 
@@ -137,6 +159,11 @@ filed. The CORS policy itself is applied and documented on
 **Enforced.** Nothing new. The composer reads only what the details page already reads for the
 viewer (`R-3`), through the same Firestore rules, and it writes nothing to Firestore or Storage.
 The CORS policy is not an access control (`R-15`).
+
+**Not an access control.** `R-3`'s rule of whose Bite may become an image is decided in the
+client, because the image is composed there. It is a licence boundary, not a confidentiality
+one: it decides what BiteTribe produces and hands on, and cannot stop a viewer taking a
+screenshot of a Bite they can already see.
 
 **Not enforced.** `storage.rules` still lets any signed-in user overwrite any image, and profile
 photos stay readable even for private accounts - both [#1350], open. This use case neither
@@ -184,9 +211,13 @@ Not implemented. The surfaces this will touch are:
 - [#1725] lets a Bite photo be drawn into a canvas and exported - `R-15` to `R-19`. Must land
   before [#1726].
 - [#1726] is the share menu and the composer with the first template at 9:16 - `R-1`, `R-2`,
-  `R-5`, and the fields of `R-6` all shown.
+  `R-3`, `R-5`, and the fields of `R-6` all shown. Until terms of use exist (`R-30`), it and every
+  child after it deliver the image share for the sharer's own Bites only.
 - [#1727] is the Instagram Post format at 4:5 - `R-5`.
-- [#1728] is the field switches, and the creator-name gate - `R-6`, `R-8`.
+- [#1728] is the field switches, and the creator name - `R-6`, `R-8`. On somebody else's Bite
+  the name has no switch.
+- No issue yet owns the terms of use and the creator's licence (`R-30`), or the creator's
+  attribution choice (`R-31`). Both block the image share of somebody else's Bite.
 - [#1729] registers the Meta app and provides its App ID. Owned by the product owner, not an
   agent - `R-28`.
 - [#1730] is the native Stories and feed hand-off for both platforms, with the plist and manifest
@@ -205,14 +236,17 @@ Not implemented. The surfaces this will touch are:
 - [UC - Inspect Bite Details](uc-inspect-bite-details.md) - the share button, the link share behind
   More…, the Shared Link Entry Contract a scanned QR code lands under, and the Review
   Attribution Contract the creator name follows
-- [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md) - the public and private profile `R-8` reads
+- [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md) - the public and private profile `R-3` and `R-8` read
+- [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md) - the legal texts a user can read today, a privacy
+  policy and no terms of use, and the deletion that leaves a Bite's photo behind with no account
+  to license it
 - [Architecture - Storage](../architecture/storage.md) - where the CORS policy and its apply command are written
 - [Implementation - Social Media Channels](../implementation/social-media-channels.md) - the `@bitetribeapp` handle the cards may carry
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
 - [Implementation - Localization](../implementation/localization.md)
 - [Implementation - Analytics Events](../implementation/analytics-events.md)
-- [Current State - Open Questions](../current-state/open-questions.md) - the template count and design, and
-  the QR link length, which are questions and not rules
+- [Current State - Open Questions](../current-state/open-questions.md) - the template count and design, the
+  QR link length, and the terms of use, which are questions and not rules
 
 [#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308
 [#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350

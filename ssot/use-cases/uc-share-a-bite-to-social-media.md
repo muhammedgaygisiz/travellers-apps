@@ -9,7 +9,8 @@ In progress. Priority P1, post-launch. The share menu and the first template shi
 open the composer - Instagram Post at 4:5 since [#1727], the two Stories at 9:16 - and the
 finished image goes to the system share sheet; **More…** is
 the link share of [UC - Inspect Bite Details](uc-inspect-bite-details.md), unchanged. Opening
-Instagram or Facebook directly and analytics are still to come. The
+Instagram or Facebook directly is still to come; every step of the funnel is measured since
+[#1733]. The
 rules without a marker below hold today; `R-1`, `R-3` and `R-8` hold in part and keep theirs until the child that finishes them. The epic is [#1723];
 each child listed under `Related GitHub Scope` closes the markers on the rules it delivers. The
 page stays at L1 until the behaviour is complete enough to enumerate (`UF-2`).
@@ -61,7 +62,7 @@ Once a share has succeeded:
 Built by [#1726], [#1727], [#1728], [#1731] and [#1732]: the menu on the user's own Bite, **More…**,
 and the composer in the entry's format with a choice of layout and colours and a switch per
 field, which saves the image to the photo library or a download, or hands it to the system
-share sheet. In a browser the menu offers Save image and Share image… instead of the apps. The rest - the hand-off to each app and analytics - is intended.
+share sheet. In a browser the menu offers Save image and Share image… instead of the apps. Each step is an analytics event since [#1733]. The rest - the hand-off to each app - is intended.
 
 - The user taps the share button on the details page of one of their own Bites (`R-3`). It opens BiteTribe's own share
   menu with the entries `R-1` names, rather than the device share sheet.
@@ -152,7 +153,7 @@ filed. The CORS policy itself is applied and documented on
 | **R-21** | Only the re-encoded canvas output is ever handed off. The original upload may carry EXIF GPS data, which re-encoding strips, so no path - Save image and Share image… included - hands off the original file.                                                                                                                                                                                               |
 | **R-22** | The image shows no coordinates, no map and no street address. The restaurant name and city are the only location it carries, and the Bite already shows them publicly.                                                                                                                                                                                                                                      |
 | **R-23** | The QR code encodes `${BITE_TRIBE_ORIGIN}/s/bite/<biteId>` and nothing else. No user-controlled text goes into it, so it cannot be turned into a phishing link.                                                                                                                                                                                                                                             |
-| **R-24** | _Intended, not met._ The analytics events of this use case carry no display name and no free text in their parameters. Delivered by [#1733].                                                                                                                                                                                                                                                                |
+| **R-24** | The analytics events of this use case carry no display name and no free text in their parameters: the Bite's id and enums only. Delivered by [#1733].                                                                                                                                                                                                                                                       |
 | **R-25** | _Intended, not met._ On iOS, items written to the Stories pasteboard carry a five-minute `expirationDate` and `localOnly: true`, so the image neither lingers on the pasteboard nor travels through Universal Clipboard. Delivered by [#1730].                                                                                                                                                              |
 | **R-26** | _Intended, not met._ On Android, the image is written to the app's cache and exposed through a `FileProvider` that is not exported. The intent is explicit (`setPackage`) and grants `FLAG_GRANT_READ_URI_PERMISSION` only, so no other app can intercept it. Delivered by [#1730].                                                                                                                         |
 | **R-27** | On iOS, photo-library access is add-only (`PHAccessLevel.addOnly`). This use case never asks to read the library. Delivered by [#1730] and [#1732].                                                                                                                                                                                                                                                         |
@@ -160,9 +161,9 @@ filed. The CORS policy itself is applied and documented on
 
 ### Measurement
 
-| ID       | Normative statement                                                                                                                                                                                                                                                                                 |
-| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **R-29** | _Intended, not met._ The funnel is measured step by step: composer opened, template chosen, target picked, and hand-off succeeded or failed, each its own event under `R-24`. The event names are [Implementation - Analytics Events](../implementation/analytics-events.md)'s, written by [#1733]. |
+| ID       | Normative statement                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R-29** | The funnel is measured step by step: share menu opened, target picked, composer opened, template chosen, and hand-off succeeded or failed, each its own event under `R-24`. A hand-off that succeeded means the image was saved or an app took it, never that it was posted: Instagram and Facebook do not report that (`G4`). The event names are [Implementation - Analytics Events](../implementation/analytics-events.md)'s, written by [#1733]. |
 
 ## Authorization
 

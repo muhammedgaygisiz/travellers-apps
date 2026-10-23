@@ -63,6 +63,13 @@ export const AnalyticsEvent = {
   TableOrderSubmitted: 'table_order_submitted',
   TableBitePromptShown: 'table_bite_prompt_shown',
   TableBiteStarted: 'table_bite_started',
+  // Share-as-image funnel, consumer app (epic #1723, issue #1733)
+  ShareMenuOpened: 'share_menu_opened',
+  ShareTargetChosen: 'share_target_chosen',
+  ShareComposerOpened: 'share_composer_opened',
+  ShareTemplateChosen: 'share_template_chosen',
+  ShareHandoffSucceeded: 'share_handoff_succeeded',
+  ShareHandoffFailed: 'share_handoff_failed',
 } as const;
 
 export type AnalyticsEventName =
@@ -270,6 +277,89 @@ export interface AnalyticsEventParamMap {
     visit_id: string;
     surface: BitePromptSurface;
   };
+  /**
+   * The share-as-image funnel (GitHub issue #1733, `UC-SBS` `R-24`, `R-29`).
+   *
+   * Every step carries the Bite and, from the composer on, what the image was
+   * made as, so each step can be read against the one before it without a
+   * join. Nothing else: the image shows a dish name, a place and possibly the
+   * sharer's name, and **none of it reaches these parameters** - only the id of
+   * the Bite, which the share link already carries in the open.
+   *
+   * A menu dismissed without a choice emits nothing after `share_menu_opened`,
+   * which is how that drop-off is read.
+   */
+  [AnalyticsEvent.ShareMenuOpened]: Pick<ShareImageParams, 'bite_id'>;
+  [AnalyticsEvent.ShareTargetChosen]: Pick<
+    ShareImageParams,
+    'bite_id' | 'target'
+  >;
+  [AnalyticsEvent.ShareComposerOpened]: Pick<
+    ShareImageParams,
+    'bite_id' | 'target' | 'format'
+  >;
+  /**
+   * The user switched the layout. Each switch is one event, and the default
+   * layout the composer opens on is not one - it was not chosen, so a composer
+   * nobody touched emits none and the hand-off still says which one went out.
+   */
+  [AnalyticsEvent.ShareTemplateChosen]: ShareImageParams;
+  /**
+   * The image left BiteTribe: it was saved, or the share sheet reported that
+   * an app took it.
+   *
+   * **Not that anything was posted.** Instagram and Facebook do not tell the
+   * app that hands them an image whether the user published it, so the honest
+   * last step of this funnel is the hand-off. See `UC-SBS` `G4`: posting is the
+   * user's own act in the other app.
+   */
+  [AnalyticsEvent.ShareHandoffSucceeded]: ShareImageParams & {
+    action: ShareImageAction;
+  };
+  [AnalyticsEvent.ShareHandoffFailed]: ShareImageParams & {
+    action: ShareImageAction;
+    /**
+     * Why the image did not leave. `cancelled` is the user closing the share
+     * sheet, which is a drop-off rather than a fault and is counted for that
+     * reason.
+     */
+    reason: 'cancelled' | 'permission_denied' | 'unavailable' | 'failed';
+  };
+}
+
+/**
+ * The share menu entry the user picked (GitHub issue #1733).
+ *
+ * One value per `ShareMenuChoice` in `bite-tribe/details`, which maps its
+ * entries onto these in `ANALYTICS_TARGET`. Inlined for the reason every other
+ * union on this page is; `analytics-events.spec.ts` compares the two as text.
+ */
+export type ShareTarget =
+  | 'instagram_story'
+  | 'instagram_post'
+  | 'facebook_story'
+  | 'save'
+  | 'share_image'
+  | 'more';
+
+/** What the composer did with the image: saved it, or shared it. */
+export type ShareImageAction = 'save' | 'share';
+
+/**
+ * What the share-as-image funnel says about each step (GitHub issue #1733).
+ *
+ * `format` and `template` mirror `ShareImageFormat` and `ShareImageLayoutId`
+ * from `bite-tribe/share-image-ui`, inlined and checked as text like the rest.
+ */
+export interface ShareImageParams {
+  /** The Bite being shared. The share link carries the same id. */
+  bite_id: string;
+  /** The menu entry that started this share. */
+  target: ShareTarget;
+  /** The image's shape: a 9:16 Story or a 4:5 Post. */
+  format: 'story' | 'post';
+  /** The layout the image is drawn in. */
+  template: 'classic' | 'wide';
 }
 
 /**
@@ -416,6 +506,12 @@ export const ANALYTICS_EVENT_SURFACE: Record<
   [AnalyticsEvent.TableOrderSubmitted]: 'consumer',
   [AnalyticsEvent.TableBitePromptShown]: 'consumer',
   [AnalyticsEvent.TableBiteStarted]: 'consumer',
+  [AnalyticsEvent.ShareMenuOpened]: 'consumer',
+  [AnalyticsEvent.ShareTargetChosen]: 'consumer',
+  [AnalyticsEvent.ShareComposerOpened]: 'consumer',
+  [AnalyticsEvent.ShareTemplateChosen]: 'consumer',
+  [AnalyticsEvent.ShareHandoffSucceeded]: 'consumer',
+  [AnalyticsEvent.ShareHandoffFailed]: 'consumer',
 };
 
 /**

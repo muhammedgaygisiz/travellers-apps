@@ -369,6 +369,35 @@ describe(ShareImageComposerComponent.name, () => {
       expect(drawnStyle()['layout']).toBe('wide');
     });
 
+    /** For the share funnel's analytics (issue #1733). */
+    it('reports each layout the user picks, and not the one already showing', async () => {
+      const element = await render();
+      const chosen: string[] = [];
+      fixture.componentInstance.layoutChosen.subscribe((layout) =>
+        chosen.push(layout),
+      );
+      const segment = element.querySelector(
+        '[data-testid="share-image-layouts"]',
+      ) as HTMLElement;
+      const pick = (value: string): void => {
+        segment.dispatchEvent(
+          new CustomEvent('ionChange', { detail: { value } }),
+        );
+        fixture.detectChanges();
+      };
+      const preview = element.querySelector(
+        '[data-testid="share-image-swipe"]',
+      ) as HTMLElement;
+
+      pick('classic');
+      pick('wide');
+      pick('wide');
+      preview.dispatchEvent(new MouseEvent('pointerdown', { clientX: 300 }));
+      preview.dispatchEvent(new MouseEvent('pointerup', { clientX: 100 }));
+
+      expect(chosen).toEqual(['wide', 'classic']);
+    });
+
     it('steps through the layouts with a horizontal swipe', async () => {
       const element = await render();
       const preview = element.querySelector(

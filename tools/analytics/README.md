@@ -16,13 +16,18 @@ Agent-operable access to the launch analytics defined in
   question. Nothing runs it directly: it is the list a reader reads, and
   `analytics-events.spec.ts` fails if it drifts from the taxonomy or from the
   query below.
+- **`share-image-funnel.config.mjs`** — the share-as-image funnel as data
+  (issue #1733): menu, entry, composer, layout, hand-off. Its own
+  configuration for the same reason, and kept in step with the taxonomy and
+  its query by the same spec.
 - **`crawlers.config.mjs`** — the data-centre towns whose web traffic is
   link-preview crawlers rather than people (issue #1709). The cohort queries
   and the App Check throttle tiles filter on it, and `analytics-events.spec.ts`
   fails if a query's copy of the list drifts from it.
 - **`queries/*.sql`** — checked-in SQL against the export, run by `query.mjs`
   via `npm run analytics:query`. `order-to-bite-funnel.sql` is that funnel as
-  numbers, per restaurant per day.
+  numbers, per restaurant per day, and `share-image-funnel.sql` the share
+  funnel per day.
 
 ## Quick start
 

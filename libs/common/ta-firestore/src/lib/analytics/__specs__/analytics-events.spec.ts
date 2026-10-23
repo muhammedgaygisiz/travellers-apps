@@ -114,6 +114,62 @@ const BITE_SOURCE = join(
   'bite-provenance.ts',
 );
 
+const SHARE_IMAGE_FUNNEL_CONFIG = join(
+  WORKSPACE,
+  'tools',
+  'analytics',
+  'share-image-funnel.config.mjs',
+);
+
+const SHARE_IMAGE_FUNNEL_QUERY = join(
+  WORKSPACE,
+  'tools',
+  'analytics',
+  'queries',
+  'share-image-funnel.sql',
+);
+
+const SHARE_IMAGE_UI = join(
+  WORKSPACE,
+  'libs',
+  'bite-tribe',
+  'share-image',
+  'ui',
+  'src',
+  'lib',
+);
+
+const DETAILS_SERVICE = join(
+  WORKSPACE,
+  'libs',
+  'bite-tribe',
+  'details',
+  'page',
+  'src',
+  'lib',
+  'integration',
+  'details.service.ts',
+);
+
+/** The quoted members of the first match of `pattern` in `file`. */
+const quotedMembers = (file: string, pattern: RegExp): string[] => {
+  const match = pattern.exec(readFileSync(file, 'utf8'));
+
+  if (!match) {
+    throw new Error(`No ${pattern} declaration found in ${file}`);
+  }
+
+  return [...match[1].matchAll(/'([^']+)'/g)].map((member) => member[1]);
+};
+
+/** The parameter names `provision-ga4.mjs` registers as custom dimensions. */
+const customDimensions = (): string[] =>
+  [
+    ...readFileSync(PROVISION_GA4, 'utf8').matchAll(
+      /parameterName: '([^']+)'/g,
+    ),
+  ].map((match) => match[1]);
+
 /** The events the funnel config declares, in order. */
 const funnelEvents = (): string[] =>
   [
@@ -375,6 +431,91 @@ describe('analytics taxonomy', () => {
    * half has the same shape - a horizon the config promises and the SQL does
    * not compute comes back as `n/a` forever.
    */
+  /**
+   * The share-as-image funnel of issue #1733, which spans the same three
+   * places the order-to-Bite funnel does, plus the two libraries whose unions
+   * its parameters copy: `scope:common` may import neither.
+   */
+  describe('the share-as-image funnel', () => {
+    const steps = (): string[] =>
+      [
+        ...readFileSync(SHARE_IMAGE_FUNNEL_CONFIG, 'utf8').matchAll(
+          /^\s+event: '([^']+)',$/gm,
+        ),
+      ].map((match) => match[1]);
+
+    it('names only events the taxonomy has', () => {
+      for (const event of steps()) {
+        expect(names).toContain(event);
+      }
+    });
+
+    it('declares the five steps in the order they happen', () => {
+      expect(steps()).toEqual([
+        'share_menu_opened',
+        'share_target_chosen',
+        'share_composer_opened',
+        'share_template_chosen',
+        'share_handoff_succeeded',
+      ]);
+    });
+
+    it('counts every step, and the failures, in the query that measures it', () => {
+      const sql = readFileSync(SHARE_IMAGE_FUNNEL_QUERY, 'utf8');
+
+      for (const event of [...steps(), 'share_handoff_failed']) {
+        expect(sql).toContain(`'${event}'`);
+      }
+    });
+
+    it('agrees with the composer about the formats and layouts', () => {
+      expect(quotedMembers(ANALYTICS_EVENTS, /format: ('[^;]*');/)).toEqual(
+        quotedMembers(
+          join(SHARE_IMAGE_UI, 'share-image-content.ts'),
+          /export type ShareImageFormat =([^;]*);/,
+        ),
+      );
+      expect(quotedMembers(ANALYTICS_EVENTS, /template: ('[^;]*');/)).toEqual(
+        quotedMembers(
+          join(SHARE_IMAGE_UI, 'share-image-style.ts'),
+          /SHARE_IMAGE_LAYOUT_IDS = \[([^\]]*)\]/,
+        ),
+      );
+    });
+
+    it('has a target for every share menu entry, and no other', () => {
+      const mapped = [
+        ...(
+          /const ANALYTICS_TARGET[^{]*\{([^}]*)\}/.exec(
+            readFileSync(DETAILS_SERVICE, 'utf8'),
+          )?.[1] ?? ''
+        ).matchAll(/: '([^']+)'/g),
+      ].map((match) => match[1]);
+
+      expect(mapped).toEqual(
+        quotedMembers(ANALYTICS_EVENTS, /export type ShareTarget =([^;]*);/),
+      );
+    });
+
+    /**
+     * `UC-SBS` `R-24`: the enums are what a GA4 report can break the funnel
+     * down by, and the Bite id is what it must not try to - it is read from the
+     * export, like the table ids.
+     */
+    it('registers its enums as dimensions, and never the Bite id', () => {
+      expect(customDimensions()).toEqual(
+        expect.arrayContaining([
+          'target',
+          'format',
+          'template',
+          'action',
+          'reason',
+        ]),
+      );
+      expect(customDimensions()).not.toContain('bite_id');
+    });
+  });
+
   describe('the activation funnel', () => {
     it('names only events the taxonomy has, or GA4 automatic events', () => {
       for (const step of activationSteps()) {

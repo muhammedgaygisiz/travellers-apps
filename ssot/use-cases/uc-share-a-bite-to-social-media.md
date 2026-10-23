@@ -221,7 +221,10 @@ Relevant, on both stores, and it lands with the code children rather than with t
   emulators: the menu as an iOS action sheet, the composer drawing the photo from inside the
   `capacitor://localhost` WebView, and the native share sheet receiving a 1080×1920 JPEG from the
   cache directory. WebKit's encoder writes three EXIF tags of its own - colour space and pixel
-  size - and no GPS block. Android is not yet checked.
+  size - and no GPS block. Also checked the same day on an Android 36
+  emulator (Pixel 7), with a development build against the emulators: the menu, the composer
+  drawing the photo from inside the `https://localhost` WebView, an export of 1080×1920 with
+  no EXIF at all, and the Android share sheet receiving it as an image from the app's cache.
 
 ## Related GitHub Scope
 

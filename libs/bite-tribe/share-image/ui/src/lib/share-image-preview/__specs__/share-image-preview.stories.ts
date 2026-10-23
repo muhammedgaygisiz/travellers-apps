@@ -9,7 +9,10 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { loadBiteImageForCanvas } from 'bite-tribe-common/bite';
 import type { Bite } from 'model';
 import { SHARE_IMAGE_FONT_FAMILY } from '../../draw-share-image';
-import { toShareImageContent } from '../../share-image-content';
+import {
+  toShareImageContent,
+  type ShareImageFormat,
+} from '../../share-image-content';
 import { SHARE_IMAGE_LOGO_SRC } from '../../share-image-composer/share-image-composer.component';
 import { ShareImagePreviewComponent } from '../share-image-preview.component';
 
@@ -57,6 +60,7 @@ const loadImage = (src: string): Promise<HTMLImageElement> =>
         [content]="content()"
         [photo]="photo()"
         [logo]="logo()"
+        [format]="format()"
         label="Preview of the image that will be shared"
       />
     }
@@ -72,6 +76,7 @@ const loadImage = (src: string): Promise<HTMLImageElement> =>
 class ShareImagePreviewDemoComponent implements OnInit {
   readonly bite = input.required<Bite>();
   readonly withPhoto = input(true);
+  readonly format = input<ShareImageFormat>('story');
 
   protected readonly content = signal(toShareImageContent(demoBite, 'en'));
   protected readonly photo = signal<HTMLImageElement | undefined>(undefined);
@@ -104,7 +109,7 @@ class ShareImagePreviewDemoComponent implements OnInit {
 export default {
   title: 'Components/Share Image',
   component: ShareImagePreviewDemoComponent,
-  args: { bite: demoBite, withPhoto: true },
+  args: { bite: demoBite, withPhoto: true, format: 'story' },
 } satisfies Meta<ShareImagePreviewDemoComponent>;
 
 type Story = StoryObj<ShareImagePreviewDemoComponent>;
@@ -149,4 +154,20 @@ export const PhotoMissing: Story = {
 /** Markup in a dish name is drawn as the literal characters. */
 export const MarkupInName: Story = {
   args: { bite: { ...demoBite, name: '<img src=x onerror=alert(1)>' } },
+};
+
+/** The Instagram Post format: 4:5, laid out on its own rather than scaled. */
+export const Post45: Story = {
+  name: 'Post 4:5',
+  args: { format: 'post' },
+};
+
+/** The longest names at 4:5, where the photo gives up the most height. */
+export const PostLongNames: Story = {
+  args: { ...LongNames.args, format: 'post' },
+};
+
+/** The logo panel at 4:5. */
+export const PostPhotoMissing: Story = {
+  args: { withPhoto: false, format: 'post' },
 };

@@ -33,10 +33,10 @@ import { ToastService } from 'toast';
 /** The share menu's entries that lead to the image composer. */
 type ShareMenuTarget = 'instagram-story' | 'instagram-post' | 'facebook-story';
 
-/** Every format opens as a Story until the 4:5 Post layout lands (#1727). */
+/** The menu entry decides the format (`UC-SBS` `R-5`). */
 const FORMAT_FOR_TARGET: Record<ShareMenuTarget, ShareImageFormat> = {
   'instagram-story': 'story',
-  'instagram-post': 'story',
+  'instagram-post': 'post',
   'facebook-story': 'story',
 };
 

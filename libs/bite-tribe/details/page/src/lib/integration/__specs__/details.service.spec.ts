@@ -613,9 +613,13 @@ describe('DetailsService', () => {
       expect(mockModalController.create).not.toHaveBeenCalled();
     });
 
-    it.each(['instagram-story', 'instagram-post', 'facebook-story'])(
-      'opens the image composer in Story format for %s',
-      async (choice) => {
+    it.each([
+      ['instagram-story', 'story'],
+      ['instagram-post', 'post'],
+      ['facebook-story', 'story'],
+    ])(
+      'opens the image composer for %s in the %s format',
+      async (choice, format) => {
         mockActionSheetController.create.mockResolvedValue(
           createShareMenu(choice),
         );
@@ -626,7 +630,7 @@ describe('DetailsService', () => {
           mockModalController.create.mock.calls[0][0];
         expect(component).toBe(ShareImageComposerComponent);
         expect(componentProps.bite()).toBe(ownBite);
-        expect(componentProps.format()).toBe('story');
+        expect(componentProps.format()).toBe(format);
         expect(mockModal.present).toHaveBeenCalled();
       },
     );

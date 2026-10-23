@@ -17,6 +17,12 @@ import {
   type ShareImageFieldSwitches,
   type ShareImageFormat,
 } from '../../share-image-content';
+import {
+  DEFAULT_SHARE_IMAGE_STYLE,
+  withLegibleText,
+  type ShareImageBackgroundId,
+  type ShareImageStyle,
+} from '../../share-image-style';
 import { SHARE_IMAGE_LOGO_SRC } from '../../share-image-composer/share-image-composer.component';
 import { ShareImagePreviewComponent } from '../share-image-preview.component';
 
@@ -65,6 +71,7 @@ const loadImage = (src: string): Promise<HTMLImageElement> =>
         [photo]="photo()"
         [logo]="logo()"
         [format]="format()"
+        [imageStyle]="imageStyle()"
         label="Preview of the image that will be shared"
       />
     }
@@ -83,6 +90,7 @@ class ShareImagePreviewDemoComponent implements OnInit {
   readonly format = input<ShareImageFormat>('story');
   readonly creatorName = input<string>();
   readonly switches = input<ShareImageFieldSwitches>(DEFAULT_FIELD_SWITCHES);
+  readonly imageStyle = input<ShareImageStyle>(DEFAULT_SHARE_IMAGE_STYLE);
 
   protected readonly content = signal(toShareImageContent(demoBite, 'en'));
   protected readonly photo = signal<HTMLImageElement | undefined>(undefined);
@@ -212,5 +220,50 @@ export const PostAllFieldsOn: Story = {
     creatorName: 'Super Mario',
     switches: allSwitches(true),
     format: 'post',
+  },
+};
+
+/** Wide: the photo edge to edge at the top. */
+export const Wide916: Story = {
+  name: 'Wide 9:16',
+  args: { imageStyle: { ...DEFAULT_SHARE_IMAGE_STYLE, layout: 'wide' } },
+};
+
+/** Wide at 4:5. */
+export const Wide45: Story = {
+  name: 'Wide 4:5',
+  args: {
+    format: 'post',
+    imageStyle: { ...DEFAULT_SHARE_IMAGE_STYLE, layout: 'wide' },
+  },
+};
+
+/** Wide with every field on, the name pill included. */
+export const WideAllFieldsOn: Story = {
+  args: {
+    creatorName: 'Super Mario',
+    switches: allSwitches(true),
+    imageStyle: { ...DEFAULT_SHARE_IMAGE_STYLE, layout: 'wide' },
+  },
+};
+
+/** A background with the first text colour legible on it. */
+const onBackground = (background: ShareImageBackgroundId): Story => ({
+  args: {
+    imageStyle: withLegibleText({ ...DEFAULT_SHARE_IMAGE_STYLE, background }),
+  },
+});
+
+export const BackgroundDusk: Story = onBackground('dusk');
+export const BackgroundOcean: Story = onBackground('ocean');
+export const BackgroundSunset: Story = onBackground('sunset');
+export const BackgroundPaper: Story = onBackground('paper');
+
+/** Light ground, dark text, Wide at 4:5, with the photo missing. */
+export const WidePaperPostPhotoMissing: Story = {
+  args: {
+    format: 'post',
+    withPhoto: false,
+    imageStyle: { layout: 'wide', background: 'paper', text: 'cocoa' },
   },
 };

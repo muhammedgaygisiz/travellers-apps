@@ -630,6 +630,9 @@ describe('DetailsService', () => {
         const { component, componentProps } =
           mockModalController.create.mock.calls[0][0];
         expect(component).toBe(ShareImageComposerComponent);
+        expect(mockModalController.create.mock.calls[0][0].cssClass).toBe(
+          'share-image-composer-modal',
+        );
         expect(componentProps.bite()).toBe(ownBite);
         expect(componentProps.format()).toBe(format);
         expect(mockModal.present).toHaveBeenCalled();

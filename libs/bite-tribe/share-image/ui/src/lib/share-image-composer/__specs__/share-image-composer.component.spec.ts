@@ -3,7 +3,10 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { loadBiteImageForCanvas } from 'bite-tribe-common/bite';
 import type { Bite } from 'model';
-import { ShareImageComposerComponent } from '../share-image-composer.component';
+import {
+  hasMoreBelow,
+  ShareImageComposerComponent,
+} from '../share-image-composer.component';
 
 jest.mock('bite-tribe-common/bite', () => ({
   loadBiteImageForCanvas: jest.fn(),
@@ -154,9 +157,11 @@ describe(ShareImageComposerComponent.name, () => {
     it('offers a switch for each field the Bite has, and none for the rest', async () => {
       const element = await render();
 
-      ['photo', 'dishName', 'place', 'price', 'qr'].forEach((field) =>
+      ['photo', 'dishName', 'place', 'price'].forEach((field) =>
         expect(toggle(element, field)).not.toBeNull(),
       );
+      // The QR code is on every image, so it has no switch.
+      expect(toggle(element, 'qr')).toBeNull();
       // The fixture has no rating, and no public name was passed.
       expect(toggle(element, 'rating')).toBeNull();
       expect(toggle(element, 'creatorName')).toBeNull();
@@ -193,5 +198,150 @@ describe(ShareImageComposerComponent.name, () => {
 
       expect(drawnContent()['creatorName']).toBe('Super Mario');
     });
+  });
+
+  /** The layout and colours (UC-SBS R-32, R-33, issue #1731). */
+  describe('style', () => {
+    const drawnStyle = (): Record<string, string> =>
+      (
+        fixture.componentInstance as unknown as {
+          imageStyle: () => Record<string, string>;
+        }
+      ).imageStyle();
+
+    const click = (element: HTMLElement, testId: string): void => {
+      (
+        element.querySelector(`[data-testid="${testId}"]`) as HTMLElement
+      ).click();
+      fixture.detectChanges();
+    };
+
+    it('starts on Classic, Night and White', async () => {
+      await render();
+
+      expect(drawnStyle()).toEqual({
+        layout: 'classic',
+        background: 'night',
+        text: 'white',
+      });
+    });
+
+    it('switches the layout from the segment', async () => {
+      const element = await render();
+
+      element
+        .querySelector('[data-testid="share-image-layouts"]')
+        ?.dispatchEvent(
+          new CustomEvent('ionChange', { detail: { value: 'wide' } }),
+        );
+      fixture.detectChanges();
+
+      expect(drawnStyle()['layout']).toBe('wide');
+    });
+
+    it('steps through the layouts with a horizontal swipe', async () => {
+      const element = await render();
+      const preview = element.querySelector(
+        '[data-testid="share-image-swipe"]',
+      ) as HTMLElement;
+      const swipe = (from: number, to: number): void => {
+        preview.dispatchEvent(new MouseEvent('pointerdown', { clientX: from }));
+        preview.dispatchEvent(new MouseEvent('pointerup', { clientX: to }));
+        fixture.detectChanges();
+      };
+
+      swipe(300, 100);
+      expect(drawnStyle()['layout']).toBe('wide');
+
+      swipe(100, 300);
+      expect(drawnStyle()['layout']).toBe('classic');
+
+      // A tap, or a short drag, changes nothing.
+      swipe(200, 180);
+      expect(drawnStyle()['layout']).toBe('classic');
+
+      // Nor does a release whose press began outside the preview.
+      preview.dispatchEvent(new MouseEvent('pointerup', { clientX: 0 }));
+      fixture.detectChanges();
+      expect(drawnStyle()['layout']).toBe('classic');
+    });
+
+    it('offers every background, and only the legible text colours', async () => {
+      const element = await render();
+      const ids = (prefix: string): string[] =>
+        [...element.querySelectorAll(`[data-testid^="${prefix}"]`)].map(
+          (swatch) =>
+            (swatch.getAttribute('data-testid') ?? '').replace(prefix, ''),
+        );
+
+      expect(ids('share-image-background-')).toEqual([
+        'night',
+        'dusk',
+        'ocean',
+        'sunset',
+        'paper',
+      ]);
+      expect(ids('share-image-text-colour-')).toEqual([
+        'white',
+        'cream',
+        'honey',
+      ]);
+
+      click(element, 'share-image-background-paper');
+
+      expect(ids('share-image-text-colour-')).toEqual(['ink', 'cocoa']);
+    });
+
+    it('switches to a legible text colour when the background makes the current one illegible', async () => {
+      const element = await render();
+
+      click(element, 'share-image-text-colour-honey');
+      click(element, 'share-image-background-sunset');
+
+      expect(drawnStyle()).toEqual({
+        layout: 'classic',
+        background: 'sunset',
+        text: 'ink',
+      });
+    });
+
+    it('keeps the layout when the colours change', async () => {
+      const element = await render();
+
+      element
+        .querySelector('[data-testid="share-image-layouts"]')
+        ?.dispatchEvent(
+          new CustomEvent('ionChange', { detail: { value: 'wide' } }),
+        );
+      click(element, 'share-image-background-ocean');
+      click(element, 'share-image-text-colour-cream');
+
+      expect(drawnStyle()).toEqual({
+        layout: 'wide',
+        background: 'ocean',
+        text: 'cream',
+      });
+    });
+  });
+});
+
+/** The "More options" cue below the preview. */
+describe(hasMoreBelow.name, () => {
+  it('shows while the content is at its top and controls are hidden below', () => {
+    expect(
+      hasMoreBelow({ scrollTop: 0, scrollHeight: 1400, clientHeight: 700 }),
+    ).toBe(true);
+  });
+
+  it('goes away once the user has scrolled', () => {
+    expect(
+      hasMoreBelow({ scrollTop: 200, scrollHeight: 1400, clientHeight: 700 }),
+    ).toBe(false);
+  });
+
+  it('does not show when everything already fits', () => {
+    expect(
+      hasMoreBelow({ scrollTop: 0, scrollHeight: 710, clientHeight: 700 }),
+    ).toBe(false);
   });
 });

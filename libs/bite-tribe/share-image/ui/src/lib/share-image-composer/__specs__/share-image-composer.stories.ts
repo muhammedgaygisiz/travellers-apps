@@ -11,7 +11,7 @@ import {
   type StoryObj,
 } from '@storybook/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { getIonicConfig } from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import type { Bite } from 'model';
 import { SHARE_IMAGE_FONT_FAMILY } from '../../draw-share-image';
 import type { ShareImageFormat } from '../../share-image-content';
@@ -19,6 +19,10 @@ import {
   SHARE_IMAGE_LOGO_SRC,
   ShareImageComposerComponent,
 } from '../share-image-composer.component';
+
+// The app registers its icon set at bootstrap; Storybook has to do it itself or
+// the "More options" chevron renders as an empty box.
+addNecessaryIcons();
 
 // Local, bundled demo image, so the reference never depends on a live photo.
 const PEACH_IMAGE = 'assets/demo/bite-demo.png';

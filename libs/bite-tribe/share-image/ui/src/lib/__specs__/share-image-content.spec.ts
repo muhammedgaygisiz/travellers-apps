@@ -108,7 +108,7 @@ describe('field switches', () => {
       ),
     );
 
-    expect(fields).toEqual(['photo', 'dishName', 'qr']);
+    expect(fields).toEqual(['photo', 'dishName']);
   });
 
   it('offers no name switch without a public name', () => {
@@ -117,7 +117,12 @@ describe('field switches', () => {
     ).not.toContain('creatorName');
   });
 
-  it('removes every switched-off field', () => {
+  it('has no switch for the QR code or the wordmark', () => {
+    expect(SHARE_IMAGE_FIELDS).not.toContain('qr');
+    expect(SHARE_IMAGE_FIELDS).not.toContain('wordmark');
+  });
+
+  it('removes every switched-off field, and keeps the QR code', () => {
     const allOff = Object.fromEntries(
       SHARE_IMAGE_FIELDS.map((field) => [field, false]),
     ) as typeof DEFAULT_FIELD_SWITCHES;
@@ -128,7 +133,7 @@ describe('field switches', () => {
       placeLine: '',
       price: undefined,
       rating: undefined,
-      qrUrl: undefined,
+      qrUrl: 'https://bitetribe.app/s/bite/bite-1',
       creatorName: undefined,
     });
   });

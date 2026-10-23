@@ -16,10 +16,13 @@ import {
   IonContent,
   IonFooter,
   IonHeader,
+  IonIcon,
   IonItem,
   IonLabel,
   IonList,
   IonListHeader,
+  IonSegment,
+  IonSegmentButton,
   IonSpinner,
   IonText,
   IonTitle,
@@ -47,10 +50,42 @@ const FIELD_LABEL_KEY: Record<ShareImageField, string> = {
   place: 'share-image-field-place',
   price: 'share-image-field-price',
   rating: 'share-image-field-rating',
-  qr: 'share-image-field-qr',
   creatorName: 'share-image-field-creator-name',
 };
 import { ShareImagePreviewComponent } from '../share-image-preview/share-image-preview.component';
+import {
+  DEFAULT_SHARE_IMAGE_STYLE,
+  legibleTextColours,
+  SHARE_IMAGE_BACKGROUNDS,
+  SHARE_IMAGE_LAYOUT_IDS,
+  textColourById,
+  withLegibleText,
+  type ShareImageBackgroundId,
+  type ShareImageLayoutId,
+  type ShareImageStyle,
+  type ShareImageTextColourId,
+} from '../share-image-style';
+
+/**
+ * How far the content may be scrolled, or how little may be hidden below,
+ * before the "More options" cue goes away.
+ */
+const SCROLL_CUE_THRESHOLD = 24;
+
+/**
+ * Whether the "More options" cue should show: the content is still near its
+ * top, and enough of it is hidden below to be worth scrolling to.
+ */
+export const hasMoreBelow = ({
+  scrollTop,
+  scrollHeight,
+  clientHeight,
+}: Pick<HTMLElement, 'scrollTop' | 'scrollHeight' | 'clientHeight'>): boolean =>
+  scrollTop < SCROLL_CUE_THRESHOLD &&
+  scrollHeight - clientHeight - scrollTop > SCROLL_CUE_THRESHOLD;
+
+/** How far a horizontal swipe on the preview must travel to change layout. */
+const SWIPE_DISTANCE = 40;
 
 /** The logo drawn beside the wordmark, served with the app's own assets. */
 export const SHARE_IMAGE_LOGO_SRC = 'assets/icons/logo.svg';
@@ -101,10 +136,13 @@ const loadFonts = async (): Promise<void> => {
     IonContent,
     IonFooter,
     IonHeader,
+    IonIcon,
     IonItem,
     IonLabel,
     IonList,
     IonListHeader,
+    IonSegment,
+    IonSegmentButton,
     IonSpinner,
     IonText,
     IonTitle,
@@ -153,6 +191,35 @@ export class ShareImageComposerComponent implements OnInit {
   protected readonly content = computed(() =>
     applyFieldSwitches(this.fullContent(), this.switches()),
   );
+
+  /** The layout and colours, chosen separately; nothing is remembered. */
+  protected readonly imageStyle = signal<ShareImageStyle>({
+    ...DEFAULT_SHARE_IMAGE_STYLE,
+  });
+
+  protected readonly layouts = SHARE_IMAGE_LAYOUT_IDS.map((id) => ({
+    id,
+    labelKey: `share-image-layout-${id}`,
+  }));
+
+  protected readonly backgrounds = SHARE_IMAGE_BACKGROUNDS.map(
+    ({ id, stops }) => ({
+      id,
+      swatch: `linear-gradient(${stops[0]}, ${stops[1]})`,
+      labelKey: `share-image-background-${id}`,
+    }),
+  );
+
+  /** Only the text colours legible on the chosen background (`UC-SBS` `R-33`). */
+  protected readonly textColours = computed(() =>
+    legibleTextColours(this.imageStyle().background).map((id) => ({
+      id,
+      swatch: textColourById(id).color,
+      labelKey: `share-image-text-colour-${id}`,
+    })),
+  );
+
+  private swipeStartX?: number;
   protected readonly photo = signal<HTMLImageElement | undefined>(undefined);
   protected readonly logo = signal<HTMLImageElement | undefined>(undefined);
   protected readonly ready = signal(false);
@@ -160,6 +227,13 @@ export class ShareImageComposerComponent implements OnInit {
   protected readonly sharing = signal(false);
 
   private readonly preview = viewChild(ShareImagePreviewComponent);
+  private readonly ionContent = viewChild(IonContent);
+
+  /**
+   * Whether the customising controls are still out of view below the
+   * preview, so the user is told they can scroll to them.
+   */
+  protected readonly moreBelow = signal(false);
 
   async ngOnInit(): Promise<void> {
     const [photo, logo] = await Promise.allSettled([
@@ -180,6 +254,76 @@ export class ShareImageComposerComponent implements OnInit {
     }
 
     this.ready.set(true);
+    // Once the stage has rendered, see whether anything is hidden below it.
+    setTimeout(() => void this.updateMoreBelow(), 0);
+  }
+
+  protected async updateMoreBelow(): Promise<void> {
+    const scroll = await this.scrollElement();
+
+    if (scroll) {
+      this.moreBelow.set(hasMoreBelow(scroll));
+    }
+  }
+
+  /** Brings the first customising control into view. */
+  protected async showOptions(): Promise<void> {
+    const options = (await this.scrollElement())?.querySelector<HTMLElement>(
+      '.layouts',
+    );
+
+    if (options) {
+      await this.ionContent()?.scrollToPoint(0, options.offsetTop - 8, 300);
+    }
+  }
+
+  /** The content's scroll element, or nothing where Ionic has not upgraded it. */
+  private async scrollElement(): Promise<HTMLElement | undefined> {
+    try {
+      return await this.ionContent()?.getScrollElement();
+    } catch {
+      return undefined;
+    }
+  }
+
+  protected setLayout(layout: ShareImageLayoutId): void {
+    this.imageStyle.update((style) => ({ ...style, layout }));
+  }
+
+  protected setBackground(background: ShareImageBackgroundId): void {
+    // A text colour that is not legible on the new background gives way to
+    // the first one that is.
+    this.imageStyle.update((style) =>
+      withLegibleText({ ...style, background }),
+    );
+  }
+
+  protected setTextColour(text: ShareImageTextColourId): void {
+    this.imageStyle.update((style) => ({ ...style, text }));
+  }
+
+  protected onSwipeStart(event: PointerEvent): void {
+    this.swipeStartX = event.clientX;
+  }
+
+  /** A horizontal swipe on the preview steps to the next or previous layout. */
+  protected onSwipeEnd(event: PointerEvent): void {
+    if (this.swipeStartX === undefined) {
+      return;
+    }
+
+    const distance = event.clientX - this.swipeStartX;
+    this.swipeStartX = undefined;
+
+    if (Math.abs(distance) < SWIPE_DISTANCE) {
+      return;
+    }
+
+    const ids = SHARE_IMAGE_LAYOUT_IDS;
+    const current = ids.indexOf(this.imageStyle().layout);
+    const step = distance < 0 ? 1 : -1;
+
+    this.setLayout(ids[(current + step + ids.length) % ids.length]);
   }
 
   protected setSwitch(field: ShareImageField, on: boolean): void {

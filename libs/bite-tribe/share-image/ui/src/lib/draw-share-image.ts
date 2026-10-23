@@ -5,6 +5,14 @@ import {
   type ShareImageContent,
   type ShareImageFormat,
 } from './share-image-content';
+import {
+  backgroundById,
+  DEFAULT_SHARE_IMAGE_STYLE,
+  textColourById,
+  withAlpha,
+  type ShareImageLayoutId,
+  type ShareImageStyle,
+} from './share-image-style';
 
 /** An image the renderer can draw and measure. */
 export interface DrawableImage {
@@ -25,17 +33,40 @@ export const SHARE_IMAGE_FONT_FAMILY =
 /** The brand name, which is drawn on every image and never switched off. */
 export const WORDMARK = 'BiteTribe';
 
+/**
+ * The colours no style changes: a scanner needs a dark code on a light quiet
+ * zone, and the name pill sits on the photo rather than on the background.
+ */
 const COLOR = {
-  ground: '#1A1C22',
-  panel: '#262A33',
-  text: '#FFFFFF',
-  muted: 'rgba(255, 255, 255, 0.72)',
-  star: '#F8B850',
-  starEmpty: 'rgba(255, 255, 255, 0.24)',
   qrLight: '#FFFFFF',
   qrDark: '#000000',
   pill: 'rgba(0, 0, 0, 0.55)',
+  pillText: '#FFFFFF',
 } as const;
+
+/** The colours of one drawing, resolved from its style. */
+interface Palette {
+  ground: readonly [string, string];
+  panel: string;
+  text: string;
+  muted: string;
+  star: string;
+  starEmpty: string;
+}
+
+const toPalette = (style: ShareImageStyle): Palette => {
+  const background = backgroundById(style.background);
+  const text = textColourById(style.text).color;
+
+  return {
+    ground: background.stops,
+    panel: background.panel,
+    text,
+    muted: withAlpha(text, 0.72),
+    star: background.star,
+    starEmpty: withAlpha(text, 0.24),
+  };
+};
 
 /**
  * Where everything sits, per format. Each format has a layout of its own
@@ -45,6 +76,8 @@ const COLOR = {
  */
 export interface ShareImageLayout {
   margin: number;
+  /** How far the photo sits from the top and the sides of the image. */
+  photoInset: number;
   photoHeight: number;
   photoRadius: number;
   /** Space between the photo and the dish name. */
@@ -64,9 +97,10 @@ export interface ShareImageLayout {
   placeholderLogoHeight: number;
 }
 
-export const SHARE_IMAGE_LAYOUT: Record<ShareImageFormat, ShareImageLayout> = {
+const CLASSIC: Record<ShareImageFormat, ShareImageLayout> = {
   story: {
     margin: 72,
+    photoInset: 72,
     photoHeight: 1080,
     photoRadius: 48,
     detailsGap: 64,
@@ -85,6 +119,7 @@ export const SHARE_IMAGE_LAYOUT: Record<ShareImageFormat, ShareImageLayout> = {
   },
   post: {
     margin: 56,
+    photoInset: 56,
     photoHeight: 660,
     photoRadius: 40,
     detailsGap: 44,
@@ -103,6 +138,35 @@ export const SHARE_IMAGE_LAYOUT: Record<ShareImageFormat, ShareImageLayout> = {
   },
 };
 
+/**
+ * Wide runs the photo edge to edge and square at the top. The photo grows by
+ * the inset it gives up, so the text below it starts exactly where Classic's
+ * does and the two layouts share one overlap budget.
+ */
+const WIDE: Record<ShareImageFormat, ShareImageLayout> = {
+  story: {
+    ...CLASSIC.story,
+    photoInset: 0,
+    photoHeight: CLASSIC.story.photoHeight + CLASSIC.story.photoInset,
+    photoRadius: 0,
+  },
+  post: {
+    ...CLASSIC.post,
+    photoInset: 0,
+    photoHeight: CLASSIC.post.photoHeight + CLASSIC.post.photoInset,
+    photoRadius: 0,
+  },
+};
+
+/** Every layout, per format (`UC-SBS` `R-5`, `R-32`). */
+export const SHARE_IMAGE_LAYOUTS: Record<
+  ShareImageLayoutId,
+  Record<ShareImageFormat, ShareImageLayout>
+> = {
+  classic: CLASSIC,
+  wide: WIDE,
+};
+
 const STAR_COUNT = 5;
 const PLACE_GAP_ABOVE = 8;
 const PLACE_GAP_BELOW = 24;
@@ -114,7 +178,7 @@ const PRICE_GAP_ABOVE = 8;
  * footer without drawing anything.
  */
 export const detailsMaxBottom = (layout: ShareImageLayout): number =>
-  layout.margin +
+  layout.photoInset +
   layout.photoHeight +
   layout.detailsGap +
   layout.dishMaxLines * layout.dishLineHeight +
@@ -216,10 +280,11 @@ const drawCreatorPill = (
   const height = Math.round(fontSize * 1.8);
   const padding = Math.round(height / 2.4);
   const iconSize = fontSize;
-  const x = layout.margin + 24;
-  const y = layout.margin + layout.photoHeight - 24 - height;
-  const maxTextWidth =
-    width - 2 * layout.margin - 48 - 2 * padding - iconSize - 12;
+  const { photoInset } = layout;
+  // In from the photo's corner, but never further out than the text margin.
+  const x = Math.max(layout.margin, photoInset + 24);
+  const y = photoInset + layout.photoHeight - 24 - height;
+  const maxTextWidth = width - 2 * x - 2 * padding - iconSize - 12;
 
   ctx.font = `600 ${fontSize}px ${fontFamily}`;
   const text = fitText(ctx, name, maxTextWidth);
@@ -233,9 +298,9 @@ const drawCreatorPill = (
     x + padding,
     y + (height - iconSize) / 2,
     iconSize,
-    COLOR.text,
+    COLOR.pillText,
   );
-  ctx.fillStyle = COLOR.text;
+  ctx.fillStyle = COLOR.pillText;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText(text, x + padding + iconSize + 12, y + height / 2);
@@ -246,15 +311,16 @@ const drawPhoto = (
   assets: ShareImageAssets,
   width: number,
   layout: ShareImageLayout,
+  palette: Palette,
 ): void => {
-  const { margin, photoHeight } = layout;
-  const photoWidth = width - 2 * margin;
+  const { photoInset: inset, photoHeight } = layout;
+  const photoWidth = width - 2 * inset;
 
   ctx.save();
   roundedRectPath(
     ctx,
-    margin,
-    margin,
+    inset,
+    inset,
     photoWidth,
     photoHeight,
     layout.photoRadius,
@@ -262,12 +328,12 @@ const drawPhoto = (
   ctx.clip();
 
   if (assets.photo) {
-    drawCover(ctx, assets.photo, margin, margin, photoWidth, photoHeight);
+    drawCover(ctx, assets.photo, inset, inset, photoWidth, photoHeight);
   } else {
     // A photo that could not be loaded leaves a panel with the logo on it,
     // rather than a hole in the layout.
-    ctx.fillStyle = COLOR.panel;
-    ctx.fillRect(margin, margin, photoWidth, photoHeight);
+    ctx.fillStyle = palette.panel;
+    ctx.fillRect(inset, inset, photoWidth, photoHeight);
 
     if (assets.logo) {
       const logoHeight = layout.placeholderLogoHeight;
@@ -275,8 +341,8 @@ const drawPhoto = (
 
       ctx.drawImage(
         assets.logo,
-        margin + (photoWidth - logoWidth) / 2,
-        margin + (photoHeight - logoHeight) / 2,
+        inset + (photoWidth - logoWidth) / 2,
+        inset + (photoHeight - logoHeight) / 2,
         logoWidth,
         logoHeight,
       );
@@ -317,6 +383,7 @@ const drawStars = (
   x: number,
   y: number,
   layout: ShareImageLayout,
+  palette: Palette,
 ): void => {
   const { starSize, starGap } = layout;
 
@@ -325,7 +392,7 @@ const drawStars = (
     const filled = Math.min(Math.max(rating - star, 0), 1);
 
     starPath(ctx, starX, y, starSize);
-    ctx.fillStyle = COLOR.starEmpty;
+    ctx.fillStyle = palette.starEmpty;
     ctx.fill();
 
     if (filled > 0) {
@@ -334,7 +401,7 @@ const drawStars = (
       ctx.rect(starX, y, starSize * filled, starSize);
       ctx.clip();
       starPath(ctx, starX, y, starSize);
-      ctx.fillStyle = COLOR.star;
+      ctx.fillStyle = palette.star;
       ctx.fill();
       ctx.restore();
     }
@@ -347,17 +414,20 @@ const drawDetails = (
   content: ShareImageContent,
   width: number,
   layout: ShareImageLayout,
+  palette: Palette,
   fontFamily: string,
 ): void => {
   const { margin } = layout;
   const maxWidth = width - 2 * margin;
   const showPhoto = content.showPhoto !== false;
   // Without the photo the text moves up to take its place.
-  let y = showPhoto ? margin + layout.photoHeight + layout.detailsGap : margin;
+  let y = showPhoto
+    ? layout.photoInset + layout.photoHeight + layout.detailsGap
+    : margin;
 
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  ctx.fillStyle = COLOR.text;
+  ctx.fillStyle = palette.text;
   ctx.font = `700 ${layout.dishFontSize}px ${fontFamily}`;
 
   // Text is only ever drawn with fillText: the dish name is user content, and
@@ -374,7 +444,7 @@ const drawDetails = (
 
   if (content.placeLine) {
     y += PLACE_GAP_ABOVE;
-    ctx.fillStyle = COLOR.muted;
+    ctx.fillStyle = palette.muted;
     ctx.font = `400 ${layout.placeFontSize}px ${fontFamily}`;
     ctx.fillText(fitText(ctx, content.placeLine, maxWidth), margin, y);
     y += layout.placeFontSize + PLACE_GAP_BELOW;
@@ -386,8 +456,8 @@ const drawDetails = (
     const size = layout.placeFontSize;
 
     y += PLACE_GAP_ABOVE;
-    drawPersonIcon(ctx, margin, y, size, COLOR.muted);
-    ctx.fillStyle = COLOR.muted;
+    drawPersonIcon(ctx, margin, y, size, palette.muted);
+    ctx.fillStyle = palette.muted;
     ctx.font = `400 ${size}px ${fontFamily}`;
     ctx.textBaseline = 'top';
     ctx.fillText(
@@ -403,7 +473,7 @@ const drawDetails = (
     let x = margin;
 
     if (content.price) {
-      ctx.fillStyle = COLOR.text;
+      ctx.fillStyle = palette.text;
       ctx.font = `600 ${layout.priceFontSize}px ${fontFamily}`;
       const price = fitText(ctx, content.price, maxWidth / 2);
       ctx.fillText(price, x, y);
@@ -417,6 +487,7 @@ const drawDetails = (
         x,
         y + (layout.priceFontSize - layout.starSize) / 2,
         layout,
+        palette,
       );
     }
   }
@@ -451,6 +522,7 @@ const drawWordmark = (
   x: number,
   centerY: number,
   layout: ShareImageLayout,
+  palette: Palette,
   fontFamily: string,
 ): void => {
   const { logoHeight } = layout;
@@ -469,7 +541,7 @@ const drawWordmark = (
     textX += logoWidth + 24;
   }
 
-  ctx.fillStyle = COLOR.text;
+  ctx.fillStyle = palette.text;
   ctx.font = `700 ${layout.wordmarkFontSize}px ${fontFamily}`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
@@ -477,8 +549,8 @@ const drawWordmark = (
 };
 
 /**
- * Draws the first share-image template onto `ctx`, which must be a canvas of
- * the format's size, in that format's layout.
+ * Draws a share image onto `ctx`, which must be a canvas of the format's
+ * size, in the style's layout for that format and in its colours.
  *
  * The preview the user sees is this canvas, and the image that is shared is
  * this canvas re-encoded, so the two are the same pixels by construction
@@ -491,37 +563,49 @@ export const drawShareImage = (
   assets: ShareImageAssets,
   format: ShareImageFormat = 'story',
   fontFamily: string = SHARE_IMAGE_FONT_FAMILY,
+  style: ShareImageStyle = DEFAULT_SHARE_IMAGE_STYLE,
 ): void => {
   const { width, height } = SHARE_IMAGE_SIZE[format];
-  const layout = SHARE_IMAGE_LAYOUT[format];
+  const layout = SHARE_IMAGE_LAYOUTS[style.layout][format];
+  const palette = toPalette(style);
+  const ground = ctx.createLinearGradient(0, 0, 0, height);
+
+  ground.addColorStop(0, palette.ground[0]);
+  ground.addColorStop(1, palette.ground[1]);
 
   ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = COLOR.ground;
+  ctx.fillStyle = ground;
   ctx.fillRect(0, 0, width, height);
 
   if (content.showPhoto !== false) {
-    drawPhoto(ctx, assets, width, layout);
+    drawPhoto(ctx, assets, width, layout, palette);
 
     if (content.creatorName) {
       drawCreatorPill(ctx, content.creatorName, width, layout, fontFamily);
     }
   }
 
-  drawDetails(ctx, content, width, layout, fontFamily);
+  drawDetails(ctx, content, width, layout, palette, fontFamily);
 
   const { margin, qrSize } = layout;
   const top = footerTop(layout, format);
 
-  if (content.qrUrl) {
-    drawQrCode(
-      ctx,
-      content.qrUrl,
-      width - margin - qrSize,
-      top,
-      qrSize,
-      layout.qrRadius,
-    );
-  }
+  drawQrCode(
+    ctx,
+    content.qrUrl,
+    width - margin - qrSize,
+    top,
+    qrSize,
+    layout.qrRadius,
+  );
 
-  drawWordmark(ctx, assets, margin, top + qrSize / 2, layout, fontFamily);
+  drawWordmark(
+    ctx,
+    assets,
+    margin,
+    top + qrSize / 2,
+    layout,
+    palette,
+    fontFamily,
+  );
 };

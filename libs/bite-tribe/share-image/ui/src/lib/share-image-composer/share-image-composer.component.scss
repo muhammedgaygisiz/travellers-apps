@@ -75,7 +75,9 @@
   position: absolute;
   left: 50%;
   bottom: 12px;
-  transform: translateX(-50%);
+  // 3D, as Ionic's own `translateZ(0)` for fixed content is: without its own
+  // layer WebKit paints the scrolling swatches over the cue.
+  transform: translate3d(-50%, 0, 0);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -89,4 +91,16 @@
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
   cursor: pointer;
+}
+
+// Save image and, where the platform can share a file, Share image… side by
+// side; Save alone fills the row.
+.actions {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px;
+
+  ion-button {
+    flex: 1;
+  }
 }

@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
+  ElementRef,
   inject,
   input,
   OnInit,
@@ -122,8 +124,9 @@ const loadFonts = async (): Promise<void> => {
  * Turns one of the user's own Bites into a share image (`UC-SBS`).
  *
  * Shows a live preview of the template and hands the encoded image to
- * `shareImage`, which owns what happens to it - writing the file and opening
- * the share sheet are the caller's, so this stays a UI component.
+ * `saveImage` or `shareImage`, which own what happens to it - writing the file,
+ * saving it and opening the share sheet are the caller's, so this stays a UI
+ * component. Without `shareImage` there is no Share action.
  *
  * Opened as a modal: Ionic assigns its props onto the instance, so the inputs
  * arrive as signals, the way `LocalImagePickerService` hands its photos over.
@@ -164,7 +167,9 @@ export class ShareImageComposerComponent implements OnInit {
    */
   readonly creatorName = input<string>();
   /** Shares the finished image. Resolves once the share sheet has closed. */
-  readonly shareImage = input.required<(image: Blob) => Promise<void>>();
+  readonly shareImage = input<(image: Blob) => Promise<void>>();
+  /** Saves the finished image: to the photo library, or as a download. */
+  readonly saveImage = input.required<(image: Blob) => Promise<void>>();
   readonly closed = output<void>();
 
   private readonly transloco = inject(TranslocoService);
@@ -219,21 +224,44 @@ export class ShareImageComposerComponent implements OnInit {
     })),
   );
 
-  private swipeStartX?: number;
+  private swipeStart?: { x: number; y: number };
   protected readonly photo = signal<HTMLImageElement | undefined>(undefined);
   protected readonly logo = signal<HTMLImageElement | undefined>(undefined);
   protected readonly ready = signal(false);
   protected readonly photoFailed = signal(false);
-  protected readonly sharing = signal(false);
+  /** The action whose image is being handed over, if any. */
+  protected readonly busy = signal<'share' | 'save' | undefined>(undefined);
 
   private readonly preview = viewChild(ShareImagePreviewComponent);
   private readonly ionContent = viewChild(IonContent);
+  private readonly stage = viewChild<ElementRef<HTMLElement>>('stage');
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   /**
    * Whether the customising controls are still out of view below the
    * preview, so the user is told they can scroll to them.
    */
   protected readonly moreBelow = signal(false);
+
+  constructor() {
+    // Measured again whenever the stage or the modal changes size, not once:
+    // on a phone the stage is still laying out, and the modal still sliding
+    // in, when it first renders, so an early measurement finds nothing below.
+    effect((onCleanup) => {
+      const stage = this.stage()?.nativeElement;
+
+      // Absent in jsdom, where there is no layout to observe either.
+      if (!stage || typeof ResizeObserver === 'undefined') {
+        return;
+      }
+
+      const observer = new ResizeObserver(() => void this.updateMoreBelow());
+
+      observer.observe(stage);
+      observer.observe(this.host.nativeElement);
+      onCleanup(() => observer.disconnect());
+    });
+  }
 
   async ngOnInit(): Promise<void> {
     const [photo, logo] = await Promise.allSettled([
@@ -268,12 +296,19 @@ export class ShareImageComposerComponent implements OnInit {
 
   /** Brings the first customising control into view. */
   protected async showOptions(): Promise<void> {
-    const options = (await this.scrollElement())?.querySelector<HTMLElement>(
-      '.layouts',
-    );
+    const scroll = await this.scrollElement();
+    // Looked up in the stage: the scroll element is in Ionic's shadow DOM,
+    // where the slotted controls are not its descendants.
+    const options =
+      this.stage()?.nativeElement.querySelector<HTMLElement>('.layouts');
 
-    if (options) {
-      await this.ionContent()?.scrollToPoint(0, options.offsetTop - 8, 300);
+    if (scroll && options) {
+      const top =
+        options.getBoundingClientRect().top -
+        scroll.getBoundingClientRect().top +
+        scroll.scrollTop;
+
+      await this.ionContent()?.scrollToPoint(0, top - 8, 300);
     }
   }
 
@@ -303,19 +338,31 @@ export class ShareImageComposerComponent implements OnInit {
   }
 
   protected onSwipeStart(event: PointerEvent): void {
-    this.swipeStartX = event.clientX;
+    this.swipeStart = { x: event.clientX, y: event.clientY };
+  }
+
+  /**
+   * A cancelled press is the browser taking a vertical drag over as a scroll
+   * (`touch-action: pan-y`); its coordinates say nothing about a swipe.
+   */
+  protected onSwipeCancel(): void {
+    this.swipeStart = undefined;
   }
 
   /** A horizontal swipe on the preview steps to the next or previous layout. */
   protected onSwipeEnd(event: PointerEvent): void {
-    if (this.swipeStartX === undefined) {
+    if (this.swipeStart === undefined) {
       return;
     }
 
-    const distance = event.clientX - this.swipeStartX;
-    this.swipeStartX = undefined;
+    const distance = event.clientX - this.swipeStart.x;
+    const rise = event.clientY - this.swipeStart.y;
+    this.swipeStart = undefined;
 
-    if (Math.abs(distance) < SWIPE_DISTANCE) {
+    if (
+      Math.abs(distance) < SWIPE_DISTANCE ||
+      Math.abs(rise) > Math.abs(distance)
+    ) {
       return;
     }
 
@@ -330,19 +377,31 @@ export class ShareImageComposerComponent implements OnInit {
     this.switches.update((switches) => ({ ...switches, [field]: on }));
   }
 
-  protected async onShare(): Promise<void> {
+  protected onShare(): Promise<void> {
+    return this.handOver('share', this.shareImage());
+  }
+
+  protected onSave(): Promise<void> {
+    return this.handOver('save', this.saveImage());
+  }
+
+  /** Exports the preview once and hands it to the action, one at a time. */
+  private async handOver(
+    action: 'share' | 'save',
+    handler: ((image: Blob) => Promise<void>) | undefined,
+  ): Promise<void> {
     const preview = this.preview();
 
-    if (!preview || this.sharing()) {
+    if (!preview || !handler || this.busy()) {
       return;
     }
 
-    this.sharing.set(true);
+    this.busy.set(action);
 
     try {
-      await this.shareImage()(await preview.toBlob());
+      await handler(await preview.toBlob());
     } finally {
-      this.sharing.set(false);
+      this.busy.set(undefined);
     }
   }
 }

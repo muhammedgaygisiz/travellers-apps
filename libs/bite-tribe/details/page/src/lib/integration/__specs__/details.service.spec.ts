@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { DetailsService } from '../details.service';
 import {
   DetailsDataAccessService,
+  SaveImageDeniedError,
   ShareImageUnavailableError,
 } from 'bite-tribe/details-data-access';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
@@ -22,6 +23,7 @@ import {
 import { TranslocoService } from '@jsverse/transloco';
 import { ShareImageComposerComponent } from 'bite-tribe/share-image-ui';
 import { ToastService } from 'toast';
+import { Capacitor } from '@capacitor/core';
 import SpyInstance = jest.SpyInstance;
 
 type MockDetailsDataAccessService = Omit<
@@ -65,6 +67,8 @@ const createMockDataAccess = (
     logout: jest.fn(),
     cacheBite: jest.fn(),
     shareBite: jest.fn(),
+    canShareImageFiles: jest.fn().mockReturnValue(true),
+    saveBiteImage: jest.fn().mockResolvedValue(undefined),
     reloadBite: jest.fn(),
     reportBite: jest.fn().mockResolvedValue({ reported: true }),
   };
@@ -572,12 +576,20 @@ describe('DetailsService', () => {
     } as Bite;
     const ownBite = { ...othersBite, userId: 'user1' } as Bite;
 
+    let isNative: jest.SpyInstance;
+
     beforeEach(() => {
       mockActionSheetController.create.mockReset();
       mockModalController.create.mockClear();
       mockModal.dismiss.mockClear();
       mockToast.present.mockClear();
+      // A device, unless a test says it runs in a browser.
+      isNative = jest
+        .spyOn(Capacitor, 'isNativePlatform')
+        .mockReturnValue(true);
     });
+
+    afterEach(() => isNative.mockRestore());
 
     it("runs the link share directly on somebody else's Bite", async () => {
       await service.onShareBiteClick(othersBite);
@@ -761,6 +773,138 @@ describe('DetailsService', () => {
         expect(componentProps.creatorName()).toBe(expected);
       },
     );
+
+    /** A browser can open no app (UC-SBS R-1, R-12, issue #1732). */
+    describe('in a browser', () => {
+      beforeEach(() => isNative.mockReturnValue(false));
+
+      const menuChoices = async (): Promise<(string | undefined)[]> => {
+        mockActionSheetController.create.mockResolvedValue(createShareMenu());
+        await service.onShareBiteClick(ownBite);
+
+        return mockActionSheetController.create.mock.calls[0][0].buttons.map(
+          (button: { data?: string }) => button.data,
+        );
+      };
+
+      it('offers Save image, Share image… and More…, and no app', async () => {
+        expect(await menuChoices()).toEqual([
+          'save-image',
+          'share-image',
+          'more',
+          undefined,
+        ]);
+      });
+
+      it('leaves out Share image… where the browser cannot share files', async () => {
+        mockDataAccessService.canShareImageFiles = jest
+          .fn()
+          .mockReturnValue(false);
+
+        expect(await menuChoices()).toEqual(['save-image', 'more', undefined]);
+      });
+
+      it.each(['save-image', 'share-image'])(
+        'opens the composer in Story format for %s',
+        async (choice) => {
+          mockActionSheetController.create.mockResolvedValue(
+            createShareMenu(choice),
+          );
+
+          await service.onShareBiteClick(ownBite);
+
+          const { componentProps } =
+            mockModalController.create.mock.calls[0][0];
+          expect(componentProps.format()).toBe('story');
+        },
+      );
+
+      it('gives the composer no Share action where the browser cannot share files', async () => {
+        mockDataAccessService.canShareImageFiles = jest
+          .fn()
+          .mockReturnValue(false);
+        mockActionSheetController.create.mockResolvedValue(
+          createShareMenu('save-image'),
+        );
+
+        await service.onShareBiteClick(ownBite);
+
+        const { componentProps } = mockModalController.create.mock.calls[0][0];
+        expect(componentProps.shareImage()).toBeUndefined();
+        expect(componentProps.saveImage()).toEqual(expect.any(Function));
+      });
+
+      it('says the image was downloaded', async () => {
+        mockActionSheetController.create.mockResolvedValue(
+          createShareMenu('save-image'),
+        );
+        await service.onShareBiteClick(ownBite);
+
+        await mockModalController.create.mock.calls[0][0].componentProps.saveImage()(
+          new Blob(['jpeg']),
+        );
+
+        expect(mockToast.present).toHaveBeenCalledWith({
+          messageKey: 'share-image-downloaded',
+          outcome: 'success',
+        });
+      });
+    });
+
+    describe('saving the composed image on a device', () => {
+      const image = new Blob(['jpeg'], { type: 'image/jpeg' });
+
+      const save = async (): Promise<void> => {
+        mockActionSheetController.create.mockResolvedValue(
+          createShareMenu('instagram-story'),
+        );
+        await service.onShareBiteClick(ownBite);
+
+        await mockModalController.create.mock.calls[0][0].componentProps.saveImage()(
+          image,
+        );
+      };
+
+      it('saves the image and says it is in Photos', async () => {
+        await save();
+
+        expect(mockDataAccessService.saveBiteImage).toHaveBeenCalledWith(
+          ownBite,
+          image,
+        );
+        expect(mockToast.present).toHaveBeenCalledWith({
+          messageKey: 'share-image-saved',
+          outcome: 'success',
+        });
+      });
+
+      it('points to Settings when adding photos was refused', async () => {
+        mockDataAccessService.saveBiteImage = jest
+          .fn()
+          .mockRejectedValue(new SaveImageDeniedError());
+
+        await save();
+
+        expect(mockToast.present).toHaveBeenCalledWith({
+          messageKey: 'share-image-save-denied',
+          outcome: 'failure',
+        });
+      });
+
+      it('reports any other failure', async () => {
+        jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        mockDataAccessService.saveBiteImage = jest
+          .fn()
+          .mockRejectedValue(new Error('disk full'));
+
+        await save();
+
+        expect(mockToast.present).toHaveBeenCalledWith({
+          messageKey: 'share-image-save-failed',
+          outcome: 'failure',
+        });
+      });
+    });
 
     it('closes the composer when it asks to', async () => {
       mockActionSheetController.create.mockResolvedValue(

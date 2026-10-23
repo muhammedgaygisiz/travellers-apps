@@ -5,3 +5,4 @@
 "NSCameraUsageDescription" = "BiteTribe የምግብ ፎቶዎችን ለማንሳት እና ከሌሎች ጋር ለማጋራት የካሜራህን መዳረሻ ይፈልጋል።";
 "NSLocationWhenInUseUsageDescription" = "BiteTribe የት ምግብ እንደተመገብክ ለመመልከት እና በአቅራቢያህ ያሉ Bites ለማግኘት አካባቢህን ይጠቀማል።";
 "NSPhotoLibraryUsageDescription" = "BiteTribe የምግብ ፎቶዎችን መምረጥ እና ማጋራት እንድትችል የፎቶ ማከማቻህን መዳረሻ ይፈልጋል።";
+"NSPhotoLibraryAddUsageDescription" = "BiteTribe ከBiteዎችዎ የሚፈጥሯቸውን ምስሎች በፎቶ ቤተ-መጽሐፍትዎ ውስጥ ያስቀምጣል።";

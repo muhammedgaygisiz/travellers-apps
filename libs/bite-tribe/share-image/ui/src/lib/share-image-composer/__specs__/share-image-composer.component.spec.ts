@@ -60,11 +60,13 @@ let fixture: ComponentFixture<ShareImageComposerComponent>;
 
 describe(ShareImageComposerComponent.name, () => {
   let shareImage: jest.Mock;
+  let saveImage: jest.Mock;
 
   const render = async (creatorName?: string): Promise<HTMLElement> => {
     fixture = TestBed.createComponent(ShareImageComposerComponent);
     fixture.componentRef.setInput('bite', bite);
     fixture.componentRef.setInput('shareImage', shareImage);
+    fixture.componentRef.setInput('saveImage', saveImage);
     fixture.componentRef.setInput('creatorName', creatorName);
     fixture.detectChanges();
     await flush();
@@ -75,6 +77,7 @@ describe(ShareImageComposerComponent.name, () => {
   beforeEach(async () => {
     settleLogo();
     shareImage = jest.fn().mockResolvedValue(undefined);
+    saveImage = jest.fn().mockResolvedValue(undefined);
     loadPhoto.mockResolvedValue({ width: 10, height: 10 } as HTMLImageElement);
 
     jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
@@ -128,6 +131,55 @@ describe(ShareImageComposerComponent.name, () => {
     await flush();
 
     expect(shareImage).toHaveBeenCalledWith(exported);
+  });
+
+  it('hands the exported preview to saveImage', async () => {
+    const element = await render();
+
+    (
+      element.querySelector('[data-testid="share-image-save"]') as HTMLElement
+    ).click();
+    await flush();
+
+    expect(saveImage).toHaveBeenCalledWith(exported);
+    expect(shareImage).not.toHaveBeenCalled();
+  });
+
+  it('offers no Share action without a share handler', async () => {
+    shareImage = undefined as unknown as jest.Mock;
+    const element = await render();
+
+    expect(
+      element.querySelector('[data-testid="share-image-share"]'),
+    ).toBeNull();
+    expect(
+      element.querySelector('[data-testid="share-image-save"]'),
+    ).not.toBeNull();
+  });
+
+  it('watches the stage and the modal for size changes, until destroyed', async () => {
+    const observed: Element[] = [];
+    const disconnect = jest.fn();
+    const globals = globalThis as unknown as { ResizeObserver?: unknown };
+    const original = globals.ResizeObserver;
+
+    // jsdom has no ResizeObserver; this one only records what it was given.
+    globals.ResizeObserver = class {
+      observe = (element: Element): number => observed.push(element);
+      disconnect = disconnect;
+    };
+
+    try {
+      const element = await render();
+
+      expect(observed).toEqual([element.querySelector('.stage'), element]);
+
+      fixture.destroy();
+
+      expect(disconnect).toHaveBeenCalled();
+    } finally {
+      globals.ResizeObserver = original;
+    }
   });
 
   it('closes on cancel', async () => {
@@ -263,6 +315,29 @@ describe(ShareImageComposerComponent.name, () => {
       // Nor does a release whose press began outside the preview.
       preview.dispatchEvent(new MouseEvent('pointerup', { clientX: 0 }));
       fixture.detectChanges();
+      expect(drawnStyle()['layout']).toBe('classic');
+    });
+
+    it('leaves the layout alone when a vertical drag scrolls the content', async () => {
+      const element = await render();
+      const preview = element.querySelector(
+        '[data-testid="share-image-swipe"]',
+      ) as HTMLElement;
+      const press = (type: string, clientX: number, clientY: number): void => {
+        preview.dispatchEvent(new MouseEvent(type, { clientX, clientY }));
+        fixture.detectChanges();
+      };
+
+      // The browser takes the drag over as a scroll, and cancels the press
+      // with coordinates far from where it began.
+      press('pointerdown', 200, 500);
+      press('pointercancel', 0, 0);
+      press('pointerup', 0, 0);
+      expect(drawnStyle()['layout']).toBe('classic');
+
+      // A drag that is more vertical than horizontal is no swipe either.
+      press('pointerdown', 200, 500);
+      press('pointerup', 140, 200);
       expect(drawnStyle()['layout']).toBe('classic');
     });
 

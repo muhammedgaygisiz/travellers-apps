@@ -5,3 +5,4 @@
 "NSCameraUsageDescription" = "يحتاج BiteTribe إلى الوصول إلى الكاميرا لالتقاط صور الطعام ومشاركتها مع الآخرين.";
 "NSLocationWhenInUseUsageDescription" = "يستخدم BiteTribe موقعك لمساعدتك في تحديد المكان الذي استمتعت فيه بوجبة واكتشاف Bites القريبة.";
 "NSPhotoLibraryUsageDescription" = "يحتاج BiteTribe إلى الوصول إلى مكتبة الصور لتتمكن من اختيار صور الطعام ومشاركتها.";
+"NSPhotoLibraryAddUsageDescription" = "يحفظ BiteTribe الصور التي تنشئها من أطباقك (Bites) في مكتبة الصور لديك.";

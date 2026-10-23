@@ -9,7 +9,7 @@ In progress. Priority P1, post-launch. The share menu and the first template shi
 open the composer - Instagram Post at 4:5 since [#1727], the two Stories at 9:16 - and the
 finished image goes to the system share sheet; **More…** is
 the link share of [UC - Inspect Bite Details](uc-inspect-bite-details.md), unchanged. Opening
-Instagram or Facebook directly, saving and analytics are still to come. The
+Instagram or Facebook directly and analytics are still to come. The
 rules without a marker below hold today; `R-1`, `R-3` and `R-8` hold in part and keep theirs until the child that finishes them. The epic is [#1723];
 each child listed under `Related GitHub Scope` closes the markers on the rules it delivers. The
 page stays at L1 until the behaviour is complete enough to enumerate (`UF-2`).
@@ -58,9 +58,10 @@ Once a share has succeeded:
 
 ## Flow
 
-Built by [#1726], [#1727], [#1728] and [#1731]: the menu on the user's own Bite, **More…**, and
-the composer in the entry's format with a choice of layout and colours and a switch per field,
-handing the image to the system share sheet. The rest - the hand-off to each app and analytics - is intended.
+Built by [#1726], [#1727], [#1728], [#1731] and [#1732]: the menu on the user's own Bite, **More…**,
+and the composer in the entry's format with a choice of layout and colours and a switch per
+field, which saves the image to the photo library or a download, or hands it to the system
+share sheet. In a browser the menu offers Save image and Share image… instead of the apps. The rest - the hand-off to each app and analytics - is intended.
 
 - The user taps the share button on the details page of one of their own Bites (`R-3`). It opens BiteTribe's own share
   menu with the entries `R-1` names, rather than the device share sheet.
@@ -114,11 +115,11 @@ handing the image to the system share sheet. The rest - the hand-off to each app
 
 ### Targets
 
-| ID       | Normative statement                                                                                                                                                                                                                                                                                         |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **R-12** | _Intended, not met._ A target whose app is not installed is not offered. **Save image** and **Share image…** are always offered, on web as well as on iOS and Android, so there is never a composed image with nowhere to go. Detection and the native targets are [#1730]; Save image and web are [#1732]. |
-| **R-13** | _Intended, not met._ BiteTribe only hands the image to another app. It never posts, publishes or schedules anything on the user's behalf, and uses no Instagram Graph API.                                                                                                                                  |
-| **R-14** | Every string the menu and the composer show is a Transloco key, present in every locale.                                                                                                                                                                                                                    |
+| ID       | Normative statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R-12** | _Intended, not met._ A target whose app is not installed is not offered. **Save image** is always offered, on web as well as on iOS and Android, so there is never a composed image with nowhere to go; **Share image…** is offered wherever the platform can hand a file to a share sheet - every device, and a browser where the Web Share API takes files. A browser offers no app entries at all: its menu is Save image, Share image… where supported, and More…. Detection and the native targets are [#1730]; Save image and web are [#1732]. |
+| **R-13** | _Intended, not met._ BiteTribe only hands the image to another app. It never posts, publishes or schedules anything on the user's behalf, and uses no Instagram Graph API.                                                                                                                                                                                                                                                                                                                                                                           |
+| **R-14** | Every string the menu and the composer show is a Transloco key, present in every locale.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ### Rights And Attribution
 
@@ -154,7 +155,7 @@ filed. The CORS policy itself is applied and documented on
 | **R-24** | _Intended, not met._ The analytics events of this use case carry no display name and no free text in their parameters. Delivered by [#1733].                                                                                                                                                                                                                                                                |
 | **R-25** | _Intended, not met._ On iOS, items written to the Stories pasteboard carry a five-minute `expirationDate` and `localOnly: true`, so the image neither lingers on the pasteboard nor travels through Universal Clipboard. Delivered by [#1730].                                                                                                                                                              |
 | **R-26** | _Intended, not met._ On Android, the image is written to the app's cache and exposed through a `FileProvider` that is not exported. The intent is explicit (`setPackage`) and grants `FLAG_GRANT_READ_URI_PERMISSION` only, so no other app can intercept it. Delivered by [#1730].                                                                                                                         |
-| **R-27** | _Intended, not met._ On iOS, photo-library access is add-only (`PHAccessLevel.addOnly`). This use case never asks to read the library. Delivered by [#1730] and [#1732].                                                                                                                                                                                                                                    |
+| **R-27** | On iOS, photo-library access is add-only (`PHAccessLevel.addOnly`). This use case never asks to read the library. Delivered by [#1730] and [#1732].                                                                                                                                                                                                                                                         |
 | **R-28** | _Intended, not met._ Only Meta's public App ID enters the repository. The App Secret and the client token never do, and no Meta SDK is added - which keeps out tracking, an App Tracking Transparency prompt and new privacy-label entries. The App ID is registered by the product owner in [#1729].                                                                                                       |
 
 ### Measurement

@@ -7,6 +7,7 @@ import {
 import {
   DetailsDataAccessService,
   isShareCancelled,
+  SaveImageDeniedError,
   ShareImageUnavailableError,
 } from 'bite-tribe/details-data-access';
 import {
@@ -14,6 +15,7 @@ import {
   type ShareImageFormat,
 } from 'bite-tribe/share-image-ui';
 import { TranslocoService } from '@jsverse/transloco';
+import { Capacitor } from '@capacitor/core';
 import {
   Bite,
   BiteReportReason,
@@ -40,7 +42,25 @@ const FORMAT_FOR_TARGET: Record<ShareMenuTarget, ShareImageFormat> = {
   'facebook-story': 'story',
 };
 
-type ShareMenuChoice = ShareMenuTarget | 'more';
+/**
+ * The browser's entries. A browser can open no app directly, so it offers the
+ * composer only to save the image or hand it to the share sheet (`R-12`).
+ */
+type WebShareMenuEntry = 'save-image' | 'share-image';
+
+type ShareMenuChoice = ShareMenuTarget | WebShareMenuEntry | 'more';
+
+interface ShareMenuEntry {
+  choice: ShareMenuChoice;
+  labelKey: string;
+}
+
+const NATIVE_SHARE_MENU: ShareMenuEntry[] = [
+  { choice: 'instagram-story', labelKey: 'share-menu-instagram-story' },
+  { choice: 'instagram-post', labelKey: 'share-menu-instagram-post' },
+  { choice: 'facebook-story', labelKey: 'share-menu-facebook-story' },
+  { choice: 'more', labelKey: 'share-menu-more' },
+];
 
 @Injectable({ providedIn: 'root' })
 export class DetailsService {
@@ -257,9 +277,35 @@ export class DetailsService {
 
     if (choice === 'more') {
       await this.dataAccess.shareBite(bite);
+    } else if (choice === 'save-image' || choice === 'share-image') {
+      await this.openShareImageComposer(bite, 'story');
     } else if (choice) {
       await this.openShareImageComposer(bite, FORMAT_FOR_TARGET[choice]);
     }
+  }
+
+  /**
+   * The menu's entries for this platform. A device offers the apps; a browser
+   * offers Save image, Share image… only where it can share files, and More…
+   * (`UC-SBS` `R-1`, `R-12`).
+   */
+  private shareMenuEntries(): ShareMenuEntry[] {
+    if (Capacitor.isNativePlatform()) {
+      return NATIVE_SHARE_MENU;
+    }
+
+    return [
+      { choice: 'save-image', labelKey: 'share-menu-save-image' },
+      ...(this.dataAccess.canShareImageFiles()
+        ? [
+            {
+              choice: 'share-image' as const,
+              labelKey: 'share-menu-share-image',
+            },
+          ]
+        : []),
+      { choice: 'more', labelKey: 'share-menu-more' },
+    ];
   }
 
   private async presentShareMenu(): Promise<ShareMenuChoice | undefined> {
@@ -267,26 +313,11 @@ export class DetailsService {
     const sheet = await this.actionSheetController.create({
       header: t('share-menu-title'),
       buttons: [
-        {
-          text: t('share-menu-instagram-story'),
-          data: 'instagram-story',
-          htmlAttributes: { 'data-testid': 'share-menu-instagram-story' },
-        },
-        {
-          text: t('share-menu-instagram-post'),
-          data: 'instagram-post',
-          htmlAttributes: { 'data-testid': 'share-menu-instagram-post' },
-        },
-        {
-          text: t('share-menu-facebook-story'),
-          data: 'facebook-story',
-          htmlAttributes: { 'data-testid': 'share-menu-facebook-story' },
-        },
-        {
-          text: t('share-menu-more'),
-          data: 'more',
-          htmlAttributes: { 'data-testid': 'share-menu-more' },
-        },
+        ...this.shareMenuEntries().map(({ choice, labelKey }) => ({
+          text: t(labelKey),
+          data: choice,
+          htmlAttributes: { 'data-testid': `share-menu-${choice}` },
+        })),
         { text: t('cancel'), role: 'cancel' },
       ],
     });
@@ -313,7 +344,13 @@ export class DetailsService {
         bite: signal(bite),
         format: signal(format),
         creatorName: signal(this.sharerDisplayName()),
-        shareImage: signal((image: Blob) => this.shareBiteImage(bite, image)),
+        saveImage: signal((image: Blob) => this.saveBiteImage(bite, image)),
+        // Absent where the platform cannot share a file, which hides the action.
+        shareImage: signal(
+          this.dataAccess.canShareImageFiles()
+            ? (image: Blob): Promise<void> => this.shareBiteImage(bite, image)
+            : undefined,
+        ),
         closed,
       },
     });
@@ -335,6 +372,34 @@ export class DetailsService {
     const creator = this.biteCreatorValue();
 
     return creator?.public ? creator.displayName || undefined : undefined;
+  }
+
+  /** Saves the composed image and says how that went. */
+  private async saveBiteImage(bite: Bite, image: Blob): Promise<void> {
+    try {
+      await this.dataAccess.saveBiteImage(bite, image);
+      await this.toast.present({
+        messageKey: Capacitor.isNativePlatform()
+          ? 'share-image-saved'
+          : 'share-image-downloaded',
+        outcome: 'success',
+      });
+    } catch (error) {
+      if (error instanceof SaveImageDeniedError) {
+        await this.toast.present({
+          messageKey: 'share-image-save-denied',
+          outcome: 'failure',
+        });
+        return;
+      }
+
+      console.error('Failed to save the Bite image:', error);
+
+      await this.toast.present({
+        messageKey: 'share-image-save-failed',
+        outcome: 'failure',
+      });
+    }
   }
 
   /**

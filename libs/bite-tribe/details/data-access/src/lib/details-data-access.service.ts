@@ -341,6 +341,16 @@ export class DetailsDataAccessService {
     return this.api.reportBite(biteId, reason);
   }
 
+  /**
+   * Hands the Bite's link to the device share sheet, with its price and
+   * rating as the message.
+   *
+   * The URL ends the text on every platform, so the message reads the same
+   * wherever it lands. iOS and the web also take it as `url`, which the iOS
+   * sheet turns into a link preview. Android does not: the Share plugin
+   * appends an http(s) `url` to the text there, which sent the link twice
+   * (#1775), and it builds no preview from it.
+   */
   async shareBite(bite: Bite): Promise<void> {
     const url = sharedBiteUrl(bite.id);
 
@@ -360,7 +370,7 @@ export class DetailsDataAccessService {
     await Share.share({
       title,
       text,
-      url,
+      ...(Capacitor.getPlatform() === 'android' ? {} : { url }),
       dialogTitle: 'Share Bite',
     });
   }

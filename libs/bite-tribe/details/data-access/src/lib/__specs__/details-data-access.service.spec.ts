@@ -703,6 +703,8 @@ describe(DetailsDataAccessService.name, () => {
       shareSpy = jest.spyOn(Share, 'share');
     });
 
+    afterEach(() => jest.restoreAllMocks());
+
     it('should build share options and call share', () => {
       const mockedBite = {
         id: 'test-bite-id',
@@ -721,6 +723,39 @@ describe(DetailsDataAccessService.name, () => {
         title: 'Test Bite @ Test Place',
         url: 'https://bitetribe.app/s/bite/test-bite-id',
       });
+    });
+
+    /** Android's Share plugin appends `url` to `text` itself (#1775). */
+    it('should send the url once, inside the text, on android', () => {
+      jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('android');
+      const mockedBite = {
+        id: 'test-bite-id',
+        name: 'Test Bite',
+        place: 'Test Place',
+        price: 10,
+        currency: '$',
+        rating: 4,
+      } as Bite;
+
+      service.shareBite(mockedBite);
+
+      expect(shareSpy).toHaveBeenCalledWith({
+        dialogTitle: 'Share Bite',
+        text: '$ 10 · ⭐️ 4\nhttps://bitetribe.app/s/bite/test-bite-id',
+        title: 'Test Bite @ Test Place',
+      });
+    });
+
+    it('should keep the url for the link preview on ios', () => {
+      jest.spyOn(Capacitor, 'getPlatform').mockReturnValue('ios');
+
+      service.shareBite({ id: 'test-bite-id', name: 'Test Bite' } as Bite);
+
+      expect(shareSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://bitetribe.app/s/bite/test-bite-id',
+        }),
+      );
     });
 
     it('should use only the bite name as title when place is missing', () => {

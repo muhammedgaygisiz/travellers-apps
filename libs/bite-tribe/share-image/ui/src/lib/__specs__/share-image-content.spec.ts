@@ -1,5 +1,11 @@
 import type { Bite } from 'model';
-import { toShareImageContent } from '../share-image-content';
+import {
+  applyFieldSwitches,
+  availableFields,
+  DEFAULT_FIELD_SWITCHES,
+  SHARE_IMAGE_FIELDS,
+  toShareImageContent,
+} from '../share-image-content';
 
 const createBite = (overrides: Partial<Bite> = {}): Bite => ({
   id: 'bite-1',
@@ -76,5 +82,65 @@ describe(toShareImageContent.name, () => {
     expect(
       toShareImageContent(createBite({ currency: 'XYZW' }), 'en').price,
     ).toBe('XYZW 120');
+  });
+});
+
+/** The composer's switches (UC-SBS R-6, R-8, issue #1728). */
+describe('field switches', () => {
+  const content = toShareImageContent(createBite(), 'en', 'Super Mario');
+
+  it('starts with every field on except the sharer’s own name', () => {
+    expect(DEFAULT_FIELD_SWITCHES.creatorName).toBe(false);
+    SHARE_IMAGE_FIELDS.filter((field) => field !== 'creatorName').forEach(
+      (field) => expect(DEFAULT_FIELD_SWITCHES[field]).toBe(true),
+    );
+  });
+
+  it('offers a switch for every field the Bite has a value for', () => {
+    expect(availableFields(content)).toEqual([...SHARE_IMAGE_FIELDS]);
+  });
+
+  it('offers no switch for a field the Bite has no value for', () => {
+    const fields = availableFields(
+      toShareImageContent(
+        createBite({ price: 0, rating: undefined, place: '', city: '' }),
+        'en',
+      ),
+    );
+
+    expect(fields).toEqual(['photo', 'dishName', 'qr']);
+  });
+
+  it('offers no name switch without a public name', () => {
+    expect(
+      availableFields(toShareImageContent(createBite(), 'en')),
+    ).not.toContain('creatorName');
+  });
+
+  it('removes every switched-off field', () => {
+    const allOff = Object.fromEntries(
+      SHARE_IMAGE_FIELDS.map((field) => [field, false]),
+    ) as typeof DEFAULT_FIELD_SWITCHES;
+
+    expect(applyFieldSwitches(content, allOff)).toEqual({
+      showPhoto: false,
+      dishName: '',
+      placeLine: '',
+      price: undefined,
+      rating: undefined,
+      qrUrl: undefined,
+      creatorName: undefined,
+    });
+  });
+
+  it('keeps every switched-on field', () => {
+    const allOn = Object.fromEntries(
+      SHARE_IMAGE_FIELDS.map((field) => [field, true]),
+    ) as typeof DEFAULT_FIELD_SWITCHES;
+
+    expect(applyFieldSwitches(content, allOn)).toEqual({
+      ...content,
+      showPhoto: true,
+    });
   });
 });

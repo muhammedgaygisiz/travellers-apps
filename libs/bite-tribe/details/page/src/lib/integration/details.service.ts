@@ -310,6 +310,7 @@ export class DetailsService {
         // over as signals - see `LocalImagePickerService`.
         bite: signal(bite),
         format: signal(format),
+        creatorName: signal(this.sharerDisplayName()),
         shareImage: signal((image: Blob) => this.shareBiteImage(bite, image)),
         closed,
       },
@@ -320,6 +321,18 @@ export class DetailsService {
     });
 
     await modal.present();
+  }
+
+  /**
+   * The name the sharer may put on their image: their BiteTribe display name,
+   * read from their profile document, and only while that profile is public
+   * (`UC-SBS` `R-8`, `R-9`). Only the sharer's own Bites reach the composer,
+   * so the Bite's creator is the sharer.
+   */
+  private sharerDisplayName(): string | undefined {
+    const creator = this.biteCreatorValue();
+
+    return creator?.public ? creator.displayName || undefined : undefined;
   }
 
   /**

@@ -19,9 +19,11 @@ const createRecordingContext = (): {
   ctx: CanvasRenderingContext2D;
   texts: string[];
   images: unknown[];
+  paths: unknown[];
 } => {
   const texts: string[] = [];
   const images: unknown[] = [];
+  const paths: unknown[] = [];
   const ctx = new Proxy(
     {
       fillText: (text: string): void => {
@@ -29,6 +31,11 @@ const createRecordingContext = (): {
       },
       drawImage: (image: unknown): void => {
         images.push(image);
+      },
+      fill: (path?: unknown): void => {
+        if (path) {
+          paths.push(path);
+        }
       },
       measureText: (text: string): TextMetrics =>
         ({ width: Array.from(text).length * 10 }) as TextMetrics,
@@ -43,7 +50,12 @@ const createRecordingContext = (): {
     },
   );
 
-  return { ctx: ctx as unknown as CanvasRenderingContext2D, texts, images };
+  return {
+    ctx: ctx as unknown as CanvasRenderingContext2D,
+    texts,
+    images,
+    paths,
+  };
 };
 
 const content: ShareImageContent = {
@@ -136,6 +148,85 @@ describe(drawShareImage.name, () => {
       WORDMARK,
     ]);
     expect(images).toEqual([photo, logo]);
+  });
+});
+
+/** Switched-off fields (UC-SBS R-6, issue #1728). */
+describe('a share image with fields switched off', () => {
+  it('draws neither the photo nor its panel when the photo is off', () => {
+    const { ctx, images } = createRecordingContext();
+
+    drawShareImage(ctx, { ...content, showPhoto: false }, { photo, logo });
+
+    // Only the logo beside the wordmark is left.
+    expect(images).toEqual([logo]);
+  });
+
+  it('draws no QR code when it is off', () => {
+    const { ctx, paths } = createRecordingContext();
+
+    drawShareImage(ctx, { ...content, qrUrl: undefined }, { photo, logo });
+
+    expect(paths).toEqual([]);
+  });
+
+  it('draws a QR code when it is on', () => {
+    const { ctx, paths } = createRecordingContext();
+
+    drawShareImage(ctx, content, { photo, logo });
+
+    expect(paths).toHaveLength(1);
+  });
+
+  it('keeps the wordmark with every field off', () => {
+    const { ctx, texts } = createRecordingContext();
+
+    drawShareImage(
+      ctx,
+      { showPhoto: false, dishName: '', placeLine: '' },
+      { photo, logo },
+    );
+
+    expect(texts).toEqual([WORDMARK]);
+  });
+
+  it('draws the sharer’s name over the photo', () => {
+    const { ctx, texts } = createRecordingContext();
+
+    drawShareImage(
+      ctx,
+      { ...content, creatorName: 'Super Mario' },
+      {
+        photo,
+        logo,
+      },
+    );
+
+    expect(texts).toEqual([
+      'Super Mario',
+      'Pad thai',
+      'Som Tam Nua · Bangkok',
+      'THB 120.00',
+      WORDMARK,
+    ]);
+  });
+
+  it('draws the sharer’s name as a line when the photo is off', () => {
+    const { ctx, texts } = createRecordingContext();
+
+    drawShareImage(
+      ctx,
+      { ...content, showPhoto: false, creatorName: 'Super Mario' },
+      { photo, logo },
+    );
+
+    expect(texts).toEqual([
+      'Pad thai',
+      'Som Tam Nua · Bangkok',
+      'Super Mario',
+      'THB 120.00',
+      WORDMARK,
+    ]);
   });
 });
 

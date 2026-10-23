@@ -58,10 +58,11 @@ let fixture: ComponentFixture<ShareImageComposerComponent>;
 describe(ShareImageComposerComponent.name, () => {
   let shareImage: jest.Mock;
 
-  const render = async (): Promise<HTMLElement> => {
+  const render = async (creatorName?: string): Promise<HTMLElement> => {
     fixture = TestBed.createComponent(ShareImageComposerComponent);
     fixture.componentRef.setInput('bite', bite);
     fixture.componentRef.setInput('shareImage', shareImage);
+    fixture.componentRef.setInput('creatorName', creatorName);
     fixture.detectChanges();
     await flush();
 
@@ -136,5 +137,61 @@ describe(ShareImageComposerComponent.name, () => {
     ).click();
 
     expect(closed).toHaveBeenCalled();
+  });
+
+  /** The field switches (UC-SBS R-6, R-8, issue #1728). */
+  describe('field switches', () => {
+    const toggle = (element: HTMLElement, field: string): HTMLElement | null =>
+      element.querySelector(`[data-testid="share-image-field-${field}"]`);
+
+    const drawnContent = (): Record<string, unknown> =>
+      (
+        fixture.componentInstance as unknown as {
+          content: () => Record<string, unknown>;
+        }
+      ).content();
+
+    it('offers a switch for each field the Bite has, and none for the rest', async () => {
+      const element = await render();
+
+      ['photo', 'dishName', 'place', 'price', 'qr'].forEach((field) =>
+        expect(toggle(element, field)).not.toBeNull(),
+      );
+      // The fixture has no rating, and no public name was passed.
+      expect(toggle(element, 'rating')).toBeNull();
+      expect(toggle(element, 'creatorName')).toBeNull();
+    });
+
+    it('offers the name switch for a public name, switched off', async () => {
+      const element = await render('Super Mario');
+      const nameToggle = toggle(element, 'creatorName') as HTMLIonToggleElement;
+
+      expect(nameToggle).not.toBeNull();
+      expect(nameToggle.checked).toBe(false);
+      expect(drawnContent()['creatorName']).toBeUndefined();
+    });
+
+    it('takes a field off the image when its switch is turned off', async () => {
+      const element = await render();
+
+      toggle(element, 'price')?.dispatchEvent(
+        new CustomEvent('ionChange', { detail: { checked: false } }),
+      );
+      fixture.detectChanges();
+
+      expect(drawnContent()['price']).toBeUndefined();
+      expect(drawnContent()['dishName']).toBe('Pad thai');
+    });
+
+    it('puts the name on the image when its switch is turned on', async () => {
+      const element = await render('Super Mario');
+
+      toggle(element, 'creatorName')?.dispatchEvent(
+        new CustomEvent('ionChange', { detail: { checked: true } }),
+      );
+      fixture.detectChanges();
+
+      expect(drawnContent()['creatorName']).toBe('Super Mario');
+    });
   });
 });

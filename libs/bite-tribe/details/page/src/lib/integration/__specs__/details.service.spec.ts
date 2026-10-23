@@ -48,6 +48,7 @@ const createMockDataAccess = (
       reload: jest.fn(),
     },
     biteValue: signal(mockBite),
+    biteCreatorValue: signal(undefined),
     reviewThreads: signal([]),
     highlightedThreadId: signal(undefined),
     bucketlists: signal([]),
@@ -715,6 +716,47 @@ describe('DetailsService', () => {
         });
       });
     });
+
+    it.each([
+      [{ public: true, displayName: 'Super Mario' }, 'Super Mario'],
+      [{ public: false, displayName: 'Super Mario' }, undefined],
+      [undefined, undefined],
+    ])(
+      'passes the composer the sharer’s name only while their profile is public (%o)',
+      async (creator, expected) => {
+        mockDataAccessService.biteCreatorValue = signal(creator) as never;
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+          providers: [
+            {
+              provide: BiteDataAccessService,
+              useValue: mockBiteDataAccessService,
+            },
+            {
+              provide: LocalImagePickerService,
+              useValue: mockLocalImagePicker,
+            },
+            DetailsService,
+            { provide: ToastService, useValue: mockToast },
+            ...shareProviders,
+            {
+              provide: DetailsDataAccessService,
+              useValue: mockDataAccessService,
+            },
+            { provide: NavController, useValue: mockNavController },
+          ],
+        });
+        const sharing = TestBed.inject(DetailsService);
+        mockActionSheetController.create.mockResolvedValue(
+          createShareMenu('instagram-story'),
+        );
+
+        await sharing.onShareBiteClick(ownBite);
+
+        const { componentProps } = mockModalController.create.mock.calls[0][0];
+        expect(componentProps.creatorName()).toBe(expected);
+      },
+    );
 
     it('closes the composer when it asks to', async () => {
       mockActionSheetController.create.mockResolvedValue(

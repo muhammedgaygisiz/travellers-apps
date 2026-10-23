@@ -10,7 +10,11 @@ import { loadBiteImageForCanvas } from 'bite-tribe-common/bite';
 import type { Bite } from 'model';
 import { SHARE_IMAGE_FONT_FAMILY } from '../../draw-share-image';
 import {
+  applyFieldSwitches,
+  DEFAULT_FIELD_SWITCHES,
+  SHARE_IMAGE_FIELDS,
   toShareImageContent,
+  type ShareImageFieldSwitches,
   type ShareImageFormat,
 } from '../../share-image-content';
 import { SHARE_IMAGE_LOGO_SRC } from '../../share-image-composer/share-image-composer.component';
@@ -77,6 +81,8 @@ class ShareImagePreviewDemoComponent implements OnInit {
   readonly bite = input.required<Bite>();
   readonly withPhoto = input(true);
   readonly format = input<ShareImageFormat>('story');
+  readonly creatorName = input<string>();
+  readonly switches = input<ShareImageFieldSwitches>(DEFAULT_FIELD_SWITCHES);
 
   protected readonly content = signal(toShareImageContent(demoBite, 'en'));
   protected readonly photo = signal<HTMLImageElement | undefined>(undefined);
@@ -84,7 +90,12 @@ class ShareImagePreviewDemoComponent implements OnInit {
   protected readonly ready = signal(false);
 
   ngOnInit(): void {
-    this.content.set(toShareImageContent(this.bite(), 'en'));
+    this.content.set(
+      applyFieldSwitches(
+        toShareImageContent(this.bite(), 'en', this.creatorName()),
+        this.switches(),
+      ),
+    );
 
     const loading = Promise.allSettled([
       this.withPhoto()
@@ -170,4 +181,36 @@ export const PostLongNames: Story = {
 /** The logo panel at 4:5. */
 export const PostPhotoMissing: Story = {
   args: { withPhoto: false, format: 'post' },
+};
+
+const allSwitches = (on: boolean): ShareImageFieldSwitches =>
+  Object.fromEntries(
+    SHARE_IMAGE_FIELDS.map((field) => [field, on]),
+  ) as ShareImageFieldSwitches;
+
+/** Every switch off: the wordmark is all that is left, and it has no switch. */
+export const AllFieldsOff: Story = {
+  args: { switches: allSwitches(false) },
+};
+
+/** Every switch on, the sharer's name included, which sits on the photo. */
+export const AllFieldsOn: Story = {
+  args: { creatorName: 'Super Mario', switches: allSwitches(true) },
+};
+
+/** The photo off: the text moves up, and the name becomes a line of its own. */
+export const PhotoOffWithName: Story = {
+  args: {
+    creatorName: 'Super Mario',
+    switches: { ...allSwitches(true), photo: false },
+  },
+};
+
+/** Every switch on at 4:5. */
+export const PostAllFieldsOn: Story = {
+  args: {
+    creatorName: 'Super Mario',
+    switches: allSwitches(true),
+    format: 'post',
+  },
 };

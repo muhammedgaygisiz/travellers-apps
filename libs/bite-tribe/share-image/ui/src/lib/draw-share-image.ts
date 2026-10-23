@@ -34,6 +34,7 @@ const COLOR = {
   starEmpty: 'rgba(255, 255, 255, 0.24)',
   qrLight: '#FFFFFF',
   qrDark: '#000000',
+  pill: 'rgba(0, 0, 0, 0.55)',
 } as const;
 
 /**
@@ -174,6 +175,72 @@ const drawCover = (
   );
 };
 
+/** A head and shoulders, so the sharer's name needs no word in front of it. */
+const drawPersonIcon = (
+  ctx: Context,
+  x: number,
+  y: number,
+  size: number,
+  color: string,
+): void => {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x + size / 2, y + size * 0.3, size * 0.22, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(
+    x + size / 2,
+    y + size * 0.92,
+    size * 0.38,
+    size * 0.3,
+    0,
+    Math.PI,
+    Math.PI * 2,
+  );
+  ctx.fill();
+};
+
+/**
+ * The sharer's name on a dark pill over the bottom-left of the photo. Over
+ * the photo rather than in the text block, because the text block of either
+ * layout has no line to spare once every field is on.
+ */
+const drawCreatorPill = (
+  ctx: Context,
+  name: string,
+  width: number,
+  layout: ShareImageLayout,
+  fontFamily: string,
+): void => {
+  const fontSize = Math.round(layout.placeFontSize * 0.9);
+  const height = Math.round(fontSize * 1.8);
+  const padding = Math.round(height / 2.4);
+  const iconSize = fontSize;
+  const x = layout.margin + 24;
+  const y = layout.margin + layout.photoHeight - 24 - height;
+  const maxTextWidth =
+    width - 2 * layout.margin - 48 - 2 * padding - iconSize - 12;
+
+  ctx.font = `600 ${fontSize}px ${fontFamily}`;
+  const text = fitText(ctx, name, maxTextWidth);
+  const pillWidth = 2 * padding + iconSize + 12 + ctx.measureText(text).width;
+
+  roundedRectPath(ctx, x, y, pillWidth, height, height / 2);
+  ctx.fillStyle = COLOR.pill;
+  ctx.fill();
+  drawPersonIcon(
+    ctx,
+    x + padding,
+    y + (height - iconSize) / 2,
+    iconSize,
+    COLOR.text,
+  );
+  ctx.fillStyle = COLOR.text;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x + padding + iconSize + 12, y + height / 2);
+};
+
 const drawPhoto = (
   ctx: Context,
   assets: ShareImageAssets,
@@ -284,7 +351,9 @@ const drawDetails = (
 ): void => {
   const { margin } = layout;
   const maxWidth = width - 2 * margin;
-  let y = margin + layout.photoHeight + layout.detailsGap;
+  const showPhoto = content.showPhoto !== false;
+  // Without the photo the text moves up to take its place.
+  let y = showPhoto ? margin + layout.photoHeight + layout.detailsGap : margin;
 
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
@@ -309,6 +378,24 @@ const drawDetails = (
     ctx.font = `400 ${layout.placeFontSize}px ${fontFamily}`;
     ctx.fillText(fitText(ctx, content.placeLine, maxWidth), margin, y);
     y += layout.placeFontSize + PLACE_GAP_BELOW;
+  }
+
+  if (content.creatorName && !showPhoto) {
+    // With no photo to carry the pill, the name is a line of its own; the
+    // photo's height leaves more than enough room for it.
+    const size = layout.placeFontSize;
+
+    y += PLACE_GAP_ABOVE;
+    drawPersonIcon(ctx, margin, y, size, COLOR.muted);
+    ctx.fillStyle = COLOR.muted;
+    ctx.font = `400 ${size}px ${fontFamily}`;
+    ctx.textBaseline = 'top';
+    ctx.fillText(
+      fitText(ctx, content.creatorName, maxWidth - size - 12),
+      margin + size + 12,
+      y,
+    );
+    y += size + PLACE_GAP_BELOW;
   }
 
   if (content.price || content.rating) {
@@ -412,19 +499,29 @@ export const drawShareImage = (
   ctx.fillStyle = COLOR.ground;
   ctx.fillRect(0, 0, width, height);
 
-  drawPhoto(ctx, assets, width, layout);
+  if (content.showPhoto !== false) {
+    drawPhoto(ctx, assets, width, layout);
+
+    if (content.creatorName) {
+      drawCreatorPill(ctx, content.creatorName, width, layout, fontFamily);
+    }
+  }
+
   drawDetails(ctx, content, width, layout, fontFamily);
 
   const { margin, qrSize } = layout;
   const top = footerTop(layout, format);
 
-  drawQrCode(
-    ctx,
-    content.qrUrl,
-    width - margin - qrSize,
-    top,
-    qrSize,
-    layout.qrRadius,
-  );
+  if (content.qrUrl) {
+    drawQrCode(
+      ctx,
+      content.qrUrl,
+      width - margin - qrSize,
+      top,
+      qrSize,
+      layout.qrRadius,
+    );
+  }
+
   drawWordmark(ctx, assets, margin, top + qrSize / 2, layout, fontFamily);
 };

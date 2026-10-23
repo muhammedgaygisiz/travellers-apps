@@ -9,7 +9,7 @@ In progress. Priority P1, post-launch. The share menu and the first template shi
 open the composer - Instagram Post at 4:5 since [#1727], the two Stories at 9:16 - and the
 finished image goes to the system share sheet; **More…** is
 the link share of [UC - Inspect Bite Details](uc-inspect-bite-details.md), unchanged. Opening
-Instagram or Facebook directly, more templates, saving and analytics are still to come. The
+Instagram or Facebook directly, saving and analytics are still to come. The
 rules without a marker below hold today; `R-1`, `R-3` and `R-8` hold in part and keep theirs until the child that finishes them. The epic is [#1723];
 each child listed under `Related GitHub Scope` closes the markers on the rules it delivers. The
 page stays at L1 until the behaviour is complete enough to enumerate (`UF-2`).
@@ -58,9 +58,9 @@ Once a share has succeeded:
 
 ## Flow
 
-Built by [#1726], [#1727] and [#1728]: the menu on the user's own Bite, **More…**, and the
-composer in the entry's format with a switch per field, handing the image to the system share
-sheet. The rest - the hand-off to each app and analytics - is intended.
+Built by [#1726], [#1727], [#1728] and [#1731]: the menu on the user's own Bite, **More…**, and
+the composer in the entry's format with a choice of layout and colours and a switch per field,
+handing the image to the system share sheet. The rest - the hand-off to each app and analytics - is intended.
 
 - The user taps the share button on the details page of one of their own Bites (`R-3`). It opens BiteTribe's own share
   menu with the entries `R-1` names, rather than the device share sheet.
@@ -69,8 +69,9 @@ sheet. The rest - the hand-off to each app and analytics - is intended.
   current template.
 - The Bite's photo is loaded into the canvas with `crossOrigin = 'anonymous'`, so the finished
   canvas can be exported under the CORS policy of `R-15` to `R-19`.
-- The user swipes through templates, adjusts the template's colours, and switches individual
-  fields on and off (`R-6`); the preview follows every change immediately.
+- The user picks Classic or Bold by swiping on the preview or tapping (`R-32`), picks a
+  background and a text colour legible on it (`R-33`), and switches individual fields on and
+  off (`R-6`); the preview follows every change immediately.
 - The user confirms, and the canvas is re-encoded to an image (`R-21`) and handed to the
   target:
   - **Instagram Story** - the image is placed as the story background, or as a sticker over a
@@ -108,6 +109,8 @@ sheet. The rest - the hand-off to each app and analytics - is intended.
 | **R-9**  | The only personal detail the image may carry is the creator's BiteTribe display name, read as the Review Attribution Contract of [UC - Inspect Bite Details](uc-inspect-bite-details.md) reads it. The name the identity provider holds ([#1308]) and the creator's profile photo are never drawn.                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | **R-10** | The preview is pixel-identical to the image handed off. There is one rendering, and the preview is it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | **R-11** | The image is rendered on the device. No backend renders it, and no Cloud Function is involved.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **R-32** | The image comes in two layouts, **Classic** - the photo framed in the card - and **Bold** - the photo edge to edge at the top - in both formats. A layout is data the one shared renderer reads; no layout has drawing code of its own, so every rule of this page holds in every layout. A design that needs new drawing structure is a decision of its own, not a new layout. Delivered by [#1731].                                                                                                                                                                                                                                                                                                                                                            |
+| **R-33** | The colours are chosen separately from the layout: one of five background gradients (Night, Dusk, Ocean, Sunset, Paper) and one of five text colours (White, Cream, Honey, Ink, Cocoa), on either layout. A text colour is offered only where it reaches a contrast of 4.5:1 against both ends of the background's gradient, so the wordmark and the text are always legible; a background that makes the chosen text colour illegible switches it to the first legible one. There is no free colour picker. Delivered by [#1731].                                                                                                                                                                                                                               |
 
 ### Targets
 
@@ -247,7 +250,7 @@ Relevant, on both stores, and it lands with the code children rather than with t
   agent - `R-28`.
 - [#1730] is the native Stories and feed hand-off for both platforms, with the plist and manifest
   entries - `R-12`, `R-25` to `R-27`. Depends on [#1729].
-- [#1731] is the template gallery and colour customisation.
+- [#1731] is the layout choice, Classic and Bold, and the colour choice - `R-32`, `R-33`.
 - [#1732] is Save image and web support for the composer - `R-12`, `R-27`.
 - [#1733] is the analytics for the funnel - `R-24`, `R-29`.
 

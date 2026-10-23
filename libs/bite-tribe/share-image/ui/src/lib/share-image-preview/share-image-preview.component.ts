@@ -17,6 +17,10 @@ import {
   type ShareImageContent,
   type ShareImageFormat,
 } from '../share-image-content';
+import {
+  DEFAULT_SHARE_IMAGE_STYLE,
+  type ShareImageStyle,
+} from '../share-image-style';
 
 /** JPEG at this quality is what Instagram and Facebook re-encode to anyway. */
 const EXPORT_TYPE = 'image/jpeg';
@@ -67,6 +71,8 @@ export class ShareImagePreviewComponent {
   readonly logo = input<ShareImageAssets['logo']>();
   readonly format = input<ShareImageFormat>('story');
   readonly fontFamily = input(SHARE_IMAGE_FONT_FAMILY);
+  /** The layout and colours to draw in. */
+  readonly imageStyle = input<ShareImageStyle>(DEFAULT_SHARE_IMAGE_STYLE);
   /** What a screen reader announces for the image. */
   readonly label = input('');
 
@@ -88,6 +94,7 @@ export class ShareImagePreviewComponent {
           { photo: this.photo(), logo: this.logo() },
           this.format(),
           this.fontFamily(),
+          this.imageStyle(),
         );
       }
     });

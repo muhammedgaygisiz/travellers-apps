@@ -194,4 +194,123 @@ describe(ShareImageComposerComponent.name, () => {
       expect(drawnContent()['creatorName']).toBe('Super Mario');
     });
   });
+
+  /** The layout and colours (UC-SBS R-32, R-33, issue #1731). */
+  describe('style', () => {
+    const drawnStyle = (): Record<string, string> =>
+      (
+        fixture.componentInstance as unknown as {
+          imageStyle: () => Record<string, string>;
+        }
+      ).imageStyle();
+
+    const click = (element: HTMLElement, testId: string): void => {
+      (
+        element.querySelector(`[data-testid="${testId}"]`) as HTMLElement
+      ).click();
+      fixture.detectChanges();
+    };
+
+    it('starts on Classic, Night and White', async () => {
+      await render();
+
+      expect(drawnStyle()).toEqual({
+        layout: 'classic',
+        background: 'night',
+        text: 'white',
+      });
+    });
+
+    it('switches the layout from the segment', async () => {
+      const element = await render();
+
+      element
+        .querySelector('[data-testid="share-image-layouts"]')
+        ?.dispatchEvent(
+          new CustomEvent('ionChange', { detail: { value: 'bold' } }),
+        );
+      fixture.detectChanges();
+
+      expect(drawnStyle()['layout']).toBe('bold');
+    });
+
+    it('steps through the layouts with a horizontal swipe', async () => {
+      const element = await render();
+      const preview = element.querySelector(
+        '[data-testid="share-image-swipe"]',
+      ) as HTMLElement;
+      const swipe = (from: number, to: number): void => {
+        preview.dispatchEvent(new MouseEvent('pointerdown', { clientX: from }));
+        preview.dispatchEvent(new MouseEvent('pointerup', { clientX: to }));
+        fixture.detectChanges();
+      };
+
+      swipe(300, 100);
+      expect(drawnStyle()['layout']).toBe('bold');
+
+      swipe(100, 300);
+      expect(drawnStyle()['layout']).toBe('classic');
+
+      // A tap, or a short drag, changes nothing.
+      swipe(200, 180);
+      expect(drawnStyle()['layout']).toBe('classic');
+    });
+
+    it('offers every background, and only the legible text colours', async () => {
+      const element = await render();
+      const ids = (prefix: string): string[] =>
+        [...element.querySelectorAll(`[data-testid^="${prefix}"]`)].map(
+          (swatch) =>
+            (swatch.getAttribute('data-testid') ?? '').replace(prefix, ''),
+        );
+
+      expect(ids('share-image-background-')).toEqual([
+        'night',
+        'dusk',
+        'ocean',
+        'sunset',
+        'paper',
+      ]);
+      expect(ids('share-image-text-colour-')).toEqual([
+        'white',
+        'cream',
+        'honey',
+      ]);
+
+      click(element, 'share-image-background-paper');
+
+      expect(ids('share-image-text-colour-')).toEqual(['ink', 'cocoa']);
+    });
+
+    it('switches to a legible text colour when the background makes the current one illegible', async () => {
+      const element = await render();
+
+      click(element, 'share-image-text-colour-honey');
+      click(element, 'share-image-background-sunset');
+
+      expect(drawnStyle()).toEqual({
+        layout: 'classic',
+        background: 'sunset',
+        text: 'ink',
+      });
+    });
+
+    it('keeps the layout when the colours change', async () => {
+      const element = await render();
+
+      element
+        .querySelector('[data-testid="share-image-layouts"]')
+        ?.dispatchEvent(
+          new CustomEvent('ionChange', { detail: { value: 'bold' } }),
+        );
+      click(element, 'share-image-background-ocean');
+      click(element, 'share-image-text-colour-cream');
+
+      expect(drawnStyle()).toEqual({
+        layout: 'bold',
+        background: 'ocean',
+        text: 'cream',
+      });
+    });
+  });
 });

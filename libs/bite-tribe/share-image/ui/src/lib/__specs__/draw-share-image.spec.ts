@@ -2,9 +2,13 @@ import {
   detailsMaxBottom,
   drawShareImage,
   footerTop,
-  SHARE_IMAGE_LAYOUT,
+  SHARE_IMAGE_LAYOUTS,
   WORDMARK,
 } from '../draw-share-image';
+import {
+  SHARE_IMAGE_LAYOUT_IDS,
+  type ShareImageLayoutId,
+} from '../share-image-style';
 import {
   SHARE_IMAGE_SIZE,
   type ShareImageFormat,
@@ -20,18 +24,28 @@ const createRecordingContext = (): {
   texts: string[];
   images: unknown[];
   paths: unknown[];
+  imagePlacements: number[][];
+  gradientStops: string[];
 } => {
   const texts: string[] = [];
   const images: unknown[] = [];
   const paths: unknown[] = [];
+  const imagePlacements: number[][] = [];
+  const gradientStops: string[] = [];
   const ctx = new Proxy(
     {
       fillText: (text: string): void => {
         texts.push(text);
       },
-      drawImage: (image: unknown): void => {
+      drawImage: (image: unknown, ...coordinates: number[]): void => {
         images.push(image);
+        imagePlacements.push(coordinates);
       },
+      createLinearGradient: (): object => ({
+        addColorStop: (_offset: number, color: string): void => {
+          gradientStops.push(color);
+        },
+      }),
       fill: (path?: unknown): void => {
         if (path) {
           paths.push(path);
@@ -55,6 +69,8 @@ const createRecordingContext = (): {
     texts,
     images,
     paths,
+    imagePlacements,
+    gradientStops,
   };
 };
 
@@ -230,30 +246,86 @@ describe('a share image with fields switched off', () => {
   });
 });
 
-/** UC-SBS R-5: each format lays the template out within its own size. */
-describe.each<ShareImageFormat>(['story', 'post'])(
-  'the %s layout',
-  (format) => {
-    const layout = SHARE_IMAGE_LAYOUT[format];
-    const { width, height } = SHARE_IMAGE_SIZE[format];
+/** UC-SBS R-32, R-33: the layout and the colours (issue #1731). */
+describe('a share image in a style', () => {
+  it('fills the ground with the background gradient', () => {
+    const { ctx, gradientStops } = createRecordingContext();
 
-    it('ends the longest possible text block above the footer', () => {
-      expect(detailsMaxBottom(layout)).toBeLessThan(footerTop(layout, format));
+    drawShareImage(ctx, content, { photo, logo }, 'story', undefined, {
+      layout: 'classic',
+      background: 'dusk',
+      text: 'cream',
     });
 
-    it('keeps the footer inside the image', () => {
-      expect(footerTop(layout, format) + layout.qrSize).toBeLessThanOrEqual(
-        height - layout.margin,
-      );
+    expect(gradientStops).toEqual(['#2B1E3F', '#6B2A55']);
+  });
+
+  it('frames the photo in Classic', () => {
+    const { ctx, imagePlacements } = createRecordingContext();
+
+    drawShareImage(ctx, content, { photo, logo }, 'story');
+
+    // drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
+    expect(imagePlacements[0].slice(4)).toEqual([72, 72, 936, 1080]);
+  });
+
+  it('runs the photo edge to edge in Bold', () => {
+    const { ctx, imagePlacements } = createRecordingContext();
+
+    drawShareImage(ctx, content, { photo, logo }, 'story', undefined, {
+      layout: 'bold',
+      background: 'night',
+      text: 'white',
     });
 
-    it('leaves room beside the QR code for the wordmark', () => {
-      const wordmarkRoom = width - 2 * layout.margin - layout.qrSize;
+    expect(imagePlacements[0].slice(4)).toEqual([0, 0, 1080, 1152]);
+  });
 
-      // The logo plus "BiteTribe" in a bold face is about five font-sizes wide.
-      expect(layout.logoHeight + 5 * layout.wordmarkFontSize).toBeLessThan(
-        wordmarkRoom,
-      );
+  it('draws the same fields in Bold', () => {
+    const { ctx, texts } = createRecordingContext();
+
+    drawShareImage(ctx, content, { photo, logo }, 'post', undefined, {
+      layout: 'bold',
+      background: 'paper',
+      text: 'ink',
     });
-  },
-);
+
+    expect(texts).toEqual([
+      'Pad thai',
+      'Som Tam Nua · Bangkok',
+      'THB 120.00',
+      WORDMARK,
+    ]);
+  });
+});
+
+/** UC-SBS R-5, R-32: every layout fits every format within its own size. */
+describe.each(
+  SHARE_IMAGE_LAYOUT_IDS.flatMap((layoutId) =>
+    (['story', 'post'] as const).map(
+      (format) => [layoutId, format] as [ShareImageLayoutId, ShareImageFormat],
+    ),
+  ),
+)('the %s layout at %s', (layoutId, format) => {
+  const layout = SHARE_IMAGE_LAYOUTS[layoutId][format];
+  const { width, height } = SHARE_IMAGE_SIZE[format];
+
+  it('ends the longest possible text block above the footer', () => {
+    expect(detailsMaxBottom(layout)).toBeLessThan(footerTop(layout, format));
+  });
+
+  it('keeps the footer inside the image', () => {
+    expect(footerTop(layout, format) + layout.qrSize).toBeLessThanOrEqual(
+      height - layout.margin,
+    );
+  });
+
+  it('leaves room beside the QR code for the wordmark', () => {
+    const wordmarkRoom = width - 2 * layout.margin - layout.qrSize;
+
+    // The logo plus "BiteTribe" in a bold face is about five font-sizes wide.
+    expect(layout.logoHeight + 5 * layout.wordmarkFontSize).toBeLessThan(
+      wordmarkRoom,
+    );
+  });
+});

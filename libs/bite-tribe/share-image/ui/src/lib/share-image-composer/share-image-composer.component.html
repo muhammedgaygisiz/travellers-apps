@@ -18,12 +18,82 @@
     <div class="stage">
       <bt-share-image-preview
         class="preview"
+        data-testid="share-image-swipe"
         [content]="content()"
         [photo]="photo()"
         [logo]="logo()"
         [format]="format()"
+        [imageStyle]="imageStyle()"
         [label]="'share-image-preview-label' | transloco"
+        (pointerdown)="onSwipeStart($event)"
+        (pointerup)="onSwipeEnd($event)"
+        (pointercancel)="onSwipeEnd($event)"
       />
+
+      <ion-segment
+        class="layouts"
+        data-testid="share-image-layouts"
+        [attr.aria-label]="'share-image-layout-title' | transloco"
+        [value]="imageStyle().layout"
+        (ionChange)="setLayout($any($event.detail.value))"
+      >
+        @for (layout of layouts; track layout.id) {
+          <ion-segment-button
+            [value]="layout.id"
+            [attr.data-testid]="'share-image-layout-' + layout.id"
+          >
+            <ion-label>{{ layout.labelKey | transloco }}</ion-label>
+          </ion-segment-button>
+        }
+      </ion-segment>
+
+      <div class="colours">
+        <span class="colours-title">{{
+          'share-image-background-title' | transloco
+        }}</span>
+        <div
+          class="swatches"
+          role="radiogroup"
+          [attr.aria-label]="'share-image-background-title' | transloco"
+        >
+          @for (background of backgrounds; track background.id) {
+            <button
+              type="button"
+              class="swatch"
+              role="radio"
+              [attr.data-testid]="'share-image-background-' + background.id"
+              [attr.aria-checked]="imageStyle().background === background.id"
+              [attr.aria-label]="background.labelKey | transloco"
+              [class.selected]="imageStyle().background === background.id"
+              [style.background]="background.swatch"
+              (click)="setBackground(background.id)"
+            ></button>
+          }
+        </div>
+
+        <span class="colours-title">{{
+          'share-image-text-colour-title' | transloco
+        }}</span>
+        <div
+          class="swatches"
+          role="radiogroup"
+          [attr.aria-label]="'share-image-text-colour-title' | transloco"
+        >
+          @for (colour of textColours(); track colour.id) {
+            <button
+              type="button"
+              class="swatch"
+              role="radio"
+              [attr.data-testid]="'share-image-text-colour-' + colour.id"
+              [attr.aria-checked]="imageStyle().text === colour.id"
+              [attr.aria-label]="colour.labelKey | transloco"
+              [class.selected]="imageStyle().text === colour.id"
+              [style.background]="colour.swatch"
+              (click)="setTextColour(colour.id)"
+            ></button>
+          }
+        </div>
+      </div>
 
       @if (photoFailed()) {
         <ion-text

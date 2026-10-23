@@ -27,6 +27,10 @@ nothing, and how a review and its thread are attributed.
 - A public creator profile identifies who shared the Bite.
 - The page shows the Bite's distance from the user's current position and converts its price into the user's preferred currency.
 - User can share the Bite through the device share sheet, including WhatsApp when available.
+  The message is the price and rating, or a fallback line, followed by the Bite's link, which
+  appears once on every platform. iOS also receives the link on its own, for the sheet's link
+  preview; Android receives it only inside the text, because its share plugin would append it
+  a second time (issue [#1775]).
   On the user's own Bite, the share button opens a share menu instead (issue [#1726]) -
   Instagram Story, Instagram Post, Facebook Story and More… - whose More… entry is this link
   share, unchanged. On anyone else's Bite it stays this link share, until terms of use let other
@@ -332,3 +336,4 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
 [#1726]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1726
 [#1772]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1772
+[#1775]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1775

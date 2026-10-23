@@ -62,6 +62,16 @@ describe(toShareImageContent.name, () => {
     ).toBe('Som Tam Nua');
   });
 
+  it('shows a bare number for a price without a currency', () => {
+    expect(
+      toShareImageContent(createBite({ currency: undefined }), 'en').price,
+    ).toBe('120');
+  });
+
+  it('keeps a rating above five at five', () => {
+    expect(toShareImageContent(createBite({ rating: 7 }), 'en').rating).toBe(5);
+  });
+
   it('still shows a price in a currency Intl does not know', () => {
     expect(
       toShareImageContent(createBite({ currency: 'XYZW' }), 'en').price,

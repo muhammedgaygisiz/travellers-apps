@@ -4,6 +4,7 @@ export * from './lib/likes/likes.component';
 export * from './lib/pipes/get-image.pipe';
 export * from './lib/utils/bite-image-src';
 export * from './lib/utils/load-bite-image-for-canvas';
+export * from './lib/utils/can-share-bite-as-image';
 export * from './lib/utils/getLocalizedCityAndCountry';
 export * from './lib/utils/like-counts';
 export * from './lib/bite-image-status/bite-image-status.component';

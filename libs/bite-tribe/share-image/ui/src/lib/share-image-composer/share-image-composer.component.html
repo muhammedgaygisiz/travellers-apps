@@ -1,0 +1,61 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button
+        fill="clear"
+        data-testid="share-image-close"
+        (click)="closed.emit()"
+      >
+        {{ 'cancel' | transloco }}
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'share-image-title' | transloco }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  @if (ready()) {
+    <div class="stage">
+      <bt-share-image-preview
+        class="preview"
+        [content]="content()"
+        [photo]="photo()"
+        [logo]="logo()"
+        [format]="format()"
+        [label]="'share-image-preview-label' | transloco"
+      />
+
+      @if (photoFailed()) {
+        <ion-text
+          color="medium"
+          class="photo-failed"
+          data-testid="share-image-photo-failed"
+        >
+          <p>{{ 'share-image-photo-failed' | transloco }}</p>
+        </ion-text>
+      }
+    </div>
+  } @else {
+    <div class="loading">
+      <ion-spinner />
+    </div>
+  }
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-button
+      expand="block"
+      class="ion-margin-horizontal"
+      data-testid="share-image-share"
+      [disabled]="!ready() || sharing()"
+      (click)="onShare()"
+    >
+      @if (sharing()) {
+        <ion-spinner name="dots" />
+      } @else {
+        {{ 'share-image-share' | transloco }}
+      }
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

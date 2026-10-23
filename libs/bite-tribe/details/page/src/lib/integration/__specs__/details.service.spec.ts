@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { DetailsService } from '../details.service';
-import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
+import {
+  DetailsDataAccessService,
+  ShareImageUnavailableError,
+} from 'bite-tribe/details-data-access';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { signal } from '@angular/core';
@@ -11,7 +14,13 @@ import {
   PublicUser,
   RemoveBiteFromBucketlistParams,
 } from 'model';
-import { NavController } from '@ionic/angular/standalone';
+import {
+  ActionSheetController,
+  ModalController,
+  NavController,
+} from '@ionic/angular/standalone';
+import { TranslocoService } from '@jsverse/transloco';
+import { ShareImageComposerComponent } from 'bite-tribe/share-image-ui';
 import { ToastService } from 'toast';
 import SpyInstance = jest.SpyInstance;
 
@@ -78,6 +87,37 @@ const mockToast = {
   present: jest.fn().mockResolvedValue(undefined),
 };
 
+/** The share menu, answering with whichever entry a test picks. */
+const createShareMenu = (
+  choice?: string,
+): { present: jest.Mock; onDidDismiss: jest.Mock } => ({
+  present: jest.fn().mockResolvedValue(undefined),
+  onDidDismiss: jest.fn().mockResolvedValue({ data: choice }),
+});
+
+const mockActionSheetController = {
+  create: jest.fn(),
+};
+
+const mockModal = {
+  present: jest.fn().mockResolvedValue(undefined),
+  dismiss: jest.fn().mockResolvedValue(true),
+};
+
+const mockModalController = {
+  create: jest.fn().mockResolvedValue(mockModal),
+};
+
+const mockTransloco = {
+  translate: jest.fn((key: string) => key),
+};
+
+const shareProviders = [
+  { provide: ActionSheetController, useValue: mockActionSheetController },
+  { provide: ModalController, useValue: mockModalController },
+  { provide: TranslocoService, useValue: mockTransloco },
+];
+
 describe('DetailsService', () => {
   let service: DetailsService;
   let mockDataAccessService: MockDetailsDataAccessService;
@@ -108,6 +148,7 @@ describe('DetailsService', () => {
           provide: NavController,
           useValue: mockNavController,
         },
+        ...shareProviders,
       ],
     });
 
@@ -193,6 +234,7 @@ describe('DetailsService', () => {
           },
           DetailsService,
           { provide: ToastService, useValue: mockToast },
+          ...shareProviders,
           {
             provide: DetailsDataAccessService,
             useValue: mockDataAccessService,
@@ -231,6 +273,7 @@ describe('DetailsService', () => {
           },
           DetailsService,
           { provide: ToastService, useValue: mockToast },
+          ...shareProviders,
           {
             provide: DetailsDataAccessService,
             useValue: mockDataAccessService,
@@ -276,6 +319,7 @@ describe('DetailsService', () => {
           },
           DetailsService,
           { provide: ToastService, useValue: mockToast },
+          ...shareProviders,
           {
             provide: DetailsDataAccessService,
             useValue: mockDataAccessService,
@@ -318,6 +362,7 @@ describe('DetailsService', () => {
           },
           DetailsService,
           { provide: ToastService, useValue: mockToast },
+          ...shareProviders,
           {
             provide: DetailsDataAccessService,
             useValue: mockDataAccessService,
@@ -360,6 +405,7 @@ describe('DetailsService', () => {
           },
           DetailsService,
           { provide: ToastService, useValue: mockToast },
+          ...shareProviders,
           {
             provide: DetailsDataAccessService,
             useValue: mockDataAccessService,
@@ -516,12 +562,165 @@ describe('DetailsService', () => {
     });
   });
 
+  /** The share button (UC-SBS R-1 to R-3, issue #1726). */
   describe('onShareBiteClick', () => {
-    it('should call dataAccess.shareBite with the provided bite', () => {
-      const bite: Bite = { id: 'bite123', name: 'Test Bite' } as Bite;
-      service.onShareBiteClick(bite);
-      expect(service.dataAccess.shareBite).toHaveBeenCalledWith(bite);
+    const othersBite = {
+      id: 'bite123',
+      name: 'Test Bite',
+      userId: 'someone-else',
+    } as Bite;
+    const ownBite = { ...othersBite, userId: 'user1' } as Bite;
+
+    beforeEach(() => {
+      mockActionSheetController.create.mockReset();
+      mockModalController.create.mockClear();
+      mockModal.dismiss.mockClear();
+      mockToast.present.mockClear();
+    });
+
+    it("runs the link share directly on somebody else's Bite", async () => {
+      await service.onShareBiteClick(othersBite);
+
+      expect(service.dataAccess.shareBite).toHaveBeenCalledWith(othersBite);
       expect(service.dataAccess.shareBite).toHaveBeenCalledTimes(1);
+      expect(mockActionSheetController.create).not.toHaveBeenCalled();
+    });
+
+    it("offers the share menu on the viewer's own Bite", async () => {
+      mockActionSheetController.create.mockResolvedValue(createShareMenu());
+
+      await service.onShareBiteClick(ownBite);
+
+      const { buttons } = mockActionSheetController.create.mock.calls[0][0];
+      expect(buttons.map((button: { data?: string }) => button.data)).toEqual([
+        'instagram-story',
+        'instagram-post',
+        'facebook-story',
+        'more',
+        undefined,
+      ]);
+      expect(service.dataAccess.shareBite).not.toHaveBeenCalled();
+    });
+
+    it('runs the unchanged link share for More…', async () => {
+      mockActionSheetController.create.mockResolvedValue(
+        createShareMenu('more'),
+      );
+
+      await service.onShareBiteClick(ownBite);
+
+      expect(service.dataAccess.shareBite).toHaveBeenCalledWith(ownBite);
+      expect(mockModalController.create).not.toHaveBeenCalled();
+    });
+
+    it.each(['instagram-story', 'instagram-post', 'facebook-story'])(
+      'opens the image composer in Story format for %s',
+      async (choice) => {
+        mockActionSheetController.create.mockResolvedValue(
+          createShareMenu(choice),
+        );
+
+        await service.onShareBiteClick(ownBite);
+
+        const { component, componentProps } =
+          mockModalController.create.mock.calls[0][0];
+        expect(component).toBe(ShareImageComposerComponent);
+        expect(componentProps.bite()).toBe(ownBite);
+        expect(componentProps.format()).toBe('story');
+        expect(mockModal.present).toHaveBeenCalled();
+      },
+    );
+
+    it('does nothing when the menu is cancelled', async () => {
+      mockActionSheetController.create.mockResolvedValue(createShareMenu());
+
+      await service.onShareBiteClick(ownBite);
+
+      expect(service.dataAccess.shareBite).not.toHaveBeenCalled();
+      expect(mockModalController.create).not.toHaveBeenCalled();
+    });
+
+    describe('sharing the composed image', () => {
+      const image = new Blob(['jpeg'], { type: 'image/jpeg' });
+
+      const openComposer = async (): Promise<(blob: Blob) => Promise<void>> => {
+        mockActionSheetController.create.mockResolvedValue(
+          createShareMenu('instagram-story'),
+        );
+        await service.onShareBiteClick(ownBite);
+
+        return mockModalController.create.mock.calls[0][0].componentProps.shareImage();
+      };
+
+      it('hands the image to the data access', async () => {
+        mockDataAccessService.shareBiteImage = jest
+          .fn()
+          .mockResolvedValue(undefined);
+
+        await (
+          await openComposer()
+        )(image);
+
+        expect(mockDataAccessService.shareBiteImage).toHaveBeenCalledWith(
+          ownBite,
+          image,
+        );
+        expect(mockToast.present).not.toHaveBeenCalled();
+      });
+
+      it('says nothing when the user closes the share sheet', async () => {
+        mockDataAccessService.shareBiteImage = jest
+          .fn()
+          .mockRejectedValue(new Error('Share canceled'));
+
+        await (
+          await openComposer()
+        )(image);
+
+        expect(mockToast.present).not.toHaveBeenCalled();
+      });
+
+      it('says when this browser cannot share an image', async () => {
+        mockDataAccessService.shareBiteImage = jest
+          .fn()
+          .mockRejectedValue(new ShareImageUnavailableError());
+
+        await (
+          await openComposer()
+        )(image);
+
+        expect(mockToast.present).toHaveBeenCalledWith({
+          messageKey: 'share-image-unavailable',
+          outcome: 'failure',
+        });
+      });
+
+      it('reports any other failure', async () => {
+        jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        mockDataAccessService.shareBiteImage = jest
+          .fn()
+          .mockRejectedValue(new Error('disk full'));
+
+        await (
+          await openComposer()
+        )(image);
+
+        expect(mockToast.present).toHaveBeenCalledWith({
+          messageKey: 'share-image-failed',
+          outcome: 'failure',
+        });
+      });
+    });
+
+    it('closes the composer when it asks to', async () => {
+      mockActionSheetController.create.mockResolvedValue(
+        createShareMenu('instagram-story'),
+      );
+
+      await service.onShareBiteClick(ownBite);
+      mockModalController.create.mock.calls[0][0].componentProps.closed.emit();
+
+      expect(mockModal.dismiss).toHaveBeenCalled();
     });
   });
 

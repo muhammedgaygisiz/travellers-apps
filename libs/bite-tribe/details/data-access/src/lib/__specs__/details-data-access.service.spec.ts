@@ -16,9 +16,15 @@ import { Geolocation } from '@capacitor/geolocation';
 import { getCurrentPosition } from 'geolocation';
 import { Bite, LikeClick } from 'model';
 import { Share } from '@capacitor/share';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem } from '@capacitor/filesystem';
+import { ShareImageUnavailableError } from '../share-image-errors';
 
 jest.mock('bite-tribe/store');
-jest.mock('bite-tribe/api', () => ({ BiteTribeApiService: class {} }));
+jest.mock('bite-tribe/api', () => ({
+  BiteTribeApiService: class {},
+  toBase64: jest.fn().mockResolvedValue('BASE64'),
+}));
 jest.mock('@capacitor/geolocation', () => ({
   Geolocation: {
     getCollection: jest.fn(),
@@ -36,6 +42,12 @@ jest.mock('geolocation', () => ({
   getCurrentPosition: jest.fn(),
 }));
 jest.mock('@capacitor/share');
+jest.mock('@capacitor/filesystem', () => ({
+  Directory: { Cache: 'CACHE' },
+  Filesystem: {
+    writeFile: jest.fn().mockResolvedValue({ uri: 'file:///cache/image.jpg' }),
+  },
+}));
 
 const getCurrentPositionMock = getCurrentPosition as jest.Mock;
 
@@ -737,6 +749,52 @@ describe(DetailsDataAccessService.name, () => {
         expect.objectContaining({
           text: 'Check out this Bite on BiteTribe 👇\nhttps://bitetribe.app/s/bite/test-bite-id',
         }),
+      );
+    });
+  });
+
+  /** The composed share image (UC-SBS, issue #1726). */
+  describe('shareBiteImage', () => {
+    const bite = { id: 'bite-1', name: 'Pad thai' } as Bite;
+    const image = new Blob(['jpeg'], { type: 'image/jpeg' });
+
+    afterEach(() => jest.restoreAllMocks());
+
+    it('writes the image to the cache and shares the file on a device', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+      const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({});
+
+      await service.shareBiteImage(bite, image);
+
+      expect(Filesystem.writeFile).toHaveBeenCalledWith({
+        path: 'share-image/bitetribe-bite-1.jpg',
+        data: 'BASE64',
+        directory: 'CACHE',
+        recursive: true,
+      });
+      expect(shareSpy).toHaveBeenCalledWith({
+        files: ['file:///cache/image.jpg'],
+      });
+    });
+
+    it('shares the file through the Web Share API in a browser', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+      const share = jest.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, { canShare: () => true, share });
+
+      await service.shareBiteImage(bite, image);
+
+      const [{ files }] = share.mock.calls[0];
+      expect(files[0].name).toBe('bitetribe-bite-1.jpg');
+      expect(files[0].type).toBe('image/jpeg');
+    });
+
+    it('refuses in a browser that cannot share files', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+      Object.assign(navigator, { canShare: () => false });
+
+      await expect(service.shareBiteImage(bite, image)).rejects.toBeInstanceOf(
+        ShareImageUnavailableError,
       );
     });
   });

@@ -139,11 +139,11 @@ const CLASSIC: Record<ShareImageFormat, ShareImageLayout> = {
 };
 
 /**
- * Bold runs the photo edge to edge and square at the top. The photo grows by
+ * Wide runs the photo edge to edge and square at the top. The photo grows by
  * the inset it gives up, so the text below it starts exactly where Classic's
  * does and the two layouts share one overlap budget.
  */
-const BOLD: Record<ShareImageFormat, ShareImageLayout> = {
+const WIDE: Record<ShareImageFormat, ShareImageLayout> = {
   story: {
     ...CLASSIC.story,
     photoInset: 0,
@@ -164,7 +164,7 @@ export const SHARE_IMAGE_LAYOUTS: Record<
   Record<ShareImageFormat, ShareImageLayout>
 > = {
   classic: CLASSIC,
-  bold: BOLD,
+  wide: WIDE,
 };
 
 const STAR_COUNT = 5;
@@ -590,16 +590,14 @@ export const drawShareImage = (
   const { margin, qrSize } = layout;
   const top = footerTop(layout, format);
 
-  if (content.qrUrl) {
-    drawQrCode(
-      ctx,
-      content.qrUrl,
-      width - margin - qrSize,
-      top,
-      qrSize,
-      layout.qrRadius,
-    );
-  }
+  drawQrCode(
+    ctx,
+    content.qrUrl,
+    width - margin - qrSize,
+    top,
+    qrSize,
+    layout.qrRadius,
+  );
 
   drawWordmark(
     ctx,

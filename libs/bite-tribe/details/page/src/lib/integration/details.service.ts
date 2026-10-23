@@ -305,6 +305,8 @@ export class DetailsService {
     const closed = new EventEmitter<void>();
     const modal = await this.modalController.create({
       component: ShareImageComposerComponent,
+      // Taller than Ionic's default on large screens; see `_globals.scss`.
+      cssClass: 'share-image-composer-modal',
       componentProps: {
         // Ionic assigns componentProps onto the instance, so inputs are handed
         // over as signals - see `LocalImagePickerService`.

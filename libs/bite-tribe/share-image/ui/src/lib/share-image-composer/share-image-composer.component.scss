@@ -68,3 +68,25 @@
   justify-content: center;
   height: 100%;
 }
+
+// Floats over the bottom of the content while the customising controls are
+// out of view, so the user knows there is more below the preview.
+.more-options {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
+  cursor: pointer;
+}

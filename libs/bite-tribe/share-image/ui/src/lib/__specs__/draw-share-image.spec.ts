@@ -178,15 +178,7 @@ describe('a share image with fields switched off', () => {
     expect(images).toEqual([logo]);
   });
 
-  it('draws no QR code when it is off', () => {
-    const { ctx, paths } = createRecordingContext();
-
-    drawShareImage(ctx, { ...content, qrUrl: undefined }, { photo, logo });
-
-    expect(paths).toEqual([]);
-  });
-
-  it('draws a QR code when it is on', () => {
+  it('always draws the QR code', () => {
     const { ctx, paths } = createRecordingContext();
 
     drawShareImage(ctx, content, { photo, logo });
@@ -194,16 +186,17 @@ describe('a share image with fields switched off', () => {
     expect(paths).toHaveLength(1);
   });
 
-  it('keeps the wordmark with every field off', () => {
-    const { ctx, texts } = createRecordingContext();
+  it('keeps the wordmark and the QR code with every field off', () => {
+    const { ctx, texts, paths } = createRecordingContext();
 
     drawShareImage(
       ctx,
-      { showPhoto: false, dishName: '', placeLine: '' },
+      { showPhoto: false, dishName: '', placeLine: '', qrUrl: content.qrUrl },
       { photo, logo },
     );
 
     expect(texts).toEqual([WORDMARK]);
+    expect(paths).toHaveLength(1);
   });
 
   it('draws the sharer’s name over the photo', () => {
@@ -269,11 +262,11 @@ describe('a share image in a style', () => {
     expect(imagePlacements[0].slice(4)).toEqual([72, 72, 936, 1080]);
   });
 
-  it('runs the photo edge to edge in Bold', () => {
+  it('runs the photo edge to edge in Wide', () => {
     const { ctx, imagePlacements } = createRecordingContext();
 
     drawShareImage(ctx, content, { photo, logo }, 'story', undefined, {
-      layout: 'bold',
+      layout: 'wide',
       background: 'night',
       text: 'white',
     });
@@ -281,11 +274,11 @@ describe('a share image in a style', () => {
     expect(imagePlacements[0].slice(4)).toEqual([0, 0, 1080, 1152]);
   });
 
-  it('draws the same fields in Bold', () => {
+  it('draws the same fields in Wide', () => {
     const { ctx, texts } = createRecordingContext();
 
     drawShareImage(ctx, content, { photo, logo }, 'post', undefined, {
-      layout: 'bold',
+      layout: 'wide',
       background: 'paper',
       text: 'ink',
     });

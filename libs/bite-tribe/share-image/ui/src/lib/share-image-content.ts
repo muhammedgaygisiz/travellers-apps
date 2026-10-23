@@ -34,8 +34,11 @@ export interface ShareImageContent {
   price?: string;
   /** Between 0 and 5, or absent when the Bite is unrated. */
   rating?: number;
-  /** What the QR code encodes, or absent when the code is switched off. */
-  qrUrl?: string;
+  /**
+   * What the QR code encodes. The code is on every image, like the wordmark:
+   * it is how a viewer of the post finds the Bite in BiteTribe.
+   */
+  qrUrl: string;
   /**
    * The sharer's BiteTribe display name, present only when they switched it
    * on and only while their profile is public (`R-8`).
@@ -43,14 +46,16 @@ export interface ShareImageContent {
   creatorName?: string;
 }
 
-/** The fields a share image has a switch for. The wordmark has none (`R-7`). */
+/**
+ * The fields a share image has a switch for. The wordmark and the QR code
+ * have none: they are on every image (`R-6`, `R-7`).
+ */
 export const SHARE_IMAGE_FIELDS = [
   'photo',
   'dishName',
   'place',
   'price',
   'rating',
-  'qr',
   'creatorName',
 ] as const;
 
@@ -68,7 +73,6 @@ export const DEFAULT_FIELD_SWITCHES: ShareImageFieldSwitches = {
   place: true,
   price: true,
   rating: true,
-  qr: true,
   creatorName: false,
 };
 
@@ -106,7 +110,7 @@ export const applyFieldSwitches = (
   placeLine: switches.place ? content.placeLine : '',
   price: switches.price ? content.price : undefined,
   rating: switches.rating ? content.rating : undefined,
-  qrUrl: switches.qr ? content.qrUrl : undefined,
+  qrUrl: content.qrUrl,
   creatorName: switches.creatorName ? content.creatorName : undefined,
 });
 

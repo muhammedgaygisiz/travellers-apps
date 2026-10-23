@@ -7,8 +7,8 @@
  * composer code and no renderer code.
  */
 
-/** Classic frames the photo in the card; Bold runs it edge to edge. */
-export const SHARE_IMAGE_LAYOUT_IDS = ['classic', 'bold'] as const;
+/** Classic frames the photo in the card; Wide runs it edge to edge. */
+export const SHARE_IMAGE_LAYOUT_IDS = ['classic', 'wide'] as const;
 
 export type ShareImageLayoutId = (typeof SHARE_IMAGE_LAYOUT_IDS)[number];
 

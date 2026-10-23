@@ -65,8 +65,8 @@ describe('the colours offered', () => {
 describe(withLegibleText.name, () => {
   it('keeps a text colour that is legible on the new background', () => {
     expect(
-      withLegibleText({ layout: 'bold', background: 'ocean', text: 'honey' }),
-    ).toEqual({ layout: 'bold', background: 'ocean', text: 'honey' });
+      withLegibleText({ layout: 'wide', background: 'ocean', text: 'honey' }),
+    ).toEqual({ layout: 'wide', background: 'ocean', text: 'honey' });
   });
 
   it('switches to the first legible text colour when the current one is not', () => {

@@ -223,27 +223,27 @@ export const PostAllFieldsOn: Story = {
   },
 };
 
-/** Bold: the photo edge to edge at the top. */
-export const Bold916: Story = {
-  name: 'Bold 9:16',
-  args: { imageStyle: { ...DEFAULT_SHARE_IMAGE_STYLE, layout: 'bold' } },
+/** Wide: the photo edge to edge at the top. */
+export const Wide916: Story = {
+  name: 'Wide 9:16',
+  args: { imageStyle: { ...DEFAULT_SHARE_IMAGE_STYLE, layout: 'wide' } },
 };
 
-/** Bold at 4:5. */
-export const Bold45: Story = {
-  name: 'Bold 4:5',
+/** Wide at 4:5. */
+export const Wide45: Story = {
+  name: 'Wide 4:5',
   args: {
     format: 'post',
-    imageStyle: { ...DEFAULT_SHARE_IMAGE_STYLE, layout: 'bold' },
+    imageStyle: { ...DEFAULT_SHARE_IMAGE_STYLE, layout: 'wide' },
   },
 };
 
-/** Bold with every field on, the name pill included. */
-export const BoldAllFieldsOn: Story = {
+/** Wide with every field on, the name pill included. */
+export const WideAllFieldsOn: Story = {
   args: {
     creatorName: 'Super Mario',
     switches: allSwitches(true),
-    imageStyle: { ...DEFAULT_SHARE_IMAGE_STYLE, layout: 'bold' },
+    imageStyle: { ...DEFAULT_SHARE_IMAGE_STYLE, layout: 'wide' },
   },
 };
 
@@ -259,11 +259,11 @@ export const BackgroundOcean: Story = onBackground('ocean');
 export const BackgroundSunset: Story = onBackground('sunset');
 export const BackgroundPaper: Story = onBackground('paper');
 
-/** Light ground, dark text, Bold at 4:5, with the photo missing. */
-export const BoldPaperPostPhotoMissing: Story = {
+/** Light ground, dark text, Wide at 4:5, with the photo missing. */
+export const WidePaperPostPhotoMissing: Story = {
   args: {
     format: 'post',
     withPhoto: false,
-    imageStyle: { layout: 'bold', background: 'paper', text: 'cocoa' },
+    imageStyle: { layout: 'wide', background: 'paper', text: 'cocoa' },
   },
 };

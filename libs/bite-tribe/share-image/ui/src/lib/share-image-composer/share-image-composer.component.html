@@ -13,7 +13,11 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content
+  class="ion-padding"
+  [scrollEvents]="true"
+  (ionScroll)="updateMoreBelow()"
+>
   @if (ready()) {
     <div class="stage">
       <bt-share-image-preview
@@ -122,7 +126,22 @@
         }
       </ion-list>
     </div>
-  } @else {
+  }
+
+  @if (moreBelow()) {
+    <button
+      slot="fixed"
+      type="button"
+      class="more-options"
+      data-testid="share-image-more-options"
+      (click)="showOptions()"
+    >
+      {{ 'share-image-more-options' | transloco }}
+      <ion-icon name="chevron-down-outline" aria-hidden="true" />
+    </button>
+  }
+
+  @if (!ready()) {
     <div class="loading">
       <ion-spinner />
     </div>

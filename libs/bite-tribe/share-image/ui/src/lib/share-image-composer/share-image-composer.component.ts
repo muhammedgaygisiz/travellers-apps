@@ -16,6 +16,7 @@ import {
   IonContent,
   IonFooter,
   IonHeader,
+  IonIcon,
   IonItem,
   IonLabel,
   IonList,
@@ -49,7 +50,6 @@ const FIELD_LABEL_KEY: Record<ShareImageField, string> = {
   place: 'share-image-field-place',
   price: 'share-image-field-price',
   rating: 'share-image-field-rating',
-  qr: 'share-image-field-qr',
   creatorName: 'share-image-field-creator-name',
 };
 import { ShareImagePreviewComponent } from '../share-image-preview/share-image-preview.component';
@@ -65,6 +65,24 @@ import {
   type ShareImageStyle,
   type ShareImageTextColourId,
 } from '../share-image-style';
+
+/**
+ * How far the content may be scrolled, or how little may be hidden below,
+ * before the "More options" cue goes away.
+ */
+const SCROLL_CUE_THRESHOLD = 24;
+
+/**
+ * Whether the "More options" cue should show: the content is still near its
+ * top, and enough of it is hidden below to be worth scrolling to.
+ */
+export const hasMoreBelow = ({
+  scrollTop,
+  scrollHeight,
+  clientHeight,
+}: Pick<HTMLElement, 'scrollTop' | 'scrollHeight' | 'clientHeight'>): boolean =>
+  scrollTop < SCROLL_CUE_THRESHOLD &&
+  scrollHeight - clientHeight - scrollTop > SCROLL_CUE_THRESHOLD;
 
 /** How far a horizontal swipe on the preview must travel to change layout. */
 const SWIPE_DISTANCE = 40;
@@ -118,6 +136,7 @@ const loadFonts = async (): Promise<void> => {
     IonContent,
     IonFooter,
     IonHeader,
+    IonIcon,
     IonItem,
     IonLabel,
     IonList,
@@ -208,6 +227,13 @@ export class ShareImageComposerComponent implements OnInit {
   protected readonly sharing = signal(false);
 
   private readonly preview = viewChild(ShareImagePreviewComponent);
+  private readonly ionContent = viewChild(IonContent);
+
+  /**
+   * Whether the customising controls are still out of view below the
+   * preview, so the user is told they can scroll to them.
+   */
+  protected readonly moreBelow = signal(false);
 
   async ngOnInit(): Promise<void> {
     const [photo, logo] = await Promise.allSettled([
@@ -228,6 +254,36 @@ export class ShareImageComposerComponent implements OnInit {
     }
 
     this.ready.set(true);
+    // Once the stage has rendered, see whether anything is hidden below it.
+    setTimeout(() => void this.updateMoreBelow(), 0);
+  }
+
+  protected async updateMoreBelow(): Promise<void> {
+    const scroll = await this.scrollElement();
+
+    if (scroll) {
+      this.moreBelow.set(hasMoreBelow(scroll));
+    }
+  }
+
+  /** Brings the first customising control into view. */
+  protected async showOptions(): Promise<void> {
+    const options = (await this.scrollElement())?.querySelector<HTMLElement>(
+      '.layouts',
+    );
+
+    if (options) {
+      await this.ionContent()?.scrollToPoint(0, options.offsetTop - 8, 300);
+    }
+  }
+
+  /** The content's scroll element, or nothing where Ionic has not upgraded it. */
+  private async scrollElement(): Promise<HTMLElement | undefined> {
+    try {
+      return await this.ionContent()?.getScrollElement();
+    } catch {
+      return undefined;
+    }
   }
 
   protected setLayout(layout: ShareImageLayoutId): void {

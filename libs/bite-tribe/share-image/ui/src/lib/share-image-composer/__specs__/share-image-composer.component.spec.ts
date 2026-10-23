@@ -3,7 +3,10 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { loadBiteImageForCanvas } from 'bite-tribe-common/bite';
 import type { Bite } from 'model';
-import { ShareImageComposerComponent } from '../share-image-composer.component';
+import {
+  hasMoreBelow,
+  ShareImageComposerComponent,
+} from '../share-image-composer.component';
 
 jest.mock('bite-tribe-common/bite', () => ({
   loadBiteImageForCanvas: jest.fn(),
@@ -154,9 +157,11 @@ describe(ShareImageComposerComponent.name, () => {
     it('offers a switch for each field the Bite has, and none for the rest', async () => {
       const element = await render();
 
-      ['photo', 'dishName', 'place', 'price', 'qr'].forEach((field) =>
+      ['photo', 'dishName', 'place', 'price'].forEach((field) =>
         expect(toggle(element, field)).not.toBeNull(),
       );
+      // The QR code is on every image, so it has no switch.
+      expect(toggle(element, 'qr')).toBeNull();
       // The fixture has no rating, and no public name was passed.
       expect(toggle(element, 'rating')).toBeNull();
       expect(toggle(element, 'creatorName')).toBeNull();
@@ -227,11 +232,11 @@ describe(ShareImageComposerComponent.name, () => {
       element
         .querySelector('[data-testid="share-image-layouts"]')
         ?.dispatchEvent(
-          new CustomEvent('ionChange', { detail: { value: 'bold' } }),
+          new CustomEvent('ionChange', { detail: { value: 'wide' } }),
         );
       fixture.detectChanges();
 
-      expect(drawnStyle()['layout']).toBe('bold');
+      expect(drawnStyle()['layout']).toBe('wide');
     });
 
     it('steps through the layouts with a horizontal swipe', async () => {
@@ -246,7 +251,7 @@ describe(ShareImageComposerComponent.name, () => {
       };
 
       swipe(300, 100);
-      expect(drawnStyle()['layout']).toBe('bold');
+      expect(drawnStyle()['layout']).toBe('wide');
 
       swipe(100, 300);
       expect(drawnStyle()['layout']).toBe('classic');
@@ -306,16 +311,37 @@ describe(ShareImageComposerComponent.name, () => {
       element
         .querySelector('[data-testid="share-image-layouts"]')
         ?.dispatchEvent(
-          new CustomEvent('ionChange', { detail: { value: 'bold' } }),
+          new CustomEvent('ionChange', { detail: { value: 'wide' } }),
         );
       click(element, 'share-image-background-ocean');
       click(element, 'share-image-text-colour-cream');
 
       expect(drawnStyle()).toEqual({
-        layout: 'bold',
+        layout: 'wide',
         background: 'ocean',
         text: 'cream',
       });
     });
+  });
+});
+
+/** The "More options" cue below the preview. */
+describe(hasMoreBelow.name, () => {
+  it('shows while the content is at its top and controls are hidden below', () => {
+    expect(
+      hasMoreBelow({ scrollTop: 0, scrollHeight: 1400, clientHeight: 700 }),
+    ).toBe(true);
+  });
+
+  it('goes away once the user has scrolled', () => {
+    expect(
+      hasMoreBelow({ scrollTop: 200, scrollHeight: 1400, clientHeight: 700 }),
+    ).toBe(false);
+  });
+
+  it('does not show when everything already fits', () => {
+    expect(
+      hasMoreBelow({ scrollTop: 0, scrollHeight: 710, clientHeight: 700 }),
+    ).toBe(false);
   });
 });

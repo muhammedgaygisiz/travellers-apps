@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { IonContent } from '@ionic/angular/standalone';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { loadBiteImageForCanvas } from 'bite-tribe-common/bite';
 import type { Bite } from 'model';
@@ -145,6 +146,25 @@ describe(ShareImageComposerComponent.name, () => {
     expect(shareImage).not.toHaveBeenCalled();
   });
 
+  it('hands over one image at a time, however often the action is tapped', async () => {
+    saveImage.mockReturnValue(new Promise(() => undefined));
+    const element = await render();
+    const save = element.querySelector(
+      '[data-testid="share-image-save"]',
+    ) as HTMLElement;
+
+    save.click();
+    await flush();
+    save.click();
+    (
+      element.querySelector('[data-testid="share-image-share"]') as HTMLElement
+    ).click();
+    await flush();
+
+    expect(saveImage).toHaveBeenCalledTimes(1);
+    expect(shareImage).not.toHaveBeenCalled();
+  });
+
   it('offers no Share action without a share handler', async () => {
     shareImage = undefined as unknown as jest.Mock;
     const element = await render();
@@ -180,6 +200,64 @@ describe(ShareImageComposerComponent.name, () => {
     } finally {
       globals.ResizeObserver = original;
     }
+  });
+
+  /** The "More options" cue (issue #1731). */
+  describe('more options cue', () => {
+    const cue = (element: HTMLElement): HTMLElement | null =>
+      element.querySelector('[data-testid="share-image-more-options"]');
+
+    /** A scroll element with controls hidden below, scrolled `scrollTop` down. */
+    const scrollWithMoreBelow = (scrollTop = 0): HTMLElement =>
+      Object.assign(document.createElement('div'), {
+        scrollTop,
+        getBoundingClientRect: () => ({ top: 100 }) as DOMRect,
+      });
+
+    beforeEach(() => {
+      jest
+        .spyOn(HTMLElement.prototype, 'scrollHeight', 'get')
+        .mockReturnValue(1400);
+      jest
+        .spyOn(HTMLElement.prototype, 'clientHeight', 'get')
+        .mockReturnValue(700);
+    });
+
+    it('scrolls the first control into view when tapped', async () => {
+      const scroll = scrollWithMoreBelow();
+      jest
+        .spyOn(IonContent.prototype, 'getScrollElement')
+        .mockResolvedValue(scroll);
+      const scrollToPoint = jest
+        .spyOn(IonContent.prototype, 'scrollToPoint')
+        .mockResolvedValue(undefined);
+      const element = await render();
+      // The cue is measured once the stage has rendered, a turn after start-up.
+      await flush();
+      jest
+        .spyOn(
+          element.querySelector('.layouts') as HTMLElement,
+          'getBoundingClientRect',
+        )
+        .mockReturnValue({ top: 600 } as DOMRect);
+
+      cue(element)?.click();
+      await flush();
+
+      // 500px below the top of the scroll element, less the 8px of air.
+      expect(scrollToPoint).toHaveBeenCalledWith(0, 492, 300);
+    });
+
+    it('does not show where the content cannot be measured', async () => {
+      jest
+        .spyOn(IonContent.prototype, 'getScrollElement')
+        .mockRejectedValue(new Error('not upgraded'));
+
+      const element = await render();
+      await flush();
+
+      expect(cue(element)).toBeNull();
+    });
   });
 
   it('closes on cancel', async () => {

@@ -858,6 +858,15 @@ describe(DetailsDataAccessService.name, () => {
         ShareImageUnavailableError,
       );
     });
+
+    it('refuses in a browser without the Web Share API', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+      Object.assign(navigator, { canShare: undefined });
+
+      await expect(service.shareBiteImage(bite, image)).rejects.toBeInstanceOf(
+        ShareImageUnavailableError,
+      );
+    });
   });
 
   /** Saving the composed share image (UC-SBS R-12, R-27, issue #1732). */
@@ -941,6 +950,13 @@ describe(DetailsDataAccessService.name, () => {
       expect(service.canShareImageFiles()).toBe(true);
 
       Object.assign(navigator, { canShare: () => false });
+      expect(service.canShareImageFiles()).toBe(false);
+    });
+
+    it('is false in a browser without the Web Share API', () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+      Object.assign(navigator, { canShare: undefined });
+
       expect(service.canShareImageFiles()).toBe(false);
     });
   });

@@ -140,8 +140,7 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 
 - How many templates ship at launch, who designs them, and do they use the brand characters in [Implementation - Brand Characters](../implementation/brand-characters.md)? Gates [#1731]; [#1726] ships one template either way.
 - Does the QR code carry the full `/s/bite/<biteId>` link or a short one? The full link may make the code too dense to scan at small sizes. Whichever it is, `UC-SBS` `R-23` holds: the code carries the Bite's address and nothing user-controlled. Gates [#1726].
-- Is the display name on or off by default when a sharer shares their own Bite? `UC-SBS` `R-8` gives them the switch, and leaves the default open. Gates [#1728].
-- **Who writes the terms of use, and what do they license?** BiteTribe has a privacy policy and no terms, so no creator has licensed anyone to put their photo on another platform. `UC-SBS` `R-30` states what the licence must cover for somebody else's Bite to be shared as an image; it needs a Swiss or EU IP lawyer's confirmation before it is published, and it needs an owning issue. Every existing account has to accept the terms actively before its Bites can be shared by others - an unannounced change of terms does not grant a licence. Gates the image share of somebody else's Bite, not of one's own.
+- **Who writes the terms of use, and what do they license?** BiteTribe has a privacy policy and no terms, so no creator has licensed anyone to put their photo on another platform. `UC-SBS` `R-30` states what the licence must cover for somebody else's Bite to be shared as an image; it needs a Swiss or EU IP lawyer's confirmation before it is published. Issue [#1772] owns the work. Every existing account has to accept the terms actively before its Bites can be shared by others - an unannounced change of terms does not grant a licence. Gates the image share of somebody else's Bite, not of one's own.
 - Should a creator be able to refuse image sharing of their Bites altogether, beyond choosing whether they are named (`UC-SBS` `R-31`)? Accepting the terms would otherwise be the only gate.
 - Does an image add any exposure that the Bite on screen does not? **Narrowed by `UC-SBS` `R-3`:** a private creator's Bite, and a deleted account's, are never shared as an image by anyone else, so the question is left only for a public creator who has licensed their Bites - whether a Bite they can restrict in some other way needs the same exclusion.
 
@@ -187,5 +186,5 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 [#1658]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1658
 [#1723]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1723
 [#1726]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1726
-[#1728]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1728
 [#1731]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1731
+[#1772]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1772

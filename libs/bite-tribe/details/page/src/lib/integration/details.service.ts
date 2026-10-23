@@ -1,7 +1,19 @@
-import { inject, Injectable } from '@angular/core';
+import { EventEmitter, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
-import { LocalImagePickerService } from 'bite-tribe-common/bite';
-import { DetailsDataAccessService } from 'bite-tribe/details-data-access';
+import {
+  canShareBiteAsImage,
+  LocalImagePickerService,
+} from 'bite-tribe-common/bite';
+import {
+  DetailsDataAccessService,
+  isShareCancelled,
+  ShareImageUnavailableError,
+} from 'bite-tribe/details-data-access';
+import {
+  ShareImageComposerComponent,
+  type ShareImageFormat,
+} from 'bite-tribe/share-image-ui';
+import { TranslocoService } from '@jsverse/transloco';
 import {
   Bite,
   BiteReportReason,
@@ -10,9 +22,25 @@ import {
   PublicUser,
   RemoveBiteFromBucketlistParams,
 } from 'model';
-import { NavController } from '@ionic/angular/standalone';
+import {
+  ActionSheetController,
+  ModalController,
+  NavController,
+} from '@ionic/angular/standalone';
 import { PATH } from 'utils';
 import { ToastService } from 'toast';
+
+/** The share menu's entries that lead to the image composer. */
+type ShareMenuTarget = 'instagram-story' | 'instagram-post' | 'facebook-story';
+
+/** Every format opens as a Story until the 4:5 Post layout lands (#1727). */
+const FORMAT_FOR_TARGET: Record<ShareMenuTarget, ShareImageFormat> = {
+  'instagram-story': 'story',
+  'instagram-post': 'story',
+  'facebook-story': 'story',
+};
+
+type ShareMenuChoice = ShareMenuTarget | 'more';
 
 @Injectable({ providedIn: 'root' })
 export class DetailsService {
@@ -21,6 +49,9 @@ export class DetailsService {
   private readonly localImagePicker = inject(LocalImagePickerService);
   private readonly navController = inject(NavController);
   private readonly toast = inject(ToastService);
+  private readonly actionSheetController = inject(ActionSheetController);
+  private readonly modalController = inject(ModalController);
+  private readonly transloco = inject(TranslocoService);
 
   bite = this.dataAccess.bite;
 
@@ -208,8 +239,116 @@ export class DetailsService {
     }
   }
 
-  onShareBiteClick(bite: Bite): void {
-    this.dataAccess.shareBite(bite);
+  /**
+   * The share button (`UC-SBS` `R-1` to `R-3`).
+   *
+   * On the viewer's own Bite it opens BiteTribe's share menu: the three app
+   * entries lead to the image composer, and **More…** is the link share,
+   * unchanged. Every other Bite keeps the link share alone, with no menu,
+   * until the terms of use of issue #1772 let anyone else's photo be shared.
+   */
+  async onShareBiteClick(bite: Bite): Promise<void> {
+    if (!canShareBiteAsImage(bite, this.userId())) {
+      await this.dataAccess.shareBite(bite);
+      return;
+    }
+
+    const choice = await this.presentShareMenu();
+
+    if (choice === 'more') {
+      await this.dataAccess.shareBite(bite);
+    } else if (choice) {
+      await this.openShareImageComposer(bite, FORMAT_FOR_TARGET[choice]);
+    }
+  }
+
+  private async presentShareMenu(): Promise<ShareMenuChoice | undefined> {
+    const t = (key: string): string => this.transloco.translate(key);
+    const sheet = await this.actionSheetController.create({
+      header: t('share-menu-title'),
+      buttons: [
+        {
+          text: t('share-menu-instagram-story'),
+          data: 'instagram-story',
+          htmlAttributes: { 'data-testid': 'share-menu-instagram-story' },
+        },
+        {
+          text: t('share-menu-instagram-post'),
+          data: 'instagram-post',
+          htmlAttributes: { 'data-testid': 'share-menu-instagram-post' },
+        },
+        {
+          text: t('share-menu-facebook-story'),
+          data: 'facebook-story',
+          htmlAttributes: { 'data-testid': 'share-menu-facebook-story' },
+        },
+        {
+          text: t('share-menu-more'),
+          data: 'more',
+          htmlAttributes: { 'data-testid': 'share-menu-more' },
+        },
+        { text: t('cancel'), role: 'cancel' },
+      ],
+    });
+
+    await sheet.present();
+
+    const { data } = await sheet.onDidDismiss<ShareMenuChoice>();
+
+    return data;
+  }
+
+  private async openShareImageComposer(
+    bite: Bite,
+    format: ShareImageFormat,
+  ): Promise<void> {
+    const closed = new EventEmitter<void>();
+    const modal = await this.modalController.create({
+      component: ShareImageComposerComponent,
+      componentProps: {
+        // Ionic assigns componentProps onto the instance, so inputs are handed
+        // over as signals - see `LocalImagePickerService`.
+        bite: signal(bite),
+        format: signal(format),
+        shareImage: signal((image: Blob) => this.shareBiteImage(bite, image)),
+        closed,
+      },
+    });
+
+    closed.subscribe(() => {
+      void modal.dismiss();
+    });
+
+    await modal.present();
+  }
+
+  /**
+   * Shares the composed image and reports a failure. The composer stays open
+   * either way, so a cancelled or failed share can simply be tried again.
+   */
+  private async shareBiteImage(bite: Bite, image: Blob): Promise<void> {
+    try {
+      await this.dataAccess.shareBiteImage(bite, image);
+    } catch (error) {
+      if (isShareCancelled(error)) {
+        return;
+      }
+
+      if (error instanceof ShareImageUnavailableError) {
+        await this.toast.present({
+          messageKey: 'share-image-unavailable',
+          outcome: 'failure',
+        });
+        return;
+      }
+
+      console.error('Failed to share the Bite image:', error);
+
+      await this.toast.present({
+        messageKey: 'share-image-failed',
+        outcome: 'failure',
+      });
+    }
   }
 
   /**

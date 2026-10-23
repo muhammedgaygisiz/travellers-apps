@@ -27,12 +27,12 @@ nothing, and how a review and its thread are attributed.
 - A public creator profile identifies who shared the Bite.
 - The page shows the Bite's distance from the user's current position and converts its price into the user's preferred currency.
 - User can share the Bite through the device share sheet, including WhatsApp when available.
-  On a Bite that may also be shared as an image, the share button is to open a share menu
-  instead - Instagram Story, Instagram Post, Facebook Story and More… - whose More… entry is
-  this link share, unchanged; on any other Bite it stays this link share. The menu, the
+  On the user's own Bite, the share button opens a share menu instead (issue [#1726]) -
+  Instagram Story, Instagram Post, Facebook Story and More… - whose More… entry is this link
+  share, unchanged. On anyone else's Bite it stays this link share, until terms of use let other
+  people's Bites be shared as images (issue [#1772]). The menu, the
   image composer behind its other entries and the hand-off to each app are
-  [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md)'s (`UC-SBS` `R-1` to `R-3`). Until issue [#1726]
-  lands, the button opens the device share sheet directly.
+  [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md)'s (`UC-SBS` `R-1` to `R-3`).
 - The Bite is the only shareable entity in BiteTribe. The share link, the
   `handleSharedLinkToBite` preview endpoint, and the native `/s/bite/*` deep-link
   registration in the iOS Associated Domains file and the Android App Links
@@ -331,3 +331,4 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
 [#1726]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1726
+[#1772]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1772

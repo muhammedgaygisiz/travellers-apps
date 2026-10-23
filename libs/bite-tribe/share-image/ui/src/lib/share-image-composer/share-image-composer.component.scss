@@ -1,0 +1,27 @@
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+}
+
+.preview {
+  flex: 1;
+  min-height: 0;
+}
+
+.photo-failed {
+  display: block;
+  text-align: center;
+
+  p {
+    margin: 0;
+  }
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}

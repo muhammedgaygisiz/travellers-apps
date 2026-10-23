@@ -8,9 +8,9 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { BiteTribeApiService } from 'bite-tribe/api';
+import { BiteTribeApiService, toBase64 } from 'bite-tribe/api';
 import { CrashReportingService } from 'ta-firestore';
-import { BITE_TRIBE_ORIGIN, resourceValue } from 'utils';
+import { resourceValue, sharedBiteUrl } from 'utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
@@ -25,27 +25,18 @@ import {
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Position } from '@capacitor/geolocation';
 import { Share } from '@capacitor/share';
+import { Directory, Filesystem } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
 import { lastValueFrom } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { retry, withTimeout } from './async-retry';
 import { BiteNotFoundError } from './bite-not-found-error';
+import { ShareImageUnavailableError } from './share-image-errors';
 import {
   BiteLoadFailure,
   classifyBiteLoadFailure,
   describeBiteLoadError,
 } from './bite-load-failure';
-
-/**
- * The address a shared Bite is sent as (GitHub issue #345).
- *
- * Built from {@link BITE_TRIBE_ORIGIN} rather than spelled out, so a share
- * names the canonical host decided in issue #1454 - the same one the table QR
- * codes are printed with. Shares sent before this change point at
- * `bite-tribe.web.app` and keep working: that host serves the same build, is
- * still handled by `handleSharedLinkToBite`, and is still a verified App Link
- * on both platforms.
- */
-const SHARE_BITE_URL = `${BITE_TRIBE_ORIGIN}/s/bite`;
 
 // The bite document read can transiently fail or hang right after a cold start
 // from a push notification (Firestore/auth not ready yet). Retry it silently so
@@ -351,7 +342,7 @@ export class DetailsDataAccessService {
   }
 
   async shareBite(bite: Bite): Promise<void> {
-    const url = `${SHARE_BITE_URL}/${encodeURIComponent(bite.id)}`;
+    const url = sharedBiteUrl(bite.id);
 
     const title = bite.place ? `${bite.name} @ ${bite.place}` : bite.name;
 
@@ -372,5 +363,40 @@ export class DetailsDataAccessService {
       url,
       dialogTitle: 'Share Bite',
     });
+  }
+
+  /**
+   * Hands a composed share image to the device share sheet as a file
+   * (`UC-SBS`). Only the re-encoded canvas output reaches this - never the
+   * original upload, which may carry EXIF GPS data (`R-21`).
+   *
+   * A native build writes the image to the cache directory first, because the
+   * Share plugin shares files by URI. A browser shares it through the Web
+   * Share API, and throws {@link ShareImageUnavailableError} where that cannot
+   * take files.
+   */
+  async shareBiteImage(bite: Bite, image: Blob): Promise<void> {
+    const fileName = `bitetribe-${bite.id}.jpg`;
+
+    if (Capacitor.isNativePlatform()) {
+      const { uri } = await Filesystem.writeFile({
+        path: `share-image/${fileName}`,
+        data: await toBase64(image),
+        directory: Directory.Cache,
+        recursive: true,
+      });
+
+      await Share.share({ files: [uri] });
+
+      return;
+    }
+
+    const file = new File([image], fileName, { type: image.type });
+
+    if (!navigator.canShare?.({ files: [file] })) {
+      throw new ShareImageUnavailableError();
+    }
+
+    await navigator.share({ files: [file] });
   }
 }

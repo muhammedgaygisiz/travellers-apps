@@ -34,6 +34,11 @@ Examples:
 - `libs/bite-tribe/profile/page`
 - `libs/bite-tribe/profile/data-access`
 
+A screen that another feature opens, rather than a route of its own, is a `ui` library: the share
+image composer, `libs/bite-tribe/share-image/ui`, is presented as a modal by the Bite details
+page, and a feature library may not import another feature library (see
+[Implementation - Libraries](libraries.md)).
+
 ## Business Feature Libraries
 
 ```text

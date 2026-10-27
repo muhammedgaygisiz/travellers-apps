@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { HomeDataAccessService } from '../home-data-access.service';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
-import type { Bite, Bucketlist, Like, LikeClick } from 'model';
+import type { Bite, Bucketlist, Like, LikeClick, PublicUser } from 'model';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { haversineDistance } from 'utils';
@@ -68,7 +68,9 @@ class StoreMock {
   homeSorting$ = of('distance');
   mybites$ = of([]);
   imageUploads$ = of([]);
-  sortedMyBites$ = of([]);
+  sortedMyBites$ = of<Bite[]>([]);
+  myProfileBites$ = of<Bite[]>([]);
+  publicUser$ = of<PublicUser | undefined>(undefined);
   myBitesSorting$ = of('distance');
   sortedRestaurantBites$ = of([]);
   restaurantBitesSorting$ = of('createdAt');
@@ -437,6 +439,46 @@ describe('HomeDataAccessService', () => {
         expect(setBiteTriedOutStatusSpy).not.toHaveBeenCalled();
       },
     ));
+  });
+
+  describe('myBiteCount', () => {
+    const givenStore = (store: Partial<StoreMock>): HomeDataAccessService => {
+      Object.assign(biteTribeStoreService, store);
+      return TestBed.inject(HomeDataAccessService);
+    };
+
+    const bites = (count: number): Bite[] =>
+      Array.from({ length: count }, (_, index) => ({
+        ...BITE_WITH_POSITION,
+        id: `bite-${index}`,
+      }));
+
+    it('should report the aggregate when fewer Bites are loaded than it counts', () => {
+      const service = givenStore({
+        publicUser$: of({ biteCount: 42 } as PublicUser),
+        myProfileBites$: of(bites(3)),
+      });
+
+      expect(service.myBiteCount()).toBe(42);
+    });
+
+    it('should raise a stale aggregate to the loaded Bites', () => {
+      const service = givenStore({
+        publicUser$: of({ biteCount: 2 } as PublicUser),
+        myProfileBites$: of(bites(3)),
+      });
+
+      expect(service.myBiteCount()).toBe(3);
+    });
+
+    it('should count the Bites a filter hides from the list', () => {
+      const service = givenStore({
+        myProfileBites$: of(bites(3)),
+        sortedMyBites$: of(bites(1)),
+      });
+
+      expect(service.myBiteCount()).toBe(3);
+    });
   });
 
   describe('triedOutBiteIds', () => {

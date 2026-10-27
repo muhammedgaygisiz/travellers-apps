@@ -151,6 +151,7 @@
   "anonymous": "Anonim",
   "logout": "Çıkış",
   "my-bites": "Bitelerim",
+  "title-bite-count": "Toplam Bite: {{count}}",
   "weekly-bites": "Haftanın bite'ları",
   "my-profile": "Profilim",
   "settings": "Ayarlar",

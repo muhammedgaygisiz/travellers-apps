@@ -123,6 +123,7 @@ rest of the product reads.
   decides what happens — including presenting the picker.
 - User can post the Bite and stay on the form to add another Bite at the same place. Restaurant, currency, and position stay; image, dish name, price, rating, description, and tags reset, and the tags of the Bites already posted in that session become suggestions.
 - User can edit the Bite later.
+- My Bites shows the total number of the user's Bites as a badge next to its title. It is the total, not the length of the list underneath: a filter narrows the list but never the badge. It is counted the way the profile header counts, from the user document's `biteCount` aggregate raised to the number of loaded Bites when that is higher (`totalBiteCount`), so the two surfaces never report different numbers. The badge is not shown while the Bites are still loading. See GitHub issue [#1783].
 
 ## MVP Classification
 
@@ -159,6 +160,7 @@ each under App Functionality.
 - Shared restaurant selector.
 - Bite page suspicious price validation.
 - Playwright create-Bite E2E smoke coverage.
+- Playwright My Bites count E2E coverage: a Bite posted in the same session raises the title badge by one without a reload. See GitHub issue [#1783].
 - Playwright photo-upload-status E2E coverage: the poster-only wait message, the
   failed state and its poster-only retry, the age threshold that leaves the
   document untouched, and a blocked upload driven from the create flow through
@@ -185,6 +187,7 @@ each under App Functionality.
 - Issue [#1394] moved the Android gallery onto the system Photo Picker, dropping its own permission prompt. Closed.
 - Issue [#1409] moved the `ACCESS_MEDIA_LOCATION` grant to the onboarding photos step (the Media Permission Rule). Closed.
 - Issue [#1078] replaced the permissive `/{document=**}` Firestore wildcard with default-deny and per-collection matches, which is what makes the deferred work under [#1290] possible. Closed.
+- Issue [#1783] shows the total Bite count as a badge next to the My Bites title, sharing the profile header's count rule. Open.
 - Issue [#1290] - storing the resolved candidate positions on the Bite so a source can be re-chosen while editing. Open, classified `[Secondary]`.
 
 ## Related Domains
@@ -214,3 +217,4 @@ each under App Functionality.
 [#1394]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1394
 [#1409]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1409
 [#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717
+[#1783]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1783

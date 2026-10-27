@@ -197,6 +197,43 @@ describe('BiteTribeHomeComponent', () => {
    * The Create Bite page is behind a token refresh and a lazy chunk, so the tap
    * has to be answered where it happened. See GitHub issue #1287.
    */
+  describe('title count', () => {
+    const titleCount = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="title-count"]');
+
+    it('should render no badge when no count is given', () => {
+      fixture.detectChanges();
+
+      expect(titleCount()).toBeNull();
+    });
+
+    it('should render the count as a badge next to the title', () => {
+      componentRef.setInput('titleCount', 42);
+
+      fixture.detectChanges();
+
+      expect(titleCount()?.textContent?.trim()).toBe('42');
+      expect(titleCount()?.hasAttribute('aria-label')).toBe(true);
+    });
+
+    it('should render a count of zero', () => {
+      componentRef.setInput('titleCount', 0);
+
+      fixture.detectChanges();
+
+      expect(titleCount()?.textContent?.trim()).toBe('0');
+    });
+
+    it('should render no badge while the Bites are loading', () => {
+      componentRef.setInput('titleCount', 42);
+      componentRef.setInput('isBitesLoading', true);
+
+      fixture.detectChanges();
+
+      expect(titleCount()).toBeNull();
+    });
+  });
+
   describe('create bite pending', () => {
     it('should leave the add button usable by default', () => {
       fixture.detectChanges();

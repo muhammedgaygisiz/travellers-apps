@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { PageComponent, PageMenuTarget } from 'common/ui/page';
 import {
+  IonBadge,
   IonButton,
   IonButtons,
   IonCard,
@@ -47,6 +48,7 @@ const MIN_SKELETON_VISIBLE_MS = 2000;
     PageComponent,
     IonContent,
     IonText,
+    IonBadge,
     IonIcon,
     IonButton,
     IonButtons,
@@ -73,6 +75,14 @@ export class BiteTribeHomeComponent {
   enableBackButton = input<boolean>(false);
   userId = input<string>();
   title = input('Bites');
+  /**
+   * A total shown as a badge next to the title. Only My Bites sets it; every
+   * other page leaves it unset and shows no badge (issue #1783).
+   */
+  titleCount = input<number>();
+  showTitleCount = computed(
+    () => this.titleCount() !== undefined && !this.isBitesLoading(),
+  );
   editableBites = input(false, { transform: booleanAttribute });
   showFooter = input(true);
   isAuthenticated = input(false);

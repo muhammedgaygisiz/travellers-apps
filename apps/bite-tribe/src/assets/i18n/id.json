@@ -830,5 +830,14 @@
   "report-bite-submit": "Laporkan",
   "report-bite-sent": "Terima kasih. Kami akan memeriksa Bite ini.",
   "report-bite-already-sent": "Kamu sudah melaporkan Bite ini.",
-  "report-bite-failed": "Laporan tidak dapat dikirim. Silakan coba lagi."
+  "report-bite-failed": "Laporan tidak dapat dikirim. Silakan coba lagi.",
+  "show-on-globe": "Lihat di globe",
+  "your-world": "Dunia Bite-mu",
+  "users-world": "Dunia Bite {{name}}",
+  "countries": "Negara",
+  "continents": "Benua",
+  "globe-aria-label": "Globe dengan negara tempat Bites dibuat",
+  "zoom-in": "Perbesar",
+  "zoom-out": "Perkecil",
+  "show-whole-globe": "Tampilkan seluruh globe"
 }

@@ -830,5 +830,14 @@
   "report-bite-submit": "Bildir",
   "report-bite-sent": "Teşekkürler. Bu Bite'ı inceleyeceğiz.",
   "report-bite-already-sent": "Bu Bite'ı zaten bildirdin.",
-  "report-bite-failed": "Bildirim gönderilemedi. Lütfen tekrar dene."
+  "report-bite-failed": "Bildirim gönderilemedi. Lütfen tekrar dene.",
+  "show-on-globe": "Küre üzerinde göster",
+  "your-world": "Senin Bite dünyan",
+  "users-world": "{{name}} kullanıcısının Bite dünyası",
+  "countries": "Ülkeler",
+  "continents": "Kıtalar",
+  "globe-aria-label": "Bite'ların oluşturulduğu ülkeleri gösteren küre",
+  "zoom-in": "Yakınlaştır",
+  "zoom-out": "Uzaklaştır",
+  "show-whole-globe": "Tüm küreyi göster"
 }

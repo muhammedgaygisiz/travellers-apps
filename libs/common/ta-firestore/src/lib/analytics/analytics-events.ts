@@ -70,6 +70,10 @@ export const AnalyticsEvent = {
   ShareTemplateChosen: 'share_template_chosen',
   ShareHandoffSucceeded: 'share_handoff_succeeded',
   ShareHandoffFailed: 'share_handoff_failed',
+  // The visited-countries globe, consumer app (issue #1787)
+  WorldGlobeOpened: 'world_globe_open',
+  WorldGlobeCountryTapped: 'world_globe_country_tap',
+  WorldGlobeZoomed: 'world_globe_zoom',
 } as const;
 
 export type AnalyticsEventName =
@@ -325,6 +329,26 @@ export interface AnalyticsEventParamMap {
      */
     reason: 'cancelled' | 'permission_denied' | 'unavailable' | 'failed';
   };
+  /**
+   * The world page opened (GitHub issue #1787). `own_profile` separates a user
+   * looking at their own globe from one looking at somebody else's, which is
+   * the question the page was built to answer: is it a mirror or a window.
+   */
+  [AnalyticsEvent.WorldGlobeOpened]: { own_profile: boolean };
+  /**
+   * A country tapped on the globe. The alpha-2 code is a country, not a
+   * person: the profile's flags show the same list to everybody who can open
+   * it. `has_bites` says whether it was a highlighted country.
+   */
+  [AnalyticsEvent.WorldGlobeCountryTapped]: {
+    country_code: string;
+    has_bites: boolean;
+  };
+  /**
+   * The globe was zoomed, at most once per visit to the page: the question is
+   * whether people zoom at all, and with what, not how often a pinch fires.
+   */
+  [AnalyticsEvent.WorldGlobeZoomed]: { control: 'button' | 'gesture' };
 }
 
 /**
@@ -512,6 +536,9 @@ export const ANALYTICS_EVENT_SURFACE: Record<
   [AnalyticsEvent.ShareTemplateChosen]: 'consumer',
   [AnalyticsEvent.ShareHandoffSucceeded]: 'consumer',
   [AnalyticsEvent.ShareHandoffFailed]: 'consumer',
+  [AnalyticsEvent.WorldGlobeOpened]: 'consumer',
+  [AnalyticsEvent.WorldGlobeCountryTapped]: 'consumer',
+  [AnalyticsEvent.WorldGlobeZoomed]: 'consumer',
 };
 
 /**

@@ -30,6 +30,11 @@
             "output": "assets/leaflet"
           },
           {
+            "input": "node_modules/world-atlas",
+            "glob": "countries-{110m,50m}.json",
+            "output": "assets/world-atlas"
+          },
+          {
             "glob": "**/*",
             "input": "apps/bite-tribe/public"
           },

@@ -830,5 +830,14 @@
   "report-bite-submit": "Report",
   "report-bite-sent": "Thanks. We will look at this Bite.",
   "report-bite-already-sent": "You have already reported this Bite.",
-  "report-bite-failed": "The report could not be sent. Please try again."
+  "report-bite-failed": "The report could not be sent. Please try again.",
+  "show-on-globe": "Show on globe",
+  "your-world": "Your Bite World",
+  "users-world": "{{name}}'s Bite World",
+  "countries": "Countries",
+  "continents": "Continents",
+  "globe-aria-label": "Globe with the countries Bites were created in",
+  "zoom-in": "Zoom in",
+  "zoom-out": "Zoom out",
+  "show-whole-globe": "Show the whole globe"
 }

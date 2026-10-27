@@ -1,0 +1,80 @@
+// The globe's colours, read by the component when it draws the canvas. The
+// visited countries take the brand blue in both themes; the rest follows the
+// page. See GitHub issue #1787.
+:host {
+  --globe-sea: #e8f1fb;
+  --globe-land: #e4e2dc;
+  --globe-border: #ffffff;
+  --globe-visited: var(--ion-color-primary, #4a90d9);
+  --globe-selected: #2f6fb3;
+  --globe-grid: #c9dcf2;
+
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+@mixin dark-globe {
+  --globe-sea: #1d2a38;
+  --globe-land: #3a3a37;
+  --globe-border: #20201e;
+  --globe-selected: #8fbcec;
+  --globe-grid: #2c3e52;
+}
+
+// Both theme switches, as in `apps/bite-tribe/src/theme/variables.scss`: the
+// explicit class, and the system setting while the user has chosen neither.
+:host-context(html.dark) {
+  @include dark-globe;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(html:not(.light)) {
+    @include dark-globe;
+  }
+}
+
+.globe-canvas {
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+
+.globe-canvas:active {
+  cursor: grabbing;
+}
+
+.globe-controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ion-color-step-150, #d6d6d6);
+  border-radius: 8px;
+  background: var(--ion-background-color, #ffffff);
+  overflow: hidden;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ion-text-color, #20201e);
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  button:active {
+    background: var(--ion-color-step-100, #e6e6e6);
+  }
+
+  button + button {
+    border-top: 1px solid var(--ion-color-step-150, #d6d6d6);
+  }
+}

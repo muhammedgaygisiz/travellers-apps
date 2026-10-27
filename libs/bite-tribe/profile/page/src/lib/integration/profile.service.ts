@@ -159,6 +159,28 @@ export class ProfileService {
     this.dataAccess.submitUnblockClick(user);
   }
 
+  /** Opens the profile's countries on a globe (GitHub issue #1787). */
+  gotoWorld(userId: string): void {
+    this.navController.navigateForward([PATH.WORLD, userId]);
+  }
+
+  trackWorldOpened(ownProfile: boolean): void {
+    this.analytics.logEvent(AnalyticsEvent.WorldGlobeOpened, {
+      own_profile: ownProfile,
+    });
+  }
+
+  trackWorldCountryTapped(countryCode: string, hasBites: boolean): void {
+    this.analytics.logEvent(AnalyticsEvent.WorldGlobeCountryTapped, {
+      country_code: countryCode,
+      has_bites: hasBites,
+    });
+  }
+
+  trackWorldZoomed(control: 'button' | 'gesture'): void {
+    this.analytics.logEvent(AnalyticsEvent.WorldGlobeZoomed, { control });
+  }
+
   gotoFollowers(userId: string): void {
     this.navController.navigateForward([PATH.FOLLOWERS, userId, 'followers']);
   }

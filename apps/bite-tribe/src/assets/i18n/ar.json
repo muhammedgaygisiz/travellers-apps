@@ -830,5 +830,14 @@
   "report-bite-submit": "إبلاغ",
   "report-bite-sent": "شكرًا. سنراجع هذه الـBite.",
   "report-bite-already-sent": "لقد أبلغت عن هذه الـBite بالفعل.",
-  "report-bite-failed": "تعذّر إرسال البلاغ. يُرجى المحاولة مرة أخرى."
+  "report-bite-failed": "تعذّر إرسال البلاغ. يُرجى المحاولة مرة أخرى.",
+  "show-on-globe": "عرض على الكرة الأرضية",
+  "your-world": "عالم Bite الخاص بك",
+  "users-world": "عالم Bite الخاص بـ {{name}}",
+  "countries": "الدول",
+  "continents": "القارات",
+  "globe-aria-label": "كرة أرضية تُظهر الدول التي أُنشئت فيها Bites",
+  "zoom-in": "تكبير",
+  "zoom-out": "تصغير",
+  "show-whole-globe": "عرض الكرة الأرضية كاملة"
 }

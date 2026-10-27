@@ -276,6 +276,46 @@ describe(ProfileService.name, () => {
     });
   });
 
+  /** GitHub issue #1787. */
+  describe('the world page', () => {
+    beforeEach(() => logEvent.mockClear());
+
+    it('should open the world page of the given profile', () => {
+      const navigateSpy = jest
+        .spyOn(service['navController'], 'navigateForward')
+        .mockImplementation();
+
+      service.gotoWorld('user123');
+
+      expect(navigateSpy).toHaveBeenCalledWith(['world', 'user123']);
+    });
+
+    it('should log the page opening with whose profile it is', () => {
+      service.trackWorldOpened(true);
+
+      expect(logEvent).toHaveBeenCalledWith('world_globe_open', {
+        own_profile: true,
+      });
+    });
+
+    it('should log a country tap with its code and whether it has Bites', () => {
+      service.trackWorldCountryTapped('TH', false);
+
+      expect(logEvent).toHaveBeenCalledWith('world_globe_country_tap', {
+        country_code: 'TH',
+        has_bites: false,
+      });
+    });
+
+    it('should log a zoom with the control that made it', () => {
+      service.trackWorldZoomed('gesture');
+
+      expect(logEvent).toHaveBeenCalledWith('world_globe_zoom', {
+        control: 'gesture',
+      });
+    });
+  });
+
   describe('gotoFollowers', () => {
     it('should navigate to the correct followers page', () => {
       const userId = 'user123';

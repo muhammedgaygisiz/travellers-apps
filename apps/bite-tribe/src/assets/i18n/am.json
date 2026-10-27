@@ -830,5 +830,14 @@
   "report-bite-submit": "ሪፖርት አድርግ",
   "report-bite-sent": "እናመሰግናለን። ይህን Bite እንመረምራለን።",
   "report-bite-already-sent": "ይህን Bite አስቀድመው ሪፖርት አድርገዋል።",
-  "report-bite-failed": "ሪፖርቱ ሊላክ አልቻለም። እባክዎ እንደገና ይሞክሩ።"
+  "report-bite-failed": "ሪፖርቱ ሊላክ አልቻለም። እባክዎ እንደገና ይሞክሩ።",
+  "show-on-globe": "በምድር ሉል ላይ አሳይ",
+  "your-world": "የእርስዎ የBite ዓለም",
+  "users-world": "የ{{name}} የBite ዓለም",
+  "countries": "አገሮች",
+  "continents": "አህጉራት",
+  "globe-aria-label": "Bites የተፈጠሩባቸውን አገሮች የሚያሳይ የምድር ሉል",
+  "zoom-in": "አቅርብ",
+  "zoom-out": "አርቅ",
+  "show-whole-globe": "ሙሉውን የምድር ሉል አሳይ"
 }

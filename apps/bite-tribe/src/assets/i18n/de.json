@@ -830,5 +830,14 @@
   "report-bite-submit": "Melden",
   "report-bite-sent": "Danke. Wir sehen uns diesen Bite an.",
   "report-bite-already-sent": "Du hast diesen Bite bereits gemeldet.",
-  "report-bite-failed": "Die Meldung konnte nicht gesendet werden. Bitte versuche es erneut."
+  "report-bite-failed": "Die Meldung konnte nicht gesendet werden. Bitte versuche es erneut.",
+  "show-on-globe": "Auf dem Globus zeigen",
+  "your-world": "Deine Bite-Welt",
+  "users-world": "Bite-Welt von {{name}}",
+  "countries": "Länder",
+  "continents": "Kontinente",
+  "globe-aria-label": "Globus mit den Ländern, in denen Bites entstanden sind",
+  "zoom-in": "Vergrößern",
+  "zoom-out": "Verkleinern",
+  "show-whole-globe": "Ganzen Globus zeigen"
 }

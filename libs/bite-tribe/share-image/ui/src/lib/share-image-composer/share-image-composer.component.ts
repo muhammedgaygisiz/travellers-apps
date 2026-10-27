@@ -171,6 +171,12 @@ export class ShareImageComposerComponent implements OnInit {
   /** Saves the finished image: to the photo library, or as a download. */
   readonly saveImage = input.required<(image: Blob) => Promise<void>>();
   readonly closed = output<void>();
+  /**
+   * A layout the user picked, by tapping or swiping, for the share funnel's
+   * analytics (issue #1733). Not the one the composer opens on, which nobody
+   * chose, and not a tap on the layout already showing.
+   */
+  readonly layoutChosen = output<ShareImageLayoutId>();
 
   private readonly transloco = inject(TranslocoService);
   private readonly activeLang = toSignal(this.transloco.langChanges$, {
@@ -322,7 +328,12 @@ export class ShareImageComposerComponent implements OnInit {
   }
 
   protected setLayout(layout: ShareImageLayoutId): void {
+    if (layout === this.imageStyle().layout) {
+      return;
+    }
+
     this.imageStyle.update((style) => ({ ...style, layout }));
+    this.layoutChosen.emit(layout);
   }
 
   protected setBackground(background: ShareImageBackgroundId): void {

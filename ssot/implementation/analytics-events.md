@@ -77,6 +77,12 @@
   | Table funnel | `table_order_submitted`               | `TableGuestParams`, `line_count: number`                                                                   | An order reached the kitchen, replays excluded                                                     | `libs/bite-tribe/table-order/data-access/.../table-order.service.ts`                                        |
   | Table funnel | `table_bite_prompt_shown`             | `restaurant_id`, `has_account`, `visit_id: string`, `surface: 'table' \| 'visit_detail'`                   | A visit summary reached a guest with the Bite offer on it                                          | `.../table-order/data-access/.../visit-summary.service.ts`, `.../visits/page/.../visit-detail.container.ts` |
   | Table funnel | `table_bite_started`                  | `restaurant_id`, `has_account`, `visit_id: string`, `surface: 'table' \| 'visit_detail'`                   | The guest opened the Bite form from that offer                                                     | `.../menu/page/.../order/table-order.component.ts`, `.../visits/page/.../visit-detail.container.ts`         |
+  | Share funnel | `share_menu_opened`                   | `bite_id: string`                                                                                          | The share menu reaches the screen on the viewer's own Bite                                         | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+  | Share funnel | `share_target_chosen`                 | `bite_id`, `target: ShareTarget`                                                                           | A menu entry is picked; a dismissed menu emits nothing                                             | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+  | Share funnel | `share_composer_opened`               | `bite_id`, `target`, `format: 'story' \| 'post'`                                                           | The image composer reaches the screen                                                              | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+  | Share funnel | `share_template_chosen`               | `ShareImageParams`                                                                                         | The user switches the layout; the default one is not counted                                       | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+  | Share funnel | `share_handoff_succeeded`             | `ShareImageParams`, `action: 'save' \| 'share'`                                                            | The image is saved, or the share sheet reports an app took it - not that it was posted             | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+  | Share funnel | `share_handoff_failed`                | `ShareImageParams`, `action`, `reason: 'cancelled' \| 'permission_denied' \| 'unavailable' \| 'failed'`    | The image did not leave; `cancelled` is the user closing the share sheet                           | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
 
   The onboarding funnel events belong to the onboarding assistant epic ([epic-850](../records/epic-850.md),
   issue [#1017]), not to the launch taxonomy of issue 910. `onboarding_step_completed`
@@ -93,6 +99,9 @@
   retention. From a profile it is counted on the tap, because that follow is
   optimistic and its write reports no outcome; from a suggestion it is counted once
   the write succeeds.
+
+  The share-funnel events belong to issue [#1733] and are described under
+  [The Share-As-Image Funnel](#the-share-as-image-funnel) below.
 
 - ## App Check Telemetry
 
@@ -465,6 +474,89 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   other. The activation funnel of [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) counts both as one step, which is
   what made the web's conversion visible at all.
 
+- ## The Share-As-Image Funnel
+
+  [Epic-1723][#1723] lets a user turn one of their own Bites into an image for
+  an Instagram or Facebook Story or Post, and issue [#1733] is how often that
+  happens and where the ones who start stop. Five steps and a failure beside the
+  last one, all emitted by the consumer app from the details page's integration
+  service. [UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md)
+  states the contract as `R-24` and `R-29`.
+
+  | #   | Step              | Event                     | Optional |
+  | --- | ----------------- | ------------------------- | -------- |
+  | 1   | Share menu opened | `share_menu_opened`       | no       |
+  | 2   | Entry picked      | `share_target_chosen`     | no       |
+  | 3   | Composer opened   | `share_composer_opened`   | no       |
+  | 4   | Layout picked     | `share_template_chosen`   | yes      |
+  | 5   | Image handed off  | `share_handoff_succeeded` | no       |
+  | –   | Hand-off failed   | `share_handoff_failed`    | –        |
+
+  The list lives as data in `tools/analytics/share-image-funnel.config.mjs`,
+  beside `funnel.config.mjs` rather than in it, and `analytics-events.spec.ts`
+  keeps it, its query, the taxonomy and the unions the parameters copy in step.
+
+- ### What Each Parameter Is
+
+  `ShareImageParams` is `bite_id`, `target`, `format` and `template`, and each
+  step carries as much of it as is known by then.
+
+  - `bite_id` - the Bite being shared. The share link carries the same id.
+  - `target` - the menu entry that started the share: `instagram_story`,
+    `instagram_post`, `facebook_story`, or in a browser `save` and
+    `share_image`, or `more` for the link share. `ANALYTICS_TARGET` in
+    `details.service.ts` maps the menu's entries onto these.
+  - `format` - `story` (9:16) or `post` (4:5), decided by the entry.
+  - `template` - the layout, `classic` or `wide`. On the hand-off it is the
+    layout that went out, picked or not.
+  - `action` - on the hand-off only: `save` or `share`. An Instagram Story can
+    be saved rather than shared, so `target` and `action` are both needed.
+  - `reason` - on a failure only: `cancelled`, `permission_denied`,
+    `unavailable` (a browser that cannot share files) or `failed`.
+
+- ### What Each Step Counts, And What It Does Not
+
+  **No free text, ever (`R-24`).** The image shows a dish name, a place and
+  possibly the sharer's display name. None of them is a parameter, and the
+  details service spec fails if any of them reaches one.
+
+  **A dismissed menu is a drop-off, not an event.** `share_menu_opened` with no
+  `share_target_chosen` after it is the user closing the menu.
+
+  **`more` leaves the funnel at step 2.** The link share has no composer, and is
+  the shared-link entry's to measure, as are visits that come back through the
+  QR code.
+
+  **The default layout is not a choice.** `share_template_chosen` is one event
+  per switch, so a composer can emit none or several; a tap on the layout
+  already showing emits nothing. The hand-off names the layout either way, which
+  is the figure to read for which layout people share.
+
+  **"Succeeded" is the hand-off, not the post.** Instagram and Facebook do not
+  tell the app that hands them an image whether the user published it. Saved,
+  or taken by an app from the share sheet, is the last thing BiteTribe can see
+  (`UC-SBS` `G4`). A closed share sheet is `share_handoff_failed` with
+  `reason: cancelled` - counted, because it is a drop-off, and apart from the
+  faults, because it is not one.
+
+- ### Where It Is Measured
+
+  `tools/analytics/queries/share-image-funnel.sql`, run with
+  `npm run analytics:query -- share-image-funnel [--days=n]`. Over the BigQuery
+  export, because `bites_shared` is a distinct count of `bite_id` and the id is
+  deliberately not a custom dimension.
+
+  **The launch dashboard is untouched**, for the reason it holds no `table_*`
+  tile: whether sharing as an image brings enough reach to be worth its upkeep
+  is a question about one feature, not about the health of the launch.
+
+  Five parameters were added to `provision-ga4.mjs`: `target`, `format`,
+  `template`, `action` and `reason`. `reason` is a **shared parameter name** -
+  the email-verification resend, the account deletion, the follow suggestions
+  and the App Check telemetry already send one - so a breakdown by it needs an
+  event filter, like `surface`. GA4 does not backfill, so every event collected
+  before the `--apply` reports `(not set)` for them.
+
 - ## Launch Dashboard Spec
 
   Build a daily-monitoring dashboard in the Firebase console (Analytics
@@ -552,6 +644,11 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 - `tools/analytics/queries/order-to-bite-funnel.sql` — that funnel as numbers,
   per restaurant per day. Run with
   `npm run analytics:query -- order-to-bite-funnel`; `--dry-run` needs no
+  credentials.
+- `tools/analytics/share-image-funnel.config.mjs` — the share-as-image funnel
+  of issue [#1733] as data, held in step by the same spec.
+- `tools/analytics/queries/share-image-funnel.sql` — that funnel per day. Run
+  with `npm run analytics:query -- share-image-funnel`; `--dry-run` needs no
   credentials.
 
   GA4 has no API to create the visual dashboard/exploration, so the config +
@@ -675,6 +772,27 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 - Write a Bite by hand from the home screen → `bite_created` with
   `source: manual`.
 
+- ### DebugView, the share-as-image funnel
+
+  On a device or emulator signed in as the creator of a Bite, on that Bite's
+  details page. On Android the Capacitor bridge logs each `logEvent` call with
+  its parameters to logcat (`pluginId: FirebaseAnalytics`), which shows the
+  whole payload even on a dev build.
+
+- Tap share → `share_menu_opened` with `bite_id`. Dismiss it → nothing more.
+- Pick **Instagram Post** → `share_target_chosen` (`target: instagram_post`),
+  then `share_composer_opened` with `format: post`.
+- Switch to **Wide** → `share_template_chosen` with `template: wide`. Tap Wide
+  again → nothing.
+- Tap **Save image** → `share_handoff_succeeded` with `action: save` and
+  `template: wide`.
+- Tap **Share**, close the share sheet → `share_handoff_failed` with
+  `reason: cancelled`.
+- Open the menu again and pick **More…** → `share_target_chosen` with
+  `target: more`, and no composer event.
+- Check that no parameter of any of these carries the dish name, the place or
+  a display name.
+
 - ### DebugView, business app (table operations)
 
   The business app is web-only and its table events need a **non-dev** build to
@@ -718,3 +836,5 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 [#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103
 [#1621]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1621
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
+[#1723]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1723
+[#1733]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1733

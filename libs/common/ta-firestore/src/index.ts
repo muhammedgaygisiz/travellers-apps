@@ -16,6 +16,9 @@ export {
   type AnalyticsEventName,
   type AnalyticsEventParamMap,
   type AnalyticsSurface,
+  type ShareImageAction,
+  type ShareImageParams,
+  type ShareTarget,
   type TableOperationParams,
   type TableOperationStatus,
 } from './lib/analytics/analytics-events';

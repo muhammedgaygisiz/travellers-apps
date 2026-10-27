@@ -11,8 +11,10 @@ import {
   ShareImageUnavailableError,
 } from 'bite-tribe/details-data-access';
 import {
+  DEFAULT_SHARE_IMAGE_STYLE,
   ShareImageComposerComponent,
   type ShareImageFormat,
+  type ShareImageLayoutId,
 } from 'bite-tribe/share-image-ui';
 import { TranslocoService } from '@jsverse/transloco';
 import { Capacitor } from '@capacitor/core';
@@ -31,6 +33,14 @@ import {
 } from '@ionic/angular/standalone';
 import { PATH } from 'utils';
 import { ToastService } from 'toast';
+import {
+  AnalyticsEvent,
+  type AnalyticsEventParamMap,
+  AnalyticsService,
+  type ShareImageAction,
+  type ShareImageParams,
+  type ShareTarget,
+} from 'ta-firestore';
 
 /** The share menu's entries that lead to the image composer. */
 type ShareMenuTarget = 'instagram-story' | 'instagram-post' | 'facebook-story';
@@ -55,6 +65,19 @@ interface ShareMenuEntry {
   labelKey: string;
 }
 
+/**
+ * Each menu entry as the share funnel's analytics names it (issue #1733): the
+ * same entry, in the underscores GA4 values use.
+ */
+const ANALYTICS_TARGET: Record<ShareMenuChoice, ShareTarget> = {
+  'instagram-story': 'instagram_story',
+  'instagram-post': 'instagram_post',
+  'facebook-story': 'facebook_story',
+  'save-image': 'save',
+  'share-image': 'share_image',
+  more: 'more',
+};
+
 const NATIVE_SHARE_MENU: ShareMenuEntry[] = [
   { choice: 'instagram-story', labelKey: 'share-menu-instagram-story' },
   { choice: 'instagram-post', labelKey: 'share-menu-instagram-post' },
@@ -72,6 +95,7 @@ export class DetailsService {
   private readonly actionSheetController = inject(ActionSheetController);
   private readonly modalController = inject(ModalController);
   private readonly transloco = inject(TranslocoService);
+  private readonly analytics = inject(AnalyticsService);
 
   bite = this.dataAccess.bite;
 
@@ -266,6 +290,10 @@ export class DetailsService {
    * entries lead to the image composer, and **More…** is the link share,
    * unchanged. Every other Bite keeps the link share alone, with no menu,
    * until the terms of use of issue #1772 let anyone else's photo be shared.
+   *
+   * Each step of the menu and the composer is an event of the share funnel
+   * (`UC-SBS` `R-29`, issue #1733). The link share on somebody else's Bite opens
+   * no menu and is not part of it.
    */
   async onShareBiteClick(bite: Bite): Promise<void> {
     if (!canShareBiteAsImage(bite, this.userId())) {
@@ -273,14 +301,28 @@ export class DetailsService {
       return;
     }
 
-    const choice = await this.presentShareMenu();
+    const choice = await this.presentShareMenu(bite);
+
+    if (!choice) {
+      return;
+    }
+
+    const target = ANALYTICS_TARGET[choice];
+    this.analytics.logEvent(AnalyticsEvent.ShareTargetChosen, {
+      bite_id: bite.id,
+      target,
+    });
 
     if (choice === 'more') {
       await this.dataAccess.shareBite(bite);
     } else if (choice === 'save-image' || choice === 'share-image') {
-      await this.openShareImageComposer(bite, 'story');
-    } else if (choice) {
-      await this.openShareImageComposer(bite, FORMAT_FOR_TARGET[choice]);
+      await this.openShareImageComposer(bite, 'story', target);
+    } else {
+      await this.openShareImageComposer(
+        bite,
+        FORMAT_FOR_TARGET[choice],
+        target,
+      );
     }
   }
 
@@ -308,7 +350,9 @@ export class DetailsService {
     ];
   }
 
-  private async presentShareMenu(): Promise<ShareMenuChoice | undefined> {
+  private async presentShareMenu(
+    bite: Bite,
+  ): Promise<ShareMenuChoice | undefined> {
     const t = (key: string): string => this.transloco.translate(key);
     const sheet = await this.actionSheetController.create({
       header: t('share-menu-title'),
@@ -323,6 +367,9 @@ export class DetailsService {
     });
 
     await sheet.present();
+    this.analytics.logEvent(AnalyticsEvent.ShareMenuOpened, {
+      bite_id: bite.id,
+    });
 
     const { data } = await sheet.onDidDismiss<ShareMenuChoice>();
 
@@ -332,8 +379,18 @@ export class DetailsService {
   private async openShareImageComposer(
     bite: Bite,
     format: ShareImageFormat,
+    target: ShareTarget,
   ): Promise<void> {
+    // What every later step of the funnel says about this image. The layout
+    // follows the user's picks, so a hand-off names the one that went out.
+    const funnel: ShareImageParams = {
+      bite_id: bite.id,
+      target,
+      format,
+      template: DEFAULT_SHARE_IMAGE_STYLE.layout,
+    };
     const closed = new EventEmitter<void>();
+    const layoutChosen = new EventEmitter<ShareImageLayoutId>();
     const modal = await this.modalController.create({
       component: ShareImageComposerComponent,
       // Taller than Ionic's default on large screens; see `_globals.scss`.
@@ -344,14 +401,18 @@ export class DetailsService {
         bite: signal(bite),
         format: signal(format),
         creatorName: signal(this.sharerDisplayName()),
-        saveImage: signal((image: Blob) => this.saveBiteImage(bite, image)),
+        saveImage: signal((image: Blob) =>
+          this.saveBiteImage(bite, image, funnel),
+        ),
         // Absent where the platform cannot share a file, which hides the action.
         shareImage: signal(
           this.dataAccess.canShareImageFiles()
-            ? (image: Blob): Promise<void> => this.shareBiteImage(bite, image)
+            ? (image: Blob): Promise<void> =>
+                this.shareBiteImage(bite, image, funnel)
             : undefined,
         ),
         closed,
+        layoutChosen,
       },
     });
 
@@ -359,7 +420,19 @@ export class DetailsService {
       void modal.dismiss();
     });
 
+    layoutChosen.subscribe((template) => {
+      funnel.template = template;
+      this.analytics.logEvent(AnalyticsEvent.ShareTemplateChosen, {
+        ...funnel,
+      });
+    });
+
     await modal.present();
+    this.analytics.logEvent(AnalyticsEvent.ShareComposerOpened, {
+      bite_id: bite.id,
+      target,
+      format,
+    });
   }
 
   /**
@@ -375,9 +448,17 @@ export class DetailsService {
   }
 
   /** Saves the composed image and says how that went. */
-  private async saveBiteImage(bite: Bite, image: Blob): Promise<void> {
+  private async saveBiteImage(
+    bite: Bite,
+    image: Blob,
+    funnel: ShareImageParams,
+  ): Promise<void> {
     try {
       await this.dataAccess.saveBiteImage(bite, image);
+      this.analytics.logEvent(AnalyticsEvent.ShareHandoffSucceeded, {
+        ...funnel,
+        action: 'save',
+      });
       await this.toast.present({
         messageKey: Capacitor.isNativePlatform()
           ? 'share-image-saved'
@@ -386,6 +467,7 @@ export class DetailsService {
       });
     } catch (error) {
       if (error instanceof SaveImageDeniedError) {
+        this.logHandoffFailed(funnel, 'save', 'permission_denied');
         await this.toast.present({
           messageKey: 'share-image-save-denied',
           outcome: 'failure',
@@ -394,6 +476,7 @@ export class DetailsService {
       }
 
       console.error('Failed to save the Bite image:', error);
+      this.logHandoffFailed(funnel, 'save', 'failed');
 
       await this.toast.present({
         messageKey: 'share-image-save-failed',
@@ -406,15 +489,25 @@ export class DetailsService {
    * Shares the composed image and reports a failure. The composer stays open
    * either way, so a cancelled or failed share can simply be tried again.
    */
-  private async shareBiteImage(bite: Bite, image: Blob): Promise<void> {
+  private async shareBiteImage(
+    bite: Bite,
+    image: Blob,
+    funnel: ShareImageParams,
+  ): Promise<void> {
     try {
       await this.dataAccess.shareBiteImage(bite, image);
+      this.analytics.logEvent(AnalyticsEvent.ShareHandoffSucceeded, {
+        ...funnel,
+        action: 'share',
+      });
     } catch (error) {
       if (isShareCancelled(error)) {
+        this.logHandoffFailed(funnel, 'share', 'cancelled');
         return;
       }
 
       if (error instanceof ShareImageUnavailableError) {
+        this.logHandoffFailed(funnel, 'share', 'unavailable');
         await this.toast.present({
           messageKey: 'share-image-unavailable',
           outcome: 'failure',
@@ -423,12 +516,25 @@ export class DetailsService {
       }
 
       console.error('Failed to share the Bite image:', error);
+      this.logHandoffFailed(funnel, 'share', 'failed');
 
       await this.toast.present({
         messageKey: 'share-image-failed',
         outcome: 'failure',
       });
     }
+  }
+
+  private logHandoffFailed(
+    funnel: ShareImageParams,
+    action: ShareImageAction,
+    reason: AnalyticsEventParamMap[typeof AnalyticsEvent.ShareHandoffFailed]['reason'],
+  ): void {
+    this.analytics.logEvent(AnalyticsEvent.ShareHandoffFailed, {
+      ...funnel,
+      action,
+      reason,
+    });
   }
 
   /**

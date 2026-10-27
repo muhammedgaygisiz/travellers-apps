@@ -24,6 +24,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { ShareImageComposerComponent } from 'bite-tribe/share-image-ui';
 import { ToastService } from 'toast';
 import { Capacitor } from '@capacitor/core';
+import { AnalyticsService } from 'ta-firestore';
 import SpyInstance = jest.SpyInstance;
 
 type MockDetailsDataAccessService = Omit<
@@ -117,7 +118,12 @@ const mockTransloco = {
   translate: jest.fn((key: string) => key),
 };
 
+const mockAnalytics = {
+  logEvent: jest.fn(),
+};
+
 const shareProviders = [
+  { provide: AnalyticsService, useValue: mockAnalytics },
   { provide: ActionSheetController, useValue: mockActionSheetController },
   { provide: ModalController, useValue: mockModalController },
   { provide: TranslocoService, useValue: mockTransloco },
@@ -903,6 +909,218 @@ describe('DetailsService', () => {
           messageKey: 'share-image-save-failed',
           outcome: 'failure',
         });
+      });
+    });
+
+    /** The share funnel's analytics (UC-SBS R-24, R-29, issue #1733). */
+    describe('analytics', () => {
+      const image = new Blob(['jpeg'], { type: 'image/jpeg' });
+
+      /** Every event logged, as `[name, params]`. */
+      const logged = (): [string, Record<string, unknown>?][] =>
+        mockAnalytics.logEvent.mock.calls as [
+          string,
+          Record<string, unknown>?,
+        ][];
+
+      const names = (): string[] => logged().map(([name]) => name);
+
+      const componentProps = (): Record<string, () => unknown> & {
+        layoutChosen: { emit: (layout: string) => void };
+      } => mockModalController.create.mock.calls[0][0].componentProps;
+
+      const openComposer = async (
+        choice = 'instagram-story',
+      ): Promise<void> => {
+        mockActionSheetController.create.mockResolvedValue(
+          createShareMenu(choice),
+        );
+        await service.onShareBiteClick(ownBite);
+      };
+
+      beforeEach(() => mockAnalytics.logEvent.mockClear());
+
+      it('counts the menu once it is shown, and nothing more when it is dismissed', async () => {
+        mockActionSheetController.create.mockResolvedValue(createShareMenu());
+
+        await service.onShareBiteClick(ownBite);
+
+        expect(logged()).toEqual([
+          ['share_menu_opened', { bite_id: 'bite123' }],
+        ]);
+      });
+
+      it("counts nothing for the link share on somebody else's Bite", async () => {
+        await service.onShareBiteClick(othersBite);
+
+        expect(mockAnalytics.logEvent).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['instagram-story', 'instagram_story'],
+        ['instagram-post', 'instagram_post'],
+        ['facebook-story', 'facebook_story'],
+        ['more', 'more'],
+      ])('names the %s entry %s', async (choice, target) => {
+        await openComposer(choice);
+
+        expect(logged()[1]).toEqual([
+          'share_target_chosen',
+          { bite_id: 'bite123', target },
+        ]);
+      });
+
+      it('names the browser entries save and share_image', async () => {
+        isNative.mockReturnValue(false);
+
+        await openComposer('save-image');
+        await openComposer('share-image');
+
+        const targets = logged()
+          .filter(([name]) => name === 'share_target_chosen')
+          .map(([, params]) => params?.['target']);
+        expect(targets).toEqual(['save', 'share_image']);
+      });
+
+      it('counts the composer once it is shown, with its format', async () => {
+        await openComposer('instagram-post');
+
+        expect(names()).toEqual([
+          'share_menu_opened',
+          'share_target_chosen',
+          'share_composer_opened',
+        ]);
+        expect(logged()[2][1]).toEqual({
+          bite_id: 'bite123',
+          target: 'instagram_post',
+          format: 'post',
+        });
+      });
+
+      it('counts each layout the user picks, and hands off the last one', async () => {
+        await openComposer();
+
+        componentProps().layoutChosen.emit('wide');
+        await (
+          componentProps()['saveImage']() as (blob: Blob) => Promise<void>
+        )(image);
+
+        const funnel = {
+          bite_id: 'bite123',
+          target: 'instagram_story',
+          format: 'story',
+          template: 'wide',
+        };
+        expect(logged().slice(3)).toEqual([
+          ['share_template_chosen', funnel],
+          ['share_handoff_succeeded', { ...funnel, action: 'save' }],
+        ]);
+      });
+
+      it('hands off the layout the composer opened on when none was picked', async () => {
+        mockDataAccessService.shareBiteImage = jest
+          .fn()
+          .mockResolvedValue(undefined);
+        await openComposer();
+
+        await (
+          componentProps()['shareImage']() as (blob: Blob) => Promise<void>
+        )(image);
+
+        expect(logged()[3]).toEqual([
+          'share_handoff_succeeded',
+          {
+            bite_id: 'bite123',
+            target: 'instagram_story',
+            format: 'story',
+            template: 'classic',
+            action: 'share',
+          },
+        ]);
+      });
+
+      it.each([
+        ['cancelled', new Error('Share canceled')],
+        ['unavailable', new ShareImageUnavailableError()],
+        ['failed', new Error('disk full')],
+      ])('counts a share that did not leave as %s', async (reason, error) => {
+        jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        mockDataAccessService.shareBiteImage = jest
+          .fn()
+          .mockRejectedValue(error);
+        await openComposer();
+
+        await (
+          componentProps()['shareImage']() as (blob: Blob) => Promise<void>
+        )(image);
+
+        expect(logged()[3]).toEqual([
+          'share_handoff_failed',
+          expect.objectContaining({ action: 'share', reason }),
+        ]);
+        expect(names()).not.toContain('share_handoff_succeeded');
+      });
+
+      it.each([
+        ['permission_denied', new SaveImageDeniedError()],
+        ['failed', new Error('disk full')],
+      ])('counts a save that did not happen as %s', async (reason, error) => {
+        jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        mockDataAccessService.saveBiteImage = jest
+          .fn()
+          .mockRejectedValue(error);
+        await openComposer();
+
+        await (
+          componentProps()['saveImage']() as (blob: Blob) => Promise<void>
+        )(image);
+
+        expect(logged()[3]).toEqual([
+          'share_handoff_failed',
+          expect.objectContaining({ action: 'save', reason }),
+        ]);
+      });
+
+      /** R-24: identifiers and enums only. */
+      it('carries no dish name, place or display name in any parameter', async () => {
+        const named = {
+          ...ownBite,
+          name: 'Pad thai',
+          place: 'Som Tam Nua',
+          city: 'Bangkok',
+        } as Bite;
+        mockDataAccessService.biteCreatorValue = signal({
+          public: true,
+          displayName: 'Super Mario',
+        }) as never;
+        mockActionSheetController.create.mockResolvedValue(
+          createShareMenu('instagram-story'),
+        );
+
+        await service.onShareBiteClick(named);
+        componentProps().layoutChosen.emit('wide');
+        await (
+          componentProps()['saveImage']() as (blob: Blob) => Promise<void>
+        )(image);
+
+        const values = logged().flatMap(([, params]) =>
+          Object.values(params ?? {}),
+        );
+        expect(values.length).toBeGreaterThan(0);
+        for (const value of values) {
+          expect([
+            'Pad thai',
+            'Som Tam Nua',
+            'Bangkok',
+            'Super Mario',
+          ]).not.toContain(value);
+        }
+        const keys = new Set(
+          logged().flatMap(([, params]) => Object.keys(params ?? {})),
+        );
+        expect([...keys].sort()).toEqual(
+          ['action', 'bite_id', 'format', 'target', 'template'].sort(),
+        );
       });
     });
 

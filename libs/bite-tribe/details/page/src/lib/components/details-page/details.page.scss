@@ -45,6 +45,11 @@
     }
   }
 
+  // A long Bite name must wrap, not squeeze the action icons next to it.
+  .action-icon {
+    flex-shrink: 0;
+  }
+
   .icon-button {
     cursor: pointer;
   }

@@ -152,6 +152,20 @@ export const WithDescription: Story = {
 };
 
 /**
+ * A name long enough to wrap over several lines. The title wraps and the share
+ * and navigation icons keep their size instead of being squeezed beside it.
+ */
+export const WithLongName: Story = {
+  args: {
+    ...Default.args,
+    bite: {
+      ...Default.args?.bite,
+      name: 'Veal Steak with mushrooms, sour cream, red cabbage with apple, sweet potato cream',
+    } as unknown as Bite,
+  },
+};
+
+/**
  * The same Bite three weeks old. `Default` sits in the minute band, so this is
  * what makes the unit selection visible: the pipe picks one unit and renders it
  * in the reader's language rather than composing `3 w 0 d ago`.

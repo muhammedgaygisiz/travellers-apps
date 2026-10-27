@@ -83,15 +83,18 @@
             name="share-social-outline"
             color="primary"
             size="large"
-            class="cursor-pointer"
+            class="action-icon cursor-pointer"
             (click)="onShareBiteClicked(biteData)"
           />
           } @else {
-          <ion-skeleton-text class="icon-skeleton" [animated]="true" />
+          <ion-skeleton-text
+            class="action-icon icon-skeleton"
+            [animated]="true"
+          />
           }
         </div>
 
-        <div class="ion-text-end">
+        <div class="action-icon ion-text-end">
           @if (biteData) {
           <ion-icon
             data-testid="bite-details-navigation"

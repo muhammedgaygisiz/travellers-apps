@@ -69,3 +69,13 @@ export const WithBites: Story = {
     ],
   },
 };
+
+// A selected Bite opens in a side panel on a wide screen (laptop) and in the
+// snap drawer on a phone (iphone7). Markers stay blank in Loki's Chrome; the
+// panel and the drawer are what these references guard.
+export const WithSelectedBite: Story = {
+  args: {
+    ...WithBites.args,
+    selectedBite: WithBites.args?.bites?.[0],
+  },
+};

@@ -176,7 +176,9 @@ When it is on and the viewport is at least 1024px: the content column widens fro
 
 The switch is a media query only — no resize listener and no component state — so both variants exist in the DOM at once and CSS decides which is shown.
 
-The breakpoint is repeated as a SCSS variable in `page.component.scss`, `bite-list.component.scss` and `home.component.scss`, which have no shared stylesheet between them. They have to change together. See GitHub issue [#1250].
+**One exception: search results.** At desktop widths the search page renders Bite, City and Country results as the home feed's `bt-bite` cards, and every other width and category keeps the avatar list. Rendering both and hiding one would put a second component, and each card's rating modal, in the DOM for up to 50 results per page, so `SearchListComponent` follows a `matchMedia` listener instead and renders only one. The cards are read-only, because the search payload carries no likes. See GitHub issue [#1791].
+
+The breakpoint is repeated as a SCSS variable in `page.component.scss`, `bite-list.component.scss`, `home.component.scss` and `search-list.component.scss`, and as a media query string in `search-list.component.ts`. Nothing shares them, so they have to change together. See GitHub issue [#1250].
 
 ## App Data In The Shared Page Chrome
 
@@ -198,6 +200,7 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 
 [#1219]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1219
 [#1250]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1250
+[#1791]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1791
 [#1251]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1251
 [#1260]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1260
 [#1267]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1267

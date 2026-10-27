@@ -2,10 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  inject,
   input,
   linkedSignal,
   output,
   signal,
+  type Signal,
 } from '@angular/core';
 import {
   IonAvatar,
@@ -19,16 +22,37 @@ import {
 } from '@ionic/angular/standalone';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { TranslocoPipe } from '@jsverse/transloco';
-import type { SearchBite, SearchRestaurant, SearchResult } from 'model';
+import { BiteComponent } from 'bite-tribe-common/bite';
+import type { Bite, SearchBite, SearchRestaurant, SearchResult } from 'model';
 
 /** Matches the home feed and profile windows, so every list pages alike. */
 const PAGE_SIZE = 50;
+
+/**
+ * Where the page's content column widens and the home feed turns into a card
+ * grid. Kept in step with `$desktop-breakpoint` in the component stylesheet.
+ * See GitHub issue #1791.
+ */
+const DESKTOP_MEDIA_QUERY = '(width >= 1024px)';
+
+/** The categories whose results are Bites, and so can render as Bite cards. */
+const BITE_CATEGORIES = new Set<SearchResult['category']>([
+  'bite',
+  'city',
+  'country',
+]);
+
+interface BiteCard {
+  result: SearchResult;
+  bite: Bite;
+}
 
 @Component({
   selector: 'search-list',
   templateUrl: './search-list.component.html',
   styleUrl: './search-list.component.scss',
   imports: [
+    BiteComponent,
     IonAvatar,
     IonIcon,
     IonInfiniteScroll,
@@ -70,9 +94,32 @@ export class SearchListComponent {
     this.sortedResults().slice(0, this.currentPage() * PAGE_SIZE),
   );
 
+  /**
+   * Bite results render as the home feed's cards at desktop widths, where the
+   * avatar list would be a narrow strip in a wide column. Phones keep the list,
+   * and so do User and Restaurant results, which are not Bites. A search
+   * returns one category, so the first result decides for the whole set.
+   * See GitHub issue #1791.
+   */
+  showBiteCards = computed(() => {
+    const [first] = this.results();
+    return this.isDesktop() && !!first && BITE_CATEGORIES.has(first.category);
+  });
+
+  biteCards = computed<BiteCard[]>(() =>
+    this.showBiteCards()
+      ? this.displayedResults().map((result) => ({
+          result,
+          bite: toCardBite(result.value as SearchBite),
+        }))
+      : [],
+  );
+
   hasMore = computed(
     () => this.sortedResults().length > this.currentPage() * PAGE_SIZE,
   );
+
+  private readonly isDesktop = this.watchDesktopMedia();
 
   onIonInfinite(event: InfiniteScrollCustomEvent): void {
     if (this.hasMore()) {
@@ -146,6 +193,31 @@ export class SearchListComponent {
     return result.category === 'restaurant' && !result.value.restaurantId;
   }
 
+  /**
+   * A media query listener rather than CSS alone: rendering both the list and
+   * the cards and hiding one would put two components, and every card's rating
+   * modal, in the DOM for each result.
+   */
+  private watchDesktopMedia(): Signal<boolean> {
+    const isDesktop = signal(false);
+
+    if (typeof matchMedia !== 'function') {
+      return isDesktop.asReadonly();
+    }
+
+    const query = matchMedia(DESKTOP_MEDIA_QUERY);
+    const onChange = (event: MediaQueryListEvent): void =>
+      isDesktop.set(event.matches);
+
+    isDesktop.set(query.matches);
+    query.addEventListener('change', onChange);
+    inject(DestroyRef).onDestroy(() =>
+      query.removeEventListener('change', onChange),
+    );
+
+    return isDesktop.asReadonly();
+  }
+
   private getBiteSubtitle(bite: SearchBite): string | undefined {
     if (bite.place && bite.description) {
       return `${bite.place} - ${bite.description}`;
@@ -159,4 +231,18 @@ export class SearchListComponent {
   ): string | undefined {
     return restaurant.place;
   }
+}
+
+/**
+ * Fills the `Bite` fields the card requires but the search payload does not
+ * carry. The card is shown read-only, so nothing reads the placeholders: it
+ * draws no likes, no price and no distance.
+ */
+function toCardBite(bite: SearchBite): Bite {
+  return {
+    ...bite,
+    image: bite.image ?? '',
+    price: 0,
+    position: bite.position ?? { latitude: 0, longitude: 0 },
+  };
 }

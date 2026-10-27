@@ -12,6 +12,16 @@
   >
     <ion-label>{{ 'no-search-results-found' | transloco }}</ion-label>
   </div>
+} @else if (showBiteCards()) {
+  <div class="bite-cards" data-testid="search-results">
+    @for (card of biteCards(); track getResultId(card.result)) {
+      <bt-bite
+        readonly
+        [bite]="card.bite"
+        (biteClick)="resultClick.emit(card.result)"
+      />
+    }
+  </div>
 } @else if (results().length > 0) {
   <ion-list data-testid="search-results">
     @for (result of displayedResults(); track getResultId(result)) {
@@ -51,13 +61,13 @@
       </ion-item>
     }
   </ion-list>
+}
 
-  @if (hasMore()) {
-    <ion-infinite-scroll
-      data-testid="search-infinite-scroll"
-      (ionInfinite)="onIonInfinite($event)"
-    >
-      <ion-infinite-scroll-content />
-    </ion-infinite-scroll>
-  }
+@if (!isLoading() && hasMore()) {
+  <ion-infinite-scroll
+    data-testid="search-infinite-scroll"
+    (ionInfinite)="onIonInfinite($event)"
+  >
+    <ion-infinite-scroll-content />
+  </ion-infinite-scroll>
 }

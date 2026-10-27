@@ -59,10 +59,14 @@ their own action and press, and never also open the card. See GitHub issue
           <div
             class="location ion-display-flex ion-flex-column ion-align-items-end"
           >
-            <bt-distance
-              [distance]="$safeNavigationMigration(biteData?.distance)"
-              [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
-            />
+            <!-- Without a distance the component draws a bare icon, as on a
+            search result, which carries no distance. See GitHub issue #1791. -->
+            @if (biteData?.distance || hasErrorLoadingGpsPosition()) {
+              <bt-distance
+                [distance]="$safeNavigationMigration(biteData?.distance)"
+                [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
+              />
+            }
             {{ biteLocation() }}
           </div>
         </ion-card-subtitle>

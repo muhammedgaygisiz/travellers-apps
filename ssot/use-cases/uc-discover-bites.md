@@ -26,6 +26,7 @@ them.
 - Map zoom controls and zoom gestures are available to every user regardless of subscription tier.
 - User can filter or search within the feed.
 - An empty feed and an empty search result are two different states and never share their copy. `No bites found. Be the first one.` invites a first Bite and is only correct when there is nothing to show; a search that excluded everything names the term instead and offers to clear it, because the Bites are still there and the next action is to change the search, not to create. See issue [#1331].
+- On a desktop browser (1024px and wider), a search whose results are Bites (Bite, City or Country) shows them as the feed's cards in the same two- or three-column grid; phones, and User and Restaurant results, keep the list. See issue [#1791].
 - Nearby Bites can be loaded through backend-assisted location loading.
 - The feed, the three searches and the weekly page offer another user's Bite only once its photo is uploaded. A Bite whose photo is still pending or never arrived reaches its own poster and nobody else, so the feed never carries a card no viewer can judge; the poster keeps it, with the retry and a line saying nobody else can see it. The filter runs before any cap, so a page still fills with Bites the viewer can see. See issue [#1717] and [Bite](../domain/bite.md).
 - `loadBitesByLocation` loads a fixed 15 km radius around the reported position. This radius is the free tier. Loading a position other than the current one, or a radius beyond 15 km, becomes a Pro capability through [epic-1122][#1122]. See [Monetization](../product/monetization.md).
@@ -88,3 +89,4 @@ onboarding rather than from this flow — see [UC - Guide New Users After Regist
 [#1230]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1230
 [#1331]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1331
 [#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717
+[#1791]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1791

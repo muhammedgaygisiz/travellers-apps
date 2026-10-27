@@ -46,6 +46,7 @@ const countryResults: SearchResult[] = [
       id: 'bite-1',
       name: 'Fondue Moitié-Moitié',
       place: 'Bern',
+      imagePath: 'assets/demo/bite-demo.png',
       position: { latitude: 46.948, longitude: 7.447 },
       rating: 5,
     },
@@ -56,6 +57,7 @@ const countryResults: SearchResult[] = [
       id: 'bite-2',
       name: 'Zürcher Geschnetzeltes',
       place: 'Zurich',
+      imagePath: 'assets/demo/bite-demo.png',
       position: { latitude: 47.3769, longitude: 8.5417 },
       rating: 4,
     },
@@ -66,6 +68,7 @@ const countryResults: SearchResult[] = [
       id: 'bite-3',
       name: 'Not rated yet',
       place: 'Geneva',
+      imagePath: 'assets/demo/bite-demo.png',
       position: { latitude: 46.2044, longitude: 6.1432 },
     },
   },
@@ -112,7 +115,11 @@ export const CountryNotPicked: Story = {
   },
 };
 
-/** After a pick, the field carries the flag and the localized country name. */
+/**
+ * After a pick, the field carries the flag and the localized country name. At
+ * desktop widths the Bites render as the home feed's cards (GitHub issue
+ * #1791).
+ */
 export const CountryPicked: Story = {
   args: {
     selectedCategory: 'country',

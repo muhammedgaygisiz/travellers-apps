@@ -255,4 +255,87 @@ describe(SearchListComponent.name, () => {
     expect(component.getResultFallbackIcon(result)).toBe('storefront-outline');
     expect(component.isUnverifiedRestaurant(result)).toBe(true);
   });
+
+  describe('at desktop widths', () => {
+    let mediaListener: ((event: MediaQueryListEvent) => void) | undefined;
+    let matches: boolean;
+
+    const cityResult: SearchResult = {
+      category: 'city',
+      value: { id: 'bite-1', name: 'Pizza', place: 'Napoli' },
+    };
+
+    const createAtWidth = (desktop: boolean): void => {
+      matches = desktop;
+      window.matchMedia = jest.fn().mockImplementation(() => ({
+        get matches(): boolean {
+          return matches;
+        },
+        addEventListener: (
+          _type: string,
+          listener: (event: MediaQueryListEvent) => void,
+        ): void => {
+          mediaListener = listener;
+        },
+        removeEventListener: jest.fn(),
+      }));
+
+      fixture = TestBed.createComponent(SearchListComponent);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+    };
+
+    afterEach(() => {
+      delete (window as Partial<Window>).matchMedia;
+    });
+
+    it('should render Bite results as cards and emit the clicked result', () => {
+      createAtWidth(true);
+      const emitted: SearchResult[] = [];
+      component.resultClick.subscribe((result) => emitted.push(result));
+      componentRef.setInput('results', [cityResult]);
+      fixture.detectChanges();
+
+      const cards = fixture.nativeElement.querySelectorAll('bt-bite');
+      expect(cards).toHaveLength(1);
+      expect(fixture.nativeElement.querySelector('ion-list')).toBeNull();
+
+      cards[0].querySelector('ion-card').click();
+      expect(emitted).toEqual([cityResult]);
+    });
+
+    it('should keep the list for results that are not Bites', () => {
+      createAtWidth(true);
+      componentRef.setInput('results', buildUserResults(2));
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('bt-bite')).toBeNull();
+      expect(fixture.nativeElement.querySelectorAll('ion-item')).toHaveLength(
+        2,
+      );
+    });
+
+    it('should switch between list and cards when the width crosses the breakpoint', () => {
+      createAtWidth(false);
+      componentRef.setInput('results', [cityResult]);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('bt-bite')).toBeNull();
+
+      mediaListener?.({ matches: true } as MediaQueryListEvent);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('bt-bite')).toBeTruthy();
+    });
+
+    it('should fill the card fields the search payload does not carry', () => {
+      createAtWidth(true);
+      componentRef.setInput('results', [cityResult]);
+
+      expect(component.biteCards()[0].bite).toEqual({
+        ...cityResult.value,
+        image: '',
+        price: 0,
+        position: { latitude: 0, longitude: 0 },
+      });
+    });
+  });
 });

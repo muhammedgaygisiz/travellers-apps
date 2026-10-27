@@ -1,7 +1,38 @@
 @use 'globals';
 
+/* Mirrors the breakpoints of the home feed's grid in bite-list.component.scss,
+ * so a Bite card sits in the same columns here as there. See GitHub issue
+ * #1791. */
+$desktop-breakpoint: 1024px;
+$wide-desktop-breakpoint: 1280px;
+
 :host {
   display: block;
+
+  /* The page widens past the phone column at desktop widths for the cards.
+   * The avatar list and the loading and empty states keep the column they had,
+   * so User and Restaurant results look as before. */
+  ion-list,
+  .state-container {
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  .bite-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: start;
+    padding-inline: 16px;
+
+    @media (width >= $wide-desktop-breakpoint) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    bt-bite {
+      display: block;
+    }
+  }
 
   .state-container {
     padding: 2rem;

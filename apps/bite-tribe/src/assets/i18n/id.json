@@ -151,6 +151,7 @@
   "anonymous": "Anonymous",
   "logout": "Keluar",
   "my-bites": "Bites-ku",
+  "title-bite-count": "Total Bites: {{count}}",
   "weekly-bites": "Bite minggu ini",
   "my-profile": "Profilku",
   "settings": "Pengaturan",

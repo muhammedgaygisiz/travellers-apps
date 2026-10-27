@@ -150,6 +150,7 @@
   "anonymous": "Anonimo",
   "logout": "Disconnetti",
   "my-bites": "I miei Bites",
+  "title-bite-count": "Bites totali: {{count}}",
   "weekly-bites": "Bites della settimana",
   "my-profile": "Il mio profilo",
   "settings": "Impostazioni",

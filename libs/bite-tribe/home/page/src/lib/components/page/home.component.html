@@ -54,7 +54,20 @@
 
     <div class="home-header-container" slot="fixed">
       <ion-text color="secondary" class="subheadline">
-        <h4>{{ title() }}</h4>
+        <h4>
+          {{ title() }}
+          @if (showTitleCount()) {
+            <ion-badge
+              class="title-count"
+              color="primary"
+              data-testid="title-count"
+              [attr.aria-label]="
+                'title-bite-count' | transloco: { count: titleCount() }
+              "
+              >{{ titleCount() }}</ion-badge
+            >
+          }
+        </h4>
       </ion-text>
 
       <bt-home-feed-controls

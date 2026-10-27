@@ -75,6 +75,21 @@ $desktop-content-max-width: 1440px;
     }
   }
 
+  /* The My Bites total, next to the title (issue #1783). The title is a flex
+   * row and the badge is shorter than its line, so adding the badge never
+   * makes the header taller and moves the chip row under it. */
+  h4:has(.title-count) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .title-count {
+    padding: 3px 8px;
+    border-radius: 999px;
+    line-height: 1;
+  }
+
   .home-scrolling-content-container {
     padding-top: 80px;
   }

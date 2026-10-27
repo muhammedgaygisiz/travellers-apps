@@ -34,6 +34,7 @@ import { CountryFlags } from './components/country-flags';
 import { ProfileSkeleton } from './components/profile-skeleton';
 import { ProfileVisibility } from './components/profile-visibility';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { totalBiteCount } from 'utils';
 
 const UNFOLLOW = 'unfollow';
 const BLOCK = 'block';
@@ -198,26 +199,9 @@ export class ProfileComponent {
     return this.profileMetadata()?.following;
   });
 
-  biteCount = computed(() => {
-    // The aggregate stored on the user document leads, because it is the only
-    // count that also covers Bites the client never loaded, and counting the
-    // loaded ones alone would report a paginated subset.
-    //
-    // It does not get the last word, though. The client's copy of the user
-    // document can predate a write the user made themselves, and the aggregate
-    // being a number in that case too meant the stale value was reported
-    // unchallenged: after posting a Bite the header read one less than the list
-    // right underneath it, and only an app restart repaired it (issue #1310).
-    // A list longer than the aggregate claims is proof the aggregate is behind,
-    // whether or not it is the whole list, so it raises the count. A list
-    // shorter proves nothing — that is the paginated case.
-    const aggregateBiteCount = this.user()?.biteCount;
-    const loadedBiteCount = this.bites()?.length ?? 0;
-
-    return typeof aggregateBiteCount === 'number'
-      ? Math.max(aggregateBiteCount, loadedBiteCount)
-      : loadedBiteCount;
-  });
+  biteCount = computed(() =>
+    totalBiteCount(this.user()?.biteCount, this.bites()?.length ?? 0),
+  );
 
   displayedBites = computed(() => {
     const allBites = this.bites() || [];

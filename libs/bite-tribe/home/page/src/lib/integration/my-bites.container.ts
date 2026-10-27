@@ -10,6 +10,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
     <bt-home
       class="ion-page"
       title="{{ 'my-bites' | transloco }}"
+      [titleCount]="service.myBiteCount()"
       [showFooter]="false"
       [showAddButton]="false"
       [enableBackButton]="true"

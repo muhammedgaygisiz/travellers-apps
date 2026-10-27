@@ -23,6 +23,7 @@ import {
   normalize,
   resourceFailed,
   resourceValue,
+  totalBiteCount,
 } from 'utils';
 import {
   getLocationPermissionState,
@@ -67,6 +68,18 @@ export class HomeDataAccessService {
   myBitesSorting = toSignal(this.storeService.myBitesSorting$, {
     initialValue: 'distance',
   });
+  private readonly myProfile = toSignal(this.storeService.publicUser$);
+  private readonly allMyBites = toSignal(this.storeService.myProfileBites$, {
+    initialValue: [] as Bite[],
+  });
+  /**
+   * The total of the user's Bites, counted the way the profile header counts
+   * them. It reads the unfiltered list on purpose: `myBites` drops the Bites a
+   * filter excludes, and the title reports the total (issue #1783).
+   */
+  myBiteCount = computed(() =>
+    totalBiteCount(this.myProfile()?.biteCount, this.allMyBites().length),
+  );
   restaurantBitesSorting = toSignal(this.storeService.restaurantBitesSorting$, {
     initialValue: 'createdAt',
   });

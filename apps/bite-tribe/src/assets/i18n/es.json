@@ -151,6 +151,7 @@
   "anonymous": "Anónimo",
   "logout": "Cerrar sesión",
   "my-bites": "Mis Bites",
+  "title-bite-count": "Total de Bites: {{count}}",
   "weekly-bites": "Bites de la semana",
   "my-profile": "Mi perfil",
   "settings": "Configuración",

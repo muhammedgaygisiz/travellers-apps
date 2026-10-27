@@ -27,6 +27,7 @@ export class HomeService {
   sorting = this.dataAccess.sorting;
   myBites = this.dataAccess.myBites;
   myBitesSorting = this.dataAccess.myBitesSorting;
+  myBiteCount = this.dataAccess.myBiteCount;
   restaurantBites = this.dataAccess.restaurantBites;
   restaurantBitesLoading = this.dataAccess.restaurantBitesLoading;
   restaurantBitesFailed = this.dataAccess.restaurantBitesFailed;

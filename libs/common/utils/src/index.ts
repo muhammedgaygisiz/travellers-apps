@@ -26,6 +26,7 @@ export {
 
 export { normalize } from './lib/normalize';
 export { isFromCardControl } from './lib/is-from-card-control';
+export { totalBiteCount } from './lib/total-bite-count';
 export { currencyCodes } from './lib/currencies';
 export { countries, type Country } from './lib/countries';
 export { getLocalizedCurrencyName } from './lib/get-localized-currency-name';

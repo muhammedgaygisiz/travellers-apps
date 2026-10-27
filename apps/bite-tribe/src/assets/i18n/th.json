@@ -150,6 +150,7 @@
   "anonymous": "นิรนาม",
   "logout": "ออกจากระบบ",
   "my-bites": "Bites ของฉัน",
+  "title-bite-count": "Bites ทั้งหมด: {{count}}",
   "weekly-bites": "ไบต์ประจำสัปดาห์",
   "my-profile": "โปรไฟล์ของฉัน",
   "settings": "การตั้งค่า",

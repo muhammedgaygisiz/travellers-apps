@@ -25,6 +25,7 @@ export const MyBites: Story = {
     isAuthenticated: true,
     allTags: ['alkoholfrei', 'non-alcohol', 'bern', 'drink', 'halal'],
     title: 'My Bites',
+    titleCount: 42,
     showFooter: false,
     showHeaderMenu: false,
     enableBackButton: true,

@@ -145,9 +145,12 @@ test.describe('Discover Bites', () => {
     await expect(zoomOut).not.toHaveClass(/leaflet-disabled/);
     await zoomOut.click();
 
+    // At desktop width the selected Bite opens in the side panel, not the
+    // phone's snap drawer.
     await seededMarker.click();
-    await expect(page.locator('map-page bt-snap-drawer')).toContainText(
-      olderBite.name,
-    );
+    const sidePanel = page.getByTestId('map-side-panel');
+    await expect(sidePanel).toContainText(olderBite.name);
+    await page.getByTestId('map-side-panel-close').click();
+    await expect(sidePanel).toBeHidden();
   });
 });

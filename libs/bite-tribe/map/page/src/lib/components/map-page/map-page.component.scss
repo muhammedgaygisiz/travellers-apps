@@ -40,6 +40,45 @@
     }
   }
 
+  // Keep the map's zoom control clear of the side panel while it is open.
+  .container.has-side-panel ::ng-deep .leaflet-top.leaflet-left {
+    left: calc(400px + 1rem);
+  }
+
+  // Wide screens: the selected Bite floats in a panel at the left of the map,
+  // the way Google Maps shows a place, instead of the phone's bottom drawer.
+  .side-panel {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    max-height: calc(100% - 2rem);
+    overflow-y: auto;
+    background: var(--ion-background-color);
+    border-radius: var(--border-radius);
+    box-shadow: rgba(0, 0, 0, 0.55) 0 3px 15px;
+
+    .side-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.5rem 0 1rem;
+
+      .bite-title {
+        flex: 1;
+        min-width: 0;
+        text-align: start;
+      }
+    }
+
+    bt-bite {
+      margin: 0.5rem 1rem 1rem;
+    }
+  }
+
   .my-position-fab {
     // Lift the control clear of the bottom safe area so it reads like the
     // Google Maps "my location" button floating over the map.

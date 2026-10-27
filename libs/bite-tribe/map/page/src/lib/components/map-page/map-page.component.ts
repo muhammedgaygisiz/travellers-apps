@@ -2,14 +2,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  inject,
   input,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
   IonContent,
   IonFab,
+  IonButton,
   IonFabButton,
   IonIcon,
 } from '@ionic/angular/standalone';
@@ -18,6 +22,8 @@ import type { Bite, Geopoint, LikeClick } from 'model';
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { SnapDrawerComponent } from '../snap-drawer/snap-drawer.component';
+
+const WIDE_SCREEN_QUERY = '(min-width: 768px)';
 
 @Component({
   selector: 'map-page',
@@ -28,6 +34,7 @@ import { SnapDrawerComponent } from '../snap-drawer/snap-drawer.component';
     PageComponent,
     IonContent,
     IonFab,
+    IonButton,
     IonFabButton,
     IonIcon,
     MapComponent,
@@ -52,6 +59,28 @@ export class MapPageComponent {
   private readonly map = viewChild(MapComponent);
 
   selectedBite: Bite | undefined | null;
+
+  /**
+   * A bottom drawer dragged up over the map suits a phone; on a wide screen it
+   * stretches the Bite image into a banner, so the Bite opens in a side panel.
+   */
+  protected readonly isWideScreen = signal(false);
+
+  constructor() {
+    const query = window.matchMedia?.(WIDE_SCREEN_QUERY);
+    if (!query) return;
+    this.isWideScreen.set(query.matches);
+    const onChange = (event: MediaQueryListEvent): void =>
+      this.isWideScreen.set(event.matches);
+    query.addEventListener('change', onChange);
+    inject(DestroyRef).onDestroy(() =>
+      query.removeEventListener('change', onChange),
+    );
+  }
+
+  closeSelectedBite(): void {
+    this.selectedBite = undefined;
+  }
 
   /**
    * Recenters the map on the user's location and asks the container to refresh

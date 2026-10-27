@@ -147,4 +147,44 @@ describe('MapPageComponent', () => {
       expect(component.selectedBite).toBeUndefined();
     });
   });
+
+  describe('closeSelectedBite', () => {
+    it('should clear the selected bite', () => {
+      component.selectedBite = createBite('1', 1, 2);
+      component.closeSelectedBite();
+      expect(component.selectedBite).toBeUndefined();
+    });
+  });
+
+  describe('isWideScreen', () => {
+    const originalMatchMedia = window.matchMedia;
+
+    afterEach(() => {
+      window.matchMedia = originalMatchMedia;
+    });
+
+    const mockMatchMedia = (matches: boolean): void => {
+      window.matchMedia = jest.fn().mockReturnValue({
+        matches,
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      });
+    };
+
+    const isWideScreen = (instance: MapPageComponent): boolean =>
+      (instance as unknown as { isWideScreen: () => boolean }).isWideScreen();
+
+    it('should be true on a screen at least 768px wide', () => {
+      mockMatchMedia(true);
+      const wide = TestBed.createComponent(MapPageComponent);
+      expect(window.matchMedia).toHaveBeenCalledWith('(min-width: 768px)');
+      expect(isWideScreen(wide.componentInstance)).toBe(true);
+    });
+
+    it('should be false on a narrower screen', () => {
+      mockMatchMedia(false);
+      const narrow = TestBed.createComponent(MapPageComponent);
+      expect(isWideScreen(narrow.componentInstance)).toBe(false);
+    });
+  });
 });

@@ -35,6 +35,7 @@ import {
   ellipsisVertical,
   filter,
   fastFoodOutline,
+  globeOutline,
   filterOutline,
   flagOutline,
   flameOutline,
@@ -90,6 +91,7 @@ export const addNecessaryIcons = (): void => {
   addIcons({
     businessOutline,
     fastFoodOutline,
+    globeOutline,
     peopleOutline,
     pricetagOutline,
     filterOutline,

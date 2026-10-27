@@ -37,6 +37,12 @@ const config: StorybookConfig = {
       from: '../../../ssot/assets/characters/',
       to: '/assets/characters/',
     },
+    // The globe's country outlines, served where the app build copies them
+    // (`apps/bite-tribe/project.json`). See issue #1787.
+    {
+      from: '../../../node_modules/world-atlas/',
+      to: '/assets/world-atlas/',
+    },
   ],
   framework: {
     name: '@storybook/angular',

@@ -7,7 +7,8 @@ Supported today. Profile view and edit, public profiles, follow and unfollow wit
 lists, the visibility choice, user-to-user blocking, and the two identity contracts below
 all ship. Onboarding
 has collected an optional home city since [#1271], so a profile without one stays the
-normal case. Follow suggestions ship with [#1708].
+normal case. Follow suggestions ship with [#1708]. The visited-countries globe
+ships with [#1787].
 
 ## Goal
 
@@ -30,6 +31,7 @@ signed-in account, the follow relation, and the block one account places on anot
   `Follow Suggestions` below.
 - User blocks or unblocks another account from that account's profile, per the block
   contract below.
+- User opens a profile's countries on a globe, per `Visited Countries Globe` below.
 - Profile identity is used in search and Bite trust context.
 - Profile Bites are always listed newest first. The profile is a timeline of what
   a user cooked or ate, so it ignores the distance sorting and the my-bites
@@ -147,6 +149,41 @@ actually posts.
 - **Measured.** `follow_suggestions_shown`, `follow_suggestion_followed` and
   `user_followed`, defined in [Implementation - Analytics Events](../implementation/analytics-events.md).
 
+## Visited Countries Globe
+
+Issue [#1787], suggested by a user who had built a travel globe of his own. The flag
+row under a profile says which countries a user has Bites in; the globe shows where
+they are.
+
+- **Data.** The profile's `countryCodes`, the list the flags already show and
+  `user-country-codes.ts` keeps in step with the user's Bites, decides which countries
+  appear. The page writes nothing; its one extra read is the user's Bites, counted per
+  country for the list below.
+- **Entry.** A "Show on globe" button under the flags, on every profile that shows
+  flags - the viewer's own and anybody else's they can open. A profile without
+  country codes shows neither.
+- **Page.** `world/:userId`. "Your Bite World" on the viewer's own profile, "{name}'s Bite World"
+  on another, with the number of countries and of the continents they lie on. The
+  continent of each country is fixed in the globe's country table: Russia counts as
+  Europe, Türkiye as Asia, Cyprus as Europe.
+- **Globe.** Drawn on the device from bundled country outlines: no map tiles, no
+  network, the same in light and dark. It opens facing the highlighted countries and
+  turns slowly until the first touch, never under reduced motion. Drag turns it;
+  pinch, the wheel and `+` / `-` zoom between 1x and 12x; the globe button goes back
+  to the whole globe. A tapped country is turned to the middle, zoomed to fit and
+  named in the app language - also one without Bites.
+- **Country list.** Under the globe, one row per country: flag, name in the app
+  language, and the number of the user's Bites there, most first and then by name.
+  Tapping a row selects the country and turns the globe to it, as a tap on the globe
+  does. Rows show no number while the Bites are counted or if they cannot be read; a
+  flagged country with no counted Bite - its address still resolving - shows 0.
+- **Small countries.** Countries the coarse outlines leave out, such as Singapore and
+  Malta, load the finer outlines and are drawn as a dot until zoom makes them a shape.
+- **Measured.** `world_globe_open`, `world_globe_country_tap` and `world_globe_zoom`,
+  defined in [Implementation - Analytics Events](../implementation/analytics-events.md).
+- **Not part of it.** No journey playback, no link from a country to the Bites there,
+  no street-level detail.
+
 ## User Block Contract
 
 Issue [#1609]. A block is a personal boundary one account sets against another. It needs
@@ -197,7 +234,7 @@ identity wrong here is the [#1308] class of defect rather than polish.
 user-generated-content safeguard set.
 
 **[Secondary]** — the social graph: follow and unfollow, the follower and following
-lists, and follow suggestions. Shipped, but the contribution loop does not depend on it
+lists, follow suggestions, and the visited-countries globe. Shipped, but the contribution loop does not depend on it
 for the initial release.
 
 ## App Store Review Area
@@ -208,7 +245,9 @@ photo library — the permission itself is collected in onboarding rather than h
 by the name, photo and user-ID entries declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 Follow suggestions add no permission and no purpose string: they use a position only
 where location is already granted, so the priming rule onboarding owns is untouched, and
-their three events are product interaction like the rest.
+their three events are product interaction like the rest. The visited-countries globe
+adds no permission either: it shows the country codes the profile already shows, from
+outlines bundled with the app.
 
 The user block contract is the blocking half of Apple's user-generated-content guideline
 and the equivalent Google Play policy; see [User Roles](../product/user-roles.md) footnote 5 for the rest of the set.
@@ -222,6 +261,10 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 - `blockUser` and `unblockUser` callables.
 - Profile API.
 - Public-user conversion.
+- Visited-countries globe: `world/:userId`; `bt-globe` and its country table in
+  `libs/bite-tribe-common/map/src/lib/globe` (entry point `bite-tribe-common/map/globe`);
+  `WorldContainer` and `world-page` in `libs/bite-tribe/profile/page`; the
+  `Components/Globe` and `Pages/World` stories.
 - Playwright coverage for profile editing, public-profile navigation,
   follower/following lists, and follow/unfollow persistence.
 - Follow suggestions: the `suggestPeopleToFollow` callable and the shared
@@ -238,6 +281,7 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 - Issue [#1270], together with onboarding's [#1271], is the Profile Identity Contract above. Closed.
 - Issue [#1708] is `Follow Suggestions` above, motivated by the analytics check on [#914] and sharing its pick list with the follow-up mail of [#1707].
 - Issue [#1609] is the User Block Contract above.
+- Issue [#1787] is `Visited Countries Globe` above.
 
 ## Related Domains
 
@@ -269,3 +313,4 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 [#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
+[#1787]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1787

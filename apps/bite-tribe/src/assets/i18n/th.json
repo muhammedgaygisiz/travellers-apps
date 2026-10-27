@@ -830,5 +830,15 @@
   "report-bite-submit": "รายงาน",
   "report-bite-sent": "ขอบคุณ เราจะตรวจสอบ Bite นี้",
   "report-bite-already-sent": "คุณรายงาน Bite นี้ไปแล้ว",
-  "report-bite-failed": "ไม่สามารถส่งรายงานได้ โปรดลองอีกครั้ง"
+  "report-bite-failed": "ไม่สามารถส่งรายงานได้ โปรดลองอีกครั้ง",
+  "show-on-globe": "ดูบนลูกโลก",
+  "your-world": "โลก Bite ของคุณ",
+  "users-world": "โลก Bite ของ {{name}}",
+  "countries": "ประเทศ",
+  "continents": "ทวีป",
+  "globe-aria-label": "ลูกโลกแสดงประเทศที่สร้าง Bites",
+  "zoom-in": "ซูมเข้า",
+  "zoom-out": "ซูมออก",
+  "show-whole-globe": "แสดงลูกโลกทั้งหมด",
+  "country-bite-count": "Bites: {{count}}"
 }

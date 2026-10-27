@@ -1,0 +1,64 @@
+.world-title {
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.world-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.world-summary {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.world-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.world-stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.world-stat-label {
+  font-size: 0.875rem;
+  color: var(--ion-color-medium);
+}
+
+.world-country-name {
+  min-height: 1.5em;
+  margin: 0.75rem 0 0;
+  font-weight: 500;
+  text-align: center;
+}
+
+.world-countries {
+  max-width: 420px;
+  margin: 0.5rem auto 0;
+  background: transparent;
+}
+
+.world-country-flag {
+  width: 1.6rem;
+  height: 1.2rem;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  background-size: cover;
+  background-position: center;
+}
+
+.world-country-bites {
+  font-weight: 600;
+  color: var(--ion-color-medium);
+}
+
+.world-country-selected {
+  --background: rgba(var(--ion-color-primary-rgb), 0.12);
+}

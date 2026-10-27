@@ -830,5 +830,15 @@
   "report-bite-submit": "Denunciar",
   "report-bite-sent": "Obrigado. Vamos analisar este Bite.",
   "report-bite-already-sent": "Você já denunciou este Bite.",
-  "report-bite-failed": "Não foi possível enviar a denúncia. Tente novamente."
+  "report-bite-failed": "Não foi possível enviar a denúncia. Tente novamente.",
+  "show-on-globe": "Ver no globo",
+  "your-world": "Seu mundo Bite",
+  "users-world": "O mundo Bite de {{name}}",
+  "countries": "Países",
+  "continents": "Continentes",
+  "globe-aria-label": "Globo com os países onde foram criados Bites",
+  "zoom-in": "Aproximar",
+  "zoom-out": "Afastar",
+  "show-whole-globe": "Ver o globo inteiro",
+  "country-bite-count": "Bites: {{count}}"
 }

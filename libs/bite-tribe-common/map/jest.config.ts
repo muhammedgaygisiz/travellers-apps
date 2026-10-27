@@ -1,3 +1,11 @@
+const NODE_MODULES_TO_IGNORE = [
+  '.*.mjs$',
+  'ionicons',
+  '@ionic',
+  '@stencil',
+  '@jsverse',
+].join('|');
+
 export default {
   displayName: 'bite-tribe-common/map',
   preset: '../../../jest.preset.js',
@@ -12,7 +20,10 @@ export default {
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
+  moduleNameMapper: {
+    '^d3$': '<rootDir>/../../../node_modules/d3/dist/d3.min.js',
+  },
+  transformIgnorePatterns: [`node_modules/(?!(${NODE_MODULES_TO_IGNORE}))`],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',

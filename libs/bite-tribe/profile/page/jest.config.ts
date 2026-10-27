@@ -21,6 +21,9 @@ export default {
       },
     ],
   },
+  moduleNameMapper: {
+    '^d3$': '<rootDir>/../../../../node_modules/d3/dist/d3.min.js',
+  },
   transformIgnorePatterns: [`node_modules/(?!(${NODE_MODULES_TO_IGNORE}))`],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',

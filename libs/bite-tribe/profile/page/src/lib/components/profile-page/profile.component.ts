@@ -142,6 +142,8 @@ export class ProfileComponent {
   readonly unblockButtonClick = output<PublicUser>();
   readonly followersClick = output<string>();
   readonly followingClick = output<string>();
+  /** The profile's user id, to open its countries on a globe (#1787). */
+  readonly worldClick = output<string>();
   readonly retryImageUpload = output<Bite>();
 
   isOpen = signal(false);
@@ -198,6 +200,11 @@ export class ProfileComponent {
   followingCount = computed(() => {
     return this.profileMetadata()?.following;
   });
+
+  /** Whether the flag row shows anything, and so the globe has something. */
+  hasCountries = computed(() =>
+    (this.user()?.countryCodes ?? []).some((code) => !!code?.trim()),
+  );
 
   biteCount = computed(() =>
     totalBiteCount(this.user()?.biteCount, this.bites()?.length ?? 0),

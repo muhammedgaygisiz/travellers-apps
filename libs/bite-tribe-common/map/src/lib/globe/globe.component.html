@@ -1,0 +1,38 @@
+<canvas
+  #canvas
+  class="globe-canvas"
+  role="img"
+  [attr.aria-label]="'globe-aria-label' | transloco"
+  (pointerdown)="onPointerDown($event)"
+  (pointermove)="onPointerMove($event)"
+  (pointerup)="onPointerUp($event)"
+  (pointercancel)="onPointerCancel($event)"
+  (wheel)="onWheel($event)"
+></canvas>
+
+<div class="globe-controls">
+  <button
+    type="button"
+    data-testid="globe-zoom-in"
+    [attr.aria-label]="'zoom-in' | transloco"
+    (click)="zoomIn()"
+  >
+    <ion-icon aria-hidden="true" name="add-outline" />
+  </button>
+  <button
+    type="button"
+    data-testid="globe-zoom-out"
+    [attr.aria-label]="'zoom-out' | transloco"
+    (click)="zoomOut()"
+  >
+    <ion-icon aria-hidden="true" name="remove-outline" />
+  </button>
+  <button
+    type="button"
+    data-testid="globe-reset"
+    [attr.aria-label]="'show-whole-globe' | transloco"
+    (click)="reset()"
+  >
+    <ion-icon aria-hidden="true" name="globe-outline" />
+  </button>
+</div>

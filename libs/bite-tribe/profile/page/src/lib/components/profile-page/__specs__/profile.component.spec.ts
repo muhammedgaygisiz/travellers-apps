@@ -594,4 +594,36 @@ describe('ProfileComponent', () => {
       expect(completeSpy).toHaveBeenCalled();
     });
   });
+  /** GitHub issue #1787. */
+  describe('the show on globe button', () => {
+    const button = (): HTMLElement | null =>
+      (fixture.nativeElement as HTMLElement).querySelector(
+        '[data-testid="profile-show-on-globe"]',
+      );
+
+    it('should show the button for a profile with countries', () => {
+      compRef.setInput('user', { userId: 'u1', countryCodes: ['AT'] });
+      fixture.detectChanges();
+
+      expect(button()).not.toBeNull();
+    });
+
+    it('should hide the button for a profile without countries', () => {
+      compRef.setInput('user', { userId: 'u1', countryCodes: [' ', ''] });
+      fixture.detectChanges();
+
+      expect(button()).toBeNull();
+    });
+
+    it("should hand on the profile's user id when tapped", () => {
+      const opened: string[] = [];
+
+      component.worldClick.subscribe((userId) => opened.push(userId));
+      compRef.setInput('user', { userId: 'u1', countryCodes: ['AT'] });
+      fixture.detectChanges();
+      button()?.click();
+
+      expect(opened).toEqual(['u1']);
+    });
+  });
 });

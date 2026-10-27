@@ -234,6 +234,13 @@ const APP_ROUTES: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: `${PATH.WORLD}/:userId`,
+    loadComponent: () =>
+      import('bite-tribe/profile').then((m) => m.WorldContainer),
+    title: 'World',
+    canActivate: [authGuard],
+  },
+  {
     path: PATH.EDIT_PROFILE,
     loadComponent: () =>
       import('bite-tribe/profile').then((m) => m.EditProfileContainer),

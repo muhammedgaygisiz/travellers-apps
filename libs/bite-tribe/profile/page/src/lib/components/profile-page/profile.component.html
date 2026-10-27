@@ -114,6 +114,19 @@
           [countryCodes]="$safeNavigationMigration(userData?.countryCodes)"
         />
 
+        @if (hasCountries() && userData) {
+          <ion-button
+            class="show-on-globe"
+            fill="outline"
+            size="small"
+            data-testid="profile-show-on-globe"
+            (click)="worldClick.emit(userData.userId)"
+          >
+            <ion-icon slot="start" name="globe-outline" />
+            {{ 'show-on-globe' | transloco }}
+          </ion-button>
+        }
+
         <div class="bites-section">
           <h2>{{ 'bites' | transloco }}</h2>
 

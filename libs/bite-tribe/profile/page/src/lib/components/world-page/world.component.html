@@ -1,0 +1,89 @@
+<ta-page
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
+  [loading]="isLoading()"
+>
+  <ion-content class="ion-padding content-safe-padding-bottom">
+    <h1 class="world-title" data-testid="world-title">
+      @if (isOwnProfile()) {
+        {{ 'your-world' | transloco }}
+      } @else {
+        {{ 'users-world' | transloco: { name: displayName() ?? '' } }}
+      }
+    </h1>
+
+    @if (isLoading()) {
+      <div class="world-spinner">
+        <ion-spinner color="primary" />
+      </div>
+    } @else {
+      <div class="world-summary" data-testid="world-summary">
+        <div class="world-stat">
+          <span class="world-stat-value" data-testid="world-country-count">
+            {{ countryCount() }}
+          </span>
+          <span class="world-stat-label">{{ 'countries' | transloco }}</span>
+        </div>
+        <div class="world-stat">
+          <span class="world-stat-value" data-testid="world-continent-count">
+            {{ continentCount() }}
+          </span>
+          <span class="world-stat-label">{{ 'continents' | transloco }}</span>
+        </div>
+      </div>
+
+      <bt-globe
+        [countryCodes]="countryCodes()"
+        [autoSpin]="autoSpin()"
+        [(selectedCountryCode)]="selectedCountryCode"
+        (countryTap)="onGlobeTap($event)"
+        (zoomed)="zoomed.emit($event)"
+      />
+
+      <p
+        class="world-country-name"
+        data-testid="world-country-name"
+        aria-live="polite"
+      >
+        {{ selectedCountryName() ?? '' }}
+      </p>
+
+      @if (rows().length) {
+        <ion-list class="world-countries" data-testid="world-countries">
+          @for (row of rows(); track row.countryCode) {
+            <ion-item
+              button
+              detail="false"
+              data-testid="world-country-row"
+              [class.world-country-selected]="
+                row.countryCode === selectedCountryCode()
+              "
+              (click)="onRowTap(row.countryCode)"
+            >
+              <span
+                slot="start"
+                class="world-country-flag {{ row.flagClass }}"
+              ></span>
+              <ion-label>{{ row.name }}</ion-label>
+              @if (row.biteCount !== undefined) {
+                <span
+                  slot="end"
+                  class="world-country-bites"
+                  data-testid="world-country-bites"
+                  [attr.aria-label]="
+                    'country-bite-count' | transloco: { count: row.biteCount }
+                  "
+                >
+                  {{ row.biteCount }}
+                </span>
+              }
+            </ion-item>
+          }
+        </ion-list>
+      }
+    }
+  </ion-content>
+</ta-page>

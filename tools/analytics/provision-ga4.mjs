@@ -88,6 +88,12 @@ const CUSTOM_DIMENSIONS = [
   { parameterName: 'template', displayName: 'Share image template' },
   { parameterName: 'action', displayName: 'Share image action' },
   { parameterName: 'reason', displayName: 'Failure reason' },
+  // The visited-countries globe (issue #1787). `country_code` is an ISO
+  // alpha-2 code, so at most ~250 values - low enough to register.
+  { parameterName: 'own_profile', displayName: 'Own profile' },
+  { parameterName: 'country_code', displayName: 'Country code' },
+  { parameterName: 'has_bites', displayName: 'Country has Bites' },
+  { parameterName: 'control', displayName: 'Zoom control' },
   // Which app the session came from (issue #1098). Both apps report to one
   // property through one measurement id, so this is the only thing separating
   // a staff shift from a diner's session - and `activeUsers` counts people,

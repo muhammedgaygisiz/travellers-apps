@@ -9,6 +9,8 @@ export const PATH = {
   EDIT_PROFILE: 'edit-profile',
   PROFILE: 'profile',
   MY_PROFILE: 'my-profile',
+  /** A profile's countries on a globe, `world/{userId}` (GitHub issue #1787). */
+  WORLD: 'world',
   ABOUT: 'about',
   FOLLOWERS: 'followers',
   MY_BUCKETLISTS: 'my-bucketlists',

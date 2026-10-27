@@ -83,6 +83,9 @@
   | Share funnel | `share_template_chosen`               | `ShareImageParams`                                                                                         | The user switches the layout; the default one is not counted                                       | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
   | Share funnel | `share_handoff_succeeded`             | `ShareImageParams`, `action: 'save' \| 'share'`                                                            | The image is saved, or the share sheet reports an app took it - not that it was posted             | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
   | Share funnel | `share_handoff_failed`                | `ShareImageParams`, `action`, `reason: 'cancelled' \| 'permission_denied' \| 'unavailable' \| 'failed'`    | The image did not leave; `cancelled` is the user closing the share sheet                           | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+  | World globe  | `world_globe_open`                    | `own_profile: boolean`                                                                                     | The world page is entered and its profile is known                                                 | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
+  | World globe  | `world_globe_country_tap`             | `country_code: string`, `has_bites: boolean`, `source: 'globe' \| 'list'`                                  | A country is tapped on the globe or in the list under it                                           | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
+  | World globe  | `world_globe_zoom`                    | `control: 'button' \| 'gesture'`                                                                           | The first zoom of a visit to the page; later ones are not counted                                  | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
 
   The onboarding funnel events belong to the onboarding assistant epic ([epic-850](../records/epic-850.md),
   issue [#1017]), not to the launch taxonomy of issue 910. `onboarding_step_completed`
@@ -102,6 +105,19 @@
 
   The share-funnel events belong to issue [#1733] and are described under
   [The Share-As-Image Funnel](#the-share-as-image-funnel) below.
+
+  The world-globe events belong to issue [#1787], the visited-countries globe in
+  [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md).
+  They answer whether people open the globe, on whose profile, and whether they
+  do anything with it. `country_code` is an ISO alpha-2 code from the profile's
+  flags, which everybody who can open the profile already sees; no event names
+  the profile. `world_globe_zoom` is counted once per visit, because a pinch fires
+  continuously and the question is whether people zoom, not how much. Four
+  parameters were added to `provision-ga4.mjs`: `own_profile`, `country_code`,
+  `has_bites` and `control`. The tap's `source` reuses the already registered,
+  shared `source` dimension (also the Bite source of `bite_created`), so a
+  breakdown by it needs an event filter. GA4 does not backfill, so every event collected
+  before the `--apply` reports `(not set)` for them.
 
 - ## App Check Telemetry
 
@@ -838,3 +854,4 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
 [#1723]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1723
 [#1733]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1733
+[#1787]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1787

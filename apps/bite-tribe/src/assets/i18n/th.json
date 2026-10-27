@@ -839,5 +839,6 @@
   "globe-aria-label": "ลูกโลกแสดงประเทศที่สร้าง Bites",
   "zoom-in": "ซูมเข้า",
   "zoom-out": "ซูมออก",
-  "show-whole-globe": "แสดงลูกโลกทั้งหมด"
+  "show-whole-globe": "แสดงลูกโลกทั้งหมด",
+  "country-bite-count": "Bites: {{count}}"
 }

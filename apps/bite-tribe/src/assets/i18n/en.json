@@ -839,5 +839,6 @@
   "globe-aria-label": "Globe with the countries Bites were created in",
   "zoom-in": "Zoom in",
   "zoom-out": "Zoom out",
-  "show-whole-globe": "Show the whole globe"
+  "show-whole-globe": "Show the whole globe",
+  "country-bite-count": "Bites: {{count}}"
 }

@@ -200,6 +200,31 @@ describe('GlobeComponent drawing and motion', () => {
       expect(camera().zoom).toBe(zoom);
     });
 
+    it('should turn to a country the host selects', async () => {
+      await render(['AT', 'TH']);
+      component.selectedCountryCode.set('TH');
+      fixture.detectChanges();
+      runFrames(60);
+
+      expect(component['camera'].faces([100.5, 13.75])).toBe(true);
+      expect(camera().zoom).toBeGreaterThan(1);
+    });
+
+    it('should open still on a selection it was given before drawing', async () => {
+      fixture = TestBed.createComponent(GlobeComponent);
+      component = fixture.componentInstance;
+      fixture.componentRef.setInput('countryCodes', ['AT', 'TH']);
+      fixture.componentRef.setInput('autoSpin', false);
+      fixture.componentRef.setInput('selectedCountryCode', 'TH');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      await new Promise((resolve) => setTimeout(resolve));
+      fixture.detectChanges();
+      runFrames(60);
+
+      expect(camera().zoom).toBe(1);
+    });
+
     it('should jump rather than fly under reduced motion', async () => {
       reducedMotion = true;
       await render(['AT']);

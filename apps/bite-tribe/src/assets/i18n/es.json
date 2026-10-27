@@ -839,5 +839,6 @@
   "globe-aria-label": "Globo con los países donde se crearon Bites",
   "zoom-in": "Acercar",
   "zoom-out": "Alejar",
-  "show-whole-globe": "Ver todo el globo"
+  "show-whole-globe": "Ver todo el globo",
+  "country-bite-count": "Bites: {{count}}"
 }

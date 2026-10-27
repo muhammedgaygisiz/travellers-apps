@@ -156,8 +156,9 @@ row under a profile says which countries a user has Bites in; the globe shows wh
 they are.
 
 - **Data.** The profile's `countryCodes`, the list the flags already show and
-  `user-country-codes.ts` keeps in step with the user's Bites. The globe adds no read
-  and no write, and shows nothing the flags do not.
+  `user-country-codes.ts` keeps in step with the user's Bites, decides which countries
+  appear. The page writes nothing; its one extra read is the user's Bites, counted per
+  country for the list below.
 - **Entry.** A "Show on globe" button under the flags, on every profile that shows
   flags - the viewer's own and anybody else's they can open. A profile without
   country codes shows neither.
@@ -171,12 +172,17 @@ they are.
   pinch, the wheel and `+` / `-` zoom between 1x and 12x; the globe button goes back
   to the whole globe. A tapped country is turned to the middle, zoomed to fit and
   named in the app language - also one without Bites.
+- **Country list.** Under the globe, one row per country: flag, name in the app
+  language, and the number of the user's Bites there, most first and then by name.
+  Tapping a row selects the country and turns the globe to it, as a tap on the globe
+  does. Rows show no number while the Bites are counted or if they cannot be read; a
+  flagged country with no counted Bite - its address still resolving - shows 0.
 - **Small countries.** Countries the coarse outlines leave out, such as Singapore and
   Malta, load the finer outlines and are drawn as a dot until zoom makes them a shape.
 - **Measured.** `world_globe_open`, `world_globe_country_tap` and `world_globe_zoom`,
   defined in [Implementation - Analytics Events](../implementation/analytics-events.md).
-- **Not part of it.** No journey playback, no per-country Bite counts or list, no link
-  from a country to the Bites there, no street-level detail.
+- **Not part of it.** No journey playback, no link from a country to the Bites there,
+  no street-level detail.
 
 ## User Block Contract
 

@@ -1,7 +1,7 @@
-import { signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { TranslocoService } from '@jsverse/transloco';
+import { provideTransloco, TranslocoLoader } from '@jsverse/transloco';
 import { of } from 'rxjs';
 import type { PublicUser } from 'model';
 import { getIonicConfig } from 'utils';
@@ -9,12 +9,12 @@ import { GLOBE_OUTLINE_LOADER } from 'bite-tribe-common/map/globe';
 import { WorldContainer } from '../world.container';
 import { ProfileService } from '../profile.service';
 
-const MockTranslocoService = {
-  translate: jest.fn((key: string): string => key),
-  config: { reRenderOnLangChange: jest.fn() },
-  langChanges$: of('en'),
-  getActiveLang: (): string => 'en',
-};
+@Injectable()
+class EmptyTranslocoLoader implements TranslocoLoader {
+  getTranslation(): ReturnType<TranslocoLoader['getTranslation']> {
+    return of({});
+  }
+}
 
 const OWNER: PublicUser = {
   userId: 'owner',
@@ -36,6 +36,7 @@ describe(WorldContainer.name, () => {
     userValue: user,
     myUser,
     user: { isLoading: (): boolean => false },
+    biteCountsByCountry: jest.fn().mockResolvedValue({ JP: 3, TH: 1 }),
     trackWorldOpened: jest.fn(),
     trackWorldCountryTapped: jest.fn(),
     trackWorldZoomed: jest.fn(),
@@ -51,7 +52,10 @@ describe(WorldContainer.name, () => {
       providers: [
         provideIonicAngular(getIonicConfig()),
         { provide: ProfileService, useValue: service },
-        { provide: TranslocoService, useValue: MockTranslocoService },
+        provideTransloco({
+          config: { availableLangs: ['en'], defaultLang: 'en' },
+          loader: EmptyTranslocoLoader,
+        }),
         {
           provide: GLOBE_OUTLINE_LOADER,
           useValue: (): Promise<never> => new Promise(() => undefined),
@@ -96,10 +100,36 @@ describe(WorldContainer.name, () => {
     expect(service.trackWorldOpened).toHaveBeenCalledTimes(2);
   });
 
-  it('should log a country tap with whether it has Bites', () => {
-    container.onCountryTap({ countryCode: 'TH', visited: true });
+  it("should count the profile's Bites per country once it is known", async () => {
+    user.set(OWNER);
+    TestBed.tick();
+    await new Promise((resolve) => setTimeout(resolve));
 
-    expect(service.trackWorldCountryTapped).toHaveBeenCalledWith('TH', true);
+    expect(service.biteCountsByCountry).toHaveBeenCalledWith('owner');
+    expect(container.biteCounts()).toEqual({ JP: 3, TH: 1 });
+  });
+
+  it('should leave the counts out when they cannot be read', async () => {
+    service.biteCountsByCountry.mockRejectedValueOnce(new Error('denied'));
+    user.set(OWNER);
+    TestBed.tick();
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(container.biteCounts()).toBeUndefined();
+  });
+
+  it('should log a country tap with whether it has Bites', () => {
+    container.onCountryTap({
+      countryCode: 'TH',
+      visited: true,
+      source: 'list',
+    });
+
+    expect(service.trackWorldCountryTapped).toHaveBeenCalledWith(
+      'TH',
+      true,
+      'list',
+    );
   });
 
   it('should log only the first zoom of a visit', () => {

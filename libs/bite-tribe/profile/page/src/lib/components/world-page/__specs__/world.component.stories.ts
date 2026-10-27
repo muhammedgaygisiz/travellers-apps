@@ -21,13 +21,18 @@ export default {
 
 type Story = StoryObj<WorldComponent>;
 
-const countryCodes = ['AT', 'DE', 'IT', 'FR', 'TR', 'AE', 'TH'];
+/**
+ * Flat, straight-edged flags only: emblems and curves render differently
+ * across Chrome builds and fail the visual run in CI.
+ */
+const countryCodes = ['AT', 'DE', 'IT', 'FR', 'NL', 'PL', 'TH'];
 
 export const OwnProfile: Story = {
   args: {
     isOwnProfile: true,
     displayName: 'Mo',
     countryCodes,
+    biteCounts: { AT: 12, DE: 3, IT: 4, FR: 1, NL: 6, PL: 2, TH: 9 },
     autoSpin: false,
   },
 };
@@ -36,7 +41,8 @@ export const OtherProfile: Story = {
   args: {
     isOwnProfile: false,
     displayName: 'Leela',
-    countryCodes: ['JP', 'KR', 'TH', 'VN', 'US', 'MX', 'PE'],
+    countryCodes: ['JP', 'TH', 'ID', 'NG', 'CO', 'PL'],
+    biteCounts: { JP: 14, TH: 7, ID: 3, NG: 2, CO: 4, PL: 1 },
     autoSpin: false,
   },
 };
@@ -47,5 +53,13 @@ export const Loading: Story = {
     isOwnProfile: true,
     countryCodes: [],
     autoSpin: false,
+  },
+};
+
+/** The Bites are still being counted: the rows show no numbers yet. */
+export const CountingBites: Story = {
+  args: {
+    ...OwnProfile.args,
+    biteCounts: undefined,
   },
 };

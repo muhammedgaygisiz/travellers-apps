@@ -839,5 +839,6 @@
   "globe-aria-label": "كرة أرضية تُظهر الدول التي أُنشئت فيها Bites",
   "zoom-in": "تكبير",
   "zoom-out": "تصغير",
-  "show-whole-globe": "عرض الكرة الأرضية كاملة"
+  "show-whole-globe": "عرض الكرة الأرضية كاملة",
+  "country-bite-count": "Bites: {{count}}"
 }

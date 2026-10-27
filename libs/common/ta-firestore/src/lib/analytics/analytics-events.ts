@@ -338,11 +338,13 @@ export interface AnalyticsEventParamMap {
   /**
    * A country tapped on the globe. The alpha-2 code is a country, not a
    * person: the profile's flags show the same list to everybody who can open
-   * it. `has_bites` says whether it was a highlighted country.
+   * it. `has_bites` says whether it was a highlighted country, and `source`
+   * whether it was tapped on the globe or in the list under it.
    */
   [AnalyticsEvent.WorldGlobeCountryTapped]: {
     country_code: string;
     has_bites: boolean;
+    source: 'globe' | 'list';
   };
   /**
    * The globe was zoomed, at most once per visit to the page: the question is

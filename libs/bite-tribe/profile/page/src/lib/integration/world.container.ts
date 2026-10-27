@@ -4,15 +4,16 @@ import {
   computed,
   effect,
   inject,
+  resource,
   signal,
 } from '@angular/core';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
-import type {
-  GlobeCountryTap,
-  GlobeZoomControl,
-} from 'bite-tribe-common/map/globe';
+import type { GlobeZoomControl } from 'bite-tribe-common/map/globe';
 import { ProfileService } from './profile.service';
-import { WorldComponent } from '../components/world-page/world.component';
+import {
+  WorldComponent,
+  type WorldCountryTap,
+} from '../components/world-page/world.component';
 
 /**
  * The world page of the profile in the route, `world/{userId}` (GitHub issue
@@ -28,6 +29,7 @@ import { WorldComponent } from '../components/world-page/world.component';
       [displayName]="user()?.displayName"
       [isOwnProfile]="isOwnProfile()"
       [countryCodes]="user()?.countryCodes"
+      [biteCounts]="biteCounts()"
       (countryTap)="onCountryTap($event)"
       (zoomed)="onZoomed($event)"
     />
@@ -45,6 +47,21 @@ export class WorldContainer {
 
     return !!userId && userId === this.service.myUser()?.userId;
   });
+
+  /**
+   * Bites per country for the list under the globe. Read once per profile;
+   * a failed read leaves the list without numbers rather than without rows.
+   */
+  private readonly biteCountsResource = resource({
+    params: () => this.user()?.userId,
+    loader: ({ params }) => this.service.biteCountsByCountry(params),
+  });
+
+  biteCounts = computed(() =>
+    this.biteCountsResource.hasValue()
+      ? this.biteCountsResource.value()
+      : undefined,
+  );
 
   /** Ionic keeps a page alive in its stack; each entry is a new visit. */
   private readonly visit = signal(0);
@@ -69,8 +86,8 @@ export class WorldContainer {
     FirebaseAnalytics.setCurrentScreen({ screenName: 'World' });
   }
 
-  onCountryTap({ countryCode, visited }: GlobeCountryTap): void {
-    this.service.trackWorldCountryTapped(countryCode, visited);
+  onCountryTap({ countryCode, visited, source }: WorldCountryTap): void {
+    this.service.trackWorldCountryTapped(countryCode, visited, source);
   }
 
   onZoomed(control: GlobeZoomControl): void {

@@ -108,4 +108,81 @@ describe(WorldComponent.name, () => {
     expect(element.querySelector('ion-spinner')).not.toBeNull();
     expect(element.querySelector('bt-globe')).toBeNull();
   });
+  describe('the country list', () => {
+    const rows = (): string[] =>
+      [
+        ...(fixture.nativeElement as HTMLElement).querySelectorAll(
+          '[data-testid="world-country-row"]',
+        ),
+      ].map((row) => (row.textContent ?? '').replace(/\s+/g, ' ').trim());
+
+    it('should list the countries with the most Bites first', () => {
+      fixture.componentRef.setInput('countryCodes', ['AT', 'TH', 'JP']);
+      fixture.componentRef.setInput('biteCounts', { AT: 1, TH: 5, JP: 2 });
+      fixture.detectChanges();
+
+      expect(rows()).toEqual(['Thailand 5', 'Japan 2', 'Austria 1']);
+    });
+
+    it('should list the countries by name while the Bites are counted', () => {
+      fixture.componentRef.setInput('countryCodes', ['TH', 'AT', 'JP']);
+      fixture.detectChanges();
+
+      expect(rows()).toEqual(['Austria', 'Japan', 'Thailand']);
+    });
+
+    it('should count a flagged country without counted Bites as 0', () => {
+      fixture.componentRef.setInput('countryCodes', ['AT', 'TH']);
+      fixture.componentRef.setInput('biteCounts', { AT: 2 });
+      fixture.detectChanges();
+
+      expect(rows()).toEqual(['Austria 2', 'Thailand 0']);
+    });
+
+    it('should select the country of a tapped row and report the tap', () => {
+      const taps: unknown[] = [];
+
+      fixture.componentInstance.countryTap.subscribe((tap) => taps.push(tap));
+      fixture.componentRef.setInput('countryCodes', ['AT', 'TH']);
+      fixture.componentRef.setInput('biteCounts', { AT: 1, TH: 5 });
+      fixture.detectChanges();
+
+      (
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '[data-testid="world-country-row"]',
+        ) as HTMLElement
+      ).click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.selectedCountryCode()).toBe('TH');
+      expect(taps).toEqual([
+        { countryCode: 'TH', visited: true, source: 'list' },
+      ]);
+    });
+
+    it('should report a tap on the globe as one', () => {
+      const taps: unknown[] = [];
+
+      fixture.componentInstance.countryTap.subscribe((tap) => taps.push(tap));
+      fixture.componentInstance.onGlobeTap({
+        countryCode: 'NO',
+        visited: false,
+      });
+
+      expect(taps).toEqual([
+        { countryCode: 'NO', visited: false, source: 'globe' },
+      ]);
+    });
+
+    it('should list nothing for a profile without countries', () => {
+      fixture.componentRef.setInput('countryCodes', []);
+      fixture.detectChanges();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '[data-testid="world-countries"]',
+        ),
+      ).toBeNull();
+    });
+  });
 });

@@ -39,7 +39,7 @@
         [countryCodes]="countryCodes()"
         [autoSpin]="autoSpin()"
         [(selectedCountryCode)]="selectedCountryCode"
-        (countryTap)="countryTap.emit($event)"
+        (countryTap)="onGlobeTap($event)"
         (zoomed)="zoomed.emit($event)"
       />
 
@@ -50,6 +50,40 @@
       >
         {{ selectedCountryName() ?? '' }}
       </p>
+
+      @if (rows().length) {
+        <ion-list class="world-countries" data-testid="world-countries">
+          @for (row of rows(); track row.countryCode) {
+            <ion-item
+              button
+              detail="false"
+              data-testid="world-country-row"
+              [class.world-country-selected]="
+                row.countryCode === selectedCountryCode()
+              "
+              (click)="onRowTap(row.countryCode)"
+            >
+              <span
+                slot="start"
+                class="world-country-flag {{ row.flagClass }}"
+              ></span>
+              <ion-label>{{ row.name }}</ion-label>
+              @if (row.biteCount !== undefined) {
+                <span
+                  slot="end"
+                  class="world-country-bites"
+                  data-testid="world-country-bites"
+                  [attr.aria-label]="
+                    'country-bite-count' | transloco: { count: row.biteCount }
+                  "
+                >
+                  {{ row.biteCount }}
+                </span>
+              }
+            </ion-item>
+          }
+        </ion-list>
+      }
     }
   </ion-content>
 </ta-page>

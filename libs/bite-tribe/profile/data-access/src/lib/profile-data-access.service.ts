@@ -90,6 +90,15 @@ export class ProfileDataAccessService {
     this.storeService.logout();
   }
 
+  /**
+   * Every Bite of a user, read once for the world page's per-country counts
+   * (GitHub issue #1787). Not kept in the store: the profile's own list is
+   * loaded by route there, and the world page only needs the counts.
+   */
+  loadBitesByUser(userId: string): Promise<Bite[]> {
+    return this.api.bitesByUser(userId);
+  }
+
   submitLikeClick(likeClick: LikeClick): void {
     this.storeService.submitLikeClick(likeClick);
   }

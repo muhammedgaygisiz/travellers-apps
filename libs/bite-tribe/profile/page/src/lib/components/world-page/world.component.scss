@@ -38,3 +38,27 @@
   font-weight: 500;
   text-align: center;
 }
+
+.world-countries {
+  max-width: 420px;
+  margin: 0.5rem auto 0;
+  background: transparent;
+}
+
+.world-country-flag {
+  width: 1.6rem;
+  height: 1.2rem;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  background-size: cover;
+  background-position: center;
+}
+
+.world-country-bites {
+  font-weight: 600;
+  color: var(--ion-color-medium);
+}
+
+.world-country-selected {
+  --background: rgba(var(--ion-color-primary-rgb), 0.12);
+}

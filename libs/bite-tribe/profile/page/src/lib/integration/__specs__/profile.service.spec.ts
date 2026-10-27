@@ -299,12 +299,31 @@ describe(ProfileService.name, () => {
     });
 
     it('should log a country tap with its code and whether it has Bites', () => {
-      service.trackWorldCountryTapped('TH', false);
+      service.trackWorldCountryTapped('TH', false, 'list');
 
       expect(logEvent).toHaveBeenCalledWith('world_globe_country_tap', {
         country_code: 'TH',
         has_bites: false,
+        source: 'list',
       });
+    });
+
+    it("should count the user's Bites per country", async () => {
+      profileDataAccessService.loadBitesByUser = jest
+        .fn()
+        .mockResolvedValue([
+          { countryCode: 'AT' },
+          { countryCode: 'AT' },
+          { countryCode: 'TH' },
+        ]);
+
+      await expect(service.biteCountsByCountry('user123')).resolves.toEqual({
+        AT: 2,
+        TH: 1,
+      });
+      expect(profileDataAccessService.loadBitesByUser).toHaveBeenCalledWith(
+        'user123',
+      );
     });
 
     it('should log a zoom with the control that made it', () => {

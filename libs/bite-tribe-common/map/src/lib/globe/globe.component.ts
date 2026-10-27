@@ -156,6 +156,8 @@ export class GlobeComponent {
   private drawRequested = false;
   private flight: number | undefined;
   private destroyed = false;
+  /** The selection the globe last turned to, so it turns once per change. */
+  private flownTo: string | undefined;
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -175,6 +177,7 @@ export class GlobeComponent {
       this.outlines();
       this.selectedCountryCode();
       this.centreOnVisited();
+      this.followSelection();
       this.loadFineIfAVisitedCountryIsMissing();
       this.requestDraw();
     });
@@ -276,14 +279,47 @@ export class GlobeComponent {
     }
 
     const { countryCode } = outline;
-    const { rotation, zoom } = this.camera.fit(outline);
 
+    this.flyToCountry(outline);
     this.selectedCountryCode.set(countryCode);
     this.countryTap.emit({
       countryCode,
       visited: this.visitedCodes().has(countryCode),
     });
+  }
+
+  private flyToCountry(outline: CountryOutline): void {
+    const { rotation, zoom } = this.camera.fit(outline);
+
+    this.flownTo = outline.countryCode;
     this.flyTo([-rotation[0], -rotation[1]], zoom, FLY_MILLISECONDS);
+  }
+
+  /**
+   * Turns to a country the host selected - a row in a list - the way a tap on
+   * the globe does. A selection already there when the outlines arrive is
+   * only highlighted, so a page that opens with one opens still.
+   */
+  private followSelection(): void {
+    const selected = this.selectedCountryCode();
+    const outlines = this.outlines();
+
+    if (!outlines.length || !selected) {
+      this.flownTo = selected;
+
+      return;
+    }
+
+    if (selected === this.flownTo) {
+      return;
+    }
+
+    const outline = outlines.find((each) => each.countryCode === selected);
+
+    if (outline) {
+      this.stopInteraction();
+      this.flyToCountry(outline);
+    }
   }
 
   private zoomByButton(factor: number): void {

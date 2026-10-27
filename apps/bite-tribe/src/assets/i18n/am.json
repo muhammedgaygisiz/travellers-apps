@@ -839,5 +839,6 @@
   "globe-aria-label": "Bites የተፈጠሩባቸውን አገሮች የሚያሳይ የምድር ሉል",
   "zoom-in": "አቅርብ",
   "zoom-out": "አርቅ",
-  "show-whole-globe": "ሙሉውን የምድር ሉል አሳይ"
+  "show-whole-globe": "ሙሉውን የምድር ሉል አሳይ",
+  "country-bite-count": "Bites: {{count}}"
 }

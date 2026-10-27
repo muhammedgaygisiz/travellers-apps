@@ -17,6 +17,7 @@ import {
   type EmailVerificationSurface,
 } from 'bite-tribe/email-verification-data-access';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { countBitesByCountry } from './utils/count-bites-by-country';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
@@ -164,16 +165,26 @@ export class ProfileService {
     this.navController.navigateForward([PATH.WORLD, userId]);
   }
 
+  /** The user's Bites per country, for the world page's list (#1787). */
+  async biteCountsByCountry(userId: string): Promise<Record<string, number>> {
+    return countBitesByCountry(await this.dataAccess.loadBitesByUser(userId));
+  }
+
   trackWorldOpened(ownProfile: boolean): void {
     this.analytics.logEvent(AnalyticsEvent.WorldGlobeOpened, {
       own_profile: ownProfile,
     });
   }
 
-  trackWorldCountryTapped(countryCode: string, hasBites: boolean): void {
+  trackWorldCountryTapped(
+    countryCode: string,
+    hasBites: boolean,
+    source: 'globe' | 'list',
+  ): void {
     this.analytics.logEvent(AnalyticsEvent.WorldGlobeCountryTapped, {
       country_code: countryCode,
       has_bites: hasBites,
+      source,
     });
   }
 

@@ -839,5 +839,6 @@
   "globe-aria-label": "Globe dengan negara tempat Bites dibuat",
   "zoom-in": "Perbesar",
   "zoom-out": "Perkecil",
-  "show-whole-globe": "Tampilkan seluruh globe"
+  "show-whole-globe": "Tampilkan seluruh globe",
+  "country-bite-count": "Bites: {{count}}"
 }

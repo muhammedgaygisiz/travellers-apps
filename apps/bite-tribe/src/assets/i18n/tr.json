@@ -839,5 +839,6 @@
   "globe-aria-label": "Bite'ların oluşturulduğu ülkeleri gösteren küre",
   "zoom-in": "Yakınlaştır",
   "zoom-out": "Uzaklaştır",
-  "show-whole-globe": "Tüm küreyi göster"
+  "show-whole-globe": "Tüm küreyi göster",
+  "country-bite-count": "Bite: {{count}}"
 }

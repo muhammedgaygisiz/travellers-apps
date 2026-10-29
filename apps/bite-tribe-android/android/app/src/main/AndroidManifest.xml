@@ -4,6 +4,17 @@
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+  <!--
+    The two apps a share image is handed to directly (issue #1730). Android 11
+    and later hide every other app's package unless it is named here, which
+    would make Instagram and Facebook read as not installed. Named by package
+    rather than by intent, so the app sees these two and nothing else.
+  -->
+  <queries>
+    <package android:name="com.instagram.android" />
+    <package android:name="com.facebook.katana" />
+  </queries>
+
   <application
     android:allowBackup="true"
     android:icon="@mipmap/ic_launcher"

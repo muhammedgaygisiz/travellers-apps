@@ -15,13 +15,19 @@
 --   link_shares          the `more` entries: the link share, outside this funnel
 --   composers_opened     `share_composer_opened`, split into Story and Post
 --   layouts_picked       `share_template_chosen`; none, one or several per image
---   handoffs_succeeded   `share_handoff_succeeded`, split into saved and shared
+--   handoffs_succeeded   `share_handoff_succeeded`, split into saved, shared
+--                        through the share sheet, and opened in the app
 --   handoffs_cancelled   `share_handoff_failed` with `reason = cancelled`
 --   handoffs_failed      every other `share_handoff_failed`
 --
--- "Succeeded" is the image leaving BiteTribe - saved, or taken by an app from
--- the share sheet. Instagram and Facebook do not report whether the user then
--- posted it, so nothing here can count a post.
+-- "Succeeded" is the image leaving BiteTribe - saved, taken by an app from the
+-- share sheet, or handed straight to Instagram or Facebook (issue #1730).
+-- Instagram and Facebook do not report whether the user then posted it, so
+-- nothing here can count a post.
+--
+-- A direct hand-off that fails falls back to the share sheet, so one image can
+-- be a failed `open_app` and then a `share`: handoffs_failed counts the first
+-- even when the second succeeded.
 WITH funnel AS (
   SELECT
     PARSE_DATE('%Y%m%d', event_date) AS share_day,
@@ -75,6 +81,8 @@ steps AS (
       AS images_saved,
     COUNTIF(event_name = 'share_handoff_succeeded' AND action = 'share')
       AS images_shared,
+    COUNTIF(event_name = 'share_handoff_succeeded' AND action = 'open_app')
+      AS images_opened_in_app,
     -- Closing the share sheet is a user changing their mind, not a fault, so
     -- it is its own column rather than part of the failures.
     COUNTIF(event_name = 'share_handoff_failed' AND reason = 'cancelled')
@@ -98,6 +106,7 @@ SELECT
   handoffs_succeeded,
   images_saved,
   images_shared,
+  images_opened_in_app,
   handoffs_cancelled,
   handoffs_failed,
   bites_shared,

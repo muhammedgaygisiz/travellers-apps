@@ -4,4 +4,7 @@
     <string name="title_activity_main">BiteTribe</string>
     <string name="package_name">com.bitetribe.app</string>
     <string name="custom_url_scheme">com.bitetribe.app</string>
+    <!-- Meta's public App ID for the Stories hand-off (issue #1730). Not a
+         secret: the App Secret and client token are never in the app. -->
+    <string name="meta_app_id" translatable="false">1431506688471796</string>
 </resources>

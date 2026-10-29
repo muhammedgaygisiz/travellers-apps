@@ -81,7 +81,7 @@
   | Share funnel | `share_target_chosen`                 | `bite_id`, `target: ShareTarget`                                                                           | A menu entry is picked; a dismissed menu emits nothing                                             | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
   | Share funnel | `share_composer_opened`               | `bite_id`, `target`, `format: 'story' \| 'post'`                                                           | The image composer reaches the screen                                                              | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
   | Share funnel | `share_template_chosen`               | `ShareImageParams`                                                                                         | The user switches the layout; the default one is not counted                                       | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
-  | Share funnel | `share_handoff_succeeded`             | `ShareImageParams`, `action: 'save' \| 'share'`                                                            | The image is saved, or the share sheet reports an app took it - not that it was posted             | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+  | Share funnel | `share_handoff_succeeded`             | `ShareImageParams`, `action: 'save' \| 'share' \| 'open_app'`                                              | Saved, taken from the share sheet, or the target app opened with it - not that it was posted       | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
   | Share funnel | `share_handoff_failed`                | `ShareImageParams`, `action`, `reason: 'cancelled' \| 'permission_denied' \| 'unavailable' \| 'failed'`    | The image did not leave; `cancelled` is the user closing the share sheet                           | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
   | World globe  | `world_globe_open`                    | `own_profile: boolean`                                                                                     | The world page is entered and its profile is known                                                 | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
   | World globe  | `world_globe_country_tap`             | `country_code: string`, `has_bites: boolean`, `source: 'globe' \| 'list'`                                  | A country is tapped on the globe or in the list under it                                           | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
@@ -558,10 +558,17 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 
   **"Succeeded" is the hand-off, not the post.** Instagram and Facebook do not
   tell the app that hands them an image whether the user published it. Saved,
-  or taken by an app from the share sheet, is the last thing BiteTribe can see
-  (`UC-SBS` `G4`). A closed share sheet is `share_handoff_failed` with
+  taken by an app from the share sheet, or handed straight to Instagram or
+  Facebook (`action: open_app`, issue [#1730]) is the last thing BiteTribe can
+  see (`UC-SBS` `G4`). A closed share sheet is `share_handoff_failed` with
   `reason: cancelled` - counted, because it is a drop-off, and apart from the
   faults, because it is not one.
+
+  **A failed direct hand-off is two events.** When the app will not take the
+  image, the composer falls back to the share sheet: `share_handoff_failed`
+  with `action: open_app` and its reason, then whatever the share sheet
+  reports with `action: share`. A fallback that worked still counts one
+  failure, which is the figure that shows the direct route breaking.
 
 - ### Where It Is Measured
 
@@ -810,8 +817,11 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   again → nothing.
 - Tap **Save image** → `share_handoff_succeeded` with `action: save` and
   `template: wide`.
-- Tap **Share**, close the share sheet → `share_handoff_failed` with
-  `reason: cancelled`.
+- Tap **Share** with Instagram installed → Instagram opens with the image, and
+  `share_handoff_succeeded` with `action: open_app`.
+- On a device without Instagram, the Instagram entries are not in the menu. In
+  a browser, pick **Share image…**, tap **Share** and close the share sheet →
+  `share_handoff_failed` with `action: share` and `reason: cancelled`.
 - Open the menu again and pick **More…** → `share_target_chosen` with
   `target: more`, and no composer event.
 - Check that no parameter of any of these carries the dish name, the place or
@@ -861,6 +871,7 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 [#1621]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1621
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
 [#1723]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1723
+[#1730]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1730
 [#1733]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1733
 [#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
 [#1787]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1787

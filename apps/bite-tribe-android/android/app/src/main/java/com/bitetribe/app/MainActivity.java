@@ -13,6 +13,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(AppSettingsPlugin.class);
         registerPlugin(BiteHapticsPlugin.class);
         registerPlugin(SaveImagePlugin.class);
+        registerPlugin(SocialSharePlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

@@ -6,12 +6,12 @@
 
 In progress. Priority P1, post-launch. The share menu and the first template ship with
 [#1726]: on the user's own Bite the share button opens BiteTribe's menu, its three app entries
-open the composer - Instagram Post at 4:5 since [#1727], the two Stories at 9:16 - and the
-finished image goes to the system share sheet; **More…** is
-the link share of [UC - Inspect Bite Details](uc-inspect-bite-details.md), unchanged. Opening
-Instagram or Facebook directly is still to come; every step of the funnel is measured since
-[#1733]. The
-rules without a marker below hold today; `R-1`, `R-3` and `R-8` hold in part and keep theirs until the child that finishes them. The epic is [#1723];
+open the composer - Instagram Post at 4:5 since [#1727], the two Stories at 9:16 - and on a
+device the finished image opens Instagram or Facebook directly since [#1730], each entry shown
+only while its app is installed and falling back to the system share sheet; **More…** is
+the link share of [UC - Inspect Bite Details](uc-inspect-bite-details.md), unchanged. Every step
+of the funnel is measured since [#1733]. The
+rules without a marker below hold today; `R-3` and `R-8` hold in part and keep theirs until the child that finishes them. The epic is [#1723];
 each child listed under `Related GitHub Scope` closes the markers on the rules it delivers. The
 page stays at L1 until the behaviour is complete enough to enumerate (`UF-2`).
 
@@ -59,10 +59,10 @@ Once a share has succeeded:
 
 ## Flow
 
-Built by [#1726], [#1727], [#1728], [#1731] and [#1732]: the menu on the user's own Bite, **More…**,
+Built by [#1726], [#1727], [#1728], [#1731], [#1732] and [#1730]: the menu on the user's own Bite, **More…**,
 and the composer in the entry's format with a choice of layout and colours and a switch per
-field, which saves the image to the photo library or a download, or hands it to the system
-share sheet. In a browser the menu offers Save image and Share image… instead of the apps. Each step is an analytics event since [#1733]. The rest - the hand-off to each app - is intended.
+field, which saves the image to the photo library or a download, or hands it to the app the
+entry named. A hand-off that fails falls back to the system share sheet with the same image. In a browser the menu offers Save image and Share image… instead of the apps. Each step is an analytics event since [#1733].
 
 - The user taps the share button on the details page of one of their own Bites (`R-3`). It opens BiteTribe's own share
   menu with the entries `R-1` names, rather than the device share sheet.
@@ -95,7 +95,7 @@ share sheet. In a browser the menu offers Save image and Share image… instead 
 
 | ID      | Normative statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **R-1** | _Intended, not met._ On a Bite that `R-3` lets the viewer share as an image, the details page's share button opens a share menu offering **Instagram Story**, **Instagram Post**, **Facebook Story** and **More…**, subject to `R-12`. On any other Bite it runs the link share directly, as it does today. Delivered by [#1726], with the two app targets beyond the system share sheet by [#1730].                                                                                                                                                                                                                                                                                     |
+| **R-1** | On a Bite that `R-3` lets the viewer share as an image, the details page's share button opens a share menu offering **Instagram Story**, **Instagram Post**, **Facebook Story** and **More…**, subject to `R-12`. On any other Bite it runs the link share directly, as it does today. Delivered by [#1726], with the apps opened directly by [#1730].                                                                                                                                                                                                                                                                                                                                   |
 | **R-2** | **More…** is the link share that [UC - Inspect Bite Details](uc-inspect-bite-details.md) owns, unchanged: the same link, the same text, the same device share sheet. The menu adds entries in front of it and changes nothing behind it. Delivered by [#1726].                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | **R-3** | _Intended, not met._ Who may share a Bite as an image depends on whose Bite it is. **The sharer's own Bite** can always be shared, because the sharer took the photo. **Somebody else's Bite** can be shared only when its creator's profile is public, their account still exists, and they have accepted terms that license it (`R-30`). The Bite of a private creator, of a deleted account, or of a creator who has not accepted the terms is never shared as an image by anyone else; the link share stays open for it. In every case the composer reads nothing the details page does not already show the viewer. The own-Bite half is delivered by [#1726], the rest by [#1772]. |
 | **R-4** | An image is a second shareable form of a Bite, not a new shareable entity. The rule that the Bite is the only shareable entity stays [UC - Inspect Bite Details](uc-inspect-bite-details.md)'s, and no BiteTrail, profile, bucket list or restaurant gets an image share.                                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -116,11 +116,11 @@ share sheet. In a browser the menu offers Save image and Share image… instead 
 
 ### Targets
 
-| ID       | Normative statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **R-12** | _Intended, not met._ A target whose app is not installed is not offered. **Save image** is always offered, on web as well as on iOS and Android, so there is never a composed image with nowhere to go; **Share image…** is offered wherever the platform can hand a file to a share sheet - every device, and a browser where the Web Share API takes files. A browser offers no app entries at all: its menu is Save image, Share image… where supported, and More…. Detection and the native targets are [#1730]; Save image and web are [#1732]. |
-| **R-13** | _Intended, not met._ BiteTribe only hands the image to another app. It never posts, publishes or schedules anything on the user's behalf, and uses no Instagram Graph API.                                                                                                                                                                                                                                                                                                                                                                           |
-| **R-14** | Every string the menu and the composer show is a Transloco key, present in every locale.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ID       | Normative statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R-12** | A target whose app is not installed is not offered. **Save image** is always offered, on web as well as on iOS and Android, so there is never a composed image with nowhere to go; **Share image…** is offered wherever the platform can hand a file to a share sheet - every device, and a browser where the Web Share API takes files. A browser offers no app entries at all: its menu is Save image, Share image… where supported, and More…. Detection and the native targets are [#1730]; Save image and web are [#1732]. |
+| **R-13** | BiteTribe only hands the image to another app. It never posts, publishes or schedules anything on the user's behalf, and uses no Instagram Graph API.                                                                                                                                                                                                                                                                                                                                                                           |
+| **R-14** | Every string the menu and the composer show is a Transloco key, present in every locale.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 ### Rights And Attribution
 
@@ -154,10 +154,10 @@ filed. The CORS policy itself is applied and documented on
 | **R-22** | The image shows no coordinates, no map and no street address. The restaurant name and city are the only location it carries, and the Bite already shows them publicly.                                                                                                                                                                                                                                      |
 | **R-23** | The QR code encodes `${BITE_TRIBE_ORIGIN}/s/bite/<biteId>` and nothing else. No user-controlled text goes into it, so it cannot be turned into a phishing link.                                                                                                                                                                                                                                             |
 | **R-24** | The analytics events of this use case carry no display name and no free text in their parameters: the Bite's id and enums only. Delivered by [#1733].                                                                                                                                                                                                                                                       |
-| **R-25** | _Intended, not met._ On iOS, items written to the Stories pasteboard carry a five-minute `expirationDate` and `localOnly: true`, so the image neither lingers on the pasteboard nor travels through Universal Clipboard. Delivered by [#1730].                                                                                                                                                              |
-| **R-26** | _Intended, not met._ On Android, the image is written to the app's cache and exposed through a `FileProvider` that is not exported. The intent is explicit (`setPackage`) and grants `FLAG_GRANT_READ_URI_PERMISSION` only, so no other app can intercept it. Delivered by [#1730].                                                                                                                         |
+| **R-25** | On iOS, items written to the Stories pasteboard carry a five-minute `expirationDate` and `localOnly: true`, so the image neither lingers on the pasteboard nor travels through Universal Clipboard. Delivered by [#1730].                                                                                                                                                                                   |
+| **R-26** | On Android, the image is written to the app's cache and exposed through a `FileProvider` that is not exported. The intent is explicit (`setPackage`) and grants `FLAG_GRANT_READ_URI_PERMISSION` only, so no other app can intercept it. Delivered by [#1730].                                                                                                                                              |
 | **R-27** | On iOS, photo-library access is add-only (`PHAccessLevel.addOnly`). This use case never asks to read the library. Delivered by [#1730] and [#1732].                                                                                                                                                                                                                                                         |
-| **R-28** | _Intended, not met._ Only Meta's public App ID enters the repository. The App Secret and the client token never do, and no Meta SDK is added - which keeps out tracking, an App Tracking Transparency prompt and new privacy-label entries. The App ID is registered by the product owner in [#1729].                                                                                                       |
+| **R-28** | Only Meta's public App ID enters the repository. The App Secret and the client token never do, and no Meta SDK is added - which keeps out tracking, an App Tracking Transparency prompt and new privacy-label entries. The App ID is registered by the product owner in [#1729] and lives in the wrappers' configuration since [#1730].                                                                     |
 
 ### Measurement
 
@@ -188,14 +188,14 @@ reachable in the shipping app. The link share behind **More…** is
 
 ## App Store Review Area
 
-Relevant, on both stores, and it lands with the code children rather than with this page.
+Relevant, on both stores. The entries landed with [#1732] and [#1730]; [Implementation - Store Declarations](../implementation/store-declarations.md) records them.
 
-- **iOS** - the Instagram Post hand-off saves to the photo library, so
-  `NSPhotoLibraryAddUsageDescription` is required, in every locale's `InfoPlist.strings`.
-  Detecting the target apps needs `LSApplicationQueriesSchemes` entries for `instagram`,
-  `instagram-stories` and `facebook-stories`. Neither exists today.
-- **Android** - detecting the target apps needs `<queries>` package-visibility entries for
-  `com.instagram.android` and `com.facebook.katana`. Saving through MediaStore needs no storage
+- **iOS** - Save image and the Instagram Post hand-off save to the photo library, so
+  `NSPhotoLibraryAddUsageDescription` is present, in every locale's `InfoPlist.strings`.
+  Detecting the target apps uses `LSApplicationQueriesSchemes` entries for `instagram`,
+  `instagram-stories` and `facebook-stories`.
+- **Android** - detecting the target apps uses `<queries>` package-visibility entries for
+  `com.instagram.android` and `com.facebook.katana`, and nothing wider. Saving through MediaStore needs no storage
   permission on API 29 and up.
 - **Privacy** - no new data is collected: the image is composed on the device and handed to
   another app at the user's request. The declarations in
@@ -215,6 +215,10 @@ Relevant, on both stores, and it lands with the code children rather than with t
 - `DetailsService.onShareBiteClick` and `DetailsDataAccessService.shareBiteImage` in
   `libs/bite-tribe/details` - the menu, the composer modal, and the file handed to the share
   sheet. `shareBite`, behind **More…**, is unchanged.
+- `DetailsDataAccessService.canShareImageTo` and `shareBiteImageTo`, behind the `SocialShare`
+  bridge in `libs/common/social-share` and the `SocialSharePlugin` of each wrapper - the
+  installed-app check that hides an entry, and the direct hand-off of `R-25` to `R-28`
+  ([#1730]). [Architecture - Capacitor](../architecture/capacitor.md) names the pasteboard keys, intents and declarations.
 - `sharedBiteUrl` in `libs/common/utils`, which both the link share and the QR code use (`R-23`).
 - `loadBiteImageForCanvas` in `bite-tribe-common/bite`, and the bucket CORS policy of
   [Architecture - Storage](../architecture/storage.md), from [#1725].

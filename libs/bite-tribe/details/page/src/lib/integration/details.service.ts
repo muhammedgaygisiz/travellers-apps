@@ -9,6 +9,7 @@ import {
   isShareCancelled,
   SaveImageDeniedError,
   ShareImageUnavailableError,
+  ShareTargetUnavailableError,
 } from 'bite-tribe/details-data-access';
 import {
   DEFAULT_SHARE_IMAGE_STYLE,
@@ -17,6 +18,7 @@ import {
   type ShareImageLayoutId,
 } from 'bite-tribe/share-image-ui';
 import { TranslocoService } from '@jsverse/transloco';
+import type { SocialShareTarget } from 'social-share';
 import { Capacitor } from '@capacitor/core';
 import {
   Bite,
@@ -42,8 +44,11 @@ import {
   type ShareTarget,
 } from 'ta-firestore';
 
-/** The share menu's entries that lead to the image composer. */
-type ShareMenuTarget = 'instagram-story' | 'instagram-post' | 'facebook-story';
+/**
+ * The share menu's entries that open an app. Each leads to the image composer,
+ * and on a device the composer hands the image to that app (issue #1730).
+ */
+type ShareMenuTarget = SocialShareTarget;
 
 /** The menu entry decides the format (`UC-SBS` `R-5`). */
 const FORMAT_FOR_TARGET: Record<ShareMenuTarget, ShareImageFormat> = {
@@ -78,12 +83,17 @@ const ANALYTICS_TARGET: Record<ShareMenuChoice, ShareTarget> = {
   more: 'more',
 };
 
-const NATIVE_SHARE_MENU: ShareMenuEntry[] = [
+/** The app entries a device offers, each only while its app is installed. */
+const NATIVE_APP_ENTRIES: { choice: ShareMenuTarget; labelKey: string }[] = [
   { choice: 'instagram-story', labelKey: 'share-menu-instagram-story' },
   { choice: 'instagram-post', labelKey: 'share-menu-instagram-post' },
   { choice: 'facebook-story', labelKey: 'share-menu-facebook-story' },
-  { choice: 'more', labelKey: 'share-menu-more' },
 ];
+
+const MORE_ENTRY: ShareMenuEntry = {
+  choice: 'more',
+  labelKey: 'share-menu-more',
+};
 
 @Injectable({ providedIn: 'root' })
 export class DetailsService {
@@ -322,18 +332,28 @@ export class DetailsService {
         bite,
         FORMAT_FOR_TARGET[choice],
         target,
+        choice,
       );
     }
   }
 
   /**
-   * The menu's entries for this platform. A device offers the apps; a browser
-   * offers Save image, Share image… only where it can share files, and More…
-   * (`UC-SBS` `R-1`, `R-12`).
+   * The menu's entries for this platform. A device offers the apps that are
+   * installed; a browser offers Save image, Share image… only where it can
+   * share files, and More… (`UC-SBS` `R-1`, `R-12`).
    */
-  private shareMenuEntries(): ShareMenuEntry[] {
+  private async shareMenuEntries(): Promise<ShareMenuEntry[]> {
     if (Capacitor.isNativePlatform()) {
-      return NATIVE_SHARE_MENU;
+      const installed = await Promise.all(
+        NATIVE_APP_ENTRIES.map(({ choice }) =>
+          this.dataAccess.canShareImageTo(choice),
+        ),
+      );
+
+      return [
+        ...NATIVE_APP_ENTRIES.filter((_, index) => installed[index]),
+        MORE_ENTRY,
+      ];
     }
 
     return [
@@ -346,7 +366,7 @@ export class DetailsService {
             },
           ]
         : []),
-      { choice: 'more', labelKey: 'share-menu-more' },
+      MORE_ENTRY,
     ];
   }
 
@@ -357,7 +377,7 @@ export class DetailsService {
     const sheet = await this.actionSheetController.create({
       header: t('share-menu-title'),
       buttons: [
-        ...this.shareMenuEntries().map(({ choice, labelKey }) => ({
+        ...(await this.shareMenuEntries()).map(({ choice, labelKey }) => ({
           text: t(labelKey),
           data: choice,
           htmlAttributes: { 'data-testid': `share-menu-${choice}` },
@@ -376,10 +396,16 @@ export class DetailsService {
     return data;
   }
 
+  /**
+   * `app` is the app the menu entry named. On a device the composer's Share
+   * action hands the image to that app directly; everywhere else, and for
+   * Save image and Share image…, it opens the share sheet.
+   */
   private async openShareImageComposer(
     bite: Bite,
     format: ShareImageFormat,
     target: ShareTarget,
+    app?: ShareMenuTarget,
   ): Promise<void> {
     // What every later step of the funnel says about this image. The layout
     // follows the user's picks, so a hand-off names the one that went out.
@@ -405,12 +431,7 @@ export class DetailsService {
           this.saveBiteImage(bite, image, funnel),
         ),
         // Absent where the platform cannot share a file, which hides the action.
-        shareImage: signal(
-          this.dataAccess.canShareImageFiles()
-            ? (image: Blob): Promise<void> =>
-                this.shareBiteImage(bite, image, funnel)
-            : undefined,
-        ),
+        shareImage: signal(this.shareAction(bite, funnel, app)),
         closed,
         layoutChosen,
       },
@@ -445,6 +466,58 @@ export class DetailsService {
     const creator = this.biteCreatorValue();
 
     return creator?.public ? creator.displayName || undefined : undefined;
+  }
+
+  /**
+   * What the composer's Share action does: open the menu entry's app on a
+   * device, or the share sheet. Nothing where the platform can share no file.
+   */
+  private shareAction(
+    bite: Bite,
+    funnel: ShareImageParams,
+    app: ShareMenuTarget | undefined,
+  ): ((image: Blob) => Promise<void>) | undefined {
+    if (app && Capacitor.isNativePlatform()) {
+      return (image) => this.handOffToApp(app, bite, image, funnel);
+    }
+
+    return this.dataAccess.canShareImageFiles()
+      ? (image): Promise<void> => this.shareBiteImage(bite, image, funnel)
+      : undefined;
+  }
+
+  /**
+   * Opens the target app with the composed image (issue #1730). A hand-off that
+   * fails falls back to the share sheet with the same image, so the user still
+   * has somewhere to send it; the failure is recorded first, and the share
+   * sheet then records its own outcome.
+   */
+  private async handOffToApp(
+    app: ShareMenuTarget,
+    bite: Bite,
+    image: Blob,
+    funnel: ShareImageParams,
+  ): Promise<void> {
+    try {
+      await this.dataAccess.shareBiteImageTo(app, bite, image);
+      this.analytics.logEvent(AnalyticsEvent.ShareHandoffSucceeded, {
+        ...funnel,
+        action: 'open_app',
+      });
+
+      return;
+    } catch (error) {
+      if (error instanceof SaveImageDeniedError) {
+        this.logHandoffFailed(funnel, 'open_app', 'permission_denied');
+      } else if (error instanceof ShareTargetUnavailableError) {
+        this.logHandoffFailed(funnel, 'open_app', 'unavailable');
+      } else {
+        console.error(`Failed to hand the Bite image to ${app}:`, error);
+        this.logHandoffFailed(funnel, 'open_app', 'failed');
+      }
+    }
+
+    await this.shareBiteImage(bite, image, funnel);
   }
 
   /** Saves the composed image and says how that went. */

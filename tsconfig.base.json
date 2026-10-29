@@ -194,6 +194,7 @@
       "media-location": ["libs/common/media-location/src/index.ts"],
       "image-compression": ["libs/common/image-compression/src/index.ts"],
       "model": ["libs/bite-tribe-common/model/src/index.ts"],
+      "social-share": ["libs/common/social-share/src/index.ts"],
       "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
       "toast": ["libs/common/toast/src/index.ts"],
       "haptics": ["libs/common/haptics/src/index.ts"],

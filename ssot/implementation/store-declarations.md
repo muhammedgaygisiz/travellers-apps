@@ -216,6 +216,24 @@ change. It does add two platform entries, both write-only:
   needs no permission. Play's photo and video permissions policy concerns reading
   media (`READ_MEDIA_IMAGES` and its predecessors) and is not touched.
 
+### Opening Instagram And Facebook Changes No Declaration
+
+The composer's direct hand-off (issue [#1730]) gives the image to Instagram or
+Facebook on the device, at the user's request. BiteTribe sends nothing to Meta
+itself and adds no Meta SDK, so the nutrition labels and Play's Data safety
+form stay as they are; the only Meta value in the app is the public App ID the
+Stories APIs require ([UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md) `R-28`). It adds
+two platform entries, both for detecting whether the apps are installed:
+
+- **iOS:** three `LSApplicationQueriesSchemes` entries, `instagram`,
+  `instagram-stories` and `facebook-stories`, next to the existing `maps` and
+  `comgooglemaps`. The Instagram Post hand-off saves the image first, through
+  the `NSPhotoLibraryAddUsageDescription` and add-only access that Save image
+  already declared above; it asks for nothing new and never for read access.
+- **Android:** a `<queries>` block naming the two packages,
+  `com.instagram.android` and `com.facebook.katana`. That is the narrow form
+  Google Play expects; the app does not ask for `QUERY_ALL_PACKAGES`.
+
 ### Measuring The Share Funnel Changes No Declaration
 
 The six `share_*` events of issue [#1733] go through the same Firebase Analytics
@@ -306,5 +324,6 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 [#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
 [#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
 [#1433]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1433
+[#1730]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1730
 [#1732]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1732
 [#1733]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1733

@@ -21,6 +21,7 @@ import { Filesystem } from '@capacitor/filesystem';
 import {
   SaveImageDeniedError,
   ShareImageUnavailableError,
+  ShareTargetUnavailableError,
 } from '../share-image-errors';
 
 jest.mock('bite-tribe/store');
@@ -46,28 +47,44 @@ jest.mock('geolocation', () => ({
 }));
 jest.mock('@capacitor/share');
 
-// The wrappers' local save plugin (issue #1732). The service registers it as
-// it is imported, which is before this file's own declarations run, so the
-// mock lives inside the factory and is read back through `jest.requireMock`.
+// The wrappers' local save plugin (issue #1732) and social share plugin
+// (issue #1730). Both are registered as their modules are imported, which is
+// before this file's own declarations run, so the mocks live inside the
+// factory and are read back through `jest.requireMock`.
 jest.mock('@capacitor/core', () => {
   const actual = jest.requireActual('@capacitor/core');
   const saveImage = { saveToPhotos: jest.fn() };
+  const socialShare = {
+    canShareTo: jest.fn(),
+    shareToInstagramStory: jest.fn(),
+    shareToFacebookStory: jest.fn(),
+    shareToInstagramFeed: jest.fn(),
+  };
+  const local: Record<string, unknown> = {
+    SaveImage: saveImage,
+    SocialShare: socialShare,
+  };
 
   return {
     ...actual,
     __saveImage: saveImage,
+    __socialShare: socialShare,
     registerPlugin: (name: string, implementations?: unknown): unknown =>
-      name === 'SaveImage'
-        ? saveImage
-        : actual.registerPlugin(name, implementations),
+      local[name] ?? actual.registerPlugin(name, implementations),
   };
 });
 
-const mockSaveImage = (
+const { __saveImage: mockSaveImage, __socialShare: mockSocialShare } =
   jest.requireMock('@capacitor/core') as {
     __saveImage: { saveToPhotos: jest.Mock };
-  }
-).__saveImage;
+    __socialShare: Record<
+      | 'canShareTo'
+      | 'shareToInstagramStory'
+      | 'shareToFacebookStory'
+      | 'shareToInstagramFeed',
+      jest.Mock
+    >;
+  };
 jest.mock('@capacitor/filesystem', () => ({
   Directory: { Cache: 'CACHE' },
   Filesystem: {
@@ -931,6 +948,118 @@ describe(DetailsDataAccessService.name, () => {
       expect(clicked[0].download).toBe('bitetribe-bite-1.jpg');
       expect(clicked[0].getAttribute('href')).toBe('blob:share-image');
       expect(mockSaveImage.saveToPhotos).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('canShareImageTo', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+      mockSocialShare.canShareTo.mockReset();
+    });
+
+    it.each([true, false])(
+      'asks the native plugin on a device (installed: %s)',
+      async (available) => {
+        jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+        mockSocialShare.canShareTo.mockResolvedValue({ available });
+
+        await expect(service.canShareImageTo('facebook-story')).resolves.toBe(
+          available,
+        );
+        expect(mockSocialShare.canShareTo).toHaveBeenCalledWith({
+          target: 'facebook-story',
+        });
+      },
+    );
+
+    it('reads a failed check as not installed', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+      jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      mockSocialShare.canShareTo.mockRejectedValue(
+        new Error('not implemented'),
+      );
+
+      await expect(service.canShareImageTo('instagram-story')).resolves.toBe(
+        false,
+      );
+    });
+
+    it('offers no app in a browser', async () => {
+      jest.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+
+      await expect(service.canShareImageTo('instagram-post')).resolves.toBe(
+        false,
+      );
+      expect(mockSocialShare.canShareTo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('shareBiteImageTo', () => {
+    const bite = { id: 'bite-1', name: 'Pad thai' } as Bite;
+    const image = new Blob(['jpeg'], { type: 'image/jpeg' });
+
+    afterEach(() => {
+      for (const method of Object.values(mockSocialShare)) {
+        method.mockReset();
+      }
+    });
+
+    it.each([
+      ['instagram-story', 'shareToInstagramStory'],
+      ['instagram-post', 'shareToInstagramFeed'],
+      ['facebook-story', 'shareToFacebookStory'],
+    ] as const)(
+      'writes the image to the cache and hands that file to %s',
+      async (target, method) => {
+        mockSocialShare[method].mockResolvedValue(undefined);
+
+        await service.shareBiteImageTo(target, bite, image);
+
+        expect(Filesystem.writeFile).toHaveBeenCalledWith(
+          expect.objectContaining({ path: 'share-image/bitetribe-bite-1.jpg' }),
+        );
+        expect(mockSocialShare[method]).toHaveBeenCalledWith({
+          path: 'file:///cache/image.jpg',
+        });
+      },
+    );
+
+    it('says so when the app is not there to take it', async () => {
+      mockSocialShare.shareToInstagramStory.mockRejectedValue(
+        Object.assign(new Error('gone'), { code: 'unavailable' }),
+      );
+
+      await expect(
+        service.shareBiteImageTo('instagram-story', bite, image),
+      ).rejects.toBeInstanceOf(ShareTargetUnavailableError);
+    });
+
+    it('says so when the user refused to let the app add the photo', async () => {
+      mockSocialShare.shareToInstagramFeed.mockRejectedValue(
+        Object.assign(new Error('denied'), { code: 'permission-denied' }),
+      );
+
+      await expect(
+        service.shareBiteImageTo('instagram-post', bite, image),
+      ).rejects.toBeInstanceOf(SaveImageDeniedError);
+    });
+
+    it('passes any other failure on', async () => {
+      mockSocialShare.shareToFacebookStory.mockRejectedValue(
+        new Error('disk full'),
+      );
+
+      await expect(
+        service.shareBiteImageTo('facebook-story', bite, image),
+      ).rejects.toThrow('disk full');
+    });
+
+    it('passes on a rejection that carries nothing', async () => {
+      mockSocialShare.shareToInstagramStory.mockRejectedValue(undefined);
+
+      await expect(
+        service.shareBiteImageTo('instagram-story', bite, image),
+      ).rejects.toBeUndefined();
     });
   });
 

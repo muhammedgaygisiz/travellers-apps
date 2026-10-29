@@ -86,6 +86,7 @@
   | World globe  | `world_globe_open`                    | `own_profile: boolean`                                                                                     | The world page is entered and its profile is known                                                 | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
   | World globe  | `world_globe_country_tap`             | `country_code: string`, `has_bites: boolean`, `source: 'globe' \| 'list'`                                  | A country is tapped on the globe or in the list under it                                           | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
   | World globe  | `world_globe_zoom`                    | `control: 'button' \| 'gesture'`                                                                           | The first zoom of a visit to the page; later ones are not counted                                  | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
+  | Celebration  | `celebration_shown`                   | `moment: CelebrationMoment`                                                                                | Once per `celebrate()` call, including when reduced motion skips the confetti                      | `libs/common/celebration/src/lib/celebration.service.ts`                                                    |
 
   The onboarding funnel events belong to the onboarding assistant epic ([epic-850](../records/epic-850.md),
   issue [#1017]), not to the launch taxonomy of issue 910. `onboarding_step_completed`
@@ -118,6 +119,13 @@
   shared `source` dimension (also the Bite source of `bite_created`), so a
   breakdown by it needs an event filter. GA4 does not backfill, so every event collected
   before the `--apply` reports `(not set)` for them.
+
+  `celebration_shown` belongs to issue [#1795], the celebrations of epic [#1741].
+  It answers whether the moments fire as rarely as the epic intends. `moment` is
+  one of `first-bite`, `first-country`, `onboarding-finished`, `first-follow` and
+  `bite-trail-completed`, and was added to `provision-ga4.mjs`. It is logged
+  even when reduced motion skips the confetti, because the toast still marks the
+  moment.
 
 - ## App Check Telemetry
 
@@ -854,4 +862,6 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
 [#1723]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1723
 [#1733]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1733
+[#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
 [#1787]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1787
+[#1795]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1795

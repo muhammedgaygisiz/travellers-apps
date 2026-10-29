@@ -168,6 +168,62 @@ shows rest, pressed, disabled and reduced-motion, in light and dark, for every
 button fill, a chip, a list row and a card, and a destructive alert at rest
 and pressed, in light and dark.
 
+## Celebration Rule
+
+A few firsts in bite-tribe are celebrated (epic [#1741]): one short confetti
+burst from the bottom of the screen, the moment's own success toast, and the
+`success` haptic that toast already plays. The ceiling is that burst. There is
+no full-screen takeover, no modal, no mascot and no sound, and a routine action
+is never celebrated.
+
+**Every celebration goes through `CelebrationService` in
+`libs/common/celebration`** (issue [#1795]). `celebrate(moment, params?)` takes
+one of five `CelebrationMoment`s - `first-bite`, `first-country`,
+`onboarding-finished`, `first-follow`, `bite-trail-completed` - and owns
+everything else:
+
+| Decision  | Value                                                                                                        |
+| --------- | ------------------------------------------------------------------------------------------------------------ |
+| Confetti  | `canvas-confetti`, one burst from `{ x: 0.5, y: 1 }` straight up, about 80 particles and 1 s                 |
+| Colours   | `--ion-color-primary`, `--bite-tribe-color` and `--ion-color-secondary`, read from the document at fire time |
+| Copy      | The moment's key in `CELEBRATION_MESSAGE_KEYS`, presented through `ToastService` with `outcome: 'success'`   |
+| Haptic    | The `success` the toast plays. The confetti plays none                                                       |
+| Analytics | `celebration_shown` with the `moment`, once per call                                                         |
+
+Details worth knowing before changing it:
+
+- **It replaces the moment's toast; it never adds one.** A call site that
+  celebrates raises no ordinary success toast of its own, and plays no haptic,
+  so each moment stays one action with one reaction.
+- **An overlay, never in the way.** The burst is drawn on a fixed,
+  full-viewport canvas with `pointer-events: none`, appended to the document
+  body rather than to a page, so it keeps running across a route change - a
+  first Bite returns to home, finishing onboarding enters the app. The canvas
+  is removed when the burst ends.
+- **Tertiary is left out of the colours.** `--ion-color-tertiary` sits a
+  shade away from the page background in both modes (`#f1f1f1` on white,
+  `#1c212b` on `#1a1c22`) and would draw invisible particles. The brand orange
+  `--bite-tribe-color` takes its place.
+- **One at a time.** A celebration that starts while a burst is running still
+  presents its toast but draws no second burst.
+- **Reduced motion draws nothing.** Under `prefers-reduced-motion: reduce` no
+  canvas is created; the toast and haptic still mark the moment. The in-app
+  haptics switch reaches the toast's haptic as it reaches every other one, and
+  does not touch the confetti.
+- **Never rejects.** A failure of the library or of the burst is swallowed,
+  the posture `ToastService.present()` holds.
+- **Detected at the moment of action, with no "seen" store.** Each call site
+  decides from a before/after comparison of state it already holds, so nothing
+  is written to `Preferences`, the account or Firestore, and a second phone
+  never replays a moment. A deliberate redo - deleting the only Bite and
+  posting again - may replay one, which the epic accepts.
+- **Only this library imports `canvas-confetti`**, and only bite-tribe calls
+  it. Its spec fails if another file imports the library.
+
+`Tech/Celebration` in Storybook (`libs/common/celebration/src/lib/__specs__/celebration.stories.ts`)
+fires the burst in light and dark. It is kept out of the Loki run, because at
+rest it is a single button and a captured burst would be random.
+
 ## Desktop Layout
 
 `PageChromeConfig.desktopLayout` opts a page into the desktop layout in `libs/common/ui/page`. It is off by default, so pages that do not set it are unaffected at every width.
@@ -217,7 +273,9 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1696]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1696
 [#1740]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1740
 [#1745]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1745
+[#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
 [#1747]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1747
 [#1749]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1749
 [#1765]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1765
 [#1766]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1766
+[#1795]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1795

@@ -74,6 +74,8 @@ export const AnalyticsEvent = {
   WorldGlobeOpened: 'world_globe_open',
   WorldGlobeCountryTapped: 'world_globe_country_tap',
   WorldGlobeZoomed: 'world_globe_zoom',
+  // Celebrations, consumer app (epic #1741, issue #1795)
+  CelebrationShown: 'celebration_shown',
 } as const;
 
 export type AnalyticsEventName =
@@ -351,6 +353,21 @@ export interface AnalyticsEventParamMap {
    * whether people zoom at all, and with what, not how often a pinch fires.
    */
   [AnalyticsEvent.WorldGlobeZoomed]: { control: 'button' | 'gesture' };
+  /**
+   * A celebration was played (GitHub issue #1795), once per moment, so it can
+   * be seen whether the moments fire as rarely as epic #1741 intends.
+   * `moment` mirrors `CelebrationMoment` from `celebration`. It is inlined
+   * because `celebration` emits this event and so depends on this library;
+   * `analytics-events.spec.ts` compares the two as text.
+   */
+  [AnalyticsEvent.CelebrationShown]: {
+    moment:
+      | 'first-bite'
+      | 'first-country'
+      | 'onboarding-finished'
+      | 'first-follow'
+      | 'bite-trail-completed';
+  };
 }
 
 /**
@@ -541,6 +558,7 @@ export const ANALYTICS_EVENT_SURFACE: Record<
   [AnalyticsEvent.WorldGlobeOpened]: 'consumer',
   [AnalyticsEvent.WorldGlobeCountryTapped]: 'consumer',
   [AnalyticsEvent.WorldGlobeZoomed]: 'consumer',
+  [AnalyticsEvent.CelebrationShown]: 'consumer',
 };
 
 /**

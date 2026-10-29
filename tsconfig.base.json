@@ -197,6 +197,7 @@
       "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
       "toast": ["libs/common/toast/src/index.ts"],
       "haptics": ["libs/common/haptics/src/index.ts"],
+      "celebration": ["libs/common/celebration/src/index.ts"],
       "utils": ["libs/common/utils/src/index.ts"],
       "bite-tribe/about": ["libs/bite-tribe/about/page/src/index.ts"],
       "bite-tribe/about-data-access": [

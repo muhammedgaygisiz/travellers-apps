@@ -156,6 +156,31 @@ describe('MapPageComponent', () => {
     });
   });
 
+  describe('keepTouchOnMap', () => {
+    it('should stop a touch on the map from reaching the swipe-back gesture', () => {
+      fixture.detectChanges();
+      const outletListener = jest.fn();
+      fixture.nativeElement.addEventListener('touchstart', outletListener);
+      const map: HTMLElement = fixture.nativeElement.querySelector('bt-map');
+
+      map.dispatchEvent(new Event('touchstart', { bubbles: true }));
+
+      expect(outletListener).not.toHaveBeenCalled();
+    });
+
+    it('should let a touch outside the map through', () => {
+      fixture.detectChanges();
+      const outletListener = jest.fn();
+      fixture.nativeElement.addEventListener('touchstart', outletListener);
+      const content: HTMLElement =
+        fixture.nativeElement.querySelector('ion-content');
+
+      content.dispatchEvent(new Event('touchstart', { bubbles: true }));
+
+      expect(outletListener).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('isWideScreen', () => {
     const originalMatchMedia = window.matchMedia;
 

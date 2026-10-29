@@ -657,6 +657,56 @@ dependency, and that plays the platform's own haptic primitive:
   either platform, and the setting above stays on the device and is never
   collected.
 
+## Social Share Hand-Off Rule
+
+The share image composer of [UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md) opens Instagram and
+Facebook directly through `SocialShare`, a local Capacitor plugin in both
+wrappers (issue [#1730]), behind the typed bridge in `libs/common/social-share`.
+`@capacitor/share` only opens the system share sheet; it cannot write to the
+Stories pasteboard on iOS or send a targeted intent on Android.
+
+| Target          | iOS                                                                                                                             | Android                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Instagram Story | Pasteboard `com.instagram.sharedSticker.backgroundImage`, then `instagram-stories://share?source_application=<id>`              | `com.instagram.share.ADD_TO_STORY` to `com.instagram.android`, extra `source_application`                        |
+| Facebook Story  | Pasteboard `com.facebook.sharedSticker.backgroundImage` and `com.facebook.sharedSticker.appID`, then `facebook-stories://share` | `com.facebook.stories.ADD_TO_STORY` to `com.facebook.katana`, extra `com.facebook.platform.extra.APPLICATION_ID` |
+| Instagram Post  | Saved add-only with `PHPhotoLibrary`, then `instagram://library?LocalIdentifier=<id>`                                           | `ACTION_SEND` to `com.instagram.android`                                                                         |
+
+- **The App ID is wrapper configuration.** Meta's public App ID - registered in
+  issue [#1729], recorded in [Implementation - Social Media Channels](../implementation/social-media-channels.md) - is `MetaAppID` in the iOS
+  `Info.plist` and the `meta_app_id` string resource on Android. The web layer
+  never handles it. The App Secret and the client token are never in the
+  repository, and no Meta SDK is installed (`UC-SBS` `R-28`).
+- **The keys are Meta's documented ones, not the issue's shorthand.** Issue
+  [#1730] names a `source_application` pasteboard key on iOS and a
+  `com.facebook.platform.APP_ID` extra on Android. Meta's Stories documentation
+  puts Instagram's App ID in the URL's `source_application` query and Facebook's
+  in `com.facebook.sharedSticker.appID` on iOS and
+  `com.facebook.platform.extra.APPLICATION_ID` on Android, so those are what the
+  plugins send.
+- **The pasteboard expires and stays local.** Each Stories item is written with
+  `expirationDate` five minutes ahead and `localOnly` (`UC-SBS` `R-25`), so it neither
+  outlives the hand-off nor reaches other devices through Universal Clipboard.
+- **Add-only, always.** The iOS Instagram Post hand-off asks for
+  `PHAccessLevel.addOnly` and takes the asset's local identifier from the
+  creation request's placeholder, because add-only access can never look the
+  asset up afterwards (`UC-SBS` `R-27`).
+- **Explicit intents through the existing `FileProvider`.** Android shares the
+  cache file through the wrapper's `${applicationId}.fileprovider`, which is
+  `exported="false"`; every intent names its package and grants
+  `FLAG_GRANT_READ_URI_PERMISSION` only (`UC-SBS` `R-26`). It starts the activity for a
+  result because Instagram and Facebook identify the sender with
+  `getCallingPackage()`, which is only set that way.
+- **Detection needs a declaration on each platform.** `canShareTo` asks
+  `canOpenURL` on iOS, which answers only for schemes in
+  `LSApplicationQueriesSchemes` (`instagram`, `instagram-stories`,
+  `facebook-stories`), and resolves the target's own intent on Android, which
+  sees only the packages under `<queries>` (`com.instagram.android`,
+  `com.facebook.katana`). A failed check reads as not installed, so the menu
+  hides the entry rather than offering an app it cannot reach (`UC-SBS` `R-12`).
+- **Registration.** Like `BiteHaptics` and `SaveImage`, it is registered by
+  `BridgeViewController` on iOS and in `MainActivity` before `super.onCreate`
+  on Android.
+
 ## Code Anchors
 
 ```text
@@ -675,6 +725,9 @@ libs/common/ui/star-rating
 apps/bite-tribe-android/android/app/src/main/java/com/bitetribe/app/BiteHapticsPlugin.java
 apps/bite-tribe-ios/ios/App/App/BiteHapticsPlugin.swift
 apps/bite-tribe-ios/ios/App/App/BridgeViewController.swift
+libs/common/social-share
+apps/bite-tribe-android/android/app/src/main/java/com/bitetribe/app/SocialSharePlugin.java
+apps/bite-tribe-ios/ios/App/App/SocialSharePlugin.swift
 libs/common/toast/src/lib/toast.service.ts
 libs/bite-tribe-common/bite/src/lib/bite.component.ts
 libs/bite-tribe-common/bite/src/lib/likes/likes.component.ts
@@ -710,6 +763,8 @@ libs/common/image-compression
 [#1635]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1635
 [#1636]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1636
 [#1637]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1637
+[#1729]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1729
+[#1730]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1730
 [#1740]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1740
 [#1743]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1743
 [#1744]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1744

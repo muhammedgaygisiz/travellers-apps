@@ -4,6 +4,7 @@ import {
   DetailsDataAccessService,
   SaveImageDeniedError,
   ShareImageUnavailableError,
+  ShareTargetUnavailableError,
 } from 'bite-tribe/details-data-access';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LocalImagePickerService } from 'bite-tribe-common/bite';
@@ -69,6 +70,8 @@ const createMockDataAccess = (
     cacheBite: jest.fn(),
     shareBite: jest.fn(),
     canShareImageFiles: jest.fn().mockReturnValue(true),
+    canShareImageTo: jest.fn().mockResolvedValue(true),
+    shareBiteImageTo: jest.fn().mockResolvedValue(undefined),
     saveBiteImage: jest.fn().mockResolvedValue(undefined),
     reloadBite: jest.fn(),
     reportBite: jest.fn().mockResolvedValue({ reported: true }),
@@ -666,12 +669,15 @@ describe('DetailsService', () => {
       expect(mockModalController.create).not.toHaveBeenCalled();
     });
 
-    describe('sharing the composed image', () => {
+    /** Share image… in a browser; a device reaches the sheet as a fallback. */
+    describe('sharing the composed image through the share sheet', () => {
       const image = new Blob(['jpeg'], { type: 'image/jpeg' });
+
+      beforeEach(() => isNative.mockReturnValue(false));
 
       const openComposer = async (): Promise<(blob: Blob) => Promise<void>> => {
         mockActionSheetController.create.mockResolvedValue(
-          createShareMenu('instagram-story'),
+          createShareMenu('share-image'),
         );
         await service.onShareBiteClick(ownBite);
 
@@ -779,6 +785,120 @@ describe('DetailsService', () => {
         expect(componentProps.creatorName()).toBe(expected);
       },
     );
+
+    /** The menu offers an app only while it is installed (UC-SBS R-12). */
+    it.each([
+      [
+        'Instagram is missing',
+        {
+          'instagram-story': false,
+          'instagram-post': false,
+          'facebook-story': true,
+        },
+        ['facebook-story', 'more'],
+      ],
+      [
+        'Facebook is missing',
+        {
+          'instagram-story': true,
+          'instagram-post': true,
+          'facebook-story': false,
+        },
+        ['instagram-story', 'instagram-post', 'more'],
+      ],
+      [
+        'neither is installed',
+        {
+          'instagram-story': false,
+          'instagram-post': false,
+          'facebook-story': false,
+        },
+        ['more'],
+      ],
+    ])(
+      'leaves out the entries of an app that is not installed when %s',
+      async (_, installed: Record<string, boolean>, expected) => {
+        mockDataAccessService.canShareImageTo = jest.fn(
+          async (target: string) => installed[target],
+        );
+        mockActionSheetController.create.mockResolvedValue(createShareMenu());
+
+        await service.onShareBiteClick(ownBite);
+
+        const { buttons } = mockActionSheetController.create.mock.calls[0][0];
+        expect(
+          buttons
+            .map((button: { data?: string }) => button.data)
+            .filter(Boolean),
+        ).toEqual(expected);
+      },
+    );
+
+    /** Each app entry opens its app directly on a device (issue #1730). */
+    describe('handing the composed image to the app', () => {
+      const image = new Blob(['jpeg'], { type: 'image/jpeg' });
+
+      const openComposer = async (
+        choice: string,
+      ): Promise<(blob: Blob) => Promise<void>> => {
+        mockActionSheetController.create.mockResolvedValue(
+          createShareMenu(choice),
+        );
+        await service.onShareBiteClick(ownBite);
+
+        return mockModalController.create.mock.calls[0][0].componentProps.shareImage();
+      };
+
+      beforeEach(() => {
+        mockDataAccessService.shareBiteImageTo = jest
+          .fn()
+          .mockResolvedValue(undefined);
+        mockDataAccessService.shareBiteImage = jest
+          .fn()
+          .mockResolvedValue(undefined);
+      });
+
+      it.each(['instagram-story', 'instagram-post', 'facebook-story'])(
+        'opens %s with the image, without the share sheet',
+        async (choice) => {
+          await (
+            await openComposer(choice)
+          )(image);
+
+          expect(mockDataAccessService.shareBiteImageTo).toHaveBeenCalledWith(
+            choice,
+            ownBite,
+            image,
+          );
+          expect(mockDataAccessService.shareBiteImage).not.toHaveBeenCalled();
+          expect(mockToast.present).not.toHaveBeenCalled();
+        },
+      );
+
+      it.each([
+        ['the app is gone', new ShareTargetUnavailableError()],
+        ['photo access was refused', new SaveImageDeniedError()],
+        ['the hand-off failed', new Error('no activity')],
+      ])(
+        'falls back to the share sheet with the same image when %s',
+        async (_, error) => {
+          jest.spyOn(console, 'error').mockImplementation(() => undefined);
+          mockDataAccessService.shareBiteImageTo = jest
+            .fn()
+            .mockRejectedValue(error);
+
+          await (
+            await openComposer('instagram-post')
+          )(image);
+
+          expect(mockDataAccessService.shareBiteImage).toHaveBeenCalledWith(
+            ownBite,
+            image,
+          );
+          expect(mockToast.present).not.toHaveBeenCalled();
+        },
+      );
+    });
 
     /** A browser can open no app (UC-SBS R-1, R-12, issue #1732). */
     describe('in a browser', () => {
@@ -1018,9 +1138,6 @@ describe('DetailsService', () => {
       });
 
       it('hands off the layout the composer opened on when none was picked', async () => {
-        mockDataAccessService.shareBiteImage = jest
-          .fn()
-          .mockResolvedValue(undefined);
         await openComposer();
 
         await (
@@ -1034,10 +1151,43 @@ describe('DetailsService', () => {
             target: 'instagram_story',
             format: 'story',
             template: 'classic',
-            action: 'share',
+            action: 'open_app',
           },
         ]);
       });
+
+      it.each([
+        ['permission_denied', new SaveImageDeniedError()],
+        ['unavailable', new ShareTargetUnavailableError()],
+        ['failed', new Error('no activity')],
+      ])(
+        'counts a direct hand-off that failed as %s, then the share sheet it fell back to',
+        async (reason, error) => {
+          jest.spyOn(console, 'error').mockImplementation(() => undefined);
+          mockDataAccessService.shareBiteImageTo = jest
+            .fn()
+            .mockRejectedValue(error);
+          mockDataAccessService.shareBiteImage = jest
+            .fn()
+            .mockResolvedValue(undefined);
+          await openComposer();
+
+          await (
+            componentProps()['shareImage']() as (blob: Blob) => Promise<void>
+          )(image);
+
+          expect(logged().slice(3)).toEqual([
+            [
+              'share_handoff_failed',
+              expect.objectContaining({ action: 'open_app', reason }),
+            ],
+            [
+              'share_handoff_succeeded',
+              expect.objectContaining({ action: 'share' }),
+            ],
+          ]);
+        },
+      );
 
       it.each([
         ['cancelled', new Error('Share canceled')],
@@ -1045,10 +1195,11 @@ describe('DetailsService', () => {
         ['failed', new Error('disk full')],
       ])('counts a share that did not leave as %s', async (reason, error) => {
         jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        isNative.mockReturnValue(false);
         mockDataAccessService.shareBiteImage = jest
           .fn()
           .mockRejectedValue(error);
-        await openComposer();
+        await openComposer('share-image');
 
         await (
           componentProps()['shareImage']() as (blob: Blob) => Promise<void>

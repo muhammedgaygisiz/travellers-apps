@@ -32,8 +32,16 @@ import { getCurrentPosition } from 'geolocation';
 import { retry, withTimeout } from './async-retry';
 import { BiteNotFoundError } from './bite-not-found-error';
 import {
+  SOCIAL_SHARE_PERMISSION_DENIED,
+  SOCIAL_SHARE_UNAVAILABLE,
+  SocialShare,
+  type SocialShareFile,
+  type SocialShareTarget,
+} from 'social-share';
+import {
   SaveImageDeniedError,
   ShareImageUnavailableError,
+  ShareTargetUnavailableError,
 } from './share-image-errors';
 
 /**
@@ -48,6 +56,16 @@ interface SaveImagePlugin {
 const SaveImage = registerPlugin<SaveImagePlugin>('SaveImage');
 
 const shareImageFileName = (bite: Bite): string => `bitetribe-${bite.id}.jpg`;
+
+/** The native hand-off behind each app target (issue #1730). */
+const HAND_OFF: Record<
+  SocialShareTarget,
+  (file: SocialShareFile) => Promise<void>
+> = {
+  'instagram-story': (file) => SocialShare.shareToInstagramStory(file),
+  'instagram-post': (file) => SocialShare.shareToInstagramFeed(file),
+  'facebook-story': (file) => SocialShare.shareToFacebookStory(file),
+};
 
 /** Hands a blob to the browser as a file download. */
 const downloadImage = (image: Blob, fileName: string): void => {
@@ -477,8 +495,64 @@ export class DetailsDataAccessService {
   }
 
   /**
-   * Writes the image to the cache directory, where both the Share plugin and
-   * the save plugin read it from by URI.
+   * Whether a share image can be handed to `target`'s app, which decides
+   * whether the menu offers it (`UC-SBS` `R-12`). A browser can open no app,
+   * and a check that fails reads as not installed, so the menu never offers an
+   * app it cannot reach.
+   */
+  async canShareImageTo(target: SocialShareTarget): Promise<boolean> {
+    if (!Capacitor.isNativePlatform()) {
+      return false;
+    }
+
+    try {
+      const { available } = await SocialShare.canShareTo({ target });
+
+      return available;
+    } catch (error) {
+      console.warn(`Could not check the ${target} share target:`, error);
+
+      return false;
+    }
+  }
+
+  /**
+   * Hands a composed share image straight to `target`'s app (`UC-SBS`
+   * `R-25` to `R-27`, issue #1730): the Stories editor with the image as its
+   * background, or Instagram's feed composer. Only the re-encoded canvas output
+   * is handed over (`R-21`).
+   *
+   * Throws {@link ShareTargetUnavailableError} when the app is missing or would
+   * not open, and {@link SaveImageDeniedError} when the iOS Instagram Post
+   * hand-off was refused add access to the photo library.
+   */
+  async shareBiteImageTo(
+    target: SocialShareTarget,
+    bite: Bite,
+    image: Blob,
+  ): Promise<void> {
+    const path = await this.writeShareImage(bite, image);
+
+    try {
+      await HAND_OFF[target]({ path });
+    } catch (error) {
+      const code = (error as { code?: string })?.code;
+
+      if (code === SOCIAL_SHARE_PERMISSION_DENIED) {
+        throw new SaveImageDeniedError();
+      }
+
+      if (code === SOCIAL_SHARE_UNAVAILABLE) {
+        throw new ShareTargetUnavailableError();
+      }
+
+      throw error;
+    }
+  }
+
+  /**
+   * Writes the image to the cache directory, where the Share plugin, the save
+   * plugin and the social share plugin read it from by URI.
    */
   private async writeShareImage(bite: Bite, image: Blob): Promise<string> {
     const { uri } = await Filesystem.writeFile({

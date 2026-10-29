@@ -309,8 +309,8 @@ export interface AnalyticsEventParamMap {
    */
   [AnalyticsEvent.ShareTemplateChosen]: ShareImageParams;
   /**
-   * The image left BiteTribe: it was saved, or the share sheet reported that
-   * an app took it.
+   * The image left BiteTribe: it was saved, the share sheet reported that an
+   * app took it, or the target app was opened with it.
    *
    * **Not that anything was posted.** Instagram and Facebook do not tell the
    * app that hands them an image whether the user published it, so the honest
@@ -368,8 +368,13 @@ export type ShareTarget =
   | 'share_image'
   | 'more';
 
-/** What the composer did with the image: saved it, or shared it. */
-export type ShareImageAction = 'save' | 'share';
+/**
+ * What the composer did with the image: saved it, handed it to the share sheet,
+ * or opened the target app with it directly (`open_app`, issue #1730). A direct
+ * hand-off that fails and falls back to the share sheet is one failed
+ * `open_app` followed by a `share`.
+ */
+export type ShareImageAction = 'save' | 'share' | 'open_app';
 
 /**
  * What the share-as-image funnel says about each step (GitHub issue #1733).

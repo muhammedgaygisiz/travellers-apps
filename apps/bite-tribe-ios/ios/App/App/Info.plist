@@ -35,9 +35,14 @@
 	<array>
 		<string>maps</string>
 		<string>comgooglemaps</string>
+		<string>instagram</string>
+		<string>instagram-stories</string>
+		<string>facebook-stories</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>MetaAppID</key>
+	<string>1431506688471796</string>
 	<key>NSCameraUsageDescription</key>
 	<string>BiteTribe needs access to your camera to capture food photos and share them with others.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

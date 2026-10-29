@@ -14,9 +14,24 @@ export class ShareImageUnavailableError extends Error {
 }
 
 /**
+ * Raised when the app a share image was meant for could not take it: it is not
+ * installed, or the OS would not open it (issue #1730). The menu hides a target
+ * whose app is missing, so this means the app went away while the composer was
+ * open, or refused the hand-off.
+ */
+export class ShareTargetUnavailableError extends Error {
+  constructor() {
+    super('The target app is not available.');
+
+    this.name = 'ShareTargetUnavailableError';
+  }
+}
+
+/**
  * Raised when the user has refused BiteTribe permission to add the image to
  * their photos, so they can be told where to change it rather than shown a
- * generic failure. Both native save plugins reject with `permission-denied`.
+ * generic failure. Both native save plugins reject with `permission-denied`, and
+ * so does the iOS Instagram Post hand-off, which saves the image first.
  */
 export class SaveImageDeniedError extends Error {
   constructor() {

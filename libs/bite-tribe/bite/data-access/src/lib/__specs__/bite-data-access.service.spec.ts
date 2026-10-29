@@ -9,9 +9,10 @@ import type {
   Bite,
   CreateAndUploadImageCallbackParams,
   Geopoint,
+  PublicUser,
   UploadParams,
 } from 'model';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import {
   BiteDataAccessService,
   STALLED_UPLOAD_TIMEOUT_MS,
@@ -54,6 +55,7 @@ describe(BiteDataAccessService.name, () => {
     searchPlaces: jest.Mock;
     searchNearbyPlaces: jest.Mock;
     getCurrencyByPosition: jest.Mock;
+    hasBitesByUser: jest.Mock;
   };
   let store: {
     saveNewBite: jest.Mock;
@@ -65,9 +67,15 @@ describe(BiteDataAccessService.name, () => {
   };
   let analytics: { logEvent: jest.Mock };
   const biteIdFromUrl = signal<string | undefined>(undefined);
+  let publicUser$: BehaviorSubject<Partial<PublicUser> | undefined>;
+  const user = signal<{ uid: string } | undefined>(undefined);
 
   beforeEach(() => {
     biteIdFromUrl.set(undefined);
+    publicUser$ = new BehaviorSubject<Partial<PublicUser> | undefined>(
+      undefined,
+    );
+    user.set({ uid: 'leela' });
     // The stall watchdog is a timer, and every upload started in this file arms
     // one, so the clock is controlled for the whole suite.
     jest.useFakeTimers();
@@ -86,6 +94,7 @@ describe(BiteDataAccessService.name, () => {
       searchPlaces: jest.fn().mockResolvedValue([]),
       searchNearbyPlaces: jest.fn().mockResolvedValue([]),
       getCurrencyByPosition: jest.fn().mockResolvedValue(undefined),
+      hasBitesByUser: jest.fn().mockResolvedValue(false),
     };
     store = {
       saveNewBite: jest.fn(),
@@ -118,6 +127,8 @@ describe(BiteDataAccessService.name, () => {
             cachedBite$: of(undefined),
             nearbyRestaurants$: of(undefined),
             tagSuggestionsForEditingBite$: of(undefined),
+            publicUser$,
+            user,
           },
         },
       ],
@@ -129,6 +140,44 @@ describe(BiteDataAccessService.name, () => {
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
+  });
+
+  describe('hasOwnBites', () => {
+    it('answers from the aggregate when it counts a Bite', async () => {
+      publicUser$.next({ userId: 'leela', biteCount: 4 });
+
+      await expect(service.hasOwnBites()).resolves.toBe(true);
+      expect(api.hasBitesByUser).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['no aggregate', undefined],
+      ['an aggregate of zero', 0],
+    ])('asks Firestore for a profile with %s', async (_, biteCount) => {
+      publicUser$.next({ userId: 'leela', biteCount });
+      api.hasBitesByUser.mockResolvedValue(true);
+
+      await expect(service.hasOwnBites()).resolves.toBe(true);
+      expect(api.hasBitesByUser).toHaveBeenCalledWith('leela');
+    });
+
+    it('asks Firestore before the profile has loaded', async () => {
+      await expect(service.hasOwnBites()).resolves.toBe(false);
+      expect(api.hasBitesByUser).toHaveBeenCalledWith('leela');
+    });
+
+    it('cannot tell while signed out', async () => {
+      user.set(undefined);
+
+      await expect(service.hasOwnBites()).resolves.toBeUndefined();
+      expect(api.hasBitesByUser).not.toHaveBeenCalled();
+    });
+
+    it('cannot tell when the read fails', async () => {
+      api.hasBitesByUser.mockRejectedValue(new Error('offline'));
+
+      await expect(service.hasOwnBites()).resolves.toBeUndefined();
+    });
   });
 
   describe('biteLoader', () => {

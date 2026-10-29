@@ -23,6 +23,7 @@ import { getCurrencyByPosition } from './utils/get-currency-by-position';
 import { reportBite } from './utils/report-bite';
 import { BITE_COLLECTION } from '../utils/constants';
 import { loadBitesByUser } from './utils/load-bites-by-user';
+import { hasBitesByUser } from './utils/has-bites-by-user';
 import { loadWeeklyBites } from './utils/load-weekly-bites';
 import { createBite } from './utils/create-bite';
 import { saveEditedBite } from './utils/save-edited-bite';
@@ -65,6 +66,10 @@ export class BiteApiService {
 
   public async loadBitesByUser(userUid: string): Promise<Bite[]> {
     return loadBitesByUser(userUid);
+  }
+
+  public async hasBitesByUser(userUid: string): Promise<boolean> {
+    return hasBitesByUser(userUid);
   }
 
   public async loadWeeklyBites(

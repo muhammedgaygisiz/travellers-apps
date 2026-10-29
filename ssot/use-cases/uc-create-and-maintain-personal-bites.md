@@ -122,6 +122,7 @@ rest of the product reads.
   a service themselves: they take inputs and emit outputs, and the smart layer
   decides what happens — including presenting the picker.
 - User can post the Bite and stay on the form to add another Bite at the same place. Restaurant, currency, and position stay; image, dish name, price, rating, description, and tags reset, and the tags of the Bites already posted in that session become suggestions.
+- The user's first Bite is celebrated instead of confirmed: a short confetti burst and `Your first Bite is in!` replace the ordinary `Bite created successfully!` toast, on the post path and the add-another path alike, where the burst plays over the form. Whether it is the first is asked before the create, from the profile's `biteCount` when it counts a Bite and otherwise from Firestore for a single Bite of the user's. The store cannot answer: it holds the user's own Bites only once My Bites or My Profile has loaded them. Nothing is stored, so deleting the only Bite and posting again celebrates again, which epic [#1741] accepts. When the answer cannot be told - signed out, or the read failed - the ordinary toast is shown, and a failed create celebrates nothing. See GitHub issue [#1796] and the Celebration Rule in [Implementation - Ionic Patterns](../implementation/ionic-patterns.md).
 - User can edit the Bite later.
 - My Bites shows the total number of the user's Bites as a badge next to its title. It is the total, not the length of the list underneath: a filter narrows the list but never the badge. It is counted the way the profile header counts, from the user document's `biteCount` aggregate raised to the number of loaded Bites when that is higher (`totalBiteCount`), so the two surfaces never report different numbers. The badge is not shown while the Bites are still loading. See GitHub issue [#1783].
 
@@ -188,6 +189,7 @@ each under App Functionality.
 - Issue [#1409] moved the `ACCESS_MEDIA_LOCATION` grant to the onboarding photos step (the Media Permission Rule). Closed.
 - Issue [#1078] replaced the permissive `/{document=**}` Firestore wildcard with default-deny and per-collection matches, which is what makes the deferred work under [#1290] possible. Closed.
 - Issue [#1783] shows the total Bite count as a badge next to the My Bites title, sharing the profile header's count rule. Open.
+- Issue [#1796] celebrates the user's first Bite in place of the ordinary creation toast, part of epic [#1741]. Open.
 - Issue [#1290] - storing the resolved candidate positions on the Bite so a source can be re-chosen while editing. Open, classified `[Secondary]`.
 
 ## Related Domains
@@ -200,6 +202,7 @@ each under App Functionality.
 
 - [Personas](../product/personas.md) - the audiences this loop serves: Food lover, Traveler, Bite creator
 - [Implementation - Feature Patterns](../implementation/feature-patterns.md) - the Entry Feedback Contract
+- [Implementation - Ionic Patterns](../implementation/ionic-patterns.md) - the Celebration Rule
 - [Architecture - Capacitor](../architecture/capacitor.md) - the Media Permission Rule
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
 - [Current State - Known Issues](../current-state/known-issues.md)
@@ -217,4 +220,6 @@ each under App Functionality.
 [#1394]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1394
 [#1409]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1409
 [#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717
+[#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
 [#1783]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1783
+[#1796]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1796

@@ -410,6 +410,11 @@ export class BiteTribeApiService {
     return this.biteApiService.loadBitesByUser(userUid);
   }
 
+  /** Whether the user has posted any Bite, without loading them. */
+  async hasBitesByUser(userUid: string): Promise<boolean> {
+    return this.biteApiService.hasBitesByUser(userUid);
+  }
+
   async weeklyBites(range?: WeekRange): Promise<WeeklyBites | undefined> {
     return this.biteApiService.loadWeeklyBites(range);
   }

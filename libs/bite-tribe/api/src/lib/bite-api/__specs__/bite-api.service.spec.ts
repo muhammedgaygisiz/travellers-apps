@@ -4,6 +4,7 @@ import { AuthService } from 'ta-firestore';
 import { of } from 'rxjs';
 import { loadBitesByLocation } from '../utils/load-bites-by-location';
 import { loadBitesByUser } from '../utils/load-bites-by-user';
+import { hasBitesByUser } from '../utils/has-bites-by-user';
 import { createBite } from '../utils/create-bite';
 import { loadBiteById } from '../utils/load-bite-by-id';
 import { Bite, Bucketlist } from 'model';
@@ -22,6 +23,10 @@ jest.mock('../utils/load-bites-by-location', () => ({
 
 jest.mock('../utils/load-bites-by-user', () => ({
   loadBitesByUser: jest.fn(),
+}));
+
+jest.mock('../utils/has-bites-by-user', () => ({
+  hasBitesByUser: jest.fn(),
 }));
 
 const mockedBiteId = 'mocked-bite-id';
@@ -109,6 +114,15 @@ describe(BiteApiService.name, () => {
       await service.loadBitesByUser('123');
 
       expect(loadBitesByUser).toHaveBeenCalledWith('123');
+    });
+  });
+
+  describe('hasBitesByUser', () => {
+    it('should call hasBitesByUser', async () => {
+      (hasBitesByUser as jest.Mock).mockResolvedValue(true);
+
+      await expect(service.hasBitesByUser('123')).resolves.toBe(true);
+      expect(hasBitesByUser).toHaveBeenCalledWith('123');
     });
   });
 

@@ -1,5 +1,5 @@
 import { TestScheduler } from 'rxjs/testing';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject, Subscription } from 'rxjs';
 import { NavController, Platform } from '@ionic/angular';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
@@ -17,6 +17,8 @@ import SpyInstance = jest.SpyInstance;
 import { gpsPosition, publicUser } from '../selectors';
 import { LocationPermissionNotGrantedError } from 'geolocation';
 import { ToastService } from 'toast';
+import { CelebrationService } from 'celebration';
+import { TranslocoService } from '@jsverse/transloco';
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
@@ -65,6 +67,14 @@ const ToastServiceMock = {
   present: jest.fn().mockResolvedValue(undefined),
 };
 
+const CelebrationServiceMock = {
+  celebrate: jest.fn().mockResolvedValue(undefined),
+};
+
+const TranslocoServiceMock = {
+  getActiveLang: jest.fn(() => 'en'),
+};
+
 const NavControllerMock = {};
 const AnalyticsServiceMock = {
   logEvent: jest.fn(),
@@ -90,6 +100,8 @@ describe(AppEffect.name, () => {
         { provide: NavController, useValue: NavControllerMock },
         { provide: AnalyticsService, useValue: AnalyticsServiceMock },
         { provide: ToastService, useValue: ToastServiceMock },
+        { provide: CelebrationService, useValue: CelebrationServiceMock },
+        { provide: TranslocoService, useValue: TranslocoServiceMock },
         provideMockStore(),
       ],
     });
@@ -220,6 +232,108 @@ describe(AppEffect.name, () => {
 
         expectObservable(effects.loadPublicProfile$).toBe(expected, output);
       });
+    });
+  });
+
+  describe('celebrateFirstCountry$', () => {
+    const signedIn = fromAuth.AuthActions.loadedUser({
+      user: { uid: 'leela' } as unknown as Parameters<
+        typeof fromAuth.AuthActions.loadedUser
+      >[0]['user'],
+    });
+    const signedOut = fromAuth.AuthActions.loadedUser({
+      user: undefined as unknown as Parameters<
+        typeof fromAuth.AuthActions.loadedUser
+      >[0]['user'],
+    });
+
+    let actions: Subject<Action>;
+    let profiles: Subject<Partial<PublicUser>>;
+    let subscription: Subscription;
+    const originalProfile$ = BiteTribeApiServiceMock.publicProfile$;
+
+    beforeEach(() => {
+      CelebrationServiceMock.celebrate.mockClear();
+      actions = new Subject<Action>();
+      profiles = new Subject<Partial<PublicUser>>();
+      actions$ = actions;
+      BiteTribeApiServiceMock.publicProfile$ =
+        profiles as unknown as Observable<PublicUser>;
+      subscription = effects.celebrateFirstCountry$.subscribe();
+    });
+
+    afterEach(() => {
+      subscription.unsubscribe();
+      BiteTribeApiServiceMock.publicProfile$ = originalProfile$;
+    });
+
+    it('should have dispatch false set', () => {
+      expect(
+        getEffectsMetadata(effects).celebrateFirstCountry$?.dispatch,
+      ).toBeFalsy();
+    });
+
+    it('celebrates a code a later snapshot adds, naming the country in the active language', () => {
+      TranslocoServiceMock.getActiveLang.mockReturnValueOnce('de');
+      actions.next(signedIn);
+      profiles.next({ countryCodes: ['DE'] });
+      profiles.next({ countryCodes: ['DE', 'ES'] });
+
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(1);
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+        'first-country',
+        { country: 'Spanien' },
+      );
+    });
+
+    it('celebrates nothing for the first snapshot after start-up', () => {
+      actions.next(signedIn);
+      profiles.next({ countryCodes: ['DE', 'JP'] });
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('celebrates nothing going from no codes to one', () => {
+      actions.next(signedIn);
+      profiles.next({ countryCodes: [] });
+      profiles.next({ countryCodes: ['DE'] });
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('celebrates once for a snapshot that adds two codes', () => {
+      actions.next(signedIn);
+      profiles.next({ countryCodes: ['DE'] });
+      profiles.next({ countryCodes: ['DE', 'JP', 'TH'] });
+
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(1);
+    });
+
+    it('celebrates nothing for a snapshot that removes a code', () => {
+      actions.next(signedIn);
+      profiles.next({ countryCodes: ['DE', 'JP'] });
+      profiles.next({ countryCodes: ['DE'] });
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('starts a new baseline on each sign-in', () => {
+      actions.next(signedIn);
+      profiles.next({ countryCodes: ['DE'] });
+      actions.next(signedIn);
+      profiles.next({ countryCodes: ['DE', 'JP'] });
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('stops listening once signed out', () => {
+      actions.next(signedIn);
+      profiles.next({ countryCodes: ['DE'] });
+      actions.next(signedOut);
+      profiles.next({ countryCodes: ['DE', 'JP'] });
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+      expect(profiles.observed).toBe(false);
     });
   });
 

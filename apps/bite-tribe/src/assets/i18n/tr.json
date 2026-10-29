@@ -299,6 +299,7 @@
   "location-label": "Konum:",
   "bite-created-successfully": "Bite başarıyla oluşturuldu!",
   "bite-created-first": "İlk Bite'ın paylaşıldı!",
+  "country-badge-earned": "Yeni bir ülkede ilk Bite'ın: {{country}}!",
   "image-uploaded-successfully": "Görsel başarıyla yüklendi!",
   "uploading-keep-app-open": "Fotoğraf yükleniyor — uygulamayı açık tutun",
   "loading-photo": "Fotoğraf yükleniyor…",

@@ -1053,6 +1053,14 @@ describe(DetailsDataAccessService.name, () => {
         service.shareBiteImageTo('facebook-story', bite, image),
       ).rejects.toThrow('disk full');
     });
+
+    it('passes on a rejection that carries nothing', async () => {
+      mockSocialShare.shareToInstagramStory.mockRejectedValue(undefined);
+
+      await expect(
+        service.shareBiteImageTo('instagram-story', bite, image),
+      ).rejects.toBeUndefined();
+    });
   });
 
   describe('canShareImageFiles', () => {

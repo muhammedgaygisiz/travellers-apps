@@ -94,6 +94,8 @@ const CUSTOM_DIMENSIONS = [
   { parameterName: 'country_code', displayName: 'Country code' },
   { parameterName: 'has_bites', displayName: 'Country has Bites' },
   { parameterName: 'control', displayName: 'Zoom control' },
+  // The celebrations (issue #1795). `moment` is one of five fixed values.
+  { parameterName: 'moment', displayName: 'Celebration moment' },
   // Which app the session came from (issue #1098). Both apps report to one
   // property through one measurement id, so this is the only thing separating
   // a staff shift from a diner's session - and `activeUsers` counts people,

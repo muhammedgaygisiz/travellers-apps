@@ -78,6 +78,16 @@ export class MapPageComponent {
     );
   }
 
+  /**
+   * Ionic's iOS swipe-back gesture listens on the router outlet for a touch
+   * starting near the left edge, so a pinch with one finger there navigated
+   * back instead of zooming. Leaflet has already handled the touch by the time
+   * it reaches this host, so stopping it here keeps every map touch on the map.
+   */
+  keepTouchOnMap(event: Event): void {
+    event.stopPropagation();
+  }
+
   closeSelectedBite(): void {
     this.selectedBite = undefined;
   }

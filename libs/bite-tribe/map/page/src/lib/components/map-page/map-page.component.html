@@ -19,6 +19,7 @@
         [geopoints]="positions()"
         [gpsPosition]="gpsPosition()"
         (clickOnMarker)="onGeopointSelection($event)"
+        (touchstart)="keepTouchOnMap($event)"
       />
       @if (showMyPositionButton()) {
         <ion-fab

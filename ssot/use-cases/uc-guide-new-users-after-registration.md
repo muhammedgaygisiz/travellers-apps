@@ -63,6 +63,13 @@ with an answer - including a declined one.
   never holds Finish back; who is offered, and why, is `Follow Suggestions` in
   [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md).
 - Completion is marked on the user profile; the assistant never shows again.
+- Arriving is celebrated: once the completion write succeeds, `finish()` celebrates
+  `onboarding-finished` - a short confetti burst and `Welcome to the tribe!` - and
+  enters the app without waiting for it. The burst is drawn on the document body, so it
+  keeps playing across the root navigation to Home or to the shared Bite the user came
+  in through. A failed write keeps the user on the finish step and celebrates nothing.
+  See GitHub issue [#1798] and the Celebration Rule in
+  [Implementation - Ionic Patterns](../implementation/ionic-patterns.md).
 - After the assistant, must-dismiss coach marks teach the essential features on first visit: home feed, home menu, home feed controls, create-Bite button, Bite details, map, bucket lists, bucket list swipe, leaderboard.
 - The home menu mark introduces the header menu as the route to the profile, bucket lists, leaderboard, gallery, marketplace, and settings.
 - The home feed controls mark explains Search and Bitemap, and distinguishes Distance (closest Bites) from Date (newest Bites from anywhere).
@@ -191,6 +198,7 @@ permission surface, so the purpose strings are read here before any other screen
 - Issue [#1707] (the follow-up mail the day after sign-up), with the consent
   decision in [#989]
 - Issue [#1708] (people to follow on the finish step)
+- Issue [#1798] (finishing onboarding is celebrated), part of epic [#1741]
 
 ## Related Domains
 
@@ -235,3 +243,5 @@ permission surface, so the purpose strings are read here before any other screen
 [#1607]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1607
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
+[#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
+[#1798]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1798

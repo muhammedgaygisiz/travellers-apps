@@ -13,6 +13,7 @@ import {
   OnboardingStepId,
 } from 'bite-tribe/onboarding-data-access';
 import type { PublicUser, Settings } from 'model';
+import { CelebrationService } from 'celebration';
 import {
   ONBOARDING_STEPS,
   type OnboardingStepDefinition,
@@ -46,6 +47,7 @@ export class OnboardingService {
   private readonly transloco = inject(TranslocoService);
   private readonly analytics = inject(AnalyticsService);
   private readonly requestedUrlService = inject(RequestedUrlService);
+  private readonly celebration = inject(CelebrationService);
 
   /**
    * The steps this device actually shows.
@@ -578,6 +580,10 @@ export class OnboardingService {
    * enters the app. A failed write keeps the user on the finish step so they can
    * retry, rather than dropping them into the app with the assistant unmarked
    * and set to reappear on the next start.
+   *
+   * Arriving is celebrated (issue #1798). The burst is drawn on the document
+   * body, so it keeps playing across the root navigation that follows, and
+   * nothing waits for it.
    */
   private async finish(): Promise<void> {
     try {
@@ -589,6 +595,7 @@ export class OnboardingService {
 
     // Funnel exit: only after the durable completion flag is written.
     this.analytics.logEvent(AnalyticsEvent.OnboardingAssistantCompleted);
+    void this.celebration.celebrate('onboarding-finished');
 
     this.dataAccess.dismissForSession();
 

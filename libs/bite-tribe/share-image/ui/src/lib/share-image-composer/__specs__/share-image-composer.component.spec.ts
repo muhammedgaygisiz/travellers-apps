@@ -6,6 +6,7 @@ import { loadBiteImageForCanvas } from 'bite-tribe-common/bite';
 import type { Bite } from 'model';
 import {
   hasMoreBelow,
+  rasterise,
   ShareImageComposerComponent,
 } from '../share-image-composer.component';
 
@@ -525,5 +526,32 @@ describe(hasMoreBelow.name, () => {
     expect(
       hasMoreBelow({ scrollTop: 0, scrollHeight: 710, clientHeight: 700 }),
     ).toBe(false);
+  });
+});
+
+/** The logo, drawn once at its own size before the template scales it. */
+describe(rasterise.name, () => {
+  const logo = { width: 685, height: 885 } as HTMLImageElement;
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it('draws the image at its own size onto a canvas of that size', () => {
+    const drawImage = jest.fn();
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
+
+    const result = rasterise(logo);
+
+    expect(result).toBeInstanceOf(HTMLCanvasElement);
+    expect(result.width).toBe(685);
+    expect(result.height).toBe(885);
+    expect(drawImage).toHaveBeenCalledWith(logo, 0, 0, 685, 885);
+  });
+
+  it('returns the image itself without a 2D context', () => {
+    jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+
+    expect(rasterise(logo)).toBe(logo);
   });
 });

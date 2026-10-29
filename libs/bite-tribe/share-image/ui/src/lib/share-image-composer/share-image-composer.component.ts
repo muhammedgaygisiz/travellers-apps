@@ -34,7 +34,10 @@ import {
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { loadBiteImageForCanvas } from 'bite-tribe-common/bite';
 import type { Bite } from 'model';
-import { SHARE_IMAGE_FONT_FAMILY } from '../draw-share-image';
+import {
+  SHARE_IMAGE_FONT_FAMILY,
+  type ShareImageAssets,
+} from '../draw-share-image';
 import {
   applyFieldSwitches,
   availableFields,
@@ -102,6 +105,32 @@ const loadImage = (src: string): Promise<HTMLImageElement> =>
     image.onerror = (): void => reject(new Error(`Could not load ${src}`));
     image.src = src;
   });
+
+/**
+ * Draws `image` once at its own size onto a canvas, which the template then
+ * scales instead of the image (issue #1805).
+ *
+ * Android's WebView leaves out the masked parts of an SVG - the logo's
+ * feathers - when it draws the SVG scaled to some sizes, roughly a fifth to a
+ * half of its own, which is where the template draws the logo. A bitmap scales
+ * without that. Without a 2D context the image is returned as it is.
+ */
+export const rasterise = (
+  image: HTMLImageElement,
+): HTMLCanvasElement | HTMLImageElement => {
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    return image;
+  }
+
+  ctx.drawImage(image, 0, 0, image.width, image.height);
+  return canvas;
+};
 
 /**
  * Waits for the template's font, because the canvas draws with whatever is
@@ -232,7 +261,7 @@ export class ShareImageComposerComponent implements OnInit {
 
   private swipeStart?: { x: number; y: number };
   protected readonly photo = signal<HTMLImageElement | undefined>(undefined);
-  protected readonly logo = signal<HTMLImageElement | undefined>(undefined);
+  protected readonly logo = signal<ShareImageAssets['logo']>(undefined);
   protected readonly ready = signal(false);
   protected readonly photoFailed = signal(false);
   /** The action whose image is being handed over, if any. */
@@ -284,7 +313,7 @@ export class ShareImageComposerComponent implements OnInit {
     }
 
     if (logo.status === 'fulfilled') {
-      this.logo.set(logo.value);
+      this.logo.set(rasterise(logo.value));
     }
 
     this.ready.set(true);

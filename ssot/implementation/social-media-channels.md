@@ -166,6 +166,42 @@ participate in existing communities, and a brand account posting into `r/food` o
 a city subreddit reads as spam and gets removed. That is outreach and belongs to
 [#913].
 
+## The Meta App
+
+Instagram's and Facebook's Stories share APIs reject a share that carries no
+registered Meta App ID, so BiteTribe has a Meta app even though it ships no Meta
+SDK. Registered 29 October 2026 for [#1729]; [#1730] puts the ID into the app.
+
+| Field            | Value                                                             |
+| ---------------- | ----------------------------------------------------------------- |
+| App name         | `BiteTribe`                                                       |
+| App ID           | `1431506688471796`                                                |
+| Owner            | **BiteTribe** Meta business portfolio, ID `1059515020497260`      |
+| Admin            | Muhammed                                                          |
+| Contact email    | `social@bitetribe.app`                                            |
+| Mode             | Development                                                       |
+| iOS bundle ID    | `com.bitetribe.app`                                               |
+| Android package  | `com.bitetribe.app`, class `com.bitetribe.app.MainActivity`       |
+| Android key hash | `SFUn0tUDoFQhKQDT+8jEP2EoDdQ=` and `XkO+86h58B8xHya/dQBFz/JCGhc=` |
+
+**The App ID is public, and it is the only Meta value the project needs.** iOS
+sends it in the `source_application` pasteboard key; Android sends it in the
+`source_application` intent extra for Instagram and `com.facebook.platform.APP_ID`
+for Facebook Stories. The App Secret and client token are never committed or
+shared - with no Meta SDK, nothing uses them.
+
+**The portfolio owns the app, not a person.** The same portfolio owns the
+BiteTribe Facebook Page, so handover is adding an admin to the portfolio rather
+than moving the app.
+
+The two key hashes are the base64 SHA-1 fingerprints already registered on the
+Firebase Android app, so Meta and Firebase recognise the same signing keys.
+
+**No App Review.** The app has no use cases and no permissions; the Stories share
+APIs need neither. It stays in Development mode unless testing on [#1730] shows
+Instagram or Facebook rejecting shares from a Development-mode ID, in which case
+it is switched to Live.
+
 ## Profile Content
 
 The same on every platform, so the accounts read as one brand. All of it is
@@ -1269,3 +1305,5 @@ yet reflected.
 [#1454]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1454
 [#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455
 [#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628
+[#1729]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1729
+[#1730]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1730

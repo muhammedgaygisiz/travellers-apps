@@ -299,6 +299,7 @@
   "location-label": "Location:",
   "bite-created-successfully": "Bite created successfully!",
   "bite-created-first": "Your first Bite is in!",
+  "country-badge-earned": "First Bite in a new country: {{country}}!",
   "image-uploaded-successfully": "Image uploaded successfully!",
   "uploading-keep-app-open": "Uploading photo — keep the app open",
   "loading-photo": "Loading photo…",

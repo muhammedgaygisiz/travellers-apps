@@ -30,6 +30,20 @@ computed from; what a notification about one of them says, and to whom, belongs 
 - Ranking-change notifications can nudge users when their position changes.
 - A first Bite in a new country earns a country badge, which congratulates the
   user and, for a public profile, is announced to their followers.
+- The badge is also celebrated in the app while it runs: a short confetti burst
+  and `First Bite in a new country: {{country}}!`, with the country named in the
+  user's language. The phone does not know the country when the post succeeds -
+  `enrichBiteAddressOnWrite` derives it a few seconds later - so the store's
+  `celebrateFirstCountry$` keeps the user's own document listened to for the
+  session and celebrates when a snapshot adds a code to `countryCodes`. The first
+  snapshot after sign-in only sets the baseline, a snapshot that adds several
+  codes celebrates once, and a move into a new country counts like a post. Going
+  from no codes to one celebrates nothing: that Bite is the user's first, and the
+  first-Bite celebration already played (epic [#1741]). The user's own push for
+  the badge is not shown on top while the app is in the foreground, because
+  neither app configures `presentationOptions` for `PushNotifications`, so the
+  plugin presents nothing there. See GitHub issue [#1797] and the Celebration
+  Rule in [Implementation - Ionic Patterns](../implementation/ionic-patterns.md).
 
 ## MVP Classification
 
@@ -53,6 +67,7 @@ them is collected in onboarding.
 - `sendDailyLeaderboardNotification`
 - Profile country badges
 - `notifyOnNewCountryBadge`
+- `celebrateFirstCountry$` in the bite-tribe store's `AppEffect`
 
 ## Related GitHub Scope
 
@@ -66,6 +81,7 @@ them is collected in onboarding.
 - Issue [#975] added the country badges; [#1212] turned a new badge into a notification for the
   user and their followers, and that contract lives in
   [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
+- Issue [#1797] celebrates a new country badge in the app, part of epic [#1741]. Open.
 - Issue [#770] is the **BiteTrail** gamification epic and is owned by
   [UC - Add BiteTrail Gamification](uc-add-bitetrail-gamification.md), not by this page.
 
@@ -95,3 +111,5 @@ them is collected in onboarding.
 [#975]: https://github.com/muhammedgaygisiz/travellers-apps/issues/975
 [#1212]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1212
 [#1611]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1611
+[#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
+[#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797

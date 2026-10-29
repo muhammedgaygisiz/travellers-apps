@@ -19,7 +19,12 @@ import { BiteTribeApiService } from 'bite-tribe/api';
 import { AnalyticsEvent, AnalyticsService, fromAuth } from 'ta-firestore';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
-import { isBase64String, isEmailVerificationPromptVisible, PATH } from 'utils';
+import {
+  getLocalizedCountryName,
+  isBase64String,
+  isEmailVerificationPromptVisible,
+  PATH,
+} from 'utils';
 import { stopIfUserIsUndefined } from './utils/stop-if-user-is-undefined';
 import { dispatchGpsPosition } from './utils/dispatch-gps-position';
 import {
@@ -36,6 +41,9 @@ import { userId } from '../router/selectors';
 import { publicUser } from './selectors';
 import { CreateAndUploadImageCallbackParams } from 'model';
 import { ToastService } from 'toast';
+import { CelebrationService } from 'celebration';
+import { TranslocoService } from '@jsverse/transloco';
+import { newCountryCodes } from './utils/new-country-codes';
 
 @Injectable()
 export class AppEffect {
@@ -47,6 +55,8 @@ export class AppEffect {
   private readonly analytics = inject(AnalyticsService);
   private readonly pushNavigation = inject(PushNavigationService);
   private readonly toast = inject(ToastService);
+  private readonly celebration = inject(CelebrationService);
+  private readonly transloco = inject(TranslocoService);
 
   private readonly userId = toSignal(this.store.select(userId));
 
@@ -97,7 +107,9 @@ export class AppEffect {
    * unsubscribing here removes it rather than leaving it to bill for updates
    * this effect would never read. The profile the store holds is therefore a
    * login-time snapshot, and server-maintained aggregates on it are kept
-   * current by the reducer instead. See [[Architecture - State Management]].
+   * current by the reducer instead. `celebrateFirstCountry$` holds its own
+   * subscription for the session, which feeds the celebration and not this
+   * slice. See [[Architecture - State Management]].
    */
   loadPublicProfile$ = createEffect(() => {
     return this.actions$.pipe(
@@ -107,6 +119,40 @@ export class AppEffect {
       map((profile) => AppActions.setPublicProfile({ profile })),
     );
   });
+
+  /**
+   * Celebrates a first Bite in a new country while the app runs (issue #1797).
+   *
+   * The phone does not know the country when the post succeeds: the backend
+   * derives it from the position a few seconds later and adds it to the user's
+   * `countryCodes`. So this keeps the user's own document listened to for the
+   * session - one read per change to it - and celebrates when a snapshot adds
+   * a code. Each sign-in starts a new baseline; see `newCountryCodes` for what
+   * is and is not celebrated.
+   *
+   * The `countryBadge.title` push for the same badge is not shown on top while
+   * the app is in the foreground: neither app configures `presentationOptions`
+   * for `PushNotifications`, so the plugin presents nothing in the foreground
+   * and only reports the push to its listener.
+   */
+  celebrateFirstCountry$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(fromAuth.AuthActions.loadedUser),
+        switchMap(({ user }) =>
+          user ? this.api.publicProfile$.pipe(newCountryCodes()) : EMPTY,
+        ),
+        tap((countryCode) => {
+          void this.celebration.celebrate('first-country', {
+            country: getLocalizedCountryName(
+              countryCode,
+              this.transloco.getActiveLang(),
+            ),
+          });
+        }),
+      ),
+    { dispatch: false },
+  );
 
   initAfterLogin$ = createEffect(
     () =>

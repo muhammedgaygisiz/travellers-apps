@@ -94,6 +94,8 @@ export class BiteDataAccessService {
     this.storeService.tagSuggestionsForEditingBite$,
   );
 
+  private readonly myProfile = toSignal(this.storeService.publicUser$);
+
   networkStatus = this.networkStatusService.status;
 
   readonly googlePlaceSearchText = signal('');
@@ -168,6 +170,37 @@ export class BiteDataAccessService {
    * the same Bite.
    */
   private readonly uploadsInFlight = new Set<string>();
+
+  /**
+   * Whether the signed-in user has posted any Bite, or `undefined` when that
+   * cannot be told: signed out, or the read failed.
+   *
+   * The aggregate on their profile answers when it counts a Bite. Otherwise
+   * Firestore is asked for a single one, because neither the store nor the
+   * aggregate can say "none": the store holds the user's own Bites only after
+   * My Bites or My Profile loaded them (and another profile's Bites after
+   * that one is opened), and an account the aggregate was never written for
+   * has no `biteCount` at all.
+   */
+  async hasOwnBites(): Promise<boolean | undefined> {
+    const biteCount = this.myProfile()?.biteCount;
+
+    if (typeof biteCount === 'number' && biteCount > 0) {
+      return true;
+    }
+
+    const uid = this.storeService.user()?.uid;
+
+    if (!uid) {
+      return undefined;
+    }
+
+    try {
+      return await this.api.hasBitesByUser(uid);
+    } catch {
+      return undefined;
+    }
+  }
 
   async submitNewBite(bite: Bite): Promise<void> {
     this.storeService.saveNewBite();

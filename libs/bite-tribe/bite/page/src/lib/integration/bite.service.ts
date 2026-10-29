@@ -1,6 +1,7 @@
 import { Location } from '@angular/common';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
+import { CelebrationService } from 'celebration';
 import type { Bite, Geopoint } from 'model';
 import type { BiteFormValue } from '../components/page/bite.page';
 import { biteSourceOf, withDraftProvenance } from './bite-provenance';
@@ -19,6 +20,7 @@ export class BiteService {
   private readonly transloco = inject(TranslocoService);
   private readonly toast = inject(ToastService);
   private readonly analytics = inject(AnalyticsService);
+  private readonly celebration = inject(CelebrationService);
 
   image = signal<string>('');
 
@@ -90,32 +92,41 @@ export class BiteService {
   }
 
   async submitNewBite(newBite: BiteFormValue): Promise<void> {
-    await this.createBite(newBite, () => {
+    await this.createBite(newBite, (first) => {
       void this.navController.navigateBack(['home']);
 
-      void this.toast.present({
-        messageKey: 'bite-created-successfully',
-        outcome: 'success',
-      });
+      this.confirmCreated(first);
     });
   }
 
   /**
    * Creates the Bite but keeps the user on the create form so the next Bite at
-   * the same place can be posted right away.
+   * the same place can be posted right away. A first Bite celebrates over the
+   * form.
    */
   async submitNewBiteAndAddAnother(newBite: BiteFormValue): Promise<void> {
-    await this.createBite(newBite, () => {
-      void this.toast.present({
-        messageKey: 'bite-created-successfully',
-        outcome: 'success',
-      });
+    await this.createBite(newBite, (first) => this.confirmCreated(first));
+  }
+
+  /**
+   * The user's first Bite is celebrated in place of the ordinary toast (issue
+   * #1796); every later one gets the ordinary toast.
+   */
+  private confirmCreated(first: boolean): void {
+    if (first) {
+      void this.celebration.celebrate('first-bite');
+      return;
+    }
+
+    void this.toast.present({
+      messageKey: 'bite-created-successfully',
+      outcome: 'success',
     });
   }
 
   private async createBite(
     newBite: BiteFormValue,
-    onCreated: () => void,
+    onCreated: (first: boolean) => void,
   ): Promise<void> {
     const loading = await this.loadingController.create({
       message: this.transloco.translate('creating-bite'),
@@ -134,6 +145,11 @@ export class BiteService {
       this.cachedBite(),
     );
 
+    // Also read before the write, which would count as one. Nothing is
+    // stored: deleting the only Bite and posting again celebrates again, as
+    // epic #1741 accepts. An answer that cannot be told is not taken for none.
+    const first = (await this.dataAccess.hasOwnBites()) === false;
+
     try {
       await this.dataAccess.submitNewBite(document);
 
@@ -141,7 +157,7 @@ export class BiteService {
         source: biteSourceOf(document),
       });
 
-      onCreated();
+      onCreated(first);
     } finally {
       await loading.dismiss();
     }

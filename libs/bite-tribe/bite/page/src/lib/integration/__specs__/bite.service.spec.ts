@@ -6,6 +6,7 @@ import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { TranslocoService } from '@jsverse/transloco';
 import { ToastService } from 'toast';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { CelebrationService } from 'celebration';
 
 const Mock = {
   navigateBack: jest.fn(),
@@ -21,6 +22,7 @@ const Mock = {
   biteValue: jest.fn(),
   getCurrencyByPosition: jest.fn(),
   currency: (): string => 'EUR',
+  hasOwnBites: jest.fn(),
 };
 
 const LoadingMock = {
@@ -42,11 +44,16 @@ const AnalyticsMock = {
   logEvent: jest.fn(),
 };
 
+const CelebrationMock = {
+  celebrate: jest.fn().mockResolvedValue(undefined),
+};
+
 describe('BiteService', () => {
   let service: BiteService;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    Mock.hasOwnBites.mockResolvedValue(true);
     TestBed.configureTestingModule({
       providers: [
         { provide: BiteDataAccessService, useValue: Mock },
@@ -56,6 +63,7 @@ describe('BiteService', () => {
         { provide: ToastService, useValue: ToastMock },
         { provide: TranslocoService, useValue: TranslocoMock },
         { provide: AnalyticsService, useValue: AnalyticsMock },
+        { provide: CelebrationService, useValue: CelebrationMock },
       ],
     }).compileComponents();
 
@@ -142,6 +150,66 @@ describe('BiteService', () => {
         AnalyticsEvent.BiteCreated,
         { source: 'manual' },
       );
+    });
+  });
+
+  describe('the first Bite', () => {
+    const newBite = { id: '', name: 'Test Bite' };
+
+    it.each([
+      ['submitNewBite', 'submitNewBite'],
+      ['submitNewBiteAndAddAnother', 'submitNewBiteAndAddAnother'],
+    ] as const)(
+      'celebrates in place of the ordinary toast through %s',
+      async (_, submit) => {
+        Mock.hasOwnBites.mockResolvedValue(false);
+
+        await service[submit](newBite);
+
+        expect(CelebrationMock.celebrate).toHaveBeenCalledTimes(1);
+        expect(CelebrationMock.celebrate).toHaveBeenCalledWith('first-bite');
+        expect(ToastMock.present).not.toHaveBeenCalled();
+      },
+    );
+
+    it('asks before the create, which would count as a Bite', async () => {
+      Mock.hasOwnBites.mockResolvedValue(false);
+      Mock.submitNewBite.mockImplementationOnce(async () => {
+        Mock.hasOwnBites.mockResolvedValue(true);
+      });
+
+      await service.submitNewBite(newBite);
+
+      expect(CelebrationMock.celebrate).toHaveBeenCalledWith('first-bite');
+    });
+
+    it('shows the ordinary toast and no confetti for a later Bite', async () => {
+      await service.submitNewBite(newBite);
+
+      expect(CelebrationMock.celebrate).not.toHaveBeenCalled();
+      expect(ToastMock.present).toHaveBeenCalledWith({
+        messageKey: 'bite-created-successfully',
+        outcome: 'success',
+      });
+    });
+
+    it('does not celebrate when it cannot tell', async () => {
+      Mock.hasOwnBites.mockResolvedValue(undefined);
+
+      await service.submitNewBite(newBite);
+
+      expect(CelebrationMock.celebrate).not.toHaveBeenCalled();
+      expect(ToastMock.present).toHaveBeenCalledTimes(1);
+    });
+
+    it('celebrates nothing when the create fails', async () => {
+      Mock.hasOwnBites.mockResolvedValue(false);
+      Mock.submitNewBite.mockRejectedValueOnce(new Error('offline'));
+
+      await expect(service.submitNewBite(newBite)).rejects.toThrow('offline');
+
+      expect(CelebrationMock.celebrate).not.toHaveBeenCalled();
+      expect(ToastMock.present).not.toHaveBeenCalled();
     });
   });
 

@@ -1,14 +1,28 @@
 import { TestBed } from '@angular/core/testing';
 import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 import { Preferences } from '@capacitor/preferences';
+import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { CoachMarkStateService } from '../coach-mark-state.service';
 
 jest.mock('@capacitor/preferences', () => ({
   Preferences: { get: jest.fn(), set: jest.fn() },
 }));
 
+jest.mock('@capacitor-firebase/firestore', () => ({
+  FirebaseFirestore: { getDocument: jest.fn(), updateDocument: jest.fn() },
+}));
+
 const get = Preferences.get as jest.Mock;
 const set = Preferences.set as jest.Mock;
+const getDocument = FirebaseFirestore.getDocument as jest.Mock;
+const updateDocument = FirebaseFirestore.updateDocument as jest.Mock;
+
+/** The account's seen set, as the user document holds it. */
+const accountHolds = (coachMarksSeen?: string[]): void => {
+  getDocument.mockResolvedValue({
+    snapshot: { id: 'user-1', data: coachMarksSeen ? { coachMarksSeen } : {} },
+  });
+};
 
 describe('CoachMarkStateService', () => {
   let service: CoachMarkStateService;
@@ -32,6 +46,11 @@ describe('CoachMarkStateService', () => {
 
     service = TestBed.inject(CoachMarkStateService);
   };
+
+  beforeEach(() => {
+    accountHolds();
+    updateDocument.mockResolvedValue(undefined);
+  });
 
   afterEach(() => jest.clearAllMocks());
 
@@ -158,6 +177,112 @@ describe('CoachMarkStateService', () => {
       await service.markSeen('map');
 
       expect(logEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  // The seen set belongs to the account, so a reinstall or a new phone keeps
+  // it; the device copy covers an unreadable account and the marks dismissed
+  // before the account held them (issue #1851).
+  describe('on the account', () => {
+    it('treats a surface the account has seen as seen on a fresh install', async () => {
+      setup();
+      get.mockResolvedValue({ value: null });
+      accountHolds(['home-feed']);
+
+      await expect(service.hasSeen('home-feed')).resolves.toBe(true);
+      expect(getDocument).toHaveBeenCalledWith({ reference: 'users/user-1' });
+    });
+
+    it('treats a surface seen only on this device as seen', async () => {
+      setup();
+      get.mockResolvedValue({ value: JSON.stringify(['map']) });
+      accountHolds([]);
+
+      await expect(service.hasSeen('map')).resolves.toBe(true);
+    });
+
+    it('writes the union of device and account to both on a dismissal', async () => {
+      setup();
+      get.mockResolvedValue({ value: JSON.stringify(['map']) });
+      accountHolds(['home-feed']);
+      set.mockResolvedValue(undefined);
+
+      await service.markSeen('leaderboard');
+
+      expect(updateDocument).toHaveBeenCalledWith({
+        reference: 'users/user-1',
+        data: { coachMarksSeen: ['home-feed', 'map', 'leaderboard'] },
+      });
+      expect(set).toHaveBeenCalledWith({
+        key: 'coach-marks-seen:user-1',
+        value: JSON.stringify(['home-feed', 'map', 'leaderboard']),
+      });
+    });
+
+    it('does not write to the account for a surface already seen there', async () => {
+      setup();
+      get.mockResolvedValue({ value: null });
+      accountHolds(['map']);
+
+      await service.markSeen('map');
+
+      expect(updateDocument).not.toHaveBeenCalled();
+      expect(logEvent).not.toHaveBeenCalled();
+    });
+
+    it('reads the account once per user, not once per coach mark', async () => {
+      setup();
+      get.mockResolvedValue({ value: null });
+      accountHolds(['home-feed']);
+
+      await service.hasSeen('home-feed');
+      await service.hasSeen('map');
+      await service.hasSeen('leaderboard');
+
+      expect(getDocument).toHaveBeenCalledTimes(1);
+    });
+
+    it('answers from what a dismissal wrote, without reading the account again', async () => {
+      setup();
+      get.mockResolvedValue({ value: null });
+      set.mockResolvedValue(undefined);
+
+      await service.markSeen('map');
+      get.mockResolvedValue({ value: null });
+
+      await expect(service.hasSeen('map')).resolves.toBe(true);
+      expect(getDocument).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to the device when the account cannot be read, and retries later', async () => {
+      setup();
+      get.mockResolvedValue({ value: JSON.stringify(['map']) });
+      getDocument.mockRejectedValueOnce(new Error('offline'));
+
+      await expect(service.hasSeen('map')).resolves.toBe(true);
+      await expect(service.hasSeen('home-feed')).resolves.toBe(false);
+      expect(getDocument).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps the device write when the account write fails', async () => {
+      setup();
+      get.mockResolvedValue({ value: null });
+      set.mockResolvedValue(undefined);
+      updateDocument.mockRejectedValue(new Error('permission-denied'));
+
+      await expect(service.markSeen('map')).resolves.toBeUndefined();
+      expect(set).toHaveBeenCalledWith({
+        key: 'coach-marks-seen:user-1',
+        value: JSON.stringify(['map']),
+      });
+    });
+
+    it('does not read the account without an authenticated user', async () => {
+      setup(null);
+
+      await service.hasSeen('map');
+
+      expect(getDocument).not.toHaveBeenCalled();
     });
   });
 });

@@ -34,4 +34,7 @@ export interface PublicUser {
   onboardingCompletedAt?: string;
   onboardingCompletedAtTimestamp?: number;
   onboardingVersion?: number;
+
+  /** The coach mark surfaces this account has dismissed (issue #1851). */
+  coachMarksSeen?: string[];
 }

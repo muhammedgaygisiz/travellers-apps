@@ -447,12 +447,48 @@ export class ProfileApiService {
     return result.data;
   }
 
-  async followUser(user: PublicUser): Promise<void> {
+  /** Follows the user, answering whether the write worked. */
+  async followUser(user: PublicUser): Promise<boolean> {
     try {
       await this.follow(user.userId);
+
+      return true;
     } catch (error) {
       console.error('Error following user:', error);
       this.errorHandler.handleError(error);
+
+      return false;
+    }
+  }
+
+  /**
+   * Whether the signed-in user follows anybody, read as a single document of
+   * their `following` subcollection, or `undefined` when that cannot be told:
+   * signed out, or the read failed.
+   *
+   * Not read off the profile. The store's copy of `followingCount` is the
+   * login-time snapshot, and `profileMetadata.following` is the count of
+   * whichever profile is open - on a follow, the person being followed
+   * (issue #1799).
+   */
+  async followsAnyone(): Promise<boolean | undefined> {
+    const currentUser = this.authService.getUser();
+
+    if (!currentUser) {
+      return undefined;
+    }
+
+    try {
+      const result = await FirebaseFirestore.getCollection({
+        reference: `${USERS_COLLECTION}/${currentUser.uid}/following`,
+        queryConstraints: [{ type: 'limit', limit: 1 }],
+      });
+
+      return result.snapshots.length > 0;
+    } catch (error) {
+      console.warn('Could not tell whether the user follows anybody:', error);
+
+      return undefined;
     }
   }
 

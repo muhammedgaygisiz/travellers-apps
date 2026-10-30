@@ -301,6 +301,7 @@
   "bite-created-first": "Votre premier Bite est publié !",
   "country-badge-earned": "Premier Bite dans un nouveau pays : {{country}} !",
   "onboarding-finished": "Bienvenue dans la tribu !",
+  "first-follow": "Vous suivez maintenant {{user}}. Bienvenue dans son voyage culinaire !",
   "image-uploaded-successfully": "Image téléchargée avec succès !",
   "uploading-keep-app-open": "Envoi de la photo — gardez l’application ouverte",
   "loading-photo": "Chargement de la photo…",

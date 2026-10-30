@@ -11,6 +11,7 @@ import type {
 import { lastValueFrom } from 'rxjs';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { ToastService } from 'toast';
+import { CelebrationService } from 'celebration';
 import { resourceValue } from 'utils';
 
 /** How long a dismissed home card stays away. */
@@ -35,6 +36,7 @@ export class FollowSuggestionsService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly analytics = inject(AnalyticsService);
   private readonly toast = inject(ToastService);
+  private readonly celebration = inject(CelebrationService);
 
   private readonly userId = toSignal(this.storeService.userId$);
   private readonly profile = toSignal(this.storeService.publicUser$);
@@ -134,6 +136,10 @@ export class FollowSuggestionsService {
    * Follows one suggested person. Resolves whether or not the write worked: a
    * failure puts the button back and says so, and there is nothing else for
    * a caller to do about it.
+   *
+   * The first person a user follows is celebrated, as on a profile (issue
+   * #1799). Whether it is the first is asked before the write, which would
+   * count as one.
    */
   async follow(
     suggestion: FollowSuggestion,
@@ -150,7 +156,10 @@ export class FollowSuggestionsService {
 
     this.pending.update((ids) => new Set(ids).add(userId));
 
+    let followedAnybody: boolean | undefined;
+
     try {
+      followedAnybody = await this.profileApi.followsAnyone();
       await this.profileApi.follow(userId);
     } catch {
       await this.toast.present({
@@ -177,6 +186,12 @@ export class FollowSuggestionsService {
     this.analytics.logEvent(AnalyticsEvent.UserFollowed, {
       source: 'suggestion',
     });
+
+    if (followedAnybody === false) {
+      void this.celebration.celebrate('first-follow', {
+        user: suggestion.displayName,
+      });
+    }
 
     return true;
   }

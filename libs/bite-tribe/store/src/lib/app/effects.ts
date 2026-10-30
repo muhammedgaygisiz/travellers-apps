@@ -399,15 +399,28 @@ export class AppEffect {
     { dispatch: false },
   );
 
+  /**
+   * Follows from a profile. The first person a user follows is celebrated
+   * (issue #1799), and the follow suggestions celebrate theirs the same way.
+   * Whether it is the first is asked before the write, which would count as
+   * one; an answer that cannot be told is not taken for none.
+   */
   followUser$ = createEffect(
     () => {
       return this.actions$.pipe(
         ofType(AppActions.followUser),
         throttleTime(500),
         tap(async ({ user }) => {
-          await this.api.followUser(user);
+          const followedAnybody = await this.api.followsAnyone();
+          const followed = await this.api.followUser(user);
 
           this.store.dispatch(AppActions.followedUser());
+
+          if (followed && followedAnybody === false) {
+            void this.celebration.celebrate('first-follow', {
+              user: user.displayName,
+            });
+          }
         }),
       );
     },

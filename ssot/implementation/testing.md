@@ -164,16 +164,22 @@ Two boundary details keep direct Loki working against the Angular Storybook 10 h
 
 Six behaviours that have each cost a wrong conclusion at least once.
 
-**Build Storybook with `--skip-nx-cache` before every Loki run.** Nx restores a
-cached `dist/storybook/storybook-host` whose hash does not track the component
-libraries the stories render, so a build that reports `Cache: 1/1 hit` can hand
-Loki the previous UI. Loki then validates a build that predates the change and
-reports PASS, or fails against references it should have matched. `npm run
-build:storybook` does not protect against this - on 2026-09-11 it hit the cache
+**Build Storybook with `--skip-nx-cache` before every Loki run.** A build that
+reports `Cache: 1/1 hit` can hand Loki the previous UI. Loki then validates a
+build that predates the change and reports PASS, or fails against references it
+should have matched. On 2026-09-11 `npm run build:storybook` hit the cache
 immediately after three source files changed, and `grep -rl` on the built bundle
-found none of the new markup. Delete the directory, build with
-`npm run build:storybook -- --skip-nx-cache`, and confirm a token from the change
-is actually in `dist/storybook/storybook-host` before trusting a Loki result.
+found none of the new markup.
+
+Until [issue #1815][#1815] the cache key genuinely left things out: every business
+and admin story and the components they render, the brand characters, and
+`libs/bite-tribe-common/styles`. That issue closed those gaps, and CI now relies
+on the cached build (see [CI Pipeline](ci-pipeline.md#loki-runs-only-when-a-story-is-affected)).
+The rule stands locally anyway, because the 2026-09-11 record does not say which
+files changed, so it cannot be shown that the gap explains it. Delete the
+directory, build with `npm run build:storybook -- --skip-nx-cache`, and confirm a
+token from the change is actually in `dist/storybook/storybook-host` before
+trusting a Loki result.
 
 **Use `loki:approve`, not `loki:update`, to accept a diff.** `tools/loki.mjs`
 forwards its command straight to the upstream CLI with no story filter, so
@@ -269,3 +275,4 @@ committed reference already shows a skeleton.
 [#1547]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1547
 [#1549]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1549
 [#1814]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1814
+[#1815]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1815

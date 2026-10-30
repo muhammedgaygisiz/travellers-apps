@@ -62,15 +62,15 @@ tests
 Not every test in this repository runs on a pull request, and the difference is
 worth stating rather than inferring from a workflow file.
 
-| Suite                       | Command                 | Gates a merge             |
-| --------------------------- | ----------------------- | ------------------------- |
-| Unit tests                  | `nx affected -t test`   | Yes, `tests`              |
-| Lint, Stylelint             | `nx affected -t lint`   | Yes                       |
-| SSOT structure              | `npm run check:ssot`    | Yes, inside `lint`        |
-| Visual regression           | `npm run loki:test`     | Yes, `loki`               |
-| Consumer and business e2e   | `nx e2e …`              | Yes                       |
-| Firestore rules             | `npm run test:rules`    | Yes, `firestore-rules`    |
-| Firebase Functions emulator | `npm run test:emulator` | Yes, `functions-emulator` |
+| Suite                       | Command                 | Gates a merge                         |
+| --------------------------- | ----------------------- | ------------------------------------- |
+| Unit tests                  | `nx affected -t test`   | Yes, `tests`                          |
+| Lint, Stylelint             | `nx affected -t lint`   | Yes                                   |
+| SSOT structure              | `npm run check:ssot`    | Yes, inside `lint`                    |
+| Visual regression           | `npm run loki:test`     | Yes, `loki`, when a story is affected |
+| Consumer and business e2e   | `nx e2e …`              | Yes                                   |
+| Firestore rules             | `npm run test:rules`    | Yes, `firestore-rules`                |
+| Firebase Functions emulator | `npm run test:emulator` | Yes, `functions-emulator`             |
 
 **Coverage Is Informational.** `codecov/project` is reported on every pull
 request and never fails one: `codecov.yml` sets it `informational`. The `tests`
@@ -213,17 +213,17 @@ See [Implementation - Firebase Functions](firebase-functions.md).
 
 The lint, stylelint and tests chain is deliberately sequential so a cheap failure stops the run before the expensive jobs start. Everything after `tests` fans out in parallel.
 
-`report` posts a single sticky PR comment with the E2E and Loki results. It runs with `if: !cancelled()` so a failing job is still reported.
+`report` posts a single sticky PR comment with the E2E and Loki results. It runs with `if: !cancelled()` so a failing job is still reported. A `loki` run that skipped its capture because no story was affected reports as passed, because the job itself succeeded.
 
 ## Composite Actions
 
-| Action                                   | Used by                                | Responsibility                                                                              |
-| ---------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `.github/actions/setup`                  | `setup`, deploys, standalone workflows | Restore `node_modules`, set up Node.js from `.nvmrc`; on a miss `npm ci` and save the cache |
-| `.github/actions/restore-cache`          | Every pipeline job                     | Exact-key restore of `node_modules`, no fallback; exposes `cache-hit`                       |
-| `.github/actions/install-if-missing`     | The build jobs                         | `npm ci` when the restored `node_modules` is unusable                                       |
-| `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`           | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
-| `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, builds   | Persist and restore the Nx computation cache                                                |
+| Action                                   | Used by                                                                     | Responsibility                                                                              |
+| ---------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `.github/actions/setup`                  | `setup`, deploys, standalone workflows                                      | Restore `node_modules`, set up Node.js from `.nvmrc`; on a miss `npm ci` and save the cache |
+| `.github/actions/restore-cache`          | Every pipeline job                                                          | Exact-key restore of `node_modules`, no fallback; exposes `cache-hit`                       |
+| `.github/actions/install-if-missing`     | The build jobs                                                              | `npm ci` when the restored `node_modules` is unusable                                       |
+| `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`, `loki`                                        | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
+| `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, builds, `loki`, `deploy-bite-tribe-storybook` | Persist and restore the Nx computation cache                                                |
 
 `setup` reads `cache-hit` from `restore-cache` through the step id `cache`. On a hit it skips `npm ci` and the save, and sets up Node.js without the npm download cache, which only `npm ci` uses. Node.js itself is still set up from `.nvmrc` because the deploy jobs build through this action. Before [#1811] the step had no id, so the guards were always true and every run reinstalled the `node_modules` it had just restored.
 
@@ -308,11 +308,52 @@ Nx names the index after the machine id of the host that wrote it, reading `/var
 
 ## Affected Computation
 
-`lint`, `stylelint` and `tests` run through `nx affected`. Builds, Loki and E2E run unconditionally, which is why `functions-build` is the type check for the Firebase functions rather than an affected-gated target: it compiles them on every run.
+`lint`, `stylelint` and `tests` run through `nx affected`. Builds and E2E run unconditionally, which is why `functions-build` is the type check for the Firebase functions rather than an affected-gated target: it compiles them on every run.
 
 `pipeline.yml` sets `NX_BASE: develop` as a workflow-level default. `nrwl/nx-set-shas` then writes the resolved `NX_BASE` and `NX_HEAD` SHAs to `GITHUB_ENV`, which takes precedence for the steps that follow, so the affected jobs compare against the real merge base rather than the branch name. Jobs that need affected must therefore run `setup-env-for-affected` before the Nx command.
 
 Every checkout in `pipeline.yml` uses `fetch-depth: 0` because affected needs full history.
+
+### Loki Runs Only When A Story Is Affected
+
+`loki` captures only when `storybook-host` is in `nx show projects --affected`.
+Otherwise it skips the build and the capture and still succeeds, so `report` and
+the required check stay green. Until [issue #1815][#1815] it captured all 846
+references on every pull request, at a median of 9.3 minutes, including pull
+requests that touched only `ssot/` or a workflow.
+
+The gate reads the project graph rather than path filters, which only works
+because the graph was made to say what a capture reads. Three things had to
+change, and each was a real gap rather than a precaution:
+
+- **Every app with a story is an implicit dependency.** `storybook-host`
+  imports nothing from the business and admin apps, so before [#1815] it reached
+  none of their libraries. That left 21 story files in 14 projects, and the two
+  apps' Transloco catalogues the Storybook serves, outside both the gate and the
+  build's cache key. `implicitDependencies` now names `bite-tribe`,
+  `bite-tribe-business` and `bite-tribe-admin`, which covers every project but
+  the Firebase functions, the e2e suites, the native wrappers, `chart` and `cv`.
+- **Files outside any project are declared as inputs.** Nx counts a
+  `{workspaceRoot}/…` target input as touching that project. `build-storybook`
+  declares the brand characters under `ssot/assets/characters`, which a story
+  renders, and `libs/bite-tribe-common/styles`, which the build reaches through
+  `stylePreprocessorOptions` and no project owns. It also declares `world-atlas`
+  as an external dependency, because the build copies its files without any
+  project importing it.
+- **A `loki` target declares what the capture reads.** `storybook-host:loki`
+  runs `node tools/loki.mjs test` after `build-storybook` and is not cached. Its
+  inputs add `.loki/reference`, `loki.config.js`, `tools/loki.mjs` and
+  `package.json`, so a pull request that only adopts references, changes the
+  runner or bumps a dependency still captures. `package.json` is the broad one,
+  kept deliberately: a bump to `loki` or `world-atlas` would otherwise affect
+  nothing.
+
+The check runs outside any condition, so an Nx failure fails the job rather than
+reading as "not affected".
+
+On `develop`, `nrwl/nx-set-shas` compares against the last successful run, so a
+skipped capture means no story changed since stories last passed.
+`deploy-bite-tribe-storybook` therefore still runs unconditionally after `loki`.
 
 ## Build-Time Environment Variables
 
@@ -326,7 +367,9 @@ The three deploy jobs do **not** pass the same set. `NX_APP_BITE_TRIBE_MEASSUREM
 
 The failure mode is worth knowing, because it is silent. Without `measurementId` in the Firebase options the web SDK recovers one from a runtime `webConfig` fetch keyed on the app id, and if that fetch does not answer, `getAnalytics()` throws inside `AnalyticsService.emit`, which swallows it by design - tracking must never break a user flow. So the app works, the events do not arrive, and nothing says so. An app that emits events states the value rather than trusting the recovery.
 
-`deploy-bite-tribe-storybook` is not subject to this. The Storybook build reads no `NX_APP_*` variables, so it needs no secrets and its artifact is the same whichever job produced it.
+`deploy-bite-tribe-storybook` is not subject to this. The Storybook build reads no `NX_APP_*` variables, so it needs no secrets and its artifact is the same whichever job produced it. That is why `loki` and the deploy share it through `nx-cache`, and on `develop` the deploy replays the build `loki` cached a few minutes earlier rather than building it a second time.
+
+One file in that build is not covered by the hash. `npm run build:storybook` writes `nxgraph.html`, the page the `Tech/Graph` story frames, before the build, and the file is gitignored, so Nx does not hash it. A cache hit replays the graph of whichever run cached the build. Loki is unaffected, because the reference for that story captures a blank frame. The deploy copies the freshly generated graph over the restored build before it publishes.
 
 See [Implementation - Release And Build Workflow](release-and-build-workflow.md) for how the values reach the bundle and which of them are public by design, and [Current State - Known Issues](../current-state/known-issues.md) for the deliberately misspelled `NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID` secret name.
 
@@ -408,6 +451,7 @@ the Nx-cache gaps under Current Limitations are the larger lever.
 - Bump the Nx cache key prefix whenever the set of cached paths changes. Old entries can never produce a hit and would only be restored as dead weight.
 - Do not add the `nx-cache` action to a job that builds with a different `NX_APP_*` set than the other jobs, unless those variables are first declared as `env` inputs in `nx.json`.
 - Run `setup-env-for-affected` before any `nx affected` command, and keep `fetch-depth: 0` on its checkout.
+- Keep every file a story renders inside `storybook-host`'s graph or its target inputs. A story in a project the graph does not reach, or a file outside any project that the build or the capture reads, is skipped by the `loki` gate and left out of the build's cache key. Check a new one with `nx show target inputs storybook-host:build-storybook`.
 - Verify a caching change by reading the `Cache: <hits>/<total> hit` line that Nx prints at the end of each run. The first run after a key change is always 0%; the second run on the same branch is the real signal.
 - Pull requests read the cache scope of the default branch. A cache written by a pull request is visible only to that pull request, so a new caching behavior only proves itself once `develop` has run with it.
 - Keep the E2E jobs on separate runners. Both suites drive the same Firebase emulator ports and would fight over them in one job.
@@ -428,6 +472,7 @@ the Nx-cache gaps under Current Limitations are the larger lever.
 
 ```text
 .github/workflows/pipeline.yml
+apps/storybook-host/project.json
 .github/workflows/deploy-cv.yml
 .github/workflows/analytics-digest.yml
 .github/workflows/native-release.yml
@@ -448,7 +493,7 @@ nx.json
 
 ## Current Limitations
 
-- `loki`, `e2e`, `business-e2e` and `deploy-bite-tribe-storybook` do not restore the Nx cache, so the Storybook build and the E2E app builds re-run on every pipeline run. On `develop` the Storybook is therefore built twice, once in `loki` and once in the deploy, at roughly 80 seconds each. Both Storybook builds are safe to put on the Nx cache; the E2E jobs build with `NX_APP_BITE_TRIBE_IS_DEV=true` and fall under the environment-variable rule above.
+- `e2e` and `business-e2e` do not restore the Nx cache, so the E2E app builds re-run on every pipeline run. They build with `NX_APP_BITE_TRIBE_IS_DEV=true` and fall under the environment-variable rule above. `loki` and `deploy-bite-tribe-storybook` were in this list until [issue #1815][#1815], which put both Storybook builds on the cache. Before that, `develop` built the Storybook twice, at roughly 80 seconds each.
 - Only the two build jobs carry `install-if-missing`. Every other job restores `node_modules` with an exact key and no fallback, so a cache miss or an unreachable cache service fails them with `nx: not found` instead of installing.
 - There is no remote cache. Nx Cloud's free tier is exhausted too quickly for this workspace, and the self-hosted cache plugins (`@nx/gcs-cache` and siblings) are deprecated over CVE-2025-36852, an unpatchable cache-poisoning design flaw. The GitHub Actions cache is used instead, and its branch scoping provides the isolation those plugins lack.
 - The native jobs in `native-release.yml` have never run. The Android and iOS signing secrets are not provisioned, so the workflow is written and reviewed but unexecuted, and the manual workstation release in [Implementation - Store Release Steps](store-release-steps.md) is still the one that produces store artifacts. See [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md).
@@ -478,4 +523,5 @@ nx.json
 [#1588]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1588
 [#1681]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1681
 [#1811]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1811
+[#1815]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1815
 [#1839]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1839

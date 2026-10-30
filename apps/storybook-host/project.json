@@ -5,7 +5,18 @@
   "prefix": "app",
   "sourceRoot": "apps/storybook-host/src",
   "tags": ["scope:bite-tribe"],
-  "implicitDependencies": ["bite-tribe"],
+  "implicitDependencies": [
+    "bite-tribe",
+    "bite-tribe-business",
+    "bite-tribe-admin"
+  ],
+  "namedInputs": {
+    "storybook": [
+      "default",
+      "{workspaceRoot}/libs/bite-tribe-common/styles/**/*",
+      "{workspaceRoot}/ssot/assets/characters/**/*"
+    ]
+  },
   "targets": {
     "build": {
       "executor": "@angular/build:application",
@@ -86,6 +97,11 @@
     },
     "build-storybook": {
       "executor": "@storybook/angular:build-storybook",
+      "inputs": [
+        "storybook",
+        "^default",
+        { "externalDependencies": ["world-atlas"] }
+      ],
       "outputs": ["{options.outputDir}"],
       "options": {
         "outputDir": "dist/storybook/storybook-host",
@@ -109,6 +125,22 @@
         "ci": {
           "quiet": true
         }
+      }
+    },
+    "loki": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build-storybook"],
+      "cache": false,
+      "inputs": [
+        "storybook",
+        "^default",
+        "{workspaceRoot}/.loki/reference/**/*",
+        "{workspaceRoot}/loki.config.js",
+        "{workspaceRoot}/tools/loki.mjs",
+        "{workspaceRoot}/package.json"
+      ],
+      "options": {
+        "command": "node tools/loki.mjs test"
       }
     }
   }

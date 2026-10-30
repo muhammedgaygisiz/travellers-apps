@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import * as appCheckUtils from '../initialize-firebase-app-check';
+import { preloadFirestoreWebPlugin } from '../preload-firestore-web-plugin';
 import { FirebaseApp, FirebaseOptions, initializeApp } from 'firebase/app';
 import { Firestore } from 'firebase/firestore';
 import { Analytics } from 'firebase/analytics';
@@ -59,6 +60,9 @@ jest.mock('../provide-firestore-simulator', () => ({
 }));
 
 jest.mock('@capacitor/core');
+jest.mock('../preload-firestore-web-plugin', () => ({
+  preloadFirestoreWebPlugin: jest.fn(async () => undefined),
+}));
 
 describe(provideFirestoreUtils.name, () => {
   const firebaseApp = { name: 'bite-tribe' } as unknown as FirebaseApp;
@@ -180,6 +184,9 @@ describe(provideFirestoreUtils.name, () => {
     };
     const gate = createGate();
     gate.startNavigation.mockImplementation(() => calls.push('nav'));
+    jest.mocked(preloadFirestoreWebPlugin).mockImplementationOnce(async () => {
+      calls.push('firestore');
+    });
 
     const initializer = createFirebaseStartupInitializer(
       firebaseApp,
@@ -191,7 +198,9 @@ describe(provideFirestoreUtils.name, () => {
 
     await initializer();
 
-    expect(calls).toEqual(['app-check', 'auth', 'nav']);
+    // The Firestore web plugin is loaded before sign-in starts its listeners
+    // (issue #1835).
+    expect(calls).toEqual(['app-check', 'firestore', 'auth', 'nav']);
     expect(gate.readiness.markReady).toHaveBeenCalled();
     expect(gate.readiness.markBlocked).not.toHaveBeenCalled();
   });

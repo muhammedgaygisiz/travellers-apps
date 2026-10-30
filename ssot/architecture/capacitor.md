@@ -707,6 +707,16 @@ Stories pasteboard on iOS or send a targeted intent on Android.
   `BridgeViewController` on iOS and in `MainActivity` before `super.onCreate`
   on Android.
 
+## Web Plugin Loading Rule
+
+On the web, Capacitor builds a plugin's JavaScript implementation on its first call and does not share that load. Every call that arrives while the first load is still in flight gets **an instance of its own**, and later calls go to whichever instance was built last. A plugin that keeps state on its web instance splits that state across instances.
+
+`@capacitor-firebase/firestore` is such a plugin. It numbers snapshot listeners per instance and keeps their unsubscribe functions in a per-instance map. Signing in starts several listeners at once, so they all came back as id `"1"`, each on a different instance. `removeSnapshotListener` reaches only the last instance, so it removed whichever listener that instance held. The store's single profile snapshot then kept listening for the rest of the session, and the first-country celebration's listener could be the one that went quiet. Which one it hit depended on which registration resolved first, so the failure was intermittent. See issue [#1835].
+
+**Load a stateful web plugin with one awaited call before anything uses it concurrently.** `preloadFirestoreWebPlugin` in `libs/common/ta-firestore` does this for Firestore. It runs in the startup initializer before `authService.initialize()`, and calls `removeSnapshotListener` with an id nothing holds: that loads the implementation and changes nothing. Native platforms go through the bridge, never build a web instance, and skip it.
+
+A plugin whose web implementation holds no state across calls is unaffected. A new one that does, such as listener or watch bookkeeping, gets the same preload. `preload-firestore-web-plugin.spec.ts` reproduces the race against the real `@capacitor/core`, so a Capacitor upgrade that fixes the loader shows up there as a failing test.
+
 ## Code Anchors
 
 ```text
@@ -736,6 +746,7 @@ libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.t
 libs/common/push-notifications
 libs/common/networkstatus/feature
 libs/common/image-compression
+libs/common/ta-firestore/src/lib/preload-firestore-web-plugin.ts
 ```
 
 ## Current Limitations
@@ -774,3 +785,4 @@ libs/common/image-compression
 [#1748]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1748
 [#1749]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1749
 [#1765]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1765
+[#1835]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1835

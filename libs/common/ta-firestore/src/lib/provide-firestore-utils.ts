@@ -49,6 +49,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { Analytics } from 'firebase/analytics';
 import { AuthService } from './auth.service';
 import { StartupNavigationService } from './startup-navigation.service';
+import { preloadFirestoreWebPlugin } from './preload-firestore-web-plugin';
 
 export const FIREBASE_APP = new InjectionToken<'FIREBASE_APP' | null>(
   'FIREBASE_APP',
@@ -283,6 +284,9 @@ const resumeStartup = async (
   }
 
   startup.resumed = true;
+  // Before auth, because signing in is what starts several Firestore
+  // listeners at once (issue #1835).
+  await preloadFirestoreWebPlugin();
   await authService.initialize();
   await gate.startNavigation();
 };

@@ -240,11 +240,15 @@ Where each moment is wired:
 | `first-follow`         | `followUser$` and `FollowSuggestionsService.follow`     | `followsAnyone()` before the write: one document of the user's own `following`                                        | [#1799] |
 | `bite-trail-completed` | `setBiteTriedOutStatusEffect$`                          | `completesBucketlist`: the tick that brings `bucketlistProgress` from below 1 to 1, celebrated once the save succeeds | [#1800] |
 
-`first-country` is the only moment that is not a direct reaction to a tap: the
-backend sets the country seconds after the post, so the store keeps the user's
-own document listened to for the session. Known gap: in two of three signup
-sessions of the [#1801] pre-pass that listener never reached the effect, so the
-moment stayed silent until the next app start. Tracked in [#1835].
+`first-country` is the only moment that is not a direct reaction to a tap:
+the backend sets the country seconds after the post, so the store keeps the
+user's own document listened to for the session. In the [#1801] pre-pass, that
+listener sometimes never reached the effect on the web. The cause was
+Capacitor's web plugin loader handing the Firestore listeners registered at
+sign-in instances of their own, so removing one listener could remove another.
+It is fixed by loading the plugin once at startup; see the Web Plugin Loading
+Rule in [Architecture - Capacitor](../architecture/capacitor.md) and issue
+[#1835].
 
 **Acceptance.** [#1801] runs the checklist on the reference devices. A
 simulator and web pre-pass against the emulators passed every row it could

@@ -42,7 +42,7 @@ Current model fields:
 | Bites        | `biteIds`            | Bites included in the journey.           |
 | Image        | `imagePath`          | Display image for the BiteTrail.         |
 | Owner image  | `ownerImagePath`     | Display image for the owner.             |
-| Owner name   | `ownerName`          | Display name of the owner.               |
+| Owner name   | `ownerName`          | Owner's display name, kept current.      |
 | Location     | `location`           | Human-readable location context.         |
 | Description  | `description`        | Explanation of the journey.              |
 | Price        | `price`              | Price of the BiteTrail.                  |

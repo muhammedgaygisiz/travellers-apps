@@ -244,7 +244,9 @@ than displays.
 - `author` is still written, so a reader has an attribution before the join
   resolves, but it is now written from the profile. An account with no readable
   profile writes an empty name rather than falling back to the provider's — the
-  provider's name never reaches a review document.
+  provider's name never reaches a review document. A later display-name change
+  rewrites it on every review the person wrote, per `Display Name Copies` in
+  [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md).
 - A review whose author cannot be resolved keeps its stored name. Those are the
   ones written before `authorId` was carried and the ones whose account is gone;
   blanking them would remove the only attribution they have. The existing data

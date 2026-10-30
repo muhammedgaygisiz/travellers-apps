@@ -97,6 +97,7 @@ export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-cr
 export { upgradeGuestAccount } from './functions/users/upgrade-guest-account';
 export { claimTableVisit } from './functions/restaurants/claim-table-visit';
 export { claimDisplayName } from './functions/users/claim-display-name';
+export { syncDisplayNameCopiesOnUserUpdate } from './functions/users/sync-display-name-copies';
 export { setUserRoles } from './functions/users/set-user-roles';
 export { setUserBlocked } from './functions/users/set-user-blocked';
 export { blockUser, unblockUser } from './functions/users/block-user';

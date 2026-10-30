@@ -33,7 +33,15 @@ Two consequences for validation:
 - `nx show project <name>` is the only accurate view of a `test` target. Reading `project.json` will show you no Jest target at all.
 - The Nx target now shells out to `jest` with `cwd` set to the project root, so the direct fallback below runs the same Jest that Nx runs.
 
-`model` gained a `test` target with issue [#1080] and is the workspace's one non-Angular Jest config: it takes the `ts-jest` transform straight from `jest.preset.js` instead of overriding it with `jest-preset-angular`, because a types-only library has no component to compile. Its `tsconfig.spec.json` sets `allowJs`, since `jest.preset.js` adds the workspace `__mocks__` directory to every project's roots and `ts-jest` otherwise warns twice per run about compiling `fetch.js` and `resize-observer.js`.
+`model` gained a `test` target with issue [#1080] and is the workspace's one non-Angular Jest config: it takes the `ts-jest` transform straight from `jest.preset.js` instead of overriding it with `jest-preset-angular`, because a types-only library has no component to compile. Its `tsconfig.spec.json` sets `allowJs`, since `jest.preset.js` adds the workspace `__mocks__` directory to every project's roots and `ts-jest` otherwise warns about compiling the JavaScript setup files listed below.
+
+### Shared Setup Files
+
+`jest.preset.js` loads three files from the workspace `__mocks__` directory into every project through `setupFilesAfterEnv`:
+
+- `fetch.js` replaces `fetch` with a mock that resolves `{ ok: true }` with an empty `json()`.
+- `resize-observer.js` stubs `ResizeObserver`, which jsdom lacks.
+- `ionic-asset-path.js` sets Ionic's asset path to the jsdom origin (issue [#1814]). An `ion-icon` whose name was not registered through `addIcons()` resolves `svg/<name>.svg` against that path. Left empty, jsdom rejects the base URL, and every such icon printed a stack trace and an Ionicons warning: about 4 900 of each in one CI run. With the path set, the lookup reaches the `fetch` mock and the icon renders empty, as it did before, without logging. Projects whose `transformIgnorePatterns` do not cover `@ionic` cannot load the module, and the file skips them.
 
 Its specs are compile-time assertions: `ts-jest` type-checks the spec, so a shape the model can no longer express fails the run before any expectation is evaluated. A coverage run collects nothing, which the 80% threshold in `jest.preset.js` tolerates because there is no instrumented file to measure.
 
@@ -260,3 +268,4 @@ committed reference already shows a skeleton.
 [#1379]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1379
 [#1547]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1547
 [#1549]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1549
+[#1814]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1814

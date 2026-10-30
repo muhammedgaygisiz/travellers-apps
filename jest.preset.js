@@ -17,6 +17,7 @@ module.exports = {
   setupFilesAfterEnv: [
     path.resolve(__dirname, './__mocks__/fetch.js'),
     path.resolve(__dirname, './__mocks__/resize-observer.js'),
+    path.resolve(__dirname, './__mocks__/ionic-asset-path.js'),
   ],
   coverageThreshold: {
     global: {

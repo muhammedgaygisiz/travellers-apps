@@ -302,6 +302,7 @@
   "country-badge-earned": "Bite แรกในประเทศใหม่: {{country}}!",
   "onboarding-finished": "ยินดีต้อนรับสู่ทีม!",
   "first-follow": "ตอนนี้คุณติดตาม {{user}} แล้ว ยินดีต้อนรับสู่การเดินทางด้านอาหารนี้!",
+  "bite-trail-completed": "คุณลองครบทุก Bite ใน {{trail}} แล้ว!",
   "image-uploaded-successfully": "อัปโหลดรูปภาพสำเร็จแล้ว!",
   "uploading-keep-app-open": "กำลังอัปโหลดรูปภาพ — โปรดเปิดแอปไว้",
   "loading-photo": "กำลังโหลดรูปภาพ…",

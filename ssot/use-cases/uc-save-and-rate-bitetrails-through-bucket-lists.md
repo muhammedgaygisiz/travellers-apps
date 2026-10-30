@@ -34,6 +34,7 @@ coach mark that teaches the swipe to
 - A Bucket List shows only the Bites its viewer can see. A Bite whose photo never arrived stays in `biteIds` but is shown to its own poster alone - not to the list's owner - and an id whose Bite no longer exists is not rendered at all. A list whose Bites are all hidden shows the empty state. See issue [#1717].
 - A single Bite can be added to a Bucket List only once its photo is uploaded. The save is refused with the reason rather than dropped silently, and the details page does not offer it.
 - User opens the Bucket List and swipes a Bite to tick it off as tried out, or swipes an already ticked Bite to undo it. A first-visit coach mark teaches the gesture.
+- The tick that tries out the last untried Bite of a Bucket List is celebrated once it is saved: a short confetti burst and `You've tried every Bite on {{trail}}!`, naming the list. This holds for every Bucket List, not only one saved from a BiteTrail, because the progress bar and the done mark it echoes are shown on every list. Completion is read with `bucketlistProgress` from `utils`, the same helper `ProgressPipe` uses, so the celebration and the done mark cannot disagree; an empty list never completes. Any other tick, an un-tick, or a save that fails celebrates nothing, and the tick has no other feedback to replace. Un-ticking and re-ticking the last Bite celebrates again, which epic [#1741] accepts. A list holding a Bite hidden from its owner under [#1717] cannot be ticked to complete, for the progress bar and the celebration alike, because the hidden Bite counts towards the total. See GitHub issue [#1800] and the Celebration Rule in [Implementation - Ionic Patterns](../implementation/ionic-patterns.md).
 - User can rate the BiteTrail through Bucket List-related flows.
 
 ## MVP Classification
@@ -83,6 +84,7 @@ Location** under App Functionality is already declared in
 - Issue [#1717] hides a Bite whose photo never arrived from everybody but its poster, bucket
   lists included, and refuses to add one. The list overview's badge still counts the stored
   `biteIds`. Open.
+- Issue [#1800] celebrates the tick that completes a Bucket List, part of epic [#1741].
 
 ## Related Domains
 
@@ -108,4 +110,6 @@ Location** under App Functionality is already declared in
 [#812]: https://github.com/muhammedgaygisiz/travellers-apps/issues/812
 [#1016]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1016
 [#1162]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1162
+[#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
+[#1800]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1800
 [#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717

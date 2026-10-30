@@ -3,7 +3,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { provideMockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BucketListEffect } from '../effects';
 import { BucketlistActions } from '../actions';
 import SpyInstance = jest.SpyInstance;
@@ -11,6 +11,9 @@ import { AuthService } from 'ta-firestore';
 import { NavController } from '@ionic/angular/standalone';
 import { ToastService } from 'toast';
 import type { Action } from '@ngrx/store';
+import type { Bucketlist } from 'model';
+import { CelebrationService } from 'celebration';
+import { bucketlists } from '../selectors';
 
 const assertDeepEqual = (actual: unknown, expected: unknown): void => {
   expect(actual).toEqual(expected);
@@ -46,6 +49,8 @@ const MockToastService = {
   present: mockToastPresent,
 };
 
+const mockCelebrate = jest.fn().mockResolvedValue(undefined);
+
 const mockNavigateForward = jest.fn();
 const MockNavController = {
   navigateForward: mockNavigateForward,
@@ -65,11 +70,12 @@ describe('BucketListEffect', () => {
       providers: [
         BucketListEffect,
         provideMockActions(() => actions$),
-        provideMockStore(),
+        provideMockStore({ selectors: [{ selector: bucketlists, value: [] }] }),
         { provide: BiteTribeApiService, useValue: BiteTribeApiServiceMock },
         { provide: AuthService, useValue: MockedAuthService },
         { provide: ToastService, useValue: MockToastService },
         { provide: NavController, useValue: MockNavController },
+        { provide: CelebrationService, useValue: { celebrate: mockCelebrate } },
       ],
     });
 
@@ -460,6 +466,93 @@ describe('BucketListEffect', () => {
         bucketlistId: 'bucketlistId',
         biteId: 'biteId',
         checked: true,
+      });
+    });
+
+    describe('celebrating a completed bucket list', () => {
+      /** The list as the reducer leaves it after the tick. */
+      const afterTick = (
+        biteIds: string[],
+        triedOutBiteIds: string[],
+      ): Bucketlist => ({
+        id: 'bucketlistId',
+        userId: '123',
+        name: 'Lisbon pastries',
+        biteIds,
+        triedOutBites: triedOutBiteIds.map((biteId) => ({
+          biteId,
+          date: '',
+          timestamp: 0,
+        })),
+      });
+
+      const tick = (checked: boolean): void => {
+        scheduler.run(({ cold, expectObservable }) => {
+          actions$ = cold('a', {
+            a: BucketlistActions.setBiteTriedOutStatus({
+              bucketlistId: 'bucketlistId',
+              biteId: 'biteId',
+              checked,
+            }),
+          });
+
+          expectObservable(effects.setBiteTriedOutStatusEffect$).toBe('a', {
+            a: expect.anything(),
+          });
+        });
+      };
+
+      beforeEach(() => {
+        mockCelebrate.mockResolvedValue(undefined);
+      });
+
+      it('celebrates the tick that tries out the last Bite, naming the list', () => {
+        TestBed.inject(MockStore).overrideSelector(bucketlists, [
+          afterTick(['other', 'biteId'], ['other', 'biteId']),
+        ]);
+
+        tick(true);
+
+        expect(mockCelebrate).toHaveBeenCalledTimes(1);
+        expect(mockCelebrate).toHaveBeenCalledWith('bite-trail-completed', {
+          trail: 'Lisbon pastries',
+        });
+      });
+
+      it('celebrates nothing for a tick that leaves Bites untried', () => {
+        TestBed.inject(MockStore).overrideSelector(bucketlists, [
+          afterTick(['other', 'biteId', 'third'], ['biteId']),
+        ]);
+
+        tick(true);
+
+        expect(mockCelebrate).not.toHaveBeenCalled();
+      });
+
+      it('celebrates nothing for an un-tick', () => {
+        TestBed.inject(MockStore).overrideSelector(bucketlists, [
+          afterTick(['other', 'biteId'], ['other']),
+        ]);
+
+        tick(false);
+
+        expect(mockCelebrate).not.toHaveBeenCalled();
+      });
+
+      it('celebrates nothing when the update fails', () => {
+        TestBed.inject(MockStore).overrideSelector(bucketlists, [
+          afterTick(['biteId'], ['biteId']),
+        ]);
+        updateBucketlistTriedOutStatusSpy.mockImplementationOnce(
+          () =>
+            throwError(() => new Error('Failed')) as unknown as ReturnType<
+              BiteTribeApiService['updateBucketlistTriedOutStatus']
+            >,
+        );
+
+        tick(true);
+
+        expect(mockCelebrate).not.toHaveBeenCalled();
       });
     });
 

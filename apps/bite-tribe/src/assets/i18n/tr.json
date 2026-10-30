@@ -302,6 +302,7 @@
   "country-badge-earned": "Yeni bir ülkede ilk Bite'ın: {{country}}!",
   "onboarding-finished": "Kabileye hoş geldin!",
   "first-follow": "Artık {{user}} kullanıcısını takip ediyorsun. Bu lezzet yolculuğuna hoş geldin!",
+  "bite-trail-completed": "{{trail}} listesindeki tüm Bite'ları denedin!",
   "image-uploaded-successfully": "Görsel başarıyla yüklendi!",
   "uploading-keep-app-open": "Fotoğraf yükleniyor — uygulamayı açık tutun",
   "loading-photo": "Fotoğraf yükleniyor…",

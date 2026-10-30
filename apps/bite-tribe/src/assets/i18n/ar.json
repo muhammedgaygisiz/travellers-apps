@@ -302,6 +302,7 @@
   "country-badge-earned": "أول Bite لك في بلد جديد: {{country}}!",
   "onboarding-finished": "مرحبًا بك في القبيلة!",
   "first-follow": "أنت تتابع {{user}} الآن. مرحبًا بك في هذه الرحلة الغذائية!",
+  "bite-trail-completed": "لقد جرّبت كل Bites في {{trail}}!",
   "image-uploaded-successfully": "تم رفع الصورة بنجاح!",
   "uploading-keep-app-open": "جارٍ رفع الصورة — أبقِ التطبيق مفتوحًا",
   "loading-photo": "جارٍ تحميل الصورة…",

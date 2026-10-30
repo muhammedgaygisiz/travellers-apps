@@ -184,7 +184,7 @@ everything else:
 
 | Decision  | Value                                                                                                        |
 | --------- | ------------------------------------------------------------------------------------------------------------ |
-| Confetti  | `canvas-confetti`, one burst from `{ x: 0.5, y: 1 }` straight up, about 80 particles and 1 s                 |
+| Confetti  | `canvas-confetti`, one burst from `{ x: 0.5, y: 1 }` straight up, 80 particles over 120 ticks, about 2 s     |
 | Colours   | `--ion-color-primary`, `--bite-tribe-color` and `--ion-color-secondary`, read from the document at fire time |
 | Copy      | The moment's key in `CELEBRATION_MESSAGE_KEYS`, presented through `ToastService` with `outcome: 'success'`   |
 | Haptic    | The `success` the toast plays. The confetti plays none                                                       |
@@ -212,17 +212,47 @@ Details worth knowing before changing it:
   does not touch the confetti.
 - **Never rejects.** A failure of the library or of the burst is swallowed,
   the posture `ToastService.present()` holds.
-- **Detected at the moment of action, with no "seen" store.** Each call site
-  decides from a before/after comparison of state it already holds, so nothing
-  is written to `Preferences`, the account or Firestore, and a second phone
-  never replays a moment. A deliberate redo - deleting the only Bite and
-  posting again - may replay one, which the epic accepts.
+- **Detected at the moment it happens, with no "seen" store.** Nothing is
+  written to `Preferences`, the account or Firestore to remember a moment, so
+  a second phone never replays one. A deliberate redo - deleting the only Bite
+  and posting again, unfollowing everybody and following again, un-ticking
+  and re-ticking the last Bite - may replay one, which the epic accepts.
+- **Asked before the write, never inferred from the store.** Where "first"
+  depends on what the user already has, the call site asks before it writes,
+  because the write itself would count. The store cannot answer: it holds the
+  user's own Bites only after My Bites or My Profile loaded them, and its
+  `followingCount` is the login-time snapshot. A first that cannot be told -
+  signed out, or the read failed - is not taken for one.
 - **Only this library imports `canvas-confetti`**, and only bite-tribe calls
   it. Its spec fails if another file imports the library.
 
 `Tech/Celebration` in Storybook (`libs/common/celebration/src/lib/__specs__/celebration.stories.ts`)
 fires the burst in light and dark. It is kept out of the Loki run, because at
 rest it is a single button and a captured burst would be random.
+
+Where each moment is wired:
+
+| Moment                 | Call site                                               | How "first" or "done" is decided                                                                                      | Issue   |
+| ---------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------- |
+| `first-bite`           | `BiteService.createBite`, post and post-and-add-another | `hasOwnBites()` before the create: the profile's `biteCount` when it counts a Bite, else one Firestore document       | [#1796] |
+| `first-country`        | `celebrateFirstCountry$` in the store's `AppEffect`     | Each later snapshot of the user's own document that adds a `countryCodes` entry; none when the codes were empty       | [#1797] |
+| `onboarding-finished`  | `OnboardingService.finish()`                            | Once the completion write succeeds                                                                                    | [#1798] |
+| `first-follow`         | `followUser$` and `FollowSuggestionsService.follow`     | `followsAnyone()` before the write: one document of the user's own `following`                                        | [#1799] |
+| `bite-trail-completed` | `setBiteTriedOutStatusEffect$`                          | `completesBucketlist`: the tick that brings `bucketlistProgress` from below 1 to 1, celebrated once the save succeeds | [#1800] |
+
+`first-country` is the only moment that is not a direct reaction to a tap: the
+backend sets the country seconds after the post, so the store keeps the user's
+own document listened to for the session. Known gap: in two of three signup
+sessions of the [#1801] pre-pass that listener never reached the effect, so the
+moment stayed silent until the next app start. Tracked in [#1835].
+
+**Acceptance.** [#1801] runs the checklist on the reference devices. A
+simulator and web pre-pass against the emulators passed every row it could
+reach - one burst per moment, the burst surviving navigation, taps reaching the
+content under it, reduced motion drawing nothing - and measured the burst at
+about 2 s rather than the 1 s first written here. Haptics, the feel of the
+burst and frame rate on the budget Samsung are still for the devices; tune
+`CELEBRATION_BURST` there and record the final values in this section.
 
 ## Desktop Layout
 
@@ -279,3 +309,10 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1765]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1765
 [#1766]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1766
 [#1795]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1795
+[#1796]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1796
+[#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797
+[#1798]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1798
+[#1799]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1799
+[#1800]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1800
+[#1801]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1801
+[#1835]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1835

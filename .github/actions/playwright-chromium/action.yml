@@ -1,0 +1,45 @@
+name: 'Playwright Chromium'
+description: "Provide Playwright's Chromium from a cache keyed on the Playwright version, and install its system packages only when the runner lacks them."
+runs:
+  using: 'composite'
+  steps:
+    # Read the version from the installed package rather than package.json, so
+    # the cache key always names the browser build this node_modules expects. A
+    # bump to @playwright/test therefore misses the cache and downloads the new
+    # browser on its first run.
+    - name: Read the Playwright version
+      id: version
+      shell: bash
+      run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+    # ImageOS (for example `ubuntu24`) is in the key because the browser build
+    # Playwright downloads depends on the host distribution.
+    - name: Cache Playwright browsers
+      id: cache
+      uses: actions/cache@v6
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-chromium-${{ runner.os }}-${{ env.ImageOS }}-${{ steps.version.outputs.version }}
+
+    # Browser only. `--with-deps` is what used to cost 10+ minutes on a slow
+    # package mirror (issue #1818); the system packages are handled below.
+    - name: Install Chromium
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: npx playwright install chromium
+
+    # The runner image ships Google Chrome, whose packages cover what
+    # Playwright's Chromium links against, so this normally finds nothing to
+    # do and apt never runs. If an image update drops one, launching fails and
+    # only then are the system packages installed.
+    - name: Install Chromium's system packages if the runner lacks them
+      shell: bash
+      run: |
+        probe="require('@playwright/test').chromium.launch().then((b) => b.close())"
+        if node -e "$probe"; then
+          echo 'Chromium launches; no system packages needed.'
+          exit 0
+        fi
+        echo '::warning::Chromium could not launch on this runner, so its system packages are being installed with apt.'
+        npx playwright install-deps chromium
+        node -e "$probe"

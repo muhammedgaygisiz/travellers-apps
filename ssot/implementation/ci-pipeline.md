@@ -224,6 +224,7 @@ The lint, stylelint and tests chain is deliberately sequential so a cheap failur
 | `.github/actions/install-if-missing`     | The build jobs                                                                    | `npm ci` when the restored `node_modules` is unusable                                       |
 | `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`, `loki-build`                                        | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
 | `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, builds, `loki-build`, `deploy-bite-tribe-storybook` | Persist and restore the Nx computation cache                                                |
+| `.github/actions/playwright-chromium`    | `e2e`, `business-e2e`                                                             | Restore Playwright's Chromium by version; install system packages only if it cannot launch  |
 
 `setup` reads `cache-hit` from `restore-cache` through the step id `cache`. On a hit it skips `npm ci` and the save, and sets up Node.js without the npm download cache, which only `npm ci` uses. Node.js itself is still set up from `.nvmrc` because the deploy jobs build through this action. Before [#1811] the step had no id, so the guards were always true and every run reinstalled the `node_modules` it had just restored.
 
@@ -283,15 +284,40 @@ through `digest-mismatch`. That is the safer default and it is kept.
 
 ## Caching Layers
 
-Three independent caches, each with its own key:
+Four independent caches, each with its own key:
 
-| Cache          | Path                              | Key                                                                           |
-| -------------- | --------------------------------- | ----------------------------------------------------------------------------- |
-| Dependencies   | `node_modules`                    | `node-modules-<package-lock hash>`                                            |
-| npm download   | npm's own cache directory         | `node-cache-<os>-npm-<package-lock hash>`                                     |
-| Nx computation | `.nx/cache`, `.nx/workspace-data` | `nx-cache-v2-<os>-<run id>-<job>`, restored by the `nx-cache-v2-<os>-` prefix |
+| Cache               | Path                              | Key                                                                           |
+| ------------------- | --------------------------------- | ----------------------------------------------------------------------------- |
+| Dependencies        | `node_modules`                    | `node-modules-<package-lock hash>`                                            |
+| npm download        | npm's own cache directory         | `node-cache-<os>-npm-<package-lock hash>`                                     |
+| Nx computation      | `.nx/cache`, `.nx/workspace-data` | `nx-cache-v2-<os>-<run id>-<job>`, restored by the `nx-cache-v2-<os>-` prefix |
+| Playwright browsers | `~/.cache/ms-playwright`          | `playwright-chromium-<os>-<ImageOS>-<@playwright/test version>`               |
 
 The Nx key is unique per run and job so every job saves its own entry, while the `restore-keys` prefix pulls the most recent entry from any earlier job or run. Nx keys its own entries by content hash, so restoring a slightly stale cache is safe: matching tasks are replayed and everything else is recomputed.
+
+### Playwright Browsers Without apt
+
+`e2e` and `business-e2e` get Chromium through
+`.github/actions/playwright-chromium`. Until [issue #1818][#1818] both ran
+`npx playwright install --with-deps chromium` on every run. That usually took 21
+to 44 seconds, but the `apt-get` half of `--with-deps` took 610 s and 729 s on
+two of eleven pull-request runs when the package mirror was slow.
+
+The action caches `~/.cache/ms-playwright` under the version read from the
+installed `@playwright/test`. A bump therefore misses the cache, and the next run
+downloads the new browser with `playwright install chromium`, which fetches the
+browser without system packages. It then launches Chromium once. The runner
+image ships Google Chrome, whose packages cover what Playwright's Chromium links
+against, so the launch normally succeeds and `apt` never runs. Only if it fails,
+for example after a runner image drops a library, does the action run
+`playwright install-deps chromium` and warn in the run summary.
+
+The alternative was running both jobs in the `mcr.microsoft.com/playwright`
+image for the pinned version. It was rejected because the image is about 930 MB
+compressed (`v1.61.1-noble`, amd64), and it is pulled on every run whether or
+not anything changed. The cache costs one download per Playwright bump. The
+container's tag would also have to be bumped by hand alongside `package.json`,
+and its Node.js is not the version in `.nvmrc`.
 
 ## Nx Cache Mechanics
 
@@ -518,6 +544,7 @@ apps/bite-tribe-ios/ios/App/ExportOptions.plist
 .github/actions/restore-cache/action.yml
 .github/actions/install-if-missing/action.yml
 .github/actions/setup-env-for-affected/action.yml
+.github/actions/playwright-chromium/action.yml
 nx.json
 .nvmrc
 ```
@@ -556,4 +583,5 @@ nx.json
 [#1811]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1811
 [#1815]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1815
 [#1816]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1816
+[#1818]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1818
 [#1839]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1839

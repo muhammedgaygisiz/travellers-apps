@@ -366,8 +366,8 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+      - name: 'Playwright Chromium'
+        uses: ./.github/actions/playwright-chromium
 
       # Boots the Firebase emulators + Angular dev server (see
       # apps/bite-tribe-e2e/playwright.config.ts) and runs the suite.
@@ -420,8 +420,8 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+      - name: 'Playwright Chromium'
+        uses: ./.github/actions/playwright-chromium
 
       # Boots the Firebase emulators + business Angular dev server (see
       # apps/bite-tribe-business-e2e/playwright.config.ts) and runs the suite.

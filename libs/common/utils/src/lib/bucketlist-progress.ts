@@ -12,13 +12,17 @@ export const bucketlistProgress = (
     | null
     | undefined,
 ): number => {
-  const total = bucketlist?.biteIds?.length ?? 0;
+  if (!bucketlist) {
+    return 0;
+  }
+
+  const total = bucketlist.biteIds?.length ?? 0;
 
   if (total === 0) {
     return 0;
   }
 
-  const triedOut = bucketlist?.triedOutBites?.length ?? 0;
+  const triedOut = bucketlist.triedOutBites?.length ?? 0;
 
   return triedOut / total;
 };

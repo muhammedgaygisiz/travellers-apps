@@ -76,7 +76,7 @@ describe('sendLocalizedNotification', () => {
     expect(sendEachForMulticast).toHaveBeenCalledWith({
       tokens: ['token-a'],
       notification: {
-        title: 'Neuer Follower!',
+        title: 'Dir folgt jemand Neues!',
         body: 'Mo folgt dir jetzt.',
       },
       data: { type: 'NEW_FOLLOWER', followerUid: 'follower-1' },

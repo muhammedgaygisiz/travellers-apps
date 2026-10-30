@@ -3,9 +3,9 @@ import { NotificationMessages } from '../notification-messages';
 /** Arabic copy. */
 export const ar: NotificationMessages = {
   'common.someone': 'شخص ما',
-  'emailVerification.subject': 'أكّد عنوان بريدك الإلكتروني في BiteTribe',
+  'emailVerification.subject': 'تأكيد عنوان بريدك الإلكتروني في BiteTribe',
   'emailVerification.body':
-    'يرجى تأكيد عنوان بريدك الإلكتروني ليبقى حسابك في BiteTribe آمنًا ولتتمكن من تلقي الرسائل المهمة المتعلقة بحسابك.',
+    'يُرجى تأكيد عنوان بريدك الإلكتروني ليبقى حسابك في BiteTribe آمنًا وتصلك الرسائل المهمة المتعلقة به.',
   'emailVerification.linkLabel': 'تأكيد عنوان البريد الإلكتروني',
   'visitSummary.subject': 'زيارتك إلى {{restaurant}}',
   'visitSummary.heading': 'ما طلبته',
@@ -16,18 +16,20 @@ export const ar: NotificationMessages = {
   'visitSummary.footnote':
     'هذا ملخص لما تم طلبه وليس إيصالاً. إيصالك يصدر من المطعم.',
   'visitReminder.title': 'هل كان لذيذًا؟',
-  'visitReminder.body': 'حوّل طبق الليلة الماضية إلى Bite. صورة، تقييم، انتهى.',
+  'visitReminder.body':
+    'يمكن تحويل طبق الليلة الماضية إلى Bite. صورة، تقييم، انتهى.',
   'newBite.title': 'Bite جديد',
-  'newBite.body': '{{author}} أنشأ للتو Bite جديدًا',
-  'newBite.bodyWithName': '{{author}} أنشأ للتو Bite جديدًا: {{bite}}',
-  'newFollower.title': 'متابع جديد!',
-  'newFollower.body': '{{follower}} يتابعك الآن.',
+  'newBite.body': 'Bite جديد من {{author}}',
+  'newBite.bodyWithName': 'Bite جديد من {{author}}: {{bite}}',
+  'newFollower.title': 'متابعة جديدة!',
+  'newFollower.body': 'متابعة جديدة من {{follower}}.',
   'newLike.title': 'إعجاب جديد على Bite الخاص بك!',
-  'newLike.body': '{{liker}} أعجب بـ Bite «{{bite}}» الخاص بك.',
+  'newLike.body': 'إعجاب من {{liker}} بـ Bite «{{bite}}» الخاص بك.',
   'newReview.title': 'مراجعة جديدة على Bite الخاص بك!',
-  'newReview.body': '{{reviewer}} كتب مراجعة على Bite «{{bite}}» الخاص بك.',
+  'newReview.body':
+    'مراجعة جديدة من {{reviewer}} على Bite «{{bite}}» الخاص بك.',
   'newReviewReply.title': 'رد جديد على مراجعة',
-  'newReviewReply.body': '{{replier}} رد على مراجعة لـ «{{bite}}».',
+  'newReviewReply.body': 'رد جديد من {{replier}} على مراجعة لـ «{{bite}}».',
   'weeklyBites.title': '🍽️ قضمات الأسبوع وصلت 🤩',
   'weeklyBites.bodyOne': 'شاركت BiteTribe قضمة جديدة واحدة الأسبوع الماضي',
   'weeklyBites.bodyMany': 'شاركت BiteTribe {{count}} قضمة جديدة الأسبوع الماضي',
@@ -40,20 +42,20 @@ export const ar: NotificationMessages = {
   'countryBadge.title': '🎉 شارة دولة جديدة!',
   'countryBadge.body': 'تهانينا! لقد فتحت شارة {{country}}',
   'countryBadge.followerTitle': '🌍 شارة دولة جديدة',
-  'countryBadge.followerBody': '{{user}} فتح شارة {{country}}',
+  'countryBadge.followerBody': 'شارة {{country}} الجديدة لـ {{user}}',
   'newTableOrder.title': '🔔 طلب جديد',
   'newTableOrder.body': 'الطاولة {{table}} أرسلت طلبًا الآن.',
   'newTableOrder.bodyWithoutTable': 'إحدى الطاولات أرسلت طلبًا الآن.',
   'newVersion.title': '🚀 يتوفر إصدار جديد',
   'newVersion.bodyIos':
-    'إصدار جديد من BiteTribe متاح الآن في App Store. حدّث التطبيق لتحصل على أحدث المزايا.',
+    'إصدار جديد من BiteTribe متاح الآن في App Store. يُرجى تحديث التطبيق للحصول على أحدث المزايا.',
   'newVersion.bodyAndroid':
-    'إصدار جديد من BiteTribe متاح الآن على Google Play. حدّث التطبيق لتحصل على أحدث المزايا.',
-  'newUserFollowUp.emailSubject': 'أطباق وعشاق طعام اخترناهم لك',
+    'إصدار جديد من BiteTribe متاح الآن على Google Play. يُرجى تحديث التطبيق للحصول على أحدث المزايا.',
+  'newUserFollowUp.emailSubject': 'أطباق وأشخاص اخترناهم لك',
   'newUserFollowUp.emailIntro':
     'مرحبًا بك في BiteTribe! إليك بعض الأطباق التي تستحق التجربة وبعض الأشخاص الذين تستحق متابعتهم.',
   'newUserFollowUp.bitesHeading': 'أطباق تستحق التجربة',
-  'newUserFollowUp.peopleHeading': 'عشاق طعام تستحق متابعتهم',
+  'newUserFollowUp.peopleHeading': 'أشخاص تستحق متابعتهم',
   'newUserFollowUp.openBite': 'فتح الـ Bite',
   'newUserFollowUp.openProfile': 'عرض الملف الشخصي',
   'newUserFollowUp.footer':

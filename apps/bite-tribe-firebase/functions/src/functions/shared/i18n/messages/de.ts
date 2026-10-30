@@ -24,7 +24,7 @@ export const de: NotificationMessages = {
   'newBite.body': '{{author}} hat gerade einen neuen Bite erstellt',
   'newBite.bodyWithName':
     '{{author}} hat gerade einen neuen Bite erstellt: {{bite}}',
-  'newFollower.title': 'Neuer Follower!',
+  'newFollower.title': 'Dir folgt jemand Neues!',
   'newFollower.body': '{{follower}} folgt dir jetzt.',
   'newLike.title': 'Neues Like für deinen Bite!',
   'newLike.body': '{{liker}} gefällt dein Bite „{{bite}}“.',

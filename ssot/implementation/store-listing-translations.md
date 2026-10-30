@@ -196,7 +196,7 @@ TROUVEZ QUELQUE CHOSE QUI EN VAUT LA PEINE
 Parcourez les Bites près de vous, ou passez à la carte pour voir ce qui est bon au coin de la rue. Cherchez par plat, par lieu ou par tag. Chaque Bite porte une photo, un prix et un vrai avis : vous décidez avant de vous asseoir.
 
 PARTAGEZ CE QUE VOUS AVEZ MANGÉ
-Photographiez le plat, identifiez le lieu, ajoutez le prix et votre note. Votre position et la devise locale sont remplies pour vous. Un plat par Bite – c'est ce qui le rend utile à tous les autres.
+Photographiez le plat, identifiez le lieu, ajoutez le prix et votre note. Votre position et la devise locale sont remplies pour vous. Un plat par Bite – c'est ce qui le rend utile à tout le monde.
 
 SUIVEZ UN BITETRAIL
 Les BiteTrails sont des parcours gourmands composés à la main. Enregistrez-en un comme liste de souhaits et cochez chaque Bite à mesure que vous le goûtez. Parfait pour un week-end dans une nouvelle ville, tout autant que pour enfin explorer votre propre quartier.
@@ -241,7 +241,7 @@ ENCUENTRA ALGO QUE MEREZCA LA PENA
 Explora los Bites cerca de ti o pasa al mapa para ver qué hay bueno a la vuelta de la esquina. Busca por plato, por sitio o por etiqueta. Cada Bite lleva una foto, un precio y una opinión real, para que decidas antes de sentarte.
 
 COMPARTE LO QUE COMISTE
-Fotografía el plato, etiqueta el sitio, añade el precio y tu valoración. Tu posición y la moneda local se rellenan solas. Un plato por Bite: eso es lo que lo hace útil para los demás.
+Fotografía el plato, etiqueta el sitio, añade el precio y tu valoración. Tu posición y la moneda local se rellenan solas. Un plato por Bite: eso es lo que lo hace útil para todo el mundo.
 
 SIGUE UN BITETRAIL
 Los BiteTrails son rutas gastronómicas seleccionadas a mano. Guarda una como lista de deseos y ve marcando cada Bite según lo pruebas. Ideal para un fin de semana en una ciudad nueva, y también para comerte por fin tu propio barrio.
@@ -286,7 +286,7 @@ TROVA QUALCOSA CHE VALGA LA PENA
 Sfoglia i Bite vicino a te, o passa alla mappa per vedere cosa c'è di buono dietro l'angolo. Cerca per piatto, locale o tag. Ogni Bite porta una foto, un prezzo e un'opinione vera, così decidi prima di sederti.
 
 CONDIVIDI QUELLO CHE HAI MANGIATO
-Fotografa il piatto, tagga il locale, aggiungi il prezzo e il tuo voto. La tua posizione e la valuta locale vengono compilate per te. Un piatto per Bite: è questo che lo rende utile a tutti gli altri.
+Fotografa il piatto, tagga il locale, aggiungi il prezzo e il tuo voto. La tua posizione e la valuta locale vengono compilate per te. Un piatto per Bite: è questo che lo rende utile a chiunque.
 
 SEGUI UN BITETRAIL
 I BiteTrail sono percorsi gastronomici curati a mano. Salvane uno come lista dei desideri e spunta ogni Bite man mano che lo provi. Perfetto per un weekend in una città nuova, e altrettanto per mangiarti finalmente il tuo quartiere.
@@ -457,38 +457,38 @@ inside the Arabic run, which is normal and needs no markup in either console.
 Subtitle and short description:
 
 ```text
-اكتشف. جرّب. شارك.
+اكتشاف. تذوّق. مشاركة.
 ```
 
 Description:
 
 ```text
-كل تطبيقات الطعام تخبرك إلى أين تذهب. BiteTribe يخبرك بما تطلب.
+كل تطبيقات الطعام تقترح عليك مكانًا. BiteTribe يقترح عليك ما يستحق الطلب.
 
-الـ Bite طبق حقيقي واحد – صوّره الشخص الذي أكله، ومثبّت على المكان الذي أكله فيه، مع السعر الذي دفعه ورأيه الصريح.
+الـ Bite طبق حقيقي واحد – مصوَّر في المكان الذي أُكل فيه، ومعه السعر المدفوع ورأي صريح.
 
-اعثر على ما يستحق الأكل
-تصفّح الـ Bites القريبة منك، أو انتقل إلى الخريطة لترى ما هو لذيذ عند الناصية. ابحث بالطبق أو المكان أو الوسم. كل Bite يحمل صورة وسعرًا ورأيًا حقيقيًا، لتقرر قبل أن تجلس.
+اكتشاف ما يستحق الأكل
+الـ Bites القريبة منك في متناول يدك، والخريطة تكشف ما هو لذيذ عند الناصية. البحث ممكن بالطبق أو المكان أو الوسم. كل Bite يحمل صورة وسعرًا ورأيًا حقيقيًا، فيسهل القرار قبل الجلوس.
 
-شارك ما أكلته
-صوّر الطبق، وحدّد المكان، وأضف السعر وتقييمك. يُملأ موقعك والعملة المحلية تلقائيًا. طبق واحد لكل Bite – وهذا ما يجعله مفيدًا للجميع.
+مشاركة ما أكلته
+صورة للطبق، وتحديد للمكان، وإضافة للسعر وتقييمك. يُملأ موقعك والعملة المحلية تلقائيًا. طبق واحد لكل Bite – وهذا ما يجعله مفيدًا للجميع.
 
-اتبع BITETRAIL
-الـ BiteTrails رحلات طعام منسّقة بعناية. احفظ واحدة كقائمة آمال وأشّر على كل Bite بمجرد أن تجربه. مثالية لعطلة نهاية أسبوع في مدينة جديدة، ومناسبة تمامًا لتأكل أخيرًا حيّك أنت.
+متابعة BITETRAIL
+الـ BiteTrails رحلات طعام منسّقة بعناية. يمكن حفظ واحدة كقائمة آمال والتأشير على كل Bite بعد تجربته. مثالية لعطلة نهاية أسبوع في مدينة جديدة، ومناسبة تمامًا لاكتشاف حيّك أخيرًا.
 
-ابنِ الـ Tribe الخاصة بك
-تابع من تثق بذوقهم واعرف حين ينشرون شيئًا جديدًا. ردّ على مراجعاتهم، وأعجب بما تحب، وشاهد مساهماتك تتراكم على لوحة المتصدرين.
+بناء الـ Tribe الخاصة بك
+متابعة أشخاص بذوق موثوق ومعرفة جديدهم فور نشره. الرد على مراجعاتهم، والإعجاب بما يعجبك، ومشاهدة مساهماتك تتراكم على لوحة المتصدرين.
 
-كُل جيدًا في أي مكان
-يتحدث BiteTribe إحدى عشرة لغة ويتعامل مع العملات المحلية، فالـ Bite الذي تحفظه في زيورخ يظل مفهومًا حين تقرأه في بانكوك.
+أكل جيد في أي مكان
+يتحدث BiteTribe إحدى عشرة لغة ويتعامل مع العملات المحلية، فالـ Bite المحفوظ في زيورخ يظل مفهومًا عند قراءته في بانكوك.
 
-اكتشف. جرّب. شارك.
+اكتشاف. تذوّق. مشاركة.
 ```
 
 Promotional text:
 
 ```text
-كل دبوس على الخريطة هو طبق حقيقي، صوّره الشخص الذي أكله، مع السعر الذي دفعه ورأيه الصريح.
+كل دبوس على الخريطة طبق حقيقي، مصوَّر حيث أُكل، ومعه السعر المدفوع ورأي صريح.
 ```
 
 Keywords:
@@ -510,7 +510,7 @@ Description:
 ```text
 ሁሉም የምግብ መተግበሪያዎች የት እንደሚሄዱ ይነግሩዎታል። BiteTribe ምን እንደሚያዝዙ ይነግርዎታል።
 
-Bite አንድ እውነተኛ ምግብ ነው – በበላው ሰው የተነሳ፣ በበላበት ቦታ ላይ የተሰካ፣ ከከፈለው ዋጋ እና ከቅን አስተያየቱ ጋር።
+Bite አንድ እውነተኛ ምግብ ነው – በበሉት ሰው የተነሳ፣ በበሉበት ቦታ ላይ የተሰካ፣ ከከፈሉት ዋጋ እና ከቅን አስተያየታቸው ጋር።
 
 ለመብላት የሚያስቆጭ ነገር ያግኙ
 በአቅራቢያዎ ያሉ Bites ን ይመልከቱ፣ ወይም ወደ ካርታው ተሸጋግረው በአካባቢው ምን ጥሩ እንዳለ ይዩ። በምግብ፣ በቦታ ወይም በመለያ ይፈልጉ። እያንዳንዱ Bite ፎቶ፣ ዋጋ እና እውነተኛ አስተያየት ይዟል፤ ስለዚህ ከመቀመጥዎ በፊት ይወስናሉ።
@@ -533,7 +533,7 @@ BiteTribe አስራ አንድ ቋንቋዎችን ይናገራል እና የአ�
 Promotional text:
 
 ```text
-በካርታው ላይ ያለ እያንዳንዱ ምልክት እውነተኛ ምግብ ነው፤ በበላው ሰው የተነሳ፣ ከከፈለው ዋጋ እና ከቅን አስተያየቱ ጋር።
+በካርታው ላይ ያለ እያንዳንዱ ምልክት እውነተኛ ምግብ ነው፤ በበሉት ሰው የተነሳ፣ ከከፈሉት ዋጋ እና ከቅን አስተያየታቸው ጋር።
 ```
 
 Keywords:

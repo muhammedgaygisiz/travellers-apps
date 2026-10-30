@@ -84,7 +84,14 @@ export class ProfileApiService {
             ],
           },
         },
-        (publicProfileDoc) => {
+        (publicProfileDoc, error) => {
+          // The SDK detaches a listener that errors, so this one has stopped
+          // delivering: say so rather than go quiet (issue #1835).
+          if (error) {
+            this.errorHandler.handleError(error);
+            return;
+          }
+
           const profile = this.handleResponse(publicProfileDoc);
 
           if (profile) {

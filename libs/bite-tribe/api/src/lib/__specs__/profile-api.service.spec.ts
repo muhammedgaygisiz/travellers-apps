@@ -160,6 +160,26 @@ describe(ProfileApiService.name, () => {
       },
     ));
 
+    it('should report a listener error instead of going quiet', inject(
+      [ProfileApiService],
+      (service: ProfileApiService) => {
+        MockedErrorHandler.handleError.mockClear();
+        const emitted: unknown[] = [];
+        const subscription = service.publicProfile$.subscribe((profile) =>
+          emitted.push(profile),
+        );
+        const error = new Error('permission-denied');
+
+        const callback = addCollectionSnapshotListenerSpy.mock.calls[0][1];
+        callback(null, error);
+
+        expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(error);
+        expect(emitted).toEqual([]);
+
+        subscription.unsubscribe();
+      },
+    ));
+
     it('should ignore a snapshot that carries no document', inject(
       [ProfileApiService],
       (service: ProfileApiService) => {

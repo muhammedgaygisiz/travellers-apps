@@ -162,12 +162,12 @@ export class AuthEffects {
       ofType(AuthActions.loginWithGoogleAccount),
       exhaustMap(() =>
         from(this.signInWithGoogleAccount()).pipe(
-          switchMap((result) => {
-            console.debug('#mo signInResult', result);
-            return from(this.assertRequiredRole());
-          }),
+          switchMap(() => from(this.assertRequiredRole())),
+          // No navigation here: `successFulLogin$` routes every sign-in made
+          // from an entry page. A second one to `/` superseded it, and from
+          // `/start` that is the page already shown, so the visitor stayed
+          // there (issue #1850).
           map(() => AuthActions.loginSucceeded()),
-          tap(() => this.navController.navigateBack(['/'])),
           catchError((err) => of(this.toProviderFailure(err))),
         ),
       ),
@@ -180,8 +180,8 @@ export class AuthEffects {
       exhaustMap(() =>
         from(this.signInWithAppleAccount()).pipe(
           switchMap(() => from(this.assertRequiredRole())),
+          // Routed by `successFulLogin$`, as for Google (issue #1850).
           map(() => AuthActions.loginSucceeded()),
-          tap(() => this.navController.navigateBack(['/'])),
           catchError((err) => of(this.toProviderFailure(err))),
         ),
       ),

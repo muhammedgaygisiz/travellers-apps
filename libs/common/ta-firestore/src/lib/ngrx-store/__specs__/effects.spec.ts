@@ -283,6 +283,32 @@ describe(AuthEffects.name, () => {
     });
   });
 
+  // Routing after a provider sign-in belongs to `successFulLogin$` alone. A
+  // navigation of the effect's own superseded it, and from `/start` it led back
+  // to the page already shown (issue #1850).
+  describe.each([
+    [
+      'Google',
+      AuthActions.loginWithGoogleAccount(),
+      (): Observable<Action> => effects.loginWithGoogleAccountEffect$,
+    ],
+    [
+      'Apple',
+      AuthActions.loginWithAppleAccount(),
+      (): Observable<Action> => effects.loginWithAppleAccountEffect$,
+    ],
+  ])('given a successful %s sign-in', (_provider, action, effect) => {
+    it('should report the sign-in without navigating', async () => {
+      actions$ = of(action);
+
+      const result = await firstValueFrom(effect());
+
+      expect(result).toEqual(AuthActions.loginSucceeded());
+      expect(MockNavController.navigateBack).not.toHaveBeenCalled();
+      expect(MockNavController.navigateRoot).not.toHaveBeenCalled();
+    });
+  });
+
   describe('loadUser$', () => {
     describe('given a loginSucceeded action with a user', () => {
       beforeEach(() => {

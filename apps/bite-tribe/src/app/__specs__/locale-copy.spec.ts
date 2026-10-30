@@ -73,18 +73,21 @@ describe('locale copy', () => {
         /\bestás segur[oa]\b/i,
         /\bsé (?:el|la) primer[oa]\b/i,
         /\bsentad[oa]\b/i,
+        /\b(?:permanecer|seguir|quedarte) (?:públic|privad)[oa]\b/i,
       ],
       'it.json': [
         /(?<!\b(?:il|un|del|di|al|nel) )\bbenvenut[oaie]\b/i,
         /\bsei sicur[oa]\b/i,
         /\bsii (?:il|la) prim[oa]\b/i,
         /\bsedut[oa]\b/i,
+        /\b(?:rimani|restare|resta|diventa) (?:pubblic|privat)[oa]\b/i,
       ],
       'pt.json': [
         /\bbem-vind[oa]s?\b/i,
         /\bobrigad[oa]\b/i,
         /\bseja (?:o|a) primeir[oa]\b/i,
         /\bsentad[oa]\b/i,
+        /\bficar (?:públic|privad)[oa]\b/i,
       ],
       // `Bienvenue` is the neutral noun; the bare adjective is masculine.
       'fr.json': [
@@ -92,6 +95,7 @@ describe('locale copy', () => {
         /\bes-tu sûre?\b/i,
         /\bsois (?:le|la) premi(?:er|ère)\b/i,
         /\btoi seule?\b/i,
+        /\brester (?:public|privé)\b/i,
       ],
       'de.json': [/\b(?:Benutzer|Nutzer)(?:n|s)?\b/],
       // Masculine informal second person; Amharic uses the polite form.

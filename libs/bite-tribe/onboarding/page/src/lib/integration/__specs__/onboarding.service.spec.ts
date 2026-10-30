@@ -13,6 +13,7 @@ import {
 } from 'bite-tribe/onboarding-data-access';
 import type { Settings } from 'model';
 import { PATH } from 'utils';
+import { CelebrationService } from 'celebration';
 import { OnboardingService } from '../onboarding.service';
 import { ONBOARDING_STEPS } from '../../steps/onboarding-steps';
 
@@ -36,6 +37,7 @@ describe('OnboardingService', () => {
   let getMediaLocationPermissionState: jest.Mock;
   let completeOnboarding: jest.Mock;
   let navigateRoot: jest.Mock;
+  let celebrate: jest.Mock;
   let logEvent: jest.Mock;
   let loadingPresent: jest.Mock;
   let loadingDismiss: jest.Mock;
@@ -104,6 +106,7 @@ describe('OnboardingService', () => {
     getMediaLocationPermissionState = jest.fn().mockResolvedValue('prompt');
     completeOnboarding = jest.fn().mockResolvedValue(undefined);
     navigateRoot = jest.fn();
+    celebrate = jest.fn().mockResolvedValue(undefined);
     logEvent = jest.fn();
     loadingPresent = jest.fn().mockResolvedValue(undefined);
     loadingDismiss = jest.fn().mockResolvedValue(undefined);
@@ -140,6 +143,7 @@ describe('OnboardingService', () => {
           useValue: { loadCompletedSteps, saveCompletedSteps },
         },
         { provide: NavController, useValue: { navigateRoot } },
+        { provide: CelebrationService, useValue: { celebrate } },
         { provide: LoadingController, useValue: { create: createLoading } },
         {
           provide: TranslocoService,
@@ -424,6 +428,39 @@ describe('OnboardingService', () => {
       expect(dismissForSession).not.toHaveBeenCalled();
       expect(navigateRoot).not.toHaveBeenCalled();
       expect(service.currentStep().id).toBe('finish');
+    });
+
+    it('celebrates arriving once, without waiting to navigate', async () => {
+      setup(ONBOARDING_STEPS.slice(0, -1).map((step) => step.id));
+      celebrate.mockReturnValue(new Promise(() => undefined));
+      await service.initialize();
+
+      await service.next();
+
+      expect(celebrate).toHaveBeenCalledTimes(1);
+      expect(celebrate).toHaveBeenCalledWith('onboarding-finished');
+      expect(navigateRoot).toHaveBeenCalledWith(`/${PATH.HOME}`);
+    });
+
+    it('celebrates nothing when the completion write fails', async () => {
+      setup(ONBOARDING_STEPS.slice(0, -1).map((step) => step.id));
+      completeOnboarding.mockRejectedValue(new Error('offline'));
+      await service.initialize();
+
+      await service.next();
+
+      expect(celebrate).not.toHaveBeenCalled();
+    });
+
+    it('celebrates nothing while moving between earlier steps', async () => {
+      setup(['identity']);
+      await service.initialize();
+
+      service.updateVisibility(true);
+      await service.next();
+      service.back();
+
+      expect(celebrate).not.toHaveBeenCalled();
     });
   });
 

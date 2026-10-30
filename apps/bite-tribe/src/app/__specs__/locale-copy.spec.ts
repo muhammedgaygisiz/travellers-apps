@@ -59,6 +59,58 @@ describe('locale copy', () => {
   });
 
   /**
+   * Copy addresses the user without a grammatical gender, by rephrasing rather
+   * than by marking both forms (`Implementation - Localization`). A deny-list
+   * cannot prove a string neutral; it only keeps the forms that already shipped
+   * from coming back. See GitHub issue #1824.
+   */
+  describe('gender-neutral address', () => {
+    // Spanish `la bienvenida` and Italian `il benvenuto` are nouns and the
+    // neutral rephrasing; only the adjective addresses the user with a gender.
+    const GENDERED_ADDRESS: Record<string, RegExp[]> = {
+      'es.json': [/(?<!\b(?:la|una|de) )\bbienvenid[oa]s?\b/i],
+      'it.json': [/(?<!\b(?:il|un|del|di|al|nel) )\bbenvenut[oaie]\b/i],
+      'pt.json': [/\bbem-vind[oa]s?\b/i],
+      // `Bienvenue` is the neutral noun; the bare adjective is masculine.
+      'fr.json': [/\bbienvenus?\b/i],
+      // Masculine second person: "you came", "you follow".
+      'am.json': [/መጣህ/, /ትከተላለህ/],
+    };
+
+    /**
+     * Strings that shipped before the rule. Issue #1825 rewrites them and
+     * deletes this list.
+     */
+    const KNOWN_EXCEPTIONS = [
+      'am.json first-follow',
+      'es.json onboarding-finished',
+      'it.json onboarding-finished',
+      'pt.json onboarding-finished',
+    ];
+
+    const offenders = Object.entries(GENDERED_ADDRESS).flatMap(
+      ([file, patterns]) =>
+        Object.entries(readLocale(file))
+          .filter(([, value]) =>
+            patterns.some((pattern) => pattern.test(value)),
+          )
+          .map(([key]) => `${file} ${key}`),
+    );
+
+    it('does not address the user with a gendered form', () => {
+      expect(
+        offenders.filter((offender) => !KNOWN_EXCEPTIONS.includes(offender)),
+      ).toEqual([]);
+    });
+
+    it('lists no exception that has already been rewritten', () => {
+      expect(
+        KNOWN_EXCEPTIONS.filter((exception) => !offenders.includes(exception)),
+      ).toEqual([]);
+    });
+  });
+
+  /**
    * The theme row names the setting, not one of its two options. Every other
    * locale uses the neutral word, and `Theme` was left untranslated in German
    * and French. See GitHub issue #1416.

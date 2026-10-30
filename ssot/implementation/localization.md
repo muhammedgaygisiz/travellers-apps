@@ -124,6 +124,13 @@ carries only the app name and URL scheme.
 - Keep tone consistent inside each locale.
 - German addresses the user informally with "du", never with "Sie". This holds across every surface: the app locale file, the notification and verification-mail catalog, and the privacy policy. The same choice is made per language wherever a language distinguishes formal and informal address.
 - In German, the form follows what the string does, not what it says. Copy that asks the user to act - hints, coach copy, onboarding benefits, validation and error messages, parenthetical field instructions, and option rows that continue a flow with something the user typed - uses the du-imperative: `Verwende: "Jabri"`, `Tippe auf die Karte, um den Standort zu setzen.`, `Trenne sie mit Leerzeichen`. Controls that only name their action - buttons, menu entries, list actions, field placeholders - keep the conventional infinitive noun phrase: `Speichern`, `Konto löschen`, `Anzeigenamen eingeben`. The English source is the reliable signal: an English imperative sentence should arrive in German as an imperative, and an infinitive rendering of one is a translation artifact. See issue [#1268].
+- Copy addresses the user without a grammatical gender. BiteTribe never asks for one, so a gendered form is a guess, and in Spanish, Italian, Portuguese, French, Arabic and Amharic the guess is masculine by default. The rule holds on every surface this page lists: the app locale files, the notification and verification-mail catalog, `InfoPlist.strings` and the store listings. See issue [#1824].
+  - Rephrase rather than mark both forms. `Te damos la bienvenida a la tribu`, `Ti diamo il benvenuto`, `Boas-vindas à tribo`, not `Bienvenido/a`, `Bienvenid@` or `Benvenuto/a`. A slash or symbol reads as an afterthought and breaks screen readers.
+  - Prefer a neutral noun for people. German `Personen`, `Mitglieder`, `Leute` or a rephrasing (`Noch niemand in der Bestenliste`), never the generic masculine `Benutzer`. Where no neutral noun exists, German uses the gender colon, as `Aktive:r Creator:in` already does.
+  - Where a language's polite form is neutral and its informal form is not, that string uses the polite form, even though the informal-address rule above would otherwise apply. Amharic `መጡ` and `ይከተላሉ`, not `መጣህ` and `ትከተላለህ`.
+  - Copy about another user names them through `{{user}}` or uses a neutral construction, never `he` or `she` or a gendered possessive the language lets you avoid.
+  - Where no natural neutral form exists, as with some Arabic imperatives, keep the clearest sentence and record the key here as a known limit rather than forcing awkward copy.
+  - `apps/bite-tribe/src/app/__specs__/locale-copy.spec.ts` denies the gendered welcome forms that already shipped, per locale, and names the locale and key it finds. A deny-list cannot prove a string neutral, so it is a backstop for review, not a substitute for it. Its known-exceptions list holds strings that predate the rule. Issue [#1825] rewrites them and deletes the list.
 - Avoid hardcoded visible English in templates, alerts, labels, button text, empty states, and error states.
 - A brand term is keyed like any other string. `Bitemap` reads the same in every locale, which is exactly why a literal survives review: nothing looks wrong in any language. Keying it - one key, the same value in all eleven files - keeps the rule above checkable by reading the template, instead of by knowing which words happen to be brand. The same holds for copy that only one locale translates today, such as `bites`: ten catalogs carry the English word and Turkish carries `Bite'ler`, so a literal is invisible until a Turkish account opens the screen. See issue [#1612].
 - Diacritics are part of the word, not decoration. A Turkish string written in ASCII - `Isik Modu` for `Işık Modu`, `Aydinlik` for `Aydınlık`, `Konum bulunamadi` for `Konum bulunamadı` - reads as sloppiness to a native speaker in a way an English reviewer never sees, and no build fails over it. `apps/bite-tribe/src/app/__specs__/locale-copy.spec.ts` pins the settings strings that shipped that way, and asserts that every locale file carries the same key set as `en.json` so a half-translated feature fails a test instead of silently falling back to English; see issue [#1416].
@@ -158,8 +165,8 @@ language name rather than on the first mismatch:
 npx jest --config apps/bite-tribe/jest.config.ts --runInBand apps/bite-tribe/src/app/__specs__/language-names.spec.ts
 ```
 
-Key parity, the Turkish settings strings, and the theme label have a second
-guard next to it:
+Key parity, the Turkish settings strings, the theme label and the gendered
+welcome forms have a second guard next to it:
 
 ```bash
 npx jest --config apps/bite-tribe/jest.config.ts --runInBand apps/bite-tribe/src/app/__specs__/locale-copy.spec.ts
@@ -201,3 +208,5 @@ ls -d /tmp/bt-ios/Build/Products/Debug-iphonesimulator/App.app/*.lproj
 [#1417]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1417
 [#1612]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1612
 [#1613]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1613
+[#1824]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1824
+[#1825]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1825

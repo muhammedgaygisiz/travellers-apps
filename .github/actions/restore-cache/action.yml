@@ -1,9 +1,14 @@
-name: "Restore Cache"
-description: "Restores cache if given"
+name: 'Restore Cache'
+description: 'Restores cache if given'
+outputs:
+  cache-hit:
+    description: "'true' when node_modules was restored from the exact package-lock key"
+    value: ${{ steps.restore.outputs.cache-hit }}
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Cache restore
+      id: restore
       uses: actions/cache/restore@v6
       with:
         path: node_modules

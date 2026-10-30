@@ -376,8 +376,12 @@ export class BiteTribeApiService {
     return this.profileApiService.checkDisplayNameAvailability(displayName);
   }
 
-  async followUser(user: PublicUser): Promise<void> {
-    await this.profileApiService.followUser(user);
+  async followUser(user: PublicUser): Promise<boolean> {
+    return this.profileApiService.followUser(user);
+  }
+
+  async followsAnyone(): Promise<boolean | undefined> {
+    return this.profileApiService.followsAnyone();
   }
 
   async unfollowUser(user: PublicUser): Promise<void> {

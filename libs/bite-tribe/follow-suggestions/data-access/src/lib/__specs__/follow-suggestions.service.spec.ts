@@ -5,6 +5,7 @@ import type { FollowSuggestion, PublicUser, Settings } from 'model';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { AnalyticsService } from 'ta-firestore';
 import { ToastService } from 'toast';
+import { CelebrationService } from 'celebration';
 import {
   FOLLOW_SUGGESTIONS_DISMISS_MS,
   FollowSuggestionsService,
@@ -42,7 +43,9 @@ describe(FollowSuggestionsService.name, () => {
   const profileApi = {
     fetchFollowSuggestions: jest.fn(),
     follow: jest.fn(),
+    followsAnyone: jest.fn(),
   };
+  const celebrate = jest.fn();
   const settingsApi = { mergeSettings: jest.fn() };
   const notifySavedSettings = jest.fn();
   const logEvent = jest.fn();
@@ -72,6 +75,7 @@ describe(FollowSuggestionsService.name, () => {
         },
         { provide: AnalyticsService, useValue: { logEvent } },
         { provide: ToastService, useValue: { present } },
+        { provide: CelebrationService, useValue: { celebrate } },
       ],
     });
     service = TestBed.inject(FollowSuggestionsService);
@@ -91,6 +95,8 @@ describe(FollowSuggestionsService.name, () => {
     blockedUserIds$ = new BehaviorSubject<string[]>([]);
     profileApi.fetchFollowSuggestions.mockResolvedValue([ana, ben]);
     profileApi.follow.mockResolvedValue(undefined);
+    profileApi.followsAnyone.mockResolvedValue(true);
+    celebrate.mockResolvedValue(undefined);
     getLocationPermissionState.mockResolvedValue('unsupported');
     create();
   });
@@ -224,6 +230,53 @@ describe(FollowSuggestionsService.name, () => {
       await following;
       expect(service.pendingIds().has('ana')).toBe(false);
       expect(profileApi.follow).toHaveBeenCalledTimes(1);
+    });
+
+    it('celebrates the first follow by display name', async () => {
+      profileApi.followsAnyone.mockResolvedValue(false);
+
+      await service.follow(ben, 'onboarding');
+
+      expect(celebrate).toHaveBeenCalledTimes(1);
+      expect(celebrate).toHaveBeenCalledWith('first-follow', { user: 'Ben' });
+    });
+
+    it('asks before the write, which would count as a follow', async () => {
+      const order: string[] = [];
+      profileApi.followsAnyone.mockImplementation(async () => {
+        order.push('followsAnyone');
+        return false;
+      });
+      profileApi.follow.mockImplementation(async () => {
+        order.push('follow');
+      });
+
+      await service.follow(ben, 'home');
+
+      expect(order).toEqual(['followsAnyone', 'follow']);
+    });
+
+    it('celebrates nothing for a later follow', async () => {
+      await service.follow(ben, 'following');
+
+      expect(celebrate).not.toHaveBeenCalled();
+    });
+
+    it('celebrates nothing when it cannot tell', async () => {
+      profileApi.followsAnyone.mockResolvedValue(undefined);
+
+      await service.follow(ben, 'home');
+
+      expect(celebrate).not.toHaveBeenCalled();
+    });
+
+    it('celebrates nothing when the follow fails', async () => {
+      profileApi.followsAnyone.mockResolvedValue(false);
+      profileApi.follow.mockRejectedValue(new Error('permission-denied'));
+
+      await service.follow(ben, 'home');
+
+      expect(celebrate).not.toHaveBeenCalled();
     });
   });
 

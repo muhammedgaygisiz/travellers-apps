@@ -56,6 +56,7 @@ class ProfileApiMock {
   getUserByBiteId = jest.fn();
   getUserById = jest.fn();
   followUser = jest.fn();
+  followsAnyone = jest.fn();
   unfollowUser = jest.fn();
   blockUser = jest.fn();
   unblockUser = jest.fn();
@@ -637,6 +638,20 @@ describe(BiteTribeApiService.name, () => {
         const user = { id: 'user-id', name: 'Test User' } as any;
         service.followUser(user);
         expect(followUserSpy).toHaveBeenCalledWith(user);
+      },
+    ));
+  });
+
+  describe('followsAnyone', () => {
+    it('should call followsAnyone on ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        jest.spyOn(profileApiService, 'followsAnyone').mockResolvedValue(false);
+
+        await expect(service.followsAnyone()).resolves.toBe(false);
       },
     ));
   });

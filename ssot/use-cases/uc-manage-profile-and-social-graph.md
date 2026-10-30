@@ -26,6 +26,21 @@ signed-in account, the follow relation, and the block one account places on anot
 - User views or edits their own profile.
 - User opens public profiles.
 - User follows or unfollows other users.
+- The first person a user follows is celebrated: a short confetti burst and
+  `You're now following {{user}}. Welcome to their food journey!`, naming the
+  followed account by display name only, never a real name ([#1308]). Every follow
+  path counts - the profile's follow button through the store's `followUser$`, and
+  the follow suggestions on the onboarding finish step, the Following list and home.
+  Whether it is the first is asked before the write, as one document of the user's
+  own `following` subcollection (`followsAnyone`): the store cannot answer, because
+  its `followingCount` is the login-time snapshot and `profileMetadata.following` is
+  the count of whichever profile is open, which on a follow is the person being
+  followed. A later follow raises no toast, as before; a failed follow, or one where
+  the answer cannot be told, celebrates nothing. Nothing is stored, so unfollowing
+  everybody and following again celebrates again, which epic [#1741] accepts. The copy
+  does not promise the followed account's Bites in the feed: the feed is by place and
+  date, not by follow. See GitHub issue [#1799] and the Celebration Rule in
+  [Implementation - Ionic Patterns](../implementation/ionic-patterns.md).
 - User inspects followers and following.
 - A user is offered people to follow, and follows them in one tap. See
   `Follow Suggestions` below.
@@ -282,6 +297,7 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 - Issue [#1708] is `Follow Suggestions` above, motivated by the analytics check on [#914] and sharing its pick list with the follow-up mail of [#1707].
 - Issue [#1609] is the User Block Contract above.
 - Issue [#1787] is `Visited Countries Globe` above.
+- Issue [#1799] celebrates the first person a user follows, part of epic [#1741].
 
 ## Related Domains
 
@@ -314,3 +330,5 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
 [#1787]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1787
+[#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
+[#1799]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1799

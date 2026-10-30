@@ -1040,7 +1040,7 @@ describe(ProfileApiService.name, () => {
           userId: 'followed-user-id',
         } as unknown as PublicUser;
 
-        await service.followUser(publicUser);
+        await expect(service.followUser(publicUser)).resolves.toBe(true);
 
         expect(setDocumentSpy).toHaveBeenCalledWith({
           reference: 'users/followed-user-id/followers/123',
@@ -1083,16 +1083,83 @@ describe(ProfileApiService.name, () => {
             userId: 'followed-user-id',
           } as unknown as PublicUser;
 
-          try {
-            await service.followUser(publicUser);
-          } catch {
-            // Expected to throw
-          }
+          await expect(service.followUser(publicUser)).resolves.toBe(false);
 
           expect(consoleErrorSpy).toHaveBeenCalledWith(
             'Error following user:',
             expect.any(Error),
           );
+        },
+      ));
+    });
+  });
+
+  describe('followsAnyone', () => {
+    const answer = (snapshots: unknown[]): jest.SpyInstance =>
+      jest
+        .spyOn(FirebaseFirestore, 'getCollection')
+        .mockResolvedValue({ snapshots } as Awaited<
+          ReturnType<typeof FirebaseFirestore.getCollection>
+        >);
+
+    it('reads at most one followed account', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const getCollection = answer([]);
+
+        await service.followsAnyone();
+
+        expect(getCollection).toHaveBeenCalledWith({
+          reference: 'users/123/following',
+          queryConstraints: [{ type: 'limit', limit: 1 }],
+        });
+      },
+    ));
+
+    it('is true when the user follows somebody', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        answer([{ id: 'other', data: {} }]);
+
+        await expect(service.followsAnyone()).resolves.toBe(true);
+      },
+    ));
+
+    it('is false when the user follows nobody', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        answer([]);
+
+        await expect(service.followsAnyone()).resolves.toBe(false);
+      },
+    ));
+
+    it('cannot tell when the read fails', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.spyOn(console, 'warn').mockImplementation();
+        jest
+          .spyOn(FirebaseFirestore, 'getCollection')
+          .mockRejectedValue(new Error('offline'));
+
+        await expect(service.followsAnyone()).resolves.toBeUndefined();
+      },
+    ));
+
+    describe('given current user is undefined', () => {
+      beforeEach(() => {
+        TestBed.overrideProvider(AuthService, {
+          useValue: {
+            ...MockedAuthService,
+            getUser: (): any => undefined,
+          },
+        });
+      });
+
+      it('cannot tell', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          await expect(service.followsAnyone()).resolves.toBeUndefined();
         },
       ));
     });

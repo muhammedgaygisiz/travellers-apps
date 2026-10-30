@@ -49,6 +49,7 @@ const BiteTribeApiServiceMock = {
   getExchangeRates: jest.fn(),
   reloadGPSPosition: jest.fn(),
   followUser: jest.fn(),
+  followsAnyone: jest.fn(),
   getTotalNumberOfBites: jest.fn(),
   getTotalNumberOfUsers: jest.fn(),
   unfollowUser: jest.fn(),
@@ -822,23 +823,90 @@ describe(AppEffect.name, () => {
   });
 
   describe('followUser$', () => {
-    let followUserSpy: SpyInstance;
+    const user = { userId: 'user-id', displayName: 'leela' } as PublicUser;
+    let actions: Subject<Action>;
+    let subscription: Subscription;
+
+    /** Lets the effect's awaits settle. */
+    const settled = async (): Promise<void> => {
+      for (let i = 0; i < 5; i++) {
+        await Promise.resolve();
+      }
+    };
 
     beforeEach(() => {
-      followUserSpy = jest.spyOn(apiService, 'followUser').mockImplementation();
+      CelebrationServiceMock.celebrate.mockClear();
+      BiteTribeApiServiceMock.followsAnyone.mockResolvedValue(true);
+      BiteTribeApiServiceMock.followUser.mockResolvedValue(true);
+      actions = new Subject<Action>();
+      actions$ = actions;
+      subscription = effects.followUser$.subscribe();
     });
 
-    it('should call followUser from Store Service', () => {
-      scheduler.run(({ cold, expectObservable }) => {
-        const user = { userId: 'user-id' } as PublicUser;
-        actions$ = cold('a', {
-          a: AppActions.followUser({ user }),
-        });
+    afterEach(() => subscription.unsubscribe());
 
-        expectObservable(effects.followUser$);
+    it('follows the user and reports it', async () => {
+      actions.next(AppActions.followUser({ user }));
+      await settled();
+
+      expect(BiteTribeApiServiceMock.followUser).toHaveBeenCalledWith(user);
+      expect(dispatchSpy).toHaveBeenCalledWith(AppActions.followedUser());
+    });
+
+    it('celebrates the first follow by display name', async () => {
+      BiteTribeApiServiceMock.followsAnyone.mockResolvedValue(false);
+
+      actions.next(AppActions.followUser({ user }));
+      await settled();
+
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(1);
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+        'first-follow',
+        { user: 'leela' },
+      );
+    });
+
+    it('asks before the write, which would count as a follow', async () => {
+      const order: string[] = [];
+      BiteTribeApiServiceMock.followsAnyone.mockImplementation(async () => {
+        order.push('followsAnyone');
+        return false;
+      });
+      BiteTribeApiServiceMock.followUser.mockImplementation(async () => {
+        order.push('followUser');
+        return true;
       });
 
-      expect(followUserSpy).toHaveBeenCalledTimes(1);
+      actions.next(AppActions.followUser({ user }));
+      await settled();
+
+      expect(order).toEqual(['followsAnyone', 'followUser']);
+    });
+
+    it('celebrates nothing for a later follow', async () => {
+      actions.next(AppActions.followUser({ user }));
+      await settled();
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('celebrates nothing when it cannot tell', async () => {
+      BiteTribeApiServiceMock.followsAnyone.mockResolvedValue(undefined);
+
+      actions.next(AppActions.followUser({ user }));
+      await settled();
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('celebrates nothing when the follow fails', async () => {
+      BiteTribeApiServiceMock.followsAnyone.mockResolvedValue(false);
+      BiteTribeApiServiceMock.followUser.mockResolvedValue(false);
+
+      actions.next(AppActions.followUser({ user }));
+      await settled();
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
     });
   });
 

@@ -1,17 +1,23 @@
-name: "Setup Node.js & Install Dependencies"
-description: "Sets up Node.js and installs dependencies"
+name: 'Setup Node.js & Install Dependencies'
+description: 'Sets up Node.js and installs dependencies'
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
+    # The `id` is what the `cache-hit` checks below read. Without it they
+    # were always true, so every run reinstalled a node_modules it had just
+    # restored (#1811).
     - name: Cache restore
+      id: cache
       uses: ./.github/actions/restore-cache
 
+    # Node itself is set up on a hit too: the deploy jobs build through this
+    # action and must keep the `.nvmrc` version. Only the npm download cache,
+    # which only `npm ci` needs, is skipped.
     - name: Set up Node.js
       uses: actions/setup-node@v7
-      if: steps.cache.outputs.cache-hit != 'true'
       with:
         node-version-file: '.nvmrc'
-        cache: 'npm'
+        cache: ${{ steps.cache.outputs.cache-hit != 'true' && 'npm' || '' }}
 
     - name: Install dependencies
       run: npm ci
@@ -19,7 +25,7 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true'
 
     - name: Cache NPM Dependencies
-      uses: actions/cache@v6
+      uses: actions/cache/save@v6
       if: steps.cache.outputs.cache-hit != 'true'
       with:
         path: node_modules

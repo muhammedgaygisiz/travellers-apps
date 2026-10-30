@@ -217,13 +217,15 @@ The lint, stylelint and tests chain is deliberately sequential so a cheap failur
 
 ## Composite Actions
 
-| Action                                   | Used by                                | Responsibility                                                             |
-| ---------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------- |
-| `.github/actions/setup`                  | `setup`, deploys, standalone workflows | Restore `node_modules`, set up Node.js from `.nvmrc`, `npm ci`, save cache |
-| `.github/actions/restore-cache`          | Every pipeline job                     | Exact-key restore of `node_modules`, no fallback                           |
-| `.github/actions/install-if-missing`     | The build jobs                         | `npm ci` when the restored `node_modules` is unusable                      |
-| `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`           | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                  |
-| `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, builds   | Persist and restore the Nx computation cache                               |
+| Action                                   | Used by                                | Responsibility                                                                              |
+| ---------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `.github/actions/setup`                  | `setup`, deploys, standalone workflows | Restore `node_modules`, set up Node.js from `.nvmrc`; on a miss `npm ci` and save the cache |
+| `.github/actions/restore-cache`          | Every pipeline job                     | Exact-key restore of `node_modules`, no fallback; exposes `cache-hit`                       |
+| `.github/actions/install-if-missing`     | The build jobs                         | `npm ci` when the restored `node_modules` is unusable                                       |
+| `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`           | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
+| `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, builds   | Persist and restore the Nx computation cache                                                |
+
+`setup` reads `cache-hit` from `restore-cache` through the step id `cache`. On a hit it skips `npm ci` and the save, and sets up Node.js without the npm download cache, which only `npm ci` uses. Node.js itself is still set up from `.nvmrc` because the deploy jobs build through this action. Before [#1811] the step had no id, so the guards were always true and every run reinstalled the `node_modules` it had just restored.
 
 ## Action Versions
 
@@ -475,4 +477,5 @@ nx.json
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1588]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1588
 [#1681]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1681
+[#1811]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1811
 [#1839]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1839

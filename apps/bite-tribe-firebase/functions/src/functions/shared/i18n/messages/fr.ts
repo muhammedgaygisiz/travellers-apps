@@ -24,7 +24,7 @@ export const fr: NotificationMessages = {
   'newBite.body': '{{author}} vient de créer un nouveau Bite',
   'newBite.bodyWithName':
     '{{author}} vient de créer un nouveau Bite : {{bite}}',
-  'newFollower.title': 'Nouvel abonné !',
+  'newFollower.title': 'Quelqu’un te suit !',
   'newFollower.body': '{{follower}} te suit désormais.',
   'newLike.title': 'Nouveau like sur ton Bite !',
   'newLike.body': '{{liker}} a aimé ton Bite « {{bite}} ».',
@@ -39,10 +39,11 @@ export const fr: NotificationMessages = {
     'La BiteTribe a partagé {{count}} nouveaux Bites la semaine dernière',
   'leaderboard.title': 'Classement mis à jour',
   'leaderboard.enteredTop':
-    'Tu es entré dans le top {{limit}} à la place n°{{rank}} du classement ! 🎉',
-  'leaderboard.droppedOut': 'Tu es sorti du top {{limit}} du classement.',
-  'leaderboard.climbed': 'Tu es monté à la place n°{{rank}} du classement ! 🎉',
-  'leaderboard.dropped': 'Tu es descendu à la place n°{{rank}} du classement.',
+    'Te voilà dans le top {{limit}}, à la place n°{{rank}} du classement ! 🎉',
+  'leaderboard.droppedOut':
+    'Tu ne fais plus partie du top {{limit}} du classement.',
+  'leaderboard.climbed': 'Te voilà à la place n°{{rank}} du classement ! 🎉',
+  'leaderboard.dropped': 'Tu passes à la place n°{{rank}} du classement.',
   'countryBadge.title': '🎉 Nouveau badge pays !',
   'countryBadge.body':
     'Bravo ! Tu viens de débloquer le badge pour {{country}}',
@@ -73,6 +74,6 @@ export const fr: NotificationMessages = {
     'BiteTribe ne t’enverra plus d’e-mails comme celui-ci. Les e-mails liés à ton compte, comme la vérification, continueront d’arriver.',
   'emailUnsubscribe.button': 'Se désabonner',
   'emailUnsubscribe.done':
-    'Tu es désabonné. BiteTribe ne t’enverra plus d’e-mails comme celui-ci.',
+    'Désabonnement confirmé. BiteTribe ne t’enverra plus d’e-mails comme celui-ci.',
   'emailUnsubscribe.invalid': 'Ce lien de désabonnement n’est plus valide.',
 };

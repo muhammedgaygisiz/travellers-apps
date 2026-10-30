@@ -62,31 +62,53 @@ describe('locale copy', () => {
    * Copy addresses the user without a grammatical gender, by rephrasing rather
    * than by marking both forms (`Implementation - Localization`). A deny-list
    * cannot prove a string neutral; it only keeps the forms that already shipped
-   * from coming back. See GitHub issue #1824.
+   * from coming back. See GitHub issues #1824 and #1825.
    */
   describe('gender-neutral address', () => {
     // Spanish `la bienvenida` and Italian `il benvenuto` are nouns and the
     // neutral rephrasing; only the adjective addresses the user with a gender.
     const GENDERED_ADDRESS: Record<string, RegExp[]> = {
-      'es.json': [/(?<!\b(?:la|una|de) )\bbienvenid[oa]s?\b/i],
-      'it.json': [/(?<!\b(?:il|un|del|di|al|nel) )\bbenvenut[oaie]\b/i],
-      'pt.json': [/\bbem-vind[oa]s?\b/i],
+      'es.json': [
+        /(?<!\b(?:la|una|de) )\bbienvenid[oa]s?\b/i,
+        /\bestás segur[oa]\b/i,
+        /\bsé (?:el|la) primer[oa]\b/i,
+        /\bsentad[oa]\b/i,
+      ],
+      'it.json': [
+        /(?<!\b(?:il|un|del|di|al|nel) )\bbenvenut[oaie]\b/i,
+        /\bsei sicur[oa]\b/i,
+        /\bsii (?:il|la) prim[oa]\b/i,
+        /\bsedut[oa]\b/i,
+      ],
+      'pt.json': [
+        /\bbem-vind[oa]s?\b/i,
+        /\bobrigad[oa]\b/i,
+        /\bseja (?:o|a) primeir[oa]\b/i,
+        /\bsentad[oa]\b/i,
+      ],
       // `Bienvenue` is the neutral noun; the bare adjective is masculine.
-      'fr.json': [/\bbienvenus?\b/i],
-      // Masculine second person: "you came", "you follow".
-      'am.json': [/መጣህ/, /ትከተላለህ/],
+      'fr.json': [
+        /\bbienvenus?\b/i,
+        /\bes-tu sûre?\b/i,
+        /\bsois (?:le|la) premi(?:er|ère)\b/i,
+        /\btoi seule?\b/i,
+      ],
+      'de.json': [/\b(?:Benutzer|Nutzer)(?:n|s)?\b/],
+      // Masculine informal second person; Amharic uses the polite form.
+      'am.json': [
+        /መጣህ/,
+        /ትከተላለህ/,
+        /ትፈልጋለህ/,
+        /ትችላለህ/,
+        /ነህ[?።\s]/,
+        /እባክህ/,
+        /አንተ/,
+      ],
+      // Masculine imperative and adjective; Arabic uses a verbal noun.
+      'ar.json': [/هل أنت متأكد/, /(?:^|\s)حاول مرة أخرى/, /(?:^|\s)اضغط /],
+      // Gendered speaker particles in the app's own voice.
+      'th.json': [/ครับ|ค่ะ/],
     };
-
-    /**
-     * Strings that shipped before the rule. Issue #1825 rewrites them and
-     * deletes this list.
-     */
-    const KNOWN_EXCEPTIONS = [
-      'am.json first-follow',
-      'es.json onboarding-finished',
-      'it.json onboarding-finished',
-      'pt.json onboarding-finished',
-    ];
 
     const offenders = Object.entries(GENDERED_ADDRESS).flatMap(
       ([file, patterns]) =>
@@ -98,15 +120,7 @@ describe('locale copy', () => {
     );
 
     it('does not address the user with a gendered form', () => {
-      expect(
-        offenders.filter((offender) => !KNOWN_EXCEPTIONS.includes(offender)),
-      ).toEqual([]);
-    });
-
-    it('lists no exception that has already been rewritten', () => {
-      expect(
-        KNOWN_EXCEPTIONS.filter((exception) => !offenders.includes(exception)),
-      ).toEqual([]);
+      expect(offenders).toEqual([]);
     });
   });
 

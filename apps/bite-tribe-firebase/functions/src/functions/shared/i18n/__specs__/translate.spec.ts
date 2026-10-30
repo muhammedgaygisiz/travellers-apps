@@ -6,7 +6,9 @@ import { createTranslate } from '../translate';
 
 describe('createTranslate', () => {
   it('renders the copy of the requested language', () => {
-    expect(createTranslate('de')('newFollower.title')).toBe('Neuer Follower!');
+    expect(createTranslate('de')('newFollower.title')).toBe(
+      'Dir folgt jemand Neues!',
+    );
   });
 
   it('interpolates the parameters of a message', () => {
@@ -42,7 +44,7 @@ describe('createTranslate', () => {
 
   it('resolves a locale with a region subtag to its base language', () => {
     expect(createTranslate('de-CH')('newFollower.title')).toBe(
-      'Neuer Follower!',
+      'Dir folgt jemand Neues!',
     );
   });
 });

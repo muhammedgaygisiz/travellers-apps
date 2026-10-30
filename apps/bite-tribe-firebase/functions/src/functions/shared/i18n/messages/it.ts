@@ -39,11 +39,11 @@ export const it: NotificationMessages = {
     'La BiteTribe ha condiviso {{count}} nuovi Bites la scorsa settimana',
   'leaderboard.title': 'Classifica aggiornata',
   'leaderboard.enteredTop':
-    'Sei entrato nella top {{limit}} in posizione {{rank}} della classifica! 🎉',
-  'leaderboard.droppedOut': 'Sei uscito dalla top {{limit}} della classifica.',
+    'Hai raggiunto la top {{limit}}, in posizione {{rank}} della classifica! 🎉',
+  'leaderboard.droppedOut': 'Non sei più nella top {{limit}} della classifica.',
   'leaderboard.climbed':
-    'Sei salito alla posizione {{rank}} della classifica! 🎉',
-  'leaderboard.dropped': 'Sei sceso alla posizione {{rank}} della classifica.',
+    'Hai raggiunto la posizione {{rank}} della classifica! 🎉',
+  'leaderboard.dropped': 'Ora sei in posizione {{rank}} della classifica.',
   'countryBadge.title': '🎉 Nuovo badge Paese!',
   'countryBadge.body': 'Complimenti! Hai sbloccato il badge di {{country}}',
   'countryBadge.followerTitle': '🌍 Nuovo badge Paese',
@@ -58,13 +58,13 @@ export const it: NotificationMessages = {
     'La nuova versione di BiteTribe è su Google Play. Aggiorna ora per non perderti nulla.',
   'newUserFollowUp.emailSubject': 'Piatti e foodie scelti per te',
   'newUserFollowUp.emailIntro':
-    'Benvenuto su BiteTribe! Ecco alcuni piatti da provare e alcune persone da seguire.',
+    'Ti diamo il benvenuto su BiteTribe! Ecco alcuni piatti da provare e alcune persone da seguire.',
   'newUserFollowUp.bitesHeading': 'Piatti da provare',
   'newUserFollowUp.peopleHeading': 'Foodie da seguire',
   'newUserFollowUp.openBite': 'Apri il Bite',
   'newUserFollowUp.openProfile': 'Vedi profilo',
   'newUserFollowUp.footer':
-    'Ricevi questa email una sola volta, perché ti sei appena iscritto a BiteTribe.',
+    'Ricevi questa email una sola volta, perché hai appena creato un account BiteTribe.',
   'newUserFollowUp.unsubscribeLabel':
     'Annulla l’iscrizione alle email di BiteTribe',
   'emailUnsubscribe.title': 'Annulla l’iscrizione alle email di BiteTribe',

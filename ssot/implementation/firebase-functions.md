@@ -190,20 +190,28 @@ file that a spec imports, `nx run functions:test` passed nine tests and
 
 That error used to reach `develop` green and surface in the `predeploy` hook of
 `firebase.json`, at deploy time, on whoever's workstation ran the deploy. The
-`functions-build` job in `pipeline.yml` now compiles them on every pull request,
-which is what closes it.
+`build` job in `pipeline.yml` now compiles them on every pull request that
+affects `functions`, which is what closes it. Affected selects `functions` for
+its own sources and package files and for the workspace changes that can break
+the compile; [Implementation - CI Pipeline](ci-pipeline.md#affected-computation)
+lists them.
 
 The two jobs do not compile with the same compiler, and that is worth knowing
-before trusting a green pull request. `functions-build` does not install this
+before trusting a green pull request. `build` does not install this
 package, so its `tsc` resolves to the workspace TypeScript 6; `deploy-functions`
 installs it and compiles with the `^5.7.3` pinned here, which is also what a
 workstation deploy uses. See [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md).
 
 Rules:
 
-- `functions-build` is the type check, not a formality. It exists because
-  nothing else in CI compiles this project, so removing it removes the only
-  compiler in the pipeline.
+- The functions compile in `build` is the type check, not a formality. Nothing
+  else in CI compiles this project, so dropping `functions` from that job
+  removes the only compiler in the pipeline. Until [issue #1819][#1819] it was
+  a job of its own, `functions-build`, that ran on every pull request.
+- Gating it on affected holds only while affected selects `functions` for
+  every change that can break it. A new input outside the project root - a
+  shared tsconfig it starts extending, a generated source - has to reach its
+  project graph, or the compile is skipped for the change that breaks it.
 - A change to how the tests compile is not a substitute for it. If
   `isolatedModules` is ever removed from `tsconfig.dev.json`, the specs get
   checked, but the sources no spec imports still do not.
@@ -256,3 +264,4 @@ Rules:
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
 [#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797
+[#1819]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1819

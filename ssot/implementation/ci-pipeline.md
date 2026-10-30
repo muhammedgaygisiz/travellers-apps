@@ -42,9 +42,9 @@ stylelint
 |
 tests
 |
-+-- loki ------------+-- deploy-bite-tribe-storybook       (develop only)
-+-- e2e -------------+-- report (pull requests only)
-+-- business-e2e ----+
++-- loki-build -- loki-capture (x2) -- loki --+-- deploy-bite-tribe-storybook (develop only)
++-- e2e --------------------------------------+-- report (pull requests only)
++-- business-e2e -----------------------------+
 |
 +-- firestore-rules ----------- deploy-firestore-rules       (develop only)
 +-- functions-emulator
@@ -213,17 +213,17 @@ See [Implementation - Firebase Functions](firebase-functions.md).
 
 The lint, stylelint and tests chain is deliberately sequential so a cheap failure stops the run before the expensive jobs start. Everything after `tests` fans out in parallel.
 
-`report` posts a single sticky PR comment with the E2E and Loki results. It runs with `if: !cancelled()` so a failing job is still reported. A `loki` run that skipped its capture because no story was affected reports as passed, because the job itself succeeded.
+`report` posts a single sticky PR comment with the E2E and Loki results. It runs with `if: !cancelled()` so a failing job is still reported. A `loki` run that skipped its capture because no story was affected reports as passed, because the job itself succeeded. `loki` is the aggregate of `loki-build` and both `loki-capture` legs, so the comment shows one Loki result that is red if either configuration failed (see [Loki Captures Each Configuration On Its Own Runner](#loki-captures-each-configuration-on-its-own-runner)).
 
 ## Composite Actions
 
-| Action                                   | Used by                                                                     | Responsibility                                                                              |
-| ---------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `.github/actions/setup`                  | `setup`, deploys, standalone workflows                                      | Restore `node_modules`, set up Node.js from `.nvmrc`; on a miss `npm ci` and save the cache |
-| `.github/actions/restore-cache`          | Every pipeline job                                                          | Exact-key restore of `node_modules`, no fallback; exposes `cache-hit`                       |
-| `.github/actions/install-if-missing`     | The build jobs                                                              | `npm ci` when the restored `node_modules` is unusable                                       |
-| `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`, `loki`                                        | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
-| `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, builds, `loki`, `deploy-bite-tribe-storybook` | Persist and restore the Nx computation cache                                                |
+| Action                                   | Used by                                                                           | Responsibility                                                                              |
+| ---------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `.github/actions/setup`                  | `setup`, deploys, standalone workflows                                            | Restore `node_modules`, set up Node.js from `.nvmrc`; on a miss `npm ci` and save the cache |
+| `.github/actions/restore-cache`          | Every pipeline job                                                                | Exact-key restore of `node_modules`, no fallback; exposes `cache-hit`                       |
+| `.github/actions/install-if-missing`     | The build jobs                                                                    | `npm ci` when the restored `node_modules` is unusable                                       |
+| `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`, `loki-build`                                        | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
+| `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, builds, `loki-build`, `deploy-bite-tribe-storybook` | Persist and restore the Nx computation cache                                                |
 
 `setup` reads `cache-hit` from `restore-cache` through the step id `cache`. On a hit it skips `npm ci` and the save, and sets up Node.js without the npm download cache, which only `npm ci` uses. Node.js itself is still set up from `.nvmrc` because the deploy jobs build through this action. Before [#1811] the step had no id, so the guards were always true and every run reinstalled the `node_modules` it had just restored.
 
@@ -316,8 +316,9 @@ Every checkout in `pipeline.yml` uses `fetch-depth: 0` because affected needs fu
 
 ### Loki Runs Only When A Story Is Affected
 
-`loki` captures only when `storybook-host` is in `nx show projects --affected`.
-Otherwise it skips the build and the capture and still succeeds, so `report` and
+Loki captures only when `storybook-host` is in `nx show projects --affected`.
+`loki-build` makes that check. Otherwise it skips the build, both capture legs
+skip their steps, and all three jobs still succeed, so `report` and
 the required check stay green. Until [issue #1815][#1815] it captured all 846
 references on every pull request, at a median of 9.3 minutes, including pull
 requests that touched only `ssot/` or a workflow.
@@ -355,6 +356,36 @@ On `develop`, `nrwl/nx-set-shas` compares against the last successful run, so a
 skipped capture means no story changed since stories last passed.
 `deploy-bite-tribe-storybook` therefore still runs unconditionally after `loki`.
 
+### Loki Captures Each Configuration On Its Own Runner
+
+`loki.config.js` defines two configurations, `chrome.laptop` and
+`chrome.iphone7`. Until [issue #1816][#1816] both were captured in one
+`npm run loki:test` on one runner, which took 6 to 9 minutes after the Storybook
+build. They now capture in parallel, over three jobs:
+
+- **`loki-build`** runs the affected check, builds Storybook once through the Nx
+  cache, and uploads `dist/storybook/storybook-host` as the `loki-storybook`
+  artifact. The capture legs download it rather than building it again.
+- **`loki-capture`** is a matrix with one leg per configuration. Each leg runs
+  `npm run loki:test -- --configurationFilter "^<configuration>$"`;
+  `tools/loki.mjs` passes the argument through to the Loki CLI. The legs run
+  with `fail-fast: false`, so a pull request sees every changed reference in one
+  run, and each uploads its own `loki-diffs-<configuration>` artifact on
+  failure.
+- **`loki`** needs both and passes only when `loki-build` and every leg
+  succeeded. `report` and `deploy-bite-tribe-storybook` read this job, so
+  neither depends on how many configurations exist.
+
+The legs always run and skip their steps when no story is affected, so an
+unaffected pull request shows two green legs rather than two skipped ones.
+
+Each leg first checks that its matrix entry names a configuration in
+`loki.config.js`. Loki exits 0 with "No matching configurations" when the filter
+matches nothing, so a matrix entry that drifted from the config, or a renamed
+configuration, would otherwise pass without capturing anything. A configuration
+added to `loki.config.js` must be added to the matrix as well; nothing fails if
+it is not, and it is simply never captured in CI.
+
 ## Build-Time Environment Variables
 
 Nx task hashes do **not** include the `NX_APP_*` build-time variables. They are not declared as `env` inputs in `nx.json`, so two builds that differ only in those values share a task hash and Nx will replay either artifact for the other.
@@ -367,7 +398,7 @@ The three deploy jobs do **not** pass the same set. `NX_APP_BITE_TRIBE_MEASSUREM
 
 The failure mode is worth knowing, because it is silent. Without `measurementId` in the Firebase options the web SDK recovers one from a runtime `webConfig` fetch keyed on the app id, and if that fetch does not answer, `getAnalytics()` throws inside `AnalyticsService.emit`, which swallows it by design - tracking must never break a user flow. So the app works, the events do not arrive, and nothing says so. An app that emits events states the value rather than trusting the recovery.
 
-`deploy-bite-tribe-storybook` is not subject to this. The Storybook build reads no `NX_APP_*` variables, so it needs no secrets and its artifact is the same whichever job produced it. That is why `loki` and the deploy share it through `nx-cache`, and on `develop` the deploy replays the build `loki` cached a few minutes earlier rather than building it a second time.
+`deploy-bite-tribe-storybook` is not subject to this. The Storybook build reads no `NX_APP_*` variables, so it needs no secrets and its artifact is the same whichever job produced it. That is why `loki-build` and the deploy share it through `nx-cache`, and on `develop` the deploy replays the build `loki-build` cached a few minutes earlier rather than building it a second time.
 
 One file in that build is not covered by the hash. `npm run build:storybook` writes `nxgraph.html`, the page the `Tech/Graph` story frames, before the build, and the file is gitignored, so Nx does not hash it. A cache hit replays the graph of whichever run cached the build. Loki is unaffected, because the reference for that story captures a blank frame. The deploy copies the freshly generated graph over the restored build before it publishes.
 
@@ -524,4 +555,5 @@ nx.json
 [#1681]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1681
 [#1811]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1811
 [#1815]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1815
+[#1816]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1816
 [#1839]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1839

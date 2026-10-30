@@ -203,10 +203,16 @@ jobs:
           fail_ci_if_error: false # optional (default = false)
           verbose: false # optional (default = false)
 
-  loki:
+  # Loki is split over three jobs so the two configurations in loki.config.js
+  # capture on separate runners (issue #1816). `loki-build` builds Storybook once
+  # and hands it to both capture legs as an artifact, and `loki` folds the legs
+  # back into the single result that `report` and the Storybook deploy read.
+  loki-build:
     runs-on: ubuntu-latest
     needs:
       - tests
+    outputs:
+      storybook: ${{ steps.affected.outputs.storybook }}
 
     steps:
       - name: Checkout repository
@@ -225,7 +231,7 @@ jobs:
       # app and library a story renders, and its `loki` target declares the
       # files outside any project that a capture reads (references, the Loki
       # runner and config, the brand characters, package.json). A skipped
-      # capture leaves the job green, so `report` and the required check pass.
+      # capture leaves the jobs green, so `report` passes.
       # The two commands run outside a condition on purpose: if Nx fails, the
       # step fails, rather than reading the failure as "not affected".
       - name: Check whether a story is affected
@@ -252,21 +258,92 @@ jobs:
         if: steps.affected.outputs.storybook == 'true'
         run: npm run build:storybook
 
-      # Run the full visual-regression suite through the upstream oblador/loki
-      # CLI (tools/loki.mjs) against the committed .loki/reference images. Loki
-      # drives a headless Chrome inside Docker, which is available on
-      # ubuntu-latest. A visual diff fails the job (blocking check).
-      - name: Run Loki visual tests
+      - name: Upload the Storybook build for the capture jobs
         if: steps.affected.outputs.storybook == 'true'
-        run: npm run loki:test
+        uses: actions/upload-artifact@v7
+        with:
+          name: loki-storybook
+          path: dist/storybook/storybook-host
+          retention-days: 1
+          if-no-files-found: error
+
+  # One leg per configuration in loki.config.js. The legs always run, and skip
+  # their steps instead, so a pull request with no affected story still reports
+  # two green checks rather than two skipped ones.
+  loki-capture:
+    runs-on: ubuntu-latest
+    needs:
+      - loki-build
+    strategy:
+      # Both legs finish even when one finds a diff, so a pull request sees
+      # every changed reference in one run.
+      fail-fast: false
+      matrix:
+        configuration:
+          - chrome.laptop
+          - chrome.iphone7
+
+    steps:
+      - name: Checkout repository
+        if: needs.loki-build.outputs.storybook == 'true'
+        uses: actions/checkout@v7
+
+      - name: 'Restore Cache'
+        if: needs.loki-build.outputs.storybook == 'true'
+        uses: ./.github/actions/restore-cache
+
+      - name: Download the Storybook build
+        if: needs.loki-build.outputs.storybook == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: loki-storybook
+          path: dist/storybook/storybook-host
+
+      # Loki exits 0 with "No matching configurations" when the filter matches
+      # nothing, so a matrix entry that drifts from loki.config.js would pass
+      # without capturing. Fail it here instead.
+      - name: Check the configuration exists
+        if: needs.loki-build.outputs.storybook == 'true'
+        env:
+          CONFIGURATION: ${{ matrix.configuration }}
+        run: node -e "require('./loki.config.js').configurations[process.env.CONFIGURATION] || (console.error('No Loki configuration ' + process.env.CONFIGURATION), process.exit(1))"
+
+      # Run this configuration's visual-regression suite through the upstream
+      # oblador/loki CLI (tools/loki.mjs) against the committed .loki/reference
+      # images. Loki drives a headless Chrome inside Docker, which is available
+      # on ubuntu-latest. A visual diff fails the leg, and with it `loki`.
+      - name: Run Loki visual tests
+        if: needs.loki-build.outputs.storybook == 'true'
+        env:
+          CONFIGURATION: ${{ matrix.configuration }}
+        run: npm run loki:test -- --configurationFilter "^${CONFIGURATION}\$"
 
       - name: Upload Loki diffs
         uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: loki-diffs
+          name: loki-diffs-${{ matrix.configuration }}
           path: .loki/difference
           retention-days: 7
+
+  # The single Loki result: green only when the build and both capture legs
+  # are. `report` and `deploy-bite-tribe-storybook` read this job, so neither
+  # has to know how many configurations there are.
+  loki:
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() }}
+    needs:
+      - loki-build
+      - loki-capture
+
+    steps:
+      - name: Require the build and every capture leg to pass
+        env:
+          BUILD: ${{ needs.loki-build.result }}
+          CAPTURE: ${{ needs.loki-capture.result }}
+        run: |
+          echo "loki-build: $BUILD, loki-capture: $CAPTURE"
+          [ "$BUILD" = 'success' ] && [ "$CAPTURE" = 'success' ]
 
   e2e:
     runs-on: ubuntu-latest
@@ -416,7 +493,7 @@ jobs:
               `| Business E2E (Playwright) | ${icon(results.businessE2e)} |`,
               `| Visual regression (Loki) | ${icon(results.loki)} |`,
               '',
-              `Artifacts on the [workflow run](${runUrl}): \`playwright-report\`, \`business-playwright-report\`, plus \`loki-diffs\` when Loki finds visual changes.`,
+              `Artifacts on the [workflow run](${runUrl}): \`playwright-report\`, \`business-playwright-report\`, plus \`loki-diffs-<configuration>\` for each Loki configuration that finds visual changes.`,
             ].join('\n');
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
@@ -1031,6 +1108,9 @@ jobs:
   # The Storybook build reads no NX_APP_* variables, so unlike the two app
   # deploys this job needs no secrets — only the Firebase service account — and
   # may restore the build `loki` cached instead of rebuilding it.
+  #
+  # `loki` passes only when both capture legs did, so the deploy waits for
+  # both configurations.
   #
   # It runs whether or not `loki` captured: a skipped capture means no story
   # changed since the last green run, so the stories are still the ones that

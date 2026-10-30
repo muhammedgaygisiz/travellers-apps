@@ -9,6 +9,10 @@
 // machines and CI (Loki always passes `--add-host=host.docker.internal:host-gateway`).
 //
 // Usage: node tools/loki.mjs <test|update|approve> [extra loki args...]
+//
+// Extra args go to the Loki CLI unchanged. CI uses that to capture each
+// configuration on its own runner, e.g.
+// `npm run loki:test -- --configurationFilter "^chrome.laptop$"`.
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { join, extname, normalize, dirname } from 'node:path';

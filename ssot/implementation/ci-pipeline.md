@@ -72,6 +72,17 @@ worth stating rather than inferring from a workflow file.
 | Firestore rules             | `npm run test:rules`    | Yes, `firestore-rules`    |
 | Firebase Functions emulator | `npm run test:emulator` | Yes, `functions-emulator` |
 
+**Coverage Is Informational.** `codecov/project` is reported on every pull
+request and never fails one: `codecov.yml` sets it `informational`. The `tests`
+job runs `nx affected -t test --coverage`, so a pull request uploads coverage
+for the projects it affects and nothing else. The project figure is then taken
+over a different set of files each time, and it moves with that set: on [#1839]
+it compared 503 files against the base's 709 and reported a 0.54% drop the
+change did not cause, while neighbouring pull requests had been measured over
+2 and 672 files. A number that cannot be compared between two runs cannot gate a
+merge. The per-file report in Codecov's comment still names lines a change left
+uncovered, and those are worth reading.
+
 **The unit-test job cannot see the emulator specs, and that is deliberate.**
 `jest.config.cjs` matches `src/**/*.spec.ts`; an emulator spec is
 `*.emulator-spec.ts` and runs under `jest.emulator.config.cjs`, because it
@@ -464,3 +475,4 @@ nx.json
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1588]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1588
 [#1681]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1681
+[#1839]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1839

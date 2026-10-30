@@ -51,7 +51,7 @@ It is the default workflow for implementing a feature, fix, refactor, or launch 
 
 7. Merge.
    - Merge the PR when required checks are successful.
-   - Ignore the Codecov coverage step when it is the only remaining blocker.
+   - Codecov's project coverage is informational and never blocks a merge; see [CI Pipeline](../implementation/ci-pipeline.md#which-suites-gate-a-merge).
    - Post the closing report as a comment on the issue, in the shape [GitHub Issue Format](github-issue-format.md) defines under `Closing Report`, and write any durable rule it produced onto the SSOT page that owns it.
    - Move the issue to Done after the PR is merged and the behavior is verified.
 

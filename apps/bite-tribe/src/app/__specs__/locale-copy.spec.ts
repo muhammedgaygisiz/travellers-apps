@@ -80,7 +80,7 @@ describe('locale copy', () => {
         /\bsei sicur[oa]\b/i,
         /\bsii (?:il|la) prim[oa]\b/i,
         /\bsedut[oa]\b/i,
-        /\b(?:rimani|restare|resta|diventa) (?:pubblic|privat)[oa]\b/i,
+        /\b(?:rimani|resta|diventa|puoi restare) (?:pubblic|privat)[oa]\b/i,
       ],
       'pt.json': [
         /\bbem-vind[oa]s?\b/i,

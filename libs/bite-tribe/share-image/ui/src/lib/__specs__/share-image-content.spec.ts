@@ -2,6 +2,7 @@ import type { Bite } from 'model';
 import {
   applyFieldSwitches,
   availableFields,
+  celebrationOf,
   DEFAULT_FIELD_SWITCHES,
   SHARE_IMAGE_FIELDS,
   toShareImageContent,
@@ -87,7 +88,12 @@ describe(toShareImageContent.name, () => {
 
 /** The composer's switches (UC-SBS R-6, R-8, issue #1728). */
 describe('field switches', () => {
-  const content = toShareImageContent(createBite(), 'en', 'Super Mario');
+  const content = toShareImageContent(
+    createBite(),
+    'en',
+    'Super Mario',
+    'My first Bite in Thailand',
+  );
 
   it('starts with every field on except the sharer’s own name', () => {
     expect(DEFAULT_FIELD_SWITCHES.creatorName).toBe(false);
@@ -115,6 +121,16 @@ describe('field switches', () => {
     expect(
       availableFields(toShareImageContent(createBite(), 'en')),
     ).not.toContain('creatorName');
+  });
+
+  it('offers no celebration switch on a Bite that was no first', () => {
+    expect(
+      availableFields(toShareImageContent(createBite(), 'en')),
+    ).not.toContain('celebration');
+  });
+
+  it('starts with the celebration on', () => {
+    expect(DEFAULT_FIELD_SWITCHES.celebration).toBe(true);
   });
 
   it('has no switch for the QR code or the wordmark', () => {
@@ -147,5 +163,81 @@ describe('field switches', () => {
       ...content,
       showPhoto: true,
     });
+  });
+});
+
+/** Which first a Bite was, from the sharer's own Bites (issue #1837). */
+describe(celebrationOf.name, () => {
+  const at = (
+    id: string,
+    createdAtTimestamp: number,
+    countryCode?: string,
+  ): Bite => createBite({ id, createdAtTimestamp, countryCode });
+
+  const first = at('first', 1, 'DE');
+  const second = at('second', 2, 'DE');
+  const third = at('third', 3, 'TH');
+  const fourth = at('fourth', 4, 'TH');
+  const own = [first, second, third, fourth];
+
+  it('names the earliest Bite the first Bite', () => {
+    expect(celebrationOf(first, own)).toEqual({ moment: 'first-bite' });
+  });
+
+  it('claims nothing from a list that leaves the Bite itself out', () => {
+    expect(celebrationOf(first, [])).toBeUndefined();
+    expect(celebrationOf(third, [first, second])).toBeUndefined();
+  });
+
+  it('names the earliest Bite in a further country a first country', () => {
+    expect(celebrationOf(third, own)).toEqual({
+      moment: 'first-country',
+      countryCode: 'TH',
+    });
+  });
+
+  it('names nothing on a later Bite in a country already visited', () => {
+    expect(celebrationOf(second, own)).toBeUndefined();
+    expect(celebrationOf(fourth, own)).toBeUndefined();
+  });
+
+  it('names no first country when no earlier Bite had a country', () => {
+    const unresolved = at('unresolved', 1);
+
+    expect(celebrationOf(third, [unresolved, third])).toBeUndefined();
+  });
+
+  it('names no first country on a Bite without a country yet', () => {
+    const pending = at('pending', 5);
+
+    expect(celebrationOf(pending, [...own, pending])).toBeUndefined();
+  });
+
+  it('reads the age off createdAt where there is no timestamp', () => {
+    const older = createBite({
+      id: 'older',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      countryCode: 'DE',
+    });
+    const newer = createBite({
+      id: 'newer',
+      createdAt: '2026-02-01T00:00:00.000Z',
+      countryCode: 'TH',
+    });
+
+    expect(celebrationOf(older, [older, newer])).toEqual({
+      moment: 'first-bite',
+    });
+    expect(celebrationOf(newer, [older, newer])).toEqual({
+      moment: 'first-country',
+      countryCode: 'TH',
+    });
+  });
+
+  it('claims nothing where a Bite does not say when it was posted', () => {
+    const undated = createBite({ id: 'undated', countryCode: 'TH' });
+
+    expect(celebrationOf(undated, [undated])).toBeUndefined();
+    expect(celebrationOf(first, [first, undated])).toBeUndefined();
   });
 });

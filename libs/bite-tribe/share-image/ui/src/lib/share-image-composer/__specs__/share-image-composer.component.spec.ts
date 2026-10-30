@@ -4,6 +4,7 @@ import { IonContent } from '@ionic/angular/standalone';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { loadBiteImageForCanvas } from 'bite-tribe-common/bite';
 import type { Bite } from 'model';
+import type { ShareImageCelebration } from '../../share-image-content';
 import {
   hasMoreBelow,
   rasterise,
@@ -64,12 +65,16 @@ describe(ShareImageComposerComponent.name, () => {
   let shareImage: jest.Mock;
   let saveImage: jest.Mock;
 
-  const render = async (creatorName?: string): Promise<HTMLElement> => {
+  const render = async (
+    creatorName?: string,
+    celebration?: ShareImageCelebration,
+  ): Promise<HTMLElement> => {
     fixture = TestBed.createComponent(ShareImageComposerComponent);
     fixture.componentRef.setInput('bite', bite);
     fixture.componentRef.setInput('shareImage', shareImage);
     fixture.componentRef.setInput('saveImage', saveImage);
     fixture.componentRef.setInput('creatorName', creatorName);
+    fixture.componentRef.setInput('celebration', celebration);
     fixture.detectChanges();
     await flush();
 
@@ -90,7 +95,17 @@ describe(ShareImageComposerComponent.name, () => {
     await TestBed.configureTestingModule({
       imports: [
         ShareImageComposerComponent,
-        TranslocoTestingModule.forRoot({ langs: { en: {} } }),
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'share-image-celebration-first-bite': 'My first Bite',
+              'share-image-celebration-first-country':
+                'My first Bite in {{country}}',
+            },
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true,
+        }),
       ],
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
@@ -328,6 +343,53 @@ describe(ShareImageComposerComponent.name, () => {
       fixture.detectChanges();
 
       expect(drawnContent()['creatorName']).toBe('Super Mario');
+    });
+  });
+
+  /** A celebrated Bite (issue #1837). */
+  describe('celebration', () => {
+    const toggle = (element: HTMLElement): HTMLIonToggleElement | null =>
+      element.querySelector('[data-testid="share-image-field-celebration"]');
+
+    const drawnCelebration = (): unknown =>
+      (
+        fixture.componentInstance as unknown as {
+          content: () => Record<string, unknown>;
+        }
+      ).content()['celebration'];
+
+    it('offers no celebration switch on a Bite that was no first', async () => {
+      const element = await render();
+
+      expect(toggle(element)).toBeNull();
+      expect(drawnCelebration()).toBeUndefined();
+    });
+
+    it('names the first Bite, switched on', async () => {
+      const element = await render(undefined, { moment: 'first-bite' });
+
+      expect(toggle(element)?.checked).toBe(true);
+      expect(drawnCelebration()).toBe('My first Bite');
+    });
+
+    it('names the country of a first country in the sharer’s language', async () => {
+      await render(undefined, { moment: 'first-country', countryCode: 'TH' });
+
+      expect(drawnCelebration()).toBe('My first Bite in Thailand');
+    });
+
+    it('takes the line off, and says so, when switched off', async () => {
+      const element = await render(undefined, { moment: 'first-bite' });
+      const switched = jest.fn();
+      fixture.componentInstance.celebrationSwitched.subscribe(switched);
+
+      toggle(element)?.dispatchEvent(
+        new CustomEvent('ionChange', { detail: { checked: false } }),
+      );
+      fixture.detectChanges();
+
+      expect(drawnCelebration()).toBeUndefined();
+      expect(switched).toHaveBeenCalledWith(false);
     });
   });
 

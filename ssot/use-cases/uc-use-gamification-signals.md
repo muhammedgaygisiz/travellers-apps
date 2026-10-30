@@ -82,6 +82,9 @@ them is collected in onboarding.
   user and their followers, and that contract lives in
   [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
 - Issue [#1797] celebrates a new country badge in the app, part of epic [#1741]. Open.
+- Issue [#1837] lets the sharer name a first Bite or a first country on that Bite's share
+  image, part of epic [#1741]; the contract is `R-34` of
+  [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md).
 - Issue [#770] is the **BiteTrail** gamification epic and is owned by
   [UC - Add BiteTrail Gamification](uc-add-bitetrail-gamification.md), not by this page.
 
@@ -112,4 +115,5 @@ them is collected in onboarding.
 [#1212]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1212
 [#1611]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1611
 [#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
+[#1837]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1837
 [#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797

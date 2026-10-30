@@ -12,8 +12,10 @@ import {
   ShareTargetUnavailableError,
 } from 'bite-tribe/details-data-access';
 import {
+  celebrationOf,
   DEFAULT_SHARE_IMAGE_STYLE,
   ShareImageComposerComponent,
+  type ShareImageCelebration,
   type ShareImageFormat,
   type ShareImageLayoutId,
 } from 'bite-tribe/share-image-ui';
@@ -40,6 +42,7 @@ import {
   type AnalyticsEventParamMap,
   AnalyticsService,
   type ShareImageAction,
+  type ShareImageCelebrationParam,
   type ShareImageParams,
   type ShareTarget,
 } from 'ta-firestore';
@@ -82,6 +85,12 @@ const ANALYTICS_TARGET: Record<ShareMenuChoice, ShareTarget> = {
   'share-image': 'share_image',
   more: 'more',
 };
+
+/** A celebrated first as the share funnel's analytics names it (issue #1837). */
+const toCelebrationParam = (
+  celebration: ShareImageCelebration,
+): ShareImageCelebrationParam =>
+  celebration.moment === 'first-country' ? 'first_country' : 'first_bite';
 
 /** The app entries a device offers, each only while its app is installed. */
 const NATIVE_APP_ENTRIES: { choice: ShareMenuTarget; labelKey: string }[] = [
@@ -417,6 +426,10 @@ export class DetailsService {
     };
     const closed = new EventEmitter<void>();
     const layoutChosen = new EventEmitter<ShareImageLayoutId>();
+    const celebrationSwitched = new EventEmitter<boolean>();
+    // Arrives once the sharer's own Bites are read, after the composer opened;
+    // until then the composer offers no celebration switch.
+    const celebration = signal<ShareImageCelebration | undefined>(undefined);
     const modal = await this.modalController.create({
       component: ShareImageComposerComponent,
       // Taller than Ionic's default on large screens; see `_globals.scss`.
@@ -427,6 +440,7 @@ export class DetailsService {
         bite: signal(bite),
         format: signal(format),
         creatorName: signal(this.sharerDisplayName()),
+        celebration,
         saveImage: signal((image: Blob) =>
           this.saveBiteImage(bite, image, funnel),
         ),
@@ -434,8 +448,28 @@ export class DetailsService {
         shareImage: signal(this.shareAction(bite, funnel, app)),
         closed,
         layoutChosen,
+        celebrationSwitched,
       },
     });
+
+    // The key is left out, not set to undefined, while no line goes out.
+    const recordCelebration = (on: boolean): void => {
+      const moment = celebration();
+
+      if (on && moment) {
+        funnel.celebration = toCelebrationParam(moment);
+      } else {
+        delete funnel.celebration;
+      }
+    };
+
+    void this.celebrationOf(bite).then((moment) => {
+      celebration.set(moment);
+      // The switch starts on, so the line goes out unless it is switched off.
+      recordCelebration(true);
+    });
+
+    celebrationSwitched.subscribe(recordCelebration);
 
     closed.subscribe(() => {
       void modal.dismiss();
@@ -454,6 +488,21 @@ export class DetailsService {
       target,
       format,
     });
+  }
+
+  /**
+   * Which first the Bite was, from the sharer's own Bites (issue #1837). A
+   * read that fails offers no celebration rather than a wrong one.
+   */
+  private async celebrationOf(
+    bite: Bite,
+  ): Promise<ShareImageCelebration | undefined> {
+    try {
+      return celebrationOf(bite, await this.dataAccess.ownBites());
+    } catch (error) {
+      console.error('Failed to read the sharer’s own Bites:', error);
+      return undefined;
+    }
   }
 
   /**

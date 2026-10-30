@@ -44,6 +44,11 @@ export interface ShareImageContent {
    * on and only while their profile is public (`R-8`).
    */
   creatorName?: string;
+  /**
+   * The line naming the first this Bite was, such as "My first Bite in
+   * Japan", present only on a celebrated Bite (issue #1837).
+   */
+  celebration?: string;
 }
 
 /**
@@ -57,6 +62,7 @@ export const SHARE_IMAGE_FIELDS = [
   'price',
   'rating',
   'creatorName',
+  'celebration',
 ] as const;
 
 export type ShareImageField = (typeof SHARE_IMAGE_FIELDS)[number];
@@ -74,6 +80,9 @@ export const DEFAULT_FIELD_SWITCHES: ShareImageFieldSwitches = {
   price: true,
   rating: true,
   creatorName: false,
+  // Whoever opens the composer on a celebrated Bite most likely shares it
+  // because of that, so the line starts on.
+  celebration: true,
 };
 
 /**
@@ -95,6 +104,8 @@ export const availableFields = (
         return !!content.rating;
       case 'creatorName':
         return !!content.creatorName;
+      case 'celebration':
+        return !!content.celebration;
       default:
         return true;
     }
@@ -112,6 +123,7 @@ export const applyFieldSwitches = (
   rating: switches.rating ? content.rating : undefined,
   qrUrl: content.qrUrl,
   creatorName: switches.creatorName ? content.creatorName : undefined,
+  celebration: switches.celebration ? content.celebration : undefined,
 });
 
 const MAX_RATING = 5;
@@ -139,12 +151,14 @@ const formatPrice = (
 
 /**
  * The content of a Bite's share image. `creatorName` is the sharer's display
- * name, which the caller passes only while their profile is public.
+ * name, which the caller passes only while their profile is public, and
+ * `celebration` the already translated line for a celebrated Bite.
  */
 export const toShareImageContent = (
   bite: Bite,
   lang: string,
   creatorName?: string,
+  celebration?: string,
 ): ShareImageContent => ({
   dishName: bite.name,
   placeLine: [bite.place, bite.city].filter((part) => !!part).join(' · '),
@@ -154,4 +168,74 @@ export const toShareImageContent = (
     : undefined,
   qrUrl: sharedBiteUrl(bite.id),
   creatorName: creatorName || undefined,
+  celebration: celebration || undefined,
 });
+
+/**
+ * A first the app celebrated that belongs to one Bite (issue #1837). The other
+ * celebrated moments - finishing onboarding, a first follow, a completed
+ * BiteTrail - are not about a Bite, so no share image names them.
+ */
+export type ShareImageCelebration =
+  { moment: 'first-bite' } | { moment: 'first-country'; countryCode: string };
+
+/** When a Bite was posted, or `undefined` where it does not say. */
+const postedAt = (bite: Bite): number | undefined => {
+  if (typeof bite.createdAtTimestamp === 'number') {
+    return bite.createdAtTimestamp;
+  }
+
+  const parsed = bite.createdAt ? Date.parse(bite.createdAt) : NaN;
+
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
+/**
+ * Which first `bite` was, worked out from the sharer's own Bites rather than
+ * remembered from the celebration, so it is right days later and after a
+ * session that missed the celebration (#1835).
+ *
+ * It follows the celebration's own rule: the earliest Bite is the first Bite,
+ * and the earliest Bite in a country is a first country only when an earlier
+ * Bite already had a country - going from no country to one is the first
+ * Bite, not a first country. Nothing is claimed where the answer cannot be
+ * told: when `ownBites` leaves out `bite` itself, and so is not the whole list,
+ * or when any of them does not say when it was posted.
+ */
+export const celebrationOf = (
+  bite: Bite,
+  ownBites: readonly Bite[],
+): ShareImageCelebration | undefined => {
+  const at = postedAt(bite);
+  const others = ownBites.filter((other) => other.id !== bite.id);
+
+  if (
+    at === undefined ||
+    others.length === ownBites.length ||
+    others.some((other) => postedAt(other) === undefined)
+  ) {
+    return undefined;
+  }
+
+  const earlier = others.filter((other) => {
+    const otherAt = postedAt(other) as number;
+
+    return otherAt < at || (otherAt === at && other.id < bite.id);
+  });
+
+  if (earlier.length === 0) {
+    return { moment: 'first-bite' };
+  }
+
+  const { countryCode } = bite;
+
+  if (
+    countryCode &&
+    earlier.every((other) => other.countryCode !== countryCode) &&
+    earlier.some((other) => !!other.countryCode)
+  ) {
+    return { moment: 'first-country', countryCode };
+  }
+
+  return undefined;
+};

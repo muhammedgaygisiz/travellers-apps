@@ -42,6 +42,8 @@ const COLOR = {
   qrDark: '#000000',
   pill: 'rgba(0, 0, 0, 0.55)',
   pillText: '#FFFFFF',
+  /** The brand orange, `--bite-tribe-color`, that the confetti also uses. */
+  celebration: '#FEC56B',
 } as const;
 
 /** The colours of one drawing, resolved from its style. */
@@ -265,6 +267,78 @@ const drawPersonIcon = (
 };
 
 /**
+ * A party popper: a cone opening to the top right, with confetti above it.
+ * Drawn as shapes rather than as an emoji, whose glyph differs between iOS,
+ * Android and web, so the preview stays the image that is shared (`R-10`).
+ */
+const drawCelebrationIcon = (
+  ctx: Context,
+  x: number,
+  y: number,
+  size: number,
+  color: string,
+): void => {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(x + size * 0.05, y + size * 0.95);
+  ctx.lineTo(x + size * 0.28, y + size * 0.3);
+  ctx.lineTo(x + size * 0.7, y + size * 0.72);
+  ctx.closePath();
+  ctx.fill();
+
+  for (const [dotX, dotY, radius] of [
+    [0.62, 0.12, 0.08],
+    [0.88, 0.32, 0.07],
+    [0.82, 0.08, 0.05],
+    [0.45, 0.04, 0.05],
+    [0.95, 0.58, 0.05],
+  ]) {
+    ctx.beginPath();
+    ctx.arc(x + size * dotX, y + size * dotY, size * radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+};
+
+/**
+ * The celebration line on a dark pill over the top-left of the photo, the
+ * corner the sharer's name leaves free (issue #1837).
+ */
+const drawCelebrationPill = (
+  ctx: Context,
+  line: string,
+  width: number,
+  layout: ShareImageLayout,
+  fontFamily: string,
+): void => {
+  const fontSize = Math.round(layout.placeFontSize * 0.9);
+  const height = Math.round(fontSize * 1.8);
+  const padding = Math.round(height / 2.4);
+  const iconSize = fontSize;
+  const x = Math.max(layout.margin, layout.photoInset + 24);
+  const y = Math.max(layout.margin, layout.photoInset + 24);
+  const maxTextWidth = width - 2 * x - 2 * padding - iconSize - 12;
+
+  ctx.font = `600 ${fontSize}px ${fontFamily}`;
+  const text = fitText(ctx, line, maxTextWidth);
+  const pillWidth = 2 * padding + iconSize + 12 + ctx.measureText(text).width;
+
+  roundedRectPath(ctx, x, y, pillWidth, height, height / 2);
+  ctx.fillStyle = COLOR.pill;
+  ctx.fill();
+  drawCelebrationIcon(
+    ctx,
+    x + padding,
+    y + (height - iconSize) / 2,
+    iconSize,
+    COLOR.celebration,
+  );
+  ctx.fillStyle = COLOR.pillText;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x + padding + iconSize + 12, y + height / 2);
+};
+
+/**
  * The sharer's name on a dark pill over the bottom-left of the photo. Over
  * the photo rather than in the text block, because the text block of either
  * layout has no line to spare once every field is on.
@@ -427,6 +501,24 @@ const drawDetails = (
 
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
+
+  if (content.celebration && !showPhoto) {
+    // With no photo to carry the pill, the celebration heads the text block,
+    // in the space the photo left.
+    const size = layout.placeFontSize;
+
+    drawCelebrationIcon(ctx, margin, y, size, palette.star);
+    ctx.fillStyle = palette.text;
+    ctx.font = `600 ${size}px ${fontFamily}`;
+    ctx.textBaseline = 'top';
+    ctx.fillText(
+      fitText(ctx, content.celebration, maxWidth - size - 12),
+      margin + size + 12,
+      y,
+    );
+    y += size + layout.detailsGap;
+  }
+
   ctx.fillStyle = palette.text;
   ctx.font = `700 ${layout.dishFontSize}px ${fontFamily}`;
 
@@ -582,6 +674,10 @@ export const drawShareImage = (
 
     if (content.creatorName) {
       drawCreatorPill(ctx, content.creatorName, width, layout, fontFamily);
+    }
+
+    if (content.celebration) {
+      drawCelebrationPill(ctx, content.celebration, width, layout, fontFamily);
     }
   }
 

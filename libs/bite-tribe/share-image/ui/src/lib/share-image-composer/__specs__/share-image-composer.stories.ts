@@ -14,7 +14,10 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import type { Bite } from 'model';
 import { SHARE_IMAGE_FONT_FAMILY } from '../../draw-share-image';
-import type { ShareImageFormat } from '../../share-image-content';
+import type {
+  ShareImageCelebration,
+  ShareImageFormat,
+} from '../../share-image-content';
 import {
   SHARE_IMAGE_LOGO_SRC,
   ShareImageComposerComponent,
@@ -68,6 +71,7 @@ const preload = (src: string): Promise<unknown> =>
         [bite]="bite()"
         [format]="format()"
         [creatorName]="creatorName()"
+        [celebration]="celebration()"
         [shareImage]="shareImage"
         [saveImage]="saveImage"
       />
@@ -85,6 +89,7 @@ class ShareImageComposerDemoComponent implements OnInit {
   readonly bite = input.required<Bite>();
   readonly format = input<ShareImageFormat>('story');
   readonly creatorName = input<string>();
+  readonly celebration = input<ShareImageCelebration>();
 
   protected readonly ready = signal(false);
   protected readonly shareImage = (): Promise<void> => Promise.resolve();
@@ -133,4 +138,12 @@ export const WithNameSwitch: Story = {
 /** A Bite with no price and no rating offers neither switch. */
 export const NoPriceOrRating: Story = {
   args: { bite: { ...demoBite, price: 0, rating: undefined } },
+};
+
+/**
+ * The sharer's first Bite in a country: its switch is offered and starts on,
+ * and the line sits on the photo (issue #1837).
+ */
+export const WithCelebration: Story = {
+  args: { celebration: { moment: 'first-country', countryCode: 'TH' } },
 };

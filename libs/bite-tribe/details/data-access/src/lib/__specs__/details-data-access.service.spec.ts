@@ -149,7 +149,7 @@ describe(DetailsDataAccessService.name, () => {
         },
         {
           provide: BiteTribeApiService,
-          useValue: { reportBite: jest.fn() },
+          useValue: { reportBite: jest.fn(), bitesByUser: jest.fn() },
         },
         {
           provide: BiteTribeStoreService,
@@ -196,6 +196,29 @@ describe(DetailsDataAccessService.name, () => {
       reported: true,
     });
     expect(api.reportBite).toHaveBeenCalledWith('bite-1', 'spam');
+  });
+
+  /** The share image works out which first a Bite was from these (#1837). */
+  describe('ownBites', () => {
+    const api = (): { bitesByUser: jest.Mock } =>
+      TestBed.inject(BiteTribeApiService) as unknown as {
+        bitesByUser: jest.Mock;
+      };
+
+    it('reads the signed-in user’s Bites', async () => {
+      const bites = [{ id: 'bite-1' }];
+      api().bitesByUser.mockResolvedValue(bites);
+      (service as unknown as { userId: () => string }).userId = (): string =>
+        'user-1';
+
+      await expect(service.ownBites()).resolves.toBe(bites);
+      expect(api().bitesByUser).toHaveBeenCalledWith('user-1');
+    });
+
+    it('reads nothing while signed out', async () => {
+      await expect(service.ownBites()).resolves.toEqual([]);
+      expect(api().bitesByUser).not.toHaveBeenCalled();
+    });
   });
 
   describe('biteParams', () => {

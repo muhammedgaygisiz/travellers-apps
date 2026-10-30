@@ -408,7 +408,16 @@ export interface ShareImageParams {
   format: 'story' | 'post';
   /** The layout the image is drawn in. */
   template: 'classic' | 'wide';
+  /**
+   * The first the image says this Bite was, while its line is switched on;
+   * absent on every other image (issue #1837). A moment, not a country: the
+   * country it names stays on the image.
+   */
+  celebration?: ShareImageCelebrationParam;
 }
+
+/** The celebrated firsts a share image can name (issue #1837). */
+export type ShareImageCelebrationParam = 'first_bite' | 'first_country';
 
 /**
  * The two screens a meal can be turned into a Bite from (GitHub issue #1112).

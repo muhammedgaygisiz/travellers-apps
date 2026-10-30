@@ -217,10 +217,39 @@ jobs:
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
+      - name: 'Setup env'
+        uses: ./.github/actions/setup-env-for-affected
+
+      # Skip the capture when no story can have changed. This is read from the
+      # project graph, not from path filters: storybook-host depends on every
+      # app and library a story renders, and its `loki` target declares the
+      # files outside any project that a capture reads (references, the Loki
+      # runner and config, the brand characters, package.json). A skipped
+      # capture leaves the job green, so `report` and the required check pass.
+      # The two commands run outside a condition on purpose: if Nx fails, the
+      # step fails, rather than reading the failure as "not affected".
+      - name: Check whether a story is affected
+        id: affected
+        shell: bash
+        run: |
+          affected=$(npm run --silent nx -- show projects --affected --json)
+          storybook=$(jq 'index("storybook-host") != null' <<< "$affected")
+          echo "storybook=$storybook" >> "$GITHUB_OUTPUT"
+          if [ "$storybook" != 'true' ]; then
+            echo 'storybook-host is not affected, so no story can have changed. Loki capture skipped.' | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # The Storybook build reads no NX_APP_* variables, so its artifact is the
+      # same in every job and is safe to share through the Nx cache.
+      - name: 'Nx cache'
+        if: steps.affected.outputs.storybook == 'true'
+        uses: ./.github/actions/nx-cache
+
       # Build the static Storybook (dist/storybook/storybook-host) the same way
-      # as the manual Loki reference-update workflow, so captures match the
+      # `npm run loki:update` expects it locally, so captures match the
       # committed references.
       - name: Build Storybook
+        if: steps.affected.outputs.storybook == 'true'
         run: npm run build:storybook
 
       # Run the full visual-regression suite through the upstream oblador/loki
@@ -228,6 +257,7 @@ jobs:
       # drives a headless Chrome inside Docker, which is available on
       # ubuntu-latest. A visual diff fails the job (blocking check).
       - name: Run Loki visual tests
+        if: steps.affected.outputs.storybook == 'true'
         run: npm run loki:test
 
       - name: Upload Loki diffs
@@ -999,7 +1029,12 @@ jobs:
   # whose stories passed visual regression on the same commit.
   #
   # The Storybook build reads no NX_APP_* variables, so unlike the two app
-  # deploys this job needs no secrets — only the Firebase service account.
+  # deploys this job needs no secrets — only the Firebase service account — and
+  # may restore the build `loki` cached instead of rebuilding it.
+  #
+  # It runs whether or not `loki` captured: a skipped capture means no story
+  # changed since the last green run, so the stories are still the ones that
+  # passed visual regression.
   deploy-bite-tribe-storybook:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
@@ -1013,8 +1048,20 @@ jobs:
       - name: Setup action
         uses: ./.github/actions/setup
 
+      - name: 'Nx cache'
+        uses: ./.github/actions/nx-cache
+
       - name: Build BiteTribe Storybook
         run: npm run build:storybook
+
+      # `npm run build:storybook` writes nxgraph.html before the build, but the
+      # file is gitignored and so not part of build-storybook's hash: a cache hit
+      # replays the graph of whichever run cached it. Copy this commit's graph
+      # over it so the published Tech/Graph page is current.
+      - name: Refresh the dependency graph in the built Storybook
+        run: |
+          rm -rf dist/storybook/storybook-host/assets/temp
+          cp -R apps/storybook-host/src/assets/temp dist/storybook/storybook-host/assets/temp
 
       - name: BiteTribe Storybook Publish to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0.11.0

@@ -184,6 +184,17 @@ describe(celebrationOf.name, () => {
     expect(celebrationOf(first, own)).toEqual({ moment: 'first-bite' });
   });
 
+  it('orders Bites posted at the same moment by their id', () => {
+    const a = at('a', 1, 'DE');
+    const b = at('b', 1, 'TH');
+
+    expect(celebrationOf(a, [a, b])).toEqual({ moment: 'first-bite' });
+    expect(celebrationOf(b, [a, b])).toEqual({
+      moment: 'first-country',
+      countryCode: 'TH',
+    });
+  });
+
   it('claims nothing from a list that leaves the Bite itself out', () => {
     expect(celebrationOf(first, [])).toBeUndefined();
     expect(celebrationOf(third, [first, second])).toBeUndefined();

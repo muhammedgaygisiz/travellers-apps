@@ -1206,6 +1206,19 @@ describe('DetailsService', () => {
           expect((await handOff())['celebration']).toBe('first_country');
         });
 
+        it('names a first Bite first_bite on the hand-off', async () => {
+          (service.dataAccess.ownBites as jest.Mock).mockResolvedValue([
+            earlier,
+          ]);
+          mockActionSheetController.create.mockResolvedValue(
+            createShareMenu('instagram-story'),
+          );
+          await service.onShareBiteClick(earlier);
+          await settle();
+
+          expect((await handOff())['celebration']).toBe('first_bite');
+        });
+
         it('leaves the moment out once the line is switched off', async () => {
           await openCelebrated();
 

@@ -64,6 +64,9 @@ jobs:
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
+      - name: 'Install dependencies when the cache is unavailable'
+        uses: ./.github/actions/install-if-missing
+
       - name: 'Setup env'
         uses: ./.github/actions/setup-env-for-affected
 
@@ -162,6 +165,9 @@ jobs:
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
+      - name: 'Install dependencies when the cache is unavailable'
+        uses: ./.github/actions/install-if-missing
+
       - name: 'Setup env'
         uses: ./.github/actions/setup-env-for-affected
 
@@ -184,6 +190,9 @@ jobs:
 
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
+
+      - name: 'Install dependencies when the cache is unavailable'
+        uses: ./.github/actions/install-if-missing
 
       - name: 'Setup env'
         uses: ./.github/actions/setup-env-for-affected
@@ -222,6 +231,9 @@ jobs:
 
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
+
+      - name: 'Install dependencies when the cache is unavailable'
+        uses: ./.github/actions/install-if-missing
 
       - name: 'Setup env'
         uses: ./.github/actions/setup-env-for-affected
@@ -292,6 +304,10 @@ jobs:
         if: needs.loki-build.outputs.storybook == 'true'
         uses: ./.github/actions/restore-cache
 
+      - name: 'Install dependencies when the cache is unavailable'
+        if: needs.loki-build.outputs.storybook == 'true'
+        uses: ./.github/actions/install-if-missing
+
       - name: Download the Storybook build
         if: needs.loki-build.outputs.storybook == 'true'
         uses: actions/download-artifact@v8
@@ -359,6 +375,9 @@ jobs:
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
 
+      - name: 'Install dependencies when the cache is unavailable'
+        uses: ./.github/actions/install-if-missing
+
       # The Firebase emulators require a JVM; firebase-tools needs JDK 21+.
       - name: Set up Java
         uses: actions/setup-java@v6
@@ -412,6 +431,9 @@ jobs:
 
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
+
+      - name: 'Install dependencies when the cache is unavailable'
+        uses: ./.github/actions/install-if-missing
 
       # The Firebase emulators require a JVM; firebase-tools needs JDK 21+.
       - name: Set up Java

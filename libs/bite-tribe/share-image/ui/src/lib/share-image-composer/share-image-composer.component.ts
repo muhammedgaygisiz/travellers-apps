@@ -34,6 +34,7 @@ import {
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { loadBiteImageForCanvas } from 'bite-tribe-common/bite';
 import type { Bite } from 'model';
+import { getLocalizedCountryName } from 'utils';
 import {
   SHARE_IMAGE_FONT_FAMILY,
   type ShareImageAssets,
@@ -43,6 +44,7 @@ import {
   availableFields,
   DEFAULT_FIELD_SWITCHES,
   toShareImageContent,
+  type ShareImageCelebration,
   type ShareImageField,
   type ShareImageFieldSwitches,
   type ShareImageFormat,
@@ -56,6 +58,7 @@ const FIELD_LABEL_KEY: Record<ShareImageField, string> = {
   price: 'share-image-field-price',
   rating: 'share-image-field-rating',
   creatorName: 'share-image-field-creator-name',
+  celebration: 'share-image-field-celebration',
 };
 import { ShareImagePreviewComponent } from '../share-image-preview/share-image-preview.component';
 import {
@@ -195,6 +198,11 @@ export class ShareImageComposerComponent implements OnInit {
    * Without it there is no name switch (`UC-SBS` `R-8`).
    */
   readonly creatorName = input<string>();
+  /**
+   * The first this Bite was, if it was one. Without it there is no
+   * celebration switch (issue #1837).
+   */
+  readonly celebration = input<ShareImageCelebration>();
   /** Shares the finished image. Resolves once the share sheet has closed. */
   readonly shareImage = input<(image: Blob) => Promise<void>>();
   /** Saves the finished image: to the photo library, or as a download. */
@@ -206,6 +214,8 @@ export class ShareImageComposerComponent implements OnInit {
    * chose, and not a tap on the layout already showing.
    */
   readonly layoutChosen = output<ShareImageLayoutId>();
+  /** The celebration switch flipped, for the share funnel's analytics. */
+  readonly celebrationSwitched = output<boolean>();
 
   private readonly transloco = inject(TranslocoService);
   private readonly activeLang = toSignal(this.transloco.langChanges$, {
@@ -217,8 +227,38 @@ export class ShareImageComposerComponent implements OnInit {
     ...DEFAULT_FIELD_SWITCHES,
   });
 
+  /**
+   * The active language's translations, once loaded. The canvas is drawn from
+   * plain strings, so a line translated before its file arrived would stay the
+   * bare key; reading this redraws it once the file is there.
+   */
+  private readonly translation = toSignal(this.transloco.selectTranslation());
+
+  /** The celebration in the sharer's language, the country named in it too. */
+  private readonly celebrationLine = computed(() => {
+    const celebration = this.celebration();
+    const lang = this.activeLang();
+
+    if (!celebration || !this.translation()) {
+      return undefined;
+    }
+
+    // Read with the active language, which `lang` tracks, so the line
+    // follows a change of language.
+    return celebration.moment === 'first-country'
+      ? this.transloco.translate('share-image-celebration-first-country', {
+          country: getLocalizedCountryName(celebration.countryCode, lang),
+        })
+      : this.transloco.translate('share-image-celebration-first-bite');
+  });
+
   private readonly fullContent = computed(() =>
-    toShareImageContent(this.bite(), this.activeLang(), this.creatorName()),
+    toShareImageContent(
+      this.bite(),
+      this.activeLang(),
+      this.creatorName(),
+      this.celebrationLine(),
+    ),
   );
 
   protected readonly fields = computed(() =>
@@ -415,6 +455,10 @@ export class ShareImageComposerComponent implements OnInit {
 
   protected setSwitch(field: ShareImageField, on: boolean): void {
     this.switches.update((switches) => ({ ...switches, [field]: on }));
+
+    if (field === 'celebration') {
+      this.celebrationSwitched.emit(on);
+    }
   }
 
   protected onShare(): Promise<void> {

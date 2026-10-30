@@ -89,6 +89,8 @@ class ShareImagePreviewDemoComponent implements OnInit {
   readonly withPhoto = input(true);
   readonly format = input<ShareImageFormat>('story');
   readonly creatorName = input<string>();
+  /** The celebration line, already in words (issue #1837). */
+  readonly celebration = input<string>();
   readonly switches = input<ShareImageFieldSwitches>(DEFAULT_FIELD_SWITCHES);
   readonly imageStyle = input<ShareImageStyle>(DEFAULT_SHARE_IMAGE_STYLE);
 
@@ -100,7 +102,12 @@ class ShareImagePreviewDemoComponent implements OnInit {
   ngOnInit(): void {
     this.content.set(
       applyFieldSwitches(
-        toShareImageContent(this.bite(), 'en', this.creatorName()),
+        toShareImageContent(
+          this.bite(),
+          'en',
+          this.creatorName(),
+          this.celebration(),
+        ),
         this.switches(),
       ),
     );
@@ -211,6 +218,35 @@ export const PhotoOffWithName: Story = {
   args: {
     creatorName: 'Super Mario',
     switches: { ...allSwitches(true), photo: false },
+  },
+};
+
+/**
+ * A celebrated Bite: the line sits on the photo's top-left corner, the name
+ * on its bottom-left (issue #1837).
+ */
+export const WithCelebration: Story = {
+  args: {
+    creatorName: 'Super Mario',
+    celebration: 'My first Bite in Thailand',
+    switches: allSwitches(true),
+  },
+};
+
+/** The photo off: the celebration heads the text block. */
+export const PhotoOffWithCelebration: Story = {
+  args: {
+    celebration: 'My first Bite in Thailand',
+    switches: { ...allSwitches(true), photo: false },
+  },
+};
+
+/** A celebrated Bite at 4:5, in Wide. */
+export const PostWideWithCelebration: Story = {
+  args: {
+    celebration: 'My first Bite in Thailand',
+    format: 'post',
+    imageStyle: { ...DEFAULT_SHARE_IMAGE_STYLE, layout: 'wide' },
   },
 };
 

@@ -1,7 +1,13 @@
 # file: `codecov.yml`
 coverage:
   status:
-    project: yes
+    # Reported, never failing: CI uploads coverage for the Nx-affected
+    # projects only, so each PR's project figure is measured over a different
+    # set of files and moves with that set rather than with the change.
+    # See "Coverage Is Informational" in ssot/implementation/ci-pipeline.md.
+    project:
+      default:
+        informational: true
     patch: off
 
 ignore:

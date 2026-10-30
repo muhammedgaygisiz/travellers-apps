@@ -522,8 +522,9 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 
 - ### What Each Parameter Is
 
-  `ShareImageParams` is `bite_id`, `target`, `format` and `template`, and each
-  step carries as much of it as is known by then.
+  `ShareImageParams` is `bite_id`, `target`, `format`, `template` and, on a
+  celebrated Bite, `celebration`, and each step carries as much of it as is
+  known by then.
 
   - `bite_id` - the Bite being shared. The share link carries the same id.
   - `target` - the menu entry that started the share: `instagram_story`,
@@ -533,6 +534,10 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   - `format` - `story` (9:16) or `post` (4:5), decided by the entry.
   - `template` - the layout, `classic` or `wide`. On the hand-off it is the
     layout that went out, picked or not.
+  - `celebration` - `first_bite` or `first_country`, while the image carries
+    its celebration line (`UC-SBS` `R-34`, issue [#1837]); absent when the Bite
+    was no first or the line was switched off. It names the moment, never the
+    country.
   - `action` - on the hand-off only: `save` or `share`. An Instagram Story can
     be saved rather than shared, so `target` and `action` are both needed.
   - `reason` - on a failure only: `cancelled`, `permission_denied`,
@@ -876,3 +881,4 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 [#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
 [#1787]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1787
 [#1795]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1795
+[#1837]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1837

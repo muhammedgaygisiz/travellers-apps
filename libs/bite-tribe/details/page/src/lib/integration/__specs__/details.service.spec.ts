@@ -75,6 +75,7 @@ const createMockDataAccess = (
     saveBiteImage: jest.fn().mockResolvedValue(undefined),
     reloadBite: jest.fn(),
     reportBite: jest.fn().mockResolvedValue({ reported: true }),
+    ownBites: jest.fn().mockResolvedValue([]),
   };
   return { ...base, ...overrides } as MockDetailsDataAccessService;
 };
@@ -1135,6 +1136,100 @@ describe('DetailsService', () => {
           ['share_template_chosen', funnel],
           ['share_handoff_succeeded', { ...funnel, action: 'save' }],
         ]);
+      });
+
+      /** A celebrated Bite (issue #1837). */
+      describe('celebration', () => {
+        const datedOwnBite = {
+          ...ownBite,
+          createdAtTimestamp: 2,
+          countryCode: 'TH',
+        } as Bite;
+        const earlier = {
+          id: 'earlier',
+          userId: 'user1',
+          createdAtTimestamp: 1,
+          countryCode: 'DE',
+        } as Bite;
+
+        /** Lets the read of the sharer's own Bites settle; timers are fake. */
+        const settle = async (): Promise<void> => {
+          for (let tick = 0; tick < 5; tick += 1) {
+            await Promise.resolve();
+          }
+        };
+
+        const openCelebrated = async (): Promise<void> => {
+          (service.dataAccess.ownBites as jest.Mock).mockResolvedValue([
+            earlier,
+            datedOwnBite,
+          ]);
+          mockActionSheetController.create.mockResolvedValue(
+            createShareMenu('instagram-story'),
+          );
+          await service.onShareBiteClick(datedOwnBite);
+          await settle();
+        };
+
+        const handOff = async (): Promise<Record<string, unknown>> => {
+          await (
+            componentProps()['saveImage']() as (blob: Blob) => Promise<void>
+          )(image);
+
+          return logged().at(-1)?.[1] as Record<string, unknown>;
+        };
+
+        it('hands the composer the first the Bite was', async () => {
+          await openCelebrated();
+
+          expect(componentProps()['celebration']()).toEqual({
+            moment: 'first-country',
+            countryCode: 'TH',
+          });
+        });
+
+        it('offers no celebration where the own Bites cannot be read', async () => {
+          (service.dataAccess.ownBites as jest.Mock).mockRejectedValue(
+            new Error('offline'),
+          );
+          jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+          await openComposer();
+          await settle();
+
+          expect(componentProps()['celebration']()).toBeUndefined();
+        });
+
+        it('names the moment on the hand-off while the line is on', async () => {
+          await openCelebrated();
+
+          expect((await handOff())['celebration']).toBe('first_country');
+        });
+
+        it('names a first Bite first_bite on the hand-off', async () => {
+          (service.dataAccess.ownBites as jest.Mock).mockResolvedValue([
+            earlier,
+          ]);
+          mockActionSheetController.create.mockResolvedValue(
+            createShareMenu('instagram-story'),
+          );
+          await service.onShareBiteClick(earlier);
+          await settle();
+
+          expect((await handOff())['celebration']).toBe('first_bite');
+        });
+
+        it('leaves the moment out once the line is switched off', async () => {
+          await openCelebrated();
+
+          (
+            componentProps() as unknown as {
+              celebrationSwitched: { emit: (on: boolean) => void };
+            }
+          ).celebrationSwitched.emit(false);
+
+          expect(await handOff()).not.toHaveProperty('celebration');
+        });
       });
 
       it('hands off the layout the composer opened on when none was picked', async () => {

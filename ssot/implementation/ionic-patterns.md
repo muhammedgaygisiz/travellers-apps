@@ -246,6 +246,14 @@ own document listened to for the session. Known gap: in two of three signup
 sessions of the [#1801] pre-pass that listener never reached the effect, so the
 moment stayed silent until the next app start. Tracked in [#1835].
 
+**The share image names a first afterwards, by a different route.** The two
+moments that belong to one Bite, `first-bite` and `first-country`, can be named
+on that Bite's share image ([#1837], `UC-SBS` `R-34`). The composer does not ask
+`CelebrationService`, which keeps nothing: `celebrationOf` in
+`libs/bite-tribe/share-image/ui` works the moment out from the user's own Bites,
+ordered by when they were posted, by the rule the table above applies. So a Bite
+shared days later, or one whose celebration was missed, still says what it was.
+
 **Acceptance.** [#1801] runs the checklist on the reference devices. A
 simulator and web pre-pass against the emulators passed every row it could
 reach - one burst per moment, the burst surviving navigation, taps reaching the
@@ -313,6 +321,7 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797
 [#1798]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1798
 [#1799]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1799
+[#1837]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1837
 [#1800]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1800
 [#1801]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1801
 [#1835]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1835

@@ -6,6 +6,7 @@ import {
   WORDMARK,
 } from '../draw-share-image';
 import {
+  DEFAULT_SHARE_IMAGE_STYLE,
   SHARE_IMAGE_LAYOUT_IDS,
   type ShareImageLayoutId,
 } from '../share-image-style';
@@ -237,6 +238,66 @@ describe('a share image with fields switched off', () => {
       WORDMARK,
     ]);
   });
+});
+
+/** A celebrated Bite (issue #1837). */
+describe('a share image of a celebrated Bite', () => {
+  const celebration = 'My first Bite in Thailand';
+
+  it('draws the celebration over the photo, before the text block', () => {
+    const { ctx, texts } = createRecordingContext();
+
+    drawShareImage(
+      ctx,
+      { ...content, creatorName: 'Super Mario', celebration },
+      { photo, logo },
+    );
+
+    expect(texts).toEqual([
+      'Super Mario',
+      celebration,
+      'Pad thai',
+      'Som Tam Nua · Bangkok',
+      'THB 120.00',
+      WORDMARK,
+    ]);
+  });
+
+  it('heads the text block with the celebration when the photo is off', () => {
+    const { ctx, texts } = createRecordingContext();
+
+    drawShareImage(
+      ctx,
+      { ...content, showPhoto: false, celebration },
+      { photo, logo },
+    );
+
+    expect(texts).toEqual([
+      celebration,
+      'Pad thai',
+      'Som Tam Nua · Bangkok',
+      'THB 120.00',
+      WORDMARK,
+    ]);
+  });
+
+  it.each(SHARE_IMAGE_LAYOUT_IDS)(
+    'draws the celebration in %s at 4:5',
+    (layout) => {
+      const { ctx, texts } = createRecordingContext();
+
+      drawShareImage(
+        ctx,
+        { ...content, celebration },
+        { photo, logo },
+        'post',
+        undefined,
+        { ...DEFAULT_SHARE_IMAGE_STYLE, layout },
+      );
+
+      expect(texts).toContain(celebration);
+    },
+  );
 });
 
 /** UC-SBS R-32, R-33: the layout and the colours (issue #1731). */

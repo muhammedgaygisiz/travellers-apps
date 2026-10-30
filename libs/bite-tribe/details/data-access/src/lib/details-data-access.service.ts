@@ -391,6 +391,17 @@ export class DetailsDataAccessService {
   }
 
   /**
+   * The signed-in user's own Bites, read for the share image to tell which
+   * first a Bite was (issue #1837). Straight from Firestore: the store holds
+   * them only after My Bites or My Profile loaded them. Empty when signed out.
+   */
+  async ownBites(): Promise<Bite[]> {
+    const uid = this.userId();
+
+    return uid ? this.api.bitesByUser(uid) : [];
+  }
+
+  /**
    * Hands the Bite's link to the device share sheet, with its price and
    * rating as the message.
    *

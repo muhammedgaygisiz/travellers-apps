@@ -1,17 +1,11 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { Bucketlist } from 'model';
+import { bucketlistProgress } from 'utils';
 
+/** The list's progress, from the helper the completion celebration uses. */
 @Pipe({ name: 'progress' })
 export class ProgressPipe implements PipeTransform {
   transform(bucketlist: Bucketlist): number {
-    const total = bucketlist?.biteIds?.length ?? 0;
-
-    if (total === 0) {
-      return 0;
-    }
-
-    const triedOut = bucketlist.triedOutBites?.length ?? 0;
-
-    return triedOut / total;
+    return bucketlistProgress(bucketlist);
   }
 }

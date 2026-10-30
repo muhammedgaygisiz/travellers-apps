@@ -2,7 +2,16 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { BucketlistActions } from './actions';
-import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
+import {
+  catchError,
+  from,
+  map,
+  Observable,
+  of,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 import { routerNavigatedAction } from '@ngrx/router-store';
 import { AuthService } from 'ta-firestore';
 import { shouldLoadBucketlists } from './utils/should-load-bucketlists';
@@ -10,6 +19,10 @@ import { NavController } from '@ionic/angular/standalone';
 import { PATH } from 'utils';
 import { ToastService } from 'toast';
 import { isListableBite } from 'model';
+import { Store } from '@ngrx/store';
+import { CelebrationService } from 'celebration';
+import { bucketlists } from './selectors';
+import { completesBucketlist } from './utils/completes-bucketlist';
 
 /**
  * Thrown by the save guard for a Bite that may not go on a bucket list, so the
@@ -29,6 +42,8 @@ export class BucketListEffect {
   private readonly authService = inject(AuthService);
   private readonly toast = inject(ToastService);
   private readonly navController = inject(NavController);
+  private readonly store = inject(Store);
+  private readonly celebration = inject(CelebrationService);
 
   loadMyBucketlists$ = createEffect(() => {
     return this.actions$.pipe(
@@ -216,21 +231,37 @@ export class BucketListEffect {
     );
   });
 
+  /**
+   * Saves a tried-out tick. The tick that completes a bucket list is
+   * celebrated once it is saved (issue #1800); the tick shows no other
+   * feedback, so the celebration's toast is the only one.
+   */
   setBiteTriedOutStatusEffect$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BucketlistActions.setBiteTriedOutStatus),
-      switchMap(({ bucketlistId, biteId, checked }) =>
-        from(
+      withLatestFrom(this.store.select(bucketlists)),
+      switchMap(([{ bucketlistId, biteId, checked }, lists]) => {
+        const bucketlist = lists.find((list) => list.id === bucketlistId);
+        const completes = completesBucketlist(bucketlist, biteId, checked);
+
+        return from(
           this.api.updateBucketlistTriedOutStatus({
             bucketlistId,
             biteId,
             checked,
           }),
         ).pipe(
+          tap(() => {
+            if (completes && bucketlist) {
+              void this.celebration.celebrate('bite-trail-completed', {
+                trail: bucketlist.name,
+              });
+            }
+          }),
           map(() => BucketlistActions.setBiteTriedOutStatusSucceeded()),
           catchError(() => of(BucketlistActions.setBiteTriedOutStatusFailed())),
-        ),
-      ),
+        );
+      }),
     );
   });
 
